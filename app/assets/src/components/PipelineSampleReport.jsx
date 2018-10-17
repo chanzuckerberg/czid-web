@@ -3,20 +3,23 @@ import React from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import $ from "jquery";
-import ReactAutocomplete from "react-autocomplete";
 import { Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
 import { getTaxonName } from "../helpers/taxon";
 import ThresholdMap from "./utils/ThresholdMap";
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
-import OurDropdown from "./ui/controls/dropdowns/Dropdown";
-import MultipleNestedDropdown from "./ui/controls/dropdowns/MultipleNestedDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import ReportTable from "./views/report/ReportTable";
+import BackgroundModelFilter from "./views/report/filters/BackgroundModelFilter";
+import CategoryFilter from "./views/report/filters/CategoryFilter";
+import MetricPicker from "./views/report/filters/MetricPicker";
+import SpecificityFilter from "./views/report/filters/SpecificityFilter";
+import NameTypeFilter from "./views/report/filters/NameTypeFilter";
+import ReportSearchBox from "./views/report/filters/ReportSearchBox";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
@@ -168,6 +171,7 @@ class PipelineSampleReport extends React.Component {
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
     this.getRowClass = this.getRowClass.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
 
     // control handlers
     this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(
@@ -1468,140 +1472,6 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
   }
 }
 
-function CategoryFilter({ parent }) {
-  let options = [];
-  parent.all_categories.forEach(category => {
-    options.push({ text: category.name, value: category.name });
-
-    let suboptions = [];
-    (parent.categoryParentChild[category.name] || []).forEach(subcategory => {
-      suboptions.push({
-        text: subcategory,
-        value: subcategory
-      });
-    });
-    if (suboptions.length > 0) {
-      options[options.length - 1].suboptions = suboptions;
-    }
-  });
-
-  let selectedSuboptions = {};
-  parent.state.includedSubcategories.forEach(subcategory => {
-    let category = parent.categoryChildParent[subcategory];
-    if (!selectedSuboptions[category]) {
-      selectedSuboptions[category] = [];
-    }
-    selectedSuboptions[category].push(subcategory);
-  });
-
-  return (
-    <MultipleNestedDropdown
-      options={options}
-      selectedOptions={parent.state.includedCategories}
-      selectedSuboptions={selectedSuboptions}
-      label="Categories: "
-      onChange={parent.handleIncludedCategoriesChange}
-    />
-  );
-}
-
-function ReportSearchBox({ parent }) {
-  return (
-    <li className="search-box genus-autocomplete-container">
-      <ReactAutocomplete
-        inputProps={{ placeholder: "Search" }}
-        items={parent.state.search_keys_in_sample}
-        shouldItemRender={(item, value) =>
-          item[0] == "Show All" ||
-          (value.length > 2 &&
-            item[0].toLowerCase().indexOf(value.toLowerCase()) > -1)
-        }
-        getItemValue={item => item[0]}
-        renderItem={(item, highlighted) => (
-          <div
-            key={item[1]}
-            style={{
-              backgroundColor: highlighted ? "#eee" : "transparent",
-              fontFamily: "'Helvetica Neue', Arial, Helvetica, sans-serif",
-              fontSize: "1rem",
-              overflow: "hidden"
-            }}
-          >
-            {item[0]}
-          </div>
-        )}
-        value={parent.state.searchKey}
-        onChange={e => parent.handleSearch(e)}
-        onSelect={(value, item) => parent.searchSelectedTaxon(value, item)}
-      />
-      <i className="fa fa-search" />
-    </li>
-  );
-}
-
-function NameTypeFilter({ parent }) {
-  const nameTypeOptions = [
-    { text: "Scientific", value: "Scientific name" },
-    { text: "Common", value: "Common name" }
-  ];
-  return (
-    <OurDropdown
-      options={nameTypeOptions}
-      value={parent.state.name_type}
-      label="Name Type: "
-      onChange={parent.handleNameTypeChange}
-    />
-  );
-}
-
-function BackgroundModelFilter({ parent }) {
-  let disabled = false;
-  let backgroundOptions = parent.all_backgrounds.map(background => {
-    return { text: background.name, value: background.id };
-  });
-  if (backgroundOptions.length == 0) {
-    backgroundOptions = [
-      { text: "No background models to display", value: -1 }
-    ];
-    disabled = true;
-  }
-  return (
-    <OurDropdown
-      options={backgroundOptions}
-      value={parent.state.backgroundData.id}
-      disabled={disabled}
-      label="Background: "
-      onChange={parent.handleBackgroundModelChange}
-    />
-  );
-}
-
-function SpecificityFilter({ parent }) {
-  const specificityOptions = [
-    { text: "All", value: 0 },
-    { text: "Specific Only", value: 1 }
-  ];
-  return (
-    <OurDropdown
-      options={specificityOptions}
-      value={parent.state.readSpecificity}
-      label="Read Specificity: "
-      onChange={parent.handleSpecificityChange}
-    />
-  );
-}
-
-function MetricPicker({ parent }) {
-  return (
-    <OurDropdown
-      options={parent.treeMetrics}
-      value={parent.state.treeMetric}
-      label="Tree Metric: "
-      onChange={parent.handleTreeMetricChange}
-    />
-  );
-}
-
 class RenderMarkup extends React.Component {
   constructor(props) {
     super(props);
@@ -1654,8 +1524,8 @@ class RenderMarkup extends React.Component {
     );
   }
   renderTree() {
-    let parent = this.props.parent;
-    if (!(parent.state.selected_taxons.length && this.state.view == "tree")) {
+    const parent = this.props.parent;
+    if (!parent.state.selected_taxons.length) {
       return;
     }
     return (
@@ -1672,6 +1542,99 @@ class RenderMarkup extends React.Component {
     );
   }
 
+  renderFilters() {
+    const parent = this.props.parent;
+    return (
+      <div className="report-top-filters">
+        <div className="filter-lists">
+          <div className="filter-lists-element">
+            <ReportSearchBox
+              searchKeysInSample={parent.state.search_keys_in_sample}
+              searchKey={parent.state.searchKey}
+              onSelect={(value, item) =>
+                parent.searchSelectedTaxon(value, item)
+              }
+              onChange={parent.handleSearch}
+            />
+          </div>
+          <div className="filter-lists-element">
+            <NameTypeFilter
+              value={parent.state.name_type}
+              onChange={parent.handleNameTypeChange}
+            />
+          </div>
+          <div className="filter-lists-element">
+            <BackgroundModelFilter
+              allBackgrounds={parent.all_backgrounds}
+              value={parent.state.backgroundData.id}
+              onChange={parent.handleBackgroundModelChange}
+            />
+          </div>
+          <div className="filter-lists-element">
+            <CategoryFilter
+              parent={parent}
+              allCategories={parent.all_categories}
+              categoryParentChild={parent.categoryParentChild}
+              categoryChildParent={parent.categoryChildParent}
+              selectedCategories={parent.state.includedCategories}
+              selectedSubcategories={parent.state.includedSubcategories}
+              onChange={parent.handleIncludedCategoriesChange}
+            />
+          </div>
+          <div className="filter-lists-element">
+            <ThresholdFilterDropdown
+              options={{
+                targets: parent.allThresholds,
+                operators: [">=", "<="]
+              }}
+              thresholds={parent.state.activeThresholds}
+              onApply={parent.handleThresholdFiltersChange}
+            />
+          </div>
+          <div className="filter-lists-element">
+            <SpecificityFilter
+              value={parent.state.readSpecificity}
+              onChange={parent.handleSpecificityChange}
+            />
+          </div>
+          {this.state.view == "tree" && (
+            <div className="filter-lists-element">
+              <MetricPicker
+                options={parent.treeMetrics}
+                value={parent.state.treeMetric}
+                onChange={parent.handleTreeMetricChange}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  renderTable() {
+    const parent = this.props.parent;
+    return (
+      <ReportTable
+        taxons={parent.state.selected_taxons_top}
+        taxonRowRefs={parent.taxon_row_refs}
+        confirmedTaxIds={parent.props.confirmed_taxids}
+        watchedTaxIds={parent.props.watched_taxids}
+        renderName={parent.renderName}
+        renderNumber={parent.renderNumber}
+        displayHighlightTags={parent.displayHighlightTags}
+        showConcordance={parent.showConcordance}
+        getRowClass={parent.getRowClass}
+        reportDetails={parent.report_details}
+        backgroundData={parent.state.backgroundData}
+        expandTable={parent.expandTable}
+        collapseTable={parent.collapseTable}
+        renderColumnHeader={parent.renderColumnHeader}
+        countType={parent.state.countType}
+        setCountType={countType => parent.setState({ countType })}
+      />
+    );
+  }
+
   render() {
     const {
       filter_row_stats,
@@ -1682,80 +1645,26 @@ class RenderMarkup extends React.Component {
     } = this.props;
 
     return (
-      <div>
-        <div id="reports" className="reports-screen tab-screen col s12">
-          <div className="tab-screen-content">
-            <div className="row reports-container">
-              <div className="col s12 reports-section">
-                <div className="reports-count">
-                  <div className="report-top-filters">
-                    <div className="filter-lists">
-                      <div className="filter-lists-element">
-                        <ReportSearchBox parent={parent} />
-                      </div>
-                      <div className="filter-lists-element">
-                        <NameTypeFilter parent={parent} />
-                      </div>
-                      <div className="filter-lists-element">
-                        <BackgroundModelFilter parent={parent} />
-                      </div>
-                      <div className="filter-lists-element">
-                        <CategoryFilter parent={parent} />
-                      </div>
-                      <div className="filter-lists-element">
-                        <ThresholdFilterDropdown
-                          options={{
-                            targets: parent.allThresholds,
-                            operators: [">=", "<="]
-                          }}
-                          thresholds={parent.state.activeThresholds}
-                          onApply={parent.handleThresholdFiltersChange}
-                        />
-                      </div>
-                      <div className="filter-lists-element">
-                        <SpecificityFilter parent={parent} />
-                      </div>
-                      {this.state.view == "tree" && (
-                        <div className="filter-lists-element">
-                          <MetricPicker parent={parent} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {this.renderMenu()}
-                  <div className="filter-tags-list">
-                    {advanced_filter_tag_list} {categories_filter_tag_list}{" "}
-                    {subcats_filter_tag_list}
-                  </div>
-                  {filter_row_stats}
+      <div id="reports" className="reports-screen tab-screen col s12">
+        <div className="tab-screen-content">
+          <div className="row reports-container">
+            <div className="col s12 reports-section">
+              <div className="reports-count">
+                {this.renderFilters()}
+                {this.renderMenu()}
+                <div className="filter-tags-list">
+                  {advanced_filter_tag_list} {categories_filter_tag_list}{" "}
+                  {subcats_filter_tag_list}
                 </div>
-                {this.state.view == "table" && (
-                  <ReportTable
-                    taxons={parent.state.selected_taxons_top}
-                    taxonRowRefs={parent.taxon_row_refs}
-                    confirmedTaxIds={parent.props.confirmed_taxids}
-                    watchedTaxIds={parent.props.watched_taxids}
-                    renderName={parent.renderName}
-                    renderNumber={parent.renderNumber}
-                    displayHighlightTags={parent.displayHighlightTags}
-                    showConcordance={parent.showConcordance}
-                    getRowClass={parent.getRowClass}
-                    reportDetails={parent.report_details}
-                    backgroundData={parent.state.backgroundData}
-                    expandTable={parent.expandTable}
-                    collapseTable={parent.collapseTable}
-                    renderColumnHeader={parent.renderColumnHeader}
-                    countType={parent.state.countType}
-                    setCountType={countType => parent.setState({ countType })}
-                  />
-                )}
-                {this.renderTree()}
-                {parent.state.loading && (
-                  <div className="loading-container">
-                    <LoadingLabel />
-                  </div>
-                )}
+                {filter_row_stats}
               </div>
+              {this.state.view == "table" && this.renderTable()}
+              {this.state.view == "tree" && this.renderTree()}
+              {parent.state.loading && (
+                <div className="loading-container">
+                  <LoadingLabel />
+                </div>
+              )}
             </div>
           </div>
         </div>
