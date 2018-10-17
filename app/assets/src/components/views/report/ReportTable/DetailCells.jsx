@@ -1,28 +1,35 @@
 import React from "react";
 
-const DetailCells = ({ parent, openTaxonModal }) => {
-  return parent.state.selected_taxons_top.map(taxInfo => (
+// TODO(mark): Use alias instead, to avoid dots.
+import PropTypes from "../../../utils/propTypes";
+
+const DetailCells = ({
+  taxons,
+  taxonRowRefs,
+  confirmedTaxIds,
+  watchedTaxIds,
+  renderName,
+  renderNumber,
+  displayHighlightTags,
+  showConcordance,
+  getRowClass,
+  openTaxonModal,
+  reportDetails,
+  backgroundData
+}) => {
+  return taxons.map(taxInfo => (
     <tr
       key={taxInfo.tax_id}
       id={`taxon-${taxInfo.tax_id}`}
       ref={elm => {
-        parent.taxon_row_refs[taxInfo.tax_id] = elm;
+        taxonRowRefs[taxInfo.tax_id] = elm;
       }}
-      className={parent.getRowClass(
-        taxInfo,
-        parent.props.confirmed_taxids,
-        parent.props.watched_taxids
-      )}
+      className={getRowClass(taxInfo, confirmedTaxIds, watchedTaxIds)}
     >
       <td>
-        {parent.render_name(
-          taxInfo,
-          parent.report_details,
-          parent,
-          openTaxonModal
-        )}
+        {renderName(taxInfo, reportDetails, backgroundData, openTaxonModal)}
       </td>
-      {parent.render_number(
+      {renderNumber(
         taxInfo.NT.aggregatescore,
         null,
         0,
@@ -30,29 +37,36 @@ const DetailCells = ({ parent, openTaxonModal }) => {
         undefined,
         taxInfo.topScoring == 1
       )}
-      {parent.render_number(taxInfo.NT.zscore, taxInfo.NR.zscore, 1)}
-      {parent.render_number(taxInfo.NT.rpm, taxInfo.NR.rpm, 1)}
-      {parent.render_number(taxInfo.NT.r, taxInfo.NR.r, 0)}
-      {parent.render_number(
-        taxInfo.NT.percentidentity,
-        taxInfo.NR.percentidentity,
-        1
-      )}
-      {parent.render_number(
-        taxInfo.NT.neglogevalue,
-        taxInfo.NR.neglogevalue,
-        0
-      )}
-      {parent.render_number(
+      {renderNumber(taxInfo.NT.zscore, taxInfo.NR.zscore, 1)}
+      {renderNumber(taxInfo.NT.rpm, taxInfo.NR.rpm, 1)}
+      {renderNumber(taxInfo.NT.r, taxInfo.NR.r, 0)}
+      {renderNumber(taxInfo.NT.percentidentity, taxInfo.NR.percentidentity, 1)}
+      {renderNumber(taxInfo.NT.neglogevalue, taxInfo.NR.neglogevalue, 0)}
+      {renderNumber(
         taxInfo.NT.percentconcordant,
         taxInfo.NR.percentconcordant,
         1,
         undefined,
-        parent.showConcordance
+        showConcordance
       )}
-      <td>{parent.displayHighlightTags(taxInfo)}</td>
+      <td>{displayHighlightTags(taxInfo)}</td>
     </tr>
   ));
+};
+
+DetailCells.propTypes = {
+  taxons: PropTypes.arrayOf(PropTypes.Taxon).isRequired,
+  taxonRowRefs: PropTypes.objectOf(PropTypes.any).isRequired, // These are DOM elements.
+  confirmedTaxIds: PropTypes.arrayOf(PropTypes.string).isRequired,
+  watchedTaxIds: PropTypes.arrayOf(PropTypes.string).isRequired,
+  renderName: PropTypes.func.isRequired,
+  renderNumber: PropTypes.func.isRequired,
+  displayHighlightTags: PropTypes.func.isRequired,
+  showConcordance: PropTypes.bool.isRequired,
+  openTaxonModal: PropTypes.func.isRequired,
+  getRowClass: PropTypes.func.isRequired,
+  reportDetails: PropTypes.ReportDetails,
+  backgroundData: PropTypes.BackgroundData
 };
 
 export default DetailCells;
