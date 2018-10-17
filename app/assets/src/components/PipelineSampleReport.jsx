@@ -15,7 +15,6 @@ import MultipleNestedDropdown from "./ui/controls/dropdowns/MultipleNestedDropdo
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
-import PathogenSummary from "./views/report/PathogenSummary";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import ReportTable from "./views/report/ReportTable";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
@@ -33,7 +32,6 @@ class PipelineSampleReport extends React.Component {
     this.admin = props.admin;
     this.allowedFeatures = props.allowedFeatures;
     this.allowPhyloTree = props.can_edit;
-    this.allowPathogenSummary = false;
     this.report_ts = props.report_ts;
     this.sample_id = props.sample_id;
     this.projectId = props.projectId;
@@ -116,7 +114,6 @@ class PipelineSampleReport extends React.Component {
     this.state = {
       taxonomy_details: [],
       topScoringTaxa: [],
-      pathogenTagSummary: {},
       backgroundData: {
         id: defaultBackgroundId,
         name: ""
@@ -169,6 +166,7 @@ class PipelineSampleReport extends React.Component {
     this.fillUrlParams = this.fillUrlParams.bind(this);
     this.flash = this.flash.bind(this);
     this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
+    this.getRowClass = this.getRowClass.bind(this);
     this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
 
     // control handlers
@@ -191,6 +189,9 @@ class PipelineSampleReport extends React.Component {
     this.handleViewClicked = this.handleViewClicked.bind(this);
 
     this.renderMore = this.renderMore.bind(this);
+    this.renderName = this.renderName.bind(this);
+    this.renderNumber = this.renderNumber.bind(this);
+    this.renderColumnHeader = this.renderColumnHeader.bind(this);
     this.resetAllFilters = this.resetAllFilters.bind(this);
     this.setSortParams = this.setSortParams.bind(this);
     this.sortCompareFunction = this.sortCompareFunction.bind(this);
@@ -280,7 +281,6 @@ class PipelineSampleReport extends React.Component {
           rows_total: res.data.taxonomy_details[1],
           taxonomy_details: res.data.taxonomy_details[2],
           topScoringTaxa: res.data.topScoringTaxa,
-          pathogenTagSummary: res.data.pathogenTagSummary,
           backgroundData: {
             id: res.data.background_info.id,
             name: res.data.background_info.name
@@ -1003,7 +1003,7 @@ class PipelineSampleReport extends React.Component {
     return category_lowercase;
   }
 
-  render_name(tax_info, report_details, parent, openTaxonModal) {
+  renderName(tax_info, report_details, backgroundData, openTaxonModal) {
     let taxCommonName = tax_info["common_name"];
     const taxonName = getTaxonName(tax_info, this.state.name_type);
 
@@ -1017,7 +1017,7 @@ class PipelineSampleReport extends React.Component {
     const openTaxonModalHandler = () =>
       openTaxonModal({
         taxInfo: tax_info,
-        backgroundData: parent.state.backgroundData,
+        backgroundData,
         taxonName
       });
 
@@ -1079,7 +1079,7 @@ class PipelineSampleReport extends React.Component {
     return taxonDescription;
   }
 
-  render_number(
+  renderNumber(
     ntCount,
     nrCount,
     num_decimals,
@@ -1141,7 +1141,7 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  render_column_header(
+  renderColumnHeader(
     visible_metric,
     column_name,
     tooltip_message,
@@ -1687,12 +1687,6 @@ class RenderMarkup extends React.Component {
           <div className="tab-screen-content">
             <div className="row reports-container">
               <div className="col s12 reports-section">
-                {parent.allowPathogenSummary ? (
-                  <PathogenSummary
-                    topScoringTaxa={parent.state.topScoringTaxa}
-                    pathogenTagSummary={parent.state.pathogenTagSummary}
-                  />
-                ) : null}
                 <div className="reports-count">
                   <div className="report-top-filters">
                     <div className="filter-lists">
@@ -1735,7 +1729,26 @@ class RenderMarkup extends React.Component {
                   </div>
                   {filter_row_stats}
                 </div>
-                {this.state.view == "table" && <ReportTable parent={parent} />}
+                {this.state.view == "table" && (
+                  <ReportTable
+                    taxons={parent.state.selected_taxons_top}
+                    taxonRowRefs={parent.taxon_row_refs}
+                    confirmedTaxIds={parent.props.confirmed_taxids}
+                    watchedTaxIds={parent.props.watched_taxids}
+                    renderName={parent.renderName}
+                    renderNumber={parent.renderNumber}
+                    displayHighlightTags={parent.displayHighlightTags}
+                    showConcordance={parent.showConcordance}
+                    getRowClass={parent.getRowClass}
+                    reportDetails={parent.report_details}
+                    backgroundData={parent.state.backgroundData}
+                    expandTable={parent.expandTable}
+                    collapseTable={parent.collapseTable}
+                    renderColumnHeader={parent.renderColumnHeader}
+                    countType={parent.state.countType}
+                    setCountType={countType => parent.setState({ countType })}
+                  />
+                )}
                 {this.renderTree()}
                 {parent.state.loading && (
                   <div className="loading-container">
