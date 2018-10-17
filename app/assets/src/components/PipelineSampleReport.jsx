@@ -7,6 +7,12 @@ import { Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
 import { getTaxonName } from "../helpers/taxon";
 import ThresholdMap from "./utils/ThresholdMap";
+import {
+  computeThresholdedTaxons,
+  isTaxonIncluded,
+  getTaxonSortComparator,
+  getCategoryAdjective
+} from "./views/report/utils";
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
@@ -159,7 +165,6 @@ class PipelineSampleReport extends React.Component {
 
     this.anyFilterSet = this.anyFilterSet.bind(this);
     this.applyFilters = this.applyFilters.bind(this);
-    this.computeThresholdedTaxons = this.computeThresholdedTaxons.bind(this);
     this.collapseGenus = this.collapseGenus.bind(this);
     this.collapseTable = this.collapseTable.bind(this);
     this.displayHighlightTags = this.displayHighlightTags.bind(this);
@@ -198,7 +203,6 @@ class PipelineSampleReport extends React.Component {
     this.renderColumnHeader = this.renderColumnHeader.bind(this);
     this.resetAllFilters = this.resetAllFilters.bind(this);
     this.setSortParams = this.setSortParams.bind(this);
-    this.sortCompareFunction = this.sortCompareFunction.bind(this);
     this.sortResults = this.sortResults.bind(this);
     this.isTaxonExpanded = this.isTaxonExpanded.bind(this);
 
@@ -337,7 +341,10 @@ class PipelineSampleReport extends React.Component {
     // Threshold filters
     //
     if (recomputeThresholdedTaxons) {
-      this.computeThresholdedTaxons();
+      this.thresholded_taxons = computeThresholdedTaxons(
+        this.state.taxonomy_details,
+        this.state.activeThresholds
+      );
     }
 
     let input_taxons = this.thresholded_taxons;
@@ -405,7 +412,7 @@ class PipelineSampleReport extends React.Component {
       for (var i = 0; i < input_taxons.length; i++) {
         let taxon = input_taxons[i];
         if (
-          this.isTaxonIncluded(
+          isTaxonIncluded(
             taxon,
             includedCategories,
             includedSubcategoryColumns,
@@ -425,7 +432,7 @@ class PipelineSampleReport extends React.Component {
           taxon = input_taxons[i];
           while (taxon && taxon.genus_taxid == -200) {
             if (
-              this.isTaxonIncluded(
+              isTaxonIncluded(
                 taxon,
                 includedCategories,
                 includedSubcategoryColumns,
@@ -487,25 +494,6 @@ class PipelineSampleReport extends React.Component {
       }
     }
     return res;
-  }
-
-  isTaxonIncluded(
-    taxon,
-    includedCategories,
-    includedSubcategoryColumns,
-    excludedSubcategoryColumns
-  ) {
-    // returns if taxon is in either the included categories / subcategories AND
-    // the taxon is not in an excluded subcategory
-    return (
-      (includedCategories.indexOf(taxon.category_name) >= 0 ||
-        includedSubcategoryColumns.some(column => {
-          return taxon[column] == 1;
-        })) &&
-      !excludedSubcategoryColumns.some(column => {
-        return taxon[column] == 1;
-      })
-    );
   }
 
   filterNonSpecific(rows) {
@@ -609,60 +597,6 @@ class PipelineSampleReport extends React.Component {
     }
   }
 
-  sortCompareFunction(a, b) {
-    const [ptype, pmetric] = this.sortParams.primary;
-    const [stype, smetric] = this.sortParams.secondary;
-    const genus_a = this.genus_map[a.genus_taxid];
-    const genus_b = this.genus_map[b.genus_taxid];
-
-    const genus_a_p_val = parseFloat(genus_a[ptype][pmetric]);
-    const genus_a_s_val = parseFloat(genus_a[stype][smetric]);
-    const a_p_val = parseFloat(a[ptype][pmetric]);
-    const a_s_val = parseFloat(a[stype][smetric]);
-
-    const genus_b_p_val = parseFloat(genus_b[ptype][pmetric]);
-    const genus_b_s_val = parseFloat(genus_b[stype][smetric]);
-    const b_p_val = parseFloat(b[ptype][pmetric]);
-    const b_s_val = parseFloat(b[stype][smetric]);
-    // compared at genus level descending and then species level descending
-    //
-    //
-    if (a.genus_taxid == b.genus_taxid) {
-      // same genus
-      if (a.tax_level > b.tax_level) {
-        return -1;
-      } else if (a.tax_level < b.tax_level) {
-        return 1;
-      }
-      if (a_p_val > b_p_val) {
-        return -1;
-      } else if (a_p_val < b_p_val) {
-        return 1;
-      }
-      if (a_s_val > b_s_val) {
-        return -1;
-      } else if (a_s_val < b_s_val) {
-        return 1;
-      }
-      return 0;
-    }
-    if (genus_a_p_val > genus_b_p_val) {
-      return -1;
-    } else if (genus_a_p_val < genus_b_p_val) {
-      return 1;
-    }
-    if (genus_a_s_val > genus_b_s_val) {
-      return -1;
-    } else if (genus_a_s_val < genus_b_s_val) {
-      return 1;
-    }
-    if (a.genus_taxid < b.genus_taxid) {
-      return -1;
-    } else if (a.genus_taxid > b.genus_taxid) {
-      return 1;
-    }
-  }
-
   setSortParams() {
     const primary_sort = this.state.sort_by.split("_");
     primary_sort[0] = primary_sort[0].toUpperCase();
@@ -733,17 +667,20 @@ class PipelineSampleReport extends React.Component {
   sortResults() {
     this.setSortParams();
     let selected_taxons = this.state.selected_taxons;
-    selected_taxons = selected_taxons.sort(this.sortCompareFunction);
+    const taxonSortComparator = getTaxonSortComparator(
+      this.sortParams.primary,
+      this.sortParams.secondary,
+      this.genus_map
+    );
+    selected_taxons = selected_taxons.sort(taxonSortComparator);
     this.setState({
       selected_taxons: selected_taxons,
       selected_taxons_top: selected_taxons.slice(0, this.max_rows_to_render),
       pagesRendered: 1
     });
-    this.thresholded_taxons = this.thresholded_taxons.sort(
-      this.sortCompareFunction
-    );
+    this.thresholded_taxons = this.thresholded_taxons.sort(taxonSortComparator);
     this.state.taxonomy_details = this.state.taxonomy_details.sort(
-      this.sortCompareFunction
+      taxonSortComparator
     );
   }
 
@@ -758,46 +695,6 @@ class PipelineSampleReport extends React.Component {
     const activeThresholds = Object.assign([], this.state.activeThresholds);
     activeThresholds.splice(pos, 1);
     this.handleThresholdFiltersChange(activeThresholds);
-  }
-
-  computeThresholdedTaxons() {
-    const candidate_taxons = this.state.taxonomy_details;
-    const activeThresholds = this.state.activeThresholds;
-    let result_taxons = [];
-    let genus_taxon = {};
-    let matched_taxons = [];
-    for (let i = 0; i < candidate_taxons.length; i++) {
-      const taxon = candidate_taxons[i];
-      if (taxon.genus_taxid == taxon.tax_id) {
-        // genus
-        if (matched_taxons.length > 0) {
-          result_taxons.push(genus_taxon);
-          result_taxons = result_taxons.concat(matched_taxons);
-        } else if (
-          ThresholdMap.taxonPassThresholdFilter(genus_taxon, activeThresholds)
-        ) {
-          result_taxons.push(genus_taxon);
-        }
-        genus_taxon = taxon;
-        matched_taxons = [];
-      } else {
-        // species
-        if (ThresholdMap.taxonPassThresholdFilter(taxon, activeThresholds)) {
-          matched_taxons.push(taxon);
-        }
-      }
-    }
-
-    if (matched_taxons.length > 0) {
-      result_taxons.push(genus_taxon);
-      result_taxons = result_taxons.concat(matched_taxons);
-    } else if (
-      ThresholdMap.taxonPassThresholdFilter(genus_taxon, activeThresholds)
-    ) {
-      result_taxons.push(genus_taxon);
-    }
-
-    this.thresholded_taxons = result_taxons;
   }
 
   handleBackgroundModelChange(_, data) {
@@ -988,25 +885,6 @@ class PipelineSampleReport extends React.Component {
     );
   }
 
-  static category_to_adjective(category) {
-    const category_lowercase = category.toLowerCase();
-    switch (category_lowercase) {
-      case "bacteria":
-        return "bacterial";
-      case "archaea":
-        return "archaeal";
-      case "eukaryota":
-        return "eukaryotic";
-      case "viruses":
-        return "viral";
-      case "viroids":
-        return "viroidal";
-      case "uncategorized":
-        return "uncategorized";
-    }
-    return category_lowercase;
-  }
-
   renderName(tax_info, report_details, backgroundData, openTaxonModal) {
     let taxCommonName = tax_info["common_name"];
     const taxonName = getTaxonName(tax_info, this.state.name_type);
@@ -1073,8 +951,8 @@ class PipelineSampleReport extends React.Component {
             {collapseExpand} {taxonNameDisplay}
           </div>
           <i className="count-info">
-            ({tax_info.species_count}{" "}
-            {PipelineSampleReport.category_to_adjective(category_name)} species)
+            ({tax_info.species_count} {getCategoryAdjective(category_name)}{" "}
+            species)
           </i>
           {secondaryTaxonDisplay}
         </div>
