@@ -590,19 +590,10 @@ class SampleUpload extends React.Component {
 
   uploadFileToURL(file, url) {
     console.log("in uploadFileToURL");
-
-    const formData = new FormData();
-    formData.append("File[]", file);
-
-    const options = {
-      headers: {
-        "Content-Type": "multipart/form-data"
-      }
-    };
     axios
-      .put(url, formData, options)
+      .put(url, file)
       .then(() => {
-        console.log("uplad is done");
+        console.log("upload is done");
       })
       .catch(e => {
         console.log("upload failed");
