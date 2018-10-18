@@ -1,6 +1,7 @@
 class PhyloTree < ApplicationRecord
   include PipelineOutputsHelper
   include PipelineRunsHelper
+  include ActionView::Helpers::DateHelper
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user
   belongs_to :project
@@ -48,6 +49,11 @@ class PhyloTree < ApplicationRecord
     "#{phylo_tree_output_s3_path}/#{PipelineRun::PIPELINE_VERSION_FILE}"
   end
 
+  def runtime(human_readable = true)
+    seconds = (ready_at || Time.current) - created_at
+    human_readable ? distance_of_time_in_words(seconds) : seconds
+  end
+
   def monitor_results
     # Retrieve dag version, which is needed to construct the output path:
     update_pipeline_version(self, :dag_version, dag_version_file)
@@ -72,7 +78,10 @@ class PhyloTree < ApplicationRecord
 
     # Update status:
     required_outputs = select_outputs("required")
-    self.status = STATUS_READY if required_outputs.all? { |ro| self[ro].present? }
+    if required_outputs.all? { |ro| self[ro].present? }
+      self.status = STATUS_READY
+      self.ready_at = Time.current
+    end
     save
 
     # Clean up:
@@ -120,7 +129,7 @@ class PhyloTree < ApplicationRecord
       species_counts.each do |sc|
         top_taxid_by_run_id[sc.pipeline_run_id] ||= sc.tax_id
       end
-      reference_taxids = top_taxid_by_run_id.values
+      reference_taxids = top_taxid_by_run_id.values.uniq
     else
       reference_taxids = [taxid]
     end
