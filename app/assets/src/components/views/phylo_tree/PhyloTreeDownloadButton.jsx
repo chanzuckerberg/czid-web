@@ -7,7 +7,7 @@ class PhyloTreeDownloadButton extends React.Component {
     super(props);
 
     this.allOptions = [
-      { text: "Multiple alignment", value: "multiple_alignment" },
+      { text: "SNP site fasta", value: "multiple_alignment" },
       { text: "SNP annotations", value: "snp_annotations" }
     ];
     this.download = this.download.bind(this);
