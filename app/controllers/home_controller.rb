@@ -12,7 +12,17 @@ class HomeController < ApplicationController
       # Call secure home#index path if authenticated
       redirect_to home_path
     else
-      @preview = true if landing_params[:preview]
+      @show_bulletin = false
+      if landing_params[:show_bulletin]
+        @show_bulletin = true
+      else
+        time_zone = ActiveSupport::TimeZone.new("Pacific Time (US & Canada)")
+        start_time = time_zone.parse("2018-10-16 05:00:00")
+        end_time = time_zone.parse("2018-12-05 11:30:00")
+        if start_time < Time.now.utc && Time.now.utc < end_time
+          @show_bulletin = true
+        end
+      end
       render 'landing'
     end
   end
@@ -81,6 +91,6 @@ class HomeController < ApplicationController
   end
 
   def landing_params
-    params.permit(:preview)
+    params.permit(:show_bulletin)
   end
 end

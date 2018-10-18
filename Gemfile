@@ -55,6 +55,7 @@ gem 'aws-sdk'
 # Redirect
 gem 'activesupport'
 gem 'rack-host-redirect'
+gem 'useragent'
 
 # Performance profiling in all envs
 gem 'flamegraph'

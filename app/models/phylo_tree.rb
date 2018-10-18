@@ -115,7 +115,7 @@ class PhyloTree < ApplicationRecord
       species_counts.each do |sc|
         top_taxid_by_run_id[sc.pipeline_run_id] ||= sc.tax_id
       end
-      reference_taxids = top_taxid_by_run_id.values
+      reference_taxids = top_taxid_by_run_id.values.uniq
     else
       reference_taxids = [taxid]
     end

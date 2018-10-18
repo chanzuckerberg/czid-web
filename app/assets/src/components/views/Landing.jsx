@@ -211,20 +211,26 @@ class Landing extends React.Component {
       </div>
     );
 
-    const bulletinLink = () => (location.href = "/");
     let bulletinBanner;
-    if (this.props.preview) {
+    if (this.props.showBulletin) {
       bulletinBanner = (
         <div className="bulletin-banner">
           <Container>
-            <div className="bulletin-title">Lorem Ipsum Dolor Sit Amet</div>
+            <div className="bulletin-title">Grand Challenges Grant RFP</div>
             <div className="bulletin-description">
-              Sed condimentum lobortis diam, nec tincidunt erat maximus sit
-              amet. Curabitur semper mi interdum purus vehicula, congue semper
-              mauris tristique. Phasellus id cursus magna, dignissim tempor
-              enim. In in scelerisque eros.
+              In collaboration with the Gates Foundation, Chan Zuckerberg
+              Initiative and Chan Zuckerberg Biohub have announced a Grand
+              Challenges Grant that will use IDseq to build capacity for
+              metagenomic sequencing in labs around the world. Applications open
+              until December 5, 2018.
             </div>
-            <TransparentButton text="Learn More" onClick={bulletinLink} />
+            <a
+              href="https://gcgh.grandchallenges.org/challenge/application-metagenomic-next-generation-sequencing-detect-and-identify-pathogens-round-22"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <TransparentButton text="Learn More" />
+            </a>
           </Container>
         </div>
       );
@@ -266,14 +272,14 @@ class Landing extends React.Component {
         <div className="footer-links">
           <a href={mailto}>Contact</a>
           <a
-            href="https://s3-us-west-2.amazonaws.com/idseq-database/Terms.pdf"
+            href="https://assets.idseq.net/Terms.pdf"
             target="_blank"
             rel="noopener noreferrer"
           >
             Terms
           </a>
           <a
-            href="https://s3-us-west-2.amazonaws.com/idseq-database/Privacy.pdf"
+            href="https://assets.idseq.net/Privacy.pdf"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -297,7 +303,7 @@ class Landing extends React.Component {
 
 Landing.propTypes = {
   contactEmail: PropTypes.string.isRequired,
-  preview: PropTypes.string
+  showBulletin: PropTypes.string
 };
 
 export default Landing;
