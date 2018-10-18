@@ -43,6 +43,10 @@ class PhyloTree < ApplicationRecord
     "#{phylo_tree_output_s3_path}/#{PipelineRun::PIPELINE_VERSION_FILE}"
   end
 
+  def runtime
+    (ready_at || Time.current) - created_at
+  end
+
   def monitor_results
     # Retrieve dag version, which is needed to construct the output path:
     update_pipeline_version(self, :dag_version, dag_version_file)
@@ -67,7 +71,10 @@ class PhyloTree < ApplicationRecord
 
     # Update status:
     required_outputs = select_outputs("required")
-    self.status = STATUS_READY if required_outputs.all? { |ro| self[ro].present? }
+    if required_outputs.all? { |ro| self[ro].present? }
+      self.status = STATUS_READY
+      self.ready_at = Time.current
+    end
     save
 
     # Clean up:
