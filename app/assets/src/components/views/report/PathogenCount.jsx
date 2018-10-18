@@ -1,4 +1,5 @@
 import React from "react";
+import BasicPopup from "../../BasicPopup";
 import Label from "../../ui/labels/Label";
 import { CATEGORIES } from "../../ui/labels/PathogenLabel";
 
@@ -12,13 +13,18 @@ const PathogenCount = ({ tag2count }) => {
       <span className="idseq-ui pathogen-preview">
         {tags.map(type => {
           return (
-            <Label circular color={CATEGORIES[type]["color"]} size="mini" />
+            <Label circular color={CATEGORIES[type]["color"]} key={type} />
           );
         })}
         <span className="pathogen-count">{totalCount}</span>
       </span>
     );
-    return display;
+    return (
+      <BasicPopup
+        trigger={display}
+        content="contains flagged pathogen species"
+      />
+    );
   }
 };
 

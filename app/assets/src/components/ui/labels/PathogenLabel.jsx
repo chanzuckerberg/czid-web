@@ -6,19 +6,19 @@ const NIAID_URL =
   "https://www.niaid.nih.gov/research/emerging-infectious-diseases-pathogens";
 export const CATEGORIES = {
   categoryA: {
-    text: "pathogenic | a",
+    text: "pathogen | a",
     color: "red",
     tooltip: "NIAID pathogen priority list | category A",
     url: NIAID_URL
   },
   categoryB: {
-    text: "pathogenic | b",
+    text: "pathogen | b",
     color: "orange",
     tooltip: "NIAID pathogen priority list | category B",
     url: NIAID_URL
   },
   categoryC: {
-    text: "pathogenic | c",
+    text: "pathogen | a",
     color: "yellow",
     tooltip: "NIAID pathogen priority list | category C",
     url: NIAID_URL
