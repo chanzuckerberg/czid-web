@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%= render "layouts/google_analytics" %>
+    <title>IDseq</title>
+    <meta name="description" content="An unbiased global software platform that helps scientists identify pathogens in metagenomic sequencing data.">
+    <meta name="keywords" content="Infectious disease, sequencing, metagenomic sequencing, genomics, Chan Zuckerberg Initiative, CZI, Chan Zuckerberg Biohub, CZ Biohub, science, next gen sequencing, research, biology, virology, bioinformatics, computational biology, global health">
+    <%= csrf_meta_tags %>
+    <link rel="icon" type="image/png" href="<%= image_url("logo-#{Rails.env}.png") %>"/>
+    <p>
+      Sorry, IDseq does not currently support your web browser!
+    </p>
+    <p>
+      We recommend using an alternative modern browser such as Google Chrome v50+ or Firefox v50+.
+    </p>
+  </head>
+</html>
