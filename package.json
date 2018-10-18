@@ -89,6 +89,7 @@
     "react-autocomplete": "^1.7.2",
     "react-dom": "16.4",
     "react-dropzone": "^6.2.4",
+    "react-dropzone-s3-uploader": "^1.1.0",
     "react-moment": "^0.7.9",
     "react-sticky": "^6.0.1",
     "react-table": "^6.8.6",

@@ -5,7 +5,9 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
-import ReactDropzone from "react-dropzone";
+import DropzoneUploader from "react-dropzone";
+import Materialize from "materialize-css";
+// import DropzoneS3Uploader from 'react-dropzone-s3-uploader';
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -78,6 +80,7 @@ class SampleUpload extends React.Component {
           : this.selected.inputFiles[1].source
         : "";
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
+    this.uploadFileToURL = this.uploadFileToURL.bind(this);
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -579,6 +582,32 @@ class SampleUpload extends React.Component {
   onDrop(acceptedFiles, rejectedFiles) {
     console.log("accepted: ", acceptedFiles);
     console.log("rejected: ", rejectedFiles);
+
+    let url =
+      "https://idseq-samples-development.s3.us-west-2.amazonaws.com/samples/86/1073/fastqs/1_R1.fastq.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA2U4NV5TWAJZWDJ5R%2F20181018%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20181018T181648Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Security-Token=FQoGZXIvYXdzEHQaDEa859sXF01hAb%2FtGCLzAbmdyQnXYHzjWpFOk2PN0VxrytYJm9EFVixcUU7kLGNXAxMYaeL4nH4oaLW1I7rAAhfqb36I2vKgVlac6Gl%2BmOlnQ3csHMsLY%2BAb5wiLTiJIl4ckK9G%2B6DolhhQWxOTVTFEma71xhs76PRZOJZSGXV18ZJ0WuCZ9frX84WAgyKrnq%2BXURVcscXiunkpt0ltobnAuW2e3iEKTPyu6EcJTzaKpH63moJYGxlvl%2BAYgYnI6jE5x5IFzcc%2B5SELt1%2BuOb6yPeUd4VfJ%2Bde5ZmdS92lSkwJqf5kZ%2FWkd1oNptJIkl2MpSr1%2FP%2BwQVYIvsp2xbUHpLWCiQnKPeBQ%3D%3D&X-Amz-Signature=98f3d210339d197daf537298a304a712638115c9c4287bcee6dd69735ffe6084";
+    this.uploadFileToURL(acceptedFiles[0], url);
+  }
+
+  uploadFileToURL(file, url) {
+    console.log("in uploadFileToURL");
+
+    const formData = new FormData();
+    formData.append("File[]", file);
+
+    const options = {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    };
+    axios
+      .put(url, formData, options)
+      .then(() => {
+        console.log("uplad is done");
+      })
+      .catch(e => {
+        console.log("upload failed");
+        console.log(e);
+      });
   }
 
   renderSampleForm(updateExistingSample = false) {
@@ -631,6 +660,8 @@ class SampleUpload extends React.Component {
         )}
       </button>
     );
+
+    const dragAndDropUploader = <DropzoneUploader onDrop={this.onDrop} />;
 
     return (
       <div id="samplesUploader" className="row">
@@ -849,9 +880,7 @@ class SampleUpload extends React.Component {
                   </div>
                 </div>
 
-                <ReactDropzone onDrop={this.onDrop}>
-                  Drop your files here!
-                </ReactDropzone>
+                {dragAndDropUploader}
 
                 <div className="field">
                   <div className="row">
