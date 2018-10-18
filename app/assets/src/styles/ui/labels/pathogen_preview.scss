@@ -1,12 +1,11 @@
 .idseq-ui.pathogen-preview {
   margin-left: 10px;
-  &:first-child {
-    margin-left: 10px;
+  .ui.circular {
+    min-width: 10px;
+    min-height: 10px;
   }
-  min-width: 12px;
-  min-height: 12 px;
-  font-size: 12px;
   .pathogen-count {
+    font-size: 12px;
     font-weight: bold;
   }
 }
