@@ -18,7 +18,7 @@ import BasicPopup from "./BasicPopup";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
-import PathogenCount from "./views/report/PathogenCount";
+import PathogenPreview from "./views/report/PathogenPreview";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import ReportTable from "./views/report/ReportTable";
 import BackgroundModelFilter from "./views/report/filters/BackgroundModelFilter";
@@ -881,7 +881,7 @@ class PipelineSampleReport extends React.Component {
     let secondaryTaxonDisplay = (
       <span>
         {this.state.generaContainingTags[tax_info.tax_id] && (
-          <PathogenCount
+          <PathogenPreview
             tag2count={this.state.generaContainingTags[tax_info.tax_id]}
           />
         )}

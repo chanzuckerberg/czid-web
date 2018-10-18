@@ -3,7 +3,7 @@ import BasicPopup from "../../BasicPopup";
 import Label from "../../ui/labels/Label";
 import { CATEGORIES } from "../../ui/labels/PathogenLabel";
 
-const PathogenCount = ({ tag2count }) => {
+const PathogenPreview = ({ tag2count }) => {
   let tags = Object.keys(tag2count).sort();
   if (tags.length === 0) {
     return null;
@@ -28,4 +28,4 @@ const PathogenCount = ({ tag2count }) => {
   }
 };
 
-export default PathogenCount;
+export default PathogenPreview;
