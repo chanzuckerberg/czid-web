@@ -168,7 +168,7 @@ ActiveRecord::Schema.define(version: 20_181_017_164_553) do
     t.string "dag_branch"
     t.text "ncbi_metadata"
     t.string "snp_annotations"
-    t.string "multiple_alignment"
+    t.datetime "ready_at"
     t.index ["name"], name: "index_phylo_trees_on_name", unique: true
     t.index ["project_id", "taxid"], name: "index_phylo_trees_on_project_id_and_taxid"
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
