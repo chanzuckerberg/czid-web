@@ -1,6 +1,7 @@
 class PhyloTree < ApplicationRecord
   include PipelineOutputsHelper
   include PipelineRunsHelper
+  include ActionView::Helpers::DateHelper
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user
   belongs_to :project
@@ -43,8 +44,9 @@ class PhyloTree < ApplicationRecord
     "#{phylo_tree_output_s3_path}/#{PipelineRun::PIPELINE_VERSION_FILE}"
   end
 
-  def runtime
-    (ready_at || Time.current) - created_at
+  def runtime(human_readable = true)
+    seconds = (ready_at || Time.current) - created_at
+    human_readable ? distance_of_time_in_words(seconds) : seconds
   end
 
   def monitor_results
