@@ -223,7 +223,7 @@ class PipelineRunStage < ApplicationRecord
     dag_commands = prepare_dag("postprocess", attribute_dict)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Dispatch job with himem number of vCPUs and to the himem queue.
-    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM)
+    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HOST_FILTERING_MEMORY_IN_MB)
   end
 
   def experimental_command
