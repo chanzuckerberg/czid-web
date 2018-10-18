@@ -1,4 +1,5 @@
 import React from "react";
+import Label from "../../ui/labels/Label";
 import { CATEGORIES } from "../../ui/labels/PathogenLabel";
 
 const PathogenCount = ({ tag2count }) => {
@@ -8,16 +9,13 @@ const PathogenCount = ({ tag2count }) => {
   } else {
     let totalCount = Object.values(tag2count).reduce((a, b) => a + b);
     let display = (
-      <span>
-        {totalCount}
+      <span className="idseq-ui pathogen-preview">
         {tags.map(type => {
           return (
-            <i
-              className="fa fa-circle"
-              style={{ color: CATEGORIES[type]["color"] }}
-            />
+            <Label circular color={CATEGORIES[type]["color"]} size="mini" />
           );
         })}
+        <span className="pathogen-count">{totalCount}</span>
       </span>
     );
     return display;
