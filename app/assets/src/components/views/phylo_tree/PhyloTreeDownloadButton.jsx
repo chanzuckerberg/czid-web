@@ -7,7 +7,7 @@ class PhyloTreeDownloadButton extends React.Component {
     super(props);
 
     this.allOptions = [
-      { text: "VCF (single-reference)", value: "vcf" },
+      { text: "VCF", value: "vcf" },
       { text: "SNP annotations", value: "snp_annotations" }
     ];
     this.download = this.download.bind(this);
