@@ -4,21 +4,21 @@ import React from "react";
 
 const NIAID_URL =
   "https://www.niaid.nih.gov/research/emerging-infectious-diseases-pathogens";
-export const CATEGORIES = {
+const CATEGORIES = {
   categoryA: {
-    text: "pathogen | a",
+    text: "pathogenic | a",
     color: "red",
     tooltip: "NIAID pathogen priority list | category A",
     url: NIAID_URL
   },
   categoryB: {
-    text: "pathogen | b",
+    text: "pathogenic | b",
     color: "orange",
     tooltip: "NIAID pathogen priority list | category B",
     url: NIAID_URL
   },
   categoryC: {
-    text: "pathogen | a",
+    text: "pathogenic | c",
     color: "yellow",
     tooltip: "NIAID pathogen priority list | category C",
     url: NIAID_URL
