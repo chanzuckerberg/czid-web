@@ -1,1 +1,1 @@
-<p><%= @sharing_user_email %> has added you to the project '<%= link_to @shared_project_name, "#{root_url}?project_id=#{@shared_project_id}" %>' on IDseq!</p>
+<p><%= @sharing_user.name %> (<%= @sharing_user.email %>) has invited you to IDseq project <b><%= @shared_project_name %>.</p>
