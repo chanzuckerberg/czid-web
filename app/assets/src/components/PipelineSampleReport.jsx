@@ -882,7 +882,7 @@ class PipelineSampleReport extends React.Component {
       <span>
         {this.state.generaContainingTags[tax_info.tax_id] && (
           <PathogenPreview
-            tag2count={this.state.generaContainingTags[tax_info.tax_id]}
+            tag2Count={this.state.generaContainingTags[tax_info.tax_id]}
           />
         )}
         {tax_info.pathogenTag && <PathogenLabel type={tax_info.pathogenTag} />}
