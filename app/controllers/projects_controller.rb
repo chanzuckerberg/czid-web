@@ -243,19 +243,19 @@ class ProjectsController < ApplicationController
   end
 
   def new_user_shared_project_email_arguments
-    { 
+    {
       email_subject: 'You have been invited to IDseq',
       email_template: 'new_user_new_project',
       sharing_user_id: current_user.id,
-      shared_project_id: @project.id 
+      shared_project_id: @project.id
     }
   end
 
   def shared_project_email_arguments
-    { 
+    {
       email_subject: 'You have been added to a project on IDseq',
       sharing_user_id: current_user.id,
-      shared_project_id: @project.id 
+      shared_project_id: @project.id
     }
   end
 
