@@ -1,7 +1,7 @@
 // Place all the styles related to the Reports controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
-@import "variables";
+@import "typography";
 @import "themes/colors";
 
 // removing the arrows
@@ -15,228 +15,20 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-.flash {
-  animation-name: anim-info-updated;
-  animation-duration: 500ms;
-}
-
-@keyframes anim-info-updated {
-  0% {
-    background-color: #edf8ff;
-  }
-  100% {
-    background-color: transparent;
-  }
-}
-
 .row.reports-container {
   margin-bottom: 0px;
 }
 
 //Report Sidebar and Filters Styling
 
-.reports-sidebar {
-  background: $sidebar-background;
-  position: sticky;
-  z-index: 1;
-  position: -webkit-sticky;
-  position: -moz-sticky;
-  position: -o-sticky;
-  position: -ms-sticky;
-  top: 0px;
-  min-height: -webkit-fill-available !important;
-  border-right: 1px solid rgb(212, 212, 212);
-}
-
-.sidebar-title {
-  padding: 15px 0 10px 0;
-  color: #002238;
-  font-size: $font-size-large;
-  border-bottom: 1px solid #c8c8c8;
-  margin: 0 10px 15px;
-}
-
 .reports-divider {
-  background-color: #f8f8f8;
+  background-color: $off-white;
   height: 8px !important;
-  border-top: 1px solid #fff !important;
+  border-top: 1px solid $white !important;
   margin-top: -0.4rem !important;
 }
 #details table tr td {
   padding: 2px;
-}
-
-.sidebar-tabs {
-  .tabs {
-    display: flex !important;
-    .indicator {
-      display: none;
-    }
-    .tab {
-      &.reports-pane {
-        border-right: 1px solid #d6d6d6;
-      }
-      a {
-        text-align: center !important;
-        font-size: $font-size-small !important;
-      }
-    }
-  }
-
-  a.active {
-    color: #3867fa !important;
-  }
-
-  .sidebar-divider {
-    background: #eef1f2;
-    height: 25px;
-    margin-top: 20px;
-  }
-
-  .report-data {
-    margin-bottom: 20px;
-    float: left;
-    width: 100%;
-    &.background-model {
-      .input-field {
-        margin-top: 5px;
-        .caret {
-          color: rgb(103, 121, 134);
-          z-index: 500;
-          display: none !important;
-        }
-        .fa-angle-down {
-          position: absolute;
-          z-index: 50;
-          top: 31%;
-          right: 2px;
-          font-size: $font-size-large;
-          color: #444242;
-        }
-        .select-wrapper {
-          ul {
-            top: 45px !important;
-            padding-left: 0px !important;
-            li > span {
-              color: black !important;
-              font-size: $font-size-base !important;
-            }
-          }
-        }
-        .select-dropdown {
-          background: #fff;
-          border-radius: 3px;
-          padding-left: 8px;
-          border: 1px solid #a6b7c1;
-          width: 100%;
-          font-size: $font-size-base;
-        }
-      }
-    }
-  }
-
-  .report-data section {
-    float: left;
-    width: 100%;
-  }
-
-  .report-data div:nth-child(odd) {
-    color: #677986;
-    font-size: $font-size-large;
-    font-weight: $font-weight-regular;
-  }
-
-  .report-data div:nth-child(even) {
-    color: #1b232a;
-    margin-bottom: 10px;
-    font-size: $font-size-base;
-  }
-
-  .report-title {
-    font-size: $font-size-base;
-    color: #333333;
-  }
-
-  #filters-pane {
-    padding: 0;
-    .filter-title {
-      padding: 15px;
-      color: #b8b8b8;
-      font-size: $font-size-small;
-      border-bottom: 1px solid #d6d6d6;
-    }
-
-    .filter-values {
-      padding: 15px;
-    }
-
-    .filter-controls {
-      .category-title {
-        color: #677986;
-        margin-bottom: 15px;
-      }
-      .categories {
-        p {
-          margin: 5px;
-          label {
-            color: #1b232a;
-          }
-        }
-      }
-      .noUi-tooltip,
-      .noUi-handle {
-        background: #979797;
-      }
-
-      .noUi-tooltip {
-        display: none;
-      }
-
-      .noUi-connect {
-        background: #565656;
-      }
-
-      .threshold-label {
-        text-align: right;
-        margin-top: 15px;
-        label {
-          font-size: $font-size-small;
-          color: #464343;
-        }
-      }
-      input.browser-default {
-        border: 1px solid !important;
-        border-color: #dfdfdf !important;
-        padding: 5px;
-        width: 100%;
-        margin-top: 10px;
-        &:focus {
-          outline: none;
-        }
-      }
-      .input-container {
-        padding: 0;
-        input {
-          &:focus {
-            box-shadow: 0 0 5px #00a9f4 !important;
-            border: 1px solid #00a9f4 !important;
-          }
-        }
-      }
-    }
-  }
-
-  .apply-filter-button {
-    color: #f8f9f9;
-    width: 100%;
-    padding: 0 12px;
-    a {
-      margin: 20px 0 15px;
-      &.changed {
-        background: #3867fa !important;
-      }
-    }
-  }
 }
 
 .reports-main {
@@ -248,41 +40,12 @@ input[type="number"] {
   text-align: right;
 }
 
-.report-number-blank {
-  text-align: right;
-  color: $subdued-color;
-}
-
 .reports-screen {
-  background: #ffffff !important;
+  background: $white !important;
 }
 
 .reports-screen.container {
   width: 90%;
-}
-
-.reports-table-title .result-count {
-  font-size: 12px;
-  color: #535353;
-}
-
-.slider-title {
-  color: #535353;
-  font-size: $font-size-small;
-  margin: 35px 0 15px;
-}
-
-.slider-values div {
-  display: inline-block;
-  margin-bottom: 15px;
-  color: #9b9b9b;
-  font-size: $font-size-small;
-  border: 1px solid rgb(200, 200, 200);
-  padding: 0 5px;
-  background: white;
-}
-.slider-values .end {
-  float: right;
 }
 
 .report-table {
@@ -291,17 +54,17 @@ input[type="number"] {
   .count-type {
     text-align: right;
     font-weight: normal;
-    color: #999999;
+    color: $medium-grey;
     font-size: $font-size-small;
     &.active {
       font-weight: bolder;
-      color: #333333;
+      color: $darkest-grey;
       font-size: $font-size-base;
     }
   }
   .blank {
     font-style: italic;
-    color: #d1d1d2 !important;
+    color: $light-grey !important;
     font-weight: normal !important;
   }
 
@@ -318,21 +81,12 @@ input[type="number"] {
   }
 
   tr:not(.report-header):hover {
-    background-color: #f8f9fe;
+    background-color: $off-white-blue;
   }
 }
 
 .report-table .count-info {
-  color: #a0a0a0;
-}
-
-@keyframes highlight-animation {
-  from {
-    background-color: rgb(232, 242, 230);
-  }
-  to {
-    background-color: white;
-  }
+  color: $medium-grey;
 }
 
 .report-table {
@@ -343,31 +97,26 @@ input[type="number"] {
     font-weight: $font-weight-semibold;
   }
 
-  .highlighted {
-    animation-name: highlight-animation;
-    animation-duration: 2s;
-  }
-
   .report-row-genus {
-    background: #f7f7f7;
-    border-left: 5px solid white;
+    background: $off-white;
+    border-left: 5px solid $white;
   }
 
   .report-row-species {
-    border-left: 5px solid white;
+    border-left: 5px solid $white;
   }
 
   .top-scoring-row {
-    border-left: 5px solid $brand-blue;
-    background-color: $transparent-brand-blue;
+    border-left: 5px solid $primary-light;
+    background-color: $primary-lightest;
   }
 
   .confirmed {
-    color: #3cb371;
+    color: $success;
   }
 
   .watched {
-    color: #f4a460;
+    color: $warning;
   }
 
   .fa.fa-chevron-up,
@@ -380,64 +129,9 @@ input[type="number"] {
   .fa.fa-angle-down {
     font-size: $font-size-h4;
   }
-  .fa :not(insight-icon) {
-    margin-left: 2px;
-    margin-right: 5px;
-    font-size: $font-size-h4;
-    width: 10px;
-    &:hover {
-      color: #444242;
-    }
-    -webkit-user-select: none; /* Chrome all / Safari all */
-    -moz-user-select: none; /* Firefox all */
-    -ms-user-select: none; /* IE 10+ */
-    user-select: none; /* Likely future */
-  }
 }
 .report-table .species-name {
   margin-left: 40px;
-}
-
-.report-table .toggle-species {
-  &:hover {
-    color: #313030;
-  }
-}
-
-#sort-report {
-  a {
-    font-size: $font-size-base;
-    padding: 6px;
-
-    .sort-title {
-      display: inline-block;
-      text-transform: capitalize;
-    }
-
-    .sort-icon {
-      padding: 5px;
-    }
-  }
-}
-
-.sort-report {
-  span {
-    text-transform: capitalize;
-    &.sort-value {
-      color: #929292;
-      font-size: $font-size-base;
-      margin: 0 5px;
-    }
-  }
-  &.btn-flat {
-    font-size: $font-size-base;
-    i {
-      font-size: 13px;
-    }
-  }
-}
-#reports-pane {
-  padding: 0;
 }
 
 .report-table .sort-controls {
@@ -449,7 +143,7 @@ input[type="number"] {
   .table-head-label {
     cursor: pointer;
     &.active {
-      color: $id-blue;
+      color: $primary-light;
     }
   }
   i {
@@ -459,15 +153,15 @@ input[type="number"] {
     cursor: pointer;
     &:hover,
     &.active {
-      color: $id-blue;
+      color: $primary-light;
     }
   }
   .column-switcher {
-    color: #999999;
+    color: $medium-grey;
     cursor: pointer;
     font-weight: normal;
     &.active {
-      color: #333333;
+      color: $darkest-grey;
       font-weight: bolder;
     }
   }
@@ -506,34 +200,11 @@ input[type="number"] {
   th:last-child {
     padding-right: 0px;
   }
-
-  input.browser-default {
-    text-align: right;
-    border: 1px solid !important;
-    border-color: #dfdfdf !important;
-    padding: 5px;
-    width: 100%;
-    margin-top: 5px;
-    &:focus {
-      outline: none;
-    }
-  }
 }
 .genus-search-row {
   padding-left: 0 !important;
 }
 
-.threshold-row {
-  background: #fff;
-  border: 1px solid #d9e0e4;
-  border-radius: 4px;
-  margin-top: 30px;
-  .thresh-values {
-    color: #677986;
-    padding: 18px;
-    font-weight: $font-weight-semibold;
-  }
-}
 .genus-autocomplete-container {
   padding: 0 !important;
   height: 30px !important;
@@ -549,13 +220,13 @@ input[type="number"] {
       overflow-y: scroll !important;
       max-height: 400px !important;
       z-index: 500 !important;
-      background: #fff !important;
+      background: $white !important;
       font-size: inherit !important;
       padding: 0 !important;
       margin-top: 3px;
       border-radius: 0.28571429rem !important;
-      border: 1px solid rgba(34, 36, 38, 0.15);
-      box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
+      border: 1px solid $light-grey;
+      box-shadow: 0 2px 3px 0 $light-grey;
       div {
         padding: 8px;
         cursor: pointer;
@@ -566,12 +237,6 @@ input[type="number"] {
       width: inherit;
       height: 20px !important;
       outline: none;
-      &::placeholder,
-      &::-webkit-input-placeholder,
-      &:-moz-placeholder,
-      &::placeholder {
-        color: #bac7cf;
-      }
     }
     input {
       &::placeholder {
@@ -601,27 +266,10 @@ input[type="number"] {
 .reports-section {
   padding: 0 !important;
   .filter-message {
-    color: #999999;
+    color: $medium-grey;
     font-size: 12px;
   }
   .reports-count {
-    .download-report {
-      background: #edf8ff;
-      color: rgb(3, 169, 244) !important;
-      font-weight: $font-weight-semibold;
-      cursor: pointer;
-      margin: 10px 40px;
-      display: inline-block;
-      padding: 10px;
-      border-radius: 3px;
-      &:hover {
-        background: rgb(178, 235, 242);
-      }
-      div {
-        display: inline-block;
-        margin-right: 3px;
-      }
-    }
     .count {
       display: inline-block;
       margin: 20px 0 0px 17px;
@@ -631,10 +279,10 @@ input[type="number"] {
     }
     .disable {
       cursor: pointer;
-      color: #414367;
+      color: $medium-grey;
       font-weight: $font-weight-semibold;
       &:hover {
-        color: #3867fa;
+        color: $primary-light;
       }
     }
     div.text {
@@ -643,9 +291,9 @@ input[type="number"] {
     .filter-tags-list {
       padding-left: 15px;
       .label-tags {
-        background: #3867fa !important;
-        border-color: #3867fa !important;
-        color: #fff;
+        background: $primary-light !important;
+        border-color: $primary-light !important;
+        color: $white;
       }
     }
     .filter-btn {
@@ -658,57 +306,14 @@ input[type="number"] {
         padding: 10px 15px;
         width: 100%;
         & > div.filter-lists-element > li {
-          color: #444f5a;
+          color: $darkest-grey;
           display: inline-block;
           width: 240px;
           font-size: $font-size-large;
-          &:hover {
-            color: #2e363d;
-            cursor: pointer;
-          }
-          &.top-filter-dropdown,
-          &.top-filter {
-            padding: 5px 15px;
-            border: 1px solid #dce0e7;
-            .filter-label {
-              display: inline-block;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-              overflow: hidden;
-              width: 80%;
-              position: relative;
-              font-size: 8pt;
-            }
-            .filter-label-count {
-              width: 24px;
-              height: 24px;
-              border-radius: 14px;
-              background-color: #f7f7f7;
-              font-size: 12px !important;
-              font-weight: 600;
-              letter-spacing: 1.4px;
-              text-align: center;
-              color: #3867fa;
-              border: 1px solid transparent;
-              display: inline-block;
-              position: relative;
-            }
-            .down-box {
-              position: initial !important;
-              margin: 3px;
-              font-size: 13px;
-            }
-            &.download-report-button {
-              padding: 8px;
-              position: relative;
-              top: -3px;
-              text-align: center;
-            }
-          }
           &.search-box {
             input {
               width: 100%;
-              border: 1px solid #cccccc;
+              border: 1px solid $light-grey;
               padding: 6px 35px 6px 10px;
               position: relative;
               margin: 0;
@@ -716,7 +321,7 @@ input[type="number"] {
               border-radius: 19px;
             }
             i {
-              color: #878787;
+              color: $medium-grey;
               position: relative;
               left: 22px;
             }
@@ -728,19 +333,6 @@ input[type="number"] {
                 position: relative;
               }
             }
-          }
-        }
-        .dropdown-content li {
-          min-height: inherit;
-          padding: 10px;
-          [type="checkbox"].filled-in:checked + label:after {
-            border: 2px solid #305df9;
-            background-color: #305df9;
-          }
-
-          [type="checkbox"].filled-in + label:after {
-            border: 2px solid #c7c7c7;
-            background-color: #fff;
           }
         }
 
@@ -771,24 +363,17 @@ input[type="number"] {
   &:hover {
     .link-tag {
       visibility: visible;
-      color: #3867fa;
+      color: $primary-light;
     }
   }
   .link-tag {
     visibility: hidden;
     padding-left: 10px;
-    color: #3867fa;
+    color: $primary-light;
     font-size: $font-size-base;
     cursor: text;
     .fa {
       margin-left: 7px;
-    }
-    .cloud {
-      color: #3867fa;
-      font-size: $font-size-base;
-      &:hover {
-        color: #414367;
-      }
     }
     .action-dot {
       font-size: 15px;
@@ -805,14 +390,14 @@ input[type="number"] {
   }
   .download-btn {
     // The whole button
-    color: #3867fa;
-    background-color: #fff;
+    color: $primary-light;
+    background-color: $white;
     padding-left: 5em !important;
-    border: 1px solid #3867fa;
+    border: 1px solid $primary-light;
     border-radius: 50px;
     &:hover {
-      background-color: #3867fa;
-      color: #fff;
+      background-color: $primary-light;
+      color: $white;
     }
     width: 162px;
     height: 38px;
@@ -824,93 +409,12 @@ input[type="number"] {
   }
 }
 
-.advanced-filters-modal {
-  width: 500px !important;
-  display: none;
-  position: absolute;
-  background: #fff;
-  box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
-  margin-left: -16px;
-  padding: 10px;
-  cursor: auto;
-  border-radius: 0.5rem;
-  z-index: 1;
-  border: 1px solid rgba(34, 36, 38, 0.15);
-  span.filter-label {
-    font-size: 1em !important;
-  }
-  .metric-thresholds {
-    width: 100%;
-  }
-  .add-threshold-filter {
-    background: #f7f7f7;
-    padding: 5px;
-    width: 175px;
-    text-align: center;
-    cursor: pointer;
-  }
-  .round-me {
-    border-radius: 10px;
-  }
-  input {
-    &.inner-menus {
-      border: 1px solid #cccccc;
-    }
-  }
-  .inner-menus {
-    font-family: "Lato", "Helvetica Neue", Arial, Helvetica, sans-serif;
-    border-radius: 20px;
-    font-size: 10pt;
-    height: 30px;
-  }
-  .save-btn {
-    background: #3867fa;
-    color: white;
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-}
 .s3.download-area {
   padding-left: 5rem;
   margin-top: 25px;
 }
 .download-title {
   margin-bottom: 1rem;
-}
-.categories-filters-modal {
-  display: none;
-  position: absolute;
-  background: #fff;
-  box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
-  border: 1px solid rgba(34, 36, 38, 0.15);
-  border-radius: 0.28571429rem;
-  margin-left: -16px;
-  padding: 10px;
-  left: 20px;
-  cursor: auto;
-  .metric-thresholds {
-    width: 100%;
-  }
-  .add-threshold-filter {
-    background: #f7f7f7;
-    padding: 5px;
-    width: 175px;
-    text-align: center;
-    cursor: pointer;
-  }
-  [type="checkbox"].filled-in:checked {
-    width: 18px;
-    height: 18px;
-  }
-  [type="checkbox"].filled-in:checked + label:before {
-    top: 6px;
-    left: 1px;
-  }
-  label {
-    font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
-    font-size: 1rem;
-    color: rgba(0, 0, 0, 0.87);
-  }
 }
 
 [type="checkbox"].filled-in + label:before,
@@ -930,53 +434,14 @@ input[type="number"] {
 label {
   font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
   font-size: 1rem;
-  color: rgba(0, 0, 0, 0.87);
+  color: $darkest-grey;
 }
 
 [type="checkbox"] + label {
   line-height: 27px;
 }
 
-.ntnr-switch {
-  margin-right: 1.5rem;
-  .ui.menu {
-    height: 42px;
-  }
-  .active {
-    font-weight: bolder;
-  }
-}
-.pipeline-tree {
-  .sample-tree-tooltip {
-    min-width: 230px;
-
-    font-size: 9pt;
-    .row {
-      margin-bottom: 0;
-      .value {
-        text-align: right;
-      }
-      &.active {
-        font-weight: 600;
-      }
-    }
-    .title {
-      text-transform: uppercase;
-      font-size: 8pt;
-      color: #888;
-      border-bottom: 1px solid #eee;
-      margin-bottom: 0.5em;
-    }
-    .name {
-      margin-bottom: 1em;
-    }
-    ul {
-      margin: 0;
-    }
-  }
-}
-
 .ui.icon.insight-icon {
-  color: $brand-blue !important;
+  color: $primary-light !important;
   font-size: 8pt !important;
 }

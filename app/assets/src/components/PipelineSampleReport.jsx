@@ -175,31 +175,7 @@ class PipelineSampleReport extends React.Component {
 
   componentDidMount() {
     this.scrollDown();
-    const topFilterHandler = $(".top-filter-dropdown");
-    topFilterHandler.dropdown({
-      belowOrigin: true,
-      constrainWidth: true,
-      stopPropagation: false
-    });
-
-    this.setupFilterModal(
-      ".advanced-filters-activate",
-      ".advanced-filters-modal"
-    );
-    this.setupFilterModal(
-      ".categories-filters-activate",
-      ".categories-filters-modal"
-    );
   }
-
-  setupFilterModal = (activateDiv, modalDiv) => {
-    const filtersModal = $(modalDiv);
-    const filtersActivate = $(activateDiv);
-
-    filtersActivate.on("click", e => {
-      filtersModal.slideToggle(200);
-    });
-  };
 
   fetchSearchList = () => {
     axios
@@ -511,17 +487,6 @@ class PipelineSampleReport extends React.Component {
         pagesRendered: currentPage + 1
       }));
     }
-  };
-
-  flash = () => {
-    let sel = $(".filter-message");
-    sel.removeClass("flash");
-    const el = document.getElementById("filter-message");
-    if (el) {
-      el.offsetHeight;
-      /* trigger reflow */
-    }
-    sel.addClass("flash");
   };
 
   initializeTooltip = () => {
