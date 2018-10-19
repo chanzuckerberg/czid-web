@@ -15,6 +15,7 @@
       },
       "additional_attributes": {
         "taxid": <%= @attribute_dict[:taxid] %>,
+        "reference_taxids": <%= @attribute_dict[:reference_taxids] %>,
         "nt_db": "<%= @attribute_dict[:nt_db] %>",
         "align_viz_files": <%= @attribute_dict[:align_viz_files].to_json %>,
         "taxon_byteranges": <%= @attribute_dict[:taxon_byteranges].to_json %>

@@ -3,20 +3,29 @@ import React from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import $ from "jquery";
-import ReactAutocomplete from "react-autocomplete";
 import { Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
 import { getTaxonName } from "../helpers/taxon";
 import ThresholdMap from "./utils/ThresholdMap";
+import {
+  computeThresholdedTaxons,
+  isTaxonIncluded,
+  getTaxonSortComparator,
+  getCategoryAdjective
+} from "./views/report/utils";
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
-import OurDropdown from "./ui/controls/dropdowns/Dropdown";
-import MultipleNestedDropdown from "./ui/controls/dropdowns/MultipleNestedDropdown";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import ReportTable from "./views/report/ReportTable";
+import BackgroundModelFilter from "./views/report/filters/BackgroundModelFilter";
+import CategoryFilter from "./views/report/filters/CategoryFilter";
+import MetricPicker from "./views/report/filters/MetricPicker";
+import SpecificityFilter from "./views/report/filters/SpecificityFilter";
+import NameTypeFilter from "./views/report/filters/NameTypeFilter";
+import ReportSearchBox from "./views/report/filters/ReportSearchBox";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
@@ -153,51 +162,6 @@ class PipelineSampleReport extends React.Component {
     this.expandAll = false;
     this.expandedGenera = [];
     this.thresholded_taxons = [];
-
-    this.anyFilterSet = this.anyFilterSet.bind(this);
-    this.applyFilters = this.applyFilters.bind(this);
-    this.computeThresholdedTaxons = this.computeThresholdedTaxons.bind(this);
-    this.collapseGenus = this.collapseGenus.bind(this);
-    this.collapseTable = this.collapseTable.bind(this);
-    this.displayHighlightTags = this.displayHighlightTags.bind(this);
-    this.downloadFastaUrl = this.downloadFastaUrl.bind(this);
-    this.expandGenusClick = this.expandGenusClick.bind(this);
-    this.expandTable = this.expandTable.bind(this);
-    this.fillUrlParams = this.fillUrlParams.bind(this);
-    this.flash = this.flash.bind(this);
-    this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
-    this.getRowClass = this.getRowClass.bind(this);
-    this.gotoAlignmentVizLink = this.gotoAlignmentVizLink.bind(this);
-
-    // control handlers
-    this.handleBackgroundModelChange = this.handleBackgroundModelChange.bind(
-      this
-    );
-    this.handleIncludedCategoriesChange = this.handleIncludedCategoriesChange.bind(
-      this
-    );
-    this.handleNameTypeChange = this.handleNameTypeChange.bind(this);
-    this.handleRemoveCategory = this.handleRemoveCategory.bind(this);
-    this.handleRemoveThresholdFilter = this.handleRemoveThresholdFilter.bind(
-      this
-    );
-    this.handleSpecificityChange = this.handleSpecificityChange.bind(this);
-    this.handleThresholdFiltersChange = this.handleThresholdFiltersChange.bind(
-      this
-    );
-    this.handleTreeMetricChange = this.handleTreeMetricChange.bind(this);
-    this.handleViewClicked = this.handleViewClicked.bind(this);
-
-    this.renderMore = this.renderMore.bind(this);
-    this.renderName = this.renderName.bind(this);
-    this.renderNumber = this.renderNumber.bind(this);
-    this.renderColumnHeader = this.renderColumnHeader.bind(this);
-    this.resetAllFilters = this.resetAllFilters.bind(this);
-    this.setSortParams = this.setSortParams.bind(this);
-    this.sortCompareFunction = this.sortCompareFunction.bind(this);
-    this.sortResults = this.sortResults.bind(this);
-    this.isTaxonExpanded = this.isTaxonExpanded.bind(this);
-
     this.initializeTooltip();
   }
 
@@ -211,33 +175,9 @@ class PipelineSampleReport extends React.Component {
 
   componentDidMount() {
     this.scrollDown();
-    const topFilterHandler = $(".top-filter-dropdown");
-    topFilterHandler.dropdown({
-      belowOrigin: true,
-      constrainWidth: true,
-      stopPropagation: false
-    });
-
-    this.setupFilterModal(
-      ".advanced-filters-activate",
-      ".advanced-filters-modal"
-    );
-    this.setupFilterModal(
-      ".categories-filters-activate",
-      ".categories-filters-modal"
-    );
   }
 
-  setupFilterModal(activateDiv, modalDiv) {
-    const filtersModal = $(modalDiv);
-    const filtersActivate = $(activateDiv);
-
-    filtersActivate.on("click", e => {
-      filtersModal.slideToggle(200);
-    });
-  }
-
-  fetchSearchList() {
+  fetchSearchList = () => {
     axios
       .get(
         `/samples/${this.sample_id}/search_list?report_ts=${
@@ -252,11 +192,11 @@ class PipelineSampleReport extends React.Component {
           search_keys_in_sample: search_list
         });
       });
-  }
+  };
 
   // fetchReportData loads the actual report information with another call to
   // the API endpoint.
-  fetchReportData() {
+  fetchReportData = () => {
     this.nanobar.go(30);
     this.setState({
       loading: true
@@ -291,9 +231,9 @@ class PipelineSampleReport extends React.Component {
         }
       );
     });
-  }
+  };
 
-  anyFilterSet() {
+  anyFilterSet = () => {
     return (
       this.state.search_taxon_id > 0 ||
       this.state.includedCategories.length > 0 ||
@@ -301,9 +241,9 @@ class PipelineSampleReport extends React.Component {
       (this.state.activeThresholds.length > 0 &&
         ThresholdMap.isThresholdValid(this.state.activeThresholds[0]))
     );
-  }
+  };
 
-  resetAllFilters() {
+  resetAllFilters = () => {
     this.setState(
       {
         activeThresholds: [Object.assign({}, this.defaultThreshold)],
@@ -326,14 +266,17 @@ class PipelineSampleReport extends React.Component {
         Cookies.set("includedSubcategories", "[]");
       }
     );
-  }
+  };
 
-  applyFilters(recomputeThresholdedTaxons = false) {
+  applyFilters = (recomputeThresholdedTaxons = false) => {
     //
     // Threshold filters
     //
     if (recomputeThresholdedTaxons) {
-      this.computeThresholdedTaxons();
+      this.thresholded_taxons = computeThresholdedTaxons(
+        this.state.taxonomy_details,
+        this.state.activeThresholds
+      );
     }
 
     let input_taxons = this.thresholded_taxons;
@@ -401,7 +344,7 @@ class PipelineSampleReport extends React.Component {
       for (var i = 0; i < input_taxons.length; i++) {
         let taxon = input_taxons[i];
         if (
-          this.isTaxonIncluded(
+          isTaxonIncluded(
             taxon,
             includedCategories,
             includedSubcategoryColumns,
@@ -421,7 +364,7 @@ class PipelineSampleReport extends React.Component {
           taxon = input_taxons[i];
           while (taxon && taxon.genus_taxid == -200) {
             if (
-              this.isTaxonIncluded(
+              isTaxonIncluded(
                 taxon,
                 includedCategories,
                 includedSubcategoryColumns,
@@ -462,9 +405,9 @@ class PipelineSampleReport extends React.Component {
       pagesRendered: 1,
       rows_passing_filters: selected_taxons.length
     });
-  }
+  };
 
-  updateSpeciesCount(res) {
+  updateSpeciesCount = res => {
     for (let i = 0; i < res.length; i++) {
       let isGenus = res[i].genus_taxid == res[i].tax_id;
       if (isGenus) {
@@ -483,28 +426,9 @@ class PipelineSampleReport extends React.Component {
       }
     }
     return res;
-  }
+  };
 
-  isTaxonIncluded(
-    taxon,
-    includedCategories,
-    includedSubcategoryColumns,
-    excludedSubcategoryColumns
-  ) {
-    // returns if taxon is in either the included categories / subcategories AND
-    // the taxon is not in an excluded subcategory
-    return (
-      (includedCategories.indexOf(taxon.category_name) >= 0 ||
-        includedSubcategoryColumns.some(column => {
-          return taxon[column] == 1;
-        })) &&
-      !excludedSubcategoryColumns.some(column => {
-        return taxon[column] == 1;
-      })
-    );
-  }
-
-  filterNonSpecific(rows) {
+  filterNonSpecific = rows => {
     let filtered = [];
     for (let i = 0; i < rows.length; i++) {
       let cur = rows[i];
@@ -523,16 +447,16 @@ class PipelineSampleReport extends React.Component {
       }
     }
     return filtered;
-  }
+  };
 
-  removeEmptyGenusRows(rows) {
+  removeEmptyGenusRows = rows => {
     // Remove rows unless they have a species tax level or a species count
     // under them of greater than 0.
     return rows.filter(r => r.tax_level === 1 || r.species_count > 0);
-  }
+  };
 
   //Load more samples on scroll
-  scrollDown() {
+  scrollDown = () => {
     var that = this;
     $(window).scroll(function() {
       if (
@@ -547,9 +471,9 @@ class PipelineSampleReport extends React.Component {
         return false;
       }
     });
-  }
+  };
 
-  renderMore() {
+  renderMore = () => {
     let selected_taxons = this.state.selected_taxons;
     let currentPage = this.state.pagesRendered;
     let rowsPerPage = this.max_rows_to_render;
@@ -563,20 +487,9 @@ class PipelineSampleReport extends React.Component {
         pagesRendered: currentPage + 1
       }));
     }
-  }
+  };
 
-  flash() {
-    let sel = $(".filter-message");
-    sel.removeClass("flash");
-    const el = document.getElementById("filter-message");
-    if (el) {
-      el.offsetHeight;
-      /* trigger reflow */
-    }
-    sel.addClass("flash");
-  }
-
-  initializeTooltip() {
+  initializeTooltip = () => {
     // only updating the tooltip offset when the component is loaded
     $(() => {
       const tooltipIdentifier = $("[rel='tooltip']");
@@ -594,72 +507,16 @@ class PipelineSampleReport extends React.Component {
         }
       });
     });
-  }
+  };
 
-  // applySort needs to be bound at time of use, not in constructor above
-  // TODO(yf): fix this
-  applySort(sort_by) {
+  applySort = sort_by => {
     if (sort_by.toLowerCase() != this.state.sort_by) {
       this.state.sort_by = sort_by.toLowerCase();
       this.sortResults();
     }
-  }
+  };
 
-  sortCompareFunction(a, b) {
-    const [ptype, pmetric] = this.sortParams.primary;
-    const [stype, smetric] = this.sortParams.secondary;
-    const genus_a = this.genus_map[a.genus_taxid];
-    const genus_b = this.genus_map[b.genus_taxid];
-
-    const genus_a_p_val = parseFloat(genus_a[ptype][pmetric]);
-    const genus_a_s_val = parseFloat(genus_a[stype][smetric]);
-    const a_p_val = parseFloat(a[ptype][pmetric]);
-    const a_s_val = parseFloat(a[stype][smetric]);
-
-    const genus_b_p_val = parseFloat(genus_b[ptype][pmetric]);
-    const genus_b_s_val = parseFloat(genus_b[stype][smetric]);
-    const b_p_val = parseFloat(b[ptype][pmetric]);
-    const b_s_val = parseFloat(b[stype][smetric]);
-    // compared at genus level descending and then species level descending
-    //
-    //
-    if (a.genus_taxid == b.genus_taxid) {
-      // same genus
-      if (a.tax_level > b.tax_level) {
-        return -1;
-      } else if (a.tax_level < b.tax_level) {
-        return 1;
-      }
-      if (a_p_val > b_p_val) {
-        return -1;
-      } else if (a_p_val < b_p_val) {
-        return 1;
-      }
-      if (a_s_val > b_s_val) {
-        return -1;
-      } else if (a_s_val < b_s_val) {
-        return 1;
-      }
-      return 0;
-    }
-    if (genus_a_p_val > genus_b_p_val) {
-      return -1;
-    } else if (genus_a_p_val < genus_b_p_val) {
-      return 1;
-    }
-    if (genus_a_s_val > genus_b_s_val) {
-      return -1;
-    } else if (genus_a_s_val < genus_b_s_val) {
-      return 1;
-    }
-    if (a.genus_taxid < b.genus_taxid) {
-      return -1;
-    } else if (a.genus_taxid > b.genus_taxid) {
-      return 1;
-    }
-  }
-
-  setSortParams() {
+  setSortParams = () => {
     const primary_sort = this.state.sort_by.split("_");
     primary_sort[0] = primary_sort[0].toUpperCase();
     const secondary_sort = this.default_sort_by.split("_");
@@ -668,12 +525,12 @@ class PipelineSampleReport extends React.Component {
       primary: primary_sort,
       secondary: secondary_sort
     };
-  }
+  };
 
-  handleIncludedCategoriesChange(
+  handleIncludedCategoriesChange = (
     newIncludedCategories,
     newIncludedSubcategories
-  ) {
+  ) => {
     let includedSubcategories = [];
     for (let category in newIncludedSubcategories) {
       if (newIncludedSubcategories.hasOwnProperty(category)) {
@@ -700,9 +557,9 @@ class PipelineSampleReport extends React.Component {
         this.applyFilters();
       }
     );
-  }
+  };
 
-  handleRemoveCategory(categoryToRemove) {
+  handleRemoveCategory = categoryToRemove => {
     let newIncludedCategories = this.state.includedCategories.filter(
       category => {
         return category != categoryToRemove;
@@ -712,9 +569,9 @@ class PipelineSampleReport extends React.Component {
       newIncludedCategories,
       this.state.includedSubcategories
     );
-  }
+  };
 
-  handleRemoveSubcategory(subcategoryToRemove) {
+  handleRemoveSubcategory = subcategoryToRemove => {
     let newIncludedSubcategories = this.state.includedSubcategories.filter(
       subcategory => {
         return subcategory != subcategoryToRemove;
@@ -724,79 +581,42 @@ class PipelineSampleReport extends React.Component {
       this.state.includedCategories,
       newIncludedSubcategories
     );
-  }
+  };
 
-  sortResults() {
+  sortResults = () => {
     this.setSortParams();
     let selected_taxons = this.state.selected_taxons;
-    selected_taxons = selected_taxons.sort(this.sortCompareFunction);
+    const taxonSortComparator = getTaxonSortComparator(
+      this.sortParams.primary,
+      this.sortParams.secondary,
+      this.genus_map
+    );
+    selected_taxons = selected_taxons.sort(taxonSortComparator);
     this.setState({
       selected_taxons: selected_taxons,
       selected_taxons_top: selected_taxons.slice(0, this.max_rows_to_render),
       pagesRendered: 1
     });
-    this.thresholded_taxons = this.thresholded_taxons.sort(
-      this.sortCompareFunction
-    );
+    this.thresholded_taxons = this.thresholded_taxons.sort(taxonSortComparator);
     this.state.taxonomy_details = this.state.taxonomy_details.sort(
-      this.sortCompareFunction
+      taxonSortComparator
     );
-  }
+  };
 
-  handleThresholdFiltersChange(activeThresholds) {
+  handleThresholdFiltersChange = activeThresholds => {
     ThresholdMap.saveThresholdFilters(activeThresholds);
     this.setState({ activeThresholds }, () => {
       this.applyFilters(true);
     });
-  }
+  };
 
-  handleRemoveThresholdFilter(pos) {
+  handleRemoveThresholdFilter = pos => {
     const activeThresholds = Object.assign([], this.state.activeThresholds);
     activeThresholds.splice(pos, 1);
     this.handleThresholdFiltersChange(activeThresholds);
-  }
+  };
 
-  computeThresholdedTaxons() {
-    const candidate_taxons = this.state.taxonomy_details;
-    const activeThresholds = this.state.activeThresholds;
-    let result_taxons = [];
-    let genus_taxon = {};
-    let matched_taxons = [];
-    for (let i = 0; i < candidate_taxons.length; i++) {
-      const taxon = candidate_taxons[i];
-      if (taxon.genus_taxid == taxon.tax_id) {
-        // genus
-        if (matched_taxons.length > 0) {
-          result_taxons.push(genus_taxon);
-          result_taxons = result_taxons.concat(matched_taxons);
-        } else if (
-          ThresholdMap.taxonPassThresholdFilter(genus_taxon, activeThresholds)
-        ) {
-          result_taxons.push(genus_taxon);
-        }
-        genus_taxon = taxon;
-        matched_taxons = [];
-      } else {
-        // species
-        if (ThresholdMap.taxonPassThresholdFilter(taxon, activeThresholds)) {
-          matched_taxons.push(taxon);
-        }
-      }
-    }
-
-    if (matched_taxons.length > 0) {
-      result_taxons.push(genus_taxon);
-      result_taxons = result_taxons.concat(matched_taxons);
-    } else if (
-      ThresholdMap.taxonPassThresholdFilter(genus_taxon, activeThresholds)
-    ) {
-      result_taxons.push(genus_taxon);
-    }
-
-    this.thresholded_taxons = result_taxons;
-  }
-
-  handleBackgroundModelChange(_, data) {
+  handleBackgroundModelChange = (_, data) => {
     if (data.value === this.state.backgroundData.id) {
       // Skip if no change
       return;
@@ -818,31 +638,31 @@ class PipelineSampleReport extends React.Component {
         this.props.refreshPage({ background_id: data.value });
       }
     );
-  }
+  };
 
-  handleNameTypeChange(_, data) {
+  handleNameTypeChange = (_, data) => {
     Cookies.set("name_type", data.value);
     this.setState({ name_type: data.value });
-  }
+  };
 
-  handleSpecificityChange(_, data) {
+  handleSpecificityChange = (_, data) => {
     Cookies.set("readSpecificity", data.value);
     this.setState({ readSpecificity: data.value }, () => {
       this.applyFilters();
     });
-  }
+  };
 
-  handleTreeMetricChange(_, data) {
+  handleTreeMetricChange = (_, data) => {
     Cookies.set("treeMetric", data.value);
     this.setState({ treeMetric: data.value });
-  }
+  };
 
-  handleViewClicked(_, data) {
+  handleViewClicked = (_, data) => {
     this.setState({ view: data.name });
-  }
+  };
 
   // path to NCBI
-  gotoNCBI(e) {
+  gotoNCBI = e => {
     const taxId = e.target.getAttribute("data-tax-id");
     let num = parseInt(taxId);
     if (num < -1e8) {
@@ -851,18 +671,18 @@ class PipelineSampleReport extends React.Component {
     num = num.toString();
     const ncbiLink = `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=${num}`;
     window.open(ncbiLink, "hide_referrer");
-  }
+  };
 
   // download Fasta
-  downloadFastaUrl(e) {
+  downloadFastaUrl = e => {
     const taxLevel = e.target.getAttribute("data-tax-level");
     const taxId = e.target.getAttribute("data-tax-id");
     location.href = `/samples/${
       this.sample_id
     }/fasta/${taxLevel}/${taxId}/NT_or_NR`;
-  }
+  };
 
-  gotoAlignmentVizLink(e) {
+  gotoAlignmentVizLink = e => {
     const taxId = e.target.getAttribute("data-tax-id");
     const taxLevel = e.target.getAttribute("data-tax-level");
     const pipeline_version = this.props.reportPageParams.pipeline_version;
@@ -871,9 +691,9 @@ class PipelineSampleReport extends React.Component {
         this.sample_id
       }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipeline_version}`
     );
-  }
+  };
 
-  displayHoverActions(taxInfo, reportDetails) {
+  displayHoverActions = (taxInfo, reportDetails) => {
     let tax_level_str = "";
     let ncbiDot, fastaDot, alignmentVizDot, phyloTreeDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
@@ -946,9 +766,9 @@ class PipelineSampleReport extends React.Component {
         />
       </span>
     );
-  }
+  };
 
-  displayHighlightTags(taxInfo) {
+  displayHighlightTags = taxInfo => {
     const watchDot = (
       <i
         data-tax-id={taxInfo.tax_id}
@@ -982,28 +802,9 @@ class PipelineSampleReport extends React.Component {
         ) : null}
       </div>
     );
-  }
+  };
 
-  static category_to_adjective(category) {
-    const category_lowercase = category.toLowerCase();
-    switch (category_lowercase) {
-      case "bacteria":
-        return "bacterial";
-      case "archaea":
-        return "archaeal";
-      case "eukaryota":
-        return "eukaryotic";
-      case "viruses":
-        return "viral";
-      case "viroids":
-        return "viroidal";
-      case "uncategorized":
-        return "uncategorized";
-    }
-    return category_lowercase;
-  }
-
-  renderName(tax_info, report_details, backgroundData, openTaxonModal) {
+  renderName = (tax_info, report_details, backgroundData, openTaxonModal) => {
     let taxCommonName = tax_info["common_name"];
     const taxonName = getTaxonName(tax_info, this.state.name_type);
 
@@ -1069,24 +870,24 @@ class PipelineSampleReport extends React.Component {
             {collapseExpand} {taxonNameDisplay}
           </div>
           <i className="count-info">
-            ({tax_info.species_count}{" "}
-            {PipelineSampleReport.category_to_adjective(category_name)} species)
+            ({tax_info.species_count} {getCategoryAdjective(category_name)}{" "}
+            species)
           </i>
           {secondaryTaxonDisplay}
         </div>
       );
     }
     return taxonDescription;
-  }
+  };
 
-  renderNumber(
+  renderNumber = (
     ntCount,
     nrCount,
     num_decimals,
     isAggregate = false,
     visible_flag = true,
     showInsight = false
-  ) {
+  ) => {
     if (!visible_flag) {
       return null;
     }
@@ -1115,42 +916,42 @@ class PipelineSampleReport extends React.Component {
         {nrCountLabel}
       </td>
     );
-  }
+  };
 
-  switchClassName(countType, countValue) {
+  switchClassName = (countType, countValue) => {
     const isCountBlank = countValue === 0 || countValue === -100 ? "blank" : "";
     const isActive = this.state.countType === countType ? "active" : "";
     return `${isActive} ${isCountBlank} count-type`;
-  }
+  };
 
-  isSortedActive(columnName) {
+  isSortedActive = columnName => {
     const desiredSort = columnName.toLowerCase();
     return this.state.sort_by == desiredSort ? "active" : "";
-  }
+  };
 
-  render_sort_arrow(column, desired_sort_direction, arrow_direction) {
+  render_sort_arrow = (column, desired_sort_direction, arrow_direction) => {
     let className = `${this.isSortedActive(
       column
     )} fa fa-chevron-${arrow_direction}`;
     return (
       <i
-        onClick={this.applySort.bind(this, column)}
+        onClick={() => this.applySort(column)}
         className={className}
         key={column.toLowerCase()}
       />
     );
-  }
+  };
 
-  renderColumnHeader(
+  renderColumnHeader = (
     visible_metric,
     column_name,
     tooltip_message,
     visible_flag = true
-  ) {
+  ) => {
     let element = (
       <div
         className="sort-controls"
-        onClick={this.applySort.bind(this, column_name)}
+        onClick={() => this.applySort(column_name)}
       >
         <span
           className={`${this.isSortedActive(column_name)} table-head-label`}
@@ -1166,16 +967,16 @@ class PipelineSampleReport extends React.Component {
         <BasicPopup trigger={element} content={tooltip_message} />
       </th>
     );
-  }
+  };
 
-  isTaxonExpanded(taxInfo) {
+  isTaxonExpanded = taxInfo => {
     return (
       (this.expandAll && taxInfo.genus_taxid > 0) ||
       this.expandedGenera.indexOf(taxInfo.genus_taxid.toString()) >= 0
     );
-  }
+  };
 
-  getRowClass(taxInfo, confirmedTaxIds, watchedTaxIds) {
+  getRowClass = (taxInfo, confirmedTaxIds, watchedTaxIds) => {
     const topScoringRow = taxInfo.topScoring === 1;
 
     let taxonStatusClass = "";
@@ -1201,25 +1002,25 @@ class PipelineSampleReport extends React.Component {
       taxonStatusClass,
       topScoringRow && "top-scoring-row"
     );
-  }
+  };
 
-  expandGenusClick(e) {
+  expandGenusClick = e => {
     const className = e.target.attributes.class.nodeValue;
     const attr = className.split(" ");
     const taxId = attr[2];
     this.expandGenus(taxId);
-  }
+  };
 
-  expandGenus(taxId) {
+  expandGenus = taxId => {
     const taxIdIdx = this.expandedGenera.indexOf(taxId);
     if (taxIdIdx < 0) {
       this.expandedGenera.push(taxId);
     }
     $(`.report-row-species.${taxId}`).removeClass("hidden");
     $(`.report-arrow.${taxId}`).toggleClass("hidden");
-  }
+  };
 
-  collapseGenus(e) {
+  collapseGenus = e => {
     const className = e.target.attributes.class.nodeValue;
     const attr = className.split(" ");
     const taxId = attr[2];
@@ -1229,9 +1030,9 @@ class PipelineSampleReport extends React.Component {
     }
     $(`.report-row-species.${taxId}`).addClass("hidden");
     $(`.report-arrow.${taxId}`).toggleClass("hidden");
-  }
+  };
 
-  expandTable(e) {
+  expandTable = e => {
     // expand all real genera
     this.expandAll = true;
     this.expandedGenera = [];
@@ -1239,9 +1040,9 @@ class PipelineSampleReport extends React.Component {
     $(".report-arrow-down").removeClass("hidden");
     $(".report-arrow-right").addClass("hidden");
     $(".table-arrow").toggleClass("hidden");
-  }
+  };
 
-  collapseTable(e) {
+  collapseTable = e => {
     // collapse all genera (real or negative)
     this.expandAll = false;
     this.expandedGenera = [];
@@ -1249,15 +1050,15 @@ class PipelineSampleReport extends React.Component {
     $(".report-arrow-down").addClass("hidden");
     $(".report-arrow-right").removeClass("hidden");
     $(".table-arrow").toggleClass("hidden");
-  }
+  };
 
-  handleSearch(e) {
+  handleSearch = e => {
     this.setState({
       searchKey: e.target.value
     });
-  }
+  };
 
-  searchSelectedTaxon(value, item) {
+  searchSelectedTaxon = (value, item) => {
     let searchId = item[1];
     this.setState(
       {
@@ -1268,7 +1069,7 @@ class PipelineSampleReport extends React.Component {
         this.applyFilters();
       }
     );
-  }
+  };
 
   // Fill in desired URL parameters so user's can copy and paste URLs.
   // Ex: Add ?pipeline_version=1.7&background_id=4 to /samples/545
@@ -1279,7 +1080,7 @@ class PipelineSampleReport extends React.Component {
   // (1) URL parameter specified
   // (2) saved background name in frontend cookie
   // (3) the default background
-  fillUrlParams() {
+  fillUrlParams = () => {
     // Skip if report is not present or a background ID and pipeline version
     // are explicitly specified in the URL.
     if (
@@ -1307,20 +1108,20 @@ class PipelineSampleReport extends React.Component {
     params["background_id"] = this.props.reportPageParams.background_id;
     // Modify the URL in place without triggering a page reload.
     history.replaceState(null, null, `?${stringer.stringify(params)}`);
-  }
+  };
 
-  fetchParams(param) {
+  fetchParams = param => {
     let url = new URL(window.location);
     return url.searchParams.get(param);
-  }
+  };
 
   // Select the background ID with the matching name.
-  getBackgroundIdByName(name) {
+  getBackgroundIdByName = name => {
     let match = this.all_backgrounds.filter(b => b["name"] === name);
     if (match && match[0] && match[0]["id"]) {
       return match[0]["id"];
     }
-  }
+  };
 
   render() {
     const filter_stats = `${
@@ -1468,140 +1269,6 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
   }
 }
 
-function CategoryFilter({ parent }) {
-  let options = [];
-  parent.all_categories.forEach(category => {
-    options.push({ text: category.name, value: category.name });
-
-    let suboptions = [];
-    (parent.categoryParentChild[category.name] || []).forEach(subcategory => {
-      suboptions.push({
-        text: subcategory,
-        value: subcategory
-      });
-    });
-    if (suboptions.length > 0) {
-      options[options.length - 1].suboptions = suboptions;
-    }
-  });
-
-  let selectedSuboptions = {};
-  parent.state.includedSubcategories.forEach(subcategory => {
-    let category = parent.categoryChildParent[subcategory];
-    if (!selectedSuboptions[category]) {
-      selectedSuboptions[category] = [];
-    }
-    selectedSuboptions[category].push(subcategory);
-  });
-
-  return (
-    <MultipleNestedDropdown
-      options={options}
-      selectedOptions={parent.state.includedCategories}
-      selectedSuboptions={selectedSuboptions}
-      label="Categories: "
-      onChange={parent.handleIncludedCategoriesChange}
-    />
-  );
-}
-
-function ReportSearchBox({ parent }) {
-  return (
-    <li className="search-box genus-autocomplete-container">
-      <ReactAutocomplete
-        inputProps={{ placeholder: "Search" }}
-        items={parent.state.search_keys_in_sample}
-        shouldItemRender={(item, value) =>
-          item[0] == "Show All" ||
-          (value.length > 2 &&
-            item[0].toLowerCase().indexOf(value.toLowerCase()) > -1)
-        }
-        getItemValue={item => item[0]}
-        renderItem={(item, highlighted) => (
-          <div
-            key={item[1]}
-            style={{
-              backgroundColor: highlighted ? "#eee" : "transparent",
-              fontFamily: "'Helvetica Neue', Arial, Helvetica, sans-serif",
-              fontSize: "1rem",
-              overflow: "hidden"
-            }}
-          >
-            {item[0]}
-          </div>
-        )}
-        value={parent.state.searchKey}
-        onChange={e => parent.handleSearch(e)}
-        onSelect={(value, item) => parent.searchSelectedTaxon(value, item)}
-      />
-      <i className="fa fa-search" />
-    </li>
-  );
-}
-
-function NameTypeFilter({ parent }) {
-  const nameTypeOptions = [
-    { text: "Scientific", value: "Scientific name" },
-    { text: "Common", value: "Common name" }
-  ];
-  return (
-    <OurDropdown
-      options={nameTypeOptions}
-      value={parent.state.name_type}
-      label="Name Type: "
-      onChange={parent.handleNameTypeChange}
-    />
-  );
-}
-
-function BackgroundModelFilter({ parent }) {
-  let disabled = false;
-  let backgroundOptions = parent.all_backgrounds.map(background => {
-    return { text: background.name, value: background.id };
-  });
-  if (backgroundOptions.length == 0) {
-    backgroundOptions = [
-      { text: "No background models to display", value: -1 }
-    ];
-    disabled = true;
-  }
-  return (
-    <OurDropdown
-      options={backgroundOptions}
-      value={parent.state.backgroundData.id}
-      disabled={disabled}
-      label="Background: "
-      onChange={parent.handleBackgroundModelChange}
-    />
-  );
-}
-
-function SpecificityFilter({ parent }) {
-  const specificityOptions = [
-    { text: "All", value: 0 },
-    { text: "Specific Only", value: 1 }
-  ];
-  return (
-    <OurDropdown
-      options={specificityOptions}
-      value={parent.state.readSpecificity}
-      label="Read Specificity: "
-      onChange={parent.handleSpecificityChange}
-    />
-  );
-}
-
-function MetricPicker({ parent }) {
-  return (
-    <OurDropdown
-      options={parent.treeMetrics}
-      value={parent.state.treeMetric}
-      label="Tree Metric: "
-      onChange={parent.handleTreeMetricChange}
-    />
-  );
-}
-
 class RenderMarkup extends React.Component {
   constructor(props) {
     super(props);
@@ -1654,8 +1321,8 @@ class RenderMarkup extends React.Component {
     );
   }
   renderTree() {
-    let parent = this.props.parent;
-    if (!(parent.state.selected_taxons.length && this.state.view == "tree")) {
+    const parent = this.props.parent;
+    if (!parent.state.selected_taxons.length) {
       return;
     }
     return (
@@ -1672,6 +1339,99 @@ class RenderMarkup extends React.Component {
     );
   }
 
+  renderFilters() {
+    const parent = this.props.parent;
+    return (
+      <div className="report-top-filters">
+        <div className="filter-lists">
+          <div className="filter-lists-element">
+            <ReportSearchBox
+              searchKeysInSample={parent.state.search_keys_in_sample}
+              searchKey={parent.state.searchKey}
+              onSelect={(value, item) =>
+                parent.searchSelectedTaxon(value, item)
+              }
+              onChange={parent.handleSearch}
+            />
+          </div>
+          <div className="filter-lists-element">
+            <NameTypeFilter
+              value={parent.state.name_type}
+              onChange={parent.handleNameTypeChange}
+            />
+          </div>
+          <div className="filter-lists-element">
+            <BackgroundModelFilter
+              allBackgrounds={parent.all_backgrounds}
+              value={parent.state.backgroundData.id}
+              onChange={parent.handleBackgroundModelChange}
+            />
+          </div>
+          <div className="filter-lists-element">
+            <CategoryFilter
+              parent={parent}
+              allCategories={parent.all_categories}
+              categoryParentChild={parent.categoryParentChild}
+              categoryChildParent={parent.categoryChildParent}
+              selectedCategories={parent.state.includedCategories}
+              selectedSubcategories={parent.state.includedSubcategories}
+              onChange={parent.handleIncludedCategoriesChange}
+            />
+          </div>
+          <div className="filter-lists-element">
+            <ThresholdFilterDropdown
+              options={{
+                targets: parent.allThresholds,
+                operators: [">=", "<="]
+              }}
+              thresholds={parent.state.activeThresholds}
+              onApply={parent.handleThresholdFiltersChange}
+            />
+          </div>
+          <div className="filter-lists-element">
+            <SpecificityFilter
+              value={parent.state.readSpecificity}
+              onChange={parent.handleSpecificityChange}
+            />
+          </div>
+          {this.state.view == "tree" && (
+            <div className="filter-lists-element">
+              <MetricPicker
+                options={parent.treeMetrics}
+                value={parent.state.treeMetric}
+                onChange={parent.handleTreeMetricChange}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  renderTable() {
+    const parent = this.props.parent;
+    return (
+      <ReportTable
+        taxons={parent.state.selected_taxons_top}
+        taxonRowRefs={parent.taxon_row_refs}
+        confirmedTaxIds={parent.props.confirmed_taxids}
+        watchedTaxIds={parent.props.watched_taxids}
+        renderName={parent.renderName}
+        renderNumber={parent.renderNumber}
+        displayHighlightTags={parent.displayHighlightTags}
+        showConcordance={parent.showConcordance}
+        getRowClass={parent.getRowClass}
+        reportDetails={parent.report_details}
+        backgroundData={parent.state.backgroundData}
+        expandTable={parent.expandTable}
+        collapseTable={parent.collapseTable}
+        renderColumnHeader={parent.renderColumnHeader}
+        countType={parent.state.countType}
+        setCountType={countType => parent.setState({ countType })}
+      />
+    );
+  }
+
   render() {
     const {
       filter_row_stats,
@@ -1682,80 +1442,26 @@ class RenderMarkup extends React.Component {
     } = this.props;
 
     return (
-      <div>
-        <div id="reports" className="reports-screen tab-screen col s12">
-          <div className="tab-screen-content">
-            <div className="row reports-container">
-              <div className="col s12 reports-section">
-                <div className="reports-count">
-                  <div className="report-top-filters">
-                    <div className="filter-lists">
-                      <div className="filter-lists-element">
-                        <ReportSearchBox parent={parent} />
-                      </div>
-                      <div className="filter-lists-element">
-                        <NameTypeFilter parent={parent} />
-                      </div>
-                      <div className="filter-lists-element">
-                        <BackgroundModelFilter parent={parent} />
-                      </div>
-                      <div className="filter-lists-element">
-                        <CategoryFilter parent={parent} />
-                      </div>
-                      <div className="filter-lists-element">
-                        <ThresholdFilterDropdown
-                          options={{
-                            targets: parent.allThresholds,
-                            operators: [">=", "<="]
-                          }}
-                          thresholds={parent.state.activeThresholds}
-                          onApply={parent.handleThresholdFiltersChange}
-                        />
-                      </div>
-                      <div className="filter-lists-element">
-                        <SpecificityFilter parent={parent} />
-                      </div>
-                      {this.state.view == "tree" && (
-                        <div className="filter-lists-element">
-                          <MetricPicker parent={parent} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {this.renderMenu()}
-                  <div className="filter-tags-list">
-                    {advanced_filter_tag_list} {categories_filter_tag_list}{" "}
-                    {subcats_filter_tag_list}
-                  </div>
-                  {filter_row_stats}
+      <div id="reports" className="reports-screen tab-screen col s12">
+        <div className="tab-screen-content">
+          <div className="row reports-container">
+            <div className="col s12 reports-section">
+              <div className="reports-count">
+                {this.renderFilters()}
+                {this.renderMenu()}
+                <div className="filter-tags-list">
+                  {advanced_filter_tag_list} {categories_filter_tag_list}{" "}
+                  {subcats_filter_tag_list}
                 </div>
-                {this.state.view == "table" && (
-                  <ReportTable
-                    taxons={parent.state.selected_taxons_top}
-                    taxonRowRefs={parent.taxon_row_refs}
-                    confirmedTaxIds={parent.props.confirmed_taxids}
-                    watchedTaxIds={parent.props.watched_taxids}
-                    renderName={parent.renderName}
-                    renderNumber={parent.renderNumber}
-                    displayHighlightTags={parent.displayHighlightTags}
-                    showConcordance={parent.showConcordance}
-                    getRowClass={parent.getRowClass}
-                    reportDetails={parent.report_details}
-                    backgroundData={parent.state.backgroundData}
-                    expandTable={parent.expandTable}
-                    collapseTable={parent.collapseTable}
-                    renderColumnHeader={parent.renderColumnHeader}
-                    countType={parent.state.countType}
-                    setCountType={countType => parent.setState({ countType })}
-                  />
-                )}
-                {this.renderTree()}
-                {parent.state.loading && (
-                  <div className="loading-container">
-                    <LoadingLabel />
-                  </div>
-                )}
+                {filter_row_stats}
               </div>
+              {this.state.view == "table" && this.renderTable()}
+              {this.state.view == "tree" && this.renderTree()}
+              {parent.state.loading && (
+                <div className="loading-container">
+                  <LoadingLabel />
+                </div>
+              )}
             </div>
           </div>
         </div>

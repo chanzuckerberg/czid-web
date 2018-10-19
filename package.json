@@ -54,6 +54,8 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "babel-eslint": "^10.0.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "classnames": "^2.2.6",
     "clusterfck": "git+https://github.com/chanzuckerberg/clusterfck.git#master",

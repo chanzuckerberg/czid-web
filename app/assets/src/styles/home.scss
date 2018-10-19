@@ -1,10 +1,10 @@
 // Place all the styles related to the home controller here.
 // They will automatically be included in application.scss.
 // You can use Sass (SCSS) here: http://sass-lang.com/
-@import "variables";
+@import "typography";
 
 body {
-  color: $body-color;
+  color: $darkest-grey;
   font-size: $font-size-body;
   font-family: $font-family-sans-serif;
 }
@@ -15,7 +15,7 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 2147483647;
-  background: rgba(255, 255, 255, 0.8) no-repeat center center;
+  background: $white no-repeat center center;
   top: 0;
   left: 0;
   width: 100%;
@@ -45,8 +45,8 @@ body {
         border-radius: 3px;
         padding: 5px;
         margin: 0 13px;
-        color: #fff;
-        background-color: #3867fa;
+        color: $white;
+        background-color: $primary-light;
         cursor: pointer;
       }
       i.fa.fa-flask {
@@ -76,92 +76,13 @@ table {
     th {
       font-style: thin;
       font-size: 14px;
-      color: rgb(184, 184, 184);
+      color: $light-grey;
     }
   }
 }
 
 i.fa {
   cursor: pointer;
-}
-
-.search-wrapper {
-  padding: 20px 0;
-  span {
-    margin: 10px;
-    color: rgb(174, 174, 174);
-    cursor: pointer;
-  }
-  span:hover {
-    color: rgb(64, 64, 64);
-  }
-}
-
-.sub-header-home {
-  min-height: 120px;
-  padding-top: 10px;
-  background: #263039;
-  .sub-header-items {
-    margin: 0 72px;
-    .dropdown-bubble {
-      .dropdown-container {
-        max-height: 250px;
-        overflow: scroll;
-        ul {
-          cursor: pointer;
-        }
-      }
-    }
-  }
-  .upload {
-    float: right;
-    margin-top: 18px;
-    padding: 9px 20px;
-    border-radius: 30px;
-    border: 1px solid #4ba4c1;
-    color: #4ba4c1;
-    letter-spacing: 0.5px;
-    font-size: 12px;
-    cursor: pointer;
-    &:hover {
-      border-color: #337388;
-      color: #337388;
-    }
-    span {
-      padding-right: 13px;
-    }
-    .fa-flask {
-      padding: 0 7px;
-    }
-  }
-
-  .sub-title {
-    color: #333333;
-    margin: 14px 0;
-    font-size: 32px;
-    span {
-      color: #e0e0e0;
-    }
-    .fa-angle-down {
-      font-size: 17px;
-      border: 1px solid #586878;
-      border-radius: 50%;
-      padding: 5px 8px;
-      color: #586878;
-      margin: 0px 12px;
-      vertical-align: middle;
-      &:hover {
-        border-color: #e0e0e0;
-        color: #e0e0e0;
-      }
-    }
-  }
-  .title-filter {
-    padding: 5px 0;
-    span {
-      color: #8697a3;
-    }
-  }
 }
 
 .no-data {
@@ -177,103 +98,8 @@ i.fa {
   text-align: center;
 }
 
-.pagination {
-  font-size: 14px;
-  a:hover {
-    background: #202020 none repeat scroll 0 0;
-    text-shadow: 1px 1px 1px #171717;
-  }
-  a:active {
-    text-shadow: none;
-  }
-  .current {
-    background: #202020 none repeat scroll 0 0;
-    color: white;
-    text-shadow: 1px 1px 1px #171717;
-  }
-  .disabled {
-    color: #c0c0c0;
-  }
-}
-.pagination > * {
-  margin-right: 0.1em;
-  padding: 0.3em 0.4em;
-}
-
 .page-info {
   text-align: center;
-}
-
-.form-wrapper {
-  margin-top: 100px;
-  .error-info {
-    width: 80%;
-    background: rgba(208, 2, 27, 0.07);
-    border-radius: 5px;
-    color: #d0021b;
-    margin: 0 auto;
-    padding: 10px 5px;
-    border: 1px solid rgba(160, 11, 64, 0.16);
-    font-size: 12px;
-    transition: 0.2s width ease-out;
-    text-align: center;
-  }
-  .success-info {
-    width: 80%;
-    background: #eeffd5;
-    border-radius: 5px;
-    color: #1e2025;
-    margin: 0 auto;
-    padding: 10px 5px;
-    border: 1px solid rgba(160, 11, 64, 0.16);
-    font-size: 12px;
-    transition: 0.2s width ease-out;
-    text-align: center;
-  }
-  .hidden {
-    display: none;
-  }
-}
-
-.dropdown-bubble:after {
-  content: "";
-  position: absolute;
-  left: 30px;
-  top: -13px;
-  border-style: solid;
-  border-width: 0 17px 17px 17px;
-  border-color: transparent transparent #ffffff transparent;
-  z-index: 2;
-}
-
-.dropdown-bubble {
-  box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2);
-  position: absolute;
-  background: #fff;
-  min-width: 250px;
-  font-size: 14px;
-  border-radius: 7px;
-  padding: 5px;
-  display: none;
-  z-index: 2;
-  .title a {
-    border-bottom: 1px solid #d0d0d0;
-    border-radius: 0px;
-  }
-}
-
-.dropdown-bubble ul li a {
-  padding: 5px;
-  display: block;
-  border-radius: 4px;
-}
-
-.dropdown-bubble ul li:hover {
-  color: #e2e2e2;
-}
-
-.dropdown-bubble ul li a:hover {
-  background: #7a7c9e;
 }
 
 .dropdown-content ul li {

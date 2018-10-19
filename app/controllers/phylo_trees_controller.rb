@@ -20,7 +20,7 @@ class PhyloTreesController < ApplicationController
   # have read access to all those samples.
   ########################################
 
-  READ_ACTIONS = [:show, :download_snps].freeze
+  READ_ACTIONS = [:show, :download].freeze
   EDIT_ACTIONS = [:retry].freeze
   OTHER_ACTIONS = [:new, :create, :index, :choose_taxon].freeze
 
@@ -119,14 +119,17 @@ class PhyloTreesController < ApplicationController
     end
   end
 
-  def download_snps
-    snp_file = Tempfile.new
-    s3_file = @phylo_tree.snp_annotations
-    unless s3_file && download_to_filename?(s3_file, snp_file.path)
-      snp_file.close
+  def download
+    output = params[:output]
+    local_file = Tempfile.new
+    s3_file = @phylo_tree[output]
+    if s3_file && download_to_filename?(s3_file, local_file.path)
+      send_file local_file.path, filename: "#{@phylo_tree.name.downcase.gsub(/\W/, '-')}__#{File.basename(s3_file)}"
+    else
+      local_file.close
       LogUtil.log_err_and_airbrake("downloading #{s3_file} failed")
+      head :not_found
     end
-    send_file snp_file.path, filename: "#{@phylo_tree.name.downcase.gsub(/\W/, '-')}__SNP-annotations.txt"
   end
 
   def create
