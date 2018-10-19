@@ -32,6 +32,11 @@ class PhyloTree < ApplicationRecord
         "s3_path" => "#{versioned_output_s3_path}/ksnp3_outputs/SNPs_all_annotated",
         "required" => false,
         "remote" => true
+      },
+      "vcf" => {
+        "s3_path" => "#{versioned_output_s3_path}/ksnp3_outputs/variants_reference1.vcf",
+        "required" => false,
+        "remote" => true
       }
     }
   end
