@@ -20,18 +20,9 @@ $break-large: 1460px;
     p.signup {
       font-size: 24px;
       font-weight: bold;
-      color: #414367;
+      color: $darkest-grey;
       margin-top: 9px;
       text-align: left;
-    }
-    p.verify {
-      text-align: right;
-      float: right;
-      color: #b8b8b8;
-      cursor: pointer;
-      &:hover {
-        color: #3867fa;
-      }
     }
   }
   .mail {
@@ -45,7 +36,7 @@ $break-large: 1460px;
       color: $primary-light;
       cursor: pointer;
       &:hover {
-        color: #3867fa;
+        color: $primary-light;
       }
     }
   }
@@ -65,30 +56,18 @@ $break-large: 1460px;
     padding: 15px;
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
-    color: #fff;
+    color: $white;
     font-size: 20px;
     cursor: pointer;
   }
-  .forgot-password {
-    text-align: center;
-    margin: 40px;
-    span {
-      text-decoration: underline;
-      color: #414367;
-      cursor: pointer;
-      &:hover {
-        color: #039be5;
-      }
-    }
-  }
   .error-info {
     width: 80%;
-    background: rgba(208, 2, 27, 0.07);
+    background: $error-lightest;
     border-radius: 5px;
-    color: #d0021b;
+    color: $error;
     margin: 0 auto;
     padding: 10px 5px;
-    border: 1px solid rgba(160, 11, 64, 0.16);
+    border: 1px solid $error;
     font-size: 12px;
     transition: 0.2s width ease-out;
     text-align: center;
@@ -98,12 +77,12 @@ $break-large: 1460px;
   }
   .success-info {
     width: 80%;
-    background: #eeffd5;
+    background: $success-lightest;
     border-radius: 5px;
-    color: #1e2025;
+    color: $success;
     margin: 0 auto;
     padding: 10px 5px;
-    border: 1px solid rgba(160, 11, 64, 0.16);
+    border: 1px solid $success;
     font-size: 12px;
     transition: 0.2s width ease-out;
     text-align: center;
