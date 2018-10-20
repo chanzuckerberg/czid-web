@@ -5,7 +5,7 @@
     <% if @attribute_dict[:fastq2] %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
       "star_out": ["unmapped1.<%= @attribute_dict[:file_type] %>", "unmapped2.<%= @attribute_dict[:file_type] %>"],
-      "trimmomatic_out": ["trimmomatic1.fq", "trimmomatic2.fq"],
+      "trimmomatic_out": ["trimmomatic1.<%= @attribute_dict[:file_type] %>", "trimmomatic2.<%= @attribute_dict[:file_type] %>"],
       "priceseq_out": ["priceseq1.fa", "priceseq2.fa"],
       "cdhitdup_out": ["dedup1.fa", "dedup2.fa"],
       "lzw_out": ["lzw1.fa", "lzw2.fa"],
@@ -26,6 +26,7 @@
     <% else %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>"],
       "star_out": ["unmapped1.<%= @attribute_dict[:file_type] %>"],
+      "trimmomatic_out": ["trimmomatic1.<%= @attribute_dict[:file_type] %>"],
       "priceseq_out": ["priceseq1.fa"],
       "cdhitdup_out": ["dedup1.fa"],
       "lzw_out": ["lzw1.fa"],
