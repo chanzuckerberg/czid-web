@@ -25,6 +25,9 @@ class PipelineRun < ApplicationRecord
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
+  ADAPTER_SEQUENCES = { "single-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-SE.fasta",
+                        "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta" }.freeze
+
   OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
   # VERSION_JSON_NAME = 'versions.json'.freeze # TODO: remove this line
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze

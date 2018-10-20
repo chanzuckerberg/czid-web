@@ -5,6 +5,7 @@
     <% if @attribute_dict[:fastq2] %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
       "star_out": ["unmapped1.<%= @attribute_dict[:file_type] %>", "unmapped2.<%= @attribute_dict[:file_type] %>"],
+      "trimmomatic_out": ["trimmomatic1.fq", "trimmomatic2.fq"],
       "priceseq_out": ["priceseq1.fa", "priceseq2.fa"],
       "cdhitdup_out": ["dedup1.fa", "dedup2.fa"],
       "lzw_out": ["lzw1.fa", "lzw2.fa"],
@@ -50,6 +51,16 @@
     },
     {
       "in": ["star_out"],
+      "out": "trimmomatic_out",
+      "class": "PipelineStepRunTrimmomatic",
+      "module": "idseq_dag.steps.run_trimmomatic",
+      "additional_files": {
+        "adapter_fasta": "<%= @attribute_dict[:adapter_fasta] %>"
+      },
+      "additional_attributes": {}
+    },
+    {
+      "in": ["trimmomatic_out"],
       "out": "priceseq_out",
       "class": "PipelineStepRunPriceSeq",
       "module": "idseq_dag.steps.run_priceseq",

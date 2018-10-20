@@ -170,6 +170,11 @@ class PipelineRunStage < ApplicationRecord
       max_subsample_frag: pipeline_run.subsample
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
+    attribute_dict[:adapter_fasta] = if sample.input_files[1]
+                                       PipelineRun::ADAPTER_SEQUENCES["paired-end"]
+                                     else
+                                       PipelineRun::ADAPTER_SEQUENCES["single-end"]
+                                     end
     dag_commands = prepare_dag("host_filter", attribute_dict)
 
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")
