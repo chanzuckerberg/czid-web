@@ -804,27 +804,12 @@ class SampleUpload extends React.Component {
                                 this.handleHostChange(g.id, g.name)
                               }
                             >
-                              {this.state.selectedHostGenome === g.name ? (
-                                <div
-                                  className="img-container"
-                                  dangerouslySetInnerHTML={{
-                                    __html: SampleUpload.resolveGenomeIcon(
-                                      g.name,
-                                      "#f2f6ee"
-                                    )
-                                  }}
-                                />
-                              ) : (
-                                <div
-                                  className="img-container"
-                                  dangerouslySetInnerHTML={{
-                                    __html: SampleUpload.resolveGenomeIcon(
-                                      g.name,
-                                      "#95A1Ab"
-                                    )
-                                  }}
-                                />
-                              )}
+                              <div
+                                className="img-container"
+                                dangerouslySetInnerHTML={{
+                                  __html: SampleUpload.resolveGenomeIcon(g.name)
+                                }}
+                              />
                               <div className="genome-label">{g.name}</div>
                             </li>
                           ) : null;
