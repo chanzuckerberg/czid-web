@@ -13,7 +13,7 @@ const config = {
     path: path.resolve(__dirname, "app/assets/"),
     filename: "dist/bundle.min.js"
   },
-  devtool: "source-map",
+  devtool: "cheap-module-eval-source-map",
   target: "web",
   resolve: {
     extensions: [".js", ".jsx"]
