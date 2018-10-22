@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 import $ from "jquery";
 import { Label, Menu, Icon, Popup } from "semantic-ui-react";
 import numberWithCommas from "../helpers/strings";
-import { getTaxonName } from "../helpers/taxon";
+import { getTaxonName, getGeneraContainingTags } from "../helpers/taxon";
 import ThresholdMap from "./utils/ThresholdMap";
 import {
   computeThresholdedTaxons,
@@ -18,6 +18,7 @@ import BasicPopup from "./BasicPopup";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
+import PathogenPreview from "./views/report/PathogenPreview";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
 import ReportTable from "./views/report/ReportTable";
 import BackgroundModelFilter from "./views/report/filters/BackgroundModelFilter";
@@ -220,6 +221,9 @@ class PipelineSampleReport extends React.Component {
           rows_passing_filters: res.data.taxonomy_details[0],
           rows_total: res.data.taxonomy_details[1],
           taxonomy_details: res.data.taxonomy_details[2],
+          generaContainingTags: getGeneraContainingTags(
+            res.data.taxonomy_details[2]
+          ),
           topScoringTaxa: res.data.topScoringTaxa,
           backgroundData: {
             id: res.data.background_info.id,
@@ -841,6 +845,11 @@ class PipelineSampleReport extends React.Component {
     }
     let secondaryTaxonDisplay = (
       <span>
+        {this.state.generaContainingTags[tax_info.tax_id] && (
+          <PathogenPreview
+            tag2Count={this.state.generaContainingTags[tax_info.tax_id]}
+          />
+        )}
         {tax_info.pathogenTag && <PathogenLabel type={tax_info.pathogenTag} />}
         {this.displayHoverActions(tax_info, report_details)}
       </span>

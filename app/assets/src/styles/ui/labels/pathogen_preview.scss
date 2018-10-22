@@ -1,0 +1,16 @@
+.idseq-ui.pathogen-preview {
+  margin-left: 7px;
+  .ui.circular {
+    margin-left: -1px;
+    margin-right: -1px;
+    vertical-align: -10%;
+    min-width: 10px;
+    min-height: 10px;
+    -webkit-transform: scale(0.65);
+  }
+  .pathogen-count {
+    margin-left: 3px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+}
