@@ -6,8 +6,6 @@ import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
 import DropzoneUploader from "react-dropzone";
-import Materialize from "materialize-css";
-// import DropzoneS3Uploader from 'react-dropzone-s3-uploader';
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -34,7 +32,6 @@ class SampleUpload extends React.Component {
     this.sample = props.selectedSample || "";
     this.userDetails = props.loggedin_user;
     this.updateSampleName = this.updateSampleName.bind(this);
-    this.onDrop = this.onDrop.bind(this);
     const selectedHostGenomeName =
       this.hostGenomes[0] && this.hostGenomes[0].name
         ? this.hostGenomes[0].name
@@ -81,6 +78,7 @@ class SampleUpload extends React.Component {
         : "";
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.uploadFileToURL = this.uploadFileToURL.bind(this);
+    this.createAndStartLocalUpload = this.createAndStartLocalUpload.bind(this);
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -106,7 +104,10 @@ class SampleUpload extends React.Component {
       disableProjectSelect: false,
       omitSubsamplingChecked: false,
       publicChecked: false,
-      consentChecked: false
+      consentChecked: false,
+      localUploadMode: true,
+      localFirstFile: "",
+      localSecondFile: ""
     };
   }
 
@@ -141,7 +142,11 @@ class SampleUpload extends React.Component {
     e.preventDefault();
     this.clearError();
     if (!this.isFormInvalid()) {
-      this.createSample();
+      if (this.state.localUploadMode) {
+        this.createAndStartLocalUpload();
+      } else {
+        this.createSample();
+      }
     }
   }
 
@@ -408,22 +413,24 @@ class SampleUpload extends React.Component {
       errors.selectedHostGenome = "Please select a host genome";
     }
 
-    if (this.refs.first_file_source) {
-      const firstFileSourceValue = this.refs.first_file_source.value.trim();
-      if (!this.filePathValid(firstFileSourceValue)) {
+    if (!this.state.localUploadMode) {
+      if (this.refs.first_file_source) {
+        const firstFileSourceValue = this.refs.first_file_source.value.trim();
+        if (!this.filePathValid(firstFileSourceValue)) {
+          errors.first_file_source = "Error: invalid file path";
+        }
+      } else {
         errors.first_file_source = "Error: invalid file path";
       }
-    } else {
-      errors.first_file_source = "Error: invalid file path";
-    }
 
-    if (this.refs.second_file_source) {
-      const secondFileSourceValue = this.refs.second_file_source.value.trim();
-      if (
-        secondFileSourceValue !== "" &&
-        !this.filePathValid(secondFileSourceValue)
-      ) {
-        errors.second_file_source = "Error: invalid file path";
+      if (this.refs.second_file_source) {
+        const secondFileSourceValue = this.refs.second_file_source.value.trim();
+        if (
+          secondFileSourceValue !== "" &&
+          !this.filePathValid(secondFileSourceValue)
+        ) {
+          errors.second_file_source = "Error: invalid file path";
+        }
       }
     }
 
@@ -579,14 +586,22 @@ class SampleUpload extends React.Component {
     }
   }
 
-  onDrop(acceptedFiles, rejectedFiles) {
-    console.log("accepted: ", acceptedFiles);
-    console.log("rejected: ", rejectedFiles);
+  onDrop = fieldName => (acceptedFiles, rejectedFiles) => {
+    if (acceptedFiles.length > 0) {
+      // Use the first file in case they select multiple files
+      this.setState({ [fieldName]: acceptedFiles[0] });
+    }
+  };
 
-    let url =
-      "https://idseq-samples-development.s3.us-west-2.amazonaws.com/samples/86/1073/fastqs/1_R1.fastq.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA2U4NV5TWAJZWDJ5R%2F20181018%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20181018T181648Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Security-Token=FQoGZXIvYXdzEHQaDEa859sXF01hAb%2FtGCLzAbmdyQnXYHzjWpFOk2PN0VxrytYJm9EFVixcUU7kLGNXAxMYaeL4nH4oaLW1I7rAAhfqb36I2vKgVlac6Gl%2BmOlnQ3csHMsLY%2BAb5wiLTiJIl4ckK9G%2B6DolhhQWxOTVTFEma71xhs76PRZOJZSGXV18ZJ0WuCZ9frX84WAgyKrnq%2BXURVcscXiunkpt0ltobnAuW2e3iEKTPyu6EcJTzaKpH63moJYGxlvl%2BAYgYnI6jE5x5IFzcc%2B5SELt1%2BuOb6yPeUd4VfJ%2Bde5ZmdS92lSkwJqf5kZ%2FWkd1oNptJIkl2MpSr1%2FP%2BwQVYIvsp2xbUHpLWCiQnKPeBQ%3D%3D&X-Amz-Signature=98f3d210339d197daf537298a304a712638115c9c4287bcee6dd69735ffe6084";
-    this.uploadFileToURL(acceptedFiles[0], url);
-  }
+  // onDrop(acceptedFiles, rejectedFiles) {
+  //   console.log("accepted: ", acceptedFiles);
+  //   console.log("rejected: ", rejectedFiles);
+  //   console.log("fname: ", acceptedFiles[0].name);
+  //
+  //   let url =
+  //     "https://idseq-samples-development.s3.us-west-2.amazonaws.com/samples/86/1074/fastqs/1_R1.fastq.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA2U4NV5TWPQYWX3FC%2F20181022%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20181022T181458Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Security-Token=FQoGZXIvYXdzENT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDI1PXjcIcOlAyeUrryLzAWCrVONUY18gnrJnfq0bJ3t8XeUBUJK0%2B6wRSfEWFmDtsMR%2BhieI8UkrD5ygi1iIXUcSYLU1CJwm%2FkpvOF4pS8sFkZryZHmv8qjo3HMZY94xKbL6sZm4%2FZHdoqAZV3xoHetuVoaghzBpuUa0LAApdBzV2l9qEHjGhSHL8l55S0l77scjJwwExuMzOgJdOpi6NfwaxvUAjMAOfFxRSQCFS6yTtrI6RbUc1XJHp2Cb3EwOIKT08dTO3BCY%2FuFVArMj88K7suYKY%2BSdVDn4Cu%2Bnx3Pm1NP1A0QM5rczK4CkPdtVTlEISDtJ3mTRS8DD2TVgnVQDyyi%2FpbjeBQ%3D%3D&X-Amz-Signature=440b94028666c1e165373ea57b5645d07e7aa7e214c3dc5200ed2e30fbad904c";
+  //   // this.uploadFileToURL(acceptedFiles[0], url);
+  // }
 
   uploadFileToURL(file, url) {
     console.log("in uploadFileToURL");
@@ -599,6 +614,70 @@ class SampleUpload extends React.Component {
         console.log("upload failed");
         console.log(e);
       });
+  }
+
+  createAndStartLocalUpload() {
+    // Create the sample
+    this.setState({
+      submitting: true
+    });
+    axios
+      .post("/samples.json", {
+        sample: {
+          name: this.state.sampleName,
+          project_name: this.state.selectedProject.trim(),
+          project_id: this.state.selectedPId,
+          input_files_attributes: [
+            {
+              source_type: "local",
+              source: this.state.localFirstFile
+                ? this.state.localFirstFile.name.trim()
+                : ""
+            },
+            {
+              source_type: "local",
+              source: this.state.localSecondFile
+                ? this.state.localSecondFile.name.trim()
+                : ""
+            }
+          ],
+          host_genome_id: this.state.selectedHostGenomeId,
+
+          // Admin options
+          s3_preload_result_path: this.userDetails.admin
+            ? this.refs.s3_preload_result_path.value.trim()
+            : "",
+          sample_memory: this.state.selectedMemory,
+          alignment_config_name: this.state.selectedAlignmentConfigName,
+          pipeline_branch: this.state.selectedBranch,
+          status: "created",
+          client: "web"
+        },
+        authenticity_token: this.csrf
+      })
+      .then(response => {
+        console.log("this was the response: ", response);
+        this.setState({
+          success: true,
+          submitting: false,
+          successMessage: "Sample created successfully"
+        });
+        setTimeout(() => {
+          this.gotoPage(`/samples/${response.data.id}`);
+        }, 2000);
+      })
+      .catch(error => {
+        console.log("ERR: ", error);
+        this.setState({
+          invalid: true,
+          submitting: false,
+          serverErrors: error.response.data,
+          errorMessage:
+            "Something went wrong. Try checking if sample name already exists in project?"
+        });
+      });
+
+    // Get the actual files uploaded
   }
 
   renderSampleForm(updateExistingSample = false) {
@@ -652,7 +731,12 @@ class SampleUpload extends React.Component {
       </button>
     );
 
-    const dragAndDropUploader = <DropzoneUploader onDrop={this.onDrop} />;
+    const dragAndDropUploader = (
+      <div>
+        <DropzoneUploader onDrop={this.onDrop("localFirstFile")} />
+        <DropzoneUploader onDrop={this.onDrop("localSecondFile")} />
+      </div>
+    );
 
     return (
       <div id="samplesUploader" className="row">
