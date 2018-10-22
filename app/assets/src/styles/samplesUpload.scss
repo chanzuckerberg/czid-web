@@ -1,12 +1,14 @@
-@import "variables";
+@import "typography";
+@import "themes/colors";
+
 .background-cover {
-  background-color: #edf1f2;
+  background-color: $off-white;
 }
 
 #samplesUploader {
   .upload-form-container {
     margin-top: 50px;
-    background: #ffffff;
+    background: $white;
     min-height: 400px;
     border-radius: 20px;
     .content {
@@ -21,10 +23,10 @@
         }
       }
       .success-message {
-        color: #61a615;
+        color: $success;
       }
       .error-message {
-        color: #d0021b;
+        color: $error;
       }
       .upload-page-button {
         margin-left: 2rem;
@@ -36,17 +38,17 @@
       }
       .form-title {
         font-size: $font-size-h3;
-        color: #333e48;
+        color: $darkest-grey;
         font-weight: $font-weight-bold;
         letter-spacing: 0.28px;
         padding-bottom: 1rem;
       }
       .upload-info {
-        color: #677986;
+        color: $medium-grey;
         font-size: $font-size-base;
       }
       .upload-question {
-        color: #313e49;
+        color: $darkest-grey;
         font-size: $font-size-small;
         margin-top: 20px;
         margin-bottom: 25px;
@@ -54,7 +56,7 @@
           font-weight: $font-weight-semibold;
         }
         a:hover {
-          color: #3867fa !important;
+          color: $primary-light !important;
         }
       }
       .consent-blurb {
@@ -66,7 +68,7 @@
         }
       }
       .terms-link {
-        color: $primary-button !important;
+        color: $primary-light !important;
       }
       .bulkSubmitForm {
         margin-top: 50px;
@@ -82,8 +84,8 @@
               .browser-default {
                 width: 100%;
                 padding: 10px;
-                border: 1px solid #cad0da;
-                background: #fff;
+                border: 1px solid $light-grey;
+                background: $white;
                 border-radius: 10px;
                 &.new_project_input {
                   padding-right: 45px;
@@ -92,26 +94,27 @@
               .checkbox {
                 font-size: $font-size-small;
                 font-weight: $font-weight-semibold;
-                color: #677986;
+                color: $dark-grey;
               }
               [disabled] {
-                background: #eef1f2;
-                border: #cad0da;
+                background-color: $lightest-grey;
+                border: $light-grey;
               }
               .input-icon {
                 position: absolute;
                 margin-left: -108px;
                 margin-top: 1px;
                 font-size: 13px;
-                background: #eef1f2;
+                background: $lightest-grey;
                 padding: 10.4px;
                 height: 36px;
                 text-align: center;
                 border-radius: 10px;
+
                 &:hover {
                   cursor: pointer;
-                  background: #c3dde5;
-                  color: #4c9db1;
+                  background: $primary-lighter;
+                  color: $white;
                 }
               }
               .public_access {
@@ -124,22 +127,22 @@
             }
 
             .field-title {
-              color: #000;
+              color: $black;
               font-size: $font-size-small;
               font-weight: $font-weight-semibold;
               .validation-info {
-                color: #677986;
+                color: $medium-grey;
               }
             }
             .field-error {
-              color: #d9534f;
+              color: $error;
               font-size: $font-size-small;
             }
             .no-padding {
               padding: 0;
             }
             .example-link {
-              color: #3d8cad !important;
+              color: $medium-grey !important;
               font-size: $font-size-small;
             }
             .new-button {
@@ -151,44 +154,44 @@
                 margin-right: 5px;
               }
               &[disabled] {
-                background-color: #cccccc;
-                border-color: #cccccc;
+                background-color: $light-grey;
+                border-color: $light-grey;
               }
             }
             .secondary-button {
-              background: #cccccc;
-              border-color: #cccccc;
-              color: #ffffff;
+              background: $light-grey;
+              border-color: $light-grey;
+              color: $white;
               i {
-                color: #3867fa;
+                color: $primary-light;
               }
               &.new-project-button {
                 width: 92%;
                 float: right;
                 font-size: $font-size-base;
                 height: 45px;
-                background: #e9ecf1;
-                border-color: #e9ecf1;
+                background: $lightest-grey;
+                border-color: $lightest-grey;
                 border-radius: 25px;
-                color: #586a78;
+                color: $medium-grey;
                 i {
-                  color: #586a78;
+                  color: $medium-grey;
                 }
                 &:hover,
                 &.active {
-                  background: #aec9e2;
-                  border-color: #aec9e2;
-                  color: #f2f6ee;
+                  background: $primary-lighter;
+                  border-color: $primary-lighter;
+                  color: $white;
                   i {
-                    color: #f2f6ee;
+                    color: $white;
                   }
                 }
               }
             }
             .blue-button {
-              background: #3867fa;
-              border-color: #3867fa;
-              color: #ffffff;
+              background: $primary-light;
+              border-color: $primary-light;
+              color: $white;
             }
             .upload-samples-button {
               margin-right: 10px;
@@ -204,30 +207,45 @@
                 min-height: 120px;
                 min-width: 120px;
                 margin-bottom: 10px;
-                background: #e8eff1;
+                background: $lightest-grey;
                 cursor: pointer;
+
                 .genome-label {
-                  color: #95a1ab;
+                  color: $medium-grey;
                   text-align: center;
                   font-size: $font-size-small;
                   margin-top: 5px;
                 }
+                svg {
+                  width: 65px;
+                  fill: $medium-grey;
+                }
+
                 &.active,
                 &:hover {
-                  background: #aec9e2;
-                  border-color: #305df9;
                   .genome-label {
-                    color: #f2f6ee;
+                    color: $white;
+                  }
+                  svg {
+                    fill: $white;
                   }
                 }
+
+                &.active {
+                  background: $primary-light;
+                  border-color: $primary-light;
+                }
+
+                &:hover {
+                  background: $primary-lighter;
+                  border-color: $primary-lighter;
+                }
+
                 .img-container {
                   text-align: center;
                   background-size: contain;
                   background: no-repeat center;
                   padding: 10px;
-                  svg {
-                    width: 65px;
-                  }
                 }
               }
             }
@@ -241,15 +259,15 @@
               }
               .select-dropdown {
                 padding-left: 2px;
-                border: 1px solid #cad0da;
+                border: 1px solid $light-grey;
                 border-radius: 20px;
               }
               .caret {
-                color: #bac8cf;
+                color: $medium-grey;
               }
               li {
                 span {
-                  color: #263039;
+                  color: $darkest-grey;
                   font-size: 13px;
                 }
               }
@@ -257,15 +275,15 @@
             .admin-genomes {
               .genome-label {
                 font-size: $font-size-small;
-                color: #313e49;
+                color: $darkest-grey;
                 display: inline-block;
-                border-right: 1px solid #313e49;
+                border-right: 1px solid $darkest-grey;
                 padding-right: 5px;
                 margin-left: 5px;
                 cursor: pointer;
                 &:hover,
                 &.active {
-                  color: #3a71a0;
+                  color: $primary-light;
                 }
               }
               .genome-label:last-child {
@@ -279,7 +297,7 @@
         .upload-notes {
           font-size: 12px;
           margin-bottom: 2rem;
-          color: #3d8cad;
+          color: $medium-grey;
           font-weight: 600;
         }
 
@@ -306,7 +324,7 @@
             }
           }
           i {
-            color: #bac7cf;
+            color: $light-grey;
             font-weight: $font-weight-semibold;
           }
           svg {
@@ -328,20 +346,20 @@
           }
         }
         .admin-input-title {
-          color: #677986;
+          color: $medium-grey;
           font-size: $font-size-base;
         }
         [type="checkbox"].filled-in:checked + label:after {
-          border: 2px solid #2786c1;
-          background-color: #2786c1;
+          border: 2px solid $primary-light;
+          background-color: $primary-light;
         }
 
         [type="checkbox"].filled-in + label:after {
-          border: 2px solid #c7c7c7;
-          background-color: #fff;
+          border: 2px solid $light-grey;
+          background-color: $white;
         }
         label {
-          color: #1b232a;
+          color: $darkest-grey;
         }
       }
     }

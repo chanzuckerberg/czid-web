@@ -1,9 +1,8 @@
+@import "themes/colors";
+
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:300,400,400i,600,600i,700,700i,800");
 
 $grid-size: 10px !default;
-$body-color: #212b36;
-$subdued-color: #637381;
-$subdued-grey: #aaaaaa;
 //== Typography
 //## Font, line-height, and color for body text, headings, and more.
 $font-family-sans-serif: "Open Sans", "Helvetica Neue", Arial, Helvetica,
@@ -45,7 +44,6 @@ $line-height-computed: floor(
 $headings-font-family: inherit !default;
 $headings-font-weight: 600 !default;
 $headings-line-height: 1.1 !default;
-$headings-color: $body-color !default;
 
 // a little bit extra to ensure the height comes out to just over 18px (and browser rounds to 18px)
 $id-line-height: ($grid-size * 1.8) / $font-size-base + 0.0001 !default;
@@ -78,13 +76,13 @@ h6,
   font-family: $font-family-sans-serif;
   font-weight: $headings-font-weight;
   line-height: $headings-line-height;
-  color: $headings-color;
+  color: $darkest-grey;
 
   small,
   .small {
     font-weight: normal;
     line-height: 1;
-    color: red;
+    color: $error;
   }
 }
 
@@ -100,7 +98,7 @@ h3,
   margin-top: $line-height-computed;
   margin-bottom: ($line-height-computed / 2);
   font-family: $font-family-sans-serif;
-  color: $body-color;
+  color: $darkest-grey;
 
   small,
   .small {
@@ -171,11 +169,11 @@ p,
 .body-text {
   margin: 0 0 ($line-height-computed / 2);
   font-size: $font-size-body;
-  color: $body-color;
+  color: $darkest-grey;
   font-family: $font-family-sans-serif;
 
   .subdued {
-    color: $subdued-color;
+    color: $dark-grey;
   }
 }
 .caption {
@@ -183,7 +181,7 @@ p,
   font-family: $font-family-sans-serif;
 
   .subdued {
-    color: $subdued-color;
+    color: $dark-grey;
   }
 }
 // Emphasis & misc
@@ -224,5 +222,5 @@ small,
 
 //Contextual colors
 .text-muted {
-  color: $subdued-color;
+  color: $dark-grey;
 }

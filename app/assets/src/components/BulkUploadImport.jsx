@@ -939,7 +939,7 @@ class BulkUploadImport extends React.Component {
                       <div className="field-title">
                         <div className="read-count-label">
                           Path to Samples Folder<br />
-                          <i>
+                          <i className="validation-info">
                             Files in folder must have one of the following
                             extensions to be considered:<br />
                             fastq.gz / fq.gz / fastq / fq / fasta.gz / fa.gz /
