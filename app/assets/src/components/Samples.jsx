@@ -268,14 +268,9 @@ class Samples extends React.Component {
     return this.editableProjects.indexOf(parseInt(projectId)) > -1;
   }
 
+  // TODO(mark): Rename function. Report progress display was removed.
+  // But we still need to call checkReportDownload.
   displayReportProgress(res, status_action, retrieve_action) {
-    $(".download-progress")
-      .html(
-        `<i className="fa fa-circle-o-notch fa-spin fa-fw"></i> ${
-          res.data.status_display
-        }`
-      )
-      .css("display", "block");
     setTimeout(() => {
       this.checkReportDownload(status_action, retrieve_action);
     }, 2000);
@@ -782,9 +777,7 @@ class Samples extends React.Component {
 
   renderEmptyTable() {
     return (
-      <div className="center-align">
-        <i className="fa fa-frown-o"> No result found</i>
-      </div>
+      <div className="col s12 center-align empty-message">No results found</div>
     );
   }
 
@@ -1043,12 +1036,8 @@ class Samples extends React.Component {
     );
 
     let delete_project_button = (
-      <div className="compare-area">
-        <div className="white">
-          <a onClick={this.deleteProject} className="compare center">
-            <span>Delete project</span>
-          </a>
-        </div>
+      <div className="button-container">
+        <SecondaryButton text="Delete Project" onClick={this.deleteProject} />
       </div>
     );
 
