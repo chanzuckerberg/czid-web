@@ -4,23 +4,23 @@
   cursor: pointer;
   display: inline-block;
   &.primary {
-    border: 1px solid #3867fa;
-    background: #3867fa !important;
-    color: #ffffff !important;
+    border: 1px solid $primary-blue;
+    background: $primary-blue !important;
+    color: $white !important;
     &:hover {
-      background: #ffffff !important;
-      color: #3867fa !important;
+      background: $white !important;
+      color: $primary-blue !important;
     }
   }
   &.secondary {
-    border: 1px solid #3867fa;
-    background: #ffffff !important;
-    color: #3867fa !important;
+    border: 1px solid $primary-blue;
+    background: $white !important;
+    color: $primary-blue !important;
   }
 }
 
 .ui.dropdown {
-  border: 1px solid rgb(228, 228, 228);
+  border: 1px solid $light-grey;
   padding: 5px 1.75em 5px 1em;
   border-radius: 100px;
   &.custom-dropdown {
@@ -55,8 +55,8 @@
     height: 20px;
     line-height: 20px;
     border-radius: 10px;
-    background-color: #f8f8f8;
-    color: #3867fa;
+    background-color: $off-white;
+    color: $primary-blue;
     font-weight: normal;
     font-size: inherit;
   }
@@ -74,34 +74,5 @@
     opacity: 1;
     position: static;
     margin-right: 0.5em;
-  }
-}
-.advanced-threshold-filter {
-  width: 400px;
-  input[type="text"] {
-    height: 1em;
-    border: 1px solid rgba(34, 36, 38, 0.15) !important;
-    box-shadow: none;
-    font-size: 9pt;
-  }
-  .remove-button {
-    margin-top: 5px;
-    font-size: 9pt;
-    &:hover {
-      cursor: pointer;
-    }
-  }
-  .rows {
-    margin-bottom: 1em;
-  }
-  .actions {
-    border-top: 1px solid #eee;
-    padding-top: 1em;
-  }
-  .advanced-threshold-filter-row {
-    margin-bottom: 0.5em;
-  }
-  .row:last-child {
-    margin-bottom: 0;
   }
 }

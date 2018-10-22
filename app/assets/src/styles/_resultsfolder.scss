@@ -1,14 +1,15 @@
-@import "variables";
+@import "typography";
+@import "themes/colors";
 
 .results-folder {
   .header {
     margin: 25px 75px;
     .title {
       font-size: $font-size-h3;
-      color: #03a9f4;
+      color: $primary-light;
       .path {
         margin: 20px;
-        color: #000;
+        color: $black;
         font-weight: $font-weight-thin;
       }
       .back {
@@ -19,14 +20,14 @@
       }
     }
     th {
-      color: $headings-color;
+      color: $darkest-grey;
     }
     tr {
       cursor: pointer;
       td {
-        color: $body-color;
+        color: $darkest-grey;
         &:hover {
-          color: #3867fa;
+          color: $primary-light;
         }
       }
     }
@@ -34,7 +35,7 @@
       margin-right: 15px;
     }
     .size-tag {
-      color: #d3d3d3;
+      color: $light-grey;
     }
   }
 }
