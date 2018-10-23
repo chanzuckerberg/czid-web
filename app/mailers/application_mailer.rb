@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: 'accounts@idseq.net'
+  default from: 'The IDseq Team <accounts@idseq.net>'
   layout 'mailer'
 end
