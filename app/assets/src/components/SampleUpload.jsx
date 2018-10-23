@@ -77,9 +77,6 @@ class SampleUpload extends React.Component {
           : this.selected.inputFiles[1].source
         : "";
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
-    this.uploadFileToURL = this.uploadFileToURL.bind(this);
-    this.createAndStartLocalUpload = this.createAndStartLocalUpload.bind(this);
-    this.uploadLocalToURLs = this.uploadLocalToURLs.bind(this);
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -143,9 +140,9 @@ class SampleUpload extends React.Component {
     this.clearError();
     if (!this.isFormInvalid()) {
       if (this.state.localUploadMode) {
-        this.createAndStartLocalUpload();
+        this.createSampleFromLocal();
       } else {
-        this.createSample();
+        this.createSampleFromRemote();
       }
     }
   }
@@ -244,7 +241,7 @@ class SampleUpload extends React.Component {
     }
   }
 
-  createSample() {
+  createSampleFromRemote() {
     this.setState({
       submitting: true
     });
@@ -585,20 +582,33 @@ class SampleUpload extends React.Component {
     }
   };
 
-  uploadFileToURL(file, url) {
+  uploadFileToURL = function(file, url) {
+    console.log("Upload is starting");
     axios
       .put(url, file)
       .then(() => {
         console.log("upload is done");
       })
       .catch(e => {
+        this.setState({
+          submitting: false,
+          invalid: true,
+          errorMessage:
+            `Upload of ${
+              file.name
+            } failed for some reason. Please delete the created sample and try again or ask us our team for help. ` +
+            e
+        });
         console.log("upload failed");
-        console.log(e);
       });
-  }
+  };
 
-  uploadLocalToURLs(createResponse) {
+  uploadLocalFiles = function(createResponse) {
     console.log("createResponse:", createResponse);
+    this.setState({
+      submitting: true,
+      errorMessage: "Upload in progress... Please keep this page open until completed..."
+    });
     if (createResponse.length > 0) {
       const localFiles = [
         this.state.localFirstFile,
@@ -609,10 +619,9 @@ class SampleUpload extends React.Component {
         this.uploadFileToURL(localFiles[i], url);
       }
     }
-  }
+  };
 
-  createAndStartLocalUpload() {
-    // Create the sample
+  createSampleFromLocal() {
     this.setState({
       submitting: true
     });
@@ -657,27 +666,19 @@ class SampleUpload extends React.Component {
         authenticity_token: this.csrf
       })
       .then(response => {
-        console.log("this was the response: ", response);
-        this.setState({
-          success: true,
-          submitting: false,
-          successMessage: "Sample created successfully"
-        });
-        this.uploadLocalToURLs(response.data.input_files);
+        this.uploadLocalFiles(response.data.input_files);
         // setTimeout(() => {
         //   this.gotoPage(`/samples/${response.data.id}`);
         // }, 2000);
       })
       .catch(error => {
-        console.log("ERR: ", error);
+        console.log("ERR:", error);
         this.setState({
           invalid: true,
           submitting: false,
           errorMessage: this.joinServerError(error.response.data)
         });
       });
-
-    // Get the actual files uploaded
   }
 
   renderSampleForm(updateExistingSample = false) {
@@ -1231,7 +1232,7 @@ class SampleUpload extends React.Component {
                           <span>{this.state.successMessage}</span>
                         </div>
                       ) : null}
-                      {this.state.invalid ? (
+                      {this.state.errorMessage ? (
                         <div className="form-feedback error-message">
                           {this.state.errorMessage}
                         </div>
