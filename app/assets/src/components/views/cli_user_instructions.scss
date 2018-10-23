@@ -1,0 +1,65 @@
+@import "~styles/typography";
+@import "~styles/themes/colors";
+
+.instructionContainer {
+  margin: 5%;
+}
+
+.instructionHeading {
+  margin-top: 2.2rem;
+  font-weight: $font-weight-bold;
+  font-size: 1.2rem;
+}
+
+.instructionMediumMarginTop {
+  margin-top: 1rem;
+}
+
+.codeBullet {
+  width: fit-content;
+  background-color: $primary-lightest;
+  white-space: nowrap;
+  font-family: monospace;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.code {
+  background-color: $primary-lightest;
+  white-space: nowrap;
+  font-family: monospace;
+  &.center {
+    width: -webkit-fit-content;
+    width: fit-content;
+  }
+  p {
+    font-family: monospace;
+  }
+}
+
+.codeToEdit {
+  color: $primary-lighter;
+  font-family: monospace;
+  font-weight: $font-weight-bold;
+}
+
+.codePersonal {
+  font-family: monospace;
+  font-weight: $font-weight-bold;
+}
+
+.uploadQuestion {
+  color: $darkest-grey;
+  font-size: $font-size-small;
+  margin-top: 20px;
+  margin-bottom: 25px;
+
+  .link {
+    font-weight: $font-weight-semibold;
+
+    &:hover {
+      // Important due to a { color: inherit !important; } in header.scss.
+      color: $primary-light !important;
+    }
+  }
+}

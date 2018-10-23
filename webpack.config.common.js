@@ -1,7 +1,7 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
-// modules that are not polyfilled
+// modules that are not compatible with IE11
 const includedNodeModules = ["query-string", "strict-uri-encode"];
 
 const config = {
@@ -10,6 +10,12 @@ const config = {
     path: path.resolve(__dirname, "app/assets/dist"),
     filename: "bundle.min.js"
   },
+  resolve: {
+    extensions: [".js", ".jsx"],
+    alias: {
+      styles: path.resolve(__dirname, "app/assets/src/styles")
+    }
+  },
   plugins: [
     new MiniCssExtractPlugin({
       filename: "bundle.min.css"
@@ -17,9 +23,6 @@ const config = {
   ],
   devtool: "source-map",
   target: "web",
-  resolve: {
-    extensions: [".js", ".jsx"]
-  },
   module: {
     rules: [
       {
@@ -37,8 +40,41 @@ const config = {
         loader: "babel-loader"
       },
       {
-        // sass / scss loader for webpack
+        // Use CSS modules for new files.
         test: /\.(sa|sc|c)ss$/,
+        exclude: [
+          path.resolve(__dirname, "node_modules/"),
+          path.resolve(__dirname, "app/assets/src/styles"),
+          path.resolve(__dirname, "app/assets/src/loader.scss")
+        ],
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: "css-loader",
+            options: {
+              minimize: true,
+              sourceMap: true,
+              modules: true,
+              localIdentName: "[local]-[hash:base64:5]"
+            }
+          },
+          {
+            loader: "sass-loader",
+            options: {
+              minimize: true,
+              sourceMap: true
+            }
+          }
+        ]
+      },
+      {
+        // Sass / Scss loader for legacy files in assets/src/styles.
+        test: /\.(sa|sc|c)ss$/,
+        include: [
+          path.resolve(__dirname, "node_modules/"),
+          path.resolve(__dirname, "app/assets/src/styles"),
+          path.resolve(__dirname, "app/assets/src/loader.scss")
+        ],
         use: [
           MiniCssExtractPlugin.loader,
           {
