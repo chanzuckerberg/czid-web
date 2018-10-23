@@ -1,6 +1,5 @@
 class ApplicationController < ActionController::Base
   before_action :authenticate_user!
-  # before_action :check_browser
   protect_from_forgery with: :exception
   before_action :check_rack_mini_profiler
 
