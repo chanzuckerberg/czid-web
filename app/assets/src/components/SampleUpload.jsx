@@ -79,6 +79,7 @@ class SampleUpload extends React.Component {
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.uploadFileToURL = this.uploadFileToURL.bind(this);
     this.createAndStartLocalUpload = this.createAndStartLocalUpload.bind(this);
+    this.uploadLocalToURLs = this.uploadLocalToURLs.bind(this);
     this.state = {
       submitting: false,
       allProjects: this.projects || [],
@@ -87,7 +88,6 @@ class SampleUpload extends React.Component {
       errorMessage: "",
       success: false,
       successMessage: "",
-      serverErrors: [],
       selectedAlignmentConfigName: this.selected.alignmentConfigName || null,
       selectedHostGenome: this.selected.hostGenome || "",
       selectedHostGenomeId: this.selected.hostGenomeId || null,
@@ -292,12 +292,19 @@ class SampleUpload extends React.Component {
         this.setState({
           invalid: true,
           submitting: false,
-          serverErrors: error.response.data,
-          errorMessage:
-            "Something went wrong. Try checking if sample name already exists in project?"
+          errorMessage: this.joinServerError(error.response.data)
         });
       });
   }
+
+  joinServerError = function(response) {
+    let joined = "";
+    console.log("input response:", response);
+    Object.keys(response).forEach(group => {
+      joined += response[group].join(". ");
+    });
+    return joined;
+  };
 
   updateSample() {
     let that = this;
@@ -334,8 +341,7 @@ class SampleUpload extends React.Component {
         that.setState({
           submitting: false,
           invalid: true,
-          serverErrors: error.response.data,
-          errorMessage: "Failed to upload sample"
+          errorMessage: this.joinServerError(error.response.data)
         });
       });
   }
@@ -518,20 +524,6 @@ class SampleUpload extends React.Component {
     });
   }
 
-  displayError(failedStatus, serverError, formattedError) {
-    if (failedStatus) {
-      return serverError instanceof Array ? (
-        serverError.map((error, i) => {
-          return <p key={i}>{error}</p>;
-        })
-      ) : (
-        <p>{formattedError}</p>
-      );
-    } else {
-      return null;
-    }
-  }
-
   toggleNewProjectInput(e) {
     this.clearError();
     $(".new-project-input").slideToggle();
@@ -593,18 +585,7 @@ class SampleUpload extends React.Component {
     }
   };
 
-  // onDrop(acceptedFiles, rejectedFiles) {
-  //   console.log("accepted: ", acceptedFiles);
-  //   console.log("rejected: ", rejectedFiles);
-  //   console.log("fname: ", acceptedFiles[0].name);
-  //
-  //   let url =
-  //     "https://idseq-samples-development.s3.us-west-2.amazonaws.com/samples/86/1074/fastqs/1_R1.fastq.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA2U4NV5TWPQYWX3FC%2F20181022%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20181022T181458Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Security-Token=FQoGZXIvYXdzENT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDI1PXjcIcOlAyeUrryLzAWCrVONUY18gnrJnfq0bJ3t8XeUBUJK0%2B6wRSfEWFmDtsMR%2BhieI8UkrD5ygi1iIXUcSYLU1CJwm%2FkpvOF4pS8sFkZryZHmv8qjo3HMZY94xKbL6sZm4%2FZHdoqAZV3xoHetuVoaghzBpuUa0LAApdBzV2l9qEHjGhSHL8l55S0l77scjJwwExuMzOgJdOpi6NfwaxvUAjMAOfFxRSQCFS6yTtrI6RbUc1XJHp2Cb3EwOIKT08dTO3BCY%2FuFVArMj88K7suYKY%2BSdVDn4Cu%2Bnx3Pm1NP1A0QM5rczK4CkPdtVTlEISDtJ3mTRS8DD2TVgnVQDyyi%2FpbjeBQ%3D%3D&X-Amz-Signature=440b94028666c1e165373ea57b5645d07e7aa7e214c3dc5200ed2e30fbad904c";
-  //   // this.uploadFileToURL(acceptedFiles[0], url);
-  // }
-
   uploadFileToURL(file, url) {
-    console.log("in uploadFileToURL");
     axios
       .put(url, file)
       .then(() => {
@@ -614,6 +595,20 @@ class SampleUpload extends React.Component {
         console.log("upload failed");
         console.log(e);
       });
+  }
+
+  uploadLocalToURLs(createResponse) {
+    console.log("createResponse:", createResponse);
+    if (createResponse.length > 0) {
+      const localFiles = [
+        this.state.localFirstFile,
+        this.state.localSecondFile
+      ];
+      for (let i = 0; i < createResponse.length; i++) {
+        const url = createResponse[i].presigned_url;
+        this.uploadFileToURL(localFiles[i], url);
+      }
+    }
   }
 
   createAndStartLocalUpload() {
@@ -632,11 +627,17 @@ class SampleUpload extends React.Component {
               source_type: "local",
               source: this.state.localFirstFile
                 ? this.state.localFirstFile.name.trim()
+                : "",
+              parts: this.state.localFirstFile
+                ? this.state.localFirstFile.name.trim()
                 : ""
             },
             {
               source_type: "local",
               source: this.state.localSecondFile
+                ? this.state.localSecondFile.name.trim()
+                : "",
+              parts: this.state.localSecondFile
                 ? this.state.localSecondFile.name.trim()
                 : ""
             }
@@ -662,18 +663,17 @@ class SampleUpload extends React.Component {
           submitting: false,
           successMessage: "Sample created successfully"
         });
-        setTimeout(() => {
-          this.gotoPage(`/samples/${response.data.id}`);
-        }, 2000);
+        this.uploadLocalToURLs(response.data.input_files);
+        // setTimeout(() => {
+        //   this.gotoPage(`/samples/${response.data.id}`);
+        // }, 2000);
       })
       .catch(error => {
         console.log("ERR: ", error);
         this.setState({
           invalid: true,
           submitting: false,
-          serverErrors: error.response.data,
-          errorMessage:
-            "Something went wrong. Try checking if sample name already exists in project?"
+          errorMessage: this.joinServerError(error.response.data)
         });
       });
 
@@ -1233,11 +1233,7 @@ class SampleUpload extends React.Component {
                       ) : null}
                       {this.state.invalid ? (
                         <div className="form-feedback error-message">
-                          {this.displayError(
-                            this.state.invalid,
-                            this.state.serverErrors,
-                            this.state.errorMessage
-                          )}
+                          {this.state.errorMessage}
                         </div>
                       ) : null}
                       {submitButton}
