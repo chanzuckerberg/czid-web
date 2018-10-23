@@ -57,6 +57,7 @@
     "babel-eslint": "^10.0.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-replace-object-assign": "^2.0.0",
     "classnames": "^2.2.6",
     "clusterfck": "git+https://github.com/chanzuckerberg/clusterfck.git#master",
     "copy-to-clipboard": "^3.0.8",
@@ -93,7 +94,8 @@
     "semantic-ui-css": "^2.3.0",
     "semantic-ui-react": "^0.82.1",
     "text-width": "^1.2.0",
-    "url-search-params-polyfill": "^3.0.0"
+    "url-search-params-polyfill": "^3.0.0",
+    "webpack-node-externals": "^1.7.2"
   },
   "resolutions": {
     "eslint-scope": "3.7.1"
