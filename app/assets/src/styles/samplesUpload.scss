@@ -292,6 +292,15 @@
                 padding-right: 0;
               }
             }
+
+            .dropzone-box {
+              width: 100%;
+              max-width: 20rem;
+              height: 10rem;
+              margin-top: 1rem;
+              border: 2px $dark-grey dashed;
+              border-radius: 5px;
+            }
           }
 
           .input-file-header {
@@ -301,7 +310,7 @@
               color: $black;
               font-size: 1.1rem;
               font-weight: 600;
-              margin-top: 2rem;
+              margin-top: 2.5rem;
               margin-bottom: 1.5rem;
             }
           }

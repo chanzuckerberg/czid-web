@@ -5,7 +5,7 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
-import DropzoneUploader from "react-dropzone";
+import Dropzone from "react-dropzone";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import { Icon } from "semantic-ui-react";
 
@@ -737,6 +737,7 @@ class SampleUpload extends React.Component {
         </label>
       </div>
     );
+
     const submitButton = (
       <button
         type="submit"
@@ -763,8 +764,16 @@ class SampleUpload extends React.Component {
           <div className="upload-mode-title">Local Upload Input Files</div>
         </div>
         <div className="row">
-          <DropzoneUploader onDrop={this.onDrop} />
-          <DropzoneUploader onDrop={this.onDrop} />
+          <Dropzone className="dropzone-box" onDrop={this.onDrop}>
+            <div className="dropzone-inside">
+              Drag and drop a file here, or click to use a file browser.
+            </div>
+          </Dropzone>
+          <Dropzone className="dropzone-box" onDrop={this.onDrop}>
+            <div className="dropzone-inside">
+              Drag and drop a file here, or click to use a file browser.
+            </div>
+          </Dropzone>
         </div>
       </div>
     );
