@@ -449,16 +449,12 @@ class SamplesController < ApplicationController
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
     @sample.user = current_user
     @sample.host_genome ||= (host_genome || HostGenome.first)
-    puts "foobar all the params:"
-    puts @sample.to_json
 
     respond_to do |format|
       if @sample.save
         format.html { redirect_to @sample, notice: 'Sample was successfully created.' }
         format.json { render :show, status: :created, location: @sample }
       else
-        puts "foobar ERRORS"
-        puts @sample.errors.full_messages
         format.html { render :new }
         format.json do
           render json: { sample_errors: @sample.errors.full_messages,

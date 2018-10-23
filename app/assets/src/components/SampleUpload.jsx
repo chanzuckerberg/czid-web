@@ -6,6 +6,8 @@ import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
 import DropzoneUploader from "react-dropzone";
+import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
+import { Icon } from "semantic-ui-react";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -693,6 +695,12 @@ class SampleUpload extends React.Component {
       });
   };
 
+  toggleUploadMode = () => {
+    this.setState({
+      localUploadMode: !this.state.localUploadMode
+    });
+  };
+
   renderSampleForm(updateExistingSample = false) {
     const termsBlurb = (
       <div className="consent-blurb">
@@ -744,12 +752,122 @@ class SampleUpload extends React.Component {
       </button>
     );
 
-    const dragAndDropUploader = (
-      <div>
-        <DropzoneUploader onDrop={this.onDrop} />
-        <DropzoneUploader onDrop={this.onDrop} />
+    const localInputFileSection = (
+      <div className="field">
+        <div className="input-file-header">
+          <PrimaryButton
+            text="Switch to Remote Upload (From S3)"
+            onClick={this.toggleUploadMode}
+            icon={<Icon size="large" name="server" />}
+          />
+          <div className="upload-mode-title">Local Upload Input Files</div>
+        </div>
+        <div className="row">
+          <DropzoneUploader onDrop={this.onDrop} />
+          <DropzoneUploader onDrop={this.onDrop} />
+        </div>
       </div>
     );
+
+    const remoteInputFileSection = (
+      <div>
+        <div className="field">
+          <div className="input-file-header">
+            <PrimaryButton
+              text="Switch to Local Upload (From Your Computer)"
+              onClick={this.toggleUploadMode}
+              icon={<Icon size="large" name="folder open outline" />}
+            />
+            <div className="upload-mode-title">Remote Upload Input Files</div>
+          </div>
+          <div className="row">
+            <div className="col no-padding s12">
+              <div className="field-title">
+                <div className="read-count-label">Read 1</div>
+                <div className="validation-info">
+                  Accepted formats: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa),
+                  fasta.gz (.fa.gz)
+                </div>
+                <div className="example-link">
+                  Example:
+                  s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="row input-row">
+            <div className="col no-padding s12">
+              <input
+                type="text"
+                ref="first_file_source"
+                onKeyUp={this.updateSampleName}
+                onBlur={this.clearError}
+                className="browser-default"
+                placeholder="aws/path-to-sample"
+                defaultValue={this.firstInput}
+                disabled={updateExistingSample}
+              />
+              {this.state.errors.first_file_source ? (
+                <div className="field-error">
+                  {this.state.errors.first_file_source}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        <div className="field">
+          <div className="row">
+            <div className="col no-padding s12">
+              <div className="field-title">
+                <div className="read-count-label">Read 2 (optional)</div>
+                <div className="validation-info">
+                  Accepted formats: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa),
+                  fasta.gz (.fa.gz)
+                </div>
+                <div className="example-link">
+                  Example:
+                  s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="row input-row">
+            <div className="col no-padding s12">
+              <input
+                ref="second_file_source"
+                onFocus={this.clearError}
+                type="text"
+                className="browser-default"
+                placeholder="aws/path-to-sample"
+                defaultValue={this.secondInput}
+                disabled={updateExistingSample}
+              />
+              {this.state.errors.second_file_source ? (
+                <div className="field-error">
+                  {this.state.errors.second_file_source}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        <div className="upload-notes">
+          <div>
+            - Please ensure that IDseq has permissions to read/list your S3
+            bucket or ask our team for help.
+          </div>
+          <div>
+            - Also convert links like
+            "https://s3-us-west-2.amazonaws.com/czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz"
+            to the format
+            "s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz"
+          </div>
+        </div>
+      </div>
+    );
+
+    const inputFileSection = this.state.localUploadMode
+      ? localInputFileSection
+      : remoteInputFileSection;
 
     return (
       <div id="samplesUploader" className="row">
@@ -968,93 +1086,8 @@ class SampleUpload extends React.Component {
                   </div>
                 </div>
 
-                {dragAndDropUploader}
+                {inputFileSection}
 
-                <div className="field">
-                  <div className="row">
-                    <div className="col no-padding s12">
-                      <div className="field-title">
-                        <div className="read-count-label">Read 1</div>
-                        <div className="validation-info">
-                          Accepted formats: fastq (.fq), fastq.gz (.fq.gz),
-                          fasta (.fa), fasta.gz (.fa.gz)
-                        </div>
-                        <div className="example-link">
-                          Example:
-                          s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="row input-row">
-                    <div className="col no-padding s12">
-                      <input
-                        type="text"
-                        ref="first_file_source"
-                        onKeyUp={this.updateSampleName}
-                        onBlur={this.clearError}
-                        className="browser-default"
-                        placeholder="aws/path-to-sample"
-                        defaultValue={this.firstInput}
-                        disabled={updateExistingSample}
-                      />
-                      {this.state.errors.first_file_source ? (
-                        <div className="field-error">
-                          {this.state.errors.first_file_source}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
-                <div className="field">
-                  <div className="row">
-                    <div className="col no-padding s12">
-                      <div className="field-title">
-                        <div className="read-count-label">
-                          Read 2 (optional)
-                        </div>
-                        <div className="validation-info">
-                          Accepted formats: fastq (.fq), fastq.gz (.fq.gz),
-                          fasta (.fa), fasta.gz (.fa.gz)
-                        </div>
-                        <div className="example-link">
-                          Example:
-                          s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="row input-row">
-                    <div className="col no-padding s12">
-                      <input
-                        ref="second_file_source"
-                        onFocus={this.clearError}
-                        type="text"
-                        className="browser-default"
-                        placeholder="aws/path-to-sample"
-                        defaultValue={this.secondInput}
-                        disabled={updateExistingSample}
-                      />
-                      {this.state.errors.second_file_source ? (
-                        <div className="field-error">
-                          {this.state.errors.second_file_source}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
-                <div className="upload-notes">
-                  <div>
-                    - Please ensure that IDseq has permissions to read/list your
-                    S3 bucket or ask our team for help.
-                  </div>
-                  <div>
-                    - Also convert links like
-                    "https://s3-us-west-2.amazonaws.com/czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz"
-                    to the format
-                    "s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz"
-                  </div>
-                </div>
                 <div className="field">
                   <div className="row">
                     <div className="col no-padding s12">

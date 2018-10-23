@@ -134,6 +134,7 @@
                 color: $medium-grey;
               }
             }
+
             .field-error {
               color: $error;
               font-size: $font-size-small;
@@ -290,6 +291,18 @@
                 border-right: 0;
                 padding-right: 0;
               }
+            }
+          }
+
+          .input-file-header {
+            margin-top: 3.5rem;
+
+            .upload-mode-title {
+              color: $black;
+              font-size: 1.1rem;
+              font-weight: 600;
+              margin-top: 2rem;
+              margin-bottom: 1.5rem;
             }
           }
         }
