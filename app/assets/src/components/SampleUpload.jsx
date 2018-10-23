@@ -103,9 +103,8 @@ class SampleUpload extends React.Component {
       publicChecked: false,
       consentChecked: false,
       localUploadMode: true,
-      localFirstFile: "",
-      localSecondFile: "",
-      localFilesUploaded: []
+      localFilesToUpload: [],
+      localFilesDoneUploading: []
     };
   }
 
@@ -169,9 +168,15 @@ class SampleUpload extends React.Component {
     });
   }
 
-  gotoPage(path) {
-    location.href = `${path}`;
-  }
+  goToPage = path => {
+    location.href = path;
+  };
+
+  goToPageWithTimeout = page => {
+    setTimeout(() => {
+      this.goToPage(page);
+    }, 2000);
+  };
 
   toggleCheckBox(e) {
     this.setState({
@@ -282,9 +287,7 @@ class SampleUpload extends React.Component {
           submitting: false,
           successMessage: "Sample created successfully"
         });
-        setTimeout(() => {
-          this.gotoPage(`/samples/${response.data.id}`);
-        }, 2000);
+        this.goToPageWithTimeout(`/samples/${response.data.id}`);
       })
       .catch(error => {
         this.setState({
@@ -331,9 +334,7 @@ class SampleUpload extends React.Component {
           submitting: false,
           successMessage: "Sample updated successfully"
         });
-        setTimeout(() => {
-          that.gotoPage(`/samples/${that.state.id}`);
-        }, 2000);
+        this.goToPageWithTimeout(`/samples/${that.state.id}`);
       })
       .catch(error => {
         that.setState({
@@ -576,14 +577,18 @@ class SampleUpload extends React.Component {
     }
   }
 
-  onDrop = fieldName => (acceptedFiles, rejectedFiles) => {
+  onDrop = acceptedFiles => {
     if (acceptedFiles.length > 0) {
       // Use the first file in case they select multiple files
-      this.setState({ [fieldName]: acceptedFiles[0] });
+      this.setState({
+        localFilesToUpload: this.state.localFilesToUpload.concat(
+          acceptedFiles[0]
+        )
+      });
     }
   };
 
-  uploadFileToURL = function(file, url) {
+  uploadFileToURL = (file, url) => {
     console.log("Upload is starting");
     axios
       .put(url, file)
@@ -605,22 +610,24 @@ class SampleUpload extends React.Component {
       });
   };
 
-  markAndCheckUploadCompletion = function(file) {
+  markAndCheckUploadCompletion = file => {
     this.setState({
-      localFilesUploaded: this.state.localFilesUploaded.concat(file)
+      localFilesDoneUploading: this.state.localFilesDoneUploading.concat(file)
     });
     if (
-      !this.state.localSecondFile ||
-      this.state.localFilesUploaded.length === 2
+      this.state.localFilesToUpload.length ===
+      this.state.localFilesDoneUploading.length
     ) {
       this.setState({
         submitting: false,
-        successMessage: "All uploads finished!"
+        successMessage: "All uploads finished!",
+        errorMessage: ""
       });
+      this.goToPageWithTimeout(`/samples/${this.state.id}`);
     }
   };
 
-  uploadLocalFiles = function(createResponse) {
+  uploadLocalFiles = createResponse => {
     console.log("createResponse:", createResponse);
     if (createResponse.length > 0) {
       this.setState({
@@ -629,47 +636,33 @@ class SampleUpload extends React.Component {
           "Upload in progress... Please keep this page open until completed..."
       });
 
-      const localFiles = [
-        this.state.localFirstFile,
-        this.state.localSecondFile
-      ];
       for (let i = 0; i < createResponse.length; i++) {
         const url = createResponse[i].presigned_url;
-        this.uploadFileToURL(localFiles[i], url);
+        this.uploadFileToURL(this.state.localFilesToUpload[i], url);
       }
     }
   };
 
-  createSampleFromLocal() {
+  createSampleFromLocal = () => {
     this.setState({
       submitting: true
     });
+    let inputFilesAttributes = [];
+    this.state.localFilesToUpload.forEach(file => {
+      inputFilesAttributes.push({
+        source_type: "local",
+        source: file ? file.name.trim() : "",
+        parts: file ? file.name.trim() : ""
+      });
+    });
+
     axios
       .post("/samples.json", {
         sample: {
           name: this.state.sampleName,
           project_name: this.state.selectedProject.trim(),
           project_id: this.state.selectedPId,
-          input_files_attributes: [
-            {
-              source_type: "local",
-              source: this.state.localFirstFile
-                ? this.state.localFirstFile.name.trim()
-                : "",
-              parts: this.state.localFirstFile
-                ? this.state.localFirstFile.name.trim()
-                : ""
-            },
-            {
-              source_type: "local",
-              source: this.state.localSecondFile
-                ? this.state.localSecondFile.name.trim()
-                : "",
-              parts: this.state.localSecondFile
-                ? this.state.localSecondFile.name.trim()
-                : ""
-            }
-          ],
+          input_files_attributes: inputFilesAttributes,
           host_genome_id: this.state.selectedHostGenomeId,
 
           // Admin options
@@ -685,10 +678,10 @@ class SampleUpload extends React.Component {
         authenticity_token: this.csrf
       })
       .then(response => {
+        this.setState({
+          id: response.data.id
+        });
         this.uploadLocalFiles(response.data.input_files);
-        // setTimeout(() => {
-        //   this.gotoPage(`/samples/${response.data.id}`);
-        // }, 2000);
       })
       .catch(error => {
         console.log("ERR:", error);
@@ -698,7 +691,7 @@ class SampleUpload extends React.Component {
           errorMessage: this.joinServerError(error.response.data)
         });
       });
-  }
+  };
 
   renderSampleForm(updateExistingSample = false) {
     const termsBlurb = (
@@ -753,8 +746,8 @@ class SampleUpload extends React.Component {
 
     const dragAndDropUploader = (
       <div>
-        <DropzoneUploader onDrop={this.onDrop("localFirstFile")} />
-        <DropzoneUploader onDrop={this.onDrop("localSecondFile")} />
+        <DropzoneUploader onDrop={this.onDrop} />
+        <DropzoneUploader onDrop={this.onDrop} />
       </div>
     );
 
