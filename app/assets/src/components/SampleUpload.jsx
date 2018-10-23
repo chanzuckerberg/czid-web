@@ -104,7 +104,8 @@ class SampleUpload extends React.Component {
       consentChecked: false,
       localUploadMode: true,
       localFirstFile: "",
-      localSecondFile: ""
+      localSecondFile: "",
+      localFilesUploaded: []
     };
   }
 
@@ -588,6 +589,7 @@ class SampleUpload extends React.Component {
       .put(url, file)
       .then(() => {
         console.log("upload is done");
+        this.markAndCheckUploadCompletion(file);
       })
       .catch(e => {
         this.setState({
@@ -603,13 +605,30 @@ class SampleUpload extends React.Component {
       });
   };
 
+  markAndCheckUploadCompletion = function(file) {
+    this.setState({
+      localFilesUploaded: this.state.localFilesUploaded.concat(file)
+    });
+    if (
+      !this.state.localSecondFile ||
+      this.state.localFilesUploaded.length === 2
+    ) {
+      this.setState({
+        submitting: false,
+        successMessage: "All uploads finished!"
+      });
+    }
+  };
+
   uploadLocalFiles = function(createResponse) {
     console.log("createResponse:", createResponse);
-    this.setState({
-      submitting: true,
-      errorMessage: "Upload in progress... Please keep this page open until completed..."
-    });
     if (createResponse.length > 0) {
+      this.setState({
+        submitting: true,
+        errorMessage:
+          "Upload in progress... Please keep this page open until completed..."
+      });
+
       const localFiles = [
         this.state.localFirstFile,
         this.state.localSecondFile
@@ -1226,7 +1245,7 @@ class SampleUpload extends React.Component {
                   {termsBlurb}
                   <div className="row">
                     <div className="col no-padding s12">
-                      {this.state.success ? (
+                      {this.state.successMessage ? (
                         <div className="form-feedback success-message">
                           <i className="fa fa-check-circle-o" />{" "}
                           <span>{this.state.successMessage}</span>
