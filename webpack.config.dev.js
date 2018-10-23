@@ -1,7 +1,15 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
+var STYLE_DIR = path.resolve(__dirname, "app/assets/src/styles");
+
 const config = {
+  resolve: {
+    extensions: [".js", ".jsx"],
+    alias: {
+      styles: STYLE_DIR
+    }
+  },
   plugins: [
     new MiniCssExtractPlugin({
       filename: "dist/bundle.min.css"
@@ -15,9 +23,6 @@ const config = {
   },
   devtool: "source-map",
   target: "web",
-  resolve: {
-    extensions: [".js", ".jsx"]
-  },
   module: {
     rules: [
       {
@@ -31,8 +36,41 @@ const config = {
         loader: "babel-loader"
       },
       {
-        // sass / scss loader for webpack
+        // Use CSS modules for new files.
         test: /\.(sa|sc|c)ss$/,
+        exclude: [
+          path.resolve(__dirname, "node_modules/"),
+          path.resolve(__dirname, "app/assets/src/styles"),
+          path.resolve(__dirname, "app/assets/src/loader.scss")
+        ],
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: "css-loader",
+            options: {
+              minimize: true,
+              sourceMap: true,
+              modules: true,
+              localIdentName: "[local]-[hash:base64:5]"
+            }
+          },
+          {
+            loader: "sass-loader",
+            options: {
+              minimize: true,
+              sourceMap: true
+            }
+          }
+        ]
+      },
+      {
+        // Legacy files in assets/src/styles.
+        test: /\.(sa|sc|c)ss$/,
+        include: [
+          path.resolve(__dirname, "node_modules/"),
+          path.resolve(__dirname, "app/assets/src/styles"),
+          path.resolve(__dirname, "app/assets/src/loader.scss")
+        ],
         use: [
           MiniCssExtractPlugin.loader,
           {

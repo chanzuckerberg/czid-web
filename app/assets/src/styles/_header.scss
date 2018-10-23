@@ -27,6 +27,7 @@ body {
   overflow-x: hidden;
 }
 
+// TODO(mark): Refactor all <a> elements into a <Link> component, and remove.
 a {
   color: inherit !important;
 }
@@ -193,30 +194,6 @@ a {
     color: $medium-grey;
     font-size: $font-size-base;
   }
-}
-
-.code {
-  background-color: $primary-lightest;
-  white-space: nowrap;
-  font-family: monospace;
-  &.center-code {
-    width: -webkit-fit-content;
-    width: fit-content;
-  }
-  p {
-    font-family: monospace;
-  }
-}
-
-.code-to-edit {
-  color: $primary-lighter;
-  font-family: monospace;
-  font-weight: $font-weight-bold;
-}
-
-.code-personal {
-  font-family: monospace;
-  font-weight: $font-weight-bold;
 }
 
 .modal-overlay {
