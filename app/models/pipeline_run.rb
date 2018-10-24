@@ -138,6 +138,10 @@ class PipelineRun < ApplicationRecord
 
   before_create :create_output_states, :create_run_stages
 
+  def parse_dag_vars
+    JSON.parse(dag_vars || "{}")
+  end
+
   def as_json(options = {})
     super(options.merge(except: [:command, :command_stdout, :command_error, :job_description]))
   end

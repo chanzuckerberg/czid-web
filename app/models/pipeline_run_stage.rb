@@ -145,18 +145,17 @@ class PipelineRunStage < ApplicationRecord
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
   def prepare_dag(dag_name, attribute_dict, key_s3_params = nil)
     sample = pipeline_run.sample
-    _idseq_dag_branch, dag_substitutes = dag_replacement(pipeline_run.pipeline_branch)
-    edited_dag_name = dag_substitutes[dag_name] || dag_name
-    dag_s3 = "#{sample.sample_output_s3_path}/#{edited_dag_name}.json"
+    dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
-    dag = DagGenerator.new("app/lib/dags/#{edited_dag_name}.json.erb",
+    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.erb",
                            sample.project_id,
                            sample.id,
                            sample.host_genome_name.downcase,
-                           attribute_dict)
+                           attribute_dict,
+                           pipeline_run.parse_dag_vars)
     self.dag_json = dag.render
     copy_done_file = "echo done | aws s3 cp - #{sample.sample_output_s3_path}/\\$AWS_BATCH_JOB_ID.#{JOB_SUCCEEDED_FILE_SUFFIX}"
-    upload_dag_json_and_return_job_command(dag_json, dag_s3, edited_dag_name, key_s3_params, copy_done_file)
+    upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params, copy_done_file)
   end
 
   def host_filtering_command

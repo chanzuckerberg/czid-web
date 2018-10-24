@@ -49,6 +49,10 @@ class PhyloTree < ApplicationRecord
     "#{phylo_tree_output_s3_path}/#{PipelineRun::PIPELINE_VERSION_FILE}"
   end
 
+  def parse_dag_vars
+    JSON.parse(dag_vars || "{}")
+  end
+
   def runtime(human_readable = true)
     seconds = (ready_at || Time.current) - created_at
     human_readable ? distance_of_time_in_words(seconds) : seconds
@@ -160,11 +164,9 @@ class PhyloTree < ApplicationRecord
       nt_db: alignment_config.s3_nt_db_path,
       nt_loc_db: alignment_config.s3_nt_loc_db_path
     }
-    idseq_dag_branch, template_substitutes = dag_replacement(dag_branch)
-    template_name = template_substitutes["phylo_tree"] || "phylo_tree"
-    dag_commands = prepare_dag(template_name, attribute_dict)
+    dag_commands = prepare_dag("phylo_tree", attribute_dict)
     # Dispatch command
-    base_command = [install_pipeline(idseq_dag_branch),
+    base_command = [install_pipeline(dag_branch),
                     upload_version(dag_version_file),
                     dag_commands].join("; ")
     aegea_batch_submit_command(base_command, job_queue: nil)
@@ -184,7 +186,8 @@ class PhyloTree < ApplicationRecord
                            project_id,
                            nil,
                            nil,
-                           attribute_dict)
+                           attribute_dict,
+                           parse_dag_vars)
     self.dag_json = dag.render
     upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name)
   end

@@ -56,6 +56,7 @@ class SampleUpload extends React.Component {
       jobQueue: this.sample ? this.sample.job_queue : "",
       memory: this.sample ? this.sample.sample_memory : "",
       branch: this.sample ? this.sample.pipeline_branch : "",
+      dagVars: this.sample ? this.sample.dag_vars : "{}",
       alignmentConfigName: this.sample ? this.sample.alignment_config_name : "",
       id: this.sample.id || "",
       inputFiles:
@@ -92,6 +93,7 @@ class SampleUpload extends React.Component {
       selectedResultPath: this.selected.resultPath || "",
       selectedMemory: this.selected.memory || "",
       selectedBranch: this.selected.branch || "",
+      selectedDagVars: this.selected.dagVars || "{}",
       id: this.selected.id,
       errors: {},
       adminGenomes,
@@ -257,6 +259,7 @@ class SampleUpload extends React.Component {
             : "",
           sample_memory: this.state.selectedMemory,
           pipeline_branch: this.state.selectedBranch,
+          dag_vars: this.state.selectedDagVars,
           host_genome_id: this.state.selectedHostGenomeId,
           subsample: this.state.omitSubsamplingChecked ? 0 : 1,
           alignment_config_name: this.state.selectedAlignmentConfigName,
@@ -301,6 +304,7 @@ class SampleUpload extends React.Component {
           s3_preload_result_path: this.state.selectedResultPath,
           sample_memory: this.state.selectedMemory,
           pipeline_branch: this.state.selectedBranch,
+          dag_vars: this.state.selectedDagVars,
           alignment_config_name: this.state.selectedAlignmentConfigName,
           host_genome_id: this.state.selectedHostGenomeId
         },
@@ -471,10 +475,17 @@ class SampleUpload extends React.Component {
 
   handleBranchChange(e) {
     this.setState({
-      selectedBranch: e.target.value
+      selectedBranch: e.target.value.trim()
     });
     this.clearError();
   }
+
+  handleDagVarsChange = e => {
+    this.setState({
+      selectedDagVars: e.target.value
+    });
+    this.clearError();
+  };
 
   handleAlignmentConfigNameChange(e) {
     this.setState({
@@ -1046,12 +1057,7 @@ class SampleUpload extends React.Component {
                               htmlFor="pipeline_branch"
                               className="read-count-label"
                             >
-                              Branch of idseq-dag and dag-template replacements
-                              to be used for processing
-                            </div>
-                            <div className="example-link">
-                              Example: "some-idseq-dag-branch
-                              host_filter:host_filter_with_changes"
+                              Branch of idseq-pipeline to be used for processing
                             </div>
                           </div>
                         </div>
@@ -1066,6 +1072,33 @@ class SampleUpload extends React.Component {
                             value={this.state.selectedBranch}
                             placeholder="master"
                             onChange={this.handleBranchChange}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="field">
+                      <div className="row">
+                        <div className="col no-padding s12">
+                          <div className="field-title">
+                            <div
+                              htmlFor="dag_vars"
+                              className="read-count-label"
+                            >
+                              Dictionary of variables to be used in DAG template
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row input-row">
+                        <div className="col no-padding s12">
+                          <input
+                            id="dag_vars"
+                            type="text"
+                            className="browser-default"
+                            ref="dag_vars"
+                            value={this.state.selectedDagVars}
+                            placeholder="{}"
+                            onChange={this.handleDagVarsChange}
                           />
                         </div>
                       </div>
