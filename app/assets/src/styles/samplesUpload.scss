@@ -78,6 +78,10 @@
           padding-top: 1.5rem;
         }
         .field {
+          .validation-info {
+            color: $medium-grey;
+          }
+
           .row {
             &.input-row {
               margin-top: -10px;
@@ -299,6 +303,16 @@
               margin-top: 1rem;
               border: 2px $medium-grey dashed;
               border-radius: 5px;
+              cursor: pointer;
+
+              &.occupied {
+                background-color: $primary-lightest;
+                border: 2px solid $primary-light;
+              }
+
+              &:hover {
+                background-color: $primary-lightest;
+              }
 
               .dropzone-inside {
                 margin: 2rem;
@@ -311,10 +325,15 @@
                 .dropzone-file {
                   font-weight: bold;
                   color: $primary-light;
+                  overflow-wrap: break-word;
                 }
 
                 .dropzone-progress {
                   margin-top: 1rem;
+                  color: $primary-light;
+                }
+
+                .dropzone-link {
                   color: $primary-light;
                 }
               }
@@ -323,22 +342,6 @@
             .dropzone-accepted {
               border: 2px $primary-light dashed;
               background-color: $primary-lightest;
-            }
-          }
-
-          .input-file-header {
-            margin-top: 3.5rem;
-
-            .upload-mode-title {
-              color: $black;
-              font-size: 1.1rem;
-              font-weight: 600;
-              margin-top: 3rem;
-              margin-bottom: 1.5rem;
-            }
-
-            .validation-info {
-              color: $medium-grey;
             }
           }
         }
@@ -409,6 +412,26 @@
         }
         label {
           color: $darkest-grey;
+        }
+
+        .upload-mode-title {
+          color: $black;
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin-top: 3.5rem;
+        }
+
+        .upload-mode-switcher {
+          margin-top: 2rem;
+          margin-bottom: 2rem;
+
+          .menu {
+            .active.item {
+              background-color: $primary-light;
+              // TODO for removing importants from _header.scss
+              color: $white !important;
+            }
+          }
         }
       }
     }

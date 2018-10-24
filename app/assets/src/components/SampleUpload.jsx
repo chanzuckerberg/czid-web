@@ -6,8 +6,7 @@ import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
 import Dropzone from "react-dropzone";
-import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
-import { Icon } from "semantic-ui-react";
+import { Icon, Menu } from "semantic-ui-react";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -104,7 +103,7 @@ class SampleUpload extends React.Component {
       omitSubsamplingChecked: false,
       publicChecked: false,
       consentChecked: false,
-      localUploadMode: true,
+      localUploadMode: false,
       localFilesToUpload: [],
       localFilesDoneUploading: [],
       localUploadProgress: [0, 0]
@@ -125,6 +124,7 @@ class SampleUpload extends React.Component {
     );
     this.initializeTooltip();
   }
+
   initializeTooltip() {
     // only updating the tooltip offset when the component is loaded
     $(() => {
@@ -387,6 +387,7 @@ class SampleUpload extends React.Component {
       return false;
     }
   }
+
   baseName(str) {
     console.log("str being passed in:", str);
     let base = new String(str).substring(str.lastIndexOf("/") + 1);
@@ -395,6 +396,7 @@ class SampleUpload extends React.Component {
     }
     return base;
   }
+
   isFormInvalid() {
     const errors = {};
 
@@ -578,26 +580,36 @@ class SampleUpload extends React.Component {
     }
   }
 
-  onDrop = pos => acceptedFiles => {
-    const toAdd = acceptedFiles[0];
-    const oldFiles = this.state.localFilesToUpload;
-    let newFiles = [toAdd];
+  onDrop = pos => accepted => {
+    console.log("accepted:", accepted);
+    let newFiles;
+    if (accepted.length > 0) {
+      const sampleName = accepted[0].name;
 
-    if (pos === 0 && oldFiles[1]) {
-      newFiles.push(oldFiles[1]);
-    } else if (oldFiles[0]) {
-      newFiles.unshift(oldFiles[0]);
-    }
+      if (accepted.length > 1) {
+        // Fill in both boxes if they try to upload 2 at the same time.
+        newFiles = accepted.slice(0, 2);
+      } else {
+        newFiles = accepted;
+        const oldFiles = this.state.localFilesToUpload;
+        if (pos === 0 && oldFiles[1]) {
+          newFiles.push(oldFiles[1]);
+        } else if (oldFiles[0]) {
+          newFiles.unshift(oldFiles[0]);
+        }
+      }
 
-    this.setState({
-      localFilesToUpload: newFiles
-    });
+      console.log("new files: ", newFiles);
+      this.setState({
+        localFilesToUpload: newFiles
+      });
 
-    // Set Sample Name field
-    if (!this.state.sampleName) {
-      const simplified = this.getSampleNameFromFileName(toAdd.name);
-      this.refs.sample_name.value = simplified;
-      this.setState({ sampleName: simplified });
+      // Set Sample Name field
+      if (!this.state.sampleName) {
+        const simplified = this.getSampleNameFromFileName(sampleName);
+        this.refs.sample_name.value = simplified;
+        this.setState({ sampleName: simplified });
+      }
     }
   };
 
@@ -671,6 +683,10 @@ class SampleUpload extends React.Component {
         const url = createResponse[i].presigned_url;
         this.uploadFileToURL(this.state.localFilesToUpload[i], url, i);
       }
+
+      // Chrome will show a generic message and not this message.
+      window.onbeforeunload = () =>
+        "Uploading is in progress. Are you sure you want to exit?";
     }
   };
 
@@ -722,12 +738,6 @@ class SampleUpload extends React.Component {
           errorMessage: this.joinServerError(error.response.data)
         });
       });
-  };
-
-  toggleUploadMode = () => {
-    this.setState({
-      localUploadMode: !this.state.localUploadMode
-    });
   };
 
   getSampleNameFromFileName = fname => {
@@ -791,23 +801,37 @@ class SampleUpload extends React.Component {
     );
 
     const dropzoneBox = pos => {
+      const readTitle = `Read ${pos + 1} File${pos ? " (optional)" : ""}:`;
+      let fileContent;
+      let className = "dropzone-box";
+      console.log("files to upload: ", this.state.localFilesToUpload);
+      if (this.state.localFilesToUpload[pos]) {
+        fileContent = (
+          <div className="dropzone-file">
+            <Icon name="checkmark" />
+            {this.state.localFilesToUpload[pos].name}
+          </div>
+        );
+        className += " occupied";
+      } else {
+        fileContent = (
+          <div>
+            <span>Drag and drop a file here, or </span>
+            <span className="dropzone-link">click to use a file browser.</span>
+          </div>
+        );
+      }
+
       return (
         <Dropzone
-          className="dropzone-box"
+          className={className}
           acceptClassName="dropzone-accepted"
           onDrop={this.onDrop(pos)}
           maxSize={5e9}
-          multiple={false}
         >
           <div className="dropzone-inside">
-            <div className="dropzone-file-title">{`Read ${pos + 1} File:`}</div>
-            {this.state.localFilesToUpload[pos] ? (
-              <div className="dropzone-file">
-                {this.state.localFilesToUpload[pos].name}
-              </div>
-            ) : (
-              "Drag and drop a file here, or click to use a file browser."
-            )}
+            <div className="dropzone-file-title">{readTitle}</div>
+            {fileContent}
             <div className="dropzone-progress">
               {this.state.localUploadProgress[pos]
                 ? `${this.state.localUploadProgress[pos]}% uploaded...`
@@ -818,19 +842,39 @@ class SampleUpload extends React.Component {
       );
     };
 
+    const inputFileHeader = (
+      <div className="upload-mode-title">Sample Input Files</div>
+    );
+
+    let localOrRemoteSwitcher;
+    if (!updateExistingSample) {
+      localOrRemoteSwitcher = (
+        <div className="upload-mode-switcher">
+          <Menu compact>
+            <Menu.Item
+              active={!this.state.localUploadMode}
+              onClick={() => this.setState({ localUploadMode: false })}
+            >
+              <Icon size="large" name="server" />
+              Upload from S3
+            </Menu.Item>
+            <Menu.Item
+              active={this.state.localUploadMode}
+              onClick={() => this.setState({ localUploadMode: true })}
+            >
+              <Icon size="large" name="folder open outline" />
+              Upload from Your Computer
+            </Menu.Item>
+          </Menu>
+        </div>
+      );
+    }
+
     const localInputFileSection = (
       <div className="field">
-        <div className="input-file-header">
-          <PrimaryButton
-            text="Switch to Remote Upload (From S3)"
-            onClick={this.toggleUploadMode}
-            icon={<Icon size="large" name="server" />}
-          />
-          <div className="upload-mode-title">Local Upload Input Files</div>
-          <div className="validation-info">
-            Max file size for local uploads: 5GB per file. Accepted formats:
-            fastq (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).
-          </div>
+        <div className="validation-info">
+          Max file size for local uploads: 5GB per file. Accepted formats: fastq
+          (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).
         </div>
         <div className="row">
           {dropzoneBox(0)}
@@ -842,16 +886,6 @@ class SampleUpload extends React.Component {
     const remoteInputFileSection = (
       <div>
         <div className="field">
-          {updateExistingSample ? null : (
-            <div className="input-file-header">
-              <PrimaryButton
-                text="Switch to Local Upload (From Your Computer)"
-                onClick={this.toggleUploadMode}
-                icon={<Icon size="large" name="folder open outline" />}
-              />
-              <div className="upload-mode-title">Remote Upload Input Files</div>
-            </div>
-          )}
           <div className="row">
             <div className="col no-padding s12">
               <div className="field-title">
@@ -1159,6 +1193,8 @@ class SampleUpload extends React.Component {
                   </div>
                 </div>
 
+                {inputFileHeader}
+                {localOrRemoteSwitcher}
                 {inputFileSection}
 
                 <div className="field">
