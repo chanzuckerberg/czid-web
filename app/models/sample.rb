@@ -482,7 +482,8 @@ class Sample < ApplicationRecord
   end
 
   def self.pipeline_commit(branch)
-    `git ls-remote https://github.com/chanzuckerberg/idseq-dag.git | grep refs/heads/#{branch}`.split[0]
+    branch_name = branch.split(" ")[0]
+    `git ls-remote https://github.com/chanzuckerberg/idseq-dag.git | grep refs/heads/#{branch_name}`.split[0]
   end
 
   def kickoff_pipeline
