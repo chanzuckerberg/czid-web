@@ -126,7 +126,7 @@ ActiveRecord::Schema.define(version: 20_181_024_195_651) do
   end
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "key", null: false, collation: "latin1_swedish_ci"
+    t.string "key", null: false
     t.integer "data_type", limit: 1, null: false
     t.string "text_raw_value"
     t.string "text_validated_value"
@@ -344,12 +344,12 @@ ActiveRecord::Schema.define(version: 20_181_024_195_651) do
     t.index ["pipeline_run_id", "tax_id", "count_type", "tax_level"], name: "index_pr_tax_hit_level_tc", unique: true
   end
 
-  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" do |t|
+  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
-    t.string "title", collation: "utf8mb4_general_ci"
-    t.text "summary", collation: "utf8mb4_general_ci"
-    t.text "description", collation: "utf8mb4_general_ci"
+    t.string "title"
+    t.text "summary"
+    t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
