@@ -106,7 +106,8 @@ class SampleUpload extends React.Component {
       consentChecked: false,
       localUploadMode: true,
       localFilesToUpload: [],
-      localFilesDoneUploading: []
+      localFilesDoneUploading: [],
+      localUploadProgress: [0, 0]
     };
   }
 
@@ -387,6 +388,7 @@ class SampleUpload extends React.Component {
     }
   }
   baseName(str) {
+    console.log("str being passed in:", str);
     let base = new String(str).substring(str.lastIndexOf("/") + 1);
     if (base.lastIndexOf(".") != -1) {
       base = base.substring(0, base.lastIndexOf("."));
@@ -566,12 +568,9 @@ class SampleUpload extends React.Component {
       let value = e.target.value.trim();
       if (value.length && value.indexOf("/")) {
         if (!this.refs.sample_name.value.trim().length) {
-          let base = this.baseName(value);
-          let fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/gim;
-          let readLabel = /_R1.*$|_R2.*$/gi;
-          base = base.replace(fastqLabel, "").replace(readLabel, "");
-          this.refs.sample_name.value = base;
-          this.setState({ sampleName: base });
+          const simplified = this.getSampleNameFromFileName(value);
+          this.refs.sample_name.value = simplified;
+          this.setState({ sampleName: simplified });
         }
       }
     } else {
@@ -579,23 +578,51 @@ class SampleUpload extends React.Component {
     }
   }
 
-  onDrop = position => acceptedFiles => {
-    let newFiles;
+  onDrop = pos => acceptedFiles => {
     const toAdd = acceptedFiles[0];
-    if (position === 0) {
-      newFiles = [toAdd].concat(this.state.localFilesToUpload[1]);
-    } else {
-      newFiles = [this.state.localFilesToUpload[0]].concat(toAdd);
+    const oldFiles = this.state.localFilesToUpload;
+    let newFiles = [toAdd];
+
+    if (pos === 0 && oldFiles[1]) {
+      newFiles.push(oldFiles[1]);
+    } else if (oldFiles[0]) {
+      newFiles.unshift(oldFiles[0]);
     }
+
     this.setState({
       localFilesToUpload: newFiles
     });
+
+    // Set Sample Name field
+    if (!this.state.sampleName) {
+      const simplified = this.getSampleNameFromFileName(toAdd.name);
+      this.refs.sample_name.value = simplified;
+      this.setState({ sampleName: simplified });
+    }
   };
 
-  uploadFileToURL = (file, url) => {
+  updateUploadProgress = (pos, changed) => {
+    let progress;
+    if (pos === 0) {
+      progress = [changed, this.state.localUploadProgress[1]];
+    } else {
+      progress = [this.state.localUploadProgress[0], changed];
+    }
+    this.setState({
+      localUploadProgress: progress
+    });
+  };
+
+  uploadFileToURL = (file, url, pos) => {
     console.log("Upload is starting");
+    const config = {
+      onUploadProgress: e => {
+        const percent = Math.round(e.loaded * 100 / e.total);
+        this.updateUploadProgress(pos, percent);
+      }
+    };
     axios
-      .put(url, file)
+      .put(url, file, config)
       .then(() => {
         console.log("upload is done");
         this.markAndCheckUploadCompletion(file);
@@ -642,7 +669,7 @@ class SampleUpload extends React.Component {
 
       for (let i = 0; i < createResponse.length; i++) {
         const url = createResponse[i].presigned_url;
-        this.uploadFileToURL(this.state.localFilesToUpload[i], url);
+        this.uploadFileToURL(this.state.localFilesToUpload[i], url, i);
       }
     }
   };
@@ -703,6 +730,14 @@ class SampleUpload extends React.Component {
     });
   };
 
+  getSampleNameFromFileName = fname => {
+    let base = this.baseName(fname);
+    const fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/gim;
+    const readLabel = /_R1.*$|_R2.*$/gi;
+    base = base.replace(fastqLabel, "").replace(readLabel, "");
+    return base;
+  };
+
   renderSampleForm(updateExistingSample = false) {
     const termsBlurb = (
       <div className="consent-blurb">
@@ -759,17 +794,24 @@ class SampleUpload extends React.Component {
       return (
         <Dropzone
           className="dropzone-box"
-          acceptClassName="dropzone-active"
+          acceptClassName="dropzone-accepted"
           onDrop={this.onDrop(pos)}
           maxSize={5e9}
           multiple={false}
         >
           <div className="dropzone-inside">
-            <div className="read-title">{`Read ${pos + 1} File:`}</div>
-            <div>
-              {this.state.localFilesToUpload[pos]
-                ? this.state.localFilesToUpload[pos].name
-                : "Drag and drop a file here, or click to use a file browser."}
+            <div className="dropzone-file-title">{`Read ${pos + 1} File:`}</div>
+            {this.state.localFilesToUpload[pos] ? (
+              <div className="dropzone-file">
+                {this.state.localFilesToUpload[pos].name}
+              </div>
+            ) : (
+              "Drag and drop a file here, or click to use a file browser."
+            )}
+            <div className="dropzone-progress">
+              {this.state.localUploadProgress[pos]
+                ? `${this.state.localUploadProgress[pos]}% uploaded...`
+                : null}
             </div>
           </div>
         </Dropzone>
@@ -800,14 +842,16 @@ class SampleUpload extends React.Component {
     const remoteInputFileSection = (
       <div>
         <div className="field">
-          <div className="input-file-header">
-            <PrimaryButton
-              text="Switch to Local Upload (From Your Computer)"
-              onClick={this.toggleUploadMode}
-              icon={<Icon size="large" name="folder open outline" />}
-            />
-            <div className="upload-mode-title">Remote Upload Input Files</div>
-          </div>
+          {updateExistingSample ? null : (
+            <div className="input-file-header">
+              <PrimaryButton
+                text="Switch to Local Upload (From Your Computer)"
+                onClick={this.toggleUploadMode}
+                icon={<Icon size="large" name="folder open outline" />}
+              />
+              <div className="upload-mode-title">Remote Upload Input Files</div>
+            </div>
+          )}
           <div className="row">
             <div className="col no-padding s12">
               <div className="field-title">
@@ -893,9 +937,10 @@ class SampleUpload extends React.Component {
       </div>
     );
 
-    const inputFileSection = this.state.localUploadMode
-      ? localInputFileSection
-      : remoteInputFileSection;
+    let inputFileSection = remoteInputFileSection;
+    if (!updateExistingSample && this.state.localUploadMode) {
+      inputFileSection = localInputFileSection;
+    }
 
     return (
       <div id="samplesUploader" className="row">

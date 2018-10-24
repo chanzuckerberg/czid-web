@@ -303,14 +303,24 @@
               .dropzone-inside {
                 margin: 2rem;
 
-                .read-title {
+                .dropzone-file-title {
                   font-weight: bold;
                   margin-bottom: 1rem;
+                }
+
+                .dropzone-file {
+                  font-weight: bold;
+                  color: $primary-light;
+                }
+
+                .dropzone-progress {
+                  margin-top: 1rem;
+                  color: $primary-light;
                 }
               }
             }
 
-            .dropzone-active {
+            .dropzone-accepted {
               border: 2px $primary-light dashed;
               background-color: $primary-lightest;
             }
