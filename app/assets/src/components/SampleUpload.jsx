@@ -660,8 +660,10 @@ class SampleUpload extends React.Component {
       this.setState({
         submitting: false,
         successMessage: "All uploads finished!",
-        success: true
+        success: true,
+        invalid: false
       });
+      window.onbeforeunload = null;
       this.goToPageWithTimeout(`/samples/${this.state.id}`);
     }
   };
