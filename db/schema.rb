@@ -170,6 +170,7 @@ ActiveRecord::Schema.define(version: 20_181_024_195_651) do
     t.string "snp_annotations"
     t.datetime "ready_at"
     t.string "vcf"
+    t.text "dag_vars"
     t.index ["name"], name: "index_phylo_trees_on_name", unique: true
     t.index ["project_id", "taxid"], name: "index_phylo_trees_on_project_id_and_taxid"
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
