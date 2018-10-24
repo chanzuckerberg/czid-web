@@ -103,6 +103,8 @@ class SampleUpload extends React.Component {
       omitSubsamplingChecked: false,
       publicChecked: false,
       consentChecked: false,
+
+      // Local upload fields
       localUploadMode: false,
       localFilesToUpload: [],
       localFilesDoneUploading: [],
