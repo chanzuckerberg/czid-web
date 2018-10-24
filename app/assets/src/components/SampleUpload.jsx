@@ -580,20 +580,16 @@ class SampleUpload extends React.Component {
   }
 
   onDrop = position => acceptedFiles => {
-    if (acceptedFiles.length > 0) {
-      let newFiles;
-      // Use the first file in case they select multiple files. Don't mutate
-      // state directly.
-      const toAdd = acceptedFiles[0];
-      if (position === 0) {
-        newFiles = [toAdd].concat(this.state.localFilesToUpload[1]);
-      } else {
-        newFiles = [this.state.localFilesToUpload[0]].concat(toAdd);
-      }
-      this.setState({
-        localFilesToUpload: newFiles
-      });
+    let newFiles;
+    const toAdd = acceptedFiles[0];
+    if (position === 0) {
+      newFiles = [toAdd].concat(this.state.localFilesToUpload[1]);
+    } else {
+      newFiles = [this.state.localFilesToUpload[0]].concat(toAdd);
     }
+    this.setState({
+      localFilesToUpload: newFiles
+    });
   };
 
   uploadFileToURL = (file, url) => {
@@ -765,9 +761,11 @@ class SampleUpload extends React.Component {
           className="dropzone-box"
           acceptClassName="dropzone-active"
           onDrop={this.onDrop(pos)}
+          maxSize={5e9}
+          multiple={false}
         >
           <div className="dropzone-inside">
-            <div className="read-title">{`Read ${pos + 1}:`}</div>
+            <div className="read-title">{`Read ${pos + 1} File:`}</div>
             <div>
               {this.state.localFilesToUpload[pos]
                 ? this.state.localFilesToUpload[pos].name
