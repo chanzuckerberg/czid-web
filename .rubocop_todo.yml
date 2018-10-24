@@ -118,5 +118,8 @@ Style/Next:
   # needs to have to trigger this cop
   MinBodyLength: 25
 
+Style/MethodCallWithoutArgsParentheses:
+  Enabled: false
+  
 Rails/FindEach:
   Enabled: false
