@@ -303,7 +303,6 @@ class SampleUpload extends React.Component {
 
   joinServerError = function(response) {
     let joined = "";
-    console.log("input response:", response);
     Object.keys(response).forEach(group => {
       joined += response[group].join(". ");
     });
@@ -389,7 +388,6 @@ class SampleUpload extends React.Component {
   }
 
   baseName(str) {
-    console.log("str being passed in:", str);
     let base = new String(str).substring(str.lastIndexOf("/") + 1);
     if (base.lastIndexOf(".") != -1) {
       base = base.substring(0, base.lastIndexOf("."));
@@ -581,7 +579,6 @@ class SampleUpload extends React.Component {
   }
 
   onDrop = pos => accepted => {
-    console.log("accepted:", accepted);
     let newFiles;
     if (accepted.length > 0) {
       const sampleName = accepted[0].name;
@@ -599,7 +596,6 @@ class SampleUpload extends React.Component {
         }
       }
 
-      console.log("new files: ", newFiles);
       this.setState({
         localFilesToUpload: newFiles
       });
@@ -626,7 +622,6 @@ class SampleUpload extends React.Component {
   };
 
   uploadFileToURL = (file, url, pos) => {
-    console.log("Upload is starting");
     const config = {
       onUploadProgress: e => {
         const percent = Math.round(e.loaded * 100 / e.total);
@@ -636,7 +631,6 @@ class SampleUpload extends React.Component {
     axios
       .put(url, file, config)
       .then(() => {
-        console.log("upload is done");
         this.markAndCheckUploadCompletion(file);
       })
       .catch(e => {
@@ -649,7 +643,6 @@ class SampleUpload extends React.Component {
             } failed for some reason. Please delete the created sample and try again or ask us our team for help. ` +
             e
         });
-        console.log("upload failed");
       });
   };
 
@@ -671,7 +664,6 @@ class SampleUpload extends React.Component {
   };
 
   uploadLocalFiles = createResponse => {
-    console.log("createResponse:", createResponse);
     if (createResponse.length > 0) {
       this.setState({
         submitting: true,
@@ -731,7 +723,6 @@ class SampleUpload extends React.Component {
         this.uploadLocalFiles(response.data.input_files);
       })
       .catch(error => {
-        console.log("ERR:", error);
         this.setState({
           invalid: true,
           submitting: false,
@@ -804,7 +795,6 @@ class SampleUpload extends React.Component {
       const readTitle = `Read ${pos + 1} File${pos ? " (optional)" : ""}:`;
       let fileContent;
       let className = "dropzone-box";
-      console.log("files to upload: ", this.state.localFilesToUpload);
       if (this.state.localFilesToUpload[pos]) {
         fileContent = (
           <div className="dropzone-file">
