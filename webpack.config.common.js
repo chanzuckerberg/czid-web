@@ -7,8 +7,8 @@ const includedNodeModules = ["query-string", "strict-uri-encode"];
 const config = {
   entry: `${path.resolve(__dirname, "app/assets/src/")}/index.js`,
   output: {
-    path: path.resolve(__dirname, "app/assets/dist"),
-    filename: "bundle.min.js"
+    path: path.resolve(__dirname, "app/assets/"),
+    filename: "dist/bundle.min.js"
   },
   resolve: {
     extensions: [".js", ".jsx"],
@@ -18,7 +18,7 @@ const config = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: "bundle.min.css"
+      filename: "dist/bundle.min.css"
     })
   ],
   devtool: "source-map",

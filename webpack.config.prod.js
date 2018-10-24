@@ -10,7 +10,9 @@ module.exports = merge(commonConfig, {
       new UglifyJsPlugin({
         uglifyOptions: {
           mangle: false
-        }
+        },
+        parallel: true,
+        sourceMap: true
       })
     ]
   }
