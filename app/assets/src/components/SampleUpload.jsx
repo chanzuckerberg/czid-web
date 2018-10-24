@@ -579,13 +579,19 @@ class SampleUpload extends React.Component {
     }
   }
 
-  onDrop = acceptedFiles => {
+  onDrop = position => acceptedFiles => {
     if (acceptedFiles.length > 0) {
-      // Use the first file in case they select multiple files
+      let newFiles;
+      // Use the first file in case they select multiple files. Don't mutate
+      // state directly.
+      const toAdd = acceptedFiles[0];
+      if (position === 0) {
+        newFiles = [toAdd].concat(this.state.localFilesToUpload[1]);
+      } else {
+        newFiles = [this.state.localFilesToUpload[0]].concat(toAdd);
+      }
       this.setState({
-        localFilesToUpload: this.state.localFilesToUpload.concat(
-          acceptedFiles[0]
-        )
+        localFilesToUpload: newFiles
       });
     }
   };
@@ -753,6 +759,25 @@ class SampleUpload extends React.Component {
       </button>
     );
 
+    const dropzoneBox = pos => {
+      return (
+        <Dropzone
+          className="dropzone-box"
+          acceptClassName="dropzone-active"
+          onDrop={this.onDrop(pos)}
+        >
+          <div className="dropzone-inside">
+            <div className="read-title">{`Read ${pos + 1}:`}</div>
+            <div>
+              {this.state.localFilesToUpload[pos]
+                ? this.state.localFilesToUpload[pos].name
+                : "Drag and drop a file here, or click to use a file browser."}
+            </div>
+          </div>
+        </Dropzone>
+      );
+    };
+
     const localInputFileSection = (
       <div className="field">
         <div className="input-file-header">
@@ -762,18 +787,14 @@ class SampleUpload extends React.Component {
             icon={<Icon size="large" name="server" />}
           />
           <div className="upload-mode-title">Local Upload Input Files</div>
+          <div className="validation-info">
+            Max file size for local uploads: 5GB per file. Accepted formats:
+            fastq (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).
+          </div>
         </div>
         <div className="row">
-          <Dropzone className="dropzone-box" onDrop={this.onDrop}>
-            <div className="dropzone-inside">
-              Drag and drop a file here, or click to use a file browser.
-            </div>
-          </Dropzone>
-          <Dropzone className="dropzone-box" onDrop={this.onDrop}>
-            <div className="dropzone-inside">
-              Drag and drop a file here, or click to use a file browser.
-            </div>
-          </Dropzone>
+          {dropzoneBox(0)}
+          {dropzoneBox(1)}
         </div>
       </div>
     );
