@@ -160,9 +160,11 @@ class PhyloTree < ApplicationRecord
       nt_db: alignment_config.s3_nt_db_path,
       nt_loc_db: alignment_config.s3_nt_loc_db_path
     }
-    dag_commands = prepare_dag("phylo_tree", attribute_dict)
+    idseq_dag_branch, template_substitutes = dag_replacement(dag_branch)
+    template_name = template_substitutes["phylo_tree"] || "phylo_tree"
+    dag_commands = prepare_dag(template_name, attribute_dict)
     # Dispatch command
-    base_command = [install_pipeline(dag_branch),
+    base_command = [install_pipeline(idseq_dag_branch),
                     upload_version(dag_version_file),
                     dag_commands].join("; ")
     aegea_batch_submit_command(base_command, job_queue: nil)
