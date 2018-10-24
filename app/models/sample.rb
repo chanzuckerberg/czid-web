@@ -4,6 +4,8 @@ require 'tempfile'
 require 'aws-sdk'
 
 class Sample < ApplicationRecord
+  include PipelineRunsHelper
+
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
@@ -482,7 +484,7 @@ class Sample < ApplicationRecord
   end
 
   def self.pipeline_commit(branch)
-    branch_name = branch.split(" ")[0]
+    branch_name, _dag_substitutes = dag_replacement(branch)
     `git ls-remote https://github.com/chanzuckerberg/idseq-dag.git | grep refs/heads/#{branch_name}`.split[0]
   end
 

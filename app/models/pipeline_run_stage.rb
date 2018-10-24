@@ -143,21 +143,10 @@ class PipelineRunStage < ApplicationRecord
   end
 
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
-  def dag_replacement
-    # Accept the following format for pipeline_branch, for example:
-    # "your-idseq-dag-branch host_filter:your_replacement_for_host_filter_dag postprocess:your_replacement_for_postprocess_dag"
-    result_dict = {}
-    replacements = pipeline_run.pipeline_branch.split(" ").drop(1)
-    replacements.each do |r|
-      original, substitute = r.split(":")
-      result_dict[original] = substitute
-    end
-    result_dict
-  end
-
   def prepare_dag(dag_name, attribute_dict, key_s3_params = nil)
     sample = pipeline_run.sample
-    edited_dag_name = dag_replacement[dag_name] || dag_name
+    _idseq_dag_branch, dag_substitutes = dag_replacement(pipeline_run.pipeline_branch)
+    edited_dag_name = dag_substitutes[dag_name] || dag_name
     dag_s3 = "#{sample.sample_output_s3_path}/#{edited_dag_name}.json"
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
     dag = DagGenerator.new("app/lib/dags/#{edited_dag_name}.json.erb",

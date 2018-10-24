@@ -71,6 +71,21 @@ module PipelineRunsHelper
     return nil
   end
 
+  def dag_replacement(branch_spec)
+    # Accept the following format for pipeline_branch, for example:
+    # "your-idseq-dag-branch host_filter:your_replacement_for_host_filter_dag postprocess:your_replacement_for_postprocess_dag"
+    # Return the name of the requested idseq-dag branch and a dictionary of requested DAG template replacements.
+    result_dict = {}
+    parsed_branch_spec = branch_spec.split(" ")
+    idseq_dag_branch = parsed_branch_spec[0]
+    replacements = parsed_branch_spec.drop(1)
+    replacements.each do |r|
+      original, substitute = r.split(":")
+      result_dict[original] = substitute
+    end
+    [idseq_dag_branch, result_dict]
+  end
+
   def upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params = nil, copy_done_file = "")
     # Upload dag json
     `echo '#{dag_json}' | aws s3 cp - #{dag_s3}`
