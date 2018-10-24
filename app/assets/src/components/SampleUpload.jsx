@@ -578,6 +578,7 @@ class SampleUpload extends React.Component {
     }
   }
 
+  // Handle dropped files into the Dropzone uploaders
   onDrop = pos => accepted => {
     let newFiles;
     if (accepted.length > 0) {
@@ -587,7 +588,7 @@ class SampleUpload extends React.Component {
         // Fill in both boxes if they try to upload 2 at the same time.
         newFiles = accepted.slice(0, 2);
       } else {
-        newFiles = accepted;
+        newFiles = accepted; // accepted looks like [File]
         const oldFiles = this.state.localFilesToUpload;
         if (pos === 0 && oldFiles[1]) {
           newFiles.push(oldFiles[1]);
@@ -609,18 +610,20 @@ class SampleUpload extends React.Component {
     }
   };
 
+  // Update local file upload progress for Read 0 or Read 1
   updateUploadProgress = (pos, changed) => {
-    let progress;
+    let percents;
     if (pos === 0) {
-      progress = [changed, this.state.localUploadProgress[1]];
+      percents = [changed, this.state.localUploadProgress[1]];
     } else {
-      progress = [this.state.localUploadProgress[0], changed];
+      percents = [this.state.localUploadProgress[0], changed];
     }
     this.setState({
-      localUploadProgress: progress
+      localUploadProgress: percents
     });
   };
 
+  // pos is for Read 0 or Read 1
   uploadFileToURL = (file, url, pos) => {
     const config = {
       onUploadProgress: e => {
@@ -657,16 +660,18 @@ class SampleUpload extends React.Component {
       this.setState({
         submitting: false,
         successMessage: "All uploads finished!",
-        errorMessage: ""
+        success: true
       });
       this.goToPageWithTimeout(`/samples/${this.state.id}`);
     }
   };
 
+  // Upload local files after creating the sample and getting presigned URLs
   uploadLocalFiles = createResponse => {
     if (createResponse.length > 0) {
       this.setState({
         submitting: true,
+        invalid: true,
         errorMessage:
           "Upload in progress... Please keep this page open until completed..."
       });
@@ -791,10 +796,12 @@ class SampleUpload extends React.Component {
       </button>
     );
 
+    // Dropzone box for local file selection or drag-and-drop uploads
     const dropzoneBox = pos => {
       const readTitle = `Read ${pos + 1} File${pos ? " (optional)" : ""}:`;
       let fileContent;
       let className = "dropzone-box";
+
       if (this.state.localFilesToUpload[pos]) {
         fileContent = (
           <div className="dropzone-file">
@@ -832,13 +839,9 @@ class SampleUpload extends React.Component {
       );
     };
 
-    const inputFileHeader = (
-      <div className="upload-mode-title">Sample Input Files</div>
-    );
-
-    let localOrRemoteSwitcher;
+    let uploadModeSwitcher;
     if (!updateExistingSample) {
-      localOrRemoteSwitcher = (
+      uploadModeSwitcher = (
         <div className="upload-mode-switcher">
           <Menu compact>
             <Menu.Item
@@ -1183,8 +1186,8 @@ class SampleUpload extends React.Component {
                   </div>
                 </div>
 
-                {inputFileHeader}
-                {localOrRemoteSwitcher}
+                <div className="upload-mode-title">Sample Input Files</div>
+                {uploadModeSwitcher}
                 {inputFileSection}
 
                 <div className="field">
@@ -1370,13 +1373,13 @@ class SampleUpload extends React.Component {
                   {termsBlurb}
                   <div className="row">
                     <div className="col no-padding s12">
-                      {this.state.successMessage ? (
+                      {this.state.success ? (
                         <div className="form-feedback success-message">
                           <i className="fa fa-check-circle-o" />{" "}
                           <span>{this.state.successMessage}</span>
                         </div>
                       ) : null}
-                      {this.state.errorMessage ? (
+                      {this.state.invalid ? (
                         <div className="form-feedback error-message">
                           {this.state.errorMessage}
                         </div>
