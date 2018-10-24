@@ -144,7 +144,7 @@ class PipelineRunStage < ApplicationRecord
 
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
   def dag_replacement
-    # Accept the following format for pipeline_branch:
+    # Accept the following format for pipeline_branch, for example:
     # "your-idseq-dag-branch host_filter:your_replacement_for_host_filter_dag postprocess:your_replacement_for_postprocess_dag"
     result_dict = {}
     replacements = pipeline_run.pipeline_branch.split(" ").drop(1)
