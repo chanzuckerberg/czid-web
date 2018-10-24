@@ -18,7 +18,7 @@ const config = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: "bundle.min.css"
+      filename: "dist/bundle.min.css"
     })
   ],
   devtool: "source-map",
