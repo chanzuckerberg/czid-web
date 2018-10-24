@@ -79,8 +79,8 @@ module PipelineRunsHelper
     # "your-idseq-dag-branch host_filter:your_replacement_for_host_filter_dag postprocess:your_replacement_for_postprocess_dag"
     # means:
     # (a) use the branch "your-idseq-dag-branch" of the idseq-dag repo
-    # (b) use the template "your_replacement_for_host_filter_dag.erb" instead of "host_filter.erb",
-    #     use "your_replacement_for_postprocess_dag.erb" instead of "postprocess.erb".
+    # (b) use the template "your_replacement_for_host_filter_dag.json.erb" instead of "host_filter.json.erb",
+    #     use "your_replacement_for_postprocess_dag.json.erb" instead of "postprocess.json.erb".
     result_dict = {}
     parsed_branch_spec = branch_spec.split(" ")
     idseq_dag_branch = parsed_branch_spec[0]

@@ -471,7 +471,7 @@ class SampleUpload extends React.Component {
 
   handleBranchChange(e) {
     this.setState({
-      selectedBranch: e.target.value.trim()
+      selectedBranch: e.target.value
     });
     this.clearError();
   }
@@ -1046,7 +1046,12 @@ class SampleUpload extends React.Component {
                               htmlFor="pipeline_branch"
                               className="read-count-label"
                             >
-                              Branch of idseq-pipeline to be used for processing
+                              Branch of idseq-dag and dag-template replacements
+                              to be used for processing
+                            </div>
+                            <div className="example-link">
+                              Example: "some-idseq-dag-branch
+                              host_filter:host_filter_with_changes"
                             </div>
                           </div>
                         </div>
