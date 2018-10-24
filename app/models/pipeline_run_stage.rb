@@ -151,7 +151,8 @@ class PipelineRunStage < ApplicationRecord
                            sample.project_id,
                            sample.id,
                            sample.host_genome_name.downcase,
-                           attribute_dict)
+                           attribute_dict,
+                           pipeline_run.parse_dag_vars)
     self.dag_json = dag.render
     copy_done_file = "echo done | aws s3 cp - #{sample.sample_output_s3_path}/\\$AWS_BATCH_JOB_ID.#{JOB_SUCCEEDED_FILE_SUFFIX}"
     upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params, copy_done_file)
@@ -170,6 +171,11 @@ class PipelineRunStage < ApplicationRecord
       max_subsample_frag: pipeline_run.subsample
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
+    attribute_dict[:adapter_fasta] = if sample.input_files[1]
+                                       PipelineRun::ADAPTER_SEQUENCES["paired-end"]
+                                     else
+                                       PipelineRun::ADAPTER_SEQUENCES["single-end"]
+                                     end
     dag_commands = prepare_dag("host_filter", attribute_dict)
 
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")

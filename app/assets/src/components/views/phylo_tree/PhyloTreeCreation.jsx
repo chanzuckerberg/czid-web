@@ -76,6 +76,7 @@ class PhyloTreeCreation extends React.Component {
     this.skipSelectProjectAndTaxon = this.props.projectId && this.props.taxonId;
 
     this.dagBranch = "";
+    this.dagVars = "{}";
 
     this.inputTimeout = null;
     this.inputDelay = 500;
@@ -314,6 +315,10 @@ class PhyloTreeCreation extends React.Component {
     this.dagBranch = input.value.trim();
   }
 
+  handleDagVarsChange = (_, input) => {
+    this.dagVars = input.value;
+  };
+
   handleCreation() {
     if (!this.isNumberOfSamplesValid()) {
       this.setState({
@@ -334,6 +339,7 @@ class PhyloTreeCreation extends React.Component {
       .post("/phylo_trees/create", {
         name: this.state.treeName,
         dagBranch: this.dagBranch,
+        dagVars: this.dagVars,
         projectId: this.state.projectId,
         taxId: this.state.taxonId,
         taxName: this.state.taxonName,
@@ -526,6 +532,10 @@ class PhyloTreeCreation extends React.Component {
                   placeholder="master"
                   onChange={this.handleBranchChange}
                 />
+                <div className="wizard__page-3__form__label-branch">
+                  DAG variables
+                </div>
+                <Input placeholder="{}" onChange={this.handleDagVarsChange} />
               </div>
             )}
           </div>

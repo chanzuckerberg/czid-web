@@ -49,6 +49,10 @@ class PhyloTree < ApplicationRecord
     "#{phylo_tree_output_s3_path}/#{PipelineRun::PIPELINE_VERSION_FILE}"
   end
 
+  def parse_dag_vars
+    JSON.parse(dag_vars || "{}")
+  end
+
   def runtime(human_readable = true)
     seconds = (ready_at || Time.current) - created_at
     human_readable ? distance_of_time_in_words(seconds) : seconds
@@ -182,7 +186,8 @@ class PhyloTree < ApplicationRecord
                            project_id,
                            nil,
                            nil,
-                           attribute_dict)
+                           attribute_dict,
+                           parse_dag_vars)
     self.dag_json = dag.render
     upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name)
   end

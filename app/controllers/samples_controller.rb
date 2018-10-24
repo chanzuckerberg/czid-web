@@ -645,7 +645,7 @@ class SamplesController < ApplicationController
                         :sample_notes, :job_queue, :search, :subsample,
                         :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection, :client,
                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]]
-    permitted_params << :pipeline_branch if current_user.admin?
+    permitted_params.concat([:pipeline_branch, :dag_vars]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)
   end
 

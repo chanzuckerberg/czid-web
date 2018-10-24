@@ -496,6 +496,7 @@ class Sample < ApplicationRecord
     # but was made an integer type in case we want to allow users to enter the desired number
     # of reads to susbample to in the future
     pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
+    pr.dag_vars = dag_vars if dag_vars
     pr.pipeline_commit = Sample.pipeline_commit(pr.pipeline_branch)
 
     pr.alignment_config = AlignmentConfig.find_by(name: alignment_config_name) if alignment_config_name
