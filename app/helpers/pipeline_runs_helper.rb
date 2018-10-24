@@ -72,9 +72,15 @@ module PipelineRunsHelper
   end
 
   def dag_replacement(branch_spec)
-    # Accept the following format for pipeline_branch, for example:
+    # Parse branch_spec to return
+    # (a) the name of the requested idseq-dag branch,
+    # (b) a dictionary of requested DAG template replacements.
+    # Example:
     # "your-idseq-dag-branch host_filter:your_replacement_for_host_filter_dag postprocess:your_replacement_for_postprocess_dag"
-    # Return the name of the requested idseq-dag branch and a dictionary of requested DAG template replacements.
+    # means:
+    # (a) use the branch "your-idseq-dag-branch" of the idseq-dag repo
+    # (b) use the template "your_replacement_for_host_filter_dag.erb" instead of "host_filter.erb",
+    #     use "your_replacement_for_postprocess_dag.erb" instead of "postprocess.erb".
     result_dict = {}
     parsed_branch_spec = branch_spec.split(" ")
     idseq_dag_branch = parsed_branch_spec[0]
