@@ -143,18 +143,31 @@ class PipelineRunStage < ApplicationRecord
   end
 
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
+  def dag_replacement
+    # Accept the following format for pipeline_branch:
+    # "your-idseq-dag-branch host_filter:your_replacement_for_host_filter_dag postprocess:your_replacement_for_postprocess_dag"
+    result_dict = {}
+    replacements = pipeline_run.pipeline_branch.split(" ").drop(1)
+    replacements.each do |r|
+      original, substitute = r.split(":")
+      result_dict[original] = substitute
+    end
+    result_dict
+  end
+
   def prepare_dag(dag_name, attribute_dict, key_s3_params = nil)
     sample = pipeline_run.sample
-    dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
+    edited_dag_name = dag_replacement[dag_name] || dag_name
+    dag_s3 = "#{sample.sample_output_s3_path}/#{edited_dag_name}.json"
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
-    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.erb",
+    dag = DagGenerator.new("app/lib/dags/#{edited_dag_name}.json.erb",
                            sample.project_id,
                            sample.id,
                            sample.host_genome_name.downcase,
                            attribute_dict)
     self.dag_json = dag.render
     copy_done_file = "echo done | aws s3 cp - #{sample.sample_output_s3_path}/\\$AWS_BATCH_JOB_ID.#{JOB_SUCCEEDED_FILE_SUFFIX}"
-    upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params, copy_done_file)
+    upload_dag_json_and_return_job_command(dag_json, dag_s3, edited_dag_name, key_s3_params, copy_done_file)
   end
 
   def host_filtering_command
