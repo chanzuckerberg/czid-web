@@ -1,7 +1,9 @@
 class ApplicationController < ActionController::Base
-  before_action :authenticate_user!
   protect_from_forgery with: :exception
+
+  before_action :authenticate_user!
   before_action :check_rack_mini_profiler
+  before_action :check_browser
 
   include Consul::Controller
 
@@ -53,9 +55,10 @@ class ApplicationController < ActionController::Base
   private
 
   def check_browser
-    user_agent = UserAgent.parse(request.user_agent)
-    if user_agent.browser == "Internet Explorer"
-      render layout: "unsupported_browser"
-    end
+    browser = UserAgent.parse(request.user_agent).browser
+    @browser_info = {
+      browser: browser,
+      supported: false && browser != "Internet Explorer"
+    }
   end
 end

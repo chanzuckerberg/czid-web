@@ -85,8 +85,18 @@ class Landing extends React.Component {
             </a>
           </div>
           <div className="sign-in">
-            <TransparentButton text="Sign In" onClick={signInLink} />
+            <TransparentButton
+              text="Sign In"
+              onClick={signInLink}
+              disabled={!this.props.browserInfo.supported}
+            />
           </div>
+          {this.props.browserInfo.supported || (
+            <div className="alert-browser-support">
+              {this.props.browserInfo.browser} is not currently supported.
+              Please choose a different browser.
+            </div>
+          )}
         </div>
       </div>
     );
@@ -303,7 +313,8 @@ class Landing extends React.Component {
 
 Landing.propTypes = {
   contactEmail: PropTypes.string.isRequired,
-  showBulletin: PropTypes.string
+  showBulletin: PropTypes.bool,
+  browserInfo: PropTypes.object
 };
 
 export default Landing;
