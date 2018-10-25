@@ -672,8 +672,27 @@ class SampleUpload extends React.Component {
         success: true,
         invalid: false
       });
-      window.onbeforeunload = null;
-      this.goToPageWithTimeout(`/samples/${this.state.id}`);
+
+      // Mark as uploaded
+      axios
+        .put(`/samples/${this.state.id}.json`, {
+          sample: {
+            id: this.state.id,
+            status: "uploaded"
+          },
+          authenticity_token: this.csrf
+        })
+        .then(() => {
+          window.onbeforeunload = null;
+          this.goToPageWithTimeout(`/samples/${this.state.id}`);
+        })
+        .catch(error => {
+          this.setState({
+            invalid: true,
+            submitting: false,
+            errorMessage: this.joinServerError(error.response.data)
+          });
+        });
     }
   };
 
