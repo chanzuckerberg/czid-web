@@ -303,7 +303,7 @@ class SampleUpload extends React.Component {
       });
   }
 
-  joinServerError = function(response) {
+  joinServerError = response => {
     let joined = "";
     Object.keys(response).forEach(group => {
       joined += response[group].join(". ");
@@ -725,8 +725,8 @@ class SampleUpload extends React.Component {
     this.state.localFilesToUpload.forEach(file => {
       inputFilesAttributes.push({
         source_type: "local",
-        source: file ? file.name.trim() : "",
-        parts: file ? file.name.trim() : ""
+        source: file.name.trim(),
+        parts: file.name.trim()
       });
     });
 
@@ -835,11 +835,18 @@ class SampleUpload extends React.Component {
       if (this.state.localFilesToUpload[pos]) {
         fileContent = (
           <div className="dropzone-file">
-            <Icon name="checkmark" />
-            {this.state.localFilesToUpload[pos].name}
+            <div>
+              <Icon name="checkmark" />
+              {this.state.localFilesToUpload[pos].name}
+            </div>
+            {this.state.localUploadProgress[pos] ? (
+              <div className="dropzone-progress">
+                {`${this.state.localUploadProgress[pos]}% uploaded...`}
+              </div>
+            ) : null}
           </div>
         );
-        className += " occupied";
+        className += " active";
       } else {
         fileContent = (
           <div>
@@ -852,7 +859,7 @@ class SampleUpload extends React.Component {
       return (
         <Dropzone
           className={className}
-          acceptClassName="dropzone-accepted"
+          acceptClassName="active"
           onDrop={this.onDrop(pos)}
           onDropRejected={this.onDropRejected}
           maxSize={5e9}
@@ -860,11 +867,6 @@ class SampleUpload extends React.Component {
           <div className="dropzone-inside">
             <div className="dropzone-file-title">{readTitle}</div>
             {fileContent}
-            <div className="dropzone-progress">
-              {this.state.localUploadProgress[pos]
-                ? `${this.state.localUploadProgress[pos]}% uploaded...`
-                : null}
-            </div>
           </div>
         </Dropzone>
       );

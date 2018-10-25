@@ -299,19 +299,21 @@
 
             .dropzone-box {
               width: 100%;
+              max-width: 30rem;
               height: 10rem;
               margin-top: 1rem;
               border: 2px $medium-grey dashed;
               border-radius: 5px;
               cursor: pointer;
 
-              &.occupied {
+              &.active {
                 background-color: $primary-lightest;
                 border: 2px solid $primary-light;
               }
 
               &:hover {
                 background-color: $primary-lightest;
+                border: 2px dashed $primary-light;
               }
 
               .dropzone-inside {
@@ -337,11 +339,6 @@
                   color: $primary-light;
                 }
               }
-            }
-
-            .dropzone-accepted {
-              border: 2px $primary-light dashed;
-              background-color: $primary-lightest;
             }
           }
         }
