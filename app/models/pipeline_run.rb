@@ -592,7 +592,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def job_status_display
-    return "Pipeline Initializizng" unless self.job_status
+    return "Pipeline Initializing" unless self.job_status
     stage = self.job_status.to_s.split("-")[0].split(".")[1]
     stage ? "Running #{stage}" : self.job_status
   end
