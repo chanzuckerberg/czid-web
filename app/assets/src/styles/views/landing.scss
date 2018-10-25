@@ -7,9 +7,8 @@
 }
 
 .alert-browser-support {
-  color: $error-lightest;
+  color: $light-grey;
   float: right;
-  font-size: 0.9rem;
   margin-right: 0.75rem;
   position: relative;
   top: 50%;
@@ -17,6 +16,10 @@
 
   .browser-name {
     font-weight: 700;
+  }
+
+  @media only screen and (max-width: 748px) {
+    color: $dark-grey;
   }
 }
 
