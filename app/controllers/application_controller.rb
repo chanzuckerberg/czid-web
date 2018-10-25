@@ -58,7 +58,7 @@ class ApplicationController < ActionController::Base
     browser = UserAgent.parse(request.user_agent).browser
     @browser_info = {
       browser: browser,
-      supported: false && browser != "Internet Explorer"
+      supported: browser != "Internet Explorer"
     }
   end
 end
