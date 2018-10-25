@@ -5,9 +5,9 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
-import Dropzone from "react-dropzone";
 import Icon from "./ui/icons/Icon";
 import { Menu, MenuItem } from "./ui/controls/Menu";
+import UploadBox from "./ui/controls/UploadBox";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -827,21 +827,21 @@ class SampleUpload extends React.Component {
       </button>
     );
 
-    // Dropzone box for local file selection or drag-and-drop uploads
-    const dropzoneBox = pos => {
+    // Dropzone uploader box for local file selection or drag-and-drop uploads
+    const uploadBox = pos => {
       const readTitle = `Read ${pos + 1} File${pos ? " (optional)" : ""}:`;
       let fileContent;
-      let className = "dropzone-box";
+      let className = "upload-box";
 
       if (this.state.localFilesToUpload[pos]) {
         fileContent = (
-          <div className="dropzone-file">
+          <div className="upload-box-file">
             <div>
               <Icon name="checkmark" />
               {this.state.localFilesToUpload[pos].name}
             </div>
             {this.state.localUploadProgress[pos] ? (
-              <div className="dropzone-progress">
+              <div className="upload-box-progress">
                 {`${this.state.localUploadProgress[pos]}% uploaded...`}
               </div>
             ) : null}
@@ -852,24 +852,26 @@ class SampleUpload extends React.Component {
         fileContent = (
           <div>
             <span>Drag and drop a file here, or </span>
-            <span className="dropzone-link">click to use a file browser.</span>
+            <span className="upload-box-link">
+              click to use a file browser.
+            </span>
           </div>
         );
       }
 
       return (
-        <Dropzone
+        <UploadBox
           className={className}
           acceptClassName="active"
           onDrop={this.onDrop(pos)}
           onDropRejected={this.onDropRejected}
           maxSize={5e9}
         >
-          <div className="dropzone-inside">
-            <div className="dropzone-file-title">{readTitle}</div>
+          <div className="upload-box-inside">
+            <div className="upload-box-file-title">{readTitle}</div>
             {fileContent}
           </div>
-        </Dropzone>
+        </UploadBox>
       );
     };
 
@@ -904,8 +906,8 @@ class SampleUpload extends React.Component {
           (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).
         </div>
         <div className="row">
-          {dropzoneBox(0)}
-          {dropzoneBox(1)}
+          {uploadBox(0)}
+          {uploadBox(1)}
         </div>
       </div>
     );

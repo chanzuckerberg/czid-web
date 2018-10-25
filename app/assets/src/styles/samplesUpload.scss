@@ -296,50 +296,6 @@
                 padding-right: 0;
               }
             }
-
-            .dropzone-box {
-              width: 100%;
-              max-width: 30rem;
-              height: 10rem;
-              margin-top: 1rem;
-              border: 2px $medium-grey dashed;
-              border-radius: 5px;
-              cursor: pointer;
-
-              &.active {
-                background-color: $primary-lightest;
-                border: 2px solid $primary-light;
-              }
-
-              &:hover {
-                background-color: $primary-lightest;
-                border: 2px dashed $primary-light;
-              }
-
-              .dropzone-inside {
-                margin: 2rem;
-
-                .dropzone-file-title {
-                  font-weight: bold;
-                  margin-bottom: 1rem;
-                }
-
-                .dropzone-file {
-                  font-weight: bold;
-                  color: $primary-light;
-                  overflow-wrap: break-word;
-                }
-
-                .dropzone-progress {
-                  margin-top: 1rem;
-                  color: $primary-light;
-                }
-
-                .dropzone-link {
-                  color: $primary-light;
-                }
-              }
-            }
           }
         }
 
