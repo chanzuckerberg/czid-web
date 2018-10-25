@@ -613,13 +613,6 @@ class SampleUpload extends React.Component {
     }
   };
 
-  // Handle dropped files being rejected
-  onDropRejected = () => {
-    window.alert(
-      "Invalid file. File size must be under 5GB for local uploads."
-    );
-  };
-
   // Update local file upload progress for Read 0 or Read 1
   updateUploadProgress = (pos, changed) => {
     let percents;
@@ -827,54 +820,6 @@ class SampleUpload extends React.Component {
       </button>
     );
 
-    // Dropzone uploader box for local file selection or drag-and-drop uploads
-    const uploadBox = pos => {
-      const readTitle = `Read ${pos + 1} File${pos ? " (optional)" : ""}:`;
-      let fileContent;
-      let className = "upload-box";
-
-      if (this.state.localFilesToUpload[pos]) {
-        fileContent = (
-          <div className="upload-box-file">
-            <div>
-              <Icon name="checkmark" />
-              {this.state.localFilesToUpload[pos].name}
-            </div>
-            {this.state.localUploadProgress[pos] ? (
-              <div className="upload-box-progress">
-                {`${this.state.localUploadProgress[pos]}% uploaded...`}
-              </div>
-            ) : null}
-          </div>
-        );
-        className += " active";
-      } else {
-        fileContent = (
-          <div>
-            <span>Drag and drop a file here, or </span>
-            <span className="upload-box-link">
-              click to use a file browser.
-            </span>
-          </div>
-        );
-      }
-
-      return (
-        <UploadBox
-          className={className}
-          acceptClassName="active"
-          onDrop={this.onDrop(pos)}
-          onDropRejected={this.onDropRejected}
-          maxSize={5e9}
-        >
-          <div className="upload-box-inside">
-            <div className="upload-box-file-title">{readTitle}</div>
-            {fileContent}
-          </div>
-        </UploadBox>
-      );
-    };
-
     let uploadModeSwitcher;
     if (!updateExistingSample) {
       uploadModeSwitcher = (
@@ -906,8 +851,18 @@ class SampleUpload extends React.Component {
           (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).
         </div>
         <div className="row">
-          {uploadBox(0)}
-          {uploadBox(1)}
+          <UploadBox
+            onDrop={this.onDrop(0)}
+            title={"Read 1 File:"}
+            fileToUpload={this.state.localFilesToUpload[0]}
+            uploadProgress={this.state.localUploadProgress[0]}
+          />
+          <UploadBox
+            onDrop={this.onDrop(1)}
+            title={"Read 2 File (optional):"}
+            fileToUpload={this.state.localFilesToUpload[1]}
+            uploadProgress={this.state.localUploadProgress[1]}
+          />
         </div>
       </div>
     );
