@@ -323,4 +323,26 @@ module SamplesHelper
     end
     formatted_samples
   end
+
+  # From the list of samples, return the ids of all samples whose top pipeline run is report ready.
+  def get_ready_sample_ids(samples)
+    ready_sample_ids = []
+    return ready_sample_ids if samples.empty?
+
+    # Do major SQL queries
+    sample_ids = samples.map(&:id)
+    top_pipeline_run_by_sample_id = top_pipeline_runs_multiget(sample_ids)
+    pipeline_run_ids = top_pipeline_run_by_sample_id.values.map(&:id)
+    report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
+
+    samples.each_with_index do |sample|
+      top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
+
+      if top_pipeline_run && report_ready_pipeline_run_ids.include?(top_pipeline_run.id)
+        ready_sample_ids.push(sample.id)
+      end
+    end
+
+    ready_sample_ids
+  end
 end

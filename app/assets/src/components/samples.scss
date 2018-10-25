@@ -1,0 +1,59 @@
+/* TODO(mark): Refactor into separate files (together with the components) */
+@import "~styles/themes/colors";
+@import "~styles/typography";
+
+/* BackgroundModal */
+.sampleList {
+  margin-bottom: 20px;
+
+  .selectedSamples {
+    margin-bottom: 0;
+  }
+
+  .moreSamplesCount {
+    font-weight: bold;
+  }
+}
+
+.warning {
+  color: $warning;
+  margin-bottom: 10px;
+
+  i {
+    margin-right: 5px;
+  }
+}
+
+/* FilterListMarkup */
+.statusLabels {
+  margin-left: 30px;
+  height: 20px;
+
+  .label {
+    font-size: $font-size-h6;
+    font-style: italic;
+    color: $medium-grey;
+    font-weight: $font-weight-regular;
+    text-transform: none;
+
+    &:not(:first-child) {
+      margin-left: 5px;
+      padding-left: 5px;
+      border-left: 1px solid $medium-grey;
+    }
+  }
+}
+
+/* TableColumnHeaders */
+.sampleNameHeader {
+  margin-left: 35px;
+}
+
+.checkAllContainer {
+  position: absolute;
+  margin-top: -2px;
+}
+
+.nameHeader {
+  position: relative;
+}
