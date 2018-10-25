@@ -612,6 +612,13 @@ class SampleUpload extends React.Component {
     }
   };
 
+  // Handle dropped files being rejected
+  onDropRejected = () => {
+    window.alert(
+      "Invalid file. File size must be under 5GB for local uploads."
+    );
+  };
+
   // Update local file upload progress for Read 0 or Read 1
   updateUploadProgress = (pos, changed) => {
     let percents;
@@ -828,6 +835,7 @@ class SampleUpload extends React.Component {
           className={className}
           acceptClassName="dropzone-accepted"
           onDrop={this.onDrop(pos)}
+          onDropRejected={this.onDropRejected}
           maxSize={5e9}
         >
           <div className="dropzone-inside">
