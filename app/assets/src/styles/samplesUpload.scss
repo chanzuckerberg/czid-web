@@ -417,19 +417,6 @@
           font-weight: 600;
           margin-top: 3.5rem;
         }
-
-        .upload-mode-switcher {
-          margin-top: 2rem;
-          margin-bottom: 2rem;
-
-          .menu {
-            .active.item {
-              background-color: $primary-light;
-              // TODO for removing importants from _header.scss
-              color: $white !important;
-            }
-          }
-        }
       }
     }
   }

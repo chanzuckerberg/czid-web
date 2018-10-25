@@ -6,7 +6,8 @@ import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
 import Dropzone from "react-dropzone";
-import { Icon, Menu } from "semantic-ui-react";
+import Icon from "./ui/icons/Icon";
+import { Menu, MenuItem } from "./ui/controls/Menu";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -875,22 +876,22 @@ class SampleUpload extends React.Component {
     let uploadModeSwitcher;
     if (!updateExistingSample) {
       uploadModeSwitcher = (
-        <div className="upload-mode-switcher">
+        <div className="menu-container">
           <Menu compact>
-            <Menu.Item
+            <MenuItem
               active={!this.state.localUploadMode}
               onClick={() => this.setState({ localUploadMode: false })}
             >
               <Icon size="large" name="server" />
               Upload from S3
-            </Menu.Item>
-            <Menu.Item
+            </MenuItem>
+            <MenuItem
               active={this.state.localUploadMode}
               onClick={() => this.setState({ localUploadMode: true })}
             >
               <Icon size="large" name="folder open outline" />
               Upload from Your Computer
-            </Menu.Item>
+            </MenuItem>
           </Menu>
         </div>
       );
