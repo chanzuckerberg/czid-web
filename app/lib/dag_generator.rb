@@ -3,12 +3,13 @@ class DagGenerator
   attr_accessor :template, :host_genome, :attribute_dict
 
   # http://www.stuartellis.name/articles/erb/
-  def initialize(template_file, project_id, sample_id, host_genome, attribute_dict)
+  def initialize(template_file, project_id, sample_id, host_genome, attribute_dict, dag_vars_dict)
     @project_id = project_id
     @sample_id = sample_id
     @template = File.open(template_file, 'r').read
     @host_genome = host_genome
     @attribute_dict = attribute_dict
+    @dag_vars_dict = dag_vars_dict
   end
 
   def render

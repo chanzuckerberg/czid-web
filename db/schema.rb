@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_018_234_532) do
+ActiveRecord::Schema.define(version: 20_181_024_195_651) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -170,6 +170,7 @@ ActiveRecord::Schema.define(version: 20_181_018_234_532) do
     t.string "snp_annotations"
     t.datetime "ready_at"
     t.string "vcf"
+    t.text "dag_vars"
     t.index ["name"], name: "index_phylo_trees_on_name", unique: true
     t.index ["project_id", "taxid"], name: "index_phylo_trees_on_project_id_and_taxid"
     t.index ["user_id"], name: "index_phylo_trees_on_user_id"
@@ -237,6 +238,7 @@ ActiveRecord::Schema.define(version: 20_181_018_234_532) do
     t.integer "results_finalized"
     t.bigint "alignment_config_id"
     t.integer "alert_sent", default: 0
+    t.text "dag_vars"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
@@ -289,6 +291,7 @@ ActiveRecord::Schema.define(version: 20_181_018_234_532) do
     t.string "alignment_config_name"
     t.string "web_commit", default: ""
     t.string "pipeline_commit", default: ""
+    t.text "dag_vars"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end
