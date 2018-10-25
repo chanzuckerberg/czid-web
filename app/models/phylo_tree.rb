@@ -162,7 +162,8 @@ class PhyloTree < ApplicationRecord
       taxon_byteranges: taxon_byteranges_hash,
       align_viz_files: align_viz_files,
       nt_db: alignment_config.s3_nt_db_path,
-      nt_loc_db: alignment_config.s3_nt_loc_db_path
+      nt_loc_db: alignment_config.s3_nt_loc_db_path,
+      sample_names_by_run_ids: sample_names_by_run_ids
     }
     dag_commands = prepare_dag("phylo_tree", attribute_dict)
     # Dispatch command
@@ -241,6 +242,19 @@ class PhyloTree < ApplicationRecord
       end
     end
     indexed_results
+  end
+
+  def sample_names_by_run_ids
+    query_results = ActiveRecord::Base.connection.select_all("
+      select pipeline_runs.id, samples.name
+      from pipeline_runs, samples
+      where pipeline_runs.sample_id = samples.id
+    ").to_a
+    result = {}
+    query_results.index_by(&:id).each do |pr_id, entry|
+      result[pr_id] = entry["name"]
+    end
+    result
   end
 
   def self.viewable(user)
