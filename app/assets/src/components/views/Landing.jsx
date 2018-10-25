@@ -85,8 +85,18 @@ class Landing extends React.Component {
             </a>
           </div>
           <div className="sign-in">
-            <TransparentButton text="Sign In" onClick={signInLink} />
+            <TransparentButton
+              text="Sign In"
+              onClick={signInLink}
+              disabled={!this.props.browserInfo.supported}
+            />
           </div>
+          {this.props.browserInfo.supported || (
+            <div className="alert-browser-support">
+              {this.props.browserInfo.browser} is not currently supported.
+              Please sign in from a different browser.
+            </div>
+          )}
         </div>
       </div>
     );
@@ -149,9 +159,11 @@ class Landing extends React.Component {
       <div className="account-form">
         <div className="form-header">
           <div className="form-title">Learn more about IDseq</div>
-          <div className="form-description">
-            Already have an account? <a href="/users/sign_in">Sign in.</a>
-          </div>
+          {this.props.browserInfo.supported && (
+            <div className="form-description">
+              Already have an account? <a href="/users/sign_in">Sign in.</a>
+            </div>
+          )}
         </div>
         <Form onSubmit={this.handleSubmit}>
           <Form.Group widths={2}>
@@ -303,7 +315,8 @@ class Landing extends React.Component {
 
 Landing.propTypes = {
   contactEmail: PropTypes.string.isRequired,
-  showBulletin: PropTypes.string
+  showBulletin: PropTypes.bool,
+  browserInfo: PropTypes.object
 };
 
 export default Landing;

@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import "babel-polyfill";
 import "url-search-params-polyfill";
 import "materialize-css";
 import "materialize-css/dist/css/materialize.css";
