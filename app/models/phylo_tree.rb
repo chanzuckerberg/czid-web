@@ -248,11 +248,12 @@ class PhyloTree < ApplicationRecord
     query_results = ActiveRecord::Base.connection.select_all("
       select pipeline_runs.id, samples.name
       from pipeline_runs, samples
-      where pipeline_runs.sample_id = samples.id
+      where pipeline_runs.id in (#{pipeline_run_ids.join(',')}) and
+            pipeline_runs.sample_id = samples.id
     ").to_a
     result = {}
-    query_results.index_by(&:id).each do |pr_id, entry|
-      result[pr_id] = entry["name"]
+    query_results.each do |entry|
+      result[entry["id"]] = entry["name"]
     end
     result
   end
