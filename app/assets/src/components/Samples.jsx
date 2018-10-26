@@ -2,8 +2,12 @@ import React from "react";
 import axios from "axios";
 import ReactDOM from "react-dom";
 import moment from "moment";
+import cx from "classnames";
 import $ from "jquery";
 import Materialize from "materialize-css";
+import { intersection, union, difference, map, keyBy, take } from "lodash";
+// TODO(mark): Refactor lodash/fp functions into a file of immutable utilities.
+import { merge } from "lodash/fp";
 import { Sidebar, Popup, Label, Icon, Modal, Form } from "semantic-ui-react";
 import Nanobar from "nanobar";
 import SortHelper from "./SortHelper";
@@ -18,6 +22,8 @@ import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "./ui/controls/buttons/SecondaryButton";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
+// TODO(mark): Convert styles/samples.scss to CSS modules.
+import cs from "./samples.scss";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -32,17 +38,13 @@ class Samples extends React.Component {
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
-    this.sampleAttributeHelper = {};
-    this.sampleAttributesToStore = ["name", "project_id", "pipeline_run_id"];
 
     this.getSampleAttribute = this.getSampleAttribute.bind(this);
-    this.fetchAllSelectedIds = this.fetchAllSelectedIds.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.columnSorting = this.columnSorting.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
     this.loadMore = this.loadMore.bind(this);
     this.scrollDown = this.scrollDown.bind(this);
-    this.fetchResults = this.fetchResults.bind(this);
     this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
@@ -74,14 +76,20 @@ class Samples extends React.Component {
       background_creation_response: {},
       project: null,
       project_users: [],
-      totalNumber: null,
+      // Number of samples in the current query, as defined by the filters.
+      numFilteredSamples: 0,
+      // Total number of samples in the current project.
+      numTotalSamples: 0,
       projectId: null,
       displaySelectSamples: true, // this.checkURLContent(),
       selectedProjectId: this.fetchParams("project_id") || null,
       filterParams: this.fetchParams("filter") || "",
       searchParams: this.fetchParams("search") || "",
       sampleIdsParams: this.fetchParams("ids") || [],
-      allSamples: [],
+      // The list of fetched sample ids, in the order to be displayed
+      fetchedSampleIds: [],
+      // A map of fetched sample id to sample data.
+      fetchedSamples: {},
       tissueTypes: [],
       hostGenomes: [],
       sort_by: this.fetchParams("sort_by") || "id,desc",
@@ -89,7 +97,9 @@ class Samples extends React.Component {
       pageEnd: false,
       hostFilterChange: false,
       tissueFilterChange: false,
-      allChecked: false,
+      // Ids for ready samples in the entire current query, not just the current page.
+      // Used for the 'toggle all selected' checkbox.
+      readySampleIdsForFilter: [],
       selectedSampleIds: [],
       displayDropdown: false,
       selectedTissueFilters: this.fetchParams("tissue")
@@ -100,9 +110,11 @@ class Samples extends React.Component {
             .split(",")
             .map(Number)
         : [],
-      initialFetchedSamples: [],
       loading: false,
       isRequesting: false,
+      // Whether a filter is currently being applied for the fetched samples.
+      // Determines whether to show the 'X samples matching filters' label.
+      areSamplesFiltered: false,
       displayEmpty: false,
       checkInUpdate: true,
       resetTissues: !(
@@ -626,18 +638,22 @@ class Samples extends React.Component {
       .then(res => {
         this.setState(prevState => ({
           isRequesting: false,
-          allSamples: [...prevState.allSamples, ...res.data.samples],
+          fetchedSamples: merge(
+            prevState.fetchedSamples,
+            keyBy(res.data.samples, "db_sample.id")
+          ),
+          fetchedSampleIds: [
+            ...prevState.fetchedSampleIds,
+            ...map(res.data.samples, "db_sample.id")
+          ],
           pagesLoaded: prevState.pagesLoaded + 1,
           pageEnd: res.data.samples.length < this.pageSize
         }));
       })
       .catch(() => {
-        this.setState(prevState => ({
-          isRequesting: false,
-          allSamples: [...prevState.allSamples],
-          pagesLoaded: prevState.pagesLoaded,
-          pageEnd: prevState.pageEnd
-        }));
+        this.setState({
+          isRequesting: false
+        });
       });
   }
 
@@ -670,14 +686,32 @@ class Samples extends React.Component {
     return params;
   }
 
+  hasFilters = () => {
+    const {
+      filterParams,
+      searchParams,
+      selectedHostIndices,
+      selectedTissueFilters
+    } = this.state;
+    return (
+      filterParams.length > 0 ||
+      searchParams.length > 0 ||
+      selectedHostIndices.length > 0 ||
+      selectedTissueFilters.length > 0
+    );
+  };
+
   allTissueTypes(all_tissues) {
     return all_tissues.length == 0 || all_tissues.indexOf("Not set") >= 0
       ? all_tissues
       : ["Not set", ...all_tissues];
   }
 
-  //fetch results from filtering, search or switching projects
-  fetchResults(cb, reset_filters = false) {
+  // fetch results from filtering, search or switching projects
+  // opt.resetFilters - should reset the filters
+  // opt.projectChanged - project has just changed, so reset project stats
+  fetchResults = (opts = {}) => {
+    const { resetFilters, projectChanged } = opts;
     this.nanobar.go(30);
     // always fetch from page one
     this.state.pagesLoaded = 0;
@@ -689,45 +723,53 @@ class Samples extends React.Component {
       .then(res => {
         this.nanobar.go(100);
         this.setState(prevState => ({
-          initialFetchedSamples: res.data.samples,
-          allSamples: res.data.samples,
+          fetchedSamples: keyBy(res.data.samples, "db_sample.id"),
+          fetchedSampleIds: map(res.data.samples, "db_sample.id"),
           tissueTypes: this.allTissueTypes(res.data.tissue_types),
           selectedTissueFilters:
-            reset_filters || prevState.resetTissues
+            resetFilters || prevState.resetTissues
               ? []
               : prevState.selectedTissueFilters,
           hostGenomes: res.data.host_genomes,
           selectedHostIndices:
-            reset_filters || prevState.resetHosts
+            resetFilters || prevState.resetHosts
               ? []
               : prevState.selectedHostIndices,
           displayEmpty: false,
           checkInUpdate: false, //don't trigger more update if it's from the fetchResults
           resetTissues: false,
           resetHosts: false,
-          totalNumber: res.data.total_count,
+          // Only change the total count if the project has changed.
+          numTotalSamples: projectChanged
+            ? res.data.count_project
+            : prevState.numTotalSamples,
+          // Only reset the selected ids if the project has changed.
+          selectedSampleIds: projectChanged ? [] : prevState.selectedSampleIds,
+          readySampleIdsForFilter: res.data.ready_sample_ids,
+          numFilteredSamples: res.data.count,
           pagesLoaded: prevState.pagesLoaded + 1,
           pageEnd: res.data.samples.length < this.pageSize,
-          isRequesting: false
+          isRequesting: false,
+          areSamplesFiltered: this.hasFilters()
         }));
-        if (!this.state.allSamples.length) {
+        if (!this.state.fetchedSampleIds.length) {
           this.setState({ displayEmpty: true });
-        }
-        if (typeof cb === "function") {
-          cb();
         }
       })
       .catch(() => {
-        this.setState({
-          initialFetchedSamples: [],
-          allSamples: [],
+        this.setState(prevState => ({
+          fetchedSamples: {},
+          fetchedSampleIds: [],
+          isRequesting: false,
+          numTotalSamples: projectChanged ? 0 : prevState.numTotalSamples,
+          // Only reset the selected ids if the project has changed.
+          selectedSampleIds: projectChanged ? [] : prevState.selectedSampleIds,
+          readySampleIdsForFilter: [],
+          numFilteredSamples: 0,
           displayEmpty: true
-        });
-        if (typeof cb === "function") {
-          cb();
-        }
+        }));
       });
-  }
+  };
 
   //handle search when query is passed
   handleSearch(e) {
@@ -751,7 +793,7 @@ class Samples extends React.Component {
         selectedProjectId: null,
         project: null
       });
-      this.fetchResults(null, resetFilters);
+      this.fetchResults({ resetFilters: true, projectChanged: true });
     } else {
       projId = parseInt(projId);
       axios
@@ -761,7 +803,7 @@ class Samples extends React.Component {
             project: res.data
           });
           this.fetchProjectUsers(projId);
-          this.fetchResults(null, resetFilters);
+          this.fetchResults({ resetFilters: true, projectChanged: true });
         })
         .catch(() => {
           this.setState({ project: null });
@@ -811,39 +853,19 @@ class Samples extends React.Component {
     return !this.state.columnsShown.includes(column);
   }
 
-  fetchAllSelectedIds(e) {
-    // Selects all samples and records the attributes in sampleAttributesToStore for each sample
-    let sampleList = this.state.selectedSampleIds;
-    const checked = e.target.checked;
-    const allSamples = this.state.allSamples;
-    for (let sample of allSamples) {
-      if (sample.run_info.report_ready != 1) {
-        continue;
-      }
-      let sample_id = sample.db_sample.id;
-      if (checked) {
-        if (sampleList.indexOf(sample_id) === -1) {
-          sampleList.push(sample_id);
-          // Also keep track of certain data for the sample that was just added
-          let attributeHash = {};
-          for (let key of this.sampleAttributesToStore) {
-            attributeHash[key] = this.getSampleAttribute(sample, key);
-          }
-          this.sampleAttributeHelper[sample_id] = attributeHash;
-        }
-      } else {
-        let index = sampleList.indexOf(sample_id);
-        if (index >= 0) {
-          sampleList.splice(index, 1);
-          delete this.sampleAttributeHelper[sample_id];
-        }
-      }
-    }
+  toggleAllSelectedSamples = e => {
+    let selectedSampleIds = this.state.selectedSampleIds;
+    const newChecked = e.target.checked;
+    const readySampleIdsForFilter = this.state.readySampleIdsForFilter;
+
+    const newSelectedSampleIds = newChecked
+      ? union(selectedSampleIds, readySampleIdsForFilter)
+      : difference(selectedSampleIds, readySampleIdsForFilter);
+
     this.setState({
-      allChecked: checked,
-      selectedSampleIds: sampleList
+      selectedSampleIds: newSelectedSampleIds
     });
-  }
+  };
 
   compareSamples() {
     if (this.state.selectedSampleIds.length) {
@@ -886,39 +908,24 @@ class Samples extends React.Component {
       },
       () => {
         this.setUrlLocation();
-        this.fetchResults(null, true);
+        this.fetchResults({ resetFilters: true });
       }
     );
   }
 
+  allReadySamplesSelected = () =>
+    difference(this.state.readySampleIdsForFilter, this.state.selectedSampleIds)
+      .length === 0;
+
   selectSample(e) {
-    // Stores selected sample IDs and records the attributes in sampleAttributesToStore for each sample
-    const sampleList = this.state.selectedSampleIds;
-    let attributeHash = {};
+    let sampleId = parseInt(e.target.getAttribute("data-sample-id"));
 
-    let sample_id = parseInt(e.target.getAttribute("data-sample-id"));
+    const sampleList = e.target.checked
+      ? union(this.state.selectedSampleIds, [+sampleId])
+      : difference(this.state.selectedSampleIds, [+sampleId]);
 
-    if (e.target.checked) {
-      // add the numerical value of the checkbox to options array
-      if (sampleList.indexOf(sample_id) < 0) {
-        sampleList.push(+sample_id);
-        // also keep track of certain data for the sample that was just added
-        for (let key of this.sampleAttributesToStore) {
-          attributeHash[key] = e.target.getAttribute("data-sample-" + key);
-        }
-        this.sampleAttributeHelper[sample_id] = attributeHash;
-      }
-    } else {
-      // or remove the value from the unchecked checkbox from the array
-      let index = sampleList.indexOf(+sample_id);
-      if (index >= 0) {
-        sampleList.splice(index, 1);
-        delete this.sampleAttributeHelper[sample_id];
-      }
-    }
     // update the state with the new array of options
     this.setState({
-      allChecked: false,
       selectedSampleIds: sampleList
     });
   }
@@ -986,13 +993,15 @@ class Samples extends React.Component {
       .catch(err => {});
   }
 
-  renderTable(samples) {
+  renderTable(sampleMap, sampleIds) {
     let project_id = this.state.selectedProjectId
       ? this.state.selectedProjectId
       : "all";
     let search_field = (
       <TableSearchField searchParams={this.state.searchParams} parent={this} />
     );
+
+    const samples = sampleIds.map(id => sampleMap[id]);
 
     const downloadOptions = [{ text: "Samples Table", value: "samples_table" }];
     if (project_id !== "all") {
@@ -1010,19 +1019,6 @@ class Samples extends React.Component {
           options={downloadOptions}
           onClick={this.startReportGeneration}
         />
-      </div>
-    );
-
-    let check_all = (
-      <div className="check-all">
-        <input
-          type="checkbox"
-          id="checkAll"
-          className="filled-in checkAll"
-          checked={this.state.allChecked}
-          onClick={this.fetchAllSelectedIds}
-        />
-        <label htmlFor="checkAll" />
       </div>
     );
 
@@ -1058,7 +1054,6 @@ class Samples extends React.Component {
 
     const search_box = (
       <div className="row search-box">
-        {this.state.displaySelectSamples ? check_all : null}
         {search_field}
         <div className="filter-container">
           <MultipleDropdown
@@ -1095,16 +1090,9 @@ class Samples extends React.Component {
       />
     );
 
-    let samplesCount = this.state.allSamples.length;
-    const selectedStr = this.state.selectedSampleIds.length
-      ? `${this.state.selectedSampleIds.length} samples selected.`
-      : "";
-
     const projInfo = (
       <ProjectInfoHeading
         proj={proj}
-        samplesCount={samplesCount}
-        selectedStr={selectedStr}
         project_menu={project_menu}
         table_download_dropdown={table_download_dropdown}
         compare_button={compareButton}
@@ -1112,6 +1100,8 @@ class Samples extends React.Component {
         parent={this}
         state={this.state}
         canEditProject={this.canEditProject}
+        selectedSampleIds={this.state.selectedSampleIds}
+        numTotalSamples={this.state.numTotalSamples}
       />
     );
 
@@ -1305,7 +1295,6 @@ class Samples extends React.Component {
         filterParams: "",
         searchParams: "",
         checkInUpdate: false,
-        allChecked: false,
         selectedTissueFilters: [],
         selectedHostIndices: [],
         tissueTypes: [],
@@ -1362,7 +1351,10 @@ class Samples extends React.Component {
         </Sidebar>
 
         <Sidebar.Pusher className="col no-padding samples-content s10">
-          {this.renderTable(this.state.allSamples)}
+          {this.renderTable(
+            this.state.fetchedSamples,
+            this.state.fetchedSampleIds
+          )}
         </Sidebar.Pusher>
       </div>
     );
@@ -1480,6 +1472,18 @@ function FilterListMarkup({
         <div className="filter-tags-list">
           {host_filter_tag_list} {tissue_filter_tag_list}
         </div>
+        <div className={cs.statusLabels}>
+          {parent.state.areSamplesFiltered && (
+            <span className={cs.label}>
+              {parent.state.numFilteredSamples} samples matching filters
+            </span>
+          )}
+          {parent.state.selectedSampleIds.length > 0 && (
+            <span className={cs.label}>
+              {parent.state.selectedSampleIds.length} samples selected
+            </span>
+          )}
+        </div>
         <div className="sample-table-container row">
           {tableHead}
           {!samples.length && parent.state.displayEmpty
@@ -1487,7 +1491,7 @@ function FilterListMarkup({
             : parent.renderPipelineOutput(samples)}
         </div>
       </div>
-      {!parent.state.pageEnd && parent.state.allSamples.length > 14 ? (
+      {!parent.state.pageEnd && parent.state.fetchedSampleIds.length > 14 ? (
         <div className="scroll">
           <i className="fa fa-spinner fa-spin fa-3x" />
         </div>
@@ -1696,44 +1700,63 @@ class BackgroundModal extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.renderTextField = this.renderTextField.bind(this);
     this.renderSampleList = this.renderSampleList.bind(this);
-    this.sample_ids = props.parent.state.selectedSampleIds;
-    this.sampleAttributeHelper = props.parent.sampleAttributeHelper;
   }
+
   renderSampleList() {
-    let sample_list = [];
-    for (let sample_id of this.sample_ids) {
-      if (this.sampleAttributeHelper.hasOwnProperty(sample_id)) {
-        let sample_attributes = this.sampleAttributeHelper[sample_id];
-        let sample_name = sample_attributes.name;
-        let sample_details =
-          " (project_id: " +
-          sample_attributes.project_id +
-          ", " +
-          " pipeline_run_id: " +
-          sample_attributes.pipeline_run_id +
-          ")";
-        let sample_display = this.props.parent.admin ? (
-          <span>
-            {sample_name}
-            <span className="secondary-text">{sample_details}</span>
-          </span>
-        ) : (
-          <span>{sample_name}</span>
-        );
-        sample_list.push(sample_display);
-      }
-    }
+    const MAX_SAMPLES_TO_SHOW = 10;
+
+    const availableSampleIds = intersection(
+      this.props.selectedSampleIds,
+      this.props.parent.state.fetchedSampleIds
+    );
+
+    const samplesToShow = map(
+      take(availableSampleIds, MAX_SAMPLES_TO_SHOW),
+      id => this.props.parent.state.fetchedSamples[id]
+    );
+
+    const getSampleAttribute = this.props.parent.getSampleAttribute;
+
+    const getSampleDetails = sample => {
+      const projectId = getSampleAttribute(sample, "project_id");
+      const pipelineRunId = getSampleAttribute(sample, "pipeline_run_id");
+      return ` (project_id: ${projectId}, pipeine_run_id: ${pipelineRunId})`;
+    };
+
+    const samplesRemaining =
+      this.props.selectedSampleIds.length - samplesToShow.length;
+
     return (
-      <div className="background-modal-contents">
+      <div className={cx("background-modal-contents", cs.sampleList)}>
         <div className="label-text">Selected samples:</div>
-        <ul>
-          {sample_list.map((text, index) => (
-            <li key={`background_sample_${index}`}>{text}</li>
+        <div className={cs.warning}>
+          <i className="fa fa-exclamation-triangle" />
+          A large number of samples may increase the processing time before your
+          collection can be used as a background.
+        </div>
+        <ul className={cs.selectedSamples}>
+          {samplesToShow.map(sample => (
+            <li key={sample.db_sample.id}>
+              <span>
+                {getSampleAttribute(sample, "name")}
+                {this.props.parent.admin && (
+                  <span className="secondary-text">
+                    {getSampleDetails(sample)}
+                  </span>
+                )}
+              </span>
+            </li>
           ))}
         </ul>
+        {samplesRemaining > 0 && (
+          <div className={cs.moreSamplesCount}>
+            and {samplesRemaining} more...
+          </div>
+        )}
       </div>
     );
   }
+
   handleOpen() {
     this.setState({
       modalOpen: true,
@@ -1790,7 +1813,7 @@ class BackgroundModal extends React.Component {
             <PrimaryButton
               text="Create Collection"
               onClick={this.handleOpen}
-              disabled={!this.sample_ids.length}
+              disabled={!this.props.selectedSampleIds.length}
             />
           </div>
         }
@@ -1965,15 +1988,15 @@ function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
 
 function ProjectInfoHeading({
   proj,
-  samplesCount,
-  selectedStr,
   project_menu,
   table_download_dropdown,
   compare_button,
   delete_project_button,
   parent,
   state,
-  canEditProject
+  canEditProject,
+  selectedSampleIds,
+  numTotalSamples
 }) {
   let phyloProps = {
     admin: parseInt(parent.admin),
@@ -2003,13 +2026,11 @@ function ProjectInfoHeading({
           )}
         </div>
         <p className="subheading col no-padding s12">
-          {samplesCount === 0
-            ? "No sample found"
-            : samplesCount === 1
-              ? "1 sample found"
-              : `Showing ${samplesCount} out of ${
-                  state.totalNumber
-                } total samples. ${selectedStr}`}
+          {numTotalSamples === 0
+            ? "No samples found"
+            : `${numTotalSamples} total sample${
+                numTotalSamples > 1 ? "s" : ""
+              }`}
         </p>
       </div>
       <div className="col s7 download-section-btns">
@@ -2017,7 +2038,10 @@ function ProjectInfoHeading({
         {table_download_dropdown}
         {phyloTreeModal}
         {compare_button}
-        <BackgroundModal parent={parent} />
+        <BackgroundModal
+          parent={parent}
+          selectedSampleIds={selectedSampleIds}
+        />
         {state.selectedProjectId &&
         canEditProject(state.selectedProjectId) &&
         state.project &&
@@ -2035,10 +2059,23 @@ function TableColumnHeaders({ sort, colMap, filterStatus, state, parent }) {
       <div className="samples-card white">
         <div className="flex-container">
           <ul className="flex-items">
-            <li className="table-header-name">
+            <li className={cs.nameHeader}>
+              {parent.state.displaySelectSamples &&
+                parent.state.readySampleIdsForFilter.length > 0 && (
+                  <div className={cs.checkAllContainer}>
+                    <input
+                      type="checkbox"
+                      id="checkAll"
+                      className="filled-in checkAll"
+                      checked={parent.allReadySamplesSelected()}
+                      onClick={parent.toggleAllSelectedSamples}
+                    />
+                    <label htmlFor="checkAll" />
+                  </div>
+                )}
               <div className="card-label column-title center-label sample-name">
                 <div className="sort-able" onClick={parent.sortSamples}>
-                  <span>Name</span>
+                  <span className={cs.sampleNameHeader}>Name</span>
                   <i
                     className={`fa ${
                       sort === "name,desc"
@@ -2129,19 +2166,11 @@ function SampleCardCheckboxes({
   i,
   parent
 }) {
-  let sampleAttributeProps = {};
-  for (let key of parent.sampleAttributesToStore) {
-    sampleAttributeProps["data-sample-" + key] = parent.getSampleAttribute(
-      sample,
-      key
-    );
-  }
   return (
     <li className="check-box-container">
       {parent.state.displaySelectSamples ? (
         <div>
           <input
-            {...sampleAttributeProps}
             type="checkbox"
             id={i}
             onClick={parent.selectSample}

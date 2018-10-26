@@ -399,10 +399,6 @@ $break-large: 1070px;
           &:first-child {
             flex-grow: 2;
             margin-left: 0.8rem;
-            &.table-header-name {
-              margin-left: 0.2rem;
-              margin-right: 0.5rem;
-            }
           }
           .card-label {
             &.top-label {
@@ -535,8 +531,7 @@ $break-large: 1070px;
   .search-box {
     display: inline-block;
     width: inherit;
-    height: 50px;
-    margin: 20px 0 5px 15px;
+    margin: 20px 0 5px 30px;
     border-radius: 3px;
     .wrapper {
       .metadata {
@@ -544,19 +539,10 @@ $break-large: 1070px;
         border: solid 1px $light-grey;
       }
     }
-    .check-all {
-      display: inline-block;
-      float: left;
-      padding: 9px 17px;
-      margin: 0 10px 0px 0px;
-      label {
-        vertical-align: middle;
-        padding-left: 16px;
-      }
-    }
     .search-field {
       padding-left: 20px;
       margin-right: 10px;
+      height: 40px;
       .search-icon {
         position: relative;
         margin-left: 10px;
@@ -790,8 +776,8 @@ input[type="button"] {
     }
 
     .filter-tags-list {
-      padding-left: 20px;
-      padding-bottom: 10px;
+      padding-left: 27px;
+      padding-bottom: 12px;
       .label-tags {
         background: $primary-light !important;
         border-color: $primary-light !important;
@@ -804,9 +790,6 @@ input[type="button"] {
   .project-info {
     padding-left: 20px;
     .download-section {
-      .proj-title-container {
-        margin-left: -0.3rem;
-      }
       .angle.down.icon {
         margin-left: 0.5rem;
         margin-right: -0.3rem;
@@ -1001,9 +984,6 @@ input[type="button"] {
   top: 4px;
   border: 1px solid $primary-light;
   background-color: $primary-light;
-  &.check-all {
-    padding: 10px 21px 8px 16px;
-  }
 }
 
 [type="checkbox"].filled-in:checked + label:before {

@@ -49,7 +49,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @joe_project = projects(:joe_project)
     get "/samples.json?project_id=#{@joe_project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["total_count"] == 3
+    assert JSON.parse(@response.body)["count"] == 3
   end
 
   test 'joe can see joe_sample' do
@@ -114,7 +114,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @public_project = projects(:public_project)
     get "/samples.json?project_id=#{@public_project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["total_count"] == 3
+    assert JSON.parse(@response.body)["count"] == 3
   end
 
   test 'joe can see public_sample' do
@@ -166,7 +166,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @project = projects(:one)
     get "/samples.json?project_id=#{@project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["total_count"].zero?
+    assert JSON.parse(@response.body)["count"].zero?
   end
 
   test 'joe cannot see sample one' do
@@ -212,7 +212,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @project = projects(:two)
     get "/samples.json?project_id=#{@project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["total_count"] == 1
+    assert JSON.parse(@response.body)["count"] == 1
   end
 
   test 'joe can see expired_sample' do
