@@ -20,6 +20,15 @@ class UploadBox extends React.Component {
     );
   };
 
+  // Overridden by props.onDrop
+  onDrop = accepted => {
+    if (accepted.length > 0) {
+      this.setState({
+        fileToUpload: accepted[0] // Overridden by props.fileToUpload
+      });
+    }
+  };
+
   uploadFileToURL = (file, url) => {
     const config = {
       onUploadProgress: e => {
@@ -40,13 +49,13 @@ class UploadBox extends React.Component {
   render() {
     let fileContent;
     let className = "idseq-ui upload-box";
-    const fileToUpload = this.props.fileToUpload;
+    const fileToUpload = this.props.fileToUpload || this.state.fileToUpload;
     const uploadProgress = this.state.uploadProgress;
 
     // Check and start upload
     if (fileToUpload && this.props.startUpload && !this.state.uploadRan) {
       this.setState({ uploadRan: true }, () =>
-        this.uploadFileToURL(this.props.fileToUpload, this.props.url)
+        this.uploadFileToURL(fileToUpload, this.props.url)
       );
     }
 
@@ -78,7 +87,7 @@ class UploadBox extends React.Component {
       <Dropzone
         acceptClassName="active"
         maxSize={5e9}
-        onDrop={this.props.onDrop}
+        onDrop={this.props.onDrop || this.onDrop}
         onDropRejected={this.onDropRejected}
         className={className}
       >
