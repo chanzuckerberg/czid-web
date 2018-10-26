@@ -35,7 +35,7 @@ class PipelineRun < ApplicationRecord
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
-  TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
+  TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined_with_accessions.json'.freeze
   REFINED_TAXON_COUNTS_JSON_NAME = 'reclassify/refined_taxon_counts.json'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
