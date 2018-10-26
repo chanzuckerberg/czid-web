@@ -86,7 +86,7 @@ class UploadBox extends React.Component {
 
     return (
       <Dropzone
-        acceptClassName="active"
+        acceptClassName="accepted"
         maxSize={5e9}
         onDrop={onDrop}
         onDropRejected={this.onDropRejected}

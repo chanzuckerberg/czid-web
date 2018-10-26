@@ -14,7 +14,8 @@
     border: 2px solid $primary-light;
   }
 
-  &:hover {
+  &:hover,
+  &.accepted {
     background-color: $primary-lightest;
     border: 2px dashed $primary-light;
   }
