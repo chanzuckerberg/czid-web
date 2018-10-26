@@ -6,7 +6,8 @@
       'Landing',
       {
         contactEmail: "accounts@idseq.net",
-        showBulletin: <%= @show_bulletin %>
+        showBulletin: <%= @show_bulletin %>,
+        browserInfo: <%= @browser_info.to_json.html_safe %>
       },
       'landing_page'
       );

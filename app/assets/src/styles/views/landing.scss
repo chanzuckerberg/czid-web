@@ -6,6 +6,23 @@
   margin-right: 0.75rem;
 }
 
+.alert-browser-support {
+  color: $light-grey;
+  float: right;
+  margin-right: 0.75rem;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+
+  .browser-name {
+    font-weight: 700;
+  }
+
+  @media only screen and (max-width: 748px) {
+    color: $dark-grey;
+  }
+}
+
 .first-block {
   margin-top: 5rem;
   margin-bottom: 5rem;

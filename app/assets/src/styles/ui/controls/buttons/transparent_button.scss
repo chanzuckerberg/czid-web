@@ -29,9 +29,8 @@
   }
 
   &:disabled {
-    border: 1px solid $medium-grey;
-    background-color: $white;
-    color: $medium-grey;
+    // using important due to semantic-ui styling
+    opacity: 0.5 !important;
 
     .icon-label {
       svg {

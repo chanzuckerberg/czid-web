@@ -30,6 +30,7 @@
   }
 
   &:disabled {
+    // using important due to semantic-ui styling
     opacity: 1 !important;
   }
 }
