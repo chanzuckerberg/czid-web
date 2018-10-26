@@ -1,0 +1,12 @@
+.dropdown {
+  i:global(.dropdown) {
+    /* Override semantic-ui */
+    margin-left: 0 !important;
+
+    &:before {
+      font-family: FontAwesome;
+      /* Override semantic-ui */
+      content: "\f107" !important;
+    }
+  }
+}
