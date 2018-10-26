@@ -20,11 +20,11 @@ class UploadBox extends React.Component {
     );
   };
 
-  // Overridden by props.onDrop
+  // onDrop and fileToUpload can be overridden by props
   onDrop = accepted => {
     if (accepted.length > 0) {
       this.setState({
-        fileToUpload: accepted[0] // Overridden by props.fileToUpload
+        fileToUpload: accepted[0]
       });
     }
   };
@@ -50,6 +50,7 @@ class UploadBox extends React.Component {
     let fileContent;
     let className = "idseq-ui upload-box";
     const fileToUpload = this.props.fileToUpload || this.state.fileToUpload;
+    const onDrop = this.props.onDrop || this.onDrop;
     const uploadProgress = this.state.uploadProgress;
 
     // Check and start upload
@@ -87,7 +88,7 @@ class UploadBox extends React.Component {
       <Dropzone
         acceptClassName="active"
         maxSize={5e9}
-        onDrop={this.props.onDrop || this.onDrop}
+        onDrop={onDrop}
         onDropRejected={this.onDropRejected}
         className={className}
       >
