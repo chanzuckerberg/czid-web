@@ -32,6 +32,6 @@ class InputFile < ApplicationRecord
   end
 
   def file_type
-    FILE_REGEX.match(name)[1]
+    FILE_REGEX.match(name)[1] if FILE_REGEX.match(name)
   end
 end
