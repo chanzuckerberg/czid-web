@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_024_195_651) do
+ActiveRecord::Schema.define(version: 20_181_026_200_356) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -305,6 +305,7 @@ ActiveRecord::Schema.define(version: 20_181_024_195_651) do
     t.string "hit_type"
     t.integer "tax_level"
     t.bigint "pipeline_run_id"
+    t.string "best_accession"
     t.index ["pipeline_run_id", "taxid", "hit_type", "tax_level"], name: "index_pr_tax_ht_level_tb", unique: true
     t.index ["taxid"], name: "index_taxon_byteranges_on_taxid"
   end
