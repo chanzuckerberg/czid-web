@@ -39,7 +39,8 @@
         "taxid": <%= @attribute_dict[:taxid] %>,
         "reference_taxids": <%= @attribute_dict[:reference_taxids] %>,
         "nt_db": "<%= @attribute_dict[:nt_db] %>",
-        "align_viz_files": <%= @attribute_dict[:align_viz_files].to_json %>
+        "align_viz_files": <%= @attribute_dict[:align_viz_files].to_json %>,
+        "sample_names_by_run_ids": <%= @attribute_dict[:sample_names_by_run_ids].to_json %>
       }
     }
   ],
