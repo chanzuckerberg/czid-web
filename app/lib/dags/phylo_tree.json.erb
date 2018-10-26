@@ -16,7 +16,7 @@
         "module": "idseq_dag.steps.prepare_taxon_fasta",
         "additional_files": {},
         "additional_attributes": {
-          "superkingdom_name": <%= @attribute_dict[:superkingdom_name] %>,
+          "superkingdom_name": "<%= @attribute_dict[:superkingdom_name] %>",
           "taxon_byteranges": <%= taxon_byteranges.to_json %>
         }
       },
@@ -39,7 +39,7 @@
       "additional_attributes": {
         "taxid": <%= @attribute_dict[:taxid] %>,
         "reference_taxids": <%= @attribute_dict[:reference_taxids] %>,
-        "superkingdom_name": <%= @attribute_dict[:superkingdom_name] %>,
+        "superkingdom_name": "<%= @attribute_dict[:superkingdom_name] %>",
         "nt_db": "<%= @attribute_dict[:nt_db] %>",
         "align_viz_files": <%= @attribute_dict[:align_viz_files].to_json %>
       }
