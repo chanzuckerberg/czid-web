@@ -2,10 +2,15 @@ import Dropzone from "react-dropzone";
 import PropTypes from "prop-types";
 import React from "react";
 import Icon from "../icons/Icon";
+import axios from "axios/index";
 
 class UploadBox extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      uploadRan: false
+    };
   }
 
   // Handle dropped files being rejected
@@ -15,11 +20,35 @@ class UploadBox extends React.Component {
     );
   };
 
+  uploadFileToURL = (file, url) => {
+    const config = {
+      onUploadProgress: e => {
+        const percent = Math.round(e.loaded * 100 / e.total);
+        this.setState({ uploadProgress: percent });
+      }
+    };
+    axios
+      .put(url, file, config)
+      .then(() => {
+        this.props.handleSuccess(file);
+      })
+      .catch(err => {
+        this.props.handleFailure(file, err);
+      });
+  };
+
   render() {
     let fileContent;
     let className = "idseq-ui upload-box";
     const fileToUpload = this.props.fileToUpload;
-    const uploadProgress = this.props.uploadProgress;
+    const uploadProgress = this.state.uploadProgress;
+
+    // Check and start upload
+    if (fileToUpload && this.props.startUpload && !this.state.uploadRan) {
+      this.setState({ uploadRan: true }, () =>
+        this.uploadFileToURL(this.props.fileToUpload, this.props.url)
+      );
+    }
 
     if (fileToUpload) {
       fileContent = (
@@ -65,8 +94,11 @@ class UploadBox extends React.Component {
 UploadBox.propTypes = {
   title: PropTypes.string,
   fileToUpload: PropTypes.object,
-  uploadProgress: PropTypes.number,
-  onDrop: PropTypes.func
+  url: PropTypes.string,
+  startUpload: PropTypes.bool,
+  onDrop: PropTypes.func,
+  handleSuccess: PropTypes.func,
+  handleFailure: PropTypes.func
 };
 
 export default UploadBox;

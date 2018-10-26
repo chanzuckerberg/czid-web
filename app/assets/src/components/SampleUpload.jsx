@@ -109,7 +109,8 @@ class SampleUpload extends React.Component {
       localUploadMode: false,
       localFilesToUpload: [],
       localFilesDoneUploading: [],
-      localUploadProgress: [0, 0]
+      localUploadShouldStart: false,
+      localFileUploadURLs: ["", ""]
     };
   }
 
@@ -613,46 +614,7 @@ class SampleUpload extends React.Component {
     }
   };
 
-  // Update local file upload progress for Read 0 or Read 1
-  updateUploadProgress = (pos, changed) => {
-    let percents;
-    if (pos === 0) {
-      percents = [changed, this.state.localUploadProgress[1]];
-    } else {
-      percents = [this.state.localUploadProgress[0], changed];
-    }
-    this.setState({
-      localUploadProgress: percents
-    });
-  };
-
-  // pos is for Read 0 or Read 1
-  uploadFileToURL = (file, url, pos) => {
-    const config = {
-      onUploadProgress: e => {
-        const percent = Math.round(e.loaded * 100 / e.total);
-        this.updateUploadProgress(pos, percent);
-      }
-    };
-    axios
-      .put(url, file, config)
-      .then(() => {
-        this.markAndCheckUploadCompletion(file);
-      })
-      .catch(e => {
-        this.setState({
-          submitting: false,
-          invalid: true,
-          errorMessage:
-            `Upload of ${
-              file.name
-            } failed for some reason. Please delete the created sample and try again or ask us our team for help. ` +
-            e
-        });
-      });
-  };
-
-  markAndCheckUploadCompletion = file => {
+  uploadBoxHandleSuccess = file => {
     this.setState({
       localFilesDoneUploading: this.state.localFilesDoneUploading.concat(file)
     });
@@ -690,20 +652,41 @@ class SampleUpload extends React.Component {
     }
   };
 
+  uploadBoxHandleFailure = (file, err) => {
+    this.setState({
+      submitting: false,
+      invalid: true,
+      errorMessage:
+        `Upload of ${
+          file.name
+        } failed for some reason. Please delete the created sample and try again or ask us our team for help. ` +
+        err
+    });
+  };
+
   // Upload local files after creating the sample and getting presigned URLs
   uploadLocalFiles = createResponse => {
     if (createResponse.length > 0) {
+      // Fill in presigned URL fields
+      let newURLs;
+      if (createResponse.length === 1) {
+        newURLs = [createResponse[0].presigned_url, ""];
+      } else {
+        newURLs = [
+          createResponse[0].presigned_url,
+          createResponse[1].presigned_url
+        ];
+      }
+
+      // Tell uploaders to start
       this.setState({
+        localFileUploadURLs: newURLs,
+        localUploadShouldStart: true,
         submitting: true,
         invalid: true,
         errorMessage:
           "Upload in progress... Please keep this page open until completed..."
       });
-
-      for (let i = 0; i < createResponse.length; i++) {
-        const url = createResponse[i].presigned_url;
-        this.uploadFileToURL(this.state.localFilesToUpload[i], url, i);
-      }
 
       // Chrome will show a generic message and not this message.
       window.onbeforeunload = () =>
@@ -844,6 +827,8 @@ class SampleUpload extends React.Component {
       );
     }
 
+    const toUpload = this.state.localFilesToUpload;
+
     const localInputFileSection = (
       <div className="field">
         <div className="validation-info">
@@ -854,14 +839,20 @@ class SampleUpload extends React.Component {
           <UploadBox
             onDrop={this.onDrop(0)}
             title={"Read 1 File:"}
-            fileToUpload={this.state.localFilesToUpload[0]}
-            uploadProgress={this.state.localUploadProgress[0]}
+            fileToUpload={toUpload.length > 0 ? toUpload[0] : null}
+            startUpload={this.state.localUploadShouldStart}
+            url={this.state.localFileUploadURLs[0]}
+            handleSuccess={this.uploadBoxHandleSuccess}
+            handleFailure={this.uploadBoxHandleFailure}
           />
           <UploadBox
             onDrop={this.onDrop(1)}
             title={"Read 2 File (optional):"}
-            fileToUpload={this.state.localFilesToUpload[1]}
-            uploadProgress={this.state.localUploadProgress[1]}
+            fileToUpload={toUpload.length > 1 ? toUpload[1] : null}
+            startUpload={this.state.localUploadShouldStart}
+            url={this.state.localFileUploadURLs[1]}
+            handleSuccess={this.uploadBoxHandleSuccess}
+            handleFailure={this.uploadBoxHandleFailure}
           />
         </div>
       </div>
