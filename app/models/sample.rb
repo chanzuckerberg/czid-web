@@ -205,20 +205,7 @@ class Sample < ApplicationRecord
     list_outputs(sample_input_s3_path)
   end
 
-  def adjust_extensions
-    input_files.each do |input_file|
-      # change extension to one allowed by the pipeline
-      basename = File.basename(input_file.source)
-      basename.sub!(/fq\z/, "fastq")
-      basename.sub!(/fq.gz\z/, "fastq.gz")
-      basename.sub!(/fa\z/, "fasta")
-      basename.sub!(/fa.gz\z/, "fasta.gz")
-      input_file.update(name: basename)
-    end
-  end
-
   def initiate_input_file_upload
-    adjust_extensions
     return unless input_files.first.source_type == InputFile::SOURCE_TYPE_S3
     Resque.enqueue(InitiateS3Cp, id)
   end
@@ -231,8 +218,6 @@ class Sample < ApplicationRecord
     input_files.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
-
-      input_file.name = input_file.name.sub(".fq", ".fastq")
 
       command = if fastq =~ /\.gz/
                   "aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
