@@ -7,8 +7,10 @@ import time
 import hashlib
 import random
 import threading
+import datetime
+import dateutil.parser
+from operator import itemgetter
 from functools import wraps
-
 
 # As opposed to "development", where different containers belong to different developers.
 MULTICONTAINER_ENVIRONMENTS = ["staging", "prod"]
@@ -23,6 +25,7 @@ SCALING_PERMISSION_TAG = "IDSeqEnvsThatCanScale"
 SCALING_METRIC_TAG_PREFIX = "IDSeqScalingData_"
 SCALING_METRIC_TAG_FORMAT = SCALING_METRIC_TAG_PREFIX + "{environment}"
 
+DRAINING_TAG = "draining"
 
 # A value recorded this many minutes earlier will be ignored
 EXPIRATION_PERIOD_MINUTES = 60
@@ -199,6 +202,32 @@ def set_desired_capacity(asg, compute_desired_instances, can_scale=True):
         if DEBUG:
             print cmd
         aws_command(cmd)
+        if num_desired < previous_desired:
+            start_draining(asg, previous_desired - num_desired)
+
+
+def instances_to_drain(asg, num_instances):
+    instance_ids = [item["InstanceId"] for item in asg["Instances"]]
+    cmd = f"aws ec2 describe-instances --instance-ids {' '.join(instance_ids)} --query 'Reservations[*].Instances[*].LaunchTime' --no-paginate --output text"
+    launch_times = [dateutil.parser.parse(datestring) for datestring in aws_command(cmd).splitlines()]
+    instance_ids_sorted_by_increasing_launch_time = [item[0] for item in sorted(zip(instance_ids, launch_times), key=itemgetter(1))]
+    return instance_ids_sorted_by_increasing_launch_time[:num_instances]
+
+
+def get_service_tag(instance_ids):
+    cmd = "aws ec2 describe-tags --filters "Name=resource-id,Values={' '.join(instance_ids)}"
+    tag_dict = json.loads(aws_command(cmd))
+    tags = [item['Value'] for item in tag_dict['Tags'] if item['Key'] == SERVICE_TAG]
+    unique_tags = list(set(tags))
+    assert len(unique_tags) == 1
+    return unique_tags[0]
+
+
+def start_draining(asg, num_instances):
+    instance_ids = instances_to_drain(asg, num_instances)
+    draining_since = datetime.datetime.now().isoformat()
+    cmd = f"aws ec2 create-tags --resources {' '.join(instance_ids)} --tags Key={DRAINING_TAG},Value={draining_since}"
+    aws_command(cmd)
 
 
 def count_running_batch_jobs():
@@ -285,8 +314,8 @@ def autoscaling_update(my_num_jobs, my_environment="development"):
         else:
             print "Deferring scaling decision to stay under the rate limit for 'aws batch list-jobs'."
     elif 1 <= num_real_jobs <= 6:
-        set_desired_capacity(gsnap_asg, at_least(8), can_scale)
-        set_desired_capacity(rapsearch2_asg, at_least(8), can_scale)
+        set_desired_capacity(gsnap_asg, exactly(8), can_scale)
+        set_desired_capacity(rapsearch2_asg, exactly(8), can_scale)
     else:
         set_desired_capacity(gsnap_asg, at_least(24), can_scale)
         set_desired_capacity(rapsearch2_asg, at_least(24), can_scale)
