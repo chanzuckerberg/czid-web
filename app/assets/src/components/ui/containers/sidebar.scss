@@ -1,0 +1,8 @@
+@import "~styles/themes/colors";
+
+.sidebar {
+  background-color: white;
+  // So the content doesn't overlap with the Header.
+  padding-top: 50px;
+  box-shadow: 0 0 25px $box-shadow-dark !important;
+}

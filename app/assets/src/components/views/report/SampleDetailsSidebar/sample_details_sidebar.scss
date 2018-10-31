@@ -1,0 +1,25 @@
+@import "~styles/typography";
+@import "~styles/themes/colors";
+
+.content {
+  margin: 40px 30px;
+  position: relative;
+}
+
+.title {
+  font-size: $font-size-h4;
+  font-weight: $font-weight-semibold;
+}
+
+.closeIcon {
+  position: absolute;
+  right: 0;
+  top: 0;
+  opacity: 0.3;
+  width: 20px;
+  height: 20px;
+
+  &:hover {
+    opacity: 1;
+  }
+}
