@@ -8,12 +8,6 @@ class Project < ApplicationRecord
   validates :name, presence: true, uniqueness: true
   include ReportHelper
 
-  def results_complete?
-    incomplete_runs = PipelineRun.where("id in (select max(id) from pipeline_runs group by sample_id) and sample_id in (select id from samples where project_id = #{id.to_i})").where("results_finalized != ? and job_status != ?", PipelineRun::FINALIZED_SUCCESS, PipelineRun::STATUS_CHECKED)
-    # Check for job_status is only for old runs. TODO: migrate old runs so check on job_status can be removed.
-    incomplete_runs.count.zero?
-  end
-
   def csv_dir(user_id)
     path = "/app/tmp/report_csvs/#{id}/#{user_id}"
     sanitize_path(path)
@@ -98,24 +92,6 @@ class Project < ApplicationRecord
     `cd #{user_csv_dir}; tar cvzf #{tar_filename} .`
     `aws s3 cp #{report_tar(user_id)} #{report_tar_s3(user_id)}`
     `rm -rf #{user_csv_dir}`
-  end
-
-  def project_background_name
-    "All '#{name}' samples"
-  end
-
-  def create_or_update_project_background
-    project_sample_ids = Sample.where(project_id: id)
-    project_pipeline_runs = Background.eligible_pipeline_runs.where(sample_id: project_sample_ids)
-    return if project_pipeline_runs.count < 2
-    project_background = Background.find_by(project_id: id)
-    unless project_background
-      project_background = Background.new
-      project_background.project_id = id
-    end
-    project_background.name = project_background_name
-    project_background.pipeline_runs = project_pipeline_runs
-    project_background.save
   end
 
   def self.editable(user)
