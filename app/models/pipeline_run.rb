@@ -271,7 +271,8 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_ready?
-    output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED
+    os = output_states.find_by(output: REPORT_READY_OUTPUT)
+    !os.nil? && os.state == STATUS_LOADED
   end
 
   def report_failed?
