@@ -962,20 +962,6 @@ class PipelineRun < ApplicationRecord
 
   delegate :project_id, to: :sample
 
-  def notify_users
-    project = Project.find(project_id)
-    number_samples = Sample.where(project_id: project_id).count
-    project_name = project.name
-    user_emails = project.users.map(&:email)
-    user_emails.each do |user_email|
-      email_arguments = { user_email: user_email,
-                          project_name: project_name,
-                          project_id: project_id,
-                          number_samples: number_samples }
-      UserMailer.project_complete_email(email_arguments).deliver_now
-    end
-  end
-
   def compare_ercc_counts
     return nil if ercc_counts.empty?
     ercc_counts_by_name = Hash[ercc_counts.map { |a| [a.name, a] }]
