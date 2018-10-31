@@ -3,7 +3,9 @@ import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
-import { Divider, Dropdown } from "semantic-ui-react";
+import cx from "classnames";
+import { Divider, Dropdown, Popup } from "semantic-ui-react";
+import BareDropdown from "./ui/controls/dropdowns/BareDropdown";
 import DownloadButton from "./ui/controls/buttons/DownloadButton";
 import numberWithCommas from "../helpers/strings";
 import SubHeader from "./SubHeader";
@@ -13,6 +15,7 @@ import AMRView from "./AMRView";
 import BasicPopup from "./BasicPopup";
 import { SAMPLE_FIELDS } from "./utils/SampleFields";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
+import cs from "./pipeline_sample_reads.scss";
 
 class PipelineSampleReads extends React.Component {
   constructor(props) {
@@ -787,39 +790,38 @@ class PipelineSampleReads extends React.Component {
       </div>
     );
 
-    let sample_dropdown = "";
+    let sampleDropdown = null;
     if (this.sample_map && Object.keys(this.sample_map).length > 1) {
-      sample_dropdown = (
-        <div
-          className="dropdown-button sample-select-dropdown"
-          data-activates="sample-list"
+      sampleDropdown = (
+        <BareDropdown
+          trigger={
+            <span className={cx(cs.sampleName, cs.trigger)}>
+              {this.state.sample_name}
+            </span>
+          }
+          className={cs.sampleDropdown}
+          floating
         >
-          <div className="sample-name-label">{this.state.sample_name}</div>
-          <div className="dropdown-button-arrow">
-            <i className="fa fa-chevron-down" />
-          </div>
-
-          <ul
-            id="sample-list"
-            className="dropdown-content sample-dropdown-content"
-          >
-            {Object.keys(this.sample_map).map((sample_id, i) => {
-              if (parseInt(sample_id) !== parseInt(this.sampleId)) {
+          <BareDropdown.Menu>
+            {Object.keys(this.sample_map).map(sampleId => {
+              if (parseInt(sampleId) !== parseInt(this.sampleId)) {
                 return (
-                  <li key={i}>
-                    <a href={`/samples/${sample_id}`}>
-                      {this.sample_map[sample_id]}
-                    </a>
-                  </li>
+                  <BareDropdown.Item
+                    onClick={() => window.open(`/samples/${sampleId}`, "_self")}
+                  >
+                    {this.sample_map[sampleId]}
+                  </BareDropdown.Item>
                 );
               }
             })}
-          </ul>
-        </div>
+          </BareDropdown.Menu>
+        </BareDropdown>
       );
     } else {
-      sample_dropdown = (
-        <span className="sample-name-label">{this.state.sample_name}</span>
+      sampleDropdown = (
+        <div className={cx(cs.sampleName, cs.label)}>
+          {this.state.sample_name}
+        </div>
       );
     }
 
@@ -861,19 +863,16 @@ class PipelineSampleReads extends React.Component {
     let report_buttons = null;
     if (this.reportPresent) {
       report_buttons = (
-        <div className="col no-padding s2 right-align">
-          <div className="report-action-buttons">
-            <DownloadButton onClick={this.downloadCSV} />
-          </div>
-        </div>
+        <Popup
+          trigger={<DownloadButton onClick={this.downloadCSV} />}
+          content="Download Table as CSV"
+          inverted
+          on="hover"
+        />
       );
     } else if (this.sampleInfo.status === "created" || !this.reportPresent) {
       report_buttons = (
-        <div className="col no-padding s2 right-align">
-          <div className="report-action-buttons">
-            <PrimaryButton onClick={this.deleteSample} text="Delete Sample" />
-          </div>
-        </div>
+        <PrimaryButton onClick={this.deleteSample} text="Delete Sample" />
       );
     }
 
@@ -894,20 +893,24 @@ class PipelineSampleReads extends React.Component {
     return (
       <div>
         <SubHeader>
-          <div className="sub-header">
-            <div className="title">
+          <div className={cs.pipelineSampleReadsSubheader}>
+            <div className={cs.pipelineInfo}>
               PIPELINE {version_display} {pipeline_version_blurb}
             </div>
-            <div className="row">
-              <div className="sub-title col s10">
-                <div className="project-name">
-                  <a href={`/home?project_id=${this.projectInfo.id}`}>
-                    {this.projectInfo.name + " "}
+            <div className={cs.topRow}>
+              <div className={cs.breadcrumbs}>
+                <div className={cs.projectName}>
+                  <a
+                    href={`/home?project_id=${this.projectInfo.id}`}
+                    className={cs.hover}
+                  >
+                    {this.projectInfo.name}
                   </a>
+                  <span className={cs.rightArrow}>{">"}</span>
                 </div>
-                <div className="separator">{">"}</div>
-                <div className="sample-dropdown">{sample_dropdown}</div>
+                {sampleDropdown}
               </div>
+              <div className={cs.fill} />
               {report_buttons}
             </div>
 
