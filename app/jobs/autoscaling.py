@@ -26,6 +26,7 @@ SCALING_METRIC_TAG_PREFIX = "IDSeqScalingData_"
 SCALING_METRIC_TAG_FORMAT = SCALING_METRIC_TAG_PREFIX + "{environment}"
 
 DRAINING_TAG = "draining"
+MAX_REFRESH_INTERVAL = 900  # This must be the same as MAX_INTERVAL_BETWEEN_DESCRIBE_INSTANCES in idseq-dag. After this interval, we are sure we are safe from race conditions related to batch jobs dispatching gsnap/rapsearch jobs.
 
 # A value recorded this many minutes earlier will be ignored
 EXPIRATION_PERIOD_MINUTES = 60
@@ -206,28 +207,56 @@ def set_desired_capacity(asg, compute_desired_instances, can_scale=True):
             start_draining(asg, previous_desired - num_desired)
 
 
+def instances_in(asg):
+    return [item["InstanceId"] for item in asg["Instances"]]
+
+
 def instances_to_drain(asg, num_instances):
-    instance_ids = [item["InstanceId"] for item in asg["Instances"]]
+    instance_ids = instances_in(asg)
     cmd = f"aws ec2 describe-instances --instance-ids {' '.join(instance_ids)} --query 'Reservations[*].Instances[*].LaunchTime' --no-paginate --output text"
     launch_times = [dateutil.parser.parse(datestring) for datestring in aws_command(cmd).splitlines()]
     instance_ids_sorted_by_increasing_launch_time = [item[0] for item in sorted(zip(instance_ids, launch_times), key=itemgetter(1))]
     return instance_ids_sorted_by_increasing_launch_time[:num_instances]
 
 
-def get_service_tag(instance_ids):
-    cmd = "aws ec2 describe-tags --filters "Name=resource-id,Values={' '.join(instance_ids)}"
-    tag_dict = json.loads(aws_command(cmd))
-    tags = [item['Value'] for item in tag_dict['Tags'] if item['Key'] == SERVICE_TAG]
-    unique_tags = list(set(tags))
-    assert len(unique_tags) == 1
-    return unique_tags[0]
+def iso_time_now():
+    return datetime.datetime.now().isoformat()
 
 
 def start_draining(asg, num_instances):
     instance_ids = instances_to_drain(asg, num_instances)
-    draining_since = datetime.datetime.now().isoformat()
-    cmd = f"aws ec2 create-tags --resources {' '.join(instance_ids)} --tags Key={DRAINING_TAG},Value={draining_since}"
+    cmd = f"aws ec2 create-tags --resources {' '.join(instance_ids)} --tags Key={DRAINING_TAG},Value={iso_time_now()}"
     aws_command(cmd)
+
+
+def get_draining_servers(asg):
+    ''' returns a map of draining instance IDs to the time they started draining '''
+    instance_ids = ','.join(instances_in(asg))
+    cmd = f"aws ec2 describe-tags --filters 'Name=tag-key,Values={DRAINING_TAG}' 'Name=resource-id,Values={instance_ids}'"
+    filtered_tag_dict = json.loads(aws_command(cmd))
+    instance_dict = { item['ResourceId']: dateutil.parser.parse(item['Value']) for item in tag_dict['Tags'] if item['Key'] == DRAINING_TAG }
+    return instance_dict
+
+
+def count_running_jobs(instance_id):
+    ### TBD
+
+
+def remove_termination_protection(instance_ids):
+    ### TBD
+
+
+def check_draining_servers(asg):
+    drain_date_by_instance_id = get_draining_servers(asg)
+    instance_ids_to_terminate = []
+    current_timestamp = iso_time_now()
+    for id, drain_date in drain_date_by_instance_id:
+        draining_interval = current_timestamp - drain_date
+        num_jobs = count_running_jobs(id)
+        if num_jobs == 0 and draining_interval > MAX_REFRESH_INTERVAL:
+            instance_ids_to_terminate.append(id)
+    remove_termination_protection(instance_ids_to_terminate)
+    # Note: what if we've scaled up again. Draining instances will never be killed.
 
 
 def count_running_batch_jobs():
@@ -289,6 +318,8 @@ def autoscaling_update(my_num_jobs, my_environment="development"):
         # when debugging is disabled and we can't scale we exit early here
         if not DEBUG:
             return
+    check_draining_servers(gsnap_asg)
+    check_draining_servers(rapsearch2_asg)
     if num_real_jobs == 0 and num_development_jobs == 0:
         set_desired_capacity(gsnap_asg, exactly(0), can_scale)
         set_desired_capacity(rapsearch2_asg, exactly(0), can_scale)
