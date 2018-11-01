@@ -201,7 +201,7 @@ class SamplesController < ApplicationController
     align_summary_file = @pipeline_run ? "#{@pipeline_run.alignment_viz_output_s3_path}.summary" : nil
     @align_viz = true if align_summary_file && get_s3_file(align_summary_file)
 
-    background_id = check_background_id(@sample)
+    background_id = get_background_id(@sample)
     @report_page_params = { pipeline_version: @pipeline_version, background_id: background_id } if background_id
     @report_page_params[:scoring_model] = params[:scoring_model] if params[:scoring_model]
     if @pipeline_run && (((@pipeline_run.adjusted_remaining_reads.to_i > 0 || @pipeline_run.results_finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
@@ -277,7 +277,7 @@ class SamplesController < ApplicationController
     ## TODO(yf): clean the following up.
     ####################################################
     if @pipeline_run && (((@pipeline_run.adjusted_remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
-      background_id = check_background_id(@sample)
+      background_id = get_background_id(@sample)
       pipeline_run_id = @pipeline_run.id
     end
 
@@ -615,7 +615,7 @@ class SamplesController < ApplicationController
     return {} if samples.empty?
 
     first_sample = samples.first
-    background_id = params[:background] ? params[:background].to_i : check_background_id(first_sample)
+    background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
     taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id") if taxon_ids.empty?
 
     return {} if taxon_ids.empty?
@@ -636,14 +636,14 @@ class SamplesController < ApplicationController
     render json: taxon_confirmation_map(@sample.id, current_user.id)
   end
 
-  def check_background_id(sample)
-    background_id = params[:background_id] || sample.default_background_id
-    viewable_background_ids = current_power.backgrounds.pluck(:id)
-    if viewable_background_ids.include?(background_id.to_i)
-      return background_id
-    else
-      raise "Not allowed to view background"
+  def get_background_id(sample)
+    if params[:background_id]
+      viewable_background_ids = current_power.backgrounds.pluck(:id)
+      if viewable_background_ids.include?(params[:background_id].to_i)
+        return params[:background_id]
+      end
     end
+    sample.default_background_id
   end
 
   def set_sample
