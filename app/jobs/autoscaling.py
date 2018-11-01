@@ -25,11 +25,15 @@ SCALING_PERMISSION_TAG = "IDSeqEnvsThatCanScale"
 SCALING_METRIC_TAG_PREFIX = "IDSeqScalingData_"
 SCALING_METRIC_TAG_FORMAT = SCALING_METRIC_TAG_PREFIX + "{environment}"
 
-DRAINING_TAG = "draining"
-MAX_REFRESH_INTERVAL = 900  # This must be the same as MAX_INTERVAL_BETWEEN_DESCRIBE_INSTANCES in idseq-dag. After this interval, we are sure we are safe from race conditions related to batch jobs dispatching gsnap/rapsearch jobs.
-
 # A value recorded this many minutes earlier will be ignored
 EXPIRATION_PERIOD_MINUTES = 60
+
+DRAINING_TAG = "draining"
+
+# This must be the same as MAX_INTERVAL_BETWEEN_DESCRIBE_INSTANCES in idseq-dag. After this interval, we are sure we are safe from race conditions related to batch jobs dispatching gsnap/rapsearch jobs.
+MAX_REFRESH_INTERVAL = 900
+
+JOB_TAG_PREFIX = "RunningIDseqBatchJob_"
 
 
 DEBUG = False
@@ -208,6 +212,7 @@ def set_desired_capacity(asg, compute_desired_instances, can_scale=True):
             stop_draining(asg, num_desired - previous_desired)
         aws_command(cmd)
 
+
 def instances_in(asg):
     return [item["InstanceId"] for item in asg["Instances"]]
 
@@ -267,17 +272,31 @@ def get_draining_servers(asg):
     return instance_dict
 
 
-def count_running_jobs(instance_id):
-    ### TBD
+def count_running_alignment_jobs(asg):
+    ''' returns a map of instance IDs to number of jobs running on the instance '''
+    instance_ids = instances_in(asg)
+    cmd = "aws ec2 describe-tags --filters 'Name=resource-id,Values={list_instances}'"
+    cmd = cmd.format(list_instances=','.join(instance_ids))
+    tag_dict = json.loads(aws_command(cmd))
+    count_dict = { id: 0 for id in instance_ids}
+    for item in tag_dict['Tags']:
+        if item['Key'].startswith(JOB_TAG_PREFIX):
+            instance_id = item['ResourceId']
+            count_dict[instance_id] += 1
+    return count_dict
 
 
 def remove_termination_protection(instance_ids, asg):
+    if not instance_ids:
+        return
     cmd = "aws autoscaling set-instance-protection --instance-ids {list_instances} --auto-scaling-group-name {asg_name} --no-protected-from-scale-in"
     cmd = cmd.format(list_instances=' '.join(instance_ids), asg_name=asg['AutoScalingGroupName'])
     aws_command(cmd)
 
 
 def add_termination_protection(instance_ids, asg):
+    if not instance_ids:
+        return
     cmd = "aws autoscaling set-instance-protection --instance-ids {list_instances} --auto-scaling-group-name {asg_name} --protected-from-scale-in"
     cmd = cmd.format(list_instances=' '.join(instance_ids), asg_name=asg['AutoScalingGroupName'])
     aws_command(cmd)
@@ -285,11 +304,12 @@ def add_termination_protection(instance_ids, asg):
 
 def check_draining_servers(asg, can_scale):
     drain_date_by_instance_id = get_draining_servers(asg)
+    num_jobs_by_instance_id = count_running_alignment_jobs(asg)
     instance_ids_to_terminate = []
     current_timestamp = iso_time_now()
     for id, drain_date in drain_date_by_instance_id:
         draining_interval = current_timestamp - drain_date
-        num_jobs = count_running_jobs(id)
+        num_jobs = num_jobs_by_instance_id[id]
         if num_jobs == 0 and draining_interval > MAX_REFRESH_INTERVAL:
             instance_ids_to_terminate.append(id)
     print "Instances {list_instances} are ready to be terminated".format(list_instances=' '.join(instance_ids))
