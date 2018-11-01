@@ -28,15 +28,17 @@ SCALING_METRIC_TAG_FORMAT = SCALING_METRIC_TAG_PREFIX + "{environment}"
 # A value recorded this many minutes earlier will be ignored
 EXPIRATION_PERIOD_MINUTES = 60
 
-DRAINING_TAG = "draining"
-
-# This must be the same as MAX_INTERVAL_BETWEEN_DESCRIBE_INSTANCES in idseq-dag. After this interval, we are sure we are safe from race conditions related to batch jobs dispatching gsnap/rapsearch jobs.
-MAX_REFRESH_INTERVAL = 900
-
-JOB_TAG_PREFIX = "RunningIDseqBatchJob_"
-
-
 DEBUG = False
+
+
+## constants specific to draining / safe scale-down:
+DRAINING_TAG = "draining"
+MAX_REFRESH_INTERVAL = 900
+# MAX_REFRESH_INTERVAL must be the same as MAX_INTERVAL_BETWEEN_DESCRIBE_INSTANCES in idseq-dag.
+# After this interval, we are sure we are safe from race conditions related to batch jobs dispatching gsnap/rapsearch jobs.
+JOB_TAG_PREFIX = "RunningIDseqBatchJob_"
+ALIGNMENT_JOB_EXPIRATION_SECONDS = 120 * 60
+
 
 
 def retry(operation, randgen=random.Random().random):
@@ -228,9 +230,7 @@ def add_draining_tag(instance_ids):
 
 
 def remove_draining_tag(instance_ids):
-    cmd = "aws ec2 delete-tags --resources {list_instances} --tags Key={draining_tag},Value="
-    cmd = cmd.format(list_instances=' '.join(instance_ids), draining_tag=DRAINING_TAG)
-    aws_command(cmd)
+    delete_tags_from_instances(instance_ids, [DRAINING_TAG])
 
 
 def start_draining(asg, num_instances):
@@ -279,12 +279,25 @@ def count_running_alignment_jobs(asg):
     cmd = cmd.format(list_instances=','.join(instance_ids))
     tag_dict = json.loads(aws_command(cmd))
     count_dict = { id: 0 for id in instance_ids}
+    expired_jobs = []
     for item in tag_dict['Tags']:
         if item['Key'].startswith(JOB_TAG_PREFIX):
+            job_tag = item['Key']
             instance_id = item['ResourceId']
-            count_dict[instance_id] += 1
+            unixtime = int(item['Value'])
+            if time.time() - unixtime < ALIGNMENT_JOB_EXPIRATION_SECONDS:
+                count_dict[instance_id] += 1
+            else:
+                expired_jobs.append(job_tag)
+    delete_tags_from_instances(instance_ids, expired_jobs)
     return count_dict
 
+
+def delete_tags_from_instances(instance_ids, tag_keys):
+    cmd = "aws ec2 delete-tags --resources {list_instances} --tags {list_tags}"
+    cmd = cmd.format(list_instances=' '.join(instance_ids), list_tags=' '.join(['Key='+tag for tag in tag_keys]))
+    aws_command(cmd)
+   
 
 def remove_termination_protection(instance_ids, asg):
     if not instance_ids:
