@@ -72,6 +72,35 @@ class Metadatum < ApplicationRecord
     :known_organisms => "known_organism"
   }.freeze
 
+  KEY_TO_DISPLAY_NAME = {
+    unique_id: "Sample Unique ID",
+    sample_type: "Sample Type",
+    nucleotide_type: "Nucleotide Type",
+    collection_date: "Sample Collection Date",
+    collection_location: "Sample Collection Location",
+    collected_by: "Collected By",
+    age: "Age",
+    gender: "Gender",
+    race: "Race",
+    primary_diagnosis: "Primary Diagnosis",
+    antibiotic_administered: "Antibiotic Administered",
+    admission_date: "Admission Date",
+    admission_type: "Admission Type",
+    discharge_date: "Discharge Date",
+    discharge_type: "Discharge Type",
+    immunocomp: "Immunocomp",
+    other_infections: "Other Infections",
+    comorbidity: "Comorbidity",
+    known_organism: "Known Organism",
+    infection_class: "Infection Class",
+    detection_method: "Detection Method",
+    library_prep: "Library Prep",
+    sequencer: "Sequencer",
+    rna_dna_input: "RNA / DNA Input (ng)",
+    library_prep_batch: "Library Prep Batch",
+    extraction_batch: "Extraction Batch"
+  }.freeze
+
   # Custom validator called on save or update. Writes to the *_validated_value column.
   def set_validated_values
     # Check if the key is valid
@@ -262,5 +291,14 @@ class Metadatum < ApplicationRecord
     # *_validated_value field is set in the set_validated_values validator.
     m.sample = sample
     m
+  end
+
+  def self.convert_type_to_string(type)
+    if type == STRING_TYPE
+      return "string"
+    elsif type == NUMBER_TYPE
+      return "number"
+    end
+    ""
   end
 end

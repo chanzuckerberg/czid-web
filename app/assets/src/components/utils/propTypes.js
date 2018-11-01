@@ -33,7 +33,7 @@ const Taxon = PropTypes.shape({
   topScoring: PropTypes.number
 });
 
-// TODO(mark): Complete signature.
+// TODO(mark): Complete signature as more fields of ReportDetails are used in the app.
 const ReportDetails = PropTypes.shape({
   taxon_fasta_flag: PropTypes.bool.isRequired
 });
@@ -43,9 +43,15 @@ const BackgroundData = PropTypes.shape({
   name: PropTypes.string
 });
 
+// TODO(mark): Complete signature as more fields of Sample are used in the app.
+const Sample = PropTypes.shape({
+  id: PropTypes.number.isRequired
+});
+
 export default {
   ReportDetails,
   Taxon,
   BackgroundData,
+  Sample,
   ...PropTypes
 };

@@ -838,7 +838,6 @@ class PipelineSampleReads extends React.Component {
         <AMRView amr={this.amr} />
       </div>
     ) : null;
-
     return (
       <div>
         <ViewHeader className={cs.viewHeader}>
@@ -860,14 +859,16 @@ class PipelineSampleReads extends React.Component {
                 onClick: () => window.open(`/samples/${sampleId}`, "_self")
               }))}
             />
-            <div className={cs.sampleDetailsLinkContainer}>
-              <span
-                className={cs.sampleDetailsLink}
-                onClick={this.toggleSampleDetailsSidebar}
-              >
-                Sample Details
-              </span>
-            </div>
+            {this.props.admin && (
+              <div className={cs.sampleDetailsLinkContainer}>
+                <span
+                  className={cs.sampleDetailsLink}
+                  onClick={this.toggleSampleDetailsSidebar}
+                >
+                  Sample Details
+                </span>
+              </div>
+            )}
           </ViewHeader.Content>
           <ViewHeader.Controls>{report_buttons}</ViewHeader.Controls>
         </ViewHeader>
@@ -1016,10 +1017,13 @@ class PipelineSampleReads extends React.Component {
         >
           {d_report}
         </div>
-        <SampleDetailsSidebar
-          visible={this.state.sampleDetailsSidebarVisible}
-          onClose={this.toggleSampleDetailsSidebar}
-        />
+        {this.props.admin && (
+          <SampleDetailsSidebar
+            visible={this.state.sampleDetailsSidebarVisible}
+            onClose={this.toggleSampleDetailsSidebar}
+            sample={this.props.sampleInfo}
+          />
+        )}
       </div>
     );
   }

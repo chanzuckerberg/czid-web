@@ -1,7 +1,7 @@
 <div id="PipelineSampleReads_page">
   <%= javascript_tag do %>
     react_component('PipelineSampleReads', {
-      admin: '<%= current_user.admin ? 1 : 0 %>',
+      admin: '<%= current_user.admin ? 1 : 0 %>' === '1',
       allowedFeatures: JSON.parse('<%= raw escape_json(current_user.allowed_feature_list) %>'),
       csrf: '<%=form_authenticity_token %>',
       gitVersion: '<%=@git_version %>',

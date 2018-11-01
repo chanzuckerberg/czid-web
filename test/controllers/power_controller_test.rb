@@ -45,6 +45,14 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert @joe_sample.sample_tissue == 'bone'
   end
 
+  test 'joe can update sample to joe_project v2' do
+    @joe_sample = samples(:joe_sample)
+    post "#{save_metadata_v2_sample_url(@joe_sample)}.json", params: { field: "sample_type", value: "bone" }
+    assert_response :success
+    @joe_sample.reload
+    assert @joe_sample.metadata.find_by(key: "sample_type").text_validated_value == 'bone'
+  end
+
   test 'joe can see samples in joe_project' do
     @joe_project = projects(:joe_project)
     get "/samples.json?project_id=#{@joe_project.id}"

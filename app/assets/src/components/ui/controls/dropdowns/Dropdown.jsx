@@ -1,11 +1,11 @@
 import React from "react";
 import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 
 class Dropdown extends React.Component {
   constructor(props) {
     super(props);
-    this.onChange = this.props.onChange;
     this.state = {
       value:
         this.props.value ||
@@ -25,7 +25,7 @@ class Dropdown extends React.Component {
 
   handleOnChange(e, d) {
     this.setState({ value: d.value });
-    this.onChange(e, d);
+    this.props.onChange(d.value);
   }
 
   renderText() {
@@ -47,7 +47,7 @@ class Dropdown extends React.Component {
         options={this.props.options}
         value={this.state.value}
         floating
-        className="idseq-ui"
+        className={cx("idseq-ui", this.props.rounded && "rounded")}
         onChange={this.handleOnChange.bind(this)}
         trigger={this.renderText()}
       />
@@ -58,6 +58,7 @@ class Dropdown extends React.Component {
 Dropdown.propTypes = {
   disabled: PropTypes.bool,
   fluid: PropTypes.bool,
+  rounded: PropTypes.bool,
   label: PropTypes.string,
   options: PropTypes.arrayOf(
     PropTypes.shape({
