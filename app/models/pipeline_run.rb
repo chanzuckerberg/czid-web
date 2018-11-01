@@ -477,15 +477,6 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def handle_success
-    # Check if this was the last run in a project and act accordingly:
-    if sample.project.results_complete?
-      # Ony send the project success email on the first pipeline run
-      notify_users if sample.pipeline_runs.count == 1
-      sample.project.create_or_update_project_background if sample.project.background_flag == 1
-    end
-  end
-
   def load_stats_file
     stats_s3 = "#{output_s3_path_with_version}/#{STATS_JSON_NAME}"
     # TODO: Remove the datetime check?
@@ -533,7 +524,6 @@ class PipelineRun < ApplicationRecord
     if all_output_states_terminal?
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
-        handle_success
       else
         update(results_finalized: FINALIZED_FAIL)
       end
@@ -972,20 +962,6 @@ class PipelineRun < ApplicationRecord
   end
 
   delegate :project_id, to: :sample
-
-  def notify_users
-    project = Project.find(project_id)
-    number_samples = Sample.where(project_id: project_id).count
-    project_name = project.name
-    user_emails = project.users.map(&:email)
-    user_emails.each do |user_email|
-      email_arguments = { user_email: user_email,
-                          project_name: project_name,
-                          project_id: project_id,
-                          number_samples: number_samples }
-      UserMailer.project_complete_email(email_arguments).deliver_now
-    end
-  end
 
   def compare_ercc_counts
     return nil if ercc_counts.empty?
