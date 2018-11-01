@@ -16,16 +16,11 @@ class MetadataEditor extends React.Component {
       }));
       return (
         <Dropdown
-          className="idseq-ui threshold inner-dropdown"
-          placeholder="Metric"
           fluid
           floating
           scrolling
           options={options}
-          onChange={val => {
-            onMetadataChange(metadataType.key, val);
-            onMetadataSave(metadataType.key);
-          }}
+          onChange={val => onMetadataChange(metadataType.key, val, true)}
           value={metadata[metadataType.key]}
         />
       );

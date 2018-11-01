@@ -42,22 +42,23 @@ class SampleDetailsSidebar extends React.Component {
     });
   }
 
-  onMetadataChange = (key, value) => {
+  onMetadataChange = (key, value, shouldSave) => {
     this.setState({
       metadata: {
         ...this.state.metadata,
         [key]: value
       }
     });
+
+    if (shouldSave) {
+      this._saveHelper(key, value);
+    }
   };
 
-  onMetadataSave = async key => {
-    await saveSampleMetadata(
-      this.props.sample.id,
-      key,
-      this.state.metadata[key]
-    );
-  };
+  onMetadataSave = key => this._saveHelper(key, this.state.metadata[key]);
+
+  _saveHelper = (key, value) =>
+    saveSampleMetadata(this.props.sample.id, key, value);
 
   render() {
     const { visible } = this.props;

@@ -7,9 +7,7 @@ class Dropdown extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      value:
-        this.props.value ||
-        (this.props.options.length ? this.props.options[0].value : null)
+      value: this.props.value !== undefined ? this.props.value : null
     };
     this.labels = this.props.options.reduce((labelMap, option) => {
       labelMap[option.value.toString()] = option.text;
@@ -25,7 +23,7 @@ class Dropdown extends React.Component {
 
   handleOnChange(e, d) {
     this.setState({ value: d.value });
-    this.props.onChange(d.value);
+    this.props.onChange(d.value, this.labels[d.value]);
   }
 
   renderText() {
@@ -42,6 +40,8 @@ class Dropdown extends React.Component {
   render() {
     return (
       <BaseDropdown
+        placeholder={this.props.placeholder}
+        scrolling={this.props.scrolling}
         disabled={this.props.disabled}
         fluid={this.props.fluid}
         options={this.props.options}
@@ -50,13 +50,16 @@ class Dropdown extends React.Component {
         className={cx("idseq-ui", this.props.rounded && "rounded")}
         onChange={this.handleOnChange.bind(this)}
         trigger={this.renderText()}
+        selectOnBlur={false}
       />
     );
   }
 }
 
 Dropdown.propTypes = {
+  placeholder: PropTypes.string,
   disabled: PropTypes.bool,
+  scrolling: PropTypes.bool,
   fluid: PropTypes.bool,
   rounded: PropTypes.bool,
   label: PropTypes.string,
