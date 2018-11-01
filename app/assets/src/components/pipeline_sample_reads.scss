@@ -21,16 +21,26 @@
   }
 
   .breadcrumbs {
-    .projectName {
+    margin-right: 20px;
+
+    .projectNameContainer {
       font-size: $font-size-body;
       color: $medium-grey;
       font-weight: $font-weight-semibold;
       letter-spacing: 0.5px;
       margin-bottom: 8px;
+      display: flex;
 
-      .hover:hover {
-        /* Overwrite header.scss */
-        color: $primary-light !important;
+      .projectName {
+        max-width: 600px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+
+        &:hover {
+          /* Overwrite header.scss */
+          color: $primary-light !important;
+        }
       }
     }
 
@@ -47,6 +57,8 @@
       font-weight: $font-weight-semibold;
       letter-spacing: 1px;
       font-size: $font-size-h3;
+      word-break: break-all;
+      line-height: $line-height-h3;
     }
 
     .trigger {
@@ -57,5 +69,9 @@
         color: $primary-light;
       }
     }
+  }
+
+  .reportButton {
+    flex-shrink: 0;
   }
 }

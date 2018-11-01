@@ -36,7 +36,7 @@ class PipelineRun < ApplicationRecord
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
-  REFINED_TAXON_COUNTS_JSON_NAME = 'reclassify/refined_taxon_counts.json'.freeze
+  REFINED_TAXON_COUNTS_JSON_NAME = 'assembly/refined_taxon_counts.json'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
@@ -271,7 +271,8 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_ready?
-    output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED
+    os = output_states.find_by(output: REPORT_READY_OUTPUT)
+    !os.nil? && os.state == STATUS_LOADED
   end
 
   def report_failed?
