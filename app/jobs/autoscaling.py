@@ -55,7 +55,7 @@ def retry(operation, randgen=random.Random().random):
 
 
 @retry
-oef aws_command(command_str):
+def aws_command(command_str):
     return subprocess.check_output(command_str.split())
 
 
@@ -202,11 +202,11 @@ def set_desired_capacity(asg, compute_desired_instances, can_scale=True):
     if can_scale:
         if DEBUG:
             print cmd
-        aws_command(cmd)
         if num_desired < previous_desired:
             start_draining(asg, previous_desired - num_desired)
         elif num_desired > previous_desired:
             stop_draining(asg, num_desired - previous_desired)
+        aws_command(cmd)
 
 def instances_in(asg):
     return [item["InstanceId"] for item in asg["Instances"]]
