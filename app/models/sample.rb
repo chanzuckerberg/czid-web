@@ -25,9 +25,7 @@ class Sample < ApplicationRecord
   LOG_BASENAME = 'log.txt'.freeze
 
   LOCAL_INPUT_PART_PATH = '/app/tmp/input_parts'.freeze
-  RECLASSIFY_DIR = 'reclassify'.freeze
-  ASSEMBLED_NT_DIR = 'assembled_nt'.freeze
-  ASSEMBLED_NR_DIR = 'assembled_nr'.freeze
+  ASSEMBLY_DIR = 'assembly'.freeze
 
   # TODO: Make all these params configurable without code change
   DEFAULT_STORAGE_IN_GB = 500
@@ -190,9 +188,7 @@ class Sample < ApplicationRecord
     if pr.pipeline_version.to_f >= 2.0
       file_list = list_outputs(pr.output_s3_path_with_version)
       file_list += list_outputs(sample_output_s3_path)
-      file_list += list_outputs(pr.postprocess_output_s3_path + '/' + RECLASSIFY_DIR)
-      file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLED_NT_DIR, 3, nil)
-      file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLED_NR_DIR, 3, nil)
+      file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLY_DIR, 2)
     else
       stage1_files = list_outputs(pr.host_filter_output_s3_path)
       stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
@@ -205,20 +201,7 @@ class Sample < ApplicationRecord
     list_outputs(sample_input_s3_path)
   end
 
-  def adjust_extensions
-    input_files.each do |input_file|
-      # change extension to one allowed by the pipeline
-      basename = File.basename(input_file.source)
-      basename.sub!(/fq\z/, "fastq")
-      basename.sub!(/fq.gz\z/, "fastq.gz")
-      basename.sub!(/fa\z/, "fasta")
-      basename.sub!(/fa.gz\z/, "fasta.gz")
-      input_file.update(name: basename)
-    end
-  end
-
   def initiate_input_file_upload
-    adjust_extensions
     return unless input_files.first.source_type == InputFile::SOURCE_TYPE_S3
     Resque.enqueue(InitiateS3Cp, id)
   end
@@ -231,8 +214,6 @@ class Sample < ApplicationRecord
     input_files.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
-
-      input_file.name = input_file.name.sub(".fq", ".fastq")
 
       command = if fastq =~ /\.gz/
                   "aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
