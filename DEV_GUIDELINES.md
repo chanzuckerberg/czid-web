@@ -140,10 +140,3 @@ D3 code should be created in plain JS (no JSX) and should be placed in separate 
 ### _JSON_
 
 * Use camelCase for properties in JSON object (even if writing in Ruby).
-
-* * *
-
-## Other Topics
-
-WIP
-* * *
