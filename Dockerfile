@@ -33,14 +33,11 @@ WORKDIR /app
 COPY Gemfile Gemfile.lock ./
 RUN gem install bundler && bundle install --jobs 20 --retry 5
 
-RUN npm update -g
-
 # Copy the main application.
 COPY . ./
 
 RUN yarn install
-RUN npm rebuild node-sass
-RUN mkdir -p app/assets/dist &&  npm run build-img && ls -l app/assets/dist/
+RUN mkdir -p app/assets/dist && yarn run build-img && ls -l app/assets/dist/
 
 ARG GIT_COMMIT
 ENV GIT_VERSION ${GIT_COMMIT}
