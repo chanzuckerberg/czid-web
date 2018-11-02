@@ -1,14 +1,7 @@
 # IDSeq Frontend Development Guidelines 
 
-This goal of this document is to present a set of guidelines, conventions and best practices to develop frontend code for ID Seq. It is an ongoing effort as opposed to a thorough document. It is guide by the needs I have seen while perusing ID Seq's frontend coding.
-* * *
-
-## General Principles
-
-From early observations of code practices in the legacy part of IDSeq web, I observed the two item from **general principles of software engineering **that are not being followed are:
-
-* **Separation of concerns**: make sure a methods and class have a specific and limited scope of they are concerned with. Methods should follow the single responsibility principle, i.e., focus on doing one thing well. This makes it easier to write tests and  refactor in the future (as our features/requirements change quickly);
-* **Consistency**: create an familiar environment for coding by setting conventions to naming variables, methods, properties, or how to organize code. Most of guidelines in this document are focused on creating this environment.
+The goal of this document is to present a set of guidelines, conventions and best practices to develop frontend code for ID Seq. It is an ongoing effort as opposed to a thorough document.
+This guidelines should be enforced for any new PRs.
 
 * * *
 
@@ -18,15 +11,15 @@ From early observations of code practices in the legacy part of IDSeq web, I obs
 
 **References**
 
-Use `const` to define local references and `let` if you need to reassign them. If we are using `var` you should probably refactor.
+Use `const` to define local references and `let` if you need to reassign them. Do not use `var`.
 
 **Naming**
 
-1. **Identifiers (variables, objects and methods) **are named** **using `camelCase` notation starting with a **lowercase** letter
+1. **Identifiers (variables, objects and methods)** should be named using `camelCase` notation starting with a **lowercase** letter
 2. **Classes and filenames** are named using `CamelCase` notation starting with an **uppercase** letter
-3. Use **descriptive names: **long descriptive names are preferred to short cryptic ones, e.g. `convertThresholdFieldsToJson` vs `convThresh` (great if you can be both short and descriptive...)
+3. Use **descriptive names**. Longer descriptive names are preferred to short cryptic ones, e.g. `convertThresholdedFiltersToJson` vs `convThresh` (great if you can be both short and descriptive...)
 4. Names for specific purposes:
-    1. **Event handlers:** should be prefixed with `handle...`** **and, e.g. `handleThresholdApplyClick`
+    1. **Event handlers**: should be prefixed with `handle...`** **and, e.g. `handleThresholdApplyClick`
     2. **Event hooks**: should be prefixed with `on...` e.g. `onApplyClick` 
         1. Example: `<Button onClick={this.handleButtonClick} />`
         2. `onClick` is a **hook** (kind of like a parameter), which allows a **handler** like `handlerButtonClick` to be supplied by a client. 
@@ -34,13 +27,13 @@ Use `const` to define local references and `let` if you need to reassign them. I
 
 **Strings**
 
-* Quotes: use double quotes (`"`) by default
+* Quotes: use double quotes (`"`) by default.
 * Prefer template strings over concatenation: ``this string has a ${variable}``  over  `"this string has a " + variable`.
 
 **Type Checking**
 
 * Always specify type checking of components properties using the `[prop-types](https://www.npmjs.com/package/prop-types)` module. Be as precise as possible.
-* [Airbnb's prop types validators](https://github.com/airbnb/prop-types) is available for some extra validators. 
+* [Airbnb's prop types validators](https://github.com/airbnb/prop-types) is installed and provides extra validators. 
 * If your component does not pass any props to its children, always encapsulate your `propTypes` object in the `forbidExtraProps` function from the `airbnb-prop-types` package.
 
 ### _React Components_
