@@ -29,14 +29,16 @@ WORKDIR /app
 COPY Gemfile Gemfile.lock ./
 RUN gem install bundler && bundle install --jobs 20 --retry 5
 
+# Do the same for node packages, allowing them to be cached
 RUN npm update -g
+COPY package.json package-lock.json ./
+RUN npm install
 
 # Copy the main application.
 COPY . ./
 
-RUN npm install
-RUN npm rebuild node-sass
-RUN mkdir -p app/assets/dist &&  npm run build-img && ls -l app/assets/dist/
+# Generate the app's static resources using npm/webpack
+RUN mkdir -p app/assets/dist && npm run build-img && ls -l app/assets/dist/
 
 ARG GIT_COMMIT
 ENV GIT_VERSION ${GIT_COMMIT}
