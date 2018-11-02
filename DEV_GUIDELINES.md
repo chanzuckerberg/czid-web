@@ -19,7 +19,7 @@ Use `const` to define local references and `let` if you need to reassign them. D
 2. **Classes and filenames** are named using `CamelCase` notation starting with an **uppercase** letter
 3. Use **descriptive names**. Longer descriptive names are preferred to short cryptic ones, e.g. `convertThresholdedFiltersToJson` vs `convThresh` (great if you can be both short and descriptive...)
 4. Names for specific purposes:
-    1. **Event handlers**: should be prefixed with `handle...`** **and, e.g. `handleThresholdApplyClick`
+    1. **Event handlers**: should be prefixed with `handle...` and, e.g. `handleThresholdApplyClick`
     2. **Event hooks**: should be prefixed with `on...` e.g. `onApplyClick` 
         1. Example: `<Button onClick={this.handleButtonClick} />`
         2. `onClick` is a **hook** (kind of like a parameter), which allows a **handler** like `handlerButtonClick` to be supplied by a client. 
@@ -106,7 +106,7 @@ Views represent a page or a section of a page in IDSeq. Views are stored in the 
 When designing your view, try to make as much use of the components in the `ui `and `visualizations` folders. This should be mostly plug-and-play components. 
 If you need to place a ui component in a customized place for your view (i.e. if the layout elements cannot help you), wrap it in a `div` with a proper class name, and style it in the view's css file.
 
-### REact-D3 integration 
+### React-D3 integration 
 
 *WIP*
 D3 code should be created in plain JS (no JSX) and should be placed in separate files for React code.
@@ -121,10 +121,10 @@ D3 code should be created in plain JS (no JSX) and should be placed in separate 
 
 **Naming**
 
-1. **SCSS Filenames **should use the `snake_case` notation by splitting words with **underscores**
+1. **SCSS Filenames** should use the `snake_case` notation by splitting words with **underscores**
 2. Selectors should use the `camelCase` notation. 
     1. The choice for this notation is driven by our decision to use CSS Modules (see next bullet). Legacy code uses `dash-case` typically.
-3. We use **CSS Modules **to modularize our CSS. This allows us to use short class names without fear of collisions with 3rd party libraries or classes from other components. 
+3. We use **CSS Modules** to modularize our CSS. This allows us to use short class names without fear of collisions with 3rd party libraries or classes from other components. 
     1. Our CSS is still in the process of being refactored. All files that are inside the styles directory still use global classes. All new CSS should use CSS modules.
     2.  See `components/views/cli_user_instructions.scss` for an example of the current best practice.
 
