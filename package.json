@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "yarn install && webpack --config webpack.config.dev.js --watch",
+    "start": "npm install && webpack --config webpack.config.dev.js --watch",
     "build-img": "webpack --config webpack.config.prod.js",
     "lint": "./node_modules/.bin/eslint . ./**/*.js",
     "precommit": "lint-staged",
