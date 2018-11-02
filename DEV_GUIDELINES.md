@@ -67,7 +67,7 @@ For example, if you need a specially styled button, try to wrap `<Button>` from 
 
 **Component Naming**
 
-* Include the type of the component as a **suffix **of the name. For instance:
+* Include the type of the component as a **suffix** of the name. For instance:
     * `PrimaryButton`
     * `SamplesView`
     * `HeatmapVisualization`
@@ -95,8 +95,8 @@ Once your component has more than a single `.jsx` and .`scss` file, you should c
 
 Where the `index.jsx` file is a simple redirect:
 
-`// Contents of index.jsx`
-`import Table from "./Table";`
+`// Contents of index.jsx` \
+`import Table from "./Table";` \
 `export default Table;`
 
 
