@@ -147,21 +147,3 @@ D3 code should be created in plain JS (no JSX) and should be placed in separate 
 
 WIP
 * * *
-
-## IDSeq Web Refactoring - TODO
-
-* Convert this doc to a **Readme** in the relevant IDSeq repo. Easier to maintain and update, and accessible to external developers.
-* ***maybe ***Analyze use of **Redux** for managing state (including bidirectional state)?
-* Update to **webpack 5**?
-* **Get rid of materialize.css**
-* Refactor classes to use `this.fn.bind` since we are now using `transform-class-properties` to do this automatically.
-* Remove jQuery. This is tough because jQuery is currently a band-aid over some unperformant React classes like PipelineSampleTable. Removing jQuery without refactoring will cause UI lag.
-* Consistency of UI elements. Use our `ui` elements everywhere, instead of, for example, `jQuery UI`.
-* Consistency of icons and typography.
-* Break apart large files like `PipelineSampleReport` into de-coupled classes with well-defined boundaries.
-* ***maybe*** Remove **semantic-ui dependency**: we are actually changing semantic-ui components quite a bit. So much so, that for many of them does not make sense to composed with semantic ui elements. As we built our IDSeq-web layer, we might consider removing this dependency (less complexity and less code to load).
-* ***maybe ***Move to **create-react-app**: takes a lot of configuration clutter out of the way 
-* ***discussion for long term*** Split web app and backend. Advantages:
-    * Backend can be turned into a well defined API, which can be used from the cli or even for integration into other tools (probably not a goal now though). 
-    * Frontend app would be a pure-react SPA app that interacts with our api. 
-    * Arguably some benefits for local development (auto-browser refresh, simple react app that can be started anywhere, no dependencies on the rest of the stack)
