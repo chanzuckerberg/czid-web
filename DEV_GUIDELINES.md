@@ -1,7 +1,7 @@
 # IDSeq Frontend Development Guidelines 
 
-The goal of this document is to present a set of guidelines, conventions and best practices to develop frontend code for ID Seq. It is an ongoing effort as opposed to a thorough document.
-This guidelines should be enforced for any new PRs.
+The goal of this document is to present a set of guidelines, conventions and best practices to develop frontend code for IDseq. It is an ongoing effort as opposed to a thorough document.
+These guidelines should be enforced for any new PRs.
 
 * * *
 
