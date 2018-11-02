@@ -864,7 +864,12 @@ class PipelineSampleReads extends React.Component {
     if (this.reportPresent) {
       report_buttons = (
         <Popup
-          trigger={<DownloadButton onClick={this.downloadCSV} />}
+          trigger={
+            <DownloadButton
+              onClick={this.downloadCSV}
+              className={cs.reportButton}
+            />
+          }
           content="Download Table as CSV"
           inverted
           on="hover"
@@ -872,7 +877,11 @@ class PipelineSampleReads extends React.Component {
       );
     } else if (this.sampleInfo.status === "created" || !this.reportPresent) {
       report_buttons = (
-        <PrimaryButton onClick={this.deleteSample} text="Delete Sample" />
+        <PrimaryButton
+          onClick={this.deleteSample}
+          text="Delete Sample"
+          className={cs.reportButton}
+        />
       );
     }
 
@@ -899,10 +908,10 @@ class PipelineSampleReads extends React.Component {
             </div>
             <div className={cs.topRow}>
               <div className={cs.breadcrumbs}>
-                <div className={cs.projectName}>
+                <div className={cs.projectNameContainer}>
                   <a
                     href={`/home?project_id=${this.projectInfo.id}`}
-                    className={cs.hover}
+                    className={cs.projectName}
                   >
                     {this.projectInfo.name}
                   </a>

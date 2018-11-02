@@ -70,6 +70,7 @@ class Samples extends React.Component {
     this.displayReportProgress = this.displayReportProgress.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
     this.toggleBackgroundFlag = this.toggleBackgroundFlag.bind(this);
+    this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
     this.state = {
       invite_status: null,
       background_creation_response: {},
@@ -441,24 +442,6 @@ class Samples extends React.Component {
           );
         });
     }
-  }
-
-  toggleBackgroundFlag() {
-    let project_id = this.state.project.id;
-    let current_flag = this.state.project.background_flag;
-    let new_flag = current_flag ? 0 : 1;
-    axios
-      .put(`/projects/${project_id}.json`, {
-        background_flag: new_flag,
-        authenticity_token: this.csrf
-      })
-      .then(() => {
-        this.setState({
-          project: Object.assign(this.state.project, {
-            background_flag: new_flag
-          })
-        });
-      });
   }
 
   displayMetadataDropdown() {
