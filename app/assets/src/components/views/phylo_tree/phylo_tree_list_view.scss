@@ -1,0 +1,25 @@
+@import "~styles/themes/colors";
+@import "~styles/typography";
+
+.phyloTreeListView {
+  .viewHeader {
+    margin: 40px 20px;
+  }
+
+  .preTitle {
+    font-size: $font-size-body;
+    color: $medium-grey;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+
+  .narrowContainer {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .noTreeBanner {
+    padding: 20px;
+  }
+}

@@ -1,0 +1,41 @@
+@import "~styles/themes/colors";
+@import "~styles/typography";
+
+.viewHeader {
+  display: flex;
+
+  .content {
+    margin-right: 20px;
+  }
+
+  .fill {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .rightControls {
+    flex-shrink: 0;
+  }
+
+  .sampleDropdown {
+    font-size: $font-size-h3;
+  }
+
+  .sampleName {
+    color: $black;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 1px;
+    font-size: $font-size-h3;
+    word-break: break-all;
+    line-height: $line-height-h3;
+  }
+
+  .trigger {
+    margin-right: 10px;
+    user-select: none;
+
+    &:hover {
+      color: $primary-light;
+    }
+  }
+}

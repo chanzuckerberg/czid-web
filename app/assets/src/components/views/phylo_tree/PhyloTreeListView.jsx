@@ -1,12 +1,11 @@
 import React from "react";
 import Divider from "../../layout/Divider";
-import Dropdown from "../../ui/controls/dropdowns/Dropdown";
-import FilterRow from "../../layout/FilterRow";
 import QueryString from "query-string";
 import PhyloTreeVis from "./PhyloTreeVis";
 import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
 import PropTypes from "prop-types";
-import ViewHeader from "../../layout/ViewHeader";
+import ViewHeader from "../../layout/ViewHeader/ViewHeader";
+import cs from "./phylo_tree_list_view.scss";
 
 class PhyloTreeListView extends React.Component {
   constructor(props) {
@@ -23,8 +22,6 @@ class PhyloTreeListView extends React.Component {
         props.phyloTrees
       )
     };
-
-    this.handleTreeChange = this.handleTreeChange.bind(this);
   }
 
   getDefaultSelectedTreeId(urlParams, phyloTrees = []) {
@@ -48,12 +45,12 @@ class PhyloTreeListView extends React.Component {
     return urlParams;
   }
 
-  handleTreeChange(_, newPhyloTreeId) {
-    window.sessionStorage.setItem("treeId", newPhyloTreeId.value);
+  handleTreeChange = newPhyloTreeId => {
+    window.sessionStorage.setItem("treeId", newPhyloTreeId);
     this.setState({
-      selectedPhyloTreeId: newPhyloTreeId.value
+      selectedPhyloTreeId: newPhyloTreeId
     });
-  }
+  };
 
   getTreeStatus(tree) {
     let statusMessage = "";
@@ -76,7 +73,7 @@ class PhyloTreeListView extends React.Component {
   render() {
     if (!this.state.selectedPhyloTreeId) {
       return (
-        <p className="phylo-tree-list-view__no-tree-banner">
+        <p className={cs.noTreeBanner}>
           No trees yet. You can create trees from the report page.
         </p>
       );
@@ -84,35 +81,37 @@ class PhyloTreeListView extends React.Component {
 
     let currentTree = this.phyloTreeMap.get(this.state.selectedPhyloTreeId);
     return (
-      <div className="phylo-tree-list-view">
-        <div className="phylo-tree-list-view__narrow-container">
-          <ViewHeader title="Phylogenetic Trees">
-            <PhyloTreeDownloadButton tree={currentTree} />
+      <div className={cs.phyloTreeListView}>
+        <div className={cs.narrowContainer}>
+          <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
+            <ViewHeader.Content>
+              <div className={cs.preTitle}>Phylogenetic Tree</div>
+              <ViewHeader.Title
+                label={
+                  this.phyloTreeMap.get(this.state.selectedPhyloTreeId).name
+                }
+                id={this.state.selectedPhyloTreeId}
+                options={this.props.phyloTrees.map(tree => ({
+                  label: tree.name,
+                  id: tree.id,
+                  onClick: () => this.handleTreeChange(tree.id)
+                }))}
+              />
+            </ViewHeader.Content>
+            <ViewHeader.RightControls>
+              <PhyloTreeDownloadButton tree={currentTree} />
+            </ViewHeader.RightControls>
           </ViewHeader>
         </div>
         <Divider />
-        <div className="phylo-tree-list-view__narrow-container">
-          <FilterRow>
-            <Dropdown
-              label="Tree: "
-              onChange={this.handleTreeChange}
-              options={this.props.phyloTrees.map(tree => ({
-                value: tree.id,
-                text: tree.name
-              }))}
-              value={this.state.selectedPhyloTreeId}
-            />
-          </FilterRow>
-        </div>
-        <Divider />
-        <div className="phylo-tree-list-view__narrow-container">
+        <div className={cs.narrowContainer}>
           {currentTree.newick ? (
             <PhyloTreeVis
               newick={currentTree.newick}
               nodeData={currentTree.sampleDetailsByNodeName}
             />
           ) : (
-            <p className="phylo-tree-list-view__no-tree-banner">
+            <p className={cs.noTreeBanner}>
               {this.getTreeStatus(currentTree.status)}
             </p>
           )}

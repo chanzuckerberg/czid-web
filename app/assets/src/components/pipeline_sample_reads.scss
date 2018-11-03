@@ -9,69 +9,33 @@
     margin-bottom: 10px;
   }
 
-  .topRow {
-    display: flex;
+  .viewHeader {
     margin-top: 20px;
     margin-bottom: 5px;
   }
 
-  .fill {
-    flex: 1 1 0;
-    min-width: 0;
-  }
+  .projectNameContainer {
+    font-size: $font-size-body;
+    color: $medium-grey;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+    display: flex;
 
-  .breadcrumbs {
-    margin-right: 20px;
+    .projectName {
+      max-width: 600px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
 
-    .projectNameContainer {
-      font-size: $font-size-body;
-      color: $medium-grey;
-      font-weight: $font-weight-semibold;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-      display: flex;
-
-      .projectName {
-        max-width: 600px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-
-        &:hover {
-          /* Overwrite header.scss */
-          color: $primary-light !important;
-        }
+      &:hover {
+        /* Overwrite header.scss */
+        color: $primary-light !important;
       }
     }
 
     .rightArrow {
       margin-left: 5px;
     }
-
-    .sampleDropdown {
-      font-size: $font-size-h3;
-    }
-
-    .sampleName {
-      color: $black;
-      font-weight: $font-weight-semibold;
-      letter-spacing: 1px;
-      font-size: $font-size-h3;
-      word-break: break-all;
-      line-height: $line-height-h3;
-    }
-
-    .trigger {
-      margin-right: 10px;
-      user-select: none;
-
-      &:hover {
-        color: $primary-light;
-      }
-    }
-  }
-
-  .reportButton {
-    flex-shrink: 0;
   }
 }
