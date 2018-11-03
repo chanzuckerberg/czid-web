@@ -243,6 +243,10 @@ def stop_draining(asg, num_instances):
     if instance_ids:
         print "Stopping drainage of the following instances: " + ",".join(instance_ids)
         add_termination_protection(instance_ids, asg)
+        # Note: if autoscaling.py ran too frequently, there would be a risk that an instance enters Terminating state between the time
+        # of the health check in instances_to_rescue and the time of add_termination_protection, in which case add_termination_protection
+        # would throw an error. But because autoscaling.py runs only infrequently, we can be sure that there is no scaling decision in limbo
+        # from the last execution of autoscaling.py.
         remove_draining_tag(instance_ids)
 
 
