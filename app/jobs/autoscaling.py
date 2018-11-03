@@ -262,7 +262,8 @@ def instances_to_rescue(asg, num_instances):
     That way we can probably terminate the non-rescued instances sooner.
     '''
     draining_instances = get_draining_servers(asg)
-    draining_instances_sorted = [key for key, value in sorted(draining_instances.items(), key=itemgetter(1), reverse=True)]
+    healthy_instance_ids = [inst["InstanceId"] for inst in asg["Instances"] if inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating"]
+    draining_instances_sorted = [key for key, value in sorted(draining_instances.items(), key=itemgetter(1), reverse=True) if key in healthy_instance_ids]
     return draining_instances_sorted[:num_instances]
 
 
