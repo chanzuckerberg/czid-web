@@ -33,8 +33,8 @@ DEBUG = False
 
 ## constants specific to draining / safe scale-down:
 DRAINING_TAG = "draining"
-MAX_REFRESH_INTERVAL = 900
-# MAX_REFRESH_INTERVAL must be the same as MAX_INTERVAL_BETWEEN_DESCRIBE_INSTANCES in idseq-dag.
+MAX_REFRESH_INTERVAL = 1200
+# MAX_REFRESH_INTERVAL must be slightly bigger than MAX_INTERVAL_BETWEEN_DESCRIBE_INSTANCES in idseq-dag.
 # After this interval, we are sure we are safe from race conditions related to batch jobs dispatching gsnap/rapsearch jobs.
 JOB_TAG_PREFIX = "RunningIDseqBatchJob_"
 ALIGNMENT_JOB_EXPIRATION_SECONDS = 120 * 60
