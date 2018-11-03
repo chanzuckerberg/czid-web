@@ -240,16 +240,19 @@ def start_draining(asg, num_instances):
 
 def stop_draining(asg, num_instances):
     instance_ids = instances_to_rescue(asg, num_instances)
-    add_termination_protection(instance_ids, asg)
-    remove_draining_tag(instance_ids)
+    if instance_ids:
+        print "Stopping drainage of the following instances: " + ",".join(instance_ids)
+        add_termination_protection(instance_ids, asg)
+        remove_draining_tag(instance_ids)
 
 
 def instances_to_drain(asg, num_instances):
     instance_ids = instances_in(asg)
-    cmd = "aws ec2 describe-instances --instance-ids {list_instances} --query 'Reservations[*].Instances[*].LaunchTime' --no-paginate --output text"
+    cmd = "aws ec2 describe-instances --instance-ids {list_instances} --query 'Reservations[*].Instances[*].[InstanceId,LaunchTime]' --no-paginate"
     cmd = cmd.format(list_instances=' '.join(instance_ids))
-    launch_times = [dateutil.parser.parse(datestring) for datestring in aws_command(cmd).splitlines()]
-    instance_ids_sorted_by_increasing_launch_time = [item[0] for item in sorted(zip(instance_ids, launch_times), key=itemgetter(1))]
+    aws_response = json.loads(aws_command(cmd))
+    zipped_instance_ids_and_launch_times = [instance for nest in aws_response for instance in nest]
+    instance_ids_sorted_by_increasing_launch_time = [item[0] for item in sorted(zipped_instance_ids_and_launch_times, key=itemgetter(1))]
     return instance_ids_sorted_by_increasing_launch_time[:num_instances]
 
 
@@ -269,6 +272,8 @@ def get_draining_servers(asg):
     cmd = cmd.format(draining_tag=DRAINING_TAG, instance_ids=','.join(instances_in(asg)))
     tag_dict = json.loads(aws_command(cmd))
     instance_dict = { item['ResourceId']: dateutil.parser.parse(item['Value']) for item in tag_dict['Tags'] if item['Key'] == DRAINING_TAG }
+    print "Draining servers:"
+    print instance_dict
     return instance_dict
 
 
@@ -333,7 +338,6 @@ def check_draining_servers(asg, can_scale):
         print "The following instances are ready to be terminated: " + ", ".join(instance_ids_to_terminate)
         if can_scale:
             remove_termination_protection(instance_ids_to_terminate, asg)
-
 
 def count_running_batch_jobs():
     queues_lock = threading.RLock()
