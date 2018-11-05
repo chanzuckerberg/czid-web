@@ -113,7 +113,7 @@ def set_tag(asg, key, value):
 def set_metric_value(asg, value, my_environment):
     tag_key = SCALING_METRIC_TAG_FORMAT.format(environment=my_environment)
     # parsed in update_metric_values
-    tag_value = "{unixtime:d}::{value:d}".format(unixtime=int(time.time()), value=int(value))
+    tag_value = "{unixtime:d}::{value:d}".format(unixtime=unixtime_now(), value=int(value))
     set_tag(asg, tag_key, tag_value)
     return (tag_key, tag_value)
 
@@ -156,7 +156,7 @@ def update_metric_values(asg, value, my_environment):
     for k, v in mvals.items():
         parts = v.split("::")
         unixtime = int(parts[0])
-        if time.time() - unixtime < EXPIRATION_PERIOD_MINUTES * 60:
+        if unixtime_now() - unixtime < EXPIRATION_PERIOD_MINUTES * 60:
             results[k] = int(parts[1])
         else:
             expired_keys.append(k)
@@ -219,13 +219,17 @@ def instances_in(asg):
     return [item["InstanceId"] for item in asg["Instances"]]
 
 
-def iso_time_now():
-    return datetime.datetime.now().isoformat()
+def unixtime_now():
+    return int(time.time())
+
+
+def iso2unixtime(iso_str):
+    return int(dateutil.parser.parse(iso_str).strftime('%s'))
 
 
 def add_draining_tag(instance_ids):
     cmd = "aws ec2 create-tags --resources {list_instances} --tags Key={draining_tag},Value={timestamp}"
-    cmd = cmd.format(list_instances=' '.join(instance_ids), draining_tag=DRAINING_TAG, timestamp=iso_time_now())
+    cmd = cmd.format(list_instances=' '.join(instance_ids), draining_tag=DRAINING_TAG, timestamp=unixtime_now())
     aws_command(cmd)
 
 
@@ -255,7 +259,7 @@ def instances_to_drain(asg, num_instances):
     cmd = "aws ec2 describe-instances --instance-ids {list_instances} --query 'Reservations[*].Instances[*].[InstanceId,LaunchTime]' --no-paginate"
     cmd = cmd.format(list_instances=' '.join(instance_ids))
     aws_response = json.loads(aws_command(cmd))
-    zipped_instance_ids_and_launch_times = [instance for nest in aws_response for instance in nest]
+    zipped_instance_ids_and_launch_times = [(instance[0], iso2unixtime(instance[1])) for nest in aws_response for instance in nest]
     instance_ids_sorted_by_increasing_launch_time = [item[0] for item in sorted(zipped_instance_ids_and_launch_times, key=itemgetter(1))]
     return instance_ids_sorted_by_increasing_launch_time[:num_instances]
 
@@ -276,7 +280,7 @@ def get_draining_servers(asg):
     cmd = "aws ec2 describe-tags --filters 'Name=tag-key,Values={draining_tag}' 'Name=resource-id,Values={instance_ids}'"
     cmd = cmd.format(draining_tag=DRAINING_TAG, instance_ids=','.join(instances_in(asg)))
     tag_dict = json.loads(aws_command(cmd))
-    instance_dict = { item['ResourceId']: dateutil.parser.parse(item['Value']) for item in tag_dict['Tags'] if item['Key'] == DRAINING_TAG }
+    instance_dict = { item['ResourceId']: int(item['Value']) for item in tag_dict['Tags'] if item['Key'] == DRAINING_TAG }
     print "Draining servers:"
     print instance_dict
     return instance_dict
@@ -295,7 +299,7 @@ def count_running_alignment_jobs(asg):
             job_tag = item['Key']
             instance_id = item['ResourceId']
             unixtime = int(item['Value'])
-            if time.time() - unixtime < ALIGNMENT_JOB_EXPIRATION_SECONDS:
+            if unixtime_now() - unixtime < ALIGNMENT_JOB_EXPIRATION_SECONDS:
                 count_dict[instance_id] += 1
             else:
                 expired_jobs.append(job_tag)
@@ -333,12 +337,12 @@ def check_draining_servers(asg, can_scale):
     drain_date_by_instance_id = get_draining_servers(asg)
     num_jobs_by_instance_id = count_running_alignment_jobs(asg)
     instance_ids_to_terminate = []
-    current_timestamp = dateutil.parser.parse(iso_time_now())
-    for id, drain_date in drain_date_by_instance_id.items():
-        draining_interval = (current_timestamp - drain_date).total_seconds()
-        num_jobs = num_jobs_by_instance_id[id]
+    current_timestamp = unixtime_now()
+    for instance_id, drain_date in drain_date_by_instance_id.items():
+        draining_interval = current_timestamp - drain_date
+        num_jobs = num_jobs_by_instance_id[instance_id]
         if num_jobs == 0 and draining_interval > MAX_REFRESH_INTERVAL:
-            instance_ids_to_terminate.append(id)
+            instance_ids_to_terminate.append(instance_id)
     if instance_ids_to_terminate:
         print "The following instances are ready to be terminated: " + ", ".join(instance_ids_to_terminate)
         if can_scale:
