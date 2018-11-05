@@ -3,9 +3,10 @@ import PropTypes from "prop-types";
 import SecondaryButton from "./SecondaryButton";
 import React from "react";
 
-const DownloadButton = ({ disabled, onClick }) => {
+const DownloadButton = ({ disabled, onClick, ...props }) => {
   return (
     <SecondaryButton
+      {...props}
       text="Download"
       disabled={disabled}
       onClick={onClick}

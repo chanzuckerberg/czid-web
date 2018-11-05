@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "yarn install && webpack --config webpack.config.dev.js --watch",
+    "start": "npm install && webpack --config webpack.config.dev.js --watch",
     "build-img": "webpack --config webpack.config.prod.js",
     "lint": "./node_modules/.bin/eslint . ./**/*.js",
     "precommit": "lint-staged",
@@ -42,7 +42,7 @@
     "import-glob-loader": "^1.1.0",
     "jest": "^23.0.0",
     "lint-staged": "^7.3.0",
-    "node-sass": "^4.7.2",
+    "node-sass": "^4.9.4",
     "prettier": "^1.12.1",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.20.2",
@@ -88,6 +88,7 @@
     "react": "16.4",
     "react-autocomplete": "^1.7.2",
     "react-dom": "16.4",
+    "react-dropzone": "^6.2.4",
     "react-moment": "^0.7.9",
     "react-sticky": "^6.0.1",
     "react-table": "^6.8.6",

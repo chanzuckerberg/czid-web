@@ -45,6 +45,7 @@ class SamplesController < ApplicationController
     project_id = params[:project_id]
     name_search_query = params[:search]
     filter_query = params[:filter]
+    page = params[:page]
     tissue_type_query = params[:tissue].split(',') if params[:tissue].present?
     host_query = params[:host].split(',') if params[:host].present?
     sort = params[:sort_by]
@@ -55,6 +56,8 @@ class SamplesController < ApplicationController
     results = results.where(id: samples_query) if samples_query.present?
 
     results = results.where(project_id: project_id) if project_id.present?
+
+    @count_project = results.size
 
     # Get tissue types and host genomes that are present in the sample list
     # TODO(yf) : the following tissue_types, host_genomes have performance
@@ -69,12 +72,31 @@ class SamplesController < ApplicationController
     results = filter_by_tissue_type(results, tissue_type_query) if tissue_type_query.present?
     results = filter_by_host(results, host_query) if host_query.present?
 
-    @samples = sort_by(results, sort).paginate(page: params[:page], per_page: params[:per_page] || PAGE_SIZE).includes([:user, :host_genome, :pipeline_runs, :input_files])
+    @samples = sort_by(results, sort).paginate(page: page, per_page: params[:per_page] || PAGE_SIZE).includes([:user, :host_genome, :pipeline_runs, :input_files])
     @samples_count = results.size
-    @all_samples = format_samples(@samples)
+    @samples_formatted = format_samples(@samples)
 
-    render json: { samples: @all_samples, total_count: @samples_count,
-                   tissue_types: @tissue_types, host_genomes: @host_genomes }
+    @ready_sample_ids = get_ready_sample_ids(results)
+
+    # Send more information with the first page.
+    if !page || page == '1'
+      render json: {
+        # Samples in this page.
+        samples: @samples_formatted,
+        # Number of samples in the current query.
+        count: @samples_count,
+        tissue_types: @tissue_types,
+        host_genomes: @host_genomes,
+        # Total number of samples in the project
+        count_project: @count_project,
+        # Ids for all ready samples in the current query, not just the current page.
+        ready_sample_ids: @ready_sample_ids
+      }
+    else
+      render json: {
+        samples: @samples_formatted
+      }
+    end
   end
 
   def all
@@ -163,7 +185,7 @@ class SamplesController < ApplicationController
     @pipeline_versions = @sample.pipeline_versions
 
     @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
-    @sample_status = @pipeline_run ? @pipeline_run.job_status_display : 'Uploading'
+    @sample_status = @pipeline_run ? @pipeline_run.job_status_display : 'Waiting to Start'
     pipeline_run_id = @pipeline_run ? @pipeline_run.id : nil
     job_stats_hash = job_stats_get(pipeline_run_id)
     @summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, @pipeline_run) : nil
@@ -637,15 +659,14 @@ class SamplesController < ApplicationController
   end
 
   def sample_params
-    permitted_params = [:name, :project_name, :project_id, :status, :s3_preload_result_path,
+    permitted_params = [:name, :project_name, :project_id, :status,
                         :s3_star_index_path, :s3_bowtie2_index_path,
-                        :host_genome_id, :host_genome_name, :alignment_config_name,
-                        :sample_memory, :sample_location, :sample_date, :sample_tissue,
+                        :host_genome_id, :host_genome_name, :sample_location, :sample_date, :sample_tissue,
                         :sample_template, :sample_library, :sample_sequencer,
-                        :sample_notes, :job_queue, :search, :subsample,
+                        :sample_notes, :job_queue, :search,
                         :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection, :client,
                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]]
-    permitted_params.concat([:pipeline_branch, :dag_vars]) if current_user.admin?
+    permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :sample_memory, :subsample]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)
   end
 

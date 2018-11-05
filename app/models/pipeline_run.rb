@@ -36,7 +36,7 @@ class PipelineRun < ApplicationRecord
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
-  REFINED_TAXON_COUNTS_JSON_NAME = 'reclassify/refined_taxon_counts.json'.freeze
+  REFINED_TAXON_COUNTS_JSON_NAME = 'assembly/refined_taxon_counts.json'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
@@ -271,7 +271,8 @@ class PipelineRun < ApplicationRecord
   end
 
   def report_ready?
-    output_states.find_by(output: REPORT_READY_OUTPUT).state == STATUS_LOADED
+    os = output_states.find_by(output: REPORT_READY_OUTPUT)
+    !os.nil? && os.state == STATUS_LOADED
   end
 
   def report_failed?
@@ -476,15 +477,6 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def handle_success
-    # Check if this was the last run in a project and act accordingly:
-    if sample.project.results_complete?
-      # Ony send the project success email on the first pipeline run
-      notify_users if sample.pipeline_runs.count == 1
-      sample.project.create_or_update_project_background if sample.project.background_flag == 1
-    end
-  end
-
   def load_stats_file
     stats_s3 = "#{output_s3_path_with_version}/#{STATS_JSON_NAME}"
     # TODO: Remove the datetime check?
@@ -532,7 +524,6 @@ class PipelineRun < ApplicationRecord
     if all_output_states_terminal?
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
-        handle_success
       else
         update(results_finalized: FINALIZED_FAIL)
       end
@@ -592,7 +583,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def job_status_display
-    return "Pipeline Initializizng" unless self.job_status
+    return "Pipeline Initializing" unless self.job_status
     stage = self.job_status.to_s.split("-")[0].split(".")[1]
     stage ? "Running #{stage}" : self.job_status
   end
@@ -971,20 +962,6 @@ class PipelineRun < ApplicationRecord
   end
 
   delegate :project_id, to: :sample
-
-  def notify_users
-    project = Project.find(project_id)
-    number_samples = Sample.where(project_id: project_id).count
-    project_name = project.name
-    user_emails = project.users.map(&:email)
-    user_emails.each do |user_email|
-      email_arguments = { user_email: user_email,
-                          project_name: project_name,
-                          project_id: project_id,
-                          number_samples: number_samples }
-      UserMailer.project_complete_email(email_arguments).deliver_now
-    end
-  end
 
   def compare_ercc_counts
     return nil if ercc_counts.empty?

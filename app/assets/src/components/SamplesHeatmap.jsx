@@ -419,7 +419,8 @@ class SamplesHeatmap extends React.Component {
   renderLoading() {
     return (
       <p className="loading-indicator text-center">
-        <i className="fa fa-spinner fa-pulse fa-fw" /> Loading...
+        <i className="fa fa-spinner fa-pulse fa-fw" />
+        Loading for {this.state.sampleIds.length} samples...
       </p>
     );
   }

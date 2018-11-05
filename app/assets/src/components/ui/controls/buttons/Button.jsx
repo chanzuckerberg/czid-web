@@ -3,16 +3,7 @@ import { forbidExtraProps } from "airbnb-prop-types";
 import PropTypes from "prop-types";
 import React from "react";
 
-const Button = ({
-  disabled,
-  onClick,
-  icon,
-  label,
-  primary,
-  secondary,
-  text,
-  className
-}) => {
+const Button = ({ icon, label, text, className, ...props }) => {
   let content = text;
   if (icon || label) {
     content = (
@@ -28,13 +19,7 @@ const Button = ({
     cname = `${cname} ${className}`;
   }
   return (
-    <BaseButton
-      className={cname}
-      primary={primary}
-      secondary={secondary}
-      disabled={disabled}
-      onClick={onClick}
-    >
+    <BaseButton {...props} className={cname}>
       {content}
     </BaseButton>
   );
@@ -45,6 +30,8 @@ Button.propTypes = forbidExtraProps({
   icon: PropTypes.element,
   label: PropTypes.element,
   onClick: PropTypes.func,
+  onMouseLeave: PropTypes.func,
+  onMouseEnter: PropTypes.func,
   text: PropTypes.string,
   primary: PropTypes.bool,
   secondary: PropTypes.bool,

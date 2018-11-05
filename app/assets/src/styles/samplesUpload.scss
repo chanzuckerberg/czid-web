@@ -78,6 +78,10 @@
           padding-top: 1.5rem;
         }
         .field {
+          .validation-info {
+            color: $medium-grey;
+          }
+
           .row {
             &.input-row {
               margin-top: -10px;
@@ -134,6 +138,7 @@
                 color: $medium-grey;
               }
             }
+
             .field-error {
               color: $error;
               font-size: $font-size-small;
@@ -360,6 +365,13 @@
         }
         label {
           color: $darkest-grey;
+        }
+
+        .upload-mode-title {
+          color: $black;
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin-top: 3.5rem;
         }
       }
     }

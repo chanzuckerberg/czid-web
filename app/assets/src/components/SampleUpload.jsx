@@ -5,6 +5,9 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
+import Icon from "./ui/icons/Icon";
+import { Menu, MenuItem } from "./ui/controls/Menu";
+import UploadBox from "./ui/controls/UploadBox";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -84,7 +87,6 @@ class SampleUpload extends React.Component {
       errorMessage: "",
       success: false,
       successMessage: "",
-      serverErrors: [],
       selectedAlignmentConfigName: this.selected.alignmentConfigName || null,
       selectedHostGenome: this.selected.hostGenome || "",
       selectedHostGenomeId: this.selected.hostGenomeId || null,
@@ -101,7 +103,14 @@ class SampleUpload extends React.Component {
       disableProjectSelect: false,
       omitSubsamplingChecked: false,
       publicChecked: false,
-      consentChecked: false
+      consentChecked: false,
+
+      // Local upload fields
+      localUploadMode: false,
+      localFilesToUpload: [],
+      localFilesDoneUploading: [],
+      localUploadShouldStart: false,
+      localFileUploadURLs: ["", ""]
     };
   }
 
@@ -119,6 +128,7 @@ class SampleUpload extends React.Component {
     );
     this.initializeTooltip();
   }
+
   initializeTooltip() {
     // only updating the tooltip offset when the component is loaded
     $(() => {
@@ -136,7 +146,11 @@ class SampleUpload extends React.Component {
     e.preventDefault();
     this.clearError();
     if (!this.isFormInvalid()) {
-      this.createSample();
+      if (this.state.localUploadMode) {
+        this.createSampleFromLocal();
+      } else {
+        this.createSampleFromRemote();
+      }
     }
   }
 
@@ -161,9 +175,15 @@ class SampleUpload extends React.Component {
     });
   }
 
-  gotoPage(path) {
-    location.href = `${path}`;
-  }
+  goToPage = path => {
+    location.href = path;
+  };
+
+  goToPageWithTimeout = page => {
+    setTimeout(() => {
+      this.goToPage(page);
+    }, 2000);
+  };
 
   toggleCheckBox(e) {
     this.setState({
@@ -234,7 +254,7 @@ class SampleUpload extends React.Component {
     }
   }
 
-  createSample() {
+  createSampleFromRemote() {
     this.setState({
       submitting: true
     });
@@ -274,20 +294,24 @@ class SampleUpload extends React.Component {
           submitting: false,
           successMessage: "Sample created successfully"
         });
-        setTimeout(() => {
-          this.gotoPage(`/samples/${response.data.id}`);
-        }, 2000);
+        this.goToPageWithTimeout(`/samples/${response.data.id}`);
       })
       .catch(error => {
         this.setState({
           invalid: true,
           submitting: false,
-          serverErrors: error.response.data,
-          errorMessage:
-            "Something went wrong. Try checking if sample name already exists in project?"
+          errorMessage: this.joinServerError(error.response.data)
         });
       });
   }
+
+  joinServerError = response => {
+    let joined = "";
+    Object.keys(response).forEach(group => {
+      joined += response[group].join(". ");
+    });
+    return joined;
+  };
 
   updateSample() {
     let that = this;
@@ -316,16 +340,13 @@ class SampleUpload extends React.Component {
           submitting: false,
           successMessage: "Sample updated successfully"
         });
-        setTimeout(() => {
-          that.gotoPage(`/samples/${that.state.id}`);
-        }, 2000);
+        this.goToPageWithTimeout(`/samples/${that.state.id}`);
       })
       .catch(error => {
         that.setState({
           submitting: false,
           invalid: true,
-          serverErrors: error.response.data,
-          errorMessage: "Failed to upload sample"
+          errorMessage: this.joinServerError(error.response.data)
         });
       });
   }
@@ -369,6 +390,7 @@ class SampleUpload extends React.Component {
       return false;
     }
   }
+
   baseName(str) {
     let base = new String(str).substring(str.lastIndexOf("/") + 1);
     if (base.lastIndexOf(".") != -1) {
@@ -376,6 +398,7 @@ class SampleUpload extends React.Component {
     }
     return base;
   }
+
   isFormInvalid() {
     const errors = {};
 
@@ -403,22 +426,24 @@ class SampleUpload extends React.Component {
       errors.selectedHostGenome = "Please select a host genome";
     }
 
-    if (this.refs.first_file_source) {
-      const firstFileSourceValue = this.refs.first_file_source.value.trim();
-      if (!this.filePathValid(firstFileSourceValue)) {
+    if (!this.state.localUploadMode) {
+      if (this.refs.first_file_source) {
+        const firstFileSourceValue = this.refs.first_file_source.value.trim();
+        if (!this.filePathValid(firstFileSourceValue)) {
+          errors.first_file_source = "Error: invalid file path";
+        }
+      } else {
         errors.first_file_source = "Error: invalid file path";
       }
-    } else {
-      errors.first_file_source = "Error: invalid file path";
-    }
 
-    if (this.refs.second_file_source) {
-      const secondFileSourceValue = this.refs.second_file_source.value.trim();
-      if (
-        secondFileSourceValue !== "" &&
-        !this.filePathValid(secondFileSourceValue)
-      ) {
-        errors.second_file_source = "Error: invalid file path";
+      if (this.refs.second_file_source) {
+        const secondFileSourceValue = this.refs.second_file_source.value.trim();
+        if (
+          secondFileSourceValue !== "" &&
+          !this.filePathValid(secondFileSourceValue)
+        ) {
+          errors.second_file_source = "Error: invalid file path";
+        }
       }
     }
 
@@ -506,20 +531,6 @@ class SampleUpload extends React.Component {
     });
   }
 
-  displayError(failedStatus, serverError, formattedError) {
-    if (failedStatus) {
-      return serverError instanceof Array ? (
-        serverError.map((error, i) => {
-          return <p key={i}>{error}</p>;
-        })
-      ) : (
-        <p>{formattedError}</p>
-      );
-    } else {
-      return null;
-    }
-  }
-
   toggleNewProjectInput(e) {
     this.clearError();
     $(".new-project-input").slideToggle();
@@ -561,18 +572,184 @@ class SampleUpload extends React.Component {
       let value = e.target.value.trim();
       if (value.length && value.indexOf("/")) {
         if (!this.refs.sample_name.value.trim().length) {
-          let base = this.baseName(value);
-          let fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/gim;
-          let readLabel = /_R1.*$|_R2.*$/gi;
-          base = base.replace(fastqLabel, "").replace(readLabel, "");
-          this.refs.sample_name.value = base;
-          this.setState({ sampleName: base });
+          const simplified = this.getSampleNameFromFileName(value);
+          this.refs.sample_name.value = simplified;
+          this.setState({ sampleName: simplified });
         }
       }
     } else {
       this.setState({ sampleName: sampleField });
     }
   }
+
+  // Handle dropped files into the Dropzone uploaders
+  onDrop = pos => accepted => {
+    let newFiles;
+    if (accepted.length > 0) {
+      const sampleName = accepted[0].name;
+
+      if (accepted.length > 1) {
+        // Fill in both boxes if they try to upload 2 at the same time.
+        newFiles = accepted.slice(0, 2);
+      } else {
+        newFiles = accepted; // accepted looks like [File]
+        const oldFiles = this.state.localFilesToUpload;
+        if (pos === 0 && oldFiles[1]) {
+          newFiles.push(oldFiles[1]);
+        } else if (oldFiles[0]) {
+          newFiles.unshift(oldFiles[0]);
+        }
+      }
+
+      this.setState({
+        localFilesToUpload: newFiles
+      });
+
+      // Set Sample Name field
+      if (!this.state.sampleName) {
+        const simplified = this.getSampleNameFromFileName(sampleName);
+        this.refs.sample_name.value = simplified;
+        this.setState({ sampleName: simplified });
+      }
+    }
+  };
+
+  uploadBoxHandleSuccess = file => {
+    this.setState({
+      localFilesDoneUploading: this.state.localFilesDoneUploading.concat(file)
+    });
+    if (
+      this.state.localFilesToUpload.length ===
+      this.state.localFilesDoneUploading.length
+    ) {
+      this.setState({
+        submitting: false,
+        successMessage: "All uploads finished!",
+        success: true,
+        invalid: false
+      });
+
+      // Mark as uploaded
+      axios
+        .put(`/samples/${this.state.id}.json`, {
+          sample: {
+            id: this.state.id,
+            status: "uploaded"
+          },
+          authenticity_token: this.csrf
+        })
+        .then(() => {
+          window.onbeforeunload = null;
+          this.goToPageWithTimeout(`/samples/${this.state.id}`);
+        })
+        .catch(error => {
+          this.setState({
+            invalid: true,
+            submitting: false,
+            errorMessage: this.joinServerError(error.response.data)
+          });
+        });
+    }
+  };
+
+  uploadBoxHandleFailure = (file, err) => {
+    this.setState({
+      submitting: false,
+      invalid: true,
+      errorMessage:
+        `Upload of ${
+          file.name
+        } failed for some reason. Please delete the created sample and try again or ask us our team for help. ` +
+        err
+    });
+  };
+
+  // Upload local files after creating the sample and getting presigned URLs
+  uploadLocalFiles = createResponse => {
+    if (createResponse.length > 0) {
+      // Fill in presigned URL fields
+      let newURLs;
+      if (createResponse.length === 1) {
+        newURLs = [createResponse[0].presigned_url, ""];
+      } else {
+        newURLs = [
+          createResponse[0].presigned_url,
+          createResponse[1].presigned_url
+        ];
+      }
+
+      // Tell uploaders to start
+      this.setState({
+        localFileUploadURLs: newURLs,
+        localUploadShouldStart: true,
+        submitting: true,
+        invalid: true,
+        errorMessage:
+          "Upload in progress... Please keep this page open until completed..."
+      });
+
+      // Chrome will show a generic message and not this message.
+      window.onbeforeunload = () =>
+        "Uploading is in progress. Are you sure you want to exit?";
+    }
+  };
+
+  createSampleFromLocal = () => {
+    this.setState({
+      submitting: true
+    });
+    let inputFilesAttributes = [];
+    this.state.localFilesToUpload.forEach(file => {
+      inputFilesAttributes.push({
+        source_type: "local",
+        source: file.name.trim(),
+        parts: file.name.trim()
+      });
+    });
+
+    axios
+      .post("/samples.json", {
+        sample: {
+          name: this.state.sampleName,
+          project_name: this.state.selectedProject.trim(),
+          project_id: this.state.selectedPId,
+          input_files_attributes: inputFilesAttributes,
+          host_genome_id: this.state.selectedHostGenomeId,
+
+          // Admin options
+          s3_preload_result_path: this.userDetails.admin
+            ? this.refs.s3_preload_result_path.value.trim()
+            : "",
+          sample_memory: this.state.selectedMemory,
+          alignment_config_name: this.state.selectedAlignmentConfigName,
+          pipeline_branch: this.state.selectedBranch,
+          status: "created",
+          client: "web"
+        },
+        authenticity_token: this.csrf
+      })
+      .then(response => {
+        this.setState({
+          id: response.data.id
+        });
+        this.uploadLocalFiles(response.data.input_files);
+      })
+      .catch(error => {
+        this.setState({
+          invalid: true,
+          submitting: false,
+          errorMessage: this.joinServerError(error.response.data)
+        });
+      });
+  };
+
+  getSampleNameFromFileName = fname => {
+    let base = this.baseName(fname);
+    const fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/gim;
+    const readLabel = /_R1.*$|_R2.*$/gi;
+    base = base.replace(fastqLabel, "").replace(readLabel, "");
+    return base;
+  };
 
   renderSampleForm(updateExistingSample = false) {
     const termsBlurb = (
@@ -610,6 +787,7 @@ class SampleUpload extends React.Component {
         </label>
       </div>
     );
+
     const submitButton = (
       <button
         type="submit"
@@ -624,6 +802,154 @@ class SampleUpload extends React.Component {
         )}
       </button>
     );
+
+    let uploadModeSwitcher;
+    if (!updateExistingSample) {
+      uploadModeSwitcher = (
+        <div className="menu-container">
+          <Menu compact>
+            <MenuItem
+              active={!this.state.localUploadMode}
+              onClick={() => this.setState({ localUploadMode: false })}
+            >
+              <Icon size="large" name="server" />
+              Upload from S3
+            </MenuItem>
+            <MenuItem
+              active={this.state.localUploadMode}
+              onClick={() => this.setState({ localUploadMode: true })}
+            >
+              <Icon size="large" name="folder open outline" />
+              Upload from Your Computer
+            </MenuItem>
+          </Menu>
+        </div>
+      );
+    }
+
+    const toUpload = this.state.localFilesToUpload;
+
+    const localInputFileSection = (
+      <div className="field">
+        <div className="validation-info">
+          Max file size for local uploads: 5GB per file. Accepted formats: fastq
+          (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).
+        </div>
+        <div className="row">
+          <UploadBox
+            onDrop={this.onDrop(0)}
+            title={"Read 1 File:"}
+            fileToUpload={toUpload.length > 0 ? toUpload[0] : null}
+            startUpload={this.state.localUploadShouldStart}
+            url={this.state.localFileUploadURLs[0]}
+            handleSuccess={this.uploadBoxHandleSuccess}
+            handleFailure={this.uploadBoxHandleFailure}
+          />
+          <UploadBox
+            onDrop={this.onDrop(1)}
+            title={"Read 2 File (optional):"}
+            fileToUpload={toUpload.length > 1 ? toUpload[1] : null}
+            startUpload={this.state.localUploadShouldStart}
+            url={this.state.localFileUploadURLs[1]}
+            handleSuccess={this.uploadBoxHandleSuccess}
+            handleFailure={this.uploadBoxHandleFailure}
+          />
+        </div>
+      </div>
+    );
+
+    const remoteInputFileSection = (
+      <div>
+        <div className="field">
+          <div className="row">
+            <div className="col no-padding s12">
+              <div className="field-title">
+                <div className="read-count-label">Read 1</div>
+                <div className="validation-info">
+                  Accepted formats: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa),
+                  fasta.gz (.fa.gz)
+                </div>
+                <div className="example-link">
+                  Example:
+                  s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="row input-row">
+            <div className="col no-padding s12">
+              <input
+                type="text"
+                ref="first_file_source"
+                onKeyUp={this.updateSampleName}
+                onBlur={this.clearError}
+                className="browser-default"
+                placeholder="aws/path-to-sample"
+                defaultValue={this.firstInput}
+                disabled={updateExistingSample}
+              />
+              {this.state.errors.first_file_source ? (
+                <div className="field-error">
+                  {this.state.errors.first_file_source}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        <div className="field">
+          <div className="row">
+            <div className="col no-padding s12">
+              <div className="field-title">
+                <div className="read-count-label">Read 2 (optional)</div>
+                <div className="validation-info">
+                  Accepted formats: fastq (.fq), fastq.gz (.fq.gz), fasta (.fa),
+                  fasta.gz (.fa.gz)
+                </div>
+                <div className="example-link">
+                  Example:
+                  s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="row input-row">
+            <div className="col no-padding s12">
+              <input
+                ref="second_file_source"
+                onFocus={this.clearError}
+                type="text"
+                className="browser-default"
+                placeholder="aws/path-to-sample"
+                defaultValue={this.secondInput}
+                disabled={updateExistingSample}
+              />
+              {this.state.errors.second_file_source ? (
+                <div className="field-error">
+                  {this.state.errors.second_file_source}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        <div className="upload-notes">
+          <div>
+            - Please ensure that IDseq has permissions to read/list your S3
+            bucket or ask our team for help.
+          </div>
+          <div>
+            - Also convert links like
+            "https://s3-us-west-2.amazonaws.com/czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz"
+            to the format
+            "s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz"
+          </div>
+        </div>
+      </div>
+    );
+
+    let inputFileSection = remoteInputFileSection;
+    if (!updateExistingSample && this.state.localUploadMode) {
+      inputFileSection = localInputFileSection;
+    }
 
     return (
       <div id="samplesUploader" className="row">
@@ -841,91 +1167,11 @@ class SampleUpload extends React.Component {
                     </div>
                   </div>
                 </div>
-                <div className="field">
-                  <div className="row">
-                    <div className="col no-padding s12">
-                      <div className="field-title">
-                        <div className="read-count-label">Read 1</div>
-                        <div className="validation-info">
-                          Accepted formats: fastq (.fq), fastq.gz (.fq.gz),
-                          fasta (.fa), fasta.gz (.fa.gz)
-                        </div>
-                        <div className="example-link">
-                          Example:
-                          s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="row input-row">
-                    <div className="col no-padding s12">
-                      <input
-                        type="text"
-                        ref="first_file_source"
-                        onKeyUp={this.updateSampleName}
-                        onBlur={this.clearError}
-                        className="browser-default"
-                        placeholder="aws/path-to-sample"
-                        defaultValue={this.firstInput}
-                        disabled={updateExistingSample}
-                      />
-                      {this.state.errors.first_file_source ? (
-                        <div className="field-error">
-                          {this.state.errors.first_file_source}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
-                <div className="field">
-                  <div className="row">
-                    <div className="col no-padding s12">
-                      <div className="field-title">
-                        <div className="read-count-label">
-                          Read 2 (optional)
-                        </div>
-                        <div className="validation-info">
-                          Accepted formats: fastq (.fq), fastq.gz (.fq.gz),
-                          fasta (.fa), fasta.gz (.fa.gz)
-                        </div>
-                        <div className="example-link">
-                          Example:
-                          s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="row input-row">
-                    <div className="col no-padding s12">
-                      <input
-                        ref="second_file_source"
-                        onFocus={this.clearError}
-                        type="text"
-                        className="browser-default"
-                        placeholder="aws/path-to-sample"
-                        defaultValue={this.secondInput}
-                        disabled={updateExistingSample}
-                      />
-                      {this.state.errors.second_file_source ? (
-                        <div className="field-error">
-                          {this.state.errors.second_file_source}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
-                <div className="upload-notes">
-                  <div>
-                    - Please ensure that IDseq has permissions to read/list your
-                    S3 bucket or ask our team for help.
-                  </div>
-                  <div>
-                    - Also convert links like
-                    "https://s3-us-west-2.amazonaws.com/czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz"
-                    to the format
-                    "s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz"
-                  </div>
-                </div>
+
+                <div className="upload-mode-title">Sample Input Files</div>
+                {uploadModeSwitcher}
+                {inputFileSection}
+
                 <div className="field">
                   <div className="row">
                     <div className="col no-padding s12">
@@ -1117,11 +1363,7 @@ class SampleUpload extends React.Component {
                       ) : null}
                       {this.state.invalid ? (
                         <div className="form-feedback error-message">
-                          {this.displayError(
-                            this.state.invalid,
-                            this.state.serverErrors,
-                            this.state.errorMessage
-                          )}
+                          {this.state.errorMessage}
                         </div>
                       ) : null}
                       {submitButton}
