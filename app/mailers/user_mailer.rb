@@ -9,15 +9,6 @@ class UserMailer < ApplicationMailer
     LogUtil.log_err_and_airbrake("added_to_projects_email(#{email_arguments}) failed")
   end
 
-  def project_complete_email(email_arguments)
-    @project_name = email_arguments[:project_name]
-    @project_id = email_arguments[:project_id]
-    @number_samples = email_arguments[:number_samples]
-    mail(to: email_arguments[:user_email], subject: "Project '#{@project_name}' has finished processing")
-  rescue
-    LogUtil.log_err_and_airbrake("project_complete_email(#{email_arguments}) failed")
-  end
-
   def landing_sign_up_email(body)
     account_email = "accounts@idseq.net"
     mail(to: account_email, subject: "New sign up from landing page", body: body)
