@@ -37,6 +37,7 @@ class PipelineRun < ApplicationRecord
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   REFINED_TAXON_COUNTS_JSON_NAME = 'assembly/refined_taxon_counts.json'.freeze
+  REFINED_TAXID_BYTERANGE_JSON_NAME = 'assembly/refined_taxid_locations_combined.json'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
@@ -88,7 +89,6 @@ class PipelineRun < ApplicationRecord
 
   LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
-                        "refined_taxon_counts" => "db_load_refined_taxon_counts",
                         "taxon_byteranges" => "db_load_byteranges",
                         "amr_counts" => "db_load_amr_counts" }.freeze
   # Note: reads_before_priceseqfilter, reads_after_priceseqfilter, reads_after_cdhitdup
@@ -187,7 +187,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts refined_taxon_counts taxon_byteranges amr_counts]
+    target_outputs = %w[ercc_counts taxon_counts taxon_byteranges amr_counts]
 
     # Then, generate output_states
     output_state_entries = []
@@ -391,7 +391,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_taxon_counts
-    output_json_s3_path = "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
+    output_json_s3_path = s3_file_for("taxon_counts")
     downloaded_json_path = PipelineRun.download_file_with_retries(output_json_s3_path,
                                                                   local_json_path, 3)
     LogUtil.log_err_and_airbrake("PipelineRun #{id} failed taxon_counts download") unless downloaded_json_path
@@ -400,7 +400,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_refined_taxon_counts
-    output_json_s3_path = "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
+    output_json_s3_path = s3_file_for("refined_taxon_counts")
     downloaded_json_path = PipelineRun.download_file_with_retries(output_json_s3_path,
                                                                   local_json_path, 3)
     LogUtil.log_err_and_airbrake("PipelineRun #{id} failed refined_taxon_counts download") unless downloaded_json_path
@@ -409,7 +409,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_byteranges
-    byteranges_json_s3_path = "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
+    byteranges_json_s3_path = s3_file_for("taxon_byteranges")
     downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, local_json_path)
     taxon_byteranges_csv_file = "#{local_json_path}/taxon_byteranges"
     hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
@@ -427,11 +427,17 @@ class PipelineRun < ApplicationRecord
     when "amr_counts"
       "#{expt_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
     when "taxon_counts"
-      "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
-    when "refined_taxon_counts"
-      "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
+      if pipeline_version && pipeline_version.to_f >= 3.1
+        "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
+      else
+        "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
+      end
     when "taxon_byteranges"
-      "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
+      if pipeline_version && pipeline_version.to_f >= 3.1
+        "#{postprocess_output_s3_path}/#{REFINED_TAXID_BYTERANGE_JSON_NAME}"
+      else
+        "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
+      end
     end
   end
 
@@ -915,13 +921,21 @@ class PipelineRun < ApplicationRecord
   end
 
   def s3_paths_for_taxon_byteranges
+    file_prefix = ''
+    file_prefix = Sample::ASSEMBLY_PREFIX if pipeline_version && pipeline_version.to_f >= 3.1
     # by tax_level and hit_type
-    { TaxonCount::TAX_LEVEL_SPECIES => { 'NT' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA}",
-                                         'NR' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_NR}" },
-      TaxonCount::TAX_LEVEL_GENUS => { 'NT' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
-                                       'NR' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}" },
-      TaxonCount::TAX_LEVEL_FAMILY => { 'NT' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
-                                        'NR' => "#{postprocess_output_s3_path}/#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}" } }
+    { TaxonCount::TAX_LEVEL_SPECIES => {
+      'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA}",
+      'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_NR}"
+    },
+      TaxonCount::TAX_LEVEL_GENUS => {
+        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
+        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}"
+      },
+      TaxonCount::TAX_LEVEL_FAMILY => {
+        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
+        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}"
+      } }
   end
 
   def pipeline_version_file
