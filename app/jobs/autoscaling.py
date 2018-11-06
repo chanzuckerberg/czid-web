@@ -246,11 +246,6 @@ def stop_draining(asg, num_instances):
     instance_ids = instances_to_rescue(asg, num_instances)
     if instance_ids:
         print "Stopping drainage of the following instances: " + ",".join(instance_ids)
-        add_termination_protection(instance_ids, asg)
-        # Note: if autoscaling.py ran too frequently, there would be a risk that an instance enters Terminating state between the time
-        # of the health check in instances_to_rescue and the time of add_termination_protection, in which case add_termination_protection
-        # would throw an error. But because autoscaling.py runs only infrequently, we can be sure that there is no scaling decision in limbo
-        # from the last execution of autoscaling.py.
         remove_draining_tag(instance_ids)
 
 
@@ -270,8 +265,7 @@ def instances_to_rescue(asg, num_instances):
     That way we can probably terminate the non-rescued instances sooner.
     '''
     draining_instances = get_draining_servers(asg)
-    healthy_instance_ids = [inst["InstanceId"] for inst in asg["Instances"] if inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating"]
-    draining_instances_sorted = [key for key, value in sorted(draining_instances.items(), key=itemgetter(1), reverse=True) if key in healthy_instance_ids]
+    draining_instances_sorted = [key for key, value in sorted(draining_instances.items(), key=itemgetter(1), reverse=True)]
     return draining_instances_sorted[:num_instances]
 
 
@@ -280,7 +274,8 @@ def get_draining_servers(asg):
     cmd = "aws ec2 describe-tags --filters 'Name=tag-key,Values={draining_tag}' 'Name=resource-id,Values={instance_ids}'"
     cmd = cmd.format(draining_tag=DRAINING_TAG, instance_ids=','.join(instances_in(asg)))
     tag_dict = json.loads(aws_command(cmd))
-    instance_dict = { item['ResourceId']: int(item['Value']) for item in tag_dict['Tags'] if item['Key'] == DRAINING_TAG }
+    protected_instance_ids = [inst["InstanceId"] for inst in asg["Instances"] if inst["ProtectedFromScaleIn"] == true]
+    instance_dict = { item['ResourceId']: int(item['Value']) for item in tag_dict['Tags'] if item['Key'] == DRAINING_TAG and item['ResourceId'] in protected_instance_ids }
     print "Draining servers:"
     print instance_dict
     return instance_dict
@@ -321,14 +316,6 @@ def remove_termination_protection(instance_ids, asg):
     if not instance_ids:
         return
     cmd = "aws autoscaling set-instance-protection --instance-ids {list_instances} --auto-scaling-group-name {asg_name} --no-protected-from-scale-in"
-    cmd = cmd.format(list_instances=' '.join(instance_ids), asg_name=asg['AutoScalingGroupName'])
-    aws_command(cmd)
-
-
-def add_termination_protection(instance_ids, asg):
-    if not instance_ids:
-        return
-    cmd = "aws autoscaling set-instance-protection --instance-ids {list_instances} --auto-scaling-group-name {asg_name} --protected-from-scale-in"
     cmd = cmd.format(list_instances=' '.join(instance_ids), asg_name=asg['AutoScalingGroupName'])
     aws_command(cmd)
 
