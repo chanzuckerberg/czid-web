@@ -37,7 +37,6 @@ class PipelineSampleReads extends React.Component {
     this.reportTime = props.reportTime;
     this.allCategories = props.allCategories;
     this.reportDetails = props.reportDetails;
-    this.pipelineRunRetriable = props.pipelineRunRetriable;
     this.pipelineVersions = props.pipeline_versions;
 
     this.jobStatistics = props.jobStatistics;
@@ -839,27 +838,6 @@ class PipelineSampleReads extends React.Component {
         version_display + ", NT/NR: " + this.pipelineRun.version.alignment_db;
     }
 
-    let retriable = this.pipelineRunRetriable ? (
-      <div className="row">
-        <div className="col s12">
-          <div className="content-title">Retry Pipeline</div>
-          <h6 className={this.state.rerunStatus}>
-            {this.state.rerunStatus === "success" ? waitingSpinner : null}
-          </h6>
-          <p>
-            Pipeline was not 100% successful. Sample status:{" "}
-            <b>{this.pipelineStatus}</b> <br />
-            {this.state.rerunStatus === "failed" && this.can_edit ? (
-              <a onClick={this.rerunPipeline} className="custom-button small">
-                <i className="fa fa-repeat" />
-                RETRY PIPELINE
-              </a>
-            ) : null}
-          </p>
-        </div>
-      </div>
-    ) : null;
-
     let report_buttons = null;
     if (this.reportPresent) {
       report_buttons = (
@@ -1054,7 +1032,6 @@ class PipelineSampleReads extends React.Component {
                   </div>
                 </div>
                 {this.renderERCC()}
-                {retriable}
               </div>
 
               <div className="col s3 download-area">

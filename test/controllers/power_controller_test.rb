@@ -256,12 +256,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test 'joe cannot view joe_sample with background for project one' do
-    assert_raise do
-      access_sample_with_background(backgrounds(:background_for_project_one), samples(:joe_sample))
-    end
-  end
-
   # phylo_trees
   test 'joe can see joe_phylo_tree' do
     pt = phylo_trees(:joe_phylo_tree)
