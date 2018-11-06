@@ -76,8 +76,25 @@
       "assembly/rapsearch2_contig_summary.json"
     ],
     "refined_taxon_count_out": ["assembly/refined_taxon_counts.json"],
-    "contig_summary_out": ["assembly/combined_contig_summary.json"]
+    "contig_summary_out": ["assembly/combined_contig_summary.json"],
 
+    "refined_annotated_out": ["assembly/refined_annotated_merged.fa", "assembly/refined_unidentified.fa"],
+    "refined_taxid_fasta_out": ["assembly/refined_taxid_annot.fasta"],
+    "refined_taxid_locator_out": [
+      "assembly/refined_taxid_annot_sorted_nt.fasta",
+      "assembly/refined_taxid_locations_nt.json",
+      "assembly/refined_taxid_annot_sorted_nr.fasta",
+      "assembly/refined_taxid_locations_nr.json",
+      "assembly/refined_taxid_annot_sorted_genus_nt.fasta",
+      "assembly/refined_taxid_locations_genus_nt.json",
+      "assembly/refined_taxid_annot_sorted_genus_nr.fasta",
+      "assembly/refined_taxid_locations_genus_nr.json",
+      "assembly/refined_taxid_annot_sorted_family_nt.fasta",
+      "assembly/refined_taxid_locations_family_nt.json",
+      "assembly/refined_taxid_annot_sorted_family_nr.fasta",
+      "assembly/refined_taxid_locations_family_nr.json",
+      "assembly/refined_taxid_locations_combined.json"
+    ]
     <% end %>
   },
   "steps": [
@@ -100,7 +117,13 @@
       "additional_attributes": {}
     },
     {
-      "in": ["gsnap_m8", "taxid_locator_out"],
+      "in": [
+        "gsnap_m8", 
+        "taxid_locator_out"
+        <% if @dag_vars_dict["assembly"] %>
+          ,"gsnap_accessions_out"
+        <% end %>
+      ],
       "out": "alignment_viz_out",
       "class": "PipelineStepGenerateAlignmentViz",
       "module": "idseq_dag.steps.generate_alignment_viz",
@@ -193,6 +216,32 @@
       "module": "idseq_dag.steps.combine_json",
       "additional_files": {},
       "additional_attributes": {"field_idx": 4}
+    },
+    {
+      "in": ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out"],
+      "out": "refined_annotated_out",
+      "class": "PipelineStepGenerateAnnotatedFasta",
+      "module": "idseq_dag.steps.generate_annotated_fasta",
+      "additional_files": {},
+      "additional_attributes": {}
+    },
+    {
+      "in": ["refined_annotated_out", "refined_gsnap_out", "refined_rapsearch2_out"],
+      "out": "refined_taxid_fasta_out",
+      "class": "PipelineStepGenerateTaxidFasta",
+      "module": "idseq_dag.steps.generate_taxid_fasta",
+      "additional_files": {
+        "lineage_db":  "<%= @attribute_dict[:lineage_db] %>"
+      },
+      "additional_attributes": {}
+    },
+    {
+      "in": ["refined_taxid_fasta_out"],
+      "out": "refined_taxid_locator_out",
+      "class": "PipelineStepGenerateTaxidLocator",
+      "module": "idseq_dag.steps.generate_taxid_locator",
+      "additional_files": {},
+      "additional_attributes": {}
     }
     <% end %>
   ],
