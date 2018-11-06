@@ -37,7 +37,7 @@ MAX_REFRESH_INTERVAL = 1200
 # MAX_REFRESH_INTERVAL must be slightly bigger than MAX_INTERVAL_BETWEEN_DESCRIBE_INSTANCES in idseq-dag.
 # After this interval, we are sure we are safe from race conditions related to batch jobs dispatching gsnap/rapsearch jobs.
 JOB_TAG_PREFIX = "RunningIDseqBatchJob_"
-ALIGNMENT_JOB_EXPIRATION_SECONDS = 120 * 60
+ALIGNMENT_JOB_EXPIRATION_SECONDS = 30 * 60 # Batch job should update gsnap/rapsearch job tag every 10 minutes to signal it's alive. If not, we clean up after 30 minutes. TODO: centralize this parameter in the DAG where both idseq-dag and idseq-web can read from
 
 
 
@@ -170,7 +170,8 @@ def count_healthy_instances(asg):
     # This will become more useful when we start scaling down
     num_healthy = 0
     for inst in asg["Instances"]:
-        if inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating":
+        if inst["ProtectedFromScaleIn"] and 
+            inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating":
             num_healthy += 1
     return num_healthy
 
@@ -191,7 +192,7 @@ def clamp_to_valid_range(asg, desired_capacity):
     return desired_capacity
 
 
-def set_desired_capacity(asg, compute_desired_instances, can_scale=True):
+def set_desired_capacity(asg, tag_list, compute_desired_instances, can_scale=True):
     asg_name = asg['AutoScalingGroupName']
     num_healthy = count_healthy_instances(asg)
     previous_desired = get_previous_desired(asg)
@@ -211,12 +212,8 @@ def set_desired_capacity(asg, compute_desired_instances, can_scale=True):
         if num_desired < previous_desired:
             start_draining(asg, previous_desired - num_desired)
         elif num_desired > previous_desired:
-            stop_draining(asg, num_desired - previous_desired)
+            stop_draining(asg, tag_list, num_desired - previous_desired)
         aws_command(cmd)
-
-
-def instances_in(asg):
-    return [item["InstanceId"] for item in asg["Instances"]]
 
 
 def unixtime_now():
@@ -225,6 +222,29 @@ def unixtime_now():
 
 def iso2unixtime(iso_str):
     return int(dateutil.parser.parse(iso_str).strftime('%s'))
+
+
+def get_instance_tags():
+    '''
+    Return a list of tags, of the form:
+    [
+      {"Key": ..., "ResourceId": ..., "ResourceType": ..., "Value": ...},
+      {"Key": ..., "ResourceId": ..., "ResourceType": ..., "Value": ...},
+      ...
+    ]
+    '''
+    cmd = "aws ec2 describe-tags --filters 'Name=resource-type,Values=instance' --no-paginate"
+    tag_dict = json.loads(aws_command(cmd))
+    return tag_dict["Tags"]
+
+
+def instances_in(asg):
+    return [item["InstanceId"] for item in asg["Instances"]]
+
+
+def find_tags_for_instances_in(asg, tag_list):
+    instance_ids = instances_in(asg)
+    return [tag for tag in tag_list if tag["ResourceId"] in instance_ids]
 
 
 def add_draining_tag(instance_ids):
@@ -242,54 +262,47 @@ def start_draining(asg, num_instances):
     add_draining_tag(instance_ids)
 
 
-def stop_draining(asg, num_instances):
-    instance_ids = instances_to_rescue(asg, num_instances)
+def stop_draining(asg, tag_list, num_instances):
+    instance_ids = instances_to_rescue(asg, tag_list, num_instances)
     if instance_ids:
         print "Stopping drainage of the following instances: " + ",".join(instance_ids)
         remove_draining_tag(instance_ids)
 
 
 def instances_to_drain(asg, num_instances):
-    instance_ids = instances_in(asg)
-    cmd = "aws ec2 describe-instances --instance-ids {list_instances} --query 'Reservations[*].Instances[*].[InstanceId,LaunchTime]' --no-paginate"
-    cmd = cmd.format(list_instances=' '.join(instance_ids))
+    cmd = "aws ec2 describe-instances --filters "Name=tag:Name,Values={asg_name}" --query 'Reservations[*].Instances[*].[InstanceId,LaunchTime]' --no-paginate"
+    cmd = cmd.format(asg_name=asg['AutoScalingGroupName'])
     aws_response = json.loads(aws_command(cmd))
     zipped_instance_ids_and_launch_times = [(instance[0], iso2unixtime(instance[1])) for nest in aws_response for instance in nest]
     instance_ids_sorted_by_increasing_launch_time = [item[0] for item in sorted(zipped_instance_ids_and_launch_times, key=itemgetter(1))]
     return instance_ids_sorted_by_increasing_launch_time[:num_instances]
 
 
-def instances_to_rescue(asg, num_instances):
+def instances_to_rescue(asg, tag_list, num_instances):
     '''
     Rescue the instances that have been draining for the least amount of time.
     That way we can probably terminate the non-rescued instances sooner.
     '''
-    draining_instances = get_draining_servers(asg)
+    draining_instances = get_draining_servers(asg, tag_list)
     draining_instances_sorted = [key for key, value in sorted(draining_instances.items(), key=itemgetter(1), reverse=True)]
     return draining_instances_sorted[:num_instances]
 
 
-def get_draining_servers(asg):
+def get_draining_servers(asg, tag_list):
     ''' returns a map of draining instance IDs to the time they started draining '''
-    cmd = "aws ec2 describe-tags --filters 'Name=tag-key,Values={draining_tag}' 'Name=resource-id,Values={instance_ids}'"
-    cmd = cmd.format(draining_tag=DRAINING_TAG, instance_ids=','.join(instances_in(asg)))
-    tag_dict = json.loads(aws_command(cmd))
     protected_instance_ids = [inst["InstanceId"] for inst in asg["Instances"] if inst["ProtectedFromScaleIn"] == true]
-    instance_dict = { item['ResourceId']: int(item['Value']) for item in tag_dict['Tags'] if item['Key'] == DRAINING_TAG and item['ResourceId'] in protected_instance_ids }
+    instance_dict = { item['ResourceId']: int(item['Value']) for item in tag_list if item['Key'] == DRAINING_TAG and item['ResourceId'] in protected_instance_ids }
     print "Draining servers:"
     print instance_dict
     return instance_dict
 
 
-def count_running_alignment_jobs(asg):
+def count_running_alignment_jobs(asg, tag_list):
     ''' returns a map of instance IDs to number of jobs running on the instance '''
     instance_ids = instances_in(asg)
-    cmd = "aws ec2 describe-tags --filters 'Name=resource-id,Values={list_instances}'"
-    cmd = cmd.format(list_instances=','.join(instance_ids))
-    tag_dict = json.loads(aws_command(cmd))
     count_dict = { id: 0 for id in instance_ids}
     expired_jobs = []
-    for item in tag_dict['Tags']:
+    for item in tag_list:
         if item['Key'].startswith(JOB_TAG_PREFIX):
             job_tag = item['Key']
             instance_id = item['ResourceId']
@@ -320,9 +333,9 @@ def remove_termination_protection(instance_ids, asg):
     aws_command(cmd)
 
 
-def check_draining_servers(asg, can_scale):
-    drain_date_by_instance_id = get_draining_servers(asg)
-    num_jobs_by_instance_id = count_running_alignment_jobs(asg)
+def check_draining_servers(asg, tag_list, can_scale):
+    drain_date_by_instance_id = get_draining_servers(asg, tag_list)
+    num_jobs_by_instance_id = count_running_alignment_jobs(asg, tag_list)
     instance_ids_to_terminate = []
     current_timestamp = unixtime_now()
     for instance_id, drain_date in drain_date_by_instance_id.items():
@@ -394,11 +407,14 @@ def autoscaling_update(my_num_jobs, my_environment="development"):
         # when debugging is disabled and we can't scale we exit early here
         if not DEBUG:
             return
-    check_draining_servers(gsnap_asg, can_scale)
-    check_draining_servers(rapsearch2_asg, can_scale)
+    tag_list = get_instance_tags()
+    gsnap_tags = find_tags_for_instances_in(gsnap_asg, tag_list)
+    rapsearch_tags = find_tags_for_instances_in(rapsearch2_asg, tag_list)
+    check_draining_servers(gsnap_asg, gsnap_tags, can_scale)
+    check_draining_servers(rapsearch2_asg, rapsearch_tags, can_scale)
     if num_real_jobs == 0 and num_development_jobs == 0:
-        set_desired_capacity(gsnap_asg, exactly(0), can_scale)
-        set_desired_capacity(rapsearch2_asg, exactly(0), can_scale)
+        set_desired_capacity(gsnap_asg, gsnap_tags, exactly(0), can_scale)
+        set_desired_capacity(rapsearch2_asg, rapsearch_tags, exactly(0), can_scale)
     elif num_real_jobs == 0 and num_development_jobs > 0:
         count_running_servers = get_previous_desired(gsnap_asg) + get_previous_desired(rapsearch2_asg)
         print "Only development environments are reporting in-progress jobs, and {crs} servers are running.".format(crs=count_running_servers)
@@ -408,24 +424,24 @@ def autoscaling_update(my_num_jobs, my_environment="development"):
                 print "{crbj} jobs are running in aws batch queues".format(crbj=crbj)
                 # This is an unsafe scaling operation, but the only jobs that can get hurt
                 # are development jobs.  Just rerun those.
-                set_desired_capacity(gsnap_asg, exactly(1), can_scale)
-                set_desired_capacity(rapsearch2_asg, exactly(1), can_scale)
+                set_desired_capacity(gsnap_asg, gsnap_tags, exactly(1), can_scale)
+                set_desired_capacity(rapsearch2_asg, rapsearch_tags, exactly(1), can_scale)
             elif crbj == 0:
                 print "No jobs are running in batch."
                 # in this case num_development_jobs are either zombies or jobs caught in transition
                 # between pipeline stages;  the non-zombies won't be hurt, only delayed by this
-                set_desired_capacity(gsnap_asg, exactly(0), can_scale)
-                set_desired_capacity(rapsearch2_asg, exactly(0), can_scale)
+                set_desired_capacity(gsnap_asg, gsnap_tags, exactly(0), can_scale)
+                set_desired_capacity(rapsearch2_asg, rapsearch_tags, exactly(0), can_scale)
             else:
                 print "Failed to get information about running jobs in aws batch.  Deferring scaling decision."
         else:
             print "Deferring scaling decision to stay under the rate limit for 'aws batch list-jobs'."
     elif 1 <= num_real_jobs <= 6:
-        set_desired_capacity(gsnap_asg, exactly(8), can_scale)
-        set_desired_capacity(rapsearch2_asg, exactly(8), can_scale)
+        set_desired_capacity(gsnap_asg, gsnap_tags, exactly(8), can_scale)
+        set_desired_capacity(rapsearch2_asg, rapsearch_tags, exactly(8), can_scale)
     else:
-        set_desired_capacity(gsnap_asg, at_least(24), can_scale)
-        set_desired_capacity(rapsearch2_asg, at_least(24), can_scale)
+        set_desired_capacity(gsnap_asg, gsnap_tags, at_least(24), can_scale)
+        set_desired_capacity(rapsearch2_asg, rapsearch_tags, at_least(24), can_scale)
 
 
 if __name__ == "__main__":
