@@ -85,7 +85,7 @@ class PhyloTreeListView extends React.Component {
         <div className={cs.narrowContainer}>
           <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
             <ViewHeader.Content>
-              <div className={cs.preTitle}>Phylogenetic Tree</div>
+              <ViewHeader.Pretitle>Phylogenetic Tree</ViewHeader.Pretitle>
               <ViewHeader.Title
                 label={
                   this.phyloTreeMap.get(this.state.selectedPhyloTreeId).name
@@ -98,9 +98,9 @@ class PhyloTreeListView extends React.Component {
                 }))}
               />
             </ViewHeader.Content>
-            <ViewHeader.RightControls>
+            <ViewHeader.Controls>
               <PhyloTreeDownloadButton tree={currentTree} />
-            </ViewHeader.RightControls>
+            </ViewHeader.Controls>
           </ViewHeader>
         </div>
         <Divider />

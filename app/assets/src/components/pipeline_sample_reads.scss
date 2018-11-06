@@ -2,40 +2,14 @@
 @import "~styles/typography";
 
 /* Subheader */
-.pipelineSampleReadsSubheader {
+.viewHeader {
+  margin-top: 20px;
+  margin-bottom: 5px;
+
   .pipelineInfo {
     color: $light-grey;
     font-size: $font-size-small;
-    margin-bottom: 10px;
-  }
-
-  .viewHeader {
-    margin-top: 20px;
-    margin-bottom: 5px;
-  }
-
-  .projectNameContainer {
-    font-size: $font-size-body;
-    color: $medium-grey;
-    font-weight: $font-weight-semibold;
-    letter-spacing: 0.5px;
-    margin-bottom: 2px;
-    display: flex;
-
-    .projectName {
-      max-width: 600px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-
-      &:hover {
-        /* Overwrite header.scss */
-        color: $primary-light !important;
-      }
-    }
-
-    .rightArrow {
-      margin-left: 5px;
-    }
+    margin-bottom: 20px;
+    margin-left: 1px;
   }
 }

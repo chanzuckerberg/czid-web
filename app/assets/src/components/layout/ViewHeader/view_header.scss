@@ -3,9 +3,19 @@
 
 .viewHeader {
   display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1280px;
 
   .content {
     margin-right: 20px;
+  }
+
+  .info {
+    color: $light-grey;
+    font-size: $font-size-small;
+    margin-bottom: 10px;
   }
 
   .fill {
@@ -13,7 +23,7 @@
     min-width: 0;
   }
 
-  .rightControls {
+  .controls {
     flex-shrink: 0;
   }
 
@@ -24,18 +34,55 @@
   .sampleName {
     color: $black;
     font-weight: $font-weight-semibold;
-    letter-spacing: 1px;
+    letter-spacing: 0.4px;
+    max-width: 800px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
     font-size: $font-size-h3;
-    word-break: break-all;
     line-height: $line-height-h3;
   }
 
   .trigger {
     margin-right: 10px;
     user-select: none;
+    display: inline-block;
 
     &:hover {
       color: $primary-light;
     }
   }
+
+  .pretitle {
+    font-size: $font-size-body;
+    color: $medium-grey;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+    margin-left: 1px;
+    display: flex;
+
+    .link {
+      max-width: 600px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+
+      &:hover {
+        /* Overwrite header.scss */
+        color: $primary-light !important;
+      }
+    }
+
+    .rightArrow {
+      margin-left: 5px;
+    }
+  }
+}
+
+.sampleNamePopup {
+  text-align: left;
+  /* override semantic-ui */
+  max-width: 500px !important;
+  word-break: break-all;
 }

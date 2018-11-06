@@ -6,7 +6,6 @@ import axios from "axios";
 import { Divider, Dropdown, Popup } from "semantic-ui-react";
 import DownloadButton from "./ui/controls/buttons/DownloadButton";
 import numberWithCommas from "../helpers/strings";
-import SubHeader from "./SubHeader";
 import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
 import AMRView from "./AMRView";
@@ -834,56 +833,46 @@ class PipelineSampleReads extends React.Component {
 
     return (
       <div>
-        <SubHeader>
-          <div className={cs.pipelineSampleReadsSubheader}>
+        <ViewHeader className={cs.viewHeader}>
+          <ViewHeader.Content>
             <div className={cs.pipelineInfo}>
               PIPELINE {version_display} {pipeline_version_blurb}
             </div>
-            <ViewHeader className={cs.viewHeader}>
-              <ViewHeader.Content>
-                <div className={cs.projectNameContainer}>
-                  <a
-                    href={`/home?project_id=${this.projectInfo.id}`}
-                    className={cs.projectName}
-                  >
-                    {this.projectInfo.name}
-                  </a>
-                  <span className={cs.rightArrow}>{">"}</span>
-                </div>
-                <ViewHeader.Title
-                  label={this.state.sample_name}
-                  id={this.sampleId}
-                  options={Object.keys(this.sample_map).map(sampleId => ({
-                    label: this.sample_map[sampleId],
-                    id: sampleId,
-                    onClick: () => window.open(`/samples/${sampleId}`, "_self")
-                  }))}
-                />
-              </ViewHeader.Content>
-              <ViewHeader.RightControls>
-                {report_buttons}
-              </ViewHeader.RightControls>
-            </ViewHeader>
+            <ViewHeader.Pretitle
+              breadcrumbLink={`/home?project_id=${this.projectInfo.id}`}
+            >
+              {this.projectInfo.name}
+            </ViewHeader.Pretitle>
+            <ViewHeader.Title
+              label={this.state.sample_name}
+              id={this.sampleId}
+              options={Object.keys(this.sample_map).map(sampleId => ({
+                label: this.sample_map[sampleId],
+                id: sampleId,
+                onClick: () => window.open(`/samples/${sampleId}`, "_self")
+              }))}
+            />
+          </ViewHeader.Content>
+          <ViewHeader.Controls>{report_buttons}</ViewHeader.Controls>
+        </ViewHeader>
 
-            <div className="sub-header-navigation">
-              <div className="nav-content">
-                <ul className="tabs tabs-transparent">
-                  <li className="tab">
-                    <a href="#reports" className="active">
-                      Report
-                    </a>
-                  </li>
-                  <li className="tab">
-                    <a href="#details" className="">
-                      Details
-                    </a>
-                  </li>
-                  {amr_tab}
-                </ul>
-              </div>
-            </div>
+        <div className="sub-header-navigation">
+          <div className="nav-content">
+            <ul className="tabs tabs-transparent">
+              <li className="tab">
+                <a href="#reports" className="active">
+                  Report
+                </a>
+              </li>
+              <li className="tab">
+                <a href="#details" className="">
+                  Details
+                </a>
+              </li>
+              {amr_tab}
+            </ul>
           </div>
-        </SubHeader>
+        </div>
         <Divider className="reports-divider" />
 
         {amr_table}
