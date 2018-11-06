@@ -69,7 +69,6 @@ class Samples extends React.Component {
     this.checkReportDownload = this.checkReportDownload.bind(this);
     this.displayReportProgress = this.displayReportProgress.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
-    this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
     this.state = {
       invite_status: null,
       background_creation_response: {},
