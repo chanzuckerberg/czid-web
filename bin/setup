@@ -16,7 +16,7 @@ chdir APP_ROOT do
   system('open -a Docker 1>/dev/null') || abort('install docker from directions at https://docs.docker.com/docker-for-mac/install/')
   puts '== Updating homebrew Formulae =='
   system!('brew update')
-  dependencies = ['mysql', 'hub', 'bash-completion', 'node', 'yarn']
+  dependencies = ['mysql', 'hub', 'bash-completion', 'node']
   puts '== Installing dependencies =='
   if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.4.1')
     puts("== Updating ruby ... ==")
@@ -33,7 +33,7 @@ chdir APP_ROOT do
   system!('docker -v || brew cask install docker')
   puts "\n== Preparing database =="
   system! 'docker-compose build'
-  system! 'yarn install && ./node_modules/.bin/webpack --config webpack.config.dev.js'
+  system! 'npm install && ./node_modules/.bin/webpack --config webpack.config.dev.js'
   system! 'docker-compose up -d db'
   sleep(10)
   system! 'docker-compose run --rm web rake db:drop db:create db:migrate db:seed'
