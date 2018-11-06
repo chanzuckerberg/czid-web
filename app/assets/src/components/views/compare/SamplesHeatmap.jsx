@@ -208,6 +208,8 @@ class SamplesHeatmap extends React.Component {
       })
       .then(response => {
         let taxons = this.extractTaxons(response.data);
+        console.log("taxons", taxons);
+        console.log("data", response.data);
         this.recluster = true;
         this.setState({
           data: response.data,
@@ -269,16 +271,18 @@ class SamplesHeatmap extends React.Component {
             break;
           }
         }
-        vector.push(value);
+        vector.push(value || -100000);
       }
       vector.sample = sample;
       vectors.push(vector);
     }
 
+    console.log("clustering samples - vectors", vectors);
     let cluster = clusterfck.hcluster(vectors);
 
     let clusteredSamples = [];
     let toVisit = [cluster];
+    console.log("clustering samples - cluster", cluster);
     while (toVisit.length > 0) {
       let node = toVisit.pop();
       if (node.right) {
@@ -289,6 +293,7 @@ class SamplesHeatmap extends React.Component {
       }
 
       if (node.value) {
+        console.log("\tval", node.value);
         node.label = node.value.sample.name;
         clusteredSamples.push(node.value.sample);
       }
@@ -348,10 +353,11 @@ class SamplesHeatmap extends React.Component {
 
     let vectors = [];
     for (let key of Object.keys(taxonScores)) {
-      let vector = taxonScores[key];
+      let vector = taxonScores[key].map(d => d || -100000);
       vector.taxonName = key;
       vectors.push(vector);
     }
+    console.log("clustering taxons - vectors", vectors);
     let cluster = clusterfck.hcluster(vectors);
     if (!cluster) {
       return {};
