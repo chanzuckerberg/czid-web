@@ -82,25 +82,15 @@ a {
   }
 }
 
-.sub-header-component {
-  min-height: 120px;
-  padding-top: 20px;
-  .delete-button {
-    margin-left: 50px;
-    vertical-align: middle;
-  }
-  .container {
-    width: 90%;
-  }
-}
-
 #sample-list {
   width: 100px;
   top: 11rem !important;
 }
 
 .sub-header-navigation {
-  margin-top: 15px;
+  max-width: 1280px;
+  margin: 0 auto;
+  margin-top: 10px;
 }
 
 .modal-overlay {

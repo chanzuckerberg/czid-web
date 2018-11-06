@@ -17,7 +17,6 @@
 @import "styles/cli_user_instructions";
 
 // layout
-@import "styles/layout/divider";
 @import "styles/layout/filter_row";
 @import "styles/layout/view_header";
 
@@ -50,7 +49,6 @@
 // views
 @import "styles/views/landing";
 @import "styles/views/phylo_tree/phylo_tree_creation";
-@import "styles/views/phylo_tree/phylo_tree_list_view";
 @import "styles/views/phylo_tree/phylo_tree_vis";
 @import "styles/views/playground_controls";
 @import "styles/views/report/pathogen_summary";
