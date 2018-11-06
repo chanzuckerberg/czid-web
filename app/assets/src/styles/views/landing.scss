@@ -6,6 +6,20 @@
   margin-right: 0.75rem;
 }
 
+.hiring-ad {
+  @media screen and (max-width: 768px) {
+    display: none;
+  }
+  float: right;
+  margin-top: 1.1rem;
+  margin-right: 0.9rem;
+  color: white;
+  font-weight: 600;
+  a {
+    color: $primary-light !important;
+  }
+}
+
 .alert-browser-support {
   color: $light-grey;
   float: right;
