@@ -39,6 +39,31 @@ MAX_REFRESH_INTERVAL = 1200
 JOB_TAG_PREFIX = "RunningIDseqBatchJob_"
 ALIGNMENT_JOB_EXPIRATION_SECONDS = 30 * 60 # Batch job should update gsnap/rapsearch job tag every 10 minutes to signal it's alive. If not, we clean up after 30 minutes. TODO: centralize this parameter in the DAG where both idseq-dag and idseq-web can read from
 
+## EXPLANATION OF STATE TRANSITIONS FOR GSNAP/RAPSEARCH MACHINES
+'''
+{ service: gsnap-prod-initializing, ProtectedFromScaleIn: True }
+Initializing. Scale-in protection automatically granted at birth.
+    |
+    V
+{ service: gsnap-prod, ProtectedFromScaleIn: True }
+In service, accepting chunks. Scale-in protection present.
+    |
+    V
+{ service: gsnap-prod, ProtectedFromScaleIn: True,
+  RunningIDseqBatchJob_X1: Y1, RunningIDseqBatchJob_X2: Y2, ...
+}
+Processing chunks.
+    |
+    V
+{ service: gsnap-prod, draining: T0, ProtectedFromScaleIn: True }
+Draining. Scale-in protection still present.
+Can still accept chunks for up to MAX_REFRESH_INTERVAL seconds after entering this state.
+Can still finish running chunks for up to MAX_REFRESH_INTERVAL + ALIGNMENT_JOB_EXPIRATION_SECONDS seconds after entering this state.
+    |
+    V
+{ service: gsnap-prod, draining: T0, ProtectedFromScaleIn: False }
+Discarded. Scale-in protection withdrawn on transition to this state.
+'''
 
 
 def retry(operation, randgen=random.Random().random):
