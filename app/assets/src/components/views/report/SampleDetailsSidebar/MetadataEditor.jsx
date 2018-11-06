@@ -1,9 +1,9 @@
 import React from "react";
+import { isArray } from "lodash";
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 import cs from "./sample_details_sidebar.scss";
-import { isArray } from "lodash";
-import PropTypes from "prop-types";
+import PropTypes from "~/components/utils/propTypes";
 
 class MetadataEditor extends React.Component {
   renderInput = metadataType => {
@@ -53,16 +53,10 @@ class MetadataEditor extends React.Component {
 }
 
 MetadataEditor.propTypes = {
-  metadata: PropTypes.shape({
-    collection_location: PropTypes.string
-  }),
-  metadataTypes: PropTypes.arrayOf(
-    PropTypes.shape({
-      key: PropTypes.string,
-      dataType: PropTypes.oneOf(["string", "number"]),
-      name: PropTypes.string
-    })
+  metadata: PropTypes.objectOf(
+    PropTypes.oneOfType([PropTypes.string, PropTypes.number])
   ),
+  metadataTypes: PropTypes.arrayOf(PropTypes.MetadataType),
   onMetadataChange: PropTypes.func.isRequired,
   onMetadataSave: PropTypes.func.isRequired
 };

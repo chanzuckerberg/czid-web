@@ -1,13 +1,9 @@
 import React from "react";
 import { keyBy, mapValues } from "lodash";
-import PropTypes from "../../../utils/propTypes";
-import Sidebar from "../../../ui/containers/Sidebar";
-import RemoveIcon from "../../../ui/icons/RemoveIcon";
-import {
-  getSampleMetadata,
-  saveSampleMetadata,
-  getMetadataTypes
-} from "../../../../api";
+import PropTypes from "~/components/utils/propTypes";
+import Sidebar from "~/components/ui/containers/Sidebar";
+import RemoveIcon from "~/components/ui/icons/RemoveIcon";
+import { getSampleMetadata, saveSampleMetadata, getMetadataTypes } from "~/api";
 import MetadataEditor from "./MetadataEditor";
 import cs from "./sample_details_sidebar.scss";
 
@@ -28,7 +24,9 @@ const processMetadata = metadata => {
 
 class SampleDetailsSidebar extends React.Component {
   state = {
-    metadata: null
+    metadata: null,
+    metadataTypes: null,
+    metadataChanged: {}
   };
 
   async componentDidMount() {
@@ -42,23 +40,37 @@ class SampleDetailsSidebar extends React.Component {
     });
   }
 
+  // shouldSave option is used when <Input> option is selected
+  // to change and save in one call (to avoid setState issues)
   onMetadataChange = (key, value, shouldSave) => {
     this.setState({
       metadata: {
         ...this.state.metadata,
         [key]: value
+      },
+      metadataChanged: {
+        ...this.state.metadataChanged,
+        [key]: !shouldSave
       }
     });
 
     if (shouldSave) {
-      this._saveHelper(key, value);
+      saveSampleMetadata(this.props.sample.id, key, value);
     }
   };
 
-  onMetadataSave = key => this._saveHelper(key, this.state.metadata[key]);
+  onMetadataSave = key => {
+    if (this.state.metadataChanged[key]) {
+      saveSampleMetadata(this.props.sample.id, key, this.state.metadata[key]);
 
-  _saveHelper = (key, value) =>
-    saveSampleMetadata(this.props.sample.id, key, value);
+      this.setState({
+        metadataChanged: {
+          ...this.state.metadataChanged,
+          [key]: false
+        }
+      });
+    }
+  };
 
   render() {
     const { visible } = this.props;

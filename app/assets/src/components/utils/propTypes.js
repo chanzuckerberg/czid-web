@@ -48,10 +48,17 @@ const Sample = PropTypes.shape({
   id: PropTypes.number.isRequired
 });
 
+const MetadataType = PropTypes.shape({
+  key: PropTypes.string,
+  dataType: PropTypes.oneOf(["string", "number"]),
+  name: PropTypes.string
+});
+
 export default {
   ReportDetails,
   Taxon,
   BackgroundData,
   Sample,
+  MetadataType,
   ...PropTypes
 };

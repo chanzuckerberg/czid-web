@@ -7,7 +7,7 @@ class Input extends React.Component {
     super(props);
   }
 
-  onChange = (_, inputProps) => {
+  handleChange = (_, inputProps) => {
     if (this.props.onChange) {
       this.props.onChange(inputProps.value);
     }
@@ -20,7 +20,7 @@ class Input extends React.Component {
       <SemanticInput
         className={className}
         {...props}
-        onChange={this.onChange}
+        onChange={this.handleChange}
       />
     );
   }
