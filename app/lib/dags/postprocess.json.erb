@@ -23,8 +23,10 @@
       "taxid_locations_family_nr.json",
       "taxid_locations_combined.json"
     ],
-    "alignment_viz_out": ["align_viz.summary"],
-    "host_filter_out": [
+    "alignment_viz_out": ["align_viz.summary"]
+    <% if @dag_vars_dict["assembly"] %> 
+
+    ,"host_filter_out": [
       <% if @host_genome == "human" %>
         "gsnap_filter_1.fa"
         <% if @attribute_dict[:input_file_count] > 1 %>
@@ -40,17 +42,10 @@
      <% end %>
     ],
     "gsnap_out": [
-      "gsnap.m8",
-      "gsnap.deduped.m8",
-      "gsnap.hitsummary.tab",
-      "gsnap_counts.json"
-    ],
-    "refined_gsnap_out": [
-      "reclassify/gsnap.blast.m8",
-      "reclassify/gsnap.reassigned.m8",
-      "reclassify/gsnap_refined.hitsummary.tab",
-      "reclassify/gsnap_refined_counts.json",
-      "reclassify/gsnap_genus_accession_list.tab"
+        "gsnap.m8",
+        "gsnap.deduped.m8",
+        "gsnap.hitsummary.tab",
+        "gsnap_counts.json"
     ],
     "rapsearch2_out": [
       "rapsearch2.m8",
@@ -58,14 +53,49 @@
       "rapsearch2.hitsummary.tab",
       "rapsearch2_counts.json"
     ],
-    "refined_rapsearch2_out": [
-      "reclassify/rapsearch2.blast.m8",
-      "reclassify/rapsearch2.reassigned.m8",
-      "reclassify/rapsearch2_refined.hitsummary.tab",
-      "reclassify/rapsearch2_refined_counts.json",
-      "reclassify/rapsearch2_genus_accession_list.tab"
+    "assembly_out": [
+      "assembly/contigs.fasta",
+      "assembly/scaffolds.fasta",
+      "assembly/read-contig.sam",
+      "assembly/contig_stats.json"
     ],
-    "refined_taxon_count_out": ["reclassify/refined_taxon_counts.json"]
+    "gsnap_accessions_out": ["assembly/nt.refseq.fasta"],
+    "rapsearch2_accessions_out": ["assembly/nr.refseq.fasta"],
+    "refined_gsnap_out": [
+      "assembly/gsnap.blast.m8",
+      "assembly/gsnap.reassigned.m8",
+      "assembly/gsnap.hitsummary2.tab",
+      "assembly/refined_gsnap_counts.json", 
+      "assembly/gsnap_contig_summary.json"
+    ],
+    "refined_rapsearch2_out": [
+      "assembly/rapsearch2.blast.m8",
+      "assembly/rapsearch2.reassigned.m8",
+      "assembly/rapsearch2.hitsummary2.tab",
+      "assembly/refined_rapsearch2_counts.json",
+      "assembly/rapsearch2_contig_summary.json"
+    ],
+    "refined_taxon_count_out": ["assembly/refined_taxon_counts.json"],
+    "contig_summary_out": ["assembly/combined_contig_summary.json"],
+
+    "refined_annotated_out": ["assembly/refined_annotated_merged.fa", "assembly/refined_unidentified.fa"],
+    "refined_taxid_fasta_out": ["assembly/refined_taxid_annot.fasta"],
+    "refined_taxid_locator_out": [
+      "assembly/refined_taxid_annot_sorted_nt.fasta",
+      "assembly/refined_taxid_locations_nt.json",
+      "assembly/refined_taxid_annot_sorted_nr.fasta",
+      "assembly/refined_taxid_locations_nr.json",
+      "assembly/refined_taxid_annot_sorted_genus_nt.fasta",
+      "assembly/refined_taxid_locations_genus_nt.json",
+      "assembly/refined_taxid_annot_sorted_genus_nr.fasta",
+      "assembly/refined_taxid_locations_genus_nr.json",
+      "assembly/refined_taxid_annot_sorted_family_nt.fasta",
+      "assembly/refined_taxid_locations_family_nt.json",
+      "assembly/refined_taxid_annot_sorted_family_nr.fasta",
+      "assembly/refined_taxid_locations_family_nr.json",
+      "assembly/refined_taxid_locations_combined.json"
+    ]
+    <% end %>
   },
   "steps": [
     {
@@ -79,39 +109,96 @@
       "additional_attributes": {}
     },
     {
-      "in": ["gsnap_out", "host_filter_out"],
-      "out": "refined_gsnap_out",
-      "class": "PipelineStepReclassifyReads",
-      "module": "idseq_dag.steps.reclassify_reads", 
-      "additional_files": { 
-        "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
-        "accession2taxid_db": "<%= @attribute_dict[:accession2taxid_db] %>",
-        "loc_db": "<%= @attribute_dict[:nt_loc_db] %>"
-        <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
-          ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
+      "in": ["taxid_fasta_out"],
+      "out": "taxid_locator_out",
+      "class": "PipelineStepGenerateTaxidLocator",
+      "module": "idseq_dag.steps.generate_taxid_locator",
+      "additional_files": {},
+      "additional_attributes": {}
+    },
+    {
+      "in": [
+        "gsnap_m8", 
+        "taxid_locator_out"
+        <% if @dag_vars_dict["assembly"] %>
+          ,"gsnap_accessions_out"
         <% end %>
+      ],
+      "out": "alignment_viz_out",
+      "class": "PipelineStepGenerateAlignmentViz",
+      "module": "idseq_dag.steps.generate_alignment_viz",
+      "additional_files": {
+        "nt_loc_db": "<%= @attribute_dict[:nt_loc_db] %>"
       },
       "additional_attributes": {
-        "db": "<%= @attribute_dict[:nt_db] %>",
-        "db_type": "nt"
+        "nt_db": "<%= @attribute_dict[:nt_db] %>"
+      }
+    }
+    <% if @dag_vars_dict["assembly"] %>
+    ,{
+      "in": ["host_filter_out"],
+      "out": "assembly_out",
+      "class": "PipelineStepRunAssembly",
+      "module": "idseq_dag.steps.run_assembly",
+      "additional_files": {},
+      "additional_attributes": {"memory": 200}
+    },
+    {
+      "in": ["gsnap_out"],
+      "out": "gsnap_accessions_out",
+      "class": "PipelineStepDownloadAccessions",
+      "module": "idseq_dag.steps.download_accessions",
+      "additional_files": {
+        "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
+        "loc_db": "<%= @attribute_dict[:nt_loc_db] %>"
+      },
+      "additional_attributes": {
+          "db": "<%= @attribute_dict[:nt_db] %>",
+          "db_type": "nt"
       }
     },
     {
-      "in": ["rapsearch2_out", "host_filter_out"],
-      "out": "refined_rapsearch2_out",
-      "class": "PipelineStepReclassifyReads",
-      "module": "idseq_dag.steps.reclassify_reads", 
-      "additional_files": { 
+      "in": ["rapsearch2_out"],
+      "out": "rapsearch2_accessions_out",
+      "class": "PipelineStepDownloadAccessions",
+      "module": "idseq_dag.steps.download_accessions",
+      "additional_files": {
         "lineage_db": "<%= @attribute_dict[:lineage_db] %>",
-        "accession2taxid_db": "<%= @attribute_dict[:accession2taxid_db] %>",
         "loc_db": "<%= @attribute_dict[:nr_loc_db] %>"
+      },
+      "additional_attributes": {
+          "db":  "<%= @attribute_dict[:nr_db] %>",
+          "db_type": "nr"
+      }
+    },
+    {
+      "in": ["gsnap_out", "assembly_out", "gsnap_accessions_out"],
+      "out": "refined_gsnap_out",
+      "class": "PipelineStepBlastContigs",
+      "module": "idseq_dag.steps.blast_contigs",
+      "additional_files": {
+        "lineage_db": "<%= @attribute_dict[:lineage_db] %>"
         <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
           ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
         <% end %>
       },
       "additional_attributes": {
-        "db": "<%= @attribute_dict[:nr_db] %>",
-        "db_type": "nr"
+          "db_type": "nt"
+      }
+    },
+    {
+      "in": ["rapsearch2_out", "assembly_out", "rapsearch2_accessions_out"],
+      "out": "refined_rapsearch2_out",
+      "class": "PipelineStepBlastContigs",
+      "module": "idseq_dag.steps.blast_contigs",
+      "additional_files": {
+        "lineage_db": "<%= @attribute_dict[:lineage_db] %>"
+        <% if @attribute_dict[:skip_dedeuterostome_filter] == 0 %>
+          ,"deuterostome_db": "<%= @attribute_dict[:deuterostome_db] %>"
+        <% end %>
+      },
+      "additional_attributes": {
+          "db_type": "nr"
       }
     },
     {
@@ -123,25 +210,40 @@
       "additional_attributes": {}
     },
     {
-      "in": ["taxid_fasta_out"],
-      "out": "taxid_locator_out",
-      "class": "PipelineStepGenerateTaxidLocator",
-      "module": "idseq_dag.steps.generate_taxid_locator",
+      "in": ["refined_gsnap_out", "refined_rapsearch2_out"],
+      "out": "contig_summary_out",
+      "class": "PipelineStepCombineJson",
+      "module": "idseq_dag.steps.combine_json",
+      "additional_files": {},
+      "additional_attributes": {"field_idx": 4}
+    },
+    {
+      "in": ["host_filter_out", "refined_gsnap_out", "refined_rapsearch2_out"],
+      "out": "refined_annotated_out",
+      "class": "PipelineStepGenerateAnnotatedFasta",
+      "module": "idseq_dag.steps.generate_annotated_fasta",
       "additional_files": {},
       "additional_attributes": {}
     },
     {
-      "in": ["gsnap_m8", "taxid_locator_out"],
-      "out": "alignment_viz_out",
-      "class": "PipelineStepGenerateAlignmentViz",
-      "module": "idseq_dag.steps.generate_alignment_viz",
+      "in": ["refined_annotated_out", "refined_gsnap_out", "refined_rapsearch2_out"],
+      "out": "refined_taxid_fasta_out",
+      "class": "PipelineStepGenerateTaxidFasta",
+      "module": "idseq_dag.steps.generate_taxid_fasta",
       "additional_files": {
-        "nt_loc_db": "<%= @attribute_dict[:nt_loc_db] %>"
+        "lineage_db":  "<%= @attribute_dict[:lineage_db] %>"
       },
-      "additional_attributes": {
-        "nt_db": "<%= @attribute_dict[:nt_db] %>"
-      }
+      "additional_attributes": {}
+    },
+    {
+      "in": ["refined_taxid_fasta_out"],
+      "out": "refined_taxid_locator_out",
+      "class": "PipelineStepGenerateTaxidLocator",
+      "module": "idseq_dag.steps.generate_taxid_locator",
+      "additional_files": {},
+      "additional_attributes": {}
     }
+    <% end %>
   ],
   "given_targets": {
     "taxid_fasta_in": {
@@ -150,15 +252,17 @@
     },
     "gsnap_m8": {
       "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
-    },
-    "host_filter_out": {
-      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
-    },
-    "gsnap_out": {
-      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
-    },
-    "rapsearch2_out": {
-      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
     }
+     <% if @dag_vars_dict["assembly"] %>
+      ,"host_filter_out": {
+        "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
+      } 
+      ,"gsnap_out": {
+        "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
+      },
+      "rapsearch2_out": {
+        "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
+      }
+    <% end %>
   }
 }
