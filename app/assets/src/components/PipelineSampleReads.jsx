@@ -187,7 +187,7 @@ class PipelineSampleReads extends React.Component {
     let dropdown_options = this.DROPDOWN_OPTIONS[field];
     let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : "-";
     return (
-      <div className="row detail-row">
+      <div className="row detail-row" key={`${label}_${field}`}>
         <div className="col s6 label">{label}</div>
         <div className="col s6">
           <div className="sample-notes">
@@ -225,7 +225,7 @@ class PipelineSampleReads extends React.Component {
     let value = hash[field];
     if (hash[field] instanceof Array) value = hash[field].join("; ");
     return (
-      <div className="details-container col s12">
+      <div className="details-container col s12" key={`${label}_${field}`}>
         <div className="details-title note">{label}</div>
         <div className={"sample-notes note " + (editable ? "edit-wide" : "")}>
           <pre
@@ -249,7 +249,7 @@ class PipelineSampleReads extends React.Component {
     if (popupContent)
       labelElem = <BasicPopup trigger={labelElem} content={popupContent} />;
     return (
-      <div className="row detail-row">
+      <div className="row detail-row" key={`${label}_${field}`}>
         {labelElem}
         <div className="col s6">
           <div
@@ -273,7 +273,7 @@ class PipelineSampleReads extends React.Component {
   render_metadata_numfield(label, field) {
     let display_value = this.sampleInfo[field] || this.TYPE_PROMPT;
     return (
-      <div className="row detail-row">
+      <div className="row detail-row" key={`${label}_${field}`}>
         <div className="col s6 label">{label}</div>
         <div className="col s6">
           <div
@@ -582,6 +582,7 @@ class PipelineSampleReads extends React.Component {
                     onClick={() => {
                       this.refreshPage(phash);
                     }}
+                    key={version}
                   >
                     {"Pipeline v" + version}
                   </Dropdown.Item>
