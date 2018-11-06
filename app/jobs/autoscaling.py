@@ -166,12 +166,12 @@ def update_metric_values(asg, value, my_environment):
     return results
 
 
-def count_healthy_instances(asg):
-    # This will become more useful when we start scaling down
+def count_healthy_instances(asg, tag_list):
     num_healthy = 0
+    draining_instance_ids = get_draining_servers(asg, tag_list).keys()
     for inst in asg["Instances"]:
-        if inst["ProtectedFromScaleIn"] and 
-            inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating":
+        if inst["InstanceId"] not in draining_instance_ids and
+            inst["ProtectedFromScaleIn"] and inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating":
             num_healthy += 1
     return num_healthy
 
@@ -194,7 +194,7 @@ def clamp_to_valid_range(asg, desired_capacity):
 
 def set_desired_capacity(asg, tag_list, compute_desired_instances, can_scale=True):
     asg_name = asg['AutoScalingGroupName']
-    num_healthy = count_healthy_instances(asg)
+    num_healthy = count_healthy_instances(asg, tag_list)
     previous_desired = get_previous_desired(asg)
     # Manually input DesiredCapacity will never be reduced so long as there are pending jobs.
     num_desired = clamp_to_valid_range(asg, compute_desired_instances(previous_desired))
@@ -290,7 +290,7 @@ def instances_to_rescue(asg, tag_list, num_instances):
 
 def get_draining_servers(asg, tag_list):
     ''' returns a map of draining instance IDs to the time they started draining '''
-    protected_instance_ids = [inst["InstanceId"] for inst in asg["Instances"] if inst["ProtectedFromScaleIn"] == true]
+    protected_instance_ids = [inst["InstanceId"] for inst in asg["Instances"] if inst["ProtectedFromScaleIn"]]
     instance_dict = { item['ResourceId']: int(item['Value']) for item in tag_list if item['Key'] == DRAINING_TAG and item['ResourceId'] in protected_instance_ids }
     print "Draining servers:"
     print instance_dict
@@ -300,7 +300,7 @@ def get_draining_servers(asg, tag_list):
 def count_running_alignment_jobs(asg, tag_list):
     ''' returns a map of instance IDs to number of jobs running on the instance '''
     instance_ids = instances_in(asg)
-    count_dict = { id: 0 for id in instance_ids}
+    count_dict = { id: 0 for id in instance_ids }
     expired_jobs = []
     for item in tag_list:
         if item['Key'].startswith(JOB_TAG_PREFIX):
