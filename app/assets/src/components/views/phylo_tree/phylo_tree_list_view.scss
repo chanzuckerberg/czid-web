@@ -1,0 +1,17 @@
+@import "~styles/themes/colors";
+@import "~styles/typography";
+
+.phyloTreeListView {
+  .viewHeader {
+    margin: 40px 20px;
+  }
+
+  .narrowContainer {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .noTreeBanner {
+    padding: 20px;
+  }
+}

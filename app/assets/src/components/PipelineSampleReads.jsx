@@ -3,18 +3,16 @@ import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
-import cx from "classnames";
 import { Divider, Dropdown, Popup } from "semantic-ui-react";
-import BareDropdown from "./ui/controls/dropdowns/BareDropdown";
 import DownloadButton from "./ui/controls/buttons/DownloadButton";
 import numberWithCommas from "../helpers/strings";
-import SubHeader from "./SubHeader";
 import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
 import AMRView from "./AMRView";
 import BasicPopup from "./BasicPopup";
 import { SAMPLE_FIELDS } from "./utils/SampleFields";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
+import ViewHeader from "./layout/ViewHeader";
 import cs from "./pipeline_sample_reads.scss";
 
 class PipelineSampleReads extends React.Component {
@@ -789,41 +787,6 @@ class PipelineSampleReads extends React.Component {
       </div>
     );
 
-    let sampleDropdown = null;
-    if (this.sample_map && Object.keys(this.sample_map).length > 1) {
-      sampleDropdown = (
-        <BareDropdown
-          trigger={
-            <span className={cx(cs.sampleName, cs.trigger)}>
-              {this.state.sample_name}
-            </span>
-          }
-          className={cs.sampleDropdown}
-          floating
-        >
-          <BareDropdown.Menu>
-            {Object.keys(this.sample_map).map(sampleId => {
-              if (parseInt(sampleId) !== parseInt(this.sampleId)) {
-                return (
-                  <BareDropdown.Item
-                    onClick={() => window.open(`/samples/${sampleId}`, "_self")}
-                  >
-                    {this.sample_map[sampleId]}
-                  </BareDropdown.Item>
-                );
-              }
-            })}
-          </BareDropdown.Menu>
-        </BareDropdown>
-      );
-    } else {
-      sampleDropdown = (
-        <div className={cx(cs.sampleName, cs.label)}>
-          {this.state.sample_name}
-        </div>
-      );
-    }
-
     let version_display = "";
     if (
       this.pipelineRun &&
@@ -842,12 +805,7 @@ class PipelineSampleReads extends React.Component {
     if (this.reportPresent) {
       report_buttons = (
         <Popup
-          trigger={
-            <DownloadButton
-              onClick={this.downloadCSV}
-              className={cs.reportButton}
-            />
-          }
+          trigger={<DownloadButton onClick={this.downloadCSV} />}
           content="Download Table as CSV"
           inverted
           on="hover"
@@ -855,11 +813,7 @@ class PipelineSampleReads extends React.Component {
       );
     } else if (this.sampleInfo.status === "created" || !this.reportPresent) {
       report_buttons = (
-        <PrimaryButton
-          onClick={this.deleteSample}
-          text="Delete Sample"
-          className={cs.reportButton}
-        />
+        <PrimaryButton onClick={this.deleteSample} text="Delete Sample" />
       );
     }
 
@@ -879,47 +833,46 @@ class PipelineSampleReads extends React.Component {
 
     return (
       <div>
-        <SubHeader>
-          <div className={cs.pipelineSampleReadsSubheader}>
+        <ViewHeader className={cs.viewHeader}>
+          <ViewHeader.Content>
             <div className={cs.pipelineInfo}>
               PIPELINE {version_display} {pipeline_version_blurb}
             </div>
-            <div className={cs.topRow}>
-              <div className={cs.breadcrumbs}>
-                <div className={cs.projectNameContainer}>
-                  <a
-                    href={`/home?project_id=${this.projectInfo.id}`}
-                    className={cs.projectName}
-                  >
-                    {this.projectInfo.name}
-                  </a>
-                  <span className={cs.rightArrow}>{">"}</span>
-                </div>
-                {sampleDropdown}
-              </div>
-              <div className={cs.fill} />
-              {report_buttons}
-            </div>
+            <ViewHeader.Pretitle
+              breadcrumbLink={`/home?project_id=${this.projectInfo.id}`}
+            >
+              {this.projectInfo.name}
+            </ViewHeader.Pretitle>
+            <ViewHeader.Title
+              label={this.state.sample_name}
+              id={this.sampleId}
+              options={Object.keys(this.sample_map).map(sampleId => ({
+                label: this.sample_map[sampleId],
+                id: sampleId,
+                onClick: () => window.open(`/samples/${sampleId}`, "_self")
+              }))}
+            />
+          </ViewHeader.Content>
+          <ViewHeader.Controls>{report_buttons}</ViewHeader.Controls>
+        </ViewHeader>
 
-            <div className="sub-header-navigation">
-              <div className="nav-content">
-                <ul className="tabs tabs-transparent">
-                  <li className="tab">
-                    <a href="#reports" className="active">
-                      Report
-                    </a>
-                  </li>
-                  <li className="tab">
-                    <a href="#details" className="">
-                      Details
-                    </a>
-                  </li>
-                  {amr_tab}
-                </ul>
-              </div>
-            </div>
+        <div className="sub-header-navigation">
+          <div className="nav-content">
+            <ul className="tabs tabs-transparent">
+              <li className="tab">
+                <a href="#reports" className="active">
+                  Report
+                </a>
+              </li>
+              <li className="tab">
+                <a href="#details" className="">
+                  Details
+                </a>
+              </li>
+              {amr_tab}
+            </ul>
           </div>
-        </SubHeader>
+        </div>
         <Divider className="reports-divider" />
 
         {amr_table}
