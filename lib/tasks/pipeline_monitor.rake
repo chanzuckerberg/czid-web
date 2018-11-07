@@ -78,7 +78,8 @@ class CheckPipelineRuns
       "app/jobs/autoscaling.py update #{new_job_count} #{Rails.env}" \
       " #{PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS}" \
       " #{PipelineRun::JOB_TAG_PREFIX}" \
-      " #{PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS}"
+      " #{PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS}" \
+      " #{PipelineRun::DRAINING_TAG}"
     )
     Rails.logger.info(c_stdout)
     Rails.logger.error(c_stderr) unless c_status.success? && c_stderr.blank?

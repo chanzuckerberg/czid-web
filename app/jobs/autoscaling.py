@@ -32,7 +32,7 @@ DEBUG = False
 
 
 ## constants specific to draining / safe scale-down:
-DRAINING_TAG = "draining"
+DRAINING_TAG = "draining" # gets overwritten via an argument
 GRACE_PERIOD_SECONDS__JOB_DISPATCH_LAG = 300
 GRACE_PERIOD_SECONDS__JOB_TAG_KEEP_ALIVE = 300
 
@@ -395,7 +395,10 @@ def count_running_batch_jobs():
 
 
 def autoscaling_update(my_num_jobs, my_environment="development",
-                       max_job_dispatch_lag_seconds=900, job_tag_prefix="RunningIDseqBatchJob_", job_tag_keep_alive_seconds=600):
+                       max_job_dispatch_lag_seconds=900, job_tag_prefix="RunningIDseqBatchJob_",
+                       job_tag_keep_alive_seconds=600, draining_tag="draining"):
+    global DRAINING_TAG
+    DRAINING_TAG = draining_tag
     min_draining_wait = max_job_dispatch_lag_seconds + GRACE_PERIOD_SECONDS__JOB_DISPATCH_LAG
     job_tag_expiration = job_tag_keep_alive_seconds + GRACE_PERIOD_SECONDS__JOB_TAG_KEEP_ALIVE
     if my_environment in MULTICONTAINER_ENVIRONMENTS:
