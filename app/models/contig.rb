@@ -1,0 +1,2 @@
+class Contig < ApplicationRecord
+end

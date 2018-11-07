@@ -1,0 +1,2 @@
+class ContigCount < ApplicationRecord
+end
