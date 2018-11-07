@@ -283,8 +283,6 @@ def remove_draining_tag(instance_ids, draining_tag):
 
 def start_draining(asg_instance_name, draining_tag, num_instances):
     instance_ids = instances_to_drain(asg_instance_name, draining_tag, num_instances)
-    print "start_draining "
-    print instance_ids
     if instance_ids:
         print "Starting to drain the following instances: " + ",".join(instance_ids)
         add_draining_tag(instance_ids, draining_tag)
