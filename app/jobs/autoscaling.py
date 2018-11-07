@@ -159,7 +159,6 @@ def delete_expired_metric_tags(asg, garbage_tag_keys):
 
 
 def permission_to_scale(asg, my_environment):
-    return True # TEST - remove
     allowed_envs = get_tag(asg, SCALING_PERMISSION_TAG)
     if allowed_envs == None:
         # Let's hope this never overwrites anything important.
@@ -431,7 +430,6 @@ def autoscaling_update(my_num_jobs, my_environment="development",
         print json.dumps(mvals, indent=2)
     num_development_jobs = sum(v for k, v in mvals.iteritems() if "development" in k)
     num_real_jobs = sum(mvals.itervalues()) - num_development_jobs
-    num_real_jobs = 0 # TEST
     print "ASG tags indicate {num_jobs} in-progress job(s) across {num_env} environments.".format(num_jobs=num_real_jobs + num_development_jobs, num_env=len(mvals))
     print "From cloud environments: {num_real_jobs}".format(num_real_jobs=num_real_jobs)
     print "From development environments: {num_development_jobs}".format(num_development_jobs=num_development_jobs)
