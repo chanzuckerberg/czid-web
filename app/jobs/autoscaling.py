@@ -32,7 +32,6 @@ DEBUG = False
 
 
 ## constants specific to draining / safe scale-down:
-DRAINING_TAG = "draining" # gets overwritten via an argument
 GRACE_PERIOD_SECONDS__JOB_DISPATCH_LAG = 300
 GRACE_PERIOD_SECONDS__JOB_TAG_KEEP_ALIVE = 300
 
@@ -189,9 +188,9 @@ def update_metric_values(asg, value, my_environment):
     return results
 
 
-def count_healthy_instances(asg, tag_list):
+def count_healthy_instances(asg, tag_list, draining_tag):
     num_healthy = 0
-    draining_instance_ids = get_draining_servers(asg, tag_list).keys()
+    draining_instance_ids = get_draining_servers(asg, tag_list, draining_tag).keys()
     for inst in asg["Instances"]:
         if inst["InstanceId"] not in draining_instance_ids and
             inst["ProtectedFromScaleIn"] and inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating":
@@ -233,9 +232,9 @@ def set_desired_capacity(asg, tag_list, compute_desired_instances, can_scale=Tru
         if DEBUG:
             print cmd
         if num_desired < previous_desired:
-            start_draining(asg, previous_desired - num_desired)
+            start_draining(asg, draining_tag, previous_desired - num_desired)
         elif num_desired > previous_desired:
-            stop_draining(asg, tag_list, num_desired - previous_desired)
+            stop_draining(asg, tag_list, draining_tag, num_desired - previous_desired)
         aws_command(cmd)
 
 
@@ -270,26 +269,26 @@ def find_tags_for_instances_in(asg, tag_list):
     return [tag for tag in tag_list if tag["ResourceId"] in instance_ids]
 
 
-def add_draining_tag(instance_ids):
+def add_draining_tag(instance_ids, draining_tag):
     cmd = "aws ec2 create-tags --resources {list_instances} --tags Key={draining_tag},Value={timestamp}"
-    cmd = cmd.format(list_instances=' '.join(instance_ids), draining_tag=DRAINING_TAG, timestamp=unixtime_now())
+    cmd = cmd.format(list_instances=' '.join(instance_ids), draining_tag=draining_tag, timestamp=unixtime_now())
     aws_command(cmd)
 
 
-def remove_draining_tag(instance_ids):
-    delete_tags_from_instances(instance_ids, [DRAINING_TAG])
+def remove_draining_tag(instance_ids, draining_tag):
+    delete_tags_from_instances(instance_ids, [draining_tag])
 
 
-def start_draining(asg, num_instances):
+def start_draining(asg, draining_tag, num_instances):
     instance_ids = instances_to_drain(asg, num_instances)
-    add_draining_tag(instance_ids)
+    add_draining_tag(instance_ids, draining_tag)
 
 
-def stop_draining(asg, tag_list, num_instances):
-    instance_ids = instances_to_rescue(asg, tag_list, num_instances)
+def stop_draining(asg, tag_list, draining_tag, num_instances):
+    instance_ids = instances_to_rescue(asg, tag_list, draining_tag, num_instances)
     if instance_ids:
         print "Stopping drainage of the following instances: " + ",".join(instance_ids)
-        remove_draining_tag(instance_ids)
+        remove_draining_tag(instance_ids, draining_tag)
 
 
 def instances_to_drain(asg, num_instances):
@@ -301,20 +300,20 @@ def instances_to_drain(asg, num_instances):
     return instance_ids_sorted_by_increasing_launch_time[:num_instances]
 
 
-def instances_to_rescue(asg, tag_list, num_instances):
+def instances_to_rescue(asg, tag_list, draining_tag, num_instances):
     '''
     Rescue the instances that have been draining for the least amount of time.
     That way we can probably terminate the non-rescued instances sooner.
     '''
-    draining_instances = get_draining_servers(asg, tag_list)
+    draining_instances = get_draining_servers(asg, tag_list, draining_tag)
     draining_instances_sorted = [key for key, value in sorted(draining_instances.items(), key=itemgetter(1), reverse=True)]
     return draining_instances_sorted[:num_instances]
 
 
-def get_draining_servers(asg, tag_list):
+def get_draining_servers(asg, tag_list, draining_tag):
     ''' returns a map of draining instance IDs to the time they started draining '''
     protected_instance_ids = [inst["InstanceId"] for inst in asg["Instances"] if inst["ProtectedFromScaleIn"]]
-    instance_dict = { item['ResourceId']: int(item['Value']) for item in tag_list if item['Key'] == DRAINING_TAG and item['ResourceId'] in protected_instance_ids }
+    instance_dict = { item['ResourceId']: int(item['Value']) for item in tag_list if item['Key'] == draining_tag and item['ResourceId'] in protected_instance_ids }
     print "Draining servers:"
     print instance_dict
     return instance_dict
@@ -356,8 +355,8 @@ def remove_termination_protection(instance_ids, asg):
     aws_command(cmd)
 
 
-def check_draining_servers(asg, tag_list, can_scale):
-    drain_date_by_instance_id = get_draining_servers(asg, tag_list)
+def check_draining_servers(asg, tag_list, draining_tag, can_scale):
+    drain_date_by_instance_id = get_draining_servers(asg, tag_list, draining_tag)
     num_jobs_by_instance_id = count_running_alignment_jobs(asg, tag_list)
     instance_ids_to_terminate = []
     current_timestamp = unixtime_now()
@@ -397,8 +396,6 @@ def count_running_batch_jobs():
 def autoscaling_update(my_num_jobs, my_environment="development",
                        max_job_dispatch_lag_seconds=900, job_tag_prefix="RunningIDseqBatchJob_",
                        job_tag_keep_alive_seconds=600, draining_tag="draining"):
-    global DRAINING_TAG
-    DRAINING_TAG = draining_tag
     min_draining_wait = max_job_dispatch_lag_seconds + GRACE_PERIOD_SECONDS__JOB_DISPATCH_LAG
     job_tag_expiration = job_tag_keep_alive_seconds + GRACE_PERIOD_SECONDS__JOB_TAG_KEEP_ALIVE
     if my_environment in MULTICONTAINER_ENVIRONMENTS:
@@ -439,8 +436,8 @@ def autoscaling_update(my_num_jobs, my_environment="development",
     tag_list = get_instance_tags()
     gsnap_tags = find_tags_for_instances_in(gsnap_asg, tag_list)
     rapsearch_tags = find_tags_for_instances_in(rapsearch2_asg, tag_list)
-    check_draining_servers(gsnap_asg, gsnap_tags, can_scale)
-    check_draining_servers(rapsearch2_asg, rapsearch_tags, can_scale)
+    check_draining_servers(gsnap_asg, gsnap_tags, draining_tag, can_scale)
+    check_draining_servers(rapsearch2_asg, rapsearch_tags, draining_tag, can_scale)
     if num_real_jobs == 0 and num_development_jobs == 0:
         set_desired_capacity(gsnap_asg, gsnap_tags, exactly(0), can_scale)
         set_desired_capacity(rapsearch2_asg, rapsearch_tags, exactly(0), can_scale)
