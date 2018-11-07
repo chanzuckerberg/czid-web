@@ -23,13 +23,17 @@ Rails.application.routes.draw do
     get :unidentified_fasta, on: :member
     get :results_folder, on: :member
     post :bulk_upload, on: :collection
-    post :save_metadata, on: :member
     post :add_taxon_confirmation, on: :member
     post :remove_taxon_confirmation, on: :member
     get :samples_taxons, on: :collection
     get :heatmap, on: :collection
     get :download_heatmap, on: :collection
+    get :metadata_types, on: :collection
+    get :metadata, on: :member
+    post :save_metadata, on: :member
+    post :save_metadata_v2, on: :member
   end
+
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
   get 'samples/:id/assembly/:taxid', to: 'samples#assembly'
   get 'samples/:id/alignment/:taxon_info', to: 'samples#show_taxid_alignment'

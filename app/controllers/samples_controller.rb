@@ -14,10 +14,10 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
-  EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata].freeze
+  EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -166,6 +166,42 @@ class SamplesController < ApplicationController
   def report_csv
     @report_csv = report_csv_from_params(@sample, params)
     send_data @report_csv, filename: @sample.name + '_report.csv'
+  end
+
+  # GET /samples/1/metadata
+  # GET /samples/1/metadata.json
+  def metadata
+    render json: @sample.metadata
+  end
+
+  # POST /samples/1/save_metadata_v2
+  def save_metadata_v2
+    @sample.metadatum_add_or_update(params[:field], params[:value])
+    render json: {
+      status: "success",
+      message: "Saved successfully"
+    }
+  rescue
+    error_messages = @sample ? @sample.errors.full_messages : []
+    render json: {
+      status: 'failed',
+      message: 'Unable to update sample',
+      errors: error_messages
+    }
+  end
+
+  # GET /samples/metadata_types
+  # For now, the types are always the same. Later, it may depend on the host.
+  def metadata_types
+    metadata_types = Metadatum::KEY_TO_TYPE.keys.map do |key|
+      {
+        key: key,
+        dataType: Metadatum.convert_type_to_string(Metadatum::KEY_TO_TYPE[key]),
+        name: Metadatum::KEY_TO_DISPLAY_NAME[key],
+        options: Metadatum::KEY_TO_STRING_OPTIONS[key]
+      }
+    end
+    render json: metadata_types
   end
 
   # GET /samples/1

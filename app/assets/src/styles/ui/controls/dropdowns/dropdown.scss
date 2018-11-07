@@ -3,7 +3,7 @@
 /* TODO: Redundant with other dropdowns - will refactor */
 .idseq-ui.ui.dropdown {
   border: 1px solid $light-grey;
-  border-radius: 19px;
+  border-radius: 4px;
   color: $black;
   letter-spacing: 0.4px;
   height: 38px;
@@ -15,6 +15,10 @@
   font-weight: 400;
   font-style: normal;
   font-stretch: normal;
+
+  &.rounded {
+    border-radius: 19px;
+  }
 
   .item {
     font-family: $font-family-default;
@@ -61,7 +65,6 @@
 
   &.active {
     border: 1px solid $primary-light;
-    border-radius: 19px;
     i.dropdown.icon:before {
       color: $primary-light;
     }

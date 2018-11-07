@@ -12,4 +12,18 @@
     margin-bottom: 20px;
     margin-left: 1px;
   }
+
+  .sampleDetailsLinkContainer {
+    margin-top: 5px;
+  }
+
+  .sampleDetailsLink {
+    color: $primary-light;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.5;
+    }
+  }
 }

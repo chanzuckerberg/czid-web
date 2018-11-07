@@ -32,6 +32,8 @@ Button.propTypes = forbidExtraProps({
   onClick: PropTypes.func,
   onMouseLeave: PropTypes.func,
   onMouseEnter: PropTypes.func,
+  onBlur: PropTypes.func,
+  onFocus: PropTypes.func,
   text: PropTypes.string,
   primary: PropTypes.bool,
   secondary: PropTypes.bool,

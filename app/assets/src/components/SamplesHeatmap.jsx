@@ -99,16 +99,10 @@ class SamplesHeatmap extends React.Component {
     this.getTaxonFor = this.getTaxonFor.bind(this);
     this.getTooltip = this.getTooltip.bind(this);
     this.onApplyClick = this.onApplyClick.bind(this);
-    this.onBackgroundChanged = this.onBackgroundChanged.bind(this);
-    this.onCategoryChange = this.onCategoryChange.bind(this);
     this.onCellClick = this.onCellClick.bind(this);
-    this.onDataScaleChange = this.onDataScaleChange.bind(this);
-    this.onMetricChange = this.onMetricChange.bind(this);
     this.onRemoveRow = this.onRemoveRow.bind(this);
     this.onSampleLabelClick = this.onSampleLabelClick.bind(this);
     this.onShareClick = this.onShareClick.bind(this);
-    this.onSpecificityChange = this.onSpecificityChange.bind(this);
-    this.onTaxonLevelChange = this.onTaxonLevelChange.bind(this);
     this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
     this.onThresholdFilterApply = this.onThresholdFilterApply.bind(this);
   }
@@ -492,22 +486,23 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  onMetricChange(_, metric) {
-    if (metric.value == this.state.selectedOptions.metric) {
+  onMetricChange = metric => {
+    if (metric == this.state.selectedOptions.metric) {
       return;
     }
 
     this.optionsChanged = true;
     this.setSelectedOptionsState(
-      { metric: metric.value },
+      { metric },
       this.explicitApply ? undefined : this.updateHeatmap
     );
-  }
+  };
 
   renderMetricPicker() {
     return (
       <Dropdown
         fluid
+        rounded
         options={this.state.availableOptions.metrics}
         onChange={this.onMetricChange}
         value={this.state.selectedOptions.metric}
@@ -540,22 +535,23 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  onTaxonLevelChange(_, taxonLevel) {
-    if (this.state.selectedOptions.species == taxonLevel.value) {
+  onTaxonLevelChange = taxonLevel => {
+    if (this.state.selectedOptions.species == taxonLevel) {
       return;
     }
 
     this.optionsChanged = true;
     this.setSelectedOptionsState(
-      { species: taxonLevel.value },
+      { species: taxonLevel },
       this.explicitApply ? undefined : this.updateHeatmap
     );
-  }
+  };
 
   renderTaxonLevelPicker() {
     return (
       <Dropdown
         fluid
+        rounded
         options={this.state.availableOptions.taxonLevels}
         value={this.state.selectedOptions.species}
         onChange={this.onTaxonLevelChange}
@@ -565,14 +561,14 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  onDataScaleChange(_, scaleIdx) {
-    if (scaleIdx.value == this.state.selectedOptions.dataScaleIdx) {
+  onDataScaleChange = scaleIdx => {
+    if (scaleIdx == this.state.selectedOptions.dataScaleIdx) {
       return;
     }
 
     this.recluster = true;
-    this.setSelectedOptionsState({ dataScaleIdx: scaleIdx.value });
-  }
+    this.setSelectedOptionsState({ dataScaleIdx: scaleIdx });
+  };
 
   renderScalePicker() {
     let options = this.state.availableOptions.scales.map(function(
@@ -585,6 +581,7 @@ class SamplesHeatmap extends React.Component {
     return (
       <Dropdown
         fluid
+        rounded
         value={this.state.selectedOptions.dataScaleIdx}
         onChange={this.onDataScaleChange}
         options={options}
@@ -624,13 +621,13 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  onCategoryChange(categories, subcategories) {
+  onCategoryChange = (categories, subcategories) => {
     this.optionsChanged = true;
     this.setSelectedOptionsState(
       { categories, subcategories },
       this.explicitApply ? undefined : this.updateHeatmap
     );
-  }
+  };
 
   renderCategoryFilter() {
     let options = this.state.availableOptions.categories.map(category => {
@@ -657,17 +654,17 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  onBackgroundChanged(_, background) {
-    if (background.value == this.state.selectedOptions.background) {
+  onBackgroundChanged = background => {
+    if (background == this.state.selectedOptions.background) {
       return;
     }
 
     this.optionsChanged = true;
     this.setSelectedOptionsState(
-      { background: background.value },
+      { background },
       this.explicitApply ? undefined : this.updateHeatmap
     );
-  }
+  };
 
   renderBackgroundPicker() {
     let options = this.state.availableOptions.backgrounds.map(function(
@@ -679,6 +676,7 @@ class SamplesHeatmap extends React.Component {
     return (
       <Dropdown
         fluid
+        rounded
         options={options}
         onChange={this.onBackgroundChanged}
         value={this.state.selectedOptions.background}
@@ -709,22 +707,23 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  onSpecificityChange(_, specificity) {
-    if (specificity.value === this.state.selectedOptions.readSpecificity) {
+  onSpecificityChange = specificity => {
+    if (specificity === this.state.selectedOptions.readSpecificity) {
       return;
     }
 
     this.optionsChanged = true;
     this.setSelectedOptionsState(
-      { readSpecificity: specificity.value },
+      { readSpecificity: specificity },
       this.explicitApply ? undefined : this.updateHeatmap
     );
-  }
+  };
 
   renderSpecificityFilter() {
     return (
       <Dropdown
         fluid
+        rounded
         options={this.availableOptions.specificityOptions}
         value={this.state.selectedOptions.readSpecificity}
         label="Read Specificity: "

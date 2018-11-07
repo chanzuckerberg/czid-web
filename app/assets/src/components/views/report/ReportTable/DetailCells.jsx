@@ -57,8 +57,8 @@ const DetailCells = ({
 DetailCells.propTypes = {
   taxons: PropTypes.arrayOf(PropTypes.Taxon).isRequired,
   taxonRowRefs: PropTypes.objectOf(PropTypes.any).isRequired, // These are DOM elements.
-  confirmedTaxIds: PropTypes.arrayOf(PropTypes.string).isRequired,
-  watchedTaxIds: PropTypes.arrayOf(PropTypes.string).isRequired,
+  confirmedTaxIds: PropTypes.arrayOf(PropTypes.number).isRequired,
+  watchedTaxIds: PropTypes.arrayOf(PropTypes.number).isRequired,
   renderName: PropTypes.func.isRequired,
   renderNumber: PropTypes.func.isRequired,
   displayHighlightTags: PropTypes.func.isRequired,

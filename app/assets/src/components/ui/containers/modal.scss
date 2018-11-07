@@ -1,0 +1,19 @@
+.modal {
+  padding: 40px;
+  left: auto;
+  right: auto;
+
+  .closeIcon {
+    position: absolute;
+    right: 25px;
+    top: 25px;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    opacity: 0.3;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
