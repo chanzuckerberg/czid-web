@@ -85,14 +85,11 @@ class PhyloTreeCreation extends React.Component {
     this.canContinueWithTaxonAndProject = this.canContinueWithTaxonAndProject.bind(
       this
     );
-    this.handleBranchChange = this.handleBranchChange.bind(this);
     this.handleChangedProjectSamples = this.handleChangedProjectSamples.bind(
       this
     );
     this.handleChangedOtherSamples = this.handleChangedOtherSamples.bind(this);
     this.handleComplete = this.handleComplete.bind(this);
-    this.handleFilterChange = this.handleFilterChange.bind(this);
-    this.handleNameChange = this.handleNameChange.bind(this);
     this.handleNewTreeContextResponse = this.handleNewTreeContextResponse.bind(
       this
     );
@@ -300,23 +297,23 @@ class PhyloTreeCreation extends React.Component {
     this.setState({ selectedOtherSamples });
   }
 
-  handleFilterChange(_, input) {
+  handleFilterChange = newFilter => {
     clearTimeout(this.inputTimeout);
     this.inputTimeout = setTimeout(() => {
-      this.setState({ otherSamplesFilter: input.value });
+      this.setState({ otherSamplesFilter: newFilter });
     }, this.inputDelay);
-  }
+  };
 
-  handleNameChange(_, input) {
-    this.setState({ treeName: input.value.trim() });
-  }
+  handleNameChange = newName => {
+    this.setState({ treeName: newName.trim() });
+  };
 
-  handleBranchChange(_, input) {
-    this.dagBranch = input.value.trim();
-  }
+  handleBranchChange = newBranch => {
+    this.dagBranch = newBranch.trim();
+  };
 
-  handleDagVarsChange = (_, input) => {
-    this.dagVars = input.value;
+  handleDagVarsChange = newDagVars => {
+    this.dagVars = newDagVars;
   };
 
   handleCreation() {
