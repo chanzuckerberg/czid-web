@@ -959,7 +959,7 @@ module ReportHelper
   def taxonomy_details(pipeline_run_id, background_id, params)
     # Fetch and clean data.
     t0 = wall_clock_ms
-    refined = params[:refined].to_i == 2 ? false : true # default turned on unless set to 2
+    refined = params[:refined].to_i == 2 ? false : true # TODO(yf): revisit for contig counts
     taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id, refined)
     tax_2d = taxon_counts_cleanup(taxon_counts)
     t1 = wall_clock_ms
