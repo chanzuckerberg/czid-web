@@ -136,6 +136,12 @@ class PipelineRun < ApplicationRecord
   # (RM) transition executed by the Result Monitor
   # (Resque Worker) transition executed by the Resque Worker
 
+  # Constants for alignment chunk scheduling,
+  # shared between idseq-web/app/jobs/autoscaling.py and idseq-dag/idseq_dag/util/server.py:
+  MAX_JOB_DISPATCH_LAG_SECONDS = 900
+  JOB_TAG_PREFIX = "RunningIDseqBatchJob_".freeze
+  JOB_TAG_KEEP_ALIVE_SECONDS = 600
+
   before_create :create_output_states, :create_run_stages
 
   def parse_dag_vars

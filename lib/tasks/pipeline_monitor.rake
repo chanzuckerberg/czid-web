@@ -74,7 +74,12 @@ class CheckPipelineRuns
     end
     autoscaling_state[:t_last] = t_now
     autoscaling_state[:job_count] = new_job_count
-    c_stdout, c_stderr, c_status = Open3.capture3("app/jobs/autoscaling.py update #{new_job_count} #{Rails.env}")
+    c_stdout, c_stderr, c_status = Open3.capture3(
+      "app/jobs/autoscaling.py update #{new_job_count} #{Rails.env}" \
+      " #{PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS}" \
+      " #{PipelineRun::JOB_TAG_PREFIX}" \
+      " #{PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS}"
+    )
     Rails.logger.info(c_stdout)
     Rails.logger.error(c_stderr) unless c_status.success? && c_stderr.blank?
     autoscaling_state

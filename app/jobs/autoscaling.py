@@ -33,11 +33,9 @@ DEBUG = False
 
 ## constants specific to draining / safe scale-down:
 DRAINING_TAG = "draining"
-MAX_REFRESH_INTERVAL = 1200
-# MAX_REFRESH_INTERVAL must be slightly bigger than MAX_INTERVAL_BETWEEN_DESCRIBE_INSTANCES in idseq-dag.
-# After this interval, we are sure we are safe from race conditions related to batch jobs dispatching gsnap/rapsearch jobs.
-JOB_TAG_PREFIX = "RunningIDseqBatchJob_"
-ALIGNMENT_JOB_EXPIRATION_SECONDS = 30 * 60 # Batch job should update gsnap/rapsearch job tag every 10 minutes to signal it's alive. If not, we clean up after 30 minutes. TODO: centralize this parameter in the DAG where both idseq-dag and idseq-web can read from
+GRACE_PERIOD_SECONDS__JOB_DISPATCH_LAG = 300
+GRACE_PERIOD_SECONDS__JOB_TAG_KEEP_ALIVE = 300
+
 
 ## EXPLANATION OF STATE TRANSITIONS FOR GSNAP/RAPSEARCH MACHINES
 '''
@@ -57,8 +55,8 @@ Processing chunks.
     V
 { service: gsnap-prod, draining: T0, ProtectedFromScaleIn: True }
 Draining. Scale-in protection still present.
-Can still accept chunks for up to MAX_REFRESH_INTERVAL seconds after entering this state.
-Can still finish running chunks for up to MAX_REFRESH_INTERVAL + ALIGNMENT_JOB_EXPIRATION_SECONDS seconds after entering this state.
+Can still accept chunks for up to min_draining_wait seconds after entering this state.
+Can still finish running chunks for up to (min_draining_wait + job_tag_expiration) seconds after entering this state.
     |
     V
 { service: gsnap-prod, draining: T0, ProtectedFromScaleIn: False }
@@ -332,7 +330,7 @@ def count_running_alignment_jobs(asg, tag_list):
             job_tag = item['Key']
             instance_id = item['ResourceId']
             unixtime = int(item['Value'])
-            if unixtime_now() - unixtime < ALIGNMENT_JOB_EXPIRATION_SECONDS:
+            if unixtime_now() - unixtime < job_tag_expiration:
                 count_dict[instance_id] += 1
             else:
                 expired_jobs.append(job_tag)
@@ -366,7 +364,7 @@ def check_draining_servers(asg, tag_list, can_scale):
     for instance_id, drain_date in drain_date_by_instance_id.items():
         draining_interval = current_timestamp - drain_date
         num_jobs = num_jobs_by_instance_id[instance_id]
-        if num_jobs == 0 and draining_interval > MAX_REFRESH_INTERVAL:
+        if num_jobs == 0 and draining_interval > min_draining_wait:
             instance_ids_to_terminate.append(instance_id)
     if instance_ids_to_terminate:
         print "The following instances are ready to be terminated: " + ", ".join(instance_ids_to_terminate)
@@ -396,7 +394,10 @@ def count_running_batch_jobs():
     return sum(len(job_list["jobSummaryList"]) for job_list in queues.itervalues())
 
 
-def autoscaling_update(my_num_jobs, my_environment="development"):
+def autoscaling_update(my_num_jobs, my_environment="development",
+                       max_job_dispatch_lag_seconds=900, job_tag_prefix="RunningIDseqBatchJob_", job_tag_keep_alive_seconds=600):
+    min_draining_wait = max_job_dispatch_lag_seconds + GRACE_PERIOD_SECONDS__JOB_DISPATCH_LAG
+    job_tag_expiration = job_tag_keep_alive_seconds + GRACE_PERIOD_SECONDS__JOB_TAG_KEEP_ALIVE
     if my_environment in MULTICONTAINER_ENVIRONMENTS:
         asg_env = my_environment
     else:
