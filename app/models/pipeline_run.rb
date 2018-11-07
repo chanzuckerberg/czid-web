@@ -141,6 +141,7 @@ class PipelineRun < ApplicationRecord
   MAX_JOB_DISPATCH_LAG_SECONDS = 900
   JOB_TAG_PREFIX = "RunningIDseqBatchJob_".freeze
   JOB_TAG_KEEP_ALIVE_SECONDS = 600
+  DRAINING_TAG = "draining".freeze
 
   before_create :create_output_states, :create_run_stages
 

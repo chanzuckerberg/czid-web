@@ -52,7 +52,8 @@
         "environment": "<%= Rails.env == 'prod' ? 'prod' : 'staging' %>",
         "max_interval_between_describe_instances": <%= @attribute_dict[:max_interval_between_describe_instances] %>,
         "job_tag_prefix": "<%= @attribute_dict[:job_tag_prefix] %>",
-        "job_tag_refresh_seconds": <%= @attribute_dict[:job_tag_refresh_seconds] %>
+        "job_tag_refresh_seconds": <%= @attribute_dict[:job_tag_refresh_seconds] %>,
+        "draining_tag": "<%= @attribute_dict[:draining_tag] %>"
         <% if @attribute_dict[:index_dir_suffix] %>
           ,"index_dir_suffix": "<%= @attribute_dict[:index_dir_suffix] %>"
         <% end %>
@@ -78,7 +79,8 @@
         "environment": "<%= Rails.env == 'prod' ? 'prod' : 'staging' %>",
         "max_interval_between_describe_instances": <%= @attribute_dict[:max_interval_between_describe_instances] %>,
         "job_tag_prefix": "<%= @attribute_dict[:job_tag_prefix] %>",
-        "job_tag_refresh_seconds": <%= @attribute_dict[:job_tag_refresh_seconds] %>
+        "job_tag_refresh_seconds": <%= @attribute_dict[:job_tag_refresh_seconds] %>,
+        "draining_tag": "<%= @attribute_dict[:draining_tag] %>"
         <% if @attribute_dict[:index_dir_suffix] %>
           ,"index_dir_suffix": "<%= @attribute_dict[:index_dir_suffix] %>"
         <% end %>
