@@ -6,24 +6,22 @@ import queryString from "query-string";
 import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
-import symlog from "./symlog";
-import DownloadButton from "./ui/controls/buttons/DownloadButton";
-import Dropdown from "./ui/controls/dropdowns/Dropdown";
-import ErrorBoundary from "./ErrorBoundary";
-import Heatmap from "./visualizations/Heatmap";
-import HeatmapLegend from "./visualizations/HeatmapLegend";
-import MultipleNestedDropdown from "./ui/controls/dropdowns/MultipleNestedDropdown";
-import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
+import symlog from "./symlog.js";
+import DownloadButton from "../../ui/controls/buttons/DownloadButton";
+import Dropdown from "../../ui/controls/dropdowns/Dropdown";
+import ErrorBoundary from "../../ErrorBoundary";
+import Heatmap from "../../visualizations/Heatmap";
+import HeatmapLegend from "../../visualizations/HeatmapLegend";
+import MultipleNestedDropdown from "../../ui/controls/dropdowns/MultipleNestedDropdown";
+import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
 import PropTypes from "prop-types";
-import Slider from "./ui/controls/Slider";
+import Slider from "../../ui/controls/Slider";
 import TaxonTooltip from "./TaxonTooltip";
-import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
-import { Colormap } from "./utils/colormaps/Colormap";
+import ThresholdFilterDropdown from "../../ui/controls/dropdowns/ThresholdFilterDropdown";
+import { Colormap } from "../../utils/colormaps/Colormap";
 import DeepEqual from "fast-deep-equal";
 
 class SamplesHeatmap extends React.Component {
-  // TODO: do not make another request if values did not change
-
   constructor(props) {
     super(props);
 
@@ -260,6 +258,11 @@ class SamplesHeatmap extends React.Component {
   }
 
   clusterSamples(data, metric, taxons) {
+    let scaleIndex = this.state.selectedOptions.dataScaleIdx;
+    console.log(this.state.availableOptions.scales[scaleIndex]);
+    let transformFunction = this.state.availableOptions.scales[scaleIndex][1]();
+    console.log("transform", transformFunction);
+
     let vectors = [];
     for (let sample of data) {
       let vector = [];
@@ -271,7 +274,8 @@ class SamplesHeatmap extends React.Component {
             break;
           }
         }
-        vector.push(value || -100000);
+        console.log(value, transformFunction(value));
+        vector.push(value || 0);
       }
       vector.sample = sample;
       vectors.push(vector);
@@ -353,7 +357,7 @@ class SamplesHeatmap extends React.Component {
 
     let vectors = [];
     for (let key of Object.keys(taxonScores)) {
-      let vector = taxonScores[key].map(d => d || -100000);
+      let vector = taxonScores[key].map(d => d || 0);
       vector.taxonName = key;
       vectors.push(vector);
     }
@@ -386,6 +390,7 @@ class SamplesHeatmap extends React.Component {
   }
 
   getColumnLabel(columnIndex) {
+    console.log(this.clusteredSamples.flat, columnIndex);
     return this.clusteredSamples.flat[columnIndex].name;
   }
 
