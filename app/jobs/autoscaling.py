@@ -159,6 +159,7 @@ def delete_expired_metric_tags(asg, garbage_tag_keys):
 
 
 def permission_to_scale(asg, my_environment):
+    return True # TEST - remove
     allowed_envs = get_tag(asg, SCALING_PERMISSION_TAG)
     if allowed_envs == None:
         # Let's hope this never overwrites anything important.
@@ -192,7 +193,7 @@ def count_healthy_instances(asg, tag_list, draining_tag):
     num_healthy = 0
     draining_instance_ids = get_draining_servers(asg, tag_list, draining_tag).keys()
     for inst in asg["Instances"]:
-        if inst["InstanceId"] not in draining_instance_ids and
+        if inst["InstanceId"] not in draining_instance_ids and \
             inst["ProtectedFromScaleIn"] and inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating":
             num_healthy += 1
     return num_healthy
@@ -214,9 +215,9 @@ def clamp_to_valid_range(asg, desired_capacity):
     return desired_capacity
 
 
-def set_desired_capacity(asg, tag_list, compute_desired_instances, can_scale=True):
+def set_desired_capacity(asg, tag_list, draining_tag, compute_desired_instances, can_scale=True):
     asg_name = asg['AutoScalingGroupName']
-    num_healthy = count_healthy_instances(asg, tag_list)
+    num_healthy = count_healthy_instances(asg, tag_list, draining_tag)
     previous_desired = get_previous_desired(asg)
     # Manually input DesiredCapacity will never be reduced so long as there are pending jobs.
     num_desired = clamp_to_valid_range(asg, compute_desired_instances(previous_desired))
@@ -292,7 +293,7 @@ def stop_draining(asg, tag_list, draining_tag, num_instances):
 
 
 def instances_to_drain(asg, num_instances):
-    cmd = "aws ec2 describe-instances --filters "Name=tag:Name,Values={asg_name}" --query 'Reservations[*].Instances[*].[InstanceId,LaunchTime]' --no-paginate"
+    cmd = "aws ec2 describe-instances --filters 'Name=tag:Name,Values={asg_name}' --query 'Reservations[*].Instances[*].[InstanceId,LaunchTime]' --no-paginate"
     cmd = cmd.format(asg_name=asg['AutoScalingGroupName'])
     aws_response = json.loads(aws_command(cmd))
     zipped_instance_ids_and_launch_times = [(instance[0], iso2unixtime(instance[1])) for nest in aws_response for instance in nest]
@@ -319,13 +320,13 @@ def get_draining_servers(asg, tag_list, draining_tag):
     return instance_dict
 
 
-def count_running_alignment_jobs(asg, tag_list):
+def count_running_alignment_jobs(asg, tag_list, job_tag_prefix):
     ''' returns a map of instance IDs to number of jobs running on the instance '''
     instance_ids = instances_in(asg)
     count_dict = { id: 0 for id in instance_ids }
     expired_jobs = []
     for item in tag_list:
-        if item['Key'].startswith(JOB_TAG_PREFIX):
+        if item['Key'].startswith(job_tag_prefix):
             job_tag = item['Key']
             instance_id = item['ResourceId']
             unixtime = int(item['Value'])
@@ -355,9 +356,9 @@ def remove_termination_protection(instance_ids, asg):
     aws_command(cmd)
 
 
-def check_draining_servers(asg, tag_list, draining_tag, can_scale):
+def check_draining_servers(asg, tag_list, draining_tag, job_tag_prefix, can_scale):
     drain_date_by_instance_id = get_draining_servers(asg, tag_list, draining_tag)
-    num_jobs_by_instance_id = count_running_alignment_jobs(asg, tag_list)
+    num_jobs_by_instance_id = count_running_alignment_jobs(asg, tag_list, job_tag_prefix)
     instance_ids_to_terminate = []
     current_timestamp = unixtime_now()
     for instance_id, drain_date in drain_date_by_instance_id.items():
@@ -423,6 +424,7 @@ def autoscaling_update(my_num_jobs, my_environment="development",
         print json.dumps(mvals, indent=2)
     num_development_jobs = sum(v for k, v in mvals.iteritems() if "development" in k)
     num_real_jobs = sum(mvals.itervalues()) - num_development_jobs
+    num_real_jobs = 8 # TEST
     print "ASG tags indicate {num_jobs} in-progress job(s) across {num_env} environments.".format(num_jobs=num_real_jobs + num_development_jobs, num_env=len(mvals))
     print "From cloud environments: {num_real_jobs}".format(num_real_jobs=num_real_jobs)
     print "From development environments: {num_development_jobs}".format(num_development_jobs=num_development_jobs)
@@ -436,11 +438,11 @@ def autoscaling_update(my_num_jobs, my_environment="development",
     tag_list = get_instance_tags()
     gsnap_tags = find_tags_for_instances_in(gsnap_asg, tag_list)
     rapsearch_tags = find_tags_for_instances_in(rapsearch2_asg, tag_list)
-    check_draining_servers(gsnap_asg, gsnap_tags, draining_tag, can_scale)
-    check_draining_servers(rapsearch2_asg, rapsearch_tags, draining_tag, can_scale)
+    check_draining_servers(gsnap_asg, gsnap_tags, draining_tag, job_tag_prefix, can_scale)
+    check_draining_servers(rapsearch2_asg, rapsearch_tags, draining_tag, job_tag_prefix, can_scale)
     if num_real_jobs == 0 and num_development_jobs == 0:
-        set_desired_capacity(gsnap_asg, gsnap_tags, exactly(0), can_scale)
-        set_desired_capacity(rapsearch2_asg, rapsearch_tags, exactly(0), can_scale)
+        set_desired_capacity(gsnap_asg, gsnap_tags, draining_tag, exactly(0), can_scale)
+        set_desired_capacity(rapsearch2_asg, rapsearch_tags, draining_tag, exactly(0), can_scale)
     elif num_real_jobs == 0 and num_development_jobs > 0:
         count_running_servers = get_previous_desired(gsnap_asg) + get_previous_desired(rapsearch2_asg)
         print "Only development environments are reporting in-progress jobs, and {crs} servers are running.".format(crs=count_running_servers)
@@ -450,24 +452,24 @@ def autoscaling_update(my_num_jobs, my_environment="development",
                 print "{crbj} jobs are running in aws batch queues".format(crbj=crbj)
                 # This is an unsafe scaling operation, but the only jobs that can get hurt
                 # are development jobs.  Just rerun those.
-                set_desired_capacity(gsnap_asg, gsnap_tags, exactly(1), can_scale)
-                set_desired_capacity(rapsearch2_asg, rapsearch_tags, exactly(1), can_scale)
+                set_desired_capacity(gsnap_asg, gsnap_tags, draining_tag, exactly(1), can_scale)
+                set_desired_capacity(rapsearch2_asg, rapsearch_tags, draining_tag, exactly(1), can_scale)
             elif crbj == 0:
                 print "No jobs are running in batch."
                 # in this case num_development_jobs are either zombies or jobs caught in transition
                 # between pipeline stages;  the non-zombies won't be hurt, only delayed by this
-                set_desired_capacity(gsnap_asg, gsnap_tags, exactly(0), can_scale)
-                set_desired_capacity(rapsearch2_asg, rapsearch_tags, exactly(0), can_scale)
+                set_desired_capacity(gsnap_asg, gsnap_tags, draining_tag, exactly(0), can_scale)
+                set_desired_capacity(rapsearch2_asg, rapsearch_tags, draining_tag, exactly(0), can_scale)
             else:
                 print "Failed to get information about running jobs in aws batch.  Deferring scaling decision."
         else:
             print "Deferring scaling decision to stay under the rate limit for 'aws batch list-jobs'."
     elif 1 <= num_real_jobs <= 6:
-        set_desired_capacity(gsnap_asg, gsnap_tags, exactly(8), can_scale)
-        set_desired_capacity(rapsearch2_asg, rapsearch_tags, exactly(8), can_scale)
+        set_desired_capacity(gsnap_asg, gsnap_tags, draining_tag, exactly(8), can_scale)
+        set_desired_capacity(rapsearch2_asg, rapsearch_tags, draining_tag, exactly(8), can_scale)
     else:
-        set_desired_capacity(gsnap_asg, gsnap_tags, at_least(24), can_scale)
-        set_desired_capacity(rapsearch2_asg, rapsearch_tags, at_least(24), can_scale)
+        set_desired_capacity(gsnap_asg, gsnap_tags, draining_tag, at_least(24), can_scale)
+        set_desired_capacity(rapsearch2_asg, rapsearch_tags, draining_tag, at_least(24), can_scale)
 
 
 if __name__ == "__main__":
