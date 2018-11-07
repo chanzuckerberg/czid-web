@@ -234,9 +234,9 @@ def set_desired_capacity(asg, asg_instance_name, tag_list, draining_tag, compute
         if DEBUG:
             print cmd
         if num_desired < num_healthy:
-            start_draining(asg_instance_name, draining_tag, previous_desired - num_desired)
+            start_draining(asg_instance_name, draining_tag, num_healthy - num_desired)
         elif num_desired > num_healthy:
-            stop_draining(asg, tag_list, draining_tag, num_desired - previous_desired)
+            stop_draining(asg, tag_list, draining_tag, num_desired - num_healthy)
         aws_command(cmd)
 
 
