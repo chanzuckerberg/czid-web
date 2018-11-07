@@ -399,15 +399,6 @@ class PipelineRun < ApplicationRecord
     load_taxons(downloaded_json_path, false)
   end
 
-  def db_load_refined_taxon_counts
-    output_json_s3_path = s3_file_for("refined_taxon_counts")
-    downloaded_json_path = PipelineRun.download_file_with_retries(output_json_s3_path,
-                                                                  local_json_path, 3)
-    LogUtil.log_err_and_airbrake("PipelineRun #{id} failed refined_taxon_counts download") unless downloaded_json_path
-    return unless downloaded_json_path
-    load_taxons(downloaded_json_path, true)
-  end
-
   def db_load_byteranges
     byteranges_json_s3_path = s3_file_for("taxon_byteranges")
     downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, local_json_path)
