@@ -325,7 +325,7 @@ def get_draining_servers(asg, tag_list, draining_tag):
     return instance_dict
 
 
-def count_running_alignment_jobs(asg, tag_list, job_tag_prefix):
+def count_running_alignment_jobs(asg, tag_list, job_tag_prefix, job_tag_expiration):
     ''' returns a map of instance IDs to number of jobs running on the instance '''
     instance_ids = instances_in(asg)
     count_dict = { id: 0 for id in instance_ids }
@@ -361,9 +361,9 @@ def remove_termination_protection(instance_ids, asg):
     aws_command(cmd)
 
 
-def check_draining_servers(asg, tag_list, draining_tag, job_tag_prefix, min_draining_wait, can_scale):
+def check_draining_servers(asg, tag_list, draining_tag, job_tag_prefix, job_tag_expiration, min_draining_wait, can_scale):
     drain_date_by_instance_id = get_draining_servers(asg, tag_list, draining_tag)
-    num_jobs_by_instance_id = count_running_alignment_jobs(asg, tag_list, job_tag_prefix)
+    num_jobs_by_instance_id = count_running_alignment_jobs(asg, tag_list, job_tag_prefix, job_tag_expiration)
     instance_ids_to_terminate = []
     current_timestamp = unixtime_now()
     for instance_id, drain_date in drain_date_by_instance_id.items():
@@ -431,7 +431,7 @@ def autoscaling_update(my_num_jobs, my_environment="development",
         print json.dumps(mvals, indent=2)
     num_development_jobs = sum(v for k, v in mvals.iteritems() if "development" in k)
     num_real_jobs = sum(mvals.itervalues()) - num_development_jobs
-    num_real_jobs = 4 # TEST
+    num_real_jobs = 0 # TEST
     print "ASG tags indicate {num_jobs} in-progress job(s) across {num_env} environments.".format(num_jobs=num_real_jobs + num_development_jobs, num_env=len(mvals))
     print "From cloud environments: {num_real_jobs}".format(num_real_jobs=num_real_jobs)
     print "From development environments: {num_development_jobs}".format(num_development_jobs=num_development_jobs)
@@ -445,8 +445,8 @@ def autoscaling_update(my_num_jobs, my_environment="development",
     tag_list = get_instance_tags()
     gsnap_tags = find_tags_for_instances_in(gsnap_asg, tag_list)
     rapsearch_tags = find_tags_for_instances_in(rapsearch2_asg, tag_list)
-    check_draining_servers(gsnap_asg, gsnap_tags, draining_tag, job_tag_prefix, min_draining_wait, can_scale)
-    check_draining_servers(rapsearch2_asg, rapsearch_tags, draining_tag, job_tag_prefix, min_draining_wait, can_scale)
+    check_draining_servers(gsnap_asg, gsnap_tags, draining_tag, job_tag_prefix, job_tag_expiration, min_draining_wait, can_scale)
+    check_draining_servers(rapsearch2_asg, rapsearch_tags, draining_tag, job_tag_prefix, job_tag_expiration, min_draining_wait, can_scale)
     if num_real_jobs == 0 and num_development_jobs == 0:
         set_desired_capacity(gsnap_asg, gsnap_instance_name, gsnap_tags, draining_tag, exactly(0), can_scale)
         set_desired_capacity(rapsearch2_asg, rapsearch_instance_name, rapsearch_tags, draining_tag, exactly(0), can_scale)
