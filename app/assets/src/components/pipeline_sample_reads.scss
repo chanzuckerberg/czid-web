@@ -2,76 +2,28 @@
 @import "~styles/typography";
 
 /* Subheader */
-.pipelineSampleReadsSubheader {
+.viewHeader {
+  margin-top: 20px;
+  margin-bottom: 5px;
+
   .pipelineInfo {
     color: $light-grey;
     font-size: $font-size-small;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
+    margin-left: 1px;
   }
 
-  .topRow {
-    display: flex;
-    margin-top: 20px;
-    margin-bottom: 5px;
+  .sampleDetailsLinkContainer {
+    margin-top: 5px;
   }
 
-  .fill {
-    flex: 1 1 0;
-    min-width: 0;
-  }
+  .sampleDetailsLink {
+    color: $primary-light;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
 
-  .breadcrumbs {
-    margin-right: 20px;
-
-    .projectNameContainer {
-      font-size: $font-size-body;
-      color: $medium-grey;
-      font-weight: $font-weight-semibold;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-      display: flex;
-
-      .projectName {
-        max-width: 600px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-
-        &:hover {
-          /* Overwrite header.scss */
-          color: $primary-light !important;
-        }
-      }
+    &:hover {
+      opacity: 0.5;
     }
-
-    .rightArrow {
-      margin-left: 5px;
-    }
-
-    .sampleDropdown {
-      font-size: $font-size-h3;
-    }
-
-    .sampleName {
-      color: $black;
-      font-weight: $font-weight-semibold;
-      letter-spacing: 1px;
-      font-size: $font-size-h3;
-      word-break: break-all;
-      line-height: $line-height-h3;
-    }
-
-    .trigger {
-      margin-right: 10px;
-      user-select: none;
-
-      &:hover {
-        color: $primary-light;
-      }
-    }
-  }
-
-  .reportButton {
-    flex-shrink: 0;
   }
 }

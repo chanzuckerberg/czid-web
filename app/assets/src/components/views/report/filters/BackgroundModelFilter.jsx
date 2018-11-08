@@ -1,7 +1,7 @@
 import React from "react";
 
 import PropTypes from "../../../utils/propTypes";
-import OurDropdown from "../../../ui/controls/dropdowns/Dropdown";
+import Dropdown from "../../../ui/controls/dropdowns/Dropdown";
 
 const BackgroundModelFilter = ({ allBackgrounds, value, onChange }) => {
   let disabled = false;
@@ -15,12 +15,13 @@ const BackgroundModelFilter = ({ allBackgrounds, value, onChange }) => {
     disabled = true;
   }
   return (
-    <OurDropdown
+    <Dropdown
       options={backgroundOptions}
       value={value}
       disabled={disabled}
       label="Background: "
       onChange={onChange}
+      rounded
     />
   );
 };

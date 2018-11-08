@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { Modal as SemanticModal } from "semantic-ui-react";
 import RemoveIcon from "../icons/RemoveIcon";
+import cs from "./modal.scss";
 
 class Modal extends React.Component {
   constructor(props) {
@@ -10,14 +11,12 @@ class Modal extends React.Component {
 
   render() {
     return (
-      <SemanticModal className="idseq-ui" {...this.props}>
+      <SemanticModal className={cs.modal} {...this.props}>
         {this.props.title && (
           <SemanticModal.Header>{this.props.title}</SemanticModal.Header>
         )}
         {this.props.onClose && (
-          <div className="close-icon" onClick={this.props.onClose}>
-            <RemoveIcon />
-          </div>
+          <RemoveIcon className={cs.closeIcon} onClick={this.props.onClose} />
         )}
         <SemanticModal.Content>{this.props.children}</SemanticModal.Content>
       </SemanticModal>

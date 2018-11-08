@@ -45,6 +45,14 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert @joe_sample.sample_tissue == 'bone'
   end
 
+  test 'joe can update sample to joe_project v2' do
+    @joe_sample = samples(:joe_sample)
+    post "#{save_metadata_v2_sample_url(@joe_sample)}.json", params: { field: "sample_type", value: "bone" }
+    assert_response :success
+    @joe_sample.reload
+    assert @joe_sample.metadata.find_by(key: "sample_type").text_validated_value == 'bone'
+  end
+
   test 'joe can see samples in joe_project' do
     @joe_project = projects(:joe_project)
     get "/samples.json?project_id=#{@joe_project.id}"
@@ -254,12 +262,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe can view joe_sample with background for joe_project' do
     access_sample_with_background(backgrounds(:background_for_joe_project), samples(:joe_sample))
     assert_response :success
-  end
-
-  test 'joe cannot view joe_sample with background for project one' do
-    assert_raise do
-      access_sample_with_background(backgrounds(:background_for_project_one), samples(:joe_sample))
-    end
   end
 
   # phylo_trees
