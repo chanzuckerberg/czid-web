@@ -221,7 +221,7 @@ class SamplesController < ApplicationController
     @pipeline_versions = @sample.pipeline_versions
 
     @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
-    @sample_status = @pipeline_run ? @pipeline_run.job_status_display : 'Waiting to Start'
+    @sample_status = @pipeline_run ? @pipeline_run.job_status_display : 'Waiting to Start or Receive Files'
     pipeline_run_id = @pipeline_run ? @pipeline_run.id : nil
     job_stats_hash = job_stats_get(pipeline_run_id)
     @summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, @pipeline_run) : nil
