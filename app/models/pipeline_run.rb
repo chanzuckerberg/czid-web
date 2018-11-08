@@ -49,7 +49,7 @@ class PipelineRun < ApplicationRecord
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
-  DB_BATCH_SIZE = 200
+  MIN_CONTIG_SIZE = 4
 
   # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
   # and for submitting jobs that need to be run next.
@@ -1022,6 +1022,17 @@ class PipelineRun < ApplicationRecord
     after(pipeline_version, "1000.1000")
     # Very big version number so we don't accidentally start going into assembly mode.
     # Once we decide to deploy the assembly pipeline, change "1000.1000" to the relevant version number of idseq-pipeline.
+  end
+
+  def get_contigs_for_taxid(taxid, min_contig_size = MIN_CONTIG_SIZE)
+    contig_names = contig_counts.where("count >= #{min_contig_size}")
+                                .where(taxid: taxid)
+                                .pluck(:contig_name).uniq
+    contigs.where(name: contig_names)
+  end
+
+  def get_taxid_list_with_contigs(min_contig_size = MIN_CONTIG_SIZE)
+    contig_counts.where("count >= #{min_contig_size} and taxid > 0").pluck(:taxid).uniq
   end
 
   def alignment_output_s3_path
