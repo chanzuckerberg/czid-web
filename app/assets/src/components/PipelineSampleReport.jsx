@@ -620,45 +620,41 @@ class PipelineSampleReport extends React.Component {
     this.handleThresholdFiltersChange(activeThresholds);
   };
 
-  handleBackgroundModelChange = (_, data) => {
-    if (data.value === this.state.backgroundData.id) {
+  handleBackgroundModelChange = (backgroundId, backgroundName) => {
+    if (backgroundId === this.state.backgroundData.id) {
       // Skip if no change
       return;
     }
 
-    const backgroundName = data.options.find(function(option) {
-      return option.value === data.value;
-    }).text;
-
-    Cookies.set("background_name", backgroundName);
+    Cookies.set("background_id", backgroundId);
     this.setState(
       {
         backgroundData: {
           name: backgroundName,
-          id: data.value
+          id: backgroundId
         }
       },
       () => {
-        this.props.refreshPage({ background_id: data.value });
+        this.props.refreshPage({ background_id: backgroundId });
       }
     );
   };
 
-  handleNameTypeChange = (_, data) => {
-    Cookies.set("name_type", data.value);
-    this.setState({ name_type: data.value });
+  handleNameTypeChange = nameType => {
+    Cookies.set("name_type", nameType);
+    this.setState({ name_type: nameType });
   };
 
-  handleSpecificityChange = (_, data) => {
-    Cookies.set("readSpecificity", data.value);
-    this.setState({ readSpecificity: data.value }, () => {
+  handleSpecificityChange = specificity => {
+    Cookies.set("readSpecificity", specificity);
+    this.setState({ readSpecificity: specificity }, () => {
       this.applyFilters();
     });
   };
 
-  handleTreeMetricChange = (_, data) => {
-    Cookies.set("treeMetric", data.value);
-    this.setState({ treeMetric: data.value });
+  handleTreeMetricChange = treeMetric => {
+    Cookies.set("treeMetric", treeMetric);
+    this.setState({ treeMetric });
   };
 
   handleViewClicked = (_, data) => {
@@ -1104,12 +1100,14 @@ class PipelineSampleReport extends React.Component {
     let params = new URLSearchParams(window.href);
     const stringer = require("querystring");
 
-    // If a background name is set in Cookies, get its ID from allBackgrounds.
-    // This is necessary because soon we may show different backgrounds IDs
-    // as the same name to the users.
-    if (!this.fetchParams("background_id") && Cookies.get("background_name")) {
-      const bg_id = this.getBackgroundIdByName(Cookies.get("background_name"));
-      if (bg_id) this.props.reportPageParams.background_id = bg_id;
+    if (!this.fetchParams("background_id") && Cookies.get("background_id")) {
+      const cookie_bgid = Cookies.get("background_id");
+      let match = this.all_backgrounds.filter(b => b["id"] == cookie_bgid);
+      if (match.length > 0) {
+        this.props.reportPageParams.background_id = cookie_bgid;
+      } else {
+        Cookies.remove("background_id");
+      }
     }
 
     // Set pipeline_version and background_id from reportPageParams.
@@ -1122,14 +1120,6 @@ class PipelineSampleReport extends React.Component {
   fetchParams = param => {
     let url = new URL(window.location);
     return url.searchParams.get(param);
-  };
-
-  // Select the background ID with the matching name.
-  getBackgroundIdByName = name => {
-    let match = this.all_backgrounds.filter(b => b["name"] === name);
-    if (match && match[0] && match[0]["id"]) {
-      return match[0]["id"];
-    }
   };
 
   render() {

@@ -1,9 +1,13 @@
 import React from "react";
+import cx from "classnames";
+import PropTypes from "prop-types";
+import cs from "./remove_icon.scss";
 
-const RemoveIcon = () => {
+const RemoveIcon = ({ className, onClick }) => {
   return (
     <svg
-      className="icon remove"
+      className={cx(className, cs.removeIcon, onClick && cs.clickable)}
+      onClick={onClick}
       xmlns="http://www.w3.org/2000/svg"
       width="12"
       height="12"
@@ -16,6 +20,11 @@ const RemoveIcon = () => {
       />
     </svg>
   );
+};
+
+RemoveIcon.propTypes = {
+  className: PropTypes.string,
+  onClick: PropTypes.func
 };
 
 export default RemoveIcon;

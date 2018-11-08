@@ -1,15 +1,13 @@
 import React from "react";
 import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 
 class Dropdown extends React.Component {
   constructor(props) {
     super(props);
-    this.onChange = this.props.onChange;
     this.state = {
-      value:
-        this.props.value ||
-        (this.props.options.length ? this.props.options[0].value : null)
+      value: this.props.value !== undefined ? this.props.value : null
     };
     this.labels = this.props.options.reduce((labelMap, option) => {
       labelMap[option.value.toString()] = option.text;
@@ -25,7 +23,7 @@ class Dropdown extends React.Component {
 
   handleOnChange(e, d) {
     this.setState({ value: d.value });
-    this.onChange(e, d);
+    this.props.onChange(d.value, this.labels[d.value]);
   }
 
   renderText() {
@@ -42,22 +40,28 @@ class Dropdown extends React.Component {
   render() {
     return (
       <BaseDropdown
+        placeholder={this.props.placeholder}
+        scrolling={this.props.scrolling}
         disabled={this.props.disabled}
         fluid={this.props.fluid}
         options={this.props.options}
         value={this.state.value}
         floating
-        className="idseq-ui"
+        className={cx("idseq-ui", this.props.rounded && "rounded")}
         onChange={this.handleOnChange.bind(this)}
         trigger={this.renderText()}
+        selectOnBlur={false}
       />
     );
   }
 }
 
 Dropdown.propTypes = {
+  placeholder: PropTypes.string,
   disabled: PropTypes.bool,
+  scrolling: PropTypes.bool,
   fluid: PropTypes.bool,
+  rounded: PropTypes.bool,
   label: PropTypes.string,
   options: PropTypes.arrayOf(
     PropTypes.shape({

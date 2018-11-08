@@ -5,9 +5,7 @@
     <% if @attribute_dict[:fastq2] %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
       "star_out": ["unmapped1.<%= @attribute_dict[:file_type] %>", "unmapped2.<%= @attribute_dict[:file_type] %>"],
-      <% if @dag_vars_dict["trimmomatic"] %>
-        "trimmomatic_out": ["trimmomatic1.<%= @attribute_dict[:file_type] %>", "trimmomatic2.<%= @attribute_dict[:file_type] %>"],
-      <% end %>
+      "trimmomatic_out": ["trimmomatic1.<%= @attribute_dict[:file_type] %>", "trimmomatic2.<%= @attribute_dict[:file_type] %>"],
       "priceseq_out": ["priceseq1.fa", "priceseq2.fa"],
       "cdhitdup_out": ["dedup1.fa", "dedup2.fa"],
       "lzw_out": ["lzw1.fa", "lzw2.fa"],
@@ -28,9 +26,7 @@
     <% else %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>"],
       "star_out": ["unmapped1.<%= @attribute_dict[:file_type] %>"],
-      <% if @dag_vars_dict["trimmomatic"] %>
-        "trimmomatic_out": ["trimmomatic1.<%= @attribute_dict[:file_type] %>"],
-      <% end %>
+      "trimmomatic_out": ["trimmomatic1.<%= @attribute_dict[:file_type] %>"],
       "priceseq_out": ["priceseq1.fa"],
       "cdhitdup_out": ["dedup1.fa"],
       "lzw_out": ["lzw1.fa"],
@@ -54,25 +50,19 @@
       "additional_attributes": { "truncate_fragments_to": <%= @attribute_dict[:max_fragments] %>
                                 ,"output_gene_file": "reads_per_gene.star.tab" }
     },
-    <% if @dag_vars_dict["trimmomatic"] %>
-      {
-        "in": ["star_out"],
-        "out": "trimmomatic_out",
-        "class": "PipelineStepRunTrimmomatic",
-        "module": "idseq_dag.steps.run_trimmomatic",
-        "additional_files": {
-          "adapter_fasta": "<%= @attribute_dict[:adapter_fasta] %>"
-        },
-        "additional_attributes": {}
+    {
+      "in": ["star_out"],
+      "out": "trimmomatic_out",
+      "class": "PipelineStepRunTrimmomatic",
+      "module": "idseq_dag.steps.run_trimmomatic",
+      "additional_files": {
+        "adapter_fasta": "<%= @attribute_dict[:adapter_fasta] %>"
       },
-    <% end %>
+      "additional_attributes": {}
+    },
     {
       "in": [
-        <% if @dag_vars_dict["trimmomatic"] %>
           "trimmomatic_out"
-        <% else %>
-          "star_out"
-        <% end %>
       ],
       "out": "priceseq_out",
       "class": "PipelineStepRunPriceSeq",
@@ -94,7 +84,10 @@
       "class": "PipelineStepRunLZW",
       "module": "idseq_dag.steps.run_lzw",
       "additional_files": {},
-      "additional_attributes": { "thresholds": [0.45, 0.42] }
+      "additional_attributes": {
+        "thresholds": [0.45, 0.42],
+        "threshold_readlength": 150
+      }
     },
     {
       "in": ["lzw_out"],

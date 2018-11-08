@@ -1,0 +1,11 @@
+@import "~styles/themes/colors";
+
+:global(.ui):global(.sidebar).sidebar {
+  background-color: white;
+  // So the content doesn't overlap with the Header.
+  padding-top: 50px;
+
+  &:global(.visible) {
+    box-shadow: 0 0 25px $box-shadow-dark;
+  }
+}

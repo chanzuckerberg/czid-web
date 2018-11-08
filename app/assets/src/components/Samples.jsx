@@ -69,7 +69,6 @@ class Samples extends React.Component {
     this.checkReportDownload = this.checkReportDownload.bind(this);
     this.displayReportProgress = this.displayReportProgress.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
-    this.getBackgroundIdByName = this.getBackgroundIdByName.bind(this);
     this.state = {
       invite_status: null,
       background_creation_response: {},
@@ -319,11 +318,8 @@ class Samples extends React.Component {
     this.nanobar.go(30);
 
     let url = `/projects/${this.state.selectedProjectId}/${makeAction}`;
-    const bg_name = Cookies.get("background_name");
-    if (bg_name) {
-      const bg_id = this.getBackgroundIdByName(bg_name);
-      if (bg_id) url += `?background_id=${bg_id}`;
-    }
+    const bg_id = Cookies.get("background_id");
+    if (bg_id) url += `?background_id=${bg_id}`;
     axios
       .get(url)
       .then(res => {
@@ -1300,14 +1296,6 @@ class Samples extends React.Component {
         }
       }
     });
-  }
-
-  // Select the background ID with the matching name.
-  getBackgroundIdByName(name) {
-    let match = this.props.allBackgrounds.filter(b => b["name"] === name);
-    if (match && match[0] && match[0]["id"]) {
-      return match[0]["id"];
-    }
   }
 
   render() {

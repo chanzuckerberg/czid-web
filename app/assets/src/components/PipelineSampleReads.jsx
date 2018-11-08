@@ -3,18 +3,17 @@ import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
-import cx from "classnames";
 import { Divider, Dropdown, Popup } from "semantic-ui-react";
-import BareDropdown from "./ui/controls/dropdowns/BareDropdown";
 import DownloadButton from "./ui/controls/buttons/DownloadButton";
 import numberWithCommas from "../helpers/strings";
-import SubHeader from "./SubHeader";
 import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
 import AMRView from "./AMRView";
 import BasicPopup from "./BasicPopup";
+import SampleDetailsSidebar from "./views/report/SampleDetailsSidebar";
 import { SAMPLE_FIELDS } from "./utils/SampleFields";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
+import ViewHeader from "./layout/ViewHeader";
 import cs from "./pipeline_sample_reads.scss";
 
 class PipelineSampleReads extends React.Component {
@@ -37,7 +36,6 @@ class PipelineSampleReads extends React.Component {
     this.reportTime = props.reportTime;
     this.allCategories = props.allCategories;
     this.reportDetails = props.reportDetails;
-    this.pipelineRunRetriable = props.pipelineRunRetriable;
     this.pipelineVersions = props.pipeline_versions;
 
     this.jobStatistics = props.jobStatistics;
@@ -63,7 +61,8 @@ class PipelineSampleReads extends React.Component {
       confirmed_names: props.reportDetails
         ? props.reportDetails.confirmed_names
         : [],
-      sample_name: props.sampleInfo.name
+      sample_name: props.sampleInfo.name,
+      sampleDetailsSidebarVisible: false
     };
     this.TYPE_PROMPT = "-";
     this.NUCLEOTIDE_TYPES = ["Not set", "DNA", "RNA"];
@@ -153,6 +152,12 @@ class PipelineSampleReads extends React.Component {
       .catch(err => {});
   }
 
+  toggleSampleDetailsSidebar = () => {
+    this.setState({
+      sampleDetailsSidebarVisible: !this.state.sampleDetailsSidebarVisible
+    });
+  };
+
   toggleHighlightTaxon(e) {
     let taxid = e.target.getAttribute("data-tax-id");
     let name = e.target.getAttribute("data-tax-name");
@@ -182,7 +187,7 @@ class PipelineSampleReads extends React.Component {
     let dropdown_options = this.DROPDOWN_OPTIONS[field];
     let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : "-";
     return (
-      <div className="row detail-row">
+      <div className="row detail-row" key={`${label}_${field}`}>
         <div className="col s6 label">{label}</div>
         <div className="col s6">
           <div className="sample-notes">
@@ -220,7 +225,7 @@ class PipelineSampleReads extends React.Component {
     let value = hash[field];
     if (hash[field] instanceof Array) value = hash[field].join("; ");
     return (
-      <div className="details-container col s12">
+      <div className="details-container col s12" key={`${label}_${field}`}>
         <div className="details-title note">{label}</div>
         <div className={"sample-notes note " + (editable ? "edit-wide" : "")}>
           <pre
@@ -244,7 +249,7 @@ class PipelineSampleReads extends React.Component {
     if (popupContent)
       labelElem = <BasicPopup trigger={labelElem} content={popupContent} />;
     return (
-      <div className="row detail-row">
+      <div className="row detail-row" key={`${label}_${field}`}>
         {labelElem}
         <div className="col s6">
           <div
@@ -268,7 +273,7 @@ class PipelineSampleReads extends React.Component {
   render_metadata_numfield(label, field) {
     let display_value = this.sampleInfo[field] || this.TYPE_PROMPT;
     return (
-      <div className="row detail-row">
+      <div className="row detail-row" key={`${label}_${field}`}>
         <div className="col s6 label">{label}</div>
         <div className="col s6">
           <div
@@ -577,6 +582,7 @@ class PipelineSampleReads extends React.Component {
                     onClick={() => {
                       this.refreshPage(phash);
                     }}
+                    key={version}
                   >
                     {"Pipeline v" + version}
                   </Dropdown.Item>
@@ -790,41 +796,6 @@ class PipelineSampleReads extends React.Component {
       </div>
     );
 
-    let sampleDropdown = null;
-    if (this.sample_map && Object.keys(this.sample_map).length > 1) {
-      sampleDropdown = (
-        <BareDropdown
-          trigger={
-            <span className={cx(cs.sampleName, cs.trigger)}>
-              {this.state.sample_name}
-            </span>
-          }
-          className={cs.sampleDropdown}
-          floating
-        >
-          <BareDropdown.Menu>
-            {Object.keys(this.sample_map).map(sampleId => {
-              if (parseInt(sampleId) !== parseInt(this.sampleId)) {
-                return (
-                  <BareDropdown.Item
-                    onClick={() => window.open(`/samples/${sampleId}`, "_self")}
-                  >
-                    {this.sample_map[sampleId]}
-                  </BareDropdown.Item>
-                );
-              }
-            })}
-          </BareDropdown.Menu>
-        </BareDropdown>
-      );
-    } else {
-      sampleDropdown = (
-        <div className={cx(cs.sampleName, cs.label)}>
-          {this.state.sample_name}
-        </div>
-      );
-    }
-
     let version_display = "";
     if (
       this.pipelineRun &&
@@ -839,37 +810,11 @@ class PipelineSampleReads extends React.Component {
         version_display + ", NT/NR: " + this.pipelineRun.version.alignment_db;
     }
 
-    let retriable = this.pipelineRunRetriable ? (
-      <div className="row">
-        <div className="col s12">
-          <div className="content-title">Retry Pipeline</div>
-          <h6 className={this.state.rerunStatus}>
-            {this.state.rerunStatus === "success" ? waitingSpinner : null}
-          </h6>
-          <p>
-            Pipeline was not 100% successful. Sample status:{" "}
-            <b>{this.pipelineStatus}</b> <br />
-            {this.state.rerunStatus === "failed" && this.can_edit ? (
-              <a onClick={this.rerunPipeline} className="custom-button small">
-                <i className="fa fa-repeat" />
-                RETRY PIPELINE
-              </a>
-            ) : null}
-          </p>
-        </div>
-      </div>
-    ) : null;
-
     let report_buttons = null;
     if (this.reportPresent) {
       report_buttons = (
         <Popup
-          trigger={
-            <DownloadButton
-              onClick={this.downloadCSV}
-              className={cs.reportButton}
-            />
-          }
+          trigger={<DownloadButton onClick={this.downloadCSV} />}
           content="Download Table as CSV"
           inverted
           on="hover"
@@ -877,11 +822,7 @@ class PipelineSampleReads extends React.Component {
       );
     } else if (this.sampleInfo.status === "created" || !this.reportPresent) {
       report_buttons = (
-        <PrimaryButton
-          onClick={this.deleteSample}
-          text="Delete Sample"
-          className={cs.reportButton}
-        />
+        <PrimaryButton onClick={this.deleteSample} text="Delete Sample" />
       );
     }
 
@@ -898,50 +839,58 @@ class PipelineSampleReads extends React.Component {
         <AMRView amr={this.amr} />
       </div>
     ) : null;
-
     return (
       <div>
-        <SubHeader>
-          <div className={cs.pipelineSampleReadsSubheader}>
+        <ViewHeader className={cs.viewHeader}>
+          <ViewHeader.Content>
             <div className={cs.pipelineInfo}>
               PIPELINE {version_display} {pipeline_version_blurb}
             </div>
-            <div className={cs.topRow}>
-              <div className={cs.breadcrumbs}>
-                <div className={cs.projectNameContainer}>
-                  <a
-                    href={`/home?project_id=${this.projectInfo.id}`}
-                    className={cs.projectName}
-                  >
-                    {this.projectInfo.name}
-                  </a>
-                  <span className={cs.rightArrow}>{">"}</span>
-                </div>
-                {sampleDropdown}
+            <ViewHeader.Pretitle
+              breadcrumbLink={`/home?project_id=${this.projectInfo.id}`}
+            >
+              {this.projectInfo.name}
+            </ViewHeader.Pretitle>
+            <ViewHeader.Title
+              label={this.state.sample_name}
+              id={this.sampleId}
+              options={Object.keys(this.sample_map).map(sampleId => ({
+                label: this.sample_map[sampleId],
+                id: sampleId,
+                onClick: () => window.open(`/samples/${sampleId}`, "_self")
+              }))}
+            />
+            {this.props.admin && (
+              <div className={cs.sampleDetailsLinkContainer}>
+                <span
+                  className={cs.sampleDetailsLink}
+                  onClick={this.toggleSampleDetailsSidebar}
+                >
+                  Sample Details
+                </span>
               </div>
-              <div className={cs.fill} />
-              {report_buttons}
-            </div>
+            )}
+          </ViewHeader.Content>
+          <ViewHeader.Controls>{report_buttons}</ViewHeader.Controls>
+        </ViewHeader>
 
-            <div className="sub-header-navigation">
-              <div className="nav-content">
-                <ul className="tabs tabs-transparent">
-                  <li className="tab">
-                    <a href="#reports" className="active">
-                      Report
-                    </a>
-                  </li>
-                  <li className="tab">
-                    <a href="#details" className="">
-                      Details
-                    </a>
-                  </li>
-                  {amr_tab}
-                </ul>
-              </div>
-            </div>
+        <div className="sub-header-navigation">
+          <div className="nav-content">
+            <ul className="tabs tabs-transparent">
+              <li className="tab">
+                <a href="#reports" className="active">
+                  Report
+                </a>
+              </li>
+              <li className="tab">
+                <a href="#details" className="">
+                  Details
+                </a>
+              </li>
+              {amr_tab}
+            </ul>
           </div>
-        </SubHeader>
+        </div>
         <Divider className="reports-divider" />
 
         {amr_table}
@@ -1054,7 +1003,6 @@ class PipelineSampleReads extends React.Component {
                   </div>
                 </div>
                 {this.renderERCC()}
-                {retriable}
               </div>
 
               <div className="col s3 download-area">
@@ -1070,6 +1018,13 @@ class PipelineSampleReads extends React.Component {
         >
           {d_report}
         </div>
+        {this.props.admin && (
+          <SampleDetailsSidebar
+            visible={this.state.sampleDetailsSidebarVisible}
+            onClose={this.toggleSampleDetailsSidebar}
+            sample={this.props.sampleInfo}
+          />
+        )}
       </div>
     );
   }
