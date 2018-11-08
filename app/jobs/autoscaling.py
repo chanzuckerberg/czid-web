@@ -443,8 +443,6 @@ def autoscaling_update(my_num_jobs, my_environment="development",
     tag_list = get_instance_tags()
     gsnap_tags = find_tags_for_instances_in(gsnap_asg, tag_list)
     rapsearch_tags = find_tags_for_instances_in(rapsearch2_asg, tag_list)
-    check_draining_servers(gsnap_asg, gsnap_tags, draining_tag, job_tag_prefix, job_tag_expiration, min_draining_wait, can_scale)
-    check_draining_servers(rapsearch2_asg, rapsearch_tags, draining_tag, job_tag_prefix, job_tag_expiration, min_draining_wait, can_scale)
     if num_real_jobs == 0 and num_development_jobs == 0:
         set_desired_capacity(gsnap_asg, gsnap_instance_name, gsnap_tags, draining_tag, exactly(0), can_scale)
         set_desired_capacity(rapsearch2_asg, rapsearch_instance_name, rapsearch_tags, draining_tag, exactly(0), can_scale)
@@ -479,6 +477,9 @@ def autoscaling_update(my_num_jobs, my_environment="development",
     else:
         set_desired_capacity(gsnap_asg, gsnap_instance_name, gsnap_tags, draining_tag, at_least(24), can_scale)
         set_desired_capacity(rapsearch2_asg, rapsearch_instance_name, rapsearch_tags, draining_tag, at_least(24), can_scale)
+
+    check_draining_servers(gsnap_asg, gsnap_tags, draining_tag, job_tag_prefix, job_tag_expiration, min_draining_wait, can_scale)
+    check_draining_servers(rapsearch2_asg, rapsearch_tags, draining_tag, job_tag_prefix, job_tag_expiration, min_draining_wait, can_scale)
 
 
 if __name__ == "__main__":
