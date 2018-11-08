@@ -469,7 +469,11 @@ def autoscaling_update(my_num_jobs, my_environment="development",
                 print "Failed to get information about running jobs in aws batch.  Deferring scaling decision."
         else:
             print "Deferring scaling decision to stay under the rate limit for 'aws batch list-jobs'."
-    elif 1 <= num_real_jobs <= 6:
+    elif num_real_jobs == 1:
+        # Often a test job or automatic benchmark job
+        set_desired_capacity(gsnap_asg, gsnap_instance_name, gsnap_tags, draining_tag, exactly(2), can_scale)
+        set_desired_capacity(rapsearch2_asg, rapsearch_instance_name, rapsearch_tags, draining_tag, exactly(2), can_scale)
+    elif 1 < num_real_jobs <= 6:
         set_desired_capacity(gsnap_asg, gsnap_instance_name, gsnap_tags, draining_tag, exactly(8), can_scale)
         set_desired_capacity(rapsearch2_asg, rapsearch_instance_name, rapsearch_tags, draining_tag, exactly(8), can_scale)
     else:
