@@ -313,7 +313,7 @@ def instances_to_rescue(asg, tag_list, draining_tag, num_instances):
     That way we can probably terminate the non-rescued instances sooner.
     '''
     draining_instances = get_draining_servers(asg, tag_list, draining_tag)
-    draining_instances_sorted = [key for key, value in sorted(draining_instances.items(), key=itemgetter(1), reverse=True)]
+    draining_instances_sorted = [key for key, _value in sorted(draining_instances.items(), key=itemgetter(1), reverse=True)]
     return draining_instances_sorted[:num_instances]
 
 
@@ -485,6 +485,8 @@ if __name__ == "__main__":
     assert len(sys.argv) > 2
     assert sys.argv[1] in ("update", "debug")
     assert sys.argv[2].isdigit()
+    assert sys.argv[4].isdigit()
+    assert sys.argv[6].isdigit()
     if sys.argv[1] == "debug":
         DEBUG = True
-    autoscaling_update(int(sys.argv[2]), *sys.argv[3:])
+    autoscaling_update(int(sys.argv[2]), sys.argv[3], int(sys.argv[4]), sys.argv[5], int(sys.argv[6]), sys.argv[7])
