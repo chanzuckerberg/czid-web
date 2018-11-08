@@ -44,7 +44,7 @@ export const METADATA_SECTIONS = [
   }
 ];
 
-export const SAMPLE_INFO_ADDITIONAL_INFO = [
+export const SAMPLE_ADDITIONAL_INFO = [
   {
     name: "Sample Name",
     key: "name"

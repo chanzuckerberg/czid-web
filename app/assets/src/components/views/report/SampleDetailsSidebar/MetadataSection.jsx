@@ -96,7 +96,11 @@ class MetadataSection extends React.Component {
             {children}
             {editing && (
               <div className={cs.controls}>
-                <PrimaryButton onClick={onEditToggle} text="Done Editing" />
+                <PrimaryButton
+                  onClick={onEditToggle}
+                  rectangular
+                  text="Done Editing"
+                />
               </div>
             )}
           </div>

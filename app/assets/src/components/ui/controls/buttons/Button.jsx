@@ -1,9 +1,10 @@
 import { Button as BaseButton } from "semantic-ui-react";
 import { forbidExtraProps } from "airbnb-prop-types";
 import PropTypes from "prop-types";
+import cx from "classnames";
 import React from "react";
 
-const Button = ({ icon, label, text, className, ...props }) => {
+const Button = ({ icon, label, text, rectangular, className, ...props }) => {
   let content = text;
   if (icon || label) {
     content = (
@@ -15,11 +16,11 @@ const Button = ({ icon, label, text, className, ...props }) => {
     );
   }
   let cname = "idseq-ui";
-  if (className) {
-    cname = `${cname} ${className}`;
-  }
   return (
-    <BaseButton {...props} className={cname}>
+    <BaseButton
+      {...props}
+      className={cx(cname, className, rectangular && "rectangular")}
+    >
       {content}
     </BaseButton>
   );
@@ -37,6 +38,7 @@ Button.propTypes = forbidExtraProps({
   text: PropTypes.string,
   primary: PropTypes.bool,
   secondary: PropTypes.bool,
+  rectangular: PropTypes.bool,
   className: PropTypes.string
 });
 

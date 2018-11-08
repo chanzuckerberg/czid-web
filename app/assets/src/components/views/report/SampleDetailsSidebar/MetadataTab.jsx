@@ -5,7 +5,7 @@ import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 import MetadataSection from "./MetadataSection";
 import ObjectHelper from "~/helpers/ObjectHelper";
-import { METADATA_SECTIONS, SAMPLE_INFO_ADDITIONAL_INFO } from "./constants";
+import { METADATA_SECTIONS, SAMPLE_ADDITIONAL_INFO } from "./constants";
 import cs from "./sample_details_sidebar.scss";
 
 class MetadataTab extends React.Component {
@@ -118,7 +118,7 @@ class MetadataTab extends React.Component {
         {/* Special section for Sample Info */}
         {section.name === "Sample Info" &&
           !isSectionEditing &&
-          SAMPLE_INFO_ADDITIONAL_INFO.map(info => (
+          SAMPLE_ADDITIONAL_INFO.map(info => (
             <div className={cs.field} key={info.key}>
               <div className={cs.label}>{info.name}</div>
               {info.key === "project_name" ? (
