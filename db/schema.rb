@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_107_023_601) do
+ActiveRecord::Schema.define(version: 20_181_107_235_404) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -87,7 +87,7 @@ ActiveRecord::Schema.define(version: 20_181_107_023_601) do
   create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
-    t.text "sequence"
+    t.text "sequence", limit: 4_294_967_295
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
