@@ -238,7 +238,7 @@ module ReportHelper
     ALL_CATEGORIES
   end
 
-  def fetch_taxon_counts(pipeline_run_id, background_id, _refined = false)
+  def fetch_taxon_counts(pipeline_run_id, background_id)
     pipeline_run = PipelineRun.find(pipeline_run_id)
     adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
     raw_non_host_reads = pipeline_run.adjusted_remaining_reads.to_f * pipeline_run.subsample_fraction
@@ -959,8 +959,7 @@ module ReportHelper
   def taxonomy_details(pipeline_run_id, background_id, params)
     # Fetch and clean data.
     t0 = wall_clock_ms
-    refined = params[:refined].to_i == 2 ? false : true # TODO(yf): revisit for contig counts
-    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id, refined)
+    taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
     tax_2d = taxon_counts_cleanup(taxon_counts)
     t1 = wall_clock_ms
 
