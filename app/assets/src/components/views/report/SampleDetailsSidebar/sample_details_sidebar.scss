@@ -2,7 +2,7 @@
 @import "~styles/themes/colors";
 
 .content {
-  margin: 30px 20px;
+  padding: 30px 20px;
   position: relative;
 }
 
@@ -12,10 +12,14 @@
   margin: 0 10px;
 }
 
+.tabs {
+  margin: 30px 10px;
+}
+
 .closeIcon {
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 20px;
+  top: 30px;
   opacity: 0.3;
   width: 20px;
   height: 20px;
@@ -63,5 +67,36 @@
       /* overwrite header.scss */
       opacity: 0.5;
     }
+  }
+}
+
+.erccScatterplotSection {
+  .graphContainer {
+    margin-top: 20px;
+    margin-right: 10px;
+  }
+}
+
+.notesSection {
+  .note {
+    font-size: $font-size-body;
+    line-height: 23px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 15px 10px;
+  }
+
+  .noData {
+    color: $light-grey;
+    margin: 20px 10px;
+  }
+
+  .textareaContainer {
+    margin: 15px 10px 0 10px;
+  }
+
+  .textarea {
+    height: 600px;
+    resize: vertical;
   }
 }

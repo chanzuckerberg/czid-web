@@ -62,3 +62,34 @@ export const SAMPLE_INFO_ADDITIONAL_INFO = [
     key: "host_genome_name"
   }
 ];
+
+export const PIPELINE_INFO_FIELDS = [
+  {
+    name: "Total Reads",
+    key: "totalReads"
+  },
+  {
+    name: "ERCC Reads",
+    key: "totalErccReads"
+  },
+  {
+    name: "Non-host Reads",
+    key: "nonhostReads"
+  },
+  {
+    name: "Unmapped Reads",
+    key: "unmappedReads"
+  },
+  {
+    name: "Passed Quality Control",
+    key: "qcPercent"
+  },
+  {
+    name: "Compression Ratio",
+    key: "compressionRatio"
+  },
+  {
+    name: "Date Processed",
+    key: "lastProcessedAt"
+  }
+];

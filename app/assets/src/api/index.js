@@ -29,15 +29,22 @@ const saveSampleMetadata = (id, field, value) =>
 
 const getMetadataTypes = () => get("/samples/metadata_types");
 
-const saveSampleName = (id, name) =>
+// Save fields on the sample model (NOT sample metadata)
+const saveSampleField = (id, field, value) =>
   postWithCSRF(`/samples/${id}/save_metadata`, {
-    field: "name",
-    value: name
+    field,
+    value
   });
+
+const saveSampleName = (id, name) => saveSampleField(id, "name", name);
+
+const saveSampleNotes = (id, sampleNotes) =>
+  saveSampleField(id, "sample_notes", sampleNotes);
 
 export {
   getSampleMetadata,
   saveSampleMetadata,
   getMetadataTypes,
-  saveSampleName
+  saveSampleName,
+  saveSampleNotes
 };

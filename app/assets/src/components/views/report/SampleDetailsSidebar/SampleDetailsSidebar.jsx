@@ -1,51 +1,43 @@
 import React from "react";
-import moment from "moment";
-import { keyBy, mapValues, some } from "lodash";
+import { some } from "lodash";
 import PropTypes from "~/components/utils/propTypes";
 import Sidebar from "~/components/ui/containers/Sidebar";
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
+import Tabs from "~/components/ui/controls/Tabs";
 import {
   getSampleMetadata,
   saveSampleMetadata,
   getMetadataTypes,
-  saveSampleName
+  saveSampleName,
+  saveSampleNotes
 } from "~/api";
-import MetadataEditor from "./MetadataEditor";
+import MetadataTab from "./MetadataTab";
+import PipelineTab from "./PipelineTab";
+import NotesTab from "./NotesTab";
 import ObjectHelper from "~/helpers/ObjectHelper";
+import {
+  processMetadata,
+  processMetadataTypes,
+  processPipelineInfo,
+  processAdditionalInfo
+} from "./utils";
 import cs from "./sample_details_sidebar.scss";
 
-// Transform the server metadata response to a simple key => value map.
-const processMetadata = metadata => {
-  let newMetadata = keyBy(metadata, "key");
-
-  newMetadata = mapValues(
-    newMetadata,
-    val =>
-      val.data_type === "string"
-        ? val.text_validated_value
-        : val.number_validated_value
-  );
-
-  return newMetadata;
-};
-
-const processMetadataTypes = metadataTypes => keyBy(metadataTypes, "key");
-
-// Format the upload date.
-const processAdditionalInfo = additionalInfo =>
-  ObjectHelper.set(
-    additionalInfo,
-    "upload_date",
-    moment(additionalInfo.upload_date).format("MM/DD/YYYY")
-  );
+const TABS = ["Metadata", "Pipeline", "Notes"];
 
 class SampleDetailsSidebar extends React.Component {
   state = {
     metadata: null,
     additionalInfo: null,
+    pipelineInfo: null,
     metadataTypes: null,
     metadataChanged: {},
-    metadataSavePending: {}
+    metadataSavePending: {},
+    currentTab: TABS[0]
+  };
+
+  onTabChange = tab => {
+    this.setState({ currentTab: tab });
   };
 
   async componentDidMount() {
@@ -56,6 +48,7 @@ class SampleDetailsSidebar extends React.Component {
     this.setState({
       metadata: processMetadata(metadata.metadata),
       additionalInfo: processAdditionalInfo(metadata.additional_info),
+      pipelineInfo: processPipelineInfo(metadata.additional_info),
       metadataTypes: processMetadataTypes(metadataTypes)
     });
   }
@@ -63,19 +56,11 @@ class SampleDetailsSidebar extends React.Component {
   // shouldSave option is used when <Input> option is selected
   // to change and save in one call (to avoid setState issues)
   handleMetadataChange = (key, value, shouldSave) => {
-    /* Sample name is a special case */
-    if (key === "name") {
+    /* Sample name and note are special cases */
+    if (key === "name" || key === "notes") {
       this.setState({
-        additionalInfo: ObjectHelper.set(
-          this.state.additionalInfo,
-          "name",
-          value
-        ),
-        metadataChanged: ObjectHelper.set(
-          this.state.metadataChanged,
-          "name",
-          true
-        )
+        additionalInfo: ObjectHelper.set(this.state.additionalInfo, key, value),
+        metadataChanged: ObjectHelper.set(this.state.metadataChanged, key, true)
       });
 
       return;
@@ -115,8 +100,8 @@ class SampleDetailsSidebar extends React.Component {
       this._save(
         this.props.sample.id,
         key,
-        key === "name"
-          ? this.state.additionalInfo.name
+        key === "name" || key === "notes"
+          ? this.state.additionalInfo[key]
           : this.state.metadata[key]
       );
     }
@@ -133,6 +118,8 @@ class SampleDetailsSidebar extends React.Component {
 
     if (key === "name") {
       await saveSampleName(id, value);
+    } else if (key === "notes") {
+      await saveSampleNotes(id, value);
     } else {
       await saveSampleMetadata(this.props.sample.id, key, value);
     }
@@ -152,7 +139,8 @@ class SampleDetailsSidebar extends React.Component {
       metadata,
       metadataTypes,
       metadataSavePending,
-      additionalInfo
+      additionalInfo,
+      pipelineInfo
     } = this.state;
 
     const savePending = some(metadataSavePending);
@@ -163,15 +151,33 @@ class SampleDetailsSidebar extends React.Component {
           {additionalInfo && (
             <div className={cs.title}>{additionalInfo.name}</div>
           )}
-          {metadata === null ? (
-            <div className={cs.loadingMsg}>Loading...</div>
-          ) : (
-            <MetadataEditor
+          <Tabs
+            className={cs.tabs}
+            tabs={TABS}
+            value={this.state.currentTab}
+            onChange={this.onTabChange}
+          />
+          {this.state.currentTab === "Metadata" && (
+            <MetadataTab
               metadata={metadata}
               additionalInfo={additionalInfo}
               metadataTypes={metadataTypes}
               onMetadataChange={this.handleMetadataChange}
               onMetadataSave={this.handleMetadataSave}
+              savePending={savePending}
+            />
+          )}
+          {this.state.currentTab === "Pipeline" && (
+            <PipelineTab
+              pipelineInfo={pipelineInfo}
+              erccComparison={additionalInfo.ercc_comparison}
+            />
+          )}
+          {this.state.currentTab === "Notes" && (
+            <NotesTab
+              notes={additionalInfo.notes}
+              onNoteChange={val => this.handleMetadataChange("notes", val)}
+              onNoteSave={() => this.handleMetadataSave("notes")}
               savePending={savePending}
             />
           )}

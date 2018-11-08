@@ -52,39 +52,46 @@ class MetadataSection extends React.Component {
       open,
       onToggle,
       editing,
+      editable,
+      toggleable,
       children,
-      onEditToggle
+      onEditToggle,
+      alwaysShowEditLink,
+      className
     } = this.props;
     return (
-      <div className={cs.metadataSection}>
+      <div className={cx(cs.metadataSection, className)}>
         <div className={cs.header} onClick={onToggle}>
           <div className={cs.title}>{title}</div>
-          {editing ? (
-            this.renderStatus()
-          ) : (
-            <div
-              className={cs.editLink}
-              onClick={e => {
-                onEditToggle();
-                e.stopPropagation();
-              }}
-            >
-              Edit
+          {editable &&
+            (editing ? (
+              this.renderStatus()
+            ) : (
+              <div
+                className={cx(cs.editLink, alwaysShowEditLink && cs.show)}
+                onClick={e => {
+                  onEditToggle();
+                  e.stopPropagation();
+                }}
+              >
+                Edit
+              </div>
+            ))}
+          <div className={cs.fill} />
+          {toggleable && (
+            <div className={cs.toggleContainer}>
+              <i
+                className={cx(
+                  "fa",
+                  open ? "fa-angle-up" : "fa-angle-down",
+                  cs.toggleIcon
+                )}
+                onClick={onToggle}
+              />
             </div>
           )}
-          <div className={cs.fill} />
-          <div className={cs.toggleContainer}>
-            <i
-              className={cx(
-                "fa",
-                open ? "fa-angle-up" : "fa-angle-down",
-                cs.toggleIcon
-              )}
-              onClick={onToggle}
-            />
-          </div>
         </div>
-        {open && (
+        {(open || !toggleable) && (
           <div className={cs.content}>
             {children}
             {editing && (
@@ -100,12 +107,16 @@ class MetadataSection extends React.Component {
 }
 
 MetadataSection.propTypes = {
+  className: PropTypes.string,
   title: PropTypes.string,
   open: PropTypes.bool,
+  toggleable: PropTypes.bool,
   onToggle: PropTypes.func.isRequired,
+  editable: PropTypes.bool,
   editing: PropTypes.bool,
-  onEditToggle: PropTypes.func.isRequired,
+  onEditToggle: PropTypes.func,
   savePending: PropTypes.bool,
+  alwaysShowEditLink: PropTypes.bool,
   children: PropTypes.node
 };
 

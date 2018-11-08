@@ -8,7 +8,7 @@ import ObjectHelper from "~/helpers/ObjectHelper";
 import { METADATA_SECTIONS, SAMPLE_INFO_ADDITIONAL_INFO } from "./constants";
 import cs from "./sample_details_sidebar.scss";
 
-class MetadataEditor extends React.Component {
+class MetadataTab extends React.Component {
   state = {
     sectionOpen: {
       // Open the first section by default.
@@ -57,6 +57,47 @@ class MetadataEditor extends React.Component {
       newState.sectionOpen = ObjectHelper.set(sectionOpen, section.name, true);
     }
     this.setState(newState);
+  };
+
+  renderInput = metadataType => {
+    const { metadata, onMetadataChange, onMetadataSave } = this.props;
+
+    if (isArray(metadataType.options)) {
+      const options = metadataType.options.map(option => ({
+        text: option,
+        value: option
+      }));
+      return (
+        <Dropdown
+          fluid
+          floating
+          scrolling
+          options={options}
+          onChange={val => onMetadataChange(metadataType.key, val, true)}
+          value={metadata[metadataType.key]}
+        />
+      );
+    }
+
+    return (
+      <Input
+        onChange={val => onMetadataChange(metadataType.key, val)}
+        onBlur={() => onMetadataSave(metadataType.key)}
+        value={metadata[metadataType.key]}
+        type={metadataType.dataType === "number" ? "number" : "text"}
+        className={cs.input}
+      />
+    );
+  };
+
+  renderMetadataValue = metadataType => {
+    const { metadata } = this.props;
+    const val = metadata[metadataType.key];
+    return val === undefined || val === null || val === "" ? (
+      <div className={cs.emptyValue}>--</div>
+    ) : (
+      <div className={cs.metadataValue}>{val}</div>
+    );
   };
 
   renderMetadataSectionContent = section => {
@@ -113,63 +154,30 @@ class MetadataEditor extends React.Component {
             <div className={cs.label}>{metadataTypes[key].name}</div>
             {isSectionEditing
               ? this.renderInput(metadataTypes[key])
-              : this.renderMetadata(metadataTypes[key])}
+              : this.renderMetadataValue(metadataTypes[key])}
           </div>
         ))}
       </div>
     );
   };
 
-  renderInput = metadataType => {
-    const { metadata, onMetadataChange, onMetadataSave } = this.props;
+  render() {
+    const { metadata } = this.props;
 
-    if (isArray(metadataType.options)) {
-      const options = metadataType.options.map(option => ({
-        text: option,
-        value: option
-      }));
-      return (
-        <Dropdown
-          fluid
-          floating
-          scrolling
-          options={options}
-          onChange={val => onMetadataChange(metadataType.key, val, true)}
-          value={metadata[metadataType.key]}
-        />
-      );
+    if (!metadata) {
+      return <div className={cs.loadingMsg}>Loading...</div>;
     }
 
-    return (
-      <Input
-        onChange={val => onMetadataChange(metadataType.key, val)}
-        onBlur={() => onMetadataSave(metadataType.key)}
-        value={metadata[metadataType.key]}
-        type={metadataType.dataType === "number" ? "number" : "text"}
-        className={cs.input}
-      />
-    );
-  };
-
-  renderMetadata = metadataType => {
-    const { metadata } = this.props;
-    const val = metadata[metadataType.key];
-    return val === undefined || val === null || val === "" ? (
-      <div className={cs.emptyValue}>--</div>
-    ) : (
-      <div className={cs.metadataValue}>{metadata[metadataType.key]}</div>
-    );
-  };
-
-  render() {
     return (
       <div>
         {METADATA_SECTIONS.map(section => (
           <MetadataSection
             key={section.name}
+            editable
+            toggleable
             onToggle={() => this.toggleSection(section)}
-            onEditToggle={() => this.toggleSectionEdit(section)}
             open={this.state.sectionOpen[section.name]}
+            onEditToggle={() => this.toggleSectionEdit(section)}
             editing={this.state.sectionEditing[section.name]}
             title={section.name}
             savePending={this.props.savePending}
@@ -182,7 +190,7 @@ class MetadataEditor extends React.Component {
   }
 }
 
-MetadataEditor.propTypes = {
+MetadataTab.propTypes = {
   metadata: PropTypes.objectOf(
     PropTypes.oneOfType([PropTypes.string, PropTypes.number])
   ),
@@ -198,4 +206,4 @@ MetadataEditor.propTypes = {
   })
 };
 
-export default MetadataEditor;
+export default MetadataTab;
