@@ -29,6 +29,8 @@ Button.propTypes = forbidExtraProps({
   disabled: PropTypes.bool,
   icon: PropTypes.element,
   label: PropTypes.element,
+  onBlur: PropTypes.func,
+  onFocus: PropTypes.func,
   onClick: PropTypes.func,
   onMouseLeave: PropTypes.func,
   onMouseEnter: PropTypes.func,

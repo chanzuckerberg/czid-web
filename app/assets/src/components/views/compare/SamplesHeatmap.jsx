@@ -10,7 +10,7 @@ import symlog from "./symlog.js";
 import DownloadButton from "../../ui/controls/buttons/DownloadButton";
 import Dropdown from "../../ui/controls/dropdowns/Dropdown";
 import ErrorBoundary from "../../ErrorBoundary";
-import Heatmap from "../../visualizations/Heatmap";
+import SamplesHeatmapVis from "./SamplesHeatmapVis";
 import HeatmapLegend from "../../visualizations/HeatmapLegend";
 import MultipleNestedDropdown from "../../ui/controls/dropdowns/MultipleNestedDropdown";
 import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
@@ -21,7 +21,7 @@ import ThresholdFilterDropdown from "../../ui/controls/dropdowns/ThresholdFilter
 import { Colormap } from "../../utils/colormaps/Colormap";
 import DeepEqual from "fast-deep-equal";
 
-class SamplesHeatmap extends React.Component {
+class SamplesHeatmapView extends React.Component {
   constructor(props) {
     super(props);
 
@@ -205,13 +205,14 @@ class SamplesHeatmap extends React.Component {
         cancelToken: this.lastRequestToken.token
       })
       .then(response => {
-        let taxons = this.extractTaxons(response.data);
-        console.log("taxons", taxons);
-        console.log("data", response.data);
-        this.recluster = true;
+        this.extractData(response.data);
+        // let taxons = this.extractTaxons(response.data);
+        // console.log("taxons", taxons);
+        // console.log("data", response.data);
+        // this.recluster = true;
         this.setState({
-          data: response.data,
-          taxons: taxons,
+          //   data: response.data,
+          //   taxons: taxons,
           loading: false
         });
       })
@@ -309,7 +310,68 @@ class SamplesHeatmap extends React.Component {
     };
   }
 
+  extractData(data) {
+    this.sampleIds = [];
+    this.sampleDetails = {};
+    this.taxonIds = [];
+    this.taxonDetails = {};
+    this.taxonResults = {};
+
+    for (let i = 0; i < data.length; i++) {
+      let sample = data[i];
+      this.sampleIds.push(sample.sample_id);
+      this.sampleDetails[sample.sample_id] = {
+        name: sample.name,
+        index: i
+      };
+      for (let j = 0; j < sample.taxons.length; j++) {
+        let taxon = sample.taxons[j];
+        let taxonIndex;
+        if (!(taxon.tax_id in this.taxonDetails)) {
+          taxonIndex = this.taxonIds.length;
+          this.taxonIds.push(taxon.tax_id);
+          this.taxonDetails[taxon.tax_id] = {
+            index: taxonIndex,
+            name: taxon.name,
+            category: taxon.category_name,
+            phage: !!taxon.is_phage
+          };
+        } else {
+          taxonIndex = this.taxonDetails[taxon.tax_id].index;
+        }
+
+        this.state.availableOptions.metrics.forEach(metric => {
+          let [metricType, metricName] = metric.value.split(".");
+          this.taxonResults[metric.value] =
+            this.taxonResults[metric.value] || [];
+          this.taxonResults[metric.value][taxonIndex] =
+            this.taxonResults[metric.value][taxonIndex] || [];
+          this.taxonResults[metric.value][taxonIndex][i] =
+            taxon[metricType][metricName];
+        });
+      }
+    }
+
+    console.log("sample ids", this.sampleIds);
+    console.log("sample details", this.sampleDetails);
+    console.log("taxon ids", this.taxonIds);
+    console.log("taxon details", this.taxonDetails);
+    console.log("data", this.taxonResults);
+  }
+
+  getData(metric) {
+    let mType,
+      mName = metric.value.split(".");
+    let data = [];
+    for (let i = 0; i < this.samples.length; i++) {
+      for (let j = 0; j < samples.taxons.length; j++) {
+        (data[j] || [])[i] = samples;
+      }
+    }
+  }
+
   extractTaxons(data) {
+    // this extracts all taxons
     let idToName = {},
       idToCategory = {},
       nameToId = {},
@@ -465,28 +527,37 @@ class SamplesHeatmap extends React.Component {
   }
 
   renderHeatmap() {
-    if (this.state.loading || !this.state.data || !this.state.data.length) {
+    console.log(this.state.loading, !this.taxonResults);
+    // if (this.state.loading || !this.state.data || !this.state.data.length) {
+    if (this.state.loading || !this.taxonResults) {
       return;
     }
     let scaleIndex = this.state.selectedOptions.dataScaleIdx;
     return (
-      <ErrorBoundary>
-        <Heatmap
-          colTree={this.clusteredSamples.tree}
-          rowTree={this.clusteredTaxons.tree}
-          rows={this.state.taxons.names.length}
-          columns={this.state.data.length}
-          getRowLabel={this.getRowLabel}
-          getColumnLabel={this.getColumnLabel}
-          getCellValue={this.dataGetters[this.state.selectedOptions.metric]}
-          getTooltip={this.getTooltip}
-          onCellClick={this.onCellClick}
-          onColumnLabelClick={this.onSampleLabelClick}
-          onRemoveRow={this.onRemoveRow}
-          scale={this.state.availableOptions.scales[scaleIndex][1]}
-          colors={this.colors}
-        />
-      </ErrorBoundary>
+      // <ErrorBoundary>
+      <SamplesHeatmapVis
+        sampleIds={this.sampleIds}
+        sampleDetails={this.sampleDetails}
+        taxonIds={this.taxonIds}
+        taxonDetails={this.taxonDetails}
+        data={this.taxonResults}
+        metric={this.state.selectedOptions.metric}
+
+        // colTree={this.clusteredSamples.tree}
+        // rowTree={this.clusteredTaxons.tree}
+        // rows={this.state.taxons.names.length}
+        // columns={this.state.data.length}
+        // getRowLabel={this.getRowLabel}
+        // getColumnLabel={this.getColumnLabel}
+        // getCellValue={this.dataGetters[this.state.selectedOptions.metric]}
+        // getTooltip={this.getTooltip}
+        // onCellClick={this.onCellClick}
+        // onColumnLabelClick={this.onSampleLabelClick}
+        // onRemoveRow={this.onRemoveRow}
+        // scale={this.state.availableOptions.scales[scaleIndex][1]}
+        // colors={this.colors}
+      />
+      // </ErrorBoundary>
     );
   }
 
@@ -830,7 +901,7 @@ class SamplesHeatmap extends React.Component {
   }
 }
 
-SamplesHeatmap.propTypes = {
+SamplesHeatmapView.propTypes = {
   backgrounds: PropTypes.array,
   categories: PropTypes.array,
   explicitApply: PropTypes.bool,
@@ -842,4 +913,4 @@ SamplesHeatmap.propTypes = {
   thresholdFilters: PropTypes.object
 };
 
-export default SamplesHeatmap;
+export default SamplesHeatmapView;
