@@ -91,6 +91,17 @@ class Landing extends React.Component {
               disabled={!this.props.browserInfo.supported}
             />
           </div>
+          <div className="hiring-ad">
+            {"Join our team! We're hiring "}
+            <a href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/1342063">
+              scientists
+            </a>
+            {" and "}
+            <a href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/1003911">
+              engineers
+            </a>
+            !
+          </div>
           {this.props.browserInfo.supported || (
             <div className="alert-browser-support">
               {this.props.browserInfo.browser} is not currently supported.

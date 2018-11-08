@@ -1,15 +1,16 @@
 import React from "react";
 
 import PropTypes from "../../../utils/propTypes";
-import OurDropdown from "../../../ui/controls/dropdowns/Dropdown";
+import Dropdown from "../../../ui/controls/dropdowns/Dropdown";
 
 const MetricPicker = ({ value, onChange, options }) => {
   return (
-    <OurDropdown
+    <Dropdown
       options={options}
       value={value}
       label="Tree Metric: "
       onChange={onChange}
+      rounded
     />
   );
 };

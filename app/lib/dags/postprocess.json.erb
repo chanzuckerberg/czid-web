@@ -24,7 +24,7 @@
       "taxid_locations_combined.json"
     ],
     "alignment_viz_out": ["align_viz.summary"]
-    <% if @dag_vars_dict["assembly"] %> 
+    <% if @attribute_dict[:pipeline_version].to_f >= 3.1 %> 
 
     ,"host_filter_out": [
       <% if @host_genome == "human" %>
@@ -120,7 +120,7 @@
       "in": [
         "gsnap_m8", 
         "taxid_locator_out"
-        <% if @dag_vars_dict["assembly"] %>
+        <% if @attribute_dict[:pipeline_version].to_f >= 3.1 %>
           ,"gsnap_accessions_out"
         <% end %>
       ],
@@ -134,7 +134,7 @@
         "nt_db": "<%= @attribute_dict[:nt_db] %>"
       }
     }
-    <% if @dag_vars_dict["assembly"] %>
+    <% if @attribute_dict[:pipeline_version].to_f >= 3.1 %>
     ,{
       "in": ["host_filter_out"],
       "out": "assembly_out",
@@ -253,7 +253,7 @@
     "gsnap_m8": {
       "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
     }
-     <% if @dag_vars_dict["assembly"] %>
+     <% if @attribute_dict[:pipeline_version].to_f >= 3.1 %>
       ,"host_filter_out": {
         "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
       } 

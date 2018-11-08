@@ -1,12 +1,13 @@
-.dropdown {
+:global(.ui):global(.dropdown).dropdown {
+  display: flex;
+  align-items: center;
+
   i:global(.dropdown) {
-    /* Override semantic-ui */
-    margin-left: 0 !important;
+    margin-left: 0;
 
     &:before {
       font-family: FontAwesome;
-      /* Override semantic-ui */
-      content: "\f107" !important;
+      content: "\f107";
     }
   }
 }

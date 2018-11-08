@@ -13,7 +13,8 @@ const config = {
   resolve: {
     extensions: [".js", ".jsx"],
     alias: {
-      styles: path.resolve(__dirname, "app/assets/src/styles")
+      styles: path.resolve(__dirname, "app/assets/src/styles"),
+      "~": path.resolve(__dirname, "app/assets/src")
     }
   },
   plugins: [

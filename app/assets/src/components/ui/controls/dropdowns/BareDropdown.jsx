@@ -22,7 +22,8 @@ BareDropdown.propTypes = forbidExtraProps({
   trigger: PropTypes.node.isRequired,
   children: PropTypes.node.isRequired,
   className: PropTypes.string,
-  floating: PropTypes.bool
+  floating: PropTypes.bool,
+  scrolling: PropTypes.bool
 });
 
 BareDropdown.Menu = BaseDropdown.Menu;
