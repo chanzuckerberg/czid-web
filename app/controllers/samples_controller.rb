@@ -171,7 +171,16 @@ class SamplesController < ApplicationController
   # GET /samples/1/metadata
   # GET /samples/1/metadata.json
   def metadata
-    render json: @sample.metadata
+    render json: {
+      metadata: @sample.metadata,
+      additional_info: {
+        name: @sample.name,
+        host_genome_name: @sample.host_genome_name,
+        upload_date: @sample.created_at,
+        project_name: @sample.project.name,
+        project_id: @sample.project_id
+      }
+    }
   end
 
   # POST /samples/1/save_metadata_v2

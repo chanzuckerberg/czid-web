@@ -1023,6 +1023,7 @@ class PipelineSampleReads extends React.Component {
             visible={this.state.sampleDetailsSidebarVisible}
             onClose={this.toggleSampleDetailsSidebar}
             sample={this.props.sampleInfo}
+            onNameUpdate={newName => this.setState({ sample_name: newName })}
           />
         )}
       </div>

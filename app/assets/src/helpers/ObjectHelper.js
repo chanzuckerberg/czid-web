@@ -1,3 +1,4 @@
+import { set as _set } from "lodash/fp";
 /**
  * @class ObjectHelper
  */
@@ -25,6 +26,10 @@ class ObjectHelper {
   }
   static deepCopy(obj) {
     return JSON.parse(JSON.stringify(obj));
+  }
+  // Sets the value at path of object, and returns new object.
+  static set(obj, path, value) {
+    return _set(path, value, obj);
   }
 }
 

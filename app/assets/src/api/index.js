@@ -29,4 +29,15 @@ const saveSampleMetadata = (id, field, value) =>
 
 const getMetadataTypes = () => get("/samples/metadata_types");
 
-export { getSampleMetadata, saveSampleMetadata, getMetadataTypes };
+const saveSampleName = (id, name) =>
+  postWithCSRF(`/samples/${id}/save_metadata`, {
+    field: "name",
+    value: name
+  });
+
+export {
+  getSampleMetadata,
+  saveSampleMetadata,
+  getMetadataTypes,
+  saveSampleName
+};

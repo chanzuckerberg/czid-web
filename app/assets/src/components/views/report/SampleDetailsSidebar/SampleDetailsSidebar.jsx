@@ -1,10 +1,17 @@
 import React from "react";
-import { keyBy, mapValues } from "lodash";
+import moment from "moment";
+import { keyBy, mapValues, some } from "lodash";
 import PropTypes from "~/components/utils/propTypes";
 import Sidebar from "~/components/ui/containers/Sidebar";
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
-import { getSampleMetadata, saveSampleMetadata, getMetadataTypes } from "~/api";
+import {
+  getSampleMetadata,
+  saveSampleMetadata,
+  getMetadataTypes,
+  saveSampleName
+} from "~/api";
 import MetadataEditor from "./MetadataEditor";
+import ObjectHelper from "~/helpers/ObjectHelper";
 import cs from "./sample_details_sidebar.scss";
 
 // Transform the server metadata response to a simple key => value map.
@@ -22,11 +29,23 @@ const processMetadata = metadata => {
   return newMetadata;
 };
 
+const processMetadataTypes = metadataTypes => keyBy(metadataTypes, "key");
+
+// Format the upload date.
+const processAdditionalInfo = additionalInfo =>
+  ObjectHelper.set(
+    additionalInfo,
+    "upload_date",
+    moment(additionalInfo.upload_date).format("MM/DD/YYYY")
+  );
+
 class SampleDetailsSidebar extends React.Component {
   state = {
     metadata: null,
+    additionalInfo: null,
     metadataTypes: null,
-    metadataChanged: {}
+    metadataChanged: {},
+    metadataSavePending: {}
   };
 
   async componentDidMount() {
@@ -35,60 +54,125 @@ class SampleDetailsSidebar extends React.Component {
       getMetadataTypes()
     ]);
     this.setState({
-      metadata: processMetadata(metadata),
-      metadataTypes
+      metadata: processMetadata(metadata.metadata),
+      additionalInfo: processAdditionalInfo(metadata.additional_info),
+      metadataTypes: processMetadataTypes(metadataTypes)
     });
   }
 
   // shouldSave option is used when <Input> option is selected
   // to change and save in one call (to avoid setState issues)
-  onMetadataChange = (key, value, shouldSave) => {
+  handleMetadataChange = (key, value, shouldSave) => {
+    /* Sample name is a special case */
+    if (key === "name") {
+      this.setState({
+        additionalInfo: ObjectHelper.set(
+          this.state.additionalInfo,
+          "name",
+          value
+        ),
+        metadataChanged: ObjectHelper.set(
+          this.state.metadataChanged,
+          "name",
+          true
+        )
+      });
+
+      return;
+    }
+
     this.setState({
-      metadata: {
-        ...this.state.metadata,
-        [key]: value
-      },
-      metadataChanged: {
-        ...this.state.metadataChanged,
-        [key]: !shouldSave
-      }
+      metadata: ObjectHelper.set(this.state.metadata, key, value),
+      metadataChanged: ObjectHelper.set(
+        this.state.metadataChanged,
+        key,
+        !shouldSave
+      )
     });
 
     if (shouldSave) {
-      saveSampleMetadata(this.props.sample.id, key, value);
+      this._save(this.props.sample.id, key, value);
     }
   };
 
-  onMetadataSave = key => {
+  handleMetadataSave = async key => {
     if (this.state.metadataChanged[key]) {
-      saveSampleMetadata(this.props.sample.id, key, this.state.metadata[key]);
+      // Updating the name is pretty slow, so only do it on save, instead of on change.
+      if (key === "name") {
+        if (this.props.onNameUpdate) {
+          this.props.onNameUpdate(this.state.additionalInfo.name);
+        }
+      }
 
       this.setState({
-        metadataChanged: {
-          ...this.state.metadataChanged,
-          [key]: false
-        }
+        metadataChanged: ObjectHelper.set(
+          this.state.metadataChanged,
+          key,
+          false
+        )
       });
+
+      this._save(
+        this.props.sample.id,
+        key,
+        key === "name"
+          ? this.state.additionalInfo.name
+          : this.state.metadata[key]
+      );
     }
+  };
+
+  _save = async (id, key, value) => {
+    this.setState({
+      metadataSavePending: ObjectHelper.set(
+        this.state.metadataSavePending,
+        key,
+        true
+      )
+    });
+
+    if (key === "name") {
+      await saveSampleName(id, value);
+    } else {
+      await saveSampleMetadata(this.props.sample.id, key, value);
+    }
+
+    this.setState({
+      metadataSavePending: ObjectHelper.set(
+        this.state.metadataSavePending,
+        key,
+        false
+      )
+    });
   };
 
   render() {
     const { visible } = this.props;
-    const { metadata, metadataTypes } = this.state;
+    const {
+      metadata,
+      metadataTypes,
+      metadataSavePending,
+      additionalInfo
+    } = this.state;
 
+    const savePending = some(metadataSavePending);
     return (
       <Sidebar visible={visible} width="very wide">
         <div className={cs.content}>
           <RemoveIcon className={cs.closeIcon} onClick={this.props.onClose} />
-          <div className={cs.title}>Sample Details</div>
+          {additionalInfo && (
+            <div className={cs.title}>{additionalInfo.name}</div>
+          )}
           {metadata === null ? (
             <div className={cs.loadingMsg}>Loading...</div>
           ) : (
             <MetadataEditor
               metadata={metadata}
+              additionalInfo={additionalInfo}
               metadataTypes={metadataTypes}
-              onMetadataChange={this.onMetadataChange}
-              onMetadataSave={this.onMetadataSave}
+              onMetadataChange={this.handleMetadataChange}
+              onMetadataSave={this.handleMetadataSave}
+              savePending={savePending}
             />
           )}
         </div>
@@ -100,7 +184,8 @@ class SampleDetailsSidebar extends React.Component {
 SampleDetailsSidebar.propTypes = {
   visible: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
-  sample: PropTypes.Sample.isRequired
+  sample: PropTypes.Sample.isRequired,
+  onNameUpdate: PropTypes.func
 };
 
 export default SampleDetailsSidebar;

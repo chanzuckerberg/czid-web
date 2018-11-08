@@ -2,13 +2,14 @@
 @import "~styles/themes/colors";
 
 .content {
-  margin: 40px 30px;
+  margin: 30px 20px;
   position: relative;
 }
 
 .title {
   font-size: $font-size-h4;
   font-weight: $font-weight-semibold;
+  margin: 0 10px;
 }
 
 .closeIcon {
@@ -25,14 +26,42 @@
 }
 
 .field {
-  margin: 30px 0;
+  padding: 15px 0;
+  display: flex;
+  align-items: center;
+
+  &:nth-child(even) {
+    background-color: $off-white;
+  }
 
   .label {
     font-weight: bold;
-    margin-bottom: 5px;
+    width: 160px;
+    flex-shrink: 0;
+    margin-right: 20px;
+    margin-left: 10px;
   }
 
   .input {
-    width: 100%;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .metadataValue {
+    color: $dark-grey;
+  }
+
+  .emptyValue {
+    color: $light-grey;
+  }
+
+  .projectLink {
+    /* overwrite header.scss */
+    color: $primary-light !important;
+
+    &:hover {
+      /* overwrite header.scss */
+      opacity: 0.5;
+    }
   }
 }
