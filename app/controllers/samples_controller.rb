@@ -14,7 +14,7 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata].freeze
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
@@ -370,6 +370,20 @@ class SamplesController < ApplicationController
     pipeline_run = @sample.pipeline_runs.first
     assembly_fasta = pipeline_run.assembly_output_s3_path(params[:taxid])
     send_data get_s3_file(assembly_fasta), filename: @sample.name + '_' + clean_taxid_name(pipeline_run, params[:taxid]) + '-assembled-scaffolds.fasta'
+  end
+
+  def contig_taxid_list
+    pr = @sample.pipeline_runs.first
+    render json: pr.get_taxid_list_with_contigs
+  end
+
+  def taxid_contigs
+    taxid = params[:taxid]
+    pr = @sample.pipeline_runs.first
+    contigs = pr.get_contigs_for_taxid(taxid)
+    output_fasta = ''
+    contigs.each { |contig| output_fasta += contig.to_fa }
+    send_data output_fasta, filename: "#{@sample.name}_tax_#{taxid}_contigs.fasta"
   end
 
   def show_taxid_fasta

@@ -30,6 +30,8 @@ Rails.application.routes.draw do
     get :download_heatmap, on: :collection
     get :metadata_types, on: :collection
     get :metadata, on: :member
+    get :contig_taxid_list, on: :member
+    get :taxid_contigs, on: :member
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
   end
