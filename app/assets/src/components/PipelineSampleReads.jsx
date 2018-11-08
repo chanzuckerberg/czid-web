@@ -10,6 +10,7 @@ import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
 import AMRView from "./AMRView";
 import BasicPopup from "./BasicPopup";
+import SampleDetailsSidebar from "./views/report/SampleDetailsSidebar";
 import { SAMPLE_FIELDS } from "./utils/SampleFields";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import ViewHeader from "./layout/ViewHeader";
@@ -60,7 +61,8 @@ class PipelineSampleReads extends React.Component {
       confirmed_names: props.reportDetails
         ? props.reportDetails.confirmed_names
         : [],
-      sample_name: props.sampleInfo.name
+      sample_name: props.sampleInfo.name,
+      sampleDetailsSidebarVisible: false
     };
     this.TYPE_PROMPT = "-";
     this.NUCLEOTIDE_TYPES = ["Not set", "DNA", "RNA"];
@@ -150,6 +152,12 @@ class PipelineSampleReads extends React.Component {
       .catch(err => {});
   }
 
+  toggleSampleDetailsSidebar = () => {
+    this.setState({
+      sampleDetailsSidebarVisible: !this.state.sampleDetailsSidebarVisible
+    });
+  };
+
   toggleHighlightTaxon(e) {
     let taxid = e.target.getAttribute("data-tax-id");
     let name = e.target.getAttribute("data-tax-name");
@@ -179,7 +187,7 @@ class PipelineSampleReads extends React.Component {
     let dropdown_options = this.DROPDOWN_OPTIONS[field];
     let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : "-";
     return (
-      <div className="row detail-row">
+      <div className="row detail-row" key={`${label}_${field}`}>
         <div className="col s6 label">{label}</div>
         <div className="col s6">
           <div className="sample-notes">
@@ -217,7 +225,7 @@ class PipelineSampleReads extends React.Component {
     let value = hash[field];
     if (hash[field] instanceof Array) value = hash[field].join("; ");
     return (
-      <div className="details-container col s12">
+      <div className="details-container col s12" key={`${label}_${field}`}>
         <div className="details-title note">{label}</div>
         <div className={"sample-notes note " + (editable ? "edit-wide" : "")}>
           <pre
@@ -241,7 +249,7 @@ class PipelineSampleReads extends React.Component {
     if (popupContent)
       labelElem = <BasicPopup trigger={labelElem} content={popupContent} />;
     return (
-      <div className="row detail-row">
+      <div className="row detail-row" key={`${label}_${field}`}>
         {labelElem}
         <div className="col s6">
           <div
@@ -265,7 +273,7 @@ class PipelineSampleReads extends React.Component {
   render_metadata_numfield(label, field) {
     let display_value = this.sampleInfo[field] || this.TYPE_PROMPT;
     return (
-      <div className="row detail-row">
+      <div className="row detail-row" key={`${label}_${field}`}>
         <div className="col s6 label">{label}</div>
         <div className="col s6">
           <div
@@ -574,6 +582,7 @@ class PipelineSampleReads extends React.Component {
                     onClick={() => {
                       this.refreshPage(phash);
                     }}
+                    key={version}
                   >
                     {"Pipeline v" + version}
                   </Dropdown.Item>
@@ -830,7 +839,6 @@ class PipelineSampleReads extends React.Component {
         <AMRView amr={this.amr} />
       </div>
     ) : null;
-
     return (
       <div>
         <ViewHeader className={cs.viewHeader}>
@@ -852,6 +860,16 @@ class PipelineSampleReads extends React.Component {
                 onClick: () => window.open(`/samples/${sampleId}`, "_self")
               }))}
             />
+            {this.props.admin && (
+              <div className={cs.sampleDetailsLinkContainer}>
+                <span
+                  className={cs.sampleDetailsLink}
+                  onClick={this.toggleSampleDetailsSidebar}
+                >
+                  Sample Details
+                </span>
+              </div>
+            )}
           </ViewHeader.Content>
           <ViewHeader.Controls>{report_buttons}</ViewHeader.Controls>
         </ViewHeader>
@@ -1000,6 +1018,13 @@ class PipelineSampleReads extends React.Component {
         >
           {d_report}
         </div>
+        {this.props.admin && (
+          <SampleDetailsSidebar
+            visible={this.state.sampleDetailsSidebarVisible}
+            onClose={this.toggleSampleDetailsSidebar}
+            sample={this.props.sampleInfo}
+          />
+        )}
       </div>
     );
   }

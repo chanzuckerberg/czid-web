@@ -82,27 +82,23 @@ class PhyloTreeListView extends React.Component {
     let currentTree = this.phyloTreeMap.get(this.state.selectedPhyloTreeId);
     return (
       <div className={cs.phyloTreeListView}>
-        <div className={cs.narrowContainer}>
-          <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
-            <ViewHeader.Content>
-              <ViewHeader.Pretitle>Phylogenetic Tree</ViewHeader.Pretitle>
-              <ViewHeader.Title
-                label={
-                  this.phyloTreeMap.get(this.state.selectedPhyloTreeId).name
-                }
-                id={this.state.selectedPhyloTreeId}
-                options={this.props.phyloTrees.map(tree => ({
-                  label: tree.name,
-                  id: tree.id,
-                  onClick: () => this.handleTreeChange(tree.id)
-                }))}
-              />
-            </ViewHeader.Content>
-            <ViewHeader.Controls>
-              <PhyloTreeDownloadButton tree={currentTree} />
-            </ViewHeader.Controls>
-          </ViewHeader>
-        </div>
+        <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
+          <ViewHeader.Content>
+            <ViewHeader.Pretitle>Phylogenetic Tree</ViewHeader.Pretitle>
+            <ViewHeader.Title
+              label={this.phyloTreeMap.get(this.state.selectedPhyloTreeId).name}
+              id={this.state.selectedPhyloTreeId}
+              options={this.props.phyloTrees.map(tree => ({
+                label: tree.name,
+                id: tree.id,
+                onClick: () => this.handleTreeChange(tree.id)
+              }))}
+            />
+          </ViewHeader.Content>
+          <ViewHeader.Controls>
+            <PhyloTreeDownloadButton tree={currentTree} />
+          </ViewHeader.Controls>
+        </ViewHeader>
         <Divider />
         <div className={cs.narrowContainer}>
           {currentTree.newick ? (

@@ -14,10 +14,10 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz].freeze
-  EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata].freeze
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
+  EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -168,6 +168,42 @@ class SamplesController < ApplicationController
     send_data @report_csv, filename: @sample.name + '_report.csv'
   end
 
+  # GET /samples/1/metadata
+  # GET /samples/1/metadata.json
+  def metadata
+    render json: @sample.metadata
+  end
+
+  # POST /samples/1/save_metadata_v2
+  def save_metadata_v2
+    @sample.metadatum_add_or_update(params[:field], params[:value])
+    render json: {
+      status: "success",
+      message: "Saved successfully"
+    }
+  rescue
+    error_messages = @sample ? @sample.errors.full_messages : []
+    render json: {
+      status: 'failed',
+      message: 'Unable to update sample',
+      errors: error_messages
+    }
+  end
+
+  # GET /samples/metadata_types
+  # For now, the types are always the same. Later, it may depend on the host.
+  def metadata_types
+    metadata_types = Metadatum::KEY_TO_TYPE.keys.map do |key|
+      {
+        key: key,
+        dataType: Metadatum.convert_type_to_string(Metadatum::KEY_TO_TYPE[key]),
+        name: Metadatum::KEY_TO_DISPLAY_NAME[key],
+        options: Metadatum::KEY_TO_STRING_OPTIONS[key]
+      }
+    end
+    render json: metadata_types
+  end
+
   # GET /samples/1
   # GET /samples/1.json
 
@@ -185,7 +221,7 @@ class SamplesController < ApplicationController
     @pipeline_versions = @sample.pipeline_versions
 
     @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
-    @sample_status = @pipeline_run ? @pipeline_run.job_status_display : 'Waiting to Start'
+    @sample_status = @pipeline_run ? @pipeline_run.job_status_display : 'Waiting to Start or Receive Files'
     pipeline_run_id = @pipeline_run ? @pipeline_run.id : nil
     job_stats_hash = job_stats_get(pipeline_run_id)
     @summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, @pipeline_run) : nil
@@ -334,6 +370,20 @@ class SamplesController < ApplicationController
     pipeline_run = @sample.pipeline_runs.first
     assembly_fasta = pipeline_run.assembly_output_s3_path(params[:taxid])
     send_data get_s3_file(assembly_fasta), filename: @sample.name + '_' + clean_taxid_name(pipeline_run, params[:taxid]) + '-assembled-scaffolds.fasta'
+  end
+
+  def contig_taxid_list
+    pr = @sample.pipeline_runs.first
+    render json: pr.get_taxid_list_with_contigs
+  end
+
+  def taxid_contigs
+    taxid = params[:taxid]
+    pr = @sample.pipeline_runs.first
+    contigs = pr.get_contigs_for_taxid(taxid)
+    output_fasta = ''
+    contigs.each { |contig| output_fasta += contig.to_fa }
+    send_data output_fasta, filename: "#{@sample.name}_tax_#{taxid}_contigs.fasta"
   end
 
   def show_taxid_fasta

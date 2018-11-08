@@ -1,7 +1,7 @@
 import React from "react";
 
 import PropTypes from "../../../utils/propTypes";
-import OurDropdown from "../../../ui/controls/dropdowns/Dropdown";
+import Dropdown from "../../../ui/controls/dropdowns/Dropdown";
 
 const SPECIFICITY_OPTIONS = [
   { text: "All", value: 0 },
@@ -10,11 +10,12 @@ const SPECIFICITY_OPTIONS = [
 
 const SpecificityFilter = ({ value, onChange }) => {
   return (
-    <OurDropdown
+    <Dropdown
       options={SPECIFICITY_OPTIONS}
       value={value}
       label="Read Specificity: "
       onChange={onChange}
+      rounded
     />
   );
 };
