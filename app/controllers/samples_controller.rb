@@ -176,13 +176,15 @@ class SamplesController < ApplicationController
     summary_stats = nil
     pr_display = nil
     ercc_comparison = nil
+
     if pr
+      pr_display = curate_pipeline_run_display(pr)
+      ercc_comparison = pr.compare_ercc_counts
+
       job_stats_hash = job_stats_get(pr.id)
       if job_stats_hash.present?
         summary_stats = get_summary_stats(job_stats_hash, pr)
       end
-      pr_display = curate_pipeline_run_display(pr)
-      ercc_comparison = pr.compare_ercc_counts
     end
 
     render json: {
