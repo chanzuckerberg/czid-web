@@ -893,6 +893,14 @@ class PipelineSampleReads extends React.Component {
         <AMRView amr={this.amr} />
       </div>
     ) : null;
+
+    // Refresh the page every 5 minutes while in progress
+    if (this.pipelineInProgress()) {
+      setTimeout(() => {
+        location.reload();
+      }, 300000);
+    }
+
     return (
       <div>
         <ViewHeader className={cs.viewHeader}>
