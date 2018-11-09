@@ -242,6 +242,8 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
+    MetricUtil.put_metric_now("testB", 527)
+
     @pipeline_run = select_pipeline_run(@sample, params)
     @amr_counts = nil
     can_see_amr = (current_user.admin? || current_user.allowed_feature_list.include?("AMR"))
