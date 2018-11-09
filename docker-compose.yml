@@ -65,6 +65,7 @@ services:
       - ./tmp:/app/tmp
       - ./db:/app/db
       - ~/.aws:/root/.aws:ro
+      - ~/.aws/cli/cache:/root/.aws/cli/cache
     ports:
       - "3000:3000"
     depends_on:
