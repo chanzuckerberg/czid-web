@@ -14,7 +14,8 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
+                  :contigs_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
@@ -342,6 +343,7 @@ class SamplesController < ApplicationController
 
     # Label top-scoring hits for the executive summary
     @report_info[:topScoringTaxa] = label_top_scoring_taxa!(@report_info[:taxonomy_details][2])
+    @report_info[:contig_taxid_list] = @pipeline_run.get_taxid_list_with_contigs
 
     render json: JSON.dump(@report_info)
   end
@@ -390,13 +392,13 @@ class SamplesController < ApplicationController
   end
 
   def contig_taxid_list
-    pr = @sample.pipeline_runs.first
+    pr = select_pipeline_run(@sample, params)
     render json: pr.get_taxid_list_with_contigs
   end
 
   def taxid_contigs
     taxid = params[:taxid]
-    pr = @sample.pipeline_runs.first
+    pr = select_pipeline_run(@sample, params)
     contigs = pr.get_contigs_for_taxid(taxid)
     output_fasta = ''
     contigs.each { |contig| output_fasta += contig.to_fa }
@@ -459,6 +461,19 @@ class SamplesController < ApplicationController
         render json: output_array.sort { |a, b| b['reads_count'] <=> a['reads_count'] }
       end
       format.html {}
+    end
+  end
+
+  def contigs_fasta
+    contigs_fasta_s3_path = @sample.contigs_fasta_s3_path
+
+    if contigs_fasta_s3_path
+      @contigs_fasta = get_s3_file(contigs_fasta_s3_path)
+      send_data @contigs_fasta, filename: @sample.name + '_contigs.fasta'
+    else
+      render json: {
+        error: "contigs fasta file does not exist for this sample"
+      }
     end
   end
 

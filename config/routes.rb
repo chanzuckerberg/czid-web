@@ -21,6 +21,7 @@ Rails.application.routes.draw do
     get :bulk_import, on: :collection
     get :nonhost_fasta, on: :member
     get :unidentified_fasta, on: :member
+    get :contigs_fasta, on: :member
     get :results_folder, on: :member
     post :bulk_upload, on: :collection
     post :add_taxon_confirmation, on: :member
