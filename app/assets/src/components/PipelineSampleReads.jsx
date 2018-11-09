@@ -3,9 +3,11 @@ import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
+import cx from "classnames";
 import { Divider, Dropdown, Popup } from "semantic-ui-react";
 import DownloadButton from "./ui/controls/buttons/DownloadButton";
 import numberWithCommas from "../helpers/strings";
+import { pipelineHasAssembly } from "./utils/sample";
 import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
 import AMRView from "./AMRView";
@@ -528,6 +530,45 @@ class PipelineSampleReads extends React.Component {
     });
   }
 
+  renderPipelineWarnings = () => {
+    const warnings = [];
+
+    if (
+      this.reportPresent &&
+      pipelineHasAssembly(this.pipelineRun) &&
+      this.pipelineRun.assembled !== 1
+    ) {
+      warnings.push("Assembly of reads could not be performed for this run.");
+    }
+
+    if (warnings.length > 0) {
+      const content = (
+        <div>
+          {warnings.map(warning => (
+            <div className={cs.warning} key={warning}>
+              {warning}
+            </div>
+          ))}
+        </div>
+      );
+      return (
+        <Popup
+          trigger={
+            <i className={cx("fa fa-exclamation-circle", cs.warningIcon)} />
+          }
+          position="bottom left"
+          content={content}
+          inverted
+          on="click"
+          wide="very"
+          horizontalOffset={15}
+        />
+      );
+    } else {
+      return null;
+    }
+  };
+
   renderERCC() {
     if (!this.props.ercc_comparison) {
       return;
@@ -770,6 +811,10 @@ class PipelineSampleReads extends React.Component {
     let nonhost_assembly_complete =
       this.reportDetails &&
       this.reportDetails.assembled_taxids.indexOf("all") >= 0;
+    const assembled =
+      this.pipelineRun &&
+      pipelineHasAssembly(this.pipelineRun) &&
+      this.pipelineRun.assembled === 1;
     let download_section = (
       <div>
         <ResultButton
@@ -777,6 +822,12 @@ class PipelineSampleReads extends React.Component {
           icon="fa-cloud-download"
           label="Non-Host Reads"
           visible={stage2_complete}
+        />
+        <ResultButton
+          url={`/samples/${this.sampleInfo.id}/contigs_fasta`}
+          icon="fa-cloud-download"
+          label="Non-Host Contigs"
+          visible={assembled}
         />
         <ResultButton
           url={`/samples/${this.sampleInfo.id}/unidentified_fasta`}
@@ -847,7 +898,8 @@ class PipelineSampleReads extends React.Component {
         <ViewHeader className={cs.viewHeader}>
           <ViewHeader.Content>
             <div className={cs.pipelineInfo}>
-              PIPELINE {version_display} {pipeline_version_blurb}
+              PIPELINE {version_display} {pipeline_version_blurb}{" "}
+              {this.renderPipelineWarnings()}
             </div>
             <ViewHeader.Pretitle
               breadcrumbLink={`/home?project_id=${this.projectInfo.id}`}
