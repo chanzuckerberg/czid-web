@@ -1,8 +1,8 @@
 import React from "react";
+import { set } from "lodash/fp";
 import { PIPELINE_INFO_FIELDS } from "./constants";
 import MetadataSection from "./MetadataSection";
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
-import ObjectHelper from "~/helpers/ObjectHelper";
 import PropTypes from "~/components/utils/propTypes";
 import cs from "./sample_details_sidebar.scss";
 
@@ -36,7 +36,7 @@ class PipelineTab extends React.Component {
     const { sectionOpen } = this.state;
 
     this.setState({
-      sectionOpen: ObjectHelper.set(sectionOpen, section, !sectionOpen[section])
+      sectionOpen: set(section, !sectionOpen[section], sectionOpen)
     });
   };
 

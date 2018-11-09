@@ -1,5 +1,6 @@
 import React from "react";
 import { some } from "lodash";
+import { set } from "lodash/fp";
 import PropTypes from "~/components/utils/propTypes";
 import Sidebar from "~/components/ui/containers/Sidebar";
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
@@ -14,7 +15,6 @@ import {
 import MetadataTab from "./MetadataTab";
 import PipelineTab from "./PipelineTab";
 import NotesTab from "./NotesTab";
-import ObjectHelper from "~/helpers/ObjectHelper";
 import {
   processMetadata,
   processMetadataTypes,
@@ -59,20 +59,16 @@ class SampleDetailsSidebar extends React.Component {
     /* Sample name and note are special cases */
     if (key === "name" || key === "notes") {
       this.setState({
-        additionalInfo: ObjectHelper.set(this.state.additionalInfo, key, value),
-        metadataChanged: ObjectHelper.set(this.state.metadataChanged, key, true)
+        additionalInfo: set(key, value, this.state.additionalInfo),
+        metadataChanged: set(key, true, this.state.metadataChanged)
       });
 
       return;
     }
 
     this.setState({
-      metadata: ObjectHelper.set(this.state.metadata, key, value),
-      metadataChanged: ObjectHelper.set(
-        this.state.metadataChanged,
-        key,
-        !shouldSave
-      )
+      metadata: set(key, value, this.state.metadata),
+      metadataChanged: set(key, !shouldSave, this.state.metadataChanged)
     });
 
     if (shouldSave) {
@@ -90,11 +86,7 @@ class SampleDetailsSidebar extends React.Component {
       }
 
       this.setState({
-        metadataChanged: ObjectHelper.set(
-          this.state.metadataChanged,
-          key,
-          false
-        )
+        metadataChanged: set(key, false, this.state.metadataChanged)
       });
 
       this._save(
@@ -109,11 +101,7 @@ class SampleDetailsSidebar extends React.Component {
 
   _save = async (id, key, value) => {
     this.setState({
-      metadataSavePending: ObjectHelper.set(
-        this.state.metadataSavePending,
-        key,
-        true
-      )
+      metadataSavePending: set(key, true, this.state.metadataSavePending)
     });
 
     if (key === "name") {
@@ -125,11 +113,7 @@ class SampleDetailsSidebar extends React.Component {
     }
 
     this.setState({
-      metadataSavePending: ObjectHelper.set(
-        this.state.metadataSavePending,
-        key,
-        false
-      )
+      metadataSavePending: set(key, false, this.state.metadataSavePending)
     });
   };
 

@@ -1,10 +1,11 @@
 import React from "react";
 import { mapValues, isArray, filter, includes } from "lodash";
+// TODO(mark): Refactor all calls to lodash/fp.
+import { set } from "lodash/fp";
 import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 import MetadataSection from "./MetadataSection";
-import ObjectHelper from "~/helpers/ObjectHelper";
 import { METADATA_SECTIONS, SAMPLE_ADDITIONAL_INFO } from "./constants";
 import cs from "./sample_details_sidebar.scss";
 
@@ -20,20 +21,12 @@ class MetadataTab extends React.Component {
   toggleSection = section => {
     const { sectionOpen, sectionEditing } = this.state;
     const newState = {
-      sectionOpen: ObjectHelper.set(
-        sectionOpen,
-        section.name,
-        !sectionOpen[section.name]
-      )
+      sectionOpen: set(section.name, !sectionOpen[section.name], sectionOpen)
     };
 
     // If we are closing a section, stop editing it.
     if (sectionOpen[section.name]) {
-      newState.sectionEditing = ObjectHelper.set(
-        sectionEditing,
-        section.name,
-        false
-      );
+      newState.sectionEditing = set(section.name, false, sectionEditing);
     }
 
     this.setState(newState);
@@ -42,10 +35,10 @@ class MetadataTab extends React.Component {
   toggleSectionEdit = section => {
     const { sectionEditing, sectionOpen } = this.state;
     const newState = {
-      sectionEditing: ObjectHelper.set(
-        sectionEditing,
+      sectionEditing: set(
         section.name,
-        !sectionEditing[section.name]
+        !sectionEditing[section.name],
+        sectionEditing
       )
     };
 
@@ -54,7 +47,7 @@ class MetadataTab extends React.Component {
       newState.sectionEditing = mapValues(sectionEditing, () => false);
       newState.sectionEditing[section.name] = true;
       // The edited section should be opened.
-      newState.sectionOpen = ObjectHelper.set(sectionOpen, section.name, true);
+      newState.sectionOpen = set(section.name, true, sectionOpen);
     }
     this.setState(newState);
   };
