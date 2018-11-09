@@ -161,6 +161,7 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @errors.empty? && !@samples.empty?
+        MetricUtil.put_metric_now("samples.uploaded", @samples.count)
         format.json { render json: { samples: @samples, sample_ids: @samples.pluck(:id) } }
       else
         format.json { render json: { samples: @samples, errors: @errors }, status: :unprocessable_entity }
@@ -242,8 +243,6 @@ class SamplesController < ApplicationController
   # GET /samples/1.json
 
   def show
-    MetricUtil.put_metric_now("testB", 527)
-
     @pipeline_run = select_pipeline_run(@sample, params)
     @amr_counts = nil
     can_see_amr = (current_user.admin? || current_user.allowed_feature_list.include?("AMR"))
@@ -575,6 +574,7 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @sample.save
+        MetricUtil.put_metric_now("samples.uploaded", 1)
         format.html { redirect_to @sample, notice: 'Sample was successfully created.' }
         format.json { render :show, status: :created, location: @sample }
       else

@@ -14,6 +14,7 @@ class MetricUtil
   end
 
   def self.put_metric_point_series(name, points)
+    name = "idseq.web.#{Rails.env}.#{name}"
     data = JSON.dump("series" => [{
                        "metric" => name,
                        "points" => points
