@@ -1061,6 +1061,39 @@ class PipelineRun < ApplicationRecord
     ret
   end
 
+  def outputs_by_step
+    return unless pipeline_run_stages && pipeline_run_stages.first.dag_json
+
+    # Get map of s3 path to presigned URL and size
+    s3_path_to_info = {}
+    sample.results_folder_files.each do |entry|
+      s3_path_to_info[entry[:key]] = entry
+    end
+    # Get outputs and descriptions by target
+    result = {}
+    pipeline_run_stages.each do |prs|
+      dag_dict = JSON.parse(prs.dag_json)
+      output_dir_s3 = dag_dict["output_dir_s3"]
+      targets = dag_dict["targets"]
+      targets.each do |target_name, output_list|
+        file_info = []
+        output_list.each do |output|
+          file_info << s3_path_to_info["#{output_dir_s3}/#{output}"]
+        end
+        result[target_name] = {
+          "step_description" => STEP_DESCRIPTIONS[target_name],
+          "file_list" => file_info
+        }
+      end
+    end
+    # Get read counts (host filtering steps only)
+    job_stats.each do |js|
+      target_name = js.task
+      result[target_name]["reads_after"] = js.reads_after if result.keys.include?(target_name)
+    end
+    result
+  end
+
   def self.viewable(user)
     where(sample_id: Sample.viewable(user).pluck(:id))
   end

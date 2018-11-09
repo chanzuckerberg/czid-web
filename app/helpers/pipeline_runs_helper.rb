@@ -1,6 +1,17 @@
 require 'open3'
 
 module PipelineRunsHelper
+  STEP_DESCRIPTIONS = {
+    "star_out" => "Remove host reads using STAR.",
+    "trimmomatic_out" => "Trim Illumina adapters using trimmomatic.",
+    "priceseq_out" => "Remove low-quality reads using PriceSeqFilter.",
+    "cdhitdup_out" => "Remove duplicate reads using CD-HIT-DUP.",
+    "lzw_out" => "Remove low-complexity reads using LZW compression filter.",
+    "bowtie2_out" => "Remove remaining host reads using Bowtie2.",
+    "subsampled_out" => "Subsample if there are too many remaining reads.",
+    "gsnap_filter_out" => "Remove remaining host reads using GSNAP."
+  }.freeze
+
   def aegea_batch_submit_command(base_command,
                                  memory: Sample::DEFAULT_MEMORY_IN_MB,
                                  vcpus: Sample::DEFAULT_VCPUS,
