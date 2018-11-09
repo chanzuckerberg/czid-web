@@ -15,7 +15,6 @@ class Sample < ApplicationRecord
 
   DAG_ANNOTATED_FASTA_BASENAME = 'taxid_annot.fasta'.freeze
   DAG_UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fa'.freeze
-  CONTIGS_FASTA_BASENAME = 'contigs.fasta'.freeze
 
   SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'.freeze
@@ -298,9 +297,7 @@ class Sample < ApplicationRecord
 
   def contigs_fasta_s3_path
     pr = pipeline_runs.first
-    return "#{pr.postprocess_output_s3_path}/#{ASSEMBLY_DIR}/#{CONTIGS_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 3.1
-
-    nil
+    return "#{pr.postprocess_output_s3_path}/#{PipelineRun::ASSEMBLED_CONTIGS_NAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 3.1
   end
 
   def annotated_fasta_s3_path

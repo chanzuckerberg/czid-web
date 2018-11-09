@@ -343,6 +343,7 @@ class SamplesController < ApplicationController
 
     # Label top-scoring hits for the executive summary
     @report_info[:topScoringTaxa] = label_top_scoring_taxa!(@report_info[:taxonomy_details][2])
+    @report_info[:contig_taxid_list] = @pipeline_run.get_taxid_list_with_contigs
 
     render json: JSON.dump(@report_info)
   end
@@ -391,13 +392,13 @@ class SamplesController < ApplicationController
   end
 
   def contig_taxid_list
-    pr = @sample.pipeline_runs.first
+    pr = select_pipeline_run(@sample, params)
     render json: pr.get_taxid_list_with_contigs
   end
 
   def taxid_contigs
     taxid = params[:taxid]
-    pr = @sample.pipeline_runs.first
+    pr = select_pipeline_run(@sample, params)
     contigs = pr.get_contigs_for_taxid(taxid)
     output_fasta = ''
     contigs.each { |contig| output_fasta += contig.to_fa }
