@@ -2,6 +2,7 @@ require 'open3'
 
 module PipelineRunsHelper
   STEP_DESCRIPTIONS = {
+    # Stage 1
     "star_out" => "Remove host reads using STAR.",
     "trimmomatic_out" => "Trim Illumina adapters using trimmomatic.",
     "priceseq_out" => "Remove low-quality reads using PriceSeqFilter.",
@@ -9,7 +10,12 @@ module PipelineRunsHelper
     "lzw_out" => "Remove low-complexity reads using LZW compression filter.",
     "bowtie2_out" => "Remove remaining host reads using Bowtie2.",
     "subsampled_out" => "Subsample if there are too many remaining reads.",
-    "gsnap_filter_out" => "Remove remaining host reads using GSNAP."
+    "gsnap_filter_out" => "Remove remaining host reads using GSNAP.",
+    # Stage 2
+    "gsnap_out" => "Align reads to the NCBI NT database using GSNAP.",
+    "rapsearch2_out" => "Align reads to the NCBI NR database using RAPSearch2.",
+    "taxon_count_out" => "Count taxon hits.",
+    "annotated_out" => "Annotate non-host FASTA with NCBI accession IDs."
   }.freeze
 
   def aegea_batch_submit_command(base_command,
