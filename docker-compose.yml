@@ -115,6 +115,7 @@ services:
       - .:/app:ro
       - ./log:/app/log
       - ~/.aws:/root/.aws:ro
+      - ~/.aws/cli/cache:/root/.aws/cli/cache
     depends_on:
       - db
       - redis
@@ -156,6 +157,7 @@ services:
       - .:/app:ro
       - ./log:/app/log
       - ~/.aws:/root/.aws:ro
+      - ~/.aws/cli/cache:/root/.aws/cli/cache
     depends_on:
       - db
       - redis
@@ -197,6 +199,7 @@ services:
       - .:/app:ro
       - ./log:/app/log
       - ~/.aws:/root/.aws:ro
+      - ~/.aws/cli/cache:/root/.aws/cli/cache
     depends_on:
       - db
       - redis
