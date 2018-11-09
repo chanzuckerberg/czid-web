@@ -474,7 +474,7 @@ class Sample < ApplicationRecord
   end
 
   def self.pipeline_commit(branch)
-    o = self.Syscall.pipe(["git", "ls-remote", "https://github.com/chanzuckerberg/idseq-dag.git"], ["grep", "refs/heads/#{branch}"])
+    o = Syscall.pipe(["git", "ls-remote", "https://github.com/chanzuckerberg/idseq-dag.git"], ["grep", "refs/heads/#{branch}"])
     return false if o.blank?
     o.split[0]
   end
