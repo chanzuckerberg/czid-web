@@ -12,10 +12,13 @@ module PipelineRunsHelper
     "subsampled_out" => "Subsample if there are too many remaining reads.",
     "gsnap_filter_out" => "Remove remaining host reads using GSNAP.",
     # Stage 2
-    "gsnap_out" => "Align reads to the NCBI NT database using GSNAP.",
-    "rapsearch2_out" => "Align reads to the NCBI NR database using RAPSearch2.",
+    "gsnap_out" => "Align remaining reads to the NCBI NT database using GSNAP.",
+    "rapsearch2_out" => "Align remaining reads to the NCBI NR database using RAPSearch2.",
     "taxon_count_out" => "Count taxon hits.",
-    "annotated_out" => "Annotate non-host FASTA with NCBI accession IDs."
+    "annotated_out" => "Annotate non-host FASTA with NCBI accession IDs.",
+    # Stage 3
+    "taxid_fasta_out" => "Annotate non-host FASTA with Taxonomy IDs.",
+    "taxid_locator_out" => "Sort annotated FASTA by Taxonomy IDs and store the byte range of each Taxonomy ID in a JSON."
   }.freeze
 
   def aegea_batch_submit_command(base_command,
