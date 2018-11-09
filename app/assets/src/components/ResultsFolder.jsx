@@ -52,11 +52,7 @@ class ResultsFolder extends React.Component {
             <table>
               <thead>
                 <tr>
-                  <th>
-                    {this.filePath[3] === "results"
-                      ? "Results folder"
-                      : "Fastqs folder"}
-                  </th>
+                  <th>Results folder</th>
                 </tr>
               </thead>
               {Object.keys(this.stepDict).map((step_name, i) => {

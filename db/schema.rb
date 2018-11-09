@@ -32,9 +32,6 @@ ActiveRecord::Schema.define(version: 20_181_107_235_404) do
     t.float "depth", limit: 24
     t.bigint "pipeline_run_id"
     t.string "drug_family"
-    t.integer "level"
-    t.float "drug_gene_coverage", limit: 24
-    t.float "drug_gene_depth", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "allele"], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
@@ -331,7 +328,6 @@ ActiveRecord::Schema.define(version: 20_181_107_235_404) do
     t.string "hit_type"
     t.integer "tax_level"
     t.bigint "pipeline_run_id"
-    t.string "best_accession"
     t.index ["pipeline_run_id", "taxid", "hit_type", "tax_level"], name: "index_pr_tax_ht_level_tb", unique: true
     t.index ["taxid"], name: "index_taxon_byteranges_on_taxid"
   end
