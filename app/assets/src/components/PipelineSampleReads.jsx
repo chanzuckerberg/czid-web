@@ -302,9 +302,7 @@ class PipelineSampleReads extends React.Component {
   }
 
   pipelineInProgress() {
-    if (this.pipelineRun === null) {
-      return true;
-    } else if (this.pipelineRun.finalized === 1) {
+    if (this.pipelineRun && this.pipelineRun.finalized === 1) {
       return false;
     }
     return true;
