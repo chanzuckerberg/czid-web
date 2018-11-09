@@ -12,6 +12,10 @@
   padding: 6px 16px;
   vertical-align: middle;
 
+  &.rectangular {
+    border-radius: 4px;
+  }
+
   div.icon-label {
     height: 24px;
     line-height: 24px;

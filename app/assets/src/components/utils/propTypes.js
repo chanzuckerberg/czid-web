@@ -54,11 +54,20 @@ const MetadataType = PropTypes.shape({
   name: PropTypes.string
 });
 
+const ERCCComparison = PropTypes.arrayOf(
+  PropTypes.shape({
+    name: PropTypes.string,
+    actual: PropTypes.number,
+    expected: PropTypes.number
+  })
+);
+
 export default {
   ReportDetails,
   Taxon,
   BackgroundData,
   Sample,
   MetadataType,
+  ERCCComparison,
   ...PropTypes
 };

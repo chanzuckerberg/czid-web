@@ -171,7 +171,24 @@ class SamplesController < ApplicationController
   # GET /samples/1/metadata
   # GET /samples/1/metadata.json
   def metadata
-    render json: @sample.metadata
+    pipeline_run = select_pipeline_run(@sample, params)
+    pipeline_run_id = pipeline_run ? pipeline_run.id : nil
+    job_stats_hash = job_stats_get(pipeline_run_id)
+
+    render json: {
+      metadata: @sample.metadata,
+      additional_info: {
+        name: @sample.name,
+        host_genome_name: @sample.host_genome_name,
+        upload_date: @sample.created_at,
+        project_name: @sample.project.name,
+        project_id: @sample.project_id,
+        pipeline_run: curate_pipeline_run_display(pipeline_run),
+        ercc_comparison: pipeline_run.compare_ercc_counts,
+        summary_stats: job_stats_hash.present? ? get_summary_stats(job_stats_hash, pipeline_run) : nil,
+        notes: @sample.sample_notes
+      }
+    }
   end
 
   # POST /samples/1/save_metadata_v2

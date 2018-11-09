@@ -1,0 +1,38 @@
+@import "~styles/themes/colors";
+@import "~styles/typography";
+
+.tabs {
+  display: flex;
+  height: 30px;
+  padding-bottom: 10px;
+
+  .tab {
+    color: $medium-grey;
+    font-size: $font-size-body;
+    letter-spacing: 0.4px;
+    font-weight: 600;
+    margin-right: 30px;
+    cursor: pointer;
+
+    &.selected {
+      color: $black;
+    }
+  }
+
+  /* The tab border extends OUTSIDE of the tab container */
+  .tabBorder {
+    height: 4px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    transform: translateY(26px);
+    background-color: $lightest-grey;
+  }
+
+  .indicator {
+    position: absolute;
+    height: 100%;
+    background-color: $primary-light;
+    transition: all 0.2s;
+  }
+}
