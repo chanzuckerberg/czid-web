@@ -892,7 +892,12 @@ class PipelineSampleReads extends React.Component {
       </div>
     ) : null;
 
-    // Refresh the page every 5 minutes while in progress
+    // Refresh the page every 5 minutes while in progress. Purpose is so that
+    // users with the page open will get some sense of updated status and see
+    // when the report is done.
+    // TODO: Future refactor should convert this to just fetch updated data with
+    // axios so that we don't pay for the full reload. This report load is
+    // currently only going: Rails -> React props.
     if (this.pipelineInProgress()) {
       setTimeout(() => {
         location.reload();
