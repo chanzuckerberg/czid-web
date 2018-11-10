@@ -109,21 +109,20 @@ class Sample < ApplicationRecord
 
   def input_files_checks
     # validate that we have the correct number of input files
-    errors.add(:input_files, "no input files") unless input_files.size.between?(1, 2)
+    errors.add(:input_files, "invalid number") unless input_files.size.between?(1, 2)
     # validate that both input files have the same source_type and file_type
     if input_files.length == 2
-      errors.add(:input_files, "file source type different") unless input_files[0].source_type == input_files[1].source_type
-      errors.add(:input_files, "file formats different") unless input_files[0].file_type == input_files[1].file_type
+      errors.add(:input_files, "have different source types") unless input_files[0].source_type == input_files[1].source_type
+      errors.add(:input_files, "have different file formats") unless input_files[0].file_type == input_files[1].file_type
       if input_files[0].source == input_files[1].source
-        errors.add(:input_files, "read 1 source and read 2 source are identical")
+        errors.add(:input_files, "have identical read 1 source and read 2 source")
       end
     end
-    # TODO: for s3 input types, test permissions before saving, by making a HEAD request
   end
 
   def set_presigned_url_for_local_upload
     input_files.each do |f|
-      if f.source_type == 'local' && f.parts
+      if f.source_type == InputFile::SOURCE_TYPE_LOCAL && f.parts
         # TODO: investigate the content-md5 stuff https://github.com/aws/aws-sdk-js/issues/151 https://gist.github.com/algorist/385616
         parts = f.parts.split(", ")
         presigned_urls = parts.map do |part|
@@ -341,7 +340,7 @@ class Sample < ApplicationRecord
     return unless status == STATUS_UPLOADED
     begin
       input_files.each do |f|
-        next unless f.source_type == 'local'
+        next unless f.source_type == InputFile::SOURCE_TYPE_LOCAL
         parts = f.parts.split(", ")
         next unless parts.length > 1
         source_parts = []
