@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_107_235_404) do
+ActiveRecord::Schema.define(version: 20_181_112_192_043) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -91,6 +91,7 @@ ActiveRecord::Schema.define(version: 20_181_107_235_404) do
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "lineage_json"
     t.index ["pipeline_run_id", "name"], name: "index_contigs_on_pipeline_run_id_and_name", unique: true
     t.index ["pipeline_run_id", "read_count"], name: "index_contigs_on_pipeline_run_id_and_read_count"
   end
