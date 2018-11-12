@@ -348,12 +348,13 @@ class Sample < ApplicationRecord
         parts.each_with_index do |part, index|
           source_part = File.join("s3://#{SAMPLES_BUCKET_NAME}", File.dirname(f.file_path), File.basename(part))
           source_parts << source_part
-          `aws s3 cp #{source_part} #{local_path}/#{index}`
+          Syscall.run("aws", "s3", "cp", source_part, "#{local_path}/#{index}")
         end
-        `cd #{local_path}; cat * > complete_file; aws s3 cp complete_file s3://#{SAMPLES_BUCKET_NAME}/#{f.file_path}`
-        `rm -rf #{local_path}`
+        Syscall.run_in_dir(local_path, "cat * > complete_file")
+        Syscall.run_in_dir(local_path, "aws", "s3", "cp", "complete_file", "s3://#{SAMPLES_BUCKET_NAME}/#{f.file_path}")
+        Syscall.run("rm", "-rf", local_path)
         source_parts.each do |source_part|
-          `aws s3 rm #{source_part}`
+          Syscall.run("aws", "s3", "rm", source_part)
         end
       end
     rescue
@@ -472,7 +473,9 @@ class Sample < ApplicationRecord
   end
 
   def self.pipeline_commit(branch)
-    `git ls-remote https://github.com/chanzuckerberg/idseq-dag.git | grep refs/heads/#{branch}`.split[0]
+    o = Syscall.pipe(["git", "ls-remote", "https://github.com/chanzuckerberg/idseq-dag.git"], ["grep", "refs/heads/#{branch}"])
+    return false if o.blank?
+    o.split[0]
   end
 
   def kickoff_pipeline
