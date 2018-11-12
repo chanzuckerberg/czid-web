@@ -122,6 +122,11 @@ class SamplesController < ApplicationController
       return
     end
 
+    unless current_user.can_upload(params[:bulk_path])
+      render json: { status: "user is not authorized to upload from s3 url #{params[:bulk_path]}" }, status: :unprocessable_entity
+      return
+    end
+
     @host_genome_id = params[:host_genome_id]
     @bulk_path = params[:bulk_path]
     @samples = parsed_samples_for_s3_path(@bulk_path, @project_id, @host_genome_id)
@@ -172,9 +177,20 @@ class SamplesController < ApplicationController
   # GET /samples/1/metadata
   # GET /samples/1/metadata.json
   def metadata
-    pipeline_run = select_pipeline_run(@sample, params)
-    pipeline_run_id = pipeline_run ? pipeline_run.id : nil
-    job_stats_hash = job_stats_get(pipeline_run_id)
+    pr = select_pipeline_run(@sample, params)
+    summary_stats = nil
+    pr_display = nil
+    ercc_comparison = nil
+
+    if pr
+      pr_display = curate_pipeline_run_display(pr)
+      ercc_comparison = pr.compare_ercc_counts
+
+      job_stats_hash = job_stats_get(pr.id)
+      if job_stats_hash.present?
+        summary_stats = get_summary_stats(job_stats_hash, pr)
+      end
+    end
 
     render json: {
       metadata: @sample.metadata,
@@ -184,9 +200,9 @@ class SamplesController < ApplicationController
         upload_date: @sample.created_at,
         project_name: @sample.project.name,
         project_id: @sample.project_id,
-        pipeline_run: curate_pipeline_run_display(pipeline_run),
-        ercc_comparison: pipeline_run.compare_ercc_counts,
-        summary_stats: job_stats_hash.present? ? get_summary_stats(job_stats_hash, pipeline_run) : nil,
+        pipeline_run: pr_display,
+        ercc_comparison: ercc_comparison,
+        summary_stats: summary_stats,
         notes: @sample.sample_notes
       }
     }
@@ -547,7 +563,8 @@ class SamplesController < ApplicationController
       host_genome = HostGenome.find_by(name: host_genome_name)
     end
 
-    params[:input_files_attributes].select! { |f| f["source"] != '' && current_user.can_upload(f["source"]) }
+    params[:input_files_attributes].reject! { |f| f["source"] == '' }
+
     @sample = Sample.new(params)
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
