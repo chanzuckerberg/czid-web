@@ -122,6 +122,11 @@ class SamplesController < ApplicationController
       return
     end
 
+    unless current_user.can_upload(params[:bulk_path])
+      render json: { status: "user is not authorized to upload from s3 url #{params[:bulk_path]}" }, status: :unprocessable_entity
+      return
+    end
+
     @host_genome_id = params[:host_genome_id]
     @bulk_path = params[:bulk_path]
     @samples = parsed_samples_for_s3_path(@bulk_path, @project_id, @host_genome_id)
@@ -558,7 +563,8 @@ class SamplesController < ApplicationController
       host_genome = HostGenome.find_by(name: host_genome_name)
     end
 
-    params[:input_files_attributes].select! { |f| f["source"] != '' && current_user.can_upload(f["source"]) }
+    params[:input_files_attributes].reject! { |f| f["source"] == '' }
+
     @sample = Sample.new(params)
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
