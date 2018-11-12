@@ -33,7 +33,6 @@ class PipelineRun < ApplicationRecord
                         "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta" }.freeze
 
   OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
-  # VERSION_JSON_NAME = 'versions.json'.freeze # TODO: remove this line
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
@@ -297,16 +296,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_ercc_counts
-    # TODO: remove the following. deprecated.
-    # Load version info applicable to host filtering
-    # version_s3_path = "#{host_filter_output_s3_path}/#{VERSION_JSON_NAME}"
-    # self.version = `aws s3 cp #{version_s3_path} -`
-
-    # Load ERCC counts
     ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
     return unless status.exitstatus.zero?
-    ercc_lines = `aws s3 cp #{ercc_s3_path} - | grep 'ERCC' | cut -f1,2`
+    ercc_lines = Syscall.pipe(["aws", "s3", "cp", ercc_s3_path, "-"], ["grep", "ERCC"], ["cut", "-f1,2"])
     ercc_counts_array = []
     ercc_lines.split(/\r?\n/).each do |line|
       fields = line.split("\t")
@@ -410,10 +403,6 @@ class PipelineRun < ApplicationRecord
                                .where(count_type: check_count_type).count
     return if loaded_records > 0
 
-    # TODO: remove the following. deprecated.
-    # version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
-    # update(version: `aws s3 cp #{version_s3_path} -`)
-
     # only keep counts at certain taxonomic levels
     taxon_counts_attributes_filtered = []
     acceptable_tax_levels = [TaxonCount::TAX_LEVEL_SPECIES]
@@ -465,11 +454,11 @@ class PipelineRun < ApplicationRecord
     downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, local_json_path)
     taxon_byteranges_csv_file = "#{local_json_path}/taxon_byteranges"
     hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
-    ` cd #{local_json_path};
-      sed -e 's/$/,#{id}/' -i taxon_byteranges;
-      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
-    `
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
+    Syscall.run_in_dir(local_json_path, "sed", "-e", "s/$/,#{id}/", "-i", "taxon_byteranges")
+    Syscall.run_in_dir(local_json_path, "mysqlimport", "--replace", "--local", "--user=$DB_USERNAME", "--host=#{rds_host}",
+                       "--password=$DB_PASSWORD", "--columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id", "--fields-terminated-by=','",
+                       "idseq_#{Rails.env}", "taxon_byteranges")
+    Syscall.run("rm", "-f", downloaded_byteranges_path)
   end
 
   def s3_file_for(output)
@@ -676,7 +665,7 @@ class PipelineRun < ApplicationRecord
     all_counts = []
     stdout.split("\n").each do |line|
       fname = line.split(" ")[3] # Last col in line
-      raw = `aws s3 cp #{res_folder}/#{fname} -`
+      raw = Syscall.run("aws", "s3", "cp", "#{res_folder}/#{fname}", "-")
       contents = JSON.parse(raw)
       # Ex: {"gsnap_filter_out": 194}
       contents.each do |key, count|
@@ -1028,11 +1017,11 @@ class PipelineRun < ApplicationRecord
     contig_names = contig_counts.where("count >= #{min_contig_size}")
                                 .where(taxid: taxid)
                                 .pluck(:contig_name).uniq
-    contigs.where(name: contig_names)
+    contigs.where(name: contig_names).order("read_count DESC")
   end
 
   def get_taxid_list_with_contigs(min_contig_size = MIN_CONTIG_SIZE)
-    contig_counts.where("count >= #{min_contig_size} and taxid > 0").pluck(:taxid).uniq
+    contig_counts.where("count >= #{min_contig_size} and taxid > 0 and contig_name != '*'").pluck(:taxid).uniq
   end
 
   def alignment_output_s3_path

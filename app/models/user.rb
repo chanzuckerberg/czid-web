@@ -36,6 +36,6 @@ class User < ApplicationRecord
 
   def can_upload(s3_path)
     user_bucket = s3_path.split("/")[2] # get "bucket" from "s3://bucket/path/to/file"
-    user_bucket != SAMPLES_BUCKET_NAME || admin?
+    (user_bucket != SAMPLES_BUCKET_NAME && !user_bucket.downcase.starts_with?("idseq-")) || admin?
   end
 end

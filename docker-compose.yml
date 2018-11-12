@@ -17,7 +17,7 @@ services:
   webtest:
     image: chanzuckerberg/idseq-web:compose
     volumes:
-      - ~/.aws:/root/.aws
+      - ~/.aws:/root/.aws:ro
     ports:
       - "8000:8000"
     depends_on:
@@ -60,8 +60,12 @@ services:
     build: .
     image: chanzuckerberg/idseq-web:compose
     volumes:
-      - .:/app
-      - ~/.aws:/root/.aws
+      - .:/app:ro
+      - ./log:/app/log
+      - ./tmp:/app/tmp
+      - ./db:/app/db
+      - ~/.aws:/root/.aws:ro
+      - ~/.aws/cli/cache:/root/.aws/cli/cache
     ports:
       - "3000:3000"
     depends_on:
@@ -108,8 +112,10 @@ services:
   resque:
     image: chanzuckerberg/idseq-web:compose
     volumes:
-      - .:/app
-      - ~/.aws:/root/.aws
+      - .:/app:ro
+      - ./log:/app/log
+      - ~/.aws:/root/.aws:ro
+      - ~/.aws/cli/cache:/root/.aws/cli/cache
     depends_on:
       - db
       - redis
@@ -148,8 +154,10 @@ services:
   resque_result_monitor:
     image: chanzuckerberg/idseq-web:compose
     volumes:
-      - .:/app
-      - ~/.aws:/root/.aws
+      - .:/app:ro
+      - ./log:/app/log
+      - ~/.aws:/root/.aws:ro
+      - ~/.aws/cli/cache:/root/.aws/cli/cache
     depends_on:
       - db
       - redis
@@ -188,8 +196,10 @@ services:
   resque_pipeline_monitor:
     image: chanzuckerberg/idseq-web:compose
     volumes:
-      - .:/app
-      - ~/.aws:/root/.aws
+      - .:/app:ro
+      - ./log:/app/log
+      - ~/.aws:/root/.aws:ro
+      - ~/.aws/cli/cache:/root/.aws/cli/cache
     depends_on:
       - db
       - redis

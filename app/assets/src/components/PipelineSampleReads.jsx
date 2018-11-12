@@ -3,9 +3,11 @@ import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
+import cx from "classnames";
 import { Divider, Dropdown, Popup } from "semantic-ui-react";
 import DownloadButton from "./ui/controls/buttons/DownloadButton";
 import numberWithCommas from "../helpers/strings";
+import { pipelineHasAssembly } from "./utils/sample";
 import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
 import AMRView from "./AMRView";
@@ -300,9 +302,7 @@ class PipelineSampleReads extends React.Component {
   }
 
   pipelineInProgress() {
-    if (this.pipelineRun === null) {
-      return true;
-    } else if (this.pipelineRun.finalized === 1) {
+    if (this.pipelineRun && this.pipelineRun.finalized === 1) {
       return false;
     }
     return true;
@@ -527,6 +527,45 @@ class PipelineSampleReads extends React.Component {
       }
     });
   }
+
+  renderPipelineWarnings = () => {
+    const warnings = [];
+
+    if (
+      this.reportPresent &&
+      pipelineHasAssembly(this.pipelineRun) &&
+      this.pipelineRun.assembled !== 1
+    ) {
+      warnings.push("Assembly of reads could not be performed for this run.");
+    }
+
+    if (warnings.length > 0) {
+      const content = (
+        <div>
+          {warnings.map(warning => (
+            <div className={cs.warning} key={warning}>
+              {warning}
+            </div>
+          ))}
+        </div>
+      );
+      return (
+        <Popup
+          trigger={
+            <i className={cx("fa fa-exclamation-circle", cs.warningIcon)} />
+          }
+          position="bottom left"
+          content={content}
+          inverted
+          on="click"
+          wide="very"
+          horizontalOffset={15}
+        />
+      );
+    } else {
+      return null;
+    }
+  };
 
   renderERCC() {
     if (!this.props.ercc_comparison) {
@@ -770,6 +809,10 @@ class PipelineSampleReads extends React.Component {
     let nonhost_assembly_complete =
       this.reportDetails &&
       this.reportDetails.assembled_taxids.indexOf("all") >= 0;
+    const assembled =
+      this.pipelineRun &&
+      pipelineHasAssembly(this.pipelineRun) &&
+      this.pipelineRun.assembled === 1;
     let download_section = (
       <div>
         <ResultButton
@@ -777,6 +820,12 @@ class PipelineSampleReads extends React.Component {
           icon="fa-cloud-download"
           label="Non-Host Reads"
           visible={stage2_complete}
+        />
+        <ResultButton
+          url={`/samples/${this.sampleInfo.id}/contigs_fasta`}
+          icon="fa-cloud-download"
+          label="Non-Host Contigs"
+          visible={assembled}
         />
         <ResultButton
           url={`/samples/${this.sampleInfo.id}/unidentified_fasta`}
@@ -842,12 +891,26 @@ class PipelineSampleReads extends React.Component {
         <AMRView amr={this.amr} />
       </div>
     ) : null;
+
+    // Refresh the page every 5 minutes while in progress. Purpose is so that
+    // users with the page open will get some sense of updated status and see
+    // when the report is done.
+    // TODO: Future refactor should convert this to just fetch updated data with
+    // axios so that we don't pay for the full reload. This report load is
+    // currently only going: Rails -> React props.
+    if (this.pipelineInProgress()) {
+      setTimeout(() => {
+        location.reload();
+      }, 300000);
+    }
+
     return (
       <div>
         <ViewHeader className={cs.viewHeader}>
           <ViewHeader.Content>
             <div className={cs.pipelineInfo}>
-              PIPELINE {version_display} {pipeline_version_blurb}
+              PIPELINE {version_display} {pipeline_version_blurb}{" "}
+              {this.renderPipelineWarnings()}
             </div>
             <ViewHeader.Pretitle
               breadcrumbLink={`/home?project_id=${this.projectInfo.id}`}
