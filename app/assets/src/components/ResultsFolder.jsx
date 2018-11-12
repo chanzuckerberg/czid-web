@@ -1,4 +1,5 @@
 import React from "react";
+import Divider from "./layout/Divider";
 
 class ResultsFolder extends React.Component {
   constructor(props, context) {
@@ -88,7 +89,7 @@ class ResultsFolder extends React.Component {
                     })}
                     <tr key="last">
                       <td>
-                        <hr />
+                        <Divider />
                       </td>
                     </tr>
                   </tbody>
