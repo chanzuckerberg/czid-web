@@ -84,16 +84,16 @@ module PipelineRunsHelper
   end
 
   def fetch_pipeline_version(s3_file = pipeline_version_file)
-    whole_version = `aws s3 cp #{s3_file} -`.strip
+    stdout = Syscall.run("aws", "s3", "cp", s3_file, "-")
+    return nil if stdout.blank?
+    whole_version = stdout.strip
     whole_version =~ /(^\d+\.\d+).*/
-    return Regexp.last_match(1)
-  rescue
-    return nil
+    Regexp.last_match(1)
   end
 
   def upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params = nil, copy_done_file = "")
     # Upload dag json
-    `echo '#{dag_json}' | aws s3 cp - #{dag_s3}`
+    Syscall.pipe(["echo", dag_json], ["aws", "s3", "cp", "-", dag_s3])
 
     # Generate job command
     dag_path_on_worker = "/mnt/#{dag_name}.json"
