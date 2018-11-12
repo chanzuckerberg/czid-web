@@ -1062,7 +1062,6 @@ class PipelineRun < ApplicationRecord
   end
 
   def outputs_by_step
-    return unless pipeline_run_stages
     # Get map of s3 path to presigned URL and size
     filename_to_info = {}
     sample.results_folder_files.each do |entry|
