@@ -3,21 +3,23 @@ require "net/http"
 
 # MetricUtil is currently used for posting metrics to Datadog's metrics endpoints.
 class MetricUtil
-  def self.put_metric_now(name, value)
-    put_metric(name, value, Time.now.to_i)
+  def self.put_metric_now(name, value, tags = [])
+    put_metric(name, value, Time.now.to_i, tags)
   end
 
-  def self.put_metric(name, value, time)
+  def self.put_metric(name, value, time, tags = [])
     # Time = POSIX time with just seconds
     points = [[time, value]]
-    put_metric_point_series(name, points)
+    put_metric_point_series(name, points, tags)
   end
 
-  def self.put_metric_point_series(name, points)
+  def self.put_metric_point_series(name, points, tags = [])
+    # Tags look like: ["environment:test", "type:bulk"]
     name = "idseq.web.#{Rails.env}.#{name}"
     data = JSON.dump("series" => [{
                        "metric" => name,
-                       "points" => points
+                       "points" => points,
+                       "tags" => tags
                      }])
     post_to_datadog(data)
   end
