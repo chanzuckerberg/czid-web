@@ -16,13 +16,12 @@ class InputFile < ApplicationRecord
     source.strip! if source.present?
     if source_type == SOURCE_TYPE_S3
       if source[0..4] != 's3://'
-        errors.add(:input_files, "file source doesn't start with s3:// for s3 input")
-      end
-      unless sample.bulk_mode # skip the check for bulk mode
-        _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", source.to_s)
-        unless status.exitstatus.zero?
-          errors.add(:input_files, "file source #{source} doesn't exist")
-        end
+        errors.add(:input_files, "source doesn't start with s3:// for s3 input")
+      elsif !sample.user.can_upload(source.to_s)
+        errors.add(:input_files, "forbidden s3 bucket")
+      elsif !sample.bulk_mode # skip the check for bulk mode
+        fhead = Syscall.pipe(["aws", "s3", "cp", source.to_s, "-"], ["head", "-c", "100"])
+        errors.add(:input_files, "forbidden file object") if fhead.empty?
       end
     end
   end

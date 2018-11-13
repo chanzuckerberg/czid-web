@@ -1,0 +1,71 @@
+@import "~styles/themes/colors";
+@import "~styles/typography";
+
+.header {
+  display: flex;
+  height: 50px;
+  align-items: center;
+  border-bottom: 1px solid $light-grey;
+  cursor: pointer;
+
+  .title {
+    color: $black;
+    font-weight: 600;
+    letter-spacing: 1.45px;
+    font-size: $font-size-body;
+    text-transform: uppercase;
+    padding: 0 10px;
+  }
+
+  .fill {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .toggleIcon {
+    padding: 0 20px;
+    font-size: 30px;
+    color: $medium-grey;
+
+    &:hover {
+      color: $black;
+    }
+  }
+
+  .editLink {
+    color: $light-grey;
+    text-decoration: underline;
+    font-size: $font-size-small;
+    display: none;
+    cursor: pointer;
+
+    &.show {
+      display: block;
+    }
+
+    &:hover {
+      color: $black;
+    }
+  }
+
+  .status {
+    color: $light-grey;
+    font-size: $font-size-small;
+    margin-top: 1px;
+  }
+}
+
+.content {
+  margin-bottom: 20px;
+
+  .controls {
+    text-align: right;
+    margin-top: 15px;
+  }
+}
+
+.metadataSection:hover {
+  .editLink {
+    display: block;
+  }
+}

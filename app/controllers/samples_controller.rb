@@ -14,7 +14,8 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata].freeze
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
+                  :contigs_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
@@ -121,6 +122,11 @@ class SamplesController < ApplicationController
       return
     end
 
+    unless current_user.can_upload(params[:bulk_path])
+      render json: { status: "user is not authorized to upload from s3 url #{params[:bulk_path]}" }, status: :unprocessable_entity
+      return
+    end
+
     @host_genome_id = params[:host_genome_id]
     @bulk_path = params[:bulk_path]
     @samples = parsed_samples_for_s3_path(@bulk_path, @project_id, @host_genome_id)
@@ -171,7 +177,35 @@ class SamplesController < ApplicationController
   # GET /samples/1/metadata
   # GET /samples/1/metadata.json
   def metadata
-    render json: @sample.metadata
+    pr = select_pipeline_run(@sample, params)
+    summary_stats = nil
+    pr_display = nil
+    ercc_comparison = nil
+
+    if pr
+      pr_display = curate_pipeline_run_display(pr)
+      ercc_comparison = pr.compare_ercc_counts
+
+      job_stats_hash = job_stats_get(pr.id)
+      if job_stats_hash.present?
+        summary_stats = get_summary_stats(job_stats_hash, pr)
+      end
+    end
+
+    render json: {
+      metadata: @sample.metadata,
+      additional_info: {
+        name: @sample.name,
+        host_genome_name: @sample.host_genome_name,
+        upload_date: @sample.created_at,
+        project_name: @sample.project.name,
+        project_id: @sample.project_id,
+        pipeline_run: pr_display,
+        ercc_comparison: ercc_comparison,
+        summary_stats: summary_stats,
+        notes: @sample.sample_notes
+      }
+    }
   end
 
   # POST /samples/1/save_metadata_v2
@@ -221,7 +255,7 @@ class SamplesController < ApplicationController
     @pipeline_versions = @sample.pipeline_versions
 
     @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
-    @sample_status = @pipeline_run ? @pipeline_run.job_status_display : 'Waiting to Start'
+    @sample_status = @pipeline_run ? @pipeline_run.job_status_display : 'Waiting to Start or Receive Files'
     pipeline_run_id = @pipeline_run ? @pipeline_run.id : nil
     job_stats_hash = job_stats_get(pipeline_run_id)
     @summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, @pipeline_run) : nil
@@ -325,6 +359,7 @@ class SamplesController < ApplicationController
 
     # Label top-scoring hits for the executive summary
     @report_info[:topScoringTaxa] = label_top_scoring_taxa!(@report_info[:taxonomy_details][2])
+    @report_info[:contig_taxid_list] = @pipeline_run.get_taxid_list_with_contigs
 
     render json: JSON.dump(@report_info)
   end
@@ -370,6 +405,20 @@ class SamplesController < ApplicationController
     pipeline_run = @sample.pipeline_runs.first
     assembly_fasta = pipeline_run.assembly_output_s3_path(params[:taxid])
     send_data get_s3_file(assembly_fasta), filename: @sample.name + '_' + clean_taxid_name(pipeline_run, params[:taxid]) + '-assembled-scaffolds.fasta'
+  end
+
+  def contig_taxid_list
+    pr = select_pipeline_run(@sample, params)
+    render json: pr.get_taxid_list_with_contigs
+  end
+
+  def taxid_contigs
+    taxid = params[:taxid]
+    pr = select_pipeline_run(@sample, params)
+    contigs = pr.get_contigs_for_taxid(taxid)
+    output_fasta = ''
+    contigs.each { |contig| output_fasta += contig.to_fa }
+    send_data output_fasta, filename: "#{@sample.name}_tax_#{taxid}_contigs.fasta"
   end
 
   def show_taxid_fasta
@@ -428,6 +477,19 @@ class SamplesController < ApplicationController
         render json: output_array.sort { |a, b| b['reads_count'] <=> a['reads_count'] }
       end
       format.html {}
+    end
+  end
+
+  def contigs_fasta
+    contigs_fasta_s3_path = @sample.contigs_fasta_s3_path
+
+    if contigs_fasta_s3_path
+      @contigs_fasta = get_s3_file(contigs_fasta_s3_path)
+      send_data @contigs_fasta, filename: @sample.name + '_contigs.fasta'
+    else
+      render json: {
+        error: "contigs fasta file does not exist for this sample"
+      }
     end
   end
 
@@ -501,7 +563,8 @@ class SamplesController < ApplicationController
       host_genome = HostGenome.find_by(name: host_genome_name)
     end
 
-    params[:input_files_attributes].select! { |f| f["source"] != '' && current_user.can_upload(f["source"]) }
+    params[:input_files_attributes].reject! { |f| f["source"] == '' }
+
     @sample = Sample.new(params)
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }

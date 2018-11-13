@@ -21,6 +21,7 @@ Rails.application.routes.draw do
     get :bulk_import, on: :collection
     get :nonhost_fasta, on: :member
     get :unidentified_fasta, on: :member
+    get :contigs_fasta, on: :member
     get :results_folder, on: :member
     post :bulk_upload, on: :collection
     post :add_taxon_confirmation, on: :member
@@ -30,6 +31,8 @@ Rails.application.routes.draw do
     get :download_heatmap, on: :collection
     get :metadata_types, on: :collection
     get :metadata, on: :member
+    get :contig_taxid_list, on: :member
+    get :taxid_contigs, on: :member
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
   end
