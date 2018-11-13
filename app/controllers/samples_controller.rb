@@ -161,7 +161,8 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @errors.empty? && !@samples.empty?
-        MetricUtil.put_metric_now("samples.uploaded", @samples.count, ["client:web", "type:bulk"])
+        tags = %W[client:web type:bulk user_id:#{current_user.id}]
+        MetricUtil.put_metric_now("samples.created", @samples.count, tags)
         format.json { render json: { samples: @samples, sample_ids: @samples.pluck(:id) } }
       else
         format.json { render json: { samples: @samples, errors: @errors }, status: :unprocessable_entity }
@@ -289,7 +290,8 @@ class SamplesController < ApplicationController
       end
     end
 
-    MetricUtil.put_metric_now("samples.viewed", 1, ["user_id:#{current_user.id}"])
+    tags = %W[user_id:#{current_user.id} sample_id:#{@sample.id}]
+    MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
   def heatmap
@@ -578,9 +580,10 @@ class SamplesController < ApplicationController
       if @sample.save
         # Currently bulk CLI upload just calls this action repeatedly so we can't
         # distinguish between bulk or single there
-        tags = ["client:#{client}"]
+        tags = %W[client:#{client} user_id:#{current_user.id} sample_id:#{@sample.id}]
         tags << "type:single" if client == "web"
-        MetricUtil.put_metric_now("samples.uploaded", 1, tags)
+        MetricUtil.put_metric_now("samples.created", 1, tags)
+
         format.html { redirect_to @sample, notice: 'Sample was successfully created.' }
         format.json { render :show, status: :created, location: @sample }
       else

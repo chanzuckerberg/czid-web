@@ -3,22 +3,23 @@ require "net/http"
 
 # MetricUtil is currently used for posting metrics to Datadog's metrics endpoints.
 class MetricUtil
-  def self.put_metric_now(name, value, tags = [])
-    put_metric(name, value, Time.now.to_i, tags)
+  def self.put_metric_now(name, value, tags = [], type = "count")
+    put_metric(name, value, Time.now.to_i, tags, type)
   end
 
-  def self.put_metric(name, value, time, tags = [])
+  def self.put_metric(name, value, time, tags = [], type = "count")
     # Time = POSIX time with just seconds
     points = [[time, value]]
-    put_metric_point_series(name, points, tags)
+    put_metric_point_series(name, points, tags, type)
   end
 
-  def self.put_metric_point_series(name, points, tags = [])
+  def self.put_metric_point_series(name, points, tags = [], type = "count")
     # Tags look like: ["environment:test", "type:bulk"]
     name = "idseq.web.#{Rails.env}.#{name}"
     data = JSON.dump("series" => [{
                        "metric" => name,
                        "points" => points,
+                       "type" => type,
                        "tags" => tags
                      }])
     post_to_datadog(data)
@@ -36,19 +37,22 @@ class MetricUtil
   end
 
   def self.https_post(uri, data)
-    Rails.logger.info("Sending data: #{data}")
-    request = Net::HTTP::Post.new(uri)
-    request.content_type = "application/json"
-    request.body = data
-    req_options = {
-      use_ssl: uri.scheme == "https"
-    }
-    response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-      http.request(request)
-    end
+    # Don't block the rest of the flow
+    Thread.new do
+      Rails.logger.info("Sending data: #{data}")
+      request = Net::HTTP::Post.new(uri)
+      request.content_type = "application/json"
+      request.body = data
+      req_options = {
+        use_ssl: uri.scheme == "https"
+      }
 
-    unless response.is_a?(Net::HTTPSuccess)
-      Rails.logger.warn("Unable to send data: #{response.message}")
+      response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+        http.request(request)
+      end
+      unless response.is_a?(Net::HTTPSuccess)
+        Rails.logger.warn("Unable to send data: #{response.message}")
+      end
     end
   end
 end

@@ -582,6 +582,10 @@ class PipelineRun < ApplicationRecord
     if all_output_states_terminal?
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
+
+        run_time = Time.current - created_at
+        tags = ["sample_id:#{sample.id}"]
+        MetricUtil.put_metric_now("samples.succeeded.run_time", run_time, tags, "gauge")
       else
         update(results_finalized: FINALIZED_FAIL)
       end
@@ -648,8 +652,10 @@ class PipelineRun < ApplicationRecord
 
   def check_and_log_long_run
     # Check for long-running pipeline runs and log/alert if needed:
+    run_time = Time.current - created_at
+    MetricUtil.put_metric_now("samples.running.run_time", run_time, [], "gauge")
+
     if alert_sent.zero?
-      run_time = Time.current - created_at
       threshold = 5.hours
       if run_time > threshold
         duration_hrs = (run_time / 60 / 60).round(2)
