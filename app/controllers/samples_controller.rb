@@ -669,7 +669,7 @@ class SamplesController < ApplicationController
     taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id") if taxon_ids.empty?
 
     return {} if taxon_ids.empty?
-
+    Rails.logger.debug("going for details")
     samples_taxons_details(samples, taxon_ids, background_id, species_selected)
   end
 

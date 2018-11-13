@@ -18,14 +18,13 @@ import PropTypes from "prop-types";
 import Slider from "../../ui/controls/Slider";
 import TaxonTooltip from "./TaxonTooltip";
 import ThresholdFilterDropdown from "../../ui/controls/dropdowns/ThresholdFilterDropdown";
-import { Colormap } from "../../utils/colormaps/Colormap";
 import DeepEqual from "fast-deep-equal";
+import cs from "./samples_heatmap_view.scss";
+import NarrowContainer from "../../layout/NarrowContainer.jsx";
 
 class SamplesHeatmapView extends React.Component {
   constructor(props) {
     super(props);
-
-    this.colors = Colormap.getNScale("viridis", 10).reverse();
 
     // URL params have precedence
     this.urlParams = this.parseUrlParams();
@@ -70,8 +69,6 @@ class SamplesHeatmapView extends React.Component {
         taxonsPerSample: parseInt(this.urlParams.taxonsPerSample) || 30,
         readSpecificity: this.availableOptions.specificityOptions[1].value
       },
-      data: null,
-      taxons: {},
       loading: false,
       sampleIds: this.urlParams.sampleIds || this.props.sampleIds,
       taxonIds: this.urlParams.taxonIds || this.props.taxonIds || []
@@ -94,7 +91,7 @@ class SamplesHeatmapView extends React.Component {
 
     this.getColumnLabel = this.getColumnLabel.bind(this);
     this.getRowLabel = this.getRowLabel.bind(this);
-    this.getTaxonFor = this.getTaxonFor.bind(this);
+    // this.getTaxonFor = this.getTaxonFor.bind(this);
     this.getTooltip = this.getTooltip.bind(this);
     this.onApplyClick = this.onApplyClick.bind(this);
     this.onCellClick = this.onCellClick.bind(this);
@@ -177,12 +174,24 @@ class SamplesHeatmapView extends React.Component {
   }
 
   fetchDataFromServer() {
+    console.log("fetch data");
     this.setState({ loading: true });
 
     if (this.lastRequestToken)
       this.lastRequestToken.cancel("Parameters changed");
 
     this.lastRequestToken = axios.CancelToken.source();
+    console.log("params", {
+      sampleIds: this.state.sampleIds,
+      taxonIds: this.state.taxonIds,
+      species: this.state.selectedOptions.species,
+      categories: this.state.selectedOptions.categories,
+      subcategories: this.state.selectedOptions.subcategories,
+      sortBy: this.metricToSortField(this.state.selectedOptions.metric),
+      thresholdFilters: this.state.selectedOptions.thresholdFilters,
+      taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
+      readSpecificity: this.state.selectedOptions.readSpecificity
+    });
     axios
       .get("/samples/samples_taxons.json", {
         params: {
@@ -199,16 +208,14 @@ class SamplesHeatmapView extends React.Component {
         cancelToken: this.lastRequestToken.token
       })
       .then(response => {
-        this.extractData(response.data);
+        let newState = this.extractData(response.data);
+        newState.loading = false;
         // let taxons = this.extractTaxons(response.data);
         // console.log("taxons", taxons);
         // console.log("data", response.data);
         // this.recluster = true;
-        this.setState({
-          //   data: response.data,
-          //   taxons: taxons,
-          loading: false
-        });
+        console.log("set new state", newState);
+        this.setState(newState);
       })
       .catch(thrown => {
         // TODO: process error if not cancelled request by client: if (!axios.isCancel(thrown) {
@@ -252,198 +259,193 @@ class SamplesHeatmapView extends React.Component {
     };
   }
 
-  clusterSamples(data, metric, taxons) {
-    let scaleIndex = this.state.selectedOptions.dataScaleIdx;
-    console.log(this.state.availableOptions.scales[scaleIndex]);
-    let transformFunction = this.state.availableOptions.scales[scaleIndex][1]();
-    console.log("transform", transformFunction);
+  // clusterSamples(data, metric, taxons) {
+  //   let scaleIndex = this.state.selectedOptions.dataScaleIdx;
+  //   let transformFunction = this.state.availableOptions.scales[scaleIndex][1]();
 
-    let vectors = [];
-    for (let sample of data) {
-      let vector = [];
-      for (let taxonName of taxons) {
-        let value = null;
-        for (let taxon of sample.taxons) {
-          if (taxon.name == taxonName) {
-            value = this.getDataProperty(taxon, metric);
-            break;
-          }
-        }
-        console.log(value, transformFunction(value));
-        vector.push(value || 0);
-      }
-      vector.sample = sample;
-      vectors.push(vector);
-    }
+  //   let vectors = [];
+  //   for (let sample of data) {
+  //     let vector = [];
+  //     for (let taxonName of taxons) {
+  //       let value = null;
+  //       for (let taxon of sample.taxons) {
+  //         if (taxon.name == taxonName) {
+  //           value = this.getDataProperty(taxon, metric);
+  //           break;
+  //         }
+  //       }
+  //       vector.push(value || 0);
+  //     }
+  //     vector.sample = sample;
+  //     vectors.push(vector);
+  //   }
 
-    console.log("clustering samples - vectors", vectors);
-    let cluster = clusterfck.hcluster(vectors);
+  //   let cluster = clusterfck.hcluster(vectors);
 
-    let clusteredSamples = [];
-    let toVisit = [cluster];
-    console.log("clustering samples - cluster", cluster);
-    while (toVisit.length > 0) {
-      let node = toVisit.pop();
-      if (node.right) {
-        toVisit.push(node.right);
-      }
-      if (node.left) {
-        toVisit.push(node.left);
-      }
+  //   let clusteredSamples = [];
+  //   let toVisit = [cluster];
+  //   while (toVisit.length > 0) {
+  //     let node = toVisit.pop();
+  //     if (node.right) {
+  //       toVisit.push(node.right);
+  //     }
+  //     if (node.left) {
+  //       toVisit.push(node.left);
+  //     }
 
-      if (node.value) {
-        console.log("\tval", node.value);
-        node.label = node.value.sample.name;
-        clusteredSamples.push(node.value.sample);
-      }
-    }
+  //     if (node.value) {
+  //       console.log("\tval", node.value);
+  //       node.label = node.value.sample.name;
+  //       clusteredSamples.push(node.value.sample);
+  //     }
+  //   }
 
-    return {
-      tree: cluster,
-      flat: clusteredSamples.reverse()
-    };
-  }
+  //   return {
+  //     tree: cluster,
+  //     flat: clusteredSamples.reverse()
+  //   };
+  // }
 
-  extractData(data) {
-    this.sampleIds = [];
-    this.sampleDetails = {};
-    this.taxonIds = [];
-    this.taxonDetails = {};
-    this.taxonResults = {};
+  extractData(rawData) {
+    console.log("raw data", rawData);
+    let sampleIds = [];
+    let sampleDetails = {};
+    let taxonIds = [];
+    let taxonDetails = {};
+    let data = {};
 
-    for (let i = 0; i < data.length; i++) {
-      let sample = data[i];
-      this.sampleIds.push(sample.sample_id);
-      this.sampleDetails[sample.sample_id] = {
+    for (let i = 0; i < rawData.length; i++) {
+      let sample = rawData[i];
+      sampleIds.push(sample.sample_id);
+      sampleDetails[sample.sample_id] = {
         name: sample.name,
         index: i
       };
       for (let j = 0; j < sample.taxons.length; j++) {
         let taxon = sample.taxons[j];
         let taxonIndex;
-        if (!(taxon.tax_id in this.taxonDetails)) {
-          taxonIndex = this.taxonIds.length;
-          this.taxonIds.push(taxon.tax_id);
-          this.taxonDetails[taxon.tax_id] = {
+        if (!(taxon.tax_id in taxonDetails)) {
+          taxonIndex = taxonIds.length;
+          taxonIds.push(taxon.tax_id);
+          taxonDetails[taxon.tax_id] = {
             index: taxonIndex,
             name: taxon.name,
             category: taxon.category_name,
             phage: !!taxon.is_phage
           };
         } else {
-          taxonIndex = this.taxonDetails[taxon.tax_id].index;
+          taxonIndex = taxonDetails[taxon.tax_id].index;
         }
 
         this.state.availableOptions.metrics.forEach(metric => {
           let [metricType, metricName] = metric.value.split(".");
-          this.taxonResults[metric.value] =
-            this.taxonResults[metric.value] || [];
-          this.taxonResults[metric.value][taxonIndex] =
-            this.taxonResults[metric.value][taxonIndex] || [];
-          this.taxonResults[metric.value][taxonIndex][i] =
-            taxon[metricType][metricName];
+          data[metric.value] = data[metric.value] || [];
+          data[metric.value][taxonIndex] = data[metric.value][taxonIndex] || [];
+          data[metric.value][taxonIndex][i] = taxon[metricType][metricName];
         });
       }
     }
 
-    console.log("sample ids", this.sampleIds);
-    console.log("sample details", this.sampleDetails);
-    console.log("taxon ids", this.taxonIds);
-    console.log("taxon details", this.taxonDetails);
-    console.log("data", this.taxonResults);
-  }
-
-  getData(metric) {
-    let mType,
-      mName = metric.value.split(".");
-    let data = [];
-    for (let i = 0; i < this.samples.length; i++) {
-      for (let j = 0; j < samples.taxons.length; j++) {
-        (data[j] || [])[i] = samples;
-      }
-    }
-  }
-
-  extractTaxons(data) {
-    // this extracts all taxons
-    let idToName = {},
-      idToCategory = {},
-      nameToId = {},
-      ids = new Set(),
-      categories = new Set();
-
-    for (var i = 0, len = data.length; i < len; i += 1) {
-      let sample = data[i];
-      for (var j = 0; j < sample.taxons.length; j += 1) {
-        let taxon = sample.taxons[j];
-        idToName[taxon.tax_id] = taxon.name;
-        idToCategory[taxon.tax_id] = taxon.category_name;
-        nameToId[taxon.name] = taxon.tax_id;
-        ids.add(taxon.tax_id);
-        categories.add(taxon.category_name);
-      }
-    }
-
     return {
-      idToName: idToName,
-      idToCategory: idToCategory,
-      nameToId: nameToId,
-      ids: Array.from(ids),
-      names: Object.keys(nameToId),
-      categories: Array.from(categories).sort()
+      sampleIds,
+      sampleDetails,
+      taxonIds,
+      taxonDetails,
+      data
     };
   }
 
-  clusterTaxons(data, dataType, taxonNames) {
-    let taxonScores = {};
-    for (let taxon of taxonNames) {
-      taxonScores[taxon] = [];
+  // getData(metric) {
+  //   let mType,
+  //     mName = metric.value.split(".");
+  //   let data = [];
+  //   for (let i = 0; i < this.samples.length; i++) {
+  //     for (let j = 0; j < samples.taxons.length; j++) {
+  //       (data[j] || [])[i] = samples;
+  //     }
+  //   }
+  // }
 
-      for (let sample of data) {
-        let value = null;
-        for (let sampleTaxon of sample.taxons) {
-          if (sampleTaxon.name == taxon) {
-            value = this.getDataProperty(sampleTaxon, dataType);
-            break;
-          }
-        }
-        taxonScores[taxon].push(value);
-      }
-    }
+  // extractTaxons(data) {
+  //   // this extracts all taxons
+  //   let idToName = {},
+  //     idToCategory = {},
+  //     nameToId = {},
+  //     ids = new Set(),
+  //     categories = new Set();
 
-    let vectors = [];
-    for (let key of Object.keys(taxonScores)) {
-      let vector = taxonScores[key].map(d => d || 0);
-      vector.taxonName = key;
-      vectors.push(vector);
-    }
-    console.log("clustering taxons - vectors", vectors);
-    let cluster = clusterfck.hcluster(vectors);
-    if (!cluster) {
-      return {};
-    }
-    let clusteredTaxons = [];
-    let toVisit = [cluster];
-    while (toVisit.length > 0) {
-      let node = toVisit.pop();
-      if (node.right) {
-        toVisit.push(node.right);
-      }
-      if (node.left) {
-        toVisit.push(node.left);
-      }
+  //   for (var i = 0, len = data.length; i < len; i += 1) {
+  //     let sample = data[i];
+  //     for (var j = 0; j < sample.taxons.length; j += 1) {
+  //       let taxon = sample.taxons[j];
+  //       idToName[taxon.tax_id] = taxon.name;
+  //       idToCategory[taxon.tax_id] = taxon.category_name;
+  //       nameToId[taxon.name] = taxon.tax_id;
+  //       ids.add(taxon.tax_id);
+  //       categories.add(taxon.category_name);
+  //     }
+  //   }
 
-      if (node.value) {
-        node.label = node.value.taxonName;
-        clusteredTaxons.push(node.value.taxonName);
-      }
-    }
+  //   return {
+  //     idToName: idToName,
+  //     idToCategory: idToCategory,
+  //     nameToId: nameToId,
+  //     ids: Array.from(ids),
+  //     names: Object.keys(nameToId),
+  //     categories: Array.from(categories).sort()
+  //   };
+  // }
 
-    return {
-      tree: cluster,
-      flat: clusteredTaxons
-    };
-  }
+  // clusterTaxons(data, dataType, taxonNames) {
+  //   let taxonScores = {};
+  //   for (let taxon of taxonNames) {
+  //     taxonScores[taxon] = [];
+
+  //     for (let sample of data) {
+  //       let value = null;
+  //       for (let sampleTaxon of sample.taxons) {
+  //         if (sampleTaxon.name == taxon) {
+  //           value = this.getDataProperty(sampleTaxon, dataType);
+  //           break;
+  //         }
+  //       }
+  //       taxonScores[taxon].push(value);
+  //     }
+  //   }
+
+  //   let vectors = [];
+  //   for (let key of Object.keys(taxonScores)) {
+  //     let vector = taxonScores[key].map(d => d || 0);
+  //     vector.taxonName = key;
+  //     vectors.push(vector);
+  //   }
+  //   console.log("clustering taxons - vectors", vectors);
+  //   let cluster = clusterfck.hcluster(vectors);
+  //   if (!cluster) {
+  //     return {};
+  //   }
+  //   let clusteredTaxons = [];
+  //   let toVisit = [cluster];
+  //   while (toVisit.length > 0) {
+  //     let node = toVisit.pop();
+  //     if (node.right) {
+  //       toVisit.push(node.right);
+  //     }
+  //     if (node.left) {
+  //       toVisit.push(node.left);
+  //     }
+
+  //     if (node.value) {
+  //       node.label = node.value.taxonName;
+  //       clusteredTaxons.push(node.value.taxonName);
+  //     }
+  //   }
+
+  //   return {
+  //     tree: cluster,
+  //     flat: clusteredTaxons
+  //   };
+  // }
 
   getColumnLabel(columnIndex) {
     console.log(this.clusteredSamples.flat, columnIndex);
@@ -454,18 +456,18 @@ class SamplesHeatmapView extends React.Component {
     return this.clusteredTaxons.flat[rowIndex];
   }
 
-  getTaxonFor(rowIndex, columnIndex) {
-    let d = this.clusteredSamples.flat[columnIndex];
-    let taxonName = this.clusteredTaxons.flat[rowIndex];
+  // getTaxonFor(rowIndex, columnIndex) {
+  //   let d = this.clusteredSamples.flat[columnIndex];
+  //   let taxonName = this.clusteredTaxons.flat[rowIndex];
 
-    for (let i = 0; i < d.taxons.length; i += 1) {
-      let taxon = d.taxons[i];
-      if (taxon.name == taxonName) {
-        return taxon;
-      }
-    }
-    return undefined;
-  }
+  //   for (let i = 0; i < d.taxons.length; i += 1) {
+  //     let taxon = d.taxons[i];
+  //     if (taxon.name == taxonName) {
+  //       return taxon;
+  //     }
+  //   }
+  //   return undefined;
+  // }
 
   getTooltip(rowIndex, columnIndex) {
     let sample = this.clusteredSamples.flat[columnIndex],
@@ -521,37 +523,52 @@ class SamplesHeatmapView extends React.Component {
   }
 
   renderHeatmap() {
-    console.log(this.state.loading, !this.taxonResults);
-    // if (this.state.loading || !this.state.data || !this.state.data.length) {
-    if (this.state.loading || !this.taxonResults) {
+    console.log(
+      !this.state.loading,
+      !!this.state.data,
+      this.state.data
+        ? !Object.values(this.state.data).every(e => !e.length)
+        : false
+    );
+
+    if (
+      this.state.loading ||
+      !this.state.data ||
+      Object.values(this.state.data).every(e => !e.length)
+    ) {
+      console.log(this.state.data);
       return;
     }
     let scaleIndex = this.state.selectedOptions.dataScaleIdx;
-    return (
-      // <ErrorBoundary>
-      <SamplesHeatmapVis
-        sampleIds={this.sampleIds}
-        sampleDetails={this.sampleDetails}
-        taxonIds={this.taxonIds}
-        taxonDetails={this.taxonDetails}
-        data={this.taxonResults}
-        metric={this.state.selectedOptions.metric}
 
-        // colTree={this.clusteredSamples.tree}
-        // rowTree={this.clusteredTaxons.tree}
-        // rows={this.state.taxons.names.length}
-        // columns={this.state.data.length}
-        // getRowLabel={this.getRowLabel}
-        // getColumnLabel={this.getColumnLabel}
-        // getCellValue={this.dataGetters[this.state.selectedOptions.metric]}
-        // getTooltip={this.getTooltip}
-        // onCellClick={this.onCellClick}
-        // onColumnLabelClick={this.onSampleLabelClick}
-        // onRemoveRow={this.onRemoveRow}
-        // scale={this.state.availableOptions.scales[scaleIndex][1]}
-        // colors={this.colors}
-      />
-      // </ErrorBoundary>
+    // colTree={this.clusteredSamples.tree}
+    // rowTree={this.clusteredTaxons.tree}
+    // rows={this.state.taxons.names.length}
+    // columns={this.state.data.length}
+    // getRowLabel={this.getRowLabel}
+    // getColumnLabel={this.getColumnLabel}
+    // getCellValue={this.dataGetters[this.state.selectedOptions.metric]}
+    // getTooltip={this.getTooltip}
+    // onCellClick={this.onCellClick}
+    // onColumnLabelClick={this.onSampleLabelClick}
+    // onRemoveRow={this.onRemoveRow}
+    // scale={this.state.availableOptions.scales[scaleIndex][1]}
+    // colors={this.colors}
+
+    return (
+      <ErrorBoundary>
+        <NarrowContainer>
+          <SamplesHeatmapVis
+            sampleIds={this.state.sampleIds}
+            sampleDetails={this.state.sampleDetails}
+            taxonIds={this.state.taxonIds}
+            taxonDetails={this.state.taxonDetails}
+            data={this.state.data}
+            metric={this.state.selectedOptions.metric}
+            scale={this.state.availableOptions.scales[scaleIndex][1]}
+          />
+        </NarrowContainer>
+      </ErrorBoundary>
     );
   }
 
@@ -674,14 +691,15 @@ class SamplesHeatmapView extends React.Component {
   }
 
   renderLegend() {
-    return (
-      <HeatmapLegend
-        colors={this.colors}
-        min={this.minMax ? this.minMax.thresholdMin : 0}
-        max={this.minMax ? this.minMax.thresholdMax : 1}
-        disabled={!this.state.data || !this.minMax}
-      />
-    );
+    return <p>Legende Placeholder</p>;
+    // return (
+    //   <HeatmapLegend
+    //     colors={this.colors}
+    //     min={this.minMax ? this.minMax.thresholdMin : 0}
+    //     max={this.minMax ? this.minMax.thresholdMax : 1}
+    //     disabled={!this.state.data || !this.minMax}
+    //   />
+    // );
   }
 
   onApplyClick() {

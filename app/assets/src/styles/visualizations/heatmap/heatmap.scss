@@ -1,0 +1,62 @@
+@import "~styles/themes/colors";
+
+.heatmap {
+  .cells {
+    rect.cell {
+      // stroke: $white;
+
+      &:hover {
+        stroke: $primary-light;
+        stroke-width: 1px;
+      }
+    }
+
+    .shaded {
+      opacity: 0.1;
+    }
+  }
+
+  .row-label,
+  .column-label {
+    font-size: 12px;
+    cursor: pointer;
+
+    .remove-icon {
+      visibility: hidden;
+    }
+
+    &.highlighted {
+      fill: $primary-light;
+    }
+
+    &:hover {
+      text {
+        fill: $primary-light;
+      }
+
+      .remove-icon {
+        visibility: visible;
+      }
+    }
+  }
+
+  .hover-target {
+    fill: transparent;
+  }
+
+  .dendogram {
+    .link {
+      .link-path {
+        fill: transparent;
+        stroke: $light-grey;
+        stroke-width: 1px;
+      }
+
+      &.highlighted {
+        path {
+          stroke: $primary-light;
+        }
+      }
+    }
+  }
+}

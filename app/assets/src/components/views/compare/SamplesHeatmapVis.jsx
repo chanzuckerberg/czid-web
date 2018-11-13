@@ -9,12 +9,17 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   componentDidMount() {
-    console.log(this.props);
-    this.heatmap = new Heatmap(this.heatmapContainer, {
-      rowLabels: this.extractTaxonLabels(),
-      columnLabels: this.extractSampleLabels(),
-      values: this.props.data[this.props.metric]
-    });
+    this.heatmap = new Heatmap(
+      this.heatmapContainer,
+      {
+        rowLabels: this.extractTaxonLabels(),
+        columnLabels: this.extractSampleLabels(),
+        values: this.props.data[this.props.metric]
+      },
+      {
+        scale: this.props.scale
+      }
+    );
     this.heatmap.update();
   }
 
@@ -46,7 +51,6 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   render() {
-    console.log("render heatmap");
     return (
       <div className="samples-heatmap-vis">
         <div
@@ -57,7 +61,7 @@ class SamplesHeatmapVis extends React.Component {
         />
         {/* <div
           className="samples-heatmap-vis__tooltip"
-          ref={tooltip => {
+          ref={tooltip => { 
             this.treeToheatoltip = tooltip;
           }}
         >
