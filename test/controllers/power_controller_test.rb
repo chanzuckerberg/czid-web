@@ -131,6 +131,12 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test 'joe cannot see intermediate host filtering outputs for public_sample' do
+    @public_sample = samples(:public_sample)
+    get "/samples/#{@public_sample.id}/results_folder"
+    assert_equal @file_list, 'bla'
+  end
+
   # private project
 
   test 'joe cannot add users to project one ' do

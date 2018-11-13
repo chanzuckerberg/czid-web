@@ -1,0 +1,20 @@
+public_sample_run_stage:
+  pipeline_run: public_sample_run
+  dag_json: "{
+    \"targets\": {
+      \"fastqs\": [\"input.fastq\"],
+      \"star_out\": [\"unmapped1.fq\"],
+      \"trimmomatic_out\": [\"trimmomatic1.fq\"],
+      \"priceseq_out\": [\"priceseq1.fa\"],
+      \"cdhitdup_out\": [\"dedup1.fa\"],
+      \"lzw_out\": [\"lzw1.fa\"],
+      \"bowtie2_out\": [\"bowtie2_1.fa\"],
+      \"subsampled_out\": [\"subsampled_1.fa\"],
+      \"gsnap_filter_out\": [\"gsnap_filter_1.fa\"]
+    },
+    \"given_targets\": {
+      \"fastqs\": {
+        \"s3_dir\": \"test path\"
+      }
+    }
+  }"

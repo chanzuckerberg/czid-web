@@ -4,6 +4,7 @@ require 'tempfile'
 require 'aws-sdk'
 
 class Sample < ApplicationRecord
+  include TestHelper
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
@@ -169,7 +170,11 @@ class Sample < ApplicationRecord
   end
 
   def list_outputs(s3_path, display_prefix = 1, delimiter = "/")
-    prefix = s3_path.split("#{Sample::SAMPLES_BUCKET_NAME}/")[1]
+    if Rails.env == "test"
+      # for unit tests
+      return TEST_RESULT_FOLDER
+    end
+    prefix = s3_path.split("#{SAMPLES_BUCKET_NAME}/")[1]
     file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
                                        prefix: "#{prefix}/",
                                        delimiter: delimiter)
