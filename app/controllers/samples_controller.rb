@@ -179,16 +179,19 @@ class SamplesController < ApplicationController
   # GET /samples/1/metadata
   # GET /samples/1/metadata.json
   def metadata
+    # Information needed to show the samples metadata sidebar.
     pr = select_pipeline_run(@sample, params)
     summary_stats = nil
     pr_display = nil
     ercc_comparison = nil
+    assembled_taxids = []
 
     if pr
       pr_display = curate_pipeline_run_display(pr)
       ercc_comparison = pr.compare_ercc_counts
 
       job_stats_hash = job_stats_get(pr.id)
+      assembled_taxids = JSON.parse(pr.assembled_taxids || "[]")
       if job_stats_hash.present?
         summary_stats = get_summary_stats(job_stats_hash, pr)
       end
@@ -205,6 +208,7 @@ class SamplesController < ApplicationController
         pipeline_run: pr_display,
         ercc_comparison: ercc_comparison,
         summary_stats: summary_stats,
+        assembled_taxids: assembled_taxids,
         notes: @sample.sample_notes
       }
     }

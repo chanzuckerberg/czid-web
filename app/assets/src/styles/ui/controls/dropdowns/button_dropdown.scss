@@ -18,5 +18,10 @@
   .item {
     background-color: $white;
     font-weight: 400;
+
+    &:hover {
+      /* Override semantic UI */
+      background-color: $off-white !important;
+    }
   }
 }

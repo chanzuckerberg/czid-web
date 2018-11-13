@@ -49,6 +49,7 @@ class SampleDetailsSidebar extends React.Component {
       metadata: processMetadata(metadata.metadata),
       additionalInfo: processAdditionalInfo(metadata.additional_info),
       pipelineInfo: processPipelineInfo(metadata.additional_info),
+      pipelineRun: metadata.additional_info.pipeline_run,
       metadataTypes: processMetadataTypes(metadataTypes)
     });
   }
@@ -124,7 +125,8 @@ class SampleDetailsSidebar extends React.Component {
       metadataTypes,
       metadataSavePending,
       additionalInfo,
-      pipelineInfo
+      pipelineInfo,
+      pipelineRun
     } = this.state;
 
     const savePending = some(metadataSavePending);
@@ -155,6 +157,9 @@ class SampleDetailsSidebar extends React.Component {
             <PipelineTab
               pipelineInfo={pipelineInfo}
               erccComparison={additionalInfo.ercc_comparison}
+              pipelineRun={pipelineRun}
+              assembledTaxIds={additionalInfo.assembled_taxids}
+              sampleId={this.props.sample.id}
             />
           )}
           {this.state.currentTab === "Notes" && (

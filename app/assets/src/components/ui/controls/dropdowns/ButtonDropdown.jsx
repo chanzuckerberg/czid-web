@@ -54,6 +54,7 @@ class ButtonDropdown extends React.Component {
         onMouseDown={this.handleMouseDown}
         options={this.props.options}
         trigger={this.getButton()}
+        direction={this.props.direction}
       />
     );
   }
@@ -66,7 +67,8 @@ ButtonDropdown.propTypes = {
   options: PropTypes.array,
   primary: PropTypes.bool,
   secondary: PropTypes.bool,
-  text: PropTypes.string
+  text: PropTypes.string,
+  direction: PropTypes.oneOf(["left", "right"])
 };
 
 export default ButtonDropdown;
