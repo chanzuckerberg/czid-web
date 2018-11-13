@@ -51,7 +51,7 @@ https://blog.pragmatists.com/higher-order-functions-in-lodash-3283b7625175) for 
 
 **Other Best Practices**
 
-* Use aliases like `~` and `~styles` to reduce long relative paths (`../../../..`). Check out the aliases in `config.resolve.alias` in our webpack config.
+* **Import Aliases:** Use aliases like `~` and `~styles` to reduce long relative paths (`../../../..`). Check out the aliases in `config.resolve.alias` in our webpack config.
 
 ### _React Components_
 
@@ -134,13 +134,13 @@ If you need to place a ui component in a customized place for your view (i.e. if
 
 **Other Best Practices**
 
-* Always create a new object when modifying component state. This allows React to figure out if props have changed by via shallow comparison, and allows for future rendering optimizations using `React.PureComponent`. `lodash/fp` functions are immutable and do this by default.
+* **Don't Mutate Objects:** Always create a new object/array when modifying component state, instead of modifying the original object (even if you call `setState` afterward). This allows React to figure out if props have changed by via shallow comparison, and allows for future rendering optimizations using `React.PureComponent`. `lodash/fp` functions are immutable and do this by default.
 
-* Inside React components, define instance methods with arrow function syntax `foo = () => { ... }`. This removes the need for `this.foo = this.foo.bind(this)`.
+* **Use Arrow Functions:** Inside React components, define instance methods with arrow function syntax `foo = () => { ... }`. This removes the need for `this.foo = this.foo.bind(this)`.
 
-* Put all new API calls inside the `api` folder and use `get` and `postWithCSRF` instead of calling `axios` directly. The layer of indirection allows us to do things like convert snake_case to CamelCase and do standardized error handling in the future.
+* **Isolate API Calls:** Put all new API calls inside the `api` folder and use `get` and `postWithCSRF` instead of calling `axios` directly. The layer of indirection allows us to do things like convert snake_case to CamelCase and do standardized error handling in the future.
 
-* Be very careful of the the asynchronous nature of `this.setState`, as it can lead to subtle bugs. The `prevState` version (`this.setState(prevState => {}`) can work as a quick fix, but overuse of `prevState` and wrapping entire functions in `this.setState` is discouraged. You can often reorganize your functions to remove the bug (and also clarify the different code flows).
+* **Be Conscious of setState:** Be very careful of the the asynchronous nature of `this.setState`, as it can lead to subtle bugs. The `prevState` version (`this.setState(prevState => {}`) can work as a quick fix, but overuse of `prevState` and wrapping entire functions in `this.setState` is discouraged. You can often reorganize your functions to remove the bug (and also clarify the different code flows).
 
 ### React-D3 integration 
 
@@ -166,8 +166,8 @@ D3 code should be created in plain JS (no JSX) and should be placed in separate 
 
 **Other Best Practices**
 
-* Don't use `materialize`. We are trying to get rid of it.
-* [Flexbox](https://css-tricks.com/snippets/css/a-guide-to-flexbox/) is very useful for vertical centering and responsive layouts.
+* **Don't use `materialize`**: We are trying to get rid of it.
+* **[Flexbox](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)** is very useful for vertical centering and responsive layouts.
 
 ### _JSON_
 
