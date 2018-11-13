@@ -8,7 +8,7 @@ class Syscall
   #
   def self.run(*cmd)
     stdout, _stderr, status = Open3.capture3(*cmd)
-    status.success? && stdout.slice!(0..-(1 + $INPUT_RECORD_SEPARATOR.size)) # strip trailing eol
+    status.success? && stdout
   rescue
     return nil
   end
@@ -21,7 +21,7 @@ class Syscall
   #
   def self.run_in_dir(dir, *cmd)
     stdout, _stderr, status = Open3.capture3(*cmd, chdir: dir)
-    status.success? && stdout.slice!(0..-(1 + $INPUT_RECORD_SEPARATOR.size)) # strip trailing eol
+    status.success? && stdout
   rescue
     return nil
   end
