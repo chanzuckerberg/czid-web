@@ -161,6 +161,8 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @errors.empty? && !@samples.empty?
+        tags = %W[client:web type:bulk user_id:#{current_user.id}]
+        MetricUtil.put_metric_now("samples.created", @samples.count, tags)
         format.json { render json: { samples: @samples, sample_ids: @samples.pluck(:id) } }
       else
         format.json { render json: { samples: @samples, errors: @errors }, status: :unprocessable_entity }
@@ -287,6 +289,9 @@ class SamplesController < ApplicationController
         @pipeline_run_retriable = true
       end
     end
+
+    tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
+    MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
   def heatmap
@@ -573,6 +578,12 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @sample.save
+        tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id} client:#{client}]
+        # Currently bulk CLI upload just calls this action repeatedly so we can't
+        # distinguish between bulk or single there. Web bulk goes to bulk_upload.
+        tags << "type:single" if client == "web"
+        MetricUtil.put_metric_now("samples.created", 1, tags)
+
         format.html { redirect_to @sample, notice: 'Sample was successfully created.' }
         format.json { render :show, status: :created, location: @sample }
       else
