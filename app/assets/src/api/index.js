@@ -41,7 +41,7 @@ const saveSampleName = (id, name) => saveSampleField(id, "name", name);
 const saveSampleNotes = (id, sampleNotes) =>
   saveSampleField(id, "sample_notes", sampleNotes);
 
-const fetchAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
+const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
   get(
     `/samples/${sampleId}/alignment_viz/${alignmentQuery}.json?pipeline_version=${pipelineVersion}`
   );
@@ -52,5 +52,5 @@ export {
   getMetadataTypes,
   saveSampleName,
   saveSampleNotes,
-  fetchAlignmentData
+  getAlignmentData
 };

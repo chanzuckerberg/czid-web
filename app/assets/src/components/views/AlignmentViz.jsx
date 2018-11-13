@@ -1,8 +1,8 @@
 import React from "react";
 import cx from "classnames";
 import { Popup } from "semantic-ui-react";
-import { getSampleMetadata, fetchAlignmentData } from "~/api";
-import AccessionViz from "./AccessionViz";
+import { getSampleMetadata, getAlignmentData } from "~/api";
+import AccessionViz from "../AccessionViz";
 import cs from "./alignment_viz.scss";
 
 class AlignmentViz extends React.Component {
@@ -27,7 +27,7 @@ class AlignmentViz extends React.Component {
 
     // TODO(mark): Remove the metadata call once the alignment viz takes assembly into account.
     const [alignmentData, metadata] = await Promise.all([
-      fetchAlignmentData(sampleId, this.alignmentQuery, this.pipelineVersion),
+      getAlignmentData(sampleId, this.alignmentQuery, this.pipelineVersion),
       getSampleMetadata(sampleId)
     ]);
 
