@@ -619,6 +619,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def update_job_status
+    Rails.logger.info("AT pr.update_job_status")
     prs = active_stage
     if prs.nil?
       # all stages succeeded
@@ -653,7 +654,8 @@ class PipelineRun < ApplicationRecord
   def check_and_log_long_run
     # Check for long-running pipeline runs and log/alert if needed:
     run_time = Time.current - created_at
-    MetricUtil.put_metric_now("samples.running.run_time", run_time, [], "gauge")
+    tags = ["sample_id:#{sample.id}"]
+    MetricUtil.put_metric_now("samples.running.run_time", run_time, tags, "gauge")
 
     if alert_sent.zero?
       threshold = 5.hours

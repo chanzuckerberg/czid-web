@@ -290,7 +290,7 @@ class SamplesController < ApplicationController
       end
     end
 
-    tags = %W[user_id:#{current_user.id} sample_id:#{@sample.id}]
+    tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
     MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
@@ -578,9 +578,9 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @sample.save
+        tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id} client:#{client}]
         # Currently bulk CLI upload just calls this action repeatedly so we can't
-        # distinguish between bulk or single there
-        tags = %W[client:#{client} user_id:#{current_user.id} sample_id:#{@sample.id}]
+        # distinguish between bulk or single there. Web bulk goes to bulk_upload.
         tags << "type:single" if client == "web"
         MetricUtil.put_metric_now("samples.created", 1, tags)
 
