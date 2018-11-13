@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_107_235_404) do
+ActiveRecord::Schema.define(version: 20_181_113_172_609) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -178,7 +178,7 @@ ActiveRecord::Schema.define(version: 20_181_107_235_404) do
     t.text "newick"
     t.integer "status", default: 0
     t.string "dag_version"
-    t.text "dag_json"
+    t.text "dag_json", limit: 4_294_967_295
     t.text "command_stdout"
     t.text "command_stderr"
     t.string "job_id"
