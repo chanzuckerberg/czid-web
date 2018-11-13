@@ -177,6 +177,9 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       if @project.save
+        tags = %W[project_id:#{@project.id} user_id:#{current_user.id}]
+        MetricUtil.put_metric_now("projects.created", 1, tags)
+
         format.html { redirect_to @project, notice: 'Project was successfully created.' }
         format.json { render :show, status: :created, location: @project }
       else
