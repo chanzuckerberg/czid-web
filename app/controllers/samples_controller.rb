@@ -504,7 +504,8 @@ class SamplesController < ApplicationController
   end
 
   def results_folder
-    @file_list = @sample.pipeline_runs.first.outputs_by_step
+    user_owns_sample = (@sample.user_id == current_user.id)
+    @file_list = @sample.pipeline_runs.first.outputs_by_step(user_owns_sample)
     @file_path = "#{@sample.sample_path}/results/"
     render template: "samples/folder"
   end

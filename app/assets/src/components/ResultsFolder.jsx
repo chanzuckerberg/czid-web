@@ -16,7 +16,9 @@ class ResultsFolder extends React.Component {
   }
 
   download(url) {
-    location.href = `${url}`;
+    if (!!url) {
+      location.href = `${url}`;
+    }
   }
 
   render() {
@@ -76,6 +78,7 @@ class ResultsFolder extends React.Component {
                     {fileList.map((file, j) => {
                       return (
                         <tr
+                          className={`${file.url ? "" : "disabled-"}file-link`}
                           onClick={this.download.bind(this, file.url)}
                           key={j}
                         >
