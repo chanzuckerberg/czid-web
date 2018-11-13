@@ -619,7 +619,6 @@ class PipelineRun < ApplicationRecord
   end
 
   def update_job_status
-    Rails.logger.info("AT pr.update_job_status")
     prs = active_stage
     if prs.nil?
       # all stages succeeded
