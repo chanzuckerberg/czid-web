@@ -1,6 +1,7 @@
 require 'test_helper'
 
 class PowerControllerTest < ActionDispatch::IntegrationTest
+  include TestHelper
   setup do
     @joe = users(:joe)
     post user_session_path, params: { 'user[email]' => @joe.email, 'user[password]' => 'passwordjoe' }
@@ -133,8 +134,21 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   test 'joe cannot see intermediate host filtering outputs for public_sample' do
     @public_sample = samples(:public_sample)
-    get "/samples/#{@public_sample.id}/results_folder"
-    assert_equal @file_list, 'bla'
+    get "/samples/#{@public_sample.id}/results_folder.json"
+    displayed_data = JSON.parse(@response.body)["displayed_data"]
+    intermediate_targets = %w[fastqs star_out trimmomatic_out priceseq_out cdhitdup_out lzw_out bowtie2_out subsampled_out]
+    original_url_by_key = TEST_RESULT_FOLDER.map { |file_info| [file_info[:key], file_info[:url]] }.to_h
+    visible_intermediate_files = []
+    displayed_data.each do |target, target_info|
+      target_info["file_list"].each do |file_info|
+        original_url = original_url_by_key[file_info["key"]]
+        final_url = file_info["url"]
+        if intermediate_targets.include?(target) && final_url == original_url
+          visible_intermediate_files << final_url
+        end
+      end
+    end
+    assert_empty visible_intermediate_files
   end
 
   # private project

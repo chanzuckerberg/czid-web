@@ -512,7 +512,14 @@ class SamplesController < ApplicationController
     user_owns_sample = (@sample.user_id == current_user.id)
     @file_list = @sample.pipeline_runs.first.outputs_by_step(user_owns_sample)
     @file_path = "#{@sample.sample_path}/results/"
-    render template: "samples/folder"
+    respond_to do |format|
+      format.html do
+        render template: "samples/folder"
+      end
+      format.json do
+        render json: { displayed_data: @file_list }
+      end
+    end
   end
 
   # GET /samples/new
