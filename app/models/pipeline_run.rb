@@ -1,5 +1,6 @@
 require 'open3'
 require 'json'
+require 'csv'
 class PipelineRun < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
@@ -44,6 +45,7 @@ class PipelineRun < ApplicationRecord
   ASSEMBLED_CONTIGS_NAME = 'assembly/contigs.fasta'.freeze
   ASSEMBLED_STATS_NAME = 'assembly/contig_stats.json'.freeze
   CONTIG_SUMMARY_JSON_NAME = 'assembly/combined_contig_summary.json'.freeze
+  CONTIG_MAPPING_NAME = 'assembly/contig2taxon_lineage.csv'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
@@ -96,7 +98,6 @@ class PipelineRun < ApplicationRecord
 
   LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
-                        "contigs" => "db_load_contigs",
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
                         "amr_counts" => "db_load_amr_counts" }.freeze
@@ -196,7 +197,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts contigs contig_counts taxon_byteranges amr_counts]
+    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
 
     # Then, generate output_states
     output_state_entries = []
@@ -312,7 +313,7 @@ class PipelineRun < ApplicationRecord
     update(total_ercc_reads: total_ercc_reads)
   end
 
-  def db_load_contigs
+  def db_load_contigs(contig2taxid)
     contig_stats_s3_path = s3_file_for("contigs")
     contig_s3_path = "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}"
 
@@ -320,9 +321,15 @@ class PipelineRun < ApplicationRecord
                                                                      LOCAL_JSON_PATH, 3)
     contig_stats_json = JSON.parse(File.read(downloaded_contig_stats))
     return if contig_stats_json.empty?
+
     update(assembled: 1)
     contig_fasta = PipelineRun.download_file_with_retries(contig_s3_path, LOCAL_JSON_PATH, 3)
     contig_array = []
+    taxid_list = []
+    contig2taxid.values.each { |entry| taxid_list += entry.values }
+    taxon_lineage_map = {}
+    TaxonLineage.where(taxid: taxid_list).each { |t| taxon_lineage_map[t.taxid] = t.to_a }
+
     File.open(contig_fasta, 'r') do |cf|
       line = cf.gets
       header = ''
@@ -339,9 +346,34 @@ class PipelineRun < ApplicationRecord
         line = cf.gets
       end
       read_count = contig_stats_json[header] || 0
-      contig_array << { name: header, sequence: sequence, read_count: read_count }
+      lineage_json = {}
+      entry = contig2taxid[header]
+      if entry
+        entry.each { |count_type, taxid| lineage_json[count_type] = taxon_lineage_map[taxid] }
+      end
+      contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_s }
     end
     update(contigs_attributes: contig_array) unless contig_array.empty?
+    generate_contig_mapping_table(contig_array)
+  end
+
+  def generate_contig_mapping_table(contig_array)
+    local_file_name = "#{LOCAL_JSON_PATH}/#{CONTIG_MAPPING_NAME}"
+    s3_file_name = "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}"
+    CSV.open(local_file_name, 'w') do |writer|
+      header_row = ['contig_name', 'read_count']
+      header_row += TaxonLineage.names_a.map { |name| "NT.#{name}" }
+      header_row += TaxonLineage.names_a.map { |name| "NR.#{name}" }
+      writer << header_row
+      contig_array.each do |c|
+        lineage = JSON.parse(c[:lineage_json])
+        row = [c[:name], c[:read_count]]
+        row += (lineage['NT'] || TaxonLineage.null_array)
+        row += (lineage['NR'] || TaxonLineage.null_array)
+        writer << row
+      end
+    end
+    _stdout, _stderr, _status = Open3.capture3("aws s3 cp #{local_file_name} #{s3_file_name}")
   end
 
   def db_load_contig_counts
@@ -350,6 +382,7 @@ class PipelineRun < ApplicationRecord
                                                                       LOCAL_JSON_PATH, 3)
     contig_counts_json = JSON.parse(File.read(downloaded_contig_counts))
     contig_counts_array = []
+    contig2taxid = {}
     contig_counts_json.each do |tax_entry|
       contigs = tax_entry["contig_counts"]
       contigs.each do |contig_name, count|
@@ -358,9 +391,14 @@ class PipelineRun < ApplicationRecord
                                  tax_level: tax_entry['tax_level'],
                                  contig_name: contig_name,
                                  count: count }
+        if tax_entry['tax_level'].to_i == 1 # species
+          contig2taxid[contig_name] ||= {}
+          contig2taxid[contig_name][tax_entry['count_type']] = tax_entry['taxid']
+        end
       end
     end
     update(contig_counts_attributes: contig_counts_array) unless contig_counts_array.empty?
+    db_load_contigs(contig2taxid)
   end
 
   def db_load_amr_counts

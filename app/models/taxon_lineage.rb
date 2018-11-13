@@ -159,6 +159,21 @@ class TaxonLineage < ApplicationRecord
     tax_map
   end
 
+  def to_a
+    [species_taxid, genus_taxid, family_taxid, order_taxid, class_taxid, phylum_taxid,
+     kingdom_taxid, superkingdom_taxid]
+  end
+
+  def self.names_a
+    ['species_taxid', 'genus_taxid', 'family_taxid', 'order_taxid', 'class_taxid', 'phylum_taxid',
+     'kingdom_taxid', 'superkingdom_taxid']
+  end
+
+  def self.null_array
+    [MISSING_SPECIES_ID, MISSING_GENUS_ID, MISSING_FAMILY_ID, MISSING_ORDER_ID, MISSING_CLASS_ID,
+     MISSING_PHYLUM_ID, MISSING_KINGDOM_ID, MISSING_SUPERKINGDOM_ID]
+  end
+
   def self.most_specific_positive_id(tax)
     targets = [tax['species_taxid'], tax['genus_taxid'], tax['family_taxid']]
     targets.each do |tentative_id|
