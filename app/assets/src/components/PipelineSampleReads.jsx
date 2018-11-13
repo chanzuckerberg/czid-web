@@ -302,9 +302,7 @@ class PipelineSampleReads extends React.Component {
   }
 
   pipelineInProgress() {
-    if (this.pipelineRun === null) {
-      return true;
-    } else if (this.pipelineRun.finalized === 1) {
+    if (this.pipelineRun && this.pipelineRun.finalized === 1) {
       return false;
     }
     return true;
@@ -893,6 +891,19 @@ class PipelineSampleReads extends React.Component {
         <AMRView amr={this.amr} />
       </div>
     ) : null;
+
+    // Refresh the page every 5 minutes while in progress. Purpose is so that
+    // users with the page open will get some sense of updated status and see
+    // when the report is done.
+    // TODO: Future refactor should convert this to just fetch updated data with
+    // axios so that we don't pay for the full reload. This report load is
+    // currently only going: Rails -> React props.
+    if (this.pipelineInProgress()) {
+      setTimeout(() => {
+        location.reload();
+      }, 300000);
+    }
+
     return (
       <div>
         <ViewHeader className={cs.viewHeader}>

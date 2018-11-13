@@ -22,6 +22,8 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       if @user.save
+        MetricUtil.put_metric_now("users.created", 1, ["user_id:#{@user.id}"])
+
         format.html { redirect_to edit_user_path(@user), notice: "User was successfully created" }
         format.json { render :show, status: :created, location: root_path }
       else
