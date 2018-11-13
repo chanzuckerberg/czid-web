@@ -146,6 +146,13 @@ class PipelineRun < ApplicationRecord
   # (RM) transition executed by the Result Monitor
   # (Resque Worker) transition executed by the Resque Worker
 
+  # Constants for alignment chunk scheduling,
+  # shared between idseq-web/app/jobs/autoscaling.py and idseq-dag/idseq_dag/util/server.py:
+  MAX_JOB_DISPATCH_LAG_SECONDS = 900
+  JOB_TAG_PREFIX = "RunningIDseqBatchJob_".freeze
+  JOB_TAG_KEEP_ALIVE_SECONDS = 600
+  DRAINING_TAG = "draining".freeze
+
   before_create :create_output_states, :create_run_stages
 
   def parse_dag_vars
@@ -613,6 +620,10 @@ class PipelineRun < ApplicationRecord
     if all_output_states_terminal?
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
+
+        run_time = Time.current - created_at
+        tags = ["sample_id:#{sample.id}"]
+        MetricUtil.put_metric_now("samples.succeeded.run_time", run_time, tags, "gauge")
       else
         update(results_finalized: FINALIZED_FAIL)
       end
@@ -679,8 +690,11 @@ class PipelineRun < ApplicationRecord
 
   def check_and_log_long_run
     # Check for long-running pipeline runs and log/alert if needed:
+    run_time = Time.current - created_at
+    tags = ["sample_id:#{sample.id}"]
+    MetricUtil.put_metric_now("samples.running.run_time", run_time, tags, "gauge")
+
     if alert_sent.zero?
-      run_time = Time.current - created_at
       threshold = 5.hours
       if run_time > threshold
         duration_hrs = (run_time / 60 / 60).round(2)
