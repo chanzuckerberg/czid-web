@@ -1,11 +1,12 @@
 import React from "react";
+import Divider from "./layout/Divider";
 
 class ResultsFolder extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.fileUrl = props.filePath;
     this.filePath = this.fileUrl.split("/");
-    this.fileList = props.fileList;
+    this.stepDict = props.fileList;
     this.sampleName = props.sampleName;
     this.projectName = props.projectName;
   }
@@ -15,7 +16,9 @@ class ResultsFolder extends React.Component {
   }
 
   download(url) {
-    location.href = `${url}`;
+    if (url) {
+      location.href = `${url}`;
+    }
   }
 
   render() {
@@ -48,30 +51,53 @@ class ResultsFolder extends React.Component {
           </span>
         </div>
         <div className="header">
-          {this.fileList.length ? (
+          {Object.keys(this.stepDict).length ? (
             <table>
               <thead>
                 <tr>
-                  <th>
-                    {this.filePath[3] === "results"
-                      ? "Results folder"
-                      : "Fastqs folder"}
-                  </th>
+                  <th>Results folder</th>
                 </tr>
               </thead>
-              <tbody>
-                {this.fileList.map((file, i) => {
-                  return (
-                    <tr onClick={this.download.bind(this, file.url)} key={i}>
+              {Object.keys(this.stepDict).map((step_name, i) => {
+                let step = this.stepDict[step_name];
+                let description = step["step_description"];
+                let reads_after = step["reads_after"];
+                let fileList = step["file_list"];
+                return (
+                  <tbody key={i}>
+                    <tr key="first">
                       <td>
-                        <i className="fa fa-file" />
-                        {file["display_name"]}
-                        <span className="size-tag"> -- {file["size"]}</span>
+                        Step <b>{step_name}</b>: {description}{" "}
+                        {reads_after ? (
+                          <span>
+                            (<b>{reads_after}</b> reads remained.)
+                          </span>
+                        ) : null}
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
+                    {fileList.map((file, j) => {
+                      return (
+                        <tr
+                          className={`${file.url ? "" : "disabled-"}file-link`}
+                          onClick={this.download.bind(this, file.url)}
+                          key={j}
+                        >
+                          <td>
+                            <i className="fa fa-file" />
+                            {file["display_name"]}
+                            <span className="size-tag"> -- {file["size"]}</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    <tr key="last">
+                      <td>
+                        <Divider />
+                      </td>
+                    </tr>
+                  </tbody>
+                );
+              })}
             </table>
           ) : (
             "No files to show"

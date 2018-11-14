@@ -589,7 +589,7 @@ class PipelineSampleReads extends React.Component {
     return (
       <div className="row last-row">
         <div className="col s12">
-          <div className="content-title">ERCC Spike In Counts</div>
+          <div className="content-title">ERCC Spike-In Counts</div>
           <ERCCScatterPlot
             ercc_comparison={this.props.ercc_comparison}
             width={720}
