@@ -16,7 +16,7 @@ class ResultsFolder extends React.Component {
   }
 
   download(url) {
-    if (!!url) {
+    if (url) {
       location.href = `${url}`;
     }
   }
