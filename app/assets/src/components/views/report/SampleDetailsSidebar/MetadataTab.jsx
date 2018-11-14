@@ -166,7 +166,7 @@ class MetadataTab extends React.Component {
         {METADATA_SECTIONS.map(section => (
           <MetadataSection
             key={section.name}
-            editable
+            editable={this.props.additionalInfo.editable}
             toggleable
             onToggle={() => this.toggleSection(section)}
             open={this.state.sectionOpen[section.name]}
@@ -195,7 +195,8 @@ MetadataTab.propTypes = {
     name: PropTypes.string,
     project_name: PropTypes.string,
     upload_date: PropTypes.string,
-    host_genome_name: PropTypes.string
+    host_genome_name: PropTypes.string,
+    editable: PropTypes.bool
   })
 };
 
