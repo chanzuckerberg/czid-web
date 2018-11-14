@@ -12,7 +12,7 @@ import {
   isTaxonIncluded,
   getTaxonSortComparator,
   getCategoryAdjective
-} from "./views/report/utils";
+} from "./views/report/utils/taxon";
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
