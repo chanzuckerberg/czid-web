@@ -887,6 +887,7 @@ class PipelineSampleReads extends React.Component {
         <AMRView amr={this.amr} />
       </div>
     ) : null;
+    const multipleTabs = show_amr;
 
     // Refresh the page every 5 minutes while in progress. Purpose is so that
     // users with the page open will get some sense of updated status and see
@@ -922,42 +923,40 @@ class PipelineSampleReads extends React.Component {
                 onClick: () => window.open(`/samples/${sampleId}`, "_self")
               }))}
             />
-            {this.props.admin && (
-              <div className={cs.sampleDetailsLinkContainer}>
-                <span
-                  className={cs.sampleDetailsLink}
-                  onClick={this.toggleSampleDetailsSidebar}
-                >
-                  Sample Details
-                </span>
-              </div>
-            )}
+            <div className={cs.sampleDetailsLinkContainer}>
+              <span
+                className={cs.sampleDetailsLink}
+                onClick={this.toggleSampleDetailsSidebar}
+              >
+                Sample Details
+              </span>
+            </div>
           </ViewHeader.Content>
           <ViewHeader.Controls>{report_buttons}</ViewHeader.Controls>
         </ViewHeader>
 
-        <div className="sub-header-navigation">
-          <div className="nav-content">
-            <ul className="tabs tabs-transparent">
-              <li className="tab">
-                <a href="#reports" className="active">
-                  Report
-                </a>
-              </li>
-              <li className="tab">
-                <a href="#details" className="">
-                  Details
-                </a>
-              </li>
-              {amr_tab}
-            </ul>
+        {multipleTabs && (
+          <div className="sub-header-navigation">
+            <div className="nav-content">
+              <ul className="tabs tabs-transparent">
+                <li className="tab">
+                  <a href="#reports" className="active">
+                    Report
+                  </a>
+                </li>
+                {amr_tab}
+              </ul>
+            </div>
           </div>
-        </div>
-        <Divider className="reports-divider" />
+        )}
+        <Divider
+          className={cx(cs.reportsDivider, multipleTabs && cs.hasTabs)}
+        />
 
         {amr_table}
 
-        <div id="details" className="tab-screen col s12">
+        {/* TODO(mark): Remove all old Sample Details code once new sidebar goes live */}
+        <div id="details" className={cx("tab-screen col s12", cs.detailsTab)}>
           <div className="center">
             <span className="note-action-feedback note-saved-success" />
             <span className="note-action-feedback note-save-failed" />
@@ -1080,14 +1079,12 @@ class PipelineSampleReads extends React.Component {
         >
           {d_report}
         </div>
-        {this.props.admin && (
-          <SampleDetailsSidebar
-            visible={this.state.sampleDetailsSidebarVisible}
-            onClose={this.toggleSampleDetailsSidebar}
-            sample={this.props.sampleInfo}
-            onNameUpdate={newName => this.setState({ sample_name: newName })}
-          />
-        )}
+        <SampleDetailsSidebar
+          visible={this.state.sampleDetailsSidebarVisible}
+          onClose={this.toggleSampleDetailsSidebar}
+          sample={this.props.sampleInfo}
+          onNameUpdate={newName => this.setState({ sample_name: newName })}
+        />
       </div>
     );
   }
