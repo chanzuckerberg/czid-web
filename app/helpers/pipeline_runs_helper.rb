@@ -14,11 +14,21 @@ module PipelineRunsHelper
     # Stage 2
     "gsnap_out" => "Align remaining reads to the NCBI NT database using GSNAP.",
     "rapsearch2_out" => "Align remaining reads to the NCBI NR database using RAPSearch2.",
-    "taxon_count_out" => "Count taxon hits.",
-    "annotated_out" => "Annotate non-host FASTA with NCBI accession IDs.",
+    "taxon_count_out" => "Count preliminary taxon hits.",
+    "annotated_out" => "Annotate non-host FASTA with preliminary NCBI accession IDs.",
     # Stage 3
-    "taxid_fasta_out" => "Annotate non-host FASTA with Taxonomy IDs.",
-    "taxid_locator_out" => "Sort annotated FASTA by Taxonomy IDs and store the byte range of each Taxonomy ID in a JSON."
+    "taxid_fasta_out" => "Annotate non-host FASTA with preliminary Taxonomy IDs.",
+    "taxid_locator_out" => "Sort preliminary annotated FASTA by Taxonomy IDs and store the byte range of each Taxonomy ID in a JSON.",
+    "alignment_viz_out" => "Record number of unique accessions matched.",
+    "assembly_out" => "Assemble non-host reads using SPAdes.",
+    "gsnap_accessions_out" => "Generate FASTA of candidate references matched during GSNAP / NT alignment.",
+    "rapsearch2_accessions_out" => "Generate FASTA of candidate references matched during RAPSearch2 / NR alignment.",
+    "refined_gsnap_out" => "BLAST assembled contigs against candidate references from NT; reassign corresponding reads to the matched taxon.",
+    "refined_rapsearch2_out" => "BLAST assembled contigs against candidate references from NR; reassign corresponding reads to the matched taxon.",
+    "refined_taxon_count_out" => "Count taxon hits after the reassignment based on the BLAST results.",
+    "contig_summary_out" => "Record statistics on the assembled contigs.",
+    "refined_annotated_out" => "Annotate non-host FASTA with NCBI accession IDs after the BLAST-based match refinement.",
+    "refined_taxid_locator_out" => "Annotate non-host FASTA with revised Taxonomy IDs after the BLAST-based match refinement."
   }.freeze
 
   def aegea_batch_submit_command(base_command,
