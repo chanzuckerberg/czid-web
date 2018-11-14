@@ -165,6 +165,7 @@ class SampleDetailsSidebar extends React.Component {
           {this.state.currentTab === "Notes" && (
             <NotesTab
               notes={additionalInfo.notes}
+              editable={additionalInfo.editable}
               onNoteChange={val => this.handleMetadataChange("notes", val)}
               onNoteSave={() => this.handleMetadataSave("notes")}
               savePending={savePending}

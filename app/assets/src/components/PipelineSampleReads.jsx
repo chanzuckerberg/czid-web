@@ -552,7 +552,7 @@ class PipelineSampleReads extends React.Component {
       pipelineHasAssembly(this.pipelineRun) &&
       this.pipelineRun.assembled !== 1
     ) {
-      warnings.push("Assembly of reads could not be performed for this run.");
+      warnings.push("The reads did not assemble for this run.");
     }
 
     if (warnings.length > 0) {
@@ -573,7 +573,6 @@ class PipelineSampleReads extends React.Component {
           position="bottom left"
           content={content}
           inverted
-          on="click"
           wide="very"
           horizontalOffset={15}
         />
@@ -825,10 +824,7 @@ class PipelineSampleReads extends React.Component {
     let nonhost_assembly_complete =
       this.reportDetails &&
       this.reportDetails.assembled_taxids.indexOf("all") >= 0;
-    const assembled =
-      this.pipelineRun &&
-      pipelineHasAssembly(this.pipelineRun) &&
-      this.pipelineRun.assembled === 1;
+    const assembled = this.pipelineRun && this.pipelineRun.assembled === 1;
     let download_section = (
       <div>
         <ResultButton

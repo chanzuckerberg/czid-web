@@ -186,6 +186,8 @@ class SamplesController < ApplicationController
     ercc_comparison = nil
     assembled_taxids = []
 
+    editable = current_power.updatable_sample?(@sample)
+
     if pr
       pr_display = curate_pipeline_run_display(pr)
       ercc_comparison = pr.compare_ercc_counts
@@ -201,6 +203,7 @@ class SamplesController < ApplicationController
       metadata: @sample.metadata,
       additional_info: {
         name: @sample.name,
+        editable: editable,
         host_genome_name: @sample.host_genome_name,
         upload_date: @sample.created_at,
         project_name: @sample.project.name,
