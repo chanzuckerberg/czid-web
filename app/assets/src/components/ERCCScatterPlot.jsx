@@ -28,7 +28,7 @@ class ERCCScatterPlot extends React.Component {
         yKey="actual"
         width={this.props.width}
         height={this.props.height}
-        xLabel="log10 spike in concetrations"
+        xLabel="log10 spike-in concentrations"
         yLabel="log10 read-pairs per gene"
       />
     );
