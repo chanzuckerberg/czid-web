@@ -6,7 +6,10 @@
   height: 50px;
   align-items: center;
   border-bottom: 1px solid $light-grey;
-  cursor: pointer;
+
+  &.toggleable {
+    cursor: pointer;
+  }
 
   .title {
     color: $black;
