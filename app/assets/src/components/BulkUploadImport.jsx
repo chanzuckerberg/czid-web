@@ -949,8 +949,7 @@ class BulkUploadImport extends React.Component {
                           </i>
                         </div>
                         <div className="example-link">
-                          Example:
-                          s3://czbiohub-seqbot/fastqs/171018_NB501961_0022_AHL2TVBGX3/rawdata
+                          Example: s3://your_s3_bucket/rawdata/fastqs
                         </div>
                       </div>
                     </div>
@@ -980,9 +979,8 @@ class BulkUploadImport extends React.Component {
                   </div>
                   <div>
                     - Also convert links like
-                    "https://s3-us-west-2.amazonaws.com/czbiohub-seqbot/fastqs/171018_NB501961_0022_AHL2TVBGX3/rawdata"
-                    to the format
-                    "s3://czbiohub-seqbot/fastqs/171018_NB501961_0022_AHL2TVBGX3/rawdata"
+                    "https://s3-us-west-2.amazonaws.com/your_s3_bucket/rawdata/fastqs"
+                    to the format "s3://your_s3_bucket/rawdata/fastqs"
                   </div>
                 </div>
                 {termsBlurb}

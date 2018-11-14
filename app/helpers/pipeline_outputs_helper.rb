@@ -158,7 +158,6 @@ module PipelineOutputsHelper
   def get_taxid_fasta_from_pipeline_run(pipeline_run, taxid, tax_level, hit_type)
     return '' unless pipeline_run
     uri = pipeline_run.s3_paths_for_taxon_byteranges[tax_level][hit_type]
-    # e.g. "s3://czbiohub-idseq-samples-development/samples/8/74/postprocess/taxid_annot_sorted_genus_nt.fasta"
     uri_parts = uri.split("/", 4)
     bucket = uri_parts[2]
     key = uri_parts[3]

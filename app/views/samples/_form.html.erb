@@ -26,7 +26,7 @@
     <div class="field">
       <%= form.label 'Read 1 FASTQ S3 Path' %><br>
       <span style='font-size:9px; color: green'>
-      Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
+      Example: s3://your_s3_bucket/project1/fastqs/sample075_water_S23_R1_001.fastq.gz
       </span>
       <%= text_field_tag 'sample[input_files_attributes][0][source]', '', placeholder: 'Required' %>
     </div>
@@ -34,7 +34,7 @@
     <div class="field">
       <%= form.label 'Read 2 FASTQ S3 Path' %><br>
       <span style='font-size:9px; color: green'>
-      Example: s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz
+      Example: s3://your_s3_bucket/project1/fastqs/sample075_water_S23_R2_001.fastq.gz
       </span>
       <%= text_field_tag 'sample[input_files_attributes][1][source]', '', placeholder: 'Required' %>
     </div>
