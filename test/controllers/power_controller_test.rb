@@ -151,6 +151,12 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_empty visible_intermediate_files
   end
 
+  test 'joe cannot see raw_result_folder for joe_sample' do
+    @joe_sample = samples(:joe_sample)
+    get "/samples/#{@joe_sample.id}/raw_results_folder"
+    assert_response :redirect
+  end
+
   # private project
 
   test 'joe cannot add users to project one ' do

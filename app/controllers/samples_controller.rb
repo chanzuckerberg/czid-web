@@ -15,7 +15,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
-                  :contigs_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
+                  :contigs_fasta, :results_folder, :raw_results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
@@ -23,7 +23,7 @@ class SamplesController < ApplicationController
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
 
-  before_action :admin_required, only: [:kickoff_pipeline, :retry_pipeline, :pipeline_runs]
+  before_action :admin_required, only: [:kickoff_pipeline, :retry_pipeline, :pipeline_runs, :raw_results_folder]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
   current_power do # Put this here for CLI
@@ -506,6 +506,12 @@ class SamplesController < ApplicationController
   def unidentified_fasta
     @unidentified_fasta = get_s3_file(@sample.unidentified_fasta_s3_path)
     send_data @unidentified_fasta, filename: @sample.name + '_unidentified.fasta'
+  end
+
+  def raw_results_folder
+    @file_list = @sample.results_folder_files
+    @file_path = "#{@sample.sample_path}/results/"
+    render template: "samples/raw_folder"
   end
 
   def results_folder
