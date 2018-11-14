@@ -170,10 +170,7 @@ class Sample < ApplicationRecord
   end
 
   def list_outputs(s3_path, display_prefix = 1, delimiter = "/")
-    if Rails.env == "test"
-      # for unit tests
-      return TEST_RESULT_FOLDER
-    end
+    return TEST_RESULT_FOLDER if Rails.env == "test"
     prefix = s3_path.split("#{SAMPLES_BUCKET_NAME}/")[1]
     file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
                                        prefix: "#{prefix}/",
