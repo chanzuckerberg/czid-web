@@ -208,11 +208,11 @@ class SamplesController < ApplicationController
         upload_date: @sample.created_at,
         project_name: @sample.project.name,
         project_id: @sample.project_id,
-        pipeline_run: pr_display,
+        notes: @sample.sample_notes,
         ercc_comparison: ercc_comparison,
-        summary_stats: summary_stats,
+        pipeline_run: pr_display,
+        summary_stats: summary_stats
         assembled_taxids: assembled_taxids,
-        notes: @sample.sample_notes
       }
     }
   end
