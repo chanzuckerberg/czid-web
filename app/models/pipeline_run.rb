@@ -1068,14 +1068,14 @@ class PipelineRun < ApplicationRecord
     # Get map of s3 path to presigned URL and size.
     filename_to_info = {}
     sample.results_folder_files.each do |entry|
-      filename_to_info["s3://#{SAMPLES_BUCKET_NAME}/#{entry[:key]}"] = entry
+      filename_to_info[entry[:key]] = entry
     end
     # Get outputs and descriptions by target.
     result = {}
     pipeline_run_stages.each_with_index do |prs, stage_idx|
       next unless prs.dag_json
       dag_dict = JSON.parse(prs.dag_json)
-      output_dir_s3 = dag_dict["output_dir_s3"]
+      output_dir_s3_key = dag_dict["output_dir_s3"].chomp("/").split("/", 4)[3] # keep everything after bucket name, except trailing '/'
       targets = dag_dict["targets"]
       given_targets = dag_dict["given_targets"]
       num_steps = targets.length
@@ -1083,7 +1083,7 @@ class PipelineRun < ApplicationRecord
         next if given_targets.keys.include?(target_name)
         file_info = []
         output_list.each do |output|
-          file_info_for_output = filename_to_info["#{output_dir_s3}/#{pipeline_version}/#{output}"]
+          file_info_for_output = filename_to_info["#{output_dir_s3_key}/#{pipeline_version}/#{output}"]
           next unless file_info_for_output
           if !user_owns_sample && stage_idx.zero? && step_idx < num_steps - 1
             # Delete URLs for all host-filtering outputs but the last, unless user uploaded the sample.
