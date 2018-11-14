@@ -151,10 +151,10 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert_empty visible_intermediate_files
   end
 
-  test 'joe cannot see raw_result_folder for joe_sample' do
-    @joe_sample = samples(:joe_sample)
-    get "/samples/#{@joe_sample.id}/raw_results_folder"
-    assert_response :redirect
+  test 'joe cannot see raw_result_folder for public_sample' do
+    assert_raises(ActiveRecord::RecordNotFound) do
+      get "/samples/#{samples(:public_sample).id}/raw_results_folder"
+    end
   end
 
   # private project
