@@ -202,9 +202,9 @@ class SampleDetailsSidebar extends React.Component {
 
   render() {
     const { visible } = this.props;
-    const { metadata, additionalInfo } = this.state;
+    const { metadata, metadataTypes, additionalInfo } = this.state;
 
-    const loading = !metadata;
+    const loading = !metadata || !metadataTypes;
 
     return (
       <Sidebar visible={visible} width="very wide">

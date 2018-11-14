@@ -664,13 +664,8 @@ class PipelineSampleReads extends React.Component {
         </span>
       );
     }
-    if (this.pipelineInProgress()) {
-      d_report = (
-        <div className="center-align text-grey text-lighten-2 no-report sample-wait-top">
-          {waitingSpinner}
-        </div>
-      );
-    } else if (this.reportPresent) {
+
+    if (this.reportPresent) {
       d_report = (
         <PipelineSampleReport
           sample_id={this.sampleId}
@@ -694,6 +689,12 @@ class PipelineSampleReads extends React.Component {
           // Needs to be passed down to set the background dropdown properly.
           reportPageParams={this.props.reportPageParams}
         />
+      );
+    } else if (this.pipelineInProgress()) {
+      d_report = (
+        <div className="center-align text-grey text-lighten-2 no-report sample-wait-top">
+          {waitingSpinner}
+        </div>
       );
     } else {
       d_report = (

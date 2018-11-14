@@ -211,8 +211,8 @@ class SamplesController < ApplicationController
         notes: @sample.sample_notes,
         ercc_comparison: ercc_comparison,
         pipeline_run: pr_display,
-        summary_stats: summary_stats
-        assembled_taxids: assembled_taxids,
+        summary_stats: summary_stats,
+        assembled_taxids: assembled_taxids
       }
     }
   end
