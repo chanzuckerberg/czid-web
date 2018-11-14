@@ -77,6 +77,22 @@
   }
 }
 
+.downloadSectionContent {
+  padding-top: 5px;
+
+  .downloadLink {
+    padding: 5px 10px;
+    display: block;
+    margin: 5px 0;
+    /* overwrite header.scss */
+    color: $primary-light !important;
+
+    &:hover {
+      opacity: 0.5;
+    }
+  }
+}
+
 .notesSection {
   .note {
     font-size: $font-size-body;

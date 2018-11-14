@@ -1,4 +1,4 @@
-import ThresholdMap from "../../utils/ThresholdMap";
+import ThresholdMap from "~/components/utils/ThresholdMap";
 
 export const computeThresholdedTaxons = (candidateTaxons, activeThresholds) => {
   let resultTaxons = [];

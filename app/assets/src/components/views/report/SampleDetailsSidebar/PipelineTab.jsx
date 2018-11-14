@@ -4,13 +4,15 @@ import { PIPELINE_INFO_FIELDS } from "./constants";
 import MetadataSection from "./MetadataSection";
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import PropTypes from "~/components/utils/propTypes";
+import { getDownloadLinks } from "../utils/download";
 import cs from "./sample_details_sidebar.scss";
 
 class PipelineTab extends React.Component {
   state = {
     sectionOpen: {
       pipelineInfo: true,
-      erccScatterplot: false
+      erccScatterplot: false,
+      downloads: false
     },
     sectionEditing: {},
     graphWidth: 0
@@ -57,6 +59,7 @@ class PipelineTab extends React.Component {
   };
 
   render() {
+    const { pipelineRun, assembledTaxIds, sampleId } = this.props;
     return (
       <div>
         <MetadataSection
@@ -68,6 +71,7 @@ class PipelineTab extends React.Component {
           {PIPELINE_INFO_FIELDS.map(this.renderPipelineInfoField)}
         </MetadataSection>
         <MetadataSection
+          toggleable
           onToggle={() => this.toggleSection("erccScatterplot")}
           open={this.state.sectionOpen.erccScatterplot}
           title="ERCC Spike in Counts"
@@ -84,6 +88,27 @@ class PipelineTab extends React.Component {
             />
           </div>
         </MetadataSection>
+        <MetadataSection
+          toggleable
+          onToggle={() => this.toggleSection("downloads")}
+          open={this.state.sectionOpen.downloads}
+          title="Downloads"
+        >
+          <div className={cs.downloadSectionContent}>
+            {getDownloadLinks(sampleId, pipelineRun, assembledTaxIds).map(
+              option => (
+                <a
+                  key={option.label}
+                  className={cs.downloadLink}
+                  href={option.path}
+                  target={option.newPage ? "_blank" : "_self"}
+                >
+                  {option.label}
+                </a>
+              )
+            )}
+          </div>
+        </MetadataSection>
       </div>
     );
   }
@@ -91,7 +116,10 @@ class PipelineTab extends React.Component {
 
 PipelineTab.propTypes = {
   pipelineInfo: PropTypes.objectOf(PropTypes.string),
-  erccComparison: PropTypes.ERCCComparison
+  erccComparison: PropTypes.ERCCComparison,
+  pipelineRun: PropTypes.PipelineRun,
+  assembledTaxIds: PropTypes.arrayOf(PropTypes.string),
+  sampleId: PropTypes.number
 };
 
 export default PipelineTab;
