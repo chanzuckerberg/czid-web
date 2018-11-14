@@ -18,7 +18,6 @@ class ERCCScatterPlot extends React.Component {
         });
       }
     }
-
     if (!data.length) {
       return <div className={cs.noData}>No data</div>;
     }

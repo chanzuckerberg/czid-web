@@ -14,6 +14,7 @@ import Heatmap from "./visualizations/Heatmap";
 import HeatmapLegend from "./visualizations/HeatmapLegend";
 import MultipleNestedDropdown from "./ui/controls/dropdowns/MultipleNestedDropdown";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
+import SampleDetailsSidebar from "./views/report/SampleDetailsSidebar";
 import PropTypes from "prop-types";
 import Slider from "./ui/controls/Slider";
 import TaxonTooltip from "./TaxonTooltip";
@@ -76,7 +77,11 @@ class SamplesHeatmap extends React.Component {
       taxons: {},
       loading: false,
       sampleIds: this.urlParams.sampleIds || this.props.sampleIds,
-      taxonIds: this.urlParams.taxonIds || this.props.taxonIds || []
+      taxonIds: this.urlParams.taxonIds || this.props.taxonIds || [],
+      // If we made the sidebar visibility depend on sampleId !== null,
+      // there would be a visual flicker when sampleId is set to null as the sidebar closes.
+      selectedSampleId: null,
+      sidebarVisible: false
     };
 
     this.lastRequestToken = null;
@@ -101,7 +106,6 @@ class SamplesHeatmap extends React.Component {
     this.onApplyClick = this.onApplyClick.bind(this);
     this.onCellClick = this.onCellClick.bind(this);
     this.onRemoveRow = this.onRemoveRow.bind(this);
-    this.onSampleLabelClick = this.onSampleLabelClick.bind(this);
     this.onShareClick = this.onShareClick.bind(this);
     this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
     this.onThresholdFilterApply = this.onThresholdFilterApply.bind(this);
@@ -419,10 +423,26 @@ class SamplesHeatmap extends React.Component {
     );
   }
 
-  onSampleLabelClick(d, i) {
+  handleSampleLabelClick = (d, i) => {
     let sample = this.clusteredSamples.flat[i];
-    window.location.href = "/samples/" + sample.sample_id;
-  }
+    if (
+      this.state.sidebarVisible &&
+      this.state.selectedSampleId === sample.sample_id
+    ) {
+      this.handleSidebarClose();
+    } else {
+      this.setState({
+        selectedSampleId: sample.sample_id,
+        sidebarVisible: true
+      });
+    }
+  };
+
+  handleSidebarClose = () => {
+    this.setState({
+      sidebarVisible: false
+    });
+  };
 
   onCellClick(d) {
     let sample = this.clusteredSamples.flat[d.col];
@@ -464,7 +484,7 @@ class SamplesHeatmap extends React.Component {
           getCellValue={this.dataGetters[this.state.selectedOptions.metric]}
           getTooltip={this.getTooltip}
           onCellClick={this.onCellClick}
-          onColumnLabelClick={this.onSampleLabelClick}
+          onColumnLabelClick={this.handleSampleLabelClick}
           onRemoveRow={this.onRemoveRow}
           scale={this.state.availableOptions.scales[scaleIndex][1]}
           colors={this.colors}
@@ -813,6 +833,12 @@ class SamplesHeatmap extends React.Component {
           </h2>
         </div>
         {this.renderVisualization()}
+        <SampleDetailsSidebar
+          showReportLink
+          visible={this.state.sidebarVisible}
+          onClose={this.handleSidebarClose}
+          sampleId={this.state.selectedSampleId}
+        />
       </div>
     );
   }

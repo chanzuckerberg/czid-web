@@ -1108,7 +1108,7 @@ class PipelineSampleReads extends React.Component {
         <SampleDetailsSidebar
           visible={this.state.sampleDetailsSidebarVisible}
           onClose={this.toggleSampleDetailsSidebar}
-          sample={this.props.sampleInfo}
+          sampleId={this.sampleId}
           onNameUpdate={newName => this.setState({ sample_name: newName })}
         />
       </div>
