@@ -70,7 +70,7 @@ class PipelineTab extends React.Component {
         <MetadataSection
           onToggle={() => this.toggleSection("erccScatterplot")}
           open={this.state.sectionOpen.erccScatterplot}
-          title="ERCC Spike in Counts"
+          title="ERCC Spike-In Counts"
           className={cs.erccScatterplotSection}
         >
           <div
