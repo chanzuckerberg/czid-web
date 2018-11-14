@@ -16,7 +16,7 @@ class SamplesController < ApplicationController
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
-  EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2].freeze
+  EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
 
@@ -515,10 +515,24 @@ class SamplesController < ApplicationController
     send_data @unidentified_fasta, filename: @sample.name + '_unidentified.fasta'
   end
 
-  def results_folder
+  def raw_results_folder
     @file_list = @sample.results_folder_files
     @file_path = "#{@sample.sample_path}/results/"
-    render template: "samples/folder"
+    render template: "samples/raw_folder"
+  end
+
+  def results_folder
+    user_owns_sample = (@sample.user_id == current_user.id)
+    @file_list = @sample.pipeline_runs.first.outputs_by_step(user_owns_sample)
+    @file_path = "#{@sample.sample_path}/results/"
+    respond_to do |format|
+      format.html do
+        render template: "samples/folder"
+      end
+      format.json do
+        render json: { displayed_data: @file_list }
+      end
+    end
   end
 
   # GET /samples/new
