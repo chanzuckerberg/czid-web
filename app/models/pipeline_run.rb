@@ -374,6 +374,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def generate_contig_mapping_table
+    # generate a csv file for contig mapping based on lineage_json
     local_file_name = "#{LOCAL_JSON_PATH}/#{CONTIG_MAPPING_NAME}"
     Open3.capture3("mkdir -p #{File.dirname(local_file_name)}")
     s3_file_name = "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}"
