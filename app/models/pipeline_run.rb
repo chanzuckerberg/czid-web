@@ -344,7 +344,7 @@ class PipelineRun < ApplicationRecord
       while line
         if line[0] == '>'
           read_count = contig_stats_json[header] || 0
-          lineage_json = get_lineage_json(header, taxon_lineage_map)
+          lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
           contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json } if header != ''
           header = line[1..line.size].rstrip
           sequence = ''
@@ -354,19 +354,21 @@ class PipelineRun < ApplicationRecord
         line = cf.gets
       end
       read_count = contig_stats_json[header] || 0
-      lineage_json = get_lineage_json(header, taxon_lineage_map)
+      lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
       contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
     end
     update(contigs_attributes: contig_array) unless contig_array.empty?
     generate_contig_mapping_table
   end
 
-  def get_lineage_json(contig_name, taxon_lineage_map)
+  def get_lineage_json(ct2taxid, taxon_lineage_map)
+    # Get the full lineage based on taxid
     # Sample output:
+    # {"NT": [573,570,543,91347,1236,1224,-650,2, "Bacteria"],
+    #  "NR": [573,570,543,91347,1236,1224,-650,2, "Bacteria"]}
     output = {}
-    entry = contig2taxid[contig_name]
-    if entry
-      entry.each { |count_type, taxid| output[count_type] = taxon_lineage_map[taxid.to_i] }
+    if ct2taxid
+      ct2taxid.each { |count_type, taxid| output[count_type] = taxon_lineage_map[taxid.to_i] }
     end
     output
   end
@@ -389,6 +391,7 @@ class PipelineRun < ApplicationRecord
       end
     end
     Open3.capture3("aws s3 cp #{local_file_name} #{s3_file_name}")
+    local_file_name
   end
 
   def db_load_contig_counts

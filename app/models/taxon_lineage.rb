@@ -161,17 +161,17 @@ class TaxonLineage < ApplicationRecord
 
   def to_a
     [species_taxid, genus_taxid, family_taxid, order_taxid, class_taxid, phylum_taxid,
-     kingdom_taxid, superkingdom_taxid]
+     kingdom_taxid, superkingdom_taxid, superkingdom_name]
   end
 
   def self.names_a
     ['species_taxid', 'genus_taxid', 'family_taxid', 'order_taxid', 'class_taxid', 'phylum_taxid',
-     'kingdom_taxid', 'superkingdom_taxid']
+     'kingdom_taxid', 'superkingdom_taxid', 'superkingdom_name']
   end
 
   def self.null_array
     [MISSING_SPECIES_ID, MISSING_GENUS_ID, MISSING_FAMILY_ID, MISSING_ORDER_ID, MISSING_CLASS_ID,
-     MISSING_PHYLUM_ID, MISSING_KINGDOM_ID, MISSING_SUPERKINGDOM_ID]
+     MISSING_PHYLUM_ID, MISSING_KINGDOM_ID, MISSING_SUPERKINGDOM_ID, ""]
   end
 
   def self.most_specific_positive_id(tax)
