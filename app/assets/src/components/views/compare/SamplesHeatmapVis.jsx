@@ -80,9 +80,8 @@ class SamplesHeatmapVis extends React.Component {
         metric => this.props.data[metric][node.rowIndex][node.columnIndex]
       )
       .map(metric => {
-        let value = this.props.data[metric][node.rowIndex][
-          node.columnIndex
-        ].toFixed(0);
+        let data = this.props.data[metric];
+        let value = data[node.rowIndex][node.columnIndex].toFixed(0);
         return [
           this.metricLabels[metric],
           metric === this.props.metric ? <b>{value}</b> : value

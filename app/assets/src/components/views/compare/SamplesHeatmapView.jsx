@@ -14,7 +14,6 @@ import MultipleNestedDropdown from "../../ui/controls/dropdowns/MultipleNestedDr
 import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
 import PropTypes from "prop-types";
 import Slider from "../../ui/controls/Slider";
-import TaxonTooltip from "./TaxonTooltip";
 import ThresholdFilterDropdown from "../../ui/controls/dropdowns/ThresholdFilterDropdown";
 import DeepEqual from "fast-deep-equal";
 import NarrowContainer from "../../layout/NarrowContainer.jsx";
@@ -97,7 +96,6 @@ class SamplesHeatmapView extends React.Component {
       this.dataAccessorKeys[metric.value] = metric.value.split(".");
     }
 
-    this.getTooltip = this.getTooltip.bind(this);
     this.handleRemoveTaxon = this.handleRemoveTaxon.bind(this);
     this.onShareClick = this.onShareClick.bind(this);
     this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
@@ -257,22 +255,6 @@ class SamplesHeatmapView extends React.Component {
       taxonDetails,
       data
     };
-  }
-
-  getTooltip(rowIndex, columnIndex) {
-    let sample = this.clusteredSamples.flat[columnIndex],
-      taxonName = this.clusteredTaxons.flat[rowIndex],
-      taxon;
-
-    for (let i = 0; i < sample.taxons.length; i += 1) {
-      let ttaxon = sample.taxons[i];
-      if (ttaxon.name == taxonName) {
-        taxon = ttaxon;
-        break;
-      }
-    }
-
-    return <TaxonTooltip sample={sample} taxon={taxon} />;
   }
 
   renderLoading() {
