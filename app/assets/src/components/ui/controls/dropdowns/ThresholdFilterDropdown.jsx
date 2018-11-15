@@ -222,7 +222,7 @@ const ThresholdFilter = ({
           floating
           scrolling
           options={metrics}
-          onChange={handleMetricChange.bind(this)}
+          onChange={handleMetricChange}
           value={metric}
         />
       </Grid.Column>
@@ -234,7 +234,7 @@ const ThresholdFilter = ({
           floating
           scrolling
           options={operators.map(option => ({ text: option, value: option }))}
-          onChange={handleOperatorChange.bind(this)}
+          onChange={handleOperatorChange}
           value={operator}
         />
       </Grid.Column>
@@ -243,7 +243,7 @@ const ThresholdFilter = ({
           fluid
           focus
           type="number"
-          onChange={handleValueChange.bind(this)}
+          onChange={handleValueChange}
           value={value}
         />
       </Grid.Column>

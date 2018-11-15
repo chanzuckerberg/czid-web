@@ -21,9 +21,8 @@ class SequentialLegendVis extends React.Component {
 
   render() {
     return (
-      <div className="sequential-legend-vis">
+      <div>
         <div
-          className="sequential-legend__container"
           ref={container => {
             this.legendContainer = container;
           }}
@@ -36,7 +35,7 @@ class SequentialLegendVis extends React.Component {
 SequentialLegendVis.propTypes = {
   max: PropTypes.number,
   min: PropTypes.number,
-  scale: PropTypes.func
+  scale: PropTypes.string
 };
 
 export default SequentialLegendVis;

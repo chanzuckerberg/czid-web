@@ -3,7 +3,7 @@ import Heatmap from "../../visualizations/heatmap/Heatmap";
 import PropTypes from "prop-types";
 import React from "react";
 import { openUrl } from "../../utils/links";
-import SvgSaver from "svgsaver";
+import cs from "./samples_heatmap_vis.scss";
 
 class SamplesHeatmapVis extends React.Component {
   constructor(props) {
@@ -28,8 +28,6 @@ class SamplesHeatmapVis extends React.Component {
       { key: "NR.rpm", label: "NR rPM" },
       { key: "NR.r", label: "NR r (total reads)" }
     ];
-
-    this.handleCellClick = this.handleCellClick.bind(this);
   }
 
   componentDidMount() {
@@ -113,22 +111,21 @@ class SamplesHeatmapVis extends React.Component {
     ];
   }
 
-  handleCellClick(cell) {
-    openUrl(`/samples/${this.props.sampleIds[cell.columnIndex]}`, event);
-  }
+  handleCellClick = cell => {
+    openUrl(`/samples/${this.props.sampleIds[cell.columnIndex]}`);
+  };
 
   render() {
     return (
-      <div className="samples-heatmap-vis">
+      <div className={cs.samplesHeatmapVis}>
         <div
-          className="samples-heatmap-vis__container"
           ref={container => {
             this.heatmapContainer = container;
           }}
         />
         <div
           id="heatmap"
-          className="samples-heatmap-vis__tooltip"
+          className={cs.tooltip}
           ref={tooltip => {
             this.tooltipContainer = tooltip;
           }}
@@ -147,7 +144,7 @@ SamplesHeatmapVis.propTypes = {
   onSampleLabelClick: PropTypes.func,
   sampleDetails: PropTypes.object,
   sampleIds: PropTypes.array,
-  scale: PropTypes.func,
+  scale: PropTypes.string,
   taxonDetails: PropTypes.object,
   taxonIds: PropTypes.array
 };

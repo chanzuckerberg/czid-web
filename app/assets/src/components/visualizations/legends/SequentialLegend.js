@@ -1,4 +1,4 @@
-import { scaleLinear, scaleSequential } from "d3-scale";
+import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
 import { select } from "d3-selection";
 import numberAbbreviate from "number-abbreviate";
@@ -13,7 +13,6 @@ export default class HeatmapLegend {
     this.options = Object.assign(
       {
         numberOfLevels: 10,
-        scale: scaleLinear,
         colors: null,
         height: 35,
         width: container.clientWidth,

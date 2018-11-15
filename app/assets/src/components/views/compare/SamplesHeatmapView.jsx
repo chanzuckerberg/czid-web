@@ -5,7 +5,6 @@ import queryString from "query-string";
 import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
-import symlog from "./symlog.js";
 import Dropdown from "../../ui/controls/dropdowns/Dropdown";
 import ErrorBoundary from "../../ErrorBoundary";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
@@ -58,7 +57,7 @@ class SamplesHeatmapView extends React.Component {
         }),
         thresholdFilters: this.props.thresholdFilters,
         // Client side options
-        scales: [["Log", symlog], ["Lin", d3.scale.linear]],
+        scales: [["Log", "symlog"], ["Lin", "linear"]],
         taxonsPerSample: {
           min: 0,
           max: 100

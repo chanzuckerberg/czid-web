@@ -1,4 +1,4 @@
-const openUrl = (link, event) => {
+const openUrl = link => {
   let openInNewTab = false;
 
   // metakey is CMD in mac

@@ -1,4 +1,4 @@
-import { default as compound } from "./compound";
+import compound from "./compound";
 import d3 from "d3";
 
 function intersection(r1, r2) {

@@ -5,6 +5,7 @@ import { mean } from "lodash/fp";
 import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
 import SvgSaver from "svgsaver";
+import symlog from "../../utils/d3/scales/symlog.js";
 
 export default class Heatmap {
   constructor(container, data, options) {
@@ -17,7 +18,7 @@ export default class Heatmap {
     this.options = Object.assign(
       {
         numberOfLevels: 10,
-        scale: d3.scale.linear,
+        scale: "linear",
         colors: null,
         colorNoValue: "rgb(238, 241, 244)",
         fontSize: "9pt",
@@ -47,7 +48,13 @@ export default class Heatmap {
       );
     }
 
+    this.scaleType = this.getScaleType();
+
     this.processData();
+  }
+
+  getScaleType() {
+    return this.options.scale === "symlog" ? symlog : d3.scale.linear;
   }
 
   processData(start) {
@@ -82,6 +89,7 @@ export default class Heatmap {
 
   updateScale(scale) {
     this.options.scale = scale;
+    this.scaleType = this.getScaleType();
     this.processData("cluster");
   }
 
@@ -239,15 +247,13 @@ export default class Heatmap {
   }
 
   getScale() {
-    return this.options
-      .scale()
+    return this.scaleType()
       .domain([this.limits.min, this.limits.max])
       .range([0, 1]);
   }
 
   getRows() {
     let scale = this.getScale();
-
     // replacing null with zeros
     // might be space-inneficient if the matrix is too sparse
     // alternative is to create a distance function that supports nulls
@@ -267,7 +273,6 @@ export default class Heatmap {
 
   getColumns() {
     let scale = this.getScale();
-
     let columns = [];
     for (let i = 0; i < this.columnLabels.length; i++) {
       for (let j = 0; j < this.rowLabels.length; j++) {
@@ -284,9 +289,8 @@ export default class Heatmap {
   }
 
   sortTree(root) {
-    let scale = this.getScale();
-
     if (!root) return;
+    let scale = this.getScale();
     let stack = [];
     while (true) {
       while (root) {
@@ -392,8 +396,7 @@ export default class Heatmap {
         });
     };
 
-    let colorScale = this.options
-      .scale()
+    let colorScale = this.scaleType()
       .domain([this.limits.min, this.limits.max])
       .range([0, this.options.colors.length - 1]);
 
