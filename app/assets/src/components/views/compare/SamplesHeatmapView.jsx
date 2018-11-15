@@ -6,7 +6,6 @@ import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
 import symlog from "./symlog.js";
-import DownloadButton from "../../ui/controls/buttons/DownloadButton";
 import Dropdown from "../../ui/controls/dropdowns/Dropdown";
 import ErrorBoundary from "../../ErrorBoundary";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
@@ -23,6 +22,7 @@ import { min, max } from "lodash/fp";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
 import Divider from "../../layout/Divider.jsx";
 import cs from "./samples_heatmap_view.scss";
+import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown.jsx";
 
 class SamplesHeatmapView extends React.Component {
   constructor(props) {
@@ -89,20 +89,11 @@ class SamplesHeatmapView extends React.Component {
     );
     this.lastRequestToken = null;
 
-    this.optionsChanged = false;
-
-    // Note: copies references of nested objects
-    this.appliedOptions = Object.assign({}, this.state.selectedOptions);
-
-    this.dataGetters = {};
-    this.dataAccessorKeys = {};
-    for (let metric of this.state.availableOptions.metrics) {
-      this.dataGetters[metric.value] = this.makeDataGetter(metric.value);
-      this.dataAccessorKeys[metric.value] = metric.value.split(".");
-    }
+    this.heatmapVis = React.createRef();
 
     this.handleRemoveTaxon = this.handleRemoveTaxon.bind(this);
     this.handleSampleLabelClick = this.handleSampleLabelClick.bind(this);
+    this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.onShareClick = this.onShareClick.bind(this);
     this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
     this.onThresholdFilterApply = this.onThresholdFilterApply.bind(this);
@@ -149,7 +140,7 @@ class SamplesHeatmapView extends React.Component {
 
   downloadCurrentViewDataURL() {
     let url = new URL("/samples/download_heatmap", window.origin);
-    return `${url.toString()}?${this.prepareParams()}`;
+    location.href = `${url.toString()}?${this.prepareParams()}`;
   }
 
   getUrlForCurrentParams() {
@@ -159,20 +150,6 @@ class SamplesHeatmapView extends React.Component {
 
   onShareClick() {
     copy(this.getUrlForCurrentParams());
-  }
-
-  getDataProperty(data, property) {
-    let keys = this.dataAccessorKeys[property];
-    return data[keys[0]][keys[1]];
-  }
-
-  makeDataGetter(metric) {
-    return function(row, col) {
-      let taxon = this.getTaxonFor(row, col);
-      if (taxon) {
-        return this.getDataProperty(taxon, metric);
-      }
-    }.bind(this);
   }
 
   metricToSortField(metric) {
@@ -333,6 +310,7 @@ class SamplesHeatmapView extends React.Component {
     return (
       <ErrorBoundary>
         <SamplesHeatmapVis
+          ref={this.heatmapVis}
           sampleIds={this.state.sampleIds}
           sampleDetails={this.state.sampleDetails}
           taxonIds={this.state.taxonIds}
@@ -365,7 +343,6 @@ class SamplesHeatmapView extends React.Component {
       return;
     }
 
-    this.optionsChanged = true;
     this.setSelectedOptionsState({ metric }, this.updateHeatmap);
   };
 
@@ -388,7 +365,6 @@ class SamplesHeatmapView extends React.Component {
       return;
     }
 
-    this.optionsChanged = true;
     this.setSelectedOptionsState(
       { thresholdFilters: filters },
       this.updateHeatmap
@@ -411,7 +387,6 @@ class SamplesHeatmapView extends React.Component {
       return;
     }
 
-    this.optionsChanged = true;
     this.setSelectedOptionsState({ species: taxonLevel }, this.updateHeatmap);
   };
 
@@ -465,7 +440,6 @@ class SamplesHeatmapView extends React.Component {
 
   updateHeatmap() {
     this.fetchDataFromServer();
-    this.optionsChanged = false;
   }
 
   getUrlParams() {
@@ -479,7 +453,6 @@ class SamplesHeatmapView extends React.Component {
   }
 
   onCategoryChange = (categories, subcategories) => {
-    this.optionsChanged = true;
     this.setSelectedOptionsState(
       { categories, subcategories },
       this.updateHeatmap
@@ -516,7 +489,6 @@ class SamplesHeatmapView extends React.Component {
       return;
     }
 
-    this.optionsChanged = true;
     this.setSelectedOptionsState({ background }, this.updateHeatmap);
   };
 
@@ -541,7 +513,6 @@ class SamplesHeatmapView extends React.Component {
   }
 
   onTaxonsPerSampleEnd(newValue) {
-    this.optionsChanged = true;
     this.setSelectedOptionsState(
       { taxonsPerSample: newValue },
       this.updateHeatmap
@@ -566,7 +537,6 @@ class SamplesHeatmapView extends React.Component {
       return;
     }
 
-    this.optionsChanged = true;
     this.setSelectedOptionsState(
       { readSpecificity: specificity },
       this.updateHeatmap
@@ -620,7 +590,25 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
+  handleDownloadClick(fileType) {
+    switch (fileType) {
+      case "svg":
+        this.heatmapVis.current.download();
+        break;
+      case "csv":
+        this.downloadCurrentViewDataURL();
+        break;
+      default:
+        break;
+    }
+  }
+
   render() {
+    let downloadOptions = [
+      { text: "Download CSV", value: "csv" },
+      { text: "Download SVG", value: "svg" }
+    ];
+
     return (
       <div className={cs.heatmap}>
         <div>
@@ -636,16 +624,20 @@ class SamplesHeatmapView extends React.Component {
             <ViewHeader.Controls>
               <Popup
                 trigger={
-                  <PrimaryButton text="Share" onClick={this.onShareClick} />
+                  <PrimaryButton
+                    text="Share"
+                    onClick={this.onShareClick}
+                    className={cs.controlElement}
+                  />
                 }
                 content="A shareable URL has been copied to your clipboard!"
                 on="click"
                 hideOnScroll
               />
-              <DownloadButton
-                onClick={() => {
-                  location.href = this.downloadCurrentViewDataURL();
-                }}
+              <DownloadButtonDropdown
+                className={cs.controlElement}
+                options={downloadOptions}
+                onClick={this.handleDownloadClick}
                 disabled={!this.state.data}
               />
             </ViewHeader.Controls>

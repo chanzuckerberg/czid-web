@@ -3,6 +3,7 @@ import Heatmap from "../../visualizations/heatmap/Heatmap";
 import PropTypes from "prop-types";
 import React from "react";
 import { openUrl } from "../../utils/links";
+import SvgSaver from "svgsaver";
 
 class SamplesHeatmapVis extends React.Component {
   constructor(props) {
@@ -69,6 +70,10 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({ nodeHover: node });
   }
 
+  download() {
+    this.heatmap.download();
+  }
+
   getTooltipData() {
     let node = this.state.nodeHover;
     let sampleId = this.props.sampleIds[node.columnIndex];
@@ -122,6 +127,7 @@ class SamplesHeatmapVis extends React.Component {
           }}
         />
         <div
+          id="heatmap"
           className="samples-heatmap-vis__tooltip"
           ref={tooltip => {
             this.tooltipContainer = tooltip;

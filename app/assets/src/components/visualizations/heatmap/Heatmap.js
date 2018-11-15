@@ -4,13 +4,15 @@ import Cluster from "clusterfck";
 import { mean } from "lodash/fp";
 import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
+import SvgSaver from "svgsaver";
 
-export default class NewHeatmap {
+export default class Heatmap {
   constructor(container, data, options) {
     this.svg = null;
     this.g = null;
-    this.container = container;
+    this.container = d3.select(container);
     this.data = data;
+    this.svgSaver = new SvgSaver();
 
     this.options = Object.assign(
       {
@@ -144,10 +146,11 @@ export default class NewHeatmap {
 
   setupContainers() {
     this.tooltipContainer = d3.select(this.options.tooltipContainer);
-    this.svg = d3
-      .select(this.container)
+    this.svg = this.container
       .append("svg")
-      .attr("class", "heatmap");
+      .attr("class", "heatmap")
+      .attr("id", "visualization")
+      .attr("xmlns", "http://www.w3.org/2000/svg");
 
     this.g = this.svg.append("g");
     this.gRowLabels = this.g.append("g").attr("class", "row-labels");
@@ -357,6 +360,10 @@ export default class NewHeatmap {
 
   range(n) {
     return Array.apply(null, { length: n }).map(Number.call, Number);
+  }
+
+  download() {
+    this.svgSaver.asSvg(this.svg.node(), "heatmap.svg");
   }
 
   removeRow(row) {
