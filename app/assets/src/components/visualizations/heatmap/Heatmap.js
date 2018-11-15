@@ -458,6 +458,10 @@ export default class NewHeatmap {
   }
 
   renderRowLabels() {
+    let applyFormat = nodes => {
+      nodes.attr("transform", d => `translate(0, ${d.pos * this.cell.height})`);
+    };
+
     let rowLabel = this.gRowLabels
       .selectAll(".row-label")
       .data(this.filteredRowLabels, d => d.label);
@@ -469,21 +473,26 @@ export default class NewHeatmap {
       .style("opacity", 0)
       .remove();
 
-    let rowLabelEnter = rowLabel.enter();
-    let rowLabelGroup = rowLabelEnter
+    let rowLabelUpdate = rowLabel
+      .transition()
+      .duration(this.options.transitionDuration);
+    applyFormat(rowLabelUpdate);
+
+    let rowLabelEnter = rowLabel
+      .enter()
       .append("g")
       .attr("class", "row-label")
       .on("mousein", this.options.onRowLabelMouseIn)
       .on("mouseout", this.options.onRowLabelMouseOut);
 
-    rowLabelGroup
+    rowLabelEnter
       .append("rect")
       .attr("class", "hover-target")
       .attr("width", this.rowLabelsWidth)
       .attr("height", this.cell.height)
       .style("text-anchor", "end");
 
-    rowLabelGroup
+    rowLabelEnter
       .append("text")
       .text(d => d.label)
       .attr(
@@ -500,7 +509,7 @@ export default class NewHeatmap {
           this.options.onRowLabelClick(d.label, d3.event)
       );
 
-    rowLabelGroup
+    rowLabelEnter
       .append("text")
       .attr("class", "remove-icon mono")
       .text("X")
@@ -508,23 +517,31 @@ export default class NewHeatmap {
       .style("dominant-baseline", "central")
       .on("click", this.removeRow.bind(this));
 
-    rowLabel
-      .transition()
-      .duration(this.options.transitionDuration)
-      .attr("transform", d => `translate(0, ${d.pos * this.cell.height})`);
+    applyFormat(rowLabelEnter);
   }
 
   renderColumnLabels() {
+    let applyFormat = nodes => {
+      nodes.attr("transform", d => {
+        return `translate(${d.pos * this.cell.width},-${this.options.spacing})`;
+      });
+    };
+
     let columnLabel = this.gColumnLabels
       .selectAll(".column-label")
       .data(this.columnLabels, d => d.label);
 
-    let columnLabelEnter = columnLabel.enter();
-    let columnLabelGroup = columnLabelEnter
+    let columnLabelUpdate = columnLabel
+      .transition()
+      .duration(this.options.transitionDuration);
+    applyFormat(columnLabelUpdate);
+
+    let columnLabelEnter = columnLabel
+      .enter()
       .append("g")
       .attr("class", "column-label");
 
-    columnLabelGroup
+    columnLabelEnter
       .append("text")
       .text(d => d.label)
       .style("text-anchor", "left")
@@ -543,12 +560,7 @@ export default class NewHeatmap {
           this.options.onColumnLabelClick(d.label, d3.event)
       );
 
-    columnLabel
-      .transition()
-      .duration(this.options.transitionDuration)
-      .attr("transform", d => {
-        return `translate(${d.pos * this.cell.width},-${this.options.spacing})`;
-      });
+    applyFormat(columnLabelEnter);
   }
 
   // Dendograms

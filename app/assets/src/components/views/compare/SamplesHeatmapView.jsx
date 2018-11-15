@@ -146,9 +146,13 @@ class SamplesHeatmapView extends React.Component {
     return `${url.toString()}?${this.prepareParams()}`;
   }
 
-  onShareClick() {
+  getUrlForCurrentParams() {
     let url = new URL(location.pathname, window.origin);
-    copy(`${url.toString()}?${this.prepareParams()}`);
+    return `${url.toString()}?${this.prepareParams()}`;
+  }
+
+  onShareClick() {
+    copy(this.getUrlForCurrentParams());
   }
 
   getDataProperty(data, property) {
@@ -197,6 +201,7 @@ class SamplesHeatmapView extends React.Component {
       .then(response => {
         let newState = this.extractData(response.data);
         newState.loading = false;
+        window.history.replaceState("", "", this.getUrlForCurrentParams());
         this.setState(newState);
       })
       .catch(thrown => {
@@ -258,7 +263,7 @@ class SamplesHeatmapView extends React.Component {
 
   renderLoading() {
     return (
-      <p className="loading-indicator text-center">
+      <p className={cs.loadingIndicator}>
         <i className="fa fa-spinner fa-pulse fa-fw" />
         Loading for {this.state.sampleIds.length} samples...
       </p>

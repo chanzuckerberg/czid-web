@@ -18,15 +18,15 @@ class SamplesHeatmapVis extends React.Component {
     this.handleNodeHover = this.handleNodeHover.bind(this);
 
     // TODO: yet another metric name conversion to remove
-    this.metricLabels = {
-      "NT.aggregatescore": "Score",
-      "NT.zscore": "NT Z Score",
-      "NT.rpm": "NT rPM",
-      "NT.r": "NT r (total reads)",
-      "NR.zscore": "NR Z Score",
-      "NR.rpm": "NR rPM",
-      "NR.r": "NR r (total reads)"
-    };
+    this.metrics = [
+      { key: "NT.aggregatescore", label: "Score" },
+      { key: "NT.zscore", label: "NT Z Score" },
+      { key: "NT.rpm", label: "NT rPM" },
+      { key: "NT.r", label: "NT r (total reads)" },
+      { key: "NR.zscore", label: "NR Z Score" },
+      { key: "NR.rpm", label: "NR rPM" },
+      { key: "NR.r", label: "NR r (total reads)" }
+    ];
 
     this.handleSampleLabelClick = this.handleSampleLabelClick.bind(this);
     this.handleCellClick = this.handleCellClick.bind(this);
@@ -76,18 +76,22 @@ class SamplesHeatmapVis extends React.Component {
     let taxonId = this.props.taxonIds[node.rowIndex];
     let sampleDetails = this.props.sampleDetails[sampleId];
     let taxonDetails = this.props.taxonDetails[taxonId];
-    let values = Object.keys(this.props.data)
-      .filter(
-        metric => this.props.data[metric][node.rowIndex][node.columnIndex]
-      )
-      .map(metric => {
-        let data = this.props.data[metric];
-        let value = data[node.rowIndex][node.columnIndex].toFixed(0);
+
+    let nodeHasData = this.metrics.some(
+      metric => !!this.props.data[metric.key][node.rowIndex][node.columnIndex]
+    );
+
+    let values = null;
+    if (nodeHasData) {
+      values = this.metrics.map(metric => {
+        let data = this.props.data[metric.key];
+        let value = (data[node.rowIndex][node.columnIndex] || 0).toFixed(0);
         return [
-          this.metricLabels[metric],
-          metric === this.props.metric ? <b>{value}</b> : value
+          metric.label,
+          metric.key === this.props.metric ? <b>{value}</b> : value
         ];
       });
+    }
 
     return [
       {
@@ -100,7 +104,7 @@ class SamplesHeatmapVis extends React.Component {
       },
       {
         name: "Values",
-        data: values.length ? values : [["", "Taxon not found in Sample"]]
+        data: nodeHasData ? values : [["", "Taxon not found in Sample"]]
       }
     ];
   }
