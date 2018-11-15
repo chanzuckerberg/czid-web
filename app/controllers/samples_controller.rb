@@ -15,7 +15,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
-                  :contigs_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
+                  :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
@@ -493,7 +493,8 @@ class SamplesController < ApplicationController
   end
 
   def contigs_fasta
-    contigs_fasta_s3_path = @sample.contigs_fasta_s3_path
+    pr = select_pipeline_run(@sample, params)
+    contigs_fasta_s3_path = pr.contigs_fasta_s3_path
 
     if contigs_fasta_s3_path
       @contigs_fasta = get_s3_file(contigs_fasta_s3_path)
@@ -501,6 +502,20 @@ class SamplesController < ApplicationController
     else
       render json: {
         error: "contigs fasta file does not exist for this sample"
+      }
+    end
+  end
+
+  def contigs_summary
+    pr = select_pipeline_run(@sample, params)
+    contigs_summary_s3_path = pr.contigs_summary_s3_path
+
+    if contigs_summary_s3_path
+      @contigs_summary = get_s3_file(contigs_summary_s3_path)
+      send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'
+    else
+      render json: {
+        error: "contigs summary file does not exist for this sample"
       }
     end
   end

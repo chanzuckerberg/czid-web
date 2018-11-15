@@ -91,6 +91,7 @@ ActiveRecord::Schema.define(version: 20_181_113_172_609) do
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "lineage_json"
     t.index ["pipeline_run_id", "name"], name: "index_contigs_on_pipeline_run_id_and_name", unique: true
     t.index ["pipeline_run_id", "read_count"], name: "index_contigs_on_pipeline_run_id_and_read_count"
   end
