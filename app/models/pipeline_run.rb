@@ -50,6 +50,7 @@ class PipelineRun < ApplicationRecord
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
+  ASSEMBLY_PIPELINE_VERSION = 3.1
   MIN_CONTIG_SIZE = 4
 
   # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
@@ -363,11 +364,11 @@ class PipelineRun < ApplicationRecord
   end
 
   def contigs_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if pipeline_version && pipeline_version.to_f >= 3.1
+    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
   end
 
   def contigs_summary_s3_path
-    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if pipeline_version && pipeline_version.to_f >= 3.1
+    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
   end
 
   def get_lineage_json(ct2taxid, taxon_lineage_map)
@@ -419,7 +420,7 @@ class PipelineRun < ApplicationRecord
                                  tax_level: tax_entry['tax_level'],
                                  contig_name: contig_name,
                                  count: count }
-        if tax_entry['tax_level'].to_i == 1 # species
+        if tax_entry['tax_level'].to_i == TaxonCount:: TAX_LEVEL_SPECIES # species
           contig2taxid[contig_name] ||= {}
           contig2taxid[contig_name][tax_entry['count_type']] = tax_entry['taxid']
         end
@@ -535,13 +536,13 @@ class PipelineRun < ApplicationRecord
     when "amr_counts"
       "#{expt_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
     when "taxon_counts"
-      if pipeline_version && pipeline_version.to_f >= 3.1
+      if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
         "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
       else
         "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
       end
     when "taxon_byteranges"
-      if pipeline_version && pipeline_version.to_f >= 3.1
+      if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
         "#{postprocess_output_s3_path}/#{REFINED_TAXID_BYTERANGE_JSON_NAME}"
       else
         "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
@@ -1041,7 +1042,7 @@ class PipelineRun < ApplicationRecord
 
   def s3_paths_for_taxon_byteranges
     file_prefix = ''
-    file_prefix = Sample::ASSEMBLY_PREFIX if pipeline_version && pipeline_version.to_f >= 3.1
+    file_prefix = Sample::ASSEMBLY_PREFIX if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
     # by tax_level and hit_type
     { TaxonCount::TAX_LEVEL_SPECIES => {
       'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA}",
