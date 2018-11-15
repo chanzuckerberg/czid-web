@@ -12,7 +12,6 @@ import dateutil.parser
 from operator import itemgetter
 from functools import wraps
 
-SCALING_ENVIRONMENTS = ["staging", "prod"] # as opposed to 'development'
 DEBUG = False
 
 ## EXPLANATION OF STATE TRANSITIONS FOR GSNAP/RAPSEARCH MACHINES
@@ -270,34 +269,47 @@ def get_asg_list():
     asg_list = json.loads(asg_json).get('AutoScalingGroups', [])
     return asg_list
 
+def required_capacity(num_jobs):
+    if num_jobs == 0:
+        required_capacity = exactly(0)
+    elif self.num_jobs == 1:
+        # Often a test job or automatic benchmark job
+        required_capacity = exactly(4)
+    elif 1 < self.num_jobs <= 6:
+        required_capacity = exactly(8)
+    else:
+        required_capacity = at_least(24)
+    return required_capacity
+
 def autoscaling_update(my_num_jobs, my_environment="development",
                        max_job_dispatch_lag_seconds=900, job_tag_prefix="RunningIDseqBatchJob_",
                        job_tag_keep_alive_seconds=600, draining_tag="draining"):
-    if my_environment not in SCALING_ENVIRONMENTS:
-        return
-    print "{my_num_jobs} jobs are in progress.".format(my_num_jobs=my_num_jobs)
     asg_list = get_asg_list()
     tag_list = get_tag_list()
     gsnap_ASG = ASG(...)
-    if not gsnap_ASG.can_scale:
+    rapsearch_ASG = ASG(...)
+    if not (gsnap_ASG.can_scale && rapsearch_ASG.can_scale):
         print "Scaling by agents of {my_environment} is not permitted.".format(my_environment=my_environment)
-        # when debugging is enabled and we can't scale we print the scaling commands without executing them
-        # when debugging is disabled and we can't scale we exit early here
-        if not DEBUG:
-            return
-    print "Required capacity for GSNAP ASG: " + gsnap_ASG.determine_required_capacity()
-    gsnap_ASG.set_desired_capacity()
+        return
 
-    check_draining_servers(gsnap_asg, gsnap_tags, draining_tag, job_tag_prefix, job_tag_expiration, min_draining_wait, can_scale)
-    check_draining_servers(rapsearch2_asg, rapsearch_tags, draining_tag, job_tag_prefix, job_tag_expiration, min_draining_wait, can_scale)
+    print "{my_num_jobs} jobs are in progress.".format(my_num_jobs=my_num_jobs)
+    compute_num_instances = required_capacity(my_num_jobs)
+    for service_ASG in [gsnap_ASG, rapsearch_ASG]:
+        num_healthy = service_ASG.num_healthy_instances()
+        num_desired = service_ASG.num_desired_instances()
+        if num_desired < num_healthy:
+            service_ASG.start_draining(num_healthy - num_desired)
+        elif num_desired > num_healthy:
+            service_ASG.stop_draining(num_desired - num_healthy)
+        service_ASG.set_desired_capacity()
+        service_ASG.cleanup_draining_servers()
 
 class ASG(object):
-    def __init__(self, service, environment, num_jobs, aws_describe_all_asgs, aws_describe_all_tags, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds):
+    def __init__(self, service, environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds):
         self.service = service
         self.environment = environment
-        self.num_jobs = num_jobs
-        self.aws_describe_all_asgs = aws_describe_all_asgs
-        self.aws_describe_all_tags = aws_describe_all_tags
+        self.asg_list = asg_list
+        self.tag_list = tag_list
         self.draining_tag = draining_tag
         self.job_tag_prefix = job_tag_prefix
         self.max_job_dispatch_lag_seconds = max_job_dispatch_lag_seconds
@@ -335,7 +347,7 @@ class ASG(object):
 
      def find_asg(self):
          matching = []
-         for asg in self.aws_describe_all_asgs:
+         for asg in self.asg_list:
              if asg['AutoScalingGroupName'].startswith(self.instance_name):
                  matching.append(asg)
          assert len(matching) == 1
@@ -349,18 +361,6 @@ class ASG(object):
 
     def find_tags(self):
         return [tag for tag in self.tag_list if tag["ResourceId"] in self.instance_ids]
-
-    def determine_required_capacity(self):
-        if self.num_jobs == 0:
-            self.required_capacity = exactly(0)
-        elif self.num_jobs == 1:
-            # Often a test job or automatic benchmark job
-            self.required_capacity = exactly(4)
-        elif 1 < self.num_jobs <= 6:
-            self.required_capacity = exactly(8)
-        else:
-            self.required_capacity = at_least(24)
-        return self.required_capacity
 
     def set_desired_capacity(self):
         asg_name = self.asg['AutoScalingGroupName']
