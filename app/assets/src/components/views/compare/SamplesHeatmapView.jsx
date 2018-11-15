@@ -166,7 +166,6 @@ class SamplesHeatmapView extends React.Component {
   }
 
   metricToSortField(metric) {
-    // TODO: change into a json object - requires server changes
     let fields = metric.split(".");
     let countType = fields[0].toLowerCase();
     let metricName = fields[1].toLowerCase();
