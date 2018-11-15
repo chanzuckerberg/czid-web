@@ -17,8 +17,6 @@ class SequentialLegendVis extends React.Component {
     this.legend.update();
   }
 
-  componentDidUpdate() {}
-
   render() {
     return (
       <div>

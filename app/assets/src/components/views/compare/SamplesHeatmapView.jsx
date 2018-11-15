@@ -88,8 +88,6 @@ class SamplesHeatmapView extends React.Component {
     );
     this.lastRequestToken = null;
 
-    this.heatmapVis = React.createRef();
-
     this.handleRemoveTaxon = this.handleRemoveTaxon.bind(this);
     this.handleSampleLabelClick = this.handleSampleLabelClick.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
@@ -309,7 +307,9 @@ class SamplesHeatmapView extends React.Component {
     return (
       <ErrorBoundary>
         <SamplesHeatmapVis
-          ref={this.heatmapVis}
+          ref={vis => {
+            this.heatmapVis = vis;
+          }}
           sampleIds={this.state.sampleIds}
           sampleDetails={this.state.sampleDetails}
           taxonIds={this.state.taxonIds}
@@ -592,7 +592,7 @@ class SamplesHeatmapView extends React.Component {
   handleDownloadClick(fileType) {
     switch (fileType) {
       case "svg":
-        this.heatmapVis.current.download();
+        this.heatmapVis.download();
         break;
       case "csv":
         this.downloadCurrentViewDataURL();
