@@ -41,13 +41,13 @@ class SampleDetailsSidebar extends React.Component {
   };
 
   componentDidMount() {
-    if (this.props.sample.id) {
+    if (this.props.sampleId) {
       this.fetchMetadata();
     }
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.sample.id !== prevProps.sample.id) {
+    if (this.props.sampleId !== prevProps.sampleId) {
       this.fetchMetadata();
     }
   }
@@ -59,19 +59,18 @@ class SampleDetailsSidebar extends React.Component {
       pipelineInfo: null
     });
 
-    if (!this.props.sample.id) {
+    if (!this.props.sampleId) {
       return;
     }
 
     // Metadata Types currently doesn't change, so only need to fetch it once.
     let metadata = null;
     let metadataTypes = null;
-
     if (this.state.metadataTypes) {
-      metadata = await getSampleMetadata(this.props.sample.id);
+      metadata = await getSampleMetadata(this.props.sampleId);
     } else {
       [metadata, metadataTypes] = await Promise.all([
-        getSampleMetadata(this.props.sample.id),
+        getSampleMetadata(this.props.sampleId),
         getMetadataTypes()
       ]);
     }
@@ -106,7 +105,7 @@ class SampleDetailsSidebar extends React.Component {
     });
 
     if (shouldSave) {
-      this._save(this.props.sample.id, key, value);
+      this._save(this.props.sampleId, key, value);
     }
   };
 
@@ -124,7 +123,7 @@ class SampleDetailsSidebar extends React.Component {
       });
 
       this._save(
-        this.props.sample.id,
+        this.props.sampleId,
         key,
         key === "name" || key === "notes"
           ? this.state.additionalInfo[key]
@@ -143,7 +142,7 @@ class SampleDetailsSidebar extends React.Component {
     } else if (key === "notes") {
       await saveSampleNotes(id, value);
     } else {
-      await saveSampleMetadata(this.props.sample.id, key, value);
+      await saveSampleMetadata(this.props.sampleId, key, value);
     }
 
     this.setState({
@@ -182,7 +181,7 @@ class SampleDetailsSidebar extends React.Component {
           erccComparison={additionalInfo.ercc_comparison}
           pipelineRun={pipelineRun}
           assembledTaxIds={additionalInfo.assembled_taxids}
-          sampleId={this.props.sample.id}
+          sampleId={this.props.sampleId}
         />
       );
     }
@@ -201,7 +200,7 @@ class SampleDetailsSidebar extends React.Component {
   };
 
   render() {
-    const { visible } = this.props;
+    const { visible, showReportLink, sampleId } = this.props;
     const { metadata, metadataTypes, additionalInfo } = this.state;
 
     const loading = !metadata || !metadataTypes;
@@ -215,6 +214,12 @@ class SampleDetailsSidebar extends React.Component {
           ) : (
             <div className={cs.title}>{additionalInfo.name}</div>
           )}
+          {!loading &&
+            showReportLink && (
+              <div className={cs.reportLink}>
+                <a href={`/samples/${sampleId}`}>See Report</a>
+              </div>
+            )}
           {!loading && (
             <Tabs
               className={cs.tabs}
@@ -233,8 +238,9 @@ class SampleDetailsSidebar extends React.Component {
 SampleDetailsSidebar.propTypes = {
   visible: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
-  sample: PropTypes.Sample.isRequired,
-  onNameUpdate: PropTypes.func
+  sampleId: PropTypes.number,
+  onNameUpdate: PropTypes.func,
+  showReportLink: PropTypes.bool
 };
 
 export default SampleDetailsSidebar;
