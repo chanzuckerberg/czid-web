@@ -61,7 +61,10 @@ class MetadataSection extends React.Component {
     } = this.props;
     return (
       <div className={cx(cs.metadataSection, className)}>
-        <div className={cs.header} onClick={onToggle}>
+        <div
+          className={cx(cs.header, toggleable && cs.toggleable)}
+          onClick={onToggle}
+        >
           <div className={cs.title}>{title}</div>
           {editable &&
             (editing ? (
@@ -115,7 +118,7 @@ MetadataSection.propTypes = {
   title: PropTypes.string,
   open: PropTypes.bool,
   toggleable: PropTypes.bool,
-  onToggle: PropTypes.func.isRequired,
+  onToggle: PropTypes.func,
   editable: PropTypes.bool,
   editing: PropTypes.bool,
   onEditToggle: PropTypes.func,

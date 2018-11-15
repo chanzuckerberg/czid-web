@@ -1125,6 +1125,49 @@ class PipelineRun < ApplicationRecord
     ret
   end
 
+  def outputs_by_step(user_owns_sample = false)
+    # Get map of s3 path to presigned URL and size.
+    filename_to_info = {}
+    sample.results_folder_files.each do |entry|
+      filename_to_info[entry[:key]] = entry
+    end
+    # Get outputs and descriptions by target.
+    result = {}
+    pipeline_run_stages.each_with_index do |prs, stage_idx|
+      next unless prs.dag_json
+      dag_dict = JSON.parse(prs.dag_json)
+      output_dir_s3_key = dag_dict["output_dir_s3"].chomp("/").split("/", 4)[3] # keep everything after bucket name, except trailing '/'
+      targets = dag_dict["targets"]
+      given_targets = dag_dict["given_targets"]
+      num_steps = targets.length
+      targets.each_with_index do |(target_name, output_list), step_idx|
+        next if given_targets.keys.include?(target_name)
+        file_info = []
+        output_list.each do |output|
+          file_info_for_output = filename_to_info["#{output_dir_s3_key}/#{pipeline_version}/#{output}"]
+          next unless file_info_for_output
+          if !user_owns_sample && stage_idx.zero? && step_idx < num_steps - 1
+            # Delete URLs for all host-filtering outputs but the last, unless user uploaded the sample.
+            file_info_for_output["url"] = nil
+          end
+          file_info << file_info_for_output
+        end
+        if file_info.present?
+          result[target_name] = {
+            "step_description" => STEP_DESCRIPTIONS[target_name],
+            "file_list" => file_info
+          }
+        end
+      end
+    end
+    # Get read counts (host filtering steps only)
+    job_stats.each do |js|
+      target_name = js.task
+      result[target_name]["reads_after"] = js.reads_after if result.keys.include?(target_name)
+    end
+    result
+  end
+
   def self.viewable(user)
     where(sample_id: Sample.viewable(user).pluck(:id))
   end

@@ -22,7 +22,7 @@
     th {
       color: $darkest-grey;
     }
-    tr {
+    tr.file-link {
       cursor: pointer;
       td {
         color: $darkest-grey;
@@ -30,6 +30,9 @@
           color: $primary-light;
         }
       }
+    }
+    tr.disabled-file-link {
+      color: $medium-grey;
     }
     i.fa-file {
       margin-right: 15px;

@@ -9,6 +9,14 @@ import MetadataSection from "./MetadataSection";
 import { METADATA_SECTIONS, SAMPLE_ADDITIONAL_INFO } from "./constants";
 import cs from "./sample_details_sidebar.scss";
 
+const renderMetadataValue = val => {
+  return val === undefined || val === null || val === "" ? (
+    <div className={cs.emptyValue}>--</div>
+  ) : (
+    <div className={cs.metadataValue}>{val}</div>
+  );
+};
+
 class MetadataTab extends React.Component {
   state = {
     sectionOpen: {
@@ -83,14 +91,9 @@ class MetadataTab extends React.Component {
     );
   };
 
-  renderMetadataValue = metadataType => {
+  renderMetadataType = metadataType => {
     const { metadata } = this.props;
-    const val = metadata[metadataType.key];
-    return val === undefined || val === null || val === "" ? (
-      <div className={cs.emptyValue}>--</div>
-    ) : (
-      <div className={cs.metadataValue}>{val}</div>
-    );
+    return renderMetadataValue(metadata[metadataType.key]);
   };
 
   renderMetadataSectionContent = section => {
@@ -122,9 +125,7 @@ class MetadataTab extends React.Component {
                   {additionalInfo[info.key]}
                 </a>
               ) : (
-                <div className={cs.metadataValue}>
-                  {additionalInfo[info.key]}
-                </div>
+                renderMetadataValue(additionalInfo[info.key])
               )}
             </div>
           ))}
@@ -147,7 +148,7 @@ class MetadataTab extends React.Component {
             <div className={cs.label}>{metadataTypes[key].name}</div>
             {isSectionEditing
               ? this.renderInput(metadataTypes[key])
-              : this.renderMetadataValue(metadataTypes[key])}
+              : this.renderMetadataType(metadataTypes[key])}
           </div>
         ))}
       </div>
@@ -155,18 +156,12 @@ class MetadataTab extends React.Component {
   };
 
   render() {
-    const { metadata } = this.props;
-
-    if (!metadata) {
-      return <div className={cs.loadingMsg}>Loading...</div>;
-    }
-
     return (
       <div>
         {METADATA_SECTIONS.map(section => (
           <MetadataSection
             key={section.name}
-            editable
+            editable={this.props.additionalInfo.editable}
             toggleable
             onToggle={() => this.toggleSection(section)}
             open={this.state.sectionOpen[section.name]}
@@ -186,17 +181,19 @@ class MetadataTab extends React.Component {
 MetadataTab.propTypes = {
   metadata: PropTypes.objectOf(
     PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-  ),
-  metadataTypes: PropTypes.objectOf(PropTypes.MetadataType),
+  ).isRequired,
+  metadataTypes: PropTypes.objectOf(PropTypes.MetadataType).isRequired,
   onMetadataChange: PropTypes.func.isRequired,
   onMetadataSave: PropTypes.func.isRequired,
   savePending: PropTypes.bool,
   additionalInfo: PropTypes.shape({
-    name: PropTypes.string,
-    project_name: PropTypes.string,
+    name: PropTypes.string.isRequired,
+    project_id: PropTypes.number.isRequired,
+    project_name: PropTypes.string.isRequired,
     upload_date: PropTypes.string,
-    host_genome_name: PropTypes.string
-  })
+    host_genome_name: PropTypes.string,
+    editable: PropTypes.bool
+  }).isRequired
 };
 
 export default MetadataTab;

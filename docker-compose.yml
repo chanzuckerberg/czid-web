@@ -65,6 +65,7 @@ services:
       - ./log:/app/log
       - ./tmp:/app/tmp
       - ./db:/app/db
+      - ./coverage:/app/coverage
       - ~/.aws:/root/.aws:ro
       - ~/.aws/cli/cache:/root/.aws/cli/cache
     ports:

@@ -16,13 +16,19 @@ class NotesTab extends React.Component {
   };
 
   render() {
-    const { notes, onNoteChange, onNoteSave, savePending } = this.props;
+    const {
+      notes,
+      onNoteChange,
+      onNoteSave,
+      savePending,
+      editable
+    } = this.props;
 
     const notesEmpty = !notes || notes.length === 0;
 
     return (
       <MetadataSection
-        editable
+        editable={editable}
         onEditToggle={() => this.toggleEditing()}
         editing={this.state.editing}
         title="Notes"
@@ -53,6 +59,7 @@ class NotesTab extends React.Component {
 
 NotesTab.propTypes = {
   notes: PropTypes.string,
+  editable: PropTypes.bool,
   onNoteChange: PropTypes.func.isRequired,
   onNoteSave: PropTypes.func.isRequired,
   savePending: PropTypes.bool

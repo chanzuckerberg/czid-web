@@ -871,7 +871,7 @@ class SampleUpload extends React.Component {
                 </div>
                 <div className="example-link">
                   Example:
-                  s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz
+                  s3://your_s3_bucket/project1/fastqs/sample075_water_S23_R1_001.fastq.gz
                 </div>
               </div>
             </div>
@@ -907,7 +907,7 @@ class SampleUpload extends React.Component {
                 </div>
                 <div className="example-link">
                   Example:
-                  s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R2_001.fastq.gz
+                  s3://your_s3_bucket/project1/fastqs/sample075_water_S23_R2_001.fastq.gz
                 </div>
               </div>
             </div>
@@ -938,9 +938,9 @@ class SampleUpload extends React.Component {
           </div>
           <div>
             - Also convert links like
-            "https://s3-us-west-2.amazonaws.com/czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz"
+            "https://s3-us-west-2.amazonaws.com/your_s3_bucket/project1/fastqs/sample075_water_S23_R2_001.fastq.gz"
             to the format
-            "s3://czbiohub-infectious-disease/RR004/RR004_water_2_S23/RR004_water_2_S23_R1_001.fastq.gz"
+            "s3://your_s3_bucket/project1/fastqs/sample075_water_S23_R2_001.fastq.gz"
           </div>
         </div>
       </div>

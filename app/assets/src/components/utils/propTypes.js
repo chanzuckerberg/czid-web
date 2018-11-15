@@ -33,7 +33,7 @@ const Taxon = PropTypes.shape({
   topScoring: PropTypes.number
 });
 
-// TODO(mark): Complete signature as more fields of ReportDetails are used in the app.
+// TODO(mark): Expand signature as more fields of ReportDetails are used in the app.
 const ReportDetails = PropTypes.shape({
   taxon_fasta_flag: PropTypes.bool.isRequired
 });
@@ -43,7 +43,7 @@ const BackgroundData = PropTypes.shape({
   name: PropTypes.string
 });
 
-// TODO(mark): Complete signature as more fields of Sample are used in the app.
+// TODO(mark): Expand signature as more fields of Sample are used in the app.
 const Sample = PropTypes.shape({
   id: PropTypes.number.isRequired
 });
@@ -62,6 +62,15 @@ const ERCCComparison = PropTypes.arrayOf(
   })
 );
 
+// TODO(mark): Expand signature as more fields of PipelineRun are used in the app.
+const PipelineRun = PropTypes.shape({
+  pipeline_version: PropTypes.string,
+  assembled: PropTypes.number,
+  total_ercc_reads: PropTypes.number,
+  total_reads: PropTypes.number,
+  adjusted_remaining_reads: PropTypes.number
+});
+
 export default {
   ReportDetails,
   Taxon,
@@ -69,5 +78,6 @@ export default {
   Sample,
   MetadataType,
   ERCCComparison,
+  PipelineRun,
   ...PropTypes
 };

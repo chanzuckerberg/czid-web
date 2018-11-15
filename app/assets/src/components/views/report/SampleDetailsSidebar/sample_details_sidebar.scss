@@ -6,7 +6,8 @@
   position: relative;
 }
 
-.title {
+.title,
+.loadingMsg {
   font-size: $font-size-h4;
   font-weight: $font-weight-semibold;
   margin: 0 10px;
@@ -18,7 +19,7 @@
 
 .closeIcon {
   position: absolute;
-  right: 20px;
+  right: 40px;
   top: 30px;
   opacity: 0.3;
   width: 20px;
@@ -70,10 +71,40 @@
   }
 }
 
+.reportLink {
+  margin: 5px 10px;
+
+  a {
+    /* overwrite header.scss */
+    color: $primary-light !important;
+
+    &:hover {
+      /* overwrite header.scss */
+      opacity: 0.5;
+    }
+  }
+}
+
 .erccScatterplotSection {
   .graphContainer {
     margin-top: 20px;
     margin-right: 10px;
+  }
+}
+
+.downloadSectionContent {
+  padding-top: 5px;
+
+  .downloadLink {
+    padding: 5px 10px;
+    display: block;
+    margin: 5px 0;
+    /* overwrite header.scss */
+    color: $primary-light !important;
+
+    &:hover {
+      opacity: 0.5;
+    }
   }
 }
 
