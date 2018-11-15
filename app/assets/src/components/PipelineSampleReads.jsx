@@ -828,6 +828,12 @@ class PipelineSampleReads extends React.Component {
           visible={assembled}
         />
         <ResultButton
+          url={`/samples/${this.sampleInfo.id}/contigs_summary`}
+          icon="fa-cloud-download"
+          label="Contigs Summary"
+          visible={assembled}
+        />
+        <ResultButton
           url={`/samples/${this.sampleInfo.id}/unidentified_fasta`}
           icon="fa-cloud-download"
           label="Unmapped Reads"

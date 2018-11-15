@@ -329,13 +329,12 @@ class PipelineRun < ApplicationRecord
     contig_stats_json = JSON.parse(File.read(downloaded_contig_stats))
     return if contig_stats_json.empty?
 
-    update(assembled: 1)
     contig_fasta = PipelineRun.download_file_with_retries(contig_s3_path, LOCAL_JSON_PATH, 3)
     contig_array = []
     taxid_list = []
     contig2taxid.values.each { |entry| taxid_list += entry.values }
     taxon_lineage_map = {}
-    TaxonLineage.where(taxid: taxid_list.uniq).each { |t| taxon_lineage_map[t.taxid.to_i] = t.to_a }
+    TaxonLineage.where(taxid: taxid_list.uniq).order(:id).each { |t| taxon_lineage_map[t.taxid.to_i] = t.to_a }
 
     File.open(contig_fasta, 'r') do |cf|
       line = cf.gets
@@ -357,8 +356,18 @@ class PipelineRun < ApplicationRecord
       lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
       contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
     end
+    contigs.destroy_all
     update(contigs_attributes: contig_array) unless contig_array.empty?
     generate_contig_mapping_table
+    update(assembled: 1)
+  end
+
+  def contigs_fasta_s3_path
+    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if pipeline_version && pipeline_version.to_f >= 3.1
+  end
+
+  def contigs_summary_s3_path
+    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if pipeline_version && pipeline_version.to_f >= 3.1
   end
 
   def get_lineage_json(ct2taxid, taxon_lineage_map)
@@ -375,9 +384,9 @@ class PipelineRun < ApplicationRecord
 
   def generate_contig_mapping_table
     # generate a csv file for contig mapping based on lineage_json
-    local_file_name = "#{LOCAL_JSON_PATH}/#{CONTIG_MAPPING_NAME}"
+    local_file_name = "#{LOCAL_JSON_PATH}/#{CONTIG_MAPPING_NAME}#{id}"
     Open3.capture3("mkdir -p #{File.dirname(local_file_name)}")
-    s3_file_name = "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}"
+    s3_file_name = contigs_summary_s3_path
     CSV.open(local_file_name, 'w') do |writer|
       header_row = ['contig_name', 'read_count']
       header_row += TaxonLineage.names_a.map { |name| "NT.#{name}" }
@@ -416,6 +425,7 @@ class PipelineRun < ApplicationRecord
         end
       end
     end
+    contig_counts.destroy_all
     update(contig_counts_attributes: contig_counts_array) unless contig_counts_array.empty?
     db_load_contigs(contig2taxid)
   end

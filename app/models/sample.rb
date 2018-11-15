@@ -294,11 +294,6 @@ class Sample < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/expt"
   end
 
-  def contigs_fasta_s3_path
-    pr = pipeline_runs.first
-    return "#{pr.postprocess_output_s3_path}/#{PipelineRun::ASSEMBLED_CONTIGS_NAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 3.1
-  end
-
   def annotated_fasta_s3_path
     pr = pipeline_runs.first
     return "#{pr.postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 3.1
