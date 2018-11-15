@@ -4,19 +4,24 @@ import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
 import cx from "classnames";
+import { get } from "lodash/fp";
 import { Divider, Dropdown, Popup } from "semantic-ui-react";
-import DownloadButton from "./ui/controls/buttons/DownloadButton";
 import numberWithCommas from "../helpers/strings";
 import { pipelineHasAssembly } from "./utils/sample";
 import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
 import AMRView from "./AMRView";
 import BasicPopup from "./BasicPopup";
+import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import SampleDetailsSidebar from "./views/report/SampleDetailsSidebar";
 import { SAMPLE_FIELDS } from "./utils/SampleFields";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import ViewHeader from "./layout/ViewHeader";
 import cs from "./pipeline_sample_reads.scss";
+import {
+  getDownloadDropdownOptions,
+  getLinkInfoForDownloadOption
+} from "./views/report/utils/download";
 
 class PipelineSampleReads extends React.Component {
   constructor(props) {
@@ -418,6 +423,17 @@ class PipelineSampleReads extends React.Component {
     $("select").material_select();
   }
 
+  handleDownload = option => {
+    if (option === "download_csv") {
+      this.downloadCSV();
+      return;
+    }
+    const linkInfo = getLinkInfoForDownloadOption(option, this.sampleInfo.id);
+    if (linkInfo) {
+      window.open(linkInfo.path, linkInfo.newPage ? "_blank" : "_self");
+    }
+  };
+
   handleDropdownChange(field, position, element) {
     const parent = $(element.target).parent();
     const value = this.DROPDOWN_OPTIONS[field][position];
@@ -532,7 +548,7 @@ class PipelineSampleReads extends React.Component {
     const warnings = [];
 
     if (
-      this.reportPresent &&
+      !this.pipelineInProgress() &&
       pipelineHasAssembly(this.pipelineRun) &&
       this.pipelineRun.assembled !== 1
     ) {
@@ -573,7 +589,7 @@ class PipelineSampleReads extends React.Component {
     return (
       <div className="row last-row">
         <div className="col s12">
-          <div className="content-title">ERCC Spike In Counts</div>
+          <div className="content-title">ERCC Spike-In Counts</div>
           <ERCCScatterPlot
             ercc_comparison={this.props.ercc_comparison}
             width={720}
@@ -860,12 +876,22 @@ class PipelineSampleReads extends React.Component {
 
     let report_buttons = null;
     if (this.reportPresent) {
+      const downloadOptions = [
+        {
+          text: "Download Report Table (.csv)",
+          value: "download_csv"
+        },
+        ...getDownloadDropdownOptions(
+          this.pipelineRun,
+          get("assembled_taxids", this.reportDetails)
+        )
+      ];
+
       report_buttons = (
-        <Popup
-          trigger={<DownloadButton onClick={this.downloadCSV} />}
-          content="Download Table as CSV"
-          inverted
-          on="hover"
+        <DownloadButtonDropdown
+          options={downloadOptions}
+          onClick={this.handleDownload}
+          direction="left"
         />
       );
     } else if (this.sampleInfo.status === "created" || !this.reportPresent) {

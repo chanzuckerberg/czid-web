@@ -1,26 +1,26 @@
 import { Icon } from "semantic-ui-react";
+import { forbidExtraProps } from "airbnb-prop-types";
 import ButtonDropdown from "./ButtonDropdown";
 import PropTypes from "prop-types";
 import React from "react";
 
-const DownloadButtonDropdown = ({ disabled, options, onClick }) => {
+const DownloadButtonDropdown = props => {
   return (
     <ButtonDropdown
+      {...props}
       secondary
       fluid
-      options={options}
-      disabled={disabled}
       text="Download"
-      onClick={onClick}
       icon={<Icon size="large" className={"cloud download alternate"} />}
     />
   );
 };
 
-DownloadButtonDropdown.propTypes = {
+DownloadButtonDropdown.propTypes = forbidExtraProps({
   disabled: PropTypes.bool,
   options: PropTypes.array,
-  onClick: PropTypes.func
-};
+  onClick: PropTypes.func,
+  direction: PropTypes.oneOf(["left", "right"])
+});
 
 export default DownloadButtonDropdown;

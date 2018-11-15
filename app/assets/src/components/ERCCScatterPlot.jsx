@@ -6,15 +6,17 @@ import cs from "./ercc_scatterplot.scss";
 class ERCCScatterPlot extends React.Component {
   render() {
     let data = [];
-    for (let row of this.props.ercc_comparison) {
-      if (row.actual == 0) {
-        continue;
+    if (this.props.ercc_comparison) {
+      for (let row of this.props.ercc_comparison) {
+        if (row.actual == 0) {
+          continue;
+        }
+        data.push({
+          name: row.name,
+          actual: Math.log10(row.actual),
+          expected: Math.log10(row.expected)
+        });
       }
-      data.push({
-        name: row.name,
-        actual: Math.log10(row.actual),
-        expected: Math.log10(row.expected)
-      });
     }
 
     if (!data.length) {
@@ -28,7 +30,7 @@ class ERCCScatterPlot extends React.Component {
         yKey="actual"
         width={this.props.width}
         height={this.props.height}
-        xLabel="log10 spike in concetrations"
+        xLabel="log10 spike-in concentrations"
         yLabel="log10 read-pairs per gene"
       />
     );

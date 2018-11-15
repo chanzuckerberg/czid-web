@@ -4,6 +4,7 @@ require 'tempfile'
 require 'aws-sdk'
 
 class Sample < ApplicationRecord
+  include TestHelper
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
@@ -169,7 +170,8 @@ class Sample < ApplicationRecord
   end
 
   def list_outputs(s3_path, display_prefix = 1, delimiter = "/")
-    prefix = s3_path.split("#{Sample::SAMPLES_BUCKET_NAME}/")[1]
+    return TEST_RESULT_FOLDER if Rails.env == "test"
+    prefix = s3_path.split("#{SAMPLES_BUCKET_NAME}/")[1]
     file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
                                        prefix: "#{prefix}/",
                                        delimiter: delimiter)
@@ -190,7 +192,8 @@ class Sample < ApplicationRecord
     if pr.pipeline_version.to_f >= 2.0
       file_list = list_outputs(pr.output_s3_path_with_version)
       file_list += list_outputs(sample_output_s3_path)
-      file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLY_DIR, 2)
+      file_list += list_outputs(pr.postprocess_output_s3_path)
+      file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLY_DIR)
     else
       stage1_files = list_outputs(pr.host_filter_output_s3_path)
       stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
