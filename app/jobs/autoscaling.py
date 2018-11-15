@@ -295,14 +295,42 @@ def autoscaling_update(my_num_jobs, my_environment="development",
     print "{my_num_jobs} jobs are in progress.".format(my_num_jobs=my_num_jobs)
     compute_num_instances = required_capacity(my_num_jobs)
     for service_ASG in [gsnap_ASG, rapsearch_ASG]:
-        num_healthy = service_ASG.num_healthy_instances()
         num_desired = service_ASG.num_desired_instances()
-        if num_desired < num_healthy:
-            service_ASG.start_draining(num_healthy - num_desired)
-        elif num_desired > num_healthy:
-            service_ASG.stop_draining(num_desired - num_healthy)
-        service_ASG.set_desired_capacity()
-        service_ASG.cleanup_draining_servers()
+        healthy_instances = service_ASG.healthy_instances()
+        draining_instances = service_ASG.draining_instances()
+        terminating_instances = service_ASG.terminating_instances()
+
+        print "--- Analyzing the {instance_name} ASG ---".format(instance_name=service_ASG.instance_name)
+        print "CURRENTLY:"
+        print "The desired capacity is {num_desired}.".format(num_desired=num_desired)
+        print "There are {num_healthy} healthy instances: {healthy_instances}.".format(num_healthy=len(healthy_instances), healthy_instances=healthy_instances)
+        print "There are {num_draining} draining instances: {draining_instances}.".format(num_draining=len(draining_instances), draining_instances=draining_instances)
+        print "There are {num_terminating} terminating instances: {terminating_instances}.".format(num_terminating=len(terminating_instances), terminating_instances=terminating_instances)
+
+        print "MOVING FORWARD:"
+        new_num_desired = compute_num_instances(num_desired)
+        print "The desired capacity needs to be {new_num_desired}.".format(new_num_desired=new_num_desired)
+        service_ASG.set_desired_capacity(new_num_desired)
+
+        print "HEALTHY <--> DRAINING transitions:"
+        if new_num_desired < num_healthy:
+            num_to_drain = num_healthy - new_num_desired
+            instances_to_drain = service_ASG.start_draining(num_to_drain)
+            print "{num_to_drain} instances need to be drained: {instances_to_drain}.".format(num_to_drain=num_to_drain, instances_to_drain=instances_to_drain)
+        elif new_num_desired > num_healthy:
+            num_to_rescue = new_num_desired - num_healthy
+            instances_to_rescue = service_ASG.stop_draining(num_to_rescue)
+            print "{num_to_rescue} instances need to stop draining: {instances_to_rescue}.".format(num_to_rescue=num_to_rescue, instances_to_rescue=instances_to_rescue)
+        else:
+           "No instances need to make a HEALTHY <--> DRAINING transition."
+
+        print "DRAINING --> TERMINATING transitions:"
+        instances_to_terminate = service_ASG.cleanup_draining_servers()
+        num_to_terminate = len(num_to_terminate)
+        if num_to_terminate > 0:
+            "{num_to_terminate} instances have finished draining and can be terminated: {instances_to_terminate}.".format(num_to_terminate=num_to_terminate, instances_to_terminate=instances_to_terminate)
+        else:
+            "There are no instances that need to move from draining to terminating state."
 
 class ASG(object):
     def __init__(self, service, environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds):
