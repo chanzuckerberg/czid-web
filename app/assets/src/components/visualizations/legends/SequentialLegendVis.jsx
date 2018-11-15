@@ -1,5 +1,6 @@
 import React from "react";
 import SequentialLegend from "./SequentialLegend";
+import PropTypes from "prop-types";
 
 class SequentialLegendVis extends React.Component {
   constructor(props) {
@@ -31,5 +32,11 @@ class SequentialLegendVis extends React.Component {
     );
   }
 }
+
+SequentialLegendVis.propTypes = {
+  max: PropTypes.number,
+  min: PropTypes.number,
+  scale: PropTypes.func
+};
 
 export default SequentialLegendVis;

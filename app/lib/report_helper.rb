@@ -452,6 +452,7 @@ module ReportHelper
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
       result_hash[pipeline_run_id]["taxon_counts"] << row
     end
+
     result_hash
   end
 

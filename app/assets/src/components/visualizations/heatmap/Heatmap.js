@@ -614,9 +614,10 @@ export default class NewHeatmap {
         return 1;
       });
 
-    let diagonal = d =>
-      `M${d.source.y},${d.source.x}V${d.target.x}H${d.target.y}`;
-    let roundedDiagonal = d => {
+    let diagonal = (d, useRectEdges) => {
+      if (useRectEdges)
+        return `M${d.source.y},${d.source.x}V${d.target.x}H${d.target.y}`;
+
       let radius = 4;
       let dir = (d.source.x - d.target.x) / Math.abs(d.source.x - d.target.x);
       return `M${d.source.y},${d.source.x}
@@ -675,7 +676,7 @@ export default class NewHeatmap {
     links
       .append("path")
       .attr("class", "link-path")
-      .attr("d", roundedDiagonal);
+      .attr("d", diagonal);
 
     links
       .append("rect")

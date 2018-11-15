@@ -641,7 +641,6 @@ class SamplesController < ApplicationController
   def sample_taxons_dict(params)
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
     num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
-    Rails.logger.debug(params[:removedTaxonIds])
     removed_taxon_ids = (params[:removedTaxonIds] || []).map do |x|
       begin
         Integer(x)
@@ -669,11 +668,6 @@ class SamplesController < ApplicationController
     background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
 
     taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
-
-    Rails.logger.debug("taxon_ids")
-    Rails.logger.debug(taxon_ids)
-    Rails.logger.debug("removed_taxon_ids")
-    Rails.logger.debug(removed_taxon_ids)
     taxon_ids -= removed_taxon_ids
     return {} if taxon_ids.empty?
 

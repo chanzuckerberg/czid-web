@@ -1,6 +1,7 @@
-import React from "react";
-import Heatmap from "../../visualizations/heatmap/NewHeatmap";
 import DataTooltip from "../../ui/containers/DataTooltip";
+import Heatmap from "../../visualizations/heatmap/Heatmap";
+import PropTypes from "prop-types";
+import React from "react";
 import { openUrl } from "../../utils/links";
 
 class SamplesHeatmapVis extends React.Component {
@@ -133,5 +134,16 @@ class SamplesHeatmapVis extends React.Component {
     );
   }
 }
+
+SamplesHeatmapVis.propTypes = {
+  data: PropTypes.object,
+  metric: PropTypes.string,
+  onRemoveTaxon: PropTypes.func,
+  sampleDetails: PropTypes.object,
+  sampleIds: PropTypes.array,
+  scale: PropTypes.func,
+  taxonDetails: PropTypes.object,
+  taxonIds: PropTypes.array
+};
 
 export default SamplesHeatmapVis;
