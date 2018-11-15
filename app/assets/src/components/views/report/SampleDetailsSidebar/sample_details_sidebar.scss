@@ -6,7 +6,8 @@
   position: relative;
 }
 
-.title {
+.title,
+.loadingMsg {
   font-size: $font-size-h4;
   font-weight: $font-weight-semibold;
   margin: 0 10px;

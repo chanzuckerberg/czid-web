@@ -548,7 +548,7 @@ class PipelineSampleReads extends React.Component {
     const warnings = [];
 
     if (
-      this.reportPresent &&
+      !this.pipelineInProgress() &&
       pipelineHasAssembly(this.pipelineRun) &&
       this.pipelineRun.assembled !== 1
     ) {

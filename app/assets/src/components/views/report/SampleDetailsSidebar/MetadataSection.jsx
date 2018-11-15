@@ -118,7 +118,7 @@ MetadataSection.propTypes = {
   title: PropTypes.string,
   open: PropTypes.bool,
   toggleable: PropTypes.bool,
-  onToggle: PropTypes.func.isRequired,
+  onToggle: PropTypes.func,
   editable: PropTypes.bool,
   editing: PropTypes.bool,
   onEditToggle: PropTypes.func,

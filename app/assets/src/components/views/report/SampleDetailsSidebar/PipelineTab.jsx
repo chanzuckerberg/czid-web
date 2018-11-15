@@ -115,11 +115,11 @@ class PipelineTab extends React.Component {
 }
 
 PipelineTab.propTypes = {
-  pipelineInfo: PropTypes.objectOf(PropTypes.string),
+  pipelineInfo: PropTypes.objectOf(PropTypes.string).isRequired,
+  sampleId: PropTypes.number.isRequired,
   erccComparison: PropTypes.ERCCComparison,
   pipelineRun: PropTypes.PipelineRun,
-  assembledTaxIds: PropTypes.arrayOf(PropTypes.string),
-  sampleId: PropTypes.number
+  assembledTaxIds: PropTypes.arrayOf(PropTypes.string)
 };
 
 export default PipelineTab;
