@@ -1,11 +1,34 @@
 import React from "react";
 import Heatmap from "../../visualizations/heatmap/NewHeatmap";
+import DataTooltip from "../../ui/containers/DataTooltip";
+import { openUrl } from "../../utils/links";
 
 class SamplesHeatmapVis extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      nodeHover: null
+    };
+
     this.heatmap = null;
+    this.scale = this.props.scale;
+
+    this.handleNodeHover = this.handleNodeHover.bind(this);
+
+    // TODO: yet another metric name conversion to remove
+    this.metricLabels = {
+      "NT.aggregatescore": "Score",
+      "NT.zscore": "NT Z Score",
+      "NT.rpm": "NT rPM",
+      "NT.r": "NT r (total reads)",
+      "NR.zscore": "NR Z Score",
+      "NR.rpm": "NR rPM",
+      "NR.r": "NR r (total reads)"
+    };
+
+    this.handleSampleLabelClick = this.handleSampleLabelClick.bind(this);
+    this.handleCellClick = this.handleCellClick.bind(this);
   }
 
   componentDidMount() {
@@ -17,10 +40,21 @@ class SamplesHeatmapVis extends React.Component {
         values: this.props.data[this.props.metric]
       },
       {
-        scale: this.props.scale
+        scale: this.props.scale,
+        tooltipContainer: this.tooltipContainer,
+        onNodeHover: this.handleNodeHover,
+        onRemoveRow: this.props.onRemoveTaxon,
+        onColumnLabelClick: this.handleSampleLabelClick,
+        onCellClick: this.handleCellClick
       }
     );
-    this.heatmap.update();
+  }
+
+  componentDidUpdate() {
+    if (this.props.scale !== this.scale) {
+      this.scale = this.props.scale;
+      this.heatmap.updateScale(this.props.scale);
+    }
   }
 
   extractSampleLabels() {
@@ -31,23 +65,52 @@ class SamplesHeatmapVis extends React.Component {
     return this.props.taxonIds.map(id => this.props.taxonDetails[id].name);
   }
 
-  renderHeatmap() {
-    <div>Heatmap goes here...</div>;
-    // return <Heatmap
-    //   colTree={this.clusteredSamples.tree}
-    //   rowTree={this.clusteredTaxons.tree}
-    //   rows={this.state.taxons.names.length}
-    //   columns={this.state.data.length}
-    //   getRowLabel={this.getRowLabel}
-    //   getColumnLabel={this.getColumnLabel}
-    //   getCellValue={this.dataGetters[this.state.selectedOptions.metric]}
-    //   getTooltip={this.getTooltip}
-    //   onCellClick={this.onCellClick}
-    //   onColumnLabelClick={this.onSampleLabelClick}
-    //   onRemoveRow={this.onRemoveRow}
-    //   scale={this.state.availableOptions.scales[scaleIndex][1]}
-    //   colors={this.colors}
-    //   />
+  handleNodeHover(node) {
+    this.setState({ nodeHover: node });
+  }
+
+  getTooltipData() {
+    let node = this.state.nodeHover;
+    let sampleId = this.props.sampleIds[node.columnIndex];
+    let taxonId = this.props.taxonIds[node.rowIndex];
+    let sampleDetails = this.props.sampleDetails[sampleId];
+    let taxonDetails = this.props.taxonDetails[taxonId];
+    let values = Object.keys(this.props.data)
+      .filter(
+        metric => this.props.data[metric][node.rowIndex][node.columnIndex]
+      )
+      .map(metric => {
+        let value = this.props.data[metric][node.rowIndex][
+          node.columnIndex
+        ].toFixed(0);
+        return [
+          this.metricLabels[metric],
+          metric === this.props.metric ? <b>{value}</b> : value
+        ];
+      });
+
+    return [
+      {
+        name: "Info",
+        data: [
+          ["Sample", sampleDetails.name],
+          ["Taxon", taxonDetails.name],
+          ["Category", taxonDetails.category]
+        ]
+      },
+      {
+        name: "Values",
+        data: values.length ? values : [["", "Taxon not found in Sample"]]
+      }
+    ];
+  }
+
+  handleSampleLabelClick(sampleName, event) {
+    openUrl(`/samples/${this.props.sampleDetails[sampleName].id}`, event);
+  }
+
+  handleCellClick(cell) {
+    openUrl(`/samples/${this.props.sampleIds[cell.columnIndex]}`, event);
   }
 
   render() {
@@ -59,14 +122,14 @@ class SamplesHeatmapVis extends React.Component {
             this.heatmapContainer = container;
           }}
         />
-        {/* <div
+        <div
           className="samples-heatmap-vis__tooltip"
-          ref={tooltip => { 
-            this.treeToheatoltip = tooltip;
+          ref={tooltip => {
+            this.tooltipContainer = tooltip;
           }}
         >
-          {this.renderTooltip()}
-        </div> */}
+          {this.state.nodeHover && <DataTooltip data={this.getTooltipData()} />}
+        </div>
       </div>
     );
   }

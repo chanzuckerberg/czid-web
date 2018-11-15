@@ -1,14 +1,20 @@
 @import "~styles/themes/colors";
-@import "~styles/typography";
 
-.phyloTreeListView {
+.heatmap {
   .viewHeader {
     margin-top: 40px;
     margin-bottom: 40px;
+
+    button {
+      margin-left: 10px;
+    }
   }
 
-  .narrowContainer {
-    max-width: 1280px;
-    margin: 0 auto;
+  .menu {
+    background-color: $white;
+
+    .filterRow {
+      margin: 20px 0;
+    }
   }
 }

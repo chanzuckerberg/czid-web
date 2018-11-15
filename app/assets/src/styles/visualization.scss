@@ -51,21 +51,19 @@
     }
   }
   .sub-menu {
-    padding: 1em;
-    border: 1px solid $lightest-grey;
-    border-width: 1px 0;
+    padding: 10px;
     background: $white;
     margin: 0;
 
-    .s2 {
-      width: auto;
-      min-width: 15%;
-    }
+    // .s2 {
+    //   width: auto;
+    //   min-width: 15%;
+    // }
 
-    .s3 {
-      width: auto;
-      min-width: 20%;
-    }
+    // .s3 {
+    //   width: auto;
+    //   min-width: 20%;
+    // }
   }
   .visualization-content {
     margin-top: 2em;

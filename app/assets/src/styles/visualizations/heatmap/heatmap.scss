@@ -3,7 +3,7 @@
 .heatmap {
   .cells {
     rect.cell {
-      // stroke: $white;
+      cursor: pointer;
 
       &:hover {
         stroke: $primary-light;

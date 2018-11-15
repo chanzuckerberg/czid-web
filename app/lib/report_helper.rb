@@ -452,7 +452,6 @@ module ReportHelper
       row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
       result_hash[pipeline_run_id]["taxon_counts"] << row
     end
-    Rails.logger.debug(result_hash)
     result_hash
   end
 
@@ -461,7 +460,6 @@ module ReportHelper
     parent_ids = fetch_parent_ids(taxon_ids, samples)
     results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
     results = []
-    Rails.logger.debug("results_by_pr: #{results_by_pr}")
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
@@ -484,7 +482,6 @@ module ReportHelper
         taxons: filtered_rows
       }
     end
-    Rails.logger.debug("results: #{results}")
     results
   end
 
