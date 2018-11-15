@@ -1,6 +1,5 @@
 class ProjectsController < ApplicationController
   include ApplicationHelper
-  include AwsHelper
   include SamplesHelper
   include ReportHelper
   ########################################
@@ -100,14 +99,16 @@ class ProjectsController < ApplicationController
 
   def make_project_reports_csv
     user_id = current_user.id
-    safe_s3_rm(@project.report_tar_s3(user_id))
+    Syscall.s3_rm(@project.report_tar_s3(user_id))
     params["user_id"] = user_id
     Resque.enqueue(GenerateProjectReportsCsv, params)
     render json: { status_display: project_reports_progress_message }
   end
 
   def project_reports_csv_status
-    final_complete = `aws s3 ls #{@project.report_tar_s3(current_user.id)} | wc -l`.to_i == 1
+    stdout = Syscall.pipe(["aws", "s3", "ls", @project.report_tar_s3(current_user.id)], ["wc", "-l"])
+    return if stdout.blank?
+    final_complete = stdout.to_i == 1
     if final_complete
       render json: { status_display: "complete" }
       return
@@ -118,20 +119,22 @@ class ProjectsController < ApplicationController
   def send_project_reports_csv
     user_id = current_user.id
     output_file = @project.report_tar(user_id)
-    safe_s3_cp(@project.report_tar_s3(user_id), output_file)
+    Syscall.s3_cp(@project.report_tar_s3(user_id), output_file)
     send_file output_file
   end
 
   def make_host_gene_counts
     user_id = current_user.id
-    safe_s3_rm(@project.host_gene_counts_tar_s3(user_id))
+    Syscall.s3_rm(@project.host_gene_counts_tar_s3(user_id))
     params["user_id"] = user_id
     Resque.enqueue(HostGeneCounts, params)
     render json: { status_display: project_reports_progress_message }
   end
 
   def host_gene_counts_status
-    final_complete = `aws s3 ls #{@project.host_gene_counts_tar_s3(current_user.id)} | wc -l`.to_i == 1
+    stdout = Syscall.pipe(["aws", "s3", "ls", @project.host_gene_counts_tar_s3(current_user.id)], ["wc", "-l"])
+    return if stdout.blank?
+    final_complete = stdout.to_i == 1
     if final_complete
       render json: { status_display: "complete" }
       return
@@ -142,7 +145,7 @@ class ProjectsController < ApplicationController
   def send_host_gene_counts
     user_id = current_user.id
     output_file = @project.host_gene_counts_tar(user_id)
-    safe_s3_cp(@project.host_gene_counts_tar_s3(user_id), output_file)
+    Syscall.s3_cp(@project.host_gene_counts_tar_s3(user_id), output_file)
     send_file output_file
   end
 
@@ -174,6 +177,9 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       if @project.save
+        tags = %W[project_id:#{@project.id} user_id:#{current_user.id}]
+        MetricUtil.put_metric_now("projects.created", 1, tags)
+
         format.html { redirect_to @project, notice: 'Project was successfully created.' }
         format.json { render :show, status: :created, location: @project }
       else

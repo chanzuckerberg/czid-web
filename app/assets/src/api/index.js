@@ -29,4 +29,28 @@ const saveSampleMetadata = (id, field, value) =>
 
 const getMetadataTypes = () => get("/samples/metadata_types");
 
-export { getSampleMetadata, saveSampleMetadata, getMetadataTypes };
+// Save fields on the sample model (NOT sample metadata)
+const saveSampleField = (id, field, value) =>
+  postWithCSRF(`/samples/${id}/save_metadata`, {
+    field,
+    value
+  });
+
+const saveSampleName = (id, name) => saveSampleField(id, "name", name);
+
+const saveSampleNotes = (id, sampleNotes) =>
+  saveSampleField(id, "sample_notes", sampleNotes);
+
+const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
+  get(
+    `/samples/${sampleId}/alignment_viz/${alignmentQuery}.json?pipeline_version=${pipelineVersion}`
+  );
+
+export {
+  getSampleMetadata,
+  saveSampleMetadata,
+  getMetadataTypes,
+  saveSampleName,
+  saveSampleNotes,
+  getAlignmentData
+};

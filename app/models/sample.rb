@@ -4,6 +4,7 @@ require 'tempfile'
 require 'aws-sdk'
 
 class Sample < ApplicationRecord
+  include TestHelper
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
@@ -109,21 +110,20 @@ class Sample < ApplicationRecord
 
   def input_files_checks
     # validate that we have the correct number of input files
-    errors.add(:input_files, "no input files") unless input_files.size.between?(1, 2)
+    errors.add(:input_files, "invalid number") unless input_files.size.between?(1, 2)
     # validate that both input files have the same source_type and file_type
     if input_files.length == 2
-      errors.add(:input_files, "file source type different") unless input_files[0].source_type == input_files[1].source_type
-      errors.add(:input_files, "file formats different") unless input_files[0].file_type == input_files[1].file_type
+      errors.add(:input_files, "have different source types") unless input_files[0].source_type == input_files[1].source_type
+      errors.add(:input_files, "have different file formats") unless input_files[0].file_type == input_files[1].file_type
       if input_files[0].source == input_files[1].source
-        errors.add(:input_files, "read 1 source and read 2 source are identical")
+        errors.add(:input_files, "have identical read 1 source and read 2 source")
       end
     end
-    # TODO: for s3 input types, test permissions before saving, by making a HEAD request
   end
 
   def set_presigned_url_for_local_upload
     input_files.each do |f|
-      if f.source_type == 'local' && f.parts
+      if f.source_type == InputFile::SOURCE_TYPE_LOCAL && f.parts
         # TODO: investigate the content-md5 stuff https://github.com/aws/aws-sdk-js/issues/151 https://gist.github.com/algorist/385616
         parts = f.parts.split(", ")
         presigned_urls = parts.map do |part|
@@ -170,7 +170,8 @@ class Sample < ApplicationRecord
   end
 
   def list_outputs(s3_path, display_prefix = 1, delimiter = "/")
-    prefix = s3_path.split("#{Sample::SAMPLES_BUCKET_NAME}/")[1]
+    return TEST_RESULT_FOLDER if Rails.env == "test"
+    prefix = s3_path.split("#{SAMPLES_BUCKET_NAME}/")[1]
     file_list = S3_CLIENT.list_objects(bucket: SAMPLES_BUCKET_NAME,
                                        prefix: "#{prefix}/",
                                        delimiter: delimiter)
@@ -191,7 +192,8 @@ class Sample < ApplicationRecord
     if pr.pipeline_version.to_f >= 2.0
       file_list = list_outputs(pr.output_s3_path_with_version)
       file_list += list_outputs(sample_output_s3_path)
-      file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLY_DIR, 2)
+      file_list += list_outputs(pr.postprocess_output_s3_path)
+      file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLY_DIR)
     else
       stage1_files = list_outputs(pr.host_filter_output_s3_path)
       stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
@@ -336,7 +338,7 @@ class Sample < ApplicationRecord
     return unless status == STATUS_UPLOADED
     begin
       input_files.each do |f|
-        next unless f.source_type == 'local'
+        next unless f.source_type == InputFile::SOURCE_TYPE_LOCAL
         parts = f.parts.split(", ")
         next unless parts.length > 1
         source_parts = []
@@ -344,12 +346,13 @@ class Sample < ApplicationRecord
         parts.each_with_index do |part, index|
           source_part = File.join("s3://#{SAMPLES_BUCKET_NAME}", File.dirname(f.file_path), File.basename(part))
           source_parts << source_part
-          `aws s3 cp #{source_part} #{local_path}/#{index}`
+          Syscall.run("aws", "s3", "cp", source_part, "#{local_path}/#{index}")
         end
-        `cd #{local_path}; cat * > complete_file; aws s3 cp complete_file s3://#{SAMPLES_BUCKET_NAME}/#{f.file_path}`
-        `rm -rf #{local_path}`
+        Syscall.run_in_dir(local_path, "cat * > complete_file")
+        Syscall.run_in_dir(local_path, "aws", "s3", "cp", "complete_file", "s3://#{SAMPLES_BUCKET_NAME}/#{f.file_path}")
+        Syscall.run("rm", "-rf", local_path)
         source_parts.each do |source_part|
-          `aws s3 rm #{source_part}`
+          Syscall.run("aws", "s3", "rm", source_part)
         end
       end
     rescue
@@ -468,7 +471,9 @@ class Sample < ApplicationRecord
   end
 
   def self.pipeline_commit(branch)
-    `git ls-remote https://github.com/chanzuckerberg/idseq-dag.git | grep refs/heads/#{branch}`.split[0]
+    o = Syscall.pipe(["git", "ls-remote", "https://github.com/chanzuckerberg/idseq-dag.git"], ["grep", "refs/heads/#{branch}"])
+    return false if o.blank?
+    o.split[0]
   end
 
   def kickoff_pipeline

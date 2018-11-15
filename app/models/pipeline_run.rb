@@ -1,5 +1,6 @@
 require 'open3'
 require 'json'
+require 'csv'
 class PipelineRun < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
@@ -33,7 +34,6 @@ class PipelineRun < ApplicationRecord
                         "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta" }.freeze
 
   OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
-  # VERSION_JSON_NAME = 'versions.json'.freeze # TODO: remove this line
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
@@ -45,10 +45,12 @@ class PipelineRun < ApplicationRecord
   ASSEMBLED_CONTIGS_NAME = 'assembly/contigs.fasta'.freeze
   ASSEMBLED_STATS_NAME = 'assembly/contig_stats.json'.freeze
   CONTIG_SUMMARY_JSON_NAME = 'assembly/combined_contig_summary.json'.freeze
+  CONTIG_MAPPING_NAME = 'assembly/contig2taxon_lineage.csv'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
+  ASSEMBLY_PIPELINE_VERSION = 3.1
   MIN_CONTIG_SIZE = 4
 
   # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
@@ -97,7 +99,6 @@ class PipelineRun < ApplicationRecord
 
   LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
-                        "contigs" => "db_load_contigs",
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
                         "amr_counts" => "db_load_amr_counts" }.freeze
@@ -145,6 +146,13 @@ class PipelineRun < ApplicationRecord
   #
   # (RM) transition executed by the Result Monitor
   # (Resque Worker) transition executed by the Resque Worker
+
+  # Constants for alignment chunk scheduling,
+  # shared between idseq-web/app/jobs/autoscaling.py and idseq-dag/idseq_dag/util/server.py:
+  MAX_JOB_DISPATCH_LAG_SECONDS = 900
+  JOB_TAG_PREFIX = "RunningIDseqBatchJob_".freeze
+  JOB_TAG_KEEP_ALIVE_SECONDS = 600
+  DRAINING_TAG = "draining".freeze
 
   before_create :create_output_states, :create_run_stages
 
@@ -197,7 +205,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts contigs contig_counts taxon_byteranges amr_counts]
+    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
 
     # Then, generate output_states
     output_state_entries = []
@@ -297,16 +305,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_ercc_counts
-    # TODO: remove the following. deprecated.
-    # Load version info applicable to host filtering
-    # version_s3_path = "#{host_filter_output_s3_path}/#{VERSION_JSON_NAME}"
-    # self.version = `aws s3 cp #{version_s3_path} -`
-
-    # Load ERCC counts
     ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
     return unless status.exitstatus.zero?
-    ercc_lines = `aws s3 cp #{ercc_s3_path} - | grep 'ERCC' | cut -f1,2`
+    ercc_lines = Syscall.pipe(["aws", "s3", "cp", ercc_s3_path, "-"], ["grep", "ERCC"], ["cut", "-f1,2"])
     ercc_counts_array = []
     ercc_lines.split(/\r?\n/).each do |line|
       fields = line.split("\t")
@@ -319,7 +321,7 @@ class PipelineRun < ApplicationRecord
     update(total_ercc_reads: total_ercc_reads)
   end
 
-  def db_load_contigs
+  def db_load_contigs(contig2taxid)
     contig_stats_s3_path = s3_file_for("contigs")
     contig_s3_path = "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}"
 
@@ -327,9 +329,14 @@ class PipelineRun < ApplicationRecord
                                                                      LOCAL_JSON_PATH, 3)
     contig_stats_json = JSON.parse(File.read(downloaded_contig_stats))
     return if contig_stats_json.empty?
-    update(assembled: 1)
+
     contig_fasta = PipelineRun.download_file_with_retries(contig_s3_path, LOCAL_JSON_PATH, 3)
     contig_array = []
+    taxid_list = []
+    contig2taxid.values.each { |entry| taxid_list += entry.values }
+    taxon_lineage_map = {}
+    TaxonLineage.where(taxid: taxid_list.uniq).order(:id).each { |t| taxon_lineage_map[t.taxid.to_i] = t.to_a }
+
     File.open(contig_fasta, 'r') do |cf|
       line = cf.gets
       header = ''
@@ -337,7 +344,8 @@ class PipelineRun < ApplicationRecord
       while line
         if line[0] == '>'
           read_count = contig_stats_json[header] || 0
-          contig_array << { name: header, sequence: sequence, read_count: read_count } if header != ''
+          lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
+          contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json } if header != ''
           header = line[1..line.size].rstrip
           sequence = ''
         else
@@ -346,9 +354,55 @@ class PipelineRun < ApplicationRecord
         line = cf.gets
       end
       read_count = contig_stats_json[header] || 0
-      contig_array << { name: header, sequence: sequence, read_count: read_count }
+      lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
+      contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
     end
+    contigs.destroy_all
     update(contigs_attributes: contig_array) unless contig_array.empty?
+    generate_contig_mapping_table
+    update(assembled: 1)
+  end
+
+  def contigs_fasta_s3_path
+    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
+  end
+
+  def contigs_summary_s3_path
+    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
+  end
+
+  def get_lineage_json(ct2taxid, taxon_lineage_map)
+    # Get the full lineage based on taxid
+    # Sample output:
+    # {"NT": [573,570,543,91347,1236,1224,-650,2, "Bacteria"],
+    #  "NR": [573,570,543,91347,1236,1224,-650,2, "Bacteria"]}
+    output = {}
+    if ct2taxid
+      ct2taxid.each { |count_type, taxid| output[count_type] = taxon_lineage_map[taxid.to_i] }
+    end
+    output
+  end
+
+  def generate_contig_mapping_table
+    # generate a csv file for contig mapping based on lineage_json
+    local_file_name = "#{LOCAL_JSON_PATH}/#{CONTIG_MAPPING_NAME}#{id}"
+    Open3.capture3("mkdir -p #{File.dirname(local_file_name)}")
+    s3_file_name = contigs_summary_s3_path
+    CSV.open(local_file_name, 'w') do |writer|
+      header_row = ['contig_name', 'read_count']
+      header_row += TaxonLineage.names_a.map { |name| "NT.#{name}" }
+      header_row += TaxonLineage.names_a.map { |name| "NR.#{name}" }
+      writer << header_row
+      contigs.each do |c|
+        lineage = JSON.parse(c.lineage_json)
+        row = [c.name, c.read_count]
+        row += (lineage['NT'] || TaxonLineage.null_array)
+        row += (lineage['NR'] || TaxonLineage.null_array)
+        writer << row
+      end
+    end
+    Open3.capture3("aws s3 cp #{local_file_name} #{s3_file_name}")
+    local_file_name
   end
 
   def db_load_contig_counts
@@ -357,6 +411,7 @@ class PipelineRun < ApplicationRecord
                                                                       LOCAL_JSON_PATH, 3)
     contig_counts_json = JSON.parse(File.read(downloaded_contig_counts))
     contig_counts_array = []
+    contig2taxid = {}
     contig_counts_json.each do |tax_entry|
       contigs = tax_entry["contig_counts"]
       contigs.each do |contig_name, count|
@@ -365,9 +420,15 @@ class PipelineRun < ApplicationRecord
                                  tax_level: tax_entry['tax_level'],
                                  contig_name: contig_name,
                                  count: count }
+        if tax_entry['tax_level'].to_i == TaxonCount:: TAX_LEVEL_SPECIES # species
+          contig2taxid[contig_name] ||= {}
+          contig2taxid[contig_name][tax_entry['count_type']] = tax_entry['taxid']
+        end
       end
     end
+    contig_counts.destroy_all
     update(contig_counts_attributes: contig_counts_array) unless contig_counts_array.empty?
+    db_load_contigs(contig2taxid)
   end
 
   def db_load_amr_counts
@@ -409,10 +470,6 @@ class PipelineRun < ApplicationRecord
     loaded_records = TaxonCount.where(pipeline_run_id: id)
                                .where(count_type: check_count_type).count
     return if loaded_records > 0
-
-    # TODO: remove the following. deprecated.
-    # version_s3_path = "#{alignment_output_s3_path}/#{VERSION_JSON_NAME}"
-    # update(version: `aws s3 cp #{version_s3_path} -`)
 
     # only keep counts at certain taxonomic levels
     taxon_counts_attributes_filtered = []
@@ -465,11 +522,11 @@ class PipelineRun < ApplicationRecord
     downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, local_json_path)
     taxon_byteranges_csv_file = "#{local_json_path}/taxon_byteranges"
     hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
-    ` cd #{local_json_path};
-      sed -e 's/$/,#{id}/' -i taxon_byteranges;
-      mysqlimport --replace --local --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id --fields-terminated-by=',' idseq_#{Rails.env} taxon_byteranges;
-    `
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_byteranges_path}")
+    Syscall.run_in_dir(local_json_path, "sed", "-e", "s/$/,#{id}/", "-i", "taxon_byteranges")
+    Syscall.run_in_dir(local_json_path, "mysqlimport", "--replace", "--local", "--user=$DB_USERNAME", "--host=#{rds_host}",
+                       "--password=$DB_PASSWORD", "--columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id", "--fields-terminated-by=','",
+                       "idseq_#{Rails.env}", "taxon_byteranges")
+    Syscall.run("rm", "-f", downloaded_byteranges_path)
   end
 
   def s3_file_for(output)
@@ -479,13 +536,13 @@ class PipelineRun < ApplicationRecord
     when "amr_counts"
       "#{expt_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
     when "taxon_counts"
-      if pipeline_version && pipeline_version.to_f >= 3.1
+      if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
         "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
       else
         "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
       end
     when "taxon_byteranges"
-      if pipeline_version && pipeline_version.to_f >= 3.1
+      if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
         "#{postprocess_output_s3_path}/#{REFINED_TAXID_BYTERANGE_JSON_NAME}"
       else
         "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
@@ -586,6 +643,10 @@ class PipelineRun < ApplicationRecord
     if all_output_states_terminal?
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
+
+        run_time = Time.current - created_at
+        tags = ["sample_id:#{sample.id}"]
+        MetricUtil.put_metric_now("samples.succeeded.run_time", run_time, tags, "gauge")
       else
         update(results_finalized: FINALIZED_FAIL)
       end
@@ -652,8 +713,11 @@ class PipelineRun < ApplicationRecord
 
   def check_and_log_long_run
     # Check for long-running pipeline runs and log/alert if needed:
+    run_time = Time.current - created_at
+    tags = ["sample_id:#{sample.id}"]
+    MetricUtil.put_metric_now("samples.running.run_time", run_time, tags, "gauge")
+
     if alert_sent.zero?
-      run_time = Time.current - created_at
       threshold = 5.hours
       if run_time > threshold
         duration_hrs = (run_time / 60 / 60).round(2)
@@ -676,7 +740,7 @@ class PipelineRun < ApplicationRecord
     all_counts = []
     stdout.split("\n").each do |line|
       fname = line.split(" ")[3] # Last col in line
-      raw = `aws s3 cp #{res_folder}/#{fname} -`
+      raw = Syscall.run("aws", "s3", "cp", "#{res_folder}/#{fname}", "-")
       contents = JSON.parse(raw)
       # Ex: {"gsnap_filter_out": 194}
       contents.each do |key, count|
@@ -978,7 +1042,7 @@ class PipelineRun < ApplicationRecord
 
   def s3_paths_for_taxon_byteranges
     file_prefix = ''
-    file_prefix = Sample::ASSEMBLY_PREFIX if pipeline_version && pipeline_version.to_f >= 3.1
+    file_prefix = Sample::ASSEMBLY_PREFIX if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
     # by tax_level and hit_type
     { TaxonCount::TAX_LEVEL_SPECIES => {
       'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA}",
@@ -1028,11 +1092,11 @@ class PipelineRun < ApplicationRecord
     contig_names = contig_counts.where("count >= #{min_contig_size}")
                                 .where(taxid: taxid)
                                 .pluck(:contig_name).uniq
-    contigs.where(name: contig_names)
+    contigs.where(name: contig_names).order("read_count DESC")
   end
 
   def get_taxid_list_with_contigs(min_contig_size = MIN_CONTIG_SIZE)
-    contig_counts.where("count >= #{min_contig_size} and taxid > 0").pluck(:taxid).uniq
+    contig_counts.where("count >= #{min_contig_size} and taxid > 0 and contig_name != '*'").pluck(:taxid).uniq
   end
 
   def alignment_output_s3_path
@@ -1059,6 +1123,49 @@ class PipelineRun < ApplicationRecord
       }
     end
     ret
+  end
+
+  def outputs_by_step(user_owns_sample = false)
+    # Get map of s3 path to presigned URL and size.
+    filename_to_info = {}
+    sample.results_folder_files.each do |entry|
+      filename_to_info[entry[:key]] = entry
+    end
+    # Get outputs and descriptions by target.
+    result = {}
+    pipeline_run_stages.each_with_index do |prs, stage_idx|
+      next unless prs.dag_json
+      dag_dict = JSON.parse(prs.dag_json)
+      output_dir_s3_key = dag_dict["output_dir_s3"].chomp("/").split("/", 4)[3] # keep everything after bucket name, except trailing '/'
+      targets = dag_dict["targets"]
+      given_targets = dag_dict["given_targets"]
+      num_steps = targets.length
+      targets.each_with_index do |(target_name, output_list), step_idx|
+        next if given_targets.keys.include?(target_name)
+        file_info = []
+        output_list.each do |output|
+          file_info_for_output = filename_to_info["#{output_dir_s3_key}/#{pipeline_version}/#{output}"]
+          next unless file_info_for_output
+          if !user_owns_sample && stage_idx.zero? && step_idx < num_steps - 1
+            # Delete URLs for all host-filtering outputs but the last, unless user uploaded the sample.
+            file_info_for_output["url"] = nil
+          end
+          file_info << file_info_for_output
+        end
+        if file_info.present?
+          result[target_name] = {
+            "step_description" => STEP_DESCRIPTIONS[target_name],
+            "file_list" => file_info
+          }
+        end
+      end
+    end
+    # Get read counts (host filtering steps only)
+    job_stats.each do |js|
+      target_name = js.task
+      result[target_name]["reads_after"] = js.reads_after if result.keys.include?(target_name)
+    end
+    result
   end
 
   def self.viewable(user)

@@ -90,6 +90,7 @@ expired_sample_run:
   alignment_config: one
 public_sample_run:
   sample: public_sample
+  pipeline_version: '1.0'
   job_id: 'public_sample_job'
   job_status: 'CHECKED'
   total_reads: 1

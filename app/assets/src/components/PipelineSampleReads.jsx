@@ -3,18 +3,25 @@ import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
+import cx from "classnames";
+import { get } from "lodash/fp";
 import { Divider, Dropdown, Popup } from "semantic-ui-react";
-import DownloadButton from "./ui/controls/buttons/DownloadButton";
 import numberWithCommas from "../helpers/strings";
+import { pipelineHasAssembly } from "./utils/sample";
 import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
 import AMRView from "./AMRView";
 import BasicPopup from "./BasicPopup";
+import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import SampleDetailsSidebar from "./views/report/SampleDetailsSidebar";
 import { SAMPLE_FIELDS } from "./utils/SampleFields";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import ViewHeader from "./layout/ViewHeader";
 import cs from "./pipeline_sample_reads.scss";
+import {
+  getDownloadDropdownOptions,
+  getLinkInfoForDownloadOption
+} from "./views/report/utils/download";
 
 class PipelineSampleReads extends React.Component {
   constructor(props) {
@@ -300,9 +307,7 @@ class PipelineSampleReads extends React.Component {
   }
 
   pipelineInProgress() {
-    if (this.pipelineRun === null) {
-      return true;
-    } else if (this.pipelineRun.finalized === 1) {
+    if (this.pipelineRun && this.pipelineRun.finalized === 1) {
       return false;
     }
     return true;
@@ -418,6 +423,17 @@ class PipelineSampleReads extends React.Component {
     $("select").material_select();
   }
 
+  handleDownload = option => {
+    if (option === "download_csv") {
+      this.downloadCSV();
+      return;
+    }
+    const linkInfo = getLinkInfoForDownloadOption(option, this.sampleInfo.id);
+    if (linkInfo) {
+      window.open(linkInfo.path, linkInfo.newPage ? "_blank" : "_self");
+    }
+  };
+
   handleDropdownChange(field, position, element) {
     const parent = $(element.target).parent();
     const value = this.DROPDOWN_OPTIONS[field][position];
@@ -528,6 +544,44 @@ class PipelineSampleReads extends React.Component {
     });
   }
 
+  renderPipelineWarnings = () => {
+    const warnings = [];
+
+    if (
+      !this.pipelineInProgress() &&
+      pipelineHasAssembly(this.pipelineRun) &&
+      this.pipelineRun.assembled !== 1
+    ) {
+      warnings.push("The reads did not assemble for this run.");
+    }
+
+    if (warnings.length > 0) {
+      const content = (
+        <div>
+          {warnings.map(warning => (
+            <div className={cs.warning} key={warning}>
+              {warning}
+            </div>
+          ))}
+        </div>
+      );
+      return (
+        <Popup
+          trigger={
+            <i className={cx("fa fa-exclamation-circle", cs.warningIcon)} />
+          }
+          position="bottom left"
+          content={content}
+          inverted
+          wide="very"
+          horizontalOffset={15}
+        />
+      );
+    } else {
+      return null;
+    }
+  };
+
   renderERCC() {
     if (!this.props.ercc_comparison) {
       return;
@@ -535,8 +589,11 @@ class PipelineSampleReads extends React.Component {
     return (
       <div className="row last-row">
         <div className="col s12">
-          <div className="content-title">ERCC Spike In Counts</div>
-          <ERCCScatterPlot ercc_comparison={this.props.ercc_comparison} />
+          <div className="content-title">ERCC Spike-In Counts</div>
+          <ERCCScatterPlot
+            ercc_comparison={this.props.ercc_comparison}
+            width={720}
+          />
         </div>
       </div>
     );
@@ -767,6 +824,7 @@ class PipelineSampleReads extends React.Component {
     let nonhost_assembly_complete =
       this.reportDetails &&
       this.reportDetails.assembled_taxids.indexOf("all") >= 0;
+    const assembled = this.pipelineRun && this.pipelineRun.assembled === 1;
     let download_section = (
       <div>
         <ResultButton
@@ -774,6 +832,18 @@ class PipelineSampleReads extends React.Component {
           icon="fa-cloud-download"
           label="Non-Host Reads"
           visible={stage2_complete}
+        />
+        <ResultButton
+          url={`/samples/${this.sampleInfo.id}/contigs_fasta`}
+          icon="fa-cloud-download"
+          label="Non-Host Contigs"
+          visible={assembled}
+        />
+        <ResultButton
+          url={`/samples/${this.sampleInfo.id}/contigs_summary`}
+          icon="fa-cloud-download"
+          label="Contigs Summary"
+          visible={assembled}
         />
         <ResultButton
           url={`/samples/${this.sampleInfo.id}/unidentified_fasta`}
@@ -812,12 +882,22 @@ class PipelineSampleReads extends React.Component {
 
     let report_buttons = null;
     if (this.reportPresent) {
+      const downloadOptions = [
+        {
+          text: "Download Report Table (.csv)",
+          value: "download_csv"
+        },
+        ...getDownloadDropdownOptions(
+          this.pipelineRun,
+          get("assembled_taxids", this.reportDetails)
+        )
+      ];
+
       report_buttons = (
-        <Popup
-          trigger={<DownloadButton onClick={this.downloadCSV} />}
-          content="Download Table as CSV"
-          inverted
-          on="hover"
+        <DownloadButtonDropdown
+          options={downloadOptions}
+          onClick={this.handleDownload}
+          direction="left"
         />
       );
     } else if (this.sampleInfo.status === "created" || !this.reportPresent) {
@@ -839,12 +919,27 @@ class PipelineSampleReads extends React.Component {
         <AMRView amr={this.amr} />
       </div>
     ) : null;
+    const multipleTabs = show_amr;
+
+    // Refresh the page every 5 minutes while in progress. Purpose is so that
+    // users with the page open will get some sense of updated status and see
+    // when the report is done.
+    // TODO: Future refactor should convert this to just fetch updated data with
+    // axios so that we don't pay for the full reload. This report load is
+    // currently only going: Rails -> React props.
+    if (this.pipelineInProgress()) {
+      setTimeout(() => {
+        location.reload();
+      }, 300000);
+    }
+
     return (
       <div>
         <ViewHeader className={cs.viewHeader}>
           <ViewHeader.Content>
             <div className={cs.pipelineInfo}>
-              PIPELINE {version_display} {pipeline_version_blurb}
+              PIPELINE {version_display} {pipeline_version_blurb}{" "}
+              {this.renderPipelineWarnings()}
             </div>
             <ViewHeader.Pretitle
               breadcrumbLink={`/home?project_id=${this.projectInfo.id}`}
@@ -860,42 +955,40 @@ class PipelineSampleReads extends React.Component {
                 onClick: () => window.open(`/samples/${sampleId}`, "_self")
               }))}
             />
-            {this.props.admin && (
-              <div className={cs.sampleDetailsLinkContainer}>
-                <span
-                  className={cs.sampleDetailsLink}
-                  onClick={this.toggleSampleDetailsSidebar}
-                >
-                  Sample Details
-                </span>
-              </div>
-            )}
+            <div className={cs.sampleDetailsLinkContainer}>
+              <span
+                className={cs.sampleDetailsLink}
+                onClick={this.toggleSampleDetailsSidebar}
+              >
+                Sample Details
+              </span>
+            </div>
           </ViewHeader.Content>
           <ViewHeader.Controls>{report_buttons}</ViewHeader.Controls>
         </ViewHeader>
 
-        <div className="sub-header-navigation">
-          <div className="nav-content">
-            <ul className="tabs tabs-transparent">
-              <li className="tab">
-                <a href="#reports" className="active">
-                  Report
-                </a>
-              </li>
-              <li className="tab">
-                <a href="#details" className="">
-                  Details
-                </a>
-              </li>
-              {amr_tab}
-            </ul>
+        {multipleTabs && (
+          <div className="sub-header-navigation">
+            <div className="nav-content">
+              <ul className="tabs tabs-transparent">
+                <li className="tab">
+                  <a href="#reports" className="active">
+                    Report
+                  </a>
+                </li>
+                {amr_tab}
+              </ul>
+            </div>
           </div>
-        </div>
-        <Divider className="reports-divider" />
+        )}
+        <Divider
+          className={cx(cs.reportsDivider, multipleTabs && cs.hasTabs)}
+        />
 
         {amr_table}
 
-        <div id="details" className="tab-screen col s12">
+        {/* TODO(mark): Remove all old Sample Details code once new sidebar goes live */}
+        <div id="details" className={cx("tab-screen col s12", cs.detailsTab)}>
           <div className="center">
             <span className="note-action-feedback note-saved-success" />
             <span className="note-action-feedback note-save-failed" />
@@ -1018,13 +1111,12 @@ class PipelineSampleReads extends React.Component {
         >
           {d_report}
         </div>
-        {this.props.admin && (
-          <SampleDetailsSidebar
-            visible={this.state.sampleDetailsSidebarVisible}
-            onClose={this.toggleSampleDetailsSidebar}
-            sample={this.props.sampleInfo}
-          />
-        )}
+        <SampleDetailsSidebar
+          visible={this.state.sampleDetailsSidebarVisible}
+          onClose={this.toggleSampleDetailsSidebar}
+          sampleId={this.sampleId}
+          onNameUpdate={newName => this.setState({ sample_name: newName })}
+        />
       </div>
     );
   }

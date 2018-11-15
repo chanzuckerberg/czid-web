@@ -14,8 +14,9 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
-  EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2].freeze
+  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
+                  :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
+  EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
 
@@ -121,6 +122,11 @@ class SamplesController < ApplicationController
       return
     end
 
+    unless current_user.can_upload(params[:bulk_path])
+      render json: { status: "user is not authorized to upload from s3 url #{params[:bulk_path]}" }, status: :unprocessable_entity
+      return
+    end
+
     @host_genome_id = params[:host_genome_id]
     @bulk_path = params[:bulk_path]
     @samples = parsed_samples_for_s3_path(@bulk_path, @project_id, @host_genome_id)
@@ -155,6 +161,8 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @errors.empty? && !@samples.empty?
+        tags = %W[client:web type:bulk user_id:#{current_user.id}]
+        MetricUtil.put_metric_now("samples.created", @samples.count, tags)
         format.json { render json: { samples: @samples, sample_ids: @samples.pluck(:id) } }
       else
         format.json { render json: { samples: @samples, errors: @errors }, status: :unprocessable_entity }
@@ -171,7 +179,42 @@ class SamplesController < ApplicationController
   # GET /samples/1/metadata
   # GET /samples/1/metadata.json
   def metadata
-    render json: @sample.metadata
+    # Information needed to show the samples metadata sidebar.
+    pr = select_pipeline_run(@sample, params)
+    summary_stats = nil
+    pr_display = nil
+    ercc_comparison = nil
+    assembled_taxids = []
+
+    editable = current_power.updatable_sample?(@sample)
+
+    if pr
+      pr_display = curate_pipeline_run_display(pr)
+      ercc_comparison = pr.compare_ercc_counts
+
+      job_stats_hash = job_stats_get(pr.id)
+      assembled_taxids = JSON.parse(pr.assembled_taxids || "[]")
+      if job_stats_hash.present?
+        summary_stats = get_summary_stats(job_stats_hash, pr)
+      end
+    end
+
+    render json: {
+      metadata: @sample.metadata,
+      additional_info: {
+        name: @sample.name,
+        editable: editable,
+        host_genome_name: @sample.host_genome_name,
+        upload_date: @sample.created_at,
+        project_name: @sample.project.name,
+        project_id: @sample.project_id,
+        notes: @sample.sample_notes,
+        ercc_comparison: ercc_comparison,
+        pipeline_run: pr_display,
+        summary_stats: summary_stats,
+        assembled_taxids: assembled_taxids
+      }
+    }
   end
 
   # POST /samples/1/save_metadata_v2
@@ -253,6 +296,9 @@ class SamplesController < ApplicationController
         @pipeline_run_retriable = true
       end
     end
+
+    tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
+    MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
   def heatmap
@@ -325,6 +371,7 @@ class SamplesController < ApplicationController
 
     # Label top-scoring hits for the executive summary
     @report_info[:topScoringTaxa] = label_top_scoring_taxa!(@report_info[:taxonomy_details][2])
+    @report_info[:contig_taxid_list] = @pipeline_run.get_taxid_list_with_contigs
 
     render json: JSON.dump(@report_info)
   end
@@ -373,13 +420,13 @@ class SamplesController < ApplicationController
   end
 
   def contig_taxid_list
-    pr = @sample.pipeline_runs.first
+    pr = select_pipeline_run(@sample, params)
     render json: pr.get_taxid_list_with_contigs
   end
 
   def taxid_contigs
     taxid = params[:taxid]
-    pr = @sample.pipeline_runs.first
+    pr = select_pipeline_run(@sample, params)
     contigs = pr.get_contigs_for_taxid(taxid)
     output_fasta = ''
     contigs.each { |contig| output_fasta += contig.to_fa }
@@ -445,6 +492,34 @@ class SamplesController < ApplicationController
     end
   end
 
+  def contigs_fasta
+    pr = select_pipeline_run(@sample, params)
+    contigs_fasta_s3_path = pr.contigs_fasta_s3_path
+
+    if contigs_fasta_s3_path
+      @contigs_fasta = get_s3_file(contigs_fasta_s3_path)
+      send_data @contigs_fasta, filename: @sample.name + '_contigs.fasta'
+    else
+      render json: {
+        error: "contigs fasta file does not exist for this sample"
+      }
+    end
+  end
+
+  def contigs_summary
+    pr = select_pipeline_run(@sample, params)
+    contigs_summary_s3_path = pr.contigs_summary_s3_path
+
+    if contigs_summary_s3_path
+      @contigs_summary = get_s3_file(contigs_summary_s3_path)
+      send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'
+    else
+      render json: {
+        error: "contigs summary file does not exist for this sample"
+      }
+    end
+  end
+
   def nonhost_fasta
     @nonhost_fasta = get_s3_file(@sample.annotated_fasta_s3_path)
     send_data @nonhost_fasta, filename: @sample.name + '_nonhost.fasta'
@@ -455,10 +530,24 @@ class SamplesController < ApplicationController
     send_data @unidentified_fasta, filename: @sample.name + '_unidentified.fasta'
   end
 
-  def results_folder
+  def raw_results_folder
     @file_list = @sample.results_folder_files
     @file_path = "#{@sample.sample_path}/results/"
-    render template: "samples/folder"
+    render template: "samples/raw_folder"
+  end
+
+  def results_folder
+    user_owns_sample = (@sample.user_id == current_user.id)
+    @file_list = @sample.pipeline_runs.first.outputs_by_step(user_owns_sample)
+    @file_path = "#{@sample.sample_path}/results/"
+    respond_to do |format|
+      format.html do
+        render template: "samples/folder"
+      end
+      format.json do
+        render json: { displayed_data: @file_list }
+      end
+    end
   end
 
   # GET /samples/new
@@ -515,7 +604,8 @@ class SamplesController < ApplicationController
       host_genome = HostGenome.find_by(name: host_genome_name)
     end
 
-    params[:input_files_attributes].select! { |f| f["source"] != '' && current_user.can_upload(f["source"]) }
+    params[:input_files_attributes].reject! { |f| f["source"] == '' }
+
     @sample = Sample.new(params)
     @sample.project = project if project
     @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
@@ -524,6 +614,12 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @sample.save
+        tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id} client:#{client}]
+        # Currently bulk CLI upload just calls this action repeatedly so we can't
+        # distinguish between bulk or single there. Web bulk goes to bulk_upload.
+        tags << "type:single" if client == "web"
+        MetricUtil.put_metric_now("samples.created", 1, tags)
+
         format.html { redirect_to @sample, notice: 'Sample was successfully created.' }
         format.json { render :show, status: :created, location: @sample }
       else

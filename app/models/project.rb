@@ -61,24 +61,26 @@ class Project < ApplicationRecord
     samples = current_power.project_samples(self)
     output_dir = host_gene_count_dir(user_id)
     work_dir = "#{output_dir}/workdir"
-    `rm -rf #{output_dir}; mkdir -p #{work_dir}`
+    Syscall.run("rm", "-rf", output_dir)
+    Syscall.run("mkdir", "-p", work_dir)
     output_file = host_gene_counts_tar(user_id)
     samples.each do |sample|
       sample_name = "#{sample.name.downcase.gsub(/\W/, '-')}_#{sample.id}"
       _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", "#{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab")
       next unless status.exitstatus.zero?
-      `aws s3 cp #{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab #{work_dir}/#{sample_name}`
+      Syscall.run("aws", "s3", "cp", "#{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab", "#{work_dir}/#{sample_name}")
     end
-    `cd #{work_dir}; tar cvzf #{output_file} .`
-    `aws s3 cp #{output_file} #{host_gene_counts_tar_s3(user_id)}`
-    `rm -rf #{output_dir}`
+    Syscall.run_in_dir(work_dir, "tar", "cvzf", output_file, ".")
+    Syscall.run("aws", "s3", "cp", output_file, host_gene_counts_tar_s3(user_id))
+    Syscall.run("rm", "-rf", output_dir)
   end
 
   def bulk_report_csvs_from_params(params)
     user_id = params["user_id"]
     current_power = Power.new(User.find(user_id))
     user_csv_dir = csv_dir(user_id)
-    `rm -rf #{user_csv_dir}; mkdir -p #{user_csv_dir}`
+    Syscall.run("rm", "-rf", user_csv_dir)
+    Syscall.run("mkdir", "-p", user_csv_dir)
     sample_names_used = []
     current_power.project_samples(self).each do |sample|
       csv_data = report_csv_from_params(sample, params)
@@ -89,9 +91,9 @@ class Project < ApplicationRecord
       filename = "#{user_csv_dir}/#{clean_sample_name}.csv"
       File.write(filename, csv_data)
     end
-    `cd #{user_csv_dir}; tar cvzf #{tar_filename} .`
-    `aws s3 cp #{report_tar(user_id)} #{report_tar_s3(user_id)}`
-    `rm -rf #{user_csv_dir}`
+    Syscall.run_in_dir(user_csv_dir, "tar", "cvzf", tar_filename, ".")
+    Syscall.run("aws", "s3", "cp", report_tar(user_id), report_tar_s3(user_id))
+    Syscall.run("rm", "-rf", user_csv_dir)
   end
 
   def self.editable(user)

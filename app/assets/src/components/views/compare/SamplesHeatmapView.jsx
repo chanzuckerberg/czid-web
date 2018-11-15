@@ -12,6 +12,7 @@ import ErrorBoundary from "../../ErrorBoundary";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
 import MultipleNestedDropdown from "../../ui/controls/dropdowns/MultipleNestedDropdown";
 import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
+import SampleDetailsSidebar from "../report/SampleDetailsSidebar";
 import PropTypes from "prop-types";
 import Slider from "../../ui/controls/Slider";
 import ThresholdFilterDropdown from "../../ui/controls/dropdowns/ThresholdFilterDropdown";
@@ -76,7 +77,11 @@ class SamplesHeatmapView extends React.Component {
         readSpecificity: this.availableOptions.specificityOptions[1].value
       },
       loading: false,
-      sampleIds: this.urlParams.sampleIds || this.props.sampleIds
+      sampleIds: this.urlParams.sampleIds || this.props.sampleIds,
+      // If we made the sidebar visibility depend on sampleId !== null,
+      // there would be a visual flicker when sampleId is set to null as the sidebar closes.
+      selectedSampleId: null,
+      sidebarVisible: false
     };
 
     this.removedTaxonIds = new Set(
@@ -97,6 +102,7 @@ class SamplesHeatmapView extends React.Component {
     }
 
     this.handleRemoveTaxon = this.handleRemoveTaxon.bind(this);
+    this.handleSampleLabelClick = this.handleSampleLabelClick.bind(this);
     this.onShareClick = this.onShareClick.bind(this);
     this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
     this.onThresholdFilterApply = this.onThresholdFilterApply.bind(this);
@@ -275,6 +281,24 @@ class SamplesHeatmapView extends React.Component {
     this.removedTaxonIds.add(taxonId);
   }
 
+  handleSampleLabelClick(sampleName) {
+    let sampleId = this.state.sampleDetails[sampleName].id;
+    if (this.state.sidebarVisible && this.state.selectedSampleId === sampleId) {
+      this.handleSidebarClose();
+    } else {
+      this.setState({
+        selectedSampleId: sampleId,
+        sidebarVisible: true
+      });
+    }
+  }
+
+  handleSidebarClose = () => {
+    this.setState({
+      sidebarVisible: false
+    });
+  };
+
   renderLegend() {
     if (
       this.state.loading ||
@@ -317,6 +341,7 @@ class SamplesHeatmapView extends React.Component {
           metric={this.state.selectedOptions.metric}
           scale={this.state.availableOptions.scales[scaleIndex][1]}
           onRemoveTaxon={this.handleRemoveTaxon}
+          onSampleLabelClick={this.handleSampleLabelClick}
         />
       </ErrorBoundary>
     );
@@ -627,6 +652,12 @@ class SamplesHeatmapView extends React.Component {
           </ViewHeader>
         </div>
         <NarrowContainer>{this.renderVisualization()}</NarrowContainer>
+        <SampleDetailsSidebar
+          showReportLink
+          visible={this.state.sidebarVisible}
+          onClose={this.handleSidebarClose}
+          sampleId={this.state.selectedSampleId}
+        />
       </div>
     );
   }

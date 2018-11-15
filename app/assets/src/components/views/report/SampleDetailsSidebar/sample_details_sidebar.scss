@@ -2,19 +2,25 @@
 @import "~styles/themes/colors";
 
 .content {
-  margin: 40px 30px;
+  padding: 30px 20px;
   position: relative;
 }
 
-.title {
+.title,
+.loadingMsg {
   font-size: $font-size-h4;
   font-weight: $font-weight-semibold;
+  margin: 0 10px;
+}
+
+.tabs {
+  margin: 30px 10px;
 }
 
 .closeIcon {
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 40px;
+  top: 30px;
   opacity: 0.3;
   width: 20px;
   height: 20px;
@@ -25,14 +31,103 @@
 }
 
 .field {
-  margin: 30px 0;
+  padding: 15px 0;
+  display: flex;
+  align-items: center;
+
+  &:nth-child(even) {
+    background-color: $off-white;
+  }
 
   .label {
-    font-weight: bold;
-    margin-bottom: 5px;
+    font-weight: 600;
+    width: 160px;
+    flex-shrink: 0;
+    margin-right: 20px;
+    margin-left: 10px;
   }
 
   .input {
-    width: 100%;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .metadataValue {
+    color: $dark-grey;
+  }
+
+  .emptyValue {
+    color: $light-grey;
+  }
+
+  .projectLink {
+    /* overwrite header.scss */
+    color: $primary-light !important;
+
+    &:hover {
+      /* overwrite header.scss */
+      opacity: 0.5;
+    }
+  }
+}
+
+.reportLink {
+  margin: 5px 10px;
+
+  a {
+    /* overwrite header.scss */
+    color: $primary-light !important;
+
+    &:hover {
+      /* overwrite header.scss */
+      opacity: 0.5;
+    }
+  }
+}
+
+.erccScatterplotSection {
+  .graphContainer {
+    margin-top: 20px;
+    margin-right: 10px;
+  }
+}
+
+.downloadSectionContent {
+  padding-top: 5px;
+
+  .downloadLink {
+    padding: 5px 10px;
+    display: block;
+    margin: 5px 0;
+    /* overwrite header.scss */
+    color: $primary-light !important;
+
+    &:hover {
+      opacity: 0.5;
+    }
+  }
+}
+
+.notesSection {
+  .note {
+    font-size: $font-size-body;
+    line-height: 23px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 15px 10px;
+  }
+
+  .noData {
+    color: $light-grey;
+    margin: 20px 10px;
+  }
+
+  .textareaContainer {
+    margin: 15px 10px 0 10px;
+  }
+
+  .textarea {
+    height: 600px;
+    resize: vertical;
   }
 }

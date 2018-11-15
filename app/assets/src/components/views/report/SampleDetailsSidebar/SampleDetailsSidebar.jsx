@@ -1,96 +1,234 @@
 import React from "react";
-import { keyBy, mapValues } from "lodash";
+import { some } from "lodash";
+import { set } from "lodash/fp";
 import PropTypes from "~/components/utils/propTypes";
 import Sidebar from "~/components/ui/containers/Sidebar";
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
-import { getSampleMetadata, saveSampleMetadata, getMetadataTypes } from "~/api";
-import MetadataEditor from "./MetadataEditor";
+import Tabs from "~/components/ui/controls/Tabs";
+import {
+  getSampleMetadata,
+  saveSampleMetadata,
+  getMetadataTypes,
+  saveSampleName,
+  saveSampleNotes
+} from "~/api";
+import MetadataTab from "./MetadataTab";
+import PipelineTab from "./PipelineTab";
+import NotesTab from "./NotesTab";
+import {
+  processMetadata,
+  processMetadataTypes,
+  processPipelineInfo,
+  processAdditionalInfo
+} from "./utils";
 import cs from "./sample_details_sidebar.scss";
 
-// Transform the server metadata response to a simple key => value map.
-const processMetadata = metadata => {
-  let newMetadata = keyBy(metadata, "key");
-
-  newMetadata = mapValues(
-    newMetadata,
-    val =>
-      val.data_type === "string"
-        ? val.text_validated_value
-        : val.number_validated_value
-  );
-
-  return newMetadata;
-};
+const TABS = ["Metadata", "Pipeline", "Notes"];
 
 class SampleDetailsSidebar extends React.Component {
   state = {
     metadata: null,
+    additionalInfo: null,
+    pipelineInfo: null,
     metadataTypes: null,
-    metadataChanged: {}
+    metadataChanged: {},
+    metadataSavePending: {},
+    currentTab: TABS[0]
   };
 
-  async componentDidMount() {
-    const [metadata, metadataTypes] = await Promise.all([
-      getSampleMetadata(this.props.sample.id),
-      getMetadataTypes()
-    ]);
-    this.setState({
-      metadata: processMetadata(metadata),
-      metadataTypes
-    });
+  onTabChange = tab => {
+    this.setState({ currentTab: tab });
+  };
+
+  componentDidMount() {
+    if (this.props.sampleId) {
+      this.fetchMetadata();
+    }
   }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.sampleId !== prevProps.sampleId) {
+      this.fetchMetadata();
+    }
+  }
+
+  fetchMetadata = async () => {
+    this.setState({
+      metadata: null,
+      additionalInfo: null,
+      pipelineInfo: null
+    });
+
+    if (!this.props.sampleId) {
+      return;
+    }
+
+    // Metadata Types currently doesn't change, so only need to fetch it once.
+    let metadata = null;
+    let metadataTypes = null;
+    if (this.state.metadataTypes) {
+      metadata = await getSampleMetadata(this.props.sampleId);
+    } else {
+      [metadata, metadataTypes] = await Promise.all([
+        getSampleMetadata(this.props.sampleId),
+        getMetadataTypes()
+      ]);
+    }
+
+    this.setState({
+      metadata: processMetadata(metadata.metadata),
+      additionalInfo: processAdditionalInfo(metadata.additional_info),
+      pipelineInfo: processPipelineInfo(metadata.additional_info),
+      pipelineRun: metadata.additional_info.pipeline_run,
+      metadataTypes: metadataTypes
+        ? processMetadataTypes(metadataTypes)
+        : this.state.metadataTypes
+    });
+  };
 
   // shouldSave option is used when <Input> option is selected
   // to change and save in one call (to avoid setState issues)
-  onMetadataChange = (key, value, shouldSave) => {
+  handleMetadataChange = (key, value, shouldSave) => {
+    /* Sample name and note are special cases */
+    if (key === "name" || key === "notes") {
+      this.setState({
+        additionalInfo: set(key, value, this.state.additionalInfo),
+        metadataChanged: set(key, true, this.state.metadataChanged)
+      });
+
+      return;
+    }
+
     this.setState({
-      metadata: {
-        ...this.state.metadata,
-        [key]: value
-      },
-      metadataChanged: {
-        ...this.state.metadataChanged,
-        [key]: !shouldSave
-      }
+      metadata: set(key, value, this.state.metadata),
+      metadataChanged: set(key, !shouldSave, this.state.metadataChanged)
     });
 
     if (shouldSave) {
-      saveSampleMetadata(this.props.sample.id, key, value);
+      this._save(this.props.sampleId, key, value);
     }
   };
 
-  onMetadataSave = key => {
+  handleMetadataSave = async key => {
     if (this.state.metadataChanged[key]) {
-      saveSampleMetadata(this.props.sample.id, key, this.state.metadata[key]);
+      // Updating the name is pretty slow, so only do it on save, instead of on change.
+      if (key === "name") {
+        if (this.props.onNameUpdate) {
+          this.props.onNameUpdate(this.state.additionalInfo.name);
+        }
+      }
 
       this.setState({
-        metadataChanged: {
-          ...this.state.metadataChanged,
-          [key]: false
-        }
+        metadataChanged: set(key, false, this.state.metadataChanged)
       });
+
+      this._save(
+        this.props.sampleId,
+        key,
+        key === "name" || key === "notes"
+          ? this.state.additionalInfo[key]
+          : this.state.metadata[key]
+      );
     }
+  };
+
+  _save = async (id, key, value) => {
+    this.setState({
+      metadataSavePending: set(key, true, this.state.metadataSavePending)
+    });
+
+    if (key === "name") {
+      await saveSampleName(id, value);
+    } else if (key === "notes") {
+      await saveSampleNotes(id, value);
+    } else {
+      await saveSampleMetadata(this.props.sampleId, key, value);
+    }
+
+    this.setState({
+      metadataSavePending: set(key, false, this.state.metadataSavePending)
+    });
+  };
+
+  renderTab = () => {
+    const {
+      metadata,
+      metadataTypes,
+      metadataSavePending,
+      additionalInfo,
+      pipelineInfo,
+      pipelineRun
+    } = this.state;
+
+    const savePending = some(metadataSavePending);
+
+    if (this.state.currentTab === "Metadata") {
+      return (
+        <MetadataTab
+          metadata={metadata}
+          additionalInfo={additionalInfo}
+          metadataTypes={metadataTypes}
+          onMetadataChange={this.handleMetadataChange}
+          onMetadataSave={this.handleMetadataSave}
+          savePending={savePending}
+        />
+      );
+    }
+    if (this.state.currentTab === "Pipeline") {
+      return (
+        <PipelineTab
+          pipelineInfo={pipelineInfo}
+          erccComparison={additionalInfo.ercc_comparison}
+          pipelineRun={pipelineRun}
+          assembledTaxIds={additionalInfo.assembled_taxids}
+          sampleId={this.props.sampleId}
+        />
+      );
+    }
+    if (this.state.currentTab === "Notes") {
+      return (
+        <NotesTab
+          notes={additionalInfo.notes}
+          editable={additionalInfo.editable}
+          onNoteChange={val => this.handleMetadataChange("notes", val)}
+          onNoteSave={() => this.handleMetadataSave("notes")}
+          savePending={savePending}
+        />
+      );
+    }
+    return null;
   };
 
   render() {
-    const { visible } = this.props;
-    const { metadata, metadataTypes } = this.state;
+    const { visible, showReportLink, sampleId } = this.props;
+    const { metadata, metadataTypes, additionalInfo } = this.state;
+
+    const loading = !metadata || !metadataTypes;
 
     return (
       <Sidebar visible={visible} width="very wide">
         <div className={cs.content}>
           <RemoveIcon className={cs.closeIcon} onClick={this.props.onClose} />
-          <div className={cs.title}>Sample Details</div>
-          {metadata === null ? (
+          {loading ? (
             <div className={cs.loadingMsg}>Loading...</div>
           ) : (
-            <MetadataEditor
-              metadata={metadata}
-              metadataTypes={metadataTypes}
-              onMetadataChange={this.onMetadataChange}
-              onMetadataSave={this.onMetadataSave}
+            <div className={cs.title}>{additionalInfo.name}</div>
+          )}
+          {!loading &&
+            showReportLink && (
+              <div className={cs.reportLink}>
+                <a href={`/samples/${sampleId}`}>See Report</a>
+              </div>
+            )}
+          {!loading && (
+            <Tabs
+              className={cs.tabs}
+              tabs={TABS}
+              value={this.state.currentTab}
+              onChange={this.onTabChange}
             />
           )}
+          {!loading && this.renderTab()}
         </div>
       </Sidebar>
     );
@@ -100,7 +238,9 @@ class SampleDetailsSidebar extends React.Component {
 SampleDetailsSidebar.propTypes = {
   visible: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
-  sample: PropTypes.Sample.isRequired
+  sampleId: PropTypes.number,
+  onNameUpdate: PropTypes.func,
+  showReportLink: PropTypes.bool
 };
 
 export default SampleDetailsSidebar;

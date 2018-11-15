@@ -12,7 +12,7 @@ import {
   isTaxonIncluded,
   getTaxonSortComparator,
   getCategoryAdjective
-} from "./views/report/utils";
+} from "./views/report/utils/taxon";
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
@@ -157,7 +157,8 @@ class PipelineSampleReport extends React.Component {
         ? parseInt(cachedReadSpecificity)
         : 0,
       treeMetric: cachedTreeMetric || this.treeMetrics[0].value,
-      phyloTreeModalOpen: true
+      phyloTreeModalOpen: true,
+      contigTaxidList: []
     };
 
     this.expandAll = false;
@@ -228,7 +229,8 @@ class PipelineSampleReport extends React.Component {
           backgroundData: {
             id: res.data.background_info.id,
             name: res.data.background_info.name
-          }
+          },
+          contigTaxidList: res.data.contig_taxid_list
         },
         () => {
           this.applyFilters(true);
@@ -682,6 +684,12 @@ class PipelineSampleReport extends React.Component {
     }/fasta/${taxLevel}/${taxId}/NT_or_NR`;
   };
 
+  // download Contig
+  downloadContigUrl = e => {
+    const taxId = e.target.getAttribute("data-tax-id");
+    location.href = `/samples/${this.sample_id}/taxid_contigs?taxid=${taxId}`;
+  };
+
   gotoAlignmentVizLink = e => {
     const taxId = e.target.getAttribute("data-tax-id");
     const taxLevel = e.target.getAttribute("data-tax-level");
@@ -695,7 +703,7 @@ class PipelineSampleReport extends React.Component {
 
   displayHoverActions = (taxInfo, reportDetails) => {
     let tax_level_str = "";
-    let ncbiDot, fastaDot, alignmentVizDot, phyloTreeDot;
+    let ncbiDot, fastaDot, alignmentVizDot, phyloTreeDot, contigVizDot;
     if (taxInfo.tax_level == 1) tax_level_str = "species";
     else tax_level_str = "genus";
 
@@ -730,6 +738,15 @@ class PipelineSampleReport extends React.Component {
           aria-hidden="true"
         />
       );
+    if (this.state.contigTaxidList.indexOf(taxInfo.tax_id) >= 0)
+      contigVizDot = (
+        <i
+          data-tax-id={taxInfo.tax_id}
+          onClick={this.downloadContigUrl}
+          className="fa fa-puzzle-piece action-dot"
+          aria-hidden="true"
+        />
+      );
     if (
       this.allowPhyloTree &&
       taxInfo.tax_id > 0 &&
@@ -752,6 +769,7 @@ class PipelineSampleReport extends React.Component {
       <span className="link-tag">
         <BasicPopup trigger={ncbiDot} content={"NCBI Taxonomy Browser"} />
         <BasicPopup trigger={fastaDot} content={"FASTA Download"} />
+        <BasicPopup trigger={contigVizDot} content={"Contigs Download"} />
         <BasicPopup
           trigger={alignmentVizDot}
           content={"Alignment Visualization"}

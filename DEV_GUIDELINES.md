@@ -9,6 +9,10 @@ These guidelines should be enforced for any new PRs.
 
 ### _Javascript_
 
+When in doubt, follow the [Airbnb JS Style Guide](https://github.com/airbnb/javascript).
+
+The following rules are particularly relevant to `idseq-web`.
+
 **References**
 
 Use `const` to define local references and `let` if you need to reassign them. Do not use `var`.
@@ -35,6 +39,19 @@ Use `const` to define local references and `let` if you need to reassign them. D
 * Always specify type checking of components properties using the `[prop-types](https://www.npmjs.com/package/prop-types)` module. Be as precise as possible.
 * [Airbnb's prop types validators](https://github.com/airbnb/prop-types) is installed and provides extra validators. 
 * If your component does not pass any props to its children, always encapsulate your `propTypes` object in the `forbidExtraProps` function from the `airbnb-prop-types` package.
+
+**`lodash/fp`**
+
+[`lodash/fp`](https://github.com/lodash/lodash/wiki/FP-Guide) provides nice immutable utility functions (see React section below on immutability). We use `lodash/fp` exclusively (no `lodash`) in order to prevent confusion between the two variants.
+
+See [Higher-Order Functions in Lodash](
+https://blog.pragmatists.com/higher-order-functions-in-lodash-3283b7625175) for some examples of using `lodash/fp` in practice.
+
+`lodash/fp` has many useful functions, and you should use them whenever possible to simplify your code.
+
+**Other Best Practices**
+
+* **Import Aliases:** Use aliases like `~` and `~styles` to reduce long relative paths (`../../../..`). Check out the aliases in `config.resolve.alias` in our webpack config.
 
 ### _React Components_
 
@@ -65,6 +82,17 @@ If you need a custom component for your view, see whether you can wrap an existi
 
 For example, if you need a specially styled button, try to wrap `<Button>` from `ui` instead of creating your own `<button>` element.
 
+**Component Design**
+
+[Thinking in React](https://reactjs.org/docs/thinking-in-react.html) from the official React docs is highly recommended reading.
+
+[Presentational and Contatiner Components](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0) from Dan Abhramov (co-author of Redux) is also great for learning how to think in React.
+
+Try to break components down into smaller components, each of which has a single specialized task, instead of writing huge monolithic components (like `<PipelineSampleReport`, which is currently in our code-base). This approach improves **separation of concerns**, makes things easier to reason about, and encourages reusability.
+
+Whenever possible, try to perform the bulk of business logic in pure functions (i.e. functions that just take inputs and outputs and don't call `this.setState`). Factor these pure functions out of the component into utility files (`./utils.js`). This keeps the component slim and focused on the core business logic and rendering.
+
+
 **Component Naming**
 
 * Include the type of the component as a **suffix** of the name. For instance:
@@ -78,8 +106,6 @@ For example, if you need a specially styled button, try to wrap `<Button>` from 
 If your component is simple and has no styling, a single `.jsx` file will do.
 
 If your component has styling, you should create a `.scss` file in the same folder as the `.jsx`. (Also see styling section below)
-
-As your component gets more complex, consider breaking it up into multiple components. One way is to have a [root container component and multiple presentational components](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0) that focus on specific, well-defined parts of the component (for example, for a `Table` component, you can have `<Table>`, `<Header>`, and `<Row>`.
 
 Once your component has more than a single `.jsx` and .`scss` file, you should create a separate folder to hold your component. Follow the convention below:
 
@@ -106,6 +132,16 @@ Views represent a page or a section of a page in IDSeq. Views are stored in the 
 When designing your view, try to make as much use of the components in the `ui `and `visualizations` folders. This should be mostly plug-and-play components. 
 If you need to place a ui component in a customized place for your view (i.e. if the layout elements cannot help you), wrap it in a `div` with a proper class name, and style it in the view's css file.
 
+**Other Best Practices**
+
+* **Don't Mutate Objects:** Always create a new object/array when modifying component state, instead of modifying the original object (even if you call `setState` afterward). This allows React to figure out if props have changed by via shallow comparison, and allows for future rendering optimizations using `React.PureComponent`. `lodash/fp` functions are immutable and do this by default.
+
+* **Use Arrow Functions:** Inside React components, define instance methods with arrow function syntax `foo = () => { ... }`. This removes the need for `this.foo = this.foo.bind(this)`.
+
+* **Isolate API Calls:** Put all new API calls inside the `api` folder and use `get` and `postWithCSRF` instead of calling `axios` directly. The layer of indirection allows us to do things like convert snake_case to CamelCase and do standardized error handling in the future.
+
+* **Be Conscious of setState:** Be very careful of the the asynchronous nature of `this.setState`, as it can lead to subtle bugs. The `prevState` version (`this.setState(prevState => {}`) can work as a quick fix, but overuse of `prevState` and wrapping entire functions in `this.setState` is discouraged. You can often reorganize your functions to remove the bug (and also clarify the different code flows).
+
 ### React-D3 integration 
 
 *WIP*
@@ -128,7 +164,10 @@ D3 code should be created in plain JS (no JSX) and should be placed in separate 
     1. Our CSS is still in the process of being refactored. All files that are inside the styles directory still use global classes. All new CSS should use CSS modules.
     2.  See `components/views/cli_user_instructions.scss` for an example of the current best practice.
 
+**Other Best Practices**
 
+* **Don't use `materialize`**: We are trying to get rid of it.
+* **[Flexbox](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)** is very useful for vertical centering and responsive layouts.
 
 ### _JSON_
 

@@ -28,7 +28,6 @@ class SamplesHeatmapVis extends React.Component {
       { key: "NR.r", label: "NR r (total reads)" }
     ];
 
-    this.handleSampleLabelClick = this.handleSampleLabelClick.bind(this);
     this.handleCellClick = this.handleCellClick.bind(this);
   }
 
@@ -45,7 +44,7 @@ class SamplesHeatmapVis extends React.Component {
         tooltipContainer: this.tooltipContainer,
         onNodeHover: this.handleNodeHover,
         onRemoveRow: this.props.onRemoveTaxon,
-        onColumnLabelClick: this.handleSampleLabelClick,
+        onColumnLabelClick: this.props.onSampleLabelClick,
         onCellClick: this.handleCellClick
       }
     );
@@ -109,10 +108,6 @@ class SamplesHeatmapVis extends React.Component {
     ];
   }
 
-  handleSampleLabelClick(sampleName, event) {
-    openUrl(`/samples/${this.props.sampleDetails[sampleName].id}`, event);
-  }
-
   handleCellClick(cell) {
     openUrl(`/samples/${this.props.sampleIds[cell.columnIndex]}`, event);
   }
@@ -143,6 +138,7 @@ SamplesHeatmapVis.propTypes = {
   data: PropTypes.object,
   metric: PropTypes.string,
   onRemoveTaxon: PropTypes.func,
+  onSampleLabelClick: PropTypes.func,
   sampleDetails: PropTypes.object,
   sampleIds: PropTypes.array,
   scale: PropTypes.func,

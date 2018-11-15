@@ -159,6 +159,19 @@ class TaxonLineage < ApplicationRecord
     tax_map
   end
 
+  def to_a
+    TaxonLineage.names_a.map { |col| self[col] }
+  end
+
+  def self.names_a
+    ['species_taxid', 'genus_taxid', 'family_taxid', 'order_taxid', 'class_taxid', 'phylum_taxid',
+     'kingdom_taxid', 'superkingdom_taxid', 'superkingdom_name']
+  end
+
+  def self.null_array
+    TaxonLineage.column_defaults.values_at(*TaxonLineage.names_a)
+  end
+
   def self.most_specific_positive_id(tax)
     targets = [tax['species_taxid'], tax['genus_taxid'], tax['family_taxid']]
     targets.each do |tentative_id|

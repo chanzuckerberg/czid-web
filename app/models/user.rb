@@ -13,6 +13,8 @@ class User < ApplicationRecord
   attr_accessor :email_arguments
   ROLE_ADMIN = 1
   DEMO_USER_EMAILS = ['idseq.guest@chanzuckerberg.com'].freeze
+  IDSEQ_BUCKET_PREFIXES = ['idseq-'].freeze
+  CZBIOHUB_BUCKET_PREFIXES = ['czb-', 'czbiohub-'].freeze
 
   def as_json(options = {})
     super({ except: [:authentication_token], methods: [:admin] }.merge(options))
@@ -35,7 +37,16 @@ class User < ApplicationRecord
   end
 
   def can_upload(s3_path)
+    return true if admin?
+
     user_bucket = s3_path.split("/")[2] # get "bucket" from "s3://bucket/path/to/file"
-    user_bucket != SAMPLES_BUCKET_NAME || admin?
+
+    # Don't allow any users to upload from idseq buckets
+    return false if user_bucket == SAMPLES_BUCKET_NAME || IDSEQ_BUCKET_PREFIXES.any? { |prefix| user_bucket.downcase.starts_with?(prefix) }
+
+    # Don't allow any non-biohub users to upload from czbiohub buckets
+    return false if email.split("@").last != "czbiohub.org" && CZBIOHUB_BUCKET_PREFIXES.any? { |prefix| user_bucket.downcase.starts_with?(prefix) }
+
+    true
   end
 end
