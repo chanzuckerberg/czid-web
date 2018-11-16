@@ -68,11 +68,13 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({ nodeHoverInfo: this.getTooltipData(node) });
   };
 
-  handleNodeHoverMove = () => {
-    this.setState({
-      tooltipX: event.pageX,
-      tooltipY: event.pageY
-    });
+  handleNodeHoverMove = (_, currentEvent) => {
+    if (currentEvent) {
+      this.setState({
+        tooltipX: currentEvent.pageX,
+        tooltipY: currentEvent.pageY
+      });
+    }
   };
 
   handleNodeHoverOut = () => {
@@ -121,8 +123,8 @@ class SamplesHeatmapVis extends React.Component {
     ];
   }
 
-  handleCellClick = cell => {
-    openUrl(`/samples/${this.props.sampleIds[cell.columnIndex]}`);
+  handleCellClick = (cell, currentEvent) => {
+    openUrl(`/samples/${this.props.sampleIds[cell.columnIndex]}`, currentEvent);
   };
 
   render() {

@@ -1,8 +1,10 @@
-const openUrl = link => {
+const openUrl = (link, currentEvent) => {
+  // currentEvent is optional and it is used to consider
+  // modifiers like CMD and CTRL key to open urls in new tabs
   let openInNewTab = false;
 
   // metakey is CMD in mac
-  if (event && (event.metaKey || event.ctrlKey)) {
+  if (currentEvent && (currentEvent.metaKey || currentEvent.ctrlKey)) {
     openInNewTab = true;
   }
 

@@ -451,7 +451,8 @@ export default class Heatmap {
         this.options.onNodeHoverOut && this.options.onNodeHoverOut(d);
       })
       .on("mousemove", d => {
-        this.options.onNodeHoverMove && this.options.onNodeHoverMove(d);
+        this.options.onNodeHoverMove &&
+          this.options.onNodeHoverMove(d, d3.event);
       })
       .on(
         "click",
