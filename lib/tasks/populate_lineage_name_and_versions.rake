@@ -6,8 +6,6 @@ task populate_lineage_name_and_versions: :environment do
     level_str = TaxonCount::LEVEL_2_NAME[level_int]
     TaxonLineage.where("#{level_str}_taxid > 0").where(tax_name: nil).update_all("tax_name=#{level_str}_name")
   end
-  
-  return
 
   # Set started_at and ended_at. distinct.pluck is really fast.
   start_vals = TaxonLineage.distinct.pluck(:started_at).sort
