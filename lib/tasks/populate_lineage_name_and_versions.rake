@@ -1,7 +1,7 @@
 task populate_lineage_name_and_versions: :environment do
-  # For each lineage entry, find the first positive tax level (species->genus->...)
-  # and set the corresponding name.
   puts "Updating lineage names..."
+  # Starting from species, go up through the levels and set the tax_name if you
+  # have a positive taxid on that level.
   (1..8).each do |level_int|
     level_str = TaxonCount::LEVEL_2_NAME[level_int]
     TaxonLineage.where("#{level_str}_taxid > 0").where(tax_name: nil).update_all("tax_name=#{level_str}_name")
