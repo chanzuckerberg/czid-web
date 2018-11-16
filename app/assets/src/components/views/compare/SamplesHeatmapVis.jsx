@@ -4,19 +4,18 @@ import PropTypes from "prop-types";
 import React from "react";
 import { openUrl } from "../../utils/links";
 import cs from "./samples_heatmap_vis.scss";
+import cx from "classnames";
 
 class SamplesHeatmapVis extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      nodeHover: null
+      nodeHoverInfo: null
     };
 
     this.heatmap = null;
     this.scale = this.props.scale;
-
-    this.handleNodeHover = this.handleNodeHover.bind(this);
 
     // TODO: yet another metric name conversion to remove
     this.metrics = [
@@ -40,8 +39,9 @@ class SamplesHeatmapVis extends React.Component {
       },
       {
         scale: this.props.scale,
-        tooltipContainer: this.tooltipContainer,
         onNodeHover: this.handleNodeHover,
+        onNodeHoverOut: this.handleNodeHoverOut,
+        onNodeHoverMove: this.handleNodeHoverMove,
         onRemoveRow: this.props.onRemoveTaxon,
         onColumnLabelClick: this.props.onSampleLabelClick,
         onCellClick: this.handleCellClick
@@ -64,16 +64,26 @@ class SamplesHeatmapVis extends React.Component {
     return this.props.taxonIds.map(id => this.props.taxonDetails[id].name);
   }
 
-  handleNodeHover(node) {
-    this.setState({ nodeHover: node });
-  }
+  handleNodeHover = node => {
+    this.setState({ nodeHoverInfo: this.getTooltipData(node) });
+  };
+
+  handleNodeHoverMove = () => {
+    this.setState({
+      tooltipX: event.pageX,
+      tooltipY: event.pageY
+    });
+  };
+
+  handleNodeHoverOut = () => {
+    this.setState({ nodeHoverInfo: null });
+  };
 
   download() {
     this.heatmap.download();
   }
 
-  getTooltipData() {
-    let node = this.state.nodeHover;
+  getTooltipData(node) {
     let sampleId = this.props.sampleIds[node.columnIndex];
     let taxonId = this.props.taxonIds[node.rowIndex];
     let sampleDetails = this.props.sampleDetails[sampleId];
@@ -123,15 +133,17 @@ class SamplesHeatmapVis extends React.Component {
             this.heatmapContainer = container;
           }}
         />
-        <div
-          id="heatmap"
-          className={cs.tooltip}
-          ref={tooltip => {
-            this.tooltipContainer = tooltip;
-          }}
-        >
-          {this.state.nodeHover && <DataTooltip data={this.getTooltipData()} />}
-        </div>
+        {this.state.nodeHoverInfo && (
+          <div
+            className={cx(cs.tooltip, this.state.nodeHoverInfo && cs.visible)}
+            style={{
+              left: `${this.state.tooltipX + 20}px`,
+              top: `${this.state.tooltipY + 20}px`
+            }}
+          >
+            <DataTooltip data={this.state.nodeHoverInfo} />
+          </div>
+        )}
       </div>
     );
   }

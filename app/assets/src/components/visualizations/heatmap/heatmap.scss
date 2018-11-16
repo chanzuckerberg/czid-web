@@ -16,37 +16,40 @@
     }
   }
 
-  .row-label,
-  .column-label {
-    font-size: 12px;
-    cursor: pointer;
+  .rowLabels,
+  .columnLabels {
+    .rowLabel,
+    .columnLabel {
+      font-size: 12px;
+      cursor: pointer;
 
-    .remove-icon {
-      visibility: hidden;
-    }
+      .removeIcon {
+        visibility: hidden;
+      }
 
-    &.highlighted {
-      fill: $primary-light;
-    }
-
-    &:hover {
-      text {
+      &.highlighted {
         fill: $primary-light;
       }
 
-      .remove-icon {
-        visibility: visible;
+      &:hover {
+        text {
+          fill: $primary-light;
+        }
+
+        .removeIcon {
+          visibility: visible;
+        }
       }
     }
   }
 
-  .hover-target {
+  .hoverTarget {
     fill: transparent;
   }
 
   .dendogram {
     .link {
-      .link-path {
+      .linkPath {
         fill: transparent;
         stroke: $light-grey;
         stroke-width: 1px;

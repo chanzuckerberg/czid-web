@@ -1,6 +1,5 @@
 import React from "react";
 import axios from "axios";
-import d3 from "d3";
 import queryString from "query-string";
 import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";

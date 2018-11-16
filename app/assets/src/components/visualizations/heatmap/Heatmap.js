@@ -6,6 +6,8 @@ import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
 import SvgSaver from "svgsaver";
 import symlog from "../../utils/d3/scales/symlog.js";
+import cs from "./heatmap.scss";
+import cx from "classnames";
 
 export default class Heatmap {
   constructor(container, data, options) {
@@ -35,8 +37,7 @@ export default class Heatmap {
         rowClusterWidth: 40,
         columnClusterHeight: 40,
         spacing: 10,
-        transitionDuration: 200,
-        tooltipContainer: null
+        transitionDuration: 200
       },
       options
     );
@@ -153,23 +154,22 @@ export default class Heatmap {
   }
 
   setupContainers() {
-    this.tooltipContainer = d3.select(this.options.tooltipContainer);
     this.svg = this.container
       .append("svg")
-      .attr("class", "heatmap")
+      .attr("class", cs.heatmap)
       .attr("id", "visualization")
       .attr("xmlns", "http://www.w3.org/2000/svg");
 
     this.g = this.svg.append("g");
-    this.gRowLabels = this.g.append("g").attr("class", "row-labels");
-    this.gColumnLabels = this.g.append("g").attr("class", "column-labels");
-    this.gCells = this.g.append("g").attr("class", "cells");
+    this.gRowLabels = this.g.append("g").attr("class", cs.rowLabels);
+    this.gColumnLabels = this.g.append("g").attr("class", cs.columnLabels);
+    this.gCells = this.g.append("g").attr("class", cs.cells);
     this.gRowDendogram = this.g
       .append("g")
-      .attr("class", "dendogram row-dendogram");
+      .attr("class", cx(cs.dendogram, "rowDendogram"));
     this.gColumnDendogram = this.g
       .append("g")
-      .attr("class", "dendogram column-dendogram");
+      .attr("class", cx(cs.dendogram, "columnDendogram"));
   }
 
   placeContainers() {
@@ -366,8 +366,8 @@ export default class Heatmap {
     return Array.apply(null, { length: n }).map(Number.call, Number);
   }
 
-  download() {
-    this.svgSaver.asSvg(this.svg.node(), "heatmap.svg");
+  download(filename) {
+    this.svgSaver.asSvg(this.svg.node(), filename || "heatmap.svg");
   }
 
   removeRow(row) {
@@ -401,7 +401,7 @@ export default class Heatmap {
       .range([0, this.options.colors.length - 1]);
 
     let cells = this.gCells
-      .selectAll(".cell")
+      .selectAll(`.${cs.cell}`)
       .data(this.filteredCells, d => d.id);
 
     cells
@@ -419,46 +419,39 @@ export default class Heatmap {
     let cellsEnter = cells
       .enter()
       .append("rect")
-      .attr(
-        "class",
-        d => `cell cell-column-${d.columnIndex} cell-row-${d.rowIndex}`
+      .attr("class", d =>
+        cx(cs.cell, `cellColumn_${d.columnIndex}`, `cellRow_${d.rowIndex}`)
       )
       .on("mouseover", d => {
         this.rowLabels[d.rowIndex].highlighted = true;
         this.columnLabels[d.columnIndex].highlighted = true;
         this.updateLabelHighlights(
-          this.gRowLabels.selectAll(".row-label"),
+          this.gRowLabels.selectAll(`.${cs.rowLabel}`),
           this.rowLabels
         );
         this.updateLabelHighlights(
-          this.gColumnLabels.selectAll(".column-label"),
+          this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
           this.columnLabels
         );
 
         this.options.onNodeHover && this.options.onNodeHover(d);
-        if (this.tooltipContainer)
-          this.tooltipContainer.classed("visible", true);
       })
       .on("mouseleave", d => {
         this.rowLabels[d.rowIndex].highlighted = false;
         this.columnLabels[d.columnIndex].highlighted = false;
         this.updateLabelHighlights(
-          this.gRowLabels.selectAll(".row-label"),
+          this.gRowLabels.selectAll(`.${cs.rowLabel}`),
           this.rowLabels
         );
         this.updateLabelHighlights(
-          this.gColumnLabels.selectAll(".column-label"),
+          this.gColumnLabels.selectAll(`.${cs.columnLabel}`),
           this.columnLabels
         );
 
-        if (this.tooltipContainer)
-          this.tooltipContainer.classed("visible", false);
+        this.options.onNodeHoverOut && this.options.onNodeHoverOut(d);
       })
-      .on("mousemove", () => {
-        if (this.tooltipContainer)
-          this.tooltipContainer
-            .style("left", `${d3.event.pageX + 20}px`)
-            .style("top", `${d3.event.pageY + 20}px`);
+      .on("mousemove", d => {
+        this.options.onNodeHoverMove && this.options.onNodeHoverMove(d);
       })
       .on(
         "click",
@@ -473,7 +466,7 @@ export default class Heatmap {
     };
 
     let rowLabel = this.gRowLabels
-      .selectAll(".row-label")
+      .selectAll(`.${cs.rowLabel}`)
       .data(this.filteredRowLabels, d => d.label);
 
     rowLabel
@@ -491,13 +484,13 @@ export default class Heatmap {
     let rowLabelEnter = rowLabel
       .enter()
       .append("g")
-      .attr("class", "row-label")
+      .attr("class", cs.rowLabel)
       .on("mousein", this.options.onRowLabelMouseIn)
       .on("mouseout", this.options.onRowLabelMouseOut);
 
     rowLabelEnter
       .append("rect")
-      .attr("class", "hover-target")
+      .attr("class", cs.hoverTarget)
       .attr("width", this.rowLabelsWidth)
       .attr("height", this.cell.height)
       .style("text-anchor", "end");
@@ -521,7 +514,7 @@ export default class Heatmap {
 
     rowLabelEnter
       .append("text")
-      .attr("class", "remove-icon mono")
+      .attr("class", cs.removeIcon)
       .text("X")
       .attr("transform", `translate(0, ${this.cell.height / 2})`)
       .style("dominant-baseline", "central")
@@ -538,7 +531,7 @@ export default class Heatmap {
     };
 
     let columnLabel = this.gColumnLabels
-      .selectAll(".column-label")
+      .selectAll(`.${cs.columnLabel}`)
       .data(this.columnLabels, d => d.label);
 
     let columnLabelUpdate = columnLabel
@@ -549,7 +542,7 @@ export default class Heatmap {
     let columnLabelEnter = columnLabel
       .enter()
       .append("g")
-      .attr("class", "column-label");
+      .attr("class", cs.columnLabel);
 
     columnLabelEnter
       .append("text")
@@ -614,7 +607,7 @@ export default class Heatmap {
 
   updateCellHighlights() {
     this.gCells
-      .selectAll(".cell")
+      .selectAll(`.${cs.cell}`)
       .data(this.cells, d => d.id)
       .classed(
         "shaded",
@@ -625,7 +618,9 @@ export default class Heatmap {
   }
 
   updateLabelHighlights(nodes, labels) {
-    nodes.data(labels, d => d.label).classed("highlighted", d => d.highlighted);
+    nodes
+      .data(labels, d => d.label)
+      .classed(cs.highlighted, d => d.highlighted);
   }
 
   renderDendrogram(container, tree, targets, width, height) {
@@ -668,9 +663,9 @@ export default class Heatmap {
       }
 
       container
-        .selectAll(".link")
+        .selectAll(`.${cs.link}`)
         .data(cluster.links(nodes))
-        .classed("highlighted", d => d.source.highlighted);
+        .classed(cs.highlighted, d => d.source.highlighted);
 
       this.updateCellHighlights();
     };
@@ -689,20 +684,20 @@ export default class Heatmap {
     var nodes = cluster.nodes(tree);
 
     let links = container
-      .selectAll(".link")
+      .selectAll(`.${cs.link}`)
       .data(cluster.links(nodes))
       .enter()
       .append("g")
-      .attr("class", "link");
+      .attr("class", cs.link);
 
     links
       .append("path")
-      .attr("class", "link-path")
+      .attr("class", cs.linkPath)
       .attr("d", diagonal);
 
     links
       .append("rect")
-      .attr("class", "hover-target")
+      .attr("class", cs.hoverTarget)
       .attr("x", d => Math.min(d.source.y, d.target.y))
       .attr("y", d => Math.min(d.source.x, d.target.x))
       .attr("width", d => {
