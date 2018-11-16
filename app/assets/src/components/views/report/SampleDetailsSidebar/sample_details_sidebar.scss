@@ -6,7 +6,8 @@
   position: relative;
 }
 
-.title {
+.title,
+.loadingMsg {
   font-size: $font-size-h4;
   font-weight: $font-weight-semibold;
   margin: 0 10px;
@@ -18,7 +19,7 @@
 
 .closeIcon {
   position: absolute;
-  right: 20px;
+  right: 40px;
   top: 30px;
   opacity: 0.3;
   width: 20px;
@@ -60,6 +61,20 @@
   }
 
   .projectLink {
+    /* overwrite header.scss */
+    color: $primary-light !important;
+
+    &:hover {
+      /* overwrite header.scss */
+      opacity: 0.5;
+    }
+  }
+}
+
+.reportLink {
+  margin: 5px 10px;
+
+  a {
     /* overwrite header.scss */
     color: $primary-light !important;
 
