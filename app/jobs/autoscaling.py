@@ -59,91 +59,24 @@ def retry(operation, randgen=random.Random().random):
         return operation(*args, **kwargs)
     return wrapped_operation
 
-
 @retry
 def aws_command(command_str):
     return subprocess.check_output(command_str, shell=True)
 
-
-def find_asg(asg_list, name_prefix):
-    matching = []
-    for asg in asg_list:
-        if asg['AutoScalingGroupName'].startswith(name_prefix):
-            matching.append(asg)
-    assert len(matching) == 1
-    return matching[0]
-
-
 def at_most(upper_limit):
     return lambda n: min(n, upper_limit)
-
 
 def at_least(lower_limit):
     return lambda n: max(n, lower_limit)
 
-
 def exactly(value):
     return lambda _n: value
-
-
-def count_healthy_instances(asg, tag_list, draining_tag):
-    draining_instance_ids = get_draining_servers(asg, tag_list, draining_tag).keys()
-    num_draining = len(draining_instance_ids)
-    num_healthy = 0
-    for inst in asg["Instances"]:
-        if inst["InstanceId"] not in draining_instance_ids and \
-            inst["ProtectedFromScaleIn"] and inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating":
-            num_healthy += 1
-    return num_healthy, num_draining
-
-
-def get_previous_desired(asg):
-    return int(asg.get("DesiredCapacity", asg.get("MinSize", 0)))
-
-
-def clamp_to_valid_range(asg, desired_capacity):
-    min_size = int(asg.get("MinSize", desired_capacity))
-    max_size = int(asg.get("MaxSize", desired_capacity))
-    if desired_capacity < min_size:
-        print "Clamping {} up to {}".format(desired_capacity, min_size)
-        desired_capacity = min_size
-    if desired_capacity > max_size:
-        print "Clamping {} down to {}".format(desired_capacity, max_size)
-        desired_capacity = max_size
-    return desired_capacity
-
-
-def set_desired_capacity(asg, asg_instance_name, tag_list, draining_tag, compute_desired_instances, can_scale=True):
-    asg_name = asg['AutoScalingGroupName']
-    num_healthy, num_draining = count_healthy_instances(asg, tag_list, draining_tag)
-    previous_desired = get_previous_desired(asg)
-    # Manually input MinCapacity will never be reduced so long as there are pending jobs.
-    num_desired = clamp_to_valid_range(asg, compute_desired_instances(previous_desired))
-    if num_desired == previous_desired:
-        action = "should remain"
-    else:
-        action = "should change to"
-    cmd = "aws autoscaling set-desired-capacity --auto-scaling-group-name {asg_name} --desired-capacity {num_desired}"
-    cmd = cmd.format(asg_name=asg_name, num_desired=num_desired)
-    msg = "Autoscaling group {asg_name} has {num_healthy} healthy and {num_draining} draining instance(s). Desired capacity {action} {num_desired}."
-    print msg.format(asg_name=asg_name, num_healthy=num_healthy, num_draining=num_draining, action=action, num_desired=num_desired)
-    if can_scale:
-        if DEBUG:
-            print cmd
-        if num_desired < num_healthy:
-            start_draining(asg_instance_name, draining_tag, num_healthy - num_desired)
-        elif num_desired > num_healthy:
-            stop_draining(asg, tag_list, draining_tag, num_desired - num_healthy)
-        aws_command(cmd)
-
 
 def unixtime_now():
     return int(time.time())
 
-
 def iso2unixtime(iso_str):
     return int(dateutil.parser.parse(iso_str).strftime('%s'))
-
 
 def get_tag_list():
     '''
@@ -158,81 +91,6 @@ def get_tag_list():
     tag_dict = json.loads(aws_command(cmd))
     return tag_dict["Tags"]
 
-
-def add_draining_tag(instance_ids, draining_tag):
-    cmd = "aws ec2 create-tags --resources {list_instances} --tags Key={draining_tag},Value={timestamp}"
-    cmd = cmd.format(list_instances=' '.join(instance_ids), draining_tag=draining_tag, timestamp=unixtime_now())
-    aws_command(cmd)
-
-
-def remove_draining_tag(instance_ids, draining_tag):
-    delete_tags_from_instances(instance_ids, [draining_tag])
-
-
-def start_draining(asg_instance_name, draining_tag, num_instances):
-    instance_ids = instances_to_drain(asg_instance_name, draining_tag, num_instances)
-    if instance_ids:
-        print "Starting to drain the following instances: " + ",".join(instance_ids)
-        add_draining_tag(instance_ids, draining_tag)
-
-
-def stop_draining(asg, tag_list, draining_tag, num_instances):
-    instance_ids = instances_to_rescue(asg, tag_list, draining_tag, num_instances)
-    if instance_ids:
-        print "Stopping drainage of the following instances: " + ",".join(instance_ids)
-        remove_draining_tag(instance_ids, draining_tag)
-
-
-def instances_to_drain(asg_instance_name, draining_tag, num_instances):
-    cmd = "aws ec2 describe-instances --filters 'Name=tag:Name,Values={asg_instance_name}' --query 'Reservations[*].Instances[*].[InstanceId,LaunchTime,Tags]' --no-paginate"
-    cmd = cmd.format(asg_instance_name=asg_instance_name)
-    aws_response = json.loads(aws_command(cmd))
-    zipped_instance_ids_and_launch_times = [(instance[0], iso2unixtime(instance[1]))
-        for instance_list in aws_response
-        for instance in instance_list
-        if draining_tag not in [tag["Key"] for tag in instance[2]]
-    ]
-    instance_ids_sorted_by_increasing_launch_time = [item[0] for item in sorted(zipped_instance_ids_and_launch_times, key=itemgetter(1))]
-    return instance_ids_sorted_by_increasing_launch_time[:num_instances]
-
-
-def instances_to_rescue(asg, tag_list, draining_tag, num_instances):
-    '''
-    Rescue the instances that have been draining for the least amount of time.
-    That way we can probably terminate the non-rescued instances sooner.
-    '''
-    draining_instances = get_draining_servers(asg, tag_list, draining_tag)
-    draining_instances_sorted = [key for key, _value in sorted(draining_instances.items(), key=itemgetter(1), reverse=True)]
-    return draining_instances_sorted[:num_instances]
-
-
-def get_draining_servers(asg, tag_list, draining_tag):
-    ''' returns a map of draining instance IDs to the time they started draining '''
-    protected_instance_ids = [inst["InstanceId"] for inst in asg["Instances"] if inst["ProtectedFromScaleIn"]]
-    instance_dict = { item['ResourceId']: int(item['Value']) for item in tag_list if item['Key'] == draining_tag and item['ResourceId'] in protected_instance_ids }
-    return instance_dict
-
-
-def count_running_alignment_jobs(asg, tag_list, job_tag_prefix, job_tag_expiration):
-    ''' returns a map of instance IDs to number of jobs running on the instance '''
-    instance_ids = self.instance_ids
-    count_dict = { id: 0 for id in instance_ids }
-    expired_jobs = []
-    for item in tag_list:
-        if item['Key'].startswith(job_tag_prefix):
-            job_tag = item['Key']
-            instance_id = item['ResourceId']
-            unixtime = int(item['Value'])
-            if unixtime_now() - unixtime < job_tag_expiration:
-                count_dict[instance_id] += 1
-            else:
-                expired_jobs.append(job_tag)
-    if expired_jobs:
-        print "The following job tags have expired and will be deleted: " + ", ".join(expired_jobs)
-        delete_tags_from_instances(instance_ids, expired_jobs)
-    return count_dict
-
-
 def delete_tags_from_instances(instance_ids, tag_keys):
     if not instance_ids or not tag_keys:
         return
@@ -240,30 +98,6 @@ def delete_tags_from_instances(instance_ids, tag_keys):
     cmd = cmd.format(list_instances=' '.join(instance_ids), list_tags=' '.join(['Key='+tag for tag in tag_keys]))
     aws_command(cmd)
    
-
-def remove_termination_protection(instance_ids, asg):
-    if not instance_ids:
-        return
-    cmd = "aws autoscaling set-instance-protection --instance-ids {list_instances} --auto-scaling-group-name {asg_name} --no-protected-from-scale-in"
-    cmd = cmd.format(list_instances=' '.join(instance_ids), asg_name=asg['AutoScalingGroupName'])
-    aws_command(cmd)
-
-
-def check_draining_servers(asg, tag_list, draining_tag, job_tag_prefix, job_tag_expiration, min_draining_wait, can_scale):
-    drain_date_by_instance_id = get_draining_servers(asg, tag_list, draining_tag)
-    num_jobs_by_instance_id = count_running_alignment_jobs(asg, tag_list, job_tag_prefix, job_tag_expiration)
-    instance_ids_to_terminate = []
-    current_timestamp = unixtime_now()
-    for instance_id, drain_date in drain_date_by_instance_id.items():
-        draining_interval = current_timestamp - drain_date
-        num_jobs = num_jobs_by_instance_id[instance_id]
-        if num_jobs == 0 and draining_interval > min_draining_wait:
-            instance_ids_to_terminate.append(instance_id)
-    if instance_ids_to_terminate:
-        print "The following instances are ready to be terminated: " + ", ".join(instance_ids_to_terminate)
-        if can_scale:
-            remove_termination_protection(instance_ids_to_terminate, asg)
-
 def get_asg_list():
     asg_json = aws_command("aws autoscaling describe-auto-scaling-groups")
     asg_list = json.loads(asg_json).get('AutoScalingGroups', [])
@@ -295,38 +129,41 @@ def autoscaling_update(my_num_jobs, my_environment="development",
     print "{my_num_jobs} jobs are in progress.".format(my_num_jobs=my_num_jobs)
     compute_num_instances = required_capacity(my_num_jobs)
     for service_ASG in [gsnap_ASG, rapsearch_ASG]:
-        num_desired = service_ASG.num_desired_instances()
-        healthy_instances = service_ASG.healthy_instances()
-        draining_instances = service_ASG.draining_instances()
-        terminating_instances = service_ASG.terminating_instances()
-
         print "--- Analyzing the {instance_name} ASG ---".format(instance_name=service_ASG.instance_name)
+        num_desired = service_ASG.num_desired_instances()
+        healthy_instances, draining_instances, terminating_instances, corrupt_instances = service_ASG.classify_instances()
+        num_healthy = len(healthy_instances)
+        num_draining = len(draining_instances)
         print "CURRENTLY:"
         print "The desired capacity is {num_desired}.".format(num_desired=num_desired)
-        print "There are {num_healthy} healthy instances: {healthy_instances}.".format(num_healthy=len(healthy_instances), healthy_instances=healthy_instances)
-        print "There are {num_draining} draining instances: {draining_instances}.".format(num_draining=len(draining_instances), draining_instances=draining_instances)
+        print "There are {num_healthy} healthy instances: {healthy_instances}.".format(num_healthy=num_healthy, healthy_instances=healthy_instances)
+        print "There are {num_draining} draining instances: {draining_instances}.".format(num_draining=num_draining, draining_instances=draining_instances)
         print "There are {num_terminating} terminating instances: {terminating_instances}.".format(num_terminating=len(terminating_instances), terminating_instances=terminating_instances)
+        assert not corrupt_instances, "There are {num_corrupt} corrupt instances: {corrupt_instances}.".format(num_corrupt=len(corrupt_instances), corrupt_instances=corrupt_instances)
 
         print "MOVING FORWARD:"
-        new_num_desired = compute_num_instances(num_desired)
-        print "The desired capacity needs to be {new_num_desired}.".format(new_num_desired=new_num_desired)
+        raw_new_num_desired = compute_num_instances(num_desired)
+        print "In principle, the desired capacity needs to be {raw_new_num_desired}.".format(raw_new_num_desired=raw_new_num_desired)
+        new_num_desired = self.clamp_to_valid_range(raw_new_num_desired)
+        print "Enforcing the MinSize and MaxSize set by the operator, the desired capacity will be set to {new_num_desired}.".format(new_num_desired=new_num_desired)
         service_ASG.set_desired_capacity(new_num_desired)
 
         print "HEALTHY <--> DRAINING transitions:"
+        self.draining_instances = draining_instances
         if new_num_desired < num_healthy:
             num_to_drain = num_healthy - new_num_desired
             instances_to_drain = service_ASG.start_draining(num_to_drain)
             print "{num_to_drain} instances need to be drained: {instances_to_drain}.".format(num_to_drain=num_to_drain, instances_to_drain=instances_to_drain)
         elif new_num_desired > num_healthy:
-            num_to_rescue = new_num_desired - num_healthy
-            instances_to_rescue = service_ASG.stop_draining(num_to_rescue)
+            num_to_rescue = min(new_num_desired - num_healthy, num_draining)
+            instances_to_rescue = service_ASG.stop_draining(draining_instances, num_to_rescue)
             print "{num_to_rescue} instances need to stop draining: {instances_to_rescue}.".format(num_to_rescue=num_to_rescue, instances_to_rescue=instances_to_rescue)
         else:
            "No instances need to make a HEALTHY <--> DRAINING transition."
 
         print "DRAINING --> TERMINATING transitions:"
-        instances_to_terminate = service_ASG.cleanup_draining_servers()
-        num_to_terminate = len(num_to_terminate)
+        instances_to_terminate = service_ASG.start_terminating_if_safe()
+        num_to_terminate = len(instances_to_terminate)
         if num_to_terminate > 0:
             "{num_to_terminate} instances have finished draining and can be terminated: {instances_to_terminate}.".format(num_to_terminate=num_to_terminate, instances_to_terminate=instances_to_terminate)
         else:
@@ -360,8 +197,6 @@ class ASG(object):
         self.instance_ids = self.find_instance_ids()
         self.tags = self.find_tags()
 
-        self.desired_capacity = 0
-
      def permission_to_scale(self):
          def get_tag(asg, tag_key):
              for tag in asg['Tags']:
@@ -390,30 +225,129 @@ class ASG(object):
     def find_tags(self):
         return [tag for tag in self.tag_list if tag["ResourceId"] in self.instance_ids]
 
-    def set_desired_capacity(self):
-        asg_name = self.asg['AutoScalingGroupName']
-        num_healthy, num_draining = self.count_healthy_instances()
-        previous_desired = self.get_previous_desired()
-        # Manually input MinCapacity will never be reduced so long as there are pending jobs.
-        num_desired = self.clamp_to_valid_range(self.required_capacity(previous_desired))
-        if num_desired == previous_desired:
-            action = "should remain"
-        else:
-            action = "should change to"
-        cmd = "aws autoscaling set-desired-capacity --auto-scaling-group-name {asg_name} --desired-capacity {num_desired}"
-        cmd = cmd.format(asg_name=asg_name, num_desired=num_desired)
-        msg = "Autoscaling group {asg_name} has {num_healthy} healthy and {num_draining} draining instance(s). Desired capacity {action} {num_desired}."
-        print msg.format(asg_name=asg_name, num_healthy=num_healthy, num_draining=num_draining, action=action, num_desired=num_desired)
+    def num_desired_instances(self):
+        return int(self.asg.get("DesiredCapacity", self.asg.get("MinSize", 0)))
+
+    def tags_by_instance_id(self):
+        return { item['ResourceId']: { item['Key']: item['Value'] } for item in self.tag_list }
+
+    def clamp_to_valid_range(self, desired_capacity):
+        min_size = int(self.asg.get("MinSize", desired_capacity))
+        max_size = int(self.asg.get("MaxSize", desired_capacity))
+        if desired_capacity < min_size:
+            print "Clamping {} up to {}".format(desired_capacity, min_size)
+            desired_capacity = min_size
+        if desired_capacity > max_size:
+            print "Clamping {} down to {}".format(desired_capacity, max_size)
+            desired_capacity = max_size
+        return desired_capacity
+
+    def set_desired_capacity(self, new_num_desired):
+        cmd = "aws autoscaling set-desired-capacity --auto-scaling-group-name {asg_name} --desired-capacity {new_num_desired}"
+        cmd = cmd.format(asg_name=self.asg['AutoScalingGroupName'], new_num_desired=new_num_desired)
         if self.can_scale:
             if DEBUG:
                 print cmd
-            if num_desired < num_healthy:
-                self.start_draining(num_healthy - num_desired)
-            elif num_desired > num_healthy:
-                self.stop_draining(num_desired - num_healthy)
             aws_command(cmd)
 
-    def check_draining_servers():
+    def classify_instances():
+        healthy_instances = []
+        draining_instances = []
+        terminating_instances = []
+        corrupt_instances = []
+        tag_dict = self.tags_by_instance_id()
+        for inst in self.asg["Instances"]:
+            instance_id = inst["InstanceId"]
+            instance_tags = tag_dict.get(instance_id, {})
+            if not inst["ProtectedFromScaleIn"]:
+                terminating_instances.append(instance_id)
+            elif self.draining_tag in instance_tags:
+                draining_instances.append(instance_id)
+            elif inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating":
+                healthy_instances.append(instance_id)
+            else:
+                corrupt_instances.append(instance_id)
+        return healthy_instances, draining_instances, terminating_instances, corrupt_instances
+
+    def start_draining(self, num_to_drain):
+        def instances_to_drain():
+            cmd = "aws ec2 describe-instances --filters 'Name=tag:Name,Values={instance_name}' --query 'Reservations[*].Instances[*].[InstanceId,LaunchTime,Tags]' --no-paginate"
+            cmd = cmd.format(instance_name=self.instance_name)
+            aws_response = json.loads(aws_command(cmd))
+            zipped_instance_ids_and_launch_times = [(instance[0], iso2unixtime(instance[1]))
+                for instance_list in aws_response
+                for instance in instance_list
+                if self.draining_tag not in [tag["Key"] for tag in instance[2]]
+            ]
+            instance_ids_sorted_by_increasing_launch_time = [item[0] for item in sorted(zipped_instance_ids_and_launch_times, key=itemgetter(1))]
+            return instance_ids_sorted_by_increasing_launch_time[:num_to_drain]
+        def add_draining_tag(instance_ids):
+            cmd = "aws ec2 create-tags --resources {list_instances} --tags Key={draining_tag},Value={timestamp}"
+            cmd = cmd.format(list_instances=' '.join(instance_ids), draining_tag=self.draining_tag, timestamp=unixtime_now())
+            aws_command(cmd)
+        instance_ids = instances_to_drain()
+        if instance_ids && self.can_scale:
+            add_draining_tag(instance_ids)
+        return instance_ids
+
+    def get_drainage_times(self):
+        ''' returns a map of draining instance IDs to the time they started draining '''
+        tag_dict = self.tags_by_instance_id
+        return { instance_id: int(tag_dict[instance_id][self.draining_tag]) for instance_id in self.draining_instances }
+
+    def stop_draining(self, num_to_rescue):
+        def instances_to_rescue():
+            '''
+            Rescue the instances that have been draining for the least amount of time.
+            That way we can probably terminate the non-rescued instances sooner.
+            '''
+            drainage_times = self.get_drainage_times()
+            draining_instances_sorted = [key for key, _value in sorted(drainage_times.items(), key=itemgetter(1), reverse=True)]
+            return draining_instances_sorted[:num_to_rescue]
+        def remove_draining_tag(instance_ids):
+            delete_tags_from_instances(instance_ids, [self.draining_tag])
+        instance_ids = instances_to_rescue()
+        if instance_ids && self.can_scale:
+            remove_draining_tag(instance_ids)
+        return instance_ids
+
+    def start_terminating_if_safe(self):
+        def count_running_alignment_jobs():
+            ''' returns a map of draining instance IDs to number of jobs still running on the instance '''
+            instance_ids = self.draining_instances
+            count_dict = { id: 0 for id in instance_ids }
+            expired_jobs = []
+            for item in self.tag_list:
+                if item['Key'].startswith(self.job_tag_prefix):
+                    job_tag = item['Key']
+                    inst_id = item['ResourceId']
+                    unixtime = int(item['Value'])
+                    if unixtime_now() - unixtime < self.job_tag_expiration:
+                        count_dict[inst_id] += 1
+                    else:
+                        expired_jobs.append(job_tag)
+            if expired_jobs:
+                print "The following job tags have expired and will be deleted: " + ", ".join(expired_jobs)
+                delete_tags_from_instances(instance_ids, expired_jobs)
+            return count_dict
+        def instances_to_terminate():
+            drain_date_by_instance_id = self.get_drainage_times()
+            num_jobs_by_instance_id = count_running_alignment_jobs()
+            result = []
+            for instance_id, drain_date in drain_date_by_instance_id.items():
+                draining_interval = unixtime_now() - drain_date
+                num_jobs = num_jobs_by_instance_id[instance_id]
+                if num_jobs == 0 and draining_interval > self.min_draining_wait:
+                    result.append(instance_id)
+            return result
+        def remove_termination_protection(instance_ids):
+            cmd = "aws autoscaling set-instance-protection --instance-ids {list_instances} --auto-scaling-group-name {asg_name} --no-protected-from-scale-in"
+            cmd = cmd.format(list_instances=' '.join(instance_ids), asg_name=self.asg['AutoScalingGroupName'])
+            aws_command(cmd)
+        instance_ids = instances_to_terminate()
+        if instance_ids && self.can_scale:
+            remove_termination_protection(instance_ids)
+        return instance_ids
 
 if __name__ == "__main__":
     assert len(sys.argv) > 2
