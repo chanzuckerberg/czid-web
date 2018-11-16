@@ -86,13 +86,6 @@ class SamplesHeatmapView extends React.Component {
       this.urlParams.removedTaxonIds || this.props.removedTaxonIds || []
     );
     this.lastRequestToken = null;
-
-    this.handleRemoveTaxon = this.handleRemoveTaxon.bind(this);
-    this.handleSampleLabelClick = this.handleSampleLabelClick.bind(this);
-    this.handleDownloadClick = this.handleDownloadClick.bind(this);
-    this.onShareClick = this.onShareClick.bind(this);
-    this.onTaxonsPerSampleEnd = this.onTaxonsPerSampleEnd.bind(this);
-    this.onThresholdFilterApply = this.onThresholdFilterApply.bind(this);
   }
 
   componentDidMount() {
@@ -144,9 +137,9 @@ class SamplesHeatmapView extends React.Component {
     return `${url.toString()}?${this.prepareParams()}`;
   }
 
-  onShareClick() {
+  onShareClick = () => {
     copy(this.getUrlForCurrentParams());
-  }
+  };
 
   metricToSortField(metric) {
     let fields = metric.split(".");
@@ -249,12 +242,12 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  handleRemoveTaxon(taxonName) {
+  handleRemoveTaxon = taxonName => {
     let taxonId = this.state.taxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
-  }
+  };
 
-  handleSampleLabelClick(sampleName) {
+  handleSampleLabelClick = sampleName => {
     let sampleId = this.state.sampleDetails[sampleName].id;
     if (this.state.sidebarVisible && this.state.selectedSampleId === sampleId) {
       this.handleSidebarClose();
@@ -264,7 +257,7 @@ class SamplesHeatmapView extends React.Component {
         sidebarVisible: true
       });
     }
-  }
+  };
 
   handleSidebarClose = () => {
     this.setState({
@@ -358,7 +351,7 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  onThresholdFilterApply(filters) {
+  onThresholdFilterApply = filters => {
     if (DeepEqual(filters, this.state.selectedOptions.thresholdFilters)) {
       return;
     }
@@ -367,7 +360,7 @@ class SamplesHeatmapView extends React.Component {
       { thresholdFilters: filters },
       this.updateHeatmap
     );
-  }
+  };
 
   renderAdvancedFilterPicker() {
     return (
@@ -510,12 +503,12 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  onTaxonsPerSampleEnd(newValue) {
+  onTaxonsPerSampleEnd = newValue => {
     this.setSelectedOptionsState(
       { taxonsPerSample: newValue },
       this.updateHeatmap
     );
-  }
+  };
 
   renderTaxonsPerSampleSlider() {
     return (
@@ -588,7 +581,7 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  handleDownloadClick(fileType) {
+  handleDownloadClick = fileType => {
     switch (fileType) {
       case "svg":
         this.heatmapVis.download();
@@ -599,7 +592,7 @@ class SamplesHeatmapView extends React.Component {
       default:
         break;
     }
-  }
+  };
 
   render() {
     let downloadOptions = [
