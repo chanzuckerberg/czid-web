@@ -31,11 +31,12 @@ export default class Heatmap {
         marginRight: 20,
         minCellWidth: 26,
         minCellHeight: 26,
-        minWidth: 900, // only the heatmap cells
-        minHeight: 400, // only the heatmap cells
+        minWidth: 1240,
+        minHeight: 700,
         clustering: true,
-        rowClusterWidth: 40,
-        columnClusterHeight: 40,
+        defaultClusterStep: 6,
+        maxRowClusterWidth: 100,
+        maxColumnClusterHeight: 100,
         spacing: 10,
         transitionDuration: 200
       },
@@ -49,6 +50,8 @@ export default class Heatmap {
       );
     }
 
+    this.rowClusterWidth = this.options.maxRowClusterWidth;
+    this.columnClusterHeight = this.options.maxRowClusterWidth;
     this.scaleType = this.getScaleType();
 
     this.processData();
@@ -74,11 +77,11 @@ export default class Heatmap {
       case "filter":
         this.filterData();
       // falls through
-      case "placeContainers":
-        this.placeContainers();
-      // falls through
       case "cluster":
         this.cluster();
+      // falls through
+      case "placeContainers":
+        this.placeContainers();
       // falls through
       case "update":
         this.update();
@@ -173,13 +176,25 @@ export default class Heatmap {
   }
 
   placeContainers() {
+    this.rowClusterWidth = Math.min(
+      this.getDepth(this.rowClustering) * this.options.defaultClusterStep,
+      this.options.maxRowClusterWidth
+    );
+    this.columnClusterHeight = Math.min(
+      this.getDepth(this.columnClustering) * this.options.defaultClusterStep,
+      this.options.maxColumnClusterHeight
+    );
     this.cell = {
       width: Math.max(
-        this.options.minWidth / this.columnLabels.length,
+        (this.options.minWidth - this.rowLabelsWidth - this.rowClusterWidth) /
+          this.columnLabels.length,
         this.options.minCellWidth
       ),
       height: Math.max(
-        this.options.minHeight / this.rowLabels.length,
+        (this.options.minHeight -
+          this.columnLabelsHeight -
+          this.columnClusterHeight) /
+          this.rowLabels.length,
         this.options.minCellHeight
       )
     };
@@ -189,13 +204,13 @@ export default class Heatmap {
       this.options.marginLeft +
       this.options.marginRight +
       this.rowLabelsWidth +
-      (this.options.clustering ? this.options.rowClusterWidth : 0);
+      (this.options.clustering ? this.rowClusterWidth : 0);
     this.height =
       this.cell.height * this.filteredRowLabels.length +
       this.options.marginTop +
       this.options.marginBottom +
       this.columnLabelsHeight +
-      (this.options.clustering ? this.options.columnClusterHeight : 0);
+      (this.options.clustering ? this.columnClusterHeight : 0);
 
     this.svg.attr("width", this.width).attr("height", this.height);
 
@@ -320,6 +335,20 @@ export default class Heatmap {
         break;
       }
     }
+  }
+
+  getDepth(root) {
+    if (!root) return 0;
+    let stack = [[root, 0]];
+    let maxDepth = 0;
+    while (stack.length) {
+      let [node, depth] = stack.pop();
+      maxDepth = depth > maxDepth ? depth : maxDepth;
+      if (node.left) stack.push([node.left, depth + 1]);
+      if (node.right) stack.push([node.right, depth + 1]);
+    }
+
+    return maxDepth;
   }
 
   setOrder(root, labels) {
@@ -570,7 +599,7 @@ export default class Heatmap {
   // Dendograms
   renderColumnDendrogram() {
     let width = this.cell.width * this.columnLabels.length;
-    let height = this.options.columnClusterHeight - this.options.spacing;
+    let height = this.columnClusterHeight - this.options.spacing;
 
     this.gColumnDendogram.select("g").remove();
     let container = this.gColumnDendogram.append("g");
@@ -588,7 +617,7 @@ export default class Heatmap {
   }
 
   renderRowDendrogram() {
-    let height = this.options.rowClusterWidth - 10;
+    let height = this.rowClusterWidth - 10;
     let width = this.cell.height * this.filteredRowLabels.length;
 
     this.gRowDendogram.select("g").remove();
@@ -602,7 +631,7 @@ export default class Heatmap {
     );
     container.attr(
       "transform",
-      `scale(-1,1) translate(-${this.options.rowClusterWidth},0)`
+      `scale(-1,1) translate(-${this.rowClusterWidth},0)`
     );
   }
 
@@ -611,7 +640,7 @@ export default class Heatmap {
       .selectAll(`.${cs.cell}`)
       .data(this.cells, d => d.id)
       .classed(
-        "shaded",
+        cs.shaded,
         d =>
           this.columnLabels[d.columnIndex].shaded ||
           this.rowLabels[d.rowIndex].shaded
