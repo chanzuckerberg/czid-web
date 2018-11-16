@@ -2,16 +2,11 @@ task populate_lineage_name_and_versions: :environment do
   # For each lineage entry, find the first positive tax level (species->genus->...)
   # and set the corresponding name.
   puts "Updating lineage names..."
-  TaxonLineage.all.each do |lin|
-    (1..8).each do |level_int|
-      level_str = TaxonCount::LEVEL_2_NAME[level_int]
-      if lin["#{level_str}_taxid"] > 0
-        new_name = lin["#{level_str}_name"]
-        lin.update(name: new_name)
-      end
-    end
+  (1..8).each do |level_int|
+    level_str = TaxonCount::LEVEL_2_NAME[level_int]
+    TaxonLineage.where("#{level_str}_taxid > 0").where(tax_name: nil).update_all("tax_name=#{level_str}_name")
   end
-
+  
   return
 
   # Set started_at and ended_at. distinct.pluck is really fast.
