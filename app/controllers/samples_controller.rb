@@ -737,14 +737,14 @@ class SamplesController < ApplicationController
   def sample_taxons_dict(params)
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
     num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
-    taxon_ids = (params[:taxonIds] || []).map do |x|
+    removed_taxon_ids = (params[:removedTaxonIds] || []).map do |x|
       begin
         Integer(x)
       rescue ArgumentError
         nil
       end
     end
-    taxon_ids = taxon_ids.compact
+    removed_taxon_ids = removed_taxon_ids.compact
     categories = params[:categories]
     threshold_filters = if params[:thresholdFilters].is_a?(Array)
                           (params[:thresholdFilters] || []).map { |filter| JSON.parse(filter || "{}") }
@@ -762,8 +762,9 @@ class SamplesController < ApplicationController
 
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
-    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id") if taxon_ids.empty?
 
+    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
+    taxon_ids -= removed_taxon_ids
     return {} if taxon_ids.empty?
 
     samples_taxons_details(samples, taxon_ids, background_id, species_selected)
