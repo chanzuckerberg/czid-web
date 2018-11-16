@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_115_235_300) do
+ActiveRecord::Schema.define(version: 20_181_113_172_609) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -32,6 +32,9 @@ ActiveRecord::Schema.define(version: 20_181_115_235_300) do
     t.float "depth", limit: 24
     t.bigint "pipeline_run_id"
     t.string "drug_family"
+    t.integer "level"
+    t.float "drug_gene_coverage", limit: 24
+    t.float "drug_gene_depth", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "allele"], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
@@ -149,7 +152,7 @@ ActiveRecord::Schema.define(version: 20_181_115_235_300) do
   end
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "key", null: false
+    t.string "key", null: false, collation: "latin1_swedish_ci"
     t.integer "data_type", limit: 1, null: false
     t.string "text_raw_value"
     t.string "text_validated_value"
@@ -368,12 +371,12 @@ ActiveRecord::Schema.define(version: 20_181_115_235_300) do
     t.index ["pipeline_run_id", "tax_id", "count_type", "tax_level"], name: "index_pr_tax_hit_level_tc", unique: true
   end
 
-  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" do |t|
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
-    t.string "title"
-    t.text "summary"
-    t.text "description"
+    t.string "title", collation: "utf8mb4_general_ci"
+    t.text "summary", collation: "utf8mb4_general_ci"
+    t.text "description", collation: "utf8mb4_general_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -409,13 +412,9 @@ ActiveRecord::Schema.define(version: 20_181_115_235_300) do
     t.integer "kingdom_taxid", default: -650, null: false
     t.string "kingdom_name", default: "", null: false
     t.string "kingdom_common_name", default: "", null: false
-    t.string "name"
-    t.integer "version_start", limit: 1
-    t.integer "version_end", limit: 1
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid", "genus_name"], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
-    t.index ["name"], name: "index_taxon_lineages_on_name"
     t.index ["order_taxid"], name: "index_taxon_lineages_on_order_taxid"
     t.index ["phylum_taxid"], name: "index_taxon_lineages_on_phylum_taxid"
     t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
