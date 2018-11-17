@@ -1,0 +1,25 @@
+@import "~styles/themes/colors";
+
+.heatmap {
+  .viewHeader {
+    margin-top: 40px;
+    margin-bottom: 40px;
+
+    .controlElement {
+      margin-left: 10px;
+    }
+  }
+
+  .menu {
+    background-color: $white;
+
+    .filterRow {
+      margin: 20px 0;
+    }
+  }
+
+  .loadingIndicator {
+    margin: 50px;
+    text-align: center;
+  }
+}

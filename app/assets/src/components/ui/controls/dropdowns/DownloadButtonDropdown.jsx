@@ -17,6 +17,7 @@ const DownloadButtonDropdown = props => {
 };
 
 DownloadButtonDropdown.propTypes = forbidExtraProps({
+  className: PropTypes.string,
   disabled: PropTypes.bool,
   options: PropTypes.array,
   onClick: PropTypes.func,
