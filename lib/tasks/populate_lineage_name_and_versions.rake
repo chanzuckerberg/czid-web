@@ -5,7 +5,7 @@ task populate_lineage_name_and_versions: :environment do
   # TaxonLineage.tax_level is a function call so this goes 1,2,3,.. with the same positive/negative check for the sake of keeping the update queries to a minimum.
   (1..8).each do |level_int|
     level_str = TaxonCount::LEVEL_2_NAME[level_int]
-    TaxonLineage.where("#{level_str}_taxid > 0").where(tax_name: nil).update_all ("tax_name=#{level_str}_name") # rubocop:disable Rails/SkipsModelValidations
+    TaxonLineage.where("#{level_str}_taxid > 0").where(tax_name: nil).update_all("tax_name=#{level_str}_name") # rubocop:disable Rails/SkipsModelValidations
   end
 
   # Set started_at and ended_at. distinct.pluck is really fast.
