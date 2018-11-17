@@ -158,7 +158,7 @@ class ASG(object):
 
 
         decrease DesiredCapacity  |  / \   increase DesiredCapacity
-              add draining_tag    |   |   remove draining_tag
+              add draining_tag    |   |    remove draining_tag
                                  \ /  |
 
                             _________________     Draining.
