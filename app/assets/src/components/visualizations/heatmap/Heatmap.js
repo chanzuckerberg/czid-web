@@ -296,7 +296,7 @@ export default class Heatmap {
             columns[i] = [];
             columns[i].idx = i;
           }
-          columns[i].push(scale(this.data.values[i][j] || 0));
+          columns[i].push(scale(this.data.values[j][i] || 0));
         }
       }
     }
@@ -662,7 +662,7 @@ export default class Heatmap {
       });
 
     let diagonal = (d, useRectEdges) => {
-      if (useRectEdges)
+      if (useRectEdges === true)
         return `M${d.source.y},${d.source.x}V${d.target.x}H${d.target.y}`;
 
       let radius = 4;
