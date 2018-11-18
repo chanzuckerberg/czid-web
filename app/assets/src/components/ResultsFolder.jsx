@@ -1,12 +1,69 @@
 import React from "react";
 import Divider from "./layout/Divider";
 
+class ResultsFolderStepList extends React.Component {
+  constructor(props, context) {
+    super(props, context);
+    this.stepDict = props.stepDict;
+  }
+
+  download(url) {
+    if (url) {
+      location.href = `${url}`;
+    }
+  }
+
+  render() {
+    console.log(this.stepDict);
+    return Object.keys(this.stepDict).map((step_name, i) => {
+      let step = this.stepDict[step_name];
+      let description = step["step_description"];
+      let reads_after = step["reads_after"];
+      let fileList = step["file_list"];
+      return (
+        <tbody key={i}>
+          <tr key="first">
+            <td>
+              Step <b>{step_name}</b>: {description}{" "}
+              {reads_after ? (
+                <span>
+                  (<b>{reads_after}</b> reads remained.)
+                </span>
+              ) : null}
+            </td>
+          </tr>
+          {fileList.map((file, j) => {
+            return (
+              <tr
+                className={`${file.url ? "" : "disabled-"}file-link`}
+                onClick={this.download.bind(this, file.url)}
+                key={j}
+              >
+                <td>
+                  <i className="fa fa-file" />
+                  {file["display_name"]}
+                  <span className="size-tag"> -- {file["size"]}</span>
+                </td>
+              </tr>
+            );
+          })}
+          <tr key="last">
+            <td>
+              <Divider />
+            </td>
+          </tr>
+        </tbody>
+      );
+    });
+  }
+}
+
 class ResultsFolder extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.fileUrl = props.filePath;
     this.filePath = this.fileUrl.split("/");
-    this.stepDict = props.fileList;
+    this.stageDict = props.fileList;
     this.sampleName = props.sampleName;
     this.projectName = props.projectName;
   }
@@ -19,6 +76,12 @@ class ResultsFolder extends React.Component {
     if (url) {
       location.href = `${url}`;
     }
+  }
+
+  download_string2file(str) {
+    var file = new Blob([str], { type: "text/plain" });
+    download_url = URL.createObjectURL(file);
+    location.href = `${download_url}`;
   }
 
   render() {
@@ -51,57 +114,35 @@ class ResultsFolder extends React.Component {
           </span>
         </div>
         <div className="header">
-          {Object.keys(this.stepDict).length ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>Results folder</th>
-                </tr>
-              </thead>
-              {Object.keys(this.stepDict).map((step_name, i) => {
-                let step = this.stepDict[step_name];
-                let description = step["step_description"];
-                let reads_after = step["reads_after"];
-                let fileList = step["file_list"];
+          {!Object.keys(this.stageDict).length
+            ? "No files to show"
+            : Object.keys(this.stageDict).map((stage_name, k) => {
+                let stage = this.stageDict[stage_name];
+                let stage_description = stage["stage_description"];
+                let stage_dag_json = stage["stage_dag_json"];
+                let stepDict = stage["steps"];
                 return (
-                  <tbody key={i}>
-                    <tr key="first">
-                      <td>
-                        Step <b>{step_name}</b>: {description}{" "}
-                        {reads_after ? (
-                          <span>
-                            (<b>{reads_after}</b> reads remained.)
-                          </span>
-                        ) : null}
-                      </td>
-                    </tr>
-                    {fileList.map((file, j) => {
-                      return (
-                        <tr
-                          className={`${file.url ? "" : "disabled-"}file-link`}
-                          onClick={this.download.bind(this, file.url)}
-                          key={j}
-                        >
-                          <td>
-                            <i className="fa fa-file" />
-                            {file["display_name"]}
-                            <span className="size-tag"> -- {file["size"]}</span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                    <tr key="last">
-                      <td>
-                        <Divider />
-                      </td>
-                    </tr>
-                  </tbody>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>
+                          {stage_name}: {stage_description}
+                        </th>
+                      </tr>
+                      <tr
+                        className="file-link"
+                        onClick={this.download_string2file.bind(
+                          this,
+                          stage_dag_json
+                        )}
+                      >
+                        <th>config.json</th>
+                      </tr>
+                    </thead>
+                    <ResultsFolderStepList stepDict={this.stepDict} />
+                  </table>
                 );
               })}
-            </table>
-          ) : (
-            "No files to show"
-          )}
         </div>
       </div>
     );
