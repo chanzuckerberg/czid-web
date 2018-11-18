@@ -14,7 +14,6 @@ class ResultsFolderStepList extends React.Component {
   }
 
   render() {
-    console.log(this.stepDict);
     return Object.keys(this.stepDict).map((step_name, i) => {
       let step = this.stepDict[step_name];
       let description = step["step_description"];
@@ -79,8 +78,8 @@ class ResultsFolder extends React.Component {
   }
 
   download_string2file(str) {
-    var file = new Blob([str], { type: "text/plain" });
-    download_url = URL.createObjectURL(file);
+    let file = new Blob([str], { type: "text/plain" });
+    let download_url = URL.createObjectURL(file);
     location.href = `${download_url}`;
   }
 
@@ -129,17 +128,27 @@ class ResultsFolder extends React.Component {
                           {stage_name}: {stage_description}
                         </th>
                       </tr>
-                      <tr
-                        className="file-link"
-                        onClick={this.download_string2file.bind(
-                          this,
-                          stage_dag_json
-                        )}
-                      >
-                        <th>config.json</th>
-                      </tr>
                     </thead>
-                    <ResultsFolderStepList stepDict={this.stepDict} />
+                    <tbody>
+                      <tr>
+                        <td
+                          className="file-link"
+                          onClick={this.download_string2file.bind(
+                            this,
+                            stage_dag_json
+                          )}
+                        >
+                          <i className="fa fa-file" />
+                          config.json
+                        </td>
+                      </tr>
+                      <tr key="last">
+                        <td>
+                          <Divider />
+                        </td>
+                      </tr>
+                    </tbody>
+                    <ResultsFolderStepList stepDict={stepDict} />
                   </table>
                 );
               })}

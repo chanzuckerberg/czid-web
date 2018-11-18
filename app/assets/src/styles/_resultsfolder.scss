@@ -22,23 +22,23 @@
     th {
       color: $darkest-grey;
     }
-    tr.file-link {
-      cursor: pointer;
-      td {
-        color: $darkest-grey;
-        &:hover {
-          color: $primary-light;
-        }
+  }
+  .file-link {
+    cursor: pointer;
+    td {
+      color: $darkest-grey;
+      &:hover {
+        color: $primary-light;
       }
     }
-    tr.disabled-file-link {
-      color: $medium-grey;
-    }
-    i.fa-file {
-      margin-right: 15px;
-    }
-    .size-tag {
-      color: $light-grey;
-    }
+  }
+  tr.disabled-file-link {
+    color: $medium-grey;
+  }
+  i.fa-file {
+    margin-right: 15px;
+  }
+  .size-tag {
+    color: $light-grey;
   }
 }

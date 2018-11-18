@@ -1134,9 +1134,9 @@ class PipelineRun < ApplicationRecord
     # Get outputs and descriptions by target.
     result = {}
     pipeline_run_stages.each_with_index do |prs, stage_idx|
-      next unless prs.dag_json
+      next unless prs.dag_json && STEP_DESCRIPTIONS[prs.name]
       result[prs.name] = {
-        "stage_description" => (STEP_DESCRIPTIONS[prs.name] || {})["stage"],
+        "stage_description" => STEP_DESCRIPTIONS[prs.name]["stage"],
         "stage_dag_json" => prs.dag_json,
         "steps" => {}
       }
