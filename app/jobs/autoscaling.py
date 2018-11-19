@@ -191,8 +191,6 @@ class ASG(object):
         self.draining_instances = []
         self.service = service
         self.environment = environment
-        self.asg_list = asg_list
-        self.tag_list = tag_list
         self.draining_tag = draining_tag
         self.job_tag_prefix = job_tag_prefix
         self.max_job_dispatch_lag_seconds = max_job_dispatch_lag_seconds
@@ -202,7 +200,7 @@ class ASG(object):
         self.job_tag_expiration = self.job_tag_keep_alive_seconds + self.job_tag_keep_alive_grace_period_seconds
         self.instance_name = self.service + "-asg-" + self.environment
 
-        self.asg, self.instance_ids, self.tags = self.find_attributes()
+        self.asg, self.instance_ids, self.tags = self.find_attributes(asg_list, tag_list, self.instance_name)
         self.can_scale = self.permission_to_scale(self.asg)
 
 
@@ -217,11 +215,12 @@ class ASG(object):
             return False
         return self.environment in set(s.strip() for s in allowed_envs.split(","))
 
-    def find_attributes(self):
+    @staticmethod
+    def find_attributes(asg_list, tag_list, instance_name):
         def find_asg():
             matching = []
-            for asg in self.asg_list:
-                if asg['AutoScalingGroupName'].startswith(self.instance_name):
+            for asg in asg_list:
+                if asg['AutoScalingGroupName'].startswith(instance_name):
                     matching.append(asg)
             assert len(matching) == 1
             result = matching[0]
@@ -231,7 +230,7 @@ class ASG(object):
         def find_instance_ids(asg):
             return [item["InstanceId"] for item in asg["Instances"]]
         def find_tags(instance_ids):
-            return [tag for tag in self.tag_list if tag["ResourceId"] in instance_ids]
+            return [tag for tag in tag_list if tag["ResourceId"] in instance_ids]
         asg = find_asg()
         instance_ids = find_instance_ids(asg)
         tags = find_tags(instance_ids)
@@ -242,7 +241,7 @@ class ASG(object):
 
     def tags_by_instance_id(self):
         result = defaultdict(lambda: {})
-        for item in self.tag_list:
+        for item in self.tags:
             instance_id = item['ResourceId']
             key = item['Key']
             value = item['Value']
@@ -279,8 +278,7 @@ class ASG(object):
             instance_tags = tag_dict.get(instance_id, {})
             if DEBUG:
                 print "{instance_id}: {instance_tags}".format(instance_id=instance_id, instance_tags=instance_tags)
-            print instance_tags
-            if not inst["ProtectedFromScaleIn"]:
+            if not inst["ProtectedFromScaleIn"] and not inst["LifecycleState"] == "Pending":
                 terminating_instances.append(instance_id)
             elif self.draining_tag in instance_tags:
                 draining_instances.append(instance_id)
