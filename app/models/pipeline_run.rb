@@ -359,7 +359,6 @@ class PipelineRun < ApplicationRecord
     end
     contigs.destroy_all
     update(contigs_attributes: contig_array) unless contig_array.empty?
-    generate_contig_mapping_table
     update(assembled: 1)
   end
 
@@ -387,7 +386,7 @@ class PipelineRun < ApplicationRecord
     # generate a csv file for contig mapping based on lineage_json
     local_file_name = "#{LOCAL_JSON_PATH}/#{CONTIG_MAPPING_NAME}#{id}"
     Open3.capture3("mkdir -p #{File.dirname(local_file_name)}")
-    s3_file_name = contigs_summary_s3_path
+    # s3_file_name = contigs_summary_s3_path # TODO(yf): might turn back for s3 generation later
     CSV.open(local_file_name, 'w') do |writer|
       header_row = ['contig_name', 'read_count']
       header_row += TaxonLineage.names_a.map { |name| "NT.#{name}" }
@@ -401,7 +400,7 @@ class PipelineRun < ApplicationRecord
         writer << row
       end
     end
-    Open3.capture3("aws s3 cp #{local_file_name} #{s3_file_name}")
+    # Open3.capture3("aws s3 cp #{local_file_name} #{s3_file_name}")
     local_file_name
   end
 
