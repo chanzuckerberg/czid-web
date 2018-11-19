@@ -408,6 +408,9 @@ ActiveRecord::Schema.define(version: 20_181_113_172_609) do
     t.integer "kingdom_taxid", default: -650, null: false
     t.string "kingdom_name", default: "", null: false
     t.string "kingdom_common_name", default: "", null: false
+    t.string "tax_name"
+    t.integer "version_start", limit: 1
+    t.integer "version_end", limit: 1
     t.index ["class_taxid"], name: "index_taxon_lineages_on_class_taxid"
     t.index ["family_taxid"], name: "index_taxon_lineages_on_family_taxid"
     t.index ["genus_taxid", "genus_name"], name: "index_taxon_lineages_on_genus_taxid_and_genus_name"
@@ -415,6 +418,7 @@ ActiveRecord::Schema.define(version: 20_181_113_172_609) do
     t.index ["phylum_taxid"], name: "index_taxon_lineages_on_phylum_taxid"
     t.index ["species_taxid"], name: "index_taxon_lineages_on_species_taxid"
     t.index ["superkingdom_taxid"], name: "index_taxon_lineages_on_superkingdom_taxid"
+    t.index ["tax_name"], name: "index_taxon_lineages_on_tax_name"
     t.index ["taxid", "ended_at"], name: "index_taxon_lineages_on_taxid_and_end", unique: true
     t.index ["taxid", "started_at", "ended_at"], name: "index_taxon_lineages_on_taxid_and_started_at_and_ended_at"
     t.index ["taxid", "started_at"], name: "index_taxon_lineages_on_taxid_and_start", unique: true
