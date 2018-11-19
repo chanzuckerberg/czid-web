@@ -33,7 +33,6 @@ class ConfigFile extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.stageDagJson = props.stageDagJson;
-    console.log("CONFIG");
   }
 
   download_string2file(str) {
