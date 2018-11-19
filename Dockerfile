@@ -5,7 +5,7 @@ FROM ruby:2.4
 # Debian image, we use apt-get to install those.
 RUN apt-get update && apt-get install -y build-essential nodejs mysql-client python-dev python-pip apt-transport-https
 
-RUN curl -sL https://deb.nodesource.com/setup_9.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt-get update && apt-get install -y nodejs
 RUN pip install --upgrade pip 
 RUN pip install --upgrade setuptools

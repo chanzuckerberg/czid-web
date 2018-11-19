@@ -177,13 +177,16 @@ export default class Heatmap {
 
   placeContainers() {
     this.rowClusterWidth = Math.min(
-      this.getDepth(this.rowClustering) * this.options.defaultClusterStep,
+      this.getDepth(this.rowClustering) * this.options.defaultClusterStep +
+        this.options.spacing,
       this.options.maxRowClusterWidth
     );
     this.columnClusterHeight = Math.min(
-      this.getDepth(this.columnClustering) * this.options.defaultClusterStep,
+      this.getDepth(this.columnClustering) * this.options.defaultClusterStep +
+        this.options.spacing,
       this.options.maxColumnClusterHeight
     );
+
     this.cell = {
       width: Math.max(
         (this.options.minWidth - this.rowLabelsWidth - this.rowClusterWidth) /
