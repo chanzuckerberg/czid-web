@@ -6,6 +6,7 @@ import time
 import random
 from operator import itemgetter
 from functools import wraps
+from collections import defaultdict
 import dateutil.parser
 
 DEBUG = False
@@ -145,7 +146,7 @@ def autoscaling_update(my_num_jobs, my_environment="development",
         if num_to_terminate > 0:
             print "{num_to_terminate} instances have finished draining and can be terminated: {instances_to_terminate}.".format(num_to_terminate=num_to_terminate, instances_to_terminate=instances_to_terminate)
         else:
-            print "There are no instances that need to move from draining to terminating state."
+            print "No instances are ready to move from draining to terminating state."
 
 class ASG(object):
     r'''
@@ -201,16 +202,17 @@ class ASG(object):
         self.job_tag_expiration = self.job_tag_keep_alive_seconds + self.job_tag_keep_alive_grace_period_seconds
         self.instance_name = self.service + "-asg-" + self.environment
 
-        self.can_scale = self.permission_to_scale()
         self.asg, self.instance_ids, self.tags = self.find_attributes()
+        self.can_scale = self.permission_to_scale(self.asg)
 
-    def permission_to_scale(self):
+
+    def permission_to_scale(self, asg):
         def get_tag(asg, tag_key):
             for tag in asg['Tags']:
                 if tag['Key'] == tag_key:
                     return tag['Value']
             return None
-        allowed_envs = get_tag(self.asg, self.scaling_permission_tag)
+        allowed_envs = get_tag(asg, self.scaling_permission_tag)
         if allowed_envs == None:
             return False
         return self.environment in set(s.strip() for s in allowed_envs.split(","))
@@ -239,7 +241,13 @@ class ASG(object):
         return int(self.asg.get("DesiredCapacity", self.asg.get("MinSize", 0)))
 
     def tags_by_instance_id(self):
-        return {item['ResourceId']: {item['Key']: item['Value']} for item in self.tag_list}
+        result = defaultdict(lambda: {})
+        for item in self.tag_list:
+            instance_id = item['ResourceId']
+            key = item['Key']
+            value = item['Value']
+            result[instance_id][key] = value
+        return result
 
     def clamp_to_valid_range(self, desired_capacity):
         min_size = int(self.asg.get("MinSize", desired_capacity))
@@ -269,6 +277,9 @@ class ASG(object):
         for inst in self.asg["Instances"]:
             instance_id = inst["InstanceId"]
             instance_tags = tag_dict.get(instance_id, {})
+            if DEBUG:
+                print "{instance_id}: {instance_tags}".format(instance_id=instance_id, instance_tags=instance_tags)
+            print instance_tags
             if not inst["ProtectedFromScaleIn"]:
                 terminating_instances.append(instance_id)
             elif self.draining_tag in instance_tags:
@@ -328,7 +339,7 @@ class ASG(object):
             instance_ids = self.draining_instances
             count_dict = {id: 0 for id in instance_ids}
             expired_jobs = []
-            for item in self.tag_list:
+            for item in self.tags:
                 if item['Key'].startswith(self.job_tag_prefix):
                     job_tag = item['Key']
                     inst_id = item['ResourceId']
