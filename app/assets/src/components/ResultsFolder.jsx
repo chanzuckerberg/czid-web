@@ -1,10 +1,10 @@
 import React from "react";
 import Divider from "./layout/Divider";
 
-class ResultsFolderStepList extends React.Component {
+class OutputFile extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.stepDict = props.stepDict;
+    this.file = props.file;
   }
 
   download(url) {
@@ -14,45 +14,101 @@ class ResultsFolderStepList extends React.Component {
   }
 
   render() {
-    return Object.keys(this.stepDict).map((step_name, i) => {
-      let step = this.stepDict[step_name];
-      let description = step["step_description"];
-      let reads_after = step["reads_after"];
-      let fileList = step["file_list"];
-      return (
-        <tbody key={i}>
-          <tr key="first">
-            <td>
-              Step <b>{step_name}</b>: {description}{" "}
-              {reads_after ? (
-                <span>
-                  (<b>{reads_after}</b> reads remained.)
-                </span>
-              ) : null}
-            </td>
-          </tr>
-          {fileList.map((file, j) => {
-            return (
-              <tr
-                className={`${file.url ? "" : "disabled-"}file-link`}
-                onClick={this.download.bind(this, file.url)}
-                key={j}
-              >
-                <td>
-                  <i className="fa fa-file" />
-                  {file["display_name"]}
-                  <span className="size-tag"> -- {file["size"]}</span>
-                </td>
-              </tr>
-            );
-          })}
-          <tr key="last">
-            <td>
-              <Divider />
-            </td>
-          </tr>
-        </tbody>
-      );
+    return (
+      <tr
+        className={`${this.file.url ? "" : "disabled-"}file-link`}
+        onClick={this.download.bind(this, this.file.url)}
+      >
+        <td>
+          <i className="fa fa-file" />
+          {this.file["display_name"]}
+          <span className="size-tag"> -- {this.file["size"]}</span>
+        </td>
+      </tr>
+    );
+  }
+}
+
+class ConfigFile extends React.Component {
+  constructor(props, context) {
+    super(props, context);
+    this.stageDagJson = props.stageDagJson;
+    console.log("CONFIG");
+  }
+
+  download_string2file(str) {
+    let file = new Blob([str], { type: "text/plain" });
+    let download_url = URL.createObjectURL(file);
+    location.href = `${download_url}`;
+  }
+
+  render() {
+    return (
+      <tr>
+        <td
+          className="file-link"
+          onClick={this.download_string2file.bind(this, this.stageDagJson)}
+        >
+          <i className="fa fa-file" />
+          config.json
+        </td>
+      </tr>
+    );
+  }
+}
+
+const ResultsFolderStepDivider = () => {
+  return (
+    <tr key="last">
+      <td>
+        <Divider />
+      </td>
+    </tr>
+  );
+};
+
+class ResultsFolderStep extends React.Component {
+  constructor(props, context) {
+    super(props, context);
+    this.stepName = props.stepName;
+    this.step = props.step;
+  }
+
+  render() {
+    let description = this.step["step_description"];
+    let readsAfter = this.step["reads_after"];
+    let fileList = this.step["file_list"];
+    return (
+      <tbody>
+        <tr key="first">
+          <td>
+            Step <b>{this.stepName}</b>: {description}{" "}
+            {readsAfter ? (
+              <span>
+                (<b>{readsAfter}</b> reads remained.)
+              </span>
+            ) : null}
+          </td>
+        </tr>
+        {fileList.map((file, j) => {
+          return <OutputFile file={file} key={j} />;
+        })}
+        <ResultsFolderStepDivider />
+      </tbody>
+    );
+  }
+}
+
+class ResultsFolderStepList extends React.Component {
+  constructor(props, context) {
+    super(props, context);
+    this.stepDict = props.stepDict;
+  }
+
+  render() {
+    return Object.keys(this.stepDict).map((stepName, i) => {
+      let step = this.stepDict[stepName];
+      return <ResultsFolderStep stepName={stepName} step={step} />;
     });
   }
 }
@@ -69,18 +125,6 @@ class ResultsFolder extends React.Component {
 
   gotoPath(path) {
     location.href = `${path}`;
-  }
-
-  download(url) {
-    if (url) {
-      location.href = `${url}`;
-    }
-  }
-
-  download_string2file(str) {
-    let file = new Blob([str], { type: "text/plain" });
-    let download_url = URL.createObjectURL(file);
-    location.href = `${download_url}`;
   }
 
   render() {
@@ -115,38 +159,23 @@ class ResultsFolder extends React.Component {
         <div className="header">
           {!Object.keys(this.stageDict).length
             ? "No files to show"
-            : Object.keys(this.stageDict).map((stage_name, k) => {
-                let stage = this.stageDict[stage_name];
-                let stage_description = stage["stage_description"];
-                let stage_dag_json = stage["stage_dag_json"];
+            : Object.keys(this.stageDict).map((stageName, k) => {
+                let stage = this.stageDict[stageName];
+                let stageDescription = stage["stage_description"];
+                let stageDagJson = stage["stage_dag_json"];
                 let stepDict = stage["steps"];
                 return (
                   <table>
                     <thead>
                       <tr>
                         <th>
-                          {stage_name}: {stage_description}
+                          {stageName}: {stageDescription}
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td
-                          className="file-link"
-                          onClick={this.download_string2file.bind(
-                            this,
-                            stage_dag_json
-                          )}
-                        >
-                          <i className="fa fa-file" />
-                          config.json
-                        </td>
-                      </tr>
-                      <tr key="last">
-                        <td>
-                          <Divider />
-                        </td>
-                      </tr>
+                      <ConfigFile stageDagJson={stageDagJson} />
+                      <ResultsFolderStepDivider />
                     </tbody>
                     <ResultsFolderStepList stepDict={stepDict} />
                   </table>
