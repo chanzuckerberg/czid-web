@@ -6,7 +6,7 @@ import time
 import random
 from operator import itemgetter
 from functools import wraps
-from collections import defaultdict
+from collections import defaultdict, Counter
 import dateutil.parser
 
 DEBUG = False
@@ -87,9 +87,9 @@ def required_capacity(num_jobs):
         result = at_least(24)
     return result
 
-def autoscaling_update(my_num_jobs, my_environment="development",
-                       max_job_dispatch_lag_seconds=900, job_tag_prefix="RunningIDseqBatchJob_",
-                       job_tag_keep_alive_seconds=600, draining_tag="draining"):
+def autoscaling_update(my_num_jobs, my_environment,
+                       max_job_dispatch_lag_seconds, job_tag_prefix,
+                       job_tag_keep_alive_seconds, draining_tag):
     '''
     Plan and perform an update to the GSNAP/RAPSEARCH ASGs.
     Note: Will not scale up for jobs originating in a development environment.
@@ -110,7 +110,7 @@ def autoscaling_update(my_num_jobs, my_environment="development",
     for service_ASG in [gsnap_ASG, rapsearch_ASG]:
         print "--- Analyzing the {instance_name} ASG ---".format(instance_name=service_ASG.instance_name)
         num_desired = service_ASG.num_desired_instances()
-        healthy_instances, draining_instances, terminating_instances, corrupt_instances = service_ASG.classify_instances()
+        healthy_instances, draining_instances, terminating_instances, is_valid_classification = service_ASG.classify_instances()
         num_healthy = len(healthy_instances)
         num_draining = len(draining_instances)
         print "CURRENTLY:"
@@ -118,7 +118,8 @@ def autoscaling_update(my_num_jobs, my_environment="development",
         print "There are {num_healthy} healthy instances: {healthy_instances}.".format(num_healthy=num_healthy, healthy_instances=healthy_instances)
         print "There are {num_draining} draining instances: {draining_instances}.".format(num_draining=num_draining, draining_instances=draining_instances)
         print "There are {num_terminating} terminating instances: {terminating_instances}.".format(num_terminating=len(terminating_instances), terminating_instances=terminating_instances)
-        assert not corrupt_instances, "There are {num_corrupt} corrupt instances: {corrupt_instances}.".format(num_corrupt=len(corrupt_instances), corrupt_instances=corrupt_instances)
+        if not is_valid_classification:
+            print "WARNING: some instances were classified into multiple states or none. This should never happen."
 
         print "MOVING FORWARD:"
         raw_new_num_desired = compute_num_instances(num_desired)
@@ -278,15 +279,21 @@ class ASG(object):
             instance_tags = tag_dict.get(instance_id, {})
             if DEBUG:
                 print "{instance_id}: {instance_tags}".format(instance_id=instance_id, instance_tags=instance_tags)
-            if not inst["ProtectedFromScaleIn"] and not inst["LifecycleState"] == "Pending":
+            is_terminating = not (inst["ProtectedFromScaleIn"] or inst["LifecycleState"] == "Pending")
+            is_draining = ((inst["ProtectedFromScaleIn"] or inst["LifecycleState"] == "Pending") and
+                           self.draining_tag in instance_tags)
+            is_healthy = ((inst["ProtectedFromScaleIn"] or inst["LifecycleState"] == "Pending") and
+                          not self.draining_tag in instance_tags and
+                          inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating")
+            if is_terminating:
                 terminating_instances.append(instance_id)
-            elif self.draining_tag in instance_tags:
+            if is_draining:
                 draining_instances.append(instance_id)
-            elif inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating":
+            if is_healthy:
                 healthy_instances.append(instance_id)
-            else:
-                corrupt_instances.append(instance_id)
-        return healthy_instances, draining_instances, terminating_instances, corrupt_instances
+        state_tally = Counter(healthy_instances + draining_instances + terminating_instances)
+        is_valid = all(state_tally[inst] == 1 for inst in self.asg["Instances"])
+        return healthy_instances, draining_instances, terminating_instances, is_valid
 
     def start_draining(self, num_to_drain):
         def instances_to_drain():
