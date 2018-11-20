@@ -13,7 +13,7 @@ class PhyloTreeCreation extends React.Component {
   constructor(props) {
     super(props);
 
-    this.minNumberOfSamples = 4;
+    this.minNumberOfSamples = 2;
     this.maxNumberOfSamples = 100;
 
     this.state = {
