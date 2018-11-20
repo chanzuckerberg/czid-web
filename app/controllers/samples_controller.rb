@@ -830,30 +830,4 @@ class SamplesController < ApplicationController
     samples = samples.order("#{column} #{direction}") if column && direction
     samples
   end
-
-  # Find sample results based on the string searched. Need to keep some functions
-  # here to access current_power functions. Currently supports some sample
-  # attributes and pathogen tax_name searches.
-  # TODO: Potentially add Metadatum and other search capabilities.
-  def pathogen_search(query)
-    query = query.strip
-
-    # Get taxids that match the query name at any tax level
-    matching_taxids = TaxonLineage.where("tax_name LIKE :search", search: "#{query}%").pluck(:taxid)
-
-    # Get all eligible/accessible pipeline runs
-    eligible_pr_ids = current_power.pipeline_runs.top_completed_runs.pluck(:id)
-
-    # Get pipeline runs that match the taxids
-    matching_pr_ids = TaxonByterange.where(taxid: matching_taxids).pluck(:pipeline_run_id)
-
-    # Filter to the eligible and matching pipeline runs. Used IDs because of
-    # some "Column 'id' in IN/ALL/ANY subquery is ambiguous" issue with
-    # chained queries.
-    filtered_pr_ids = eligible_pr_ids && matching_pr_ids
-
-    # Find the sample ids
-    sample_ids = PipelineRun.joins(:sample).where(id: filtered_pr_ids).pluck(:'pipeline_runs.sample_id').uniq
-    current_power.samples.where(id: sample_ids)
-  end
 end
