@@ -204,7 +204,9 @@ class PipelineRunStage < ApplicationRecord
       max_interval_between_describe_instances: PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS,
       job_tag_prefix: PipelineRun::JOB_TAG_PREFIX,
       job_tag_refresh_seconds: PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS,
-      draining_tag: PipelineRun::DRAINING_TAG
+      draining_tag: PipelineRun::DRAINING_TAG,
+      gsnap_m8: PipelineRun::GSNAP_M8,
+      rapsearch_m8: PipelineRun::RAPSEARCH_M8
     }
     key_s3_params = format("--key-path-s3 s3://idseq-secrets/idseq-%s.pem", (Rails.env == 'prod' ? 'prod' : 'staging')) # TODO: This is hacky
     dag_commands = prepare_dag("non_host_alignment", attribute_dict, key_s3_params)
