@@ -1137,7 +1137,7 @@ class PipelineRun < ApplicationRecord
       next unless prs.dag_json && STEP_DESCRIPTIONS[prs.name]
       result[prs.name] = {
         "stage_description" => STEP_DESCRIPTIONS[prs.name]["stage"],
-        "stage_dag_json" => prs.dag_json,
+        "stage_dag_json" => prs.redacted_dag_json,
         "steps" => {}
       }
       dag_dict = JSON.parse(prs.dag_json)
