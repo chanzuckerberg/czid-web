@@ -43,11 +43,11 @@ class ConfigFile extends React.Component {
 
   render() {
     return (
-      <tr>
-        <td
-          className="file-link"
-          onClick={this.download_string2file.bind(this, this.stageDagJson)}
-        >
+      <tr
+        className="file-link"
+        onClick={this.download_string2file.bind(this, this.stageDagJson)}
+      >
+        <td>
           <i className="fa fa-file" />
           config.json
         </td>
