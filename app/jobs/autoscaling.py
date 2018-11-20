@@ -73,21 +73,7 @@ def get_asg_list():
     asg_list = json.loads(asg_json).get('AutoScalingGroups', [])
     return asg_list
 
-def required_capacity(num_jobs):
-    if num_jobs == 0:
-        result = exactly(0)
-    elif num_jobs == 1:
-        # Often a test job or automatic benchmark job
-        result = exactly(4)
-    elif 1 < num_jobs <= 6:
-        result = exactly(8)
-    else:
-        # This means, as long as we're in this regime, a DesiredCapacity > 24 set manually by the operator
-        # will be respected and not scaled down until we exit this regime.
-        result = at_least(24)
-    return result
-
-def autoscaling_update(my_num_jobs, my_environment="development",
+def autoscaling_update(num_gsnap_chunks, num_rapsearch_chunks, my_environment="development",
                        max_job_dispatch_lag_seconds=900, job_tag_prefix="RunningIDseqBatchJob_",
                        job_tag_keep_alive_seconds=600, draining_tag="draining"):
     '''
@@ -99,17 +85,15 @@ def autoscaling_update(my_num_jobs, my_environment="development",
 
     asg_list = get_asg_list()
     tag_list = get_tag_list()
-    gsnap_ASG = ASG("gsnapl", my_environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds)
-    rapsearch_ASG = ASG("rapsearch2", my_environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds)
+    gsnap_ASG = ASG("gsnapl", num_gsnap_chunks, my_environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds)
+    rapsearch_ASG = ASG("rapsearch2", num_rapsearch_chunks, my_environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds)
     if not (gsnap_ASG.can_scale and rapsearch_ASG.can_scale):
         print "Scaling by agents of {my_environment} is not permitted.".format(my_environment=my_environment)
         return
 
-    print "{my_num_jobs} jobs are in progress.".format(my_num_jobs=my_num_jobs)
-    compute_num_instances = required_capacity(my_num_jobs)
     for service_ASG in [gsnap_ASG, rapsearch_ASG]:
         print "--- Analyzing the {instance_name} ASG ---".format(instance_name=service_ASG.instance_name)
-        num_desired = service_ASG.num_desired_instances()
+        num_desired = service_ASG.desired_capacity()
         healthy_instances, draining_instances, terminating_instances, corrupt_instances = service_ASG.classify_instances()
         num_healthy = len(healthy_instances)
         num_draining = len(draining_instances)
@@ -120,8 +104,10 @@ def autoscaling_update(my_num_jobs, my_environment="development",
         print "There are {num_terminating} terminating instances: {terminating_instances}.".format(num_terminating=len(terminating_instances), terminating_instances=terminating_instances)
         assert not corrupt_instances, "There are {num_corrupt} corrupt instances: {corrupt_instances}.".format(num_corrupt=len(corrupt_instances), corrupt_instances=corrupt_instances)
 
+        print "CHUNKS IN PROGRESS: {service_ASG.num_chunks}"
+
         print "MOVING FORWARD:"
-        raw_new_num_desired = compute_num_instances(num_desired)
+        raw_new_num_desired = service_ASG.required_capacity(num_desired)
         print "In principle, the desired capacity needs to be {raw_new_num_desired}.".format(raw_new_num_desired=raw_new_num_desired)
         new_num_desired = service_ASG.clamp_to_valid_range(raw_new_num_desired)
         print "Enforcing the MinSize and MaxSize set by the operator, the desired capacity will be set to {new_num_desired}.".format(new_num_desired=new_num_desired)
@@ -187,9 +173,11 @@ class ASG(object):
     job_dispatch_lag_grace_period_seconds = 300
     job_tag_keep_alive_grace_period_seconds = 300
 
-    def __init__(self, service, environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds):
+    def __init__(self, service, num_chunks, environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds):
         self.draining_instances = []
+
         self.service = service
+        self.num_chunks = num_chunks
         self.environment = environment
         self.draining_tag = draining_tag
         self.job_tag_prefix = job_tag_prefix
@@ -236,7 +224,7 @@ class ASG(object):
         tags = find_tags(instance_ids)
         return asg, instance_ids, tags
 
-    def num_desired_instances(self):
+    def desired_capacity(self):
         return int(self.asg.get("DesiredCapacity", self.asg.get("MinSize", 0)))
 
     def tags_by_instance_id(self):
@@ -247,6 +235,23 @@ class ASG(object):
             value = item['Value']
             result[instance_id][key] = value
         return result
+
+    def required_capacity_func(self):
+        if self.num_chunks == 0:
+            result = exactly(0)
+        elif self.num_chunks == 1:
+            # Often a test job or automatic benchmark job
+            result = exactly(4)
+        elif 1 < self.num_chunks <= 6:
+            result = exactly(8)
+        else:
+            # This means, as long as we're in this regime, a DesiredCapacity > 24 set manually by the operator
+            # will be respected and not scaled down until we exit this regime.
+            result = at_least(24)
+        return result
+
+    def required_capacity(self, current_desired_capacity):
+        return self.required_capacity_func(current_desired_capacity)
 
     def clamp_to_valid_range(self, desired_capacity):
         min_size = int(self.asg.get("MinSize", desired_capacity))
