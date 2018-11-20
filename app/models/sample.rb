@@ -135,13 +135,41 @@ class Sample < ApplicationRecord
     end
   end
 
-  def self.search(search)
+  # Find sample results based on the string searched. Supports direct search on
+  # sample attributes and search by pathogen name presence.
+  # TODO: Add Metadatum 2.0 and other search capabilities.
+  def self.search(search, eligible_pr_ids = [])
+    # pipeline_run_ids to restrict the set of pipeline runs to search
     if search
-      where('samples.name LIKE :search
+      search = search.strip
+      results = where('samples.name LIKE :search
         OR samples.sample_tissue LIKE :search
         OR samples.sample_location LIKE :search
         OR samples.sample_notes LIKE :search
         OR samples.sample_unique_id LIKE :search', search: "%#{search}%")
+
+      unless eligible_pr_ids.empty?
+        # Require scope of eligible pipeline runs for pathogen search
+
+        # Get taxids that match the query name at any tax level
+        matching_taxids = TaxonLineage.where("tax_name LIKE :search", search: "#{search}%").pluck(:taxid)
+
+        # Get pipeline runs that match the taxids
+        matching_pr_ids = TaxonByterange.where(taxid: matching_taxids).pluck(:pipeline_run_id)
+
+        # Filter to the eligible and matching pipeline runs. Used IDs because of
+        # some "'id' in IN/ALL/ANY subquery is ambiguous" issue with chained
+        # queries.
+        filtered_pr_ids = eligible_pr_ids && matching_pr_ids
+
+        # Find the sample ids
+        sample_ids = PipelineRun.joins(:sample).where(id: filtered_pr_ids).pluck(:'pipeline_runs.sample_id').uniq
+        pathogen_results = where(id: sample_ids)
+
+        results = results.or(pathogen_results)
+      end
+
+      results
     else
       scoped
     end

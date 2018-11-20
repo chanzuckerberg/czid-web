@@ -63,12 +63,18 @@ class SamplesController < ApplicationController
     # Get tissue types and host genomes that are present in the sample list
     # TODO(yf) : the following tissue_types, host_genomes have performance
     # impact that it should be moved to different dedicated functions. Not
-    # parsina the whole results.
+    # parsing the whole results.
     @tissue_types = results.select("distinct(sample_tissue)").map(&:sample_tissue).compact.sort
     host_genome_ids = results.select("distinct(host_genome_id)").map(&:host_genome_id).compact.sort
     @host_genomes = HostGenome.find(host_genome_ids)
 
-    results = results.search(name_search_query) if name_search_query.present?
+    # Query by name for a Sample attribute or pathogen name in the Sample
+    if name_search_query.present?
+      # Pass in a scope of pipeline runs using current_power
+      pipeline_run_ids = current_power.pipeline_runs.top_completed_runs.pluck(:id)
+      results = results.search(name_search_query, pipeline_run_ids)
+    end
+
     results = filter_by_status(results, filter_query) if filter_query.present?
     results = filter_by_tissue_type(results, tissue_type_query) if tissue_type_query.present?
     results = filter_by_host(results, host_query) if host_query.present?
@@ -823,5 +829,31 @@ class SamplesController < ApplicationController
     column, direction = dir.split(',')
     samples = samples.order("#{column} #{direction}") if column && direction
     samples
+  end
+
+  # Find sample results based on the string searched. Need to keep some functions
+  # here to access current_power functions. Currently supports some sample
+  # attributes and pathogen tax_name searches.
+  # TODO: Potentially add Metadatum and other search capabilities.
+  def pathogen_search(query)
+    query = query.strip
+
+    # Get taxids that match the query name at any tax level
+    matching_taxids = TaxonLineage.where("tax_name LIKE :search", search: "#{query}%").pluck(:taxid)
+
+    # Get all eligible/accessible pipeline runs
+    eligible_pr_ids = current_power.pipeline_runs.top_completed_runs.pluck(:id)
+
+    # Get pipeline runs that match the taxids
+    matching_pr_ids = TaxonByterange.where(taxid: matching_taxids).pluck(:pipeline_run_id)
+
+    # Filter to the eligible and matching pipeline runs. Used IDs because of
+    # some "Column 'id' in IN/ALL/ANY subquery is ambiguous" issue with
+    # chained queries.
+    filtered_pr_ids = eligible_pr_ids && matching_pr_ids
+
+    # Find the sample ids
+    sample_ids = PipelineRun.joins(:sample).where(id: filtered_pr_ids).pluck(:'pipeline_runs.sample_id').uniq
+    current_power.samples.where(id: sample_ids)
   end
 end
