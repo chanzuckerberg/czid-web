@@ -53,29 +53,28 @@ class CheckPipelineRuns
   end
 
   def self.autoscaling_update(autoscaling_state, t_now)
+    return if Rails.env == "development"
     unless autoscaling_state
       autoscaling_state = {
         t_last: t_now - forced_update_interval,
-        job_count: nil
+        chunk_counts: nil
       }
     end
-    last_job_count = autoscaling_state[:job_count]
+    last_chunk_counts = autoscaling_state[:chunk_counts]
     t_last = autoscaling_state[:t_last]
-    runs = PipelineRun.in_progress_at_stage_1_or_2
-    runs = runs.where("id > 10") if Rails.env == "development"
-    new_job_count = runs.count
-    return autoscaling_state if new_job_count == last_job_count && ((t_now - t_last) < forced_update_interval)
-    if last_job_count.nil?
-      Rails.logger.info("Autoscaling update to #{new_job_count}.")
-    elsif last_job_count == new_job_count
-      Rails.logger.info("Forced autoscaling update at #{new_job_count} after #{t_now - t_last} seconds.")
+    new_chunk_counts = PipelineRun.count_alignment_chunks_in_progress
+    return autoscaling_state if new_chunk_counts == last_chunk_counts && ((t_now - t_last) < forced_update_interval)
+    if last_chunk_counts.nil?
+      Rails.logger.info("Autoscaling update to #{new_chunk_counts}.")
+    elsif last_chunk_counts == new_chunk_counts
+      Rails.logger.info("Forced autoscaling update at #{new_chunk_counts} after #{t_now - t_last} seconds.")
     else
-      Rails.logger.info("Autoscaling update from #{last_job_count} to #{new_job_count}.")
+      Rails.logger.info("Autoscaling update from #{last_chunk_counts} to #{new_chunk_counts}.")
     end
     autoscaling_state[:t_last] = t_now
-    autoscaling_state[:job_count] = new_job_count
+    autoscaling_state[:chunk_counts] = new_chunk_counts
     c_stdout, c_stderr, c_status = Open3.capture3(
-      "app/jobs/autoscaling.py update #{new_job_count} #{Rails.env}" \
+      "app/jobs/autoscaling.py update #{new_chunk_counts[:gsnap]} #{new_chunk_counts[:rapsearch]} #{Rails.env}" \
       " #{PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS}" \
       " #{PipelineRun::JOB_TAG_PREFIX}" \
       " #{PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS}" \
