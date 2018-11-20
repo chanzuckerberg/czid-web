@@ -370,11 +370,16 @@ class ASG(object):
         return instance_ids
 
 if __name__ == "__main__":
-    assert len(sys.argv) > 2
-    assert sys.argv[1] in ("update", "debug")
-    assert sys.argv[2].isdigit()
-    assert sys.argv[4].isdigit()
-    assert sys.argv[6].isdigit()
-    if sys.argv[1] == "debug":
+    _, mode, gsnap_chunk_count, rapsearch_chunk_count, rails_env, max_job_dispatch_lag_seconds, job_tag_prefix, job_tag_keep_alive_seconds, draining_tag = sys.argv
+
+    assert mode in ("update", "debug")
+    if mode == "debug":
         DEBUG = True
-    autoscaling_update(int(sys.argv[2]), sys.argv[3], int(sys.argv[4]), sys.argv[5], int(sys.argv[6]), sys.argv[7])
+
+    assert all(item.isdigit() for item in [gsnap_chunk_count, rapsearch_chunk_count, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds])
+    gsnap_chunk_count = int(gsnap_chunk_count)
+    rapsearch_chunk_count = int(rapsearch_chunk_count)
+    max_job_dispatch_lag_seconds = int(max_job_dispatch_lag_seconds)
+    job_tag_keep_alive_seconds = int(job_tag_keep_alive_seconds)
+
+    autoscaling_update(mode, gsnap_chunk_count, rapsearch_chunk_count, rails_env, max_job_dispatch_lag_seconds, job_tag_prefix, job_tag_keep_alive_seconds, draining_tag)
