@@ -407,8 +407,9 @@ if __name__ == "__main__":
     _, autoscaling_config_json = sys.argv
     autoscaling_config = json.loads(autoscaling_config_json)
 
+    mode = autoscaling_config.pop("mode")
     assert mode in ("update", "debug")
     if mode == "debug":
         DEBUG = True
 
-    autoscaling_update(**autoscaling_config_json)
+    autoscaling_update(**autoscaling_config)
