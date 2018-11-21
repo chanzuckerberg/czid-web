@@ -71,11 +71,11 @@ class CheckPipelineRuns
     autoscaling_state[:chunk_counts] = new_chunk_counts
     autoscaling_config = {
       'mode' => 'update',
-      'gsnap_chunk_count' => new_chunk_counts[:gsnap],
-      'rapsearch_chunk_count' => new_chunk_counts[:rapsearch],
+      'num_gsnap_chunks' => new_chunk_counts[:gsnap],
+      'num_rapsearch_chunks' => new_chunk_counts[:rapsearch],
       'gsnap_max_concurrent' => PipelineRun::GSNAP_MAX_CONCURRENT,
       'rapsearch_max_concurrent' => PipelineRun::RAPSEARCH_MAX_CONCURRENT,
-      'rails_env' => Rails.env,
+      'my_environment' => Rails.env,
       'max_job_dispatch_lag_seconds' => PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS,
       'job_tag_prefix' => PipelineRun::JOB_TAG_PREFIX,
       'job_tag_keep_alive_seconds' => PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS,
