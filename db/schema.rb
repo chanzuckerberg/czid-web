@@ -182,7 +182,7 @@ ActiveRecord::Schema.define(version: 20_181_120_205_014) do
     t.text "newick"
     t.integer "status", default: 0
     t.string "dag_version"
-    t.text "dag_json", limit: 4_294_967_295
+    t.text "dag_json"
     t.text "command_stdout"
     t.text "command_stderr"
     t.string "job_id"

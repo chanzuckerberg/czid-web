@@ -3,6 +3,7 @@ import PrimaryButton from "../buttons/PrimaryButton";
 import SecondaryButton from "../buttons/SecondaryButton";
 import PropTypes from "prop-types";
 import React from "react";
+import cx from "classnames";
 
 class ButtonDropdown extends React.Component {
   constructor(props) {
@@ -46,9 +47,13 @@ class ButtonDropdown extends React.Component {
   render() {
     return (
       <Dropdown
-        className={`idseq-ui button-dropdown button ${
-          this.props.primary ? "primary" : "secondary"
-        }`}
+        className={cx(
+          "idseq-ui",
+          "button-dropdown",
+          "button",
+          this.props.primary ? "primary" : "secondary",
+          this.props.className
+        )}
         disabled={this.props.disabled}
         floating
         onMouseDown={this.handleMouseDown}
@@ -61,6 +66,7 @@ class ButtonDropdown extends React.Component {
 }
 
 ButtonDropdown.propTypes = {
+  className: PropTypes.string,
   disabled: PropTypes.bool,
   icon: PropTypes.element,
   onClick: PropTypes.func,

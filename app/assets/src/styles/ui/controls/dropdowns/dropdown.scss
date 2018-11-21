@@ -29,6 +29,12 @@
     font-stretch: normal;
   }
 
+  .label-container {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
   .label-title {
     float: left;
     font-weight: 600;

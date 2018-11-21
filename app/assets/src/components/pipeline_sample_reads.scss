@@ -41,3 +41,18 @@
     margin-bottom: 0;
   }
 }
+
+.reportsDivider {
+  background-color: $off-white;
+  height: 8px !important;
+  border-top: 1px solid $white !important;
+
+  &.hasTabs {
+    margin-top: -5px !important;
+  }
+}
+
+// TODO(mark): Remove all old Sample Details code once new sidebar goes live
+.detailsTab {
+  display: none;
+}

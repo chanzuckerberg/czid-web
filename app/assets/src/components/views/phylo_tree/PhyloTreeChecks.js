@@ -1,4 +1,4 @@
-const MIN_READS = 100;
+const MIN_READS = 1;
 
 class PhyloTreeChecks {
   static passesCreateCondition(ntReads, nrReads) {

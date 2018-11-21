@@ -61,13 +61,9 @@ class CheckPipelineRuns
       }
     end
     last_chunk_counts = autoscaling_state[:chunk_counts]
-    t_last = autoscaling_state[:t_last]
     new_chunk_counts = PipelineRun.count_alignment_chunks_in_progress
-    return autoscaling_state if new_chunk_counts == last_chunk_counts && ((t_now - t_last) < forced_update_interval)
     if last_chunk_counts.nil?
       Rails.logger.info("Autoscaling update to #{new_chunk_counts}.")
-    elsif last_chunk_counts == new_chunk_counts
-      Rails.logger.info("Forced autoscaling update at #{new_chunk_counts} after #{t_now - t_last} seconds.")
     else
       Rails.logger.info("Autoscaling update from #{last_chunk_counts} to #{new_chunk_counts}.")
     end
