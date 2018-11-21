@@ -96,6 +96,8 @@ def autoscaling_update(my_num_jobs, my_environment,
           You can provision machines for development jobs by manually setting MinSize on the ASGs,
           which is respected by this autoscaler.
     '''
+    if my_environment == "development":
+        return
 
     asg_list = get_asg_list()
     tag_list = get_tag_list()
