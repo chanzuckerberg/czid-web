@@ -205,6 +205,9 @@ class PipelineRunStage < ApplicationRecord
       job_tag_prefix: PipelineRun::JOB_TAG_PREFIX,
       job_tag_refresh_seconds: PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS,
       draining_tag: PipelineRun::DRAINING_TAG,
+      chunk_size: PipelineRun::GSNAP_RAPSEARCH_CHUNK_SIZE,
+      gsnap_max_concurrent: PipelineRun::GSNAP_MAX_CONCURRENT,
+      rapsearch_max_concurrent: PipelineRun::RAPSEARCH_MAX_CONCURRENT,
       gsnap_m8: PipelineRun::GSNAP_M8,
       rapsearch_m8: PipelineRun::RAPSEARCH_M8
     }

@@ -33,6 +33,11 @@ class PipelineRun < ApplicationRecord
   ADAPTER_SEQUENCES = { "single-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-SE.fasta",
                         "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta" }.freeze
 
+  GSNAP_CHUNK_SIZE = 15_000
+  RAPSEARCH_CHUNK_SIZE = 10_000
+  GSNAP_MAX_CONCURRENT = 2
+  RAPSEARCH_MAX_CONCURRENT = 6
+
   GSNAP_M8 = "gsnap.m8".freeze
   RAPSEARCH_M8 = "rapsearch2.m8".freeze
   OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
@@ -188,12 +193,14 @@ class PipelineRun < ApplicationRecord
     in_progress.where("job_status NOT LIKE '3.%' AND job_status NOT LIKE '4.%'")
   end
 
-  def self.count_chunks(run_ids, known_num_reads)
-    chunk_size = 15_000 # TODO: make this a constant and pass to DAG
+  def self.count_chunks(run_ids, known_num_reads, chunk_size)
     num_chunks = {}
     run_ids.each do |pr_id|
       # each run will count for 1 chunk unless number of non-host reads is known
-      num_chunks[pr_id] = ((known_num_reads[pr_id] || chunk_size) / chunk_size.to_f).ceil
+      total_num_chunks = ((known_num_reads[pr_id] || chunk_size) / chunk_size.to_f).ceil
+      # due to rate limits in idseq-dag, there is a cap on the number of chunks dispatched concurrently by a single job
+      capped_num_chunks = min(total_num_chunks, 30)
+      num_chunks[pr_id] = capped_num_chunks
     end
     num_chunks.values.sum
   end
@@ -203,8 +210,8 @@ class PipelineRun < ApplicationRecord
     need_rapsearch = in_progress_at_stage_1_or_2.where(rapsearch_done: 0).pluck(:id)
     last_host_filter_step = JobStat.where(pipeline_run_id: need_gsnap + need_rapsearch).where(task: "subsampled_out")
     known_num_reads = Hash[last_host_filter_step.pluck(:pipeline_run_id, :reads_after)]
-    gsnap_num_chunks = count_chunks(need_gsnap, known_num_reads)
-    rapsearch_num_chunks = count_chunks(need_rapsearch, known_num_reads)
+    gsnap_num_chunks = count_chunks(need_gsnap, known_num_reads, GSNAP_CHUNK_SIZE)
+    rapsearch_num_chunks = count_chunks(need_rapsearch, known_num_reads, RAPSEARCH_CHUNK_SIZE)
     { gsnap: gsnap_num_chunks, rapsearch: rapsearch_num_chunks }
   end
 

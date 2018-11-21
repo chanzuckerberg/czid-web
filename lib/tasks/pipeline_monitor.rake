@@ -73,6 +73,8 @@ class CheckPipelineRuns
       'mode' => 'update',
       'gsnap_chunk_count' => new_chunk_counts[:gsnap],
       'rapsearch_chunk_count' => new_chunk_counts[:rapsearch],
+      'gsnap_max_concurrent' => PipelineRun::GSNAP_MAX_CONCURRENT,
+      'rapsearch_max_concurrent' => PipelineRun::RAPSEARCH_MAX_CONCURRENT,
       'rails_env' => Rails.env,
       'max_job_dispatch_lag_seconds' => PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS,
       'job_tag_prefix' => PipelineRun::JOB_TAG_PREFIX,
