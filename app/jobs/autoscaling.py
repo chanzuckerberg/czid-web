@@ -138,12 +138,14 @@ def autoscaling_update(my_num_jobs, my_environment,
         service_ASG.draining_instances = draining_instances
         if new_num_desired < num_healthy:
             num_to_drain = num_healthy - new_num_desired
+            print "{num_to_drain} instances need to be drained.".format(num_to_drain=num_to_drain)
             instances_to_drain = service_ASG.start_draining(num_to_drain)
-            print "{num_to_drain} instances need to be drained: {instances_to_drain}.".format(num_to_drain=num_to_drain, instances_to_drain=instances_to_drain)
+            print "Moved {instances_to_drain} from 'healthy' to 'draining' state.".format(instances_to_drain=instances_to_drain)
         elif new_num_desired > num_healthy:
             num_to_rescue = min(new_num_desired - num_healthy, num_draining)
+            print "{num_to_rescue} instances need to stop draining.".format(num_to_rescue=num_to_rescue)
             instances_to_rescue = service_ASG.stop_draining(num_to_rescue)
-            print "{num_to_rescue} instances need to stop draining: {instances_to_rescue}.".format(num_to_rescue=num_to_rescue, instances_to_rescue=instances_to_rescue)
+            print "Moved {instances_to_rescue} from 'draining' to 'healthy' state.".format(instances_to_rescue=instances_to_rescue)
         else:
             print "No instances need to make a HEALTHY <--> DRAINING transition."
 
