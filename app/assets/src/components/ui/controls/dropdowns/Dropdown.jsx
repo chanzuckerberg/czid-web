@@ -28,7 +28,7 @@ class Dropdown extends React.Component {
 
   renderText() {
     return (
-      <div>
+      <div className="label-container">
         <span className="label-title">{this.props.label}</span>
         {this.state.value !== undefined &&
           this.state.value !== null &&

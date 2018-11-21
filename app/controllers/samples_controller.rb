@@ -15,7 +15,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
-                  :contigs_fasta, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
+                  :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
   EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
@@ -208,11 +208,11 @@ class SamplesController < ApplicationController
         upload_date: @sample.created_at,
         project_name: @sample.project.name,
         project_id: @sample.project_id,
-        pipeline_run: pr_display,
+        notes: @sample.sample_notes,
         ercc_comparison: ercc_comparison,
+        pipeline_run: pr_display,
         summary_stats: summary_stats,
-        assembled_taxids: assembled_taxids,
-        notes: @sample.sample_notes
+        assembled_taxids: assembled_taxids
       }
     }
   end
@@ -493,7 +493,8 @@ class SamplesController < ApplicationController
   end
 
   def contigs_fasta
-    contigs_fasta_s3_path = @sample.contigs_fasta_s3_path
+    pr = select_pipeline_run(@sample, params)
+    contigs_fasta_s3_path = pr.contigs_fasta_s3_path
 
     if contigs_fasta_s3_path
       @contigs_fasta = get_s3_file(contigs_fasta_s3_path)
@@ -501,6 +502,20 @@ class SamplesController < ApplicationController
     else
       render json: {
         error: "contigs fasta file does not exist for this sample"
+      }
+    end
+  end
+
+  def contigs_summary
+    pr = select_pipeline_run(@sample, params)
+    contigs_summary_s3_path = pr.contigs_summary_s3_path
+
+    if contigs_summary_s3_path
+      @contigs_summary = get_s3_file(contigs_summary_s3_path)
+      send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'
+    else
+      render json: {
+        error: "contigs summary file does not exist for this sample"
       }
     end
   end
@@ -722,14 +737,14 @@ class SamplesController < ApplicationController
   def sample_taxons_dict(params)
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
     num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
-    taxon_ids = (params[:taxonIds] || []).map do |x|
+    removed_taxon_ids = (params[:removedTaxonIds] || []).map do |x|
       begin
         Integer(x)
       rescue ArgumentError
         nil
       end
     end
-    taxon_ids = taxon_ids.compact
+    removed_taxon_ids = removed_taxon_ids.compact
     categories = params[:categories]
     threshold_filters = if params[:thresholdFilters].is_a?(Array)
                           (params[:thresholdFilters] || []).map { |filter| JSON.parse(filter || "{}") }
@@ -747,8 +762,9 @@ class SamplesController < ApplicationController
 
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
-    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id") if taxon_ids.empty?
 
+    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
+    taxon_ids -= removed_taxon_ids
     return {} if taxon_ids.empty?
 
     samples_taxons_details(samples, taxon_ids, background_id, species_selected)

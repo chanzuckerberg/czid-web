@@ -1,10 +1,10 @@
-<div id="SamplesHeatmap_page">
+<div id="SamplesHeatmapView_page">
 </div>
 
 <%= javascript_tag do %>
   react_component(
-    'SamplesHeatmap', 
+    'SamplesHeatmapView', 
     JSON.parse('<%= raw escape_json(@heatmap_data) %>'),
-    'SamplesHeatmap_page'
+    'SamplesHeatmapView_page'
   );
 <% end %>

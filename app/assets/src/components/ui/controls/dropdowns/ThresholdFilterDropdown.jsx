@@ -198,19 +198,18 @@ const ThresholdFilter = ({
   onChange,
   onRemove
 }) => {
-  const handleMetricChange = (_, metric) => {
-    threshold.metric = metric.value;
-    onChange(threshold);
+  let { metric, value, operator } = threshold;
+
+  const handleMetricChange = (_, newMetric) => {
+    onChange({ metric: newMetric.value, value, operator });
   };
 
-  const handleOperatorChange = (_, operator) => {
-    threshold.operator = operator.value;
-    onChange(threshold);
+  const handleOperatorChange = (_, newOperator) => {
+    onChange({ metric, value, operator: newOperator.value });
   };
 
-  const handleValueChange = (_, value) => {
-    threshold.value = value.value;
-    onChange(threshold);
+  const handleValueChange = (_, newValue) => {
+    onChange({ metric, value: newValue.value, operator });
   };
 
   return (
@@ -223,8 +222,8 @@ const ThresholdFilter = ({
           floating
           scrolling
           options={metrics}
-          onChange={handleMetricChange.bind(this)}
-          value={threshold.metric}
+          onChange={handleMetricChange}
+          value={metric}
         />
       </Grid.Column>
       <Grid.Column>
@@ -236,7 +235,7 @@ const ThresholdFilter = ({
           scrolling
           options={operators.map(option => ({ text: option, value: option }))}
           onChange={handleOperatorChange}
-          value={threshold.operator}
+          value={operator}
         />
       </Grid.Column>
       <Grid.Column>
@@ -245,7 +244,7 @@ const ThresholdFilter = ({
           focus
           type="number"
           onChange={handleValueChange}
-          value={threshold.value}
+          value={value}
         />
       </Grid.Column>
       <Grid.Column width={1}>
