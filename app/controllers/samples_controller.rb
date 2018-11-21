@@ -63,12 +63,18 @@ class SamplesController < ApplicationController
     # Get tissue types and host genomes that are present in the sample list
     # TODO(yf) : the following tissue_types, host_genomes have performance
     # impact that it should be moved to different dedicated functions. Not
-    # parsina the whole results.
+    # parsing the whole results.
     @tissue_types = results.select("distinct(sample_tissue)").map(&:sample_tissue).compact.sort
     host_genome_ids = results.select("distinct(host_genome_id)").map(&:host_genome_id).compact.sort
     @host_genomes = HostGenome.find(host_genome_ids)
 
-    results = results.search(name_search_query) if name_search_query.present?
+    # Query by name for a Sample attribute or pathogen name in the Sample
+    if name_search_query.present?
+      # Pass in a scope of pipeline runs using current_power
+      pipeline_run_ids = current_power.pipeline_runs.top_completed_runs.pluck(:id)
+      results = results.search(name_search_query, pipeline_run_ids)
+    end
+
     results = filter_by_status(results, filter_query) if filter_query.present?
     results = filter_by_tissue_type(results, tissue_type_query) if tissue_type_query.present?
     results = filter_by_host(results, host_query) if host_query.present?
