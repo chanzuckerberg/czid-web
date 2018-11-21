@@ -84,7 +84,10 @@ class PhyloTreeListView extends React.Component {
       <div className={cs.phyloTreeListView}>
         <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
           <ViewHeader.Content>
-            <ViewHeader.Pretitle>Phylogenetic Tree</ViewHeader.Pretitle>
+            <ViewHeader.Pretitle>
+              Phylogenetic Tree{" "}
+              {currentTree.tax_name && `- ${currentTree.tax_name}`}
+            </ViewHeader.Pretitle>
             <ViewHeader.Title
               label={this.phyloTreeMap.get(this.state.selectedPhyloTreeId).name}
               id={this.state.selectedPhyloTreeId}
