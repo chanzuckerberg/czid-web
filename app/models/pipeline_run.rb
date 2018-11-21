@@ -217,8 +217,8 @@ class PipelineRun < ApplicationRecord
     last_host_filter_step = "subsampled_out"
     known_num_reads = Hash[in_progress_job_stats.where(task: last_host_filter_step).pluck(:pipeline_run_id, :reads_after)]
     # Get number of chunks that have already completed
-    completed_gsnap_chunks = Hash[need_alignment.pluck(:pipeline_run_id, :completed_gsnap_chunks)]
-    completed_rapsearch_chunks = Hash[need_alignment.pluck(:pipeline_run_id, :completed_rapsearch_chunks)]
+    completed_gsnap_chunks = Hash[need_alignment.pluck(:id, :completed_gsnap_chunks)]
+    completed_rapsearch_chunks = Hash[need_alignment.pluck(:id, :completed_rapsearch_chunks)]
     # Compute number of chunks that still need to be processed
     gsnap_num_chunks = count_chunks(need_alignment, known_num_reads, GSNAP_CHUNK_SIZE, completed_gsnap_chunks)
     rapsearch_num_chunks = count_chunks(need_alignment, known_num_reads, RAPSEARCH_CHUNK_SIZE, completed_rapsearch_chunks)
