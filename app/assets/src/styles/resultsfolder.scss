@@ -1,0 +1,44 @@
+@import "typography";
+@import "themes/colors";
+
+.results-folder {
+  .header {
+    margin: 25px 75px;
+    .title {
+      font-size: $font-size-h3;
+      color: $primary-light;
+      .path {
+        margin: 20px;
+        color: $black;
+        font-weight: $font-weight-thin;
+      }
+      .back {
+        cursor: pointer;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+    th {
+      color: $darkest-grey;
+    }
+  }
+}
+.fileLink {
+  cursor: pointer;
+  td {
+    color: $darkest-grey;
+    &:hover {
+      color: $primary-light;
+    }
+  }
+}
+.disabledFileLink {
+  color: $medium-grey;
+}
+i.fa-file {
+  margin-right: 15px;
+}
+.size-tag {
+  color: $light-grey;
+}

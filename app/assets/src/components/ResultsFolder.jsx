@@ -8,11 +8,17 @@ class OutputFile extends React.Component {
     this.file = props.file;
   }
 
+  conditionalOpenUrl = url => {
+    if (url) {
+      openUrl(this.file.url);
+    }
+  };
+
   render() {
     return (
       <tr
         className={`${this.file.url ? "" : "disabled-"}file-link`}
-        onClick={openUrl.bind(this, this.file.url)}
+        onClick={this.conditionalOpenUrl.bind(this, this.file.url)}
       >
         <td>
           <i className="fa fa-file" />
@@ -96,7 +102,7 @@ class ResultsFolderStepList extends React.Component {
   render() {
     return Object.keys(this.stepDict).map((stepName, i) => {
       let step = this.stepDict[stepName];
-      return <ResultsFolderStep stepName={stepName} step={step} />;
+      return <ResultsFolderStep stepName={stepName} step={step} key={i} />;
     });
   }
 }
@@ -153,7 +159,7 @@ class ResultsFolder extends React.Component {
                 let stageDagJson = stage["stage_dag_json"];
                 let stepDict = stage["steps"];
                 return (
-                  <table>
+                  <table key={k}>
                     <thead>
                       <tr>
                         <th>
