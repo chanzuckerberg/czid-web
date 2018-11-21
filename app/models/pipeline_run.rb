@@ -717,15 +717,6 @@ class PipelineRun < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
   end
 
-  def update_gsnap_rapsearch_indicators
-    if gsnap_done.zero? && file_generated_since_run(self, "#{alignment_output_s3_path}/#{GSNAP_M8}")
-      self.gsnap_done = 1
-    end
-    if rapsearch_done.zero? && file_generated_since_run(self, "#{alignment_output_s3_path}/#{RAPSEARCH_M8}")
-      self.rapsearch_done = 1
-    end
-  end
-
   def update_job_status
     prs = active_stage
     if prs.nil?
@@ -743,7 +734,6 @@ class PipelineRun < ApplicationRecord
       else
         # still running
         prs.update_job_status
-        update_gsnap_rapsearch_indicators
         # Check for long-running pipeline run and log/alert if needed
         check_and_log_long_run
       end
