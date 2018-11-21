@@ -60,7 +60,6 @@ class CheckPipelineRuns
       }
     end
     last_job_count = autoscaling_state[:job_count]
-    t_last = autoscaling_state[:t_last]
     runs = PipelineRun.in_progress_at_stage_1_or_2
     runs = runs.where("id > 10") if Rails.env == "development"
     new_job_count = runs.count
