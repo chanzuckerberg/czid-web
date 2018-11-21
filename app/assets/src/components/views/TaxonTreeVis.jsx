@@ -306,7 +306,7 @@ class TaxonTreeVis extends React.Component {
         }
         background={this.props.backgroundData}
         taxonName={taxonName}
-        handleClose={this.handleTaxonModalClose}
+        onClose={this.handleTaxonModalClose}
       />
     );
   }

@@ -3,6 +3,7 @@ import cx from "classnames";
 import { Popup } from "semantic-ui-react";
 import { getSampleMetadata, getAlignmentData } from "~/api";
 import AccessionViz from "../AccessionViz";
+import { pipelineHasAssembly } from "../utils/sample";
 import cs from "./alignment_viz.scss";
 
 class AlignmentViz extends React.Component {
@@ -52,7 +53,7 @@ class AlignmentViz extends React.Component {
           {this.taxName ? this.taxName + " (" + this.taxLevel + ")" : ""}
           Alignment ({alignmentData.length} unique accessions)
           {pipelineRun &&
-            pipelineRun.assembled === 1 && (
+            pipelineHasAssembly(pipelineRun) && (
               <Popup
                 trigger={
                   <i
