@@ -136,15 +136,9 @@ class TaxonModal extends React.Component {
   }
 
   render() {
-    // The Modal component always expects a 'trigger', even though it doesn't make sense in our use case.
     // <TaxonModal> is always open when rendered. To hide <TaxonModal>, we simply don't render it.
     return (
-      <Modal
-        title={this.props.taxonName}
-        trigger={<span />}
-        open
-        onClose={this.props.handleClose}
-      >
+      <Modal title={this.props.taxonName} open onClose={this.props.onClose}>
         <div className="taxon-info">
           <div className="taxon-info__label" />
           {this.state.taxonDescription && (
@@ -222,7 +216,8 @@ TaxonModal.propTypes = {
   parentTaxonId: PropTypes.number,
   taxonId: PropTypes.number,
   taxonName: PropTypes.string,
-  taxonValues: PropTypes.object
+  taxonValues: PropTypes.object,
+  onClose: PropTypes.func
 };
 
 export default TaxonModal;

@@ -1,48 +1,29 @@
+import { forbidExtraProps } from "airbnb-prop-types";
 import Modal from "../../ui/containers/Modal";
 import PhyloTreeCreation from "./PhyloTreeCreation";
 import PropTypes from "prop-types";
 import React from "react";
 
 class PhyloTreeCreationModal extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      open: false
-    };
-
-    this.handleOpen = this.handleOpen.bind(this);
-    this.handleClose = this.handleClose.bind(this);
-  }
-
-  handleOpen() {
-    this.setState({ open: true });
-  }
-
-  handleClose() {
-    this.setState({ open: false });
-  }
-
   render() {
+    // <PhyloTreeCreationModal> is always open when rendered.
+    // To hide <PhyloTreeCreationModal>, we simply don't render it.
     return (
-      <Modal
-        trigger={<span onClick={this.handleOpen}>{this.props.trigger}</span>}
-        open={this.state.open}
-        onClose={this.handleClose}
-      >
-        <PhyloTreeCreation
-          onComplete={() => {
-            this.setState({ open: false });
-          }}
-          {...this.props}
-        />
+      <Modal open onClose={this.props.onClose}>
+        <PhyloTreeCreation onComplete={this.props.onClose} {...this.props} />
       </Modal>
     );
   }
 }
 
-PhyloTreeCreationModal.propTypes = {
-  trigger: PropTypes.node
-};
+PhyloTreeCreationModal.propTypes = forbidExtraProps({
+  onClose: PropTypes.func.isRequired,
+  admin: PropTypes.number,
+  csrf: PropTypes.string.isRequired,
+  projectId: PropTypes.number,
+  projectName: PropTypes.string,
+  taxonId: PropTypes.number,
+  taxonName: PropTypes.string
+});
 
 export default PhyloTreeCreationModal;

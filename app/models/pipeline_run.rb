@@ -1132,7 +1132,12 @@ class PipelineRun < ApplicationRecord
     # Get outputs and descriptions by target.
     result = {}
     pipeline_run_stages.each_with_index do |prs, stage_idx|
-      next unless prs.dag_json
+      next unless prs.dag_json && STEP_DESCRIPTIONS[prs.name]
+      result[prs.name] = {
+        "stage_description" => STEP_DESCRIPTIONS[prs.name]["stage"],
+        "stage_dag_json" => prs.redacted_dag_json,
+        "steps" => {}
+      }
       dag_dict = JSON.parse(prs.dag_json)
       output_dir_s3_key = dag_dict["output_dir_s3"].chomp("/").split("/", 4)[3] # keep everything after bucket name, except trailing '/'
       targets = dag_dict["targets"]
@@ -1151,8 +1156,8 @@ class PipelineRun < ApplicationRecord
           file_info << file_info_for_output
         end
         if file_info.present?
-          result[target_name] = {
-            "step_description" => STEP_DESCRIPTIONS[target_name],
+          result[prs.name]["steps"][target_name] = {
+            "step_description" => STEP_DESCRIPTIONS[prs.name]["steps"][target_name],
             "file_list" => file_info
           }
         end
