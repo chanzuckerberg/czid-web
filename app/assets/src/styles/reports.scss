@@ -363,15 +363,6 @@ input[type="number"] {
   .link-tag {
     visibility: hidden;
     padding-left: 10px;
-    color: $primary-light;
-    font-size: $font-size-base;
-    cursor: text;
-    .fa {
-      margin-left: 7px;
-    }
-    .action-dot {
-      font-size: 15px;
-    }
   }
 }
 
