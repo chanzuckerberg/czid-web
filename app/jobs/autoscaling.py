@@ -142,7 +142,7 @@ def autoscaling_update(my_num_jobs, my_environment,
             print "{num_to_drain} instances need to be drained.".format(num_to_drain=num_to_drain)
             instances_to_drain = service_ASG.start_draining(num_to_drain)
             print "Moved {instances_to_drain} from 'healthy' to 'draining' state.".format(instances_to_drain=instances_to_drain)
-        elif new_num_desired > num_healthy:
+        elif new_num_desired > num_healthy and num_draining > 0:
             num_to_rescue = min(new_num_desired - num_healthy, num_draining)
             print "{num_to_rescue} instances need to stop draining.".format(num_to_rescue=num_to_rescue)
             instances_to_rescue = service_ASG.stop_draining(num_to_rescue)
@@ -156,7 +156,7 @@ def autoscaling_update(my_num_jobs, my_environment,
         if num_to_discard > 0:
             print "{num_to_discard} instances have finished draining and can be discarded: {instances_to_discard}.".format(num_to_discard=num_to_discard, instances_to_discard=instances_to_discard)
         else:
-            print "No instances are ready to move from draining to discard state."
+            print "No instances are ready to move from 'draining' to 'discarded' state."
 
 class ASG(object):
     r'''
@@ -313,7 +313,7 @@ class ASG(object):
             if is_healthy:
                 healthy_instances.append(instance_id)
         state_tally = Counter(healthy_instances + draining_instances + discarded_instances + terminating_instances)
-        is_valid = all(state_tally[inst] == 1 for inst in self.asg["Instances"])
+        is_valid = all(state_tally[inst["InstanceId"]] == 1 for inst in self.asg["Instances"])
         return healthy_instances, draining_instances, discarded_instances, terminating_instances, is_valid
 
     def start_draining(self, num_to_drain):
