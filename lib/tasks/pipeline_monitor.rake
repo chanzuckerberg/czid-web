@@ -69,13 +69,17 @@ class CheckPipelineRuns
     end
     autoscaling_state[:t_last] = t_now
     autoscaling_state[:chunk_counts] = new_chunk_counts
-    c_stdout, c_stderr, c_status = Open3.capture3(
-      "app/jobs/autoscaling.py update #{new_chunk_counts[:gsnap]} #{new_chunk_counts[:rapsearch]} #{Rails.env}" \
-      " #{PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS}" \
-      " #{PipelineRun::JOB_TAG_PREFIX}" \
-      " #{PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS}" \
-      " #{PipelineRun::DRAINING_TAG}"
-    )
+    autoscaling_config = {
+      'mode' => 'update',
+      'gsnap_chunk_count' => new_chunk_counts[:gsnap],
+      'rapsearch_chunk_count' => new_chunk_counts[:rapsearch],
+      'rails_env' => Rails.env,
+      'max_job_dispatch_lag_seconds' => PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS,
+      'job_tag_prefix' => PipelineRun::JOB_TAG_PREFIX,
+      'job_tag_keep_alive_seconds' => PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS,
+      'draining_tag' => PipelineRun::DRAINING_TAG
+    }
+    c_stdout, c_stderr, c_status = Open3.capture3("app/jobs/autoscaling.py '#{autoscaling_config.to_json}'")
     Rails.logger.info(c_stdout)
     Rails.logger.error(c_stderr) unless c_status.success? && c_stderr.blank?
     autoscaling_state
