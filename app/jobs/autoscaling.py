@@ -113,6 +113,7 @@ def autoscaling_update(my_num_jobs, my_environment,
         healthy_instances, draining_instances, discarded_instances, terminating_instances, is_valid_classification = service_ASG.classify_instances()
         num_healthy = len(healthy_instances)
         num_draining = len(draining_instances)
+        num_discarded = len(discarded_instances)
         print "CURRENTLY:"
         print "The desired capacity is {num_desired}.".format(num_desired=num_desired)
         print "There are {num_healthy} healthy instances: {healthy_instances}.".format(num_healthy=num_healthy, healthy_instances=healthy_instances)
@@ -290,7 +291,6 @@ class ASG(object):
         draining_instances = []
         discarded_instances = []
         terminating_instances = []
-        corrupt_instances = []
         tag_dict = self.tags_by_instance_id()
         for inst in self.asg["Instances"]:
             instance_id = inst["InstanceId"]
