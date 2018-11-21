@@ -64,11 +64,8 @@ class CheckPipelineRuns
     runs = PipelineRun.in_progress_at_stage_1_or_2
     runs = runs.where("id > 10") if Rails.env == "development"
     new_job_count = runs.count
-    return autoscaling_state if new_job_count == last_job_count && ((t_now - t_last) < forced_update_interval)
     if last_job_count.nil?
       Rails.logger.info("Autoscaling update to #{new_job_count}.")
-    elsif last_job_count == new_job_count
-      Rails.logger.info("Forced autoscaling update at #{new_job_count} after #{t_now - t_last} seconds.")
     else
       Rails.logger.info("Autoscaling update from #{last_job_count} to #{new_job_count}.")
     end
