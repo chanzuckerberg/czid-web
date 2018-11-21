@@ -193,25 +193,35 @@ class PipelineRun < ApplicationRecord
     in_progress.where("job_status NOT LIKE '3.%' AND job_status NOT LIKE '4.%'")
   end
 
-  def self.count_chunks(run_ids, known_num_reads, chunk_size)
-    num_chunks = {}
+  def self.count_chunks(run_ids, known_num_reads, chunk_size, completed_chunks)
+    num_chunks_by_run_id = {}
     run_ids.each do |pr_id|
-      # each run will count for 1 chunk unless number of non-host reads is known
-      total_num_chunks = ((known_num_reads[pr_id] || chunk_size) / chunk_size.to_f).ceil
-      # due to rate limits in idseq-dag, there is a cap on the number of chunks dispatched concurrently by a single job
-      capped_num_chunks = min(total_num_chunks, 30)
-      num_chunks[pr_id] = capped_num_chunks
+      # A priori, each run will count for 1 chunk
+      num_chunks = 1
+      # If number of non-host reads is known, we can compute the actual number of chunks from it
+      num_chunks = (known_num_reads[pr_id] / chunk_size.to_f).ceil if known_num_reads[pr_id]
+      # If any chunks have already completed, we can subtract them
+      num_chunks = max(0, num_chunks - completed_chunks[pr_id]) if completed_chunks[pr_id]
+      # Due to rate limits in idseq-dag, there is a cap on the number of chunks dispatched concurrently by a single job
+      num_chunks = min(num_chunks, 30)
+      num_chunks_by_run_id[pr_id] = num_chunks
     end
-    num_chunks.values.sum
+    num_chunks_by_run_id.values.sum
   end
 
   def self.count_alignment_chunks_in_progress
-    need_gsnap = in_progress_at_stage_1_or_2.where(gsnap_done: 0).pluck(:id)
-    need_rapsearch = in_progress_at_stage_1_or_2.where(rapsearch_done: 0).pluck(:id)
-    last_host_filter_step = JobStat.where(pipeline_run_id: need_gsnap + need_rapsearch).where(task: "subsampled_out")
-    known_num_reads = Hash[last_host_filter_step.pluck(:pipeline_run_id, :reads_after)]
-    gsnap_num_chunks = count_chunks(need_gsnap, known_num_reads, GSNAP_CHUNK_SIZE)
-    rapsearch_num_chunks = count_chunks(need_rapsearch, known_num_reads, RAPSEARCH_CHUNK_SIZE)
+    # Get run ids in progress
+    need_alignment = in_progress_at_stage_1_or_2
+    # Get numbers of non-host reads to estimate total number of chunks
+    in_progress_job_stats = JobStat.where(pipeline_run_id: need_alignment.pluck(:id))
+    last_host_filter_step = "subsampled_out"
+    known_num_reads = Hash[in_progress_job_stats.where(task: last_host_filter_step).pluck(:pipeline_run_id, :reads_after)]
+    # Get number of chunks that have already completed
+    completed_gsnap_chunks = Hash[need_alignment.pluck(:pipeline_run_id, :completed_gsnap_chunks)]
+    completed_rapsearch_chunks = Hash[need_alignment.pluck(:pipeline_run_id, :completed_rapsearch_chunks)]
+    # Compute number of chunks that still need to be processed
+    gsnap_num_chunks = count_chunks(need_alignment, known_num_reads, GSNAP_CHUNK_SIZE, completed_gsnap_chunks)
+    rapsearch_num_chunks = count_chunks(need_alignment, known_num_reads, RAPSEARCH_CHUNK_SIZE, completed_rapsearch_chunks)
     { gsnap: gsnap_num_chunks, rapsearch: rapsearch_num_chunks }
   end
 
@@ -661,6 +671,7 @@ class PipelineRun < ApplicationRecord
       # TODO:  S3 is a middleman between these two functions;  load_stats shouldn't wait for S3
       compile_stats_file
       load_stats_file
+      load_chunk_stats
     rescue
       # TODO: Log this exception
       compiling_stats_failed = true
@@ -763,6 +774,17 @@ class PipelineRun < ApplicationRecord
         update(alert_sent: 1)
       end
     end
+  end
+
+  def load_chunk_stats
+    stdout = Syscall.run("aws", "s3", "ls", "#{output_s3_path_with_version}/chunks/")
+    return unless stdout
+    outputs = stdout.split("\n").map { |line| line.split.last }
+    gsnap_outputs = outputs.select { |file_name| file_name.start_with?("multihit-gsnap-out") && file_name.end_with?(".m8") }
+    rapsearch_outputs = outputs.select { |file_name| file_name.start_with?("multihit-rapsearch2-out") && file_name.end_with?(".m8") }
+    self.completed_gsnap_chunks = gsnap_outputs.length
+    self.completed_rapsearch_chunks = rapsearch_outputs.length
+    save
   end
 
   def compile_stats_file

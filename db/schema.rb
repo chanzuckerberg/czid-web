@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_120_205_014) do
+ActiveRecord::Schema.define(version: 20_181_121_222_152) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -182,7 +182,7 @@ ActiveRecord::Schema.define(version: 20_181_120_205_014) do
     t.text "newick"
     t.integer "status", default: 0
     t.string "dag_version"
-    t.text "dag_json"
+    t.text "dag_json", limit: 4_294_967_295
     t.text "command_stdout"
     t.text "command_stderr"
     t.string "job_id"
@@ -266,8 +266,8 @@ ActiveRecord::Schema.define(version: 20_181_120_205_014) do
     t.integer "alert_sent", default: 0
     t.text "dag_vars"
     t.integer "assembled", limit: 2
-    t.integer "gsnap_done", limit: 1, default: 0
-    t.integer "rapsearch_done", limit: 1, default: 0
+    t.integer "completed_gsnap_chunks"
+    t.integer "completed_rapsearch_chunks"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
