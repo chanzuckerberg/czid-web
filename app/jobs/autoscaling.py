@@ -112,13 +112,13 @@ def autoscaling_update(my_num_jobs, my_environment,
     for service_ASG in [gsnap_ASG, rapsearch_ASG]:
         print "--- Analyzing the {instance_name} ASG ---".format(instance_name=service_ASG.instance_name)
         num_desired = service_ASG.num_desired_instances()
-        healthy_instances, draining_instances, discarded_instances, terminating_instances, is_valid_classification = service_ASG.classify_instances()
-        num_healthy = len(healthy_instances)
+        available_instances, draining_instances, discarded_instances, terminating_instances, is_valid_classification = service_ASG.classify_instances()
+        num_available = len(available_instances)
         num_draining = len(draining_instances)
         num_discarded = len(discarded_instances)
         print "CURRENTLY:"
         print "The desired capacity is {num_desired}.".format(num_desired=num_desired)
-        print "There are {num_healthy} healthy instances: {healthy_instances}.".format(num_healthy=num_healthy, healthy_instances=healthy_instances)
+        print "There are {num_available} available instances: {available_instances}.".format(num_available=num_available, available_instances=available_instances)
         print "There are {num_draining} draining instances: {draining_instances}.".format(num_draining=num_draining, draining_instances=draining_instances)
         print "There are {num_discarded} discarded instances: {discarded_instances}.".format(num_discarded=num_discarded, discarded_instances=discarded_instances)
         print "There are {num_terminating} terminating instances: {terminating_instances}.".format(num_terminating=len(terminating_instances), terminating_instances=terminating_instances)
@@ -139,16 +139,16 @@ def autoscaling_update(my_num_jobs, my_environment,
 
         print "HEALTHY <--> DRAINING transitions:"
         service_ASG.draining_instances = draining_instances
-        if new_num_desired < num_healthy:
-            num_to_drain = num_healthy - new_num_desired
+        if new_num_desired < num_available:
+            num_to_drain = num_available - new_num_desired
             print "{num_to_drain} instances need to be drained.".format(num_to_drain=num_to_drain)
             instances_to_drain = service_ASG.start_draining(num_to_drain)
-            print "Moved {instances_to_drain} from 'healthy' to 'draining' state.".format(instances_to_drain=instances_to_drain)
-        elif new_num_desired > num_healthy and num_draining > 0:
-            num_to_rescue = min(new_num_desired - num_healthy, num_draining)
+            print "Moved {instances_to_drain} from 'available' to 'draining' state.".format(instances_to_drain=instances_to_drain)
+        elif new_num_desired > num_available and num_draining > 0:
+            num_to_rescue = min(new_num_desired - num_available, num_draining)
             print "{num_to_rescue} instances need to stop draining.".format(num_to_rescue=num_to_rescue)
             instances_to_rescue = service_ASG.stop_draining(num_to_rescue)
-            print "Moved {instances_to_rescue} from 'draining' to 'healthy' state.".format(instances_to_rescue=instances_to_rescue)
+            print "Moved {instances_to_rescue} from 'draining' to 'available' state.".format(instances_to_rescue=instances_to_rescue)
         else:
             print "No instances need to make a HEALTHY <--> DRAINING transition."
 
@@ -166,7 +166,7 @@ class ASG(object):
 
                             _________________
                            |                 |    Either initializing or ready to take jobs.
-                           |     HEALTHY     |    Scale-in protection automatically granted at birth.
+                           |    AVAILABLE    |    Scale-in protection automatically granted upon transition to 'InService' lifecycle state.
                            |_________________|
 
 
@@ -205,8 +205,8 @@ class ASG(object):
     # of environments permitted to trigger scaling, usually just "prod".
     scaling_permission_tag = 'IDSeqEnvsThatCanScale'
 
-    job_dispatch_lag_grace_period_seconds = 300
-    job_tag_keep_alive_grace_period_seconds = 300
+    job_dispatch_lag_grace_period_seconds = 60
+    job_tag_keep_alive_grace_period_seconds = 60
 
     def __init__(self, service, environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds):
         self.draining_instances = []
@@ -289,7 +289,7 @@ class ASG(object):
             aws_command(cmd)
 
     def classify_instances(self):
-        healthy_instances = []
+        available_instances = []
         draining_instances = []
         discarded_instances = []
         terminating_instances = []
@@ -303,20 +303,26 @@ class ASG(object):
             is_discarded = (not inst["ProtectedFromScaleIn"] and not inst["LifecycleState"] in ["Pending", "Terminating"])
             is_draining = ((inst["ProtectedFromScaleIn"] or inst["LifecycleState"] == "Pending") and
                            self.draining_tag in instance_tags)
-            is_healthy = ((inst["ProtectedFromScaleIn"] or inst["LifecycleState"] == "Pending") and
-                          not self.draining_tag in instance_tags and
-                          inst["HealthStatus"] == "Healthy" and inst["LifecycleState"] != "Terminating")
+            is_available = ((inst["ProtectedFromScaleIn"] or inst["LifecycleState"] == "Pending") and
+                          not self.draining_tag in instance_tags)
+            # Note: automatic scale-in protection associated with the ASG is set on each instance once its AWS lifecycle transitions from 'Pending' to 'InService'.
+            # For simplification, in a slight abuse of language, we include in the 'available' state instances that are EITHER 'InService' OR 'Pending'.
+            # 'Pending' state inevitable leads to 'InService' state, with scale-in protection set.
+            # When a decision to drain a 'Pending' instance is made, the creation of the draining_tag will succeed.
+            # However, any invocation of 'remove_scalein_protection' will be ineffectual as long as the instance is 'Pending'.
+            # The present autoscaler tolerates this case: the next incarnation will detect that the instance is still in draining state
+            # and will call 'remove_scalein_protection' again.
             if is_terminating:
                 terminating_instances.append(instance_id)
             if is_discarded:
                 discarded_instances.append(instance_id)
             if is_draining:
                 draining_instances.append(instance_id)
-            if is_healthy:
-                healthy_instances.append(instance_id)
-        state_tally = Counter(healthy_instances + draining_instances + discarded_instances + terminating_instances)
+            if is_available:
+                available_instances.append(instance_id)
+        state_tally = Counter(available_instances + draining_instances + discarded_instances + terminating_instances)
         is_valid = all(state_tally[inst["InstanceId"]] == 1 for inst in self.asg["Instances"])
-        return healthy_instances, draining_instances, discarded_instances, terminating_instances, is_valid
+        return available_instances, draining_instances, discarded_instances, terminating_instances, is_valid
 
     def start_draining(self, num_to_drain):
         def instances_to_drain():
@@ -390,13 +396,13 @@ class ASG(object):
                 if num_jobs == 0 and draining_interval > self.min_draining_wait:
                     result.append(instance_id)
             return result
-        def remove_termination_protection(instance_ids):
+        def remove_scalein_protection(instance_ids):
             cmd = "aws autoscaling set-instance-protection --instance-ids {list_instances} --auto-scaling-group-name {asg_name} --no-protected-from-scale-in"
             cmd = cmd.format(list_instances=' '.join(instance_ids), asg_name=self.asg['AutoScalingGroupName'])
             aws_command(cmd)
         instance_ids = instances_to_discard()
         if instance_ids and self.can_scale:
-            remove_termination_protection(instance_ids)
+            remove_scalein_protection(instance_ids)
         return instance_ids
 
 if __name__ == "__main__":
