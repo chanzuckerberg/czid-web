@@ -1,5 +1,6 @@
 import React from "react";
 import Divider from "./layout/Divider";
+import { openUrl, downloadStringToFile } from "./utils/links";
 
 class OutputFile extends React.Component {
   constructor(props, context) {
@@ -7,17 +8,11 @@ class OutputFile extends React.Component {
     this.file = props.file;
   }
 
-  download(url) {
-    if (url) {
-      location.href = `${url}`;
-    }
-  }
-
   render() {
     return (
       <tr
         className={`${this.file.url ? "" : "disabled-"}file-link`}
-        onClick={this.download.bind(this, this.file.url)}
+        onClick={openUrl.bind(this, this.file.url)}
       >
         <td>
           <i className="fa fa-file" />
@@ -35,17 +30,11 @@ class ConfigFile extends React.Component {
     this.stageDagJson = props.stageDagJson;
   }
 
-  download_string2file(str) {
-    let file = new Blob([str], { type: "text/plain" });
-    let download_url = URL.createObjectURL(file);
-    location.href = `${download_url}`;
-  }
-
   render() {
     return (
       <tr
         className="file-link"
-        onClick={this.download_string2file.bind(this, this.stageDagJson)}
+        onClick={downloadStringToFile.bind(this, this.stageDagJson)}
       >
         <td>
           <i className="fa fa-file" />
