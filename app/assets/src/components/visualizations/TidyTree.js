@@ -22,7 +22,7 @@ export default class TidyTree {
         tooltipContainer: null,
         collapseThreshold: 0.4,
         useCommonName: false,
-        minNonCollapsableChildren: 3,
+        minNonCollapsableChildren: 2,
         smallerFont: 8,
         largerFont: 12
       },
@@ -121,7 +121,14 @@ export default class TidyTree {
       .domain(this.range)
       .range([0, 1]);
     this.root.eachAfter(d => {
-      if (d.children) {
+      if (
+        !d.data.highlight &&
+        collapsedScale(d.data.values[this.options.attribute]) <
+          this.options.collapseThreshold
+      ) {
+        d.collapsedChildren = d.children;
+        d.children = null;
+      } else if (d.children) {
         d.collapsedChildren = d.children.filter(
           child =>
             !child.data.highlight &&
@@ -129,7 +136,7 @@ export default class TidyTree {
               this.options.collapseThreshold
         );
         if (
-          d.collapsedChildren.length < this.options.minNonCollapsableChildren
+          d.collapsedChildren.length <= this.options.minNonCollapsableChildren
         ) {
           d.collapsedChildren = null;
         } else {
@@ -165,6 +172,8 @@ export default class TidyTree {
   }
 
   toggleCollapseNode(node) {
+    let updatedNode = node;
+
     if (
       this.hasAllChildrenCollapsed(node) ||
       this.hasAllChildrenVisible(node)
@@ -177,33 +186,40 @@ export default class TidyTree {
         node.collapsedChildren = node.hiddenChildren;
         node.hiddenChildren = null;
       }
-      this.update(
-        Object.assign(node, {
-          x0: node.x,
-          y0: node.y
-        })
-      );
     } else if (this.hasHiddenChildren(node)) {
       node.hiddenChildren = node.collapsedChildren;
       node.collapsedChildren = node.children;
       node.children = null;
-      this.update(
-        Object.assign(node, {
-          x0: node.x,
-          y0: node.y
-        })
-      );
     } else if (node.isAggregated) {
       let parent = node.parent;
       parent.children.pop();
       parent.children = parent.children.concat(parent.collapsedChildren);
       parent.collapsedChildren = null;
-      this.update(
-        Object.assign(parent, {
-          x0: node.x,
-          y0: node.y
-        })
-      );
+      updatedNode = parent;
+    }
+
+    updatedNode.children.forEach(child => {
+      this.expandCollapsedWithFewChildren(child);
+    });
+    this.update(
+      Object.assign(node, {
+        x0: node.x,
+        y0: node.y
+      })
+    );
+  }
+
+  expandCollapsedWithFewChildren(node) {
+    if (
+      node.collapsedChildren &&
+      node.collapsedChildren.length <= this.options.minNonCollapsableChildren
+    ) {
+      node.children = (node.children || []).concat(node.collapsedChildren);
+      node.collapsedChildren = null;
+
+      node.children.forEach(child => {
+        this.expandCollapsedWithFewChildren(child);
+      });
     }
   }
 
