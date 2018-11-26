@@ -392,13 +392,24 @@ class SampleUpload extends React.Component {
     }
   }
 
-  baseName(str) {
-    let base = cleanLocalFileName(str).substring(str.lastIndexOf("/") + 1);
-    if (base.lastIndexOf(".") != -1) {
+  baseName = str => {
+    let base = cleanLocalFileName(str);
+
+    let separator = "/";
+    if (base.includes("\\")) {
+      // If the name includes the backslash \ it's probably from Windows.
+      separator = "\\";
+    }
+
+    // Get the last piece
+    base = base.substring(base.lastIndexOf(separator) + 1);
+
+    if (base.includes(".")) {
+      // Leave off the extension
       base = base.substring(0, base.lastIndexOf("."));
     }
     return base;
-  }
+  };
 
   isFormInvalid() {
     const errors = {};
