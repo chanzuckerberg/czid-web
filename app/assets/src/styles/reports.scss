@@ -105,14 +105,6 @@ input[type="number"] {
     background-color: $primary-lightest;
   }
 
-  .confirmed {
-    color: $success;
-  }
-
-  .watched {
-    color: $warning;
-  }
-
   .fa.fa-chevron-up,
   .fa.fa-angle-right,
   .fa.fa-angle-down {
@@ -175,6 +167,10 @@ input[type="number"] {
     width: 75px;
     min-width: 50px;
     font-size: $font-size-small;
+
+    &.last-col {
+      width: 30px;
+    }
   }
 
   td:first-child {
