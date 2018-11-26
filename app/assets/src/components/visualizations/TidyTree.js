@@ -198,9 +198,11 @@ export default class TidyTree {
       updatedNode = parent;
     }
 
-    updatedNode.children.forEach(child => {
-      this.expandCollapsedWithFewChildren(child);
-    });
+    if (updatedNode.children) {
+      updatedNode.children.forEach(child => {
+        this.expandCollapsedWithFewChildren(child);
+      });
+    }
     this.update(
       Object.assign(node, {
         x0: node.x,
