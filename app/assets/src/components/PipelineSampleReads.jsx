@@ -59,15 +59,6 @@ class PipelineSampleReads extends React.Component {
     this.state = {
       rerunStatus: "failed",
       rerunStatusMessage: "Sample run failed",
-      watched_taxids: props.reportDetails
-        ? props.reportDetails.watched_taxids
-        : [],
-      confirmed_taxids: props.reportDetails
-        ? props.reportDetails.confirmed_taxids
-        : [],
-      confirmed_names: props.reportDetails
-        ? props.reportDetails.confirmed_names
-        : [],
       sample_name: props.sampleInfo.name,
       sampleDetailsSidebarVisible: false
     };
@@ -116,7 +107,6 @@ class PipelineSampleReads extends React.Component {
 
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
-    this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
     this.downloadCSV = this.downloadCSV.bind(this);
   }
 
@@ -164,31 +154,6 @@ class PipelineSampleReads extends React.Component {
       sampleDetailsSidebarVisible: !this.state.sampleDetailsSidebarVisible
     });
   };
-
-  toggleHighlightTaxon(e) {
-    let taxid = e.target.getAttribute("data-tax-id");
-    let name = e.target.getAttribute("data-tax-name");
-    let strength = e.target.getAttribute("data-confirmation-strength");
-    let current_taxids = this.state[strength + "_taxids"];
-    let action =
-      current_taxids.indexOf(parseInt(taxid)) >= 0
-        ? "remove_taxon_confirmation"
-        : "add_taxon_confirmation";
-    axios
-      .post(`/samples/${this.sampleId}/${action}`, {
-        taxid: taxid,
-        name: name,
-        strength: strength,
-        authenticity_token: this.csrf
-      })
-      .then(res => {
-        this.setState({
-          watched_taxids: res.data.watched_taxids,
-          confirmed_taxids: res.data.confirmed_taxids,
-          confirmed_names: res.data.confirmed_names
-        });
-      });
-  }
 
   render_metadata_dropdown(label, field) {
     let dropdown_options = this.DROPDOWN_OPTIONS[field];
@@ -681,9 +646,6 @@ class PipelineSampleReads extends React.Component {
           report_details={this.reportDetails}
           can_see_align_viz={this.canSeeAlignViz}
           can_edit={this.can_edit}
-          confirmed_taxids={this.state.confirmed_taxids}
-          watched_taxids={this.state.watched_taxids}
-          toggleHighlightTaxon={this.toggleHighlightTaxon}
           refreshPage={this.refreshPage}
           gsnapFilterStatus={this.gsnapFilterStatus}
           // Needs to be passed down to set the background dropdown properly.
@@ -1060,14 +1022,6 @@ class PipelineSampleReads extends React.Component {
                           "name",
                           this.TYPE_PROMPT,
                           this.can_edit
-                        )}
-                        {this.render_metadata_textfield_wide(
-                          this.sampleFieldProperties.get("confirmed_names")
-                            .label,
-                          this.state,
-                          "confirmed_names",
-                          "None",
-                          false
                         )}
                         {this.render_metadata_textfield_wide(
                           this.sampleFieldProperties.get("sample_notes").label,
