@@ -457,6 +457,7 @@ module ReportHelper
   end
 
   def samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+    Rails.logger.debug("sample 0: #{samples[0]}")
     samples_by_id = Hash[samples.map { |s| [s.id, s] }]
     parent_ids = fetch_parent_ids(taxon_ids, samples)
     results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
@@ -480,9 +481,12 @@ module ReportHelper
       results << {
         sample_id: sample_id,
         name: samples_by_id[sample_id].name,
+        metadata: samples_by_id[sample_id].metadata,
         taxons: filtered_rows
       }
     end
+    Rails.logger.debug("results")
+    Rails.logger.debug(results)
     results
   end
 

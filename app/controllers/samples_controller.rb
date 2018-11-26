@@ -341,6 +341,8 @@ class SamplesController < ApplicationController
 
   def samples_taxons
     @sample_taxons_dict = sample_taxons_dict(params)
+    Rails.logger.debug("@sample_taxons_dict")
+    Rails.logger.debug(@sample_taxons_dict)
     render json: @sample_taxons_dict
   end
 
@@ -757,7 +759,7 @@ class SamplesController < ApplicationController
     # TODO: should fail if field is not well formatted and return proper error to client
     sort_by = params[:sortBy] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
     species_selected = params[:species] == "1" # Otherwise genus selected
-    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
+    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs, :metadata])
     return {} if samples.empty?
 
     first_sample = samples.first

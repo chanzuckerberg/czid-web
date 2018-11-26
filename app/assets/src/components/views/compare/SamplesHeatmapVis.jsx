@@ -5,13 +5,15 @@ import React from "react";
 import { openUrl } from "../../utils/links";
 import cs from "./samples_heatmap_vis.scss";
 import cx from "classnames";
+import { Popup } from "semantic-ui-react";
 
 class SamplesHeatmapVis extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      nodeHoverInfo: null
+      nodeHoverInfo: null,
+      addColumnMetadataActive: false
     };
 
     this.heatmap = null;
@@ -44,7 +46,9 @@ class SamplesHeatmapVis extends React.Component {
         onNodeHoverMove: this.handleNodeHoverMove,
         onRemoveRow: this.props.onRemoveTaxon,
         onColumnLabelClick: this.props.onSampleLabelClick,
-        onCellClick: this.handleCellClick
+        onCellClick: this.handleCellClick,
+        onAddColumnMetadataClick: this.handleOnAddColumnMetadataClick,
+        columnMetadata: [{ key: "collection_location", label: "Location" }]
       }
     );
   }
@@ -57,11 +61,21 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   extractSampleLabels() {
-    return this.props.sampleIds.map(id => this.props.sampleDetails[id].name);
+    return this.props.sampleIds.map(id => {
+      return {
+        label: this.props.sampleDetails[id].name,
+        metadata: this.props.sampleDetails[id].metadata
+      };
+    });
   }
 
   extractTaxonLabels() {
-    return this.props.taxonIds.map(id => this.props.taxonDetails[id].name);
+    return this.props.taxonIds.map(id => {
+      return {
+        label: this.props.taxonDetails[id].name,
+        metadata: this.props.taxonDetails[id].metadata
+      };
+    });
   }
 
   handleNodeHover = node => {
@@ -81,6 +95,13 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({ nodeHoverInfo: null });
   };
 
+  handleOnAddColumnMetadataClick = () => {
+    this.setState({
+      addColumnMetadataActive: true
+    });
+  };
+
+  // render = ()
   download() {
     this.heatmap.download();
   }
@@ -127,6 +148,23 @@ class SamplesHeatmapVis extends React.Component {
     openUrl(`/samples/${this.props.sampleIds[cell.columnIndex]}`, currentEvent);
   };
 
+  renderColumnMetadataSelector() {
+    console.log("rendering selector");
+    return (
+      <Popup
+        open="true"
+        on="click"
+        position="bottom right"
+        content={
+          <div>
+            <div>Search box</div>
+            <div>Metadata list</div>
+          </div>
+        }
+      />
+    );
+  }
+
   render() {
     return (
       <div className={cs.samplesHeatmapVis}>
@@ -146,6 +184,8 @@ class SamplesHeatmapVis extends React.Component {
             <DataTooltip data={this.state.nodeHoverInfo} />
           </div>
         )}
+        {this.state.addColumnMetadataActive &&
+          this.renderColumnMetadataSelector()}
       </div>
     );
   }

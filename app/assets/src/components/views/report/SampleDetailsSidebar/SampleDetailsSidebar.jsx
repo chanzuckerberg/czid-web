@@ -20,7 +20,7 @@ import {
   processMetadataTypes,
   processPipelineInfo,
   processAdditionalInfo
-} from "./utils";
+} from "../../../utils/metadata";
 import cs from "./sample_details_sidebar.scss";
 
 const TABS = ["Metadata", "Pipeline", "Notes"];

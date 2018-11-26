@@ -4,15 +4,15 @@ import queryString from "query-string";
 import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
-import Dropdown from "../../ui/controls/dropdowns/Dropdown";
+import Dropdown from "ui/controls/dropdowns/Dropdown";
 import ErrorBoundary from "../../ErrorBoundary";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
-import MultipleNestedDropdown from "../../ui/controls/dropdowns/MultipleNestedDropdown";
-import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
+import MultipleNestedDropdown from "ui/controls/dropdowns/MultipleNestedDropdown";
+import PrimaryButton from "ui/controls/buttons/PrimaryButton";
 import SampleDetailsSidebar from "../report/SampleDetailsSidebar";
 import PropTypes from "prop-types";
-import Slider from "../../ui/controls/Slider";
-import ThresholdFilterDropdown from "../../ui/controls/dropdowns/ThresholdFilterDropdown";
+import Slider from "ui/controls/Slider";
+import ThresholdFilterDropdown from "ui/controls/dropdowns/ThresholdFilterDropdown";
 import DeepEqual from "fast-deep-equal";
 import NarrowContainer from "../../layout/NarrowContainer.jsx";
 import SequentialLegendVis from "../../visualizations/legends/SequentialLegendVis.jsx";
@@ -20,7 +20,8 @@ import { min, max } from "lodash/fp";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
 import Divider from "../../layout/Divider.jsx";
 import cs from "./samples_heatmap_view.scss";
-import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown.jsx";
+import DownloadButtonDropdown from "ui/controls/dropdowns/DownloadButtonDropdown.jsx";
+import { processMetadata } from "utils/metadata";
 
 class SamplesHeatmapView extends React.Component {
   constructor(props) {
@@ -171,6 +172,7 @@ class SamplesHeatmapView extends React.Component {
         cancelToken: this.lastRequestToken.token
       })
       .then(response => {
+        console.log(response);
         let newState = this.extractData(response.data);
         newState.loading = false;
         window.history.replaceState("", "", this.getUrlForCurrentParams());
@@ -194,7 +196,8 @@ class SamplesHeatmapView extends React.Component {
       sampleDetails[sample.sample_id] = {
         id: sample.sample_id,
         name: sample.name,
-        index: i
+        index: i,
+        metadata: processMetadata(sample.metadata)
       };
       sampleDetails[sample.name] = sampleDetails[sample.sample_id];
       for (let j = 0; j < sample.taxons.length; j++) {

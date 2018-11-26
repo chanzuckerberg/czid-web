@@ -2,7 +2,7 @@ import { histogram, extent, min, max, mean, deviation } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
 import { select } from "d3-selection";
 import { scaleLinear } from "d3-scale";
-import { Colormap } from "../utils/colormaps/Colormap";
+import { SequentialColormap } from "../utils/colormaps/SequentialColormap";
 
 export default class Histogram {
   constructor(container, data, options) {
