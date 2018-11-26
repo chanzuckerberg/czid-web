@@ -1242,7 +1242,7 @@ class RenderMarkup extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      view: this.props.view || "tree"
+      view: this.props.view || "table"
     };
   }
 
