@@ -58,6 +58,11 @@ class PipelineRunStage < ApplicationRecord
     job_status == STATUS_CHECKED
   end
 
+  def redacted_dag_json
+    # redact any s3 paths
+    dag_json.gsub(%r{(\"s3://).*(\")}, '"s3://..."')
+  end
+
   def run_job
     # Check output for the run and decide if we should run this stage
     return if started? && !failed? # job has been started successfully
