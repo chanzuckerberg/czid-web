@@ -38,7 +38,8 @@ export default class Heatmap {
         maxRowClusterWidth: 100,
         maxColumnClusterHeight: 100,
         spacing: 10,
-        transitionDuration: 200
+        transitionDuration: 200,
+        nullValue: 0
       },
       options
     );
@@ -132,8 +133,14 @@ export default class Heatmap {
     this.columnLabelsHeight += this.options.spacing;
 
     this.limits = {
-      min: d3.min(this.data.values, array => d3.min(array)),
-      max: d3.max(this.data.values, array => d3.max(array))
+      min: Math.min(
+        d3.min(this.data.values, array => d3.min(array)),
+        this.options.nullValue
+      ),
+      max: Math.max(
+        d3.max(this.data.values, array => d3.max(array)),
+        this.options.nullValue
+      )
     };
 
     this.cells = [];
@@ -177,13 +184,16 @@ export default class Heatmap {
 
   placeContainers() {
     this.rowClusterWidth = Math.min(
-      this.getDepth(this.rowClustering) * this.options.defaultClusterStep,
+      this.getDepth(this.rowClustering) * this.options.defaultClusterStep +
+        this.options.spacing,
       this.options.maxRowClusterWidth
     );
     this.columnClusterHeight = Math.min(
-      this.getDepth(this.columnClustering) * this.options.defaultClusterStep,
+      this.getDepth(this.columnClustering) * this.options.defaultClusterStep +
+        this.options.spacing,
       this.options.maxColumnClusterHeight
     );
+
     this.cell = {
       width: Math.max(
         (this.options.minWidth - this.rowLabelsWidth - this.rowClusterWidth) /
@@ -269,7 +279,7 @@ export default class Heatmap {
 
   getRows() {
     let scale = this.getScale();
-    // replacing null with zeros
+    // getRows and getColumns replace null with option.nullValue
     // might be space-inneficient if the matrix is too sparse
     // alternative is to create a distance function that supports nulls
     let rows = [];
@@ -277,7 +287,7 @@ export default class Heatmap {
       if (!this.rowLabels[i].hidden) {
         let row = this.data.values[i].slice();
         for (let j = 0; j < this.columnLabels.length; j++) {
-          row[j] = scale(row[j] || 0);
+          row[j] = scale(row[j] || this.options.nullValue);
         }
         row.idx = i;
         rows.push(row);
@@ -296,7 +306,9 @@ export default class Heatmap {
             columns[i] = [];
             columns[i].idx = i;
           }
-          columns[i].push(scale(this.data.values[j][i] || 0));
+          columns[i].push(
+            scale(this.data.values[j][i] || this.options.nullValue)
+          );
         }
       }
     }

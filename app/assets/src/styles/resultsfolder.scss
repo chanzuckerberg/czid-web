@@ -23,22 +23,22 @@
       color: $darkest-grey;
     }
   }
-  .file-link {
-    cursor: pointer;
-    td {
-      color: $darkest-grey;
-      &:hover {
-        color: $primary-light;
-      }
+}
+.fileLink {
+  cursor: pointer;
+  td {
+    color: $darkest-grey;
+    &:hover {
+      color: $primary-light;
     }
   }
-  tr.disabled-file-link {
-    color: $medium-grey;
-  }
-  i.fa-file {
-    margin-right: 15px;
-  }
-  .size-tag {
-    color: $light-grey;
-  }
+}
+.disabledFileLink {
+  color: $medium-grey;
+}
+i.fa-file {
+  margin-right: 15px;
+}
+.size-tag {
+  color: $light-grey;
 }
