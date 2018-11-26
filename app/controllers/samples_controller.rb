@@ -16,7 +16,7 @@ class SamplesController < ApplicationController
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
-  EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
 
@@ -713,18 +713,6 @@ class SamplesController < ApplicationController
   def pipeline_runs
   end
 
-  def add_taxon_confirmation
-    keys = taxon_confirmation_unique_on(params)
-    TaxonConfirmation.create(taxon_confirmation_params) unless TaxonConfirmation.find_by(taxon_confirmation_params(keys))
-    respond_taxon_confirmations
-  end
-
-  def remove_taxon_confirmation
-    keys = taxon_confirmation_unique_on(params)
-    TaxonConfirmation.where(taxon_confirmation_params(keys)).destroy_all
-    respond_taxon_confirmations
-  end
-
   def cli_user_instructions
     render template: "samples/cli_user_instructions"
   end
@@ -774,19 +762,6 @@ class SamplesController < ApplicationController
     return {} if taxon_ids.empty?
 
     samples_taxons_details(samples, taxon_ids, background_id, species_selected)
-  end
-
-  def taxon_confirmation_unique_on(params)
-    params[:strength] == TaxonConfirmation::WATCHED ? [:sample_id, :taxid, :strength, :user_id] : [:sample_id, :taxid, :strength]
-  end
-
-  def taxon_confirmation_params(keys = nil)
-    h = { sample_id: @sample.id, user_id: current_user.id, taxid: params[:taxid], name: params[:name], strength: params[:strength] }
-    keys ? h.select { |k, _v| k && keys.include?(k) } : h
-  end
-
-  def respond_taxon_confirmations
-    render json: taxon_confirmation_map(@sample.id, current_user.id)
   end
 
   def get_background_id(sample)
