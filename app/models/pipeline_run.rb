@@ -1123,7 +1123,7 @@ class PipelineRun < ApplicationRecord
     ret
   end
 
-  def outputs_by_step(user_owns_sample = false)
+  def outputs_by_step(can_see_stage1_results = false)
     # Get map of s3 path to presigned URL and size.
     filename_to_info = {}
     sample.results_folder_files.each do |entry|
@@ -1149,7 +1149,7 @@ class PipelineRun < ApplicationRecord
         output_list.each do |output|
           file_info_for_output = filename_to_info["#{output_dir_s3_key}/#{pipeline_version}/#{output}"]
           next unless file_info_for_output
-          if !user_owns_sample && stage_idx.zero? && step_idx < num_steps - 1
+          if !can_see_stage1_results && stage_idx.zero? && step_idx < num_steps - 1
             # Delete URLs for all host-filtering outputs but the last, unless user uploaded the sample.
             file_info_for_output["url"] = nil
           end
