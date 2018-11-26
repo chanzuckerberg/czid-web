@@ -738,42 +738,6 @@ class PipelineSampleReport extends React.Component {
     );
   };
 
-  displayHighlightTags = taxInfo => {
-    const watchDot = (
-      <i
-        data-tax-id={taxInfo.tax_id}
-        data-tax-name={taxInfo.name}
-        data-confirmation-strength="watched"
-        onClick={this.props.toggleHighlightTaxon}
-        className="fa fa-eye action-dot"
-        aria-hidden="true"
-      />
-    );
-    const confirmedHitDot = (
-      <i
-        data-tax-id={taxInfo.tax_id}
-        data-tax-name={taxInfo.name}
-        data-confirmation-strength="confirmed"
-        onClick={this.props.toggleHighlightTaxon}
-        className="fa fa-check action-dot"
-        aria-hidden="true"
-      />
-    );
-    return (
-      <div className="hover-wrapper">
-        {this.can_edit ? (
-          <span className="link-tag">
-            <BasicPopup trigger={watchDot} content={"Toggle Watching"} />
-            <BasicPopup
-              trigger={confirmedHitDot}
-              content={"Toggle Confirmed Hit"}
-            />
-          </span>
-        ) : null}
-      </div>
-    );
-  };
-
   renderName = (tax_info, report_details, backgroundData, openTaxonModal) => {
     let taxCommonName = tax_info["common_name"];
     const taxonName = getTaxonName(tax_info, this.state.name_type);
@@ -951,21 +915,13 @@ class PipelineSampleReport extends React.Component {
     );
   };
 
-  getRowClass = (taxInfo, confirmedTaxIds, watchedTaxIds) => {
+  getRowClass = taxInfo => {
     const topScoringRow = taxInfo.topScoring === 1;
-
-    let taxonStatusClass = "";
-    if (confirmedTaxIds.indexOf(taxInfo.tax_id) >= 0) {
-      taxonStatusClass = "confirmed";
-    } else if (watchedTaxIds.indexOf(taxInfo.tax_id) >= 0) {
-      taxonStatusClass = "watched";
-    }
 
     if (taxInfo.tax_level == 2) {
       return cx(
         "report-row-genus",
         taxInfo.genus_taxid, // TODO(mark): remove non-styling-related class.
-        taxonStatusClass,
         topScoringRow && "top-scoring-row"
       );
     }
@@ -974,7 +930,6 @@ class PipelineSampleReport extends React.Component {
       "report-row-species",
       taxInfo.genus_taxid, // TODO(mark): remove non-styling-related class.
       !this.isTaxonExpanded(taxInfo) && "hidden",
-      taxonStatusClass,
       topScoringRow && "top-scoring-row"
     );
   };
@@ -1383,11 +1338,8 @@ class RenderMarkup extends React.Component {
       <ReportTable
         taxons={parent.state.selected_taxons_top}
         taxonRowRefs={parent.taxon_row_refs}
-        confirmedTaxIds={parent.props.confirmed_taxids}
-        watchedTaxIds={parent.props.watched_taxids}
         renderName={parent.renderName}
         renderNumber={parent.renderNumber}
-        displayHighlightTags={parent.displayHighlightTags}
         showConcordance={parent.showConcordance}
         getRowClass={parent.getRowClass}
         reportDetails={parent.report_details}
