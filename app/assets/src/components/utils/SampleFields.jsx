@@ -41,9 +41,5 @@ export const SAMPLE_FIELDS = [
     label: "Detection method",
     description: "Method for detecting known organisms"
   },
-  { name: "sample_notes", label: "Notes" },
-  {
-    name: "confirmed_names",
-    label: "Manually confirmed hits (from Report tab)"
-  }
+  { name: "sample_notes", label: "Notes" }
 ];
