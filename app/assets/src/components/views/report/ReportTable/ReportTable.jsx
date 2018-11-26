@@ -13,9 +13,6 @@ export default class ReportTable extends React.Component {
     this.state = {
       taxonModalData: null
     };
-
-    this.openTaxonModal = this.openTaxonModal.bind(this);
-    this.closeTaxonModal = this.closeTaxonModal.bind(this);
   }
 
   renderTaxonModal() {
@@ -35,22 +32,22 @@ export default class ReportTable extends React.Component {
         }
         background={backgroundData}
         taxonName={taxonName}
-        handleClose={this.closeTaxonModal}
+        onClose={this.handleTaxonModalClose}
       />
     );
   }
 
-  openTaxonModal(taxonModalData) {
+  handleTaxonModalOpen = taxonModalData => {
     this.setState({
       taxonModalData
     });
-  }
+  };
 
-  closeTaxonModal() {
+  handleTaxonModalClose = () => {
     this.setState({
       taxonModalData: null
     });
-  }
+  };
 
   render() {
     const {
@@ -162,7 +159,7 @@ export default class ReportTable extends React.Component {
               displayHighlightTags={displayHighlightTags}
               showConcordance={showConcordance}
               getRowClass={getRowClass}
-              openTaxonModal={this.openTaxonModal}
+              openTaxonModal={this.handleTaxonModalOpen}
               reportDetails={reportDetails}
               backgroundData={backgroundData}
             />

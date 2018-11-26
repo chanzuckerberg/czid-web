@@ -152,7 +152,8 @@ class Samples extends React.Component {
         "sample_diagnosis",
         "sample_organism",
         "sample_detection"
-      ]
+      ],
+      phyloTreeCreationModalOpen: false
     };
 
     this.sortCount = 0;
@@ -1967,16 +1968,24 @@ function ProjectInfoHeading({
   selectedSampleIds,
   numTotalSamples
 }) {
+  const handlePhyloModalOpen = () => {
+    parent.setState({ phyloTreeCreationModalOpen: true });
+  };
+
+  const handlePhyloModalClose = () => {
+    parent.setState({ phyloTreeCreationModalOpen: false });
+  };
+
   let phyloProps = {
     admin: parseInt(parent.admin),
-    csrf: parent.csrf,
-    trigger: (
-      <div className="button-container">
-        <PhylogenyButton />
-      </div>
-    )
+    csrf: parent.csrf
   };
-  let phyloTreeModal = <PhyloTreeCreationModal {...phyloProps} />;
+
+  let phyloModalTrigger = (
+    <div className="button-container">
+      <PhylogenyButton onClick={handlePhyloModalOpen} />
+    </div>
+  );
 
   return (
     <div className="row download-section">
@@ -2005,7 +2014,7 @@ function ProjectInfoHeading({
       <div className="col s7 download-section-btns">
         {state.selectedProjectId ? project_menu : null}
         {table_download_dropdown}
-        {phyloTreeModal}
+        {phyloModalTrigger}
         {compare_button}
         <BackgroundModal
           parent={parent}
@@ -2018,6 +2027,12 @@ function ProjectInfoHeading({
           ? delete_project_button
           : null}
       </div>
+      {state.phyloTreeCreationModalOpen && (
+        <PhyloTreeCreationModal
+          {...phyloProps}
+          onClose={handlePhyloModalClose}
+        />
+      )}
     </div>
   );
 }

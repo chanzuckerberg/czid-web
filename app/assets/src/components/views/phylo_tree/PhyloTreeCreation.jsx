@@ -13,7 +13,7 @@ class PhyloTreeCreation extends React.Component {
   constructor(props) {
     super(props);
 
-    this.minNumberOfSamples = 4;
+    this.minNumberOfSamples = 2;
     this.maxNumberOfSamples = 100;
 
     this.state = {
@@ -640,7 +640,9 @@ PhyloTreeCreation.propTypes = {
   csrf: PropTypes.string.isRequired,
   onComplete: PropTypes.func,
   projectId: PropTypes.number,
-  taxonId: PropTypes.number
+  projectName: PropTypes.string,
+  taxonId: PropTypes.number,
+  taxonName: PropTypes.string
 };
 
 export default PhyloTreeCreation;
