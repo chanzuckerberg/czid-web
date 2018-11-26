@@ -514,16 +514,10 @@ class SamplesController < ApplicationController
 
   def contigs_summary
     pr = select_pipeline_run(@sample, params)
-    contigs_summary_s3_path = pr.contigs_summary_s3_path
+    local_file = pr.generate_contig_mapping_table
 
-    if contigs_summary_s3_path
-      @contigs_summary = get_s3_file(contigs_summary_s3_path)
-      send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'
-    else
-      render json: {
-        error: "contigs summary file does not exist for this sample"
-      }
-    end
+    @contigs_summary = File.read(local_file)
+    send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'
   end
 
   def nonhost_fasta
