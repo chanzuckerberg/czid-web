@@ -22,7 +22,7 @@ export default class TidyTree {
         tooltipContainer: null,
         collapseThreshold: 0.4,
         useCommonName: false,
-        minNonCollapsableChildren: 2,
+        minNonCollapsableChildren: 3,
         smallerFont: 8,
         largerFont: 12
       },
@@ -121,13 +121,7 @@ export default class TidyTree {
       .domain(this.range)
       .range([0, 1]);
     this.root.eachAfter(d => {
-      if (
-        collapsedScale(d.data.values[this.options.attribute]) <
-        this.options.collapseThreshold
-      ) {
-        d.collapsedChildren = d.children;
-        d.children = null;
-      } else if (d.children) {
+      if (d.children) {
         d.collapsedChildren = d.children.filter(
           child =>
             !child.data.highlight &&
