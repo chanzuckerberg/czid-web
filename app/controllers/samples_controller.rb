@@ -543,8 +543,8 @@ class SamplesController < ApplicationController
   end
 
   def results_folder
-    user_owns_sample = (@sample.user_id == current_user.id)
-    @file_list = @sample.pipeline_runs.first.outputs_by_step(user_owns_sample)
+    can_see_stage1_results = current_power.updatable_samples.include?(@sample)
+    @file_list = @sample.pipeline_runs.first.outputs_by_step(can_see_stage1_results)
     @file_path = "#{@sample.sample_path}/results/"
     respond_to do |format|
       format.html do
