@@ -201,9 +201,9 @@ class PipelineRun < ApplicationRecord
       # If number of non-host reads is known, we can compute the actual number of chunks from it
       num_chunks = (known_num_reads[pr_id] / chunk_size.to_f).ceil if known_num_reads[pr_id]
       # If any chunks have already completed, we can subtract them
-      num_chunks = max(0, num_chunks - completed_chunks[pr_id]) if completed_chunks[pr_id]
+      num_chunks = [0, num_chunks - completed_chunks[pr_id]].max if completed_chunks[pr_id]
       # Due to rate limits in idseq-dag, there is a cap on the number of chunks dispatched concurrently by a single job
-      num_chunks = min(num_chunks, 30)
+      num_chunks = [num_chunks, 30].min
       num_chunks_by_run_id[pr_id] = num_chunks
     end
     num_chunks_by_run_id.values.sum
