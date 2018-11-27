@@ -65,24 +65,21 @@ def get_asg_list():
     asg_list = json.loads(asg_json).get('AutoScalingGroups', [])
     return asg_list
 
-def autoscaling_update(num_gsnap_chunks, num_rapsearch_chunks,
-                       gsnap_max_concurrent, rapsearch_max_concurrent,
-                       my_environment,
-                       max_job_dispatch_lag_seconds, job_tag_prefix,
-                       job_tag_keep_alive_seconds, draining_tag):
+def autoscaling_update(config):
     '''
     Plan and perform an update to the GSNAP/RAPSEARCH ASGs.
     Note: Will not scale up for jobs originating in a development environment.
           You can provision machines for development jobs by manually setting MinSize on the ASGs,
           which is respected by this autoscaler.
     '''
+    my_environment = config['my_environment']
     if my_environment == "development":
         return
 
     asg_list = get_asg_list()
     tag_list = get_tag_list()
-    gsnap_ASG = ASG("gsnapl", num_gsnap_chunks, gsnap_max_concurrent, my_environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds)
-    rapsearch_ASG = ASG("rapsearch2", num_rapsearch_chunks, rapsearch_max_concurrent, my_environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds)
+    gsnap_ASG = ASG("gsnapl", asg_list, tag_list, config)
+    rapsearch_ASG = ASG("rapsearch2", asg_list, tag_list, config)
     if not (gsnap_ASG.can_scale and rapsearch_ASG.can_scale):
         print "Scaling by agents of {my_environment} is not permitted.".format(my_environment=my_environment)
         return
@@ -104,7 +101,7 @@ def autoscaling_update(num_gsnap_chunks, num_rapsearch_chunks,
             print "WARNING: some instances were classified into multiple states or none. This should never happen."
 
         print "CHUNKS IN PROGRESS: {num_chunks}".format(num_chunks=service_ASG.num_chunks)
-        raw_new_num_desired = service_ASG.required_capacity(num_desired)
+        raw_new_num_desired = service_ASG.required_capacity()
 
         print "MOVING FORWARD:"
         print "In principle, the desired capacity needs to be {raw_new_num_desired}.".format(raw_new_num_desired=raw_new_num_desired)
@@ -190,21 +187,19 @@ class ASG(object):
 
     numa_partitions = 2 # i3.16xlarge or i3.metal
     desired_queue_depth = 3 # initialization takes time: it's fine if some number of chunks have to run sequentially rather than in parallel
-    instance_limit = 24 # this autoscaler will never go beyond this number unless operator intervenes
 
-    def __init__(self, service, num_chunks, max_concurrent, environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds):
+    def __init__(self, service, asg_list, tag_list, config):
         self.draining_instances = []
 
         self.service = service
-        self.num_chunks = num_chunks
-        self.max_concurrent = max_concurrent
-        self.environment = environment
-        self.draining_tag = draining_tag
-        self.job_tag_prefix = job_tag_prefix
-        self.max_job_dispatch_lag_seconds = max_job_dispatch_lag_seconds
-        self.job_tag_keep_alive_seconds = job_tag_keep_alive_seconds
+        self.num_chunks = config[service]['num_chunks']
+        self.max_concurrent = config[service]['max_concurrent']
 
-        self.desired_concurrency = max(self.numa_partitions, self.max_concurrent - self.numa_partitions)
+        self.environment = config['my_environment']
+        self.draining_tag = config['draining_tag']
+        self.job_tag_prefix = config['job_tag_prefix']
+        self.max_job_dispatch_lag_seconds = config['max_job_dispatch_lag_seconds']
+        self.job_tag_keep_alive_seconds = config['job_tag_keep_alive_seconds']
 
         self.min_draining_wait = self.max_job_dispatch_lag_seconds + self.job_dispatch_lag_grace_period_seconds
         self.job_tag_expiration = self.job_tag_keep_alive_seconds + self.job_tag_keep_alive_grace_period_seconds
@@ -258,21 +253,13 @@ class ASG(object):
             result[instance_id][key] = value
         return result
 
-    def required_capacity(self, current_desired_capacity):
-        best_concurrency = max(self.numa_partitions, self.max_concurrent - self.numa_partitions)
-        best_num_instances = int(math.ceil(float(self.num_chunks) / (self.desired_concurrency * self.desired_queue_depth)))
+    def required_capacity(self):
+        ideal_concurrency = max(self.numa_partitions, self.max_concurrent - self.numa_partitions)
+        ideal_num_instances = int(math.ceil(float(self.num_chunks) / (ideal_concurrency * self.desired_queue_depth)))
         if DEBUG:
-            msg = "num_chunks / (desired_concurrency * desired_queue_depth) = {num_chunks} / ({desired_concurrency} * {desired_queue_depth}) = {best_num_instances}"
-            print msg.format(num_chunks=self.num_chunks, desired_concurrency=self.desired_concurrency, desired_queue_depth=self.desired_queue_depth, best_num_instances=best_num_instances)
-        if best_num_instances < self.instance_limit:
-            result = best_num_instances
-        else:
-            # Go only up to instance_limit.
-            # Ignore instance_limit if operator has set DesiredCapacity higher than that.
-            result = max(self.instance_limit, current_desired_capacity)
-            if DEBUG:
-                print "Limiting to {result} to avoid surge in cost.".format(result=result)
-        return result
+            msg = "num_chunks / (ideal_concurrency * desired_queue_depth) = {num_chunks} / ({ideal_concurrency} * {desired_queue_depth}) = {ideal_num_instances}"
+            print msg.format(num_chunks=self.num_chunks, ideal_concurrency=ideal_concurrency, desired_queue_depth=self.desired_queue_depth, ideal_num_instances=ideal_num_instances)
+        return ideal_num_instances
 
     def clamp_to_valid_range(self, desired_capacity):
         min_size = int(self.asg.get("MinSize", desired_capacity))
@@ -309,7 +296,7 @@ class ASG(object):
             is_draining = ((inst["ProtectedFromScaleIn"] or inst["LifecycleState"] == "Pending") and
                            self.draining_tag in instance_tags)
             is_available = ((inst["ProtectedFromScaleIn"] or inst["LifecycleState"] == "Pending") and
-                          not self.draining_tag in instance_tags)
+                            not self.draining_tag in instance_tags)
             # Note: automatic scale-in protection associated with the ASG is set on each instance once its AWS lifecycle transitions from 'Pending' to 'InService'.
             # For simplification, in a slight abuse of language, we include in the 'available' state instances that are EITHER 'InService' OR 'Pending'.
             # 'Pending' state inevitable leads to 'InService' state, with scale-in protection set.
@@ -419,4 +406,4 @@ if __name__ == "__main__":
     if mode == "debug":
         DEBUG = True
 
-    autoscaling_update(**autoscaling_config)
+    autoscaling_update(autoscaling_config)
