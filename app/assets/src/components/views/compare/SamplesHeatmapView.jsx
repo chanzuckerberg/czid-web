@@ -269,7 +269,7 @@ class SamplesHeatmapView extends React.Component {
     if (
       this.state.loading ||
       !this.state.data ||
-      !this.state.data[this.state.selectedOptions.metric].length
+      !(this.state.data[this.state.selectedOptions.metric] || []).length
     ) {
       return;
     }
