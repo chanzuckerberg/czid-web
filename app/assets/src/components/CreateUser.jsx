@@ -100,6 +100,12 @@ class CreateUser extends React.Component {
     });
   }
 
+  handleInstitutionChange(e) {
+    this.setState({
+      institution: e.target.value
+    });
+  }
+
   isCreateFormInvalid() {
     if (
       this.state.email === "" &&
@@ -287,11 +293,7 @@ class CreateUser extends React.Component {
                 <i className="fa fa-building" aria-hidden="true" />
                 <input
                   type="text"
-                  onChange={e =>
-                    this.setState({
-                      institution: e.target.value
-                    })
-                  }
+                  onChange={this.handleInstitutionChange}
                   onFocus={this.clearError}
                   value={this.state.institution}
                 />
