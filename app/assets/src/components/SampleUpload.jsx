@@ -107,7 +107,7 @@ class SampleUpload extends React.Component {
       consentChecked: false,
 
       // Local upload fields
-      localUploadMode: false,
+      localUploadMode: true,
       localFilesToUpload: [],
       localFilesDoneUploading: [],
       localUploadShouldStart: false,
@@ -802,18 +802,18 @@ class SampleUpload extends React.Component {
         <div className="menu-container">
           <Menu compact>
             <MenuItem
-              active={!this.state.localUploadMode}
-              onClick={() => this.setState({ localUploadMode: false })}
-            >
-              <Icon size="large" name="server" />
-              Upload from S3
-            </MenuItem>
-            <MenuItem
               active={this.state.localUploadMode}
               onClick={() => this.setState({ localUploadMode: true })}
             >
               <Icon size="large" name="folder open outline" />
               Upload from Your Computer
+            </MenuItem>
+            <MenuItem
+              active={!this.state.localUploadMode}
+              onClick={() => this.setState({ localUploadMode: false })}
+            >
+              <Icon size="large" name="server" />
+              Upload from S3
             </MenuItem>
           </Menu>
         </div>
