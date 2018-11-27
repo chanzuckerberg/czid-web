@@ -24,6 +24,7 @@ import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 // TODO(mark): Convert styles/samples.scss to CSS modules.
 import cs from "./samples.scss";
+import { openUrl } from "./utils/links";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -294,7 +295,7 @@ class Samples extends React.Component {
 
     switch (option) {
       case "samples_table":
-        location.href = `/projects/${project_id}/csv`;
+        openUrl(`/projects/${project_id}/csv`);
         break;
       case "project_reports":
         this.generateReport(
@@ -342,9 +343,11 @@ class Samples extends React.Component {
       .then(res => {
         let download_status = res.data.status_display;
         if (download_status === "complete") {
-          location.href = `/projects/${
-            this.state.project_id_download_in_progress
-          }/${retrieve_action}`;
+          openUrl(
+            `/projects/${
+              this.state.project_id_download_in_progress
+            }/${retrieve_action}`
+          );
           this.nanobar.go(100);
           this.setState({
             project_id_download_in_progress: null
@@ -789,10 +792,8 @@ class Samples extends React.Component {
     }
   }
 
-  viewSample(id, e) {
-    e.preventDefault();
-
-    window.open(`/samples/${id}`, "_self");
+  viewSample(id, currentEvent) {
+    openUrl(`/samples/${id}`, currentEvent);
   }
 
   renderEmptyTable() {
@@ -959,14 +960,14 @@ class Samples extends React.Component {
     return result;
   }
 
-  deleteProject(e) {
+  deleteProject() {
     let projectId = this.state.selectedProjectId;
     axios
       .delete(`/projects/${projectId}.json`, {
         data: { authenticity_token: this.csrf }
       })
-      .then(res => {
-        location.href = "/";
+      .then(_ => {
+        openUrl("/");
       })
       .catch(err => {});
   }
