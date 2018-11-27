@@ -53,6 +53,8 @@ class PipelineRun < ApplicationRecord
   ASSEMBLED_CONTIGS_NAME = 'assembly/contigs.fasta'.freeze
   ASSEMBLED_STATS_NAME = 'assembly/contig_stats.json'.freeze
   CONTIG_SUMMARY_JSON_NAME = 'assembly/combined_contig_summary.json'.freeze
+  CONTIG_NT_TOP_M8 = 'assembly/gsnap.blast.top.m8'.freeze
+  CONTIG_NR_TOP_M8 = 'assembly/rapsearch2.blast.top.m8'.freeze
   CONTIG_MAPPING_NAME = 'assembly/contig2taxon_lineage.csv'.freeze
   ASSEMBLY_STATUSFILE = 'job-complete'.freeze
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
@@ -60,6 +62,12 @@ class PipelineRun < ApplicationRecord
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
   ASSEMBLY_PIPELINE_VERSION = 3.1
   MIN_CONTIG_SIZE = 4
+  M8_FIELDS = ["Query", "Accession", "Percentage Identity", "Alignment Length",
+               "Number of mismatches", "Number of gap openings",
+               "Start of alignment in query", "End of alignment in query",
+               "Start of alignment in accession", "End of alignment in accession",
+               "E-value", "Bitscore"].freeze
+  M8_FIELDS_TO_EXTRACT = [1, 2, 3, 4, 10, 11].freeze
 
   # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
   # and for submitting jobs that need to be run next.
@@ -426,7 +434,6 @@ class PipelineRun < ApplicationRecord
     end
     contigs.destroy_all
     update(contigs_attributes: contig_array) unless contig_array.empty?
-    generate_contig_mapping_table
     update(assembled: 1)
   end
 
@@ -450,25 +457,51 @@ class PipelineRun < ApplicationRecord
     output
   end
 
+  def get_m8_mapping(m8_file)
+    m8_s3_path = "#{postprocess_output_s3_path}/#{m8_file}"
+    m8_local_dir = "#{LOCAL_JSON_PATH}/#{id}"
+    m8_local_path = PipelineRun.download_file_with_retries(m8_s3_path, m8_local_dir, 2)
+    output = {}
+    File.open(m8_local_path, 'r') do |m8f|
+      line = m8f.gets
+      while line
+        fields = line.split("\t")
+        output[fields[0]] = fields
+        line = m8f.gets
+      end
+    end
+    output
+  end
+
   def generate_contig_mapping_table
-    # generate a csv file for contig mapping based on lineage_json
+    # generate a csv file for contig mapping based on lineage_json and top m8
     local_file_name = "#{LOCAL_JSON_PATH}/#{CONTIG_MAPPING_NAME}#{id}"
     Open3.capture3("mkdir -p #{File.dirname(local_file_name)}")
-    s3_file_name = contigs_summary_s3_path
+    # s3_file_name = contigs_summary_s3_path # TODO(yf): might turn back for s3 generation later
+    nt_m8_map = get_m8_mapping(CONTIG_NT_TOP_M8)
+    nr_m8_map = get_m8_mapping(CONTIG_NR_TOP_M8)
     CSV.open(local_file_name, 'w') do |writer|
-      header_row = ['contig_name', 'read_count']
+      header_row = ['contig_name', 'read_count', 'contig_length', 'contig_coverage']
       header_row += TaxonLineage.names_a.map { |name| "NT.#{name}" }
+      header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NT.#{M8_FIELDS[idx]}" }
       header_row += TaxonLineage.names_a.map { |name| "NR.#{name}" }
+      header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NR.#{M8_FIELDS[idx]}" }
       writer << header_row
       contigs.each do |c|
+        nt_m8 = nt_m8_map[c.name] || []
+        nr_m8 = nr_m8_map[c.name] || []
         lineage = JSON.parse(c.lineage_json)
         row = [c.name, c.read_count]
+        cfs = c.name.split("_")
+        row += [cfs[3], cfs[5]]
         row += (lineage['NT'] || TaxonLineage.null_array)
+        row += M8_FIELDS_TO_EXTRACT.map { |idx| nt_m8[idx] }
         row += (lineage['NR'] || TaxonLineage.null_array)
+        row += M8_FIELDS_TO_EXTRACT.map { |idx| nr_m8[idx] }
         writer << row
       end
     end
-    Open3.capture3("aws s3 cp #{local_file_name} #{s3_file_name}")
+    # Open3.capture3("aws s3 cp #{local_file_name} #{s3_file_name}")
     local_file_name
   end
 
@@ -1202,7 +1235,7 @@ class PipelineRun < ApplicationRecord
     ret
   end
 
-  def outputs_by_step(user_owns_sample = false)
+  def outputs_by_step(can_see_stage1_results = false)
     # Get map of s3 path to presigned URL and size.
     filename_to_info = {}
     sample.results_folder_files.each do |entry|
@@ -1228,7 +1261,7 @@ class PipelineRun < ApplicationRecord
         output_list.each do |output|
           file_info_for_output = filename_to_info["#{output_dir_s3_key}/#{pipeline_version}/#{output}"]
           next unless file_info_for_output
-          if !user_owns_sample && stage_idx.zero? && step_idx < num_steps - 1
+          if !can_see_stage1_results && stage_idx.zero? && step_idx < num_steps - 1
             # Delete URLs for all host-filtering outputs but the last, unless user uploaded the sample.
             file_info_for_output["url"] = nil
           end
