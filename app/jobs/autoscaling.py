@@ -103,10 +103,10 @@ def autoscaling_update(num_gsnap_chunks, num_rapsearch_chunks,
         if not is_valid_classification:
             print "WARNING: some instances were classified into multiple states or none. This should never happen."
 
-        print "CHUNKS IN PROGRESS: {service_ASG.num_chunks}"
+        print "CHUNKS IN PROGRESS: {num_chunks}".format(num_chunks=service_ASG.num_chunks)
+        raw_new_num_desired = service_ASG.required_capacity(num_desired)
 
         print "MOVING FORWARD:"
-        raw_new_num_desired = service_ASG.required_capacity(num_desired)
         print "In principle, the desired capacity needs to be {raw_new_num_desired}.".format(raw_new_num_desired=raw_new_num_desired)
         new_num_desired = service_ASG.clamp_to_valid_range(raw_new_num_desired)
         print "Enforcing the MinSize and MaxSize set by the operator, the desired capacity should be set to {new_num_desired}.".format(new_num_desired=new_num_desired)
@@ -261,12 +261,17 @@ class ASG(object):
     def required_capacity(self, current_desired_capacity):
         best_concurrency = max(self.numa_partitions, self.max_concurrent - self.numa_partitions)
         best_num_instances = int(math.ceil(float(self.num_chunks) / (self.desired_concurrency * self.desired_queue_depth)))
+        if DEBUG:
+            msg = "num_chunks / (desired_concurrency * desired_queue_depth) = {num_chunks} / ({desired_concurrency} * {desired_queue_depth}) = {best_num_instances}"
+            print msg.format(num_chunks=self.num_chunks, desired_concurrency=self.desired_concurrency, desired_queue_depth=self.desired_queue_depth, best_num_instances=best_num_instances)
         if best_num_instances < self.instance_limit:
             result = best_num_instances
         else:
             # Go only up to instance_limit.
             # Ignore instance_limit if operator has set DesiredCapacity higher than that.
             result = max(self.instance_limit, current_desired_capacity)
+            if DEBUG:
+                print "Limiting to {result} to avoid surge in cost.".format(result=result)
         return result
 
     def clamp_to_valid_range(self, desired_capacity):
