@@ -2,7 +2,7 @@ import { histogram, extent, min, max, mean, deviation } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
 import { select } from "d3-selection";
 import { scaleLinear } from "d3-scale";
-import { Colormap } from "../utils/colormaps/Colormap";
+import { CategoricalColormap } from "../utils/colormaps/CategoricalColormap";
 
 export default class Histogram {
   constructor(container, data, options) {
@@ -89,10 +89,7 @@ export default class Histogram {
   update() {
     if (!this.data) return;
 
-    let colors = Colormap.getNScale(
-      this.options.colormap,
-      this.data.length + 1
-    );
+    let colors = new CategoricalColormap().getNScale(this.data.length + 1);
 
     let mins = [];
     let maxs = [];
