@@ -46,7 +46,7 @@
       },
       "additional_attributes": {
         "service": "gsnap",
-        "chunks_in_flight": 32,
+        "chunks_in_flight": <%= @attribute_dict[:chunks_in_flight] %>,
         "chunk_size": <%= @attribute_dict[:gsnap_chunk_size] %>,
         "max_concurrent": <%= @attribute_dict[:gsnap_max_concurrent] %>,
         "environment": "<%= Rails.env == 'prod' ? 'prod' : 'staging' %>",
@@ -73,7 +73,7 @@
       },
       "additional_attributes": {
         "service": "rapsearch2",
-        "chunks_in_flight": 32,
+        "chunks_in_flight": <%= @attribute_dict[:chunks_in_flight] %>,
         "chunk_size": <%= @attribute_dict[:rapsearch_chunk_size] %>,
         "max_concurrent": <%= @attribute_dict[:rapsearch_max_concurrent] %>,
         "environment": "<%= Rails.env == 'prod' ? 'prod' : 'staging' %>",

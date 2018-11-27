@@ -204,6 +204,8 @@ class ASG(object):
         self.max_job_dispatch_lag_seconds = max_job_dispatch_lag_seconds
         self.job_tag_keep_alive_seconds = job_tag_keep_alive_seconds
 
+        self.desired_concurrency = max(self.numa_partitions, self.max_concurrent - self.numa_partitions)
+
         self.min_draining_wait = self.max_job_dispatch_lag_seconds + self.job_dispatch_lag_grace_period_seconds
         self.job_tag_expiration = self.job_tag_keep_alive_seconds + self.job_tag_keep_alive_grace_period_seconds
         self.instance_name = self.service + "-asg-" + self.environment
@@ -258,7 +260,7 @@ class ASG(object):
 
     def required_capacity(self, current_desired_capacity):
         best_concurrency = max(self.numa_partitions, self.max_concurrent - self.numa_partitions)
-        best_num_instances = int(math.ceil(float(self.num_chunks) / (desired_concurrency * self.desired_queue_depth)))
+        best_num_instances = int(math.ceil(float(self.num_chunks) / (self.desired_concurrency * self.desired_queue_depth)))
         if best_num_instances < self.instance_limit:
             result = best_num_instances
         else:

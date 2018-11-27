@@ -37,6 +37,7 @@ class PipelineRun < ApplicationRecord
   RAPSEARCH_CHUNK_SIZE = 10_000
   GSNAP_MAX_CONCURRENT = 2
   RAPSEARCH_MAX_CONCURRENT = 6
+  MAX_CHUNKS_IN_FLIGHT = 32
 
   GSNAP_M8 = "gsnap.m8".freeze
   RAPSEARCH_M8 = "rapsearch2.m8".freeze
@@ -193,17 +194,26 @@ class PipelineRun < ApplicationRecord
     in_progress.where("job_status NOT LIKE '3.%' AND job_status NOT LIKE '4.%'")
   end
 
-  def self.count_chunks(run_ids, known_num_reads, chunk_size, completed_chunks)
+  def self.count_chunks(run_ids, known_num_reads, count_config, completed_chunks)
+    chunk_size = count_config[:chunk_size]
+    can_pair_chunks = count_config[:can_pair_chunks]
+    is_run_paired = count_config[:is_run_paired]
     num_chunks_by_run_id = {}
     run_ids.each do |pr_id|
       # A priori, each run will count for 1 chunk
       num_chunks = 1
       # If number of non-host reads is known, we can compute the actual number of chunks from it
-      num_chunks = (known_num_reads[pr_id] / chunk_size.to_f).ceil if known_num_reads[pr_id]
+      if known_num_reads[pr_id]
+        num_reads = known_num_reads[pr_id]
+        if can_pair_chunks && is_run_paired[pr_id]
+          num_reads /= 2.0
+        end
+        num_chunks = (num_reads / chunk_size.to_f).ceil
+      end
       # If any chunks have already completed, we can subtract them
       num_chunks = [0, num_chunks - completed_chunks[pr_id]].max if completed_chunks[pr_id]
       # Due to rate limits in idseq-dag, there is a cap on the number of chunks dispatched concurrently by a single job
-      num_chunks = [num_chunks, 30].min
+      num_chunks = [num_chunks, MAX_CHUNKS_IN_FLIGHT].min
       num_chunks_by_run_id[pr_id] = num_chunks
     end
     num_chunks_by_run_id.values.sum
@@ -216,12 +226,30 @@ class PipelineRun < ApplicationRecord
     in_progress_job_stats = JobStat.where(pipeline_run_id: need_alignment.pluck(:id))
     last_host_filter_step = "subsampled_out"
     known_num_reads = Hash[in_progress_job_stats.where(task: last_host_filter_step).pluck(:pipeline_run_id, :reads_after)]
+    # Determine which samples are paired-end to adjust chunk count
+    runs_by_sample_id = need_alignment.index_by(&:sample_id)
+    files_by_sample_id = InputFile.where(sample_id: need_alignment.pluck(:sample_id)).group_by(&:sample_id)
+    is_run_paired = {}
+    runs_by_sample_id.each do |sid, pr|
+      is_run_paired[pr.id] = (files_by_sample_id[sid].count == 2)
+    end
     # Get number of chunks that have already completed
     completed_gsnap_chunks = Hash[need_alignment.pluck(:id, :completed_gsnap_chunks)]
     completed_rapsearch_chunks = Hash[need_alignment.pluck(:id, :completed_rapsearch_chunks)]
     # Compute number of chunks that still need to be processed
-    gsnap_num_chunks = count_chunks(need_alignment, known_num_reads, GSNAP_CHUNK_SIZE, completed_gsnap_chunks)
-    rapsearch_num_chunks = count_chunks(need_alignment, known_num_reads, RAPSEARCH_CHUNK_SIZE, completed_rapsearch_chunks)
+    count_configs = {
+      gsnap: {
+        chunk_size: GSNAP_CHUNK_SIZE,
+        can_pair_chunks: true, # gsnap can take paired inputs
+        is_run_paired: is_run_paired
+      },
+      rapsearch: {
+        chunk_size: RAPSEARCH_CHUNK_SIZE,
+        can_pair_chunks: false # rapsearch always takes a single input file
+      }
+    }
+    gsnap_num_chunks = count_chunks(need_alignment.pluck(:id), known_num_reads, count_configs[:gsnap], completed_gsnap_chunks)
+    rapsearch_num_chunks = count_chunks(need_alignment.pluck(:id), known_num_reads, count_configs[:rapsearch], completed_rapsearch_chunks)
     { gsnap: gsnap_num_chunks, rapsearch: rapsearch_num_chunks }
   end
 
