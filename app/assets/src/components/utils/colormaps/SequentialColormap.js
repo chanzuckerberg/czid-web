@@ -1,4 +1,4 @@
-export class Colormap {
+export class SequentialColormap {
   // Colormap provides utility functions to load color maps (array defining a scale of colors) from
   // a JSON array and create colors scales with a variable number of colors.
 
