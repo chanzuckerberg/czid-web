@@ -8,7 +8,7 @@ import ObjectHelper from "../helpers/ObjectHelper";
 import Icon from "./ui/icons/Icon";
 import { Menu, MenuItem } from "./ui/controls/Menu";
 import UploadBox from "./ui/controls/UploadBox";
-import { cleanLocalFileName } from "./utils/sample";
+import { cleanLocalFilePath, baseName } from "./utils/sample";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -392,25 +392,6 @@ class SampleUpload extends React.Component {
     }
   }
 
-  baseName = str => {
-    let base = cleanLocalFileName(str);
-
-    let separator = "/";
-    if (base.includes("\\")) {
-      // If the name includes the backslash \ it's probably from Windows.
-      separator = "\\";
-    }
-
-    // Get the last piece
-    base = base.substring(base.lastIndexOf(separator) + 1);
-
-    if (base.includes(".")) {
-      // Leave off the extension
-      base = base.substring(0, base.lastIndexOf("."));
-    }
-    return base;
-  };
-
   isFormInvalid() {
     const errors = {};
 
@@ -714,8 +695,8 @@ class SampleUpload extends React.Component {
     this.state.localFilesToUpload.forEach(file => {
       inputFilesAttributes.push({
         source_type: "local",
-        source: cleanLocalFileName(file.name),
-        parts: cleanLocalFileName(file.name)
+        source: cleanLocalFilePath(file.name),
+        parts: cleanLocalFilePath(file.name)
       });
     });
 
@@ -756,7 +737,7 @@ class SampleUpload extends React.Component {
   };
 
   getSampleNameFromFileName = fname => {
-    let base = this.baseName(fname);
+    let base = baseName(fname);
     const fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/gim;
     const readLabel = /_R1.*$|_R2.*$/gi;
     base = base.replace(fastqLabel, "").replace(readLabel, "");
