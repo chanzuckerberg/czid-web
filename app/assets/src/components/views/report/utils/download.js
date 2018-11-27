@@ -2,6 +2,8 @@ import { compact } from "lodash/fp";
 
 const NON_HOST_READS_LABEL = "Download Non-Host Reads (.fasta)";
 const NON_HOST_CONTIGS_LABEL = "Download Non-Host Contigs (.fasta)";
+const NON_HOST_CONTIGS_MAPPING_LABEL =
+  "Download Non-Host Contigs Summary (.csv)";
 const NON_HOST_ASSEMBLIES_LABEL = "Download Non-Host Assemblies (.fasta)";
 const UNMAPPED_READS_LABEL = "Download Unmapped Reads (.fasta)";
 const RESULTS_FOLDER_LABEL = "See Results Folder";
@@ -16,6 +18,7 @@ const getDownloadOptions = (pipelineRun, assembledTaxids) => {
   return compact([
     stageTwoComplete && NON_HOST_READS_LABEL,
     assembled && NON_HOST_CONTIGS_LABEL,
+    assembled && NON_HOST_CONTIGS_MAPPING_LABEL,
     nonhostAssemblyComplete && NON_HOST_ASSEMBLIES_LABEL,
     stageTwoComplete && UNMAPPED_READS_LABEL,
     RESULTS_FOLDER_LABEL
@@ -41,6 +44,10 @@ const getDownloadLinkInfoMap = sampleId => ({
   },
   [NON_HOST_CONTIGS_LABEL]: {
     path: `/samples/${sampleId}/contigs_fasta`,
+    newPage: false
+  },
+  [NON_HOST_CONTIGS_MAPPING_LABEL]: {
+    path: `/samples/${sampleId}/contigs_summary`,
     newPage: false
   },
   [NON_HOST_ASSEMBLIES_LABEL]: {
