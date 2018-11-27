@@ -18,6 +18,7 @@ class CreateUser extends React.Component {
     this.selectedUser = {
       email: this.user ? this.user.email : "",
       name: this.user ? this.user.name : "",
+      institution: this.user ? this.user.institution : "",
       password: "",
       id: this.user ? this.user.id : null,
       password_confirmation: "",
@@ -148,6 +149,7 @@ class CreateUser extends React.Component {
           user: {
             name: this.state.name,
             email: this.state.email,
+            institution: this.state.institution,
             password: this.state.password,
             password_confirmation: this.state.password_confirmation,
             role: this.state.isAdmin ? 1 : 0
@@ -185,6 +187,7 @@ class CreateUser extends React.Component {
           user: {
             name: this.state.name,
             email: this.state.email,
+            institution: this.state.institution,
             password: this.state.password,
             password_confirmation: this.state.pConfirm,
             role: this.state.adminstatus ? 1 : 0
@@ -279,6 +282,20 @@ class CreateUser extends React.Component {
                   value={this.state.name}
                 />
                 <label htmlFor="user_name">Name</label>
+              </div>
+              <div className="input-field">
+                <i className="fa fa-building" aria-hidden="true" />
+                <input
+                  type="text"
+                  onChange={e =>
+                    this.setState({
+                      institution: e.target.value
+                    })
+                  }
+                  onFocus={this.clearError}
+                  value={this.state.institution}
+                />
+                <label>Institution</label>
               </div>
               <div className="input-field">
                 <i className="fa fa-key" aria-hidden="true" />
