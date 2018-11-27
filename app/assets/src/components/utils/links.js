@@ -17,8 +17,8 @@ const openUrl = (link, currentEvent) => {
 
 const downloadStringToFile = str => {
   let file = new Blob([str], { type: "text/plain" });
-  let download_url = URL.createObjectURL(file);
-  location.href = `${download_url}`;
+  let downloadUrl = URL.createObjectURL(file);
+  location.href = `${downloadUrl}`;
 };
 
 export { openUrl, downloadStringToFile };
