@@ -114,7 +114,7 @@ def autoscaling_update(config):
             print "Applying DesiredCapacity {new_num_desired}.".format(new_num_desired=new_num_desired)
             service_ASG.set_desired_capacity(new_num_desired)
 
-        print "HEALTHY <--> DRAINING transitions:"
+        print "AVAILABLE <--> DRAINING transitions:"
         service_ASG.draining_instances = draining_instances
         if new_num_desired < num_available:
             num_to_drain = num_available - new_num_desired
@@ -127,7 +127,7 @@ def autoscaling_update(config):
             instances_to_rescue = service_ASG.stop_draining(num_to_rescue)
             print "Moved {instances_to_rescue} from 'draining' to 'available' state.".format(instances_to_rescue=instances_to_rescue)
         else:
-            print "No instances need to make a HEALTHY <--> DRAINING transition."
+            print "No instances need to make an AVAILABLE <--> DRAINING transition."
 
         print "DRAINING --> DISCARDED transitions:"
         instances_to_discard = service_ASG.discard_if_safe()
