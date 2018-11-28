@@ -193,7 +193,6 @@ class ASG(object):
     job_tag_keep_alive_grace_period_seconds = 60
 
     numa_partitions = 2 # i3.16xlarge or i3.metal
-    desired_queue_depth = 3 # initialization takes time: it's fine if some number of chunks have to run sequentially rather than in parallel
 
     def __init__(self, service, asg_list, tag_list, config):
         self.draining_instances = []
