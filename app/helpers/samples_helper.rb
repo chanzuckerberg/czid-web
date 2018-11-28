@@ -5,10 +5,10 @@ module SamplesHelper
   include PipelineOutputsHelper
 
   def generate_sample_list_csv(formatted_samples)
-    attributes = %w[sample_name uploader upload_date runtime_seconds overall_job_status num_input_files
-                    total_reads nonhost_reads nonhost_reads_percent ercc_reads subsampled_fraction
-                    quality_control compression_ratio tissue_type nucleotide_type
-                    location host_genome notes sample_diagnosis]
+    attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
+                    total_reads nonhost_reads nonhost_reads_percent quality_control
+                    compression_ratio sample_type nucleotide_type collection_location
+                    host_genome notes]
     CSV.generate(headers: true) do |csv|
       csv << attributes
       formatted_samples.each do |sample_info|
@@ -16,32 +16,22 @@ module SamplesHelper
         pipeline_run = derived_output[:pipeline_run]
         db_sample = sample_info[:db_sample]
         run_info = sample_info[:run_info]
+        metadata = sample_info[:metadata]
         data_values = { sample_name: db_sample ? db_sample[:name] : '',
+                        uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
                         upload_date: db_sample ? db_sample[:created_at] : '',
-                        num_input_files: db_sample ? db_sample.input_files.count : '',
+                        overall_job_status: run_info ? run_info[:result_status_description] : '',
+                        runtime_seconds: run_info ? run_info[:total_runtime] : '',
                         total_reads: pipeline_run ? pipeline_run.total_reads : '',
                         nonhost_reads: pipeline_run ? pipeline_run.adjusted_remaining_reads : '',
                         nonhost_reads_percent: derived_output[:summary_stats] && derived_output[:summary_stats][:percent_remaining] ? derived_output[:summary_stats][:percent_remaining].round(3) : '',
-                        ercc_reads: pipeline_run ? pipeline_run.total_ercc_reads : '',
-                        subsampled_fraction: pipeline_run ? pipeline_run.fraction_subsampled : '',
                         quality_control: derived_output[:summary_stats] && derived_output[:summary_stats][:qc_percent] ? derived_output[:summary_stats][:qc_percent].round(3) : '',
                         compression_ratio: derived_output[:summary_stats] && derived_output[:summary_stats][:compression_ratio] ? derived_output[:summary_stats][:compression_ratio].round(2) : '',
-                        tissue_type: db_sample ? db_sample[:sample_tissue] : '',
-                        nucleotide_type: db_sample ? db_sample[:sample_template] : '',
-                        location: db_sample ? db_sample[:sample_location] : '',
-                        host_genome: derived_output ? derived_output[:host_genome_name] : '',
-                        notes: db_sample ? db_sample[:sample_notes] : '',
-                        overall_job_status: run_info ? run_info[:result_status_description] : '',
-                        uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
-                        runtime_seconds: run_info ? run_info[:total_runtime] : '',
-                        sample_library: db_sample ? db_sample[:sample_library] : '',
-                        sample_sequencer: db_sample ? db_sample[:sample_sequencer] : '',
-                        sample_date: db_sample ? db_sample[:sample_date] : '',
-                        sample_input_pg: db_sample ? db_sample[:sample_input_pg] : '',
-                        sample_batch: db_sample ? db_sample[:sample_batch] : '',
-                        sample_diagnosis: db_sample ? db_sample[:sample_diagnosis] : '',
-                        sample_organism: db_sample ? db_sample[:sample_organism] : '',
-                        sample_detection: db_sample ? db_sample[:sample_detection] : '' }
+                        sample_type: metadata && metadata[:sample_type] ? metadata[:sample_type] : '',
+                        nucleotide_type: metadata && metadata[:nucleotide_type] ? metadata[:nucleotide_type] : '',
+                        collection_location: metadata && metadata[:collection_location] ? metadata[:collection_location] : '',
+                        host_genome: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
+                        notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '' }
         attributes_as_symbols = attributes.map(&:to_sym)
         csv << data_values.values_at(*attributes_as_symbols)
       end
@@ -206,8 +196,25 @@ module SamplesHelper
 
   def filter_by_tissue_type(samples, query)
     return samples.where("false") if query == ["none"]
-    updated_query = query.map { |x| x == 'Not set' ? nil : x }
-    samples.where(sample_tissue: updated_query)
+
+    # Use a set to speed up query.
+    query_set = query.to_set
+
+    include_not_set = query.include?('Not set')
+
+    sample_type_metadatum = Metadatum
+                            .where(sample_id: samples.pluck(:id), key: "sample_type")
+
+    matching_sample_ids = sample_type_metadatum
+                          .select { |m| query_set.include?(m.validated_value) }
+                          .pluck(:sample_id)
+
+    if include_not_set
+      not_set_ids = samples.pluck(:id) - sample_type_metadatum.pluck(:sample_id)
+      matching_sample_ids.concat(not_set_ids)
+    end
+
+    samples.where(id: matching_sample_ids)
   end
 
   def filter_by_host(samples, query)
@@ -286,6 +293,18 @@ module SamplesHelper
     top_pipeline_run_by_sample_id
   end
 
+  def metadata_multiget(sample_ids)
+    metadata = Metadatum.where(sample_id: sample_ids)
+
+    metadata_by_sample_id = {}
+    metadata.each do |metadatum|
+      metadata_by_sample_id[metadatum.sample_id] ||= {}
+      metadata_by_sample_id[metadatum.sample_id][metadatum.key.to_sym] = metadatum.validated_value
+    end
+
+    metadata_by_sample_id
+  end
+
   def dependent_records_multiget(table, parent_id_column_sym, parent_ids)
     all_records = table.where(parent_id_column_sym => parent_ids)
     records_by_parent_id = {}
@@ -308,11 +327,13 @@ module SamplesHelper
     report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
     pipeline_run_stages_by_pipeline_run_id = dependent_records_multiget(PipelineRunStage, :pipeline_run_id, pipeline_run_ids)
     output_states_by_pipeline_run_id = dependent_records_multiget(OutputState, :pipeline_run_id, pipeline_run_ids)
+    metadata_by_sample_id = metadata_multiget(sample_ids)
 
     # Massage data into the right format
     samples.each_with_index do |sample|
       job_info = {}
       job_info[:db_sample] = sample
+      job_info[:metadata] = metadata_by_sample_id[sample.id]
       top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
       job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}
       job_info[:derived_sample_output] = sample_derived_data(sample, job_stats_hash)
@@ -344,5 +365,16 @@ module SamplesHelper
     end
 
     ready_sample_ids
+  end
+
+  def get_distinct_sample_types(samples)
+    types = Metadatum
+            .where(key: "sample_type")
+            .where(sample_id: samples.pluck(:id))
+            .pluck(:text_validated_value)
+            .uniq
+
+    # Only include valid sample types
+    types & Metadatum::KEY_TO_STRING_OPTIONS[:sample_type]
   end
 end
