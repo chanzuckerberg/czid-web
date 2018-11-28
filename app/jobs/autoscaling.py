@@ -4,6 +4,7 @@ import sys
 import subprocess
 import time
 import random
+import math
 from operator import itemgetter
 from functools import wraps
 from collections import defaultdict, Counter
@@ -32,15 +33,6 @@ def retry(operation, randgen=random.Random().random):
 @retry
 def aws_command(command_str):
     return subprocess.check_output(command_str, shell=True)
-
-def at_most(upper_limit):
-    return lambda n: min(n, upper_limit)
-
-def at_least(lower_limit):
-    return lambda n: max(n, lower_limit)
-
-def exactly(value):
-    return lambda _n: value
 
 def unixtime_now():
     return int(time.time())
@@ -73,45 +65,28 @@ def get_asg_list():
     asg_list = json.loads(asg_json).get('AutoScalingGroups', [])
     return asg_list
 
-def required_capacity(num_jobs):
-    if num_jobs == 0:
-        result = exactly(0)
-    elif num_jobs == 1:
-        # Often a test job or automatic benchmark job
-        result = exactly(4)
-    elif 1 < num_jobs <= 6:
-        result = exactly(8)
-    else:
-        # This means, as long as we're in this regime, a DesiredCapacity > 24 set manually by the operator
-        # will be respected and not scaled down until we exit this regime.
-        result = at_least(24)
-    return result
-
-def autoscaling_update(my_num_jobs, my_environment,
-                       max_job_dispatch_lag_seconds, job_tag_prefix,
-                       job_tag_keep_alive_seconds, draining_tag):
+def autoscaling_update(config):
     '''
     Plan and perform an update to the GSNAP/RAPSEARCH ASGs.
     Note: Will not scale up for jobs originating in a development environment.
           You can provision machines for development jobs by manually setting MinSize on the ASGs,
           which is respected by this autoscaler.
     '''
+    my_environment = config['my_environment']
     if my_environment == "development":
         return
 
     asg_list = get_asg_list()
     tag_list = get_tag_list()
-    gsnap_ASG = ASG("gsnapl", my_environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds)
-    rapsearch_ASG = ASG("rapsearch2", my_environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds)
+    gsnap_ASG = ASG("gsnapl", asg_list, tag_list, config)
+    rapsearch_ASG = ASG("rapsearch2", asg_list, tag_list, config)
     if not (gsnap_ASG.can_scale and rapsearch_ASG.can_scale):
         print "Scaling by agents of {my_environment} is not permitted.".format(my_environment=my_environment)
         return
 
-    print "{my_num_jobs} jobs are in progress.".format(my_num_jobs=my_num_jobs)
-    compute_num_instances = required_capacity(my_num_jobs)
     for service_ASG in [gsnap_ASG, rapsearch_ASG]:
         print "--- Analyzing the {instance_name} ASG ---".format(instance_name=service_ASG.instance_name)
-        num_desired = service_ASG.num_desired_instances()
+        num_desired = service_ASG.desired_capacity()
         available_instances, draining_instances, discarded_instances, terminating_instances, is_valid_classification = service_ASG.classify_instances()
         num_available = len(available_instances)
         num_draining = len(draining_instances)
@@ -125,8 +100,10 @@ def autoscaling_update(my_num_jobs, my_environment,
         if not is_valid_classification:
             print "WARNING: some instances were classified into multiple states or none. This should never happen."
 
+        print "CHUNKS IN PROGRESS: {num_chunks}".format(num_chunks=service_ASG.num_chunks)
+
+        raw_new_num_desired = service_ASG.required_capacity()
         print "MOVING FORWARD:"
-        raw_new_num_desired = compute_num_instances(num_desired)
         print "In principle, the desired capacity needs to be {raw_new_num_desired}.".format(raw_new_num_desired=raw_new_num_desired)
         new_num_desired = service_ASG.clamp_to_valid_range(raw_new_num_desired)
         print "Enforcing the MinSize and MaxSize set by the operator, the desired capacity should be set to {new_num_desired}.".format(new_num_desired=new_num_desired)
@@ -136,8 +113,15 @@ def autoscaling_update(my_num_jobs, my_environment,
         else:
             print "Applying DesiredCapacity {new_num_desired}.".format(new_num_desired=new_num_desired)
             service_ASG.set_desired_capacity(new_num_desired)
+            if service_ASG.num_chunks == 0 and new_num_desired == 0:
+                # Note: safety here relies on the fact that the pipeline monitor is single-threaded, so no new stages can be dispatched
+                # between the 'num_chunks == 0' measurement and the discardment of the instances. The web app is also unable to dispatch any
+                # stage 2 jobs by itself -- it can only dispatch stage 1 jobs (new sample uploads), which do not call gsnap/rapsearch ASGs until
+                # the pipeline_monitor moves them along to stage 2.
+                service_ASG.all_instances_remove_protection()
+                continue
 
-        print "HEALTHY <--> DRAINING transitions:"
+        print "AVAILABLE <--> DRAINING transitions:"
         service_ASG.draining_instances = draining_instances
         if new_num_desired < num_available:
             num_to_drain = num_available - new_num_desired
@@ -150,7 +134,7 @@ def autoscaling_update(my_num_jobs, my_environment,
             instances_to_rescue = service_ASG.stop_draining(num_to_rescue)
             print "Moved {instances_to_rescue} from 'draining' to 'available' state.".format(instances_to_rescue=instances_to_rescue)
         else:
-            print "No instances need to make a HEALTHY <--> DRAINING transition."
+            print "No instances need to make an AVAILABLE <--> DRAINING transition."
 
         print "DRAINING --> DISCARDED transitions:"
         instances_to_discard = service_ASG.discard_if_safe()
@@ -208,18 +192,27 @@ class ASG(object):
     job_dispatch_lag_grace_period_seconds = 60
     job_tag_keep_alive_grace_period_seconds = 60
 
-    def __init__(self, service, environment, asg_list, tag_list, draining_tag, job_tag_prefix, max_job_dispatch_lag_seconds, job_tag_keep_alive_seconds):
+    numa_partitions = 2 # i3.16xlarge or i3.metal
+
+    def __init__(self, service, asg_list, tag_list, config):
         self.draining_instances = []
+
         self.service = service
-        self.environment = environment
-        self.draining_tag = draining_tag
-        self.job_tag_prefix = job_tag_prefix
-        self.max_job_dispatch_lag_seconds = max_job_dispatch_lag_seconds
-        self.job_tag_keep_alive_seconds = job_tag_keep_alive_seconds
+        self.num_chunks = config[service]['num_chunks']
+        self.max_concurrent = config[service]['max_concurrent']
+
+        self.environment = config['my_environment']
+        self.draining_tag = config['draining_tag']
+        self.job_tag_prefix = config['job_tag_prefix']
+        self.max_job_dispatch_lag_seconds = config['max_job_dispatch_lag_seconds']
+        self.job_tag_keep_alive_seconds = config['job_tag_keep_alive_seconds']
 
         self.min_draining_wait = self.max_job_dispatch_lag_seconds + self.job_dispatch_lag_grace_period_seconds
         self.job_tag_expiration = self.job_tag_keep_alive_seconds + self.job_tag_keep_alive_grace_period_seconds
         self.instance_name = self.service + "-asg-" + self.environment
+
+        # Machine initialization takes time: it's fine if some number of chunks have to run sequentially rather than in parallel
+        self.desired_queue_depth = 3 if self.service == "rapsearch2" else 5
 
         self.asg, self.instance_ids, self.tags = self.find_attributes(asg_list, tag_list, self.instance_name)
         self.can_scale = self.permission_to_scale(self.asg)
@@ -257,7 +250,7 @@ class ASG(object):
         tags = find_tags(instance_ids)
         return asg, instance_ids, tags
 
-    def num_desired_instances(self):
+    def desired_capacity(self):
         return int(self.asg.get("DesiredCapacity", self.asg.get("MinSize", 0)))
 
     def tags_by_instance_id(self):
@@ -269,24 +262,28 @@ class ASG(object):
             result[instance_id][key] = value
         return result
 
+    def required_capacity(self):
+        ideal_concurrency = max(self.numa_partitions, self.max_concurrent - self.numa_partitions)
+        ideal_num_instances = int(math.ceil(float(self.num_chunks) / (ideal_concurrency * self.desired_queue_depth)))
+        msg = "num_chunks / (ideal_concurrency * desired_queue_depth) = {num_chunks} / ({ideal_concurrency} * {desired_queue_depth}) = {ideal_num_instances}"
+        print msg.format(num_chunks=self.num_chunks, ideal_concurrency=ideal_concurrency, desired_queue_depth=self.desired_queue_depth, ideal_num_instances=ideal_num_instances)
+        return ideal_num_instances
+
     def clamp_to_valid_range(self, desired_capacity):
         min_size = int(self.asg.get("MinSize", desired_capacity))
         max_size = int(self.asg.get("MaxSize", desired_capacity))
         if desired_capacity < min_size:
-            print "Clamping {} up to {}".format(desired_capacity, min_size)
             desired_capacity = min_size
         if desired_capacity > max_size:
-            print "Clamping {} down to {}".format(desired_capacity, max_size)
             desired_capacity = max_size
         return desired_capacity
 
     def set_desired_capacity(self, new_num_desired):
         cmd = "aws autoscaling set-desired-capacity --auto-scaling-group-name {asg_name} --desired-capacity {new_num_desired}"
         cmd = cmd.format(asg_name=self.asg['AutoScalingGroupName'], new_num_desired=new_num_desired)
-        if self.can_scale:
-            if DEBUG:
-                print cmd
-            aws_command(cmd)
+        if DEBUG:
+            print cmd
+        aws_command(cmd)
 
     def classify_instances(self):
         available_instances = []
@@ -304,7 +301,7 @@ class ASG(object):
             is_draining = ((inst["ProtectedFromScaleIn"] or inst["LifecycleState"] == "Pending") and
                            self.draining_tag in instance_tags)
             is_available = ((inst["ProtectedFromScaleIn"] or inst["LifecycleState"] == "Pending") and
-                          not self.draining_tag in instance_tags)
+                            not self.draining_tag in instance_tags)
             # Note: automatic scale-in protection associated with the ASG is set on each instance once its AWS lifecycle transitions from 'Pending' to 'InService'.
             # For simplification, in a slight abuse of language, we include in the 'available' state instances that are EITHER 'InService' OR 'Pending'.
             # 'Pending' state inevitable leads to 'InService' state, with scale-in protection set.
@@ -342,7 +339,7 @@ class ASG(object):
             cmd = cmd.format(list_instances=' '.join(instance_ids), draining_tag=self.draining_tag, timestamp=unixtime_now())
             aws_command(cmd)
         instance_ids = instances_to_drain()
-        if instance_ids and self.can_scale:
+        if instance_ids:
             add_draining_tag(instance_ids)
         return instance_ids
 
@@ -363,9 +360,14 @@ class ASG(object):
         def remove_draining_tag(instance_ids):
             delete_tags_from_instances(instance_ids, [self.draining_tag])
         instance_ids = instances_to_rescue()
-        if instance_ids and self.can_scale:
+        if instance_ids:
             remove_draining_tag(instance_ids)
         return instance_ids
+
+    def remove_scalein_protection(self, instance_ids):
+        cmd = "aws autoscaling set-instance-protection --instance-ids {list_instances} --auto-scaling-group-name {asg_name} --no-protected-from-scale-in"
+        cmd = cmd.format(list_instances=' '.join(instance_ids), asg_name=self.asg['AutoScalingGroupName'])
+        aws_command(cmd)
 
     def discard_if_safe(self):
         def count_running_alignment_jobs():
@@ -396,21 +398,26 @@ class ASG(object):
                 if num_jobs == 0 and draining_interval > self.min_draining_wait:
                     result.append(instance_id)
             return result
-        def remove_scalein_protection(instance_ids):
-            cmd = "aws autoscaling set-instance-protection --instance-ids {list_instances} --auto-scaling-group-name {asg_name} --no-protected-from-scale-in"
-            cmd = cmd.format(list_instances=' '.join(instance_ids), asg_name=self.asg['AutoScalingGroupName'])
-            aws_command(cmd)
         instance_ids = instances_to_discard()
-        if instance_ids and self.can_scale:
-            remove_scalein_protection(instance_ids)
+        if instance_ids:
+            self.remove_scalein_protection(instance_ids)
         return instance_ids
 
+    def all_instances_remove_protection(self):
+        all_instance_ids = [inst["InstanceId"] for inst in self.asg["Instances"]]
+        if all_instance_ids:
+            print "Discarding all {instance_name} instances immediately without draining.".format(instance_name=self.instance_name)
+            self.remove_scalein_protection(all_instance_ids)
+            print "Discarded {num_all} instances: {all_instance_ids}".format(num_all=len(all_instance_ids), all_instance_ids=all_instance_ids)
+
+
 if __name__ == "__main__":
-    assert len(sys.argv) > 2
-    assert sys.argv[1] in ("update", "debug")
-    assert sys.argv[2].isdigit()
-    assert sys.argv[4].isdigit()
-    assert sys.argv[6].isdigit()
-    if sys.argv[1] == "debug":
+    _, autoscaling_config_json = sys.argv
+    autoscaling_config = json.loads(autoscaling_config_json)
+
+    mode = autoscaling_config.pop("mode")
+    assert mode in ("update", "debug")
+    if mode == "debug":
         DEBUG = True
-    autoscaling_update(int(sys.argv[2]), sys.argv[3], int(sys.argv[4]), sys.argv[5], int(sys.argv[6]), sys.argv[7])
+
+    autoscaling_update(autoscaling_config)
