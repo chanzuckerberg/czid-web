@@ -396,6 +396,10 @@ $break-large: 1070px;
           flex: 1;
           overflow: hidden;
           text-overflow: ellipsis;
+
+          &.header {
+            overflow: visible;
+          }
           &:first-child {
             flex-grow: 2;
             margin-left: 0.8rem;
