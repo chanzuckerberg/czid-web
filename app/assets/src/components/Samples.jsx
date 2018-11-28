@@ -7,11 +7,10 @@ import $ from "jquery";
 import Materialize from "materialize-css";
 import { intersection, union, difference, map, keyBy, take } from "lodash";
 // TODO(mark): Refactor lodash/fp functions into a file of immutable utilities.
-import { merge } from "lodash/fp";
-import { Sidebar, Popup, Label, Icon, Modal, Form } from "semantic-ui-react";
+import { merge, sortBy } from "lodash/fp";
+import { Sidebar, Label, Icon, Modal, Form } from "semantic-ui-react";
 import Nanobar from "nanobar";
 import SortHelper from "./SortHelper";
-import numberWithCommas from "../helpers/strings";
 import ProjectSelection from "./ProjectSelection";
 import StringHelper from "../helpers/StringHelper";
 import Cookies from "js-cookie";
@@ -22,8 +21,16 @@ import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "./ui/controls/buttons/SecondaryButton";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
+import TableColumnHeader from "./views/samples/TableColumnHeader";
+import {
+  SAMPLE_TABLE_COLUMNS,
+  INITIAL_COLUMNS,
+  ALL_COLUMNS
+} from "./views/samples/constants";
+import { getSampleTableData } from "./views/samples/utils";
 // TODO(mark): Convert styles/samples.scss to CSS modules.
 import cs from "./samples.scss";
+import { openUrl } from "./utils/links";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -124,115 +131,11 @@ class Samples extends React.Component {
       project_id_download_in_progress: null,
       project_add_email_validation: null,
       projectType: this.fetchParams("type") || "all",
-      columnsShown: [
-        "total_reads",
-        "nonhost_reads",
-        "quality_control",
-        "compression_ratio",
-        "host_genome",
-        "location",
-        "pipeline_status"
-      ],
-      allColumns: [
-        "total_reads",
-        "nonhost_reads",
-        "quality_control",
-        "compression_ratio",
-        "host_genome",
-        "location",
-        "pipeline_status",
-        "notes",
-        "nucleotide_type",
-        "tissue_type",
-        "sample_library",
-        "sample_sequencer",
-        "sample_date",
-        "sample_input_pg",
-        "sample_batch",
-        "sample_diagnosis",
-        "sample_organism",
-        "sample_detection"
-      ],
+      columnsShown: INITIAL_COLUMNS,
       phyloTreeCreationModalOpen: false
     };
 
     this.sortCount = 0;
-    this.COLUMN_DISPLAY_MAP = {
-      total_reads: {
-        display_name: "Total reads",
-        type: "pipeline_data"
-      },
-      nonhost_reads: {
-        display_name: "Non-host reads",
-        type: "pipeline_data"
-      },
-      quality_control: {
-        display_name: "Passed QC",
-        tooltip: "Passed quality control",
-        type: "pipeline_data"
-      },
-      compression_ratio: {
-        display_name: "DCR",
-        tooltip: "Duplicate compression ratio",
-        type: "pipeline_data"
-      },
-      pipeline_status: {
-        display_name: "Status",
-        type: "pipeline_data"
-      },
-      nucleotide_type: {
-        display_name: "Nucleotide type",
-        type: "metadata"
-      },
-      location: {
-        display_name: "Location",
-        type: "metadata"
-      },
-      host_genome: {
-        display_name: "Host",
-        type: "metadata"
-      },
-      tissue_type: {
-        display_name: "Tissue type",
-        type: "metadata"
-      },
-      notes: {
-        display_name: "Notes",
-        type: "metadata"
-      },
-      sample_library: {
-        display_name: "Library prep",
-        type: "metadata"
-      },
-      sample_sequencer: {
-        display_name: "Sequencer",
-        type: "metadata"
-      },
-      sample_date: {
-        display_name: "Collection date",
-        type: "metadata"
-      },
-      sample_input_pg: {
-        display_name: "RNA/DNA input (pg)",
-        type: "metadata"
-      },
-      sample_batch: {
-        display_name: "Batch",
-        type: "metadata"
-      },
-      sample_diagnosis: {
-        display_name: "Clinical diagnosis",
-        type: "metadata"
-      },
-      sample_organism: {
-        display_name: "Known organisms",
-        type: "metadata"
-      },
-      sample_detection: {
-        display_name: "Detection method",
-        type: "metadata"
-      }
-    };
 
     $(document).ready(function() {
       $("select").material_select();
@@ -294,7 +197,7 @@ class Samples extends React.Component {
 
     switch (option) {
       case "samples_table":
-        location.href = `/projects/${project_id}/csv`;
+        openUrl(`/projects/${project_id}/csv`);
         break;
       case "project_reports":
         this.generateReport(
@@ -342,9 +245,11 @@ class Samples extends React.Component {
       .then(res => {
         let download_status = res.data.status_display;
         if (download_status === "complete") {
-          location.href = `/projects/${
-            this.state.project_id_download_in_progress
-          }/${retrieve_action}`;
+          openUrl(
+            `/projects/${
+              this.state.project_id_download_in_progress
+            }/${retrieve_action}`
+          );
           this.nanobar.go(100);
           this.setState({
             project_id_download_in_progress: null
@@ -552,10 +457,8 @@ class Samples extends React.Component {
   }
 
   renderPipelineOutput(samples) {
-    let BLANK_TEXT = <span className="blank">—</span>;
     return samples.map((sample, i) => {
       let dbSample = sample.db_sample;
-      let derivedOutput = sample.derived_sample_output;
       let runInfo = sample.run_info;
       let uploader = sample.uploader.name;
       let status = runInfo.result_status_description;
@@ -565,13 +468,7 @@ class Samples extends React.Component {
       const sample_name_info = (
         <SampleNameInfo parent={this} dbSample={dbSample} uploader={uploader} />
       );
-      let stats = derivedOutput.summary_stats;
-      const data_values = PipelineOutputDataValues({
-        derivedOutput,
-        BLANK_TEXT,
-        stats,
-        dbSample
-      });
+      const data_values = getSampleTableData(sample);
 
       return (
         <PipelineOutputCards
@@ -789,10 +686,8 @@ class Samples extends React.Component {
     }
   }
 
-  viewSample(id, e) {
-    e.preventDefault();
-
-    window.open(`/samples/${id}`, "_self");
+  viewSample(id, currentEvent) {
+    openUrl(`/samples/${id}`, currentEvent);
   }
 
   renderEmptyTable() {
@@ -959,14 +854,14 @@ class Samples extends React.Component {
     return result;
   }
 
-  deleteProject(e) {
+  deleteProject() {
     let projectId = this.state.selectedProjectId;
     axios
       .delete(`/projects/${projectId}.json`, {
         data: { authenticity_token: this.csrf }
       })
-      .then(res => {
-        location.href = "/";
+      .then(_ => {
+        openUrl("/");
       })
       .catch(err => {});
   }
@@ -1027,7 +922,7 @@ class Samples extends React.Component {
     const tissue_filter_tag_list = this.generateTagList(
       "tissueTypes",
       "selectedTissueFilters",
-      "Tissue: "
+      "Sample Type: "
     );
 
     const search_box = (
@@ -1046,7 +941,7 @@ class Samples extends React.Component {
         </div>
         <div className="filter-container">
           <MultipleDropdown
-            label="Tissues: "
+            label="Sample Types: "
             disabled={this.state.tissueTypes.length == 0}
             options={this.state.tissueTypes.map(tissue => {
               return { text: tissue, value: tissue };
@@ -1098,7 +993,6 @@ class Samples extends React.Component {
     const tableHead = (
       <TableColumnHeaders
         sort={this.state.sort_by}
-        colMap={this.COLUMN_DISPLAY_MAP}
         filterStatus={filterStatus}
         state={this.state}
         parent={this}
@@ -1383,43 +1277,28 @@ function FilterItemMarkup({
   );
 }
 
-function ColumnDropdown({
+function ColumnDropdownHeader({
   pos,
-  colMap,
   column_name,
   filterStatus,
-  allColumns,
   columnsShown,
   parent
 }) {
+  const columnOptions = sortBy(
+    column => SAMPLE_TABLE_COLUMNS[column].display_name,
+    difference(ALL_COLUMNS, columnsShown)
+  );
   return (
-    <li key={`shown-${pos}`}>
-      <ColumnPopups pos={pos} colMap={colMap} column_name={column_name} />
-      <ul
-        className="dropdown-content column-dropdown"
-        id={`column-dropdown-${pos}`}
-      >
-        {column_name === "pipeline_status" ? <div>{filterStatus}</div> : null}
-        <li>
-          <a className="title">
-            <b>Switch column</b>
-          </a>
-        </li>
-        {allColumns.map((name, i) => {
-          return (
-            <ColumnEntries
-              columnsShown={columnsShown}
-              name={name}
-              key={i}
-              i={i}
-              column_name={column_name}
-              colMap={colMap}
-              pos={pos}
-              parent={parent}
-            />
-          );
-        })}
-      </ul>
+    <li key={column_name} className="header">
+      <TableColumnHeader
+        className="card-label column-title center-label sample-name center menu-dropdown"
+        columnName={column_name}
+        displayName={SAMPLE_TABLE_COLUMNS[column_name].display_name}
+        tooltip={SAMPLE_TABLE_COLUMNS[column_name].tooltip}
+        columnMap={SAMPLE_TABLE_COLUMNS}
+        columnOptions={columnOptions}
+        onColumnOptionSelect={newColumn => parent.switchColumn(newColumn, pos)}
+      />
     </li>
   );
 }
@@ -1472,36 +1351,6 @@ function FilterListMarkup({
   );
 }
 
-function ColumnEntries({
-  columnsShown,
-  name,
-  i,
-  column_name,
-  colMap,
-  pos,
-  parent
-}) {
-  return columnsShown.includes(name) ? (
-    <li
-      key={`all-${i}`}
-      className={`disabled column_name ${
-        column_name === name ? "current" : ""
-      }`}
-    >
-      {colMap[name].display_name}
-      {column_name === name ? <i className="fa fa-check right" /> : null}
-    </li>
-  ) : (
-    <li
-      key={`all-${i}`}
-      className="selectable column_name"
-      onClick={() => parent.switchColumn(name, pos)}
-    >
-      {colMap[name].display_name}
-    </li>
-  );
-}
-
 function SampleNameInfo({ parent, dbSample, uploader }) {
   return (
     <div
@@ -1521,81 +1370,6 @@ function SampleNameInfo({ parent, dbSample, uploader }) {
       </div>
     </div>
   );
-}
-
-function PipelineOutputDataValues({
-  derivedOutput,
-  BLANK_TEXT,
-  stats,
-  dbSample
-}) {
-  let res = {
-    total_reads: !derivedOutput.pipeline_run
-      ? BLANK_TEXT
-      : numberWithCommas(derivedOutput.pipeline_run.total_reads),
-    nonhost_reads:
-      !stats || !stats.adjusted_remaining_reads
-        ? BLANK_TEXT
-        : numberWithCommas(stats.adjusted_remaining_reads),
-    nonhost_reads_percent:
-      !stats || !stats.percent_remaining ? (
-        ""
-      ) : (
-        <span className="percent">
-          {" "}
-          {`${stats.percent_remaining.toFixed(2)}%`}{" "}
-        </span>
-      ),
-    quality_control:
-      !stats || !stats.qc_percent
-        ? BLANK_TEXT
-        : `${stats.qc_percent.toFixed(2)}%`,
-    compression_ratio:
-      !stats || !stats.compression_ratio
-        ? BLANK_TEXT
-        : stats.compression_ratio.toFixed(2),
-    tissue_type:
-      dbSample && dbSample.sample_tissue ? dbSample.sample_tissue : BLANK_TEXT,
-    nucleotide_type:
-      dbSample && dbSample.sample_template
-        ? dbSample.sample_template
-        : BLANK_TEXT,
-    location:
-      dbSample && dbSample.sample_location
-        ? dbSample.sample_location
-        : BLANK_TEXT,
-    host_genome:
-      derivedOutput && derivedOutput.host_genome_name
-        ? derivedOutput.host_genome_name
-        : BLANK_TEXT,
-    notes:
-      dbSample && dbSample.sample_notes ? dbSample.sample_notes : BLANK_TEXT
-  };
-
-  // Add more fields or blank_text values
-  let fields = [
-    "sample_library",
-    "sample_sequencer",
-    "sample_date",
-    "sample_input_pg",
-    "sample_batch",
-    "sample_diagnosis",
-    "sample_organism",
-    "sample_detection"
-  ];
-  fields.forEach(function(field) {
-    AddValOrBlank(res, dbSample, field);
-  });
-  return res;
-}
-
-function AddValOrBlank(all, sample, key) {
-  let BLANK_TEXT = <span className="blank">—</span>;
-  if (sample && sample[key]) {
-    all[key] = sample[key];
-  } else {
-    all[key] = BLANK_TEXT;
-  }
 }
 
 function PipelineOutputCards({
@@ -2037,7 +1811,7 @@ function ProjectInfoHeading({
   );
 }
 
-function TableColumnHeaders({ sort, colMap, filterStatus, state, parent }) {
+function TableColumnHeaders({ sort, filterStatus, state, parent }) {
   return (
     <div className="col s12 sample-feed-head no-padding samples-table-head">
       <div className="samples-card white">
@@ -2076,15 +1850,13 @@ function TableColumnHeaders({ sort, colMap, filterStatus, state, parent }) {
               </div>
             </li>
 
-            {state.columnsShown.map((column_name, pos) => {
+            {state.columnsShown.map((columnName, pos) => {
               return (
-                <ColumnDropdown
+                <ColumnDropdownHeader
                   pos={pos}
                   key={pos}
-                  colMap={colMap}
-                  column_name={column_name}
+                  column_name={columnName}
                   filterStatus={filterStatus}
-                  allColumns={state.allColumns}
                   columnsShown={state.columnsShown}
                   parent={parent}
                 />
@@ -2120,26 +1892,6 @@ function JobStatusFilters({
       })}
       <li className="divider" />
     </div>
-  );
-}
-
-function ColumnPopups({ pos, colMap, column_name }) {
-  return (
-    <Popup
-      trigger={
-        <div
-          className="card-label column-title center-label sample-name center menu-dropdown"
-          data-activates={`column-dropdown-${pos}`}
-        >
-          {colMap[column_name].display_name} <i className="fa fa-caret-down" />
-        </div>
-      }
-      size="mini"
-      className={!colMap[column_name].tooltip ? "hidden-popup" : ""}
-      content={colMap[column_name].tooltip}
-      hideOnScroll
-      inverted
-    />
   );
 }
 
@@ -2182,6 +1934,7 @@ function SampleDetailedColumns({
   data_values,
   parent
 }) {
+  const blankCell = <span className="blank">--</span>;
   return parent.state.columnsShown.map((column, pos) => {
     let column_data = "";
     if (column === "pipeline_status") {
@@ -2204,10 +1957,14 @@ function SampleDetailedColumns({
       column_data = (
         <li key={pos}>
           <div className="card-label center center-label data-label bold-label">
-            {data_values[column]}
+            {data_values[column] || blankCell}
           </div>
           <div className="card-label center center-label data-label data-label-percent">
-            {data_values["nonhost_reads_percent"]}
+            {data_values["nonhost_reads_percent"] && (
+              <span className="percent">
+                {data_values["nonhost_reads_percent"]}
+              </span>
+            )}
           </div>
         </li>
       );
@@ -2215,7 +1972,7 @@ function SampleDetailedColumns({
       column_data = (
         <li key={pos} onClick={parent.viewSample.bind(parent, dbSample.id)}>
           <div className="card-label center center-label data-label bold-label">
-            {data_values[column]}
+            {data_values[column] || blankCell}
           </div>
         </li>
       );

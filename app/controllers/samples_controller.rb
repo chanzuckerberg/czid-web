@@ -64,7 +64,8 @@ class SamplesController < ApplicationController
     # TODO(yf) : the following tissue_types, host_genomes have performance
     # impact that it should be moved to different dedicated functions. Not
     # parsing the whole results.
-    @tissue_types = results.select("distinct(sample_tissue)").map(&:sample_tissue).compact.sort
+    @tissue_types = get_distinct_sample_types(results)
+
     host_genome_ids = results.select("distinct(host_genome_id)").map(&:host_genome_id).compact.sort
     @host_genomes = HostGenome.find(host_genome_ids)
 
