@@ -111,28 +111,25 @@ class SampleDetailsSidebar extends React.Component {
 
   handleMetadataSave = async key => {
     if (this.state.metadataChanged[key]) {
-      // Updating the name is pretty slow, so only do it on save, instead of on change.
-      if (key === "name") {
-        if (this.props.onNameUpdate) {
-          this.props.onNameUpdate(this.state.additionalInfo.name);
-        }
-      }
+      const newValue =
+        key === "name" || key === "notes"
+          ? this.state.additionalInfo[key]
+          : this.state.metadata[key];
 
       this.setState({
         metadataChanged: set(key, false, this.state.metadataChanged)
       });
 
-      this._save(
-        this.props.sampleId,
-        key,
-        key === "name" || key === "notes"
-          ? this.state.additionalInfo[key]
-          : this.state.metadata[key]
-      );
+      this._save(this.props.sampleId, key, newValue);
     }
   };
 
   _save = async (id, key, value) => {
+    // When metadata is saved, fire event.
+    if (this.props.onMetadataUpdate) {
+      this.props.onMetadataUpdate(key, value);
+    }
+
     this.setState({
       metadataSavePending: set(key, true, this.state.metadataSavePending)
     });
@@ -239,7 +236,7 @@ SampleDetailsSidebar.propTypes = {
   visible: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
   sampleId: PropTypes.number,
-  onNameUpdate: PropTypes.func,
+  onMetadataUpdate: PropTypes.func,
   showReportLink: PropTypes.bool
 };
 
