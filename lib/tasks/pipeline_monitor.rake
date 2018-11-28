@@ -63,9 +63,9 @@ class CheckPipelineRuns
     last_chunk_counts = autoscaling_state[:chunk_counts]
     new_chunk_counts = PipelineRun.count_alignment_chunks_in_progress
     if last_chunk_counts.nil?
-      Rails.logger.info("Autoscaling update to #{new_chunk_counts}.")
+      Rails.logger.info("Autoscaling update to #{new_chunk_counts} chunks.")
     else
-      Rails.logger.info("Autoscaling update from #{last_chunk_counts} to #{new_chunk_counts}.")
+      Rails.logger.info("Autoscaling update from #{last_chunk_counts} chunks to #{new_chunk_counts} chunks.")
     end
     autoscaling_state[:t_last] = t_now
     autoscaling_state[:chunk_counts] = new_chunk_counts
