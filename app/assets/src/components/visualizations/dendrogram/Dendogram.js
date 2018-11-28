@@ -2,7 +2,7 @@ import { cluster as d3Cluster, hierarchy } from "d3-hierarchy";
 import "d3-transition";
 import { timeout } from "d3-timer";
 import { select, event as currentEvent } from "d3-selection";
-import { SequentialColormap } from "../../utils/colormaps/SequentialColormap";
+import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap";
 
 export default class Dendogram {
   constructor(container, tree, options) {
@@ -17,7 +17,6 @@ export default class Dendogram {
       {
         curvedEdges: false,
         defaultColor: "#cccccc",
-        colormapName: "viridis",
         colorGroupAttribute: null,
         colorGroupLegendTitle: null,
         colorGroupAbsentName: null,
@@ -196,10 +195,7 @@ export default class Dendogram {
     this.allColorAttributeValues = allVals;
 
     // Set up colors array
-    this.colors = SequentialColormap.getNScale(
-      this.options.colormapName,
-      allVals.length
-    );
+    this.colors = new CategoricalColormap().getNScale(allVals.length);
     this.colors = [this.options.defaultColor].concat(this.colors);
 
     function colorNode(head) {

@@ -8,6 +8,7 @@ import ObjectHelper from "../helpers/ObjectHelper";
 import Icon from "./ui/icons/Icon";
 import { Menu, MenuItem } from "./ui/controls/Menu";
 import UploadBox from "./ui/controls/UploadBox";
+import { cleanLocalFilePath, baseName } from "./utils/sample";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -106,7 +107,7 @@ class SampleUpload extends React.Component {
       consentChecked: false,
 
       // Local upload fields
-      localUploadMode: false,
+      localUploadMode: true,
       localFilesToUpload: [],
       localFilesDoneUploading: [],
       localUploadShouldStart: false,
@@ -389,14 +390,6 @@ class SampleUpload extends React.Component {
     } else {
       return false;
     }
-  }
-
-  baseName(str) {
-    let base = new String(str).substring(str.lastIndexOf("/") + 1);
-    if (base.lastIndexOf(".") != -1) {
-      base = base.substring(0, base.lastIndexOf("."));
-    }
-    return base;
   }
 
   isFormInvalid() {
@@ -702,8 +695,8 @@ class SampleUpload extends React.Component {
     this.state.localFilesToUpload.forEach(file => {
       inputFilesAttributes.push({
         source_type: "local",
-        source: file.name.trim(),
-        parts: file.name.trim()
+        source: cleanLocalFilePath(file.name),
+        parts: cleanLocalFilePath(file.name)
       });
     });
 
@@ -744,7 +737,7 @@ class SampleUpload extends React.Component {
   };
 
   getSampleNameFromFileName = fname => {
-    let base = this.baseName(fname);
+    let base = baseName(fname);
     const fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/gim;
     const readLabel = /_R1.*$|_R2.*$/gi;
     base = base.replace(fastqLabel, "").replace(readLabel, "");
@@ -809,18 +802,18 @@ class SampleUpload extends React.Component {
         <div className="menu-container">
           <Menu compact>
             <MenuItem
-              active={!this.state.localUploadMode}
-              onClick={() => this.setState({ localUploadMode: false })}
-            >
-              <Icon size="large" name="server" />
-              Upload from S3
-            </MenuItem>
-            <MenuItem
               active={this.state.localUploadMode}
               onClick={() => this.setState({ localUploadMode: true })}
             >
               <Icon size="large" name="folder open outline" />
               Upload from Your Computer
+            </MenuItem>
+            <MenuItem
+              active={!this.state.localUploadMode}
+              onClick={() => this.setState({ localUploadMode: false })}
+            >
+              <Icon size="large" name="server" />
+              Upload from S3
             </MenuItem>
           </Menu>
         </div>

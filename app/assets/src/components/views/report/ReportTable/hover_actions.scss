@@ -1,0 +1,16 @@
+@import "~styles/typography";
+@import "~styles/themes/colors";
+
+.hoverActions {
+  color: $primary-light;
+  font-size: $font-size-base;
+
+  .actionDot {
+    margin-left: 7px;
+    font-size: 15px;
+  }
+
+  .disabled {
+    color: $light-grey;
+  }
+}

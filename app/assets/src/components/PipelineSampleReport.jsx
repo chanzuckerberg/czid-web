@@ -27,10 +27,10 @@ import MetricPicker from "./views/report/filters/MetricPicker";
 import SpecificityFilter from "./views/report/filters/SpecificityFilter";
 import NameTypeFilter from "./views/report/filters/NameTypeFilter";
 import ReportSearchBox from "./views/report/filters/ReportSearchBox";
-import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
 import LoadingLabel from "./ui/labels/LoadingLabel";
+import HoverActions from "./views/report/ReportTable/HoverActions";
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -702,123 +702,39 @@ class PipelineSampleReport extends React.Component {
   };
 
   displayHoverActions = (taxInfo, reportDetails) => {
-    let tax_level_str = "";
-    let ncbiDot, fastaDot, alignmentVizDot, phyloTreeDot, contigVizDot;
-    if (taxInfo.tax_level == 1) tax_level_str = "species";
-    else tax_level_str = "genus";
-
-    let valid_tax_id =
+    const validTaxId =
       taxInfo.tax_id < this.INVALID_CALL_BASE_TAXID || taxInfo.tax_id > 0;
-    if (valid_tax_id)
-      ncbiDot = (
-        <i
-          data-tax-id={taxInfo.tax_id}
-          onClick={this.gotoNCBI}
-          className="fa fa-link action-dot"
-          aria-hidden="true"
-        />
-      );
-    if (reportDetails.taxon_fasta_flag)
-      fastaDot = (
-        <i
-          data-tax-level={taxInfo.tax_level}
-          data-tax-id={taxInfo.tax_id}
-          onClick={this.downloadFastaUrl}
-          className="fa fa-download action-dot"
-          aria-hidden="true"
-        />
-      );
-    if (this.canSeeAlignViz && valid_tax_id && taxInfo.NT.r > 0)
-      alignmentVizDot = (
-        <i
-          data-tax-level={tax_level_str}
-          data-tax-id={taxInfo.tax_id}
-          onClick={this.gotoAlignmentVizLink}
-          className="fa fa-bars action-dot"
-          aria-hidden="true"
-        />
-      );
-    if (this.state.contigTaxidList.indexOf(taxInfo.tax_id) >= 0)
-      contigVizDot = (
-        <i
-          data-tax-id={taxInfo.tax_id}
-          onClick={this.downloadContigUrl}
-          className="fa fa-puzzle-piece action-dot"
-          aria-hidden="true"
-        />
-      );
-    if (
+    const ncbiEnabled = validTaxId;
+    const fastaEnabled = reportDetails.taxon_fasta_flag;
+    const contigVizEnabled =
+      this.state.contigTaxidList.indexOf(taxInfo.tax_id) >= 0;
+    const alignmentVizEnabled =
+      this.canSeeAlignViz && validTaxId && taxInfo.NT.r > 0;
+    const phyloTreeEnabled =
       this.allowPhyloTree &&
       taxInfo.tax_id > 0 &&
-      PhyloTreeChecks.passesCreateCondition(taxInfo.NT.r, taxInfo.NR.r)
-    )
-      phyloTreeDot = (
-        <PhyloTreeCreationModal
-          admin={parseInt(this.admin)}
-          csrf={this.csrf}
-          trigger={
-            <i className="fa fa-code-fork action-dot" aria-hidden="true" />
-          }
-          taxonId={taxInfo.tax_id}
-          taxonName={taxInfo.name}
-          projectId={this.projectId}
-          projectName={this.projectName}
-        />
-      );
-    return (
-      <span className="link-tag">
-        <BasicPopup trigger={ncbiDot} content={"NCBI Taxonomy Browser"} />
-        <BasicPopup trigger={fastaDot} content={"FASTA Download"} />
-        <BasicPopup trigger={contigVizDot} content={"Contigs Download"} />
-        <BasicPopup
-          trigger={alignmentVizDot}
-          content={"Alignment Visualization"}
-        />
-        <BasicPopup
-          trigger={phyloTreeDot}
-          content={
-            <div>
-              Phylogenetic Analysis <BetaLabel />
-            </div>
-          }
-        />
-      </span>
-    );
-  };
+      PhyloTreeChecks.passesCreateCondition(taxInfo.NT.r, taxInfo.NR.r);
 
-  displayHighlightTags = taxInfo => {
-    const watchDot = (
-      <i
-        data-tax-id={taxInfo.tax_id}
-        data-tax-name={taxInfo.name}
-        data-confirmation-strength="watched"
-        onClick={this.props.toggleHighlightTaxon}
-        className="fa fa-eye action-dot"
-        aria-hidden="true"
-      />
-    );
-    const confirmedHitDot = (
-      <i
-        data-tax-id={taxInfo.tax_id}
-        data-tax-name={taxInfo.name}
-        data-confirmation-strength="confirmed"
-        onClick={this.props.toggleHighlightTaxon}
-        className="fa fa-check action-dot"
-        aria-hidden="true"
-      />
-    );
     return (
-      <div className="hover-wrapper">
-        {this.can_edit ? (
-          <span className="link-tag">
-            <BasicPopup trigger={watchDot} content={"Toggle Watching"} />
-            <BasicPopup
-              trigger={confirmedHitDot}
-              content={"Toggle Confirmed Hit"}
-            />
-          </span>
-        ) : null}
-      </div>
+      <HoverActions
+        className="link-tag"
+        admin={parseInt(this.admin)}
+        csrf={this.csrf}
+        projectId={this.projectId}
+        projectName={this.projectName}
+        taxId={taxInfo.tax_id}
+        taxLevel={taxInfo.tax_level}
+        taxName={taxInfo.name}
+        ncbiEnabled={ncbiEnabled}
+        onNcbiActionClick={this.gotoNCBI}
+        fastaEnabled={fastaEnabled}
+        onFastaActionClick={this.downloadFastaUrl}
+        alignmentVizEnabled={alignmentVizEnabled}
+        onAlignmentVizClick={this.gotoAlignmentVizLink}
+        contigVizEnabled={contigVizEnabled}
+        onContigVizClick={this.downloadContigUrl}
+        phyloTreeEnabled={phyloTreeEnabled}
+      />
     );
   };
 
@@ -999,21 +915,13 @@ class PipelineSampleReport extends React.Component {
     );
   };
 
-  getRowClass = (taxInfo, confirmedTaxIds, watchedTaxIds) => {
+  getRowClass = taxInfo => {
     const topScoringRow = taxInfo.topScoring === 1;
-
-    let taxonStatusClass = "";
-    if (confirmedTaxIds.indexOf(taxInfo.tax_id) >= 0) {
-      taxonStatusClass = "confirmed";
-    } else if (watchedTaxIds.indexOf(taxInfo.tax_id) >= 0) {
-      taxonStatusClass = "watched";
-    }
 
     if (taxInfo.tax_level == 2) {
       return cx(
         "report-row-genus",
         taxInfo.genus_taxid, // TODO(mark): remove non-styling-related class.
-        taxonStatusClass,
         topScoringRow && "top-scoring-row"
       );
     }
@@ -1022,7 +930,6 @@ class PipelineSampleReport extends React.Component {
       "report-row-species",
       taxInfo.genus_taxid, // TODO(mark): remove non-styling-related class.
       !this.isTaxonExpanded(taxInfo) && "hidden",
-      taxonStatusClass,
       topScoringRow && "top-scoring-row"
     );
   };
@@ -1431,11 +1338,8 @@ class RenderMarkup extends React.Component {
       <ReportTable
         taxons={parent.state.selected_taxons_top}
         taxonRowRefs={parent.taxon_row_refs}
-        confirmedTaxIds={parent.props.confirmed_taxids}
-        watchedTaxIds={parent.props.watched_taxids}
         renderName={parent.renderName}
         renderNumber={parent.renderNumber}
-        displayHighlightTags={parent.displayHighlightTags}
         showConcordance={parent.showConcordance}
         getRowClass={parent.getRowClass}
         reportDetails={parent.report_details}

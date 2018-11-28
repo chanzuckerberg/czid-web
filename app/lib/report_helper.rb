@@ -207,29 +207,16 @@ module ReportHelper
     top_taxa
   end
 
-  def taxon_confirmation_map(sample_id, user_id)
-    taxon_confirmations = TaxonConfirmation.where(sample_id: sample_id)
-    confirmed = taxon_confirmations.where(strength: TaxonConfirmation::CONFIRMED)
-    watched = taxon_confirmations.where(strength: TaxonConfirmation::WATCHED, user_id: user_id)
-    { watched_taxids: watched.pluck(:taxid).uniq,
-      confirmed_taxids: confirmed.pluck(:taxid).uniq,
-      confirmed_names: confirmed.pluck(:name).uniq }
-  end
-
-  def report_details(pipeline_run, user_id)
+  def report_details(pipeline_run, _user_id)
     # Provides some auxiliary information on pipeline_run, including default background for sample.
     # No report-specific scores though.
     sample = pipeline_run.sample
-    taxon_confirmation_hash = taxon_confirmation_map(sample.id, user_id)
     {
       pipeline_info: pipeline_run,
       subsampled_reads: pipeline_run.subsampled_reads,
       sample_info: sample,
       default_background: Background.find(pipeline_run.sample.default_background_id),
       taxon_fasta_flag: !pipeline_run.taxon_byteranges.empty?,
-      confirmed_taxids: taxon_confirmation_hash[:confirmed_taxids],
-      watched_taxids: taxon_confirmation_hash[:watched_taxids],
-      confirmed_names: taxon_confirmation_hash[:confirmed_names],
       assembled_taxids: pipeline_run.assembled_taxids ? JSON.parse(pipeline_run.assembled_taxids) : []
     }
   end

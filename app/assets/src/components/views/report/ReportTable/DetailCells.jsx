@@ -6,11 +6,8 @@ import PropTypes from "../../../utils/propTypes";
 const DetailCells = ({
   taxons,
   taxonRowRefs,
-  confirmedTaxIds,
-  watchedTaxIds,
   renderName,
   renderNumber,
-  displayHighlightTags,
   showConcordance,
   getRowClass,
   openTaxonModal,
@@ -24,7 +21,7 @@ const DetailCells = ({
       ref={elm => {
         taxonRowRefs[taxInfo.tax_id] = elm;
       }}
-      className={getRowClass(taxInfo, confirmedTaxIds, watchedTaxIds)}
+      className={getRowClass(taxInfo)}
     >
       <td>
         {renderName(taxInfo, reportDetails, backgroundData, openTaxonModal)}
@@ -49,7 +46,7 @@ const DetailCells = ({
         undefined,
         showConcordance
       )}
-      <td>{displayHighlightTags(taxInfo)}</td>
+      <td className="last-col" />
     </tr>
   ));
 };
@@ -57,11 +54,8 @@ const DetailCells = ({
 DetailCells.propTypes = {
   taxons: PropTypes.arrayOf(PropTypes.Taxon).isRequired,
   taxonRowRefs: PropTypes.objectOf(PropTypes.any).isRequired, // These are DOM elements.
-  confirmedTaxIds: PropTypes.arrayOf(PropTypes.number).isRequired,
-  watchedTaxIds: PropTypes.arrayOf(PropTypes.number).isRequired,
   renderName: PropTypes.func.isRequired,
   renderNumber: PropTypes.func.isRequired,
-  displayHighlightTags: PropTypes.func.isRequired,
   showConcordance: PropTypes.bool.isRequired,
   openTaxonModal: PropTypes.func.isRequired,
   getRowClass: PropTypes.func.isRequired,

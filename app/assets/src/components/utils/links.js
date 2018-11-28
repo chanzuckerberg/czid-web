@@ -15,4 +15,10 @@ const openUrl = (link, currentEvent) => {
   }
 };
 
-export { openUrl };
+const downloadStringToFile = str => {
+  let file = new Blob([str], { type: "text/plain" });
+  let downloadUrl = URL.createObjectURL(file);
+  location.href = `${downloadUrl}`;
+};
+
+export { openUrl, downloadStringToFile };

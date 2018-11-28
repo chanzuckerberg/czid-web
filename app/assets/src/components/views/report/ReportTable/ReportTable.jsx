@@ -13,9 +13,6 @@ export default class ReportTable extends React.Component {
     this.state = {
       taxonModalData: null
     };
-
-    this.openTaxonModal = this.openTaxonModal.bind(this);
-    this.closeTaxonModal = this.closeTaxonModal.bind(this);
   }
 
   renderTaxonModal() {
@@ -35,33 +32,30 @@ export default class ReportTable extends React.Component {
         }
         background={backgroundData}
         taxonName={taxonName}
-        handleClose={this.closeTaxonModal}
+        onClose={this.handleTaxonModalClose}
       />
     );
   }
 
-  openTaxonModal(taxonModalData) {
+  handleTaxonModalOpen = taxonModalData => {
     this.setState({
       taxonModalData
     });
-  }
+  };
 
-  closeTaxonModal() {
+  handleTaxonModalClose = () => {
     this.setState({
       taxonModalData: null
     });
-  }
+  };
 
   render() {
     const {
       taxons,
       taxonRowRefs,
-      confirmedTaxIds,
-      watchedTaxIds,
       renderName,
       renderNumber,
       renderColumnHeader,
-      displayHighlightTags,
       showConcordance,
       getRowClass,
       reportDetails,
@@ -123,7 +117,7 @@ export default class ReportTable extends React.Component {
                 `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`,
                 showConcordance
               )}
-              <th>
+              <th className="last-col">
                 <Tipsy content="Switch count type" placement="top">
                   <div className="sort-controls center left">
                     <div
@@ -155,14 +149,11 @@ export default class ReportTable extends React.Component {
             <DetailCells
               taxons={taxons}
               taxonRowRefs={taxonRowRefs}
-              confirmedTaxIds={confirmedTaxIds}
-              watchedTaxIds={watchedTaxIds}
               renderName={renderName}
               renderNumber={renderNumber}
-              displayHighlightTags={displayHighlightTags}
               showConcordance={showConcordance}
               getRowClass={getRowClass}
-              openTaxonModal={this.openTaxonModal}
+              openTaxonModal={this.handleTaxonModalOpen}
               reportDetails={reportDetails}
               backgroundData={backgroundData}
             />
@@ -176,11 +167,8 @@ export default class ReportTable extends React.Component {
 ReportTable.propTypes = {
   taxons: PropTypes.arrayOf(PropTypes.Taxon).isRequired,
   taxonRowRefs: PropTypes.objectOf(PropTypes.any).isRequired, // These are DOM elements.
-  confirmedTaxIds: PropTypes.arrayOf(PropTypes.number).isRequired,
-  watchedTaxIds: PropTypes.arrayOf(PropTypes.number).isRequired,
   renderName: PropTypes.func.isRequired,
   renderNumber: PropTypes.func.isRequired,
-  displayHighlightTags: PropTypes.func.isRequired,
   showConcordance: PropTypes.bool.isRequired,
   getRowClass: PropTypes.func.isRequired,
   reportDetails: PropTypes.ReportDetails,
