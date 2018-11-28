@@ -12,6 +12,11 @@
     </p>
 
     <p>
+      <strong>Institution:</strong>
+      <%= @user.institution %>
+    </p>
+
+    <p>
       <% if @user.projects.count == 0 %>
         <strong>Projects:</strong> none
       <% elsif @user.projects.count == 1 %>

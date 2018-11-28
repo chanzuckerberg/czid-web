@@ -48,6 +48,10 @@ class Metadatum < ApplicationRecord
   # Key to the valid string options.
   KEY_TO_STRING_OPTIONS = {
     nucleotide_type: %w[DNA RNA],
+    sample_type: [
+      "Bronchoalveolar lavage", "Cerebrospinal fluid", "Nasopharyngeal swab",
+      "Plasma", "Serum", "Solid tissue", "Stool", "Synovial fluid", "Whole blood"
+    ],
     gender: %w[Female Male],
     race: ["Caucasian", "Asian", "African American", "Other"],
     admission_type: %w[ICU General],
@@ -291,6 +295,15 @@ class Metadatum < ApplicationRecord
     # *_validated_value field is set in the set_validated_values validator.
     m.sample = sample
     m
+  end
+
+  def validated_value
+    if data_type == "string"
+      return text_validated_value
+    elsif data_type == "number"
+      return number_validated_value
+    end
+    ""
   end
 
   def self.convert_type_to_string(type)

@@ -48,10 +48,10 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   test 'joe can update sample to joe_project v2' do
     @joe_sample = samples(:joe_sample)
-    post "#{save_metadata_v2_sample_url(@joe_sample)}.json", params: { field: "sample_type", value: "bone" }
+    post "#{save_metadata_v2_sample_url(@joe_sample)}.json", params: { field: "sample_type", value: "Whole blood" }
     assert_response :success
     @joe_sample.reload
-    assert @joe_sample.metadata.find_by(key: "sample_type").text_validated_value == 'bone'
+    assert @joe_sample.metadata.find_by(key: "sample_type").text_validated_value == 'Whole blood'
   end
 
   test 'joe can see samples in joe_project' do
