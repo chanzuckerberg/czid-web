@@ -21,7 +21,7 @@
       <thead>
         <tr>
           <th> Run ID </th>
-          <th> Job Status </th>
+          <th> Status </th>
           <th> Job Id </th>
           <th> Job Log </th>
           <th>Remaining reads</th>
@@ -44,6 +44,16 @@
                 <td><%= pipeline_run.pipeline_version %> &nbsp;</td>
                 <td><%= run_stage.created_at %></td>
                </tr>
+            <% end %>
+            <% if pipeline_run.output_states.present? %>
+              <% pipeline_run.output_states.each do |output_state| %>
+                <tr class="complete">
+                    <td>  <%= "#{pipeline_run.id} - Output - #{output_state.output}" %> </td>
+                    <td> <%= output_state.state %> </td>
+                    <td colspan=4> &nbsp; </td>
+                    <td> <%= output_state.updated_at %> </td>
+                </tr>
+              <% end %>
             <% end %>
           <% else %>
           <tr>
