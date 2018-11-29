@@ -1,7 +1,7 @@
 class AddLineageVersionToAlignmentConfig < ActiveRecord::Migration[5.1]
   def up
     # Max 32767
-    add_column :alignment_config, :lineage_version, :integer, limit: 2
+    add_column :alignment_configs, :lineage_version, :integer, limit: 2
     AlignmentConfig.where(name: "2018-02-15").update(lineage_version: 1)
     AlignmentConfig.where(name: "2018-04-01").update(lineage_version: 2)
 
@@ -16,6 +16,6 @@ class AddLineageVersionToAlignmentConfig < ActiveRecord::Migration[5.1]
   end
 
   def down
-    remove_column :alignment_config, :lineage_version
+    remove_column :alignment_configs, :lineage_version
   end
 end
