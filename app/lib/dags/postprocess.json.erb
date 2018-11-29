@@ -59,6 +59,10 @@
       "assembly/read-contig.sam",
       "assembly/contig_stats.json"
     ],
+    "coverage_out": [
+      "assembly/contig_coverage.json",
+      "assembly/contig_coverage_summary.csv"
+    ],
     "gsnap_accessions_out": ["assembly/nt.refseq.fasta"],
     "rapsearch2_accessions_out": ["assembly/nr.refseq.fasta"],
     "refined_gsnap_out": [
@@ -142,6 +146,14 @@
       "module": "idseq_dag.steps.run_assembly",
       "additional_files": {},
       "additional_attributes": {"memory": 200}
+    },
+    {
+      "in": ["assembly_out"],
+      "out": "coverage_out",
+      "class": "PipelineStepGenerateCoverageStats",
+      "module": "idseq_dag.steps.generate_coverage_stats",
+      "additional_files": {},
+      "additional_attributes": {}
     },
     {
       "in": ["gsnap_out"],
