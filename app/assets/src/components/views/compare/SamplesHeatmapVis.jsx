@@ -6,6 +6,7 @@ import { openUrl } from "../../utils/links";
 import cs from "./samples_heatmap_vis.scss";
 import cx from "classnames";
 import { Popup } from "semantic-ui-react";
+import SearchBoxList from "./SearchBoxList";
 
 class SamplesHeatmapVis extends React.Component {
   constructor(props) {
@@ -95,7 +96,7 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({ nodeHoverInfo: null });
   };
 
-  handleOnAddColumnMetadataClick = () => {
+  handleOnAddColumnMetadataClick = position => {
     this.setState({
       addColumnMetadataActive: true
     });
@@ -168,7 +169,11 @@ class SamplesHeatmapVis extends React.Component {
   render() {
     return (
       <div className={cs.samplesHeatmapVis}>
+        {/* <SearchBoxList 
+          options={this.getMetadataOptions()}
+        /> */}
         <div
+          className={cs.heatmapContainer}
           ref={container => {
             this.heatmapContainer = container;
           }}
