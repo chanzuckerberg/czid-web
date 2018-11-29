@@ -830,7 +830,12 @@ export default class Heatmap {
         .attr("r", circleRadius)
         .attr("cx", this.rowLabelsWidth - 10)
         .attr("cy", yPos)
-        .on("click", this.options.onAddColumnMetadataClick);
+        .on("click", d =>
+          this.options.onAddColumnMetadataClick(
+            { x: this.rowLabelsWidth - 10, y: yPos },
+            d
+          )
+        );
 
       addLinkEnter
         .append("line")
