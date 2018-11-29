@@ -1,4 +1,5 @@
 import React from "react";
+import { fromPairs, set } from "lodash/fp";
 import Divider from "../../layout/Divider";
 import QueryString from "query-string";
 import PhyloTreeVis from "./PhyloTreeVis";
@@ -14,13 +15,12 @@ class PhyloTreeListView extends React.Component {
     let urlParams = this.parseUrlParams();
     this.resetUrl();
 
-    this.phyloTreeMap = new Map(props.phyloTrees.map(tree => [tree.id, tree]));
-
     this.state = {
       selectedPhyloTreeId: this.getDefaultSelectedTreeId(
         urlParams,
         props.phyloTrees
-      )
+      ),
+      phyloTreeMap: fromPairs(props.phyloTrees.map(tree => [tree.id, tree]))
     };
   }
 
@@ -52,6 +52,23 @@ class PhyloTreeListView extends React.Component {
     });
   };
 
+  handleMetadataUpdate = (key, newValue, pipelineRunId) => {
+    // Update the metadata stored locally.
+    this.setState({
+      phyloTreeMap: set(
+        [
+          this.state.selectedPhyloTreeId,
+          "sampleDetailsByNodeName",
+          pipelineRunId,
+          "metadata",
+          key
+        ],
+        newValue,
+        this.state.phyloTreeMap
+      )
+    });
+  };
+
   getTreeStatus(tree) {
     let statusMessage = "";
     switch (tree) {
@@ -79,7 +96,7 @@ class PhyloTreeListView extends React.Component {
       );
     }
 
-    let currentTree = this.phyloTreeMap.get(this.state.selectedPhyloTreeId);
+    let currentTree = this.state.phyloTreeMap[this.state.selectedPhyloTreeId];
     return (
       <div className={cs.phyloTreeListView}>
         <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
@@ -89,7 +106,7 @@ class PhyloTreeListView extends React.Component {
               {currentTree.tax_name && `- ${currentTree.tax_name}`}
             </ViewHeader.Pretitle>
             <ViewHeader.Title
-              label={this.phyloTreeMap.get(this.state.selectedPhyloTreeId).name}
+              label={currentTree.name}
               id={this.state.selectedPhyloTreeId}
               options={this.props.phyloTrees.map(tree => ({
                 label: tree.name,
@@ -108,6 +125,8 @@ class PhyloTreeListView extends React.Component {
             <PhyloTreeVis
               newick={currentTree.newick}
               nodeData={currentTree.sampleDetailsByNodeName}
+              phyloTreeId={this.state.selectedPhyloTreeId}
+              onMetadataUpdate={this.handleMetadataUpdate}
             />
           ) : (
             <p className={cs.noTreeBanner}>

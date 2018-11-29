@@ -1,6 +1,7 @@
 class PhyloTree < ApplicationRecord
   include PipelineOutputsHelper
   include PipelineRunsHelper
+  include SamplesHelper
   include ActionView::Helpers::DateHelper
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user
@@ -228,10 +229,13 @@ class PhyloTree < ApplicationRecord
       order by phylo_tree_id
     ").to_a
     indexed_results = {}
+    metadata_by_sample_id = metadata_multiget(query_results.pluck("sample_id").uniq)
+
     query_results.each do |entry|
       tree_id = entry["phylo_tree_id"]
       pipeline_run_id = entry["pipeline_run_id"]
       tree_node_name = pipeline_run_id.to_s
+      entry["metadata"] = metadata_by_sample_id[entry["sample_id"]]
       indexed_results[tree_id] ||= {}
       indexed_results[tree_id][tree_node_name] = entry
     end

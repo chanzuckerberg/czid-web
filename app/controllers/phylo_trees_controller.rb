@@ -1,6 +1,7 @@
 class PhyloTreesController < ApplicationController
   include ApplicationHelper
   include PipelineRunsHelper
+  include PhyloTreeHelper
 
   before_action :authenticate_user!
   before_action :no_demo_user, only: :create
@@ -54,8 +55,9 @@ class PhyloTreesController < ApplicationController
 
     # Augment tree data with sample attributes, number of pipeline_runs and user name
     @phylo_trees = @phylo_trees.as_json
+    sample_details_map = sample_details_by_tree_id()
     @phylo_trees.each do |pt|
-      sample_details = PhyloTree.sample_details_by_tree_id[pt["id"]]
+      sample_details = sample_details_map[pt["id"]]
       pt["sampleDetailsByNodeName"] = sample_details
       pt["user"] = PhyloTree.users_by_tree_id[pt["id"]]
     end

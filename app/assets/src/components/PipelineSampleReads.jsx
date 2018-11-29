@@ -547,6 +547,14 @@ class PipelineSampleReads extends React.Component {
     }
   };
 
+  handleMetadataUpdate = (key, newValue) => {
+    if (key === "name") {
+      this.setState({
+        sample_name: newValue
+      });
+    }
+  };
+
   renderERCC() {
     if (!this.props.ercc_comparison) {
       return;
@@ -1069,7 +1077,7 @@ class PipelineSampleReads extends React.Component {
           visible={this.state.sampleDetailsSidebarVisible}
           onClose={this.toggleSampleDetailsSidebar}
           sampleId={this.sampleId}
-          onNameUpdate={newName => this.setState({ sample_name: newName })}
+          onMetadataUpdate={this.handleMetadataUpdate}
         />
       </div>
     );
