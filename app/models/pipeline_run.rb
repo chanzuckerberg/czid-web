@@ -490,7 +490,7 @@ class PipelineRun < ApplicationRecord
       contigs.each do |c|
         nt_m8 = nt_m8_map[c.name] || []
         nr_m8 = nr_m8_map[c.name] || []
-        lineage = JSON.parse(c.lineage_json)
+        lineage = JSON.parse(c.lineage_json || "{}")
         row = [c.name, c.read_count]
         cfs = c.name.split("_")
         row += [cfs[3], cfs[5]]
