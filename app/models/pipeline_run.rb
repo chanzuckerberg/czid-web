@@ -1241,6 +1241,8 @@ class PipelineRun < ApplicationRecord
     sample.results_folder_files.each do |entry|
       filename_to_info[entry[:key]] = entry
     end
+    # Get read counts
+    job_stats_by_task = job_stats.index_by(&:task)
     # Get outputs and descriptions by target.
     result = {}
     pipeline_run_stages.each_with_index do |prs, stage_idx|
@@ -1270,15 +1272,11 @@ class PipelineRun < ApplicationRecord
         if file_info.present?
           result[prs.name]["steps"][target_name] = {
             "step_description" => STEP_DESCRIPTIONS[prs.name]["steps"][target_name],
-            "file_list" => file_info
+            "file_list" => file_info,
+            "reads_after" => (job_stats_by_task[target_name] || {})["reads_after"]
           }
         end
       end
-    end
-    # Get read counts (host filtering steps only)
-    job_stats.each do |js|
-      target_name = js.task
-      result[target_name]["reads_after"] = js.reads_after if result.keys.include?(target_name)
     end
     result
   end
