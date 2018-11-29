@@ -17,6 +17,7 @@ export default class Dendogram {
       {
         curvedEdges: false,
         defaultColor: "#cccccc",
+        absentColor: "#000000", // The color when an attribute is absent.
         colorGroupAttribute: null,
         colorGroupLegendTitle: null,
         colorGroupAbsentName: null,
@@ -197,6 +198,13 @@ export default class Dendogram {
     // Set up colors array
     this.colors = new CategoricalColormap().getNScale(allVals.length);
     this.colors = [this.options.defaultColor].concat(this.colors);
+
+    // Add the absentColor at the same index as the absentName.
+    const absentNameIndex = allVals.indexOf(absentName);
+
+    if (absentNameIndex > -1) {
+      this.colors.splice(absentNameIndex, 0, this.options.absentColor);
+    }
 
     function colorNode(head) {
       // Color the nodes based on the attribute values
@@ -555,6 +563,9 @@ export default class Dendogram {
       .select("text")
       .transition()
       .duration(500)
+      .attr("stroke", function(d) {
+        return this.colors[d.data.colorIndex];
+      })
       .attr("x", function(d) {
         return d.depth === 0
           ? -(this.getBBox().width + 15)
