@@ -35,6 +35,7 @@ class PhyloTreeVis extends React.Component {
     let tree = Tree.fromNewickString(this.props.newick, this.props.nodeData);
     this.treeVis = new Dendogram(this.treeContainer, tree, {
       defaultColor: "#cccccc",
+      absentColor: "#999999",
       colormapName: "viridis",
       colorGroupAttribute: "project_name",
       colorGroupLegendTitle: "Project Name",
