@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_127_191_751) do
+ActiveRecord::Schema.define(version: 20_181_121_222_152) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -32,6 +32,9 @@ ActiveRecord::Schema.define(version: 20_181_127_191_751) do
     t.float "depth", limit: 24
     t.bigint "pipeline_run_id"
     t.string "drug_family"
+    t.integer "level"
+    t.float "drug_gene_coverage", limit: 24
+    t.float "drug_gene_depth", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "allele"], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
@@ -91,6 +94,7 @@ ActiveRecord::Schema.define(version: 20_181_127_191_751) do
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "lineage_json"
     t.index ["pipeline_run_id", "name"], name: "index_contigs_on_pipeline_run_id_and_name", unique: true
     t.index ["pipeline_run_id", "read_count"], name: "index_contigs_on_pipeline_run_id_and_read_count"
   end
@@ -148,7 +152,7 @@ ActiveRecord::Schema.define(version: 20_181_127_191_751) do
   end
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "key", null: false
+    t.string "key", null: false, collation: "latin1_swedish_ci"
     t.integer "data_type", limit: 1, null: false
     t.string "text_raw_value"
     t.string "text_validated_value"
@@ -178,7 +182,7 @@ ActiveRecord::Schema.define(version: 20_181_127_191_751) do
     t.text "newick"
     t.integer "status", default: 0
     t.string "dag_version"
-    t.text "dag_json"
+    t.text "dag_json", limit: 4_294_967_295
     t.text "command_stdout"
     t.text "command_stderr"
     t.string "job_id"
@@ -262,6 +266,8 @@ ActiveRecord::Schema.define(version: 20_181_127_191_751) do
     t.integer "alert_sent", default: 0
     t.text "dag_vars"
     t.integer "assembled", limit: 2
+    t.integer "completed_gsnap_chunks"
+    t.integer "completed_rapsearch_chunks"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
@@ -367,12 +373,12 @@ ActiveRecord::Schema.define(version: 20_181_127_191_751) do
     t.index ["pipeline_run_id", "tax_id", "count_type", "tax_level"], name: "index_pr_tax_hit_level_tc", unique: true
   end
 
-  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" do |t|
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
-    t.string "title"
-    t.text "summary"
-    t.text "description"
+    t.string "title", collation: "utf8mb4_general_ci"
+    t.text "summary", collation: "utf8mb4_general_ci"
+    t.text "description", collation: "utf8mb4_general_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
