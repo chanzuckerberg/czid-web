@@ -45,6 +45,11 @@ const BackgroundData = PropTypes.shape({
 
 // TODO(mark): Expand signature as more fields of Sample are used in the app.
 const Sample = PropTypes.shape({
+  id: PropTypes.number.isRequired,
+  name: PropTypes.string
+});
+
+const Project = PropTypes.shape({
   id: PropTypes.number.isRequired
 });
 
@@ -68,7 +73,15 @@ const PipelineRun = PropTypes.shape({
   assembled: PropTypes.number,
   total_ercc_reads: PropTypes.number,
   total_reads: PropTypes.number,
-  adjusted_remaining_reads: PropTypes.number
+  adjusted_remaining_reads: PropTypes.number,
+  version: PropTypes.shape({
+    version: PropTypes.string,
+    alignment_db: PropTypes.string
+  })
+});
+
+const SummaryStats = PropTypes.shape({
+  last_processed_at: PropTypes.string
 });
 
 export default {
@@ -79,5 +92,7 @@ export default {
   MetadataType,
   ERCCComparison,
   PipelineRun,
+  Project,
+  SummaryStats,
   ...PropTypes
 };

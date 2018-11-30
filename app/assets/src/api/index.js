@@ -1,5 +1,6 @@
 // TODO(mark): Split this file up as more API methods get added.
 import axios from "axios";
+import { toPairs } from "lodash/fp";
 
 const postWithCSRF = async (url, params) => {
   const resp = await axios.post(url, {
@@ -18,6 +19,19 @@ const get = async url => {
 
   return resp.data;
 };
+
+const deleteWithCSRF = url =>
+  axios.delete(url, {
+    data: {
+      // Fetch the CSRF token from the DOM.
+      authenticity_token: document.getElementsByName("csrf-token")[0].content
+    }
+  });
+
+const getURLParamString = params =>
+  toPairs(params)
+    .map(pair => pair.join("="))
+    .join("&");
 
 const getSampleMetadata = id => get(`/samples/${id}/metadata`);
 
@@ -46,11 +60,15 @@ const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
     `/samples/${sampleId}/alignment_viz/${alignmentQuery}.json?pipeline_version=${pipelineVersion}`
   );
 
+const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
+
 export {
   getSampleMetadata,
   saveSampleMetadata,
   getMetadataTypes,
   saveSampleName,
   saveSampleNotes,
-  getAlignmentData
+  getAlignmentData,
+  getURLParamString,
+  deleteSample
 };

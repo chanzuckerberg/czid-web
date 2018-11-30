@@ -292,7 +292,7 @@ class SamplesController < ApplicationController
     @report_page_params[:scoring_model] = params[:scoring_model] if params[:scoring_model]
     if @pipeline_run && (((@pipeline_run.adjusted_remaining_reads.to_i > 0 || @pipeline_run.results_finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       if background_id
-        @report_present = 1
+        @report_present = true
         @report_ts = @pipeline_run.updated_at.to_i
         @all_categories = all_categories
         @report_details = report_details(@pipeline_run, current_user.id)

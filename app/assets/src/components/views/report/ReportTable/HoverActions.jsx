@@ -95,7 +95,13 @@ class HoverActions extends React.Component {
       tooltipMessage = hoverAction.disabledMessage;
     }
 
-    return <BasicPopup trigger={trigger} content={tooltipMessage} />;
+    return (
+      <BasicPopup
+        key={hoverAction.icon}
+        trigger={trigger}
+        content={tooltipMessage}
+      />
+    );
   };
 
   render() {

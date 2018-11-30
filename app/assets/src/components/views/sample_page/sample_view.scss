@@ -46,8 +46,41 @@
   background-color: $off-white;
   height: 8px !important;
   border-top: 1px solid $white !important;
+}
 
-  &.hasTabs {
-    margin-top: -5px !important;
+.tabs {
+  margin: 25px 0;
+}
+
+.pipelineVersionSelectContainer {
+  display: inline-block;
+  padding-left: 2px;
+
+  .pipelineVersionSelect {
+    display: flex;
+  }
+
+  .dropdownTrigger {
+    margin-right: 5px;
+    margin-left: 3px;
+  }
+}
+
+.waitingContainer {
+  margin-top: 100px;
+  text-align: center;
+
+  .spinner {
+    margin-top: 20px;
+  }
+}
+
+.failedContainer {
+  margin-top: 20px;
+  text-align: center;
+
+  .failed {
+    color: $error !important;
+    font-weight: bold;
   }
 }
