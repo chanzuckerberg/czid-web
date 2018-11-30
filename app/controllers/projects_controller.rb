@@ -45,7 +45,7 @@ class ProjectsController < ApplicationController
   # GET /projects/1
   # GET /projects/1.json
   def show
-    @samples = current_power.project_samples(@project)
+    @samples = current_power.project_samples(@project).order(id: :desc)
     # all exisiting project are null, we ensure private projects are explicitly set to 0
     respond_to do |format|
       format.html

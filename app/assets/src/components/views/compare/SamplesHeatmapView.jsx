@@ -547,9 +547,9 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  renderSubMenu(sticky) {
+  renderSubMenu() {
     return (
-      <div style={sticky.style} className={cs.menu}>
+      <div className={cs.menu}>
         <Divider />
         <div className={`${cs.filterRow} row`}>
           <div className="col s3">{this.renderTaxonLevelPicker()}</div>
@@ -571,13 +571,10 @@ class SamplesHeatmapView extends React.Component {
 
   renderVisualization() {
     return (
-      <StickyContainer>
-        <Sticky>{this.renderSubMenu.bind(this)}</Sticky>
-        <div className="row visualization-content">
-          {this.state.loading && this.renderLoading()}
-          {this.renderHeatmap()}
-        </div>
-      </StickyContainer>
+      <div className="row visualization-content">
+        {this.state.loading && this.renderLoading()}
+        {this.renderHeatmap()}
+      </div>
     );
   }
 
@@ -634,7 +631,16 @@ class SamplesHeatmapView extends React.Component {
             </ViewHeader.Controls>
           </ViewHeader>
         </div>
-        <NarrowContainer>{this.renderVisualization()}</NarrowContainer>
+        <StickyContainer>
+          <Sticky>
+            {({ style }) => (
+              <div style={style}>
+                <NarrowContainer>{this.renderSubMenu()}</NarrowContainer>
+              </div>
+            )}
+          </Sticky>
+          {this.renderVisualization()}
+        </StickyContainer>
         <SampleDetailsSidebar
           showReportLink
           visible={this.state.sidebarVisible}
