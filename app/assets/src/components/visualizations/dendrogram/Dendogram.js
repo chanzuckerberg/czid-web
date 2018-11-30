@@ -2,7 +2,7 @@ import { cluster as d3Cluster, hierarchy } from "d3-hierarchy";
 import "d3-transition";
 import { timeout } from "d3-timer";
 import { select, event as currentEvent } from "d3-selection";
-import { Colormap } from "../../utils/colormaps/Colormap";
+import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap";
 
 export default class Dendogram {
   constructor(container, tree, options) {
@@ -17,7 +17,7 @@ export default class Dendogram {
       {
         curvedEdges: false,
         defaultColor: "#cccccc",
-        colormapName: "viridis",
+        absentColor: "#000000", // The color when an attribute is absent.
         colorGroupAttribute: null,
         colorGroupLegendTitle: null,
         colorGroupAbsentName: null,
@@ -196,8 +196,15 @@ export default class Dendogram {
     this.allColorAttributeValues = allVals;
 
     // Set up colors array
-    this.colors = Colormap.getNScale(this.options.colormapName, allVals.length);
+    this.colors = new CategoricalColormap().getNScale(allVals.length);
     this.colors = [this.options.defaultColor].concat(this.colors);
+
+    // Add the absentColor at the same index as the absentName.
+    const absentNameIndex = allVals.indexOf(absentName);
+
+    if (absentNameIndex > -1) {
+      this.colors.splice(absentNameIndex, 0, this.options.absentColor);
+    }
 
     function colorNode(head) {
       // Color the nodes based on the attribute values
@@ -556,6 +563,9 @@ export default class Dendogram {
       .select("text")
       .transition()
       .duration(500)
+      .attr("stroke", function(d) {
+        return this.colors[d.data.colorIndex];
+      })
       .attr("x", function(d) {
         return d.depth === 0
           ? -(this.getBBox().width + 15)

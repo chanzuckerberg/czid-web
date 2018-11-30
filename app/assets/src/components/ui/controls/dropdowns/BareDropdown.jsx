@@ -26,6 +26,7 @@ BareDropdown.propTypes = forbidExtraProps({
   scrolling: PropTypes.bool
 });
 
+BareDropdown.Header = BaseDropdown.Header;
 BareDropdown.Menu = BaseDropdown.Menu;
 BareDropdown.Item = BaseDropdown.Item;
 

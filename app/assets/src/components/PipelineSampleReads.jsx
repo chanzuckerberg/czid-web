@@ -1,20 +1,16 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import moment from "moment";
 import $ from "jquery";
 import axios from "axios";
 import cx from "classnames";
 import { get } from "lodash/fp";
 import { Divider, Dropdown, Popup } from "semantic-ui-react";
-import numberWithCommas from "../helpers/strings";
 import { pipelineHasAssembly } from "./utils/sample";
-import ERCCScatterPlot from "./ERCCScatterPlot";
 import PipelineSampleReport from "./PipelineSampleReport";
 import AMRView from "./AMRView";
 import BasicPopup from "./BasicPopup";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import SampleDetailsSidebar from "./views/report/SampleDetailsSidebar";
-import { SAMPLE_FIELDS } from "./utils/SampleFields";
 import PrimaryButton from "./ui/controls/buttons/PrimaryButton";
 import ViewHeader from "./layout/ViewHeader";
 import cs from "./pipeline_sample_reads.scss";
@@ -47,76 +43,20 @@ class PipelineSampleReads extends React.Component {
 
     this.jobStatistics = props.jobStatistics;
     this.summary_stats = props.summary_stats;
-    this.gotoReport = this.gotoReport.bind(this);
-    this.refreshPage = this.refreshPage.bind(this);
     this.sampleId = this.sampleInfo.id;
     this.host_genome = props.host_genome;
     this.pipelineStatus = props.sample_status;
     this.pipelineRun = props.pipelineRun;
-    this.rerunPipeline = this.rerunPipeline.bind(this);
     this.canSeeAlignViz = props.can_see_align_viz;
     this.gsnapFilterStatus = this.generateGsnapFilterStatus(this.jobStatistics);
     this.state = {
       rerunStatus: "failed",
       rerunStatusMessage: "Sample run failed",
-      watched_taxids: props.reportDetails
-        ? props.reportDetails.watched_taxids
-        : [],
-      confirmed_taxids: props.reportDetails
-        ? props.reportDetails.confirmed_taxids
-        : [],
-      confirmed_names: props.reportDetails
-        ? props.reportDetails.confirmed_names
-        : [],
       sample_name: props.sampleInfo.name,
       sampleDetailsSidebarVisible: false
     };
-    this.TYPE_PROMPT = "-";
-    this.NUCLEOTIDE_TYPES = ["Not set", "DNA", "RNA"];
-    this.DROPDOWN_OPTIONS = {
-      sample_tissue: PipelineSampleReads.fetchTissueTypes(),
-      sample_template: this.NUCLEOTIDE_TYPES
-    };
-    this.DROPDOWN_METADATA_FIELDS = Object.keys(this.DROPDOWN_OPTIONS);
-    this.render_metadata_textfield = this.render_metadata_textfield.bind(this);
-    this.render_metadata_numfield = this.render_metadata_numfield.bind(this);
-    this.render_metadata_dropdown = this.render_metadata_dropdown.bind(this);
 
-    this.sampleFieldsColumn1 = [
-      "sample_location",
-      "sample_tissue",
-      "sample_template",
-      "sample_unique_id",
-      "sample_date"
-    ];
-    this.sampleFieldsColumn2 = [
-      "sample_library",
-      "sample_sequencer",
-      "sample_input_pg",
-      "sample_batch",
-      "sample_organism",
-      "sample_detection"
-    ];
-    this.sampleFieldProperties = new Map(
-      SAMPLE_FIELDS.map(item => [item.name, item])
-    );
-    this.sampleFieldRenderMethods = {
-      sample_location: this.render_metadata_textfield,
-      sample_date: this.render_metadata_textfield,
-      sample_tissue: this.render_metadata_dropdown,
-      sample_template: this.render_metadata_dropdown,
-      sample_library: this.render_metadata_textfield,
-      sample_sequencer: this.render_metadata_textfield,
-      sample_unique_id: this.render_metadata_textfield,
-      sample_input_pg: this.render_metadata_numfield,
-      sample_batch: this.render_metadata_numfield,
-      sample_organism: this.render_metadata_textfield,
-      sample_detection: this.render_metadata_textfield
-    };
-
-    this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.deleteSample = this.deleteSample.bind(this);
-    this.toggleHighlightTaxon = this.toggleHighlightTaxon.bind(this);
     this.downloadCSV = this.downloadCSV.bind(this);
   }
 
@@ -133,7 +73,7 @@ class PipelineSampleReads extends React.Component {
     return "gsnap filter on human/chimp genome was not run.";
   }
 
-  refreshPage(overrides) {
+  refreshPage = overrides => {
     const new_params = Object.assign(
       {},
       this.props.reportPageParams,
@@ -146,7 +86,7 @@ class PipelineSampleReads extends React.Component {
       location.pathname +
       "?" +
       $.param(new_params);
-  }
+  };
 
   deleteSample() {
     axios
@@ -165,147 +105,6 @@ class PipelineSampleReads extends React.Component {
     });
   };
 
-  toggleHighlightTaxon(e) {
-    let taxid = e.target.getAttribute("data-tax-id");
-    let name = e.target.getAttribute("data-tax-name");
-    let strength = e.target.getAttribute("data-confirmation-strength");
-    let current_taxids = this.state[strength + "_taxids"];
-    let action =
-      current_taxids.indexOf(parseInt(taxid)) >= 0
-        ? "remove_taxon_confirmation"
-        : "add_taxon_confirmation";
-    axios
-      .post(`/samples/${this.sampleId}/${action}`, {
-        taxid: taxid,
-        name: name,
-        strength: strength,
-        authenticity_token: this.csrf
-      })
-      .then(res => {
-        this.setState({
-          watched_taxids: res.data.watched_taxids,
-          confirmed_taxids: res.data.confirmed_taxids,
-          confirmed_names: res.data.confirmed_names
-        });
-      });
-  }
-
-  render_metadata_dropdown(label, field) {
-    let dropdown_options = this.DROPDOWN_OPTIONS[field];
-    let display_value = this.sampleInfo[field] ? this.sampleInfo[field] : "-";
-    return (
-      <div className="row detail-row" key={`${label}_${field}`}>
-        <div className="col s6 label">{label}</div>
-        <div className="col s6">
-          <div className="sample-notes">
-            <div
-              className="details-value custom-select-dropdown select-dropdown"
-              data-activates={field}
-            >
-              <div className="details-text">{display_value}</div>
-              <i className="fa fa-chevron-down right" />
-            </div>
-            {this.can_edit ? (
-              <ul id={field} className="dropdown-content details-dropdown">
-                {dropdown_options.map((option_value, i) => {
-                  return (
-                    <li
-                      onClick={e => {
-                        this.handleDropdownChange(field, i, e);
-                      }}
-                      ref={field}
-                      key={`version_${i}`}
-                    >
-                      {option_value}
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : null}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  render_metadata_textfield_wide(label, hash, field, blank_value, editable) {
-    let value = hash[field];
-    if (hash[field] instanceof Array) value = hash[field].join("; ");
-    return (
-      <div className="details-container col s12" key={`${label}_${field}`}>
-        <div className="details-title note">{label}</div>
-        <div className={"sample-notes note " + (editable ? "edit-wide" : "")}>
-          <pre
-            className="details-value"
-            suppressContentEditableWarning
-            contentEditable={editable}
-            id={field}
-          >
-            {value && value.trim() !== "" ? value : blank_value}
-          </pre>
-        </div>
-      </div>
-    );
-  }
-
-  render_metadata_textfield(label, field, popupContent) {
-    let display_value = this.TYPE_PROMPT;
-    if (this.sampleInfo[field] && this.sampleInfo[field].trim() !== "")
-      display_value = this.sampleInfo[field];
-    let labelElem = <div className="col s6 label">{label}</div>;
-    if (popupContent)
-      labelElem = <BasicPopup trigger={labelElem} content={popupContent} />;
-    return (
-      <div className="row detail-row" key={`${label}_${field}`}>
-        {labelElem}
-        <div className="col s6">
-          <div
-            className={
-              "details-value sample-notes " + (this.can_edit ? "edit" : "")
-            }
-          >
-            <pre
-              suppressContentEditableWarning
-              contentEditable={this.can_edit}
-              id={field}
-            >
-              {display_value}
-            </pre>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  render_metadata_numfield(label, field) {
-    let display_value = this.sampleInfo[field] || this.TYPE_PROMPT;
-    return (
-      <div className="row detail-row" key={`${label}_${field}`}>
-        <div className="col s6 label">{label}</div>
-        <div className="col s6">
-          <div
-            className={
-              "details-value sample-notes " + (this.can_edit ? "edit" : "")
-            }
-          >
-            <pre
-              suppressContentEditableWarning
-              contentEditable={this.can_edit}
-              id={field}
-            >
-              {display_value}
-            </pre>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  gotoReport() {
-    $("ul.tabs").tabs("select_tab", "reports");
-    PipelineSampleReads.setTab("pipeline_display", "reports");
-  }
-
   pipelineInProgress() {
     if (this.pipelineRun && this.pipelineRun.finalized === 1) {
       return false;
@@ -313,67 +112,8 @@ class PipelineSampleReads extends React.Component {
     return true;
   }
 
-  rerunPipeline() {
-    this.setState({
-      rerunStatus: "waiting",
-      rerunStatusMessage: (
-        <span>
-          <br />
-          <i className="fa fa-circle-o-notch fa-spin fa-fw" />
-          Adding sample to queue ...
-        </span>
-      )
-    });
-    axios
-      .put(`${this.rerunPath}.json`, {
-        authenticity_token: this.csrf
-      })
-      .then(response => {
-        this.setState({
-          rerunStatus: "success",
-          rerunStatusMessage: "Rerunning sample"
-        });
-        // this should set status to UPLOADING/IN PROGRESS after rerun
-      })
-      .catch(error => {
-        this.setState({
-          rerunStatus: "failed",
-          rerunStatusMessage: (
-            <span>
-              <br />
-              <i className="fa fa-frown-o fa-fw" />Failed to re-run Pipeline
-            </span>
-          )
-        });
-      });
-  }
-
-  static getActive(section, tab) {
-    return window.localStorage.getItem(section) === tab ? "active" : "";
-  }
-
   static setTab(section, tab) {
     window.localStorage.setItem(section, tab);
-  }
-
-  static fetchTissueTypes() {
-    let tissue_types = [
-      "Not set",
-      "Bronchoalveolar lavage",
-      "Cerebrospinal fluid",
-      "Nasopharyngeal swab",
-      "Plasma",
-      "Serum",
-      "Solid tissue",
-      "Stool",
-      "Synovial fluid",
-      "Whole blood",
-      "Whole insect",
-      "Insect abdomen",
-      "Insect engorged abdomen",
-      "Insect head"
-    ];
-    return tissue_types;
   }
 
   fetchParams(param) {
@@ -400,27 +140,19 @@ class PipelineSampleReads extends React.Component {
   }
 
   componentDidMount() {
-    $(".sample-select-dropdown").dropdown({
-      belowOrigin: true
-    });
-
     $("ul.tabs").tabs();
-    this.listenNoteChanges();
-    this.initializeSelectTag();
-    $(".custom-select-dropdown").dropdown({
-      belowOrigin: true
-    });
-    for (var i = 0; i < this.DROPDOWN_METADATA_FIELDS.length; i++) {
-      let field = this.DROPDOWN_METADATA_FIELDS[i];
-      $(ReactDOM.findDOMNode(this.refs[field])).on(
-        "change",
-        this.handleDropdownChange
-      );
-    }
-  }
 
-  initializeSelectTag() {
-    $("select").material_select();
+    // Refresh the page every 5 minutes while in progress. Purpose is so that
+    // users with the page open will get some sense of updated status and see
+    // when the report is done.
+    // TODO: Future refactor should convert this to just fetch updated data with
+    // axios so that we don't pay for the full reload. This report load is
+    // currently only going: Rails -> React props.
+    if (this.pipelineInProgress()) {
+      setTimeout(() => {
+        location.reload();
+      }, 300000);
+    }
   }
 
   handleDownload = option => {
@@ -433,116 +165,6 @@ class PipelineSampleReads extends React.Component {
       window.open(linkInfo.path, linkInfo.newPage ? "_blank" : "_self");
     }
   };
-
-  handleDropdownChange(field, position, element) {
-    const parent = $(element.target).parent();
-    const value = this.DROPDOWN_OPTIONS[field][position];
-    const prevValue = parent
-      .prev()
-      .text()
-      .trim();
-    if (prevValue !== value) {
-      parent.prev().html(
-        `<div class='details-text'>
-        ${value}
-       </div>
-       <i class="fa fa-chevron-down right"/>`
-      );
-      axios
-        .post("/samples/" + this.sampleInfo.id + "/save_metadata.json", {
-          field: field,
-          value: value,
-          authenticity_token: this.csrf
-        })
-        .then(response => {
-          if (response.data.status === "success") {
-            $(".note-saved-success")
-              .html(
-                `<i class='fa fa-check-circle'></i> ${response.data.message}`
-              )
-              .css("display", "inline-block")
-              .delay(1000)
-              .slideUp(200);
-          } else {
-            $(".note-save-failed")
-              .html(`<i class='fa fa-frown-o'></i> ${response.data.message}`)
-              .css("display", "inline-block")
-              .delay(1000)
-              .slideUp(200);
-          }
-        })
-        .catch(() => {
-          $(".note-save-failed")
-            .html(`<i class='fa fa-frown-o'></i> Something went wrong!`)
-            .css("display", "inline-block")
-            .delay(1000)
-            .slideUp(200);
-        });
-    }
-  }
-
-  listenNoteChanges() {
-    if (!this.can_edit) {
-      return;
-    }
-    let currentText = "";
-    $(".sample-notes").focusin(e => {
-      currentText = e.target.innerText.trim();
-      if (currentText === this.TYPE_PROMPT) {
-        e.target.innerText = "";
-      }
-    });
-
-    $(".sample-notes").focusout(e => {
-      const newText = e.target.innerText.trim();
-      const field = e.target.id;
-      if (newText !== currentText) {
-        axios
-          .post("/samples/" + this.sampleInfo.id + "/save_metadata.json", {
-            field: field,
-            value: newText,
-            authenticity_token: this.csrf
-          })
-          .then(response => {
-            if (response.data.status === "success") {
-              $(".note-saved-success")
-                .html(
-                  `<i class='fa fa-check-circle'></i> ${response.data.message}`
-                )
-                .css("display", "inline-block")
-                .delay(1000)
-                .slideUp(200);
-              if (field === "name") {
-                // update the name displayed in the header in real-time
-                this.setState({ sample_name: newText });
-              }
-            } else if (response.data.status === "failed") {
-              $(".note-save-failed")
-                .html(
-                  `<i class='fa fa-frown-o'></i> ${response.data.message} ${
-                    response.data.errors
-                  }`
-                )
-                .css("display", "inline-block")
-                .delay(1000)
-                .slideUp(200);
-              // Reset back to the old text
-              e.target.innerText = currentText;
-            }
-          })
-          .catch(() => {
-            $(".note-save-failed")
-              .html(`<i class='fa fa-frown-o'></i> Something went wrong!`)
-              .css("display", "inline-block")
-              .delay(1000)
-              .slideUp(200);
-          });
-      }
-      if (newText.trim() === "") {
-        e.target.innerText = this.TYPE_PROMPT;
-      }
-    });
-  }
 
   renderPipelineWarnings = () => {
     const warnings = [];
@@ -582,22 +204,13 @@ class PipelineSampleReads extends React.Component {
     }
   };
 
-  renderERCC() {
-    if (!this.props.ercc_comparison) {
-      return;
+  handleMetadataUpdate = (key, newValue) => {
+    if (key === "name") {
+      this.setState({
+        sample_name: newValue
+      });
     }
-    return (
-      <div className="row last-row">
-        <div className="col s12">
-          <div className="content-title">ERCC Spike-In Counts</div>
-          <ERCCScatterPlot
-            ercc_comparison={this.props.ercc_comparison}
-            width={720}
-          />
-        </div>
-      </div>
-    );
-  }
+  };
 
   render() {
     let d_report = null;
@@ -681,9 +294,6 @@ class PipelineSampleReads extends React.Component {
           report_details={this.reportDetails}
           can_see_align_viz={this.canSeeAlignViz}
           can_edit={this.can_edit}
-          confirmed_taxids={this.state.confirmed_taxids}
-          watched_taxids={this.state.watched_taxids}
-          toggleHighlightTaxon={this.toggleHighlightTaxon}
           refreshPage={this.refreshPage}
           gsnapFilterStatus={this.gsnapFilterStatus}
           // Needs to be passed down to set the background dropdown properly.
@@ -707,164 +317,6 @@ class PipelineSampleReads extends React.Component {
         </div>
       );
     }
-
-    let pipeline_run = null;
-    const BLANK_TEXT = "unknown";
-    if (
-      this.pipelineRun &&
-      this.pipelineRun.total_reads &&
-      this.summary_stats
-    ) {
-      pipeline_run = (
-        <div className="data">
-          <div className="row">
-            <div className="col s6">
-              <div className="row detail-row">
-                <div className="col s6 label">Total reads</div>
-                <div className="details-value col s6 plain">
-                  {numberWithCommas(this.pipelineRun.total_reads)}
-                </div>
-              </div>
-              <div className="row detail-row">
-                <div className="col s6 label">ERCC reads</div>
-                <div className="details-value col s6 plain">
-                  {!this.pipelineRun.total_ercc_reads
-                    ? 0
-                    : numberWithCommas(this.pipelineRun.total_ercc_reads)}
-                  {!this.pipelineRun.total_ercc_reads
-                    ? ""
-                    : ` (${(
-                        100.0 *
-                        this.pipelineRun.total_ercc_reads /
-                        this.pipelineRun.total_reads
-                      ).toFixed(2)}%)`}
-                </div>
-              </div>
-              <div className="row detail-row">
-                <div className="col s6 label">Non-host reads</div>
-                <div
-                  className={`details-value col s6 plain ${
-                    !this.summary_stats.adjusted_remaining_reads
-                      ? BLANK_TEXT
-                      : ""
-                  }`}
-                >
-                  {!this.summary_stats.adjusted_remaining_reads
-                    ? BLANK_TEXT
-                    : numberWithCommas(
-                        this.summary_stats.adjusted_remaining_reads
-                      )}
-                  {!this.summary_stats.percent_remaining
-                    ? ""
-                    : ` (${this.summary_stats.percent_remaining.toFixed(2)}%)`}
-                </div>
-              </div>
-              <div className="row detail-row">
-                <div className="col s6 label">Unmapped reads</div>
-                <div
-                  className={`details-value col s6 plain ${
-                    !this.summary_stats.unmapped_reads ? BLANK_TEXT : ""
-                  }`}
-                >
-                  {!this.summary_stats.unmapped_reads
-                    ? BLANK_TEXT
-                    : numberWithCommas(this.summary_stats.unmapped_reads)}
-                </div>
-              </div>
-            </div>
-            <div className="col s6">
-              <div className="row detail-row">
-                <div className="col s6 label">Passed quality control</div>
-                <div
-                  className={`details-value col s6 plain ${
-                    !this.summary_stats.qc_percent ? BLANK_TEXT : ""
-                  }`}
-                >
-                  {!this.summary_stats.qc_percent
-                    ? BLANK_TEXT
-                    : `${this.summary_stats.qc_percent.toFixed(2)}%`}
-                </div>
-              </div>
-              <div className="row detail-row">
-                <div className="col s6 label">Compression ratio</div>
-                <div
-                  className={`details-value col s6 plain ${
-                    !this.summary_stats.compression_ratio ? BLANK_TEXT : ""
-                  }`}
-                >
-                  {!this.summary_stats.compression_ratio
-                    ? BLANK_TEXT
-                    : this.summary_stats.compression_ratio.toFixed(2)}
-                </div>
-              </div>
-              <div className="row detail-row">
-                <div className="col s6 label">Date processed</div>
-                <div
-                  className={`details-value col s6 plain ${
-                    !this.summary_stats.last_processed_at ? BLANK_TEXT : ""
-                  }`}
-                >
-                  {run_date_blurb}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    } else {
-      pipeline_run = (
-        <div className="center">
-          There is no pipeline output for this sample
-        </div>
-      );
-    }
-
-    let stage2_complete =
-      this.pipelineRun && this.pipelineRun.adjusted_remaining_reads;
-    let nonhost_assembly_complete =
-      this.reportDetails &&
-      this.reportDetails.assembled_taxids.indexOf("all") >= 0;
-    const assembled = this.pipelineRun && this.pipelineRun.assembled === 1;
-    let download_section = (
-      <div>
-        <ResultButton
-          url={`/samples/${this.sampleInfo.id}/nonhost_fasta`}
-          icon="fa-cloud-download"
-          label="Non-Host Reads"
-          visible={stage2_complete}
-        />
-        <ResultButton
-          url={`/samples/${this.sampleInfo.id}/contigs_fasta`}
-          icon="fa-cloud-download"
-          label="Non-Host Contigs"
-          visible={assembled}
-        />
-        <ResultButton
-          url={`/samples/${this.sampleInfo.id}/contigs_summary`}
-          icon="fa-cloud-download"
-          label="Contigs Summary"
-          visible={assembled}
-        />
-        <ResultButton
-          url={`/samples/${this.sampleInfo.id}/unidentified_fasta`}
-          icon="fa-cloud-download"
-          label="Unmapped Reads"
-          visible={stage2_complete}
-        />
-        <ResultButton
-          url={`/samples/${this.sampleInfo.id}/results_folder`}
-          icon="fa-folder-open"
-          label="Results Folder"
-          visible={true}
-        />
-        <ResultButton
-          url={`/samples/${this.sampleInfo.id}/assembly/all`}
-          icon="fa-cloud-download"
-          label="Non-Host Assemblies"
-          visible={nonhost_assembly_complete}
-        />
-      </div>
-    );
 
     let version_display = "";
     if (
@@ -921,18 +373,6 @@ class PipelineSampleReads extends React.Component {
     ) : null;
     const multipleTabs = show_amr;
 
-    // Refresh the page every 5 minutes while in progress. Purpose is so that
-    // users with the page open will get some sense of updated status and see
-    // when the report is done.
-    // TODO: Future refactor should convert this to just fetch updated data with
-    // axios so that we don't pay for the full reload. This report load is
-    // currently only going: Rails -> React props.
-    if (this.pipelineInProgress()) {
-      setTimeout(() => {
-        location.reload();
-      }, 300000);
-    }
-
     return (
       <div>
         <ViewHeader className={cs.viewHeader}>
@@ -987,124 +427,6 @@ class PipelineSampleReads extends React.Component {
 
         {amr_table}
 
-        {/* TODO(mark): Remove all old Sample Details code once new sidebar goes live */}
-        <div id="details" className={cx("tab-screen col s12", cs.detailsTab)}>
-          <div className="center">
-            <span className="note-action-feedback note-saved-success" />
-            <span className="note-action-feedback note-save-failed" />
-          </div>
-
-          <div className="container tab-screen-content">
-            <div className="row">
-              <div className="col s9">
-                <div className="row">
-                  <div className="col s12">
-                    <div className="content-title">Sample Details</div>
-                    <div className="data">
-                      <div className="row">
-                        <div className="col s6">
-                          <div className="row detail-row">
-                            <div className="col s6 label">Host</div>
-                            <div
-                              className={`details-value col s6 plain
-                            ${!this.host_genome ? BLANK_TEXT : ""}`}
-                            >
-                              {!this.host_genome
-                                ? BLANK_TEXT
-                                : this.host_genome.name}
-                            </div>
-                          </div>
-
-                          <div className="row detail-row">
-                            <div className="col s6 label">Upload date</div>
-                            <div className="details-value col s6 plain">
-                              {moment(this.sampleInfo.created_at)
-                                .startOf("second")
-                                .fromNow()}
-                            </div>
-                          </div>
-                          {this.sampleFieldsColumn1.map(field => {
-                            let properties = this.sampleFieldProperties.get(
-                              field
-                            );
-                            let renderMethod = this.sampleFieldRenderMethods[
-                              field
-                            ];
-                            return renderMethod(
-                              properties.label,
-                              properties.name,
-                              properties.description
-                            );
-                          })}
-                        </div>
-                        <div className="col s6">
-                          {this.sampleFieldsColumn2.map(field => {
-                            let properties = this.sampleFieldProperties.get(
-                              field
-                            );
-                            let renderMethod = this.sampleFieldRenderMethods[
-                              field
-                            ];
-                            return renderMethod(
-                              properties.label,
-                              properties.name,
-                              properties.description
-                            );
-                          })}
-                        </div>
-                      </div>
-                      <div className="row">
-                        {this.render_metadata_textfield_wide(
-                          this.sampleFieldProperties.get("name").label,
-                          this.sampleInfo,
-                          "name",
-                          this.TYPE_PROMPT,
-                          this.can_edit
-                        )}
-                        {this.render_metadata_textfield_wide(
-                          this.sampleFieldProperties.get("confirmed_names")
-                            .label,
-                          this.state,
-                          "confirmed_names",
-                          "None",
-                          false
-                        )}
-                        {this.render_metadata_textfield_wide(
-                          this.sampleFieldProperties.get("sample_notes").label,
-                          this.sampleInfo,
-                          "sample_notes",
-                          this.TYPE_PROMPT,
-                          this.can_edit
-                        )}
-                        {this.render_metadata_textfield_wide(
-                          this.sampleFieldProperties.get("sample_diagnosis")
-                            .label,
-                          this.sampleInfo,
-                          "sample_diagnosis",
-                          this.TYPE_PROMPT,
-                          this.can_edit
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="col s12">
-                    <div className="content-title">PIPELINE OUTPUT</div>
-                    {pipeline_run}
-                  </div>
-                </div>
-                {this.renderERCC()}
-              </div>
-
-              <div className="col s3 download-area">
-                <div className="download-title">Download Reads</div>
-                {download_section}
-              </div>
-            </div>
-          </div>
-        </div>
         <div
           id="reports"
           className="reports-screen container tab-screen col s12"
@@ -1115,20 +437,11 @@ class PipelineSampleReads extends React.Component {
           visible={this.state.sampleDetailsSidebarVisible}
           onClose={this.toggleSampleDetailsSidebar}
           sampleId={this.sampleId}
-          onNameUpdate={newName => this.setState({ sample_name: newName })}
+          onMetadataUpdate={this.handleMetadataUpdate}
         />
       </div>
     );
   }
-}
-
-function ResultButton({ url, icon, label, visible }) {
-  return visible ? (
-    <a className="custom-button" href={url}>
-      <i className={`fa ${icon}`} />
-      {label}
-    </a>
-  ) : null;
 }
 
 export default PipelineSampleReads;

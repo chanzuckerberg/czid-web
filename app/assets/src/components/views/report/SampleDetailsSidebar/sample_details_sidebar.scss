@@ -11,6 +11,9 @@
   font-size: $font-size-h4;
   font-weight: $font-weight-semibold;
   margin: 0 10px;
+  margin-right: 60px;
+  word-break: break-all;
+  line-height: 1.4em;
 }
 
 .tabs {
@@ -54,6 +57,7 @@
 
   .metadataValue {
     color: $dark-grey;
+    word-break: break-all;
   }
 
   .emptyValue {
