@@ -23,13 +23,13 @@ class Sample < ApplicationRecord
   SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR = 'taxid_annot_sorted_genus_nr.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT = 'taxid_annot_sorted_family_nt.fasta'.freeze
   SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
-  ASSEMBLY_PREFIX = 'assembly/refined_'.freeze
 
   TOTAL_READS_JSON = "total_reads.json".freeze
   LOG_BASENAME = 'log.txt'.freeze
 
   LOCAL_INPUT_PART_PATH = '/app/tmp/input_parts'.freeze
   ASSEMBLY_DIR = 'assembly'.freeze
+  ASSEMBLY_PREFIX = 'assembly/refined_'.freeze
 
   # TODO: Make all these params configurable without code change
   DEFAULT_STORAGE_IN_GB = 500
@@ -323,21 +323,6 @@ class Sample < ApplicationRecord
   # outputs are in this path.
   def sample_expt_s3_path
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/expt"
-  end
-
-  def annotated_fasta_s3_path
-    pr = pipeline_runs.first
-    return "#{pr.postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 3.1
-    return "#{pr.postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 2.0
-
-    pr.multihit? ? "#{sample_alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
-  end
-
-  def unidentified_fasta_s3_path
-    pr = pipeline_runs.first
-    return "#{pr.postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 3.1
-    return "#{pr.output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 2.0
-    "#{sample_alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
 
   def host_genome_name

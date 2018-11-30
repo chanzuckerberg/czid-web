@@ -445,6 +445,19 @@ class PipelineRun < ApplicationRecord
     return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
   end
 
+  def annotated_fasta_s3_path
+    return "#{postprocess_output_s3_path}/#{Sample::ASSEMBLY_PREFIX}#{Sample::DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 3.1
+    return "#{postprocess_output_s3_path}/#{Sample::DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 2.0
+
+    multihit? ? "#{alignment_output_s3_path}/#{Sample::MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{Sample::HIT_FASTA_BASENAME}"
+  end
+
+  def unidentified_fasta_s3_path
+    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 3.1
+    return "#{output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 2.0
+    "#{alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
+  end
+
   def get_lineage_json(ct2taxid, taxon_lineage_map)
     # Get the full lineage based on taxid
     # Sample output:
