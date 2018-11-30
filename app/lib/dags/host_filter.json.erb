@@ -4,7 +4,7 @@
   "targets": {
     <% if @attribute_dict[:fastq2] %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
-      "star_out": ["unmapped1.<%= @attribute_dict[:file_type] %>", "unmapped2.<%= @attribute_dict[:file_type] %>"],
+      "star_out": ["reads_per_gene.star.tab", "unmapped1.<%= @attribute_dict[:file_type] %>", "unmapped2.<%= @attribute_dict[:file_type] %>"],
       "trimmomatic_out": ["trimmomatic1.<%= @attribute_dict[:file_type] %>", "trimmomatic2.<%= @attribute_dict[:file_type] %>"],
       "priceseq_out": ["priceseq1.fa", "priceseq2.fa"],
       "cdhitdup_out": ["dedup1.fa", "dedup2.fa"],
@@ -25,7 +25,7 @@
       <% end %>
     <% else %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>"],
-      "star_out": ["unmapped1.<%= @attribute_dict[:file_type] %>"],
+      "star_out": ["reads_per_gene.star.tab", "unmapped1.<%= @attribute_dict[:file_type] %>"],
       "trimmomatic_out": ["trimmomatic1.<%= @attribute_dict[:file_type] %>"],
       "priceseq_out": ["priceseq1.fa"],
       "cdhitdup_out": ["dedup1.fa"],
@@ -47,8 +47,7 @@
       "additional_files": {
         "star_genome": "<%= @attribute_dict[:star_genome] %>"
       },
-      "additional_attributes": { "truncate_fragments_to": <%= @attribute_dict[:max_fragments] %>
-                                ,"output_gene_file": "reads_per_gene.star.tab" }
+      "additional_attributes": { "truncate_fragments_to": <%= @attribute_dict[:max_fragments] %> }
     },
     {
       "in": ["star_out"],
