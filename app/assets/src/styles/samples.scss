@@ -218,6 +218,24 @@ $break-large: 1070px;
 
           &.header {
             overflow: visible;
+            display: flex;
+
+            .pipeline-status-filter {
+              margin-left: 6px;
+              opacity: 0;
+              color: $medium-grey;
+
+              &.active {
+                opacity: 0.8;
+                color: $primary-light;
+              }
+            }
+
+            &:hover {
+              .pipeline-status-filter {
+                opacity: 1;
+              }
+            }
           }
           &:first-child {
             flex-grow: 2;
