@@ -4,7 +4,8 @@
       filePath: JSON.parse('<%= raw escape_json(@file_path) %>'),
       fileList: JSON.parse('<%= raw escape_json(@file_list) %>'),
       sampleName: '<%= @sample.name %>',
-      projectName: '<%= @sample.project.name %>'
+      projectName: '<%= @sample.project.name %>',
+      rawResultsUrl: '<%= @exposed_raw_results_url %>'
     }, 'ResultsFolder');
   <% end %>
 </div>

@@ -115,6 +115,7 @@ class ResultsFolder extends React.Component {
     this.stageDict = props.fileList;
     this.sampleName = props.sampleName;
     this.projectName = props.projectName;
+    this.rawResultsUrl = props.rawResultsUrl;
   }
 
   gotoPath(path) {
@@ -175,6 +176,23 @@ class ResultsFolder extends React.Component {
                   </table>
                 );
               })}
+          {this.rawResultsUrl ? (
+            <table key="rawResults">
+              <thead>
+                <tr>
+                  <th>Need an output that's not listed here?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  className="file-link"
+                  onClick={openUrl.bind(this, this.rawResultsUrl)}
+                >
+                  <td>Go to raw results folder</td>
+                </tr>
+              </tbody>
+            </table>
+          ) : null}
         </div>
       </div>
     );

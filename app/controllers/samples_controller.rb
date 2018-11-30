@@ -545,7 +545,9 @@ class SamplesController < ApplicationController
   end
 
   def results_folder
-    can_see_stage1_results = current_power.updatable_samples.include?(@sample)
+    can_edit = current_power.updatable_samples.include?(@sample)
+    @exposed_raw_results_url = can_edit ? raw_results_folder_sample_url(@sample) : nil
+    can_see_stage1_results = can_edit
     @file_list = @sample.pipeline_runs.first.outputs_by_step(can_see_stage1_results)
     @file_path = "#{@sample.sample_path}/results/"
     respond_to do |format|
