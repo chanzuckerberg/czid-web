@@ -15,7 +15,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
-                  :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
+                  :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
@@ -438,6 +438,13 @@ class SamplesController < ApplicationController
     output_fasta = ''
     contigs.each { |contig| output_fasta += contig.to_fa }
     send_data output_fasta, filename: "#{@sample.name}_tax_#{taxid}_contigs.fasta"
+  end
+
+  def summary_contig_counts
+    pr = select_pipeline_run(@sample, params)
+    min_contig_size = params[:min_contig_size] || PipelineRun::MIN_CONTIG_SIZE
+    contig_counts = pr.get_summary_contig_counts(min_contig_size)
+    render json: { min_contig_size: min_contig_size, contig_counts: contig_counts }
   end
 
   def show_taxid_fasta
