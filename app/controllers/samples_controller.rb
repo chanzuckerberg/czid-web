@@ -16,7 +16,7 @@ class SamplesController < ApplicationController
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
-  EDIT_ACTIONS = [:edit, :add_taxon_confirmation, :remove_taxon_confirmation, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
 
@@ -64,7 +64,8 @@ class SamplesController < ApplicationController
     # TODO(yf) : the following tissue_types, host_genomes have performance
     # impact that it should be moved to different dedicated functions. Not
     # parsing the whole results.
-    @tissue_types = results.select("distinct(sample_tissue)").map(&:sample_tissue).compact.sort
+    @tissue_types = get_distinct_sample_types(results)
+
     host_genome_ids = results.select("distinct(host_genome_id)").map(&:host_genome_id).compact.sort
     @host_genomes = HostGenome.find(host_genome_ids)
 
@@ -514,16 +515,10 @@ class SamplesController < ApplicationController
 
   def contigs_summary
     pr = select_pipeline_run(@sample, params)
-    contigs_summary_s3_path = pr.contigs_summary_s3_path
+    local_file = pr.generate_contig_mapping_table
 
-    if contigs_summary_s3_path
-      @contigs_summary = get_s3_file(contigs_summary_s3_path)
-      send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'
-    else
-      render json: {
-        error: "contigs summary file does not exist for this sample"
-      }
-    end
+    @contigs_summary = File.read(local_file)
+    send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'
   end
 
   def nonhost_fasta
@@ -543,8 +538,8 @@ class SamplesController < ApplicationController
   end
 
   def results_folder
-    user_owns_sample = (@sample.user_id == current_user.id)
-    @file_list = @sample.pipeline_runs.first.outputs_by_step(user_owns_sample)
+    can_see_stage1_results = current_power.updatable_samples.include?(@sample)
+    @file_list = @sample.pipeline_runs.first.outputs_by_step(can_see_stage1_results)
     @file_path = "#{@sample.sample_path}/results/"
     respond_to do |format|
       format.html do
@@ -713,18 +708,6 @@ class SamplesController < ApplicationController
   def pipeline_runs
   end
 
-  def add_taxon_confirmation
-    keys = taxon_confirmation_unique_on(params)
-    TaxonConfirmation.create(taxon_confirmation_params) unless TaxonConfirmation.find_by(taxon_confirmation_params(keys))
-    respond_taxon_confirmations
-  end
-
-  def remove_taxon_confirmation
-    keys = taxon_confirmation_unique_on(params)
-    TaxonConfirmation.where(taxon_confirmation_params(keys)).destroy_all
-    respond_taxon_confirmations
-  end
-
   def cli_user_instructions
     render template: "samples/cli_user_instructions"
   end
@@ -774,19 +757,6 @@ class SamplesController < ApplicationController
     return {} if taxon_ids.empty?
 
     samples_taxons_details(samples, taxon_ids, background_id, species_selected)
-  end
-
-  def taxon_confirmation_unique_on(params)
-    params[:strength] == TaxonConfirmation::WATCHED ? [:sample_id, :taxid, :strength, :user_id] : [:sample_id, :taxid, :strength]
-  end
-
-  def taxon_confirmation_params(keys = nil)
-    h = { sample_id: @sample.id, user_id: current_user.id, taxid: params[:taxid], name: params[:name], strength: params[:strength] }
-    keys ? h.select { |k, _v| k && keys.include?(k) } : h
-  end
-
-  def respond_taxon_confirmations
-    render json: taxon_confirmation_map(@sample.id, current_user.id)
   end
 
   def get_background_id(sample)

@@ -1,10 +1,12 @@
 import React from "react";
+import { get, keyBy } from "lodash/fp";
 import Tree from "../../utils/structures/Tree";
 import Dendogram from "../../visualizations/dendrogram/Dendogram";
 import PropTypes from "prop-types";
 import DataTooltip from "../../ui/containers/DataTooltip";
 import SampleDetailsSidebar from "../report/SampleDetailsSidebar";
-import { SAMPLE_FIELDS } from "../../utils/SampleFields";
+import { getMetadataTypes } from "~/api";
+import { SAMPLE_FIELDS, SAMPLE_METADATA_FIELDS } from "./constants";
 
 class PhyloTreeVis extends React.Component {
   constructor(props) {
@@ -15,6 +17,7 @@ class PhyloTreeVis extends React.Component {
       // If we made the sidebar visibility depend on sampleId !== null,
       // there would be a visual flicker when sampleId is set to null as the sidebar closes.
       selectedSampleId: null,
+      selectedPipelineRunId: null,
       sidebarVisible: false
     };
 
@@ -22,7 +25,6 @@ class PhyloTreeVis extends React.Component {
       (this.nodeData = props.nodeData),
       (this.treeVis = null);
 
-    this.sampleFields = SAMPLE_FIELDS;
     this.ncbiFields = [
       { name: "country", label: "Country" },
       { name: "collection_date", label: "Collection Date" }
@@ -33,6 +35,7 @@ class PhyloTreeVis extends React.Component {
     let tree = Tree.fromNewickString(this.props.newick, this.props.nodeData);
     this.treeVis = new Dendogram(this.treeContainer, tree, {
       defaultColor: "#cccccc",
+      absentColor: "#999999",
       colormapName: "viridis",
       colorGroupAttribute: "project_name",
       colorGroupLegendTitle: "Project Name",
@@ -46,9 +49,11 @@ class PhyloTreeVis extends React.Component {
       scaleLabel: "Relative distance"
     });
     this.treeVis.update();
+
+    this.fetchMetadataTypes();
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     if (
       this.props.newick != this.newick ||
       this.props.nodeData != this.nodeData
@@ -59,9 +64,21 @@ class PhyloTreeVis extends React.Component {
         Tree.fromNewickString(this.props.newick, this.props.nodeData)
       );
       this.treeVis.update();
+    }
+
+    // Close the sidebar if we switch trees.
+    if (this.props.phyloTreeId != prevProps.phyloTreeId) {
       this.handleSidebarClose();
     }
   }
+
+  fetchMetadataTypes = async () => {
+    const metadataTypes = await getMetadataTypes();
+
+    this.setState({
+      sampleMetadataTypes: keyBy("key", metadataTypes)
+    });
+  };
 
   handleNodeHover = node => {
     this.setState({ hoveredNode: node });
@@ -80,6 +97,7 @@ class PhyloTreeVis extends React.Component {
       } else {
         this.setState({
           selectedSampleId: node.data.sample_id,
+          selectedPipelineRunId: node.data.pipeline_run_id,
           sidebarVisible: true
         });
       }
@@ -90,6 +108,16 @@ class PhyloTreeVis extends React.Component {
     this.setState({
       sidebarVisible: false
     });
+  };
+
+  handleMetadataUpdate = (key, newValue) => {
+    if (this.props.onMetadataUpdate) {
+      this.props.onMetadataUpdate(
+        key,
+        newValue,
+        this.state.selectedPipelineRunId
+      );
+    }
   };
 
   getFieldValue(field) {
@@ -106,21 +134,32 @@ class PhyloTreeVis extends React.Component {
     return value || "-";
   }
 
-  getTooltipData() {
-    let fields = this.state.hoveredNode.data.accession
-      ? this.ncbiFields
-      : this.sampleFields;
+  getMetadataFieldValue = field =>
+    get(`metadata.${field}`, this.state.hoveredNode.data);
 
-    let sectionName = null;
+  getTooltipData() {
     if (this.state.hoveredNode.data.accession) {
-      sectionName = "NCBI Reference";
-    } else {
-      sectionName = "Sample";
+      return [
+        {
+          name: "NCBI Reference",
+          data: this.ncbiFields.map(f => [
+            f.label,
+            this.getFieldValue(f) || "-"
+          ])
+        }
+      ];
     }
+
     return [
       {
-        name: sectionName,
-        data: fields.map(f => [f.label, this.getFieldValue(f) || "-"])
+        name: "Sample",
+        data: [
+          ...SAMPLE_FIELDS.map(f => [f.label, this.getFieldValue(f) || "-"]),
+          ...SAMPLE_METADATA_FIELDS.map(key => [
+            get(`${key}.name`, this.state.sampleMetadataTypes) || key,
+            this.getMetadataFieldValue(key) || "-"
+          ])
+        ]
       }
     ];
   }
@@ -149,6 +188,7 @@ class PhyloTreeVis extends React.Component {
           visible={this.state.sidebarVisible}
           onClose={this.handleSidebarClose}
           sampleId={this.state.selectedSampleId}
+          onMetadataUpdate={this.handleMetadataUpdate}
         />
       </div>
     );
@@ -157,7 +197,9 @@ class PhyloTreeVis extends React.Component {
 
 PhyloTreeVis.propTypes = {
   newick: PropTypes.string,
-  nodeData: PropTypes.object
+  nodeData: PropTypes.object,
+  onMetadataUpdate: PropTypes.func,
+  phyloTreeId: PropTypes.number
 };
 
 export default PhyloTreeVis;

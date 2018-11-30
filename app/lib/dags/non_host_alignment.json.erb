@@ -17,13 +17,13 @@
      <% end %>
     ],
     "gsnap_out": [
-      "gsnap.m8",
+      "<%= @attribute_dict[:gsnap_m8] %>",
       "gsnap.deduped.m8",
       "gsnap.hitsummary.tab",
       "gsnap_counts.json"
     ],
     "rapsearch2_out": [
-      "rapsearch2.m8",
+      "<%= @attribute_dict[:rapsearch_m8] %>",
       "rapsearch2.deduped.m8",
       "rapsearch2.hitsummary.tab",
       "rapsearch2_counts.json"
@@ -46,9 +46,9 @@
       },
       "additional_attributes": {
         "service": "gsnap",
-        "chunks_in_flight": 32,
-        "chunk_size": 15000,
-        "max_concurrent": 2,
+        "chunks_in_flight": <%= @attribute_dict[:chunks_in_flight] %>,
+        "chunk_size": <%= @attribute_dict[:gsnap_chunk_size] %>,
+        "max_concurrent": <%= @attribute_dict[:gsnap_max_concurrent] %>,
         "environment": "<%= Rails.env == 'prod' ? 'prod' : 'staging' %>",
         "max_interval_between_describe_instances": <%= @attribute_dict[:max_interval_between_describe_instances] %>,
         "job_tag_prefix": "<%= @attribute_dict[:job_tag_prefix] %>",
@@ -73,9 +73,9 @@
       },
       "additional_attributes": {
         "service": "rapsearch2",
-        "chunks_in_flight": 32,
-        "chunk_size": 10000,
-        "max_concurrent": 6,
+        "chunks_in_flight": <%= @attribute_dict[:chunks_in_flight] %>,
+        "chunk_size": <%= @attribute_dict[:rapsearch_chunk_size] %>,
+        "max_concurrent": <%= @attribute_dict[:rapsearch_max_concurrent] %>,
         "environment": "<%= Rails.env == 'prod' ? 'prod' : 'staging' %>",
         "max_interval_between_describe_instances": <%= @attribute_dict[:max_interval_between_describe_instances] %>,
         "job_tag_prefix": "<%= @attribute_dict[:job_tag_prefix] %>",

@@ -8,11 +8,11 @@ class CliUserInstructions extends React.Component {
   render() {
     const singleUploadCmd = `idseq -e='${this.props.email}' -t='${
       this.props.authToken
-    }' -p='Your Project Name' -s='Your Sample Name' --r1='your_sample_R1.fastq.gz' --r2='your_sample_R2.fastq.gz' --host-genome-name='Human'`;
+    }' -p='Your Project Name' -s='Your Sample Name' --r1=your_sample_R1.fastq.gz --r2=your_sample_R2.fastq.gz --host-genome-name='Human'`;
 
     const bulkUploadCmd = `idseq -e='${this.props.email}' -t='${
       this.props.authToken
-    }' -p='Your Project Name' --bulk='.' --host-genome-name='Human'`;
+    }' -p='Your Project Name' --bulk=. --host-genome-name='Human'`;
 
     const genomesList = `'${this.props.hostGenomes.join("', '")}'`;
 
@@ -82,11 +82,11 @@ class CliUserInstructions extends React.Component {
               Your Project Name
             </span>' -s='<span className={cs.codeToEdit}>Your Sample Name</span>'
             \
-            <br /> --r1='<span className={cs.codeToEdit}>
+            <br /> --r1=<span className={cs.codeToEdit}>
               your_sample_R1
-            </span>.fastq.gz' --r2='<span className={cs.codeToEdit}>
+            </span>.fastq.gz --r2=<span className={cs.codeToEdit}>
               your_sample_R2
-            </span>.fastq.gz' --host-genome-name='<span
+            </span>.fastq.gz --host-genome-name='<span
               className={cs.codeToEdit}
             >
               Human
@@ -158,11 +158,10 @@ class CliUserInstructions extends React.Component {
             </span>' -p='<span className={cs.codeToEdit}>
               Your Project Name
             </span>' \
-            <br /> --bulk='<span className={cs.codeToEdit}>
+            <br /> --bulk=<span className={cs.codeToEdit}>
               /path/to/your/folder
-            </span>' --host-genome-name='<span className={cs.codeToEdit}>
-              Human
-            </span>'
+            </span>{" "}
+            --host-genome-name='<span className={cs.codeToEdit}>Human</span>'
           </p>
         </div>
         <div className={cs.instructionMediumMarginTop}>
