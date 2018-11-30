@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_128_174_938) do
+ActiveRecord::Schema.define(version: 20_181_130_182_356) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -429,6 +429,9 @@ ActiveRecord::Schema.define(version: 20_181_128_174_938) do
     t.index ["taxid", "ended_at"], name: "index_taxon_lineages_on_taxid_and_end", unique: true
     t.index ["taxid", "started_at", "ended_at"], name: "index_taxon_lineages_on_taxid_and_started_at_and_ended_at"
     t.index ["taxid", "started_at"], name: "index_taxon_lineages_on_taxid_and_start", unique: true
+    t.index ["taxid", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_end"
+    t.index ["taxid", "version_start", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_start_and_version_end"
+    t.index ["taxid", "version_start"], name: "index_taxon_lineages_on_taxid_and_version_start"
   end
 
   create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
