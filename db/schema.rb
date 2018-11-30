@@ -429,9 +429,9 @@ ActiveRecord::Schema.define(version: 20_181_130_182_356) do
     t.index ["taxid", "ended_at"], name: "index_taxon_lineages_on_taxid_and_end", unique: true
     t.index ["taxid", "started_at", "ended_at"], name: "index_taxon_lineages_on_taxid_and_started_at_and_ended_at"
     t.index ["taxid", "started_at"], name: "index_taxon_lineages_on_taxid_and_start", unique: true
-    t.index ["taxid", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_end"
-    t.index ["taxid", "version_start", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_start_and_version_end"
-    t.index ["taxid", "version_start"], name: "index_taxon_lineages_on_taxid_and_version_start"
+    t.index ["taxid", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_end", unique: true
+    t.index ["taxid", "version_start", "version_end"], name: "index_taxon_lineages_on_taxid_and_version_start_and_version_end", unique: true
+    t.index ["taxid", "version_start"], name: "index_taxon_lineages_on_taxid_and_version_start", unique: true
   end
 
   create_table "taxon_scoring_models", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
