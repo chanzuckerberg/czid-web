@@ -83,6 +83,7 @@ class TaxonLineage < ApplicationRecord
   def self.taxon_search_list(tax_level_str = "genus")
     taxid_column = "#{tax_level_str}_taxid"
     name_column = "#{tax_level_str}_name"
+    # TODO: Change to use latest/current lineage_version (e.g. from Parameter Store)
     max_ended_at = TaxonLineage.column_defaults["ended_at"] # currently valid
     lineages = TaxonLineage.where("#{taxid_column} > 0").where.not("#{name_column} = ''").where("ended_at = ?", max_ended_at)
     lineages = lineages.select(taxid_column, name_column).distinct.order(name_column).index_by { |record| record[name_column] } # index_by makes sure it's unique on name by itself
@@ -104,19 +105,12 @@ class TaxonLineage < ApplicationRecord
     tax_ids = tax_map.map { |x| x['tax_id'] }
     tax_ids |= tax_map.map { |x| x['family_taxid'] }
 
-    # Get created_at date for our TaxonCount entries. Same for all TaxonCounts
-    # in a PipelineRun.
-    # TODO: Move the lineage selection mechanism into alignment_config.
-    valid_date = PipelineRun.find(pipeline_run_id).created_at
-
-    # TODO: Should definitely be simplified with taxonomy/lineage refactoring.
+    # Find the right lineage entry to use based on the version. Lineage version_end
+    # is incremented when the index is updated and the record is still valid, so
+    # lineage_version should be between the inclusive range.
+    lineage_version = PipelineRun.find(pipeline_run_id).alignment_config.lineage_version
     lineage_by_taxid = {}
-
-    # Since there may be multiple TaxonLineage entries with the same taxid
-    # now, we only select the valid entry based on started_at and ended_at.
-    # The valid lineage entry has start and end dates that include the valid
-    # taxon count entry date.
-    TaxonLineage.where(taxid: tax_ids).where("started_at < ? AND ended_at > ?", valid_date, valid_date).each do |x|
+    TaxonLineage.where(taxid: tax_ids).where("#{lineage_version} BETWEEN version_start AND version_end").each do |x|
       lineage_by_taxid[x.taxid] = x.as_json
     end
 
