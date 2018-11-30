@@ -24,6 +24,7 @@ services:
       - db
       - redis
     environment:
+      - ALIGNMENT_CONFIG_DEFAULT_NAME=2018-04-01
       - SAMPLES_BUCKET_NAME=idseq-samples-development
       - AIRBRAKE_PROJECT_ID
       - AIRBRAKE_PROJECT_KEY
@@ -75,9 +76,10 @@ services:
       - redis
     environment:
       # Chamber is not used in development, but in staging/prod Chamber will
-      # override the provided values.
+      # override the values here.
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
+      - ALIGNMENT_CONFIG_DEFAULT_NAME=2018-04-01
       - SAMPLES_BUCKET_NAME=idseq-samples-development
       - AIRBRAKE_PROJECT_ID
       - AIRBRAKE_PROJECT_KEY
@@ -113,7 +115,6 @@ services:
       - TRAVIS_SECURE_ENV_VARS
       - TRAVIS_TAG
       - TRAVIS
-      - ALIGNMENT_CONFIG_DEFAULT_NAME
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"
   resque:
     image: chanzuckerberg/idseq-web:compose
@@ -128,6 +129,7 @@ services:
     environment:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
+      - ALIGNMENT_CONFIG_DEFAULT_NAME=2018-04-01
       - SAMPLES_BUCKET_NAME=idseq-samples-development
       - CI
       - CONTINUOUS_INTEGRATION
@@ -171,6 +173,7 @@ services:
     environment:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
+      - ALIGNMENT_CONFIG_DEFAULT_NAME=2018-04-01
       - SAMPLES_BUCKET_NAME=idseq-samples-development
       - CI
       - CONTINUOUS_INTEGRATION
@@ -214,6 +217,7 @@ services:
     environment:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
+      - ALIGNMENT_CONFIG_DEFAULT_NAME=2018-04-01
       - SAMPLES_BUCKET_NAME=idseq-samples-development
       - CI
       - CONTINUOUS_INTEGRATION
