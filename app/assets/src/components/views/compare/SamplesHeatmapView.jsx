@@ -22,6 +22,7 @@ import Divider from "../../layout/Divider.jsx";
 import cs from "./samples_heatmap_view.scss";
 import DownloadButtonDropdown from "ui/controls/dropdowns/DownloadButtonDropdown.jsx";
 import { processMetadata } from "utils/metadata";
+import { get, getMetadataTypes } from "../../../api";
 
 class SamplesHeatmapView extends React.Component {
   constructor(props) {
@@ -181,6 +182,46 @@ class SamplesHeatmapView extends React.Component {
       .catch(thrown => {
         // TODO: process error if not cancelled request by client: if (!axios.isCancel(thrown) {
       });
+  }
+
+  fetchHeatmapData() {
+    if (this.lastRequestToken)
+      this.lastRequestToken.cancel("Parameters changed");
+    this.lastRequestToken = axios.CancelToken.source();
+
+    return get("/samples/samples_taxons.json", {
+      params: {
+        sampleIds: this.state.sampleIds,
+        removedTaxonIds: Array.from(this.removedTaxonIds),
+        species: this.state.selectedOptions.species,
+        categories: this.state.selectedOptions.categories,
+        subcategories: this.state.selectedOptions.subcategories,
+        sortBy: this.metricToSortField(this.state.selectedOptions.metric),
+        thresholdFilters: this.state.selectedOptions.thresholdFilters,
+        taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
+        readSpecificity: this.state.selectedOptions.readSpecificity
+      },
+      cancelToken: this.lastRequestToken.token
+    });
+  }
+
+  fetchMetadata() {
+    return this.state.metadataTypes || getMetadataTypes();
+  }
+
+  async featchViewData() {
+    this.setState({ loading: true });
+
+    let [heatmapData, metadataTypes] = await Promise.all([
+      this.fetchHeatmapData(),
+      this.fetchMetadata()
+    ]);
+
+    let newState = this.extractData(heatmapData);
+    newState.metadataTypes = metadataTypes;
+    newState.loading = false;
+    window.history.replaceState("", "", this.getUrlForCurrentParams());
+    this.setState({ loading: false });
   }
 
   extractData(rawData) {

@@ -7,6 +7,7 @@ import cs from "./samples_heatmap_vis.scss";
 import cx from "classnames";
 import { Popup } from "semantic-ui-react";
 import SearchBoxList from "./SearchBoxList";
+import SearchBox from "../../ui/controls/SearchBox";
 
 class SamplesHeatmapVis extends React.Component {
   constructor(props) {
@@ -166,12 +167,21 @@ class SamplesHeatmapVis extends React.Component {
     );
   }
 
+  getAvailableMetadataOptions() {
+    return [];
+  }
+
   render() {
     return (
       <div className={cs.samplesHeatmapVis}>
         {/* <SearchBoxList 
           options={this.getMetadataOptions()}
         /> */}
+        <SearchBox
+          source={this.getAvailableMetadataOptions}
+          onResultSelect={this.handleSelectedMetadata}
+          placeholder="Search metadata field"
+        />
         <div
           className={cs.heatmapContainer}
           ref={container => {

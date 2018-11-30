@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Menu, Input } from "semantic-ui-react";
+import { Input } from "semantic-ui-react";
 
 class SearchBoxList extends React.Component {
   constructor(props) {
@@ -13,19 +13,21 @@ class SearchBoxList extends React.Component {
 
   render() {
     return (
-      <Menu vertical>
-        <Menu.Item>
-          <Input icon="search" placeholder="Search metadata" />
-        </Menu.Item>
-        {this.props.options.map(option => {
-          <Menu.Item
-            name={option.value}
-            active={option.value in this.state.selected}
-          >
-            {option.label}
-          </Menu.Item>;
-        })}
-      </Menu>
+      <div>
+        <div>
+          <Input placeholder="Search" onChange={this.handleFilterChange} />
+        </div>
+        <div>
+          {this.props.options.map(option => {
+            <div
+              active={option.value in this.state.selected}
+              onClick={() => this.handleSelectionOption(option.value)}
+            >
+              {option.label}
+            </div>;
+          })}
+        </div>
+      </div>
     );
   }
 }
