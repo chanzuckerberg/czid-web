@@ -160,9 +160,8 @@ class CliUserInstructions extends React.Component {
             </span>' \
             <br /> --bulk=<span className={cs.codeToEdit}>
               /path/to/your/folder
-            </span> --host-genome-name='<span className={cs.codeToEdit}>
-              Human
-            </span>'
+            </span>{" "}
+            --host-genome-name='<span className={cs.codeToEdit}>Human</span>'
           </p>
         </div>
         <div className={cs.instructionMediumMarginTop}>

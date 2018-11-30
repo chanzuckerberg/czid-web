@@ -6,20 +6,18 @@
   No samples yet.
 <% else %>
   <div class="sample-container">
-  <table>
+    <table> 
     <thead>
       <tr>
-        <th>Name</th>
+        <th width="10%">Name</th>
         <th>ID</th>
-        <th>Uploader</th>
+        <th width="5%">Uploader</th>
         <th>Project</th>
         <th>Sample Status</th>
-        <th>Pipeline Run status</th>
-        <th>Job Id </th>
-        <th>Job Submitted At</th>
-        <th> Job Queue </th>
-        <th> Memory Requirement </th>
+        <th>Run status</th>
         <th>&nbsp;</th>
+        <th width="25%">Job Ids </th>
+        <th>Submitted At</th>
       </tr>
     </thead>
 
@@ -38,10 +36,10 @@
           <td>
             <% pipeline_run = sample.pipeline_runs.first %>
             <% pipeline_run_submitted = 'N/A' %>
-            <% pipeline_job_id = 'N/A' %>
+            <% pipeline_job_ids = 'N/A' %>
             <% if pipeline_run %>
               <% pipeline_run_submitted = pipeline_run.created_at %>
-              <% pipeline_job_id = pipeline_run.job_id %>
+              <% pipeline_job_ids = pipeline_run.pipeline_run_stages.pluck(:job_id).compact.join("<br><br>") %>
               <%= pipeline_run.job_status %>
               &nbsp;
               <% if pipeline_run.completed? %>
@@ -50,12 +48,10 @@
               <% end %>
             <% end %>
           </td>
-          <td><%= pipeline_job_id %></td>
-          <td class="small"><%= pipeline_run_submitted %></td>
-          <td class=small><%= sample.job_queue %></td>
-          <td><%= sample.sample_memory %></td>
           <td><%= link_to 'Runs', pipeline_runs_sample_path(sample) %> &nbsp;
               <%= link_to 'Edit', edit_sample_path(sample) %></td>
+          <td><%= pipeline_job_ids.html_safe %></td>
+          <td class="small"><%= pipeline_run_submitted %></td>
         </tr>
       <% end %>
     </tbody>

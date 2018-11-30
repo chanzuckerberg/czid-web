@@ -962,6 +962,7 @@ class PipelineRun < ApplicationRecord
     # What is crucially important is the uncategorizable_id.
     uncategorizable_id = TaxonLineage::MISSING_LINEAGE_ID.fetch(tax_level_name.to_sym, -9999)
     uncategorizable_name = "Uncategorizable as a #{tax_level_name}"
+    lineage_version = alignment_config.lineage_version
     TaxonCount.connection.execute(
       "REPLACE INTO taxon_counts(pipeline_run_id, tax_id, name,
                                 tax_level, count_type, count,
@@ -997,7 +998,7 @@ class PipelineRun < ApplicationRecord
               '#{current_date}',
               '#{current_date}'
        FROM  taxon_lineages, taxon_counts
-       WHERE (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
+       WHERE (#{lineage_version} BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
              taxon_lineages.taxid = taxon_counts.tax_id AND
              taxon_counts.pipeline_run_id = #{id} AND
              taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
@@ -1008,6 +1009,7 @@ class PipelineRun < ApplicationRecord
   def update_names
     # The names from the taxon_lineages table are preferred, but, not always
     # available;  this code merges them into taxon_counts.name.
+    lineage_version = alignment_config.lineage_version
     %w[species genus family].each do |level|
       level_id = TaxonCount::NAME_2_LEVEL[level]
       TaxonCount.connection.execute("
@@ -1017,30 +1019,32 @@ class PipelineRun < ApplicationRecord
         WHERE taxon_counts.pipeline_run_id=#{id} AND
               taxon_counts.tax_level=#{level_id} AND
               taxon_counts.tax_id = taxon_lineages.taxid AND
-              (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
+              (#{lineage_version} BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
               taxon_lineages.#{level}_name IS NOT NULL
       ")
     end
   end
 
   def update_genera
+    lineage_version = alignment_config.lineage_version
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
           taxon_counts.family_taxid = taxon_lineages.family_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id} AND
-            (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
+            (#{lineage_version} BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
             taxon_lineages.taxid = taxon_counts.tax_id
     ")
   end
 
   def update_superkingdoms
+    lineage_version = alignment_config.lineage_version
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id}
-            AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
+            AND (#{lineage_version} BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end)
             AND taxon_counts.tax_id > #{TaxonLineage::INVALID_CALL_BASE_ID}
             AND taxon_lineages.taxid = taxon_counts.tax_id
     ")
@@ -1048,7 +1052,7 @@ class PipelineRun < ApplicationRecord
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id}
-            AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
+            AND (#{lineage_version} BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end)
             AND taxon_counts.tax_id < #{TaxonLineage::INVALID_CALL_BASE_ID}
             AND taxon_lineages.taxid = MOD(ABS(taxon_counts.tax_id), ABS(#{TaxonLineage::INVALID_CALL_BASE_ID}))
     ")
