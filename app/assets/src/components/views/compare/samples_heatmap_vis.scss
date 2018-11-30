@@ -1,4 +1,12 @@
 .samplesHeatmapVis {
+  .heatmapContainer {
+    overflow-x: auto;
+    svg {
+      display: block;
+      margin: 0 auto;
+    }
+  }
+
   .tooltip {
     position: absolute;
     display: none;

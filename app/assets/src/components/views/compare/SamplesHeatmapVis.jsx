@@ -131,6 +131,7 @@ class SamplesHeatmapVis extends React.Component {
     return (
       <div className={cs.samplesHeatmapVis}>
         <div
+          className={cs.heatmapContainer}
           ref={container => {
             this.heatmapContainer = container;
           }}
