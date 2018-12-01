@@ -1,3 +1,5 @@
+// Displays the top header for the sample report page.
+// Also handles the sidebar and tabs logic.
 import React from "react";
 import cx from "classnames";
 import { get } from "lodash/fp";
@@ -11,7 +13,7 @@ import ViewHeader from "~/components/layout/ViewHeader";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
 import SampleDetailsSidebar from "~/components/views/report/SampleDetailsSidebar";
-import SampleControls from "./SampleControls";
+import Controls from "./Controls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
 
 import cs from "./sample_view.scss";
@@ -57,8 +59,12 @@ class SampleView extends React.Component {
     return "gsnap filter on human/chimp genome was not run.";
   };
 
-  refreshPage = overrides => {
-    const newParams = Object.assign({}, this.props.reportPageParams, overrides);
+  refreshPage = overrideUrlParams => {
+    const newParams = Object.assign(
+      {},
+      this.props.reportPageParams,
+      overrideUrlParams
+    );
     window.location =
       location.protocol +
       "//" +
@@ -142,9 +148,9 @@ class SampleView extends React.Component {
           horizontalOffset={15}
         />
       );
-    } else {
-      return null;
     }
+
+    return null;
   };
 
   renderTab = () => {
@@ -211,7 +217,7 @@ class SampleView extends React.Component {
       reportPageParams
     } = this.props;
 
-    const showAMR = amr !== null;
+    const showAMR = amr;
 
     return (
       <div>
@@ -251,7 +257,7 @@ class SampleView extends React.Component {
             </div>
           </ViewHeader.Content>
           <ViewHeader.Controls>
-            <SampleControls
+            <Controls
               reportPresent={reportPresent}
               sample={sample}
               project={project}
@@ -262,13 +268,17 @@ class SampleView extends React.Component {
           </ViewHeader.Controls>
         </ViewHeader>
         <NarrowContainer>
-          {showAMR && (
+          {showAMR ? (
             <Tabs
               className={cs.tabs}
               tabs={["Report", "Antimicrobial Resistance"]}
               value={this.state.currentTab}
               onChange={this.handleTabChange}
             />
+          ) : (
+            <div className={cs.dividerContainer}>
+              <div className={cs.divider} />
+            </div>
           )}
           {this.renderTab()}
         </NarrowContainer>

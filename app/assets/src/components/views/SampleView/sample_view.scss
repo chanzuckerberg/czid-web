@@ -48,8 +48,21 @@
   border-top: 1px solid $white !important;
 }
 
+.dividerContainer {
+  height: 2px;
+  padding: 30px 0;
+}
+
 .tabs {
   margin: 25px 0;
+}
+
+.divider {
+  height: 2px;
+  background-color: $off-white;
+  position: absolute;
+  left: 0;
+  right: 0;
 }
 
 .pipelineVersionSelectContainer {

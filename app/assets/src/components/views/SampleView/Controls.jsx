@@ -9,7 +9,7 @@ import {
   getLinkInfoForDownloadOption
 } from "~/components/views/report/utils/download";
 
-class SampleControls extends React.Component {
+class Controls extends React.Component {
   downloadCSV = () => {
     const { reportPageParams, pipelineRun, sample } = this.props;
 
@@ -75,7 +75,7 @@ class SampleControls extends React.Component {
   }
 }
 
-SampleControls.propTypes = {
+Controls.propTypes = {
   reportPresent: PropTypes.bool,
   sample: PropTypes.Sample,
   project: PropTypes.Project,
@@ -87,4 +87,4 @@ SampleControls.propTypes = {
   })
 };
 
-export default SampleControls;
+export default Controls;
