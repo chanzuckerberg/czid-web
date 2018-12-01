@@ -10,26 +10,12 @@ class Sample < ApplicationRecord
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
-  MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
-  HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
-  UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
-
-  DAG_ANNOTATED_FASTA_BASENAME = 'taxid_annot.fasta'.freeze
-  DAG_UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fa'.freeze
-
-  SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
-  SORTED_TAXID_ANNOTATED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'.freeze
-  SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT = 'taxid_annot_sorted_genus_nt.fasta'.freeze
-  SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR = 'taxid_annot_sorted_genus_nr.fasta'.freeze
-  SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT = 'taxid_annot_sorted_family_nt.fasta'.freeze
-  SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
 
   TOTAL_READS_JSON = "total_reads.json".freeze
   LOG_BASENAME = 'log.txt'.freeze
 
   LOCAL_INPUT_PART_PATH = '/app/tmp/input_parts'.freeze
   ASSEMBLY_DIR = 'assembly'.freeze
-  ASSEMBLY_PREFIX = 'assembly/refined_'.freeze
 
   # TODO: Make all these params configurable without code change
   DEFAULT_STORAGE_IN_GB = 500

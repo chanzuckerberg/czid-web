@@ -39,6 +39,19 @@ class PipelineRun < ApplicationRecord
   RAPSEARCH_MAX_CONCURRENT = 6
   MAX_CHUNKS_IN_FLIGHT = 32
 
+  SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
+  SORTED_TAXID_ANNOTATED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'.freeze
+  SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT = 'taxid_annot_sorted_genus_nt.fasta'.freeze
+  SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR = 'taxid_annot_sorted_genus_nr.fasta'.freeze
+  SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT = 'taxid_annot_sorted_family_nt.fasta'.freeze
+  SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
+
+  DAG_ANNOTATED_FASTA_BASENAME = 'taxid_annot.fasta'.freeze
+  DAG_UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fa'.freeze
+  UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
+  MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
+  HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
+
   GSNAP_M8 = "gsnap.m8".freeze
   RAPSEARCH_M8 = "rapsearch2.m8".freeze
   OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
@@ -50,15 +63,18 @@ class PipelineRun < ApplicationRecord
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   REFINED_TAXON_COUNTS_JSON_NAME = 'assembly/refined_taxon_counts.json'.freeze
   REFINED_TAXID_BYTERANGE_JSON_NAME = 'assembly/refined_taxid_locations_combined.json'.freeze
+
+  ASSEMBLY_PREFIX = 'assembly/refined_'.freeze
   ASSEMBLED_CONTIGS_NAME = 'assembly/contigs.fasta'.freeze
   ASSEMBLED_STATS_NAME = 'assembly/contig_stats.json'.freeze
   CONTIG_SUMMARY_JSON_NAME = 'assembly/combined_contig_summary.json'.freeze
   CONTIG_NT_TOP_M8 = 'assembly/gsnap.blast.top.m8'.freeze
   CONTIG_NR_TOP_M8 = 'assembly/rapsearch2.blast.top.m8'.freeze
   CONTIG_MAPPING_NAME = 'assembly/contig2taxon_lineage.csv'.freeze
-  ASSEMBLY_STATUSFILE = 'job-complete'.freeze
+
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
+
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
   ASSEMBLY_PIPELINE_VERSION = 3.1
   MIN_CONTIG_SIZE = 4
@@ -446,10 +462,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def annotated_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{Sample::ASSEMBLY_PREFIX}#{Sample::DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 3.1
-    return "#{postprocess_output_s3_path}/#{Sample::DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 2.0
+    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 3.1
+    return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 2.0
 
-    multihit? ? "#{alignment_output_s3_path}/#{Sample::MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{Sample::HIT_FASTA_BASENAME}"
+    multihit? ? "#{alignment_output_s3_path}/#{ple::MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
 
   def unidentified_fasta_s3_path
@@ -1169,19 +1185,19 @@ class PipelineRun < ApplicationRecord
 
   def s3_paths_for_taxon_byteranges
     file_prefix = ''
-    file_prefix = Sample::ASSEMBLY_PREFIX if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
+    file_prefix = ASSEMBLY_PREFIX if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
     # by tax_level and hit_type
     { TaxonCount::TAX_LEVEL_SPECIES => {
-      'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA}",
-      'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_NR}"
+      'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",
+      'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_NR}"
     },
       TaxonCount::TAX_LEVEL_GENUS => {
-        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
-        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}"
+        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
+        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}"
       },
       TaxonCount::TAX_LEVEL_FAMILY => {
-        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
-        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}"
+        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
+        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}"
       } }
   end
 
