@@ -529,12 +529,14 @@ class SamplesController < ApplicationController
   end
 
   def nonhost_fasta
-    @nonhost_fasta = get_s3_file(@sample.annotated_fasta_s3_path)
+    pr = select_pipeline_run(@sample, params)
+    @nonhost_fasta = get_s3_file(pr.annotated_fasta_s3_path)
     send_data @nonhost_fasta, filename: @sample.name + '_nonhost.fasta'
   end
 
   def unidentified_fasta
-    @unidentified_fasta = get_s3_file(@sample.unidentified_fasta_s3_path)
+    pr = select_pipeline_run(@sample, params)
+    @unidentified_fasta = get_s3_file(pr.unidentified_fasta_s3_path)
     send_data @unidentified_fasta, filename: @sample.name + '_unidentified.fasta'
   end
 
