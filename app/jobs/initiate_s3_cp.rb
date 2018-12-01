@@ -1,4 +1,4 @@
-# Jos to initiate s3 copy
+# Job to initiate s3 copy
 class InitiateS3Cp
   @queue = :q03_pipeline_run
   def self.perform(sample_id)
