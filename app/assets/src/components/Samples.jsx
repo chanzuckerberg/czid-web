@@ -22,6 +22,7 @@ import SecondaryButton from "./ui/controls/buttons/SecondaryButton";
 import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import TableColumnHeader from "./views/samples/TableColumnHeader";
+import PipelineStatusFilter from "./views/samples/PipelineStatusFilter";
 import {
   SAMPLE_TABLE_COLUMNS,
   INITIAL_COLUMNS,
@@ -52,7 +53,6 @@ class Samples extends React.Component {
     this.handleSearchChange = this.handleSearchChange.bind(this);
     this.loadMore = this.loadMore.bind(this);
     this.scrollDown = this.scrollDown.bind(this);
-    this.handleStatusFilterSelect = this.handleStatusFilterSelect.bind(this);
     this.setUrlLocation = this.setUrlLocation.bind(this);
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
@@ -978,22 +978,14 @@ class Samples extends React.Component {
       />
     );
 
-    let filterSelect = this.handleStatusFilterSelect;
-    let status_filter_options = ["In Progress", "Complete", "Failed", "All"];
-    let status_filter_css_classes = ["uploading", "complete", "failed", "all"];
-
-    const filterStatus = (
-      <JobStatusFilters
-        status_filter_options={status_filter_options}
-        filterSelect={filterSelect}
-        status_filter_css_classes={status_filter_css_classes}
-      />
-    );
-
     const tableHead = (
       <TableColumnHeaders
         sort={this.state.sort_by}
-        filterStatus={filterStatus}
+        onStatusFilterSelect={this.handleStatusFilterSelect}
+        hasStatusFilter={
+          this.state.filterParams.length > 0 &&
+          this.state.filterParams !== "All"
+        }
         state={this.state}
         parent={this}
       />
@@ -1114,8 +1106,7 @@ class Samples extends React.Component {
   }
 
   //handle filtering when a filter is selected from list
-  handleStatusFilterSelect(e) {
-    let status = e.target.getAttribute("data-status");
+  handleStatusFilterSelect = status => {
     this.setState(
       {
         filterParams: status
@@ -1125,7 +1116,7 @@ class Samples extends React.Component {
         this.fetchResults();
       }
     );
-  }
+  };
 
   selectionToParamsOrNone(selected_options, value_when_empty = "") {
     return selected_options.length == 0
@@ -1253,34 +1244,11 @@ function LabelTagMarkup({
   );
 }
 
-function FilterItemMarkup({
-  status,
-  filterSelect,
-  status_filter_css_classes,
-  pos
-}) {
-  return (
-    <li
-      className="filter-item"
-      key={pos}
-      data-status={status}
-      onClick={filterSelect}
-    >
-      <a
-        data-status={status}
-        className={"filter-item " + status_filter_css_classes[pos]}
-      >
-        {status}
-      </a>
-      <i data-status={status} className="filter fa fa-check hidden" />
-    </li>
-  );
-}
-
 function ColumnDropdownHeader({
   pos,
   column_name,
-  filterStatus,
+  onStatusFilterSelect,
+  hasStatusFilter,
   columnsShown,
   parent
 }) {
@@ -1299,6 +1267,12 @@ function ColumnDropdownHeader({
         columnOptions={columnOptions}
         onColumnOptionSelect={newColumn => parent.switchColumn(newColumn, pos)}
       />
+      {column_name === "pipeline_status" && (
+        <PipelineStatusFilter
+          onStatusFilterSelect={onStatusFilterSelect}
+          className={cx("pipeline-status-filter", hasStatusFilter && "active")}
+        />
+      )}
     </li>
   );
 }
@@ -1811,7 +1785,13 @@ function ProjectInfoHeading({
   );
 }
 
-function TableColumnHeaders({ sort, filterStatus, state, parent }) {
+function TableColumnHeaders({
+  sort,
+  onStatusFilterSelect,
+  hasStatusFilter,
+  state,
+  parent
+}) {
   return (
     <div className="col s12 sample-feed-head no-padding samples-table-head">
       <div className="samples-card white">
@@ -1856,7 +1836,8 @@ function TableColumnHeaders({ sort, filterStatus, state, parent }) {
                   pos={pos}
                   key={pos}
                   column_name={columnName}
-                  filterStatus={filterStatus}
+                  onStatusFilterSelect={onStatusFilterSelect}
+                  hasStatusFilter={hasStatusFilter}
                   columnsShown={state.columnsShown}
                   parent={parent}
                 />
@@ -1865,32 +1846,6 @@ function TableColumnHeaders({ sort, filterStatus, state, parent }) {
           </ul>
         </div>
       </div>
-    </div>
-  );
-}
-
-function JobStatusFilters({
-  status_filter_options,
-  filterSelect,
-  status_filter_css_classes
-}) {
-  return (
-    <div className="dropdown-status-filtering">
-      <li>
-        <a className="title">
-          <b>Filter status</b>
-        </a>
-      </li>
-
-      {status_filter_options.map((status, pos) => {
-        return FilterItemMarkup({
-          status,
-          filterSelect,
-          status_filter_css_classes,
-          pos
-        });
-      })}
-      <li className="divider" />
     </div>
   );
 }

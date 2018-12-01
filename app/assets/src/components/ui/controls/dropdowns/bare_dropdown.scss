@@ -10,4 +10,10 @@
       content: "\f107";
     }
   }
+
+  &.hideArrow {
+    i:global(.dropdown) {
+      display: none;
+    }
+  }
 }
