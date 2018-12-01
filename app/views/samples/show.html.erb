@@ -1,30 +1,28 @@
-<div id="PipelineSampleReads_page">
+<div id="sample_view">
   <%= javascript_tag do %>
-    react_component('PipelineSampleReads', {
+    react_component('SampleView', {
       admin: <%= current_user.admin %>,
       allowedFeatures: JSON.parse('<%= raw escape_json(current_user.allowed_feature_list) %>'),
       csrf: '<%=form_authenticity_token %>',
       gitVersion: '<%=@git_version %>',
-      sampleInfo: JSON.parse('<%= raw escape_json(@sample) %>'),
-      projectInfo: JSON.parse('<%= raw escape_json(@project_info) %>'),
+      sample: JSON.parse('<%= raw escape_json(@sample) %>'),
+      project: JSON.parse('<%= raw escape_json(@project_info) %>'),
       pipelineRun: JSON.parse('<%= raw escape_json(@pipeline_run_display) %>'),
       jobStatistics: JSON.parse('<%= raw escape_json(@job_stats) %>'),
-      project_sample_ids_names: JSON.parse('<%= raw escape_json(@project_sample_ids_names) %>'),
-      host_genome: JSON.parse('<%= raw escape_json(@host_genome) %>'),
-      summary_stats: JSON.parse('<%= raw escape_json(@summary_stats) %>'),
-      reportPresent: '<%=@report_present %>',
+      sampleIdToNameMap: JSON.parse('<%= raw escape_json(@project_sample_ids_names) %>'),
+      hostGenome: JSON.parse('<%= raw escape_json(@host_genome) %>'),
+      summaryStats: JSON.parse('<%= raw escape_json(@summary_stats) %>'),
+      reportPresent: <%= !!@report_present %>,
       reportTime: '<%=@report_ts%>',
       allCategories: JSON.parse('<%= raw escape_json(@all_categories)%>'),
       reportDetails: JSON.parse('<%= raw escape_json(@report_details)%>'),
       reportPageParams: JSON.parse('<%= raw escape_json(@report_page_params) %>'),
-      sample_status: '<%= @sample_status %>',
-      rerun_path: '<%= retry_pipeline_sample_path %>',
-      can_edit: <%= @can_edit %>,
-      can_see_align_viz: <%= !!@align_viz %>,
-      pipeline_versions: <%= raw escape_json(@pipeline_versions) %>,
-      ercc_comparison: JSON.parse('<%= raw escape_json(@ercc_comparison) %>'),
+      sampleStatus: '<%= @sample_status %>',
+      canEdit: <%= @can_edit %>,
+      canSeeAlignViz: <%= !!@align_viz %>,
+      pipelineVersions: <%= raw escape_json(@pipeline_versions) %>,
       amr: JSON.parse('<%= raw escape_json(@amr_counts) %>'),
-      all_backgrounds: JSON.parse('<%= raw escape_json(@background_models) %>')
-    }, 'PipelineSampleReads_page');
+      allBackgrounds: JSON.parse('<%= raw escape_json(@background_models) %>')
+    }, 'sample_view');
   <% end %>
 </div>

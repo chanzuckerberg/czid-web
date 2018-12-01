@@ -1209,7 +1209,7 @@ class RenderMarkup extends React.Component {
 
   renderMenu() {
     return (
-      <Menu icon floated="right">
+      <Menu icon floated="right" className="report-top-menu">
         <Popup
           trigger={
             <Menu.Item

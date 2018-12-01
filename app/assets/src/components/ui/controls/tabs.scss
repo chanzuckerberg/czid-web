@@ -2,7 +2,6 @@
 @import "~styles/typography";
 
 .tabs {
-  display: flex;
   height: 30px;
   padding-bottom: 10px;
 
@@ -19,20 +18,27 @@
     }
   }
 
+  .tabWrapper {
+    display: flex;
+    position: relative;
+  }
+
+  .indicator {
+    position: absolute;
+    height: 4px;
+    background-color: $primary-light;
+    transition: all 0.2s;
+    transform: translateY(25px);
+    z-index: 1;
+  }
+
   /* The tab border extends OUTSIDE of the tab container */
   .tabBorder {
     height: 4px;
     position: absolute;
     left: 0;
     right: 0;
-    transform: translateY(26px);
+    margin-top: 6px;
     background-color: $lightest-grey;
-  }
-
-  .indicator {
-    position: absolute;
-    height: 100%;
-    background-color: $primary-light;
-    transition: all 0.2s;
   }
 }
