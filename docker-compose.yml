@@ -75,8 +75,6 @@ services:
       - db
       - redis
     environment:
-      # Chamber is not used in development, but in staging/prod Chamber will
-      # override the values here.
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - ALIGNMENT_CONFIG_DEFAULT_NAME
@@ -129,7 +127,7 @@ services:
     environment:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
-      - ALIGNMENT_CONFIG_DEFAULT_NAME=2018-04-01
+      - ALIGNMENT_CONFIG_DEFAULT_NAME
       - SAMPLES_BUCKET_NAME=idseq-samples-development
       - CI
       - CONTINUOUS_INTEGRATION
