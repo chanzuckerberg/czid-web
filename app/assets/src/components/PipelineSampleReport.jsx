@@ -677,27 +677,31 @@ class PipelineSampleReport extends React.Component {
 
   // download Fasta
   downloadFastaUrl = e => {
+    const pipelineVersion = this.props.reportPageParams.pipeline_version;
     const taxLevel = e.target.getAttribute("data-tax-level");
     const taxId = e.target.getAttribute("data-tax-id");
     location.href = `/samples/${
       this.sample_id
-    }/fasta/${taxLevel}/${taxId}/NT_or_NR`;
+    }/fasta/${taxLevel}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
   };
 
   // download Contig
   downloadContigUrl = e => {
+    const pipelineVersion = this.props.reportPageParams.pipeline_version;
     const taxId = e.target.getAttribute("data-tax-id");
-    location.href = `/samples/${this.sample_id}/taxid_contigs?taxid=${taxId}`;
+    location.href = `/samples/${
+      this.sample_id
+    }/taxid_contigs?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
   };
 
   gotoAlignmentVizLink = e => {
     const taxId = e.target.getAttribute("data-tax-id");
     const taxLevel = e.target.getAttribute("data-tax-level");
-    const pipeline_version = this.props.reportPageParams.pipeline_version;
+    const pipelineVersion = this.props.reportPageParams.pipeline_version;
     window.open(
       `/samples/${
         this.sample_id
-      }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipeline_version}`
+      }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`
     );
   };
 
