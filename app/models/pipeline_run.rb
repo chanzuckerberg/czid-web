@@ -1167,10 +1167,6 @@ class PipelineRun < ApplicationRecord
     "#{postprocess_output_s3_path}/align_viz"
   end
 
-  def assembly_output_s3_path(taxid = nil)
-    "#{postprocess_output_s3_path}/assembly/#{taxid}".chomp("/")
-  end
-
   def host_filter_output_s3_path
     output_s3_path_with_version
   end

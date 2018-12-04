@@ -59,7 +59,7 @@ class PipelineTab extends React.Component {
   };
 
   render() {
-    const { pipelineRun, assembledTaxIds, sampleId } = this.props;
+    const { pipelineRun, sampleId } = this.props;
     return (
       <div>
         <MetadataSection
@@ -95,18 +95,16 @@ class PipelineTab extends React.Component {
           title="Downloads"
         >
           <div className={cs.downloadSectionContent}>
-            {getDownloadLinks(sampleId, pipelineRun, assembledTaxIds).map(
-              option => (
-                <a
-                  key={option.label}
-                  className={cs.downloadLink}
-                  href={option.path}
-                  target={option.newPage ? "_blank" : "_self"}
-                >
-                  {option.label}
-                </a>
-              )
-            )}
+            {getDownloadLinks(sampleId, pipelineRun).map(option => (
+              <a
+                key={option.label}
+                className={cs.downloadLink}
+                href={option.path}
+                target={option.newPage ? "_blank" : "_self"}
+              >
+                {option.label}
+              </a>
+            ))}
           </div>
         </MetadataSection>
       </div>
@@ -118,8 +116,7 @@ PipelineTab.propTypes = {
   pipelineInfo: PropTypes.objectOf(PropTypes.string).isRequired,
   sampleId: PropTypes.number.isRequired,
   erccComparison: PropTypes.ERCCComparison,
-  pipelineRun: PropTypes.PipelineRun,
-  assembledTaxIds: PropTypes.arrayOf(PropTypes.string)
+  pipelineRun: PropTypes.PipelineRun
 };
 
 export default PipelineTab;
