@@ -113,12 +113,13 @@ def autoscaling_update(config):
         else:
             print "Applying DesiredCapacity {new_num_desired}.".format(new_num_desired=new_num_desired)
             service_ASG.set_desired_capacity(new_num_desired)
-            if service_ASG.num_chunks == 0 and new_num_desired == 0:
+            if service_ASG.num_chunks == 0 and new_num_desired == 0 and num_available + num_draining > 0:
+                print "Discarding all {instance_name} instances immediately without draining.".format(instance_name=service_ASG.instance_name)
                 # Note: safety here relies on the fact that the pipeline monitor is single-threaded, so no new stages can be dispatched
                 # between the 'num_chunks == 0' measurement and the discardment of the instances. The web app is also unable to dispatch any
                 # stage 2 jobs by itself -- it can only dispatch stage 1 jobs (new sample uploads), which do not call gsnap/rapsearch ASGs until
                 # the pipeline_monitor moves them along to stage 2.
-                service_ASG.all_instances_remove_protection()
+                service_ASG.remove_scalein_protection(available_instances + draining_instances)
                 continue
 
         print "AVAILABLE <--> DRAINING transitions:"
@@ -212,7 +213,7 @@ class ASG(object):
         self.instance_name = self.service + "-asg-" + self.environment
 
         # Machine initialization takes time: it's fine if some number of chunks have to run sequentially rather than in parallel
-        self.desired_queue_depth = 3 if self.service == "rapsearch2" else 5
+        self.desired_queue_depth = 2 if self.service == "rapsearch2" else 6
 
         self.asg, self.instance_ids, self.tags = self.find_attributes(asg_list, tag_list, self.instance_name)
         self.can_scale = self.permission_to_scale(self.asg)
@@ -402,13 +403,6 @@ class ASG(object):
         if instance_ids:
             self.remove_scalein_protection(instance_ids)
         return instance_ids
-
-    def all_instances_remove_protection(self):
-        all_instance_ids = [inst["InstanceId"] for inst in self.asg["Instances"]]
-        if all_instance_ids:
-            print "Discarding all {instance_name} instances immediately without draining.".format(instance_name=self.instance_name)
-            self.remove_scalein_protection(all_instance_ids)
-            print "Discarded {num_all} instances: {all_instance_ids}".format(num_all=len(all_instance_ids), all_instance_ids=all_instance_ids)
 
 
 if __name__ == "__main__":
