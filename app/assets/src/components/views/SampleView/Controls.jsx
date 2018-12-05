@@ -41,7 +41,11 @@ class Controls extends React.Component {
       this.downloadCSV();
       return;
     }
-    const linkInfo = getLinkInfoForDownloadOption(option, this.props.sample.id);
+    const linkInfo = getLinkInfoForDownloadOption(
+      option,
+      this.props.sample.id,
+      this.props.pipelineRun
+    );
     if (linkInfo) {
       window.open(linkInfo.path, linkInfo.newPage ? "_blank" : "_self");
     }

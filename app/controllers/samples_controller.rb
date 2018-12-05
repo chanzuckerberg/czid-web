@@ -421,9 +421,9 @@ class SamplesController < ApplicationController
   end
 
   def assembly
-    pipeline_run = @sample.pipeline_runs.first
-    assembly_fasta = pipeline_run.assembly_output_s3_path(params[:taxid])
-    send_data get_s3_file(assembly_fasta), filename: @sample.name + '_' + clean_taxid_name(pipeline_run, params[:taxid]) + '-assembled-scaffolds.fasta'
+    pr = select_pipeline_run(@sample, params)
+    assembly_fasta = pr.assembly_output_s3_path(params[:taxid])
+    send_data get_s3_file(assembly_fasta), filename: @sample.name + '_' + clean_taxid_name(pr, params[:taxid]) + '-assembled-scaffolds.fasta'
   end
 
   def contig_taxid_list
@@ -448,16 +448,16 @@ class SamplesController < ApplicationController
   end
 
   def show_taxid_fasta
+    pr = select_pipeline_run(@sample, params)
     if params[:hit_type] == "NT_or_NR"
-      nt_array = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
-      nr_array = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
+      nt_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
+      nr_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
       @taxid_fasta = ">" + ((nt_array | nr_array) - ['']).join(">")
       @taxid_fasta = "Coming soon" if @taxid_fasta == ">" # Temporary fix
     else
-      @taxid_fasta = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, params[:hit_type])
+      @taxid_fasta = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, params[:hit_type])
     end
-    pipeline_run = @sample.pipeline_runs.first
-    send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pipeline_run, params[:taxid]) + '-hits.fasta'
+    send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pr, params[:taxid]) + '-hits.fasta'
   end
 
   def show_taxid_alignment

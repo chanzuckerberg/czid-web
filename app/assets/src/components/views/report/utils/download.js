@@ -37,25 +37,35 @@ export const getDownloadDropdownOptions = (pipelineRun, assembledTaxids) => {
 
 // Get a map of download option to download path and
 // whether to open link in new page.
-const getDownloadLinkInfoMap = sampleId => ({
+const getDownloadLinkInfoMap = (sampleId, pipelineRun) => ({
   [NON_HOST_READS_LABEL]: {
-    path: `/samples/${sampleId}/nonhost_fasta`,
+    path: `/samples/${sampleId}/nonhost_fasta?pipeline_version=${
+      pipelineRun.pipeline_version
+    }`,
     newPage: false
   },
   [NON_HOST_CONTIGS_LABEL]: {
-    path: `/samples/${sampleId}/contigs_fasta`,
+    path: `/samples/${sampleId}/contigs_fasta?pipeline_version=${
+      pipelineRun.pipeline_version
+    }`,
     newPage: false
   },
   [NON_HOST_CONTIGS_MAPPING_LABEL]: {
-    path: `/samples/${sampleId}/contigs_summary`,
+    path: `/samples/${sampleId}/contigs_summary?pipeline_version=${
+      pipelineRun.pipeline_version
+    }`,
     newPage: false
   },
   [NON_HOST_ASSEMBLIES_LABEL]: {
-    path: `/samples/${sampleId}/assembly/all`,
+    path: `/samples/${sampleId}/assembly/all?pipeline_version=${
+      pipelineRun.pipeline_version
+    }`,
     newPage: false
   },
   [UNMAPPED_READS_LABEL]: {
-    path: `/samples/${sampleId}/unidentified_fasta`,
+    path: `/samples/${sampleId}/unidentified_fasta?pipeline_version=${
+      pipelineRun.pipeline_version
+    }`,
     newPage: false
   },
   [RESULTS_FOLDER_LABEL]: {
@@ -64,13 +74,13 @@ const getDownloadLinkInfoMap = sampleId => ({
   }
 });
 
-export const getLinkInfoForDownloadOption = (option, sampleId) =>
-  getDownloadLinkInfoMap(sampleId)[option];
+export const getLinkInfoForDownloadOption = (option, sampleId, pipelineRun) =>
+  getDownloadLinkInfoMap(sampleId, pipelineRun)[option];
 
 export const getDownloadLinks = (sampleId, pipelineRun, assembledTaxids) => {
   const downloadOptions = getDownloadOptions(pipelineRun, assembledTaxids);
 
-  const downloadLinkInfoMap = getDownloadLinkInfoMap(sampleId);
+  const downloadLinkInfoMap = getDownloadLinkInfoMap(sampleId, pipelineRun);
 
   return downloadOptions.map(option => ({
     label: option,
