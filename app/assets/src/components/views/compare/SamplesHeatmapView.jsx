@@ -151,39 +151,6 @@ class SamplesHeatmapView extends React.Component {
     return "highest_" + countType + "_" + metricName;
   }
 
-  // fetchDataFromServer() {
-  //   this.setState({ loading: true });
-
-  //   if (this.lastRequestToken)
-  //     this.lastRequestToken.cancel("Parameters changed");
-  //   this.lastRequestToken = axios.CancelToken.source();
-  //   axios
-  //     .get("/samples/samples_taxons.json", {
-  //       params: {
-  //         sampleIds: this.state.sampleIds,
-  //         removedTaxonIds: Array.from(this.removedTaxonIds),
-  //         species: this.state.selectedOptions.species,
-  //         categories: this.state.selectedOptions.categories,
-  //         subcategories: this.state.selectedOptions.subcategories,
-  //         sortBy: this.metricToSortField(this.state.selectedOptions.metric),
-  //         thresholdFilters: this.state.selectedOptions.thresholdFilters,
-  //         taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
-  //         readSpecificity: this.state.selectedOptions.readSpecificity
-  //       },
-  //       cancelToken: this.lastRequestToken.token
-  //     })
-  //     .then(response => {
-  //       console.log(response);
-  //       let newState = this.extractData(response.data);
-  //       newState.loading = false;
-  //       window.history.replaceState("", "", this.getUrlForCurrentParams());
-  //       this.setState(newState);
-  //     })
-  //     .catch(thrown => {
-  //       // TODO: process error if not cancelled request by client: if (!axios.isCancel(thrown) {
-  //     });
-  // }
-
   fetchHeatmapData() {
     if (this.lastRequestToken)
       this.lastRequestToken.cancel("Parameters changed");

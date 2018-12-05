@@ -754,14 +754,6 @@ export default class Heatmap {
           this.options.onColumnMetadataLabelMove(d, d3.event);
       });
 
-    // columnMetadataLabelEnter
-    //   .append("text")
-    //   .attr("class", cs.removeIcon)
-    //   .text("X")
-    //   .attr("transform", `translate(0, ${this.options.minCellHeight / 2})`)
-    //   .style("dominant-baseline", "central")
-    //   .on("click", this.removeColumnMetadata);
-
     applyFormat(columnMetadataLabelEnter);
   }
 
@@ -878,18 +870,6 @@ export default class Heatmap {
         .attr("y", yPos - 5)
         .attr("xlink:href", `${this.options.iconPath}/edit.svg`);
 
-      // addMetadataTrigger
-      //   .append("circle")
-      //   .attr("r", circleRadius);
-
-      // addMetadataTrigger
-      //   .append("line")
-      //   .attr("class", "horizontal");
-
-      // addMetadataTrigger
-      //   .append("line")
-      //   .attr("class", "vertical");
-
       // setup triggers
       if (addMetadataTrigger.size())
         this.addMetadataTrigger = addMetadataTrigger.node();
@@ -918,25 +898,6 @@ export default class Heatmap {
         )
         .attr("y1", yPos)
         .attr("y2", yPos);
-
-      // addMetadataTrigger
-      //   .select("circle")
-      //   .attr("cx", this.rowLabelsWidth - 10)
-      //   .attr("cy", yPos);
-
-      // addMetadataTrigger
-      //   .select("line.horizontal")
-      //   .attr("x1", this.rowLabelsWidth - 10 - plusRadius)
-      //   .attr("x2", this.rowLabelsWidth - 10 + plusRadius)
-      //   .attr("y1", yPos)
-      //   .attr("y2", yPos);
-
-      // addMetadataTrigger
-      //   .select("line.vertical")
-      //   .attr("x1", this.rowLabelsWidth - 10)
-      //   .attr("x2", this.rowLabelsWidth - 10)
-      //   .attr("y1", yPos - plusRadius)
-      //   .attr("y2", yPos + plusRadius);
     }
   }
 
