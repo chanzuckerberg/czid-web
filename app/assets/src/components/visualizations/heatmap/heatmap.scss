@@ -71,18 +71,10 @@
       cursor: pointer;
       font-weight: 700;
 
-      // .removeIcon {
-      //   visibility: hidden;
-      // }
-
       &:hover {
         text {
           fill: $primary-light;
         }
-
-        // .removeIcon {
-        //   visibility: visible;
-        // }
       }
     }
 

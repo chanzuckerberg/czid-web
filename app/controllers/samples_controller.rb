@@ -347,8 +347,6 @@ class SamplesController < ApplicationController
 
   def samples_taxons
     @sample_taxons_dict = sample_taxons_dict(params)
-    Rails.logger.debug("@sample_taxons_dict")
-    Rails.logger.debug(@sample_taxons_dict)
     render json: @sample_taxons_dict
   end
 
