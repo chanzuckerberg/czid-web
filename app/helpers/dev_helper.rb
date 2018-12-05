@@ -1,13 +1,13 @@
 module DevHelper
   def _alignment_cost_per_million_reads(month_starting, ec2_cost)
-    # Computes the average cost per read of gsnap/rapsearch alignment servers over the course of 1 month.
+    # Computes the average cost per million reads of gsnap/rapsearch alignment servers over the course of 1 month.
     # ec2_cost should be the cost (in $) of i3.16xlarge instances (=gsnap/rapsearch) for the month, as found in the AWS account.
     # Usage example:
     #   month_starting = "2018-08-01"
-    #   ec2_cost = 1000 (in dollars -- look up in the AWS account)
+    #   ec2_cost = 1000
     # Caveats:
     #  Function works only starting in August because prior runs don't have JobStat.where(task: "subsampled_out")
-    #  Functions assumes all pipeline_runs are complete.
+    #  Function assumes all pipeline_runs are complete.
     #  Function does not take into account read length.
     start_date = month_starting.to_date
     end_date = start_date + 1.month
