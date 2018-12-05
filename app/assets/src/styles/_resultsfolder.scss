@@ -25,11 +25,9 @@
   }
   .file-link {
     cursor: pointer;
-    td {
-      color: $darkest-grey;
-      &:hover {
-        color: $primary-light;
-      }
+    color: $darkest-grey;
+    &:hover {
+      color: $primary-light;
     }
   }
   tr.disabled-file-link {

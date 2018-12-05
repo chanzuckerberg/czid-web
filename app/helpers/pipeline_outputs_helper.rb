@@ -150,11 +150,6 @@ module PipelineOutputsHelper
     { "title" => title, "details" => results, "accessions" => accession_ids }
   end
 
-  def get_taxid_fasta(sample, taxid, tax_level, hit_type)
-    pipeline_run = sample.pipeline_runs.first
-    get_taxid_fasta_from_pipeline_run(pipeline_run, taxid, tax_level, hit_type)
-  end
-
   def get_taxid_fasta_from_pipeline_run(pipeline_run, taxid, tax_level, hit_type)
     return '' unless pipeline_run
     uri = pipeline_run.s3_paths_for_taxon_byteranges[tax_level][hit_type]

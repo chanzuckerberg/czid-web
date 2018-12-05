@@ -15,12 +15,17 @@ class Tabs extends React.Component {
 
   componentDidMount() {
     this.adjustIndicator();
+    window.addEventListener("resize", this.adjustIndicator);
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (prevProps.value !== this.props.value) {
       this.adjustIndicator();
     }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.adjustIndicator);
   }
 
   adjustIndicator = () => {
@@ -38,22 +43,23 @@ class Tabs extends React.Component {
     const { indicatorLeft, indicatorWidth } = this.state;
     return (
       <div className={cx(cs.tabs, className)}>
-        {tabs.map(tab => (
-          <div
-            key={tab}
-            ref={c => (this._tabs[tab] = c)}
-            onClick={() => onChange(tab)}
-            className={cx(cs.tab, this.props.value === tab && cs.selected)}
-          >
-            {tab}
-          </div>
-        ))}
-        <div className={cs.tabBorder}>
+        <div className={cx(cs.tabWrapper)}>
+          {tabs.map(tab => (
+            <div
+              key={tab}
+              ref={c => (this._tabs[tab] = c)}
+              onClick={() => onChange(tab)}
+              className={cx(cs.tab, this.props.value === tab && cs.selected)}
+            >
+              {tab}
+            </div>
+          ))}
           <div
             className={cs.indicator}
             style={{ left: indicatorLeft, width: indicatorWidth }}
           />
         </div>
+        <div className={cs.tabBorder} />
       </div>
     );
   }

@@ -74,176 +74,6 @@ $break-large: 1070px;
   }
 }
 
-.custom-button {
-  color: $dark-grey !important;
-  background: $white;
-  border: 1px solid $light-grey;
-  padding: 8px;
-  margin: 7px 0;
-  min-width: 11rem;
-  letter-spacing: 0.43px;
-  display: inline-block;
-  cursor: pointer;
-  border-radius: 20px;
-  font-size: 11px;
-  &:hover {
-    color: $darkest-grey !important;
-    border-color: $medium-grey;
-    background: $off-white;
-  }
-  &.small {
-    color: $off-white !important;
-    min-width: 0;
-    padding: 10px 17px;
-    background: $darkest-grey;
-  }
-  i {
-    font-size: 15px;
-    margin-left: 4px;
-    margin-right: 10px;
-    position: relative;
-    top: 1px;
-  }
-}
-
-.col.s12.details-container {
-  padding-top: 15px;
-}
-
-.edit {
-  background: $off-white-blue;
-  &:hover {
-    background: $primary-lightest;
-  }
-}
-
-.edit-wide {
-  background: $off-white-blue;
-  border: 1px solid $light-grey;
-  border-radius: 5px;
-  margin-top: 10px;
-  &:hover {
-    background: $primary-lightest;
-  }
-}
-
-.details-title {
-  margin-top: 10px;
-}
-
-.detail-row {
-  margin: 0 !important;
-  border-bottom: 1px solid $light-grey;
-  .label {
-    padding: 10px 0 !important;
-  }
-  .details-value {
-    &.plain {
-      padding-left: 20px;
-    }
-    width: 100%;
-    font-weight: 600;
-    margin-top: 2px;
-    height: 37px;
-    padding-top: 10px;
-    padding-left: 10px;
-    .details-text {
-      width: 80%;
-      display: inline;
-    }
-    i {
-      margin-top: 3px;
-      display: none;
-    }
-    &.select-dropdown {
-      font-size: 12px;
-      overflow: hidden;
-      word-wrap: inherit;
-      white-space: nowrap;
-      border: 1px solid transparent;
-      text-overflow: ellipsis;
-      display: inline-block;
-    }
-    &.unknown {
-      color: $medium-grey !important;
-      font-weight: 400 !important;
-    }
-  }
-  .custom-select-dropdown {
-    padding: 8px;
-    background: $off-white-blue;
-    &:hover,
-    &.active {
-      background: $primary-lightest;
-      i {
-        display: inline-block;
-      }
-    }
-  }
-  .details-dropdown {
-    li {
-      min-height: inherit;
-      padding: 10px;
-      font-size: 12px;
-    }
-  }
-}
-.note {
-  pre {
-    font-weight: 600;
-    margin-left: 5px;
-    padding: 15px 5px;
-    cursor: text;
-  }
-}
-
-.graph .visuals {
-  height: 25px;
-}
-
-.labels li,
-.labels li div {
-  display: inline-block;
-  margin-right: 7px;
-}
-
-.labels .label-color {
-  height: 15px;
-  width: 15px;
-}
-
-.notes {
-  width: 17% !important;
-}
-.sample-notes pre {
-  margin: 0;
-  font-family: inherit;
-  white-space: pre-wrap;
-  white-space: -moz-pre-wrap;
-  word-wrap: break-word;
-  white-space: -o-pre-wrap;
-}
-
-.note-action-feedback {
-  width: 200px;
-  color: $white;
-  border-radius: 2px;
-  padding: 6px;
-  text-align: center;
-  display: none;
-  position: absolute;
-}
-
-.note-saved-success {
-  background-color: $success;
-  border-color: $success;
-}
-
-.note-save-failed {
-  background-color: $error;
-  border-color: $error;
-}
-
 [contenteditable]:focus {
   outline: 0 solid transparent;
 }
@@ -289,17 +119,6 @@ $break-large: 1070px;
         color: $dark-grey;
       }
     }
-  }
-}
-
-.all-filter-btn {
-  height: 43px;
-  width: 150px !important;
-  .text {
-    margin-top: 7px;
-  }
-  .dropdown.icon {
-    margin-top: -3px !important;
   }
 }
 
@@ -396,6 +215,28 @@ $break-large: 1070px;
           flex: 1;
           overflow: hidden;
           text-overflow: ellipsis;
+
+          &.header {
+            overflow: visible;
+            display: flex;
+
+            .pipeline-status-filter {
+              margin-left: 6px;
+              opacity: 0;
+              color: $medium-grey;
+
+              &.active {
+                opacity: 0.8;
+                color: $primary-light;
+              }
+            }
+
+            &:hover {
+              .pipeline-status-filter {
+                opacity: 1;
+              }
+            }
+          }
           &:first-child {
             flex-grow: 2;
             margin-left: 0.8rem;

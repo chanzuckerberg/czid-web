@@ -15,15 +15,15 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
-                  :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
+                  :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
 
-  before_action :admin_required, only: [:kickoff_pipeline, :retry_pipeline, :pipeline_runs]
+  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
   current_power do # Put this here for CLI
@@ -64,7 +64,8 @@ class SamplesController < ApplicationController
     # TODO(yf) : the following tissue_types, host_genomes have performance
     # impact that it should be moved to different dedicated functions. Not
     # parsing the whole results.
-    @tissue_types = results.select("distinct(sample_tissue)").map(&:sample_tissue).compact.sort
+    @tissue_types = get_distinct_sample_types(results)
+
     host_genome_ids = results.select("distinct(host_genome_id)").map(&:host_genome_id).compact.sort
     @host_genomes = HostGenome.find(host_genome_ids)
 
@@ -291,7 +292,7 @@ class SamplesController < ApplicationController
     @report_page_params[:scoring_model] = params[:scoring_model] if params[:scoring_model]
     if @pipeline_run && (((@pipeline_run.adjusted_remaining_reads.to_i > 0 || @pipeline_run.results_finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       if background_id
-        @report_present = 1
+        @report_present = true
         @report_ts = @pipeline_run.updated_at.to_i
         @all_categories = all_categories
         @report_details = report_details(@pipeline_run, current_user.id)
@@ -420,9 +421,9 @@ class SamplesController < ApplicationController
   end
 
   def assembly
-    pipeline_run = @sample.pipeline_runs.first
-    assembly_fasta = pipeline_run.assembly_output_s3_path(params[:taxid])
-    send_data get_s3_file(assembly_fasta), filename: @sample.name + '_' + clean_taxid_name(pipeline_run, params[:taxid]) + '-assembled-scaffolds.fasta'
+    pr = select_pipeline_run(@sample, params)
+    assembly_fasta = pr.assembly_output_s3_path(params[:taxid])
+    send_data get_s3_file(assembly_fasta), filename: @sample.name + '_' + clean_taxid_name(pr, params[:taxid]) + '-assembled-scaffolds.fasta'
   end
 
   def contig_taxid_list
@@ -439,17 +440,24 @@ class SamplesController < ApplicationController
     send_data output_fasta, filename: "#{@sample.name}_tax_#{taxid}_contigs.fasta"
   end
 
+  def summary_contig_counts
+    pr = select_pipeline_run(@sample, params)
+    min_contig_size = params[:min_contig_size] || PipelineRun::MIN_CONTIG_SIZE
+    contig_counts = pr.get_summary_contig_counts(min_contig_size)
+    render json: { min_contig_size: min_contig_size, contig_counts: contig_counts }
+  end
+
   def show_taxid_fasta
+    pr = select_pipeline_run(@sample, params)
     if params[:hit_type] == "NT_or_NR"
-      nt_array = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
-      nr_array = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
+      nt_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
+      nr_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
       @taxid_fasta = ">" + ((nt_array | nr_array) - ['']).join(">")
       @taxid_fasta = "Coming soon" if @taxid_fasta == ">" # Temporary fix
     else
-      @taxid_fasta = get_taxid_fasta(@sample, params[:taxid], params[:tax_level].to_i, params[:hit_type])
+      @taxid_fasta = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, params[:hit_type])
     end
-    pipeline_run = @sample.pipeline_runs.first
-    send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pipeline_run, params[:taxid]) + '-hits.fasta'
+    send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pr, params[:taxid]) + '-hits.fasta'
   end
 
   def show_taxid_alignment
@@ -521,12 +529,14 @@ class SamplesController < ApplicationController
   end
 
   def nonhost_fasta
-    @nonhost_fasta = get_s3_file(@sample.annotated_fasta_s3_path)
+    pr = select_pipeline_run(@sample, params)
+    @nonhost_fasta = get_s3_file(pr.annotated_fasta_s3_path)
     send_data @nonhost_fasta, filename: @sample.name + '_nonhost.fasta'
   end
 
   def unidentified_fasta
-    @unidentified_fasta = get_s3_file(@sample.unidentified_fasta_s3_path)
+    pr = select_pipeline_run(@sample, params)
+    @unidentified_fasta = get_s3_file(pr.unidentified_fasta_s3_path)
     send_data @unidentified_fasta, filename: @sample.name + '_unidentified.fasta'
   end
 
@@ -537,7 +547,9 @@ class SamplesController < ApplicationController
   end
 
   def results_folder
-    can_see_stage1_results = current_power.updatable_samples.include?(@sample)
+    can_edit = current_power.updatable_samples.include?(@sample)
+    @exposed_raw_results_url = can_edit ? raw_results_folder_sample_url(@sample) : nil
+    can_see_stage1_results = can_edit
     @file_list = @sample.pipeline_runs.first.outputs_by_step(can_see_stage1_results)
     @file_path = "#{@sample.sample_path}/results/"
     respond_to do |format|
@@ -669,7 +681,24 @@ class SamplesController < ApplicationController
   def reupload_source
     Resque.enqueue(InitiateS3Cp, @sample.id)
     respond_to do |format|
-      format.html { redirect_to samples_url, notice: "Sample is being uploaded if it hasn't been." }
+      format.html { redirect_to @sample, notice: "Sample is being uploaded if it hasn't been." }
+      format.json { head :no_content }
+    end
+  end
+
+  # PUT /samples/:id/resync_prod_data_to_staging
+  def resync_prod_data_to_staging
+    if Rails.env == 'staging'
+      pr_ids = @sample.pipeline_run_ids.join(",")
+      unless pr_ids.empty?
+        ['taxon_counts', 'taxon_byteranges', 'contigs', 'contig_counts'].each do |table_name|
+          ActiveRecord::Base.connection.execute("REPLACE INTO idseq_staging.#{table_name} SELECT * FROM idseq_prod.#{table_name} WHERE pipeline_run_id IN (#{pr_ids})")
+        end
+      end
+      Resque.enqueue(InitiateS3ProdSyncToStaging, @sample.id)
+    end
+    respond_to do |format|
+      format.html { redirect_to @sample, notice: "S3 data is being synced from prod." }
       format.json { head :no_content }
     end
   end
@@ -680,10 +709,10 @@ class SamplesController < ApplicationController
     @sample.save
     respond_to do |format|
       if !@sample.pipeline_runs.empty?
-        format.html { redirect_to samples_url, notice: 'A pipeline run is in progress.' }
+        format.html { redirect_to pipeline_runs_sample_path(@sample), notice: 'A pipeline run is in progress.' }
         format.json { head :no_content }
       else
-        format.html { redirect_to samples_url, notice: 'No pipeline run in progress.' }
+        format.html { redirect_to pipeline_runs_sample_path(@sample), notice: 'No pipeline run in progress.' }
         format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
       end
     end
@@ -695,10 +724,10 @@ class SamplesController < ApplicationController
     @sample.save
     respond_to do |format|
       if !@sample.pipeline_runs.empty?
-        format.html { redirect_to samples_url, notice: 'A pipeline run is in progress.' }
+        format.html { redirect_to @sample, notice: 'A pipeline run is in progress.' }
         format.json { head :no_content }
       else
-        format.html { redirect_to samples_url, notice: 'No pipeline run in progress.' }
+        format.html { redirect_to @sample, notice: 'No pipeline run in progress.' }
         format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
       end
     end

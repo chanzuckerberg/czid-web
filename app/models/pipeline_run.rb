@@ -33,6 +33,27 @@ class PipelineRun < ApplicationRecord
   ADAPTER_SEQUENCES = { "single-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-SE.fasta",
                         "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta" }.freeze
 
+  GSNAP_CHUNK_SIZE = 15_000
+  RAPSEARCH_CHUNK_SIZE = 10_000
+  GSNAP_MAX_CONCURRENT = 2
+  RAPSEARCH_MAX_CONCURRENT = 4
+  MAX_CHUNKS_IN_FLIGHT = 32
+
+  SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
+  SORTED_TAXID_ANNOTATED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'.freeze
+  SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT = 'taxid_annot_sorted_genus_nt.fasta'.freeze
+  SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR = 'taxid_annot_sorted_genus_nr.fasta'.freeze
+  SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT = 'taxid_annot_sorted_family_nt.fasta'.freeze
+  SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
+
+  DAG_ANNOTATED_FASTA_BASENAME = 'taxid_annot.fasta'.freeze
+  DAG_UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fa'.freeze
+  UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
+  MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
+  HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
+
+  GSNAP_M8 = "gsnap.m8".freeze
+  RAPSEARCH_M8 = "rapsearch2.m8".freeze
   OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
@@ -42,15 +63,18 @@ class PipelineRun < ApplicationRecord
   TAXID_BYTERANGE_JSON_NAME = 'taxid_locations_combined.json'.freeze
   REFINED_TAXON_COUNTS_JSON_NAME = 'assembly/refined_taxon_counts.json'.freeze
   REFINED_TAXID_BYTERANGE_JSON_NAME = 'assembly/refined_taxid_locations_combined.json'.freeze
+
+  ASSEMBLY_PREFIX = 'assembly/refined_'.freeze
   ASSEMBLED_CONTIGS_NAME = 'assembly/contigs.fasta'.freeze
   ASSEMBLED_STATS_NAME = 'assembly/contig_stats.json'.freeze
   CONTIG_SUMMARY_JSON_NAME = 'assembly/combined_contig_summary.json'.freeze
   CONTIG_NT_TOP_M8 = 'assembly/gsnap.blast.top.m8'.freeze
   CONTIG_NR_TOP_M8 = 'assembly/rapsearch2.blast.top.m8'.freeze
   CONTIG_MAPPING_NAME = 'assembly/contig2taxon_lineage.csv'.freeze
-  ASSEMBLY_STATUSFILE = 'job-complete'.freeze
+
   LOCAL_JSON_PATH = '/app/tmp/results_json'.freeze
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
+
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
   ASSEMBLY_PIPELINE_VERSION = 3.1
   MIN_CONTIG_SIZE = 4
@@ -192,6 +216,65 @@ class PipelineRun < ApplicationRecord
 
   def self.in_progress_at_stage_1_or_2
     in_progress.where("job_status NOT LIKE '3.%' AND job_status NOT LIKE '4.%'")
+  end
+
+  def self.count_chunks(run_ids, known_num_reads, count_config, completed_chunks)
+    chunk_size = count_config[:chunk_size]
+    can_pair_chunks = count_config[:can_pair_chunks]
+    is_run_paired = count_config[:is_run_paired]
+    num_chunks_by_run_id = {}
+    run_ids.each do |pr_id|
+      # A priori, each run will count for 1 chunk
+      num_chunks = 1
+      # If number of non-host reads is known, we can compute the actual number of chunks from it
+      if known_num_reads[pr_id]
+        num_reads = known_num_reads[pr_id]
+        if can_pair_chunks && is_run_paired[pr_id]
+          num_reads /= 2.0
+        end
+        num_chunks = (num_reads / chunk_size.to_f).ceil
+      end
+      # If any chunks have already completed, we can subtract them
+      num_chunks = [0, num_chunks - completed_chunks[pr_id]].max if completed_chunks[pr_id]
+      # Due to rate limits in idseq-dag, there is a cap on the number of chunks dispatched concurrently by a single job
+      num_chunks = [num_chunks, MAX_CHUNKS_IN_FLIGHT].min
+      num_chunks_by_run_id[pr_id] = num_chunks
+    end
+    num_chunks_by_run_id.values.sum
+  end
+
+  def self.count_alignment_chunks_in_progress
+    # Get run ids in progress
+    need_alignment = in_progress_at_stage_1_or_2
+    # Get numbers of non-host reads to estimate total number of chunks
+    in_progress_job_stats = JobStat.where(pipeline_run_id: need_alignment.pluck(:id))
+    last_host_filter_step = "subsampled_out"
+    known_num_reads = Hash[in_progress_job_stats.where(task: last_host_filter_step).pluck(:pipeline_run_id, :reads_after)]
+    # Determine which samples are paired-end to adjust chunk count
+    runs_by_sample_id = need_alignment.index_by(&:sample_id)
+    files_by_sample_id = InputFile.where(sample_id: need_alignment.pluck(:sample_id)).group_by(&:sample_id)
+    is_run_paired = {}
+    runs_by_sample_id.each do |sid, pr|
+      is_run_paired[pr.id] = (files_by_sample_id[sid].count == 2)
+    end
+    # Get number of chunks that have already completed
+    completed_gsnap_chunks = Hash[need_alignment.pluck(:id, :completed_gsnap_chunks)]
+    completed_rapsearch_chunks = Hash[need_alignment.pluck(:id, :completed_rapsearch_chunks)]
+    # Compute number of chunks that still need to be processed
+    count_configs = {
+      gsnap: {
+        chunk_size: GSNAP_CHUNK_SIZE,
+        can_pair_chunks: true, # gsnap can take paired inputs
+        is_run_paired: is_run_paired
+      },
+      rapsearch: {
+        chunk_size: RAPSEARCH_CHUNK_SIZE,
+        can_pair_chunks: false # rapsearch always takes a single input file
+      }
+    }
+    gsnap_num_chunks = count_chunks(need_alignment.pluck(:id), known_num_reads, count_configs[:gsnap], completed_gsnap_chunks)
+    rapsearch_num_chunks = count_chunks(need_alignment.pluck(:id), known_num_reads, count_configs[:rapsearch], completed_rapsearch_chunks)
+    { gsnap: gsnap_num_chunks, rapsearch: rapsearch_num_chunks }
   end
 
   def self.top_completed_runs
@@ -378,6 +461,19 @@ class PipelineRun < ApplicationRecord
     return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
   end
 
+  def annotated_fasta_s3_path
+    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 3.1
+    return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 2.0
+
+    multihit? ? "#{alignment_output_s3_path}/#{ple::MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
+  end
+
+  def unidentified_fasta_s3_path
+    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 3.1
+    return "#{output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 2.0
+    "#{alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
+  end
+
   def get_lineage_json(ct2taxid, taxon_lineage_map)
     # Get the full lineage based on taxid
     # Sample output:
@@ -423,7 +519,7 @@ class PipelineRun < ApplicationRecord
       contigs.each do |c|
         nt_m8 = nt_m8_map[c.name] || []
         nr_m8 = nr_m8_map[c.name] || []
-        lineage = JSON.parse(c.lineage_json)
+        lineage = JSON.parse(c.lineage_json || "{}")
         row = [c.name, c.read_count]
         cfs = c.name.split("_")
         row += [cfs[3], cfs[5]]
@@ -665,6 +761,7 @@ class PipelineRun < ApplicationRecord
       # TODO:  S3 is a middleman between these two functions;  load_stats shouldn't wait for S3
       compile_stats_file
       load_stats_file
+      load_chunk_stats
     rescue
       # TODO: Log this exception
       compiling_stats_failed = true
@@ -757,6 +854,17 @@ class PipelineRun < ApplicationRecord
         update(alert_sent: 1)
       end
     end
+  end
+
+  def load_chunk_stats
+    stdout = Syscall.run("aws", "s3", "ls", "#{output_s3_path_with_version}/chunks/")
+    return unless stdout
+    outputs = stdout.split("\n").map { |line| line.split.last }
+    gsnap_outputs = outputs.select { |file_name| file_name.start_with?("multihit-gsnap-out") && file_name.end_with?(".m8") }
+    rapsearch_outputs = outputs.select { |file_name| file_name.start_with?("multihit-rapsearch2-out") && file_name.end_with?(".m8") }
+    self.completed_gsnap_chunks = gsnap_outputs.length
+    self.completed_rapsearch_chunks = rapsearch_outputs.length
+    save
   end
 
   def compile_stats_file
@@ -883,6 +991,7 @@ class PipelineRun < ApplicationRecord
     # What is crucially important is the uncategorizable_id.
     uncategorizable_id = TaxonLineage::MISSING_LINEAGE_ID.fetch(tax_level_name.to_sym, -9999)
     uncategorizable_name = "Uncategorizable as a #{tax_level_name}"
+    lineage_version = alignment_config.lineage_version
     TaxonCount.connection.execute(
       "REPLACE INTO taxon_counts(pipeline_run_id, tax_id, name,
                                 tax_level, count_type, count,
@@ -918,7 +1027,7 @@ class PipelineRun < ApplicationRecord
               '#{current_date}',
               '#{current_date}'
        FROM  taxon_lineages, taxon_counts
-       WHERE (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
+       WHERE (#{lineage_version} BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
              taxon_lineages.taxid = taxon_counts.tax_id AND
              taxon_counts.pipeline_run_id = #{id} AND
              taxon_counts.tax_level = #{TaxonCount::TAX_LEVEL_SPECIES}
@@ -929,6 +1038,7 @@ class PipelineRun < ApplicationRecord
   def update_names
     # The names from the taxon_lineages table are preferred, but, not always
     # available;  this code merges them into taxon_counts.name.
+    lineage_version = alignment_config.lineage_version
     %w[species genus family].each do |level|
       level_id = TaxonCount::NAME_2_LEVEL[level]
       TaxonCount.connection.execute("
@@ -938,30 +1048,32 @@ class PipelineRun < ApplicationRecord
         WHERE taxon_counts.pipeline_run_id=#{id} AND
               taxon_counts.tax_level=#{level_id} AND
               taxon_counts.tax_id = taxon_lineages.taxid AND
-              (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
+              (#{lineage_version} BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
               taxon_lineages.#{level}_name IS NOT NULL
       ")
     end
   end
 
   def update_genera
+    lineage_version = alignment_config.lineage_version
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.genus_taxid = taxon_lineages.genus_taxid,
           taxon_counts.family_taxid = taxon_lineages.family_taxid,
           taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id} AND
-            (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at) AND
+            (#{lineage_version} BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end) AND
             taxon_lineages.taxid = taxon_counts.tax_id
     ")
   end
 
   def update_superkingdoms
+    lineage_version = alignment_config.lineage_version
     TaxonCount.connection.execute("
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id}
-            AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
+            AND (#{lineage_version} BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end)
             AND taxon_counts.tax_id > #{TaxonLineage::INVALID_CALL_BASE_ID}
             AND taxon_lineages.taxid = taxon_counts.tax_id
     ")
@@ -969,7 +1081,7 @@ class PipelineRun < ApplicationRecord
       UPDATE taxon_counts, taxon_lineages
       SET taxon_counts.superkingdom_taxid = taxon_lineages.superkingdom_taxid
       WHERE taxon_counts.pipeline_run_id=#{id}
-            AND (taxon_counts.created_at BETWEEN taxon_lineages.started_at AND taxon_lineages.ended_at)
+            AND (#{lineage_version} BETWEEN taxon_lineages.version_start AND taxon_lineages.version_end)
             AND taxon_counts.tax_id < #{TaxonLineage::INVALID_CALL_BASE_ID}
             AND taxon_lineages.taxid = MOD(ABS(taxon_counts.tax_id), ABS(#{TaxonLineage::INVALID_CALL_BASE_ID}))
     ")
@@ -1073,19 +1185,19 @@ class PipelineRun < ApplicationRecord
 
   def s3_paths_for_taxon_byteranges
     file_prefix = ''
-    file_prefix = Sample::ASSEMBLY_PREFIX if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
+    file_prefix = ASSEMBLY_PREFIX if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
     # by tax_level and hit_type
     { TaxonCount::TAX_LEVEL_SPECIES => {
-      'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA}",
-      'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_NR}"
+      'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",
+      'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_NR}"
     },
       TaxonCount::TAX_LEVEL_GENUS => {
-        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
-        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}"
+        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
+        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}"
       },
       TaxonCount::TAX_LEVEL_FAMILY => {
-        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
-        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{Sample::SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}"
+        'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
+        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}"
       } }
   end
 
@@ -1126,6 +1238,12 @@ class PipelineRun < ApplicationRecord
     contigs.where(name: contig_names).order("read_count DESC")
   end
 
+  def get_summary_contig_counts(min_contig_size)
+    contig_counts.where("count >= #{min_contig_size} and taxid > 0 and contig_name != '*'")
+                 .select("taxid, COUNT(1) as contigs, SUM(count) AS contig_reads")
+                 .group(:taxid).as_json(except: :id)
+  end
+
   def get_taxid_list_with_contigs(min_contig_size = MIN_CONTIG_SIZE)
     contig_counts.where("count >= #{min_contig_size} and taxid > 0 and contig_name != '*'").pluck(:taxid).uniq
   end
@@ -1162,6 +1280,8 @@ class PipelineRun < ApplicationRecord
     sample.results_folder_files.each do |entry|
       filename_to_info[entry[:key]] = entry
     end
+    # Get read counts
+    job_stats_by_task = job_stats.index_by(&:task)
     # Get outputs and descriptions by target.
     result = {}
     pipeline_run_stages.each_with_index do |prs, stage_idx|
@@ -1191,15 +1311,11 @@ class PipelineRun < ApplicationRecord
         if file_info.present?
           result[prs.name]["steps"][target_name] = {
             "step_description" => STEP_DESCRIPTIONS[prs.name]["steps"][target_name],
-            "file_list" => file_info
+            "file_list" => file_info,
+            "reads_after" => (job_stats_by_task[target_name] || {})["reads_after"]
           }
         end
       end
-    end
-    # Get read counts (host filtering steps only)
-    job_stats.each do |js|
-      target_name = js.task
-      result[target_name]["reads_after"] = js.reads_after if result.keys.include?(target_name)
     end
     result
   end

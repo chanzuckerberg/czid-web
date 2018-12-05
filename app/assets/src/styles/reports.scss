@@ -259,10 +259,14 @@ input[type="number"] {
     color: $medium-grey;
     font-size: 12px;
   }
+  .report-top-menu {
+    /* Override semantic-ui */
+    margin-top: 10px !important;
+  }
   .reports-count {
     .count {
       display: inline-block;
-      margin: 20px 0 0px 17px;
+      margin: 20px 0 8px;
     }
     .download {
       float: right;
@@ -293,7 +297,7 @@ input[type="number"] {
     }
     .report-top-filters {
       .filter-lists {
-        padding: 10px 15px;
+        padding: 10px 0;
         width: 100%;
         & > div.filter-lists-element > li {
           color: $darkest-grey;

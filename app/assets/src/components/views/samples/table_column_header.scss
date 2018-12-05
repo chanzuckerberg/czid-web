@@ -1,0 +1,10 @@
+@import "~styles/themes/colors";
+
+.tableColumnHeader {
+  margin-right: 5px;
+}
+
+.header {
+  // overwrite semantic-ui.
+  color: $light-grey !important;
+}

@@ -1,0 +1,17 @@
+@import "~styles/themes/colors";
+
+.option {
+  span {
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+  .complete {
+    color: $success !important;
+  }
+  .failed {
+    color: $error !important;
+  }
+  .uploading {
+    color: $warning !important;
+  }
+}

@@ -559,35 +559,25 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
-  renderSubMenu(sticky) {
+  renderSubMenu() {
     return (
-      <StickyContainer>
-        <Sticky>
-          {({ style }) => (
-            <div style={style} className={cs.menu}>
-              <Divider />
-              <div className={`${cs.filterRow} row`}>
-                <div className="col s3">{this.renderTaxonLevelPicker()}</div>
-                <div className="col s3">{this.renderCategoryFilter()}</div>
-                <div className="col s3">{this.renderMetricPicker()}</div>
-                <div className="col s3">{this.renderBackgroundPicker()}</div>
-              </div>
-              <div className={`${cs.filterRow} row`}>
-                <div className="col s3">
-                  {this.renderAdvancedFilterPicker()}
-                </div>
-                <div className="col s3">{this.renderSpecificityFilter()}</div>
-                <div className="col s2">{this.renderScalePicker()}</div>
-                <div className="col s2">
-                  {this.renderTaxonsPerSampleSlider()}
-                </div>
-                <div className="col s2">{this.renderLegend()}</div>
-              </div>
-              <Divider />
-            </div>
-          )}
-        </Sticky>
-      </StickyContainer>
+      <div className={cs.menu}>
+        <Divider />
+        <div className={`${cs.filterRow} row`}>
+          <div className="col s3">{this.renderTaxonLevelPicker()}</div>
+          <div className="col s3">{this.renderCategoryFilter()}</div>
+          <div className="col s3">{this.renderMetricPicker()}</div>
+          <div className="col s3">{this.renderBackgroundPicker()}</div>
+        </div>
+        <div className={`${cs.filterRow} row`}>
+          <div className="col s3">{this.renderAdvancedFilterPicker()}</div>
+          <div className="col s3">{this.renderSpecificityFilter()}</div>
+          <div className="col s2">{this.renderScalePicker()}</div>
+          <div className="col s2">{this.renderTaxonsPerSampleSlider()}</div>
+          <div className="col s2">{this.renderLegend()}</div>
+        </div>
+        <Divider />
+      </div>
     );
   }
 
@@ -653,8 +643,16 @@ class SamplesHeatmapView extends React.Component {
             </ViewHeader.Controls>
           </ViewHeader>
         </div>
-        <NarrowContainer>{this.renderSubMenu()}</NarrowContainer>
-        {this.renderVisualization()}
+        <StickyContainer>
+          <Sticky>
+            {({ style }) => (
+              <div style={style}>
+                <NarrowContainer>{this.renderSubMenu()}</NarrowContainer>
+              </div>
+            )}
+          </Sticky>
+          {this.renderVisualization()}
+        </StickyContainer>
         <SampleDetailsSidebar
           showReportLink
           visible={this.state.sidebarVisible}

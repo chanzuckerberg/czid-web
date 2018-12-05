@@ -10,20 +10,6 @@ class Sample < ApplicationRecord
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
-  MULTIHIT_FASTA_BASENAME = 'accessions.rapsearch2.gsnapl.fasta'.freeze
-  HIT_FASTA_BASENAME = 'taxids.rapsearch2.filter.deuterostomes.taxids.gsnapl.unmapped.bowtie2.lzw.cdhitdup.priceseqfilter.unmapped.star.fasta'.freeze
-  UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fasta'.freeze
-
-  DAG_ANNOTATED_FASTA_BASENAME = 'taxid_annot.fasta'.freeze
-  DAG_UNIDENTIFIED_FASTA_BASENAME = 'unidentified.fa'.freeze
-
-  SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
-  SORTED_TAXID_ANNOTATED_FASTA_NR = 'taxid_annot_sorted_nr.fasta'.freeze
-  SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT = 'taxid_annot_sorted_genus_nt.fasta'.freeze
-  SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR = 'taxid_annot_sorted_genus_nr.fasta'.freeze
-  SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT = 'taxid_annot_sorted_family_nt.fasta'.freeze
-  SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR = 'taxid_annot_sorted_family_nr.fasta'.freeze
-  ASSEMBLY_PREFIX = 'assembly/refined_'.freeze
 
   TOTAL_READS_JSON = "total_reads.json".freeze
   LOG_BASENAME = 'log.txt'.freeze
@@ -325,21 +311,6 @@ class Sample < ApplicationRecord
     "s3://#{SAMPLES_BUCKET_NAME}/#{sample_path}/expt"
   end
 
-  def annotated_fasta_s3_path
-    pr = pipeline_runs.first
-    return "#{pr.postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 3.1
-    return "#{pr.postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 2.0
-
-    pr.multihit? ? "#{sample_alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{sample_alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
-  end
-
-  def unidentified_fasta_s3_path
-    pr = pipeline_runs.first
-    return "#{pr.postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 3.1
-    return "#{pr.output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pr.pipeline_version && pr.pipeline_version.to_f >= 2.0
-    "#{sample_alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
-  end
-
   def host_genome_name
     host_genome.name if host_genome
   end
@@ -535,5 +506,13 @@ class Sample < ApplicationRecord
     end
     m.edit_value(val)
     m.save!
+  end
+
+  def initiate_s3_prod_sync_to_staging
+    return unless Rails.env == 'staging'
+
+    from_path = "s3://idseq-samples-prod/#{sample_path}"
+    to_path = "s3://idseq-samples-staging/#{sample_path}"
+    Syscall.run("aws", "s3", "cp", "--recursive", from_path, to_path)
   end
 end

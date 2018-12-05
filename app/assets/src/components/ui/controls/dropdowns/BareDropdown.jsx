@@ -12,7 +12,11 @@ class BareDropdown extends React.Component {
     return (
       <BaseDropdown
         {...this.props}
-        className={cx(cs.dropdown, this.props.className)}
+        className={cx(
+          cs.dropdown,
+          this.props.className,
+          this.props.hideArrow && cs.hideArrow
+        )}
       />
     );
   }
@@ -23,9 +27,11 @@ BareDropdown.propTypes = forbidExtraProps({
   children: PropTypes.node.isRequired,
   className: PropTypes.string,
   floating: PropTypes.bool,
-  scrolling: PropTypes.bool
+  scrolling: PropTypes.bool,
+  hideArrow: PropTypes.bool
 });
 
+BareDropdown.Header = BaseDropdown.Header;
 BareDropdown.Menu = BaseDropdown.Menu;
 BareDropdown.Item = BaseDropdown.Item;
 
