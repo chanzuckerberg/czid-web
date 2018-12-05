@@ -64,48 +64,49 @@
   }
 
   .columnMetadata {
+    pointer-events: bounding-box;
+
     .columnMetadataLabel {
       font-size: 12px;
       cursor: pointer;
       font-weight: 700;
 
-      .removeIcon {
-        visibility: hidden;
-      }
+      // .removeIcon {
+      //   visibility: hidden;
+      // }
 
       &:hover {
         text {
           fill: $primary-light;
         }
 
-        .removeIcon {
-          visibility: visible;
-        }
+        // .removeIcon {
+        //   visibility: visible;
+        // }
       }
     }
 
     .columnMetadataAdd {
-      line,
-      circle {
+      visibility: hidden;
+
+      .metadataAddTrigger {
+        cursor: pointer;
+      }
+
+      .metadataAddLine {
         stroke: $light-grey;
         stroke-width: 1px;
         fill: transparent;
-        visibility: hidden;
       }
 
       rect {
-        fill: lightblue;
         opacity: 0;
-        visibility: visible;
       }
     }
 
     &:hover {
       .columnMetadataAdd {
-        line,
-        circle {
-          visibility: visible;
-        }
+        visibility: visible;
       }
     }
   }

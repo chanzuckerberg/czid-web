@@ -91,7 +91,7 @@ class SamplesHeatmapView extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchDataFromServer();
+    this.fetchViewData();
   }
 
   parseUrlParams() {
@@ -151,38 +151,38 @@ class SamplesHeatmapView extends React.Component {
     return "highest_" + countType + "_" + metricName;
   }
 
-  fetchDataFromServer() {
-    this.setState({ loading: true });
+  // fetchDataFromServer() {
+  //   this.setState({ loading: true });
 
-    if (this.lastRequestToken)
-      this.lastRequestToken.cancel("Parameters changed");
-    this.lastRequestToken = axios.CancelToken.source();
-    axios
-      .get("/samples/samples_taxons.json", {
-        params: {
-          sampleIds: this.state.sampleIds,
-          removedTaxonIds: Array.from(this.removedTaxonIds),
-          species: this.state.selectedOptions.species,
-          categories: this.state.selectedOptions.categories,
-          subcategories: this.state.selectedOptions.subcategories,
-          sortBy: this.metricToSortField(this.state.selectedOptions.metric),
-          thresholdFilters: this.state.selectedOptions.thresholdFilters,
-          taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
-          readSpecificity: this.state.selectedOptions.readSpecificity
-        },
-        cancelToken: this.lastRequestToken.token
-      })
-      .then(response => {
-        console.log(response);
-        let newState = this.extractData(response.data);
-        newState.loading = false;
-        window.history.replaceState("", "", this.getUrlForCurrentParams());
-        this.setState(newState);
-      })
-      .catch(thrown => {
-        // TODO: process error if not cancelled request by client: if (!axios.isCancel(thrown) {
-      });
-  }
+  //   if (this.lastRequestToken)
+  //     this.lastRequestToken.cancel("Parameters changed");
+  //   this.lastRequestToken = axios.CancelToken.source();
+  //   axios
+  //     .get("/samples/samples_taxons.json", {
+  //       params: {
+  //         sampleIds: this.state.sampleIds,
+  //         removedTaxonIds: Array.from(this.removedTaxonIds),
+  //         species: this.state.selectedOptions.species,
+  //         categories: this.state.selectedOptions.categories,
+  //         subcategories: this.state.selectedOptions.subcategories,
+  //         sortBy: this.metricToSortField(this.state.selectedOptions.metric),
+  //         thresholdFilters: this.state.selectedOptions.thresholdFilters,
+  //         taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
+  //         readSpecificity: this.state.selectedOptions.readSpecificity
+  //       },
+  //       cancelToken: this.lastRequestToken.token
+  //     })
+  //     .then(response => {
+  //       console.log(response);
+  //       let newState = this.extractData(response.data);
+  //       newState.loading = false;
+  //       window.history.replaceState("", "", this.getUrlForCurrentParams());
+  //       this.setState(newState);
+  //     })
+  //     .catch(thrown => {
+  //       // TODO: process error if not cancelled request by client: if (!axios.isCancel(thrown) {
+  //     });
+  // }
 
   fetchHeatmapData() {
     if (this.lastRequestToken)
@@ -209,7 +209,7 @@ class SamplesHeatmapView extends React.Component {
     return this.state.metadataTypes || getMetadataTypes();
   }
 
-  async featchViewData() {
+  async fetchViewData() {
     this.setState({ loading: true });
 
     let [heatmapData, metadataTypes] = await Promise.all([
@@ -221,7 +221,7 @@ class SamplesHeatmapView extends React.Component {
     newState.metadataTypes = metadataTypes;
     newState.loading = false;
     window.history.replaceState("", "", this.getUrlForCurrentParams());
-    this.setState({ loading: false });
+    this.setState(newState);
   }
 
   extractData(rawData) {
@@ -317,7 +317,6 @@ class SamplesHeatmapView extends React.Component {
     ) {
       return;
     }
-
     let values = this.state.data[this.state.selectedOptions.metric];
     let scaleIndex = this.state.selectedOptions.dataScaleIdx;
 
@@ -334,7 +333,8 @@ class SamplesHeatmapView extends React.Component {
     if (
       this.state.loading ||
       !this.state.data ||
-      Object.values(this.state.data).every(e => !e.length)
+      Object.values(this.state.data).every(e => !e.length) ||
+      !this.state.metadataTypes
     ) {
       return;
     }
@@ -351,6 +351,7 @@ class SamplesHeatmapView extends React.Component {
           taxonIds={this.state.taxonIds}
           taxonDetails={this.state.taxonDetails}
           data={this.state.data}
+          metadataTypes={this.state.metadataTypes}
           metric={this.state.selectedOptions.metric}
           scale={this.state.availableOptions.scales[scaleIndex][1]}
           onRemoveTaxon={this.handleRemoveTaxon}
@@ -474,7 +475,7 @@ class SamplesHeatmapView extends React.Component {
   }
 
   updateHeatmap() {
-    this.fetchDataFromServer();
+    this.fetchViewData();
   }
 
   getUrlParams() {

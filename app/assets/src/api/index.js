@@ -48,6 +48,7 @@ const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
   );
 
 export {
+  get,
   getSampleMetadata,
   saveSampleMetadata,
   getMetadataTypes,
