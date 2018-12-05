@@ -7,7 +7,7 @@ module TestHelper
     #   ec2_cost = 1000
     # Caveats:
     #  Function works only starting in August because prior runs don't have JobStat.where(task: "subsampled_out")
-    #  Functions assumes all pipeline_runs are complete.
+    #  Function assumes all pipeline_runs are complete.
     #  Function does not take into account read length.
     start_date = month_starting.to_date
     end_date = start_date + 1.month
