@@ -9,6 +9,7 @@ import Icon from "./ui/icons/Icon";
 import { Menu, MenuItem } from "./ui/controls/Menu";
 import UploadBox from "./ui/controls/UploadBox";
 import { cleanLocalFilePath, baseName } from "./utils/sample";
+import CatIcon from "./ui/icons/CatIcon";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -555,6 +556,8 @@ class SampleUpload extends React.Component {
         return IconComponent.mouse(color);
       case "ercc only":
         return IconComponent.ercc(color);
+      case "cat":
+        return <CatIcon />;
       default:
         return false;
     }
@@ -1134,12 +1137,9 @@ class SampleUpload extends React.Component {
                                 this.handleHostChange(g.id, g.name)
                               }
                             >
-                              <div
-                                className="img-container"
-                                dangerouslySetInnerHTML={{
-                                  __html: SampleUpload.resolveGenomeIcon(g.name)
-                                }}
-                              />
+                              <div className="img-container">
+                                {SampleUpload.resolveGenomeIcon(g.name)}
+                              </div>
                               <div className="genome-label">{g.name}</div>
                             </li>
                           ) : null;
