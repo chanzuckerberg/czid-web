@@ -844,8 +844,6 @@ export default class Heatmap {
         .attr("class", cs.columnMetadataAdd);
 
       let yPos = this.options.spacing / 2;
-      let plusRadius = 3;
-      let circleRadius = 5;
 
       addLinkEnter.append("rect");
 
