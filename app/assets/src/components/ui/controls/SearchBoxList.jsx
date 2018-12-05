@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import CheckmarkIcon from "~/components/ui/icons/CheckmarkIcon";
-import Input from "~/components/ui/controls/Input";
+import CheckmarkIcon from "ui/icons/CheckmarkIcon";
+import Input from "ui/controls/Input";
 import cs from "./search_box_list.scss";
 import cx from "classnames";
 
