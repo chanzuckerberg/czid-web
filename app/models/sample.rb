@@ -507,4 +507,12 @@ class Sample < ApplicationRecord
     m.edit_value(val)
     m.save!
   end
+
+  def initiate_s3_prod_sync_to_staging
+    return unless Rails.env == 'staging'
+
+    from_path = "s3://idseq-samples-prod/#{sample_path}"
+    to_path = "s3://idseq-samples-staging/#{sample_path}"
+    Syscall.run("aws", "s3", "cp", "--recursive", from_path, to_path)
+  end
 end

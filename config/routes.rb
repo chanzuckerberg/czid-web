@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   }
   resources :samples do
     put :reupload_source, on: :member
+    put :resync_prod_data_to_staging, on: :member
     put :kickoff_pipeline, on: :member
     put :retry_pipeline, on: :member
     get :all, on: :collection
