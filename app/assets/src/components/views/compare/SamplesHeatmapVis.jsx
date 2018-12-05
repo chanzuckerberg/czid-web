@@ -16,7 +16,7 @@ class SamplesHeatmapVis extends React.Component {
       addMetadataTrigger: null,
       nodeHoverInfo: null,
       columnMetadataHoverNode: null,
-      selectedMetadata: new Set(["collection_location"])
+      selectedMetadata: new Set(this.props.defaultMetadata)
     };
 
     this.heatmap = null;
@@ -289,8 +289,13 @@ class SamplesHeatmapVis extends React.Component {
   }
 }
 
+SamplesHeatmapVis.defaultProps = {
+  defaultMetadata: ["collection_location"]
+};
+
 SamplesHeatmapVis.propTypes = {
   data: PropTypes.object,
+  defaultMetadata: PropTypes.array,
   metadataTypes: PropTypes.array,
   metric: PropTypes.string,
   onRemoveTaxon: PropTypes.func,
