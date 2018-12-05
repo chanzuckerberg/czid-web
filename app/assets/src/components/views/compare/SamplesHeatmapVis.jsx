@@ -193,6 +193,7 @@ class SamplesHeatmapVis extends React.Component {
           options={this.getAvailableMetadataOptions()}
           onChange={this.handleSelectedMetadataChange}
           selected={this.state.selectedMetadata}
+          title="Select Metadata Fields"
         />
       </div>
     );

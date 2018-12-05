@@ -50,6 +50,7 @@ class SearchBoxList extends React.Component {
   render() {
     return (
       <div className={cs.searchBoxList}>
+        {this.props.title && <div className={cs.title}>{this.props.title}</div>}
         <div>
           <Input
             fluid
@@ -95,7 +96,8 @@ SearchBoxList.propTypes = {
     PropTypes.instanceOf(Set), // for sets
     PropTypes.array
   ]),
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  title: PropTypes.string
 };
 
 export default SearchBoxList;
