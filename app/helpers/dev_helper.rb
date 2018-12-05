@@ -4,7 +4,7 @@ module TestHelper
     # ec2_cost should be the cost (in $) of i3.16xlarge instances (=gsnap/rapsearch) for the month, as found in the AWS account.
     # Usage example:
     #   month_starting = "2018-08-01"
-    #   ec2_cost = 1000 (in dollars -- look up in the AWS account)
+    #   ec2_cost = 1000
     # Caveats:
     #  Function works only starting in August because prior runs don't have JobStat.where(task: "subsampled_out")
     #  Functions assumes all pipeline_runs are complete.
