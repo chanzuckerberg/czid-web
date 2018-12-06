@@ -42,7 +42,8 @@ const saveSampleMetadata = (id, field, value) =>
     value
   });
 
-const getMetadataTypes = () => get("/samples/metadata_types");
+const getMetadataTypesByHostGenomeName = () =>
+  get("/samples/metadata_types_by_host_genome_name");
 
 // Save fields on the sample model (NOT sample metadata)
 const saveSampleField = (id, field, value) =>
@@ -67,7 +68,7 @@ export {
   get,
   getSampleMetadata,
   saveSampleMetadata,
-  getMetadataTypes,
+  getMetadataTypesByHostGenomeName,
   saveSampleName,
   saveSampleNotes,
   getAlignmentData,
