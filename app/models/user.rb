@@ -44,8 +44,12 @@ class User < ApplicationRecord
     # Don't allow any users to upload from idseq buckets
     return false if user_bucket == SAMPLES_BUCKET_NAME || IDSEQ_BUCKET_PREFIXES.any? { |prefix| user_bucket.downcase.starts_with?(prefix) }
 
-    # Don't allow any non-biohub users to upload from czbiohub buckets
-    return false if email.split("@").last != "czbiohub.org" && CZBIOHUB_BUCKET_PREFIXES.any? { |prefix| user_bucket.downcase.starts_with?(prefix) }
+    # Don't allow any non-Biohub users to upload from czbiohub buckets
+    if CZBIOHUB_BUCKET_PREFIXES.any? { |prefix| user_bucket.downcase.starts_with?(prefix) }
+      unless ["czbiohub.org", "ucsf.edu"].include?(email.split("@").last)
+        return false
+      end
+    end
 
     true
   end

@@ -4,30 +4,26 @@ const NON_HOST_READS_LABEL = "Download Non-Host Reads (.fasta)";
 const NON_HOST_CONTIGS_LABEL = "Download Non-Host Contigs (.fasta)";
 const NON_HOST_CONTIGS_MAPPING_LABEL =
   "Download Non-Host Contigs Summary (.csv)";
-const NON_HOST_ASSEMBLIES_LABEL = "Download Non-Host Assemblies (.fasta)";
 const UNMAPPED_READS_LABEL = "Download Unmapped Reads (.fasta)";
 const RESULTS_FOLDER_LABEL = "See Results Folder";
 
 // Get download options based on pipeline metadata.
-const getDownloadOptions = (pipelineRun, assembledTaxids) => {
+const getDownloadOptions = pipelineRun => {
   let stageTwoComplete = pipelineRun && pipelineRun.adjusted_remaining_reads;
-  let nonhostAssemblyComplete =
-    assembledTaxids && assembledTaxids.indexOf("all") >= 0;
   const assembled = pipelineRun && pipelineRun.assembled === 1;
 
   return compact([
     stageTwoComplete && NON_HOST_READS_LABEL,
     assembled && NON_HOST_CONTIGS_LABEL,
     assembled && NON_HOST_CONTIGS_MAPPING_LABEL,
-    nonhostAssemblyComplete && NON_HOST_ASSEMBLIES_LABEL,
     stageTwoComplete && UNMAPPED_READS_LABEL,
     RESULTS_FOLDER_LABEL
   ]);
 };
 
 // Convert options to download options.
-export const getDownloadDropdownOptions = (pipelineRun, assembledTaxids) => {
-  const downloadOptions = getDownloadOptions(pipelineRun, assembledTaxids);
+export const getDownloadDropdownOptions = pipelineRun => {
+  const downloadOptions = getDownloadOptions(pipelineRun);
 
   return downloadOptions.map(option => ({
     text: option,
@@ -56,12 +52,6 @@ const getDownloadLinkInfoMap = (sampleId, pipelineRun) => ({
     }`,
     newPage: false
   },
-  [NON_HOST_ASSEMBLIES_LABEL]: {
-    path: `/samples/${sampleId}/assembly/all?pipeline_version=${
-      pipelineRun.pipeline_version
-    }`,
-    newPage: false
-  },
   [UNMAPPED_READS_LABEL]: {
     path: `/samples/${sampleId}/unidentified_fasta?pipeline_version=${
       pipelineRun.pipeline_version
@@ -77,8 +67,8 @@ const getDownloadLinkInfoMap = (sampleId, pipelineRun) => ({
 export const getLinkInfoForDownloadOption = (option, sampleId, pipelineRun) =>
   getDownloadLinkInfoMap(sampleId, pipelineRun)[option];
 
-export const getDownloadLinks = (sampleId, pipelineRun, assembledTaxids) => {
-  const downloadOptions = getDownloadOptions(pipelineRun, assembledTaxids);
+export const getDownloadLinks = (sampleId, pipelineRun) => {
+  const downloadOptions = getDownloadOptions(pipelineRun);
 
   const downloadLinkInfoMap = getDownloadLinkInfoMap(sampleId, pipelineRun);
 
