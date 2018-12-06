@@ -33,7 +33,7 @@ class SearchBoxList extends React.Component {
   handleFilterChange = filter => {
     this.setState({
       filteredOptions: this.sortedOptions.filter(option =>
-        option.label.toLowerCase().includes(this.state.filter)
+        option.label.toLowerCase().includes(filter)
       )
     });
   };
