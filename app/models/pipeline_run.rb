@@ -846,7 +846,7 @@ class PipelineRun < ApplicationRecord
     MetricUtil.put_metric_now("samples.running.run_time", run_time, tags, "gauge")
 
     if alert_sent.zero?
-      threshold = 5.hours
+      threshold = 8.hours
       if run_time > threshold
         duration_hrs = (run_time / 60 / 60).round(2)
         msg = "LongRunningSampleEvent: Sample #{sample.id} has been running for #{duration_hrs} hours."
