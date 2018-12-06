@@ -16,7 +16,7 @@ const config = {
       "~": path.resolve(__dirname, "app/assets/src"),
       "~ui": path.resolve(__dirname, "app/assets/src/components/ui"),
       "~utils": path.resolve(__dirname, "app/assets/src/components/utils"),
-      "~styles": path.resolve(__dirname, "app/assets/src/styles")
+      styles: path.resolve(__dirname, "app/assets/src/styles")
     }
   },
   plugins: [

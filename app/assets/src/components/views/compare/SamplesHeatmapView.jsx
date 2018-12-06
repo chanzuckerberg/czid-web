@@ -7,20 +7,20 @@ import DeepEqual from "fast-deep-equal";
 import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
-import ErrorBoundary from "../../ErrorBoundary";
+import ErrorBoundary from "~/components/ErrorBoundary";
 import SampleDetailsSidebar from "../report/SampleDetailsSidebar";
-import { Divider, NarrowContainer, ViewHeader } from "../../layout";
-import SequentialLegendVis from "../../visualizations/legends/SequentialLegendVis.jsx";
-import Slider from "ui/controls/Slider";
-import { PrimaryButton } from "ui/controls/buttons";
+import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
+import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
+import Slider from "~ui/controls/Slider";
+import { PrimaryButton } from "~ui/controls/buttons";
 import {
   Dropdown,
   DownloadButtonDropdown,
   ThresholdFilterDropdown,
   MultipleNestedDropdown
-} from "ui/controls/dropdowns";
-import { processMetadata } from "utils/metadata";
-import { get, getMetadataTypes } from "api";
+} from "~ui/controls/dropdowns";
+import { processMetadata } from "~utils/metadata";
+import { get, getMetadataTypes } from "~/api";
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
 

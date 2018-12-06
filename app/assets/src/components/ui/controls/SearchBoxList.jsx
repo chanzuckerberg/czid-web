@@ -1,20 +1,20 @@
 import React from "react";
 import PropTypes from "prop-types";
-import CheckmarkIcon from "ui/icons/CheckmarkIcon";
-import Input from "ui/controls/Input";
+import CheckmarkIcon from "~ui/icons/CheckmarkIcon";
+import Input from "~ui/controls/Input";
 import cs from "./search_box_list.scss";
 import cx from "classnames";
-import { partition } from "lodash/fp";
 
 class SearchBoxList extends React.Component {
   constructor(props) {
     super(props);
 
-    this.sortedOptions = this.sortOptions();
+    let selected = new Set(this.props.selected);
+    this.sortedOptions = this.sortOptions(this.props.options, selected);
 
     this.state = {
       filteredOptions: this.sortedOptions,
-      selected: new Set(this.props.selected)
+      selected
     };
   }
 
@@ -38,13 +38,18 @@ class SearchBoxList extends React.Component {
     });
   };
 
-  sortOptions() {
-    // TODO(tcarvalho): consider reviewing data structures to simplify this function
-    let [selectedOptions, unselectedOptions] = partition(
-      option => this.state.selected.has(option.value),
-      this.props.options
-    );
-    return Array.from(this.state.selected)
+  sortOptions(options, selected) {
+    // TODO(tcarvalho): review data structures to simplify this function
+    let selectedOptions = {};
+    let unselectedOptions = [];
+    options.forEach(option => {
+      if (selected.has(option.value)) {
+        selectedOptions[option.value] = option;
+      } else {
+        unselectedOptions.push(option);
+      }
+    });
+    return Array.from(selected)
       .map(optionValue => selectedOptions[optionValue])
       .concat(unselectedOptions);
   }

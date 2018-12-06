@@ -2,9 +2,9 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 import { keyBy } from "lodash/fp";
-import { DataTooltip, ContextPlaceholder } from "ui/containers";
-import { SearchBoxList } from "ui/controls";
-import { openUrl } from "utils/links";
+import { DataTooltip, ContextPlaceholder } from "~ui/containers";
+import { SearchBoxList } from "~ui/controls";
+import { openUrl } from "~utils/links";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import cs from "./samples_heatmap_vis.scss";
 
