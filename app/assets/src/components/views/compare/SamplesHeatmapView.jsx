@@ -1,26 +1,28 @@
 import React from "react";
+import PropTypes from "prop-types";
 import axios from "axios";
 import queryString from "query-string";
+import { min, max } from "lodash/fp";
+import DeepEqual from "fast-deep-equal";
 import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
-import Dropdown from "../../ui/controls/dropdowns/Dropdown";
-import ErrorBoundary from "../../ErrorBoundary";
-import SamplesHeatmapVis from "./SamplesHeatmapVis";
-import MultipleNestedDropdown from "../../ui/controls/dropdowns/MultipleNestedDropdown";
-import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
+import ErrorBoundary from "~/components/ErrorBoundary";
 import SampleDetailsSidebar from "../report/SampleDetailsSidebar";
-import PropTypes from "prop-types";
-import Slider from "../../ui/controls/Slider";
-import ThresholdFilterDropdown from "../../ui/controls/dropdowns/ThresholdFilterDropdown";
-import DeepEqual from "fast-deep-equal";
-import NarrowContainer from "../../layout/NarrowContainer.jsx";
-import SequentialLegendVis from "../../visualizations/legends/SequentialLegendVis.jsx";
-import { min, max } from "lodash/fp";
-import ViewHeader from "../../layout/ViewHeader/ViewHeader";
-import Divider from "../../layout/Divider.jsx";
+import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
+import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
+import Slider from "~ui/controls/Slider";
+import { PrimaryButton } from "~ui/controls/buttons";
+import {
+  Dropdown,
+  DownloadButtonDropdown,
+  ThresholdFilterDropdown,
+  MultipleNestedDropdown
+} from "~ui/controls/dropdowns";
+import { processMetadata } from "~utils/metadata";
+import { get, getMetadataTypes } from "~/api";
 import cs from "./samples_heatmap_view.scss";
-import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown.jsx";
+import SamplesHeatmapVis from "./SamplesHeatmapVis";
 
 class SamplesHeatmapView extends React.Component {
   constructor(props) {
@@ -89,7 +91,7 @@ class SamplesHeatmapView extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchDataFromServer();
+    this.fetchViewData();
   }
 
   parseUrlParams() {
@@ -149,36 +151,44 @@ class SamplesHeatmapView extends React.Component {
     return "highest_" + countType + "_" + metricName;
   }
 
-  fetchDataFromServer() {
-    this.setState({ loading: true });
-
+  fetchHeatmapData() {
     if (this.lastRequestToken)
       this.lastRequestToken.cancel("Parameters changed");
     this.lastRequestToken = axios.CancelToken.source();
-    axios
-      .get("/samples/samples_taxons.json", {
-        params: {
-          sampleIds: this.state.sampleIds,
-          removedTaxonIds: Array.from(this.removedTaxonIds),
-          species: this.state.selectedOptions.species,
-          categories: this.state.selectedOptions.categories,
-          subcategories: this.state.selectedOptions.subcategories,
-          sortBy: this.metricToSortField(this.state.selectedOptions.metric),
-          thresholdFilters: this.state.selectedOptions.thresholdFilters,
-          taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
-          readSpecificity: this.state.selectedOptions.readSpecificity
-        },
-        cancelToken: this.lastRequestToken.token
-      })
-      .then(response => {
-        let newState = this.extractData(response.data);
-        newState.loading = false;
-        window.history.replaceState("", "", this.getUrlForCurrentParams());
-        this.setState(newState);
-      })
-      .catch(thrown => {
-        // TODO: process error if not cancelled request by client: if (!axios.isCancel(thrown) {
-      });
+
+    return get("/samples/samples_taxons.json", {
+      params: {
+        sampleIds: this.state.sampleIds,
+        removedTaxonIds: Array.from(this.removedTaxonIds),
+        species: this.state.selectedOptions.species,
+        categories: this.state.selectedOptions.categories,
+        subcategories: this.state.selectedOptions.subcategories,
+        sortBy: this.metricToSortField(this.state.selectedOptions.metric),
+        thresholdFilters: this.state.selectedOptions.thresholdFilters,
+        taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
+        readSpecificity: this.state.selectedOptions.readSpecificity
+      },
+      cancelToken: this.lastRequestToken.token
+    });
+  }
+
+  fetchMetadata() {
+    return this.state.metadataTypes || getMetadataTypes();
+  }
+
+  async fetchViewData() {
+    this.setState({ loading: true });
+
+    let [heatmapData, metadataTypes] = await Promise.all([
+      this.fetchHeatmapData(),
+      this.fetchMetadata()
+    ]);
+
+    let newState = this.extractData(heatmapData);
+    newState.metadataTypes = metadataTypes;
+    newState.loading = false;
+    window.history.replaceState("", "", this.getUrlForCurrentParams());
+    this.setState(newState);
   }
 
   extractData(rawData) {
@@ -194,7 +204,8 @@ class SamplesHeatmapView extends React.Component {
       sampleDetails[sample.sample_id] = {
         id: sample.sample_id,
         name: sample.name,
-        index: i
+        index: i,
+        metadata: processMetadata(sample.metadata)
       };
       sampleDetails[sample.name] = sampleDetails[sample.sample_id];
       for (let j = 0; j < sample.taxons.length; j++) {
@@ -273,7 +284,6 @@ class SamplesHeatmapView extends React.Component {
     ) {
       return;
     }
-
     let values = this.state.data[this.state.selectedOptions.metric];
     let scaleIndex = this.state.selectedOptions.dataScaleIdx;
 
@@ -290,7 +300,8 @@ class SamplesHeatmapView extends React.Component {
     if (
       this.state.loading ||
       !this.state.data ||
-      Object.values(this.state.data).every(e => !e.length)
+      Object.values(this.state.data).every(e => !e.length) ||
+      !this.state.metadataTypes
     ) {
       return;
     }
@@ -307,6 +318,7 @@ class SamplesHeatmapView extends React.Component {
           taxonIds={this.state.taxonIds}
           taxonDetails={this.state.taxonDetails}
           data={this.state.data}
+          metadataTypes={this.state.metadataTypes}
           metric={this.state.selectedOptions.metric}
           scale={this.state.availableOptions.scales[scaleIndex][1]}
           onRemoveTaxon={this.handleRemoveTaxon}
@@ -430,7 +442,7 @@ class SamplesHeatmapView extends React.Component {
   }
 
   updateHeatmap() {
-    this.fetchDataFromServer();
+    this.fetchViewData();
   }
 
   getUrlParams() {

@@ -14,8 +14,9 @@ const postWithCSRF = async (url, params) => {
   return resp.data;
 };
 
-const get = async url => {
-  const resp = await axios.get(url);
+// TODO: add error handling
+const get = async (url, config) => {
+  const resp = await axios.get(url, config);
 
   return resp.data;
 };
@@ -63,6 +64,7 @@ const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
 const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
 
 export {
+  get,
   getSampleMetadata,
   saveSampleMetadata,
   getMetadataTypes,

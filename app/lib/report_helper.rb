@@ -466,6 +466,7 @@ module ReportHelper
       results << {
         sample_id: sample_id,
         name: samples_by_id[sample_id].name,
+        metadata: samples_by_id[sample_id].metadata,
         taxons: filtered_rows
       }
     end

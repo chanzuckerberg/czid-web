@@ -8,6 +8,18 @@ import SvgSaver from "svgsaver";
 import symlog from "../../utils/d3/scales/symlog.js";
 import cs from "./heatmap.scss";
 import cx from "classnames";
+import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap.js";
+
+// TODO(tcarvalho): temporary hack to send elements to the back.
+// Remove once code is ported to d3 v4, which contains this function.
+d3.selection.prototype.lower = function() {
+  return this.each(function() {
+    var firstChild = this.parentNode.firstChild;
+    if (firstChild) {
+      this.parentNode.insertBefore(this, firstChild);
+    }
+  });
+};
 
 export default class Heatmap {
   constructor(container, data, options) {
@@ -22,7 +34,7 @@ export default class Heatmap {
         numberOfLevels: 10,
         scale: "linear",
         colors: null,
-        colorNoValue: "rgb(238, 241, 244)",
+        colorNoValue: "#eaeaea",
         fontSize: "9pt",
         textRotation: -65,
         marginTop: 30,
@@ -32,14 +44,18 @@ export default class Heatmap {
         minCellWidth: 26,
         minCellHeight: 26,
         minWidth: 1240,
-        minHeight: 700,
+        minHeight: 500,
         clustering: true,
         defaultClusterStep: 6,
         maxRowClusterWidth: 100,
         maxColumnClusterHeight: 100,
         spacing: 10,
         transitionDuration: 200,
-        nullValue: 0
+        nullValue: 0,
+        columnMetadata: [],
+        metadataColorScale: new CategoricalColormap(),
+        enableColumnMetadata: false,
+        iconPath: "/assets/icons"
       },
       options
     );
@@ -55,20 +71,24 @@ export default class Heatmap {
     this.columnClusterHeight = this.options.maxRowClusterWidth;
     this.scaleType = this.getScaleType();
 
-    this.processData();
+    this.addMetadataTrigger = null;
   }
 
   getScaleType() {
     return this.options.scale === "symlog" ? symlog : d3.scale.linear;
   }
 
+  start() {
+    this.processData();
+  }
+
   processData(start) {
     // This function implements the pipeline for preparing data
     // and svg for heatmap display.
     // Starting point can be chosen given what data was changed.
+    if (!start) start = "setupContainers";
+
     switch (start) {
-      case null:
-      case undefined:
       case "setupContainers":
         this.setupContainers();
       // falls through
@@ -77,6 +97,9 @@ export default class Heatmap {
       // falls through
       case "filter":
         this.filterData();
+      // falls through
+      case "processMetadata":
+        this.processMetadata();
       // falls through
       case "cluster":
         this.cluster();
@@ -98,12 +121,17 @@ export default class Heatmap {
     this.processData("cluster");
   }
 
+  updateColumnMetadata(metadata) {
+    this.options.columnMetadata = metadata;
+    this.processData("processMetadata");
+  }
+
   parseData() {
-    this.rowLabels = this.data.rowLabels.map((label, pos) => {
-      return { label, pos, shaded: false };
+    this.rowLabels = this.data.rowLabels.map((row, pos) => {
+      return Object.assign({ pos, shaded: false }, row);
     });
-    this.columnLabels = this.data.columnLabels.map((label, pos) => {
-      return { label, pos, shaded: false };
+    this.columnLabels = this.data.columnLabels.map((column, pos) => {
+      return Object.assign({ pos, shaded: false }, column);
     });
 
     // get heatmap size and margins from data
@@ -180,6 +208,7 @@ export default class Heatmap {
     this.gColumnDendogram = this.g
       .append("g")
       .attr("class", cx(cs.dendogram, "columnDendogram"));
+    this.gColumnMetadata = this.g.append("g").attr("class", cs.columnMetadata);
   }
 
   placeContainers() {
@@ -231,7 +260,9 @@ export default class Heatmap {
 
     this.gRowLabels.attr(
       "transform",
-      `translate(0,${this.columnLabelsHeight})`
+      `translate(0, ${this.columnLabelsHeight +
+        this.options.minCellHeight * this.options.columnMetadata.length +
+        this.options.spacing})`
     );
     this.gColumnLabels.attr(
       "transform",
@@ -239,18 +270,55 @@ export default class Heatmap {
     );
     this.gCells.attr(
       "transform",
-      `translate(${this.rowLabelsWidth},${this.columnLabelsHeight})`
+      `translate(${this.rowLabelsWidth},${this.columnLabelsHeight +
+        this.options.minCellHeight * this.options.columnMetadata.length +
+        this.options.spacing})`
     );
     this.gRowDendogram.attr(
       "transform",
       `translate(${this.rowLabelsWidth +
-        this.cell.width * this.columnLabels.length},${this.columnLabelsHeight})`
+        this.cell.width * this.columnLabels.length},${this.columnLabelsHeight +
+        this.options.minCellHeight * this.options.columnMetadata.length +
+        this.options.spacing})`
     );
     this.gColumnDendogram.attr(
       "transform",
       `translate(${this.rowLabelsWidth},${this.columnLabelsHeight +
-        this.cell.height * this.filteredRowLabels.length})`
+        this.cell.height * this.filteredRowLabels.length +
+        this.options.minCellHeight * this.options.columnMetadata.length +
+        this.options.spacing})`
     );
+    this.gColumnMetadata.attr(
+      "transform",
+      `translate(0, ${this.columnLabelsHeight})`
+    );
+  }
+
+  processMetadata() {
+    // count number of distinct pieces of metadata
+    let metadatumCount = 0;
+    this.options.columnMetadata.forEach(metadata => {
+      let metadataSet = new Set();
+      this.columnLabels.forEach(column => {
+        let metadatumValue = (column.metadata || {})[metadata.value];
+        if (metadatumValue) metadataSet.add(metadatumValue);
+      });
+      metadatumCount += metadataSet.size;
+    });
+
+    let colors = this.options.metadataColorScale.getNScale(metadatumCount);
+    let idx = 0;
+    this.metadataColors = {};
+    this.options.columnMetadata.forEach(metadata => {
+      let colorMap = {};
+
+      this.columnLabels.forEach(column => {
+        let metadatumValue = (column.metadata || {})[metadata.value];
+        if (metadatumValue && !colorMap[metadatumValue])
+          colorMap[metadatumValue] = colors[idx++];
+      });
+      this.metadataColors[metadata.value] = colorMap;
+    });
   }
 
   cluster() {
@@ -264,11 +332,14 @@ export default class Heatmap {
     this.renderHeatmap();
     this.renderRowLabels();
     this.renderColumnLabels();
+    this.renderColumnMetadata();
 
     if (this.options.clustering) {
       if (this.rowClustering) this.renderRowDendrogram();
       if (this.columnClustering) this.renderColumnDendrogram();
     }
+
+    this.options.onUpdateFinished && this.options.onUpdateFinished();
   }
 
   getScale() {
@@ -411,12 +482,12 @@ export default class Heatmap {
     this.svgSaver.asSvg(this.svg.node(), filename || "heatmap.svg");
   }
 
-  removeRow(row) {
+  removeRow = row => {
     this.options.onRemoveRow && this.options.onRemoveRow(row.label);
     delete row.pos;
     row.hidden = true;
     this.processData("filter");
-  }
+  };
 
   renderHeatmap() {
     let applyFormat = nodes => {
@@ -425,9 +496,9 @@ export default class Heatmap {
         .attr("height", this.cell.height - 2)
         .attr(
           "x",
-          d => this.columnLabels[d.columnIndex].pos * this.cell.width + 2
+          d => this.columnLabels[d.columnIndex].pos * this.cell.width + 1
         )
-        .attr("y", d => this.rowLabels[d.rowIndex].pos * this.cell.height + 2)
+        .attr("y", d => this.rowLabels[d.rowIndex].pos * this.cell.height + 1)
         .style("fill", d => {
           if (!d.value && d.value !== 0) {
             return this.options.colorNoValue;
@@ -447,6 +518,7 @@ export default class Heatmap {
 
     cells
       .exit()
+      .lower()
       .transition()
       .duration(this.options.transitionDuration)
       .style("opacity", 0)
@@ -513,6 +585,7 @@ export default class Heatmap {
 
     rowLabel
       .exit()
+      .lower()
       .transition()
       .duration(this.options.transitionDuration)
       .style("opacity", 0)
@@ -560,7 +633,7 @@ export default class Heatmap {
       .text("X")
       .attr("transform", `translate(0, ${this.cell.height / 2})`)
       .style("dominant-baseline", "central")
-      .on("click", this.removeRow.bind(this));
+      .on("click", this.removeRow);
 
     applyFormat(rowLabelEnter);
   }
@@ -606,6 +679,224 @@ export default class Heatmap {
       );
 
     applyFormat(columnLabelEnter);
+  }
+
+  renderColumnMetadata() {
+    this.renderColumnMetadataLabels();
+    this.renderColumnMetadataCells();
+    this.renderColumnMetadataAddLink();
+  }
+
+  renderColumnMetadataLabels() {
+    let applyFormat = nodes => {
+      nodes.attr("transform", (_, idx) => {
+        return `translate(0, ${idx * this.options.minCellHeight})`;
+      });
+    };
+
+    let columnMetadataLabel = this.gColumnMetadata
+      .selectAll(`.${cs.columnMetadataLabel}`)
+      .data(this.options.columnMetadata, d => d.value);
+
+    columnMetadataLabel
+      .exit()
+      .lower()
+      .transition()
+      .duration(this.options.transitionDuration)
+      .style("opacity", 0)
+      .remove();
+
+    let columnMetadataLabelUpdate = columnMetadataLabel
+      .transition()
+      .duration(this.options.transitionDuration);
+    applyFormat(columnMetadataLabelUpdate);
+
+    let columnMetadataLabelEnter = columnMetadataLabel
+      .enter()
+      .append("g")
+      .attr("class", cs.columnMetadataLabel)
+      .on("mousein", this.options.onColumnMetadataLabelMouseIn)
+      .on("mouseout", this.options.onColumnMetadataLabelMouseOut);
+
+    columnMetadataLabelEnter
+      .append("rect")
+      .attr("class", cs.hoverTarget)
+      .attr("width", this.rowLabelsWidth)
+      .attr("height", this.options.minCellHeight)
+      .style("text-anchor", "end");
+
+    columnMetadataLabelEnter
+      .append("text")
+      .text(d => d.label)
+      .attr(
+        "transform",
+        `translate(${this.rowLabelsWidth - this.options.spacing}, ${this.options
+          .minCellHeight / 2})`
+      )
+      .style("dominant-baseline", "central")
+      .style("text-anchor", "end")
+      .on(
+        "click",
+        d =>
+          this.options.onColumnMetadataClick &&
+          this.options.onColumnMetadataClick(d.value, d3.event)
+      )
+      .on("mouseover", d => {
+        this.options.onColumnMetadataLabelHover &&
+          this.options.onColumnMetadataLabelHover(d);
+      })
+      .on("mouseleave", d => {
+        this.options.onColumnMetadataLabelOut &&
+          this.options.onColumnMetadataLabelOut(d);
+      })
+      .on("mousemove", d => {
+        this.options.onColumnMetadataLabelMove &&
+          this.options.onColumnMetadataLabelMove(d, d3.event);
+      });
+
+    applyFormat(columnMetadataLabelEnter);
+  }
+
+  renderColumnMetadataCells() {
+    let applyFormatForCells = nodes => {
+      nodes
+        .attr("width", this.cell.width - 2)
+        .attr("height", this.options.minCellHeight - 2)
+        .attr(
+          "transform",
+          d =>
+            `translate(${d.pos * this.cell.width + this.rowLabelsWidth + 1}, 0)`
+        );
+    };
+
+    let applyFormatForRows = nodes => {
+      nodes.attr(
+        "transform",
+        (_, i) => `translate(0, ${this.options.minCellHeight * i})`
+      );
+    };
+
+    let columnnMetadataCells = this.gColumnMetadata
+      .selectAll(".columnMetadataCells")
+      .data(this.options.columnMetadata, d => d.value);
+
+    columnnMetadataCells
+      .exit()
+      .lower()
+      .transition()
+      .duration(this.options.transitionDuration)
+      .style("opacity", 0)
+      .remove();
+
+    let rowsEnter = columnnMetadataCells
+      .enter()
+      .append("g")
+      .attr("class", d => cx("columnMetadataCells", d.value));
+    applyFormatForRows(rowsEnter);
+
+    let rowsUpdate = columnnMetadataCells
+      .transition()
+      .duration(this.options.transitionDuration);
+    applyFormatForRows(rowsUpdate);
+
+    this.options.columnMetadata.forEach(metadata => {
+      let columnMetadataCell = this.gColumnMetadata
+        .select(`.columnMetadataCells.${metadata.value}`)
+        .selectAll(`.${cs.columndMetadataCell}`)
+        .data(this.columnLabels, d => d.label);
+
+      columnMetadataCell
+        .exit()
+        .lower()
+        .transition()
+        .duration(this.options.transitionDuration)
+        .style("opacity", 0)
+        .remove();
+
+      let columnMetadataCellUpdate = columnMetadataCell
+        .transition()
+        .duration(this.options.transitionDuration);
+      applyFormatForCells(columnMetadataCellUpdate);
+
+      let columnMetadataCellEnter = columnMetadataCell
+        .enter()
+        .append("rect")
+        .attr("class", cs.columnMetadataCell)
+        .style("fill", d => {
+          let metadataValue = d.metadata[metadata.value];
+          return metadataValue
+            ? this.metadataColors[metadata.value][metadataValue]
+            : this.options.colorNoValue;
+        });
+      applyFormatForCells(columnMetadataCellEnter);
+    });
+  }
+
+  renderColumnMetadataAddLink() {
+    if (this.options.onAddColumnMetadataClick) {
+      let addLink = this.gColumnMetadata
+        .selectAll(`.${cs.columnMetadataAdd}`)
+        .data([1]);
+
+      let addLinkEnter = addLink
+        .enter()
+        .append("g")
+        .attr("class", cs.columnMetadataAdd);
+
+      let yPos = this.options.spacing / 2;
+
+      addLinkEnter.append("rect");
+
+      addLinkEnter.append("line").attr("class", cs.metadataAddLine);
+
+      let addMetadataTrigger = addLinkEnter
+        .append("g")
+        .attr("class", cs.metadataAddTrigger)
+        .on("click", () => {
+          this.options.onAddColumnMetadataClick(addMetadataTrigger.node(), {
+            x: this.rowLabelsWidth - 10,
+            y: yPos
+          });
+        });
+
+      addMetadataTrigger
+        .append("svg:image")
+        .attr("class", cs.metadataAddIcon)
+        .attr("width", 10)
+        .attr("height", 10)
+        .attr("x", this.rowLabelsWidth - 15)
+        .attr("y", yPos - 5)
+        .attr("xlink:href", `${this.options.iconPath}/edit.svg`);
+
+      // setup triggers
+      if (addMetadataTrigger.size())
+        this.addMetadataTrigger = addMetadataTrigger.node();
+
+      // update
+      addLink.attr(
+        "transform",
+        `translate(0, ${this.options.columnMetadata.length *
+          this.options.minCellHeight})`
+      );
+
+      addLink
+        .select("rect")
+        .attr(
+          "width",
+          this.rowLabelsWidth + this.columnLabels.length * this.cell.width
+        )
+        .attr("height", this.options.spacing);
+
+      addLink
+        .select(`.${cs.metadataAddLine}`)
+        .attr("x1", this.rowLabelsWidth)
+        .attr(
+          "x2",
+          this.rowLabelsWidth + this.columnLabels.length * this.cell.width
+        )
+        .attr("y1", yPos)
+        .attr("y2", yPos);
+    }
   }
 
   // Dendograms
@@ -753,5 +1044,15 @@ export default class Heatmap {
       .on("mouseout", d => {
         updateHighlights(d.source, false);
       });
+  }
+
+  getAddMetadataTriggerRef() {
+    return this.addMetadataTrigger;
+  }
+
+  getColumnMetadataLegend(value) {
+    return Object.assign({}, this.metadataColors[value], {
+      Unknown: this.options.colorNoValue
+    });
   }
 }

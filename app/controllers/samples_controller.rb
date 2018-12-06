@@ -765,7 +765,7 @@ class SamplesController < ApplicationController
     # TODO: should fail if field is not well formatted and return proper error to client
     sort_by = params[:sortBy] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
     species_selected = params[:species] == "1" # Otherwise genus selected
-    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs])
+    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs, :metadata])
     return {} if samples.empty?
 
     first_sample = samples.first
