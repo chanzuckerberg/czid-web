@@ -1,4 +1,5 @@
 # Shared variables using Docker x- extension and YAML merging syntax.
+
 x-web-variables: &web-variables
   ? ALIGNMENT_CONFIG_DEFAULT_NAME=2018-04-01
   ? SAMPLES_BUCKET_NAME=idseq-samples-development
