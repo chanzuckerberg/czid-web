@@ -1,29 +1,33 @@
-import { Dropdown as BaseDropdown, Label } from "semantic-ui-react";
 import PropTypes from "prop-types";
+import { without, omit } from "lodash/fp";
 import React from "react";
+import BareDropdown from "./BareDropdown";
+import DropdownTrigger from "./common/DropdownTrigger";
+import DropdownLabel from "./common/DropdownLabel";
+import cs from "./multiple_dropdown.scss";
+import Checkbox from "../Checkbox";
 
 class MultipleDropdown extends React.Component {
   constructor(props) {
     super(props);
-    this.passedOnChange = this.props.onChange;
 
     this.state = {
       value: this.props.value || []
     };
   }
 
-  optionClicked(e, d) {
-    e.stopPropagation();
-    let value = this.state.value.slice();
-    let idx = value.indexOf(d["data-value"]);
-    if (idx > -1) {
-      value.splice(idx, 1);
+  handleOptionClicked = (value, isChecked) => {
+    let selectedValues = this.state.value.slice();
+    if (!isChecked) {
+      selectedValues = without([value], selectedValues);
     } else {
-      value.push(d["data-value"]);
+      selectedValues.push(value);
     }
-    this.setState({ value });
-    this.passedOnChange && this.passedOnChange(e, value);
-  }
+    this.setState({ value: selectedValues });
+    this.props.onChange && this.props.onChange(selectedValues);
+  };
+
+  handleItemClicked = event => event.stopPropagation();
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.value !== this.state.value) {
@@ -36,50 +40,57 @@ class MultipleDropdown extends React.Component {
     let checkedOptions = this.props.value || this.state.value;
     for (let option of this.props.options) {
       ret.push(
-        <BaseDropdown.Item
+        <BareDropdown.Item
           key={option.value}
           data-value={option.value}
-          onClick={this.optionClicked.bind(this)}
+          onClick={this.handleItemClicked}
         >
-          <span className="text">
-            <input
-              type="checkbox"
-              checked={checkedOptions.indexOf(option.value) > -1}
-              readOnly
-            />
-            {option.text}
-          </span>
-        </BaseDropdown.Item>
+          <Checkbox
+            value={option.value}
+            label={option.text}
+            checked={checkedOptions.indexOf(option.value) > -1}
+            onChange={this.handleOptionClicked}
+          />
+        </BareDropdown.Item>
       );
     }
     return ret;
   }
 
   renderText() {
+    const label = this.state.value.length > 0 && (
+      <DropdownLabel
+        className={cs.dropdownLabel}
+        disabled={this.props.disabled}
+        text={String(this.state.value.length)}
+      />
+    );
     return (
-      <div className="label-container">
-        <div className="label-container-title">{this.props.label}</div>
-        {this.state.value.length > 0 && (
-          <Label className="label-container-count">
-            {this.state.value.length}
-          </Label>
-        )}
-      </div>
+      <DropdownTrigger
+        className={cs.dropdownTrigger}
+        label={this.props.label}
+        value={label}
+        rounded={this.props.rounded}
+      />
     );
   }
 
   render() {
+    const otherProps = omit(
+      ["label", "options", "value", "rounded", "onChange"],
+      this.props
+    );
+
     return (
-      <BaseDropdown
+      <BareDropdown
         floating
-        className="idseq-ui multiple"
-        {...this.props}
-        options={undefined}
-        value={undefined}
+        className={cs.multipleDropdown}
+        {...otherProps}
+        arrowInsideTrigger
         trigger={this.renderText()}
       >
-        <BaseDropdown.Menu>{this.renderMenuItems()}</BaseDropdown.Menu>
-      </BaseDropdown>
+        <BareDropdown.Menu>{this.renderMenuItems()}</BareDropdown.Menu>
+      </BareDropdown>
     );
   }
 }
@@ -92,7 +103,9 @@ MultipleDropdown.propTypes = {
   label: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   options: PropTypes.arrayOf(PropTypes.object),
-  value: PropTypes.array
+  value: PropTypes.array,
+  rounded: PropTypes.bool,
+  disabled: PropTypes.bool
 };
 
 export default MultipleDropdown;

@@ -372,7 +372,7 @@ class SamplesHeatmapView extends React.Component {
         options={this.state.availableOptions.metrics}
         onChange={this.onMetricChange}
         value={this.state.selectedOptions.metric}
-        label="Metric:"
+        label="Metric: "
         disabled={!this.state.data}
       />
     );
@@ -416,7 +416,7 @@ class SamplesHeatmapView extends React.Component {
         options={this.state.availableOptions.taxonLevels}
         value={this.state.selectedOptions.species}
         onChange={this.onTaxonLevelChange}
-        label="Taxon Level:"
+        label="Taxon Level: "
         disabled={!this.state.data}
       />
     );
@@ -446,7 +446,7 @@ class SamplesHeatmapView extends React.Component {
         value={this.state.selectedOptions.dataScaleIdx}
         onChange={this.onDataScaleChange}
         options={options}
-        label="Scale:"
+        label="Scale: "
         disabled={!this.state.data}
       />
     );
@@ -492,6 +492,7 @@ class SamplesHeatmapView extends React.Component {
     return (
       <MultipleNestedDropdown
         fluid
+        rounded
         options={options}
         onChange={this.onCategoryChange}
         selectedOptions={this.state.selectedOptions.categories}
@@ -524,7 +525,7 @@ class SamplesHeatmapView extends React.Component {
         options={options}
         onChange={this.onBackgroundChanged}
         value={this.state.selectedOptions.background}
-        label="Background:"
+        label="Background: "
         disabled={!this.state.data}
       />
     );

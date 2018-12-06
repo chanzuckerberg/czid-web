@@ -1,0 +1,14 @@
+@import "~styles/themes/colors";
+
+.dropdownLabel {
+  /* Override semantic ui */
+  background-color: $off-white !important;
+  color: $primary-light !important;
+  font-weight: 600 !important;
+  float: right;
+  font-size: 12px;
+
+  &.disabled {
+    color: $medium-grey !important;
+  }
+}
