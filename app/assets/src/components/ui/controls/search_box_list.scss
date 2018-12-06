@@ -51,6 +51,10 @@
 
     .listLabel {
       display: inline-block;
+
+      &:hover {
+        color: $primary-light;
+      }
     }
   }
 }
