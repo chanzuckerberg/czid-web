@@ -1,10 +1,11 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .searchBoxList {
   background-color: $white;
   border: 1px solid $light-grey;
   border-radius: 5px;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: $box-shadow-bottom-right;
   display: inline-block;
   font-size: 13px;
   min-width: 200px;
