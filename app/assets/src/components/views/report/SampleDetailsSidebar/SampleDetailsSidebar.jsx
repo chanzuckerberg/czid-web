@@ -177,7 +177,6 @@ class SampleDetailsSidebar extends React.Component {
           pipelineInfo={pipelineInfo}
           erccComparison={additionalInfo.ercc_comparison}
           pipelineRun={pipelineRun}
-          assembledTaxIds={additionalInfo.assembled_taxids}
           sampleId={this.props.sampleId}
         />
       );

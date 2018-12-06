@@ -191,7 +191,6 @@ class SamplesController < ApplicationController
     summary_stats = nil
     pr_display = nil
     ercc_comparison = nil
-    assembled_taxids = []
 
     editable = current_power.updatable_sample?(@sample)
 
@@ -200,7 +199,6 @@ class SamplesController < ApplicationController
       ercc_comparison = pr.compare_ercc_counts
 
       job_stats_hash = job_stats_get(pr.id)
-      assembled_taxids = JSON.parse(pr.assembled_taxids || "[]")
       if job_stats_hash.present?
         summary_stats = get_summary_stats(job_stats_hash, pr)
       end
@@ -218,8 +216,7 @@ class SamplesController < ApplicationController
         notes: @sample.sample_notes,
         ercc_comparison: ercc_comparison,
         pipeline_run: pr_display,
-        summary_stats: summary_stats,
-        assembled_taxids: assembled_taxids
+        summary_stats: summary_stats
       }
     }
   end
@@ -418,12 +415,6 @@ class SamplesController < ApplicationController
       message: 'Unable to update sample',
       errors: error_messages
     }
-  end
-
-  def assembly
-    pr = select_pipeline_run(@sample, params)
-    assembly_fasta = pr.assembly_output_s3_path(params[:taxid])
-    send_data get_s3_file(assembly_fasta), filename: @sample.name + '_' + clean_taxid_name(pr, params[:taxid]) + '-assembled-scaffolds.fasta'
   end
 
   def contig_taxid_list
