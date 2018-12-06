@@ -1052,7 +1052,7 @@ export default class Heatmap {
 
   getColumnMetadataLegend(value) {
     return Object.assign({}, this.metadataColors[value], {
-      Unkown: this.options.colorNoValue
+      Unknown: this.options.colorNoValue
     });
   }
 }

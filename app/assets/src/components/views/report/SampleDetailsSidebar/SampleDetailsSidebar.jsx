@@ -16,7 +16,7 @@ import MetadataTab from "./MetadataTab";
 import PipelineTab from "./PipelineTab";
 import NotesTab from "./NotesTab";
 import { processMetadata, processMetadataTypes } from "~utils/metadata";
-import { processPipelineInfo, processAdditionalInfo } from "./info_utils";
+import { processPipelineInfo, processAdditionalInfo } from "./utils";
 import cs from "./sample_details_sidebar.scss";
 
 const TABS = ["Metadata", "Pipeline", "Notes"];
