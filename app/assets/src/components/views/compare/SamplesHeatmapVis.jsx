@@ -81,8 +81,7 @@ class SamplesHeatmapVis extends React.Component {
   extractTaxonLabels() {
     return this.props.taxonIds.map(id => {
       return {
-        label: this.props.taxonDetails[id].name,
-        metadata: this.props.taxonDetails[id].metadata
+        label: this.props.taxonDetails[id].name
       };
     });
   }
@@ -156,12 +155,6 @@ class SamplesHeatmapVis extends React.Component {
 
   handleCellClick = (cell, currentEvent) => {
     openUrl(`/samples/${this.props.sampleIds[cell.columnIndex]}`, currentEvent);
-  };
-
-  handleUpdateFinished = () => {
-    this.setState({
-      addMetadataTrigger: this.heatmap.getAddMetadataTriggerRef()
-    });
   };
 
   handleAddColumnMetadataClick = trigger => {

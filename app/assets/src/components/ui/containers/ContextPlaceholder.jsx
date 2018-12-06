@@ -2,6 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 
 export default class ContextPlaceholder extends React.PureComponent {
+  // Creates a placeholder for components whose position will be relative
+  // to a given DOM element. Similar to semantic-ui Popup.
+  // Rewrote because could not make Popup work as a controllable component
+  // while respondig to events like click outside.
+  // Some positioning decisions
+
   constructor(props) {
     super(props);
 
@@ -36,12 +42,12 @@ export default class ContextPlaceholder extends React.PureComponent {
   getStyle() {
     let style = { position: "absolute" };
     if (this.props.context && this.placeholderRef) {
-      Object.assign(style, this.getPosition());
+      Object.assign(style, this.getPlaceholderPosition());
     }
     return style;
   }
 
-  getPosition() {
+  getPlaceholderPosition() {
     const contextRect = this.props.context.getBoundingClientRect();
     const placeholderRect = this.placeholderRef.getBoundingClientRect();
     let { horizontalOffset, verticalOffset, position } = this.props;

@@ -4,17 +4,18 @@ import CheckmarkIcon from "ui/icons/CheckmarkIcon";
 import Input from "ui/controls/Input";
 import cs from "./search_box_list.scss";
 import cx from "classnames";
+import { partition } from "lodash/fp";
 
 class SearchBoxList extends React.Component {
   constructor(props) {
     super(props);
 
+    this.sortedOptions = this.sortOptions();
+
     this.state = {
-      filter: "",
+      filteredOptions: this.sortedOptions,
       selected: new Set(this.props.selected)
     };
-
-    this.sortedOptions = this.sortOptions();
   }
 
   handleOptionClick = optionValue => {
@@ -29,19 +30,20 @@ class SearchBoxList extends React.Component {
     });
   };
 
-  handleFilterChange = filter => this.setState({ filter });
+  handleFilterChange = filter => {
+    this.setState({
+      filteredOptions: this.sortedOptions.filter(option =>
+        option.label.toLowerCase().includes(this.state.filter)
+      )
+    });
+  };
 
   sortOptions() {
-    // TODO(tcarvalho): review data structures to simplify this function
-    let selectedOptions = {};
-    let unselectedOptions = [];
-    this.props.options.forEach(option => {
-      if (this.state.selected.has(option.value)) {
-        selectedOptions[option.value] = option;
-      } else {
-        unselectedOptions.push(option);
-      }
-    });
+    // TODO(tcarvalho): consider reviewing data structures to simplify this function
+    let [selectedOptions, unselectedOptions] = partition(
+      option => this.state.selected.has(option.value),
+      this.props.options
+    );
     return Array.from(this.state.selected)
       .map(optionValue => selectedOptions[optionValue])
       .concat(unselectedOptions);
@@ -61,25 +63,22 @@ class SearchBoxList extends React.Component {
           />
         </div>
         <div className={cs.listBox}>
-          {this.sortedOptions.map(
-            option =>
-              option.label.toLowerCase().includes(this.state.filter) && (
-                <div
-                  className={cx(cs.listElement, {
-                    active: this.state.selected.has(option.value)
-                  })}
-                  key={`option-${option.value}`}
-                  onClick={() => this.handleOptionClick(option.value)}
-                >
-                  <div className={cs.listCheckmark}>
-                    {this.state.selected.has(option.value) && (
-                      <CheckmarkIcon size="small" />
-                    )}
-                  </div>
-                  <div className={cs.listLabel}>{option.label}</div>
-                </div>
-              )
-          )}
+          {this.state.filteredOptions.map(option => (
+            <div
+              className={cx(cs.listElement, {
+                active: this.state.selected.has(option.value)
+              })}
+              key={`option-${option.value}`}
+              onClick={() => this.handleOptionClick(option.value)}
+            >
+              <div className={cs.listCheckmark}>
+                {this.state.selected.has(option.value) && (
+                  <CheckmarkIcon size="small" />
+                )}
+              </div>
+              <div className={cs.listLabel}>{option.label}</div>
+            </div>
+          ))}
         </div>
       </div>
     );

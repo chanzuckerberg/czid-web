@@ -14,10 +14,9 @@ const config = {
     extensions: [".js", ".jsx"],
     alias: {
       "~": path.resolve(__dirname, "app/assets/src"),
-      api: path.resolve(__dirname, "app/assets/src/api"),
-      ui: path.resolve(__dirname, "app/assets/src/components/ui"),
-      utils: path.resolve(__dirname, "app/assets/src/components/utils"),
-      styles: path.resolve(__dirname, "app/assets/src/styles")
+      "~ui": path.resolve(__dirname, "app/assets/src/components/ui"),
+      "~utils": path.resolve(__dirname, "app/assets/src/components/utils"),
+      "~styles": path.resolve(__dirname, "app/assets/src/styles")
     }
   },
   plugins: [
