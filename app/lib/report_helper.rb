@@ -216,8 +216,7 @@ module ReportHelper
       subsampled_reads: pipeline_run.subsampled_reads,
       sample_info: sample,
       default_background: Background.find(pipeline_run.sample.default_background_id),
-      taxon_fasta_flag: !pipeline_run.taxon_byteranges.empty?,
-      assembled_taxids: pipeline_run.assembled_taxids ? JSON.parse(pipeline_run.assembled_taxids) : []
+      taxon_fasta_flag: !pipeline_run.taxon_byteranges.empty?
     }
   end
 
