@@ -18,7 +18,7 @@ class SamplesController < ApplicationController
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -237,23 +237,18 @@ class SamplesController < ApplicationController
     }
   end
 
-  # GET /samples/metadata_types
-  # For now, the types are always the same. Later, it may depend on the host.
-  def metadata_types
-    metadata_types = Metadatum::KEY_TO_TYPE.keys.map do |key|
-      {
-        key: key,
-        dataType: Metadatum.convert_type_to_string(Metadatum::KEY_TO_TYPE[key]),
-        name: Metadatum::KEY_TO_DISPLAY_NAME[key],
-        options: Metadatum::KEY_TO_STRING_OPTIONS[key]
-      }
+  # GET /samples/metadata_types_by_host_genome_name
+  def metadata_types_by_host_genome_name
+    metadata_types_by_host_genome_name = {}
+    HostGenome.all.pluck(:name).each do |host_genome_name|
+      metadata_types_by_host_genome_name[host_genome_name] = get_metadata_types_by_host_genome_name(host_genome_name)
     end
-    render json: metadata_types
+
+    render json: metadata_types_by_host_genome_name
   end
 
   # GET /samples/1
   # GET /samples/1.json
-
   def show
     @pipeline_run = select_pipeline_run(@sample, params)
     @amr_counts = nil

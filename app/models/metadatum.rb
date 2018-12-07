@@ -42,7 +42,12 @@ class Metadatum < ApplicationRecord
     sequencer: STRING_TYPE,
     rna_dna_input: NUMBER_TYPE,
     library_prep_batch: STRING_TYPE,
-    extraction_batch: STRING_TYPE
+    extraction_batch: STRING_TYPE,
+    sample_unit: STRING_TYPE,
+    life_stage: STRING_TYPE,
+    id_method: STRING_TYPE,
+    genus_species: STRING_TYPE,
+    blood_fed: STRING_TYPE
   }.freeze
 
   # Key to the valid string options.
@@ -61,6 +66,24 @@ class Metadatum < ApplicationRecord
     sequencer: %w[MiSeq NextSeq HiSeq NovaSeq Other]
   }.freeze
 
+  # Valid string options that apply ONLY TO MOSQUITOES. (short-term special case)
+  MOSQUITO_KEY_TO_STRING_OPTIONS = {
+    sample_unit: ["Pool", "Singleton"],
+    life_stage: ["Larva", "Nymph", "Adult"],
+    id_method: ["TEA", "Freeze", "CO2", "Dried", "Other"],
+    genus_species: [
+      "Aedes aegypti",
+      "Culex erythrothorax",
+      "Aedes sierrensis",
+      "Anopheles punctipennis",
+      "Anopheles freeborni",
+      "Culex tarsalis",
+      "Culex pipiens",
+      "Aedex albopictus",
+      "Other"
+    ],
+    blood_fed: ["Yes", "No"]
+  }.freeze
   # Mapping from alternative name to our name. Used at upload time.
   KEY_ALT_NAMES = {
     sample_unique_id: "unique_id",
@@ -84,7 +107,7 @@ class Metadatum < ApplicationRecord
     collection_location: "Sample Collection Location",
     collected_by: "Collected By",
     age: "Age",
-    gender: "Gender",
+    gender: "Sex",
     race: "Race",
     primary_diagnosis: "Primary Diagnosis",
     antibiotic_administered: "Antibiotic Administered",
@@ -102,13 +125,64 @@ class Metadatum < ApplicationRecord
     sequencer: "Sequencer",
     rna_dna_input: "RNA / DNA Input (ng)",
     library_prep_batch: "Library Prep Batch",
-    extraction_batch: "Extraction Batch"
+    extraction_batch: "Extraction Batch",
+    sample_unit: "Sample Unit",
+    life_stage: "Life Stage",
+    id_method: "ID Method",
+    genus_species: "Genus/Species",
+    blood_fed: "Blood Fed"
+  }.freeze
+
+  HOST_GENOME_NAME_TO_METADATA_KEYS = {
+    common: %w[
+      unique_id
+      sample_type
+      nucleotide_type
+      collection_date
+      collection_location
+      collected_by
+      gender
+      known_organism
+      detection_method
+      library_prep
+      sequencer
+      rna_dna_input
+      library_prep_batch
+      extraction_batch
+    ],
+    Human: %w[
+      age
+      race
+      primary_diagnosis
+      antibiotic_administered
+      admission_date
+      admission_type
+      discharge_date
+      discharge_type
+      immunocomp
+      other_infections
+      comorbidity
+      infection_class
+    ],
+    Mosquito: %w[
+      sample_unit
+      life_stage
+      id_method
+      genus_species
+      blood_fed
+    ],
+    default: %w[
+      life_stage
+      id_method
+      genus_species
+    ]
   }.freeze
 
   # Custom validator called on save or update. Writes to the *_validated_value column.
   def set_validated_values
     # Check if the key is valid
-    unless key && KEY_TO_TYPE.key?(key.to_sym)
+    valid_keys = self.class.valid_keys_by_host_genome_name(sample.host_genome_name)
+    unless key && valid_keys.include?(key)
       errors.add(:key, "#{key} is not a supported metadatum")
     end
 
@@ -123,10 +197,12 @@ class Metadatum < ApplicationRecord
   # Called by set_validated_values custom validator
   def check_and_set_string_type
     key = self.key.to_sym
-    if KEY_TO_STRING_OPTIONS.key?(key)
+
+    options = self.class.get_string_options(key, sample.host_genome_name)
+
+    if options
       # If there are explicit string options, match the value to one of them.
       matched = false
-      options = KEY_TO_STRING_OPTIONS[key]
       options.each do |opt|
         if Metadatum.str_to_basic_chars(text_raw_value) == Metadatum.str_to_basic_chars(opt)
           # Ex: Match 'neb ultra-iifs dna' to 'NEB Ultra II FS DNA'
@@ -313,5 +389,27 @@ class Metadatum < ApplicationRecord
       return "number"
     end
     ""
+  end
+
+  def self.valid_keys_by_host_genome_name(host_genome_name)
+    metadata_map = HOST_GENOME_NAME_TO_METADATA_KEYS
+
+    valid_keys = if host_genome_name && metadata_map.key?(host_genome_name.to_sym)
+                   metadata_map[:common] + metadata_map[host_genome_name.to_sym]
+                 else
+                   metadata_map[:common] + metadata_map[:default]
+                 end
+
+    valid_keys
+  end
+
+  def self.get_string_options(key_sym, host_genome_name)
+    if host_genome_name == "Mosquito" && Metadatum::MOSQUITO_KEY_TO_STRING_OPTIONS.key?(key_sym)
+      return Metadatum::MOSQUITO_KEY_TO_STRING_OPTIONS[key_sym]
+    end
+    if Metadatum::KEY_TO_STRING_OPTIONS.key? key_sym
+      return Metadatum::KEY_TO_STRING_OPTIONS[key_sym]
+    end
+    nil
   end
 end
