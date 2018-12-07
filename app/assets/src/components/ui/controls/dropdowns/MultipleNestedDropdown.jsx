@@ -1,4 +1,3 @@
-import Checkbox from "../Checkbox";
 import { omit } from "lodash/fp";
 import PropTypes from "prop-types";
 import ArrayUtils from "../../../utils/ArrayUtils";
@@ -7,6 +6,7 @@ import BareDropdown from "./BareDropdown";
 import DropdownTrigger from "./common/DropdownTrigger";
 import DropdownLabel from "./common/DropdownLabel";
 import cs from "./multiple_nested_dropdown.scss";
+import CheckboxItem from "./common/CheckboxItem";
 
 class MultipleNestedDropdown extends React.Component {
   constructor(props) {
@@ -168,14 +168,13 @@ class MultipleNestedDropdown extends React.Component {
 
   renderItem(value, text, checked, callback) {
     return (
-      <BareDropdown.Item key={`item-${value}`} onClick={this.handleItemClicked}>
-        <Checkbox
-          value={value}
-          label={text}
-          checked={checked}
-          onChange={callback}
-        />
-      </BareDropdown.Item>
+      <CheckboxItem
+        key={value}
+        value={value}
+        label={text}
+        checked={checked}
+        onOptionClick={callback}
+      />
     );
   }
 

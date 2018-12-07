@@ -1,11 +1,11 @@
 import PropTypes from "prop-types";
-import { without, omit } from "lodash/fp";
+import { without, omit, includes } from "lodash/fp";
 import React from "react";
 import BareDropdown from "./BareDropdown";
 import DropdownTrigger from "./common/DropdownTrigger";
 import DropdownLabel from "./common/DropdownLabel";
+import CheckboxItem from "./common/CheckboxItem";
 import cs from "./multiple_dropdown.scss";
-import Checkbox from "../Checkbox";
 
 class MultipleDropdown extends React.Component {
   constructor(props) {
@@ -40,18 +40,13 @@ class MultipleDropdown extends React.Component {
     let checkedOptions = this.props.value || this.state.value;
     for (let option of this.props.options) {
       ret.push(
-        <BareDropdown.Item
+        <CheckboxItem
           key={option.value}
-          data-value={option.value}
-          onClick={this.handleItemClicked}
-        >
-          <Checkbox
-            value={option.value}
-            label={option.text}
-            checked={checkedOptions.indexOf(option.value) > -1}
-            onChange={this.handleOptionClicked}
-          />
-        </BareDropdown.Item>
+          value={option.value}
+          label={option.text}
+          checked={includes(option.value, checkedOptions)}
+          onOptionClick={this.handleOptionClicked}
+        />
       );
     }
     return ret;
