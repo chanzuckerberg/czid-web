@@ -4,16 +4,16 @@ import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
 import ObjectHelper from "../helpers/ObjectHelper";
-import Icon from "~ui/icons/Icon";
-import { Menu, MenuItem } from "~ui/controls/Menu";
-import UploadBox from "~ui/controls/UploadBox";
 import { cleanLocalFilePath, baseName } from "~utils/sample";
 import CatIcon from "~ui/icons/CatIcon";
+import ERCCIcon from "~ui/icons/ERCCIcon";
 import HumanIcon from "~ui/icons/HumanIcon";
+import Icon from "~ui/icons/Icon";
 import MosquitoIcon from "~ui/icons/MosquitoIcon";
 import MouseIcon from "~ui/icons/MouseIcon";
 import TickIcon from "~ui/icons/TickIcon";
-import ERCCIcon from "~ui/icons/ERCCIcon";
+import UploadBox from "~ui/controls/UploadBox";
+import { Menu, MenuItem } from "~ui/controls/Menu";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
