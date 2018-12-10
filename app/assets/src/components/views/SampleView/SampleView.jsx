@@ -5,7 +5,7 @@ import cx from "classnames";
 import { get } from "lodash/fp";
 import { getURLParamString } from "~/api";
 import PropTypes from "~/components/utils/propTypes";
-import { pipelineHasAssembly } from "~/components/utils/sample";
+import { pipelineVersionHasAssembly } from "~/components/utils/sample";
 import AMRView from "~/components/AMRView";
 import BasicPopup from "~/components/BasicPopup";
 import PipelineSampleReport from "~/components/PipelineSampleReport";
@@ -121,7 +121,7 @@ class SampleView extends React.Component {
 
     if (
       !this.pipelineInProgress() &&
-      pipelineHasAssembly(this.props.pipelineRun) &&
+      pipelineVersionHasAssembly(this.props.pipelineRun.pipeline_version) &&
       this.props.pipelineRun.assembled !== 1
     ) {
       warnings.push("The reads did not assemble for this run.");
