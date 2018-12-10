@@ -28,8 +28,6 @@
         <th>Pipeline Run status</th>
         <th>Job Id </th>
         <th>Job Submitted At</th>
-        <th> Job Queue </th>
-        <th> Memory Requirement </th>
         <th>&nbsp;</th>
       </tr>
     </thead>
@@ -66,8 +64,6 @@
           </td>
           <td><%= pipeline_job_id %></td>
           <td class="small"><%= pipeline_run_submitted %></td>
-          <td class=small><%= sample.job_queue %></td>
-          <td><%= sample.sample_memory %></td>
           <td><%= link_to 'Runs', pipeline_runs_sample_path(sample) %> &nbsp;
               <%= link_to 'Edit', edit_sample_path(sample) %></td>
         </tr>

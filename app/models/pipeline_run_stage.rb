@@ -186,8 +186,7 @@ class PipelineRunStage < ApplicationRecord
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")
 
     # Dispatch job
-    memory = sample.sample_memory.present? ? sample.sample_memory : Sample::DEFAULT_MEMORY_IN_MB
-    aegea_batch_submit_command(batch_command, memory: memory, job_queue: pipeline_run.sample.job_queue)
+    aegea_batch_submit_command(batch_command)
   end
 
   def alignment_command
@@ -222,7 +221,7 @@ class PipelineRunStage < ApplicationRecord
     dag_commands = prepare_dag("non_host_alignment", attribute_dict, key_s3_params)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Run it
-    aegea_batch_submit_command(batch_command, job_queue: pipeline_run.sample.job_queue)
+    aegea_batch_submit_command(batch_command)
   end
 
   def postprocess_command
@@ -261,6 +260,6 @@ class PipelineRunStage < ApplicationRecord
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
 
     # Dispatch job
-    aegea_batch_submit_command(batch_command, job_queue: pipeline_run.sample.job_queue)
+    aegea_batch_submit_command(batch_command)
   end
 end
