@@ -392,24 +392,7 @@ class BulkUploadImport extends React.Component {
     this.clearError();
   }
 
-  handleHostChangeForSample(samplesId, hostGenomeId, element) {
-    const selectedSampleElement = $(element.target);
-    selectedSampleElement
-      .parent()
-      .prev()
-      .html(
-        `
-      <div>
-        <div class='genome-icon'>
-          ${SampleUpload.resolveGenomeIcon(
-            selectedSampleElement.text(),
-            "#59bcd6"
-          ) || selectedSampleElement.text()}
-        </div>
-        <i class='fa fa-caret-down' />
-      </div>
-      `
-      );
+  handleHostChangeForSample(samplesId, hostGenomeId) {
     const samples = this.state.samples;
     samples[samplesId].host_genome_id = this.state.hostGenomes[hostGenomeId].id;
     this.setState({
@@ -515,15 +498,13 @@ class BulkUploadImport extends React.Component {
                               data-activates={`genome-dropdown${i}`}
                             >
                               <div>
-                                <div
-                                  className="genome-icon"
-                                  dangerouslySetInnerHTML={{
-                                    __html: SampleUpload.resolveGenomeIcon(
-                                      this.state.hostName,
-                                      "#59bcd6"
-                                    )
-                                  }}
-                                />
+                                <div className="genome-icon">
+                                  {SampleUpload.resolveGenomeIcon(
+                                    this.state.hostGenomes.find(
+                                      host => host.id == sample.host_genome_id
+                                    ).name
+                                  )}
+                                </div>
                                 <i className="fa fa-caret-down" />
                               </div>
                             </div>
@@ -539,8 +520,8 @@ class BulkUploadImport extends React.Component {
                                 ) {
                                   return (
                                     <li
-                                      onClick={e => {
-                                        this.handleHostChangeForSample(i, j, e);
+                                      onClick={() => {
+                                        this.handleHostChangeForSample(i, j);
                                       }}
                                       ref="genome"
                                       key={j}
@@ -892,27 +873,9 @@ class BulkUploadImport extends React.Component {
                                 this.handleHostChange(g.id, g.name)
                               }
                             >
-                              {this.state.hostName === g.name ? (
-                                <div
-                                  className="img-container"
-                                  dangerouslySetInnerHTML={{
-                                    __html: SampleUpload.resolveGenomeIcon(
-                                      g.name,
-                                      "#f2f6ee"
-                                    )
-                                  }}
-                                />
-                              ) : (
-                                <div
-                                  className="img-container"
-                                  dangerouslySetInnerHTML={{
-                                    __html: SampleUpload.resolveGenomeIcon(
-                                      g.name,
-                                      "#95A1Ab"
-                                    )
-                                  }}
-                                />
-                              )}
+                              <div className="img-container">
+                                {SampleUpload.resolveGenomeIcon(g.name)}
+                              </div>
                               <div className="genome-label">{g.name}</div>
                             </li>
                           ) : null;
