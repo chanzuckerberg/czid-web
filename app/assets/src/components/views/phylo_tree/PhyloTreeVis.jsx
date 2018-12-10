@@ -1,11 +1,11 @@
 import React from "react";
-import { get, keyBy } from "lodash/fp";
+import { get, keyBy, mapValues } from "lodash/fp";
 import Tree from "../../utils/structures/Tree";
 import Dendogram from "../../visualizations/dendrogram/Dendogram";
 import PropTypes from "prop-types";
 import DataTooltip from "../../ui/containers/DataTooltip";
 import SampleDetailsSidebar from "../report/SampleDetailsSidebar";
-import { getMetadataTypes } from "~/api";
+import { getMetadataTypesByHostGenomeName } from "~/api";
 import { SAMPLE_FIELDS, SAMPLE_METADATA_FIELDS } from "./constants";
 
 class PhyloTreeVis extends React.Component {
@@ -18,7 +18,8 @@ class PhyloTreeVis extends React.Component {
       // there would be a visual flicker when sampleId is set to null as the sidebar closes.
       selectedSampleId: null,
       selectedPipelineRunId: null,
-      sidebarVisible: false
+      sidebarVisible: false,
+      sampleMetadataTypesByHostGenomeName: null
     };
 
     (this.newick = props.newick),
@@ -73,10 +74,15 @@ class PhyloTreeVis extends React.Component {
   }
 
   fetchMetadataTypes = async () => {
-    const metadataTypes = await getMetadataTypes();
+    let metadataTypesByHostGenomeName = await getMetadataTypesByHostGenomeName();
+
+    metadataTypesByHostGenomeName = mapValues(
+      keyBy("key"),
+      metadataTypesByHostGenomeName
+    );
 
     this.setState({
-      sampleMetadataTypes: keyBy("key", metadataTypes)
+      sampleMetadataTypesByHostGenomeName: metadataTypesByHostGenomeName
     });
   };
 
@@ -155,10 +161,15 @@ class PhyloTreeVis extends React.Component {
         name: "Sample",
         data: [
           ...SAMPLE_FIELDS.map(f => [f.label, this.getFieldValue(f) || "-"]),
-          ...SAMPLE_METADATA_FIELDS.map(key => [
-            get(`${key}.name`, this.state.sampleMetadataTypes) || key,
-            this.getMetadataFieldValue(key) || "-"
-          ])
+          ...SAMPLE_METADATA_FIELDS.map(key => {
+            return [
+              get(
+                `${this.state.hoveredNode.data.host_genome_name}.${key}.name`,
+                this.state.sampleMetadataTypesByHostGenomeName
+              ) || key,
+              this.getMetadataFieldValue(key) || "-"
+            ];
+          })
         ]
       }
     ];

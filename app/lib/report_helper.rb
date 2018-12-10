@@ -467,6 +467,7 @@ module ReportHelper
         sample_id: sample_id,
         name: samples_by_id[sample_id].name,
         metadata: samples_by_id[sample_id].metadata,
+        host_genome_name: samples_by_id[sample_id].host_genome_name,
         taxons: filtered_rows
       }
     end

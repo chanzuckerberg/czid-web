@@ -30,7 +30,7 @@ Rails.application.routes.draw do
     get :samples_taxons, on: :collection
     get :heatmap, on: :collection
     get :download_heatmap, on: :collection
-    get :metadata_types, on: :collection
+    get :metadata_types_by_host_genome_name, on: :collection
     get :metadata, on: :member
     get :contig_taxid_list, on: :member
     get :taxid_contigs, on: :member

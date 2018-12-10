@@ -1,8 +1,12 @@
-import { Dropdown as BaseDropdown, Label } from "semantic-ui-react";
-import Checkbox from "../Checkbox";
+import { omit } from "lodash/fp";
 import PropTypes from "prop-types";
 import ArrayUtils from "../../../utils/ArrayUtils";
 import React from "react";
+import BareDropdown from "./BareDropdown";
+import DropdownTrigger from "./common/DropdownTrigger";
+import DropdownLabel from "./common/DropdownLabel";
+import cs from "./multiple_nested_dropdown.scss";
+import CheckboxItem from "./common/CheckboxItem";
 
 class MultipleNestedDropdown extends React.Component {
   constructor(props) {
@@ -164,14 +168,13 @@ class MultipleNestedDropdown extends React.Component {
 
   renderItem(value, text, checked, callback) {
     return (
-      <BaseDropdown.Item key={`item-${value}`} onClick={this.handleItemClicked}>
-        <Checkbox
-          value={value}
-          label={text}
-          checked={checked}
-          onChange={callback}
-        />
-      </BaseDropdown.Item>
+      <CheckboxItem
+        key={value}
+        value={value}
+        label={text}
+        checked={checked}
+        onOptionClick={callback}
+      />
     );
   }
 
@@ -214,32 +217,48 @@ class MultipleNestedDropdown extends React.Component {
 
   renderLabel() {
     const numberOfSelectedOptions = this.getNumberOfSelectedOptions();
+
+    const label = numberOfSelectedOptions > 0 && (
+      <DropdownLabel
+        className={cs.dropdownLabel}
+        disabled={this.props.disabled}
+        text={String(numberOfSelectedOptions)}
+      />
+    );
+
     return (
-      <div className="label-container">
-        <div className="label-container-title">{this.props.label}</div>
-        {numberOfSelectedOptions > 0 && (
-          <Label className="label-container-count">
-            {numberOfSelectedOptions}
-          </Label>
-        )}
-      </div>
+      <DropdownTrigger
+        className={cs.dropdownTrigger}
+        label={this.props.label}
+        value={label}
+        rounded={this.props.rounded}
+      />
     );
   }
 
   render() {
-    const { selectedOptions, selectedSuboptions, ...props } = this.props;
+    const otherProps = omit(
+      [
+        "selectedOptions",
+        "selectedSuboptions",
+        "label",
+        "rounded",
+        "onChange",
+        "options"
+      ],
+      this.props
+    );
 
     return (
-      <BaseDropdown
+      <BareDropdown
+        className={cs.multipleNestedDropdown}
         floating
-        className="idseq-ui multiple-nested"
-        {...props}
-        options={undefined}
-        value={undefined}
+        arrowInsideTrigger
+        {...otherProps}
         trigger={this.renderLabel()}
       >
-        <BaseDropdown.Menu>{this.renderItems()}</BaseDropdown.Menu>
-      </BaseDropdown>
+        <BareDropdown.Menu>{this.renderItems()}</BareDropdown.Menu>
+      </BareDropdown>
     );
   }
 }
@@ -254,7 +273,9 @@ MultipleNestedDropdown.propTypes = {
   onChange: PropTypes.func,
   options: PropTypes.array,
   selectedOptions: PropTypes.array,
-  selectedSuboptions: PropTypes.object
+  selectedSuboptions: PropTypes.object,
+  disabled: PropTypes.bool,
+  rounded: PropTypes.bool
 };
 
 export default MultipleNestedDropdown;

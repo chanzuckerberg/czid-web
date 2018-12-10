@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import queryString from "query-string";
-import { min, max } from "lodash/fp";
+import { min, max, uniq, pluck, values } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
 import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
@@ -20,9 +20,10 @@ import {
   MultipleNestedDropdown
 } from "~ui/controls/dropdowns";
 import { processMetadata } from "~utils/metadata";
-import { get, getMetadataTypes } from "~/api";
+import { get, getMetadataTypesByHostGenomeName } from "~/api";
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
+import { extractMetadataTypesByHostGenomes } from "../../utils/metadata";
 
 class SamplesHeatmapView extends React.Component {
   constructor(props) {
@@ -172,20 +173,33 @@ class SamplesHeatmapView extends React.Component {
     });
   }
 
-  fetchMetadata() {
-    return this.state.metadataTypes || getMetadataTypes();
+  fetchMetadataTypesByHostGenomeName() {
+    if (this.state.metadataTypes) return null;
+    return getMetadataTypesByHostGenomeName();
   }
 
   async fetchViewData() {
     this.setState({ loading: true });
 
-    let [heatmapData, metadataTypes] = await Promise.all([
+    let [heatmapData, metadataTypesByHostGenomeName] = await Promise.all([
       this.fetchHeatmapData(),
-      this.fetchMetadata()
+      this.fetchMetadataTypesByHostGenomeName()
     ]);
 
     let newState = this.extractData(heatmapData);
-    newState.metadataTypes = metadataTypes;
+
+    // Only calculate the metadataTypes once.
+    if (metadataTypesByHostGenomeName !== null) {
+      const distinctHostGenomeNames = uniq(
+        pluck("host_genome_name", values(newState.sampleDetails))
+      );
+
+      newState.metadataTypes = extractMetadataTypesByHostGenomes(
+        metadataTypesByHostGenomeName,
+        distinctHostGenomeNames
+      );
+    }
+
     newState.loading = false;
     window.history.replaceState("", "", this.getUrlForCurrentParams());
     this.setState(newState);
@@ -205,6 +219,7 @@ class SamplesHeatmapView extends React.Component {
         id: sample.sample_id,
         name: sample.name,
         index: i,
+        host_genome_name: sample.host_genome_name,
         metadata: processMetadata(sample.metadata)
       };
       sampleDetails[sample.name] = sampleDetails[sample.sample_id];
@@ -357,7 +372,7 @@ class SamplesHeatmapView extends React.Component {
         options={this.state.availableOptions.metrics}
         onChange={this.onMetricChange}
         value={this.state.selectedOptions.metric}
-        label="Metric:"
+        label="Metric: "
         disabled={!this.state.data}
       />
     );
@@ -401,7 +416,7 @@ class SamplesHeatmapView extends React.Component {
         options={this.state.availableOptions.taxonLevels}
         value={this.state.selectedOptions.species}
         onChange={this.onTaxonLevelChange}
-        label="Taxon Level:"
+        label="Taxon Level: "
         disabled={!this.state.data}
       />
     );
@@ -431,7 +446,7 @@ class SamplesHeatmapView extends React.Component {
         value={this.state.selectedOptions.dataScaleIdx}
         onChange={this.onDataScaleChange}
         options={options}
-        label="Scale:"
+        label="Scale: "
         disabled={!this.state.data}
       />
     );
@@ -477,6 +492,7 @@ class SamplesHeatmapView extends React.Component {
     return (
       <MultipleNestedDropdown
         fluid
+        rounded
         options={options}
         onChange={this.onCategoryChange}
         selectedOptions={this.state.selectedOptions.categories}
@@ -509,7 +525,7 @@ class SamplesHeatmapView extends React.Component {
         options={options}
         onChange={this.onBackgroundChanged}
         value={this.state.selectedOptions.background}
-        label="Background:"
+        label="Background: "
         disabled={!this.state.data}
       />
     );
