@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_130_182_356) do
+ActiveRecord::Schema.define(version: 20181211192318) do
+
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -91,7 +92,7 @@ ActiveRecord::Schema.define(version: 20_181_130_182_356) do
   create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
-    t.text "sequence", limit: 4_294_967_295
+    t.text "sequence", limit: 4294967295
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -119,7 +120,7 @@ ActiveRecord::Schema.define(version: 20_181_130_182_356) do
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", null: false
+    t.string "name"
     t.text "s3_star_index_path"
     t.text "s3_bowtie2_index_path"
     t.bigint "default_background_id"
@@ -135,7 +136,7 @@ ActiveRecord::Schema.define(version: 20_181_130_182_356) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "source_type", null: false
+    t.string "source_type"
     t.text "source"
     t.text "parts"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
@@ -155,9 +156,8 @@ ActiveRecord::Schema.define(version: 20_181_130_182_356) do
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "key", null: false, collation: "latin1_swedish_ci"
     t.integer "data_type", limit: 1, null: false
-    t.string "text_raw_value"
+    t.string "raw_value"
     t.string "text_validated_value"
-    t.float "number_raw_value", limit: 24
     t.float "number_validated_value", limit: 24
     t.integer "sample_id"
     t.datetime "created_at", null: false
@@ -183,7 +183,7 @@ ActiveRecord::Schema.define(version: 20_181_130_182_356) do
     t.text "newick"
     t.integer "status", default: 0
     t.string "dag_version"
-    t.text "dag_json", limit: 4_294_967_295
+    t.text "dag_json", limit: 4294967295
     t.text "command_stdout"
     t.text "command_stderr"
     t.string "job_id"
@@ -374,12 +374,12 @@ ActiveRecord::Schema.define(version: 20_181_130_182_356) do
     t.index ["pipeline_run_id", "tax_id", "count_type", "tax_level"], name: "index_pr_tax_hit_level_tc", unique: true
   end
 
-  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" do |t|
+  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
-    t.string "title", collation: "utf8mb4_general_ci"
-    t.text "summary", collation: "utf8mb4_general_ci"
-    t.text "description", collation: "utf8mb4_general_ci"
+    t.string "title"
+    t.text "summary", limit: 16777215
+    t.text "description", limit: 16777215
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -396,25 +396,25 @@ ActiveRecord::Schema.define(version: 20_181_130_182_356) do
     t.integer "species_taxid", default: -100, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "superkingdom_name", default: "", null: false
-    t.string "phylum_name", default: "", null: false
-    t.string "class_name", default: "", null: false
-    t.string "order_name", default: "", null: false
-    t.string "family_name", default: "", null: false
-    t.string "genus_name", default: "", null: false
-    t.string "species_name", default: "", null: false
-    t.string "superkingdom_common_name", default: "", null: false
-    t.string "phylum_common_name", default: "", null: false
-    t.string "class_common_name", default: "", null: false
-    t.string "order_common_name", default: "", null: false
-    t.string "family_common_name", default: "", null: false
-    t.string "genus_common_name", default: "", null: false
-    t.string "species_common_name", default: "", null: false
+    t.string "superkingdom_name"
+    t.string "phylum_name"
+    t.string "class_name"
+    t.string "order_name"
+    t.string "family_name"
+    t.string "genus_name"
+    t.string "species_name"
+    t.string "superkingdom_common_name"
+    t.string "phylum_common_name"
+    t.string "class_common_name"
+    t.string "order_common_name"
+    t.string "family_common_name"
+    t.string "genus_common_name"
+    t.string "species_common_name"
     t.datetime "started_at", default: "2000-01-01 00:00:00", null: false
     t.datetime "ended_at", default: "3000-01-01 00:00:00", null: false
     t.integer "kingdom_taxid", default: -650, null: false
-    t.string "kingdom_name", default: "", null: false
-    t.string "kingdom_common_name", default: "", null: false
+    t.string "kingdom_name"
+    t.string "kingdom_common_name"
     t.string "tax_name"
     t.integer "version_start", limit: 1
     t.integer "version_end", limit: 1
@@ -469,11 +469,11 @@ ActiveRecord::Schema.define(version: 20_181_130_182_356) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email", default: "", null: false
+    t.string "email"
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false
+    t.string "encrypted_password"
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
@@ -490,4 +490,5 @@ ActiveRecord::Schema.define(version: 20_181_130_182_356) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
 end

@@ -504,7 +504,7 @@ class Sample < ApplicationRecord
       m.data_type = Metadatum::KEY_TO_TYPE[key.to_sym]
       m.sample = self
     end
-    m.edit_value(val)
+    m.raw_value = val
     m.save!
   end
 
