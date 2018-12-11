@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_130_182_356) do
+ActiveRecord::Schema.define(version: 20_181_210_212_053) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -125,7 +125,6 @@ ActiveRecord::Schema.define(version: 20_181_130_182_356) do
     t.bigint "default_background_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "sample_memory"
     t.integer "skip_deutero_filter"
   end
 
@@ -307,8 +306,6 @@ ActiveRecord::Schema.define(version: 20_181_130_182_356) do
     t.text "s3_preload_result_path"
     t.text "s3_star_index_path"
     t.text "s3_bowtie2_index_path"
-    t.integer "sample_memory"
-    t.string "job_queue"
     t.bigint "host_genome_id"
     t.bigint "user_id"
     t.integer "subsample"

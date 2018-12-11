@@ -27,7 +27,6 @@ class SampleUpload extends React.Component {
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleProjectChange = this.handleProjectChange.bind(this);
     this.handleHostChange = this.handleHostChange.bind(this);
-    this.handleMemoryChange = this.handleMemoryChange.bind(this);
     this.handleBranchChange = this.handleBranchChange.bind(this);
     this.handleResultChange = this.handleResultChange.bind(this);
     this.handleAlignmentConfigNameChange = this.handleAlignmentConfigNameChange.bind(
@@ -62,8 +61,6 @@ class SampleUpload extends React.Component {
       project: this.project ? this.project.name : "Select a project",
       projectId: this.project ? this.project.id : null,
       resultPath: this.sample ? this.sample.s3_preload_result_path : "",
-      jobQueue: this.sample ? this.sample.job_queue : "",
-      memory: this.sample ? this.sample.sample_memory : "",
       branch: this.sample ? this.sample.pipeline_branch : "",
       dagVars: this.sample ? this.sample.dag_vars : "{}",
       alignmentConfigName: this.sample ? this.sample.alignment_config_name : "",
@@ -99,7 +96,6 @@ class SampleUpload extends React.Component {
       selectedProject: this.selected.project || "",
       selectedPId: this.selected.projectId || null,
       selectedResultPath: this.selected.resultPath || "",
-      selectedMemory: this.selected.memory || "",
       selectedBranch: this.selected.branch || "",
       selectedDagVars: this.selected.dagVars || "{}",
       id: this.selected.id,
@@ -283,7 +279,6 @@ class SampleUpload extends React.Component {
           s3_preload_result_path: this.userDetails.admin
             ? this.refs.s3_preload_result_path.value.trim()
             : "",
-          sample_memory: this.state.selectedMemory,
           pipeline_branch: this.state.selectedBranch,
           dag_vars: this.state.selectedDagVars,
           host_genome_id: this.state.selectedHostGenomeId,
@@ -332,7 +327,6 @@ class SampleUpload extends React.Component {
           project: this.state.selectedProject,
           project_id: this.state.selectedPId,
           s3_preload_result_path: this.state.selectedResultPath,
-          sample_memory: this.state.selectedMemory,
           pipeline_branch: this.state.selectedBranch,
           dag_vars: this.state.selectedDagVars,
           alignment_config_name: this.state.selectedAlignmentConfigName,
@@ -453,12 +447,6 @@ class SampleUpload extends React.Component {
           errors.s3_preload_result_path = "Error: invalid file path";
         }
       }
-      if (this.state.selectedMemory !== "") {
-        const memorySize = parseInt(this.state.selectedMemory, 10);
-        if (isNaN(memorySize) || memorySize < 1) {
-          errors.memory = "Memory size is not valid";
-        }
-      }
     }
     const errorLength = Object.keys(errors).length;
     if (errorLength) {
@@ -485,13 +473,6 @@ class SampleUpload extends React.Component {
     this.setState({
       selectedHostGenome: hostName,
       selectedHostGenomeId: hostId
-    });
-    this.clearError();
-  }
-
-  handleMemoryChange(e) {
-    this.setState({
-      selectedMemory: e.target.value.trim()
     });
     this.clearError();
   }
@@ -720,7 +701,6 @@ class SampleUpload extends React.Component {
           s3_preload_result_path: this.userDetails.admin
             ? this.refs.s3_preload_result_path.value.trim()
             : "",
-          sample_memory: this.state.selectedMemory,
           alignment_config_name: this.state.selectedAlignmentConfigName,
           pipeline_branch: this.state.selectedBranch,
           status: "created",
@@ -1228,38 +1208,6 @@ class SampleUpload extends React.Component {
                           {this.state.errors.s3_preload_result_path ? (
                             <div className="field-error">
                               {this.state.errors.s3_preload_result_path}
-                            </div>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="field">
-                      <div className="row">
-                        <div className="col no-padding s12">
-                          <div className="field-title">
-                            <div
-                              htmlFor="sample_memory"
-                              className="read-count-label"
-                            >
-                              Sample memory (in MB)
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row input-row">
-                        <div className="col no-padding s12">
-                          <input
-                            id="sample_memory"
-                            type="text"
-                            className="browser-default"
-                            ref="memory"
-                            value={this.state.selectedMemory}
-                            placeholder="240000"
-                            onChange={this.handleMemoryChange}
-                          />
-                          {this.state.errors.memory ? (
-                            <div className="field-error">
-                              {this.state.errors.memory}
                             </div>
                           ) : null}
                         </div>
