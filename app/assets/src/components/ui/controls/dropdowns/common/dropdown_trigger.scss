@@ -1,0 +1,39 @@
+@import "~styles/themes/colors";
+@import "~styles/typography";
+
+.dropdownTrigger {
+  border: 1px solid $light-grey;
+  border-radius: 4px;
+  background-color: $white;
+  color: $black;
+  letter-spacing: 0.4px;
+  height: 38px;
+  line-height: 24px;
+  padding: 6px 26px 6px 16px;
+  font-size: 13px;
+
+  &.rounded {
+    border-radius: 19px;
+  }
+
+  &.active {
+    border: 1px solid $primary-light;
+  }
+
+  &.disabled {
+    border: 1px solid $medium-grey;
+    color: $medium-grey;
+    opacity: 1 !important;
+  }
+
+  .labelContainer {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .label {
+    font-weight: 600;
+    margin-right: 1px;
+  }
+}

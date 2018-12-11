@@ -14,8 +14,9 @@ const postWithCSRF = async (url, params) => {
   return resp.data;
 };
 
-const get = async url => {
-  const resp = await axios.get(url);
+// TODO: add error handling
+const get = async (url, config) => {
+  const resp = await axios.get(url, config);
 
   return resp.data;
 };
@@ -41,7 +42,8 @@ const saveSampleMetadata = (id, field, value) =>
     value
   });
 
-const getMetadataTypes = () => get("/samples/metadata_types");
+const getMetadataTypesByHostGenomeName = () =>
+  get("/samples/metadata_types_by_host_genome_name");
 
 // Save fields on the sample model (NOT sample metadata)
 const saveSampleField = (id, field, value) =>
@@ -63,9 +65,10 @@ const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
 const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
 
 export {
+  get,
   getSampleMetadata,
   saveSampleMetadata,
-  getMetadataTypes,
+  getMetadataTypesByHostGenomeName,
   saveSampleName,
   saveSampleNotes,
   getAlignmentData,

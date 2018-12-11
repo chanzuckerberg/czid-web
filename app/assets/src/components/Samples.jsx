@@ -168,13 +168,13 @@ class Samples extends React.Component {
     return value;
   }
 
-  selectTissueFilter(_, tissues) {
+  selectTissueFilter(tissues) {
     this.setState({ selectedTissueFilters: tissues }, () =>
       this.setUrlLocation()
     );
   }
 
-  selectHostFilter(_, hosts) {
+  selectHostFilter(hosts) {
     this.setState({ selectedHostIndices: hosts }, () => this.setUrlLocation());
   }
 
@@ -668,7 +668,7 @@ class Samples extends React.Component {
         selectedProjectId: null,
         project: null
       });
-      this.fetchResults({ resetFilters: true, projectChanged: true });
+      this.fetchResults({ resetFilters, projectChanged: true });
     } else {
       projId = parseInt(projId);
       axios
@@ -678,7 +678,7 @@ class Samples extends React.Component {
             project: res.data
           });
           this.fetchProjectUsers(projId);
-          this.fetchResults({ resetFilters: true, projectChanged: true });
+          this.fetchResults({ resetFilters, projectChanged: true });
         })
         .catch(() => {
           this.setState({ project: null });
@@ -937,6 +937,7 @@ class Samples extends React.Component {
             })}
             value={this.state.selectedHostIndices}
             onChange={this.selectHostFilter}
+            rounded
           />
         </div>
         <div className="filter-container">
@@ -948,6 +949,7 @@ class Samples extends React.Component {
             })}
             value={this.state.selectedTissueFilters}
             onChange={this.selectTissueFilter}
+            rounded
           />
         </div>
       </div>

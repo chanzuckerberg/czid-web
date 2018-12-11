@@ -62,4 +62,44 @@
       }
     }
   }
+
+  .columnMetadata {
+    pointer-events: bounding-box;
+
+    .columnMetadataLabel {
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 700;
+
+      &:hover {
+        text {
+          fill: $primary-light;
+        }
+      }
+    }
+
+    .columnMetadataAdd {
+      visibility: hidden;
+
+      .metadataAddTrigger {
+        cursor: pointer;
+      }
+
+      .metadataAddLine {
+        stroke: $light-grey;
+        stroke-width: 1px;
+        fill: transparent;
+      }
+
+      rect {
+        opacity: 0;
+      }
+    }
+
+    &:hover {
+      .columnMetadataAdd {
+        visibility: visible;
+      }
+    }
+  }
 }

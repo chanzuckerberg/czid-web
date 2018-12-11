@@ -1,4 +1,4 @@
-export const METADATA_SECTIONS = [
+export const HUMAN_METADATA_SECTIONS = [
   {
     name: "Sample Info",
     keys: [
@@ -19,7 +19,10 @@ export const METADATA_SECTIONS = [
       "primary_diagnosis",
       "antibiotic_administered",
       "admission_date",
-      "admission_type"
+      "admission_type",
+      "discharge_date",
+      "discharge_type",
+      "immunocomp"
     ]
   },
   {
@@ -31,6 +34,40 @@ export const METADATA_SECTIONS = [
       "infection_class",
       "detection_method"
     ]
+  },
+  {
+    name: "Sequencing Info",
+    keys: [
+      "library_prep",
+      "sequencer",
+      "rna_dna_input",
+      "library_prep_batch",
+      "extraction_batch"
+    ]
+  }
+];
+
+// Includes mosquito and other vectors.
+export const VECTOR_METADATA_SECTIONS = [
+  {
+    name: "Sample Info",
+    keys: [
+      "unique_id",
+      "sample_type",
+      "nucleotide_type",
+      "sample_unit",
+      "collection_date",
+      "collection_location",
+      "collected_by"
+    ]
+  },
+  {
+    name: "Specimen Info",
+    keys: ["gender", "life_stage", "genus_species", "blood_fed", "id_method"]
+  },
+  {
+    name: "Infection Info",
+    keys: ["known_organism", "detection_method"]
   },
   {
     name: "Sequencing Info",

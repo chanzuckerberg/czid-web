@@ -1,7 +1,8 @@
 import React from "react";
-import { Dropdown as BaseDropdown } from "semantic-ui-react";
+import BareDropdown from "./BareDropdown";
+import DropdownTrigger from "./common/DropdownTrigger";
 import PropTypes from "prop-types";
-import cx from "classnames";
+import cs from "./dropdown.scss";
 
 class Dropdown extends React.Component {
   constructor(props) {
@@ -21,25 +22,31 @@ class Dropdown extends React.Component {
     }
   }
 
-  handleOnChange(e, d) {
+  handleOnChange = (e, d) => {
     this.setState({ value: d.value });
     this.props.onChange(d.value, this.labels[d.value]);
-  }
+  };
 
-  renderText() {
+  renderTrigger = () => {
+    const text = this.state.value !== undefined &&
+      this.state.value !== null && (
+        <span>{this.labels[this.state.value.toString()]}</span>
+      );
     return (
-      <div className="label-container">
-        <span className="label-title">{this.props.label}</span>
-        {this.state.value !== undefined &&
-          this.state.value !== null &&
-          this.labels[this.state.value.toString()]}
-      </div>
+      <DropdownTrigger
+        label={this.props.label}
+        value={text}
+        rounded={this.props.rounded}
+        className={cs.dropdownTrigger}
+      />
     );
-  }
+  };
 
   render() {
     return (
-      <BaseDropdown
+      <BareDropdown
+        className={cs.dropdown}
+        arrowInsideTrigger
         placeholder={this.props.placeholder}
         scrolling={this.props.scrolling}
         disabled={this.props.disabled}
@@ -47,9 +54,8 @@ class Dropdown extends React.Component {
         options={this.props.options}
         value={this.state.value}
         floating
-        className={cx("idseq-ui", this.props.rounded && "rounded")}
-        onChange={this.handleOnChange.bind(this)}
-        trigger={this.renderText()}
+        onChange={this.handleOnChange}
+        trigger={this.renderTrigger()}
         selectOnBlur={false}
       />
     );
