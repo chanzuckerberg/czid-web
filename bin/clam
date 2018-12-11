@@ -24,4 +24,4 @@ MACHINE=`bin/get_private_ip $ENV`
 
 CONTAINER=`ssh $MACHINE "sudo docker ps | grep ecs-idseq-$ENV-web | head -1" | awk '{print $NF}'`
 
-ssh ec2-user@$MACHINE 'sudo docker exec '$CONTAINER' bin/entrypoint.sh '"'$*'"
+ssh $MACHINE 'sudo docker exec '$CONTAINER' bin/entrypoint.sh '"'$*'"
