@@ -172,7 +172,7 @@ class PhyloTree < ApplicationRecord
     base_command = [install_pipeline(dag_branch),
                     upload_version(dag_version_file),
                     dag_commands].join("; ")
-    aegea_batch_submit_command(base_command, job_queue: nil)
+    aegea_batch_submit_command(base_command)
   end
 
   def phylo_tree_output_s3_path

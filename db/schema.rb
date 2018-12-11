@@ -126,7 +126,6 @@ ActiveRecord::Schema.define(version: 20181211192318) do
     t.bigint "default_background_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "sample_memory"
     t.integer "skip_deutero_filter"
   end
 
@@ -307,8 +306,6 @@ ActiveRecord::Schema.define(version: 20181211192318) do
     t.text "s3_preload_result_path"
     t.text "s3_star_index_path"
     t.text "s3_bowtie2_index_path"
-    t.integer "sample_memory"
-    t.string "job_queue"
     t.bigint "host_genome_id"
     t.bigint "user_id"
     t.integer "subsample"

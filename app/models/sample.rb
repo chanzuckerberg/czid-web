@@ -20,16 +20,13 @@ class Sample < ApplicationRecord
   # TODO: Make all these params configurable without code change
   DEFAULT_STORAGE_IN_GB = 500
   DEFAULT_MEMORY_IN_MB = 120_000 # sorry, hacky
-  HOST_FILTERING_MEMORY_IN_MB = 240_000
+  POSTPROCESSING_MEMORY_IN_MB = 240_000
 
   DEFAULT_QUEUE = (Rails.env == 'prod' ? 'idseq-prod-lomem' : 'idseq-staging-lomem').freeze
   DEFAULT_VCPUS = 16
 
   DEFAULT_QUEUE_HIMEM = (Rails.env == 'prod' ? 'idseq-prod-himem' : 'idseq-staging-himem').freeze
   DEFAULT_VCPUS_HIMEM = 32
-
-  # These zombies keep coming back, so we now expressly fail submissions to them.
-  DEPRECATED_QUEUES = %w[idseq_alpha_stg1 aegea_batch_ondemand idseq_production_high_pri_stg1].freeze
 
   METADATA_FIELDS = [:sample_unique_id, # 'Unique ID' (e.g. in human case, patient ID)
                      :sample_location, :sample_date, :sample_tissue,
@@ -327,7 +324,6 @@ class Sample < ApplicationRecord
     if host_genome.present?
       self.s3_star_index_path = host_genome.s3_star_index_path
       self.s3_bowtie2_index_path = host_genome.s3_bowtie2_index_path
-      self.sample_memory ||= HOST_FILTERING_MEMORY_IN_MB
     end
     s3_preload_result_path ||= ''
     s3_preload_result_path.strip!
