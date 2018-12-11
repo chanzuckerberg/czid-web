@@ -6,7 +6,11 @@ import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 import MetadataSection from "./MetadataSection";
-import { METADATA_SECTIONS, SAMPLE_ADDITIONAL_INFO } from "./constants";
+import {
+  SAMPLE_ADDITIONAL_INFO,
+  HUMAN_METADATA_SECTIONS,
+  VECTOR_METADATA_SECTIONS
+} from "./constants";
 import cs from "./sample_details_sidebar.scss";
 
 const renderMetadataValue = val => {
@@ -18,13 +22,23 @@ const renderMetadataValue = val => {
 };
 
 class MetadataTab extends React.Component {
-  state = {
-    sectionOpen: {
-      // Open the first section by default.
-      [METADATA_SECTIONS[0].name]: true
-    },
-    sectionEditing: {}
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      sectionOpen: {
+        // Open the first section by default.
+        [this.getMetadataSections()[0].name]: true
+      },
+      sectionEditing: {}
+    };
+  }
+
+  getMetadataSections = () =>
+    this.props.additionalInfo.host_genome_name.toLowerCase().substring(0, 5) ===
+    "human"
+      ? HUMAN_METADATA_SECTIONS
+      : VECTOR_METADATA_SECTIONS;
 
   toggleSection = section => {
     const { sectionOpen, sectionEditing } = this.state;
@@ -158,7 +172,7 @@ class MetadataTab extends React.Component {
   render() {
     return (
       <div>
-        {METADATA_SECTIONS.map(section => (
+        {this.getMetadataSections().map(section => (
           <MetadataSection
             key={section.name}
             editable={this.props.additionalInfo.editable}

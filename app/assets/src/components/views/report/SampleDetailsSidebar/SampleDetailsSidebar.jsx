@@ -8,19 +8,15 @@ import Tabs from "~/components/ui/controls/Tabs";
 import {
   getSampleMetadata,
   saveSampleMetadata,
-  getMetadataTypes,
+  getMetadataTypesByHostGenomeName,
   saveSampleName,
   saveSampleNotes
 } from "~/api";
 import MetadataTab from "./MetadataTab";
 import PipelineTab from "./PipelineTab";
 import NotesTab from "./NotesTab";
-import {
-  processMetadata,
-  processMetadataTypes,
-  processPipelineInfo,
-  processAdditionalInfo
-} from "./utils";
+import { processMetadata, processMetadataTypes } from "~utils/metadata";
+import { processPipelineInfo, processAdditionalInfo } from "./utils";
 import cs from "./sample_details_sidebar.scss";
 
 const TABS = ["Metadata", "Pipeline", "Notes"];
@@ -71,8 +67,10 @@ class SampleDetailsSidebar extends React.Component {
     } else {
       [metadata, metadataTypes] = await Promise.all([
         getSampleMetadata(this.props.sampleId),
-        getMetadataTypes()
+        getMetadataTypesByHostGenomeName()
       ]);
+
+      metadataTypes = metadataTypes[metadata.additional_info.host_genome_name];
     }
 
     this.setState({
@@ -177,7 +175,6 @@ class SampleDetailsSidebar extends React.Component {
           pipelineInfo={pipelineInfo}
           erccComparison={additionalInfo.ercc_comparison}
           pipelineRun={pipelineRun}
-          assembledTaxIds={additionalInfo.assembled_taxids}
           sampleId={this.props.sampleId}
         />
       );

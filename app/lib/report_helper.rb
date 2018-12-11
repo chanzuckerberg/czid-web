@@ -216,8 +216,7 @@ module ReportHelper
       subsampled_reads: pipeline_run.subsampled_reads,
       sample_info: sample,
       default_background: Background.find(pipeline_run.sample.default_background_id),
-      taxon_fasta_flag: !pipeline_run.taxon_byteranges.empty?,
-      assembled_taxids: pipeline_run.assembled_taxids ? JSON.parse(pipeline_run.assembled_taxids) : []
+      taxon_fasta_flag: !pipeline_run.taxon_byteranges.empty?
     }
   end
 
@@ -467,6 +466,8 @@ module ReportHelper
       results << {
         sample_id: sample_id,
         name: samples_by_id[sample_id].name,
+        metadata: samples_by_id[sample_id].metadata,
+        host_genome_name: samples_by_id[sample_id].host_genome_name,
         taxons: filtered_rows
       }
     end
