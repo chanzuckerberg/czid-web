@@ -2,10 +2,12 @@ require 'open3'
 require 'csv'
 require 'English'
 task update_lineage_db: :environment do
-  ### Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-02-15-utc-1518652800-unixtime__2018-02-15-utc-1518652800-unixtime rake update_lineage_db
+  ### Usage: REFERENCE_S3_FOLDER=s3://idseq-database/taxonomy/2018-12-01 LINEAGE_VERSION=3 rake update_lineage_db
   ### REFERENCE_S3_FOLDER needs to contain names.csv.gz and taxid-lineages.csv.gz
+  ### LINEAGE_VERSION needs to be incremented by 1 from the current highest version in taxon_lineages
 
   reference_s3_path = ENV['REFERENCE_S3_FOLDER'].gsub(%r{([/]*$)}, '') # trim any trailing '/'
+  current_lineage_version = ENV['LINEAGE_VERSION'].to_i
   local_taxonomy_path = "/app/tmp/taxonomy"
   name_column_array = %w[superkingdom_name superkingdom_common_name kingdom_name kingdom_common_name phylum_name phylum_common_name class_name class_common_name
                          order_name order_common_name family_name family_common_name genus_name genus_common_name species_name species_common_name]
@@ -69,6 +71,11 @@ task update_lineage_db: :environment do
    ## Clean up
    rm -rf #{local_taxonomy_path};
   `
+  ## Add lineage version numbers
+  TaxonLineage.where(started_at: current_date).update_all(version_start: current_lineage_version)
+  TaxonLineage.where(ended_at: current_date).update_all(version_end: current_lineage_version)
+
+  ## Instructions on next steps
   raise "lineage database update failed" unless $CHILD_STATUS.success?
   puts "To complete this lineage update, you should now update PHAGE_FAMILIES_TAXIDS and PHAGE_TAXIDS in TaxonLineageHelper using the queries described therein."
   puts "You should also overwrite app/lib/taxon_search_list.json with the output of TaxonLineage.taxon_search_list."
