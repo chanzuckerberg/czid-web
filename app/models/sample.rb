@@ -20,7 +20,7 @@ class Sample < ApplicationRecord
   # TODO: Make all these params configurable without code change
   DEFAULT_STORAGE_IN_GB = 500
   DEFAULT_MEMORY_IN_MB = 120_000 # sorry, hacky
-  HOST_FILTERING_MEMORY_IN_MB = 240_000
+  POSTPROCESSING_MEMORY_IN_MB = 240_000
 
   DEFAULT_QUEUE = (Rails.env == 'prod' ? 'idseq-prod-lomem' : 'idseq-staging-lomem').freeze
   DEFAULT_VCPUS = 16
