@@ -368,14 +368,11 @@ module SamplesHelper
   end
 
   def get_distinct_sample_types(samples)
-    types = Metadatum
-            .where(key: "sample_type")
-            .where(sample_id: samples.pluck(:id))
-            .pluck(:text_validated_value)
-            .uniq
-
-    # Only include valid sample types
-    types & Metadatum::KEY_TO_STRING_OPTIONS[:sample_type]
+    Metadatum
+      .where(key: "sample_type")
+      .where(sample_id: samples.pluck(:id))
+      .pluck(:text_validated_value)
+      .uniq
   end
 
   def get_metadata_types_by_host_genome_name(host_genome_name)
