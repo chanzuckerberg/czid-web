@@ -3,12 +3,13 @@ module PhyloTreeHelper
 
   def sample_details_by_tree_id
     query_results = ActiveRecord::Base.connection.select_all("
-      select phylo_tree_id, pipeline_run_id, ncbi_metadata, sample_id, samples.*, projects.name as project_name
-      from phylo_trees, phylo_trees_pipeline_runs, pipeline_runs, samples
+      select phylo_tree_id, pipeline_run_id, ncbi_metadata, sample_id, samples.*, projects.name as project_name, host_genomes.name as host_genome_name
+      from phylo_trees, phylo_trees_pipeline_runs, pipeline_runs, host_genomes, samples
       inner join projects on samples.project_id = projects.id
       where phylo_trees.id = phylo_trees_pipeline_runs.phylo_tree_id and
             phylo_trees_pipeline_runs.pipeline_run_id = pipeline_runs.id and
-            pipeline_runs.sample_id = samples.id
+            pipeline_runs.sample_id = samples.id and
+            host_genomes.id = samples.host_genome_id
       order by phylo_tree_id
     ").to_a
     indexed_results = {}

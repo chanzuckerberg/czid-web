@@ -1,7 +1,7 @@
-@import "../../themes/colors";
+@import "~styles/themes/colors";
 
-.data-tooltip {
-  background-color: white;
+.dataTooltip {
+  background-color: $white;
   border: 1px solid $light-grey;
   border-radius: 5px;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
@@ -12,42 +12,42 @@
   padding: 10px;
   pointer-events: none;
 
-  &__title {
+  &Title {
     border-bottom: 1px solid $lightest-grey;
     color: $medium-grey;
     margin-bottom: 10px;
     text-transform: uppercase;
   }
 
-  &__subtitle {
+  &Subtitle {
     font-weight: 700;
   }
 
-  &__section-name {
+  &SectionName {
     border-bottom: 1px solid $lightest-grey;
     color: $medium-grey;
     margin-bottom: 10px;
     text-transform: uppercase;
   }
 
-  &__section {
+  &Section {
     &:not(:first-child) {
       margin-top: 20px;
     }
   }
 
-  &__value-pair {
+  &ValuePair {
     display: flex;
   }
 
-  &__label {
+  &Label {
     font-weight: 700;
     margin-right: 10px;
     width: 160px;
     flex-shrink: 0;
   }
 
-  &__value {
+  &Value {
     flex: 1 1 0;
     word-break: break-all;
   }

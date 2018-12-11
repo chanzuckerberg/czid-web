@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "~/components/utils/propTypes";
-import { get } from "lodash/fp";
 import { deleteSample } from "~/api";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
@@ -52,7 +51,7 @@ class Controls extends React.Component {
   };
 
   render() {
-    const { reportPresent, pipelineRun, reportDetails, sample } = this.props;
+    const { reportPresent, pipelineRun, sample } = this.props;
 
     if (reportPresent) {
       const downloadOptions = [
@@ -60,10 +59,7 @@ class Controls extends React.Component {
           text: "Download Report Table (.csv)",
           value: "download_csv"
         },
-        ...getDownloadDropdownOptions(
-          pipelineRun,
-          get("assembled_taxids", reportDetails)
-        )
+        ...getDownloadDropdownOptions(pipelineRun)
       ];
 
       return (

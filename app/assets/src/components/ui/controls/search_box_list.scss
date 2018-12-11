@@ -1,0 +1,61 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+
+.searchBoxList {
+  background-color: $white;
+  border: 1px solid $light-grey;
+  border-radius: 5px;
+  box-shadow: $box-shadow-bottom-right;
+  display: inline-block;
+  font-size: 13px;
+  min-width: 200px;
+  padding: 10px;
+  text-align: left;
+
+  .searchBox {
+    margin-bottom: 10px;
+  }
+
+  .title {
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .listBox {
+    height: 200px;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: $lightest-grey;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: $medium-grey;
+    }
+
+    .listElement {
+      cursor: pointer;
+      height: 24px;
+      margin-right: 10px;
+      white-space: nowrap;
+    }
+
+    .listCheckmark {
+      display: inline-block;
+      width: 20px;
+    }
+
+    .listLabel {
+      display: inline-block;
+
+      &:hover {
+        color: $primary-light;
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+@import "~styles/themes/colors";
+@import "~styles/typography";
+
+:global(.ui):global(.dropdown).dropdown {
+  &:global(.active) {
+    .dropdownTrigger {
+      border: 1px solid $primary-light;
+    }
+  }
+}

@@ -1,19 +1,54 @@
-:global(.ui):global(.dropdown).dropdown {
-  display: flex;
-  align-items: center;
+@import "~styles/themes/colors";
 
-  i:global(.dropdown) {
-    margin-left: 0;
+:global(.ui):global(.dropdown).bareDropdown {
+  // Places the arrow within the trigger.
+  &.arrowInsideTrigger {
+    position: relative;
 
-    &:before {
-      font-family: FontAwesome;
-      content: "\f107";
+    i:global(.dropdown) {
+      margin: 0;
+      padding: 0;
+      position: absolute;
+      right: 10px;
+      top: 6px;
+      line-height: 24px;
+      pointer-events: none;
+      font-size: 20px;
+    }
+  }
+
+  // Places the arrow to the right of the trigger.
+  &.arrowOutsideTrigger {
+    display: flex;
+    align-items: center;
+
+    i:global(.dropdown) {
+      margin-left: 0;
     }
   }
 
   &.hideArrow {
     i:global(.dropdown) {
       display: none;
+    }
+  }
+
+  :global(.item) {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.4px;
+  }
+
+  i:global(.dropdown) {
+    &:before {
+      font-family: FontAwesome;
+      content: "\f107";
+    }
+  }
+
+  &:global(.active) {
+    i:global(.dropdown):global(.icon):before {
+      color: $primary-light;
     }
   }
 }
