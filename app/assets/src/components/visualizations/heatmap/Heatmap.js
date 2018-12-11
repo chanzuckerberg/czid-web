@@ -39,7 +39,7 @@ export default class Heatmap {
         textRotation: -65,
         marginTop: 30,
         marginLeft: 20,
-        marginBottom: 200,
+        marginBottom: 20,
         marginRight: 20,
         minCellWidth: 26,
         minCellHeight: 26,

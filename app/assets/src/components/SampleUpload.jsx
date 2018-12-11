@@ -3,12 +3,17 @@ import ReactDOM from "react-dom";
 import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
-import IconComponent from "./IconComponent";
 import ObjectHelper from "../helpers/ObjectHelper";
-import Icon from "./ui/icons/Icon";
-import { Menu, MenuItem } from "./ui/controls/Menu";
-import UploadBox from "./ui/controls/UploadBox";
-import { cleanLocalFilePath, baseName } from "./utils/sample";
+import { cleanLocalFilePath, baseName } from "~utils/sample";
+import CatIcon from "~ui/icons/CatIcon";
+import ERCCIcon from "~ui/icons/ERCCIcon";
+import HumanIcon from "~ui/icons/HumanIcon";
+import Icon from "~ui/icons/Icon";
+import MosquitoIcon from "~ui/icons/MosquitoIcon";
+import MouseIcon from "~ui/icons/MouseIcon";
+import TickIcon from "~ui/icons/TickIcon";
+import UploadBox from "~ui/controls/UploadBox";
+import { Menu, MenuItem } from "~ui/controls/Menu";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -527,15 +532,17 @@ class SampleUpload extends React.Component {
     genomeName = genomeName.toLowerCase();
     switch (genomeName) {
       case "mosquito":
-        return IconComponent.mosquito(color);
+        return <MosquitoIcon />;
       case "human":
-        return IconComponent.human(color);
+        return <HumanIcon />;
       case "tick":
-        return IconComponent.tick(color);
+        return <TickIcon />;
       case "mouse":
-        return IconComponent.mouse(color);
+        return <MouseIcon />;
       case "ercc only":
-        return IconComponent.ercc(color);
+        return <ERCCIcon />;
+      case "cat":
+        return <CatIcon />;
       default:
         return false;
     }
@@ -1114,12 +1121,9 @@ class SampleUpload extends React.Component {
                                 this.handleHostChange(g.id, g.name)
                               }
                             >
-                              <div
-                                className="img-container"
-                                dangerouslySetInnerHTML={{
-                                  __html: SampleUpload.resolveGenomeIcon(g.name)
-                                }}
-                              />
+                              <div className="img-container">
+                                {SampleUpload.resolveGenomeIcon(g.name)}
+                              </div>
                               <div className="genome-label">{g.name}</div>
                             </li>
                           ) : null;
