@@ -8,8 +8,9 @@ class Metadatum < ApplicationRecord
   STRING_TYPE = 0
   NUMBER_TYPE = 1
   DATE_TYPE = 2
+
   # When using an ActiveRecord enum, the type returned from reading records is String.
-  enum data_type: { string: STRING_TYPE, number: NUMBER_TYPE }
+  enum data_type: { string: STRING_TYPE, number: NUMBER_TYPE, date: DATE_TYPE }
 
   # Validations
   validates :text_validated_value, length: { maximum: 250 }
@@ -22,7 +23,7 @@ class Metadatum < ApplicationRecord
     unique_id: STRING_TYPE,
     sample_type: STRING_TYPE,
     nucleotide_type: STRING_TYPE,
-    collection_date: STRING_TYPE,
+    collection_date: DATE_TYPE,
     collection_location: STRING_TYPE,
     collected_by: STRING_TYPE,
     age: NUMBER_TYPE,
@@ -30,9 +31,9 @@ class Metadatum < ApplicationRecord
     race: STRING_TYPE,
     primary_diagnosis: STRING_TYPE,
     antibiotic_administered: STRING_TYPE,
-    admission_date: STRING_TYPE,
+    admission_date: DATE_TYPE,
     admission_type: STRING_TYPE,
-    discharge_date: STRING_TYPE,
+    discharge_date: DATE_TYPE,
     discharge_type: STRING_TYPE,
     immunocomp: STRING_TYPE,
     other_infections: STRING_TYPE,
@@ -194,12 +195,7 @@ class Metadatum < ApplicationRecord
       errors.add(:key, "#{key} is not a supported metadatum")
     end
 
-    if data_type == "number"
-      # Set number types. ActiveRecord validated.
-      self.number_validated_value = raw_value.to_f
-    elsif data_type == "string"
-      check_and_set_string_type
-    end
+    public_send("check_and_set_#{data_type}_type")
   end
 
   # Called by set_validated_values custom validator
@@ -225,6 +221,21 @@ class Metadatum < ApplicationRecord
       end
     else
       self.text_validated_value = raw_value
+    end
+  end
+
+  def check_and_set_number_type
+    begin
+      self.number_validated_value = raw_value.to_f
+    rescue ArgumentError
+      errors.add(:raw_value, "#{raw_value} is not a valid Float")
+  end
+
+  def check_and_set_date_type
+    begin
+      self.date_validated_value = Date.parse("31-02-2010")
+    rescue ArgumentError
+      errors.add(:raw_value, "#{raw_value} is not a valid date")
     end
   end
 
