@@ -229,6 +229,7 @@ class Metadatum < ApplicationRecord
       self.number_validated_value = raw_value.to_f
     rescue ArgumentError
       errors.add(:raw_value, "#{raw_value} is not a valid Float")
+    end
   end
 
   def check_and_set_date_type

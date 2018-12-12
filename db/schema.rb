@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181211142318) do
+ActiveRecord::Schema.define(version: 20181212090138) do
 
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
@@ -161,6 +161,7 @@ ActiveRecord::Schema.define(version: 20181211142318) do
     t.integer "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "date_validated_value"
     t.index ["sample_id", "key"], name: "index_metadata_on_sample_id_and_key", unique: true
   end
 

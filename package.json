@@ -94,6 +94,7 @@
     "react-sticky": "^6.0.1",
     "react-table": "^6.8.6",
     "react-tipsy": "^0.6.2",
+    "semantic-ui-calendar-react": "^0.12.1",
     "semantic-ui-css": "^2.3.0",
     "semantic-ui-react": "^0.82.1",
     "svgsaver": "^0.9.0",
