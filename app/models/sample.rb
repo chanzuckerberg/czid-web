@@ -500,8 +500,12 @@ class Sample < ApplicationRecord
       m.data_type = Metadatum::KEY_TO_TYPE[key.to_sym]
       m.sample = self
     end
-    m.edit_value(val)
-    m.save!
+    if val.blank?
+      m.destroy
+    else
+      m.raw_value = val
+      m.save!
+    end
   end
 
   def initiate_s3_prod_sync_to_staging
