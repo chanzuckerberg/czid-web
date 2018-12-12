@@ -500,7 +500,7 @@ class Sample < ApplicationRecord
       m.data_type = Metadatum::KEY_TO_TYPE[key.to_sym]
       m.sample = self
     end
-    if (val.blank?)
+    if val.blank?
       m.destroy
     else
       m.raw_value = val
