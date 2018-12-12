@@ -7,6 +7,7 @@ class Metadatum < ApplicationRecord
   belongs_to :sample
   STRING_TYPE = 0
   NUMBER_TYPE = 1
+  DATE_TYPE = 2
   # When using an ActiveRecord enum, the type returned from reading records is String.
   enum data_type: { string: STRING_TYPE, number: NUMBER_TYPE }
 
@@ -177,9 +178,11 @@ class Metadatum < ApplicationRecord
 
   def raw_value_float_if_number
     if data_type == "number"
-      Float(raw_value)
-    rescue
-      errors.add(:raw_value, "#{raw_value} is not a float")
+      begin
+        Float(raw_value)
+      rescue
+        errors.add(:raw_value, "#{raw_value} is not a float")
+      end
     end
   end
 
