@@ -217,11 +217,9 @@ class Metadatum < ApplicationRecord
   end
 
   def check_and_set_float_type
-    begin
-      self.number_validated_value = Float(raw_value)
-    rescue
-      errors.add(:raw_value, "#{raw_value} is not a valid float number")
-    end
+    self.number_validated_value = Float(raw_value)
+  rescue
+    errors.add(:raw_value, "#{raw_value} is not a valid float number")
   end
 
   def self.str_to_basic_chars(res)
