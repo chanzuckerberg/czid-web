@@ -7,7 +7,7 @@ class Metadatum < ApplicationRecord
   belongs_to :sample
   STRING_TYPE = 0
   NUMBER_TYPE = 1
-  
+
   # When using an ActiveRecord enum, the type returned from reading records is String.
   enum data_type: { string: STRING_TYPE, number: NUMBER_TYPE }
 
