@@ -88,7 +88,8 @@ class MetadataTab extends React.Component {
     } else if (metadataType.dataType == "date") {
       return (
         <DateInput
-          onChange={val => onMetadataChange(metadataType.key, val, true)}
+          onChange={val => onMetadataChange(metadataType.key, val)}
+          onBlur={() => onMetadataSave(metadataType.key)}
           value={metadata[metadataType.key]}
           className={cs.input}
         />
