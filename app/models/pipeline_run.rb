@@ -448,7 +448,7 @@ class PipelineRun < ApplicationRecord
       lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
       contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
     end
-    contigs.destroy_all
+    contigs.delete_all
     update(contigs_attributes: contig_array) unless contig_array.empty?
     update(assembled: 1)
   end
@@ -905,7 +905,7 @@ class PipelineRun < ApplicationRecord
     sub_after = all_counts.detect { |entry| entry.value?("subsampled_out") }
     frac = -1
     if sub_before && sub_after
-      frac = (1.0 * sub_after[:reads_after]) / sub_before[:reads_after]
+      frac = sub_before[:reads_after] > 0 ? ((1.0 * sub_after[:reads_after]) / sub_before[:reads_after]) : 1.0
       all_counts << { fraction_subsampled: frac }
       self.fraction_subsampled = frac
     end
@@ -915,7 +915,7 @@ class PipelineRun < ApplicationRecord
     # can be compared to total reads for the user. Number of reads after host
     # filtering step vs. total reads as if subsampling had never occurred.
     rem = all_counts.detect { |entry| entry.value?("gsnap_filter_out") }
-    if rem && frac != -1
+    if rem && frac > 0
       adjusted_remaining_reads = (rem[:reads_after] * (1 / frac)).to_i
       all_counts << { adjusted_remaining_reads: adjusted_remaining_reads }
       self.adjusted_remaining_reads = adjusted_remaining_reads
@@ -1125,7 +1125,7 @@ class PipelineRun < ApplicationRecord
     if fraction_subsampled
       fraction_subsampled
     else # These should actually be the same value
-      @cached_subsample_fraction ||= (1.0 * subsampled_reads) / adjusted_remaining_reads
+      @cached_subsample_fraction ||= adjusted_remaining_reads > 0 ? ((1.0 * subsampled_reads) / adjusted_remaining_reads) : 1.0
     end
   end
 

@@ -17,7 +17,7 @@ class MonitorPipelineResults
         Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}") unless silent
         pr.monitor_results
       rescue => exception
-        LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}")
+        LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
@@ -28,7 +28,7 @@ class MonitorPipelineResults
         Rails.logger.info("Monitoring results for phylo_tree #{pt.id}") unless silent
         pt.monitor_results
       rescue => exception
-        LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}")
+        LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
         LogUtil.log_backtrace(exception)
       end
     end
