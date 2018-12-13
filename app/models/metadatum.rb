@@ -214,19 +214,15 @@ class Metadatum < ApplicationRecord
   end
 
   def check_and_set_number_type
-    begin
-      self.number_validated_value = raw_value.to_f
-    rescue ArgumentError
-      errors.add(:raw_value, "#{raw_value} is not a valid Float")
-    end
+    self.number_validated_value = raw_value.to_f
+  rescue ArgumentError
+    errors.add(:raw_value, "#{raw_value} is not a valid Float")
   end
 
   def check_and_set_date_type
-    begin
-      self.date_validated_value = Date.parse(raw_value)
-    rescue ArgumentError
-      errors.add(:raw_value, "#{raw_value} is not a valid date")
-    end
+    self.date_validated_value = Date.parse(raw_value)
+  rescue ArgumentError
+    errors.add(:raw_value, "#{raw_value} is not a valid date")
   end
 
   def self.str_to_basic_chars(res)
@@ -367,7 +363,7 @@ class Metadatum < ApplicationRecord
     m
   end
 
-  def validated_value    
+  def validated_value
     return instance_variable_get("#{data_type}_validated_value")
   rescue
     ""
