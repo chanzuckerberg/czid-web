@@ -15,7 +15,6 @@ class Metadatum < ApplicationRecord
   # Validations
   validates :text_validated_value, length: { maximum: 250 }
   validates :number_validated_value, numericality: true, allow_nil: true
-  validate :raw_value_float_if_number
   validate :set_validated_values
 
   # Key to the metadatum type. Supporting strings and numbers currently.
@@ -177,21 +176,10 @@ class Metadatum < ApplicationRecord
     ]
   }.freeze
 
-  def raw_value_float_if_number
-    if data_type == "number"
-      begin
-        Float(raw_value)
-      rescue
-        errors.add(:raw_value, "#{raw_value} is not a float")
-      end
-    end
-  end
-
   # Custom validator called on save or update. Writes to the *_validated_value column.
   def set_validated_values
     # Check if the key is valid
     valid_keys = self.class.valid_keys_by_host_genome_name(sample.host_genome_name)
-    Rails.logger.debug("gen=#{sample.host_genome_name} keys=#{valid_keys} val=#{valid_keys.include?(key)}")
     unless key && valid_keys.include?(key)
       errors.add(:key, "#{key} is not a supported metadatum")
     end
