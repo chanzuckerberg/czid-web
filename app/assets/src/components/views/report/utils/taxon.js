@@ -1,4 +1,5 @@
 import ThresholdMap from "~/components/utils/ThresholdMap";
+import { omit, set, get } from "lodash/fp";
 
 export const computeThresholdedTaxons = (candidateTaxons, activeThresholds) => {
   let resultTaxons = [];
@@ -57,6 +58,13 @@ export const isTaxonIncluded = (
   );
 };
 
+export const getTaxonMetric = (taxon, type, metric) => {
+  if (metric === "contigs" || metric === "contigreads") {
+    return get(["summaryContigCounts", type, metric], taxon) || 0;
+  }
+  return taxon[type][metric];
+};
+
 export const getTaxonSortComparator = (
   primarySortParams,
   secondarySortParams,
@@ -69,15 +77,19 @@ export const getTaxonSortComparator = (
     const genusA = genusMap[a.genus_taxid];
     const genusB = genusMap[b.genus_taxid];
 
-    const genusAPrimaryVal = parseFloat(genusA[ptype][pmetric]);
-    const genusASecondaryVal = parseFloat(genusA[stype][smetric]);
-    const aPrimaryVal = parseFloat(a[ptype][pmetric]);
-    const aSecondaryVal = parseFloat(a[stype][smetric]);
+    const genusAPrimaryVal = parseFloat(getTaxonMetric(genusA, ptype, pmetric));
+    const genusASecondaryVal = parseFloat(
+      getTaxonMetric(genusA, stype, smetric)
+    );
+    const aPrimaryVal = parseFloat(getTaxonMetric(a, ptype, pmetric));
+    const aSecondaryVal = parseFloat(getTaxonMetric(a, stype, smetric));
 
-    const genusBPrimaryVal = parseFloat(genusB[ptype][pmetric]);
-    const genusBSecondaryVal = parseFloat(genusB[stype][smetric]);
-    const bPrimaryVal = parseFloat(b[ptype][pmetric]);
-    const bSecondaryVal = parseFloat(b[stype][smetric]);
+    const genusBPrimaryVal = parseFloat(getTaxonMetric(genusB, ptype, pmetric));
+    const genusBSecondaryVal = parseFloat(
+      getTaxonMetric(genusB, stype, smetric)
+    );
+    const bPrimaryVal = parseFloat(getTaxonMetric(b, ptype, pmetric));
+    const bSecondaryVal = parseFloat(getTaxonMetric(b, stype, smetric));
 
     // compared at genus level descending and then species level descending
     if (a.genus_taxid == b.genus_taxid) {
@@ -138,4 +150,33 @@ export const getCategoryAdjective = category => {
     default:
       return categoryLowercase;
   }
+};
+
+export const addContigCountsToTaxonomyDetails = (
+  baseTaxonomyDetails,
+  summaryContigCounts
+) => {
+  let contigCountsMap = {};
+
+  summaryContigCounts.forEach(contigCount => {
+    contigCountsMap = set(
+      [contigCount.taxid, contigCount.count_type],
+      {
+        contigs: contigCount.contigs,
+        contigreads: contigCount.contig_reads
+      },
+      contigCountsMap
+    );
+  });
+
+  // Add the contigCountsMap attributes to the corresponding taxonomy detail.
+  return baseTaxonomyDetails.map(
+    detail =>
+      contigCountsMap[detail.tax_id]
+        ? {
+            ...detail,
+            summaryContigCounts: contigCountsMap[detail.tax_id]
+          }
+        : omit("summaryContigCounts", detail)
+  );
 };

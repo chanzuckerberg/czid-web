@@ -64,14 +64,22 @@ const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
 
 const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
 
+const getSampleReportInfo = (id, params) =>
+  get(`/samples/${id}/report_info${params}`);
+
+const getSummaryContigCounts = (id, minContigSize) =>
+  get(`/samples/${id}/summary_contig_counts?min_contig_size=${minContigSize}`);
+
 export {
   get,
   getSampleMetadata,
+  getSampleReportInfo,
   saveSampleMetadata,
   getMetadataTypesByHostGenomeName,
   saveSampleName,
   saveSampleNotes,
   getAlignmentData,
   getURLParamString,
-  deleteSample
+  deleteSample,
+  getSummaryContigCounts
 };

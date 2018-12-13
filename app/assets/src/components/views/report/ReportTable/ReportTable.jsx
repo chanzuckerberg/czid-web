@@ -63,7 +63,8 @@ export default class ReportTable extends React.Component {
       expandTable,
       collapseTable,
       countType,
-      setCountType
+      setCountType,
+      showAssemblyColumns
     } = this.props;
 
     return (
@@ -101,6 +102,18 @@ export default class ReportTable extends React.Component {
                 `${countType}_r`,
                 `Number of reads aligning to the taxon in the NCBI NT/NR database`
               )}
+              {showAssemblyColumns &&
+                renderColumnHeader(
+                  "contig",
+                  `${countType}_contigs`,
+                  `Number of assembled contigs aligning to the taxon in the NCBI NT/NR database`
+                )}
+              {showAssemblyColumns &&
+                renderColumnHeader(
+                  "contig r",
+                  `${countType}_contigreads`,
+                  `Total number of reads across all assembled contigs`
+                )}
               {renderColumnHeader(
                 "%id",
                 `${countType}_percentidentity`,
@@ -156,6 +169,7 @@ export default class ReportTable extends React.Component {
               openTaxonModal={this.handleTaxonModalOpen}
               reportDetails={reportDetails}
               backgroundData={backgroundData}
+              showAssemblyColumns={showAssemblyColumns}
             />
           </tbody>
         </table>
@@ -177,5 +191,6 @@ ReportTable.propTypes = {
   collapseTable: PropTypes.func.isRequired,
   renderColumnHeader: PropTypes.func.isRequired,
   countType: PropTypes.string.isRequired,
-  setCountType: PropTypes.func.isRequired
+  setCountType: PropTypes.func.isRequired,
+  showAssemblyColumns: PropTypes.bool
 };
