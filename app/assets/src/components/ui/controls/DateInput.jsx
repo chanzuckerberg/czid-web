@@ -53,6 +53,7 @@ class DateInput extends React.Component {
         onChange={this.handleChange}
         value={this.state.value}
         dateFormat="YYYY-MM-DD"
+        popupPosition="bottom left"
         {...props}
       />
     );
