@@ -44,7 +44,7 @@ class DateInput extends React.Component {
   };
 
   render() {
-    const { className, onBlur, onChange, value, ...props } = this.props;
+    const { className } = this.props;
     return (
       <BaseDateInput
         fluid
@@ -53,8 +53,7 @@ class DateInput extends React.Component {
         onChange={this.handleChange}
         value={this.state.value}
         dateFormat="YYYY-MM-DD"
-        popupPosition="bottom left"
-        {...props}
+        popupPosition="bottom right"
       />
     );
   }
