@@ -448,7 +448,7 @@ class PipelineRun < ApplicationRecord
       lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
       contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
     end
-    contigs.destroy_all
+    contigs.delete_all
     update(contigs_attributes: contig_array) unless contig_array.empty?
     update(assembled: 1)
   end
