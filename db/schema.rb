@@ -154,9 +154,8 @@ ActiveRecord::Schema.define(version: 20_181_211_174_900) do
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "key", null: false, collation: "latin1_swedish_ci"
     t.integer "data_type", limit: 1, null: false
-    t.string "text_raw_value"
+    t.string "raw_value"
     t.string "text_validated_value"
-    t.float "number_raw_value", limit: 24
     t.float "number_validated_value", limit: 24
     t.integer "sample_id"
     t.datetime "created_at", null: false
