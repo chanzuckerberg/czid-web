@@ -191,6 +191,7 @@ class Metadatum < ApplicationRecord
   def set_validated_values
     # Check if the key is valid
     valid_keys = self.class.valid_keys_by_host_genome_name(sample.host_genome_name)
+    Rails.logger.debug("gen=#{sample.host_genome_name} keys=#{valid_keys} val=#{valid_keys.include?(key)}")
     unless key && valid_keys.include?(key)
       errors.add(:key, "#{key} is not a supported metadatum")
     end
@@ -234,7 +235,7 @@ class Metadatum < ApplicationRecord
 
   def check_and_set_date_type
     begin
-      self.date_validated_value = Date.parse("31-02-2010")
+      self.date_validated_value = Date.parse(raw_value)
     rescue ArgumentError
       errors.add(:raw_value, "#{raw_value} is not a valid date")
     end
@@ -274,7 +275,7 @@ class Metadatum < ApplicationRecord
     begin
       # The unique key is on sample and metadata.key, so the value fields will
       # be updated if the key exists.
-      update_keys = [:raw_value, :text_validated_value, :number_validated_value]
+      update_keys = [:raw_value, :text_validated_value, :number_validated_value, :date_validated_value]
       results = Metadatum.import to_create, on_duplicate_key_update: update_keys
       results.failed_instances.each do |model|
         # Show the errors from ActiveRecord
@@ -378,12 +379,9 @@ class Metadatum < ApplicationRecord
     m
   end
 
-  def validated_value
-    if data_type == "string"
-      return text_validated_value
-    elsif data_type == "number"
-      return number_validated_value
-    end
+  def validated_value    
+    return instance_variable_get("#{data_type}_validated_value")
+  rescue
     ""
   end
 
@@ -392,6 +390,8 @@ class Metadatum < ApplicationRecord
       return "string"
     elsif type == NUMBER_TYPE
       return "number"
+    elsif type == DATE_TYPE
+      return "date"
     end
     ""
   end

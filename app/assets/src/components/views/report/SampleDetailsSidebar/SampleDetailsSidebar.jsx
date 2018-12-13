@@ -87,6 +87,7 @@ class SampleDetailsSidebar extends React.Component {
   // shouldSave option is used when <Input> option is selected
   // to change and save in one call (to avoid setState issues)
   handleMetadataChange = (key, value, shouldSave) => {
+    console.log("on change", key, value, shouldSave);
     /* Sample name and note are special cases */
     if (key === "name" || key === "notes") {
       this.setState({
@@ -108,6 +109,7 @@ class SampleDetailsSidebar extends React.Component {
   };
 
   handleMetadataSave = async key => {
+    console.log("on md save", key);
     if (this.state.metadataChanged[key]) {
       const newValue =
         key === "name" || key === "notes"
@@ -123,6 +125,7 @@ class SampleDetailsSidebar extends React.Component {
   };
 
   _save = async (id, key, value) => {
+    console.log("saving", id, key, value);
     // When metadata is saved, fire event.
     if (this.props.onMetadataUpdate) {
       this.props.onMetadataUpdate(key, value);
