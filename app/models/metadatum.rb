@@ -7,12 +7,13 @@ class Metadatum < ApplicationRecord
   belongs_to :sample
   STRING_TYPE = 0
   NUMBER_TYPE = 1
+  DATE_TYPE = 2
 
   # When using an ActiveRecord enum, the type returned from reading records is String.
-  enum data_type: { string: STRING_TYPE, number: NUMBER_TYPE }
+  enum data_type: { string: STRING_TYPE, number: NUMBER_TYPE, date: DATE_TYPE }
 
   # Validations
-  validates :text_validated_value, length: { maximum: 250 }
+  validates :string_validated_value, length: { maximum: 250 }
   validates :number_validated_value, numericality: true, allow_nil: true
   validate :set_validated_values
 
@@ -21,7 +22,7 @@ class Metadatum < ApplicationRecord
     unique_id: STRING_TYPE,
     sample_type: STRING_TYPE,
     nucleotide_type: STRING_TYPE,
-    collection_date: STRING_TYPE,
+    collection_date: DATE_TYPE,
     collection_location: STRING_TYPE,
     collected_by: STRING_TYPE,
     age: NUMBER_TYPE,
@@ -29,9 +30,9 @@ class Metadatum < ApplicationRecord
     race: STRING_TYPE,
     primary_diagnosis: STRING_TYPE,
     antibiotic_administered: STRING_TYPE,
-    admission_date: STRING_TYPE,
+    admission_date: DATE_TYPE,
     admission_type: STRING_TYPE,
-    discharge_date: STRING_TYPE,
+    discharge_date: DATE_TYPE,
     discharge_type: STRING_TYPE,
     immunocomp: STRING_TYPE,
     other_infections: STRING_TYPE,
@@ -183,11 +184,7 @@ class Metadatum < ApplicationRecord
       errors.add(:key, "#{key} is not a supported metadatum")
     end
 
-    if data_type == "number"
-      check_and_set_float_type
-    elsif data_type == "string"
-      check_and_set_string_type
-    end
+    public_send("check_and_set_#{data_type}_type")
   end
 
   # Called by set_validated_values custom validator
@@ -203,7 +200,7 @@ class Metadatum < ApplicationRecord
         if Metadatum.str_to_basic_chars(raw_value) == Metadatum.str_to_basic_chars(opt)
           # Ex: Match 'neb ultra-iifs dna' to 'NEB Ultra II FS DNA'
           # Ex: Match '30-day mortality' to "30 Day Mortality"
-          self.text_validated_value = opt
+          self.string_validated_value = opt
           matched = true
           break
         end
@@ -212,14 +209,20 @@ class Metadatum < ApplicationRecord
         errors.add(:raw_value, "#{raw_value} did not match options #{options.join(', ')}")
       end
     else
-      self.text_validated_value = raw_value
+      self.string_validated_value = raw_value
     end
   end
 
-  def check_and_set_float_type
-    self.number_validated_value = Float(raw_value)
-  rescue
-    errors.add(:raw_value, "#{raw_value} is not a valid float number")
+  def check_and_set_number_type
+    self.number_validated_value = raw_value.to_f
+  rescue ArgumentError
+    errors.add(:raw_value, "#{raw_value} is not a valid Float")
+  end
+
+  def check_and_set_date_type
+    self.date_validated_value = Date.parse(raw_value)
+  rescue ArgumentError
+    errors.add(:raw_value, "#{raw_value} is not a valid date")
   end
 
   def self.str_to_basic_chars(res)
@@ -256,7 +259,7 @@ class Metadatum < ApplicationRecord
     begin
       # The unique key is on sample and metadata.key, so the value fields will
       # be updated if the key exists.
-      update_keys = [:raw_value, :text_validated_value, :number_validated_value]
+      update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value]
       results = Metadatum.import to_create, on_duplicate_key_update: update_keys
       results.failed_instances.each do |model|
         # Show the errors from ActiveRecord
@@ -361,11 +364,8 @@ class Metadatum < ApplicationRecord
   end
 
   def validated_value
-    if data_type == "string"
-      return text_validated_value
-    elsif data_type == "number"
-      return number_validated_value
-    end
+    return instance_variable_get("#{data_type}_validated_value")
+  rescue
     ""
   end
 
@@ -374,6 +374,8 @@ class Metadatum < ApplicationRecord
       return "string"
     elsif type == NUMBER_TYPE
       return "number"
+    elsif type == DATE_TYPE
+      return "date"
     end
     ""
   end

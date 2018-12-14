@@ -5,6 +5,7 @@ import { set } from "lodash/fp";
 import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
+import DateInput from "~/components/ui/controls/DateInput";
 import MetadataSection from "./MetadataSection";
 import {
   SAMPLE_ADDITIONAL_INFO,
@@ -12,14 +13,6 @@ import {
   VECTOR_METADATA_SECTIONS
 } from "./constants";
 import cs from "./sample_details_sidebar.scss";
-
-const renderMetadataValue = val => {
-  return val === undefined || val === null || val === "" ? (
-    <div className={cs.emptyValue}>--</div>
-  ) : (
-    <div className={cs.metadataValue}>{val}</div>
-  );
-};
 
 class MetadataTab extends React.Component {
   constructor(props) {
@@ -92,22 +85,38 @@ class MetadataTab extends React.Component {
           value={metadata[metadataType.key]}
         />
       );
+    } else if (metadataType.dataType == "date") {
+      return (
+        <DateInput
+          onChange={val => onMetadataChange(metadataType.key, val, true)}
+          value={metadata[metadataType.key]}
+          className={cs.input}
+        />
+      );
+    } else {
+      return (
+        <Input
+          onChange={val => onMetadataChange(metadataType.key, val)}
+          onBlur={() => onMetadataSave(metadataType.key)}
+          value={metadata[metadataType.key]}
+          type={metadataType.dataType === "number" ? "number" : "text"}
+          className={cs.input}
+        />
+      );
     }
+  };
 
-    return (
-      <Input
-        onChange={val => onMetadataChange(metadataType.key, val)}
-        onBlur={() => onMetadataSave(metadataType.key)}
-        value={metadata[metadataType.key]}
-        type={metadataType.dataType === "number" ? "number" : "text"}
-        className={cs.input}
-      />
+  static renderMetadataValue = val => {
+    return val === undefined || val === null || val === "" ? (
+      <div className={cs.emptyValue}>--</div>
+    ) : (
+      <div className={cs.metadataValue}>{val}</div>
     );
   };
 
   renderMetadataType = metadataType => {
     const { metadata } = this.props;
-    return renderMetadataValue(metadata[metadataType.key]);
+    return MetadataTab.renderMetadataValue(metadata[metadataType.key]);
   };
 
   renderMetadataSectionContent = section => {
@@ -139,7 +148,7 @@ class MetadataTab extends React.Component {
                   {additionalInfo[info.key]}
                 </a>
               ) : (
-                renderMetadataValue(additionalInfo[info.key])
+                MetadataTab.renderMetadataValue(additionalInfo[info.key])
               )}
             </div>
           ))}
