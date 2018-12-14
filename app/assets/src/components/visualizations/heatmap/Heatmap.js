@@ -341,8 +341,8 @@ export default class Heatmap {
     this.renderColumnMetadata();
 
     if (this.options.clustering) {
-      if (this.rowClustering) this.renderRowDendrogram();
-      if (this.columnClustering) this.renderColumnDendrogram();
+      this.renderRowDendrogram();
+      this.renderColumnDendrogram();
     }
 
     this.options.onUpdateFinished && this.options.onUpdateFinished();
@@ -967,22 +967,24 @@ export default class Heatmap {
 
   // Dendograms
   renderColumnDendrogram() {
-    let width = this.cell.width * this.columnLabels.length;
-    let height = this.columnClusterHeight - this.options.spacing;
-
     this.gColumnDendogram.select("g").remove();
     let container = this.gColumnDendogram.append("g");
-    this.renderDendrogram(
-      container,
-      this.columnClustering,
-      this.columnLabels,
-      width,
-      height
-    );
-    container.attr(
-      "transform",
-      `rotate(-90) translate(-${height + this.options.spacing},0)`
-    );
+    if (this.columnClustering) {
+      let width = this.cell.width * this.columnLabels.length;
+      let height = this.columnClusterHeight - this.options.spacing;
+
+      this.renderDendrogram(
+        container,
+        this.columnClustering,
+        this.columnLabels,
+        width,
+        height
+      );
+      container.attr(
+        "transform",
+        `rotate(-90) translate(-${height + this.options.spacing},0)`
+      );
+    }
   }
 
   renderRowDendrogram() {
