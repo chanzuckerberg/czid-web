@@ -11,7 +11,8 @@ import {
   computeThresholdedTaxons,
   isTaxonIncluded,
   getTaxonSortComparator,
-  getCategoryAdjective
+  getCategoryAdjective,
+  addContigCountsToTaxonomyDetails
 } from "./views/report/utils/taxon";
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
@@ -26,11 +27,17 @@ import CategoryFilter from "./views/report/filters/CategoryFilter";
 import MetricPicker from "./views/report/filters/MetricPicker";
 import SpecificityFilter from "./views/report/filters/SpecificityFilter";
 import NameTypeFilter from "./views/report/filters/NameTypeFilter";
+import MinContigSizeFilter from "./views/report/filters/MinContigSizeFilter";
 import ReportSearchBox from "./views/report/filters/ReportSearchBox";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
 import LoadingLabel from "./ui/labels/LoadingLabel";
 import HoverActions from "./views/report/ReportTable/HoverActions";
+import { getSampleReportInfo } from "~/api";
+import { getSummaryContigCounts } from "../api";
+import { pipelineVersionHasAssembly } from "./utils/sample";
+
+const DEFAULT_MIN_CONTIG_SIZE = 4;
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -68,6 +75,7 @@ class PipelineSampleReport extends React.Component {
     const cached_name_type = Cookies.get("name_type");
     const cachedReadSpecificity = Cookies.get("readSpecificity");
     const cachedTreeMetric = Cookies.get("treeMetric");
+    const cachedMinContigSize = parseInt(Cookies.get("minContigSize"), 10);
 
     const savedThresholdFilters = ThresholdMap.getSavedThresholdFilters();
 
@@ -86,13 +94,17 @@ class PipelineSampleReport extends React.Component {
       { text: "NT Z Score", value: "NT_zscore" },
       { text: "NT rPM", value: "NT_rpm" },
       { text: "NT r (total reads)", value: "NT_r" },
+      { text: "NT contigs", value: "NT_contigs" },
+      { text: "NT contig reads", value: "NT_contigreads" },
       { text: "NT %id", value: "NT_percentidentity" },
       { text: "NT log(1/e)", value: "NT_neglogevalue" },
       { text: "NR Z Score", value: "NR_zscore" },
-      { text: "NR r (total reads)", value: "NR_r" },
       { text: "NR rPM", value: "NR_rpm" },
+      { text: "NR r (total reads)", value: "NR_r" },
+      { text: "NR contigs", value: "NR_contigs" },
+      { text: "NR contig reads", value: "NR_contigreads" },
       { text: "NR %id", value: "NR_percentidentity" },
-      { text: "R log(1/e)", value: "NR_neglogevalue" }
+      { text: "NR log(1/e)", value: "NR_neglogevalue" }
     ];
     this.categoryChildParent = { Phage: "Viruses" };
     this.categoryParentChild = { Viruses: ["Phage"] };
@@ -158,7 +170,8 @@ class PipelineSampleReport extends React.Component {
         : 0,
       treeMetric: cachedTreeMetric || this.treeMetrics[0].value,
       phyloTreeModalOpen: true,
-      contigTaxidList: []
+      contigTaxidList: [],
+      minContigSize: cachedMinContigSize || DEFAULT_MIN_CONTIG_SIZE
     };
 
     this.expandAll = false;
@@ -198,7 +211,7 @@ class PipelineSampleReport extends React.Component {
 
   // fetchReportData loads the actual report information with another call to
   // the API endpoint.
-  fetchReportData = () => {
+  fetchReportData = async () => {
     this.nanobar.go(30);
     this.setState({
       loading: true
@@ -206,37 +219,50 @@ class PipelineSampleReport extends React.Component {
     let params = `?${window.location.search.replace("?", "")}&report_ts=${
       this.report_ts
     }&version=${this.gitVersion}`;
-    axios.get(`/samples/${this.sample_id}/report_info${params}`).then(res => {
-      this.nanobar.go(100);
-      const genus_map = {};
-      for (let i = 0; i < res.data.taxonomy_details[2].length; i++) {
-        const taxon = res.data.taxonomy_details[2][i];
-        if (taxon.genus_taxid == taxon.tax_id) {
-          genus_map[taxon.genus_taxid] = taxon;
-        }
+
+    const [sampleReportInfo, summaryContigCounts] = await Promise.all([
+      getSampleReportInfo(this.sample_id, params),
+      getSummaryContigCounts(this.sample_id, this.state.minContigSize)
+    ]);
+
+    this.nanobar.go(100);
+
+    const taxonomyDetails = addContigCountsToTaxonomyDetails(
+      sampleReportInfo.taxonomy_details[2],
+      summaryContigCounts.contig_counts
+    );
+
+    const genus_map = {};
+
+    for (let i = 0; i < taxonomyDetails.length; i++) {
+      const taxon = taxonomyDetails[i];
+      if (taxon.genus_taxid == taxon.tax_id) {
+        genus_map[taxon.genus_taxid] = taxon;
       }
-      this.genus_map = genus_map;
-      this.setState(
-        {
-          loading: false,
-          rows_passing_filters: res.data.taxonomy_details[0],
-          rows_total: res.data.taxonomy_details[1],
-          taxonomy_details: res.data.taxonomy_details[2],
-          generaContainingTags: getGeneraContainingTags(
-            res.data.taxonomy_details[2]
-          ),
-          topScoringTaxa: res.data.topScoringTaxa,
-          backgroundData: {
-            id: res.data.background_info.id,
-            name: res.data.background_info.name
-          },
-          contigTaxidList: res.data.contig_taxid_list
+    }
+
+    this.genus_map = genus_map;
+
+    this.setState(
+      {
+        loading: false,
+        rows_passing_filters: sampleReportInfo.taxonomy_details[0],
+        rows_total: sampleReportInfo.taxonomy_details[1],
+        taxonomy_details: taxonomyDetails,
+        generaContainingTags: getGeneraContainingTags(
+          sampleReportInfo.taxonomy_details[2]
+        ),
+        topScoringTaxa: sampleReportInfo.topScoringTaxa,
+        backgroundData: {
+          id: sampleReportInfo.background_info.id,
+          name: sampleReportInfo.background_info.name
         },
-        () => {
-          this.applyFilters(true);
-        }
-      );
-    });
+        contigTaxidList: sampleReportInfo.contig_taxid_list
+      },
+      () => {
+        this.applyFilters(true);
+      }
+    );
   };
 
   anyFilterSet = () => {
@@ -659,6 +685,32 @@ class PipelineSampleReport extends React.Component {
     this.setState({ treeMetric });
   };
 
+  handleMinContigSizeChange = async minContigSize => {
+    Cookies.set("minContigSize", minContigSize);
+    this.setState({ minContigSize });
+
+    // Refetch the summary contig counts based on the new value.
+    const summaryContigCounts = await getSummaryContigCounts(
+      this.sample_id,
+      minContigSize
+    );
+
+    const taxonomyDetails = addContigCountsToTaxonomyDetails(
+      this.state.taxonomy_details,
+      summaryContigCounts.contig_counts
+    );
+
+    this.setState(
+      {
+        taxonomy_details: taxonomyDetails
+      },
+      () => {
+        // Since the contig columns have changed, we need to maybe compute the thresholds again.
+        this.applyFilters(true);
+      }
+    );
+  };
+
   handleViewClicked = (_, data) => {
     this.setState({ view: data.name });
   };
@@ -829,7 +881,8 @@ class PipelineSampleReport extends React.Component {
     num_decimals,
     isAggregate = false,
     visible_flag = true,
-    showInsight = false
+    showInsight = false,
+    className = ""
   ) => {
     if (!visible_flag) {
       return null;
@@ -853,8 +906,9 @@ class PipelineSampleReport extends React.Component {
         {nrCountStr}
       </div>
     ) : null;
+
     return (
-      <td className="report-number">
+      <td className={cx("report-number", className)}>
         {ntCountLabel}
         {nrCountLabel}
       </td>
@@ -904,9 +958,11 @@ class PipelineSampleReport extends React.Component {
         {this.render_sort_arrow(column_name, "highest", "up")}
       </div>
     );
+    const className = column_name === "NT_aggregatescore" && "score-column";
+
     if (!visible_flag) return null;
     return (
-      <th>
+      <th className={cx(className)}>
         <BasicPopup trigger={element} content={tooltip_message} />
       </th>
     );
@@ -1331,6 +1387,14 @@ class RenderMarkup extends React.Component {
               />
             </div>
           )}
+          {this.state.view == "table" && (
+            <div className="filter-lists-element">
+              <MinContigSizeFilter
+                value={parent.state.minContigSize}
+                onChange={parent.handleMinContigSizeChange}
+              />
+            </div>
+          )}
         </div>
       </div>
     );
@@ -1353,6 +1417,9 @@ class RenderMarkup extends React.Component {
         renderColumnHeader={parent.renderColumnHeader}
         countType={parent.state.countType}
         setCountType={countType => parent.setState({ countType })}
+        showAssemblyColumns={pipelineVersionHasAssembly(
+          parent.props.reportPageParams.pipeline_version
+        )}
       />
     );
   }
