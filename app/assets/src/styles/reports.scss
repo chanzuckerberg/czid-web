@@ -171,6 +171,10 @@ input[type="number"] {
     &.last-col {
       width: 30px;
     }
+
+    &.score-column {
+      width: 120px;
+    }
   }
 
   td:first-child {
@@ -297,7 +301,6 @@ input[type="number"] {
     }
     .report-top-filters {
       .filter-lists {
-        padding: 10px 0;
         width: 100%;
         & > div.filter-lists-element > li {
           color: $darkest-grey;
@@ -333,6 +336,7 @@ input[type="number"] {
         .filter-lists-element {
           display: inline-block;
           vertical-align: top;
+          margin: 4px 0;
 
           &:not(:last-child) {
             margin-right: 10px;

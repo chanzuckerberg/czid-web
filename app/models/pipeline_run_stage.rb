@@ -185,8 +185,8 @@ class PipelineRunStage < ApplicationRecord
 
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")
 
-    # Dispatch job
-    aegea_batch_submit_command(batch_command)
+    # Dispatch job. Use the himem settings for host filtering.
+    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB)
   end
 
   def alignment_command
@@ -244,7 +244,7 @@ class PipelineRunStage < ApplicationRecord
     dag_commands = prepare_dag("postprocess", attribute_dict)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Dispatch job with himem number of vCPUs and to the himem queue.
-    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::POSTPROCESSING_MEMORY_IN_MB)
+    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB)
   end
 
   def experimental_command

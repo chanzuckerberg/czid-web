@@ -5,7 +5,15 @@ import cs from "./dropdown_trigger.scss";
 
 class DropdownTrigger extends React.Component {
   render() {
-    const { label, value, rounded, active, disabled, className } = this.props;
+    const {
+      label,
+      value,
+      rounded,
+      active,
+      disabled,
+      className,
+      onClick
+    } = this.props;
     return (
       <div
         className={cx(
@@ -15,6 +23,7 @@ class DropdownTrigger extends React.Component {
           active && cs.active,
           disabled && cs.disabled
         )}
+        onClick={onClick}
       >
         <div className={cs.labelContainer}>
           <span className={cs.label}>{label}</span>
@@ -31,7 +40,8 @@ DropdownTrigger.propTypes = {
   value: PropTypes.node,
   rounded: PropTypes.bool,
   active: PropTypes.bool,
-  disabled: PropTypes.bool
+  disabled: PropTypes.bool,
+  onClick: PropTypes.func
 };
 
 export default DropdownTrigger;

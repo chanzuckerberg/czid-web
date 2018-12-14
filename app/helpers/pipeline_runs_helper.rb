@@ -47,20 +47,10 @@ module PipelineRunsHelper
   def aegea_batch_submit_command(base_command,
                                  memory: Sample::DEFAULT_MEMORY_IN_MB,
                                  vcpus: Sample::DEFAULT_VCPUS,
-                                 job_queue: nil,
+                                 job_queue: Sample::DEFAULT_QUEUE,
                                  docker_image: "idseq_dag")
     command = "aegea batch submit --command=\"#{base_command}\" "
-    if memory <= Sample::DEFAULT_MEMORY_IN_MB
-      # Use default memory, vCPUs, and queue if below the default memory threshold.
-      queue = Sample::DEFAULT_QUEUE
-    else
-      vcpus = Sample::DEFAULT_VCPUS_HIMEM
-      queue = Sample::DEFAULT_QUEUE_HIMEM
-    end
-    if job_queue.present?
-      queue = job_queue
-    end
-    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image #{docker_image} --memory #{memory} --queue #{queue} --vcpus #{vcpus} --job-role idseq-pipeline "
+    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image #{docker_image} --memory #{memory} --queue #{job_queue} --vcpus #{vcpus} --job-role idseq-pipeline "
     command
   end
 

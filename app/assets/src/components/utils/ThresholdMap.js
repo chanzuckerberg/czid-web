@@ -1,3 +1,5 @@
+import { getTaxonMetric } from "~/components/views/report/utils/taxon";
+
 function ThresholdMap(options) {
   this.options = options;
 }
@@ -39,7 +41,7 @@ ThresholdMap.taxonPassThresholdFilter = function(taxon, rules) {
       let { metric, operator, value } = rule;
       let threshold = parseFloat(value);
       const [fieldType, fieldTitle] = metric.split("_");
-      const taxonValue = (taxon[fieldType] || {})[fieldTitle];
+      const taxonValue = getTaxonMetric(taxon, fieldType, fieldTitle);
       switch (operator) {
         case ">=":
           if (taxonValue < threshold) {

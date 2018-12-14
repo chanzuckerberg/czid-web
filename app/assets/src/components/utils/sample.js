@@ -1,8 +1,8 @@
 import last from "lodash/fp";
 
-export const pipelineHasAssembly = pipelineRun => {
-  if (!pipelineRun.pipeline_version) return false;
-  const versionNums = pipelineRun.pipeline_version.split(".");
+export const pipelineVersionHasAssembly = pipelineVersion => {
+  if (!pipelineVersion) return false;
+  const versionNums = pipelineVersion.split(".");
   return +versionNums[0] >= 3 && +versionNums[1] >= 1;
 };
 
