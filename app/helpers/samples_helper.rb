@@ -371,7 +371,7 @@ module SamplesHelper
     Metadatum
       .where(key: "sample_type")
       .where(sample_id: samples.pluck(:id))
-      .pluck(:text_validated_value)
+      .pluck(:string_validated_value)
       .uniq
   end
 

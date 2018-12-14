@@ -13,7 +13,7 @@ class Metadatum < ApplicationRecord
   enum data_type: { string: STRING_TYPE, number: NUMBER_TYPE, date: DATE_TYPE }
 
   # Validations
-  validates :text_validated_value, length: { maximum: 250 }
+  validates :string_validated_value, length: { maximum: 250 }
   validates :number_validated_value, numericality: true, allow_nil: true
   validate :set_validated_values
 
@@ -200,7 +200,7 @@ class Metadatum < ApplicationRecord
         if Metadatum.str_to_basic_chars(raw_value) == Metadatum.str_to_basic_chars(opt)
           # Ex: Match 'neb ultra-iifs dna' to 'NEB Ultra II FS DNA'
           # Ex: Match '30-day mortality' to "30 Day Mortality"
-          self.text_validated_value = opt
+          self.string_validated_value = opt
           matched = true
           break
         end
@@ -209,24 +209,20 @@ class Metadatum < ApplicationRecord
         errors.add(:raw_value, "#{raw_value} did not match options #{options.join(', ')}")
       end
     else
-      self.text_validated_value = raw_value
+      self.string_validated_value = raw_value
     end
   end
 
   def check_and_set_number_type
-    begin
-      self.number_validated_value = raw_value.to_f
-    rescue ArgumentError
-      errors.add(:raw_value, "#{raw_value} is not a valid Float")
-    end
+    self.number_validated_value = raw_value.to_f
+  rescue ArgumentError
+    errors.add(:raw_value, "#{raw_value} is not a valid Float")
   end
 
   def check_and_set_date_type
-    begin
-      self.date_validated_value = Date.parse(raw_value)
-    rescue ArgumentError
-      errors.add(:raw_value, "#{raw_value} is not a valid date")
-    end
+    self.date_validated_value = Date.parse(raw_value)
+  rescue ArgumentError
+    errors.add(:raw_value, "#{raw_value} is not a valid date")
   end
 
   def self.str_to_basic_chars(res)
@@ -263,7 +259,7 @@ class Metadatum < ApplicationRecord
     begin
       # The unique key is on sample and metadata.key, so the value fields will
       # be updated if the key exists.
-      update_keys = [:raw_value, :text_validated_value, :number_validated_value, :date_validated_value]
+      update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value]
       results = Metadatum.import to_create, on_duplicate_key_update: update_keys
       results.failed_instances.each do |model|
         # Show the errors from ActiveRecord
@@ -367,7 +363,7 @@ class Metadatum < ApplicationRecord
     m
   end
 
-  def validated_value    
+  def validated_value
     return instance_variable_get("#{data_type}_validated_value")
   rescue
     ""

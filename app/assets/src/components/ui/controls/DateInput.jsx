@@ -5,9 +5,12 @@ import cs from "./date_input.scss";
 import cx from "classnames";
 import { forbidExtraProps } from "airbnb-prop-types";
 
-// TODO: fix styling limitations of the original component
-// Styles of the date picker (table in popup) cannot be overridden
+// TODO: fix limitations of the original component
+// 1) Styles of the date picker (table in popup) cannot be overridden
 // (no specific classes and classname is not passed down)
+// 2) Events onBlur and onChange do not behave as expected, as when
+// user clicks a date onBlur fires before onChange (triggering onBlur
+// manually would create problems with async setState)
 class DateInput extends React.Component {
   constructor(props) {
     super(props);
@@ -15,32 +18,10 @@ class DateInput extends React.Component {
     this.state = {
       value: this.props.value || ""
     };
-
-    // variables used to emulate proper onBlur/onChange behavior
-    this.focused = false;
-    this.changedSinceBlur = false;
   }
 
   handleChange = (_, { value }) => {
-    this.changedSinceBlur = true;
-    this.setState({ value }, () => {
-      this.props.onChange && this.props.onChange(this.state.value);
-      if (!this.focused) {
-        this.changedSinceBlur = false;
-        this.props.onBlur && this.props.onBlur();
-      }
-    });
-  };
-
-  handleFocus = () => {
-    this.focused = true;
-  };
-
-  handleBlur = () => {
-    this.focused = false;
-    if (this.changedSinceBlur) {
-      this.props.onBlur && this.props.onBlur();
-    }
+    this.setState({ value }, () => this.props.onChange(value));
   };
 
   render() {
@@ -48,8 +29,8 @@ class DateInput extends React.Component {
     return (
       <BaseDateInput
         fluid
+        closable
         className={cx("idseq-ui", "input", cs.dateInput, className)}
-        onBlur={this.handleBlur}
         onChange={this.handleChange}
         value={this.state.value}
         dateFormat="YYYY-MM-DD"
@@ -62,7 +43,6 @@ class DateInput extends React.Component {
 DateInput.propTypes = forbidExtraProps({
   className: PropTypes.string,
   onChange: PropTypes.func,
-  onBlur: PropTypes.func,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 });
 
