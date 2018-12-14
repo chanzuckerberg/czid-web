@@ -20,16 +20,21 @@ class DateInput extends React.Component {
     };
   }
 
+  handleChange = (_, { value }) => {
+    this.setState({ value }, () => this.props.onChange(value));
+  };
+
   render() {
-    const { className, value, ...props } = this.props;
+    const { className } = this.props;
     return (
       <BaseDateInput
         fluid
+        closable
         className={cx("idseq-ui", "input", cs.dateInput, className)}
+        onChange={this.handleChange}
         value={this.state.value}
         dateFormat="YYYY-MM-DD"
         popupPosition="bottom right"
-        {...props}
       />
     );
   }
@@ -38,7 +43,6 @@ class DateInput extends React.Component {
 DateInput.propTypes = forbidExtraProps({
   className: PropTypes.string,
   onChange: PropTypes.func,
-  onBlur: PropTypes.func,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 });
 
