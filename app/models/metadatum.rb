@@ -68,18 +68,6 @@ class Metadatum < ApplicationRecord
   MOSQUITO_KEY_TO_STRING_OPTIONS = {
     sample_unit: ["Pool", "Singleton"],
     life_stage: ["Larva", "Nymph", "Adult"],
-    id_method: ["TEA", "Freeze", "CO2", "Dried", "Other"],
-    genus_species: [
-      "Aedes aegypti",
-      "Culex erythrothorax",
-      "Aedes sierrensis",
-      "Anopheles punctipennis",
-      "Anopheles freeborni",
-      "Culex tarsalis",
-      "Culex pipiens",
-      "Aedex albopictus",
-      "Other"
-    ],
     blood_fed: ["Yes", "No"]
   }.freeze
   # Mapping from alternative name to our name. Used at upload time.
