@@ -55,7 +55,7 @@ const Project = PropTypes.shape({
 
 const MetadataType = PropTypes.shape({
   key: PropTypes.string,
-  dataType: PropTypes.oneOf(["string", "number"]),
+  dataType: PropTypes.oneOf(["string", "number", "date"]),
   name: PropTypes.string
 });
 

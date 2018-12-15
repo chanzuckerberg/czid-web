@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 import { keyBy } from "lodash/fp";
+import { orderBy } from "lodash";
 import { DataTooltip, ContextPlaceholder } from "~ui/containers";
 import { SearchBoxList } from "~ui/controls";
 import { openUrl } from "~utils/links";
@@ -15,7 +16,7 @@ class SamplesHeatmapVis extends React.Component {
     this.state = {
       addMetadataTrigger: null,
       nodeHoverInfo: null,
-      columnMetadataHoverNode: null,
+      columnMetadataLegend: null,
       selectedMetadata: new Set(this.props.defaultMetadata)
     };
 
@@ -104,11 +105,13 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   handleColumnMetadataLabelHover = node => {
-    this.setState({ columnMetadataHoverNode: node });
+    this.setState({
+      columnMetadataLegend: this.heatmap.getColumnMetadataLegend(node.value)
+    });
   };
 
   handleColumnMetadataLabelOut = () => {
-    this.setState({ columnMetadataHoverNode: null });
+    this.setState({ columnMetadataLegend: null });
   };
 
   download() {
@@ -204,11 +207,10 @@ class SamplesHeatmapVis extends React.Component {
     );
   }
 
-  renderColumnMetadataLegend(node) {
-    let legend = this.heatmap.getColumnMetadataLegend(node.value);
+  renderColumnMetadataLegend(legend) {
     return (
       <div className={cs.legend}>
-        {Object.keys(legend).map(label =>
+        {orderBy(Object.keys(legend)).map(label =>
           this.renderColumnMetadataLegendRow(label, legend[label])
         )}
       </div>
@@ -248,20 +250,18 @@ class SamplesHeatmapVis extends React.Component {
             <DataTooltip data={this.state.nodeHoverInfo} />
           </div>
         )}
-        {this.state.columnMetadataHoverNode && (
+        {this.state.columnMetadataLegend && (
           <div
             className={cx(
               cs.tooltip,
-              this.state.columnMetadataHoverNode && cs.visible
+              this.state.columnMetadataLegend && cs.visible
             )}
             style={{
               left: `${this.state.tooltipX + 20}px`,
               top: `${this.state.tooltipY + 20}px`
             }}
           >
-            {this.renderColumnMetadataLegend(
-              this.state.columnMetadataHoverNode
-            )}
+            {this.renderColumnMetadataLegend(this.state.columnMetadataLegend)}
           </div>
         )}
         {this.state.addMetadataTrigger && (

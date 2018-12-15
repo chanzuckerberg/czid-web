@@ -7,12 +7,8 @@ export const processMetadata = metadata => {
 
   newMetadata = mapValues(
     newMetadata,
-    val =>
-      val.data_type === "string"
-        ? val.text_validated_value
-        : val.number_validated_value
+    val => val[`${val.data_type}_validated_value`]
   );
-
   return newMetadata;
 };
 
