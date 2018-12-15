@@ -4,7 +4,7 @@ class AddDateValidatedValueToMetadata < ActiveRecord::Migration[5.1]
       rename_column :metadata, :text_validated_value, :string_validated_value
     end
 
-    unless column_exists? :metadata, :date_validated_value, :date
+    unless column_exists? :metadata, :date_validated_value
       add_column :metadata, :date_validated_value, :date
     end
     Metadatum.where("`key` LIKE '%_date'").map do |m|
