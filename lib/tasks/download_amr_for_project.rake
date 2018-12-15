@@ -1,4 +1,4 @@
-# Generate a shall script to download SRST2 output from a project to a local destination.
+# Generate a shell script to download SRST2 output from a project to a local destination.
 # Example: rake "download_amr_for_project[27, /mnt/test/27]"
 task :download_amr_for_project, [:project_id, :output_s3_path] => :environment do |_t, args|
   samples = Sample.where(project_id: args[:project_id])
