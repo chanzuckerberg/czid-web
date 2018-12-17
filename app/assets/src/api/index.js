@@ -34,7 +34,7 @@ const getURLParamString = params =>
     .map(pair => pair.join("="))
     .join("&");
 
-const getSampleMetadata = (id, pipelineVersion = null) => {
+const getSampleMetadata = (id, pipelineVersion) => {
   return get(
     pipelineVersion
       ? `/samples/${id}/metadata?pipeline_version=${pipelineVersion}`

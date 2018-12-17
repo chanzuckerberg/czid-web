@@ -29,7 +29,7 @@ class AlignmentViz extends React.Component {
     // TODO(mark): Remove the metadata call once the alignment viz takes assembly into account.
     const [alignmentData, metadata] = await Promise.all([
       getAlignmentData(sampleId, this.alignmentQuery, this.pipelineVersion),
-      getSampleMetadata(sampleId)
+      getSampleMetadata(sampleId, this.pipelineVersion)
     ]);
 
     this.setState({
