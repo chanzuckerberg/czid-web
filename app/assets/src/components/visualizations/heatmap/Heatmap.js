@@ -129,6 +129,11 @@ export default class Heatmap {
     this.processData("processMetadata");
   }
 
+  updateData(data) {
+    this.data = Object.assign(this.data, data);
+    this.processData("parse");
+  }
+
   parseData() {
     this.rowLabels = this.data.rowLabels.map((row, pos) => {
       return Object.assign({ pos, shaded: false }, row);
@@ -709,7 +714,7 @@ export default class Heatmap {
         "click",
         d =>
           this.options.onColumnLabelClick &&
-          this.options.onColumnLabelClick(d.label, d3.event)
+          this.options.onColumnLabelClick(d.id, d3.event)
       );
 
     applyFormat(columnLabelEnter);
@@ -887,13 +892,14 @@ export default class Heatmap {
       let columnMetadataCellEnter = columnMetadataCell
         .enter()
         .append("rect")
-        .attr("class", "columnMetadataCell")
-        .style("fill", d => {
-          let metadataValue = d.metadata[metadata.value];
-          return metadataValue
-            ? this.metadataColors[metadata.value][metadataValue]
-            : this.options.colorNoValue;
-        });
+        .attr("class", "columnMetadataCell");
+
+      columnMetadataCell.style("fill", d => {
+        let metadataValue = d.metadata[metadata.value];
+        return metadataValue
+          ? this.metadataColors[metadata.value][metadataValue]
+          : this.options.colorNoValue;
+      });
       applyFormatForCells(columnMetadataCellEnter);
     });
   }
