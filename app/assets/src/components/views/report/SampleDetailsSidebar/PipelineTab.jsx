@@ -95,16 +95,17 @@ class PipelineTab extends React.Component {
           title="Downloads"
         >
           <div className={cs.downloadSectionContent}>
-            {getDownloadLinks(sampleId, pipelineRun).map(option => (
-              <a
-                key={option.label}
-                className={cs.downloadLink}
-                href={option.path}
-                target={option.newPage ? "_blank" : "_self"}
-              >
-                {option.label}
-              </a>
-            ))}
+            {pipelineRun &&
+              getDownloadLinks(sampleId, pipelineRun).map(option => (
+                <a
+                  key={option.label}
+                  className={cs.downloadLink}
+                  href={option.path}
+                  target={option.newPage ? "_blank" : "_self"}
+                >
+                  {option.label}
+                </a>
+              ))}
           </div>
         </MetadataSection>
       </div>

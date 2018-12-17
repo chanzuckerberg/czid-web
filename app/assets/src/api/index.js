@@ -34,7 +34,13 @@ const getURLParamString = params =>
     .map(pair => pair.join("="))
     .join("&");
 
-const getSampleMetadata = id => get(`/samples/${id}/metadata`);
+const getSampleMetadata = (id, pipelineVersion = null) => {
+  return get(
+    pipelineVersion
+      ? `/samples/${id}/metadata?pipeline_version=${pipelineVersion}`
+      : `/samples/${id}/metadata`
+  );
+};
 
 const saveSampleMetadata = (id, field, value) =>
   postWithCSRF(`/samples/${id}/save_metadata_v2`, {

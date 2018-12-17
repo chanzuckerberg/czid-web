@@ -286,6 +286,11 @@ class SampleView extends React.Component {
           visible={this.state.sampleDetailsSidebarVisible}
           onClose={this.toggleSampleDetailsSidebar}
           sampleId={sample.id}
+          pipelineVersion={
+            reportDetails &&
+            reportDetails.pipeline_info &&
+            reportDetails.pipeline_info.pipeline_version
+          }
           onMetadataUpdate={this.handleMetadataUpdate}
         />
       </div>

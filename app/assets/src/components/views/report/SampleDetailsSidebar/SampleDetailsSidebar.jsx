@@ -63,10 +63,13 @@ class SampleDetailsSidebar extends React.Component {
     let metadata = null;
     let metadataTypes = null;
     if (this.state.metadataTypes) {
-      metadata = await getSampleMetadata(this.props.sampleId);
+      metadata = await getSampleMetadata(
+        this.props.sampleId,
+        this.props.pipelineVersion
+      );
     } else {
       [metadata, metadataTypes] = await Promise.all([
-        getSampleMetadata(this.props.sampleId),
+        getSampleMetadata(this.props.sampleId, this.props.pipelineVersion),
         getMetadataTypesByHostGenomeName()
       ]);
 
@@ -233,6 +236,7 @@ SampleDetailsSidebar.propTypes = {
   visible: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
   sampleId: PropTypes.number,
+  pipelineVersion: PropTypes.string, // Needs to be string for 3.1 vs. 3.10.
   onMetadataUpdate: PropTypes.func,
   showReportLink: PropTypes.bool
 };
