@@ -42,7 +42,7 @@ class SamplesHeatmapVis extends React.Component {
       this.heatmapContainer,
       {
         rowLabels: this.extractTaxonLabels(),
-        columnLabels: this.extractSampleLabels(),
+        columnLabels: this.extractSampleLabels(), // Also includes column metadata.
         values: this.props.data[this.props.metric]
       },
       {
@@ -63,10 +63,15 @@ class SamplesHeatmapVis extends React.Component {
     this.heatmap.start();
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     if (this.props.scale !== this.scale) {
       this.scale = this.props.scale;
       this.heatmap.updateScale(this.props.scale);
+    }
+    if (this.props.sampleDetails !== prevProps.sampleDetails) {
+      this.heatmap.updateData({
+        columnLabels: this.extractSampleLabels() // Also includes column metadata.
+      });
     }
   }
 
@@ -74,7 +79,8 @@ class SamplesHeatmapVis extends React.Component {
     return this.props.sampleIds.map(id => {
       return {
         label: this.props.sampleDetails[id].name,
-        metadata: this.props.sampleDetails[id].metadata
+        metadata: this.props.sampleDetails[id].metadata,
+        id
       };
     });
   }

@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import queryString from "query-string";
-import { min, max, uniq, pluck, values } from "lodash/fp";
+import { set, min, max, uniq, pluck, values } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
 import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
@@ -222,7 +222,6 @@ class SamplesHeatmapView extends React.Component {
         host_genome_name: sample.host_genome_name,
         metadata: processMetadata(sample.metadata)
       };
-      sampleDetails[sample.name] = sampleDetails[sample.sample_id];
       for (let j = 0; j < sample.taxons.length; j++) {
         let taxon = sample.taxons[j];
         let taxonIndex;
@@ -259,6 +258,16 @@ class SamplesHeatmapView extends React.Component {
     };
   }
 
+  handleMetadataUpdate = (key, value) => {
+    this.setState({
+      sampleDetails: set(
+        [this.state.selectedSampleId, "metadata", key],
+        value,
+        this.state.sampleDetails
+      )
+    });
+  };
+
   renderLoading() {
     return (
       <p className={cs.loadingIndicator}>
@@ -273,8 +282,7 @@ class SamplesHeatmapView extends React.Component {
     this.removedTaxonIds.add(taxonId);
   };
 
-  handleSampleLabelClick = sampleName => {
-    let sampleId = this.state.sampleDetails[sampleName].id;
+  handleSampleLabelClick = sampleId => {
     if (this.state.sidebarVisible && this.state.selectedSampleId === sampleId) {
       this.handleSidebarClose();
     } else {
@@ -674,6 +682,7 @@ class SamplesHeatmapView extends React.Component {
           visible={this.state.sidebarVisible}
           onClose={this.handleSidebarClose}
           sampleId={this.state.selectedSampleId}
+          onMetadataUpdate={this.handleMetadataUpdate}
         />
       </div>
     );
