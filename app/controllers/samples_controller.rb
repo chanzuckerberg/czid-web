@@ -754,7 +754,6 @@ class SamplesController < ApplicationController
 
     taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
     taxon_ids -= removed_taxon_ids
-    return {} if taxon_ids.empty?
 
     samples_taxons_details(samples, taxon_ids, background_id, species_selected)
   end

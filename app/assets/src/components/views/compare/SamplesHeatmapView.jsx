@@ -222,35 +222,37 @@ class SamplesHeatmapView extends React.Component {
         host_genome_name: sample.host_genome_name,
         metadata: processMetadata(sample.metadata)
       };
-      for (let j = 0; j < sample.taxons.length; j++) {
-        let taxon = sample.taxons[j];
-        let taxonIndex;
-        if (!(taxon.tax_id in taxonDetails)) {
-          taxonIndex = taxonIds.length;
-          taxonIds.push(taxon.tax_id);
-          taxonDetails[taxon.tax_id] = {
-            id: taxon.tax_id,
-            index: taxonIndex,
-            name: taxon.name,
-            category: taxon.category_name,
-            phage: !!taxon.is_phage
-          };
-          taxonDetails[taxon.name] = taxonDetails[taxon.tax_id];
-        } else {
-          taxonIndex = taxonDetails[taxon.tax_id].index;
-        }
+      if (sample.taxons) {
+        for (let j = 0; j < sample.taxons.length; j++) {
+          let taxon = sample.taxons[j];
+          let taxonIndex;
+          if (!(taxon.tax_id in taxonDetails)) {
+            taxonIndex = taxonIds.length;
+            taxonIds.push(taxon.tax_id);
+            taxonDetails[taxon.tax_id] = {
+              id: taxon.tax_id,
+              index: taxonIndex,
+              name: taxon.name,
+              category: taxon.category_name,
+              phage: !!taxon.is_phage
+            };
+            taxonDetails[taxon.name] = taxonDetails[taxon.tax_id];
+          } else {
+            taxonIndex = taxonDetails[taxon.tax_id].index;
+          }
 
-        this.state.availableOptions.metrics.forEach(metric => {
-          let [metricType, metricName] = metric.value.split(".");
-          data[metric.value] = data[metric.value] || [];
-          data[metric.value][taxonIndex] = data[metric.value][taxonIndex] || [];
-          data[metric.value][taxonIndex][i] = taxon[metricType][metricName];
-        });
+          this.state.availableOptions.metrics.forEach(metric => {
+            let [metricType, metricName] = metric.value.split(".");
+            data[metric.value] = data[metric.value] || [];
+            data[metric.value][taxonIndex] =
+              data[metric.value][taxonIndex] || [];
+            data[metric.value][taxonIndex][i] = taxon[metricType][metricName];
+          });
+        }
       }
     }
 
     return {
-      sampleIds,
       sampleDetails,
       taxonIds,
       taxonDetails,
@@ -326,7 +328,7 @@ class SamplesHeatmapView extends React.Component {
       Object.values(this.state.data).every(e => !e.length) ||
       !this.state.metadataTypes
     ) {
-      return;
+      return <div className={cs.noDataMsg}>No data to render</div>;
     }
     let scaleIndex = this.state.selectedOptions.dataScaleIdx;
 
@@ -608,8 +610,7 @@ class SamplesHeatmapView extends React.Component {
   renderVisualization() {
     return (
       <div className="row visualization-content">
-        {this.state.loading && this.renderLoading()}
-        {this.renderHeatmap()}
+        {this.state.loading ? this.renderLoading() : this.renderHeatmap()}
       </div>
     );
   }
