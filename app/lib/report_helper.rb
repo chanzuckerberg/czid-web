@@ -443,6 +443,18 @@ module ReportHelper
   end
 
   def samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+    # if there are no taxon ids, return just the samples data.
+    if taxon_ids.empty?
+      return samples.map do |sample|
+        {
+          sample: sample.id,
+          name: sample.name,
+          metadata: sample.metadata,
+          host_genome_name: sample.host_genome_name
+        }
+      end
+    end
+
     samples_by_id = Hash[samples.map { |s| [s.id, s] }]
     parent_ids = fetch_parent_ids(taxon_ids, samples)
     results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
