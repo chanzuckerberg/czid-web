@@ -419,6 +419,7 @@ class SamplesController < ApplicationController
 
   def taxid_contigs
     taxid = params[:taxid]
+    return if HUMAN_TAX_IDS.include? taxid
     pr = select_pipeline_run(@sample, params)
     contigs = pr.get_contigs_for_taxid(taxid)
     output_fasta = ''
@@ -434,6 +435,7 @@ class SamplesController < ApplicationController
   end
 
   def show_taxid_fasta
+    return if HUMAN_TAX_IDS.include? params[:taxid]
     pr = select_pipeline_run(@sample, params)
     if params[:hit_type] == "NT_or_NR"
       nt_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
@@ -444,24 +446,6 @@ class SamplesController < ApplicationController
       @taxid_fasta = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, params[:hit_type])
     end
     send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pr, params[:taxid]) + '-hits.fasta'
-  end
-
-  def show_taxid_alignment
-    # TODO(yf): DEPRECATED. Remove by 5/24/2018
-    @taxon_info = params[:taxon_info].tr("_", ".")
-    pr = @sample.pipeline_runs.first
-    s3_file_path = pr.alignment_viz_json_s3(@taxon_info)
-    alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
-    @taxid = @taxon_info.split(".")[2].to_i
-    @tax_level = @taxon_info.split(".")[1]
-    @parsed_alignment_results = parse_alignment_results(@taxid, @tax_level, alignment_data)
-
-    respond_to do |format|
-      format.json do
-        render json: alignment_data
-      end
-      format.html { @title = @parsed_alignment_results['title'] }
-    end
   end
 
   def show_taxid_alignment_viz

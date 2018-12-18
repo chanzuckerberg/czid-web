@@ -52,7 +52,7 @@ class HoverActions extends React.Component {
       icon: "fa-bars",
       handleClick: this.props.onAlignmentVizClick,
       enabled: this.props.alignmentVizEnabled,
-      disabledMessage: "Requires at least one read in NT",
+      disabledMessage: "Alignment Visualization Not Available",
       extraProps: {
         "data-tax-level": this.props.taxLevel === 1 ? "species" : "genus"
       }
@@ -66,7 +66,7 @@ class HoverActions extends React.Component {
       icon: "fa-code-fork",
       handleClick: this.handlePhyloModalOpen,
       enabled: this.props.phyloTreeEnabled,
-      disabledMessage: "Requires 100 reads in NT or NR"
+      disabledMessage: "Phylogenetic Analysis Not Available"
     }
   ];
 
