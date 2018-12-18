@@ -283,6 +283,8 @@ class SamplesController < ApplicationController
     background_id = get_background_id(@sample)
     @report_page_params = { pipeline_version: @pipeline_version, background_id: background_id } if background_id
     @report_page_params[:scoring_model] = params[:scoring_model] if params[:scoring_model]
+
+    # Check if the report table should actually show
     if @pipeline_run && (((@pipeline_run.adjusted_remaining_reads.to_i > 0 || @pipeline_run.results_finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
       if background_id
         @report_present = true
@@ -290,10 +292,6 @@ class SamplesController < ApplicationController
         @all_categories = all_categories
         @report_details = report_details(@pipeline_run, current_user.id)
         @ercc_comparison = @pipeline_run.compare_ercc_counts
-      end
-
-      if @pipeline_run.failed?
-        @pipeline_run_retriable = true
       end
     end
 
