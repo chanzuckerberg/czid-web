@@ -38,6 +38,7 @@ import { getSummaryContigCounts } from "../api";
 import { pipelineVersionHasAssembly } from "./utils/sample";
 
 const DEFAULT_MIN_CONTIG_SIZE = 4;
+const HUMAN_TAX_IDS = [9605, 9606];
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -761,12 +762,18 @@ class PipelineSampleReport extends React.Component {
     const validTaxId =
       taxInfo.tax_id < this.INVALID_CALL_BASE_TAXID || taxInfo.tax_id > 0;
     const ncbiEnabled = validTaxId;
-    const fastaEnabled = reportDetails.taxon_fasta_flag;
+    const fastaEnabled =
+      !HUMAN_TAX_IDS.includes(taxInfo.tax_id) && reportDetails.taxon_fasta_flag;
     const contigVizEnabled =
+      !HUMAN_TAX_IDS.includes(taxInfo.tax_id) &&
       this.state.contigTaxidList.indexOf(taxInfo.tax_id) >= 0;
     const alignmentVizEnabled =
-      this.canSeeAlignViz && validTaxId && taxInfo.NT.r > 0;
+      !HUMAN_TAX_IDS.includes(taxInfo.tax_id) &&
+      this.canSeeAlignViz &&
+      validTaxId &&
+      taxInfo.NT.r > 0;
     const phyloTreeEnabled =
+      !HUMAN_TAX_IDS.includes(taxInfo.tax_id) &&
       this.allowPhyloTree &&
       taxInfo.tax_id > 0 &&
       PhyloTreeChecks.passesCreateCondition(taxInfo.NT.r, taxInfo.NR.r);

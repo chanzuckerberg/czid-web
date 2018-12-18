@@ -3,7 +3,7 @@ import cx from "classnames";
 import { Popup } from "semantic-ui-react";
 import { getSampleMetadata, getAlignmentData } from "~/api";
 import AccessionViz from "../AccessionViz";
-import { pipelineHasAssembly } from "../utils/sample";
+import { pipelineVersionHasAssembly } from "../utils/sample";
 import cs from "./alignment_viz.scss";
 
 class AlignmentViz extends React.Component {
@@ -29,7 +29,7 @@ class AlignmentViz extends React.Component {
     // TODO(mark): Remove the metadata call once the alignment viz takes assembly into account.
     const [alignmentData, metadata] = await Promise.all([
       getAlignmentData(sampleId, this.alignmentQuery, this.pipelineVersion),
-      getSampleMetadata(sampleId)
+      getSampleMetadata(sampleId, this.pipelineVersion)
     ]);
 
     this.setState({
@@ -53,7 +53,7 @@ class AlignmentViz extends React.Component {
           {this.taxName ? this.taxName + " (" + this.taxLevel + ")" : ""}
           Alignment ({alignmentData.length} unique accessions)
           {pipelineRun &&
-            pipelineHasAssembly(pipelineRun) && (
+            pipelineVersionHasAssembly(pipelineRun.pipeline_version) && (
               <Popup
                 trigger={
                   <i
