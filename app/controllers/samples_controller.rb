@@ -463,16 +463,30 @@ class SamplesController < ApplicationController
     respond_to do |format|
       format.json do
         s3_file_path = pr.alignment_viz_json_s3(@taxon_info.tr('_', '.'))
-        alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
-        flattened_data = {}
-        parse_tree(flattened_data, @taxid, alignment_data, true)
-        output_array = []
-        flattened_data.each do |k, v|
-          v["accession"] = k
-          v["reads_count"] = v["reads"].size
-          output_array << v
+        (_tmp1, _tmp2, bucket, key) = s3_file_path.split('/', 4)
+        begin
+          resp = Client.head_object(bucket: bucket, key: key)
+          if resp.content_length < 10_000_000
+            alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
+            flattened_data = {}
+            parse_tree(flattened_data, @taxid, alignment_data, true)
+            output_array = []
+            flattened_data.each do |k, v|
+              v["accession"] = k
+              v["reads_count"] = v["reads"].size
+              output_array << v
+            end
+            render json: output_array.sort { |a, b| b['reads_count'] <=> a['reads_count'] }
+          else
+            render json: {
+              error: "alignment file too big"
+            }
+          end
+        rescue
+          render json: {
+            error: "unexpected error occurred"
+          }
         end
-        render json: output_array.sort { |a, b| b['reads_count'] <=> a['reads_count'] }
       end
       format.html {}
     end
