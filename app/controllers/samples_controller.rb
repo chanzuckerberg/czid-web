@@ -37,6 +37,7 @@ class SamplesController < ApplicationController
 
   PAGE_SIZE = 30
   DEFAULT_MAX_NUM_TAXONS = 30
+  HUMAN_TAX_IDS = [9605, 9606].freeze
 
   # GET /samples
   # GET /samples.json
@@ -419,7 +420,7 @@ class SamplesController < ApplicationController
 
   def taxid_contigs
     taxid = params[:taxid]
-    return if HUMAN_TAX_IDS.include? taxid
+    return if HUMAN_TAX_IDS.include? taxid.to_i
     pr = select_pipeline_run(@sample, params)
     contigs = pr.get_contigs_for_taxid(taxid)
     output_fasta = ''
@@ -435,7 +436,7 @@ class SamplesController < ApplicationController
   end
 
   def show_taxid_fasta
-    return if HUMAN_TAX_IDS.include? params[:taxid]
+    return if HUMAN_TAX_IDS.include? params[:taxid].to_i
     pr = select_pipeline_run(@sample, params)
     if params[:hit_type] == "NT_or_NR"
       nt_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
@@ -450,10 +451,11 @@ class SamplesController < ApplicationController
 
   def show_taxid_alignment_viz
     @taxon_info = params[:taxon_info].split(".")[0]
+    @taxid = @taxon_info.split("_")[2].to_i
+    return if HUMAN_TAX_IDS.include? @taxid.to_i
 
     pr = select_pipeline_run(@sample, params)
 
-    @taxid = @taxon_info.split("_")[2].to_i
     @tax_level = @taxon_info.split("_")[1]
     @taxon_name = taxon_name(@taxid, @tax_level)
     @pipeline_version = pr.pipeline_version if pr
