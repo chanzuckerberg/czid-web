@@ -206,6 +206,8 @@ class SamplesHeatmapView extends React.Component {
   }
 
   extractData(rawData) {
+    console.log("foobar 11:27am");
+    console.log("rawData", rawData);
     let sampleIds = [];
     let sampleDetails = {};
     let taxonIds = [];

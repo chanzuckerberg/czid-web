@@ -444,6 +444,8 @@ module ReportHelper
 
   def samples_taxons_details(samples, taxon_ids, background_id, species_selected)
     # if there are no taxon ids, return just the samples data.
+    puts "foobar 10:42am taxon ids"
+    puts taxon_ids
     if taxon_ids.empty?
       return samples.map do |sample|
         {
@@ -458,7 +460,7 @@ module ReportHelper
     samples_by_id = Hash[samples.map { |s| [s.id, s] }]
     parent_ids = fetch_parent_ids(taxon_ids, samples)
     results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
-    results = []
+    results = {}
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
       taxon_counts = res["taxon_counts"]
@@ -475,7 +477,7 @@ module ReportHelper
         filtered_rows << row if taxon_ids.include?(row["tax_id"])
       end
 
-      results << {
+      results[sample_id] = {
         sample_id: sample_id,
         name: samples_by_id[sample_id].name,
         metadata: samples_by_id[sample_id].metadata,
@@ -483,7 +485,23 @@ module ReportHelper
         taxons: filtered_rows
       }
     end
-    results
+
+    samples.each do |sample|
+      unless results.key?(sample.id)
+        results[sample.id] = {
+            sample_id: sample.id,
+            name: sample.name,
+            metadata: sample.metadata,
+            host_genome_name: sample.host_genome_name
+        }
+      end
+    end
+
+    puts "these are our results 11:16am"
+    puts results.values.count
+    puts results.values
+
+    results.values
   end
 
   def check_custom_filters(row, threshold_filters)

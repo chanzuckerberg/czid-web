@@ -755,6 +755,8 @@ class SamplesController < ApplicationController
                           JSON.parse(params[:thresholdFilters] || "[]")
                         end
     include_phage = (JSON.parse(params[:subcategories]) || {}).fetch("Viruses", []).include?("Phage")
+    puts "foobar 10:02am"
+    puts params[:subcategories]
     read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
 
     # TODO: should fail if field is not well formatted and return proper error to client
@@ -766,10 +768,19 @@ class SamplesController < ApplicationController
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
 
+    puts "samples:"
+    puts samples
+    puts "yo"
     taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
+    puts "top_taxons_details: #{taxon_ids}"
+    puts "removed_taxon_ids: #{removed_taxon_ids}"
     taxon_ids -= removed_taxon_ids
 
-    samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+    puts "I have #{samples.count} samples"
+    res = samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+    puts "foobar 10:48am samples_taxons_details = "
+    puts res
+    res
   end
 
   def get_background_id(sample)
