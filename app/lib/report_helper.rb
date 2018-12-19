@@ -443,9 +443,7 @@ module ReportHelper
   end
 
   def samples_taxons_details(samples, taxon_ids, background_id, species_selected)
-    # if there are no taxon ids, return just the samples data.
-    puts "foobar 10:42am taxon ids"
-    puts taxon_ids
+    # If there are no taxon ids, return just the samples metadata.
     if taxon_ids.empty?
       return samples.map do |sample|
         {
@@ -486,7 +484,7 @@ module ReportHelper
       }
     end
 
-    # For samples that didn't have matching taxons, just include the metadata.
+    # For samples that didn't have matching taxons, just throw in the metadata.
     samples.each do |sample|
       unless results.key?(sample.id)
         results[sample.id] = {
@@ -497,10 +495,6 @@ module ReportHelper
         }
       end
     end
-
-    puts "these are our results 11:16am"
-    puts results.values.count
-    puts results.values
 
     # Flatten the hash
     results.values
