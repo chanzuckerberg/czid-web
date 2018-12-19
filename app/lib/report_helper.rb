@@ -449,7 +449,7 @@ module ReportHelper
     if taxon_ids.empty?
       return samples.map do |sample|
         {
-          sample: sample.id,
+          sample_id: sample.id,
           name: sample.name,
           metadata: sample.metadata,
           host_genome_name: sample.host_genome_name
@@ -486,13 +486,14 @@ module ReportHelper
       }
     end
 
+    # For samples that didn't have matching taxons, just include the metadata.
     samples.each do |sample|
       unless results.key?(sample.id)
         results[sample.id] = {
-            sample_id: sample.id,
-            name: sample.name,
-            metadata: sample.metadata,
-            host_genome_name: sample.host_genome_name
+          sample_id: sample.id,
+          name: sample.name,
+          metadata: sample.metadata,
+          host_genome_name: sample.host_genome_name
         }
       end
     end
@@ -501,6 +502,7 @@ module ReportHelper
     puts results.values.count
     puts results.values
 
+    # Flatten the hash
     results.values
   end
 
