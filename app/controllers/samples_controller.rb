@@ -285,14 +285,12 @@ class SamplesController < ApplicationController
     @report_page_params[:scoring_model] = params[:scoring_model] if params[:scoring_model]
 
     # Check if the report table should actually show
-    if @pipeline_run && (((@pipeline_run.adjusted_remaining_reads.to_i > 0 || @pipeline_run.results_finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
-      if background_id
-        @report_present = true
-        @report_ts = @pipeline_run.updated_at.to_i
-        @all_categories = all_categories
-        @report_details = report_details(@pipeline_run, current_user.id)
-        @ercc_comparison = @pipeline_run.compare_ercc_counts
-      end
+    if background_id && @pipeline_run && @pipeline_run.report_ready?
+      @report_present = true
+      @report_ts = @pipeline_run.updated_at.to_i
+      @all_categories = all_categories
+      @report_details = report_details(@pipeline_run, current_user.id)
+      @ercc_comparison = @pipeline_run.compare_ercc_counts
     end
 
     tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
