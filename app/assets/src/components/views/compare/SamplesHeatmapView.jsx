@@ -253,6 +253,9 @@ class SamplesHeatmapView extends React.Component {
     }
 
     return {
+      // The server should always pass back the same set of sampleIds, but possibly in a different order.
+      // We overwrite both this.state.sampleDetails and this.state.sampleIds to make sure the two are in sync.
+      sampleIds,
       sampleDetails,
       taxonIds,
       taxonDetails,
