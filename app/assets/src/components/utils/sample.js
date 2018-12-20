@@ -1,4 +1,4 @@
-import last from "lodash/fp";
+import { last } from "lodash/fp";
 
 export const pipelineVersionHasAssembly = pipelineVersion => {
   if (!pipelineVersion) return false;
