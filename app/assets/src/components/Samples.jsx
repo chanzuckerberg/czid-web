@@ -687,6 +687,7 @@ class Samples extends React.Component {
   }
 
   viewSample(id, currentEvent) {
+    currentEvent.stopPropagation();
     openUrl(`/samples/${id}`, currentEvent);
   }
 
@@ -791,6 +792,9 @@ class Samples extends React.Component {
       .length === 0;
 
   selectSample(e) {
+    console.log("time is 2:17pm");
+    e.stopPropagation();
+
     let sampleId = parseInt(e.target.getAttribute("data-sample-id"));
 
     const sampleList = e.target.checked
@@ -1359,6 +1363,7 @@ function PipelineOutputCards({
   parent
 }) {
   let dbSample = sample.db_sample;
+  console.log("time is 2:06pm");
   return (
     <a className="col s12 no-padding sample-feed" key={i}>
       <div>
@@ -1371,6 +1376,10 @@ function PipelineOutputCards({
                 sample_name_info={sample_name_info}
                 i={i}
                 parent={parent}
+                onClick={e => {
+                  e.stopPropagation();
+                  console.log("hhi 2:04pm");
+                }}
               />
               <SampleDetailedColumns
                 dbSample={dbSample}
