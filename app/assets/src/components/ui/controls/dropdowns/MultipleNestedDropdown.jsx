@@ -256,9 +256,8 @@ class MultipleNestedDropdown extends React.Component {
         arrowInsideTrigger
         {...otherProps}
         trigger={this.renderLabel()}
-      >
-        <BareDropdown.Menu>{this.renderItems()}</BareDropdown.Menu>
-      </BareDropdown>
+        items={this.renderItems()}
+      />
     );
   }
 }

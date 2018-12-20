@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import cx from "classnames";
 
+/* TODO(mark): Refactor ButtonDropdown to use BareDropdown */
 class ButtonDropdown extends React.Component {
   constructor(props) {
     super(props);

@@ -22,9 +22,9 @@ class Dropdown extends React.Component {
     }
   }
 
-  handleOnChange = (e, d) => {
-    this.setState({ value: d.value });
-    this.props.onChange(d.value, this.labels[d.value]);
+  handleOnChange = value => {
+    this.setState({ value });
+    this.props.onChange(value, this.labels[value]);
   };
 
   renderTrigger = () => {
@@ -48,7 +48,6 @@ class Dropdown extends React.Component {
         className={cs.dropdown}
         arrowInsideTrigger
         placeholder={this.props.placeholder}
-        scrolling={this.props.scrolling}
         disabled={this.props.disabled}
         fluid={this.props.fluid}
         options={this.props.options}
@@ -65,7 +64,6 @@ class Dropdown extends React.Component {
 Dropdown.propTypes = {
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
-  scrolling: PropTypes.bool,
   fluid: PropTypes.bool,
   rounded: PropTypes.bool,
   label: PropTypes.string,

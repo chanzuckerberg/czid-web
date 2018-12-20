@@ -19,7 +19,7 @@ const BackgroundModelFilter = ({ allBackgrounds, value, onChange }) => {
       options={backgroundOptions}
       value={value}
       disabled={disabled}
-      label="Background: "
+      label="Background:"
       onChange={onChange}
       rounded
     />

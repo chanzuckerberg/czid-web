@@ -42,7 +42,7 @@ const CategoryFilter = ({
       selectedOptions={selectedCategories}
       selectedSuboptions={selectedSuboptions}
       rounded
-      label="Categories: "
+      label="Categories:"
       onChange={onChange}
     />
   );

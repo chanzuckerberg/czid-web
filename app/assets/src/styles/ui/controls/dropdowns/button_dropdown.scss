@@ -1,5 +1,6 @@
 @import "../../../themes/colors";
 
+// TODO(mark): Redundant with bare_dropdown.scss. Refactor.
 .idseq-ui.ui.dropdown.button.button-dropdown {
   padding: 0;
   border-radius: 19px;
@@ -12,7 +13,7 @@
 
   .idseq-ui.ui.button {
     margin: 0;
-    padding: 6px 31px 6px 16px;
+    padding: 2px 31px 4px 14px;
   }
 
   & > i.icon {
@@ -20,7 +21,7 @@
     padding: 0;
     position: absolute;
     right: 10px;
-    top: 6px;
+    top: 4px;
     line-height: 24px;
     pointer-events: none;
     font-size: 20px;
@@ -31,9 +32,18 @@
     }
   }
 
+  .menu {
+    padding: 6px 0;
+  }
+
   .item {
-    background-color: $white;
+    font-size: 12px;
     font-weight: 400;
+    letter-spacing: 0.4px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    background-color: $white;
 
     &:hover {
       /* Override semantic UI */

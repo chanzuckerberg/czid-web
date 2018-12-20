@@ -34,24 +34,24 @@ class PipelineStatusFilter extends React.Component {
       />
     );
 
+    const items = STATUS_OPTIONS.map(option => (
+      <BareDropdown.Item
+        key={option.name}
+        onClick={() => onStatusFilterSelect(option.name)}
+        className={cs.option}
+      >
+        <span className={cs[option.class]}>{option.name}</span>
+      </BareDropdown.Item>
+    ));
+
     return (
-      <BareDropdown trigger={trigger} floating scrolling hideArrow>
-        <BareDropdown.Menu>
-          <BareDropdown.Header
-            content="Filter Pipeline Status"
-            className={cs.header}
-          />
-          {STATUS_OPTIONS.map(option => (
-            <BareDropdown.Item
-              key={option.name}
-              onClick={() => onStatusFilterSelect(option.name)}
-              className={cs.option}
-            >
-              <span className={cs[option.class]}>{option.name}</span>
-            </BareDropdown.Item>
-          ))}
-        </BareDropdown.Menu>
-      </BareDropdown>
+      <BareDropdown
+        trigger={trigger}
+        floating
+        hideArrow
+        items={items}
+        menuLabel="Filter Pipeline Status"
+      />
     );
   }
 }

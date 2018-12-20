@@ -2,6 +2,7 @@ import CompareButton from "../ui/controls/buttons/CompareButton";
 import DownloadButton from "../ui/controls/buttons/DownloadButton";
 import Dropdown from "../ui/controls/dropdowns/Dropdown";
 import ButtonDropdown from "../ui/controls/dropdowns/ButtonDropdown";
+import BetaLabel from "../ui/labels/BetaLabel";
 import DownloadButtonDropdown from "../ui/controls/dropdowns/DownloadButtonDropdown";
 import MultipleDropdown from "../ui/controls/dropdowns/MultipleDropdown";
 import ThresholdFilterDropdown from "../ui/controls/dropdowns/ThresholdFilterDropdown";
@@ -52,6 +53,12 @@ class PlaygroundControls extends React.Component {
                 key={1}
                 text="Submit"
                 disabled
+                onClick={() => this.setState({ event: "PrimaryButton:Click" })}
+              />,
+              <PrimaryButton
+                key={1}
+                label={<BetaLabel />}
+                text="Submit"
                 onClick={() => this.setState({ event: "PrimaryButton:Click" })}
               />
             ]}
@@ -177,7 +184,7 @@ class PlaygroundControls extends React.Component {
           />
           <ComponentCard
             title="Download Dropdown Button"
-            width={3}
+            width={4}
             components={[
               <DownloadButtonDropdown
                 key={0}
@@ -278,6 +285,22 @@ class PlaygroundControls extends React.Component {
             ]}
           />
           <ComponentCard
+            title="Multiple Tree Dropdown"
+            width={4}
+            components={[
+              <MultipleNestedDropdown
+                key={0}
+                fluid
+                rounded
+                options={this.dropdownOptions}
+                label="Options: "
+                onChange={(a, b) => {
+                  this.setState({ event: "MultipleDropdown:Change" });
+                }}
+              />
+            ]}
+          />
+          <ComponentCard
             title="Slider"
             width={4}
             components={[
@@ -324,22 +347,6 @@ class PlaygroundControls extends React.Component {
                 label="Checkbox"
                 onChange={() => this.setState({ event: "Checkbox:Change" })}
                 value={1}
-              />
-            ]}
-          />
-          <ComponentCard
-            title="Multiple Tree Dropdown"
-            width={4}
-            components={[
-              <MultipleNestedDropdown
-                key={0}
-                fluid
-                rounded
-                options={this.dropdownOptions}
-                label="Options: "
-                onChange={(a, b) => {
-                  this.setState({ event: "MultipleDropdown:Change" });
-                }}
               />
             ]}
           />
