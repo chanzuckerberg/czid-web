@@ -930,7 +930,7 @@ class Samples extends React.Component {
         {search_field}
         <div className="filter-container">
           <MultipleDropdown
-            label="Hosts: "
+            label="Hosts:"
             disabled={this.state.hostGenomes.length == 0}
             options={this.state.hostGenomes.map(host => {
               return { text: host.name, value: host.id };
@@ -942,7 +942,7 @@ class Samples extends React.Component {
         </div>
         <div className="filter-container">
           <MultipleDropdown
-            label="Sample Types: "
+            label="Sample Types:"
             disabled={this.state.tissueTypes.length == 0}
             options={this.state.tissueTypes.map(tissue => {
               return { text: tissue, value: tissue };

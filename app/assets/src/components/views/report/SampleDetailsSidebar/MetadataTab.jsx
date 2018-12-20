@@ -79,7 +79,6 @@ class MetadataTab extends React.Component {
         <Dropdown
           fluid
           floating
-          scrolling
           options={options}
           onChange={val => onMetadataChange(metadataType.key, val, true)}
           value={metadata[metadataType.key]}

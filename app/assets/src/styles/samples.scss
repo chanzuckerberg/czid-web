@@ -388,8 +388,8 @@ $break-large: 1070px;
         position: relative;
         margin-left: 10px;
         font-size: 18px;
-        top: 0.6em;
-        color: $dark-grey;
+        top: 7px;
+        color: $medium-grey;
       }
     }
 
@@ -403,8 +403,8 @@ $break-large: 1070px;
       border: solid 1px $light-grey;
       padding-left: 32px;
       position: relative;
-      top: -1.2em;
-      height: 38px;
+      top: -18px;
+      height: 34px;
       &::placeholder {
         color: $medium-grey;
         font-family: $font-family-default;

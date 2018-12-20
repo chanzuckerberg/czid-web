@@ -13,7 +13,7 @@ const NameTypeFilter = ({ value, onChange }) => {
     <Dropdown
       options={NAME_TYPE_OPTIONS}
       value={value}
-      label="Name Type: "
+      label="Name Type:"
       onChange={onChange}
       rounded
     />

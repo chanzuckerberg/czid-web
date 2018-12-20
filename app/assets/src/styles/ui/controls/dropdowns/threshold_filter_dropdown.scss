@@ -1,14 +1,15 @@
 @import "../../../themes/colors";
 @import "../../../themes/typography";
 
+// TODO(mark): Redundant with threshld_filter_dropdown.scss. Refactor.
 .idseq-ui.ui.dropdown.threshold {
   border: 1px solid $light-grey;
   border-radius: 19px;
   color: $black;
   letter-spacing: 0.4px;
-  height: 38px;
+  height: 34px;
   line-height: 24px;
-  padding: 6px 16px;
+  padding: 4px 16px;
   position: relative;
   width: 100%;
   font-family: $font-family-default;
@@ -36,8 +37,7 @@
   .label-container-title {
     float: left;
     font-weight: 600;
-    vertical-align: middle;
-    margin-right: 10px;
+    margin-right: 5px;
   }
 
   .label-container-count.ui.label {

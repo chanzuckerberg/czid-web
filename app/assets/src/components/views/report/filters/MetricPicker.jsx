@@ -8,7 +8,7 @@ const MetricPicker = ({ value, onChange, options }) => {
     <Dropdown
       options={options}
       value={value}
-      label="Tree Metric: "
+      label="Tree Metric:"
       onChange={onChange}
       rounded
     />

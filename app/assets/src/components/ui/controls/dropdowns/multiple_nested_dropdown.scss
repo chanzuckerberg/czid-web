@@ -4,11 +4,7 @@
 :global(.ui):global(.dropdown).multipleNestedDropdown {
   :global(.item) {
     /* override semantic-ui */
-    padding: 6px 10px !important;
-  }
-
-  .dropdownLabel {
-    margin-left: 6px;
+    padding: 6px 14px 6px 10px !important;
   }
 
   &:global(.active) {
