@@ -328,7 +328,7 @@ class SamplesHeatmapView extends React.Component {
     if (
       this.state.loading ||
       !this.state.data ||
-      Object.values(this.state.data).every(e => !e.length) ||
+      !(this.state.data[this.state.selectedOptions.metric] || []).length ||
       !this.state.metadataTypes
     ) {
       return <div className={cs.noDataMsg}>No data to render</div>;
