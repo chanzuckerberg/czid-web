@@ -688,6 +688,7 @@ class Samples extends React.Component {
 
   viewSample(id, currentEvent) {
     currentEvent.stopPropagation();
+    console.log("I am in viewSample");
     openUrl(`/samples/${id}`, currentEvent);
   }
 
