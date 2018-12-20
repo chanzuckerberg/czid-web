@@ -22,9 +22,9 @@ class Dropdown extends React.Component {
     }
   }
 
-  handleOnChange = (e, d) => {
-    this.setState({ value: d.value });
-    this.props.onChange(d.value, this.labels[d.value]);
+  handleOnChange = value => {
+    this.setState({ value });
+    this.props.onChange(value, this.labels[value]);
   };
 
   renderTrigger = () => {

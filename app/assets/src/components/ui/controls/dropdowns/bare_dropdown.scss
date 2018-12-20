@@ -40,6 +40,9 @@
     height: 30px;
     display: flex;
     align-items: center;
+    /* Overwrite semantic ui */
+    padding-left: 14px !important;
+    padding-right: 14px !important;
   }
 
   .menu {
@@ -53,7 +56,7 @@
     letter-spacing: 0.4px;
     margin-bottom: 10px;
     margin-top: 8px;
-    padding: 0 16px;
+    padding: 0 14px;
   }
 
   .innerMenu {
@@ -62,9 +65,14 @@
     border-radius: 0 !important;
     border-top: none !important;
 
+    // TODO(mark): Move this to a global CSS file.
     &::-webkit-scrollbar {
-      width: 6px;
+      width: 8px;
       border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-track {
+      display: none;
     }
   }
 
