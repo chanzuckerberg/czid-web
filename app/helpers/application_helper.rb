@@ -26,4 +26,6 @@ module ApplicationHelper
     str = str.gsub("'", "\\\\'")
     str
   end
+
+  HUMAN_TAX_IDS = [9605, 9606].freeze
 end

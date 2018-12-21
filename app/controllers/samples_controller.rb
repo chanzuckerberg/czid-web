@@ -1,4 +1,5 @@
 class SamplesController < ApplicationController
+  include ApplicationHelper
   include ReportHelper
   include SamplesHelper
   include PipelineOutputsHelper
@@ -37,7 +38,6 @@ class SamplesController < ApplicationController
 
   PAGE_SIZE = 30
   DEFAULT_MAX_NUM_TAXONS = 30
-  HUMAN_TAX_IDS = [9605, 9606].freeze
 
   # GET /samples
   # GET /samples.json
