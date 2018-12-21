@@ -1,4 +1,5 @@
 class SamplesController < ApplicationController
+  include ApplicationHelper
   include ReportHelper
   include SamplesHelper
   include PipelineOutputsHelper
@@ -37,7 +38,6 @@ class SamplesController < ApplicationController
 
   PAGE_SIZE = 30
   DEFAULT_MAX_NUM_TAXONS = 30
-  HUMAN_TAX_IDS = [9605, 9606].freeze
 
   # GET /samples
   # GET /samples.json
@@ -448,7 +448,10 @@ class SamplesController < ApplicationController
   def show_taxid_alignment_viz
     @taxon_info = params[:taxon_info].split(".")[0]
     @taxid = @taxon_info.split("_")[2].to_i
-    return if HUMAN_TAX_IDS.include? @taxid.to_i
+    if HUMAN_TAX_IDS.include? @taxid.to_i
+      render json: { status: :forbidden, message: "Human taxon ids are not allowed" }
+      return
+    end
 
     pr = select_pipeline_run(@sample, params)
 
