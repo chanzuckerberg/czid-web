@@ -4,7 +4,6 @@
   font-size: 13px;
 
   &__tree-container {
-    padding: 20px;
     margin-bottom: 30rem;
     overflow: auto;
 
@@ -68,7 +67,8 @@
       }
 
       .legend-title {
-        font-weight: bold;
+        font-weight: 600;
+        letter-spacing: 0.4px;
       }
     }
   }
@@ -84,5 +84,10 @@
     .data-tooltip__label {
       min-width: 100px;
     }
+  }
+
+  &__metadata-select {
+    width: 200px;
+    margin: 20px 0;
   }
 }

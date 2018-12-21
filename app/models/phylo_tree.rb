@@ -102,6 +102,7 @@ class PhyloTree < ApplicationRecord
     return if throttle && rand >= 0.1 # if throttling, do time-consuming aegea checks only 10% of the time
     job_status, self.job_log_id, _job_hash, self.job_description = job_info(job_id, id)
     required_outputs = select_outputs("required")
+    update_pipeline_version(self, :dag_version, dag_version_file) if job_status == "SUCCEEDED" && dag_version.blank?
     if job_status == PipelineRunStage::STATUS_FAILED ||
        (job_status == "SUCCEEDED" && !required_outputs.all? { |ro| exists_in_s3?(s3_outputs[ro]["s3_path"]) })
       self.status = STATUS_FAILED

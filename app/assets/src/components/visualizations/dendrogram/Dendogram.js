@@ -1,13 +1,37 @@
 import { cluster as d3Cluster, hierarchy } from "d3-hierarchy";
 import "d3-transition";
 import { timeout } from "d3-timer";
+import { get } from "lodash/fp";
 import { select, event as currentEvent } from "d3-selection";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap";
+import cs from "./dendrogram.scss";
+
+// Margins around the main Dendogram
+const VIZ_MARGINS = {
+  // includes scale legend
+  top: 120,
+  // includes second half of nodes
+  bottom: 20,
+  // includes root label on the left of the node
+  left: 250,
+  // includes leaf nodes labels
+  right: 150
+};
+
+const SCALE_POS = {
+  top: 48,
+  left: 250
+};
+
+const LEGEND_POS = {
+  top: 20,
+  left: 16
+};
 
 export default class Dendogram {
   constructor(container, tree, options) {
     this.svg = null;
-    this.g = null;
+    this.viz = null;
     this.container = container;
     this.tree = null;
     this.root = null;
@@ -21,8 +45,8 @@ export default class Dendogram {
         colorGroupAttribute: null,
         colorGroupLegendTitle: null,
         colorGroupAbsentName: null,
-        legendX: 880,
-        legendY: 0,
+        legendX: LEGEND_POS.left,
+        legendY: LEGEND_POS.top,
         onNodeTextClick: null,
         onNodeClick: null,
         onNodeHover: null,
@@ -38,17 +62,7 @@ export default class Dendogram {
       height: 500
     };
 
-    // margin top
-    this.margins = {
-      // includes scale legend
-      top: 160,
-      // includes second half of nodes
-      bottom: 20,
-      // includes root label on the left of the node
-      left: 150,
-      // includes leaf nodes labels
-      right: 150
-    };
+    this.margins = VIZ_MARGINS;
 
     this.nodeSize = {
       width: 1,
@@ -76,8 +90,9 @@ export default class Dendogram {
         this.minTreeSize.height + this.margins.top + this.margins.bottom
       );
 
-    this.g = this.svg
+    this.viz = this.svg
       .append("g")
+      .attr("class", "viz")
       .attr(
         "transform",
         `translate(${this.margins.left}, ${this.margins.top})`
@@ -95,9 +110,15 @@ export default class Dendogram {
     );
   }
 
+  getColorGroupAttrValForNode = node => {
+    let attrPath = this.options.colorGroupAttribute;
+    let absentName = this.options.colorGroupAbsentName;
+    return get(attrPath, node.data) || absentName;
+  };
+
   setTree(tree) {
-    if (this.g) {
-      this.g.selectAll("*").remove();
+    if (this.viz) {
+      this.viz.selectAll("*").remove();
     }
 
     if (this._clickTimeout) {
@@ -160,6 +181,16 @@ export default class Dendogram {
     });
   }
 
+  updateOptions = options => {
+    this.options = Object.assign(this.options, options);
+    if (this.viz) {
+      this.viz.selectAll("*").remove();
+    }
+
+    this.updateColors();
+    this.update();
+  };
+
   updateColors() {
     // Color clusters of the nodes based on the color group attribute.
     // Color a node if all its children have the same color.
@@ -167,7 +198,6 @@ export default class Dendogram {
       return;
     }
 
-    let attrName = this.options.colorGroupAttribute;
     let absentName = this.options.colorGroupAbsentName;
 
     // Set up all attribute values. Colors end up looking like:
@@ -175,11 +205,7 @@ export default class Dendogram {
     let allVals = new Set();
     this.root.leaves().forEach(n => {
       if (n.data) {
-        if (n.data.hasOwnProperty(attrName)) {
-          allVals.add(n.data[attrName]);
-        } else {
-          allVals.add(absentName);
-        }
+        allVals.add(this.getColorGroupAttrValForNode(n));
       }
     });
     allVals = Array.from(allVals);
@@ -189,6 +215,9 @@ export default class Dendogram {
     this.skipColoring = false;
     if (allVals.length === 1 && allVals[0] === absentName) {
       this.skipColoring = true;
+      // Need appropriate values to draw the legend.
+      this.allColorAttributeValues = ["Uncolored", absentName];
+      this.colors = [this.options.defaultColor, this.options.defaultColor];
       return;
     }
 
@@ -206,22 +235,16 @@ export default class Dendogram {
       this.colors.splice(absentNameIndex, 0, this.options.absentColor);
     }
 
-    function colorNode(head) {
+    const colorNode = head => {
       // Color the nodes based on the attribute values
       if (!head.data) return 0; // 0 for uncolored default
       let colorResult = 0;
 
       if (!head.children || head.children.length === 0) {
         // Leaf node, no children
-        let attrVal;
-        if (head.data.hasOwnProperty(attrName)) {
-          // Get color based on the desired attribute
-          attrVal = head.data[attrName];
-        } else {
-          // Leaf node but missing the attribute
-          attrVal = absentName;
-        }
-        colorResult = allVals.indexOf(attrVal);
+
+        // Get color based on the desired attribute.
+        colorResult = allVals.indexOf(this.getColorGroupAttrValForNode(head));
       } else {
         // Not a leaf node, get the colors of the children
         let childrenColors = new Set();
@@ -238,67 +261,72 @@ export default class Dendogram {
       // Set this node's color
       head.data.colorIndex = colorResult;
       return colorResult;
-    }
+    };
 
     colorNode(this.root);
   }
 
   updateLegend() {
     // Generate legend for coloring by attribute name
-    if (!this.options.colorGroupAttribute || this.skipColoring) {
+    if (!this.options.colorGroupAttribute) {
       return;
     }
 
     let allVals = this.allColorAttributeValues;
-    this.legend = this.g.select(".legend");
-    if (this.legend.empty()) {
-      this.legend = this.g.append("g").attr("class", "legend");
-      let x = this.options.legendX;
-      let y = this.options.legendY;
+    this.legend = this.svg.select(".legend");
 
-      // Set legend title
-      let legendTitle = (this.options.colorGroupLegendTitle || "Legend") + ":";
+    if (this.legend.empty()) {
+      this.legend = this.svg.append("g").attr("class", "legend");
+    }
+
+    // Clear the legend.
+    this.legend.selectAll("*").remove();
+
+    let x = this.options.legendX;
+    let y = this.options.legendY;
+
+    // Set legend title
+    let legendTitle = (this.options.colorGroupLegendTitle || "Legend") + ":";
+    this.legend
+      .append("text")
+      .attr("class", "legend-title")
+      .attr("x", x)
+      .attr("y", y)
+      .text(legendTitle);
+
+    x += 5;
+    y += 25;
+
+    for (let i = 1; i < allVals.length; i++, y += 30) {
+      // First of values and colors is the placeholder for 'Uncolored'
+
+      // Add color circle
+      let color = this.colors[i];
+      this.legend
+        .append("circle")
+        .attr("r", 5)
+        .attr("transform", `translate(${x}, ${y})`)
+        .style("fill", color);
+
+      // Add text label
       this.legend
         .append("text")
-        .attr("class", "legend-title")
-        .attr("x", x)
-        .attr("y", y)
-        .text(legendTitle);
-
-      x += 5;
-      y += 25;
-
-      for (let i = 1; i < allVals.length; i++, y += 30) {
-        // First of values and colors is the placeholder for 'Uncolored'
-
-        // Add color circle
-        let color = this.colors[i];
-        this.legend
-          .append("circle")
-          .attr("r", 5)
-          .attr("transform", `translate(${x}, ${y})`)
-          .style("fill", color);
-
-        // Add text label
-        this.legend
-          .append("text")
-          .attr("x", x + 15)
-          .attr("y", y + 5)
-          .text(allVals[i]);
-      }
-
-      // background rectangle
-      let bbox = this.legend.node().getBBox();
-      let bgMargin = 10;
-      this.legend
-        .append("rect")
-        .attr("class", "legend-background")
-        .attr("x", bbox.x - bgMargin)
-        .attr("y", bbox.y - bgMargin)
-        .attr("width", bbox.width + 2 * bgMargin)
-        .attr("height", bbox.height + 2 * bgMargin)
-        .lower();
+        .attr("x", x + 15)
+        .attr("y", y + 5)
+        .text(allVals[i]);
     }
+
+    // background rectangle
+    let bbox = this.legend.node().getBBox();
+    let bgMargin = 10;
+    this.legend
+      .append("rect")
+      .attr("class", "legend-background")
+      .attr("x", bbox.x - bgMargin)
+      .attr("y", bbox.y - bgMargin)
+      .attr("width", bbox.width + 2 * bgMargin)
+      .attr("height", bbox.height + 2 * bgMargin)
+      .lower();
   }
 
   clickHandler(clickCallback, dblClickCallback, delay = 250) {
@@ -382,10 +410,10 @@ export default class Dendogram {
     }
     const tickElements = createTicks(0, width, scaleSize / 2, multiplier);
 
-    let scale = this.g.select(".scale");
+    let scale = this.svg.select(".scale");
 
     if (scale.empty()) {
-      scale = this.g
+      scale = this.svg
         .append("g")
         .attr("transform", `translate(${y},${x})`)
         .attr("class", "scale");
@@ -396,6 +424,14 @@ export default class Dendogram {
         .attr("d", function() {
           return drawScale(tickWidth, 0, width);
         });
+
+      // Set scale label
+      scale
+        .append("text")
+        .attr("class", cs.scaleLabel)
+        .attr("x", -2)
+        .attr("y", -30)
+        .text(this.options.scaleLabel);
     } else {
       scale
         .select("path")
@@ -439,14 +475,6 @@ export default class Dendogram {
       .transition(500)
       .style("opacity", 0)
       .remove();
-
-    // Set scale label
-    scale
-      .append("text")
-      .attr("class", "scale-label")
-      .attr("x", x + 78)
-      .attr("y", y - 30)
-      .text(this.options.scaleLabel);
   }
 
   update() {
@@ -454,7 +482,7 @@ export default class Dendogram {
       return;
     }
 
-    if (!this.g) {
+    if (!this.viz) {
       this.initialize();
     }
 
@@ -509,9 +537,15 @@ export default class Dendogram {
     this.updateLegend();
     this.adjustXPositions();
     this.adjustYPositions(maxDistance);
-    this.createScale(-80, 0, this.minTreeSize.width, maxDistance);
 
-    let link = this.g
+    this.createScale(
+      SCALE_POS.top,
+      SCALE_POS.left,
+      this.minTreeSize.width,
+      maxDistance
+    );
+
+    let link = this.viz
       .selectAll(".link")
       .data(this.root.descendants().slice(1), linkId);
 
@@ -536,9 +570,11 @@ export default class Dendogram {
       .duration(500)
       .attr("d", this.options.curvedEdges ? curveEdge : rectEdge);
 
-    this.g.selectAll(".link.highlight").raise();
+    this.viz.selectAll(".link.highlight").raise();
 
-    let node = this.g.selectAll(".node").data(this.root.descendants(), nodeId);
+    let node = this.viz
+      .selectAll(".node")
+      .data(this.root.descendants(), nodeId);
 
     node
       .exit()
@@ -637,17 +673,17 @@ export default class Dendogram {
     if (this.options.colorGroupAttribute && !this.skipColoring) {
       // Apply colors to the nodes from data.colorIndex
       let colors = this.colors;
-      this.g.selectAll(".node").style("fill", function(d) {
+      this.viz.selectAll(".node").style("fill", function(d) {
         return colors[d.data.colorIndex];
       });
 
-      this.g.selectAll(".link").style("stroke", function(d) {
+      this.viz.selectAll(".link").style("stroke", function(d) {
         return colors[d.data.colorIndex];
       });
     } else {
       // Color all the nodes light grey. Default not in CSS because that would
       // override D3 styling.
-      this.g.selectAll(".node").style("fill", this.options.defaultColor);
+      this.viz.selectAll(".node").style("fill", this.options.defaultColor);
     }
 
     // legend on top
