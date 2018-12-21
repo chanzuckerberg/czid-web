@@ -352,7 +352,7 @@ class Metadatum < ApplicationRecord
   end
 
   def validated_value
-    return instance_variable_get("#{data_type}_validated_value")
+    return self["#{data_type}_validated_value"]
   rescue
     ""
   end

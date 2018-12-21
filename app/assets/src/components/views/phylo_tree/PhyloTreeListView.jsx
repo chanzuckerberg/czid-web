@@ -4,6 +4,7 @@ import Divider from "../../layout/Divider";
 import QueryString from "query-string";
 import PhyloTreeVis from "./PhyloTreeVis";
 import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
+import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "prop-types";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
 import cs from "./phylo_tree_list_view.scss";
@@ -120,7 +121,7 @@ class PhyloTreeListView extends React.Component {
           </ViewHeader.Controls>
         </ViewHeader>
         <Divider />
-        <div className={cs.narrowContainer}>
+        <NarrowContainer>
           {currentTree.newick ? (
             <PhyloTreeVis
               newick={currentTree.newick}
@@ -133,7 +134,7 @@ class PhyloTreeListView extends React.Component {
               {this.getTreeStatus(currentTree.status)}
             </p>
           )}
-        </div>
+        </NarrowContainer>
       </div>
     );
   }

@@ -369,50 +369,55 @@ $break-large: 1070px;
     }
   }
 
-  .search-box {
-    display: inline-block;
+  .search-box-row {
     width: inherit;
     margin: 20px 0 5px 30px;
-    border-radius: 3px;
+
     .wrapper {
       .metadata {
         border-radius: 40px;
         border: solid 1px $light-grey;
       }
     }
-    .search-field {
-      padding-left: 20px;
-      margin-right: 10px;
-      height: 40px;
-      .search-icon {
-        position: relative;
-        margin-left: 10px;
-        font-size: 18px;
-        top: 7px;
-        color: $medium-grey;
-      }
-    }
 
-    .icon {
-      padding-top: 12px;
-      display: inline-block;
-      margin: 0 10px;
-    }
-    .search {
-      border-radius: 40px;
-      border: solid 1px $light-grey;
-      padding-left: 32px;
-      position: relative;
-      top: -18px;
-      height: 34px;
-      &::placeholder {
-        color: $medium-grey;
-        font-family: $font-family-default;
+    .search-box {
+      .icon {
+        padding-top: 12px;
+        display: inline-block;
+        margin: 0 10px;
       }
-      &:focus {
-        border-bottom-color: $lightest-grey;
-        box-shadow: 0 1px 0 0 $lightest-grey;
-        border: 1px solid $primary-light;
+      .search {
+        border-radius: 40px;
+        border: solid 1px $light-grey;
+        padding-left: 32px;
+        position: relative;
+        top: -18px;
+        height: 34px;
+        font-size: 13px;
+        font-family: $font-family-default;
+
+        &::placeholder {
+          color: $medium-grey;
+          font-family: $font-family-default;
+        }
+        &:focus {
+          border-bottom-color: $lightest-grey;
+          box-shadow: 0 1px 0 0 $lightest-grey;
+          border: 1px solid $primary-light;
+        }
+      }
+
+      .search-field {
+        padding-left: 20px;
+        margin-right: 10px;
+        height: 40px;
+        .search-icon {
+          position: relative;
+          margin-left: 10px;
+          font-size: 18px;
+          top: 7px;
+          color: $medium-grey;
+        }
       }
     }
 
