@@ -926,8 +926,8 @@ class Samples extends React.Component {
     );
 
     const search_box = (
-      <div className="row search-box">
-        {search_field}
+      <div className="row search-box-row">
+        <div className="search-box">{search_field}</div>
         <div className="filter-container">
           <MultipleDropdown
             label="Hosts:"
