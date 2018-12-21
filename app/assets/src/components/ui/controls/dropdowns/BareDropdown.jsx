@@ -34,7 +34,8 @@ class BareDropdown extends React.Component {
 
     const dropdownClassName = cx(
       cs.bareDropdown,
-      arrowInsideTrigger ? cs.arrowInsideTrigger : cs.arrowOutsideTrigger,
+      !hideArrow &&
+        (arrowInsideTrigger ? cs.arrowInsideTrigger : cs.arrowOutsideTrigger),
       className,
       hideArrow && cs.hideArrow
     );

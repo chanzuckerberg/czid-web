@@ -48,6 +48,13 @@
   .menu {
     min-width: 100%;
     padding: 6px 0;
+
+    &:global(.left) {
+      .innerMenu {
+        /* Override special case semantic ui styling for left menus */
+        margin: 0 !important;
+      }
+    }
   }
 
   .menuLabel {

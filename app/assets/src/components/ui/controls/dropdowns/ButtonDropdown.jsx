@@ -1,18 +1,12 @@
-import { Dropdown } from "semantic-ui-react";
 import PrimaryButton from "../buttons/PrimaryButton";
 import SecondaryButton from "../buttons/SecondaryButton";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import PropTypes from "prop-types";
 import React from "react";
 import cx from "classnames";
+import cs from "./button_dropdown.scss";
 
-/* TODO(mark): Refactor ButtonDropdown to use BareDropdown */
 class ButtonDropdown extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.handleMouseDown = this.handleMouseDown.bind(this);
-  }
-
   getButton() {
     if (this.props.primary) {
       return (
@@ -20,6 +14,8 @@ class ButtonDropdown extends React.Component {
           text={this.props.text}
           disabled={this.props.disabled}
           icon={this.props.icon}
+          className={cs.button}
+          hasDropdownArrow
         />
       );
     } else {
@@ -28,36 +24,21 @@ class ButtonDropdown extends React.Component {
           text={this.props.text}
           disabled={this.props.disabled}
           icon={this.props.icon}
+          className={cs.button}
+          hasDropdownArrow
         />
       );
     }
   }
 
-  handleMouseDown(event) {
-    const selectedText = event.target.textContent;
-    if (selectedText) {
-      const selectedOption = this.props.options.find(function(option) {
-        return option.text == selectedText;
-      });
-      if (selectedOption) {
-        this.props.onClick(selectedOption.value);
-      }
-    }
-  }
-
   render() {
     return (
-      <Dropdown
-        className={cx(
-          "idseq-ui",
-          "button-dropdown",
-          "button",
-          this.props.primary ? "primary" : "secondary",
-          this.props.className
-        )}
+      <BareDropdown
+        className={cx(cs.buttonDropdown, this.props.className)}
+        hideArrow
         disabled={this.props.disabled}
         floating
-        onMouseDown={this.handleMouseDown}
+        onChange={this.props.onClick}
         options={this.props.options}
         trigger={this.getButton()}
         direction={this.props.direction}
