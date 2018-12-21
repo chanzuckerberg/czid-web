@@ -71,7 +71,7 @@ class MinContigSizeFilter extends React.Component {
         trigger={
           <DropdownTrigger
             className={cs.dropdownTrigger}
-            label="Min Contig Size: "
+            label="Min Contig Size:"
             value={this.state.value}
             rounded
           />

@@ -1,4 +1,5 @@
 .idseq-ui.button {
+  position: relative;
   border-radius: 19px;
   cursor: pointer;
   font-family: $font-family-default;
@@ -6,10 +7,10 @@
   font-weight: 400;
   font-style: normal;
   font-stretch: normal;
-  height: 38px;
+  height: 34px;
   letter-spacing: 0.4px;
   min-width: 120px;
-  padding: 6px 16px;
+  padding: 4px 14px;
   vertical-align: middle;
 
   &.rectangular {
@@ -24,7 +25,7 @@
     i.icon,
     svg {
       height: 24px;
-      margin-right: 10px;
+      margin-right: 8px;
       vertical-align: middle;
     }
 
@@ -36,5 +37,30 @@
   &:disabled {
     // using important due to semantic-ui styling
     opacity: 1 !important;
+  }
+
+  &.has-dropdown-arrow {
+    padding-right: 30px;
+  }
+
+  // This is currently duplicated with the arrow in bare_dropdown.scss.
+  // The reason is that the COLOR of this arrow needs to stay in sync with the button
+  // through all the focus and hover states and it was cleaner to just add the arrow here to do that.
+  // We might consider factoring this out into a component and permanently hiding the default semantic ui arrow in the future.
+  .icon-dropdown-arrow {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    line-height: 24px;
+    pointer-events: none;
+    font-size: 20px;
+    font-style: normal;
+
+    &:before {
+      font-family: FontAwesome;
+      content: "\f107";
+    }
   }
 }

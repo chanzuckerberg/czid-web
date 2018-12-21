@@ -13,7 +13,7 @@ const SpecificityFilter = ({ value, onChange }) => {
     <Dropdown
       options={SPECIFICITY_OPTIONS}
       value={value}
-      label="Read Specificity: "
+      label="Read Specificity:"
       onChange={onChange}
       rounded
     />

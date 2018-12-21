@@ -328,7 +328,7 @@ class SamplesHeatmapView extends React.Component {
     if (
       this.state.loading ||
       !this.state.data ||
-      Object.values(this.state.data).every(e => !e.length) ||
+      !(this.state.data[this.state.selectedOptions.metric] || []).length ||
       !this.state.metadataTypes
     ) {
       return <div className={cs.noDataMsg}>No data to render</div>;
@@ -385,7 +385,7 @@ class SamplesHeatmapView extends React.Component {
         options={this.state.availableOptions.metrics}
         onChange={this.onMetricChange}
         value={this.state.selectedOptions.metric}
-        label="Metric: "
+        label="Metric:"
         disabled={!this.state.data}
       />
     );
@@ -429,7 +429,7 @@ class SamplesHeatmapView extends React.Component {
         options={this.state.availableOptions.taxonLevels}
         value={this.state.selectedOptions.species}
         onChange={this.onTaxonLevelChange}
-        label="Taxon Level: "
+        label="Taxon Level:"
         disabled={!this.state.data}
       />
     );
@@ -459,7 +459,7 @@ class SamplesHeatmapView extends React.Component {
         value={this.state.selectedOptions.dataScaleIdx}
         onChange={this.onDataScaleChange}
         options={options}
-        label="Scale: "
+        label="Scale:"
         disabled={!this.state.data}
       />
     );
@@ -538,7 +538,7 @@ class SamplesHeatmapView extends React.Component {
         options={options}
         onChange={this.onBackgroundChanged}
         value={this.state.selectedOptions.background}
-        label="Background: "
+        label="Background:"
         disabled={!this.state.data}
       />
     );
@@ -554,7 +554,7 @@ class SamplesHeatmapView extends React.Component {
   renderTaxonsPerSampleSlider() {
     return (
       <Slider
-        label="Taxa per Sample: "
+        label="Taxa per Sample:"
         min={this.state.availableOptions.taxonsPerSample.min}
         max={this.state.availableOptions.taxonsPerSample.max}
         value={this.state.selectedOptions.taxonsPerSample}
@@ -582,7 +582,7 @@ class SamplesHeatmapView extends React.Component {
         rounded
         options={this.availableOptions.specificityOptions}
         value={this.state.selectedOptions.readSpecificity}
-        label="Read Specificity: "
+        label="Read Specificity:"
         onChange={this.onSpecificityChange}
       />
     );
@@ -649,7 +649,7 @@ class SamplesHeatmapView extends React.Component {
                 } Samples`}
               />
             </ViewHeader.Content>
-            <ViewHeader.Controls>
+            <ViewHeader.Controls className={cs.controls}>
               <Popup
                 trigger={
                   <PrimaryButton

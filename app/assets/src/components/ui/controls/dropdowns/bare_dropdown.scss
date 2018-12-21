@@ -10,7 +10,7 @@
       padding: 0;
       position: absolute;
       right: 10px;
-      top: 6px;
+      top: 5px;
       line-height: 24px;
       pointer-events: none;
       font-size: 20px;
@@ -34,9 +34,53 @@
   }
 
   :global(.item) {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
     letter-spacing: 0.4px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    /* Overwrite semantic ui */
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .menu {
+    min-width: 100%;
+    padding: 6px 0;
+
+    &:global(.left) {
+      .innerMenu {
+        /* Override special case semantic ui styling for left menus */
+        margin: 0 !important;
+      }
+    }
+  }
+
+  .menuLabel {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    margin-bottom: 10px;
+    margin-top: 8px;
+    padding: 0 14px;
+  }
+
+  .innerMenu {
+    /* Override semantic-ui */
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border-top: none !important;
+
+    // TODO(mark): Move this to a global CSS file.
+    &::-webkit-scrollbar {
+      width: 8px;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-track {
+      display: none;
+    }
   }
 
   i:global(.dropdown) {
