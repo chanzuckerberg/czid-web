@@ -37,7 +37,10 @@ class PhyloTreesController < ApplicationController
     @taxon = {}
 
     taxid = params[:taxId]
-    return if HUMAN_TAX_IDS.include? taxid.to_i
+    if HUMAN_TAX_IDS.include? taxid.to_i
+      render json: { status: :forbidden, message: "Human taxon ids are not allowed" }
+      return
+    end
     project_id = params[:projectId]
 
     # Restrict to specified project
@@ -81,7 +84,10 @@ class PhyloTreesController < ApplicationController
 
   def new
     taxid = params[:taxId].to_i
-    return if HUMAN_TAX_IDS.include? taxid
+    if HUMAN_TAX_IDS.include? taxid.to_i
+      render json: { status: :forbidden, message: "Human taxon ids are not allowed" }
+      return
+    end
     project_id = params[:projectId].to_i
 
     @project = current_power.updatable_projects.find(project_id)
@@ -138,7 +144,10 @@ class PhyloTreesController < ApplicationController
 
   def create
     taxid = params[:taxId].to_i
-    return if HUMAN_TAX_IDS.include? taxid
+    if HUMAN_TAX_IDS.include? taxid.to_i
+      render json: { status: :forbidden, message: "Human taxon ids are not allowed" }
+      return
+    end
 
     @project = current_power.updatable_projects.find(params[:projectId])
     pipeline_run_ids = params[:pipelineRunIds].map(&:to_i)
