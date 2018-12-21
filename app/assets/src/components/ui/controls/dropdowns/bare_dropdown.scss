@@ -34,7 +34,7 @@
   }
 
   :global(.item) {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 400;
     letter-spacing: 0.4px;
     height: 30px;
@@ -43,6 +43,7 @@
     /* Overwrite semantic ui */
     padding-left: 14px !important;
     padding-right: 14px !important;
+    color: black !important;
   }
 
   .menu {
