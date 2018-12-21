@@ -1,7 +1,8 @@
 import React from "react";
 import $ from "jquery";
 import axios from "axios";
-import { Menu, Dropdown } from "semantic-ui-react";
+import { compact, flatten } from "lodash/fp";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import LogoIcon from "./ui/icons/LogoIcon";
 
 class Header extends React.Component {
@@ -55,6 +56,49 @@ class Header extends React.Component {
       return null;
     }
 
+    const userDropdownItems = compact(
+      flatten([
+        this.demoUser !== 1 && [
+          <BareDropdown.Item
+            text="New Sample"
+            key="1"
+            onClick={this.gotoPage.bind(this, "/samples/new")}
+          />,
+          <BareDropdown.Item
+            text="New Sample (Command Line)"
+            key="2"
+            onClick={() => this.openNewTab("/cli_user_instructions")}
+          />
+        ],
+        this.userDetails &&
+          this.userDetails.admin && (
+            <BareDropdown.Item
+              key="3"
+              text="Create User"
+              onClick={this.gotoPage.bind(this, "/users/new")}
+            />
+          ),
+        <BareDropdown.Item
+          text="Report Feedback"
+          key="4"
+          onClick={this.sendMail}
+        />,
+        <BareDropdown.Item
+          text="Terms of Use"
+          key="5"
+          onClick={() => this.openNewTab("https://assets.idseq.net/Terms.pdf")}
+        />,
+        <BareDropdown.Item
+          text="Privacy Policy"
+          key="6"
+          onClick={() =>
+            this.openNewTab("https://assets.idseq.net/Privacy.pdf")
+          }
+        />,
+        <BareDropdown.Item key="7" text="Logout" onClick={this.signOut} />
+      ])
+    );
+
     return (
       <div className="header-row row">
         <div className="page-loading">
@@ -64,66 +108,20 @@ class Header extends React.Component {
           </div>
         </div>
         <div className="site-header col s12">
-          <div>
-            <div className="">
-              <div href="/" className="left brand-details">
-                <a href="/">
-                  <span className="logo-icon">
-                    <LogoIcon />
-                  </span>
-                </a>
-              </div>
-              <Menu className="profile-header-menu">
-                <Menu.Menu position="right">
-                  <Dropdown text={this.userDetails.name}>
-                    <Dropdown.Menu>
-                      {this.demoUser !== 1 && [
-                        <Dropdown.Item
-                          text="New Sample"
-                          key="1"
-                          onClick={this.gotoPage.bind(this, "/samples/new")}
-                        />,
-                        <Dropdown.Item
-                          text="New Sample (Command Line)"
-                          key="2"
-                          onClick={() =>
-                            this.openNewTab("/cli_user_instructions")
-                          }
-                        />
-                      ]}
-                      {this.userDetails &&
-                        this.userDetails.admin && (
-                          <Dropdown.Item
-                            text="Create User"
-                            onClick={this.gotoPage.bind(this, "/users/new")}
-                          />
-                        )}
-                      <Dropdown.Item
-                        text="Report Feedback"
-                        onClick={this.sendMail}
-                      />
-                      <Dropdown.Item
-                        text="Terms of Use"
-                        onClick={() =>
-                          this.openNewTab("https://assets.idseq.net/Terms.pdf")
-                        }
-                      />
-                      <Dropdown.Item
-                        text="Privacy Policy"
-                        onClick={() =>
-                          this.openNewTab(
-                            "https://assets.idseq.net/Privacy.pdf"
-                          )
-                        }
-                      />
-                      <Dropdown.Divider />
-                      <Dropdown.Item text="Logout" onClick={this.signOut} />
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </Menu.Menu>
-              </Menu>
-            </div>
+          <div href="/" className="left brand-details">
+            <a href="/">
+              <span className="logo-icon">
+                <LogoIcon />
+              </span>
+            </a>
           </div>
+          <div className="fill" />
+          <BareDropdown
+            trigger={<div className="user-name">{this.userDetails.name}</div>}
+            className="user-dropdown"
+            items={userDropdownItems}
+            direction="left"
+          />
         </div>
       </div>
     );

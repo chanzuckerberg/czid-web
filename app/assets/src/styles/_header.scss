@@ -45,6 +45,38 @@ a {
   font-size: $font-size-base;
   position: relative;
   z-index: 1000;
+  display: flex;
+
+  .fill {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .user-name {
+    font-family: $font-family-default;
+    font-size: 14px;
+    margin-right: 5px;
+  }
+
+  .user-dropdown {
+    color: $medium-grey;
+    margin-right: 10px;
+    height: 36px;
+    margin-top: 7px;
+
+    &:hover {
+      color: $light-grey;
+    }
+
+    &.active {
+      color: $light-grey;
+
+      /* Override semantic-ui */
+      .icon.dropdown:before {
+        color: $light-grey !important;
+      }
+    }
+  }
 }
 
 .brand-details {
@@ -54,24 +86,6 @@ a {
       margin-top: 0.5rem;
       margin-left: 0.3rem;
     }
-  }
-}
-
-.profile-header-menu.menu {
-  float: right;
-  margin-top: 1rem;
-  margin-right: 0.5rem;
-  background-color: transparent;
-  min-height: 0;
-  box-shadow: none;
-  border: none;
-  .text {
-    font-family: $font-family-sans-serif;
-    font-size: 1rem;
-  }
-  color: $medium-grey;
-  &:hover {
-    color: $light-grey;
   }
 }
 
