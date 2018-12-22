@@ -49,6 +49,9 @@
   .menu {
     min-width: 100%;
     padding: 6px 0;
+    // When you nest dropdowns, semantic ui applies special (unneeded) styling that must be overridden.
+    top: 100% !important;
+    margin-left: 0 !important;
 
     &:global(.left) {
       .innerMenu {
@@ -61,19 +64,19 @@
       padding-top: 14px;
       padding-bottom: 10px;
     }
-  }
 
-  .menuLabel {
-    font-size: 13px;
-    line-height: 13px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-    margin-bottom: 12px;
-    padding: 0 14px;
-  }
+    .menuLabel {
+      font-size: 13px;
+      line-height: 13px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      margin-bottom: 12px;
+      padding: 0 14px;
+    }
 
-  .searchContainer {
-    margin: 0 14px 10px 14px;
+    .searchContainer {
+      margin: 0 14px 10px 14px;
+    }
   }
 
   .innerMenu {
@@ -101,7 +104,7 @@
   }
 
   &:global(.active) {
-    i:global(.dropdown):global(.icon):before {
+    & > i:global(.dropdown):global(.icon):before {
       color: $primary-light;
     }
   }
