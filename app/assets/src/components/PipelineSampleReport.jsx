@@ -120,16 +120,6 @@ class PipelineSampleReport extends React.Component {
       },
       {}
     );
-    this.defaultThreshold = {
-      metric: this.allThresholds[0]["value"],
-      operator: ">=",
-      value: ""
-    };
-
-    // all taxons will pass this default filter
-    this.defaultThresholdValues = savedThresholdFilters.length
-      ? savedThresholdFilters
-      : [Object.assign({}, this.defaultThreshold)];
 
     let defaultBackgroundId = parseInt(this.fetchParams("background_id")) || -1;
     // we should only keep dynamic data in the state
@@ -164,7 +154,7 @@ class PipelineSampleReport extends React.Component {
       name_type: cached_name_type ? cached_name_type : "Scientific Name",
       rendering: false,
       loading: true,
-      activeThresholds: this.defaultThresholdValues,
+      activeThresholds: savedThresholdFilters,
       countType: "NT",
       readSpecificity: cachedReadSpecificity
         ? parseInt(cachedReadSpecificity)
@@ -279,7 +269,7 @@ class PipelineSampleReport extends React.Component {
   resetAllFilters = () => {
     this.setState(
       {
-        activeThresholds: [Object.assign({}, this.defaultThreshold)],
+        activeThresholds: [],
         includedCategories: [],
         includedSubcategories: [],
         searchKey: "",
