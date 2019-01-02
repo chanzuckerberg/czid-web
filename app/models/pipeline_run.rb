@@ -33,8 +33,8 @@ class PipelineRun < ApplicationRecord
   ADAPTER_SEQUENCES = { "single-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-SE.fasta",
                         "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta" }.freeze
 
-  GSNAP_CHUNK_SIZE = 15_000
-  RAPSEARCH_CHUNK_SIZE = 10_000
+  GSNAP_CHUNK_SIZE = 60_000
+  RAPSEARCH_CHUNK_SIZE = 20_000
   GSNAP_MAX_CONCURRENT = 2
   RAPSEARCH_MAX_CONCURRENT = 4
   MAX_CHUNKS_IN_FLIGHT = 32
