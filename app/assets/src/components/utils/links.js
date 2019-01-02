@@ -1,9 +1,6 @@
 const openUrl = (link, currentEvent) => {
   // currentEvent is optional and it is used to consider
   // modifiers like CMD and CTRL key to open urls in new tabs
-  console.log("I am in openURL. stopping the click");
-  currentEvent.stopPropagation();
-  return;
   let openInNewTab = false;
 
   // metakey is CMD in mac

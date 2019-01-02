@@ -687,7 +687,6 @@ class Samples extends React.Component {
   }
 
   viewSample(id, currentEvent) {
-    console.log("I am in viewSample");
     openUrl(`/samples/${id}`, currentEvent);
   }
 
@@ -792,15 +791,8 @@ class Samples extends React.Component {
       .length === 0;
 
   selectSample(e) {
-    console.log("this was the click", e);
-    console.log(e.target);
-    console.log(e.target.getAttribute("data-sample-id"));
-    console.log("I am in selectSample. time is 3:57pm");
-
     let sampleId = parseInt(e.target.getAttribute("data-sample-id"));
 
-    console.log(e.target.getAttribute("data-checked") === "false");
-    console.log(e.target.getAttribute("data-checked") === "false");
     const sampleList =
       e.target.getAttribute("data-checked") === "false"
         ? union(this.state.selectedSampleIds, [+sampleId])
@@ -1368,7 +1360,6 @@ function PipelineOutputCards({
   parent
 }) {
   let dbSample = sample.db_sample;
-  console.log("I am in PipelineOutputCards. time is 2:06pm");
   return (
     <a className="col s12 no-padding sample-feed" key={i}>
       <div>
@@ -1869,6 +1860,8 @@ function SampleCardCheckboxes({
   i,
   parent
 }) {
+  const checked =
+    parent.state.selectedSampleIds.indexOf(sample.db_sample.id) >= 0;
   return (
     <li className="check-box-container">
       {parent.state.displaySelectSamples ? (
@@ -1876,19 +1869,15 @@ function SampleCardCheckboxes({
           <input
             type="checkbox"
             id={i}
-            key={`sample_${sample.db_sample.id}`}
             onClick={parent.selectSample}
+            key={`sample_${sample.db_sample.id}`}
             data-sample-id={sample.db_sample.id}
             className="filled-in checkbox"
-            checked={
-              parent.state.selectedSampleIds.indexOf(sample.db_sample.id) >= 0
-            }
+            checked={checked}
             disabled={report_ready != 1}
           />{" "}
           <label
-            data-checked={
-              parent.state.selectedSampleIds.indexOf(sample.db_sample.id) >= 0
-            }
+            data-checked={checked}
             onClick={parent.selectSample}
             data-sample-id={sample.db_sample.id}
           >
