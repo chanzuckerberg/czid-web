@@ -7,7 +7,7 @@ import SampleUpload from "./SampleUpload";
 import ObjectHelper from "../helpers/ObjectHelper";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import Icon from "~ui/icons/Icon";
-import UploadBox from "~ui/controls/UploadBox";
+import Dropzone from "react-dropzone";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -707,16 +707,23 @@ class BulkUploadImport extends React.Component {
           (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).
         </div>
         <div className="row">
-          <UploadBox
-            // onDrop={this.onDrop(0)}
-            title={"Read 1 File:"}
-            multiple={true}
-            // fileToUpload={toUpload.length > 0 ? toUpload[0] : null}
-            // startUpload={this.state.localUploadShouldStart}
-            // url={this.state.localFileUploadURLs[0]}
-            // handleSuccess={this.uploadBoxHandleSuccess}
-            // handleFailure={this.uploadBoxHandleFailure}
-          />
+          <Dropzone
+            acceptClassName="accepted"
+            maxSize={5e9}
+            // onDrop={}
+            onDropRejected={this.onDropRejected}
+            className={"idseq-ui upload-box"}
+          >
+            <div className="upload-box-inside">
+              <div className="upload-box-file-title">{this.props.title}</div>
+              <div>
+                <span>Drag and drop your files here, or </span>
+                <span className="upload-box-link">
+                  click to use a file browser.
+                </span>
+              </div>
+            </div>
+          </Dropzone>
         </div>
       </div>
     );
