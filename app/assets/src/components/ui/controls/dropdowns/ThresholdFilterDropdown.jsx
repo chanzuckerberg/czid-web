@@ -1,8 +1,15 @@
-import { Dropdown, Grid, Input, Label, Popup } from "semantic-ui-react";
+import { Grid } from "semantic-ui-react";
 import { forbidExtraProps } from "airbnb-prop-types";
 import PrimaryButton from "../buttons/PrimaryButton";
+import SecondaryButton from "../buttons/SecondaryButton";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import Input from "~/components/ui/controls/Input";
 import PropTypes from "prop-types";
 import RemoveIcon from "../../icons/RemoveIcon";
+import DropdownTrigger from "./common/DropdownTrigger";
+import DropdownLabel from "./common/DropdownLabel";
+import cs from "./threshold_filter_dropdown.scss";
 import React from "react";
 
 class ThresholdFilterDropdown extends React.Component {
@@ -98,83 +105,102 @@ class ThresholdFilterDropdown extends React.Component {
     event.stopPropagation();
   }
 
-  handleApply() {
-    this.handleClose();
-  }
-
-  handleClose() {
+  handleClose = shouldApply => {
     this.setState({ popupIsOpen: false });
-    let newThresholds = this.state.thresholds.filter(
-      ThresholdFilterDropdown.isThresholdValid
-    );
-    this.setState({ thresholds: newThresholds });
-    this.props.onApply(newThresholds);
-  }
 
-  handleOpen() {
+    if (shouldApply) {
+      let newThresholds = this.state.thresholds.filter(
+        ThresholdFilterDropdown.isThresholdValid
+      );
+      this.setState({ thresholds: newThresholds });
+      this.props.onApply(newThresholds);
+    } else {
+      this.setState({ thresholds: this.props.thresholds });
+    }
+  };
+
+  handleOpen = () => {
     if (!this.state.thresholds.length) {
       this.addNewItem();
     }
     this.setState({ popupIsOpen: true });
+  };
+
+  renderLabel() {
+    const label = this.props.thresholds.length > 0 && (
+      <DropdownLabel
+        className={cs.dropdownLabel}
+        disabled={this.props.disabled}
+        text={String(this.props.thresholds.length)}
+      />
+    );
+
+    return (
+      <DropdownTrigger
+        className={cs.dropdownTrigger}
+        label={this.label}
+        value={label}
+        rounded
+      />
+    );
   }
 
   render() {
     return (
-      <Popup
-        trigger={
-          <ThresholdFilterDropdownLabel
-            popupIsOpen={this.state.popupIsOpen}
-            disabled={this.props.disabled}
-            label={this.label}
-            count={this.state.thresholds.length}
-          />
-        }
-        content={
-          <div className="container">
-            <Grid verticalAlign="middle" columns="equal">
-              {this.state.thresholds.map((threshold, idx) => (
-                <ThresholdFilter
-                  key={idx}
-                  metrics={this.metrics}
-                  operators={this.operators}
-                  threshold={threshold}
-                  onChange={threshold =>
-                    this.handleThresholdChange(idx, threshold)
-                  }
-                  onRemove={() => {
-                    this.handleThresholdRemove(idx);
-                  }}
-                />
-              ))}
-              <Grid.Row className="threshold-actions">
-                <Grid.Column>
-                  <div
-                    className="add-threshold-link"
-                    onClick={this.handleAddThresholdItem.bind(this)}
-                  >
-                    + Add a threshold
-                  </div>
-                </Grid.Column>
-              </Grid.Row>
-              <Grid.Row className="threshold-buttons">
-                <Grid.Column>
-                  <PrimaryButton
-                    text="Apply"
-                    onClick={this.handleApply.bind(this)}
-                  />
-                </Grid.Column>
-              </Grid.Row>
-            </Grid>
-          </div>
-        }
-        basic
-        className="idseq-ui threshold"
-        onOpen={this.handleOpen.bind(this)}
-        onClose={this.handleClose.bind(this)}
+      <BareDropdown
+        trigger={this.renderLabel()}
+        floating
+        fluid
+        arrowInsideTrigger
+        className={cs.thresholdFilterDropdown}
+        onOpen={this.handleOpen}
+        onClose={() => this.handleClose(false)}
         open={this.state.popupIsOpen}
-        position="bottom left"
-        on="click"
-      />
+        closeOnClick={false}
+      >
+        <div className={cs.container}>
+          <Grid verticalAlign="middle" columns="equal">
+            {this.state.thresholds.map((threshold, idx) => (
+              <ThresholdFilter
+                key={idx}
+                metrics={this.metrics}
+                operators={this.operators}
+                threshold={threshold}
+                onChange={threshold =>
+                  this.handleThresholdChange(idx, threshold)
+                }
+                onRemove={() => {
+                  this.handleThresholdRemove(idx);
+                }}
+              />
+            ))}
+            <Grid.Row className={cs.thresholdActions}>
+              <Grid.Column>
+                <span
+                  className={cs.addThresholdLink}
+                  onClick={this.handleAddThresholdItem.bind(this)}
+                >
+                  + Add a threshold
+                </span>
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row className={cs.thresholdButtons}>
+              <Grid.Column>
+                <SecondaryButton
+                  text="Cancel"
+                  onClick={() => this.handleClose(false)}
+                  className={cs.button}
+                />
+                <PrimaryButton
+                  text="Apply"
+                  onClick={() => this.handleClose(true)}
+                  className={cs.button}
+                />
+              </Grid.Column>
+            </Grid.Row>
+          </Grid>
+        </div>
+      </BareDropdown>
     );
   }
 }
@@ -200,23 +226,22 @@ const ThresholdFilter = ({
 }) => {
   let { metric, value, operator } = threshold;
 
-  const handleMetricChange = (_, newMetric) => {
-    onChange({ metric: newMetric.value, value, operator });
+  const handleMetricChange = newMetric => {
+    onChange({ metric: newMetric, value, operator });
   };
 
-  const handleOperatorChange = (_, newOperator) => {
-    onChange({ metric, value, operator: newOperator.value });
+  const handleOperatorChange = newOperator => {
+    onChange({ metric, value, operator: newOperator });
   };
 
-  const handleValueChange = (_, newValue) => {
-    onChange({ metric, value: newValue.value, operator });
+  const handleValueChange = newValue => {
+    onChange({ metric, value: newValue, operator });
   };
 
   return (
-    <Grid.Row className="filter">
+    <Grid.Row className={cs.thresholdFilter}>
       <Grid.Column width={9}>
         <Dropdown
-          className="idseq-ui threshold inner-dropdown"
           placeholder="Metric"
           fluid
           floating
@@ -228,7 +253,6 @@ const ThresholdFilter = ({
       </Grid.Column>
       <Grid.Column>
         <Dropdown
-          className="idseq-ui threshold inner-dropdown"
           placeholder="Op."
           fluid
           floating
@@ -239,16 +263,10 @@ const ThresholdFilter = ({
         />
       </Grid.Column>
       <Grid.Column>
-        <Input
-          fluid
-          focus
-          type="number"
-          onChange={handleValueChange}
-          value={value}
-        />
+        <Input type="number" onChange={handleValueChange} value={value} />
       </Grid.Column>
       <Grid.Column width={1}>
-        <div onClick={onRemove}>
+        <div onClick={onRemove} className={cs.removeIcon}>
           <RemoveIcon />
         </div>
       </Grid.Column>
@@ -264,31 +282,8 @@ ThresholdFilter.propTypes = forbidExtraProps({
   threshold: PropTypes.object
 });
 
-const ThresholdFilterDropdownLabel = props => {
-  let { disabled, label, popupIsOpen, count, ...extraProps } = props;
-  const dropdownClasses = `idseq-ui ui dropdown threshold${
-    popupIsOpen ? " active" : " "
-  }${disabled ? " disabled" : " "}`;
-  return (
-    <div className={dropdownClasses} {...extraProps}>
-      <div className="label-container">
-        <div className="label-container-title">{label}</div>
-        {count > 0 && <Label className="label-container-count">{count}</Label>}
-      </div>
-      <i className="dropdown handle icon" />
-    </div>
-  );
-};
-
 ThresholdFilterDropdown.defaultProps = {
   thresholds: []
 };
-
-ThresholdFilterDropdownLabel.propType = forbidExtraProps({
-  disabled: PropTypes.bool,
-  label: PropTypes.string,
-  popupIsOpen: PropTypes.bool,
-  count: PropTypes.number
-});
 
 export default ThresholdFilterDropdown;

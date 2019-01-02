@@ -87,6 +87,9 @@ class BareDropdown extends React.Component {
       hideArrow,
       menuLabel,
       search,
+      closeOnClick,
+      itemSearchStrings,
+      children,
       ...otherProps
     } = this.props;
 
@@ -100,7 +103,19 @@ class BareDropdown extends React.Component {
 
     // Allows you the flexibility to put stuff OTHER than a menu of options in the dropdown.
     if (!this.props.options && !this.props.items) {
-      return <BaseDropdown {...otherProps} className={dropdownClassName} />;
+      return (
+        <BaseDropdown
+          {...otherProps}
+          className={dropdownClassName}
+          onBlur={e => e.stopPropagation()}
+        >
+          <BaseDropdown.Menu
+            onClick={!closeOnClick ? e => e.stopPropagation() : undefined}
+          >
+            {children}
+          </BaseDropdown.Menu>
+        </BaseDropdown>
+      );
     }
 
     if (this.props.options && this.props.items) {
@@ -115,9 +130,14 @@ class BareDropdown extends React.Component {
     );
 
     return (
-      <BaseDropdown {...baseDropdownProps} className={dropdownClassName}>
+      <BaseDropdown
+        {...baseDropdownProps}
+        className={dropdownClassName}
+        onBlur={e => e.stopPropagation()}
+      >
         <BaseDropdown.Menu
           className={cx(cs.menu, (menuLabel || search) && cs.extraPadding)}
+          onClick={!closeOnClick ? e => e.stopPropagation() : undefined}
         >
           {menuLabel && <div className={cs.menuLabel}>{menuLabel}</div>}
           {search && (
@@ -144,34 +164,51 @@ class BareDropdown extends React.Component {
 }
 
 BareDropdown.propTypes = forbidExtraProps({
-  trigger: PropTypes.node.isRequired,
+  // Custom props
+  // whether the arrow should be displayed outside the trigger or inside it.
+  arrowInsideTrigger: PropTypes.bool,
+  hideArrow: PropTypes.bool,
+  menuLabel: PropTypes.string,
+  // whether the dropdown should close when you click on the menu. Useful for custom dropdown menus.
+  closeOnClick: PropTypes.bool,
+  search: PropTypes.bool,
+  // If search is true, and you provide pre-rendered "items" instead of "options",
+  // you must also provide a list of strings to search by.
+  itemSearchStrings: PropTypes.arrayOf(PropTypes.string),
+
+  // Custom props for rendering options
   options: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.any,
       text: PropTypes.string
     })
   ),
-  items: PropTypes.arrayOf(PropTypes.node),
-  // If search is true, and you provide pre-rendered "items" instead of "options", you must also provide a list of strings to search by.
-  itemSearchStrings: PropTypes.arrayOf(PropTypes.string),
   value: PropTypes.any,
   onChange: PropTypes.func,
+
+  // Custom props for rendering items
+  items: PropTypes.arrayOf(PropTypes.node),
+
+  // Props directly passed to semantic-ui.
+  trigger: PropTypes.node.isRequired,
+  onOpen: PropTypes.func,
+  onClose: PropTypes.func,
+  open: PropTypes.bool,
   children: PropTypes.node,
   className: PropTypes.string,
   floating: PropTypes.bool,
-  hideArrow: PropTypes.bool,
   disabled: PropTypes.bool,
   selectOnBlur: PropTypes.bool,
   fluid: PropTypes.bool,
   placeholder: PropTypes.string,
-  arrowInsideTrigger: PropTypes.bool, // whether the arrow should be displayed outside the trigger or inside it.
-  menuLabel: PropTypes.string,
-  search: PropTypes.bool,
   direction: PropTypes.string
 });
 
+BareDropdown.defaultProps = {
+  closeOnClick: true
+};
+
 BareDropdown.Header = BaseDropdown.Header;
-BareDropdown.Menu = BaseDropdown.Menu;
 BareDropdown.Item = BaseDropdown.Item;
 
 export default BareDropdown;
