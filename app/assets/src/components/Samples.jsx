@@ -1869,19 +1869,17 @@ function SampleCardCheckboxes({
           <input
             type="checkbox"
             id={i}
-            onClick={parent.selectSample}
             key={`sample_${sample.db_sample.id}`}
-            data-sample-id={sample.db_sample.id}
             className="filled-in checkbox"
             checked={checked}
             disabled={report_ready != 1}
-          />{" "}
+          />
           <label
             data-checked={checked}
             onClick={parent.selectSample}
             data-sample-id={sample.db_sample.id}
           >
-            {sample_name_info}
+            <div onClick={e => e.stopPropagation()}>{sample_name_info}</div>
           </label>
         </div>
       ) : (
