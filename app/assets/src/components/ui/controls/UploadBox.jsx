@@ -1,8 +1,7 @@
-import Dropzone from "react-dropzone";
 import PropTypes from "prop-types";
 import React from "react";
-import Icon from "../icons/Icon";
 import axios from "axios/index";
+import FilePicker from "./FilePicker";
 
 class UploadBox extends React.Component {
   constructor(props) {
@@ -12,22 +11,6 @@ class UploadBox extends React.Component {
       uploadRan: false
     };
   }
-
-  // Handle dropped files being rejected
-  onDropRejected = () => {
-    window.alert(
-      "Invalid file. File size must be under 5GB for local uploads."
-    );
-  };
-
-  // onDrop and fileToUpload can be overridden by props
-  onDrop = accepted => {
-    if (accepted.length > 0) {
-      this.setState({
-        fileToUpload: accepted[0]
-      });
-    }
-  };
 
   uploadFileToURL = (file, url) => {
     const config = {
@@ -47,10 +30,7 @@ class UploadBox extends React.Component {
   };
 
   render() {
-    let fileContent;
-    let className = "idseq-ui upload-box";
-    const fileToUpload = this.props.fileToUpload || this.state.fileToUpload;
-    const onDrop = this.props.onDrop || this.onDrop;
+    const fileToUpload = this.props.fileToUpload;
     const uploadProgress = this.state.uploadProgress;
 
     // Check and start upload
@@ -60,43 +40,13 @@ class UploadBox extends React.Component {
       );
     }
 
-    if (fileToUpload) {
-      fileContent = (
-        <div className="upload-box-file">
-          <div>
-            <Icon name="checkmark" />
-            {fileToUpload.name}
-          </div>
-          {uploadProgress ? (
-            <div className="upload-box-progress">
-              {`${uploadProgress}% uploaded...`}
-            </div>
-          ) : null}
-        </div>
-      );
-      className += " active";
-    } else {
-      fileContent = (
-        <div>
-          <span>Drag and drop a file here, or </span>
-          <span className="upload-box-link">click to use a file browser.</span>
-        </div>
-      );
-    }
-
     return (
-      <Dropzone
-        acceptClassName="accepted"
-        maxSize={5e9}
-        onDrop={onDrop}
-        onDropRejected={this.onDropRejected}
-        className={className}
-      >
-        <div className="upload-box-inside">
-          <div className="upload-box-file-title">{this.props.title}</div>
-          {fileContent}
-        </div>
-      </Dropzone>
+      <FilePicker
+        file={fileToUpload}
+        onChange={this.props.onDrop}
+        title={this.props.title}
+        message={uploadProgress && `${uploadProgress}% uploaded...`}
+      />
     );
   }
 }
