@@ -8,8 +8,7 @@ import ObjectHelper from "../helpers/ObjectHelper";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import Icon from "~ui/icons/Icon";
 import Dropzone from "react-dropzone";
-import { sampleNameFromFileName } from "~utils/sample";
-import { orderBy } from "lodash";
+import { cleanLocalFilePath, sampleNameFromFileName } from "~utils/sample";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -651,6 +650,52 @@ class BulkUploadImport extends React.Component {
     });
 
     console.log(sampleNameToFiles);
+
+    this.localBulkUpload(sampleNameToFiles);
+  };
+
+  // Upload a dict of sample names to input files.
+  localBulkUpload = sampleNameToFiles => {
+    for (const [sampleName, files] of Object.entries(sampleNameToFiles)) {
+      this.createSampleFromLocal(sampleName, files);
+    }
+  };
+
+  createSampleFromLocal = (sampleName, files) => {
+    let inputFiles = [];
+    files.forEach(file => {
+      inputFiles.push({
+        source_type: "local",
+        source: cleanLocalFilePath(file.name),
+        parts: cleanLocalFilePath(file.name)
+      });
+    });
+
+    axios
+      .post("/samples.json", {
+        sample: {
+          name: sampleName,
+          project_name: this.state.project,
+          project_id: this.state.projectId,
+          input_files_attributes: inputFiles,
+          host_genome_id: this.state.hostId,
+          status: "created",
+          client: "web"
+        },
+        authenticity_token: this.csrf
+      })
+      .then(response => {
+        this.uploadLocalFiles(response.data.input_files);
+      })
+      .catch(error => {
+        console.log(error);
+        console.log(error.response.data);
+        // this.setState({
+        //   invalid: true,
+        //   submitting: false,
+        //   errorMessage: this.joinServerError(error.response.data)
+        // });
+      });
   };
 
   renderBulkUploadImportForm() {
