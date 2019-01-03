@@ -371,6 +371,8 @@ class Sample < ApplicationRecord
   def destroy
     TaxonByterange.where(pipeline_run_id: pipeline_run_ids).delete_all
     TaxonCount.where(pipeline_run_id: pipeline_run_ids).delete_all
+    ContigCount.where(pipeline_run_id: pipeline_run_ids).delete_all
+    Contig.where(pipeline_run_id: pipeline_run_ids).delete_all
     super
   end
 
