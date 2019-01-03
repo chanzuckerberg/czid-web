@@ -32,3 +32,11 @@ export const cleanLocalFilePath = name => {
   // Remove ./ and .\ from the start of file paths
   return name.replace(/^\.[\\|/]/, "");
 };
+
+export const sampleNameFromFileName = fname => {
+  let base = baseName(fname);
+  const fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/gim;
+  const readLabel = /_R1.*$|_R2.*$/gi;
+  base = base.replace(fastqLabel, "").replace(readLabel, "");
+  return base;
+};

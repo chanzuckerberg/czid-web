@@ -136,11 +136,15 @@ module SamplesHelper
     entries = s3_output.split("\n").reject { |line| line.include? "Undetermined" }
     samples = {}
     entries.each do |file_name|
+      puts "foobar 2:54pm"
+      puts file_name
       matched_paired = InputFile::BULK_FILE_PAIRED_REGEX.match(file_name)
       matched_single = InputFile::BULK_FILE_SINGLE_REGEX.match(file_name)
       if matched_paired
+        puts "matched pair: " + matched_paired.to_s
         matched = matched_paired
         read_idx = matched[2].to_i - 1
+        puts "read_idx: " + read_idx.to_s
       elsif matched_single
         matched = matched_single
         read_idx = 0

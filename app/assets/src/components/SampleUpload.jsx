@@ -4,7 +4,7 @@ import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
 import ObjectHelper from "../helpers/ObjectHelper";
-import { cleanLocalFilePath, baseName } from "~utils/sample";
+import { cleanLocalFilePath, sampleNameFromFileName } from "~utils/sample";
 import CatIcon from "~ui/icons/CatIcon";
 import ERCCIcon from "~ui/icons/ERCCIcon";
 import HumanIcon from "~ui/icons/HumanIcon";
@@ -553,7 +553,7 @@ class SampleUpload extends React.Component {
       let value = e.target.value.trim();
       if (value.length && value.indexOf("/")) {
         if (!this.refs.sample_name.value.trim().length) {
-          const simplified = this.getSampleNameFromFileName(value);
+          const simplified = sampleNameFromFileName(value);
           this.refs.sample_name.value = simplified;
           this.setState({ sampleName: simplified });
         }
@@ -588,7 +588,7 @@ class SampleUpload extends React.Component {
 
       // Set Sample Name field
       if (!this.state.sampleName) {
-        const simplified = this.getSampleNameFromFileName(sampleName);
+        const simplified = sampleNameFromFileName(sampleName);
         this.refs.sample_name.value = simplified;
         this.setState({ sampleName: simplified });
       }
@@ -721,14 +721,6 @@ class SampleUpload extends React.Component {
           errorMessage: this.joinServerError(error.response.data)
         });
       });
-  };
-
-  getSampleNameFromFileName = fname => {
-    let base = baseName(fname);
-    const fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/gim;
-    const readLabel = /_R1.*$|_R2.*$/gi;
-    base = base.replace(fastqLabel, "").replace(readLabel, "");
-    return base;
   };
 
   renderSampleForm(updateExistingSample = false) {
