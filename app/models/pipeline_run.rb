@@ -29,7 +29,7 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :contig_counts
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
-  MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
+  MAX_INPUT_FRAGMENTS = 1_000_000_000 # max fragments going into the pipeline
   ADAPTER_SEQUENCES = { "single-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-SE.fasta",
                         "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta" }.freeze
 
