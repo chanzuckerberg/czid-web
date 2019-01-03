@@ -25,21 +25,18 @@ class PipelineVersionSelect extends React.Component {
       </span>
     );
 
+    const options = otherVersions.map(version => ({
+      text: `Pipeline v${version}`,
+      value: version
+    }));
+
     return (
-      <BareDropdown trigger={trigger} className={cs.pipelineVersionDropdown}>
-        <BareDropdown.Menu>
-          {otherVersions.map(version => {
-            return (
-              <BareDropdown.Item
-                onClick={() => this.props.onPipelineVersionSelect(version)}
-                key={version}
-              >
-                {"Pipeline v" + version}
-              </BareDropdown.Item>
-            );
-          })}
-        </BareDropdown.Menu>
-      </BareDropdown>
+      <BareDropdown
+        trigger={trigger}
+        className={cs.pipelineVersionDropdown}
+        options={options}
+        onChange={this.props.onPipelineVersionSelect}
+      />
     );
   };
 

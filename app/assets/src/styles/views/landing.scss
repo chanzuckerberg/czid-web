@@ -1,7 +1,6 @@
 @import "../themes/colors";
 
 .sign-in {
-  float: right;
   margin-top: 0.4rem;
   margin-right: 0.75rem;
 }
@@ -10,7 +9,6 @@
   @media screen and (max-width: 768px) {
     display: none;
   }
-  float: right;
   margin-top: 1.1rem;
   margin-right: 0.9rem;
   color: white;
@@ -21,12 +19,9 @@
 }
 
 .alert-browser-support {
-  color: $light-grey;
-  float: right;
+  color: $medium-grey;
   margin-right: 0.75rem;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
+  margin-top: 15px;
 
   .browser-name {
     font-weight: 700;

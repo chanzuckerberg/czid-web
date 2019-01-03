@@ -84,13 +84,7 @@ class Landing extends React.Component {
               </span>
             </a>
           </div>
-          <div className="sign-in">
-            <TransparentButton
-              text="Sign In"
-              onClick={signInLink}
-              disabled={!this.props.browserInfo.supported}
-            />
-          </div>
+          <div className="fill" />
           <div className="hiring-ad">
             {"Join our team! We're hiring "}
             <a href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/1342063">
@@ -102,7 +96,15 @@ class Landing extends React.Component {
             </a>
             !
           </div>
-          {this.props.browserInfo.supported || (
+          {this.props.browserInfo.supported ? (
+            <div className="sign-in">
+              <TransparentButton
+                text="Sign In"
+                onClick={signInLink}
+                disabled={!this.props.browserInfo.supported}
+              />
+            </div>
+          ) : (
             <div className="alert-browser-support">
               {this.props.browserInfo.browser} is not currently supported.
               Please sign in from a different browser.

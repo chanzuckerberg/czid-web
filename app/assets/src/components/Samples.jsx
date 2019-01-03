@@ -793,9 +793,10 @@ class Samples extends React.Component {
   selectSample(e) {
     let sampleId = parseInt(e.target.getAttribute("data-sample-id"));
 
-    const sampleList = e.target.checked
-      ? union(this.state.selectedSampleIds, [+sampleId])
-      : difference(this.state.selectedSampleIds, [+sampleId]);
+    const sampleList =
+      e.target.getAttribute("data-checked") === "false"
+        ? union(this.state.selectedSampleIds, [+sampleId])
+        : difference(this.state.selectedSampleIds, [+sampleId]);
 
     // update the state with the new array of options
     this.setState({
@@ -1859,6 +1860,8 @@ function SampleCardCheckboxes({
   i,
   parent
 }) {
+  const checked =
+    parent.state.selectedSampleIds.indexOf(sample.db_sample.id) >= 0;
   return (
     <li className="check-box-container">
       {parent.state.displaySelectSamples ? (
@@ -1866,16 +1869,18 @@ function SampleCardCheckboxes({
           <input
             type="checkbox"
             id={i}
-            onClick={parent.selectSample}
             key={`sample_${sample.db_sample.id}`}
-            data-sample-id={sample.db_sample.id}
             className="filled-in checkbox"
-            checked={
-              parent.state.selectedSampleIds.indexOf(sample.db_sample.id) >= 0
-            }
+            checked={checked}
             disabled={report_ready != 1}
-          />{" "}
-          <label htmlFor={i}>{sample_name_info}</label>
+          />
+          <label
+            data-checked={checked}
+            onClick={parent.selectSample}
+            data-sample-id={sample.db_sample.id}
+          >
+            <div onClick={e => e.stopPropagation()}>{sample_name_info}</div>
+          </label>
         </div>
       ) : (
         sample_name_info
