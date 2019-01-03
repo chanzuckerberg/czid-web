@@ -8,7 +8,8 @@ import ObjectHelper from "../helpers/ObjectHelper";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import Icon from "~ui/icons/Icon";
 import Dropzone from "react-dropzone";
-import { cleanLocalFilePath, sampleNameFromFileName } from "~utils/sample";
+import { sampleNameFromFileName } from "~utils/sample";
+import { createSampleFromLocal } from "~/api";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -657,49 +658,16 @@ class BulkUploadImport extends React.Component {
   // Upload a dict of sample names to input files.
   localBulkUpload = sampleNameToFiles => {
     for (const [sampleName, files] of Object.entries(sampleNameToFiles)) {
-      this.createSampleFromLocal(sampleName, files);
+      createSampleFromLocal(
+        sampleName,
+        files,
+        this.state.project,
+        this.state.projectId,
+        this.state.hostId
+      ).then(response => {
+        console.log(response);
+      });
     }
-  };
-
-  createSampleFromLocal = (sampleName, localFiles) => {
-    let fileAttributes = [];
-    localFiles.forEach(file => {
-      fileAttributes.push({
-        source_type: "local",
-        source: cleanLocalFilePath(file.name),
-        parts: cleanLocalFilePath(file.name)
-      });
-    });
-
-    axios
-      .post("/samples.json", {
-        sample: {
-          name: sampleName,
-          project_name: this.state.project,
-          project_id: this.state.projectId,
-          input_files_attributes: fileAttributes,
-          host_genome_id: this.state.hostId,
-          status: "created",
-          client: "web"
-        },
-        authenticity_token: this.csrf
-      })
-      .then(response => {
-        localFiles.map((file, i) => {
-          const url = response.data.input_files[i].presigned_url;
-          this.uploadFileToURL(file, url);
-        });
-      })
-      .catch(error => {
-        console.log("error:", fileAttributes, localFiles);
-        console.log(error);
-        console.log(error.response && error.response.data);
-        // this.setState({
-        //   invalid: true,
-        //   submitting: false,
-        //   errorMessage: this.joinServerError(error.response.data)
-        // });
-      });
   };
 
   uploadFileToURL = (file, url) => {

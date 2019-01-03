@@ -33,8 +33,7 @@ import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
 import LoadingLabel from "./ui/labels/LoadingLabel";
 import HoverActions from "./views/report/ReportTable/HoverActions";
-import { getSampleReportInfo } from "~/api";
-import { getSummaryContigCounts } from "../api";
+import { getSampleReportInfo, getSummaryContigCounts } from "~/api";
 import { pipelineVersionHasAssembly } from "./utils/sample";
 
 const DEFAULT_MIN_CONTIG_SIZE = 4;
