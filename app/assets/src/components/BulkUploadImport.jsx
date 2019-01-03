@@ -8,6 +8,8 @@ import ObjectHelper from "../helpers/ObjectHelper";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import Icon from "~ui/icons/Icon";
 import Dropzone from "react-dropzone";
+import { sampleNameFromFileName } from "~utils/sample";
+import { orderBy } from "lodash";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -628,6 +630,29 @@ class BulkUploadImport extends React.Component {
     );
   }
 
+  onDrop = (acceptedFiles, rejectedFiles) => {
+    console.log(acceptedFiles);
+    console.log(rejectedFiles);
+
+    let sampleNameToFiles = {};
+
+    acceptedFiles.forEach(file => {
+      const sampleName = sampleNameFromFileName(file.name);
+      if (sampleName in sampleNameToFiles) {
+        sampleNameToFiles[sampleName].push(file);
+        // Make sure R1 before R2.
+        sampleNameToFiles[sampleName] = ObjectHelper.sortByKey(
+          sampleNameToFiles[sampleName],
+          "name"
+        );
+      } else {
+        sampleNameToFiles[sampleName] = [file];
+      }
+    });
+
+    console.log(sampleNameToFiles);
+  };
+
   renderBulkUploadImportForm() {
     const termsBlurb = (
       <div className="consent-blurb">
@@ -710,12 +735,12 @@ class BulkUploadImport extends React.Component {
           <Dropzone
             acceptClassName="accepted"
             maxSize={5e9}
-            // onDrop={}
+            onDrop={this.onDrop}
             onDropRejected={this.onDropRejected}
             className={"idseq-ui upload-box"}
           >
             <div className="upload-box-inside">
-              <div className="upload-box-file-title">{this.props.title}</div>
+              {/*<div className="upload-box-file-title">{this.props.title}</div>*/}
               <div>
                 <span>Drag and drop your files here, or </span>
                 <span className="upload-box-link">
