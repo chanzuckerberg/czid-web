@@ -639,11 +639,11 @@ class BulkUploadImport extends React.Component {
       const sampleName = sampleNameFromFileName(file.name);
       if (sampleName in sampleNameToFiles) {
         sampleNameToFiles[sampleName].push(file);
-        // Make sure R1 before R2.
+        // Make sure R1 comes before R2 and there are at most 2 files.
         sampleNameToFiles[sampleName] = ObjectHelper.sortByKey(
           sampleNameToFiles[sampleName],
           "name"
-        );
+        ).slice(0, 2);
       } else {
         sampleNameToFiles[sampleName] = [file];
       }
@@ -661,10 +661,10 @@ class BulkUploadImport extends React.Component {
     }
   };
 
-  createSampleFromLocal = (sampleName, files) => {
-    let inputFiles = [];
-    files.forEach(file => {
-      inputFiles.push({
+  createSampleFromLocal = (sampleName, localFiles) => {
+    let fileAttributes = [];
+    localFiles.forEach(file => {
+      fileAttributes.push({
         source_type: "local",
         source: cleanLocalFilePath(file.name),
         parts: cleanLocalFilePath(file.name)
@@ -677,7 +677,7 @@ class BulkUploadImport extends React.Component {
           name: sampleName,
           project_name: this.state.project,
           project_id: this.state.projectId,
-          input_files_attributes: inputFiles,
+          input_files_attributes: fileAttributes,
           host_genome_id: this.state.hostId,
           status: "created",
           client: "web"
@@ -685,16 +685,37 @@ class BulkUploadImport extends React.Component {
         authenticity_token: this.csrf
       })
       .then(response => {
-        this.uploadLocalFiles(response.data.input_files);
+        localFiles.map((file, i) => {
+          const url = response.data.input_files[i].presigned_url;
+          this.uploadFileToURL(file, url);
+        });
       })
       .catch(error => {
+        console.log("error:", fileAttributes, localFiles);
         console.log(error);
-        console.log(error.response.data);
+        console.log(error.response && error.response.data);
         // this.setState({
         //   invalid: true,
         //   submitting: false,
         //   errorMessage: this.joinServerError(error.response.data)
         // });
+      });
+  };
+
+  uploadFileToURL = (file, url) => {
+    const config = {
+      onUploadProgress: e => {
+        const percent = Math.round(e.loaded * 100 / e.total);
+        console.log(file.name, percent);
+      }
+    };
+    axios
+      .put(url, file, config)
+      .then(() => {
+        console.log(file, "DONE");
+      })
+      .catch(err => {
+        console.log(file, err);
       });
   };
 
