@@ -14,7 +14,11 @@ import MouseIcon from "~ui/icons/MouseIcon";
 import TickIcon from "~ui/icons/TickIcon";
 import UploadBox from "~ui/controls/UploadBox";
 import { Menu, MenuItem } from "~ui/controls/Menu";
+<<<<<<< HEAD
 import { createSample } from "~/api";
+=======
+import { createSampleFromLocal } from "~/api";
+>>>>>>> Some clean up
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -153,7 +157,11 @@ class SampleUpload extends React.Component {
     this.clearError();
     if (!this.isFormInvalid()) {
       if (this.state.localUploadMode) {
+<<<<<<< HEAD
         this.uploadSampleFromLocal();
+=======
+        this.prepareAndCreateSampleFromLocal();
+>>>>>>> Some clean up
       } else {
         this.uploadSampleFromRemote();
       }
@@ -684,11 +692,16 @@ class SampleUpload extends React.Component {
     }
   };
 
+<<<<<<< HEAD
   uploadSampleFromLocal = () => {
+=======
+  prepareAndCreateSampleFromLocal = () => {
+>>>>>>> Some clean up
     this.setState({
       submitting: true
     });
 
+<<<<<<< HEAD
     createSample(
       this.state.sampleName,
       this.state.selectedProject.trim(),
@@ -696,6 +709,14 @@ class SampleUpload extends React.Component {
       this.state.localFilesToUpload,
       "local",
       this.state.selectedResultPath,
+=======
+    createSampleFromLocal(
+      this.state.sampleName,
+      this.state.localFilesToUpload,
+      this.state.selectedProject.trim(),
+      this.state.selectedPId,
+      this.state.selectedHostGenomeId,
+>>>>>>> Some clean up
       this.state.selectedAlignmentConfigName,
       this.state.selectedBranch,
       this.state.selectedDagVars,

@@ -10,6 +10,8 @@ import Icon from "~ui/icons/Icon";
 import Dropzone from "react-dropzone";
 import { sampleNameFromFileName } from "~utils/sample";
 import { createSampleFromLocal } from "~/api";
+import cx from "classnames";
+import cs from "~ui/controls/file_picker.scss";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -664,9 +666,16 @@ class BulkUploadImport extends React.Component {
         this.state.project,
         this.state.projectId,
         this.state.hostId
-      ).then(response => {
-        console.log(response);
-      });
+      )
+        .then(response => {
+          files.map((file, i) => {
+            const url = response.data.input_files[i].presigned_url;
+            this.uploadFileToURL(file, url);
+          });
+        })
+        .catch(error => {
+          console.log("err here:", error.response.data);
+        });
     }
   };
 
@@ -771,7 +780,7 @@ class BulkUploadImport extends React.Component {
             maxSize={5e9}
             onDrop={this.onDrop}
             onDropRejected={this.onDropRejected}
-            className={"idseq-ui upload-box"}
+            className={cx(cs.filePicker)}
           >
             <div className="upload-box-inside">
               {/*<div className="upload-box-file-title">{this.props.title}</div>*/}
