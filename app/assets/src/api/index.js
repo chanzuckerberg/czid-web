@@ -82,7 +82,10 @@ const createSampleFromLocal = (
   localFiles,
   projectName,
   projectId,
-  hostId
+  hostId,
+  alignmentConfig,
+  pipelineBranch,
+  dagVariables
 ) =>
   new Promise((resolve, reject) => {
     const fileAttributes = Array.from(localFiles, file => {
@@ -103,7 +106,12 @@ const createSampleFromLocal = (
           input_files_attributes: fileAttributes,
           host_genome_id: hostId,
           status: "created",
-          client: "web"
+          client: "web",
+
+          // Admin options
+          alignment_config_name: alignmentConfig,
+          pipeline_branch: pipelineBranch,
+          dag_vars: dagVariables
         },
         authenticity_token: document.getElementsByName("csrf-token")[0].content
       })

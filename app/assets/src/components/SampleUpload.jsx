@@ -14,6 +14,7 @@ import MouseIcon from "~ui/icons/MouseIcon";
 import TickIcon from "~ui/icons/TickIcon";
 import UploadBox from "~ui/controls/UploadBox";
 import { Menu, MenuItem } from "~ui/controls/Menu";
+import { createSampleFromLocal } from "~/api";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -149,7 +150,7 @@ class SampleUpload extends React.Component {
     this.clearError();
     if (!this.isFormInvalid()) {
       if (this.state.localUploadMode) {
-        this.createSampleFromLocal();
+        this.prepareAndCreateSampleFromLocal();
       } else {
         this.createSampleFromRemote();
       }
@@ -675,39 +676,21 @@ class SampleUpload extends React.Component {
     }
   };
 
-  createSampleFromLocal = () => {
+  prepareAndCreateSampleFromLocal = () => {
     this.setState({
       submitting: true
     });
-    let inputFilesAttributes = [];
-    this.state.localFilesToUpload.forEach(file => {
-      inputFilesAttributes.push({
-        source_type: "local",
-        source: cleanLocalFilePath(file.name),
-        parts: cleanLocalFilePath(file.name)
-      });
-    });
 
-    axios
-      .post("/samples.json", {
-        sample: {
-          name: this.state.sampleName,
-          project_name: this.state.selectedProject.trim(),
-          project_id: this.state.selectedPId,
-          input_files_attributes: inputFilesAttributes,
-          host_genome_id: this.state.selectedHostGenomeId,
-
-          // Admin options
-          s3_preload_result_path: this.userDetails.admin
-            ? this.refs.s3_preload_result_path.value.trim()
-            : "",
-          alignment_config_name: this.state.selectedAlignmentConfigName,
-          pipeline_branch: this.state.selectedBranch,
-          status: "created",
-          client: "web"
-        },
-        authenticity_token: this.csrf
-      })
+    createSampleFromLocal(
+      this.state.sampleName,
+      this.state.localFilesToUpload,
+      this.state.selectedProject.trim(),
+      this.state.selectedPId,
+      this.state.selectedHostGenomeId,
+      this.state.selectedAlignmentConfigName,
+      this.state.selectedBranch,
+      this.state.selectedDagVars
+    )
       .then(response => {
         this.setState({
           id: response.data.id
