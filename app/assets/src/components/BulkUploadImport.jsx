@@ -660,7 +660,13 @@ class BulkUploadImport extends React.Component {
   // Upload a dict of sample names to input files.
   bulkUploadLocal = sampleNameToFiles => {
     for (const [sampleName, files] of Object.entries(sampleNameToFiles)) {
-      createSample(sampleName, files, this.state.project, this.state.hostId)
+      createSample(
+        sampleName,
+        this.state.project,
+        this.state.hostId,
+        files,
+        "local"
+      )
         .then(response => {
           files.map((file, i) => {
             const url = response.data.input_files[i].presigned_url;
