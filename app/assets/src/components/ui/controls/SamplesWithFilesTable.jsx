@@ -2,18 +2,22 @@ import React from "react";
 import PropTypes from "prop-types";
 import DataTable from "../../visualizations/table/DataTable";
 
-class SamplesAndFilesTable extends React.Component {
+class SamplesWithFilesTable extends React.Component {
   render() {
-    const { samplesWithFilesList } = this.props;
+    const { samplesWithFilesData } = this.props;
 
-    if (samplesWithFilesList) {
+    if (samplesWithFilesData) {
       return (
         <div>
-          something here
           <DataTable
-            headers={{ sampleName: "Sample Name", files: "Files" }}
-            columns={["sampleName", "files"]}
-            data={samplesWithFilesList}
+            headers={{
+              progress: "",
+              sampleName: "Sample Name",
+              files: "Files",
+              deleteButton: ""
+            }}
+            columns={["progress", "sampleName", "files", "deleteButton"]}
+            data={samplesWithFilesData}
           />
         </div>
       );
@@ -23,7 +27,7 @@ class SamplesAndFilesTable extends React.Component {
   }
 }
 
-SamplesAndFilesTable.propTypes = {
+SamplesWithFilesTable.propTypes = {
   // Ex: [
   //       { RR004_water_2_S23: [File, File] },
   //       { RR007_water_2_S23: [File, File] }
@@ -43,4 +47,4 @@ SamplesAndFilesTable.propTypes = {
   // ).isRequired
 };
 
-export default SamplesAndFilesTable;
+export default SamplesWithFilesTable;

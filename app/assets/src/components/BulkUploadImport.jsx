@@ -10,7 +10,8 @@ import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName } from "~utils/sample";
 import { createSample } from "~/api";
 import FilePicker from "~ui/controls/FilePicker";
-import SamplesAndFilesTable from "./ui/controls/SamplesAndFilesTable";
+import SamplesWithFilesTable from "./ui/controls/SamplesWithFilesTable";
+import { merge, getOr } from "lodash/fp";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -632,9 +633,6 @@ class BulkUploadImport extends React.Component {
   }
 
   onDrop = (acceptedFiles, rejectedFiles) => {
-    console.log(acceptedFiles);
-    console.log(rejectedFiles);
-
     let sampleNamesToFiles = {};
 
     acceptedFiles.forEach(file => {
@@ -651,25 +649,26 @@ class BulkUploadImport extends React.Component {
       }
     });
 
-    let samplesWithFilesList = [];
+    // Prepare the sample and file data for the data table
+    let samplesWithFilesData = [];
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
       const entry = {
         sampleName: sampleName,
         files: (
-          <div>
+          <span>
             <div>{files[0].name}</div>
             <div>{files[1].name}</div>
-          </div>
-        )
+          </span>
+        ),
+        deleteButton: "X",
+        progress: getOr(0, this.state, `sampleNamesToProgress.${sampleName}`)
       };
-      samplesWithFilesList.push(entry);
+      samplesWithFilesData.push(entry);
     }
 
-    console.log(samplesWithFilesList);
+    this.setState({ samplesWithFilesData });
 
-    this.setState({ samplesWithFilesList });
-
-    // this.bulkUploadLocal(sampleNamesToFiles);
+    this.bulkUploadLocal(sampleNamesToFiles);
   };
 
   // Upload a dict of sample names to input files.
@@ -685,7 +684,7 @@ class BulkUploadImport extends React.Component {
         .then(response => {
           files.map((file, i) => {
             const url = response.data.input_files[i].presigned_url;
-            this.uploadFileToURL(file, url);
+            this.uploadFileToURL(sampleName, file, url);
           });
         })
         .catch(error => {
@@ -694,10 +693,18 @@ class BulkUploadImport extends React.Component {
     }
   };
 
-  uploadFileToURL = (file, url) => {
+  uploadFileToURL = (sampleName, file, url) => {
     const config = {
       onUploadProgress: e => {
         const percent = Math.round(e.loaded * 100 / e.total);
+
+        let cur = {};
+        cur[sampleName] = percent;
+        const newState = merge(this.state, {
+          sampleNamesToProgress: merge(this.state.sampleNamesToProgress, cur)
+        });
+        this.setState(newState);
+
         console.log(file.name, percent);
       }
     };
@@ -797,8 +804,8 @@ class BulkUploadImport extends React.Component {
             multiFile={true}
           />
         </div>
-        <SamplesAndFilesTable
-          samplesWithFilesList={this.state.samplesWithFilesList}
+        <SamplesWithFilesTable
+          samplesWithFilesData={this.state.samplesWithFilesData}
         />
       </div>
     );
