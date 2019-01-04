@@ -655,7 +655,12 @@ class BulkUploadImport extends React.Component {
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
       const entry = {
         sampleName: sampleName,
-        files: Array.from(files, f => f.name)
+        files: (
+          <div>
+            <div>{files[0].name}</div>
+            <div>{files[1].name}</div>
+          </div>
+        )
       };
       samplesWithFilesList.push(entry);
     }
