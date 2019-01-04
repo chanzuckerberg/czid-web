@@ -14,11 +14,7 @@ import MouseIcon from "~ui/icons/MouseIcon";
 import TickIcon from "~ui/icons/TickIcon";
 import UploadBox from "~ui/controls/UploadBox";
 import { Menu, MenuItem } from "~ui/controls/Menu";
-<<<<<<< HEAD
 import { createSample } from "~/api";
-=======
-import { createSampleFromLocal } from "~/api";
->>>>>>> Some clean up
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -79,14 +75,14 @@ class SampleUpload extends React.Component {
     this.firstInput =
       this.selected.inputFiles.length && this.selected.inputFiles[0]
         ? this.selected.inputFiles[0].source === null
-          ? ""
-          : this.selected.inputFiles[0].source
+        ? ""
+        : this.selected.inputFiles[0].source
         : "";
     this.secondInput =
       this.selected.inputFiles.length && this.selected.inputFiles[1]
         ? this.selected.inputFiles[1].source === null
-          ? ""
-          : this.selected.inputFiles[1].source
+        ? ""
+        : this.selected.inputFiles[1].source
         : "";
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.state = {
@@ -157,11 +153,7 @@ class SampleUpload extends React.Component {
     this.clearError();
     if (!this.isFormInvalid()) {
       if (this.state.localUploadMode) {
-<<<<<<< HEAD
         this.uploadSampleFromLocal();
-=======
-        this.prepareAndCreateSampleFromLocal();
->>>>>>> Some clean up
       } else {
         this.uploadSampleFromRemote();
       }
@@ -655,10 +647,10 @@ class SampleUpload extends React.Component {
       submitting: false,
       invalid: true,
       errorMessage:
-        `Upload of ${
-          file.name
+      `Upload of ${
+        file.name
         } failed for some reason. Please delete the created sample and try again or ask us our team for help. ` +
-        err
+      err
     });
   };
 
@@ -692,16 +684,11 @@ class SampleUpload extends React.Component {
     }
   };
 
-<<<<<<< HEAD
   uploadSampleFromLocal = () => {
-=======
-  prepareAndCreateSampleFromLocal = () => {
->>>>>>> Some clean up
     this.setState({
       submitting: true
     });
 
-<<<<<<< HEAD
     createSample(
       this.state.sampleName,
       this.state.selectedProject.trim(),
@@ -709,14 +696,6 @@ class SampleUpload extends React.Component {
       this.state.localFilesToUpload,
       "local",
       this.state.selectedResultPath,
-=======
-    createSampleFromLocal(
-      this.state.sampleName,
-      this.state.localFilesToUpload,
-      this.state.selectedProject.trim(),
-      this.state.selectedPId,
-      this.state.selectedHostGenomeId,
->>>>>>> Some clean up
       this.state.selectedAlignmentConfigName,
       this.state.selectedBranch,
       this.state.selectedDagVars,
@@ -1098,7 +1077,7 @@ class SampleUpload extends React.Component {
                                 this.state.selectedHostGenome === g.name
                                   ? "active"
                                   : ""
-                              } genome-label`}
+                                } genome-label`}
                               id={g.name}
                               onClick={() =>
                                 this.handleHostChange(g.id, g.name)
@@ -1122,7 +1101,7 @@ class SampleUpload extends React.Component {
                                 this.state.selectedHostGenome === g.name
                                   ? "active"
                                   : ""
-                              } `}
+                                } `}
                               id={g.name}
                               onClick={() =>
                                 this.handleHostChange(g.id, g.name)

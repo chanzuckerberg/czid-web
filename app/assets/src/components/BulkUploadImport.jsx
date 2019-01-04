@@ -9,7 +9,7 @@ import { Menu, MenuItem } from "~ui/controls/Menu";
 import Icon from "~ui/icons/Icon";
 import Dropzone from "react-dropzone";
 import { sampleNameFromFileName } from "~utils/sample";
-import { createSampleFromLocal } from "~/api";
+import { createSample } from "~/api";
 import cx from "classnames";
 import cs from "~ui/controls/file_picker.scss";
 
@@ -654,19 +654,13 @@ class BulkUploadImport extends React.Component {
 
     console.log(sampleNameToFiles);
 
-    this.localBulkUpload(sampleNameToFiles);
+    this.bulkUploadLocal(sampleNameToFiles);
   };
 
   // Upload a dict of sample names to input files.
-  localBulkUpload = sampleNameToFiles => {
+  bulkUploadLocal = sampleNameToFiles => {
     for (const [sampleName, files] of Object.entries(sampleNameToFiles)) {
-      createSampleFromLocal(
-        sampleName,
-        files,
-        this.state.project,
-        this.state.projectId,
-        this.state.hostId
-      )
+      createSample(sampleName, files, this.state.project, this.state.hostId)
         .then(response => {
           files.map((file, i) => {
             const url = response.data.input_files[i].presigned_url;
