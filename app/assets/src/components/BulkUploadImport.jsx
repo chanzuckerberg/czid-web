@@ -5,6 +5,12 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import SampleUpload from "./SampleUpload";
 import ObjectHelper from "../helpers/ObjectHelper";
+import { Menu, MenuItem } from "~ui/controls/Menu";
+import Icon from "~ui/icons/Icon";
+import { sampleNameFromFileName } from "~utils/sample";
+import { createSample } from "~/api";
+import FilePicker from "~ui/controls/FilePicker";
+import SamplesAndFilesTable from "./ui/controls/SamplesAndFilesTable";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -53,7 +59,10 @@ class BulkUploadImport extends React.Component {
       errors: {},
       serverErrors: null,
       publicChecked: false,
-      consentChecked: false
+      consentChecked: false,
+
+      // Local upload fields
+      localUploadMode: false
     };
   }
   componentDidUpdate() {
@@ -622,6 +631,72 @@ class BulkUploadImport extends React.Component {
     );
   }
 
+  onDrop = (acceptedFiles, rejectedFiles) => {
+    console.log(acceptedFiles);
+    console.log(rejectedFiles);
+
+    let sampleNamesToFiles = {};
+
+    acceptedFiles.forEach(file => {
+      const sampleName = sampleNameFromFileName(file.name);
+      if (sampleName in sampleNamesToFiles) {
+        sampleNamesToFiles[sampleName].push(file);
+        // Make sure R1 comes before R2 and there are at most 2 files.
+        sampleNamesToFiles[sampleName] = ObjectHelper.sortByKey(
+          sampleNamesToFiles[sampleName],
+          "name"
+        ).slice(0, 2);
+      } else {
+        sampleNamesToFiles[sampleName] = [file];
+      }
+    });
+
+    console.log(sampleNamesToFiles);
+
+    this.setState({ sampleNamesToFiles });
+
+    // this.bulkUploadLocal(sampleNamesToFiles);
+  };
+
+  // Upload a dict of sample names to input files.
+  bulkUploadLocal = sampleNamesToFiles => {
+    for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
+      createSample(
+        sampleName,
+        this.state.project,
+        this.state.hostId,
+        files,
+        "local"
+      )
+        .then(response => {
+          files.map((file, i) => {
+            const url = response.data.input_files[i].presigned_url;
+            this.uploadFileToURL(file, url);
+          });
+        })
+        .catch(error => {
+          console.log("err here:", error.response.data);
+        });
+    }
+  };
+
+  uploadFileToURL = (file, url) => {
+    const config = {
+      onUploadProgress: e => {
+        const percent = Math.round(e.loaded * 100 / e.total);
+        console.log(file.name, percent);
+      }
+    };
+    axios
+      .put(url, file, config)
+      .then(() => {
+        console.log(file, "DONE");
+      })
+      .catch(err => {
+        console.log(file, err);
+      });
+  };
+
   renderBulkUploadImportForm() {
     const termsBlurb = (
       <div className="consent-blurb">
@@ -672,6 +747,104 @@ class BulkUploadImport extends React.Component {
         )}
       </button>
     );
+
+    const uploadModeSwitcher = (
+      <div className="menu-container">
+        <Menu compact>
+          <MenuItem
+            active={this.state.localUploadMode}
+            onClick={() => this.setState({ localUploadMode: true })}
+          >
+            <Icon size="large" name="folder open outline" />
+            Upload from Your Computer
+          </MenuItem>
+          <MenuItem
+            active={!this.state.localUploadMode}
+            onClick={() => this.setState({ localUploadMode: false })}
+          >
+            <Icon size="large" name="server" />
+            Upload from S3
+          </MenuItem>
+        </Menu>
+      </div>
+    );
+
+    const localInputFileSection = (
+      <div className="field">
+        <div className="validation-info">
+          Max file size for local uploads: 5GB per file. Accepted formats: fastq
+          (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).
+        </div>
+        <div className="row">
+          <FilePicker
+            title={"Your Input Files:"}
+            onChange={this.onDrop}
+            onRejected={files => console.log("rejected:", files)}
+            multiFile={true}
+          />
+        </div>
+        <SamplesAndFilesTable
+          sampleNamesToFiles={this.state.sampleNamesToFiles}
+        />
+      </div>
+    );
+
+    const remoteInputFileSection = (
+      <div>
+        <div className="field">
+          <div className="row">
+            <div className="col no-padding s12">
+              <div className="field-title">
+                <div className="read-count-label">
+                  Path to Samples Folder<br />
+                  <i className="validation-info">
+                    Files in folder must have one of the following extensions to
+                    be considered:<br />
+                    fastq.gz / fq.gz / fastq / fq / fasta.gz / fa.gz / fasta /
+                    fa.<br />
+                    Paired files must be labeled {'"_R1" or "_R2"'} at the end
+                    of the basename.
+                  </i>
+                </div>
+                <div className="example-link">
+                  Example: s3://your_s3_bucket/rawdata/fastqs
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="row input-row">
+            <div className="col no-padding s12">
+              <input
+                onChange={this.handleBulkPathChange}
+                onFocus={this.clearError}
+                type="text"
+                ref="bulk_path"
+                className="browser-default"
+                placeholder="s3://aws/path-to-sample-folder"
+              />
+              {this.state.errors.bulk_path ? (
+                <div className="field-error">{this.state.errors.bulk_path}</div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        <div className="upload-notes">
+          <div>
+            - Please ensure that IDseq has permissions to read/list your S3
+            bucket or ask our team for help.
+          </div>
+          <div>
+            - Also convert links like
+            "https://s3-us-west-2.amazonaws.com/your_s3_bucket/rawdata/fastqs"
+            to the format "s3://your_s3_bucket/rawdata/fastqs"
+          </div>
+        </div>
+      </div>
+    );
+
+    const inputFilesSection = this.state.localUploadMode
+      ? localInputFileSection
+      : remoteInputFileSection;
 
     return (
       <div id="samplesUploader" className="row">
@@ -896,56 +1069,9 @@ class BulkUploadImport extends React.Component {
                     </div>
                   </div>
                 </div>
-                <div className="field">
-                  <div className="row">
-                    <div className="col no-padding s12">
-                      <div className="field-title">
-                        <div className="read-count-label">
-                          Path to Samples Folder<br />
-                          <i className="validation-info">
-                            Files in folder must have one of the following
-                            extensions to be considered:<br />
-                            fastq.gz / fq.gz / fastq / fq / fasta.gz / fa.gz /
-                            fasta / fa.<br />
-                            Paired files must be labeled {'"_R1" or "_R2"'} at
-                            the end of the basename.
-                          </i>
-                        </div>
-                        <div className="example-link">
-                          Example: s3://your_s3_bucket/rawdata/fastqs
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="row input-row">
-                    <div className="col no-padding s12">
-                      <input
-                        onChange={this.handleBulkPathChange}
-                        onFocus={this.clearError}
-                        type="text"
-                        ref="bulk_path"
-                        className="browser-default"
-                        placeholder="s3://aws/path-to-sample-folder"
-                      />
-                      {this.state.errors.bulk_path ? (
-                        <div className="field-error">
-                          {this.state.errors.bulk_path}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
-                <div className="upload-notes">
-                  <div>
-                    - Please ensure that IDseq has permissions to read/list your
-                    S3 bucket or ask our team for help.
-                  </div>
-                  <div>
-                    - Also convert links like
-                    "https://s3-us-west-2.amazonaws.com/your_s3_bucket/rawdata/fastqs"
-                    to the format "s3://your_s3_bucket/rawdata/fastqs"
-                  </div>
-                </div>
+                <div className="upload-mode-title">Sample Input Files</div>
+                {uploadModeSwitcher}
+                {inputFilesSection}
                 {termsBlurb}
                 <div className="field">
                   <div className="row">
