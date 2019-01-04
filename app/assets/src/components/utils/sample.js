@@ -8,7 +8,7 @@ export const pipelineVersionHasAssembly = pipelineVersion => {
 
 // Get the basename from a file path
 export const baseName = str => {
-  let base = cleanLocalFilePath(str);
+  let base = cleanFilePath(str);
 
   let separator = "/";
   if (base.includes("\\")) {
@@ -26,7 +26,7 @@ export const baseName = str => {
   return base;
 };
 
-export const cleanLocalFilePath = name => {
+export const cleanFilePath = name => {
   name = name.trim();
 
   // Remove ./ and .\ from the start of file paths

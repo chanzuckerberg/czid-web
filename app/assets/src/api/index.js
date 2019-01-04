@@ -1,7 +1,7 @@
 // TODO(mark): Split this file up as more API methods get added.
 import axios from "axios";
 import { toPairs } from "lodash/fp";
-import { cleanLocalFilePath } from "~utils/sample";
+import { cleanFilePath } from "~utils/sample";
 
 const postWithCSRF = async (url, params) => {
   const resp = await axios.post(url, {
@@ -79,17 +79,17 @@ const getSummaryContigCounts = (id, minContigSize) =>
 
 const createSampleFromLocal = (
   sampleName,
-  localFiles,
   projectName,
-  projectId,
   hostId,
+  inputFiles,
+  preloadResultsPath,
   alignmentConfig,
   pipelineBranch,
   dagVariables
 ) =>
   new Promise((resolve, reject) => {
-    const fileAttributes = Array.from(localFiles, file => {
-      const path = cleanLocalFilePath(file.name);
+    const fileAttributes = Array.from(inputFiles, file => {
+      const path = cleanFilePath(file.name);
       return {
         source_type: "local",
         source: path,
@@ -102,13 +102,57 @@ const createSampleFromLocal = (
         sample: {
           name: sampleName,
           project_name: projectName,
-          project_id: projectId,
-          input_files_attributes: fileAttributes,
           host_genome_id: hostId,
+          input_files_attributes: fileAttributes,
           status: "created",
           client: "web",
 
           // Admin options
+          s3_preload_result_path: preloadResultsPath,
+          alignment_config_name: alignmentConfig,
+          pipeline_branch: pipelineBranch,
+          dag_vars: dagVariables
+        },
+        authenticity_token: document.getElementsByName("csrf-token")[0].content
+      })
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
+
+const createSampleFromRemote = (
+  sampleName,
+  projectName,
+  hostId,
+  inputFiles,
+  preloadResultsPath,
+  alignmentConfig,
+  pipelineBranch,
+  dagVariables
+) =>
+  new Promise((resolve, reject) => {
+    const fileAttributes = Array.from(inputFiles, file => {
+      return {
+        source_type: "s3",
+        source: file
+      };
+    });
+
+    axios
+      .post("/samples.json", {
+        sample: {
+          name: sampleName,
+          project_name: projectName,
+          host_genome_id: hostId,
+          input_files_attributes: fileAttributes,
+          status: "created",
+          client: "web",
+
+          // Admin options
+          s3_preload_result_path: preloadResultsPath,
           alignment_config_name: alignmentConfig,
           pipeline_branch: pipelineBranch,
           dag_vars: dagVariables
@@ -135,5 +179,6 @@ export {
   getURLParamString,
   deleteSample,
   getSummaryContigCounts,
-  createSampleFromLocal
+  createSampleFromLocal,
+  createSampleFromRemote
 };
