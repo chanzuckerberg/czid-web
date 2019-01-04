@@ -77,6 +77,8 @@ const getSampleReportInfo = (id, params) =>
 const getSummaryContigCounts = (id, minContigSize) =>
   get(`/samples/${id}/summary_contig_counts?min_contig_size=${minContigSize}`);
 
+// Send a request to create a single sample. Does not upload the files.
+// sourceType can be "local" or "s3".
 const createSample = (
   sampleName,
   projectName,
