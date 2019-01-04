@@ -651,9 +651,18 @@ class BulkUploadImport extends React.Component {
       }
     });
 
-    console.log(sampleNamesToFiles);
+    let samplesWithFilesList = [];
+    for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
+      const entry = {
+        sampleName: sampleName,
+        files: Array.from(files, f => f.name)
+      };
+      samplesWithFilesList.push(entry);
+    }
 
-    this.setState({ sampleNamesToFiles });
+    console.log(samplesWithFilesList);
+
+    this.setState({ samplesWithFilesList });
 
     // this.bulkUploadLocal(sampleNamesToFiles);
   };
@@ -784,7 +793,7 @@ class BulkUploadImport extends React.Component {
           />
         </div>
         <SamplesAndFilesTable
-          sampleNamesToFiles={this.state.sampleNamesToFiles}
+          samplesWithFilesList={this.state.samplesWithFilesList}
         />
       </div>
     );
