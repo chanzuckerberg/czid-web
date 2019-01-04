@@ -77,68 +77,31 @@ const getSampleReportInfo = (id, params) =>
 const getSummaryContigCounts = (id, minContigSize) =>
   get(`/samples/${id}/summary_contig_counts?min_contig_size=${minContigSize}`);
 
-const createSampleFromLocal = (
+const createSample = (
   sampleName,
   projectName,
   hostId,
   inputFiles,
-  preloadResultsPath,
-  alignmentConfig,
-  pipelineBranch,
-  dagVariables
+  sourceType,
+  preloadResultsPath = "",
+  alignmentConfig = "",
+  pipelineBranch = "",
+  dagVariables = ""
 ) =>
   new Promise((resolve, reject) => {
     const fileAttributes = Array.from(inputFiles, file => {
-      const path = cleanFilePath(file.name);
-      return {
-        source_type: "local",
-        source: path,
-        parts: path
-      };
-    });
-
-    axios
-      .post("/samples.json", {
-        sample: {
-          name: sampleName,
-          project_name: projectName,
-          host_genome_id: hostId,
-          input_files_attributes: fileAttributes,
-          status: "created",
-          client: "web",
-
-          // Admin options
-          s3_preload_result_path: preloadResultsPath,
-          alignment_config_name: alignmentConfig,
-          pipeline_branch: pipelineBranch,
-          dag_vars: dagVariables
-        },
-        authenticity_token: document.getElementsByName("csrf-token")[0].content
-      })
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => {
-        reject(error);
-      });
-  });
-
-const createSampleFromRemote = (
-  sampleName,
-  projectName,
-  hostId,
-  inputFiles,
-  preloadResultsPath,
-  alignmentConfig,
-  pipelineBranch,
-  dagVariables
-) =>
-  new Promise((resolve, reject) => {
-    const fileAttributes = Array.from(inputFiles, file => {
-      return {
-        source_type: "s3",
-        source: file
-      };
+      if (sourceType === "local") {
+        return {
+          source_type: sourceType,
+          source: cleanFilePath(file.name),
+          parts: cleanFilePath(file.name)
+        };
+      } else {
+        return {
+          source_type: sourceType,
+          source: file
+        };
+      }
     });
 
     axios
@@ -179,6 +142,5 @@ export {
   getURLParamString,
   deleteSample,
   getSummaryContigCounts,
-  createSampleFromLocal,
-  createSampleFromRemote
+  createSample
 };

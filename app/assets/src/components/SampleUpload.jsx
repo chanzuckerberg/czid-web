@@ -14,7 +14,7 @@ import MouseIcon from "~ui/icons/MouseIcon";
 import TickIcon from "~ui/icons/TickIcon";
 import UploadBox from "~ui/controls/UploadBox";
 import { Menu, MenuItem } from "~ui/controls/Menu";
-import { createSampleFromLocal, createSampleFromRemote } from "~/api";
+import { createSample } from "~/api";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -266,11 +266,12 @@ class SampleUpload extends React.Component {
       this.refs.first_file_source.value.trim(),
       this.refs.second_file_source.value.trim()
     ];
-    createSampleFromRemote(
+    createSample(
       this.state.sampleName,
       this.state.selectedProject.trim(),
       this.state.selectedHostGenomeId,
       inputFiles,
+      "s3",
       this.state.selectedResultPath,
       this.state.selectedAlignmentConfigName,
       this.state.selectedBranch,
@@ -667,11 +668,12 @@ class SampleUpload extends React.Component {
       submitting: true
     });
 
-    createSampleFromLocal(
+    createSample(
       this.state.sampleName,
       this.state.selectedProject.trim(),
       this.state.selectedHostGenomeId,
       this.state.localFilesToUpload,
+      "local",
       this.state.selectedResultPath,
       this.state.selectedAlignmentConfigName,
       this.state.selectedBranch,
