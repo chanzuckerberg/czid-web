@@ -32,6 +32,7 @@ import { getSampleTableData } from "./views/samples/utils";
 // TODO(mark): Convert styles/samples.scss to CSS modules.
 import cs from "./samples.scss";
 import { openUrl } from "./utils/links";
+import { Popup } from "semantic-ui-react";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -1334,9 +1335,17 @@ function SampleNameInfo({ parent, dbSample, uploader }) {
       onClick={e => parent.viewSample(dbSample.id, e)}
       className="sample-name-info"
     >
-      <div className="card-label center-label sample-name bold-label">
-        {dbSample.name}
-      </div>
+      <Popup
+        trigger={
+          <div className="card-label center-label sample-name bold-label">
+            {dbSample.name}
+          </div>
+        }
+        content={dbSample.name}
+        inverted
+        size="mini"
+        wide="very"
+      />
       <div className="card-label author bottom-label">
         <span className="upload-date">
           {moment(dbSample.created_at)
