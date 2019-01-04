@@ -8,7 +8,7 @@ import Materialize from "materialize-css";
 import { intersection, union, difference, map, keyBy, take } from "lodash";
 // TODO(mark): Refactor lodash/fp functions into a file of immutable utilities.
 import { merge, sortBy } from "lodash/fp";
-import { Sidebar, Label, Icon, Modal, Form } from "semantic-ui-react";
+import { Sidebar, Label, Icon, Modal, Form, Popup } from "semantic-ui-react";
 import Nanobar from "nanobar";
 import SortHelper from "./SortHelper";
 import ProjectSelection from "./ProjectSelection";
@@ -32,7 +32,6 @@ import { getSampleTableData } from "./views/samples/utils";
 // TODO(mark): Convert styles/samples.scss to CSS modules.
 import cs from "./samples.scss";
 import { openUrl } from "./utils/links";
-import { Popup } from "semantic-ui-react";
 
 class Samples extends React.Component {
   constructor(props, context) {
