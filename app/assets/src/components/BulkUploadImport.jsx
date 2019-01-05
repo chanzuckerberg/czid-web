@@ -700,12 +700,18 @@ class BulkUploadImport extends React.Component {
       onUploadProgress: e => {
         const percent = Math.round(e.loaded * 100 / e.total);
 
-        let cur = {};
-        cur[sampleName] = percent;
-        const newState = merge(this.state, {
-          sampleNamesToProgress: merge(this.state.sampleNamesToProgress, cur)
-        });
-        this.setState(newState, () => {
+        // let cur = {};
+        // cur[sampleName] = percent;
+        // const newState = merge(this.state, {
+        //   sampleNamesToProgress: merge(this.state.sampleNamesToProgress, cur)
+        // });
+
+        let updatedProgress = Object.assign(
+          {},
+          this.state.sampleNamesToProgress
+        );
+        updatedProgress[sampleName] = percent;
+        this.setState({ sampleNamesToProgress: updatedProgress }, () => {
           console.log("foobar 4:22pm", this.state.sampleNamesToProgress);
           console.log(
             "here it is:",
@@ -716,6 +722,19 @@ class BulkUploadImport extends React.Component {
             this.state.sampleNamesToProgress.RR010_transfusion_DNA_07_S7
           );
         });
+
+        //
+        // this.setState(newState, () => {
+        //   console.log("foobar 4:22pm", this.state.sampleNamesToProgress);
+        //   console.log(
+        //     "here it is:",
+        //     this.state.sampleNamesToProgress["RR010_transfusion_DNA_07_S7"]
+        //   );
+        //   console.log(
+        //     "here it is:",
+        //     this.state.sampleNamesToProgress.RR010_transfusion_DNA_07_S7
+        //   );
+        // });
 
         // console.log(file.name, percent);
       }
