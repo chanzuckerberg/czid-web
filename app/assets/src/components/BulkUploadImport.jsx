@@ -11,7 +11,7 @@ import { sampleNameFromFileName } from "~utils/sample";
 import { createSample } from "~/api";
 import FilePicker from "~ui/controls/FilePicker";
 import SamplesWithFilesTable from "./ui/controls/SamplesWithFilesTable";
-import { merge, getOr } from "lodash/fp";
+import { merge, get } from "lodash/fp";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -661,7 +661,9 @@ class BulkUploadImport extends React.Component {
           </span>
         ),
         deleteButton: "X",
-        progress: getOr(0, this.state, `sampleNamesToProgress.${sampleName}`)
+        progress: this.state.sampleNamesToProgress
+          ? this.state.sampleNamesToProgress["RR010_transfusion_DNA_07_S7"]
+          : 0
       };
       samplesWithFilesData.push(entry);
     }
@@ -703,9 +705,19 @@ class BulkUploadImport extends React.Component {
         const newState = merge(this.state, {
           sampleNamesToProgress: merge(this.state.sampleNamesToProgress, cur)
         });
-        this.setState(newState);
+        this.setState(newState, () => {
+          console.log("foobar 4:22pm", this.state.sampleNamesToProgress);
+          console.log(
+            "here it is:",
+            this.state.sampleNamesToProgress["RR010_transfusion_DNA_07_S7"]
+          );
+          console.log(
+            "here it is:",
+            this.state.sampleNamesToProgress.RR010_transfusion_DNA_07_S7
+          );
+        });
 
-        console.log(file.name, percent);
+        // console.log(file.name, percent);
       }
     };
     axios

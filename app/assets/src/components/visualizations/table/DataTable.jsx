@@ -119,11 +119,6 @@ class DataTable extends React.Component {
         this.state.selectedRows.has(row.__originalIndex)
       );
 
-    console.log("Foobar 2:35pm");
-    console.log(this.props.columns);
-    console.log(this.originalData);
-    console.log(filteredData);
-
     return (
       <table className="idseq-ui data-table">
         <thead>

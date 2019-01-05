@@ -4,6 +4,7 @@ import DataTable from "../../visualizations/table/DataTable";
 
 class SamplesWithFilesTable extends React.Component {
   render() {
+    console.log("table is re-rendering");
     const { samplesWithFilesData } = this.props;
 
     if (samplesWithFilesData) {
