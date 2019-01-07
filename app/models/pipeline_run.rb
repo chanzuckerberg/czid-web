@@ -1235,7 +1235,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def get_summary_contig_counts(min_contig_size)
-    contig_counts.where("count >= #{min_contig_size} and taxid > 0 and contig_name != '*'")
+    contig_counts.where("count >= #{min_contig_size} and contig_name != '*'")
                  .select("taxid, COUNT(1) as contigs, SUM(count) AS contig_reads, count_type")
                  .group(:taxid, :count_type).as_json(except: :id)
   end
