@@ -12,6 +12,7 @@ import { Sidebar, Label, Icon, Modal, Form } from "semantic-ui-react";
 import Nanobar from "nanobar";
 import SortHelper from "./SortHelper";
 import ProjectSelection from "./ProjectSelection";
+import BasicPopup from "./BasicPopup";
 import StringHelper from "../helpers/StringHelper";
 import Cookies from "js-cookie";
 import CompareButton from "./ui/controls/buttons/CompareButton";
@@ -1334,9 +1335,16 @@ function SampleNameInfo({ parent, dbSample, uploader }) {
       onClick={e => parent.viewSample(dbSample.id, e)}
       className="sample-name-info"
     >
-      <div className="card-label center-label sample-name bold-label">
-        {dbSample.name}
-      </div>
+      <BasicPopup
+        trigger={
+          <div className="card-label center-label sample-name bold-label">
+            {dbSample.name}
+          </div>
+        }
+        content={dbSample.name}
+        size="mini"
+        wide="very"
+      />
       <div className="card-label author bottom-label">
         <span className="upload-date">
           {moment(dbSample.created_at)
