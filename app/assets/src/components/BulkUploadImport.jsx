@@ -631,7 +631,8 @@ class BulkUploadImport extends React.Component {
     );
   }
 
-  onDrop = (acceptedFiles, rejectedFiles) => {
+  // Handle file picking. rejectedFiles are handled in onRejected.
+  onDrop = (acceptedFiles, _rejectedFiles) => {
     let sampleNamesToFiles = {};
 
     acceptedFiles.forEach(file => {
@@ -651,14 +652,10 @@ class BulkUploadImport extends React.Component {
     // Prepare the sample and file data for the data table
     let samplesWithFilesData = [];
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
+      const filesCell = <span>{files.map(f => <div>{f.name}</div>)}</span>;
       const entry = {
         sampleName: sampleName,
-        files: (
-          <span>
-            <div>{files[0].name}</div>
-            <div>{files[1].name}</div>
-          </span>
-        ),
+        files: filesCell,
         deleteButton: "X",
         progress: this.state.sampleNamesToProgress
           ? this.state.sampleNamesToProgress["RR010_transfusion_DNA_07_S7"]
@@ -667,7 +664,9 @@ class BulkUploadImport extends React.Component {
       samplesWithFilesData.push(entry);
     }
 
-    this.setState({ samplesWithFilesData });
+    if (samplesWithFilesData.length !== 0) {
+      this.setState({ samplesWithFilesData });
+    }
 
     // this.bulkUploadLocal(sampleNamesToFiles);
   };
@@ -820,6 +819,15 @@ class BulkUploadImport extends React.Component {
       </div>
     );
 
+    const onRejected = files =>
+      window.alert(
+        `${files
+          .map(f => f.name)
+          .join(
+            ", "
+          )} cannot be uploaded. Size must be under 5GB for local uploads. For larger files, please try our CLI.`
+      );
+
     const localInputFileSection = (
       <div className="field">
         <div className="validation-info">
@@ -831,7 +839,7 @@ class BulkUploadImport extends React.Component {
             <FilePicker
               title={"Your Input Files:"}
               onChange={this.onDrop}
-              onRejected={files => console.log("rejected:", files)}
+              onRejected={onRejected}
               multiFile={true}
             />
           </div>

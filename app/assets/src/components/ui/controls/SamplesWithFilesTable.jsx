@@ -1,14 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 import DataTable from "../../visualizations/table/DataTable";
+import { isEmpty } from "lodash/fp";
 
 class SamplesWithFilesTable extends React.Component {
   render() {
-    console.log("table is re-rendering");
     const { samplesWithFilesData } = this.props;
-    console.log(samplesWithFilesData);
 
-    if (samplesWithFilesData) {
+    if (!isEmpty(samplesWithFilesData)) {
       return (
         <div>
           <DataTable
