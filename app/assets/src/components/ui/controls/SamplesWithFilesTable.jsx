@@ -24,7 +24,7 @@ class SamplesWithFilesTable extends React.Component {
         </div>
       );
     } else {
-      return <div>nothing here</div>;
+      return null;
     }
   }
 }

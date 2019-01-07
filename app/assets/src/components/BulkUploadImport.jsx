@@ -11,7 +11,6 @@ import { sampleNameFromFileName } from "~utils/sample";
 import { createSample } from "~/api";
 import FilePicker from "~ui/controls/FilePicker";
 import SamplesWithFilesTable from "./ui/controls/SamplesWithFilesTable";
-import { merge, get } from "lodash/fp";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -670,7 +669,7 @@ class BulkUploadImport extends React.Component {
 
     this.setState({ samplesWithFilesData });
 
-    this.bulkUploadLocal(sampleNamesToFiles);
+    // this.bulkUploadLocal(sampleNamesToFiles);
   };
 
   // Upload a dict of sample names to input files.
@@ -827,17 +826,19 @@ class BulkUploadImport extends React.Component {
           Max file size for local uploads: 5GB per file. Accepted formats: fastq
           (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).
         </div>
-        <div className="row">
-          <FilePicker
-            title={"Your Input Files:"}
-            onChange={this.onDrop}
-            onRejected={files => console.log("rejected:", files)}
-            multiFile={true}
+        <div className="inputFileArea">
+          <div className="filePickerContainer">
+            <FilePicker
+              title={"Your Input Files:"}
+              onChange={this.onDrop}
+              onRejected={files => console.log("rejected:", files)}
+              multiFile={true}
+            />
+          </div>
+          <SamplesWithFilesTable
+            samplesWithFilesData={this.state.samplesWithFilesData}
           />
         </div>
-        <SamplesWithFilesTable
-          samplesWithFilesData={this.state.samplesWithFilesData}
-        />
       </div>
     );
 
