@@ -4,7 +4,7 @@ import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
 import ObjectHelper from "../helpers/ObjectHelper";
-import { cleanLocalFilePath, baseName } from "~utils/sample";
+import { sampleNameFromFileName } from "~utils/sample";
 import CatIcon from "~ui/icons/CatIcon";
 import ERCCIcon from "~ui/icons/ERCCIcon";
 import HumanIcon from "~ui/icons/HumanIcon";
@@ -14,6 +14,7 @@ import MouseIcon from "~ui/icons/MouseIcon";
 import TickIcon from "~ui/icons/TickIcon";
 import UploadBox from "~ui/controls/UploadBox";
 import { Menu, MenuItem } from "~ui/controls/Menu";
+import { createSample } from "~/api";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -149,9 +150,9 @@ class SampleUpload extends React.Component {
     this.clearError();
     if (!this.isFormInvalid()) {
       if (this.state.localUploadMode) {
-        this.createSampleFromLocal();
+        this.uploadSampleFromLocal();
       } else {
-        this.createSampleFromRemote();
+        this.uploadSampleFromRemote();
       }
     }
   }
@@ -256,39 +257,26 @@ class SampleUpload extends React.Component {
     }
   }
 
-  createSampleFromRemote() {
+  uploadSampleFromRemote() {
     this.setState({
       submitting: true
     });
-    axios
-      .post("/samples.json", {
-        sample: {
-          name: this.state.sampleName,
-          project_name: this.state.selectedProject.trim(),
-          project_id: this.state.selectedPId,
-          input_files_attributes: [
-            {
-              source_type: "s3",
-              source: this.refs.first_file_source.value.trim()
-            },
-            {
-              source_type: "s3",
-              source: this.refs.second_file_source.value.trim()
-            }
-          ],
-          s3_preload_result_path: this.userDetails.admin
-            ? this.refs.s3_preload_result_path.value.trim()
-            : "",
-          pipeline_branch: this.state.selectedBranch,
-          dag_vars: this.state.selectedDagVars,
-          host_genome_id: this.state.selectedHostGenomeId,
-          subsample: this.state.omitSubsamplingChecked ? 0 : 1,
-          alignment_config_name: this.state.selectedAlignmentConfigName,
-          status: "created",
-          client: "web"
-        },
-        authenticity_token: this.csrf
-      })
+
+    const inputFiles = [
+      this.refs.first_file_source.value.trim(),
+      this.refs.second_file_source.value.trim()
+    ];
+    createSample(
+      this.state.sampleName,
+      this.state.selectedProject.trim(),
+      this.state.selectedHostGenomeId,
+      inputFiles,
+      "s3",
+      this.state.selectedResultPath,
+      this.state.selectedAlignmentConfigName,
+      this.state.selectedBranch,
+      this.state.selectedDagVars
+    )
       .then(response => {
         this.setState({
           success: true,
@@ -553,7 +541,7 @@ class SampleUpload extends React.Component {
       let value = e.target.value.trim();
       if (value.length && value.indexOf("/")) {
         if (!this.refs.sample_name.value.trim().length) {
-          const simplified = this.getSampleNameFromFileName(value);
+          const simplified = sampleNameFromFileName(value);
           this.refs.sample_name.value = simplified;
           this.setState({ sampleName: simplified });
         }
@@ -588,7 +576,7 @@ class SampleUpload extends React.Component {
 
       // Set Sample Name field
       if (!this.state.sampleName) {
-        const simplified = this.getSampleNameFromFileName(sampleName);
+        const simplified = sampleNameFromFileName(sampleName);
         this.refs.sample_name.value = simplified;
         this.setState({ sampleName: simplified });
       }
@@ -675,39 +663,22 @@ class SampleUpload extends React.Component {
     }
   };
 
-  createSampleFromLocal = () => {
+  uploadSampleFromLocal = () => {
     this.setState({
       submitting: true
     });
-    let inputFilesAttributes = [];
-    this.state.localFilesToUpload.forEach(file => {
-      inputFilesAttributes.push({
-        source_type: "local",
-        source: cleanLocalFilePath(file.name),
-        parts: cleanLocalFilePath(file.name)
-      });
-    });
 
-    axios
-      .post("/samples.json", {
-        sample: {
-          name: this.state.sampleName,
-          project_name: this.state.selectedProject.trim(),
-          project_id: this.state.selectedPId,
-          input_files_attributes: inputFilesAttributes,
-          host_genome_id: this.state.selectedHostGenomeId,
-
-          // Admin options
-          s3_preload_result_path: this.userDetails.admin
-            ? this.refs.s3_preload_result_path.value.trim()
-            : "",
-          alignment_config_name: this.state.selectedAlignmentConfigName,
-          pipeline_branch: this.state.selectedBranch,
-          status: "created",
-          client: "web"
-        },
-        authenticity_token: this.csrf
-      })
+    createSample(
+      this.state.sampleName,
+      this.state.selectedProject.trim(),
+      this.state.selectedHostGenomeId,
+      this.state.localFilesToUpload,
+      "local",
+      this.state.selectedResultPath,
+      this.state.selectedAlignmentConfigName,
+      this.state.selectedBranch,
+      this.state.selectedDagVars
+    )
       .then(response => {
         this.setState({
           id: response.data.id
@@ -721,14 +692,6 @@ class SampleUpload extends React.Component {
           errorMessage: this.joinServerError(error.response.data)
         });
       });
-  };
-
-  getSampleNameFromFileName = fname => {
-    let base = baseName(fname);
-    const fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/gim;
-    const readLabel = /_R1.*$|_R2.*$/gi;
-    base = base.replace(fastqLabel, "").replace(readLabel, "");
-    return base;
   };
 
   renderSampleForm(updateExistingSample = false) {
