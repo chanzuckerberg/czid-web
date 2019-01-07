@@ -13,7 +13,7 @@ BasicPopup.propTypes = {
   wide: PropTypes.string
 };
 
-BasicPopup.propTypes = {
+BasicPopup.defaultProps = {
   size: "tiny"
 };
 
