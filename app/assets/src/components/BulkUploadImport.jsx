@@ -10,7 +10,8 @@ import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName } from "~utils/sample";
 import { createSample } from "~/api";
 import FilePicker from "~ui/controls/FilePicker";
-import SamplesWithFilesTable from "./ui/controls/SamplesWithFilesTable";
+import BulkSampleUploadTable from "./ui/controls/BulkSampleUploadTable";
+import BasicTable from "./visualizations/table/BasicTable";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -649,24 +650,7 @@ class BulkUploadImport extends React.Component {
       }
     });
 
-    // Prepare the sample and file data for the data table
-    let samplesWithFilesData = [];
-    for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
-      const filesCell = <span>{files.map(f => <div>{f.name}</div>)}</span>;
-      const entry = {
-        sampleName: sampleName,
-        files: filesCell,
-        deleteButton: "X",
-        progress: this.state.sampleNamesToProgress
-          ? this.state.sampleNamesToProgress["RR010_transfusion_DNA_07_S7"]
-          : 0
-      };
-      samplesWithFilesData.push(entry);
-    }
-
-    if (samplesWithFilesData.length !== 0) {
-      this.setState({ samplesWithFilesData });
-    }
+    this.setState({ sampleNamesToFiles });
 
     // this.bulkUploadLocal(sampleNamesToFiles);
   };
@@ -843,9 +827,10 @@ class BulkUploadImport extends React.Component {
               multiFile={true}
             />
           </div>
-          <SamplesWithFilesTable
-            samplesWithFilesData={this.state.samplesWithFilesData}
-          />
+          <BasicTable headers={["a", "b", "c"]} />
+          {/*<BulkSampleUploadTable*/}
+          {/*sampleNamesToFiles={this.state.sampleNamesToFiles}*/}
+          {/*/>*/}
         </div>
       </div>
     );
