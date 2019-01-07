@@ -1342,7 +1342,6 @@ function SampleNameInfo({ parent, dbSample, uploader }) {
           </div>
         }
         content={dbSample.name}
-        inverted
         size="mini"
         wide="very"
       />
