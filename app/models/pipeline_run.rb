@@ -1241,7 +1241,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def get_taxid_list_with_contigs(min_contig_size = MIN_CONTIG_SIZE)
-    contig_counts.where("count >= #{min_contig_size} and taxid > 0 and contig_name != '*'").pluck(:taxid).uniq
+    contig_counts.select("taxid, COUNT(1)")
+                 .where("count >= #{min_contig_size} and taxid > 0 and contig_name != '*'")
+                 .group(:taxid)
+                 .pluck(:taxid)
   end
 
   def alignment_output_s3_path
