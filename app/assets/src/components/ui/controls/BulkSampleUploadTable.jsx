@@ -11,29 +11,35 @@ class BulkSampleUploadTable extends React.Component {
 
     if (isEmpty(sampleNamesToFiles)) return null;
 
-    let rows = [];
+    let entries = [];
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
-      const entry = (
-        <tr>
-          <td className={`data-table__data column-name`}>{sampleName}</td>
-          <td className={`data-table__data column-files`}>
-            {files.map(f => <div>{f.name}</div>)}
-          </td>
-        </tr>
-      );
-      rows.push(entry);
+      const filesCell = <span>{files.map(f => <div>{f.name}</div>)}</span>;
+      const entry = {
+        sampleName: sampleName,
+        files: filesCell,
+        deleteButton: "X",
+        progress: 0
+      };
+      entries.push(entry);
     }
 
     return (
-      <table className="idseq-ui data-table">
-        <thead>
-          <tr>
-            <th>Sample Name</th>
-            <th>Files</th>
-          </tr>
-        </thead>
-        <tbody>{rows}</tbody>
-      </table>
+      <div className={cs.samplesWithFilesTable}>
+        <div className={cs.detectedMsg}>
+          These files were detected and matched. Remove files you do not want to
+          upload:
+        </div>
+        <DataTable
+          headers={{
+            progress: "",
+            sampleName: "Sample Name",
+            files: "Files",
+            deleteButton: ""
+          }}
+          columns={["progress", "sampleName", "files", "deleteButton"]}
+          data={entries}
+        />
+      </div>
     );
   }
 }

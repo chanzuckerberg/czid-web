@@ -11,7 +11,6 @@ import { sampleNameFromFileName } from "~utils/sample";
 import { createSample } from "~/api";
 import FilePicker from "~ui/controls/FilePicker";
 import BulkSampleUploadTable from "./ui/controls/BulkSampleUploadTable";
-import BasicTable from "./visualizations/table/BasicTable";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -827,10 +826,9 @@ class BulkUploadImport extends React.Component {
               multiFile={true}
             />
           </div>
-          <BasicTable headers={["a", "b", "c"]} />
-          {/*<BulkSampleUploadTable*/}
-          {/*sampleNamesToFiles={this.state.sampleNamesToFiles}*/}
-          {/*/>*/}
+          <BulkSampleUploadTable
+            sampleNamesToFiles={this.state.sampleNamesToFiles}
+          />
         </div>
       </div>
     );
