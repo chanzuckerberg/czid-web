@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import DataTable from "../../visualizations/table/DataTable";
-import { isEmpty } from "lodash/fp";
+import { isEmpty, get } from "lodash/fp";
 
 class BulkSampleUploadTable extends React.Component {
   render() {
@@ -13,10 +13,11 @@ class BulkSampleUploadTable extends React.Component {
     let entries = [];
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
       let progress;
-      if (!isEmpty(fileNamesToProgress)) {
-        // Take the average % progress for the files.
+      // If the first file has started making progress
+      if (get([files[0].name], fileNamesToProgress)) {
+        // Take the average % progress for the files
         let sum = 0;
-        files.map(f => (sum += fileNamesToProgress[f.name]));
+        files.map(f => (sum += fileNamesToProgress[f.name] || 0));
         progress = Math.round(sum / files.length);
       }
 

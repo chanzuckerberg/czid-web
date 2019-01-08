@@ -782,6 +782,7 @@ class BulkUploadImport extends React.Component {
       </div>
     );
 
+    // onRejected for local uploads
     const onRejected = files =>
       window.alert(
         `${files
@@ -791,6 +792,9 @@ class BulkUploadImport extends React.Component {
           )} cannot be uploaded. Size must be under 5GB for local uploads. For larger files, please try our CLI.`
       );
 
+    // onRemoved for when a user doesn't want to upload a local sample/files
+    const onRemoved = sampleName => {};
+
     const localInputFileSection = (
       <div className="field">
         <div className="validation-info">
@@ -798,7 +802,7 @@ class BulkUploadImport extends React.Component {
           (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).
         </div>
         <div className="inputFileArea">
-          <div className="filePickerContainer">
+          <div className="filePickerArea">
             <FilePicker
               title={"Your Input Files:"}
               onChange={this.onDrop}
@@ -809,6 +813,7 @@ class BulkUploadImport extends React.Component {
           <BulkSampleUploadTable
             sampleNamesToFiles={this.state.sampleNamesToFiles}
             fileNamesToProgress={this.state.fileNamesToProgress}
+            onRemoved={onRemoved}
           />
         </div>
       </div>
