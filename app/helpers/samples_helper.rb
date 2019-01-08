@@ -25,7 +25,7 @@ module SamplesHelper
                         total_reads: pipeline_run ? pipeline_run.total_reads : '',
                         nonhost_reads: pipeline_run ? pipeline_run.adjusted_remaining_reads : '',
                         nonhost_reads_percent: derived_output[:summary_stats] && derived_output[:summary_stats][:percent_remaining] ? derived_output[:summary_stats][:percent_remaining].round(3) : '',
-                        ercc_reads: pipeline_run ? pipeline_run.total_ercc_reads : '',	
+                        total_ercc_reads: pipeline_run ? pipeline_run.total_ercc_reads : '',
                         subsampled_fraction: pipeline_run ? pipeline_run.fraction_subsampled : '',
                         quality_control: derived_output[:summary_stats] && derived_output[:summary_stats][:qc_percent] ? derived_output[:summary_stats][:qc_percent].round(3) : '',
                         compression_ratio: derived_output[:summary_stats] && derived_output[:summary_stats][:compression_ratio] ? derived_output[:summary_stats][:compression_ratio].round(2) : '',
