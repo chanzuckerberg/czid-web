@@ -677,7 +677,9 @@ class BulkUploadImport extends React.Component {
           // Display error message
           this.setState({
             invalid: true,
-            errorMessage: joinServerError(error.response.data)
+            errorMessage: `${
+              this.state.errorMessage
+            }\n${sampleName}: ${joinServerError(error.response.data)}`
           });
         });
     }

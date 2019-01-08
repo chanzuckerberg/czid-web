@@ -24,7 +24,7 @@ class BulkSampleUploadTable extends React.Component {
       const entry = {
         progress: progress,
         sampleName: sampleName,
-        files: <span>{files.map(f => <div>{f.name}</div>)}</span>,
+        files: <div>{files.map(f => <div>{f.name}</div>)}</div>,
         deleteButton: "X"
       };
       entries.push(entry);
