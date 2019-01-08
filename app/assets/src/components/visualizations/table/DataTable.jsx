@@ -24,6 +24,7 @@ class DataTable extends React.Component {
       newState.filter = newFilter;
     }
     if (props.data !== state.originalData) {
+      newState.selectedRows = new Set(this.props.selectedRows || []);
       newState.originalData = props.data;
       newState.indexedData = DataTable.indexData(props.data);
     }
