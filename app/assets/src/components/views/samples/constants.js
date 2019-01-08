@@ -9,6 +9,14 @@ export const SAMPLE_TABLE_COLUMNS = {
     display_name: "Non-host reads",
     type: "pipeline_data"
   },
+  ercc_reads: {
+    display_name: "ERCC reads",
+    type: "pipeline_data"
+  },
+  subsampled_fraction: {
+    display_name: "Subsampled fraction",
+    type: "pipeline_data"
+  },
   quality_control: {
     display_name: "Passed QC",
     tooltip: "Passed quality control",
