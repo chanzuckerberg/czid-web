@@ -6,7 +6,7 @@ module SamplesHelper
 
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
-                    total_reads nonhost_reads nonhost_reads_percent ercc_reads subsampled_fraction
+                    total_reads nonhost_reads nonhost_reads_percent total_ercc_reads subsampled_fraction
                     quality_control compression_ratio sample_type nucleotide_type collection_location
                     host_genome notes]
     CSV.generate(headers: true) do |csv|
