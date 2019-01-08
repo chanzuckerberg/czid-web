@@ -654,14 +654,26 @@ class BulkUploadImport extends React.Component {
       }
     });
 
-    this.setState({ sampleNamesToFiles });
+    this.setState({
+      sampleNamesToFiles: merge(
+        this.state.sampleNamesToFiles,
+        sampleNamesToFiles
+      )
+    });
   };
 
   // Upload a dict of sample names to input files
   bulkUploadLocal = sampleNamesToFiles => {
     this.setState({
-      submitting: true
+      submitting: true,
+      invalid: true,
+      errorMessage:
+        "Upload in progress... Please keep this page open until completed...\n"
     });
+
+    // Latest browsers will only show a generic warning
+    window.onbeforeunload = () =>
+      "Uploading is in progress. Are you sure you want to exit?";
 
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
       createSample(
@@ -673,13 +685,14 @@ class BulkUploadImport extends React.Component {
       )
         .then(response => {
           // After successful sample creation, upload to the presigned URL
+          const sampleId = response.data.id;
           files.map((file, i) => {
             const url = response.data.input_files[i].presigned_url;
-            this.uploadFileToURL(sampleName, file, url);
+            this.uploadFileToURL(sampleName, sampleId, file, url);
           });
         })
         .catch(error => {
-          // Display error message
+          // Remove samples that couldn't be created and show error message.
           this.onRemoved(sampleName);
           this.setState({
             invalid: true,
@@ -692,7 +705,7 @@ class BulkUploadImport extends React.Component {
   };
 
   // Upload a file for a sample to a URL
-  uploadFileToURL = (sampleName, file, url) => {
+  uploadFileToURL = (sampleName, sampleId, file, url) => {
     const config = {
       // Update the UI on progress
       // TODO: Maybe a circular progress indicator that will fill up.
@@ -704,9 +717,13 @@ class BulkUploadImport extends React.Component {
         this.setState({ fileNamesToProgress: newProgress });
       }
     };
+
     axios
       .put(url, file, config)
-      // On completion the table will show a checkmark.
+      .then(() => {
+        // On completion the table will also show a checkmark
+        this.onUploadSuccess(sampleName, sampleId);
+      })
       .catch(error => {
         this.setState({
           invalid: true,
@@ -721,6 +738,48 @@ class BulkUploadImport extends React.Component {
       sampleNamesToFiles: omit(sampleName, this.state.sampleNamesToFiles),
       fileNamesToProgress: omit(sampleName, this.state.fileNamesToProgress)
     });
+  };
+
+  // Called when a local file finishes uploading
+  onUploadSuccess = (sampleName, sampleId) => {
+    // If every file in the sample is complete
+    const sampleFiles = this.state.sampleNamesToFiles[sampleName];
+    if (
+      sampleFiles.every(f => this.state.fileNamesToProgress[f.name] === 100)
+    ) {
+      // Mark the sample as uploaded
+      axios
+        .put(`/samples/${sampleId}.json`, {
+          sample: {
+            id: sampleId,
+            status: "uploaded"
+          },
+          authenticity_token: this.csrf
+        })
+        .then(() => {
+          // If every file is done uploading
+          if (
+            Object.values(this.state.fileNamesToProgress).every(p => p === 100)
+          ) {
+            this.setState({
+              submitting: false,
+              successMessage: "All uploads finished!",
+              success: true,
+              invalid: false
+            });
+
+            window.onbeforeunload = null;
+            goToPageWithTimeout(`/samples/${this.state.projectId}`);
+          }
+        })
+        .catch(error => {
+          this.setState({
+            errorMessage: `${this.state.errorMessage}. ${joinServerError(
+              error.response.data
+            )}`
+          });
+        });
+    }
   };
 
   renderBulkUploadImportForm() {
