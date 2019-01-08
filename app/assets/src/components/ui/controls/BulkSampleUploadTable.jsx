@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import DataTable from "../../visualizations/table/DataTable";
 import { isEmpty } from "lodash/fp";
-// import cs from "./bulk_sample_upload_table.scss";
 
 class BulkSampleUploadTable extends React.Component {
   render() {
@@ -31,7 +30,7 @@ class BulkSampleUploadTable extends React.Component {
     }
 
     return (
-      <div className="samples-with-files-table">
+      <div className="bulk-sample-upload-table">
         <div className="detected-msg">
           These files were detected and matched. Remove files you do not want to
           upload:
@@ -45,6 +44,7 @@ class BulkSampleUploadTable extends React.Component {
           }}
           columns={["progress", "sampleName", "files", "deleteButton"]}
           data={entries}
+          striped={true}
         />
       </div>
     );

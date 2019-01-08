@@ -1,4 +1,4 @@
-.samples-with-files-table {
+.bulk-sample-upload-table {
   .detected-msg {
     margin-bottom: 20px;
   }
@@ -15,6 +15,15 @@
     &__data {
       &.column-sampleName {
         font-weight: 700;
+      }
+
+      &.column-files {
+        div {
+          div {
+            margin-top: 10px;
+            margin-bottom: 10px;
+          }
+        }
       }
     }
   }

@@ -58,4 +58,15 @@
       width: 30px;
     }
   }
+
+  &.striped {
+    // Undo materialize striping
+    tr:nth-child(odd) {
+      background-color: transparent;
+    }
+
+    tr:nth-child(even) {
+      background-color: $off-white;
+    }
+  }
 }
