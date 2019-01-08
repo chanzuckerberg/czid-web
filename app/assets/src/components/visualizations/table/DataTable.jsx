@@ -7,11 +7,11 @@ class DataTable extends React.Component {
   constructor(props) {
     super(props);
 
-    this.originalData = this.prepareData(this.props.data);
-
     this.state = {
       filter: "",
-      selectedRows: new Set(this.props.selectedRows || [])
+      selectedRows: new Set(this.props.selectedRows || []),
+      originalData: this.props.data,
+      indexedData: DataTable.indexData(this.props.data)
     };
 
     this.handleCheckBoxChange = this.handleCheckBoxChange.bind(this);
@@ -19,12 +19,15 @@ class DataTable extends React.Component {
 
   static getDerivedStateFromProps(props, state) {
     let newFilter = DataTable.prepareFilter(props.filter);
+    let newState = {};
     if (newFilter !== state.filter) {
-      return {
-        filter: newFilter
-      };
+      newState.filter = newFilter;
     }
-    return null;
+    if (props.data !== state.originalData) {
+      newState.originalData = props.data;
+      newState.indexedData = DataTable.indexData(props.data);
+    }
+    return newState;
   }
 
   static prepareFilter(filter) {
@@ -63,8 +66,8 @@ class DataTable extends React.Component {
     return false;
   }
 
-  prepareData() {
-    let data = this.props.data.slice();
+  static indexData(originalData) {
+    let data = originalData.slice();
     for (let i = 0; i < data.length; i++) {
       data[i].__originalIndex = i;
     }
@@ -79,7 +82,7 @@ class DataTable extends React.Component {
     let stateUpdate = {};
     if (rowIndex < 0) {
       let allRows = this.state.selectedRows || new Set();
-      let filteredData = this.filterData(this.originalData);
+      let filteredData = this.filterData(this.state.indexedData);
       for (let i = 0; i < filteredData.length; i++) {
         if (checked) {
           allRows.add(filteredData[i].__originalIndex);
@@ -108,7 +111,7 @@ class DataTable extends React.Component {
   }
 
   render() {
-    const filteredData = this.filterData(this.originalData);
+    const filteredData = this.filterData(this.state.indexedData);
     const allChecked =
       filteredData.length > 0 &&
       filteredData.every(row =>
@@ -172,7 +175,8 @@ DataTable.propTypes = {
     PropTypes.arrayOf(PropTypes.number),
     // allow Set = TODO: replace by custom function
     PropTypes.object
-  ])
+  ]),
+  key: PropTypes.string
 };
 
 export default DataTable;
