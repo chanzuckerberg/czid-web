@@ -11,6 +11,8 @@ import { sampleNameFromFileName } from "~utils/sample";
 import { createSample } from "~/api";
 import FilePicker from "~ui/controls/FilePicker";
 import BulkSampleUploadTable from "./ui/controls/BulkSampleUploadTable";
+import { merge } from "lodash/fp";
+import { keyBy } from "lodash";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -651,11 +653,12 @@ class BulkUploadImport extends React.Component {
 
     this.setState({ sampleNamesToFiles });
 
-    // this.bulkUploadLocal(sampleNamesToFiles);
+    this.bulkUploadLocal(sampleNamesToFiles);
   };
 
   // Upload a dict of sample names to input files.
   bulkUploadLocal = sampleNamesToFiles => {
+    console.log("bulk upload called");
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
       createSample(
         sampleName,
@@ -681,43 +684,13 @@ class BulkUploadImport extends React.Component {
       onUploadProgress: e => {
         const percent = Math.round(e.loaded * 100 / e.total);
 
-        // let cur = {};
-        // cur[sampleName] = percent;
-        // const newState = merge(this.state, {
-        //   sampleNamesToProgress: merge(this.state.sampleNamesToProgress, cur)
-        // });
+        console.log(file, percent);
 
-        let updatedProgress = Object.assign(
-          {},
-          this.state.sampleNamesToProgress
-        );
-        updatedProgress[sampleName] = percent;
-        this.setState({ sampleNamesToProgress: updatedProgress }, () => {
-          console.log("foobar 4:22pm", this.state.sampleNamesToProgress);
-          console.log(
-            "here it is:",
-            this.state.sampleNamesToProgress["RR010_transfusion_DNA_07_S7"]
-          );
-          console.log(
-            "here it is:",
-            this.state.sampleNamesToProgress.RR010_transfusion_DNA_07_S7
-          );
+        const newState = merge(this.state, {
+          fileNamesToProgress: { [file.name]: percent }
         });
 
-        //
-        // this.setState(newState, () => {
-        //   console.log("foobar 4:22pm", this.state.sampleNamesToProgress);
-        //   console.log(
-        //     "here it is:",
-        //     this.state.sampleNamesToProgress["RR010_transfusion_DNA_07_S7"]
-        //   );
-        //   console.log(
-        //     "here it is:",
-        //     this.state.sampleNamesToProgress.RR010_transfusion_DNA_07_S7
-        //   );
-        // });
-
-        // console.log(file.name, percent);
+        this.setState(newState);
       }
     };
     axios
@@ -828,6 +801,7 @@ class BulkUploadImport extends React.Component {
           </div>
           <BulkSampleUploadTable
             sampleNamesToFiles={this.state.sampleNamesToFiles}
+            fileNamesToProgress={this.state.fileNamesToProgress}
           />
         </div>
       </div>
