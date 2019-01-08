@@ -9,11 +9,11 @@ export const SAMPLE_TABLE_COLUMNS = {
     display_name: "Non-host reads",
     type: "pipeline_data"
   },
-  ercc_reads: {
+  total_ercc_reads: {
     display_name: "ERCC reads",
     type: "pipeline_data"
   },
-  subsampled_fraction: {
+  fraction_subsampled: {
     display_name: "Subsampled fraction",
     type: "pipeline_data"
   },
