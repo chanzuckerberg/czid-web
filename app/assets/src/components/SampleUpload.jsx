@@ -75,14 +75,14 @@ class SampleUpload extends React.Component {
     this.firstInput =
       this.selected.inputFiles.length && this.selected.inputFiles[0]
         ? this.selected.inputFiles[0].source === null
-        ? ""
-        : this.selected.inputFiles[0].source
+          ? ""
+          : this.selected.inputFiles[0].source
         : "";
     this.secondInput =
       this.selected.inputFiles.length && this.selected.inputFiles[1]
         ? this.selected.inputFiles[1].source === null
-        ? ""
-        : this.selected.inputFiles[1].source
+          ? ""
+          : this.selected.inputFiles[1].source
         : "";
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.state = {
@@ -647,10 +647,10 @@ class SampleUpload extends React.Component {
       submitting: false,
       invalid: true,
       errorMessage:
-      `Upload of ${
-        file.name
+        `Upload of ${
+          file.name
         } failed for some reason. Please delete the created sample and try again or ask us our team for help. ` +
-      err
+        err
     });
   };
 
@@ -1077,7 +1077,7 @@ class SampleUpload extends React.Component {
                                 this.state.selectedHostGenome === g.name
                                   ? "active"
                                   : ""
-                                } genome-label`}
+                              } genome-label`}
                               id={g.name}
                               onClick={() =>
                                 this.handleHostChange(g.id, g.name)
@@ -1101,7 +1101,7 @@ class SampleUpload extends React.Component {
                                 this.state.selectedHostGenome === g.name
                                   ? "active"
                                   : ""
-                                } `}
+                              } `}
                               id={g.name}
                               onClick={() =>
                                 this.handleHostChange(g.id, g.name)
