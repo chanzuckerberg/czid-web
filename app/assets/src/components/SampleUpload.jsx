@@ -64,6 +64,8 @@ class SampleUpload extends React.Component {
       resultPath: this.sample ? this.sample.s3_preload_result_path : "",
       branch: this.sample ? this.sample.pipeline_branch : "",
       dagVars: this.sample ? this.sample.dag_vars : "{}",
+      subsample: this.sample ? this.sample.subsample : "",
+      maxInputFragments: this.sample ? this.sample.max_input_fragments : "",
       alignmentConfigName: this.sample ? this.sample.alignment_config_name : "",
       id: this.sample.id || "",
       inputFiles:
@@ -99,12 +101,13 @@ class SampleUpload extends React.Component {
       selectedResultPath: this.selected.resultPath || "",
       selectedBranch: this.selected.branch || "",
       selectedDagVars: this.selected.dagVars || "{}",
+      selectedMaxInputFragments: this.selected.maxInputFragments || "",
+      selectedSubsample: this.selected.subsample || "",
       id: this.selected.id,
       errors: {},
       adminGenomes,
       sampleName: this.selected.name || "",
       disableProjectSelect: false,
-      omitSubsamplingChecked: false,
       publicChecked: false,
       consentChecked: false,
 
@@ -275,7 +278,9 @@ class SampleUpload extends React.Component {
       this.state.selectedResultPath,
       this.state.selectedAlignmentConfigName,
       this.state.selectedBranch,
-      this.state.selectedDagVars
+      this.state.selectedDagVars,
+      this.state.selectedMaxInputFragments,
+      this.state.selectedSubsample
     )
       .then(response => {
         this.setState({
@@ -317,6 +322,8 @@ class SampleUpload extends React.Component {
           s3_preload_result_path: this.state.selectedResultPath,
           pipeline_branch: this.state.selectedBranch,
           dag_vars: this.state.selectedDagVars,
+          max_input_fragments: this.state.selectedMaxInputFragments,
+          subsample: this.state.selectedSubsample,
           alignment_config_name: this.state.selectedAlignmentConfigName,
           host_genome_id: this.state.selectedHostGenomeId
         },
@@ -475,6 +482,20 @@ class SampleUpload extends React.Component {
   handleDagVarsChange = e => {
     this.setState({
       selectedDagVars: e.target.value
+    });
+    this.clearError();
+  };
+
+  handleSubsampleChange = e => {
+    this.setState({
+      selectedSubsample: e.target.value
+    });
+    this.clearError();
+  };
+
+  handleMaxInputFragmentsChange = e => {
+    this.setState({
+      selectedMaxInputFragments: e.target.value
     });
     this.clearError();
   };
@@ -677,7 +698,9 @@ class SampleUpload extends React.Component {
       this.state.selectedResultPath,
       this.state.selectedAlignmentConfigName,
       this.state.selectedBranch,
-      this.state.selectedDagVars
+      this.state.selectedDagVars,
+      this.state.selectedMaxInputFragments,
+      this.state.selectedSubsample
     )
       .then(response => {
         this.setState({
@@ -1253,6 +1276,45 @@ class SampleUpload extends React.Component {
                             value={this.state.selectedDagVars}
                             placeholder="{}"
                             onChange={this.handleDagVarsChange}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="field">
+                      <div className="row">
+                        <div className="col no-padding s12">
+                          <div className="field-title">
+                            <div
+                              htmlFor="sampling_options"
+                              className="read-count-label"
+                            >
+                              Truncate input fragments / subsample non-host
+                              reads
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row input-row">
+                        <div className="col s6">
+                          <input
+                            id="max_input_fragments"
+                            type="text"
+                            className="browser-default"
+                            ref="sampling_options"
+                            value={this.state.selectedMaxInputFragments}
+                            placeholder="max input fragments"
+                            onChange={this.handleMaxInputFragmentsChange}
+                          />
+                        </div>
+                        <div className="col s6">
+                          <input
+                            id="subsample"
+                            type="text"
+                            className="browser-default"
+                            ref="sampling_options"
+                            value={this.state.selectedSubsample}
+                            placeholder="subsample non-host reads"
+                            onChange={this.handleSubsampleChange}
                           />
                         </div>
                       </div>

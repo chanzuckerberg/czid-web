@@ -88,7 +88,9 @@ const createSample = (
   preloadResultsPath = "",
   alignmentConfig = "",
   pipelineBranch = "",
-  dagVariables = ""
+  dagVariables = "",
+  maxInputFragments = "",
+  subsample = ""
 ) =>
   new Promise((resolve, reject) => {
     const fileAttributes = Array.from(inputFiles, file => {
@@ -120,7 +122,9 @@ const createSample = (
           s3_preload_result_path: preloadResultsPath,
           alignment_config_name: alignmentConfig,
           pipeline_branch: pipelineBranch,
-          dag_vars: dagVariables
+          dag_vars: dagVariables,
+          max_input_fragments: maxInputFragments,
+          subsample: subsample
         },
         authenticity_token: document.getElementsByName("csrf-token")[0].content
       })

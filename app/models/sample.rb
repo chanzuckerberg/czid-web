@@ -226,7 +226,7 @@ class Sample < ApplicationRecord
     return unless status == STATUS_CREATED
     stderr_array = []
     total_reads_json_path = nil
-    max_lines = PipelineRun::MAX_INPUT_FRAGMENTS * 4
+    max_lines = 4 * (max_input_fragments || PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS)
     input_files.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
@@ -479,10 +479,8 @@ class Sample < ApplicationRecord
 
     pr = PipelineRun.new
     pr.sample = self
-    pr.subsample = PipelineRun::DEFAULT_SUBSAMPLING # if subsample != 0 ALLWAYS SUBSAMPLE
-    # The subsample field of "sample" is currently used as a simple flag (UI checkbox),
-    # but was made an integer type in case we want to allow users to enter the desired number
-    # of reads to susbample to in the future
+    pr.subsample = subsample || PipelineRun::DEFAULT_SUBSAMPLING
+    pr.max_input_fragments = max_input_fragments || PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS
     pr.pipeline_branch = pipeline_branch.blank? ? "master" : pipeline_branch
     pr.dag_vars = dag_vars if dag_vars
     pr.pipeline_commit = Sample.pipeline_commit(pr.pipeline_branch)
