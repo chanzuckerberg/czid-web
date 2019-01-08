@@ -175,8 +175,7 @@ DataTable.propTypes = {
     PropTypes.arrayOf(PropTypes.number),
     // allow Set = TODO: replace by custom function
     PropTypes.object
-  ]),
-  key: PropTypes.string
+  ])
 };
 
 export default DataTable;
