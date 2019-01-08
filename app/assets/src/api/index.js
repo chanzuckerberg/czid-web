@@ -124,7 +124,7 @@ const createSample = (
           pipeline_branch: pipelineBranch,
           dag_vars: dagVariables,
           max_input_fragments: maxInputFragments,
-          subsample: subSample
+          subsample: subsample
         },
         authenticity_token: document.getElementsByName("csrf-token")[0].content
       })
