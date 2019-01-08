@@ -120,7 +120,9 @@ class DataTable extends React.Component {
       );
 
     return (
-      <table className="idseq-ui data-table">
+      <table
+        className={`idseq-ui data-table ${this.props.striped && "striped"}`}
+      >
         <thead>
           <tr>
             {this.props.onSelectedRowsChanged && (

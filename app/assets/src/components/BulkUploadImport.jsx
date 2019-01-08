@@ -8,10 +8,11 @@ import ObjectHelper from "../helpers/ObjectHelper";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
+import { goToPageWithTimeout } from "~utils/links";
 import { createSample } from "~/api";
 import FilePicker from "~ui/controls/FilePicker";
 import BulkSampleUploadTable from "./ui/controls/BulkSampleUploadTable";
-import { merge } from "lodash/fp";
+import { merge, omit } from "lodash/fp";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -64,6 +65,7 @@ class BulkUploadImport extends React.Component {
 
       // Local upload fields
       localUploadMode: false,
+      sampleNamesToFiles: {},
       fileNamesToProgress: {}
     };
   }
@@ -163,7 +165,7 @@ class BulkUploadImport extends React.Component {
       this.setState({
         submitting: true
       });
-      this.bulkUploadSubmit();
+      this.bulkUploadRemoteSubmit();
     }
   }
 
@@ -171,10 +173,11 @@ class BulkUploadImport extends React.Component {
     e.preventDefault();
     this.clearError();
     if (!this.isImportFormInvalid()) {
-      this.setState({
-        submitting: true
-      });
-      this.bulkUploadImport();
+      if (this.state.localUploadMode) {
+        this.bulkUploadLocal(this.state.sampleNamesToFiles);
+      } else {
+        this.bulkUploadRemoteImport();
+      }
     }
   }
 
@@ -187,10 +190,6 @@ class BulkUploadImport extends React.Component {
       invalid: false,
       success: false
     });
-  }
-
-  gotoPage(path) {
-    location.href = `${path}`;
   }
 
   toggleCheckBox(e) {
@@ -259,7 +258,11 @@ class BulkUploadImport extends React.Component {
     }
   }
 
-  bulkUploadImport() {
+  bulkUploadRemoteImport() {
+    this.setState({
+      submitting: true
+    });
+
     var that = this;
     axios
       .get("/samples/bulk_import.json", {
@@ -291,7 +294,7 @@ class BulkUploadImport extends React.Component {
       });
   }
 
-  bulkUploadSubmit() {
+  bulkUploadRemoteSubmit() {
     var that = this;
     var samples = [];
     this.state.selectedSampleIndices.map(idx => {
@@ -306,14 +309,10 @@ class BulkUploadImport extends React.Component {
         that.setState({
           success: true,
           successMessage: "Samples created. Redirecting...",
-          createdSampleIds: response.data.sample_ids
+          createdSampleIds: response.data.sample_ids,
+          submitting: false
         });
-        setTimeout(() => {
-          that.setState({
-            submitting: false
-          });
-          that.gotoPage(`/home?project_id=${that.state.projectId}`);
-        }, 2000);
+        goToPageWithTimeout(`/home?project_id=${that.state.projectId}`);
       })
       .catch(error => {
         that.setState({
@@ -346,15 +345,19 @@ class BulkUploadImport extends React.Component {
     } else {
       errors.project = "Please select a project";
     }
-    if (this.refs.bulk_path) {
-      if (this.refs.bulk_path.value === "") {
+
+    if (!this.state.localUploadMode) {
+      if (this.refs.bulk_path) {
+        if (this.refs.bulk_path.value === "") {
+          errors.bulk_path = "Please fill in the S3 bulk path";
+        } else if (!this.filePathValid(this.refs.bulk_path.value)) {
+          errors.bulk_path = "S3 bulk path is invalid";
+        }
+      } else {
         errors.bulk_path = "Please fill in the S3 bulk path";
-      } else if (!this.filePathValid(this.refs.bulk_path.value)) {
-        errors.bulk_path = "S3 bulk path is invalid";
       }
-    } else {
-      errors.bulk_path = "Please fill in the S3 bulk path";
     }
+
     const errorsLength = Object.keys(errors).length;
     this.setState({
       invalid: errorsLength > 0,
@@ -652,12 +655,14 @@ class BulkUploadImport extends React.Component {
     });
 
     this.setState({ sampleNamesToFiles });
-
-    this.bulkUploadLocal(sampleNamesToFiles);
   };
 
   // Upload a dict of sample names to input files
   bulkUploadLocal = sampleNamesToFiles => {
+    this.setState({
+      submitting: true
+    });
+
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
       createSample(
         sampleName,
@@ -675,6 +680,7 @@ class BulkUploadImport extends React.Component {
         })
         .catch(error => {
           // Display error message
+          this.onRemoved(sampleName);
           this.setState({
             invalid: true,
             errorMessage: `${
@@ -689,6 +695,7 @@ class BulkUploadImport extends React.Component {
   uploadFileToURL = (sampleName, file, url) => {
     const config = {
       // Update the UI on progress
+      // TODO: Maybe a circular progress indicator that will fill up.
       onUploadProgress: e => {
         const percent = Math.round(e.loaded * 100 / e.total);
         const newProgress = merge(this.state.fileNamesToProgress, {
@@ -699,15 +706,21 @@ class BulkUploadImport extends React.Component {
     };
     axios
       .put(url, file, config)
-      .then(() => {
-        console.log(file.name, "DONE");
-      })
+      // On completion the table will show a checkmark.
       .catch(error => {
         this.setState({
           invalid: true,
           errorMessage: `${file.name}: ${joinServerError(error.response.data)}`
         });
       });
+  };
+
+  // onRemoved for when a user doesn't want to upload a local sample/files
+  onRemoved = sampleName => {
+    this.setState({
+      sampleNamesToFiles: omit(sampleName, this.state.sampleNamesToFiles),
+      fileNamesToProgress: omit(sampleName, this.state.fileNamesToProgress)
+    });
   };
 
   renderBulkUploadImportForm() {
@@ -792,9 +805,6 @@ class BulkUploadImport extends React.Component {
           )} cannot be uploaded. Size must be under 5GB for local uploads. For larger files, please try our CLI.`
       );
 
-    // onRemoved for when a user doesn't want to upload a local sample/files
-    const onRemoved = sampleName => {};
-
     const localInputFileSection = (
       <div className="field">
         <div className="validation-info">
@@ -803,17 +813,19 @@ class BulkUploadImport extends React.Component {
         </div>
         <div className="inputFileArea">
           <div className="filePickerArea">
-            <FilePicker
-              title={"Your Input Files:"}
-              onChange={this.onDrop}
-              onRejected={onRejected}
-              multiFile={true}
-            />
+            {!this.state.submitting && (
+              <FilePicker
+                title={"Your Input Files:"}
+                onChange={this.onDrop}
+                onRejected={onRejected}
+                multiFile={true}
+              />
+            )}
           </div>
           <BulkSampleUploadTable
             sampleNamesToFiles={this.state.sampleNamesToFiles}
             fileNamesToProgress={this.state.fileNamesToProgress}
-            onRemoved={onRemoved}
+            onRemoved={this.onRemoved}
           />
         </div>
       </div>
@@ -1091,21 +1103,21 @@ class BulkUploadImport extends React.Component {
                 <div className="upload-mode-title">Sample Input Files</div>
                 {uploadModeSwitcher}
                 {inputFilesSection}
+                {this.state.success ? (
+                  <div className="form-feedback success-message">
+                    <i className="fa fa-check-circle-o" />
+                    <span>{this.state.successMessage}</span>
+                  </div>
+                ) : null}
+                {this.state.invalid ? (
+                  <div className="form-feedback error-message">
+                    {this.state.errorMessage}
+                  </div>
+                ) : null}
                 {termsBlurb}
                 <div className="field">
                   <div className="row">
                     <div className="col no-padding s12">
-                      {this.state.success ? (
-                        <div className="form-feedback success-message">
-                          <i className="fa fa-check-circle-o" />
-                          <span>{this.state.successMessage}</span>
-                        </div>
-                      ) : null}
-                      {this.state.invalid ? (
-                        <div className="form-feedback error-message">
-                          {this.state.errorMessage}
-                        </div>
-                      ) : null}
                       {submitButton}
                       <button
                         type="button"

@@ -5,6 +5,7 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import ObjectHelper from "../helpers/ObjectHelper";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
+import { goToPage, goToPageWithTimeout } from "~utils/links";
 import CatIcon from "~ui/icons/CatIcon";
 import ERCCIcon from "~ui/icons/ERCCIcon";
 import HumanIcon from "~ui/icons/HumanIcon";
@@ -181,16 +182,6 @@ class SampleUpload extends React.Component {
     });
   }
 
-  goToPage = path => {
-    location.href = path;
-  };
-
-  goToPageWithTimeout = page => {
-    setTimeout(() => {
-      this.goToPage(page);
-    }, 2000);
-  };
-
   toggleCheckBox(e) {
     this.setState({
       [e.target.id]: e.target.value == "true" ? false : true
@@ -288,7 +279,7 @@ class SampleUpload extends React.Component {
           submitting: false,
           successMessage: "Sample created successfully"
         });
-        this.goToPageWithTimeout(`/samples/${response.data.id}`);
+        goToPageWithTimeout(`/samples/${response.data.id}`);
       })
       .catch(error => {
         this.setState({
@@ -327,7 +318,7 @@ class SampleUpload extends React.Component {
           submitting: false,
           successMessage: "Sample updated successfully"
         });
-        this.goToPageWithTimeout(`/samples/${that.state.id}`);
+        goToPageWithTimeout(`/samples/${that.state.id}`);
       })
       .catch(error => {
         that.setState({
@@ -622,7 +613,7 @@ class SampleUpload extends React.Component {
         })
         .then(() => {
           window.onbeforeunload = null;
-          this.goToPageWithTimeout(`/samples/${this.state.id}`);
+          goToPageWithTimeout(`/samples/${this.state.id}`);
         })
         .catch(error => {
           this.setState({

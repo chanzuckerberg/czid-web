@@ -28,6 +28,7 @@
       .error-message {
         color: $error;
         white-space: pre;
+        margin-bottom: 30px;
       }
       .upload-page-button {
         margin-left: 2rem;
@@ -300,7 +301,7 @@
           }
 
           .inputFileArea {
-            margin-bottom: 50px;
+            margin-bottom: 20px;
 
             .filePickerArea {
               margin-bottom: 20px;

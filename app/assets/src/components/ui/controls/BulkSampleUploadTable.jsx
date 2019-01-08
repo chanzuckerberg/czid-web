@@ -2,30 +2,37 @@ import React from "react";
 import PropTypes from "prop-types";
 import DataTable from "../../visualizations/table/DataTable";
 import { isEmpty, get } from "lodash/fp";
+import RemoveIcon from "../icons/RemoveIcon";
+import LoadingIcon from "../icons/LoadingIcon";
+import CheckmarkIcon from "../icons/CheckmarkIcon";
 
 class BulkSampleUploadTable extends React.Component {
   render() {
-    const { sampleNamesToFiles, fileNamesToProgress } = this.props;
+    const { sampleNamesToFiles, fileNamesToProgress, onRemoved } = this.props;
 
     if (isEmpty(sampleNamesToFiles)) return null;
 
     // Put together the cell data for the DataTable
     let entries = [];
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
-      let progress;
-      // If the first file has started making progress
-      if (get([files[0].name], fileNamesToProgress)) {
-        // Take the average % progress for the files
-        let sum = 0;
-        files.map(f => (sum += fileNamesToProgress[f.name] || 0));
-        progress = Math.round(sum / files.length);
-      }
+      const progress = files.every(f => fileNamesToProgress[f.name] === 100) ? (
+        <CheckmarkIcon />
+      ) : (
+        <LoadingIcon />
+      );
+      const removeIcon = (
+        <RemoveIcon
+          onClick={() => onRemoved(sampleName)}
+          className="removeIcon"
+        />
+      );
+      // If files haven't started yet, show the remove icons.
+      const action = isEmpty(fileNamesToProgress) ? removeIcon : progress;
 
       const entry = {
-        progress: progress,
+        action: action,
         sampleName: sampleName,
-        files: <div>{files.map(f => <div>{f.name}</div>)}</div>,
-        deleteButton: "X"
+        files: <div>{files.map(f => <div>{f.name}</div>)}</div>
       };
       entries.push(entry);
     }
@@ -38,12 +45,11 @@ class BulkSampleUploadTable extends React.Component {
         </div>
         <DataTable
           headers={{
-            progress: "",
+            action: "",
             sampleName: "Sample Name",
-            files: "Files",
-            deleteButton: ""
+            files: "Files"
           }}
-          columns={["progress", "sampleName", "files", "deleteButton"]}
+          columns={["action", "sampleName", "files"]}
           data={entries}
           striped={true}
         />

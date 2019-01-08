@@ -5,8 +5,27 @@
   }
 
   .data-table {
-    .column-progress {
-      width: 30px;
+    .column-action {
+      width: 50px;
+      text-align: center;
+      padding-left: 5px;
+      padding-right: 25px;
+
+      .removeIcon {
+        cursor: pointer;
+        opacity: 0.3;
+        width: 10px;
+        margin-top: 5px;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+
+      .check.icon {
+        // Align better with the spinner
+        margin-left: 2px;
+      }
     }
 
     .column-deleteButton {
