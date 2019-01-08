@@ -1,4 +1,53 @@
-version: '3'
+# Shared variables using Docker x- extension and YAML merging syntax.
+
+x-web-variables: &web-variables
+  ? ALIGNMENT_CONFIG_DEFAULT_NAME=2018-04-01
+  ? SAMPLES_BUCKET_NAME=idseq-samples-development
+  ? AIRBRAKE_PROJECT_ID
+  ? AIRBRAKE_PROJECT_KEY
+  ? MAIL_GUN_API_KEY
+  ? DATADOG_API_KEY
+  ? RACK_ENV
+  ? RAILS_ENV
+
+x-aws-variables: &aws-variables
+  ? AWS_ACCESS_KEY_ID
+  ? AWS_SECRET_ACCESS_KEY
+
+x-travis-variables: &travis-variables
+  ? CI
+  ? CONTINUOUS_INTEGRATION
+  ? TRAVIS_ALLOW_FAILURE
+  ? TRAVIS_BRANCH
+  ? TRAVIS_BUILD_DIR
+  ? TRAVIS_BUILD_ID
+  ? TRAVIS_BUILD_NUMBER
+  ? TRAVIS_COMMIT
+  ? TRAVIS_COMMIT_MESSAGE
+  ? TRAVIS_COMMIT_RANGE
+  ? TRAVIS_EVENT_TYPE
+  ? TRAVIS_FILTERED
+  ? TRAVIS_JOB_ID
+  ? TRAVIS_JOB_NUMBER
+  ? TRAVIS_LANGUAGE
+  ? TRAVIS_OS_NAME
+  ? TRAVIS_PRE_CHEF_BOOTSTRAP_TIME
+  ? TRAVIS_PULL_REQUEST_BRANCH
+  ? TRAVIS_PULL_REQUEST
+  ? TRAVIS_PULL_REQUEST_SHA
+  ? TRAVIS_PULL_REQUEST_SLUG
+  ? TRAVIS_REPO_SLUG
+  ? TRAVIS_SECURE_ENV_VARS
+  ? TRAVIS_TAG
+  ? TRAVIS
+
+x-honeycomb-variables: &honeycomb-variables
+  ? IDSEQ_HONEYCOMB_DB_DATA_SET
+  ? IDSEQ_HONEYCOMB_DATA_SET
+  ? IDSEQ_HONEYCOMB_WRITE_KEY
+
+
+version: '3.4'
 services:
   db:
     image: mysql:5.6
@@ -24,39 +73,8 @@ services:
       - db
       - redis
     environment:
-      - ALIGNMENT_CONFIG_DEFAULT_NAME
-      - SAMPLES_BUCKET_NAME=idseq-samples-development
-      - AIRBRAKE_PROJECT_ID
-      - AIRBRAKE_PROJECT_KEY
-      - MAIL_GUN_API_KEY
-      - CI
-      - CONTINUOUS_INTEGRATION
-      - DATADOG_API_KEY
-      - RACK_ENV
-      - RAILS_ENV
-      - TRAVIS_ALLOW_FAILURE
-      - TRAVIS_BRANCH
-      - TRAVIS_BUILD_DIR
-      - TRAVIS_BUILD_ID
-      - TRAVIS_BUILD_NUMBER
-      - TRAVIS_COMMIT
-      - TRAVIS_COMMIT_MESSAGE
-      - TRAVIS_COMMIT_RANGE
-      - TRAVIS_EVENT_TYPE
-      - TRAVIS_FILTERED
-      - TRAVIS_JOB_ID
-      - TRAVIS_JOB_NUMBER
-      - TRAVIS_LANGUAGE
-      - TRAVIS_OS_NAME
-      - TRAVIS_PRE_CHEF_BOOTSTRAP_TIME
-      - TRAVIS_PULL_REQUEST_BRANCH
-      - TRAVIS_PULL_REQUEST
-      - TRAVIS_PULL_REQUEST_SHA
-      - TRAVIS_PULL_REQUEST_SLUG
-      - TRAVIS_REPO_SLUG
-      - TRAVIS_SECURE_ENV_VARS
-      - TRAVIS_TAG
-      - TRAVIS
+      <<: *web-variables
+      <<: *travis-variables
     command: bash
   web:
     build: .
@@ -75,44 +93,10 @@ services:
       - db
       - redis
     environment:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - ALIGNMENT_CONFIG_DEFAULT_NAME
-      - SAMPLES_BUCKET_NAME=idseq-samples-development
-      - AIRBRAKE_PROJECT_ID
-      - AIRBRAKE_PROJECT_KEY
-      - IDSEQ_HONEYCOMB_DB_DATA_SET
-      - IDSEQ_HONEYCOMB_DATA_SET
-      - IDSEQ_HONEYCOMB_WRITE_KEY
-      - MAIL_GUN_API_KEY
-      - CI
-      - CONTINUOUS_INTEGRATION
-      - DATADOG_API_KEY
-      - RACK_ENV
-      - RAILS_ENV
-      - TRAVIS_ALLOW_FAILURE
-      - TRAVIS_BRANCH
-      - TRAVIS_BUILD_DIR
-      - TRAVIS_BUILD_ID
-      - TRAVIS_BUILD_NUMBER
-      - TRAVIS_COMMIT
-      - TRAVIS_COMMIT_MESSAGE
-      - TRAVIS_COMMIT_RANGE
-      - TRAVIS_EVENT_TYPE
-      - TRAVIS_FILTERED
-      - TRAVIS_JOB_ID
-      - TRAVIS_JOB_NUMBER
-      - TRAVIS_LANGUAGE
-      - TRAVIS_OS_NAME
-      - TRAVIS_PRE_CHEF_BOOTSTRAP_TIME
-      - TRAVIS_PULL_REQUEST_BRANCH
-      - TRAVIS_PULL_REQUEST
-      - TRAVIS_PULL_REQUEST_SHA
-      - TRAVIS_PULL_REQUEST_SLUG
-      - TRAVIS_REPO_SLUG
-      - TRAVIS_SECURE_ENV_VARS
-      - TRAVIS_TAG
-      - TRAVIS
+      <<: *web-variables
+      <<: *aws-variables
+      <<: *travis-variables
+      <<: *honeycomb-variables
     command: bash -c "rm -f tmp/pids/server.pid && rails server -b 0.0.0.0 -p 3000"
   resque:
     image: chanzuckerberg/idseq-web:compose
@@ -125,38 +109,9 @@ services:
       - db
       - redis
     environment:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - ALIGNMENT_CONFIG_DEFAULT_NAME
-      - SAMPLES_BUCKET_NAME=idseq-samples-development
-      - CI
-      - CONTINUOUS_INTEGRATION
-      - DATADOG_API_KEY
-      - RACK_ENV
-      - RAILS_ENV
-      - TRAVIS_ALLOW_FAILURE
-      - TRAVIS_BRANCH
-      - TRAVIS_BUILD_DIR
-      - TRAVIS_BUILD_ID
-      - TRAVIS_BUILD_NUMBER
-      - TRAVIS_COMMIT
-      - TRAVIS_COMMIT_MESSAGE
-      - TRAVIS_COMMIT_RANGE
-      - TRAVIS_EVENT_TYPE
-      - TRAVIS_FILTERED
-      - TRAVIS_JOB_ID
-      - TRAVIS_JOB_NUMBER
-      - TRAVIS_LANGUAGE
-      - TRAVIS_OS_NAME
-      - TRAVIS_PRE_CHEF_BOOTSTRAP_TIME
-      - TRAVIS_PULL_REQUEST_BRANCH
-      - TRAVIS_PULL_REQUEST
-      - TRAVIS_PULL_REQUEST_SHA
-      - TRAVIS_PULL_REQUEST_SLUG
-      - TRAVIS_REPO_SLUG
-      - TRAVIS_SECURE_ENV_VARS
-      - TRAVIS_TAG
-      - TRAVIS
+      <<: *web-variables
+      <<: *aws-variables
+      <<: *travis-variables
     command: bundle exec "QUEUE=* COUNT=5 rake resque:workers"
   resque_result_monitor:
     image: chanzuckerberg/idseq-web:compose
@@ -169,38 +124,9 @@ services:
       - db
       - redis
     environment:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - ALIGNMENT_CONFIG_DEFAULT_NAME
-      - SAMPLES_BUCKET_NAME=idseq-samples-development
-      - CI
-      - CONTINUOUS_INTEGRATION
-      - DATADOG_API_KEY
-      - RACK_ENV
-      - RAILS_ENV
-      - TRAVIS_ALLOW_FAILURE
-      - TRAVIS_BRANCH
-      - TRAVIS_BUILD_DIR
-      - TRAVIS_BUILD_ID
-      - TRAVIS_BUILD_NUMBER
-      - TRAVIS_COMMIT
-      - TRAVIS_COMMIT_MESSAGE
-      - TRAVIS_COMMIT_RANGE
-      - TRAVIS_EVENT_TYPE
-      - TRAVIS_FILTERED
-      - TRAVIS_JOB_ID
-      - TRAVIS_JOB_NUMBER
-      - TRAVIS_LANGUAGE
-      - TRAVIS_OS_NAME
-      - TRAVIS_PRE_CHEF_BOOTSTRAP_TIME
-      - TRAVIS_PULL_REQUEST_BRANCH
-      - TRAVIS_PULL_REQUEST
-      - TRAVIS_PULL_REQUEST_SHA
-      - TRAVIS_PULL_REQUEST_SLUG
-      - TRAVIS_REPO_SLUG
-      - TRAVIS_SECURE_ENV_VARS
-      - TRAVIS_TAG
-      - TRAVIS
+      <<: *web-variables
+      <<: *aws-variables
+      <<: *travis-variables
     command: bundle exec "rake result_monitor"
   resque_pipeline_monitor:
     image: chanzuckerberg/idseq-web:compose
@@ -213,36 +139,7 @@ services:
       - db
       - redis
     environment:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - ALIGNMENT_CONFIG_DEFAULT_NAME
-      - SAMPLES_BUCKET_NAME=idseq-samples-development
-      - CI
-      - CONTINUOUS_INTEGRATION
-      - DATADOG_API_KEY
-      - RACK_ENV
-      - RAILS_ENV
-      - TRAVIS_ALLOW_FAILURE
-      - TRAVIS_BRANCH
-      - TRAVIS_BUILD_DIR
-      - TRAVIS_BUILD_ID
-      - TRAVIS_BUILD_NUMBER
-      - TRAVIS_COMMIT
-      - TRAVIS_COMMIT_MESSAGE
-      - TRAVIS_COMMIT_RANGE
-      - TRAVIS_EVENT_TYPE
-      - TRAVIS_FILTERED
-      - TRAVIS_JOB_ID
-      - TRAVIS_JOB_NUMBER
-      - TRAVIS_LANGUAGE
-      - TRAVIS_OS_NAME
-      - TRAVIS_PRE_CHEF_BOOTSTRAP_TIME
-      - TRAVIS_PULL_REQUEST_BRANCH
-      - TRAVIS_PULL_REQUEST
-      - TRAVIS_PULL_REQUEST_SHA
-      - TRAVIS_PULL_REQUEST_SLUG
-      - TRAVIS_REPO_SLUG
-      - TRAVIS_SECURE_ENV_VARS
-      - TRAVIS_TAG
-      - TRAVIS
+      <<: *web-variables
+      <<: *aws-variables
+      <<: *travis-variables
     command: bundle exec "rake pipeline_monitor"

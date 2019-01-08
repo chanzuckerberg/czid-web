@@ -37,6 +37,10 @@ class PhyloTreesController < ApplicationController
     @taxon = {}
 
     taxid = params[:taxId]
+    if HUMAN_TAX_IDS.include? taxid.to_i
+      render json: { status: :forbidden, message: "Human taxon ids are not allowed" }
+      return
+    end
     project_id = params[:projectId]
 
     # Restrict to specified project
@@ -80,6 +84,10 @@ class PhyloTreesController < ApplicationController
 
   def new
     taxid = params[:taxId].to_i
+    if HUMAN_TAX_IDS.include? taxid.to_i
+      render json: { status: :forbidden, message: "Human taxon ids are not allowed" }
+      return
+    end
     project_id = params[:projectId].to_i
 
     @project = current_power.updatable_projects.find(project_id)
@@ -135,11 +143,16 @@ class PhyloTreesController < ApplicationController
   end
 
   def create
+    taxid = params[:taxId].to_i
+    if HUMAN_TAX_IDS.include? taxid.to_i
+      render json: { status: :forbidden, message: "Human taxon ids are not allowed" }
+      return
+    end
+
     @project = current_power.updatable_projects.find(params[:projectId])
     pipeline_run_ids = params[:pipelineRunIds].map(&:to_i)
 
     name = sanitize(params[:name])
-    taxid = params[:taxId].to_i
     tax_name = params[:taxName]
     dag_branch = if current_user.admin?
                    params[:dagBranch] || "master"
@@ -177,6 +190,7 @@ class PhyloTreesController < ApplicationController
 
   def sample_details_json(pipeline_run_ids, taxid)
     return [] if pipeline_run_ids.blank?
+    return [] if HUMAN_TAX_IDS.include? taxid.to_i
 
     # Retrieve information for displaying the tree's sample list.
     # Expose it as an array of hashes containing

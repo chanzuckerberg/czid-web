@@ -1,0 +1,46 @@
+@import "~styles/themes/colors";
+
+.filePicker {
+  width: 100%;
+  max-width: 30rem;
+  height: 10rem;
+  margin-top: 1rem;
+  border: 2px $medium-grey dashed;
+  border-radius: 5px;
+  cursor: pointer;
+
+  &.active {
+    background-color: $primary-lightest;
+    border: 2px solid $primary-light;
+  }
+
+  &:hover,
+  &.accepted {
+    background-color: $primary-lightest;
+    border: 2px dashed $primary-light;
+  }
+
+  .inner {
+    margin: 2rem;
+
+    .title {
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .file {
+      font-weight: bold;
+      color: $primary-light;
+      overflow-wrap: break-word;
+    }
+
+    .message {
+      margin-top: 1rem;
+      color: $primary-light;
+    }
+
+    .browserLink {
+      color: $primary-light;
+    }
+  }
+}

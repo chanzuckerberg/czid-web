@@ -1,12 +1,38 @@
 import React from "react";
-import { get, keyBy, mapValues } from "lodash/fp";
+import {
+  get,
+  keyBy,
+  mapValues,
+  uniq,
+  pluck,
+  values,
+  sortBy,
+  concat,
+  find
+} from "lodash/fp";
 import Tree from "../../utils/structures/Tree";
 import Dendogram from "../../visualizations/dendrogram/Dendogram";
 import PropTypes from "prop-types";
 import DataTooltip from "../../ui/containers/DataTooltip";
+import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import SampleDetailsSidebar from "../report/SampleDetailsSidebar";
 import { getMetadataTypesByHostGenomeName } from "~/api";
+import { extractMetadataTypesByHostGenomes } from "~/components/utils/metadata";
 import { SAMPLE_FIELDS, SAMPLE_METADATA_FIELDS } from "./constants";
+
+const getAbsentName = attribute =>
+  attribute === "project_name" ? "NCBI References" : "No data";
+
+const EXTRA_DROPDOWN_OPTIONS = [
+  {
+    text: "Project Name",
+    value: "project_name"
+  },
+  {
+    text: "Host Genome Name",
+    value: "host_genome_name"
+  }
+];
 
 class PhyloTreeVis extends React.Component {
   constructor(props) {
@@ -19,7 +45,9 @@ class PhyloTreeVis extends React.Component {
       selectedSampleId: null,
       selectedPipelineRunId: null,
       sidebarVisible: false,
-      sampleMetadataTypesByHostGenomeName: null
+      sampleMetadataTypesByHostGenomeName: null,
+      allMetadataTypes: [],
+      selectedMetadataType: EXTRA_DROPDOWN_OPTIONS[0].value
     };
 
     (this.newick = props.newick),
@@ -38,12 +66,10 @@ class PhyloTreeVis extends React.Component {
       defaultColor: "#cccccc",
       absentColor: "#999999",
       colormapName: "viridis",
-      colorGroupAttribute: "project_name",
-      colorGroupLegendTitle: "Project Name",
+      colorGroupAttribute: EXTRA_DROPDOWN_OPTIONS[0].value,
+      colorGroupLegendTitle: EXTRA_DROPDOWN_OPTIONS[0].text,
       // Name for the legend when the attribute is missing / other
-      colorGroupAbsentName: "NCBI References",
-      legendX: 880,
-      legendY: -150,
+      colorGroupAbsentName: getAbsentName(EXTRA_DROPDOWN_OPTIONS[0].value),
       tooltipContainer: this.tooltipContainer,
       onNodeTextClick: this.handleNodeClick,
       onNodeHover: this.handleNodeHover,
@@ -76,13 +102,22 @@ class PhyloTreeVis extends React.Component {
   fetchMetadataTypes = async () => {
     let metadataTypesByHostGenomeName = await getMetadataTypesByHostGenomeName();
 
+    const distinctHostGenomeNames = uniq(
+      pluck("host_genome_name", values(this.props.nodeData))
+    );
+    const allMetadataTypes = extractMetadataTypesByHostGenomes(
+      metadataTypesByHostGenomeName,
+      distinctHostGenomeNames
+    );
+
     metadataTypesByHostGenomeName = mapValues(
       keyBy("key"),
       metadataTypesByHostGenomeName
     );
 
     this.setState({
-      sampleMetadataTypesByHostGenomeName: metadataTypesByHostGenomeName
+      sampleMetadataTypesByHostGenomeName: metadataTypesByHostGenomeName,
+      allMetadataTypes
     });
   };
 
@@ -124,6 +159,23 @@ class PhyloTreeVis extends React.Component {
         this.state.selectedPipelineRunId
       );
     }
+  };
+
+  handleMetadataTypeChange = (selectedMetadataType, name) => {
+    this.setState({
+      selectedMetadataType
+    });
+
+    // This path will be used by lodash.get on the node data.
+    const path = find({ value: selectedMetadataType }, EXTRA_DROPDOWN_OPTIONS)
+      ? selectedMetadataType
+      : `metadata.${selectedMetadataType}`;
+
+    this.treeVis.updateOptions({
+      colorGroupAttribute: path,
+      colorGroupLegendTitle: name,
+      colorGroupAbsentName: getAbsentName(selectedMetadataType)
+    });
   };
 
   getFieldValue(field) {
@@ -175,9 +227,34 @@ class PhyloTreeVis extends React.Component {
     ];
   }
 
+  getMetadataDropdownOptions = () => {
+    const metadataOptions = this.state.allMetadataTypes.map(metadataType => ({
+      text: metadataType.name,
+      value: metadataType.key
+    }));
+
+    return sortBy(
+      "text",
+      concat(EXTRA_DROPDOWN_OPTIONS, metadataOptions),
+      metadataOptions
+    );
+  };
+
   render() {
     return (
       <div className="phylo-tree-vis">
+        <div className="phylo-tree-vis__metadata-select">
+          <Dropdown
+            fluid
+            rounded
+            search
+            options={this.getMetadataDropdownOptions()}
+            label="Color by: "
+            onChange={this.handleMetadataTypeChange}
+            value={this.state.selectedMetadataType}
+            menuLabel="Select Metadata Field"
+          />
+        </div>
         <div
           className="phylo-tree-vis__tree-container"
           ref={container => {

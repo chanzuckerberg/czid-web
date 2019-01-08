@@ -25,31 +25,33 @@ class PipelineVersionSelect extends React.Component {
       </span>
     );
 
+    const options = otherVersions.map(version => ({
+      text: `Pipeline v${version}`,
+      value: version
+    }));
+
     return (
-      <BareDropdown trigger={trigger} className={cs.pipelineVersionDropdown}>
-        <BareDropdown.Menu>
-          {otherVersions.map(version => {
-            return (
-              <BareDropdown.Item
-                onClick={() => this.props.onPipelineVersionSelect(version)}
-                key={version}
-              >
-                {"Pipeline v" + version}
-              </BareDropdown.Item>
-            );
-          })}
-        </BareDropdown.Menu>
-      </BareDropdown>
+      <BareDropdown
+        trigger={trigger}
+        className={cs.pipelineVersionDropdown}
+        options={options}
+        onChange={this.props.onPipelineVersionSelect}
+      />
     );
   };
 
   render() {
-    const { pipelineVersions, lastProcessedAt } = this.props;
+    const { pipelineVersions, lastProcessedAt, pipelineRun } = this.props;
 
     if (!lastProcessedAt) return null;
 
-    // No version select.
-    if (pipelineVersions.length <= 1) {
+    // Don't show selector if there's only 1 version and it's the current one.
+    // Note: If the latest/any run failed it won't be in the pipelineVersions.
+    if (
+      pipelineVersions.length === 0 ||
+      (pipelineVersions.length === 1 &&
+        pipelineVersions[0] === pipelineRun.pipeline_version)
+    ) {
       return (
         <span className={cs.pipelineVersionSelectContainer}>
           | {this.getLastProcessedString()}

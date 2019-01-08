@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import queryString from "query-string";
-import { min, max, uniq, pluck, values } from "lodash/fp";
+import { set, min, max, uniq, pluck, values } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
 import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
@@ -222,35 +222,39 @@ class SamplesHeatmapView extends React.Component {
         host_genome_name: sample.host_genome_name,
         metadata: processMetadata(sample.metadata)
       };
-      sampleDetails[sample.name] = sampleDetails[sample.sample_id];
-      for (let j = 0; j < sample.taxons.length; j++) {
-        let taxon = sample.taxons[j];
-        let taxonIndex;
-        if (!(taxon.tax_id in taxonDetails)) {
-          taxonIndex = taxonIds.length;
-          taxonIds.push(taxon.tax_id);
-          taxonDetails[taxon.tax_id] = {
-            id: taxon.tax_id,
-            index: taxonIndex,
-            name: taxon.name,
-            category: taxon.category_name,
-            phage: !!taxon.is_phage
-          };
-          taxonDetails[taxon.name] = taxonDetails[taxon.tax_id];
-        } else {
-          taxonIndex = taxonDetails[taxon.tax_id].index;
-        }
+      if (sample.taxons) {
+        for (let j = 0; j < sample.taxons.length; j++) {
+          let taxon = sample.taxons[j];
+          let taxonIndex;
+          if (!(taxon.tax_id in taxonDetails)) {
+            taxonIndex = taxonIds.length;
+            taxonIds.push(taxon.tax_id);
+            taxonDetails[taxon.tax_id] = {
+              id: taxon.tax_id,
+              index: taxonIndex,
+              name: taxon.name,
+              category: taxon.category_name,
+              phage: !!taxon.is_phage
+            };
+            taxonDetails[taxon.name] = taxonDetails[taxon.tax_id];
+          } else {
+            taxonIndex = taxonDetails[taxon.tax_id].index;
+          }
 
-        this.state.availableOptions.metrics.forEach(metric => {
-          let [metricType, metricName] = metric.value.split(".");
-          data[metric.value] = data[metric.value] || [];
-          data[metric.value][taxonIndex] = data[metric.value][taxonIndex] || [];
-          data[metric.value][taxonIndex][i] = taxon[metricType][metricName];
-        });
+          this.state.availableOptions.metrics.forEach(metric => {
+            let [metricType, metricName] = metric.value.split(".");
+            data[metric.value] = data[metric.value] || [];
+            data[metric.value][taxonIndex] =
+              data[metric.value][taxonIndex] || [];
+            data[metric.value][taxonIndex][i] = taxon[metricType][metricName];
+          });
+        }
       }
     }
 
     return {
+      // The server should always pass back the same set of sampleIds, but possibly in a different order.
+      // We overwrite both this.state.sampleDetails and this.state.sampleIds to make sure the two are in sync.
       sampleIds,
       sampleDetails,
       taxonIds,
@@ -258,6 +262,16 @@ class SamplesHeatmapView extends React.Component {
       data
     };
   }
+
+  handleMetadataUpdate = (key, value) => {
+    this.setState({
+      sampleDetails: set(
+        [this.state.selectedSampleId, "metadata", key],
+        value,
+        this.state.sampleDetails
+      )
+    });
+  };
 
   renderLoading() {
     return (
@@ -273,8 +287,7 @@ class SamplesHeatmapView extends React.Component {
     this.removedTaxonIds.add(taxonId);
   };
 
-  handleSampleLabelClick = sampleName => {
-    let sampleId = this.state.sampleDetails[sampleName].id;
+  handleSampleLabelClick = sampleId => {
     if (this.state.sidebarVisible && this.state.selectedSampleId === sampleId) {
       this.handleSidebarClose();
     } else {
@@ -315,10 +328,10 @@ class SamplesHeatmapView extends React.Component {
     if (
       this.state.loading ||
       !this.state.data ||
-      Object.values(this.state.data).every(e => !e.length) ||
+      !(this.state.data[this.state.selectedOptions.metric] || []).length ||
       !this.state.metadataTypes
     ) {
-      return;
+      return <div className={cs.noDataMsg}>No data to render</div>;
     }
     let scaleIndex = this.state.selectedOptions.dataScaleIdx;
 
@@ -372,7 +385,7 @@ class SamplesHeatmapView extends React.Component {
         options={this.state.availableOptions.metrics}
         onChange={this.onMetricChange}
         value={this.state.selectedOptions.metric}
-        label="Metric: "
+        label="Metric:"
         disabled={!this.state.data}
       />
     );
@@ -416,7 +429,7 @@ class SamplesHeatmapView extends React.Component {
         options={this.state.availableOptions.taxonLevels}
         value={this.state.selectedOptions.species}
         onChange={this.onTaxonLevelChange}
-        label="Taxon Level: "
+        label="Taxon Level:"
         disabled={!this.state.data}
       />
     );
@@ -446,7 +459,7 @@ class SamplesHeatmapView extends React.Component {
         value={this.state.selectedOptions.dataScaleIdx}
         onChange={this.onDataScaleChange}
         options={options}
-        label="Scale: "
+        label="Scale:"
         disabled={!this.state.data}
       />
     );
@@ -525,7 +538,7 @@ class SamplesHeatmapView extends React.Component {
         options={options}
         onChange={this.onBackgroundChanged}
         value={this.state.selectedOptions.background}
-        label="Background: "
+        label="Background:"
         disabled={!this.state.data}
       />
     );
@@ -541,7 +554,7 @@ class SamplesHeatmapView extends React.Component {
   renderTaxonsPerSampleSlider() {
     return (
       <Slider
-        label="Taxa per Sample: "
+        label="Taxa per Sample:"
         min={this.state.availableOptions.taxonsPerSample.min}
         max={this.state.availableOptions.taxonsPerSample.max}
         value={this.state.selectedOptions.taxonsPerSample}
@@ -569,7 +582,7 @@ class SamplesHeatmapView extends React.Component {
         rounded
         options={this.availableOptions.specificityOptions}
         value={this.state.selectedOptions.readSpecificity}
-        label="Read Specificity: "
+        label="Read Specificity:"
         onChange={this.onSpecificityChange}
       />
     );
@@ -600,8 +613,7 @@ class SamplesHeatmapView extends React.Component {
   renderVisualization() {
     return (
       <div className="row visualization-content">
-        {this.state.loading && this.renderLoading()}
-        {this.renderHeatmap()}
+        {this.state.loading ? this.renderLoading() : this.renderHeatmap()}
       </div>
     );
   }
@@ -637,7 +649,7 @@ class SamplesHeatmapView extends React.Component {
                 } Samples`}
               />
             </ViewHeader.Content>
-            <ViewHeader.Controls>
+            <ViewHeader.Controls className={cs.controls}>
               <Popup
                 trigger={
                   <PrimaryButton
@@ -674,6 +686,7 @@ class SamplesHeatmapView extends React.Component {
           visible={this.state.sidebarVisible}
           onClose={this.handleSidebarClose}
           sampleId={this.state.selectedSampleId}
+          onMetadataUpdate={this.handleMetadataUpdate}
         />
       </div>
     );

@@ -4,7 +4,15 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 import React from "react";
 
-const Button = ({ icon, label, text, rectangular, className, ...props }) => {
+const Button = ({
+  icon,
+  label,
+  text,
+  rectangular,
+  hasDropdownArrow,
+  className,
+  ...props
+}) => {
   let content = text;
   if (icon || label) {
     content = (
@@ -19,9 +27,15 @@ const Button = ({ icon, label, text, rectangular, className, ...props }) => {
   return (
     <BaseButton
       {...props}
-      className={cx(cname, className, rectangular && "rectangular")}
+      className={cx(
+        cname,
+        className,
+        rectangular && "rectangular",
+        hasDropdownArrow && "has-dropdown-arrow"
+      )}
     >
       {content}
+      {hasDropdownArrow && <i className="icon-dropdown-arrow" />}
     </BaseButton>
   );
 };
@@ -39,7 +53,8 @@ Button.propTypes = forbidExtraProps({
   primary: PropTypes.bool,
   secondary: PropTypes.bool,
   rectangular: PropTypes.bool,
-  className: PropTypes.string
+  className: PropTypes.string,
+  hasDropdownArrow: PropTypes.bool
 });
 
 export default Button;

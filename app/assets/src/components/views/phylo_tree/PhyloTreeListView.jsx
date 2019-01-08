@@ -1,9 +1,10 @@
 import React from "react";
-import { fromPairs, set } from "lodash/fp";
+import { fromPairs, set, find } from "lodash/fp";
 import Divider from "../../layout/Divider";
 import QueryString from "query-string";
 import PhyloTreeVis from "./PhyloTreeVis";
 import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
+import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "prop-types";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
 import cs from "./phylo_tree_list_view.scss";
@@ -25,11 +26,15 @@ class PhyloTreeListView extends React.Component {
   }
 
   getDefaultSelectedTreeId(urlParams, phyloTrees = []) {
-    return (
-      urlParams.treeId ||
-      parseInt(window.sessionStorage.getItem("treeId")) ||
-      (phyloTrees[0] || {}).id
-    );
+    const selectedId =
+      urlParams.treeId || parseInt(window.sessionStorage.getItem("treeId"));
+
+    // If the selected tree doesn't exist, default to the first one.
+    if (!selectedId || !find({ id: selectedId }, phyloTrees)) {
+      return (phyloTrees[0] || {}).id;
+    }
+
+    return selectedId;
   }
 
   resetUrl() {
@@ -90,9 +95,10 @@ class PhyloTreeListView extends React.Component {
   render() {
     if (!this.state.selectedPhyloTreeId) {
       return (
-        <p className={cs.noTreeBanner}>
-          No trees yet. You can create trees from the report page.
-        </p>
+        <div className={cs.noTreeBanner}>
+          No phylogenetic trees were found. You can create trees from the report
+          page.
+        </div>
       );
     }
 
@@ -120,7 +126,7 @@ class PhyloTreeListView extends React.Component {
           </ViewHeader.Controls>
         </ViewHeader>
         <Divider />
-        <div className={cs.narrowContainer}>
+        <NarrowContainer>
           {currentTree.newick ? (
             <PhyloTreeVis
               newick={currentTree.newick}
@@ -133,7 +139,7 @@ class PhyloTreeListView extends React.Component {
               {this.getTreeStatus(currentTree.status)}
             </p>
           )}
-        </div>
+        </NarrowContainer>
       </div>
     );
   }

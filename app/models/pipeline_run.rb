@@ -29,12 +29,12 @@ class PipelineRun < ApplicationRecord
   accepts_nested_attributes_for :contig_counts
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
-  MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
+  DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
   ADAPTER_SEQUENCES = { "single-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-SE.fasta",
                         "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta" }.freeze
 
-  GSNAP_CHUNK_SIZE = 15_000
-  RAPSEARCH_CHUNK_SIZE = 10_000
+  GSNAP_CHUNK_SIZE = 60_000
+  RAPSEARCH_CHUNK_SIZE = 20_000
   GSNAP_MAX_CONCURRENT = 2
   RAPSEARCH_MAX_CONCURRENT = 4
   MAX_CHUNKS_IN_FLIGHT = 32
@@ -1235,13 +1235,16 @@ class PipelineRun < ApplicationRecord
   end
 
   def get_summary_contig_counts(min_contig_size)
-    contig_counts.where("count >= #{min_contig_size} and taxid > 0 and contig_name != '*'")
+    contig_counts.where("count >= #{min_contig_size} and contig_name != '*'")
                  .select("taxid, COUNT(1) as contigs, SUM(count) AS contig_reads, count_type")
                  .group(:taxid, :count_type).as_json(except: :id)
   end
 
   def get_taxid_list_with_contigs(min_contig_size = MIN_CONTIG_SIZE)
-    contig_counts.where("count >= #{min_contig_size} and taxid > 0 and contig_name != '*'").pluck(:taxid).uniq
+    contig_counts.select("taxid, COUNT(1)")
+                 .where("count >= #{min_contig_size} and taxid > 0 and contig_name != '*'")
+                 .group(:taxid)
+                 .pluck(:taxid)
   end
 
   def alignment_output_s3_path

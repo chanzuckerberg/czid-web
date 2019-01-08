@@ -68,21 +68,20 @@ class Title extends React.Component {
         options,
         option => String(option.id) !== String(id)
       );
+
+      const items = filteredOptions.map(option => (
+        <BareDropdown.Item onClick={option.onClick} key={option.id}>
+          {option.label}
+        </BareDropdown.Item>
+      ));
+
       return (
         <BareDropdown
           trigger={sampleName}
           className={cs.sampleDropdown}
           floating
-          scrolling
-        >
-          <BareDropdown.Menu>
-            {filteredOptions.map(option => (
-              <BareDropdown.Item onClick={option.onClick} key={option.id}>
-                {option.label}
-              </BareDropdown.Item>
-            ))}
-          </BareDropdown.Menu>
-        </BareDropdown>
+          items={items}
+        />
       );
     } else {
       return sampleName;

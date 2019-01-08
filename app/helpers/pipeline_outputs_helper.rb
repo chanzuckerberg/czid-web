@@ -140,16 +140,6 @@ module PipelineOutputsHelper
     taxon["#{tax_level}_name"] if taxon
   end
 
-  def parse_alignment_results(taxid, tax_level, alignment_data)
-    results = {}
-    parse_tree(results, taxid, alignment_data)
-    accession_ids = results.keys.sort_by { |k| -results[k]['reads_count'] }
-
-    name = taxon_name(taxid, tax_level)
-    title = name.to_s + "(#{tax_level}) Alignment (#{results.size} unique accessions)"
-    { "title" => title, "details" => results, "accessions" => accession_ids }
-  end
-
   def get_taxid_fasta_from_pipeline_run(pipeline_run, taxid, tax_level, hit_type)
     return '' unless pipeline_run
     uri = pipeline_run.s3_paths_for_taxon_byteranges[tax_level][hit_type]

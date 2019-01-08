@@ -1,6 +1,7 @@
 // TODO(mark): Split this file up as more API methods get added.
 import axios from "axios";
 import { toPairs } from "lodash/fp";
+import { cleanFilePath } from "~utils/sample";
 
 const postWithCSRF = async (url, params) => {
   const resp = await axios.post(url, {
@@ -34,7 +35,13 @@ const getURLParamString = params =>
     .map(pair => pair.join("="))
     .join("&");
 
-const getSampleMetadata = id => get(`/samples/${id}/metadata`);
+const getSampleMetadata = (id, pipelineVersion) => {
+  return get(
+    pipelineVersion
+      ? `/samples/${id}/metadata?pipeline_version=${pipelineVersion}`
+      : `/samples/${id}/metadata`
+  );
+};
 
 const saveSampleMetadata = (id, field, value) =>
   postWithCSRF(`/samples/${id}/save_metadata_v2`, {
@@ -70,6 +77,65 @@ const getSampleReportInfo = (id, params) =>
 const getSummaryContigCounts = (id, minContigSize) =>
   get(`/samples/${id}/summary_contig_counts?min_contig_size=${minContigSize}`);
 
+// Send a request to create a single sample. Does not upload the files.
+// sourceType can be "local" or "s3".
+const createSample = (
+  sampleName,
+  projectName,
+  hostId,
+  inputFiles,
+  sourceType,
+  preloadResultsPath = "",
+  alignmentConfig = "",
+  pipelineBranch = "",
+  dagVariables = "",
+  maxInputFragments = "",
+  subsample = ""
+) =>
+  new Promise((resolve, reject) => {
+    const fileAttributes = Array.from(inputFiles, file => {
+      if (sourceType === "local") {
+        return {
+          source_type: sourceType,
+          source: cleanFilePath(file.name),
+          parts: cleanFilePath(file.name)
+        };
+      } else {
+        return {
+          source_type: sourceType,
+          source: file
+        };
+      }
+    });
+
+    axios
+      .post("/samples.json", {
+        sample: {
+          name: sampleName,
+          project_name: projectName,
+          host_genome_id: hostId,
+          input_files_attributes: fileAttributes,
+          status: "created",
+          client: "web",
+
+          // Admin options
+          s3_preload_result_path: preloadResultsPath,
+          alignment_config_name: alignmentConfig,
+          pipeline_branch: pipelineBranch,
+          dag_vars: dagVariables,
+          max_input_fragments: maxInputFragments,
+          subsample: subsample
+        },
+        authenticity_token: document.getElementsByName("csrf-token")[0].content
+      })
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
+
 export {
   get,
   getSampleMetadata,
@@ -81,5 +147,6 @@ export {
   getAlignmentData,
   getURLParamString,
   deleteSample,
-  getSummaryContigCounts
+  getSummaryContigCounts,
+  createSample
 };

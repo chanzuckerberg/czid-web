@@ -48,7 +48,7 @@ class MinContigSizeFilter extends React.Component {
     `;
 
     return (
-      <div className={cs.contents} onClick={e => e.stopPropagation()}>
+      <div className={cs.contents}>
         <div className={cs.labelContainer}>
           <span className={cs.label}>Set the Min Contig Size:</span>
           <HelpIcon text={helpText} />
@@ -71,15 +71,16 @@ class MinContigSizeFilter extends React.Component {
         trigger={
           <DropdownTrigger
             className={cs.dropdownTrigger}
-            label="Min Contig Size: "
+            label="Min Contig Size:"
             value={this.state.value}
             rounded
           />
         }
         floating
         arrowInsideTrigger
+        closeOnClick={false}
       >
-        <BareDropdown.Menu>{this.renderContents()}</BareDropdown.Menu>
+        {this.renderContents()}
       </BareDropdown>
     );
   }

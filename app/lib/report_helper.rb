@@ -443,35 +443,53 @@ module ReportHelper
   end
 
   def samples_taxons_details(samples, taxon_ids, background_id, species_selected)
-    samples_by_id = Hash[samples.map { |s| [s.id, s] }]
-    parent_ids = fetch_parent_ids(taxon_ids, samples)
-    results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
-    results = []
-    results_by_pr.each do |_pr_id, res|
-      pr = res["pr"]
-      taxon_counts = res["taxon_counts"]
-      sample_id = pr.sample_id
-      tax_2d = taxon_counts_cleanup(taxon_counts)
-      only_species_or_genus_counts!(tax_2d, species_selected)
+    results = {}
 
-      rows = []
-      tax_2d.each { |_tax_id, tax_info| rows << tax_info }
-      compute_aggregate_scores_v2!(rows)
+    # Get sample results for the taxon ids
+    unless taxon_ids.empty?
+      samples_by_id = Hash[samples.map { |s| [s.id, s] }]
+      parent_ids = fetch_parent_ids(taxon_ids, samples)
+      results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+      results_by_pr.each do |_pr_id, res|
+        pr = res["pr"]
+        taxon_counts = res["taxon_counts"]
+        sample_id = pr.sample_id
+        tax_2d = taxon_counts_cleanup(taxon_counts)
+        only_species_or_genus_counts!(tax_2d, species_selected)
 
-      filtered_rows = []
-      rows.each do |row|
-        filtered_rows << row if taxon_ids.include?(row["tax_id"])
+        rows = []
+        tax_2d.each { |_tax_id, tax_info| rows << tax_info }
+        compute_aggregate_scores_v2!(rows)
+
+        filtered_rows = []
+        rows.each do |row|
+          filtered_rows << row if taxon_ids.include?(row["tax_id"])
+        end
+
+        results[sample_id] = {
+          sample_id: sample_id,
+          name: samples_by_id[sample_id].name,
+          metadata: samples_by_id[sample_id].metadata,
+          host_genome_name: samples_by_id[sample_id].host_genome_name,
+          taxons: filtered_rows
+        }
       end
-
-      results << {
-        sample_id: sample_id,
-        name: samples_by_id[sample_id].name,
-        metadata: samples_by_id[sample_id].metadata,
-        host_genome_name: samples_by_id[sample_id].host_genome_name,
-        taxons: filtered_rows
-      }
     end
-    results
+
+    # For samples that didn't have matching taxons, just throw in the metadata.
+    samples.each do |sample|
+      unless results.key?(sample.id)
+        results[sample.id] = {
+          sample_id: sample.id,
+          name: sample.name,
+          metadata: sample.metadata,
+          host_genome_name: sample.host_genome_name
+        }
+      end
+    end
+
+    # Flatten the hash
+    results.values
   end
 
   def check_custom_filters(row, threshold_filters)

@@ -12,6 +12,7 @@ import { Sidebar, Label, Icon, Modal, Form } from "semantic-ui-react";
 import Nanobar from "nanobar";
 import SortHelper from "./SortHelper";
 import ProjectSelection from "./ProjectSelection";
+import BasicPopup from "./BasicPopup";
 import StringHelper from "../helpers/StringHelper";
 import Cookies from "js-cookie";
 import CompareButton from "./ui/controls/buttons/CompareButton";
@@ -793,9 +794,10 @@ class Samples extends React.Component {
   selectSample(e) {
     let sampleId = parseInt(e.target.getAttribute("data-sample-id"));
 
-    const sampleList = e.target.checked
-      ? union(this.state.selectedSampleIds, [+sampleId])
-      : difference(this.state.selectedSampleIds, [+sampleId]);
+    const sampleList =
+      e.target.getAttribute("data-checked") === "false"
+        ? union(this.state.selectedSampleIds, [+sampleId])
+        : difference(this.state.selectedSampleIds, [+sampleId]);
 
     // update the state with the new array of options
     this.setState({
@@ -926,11 +928,11 @@ class Samples extends React.Component {
     );
 
     const search_box = (
-      <div className="row search-box">
-        {search_field}
+      <div className="row search-box-row">
+        <div className="search-box">{search_field}</div>
         <div className="filter-container">
           <MultipleDropdown
-            label="Hosts: "
+            label="Hosts:"
             disabled={this.state.hostGenomes.length == 0}
             options={this.state.hostGenomes.map(host => {
               return { text: host.name, value: host.id };
@@ -942,7 +944,7 @@ class Samples extends React.Component {
         </div>
         <div className="filter-container">
           <MultipleDropdown
-            label="Sample Types: "
+            label="Sample Types:"
             disabled={this.state.tissueTypes.length == 0}
             options={this.state.tissueTypes.map(tissue => {
               return { text: tissue, value: tissue };
@@ -1333,9 +1335,16 @@ function SampleNameInfo({ parent, dbSample, uploader }) {
       onClick={e => parent.viewSample(dbSample.id, e)}
       className="sample-name-info"
     >
-      <div className="card-label center-label sample-name bold-label">
-        {dbSample.name}
-      </div>
+      <BasicPopup
+        trigger={
+          <div className="card-label center-label sample-name bold-label">
+            {dbSample.name}
+          </div>
+        }
+        content={dbSample.name}
+        size="mini"
+        wide="very"
+      />
       <div className="card-label author bottom-label">
         <span className="upload-date">
           {moment(dbSample.created_at)
@@ -1859,6 +1868,8 @@ function SampleCardCheckboxes({
   i,
   parent
 }) {
+  const checked =
+    parent.state.selectedSampleIds.indexOf(sample.db_sample.id) >= 0;
   return (
     <li className="check-box-container">
       {parent.state.displaySelectSamples ? (
@@ -1866,16 +1877,18 @@ function SampleCardCheckboxes({
           <input
             type="checkbox"
             id={i}
-            onClick={parent.selectSample}
             key={`sample_${sample.db_sample.id}`}
-            data-sample-id={sample.db_sample.id}
             className="filled-in checkbox"
-            checked={
-              parent.state.selectedSampleIds.indexOf(sample.db_sample.id) >= 0
-            }
+            checked={checked}
             disabled={report_ready != 1}
-          />{" "}
-          <label htmlFor={i}>{sample_name_info}</label>
+          />
+          <label
+            data-checked={checked}
+            onClick={parent.selectSample}
+            data-sample-id={sample.db_sample.id}
+          >
+            <div onClick={e => e.stopPropagation()}>{sample_name_info}</div>
+          </label>
         </div>
       ) : (
         sample_name_info

@@ -8,29 +8,46 @@ class Dropdown extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: this.props.value !== undefined ? this.props.value : null
+      value: this.props.value !== undefined ? this.props.value : null,
+      labels: {}
     };
-    this.labels = this.props.options.reduce((labelMap, option) => {
-      labelMap[option.value.toString()] = option.text;
-      return labelMap;
-    }, {});
   }
 
-  componentWillReceiveProps(newProps) {
-    if (newProps.value != this.props.value) {
-      this.setState({ value: newProps.value });
+  componentDidMount() {
+    this.buildLabels();
+  }
+
+  componentDidUpdate(prevProps) {
+    // Also guard against NaN.
+    if (
+      prevProps.value !== this.props.value &&
+      !(isNaN(prevProps.value) && isNaN(this.props.value))
+    ) {
+      this.setState({ value: this.props.value });
+    }
+    if (prevProps.options !== this.props.options) {
+      this.buildLabels();
     }
   }
 
-  handleOnChange = (e, d) => {
-    this.setState({ value: d.value });
-    this.props.onChange(d.value, this.labels[d.value]);
+  buildLabels = () => {
+    this.setState({
+      labels: this.props.options.reduce((labelMap, option) => {
+        labelMap[option.value.toString()] = option.text;
+        return labelMap;
+      }, {})
+    });
+  };
+
+  handleOnChange = value => {
+    this.setState({ value });
+    this.props.onChange(value, this.state.labels[value.toString()]);
   };
 
   renderTrigger = () => {
     const text = this.state.value !== undefined &&
       this.state.value !== null && (
-        <span>{this.labels[this.state.value.toString()]}</span>
+        <span>{this.state.labels[this.state.value.toString()]}</span>
       );
     return (
       <DropdownTrigger
@@ -48,11 +65,12 @@ class Dropdown extends React.Component {
         className={cs.dropdown}
         arrowInsideTrigger
         placeholder={this.props.placeholder}
-        scrolling={this.props.scrolling}
         disabled={this.props.disabled}
         fluid={this.props.fluid}
         options={this.props.options}
         value={this.state.value}
+        search={this.props.search}
+        menuLabel={this.props.menuLabel}
         floating
         onChange={this.handleOnChange}
         trigger={this.renderTrigger()}
@@ -65,7 +83,6 @@ class Dropdown extends React.Component {
 Dropdown.propTypes = {
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
-  scrolling: PropTypes.bool,
   fluid: PropTypes.bool,
   rounded: PropTypes.bool,
   label: PropTypes.string,
@@ -77,7 +94,9 @@ Dropdown.propTypes = {
     })
   ).isRequired,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  search: PropTypes.bool,
+  menuLabel: PropTypes.string
 };
 
 export default Dropdown;

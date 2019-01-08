@@ -1,4 +1,5 @@
 class SamplesController < ApplicationController
+  include ApplicationHelper
   include ReportHelper
   include SamplesHelper
   include PipelineOutputsHelper
@@ -282,18 +283,14 @@ class SamplesController < ApplicationController
     background_id = get_background_id(@sample)
     @report_page_params = { pipeline_version: @pipeline_version, background_id: background_id } if background_id
     @report_page_params[:scoring_model] = params[:scoring_model] if params[:scoring_model]
-    if @pipeline_run && (((@pipeline_run.adjusted_remaining_reads.to_i > 0 || @pipeline_run.results_finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
-      if background_id
-        @report_present = true
-        @report_ts = @pipeline_run.updated_at.to_i
-        @all_categories = all_categories
-        @report_details = report_details(@pipeline_run, current_user.id)
-        @ercc_comparison = @pipeline_run.compare_ercc_counts
-      end
 
-      if @pipeline_run.failed?
-        @pipeline_run_retriable = true
-      end
+    # Check if the report table should actually show
+    if background_id && @pipeline_run && @pipeline_run.report_ready?
+      @report_present = true
+      @report_ts = @pipeline_run.updated_at.to_i
+      @all_categories = all_categories
+      @report_details = report_details(@pipeline_run, current_user.id)
+      @ercc_comparison = @pipeline_run.compare_ercc_counts
     end
 
     tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
@@ -419,6 +416,7 @@ class SamplesController < ApplicationController
 
   def taxid_contigs
     taxid = params[:taxid]
+    return if HUMAN_TAX_IDS.include? taxid.to_i
     pr = select_pipeline_run(@sample, params)
     contigs = pr.get_contigs_for_taxid(taxid)
     output_fasta = ''
@@ -434,6 +432,7 @@ class SamplesController < ApplicationController
   end
 
   def show_taxid_fasta
+    return if HUMAN_TAX_IDS.include? params[:taxid].to_i
     pr = select_pipeline_run(@sample, params)
     if params[:hit_type] == "NT_or_NR"
       nt_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
@@ -446,30 +445,16 @@ class SamplesController < ApplicationController
     send_data @taxid_fasta, filename: @sample.name + '_' + clean_taxid_name(pr, params[:taxid]) + '-hits.fasta'
   end
 
-  def show_taxid_alignment
-    # TODO(yf): DEPRECATED. Remove by 5/24/2018
-    @taxon_info = params[:taxon_info].tr("_", ".")
-    pr = @sample.pipeline_runs.first
-    s3_file_path = pr.alignment_viz_json_s3(@taxon_info)
-    alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
-    @taxid = @taxon_info.split(".")[2].to_i
-    @tax_level = @taxon_info.split(".")[1]
-    @parsed_alignment_results = parse_alignment_results(@taxid, @tax_level, alignment_data)
-
-    respond_to do |format|
-      format.json do
-        render json: alignment_data
-      end
-      format.html { @title = @parsed_alignment_results['title'] }
-    end
-  end
-
   def show_taxid_alignment_viz
     @taxon_info = params[:taxon_info].split(".")[0]
+    @taxid = @taxon_info.split("_")[2].to_i
+    if HUMAN_TAX_IDS.include? @taxid.to_i
+      render json: { status: :forbidden, message: "Human taxon ids are not allowed" }
+      return
+    end
 
     pr = select_pipeline_run(@sample, params)
 
-    @taxid = @taxon_info.split("_")[2].to_i
     @tax_level = @taxon_info.split("_")[1]
     @taxon_name = taxon_name(@taxid, @tax_level)
     @pipeline_version = pr.pipeline_version if pr
@@ -477,16 +462,30 @@ class SamplesController < ApplicationController
     respond_to do |format|
       format.json do
         s3_file_path = pr.alignment_viz_json_s3(@taxon_info.tr('_', '.'))
-        alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
-        flattened_data = {}
-        parse_tree(flattened_data, @taxid, alignment_data, true)
-        output_array = []
-        flattened_data.each do |k, v|
-          v["accession"] = k
-          v["reads_count"] = v["reads"].size
-          output_array << v
+        (_tmp1, _tmp2, bucket, key) = s3_file_path.split('/', 4)
+        begin
+          resp = Client.head_object(bucket: bucket, key: key)
+          if resp.content_length < 10_000_000
+            alignment_data = JSON.parse(get_s3_file(s3_file_path) || "{}")
+            flattened_data = {}
+            parse_tree(flattened_data, @taxid, alignment_data, true)
+            output_array = []
+            flattened_data.each do |k, v|
+              v["accession"] = k
+              v["reads_count"] = v["reads"].size
+              output_array << v
+            end
+            render json: output_array.sort { |a, b| b['reads_count'] <=> a['reads_count'] }
+          else
+            render json: {
+              error: "alignment file too big"
+            }
+          end
+        rescue
+          render json: {
+            error: "unexpected error occurred"
+          }
         end
-        render json: output_array.sort { |a, b| b['reads_count'] <=> a['reads_count'] }
       end
       format.html {}
     end
@@ -768,7 +767,6 @@ class SamplesController < ApplicationController
 
     taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
     taxon_ids -= removed_taxon_ids
-    return {} if taxon_ids.empty?
 
     samples_taxons_details(samples, taxon_ids, background_id, species_selected)
   end
@@ -800,7 +798,7 @@ class SamplesController < ApplicationController
                         :s3_star_index_path, :s3_bowtie2_index_path,
                         :host_genome_id, :host_genome_name, :sample_location, :sample_date, :sample_tissue,
                         :sample_template, :sample_library, :sample_sequencer,
-                        :sample_notes, :search,
+                        :sample_notes, :search, :subsample, :max_input_fragments,
                         :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection, :client,
                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample]) if current_user.admin?

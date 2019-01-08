@@ -40,7 +40,6 @@ Rails.application.routes.draw do
   end
 
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
-  get 'samples/:id/alignment/:taxon_info', to: 'samples#show_taxid_alignment'
   get 'samples/:id/alignment_viz/:taxon_info', to: 'samples#show_taxid_alignment_viz'
   get 'cli_user_instructions', to: 'samples#cli_user_instructions'
   get 'select', to: 'home#index'

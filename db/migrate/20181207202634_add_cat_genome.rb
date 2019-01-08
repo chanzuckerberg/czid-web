@@ -13,7 +13,6 @@ class AddCatGenome < ActiveRecord::Migration[5.1]
                                  # Probably not going to happen
                                  1
                                end
-    hg.sample_memory = 60_000
     hg.save
   end
 

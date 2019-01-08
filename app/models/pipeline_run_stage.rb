@@ -172,7 +172,7 @@ class PipelineRunStage < ApplicationRecord
       file_type: file_type,
       star_genome: sample.s3_star_index_path,
       bowtie2_genome: sample.s3_bowtie2_index_path,
-      max_fragments: PipelineRun::MAX_INPUT_FRAGMENTS,
+      max_fragments: pipeline_run.max_input_fragments,
       max_subsample_frag: pipeline_run.subsample
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]

@@ -83,9 +83,8 @@ class MultipleDropdown extends React.Component {
         {...otherProps}
         arrowInsideTrigger
         trigger={this.renderText()}
-      >
-        <BareDropdown.Menu>{this.renderMenuItems()}</BareDropdown.Menu>
-      </BareDropdown>
+        items={this.renderMenuItems()}
+      />
     );
   }
 }

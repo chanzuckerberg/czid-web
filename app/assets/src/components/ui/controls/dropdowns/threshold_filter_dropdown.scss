@@ -1,0 +1,67 @@
+@import "~styles/themes/colors";
+@import "~styles/typography";
+
+:global(.ui):global(.dropdown).thresholdFilterDropdown {
+  .dropdownLabel {
+    margin-left: 6px;
+  }
+
+  &:global(.active) {
+    .dropdownTrigger {
+      border: 1px solid $primary-light;
+    }
+  }
+
+  .container {
+    width: 412px;
+    padding: 6px;
+
+    .thresholdButtons {
+      /* Override row css */
+      padding-top: 5px !important;
+      text-align: center;
+
+      .button {
+        margin-left: 10px;
+
+        &:first-child {
+          margin-left: 0;
+        }
+      }
+    }
+
+    .thresholdFilter {
+      .removeIcon {
+        cursor: pointer;
+        opacity: 0.3;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+
+    .addThresholdLink {
+      text-align: left;
+      font-weight: 600;
+      cursor: pointer;
+
+      &:hover {
+        color: $primary-light;
+      }
+    }
+
+    :global(.grid) {
+      margin: 0;
+
+      :global(.row) {
+        margin: 0;
+        padding: 0;
+
+        :global(.column) {
+          padding: 6px;
+        }
+      }
+    }
+  }
+}

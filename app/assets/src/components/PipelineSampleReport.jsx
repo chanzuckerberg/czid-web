@@ -33,11 +33,11 @@ import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
 import LoadingLabel from "./ui/labels/LoadingLabel";
 import HoverActions from "./views/report/ReportTable/HoverActions";
-import { getSampleReportInfo } from "~/api";
-import { getSummaryContigCounts } from "../api";
+import { getSampleReportInfo, getSummaryContigCounts } from "~/api";
 import { pipelineVersionHasAssembly } from "./utils/sample";
 
 const DEFAULT_MIN_CONTIG_SIZE = 4;
+const HUMAN_TAX_IDS = [9605, 9606];
 
 class PipelineSampleReport extends React.Component {
   constructor(props) {
@@ -119,18 +119,8 @@ class PipelineSampleReport extends React.Component {
       },
       {}
     );
-    this.defaultThreshold = {
-      metric: this.allThresholds[0]["value"],
-      operator: ">=",
-      value: ""
-    };
 
-    // all taxons will pass this default filter
-    this.defaultThresholdValues = savedThresholdFilters.length
-      ? savedThresholdFilters
-      : [Object.assign({}, this.defaultThreshold)];
-
-    let defaultBackgroundId = parseInt(this.fetchParams("background_id"));
+    let defaultBackgroundId = parseInt(this.fetchParams("background_id")) || -1;
     // we should only keep dynamic data in the state
     // Starting state is default values which are to be set later.
     this.state = {
@@ -163,7 +153,7 @@ class PipelineSampleReport extends React.Component {
       name_type: cached_name_type ? cached_name_type : "Scientific Name",
       rendering: false,
       loading: true,
-      activeThresholds: this.defaultThresholdValues,
+      activeThresholds: savedThresholdFilters,
       countType: "NT",
       readSpecificity: cachedReadSpecificity
         ? parseInt(cachedReadSpecificity)
@@ -278,7 +268,7 @@ class PipelineSampleReport extends React.Component {
   resetAllFilters = () => {
     this.setState(
       {
-        activeThresholds: [Object.assign({}, this.defaultThreshold)],
+        activeThresholds: [],
         includedCategories: [],
         includedSubcategories: [],
         searchKey: "",
@@ -761,12 +751,18 @@ class PipelineSampleReport extends React.Component {
     const validTaxId =
       taxInfo.tax_id < this.INVALID_CALL_BASE_TAXID || taxInfo.tax_id > 0;
     const ncbiEnabled = validTaxId;
-    const fastaEnabled = reportDetails.taxon_fasta_flag;
+    const fastaEnabled =
+      !HUMAN_TAX_IDS.includes(taxInfo.tax_id) && reportDetails.taxon_fasta_flag;
     const contigVizEnabled =
+      !HUMAN_TAX_IDS.includes(taxInfo.tax_id) &&
       this.state.contigTaxidList.indexOf(taxInfo.tax_id) >= 0;
     const alignmentVizEnabled =
-      this.canSeeAlignViz && validTaxId && taxInfo.NT.r > 0;
+      !HUMAN_TAX_IDS.includes(taxInfo.tax_id) &&
+      this.canSeeAlignViz &&
+      validTaxId &&
+      taxInfo.NT.r > 0;
     const phyloTreeEnabled =
+      !HUMAN_TAX_IDS.includes(taxInfo.tax_id) &&
       this.allowPhyloTree &&
       taxInfo.tax_id > 0 &&
       PhyloTreeChecks.passesCreateCondition(taxInfo.NT.r, taxInfo.NR.r);

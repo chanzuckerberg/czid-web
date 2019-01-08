@@ -29,20 +29,19 @@ class TableColumnHeader extends React.Component {
       return trigger;
     }
 
+    const options = columnOptions.map(option => ({
+      value: option,
+      text: columnMap[option].display_name
+    }));
+
     return (
-      <BareDropdown trigger={trigger} floating scrolling>
-        <BareDropdown.Menu>
-          <BareDropdown.Header content="Switch Columns" className={cs.header} />
-          {columnOptions.map(option => (
-            <BareDropdown.Item
-              key={columnMap[option].display_name}
-              onClick={() => onColumnOptionSelect(option)}
-            >
-              {columnMap[option].display_name}
-            </BareDropdown.Item>
-          ))}
-        </BareDropdown.Menu>
-      </BareDropdown>
+      <BareDropdown
+        trigger={trigger}
+        floating
+        onChange={onColumnOptionSelect}
+        options={options}
+        menuLabel="Switch Columns"
+      />
     );
   }
 }

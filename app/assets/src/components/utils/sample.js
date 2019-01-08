@@ -1,4 +1,4 @@
-import last from "lodash/fp";
+import { last } from "lodash/fp";
 
 export const pipelineVersionHasAssembly = pipelineVersion => {
   if (!pipelineVersion) return false;
@@ -8,7 +8,7 @@ export const pipelineVersionHasAssembly = pipelineVersion => {
 
 // Get the basename from a file path
 export const baseName = str => {
-  let base = cleanLocalFilePath(str);
+  let base = cleanFilePath(str);
 
   let separator = "/";
   if (base.includes("\\")) {
@@ -26,9 +26,17 @@ export const baseName = str => {
   return base;
 };
 
-export const cleanLocalFilePath = name => {
+export const cleanFilePath = name => {
   name = name.trim();
 
   // Remove ./ and .\ from the start of file paths
   return name.replace(/^\.[\\|/]/, "");
+};
+
+export const sampleNameFromFileName = fname => {
+  let base = baseName(fname);
+  const fastqLabel = /.fastq*$|.fq*$|.fasta*$|.fa*$|.gz*$/gim;
+  const readLabel = /_R1.*$|_R2.*$/gi;
+  base = base.replace(fastqLabel, "").replace(readLabel, "");
+  return base;
 };

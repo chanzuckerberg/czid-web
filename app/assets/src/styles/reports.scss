@@ -311,10 +311,10 @@ input[type="number"] {
             input {
               width: 100%;
               border: 1px solid $light-grey;
-              padding: 6px 35px 6px 10px;
+              padding: 6px 31px 6px 14px;
               position: relative;
               margin: 0;
-              height: 24px !important;
+              height: 20px !important;
               border-radius: 19px;
             }
             i {
@@ -367,34 +367,6 @@ input[type="number"] {
   .link-tag {
     visibility: hidden;
     padding-left: 10px;
-  }
-}
-
-.report-action-buttons {
-  .ui.labeled.icon.button > .icon {
-    // Actual icon in the button
-    background-color: transparent;
-    font-size: 1.3em;
-    margin-left: 0.4em !important;
-  }
-  .download-btn {
-    // The whole button
-    color: $primary-light;
-    background-color: $white;
-    padding-left: 5em !important;
-    border: 1px solid $primary-light;
-    border-radius: 50px;
-    &:hover {
-      background-color: $primary-light;
-      color: $white;
-    }
-    width: 162px;
-    height: 38px;
-  }
-  .ui.dropdown .text {
-    // The text in the button
-    font-size: 1.2em;
-    padding: 0.05em;
   }
 }
 

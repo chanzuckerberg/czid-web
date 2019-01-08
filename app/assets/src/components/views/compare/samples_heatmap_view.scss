@@ -5,8 +5,12 @@
     margin-top: 40px;
     margin-bottom: 40px;
 
-    .controlElement {
-      margin-left: 10px;
+    .controls {
+      display: flex;
+
+      .controlElement {
+        margin-left: 10px;
+      }
     }
   }
 
@@ -18,8 +22,10 @@
     }
   }
 
-  .loadingIndicator {
+  .loadingIndicator,
+  .noDataMsg {
     margin: 50px;
     text-align: center;
+    color: $medium-grey;
   }
 }
