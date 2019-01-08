@@ -12,7 +12,7 @@ import { goToPageWithTimeout } from "~utils/links";
 import { createSample } from "~/api";
 import FilePicker from "~ui/controls/FilePicker";
 import BulkSampleUploadTable from "./ui/controls/BulkSampleUploadTable";
-import { merge, omit } from "lodash/fp";
+import { merge, omit, isEmpty } from "lodash/fp";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -665,10 +665,7 @@ class BulkUploadImport extends React.Component {
   // Upload a dict of sample names to input files
   bulkUploadLocal = sampleNamesToFiles => {
     this.setState({
-      submitting: true,
-      invalid: true,
-      errorMessage:
-        "Upload in progress... Please keep this page open until completed...\n"
+      submitting: true
     });
 
     // Latest browsers will only show a generic warning
@@ -693,13 +690,13 @@ class BulkUploadImport extends React.Component {
         })
         .catch(error => {
           // Remove samples that couldn't be created and show error message.
-          this.onRemoved(sampleName);
           this.setState({
             invalid: true,
             errorMessage: `${
               this.state.errorMessage
             }\n${sampleName}: ${joinServerError(error.response.data)}`
           });
+          this.onRemoved(sampleName);
         });
     }
   };
@@ -732,12 +729,21 @@ class BulkUploadImport extends React.Component {
       });
   };
 
-  // onRemoved for when a user doesn't want to upload a local sample/files
+  // onRemoved for when a user doesn't want to upload a local sample/files or when
+  // there's an error when trying to create the sample
   onRemoved = sampleName => {
-    this.setState({
-      sampleNamesToFiles: omit(sampleName, this.state.sampleNamesToFiles),
-      fileNamesToProgress: omit(sampleName, this.state.fileNamesToProgress)
-    });
+    this.setState(
+      {
+        sampleNamesToFiles: omit(sampleName, this.state.sampleNamesToFiles),
+        fileNamesToProgress: omit(sampleName, this.state.fileNamesToProgress)
+      },
+      () => {
+        // If there's nothing to upload anymore, not submitting state anymore
+        if (isEmpty(this.state.sampleNamesToFiles)) {
+          this.setState({ submitting: false });
+        }
+      }
+    );
   };
 
   // Called when a local file finishes uploading
@@ -1168,6 +1174,13 @@ class BulkUploadImport extends React.Component {
                     <span>{this.state.successMessage}</span>
                   </div>
                 ) : null}
+                {this.state.submitting && (
+                  <div className="form-feedback error-message">
+                    {
+                      "Upload in progress... Please keep this page open until completed..."
+                    }
+                  </div>
+                )}
                 {this.state.invalid ? (
                   <div className="form-feedback error-message">
                     {this.state.errorMessage}
