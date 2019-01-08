@@ -28,6 +28,12 @@ export const getSampleTableData = sample => {
     nonhost_reads_percent: toPercent(
       get("summary_stats.percent_remaining", derivedOutput)
     ),
+    total_ercc_reads: numberWithCommas(
+      get("pipeline_run.total_ercc_reads", derivedOutput)
+    ),
+    fraction_subsampled: roundToTwo(
+      get("pipeline_run.fraction_subsampled", derivedOutput)
+    ),
     quality_control: toPercent(get("summary_stats.qc_percent", derivedOutput)),
     compression_ratio: roundToTwo(
       get("summary_stats.compression_ratio", derivedOutput)
