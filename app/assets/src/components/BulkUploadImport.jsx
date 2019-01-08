@@ -7,12 +7,11 @@ import SampleUpload from "./SampleUpload";
 import ObjectHelper from "../helpers/ObjectHelper";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import Icon from "~ui/icons/Icon";
-import { sampleNameFromFileName } from "~utils/sample";
+import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { createSample } from "~/api";
 import FilePicker from "~ui/controls/FilePicker";
 import BulkSampleUploadTable from "./ui/controls/BulkSampleUploadTable";
 import { merge } from "lodash/fp";
-import { keyBy } from "lodash";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -64,7 +63,8 @@ class BulkUploadImport extends React.Component {
       consentChecked: false,
 
       // Local upload fields
-      localUploadMode: false
+      localUploadMode: false,
+      fileNamesToProgress: {}
     };
   }
   componentDidUpdate() {
@@ -656,9 +656,8 @@ class BulkUploadImport extends React.Component {
     this.bulkUploadLocal(sampleNamesToFiles);
   };
 
-  // Upload a dict of sample names to input files.
+  // Upload a dict of sample names to input files
   bulkUploadLocal = sampleNamesToFiles => {
-    console.log("bulk upload called");
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
       createSample(
         sampleName,
@@ -668,38 +667,44 @@ class BulkUploadImport extends React.Component {
         "local"
       )
         .then(response => {
+          // After successful sample creation, upload to the presigned URL
           files.map((file, i) => {
             const url = response.data.input_files[i].presigned_url;
             this.uploadFileToURL(sampleName, file, url);
           });
         })
         .catch(error => {
-          console.log("err here:", error.response.data);
+          // Display error message
+          this.setState({
+            invalid: true,
+            errorMessage: joinServerError(error.response.data)
+          });
         });
     }
   };
 
+  // Upload a file for a sample to a URL
   uploadFileToURL = (sampleName, file, url) => {
     const config = {
+      // Update the UI on progress
       onUploadProgress: e => {
         const percent = Math.round(e.loaded * 100 / e.total);
-
-        console.log(file, percent);
-
-        const newState = merge(this.state, {
-          fileNamesToProgress: { [file.name]: percent }
+        const newProgress = merge(this.state.fileNamesToProgress, {
+          [file.name]: percent
         });
-
-        this.setState(newState);
+        this.setState({ fileNamesToProgress: newProgress });
       }
     };
     axios
       .put(url, file, config)
       .then(() => {
-        console.log(file, "DONE");
+        console.log(file.name, "DONE");
       })
-      .catch(err => {
-        console.log(file, err);
+      .catch(error => {
+        this.setState({
+          invalid: true,
+          errorMessage: `${file.name}: ${joinServerError(error.response.data)}`
+        });
       });
   };
 
@@ -890,17 +895,6 @@ class BulkUploadImport extends React.Component {
                 </a>
               </p>
             </div>
-            {this.state.success ? (
-              <div className="form-feedback success-message">
-                <i className="fa fa-check-circle-o" />{" "}
-                <span>{this.state.successMessage}</span>
-              </div>
-            ) : null}
-            {this.state.invalid ? (
-              <div className="form-feedback error-message">
-                {this.state.errorMessage}
-              </div>
-            ) : null}
             <form ref="form" onSubmit={this.handleUpload}>
               <div className="fields">
                 <div className="field">
@@ -1094,6 +1088,17 @@ class BulkUploadImport extends React.Component {
                 <div className="field">
                   <div className="row">
                     <div className="col no-padding s12">
+                      {this.state.success ? (
+                        <div className="form-feedback success-message">
+                          <i className="fa fa-check-circle-o" />
+                          <span>{this.state.successMessage}</span>
+                        </div>
+                      ) : null}
+                      {this.state.invalid ? (
+                        <div className="form-feedback error-message">
+                          {this.state.errorMessage}
+                        </div>
+                      ) : null}
                       {submitButton}
                       <button
                         type="button"

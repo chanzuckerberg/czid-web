@@ -1,0 +1,17 @@
+.samples-with-files-table {
+  .detected-msg {
+    margin-bottom: 20px;
+  }
+
+  .data-table {
+    .column-progress {
+      width: 30px;
+    }
+
+    &__data {
+      &.column-sampleName {
+        font-weight: 700;
+      }
+    }
+  }
+}

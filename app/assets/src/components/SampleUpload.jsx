@@ -4,7 +4,7 @@ import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
 import ObjectHelper from "../helpers/ObjectHelper";
-import { sampleNameFromFileName } from "~utils/sample";
+import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import CatIcon from "~ui/icons/CatIcon";
 import ERCCIcon from "~ui/icons/ERCCIcon";
 import HumanIcon from "~ui/icons/HumanIcon";
@@ -294,18 +294,10 @@ class SampleUpload extends React.Component {
         this.setState({
           invalid: true,
           submitting: false,
-          errorMessage: this.joinServerError(error.response.data)
+          errorMessage: joinServerError(error.response.data)
         });
       });
   }
-
-  joinServerError = response => {
-    let joined = "";
-    Object.keys(response).forEach(group => {
-      joined += response[group].join(". ");
-    });
-    return joined;
-  };
 
   updateSample() {
     let that = this;
@@ -341,7 +333,7 @@ class SampleUpload extends React.Component {
         that.setState({
           submitting: false,
           invalid: true,
-          errorMessage: this.joinServerError(error.response.data)
+          errorMessage: joinServerError(error.response.data)
         });
       });
   }
@@ -636,7 +628,7 @@ class SampleUpload extends React.Component {
           this.setState({
             invalid: true,
             submitting: false,
-            errorMessage: this.joinServerError(error.response.data)
+            errorMessage: joinServerError(error.response.data)
           });
         });
     }
@@ -712,7 +704,7 @@ class SampleUpload extends React.Component {
         this.setState({
           invalid: true,
           submitting: false,
-          errorMessage: this.joinServerError(error.response.data)
+          errorMessage: joinServerError(error.response.data)
         });
       });
   };
