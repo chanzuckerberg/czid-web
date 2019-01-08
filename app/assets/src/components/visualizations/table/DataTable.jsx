@@ -122,45 +122,45 @@ class DataTable extends React.Component {
     return (
       <table className="idseq-ui data-table">
         <thead>
-        <tr>
-          {this.props.onSelectedRowsChanged && (
-            <th className="data-table__header column-reserved-selectable">
-              <Checkbox
-                checked={allChecked}
-                onChange={this.handleCheckBoxChange}
-                value={-1}
-              />
-            </th>
-          )}
-          {this.props.columns.map((column, idx) => (
-            <th className={`data-table__header column-${column}`} key={idx}>
-              {this.props.headers[column]}
-            </th>
-          ))}
-        </tr>
-        </thead>
-        <tbody>
-        {filteredData.map(row => (
-          <tr key={row.__originalIndex}>
+          <tr>
             {this.props.onSelectedRowsChanged && (
-              <td className="data-table__data column-reserved-selectable">
+              <th className="data-table__header column-reserved-selectable">
                 <Checkbox
-                  checked={this.state.selectedRows.has(row.__originalIndex)}
+                  checked={allChecked}
                   onChange={this.handleCheckBoxChange}
-                  value={row.__originalIndex}
+                  value={-1}
                 />
-              </td>
+              </th>
             )}
-            {this.props.columns.map((column, colIdx) => (
-              <td
-                className={`data-table__data column-${column}`}
-                key={colIdx}
-              >
-                {row[column]}
-              </td>
+            {this.props.columns.map((column, idx) => (
+              <th className={`data-table__header column-${column}`} key={idx}>
+                {this.props.headers[column]}
+              </th>
             ))}
           </tr>
-        ))}
+        </thead>
+        <tbody>
+          {filteredData.map(row => (
+            <tr key={row.__originalIndex}>
+              {this.props.onSelectedRowsChanged && (
+                <td className="data-table__data column-reserved-selectable">
+                  <Checkbox
+                    checked={this.state.selectedRows.has(row.__originalIndex)}
+                    onChange={this.handleCheckBoxChange}
+                    value={row.__originalIndex}
+                  />
+                </td>
+              )}
+              {this.props.columns.map((column, colIdx) => (
+                <td
+                  className={`data-table__data column-${column}`}
+                  key={colIdx}
+                >
+                  {row[column]}
+                </td>
+              ))}
+            </tr>
+          ))}
         </tbody>
       </table>
     );
@@ -176,7 +176,8 @@ DataTable.propTypes = {
     PropTypes.arrayOf(PropTypes.number),
     // allow Set = TODO: replace by custom function
     PropTypes.object
-  ])
+  ]),
+  striped: PropTypes.bool
 };
 
 export default DataTable;
