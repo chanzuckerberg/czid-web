@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import DataTable from "../../visualizations/table/DataTable";
-import { isEmpty, get } from "lodash/fp";
+import { isEmpty } from "lodash/fp";
 import RemoveIcon from "../icons/RemoveIcon";
 import LoadingIcon from "../icons/LoadingIcon";
 import CheckmarkIcon from "../icons/CheckmarkIcon";
@@ -65,6 +65,12 @@ class BulkSampleUploadTable extends React.Component {
   }
 }
 
-BulkSampleUploadTable.propTypes = {};
+BulkSampleUploadTable.propTypes = {
+  // Ex: { "water_sample": [File, File], "csf_sample": [File, File] }
+  sampleNamesToFiles: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.object)),
+  // Ex: { "water_file_r1": 24, "water_file_r2": 85 }
+  fileNamesToProgress: PropTypes.objectOf(PropTypes.number),
+  onRemoved: PropTypes.func
+};
 
 export default BulkSampleUploadTable;
