@@ -21,4 +21,14 @@ const downloadStringToFile = str => {
   location.href = `${downloadUrl}`;
 };
 
-export { openUrl, downloadStringToFile };
+const goToPage = page => {
+  location.href = page;
+};
+
+const goToPageWithTimeout = page => {
+  setTimeout(() => {
+    goToPage(page);
+  }, 2000);
+};
+
+export { openUrl, downloadStringToFile, goToPage, goToPageWithTimeout };

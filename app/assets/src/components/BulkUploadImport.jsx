@@ -178,10 +178,6 @@ class BulkUploadImport extends React.Component {
     });
   }
 
-  gotoPage(path) {
-    location.href = `${path}`;
-  }
-
   toggleCheckBox(e) {
     this.setState({
       [e.target.id]: e.target.value == "true" ? false : true
