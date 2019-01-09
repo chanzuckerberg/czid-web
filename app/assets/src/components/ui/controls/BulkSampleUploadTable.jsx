@@ -15,24 +15,30 @@ class BulkSampleUploadTable extends React.Component {
     // Put together the cell data for the DataTable
     let entries = [];
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
-      const progress = files.every(f => fileNamesToProgress[f.name] === 100) ? (
-        <CheckmarkIcon />
-      ) : (
-        <LoadingIcon />
-      );
-      const removeIcon = (
-        <RemoveIcon
-          onClick={() => onRemoved(sampleName)}
-          className="removeIcon"
-        />
-      );
-      // If files haven't started yet, show the remove icons.
-      const action = isEmpty(fileNamesToProgress) ? removeIcon : progress;
+      let progress, removeIcon;
+      if (isEmpty(fileNamesToProgress)) {
+        removeIcon = (
+          <RemoveIcon
+            onClick={() => onRemoved(sampleName)}
+            className="removeIcon"
+          />
+        );
+      } else {
+        // Show a checkmark when all a samples files are done
+        progress = files.every(f => fileNamesToProgress[f.name] === 100) ? (
+          <CheckmarkIcon />
+        ) : (
+          <LoadingIcon />
+        );
+      }
+
+      const filesList = <div>{files.map(f => <div>{f.name}</div>)}</div>;
 
       const entry = {
-        action: action,
+        progress: progress,
         sampleName: sampleName,
-        files: <div>{files.map(f => <div>{f.name}</div>)}</div>
+        files: filesList,
+        removeIcon: removeIcon
       };
       entries.push(entry);
     }
@@ -45,11 +51,12 @@ class BulkSampleUploadTable extends React.Component {
         </div>
         <DataTable
           headers={{
-            action: "",
+            progress: "",
             sampleName: "Sample Name",
-            files: "Files"
+            files: "Files",
+            removeIcon: ""
           }}
-          columns={["action", "sampleName", "files"]}
+          columns={["progress", "sampleName", "files", "removeIcon"]}
           data={entries}
           striped={true}
         />

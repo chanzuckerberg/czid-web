@@ -5,11 +5,20 @@
   }
 
   .data-table {
-    .column-action {
+    .column-progress {
       width: 50px;
       text-align: center;
       padding-left: 5px;
       padding-right: 25px;
+
+      .check.icon {
+        // Align better with the spinner
+        margin-left: 2px;
+      }
+    }
+
+    .column-removeIcon {
+      width: 20px;
 
       .removeIcon {
         cursor: pointer;
@@ -21,15 +30,6 @@
           opacity: 1;
         }
       }
-
-      .check.icon {
-        // Align better with the spinner
-        margin-left: 2px;
-      }
-    }
-
-    .column-deleteButton {
-      width: 20px;
     }
 
     &__data {

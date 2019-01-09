@@ -775,7 +775,7 @@ class BulkUploadImport extends React.Component {
             });
 
             window.onbeforeunload = null;
-            goToPageWithTimeout(`/samples/${this.state.projectId}`);
+            goToPageWithTimeout(`/home?project_id=${this.state.projectId}`);
           }
         })
         .catch(error => {
@@ -1165,8 +1165,13 @@ class BulkUploadImport extends React.Component {
                     </div>
                   </div>
                 </div>
-                <div className="upload-mode-title">Sample Input Files</div>
-                {uploadModeSwitcher}
+                {/* Admin-only local bulk uploads for now*/}
+                {this.props.loggedin_user.admin && (
+                  <div>
+                    <div className="upload-mode-title">Sample Input Files</div>{" "}
+                    {uploadModeSwitcher}
+                  </div>
+                )}
                 {inputFilesSection}
                 {this.state.success ? (
                   <div className="form-feedback success-message">
