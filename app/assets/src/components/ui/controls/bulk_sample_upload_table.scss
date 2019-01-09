@@ -5,7 +5,7 @@
   }
 
   :global {
-    // Needed because DataTable doesn't use CSS modules (yet)
+    // Global because DataTable doesn't use CSS modules (yet)
     .data-table {
       .column-progress {
         width: 50px;
