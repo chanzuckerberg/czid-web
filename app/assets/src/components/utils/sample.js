@@ -40,3 +40,11 @@ export const sampleNameFromFileName = fname => {
   base = base.replace(fastqLabel, "").replace(readLabel, "");
   return base;
 };
+
+export const joinServerError = response => {
+  let joined = "";
+  Object.keys(response).forEach(group => {
+    joined += response[group].join(". ");
+  });
+  return joined;
+};

@@ -27,7 +27,7 @@ class FilePicker extends React.Component {
   };
 
   render() {
-    const { onChange, message, onRejected, title } = this.props;
+    const { onChange, message, onRejected, title, multiFile } = this.props;
     const file = this.props.file || this.state.file;
     let content;
     // TODO(mark): Add UI for multiple files.
@@ -44,7 +44,9 @@ class FilePicker extends React.Component {
     } else {
       content = (
         <div>
-          <span>Drag and drop a file here, or </span>
+          <span>
+            Drag and drop {multiFile ? "your files" : "a file"} here, or{" "}
+          </span>
           <span className={cs.browserLink}>click to use a file browser.</span>
         </div>
       );
@@ -72,7 +74,8 @@ FilePicker.propTypes = {
   onChange: PropTypes.func.isRequired,
   message: PropTypes.string,
   title: PropTypes.string,
-  onRejected: PropTypes.func
+  onRejected: PropTypes.func,
+  multiFile: PropTypes.bool
 };
 
 export default FilePicker;

@@ -4,7 +4,8 @@ import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
 import ObjectHelper from "../helpers/ObjectHelper";
-import { sampleNameFromFileName } from "~utils/sample";
+import { sampleNameFromFileName, joinServerError } from "~utils/sample";
+import { openUrlWithTimeout } from "~utils/links";
 import CatIcon from "~ui/icons/CatIcon";
 import ERCCIcon from "~ui/icons/ERCCIcon";
 import HumanIcon from "~ui/icons/HumanIcon";
@@ -181,16 +182,6 @@ class SampleUpload extends React.Component {
     });
   }
 
-  goToPage = path => {
-    location.href = path;
-  };
-
-  goToPageWithTimeout = page => {
-    setTimeout(() => {
-      this.goToPage(page);
-    }, 2000);
-  };
-
   toggleCheckBox(e) {
     this.setState({
       [e.target.id]: e.target.value == "true" ? false : true
@@ -288,24 +279,16 @@ class SampleUpload extends React.Component {
           submitting: false,
           successMessage: "Sample created successfully"
         });
-        this.goToPageWithTimeout(`/samples/${response.data.id}`);
+        openUrlWithTimeout(`/samples/${response.data.id}`);
       })
       .catch(error => {
         this.setState({
           invalid: true,
           submitting: false,
-          errorMessage: this.joinServerError(error.response.data)
+          errorMessage: joinServerError(error.response.data)
         });
       });
   }
-
-  joinServerError = response => {
-    let joined = "";
-    Object.keys(response).forEach(group => {
-      joined += response[group].join(". ");
-    });
-    return joined;
-  };
 
   updateSample() {
     let that = this;
@@ -335,13 +318,13 @@ class SampleUpload extends React.Component {
           submitting: false,
           successMessage: "Sample updated successfully"
         });
-        this.goToPageWithTimeout(`/samples/${that.state.id}`);
+        openUrlWithTimeout(`/samples/${that.state.id}`);
       })
       .catch(error => {
         that.setState({
           submitting: false,
           invalid: true,
-          errorMessage: this.joinServerError(error.response.data)
+          errorMessage: joinServerError(error.response.data)
         });
       });
   }
@@ -630,13 +613,13 @@ class SampleUpload extends React.Component {
         })
         .then(() => {
           window.onbeforeunload = null;
-          this.goToPageWithTimeout(`/samples/${this.state.id}`);
+          openUrlWithTimeout(`/samples/${this.state.id}`);
         })
         .catch(error => {
           this.setState({
             invalid: true,
             submitting: false,
-            errorMessage: this.joinServerError(error.response.data)
+            errorMessage: joinServerError(error.response.data)
           });
         });
     }
@@ -712,7 +695,7 @@ class SampleUpload extends React.Component {
         this.setState({
           invalid: true,
           submitting: false,
-          errorMessage: this.joinServerError(error.response.data)
+          errorMessage: joinServerError(error.response.data)
         });
       });
   };

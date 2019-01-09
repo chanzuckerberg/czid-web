@@ -120,7 +120,9 @@ class DataTable extends React.Component {
       );
 
     return (
-      <table className="idseq-ui data-table">
+      <table
+        className={`idseq-ui data-table ${this.props.striped && "striped"}`}
+      >
         <thead>
           <tr>
             {this.props.onSelectedRowsChanged && (
@@ -176,7 +178,8 @@ DataTable.propTypes = {
     PropTypes.arrayOf(PropTypes.number),
     // allow Set = TODO: replace by custom function
     PropTypes.object
-  ])
+  ]),
+  striped: PropTypes.bool
 };
 
 export default DataTable;
