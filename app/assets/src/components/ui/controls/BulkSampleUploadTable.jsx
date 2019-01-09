@@ -5,6 +5,7 @@ import { isEmpty } from "lodash/fp";
 import RemoveIcon from "../icons/RemoveIcon";
 import LoadingIcon from "../icons/LoadingIcon";
 import CheckmarkIcon from "../icons/CheckmarkIcon";
+import cs from "./bulk_sample_upload_table.scss";
 
 // BulkSampleUploadTable is a table showing Sample Names and Files for local
 // bulk upload interactions
@@ -47,8 +48,8 @@ class BulkSampleUploadTable extends React.Component {
     }
 
     return (
-      <div className="bulk-sample-upload-table">
-        <div className="detected-msg">
+      <div className={cs.bulkSampleUploadTable}>
+        <div className={cs.detectedMsg}>
           These files were detected and matched. Remove files you do not want to
           upload:
         </div>

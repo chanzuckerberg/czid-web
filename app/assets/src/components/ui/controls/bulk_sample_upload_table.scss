@@ -1,0 +1,53 @@
+.bulkSampleUploadTable {
+  .detectedMsg {
+    margin-top: 40px;
+    margin-bottom: 20px;
+  }
+
+  :global {
+    // Needed because DataTable doesn't use CSS modules (yet)
+    .data-table {
+      .column-progress {
+        width: 50px;
+        text-align: center;
+        padding-left: 5px;
+        padding-right: 25px;
+
+        .check.icon {
+          // Align better with the spinner
+          margin-left: 2px;
+        }
+      }
+
+      .column-removeIcon {
+        width: 20px;
+
+        .removeIcon {
+          cursor: pointer;
+          opacity: 0.3;
+          width: 10px;
+          margin-top: 5px;
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
+
+      &__data {
+        &.column-sampleName {
+          font-weight: 700;
+        }
+
+        &.column-files {
+          div {
+            div {
+              margin-top: 10px;
+              margin-bottom: 10px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
