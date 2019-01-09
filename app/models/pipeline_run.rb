@@ -19,14 +19,12 @@ class PipelineRun < ApplicationRecord
   has_many :ercc_counts, dependent: :destroy
   has_many :amr_counts, dependent: :destroy
   has_many :contigs, dependent: :destroy
-  has_many :contig_counts, dependent: :destroy
   accepts_nested_attributes_for :taxon_counts
   accepts_nested_attributes_for :job_stats
   accepts_nested_attributes_for :taxon_byteranges
   accepts_nested_attributes_for :ercc_counts
   accepts_nested_attributes_for :amr_counts
   accepts_nested_attributes_for :contigs
-  accepts_nested_attributes_for :contig_counts
 
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
