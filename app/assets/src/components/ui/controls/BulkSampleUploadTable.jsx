@@ -6,6 +6,8 @@ import RemoveIcon from "../icons/RemoveIcon";
 import LoadingIcon from "../icons/LoadingIcon";
 import CheckmarkIcon from "../icons/CheckmarkIcon";
 
+// BulkSampleUploadTable is a table showing Sample Names and Files for local
+// bulk upload interactions
 class BulkSampleUploadTable extends React.Component {
   render() {
     const { sampleNamesToFiles, fileNamesToProgress, onRemoved } = this.props;
@@ -16,6 +18,7 @@ class BulkSampleUploadTable extends React.Component {
     let entries = [];
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
       let progress, removeIcon;
+      // Show the Remove icons if nothing has started yet
       if (isEmpty(fileNamesToProgress)) {
         removeIcon = (
           <RemoveIcon
@@ -24,7 +27,7 @@ class BulkSampleUploadTable extends React.Component {
           />
         );
       } else {
-        // Show a checkmark when all a samples files are done
+        // Show a checkmark when all a sample's files are done
         progress = files.every(f => fileNamesToProgress[f.name] === 100) ? (
           <CheckmarkIcon />
         ) : (

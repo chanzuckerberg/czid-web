@@ -5,14 +5,15 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import SampleUpload from "./SampleUpload";
 import ObjectHelper from "../helpers/ObjectHelper";
+import { merge, omit, isEmpty } from "lodash/fp";
+
+import { createSample } from "~/api";
 import { Menu, MenuItem } from "~ui/controls/Menu";
+import FilePicker from "~ui/controls/FilePicker";
+import BulkSampleUploadTable from "./ui/controls/BulkSampleUploadTable";
 import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { goToPageWithTimeout } from "~utils/links";
-import { createSample } from "~/api";
-import FilePicker from "~ui/controls/FilePicker";
-import BulkSampleUploadTable from "./ui/controls/BulkSampleUploadTable";
-import { merge, omit, isEmpty } from "lodash/fp";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -21,7 +22,7 @@ class BulkUploadImport extends React.Component {
     this.hostName = this.hostGenomes.length ? this.hostGenomes[0].name : "";
     this.hostId = this.hostGenomes.length ? this.hostGenomes[0].id : null;
     this.handleImportSubmit = this.handleImportSubmit.bind(this);
-    this.handleUploadSubmit = this.handleUploadSubmit.bind(this);
+    this.handleRemoteUploadSubmit = this.handleRemoteUploadSubmit.bind(this);
     this.csrf = props.csrf;
     this.handleProjectSubmit = this.handleProjectSubmit.bind(this);
     this.clearError = this.clearError.bind(this);
@@ -154,7 +155,7 @@ class BulkUploadImport extends React.Component {
     });
   }
 
-  handleUploadSubmit(e) {
+  handleRemoteUploadSubmit(e) {
     e.preventDefault();
     $("html, body")
       .stop()
@@ -453,7 +454,7 @@ class BulkUploadImport extends React.Component {
               <form
                 className="bulkSubmitForm"
                 ref="form"
-                onSubmit={this.handleUploadSubmit}
+                onSubmit={this.handleRemoteUploadSubmit}
               >
                 {this.state.success ? (
                   <div className="form-feedback success-message">
@@ -611,7 +612,7 @@ class BulkUploadImport extends React.Component {
                         ) : (
                           <button
                             type="submit"
-                            onClick={this.handleUploadSubmit}
+                            onClick={this.handleRemoteUploadSubmit}
                             className="new-button blue-button upload-samples-button"
                           >
                             Run Samples
@@ -662,6 +663,23 @@ class BulkUploadImport extends React.Component {
     });
   };
 
+  // onRemoved for when a user doesn't want to upload a local sample/files or when
+  // there's an error when trying to create the sample
+  onRemoved = sampleName => {
+    this.setState(
+      {
+        sampleNamesToFiles: omit(sampleName, this.state.sampleNamesToFiles),
+        fileNamesToProgress: omit(sampleName, this.state.fileNamesToProgress)
+      },
+      () => {
+        // If there's nothing to upload anymore, submitting is no longer in progress
+        if (isEmpty(this.state.sampleNamesToFiles)) {
+          this.setState({ submitting: false });
+        }
+      }
+    );
+  };
+
   // Upload a dict of sample names to input files
   bulkUploadLocal = sampleNamesToFiles => {
     this.setState({
@@ -672,6 +690,7 @@ class BulkUploadImport extends React.Component {
     window.onbeforeunload = () =>
       "Uploading is in progress. Are you sure you want to exit?";
 
+    // Send an API call to create new samples with the expected files
     for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
       createSample(
         sampleName,
@@ -681,7 +700,7 @@ class BulkUploadImport extends React.Component {
         "local"
       )
         .then(response => {
-          // After successful sample creation, upload to the presigned URL
+          // After successful sample creation, upload to the presigned URLs returned
           const sampleId = response.data.id;
           files.map((file, i) => {
             const url = response.data.input_files[i].presigned_url;
@@ -689,7 +708,8 @@ class BulkUploadImport extends React.Component {
           });
         })
         .catch(error => {
-          // Remove samples that couldn't be created and show error message.
+          // Remove samples that couldn't be created from the current list and
+          // show error message
           this.setState({
             invalid: true,
             errorMessage: `${
@@ -729,24 +749,7 @@ class BulkUploadImport extends React.Component {
       });
   };
 
-  // onRemoved for when a user doesn't want to upload a local sample/files or when
-  // there's an error when trying to create the sample
-  onRemoved = sampleName => {
-    this.setState(
-      {
-        sampleNamesToFiles: omit(sampleName, this.state.sampleNamesToFiles),
-        fileNamesToProgress: omit(sampleName, this.state.fileNamesToProgress)
-      },
-      () => {
-        // If there's nothing to upload anymore, not submitting state anymore
-        if (isEmpty(this.state.sampleNamesToFiles)) {
-          this.setState({ submitting: false });
-        }
-      }
-    );
-  };
-
-  // Called when a local file finishes uploading
+  // onUploadSuccess when a local file finishes uploading
   onUploadSuccess = (sampleName, sampleId) => {
     // If every file in the sample is complete
     const sampleFiles = this.state.sampleNamesToFiles[sampleName];
@@ -763,7 +766,7 @@ class BulkUploadImport extends React.Component {
           authenticity_token: this.csrf
         })
         .then(() => {
-          // If every file is done uploading
+          // If every file-to-upload in this batch is done uploading
           if (
             Object.values(this.state.fileNamesToProgress).every(p => p === 100)
           ) {
@@ -860,7 +863,7 @@ class BulkUploadImport extends React.Component {
       </div>
     );
 
-    // onRejected for local uploads
+    // Show error popup when the local file picker rejects files
     const onRejected = files =>
       window.alert(
         `${files
@@ -1165,7 +1168,7 @@ class BulkUploadImport extends React.Component {
                     </div>
                   </div>
                 </div>
-                {/* Admin-only local bulk uploads for now*/}
+                {/* Admin-only local bulk uploads for now */}
                 {this.props.loggedin_user.admin && (
                   <div>
                     <div className="upload-mode-title">Sample Input Files</div>{" "}

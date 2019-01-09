@@ -5,7 +5,7 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import ObjectHelper from "../helpers/ObjectHelper";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
-import { goToPage, goToPageWithTimeout } from "~utils/links";
+import { goToPageWithTimeout } from "~utils/links";
 import CatIcon from "~ui/icons/CatIcon";
 import ERCCIcon from "~ui/icons/ERCCIcon";
 import HumanIcon from "~ui/icons/HumanIcon";
