@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { goToPage } from "~utils/links";
+import { openUrl } from "~utils/links";
 
 class CreateUser extends React.Component {
   constructor(props, context) {
@@ -167,7 +167,7 @@ class CreateUser extends React.Component {
             successMessage: "User created successfully"
           },
           () => {
-            goToPage("/users");
+            openUrl("/users");
           }
         );
       })
@@ -205,7 +205,7 @@ class CreateUser extends React.Component {
             successMessage: "User updated successfully"
           },
           () => {
-            goToPage("/users");
+            openUrl("/users");
           }
         );
       })
@@ -358,12 +358,12 @@ class CreateUser extends React.Component {
           <span
             className="back"
             onClick={() =>
-              this.props.selectedUser ? goToPage("/users") : goToPage("/")
+              this.props.selectedUser ? openUrl("/users") : openUrl("/")
             }
           >
             Back
           </span>|
-          <span className="home" onClick={() => goToPage("/")}>
+          <span className="home" onClick={() => openUrl("/")}>
             Home
           </span>
         </div>

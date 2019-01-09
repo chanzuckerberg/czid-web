@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 import $ from "jquery";
 import LogoIcon from "./ui/icons/LogoIcon";
-import { goToPage } from "~utils/links";
+import { openUrl } from "~utils/links";
 
 class Login extends React.Component {
   constructor(props, context) {
@@ -53,7 +53,7 @@ class Login extends React.Component {
             successMessage: "User signed in"
           },
           () => {
-            goToPage("/");
+            openUrl("/");
           }
         );
       })
@@ -129,7 +129,7 @@ class Login extends React.Component {
               <div className="mail">
                 <p>
                   To request access to the IDseq platform, sign up<span
-                    onClick={() => goToPage("/")}
+                    onClick={() => openUrl("/")}
                   >
                     {" "}
                     here.
