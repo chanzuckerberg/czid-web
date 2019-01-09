@@ -4,6 +4,7 @@ import axios from "axios";
 import { compact, flatten } from "lodash/fp";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import LogoIcon from "./ui/icons/LogoIcon";
+import { openUrl } from "~utils/links";
 
 class Header extends React.Component {
   constructor(props, context) {
@@ -29,10 +30,6 @@ class Header extends React.Component {
     });
   }
 
-  gotoPage(path) {
-    location.href = `${path}`;
-  }
-
   openNewTab(path) {
     window.open(path);
   }
@@ -42,7 +39,7 @@ class Header extends React.Component {
       method: "DELETE",
       withCredentials: true
     }).then(res => {
-      this.gotoPage(this.props.signInEndpoint);
+      openUrl(this.props.signInEndpoint);
     });
   }
 
@@ -62,7 +59,7 @@ class Header extends React.Component {
           <BareDropdown.Item
             text="New Sample"
             key="1"
-            onClick={this.gotoPage.bind(this, "/samples/new")}
+            onClick={() => openUrl("/samples/new")}
           />,
           <BareDropdown.Item
             text="New Sample (Command Line)"
@@ -75,7 +72,7 @@ class Header extends React.Component {
             <BareDropdown.Item
               key="3"
               text="Create User"
-              onClick={this.gotoPage.bind(this, "/users/new")}
+              onClick={() => openUrl("/users/new")}
             />
           ),
         <BareDropdown.Item

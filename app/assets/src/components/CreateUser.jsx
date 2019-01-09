@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import { openUrl } from "~utils/links";
 
 class CreateUser extends React.Component {
   constructor(props, context) {
@@ -13,7 +14,6 @@ class CreateUser extends React.Component {
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
     this.handlePConfirmChange = this.handlePConfirmChange.bind(this);
     this.clearError = this.clearError.bind(this);
-    this.gotoPage = this.gotoPage.bind(this);
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.selectedUser = {
       email: this.user ? this.user.email : "",
@@ -59,10 +59,6 @@ class CreateUser extends React.Component {
       });
       this.updateUser();
     }
-  }
-
-  gotoPage(path) {
-    location.href = `${path}`;
   }
 
   clearError() {
@@ -171,7 +167,7 @@ class CreateUser extends React.Component {
             successMessage: "User created successfully"
           },
           () => {
-            that.gotoPage("/users");
+            openUrl("/users");
           }
         );
       })
@@ -209,7 +205,7 @@ class CreateUser extends React.Component {
             successMessage: "User updated successfully"
           },
           () => {
-            that.gotoPage("/users");
+            openUrl("/users");
           }
         );
       })
@@ -361,15 +357,13 @@ class CreateUser extends React.Component {
         <div className="bottom">
           <span
             className="back"
-            onClick={
-              this.props.selectedUser
-                ? this.gotoPage.bind(this, "/users")
-                : this.gotoPage.bind(this, "/")
+            onClick={() =>
+              this.props.selectedUser ? openUrl("/users") : openUrl("/")
             }
           >
             Back
           </span>|
-          <span className="home" onClick={this.gotoPage.bind(this, "/")}>
+          <span className="home" onClick={() => openUrl("/")}>
             Home
           </span>
         </div>
