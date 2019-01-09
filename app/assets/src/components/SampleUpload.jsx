@@ -5,7 +5,7 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import ObjectHelper from "../helpers/ObjectHelper";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
-import { goToPageWithTimeout } from "~utils/links";
+import { openUrlWithTimeout } from "~utils/links";
 import CatIcon from "~ui/icons/CatIcon";
 import ERCCIcon from "~ui/icons/ERCCIcon";
 import HumanIcon from "~ui/icons/HumanIcon";
@@ -279,7 +279,7 @@ class SampleUpload extends React.Component {
           submitting: false,
           successMessage: "Sample created successfully"
         });
-        goToPageWithTimeout(`/samples/${response.data.id}`);
+        openUrlWithTimeout(`/samples/${response.data.id}`);
       })
       .catch(error => {
         this.setState({
@@ -318,7 +318,7 @@ class SampleUpload extends React.Component {
           submitting: false,
           successMessage: "Sample updated successfully"
         });
-        goToPageWithTimeout(`/samples/${that.state.id}`);
+        openUrlWithTimeout(`/samples/${that.state.id}`);
       })
       .catch(error => {
         that.setState({
@@ -613,7 +613,7 @@ class SampleUpload extends React.Component {
         })
         .then(() => {
           window.onbeforeunload = null;
-          goToPageWithTimeout(`/samples/${this.state.id}`);
+          openUrlWithTimeout(`/samples/${this.state.id}`);
         })
         .catch(error => {
           this.setState({

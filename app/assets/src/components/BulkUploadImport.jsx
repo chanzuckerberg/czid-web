@@ -5,7 +5,7 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import SampleUpload from "./SampleUpload";
 import ObjectHelper from "../helpers/ObjectHelper";
-import { merge, omit, isEmpty } from "lodash/fp";
+import { merge, omit, isEmpty, get } from "lodash/fp";
 
 import { createSample } from "~/api";
 import { Menu, MenuItem } from "~ui/controls/Menu";
@@ -13,7 +13,7 @@ import FilePicker from "~ui/controls/FilePicker";
 import BulkSampleUploadTable from "./ui/controls/BulkSampleUploadTable";
 import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
-import { goToPageWithTimeout } from "~utils/links";
+import { openUrlWithTimeout } from "~utils/links";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -313,7 +313,7 @@ class BulkUploadImport extends React.Component {
           createdSampleIds: response.data.sample_ids,
           submitting: false
         });
-        goToPageWithTimeout(`/home?project_id=${that.state.projectId}`);
+        openUrlWithTimeout(`/home?project_id=${that.state.projectId}`);
       })
       .catch(error => {
         that.setState({
@@ -329,12 +329,7 @@ class BulkUploadImport extends React.Component {
   }
 
   filePathValid(str) {
-    var regexPrefix = /s3:\/\//;
-    if (str.match(regexPrefix)) {
-      return true;
-    } else {
-      return false;
-    }
+    return !!(str && str.match(/s3:\/\//));
   }
 
   isImportFormInvalid() {
@@ -347,16 +342,11 @@ class BulkUploadImport extends React.Component {
       errors.project = "Please select a project";
     }
 
-    if (!this.state.localUploadMode) {
-      if (this.refs.bulk_path) {
-        if (this.refs.bulk_path.value === "") {
-          errors.bulk_path = "Please fill in the S3 bulk path";
-        } else if (!this.filePathValid(this.refs.bulk_path.value)) {
-          errors.bulk_path = "S3 bulk path is invalid";
-        }
-      } else {
-        errors.bulk_path = "Please fill in the S3 bulk path";
-      }
+    if (
+      !this.state.localUploadMode &&
+      !this.filePathValid(get("value", this.refs.bulk_path))
+    ) {
+      errors.bulk_path = "S3 bulk path is invalid.";
     }
 
     const errorsLength = Object.keys(errors).length;
@@ -778,7 +768,7 @@ class BulkUploadImport extends React.Component {
             });
 
             window.onbeforeunload = null;
-            goToPageWithTimeout(`/home?project_id=${this.state.projectId}`);
+            openUrlWithTimeout(`/home?project_id=${this.state.projectId}`);
           }
         })
         .catch(error => {
