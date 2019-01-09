@@ -676,7 +676,7 @@ class SamplesController < ApplicationController
     if Rails.env == 'staging'
       pr_ids = @sample.pipeline_run_ids.join(",")
       unless pr_ids.empty?
-        ['taxon_counts', 'taxon_byteranges', 'contigs', 'contig_counts'].each do |table_name|
+        ['taxon_counts', 'taxon_byteranges', 'contigs'].each do |table_name|
           ActiveRecord::Base.connection.execute("REPLACE INTO idseq_staging.#{table_name} SELECT * FROM idseq_prod.#{table_name} WHERE pipeline_run_id IN (#{pr_ids})")
         end
       end

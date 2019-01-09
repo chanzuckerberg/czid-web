@@ -412,47 +412,6 @@ class PipelineRun < ApplicationRecord
     update(total_ercc_reads: total_ercc_reads)
   end
 
-  def db_load_contigs(contig2taxid)
-    contig_stats_s3_path = s3_file_for("contigs")
-    contig_s3_path = "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}"
-
-    downloaded_contig_stats = PipelineRun.download_file_with_retries(contig_stats_s3_path,
-                                                                     LOCAL_JSON_PATH, 3)
-    contig_stats_json = JSON.parse(File.read(downloaded_contig_stats))
-    return if contig_stats_json.empty?
-
-    contig_fasta = PipelineRun.download_file_with_retries(contig_s3_path, LOCAL_JSON_PATH, 3)
-    contig_array = []
-    taxid_list = []
-    contig2taxid.values.each { |entry| taxid_list += entry.values }
-    taxon_lineage_map = {}
-    TaxonLineage.where(taxid: taxid_list.uniq).order(:id).each { |t| taxon_lineage_map[t.taxid.to_i] = t.to_a }
-
-    File.open(contig_fasta, 'r') do |cf|
-      line = cf.gets
-      header = ''
-      sequence = ''
-      while line
-        if line[0] == '>'
-          read_count = contig_stats_json[header] || 0
-          lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
-          contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json } if header != ''
-          header = line[1..line.size].rstrip
-          sequence = ''
-        else
-          sequence += line
-        end
-        line = cf.gets
-      end
-      read_count = contig_stats_json[header] || 0
-      lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
-      contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
-    end
-    contigs.delete_all
-    update(contigs_attributes: contig_array) unless contig_array.empty?
-    update(assembled: 1)
-  end
-
   def contigs_fasta_s3_path
     return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
   end
@@ -535,29 +494,67 @@ class PipelineRun < ApplicationRecord
   end
 
   def db_load_contig_counts
+    # Get contig2taxid
     contig_stats_s3_path = s3_file_for("contig_counts")
     downloaded_contig_counts = PipelineRun.download_file_with_retries(contig_stats_s3_path,
                                                                       LOCAL_JSON_PATH, 3)
     contig_counts_json = JSON.parse(File.read(downloaded_contig_counts))
-    contig_counts_array = []
     contig2taxid = {}
     contig_counts_json.each do |tax_entry|
       contigs = tax_entry["contig_counts"]
-      contigs.each do |contig_name, count|
-        contig_counts_array << { count_type: tax_entry['count_type'],
-                                 taxid: tax_entry['taxid'],
-                                 tax_level: tax_entry['tax_level'],
-                                 contig_name: contig_name,
-                                 count: count }
+      contigs.each do |contig_name, _count|
         if tax_entry['tax_level'].to_i == TaxonCount:: TAX_LEVEL_SPECIES # species
           contig2taxid[contig_name] ||= {}
           contig2taxid[contig_name][tax_entry['count_type']] = tax_entry['taxid']
         end
       end
     end
-    contig_counts.destroy_all
-    update(contig_counts_attributes: contig_counts_array) unless contig_counts_array.empty?
+    # Actually load contigs
     db_load_contigs(contig2taxid)
+  end
+
+  def db_load_contigs(contig2taxid)
+    contig_stats_s3_path = s3_file_for("contigs")
+    contig_s3_path = "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}"
+
+    downloaded_contig_stats = PipelineRun.download_file_with_retries(contig_stats_s3_path,
+                                                                     LOCAL_JSON_PATH, 3)
+    contig_stats_json = JSON.parse(File.read(downloaded_contig_stats))
+    return if contig_stats_json.empty?
+
+    contig_fasta = PipelineRun.download_file_with_retries(contig_s3_path, LOCAL_JSON_PATH, 3)
+    contig_array = []
+    taxid_list = []
+    contig2taxid.values.each { |entry| taxid_list += entry.values }
+    taxon_lineage_map = {}
+    TaxonLineage.where(taxid: taxid_list.uniq).order(:id).each { |t| taxon_lineage_map[t.taxid.to_i] = t.to_a }
+
+    File.open(contig_fasta, 'r') do |cf|
+      line = cf.gets
+      header = ''
+      sequence = ''
+      while line
+        if line[0] == '>'
+          read_count = contig_stats_json[header] || 0
+          lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
+          if read_count >= MIN_CONTIG_SIZE && header != ''
+            contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
+          end
+          header = line[1..line.size].rstrip
+          sequence = ''
+        else
+          sequence += line
+        end
+        line = cf.gets
+      end
+      read_count = contig_stats_json[header] || 0
+      lineage_json = get_lineage_json(contig2taxid[header], taxon_lineage_map)
+      if read_count >= MIN_CONTIG_SIZE
+        contig_array << { name: header, sequence: sequence, read_count: read_count, lineage_json: lineage_json.to_json }
+      end
+    end
+    update(contigs_attributes: contig_array) unless contig_array.empty?
+    update(assembled: 1)
   end
 
   def db_load_amr_counts
