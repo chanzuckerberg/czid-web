@@ -1162,7 +1162,6 @@ class BulkUploadImport extends React.Component {
                       consentChecked: !this.state.consentChecked
                     })
                   }
-                  disabled={true}
                 />
                 <div className="field">
                   <div className="row">

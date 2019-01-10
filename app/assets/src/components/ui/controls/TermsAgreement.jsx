@@ -5,14 +5,13 @@ import Checkbox from "~ui/controls/Checkbox";
 
 class TermsAgreement extends React.Component {
   render() {
-    const { onChange, checked, disabled } = this.props;
+    const { onChange, checked } = this.props;
 
     return (
       <div className={cs.termsAgreement}>
         <Checkbox
           checked={checked}
           onChange={onChange}
-          disabled={disabled}
           value={1}
           label={
             <span>
@@ -46,8 +45,7 @@ class TermsAgreement extends React.Component {
 
 TermsAgreement.propTypes = {
   onChange: PropTypes.func,
-  checked: PropTypes.bool,
-  disabled: PropTypes.bool
+  checked: PropTypes.bool
 };
 
 export default TermsAgreement;
