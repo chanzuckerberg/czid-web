@@ -5,6 +5,7 @@ module PipelineRunsHelper
     PipelineRunStage::HOST_FILTERING_STAGE_NAME => {
       "stage" => "Filter out host reads and conduct quality control.",
       "steps" => {
+        "validate_input_out" => "Validates the input files and truncates to max fragments.",
         "star_out" => "Remove host reads using STAR.",
         "trimmomatic_out" => "Trim Illumina adapters using trimmomatic.",
         "priceseq_out" => "Remove low-quality reads using PriceSeqFilter.",
