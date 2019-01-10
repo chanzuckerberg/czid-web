@@ -5,13 +5,14 @@ import Checkbox from "~ui/controls/Checkbox";
 
 class TermsAgreement extends React.Component {
   render() {
-    const { onChange, checked } = this.props;
+    const { onChange, checked, disabled } = this.props;
 
     return (
       <div className={cs.termsAgreement}>
         <Checkbox
           checked={checked}
           onChange={onChange}
+          disabled={disabled}
           value={1}
           label={
             <span>
@@ -24,7 +25,6 @@ class TermsAgreement extends React.Component {
                 href="https://assets.idseq.net/Terms.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="terms-link"
               >
                 Terms
               </a>
@@ -33,7 +33,6 @@ class TermsAgreement extends React.Component {
                 href="https://assets.idseq.net/Privacy.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="terms-link"
               >
                 Data Privacy Notice.
               </a>
@@ -47,7 +46,8 @@ class TermsAgreement extends React.Component {
 
 TermsAgreement.propTypes = {
   onChange: PropTypes.func,
-  checked: PropTypes.bool
+  checked: PropTypes.bool,
+  disabled: PropTypes.bool
 };
 
 export default TermsAgreement;

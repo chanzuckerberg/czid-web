@@ -1279,6 +1279,7 @@ class SampleUpload extends React.Component {
                         consentChecked: !this.state.consentChecked
                       })
                     }
+                    disabled={true}
                   />
                   <div className="row">
                     <div className="col no-padding s12">
