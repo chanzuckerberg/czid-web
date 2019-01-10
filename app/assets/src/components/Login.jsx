@@ -2,6 +2,7 @@ import React from "react";
 import axios from "axios";
 import $ from "jquery";
 import LogoIcon from "./ui/icons/LogoIcon";
+import { openUrl } from "~utils/links";
 
 class Login extends React.Component {
   constructor(props, context) {
@@ -10,7 +11,6 @@ class Login extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.clearError = this.clearError.bind(this);
-    this.gotoPage = this.gotoPage.bind(this);
     this.state = {
       isChecked: false,
       success: false,
@@ -35,10 +35,6 @@ class Login extends React.Component {
     });
   }
 
-  gotoPage(path) {
-    location.href = `${path}`;
-  }
-
   login() {
     var that = this;
     axios
@@ -57,7 +53,7 @@ class Login extends React.Component {
             successMessage: "User signed in"
           },
           () => {
-            that.gotoPage("/");
+            openUrl("/");
           }
         );
       })
@@ -133,7 +129,7 @@ class Login extends React.Component {
               <div className="mail">
                 <p>
                   To request access to the IDseq platform, sign up<span
-                    onClick={() => this.gotoPage("/")}
+                    onClick={() => openUrl("/")}
                   >
                     {" "}
                     here.

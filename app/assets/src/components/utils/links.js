@@ -21,4 +21,10 @@ const downloadStringToFile = str => {
   location.href = `${downloadUrl}`;
 };
 
-export { openUrl, downloadStringToFile };
+const openUrlWithTimeout = link => {
+  setTimeout(() => {
+    openUrl(link);
+  }, 2000);
+};
+
+export { openUrl, downloadStringToFile, openUrlWithTimeout };
