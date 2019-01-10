@@ -48,10 +48,6 @@
   & input:checked ~ .checkmark {
     background-color: $primary-light;
 
-    &.disabled {
-      background-color: $medium-grey;
-    }
-
     &:after {
       display: block;
     }
