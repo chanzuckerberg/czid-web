@@ -87,10 +87,6 @@ class Landing extends React.Component {
           <div className="fill" />
           <div className="hiring-ad">
             {"Join our team! We're hiring "}
-            <a href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/1342063">
-              scientists
-            </a>
-            {" and "}
             <a href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/1003911">
               engineers
             </a>
