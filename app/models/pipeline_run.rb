@@ -499,8 +499,8 @@ class PipelineRun < ApplicationRecord
     contig_counts_json = JSON.parse(File.read(downloaded_contig_counts))
     contig2taxid = {}
     contig_counts_json.each do |tax_entry|
-      contigs = tax_entry["contig_counts"]
-      contigs.each do |contig_name, _count|
+      contig_list = tax_entry["contig_counts"]
+      contig_list.each do |contig_name, _count|
         if tax_entry['tax_level'].to_i == TaxonCount:: TAX_LEVEL_SPECIES # species
           contig2taxid[contig_name] ||= {}
           contig2taxid[contig_name][tax_entry['count_type']] = tax_entry['taxid']
