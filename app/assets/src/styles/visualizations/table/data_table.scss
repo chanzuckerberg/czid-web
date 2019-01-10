@@ -68,5 +68,9 @@
     tr:nth-child(even) {
       background-color: $off-white;
     }
+
+    td {
+      border-bottom-color: transparent;
+    }
   }
 }

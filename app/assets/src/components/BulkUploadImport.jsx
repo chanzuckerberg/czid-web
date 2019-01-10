@@ -5,7 +5,7 @@ import $ from "jquery";
 import Tipsy from "react-tipsy";
 import SampleUpload from "./SampleUpload";
 import ObjectHelper from "../helpers/ObjectHelper";
-import { merge, omit, isEmpty, get } from "lodash/fp";
+import { merge, omit, isEmpty, get, size } from "lodash/fp";
 
 import { createSample } from "~/api";
 import { Menu, MenuItem } from "~ui/controls/Menu";
@@ -873,7 +873,11 @@ class BulkUploadImport extends React.Component {
           <div className="filePickerArea">
             {!this.state.submitting && (
               <FilePicker
-                title={"Your Input Files:"}
+                title={
+                  isEmpty(this.state.sampleNamesToFiles)
+                    ? "Your Input Files:"
+                    : `${size(this.state.sampleNamesToFiles)} Samples To Upload`
+                }
                 onChange={this.onDrop}
                 onRejected={onRejected}
                 multiFile={true}

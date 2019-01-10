@@ -64,6 +64,7 @@
       .consent-blurb {
         margin-bottom: 1.5rem;
         label.checkbox {
+          font-size: 12px;
           span {
             cursor: default;
           }
@@ -301,7 +302,7 @@
           }
 
           .inputFileArea {
-            margin-bottom: 20px;
+            margin-bottom: 50px;
 
             .filePickerArea {
               margin-bottom: 20px;

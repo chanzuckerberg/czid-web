@@ -182,4 +182,8 @@ DataTable.propTypes = {
   striped: PropTypes.bool
 };
 
+DataTable.defaultProps = {
+  striped: true
+};
+
 export default DataTable;
