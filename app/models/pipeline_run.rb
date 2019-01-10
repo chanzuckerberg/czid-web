@@ -1222,24 +1222,53 @@ class PipelineRun < ApplicationRecord
     # Once we decide to deploy the assembly pipeline, change "1000.1000" to the relevant version number of idseq-pipeline.
   end
 
+  def contig_lineages(min_contig_size = MIN_CONTIG_SIZE)
+    contigs.select("id, read_count, lineage_json")
+           .where("read_count >= #{min_contig_size}")
+           .where("lineage_json IS NOT NULL")
+  end
+
   def get_contigs_for_taxid(taxid, min_contig_size = MIN_CONTIG_SIZE)
-    contig_names = contig_counts.where("count >= #{min_contig_size}")
-                                .where(taxid: taxid)
-                                .pluck(:contig_name).uniq
-    contigs.where(name: contig_names).order("read_count DESC")
+    contig_ids = []
+    contig_lineages(min_contig_size).each do |c|
+      lineage = JSON.parse(c.lineage_json)
+      contig_ids << c.id if lineage.values.flatten.include?(taxid)
+    end
+
+    contigs.where(id: contig_ids).order("read_count DESC")
   end
 
   def get_summary_contig_counts(min_contig_size)
-    contig_counts.where("count >= #{min_contig_size} and contig_name != '*'")
-                 .select("taxid, COUNT(1) as contigs, SUM(count) AS contig_reads, count_type")
-                 .group(:taxid, :count_type).as_json(except: :id)
+    summary_dict = {} # key: count_type:taxid , value: contigs, contig_reads
+    contig_lineages(min_contig_size).each do |c|
+      lineage = JSON.parse(c.lineage_json)
+      lineage.each do |count_type, taxid_arr|
+        taxids = taxid_arr[0..1]
+        taxids.each do |taxid|
+          dict_key = "#{count_type}:#{taxid}"
+          summary_dict[dict_key] ||= { contigs: 0, contig_reads: 0 }
+          summary_dict[dict_key][:contigs] += 1
+          summary_dict[dict_key][:contig_reads] += c.read_count
+        end
+      end
+    end
+    output = []
+    summary_dict.each do |dict_key, info|
+      count_type, taxid = dict_key.split(':')
+      info[:count_type] = count_type
+      info[:taxid] = taxid.to_i
+      output << info
+    end
+    output
   end
 
   def get_taxid_list_with_contigs(min_contig_size = MIN_CONTIG_SIZE)
-    contig_counts.select("taxid, COUNT(1)")
-                 .where("count >= #{min_contig_size} and taxid > 0 and contig_name != '*'")
-                 .group(:taxid)
-                 .pluck(:taxid)
+    taxid_list = []
+    contig_lineages(min_contig_size).each do |c|
+      lineage = JSON.parse(c.lineage_json)
+      lineage.values.each { |taxid_arr| taxid_list += taxid_arr[0..1] }
+    end
+    taxid_list.uniq
   end
 
   def alignment_output_s3_path
