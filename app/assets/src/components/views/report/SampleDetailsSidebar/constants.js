@@ -47,8 +47,7 @@ export const HUMAN_METADATA_SECTIONS = [
   }
 ];
 
-// Includes mosquito and other vectors.
-export const VECTOR_METADATA_SECTIONS = [
+export const MOSQUITO_METADATA_SECTIONS = [
   {
     name: "Sample Info",
     keys: [
@@ -57,13 +56,57 @@ export const VECTOR_METADATA_SECTIONS = [
       "nucleotide_type",
       "sample_unit",
       "collection_date",
+      "collection_lat",
+      "collection_long",
+      "collected_by"
+    ]
+  },
+  {
+    name: "Specimen Info",
+    keys: [
+      "reported_sex",
+      "comp_sex",
+      "life_stage",
+      "reported_id_genus",
+      "reported_id_species",
+      "comp_id_genus",
+      "comp_id_species",
+      "blood_fed",
+      "preservation_method",
+      "trap_type"
+    ]
+  },
+  {
+    name: "Infection Info",
+    keys: ["known_organism", "detection_method"]
+  },
+  {
+    name: "Sequencing Info",
+    keys: [
+      "library_prep",
+      "sequencer",
+      "rna_dna_input",
+      "library_prep_batch",
+      "extraction_batch"
+    ]
+  }
+];
+
+export const VECTOR_METADATA_SECTIONS = [
+  {
+    name: "Sample Info",
+    keys: [
+      "unique_id",
+      "sample_type",
+      "nucleotide_type",
+      "collection_date",
       "collection_location",
       "collected_by"
     ]
   },
   {
     name: "Specimen Info",
-    keys: ["gender", "life_stage", "genus_species", "blood_fed", "id_method"]
+    keys: ["gender", "life_stage", "genus_species", "id_method"]
   },
   {
     name: "Infection Info",

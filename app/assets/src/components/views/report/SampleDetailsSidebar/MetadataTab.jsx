@@ -10,6 +10,7 @@ import MetadataSection from "./MetadataSection";
 import {
   SAMPLE_ADDITIONAL_INFO,
   HUMAN_METADATA_SECTIONS,
+  MOSQUITO_METADATA_SECTIONS,
   VECTOR_METADATA_SECTIONS
 } from "./constants";
 import cs from "./sample_details_sidebar.scss";
@@ -27,11 +28,22 @@ class MetadataTab extends React.Component {
     };
   }
 
-  getMetadataSections = () =>
-    this.props.additionalInfo.host_genome_name.toLowerCase().substring(0, 5) ===
-    "human"
-      ? HUMAN_METADATA_SECTIONS
-      : VECTOR_METADATA_SECTIONS;
+  getMetadataSections = () => {
+    if (
+      this.props.additionalInfo.host_genome_name.toLowerCase().includes("human")
+    ) {
+      return HUMAN_METADATA_SECTIONS;
+    }
+
+    if (
+      this.props.additionalInfo.host_genome_name
+        .toLowerCase()
+        .includes("mosquito")
+    ) {
+      return MOSQUITO_METADATA_SECTIONS;
+    }
+    return VECTOR_METADATA_SECTIONS;
+  };
 
   toggleSection = section => {
     const { sectionOpen, sectionEditing } = this.state;
