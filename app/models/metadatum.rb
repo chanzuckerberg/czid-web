@@ -45,11 +45,20 @@ class Metadatum < ApplicationRecord
     rna_dna_input: NUMBER_TYPE,
     library_prep_batch: STRING_TYPE,
     extraction_batch: STRING_TYPE,
-    sample_unit: STRING_TYPE,
+    sample_unit: NUMBER_TYPE,
     life_stage: STRING_TYPE,
-    id_method: STRING_TYPE,
-    genus_species: STRING_TYPE,
-    blood_fed: STRING_TYPE
+    preservation_method: STRING_TYPE,
+    trap_type: STRING_TYPE,
+    blood_fed: STRING_TYPE,
+    reported_sex: STRING_TYPE,
+    comp_sex: STRING_TYPE,
+    # TODO(mark): Have a single more robust location type.
+    collection_lat: NUMBER_TYPE,
+    collection_long: NUMBER_TYPE,
+    reported_id_genus: STRING_TYPE,
+    reported_id_species: STRING_TYPE,
+    comp_id_genus: STRING_TYPE,
+    comp_id_species: STRING_TYPE
   }.freeze
 
   # Key to the valid string options.
@@ -66,9 +75,9 @@ class Metadatum < ApplicationRecord
 
   # Valid string options that apply ONLY TO MOSQUITOES. (short-term special case)
   MOSQUITO_KEY_TO_STRING_OPTIONS = {
-    sample_unit: ["Pool", "Singleton"],
     life_stage: ["Larva", "Nymph", "Adult"],
-    blood_fed: ["Yes", "No"]
+    reported_sex: ["Male", "Female"],
+    comp_sex: ["Male", "Female"]
   }.freeze
   # Mapping from alternative name to our name. Used at upload time.
   KEY_ALT_NAMES = {
@@ -114,9 +123,17 @@ class Metadatum < ApplicationRecord
     extraction_batch: "Extraction Batch",
     sample_unit: "Sample Unit",
     life_stage: "Life Stage",
-    id_method: "ID Method",
-    genus_species: "Genus/Species",
-    blood_fed: "Blood Fed"
+    preservation_method: "Preservation Method",
+    trap_type: "Trap Type",
+    blood_fed: "Blood Fed",
+    reported_sex: "Reported Sex",
+    comp_sex: "Computed Sex",
+    reported_id_genus: "Reported Genus",
+    reported_id_species: "Reported Species",
+    comp_id_genus: "Computed Genus",
+    comp_id_species: "Computed Species",
+    collection_lat: "Collection Latitude",
+    collection_long: "Collection Longitude"
   }.freeze
 
   HOST_GENOME_NAME_TO_METADATA_KEYS = {
@@ -125,9 +142,7 @@ class Metadatum < ApplicationRecord
       sample_type
       nucleotide_type
       collection_date
-      collection_location
       collected_by
-      gender
       known_organism
       detection_method
       library_prep
@@ -137,7 +152,9 @@ class Metadatum < ApplicationRecord
       extraction_batch
     ],
     Human: %w[
+      collection_location
       age
+      gender
       race
       primary_diagnosis
       antibiotic_administered
@@ -151,13 +168,23 @@ class Metadatum < ApplicationRecord
       infection_class
     ],
     Mosquito: %w[
+      collection_lat
+      collection_long
+      reported_sex
+      comp_sex
       sample_unit
       life_stage
-      id_method
-      genus_species
+      preservation_method
+      trap_type
       blood_fed
+      reported_id_genus
+      reported_id_species
+      comp_id_genus
+      comp_id_species
     ],
     default: %w[
+      collection_location
+      gender
       life_stage
       id_method
       genus_species
