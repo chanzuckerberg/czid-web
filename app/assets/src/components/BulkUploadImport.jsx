@@ -10,7 +10,8 @@ import { merge, omit, isEmpty, get, size } from "lodash/fp";
 import { createSample } from "~/api";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import FilePicker from "~ui/controls/FilePicker";
-import BulkSampleUploadTable from "./ui/controls/BulkSampleUploadTable";
+import BulkSampleUploadTable from "~ui/controls/BulkSampleUploadTable";
+import TermsAgreement from "~ui/controls/TermsAgreement";
 import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { openUrlWithTimeout } from "~utils/links";
@@ -782,41 +783,6 @@ class BulkUploadImport extends React.Component {
   };
 
   renderBulkUploadImportForm() {
-    const termsBlurb = (
-      <div className="consent-blurb">
-        <input
-          type="checkbox"
-          id="consentChecked"
-          className="filled-in"
-          onChange={this.toggleCheckBox}
-          value={this.state.consentChecked}
-        />
-        <label htmlFor="consentChecked" className="checkbox">
-          <span>
-            {
-              "I agree that the data I am uploading to IDseq has been lawfully collected and that I have all the necessary consents, permissions, and authorizations needed to collect, share, and export data to IDseq as outlined in the "
-            }
-          </span>
-          <a
-            href="https://assets.idseq.net/Terms.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="terms-link"
-          >
-            Terms
-          </a>
-          {" and "}
-          <a
-            href="https://assets.idseq.net/Privacy.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="terms-link"
-          >
-            Data Privacy Notice.
-          </a>
-        </label>
-      </div>
-    );
     const submitButton = (
       <button
         type="submit"
@@ -836,18 +802,20 @@ class BulkUploadImport extends React.Component {
       <div className="menu-container">
         <Menu compact>
           <MenuItem
-            active={this.state.localUploadMode}
-            onClick={() => this.setState({ localUploadMode: true })}
-          >
-            <Icon size="large" name="folder open outline" />
-            Upload from Your Computer
-          </MenuItem>
-          <MenuItem
             active={!this.state.localUploadMode}
             onClick={() => this.setState({ localUploadMode: false })}
+            disabled={this.state.submitting}
           >
             <Icon size="large" name="server" />
             Upload from S3
+          </MenuItem>
+          <MenuItem
+            active={this.state.localUploadMode}
+            onClick={() => this.setState({ localUploadMode: true })}
+            disabled={this.state.submitting}
+          >
+            <Icon size="large" name="folder open outline" />
+            Upload from Your Computer
           </MenuItem>
         </Menu>
       </div>
@@ -863,6 +831,14 @@ class BulkUploadImport extends React.Component {
           )} cannot be uploaded. Size must be under 5GB for local uploads. For larger files, please try our CLI.`
       );
 
+    let filePickerTitle = "Your Input Files:";
+    const sampleLen = size(this.state.sampleNamesToFiles);
+    if (sampleLen > 0) {
+      filePickerTitle = `${sampleLen} Sample${
+        sampleLen > 1 ? "s" : ""
+      } To Upload`;
+    }
+
     const localInputFileSection = (
       <div className="field">
         <div className="validation-info">
@@ -873,11 +849,7 @@ class BulkUploadImport extends React.Component {
           <div className="filePickerArea">
             {!this.state.submitting && (
               <FilePicker
-                title={
-                  isEmpty(this.state.sampleNamesToFiles)
-                    ? "Your Input Files:"
-                    : `${size(this.state.sampleNamesToFiles)} Samples To Upload`
-                }
+                title={filePickerTitle}
                 onChange={this.onDrop}
                 onRejected={onRejected}
                 multiFile={true}
@@ -1162,13 +1134,8 @@ class BulkUploadImport extends React.Component {
                     </div>
                   </div>
                 </div>
-                {/* Admin-only local bulk uploads for now */}
-                {this.props.loggedin_user.admin && (
-                  <div>
-                    <div className="upload-mode-title">Sample Input Files</div>{" "}
-                    {uploadModeSwitcher}
-                  </div>
-                )}
+                <div className="upload-mode-title">Sample Input Files</div>
+                {uploadModeSwitcher}
                 {inputFilesSection}
                 {this.state.success ? (
                   <div className="form-feedback success-message">
@@ -1188,7 +1155,14 @@ class BulkUploadImport extends React.Component {
                     {this.state.errorMessage}
                   </div>
                 ) : null}
-                {termsBlurb}
+                <TermsAgreement
+                  checked={this.state.consentChecked}
+                  onChange={() =>
+                    this.setState({
+                      consentChecked: !this.state.consentChecked
+                    })
+                  }
+                />
                 <div className="field">
                   <div className="row">
                     <div className="col no-padding s12">
