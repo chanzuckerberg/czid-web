@@ -418,7 +418,7 @@ class SamplesController < ApplicationController
     taxid = params[:taxid]
     return if HUMAN_TAX_IDS.include? taxid.to_i
     pr = select_pipeline_run(@sample, params)
-    contigs = pr.get_contigs_for_taxid(taxid)
+    contigs = pr.get_contigs_for_taxid(taxid.to_i)
     output_fasta = ''
     contigs.each { |contig| output_fasta += contig.to_fa }
     send_data output_fasta, filename: "#{@sample.name}_tax_#{taxid}_contigs.fasta"
@@ -676,7 +676,7 @@ class SamplesController < ApplicationController
     if Rails.env == 'staging'
       pr_ids = @sample.pipeline_run_ids.join(",")
       unless pr_ids.empty?
-        ['taxon_counts', 'taxon_byteranges', 'contigs', 'contig_counts'].each do |table_name|
+        ['taxon_counts', 'taxon_byteranges', 'contigs'].each do |table_name|
           ActiveRecord::Base.connection.execute("REPLACE INTO idseq_staging.#{table_name} SELECT * FROM idseq_prod.#{table_name} WHERE pipeline_run_id IN (#{pr_ids})")
         end
       end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_181_212_090_138) do
+ActiveRecord::Schema.define(version: 20_190_110_002_732) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -72,20 +72,6 @@ ActiveRecord::Schema.define(version: 20_181_212_090_138) do
     t.bigint "sample_id", null: false
     t.index ["background_id"], name: "index_backgrounds_samples_on_background_id"
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
-  end
-
-  create_table "contig_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "pipeline_run_id"
-    t.string "count_type"
-    t.integer "taxid"
-    t.integer "tax_level"
-    t.string "contig_name"
-    t.integer "count"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["pipeline_run_id", "count"], name: "index_contig_counts_on_pipeline_run_id_and_count"
-    t.index ["pipeline_run_id", "taxid", "count"], name: "index_contig_counts_on_pipeline_run_id_and_taxid_and_count"
-    t.index ["pipeline_run_id", "taxid", "count_type", "tax_level", "contig_name"], name: "contig_counts_pr_tax_contig", unique: true
   end
 
   create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -268,6 +254,7 @@ ActiveRecord::Schema.define(version: 20_181_212_090_138) do
     t.integer "assembled", limit: 2
     t.integer "completed_gsnap_chunks"
     t.integer "completed_rapsearch_chunks"
+    t.integer "max_input_fragments"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
@@ -319,6 +306,7 @@ ActiveRecord::Schema.define(version: 20_181_212_090_138) do
     t.string "web_commit", default: ""
     t.string "pipeline_commit", default: ""
     t.text "dag_vars"
+    t.integer "max_input_fragments"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end

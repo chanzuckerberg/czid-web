@@ -22,7 +22,6 @@ gem 'mailgun_rails', '>= 0.9.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
 # Logger
-gem 'logger'
 gem 'logging-rails', require: 'logging/rails'
 gem 'lograge'
 gem 'lograge-sql'
