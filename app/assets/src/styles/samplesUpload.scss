@@ -61,17 +61,6 @@
           color: $primary-light !important;
         }
       }
-      .consent-blurb {
-        margin-bottom: 1.5rem;
-        label.checkbox {
-          span {
-            cursor: default;
-          }
-        }
-      }
-      .terms-link {
-        color: $primary-light !important;
-      }
       .bulkSubmitForm {
         margin-top: 50px;
       }
@@ -301,7 +290,7 @@
           }
 
           .inputFileArea {
-            margin-bottom: 20px;
+            margin-bottom: 50px;
 
             .filePickerArea {
               margin-bottom: 20px;

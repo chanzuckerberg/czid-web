@@ -15,6 +15,7 @@ import MouseIcon from "~ui/icons/MouseIcon";
 import TickIcon from "~ui/icons/TickIcon";
 import UploadBox from "~ui/controls/UploadBox";
 import { Menu, MenuItem } from "~ui/controls/Menu";
+import TermsAgreement from "~ui/controls/TermsAgreement";
 import { createSample } from "~/api";
 
 class SampleUpload extends React.Component {
@@ -701,42 +702,6 @@ class SampleUpload extends React.Component {
   };
 
   renderSampleForm(updateExistingSample = false) {
-    const termsBlurb = (
-      <div className="consent-blurb">
-        <input
-          type="checkbox"
-          id="consentChecked"
-          className="filled-in"
-          onChange={this.toggleCheckBox}
-          value={this.state.consentChecked}
-        />
-        <label htmlFor="consentChecked" className="checkbox">
-          <span>
-            {
-              "I agree that the data I am uploading to IDseq has been lawfully collected and that I have all the necessary consents, permissions, and authorizations needed to collect, share, and export data to IDseq as outlined in the "
-            }
-          </span>
-          <a
-            href="https://assets.idseq.net/Terms.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="terms-link"
-          >
-            Terms
-          </a>
-          {" and "}
-          <a
-            href="https://assets.idseq.net/Privacy.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="terms-link"
-          >
-            Data Privacy Notice.
-          </a>
-        </label>
-      </div>
-    );
-
     const submitButton = (
       <button
         type="submit"
@@ -760,6 +725,7 @@ class SampleUpload extends React.Component {
             <MenuItem
               active={this.state.localUploadMode}
               onClick={() => this.setState({ localUploadMode: true })}
+              disabled={this.state.submitting}
             >
               <Icon size="large" name="folder open outline" />
               Upload from Your Computer
@@ -767,6 +733,7 @@ class SampleUpload extends React.Component {
             <MenuItem
               active={!this.state.localUploadMode}
               onClick={() => this.setState({ localUploadMode: false })}
+              disabled={this.state.submitting}
             >
               <Icon size="large" name="server" />
               Upload from S3
@@ -1305,7 +1272,14 @@ class SampleUpload extends React.Component {
                   </div>
                 ) : null}
                 <div className="field">
-                  {termsBlurb}
+                  <TermsAgreement
+                    checked={this.state.consentChecked}
+                    onChange={() =>
+                      this.setState({
+                        consentChecked: !this.state.consentChecked
+                      })
+                    }
+                  />
                   <div className="row">
                     <div className="col no-padding s12">
                       {this.state.success ? (
