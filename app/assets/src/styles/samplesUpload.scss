@@ -74,6 +74,10 @@
           }
 
           .row {
+            .sample-upload-box {
+              height: 120px;
+              margin-top: 15px;
+            }
             &.input-row {
               margin-top: -10px;
               .browser-default {
@@ -292,8 +296,10 @@
           .inputFileArea {
             margin-bottom: 50px;
 
-            .filePickerArea {
+            .bulkUploadFilePicker {
+              margin-top: 15px;
               margin-bottom: 20px;
+              height: 120px;
             }
           }
         }

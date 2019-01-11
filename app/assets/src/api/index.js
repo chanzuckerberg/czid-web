@@ -136,6 +136,16 @@ const createSample = (
       });
   });
 
+const validateMetadataCSVForProject = (id, metadata) =>
+  postWithCSRF(`/projects/${id}/validate_metadata_csv`, {
+    metadata
+  });
+
+const uploadMetadataForProject = (id, metadata) =>
+  postWithCSRF(`/projects/${id}/upload_metadata`, {
+    metadata
+  });
+
 export {
   get,
   getSampleMetadata,
@@ -148,5 +158,7 @@ export {
   getURLParamString,
   deleteSample,
   getSummaryContigCounts,
-  createSample
+  createSample,
+  validateMetadataCSVForProject,
+  uploadMetadataForProject
 };

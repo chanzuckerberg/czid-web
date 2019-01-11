@@ -1,11 +1,11 @@
 import React from "react";
 import { fromPairs, set, find } from "lodash/fp";
 import Divider from "../../layout/Divider";
-import QueryString from "query-string";
 import PhyloTreeVis from "./PhyloTreeVis";
 import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import PropTypes from "prop-types";
+import { resetUrl, parseUrlParams } from "~/helpers/url";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
 import cs from "./phylo_tree_list_view.scss";
 
@@ -14,7 +14,7 @@ class PhyloTreeListView extends React.Component {
     super(props);
 
     let urlParams = this.parseUrlParams();
-    this.resetUrl();
+    resetUrl();
 
     this.state = {
       selectedPhyloTreeId: this.getDefaultSelectedTreeId(
@@ -37,15 +37,8 @@ class PhyloTreeListView extends React.Component {
     return selectedId;
   }
 
-  resetUrl() {
-    // remove parameters from url
-    window.history.replaceState({}, document.title, location.pathname);
-  }
-
   parseUrlParams() {
-    let urlParams = QueryString.parse(location.search, {
-      arrayFormat: "bracket"
-    });
+    let urlParams = parseUrlParams();
     urlParams.treeId = parseInt(urlParams.treeId);
     return urlParams;
   }

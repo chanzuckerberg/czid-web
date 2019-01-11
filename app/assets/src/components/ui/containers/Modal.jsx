@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
+import cx from "classnames";
 import { forbidExtraProps } from "airbnb-prop-types";
 import { Modal as SemanticModal } from "semantic-ui-react";
 import RemoveIcon from "../icons/RemoveIcon";
@@ -12,7 +13,11 @@ class Modal extends React.Component {
 
   render() {
     return (
-      <SemanticModal className={cs.modal} {...this.props} trigger={<span />}>
+      <SemanticModal
+        {...this.props}
+        className={cx(cs.modal, this.props.className)}
+        trigger={<span />}
+      >
         {this.props.title && (
           <SemanticModal.Header>{this.props.title}</SemanticModal.Header>
         )}
@@ -32,7 +37,8 @@ Modal.propTypes = forbidExtraProps({
   ]).isRequired,
   onClose: PropTypes.func,
   title: PropTypes.string,
-  open: PropTypes.bool
+  open: PropTypes.bool,
+  className: PropTypes.string
 });
 
 export default Modal;

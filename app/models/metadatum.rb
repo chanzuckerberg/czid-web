@@ -216,10 +216,13 @@ class Metadatum < ApplicationRecord
     # Check if the key is valid
     valid_keys = self.class.valid_keys_by_host_genome_name(sample.host_genome_name)
     unless key && valid_keys.include?(key)
-      errors.add(:key, "#{key} is not a supported metadatum")
+      errors.add(:key, "#{key} is not a supported metadatum for host genome #{sample.host_genome_name}")
+      return
     end
 
-    public_send("check_and_set_#{data_type}_type")
+    if data_type
+      public_send("check_and_set_#{data_type}_type")
+    end
   end
 
   # Called by set_validated_values custom validator
@@ -249,9 +252,16 @@ class Metadatum < ApplicationRecord
   end
 
   def check_and_set_number_type
-    self.number_validated_value = raw_value.to_f
+    # If the raw-value doesn't match a number regex.
+    # This regex matches things like +0.2. Plus or minus, one or more digits, an optional decimal, and more digits.
+    if /\A[+-]?\d+(\.\d+)?\z/.match(raw_value).nil?
+      errors.add(:raw_value, "#{raw_value} is not a valid number")
+    else
+      # to_f will convert "abc" to 0.0, so we need the regex
+      self.number_validated_value = raw_value.to_f
+    end
   rescue ArgumentError
-    errors.add(:raw_value, "#{raw_value} is not a valid Float")
+    errors.add(:raw_value, "#{raw_value} is not a valid number")
   end
 
   def check_and_set_date_type

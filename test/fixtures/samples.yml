@@ -54,3 +54,13 @@ project_one_sampleA:
 project_one_sampleB:
   name: project_one_sampleB
   project: one
+
+metadata_validation_sample_human:
+  name: metadata_validation_sample_human
+  project: metadata_validation_project
+  host_genome: human
+
+metadata_validation_sample_mosquito:
+  name: metadata_validation_sample_mosquito
+  project: metadata_validation_project
+  host_genome: mosquito

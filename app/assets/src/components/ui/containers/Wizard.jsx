@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
+import cx from "classnames";
 import PrimaryButton from "../controls/buttons/PrimaryButton";
 import SecondaryButton from "../controls/buttons/SecondaryButton";
 
@@ -13,7 +14,8 @@ class Wizard extends React.Component {
     super(props);
 
     this.state = {
-      currentPage: 0
+      currentPage: 0,
+      continueEnabled: true
     };
 
     this.showPageInfo = this.props.showPageInfo || true;
@@ -43,13 +45,26 @@ class Wizard extends React.Component {
     return null;
   }
 
+  resetPageState = () => {
+    this.setState({
+      continueEnabled: true
+    });
+  };
+
+  handleContinueEnabled = enabled => {
+    this.setState({
+      continueEnabled: enabled
+    });
+  };
+
   handleBackClick() {
     if (this.state.currentPage > 0) {
       this.setState({ currentPage: this.state.currentPage - 1 });
+      this.resetPageState();
     }
   }
 
-  handleContinueClick(currentPage) {
+  handleContinueClick() {
     let onContinue = this.props.children[this.state.currentPage].props
       .onContinue;
     let result = true;
@@ -62,6 +77,7 @@ class Wizard extends React.Component {
       this.state.currentPage < this.props.children.length - 1
     ) {
       this.setState({ currentPage: this.state.currentPage + 1 });
+      this.resetPageState();
     }
   }
 
@@ -85,38 +101,48 @@ class Wizard extends React.Component {
     ) {
       pageInfo = `${this.state.currentPage -
         this.skipPageInfoNPages +
-        1} / ${this.props.children.length - this.skipPageInfoNPages}`;
+        1} of ${this.props.children.length - this.skipPageInfoNPages}`;
     }
 
     return (
       <WizardContext.Provider
         value={{ currentPage: this.state.currentPage, actions: wizardActions }}
       >
-        <div className="wizard">
+        <div className={cx("wizard", this.props.className)}>
           <div className="wizard__header">
             {pageInfo && <div className="wizard__header__page">{pageInfo}</div>}
             <div className="wizard__header__title">
               {currentPage.props.title || this.props.title}
             </div>
           </div>
-          {currentPage}
+          {/* Pass additional hooks to custom wizard pages */}
+          <div className="wizard__page_wrapper">
+            {React.cloneElement(currentPage, {
+              wizardEnableContinue: this.handleContinueEnabled
+            })}
+          </div>
           {!currentPage.props.skipDefaultButtons && (
             <div className="wizard__nav">
-              <SecondaryButton
-                text={this.labels.back}
-                disabled={this.state.currentPage <= 0}
-                onClick={this.handleBackClick}
-              />
+              {this.state.currentPage > 0 && (
+                <SecondaryButton
+                  text={this.labels.back}
+                  onClick={this.handleBackClick}
+                  rounded={false}
+                />
+              )}
               {this.state.currentPage < this.props.children.length - 1 && (
                 <PrimaryButton
                   text={this.labels.continue}
                   onClick={this.handleContinueClick}
+                  disabled={!this.state.continueEnabled}
+                  rounded={false}
                 />
               )}
               {this.state.currentPage == this.props.children.length - 1 && (
                 <PrimaryButton
                   text={this.labels.finish}
                   onClick={this.handleFinishClick}
+                  rounded={false}
                 />
               )}
             </div>
@@ -142,9 +168,11 @@ Wizard.propTypes = {
   onComplete: PropTypes.func,
   showPageInfo: PropTypes.bool,
   skipPageInfoNPages: PropTypes.number,
-  title: PropTypes.string
+  title: PropTypes.string,
+  className: PropTypes.string
 };
 
+// You can use this page component for basic use cases, or create your own custom page component.
 class Page extends React.Component {
   constructor(props) {
     super(props);
@@ -171,7 +199,9 @@ Page.propTypes = {
     PropTypes.PropTypes.node,
     PropTypes.arrayOf(PropTypes.node)
   ]).isRequired,
-  onLoad: PropTypes.func
+  onLoad: PropTypes.func,
+  // Props are used in Wizard.
+  skipDefaultButtons: PropTypes.bool
 };
 
 Wizard.Page = Page;

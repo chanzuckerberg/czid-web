@@ -1,0 +1,20 @@
+.metadataUploadModal {
+  min-height: 500px;
+
+  .projectName {
+    font-weight: 600;
+  }
+}
+
+.metadataCSVUpload {
+  margin-top: 40px;
+
+  &.hasIssues {
+    height: 400px;
+  }
+}
+
+.tableContainer {
+  overflow: auto;
+  max-height: 300px;
+}

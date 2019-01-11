@@ -101,7 +101,7 @@ class MetadataSection extends React.Component {
               <div className={cs.controls}>
                 <PrimaryButton
                   onClick={onEditToggle}
-                  rectangular
+                  rounded={false}
                   text="Done Editing"
                 />
               </div>

@@ -2,15 +2,15 @@
 
 .filePicker {
   width: 100%;
-  height: 120px;
-  margin-top: 15px;
   border: 2px $medium-grey dashed;
   border-radius: 5px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
 
   &.active {
     background-color: $primary-lightest;
-    border: 2px solid $primary-light;
+    border: 2px dashed $primary-light;
   }
 
   &:hover,
@@ -20,17 +20,32 @@
   }
 
   .inner {
-    margin: 2rem;
+    margin: 0 28px;
 
     .title {
-      font-weight: bold;
-      margin-bottom: 1rem;
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 5px;
     }
 
-    .file {
-      font-weight: bold;
-      color: $primary-light;
-      overflow-wrap: break-word;
+    .fileBox {
+      font-size: 13px;
+
+      .checkmarkIcon {
+        color: $primary-light;
+      }
+
+      &.noTitle {
+        font-size: 16px;
+
+        .fileName {
+          font-weight: 600;
+        }
+      }
+    }
+
+    .instructions {
+      font-size: 13px;
     }
 
     .message {

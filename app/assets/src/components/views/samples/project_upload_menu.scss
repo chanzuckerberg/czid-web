@@ -1,0 +1,13 @@
+@import "~styles/themes/colors";
+
+.trigger {
+  color: $primary-light;
+  border-left: 1px solid $light-grey;
+  padding-left: 10px;
+  margin-left: 2px;
+  cursor: pointer;
+
+  .label {
+    margin-left: 4px;
+  }
+}
