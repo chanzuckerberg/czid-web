@@ -75,7 +75,7 @@ class PipelineRun < ApplicationRecord
 
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
   ASSEMBLY_PIPELINE_VERSION = 3.1
-  MIN_CONTIG_SIZE = 4
+  MIN_CONTIG_SIZE = 4 # minimal # reads mapped to the  contig
   M8_FIELDS = ["Query", "Accession", "Percentage Identity", "Alignment Length",
                "Number of mismatches", "Number of gap openings",
                "Start of alignment in query", "End of alignment in query",
