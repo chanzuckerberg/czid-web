@@ -1073,18 +1073,18 @@ module ReportHelper
                          NT_r NT_rpm NT_zscore NR_r NR_rpm NR_zscore]
     CSV.generate(headers: true) do |csv|
       csv << attribute_names
-      sample_taxa_hash.each do |sample_record|
-        sample_record[:taxons].each do |taxon_record|
+      (sample_taxa_hash || []).each do |sample_record|
+        (sample_record[:taxons] || []).each do |taxon_record|
           data_values = { sample_name: sample_record[:name],
                           tax_id: taxon_record["tax_id"],
                           taxon_name: taxon_record["name"],
-                          aggregatescore: taxon_record["NT"]["aggregatescore"],
-                          NT_r: taxon_record["NT"]["r"],
-                          NT_rpm: taxon_record["NT"]["rpm"],
-                          NT_zscore: taxon_record["NT"]["zscore"],
-                          NR_r: taxon_record["NR"]["r"],
-                          NR_rpm: taxon_record["NR"]["rpm"],
-                          NR_zscore: taxon_record["NR"]["zscore"] }
+                          aggregatescore: (taxon_record["NT"] || {})["aggregatescore"],
+                          NT_r: (taxon_record["NT"] || {})["r"],
+                          NT_rpm: (taxon_record["NT"] || {})["rpm"],
+                          NT_zscore: (taxon_record["NT"] || {})["zscore"],
+                          NR_r: (taxon_record["NR"] || {})["r"],
+                          NR_rpm: (taxon_record["NR"] || {})["rpm"],
+                          NR_zscore: (taxon_record["NR"] || {})["zscore"] }
           csv << data_values.values_at(*attribute_names.map(&:to_sym))
         end
       end
