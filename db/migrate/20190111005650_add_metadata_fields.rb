@@ -46,12 +46,12 @@ class AddMetadataFields < ActiveRecord::Migration[5.1]
       # Ex: lat_lon could be a core field but not on new projects by default.
       t.integer :is_core, limit: 1, default: 0
 
-      # Default fields are a subset of the core fields that will appear when someone creates a
-      # project. These can be removed from a project.
+      # Default fields are a subset of the core fields that will appear on a project when someone
+      # creates a project. These can be removed from a project.
       t.integer :is_default, limit: 1, default: 0
 
       # Required fields are a subset of the core/default fields that cannot be removed from the
-      # project. Ex: collection_date, location, nucleotide_type, etc.
+      # project. This is the strictest level. Ex: collection_date, location, nucleotide_type, etc.
       t.integer :is_required, limit: 1, default: 0
 
       # Name of a group of fields for the frontend. Ex: Sample, Donor, Infection, Sequencing, etc.
@@ -78,7 +78,7 @@ class AddMetadataFields < ActiveRecord::Migration[5.1]
       t.integer :project_id
     end
 
-    # Additions to metadata-data. Every piece of metadata will belong to a type of metadata_field.
+    # Additions to metadata-data. Every piece of metadata will belong to a type of metadata_field.rb.
     add_reference :metadata, :metadata_field, foreign_key: true, index: true
 
     # Specificity will be used for things like dates and potentially location.
