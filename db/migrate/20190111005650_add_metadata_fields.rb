@@ -60,7 +60,32 @@ class AddMetadataFields < ActiveRecord::Migration[5.1]
       t.timestamps
     end
 
-    # Additions to metadata-data. A metadata_field has many metadata.
+    # Certain meta-fields are appropriate for different (and potentially multiple) hosts. E.g.
+    # "Discharge Date" is only for humans. Therefore host genomes have many meta-fields and
+    # meta-fields have many host genomes. This is a way of handling many-to-many /
+    # has_and_belongs_to_many in Rails.
+    create_table :host_genomes_metadata_fields, id: false do |t|
+      t.integer :host_genome_id
+      t.integer :metadata_field_id
+    end
+
+    # User-defined meta-fields will belong to each (and potentially multiple) projects. So
+    # meta-fields have many projects and projects have many meta-fields.
+    # When a user creates a new project, they'll basically get a copy of all the meta-fields marked
+    # "default". Then they can add and subtract from their set of meta-fields from there.
+    create_table :metadata_fields_projects, id: false do |t|
+      t.integer :metadata_field_id
+      t.integer :project_id
+    end
+
+    # Additions to metadata-data. Every piece of metadata will belong to a type of metadata_field.
     add_reference :metadata, :metadata_field, foreign_key: true, index: true
+
+    # Specificity will be used for things like dates and potentially location.
+    # Ex: The user enters "January 2019" in the frontend somehow and only wants to specify it at the
+    # month level. So specificity = "month".
+    # Ex: The user types the name of an ambiguous location and specifies that it refers to a
+    # "country" instead of a city.
+    add_column :metadata, :specificity, :string
   end
 end
