@@ -71,14 +71,14 @@ class AddMetadataFields < ActiveRecord::Migration[5.1]
 
     # User-defined meta-fields will belong to each (and potentially multiple) projects. So
     # meta-fields have many projects and projects have many meta-fields.
-    # When a user creates a new project, they'll basically get a copy of all the meta-fields marked
+    # When a user creates a new project, they'll basically get a list of all the meta-fields marked
     # "default". Then they can add and subtract from their set of meta-fields from there.
     create_table :metadata_fields_projects, id: false do |t|
       t.integer :metadata_field_id
       t.integer :project_id
     end
 
-    # Additions to metadata-data. Every piece of metadata will belong to a type of metadata_field.rb.
+    # Additions to metadata-data. Every piece of metadata will belong to a type of metadata_field.
     add_reference :metadata, :metadata_field, foreign_key: true, index: true
 
     # Specificity will be used for things like dates and potentially location.
