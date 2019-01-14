@@ -19,6 +19,16 @@ class Metadatum < ApplicationRecord
   validates :number_validated_value, numericality: true, allow_nil: true
   validate :set_validated_values
 
+  # Additional ActiveRecord field documentation:
+  #
+  # For things like location/date we should try to have a consistent pattern. This is the
+  # "explicitly-specifying levels of things" option vs. the reverse option of "freeform fields and
+  # then inferring the level of specificity from the values".
+  # t.string :specificity
+  #
+  # Every piece of metadata will belong to a type of metadata_field
+  # add_reference :metadata, :metadata_field
+
   # Key to the metadatum type. Supporting strings and numbers currently.
   KEY_TO_TYPE = {
     unique_id: STRING_TYPE,

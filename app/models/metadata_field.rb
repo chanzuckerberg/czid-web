@@ -63,4 +63,16 @@ class MetadataField < ApplicationRecord
 
   # Name of a group of fields for the frontend. Ex: Sample, Donor, Infection, Sequencing, etc.
   # t.string :group
+
+  # Certain meta-fields are appropriate for different (and potentially multiple) hosts. E.g.
+  # "Discharge Date" is only for humans. Therefore host genomes have many meta-fields and
+  # meta-fields have many host genomes. This is a way of handling many-to-many /
+  # has_and_belongs_to_many in Rails.
+  # create_join_table :host_genomes, :metadata_fields
+
+  # User-defined meta-fields will belong to each (and potentially multiple) projects. So
+  # meta-fields have many projects and projects have many meta-fields.
+  # When a user creates a new project, they'll basically get a list of all the meta-fields marked
+  # "default". Then they can add and subtract from their set of meta-fields from there.
+  # create_join_table :projects, :metadata_fields
 end
