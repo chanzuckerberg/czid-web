@@ -47,6 +47,8 @@ class Metadatum < ApplicationRecord
     extraction_batch: STRING_TYPE,
     sample_unit: NUMBER_TYPE,
     life_stage: STRING_TYPE,
+    id_method: STRING_TYPE,
+    genus_species: STRING_TYPE,
     preservation_method: STRING_TYPE,
     trap_type: STRING_TYPE,
     blood_fed: STRING_TYPE,
@@ -123,6 +125,8 @@ class Metadatum < ApplicationRecord
     extraction_batch: "Extraction Batch",
     sample_unit: "Sample Unit",
     life_stage: "Life Stage",
+    id_method: "ID Method",
+    genus_species: "Genus/Species",
     preservation_method: "Preservation Method",
     trap_type: "Trap Type",
     blood_fed: "Blood Fed",
@@ -167,7 +171,11 @@ class Metadatum < ApplicationRecord
       comorbidity
       infection_class
     ],
+    # Collection location is here (in addition to collection_lat/collection_long) as a temporary fix.
+    # Collection_location is hard-coded as a default in the front-end, for example in the heatmap.
+    # TODO(mark): Refactor front-end to be more resilient to custom metadata schemas, and remove this duplication.
     Mosquito: %w[
+      collection_location
       collection_lat
       collection_long
       reported_sex
