@@ -5,7 +5,8 @@ class Metadatum < ApplicationRecord
 
   # ActiveRecord related
   belongs_to :sample
-  belongs_to :metadata_field
+  # TODO: metadata_field type will be required after migration.
+  belongs_to :metadata_field, optional: true
   STRING_TYPE = 0
   NUMBER_TYPE = 1
   DATE_TYPE = 2
