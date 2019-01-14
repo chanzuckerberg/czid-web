@@ -86,6 +86,10 @@ class AddMetadataFields < ActiveRecord::Migration[5.1]
     # month level. So specificity = "month".
     # Ex: The user types the name of an ambiguous location and specifies that it refers to a
     # "country" instead of a city.
+    #
+    # For things like location/date we should try to have a consistent pattern. This is the
+    # "explicitly-specifying levels of things" option vs. the reverse option of "freeform fields and
+    # then inferring the level of specificity from the values".
     add_column :metadata, :specificity, :string
   end
 end
