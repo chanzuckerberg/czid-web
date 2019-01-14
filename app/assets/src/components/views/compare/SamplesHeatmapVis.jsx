@@ -224,9 +224,11 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   getSelectedMetadata() {
-    return Array.from(this.state.selectedMetadata).map(metadatum => {
-      return { value: metadatum, label: this.metadataTypes[metadatum].name };
-    });
+    return Array.from(this.state.selectedMetadata)
+      .filter(metadatum => !!this.metadataTypes[metadatum])
+      .map(metadatum => {
+        return { value: metadatum, label: this.metadataTypes[metadatum].name };
+      });
   }
 
   getAvailableMetadataOptions() {
