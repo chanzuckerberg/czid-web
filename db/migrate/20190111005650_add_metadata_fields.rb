@@ -2,7 +2,7 @@ class AddMetadataFields < ActiveRecord::Migration[5.1]
   def change
     create_table :metadata_fields do |t|
       # Name/key ex: "sample_type"
-      t.string :name, null: false
+      t.string :name, null: false, index: true
 
       # User-friendly display name ex: "Sample Type"
       t.string :display_name
@@ -59,7 +59,7 @@ class AddMetadataFields < ActiveRecord::Migration[5.1]
       t.integer :is_required, limit: 1, default: 0
 
       # Name of a group of fields for the frontend. Ex: Sample, Donor, Infection, Sequencing, etc.
-      t.string :group
+      t.string :group, index: true
 
       t.timestamps
     end
@@ -68,22 +68,22 @@ class AddMetadataFields < ActiveRecord::Migration[5.1]
     # "Discharge Date" is only for humans. Therefore host genomes have many meta-fields and
     # meta-fields have many host genomes. This is a way of handling many-to-many /
     # has_and_belongs_to_many in Rails.
-    create_table :host_genomes_metadata_fields, id: false do |t|
-      t.integer :host_genome_id
-      t.integer :metadata_field_id
+    create_join_table :host_genomes, :metadata_fields do |t|
+      t.index [:host_genome_id, :metadata_field_id], name: "index_host_genomes_metadata_fields"
+      t.index [:metadata_field_id, :host_genome_id], name: "index_metadata_fields_host_genomes"
     end
 
     # User-defined meta-fields will belong to each (and potentially multiple) projects. So
     # meta-fields have many projects and projects have many meta-fields.
     # When a user creates a new project, they'll basically get a list of all the meta-fields marked
     # "default". Then they can add and subtract from their set of meta-fields from there.
-    create_table :metadata_fields_projects, id: false do |t|
-      t.integer :metadata_field_id
-      t.integer :project_id
+    create_join_table :projects, :metadata_fields do |t|
+      t.index [:project_id, :metadata_field_id], name: "index_projects_metadata_fields"
+      # Don't need to optimize for metadata_field -> projects for now.
     end
 
     # Additions to metadata-data. Every piece of metadata will belong to a type of metadata_field.
-    add_reference :metadata, :metadata_field, foreign_key: true, index: true
+    add_reference :metadata, :metadata_field, index: true
 
     # Specificity will be used for things like dates and potentially location.
     # Ex: The user enters "January 2019" in the frontend somehow and only wants to specify it at the
