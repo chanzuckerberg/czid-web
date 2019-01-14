@@ -451,7 +451,7 @@ class PipelineRun < ApplicationRecord
     File.open(m8_local_path, 'r') do |m8f|
       line = m8f.gets
       while line
-        fields = line.split("\t")
+        fields = line.rstrip.split("\t")
         output[fields[0]] = fields
         line = m8f.gets
       end
