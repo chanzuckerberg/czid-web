@@ -2,7 +2,6 @@
 require 'English'
 require 'thread/pool'
 
-
 class MonitorPipelineResults
   # Concurrency allowed
   THREAD_POOL_SIZE = 10
@@ -17,7 +16,7 @@ class MonitorPipelineResults
 
   def self.update_jobs(silent, thread_pool)
     PipelineRun.results_in_progress.each do |pr|
-      thread_pool.process do 
+      thread_pool.process do
         begin
           break if @shutdown_requested
           Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}") unless silent
@@ -30,7 +29,7 @@ class MonitorPipelineResults
     end
 
     PhyloTree.in_progress.each do |pt|
-      thread_pool.process do 
+      thread_pool.process do
         begin
           break if @shutdown_requested
           Rails.logger.info("Monitoring results for phylo_tree #{pt.id}") unless silent

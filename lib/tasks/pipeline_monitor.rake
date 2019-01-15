@@ -12,9 +12,6 @@ IDSEQ_BENCH_MIN_FREQUENCY_HOURS = 1.0
 # by copying to the S3 location below.
 IDSEQ_BENCH_CONFIG = "s3://idseq-bench/config.json".freeze
 
-
-
-
 class CheckPipelineRuns
   # Concurrency allowed
   THREAD_POOL_SIZE = 10
@@ -29,7 +26,7 @@ class CheckPipelineRuns
 
   def self.update_jobs(silent, thread_pool)
     PipelineRun.in_progress.each do |pr|
-      thread_pool.process do 
+      thread_pool.process do
         begin
           break if @shutdown_requested
           Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}") unless silent
@@ -42,7 +39,7 @@ class CheckPipelineRuns
     end
 
     PhyloTree.in_progress.each do |pt|
-      thread_pool.process do 
+      thread_pool.process do
         begin
           break if @shutdown_requested
           Rails.logger.info("Monitoring job for phylo_tree #{pt.id}") unless silent
