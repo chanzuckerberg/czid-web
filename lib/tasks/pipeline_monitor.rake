@@ -25,6 +25,9 @@ class CheckPipelineRuns
   end
 
   def self.update_jobs(silent, thread_pool)
+    num_pr = PipelineRun.in_progress.count
+    num_pt = PhyloTree.in_progress.count
+    Rails.logger.info("New pipeline monitor loop started with #{num_pr} pr and #{num_pt} pt.")
     PipelineRun.in_progress.each do |pr|
       thread_pool.process do
         begin
