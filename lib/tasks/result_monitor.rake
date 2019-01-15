@@ -19,6 +19,7 @@ class MonitorPipelineResults
     num_pt = PhyloTree.in_progress.count
     Rails.logger.info("New result monitor loop started with #{num_pr} pr and #{num_pt} pt.")
     PipelineRun.results_in_progress.each do |pr|
+      thread_pool.wait
       thread_pool.process do
         begin
           break if @shutdown_requested
@@ -32,6 +33,7 @@ class MonitorPipelineResults
     end
 
     PhyloTree.in_progress.each do |pt|
+      thread_pool.wait
       thread_pool.process do
         begin
           break if @shutdown_requested
