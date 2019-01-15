@@ -282,6 +282,7 @@ class CheckPipelineRuns
       thread_pool.process { autoscaling_state = autoscaling_update(autoscaling_state, t_now) }
       thread_pool.wait
       thread_pool.process { benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now) }
+      thread_pool.wait(:done)
       t_now = Time.now.to_f
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + min_refresh_interval].max

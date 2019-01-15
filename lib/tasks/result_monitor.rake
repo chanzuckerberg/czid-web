@@ -60,6 +60,7 @@ class MonitorPipelineResults
       iter_count += 1
       t_iter_start = t_now
       update_jobs(thread_pool)
+      thread_pool.wait(:done)
       t_now = Time.now.to_f
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
