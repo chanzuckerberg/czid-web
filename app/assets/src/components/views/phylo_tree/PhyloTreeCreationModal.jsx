@@ -9,7 +9,7 @@ class PhyloTreeCreationModal extends React.Component {
     // <PhyloTreeCreationModal> is always open when rendered.
     // To hide <PhyloTreeCreationModal>, we simply don't render it.
     return (
-      <Modal open onClose={this.props.onClose}>
+      <Modal open tall onClose={this.props.onClose}>
         <PhyloTreeCreation onComplete={this.props.onClose} {...this.props} />
       </Modal>
     );

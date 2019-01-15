@@ -29,7 +29,7 @@
     }
   }
 
-  &__page_wrapper {
+  &__page_wrapper.padding-bottom {
     // Leave space for the nav at the bottom.
     padding-bottom: 50px;
   }

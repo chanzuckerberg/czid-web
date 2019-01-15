@@ -116,7 +116,12 @@ class Wizard extends React.Component {
             </div>
           </div>
           {/* Pass additional hooks to custom wizard pages */}
-          <div className="wizard__page_wrapper">
+          <div
+            className={cx(
+              "wizard__page_wrapper",
+              !currentPage.props.skipDefaultButtons && "padding-bottom"
+            )}
+          >
             {React.cloneElement(currentPage, {
               wizardEnableContinue: this.handleContinueEnabled
             })}
