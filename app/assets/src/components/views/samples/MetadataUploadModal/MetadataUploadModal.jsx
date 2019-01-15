@@ -61,6 +61,7 @@ class MetadataUploadModal extends React.Component {
     return (
       <Modal
         open
+        tall
         onClose={this.props.onClose}
         className={cs.metadataUploadModal}
       >

@@ -172,7 +172,9 @@ Wizard.propTypes = {
   className: PropTypes.string
 };
 
-// You can use this page component for basic use cases, or create your own custom page component.
+// You can use the Page component for basic use cases, or create your own custom page class.
+// This component can't receive props such as "wizardEnableContinue", which allows you to toggle whether
+// the continue button is enabled for the current page. Custom page classes such as UploadPage can.
 class Page extends React.Component {
   constructor(props) {
     super(props);

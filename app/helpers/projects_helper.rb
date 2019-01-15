@@ -8,13 +8,13 @@ module ProjectsHelper
     if new_samples
       # Require host_genome_name as a column.
       unless metadata["headers"].include?("host_genome_name")
-        errors.push("host_genome_name column is required.")
+        errors.push(MetadataValidationErrors.missing_host_genome_name_column)
         return { "errors" => errors, "warnings" => warnings }
       end
     else
       # Require sample_name as a column.
       unless metadata["headers"].include?("sample_name")
-        errors.push("sample_name column is required.")
+        errors.push(MetadataValidationErrors.missing_sample_name_column)
         return { "errors" => errors, "warnings" => warnings }
       end
     end
@@ -22,7 +22,7 @@ module ProjectsHelper
     # Verify that the column names are supported.
     metadata["headers"].each_with_index do |header, index|
       if header != "sample_name" && header != "host_genome_name" && !Metadatum::KEY_TO_TYPE.key?(header.to_sym)
-        errors.push("#{header} (column #{index + 1}) is not a supported metadata type.")
+        errors.push(MetadataValidationErrors.column_not_supported(header, index + 1))
       end
     end
 
@@ -31,22 +31,21 @@ module ProjectsHelper
 
     metadata["rows"].each_with_index do |row, index|
       # Check number of values in the row.
-      if row.length > metadata["headers"].length
-        errors.push("Row #{index} has too many values. (#{row.length} instead of #{metadata['headers'].length})")
-      end
-      if row.length < metadata["headers"].length
-        errors.push("Row #{index} has too few values. (#{row.length} instead of #{metadata['headers'].length})")
+      if row.length != metadata["headers"].length
+        errors.push(
+          MetadataValidationErrors.row_wrong_values(row.length, metadata['headers'].length, index + 1)
+        )
       end
 
       if new_samples
         # Check for valid host_genome_name and create temporary sample
         if row[host_genome_name_index].nil? || row[host_genome_name_index] == ""
-          errors.push("Row #{index} is missing host_genome_name.")
+          errors.push(MetadataValidationErrors.row_missing_host_genome_name(index + 1))
           next
         end
         host_genome = HostGenome.where(name: row[host_genome_name_index]).first
         if host_genome.nil?
-          errors.push("#{row[host_genome_name_index]} (row #{index}) is an invalid host_genome_name.")
+          errors.push(MetadataValidationErrors.row_invalid_host_genome_name(row[host_genome_name_index], index + 1))
           next
         end
 
@@ -56,26 +55,22 @@ module ProjectsHelper
       else
         # Check for valid sample name and fetch sample
         if row[sample_name_index].nil? || row[sample_name_index] == ""
-          errors.push("Row #{index} is missing sample_name.")
+          errors.push(MetadataValidationErrors.row_missing_sample_name(index + 1))
           next
         end
         sample = project_samples.where(name: row[sample_name_index]).first
         if sample.nil?
-          errors.push("#{row[sample_name_index]} (row #{index}) does not match any sample names in this project.")
+          errors.push(MetadataValidationErrors.row_invalid_sample_name(row[sample_name_index], index + 1))
           next
         end
       end
 
       # Validate the metadatum values with the sample.
       row.each_with_index do |value, row_index|
-        if row_index >= metadata["headers"].length
-          next
-        end
+        next if row_index >= metadata["headers"].length
 
         # Ignore empty string values.
-        if value.nil? || value == ""
-          next
-        end
+        next if value.nil? || value == ""
 
         metadata_type = metadata["headers"][row_index]
 
@@ -84,11 +79,11 @@ module ProjectsHelper
           issues = sample.metadatum_validate(metadata_type, value)
 
           issues[:errors].each do |error|
-            errors.push("#{error} (row #{index})")
+            errors.push("#{error} (row #{index + 1})")
           end
 
           issues[:warnings].each do |warning|
-            warnings.push("#{warning} (row #{index})")
+            warnings.push("#{warning} (row #{index + 1})")
           end
         end
       end
@@ -107,25 +102,24 @@ module ProjectsHelper
       sample_name = metadata_object["sample_name"]
 
       unless sample_name
-        errors.push("Row #{index} is missing sample name")
+        errors.push(MetadataUploadErrors.row_missing_sample_name(index + 1))
         next
       end
 
       sample = project_samples.where(name: sample_name).first
 
       unless sample
-        errors.push("Row #{index} has invalid sample name: #{sample_name}")
+        errors.push(MetadataUploadErrors.row_invalid_sample_name(sample_name, index + 1))
         next
       end
 
       metadata_object.each do |key, value|
-        if key == "sample_name"
-          next
-        end
+        next if key == "sample_name"
+
         saved = sample.metadatum_add_or_update(key, value)
 
         unless saved
-          errors.push("#{sample_name}: Could not save (#{key}, #{value})")
+          errors.push(MetadataUploadErrors.save_error(key, value, index + 1))
         end
       end
     end

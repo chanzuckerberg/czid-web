@@ -15,7 +15,11 @@ class Modal extends React.Component {
     return (
       <SemanticModal
         {...this.props}
-        className={cx(cs.modal, this.props.className)}
+        className={cx(
+          cs.modal,
+          this.props.className,
+          this.props.tall && cs.tall
+        )}
         trigger={<span />}
       >
         {this.props.title && (
@@ -38,7 +42,8 @@ Modal.propTypes = forbidExtraProps({
   onClose: PropTypes.func,
   title: PropTypes.string,
   open: PropTypes.bool,
-  className: PropTypes.string
+  className: PropTypes.string,
+  tall: PropTypes.bool // Increase the max-height of the Modal for tall content.
 });
 
 export default Modal;

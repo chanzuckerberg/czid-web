@@ -538,7 +538,7 @@ class Sample < ApplicationRecord
 
     # We currently compare the raw_value because val is also a raw string, so we compare equivalent things.
     if existing_m && !existing_m.raw_value.nil? && existing_m.raw_value != val
-      issues[:warnings].push("Value already exists. #{val} will overwrite #{existing_m.raw_value} for '#{key}' of #{name}")
+      issues[:warnings].push(MetadataValidationWarnings.value_already_exists(val, existing_m.raw_value, key))
     end
 
     issues
