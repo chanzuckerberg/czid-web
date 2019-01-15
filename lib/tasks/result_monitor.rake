@@ -1,7 +1,12 @@
 # Check for pipeline results and load them if available
 require 'English'
+require 'thread/pool'
+
 
 class MonitorPipelineResults
+  # Concurrency allowed
+  THREAD_POOL_SIZE = 10
+
   @sleep_quantum = 5.0
 
   @shutdown_requested = false
@@ -10,26 +15,30 @@ class MonitorPipelineResults
     attr_accessor :shutdown_requested
   end
 
-  def self.update_jobs(silent)
+  def self.update_jobs(silent, thread_pool)
     PipelineRun.results_in_progress.each do |pr|
-      begin
-        break if @shutdown_requested
-        Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}") unless silent
-        pr.monitor_results
-      rescue => exception
-        LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
-        LogUtil.log_backtrace(exception)
+      thread_pool.process do 
+        begin
+          break if @shutdown_requested
+          Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}") unless silent
+          pr.monitor_results
+        rescue => exception
+          LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
+          LogUtil.log_backtrace(exception)
+        end
       end
     end
 
     PhyloTree.in_progress.each do |pt|
-      begin
-        break if @shutdown_requested
-        Rails.logger.info("Monitoring results for phylo_tree #{pt.id}") unless silent
-        pt.monitor_results
-      rescue => exception
-        LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
-        LogUtil.log_backtrace(exception)
+      thread_pool.process do 
+        begin
+          break if @shutdown_requested
+          Rails.logger.info("Monitoring results for phylo_tree #{pt.id}") unless silent
+          pt.monitor_results
+        rescue => exception
+          LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
+          LogUtil.log_backtrace(exception)
+        end
       end
     end
   end
@@ -42,10 +51,11 @@ class MonitorPipelineResults
     # The duration of the longest update so far.
     max_work_duration = 0
     iter_count = 0
+    thread_pool = Thread.pool(THREAD_POOL_SIZE)
     until @shutdown_requested
       iter_count += 1
       t_iter_start = t_now
-      update_jobs(iter_count != 1)
+      update_jobs(iter_count != 1, thread_pool)
       t_now = Time.now.to_f
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
@@ -61,6 +71,7 @@ class MonitorPipelineResults
       sleep [t_end - t_now, @sleep_quantum].min
       t_now = Time.now.to_f
     end
+    thread_pool.shutdown
     Rails.logger.info("Exited result_monitor loop after #{iter_count} iterations.")
   end
 end
