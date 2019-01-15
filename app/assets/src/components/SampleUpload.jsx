@@ -1,8 +1,10 @@
 import React from "react";
+import QueryString from "query-string";
 import ReactDOM from "react-dom";
 import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
+import { find } from "lodash/fp";
 import ObjectHelper from "../helpers/ObjectHelper";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { openUrlWithTimeout } from "~utils/links";
@@ -14,6 +16,7 @@ import MosquitoIcon from "~ui/icons/MosquitoIcon";
 import MouseIcon from "~ui/icons/MouseIcon";
 import TickIcon from "~ui/icons/TickIcon";
 import UploadBox from "~ui/controls/UploadBox";
+import { resetUrl, parseUrlParams } from "~/helpers/url";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { createSample } from "~/api";
@@ -24,7 +27,6 @@ class SampleUpload extends React.Component {
     this.handleUpload = this.handleUpload.bind(this);
     this.handleUpdate = this.handleUpdate.bind(this);
     this.csrf = props.csrf;
-    this.project = props.projectInfo ? props.projectInfo : null;
     this.handleProjectSubmit = this.handleProjectSubmit.bind(this);
     this.clearError = this.clearError.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
@@ -37,7 +39,13 @@ class SampleUpload extends React.Component {
     );
     this.toggleNewProjectInput = this.toggleNewProjectInput.bind(this);
     this.projects = props.projects || [];
-    this.project = props.projectInfo || "";
+    const urlParams = parseUrlParams();
+    resetUrl();
+
+    if (urlParams.projectId) {
+      this.project = find(["id", parseInt(urlParams.projectId)], this.projects);
+    }
+
     this.hostGenomes = props.host_genomes || [];
     this.sample = props.selectedSample || "";
     this.userDetails = props.loggedin_user;
@@ -135,6 +143,19 @@ class SampleUpload extends React.Component {
       this.handleHostChange
     );
     this.initializeTooltip();
+  }
+
+  parseUrlParams() {
+    let urlParams = QueryString.parse(location.search, {
+      arrayFormat: "bracket"
+    });
+    urlParams.projectId = parseInt(urlParams.projectId);
+    return urlParams;
+  }
+
+  resetUrl() {
+    // remove parameters from url
+    window.history.replaceState({}, document.title, location.pathname);
   }
 
   initializeTooltip() {
@@ -753,6 +774,7 @@ class SampleUpload extends React.Component {
         </div>
         <div className="row">
           <UploadBox
+            className="sample-upload-box"
             onDrop={this.onDrop(0)}
             title={"Read 1 File:"}
             fileToUpload={toUpload.length > 0 ? toUpload[0] : null}
@@ -762,6 +784,7 @@ class SampleUpload extends React.Component {
             handleFailure={this.uploadBoxHandleFailure}
           />
           <UploadBox
+            className="sample-upload-box"
             onDrop={this.onDrop(1)}
             title={"Read 2 File (optional):"}
             fileToUpload={toUpload.length > 1 ? toUpload[1] : null}

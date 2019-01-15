@@ -846,16 +846,15 @@ class BulkUploadImport extends React.Component {
           (.fq), fastq.gz (.fq.gz), fasta (.fa), fasta.gz (.fa.gz).
         </div>
         <div className="inputFileArea">
-          <div className="filePickerArea">
-            {!this.state.submitting && (
-              <FilePicker
-                title={filePickerTitle}
-                onChange={this.onDrop}
-                onRejected={onRejected}
-                multiFile={true}
-              />
-            )}
-          </div>
+          {!this.state.submitting && (
+            <FilePicker
+              className="bulkUploadFilePicker"
+              title={filePickerTitle}
+              onChange={this.onDrop}
+              onRejected={onRejected}
+              multiFile={true}
+            />
+          )}
           <BulkSampleUploadTable
             sampleNamesToFiles={this.state.sampleNamesToFiles}
             fileNamesToProgress={this.state.fileNamesToProgress}

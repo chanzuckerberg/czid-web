@@ -2,6 +2,7 @@ import { Label as BaseLabel } from "semantic-ui-react";
 import { forbidExtraProps } from "airbnb-prop-types";
 import PropTypes from "prop-types";
 import React from "react";
+import cs from "./label.scss";
 
 const Label = ({
   className,
@@ -14,7 +15,7 @@ const Label = ({
 }) => {
   return (
     <BaseLabel
-      className={`idseq-ui ${className}`}
+      className={cs.label}
       color={color}
       size={size}
       circular={circular}

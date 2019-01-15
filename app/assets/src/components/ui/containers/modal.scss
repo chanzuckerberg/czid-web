@@ -5,15 +5,24 @@
 
   .closeIcon {
     position: absolute;
-    right: 25px;
-    top: 25px;
+    right: 20px;
+    top: 20px;
     cursor: pointer;
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     opacity: 0.3;
 
     &:hover {
       opacity: 1;
     }
+  }
+
+  &.tall {
+    max-height: 85% !important;
+  }
+
+  :global(.content) {
+    /* Overwrite semantic ui */
+    padding: 0 !important;
   }
 }

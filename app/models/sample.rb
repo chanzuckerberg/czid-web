@@ -2,6 +2,8 @@ require 'open3'
 require 'json'
 require 'tempfile'
 require 'aws-sdk'
+# TODO(mark): Move to an initializer. Make sure this works with Rails auto-reloading.
+require 'constants/metadata'
 
 class Sample < ApplicationRecord
   include TestHelper
@@ -489,7 +491,8 @@ class Sample < ApplicationRecord
     pr.save
   end
 
-  # Add or update metadatum entry on this sample
+  # Add or update metadatum entry on this sample.
+  # Returns whether the update succeeded.
   def metadatum_add_or_update(key, val)
     m = metadata.find_by(key: key.to_s)
     unless m
@@ -503,8 +506,44 @@ class Sample < ApplicationRecord
       m.destroy
     else
       m.raw_value = val
-      m.save!
+      begin
+        m.save!
+      rescue ActiveRecord::RecordInvalid
+        return false
+      end
     end
+
+    true
+  end
+
+  # Validate metadatum entry on this sample, without saving.
+  def metadatum_validate(key, val)
+    issues = {
+      errors: [],
+      warnings: []
+    }
+
+    m = Metadatum.new
+    m.key = key
+    m.data_type = Metadatum::KEY_TO_TYPE[key.to_sym]
+    m.sample = self
+    m.raw_value = val
+
+    is_valid = m.valid?
+
+    unless is_valid
+      issues[:errors].concat(m.errors.messages[:key])
+      issues[:errors].concat(m.errors.messages[:raw_value])
+    end
+
+    existing_m = metadata.find_by(key: key.to_s)
+
+    # We currently compare the raw_value because val is also a raw string, so we compare equivalent things.
+    if existing_m && !existing_m.raw_value.nil? && existing_m.raw_value != val
+      issues[:warnings].push(MetadataValidationWarnings.value_already_exists(val, existing_m.raw_value, key))
+    end
+
+    issues
   end
 
   def initiate_s3_prod_sync_to_staging

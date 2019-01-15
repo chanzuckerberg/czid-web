@@ -83,6 +83,7 @@
     "nanobar": "^0.4.2",
     "nouislider": "^11.0.3",
     "number-abbreviate": "^2.0.0",
+    "papaparse": "^4.6.2",
     "prop-types": "^15.6.0",
     "query-string": "^6.1.0",
     "rc-slider": "^8.6.1",

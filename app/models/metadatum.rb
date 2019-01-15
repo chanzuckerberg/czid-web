@@ -5,6 +5,8 @@ class Metadatum < ApplicationRecord
 
   # ActiveRecord related
   belongs_to :sample
+  # TODO: metadata_field type will be required after migration.
+  belongs_to :metadata_field, optional: true
   STRING_TYPE = 0
   NUMBER_TYPE = 1
   DATE_TYPE = 2
@@ -16,6 +18,16 @@ class Metadatum < ApplicationRecord
   validates :string_validated_value, length: { maximum: 250 }
   validates :number_validated_value, numericality: true, allow_nil: true
   validate :set_validated_values
+
+  # Additional ActiveRecord field documentation:
+  #
+  # For things like location/date we should try to have a consistent pattern. This is the
+  # "explicitly-specifying levels of things" option vs. the reverse option of "freeform fields and
+  # then inferring the level of specificity from the values".
+  # t.string :specificity
+  #
+  # Every piece of metadata will belong to a type of metadata_field
+  # add_reference :metadata, :metadata_field
 
   # Key to the metadatum type. Supporting strings and numbers currently.
   KEY_TO_TYPE = {
@@ -204,10 +216,13 @@ class Metadatum < ApplicationRecord
     # Check if the key is valid
     valid_keys = self.class.valid_keys_by_host_genome_name(sample.host_genome_name)
     unless key && valid_keys.include?(key)
-      errors.add(:key, "#{key} is not a supported metadatum")
+      errors.add(:key, MetadataValidationErrors.invalid_key_for_host_genome(key, sample.host_genome_name))
+      return
     end
 
-    public_send("check_and_set_#{data_type}_type")
+    if data_type
+      public_send("check_and_set_#{data_type}_type")
+    end
   end
 
   # Called by set_validated_values custom validator
@@ -229,7 +244,7 @@ class Metadatum < ApplicationRecord
         end
       end
       unless matched
-        errors.add(:raw_value, "#{raw_value} did not match options #{options.join(', ')}")
+        errors.add(:raw_value, MetadataValidationErrors.invalid_option(key, raw_value))
       end
     else
       self.string_validated_value = raw_value
@@ -237,15 +252,22 @@ class Metadatum < ApplicationRecord
   end
 
   def check_and_set_number_type
-    self.number_validated_value = raw_value.to_f
+    # If the raw-value doesn't match a number regex.
+    # This regex matches things like +0.2. Plus or minus, one or more digits, an optional decimal, and more digits.
+    if /\A[+-]?\d+(\.\d+)?\z/.match(raw_value).nil?
+      errors.add(:raw_value, MetadataValidationErrors.invalid_number(raw_value))
+    else
+      # to_f will convert "abc" to 0.0, so we need the regex
+      self.number_validated_value = raw_value.to_f
+    end
   rescue ArgumentError
-    errors.add(:raw_value, "#{raw_value} is not a valid Float")
+    errors.add(:raw_value, MetadataValidationErrors.invalid_number(raw_value))
   end
 
   def check_and_set_date_type
     self.date_validated_value = Date.parse(raw_value)
   rescue ArgumentError
-    errors.add(:raw_value, "#{raw_value} is not a valid date")
+    errors.add(:raw_value, MetadataValidationErrors.invalid_date(raw_value))
   end
 
   def self.str_to_basic_chars(res)

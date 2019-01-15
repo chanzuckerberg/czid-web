@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_110_002_732) do
+ActiveRecord::Schema.define(version: 20_190_111_005_650) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -114,6 +114,13 @@ ActiveRecord::Schema.define(version: 20_190_110_002_732) do
     t.integer "skip_deutero_filter"
   end
 
+  create_table "host_genomes_metadata_fields", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "host_genome_id", null: false
+    t.bigint "metadata_field_id", null: false
+    t.index ["host_genome_id", "metadata_field_id"], name: "index_host_genomes_metadata_fields"
+    t.index ["metadata_field_id", "host_genome_id"], name: "index_metadata_fields_host_genomes"
+  end
+
   create_table "input_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.text "presigned_url"
@@ -147,7 +154,34 @@ ActiveRecord::Schema.define(version: 20_190_110_002_732) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.date "date_validated_value"
+    t.bigint "metadata_field_id"
+    t.string "specificity"
+    t.index ["metadata_field_id"], name: "index_metadata_on_metadata_field_id"
     t.index ["sample_id", "key"], name: "index_metadata_on_sample_id_and_key", unique: true
+  end
+
+  create_table "metadata_fields", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name", null: false
+    t.string "display_name"
+    t.string "description"
+    t.integer "base_type", limit: 1, null: false
+    t.string "validation_type"
+    t.string "options"
+    t.integer "force_options", limit: 1, default: 0
+    t.integer "is_core", limit: 1, default: 0
+    t.integer "is_default", limit: 1, default: 0
+    t.integer "is_required", limit: 1, default: 0
+    t.string "group"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["group"], name: "index_metadata_fields_on_group"
+    t.index ["name"], name: "index_metadata_fields_on_name"
+  end
+
+  create_table "metadata_fields_projects", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "project_id", null: false
+    t.bigint "metadata_field_id", null: false
+    t.index ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields"
   end
 
   create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|

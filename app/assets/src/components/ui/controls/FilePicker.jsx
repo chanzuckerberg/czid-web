@@ -27,23 +27,30 @@ class FilePicker extends React.Component {
   };
 
   render() {
-    const { onChange, message, onRejected, title, multiFile } = this.props;
+    const {
+      onChange,
+      message,
+      onRejected,
+      title,
+      multiFile,
+      className
+    } = this.props;
     const file = this.props.file || this.state.file;
     let content;
     // TODO(mark): Add UI for multiple files.
     if (file) {
       content = (
-        <div className={cs.file}>
-          <div>
-            <Icon name="checkmark" />
-            {file.name}
+        <div>
+          <div className={cx(cs.fileBox, !title && cs.noTitle)}>
+            <Icon className={cs.checkmarkIcon} name="checkmark" />
+            <span className={cs.fileName}>{file.name} </span>loaded
           </div>
           {message ? <div className={cs.message}>{message}</div> : null}
         </div>
       );
     } else {
       content = (
-        <div>
+        <div className={cs.instructions}>
           <span>
             Drag and drop {multiFile ? "your files" : "a file"} here, or{" "}
           </span>
@@ -58,7 +65,7 @@ class FilePicker extends React.Component {
         maxSize={5e9}
         onDrop={onChange || this.onChange}
         onDropRejected={onRejected || this.onRejected}
-        className={cx(cs.filePicker, file && cs.active)}
+        className={cx(cs.filePicker, className, file && cs.active)}
       >
         <div className={cs.inner}>
           <div className={cs.title}>{title}</div>
@@ -70,6 +77,7 @@ class FilePicker extends React.Component {
 }
 
 FilePicker.propTypes = {
+  className: PropTypes.string,
   file: PropTypes.instanceOf(File),
   onChange: PropTypes.func.isRequired,
   message: PropTypes.string,

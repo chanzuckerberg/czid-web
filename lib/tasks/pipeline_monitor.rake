@@ -24,7 +24,7 @@ class CheckPipelineRuns
     attr_accessor :shutdown_requested
   end
 
-  def self.update_jobs(silent, thread_pool)
+  def self.update_jobs(thread_pool)
     num_pr = PipelineRun.in_progress.count
     num_pt = PhyloTree.in_progress.count
     Rails.logger.info("New pipeline monitor loop started with #{num_pr} pr and #{num_pt} pt.")
@@ -32,7 +32,7 @@ class CheckPipelineRuns
       thread_pool.process do
         begin
           break if @shutdown_requested
-          Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}") unless silent
+          Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
           pr.update_job_status
         rescue => exception
           LogUtil.log_err_and_airbrake("Failed to update pipeline run #{pr.id}")
@@ -45,7 +45,7 @@ class CheckPipelineRuns
       thread_pool.process do
         begin
           break if @shutdown_requested
-          Rails.logger.info("Monitoring job for phylo_tree #{pt.id}") unless silent
+          Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
           pt.monitor_job
         rescue => exception
           LogUtil.log_err_and_airbrake("Failed monitor job for phylo_tree #{pt.id}")
@@ -275,7 +275,7 @@ class CheckPipelineRuns
     until @shutdown_requested
       iter_count += 1
       t_iter_start = t_now
-      update_jobs(iter_count != 1, thread_pool)
+      update_jobs(thread_pool)
       thread_pool.process { autoscaling_state = autoscaling_update(autoscaling_state, t_now) }
       thread_pool.process { benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now) }
       t_now = Time.now.to_f

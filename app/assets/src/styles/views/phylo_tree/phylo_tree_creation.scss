@@ -1,10 +1,10 @@
 @import "../../themes/colors";
 
-.wizard {
-  &__page {
-    min-height: 410px;
-  }
+.phylo-tree-creation-wizard {
+  min-height: 440px;
+}
 
+.wizard {
   &__page-1,
   &__page-2,
   &__page-3,

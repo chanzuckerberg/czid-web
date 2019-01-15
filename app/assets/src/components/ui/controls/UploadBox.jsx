@@ -1,3 +1,4 @@
+// Allows picking a file and also uploading the file to a URL.
 import PropTypes from "prop-types";
 import React from "react";
 import axios from "axios/index";
@@ -42,6 +43,7 @@ class UploadBox extends React.Component {
 
     return (
       <FilePicker
+        className={this.props.className}
         file={fileToUpload}
         onChange={this.props.onDrop}
         title={this.props.title}
@@ -52,6 +54,7 @@ class UploadBox extends React.Component {
 }
 
 UploadBox.propTypes = {
+  className: PropTypes.string,
   title: PropTypes.string,
   fileToUpload: PropTypes.object,
   url: PropTypes.string,

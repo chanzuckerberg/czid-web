@@ -1,7 +1,7 @@
 @import "../../themes/colors.scss";
 
 .wizard {
-  font-size: 12px;
+  font-size: 13px;
 
   // TODO: overrides home.scss, remove after refactoring
   table thead {
@@ -17,23 +17,29 @@
     width: 100%;
 
     &__title {
-      font-size: 20px;
-      font-weight: 700;
+      font-size: 22px;
+      letter-spacing: 0.4px;
       line-height: 30px;
       vertical-align: middle;
     }
 
     &__page {
-      color: $medium-grey;
-      margin-bottom: 10px;
+      color: $light-grey;
+      letter-spacing: 0.4px;
     }
   }
 
+  &__page_wrapper.padding-bottom {
+    // Leave space for the nav at the bottom.
+    padding-bottom: 50px;
+  }
+
   &__nav {
+    // The nav should always at the bottom of the Wizard's parent container.
+    position: fixed;
+    bottom: 40px;
     align-items: center;
     display: flex;
-    justify-content: center;
-    margin-top: 20px;
 
     button:not(:last-child) {
       margin-right: 20px;
