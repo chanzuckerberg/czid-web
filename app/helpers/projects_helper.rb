@@ -1,3 +1,5 @@
+require 'constants/metadata'
+
 module ProjectsHelper
   # This method DOESN'T check that each row has required metadata fields such as collection_location, tissue_type.
   # This can validate both samples that are already created, as well as samples that are new.
