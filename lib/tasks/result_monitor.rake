@@ -22,7 +22,7 @@ class MonitorPipelineResults
       thread_pool.process do
         begin
           break if @shutdown_requested
-          Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}") 
+          Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
           pr.monitor_results
         rescue => exception
           LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
