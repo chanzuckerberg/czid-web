@@ -1677,6 +1677,11 @@ class AddUserModal extends React.Component {
 }
 
 function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
+  const showUploadMenu =
+    (parent.admin !== 0 ||
+      parent.allowedFeatures.includes("project_metadata_upload")) &&
+    (proj && parent.canEditProject(proj.id));
+
   return (
     <div className="right col s12">
       <ul className="project-menu">
@@ -1712,11 +1717,9 @@ function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
           ) : null}
         </li>
         {/* TODO(mark): Change admin to canEditProject when launch */}
-        {parent.admin !== 0 && (
+        {showUploadMenu && (
           <li className="">
-            {proj && parent.canEditProject(proj.id) ? (
-              <ProjectUploadMenu project={proj} />
-            ) : null}
+            <ProjectUploadMenu project={proj} />
           </li>
         )}
       </ul>
