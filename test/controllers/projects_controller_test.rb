@@ -3,6 +3,7 @@ require 'test_helper'
 class ProjectsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @project = projects(:one)
+    @metadata_validation_project = projects(:metadata_validation_project)
     @deletable_project = projects(:deletable_project)
     @user = users(:one)
     @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }

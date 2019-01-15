@@ -619,6 +619,7 @@ class PhyloTreeCreation extends React.Component {
     if (this.state.phyloTreesLoaded) {
       return (
         <Wizard
+          className="phylo-tree-creation-wizard"
           skipPageInfoNPages={this.state.skipListTrees ? 0 : 1}
           onComplete={this.handleComplete}
           defaultPage={this.state.defaultPage}

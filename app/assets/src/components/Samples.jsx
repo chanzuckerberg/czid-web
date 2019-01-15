@@ -24,6 +24,7 @@ import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import TableColumnHeader from "./views/samples/TableColumnHeader";
 import PipelineStatusFilter from "./views/samples/PipelineStatusFilter";
+import ProjectUploadMenu from "./views/samples/ProjectUploadMenu";
 import {
   SAMPLE_TABLE_COLUMNS,
   INITIAL_COLUMNS,
@@ -1710,6 +1711,14 @@ function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
             <AddUserModal parent={parent} state={parent.state} />
           ) : null}
         </li>
+        {/* TODO(mark): Change admin to canEditProject when launch */}
+        {parent.admin !== 0 && (
+          <li className="">
+            {proj && parent.canEditProject(proj.id) ? (
+              <ProjectUploadMenu project={proj} />
+            ) : null}
+          </li>
+        )}
       </ul>
     </div>
   );

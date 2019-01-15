@@ -16,3 +16,8 @@ public_project:
 joe_project:
   name: Project 3
   users: [joe]
+
+metadata_validation_project:
+  name: Metadata Project
+  users: [one]
+

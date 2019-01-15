@@ -8,9 +8,9 @@ const Button = ({
   icon,
   label,
   text,
-  rectangular,
   hasDropdownArrow,
   className,
+  rounded,
   ...props
 }) => {
   let content = text;
@@ -30,7 +30,7 @@ const Button = ({
       className={cx(
         cname,
         className,
-        rectangular && "rectangular",
+        !rounded && "rectangular",
         hasDropdownArrow && "has-dropdown-arrow"
       )}
     >
@@ -52,9 +52,13 @@ Button.propTypes = forbidExtraProps({
   text: PropTypes.string,
   primary: PropTypes.bool,
   secondary: PropTypes.bool,
-  rectangular: PropTypes.bool,
+  rounded: PropTypes.bool,
   className: PropTypes.string,
   hasDropdownArrow: PropTypes.bool
 });
+
+Button.defaultProps = {
+  rounded: true
+};
 
 export default Button;
