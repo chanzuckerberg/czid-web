@@ -23,7 +23,8 @@ class BareDropdown extends React.Component {
   componentDidUpdate(prevProps) {
     if (
       prevProps.items !== this.props.items ||
-      prevProps.options !== this.props.options
+      prevProps.options !== this.props.options ||
+      prevProps.value !== this.props.value
     ) {
       this.setState({
         filteredItems: this.getFilteredItems(this.state.filterString)
