@@ -29,7 +29,6 @@ class CheckPipelineRuns
     num_pt = PhyloTree.in_progress.count
     Rails.logger.info("New pipeline monitor loop started with #{num_pr} pr and #{num_pt} pt.")
     PipelineRun.in_progress.each do |pr|
-      thread_pool.wait
       thread_pool.process do
         begin
           break if @shutdown_requested
@@ -43,7 +42,6 @@ class CheckPipelineRuns
     end
 
     PhyloTree.in_progress.each do |pt|
-      thread_pool.wait
       thread_pool.process do
         begin
           break if @shutdown_requested
@@ -278,11 +276,9 @@ class CheckPipelineRuns
       iter_count += 1
       t_iter_start = t_now
       update_jobs(thread_pool)
-      thread_pool.wait
-      thread_pool.process { autoscaling_state = autoscaling_update(autoscaling_state, t_now) }
-      thread_pool.wait
-      thread_pool.process { benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now) }
       thread_pool.wait(:done)
+      thread_pool.process { autoscaling_state = autoscaling_update(autoscaling_state, t_now) }
+      thread_pool.process { benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now) }
       t_now = Time.now.to_f
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
