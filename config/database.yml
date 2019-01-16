@@ -6,6 +6,8 @@ default: &default
   database: idseq_<%= Rails.env %>
   encoding: utf8
   collation: utf8_unicode_ci
+  pool: 15
+  timeout: 10000
 
 development:
   <<: *default
