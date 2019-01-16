@@ -6,7 +6,7 @@ class MonitorPipelineResults
   # Concurrency allowed
   THREAD_POOL_SIZE = 10
 
-  @sleep_quantum = 5.0
+  @sleep_quantum = 30.0
 
   @shutdown_requested = false
 
@@ -86,7 +86,7 @@ task "result_monitor", [:duration] => :environment do |_t, args|
   respawn_interval = 60 * 60
   # rate-limit status updates
   cloud_env = ["prod", "staging"].include?(Rails.env)
-  checks_per_minute = cloud_env ? 4.0 : 0.2
+  checks_per_minute = cloud_env ? 2.0 : 0.2
   # make sure the system is not overwhelmed under any cirmustances
   wait_before_respawn = cloud_env ? 5 : 30
   additional_wait_after_failure = 25
