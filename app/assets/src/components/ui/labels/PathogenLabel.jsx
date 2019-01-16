@@ -1,6 +1,7 @@
 import Label from "./Label";
 import BasicPopup from "../../BasicPopup";
 import React from "react";
+import cs from "./pathogen_label.scss";
 
 const NIAID_URL =
   "https://www.niaid.nih.gov/research/emerging-infectious-diseases-pathogens";
@@ -35,7 +36,7 @@ const PathogenLabel = ({ type }) => {
         text={CATEGORIES[type]["text"]}
         color={CATEGORIES[type]["color"]}
         size="medium"
-        className="pathogen-label"
+        className={cs.pathogenLabel}
       />
     </a>
   );
