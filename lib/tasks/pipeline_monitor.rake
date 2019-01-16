@@ -276,7 +276,6 @@ class CheckPipelineRuns
       iter_count += 1
       t_iter_start = t_now
       update_jobs(thread_pool)
-      thread_pool.wait(:done)
       thread_pool.process { autoscaling_state = autoscaling_update(autoscaling_state, t_now) }
       thread_pool.process { benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now) }
       t_now = Time.now.to_f
