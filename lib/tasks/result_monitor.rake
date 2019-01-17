@@ -57,12 +57,12 @@ class MonitorPipelineResults
       t_iter_start = t_now
       fork_pids = []
       shard_id = 0
-      while shard_id < NUM_SHARDS do
+      while shard_id < NUM_SHARDS
         pid = Process.fork { update_jobs(NUM_SHARDS, shard_id) }
         fork_pids << pid
         shard_id += 1
       end
-      fork_pids.each { |pid| Process.waitpid(pid) }
+      fork_pids.each { |p| Process.waitpid(p) }
       t_now = Time.now.to_f
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
