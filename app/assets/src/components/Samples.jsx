@@ -33,6 +33,8 @@ import { getSampleTableData } from "./views/samples/utils";
 // TODO(mark): Convert styles/samples.scss to CSS modules.
 import cs from "./samples.scss";
 import { openUrl } from "./utils/links";
+import { toast } from "react-toastify";
+import NotificationComponent from "./ui/containers/NotificationComponent";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -1088,6 +1090,13 @@ class Samples extends React.Component {
     this.scrollDown();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
+    this.displayNotifications();
+  }
+
+  displayNotifications() {
+    toast(<NotificationComponent />, {
+      closeButton: false
+    });
   }
 
   initializeColumnSelect() {

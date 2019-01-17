@@ -2,6 +2,7 @@ import React from "react";
 import $ from "jquery";
 import axios from "axios";
 import { compact, flatten } from "lodash/fp";
+import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import LogoIcon from "./ui/icons/LogoIcon";
 import { openUrl } from "~utils/links";
@@ -120,6 +121,7 @@ class Header extends React.Component {
             direction="left"
           />
         </div>
+        <ToastContainer />
       </div>
     );
   }

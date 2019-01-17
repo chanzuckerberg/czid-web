@@ -1,0 +1,13 @@
+.toastContainer {
+  &:global(.Toastify__toast-container) {
+    :global(.Toastify__toast) {
+      min-height: 0;
+      padding: 0;
+      background: transparent;
+
+      &-body {
+        margin: 0;
+      }
+    }
+  }
+}
