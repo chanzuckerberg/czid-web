@@ -4,9 +4,9 @@ require 'thread/pool'
 
 class MonitorPipelineResults
   # Concurrency allowed
-  THREAD_POOL_SIZE = 10
+  NUM_SHARDS = 10
 
-  @sleep_quantum = 30.0
+  @sleep_quantum = 5.0
 
   @shutdown_requested = false
 
@@ -14,33 +14,32 @@ class MonitorPipelineResults
     attr_accessor :shutdown_requested
   end
 
-  def self.update_jobs(thread_pool)
+  def self.update_jobs(num_shards, shard_id)
+    ActiveRecord::Base.connection.reconnect!
     num_pr = PipelineRun.results_in_progress.count
     num_pt = PhyloTree.in_progress.count
-    Rails.logger.info("New result monitor loop started with #{num_pr} pr and #{num_pt} pt.")
+    Rails.logger.info("New result monitor loop started with #{num_pr} pr and #{num_pt} pt. shard #{shard_id} out of #{num_shards}")
     PipelineRun.results_in_progress.each do |pr|
-      thread_pool.process do
-        begin
-          break if @shutdown_requested
-          Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
-          pr.monitor_results
-        rescue => exception
-          LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
-          LogUtil.log_backtrace(exception)
-        end
+      next unless pr.id % num_shards == shard_id
+      begin
+        break if @shutdown_requested
+        Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
+        pr.monitor_results
+      rescue => exception
+        LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
+        LogUtil.log_backtrace(exception)
       end
     end
 
     PhyloTree.in_progress.each do |pt|
-      thread_pool.process do
-        begin
-          break if @shutdown_requested
-          Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
-          pt.monitor_results
-        rescue => exception
-          LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
-          LogUtil.log_backtrace(exception)
-        end
+      next unless pt.id % num_shards == shard_id
+      begin
+        break if @shutdown_requested
+        Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
+        pt.monitor_results
+      rescue => exception
+        LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
+        LogUtil.log_backtrace(exception)
       end
     end
   end
@@ -53,11 +52,17 @@ class MonitorPipelineResults
     # The duration of the longest update so far.
     max_work_duration = 0
     iter_count = 0
-    thread_pool = Thread.pool(THREAD_POOL_SIZE)
     until @shutdown_requested
       iter_count += 1
       t_iter_start = t_now
-      update_jobs(thread_pool)
+      fork_pids = []
+      shard_id = 0
+      while shard_id < NUM_SHARDS do
+        pid = Process.fork { update_jobs(NUM_SHARDS, shard_id) }
+        fork_pids << pid
+        shard_id += 1
+      end
+      fork_pids.each { |pid| Process.waitpid(pid) }
       t_now = Time.now.to_f
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
@@ -73,7 +78,6 @@ class MonitorPipelineResults
       sleep [t_end - t_now, @sleep_quantum].min
       t_now = Time.now.to_f
     end
-    thread_pool.shutdown
     Rails.logger.info("Exited result_monitor loop after #{iter_count} iterations.")
   end
 end
@@ -86,7 +90,7 @@ task "result_monitor", [:duration] => :environment do |_t, args|
   respawn_interval = 60 * 60
   # rate-limit status updates
   cloud_env = ["prod", "staging"].include?(Rails.env)
-  checks_per_minute = cloud_env ? 2.0 : 0.2
+  checks_per_minute = cloud_env ? 4.0 : 0.2
   # make sure the system is not overwhelmed under any cirmustances
   wait_before_respawn = cloud_env ? 5 : 30
   additional_wait_after_failure = 25
