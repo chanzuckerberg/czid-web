@@ -1,5 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
+import cx from "classnames";
+import { set } from "lodash/fp";
 import Checkbox from "../../ui/controls/Checkbox";
 
 class DataTable extends React.Component {
@@ -68,11 +70,7 @@ class DataTable extends React.Component {
   }
 
   static indexData(originalData) {
-    let data = originalData.slice();
-    for (let i = 0; i < data.length; i++) {
-      data[i].__originalIndex = i;
-    }
-    return data;
+    return originalData.map((val, index) => set("__originalIndex", index, val));
   }
 
   handleCheckBoxChange(rowIndex, checked) {
@@ -119,9 +117,17 @@ class DataTable extends React.Component {
         this.state.selectedRows.has(row.__originalIndex)
       );
 
+    const cellStyle = this.props.columnWidth
+      ? { width: this.props.columnWidth }
+      : {};
+
     return (
       <table
-        className={`idseq-ui data-table ${this.props.striped && "striped"}`}
+        className={cx(
+          "idseq-ui data-table",
+          this.props.striped && "striped",
+          this.props.className
+        )}
       >
         <thead>
           <tr>
@@ -135,8 +141,12 @@ class DataTable extends React.Component {
               </th>
             )}
             {this.props.columns.map((column, idx) => (
-              <th className={`data-table__header column-${column}`} key={idx}>
-                {this.props.headers[column]}
+              <th
+                className={`data-table__header column-${column}`}
+                key={idx}
+                style={cellStyle}
+              >
+                {this.props.headers ? this.props.headers[column] : column}
               </th>
             ))}
           </tr>
@@ -156,6 +166,7 @@ class DataTable extends React.Component {
               {this.props.columns.map((column, colIdx) => (
                 <td
                   className={`data-table__data column-${column}`}
+                  style={cellStyle}
                   key={colIdx}
                 >
                   {row[column]}
@@ -170,6 +181,7 @@ class DataTable extends React.Component {
 }
 
 DataTable.propTypes = {
+  className: PropTypes.string,
   columns: PropTypes.array,
   data: PropTypes.array,
   headers: PropTypes.object,
@@ -179,7 +191,9 @@ DataTable.propTypes = {
     // allow Set = TODO: replace by custom function
     PropTypes.object
   ]),
-  striped: PropTypes.bool
+  striped: PropTypes.bool,
+  // TODO(mark): Make column width sizing more robust.
+  columnWidth: PropTypes.number
 };
 
 DataTable.defaultProps = {

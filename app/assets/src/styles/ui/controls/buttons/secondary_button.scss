@@ -34,13 +34,13 @@
 
   &:disabled,
   &.disabled {
-    border: 1px solid $medium-grey;
-    background-color: $white;
-    color: $medium-grey;
+    border: 1px solid $light-grey;
+    background-color: $off-white;
+    color: $light-grey;
 
     .icon-label {
       svg {
-        fill: $medium-grey;
+        fill: $light-grey;
       }
     }
   }

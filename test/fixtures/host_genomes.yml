@@ -3,3 +3,9 @@ one:
 
 two:
   name: Human
+
+human:
+  name: Human
+
+mosquito:
+  name: Mosquito

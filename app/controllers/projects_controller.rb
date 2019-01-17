@@ -2,6 +2,7 @@ class ProjectsController < ApplicationController
   include ApplicationHelper
   include SamplesHelper
   include ReportHelper
+  include ProjectsHelper
   ########################################
   # Note to developers:
   # If you are adding a new action to the project controller, you must classify your action into
@@ -12,7 +13,7 @@ class ProjectsController < ApplicationController
   #
   ##########################################
 
-  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status, :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals].freeze
+  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status, :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals, :validate_metadata_csv, :upload_metadata].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index, :send_project_csv, :choose_project].freeze
 
@@ -231,6 +232,30 @@ class ProjectsController < ApplicationController
       create_new_user_random_password(params[:user_name_to_add], params[:user_email_to_add])
     end
     @project.user_ids |= [@user.id]
+  end
+
+  def validate_metadata_csv
+    metadata = params[:metadata]
+    new_samples = params[:new_samples] == "1"
+
+    project_samples = current_power.project_samples(@project)
+    issues = validate_metadata_csv_for_project(project_samples, metadata, new_samples)
+    render json: {
+      status: "success",
+      issues: issues
+    }
+  end
+
+  def upload_metadata
+    metadata = params[:metadata]
+
+    project_samples = current_power.project_samples(@project)
+
+    errors = upload_metadata_for_project(project_samples, metadata)
+    render json: {
+      status: "success",
+      errors: errors
+    }
   end
 
   private

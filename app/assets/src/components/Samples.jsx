@@ -24,6 +24,7 @@ import MultipleDropdown from "./ui/controls/dropdowns/MultipleDropdown";
 import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import TableColumnHeader from "./views/samples/TableColumnHeader";
 import PipelineStatusFilter from "./views/samples/PipelineStatusFilter";
+import ProjectUploadMenu from "./views/samples/ProjectUploadMenu";
 import {
   SAMPLE_TABLE_COLUMNS,
   INITIAL_COLUMNS,
@@ -1685,6 +1686,11 @@ class AddUserModal extends React.Component {
 }
 
 function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
+  const showUploadMenu =
+    (parent.admin !== 0 ||
+      parent.allowedFeatures.includes("project_metadata_upload")) &&
+    (proj && parent.canEditProject(proj.id));
+
   return (
     <div className="right col s12">
       <ul className="project-menu">
@@ -1719,6 +1725,12 @@ function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
             <AddUserModal parent={parent} state={parent.state} />
           ) : null}
         </li>
+        {/* TODO(mark): Change admin to canEditProject when launch */}
+        {showUploadMenu && (
+          <li className="">
+            <ProjectUploadMenu project={proj} />
+          </li>
+        )}
       </ul>
     </div>
   );

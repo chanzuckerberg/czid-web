@@ -1,0 +1,5 @@
+.label {
+  // Lower the z-index so labels appear under dropdowns. z-index of dropdown menu is 11.
+  // TODO(mark): Organize all our z-indices into a single constants file.
+  z-index: 10 !important;
+}
