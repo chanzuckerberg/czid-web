@@ -1,8 +1,28 @@
-.notificationComponent {
+@import "~styles/themes/colors";
+
+.notification {
   border-width: 1px 1px 1px 5px;
-  border-color: orange;
   border-style: solid;
-  background-color: #fcf6ec;
   border-radius: 5px;
   padding: 14px 14px 14px 9px;
+}
+
+.error {
+  border-color: $error;
+  background-color: $error-bg;
+}
+
+.warn {
+  border-color: $warning;
+  background-color: $warning-bg;
+}
+
+.info {
+  border-color: $info;
+  background-color: $info-bg;
+}
+
+.success {
+  border-color: $success;
+  background-color: $success-bg;
 }
