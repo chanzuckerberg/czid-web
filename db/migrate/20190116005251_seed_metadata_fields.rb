@@ -60,15 +60,16 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       description: "Collecting institution/agency",
       base_type: Metadatum::STRING_TYPE,
       is_core: 1,
-      is_default: 1,
       group: "Sample",
       host_genomes: HostGenome.all
     )
 
+    # HUMAN FIELDS
+
     to_create << MetadataField.new(
-      name: "patient_id",
-      display_name: "Patient ID",
-      description: "Patient identifier",
+      name: "participant_id",
+      display_name: "Participant ID",
+      description: "Unique identifier for the participant (e.g. for multiple samples from the same participant)",
       base_type: Metadatum::STRING_TYPE,
       is_core: 1,
       is_default: 1,
@@ -105,8 +106,62 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       display_name: "Race/Ethnicity",
       description: "Race/ethnicity of the participant",
       base_type: Metadatum::STRING_TYPE,
-      options: %w[White Hispanic/Latino/Spanish Black/African-American].to_s,
-      force_options: 1,
+      options: %w[White Hispanic Black Asian Other].to_s,
+      is_core: 1,
+      is_default: 1,
+      group: "Participant",
+      host_genomes: HostGenome.find_by(name: "Human")
+    )
+
+    to_create << MetadataField.new(
+      name: "primary_diagnosis",
+      display_name: "Primary Diagnosis",
+      description: "Diagnosed disease that resulted in hospital admission",
+      base_type: Metadatum::STRING_TYPE,
+      is_core: 1,
+      is_default: 1,
+      group: "Participant",
+      host_genomes: HostGenome.find_by(name: "Human")
+    )
+
+    to_create << MetadataField.new(
+      name: "admission_date",
+      display_name: "Admission Date",
+      description: "Date the patient was admitted to the facility",
+      base_type: Metadatum::DATE_TYPE,
+      is_core: 1,
+      is_default: 1,
+      group: "Participant",
+      host_genomes: HostGenome.find_by(name: "Human")
+    )
+
+    to_create << MetadataField.new(
+      name: "admission_type",
+      display_name: "Admission Type",
+      description: "Type of admission to the facility (e.g. ICU)",
+      base_type: Metadatum::STRING_TYPE,
+      options: %w[ICU General].to_s,
+      is_core: 1,
+      group: "Participant",
+      host_genomes: HostGenome.find_by(name: "Human")
+    )
+
+    to_create << MetadataField.new(
+      name: "discharge_date",
+      display_name: "Discharge Date",
+      description: "Date the patient was discharged or expired during the stay",
+      base_type: Metadatum::DATE_TYPE,
+      is_core: 1,
+      is_default: 1,
+      group: "Participant",
+      host_genomes: HostGenome.find_by(name: "Human")
+    )
+
+    to_create << MetadataField.new(
+      name: "discharge_type",
+      display_name: "Discharge Type",
+      description: "Type of discharge",
+      base_type: Metadatum::STRING_TYPE,
       is_core: 1,
       is_default: 1,
       group: "Participant",
