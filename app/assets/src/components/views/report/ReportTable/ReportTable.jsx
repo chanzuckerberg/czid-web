@@ -80,7 +80,7 @@ export default class ReportTable extends React.Component {
                 <span className="table-arrow hidden">
                   <i className="fa fa-angle-down" onClick={collapseTable} />
                 </span>
-                Taxonomy
+                Taxon
               </th>
               {renderColumnHeader(
                 "Score",
