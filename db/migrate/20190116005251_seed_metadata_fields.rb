@@ -12,7 +12,8 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       is_required: 1,
-      group: "Sample"
+      group: "Sample",
+      host_genomes: HostGenome.all
     )
 
     to_create << MetadataField.new(
@@ -25,7 +26,8 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       is_required: 1,
-      group: "Sample"
+      group: "Sample",
+      host_genomes: HostGenome.all
     )
 
     to_create << MetadataField.new(
@@ -36,7 +38,8 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       is_required: 1,
-      group: "Sample"
+      group: "Sample",
+      host_genomes: HostGenome.all
     )
 
     to_create << MetadataField.new(
@@ -47,7 +50,67 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       is_required: 1,
-      group: "Sample"
+      group: "Sample",
+      host_genomes: HostGenome.all
+    )
+
+    to_create << MetadataField.new(
+      name: "collected_by",
+      display_name: "Collected By",
+      description: "Collecting institution/agency",
+      base_type: Metadatum::STRING_TYPE,
+      is_core: 1,
+      is_default: 1,
+      group: "Sample",
+      host_genomes: HostGenome.all
+    )
+
+    to_create << MetadataField.new(
+      name: "patient_id",
+      display_name: "Patient ID",
+      description: "Patient identifier",
+      base_type: Metadatum::STRING_TYPE,
+      is_core: 1,
+      is_default: 1,
+      group: "Participant",
+      host_genomes: HostGenome.find_by(name: "Human")
+    )
+
+    to_create << MetadataField.new(
+      name: "age",
+      display_name: "Age",
+      description: "Age of the participant",
+      base_type: Metadatum::NUMBER_TYPE,
+      is_core: 1,
+      is_default: 1,
+      group: "Participant",
+      host_genomes: HostGenome.find_by(name: "Human")
+    )
+
+    to_create << MetadataField.new(
+      name: "sex",
+      display_name: "Sex",
+      description: "Sex of the participant",
+      base_type: Metadatum::STRING_TYPE,
+      options: %w[Female Male].to_s,
+      force_options: 1,
+      is_core: 1,
+      is_default: 1,
+      group: "Participant",
+      host_genomes: HostGenome.find_by(name: "Human")
+    )
+
+    to_create << MetadataField.new(
+      name: "race",
+      display_name: "Race/Ethnicity",
+      description: "Race/ethnicity of the participant",
+      base_type: Metadatum::STRING_TYPE,
+      options: %w[White Hispanic/Latino/Spanish Black/African-American].to_s,
+      force_options: 1,
+      is_core: 1,
+      is_default: 1,
+      group: "Participant",
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     to_create.each do |m|
