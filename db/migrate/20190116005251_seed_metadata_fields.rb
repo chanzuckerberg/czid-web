@@ -1,6 +1,32 @@
 class SeedMetadataFields < ActiveRecord::Migration[5.1]
   def up
-    # TODO: All the validation_types, proper association with Metadata-data entries
+    # TODO: All the validation_types, proper association with Metadata-data entries, project associations, etc.
+
+    # +----------------------+
+    # |   All/custom fields  |
+    # | +------------------+ |
+    # | |      Core        | |
+    # | | +--------------+ | |
+    # | | |   Default    | | |
+    # | | | +----------+ | | |
+    # | | | | Required | | | |
+    # | | | +__________+ | | |
+    # | | +______________+ | |
+    # | +__________________+ |
+    # +______________________+
+
+    # The core fields are basically the set of fields that we think are important/interesting/have
+    # curated ourselves. All user-created custom types will not be core (unless we make them).
+    # Ex: lat_lon could be a core field but not on new projects by default.
+    # t.integer :is_core
+
+    # Default fields are a subset of the core fields that will appear on a project when someone
+    # creates a project. These can be removed from a project.
+    # t.integer :is_default
+
+    # Required fields are a subset of the core/default fields that cannot be removed from the
+    # project. This is the strictest level. Ex: collection_date, location, nucleotide_type, etc.
+    # t.integer :is_required
 
     to_create = []
 
