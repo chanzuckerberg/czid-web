@@ -2,11 +2,15 @@ require 'open3'
 require 'json'
 require 'tempfile'
 require 'aws-sdk'
+require 'elasticsearch/model'
 # TODO(mark): Move to an initializer. Make sure this works with Rails auto-reloading.
 require 'constants/metadata'
 
 class Sample < ApplicationRecord
+  include Elasticsearch::Model
+  include Elasticsearch::Model::Callbacks
   include TestHelper
+
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
@@ -61,6 +65,15 @@ class Sample < ApplicationRecord
 
   # setter
   attr_writer :bulk_mode
+
+  def as_indexed_json(_options = {})
+    # FOR ELASTICSEARCH
+    as_json(
+      native: true,
+      only: [:name, :created_at, :updated_at],
+      include: { user: { only: [:id, :name] } }
+    )
+  end
 
   def sample_path
     File.join('samples', project_id.to_s, id.to_s)
@@ -319,6 +332,7 @@ class Sample < ApplicationRecord
   end
 
   def as_json(_options = {})
+    return super if options[:native]
     super(methods: [:input_files, :host_genome_name])
   end
 
