@@ -1095,9 +1095,38 @@ class Samples extends React.Component {
   }
 
   displayNotifications() {
-    toast(<NotificationComponent />, {
-      closeButton: false
-    });
+    toast(
+      <NotificationComponent type="success">
+        This is a sample notification
+      </NotificationComponent>,
+      {
+        closeButton: false
+      }
+    );
+    toast(
+      <NotificationComponent type="error">
+        This is a sample notification
+      </NotificationComponent>,
+      {
+        closeButton: false
+      }
+    );
+    toast(
+      <NotificationComponent type="info">
+        This is a sample notification
+      </NotificationComponent>,
+      {
+        closeButton: false
+      }
+    );
+    toast(
+      <NotificationComponent type="warn">
+        This is a sample notification
+      </NotificationComponent>,
+      {
+        closeButton: false
+      }
+    );
   }
 
   initializeColumnSelect() {

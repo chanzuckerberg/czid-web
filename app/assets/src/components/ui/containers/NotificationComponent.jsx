@@ -5,29 +5,38 @@ import cs from "./notification_component.scss";
 import cx from "classnames";
 
 class NotificationComponent extends React.Component {
-  icons = {
-    error: <AlertIcon />,
-    warn: <AlertIcon />
-  };
+  getIcon(type) {
+    switch (type) {
+      case "warn":
+      case "error":
+        return <AlertIcon />;
+    }
+    return null;
+  }
 
   render() {
     return (
       <div className={cx(cs.notification, cs[this.props.type])}>
-        <div className={cs.leftPane}>
-          {NotificationComponent.icons[this.props.type]}
-        </div>
-        <div className={cs.content}>This is a sample notification</div>
-        <div className={cs.rightPane} onClick={this.props.handleCloseToast}>
-          Dismiss
+        <div className={cs.icon}>{this.getIcon(this.props.type)}</div>
+        <div className={cs.content}>
+          <div>{this.props.children}</div>
+          <div className={cs.actions} onClick={this.props.handleCloseToast}>
+            Dismiss
+          </div>
         </div>
       </div>
     );
   }
 }
 
+NotificationComponent.defaultProps = {
+  type: "info"
+};
+
 NotificationComponent.propTypes = {
+  children: PropTypes.node,
   handleCloseToast: PropTypes.func,
-  type: PropTypes.oneof(["success", "info", "warn", "error"])
+  type: PropTypes.oneOf(["success", "info", "warn", "error"])
 };
 
 export default NotificationComponent;

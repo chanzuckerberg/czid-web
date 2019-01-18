@@ -1,28 +1,62 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .notification {
-  border-width: 1px 1px 1px 5px;
-  border-style: solid;
+  border-left: 5px solid $black;
   border-radius: 5px;
+  box-shadow: $box-shadow-bottom-right;
+  color: $black;
+  display: flex;
   padding: 14px 14px 14px 9px;
-}
 
-.error {
-  border-color: $error;
-  background-color: $error-bg;
-}
+  .content {
+  }
 
-.warn {
-  border-color: $warning;
-  background-color: $warning-bg;
-}
+  .icon {
+    flex-grow: 0;
+    margin-right: 14px;
+    width: 20px;
+  }
 
-.info {
-  border-color: $info;
-  background-color: $info-bg;
-}
+  .actions {
+    margin-top: 14px;
+    text-transform: uppercase;
+    color: $medium-grey;
+  }
 
-.success {
-  border-color: $success;
-  background-color: $success-bg;
+  &.error {
+    border-color: $error;
+    background-color: $error-bg;
+
+    .icon {
+      fill: $error;
+    }
+  }
+
+  &.warn {
+    border-color: $warning;
+    background-color: $warning-bg;
+
+    .icon {
+      fill: $warning;
+    }
+  }
+
+  &.info {
+    border-color: $info;
+    background-color: $info-bg;
+
+    .icon {
+      fill: $info;
+    }
+  }
+
+  &.success {
+    border-color: $success;
+    background-color: $success-bg;
+
+    .icon {
+      fill: $success;
+    }
+  }
 }
