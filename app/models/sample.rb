@@ -57,6 +57,11 @@ class Sample < ApplicationRecord
   before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload
 
+  # Because we use custom as_indexed_json, Elasticsearch::Model::Callbacks will not
+  # take care of updating elasticsearch index automatically. So add custom hooks:
+  after_save :reindex_elasticsearch
+  after_destroy :delete_elasticsearch
+
   # Error on trying to save string values to float
   validates :sample_input_pg, :sample_batch, numericality: true, allow_nil: true
 
@@ -75,6 +80,14 @@ class Sample < ApplicationRecord
     )
   end
 
+  def reindex_elasticsearch
+   __elasticsearch__.index_document
+  end
+
+  def delete_elasticsearch
+    __elasticsearch__.delete_document
+  end
+ 
   def sample_path
     File.join('samples', project_id.to_s, id.to_s)
   end
