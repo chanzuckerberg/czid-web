@@ -114,7 +114,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       base_type: Metadatum::STRING_TYPE,
       is_core: 1,
       is_default: 1,
-      group: "Host",
+      group: "Infection",
       host_genomes: HostGenome.all
     )
 
@@ -125,6 +125,17 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       base_type: Metadatum::STRING_TYPE,
       options: ["Definite", "No Infection", "Suspected", "Unknown", "Water Control"],
       force_options: 1,
+      is_core: 1,
+      is_default: 1,
+      group: "Infection",
+      host_genomes: HostGenome.all
+    )
+
+    to_create << MetadataField.new(
+      name: "age",
+      display_name: "Age",
+      description: "Age of the host/participant (by default in years)",
+      base_type: Metadatum::NUMBER_TYPE,
       is_core: 1,
       is_default: 1,
       group: "Host",
@@ -142,17 +153,6 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
         display_name: "Participant ID",
         description: "Unique identifier for the participant (e.g. for multiple samples from the same participant)",
         base_type: Metadatum::STRING_TYPE,
-        is_core: 1,
-        is_default: 1,
-        group: "Host",
-        host_genomes: [human_genome]
-      )
-
-      to_create << MetadataField.new(
-        name: "age",
-        display_name: "Age",
-        description: "Age of the participant",
-        base_type: Metadatum::NUMBER_TYPE,
         is_core: 1,
         is_default: 1,
         group: "Host",
@@ -185,7 +185,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       to_create << MetadataField.new(
         name: "admission_date",
         display_name: "Admission Date",
-        description: "Date the patient was admitted to the facility",
+        description: "Date the participant was admitted to the facility",
         base_type: Metadatum::DATE_TYPE,
         is_core: 1,
         group: "Host",
@@ -206,7 +206,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       to_create << MetadataField.new(
         name: "discharge_date",
         display_name: "Discharge Date",
-        description: "Date the patient was discharged or expired during the stay",
+        description: "Date the participant was discharged or expired during the stay",
         base_type: Metadatum::DATE_TYPE,
         is_core: 1,
         group: "Host",
@@ -249,24 +249,24 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       )
 
       to_create << MetadataField.new(
-        name: "comorbidity",
-        display_name: "Comorbidity",
-        description: "Information on other chronic diseases present (e.g. HIV, Diabetes, COPD, etc.)",
-        base_type: Metadatum::STRING_TYPE,
-        is_core: 1,
-        is_default: 1,
-        group: "Host",
-        host_genomes: [human_genome]
-      )
-
-      to_create << MetadataField.new(
         name: "detection_method",
         display_name: "Detection Method",
         description: "Detection method for the known organism",
         base_type: Metadatum::STRING_TYPE,
         is_core: 1,
         is_default: 1,
-        group: "Host",
+        group: "Infection",
+        host_genomes: [human_genome]
+      )
+
+      to_create << MetadataField.new(
+        name: "comorbidity",
+        display_name: "Comorbidity",
+        description: "Information on other chronic diseases present (e.g. HIV, Diabetes, COPD, etc.)",
+        base_type: Metadatum::STRING_TYPE,
+        is_core: 1,
+        is_default: 1,
+        group: "Infection",
         host_genomes: [human_genome]
       )
     end
