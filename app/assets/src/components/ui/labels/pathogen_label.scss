@@ -1,8 +1,11 @@
-.idseq-ui.pathogen-label {
+// Use .ui to make selector higher precedence than semantic-ui.
+:global(.ui).pathogenLabel {
   margin-left: 10px;
+
   &:first-child {
     margin-left: 10px;
   }
+
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: lighter;
