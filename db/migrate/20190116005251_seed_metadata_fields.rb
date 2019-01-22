@@ -402,8 +402,11 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
     end
 
     # Each project gets a reference copy of the set of "default" fields
+    default_fields = MetadataField.where(is_default: 1)
     Project.all.each do |p|
-      p.metadata_fields << MetadataField.where(is_default: 1)
+      # Bulk insertions for efficiency
+      values = default_fields.map { |f| "(#{p.id}, #{f.id})" }.join(",")
+      ActiveRecord::Base.connection.execute("INSERT INTO metadata_fields_projects (project_id, metadata_field_id) VALUES #{values}")
     end
   end
 
