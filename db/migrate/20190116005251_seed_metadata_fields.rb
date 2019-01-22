@@ -143,7 +143,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Human")]
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     to_create << MetadataField.new(
@@ -154,7 +154,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Human")]
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     to_create << MetadataField.new(
@@ -166,7 +166,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Human")]
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     to_create << MetadataField.new(
