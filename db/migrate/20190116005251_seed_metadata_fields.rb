@@ -316,78 +316,83 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
     ##### MOSQUITO / TICK #####
     ###########################
 
-    to_create << MetadataField.new(
-      name: "life_stage",
-      display_name: "Life Stage",
-      description: "Life stage of the specimen",
-      base_type: Metadatum::STRING_TYPE,
-      options: %w[Larva Nymph Adult],
-      force_options: 1,
-      is_core: 1,
-      is_default: 1,
-      group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Mosquito"), HostGenome.find_by(name: "Tick")]
-    )
+    mosquito_genome = HostGenome.find_by(name: "Mosquito")
+    if mosquito_genome
+      if HostGenome.find_by(name: "Tick")
+        to_create << MetadataField.new(
+          name: "life_stage",
+          display_name: "Life Stage",
+          description: "Life stage of the specimen",
+          base_type: Metadatum::STRING_TYPE,
+          options: %w[Larva Nymph Adult],
+          force_options: 1,
+          is_core: 1,
+          is_default: 1,
+          group: "Host",
+          host_genomes: [mosquito_genome, HostGenome.find_by(name: "Tick")]
+        )
+      end
 
-    to_create << MetadataField.new(
-      name: "preservation_method",
-      display_name: "Preservation Method",
-      description: "Preservation method of the specimen",
-      base_type: Metadatum::STRING_TYPE,
-      options: %w[TEA Freeze CO2 Dried Other],
-      is_core: 1,
-      is_default: 1,
-      group: "Host",
-      host_genomes: HostGenome.find_by(name: "Mosquito")
-    )
+      to_create << MetadataField.new(
+        name: "preservation_method",
+        display_name: "Preservation Method",
+        description: "Preservation method of the specimen",
+        base_type: Metadatum::STRING_TYPE,
+        options: %w[TEA Freeze CO2 Dried Other],
+        is_core: 1,
+        is_default: 1,
+        group: "Host",
+        host_genomes: [mosquito_genome]
+      )
 
-    to_create << MetadataField.new(
-      name: "trap_type",
-      display_name: "Trap Type",
-      description: "Trap type used on the specimen",
-      base_type: Metadatum::STRING_TYPE,
-      options: ["BG-Sentinel", "Gravid", "CDC Light Trap", "EVS/CO2", "Fay-Prince", "Other"],
-      is_core: 1,
-      is_default: 1,
-      group: "Host",
-      host_genomes: HostGenome.find_by(name: "Mosquito")
-    )
+      to_create << MetadataField.new(
+        name: "trap_type",
+        display_name: "Trap Type",
+        description: "Trap type used on the specimen",
+        base_type: Metadatum::STRING_TYPE,
+        options: ["BG-Sentinel", "Gravid", "CDC Light Trap", "EVS/CO2", "Fay-Prince", "Other"],
+        is_core: 1,
+        is_default: 1,
+        group: "Host",
+        host_genomes: [mosquito_genome]
+      )
 
-    to_create << MetadataField.new(
-      name: "genus_species",
-      display_name: "Genus/Species",
-      description: "Genus/species of the mosquito",
-      base_type: Metadatum::STRING_TYPE,
-      options: ["Aedes aegypti", "Culex erythrothorax", "Aedes sierrensis", "Anopheles punctipennis", "Anopheles freeborni", "Culex tarsalis", "Culex pipiens", "Aedes albopictus", "Other"],
-      is_core: 1,
-      is_default: 1,
-      group: "Host",
-      host_genomes: HostGenome.find_by(name: "Mosquito")
-    )
+      to_create << MetadataField.new(
+        name: "genus_species",
+        display_name: "Genus/Species",
+        description: "Genus/species of the mosquito",
+        base_type: Metadatum::STRING_TYPE,
+        options: ["Aedes aegypti", "Culex erythrothorax", "Aedes sierrensis", "Anopheles punctipennis", "Anopheles freeborni", "Culex tarsalis", "Culex pipiens", "Aedes albopictus", "Other"],
+        is_core: 1,
+        is_default: 1,
+        group: "Host",
+        host_genomes: [mosquito_genome]
+      )
 
-    to_create << MetadataField.new(
-      name: "blood_fed",
-      display_name: "Blood Fed",
-      description: "Information about the mosquito's blood feeding",
-      base_type: Metadatum::STRING_TYPE,
-      options: ["Unfed", "Partially Blood Fed", "Blood Fed", "Gravid", "Gravid and Blood Fed"],
-      force_options: 1,
-      is_core: 1,
-      is_default: 1,
-      group: "Host",
-      host_genomes: HostGenome.find_by(name: "Mosquito")
-    )
+      to_create << MetadataField.new(
+        name: "blood_fed",
+        display_name: "Blood Fed",
+        description: "Information about the mosquito's blood feeding",
+        base_type: Metadatum::STRING_TYPE,
+        options: ["Unfed", "Partially Blood Fed", "Blood Fed", "Gravid", "Gravid and Blood Fed"],
+        force_options: 1,
+        is_core: 1,
+        is_default: 1,
+        group: "Host",
+        host_genomes: [mosquito_genome]
+      )
 
-    to_create << MetadataField.new(
-      name: "sample_unit",
-      display_name: "Sample Unit",
-      description: "Number of mosquitoes in the sample that was sequenced",
-      base_type: Metadatum::NUMBER_TYPE,
-      is_core: 1,
-      is_default: 1,
-      group: "Host",
-      host_genomes: HostGenome.find_by(name: "Mosquito")
-    )
+      to_create << MetadataField.new(
+        name: "sample_unit",
+        display_name: "Sample Unit",
+        description: "Number of mosquitoes in the sample that was sequenced",
+        base_type: Metadatum::NUMBER_TYPE,
+        is_core: 1,
+        is_default: 1,
+        group: "Host",
+        host_genomes: [mosquito_genome]
+      )
+    end
 
     to_create.each do |m|
       unless MetadataField.find_by(name: m.name)
