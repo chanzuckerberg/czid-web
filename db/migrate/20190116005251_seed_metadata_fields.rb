@@ -177,7 +177,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Human")]
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     to_create << MetadataField.new(
@@ -187,7 +187,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       base_type: Metadatum::DATE_TYPE,
       is_core: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Human")]
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     to_create << MetadataField.new(
@@ -198,7 +198,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       options: %w[ICU General],
       is_core: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Human")]
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     to_create << MetadataField.new(
@@ -208,7 +208,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       base_type: Metadatum::DATE_TYPE,
       is_core: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Human")]
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     to_create << MetadataField.new(
@@ -219,7 +219,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       options: ["ICU", "Hospital", "30-Day Mortality", "Other"],
       is_core: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Human")]
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     to_create << MetadataField.new(
@@ -231,7 +231,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Human")]
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     to_create << MetadataField.new(
@@ -243,7 +243,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Human")]
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     to_create << MetadataField.new(
@@ -254,7 +254,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Human")]
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     to_create << MetadataField.new(
@@ -265,7 +265,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Human")]
+      host_genomes: HostGenome.find_by(name: "Human")
     )
 
     ######################
@@ -335,7 +335,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Mosquito")]
+      host_genomes: HostGenome.find_by(name: "Mosquito")
     )
 
     to_create << MetadataField.new(
@@ -347,7 +347,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Mosquito")]
+      host_genomes: HostGenome.find_by(name: "Mosquito")
     )
 
     to_create << MetadataField.new(
@@ -359,7 +359,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Mosquito")]
+      host_genomes: HostGenome.find_by(name: "Mosquito")
     )
 
     to_create << MetadataField.new(
@@ -372,7 +372,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Mosquito")]
+      host_genomes: HostGenome.find_by(name: "Mosquito")
     )
 
     to_create << MetadataField.new(
@@ -383,7 +383,7 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       is_core: 1,
       is_default: 1,
       group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Mosquito")]
+      host_genomes: HostGenome.find_by(name: "Mosquito")
     )
 
     to_create.each do |m|
