@@ -394,10 +394,16 @@ class SeedMetadataFields < ActiveRecord::Migration[5.1]
       )
     end
 
+    # Create the fields unless they already exist
     to_create.each do |m|
       unless MetadataField.find_by(name: m.name)
         m.save
       end
+    end
+
+    # Each project gets a reference copy of the set of "default" fields
+    Project.all.each do |p|
+      p.metadata_fields << MetadataField.where(is_default: 1)
     end
   end
 
