@@ -41,6 +41,7 @@ gem 'rake'
 gem 'resque', '>= 1.27.4'
 gem 'resque-lock'
 gem 'resque-scheduler', '>= 4.3.1'
+gem 'thread'
 # Use SCSS for stylesheets
 gem 'simple_token_authentication', '~> 1.15', '>= 1.15.1' # see semver.org
 gem 'sprockets-es6'
