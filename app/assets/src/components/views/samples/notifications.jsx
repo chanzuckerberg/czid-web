@@ -19,7 +19,7 @@ const publicSampleNotification = (samples, projectName, onClose) => {
   );
 };
 
-const publicSampleNotificationsByProject = (samples, onClose) => {
+const publicSampleNotificationsByProject = samples => {
   let samplesPerProject = {};
   for (let i = 0; i < samples.length; i++) {
     let sample = samples[i];
@@ -29,8 +29,23 @@ const publicSampleNotificationsByProject = (samples, onClose) => {
     samplesPerProject[sample.project.id].push(sample);
   }
 
-  for (let samples of Object.values(samplesPerProject)) {
-    publicSampleNotification(samples, samples[0].project.name, onClose);
+  for (let projectSamples of Object.values(samplesPerProject)) {
+    publicSampleNotification(
+      projectSamples,
+      projectSamples[0].project.name,
+      () => {
+        let a = new Set(projectSamples.map(sample => sample.id));
+        localStorage.setItem(
+          "dismissedPublicSamples",
+          JSON.stringify(
+            new Set([
+              ...JSON.parse(localStorage.getItem("dismissedPublicSamples")),
+              ...projectSamples.map(sample => sample.id)
+            ])
+          )
+        );
+      }
+    );
   }
 };
 

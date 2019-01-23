@@ -1103,9 +1103,17 @@ class Samples extends React.Component {
   }
 
   displayPublicSampleNotifications(samplesGoingPublic) {
-    let previouslyDismissedSamples = new Set(
-      JSON.parse(localStorage.getItem("dismissedPublicSamples"))
-    );
+    let previouslyDismissedSamples = new Set();
+    console.log(previouslyDismissedSamples);
+    try {
+      // catch possible old formats
+      previouslyDismissedSamples = new Set(
+        JSON.parse(localStorage.getItem("dismissedPublicSamples"))
+      );
+    } catch (_) {}
+
+    console.log(previouslyDismissedSamples);
+
     let [dismissedSamples, newSamples] = partition(samplesGoingPublic, sample =>
       previouslyDismissedSamples.has(sample.id)
     );
@@ -1114,12 +1122,7 @@ class Samples extends React.Component {
         "dismissedPublicSamples",
         JSON.stringify(map(dismissedSamples, "id"))
       );
-      publicSampleNotificationsByProject(newSamples, () => {
-        localStorage.setItem(
-          "dismissedPublicSamples",
-          JSON.stringify(map(data, "id"))
-        );
-      });
+      publicSampleNotificationsByProject(newSamples);
     }
   }
 
