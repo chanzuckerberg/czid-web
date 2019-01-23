@@ -152,65 +152,6 @@ class Metadatum < ApplicationRecord
     collection_long: "Collection Longitude"
   }.freeze
 
-  HOST_GENOME_NAME_TO_METADATA_KEYS = {
-    common: %w[
-      unique_id
-      sample_type
-      nucleotide_type
-      collection_date
-      collected_by
-      known_organism
-      detection_method
-      library_prep
-      sequencer
-      rna_dna_input
-      library_prep_batch
-      extraction_batch
-    ],
-    Human: %w[
-      collection_location
-      age
-      gender
-      race
-      primary_diagnosis
-      antibiotic_administered
-      admission_date
-      admission_type
-      discharge_date
-      discharge_type
-      immunocomp
-      other_infections
-      comorbidity
-      infection_class
-    ],
-    # Collection location is here (in addition to collection_lat/collection_long) as a temporary fix.
-    # Collection_location is hard-coded as a default in the front-end, for example in the heatmap.
-    # TODO(mark): Refactor front-end to be more resilient to custom metadata schemas, and remove this duplication.
-    Mosquito: %w[
-      collection_location
-      collection_lat
-      collection_long
-      reported_sex
-      comp_sex
-      sample_unit
-      life_stage
-      preservation_method
-      trap_type
-      blood_fed
-      reported_id_genus
-      reported_id_species
-      comp_id_genus
-      comp_id_species
-    ],
-    default: %w[
-      collection_location
-      gender
-      life_stage
-      id_method
-      genus_species
-    ]
-  }.freeze
-
   # Custom validator called on save or update. Writes to the *_validated_value column.
   def set_validated_values
     # Fail if sample resolves to nil (probably a deleted sample)
@@ -221,6 +162,7 @@ class Metadatum < ApplicationRecord
     end
 
     # Check if the key is valid
+    # TODO: Rewrite validators to be on MetadataFieldValidators
     valid_keys = self.class.valid_keys_by_host_genome_name(sample.host_genome_name)
     unless key && valid_keys.include?(key)
       errors.add(:key, MetadataValidationErrors.invalid_key_for_host_genome(key, sample.host_genome_name))
@@ -433,15 +375,13 @@ class Metadatum < ApplicationRecord
   end
 
   def self.valid_keys_by_host_genome_name(host_genome_name)
-    metadata_map = HOST_GENOME_NAME_TO_METADATA_KEYS
-
-    valid_keys = if host_genome_name && metadata_map.key?(host_genome_name.to_sym)
-                   metadata_map[:common] + metadata_map[host_genome_name.to_sym]
-                 else
-                   metadata_map[:common] + metadata_map[:default]
-                 end
-
-    valid_keys
+    # TODO: Restrict upstream functions to return only relevant fields on the project
+    hg = HostGenome.find_by(name: host_genome_name)
+    if hg
+      hg.metadata_fields.pluck(:name).to_a
+    else
+      []
+    end
   end
 
   def self.get_string_options(key_sym, host_genome_name)
