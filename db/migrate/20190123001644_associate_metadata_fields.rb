@@ -114,14 +114,21 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
       end
     end
 
+    # Change 'gender' field to 'sex'
+    Metadatum.where(key: "gender").update_all(key: "sex")
+
     # Fill in metadata_field for existing entries with a name match
     MetadataField.all.each do |field|
       entries = Metadatum.where(key: field.name)
       entries.update_all(metadata_field_id: field.id)
     end
 
-    # Change 'gender' field to 'sex'
-    Metadatum.where(key: "gender").update_all(key: "sex", metadata_field_id: MetadataField.find_by(name: "sex").id)
+    # Add custom fields to the Mosquito projects
+    ["Mosquito", "CDC Mosquito Pilot"].each do |p|
+      if Project.find_by(name: p)
+        Project.find_by(name: p).metadata_fields << MetadataField.where(name: %w[other_infections unique_id collection_lat collection_long comp_id_genus comp_id_species reported_id_genus reported_id_species reported_sex extraction_batch library_prep_batch])
+      end
+    end
 
     # Make some indexes unique
     remove_index :metadata_fields, :name
@@ -144,6 +151,12 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
     MetadataField.where(name: %w[other_infections unique_id collection_lat collection_long comp_id_genus comp_id_species reported_id_genus reported_id_species reported_sex extraction_batch library_prep_batch]).delete_all
 
     Metadatum.where(key: "sex").update_all(key: "gender", metadata_field_id: nil)
+
+    ["Mosquito", "CDC Mosquito Pilot"].each do |p|
+      if Project.find_by(name: p)
+        Project.find_by(name: p).update(metadata_fields: [])
+      end
+    end
 
     remove_index :metadata_fields, :name
     add_index :metadata_fields, :name
