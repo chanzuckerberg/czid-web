@@ -11,9 +11,6 @@ class Metadatum < ApplicationRecord
   NUMBER_TYPE = 1
   DATE_TYPE = 2
 
-  # When using an ActiveRecord enum, the type returned from reading records is String.
-  enum data_type: { string: STRING_TYPE, number: NUMBER_TYPE, date: DATE_TYPE }
-
   # Validations
   validates :string_validated_value, length: { maximum: 250 }
   validates :number_validated_value, numericality: true, allow_nil: true
@@ -28,52 +25,6 @@ class Metadatum < ApplicationRecord
   #
   # Every piece of metadata will belong to a type of metadata_field
   # add_reference :metadata, :metadata_field
-
-  # Key to the metadatum type. Supporting strings and numbers currently.
-  KEY_TO_TYPE = {
-    unique_id: STRING_TYPE,
-    sample_type: STRING_TYPE,
-    nucleotide_type: STRING_TYPE,
-    collection_date: DATE_TYPE,
-    collection_location: STRING_TYPE,
-    collected_by: STRING_TYPE,
-    age: NUMBER_TYPE,
-    sex: STRING_TYPE,
-    race: STRING_TYPE,
-    primary_diagnosis: STRING_TYPE,
-    antibiotic_administered: STRING_TYPE,
-    admission_date: DATE_TYPE,
-    admission_type: STRING_TYPE,
-    discharge_date: DATE_TYPE,
-    discharge_type: STRING_TYPE,
-    immunocomp: STRING_TYPE,
-    other_infections: STRING_TYPE,
-    comorbidity: STRING_TYPE,
-    known_organism: STRING_TYPE,
-    infection_class: STRING_TYPE,
-    detection_method: STRING_TYPE,
-    library_prep: STRING_TYPE,
-    sequencer: STRING_TYPE,
-    rna_dna_input: NUMBER_TYPE,
-    library_prep_batch: STRING_TYPE,
-    extraction_batch: STRING_TYPE,
-    sample_unit: NUMBER_TYPE,
-    life_stage: STRING_TYPE,
-    id_method: STRING_TYPE,
-    genus_species: STRING_TYPE,
-    preservation_method: STRING_TYPE,
-    trap_type: STRING_TYPE,
-    blood_fed: STRING_TYPE,
-    reported_sex: STRING_TYPE,
-    comp_sex: STRING_TYPE,
-    # TODO(mark): Have a single more robust location type.
-    collection_lat: NUMBER_TYPE,
-    collection_long: NUMBER_TYPE,
-    reported_id_genus: STRING_TYPE,
-    reported_id_species: STRING_TYPE,
-    comp_id_genus: STRING_TYPE,
-    comp_id_species: STRING_TYPE
-  }.freeze
 
   # Custom validator called on save or update. Writes to the *_validated_value column.
   def set_validated_values
@@ -98,9 +49,8 @@ class Metadatum < ApplicationRecord
       # Don't call save yet
     end
 
-    if data_type
-      public_send("check_and_set_#{data_type}_type")
-    end
+    base = self.class.convert_type_to_string(metadata_field.base_type)
+    public_send("check_and_set_#{base}_type")
   end
 
   # Called by set_validated_values custom validator
@@ -280,7 +230,8 @@ class Metadatum < ApplicationRecord
   end
 
   def validated_value
-    return self["#{data_type}_validated_value"]
+    base = self.class.convert_type_to_string(metadata_field.base_type)
+    return self["#{base}_validated_value"]
   rescue
     ""
   end
@@ -299,10 +250,6 @@ class Metadatum < ApplicationRecord
   def self.valid_keys_by_host_genome_name(host_genome_name)
     # TODO: Restrict upstream functions to return only relevant fields on the project
     hg = HostGenome.find_by(name: host_genome_name)
-    if hg
-      hg.metadata_fields.pluck(:name).to_a
-    else
-      []
-    end
+    hg ? hg.metadata_fields.pluck(:name).to_a : []
   end
 end
