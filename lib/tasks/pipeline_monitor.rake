@@ -276,9 +276,9 @@ class CheckPipelineRuns
     until @shutdown_requested
       iter_count += 1
       t_iter_start = t_now
-      pr_ids =  PipelineRun.in_progress.pluck(:id)
+      pr_ids = PipelineRun.in_progress.pluck(:id)
       pt_ids = PhyloTree.in_progress.pluck(:id)
-      num_shards = ((pr_ids.count + pt_ids.count)/MIN_JOBS_PER_SHARD).to_i
+      num_shards = ((pr_ids.count + pt_ids.count) / MIN_JOBS_PER_SHARD).to_i
       num_shards = [[num_shards, MAX_SHARDS].min, 1].max
       fork_pids = []
       shard_id = 0

@@ -98,4 +98,3 @@ task "result_monitor", [:duration] => :environment do |_t, args|
     end
   end
 end
-
