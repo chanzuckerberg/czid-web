@@ -385,7 +385,7 @@ module SamplesHelper
           key: field.name,
           dataType: Metadatum.convert_type_to_string(field.base_type),
           name: field.display_name,
-          options: field.options
+          options: field.options && JSON.parse(field.options)
         }
       end
     end

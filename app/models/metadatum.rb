@@ -75,83 +75,6 @@ class Metadatum < ApplicationRecord
     comp_id_species: STRING_TYPE
   }.freeze
 
-  # Key to the valid string options.
-  KEY_TO_STRING_OPTIONS = {
-    nucleotide_type: %w[DNA RNA],
-    gender: %w[Female Male],
-    race: ["Caucasian", "Asian", "African American", "Other"],
-    admission_type: %w[ICU General],
-    discharge_type: ["ICU", "Hospital", "30 Day Mortality", "Other"],
-    infection_class: ["Definite", "No Infection", "Suspected", "Unknown", "Water Control"],
-    library_prep: ["NEB Ultra II FS DNA", "NEB RNA Ultra II", "NEB Ultra II Directional RNA", "NEB Utra II DNA", "Nextera DNA", "Other"],
-    sequencer: %w[MiSeq NextSeq HiSeq NovaSeq Other]
-  }.freeze
-
-  # Valid string options that apply ONLY TO MOSQUITOES. (short-term special case)
-  MOSQUITO_KEY_TO_STRING_OPTIONS = {
-    life_stage: ["Larva", "Nymph", "Adult"],
-    reported_sex: ["Male", "Female"],
-    comp_sex: ["Male", "Female"]
-  }.freeze
-  # Mapping from alternative name to our name. Used at upload time.
-  KEY_ALT_NAMES = {
-    sample_unique_id: "unique_id",
-    sample_collection_date: "collection_date",
-    sample_collection_location: "collection_location",
-    :"rna/dna_input(ng)" => "rna_dna_input",
-    :"rna/dna_input (ng)" => "rna_dna_input",
-    :"rna/dna_input" => "rna_dna_input",
-    :"rna/dna input" => "rna_dna_input",
-    :"rna/dna input (ng)" => "rna_dna_input",
-    antibiotics_administered: "antibiotic_administered",
-    :"known_organism(s)" => "known_organism",
-    :known_organisms => "known_organism"
-  }.freeze
-
-  KEY_TO_DISPLAY_NAME = {
-    unique_id: "Sample Unique ID",
-    sample_type: "Sample Type",
-    nucleotide_type: "Nucleotide Type",
-    collection_date: "Sample Collection Date",
-    collection_location: "Sample Collection Location",
-    collected_by: "Collected By",
-    age: "Age",
-    gender: "Sex",
-    race: "Race",
-    primary_diagnosis: "Primary Diagnosis",
-    antibiotic_administered: "Antibiotic Administered",
-    admission_date: "Admission Date",
-    admission_type: "Admission Type",
-    discharge_date: "Discharge Date",
-    discharge_type: "Discharge Type",
-    immunocomp: "Immunocomp",
-    other_infections: "Other Infections",
-    comorbidity: "Comorbidity",
-    known_organism: "Known Organism",
-    infection_class: "Infection Class",
-    detection_method: "Detection Method",
-    library_prep: "Library Prep",
-    sequencer: "Sequencer",
-    rna_dna_input: "RNA / DNA Input (ng)",
-    library_prep_batch: "Library Prep Batch",
-    extraction_batch: "Extraction Batch",
-    sample_unit: "Sample Unit",
-    life_stage: "Life Stage",
-    id_method: "ID Method",
-    genus_species: "Genus/Species",
-    preservation_method: "Preservation Method",
-    trap_type: "Trap Type",
-    blood_fed: "Blood Fed",
-    reported_sex: "Reported Sex",
-    comp_sex: "Computed Sex",
-    reported_id_genus: "Reported Genus",
-    reported_id_species: "Reported Species",
-    comp_id_genus: "Computed Genus",
-    comp_id_species: "Computed Species",
-    collection_lat: "Collection Latitude",
-    collection_long: "Collection Longitude"
-  }.freeze
-
   # Custom validator called on save or update. Writes to the *_validated_value column.
   def set_validated_values
     # Fail if sample resolves to nil (probably a deleted sample)
@@ -178,7 +101,7 @@ class Metadatum < ApplicationRecord
   def check_and_set_string_type
     key = self.key.to_sym
 
-    options = self.class.get_string_options(key, sample.host_genome_name)
+    options = MetadataField.find_by(name: key).options
 
     if options
       # If there are explicit string options, match the value to one of them.
@@ -309,10 +232,6 @@ class Metadatum < ApplicationRecord
       # Strip whitespace and ensure symbol
       key = key.to_s.strip.to_sym
       next if done_keys.include?(key)
-      # Translate alternative names
-      if KEY_ALT_NAMES.include?(key)
-        key = KEY_ALT_NAMES[key]
-      end
       to_create << new_without_save(sample, key, value)
     end
 
@@ -382,15 +301,5 @@ class Metadatum < ApplicationRecord
     else
       []
     end
-  end
-
-  def self.get_string_options(key_sym, host_genome_name)
-    if host_genome_name == "Mosquito" && Metadatum::MOSQUITO_KEY_TO_STRING_OPTIONS.key?(key_sym)
-      return Metadatum::MOSQUITO_KEY_TO_STRING_OPTIONS[key_sym]
-    end
-    if Metadatum::KEY_TO_STRING_OPTIONS.key? key_sym
-      return Metadatum::KEY_TO_STRING_OPTIONS[key_sym]
-    end
-    nil
   end
 end
