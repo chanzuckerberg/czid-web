@@ -43,7 +43,7 @@ class CheckPipelineRuns
       end
     end
 
-    pt_ids.in_progress.each do |ptid|
+    pt_ids.each do |ptid|
       next unless ptid % num_shards == shard_id
       pt = PhyloTree.find(ptid)
       begin
