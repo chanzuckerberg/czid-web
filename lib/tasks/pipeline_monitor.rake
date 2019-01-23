@@ -14,7 +14,8 @@ IDSEQ_BENCH_CONFIG = "s3://idseq-bench/config.json".freeze
 
 class CheckPipelineRuns
   # Concurrency allowed
-  NUM_SHARDS = 10
+  MAX_SHARDS = 10
+  MIN_JOBS_PER_SHARD = 20
 
   @sleep_quantum = 5.0
 
@@ -24,13 +25,14 @@ class CheckPipelineRuns
     attr_accessor :shutdown_requested
   end
 
-  def self.update_jobs(num_shards, shard_id)
-    ActiveRecord::Base.connection.reconnect!
-    num_pr = PipelineRun.in_progress.count
-    num_pt = PhyloTree.in_progress.count
+  def self.update_jobs(num_shards, shard_id, pr_ids, pt_ids)
+    ActiveRecord::Base.connection.reconnect! if shard_id > 0
+    num_pr = pr_ids.count
+    num_pt = pt_ids.count
     Rails.logger.info("New pipeline monitor loop started with #{num_pr} pr and #{num_pt} pt. shard #{shard_id} out of #{num_shards}")
-    PipelineRun.in_progress.each do |pr|
-      next unless pr.id % num_shards == shard_id
+    pr_ids.each do |prid|
+      next unless prid % num_shards == shard_id
+      pr = PipelineRun.find(prid)
       begin
         break if @shutdown_requested
         Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
@@ -41,8 +43,9 @@ class CheckPipelineRuns
       end
     end
 
-    PhyloTree.in_progress.each do |pt|
-      next unless pt.id % num_shards == shard_id
+    pt_ids.in_progress.each do |ptid|
+      next unless ptid % num_shards == shard_id
+      pt = PhyloTree.find(ptid)
       begin
         break if @shutdown_requested
         Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
@@ -273,16 +276,20 @@ class CheckPipelineRuns
     until @shutdown_requested
       iter_count += 1
       t_iter_start = t_now
+      pr_ids =  PipelineRun.in_progress.pluck(:id)
+      pt_ids = PhyloTree.in_progress.pluck(:id)
+      num_shards = ((pr_ids.count + pt_ids.count)/MIN_JOBS_PER_SHARD).to_i
+      num_shards = [[num_shards, MAX_SHARDS].min, 1].max
       fork_pids = []
       shard_id = 0
-      while shard_id < NUM_SHARDS
-        pid = Process.fork { update_jobs(NUM_SHARDS, shard_id) }
+      while shard_id < num_shards
+        pid = Process.fork { update_jobs(num_shards, shard_id, pr_ids, pt_ids) }
         fork_pids << pid
         shard_id += 1
       end
+      fork_pids.each { |p| Process.waitpid(p) }
       autoscaling_state = autoscaling_update(autoscaling_state, t_now)
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
-      fork_pids.each { |p| Process.waitpid(p) }
       t_now = Time.now.to_f
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
