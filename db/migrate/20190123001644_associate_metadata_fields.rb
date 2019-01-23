@@ -122,11 +122,42 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
 
     # Change 'gender' field to 'sex'
     Metadatum.where(key: "gender").update_all(key: "sex", metadata_field_id: MetadataField.find_by(name: "sex").id)
+
+    # Make some indexes unique
+    remove_index :metadata_fields, :name
+    add_index :metadata_fields, :name, unique: true
+
+    remove_index :metadata_fields_projects, ["project_id", "metadata_field_id"]
+    add_index :metadata_fields_projects, ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields", unique: true
+
+    remove_index :host_genomes_metadata_fields, ["host_genome_id", "metadata_field_id"]
+    add_index :host_genomes_metadata_fields, ["host_genome_id", "metadata_field_id"], name: "index_host_genomes_metadata_fields", unique: true
+
+    remove_index :host_genomes_metadata_fields, ["metadata_field_id", "host_genome_id"]
+    add_index :host_genomes_metadata_fields, ["metadata_field_id", "host_genome_id"], name: "index_metadata_fields_host_genomes", unique: true
+
+    remove_index :metadata_fields_projects, ["project_id", "metadata_field_id"]
+    add_index :metadata_fields_projects, ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields", unique: true
   end
 
   def down
     MetadataField.where(name: %w[other_infections unique_id collection_lat collection_long comp_id_genus comp_id_species reported_id_genus reported_id_species reported_sex extraction_batch library_prep_batch]).delete_all
 
     Metadatum.where(key: "sex").update_all(key: "gender", metadata_field_id: nil)
+
+    remove_index :metadata_fields, :name
+    add_index :metadata_fields, :name
+
+    remove_index :metadata_fields_projects, ["project_id", "metadata_field_id"]
+    add_index :metadata_fields_projects, ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields"
+
+    remove_index :host_genomes_metadata_fields, ["host_genome_id", "metadata_field_id"]
+    add_index :host_genomes_metadata_fields, ["host_genome_id", "metadata_field_id"], name: "index_host_genomes_metadata_fields"
+
+    remove_index :host_genomes_metadata_fields, ["metadata_field_id", "host_genome_id"]
+    add_index :host_genomes_metadata_fields, ["metadata_field_id", "host_genome_id"], name: "index_metadata_fields_host_genomes"
+
+    remove_index :metadata_fields_projects, ["project_id", "metadata_field_id"]
+    add_index :metadata_fields_projects, ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields"
   end
 end
