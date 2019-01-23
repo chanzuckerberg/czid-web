@@ -84,6 +84,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         display_name: "Reported Sex",
         description: "Reported/expected/human-identified species of the specimen",
         base_type: Metadatum::STRING_TYPE,
+        options: %w[Female Male],
         group: "Host",
         host_genomes: [mosquito_genome]
       )
@@ -93,6 +94,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
         display_name: "Computed Sex",
         description: "Computationally-determined sex of the specimen",
         base_type: Metadatum::STRING_TYPE,
+        options: %w[Female Male],
         group: "Host",
         host_genomes: [mosquito_genome]
       )
