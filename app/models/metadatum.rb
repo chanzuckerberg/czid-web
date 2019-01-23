@@ -39,6 +39,7 @@ class Metadatum < ApplicationRecord
     collected_by: STRING_TYPE,
     age: NUMBER_TYPE,
     gender: STRING_TYPE,
+    sex: STRING_TYPE, # TODO: Remove gender
     race: STRING_TYPE,
     primary_diagnosis: STRING_TYPE,
     antibiotic_administered: STRING_TYPE,
