@@ -1,0 +1,43 @@
+@import "~styles/themes/colors";
+
+.publicSampleNotification {
+  .accordion {
+    .accordionOption {
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+
+      .title {
+        padding: 10px;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-top: 10px;
+
+        .icon {
+          float: right;
+          font-size: 20px;
+          font-weight: 500;
+          color: $medium-grey;
+        }
+      }
+
+      .content {
+        display: none;
+        padding: 10px;
+        max-height: 300px;
+        max-width: 340px;
+        overflow: auto;
+
+        .sampleEntry {
+          line-height: 20px;
+          white-space: nowrap;
+        }
+      }
+
+      &.active {
+        .content {
+          display: block;
+        }
+      }
+    }
+  }
+}

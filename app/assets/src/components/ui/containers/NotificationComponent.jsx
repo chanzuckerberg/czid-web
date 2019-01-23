@@ -10,17 +10,25 @@ class NotificationComponent extends React.Component {
       case "warn":
       case "error":
         return <AlertIcon />;
+      default:
+        break;
     }
     return null;
   }
 
   render() {
     return (
-      <div className={cx(cs.notification, cs[this.props.type])}>
+      <div
+        className={cx(
+          this.props.className,
+          cs.notification,
+          cs[this.props.type]
+        )}
+      >
         <div className={cs.icon}>{this.getIcon(this.props.type)}</div>
         <div className={cs.content}>
           <div>{this.props.children}</div>
-          <div className={cs.actions} onClick={this.props.handleCloseToast}>
+          <div className={cs.actions} onClick={this.props.onClose}>
             Dismiss
           </div>
         </div>
@@ -34,8 +42,9 @@ NotificationComponent.defaultProps = {
 };
 
 NotificationComponent.propTypes = {
+  className: PropTypes.string,
   children: PropTypes.node,
-  handleCloseToast: PropTypes.func,
+  onClose: PropTypes.func,
   type: PropTypes.oneOf(["success", "info", "warn", "error"])
 };
 

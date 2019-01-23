@@ -35,6 +35,7 @@ Rails.application.routes.draw do
     get :contig_taxid_list, on: :member
     get :taxid_contigs, on: :member
     get :summary_contig_counts, on: :member
+    get :samples_going_public, on: :collection
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
   end

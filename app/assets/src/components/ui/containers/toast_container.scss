@@ -1,5 +1,7 @@
 .toastContainer {
   &:global(.Toastify__toast-container) {
+    width: 420px;
+
     :global(.Toastify__toast) {
       box-shadow: none;
       min-height: 0;

@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/elements";
+@import "~styles/themes/typography";
 
 .notification {
   border-left: 5px solid $black;
@@ -7,6 +8,8 @@
   box-shadow: $box-shadow-bottom-right;
   color: $black;
   display: flex;
+  font-family: $font-family-default;
+  font-size: $font-size;
   padding: 14px 14px 14px 9px;
 
   .content {
@@ -15,13 +18,15 @@
   .icon {
     flex-grow: 0;
     margin-right: 14px;
-    width: 20px;
+
+    svg {
+      width: 20px;
+    }
   }
 
   .actions {
     margin-top: 14px;
     text-transform: uppercase;
-    color: $medium-grey;
   }
 
   &.error {
