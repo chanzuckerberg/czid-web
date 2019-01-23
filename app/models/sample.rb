@@ -344,7 +344,7 @@ class Sample < ApplicationRecord
     host_genome && host_genome.default_background ? host_genome.default_background.id : Background.find_by(public_access: 1).id
   end
 
-  def as_json(_options = {})
+  def as_json(options = {})
     return super if options[:native]
     super(methods: [:input_files, :host_genome_name])
   end
