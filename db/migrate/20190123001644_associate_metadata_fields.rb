@@ -89,6 +89,24 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
       )
 
       to_create << MetadataField.new(
+        name: "comp_sex",
+        display_name: "Computed Sex",
+        description: "Computationally-determined sex of the specimen",
+        base_type: Metadatum::STRING_TYPE,
+        group: "Host",
+        host_genomes: [mosquito_genome]
+      )
+
+      to_create << MetadataField.new(
+        name: "id_method",
+        display_name: "Identification Method",
+        description: "Identification method used",
+        base_type: Metadatum::STRING_TYPE,
+        group: "Host",
+        host_genomes: [mosquito_genome]
+      )
+
+      to_create << MetadataField.new(
         name: "extraction_batch",
         display_name: "Extraction Batch",
         description: "Label for the extracted batch",
@@ -148,7 +166,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
   end
 
   def down
-    MetadataField.where(name: %w[other_infections unique_id collection_lat collection_long comp_id_genus comp_id_species reported_id_genus reported_id_species reported_sex extraction_batch library_prep_batch]).delete_all
+    MetadataField.where(name: %w[other_infections unique_id collection_lat collection_long comp_id_genus comp_id_species reported_id_genus reported_id_species reported_sex extraction_batch library_prep_batch id_method comp_sex]).delete_all
 
     Metadatum.where(key: "sex").update_all(key: "gender", metadata_field_id: nil)
 
