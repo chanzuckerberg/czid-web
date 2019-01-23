@@ -1,4 +1,6 @@
 class AssociateMetadataFields < ActiveRecord::Migration[5.1]
+  # rubocop:disable SkipsModelValidations
+
   def up
     # Make custom metadata fields for Mosquito projects
     to_create = []
@@ -115,16 +117,16 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
     # Fill in metadata_field for existing entries with a name match
     MetadataField.all.each do |field|
       entries = Metadatum.where(key: field.name)
-      entries.update(metadata_field_id: field.id)
+      entries.update_all(metadata_field_id: field.id)
     end
 
     # Change 'gender' field to 'sex'
-    Metadatum.where(key: "gender").update(key: "sex", metadata_field_id: MetadataField.find_by(name: "sex").id)
+    Metadatum.where(key: "gender").update_all(key: "sex", metadata_field_id: MetadataField.find_by(name: "sex").id)
   end
 
   def down
     MetadataField.where(name: %w[other_infections unique_id collection_lat collection_long comp_id_genus comp_id_species reported_id_genus reported_id_species reported_sex extraction_batch library_prep_batch]).delete_all
 
-    Metadatum.where(key: "sex").update(key: "gender", metadata_field_id: nil)
+    Metadatum.where(key: "sex").update_all(key: "gender", metadata_field_id: nil)
   end
 end
