@@ -2,6 +2,7 @@ import React from "react";
 import { Search } from "semantic-ui-react";
 import { escapeRegExp, debounce } from "lodash";
 import PropTypes from "prop-types";
+import { get } from "../../../api";
 
 class SearchBox extends React.Component {
   constructor(props) {
@@ -11,11 +12,9 @@ class SearchBox extends React.Component {
     this.waitHandleSearchChange = 500;
     this.minChars = 2;
 
-    this.source = this.props.source;
     this.placeholder = this.props.placeholder;
 
     this.resetComponent = this.resetComponent.bind(this);
-    this.handleSearchChange = this.handleSearchChange.bind(this);
     this.handleResultSelect = this.handleResultSelect.bind(this);
 
     this.blankState = { isLoading: false, results: [], value: "" };
@@ -35,20 +34,43 @@ class SearchBox extends React.Component {
     this.props.onResultSelect(e, { result });
   }
 
-  handleSearchChange(e, { value }) {
-    this.setState({ isLoading: true, value });
-
-    setTimeout(() => {
-      if (this.state.value.length < this.minChars) return this.resetComponent();
-
+  findMatches = async query => {
+    if (this.props.clientSearchSource) {
       const re = new RegExp(escapeRegExp(this.state.value), "i");
       const isMatch = result => re.test(result.title);
+      return this.props.clientSearchSource.filter(isMatch);
+    }
+    if (this.props.serverSearchAction) {
+      let result = await get(
+        `/${this.props.serverSearchAction}?query=${query}`
+      );
+      return result;
+    }
+  };
+
+  handleSearchChange = (e, { value }) => {
+    this.setState({ isLoading: true, value });
+
+    setTimeout(async () => {
+      if (this.state.value.length < this.minChars) return this.resetComponent();
+
+      let searchResults;
+      if (this.props.clientSearchSource) {
+        const re = new RegExp(escapeRegExp(this.state.value), "i");
+        const isMatch = result => re.test(result.title);
+        searchResults = this.props.clientSearchSource.filter(isMatch);
+      } else if (this.props.serverSearchAction) {
+        searchResults = await get(
+          `/${this.props.serverSearchAction}?query=${this.state.value}`
+        );
+      }
+
       this.setState({
         isLoading: false,
-        results: this.source.filter(isMatch)
+        results: searchResults
       });
     }, this.delayCheckMatch);
-  }
+  };
 
   render() {
     const { isLoading, value, results } = this.state;
@@ -73,7 +95,11 @@ class SearchBox extends React.Component {
 }
 
 SearchBox.propTypes = {
-  source: PropTypes.array,
+  // Provide either clientSearchSource or serverSearchAction.
+  // If clientSearchSource is provided, query matching will happen on the client side (use for small data).
+  // If serverSearchAction is provided, query matching will happen on the server side (use for large data).
+  clientSearchSource: PropTypes.array,
+  serverSearchAction: PropTypes.string,
   initialValue: PropTypes.string,
   onResultSelect: PropTypes.func,
   placeholder: PropTypes.string

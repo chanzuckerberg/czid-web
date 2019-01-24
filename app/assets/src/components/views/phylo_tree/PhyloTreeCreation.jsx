@@ -30,7 +30,6 @@ class PhyloTreeCreation extends React.Component {
       selectedOtherSamples: new Set(),
       otherSamplesFilter: "",
 
-      taxaLoaded: false,
       taxonList: [],
 
       projectsLoaded: false,
@@ -93,9 +92,6 @@ class PhyloTreeCreation extends React.Component {
     this.handleNewTreeContextResponse = this.handleNewTreeContextResponse.bind(
       this
     );
-    this.handleTaxonSearchContextResponse = this.handleTaxonSearchContextResponse.bind(
-      this
-    );
     this.handleProjectSearchContextResponse = this.handleProjectSearchContextResponse.bind(
       this
     );
@@ -103,9 +99,7 @@ class PhyloTreeCreation extends React.Component {
     this.handleSelectTaxon = this.handleSelectTaxon.bind(this);
     this.isTreeNameValid = this.isTreeNameValid.bind(this);
     this.loadNewTreeContext = this.loadNewTreeContext.bind(this);
-    this.loadProjectAndTaxonSearchContext = this.loadProjectAndTaxonSearchContext.bind(
-      this
-    );
+    this.loadProjectSearchContext = this.loadProjectSearchContext.bind(this);
   }
 
   componentDidMount() {
@@ -144,7 +138,7 @@ class PhyloTreeCreation extends React.Component {
       });
   }
 
-  loadProjectAndTaxonSearchContext() {
+  loadProjectSearchContext() {
     axios
       .get("/choose_project.json")
       .then(response => this.handleProjectSearchContextResponse(response))
@@ -152,15 +146,6 @@ class PhyloTreeCreation extends React.Component {
         // TODO: properly handle error
         // eslint-disable-next-line no-console
         console.error("Error loading project search context: ", error);
-      });
-
-    axios
-      .get("/choose_taxon.json")
-      .then(response => this.handleTaxonSearchContextResponse(response))
-      .catch(error => {
-        // TODO: properly handle error
-        // eslint-disable-next-line no-console
-        console.error("Error loading taxon search context: ", error);
       });
   }
 
@@ -205,13 +190,6 @@ class PhyloTreeCreation extends React.Component {
     this.setState({
       projectList: response.data,
       projectsLoaded: true
-    });
-  }
-
-  handleTaxonSearchContextResponse(response) {
-    this.setState({
-      taxonList: response.data,
-      taxaLoaded: true
     });
   }
 
@@ -458,7 +436,7 @@ class PhyloTreeCreation extends React.Component {
         <Wizard.Page
           key="wizard__page_2"
           title="Select organism and project"
-          onLoad={this.loadProjectAndTaxonSearchContext}
+          onLoad={this.loadProjectSearchContext}
           onContinue={this.canContinueWithTaxonAndProject}
         >
           <div className="wizard__page-2__subtitle" />
@@ -467,7 +445,7 @@ class PhyloTreeCreation extends React.Component {
             <div className="wizard__page-2__searchbar__container">
               {this.state.projectsLoaded ? (
                 <SearchBox
-                  source={this.state.projectList}
+                  clientSearchSource={this.state.projectList}
                   onResultSelect={this.handleSelectProject}
                   initialValue={this.state.projectName}
                   placeholder="Existing project name"
@@ -480,16 +458,12 @@ class PhyloTreeCreation extends React.Component {
           <div className="wizard__page-2__searchbar">
             <div className="wizard__page-2__searchbar__container">Organism</div>
             <div className="wizard__page-2__searchbar__container">
-              {this.state.taxaLoaded ? (
-                <SearchBox
-                  source={this.state.taxonList}
-                  onResultSelect={this.handleSelectTaxon}
-                  initialValue={this.state.taxonName}
-                  placeholder="Genus name"
-                />
-              ) : (
-                <LoadingIcon />
-              )}
+              <SearchBox
+                serverSearchAction="choose_taxon"
+                onResultSelect={this.handleSelectTaxon}
+                initialValue={this.state.taxonName}
+                placeholder="Genus name"
+              />
             </div>
           </div>
           <div>

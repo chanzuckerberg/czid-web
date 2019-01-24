@@ -4,6 +4,9 @@
 # or operating system, you probably want to add a global ignore instead:
 #   git config --global core.excludesfile '~/.gitignore_global'
 
+# Ignore elasticsearch index files
+/docker_data/*
+
 # Ignore bundler config.
 /.bundle
 /config/initializers/app_environment_variables.rb

@@ -79,7 +79,22 @@ class PhyloTreesController < ApplicationController
   end
 
   def choose_taxon
-    render json: File.read("/app/app/lib/taxon_search_list.json")
+    query = params[:query]
+    matching_taxa = {}
+    %w[species genus].each do |level|
+      search_params = { query: { query_string: { query: "#{query}*", fields: ["#{level}_name"] } } }
+      TaxonLineage.__elasticsearch__.search(search_params).records.each do |record|
+        name = record["#{level}_name"]
+        taxid = record["#{level}_taxid"]
+        matching_taxa[name] = {
+          "title" => name,
+          "description" => "Taxonomy ID: #{taxid}",
+          "taxid" => taxid
+        }
+      end
+    end
+    taxon_list = matching_taxa.values
+    render json: JSON.dump(taxon_list)
   end
 
   def new
