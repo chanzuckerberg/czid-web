@@ -3,8 +3,11 @@ one:
 
 two:
   name: Human
-  metadata_fields:
-    - sample_type
+#  metadata_fields: [sample_type, sex]
+
+human:
+  name: Human
+#  metadata_fields: [sample_type, sex]
 
 mosquito:
   name: Mosquito
