@@ -42,6 +42,12 @@ module PipelineRunsHelper
         "refined_annotated_out" => "Annotate non-host FASTA with NCBI accession IDs after the BLAST-based match refinement.",
         "refined_taxid_locator_out" => "Annotate non-host FASTA with revised Taxonomy IDs after the BLAST-based match refinement."
       }
+    },
+    PipelineRunStage::EXPT_STAGE_NAME => {
+      "stage" => "Generate additional experimental output.",
+      "steps" => {
+        "nonhost_fastq_out" => "Filter original fastq/fasta input files to only contain non-host reads processed by IdSeq."
+      }
     }
   }.freeze
 
