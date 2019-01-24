@@ -6,6 +6,7 @@ default: &default
   database: idseq_<%= Rails.env %>
   encoding: utf8
   collation: utf8_unicode_ci
+  reconnect: true
 
 development:
   <<: *default
