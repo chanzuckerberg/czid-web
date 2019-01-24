@@ -9,3 +9,6 @@ human:
 
 mosquito:
   name: Mosquito
+
+tick:
+  name: Tick

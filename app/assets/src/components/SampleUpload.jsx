@@ -39,6 +39,8 @@ class SampleUpload extends React.Component {
     );
     this.toggleNewProjectInput = this.toggleNewProjectInput.bind(this);
     this.projects = props.projects || [];
+    // Needed to fill in this.selected.project used on the sample /edit page.
+    this.project = props.projectInfo || "";
     const urlParams = parseUrlParams();
     resetUrl();
 
@@ -1180,7 +1182,7 @@ class SampleUpload extends React.Component {
                               htmlFor="alignment_config_name"
                               className="read-count-label"
                             >
-                              Alignment Config Name. i.e. 2018-02-15
+                              Alignment Config Name. i.e. 2018-12-01
                             </div>
                           </div>
                         </div>
@@ -1193,7 +1195,7 @@ class SampleUpload extends React.Component {
                             className="browser-default"
                             ref="alignment_config_name"
                             value={this.state.selectedAlignmentConfigName}
-                            placeholder="2018-02-15"
+                            placeholder="2018-12-01"
                             onChange={this.handleAlignmentConfigNameChange}
                           />
                         </div>

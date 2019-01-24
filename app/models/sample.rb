@@ -20,7 +20,7 @@ class Sample < ApplicationRecord
   ASSEMBLY_DIR = 'assembly'.freeze
 
   # TODO: Make all these params configurable without code change
-  DEFAULT_STORAGE_IN_GB = 500
+  DEFAULT_STORAGE_IN_GB = 1000
   DEFAULT_MEMORY_IN_MB = 120_000 # sorry, hacky
   HIMEM_IN_MB = 240_000
 
