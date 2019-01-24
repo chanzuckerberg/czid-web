@@ -25,6 +25,7 @@ import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import TableColumnHeader from "./views/samples/TableColumnHeader";
 import PipelineStatusFilter from "./views/samples/PipelineStatusFilter";
 import ProjectUploadMenu from "./views/samples/ProjectUploadMenu";
+import SearchBox from "./ui/controls/SearchBox";
 import {
   SAMPLE_TABLE_COLUMNS,
   INITIAL_COLUMNS,
