@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190123001644) do
-
+ActiveRecord::Schema.define(version: 20_190_116_005_251) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -34,6 +33,9 @@ ActiveRecord::Schema.define(version: 20190123001644) do
     t.float "depth", limit: 24
     t.bigint "pipeline_run_id"
     t.string "drug_family"
+    t.integer "level"
+    t.float "drug_gene_coverage", limit: 24
+    t.float "drug_gene_depth", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "allele"], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
@@ -75,7 +77,7 @@ ActiveRecord::Schema.define(version: 20190123001644) do
   create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
-    t.text "sequence", limit: 4294967295
+    t.text "sequence", limit: 4_294_967_295
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -115,8 +117,8 @@ ActiveRecord::Schema.define(version: 20190123001644) do
   create_table "host_genomes_metadata_fields", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "host_genome_id", null: false
     t.bigint "metadata_field_id", null: false
-    t.index ["host_genome_id", "metadata_field_id"], name: "index_host_genomes_metadata_fields", unique: true
-    t.index ["metadata_field_id", "host_genome_id"], name: "index_metadata_fields_host_genomes", unique: true
+    t.index ["host_genome_id", "metadata_field_id"], name: "index_host_genomes_metadata_fields"
+    t.index ["metadata_field_id", "host_genome_id"], name: "index_metadata_fields_host_genomes"
   end
 
   create_table "input_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -143,7 +145,7 @@ ActiveRecord::Schema.define(version: 20190123001644) do
   end
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "key", null: false
+    t.string "key", null: false, collation: "latin1_swedish_ci"
     t.integer "data_type", limit: 1, null: false
     t.string "raw_value"
     t.string "string_validated_value"
@@ -173,13 +175,13 @@ ActiveRecord::Schema.define(version: 20190123001644) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["group"], name: "index_metadata_fields_on_group"
-    t.index ["name"], name: "index_metadata_fields_on_name", unique: true
+    t.index ["name"], name: "index_metadata_fields_on_name"
   end
 
   create_table "metadata_fields_projects", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "project_id", null: false
     t.bigint "metadata_field_id", null: false
-    t.index ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields", unique: true
+    t.index ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields"
   end
 
   create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -200,7 +202,7 @@ ActiveRecord::Schema.define(version: 20190123001644) do
     t.text "newick"
     t.integer "status", default: 0
     t.string "dag_version"
-    t.text "dag_json", limit: 4294967295
+    t.text "dag_json", limit: 4_294_967_295
     t.text "command_stdout"
     t.text "command_stderr"
     t.string "job_id"
@@ -278,6 +280,7 @@ ActiveRecord::Schema.define(version: 20190123001644) do
     t.string "pipeline_commit"
     t.text "assembled_taxids"
     t.bigint "truncated"
+    t.text "result_status"
     t.integer "results_finalized"
     t.bigint "alignment_config_id"
     t.integer "alert_sent", default: 0
@@ -390,12 +393,12 @@ ActiveRecord::Schema.define(version: 20190123001644) do
     t.index ["pipeline_run_id", "tax_id", "count_type", "tax_level"], name: "index_pr_tax_hit_level_tc", unique: true
   end
 
-  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" do |t|
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
-    t.string "title"
-    t.text "summary"
-    t.text "description"
+    t.string "title", collation: "utf8mb4_general_ci"
+    t.text "summary", collation: "utf8mb4_general_ci"
+    t.text "description", collation: "utf8mb4_general_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -506,5 +509,4 @@ ActiveRecord::Schema.define(version: 20190123001644) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
-
 end

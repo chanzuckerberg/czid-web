@@ -25,7 +25,6 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     }, as: :json
 
     assert_response :success
-    puts @response.parsed_body['issues']
     assert_equal 0, @response.parsed_body['issues']['errors'].length
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
