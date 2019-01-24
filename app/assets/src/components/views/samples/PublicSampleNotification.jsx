@@ -27,23 +27,24 @@ class PublicSampleNotification extends React.Component {
         className={cs.publicSampleNotification}
       >
         <div className={cs.text}>
-          <b>{samples.length}</b> sample{samples.length > 1 ? "s" : ""} of
-          project <b>{projectName}</b> will become public soon starting on{" "}
-          <b>{moment(minTimestamp.private_until).format("MMM Do, YYYY")}</b>. If
-          you have any questions, please refer to IDseq's&nbsp;
-          <b>
-            <a
-              onClick={() =>
-                window.open("https://assets.idseq.net/Privacy.pdf")
-              }
-            >
-              privacy policy
-            </a>
-          </b>
+          <span className={cs.highlight}>
+            {samples.length} sample{samples.length > 1 ? "s" : ""}
+          </span>&nbsp;of project{" "}
+          <span className={cs.highlight}>{projectName}</span> will become public
+          soon starting on &nbsp;
+          <span className={cs.highlight}>
+            {moment(minTimestamp.private_until).format("MMM Do, YYYY")}
+          </span>. If you have any questions, please refer to IDseq's&nbsp;
+          <a
+            className={cs.policyLink}
+            onClick={() => window.open("https://assets.idseq.net/Privacy.pdf")}
+          >
+            privacy policy
+          </a>
           &nbsp;or{" "}
-          <b>
-            <a href="mailto:help@idseq.com">email us</a>
-          </b>.
+          <a className={cs.emailLink} href="mailto:help@idseq.com">
+            email us
+          </a>
         </div>
 
         <div className={cs.accordion}>

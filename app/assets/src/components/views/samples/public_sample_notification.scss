@@ -1,19 +1,27 @@
 @import "~styles/themes/colors";
 
 .publicSampleNotification {
+  .text {
+    .highlight {
+      font-weight: 700;
+    }
+  }
+
   .accordion {
     .accordionOption {
-      background-color: rgba(0, 0, 0, 0.1);
+      background-color: rgba(0, 0, 0, 0.06);
       border-radius: 5px;
+      padding: 10px;
+      margin-top: 10px;
 
       .title {
-        padding: 10px;
+        font-size: 12px;
         text-transform: uppercase;
-        font-weight: 700;
-        margin-top: 10px;
+        font-weight: 600;
 
         .icon {
           float: right;
+          top: -4px;
           font-size: 20px;
           font-weight: 500;
           color: $medium-grey;
@@ -22,9 +30,9 @@
 
       .content {
         display: none;
-        padding: 10px;
         max-height: 300px;
         max-width: 340px;
+        margin-top: 10px;
         overflow: auto;
 
         .sampleEntry {
@@ -39,5 +47,11 @@
         }
       }
     }
+  }
+
+  .policyLink,
+  .emailLink {
+    text-decoration-line: underline;
+    text-decoration-style: dashed !important;
   }
 }
