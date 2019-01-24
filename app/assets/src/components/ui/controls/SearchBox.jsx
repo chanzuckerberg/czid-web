@@ -34,20 +34,6 @@ class SearchBox extends React.Component {
     this.props.onResultSelect(e, { result });
   }
 
-  findMatches = async query => {
-    if (this.props.clientSearchSource) {
-      const re = new RegExp(escapeRegExp(this.state.value), "i");
-      const isMatch = result => re.test(result.title);
-      return this.props.clientSearchSource.filter(isMatch);
-    }
-    if (this.props.serverSearchAction) {
-      let result = await get(
-        `/${this.props.serverSearchAction}?query=${query}`
-      );
-      return result;
-    }
-  };
-
   handleSearchChange = (e, { value }) => {
     this.setState({ isLoading: true, value });
 
