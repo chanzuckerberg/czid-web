@@ -146,7 +146,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
     # Add custom fields to the Mosquito projects
     ["Mosquito", "CDC Mosquito Pilot"].each do |p|
       if Project.find_by(name: p)
-        Project.find_by(name: p).metadata_fields << MetadataField.where(name: %w[other_infections unique_id collection_lat collection_long comp_id_genus comp_id_species reported_id_genus reported_id_species reported_sex extraction_batch library_prep_batch])
+        Project.find_by(name: p).metadata_fields << MetadataField.where(name: %w[other_infections unique_id collection_lat collection_long comp_id_genus comp_id_species reported_id_genus reported_id_species reported_sex comp_sex id_method extraction_batch library_prep_batch])
       end
     end
 
@@ -168,7 +168,7 @@ class AssociateMetadataFields < ActiveRecord::Migration[5.1]
   end
 
   def down
-    MetadataField.where(name: %w[other_infections unique_id collection_lat collection_long comp_id_genus comp_id_species reported_id_genus reported_id_species reported_sex extraction_batch library_prep_batch id_method comp_sex]).delete_all
+    MetadataField.where(name: %w[other_infections unique_id collection_lat collection_long comp_id_genus comp_id_species reported_id_genus reported_id_species reported_sex comp_sex id_method extraction_batch library_prep_batch]).delete_all
 
     Metadatum.where(key: "sex").update_all(key: "gender", metadata_field_id: nil)
 
