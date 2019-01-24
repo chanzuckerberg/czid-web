@@ -24,4 +24,7 @@ class PlaygroundController < ApplicationController
       }
     }
   end
+
+  def icons
+  end
 end

@@ -1,6 +1,7 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const DecipherIcon = () => {
+const DecipherIcon = props => {
   return (
     <svg
       fill="#000"
@@ -8,6 +9,7 @@ const DecipherIcon = () => {
       viewBox="0 0 64 60"
       x="0px"
       y="0px"
+      className={props.className}
     >
       <g>
         <path d="M29.077,13.386l1.846-.772a14,14,0,1,0,0,10.772l-1.846-.772a12,12,0,1,1,0-9.228Z" />
@@ -27,6 +29,10 @@ const DecipherIcon = () => {
       </g>
     </svg>
   );
+};
+
+DecipherIcon.propTypes = {
+  className: PropTypes.string
 };
 
 export default DecipherIcon;
