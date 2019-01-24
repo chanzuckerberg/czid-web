@@ -1,6 +1,7 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const ERCCIcon = () => {
+const ERCCIcon = props => {
   return (
     <svg
       version="1.1"
@@ -9,6 +10,7 @@ const ERCCIcon = () => {
       x="0px"
       y="0px"
       viewBox="0 0 463 463"
+      className={props.className}
     >
       <g>
         <path
@@ -79,6 +81,10 @@ const ERCCIcon = () => {
       </g>
     </svg>
   );
+};
+
+ERCCIcon.propTypes = {
+  className: PropTypes.string
 };
 
 export default ERCCIcon;

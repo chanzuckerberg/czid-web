@@ -1,6 +1,7 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const DiscoverIcon = () => {
+const DiscoverIcon = props => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -9,6 +10,7 @@ const DiscoverIcon = () => {
       x="0px"
       y="0px"
       viewBox="0 0 64 80"
+      className={props.className}
     >
       <g>
         <path d="M21,23C9.972,23,1,31.972,1,43s8.972,20,20,20s20-8.972,20-20S32.028,23,21,23z M21,61c-9.925,0-18-8.075-18-18   s8.075-18,18-18s18,8.075,18,18S30.925,61,21,61z" />
@@ -99,6 +101,10 @@ const DiscoverIcon = () => {
       </g>
     </svg>
   );
+};
+
+DiscoverIcon.propTypes = {
+  className: PropTypes.string
 };
 
 export default DiscoverIcon;

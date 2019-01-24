@@ -1,8 +1,14 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const MouseIcon = () => {
+const MouseIcon = props => {
   return (
-    <svg x="0px" y="0px" viewBox="0 0 463.003 463.003">
+    <svg
+      className={props.className}
+      x="0px"
+      y="0px"
+      viewBox="0 0 463.003 463.003"
+    >
       <g>
         <path
           d="M210.273,269.991c0-4.373-3.545-7.917-7.917-7.917h-39.004c-4.373,0-7.918,3.545-7.918,7.917
@@ -91,6 +97,10 @@ const MouseIcon = () => {
       </g>
     </svg>
   );
+};
+
+MouseIcon.propTypes = {
+  className: PropTypes.string
 };
 
 export default MouseIcon;

@@ -80,6 +80,7 @@ Rails.application.routes.draw do
 
   namespace :playground do
     get :controls
+    get :icons
   end
 
   authenticate :user, ->(u) { u.admin? } do
