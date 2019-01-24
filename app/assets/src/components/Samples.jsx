@@ -12,8 +12,7 @@ import {
   map,
   keyBy,
   take,
-  partition,
-  reduce
+  partition
 } from "lodash";
 // TODO(mark): Refactor lodash/fp functions into a file of immutable utilities.
 import { merge, sortBy } from "lodash/fp";
@@ -1104,15 +1103,13 @@ class Samples extends React.Component {
 
   displayPublicSampleNotifications(samplesGoingPublic) {
     let previouslyDismissedSamples = new Set();
-    console.log(previouslyDismissedSamples);
     try {
-      // catch possible old formats
       previouslyDismissedSamples = new Set(
         JSON.parse(localStorage.getItem("dismissedPublicSamples"))
       );
-    } catch (_) {}
-
-    console.log(previouslyDismissedSamples);
+    } catch (_) {
+      // catch and ignore possible old formats
+    }
 
     let [dismissedSamples, newSamples] = partition(samplesGoingPublic, sample =>
       previouslyDismissedSamples.has(sample.id)
