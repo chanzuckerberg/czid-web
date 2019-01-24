@@ -3,6 +3,7 @@ class SamplesController < ApplicationController
   include ReportHelper
   include SamplesHelper
   include PipelineOutputsHelper
+  include ElasticsearchHelper
 
   ########################################
   # Note to developers:
@@ -114,6 +115,46 @@ class SamplesController < ApplicationController
                else
                  current_power.samples
                end
+  end
+
+  def search_suggestions
+    query = params[:query]
+
+    taxon_list = taxon_search(query)
+    # TODO: filter by permissions
+    samples = prefix_match(Sample, "name", query)
+    tissues = prefix_match(Metadata, "string_validated_value", query).where(key: "sample_type")
+    locations = prefix_match(Metadata, "string_validated_value", query).where(key: "collection_location")
+    hosts = prefix_match(HostGenome, "name", query)
+
+    results = {}
+    results["Taxon"] = { "name" => "Taxon",
+                         "results" => taxon_list }
+    results["Sample"] = {
+      "name" => "Sample",
+      "results" => samples.map do |s|
+        { "title" => s.name, "sample_id" => s.id }
+      end
+    }
+    results["Locations"] = {
+      "name" => "Locations",
+      "results" => locations.group_by(&:string_validated_value).map do |val, metadata|
+        { "title" => val, "sample_ids" => metadata.pluck(:sample_id) }
+      end
+    }
+    results["Tissue"] = {
+      "name" => "Tissue",
+      "results" => tissues.group_by(&:string_validated_value).map do |val, metadata|
+        { "title" => val, "sample_ids" => metadata.pluck(:sample_id) }
+      end
+    }
+    results["Host"] = {
+      "name" => "Host",
+      "results" => hosts.map do |h|
+        { "title" => h.name, "host_genome_id" => h.id }
+      end
+    }
+    results
   end
 
   # GET /samples/bulk_new
