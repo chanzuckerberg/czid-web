@@ -1127,11 +1127,8 @@ class Samples extends React.Component {
   }
 
   checkPublicSamples() {
-    let numberOfDaysAhead = 180;
     axios
-      .get("/samples/samples_going_public.json", {
-        params: { ahead: numberOfDaysAhead }
-      })
+      .get("/samples/samples_going_public.json")
       .then(res => this.displayPublicSampleNotifications(res.data || []));
   }
 
