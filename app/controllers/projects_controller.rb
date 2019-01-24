@@ -240,8 +240,6 @@ class ProjectsController < ApplicationController
 
     project_samples = current_power.project_samples(@project)
     issues = validate_metadata_csv_for_project(project_samples, metadata, new_samples)
-    puts "there are issues:"
-    puts issues
     render json: {
       status: "success",
       issues: issues
@@ -254,8 +252,6 @@ class ProjectsController < ApplicationController
     project_samples = current_power.project_samples(@project)
 
     errors = upload_metadata_for_project(project_samples, metadata)
-    puts "there are errors:"
-    puts errors
     render json: {
       status: "success",
       errors: errors

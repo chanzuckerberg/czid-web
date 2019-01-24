@@ -93,6 +93,13 @@ class Metadatum < ApplicationRecord
       return
     end
 
+    # Associate metadata_field if not present.
+    # TODO: Require and enforce matching metadata_field
+    unless metadata_field
+      self.metadata_field = MetadataField.find_by(name: key.to_s)
+      # Don't call save yet
+    end
+
     if data_type
       public_send("check_and_set_#{data_type}_type")
     end
@@ -102,12 +109,9 @@ class Metadatum < ApplicationRecord
   def check_and_set_string_type
     key = self.key.to_sym
 
-    options = MetadataField.find_by(name: key).options
-
-    if options
-      # If there are explicit string options, match the value to one of them.
+    if metadata_field && metadata_field.force_options == 1
       matched = false
-      options.each do |opt|
+      JSON.parse(metadata_field.options || "[]").each do |opt|
         if Metadatum.str_to_basic_chars(raw_value) == Metadatum.str_to_basic_chars(opt)
           # Ex: Match 'neb ultra-iifs dna' to 'NEB Ultra II FS DNA'
           # Ex: Match '30-day mortality' to "30 Day Mortality"
