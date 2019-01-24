@@ -34,7 +34,6 @@ const publicSampleNotificationsByProject = samples => {
       projectSamples,
       projectSamples[0].project.name,
       () => {
-        let a = new Set(projectSamples.map(sample => sample.id));
         localStorage.setItem(
           "dismissedPublicSamples",
           JSON.stringify(
