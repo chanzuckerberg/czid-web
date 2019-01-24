@@ -2,11 +2,15 @@ require 'open3'
 require 'json'
 require 'tempfile'
 require 'aws-sdk'
+require 'elasticsearch/model'
 # TODO(mark): Move to an initializer. Make sure this works with Rails auto-reloading.
 require 'constants/metadata'
 
 class Sample < ApplicationRecord
+  include Elasticsearch::Model
+  include Elasticsearch::Model::Callbacks
   include TestHelper
+
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze

@@ -1,6 +1,10 @@
 require 'csv'
+require 'elasticsearch/model'
 
 class Metadatum < ApplicationRecord
+  include Elasticsearch::Model
+  include Elasticsearch::Model::Callbacks
+
   Client = Aws::S3::Client.new
 
   # ActiveRecord related

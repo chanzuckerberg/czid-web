@@ -123,9 +123,9 @@ class SamplesController < ApplicationController
     taxon_list = taxon_search(query)
     # TODO: filter by permissions
     samples = prefix_match(Sample, "name", query)
-    tissues = prefix_match(Metadata, "string_validated_value", query).where(key: "sample_type")
-    locations = prefix_match(Metadata, "string_validated_value", query).where(key: "collection_location")
-    hosts = prefix_match(HostGenome, "name", query)
+    tissues = prefix_match(Metadatum, "string_validated_value", query).where(key: "sample_type")
+    locations = prefix_match(Metadatum, "string_validated_value", query).where(key: "collection_location")
+    hosts = HostGenome.where("name LIKE :search", search: "#{query}%")
 
     results = {}
     results["Taxon"] = { "name" => "Taxon",
