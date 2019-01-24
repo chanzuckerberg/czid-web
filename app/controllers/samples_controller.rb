@@ -19,8 +19,8 @@ class SamplesController < ApplicationController
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, 
-    :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :samples_going_public].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap,
+                   :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :samples_going_public].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -339,14 +339,14 @@ class SamplesController < ApplicationController
   def samples_going_public
     ahead = params[:ahead].to_i || 10
     behind = params[:behind].to_i
-    
+
     start = Time.current - behind.days
     samples = current_power.samples.samples_going_public_in_period(
       [start, start + ahead.days],
-      user=params[:userId] ? User.find(params[:userId]) : current_user,
-      project=params[:projectId] ? Project.find(params[:projectId]) : nil
+      params[:userId] ? User.find(params[:userId]) : current_user,
+      params[:projectId] ? Project.find(params[:projectId]) : nil
     )
-    render json: samples.to_json(include: [{ project: {only: [:id, :name]}}])
+    render json: samples.to_json(include: [{ project: { only: [:id, :name] } }])
   end
 
   def samples_taxons
