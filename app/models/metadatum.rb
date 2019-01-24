@@ -213,6 +213,13 @@ class Metadatum < ApplicationRecord
 
   # Custom validator called on save or update. Writes to the *_validated_value column.
   def set_validated_values
+    # Fail if sample resolves to nil (probably a deleted sample)
+    # TODO: Replace this with MetadataField validators
+    unless sample
+      errors.add(:key, MetadataValidationErrors.missing_sample)
+      return
+    end
+
     # Check if the key is valid
     valid_keys = self.class.valid_keys_by_host_genome_name(sample.host_genome_name)
     unless key && valid_keys.include?(key)
