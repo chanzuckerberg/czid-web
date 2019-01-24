@@ -5,7 +5,15 @@ import moment from "moment";
 import cx from "classnames";
 import $ from "jquery";
 import Materialize from "materialize-css";
-import { intersection, union, difference, map, keyBy, take } from "lodash";
+import {
+  intersection,
+  union,
+  difference,
+  map,
+  keyBy,
+  take,
+  partition
+} from "lodash";
 // TODO(mark): Refactor lodash/fp functions into a file of immutable utilities.
 import { merge, sortBy } from "lodash/fp";
 import { Sidebar, Label, Icon, Modal, Form } from "semantic-ui-react";
@@ -34,6 +42,7 @@ import { getSampleTableData } from "./views/samples/utils";
 // TODO(mark): Convert styles/samples.scss to CSS modules.
 import cs from "./samples.scss";
 import { openUrl } from "./utils/links";
+import { publicSampleNotificationsByProject } from "./views/samples/notifications";
 
 class Samples extends React.Component {
   constructor(props, context) {
@@ -1089,6 +1098,35 @@ class Samples extends React.Component {
     this.scrollDown();
     this.displayPipelineStatusFilter();
     this.initializeColumnSelect();
+    this.checkPublicSamples();
+  }
+
+  displayPublicSampleNotifications(samplesGoingPublic) {
+    let previouslyDismissedSamples = new Set();
+    try {
+      previouslyDismissedSamples = new Set(
+        JSON.parse(localStorage.getItem("dismissedPublicSamples"))
+      );
+    } catch (_) {
+      // catch and ignore possible old formats
+    }
+
+    let [dismissedSamples, newSamples] = partition(samplesGoingPublic, sample =>
+      previouslyDismissedSamples.has(sample.id)
+    );
+    if (newSamples.length > 0) {
+      localStorage.setItem(
+        "dismissedPublicSamples",
+        JSON.stringify(map(dismissedSamples, "id"))
+      );
+      publicSampleNotificationsByProject(newSamples);
+    }
+  }
+
+  checkPublicSamples() {
+    axios
+      .get("/samples/samples_going_public.json")
+      .then(res => this.displayPublicSampleNotifications(res.data || []));
   }
 
   initializeColumnSelect() {

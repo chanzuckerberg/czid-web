@@ -120,6 +120,9 @@ Style/Next:
 
 Style/MethodCallWithoutArgsParentheses:
   Enabled: false
+
+Style/RedundantReturn:
+  Enabled: false
   
 Rails/FindEach:
   Enabled: false

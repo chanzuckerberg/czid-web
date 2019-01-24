@@ -318,8 +318,9 @@ class Sample < ApplicationRecord
     host_genome && host_genome.default_background ? host_genome.default_background.id : Background.find_by(public_access: 1).id
   end
 
-  def as_json(_options = {})
-    super(methods: [:input_files, :host_genome_name])
+  def as_json(options = {})
+    options[:methods] = [:input_files, :host_genome_name, :private_until]
+    super(options)
   end
 
   def check_host_genome
@@ -419,6 +420,17 @@ class Sample < ApplicationRecord
       .where("(projects.public_access = 1 or
               DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < ?)",
              Time.current)
+  end
+
+  def self.samples_going_public_in_period(range, user = nil, project = nil)
+    query = joins(:project)
+            .where("projects.public_access != 1")
+            .where("DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) BETWEEN ? AND ?", range[0], range[1])
+
+    query = query.where(user: user) if user
+    query = query.where(project: project) if project
+
+    return query
   end
 
   def archive_old_pipeline_runs
@@ -552,5 +564,9 @@ class Sample < ApplicationRecord
     from_path = "s3://idseq-samples-prod/#{sample_path}"
     to_path = "s3://idseq-samples-staging/#{sample_path}"
     Syscall.run("aws", "s3", "cp", "--recursive", from_path, to_path)
+  end
+
+  def private_until
+    return created_at + project.days_to_keep_sample_private.days
   end
 end
