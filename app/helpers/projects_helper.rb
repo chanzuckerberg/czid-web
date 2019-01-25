@@ -23,7 +23,8 @@ module ProjectsHelper
 
     # Verify that the column names are supported.
     metadata["headers"].each_with_index do |header, index|
-      if header != "sample_name" && header != "host_genome_name" && !Metadatum::KEY_TO_TYPE.key?(header.to_sym)
+      # Check for matching MetadataField or the sample_name/host_genome_name
+      unless header == "sample_name" || header == "host_genome_name" || MetadataField.find_by(name: header)
         errors.push(MetadataValidationErrors.column_not_supported(header, index + 1))
       end
     end
@@ -74,11 +75,11 @@ module ProjectsHelper
         # Ignore empty string values.
         next if value.nil? || value == ""
 
-        metadata_type = metadata["headers"][row_index]
+        field = metadata["headers"][row_index]
 
         # Ignore invalid columns.
-        if metadata_type != "sample_name" && metadata_type != "host_genome_name" && Metadatum::KEY_TO_TYPE.key?(metadata_type.to_sym)
-          issues = sample.metadatum_validate(metadata_type, value)
+        if field != "sample_name" && field != "host_genome_name" && MetadataField.find_by(name: field)
+          issues = sample.metadatum_validate(field, value)
 
           issues[:errors].each do |error|
             errors.push("#{error} (row #{index + 1})")

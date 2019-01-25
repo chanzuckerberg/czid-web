@@ -511,7 +511,6 @@ class Sample < ApplicationRecord
       # Create the entry
       m = Metadatum.new
       m.key = key
-      m.data_type = Metadatum::KEY_TO_TYPE[key.to_sym]
       m.sample = self
       # Fail if MetadataField doesn't exist
       m.metadata_field = MetadataField.find_by!(name: key.to_s)
@@ -537,7 +536,6 @@ class Sample < ApplicationRecord
 
     m = Metadatum.new
     m.key = key
-    m.data_type = Metadatum::KEY_TO_TYPE[key.to_sym]
     m.sample = self
     m.raw_value = val
 

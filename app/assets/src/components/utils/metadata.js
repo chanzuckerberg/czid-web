@@ -7,7 +7,7 @@ export const processMetadata = metadata => {
 
   newMetadata = mapValues(
     newMetadata,
-    val => val[`${val.data_type}_validated_value`]
+    val => val[`${val.base_type}_validated_value`]
   );
   return newMetadata;
 };

@@ -2,7 +2,7 @@
 
 sample_human_sex:
   key: "sex"
-  data_type: "string"
   raw_value: "Male"
   string_validated_value: "Male"
   sample: metadata_validation_sample_human
+  metadata_field: sex

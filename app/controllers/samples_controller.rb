@@ -207,7 +207,12 @@ class SamplesController < ApplicationController
     end
 
     render json: {
-      metadata: @sample.metadata,
+      # Pass down base_type for the frontend
+      metadata: @sample.metadata.map do |m|
+        m.attributes.merge(
+          "base_type" => Metadatum.convert_type_to_string(m.metadata_field.base_type)
+        )
+      end,
       additional_info: {
         name: @sample.name,
         editable: editable,
