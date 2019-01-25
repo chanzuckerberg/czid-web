@@ -39,11 +39,11 @@ Modal.propTypes = forbidExtraProps({
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node
   ]).isRequired,
-  onClose: PropTypes.func,
-  title: PropTypes.string,
-  open: PropTypes.bool,
   className: PropTypes.string,
-  tall: PropTypes.bool // Increase the max-height of the Modal for tall content.
+  onClose: PropTypes.func,
+  open: PropTypes.bool,
+  tall: PropTypes.bool, // Increase the max-height of the Modal for tall content.
+  title: PropTypes.string
 });
 
 export default Modal;

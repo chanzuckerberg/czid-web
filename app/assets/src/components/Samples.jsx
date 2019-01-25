@@ -21,7 +21,6 @@ import Nanobar from "nanobar";
 import SortHelper from "./SortHelper";
 import ProjectSelection from "./ProjectSelection";
 import BasicPopup from "./BasicPopup";
-import StringHelper from "../helpers/StringHelper";
 import Cookies from "js-cookie";
 import CompareButton from "./ui/controls/buttons/CompareButton";
 import PhylogenyButton from "./ui/controls/buttons/PhylogenyButton";
@@ -33,6 +32,7 @@ import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import TableColumnHeader from "./views/samples/TableColumnHeader";
 import PipelineStatusFilter from "./views/samples/PipelineStatusFilter";
 import ProjectUploadMenu from "./views/samples/ProjectUploadMenu";
+import AddUserModal from "./views/samples/AddUserModal/AddUserModal";
 import {
   SAMPLE_TABLE_COLUMNS,
   INITIAL_COLUMNS,
@@ -68,7 +68,6 @@ class Samples extends React.Component {
     this.sortSamples = this.sortSamples.bind(this);
     this.switchColumn = this.switchColumn.bind(this);
     this.handleProjectSelection = this.handleProjectSelection.bind(this);
-    this.handleAddUser = this.handleAddUser.bind(this);
     this.editableProjects = props.editableProjects;
     this.canEditProject = this.canEditProject.bind(this);
     this.fetchProjectUsers = this.fetchProjectUsers.bind(this);
@@ -88,7 +87,6 @@ class Samples extends React.Component {
     this.displayReportProgress = this.displayReportProgress.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
     this.state = {
-      invite_status: null,
       background_creation_response: {},
       project: null,
       project_users: [],
@@ -140,7 +138,6 @@ class Samples extends React.Component {
         this.fetchParams("host") && this.fetchParams("host").length > 0
       ),
       project_id_download_in_progress: null,
-      project_add_email_validation: null,
       projectType: this.fetchParams("type") || "all",
       columnsShown: INITIAL_COLUMNS,
       phyloTreeCreationModalOpen: false
@@ -333,32 +330,6 @@ class Samples extends React.Component {
     }
   }
 
-  toggleProjectVisibility(projId, publicAccess) {
-    if (projId) {
-      axios
-        .put(`/projects/${projId}.json`, {
-          public_access: publicAccess,
-          authenticity_token: this.csrf
-        })
-        .then(() => {
-          this.setState({
-            project: Object.assign(this.state.project, {
-              public_access: publicAccess
-            })
-          });
-        })
-        .catch(() => {
-          Materialize.toast(
-            `Unable to change project visibility for '${
-              this.state.project.name
-            }'`,
-            3000,
-            "rounded"
-          );
-        });
-    }
-  }
-
   displayMetadataDropdown() {
     this.setState({
       displayDropdown: !this.state.displayDropdown
@@ -371,34 +342,6 @@ class Samples extends React.Component {
       let new_project_users = this.state.project_users;
       new_project_users.push({ name: name_to_add, email: email_to_add });
       this.setState({ project_users: new_project_users });
-    }
-  }
-
-  handleAddUser(name_to_add, email_to_add) {
-    let project_id = this.state.selectedProjectId;
-    const isValidEmail = StringHelper.validateEmail(email_to_add);
-    const isValidName = StringHelper.validateName(name_to_add);
-    if (isValidEmail && isValidName) {
-      this.setState({
-        project_add_email_validation: null,
-        invite_status: "sending"
-      });
-      axios
-        .put(`/projects/${project_id}/add_user`, {
-          user_name_to_add: name_to_add,
-          user_email_to_add: email_to_add,
-          authenticity_token: this.csrf
-        })
-        .then(() => {
-          this.updateUserDisplay(name_to_add, email_to_add);
-          this.setState({
-            invite_status: "sent"
-          });
-        });
-    } else {
-      this.setState({
-        project_add_email_validation: "Invalid name or email address"
-      });
     }
   }
 
@@ -1102,6 +1045,8 @@ class Samples extends React.Component {
   }
 
   displayPublicSampleNotifications(samplesGoingPublic) {
+    console.log(samplesGoingPublic);
+
     let previouslyDismissedSamples = new Set();
     try {
       previouslyDismissedSamples = new Set(
@@ -1124,9 +1069,10 @@ class Samples extends React.Component {
   }
 
   checkPublicSamples() {
-    axios
-      .get("/samples/samples_going_public.json")
-      .then(res => this.displayPublicSampleNotifications(res.data || []));
+    axios.get("/samples/samples_going_public.json").then(res => {
+      console.log(res);
+      return this.displayPublicSampleNotifications(res.data || []);
+    });
   }
 
   initializeColumnSelect() {
@@ -1631,88 +1577,88 @@ class BackgroundModal extends React.Component {
   }
 }
 
-class AddUserModal extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { modalOpen: false, name: "", email: "" };
-    this.handleOpen = this.handleOpen.bind(this);
-    this.handleClose = this.handleClose.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-  handleOpen() {
-    this.setState({ modalOpen: true, email: "" });
-    this.props.parent.setState({
-      invite_status: "",
-      project_add_email_validation: ""
-    });
-  }
-  handleClose() {
-    this.setState({ modalOpen: false, email: "" });
-  }
-  handleChange(e, { id, value }) {
-    if (id == "add_user_to_project_name") {
-      this.setState({ name: value });
-    } else if (id == "add_user_to_project_email") {
-      this.setState({ email: value });
-    }
-  }
-  handleSubmit() {
-    this.props.parent.handleAddUser(this.state.name, this.state.email);
-  }
+// class AddUserModal extends React.Component {
+//   constructor(props) {
+//     super(props);
+//     this.state = { modalOpen: false, name: "", email: "" };
+//     this.handleOpen = this.handleOpen.bind(this);
+//     this.handleClose = this.handleClose.bind(this);
+//     this.handleChange = this.handleChange.bind(this);
+//     this.handleSubmit = this.handleSubmit.bind(this);
+//   }
+//   handleOpen() {
+//     this.setState({ modalOpen: true, email: "" });
+//     this.props.parent.setState({
+//       invite_status: "",
+//       project_add_email_validation: ""
+//     });
+//   }
+//   handleClose() {
+//     this.setState({ modalOpen: false, email: "" });
+//   }
+//   handleChange(e, { id, value }) {
+//     if (id == "add_user_to_project_name") {
+//       this.setState({ name: value });
+//     } else if (id == "add_user_to_project_email") {
+//       this.setState({ email: value });
+//     }
+//   }
+//   handleSubmit() {
+//     this.props.parent.handleAddUser(this.state.name, this.state.email);
+//   }
 
-  render() {
-    return (
-      <Modal
-        trigger={<a onClick={this.handleOpen}>Add User</a>}
-        open={this.state.modalOpen}
-        onClose={this.handleClose}
-        className="modal project-popup add-user-modal"
-      >
-        <Modal.Header className="project_modal_header">
-          Project Members and Access Control
-        </Modal.Header>
-        <Modal.Content className="modal-content">
-          <div className="project_modal_visibility">
-            {this.props.state.project.public_access ? (
-              <span>
-                <i className="tiny material-icons">lock_open</i>
-                <span className="label">Public Project</span>
-              </span>
-            ) : (
-              <span>
-                <div>
-                  <i className="tiny material-icons">lock</i>
-                  <span className="label">Private Project</span>
-                </div>
-                <div>
-                  <a
-                    href="#"
-                    onClick={() =>
-                      this.props.parent.toggleProjectVisibility(
-                        this.props.state.project.id,
-                        1
-                      )
-                    }
-                  >
-                    Make public
-                  </a>
-                </div>
-              </span>
-            )}
-          </div>
-          <div className="project_modal_title">
-            {this.props.state.project ? this.props.state.project.name : null}
-          </div>
-          <AddUserModalMemberArea state={this.props.state} parent={this} />
-        </Modal.Content>
-        <Modal.Actions>
-          <PrimaryButton text="Close" onClick={this.handleClose} />
-        </Modal.Actions>
-      </Modal>
-    );
-  }
-}
+//   render() {
+//     return (
+//       <Modal
+//         trigger={<a onClick={this.handleOpen}>Settings</a>}
+//         open={this.state.modalOpen}
+//         onClose={this.handleClose}
+//         className="modal project-popup add-user-modal"
+//       >
+//         <Modal.Header className="project_modal_header">
+//           Project Members and Access Control
+//         </Modal.Header>
+//         <Modal.Content className="modal-content">
+//           <div className="project_modal_visibility">
+//             {this.props.state.project.public_access ? (
+//               <span>
+//                 <i className="tiny material-icons">lock_open</i>
+//                 <span className="label">Public Project</span>
+//               </span>
+//             ) : (
+//               <span>
+//                 <div>
+//                   <i className="tiny material-icons">lock</i>
+//                   <span className="label">Private Project</span>
+//                 </div>
+//                 <div>
+//                   <a
+//                     href="#"
+//                     onClick={() =>
+//                       this.props.parent.toggleProjectVisibility(
+//                         this.props.state.project.id,
+//                         1
+//                       )
+//                     }
+//                   >
+//                     Make public
+//                   </a>
+//                 </div>
+//               </span>
+//             )}
+//           </div>
+//           <div className="project_modal_title">
+//             {this.props.state.project ? this.props.state.project.name : null}
+//           </div>
+//           <AddUserModalMemberArea state={this.props.state} parent={this} />
+//         </Modal.Content>
+//         <Modal.Actions>
+//           <PrimaryButton text="Close" onClick={this.handleClose} />
+//         </Modal.Actions>
+//       </Modal>
+//     );
+//   }
+// }
 
 function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
   const showUploadMenu =
@@ -1749,11 +1695,16 @@ function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
             )
           ) : null}
         </li>
-        <li className="add-member">
-          {proj && parent.canEditProject(proj.id) ? (
-            <AddUserModal parent={parent} state={parent.state} />
-          ) : null}
-        </li>
+        {proj &&
+          parent.canEditProject(proj.id) && (
+            <li className="add-member">
+              <AddUserModal
+                csrf={parent.csrf}
+                project={proj}
+                users={parent.state.project_users}
+              />
+            </li>
+          )}
         {/* TODO(mark): Change admin to canEditProject when launch */}
         {showUploadMenu && (
           <li className="">
@@ -2001,63 +1952,63 @@ function SampleDetailedColumns({
   });
 }
 
-function AddUserModalMemberArea({ state, parent }) {
-  return (
-    <div>
-      <div className="members_list">
-        <div className="list_title">
-          <i className="tiny material-icons">person_add</i> Project Members
-        </div>
-        <ul>
-          {state.project_users.length > 0 ? (
-            state.project_users.map(user => {
-              return (
-                <li key={user.email}>
-                  {user.name} ({user.email})
-                </li>
-              );
-            })
-          ) : (
-            <li key="None">None</li>
-          )}
-        </ul>
-      </div>
-      <div className="add_member row">
-        <Form onSubmit={parent.handleSubmit}>
-          <Form.Group>
-            <Form.Input
-              placeholder="Name"
-              id="add_user_to_project_name"
-              type="text"
-              onChange={parent.handleChange}
-            />
-            <Form.Input
-              placeholder="Email"
-              id="add_user_to_project_email"
-              type="email"
-              onChange={parent.handleChange}
-            />
-          </Form.Group>
-          <PrimaryButton type="submit" text="Add member" />
-        </Form>
-        <div className="error-message">
-          {state.project_add_email_validation}
-        </div>
-        {state.invite_status === "sending" ? (
-          <div className="status-message">
-            <i className="fa fa-circle-o-notch fa-spin fa-fw" />
-            Hang tight, sending invitation...
-          </div>
-        ) : null}
-        {state.invite_status === "sent" ? (
-          <div className="status-message status teal-text text-darken-2">
-            <i className="fa fa-smile-o fa-fw" />
-            User has been added
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-}
+// function AddUserModalMemberArea({ state, parent }) {
+//   return (
+//     <div>
+//       <div className="members_list">
+//         <div className="list_title">
+//           <i className="tiny material-icons">person_add</i> Project Members
+//         </div>
+//         <ul>
+//           {state.project_users.length > 0 ? (
+//             state.project_users.map(user => {
+//               return (
+//                 <li key={user.email}>
+//                   {user.name} ({user.email})
+//                 </li>
+//               );
+//             })
+//           ) : (
+//             <li key="None">None</li>
+//           )}
+//         </ul>
+//       </div>
+//       <div className="add_member row">
+//         <Form onSubmit={parent.handleSubmit}>
+//           <Form.Group>
+//             <Form.Input
+//               placeholder="Name"
+//               id="add_user_to_project_name"
+//               type="text"
+//               onChange={parent.handleChange}
+//             />
+//             <Form.Input
+//               placeholder="Email"
+//               id="add_user_to_project_email"
+//               type="email"
+//               onChange={parent.handleChange}
+//             />
+//           </Form.Group>
+//           <PrimaryButton type="submit" text="Add member" />
+//         </Form>
+//         <div className="error-message">
+//           {state.project_add_email_validation}
+//         </div>
+//         {state.invite_status === "sending" ? (
+//           <div className="status-message">
+//             <i className="fa fa-circle-o-notch fa-spin fa-fw" />
+//             Hang tight, sending invitation...
+//           </div>
+//         ) : null}
+//         {state.invite_status === "sent" ? (
+//           <div className="status-message status teal-text text-darken-2">
+//             <i className="fa fa-smile-o fa-fw" />
+//             User has been added
+//           </div>
+//         ) : null}
+//       </div>
+//     </div>
+//   );
+// }
 
 export default Samples;
