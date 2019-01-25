@@ -64,6 +64,7 @@ class SearchBox extends React.Component {
       <Search
         className="idseq-ui input search"
         loading={isLoading}
+        category={this.props.category}
         onSearchChange={debounce(
           this.handleSearchChange,
           this.waitHandleSearchChange,
@@ -86,6 +87,7 @@ SearchBox.propTypes = {
   // If serverSearchAction is provided, query matching will happen on the server side (use for large data).
   clientSearchSource: PropTypes.array,
   serverSearchAction: PropTypes.string,
+  category: PropTypes.bool,
   initialValue: PropTypes.string,
   onResultSelect: PropTypes.func,
   placeholder: PropTypes.string

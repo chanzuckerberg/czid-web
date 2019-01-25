@@ -20,7 +20,9 @@ class SamplesController < ApplicationController
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names,
+                   :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name,
+                   :search_suggestions].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -55,6 +57,9 @@ class SamplesController < ApplicationController
     samples_query = JSON.parse(params[:ids]) if params[:ids].present?
 
     results = current_power.samples
+
+    Rails.logger.warn("CHARLES2:")
+    Rails.logger.warn(params.keys)
 
     results = results.where(id: samples_query) if samples_query.present?
 
@@ -126,35 +131,42 @@ class SamplesController < ApplicationController
     tissues = prefix_match(Metadatum, "string_validated_value", query).where(key: "sample_type")
     locations = prefix_match(Metadatum, "string_validated_value", query).where(key: "collection_location")
     hosts = HostGenome.where("name LIKE :search", search: "#{query}%")
+    users = prefix_match(User, "name", query)
 
     results = {}
     results["Taxon"] = { "name" => "Taxon",
                          "results" => taxon_list }
     results["Sample"] = {
       "name" => "Sample",
-      "results" => samples.map do |s|
-        { "title" => s.name, "sample_id" => s.id }
+      "results" => samples.group_by(&:name).map do |val, records|
+        { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id) }
       end
     }
-    results["Locations"] = {
-      "name" => "Locations",
+    results["Location"] = {
+      "name" => "Location",
       "results" => locations.group_by(&:string_validated_value).map do |val, metadata|
-        { "title" => val, "sample_ids" => metadata.pluck(:sample_id) }
+        { "category" => "Location", "title" => val, "id" => val, "sample_ids" => metadata.pluck(:sample_id) }
       end
     }
     results["Tissue"] = {
       "name" => "Tissue",
       "results" => tissues.group_by(&:string_validated_value).map do |val, metadata|
-        { "title" => val, "sample_ids" => metadata.pluck(:sample_id) }
+        { "category" => "Tissue", "title" => val, "id" => val, "sample_ids" => metadata.pluck(:sample_id) }
       end
     }
     results["Host"] = {
       "name" => "Host",
       "results" => hosts.map do |h|
-        { "title" => h.name, "host_genome_id" => h.id }
+        { "category" => "Host", "title" => h.name, "id" => h.id }
       end
     }
-    results
+    results["User"] = {
+      "name" => "User",
+      "results" => users.index_by(&:name).map do |_, u|
+        { "category" => "User", "title" => u.name, "id" => u.id }
+      end
+    }
+    render json: JSON.dump(results)
   end
 
   # GET /samples/bulk_new

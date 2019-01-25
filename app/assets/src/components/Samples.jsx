@@ -171,6 +171,18 @@ class Samples extends React.Component {
     return value;
   }
 
+  handleSuggestSelect = (e, { result }) => {
+    if (result.category == "Tissue") {
+      this.selectTissueFilter([result.id]);
+    } else if (result.category == "Host") {
+      this.selectHostFilter([result.id]);
+    } else if (result.category == "Sample") {
+      this.setState({ sampleIdsParams: result.sample_ids }, () =>
+        this.setUrlLocation()
+      );
+    }
+  };
+
   selectTissueFilter(tissues) {
     this.setState({ selectedTissueFilters: tissues }, () =>
       this.setUrlLocation()
@@ -932,6 +944,13 @@ class Samples extends React.Component {
     const search_box = (
       <div className="row search-box-row">
         <div className="search-box">{search_field}</div>
+        <SearchBox
+          category
+          serverSearchAction="search_suggestions"
+          onResultSelect={this.handleSuggestSelect}
+          initialValue=""
+          placeholder=""
+        />
         <div className="filter-container">
           <MultipleDropdown
             label="Hosts:"
