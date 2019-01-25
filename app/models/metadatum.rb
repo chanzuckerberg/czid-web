@@ -222,7 +222,6 @@ class Metadatum < ApplicationRecord
     key = key.to_sym
     m = Metadatum.new
     m.key = key
-    m.data_type = KEY_TO_TYPE[key]
     m.raw_value = value
     # *_validated_value field is set in the set_validated_values validator.
     m.sample = sample
