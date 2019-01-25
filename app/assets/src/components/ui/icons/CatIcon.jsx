@@ -1,8 +1,14 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const CatIcon = () => {
+const CatIcon = props => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="4 5 90 90">
+    <svg
+      className={props.className}
+      xmlns="http://www.w3.org/2000/svg"
+      version="1.1"
+      viewBox="4 5 90 90"
+    >
       <g>
         <g display="none">
           <g display="inline">
@@ -63,6 +69,10 @@ const CatIcon = () => {
       </g>
     </svg>
   );
+};
+
+CatIcon.propTypes = {
+  className: PropTypes.string
 };
 
 export default CatIcon;

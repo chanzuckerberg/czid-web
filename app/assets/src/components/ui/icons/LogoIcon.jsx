@@ -1,8 +1,9 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const LogoIcon = () => {
+const LogoIcon = props => {
   return (
-    <svg viewBox="0 0 144 52" version="1.1">
+    <svg className={props.className} viewBox="0 0 144 52" version="1.1">
       <defs>
         <polygon
           id="path-1"
@@ -58,6 +59,10 @@ const LogoIcon = () => {
       </g>
     </svg>
   );
+};
+
+LogoIcon.propTypes = {
+  className: PropTypes.string
 };
 
 export default LogoIcon;
