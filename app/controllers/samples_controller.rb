@@ -337,7 +337,7 @@ class SamplesController < ApplicationController
   end
 
   def samples_going_public
-    ahead = params[:ahead].to_i || 10
+    ahead = (params[:ahead] || 10).to_i
     behind = params[:behind].to_i
 
     start = Time.current - behind.days
