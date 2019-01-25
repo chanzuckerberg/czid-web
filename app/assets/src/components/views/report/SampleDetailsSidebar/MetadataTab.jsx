@@ -29,11 +29,9 @@ class MetadataTab extends React.Component {
   }
 
   getMetadataSections = () => {
-    let { metadataTypes } = this.props;
-
+    // Group the MetadataFields by group name
     let nameToFields = {};
-
-    values(metadataTypes).forEach(field => {
+    values(this.props.metadataTypes).forEach(field => {
       const name = field.group + " Info";
       if (nameToFields.hasOwnProperty(name)) {
         nameToFields[name].push(field.key);
@@ -42,32 +40,10 @@ class MetadataTab extends React.Component {
       }
     });
 
-    console.log(nameToFields);
-
-    let result = [];
-    for (const [name, fields] of Object.entries(nameToFields)) {
-      result.push({ name: name, keys: fields });
-    }
-    console.log("RESULT:");
-    console.log(result);
-    return result;
-
-    console.log(HUMAN_METADATA_SECTIONS);
-
-    if (
-      this.props.additionalInfo.host_genome_name.toLowerCase().includes("human")
-    ) {
-      return HUMAN_METADATA_SECTIONS;
-    }
-
-    if (
-      this.props.additionalInfo.host_genome_name
-        .toLowerCase()
-        .includes("mosquito")
-    ) {
-      return MOSQUITO_METADATA_SECTIONS;
-    }
-    return VECTOR_METADATA_SECTIONS;
+    // Format as [{name: "Sample Info", keys: ["sample_type"], {name: "Host Info", keys: ["age"]}]
+    return Object.entries(nameToFields).map(entry => {
+      return { name: entry[0], keys: entry[1] };
+    });
   };
 
   toggleSection = section => {
