@@ -37,7 +37,7 @@ class MetadataTab extends React.Component {
 
     // Format as [{name: "Sample Info", keys: ["sample_type"], {name: "Host Info", keys: ["age"]}]
     return Object.entries(nameToFields).map(entry => {
-      return { name: entry[0], keys: entry[1] };
+      return { name: entry[0], keys: entry[1].sort() };
     });
   };
 
