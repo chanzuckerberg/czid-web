@@ -33,6 +33,9 @@ ActiveRecord::Schema.define(version: 20_190_124_230_435) do
     t.float "depth", limit: 24
     t.bigint "pipeline_run_id"
     t.string "drug_family"
+    t.integer "level"
+    t.float "drug_gene_coverage", limit: 24
+    t.float "drug_gene_depth", limit: 24
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "allele"], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
@@ -71,7 +74,7 @@ ActiveRecord::Schema.define(version: 20_190_124_230_435) do
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
   end
 
-  create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
     t.text "sequence", limit: 4_294_967_295
@@ -102,7 +105,7 @@ ActiveRecord::Schema.define(version: 20_190_124_230_435) do
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name"
+    t.string "name", null: false
     t.text "s3_star_index_path"
     t.text "s3_bowtie2_index_path"
     t.bigint "default_background_id"
@@ -114,8 +117,8 @@ ActiveRecord::Schema.define(version: 20_190_124_230_435) do
   create_table "host_genomes_metadata_fields", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "host_genome_id", null: false
     t.bigint "metadata_field_id", null: false
-    t.index ["host_genome_id", "metadata_field_id"], name: "index_host_genomes_metadata_fields", unique: true
-    t.index ["metadata_field_id", "host_genome_id"], name: "index_metadata_fields_host_genomes", unique: true
+    t.index ["host_genome_id", "metadata_field_id"], name: "index_host_genomes_metadata_fields"
+    t.index ["metadata_field_id", "host_genome_id"], name: "index_metadata_fields_host_genomes"
   end
 
   create_table "input_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -124,7 +127,7 @@ ActiveRecord::Schema.define(version: 20_190_124_230_435) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "source_type"
+    t.string "source_type", null: false
     t.text "source"
     t.text "parts"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
@@ -143,7 +146,7 @@ ActiveRecord::Schema.define(version: 20_190_124_230_435) do
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "key", null: false, collation: "latin1_swedish_ci"
-    t.integer "data_type"
+    t.integer "data_type", limit: 1, null: false
     t.string "raw_value"
     t.string "string_validated_value"
     t.float "number_validated_value", limit: 24
@@ -172,13 +175,13 @@ ActiveRecord::Schema.define(version: 20_190_124_230_435) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["group"], name: "index_metadata_fields_on_group"
-    t.index ["name"], name: "index_metadata_fields_on_name", unique: true
+    t.index ["name"], name: "index_metadata_fields_on_name"
   end
 
   create_table "metadata_fields_projects", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "project_id", null: false
     t.bigint "metadata_field_id", null: false
-    t.index ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields", unique: true
+    t.index ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields"
   end
 
   create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -277,6 +280,7 @@ ActiveRecord::Schema.define(version: 20_190_124_230_435) do
     t.string "pipeline_commit"
     t.text "assembled_taxids"
     t.bigint "truncated"
+    t.text "result_status"
     t.integer "results_finalized"
     t.bigint "alignment_config_id"
     t.integer "alert_sent", default: 0
@@ -293,7 +297,7 @@ ActiveRecord::Schema.define(version: 20_190_124_230_435) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "public_access", limit: 1, default: 0
+    t.integer "public_access", limit: 1
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.index ["name"], name: "index_projects_on_name", unique: true
@@ -389,12 +393,12 @@ ActiveRecord::Schema.define(version: 20_190_124_230_435) do
     t.index ["pipeline_run_id", "tax_id", "count_type", "tax_level"], name: "index_pr_tax_hit_level_tc", unique: true
   end
 
-  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" do |t|
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
-    t.string "title"
-    t.text "summary", limit: 16_777_215
-    t.text "description", limit: 16_777_215
+    t.string "title", collation: "utf8mb4_general_ci"
+    t.text "summary", collation: "utf8mb4_general_ci"
+    t.text "description", collation: "utf8mb4_general_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -484,11 +488,11 @@ ActiveRecord::Schema.define(version: 20_190_124_230_435) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email"
+    t.string "email", default: "", null: false
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password"
+    t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
