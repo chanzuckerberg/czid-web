@@ -1,7 +1,7 @@
 import React from "react";
 import { mapValues, isArray, filter, includes } from "lodash";
 // TODO(mark): Refactor all calls to lodash/fp.
-import { set } from "lodash/fp";
+import { set, keyBy, forOwn, groupBy, values, forIn } from "lodash/fp";
 import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
@@ -29,6 +29,31 @@ class MetadataTab extends React.Component {
   }
 
   getMetadataSections = () => {
+    let { metadataTypes } = this.props;
+
+    let nameToFields = {};
+
+    values(metadataTypes).forEach(field => {
+      const name = field.group + " Info";
+      if (nameToFields.hasOwnProperty(name)) {
+        nameToFields[name].push(field.key);
+      } else {
+        nameToFields[name] = [field.key];
+      }
+    });
+
+    console.log(nameToFields);
+
+    let result = [];
+    for (const [name, fields] of Object.entries(nameToFields)) {
+      result.push({ name: name, keys: fields });
+    }
+    console.log("RESULT:");
+    console.log(result);
+    return result;
+
+    console.log(HUMAN_METADATA_SECTIONS);
+
     if (
       this.props.additionalInfo.host_genome_name.toLowerCase().includes("human")
     ) {
