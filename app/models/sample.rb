@@ -513,19 +513,19 @@ class Sample < ApplicationRecord
       m.key = key
       m.data_type = Metadatum::KEY_TO_TYPE[key.to_sym]
       m.sample = self
+      # Fail if MetadataField doesn't exist
+      m.metadata_field = MetadataField.find_by!(name: key.to_s)
     end
     if val.blank?
       m.destroy
     else
       m.raw_value = val
-      begin
-        m.save!
-      rescue ActiveRecord::RecordInvalid
-        return false
-      end
+      m.save!
     end
-
     true
+  rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid => e
+    Rails.logger.error(e)
+    false
   end
 
   # Validate metadatum entry on this sample, without saving.

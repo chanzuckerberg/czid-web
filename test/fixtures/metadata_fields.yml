@@ -1,0 +1,31 @@
+sample_type:
+  name: "sample_type"
+  display_name: "Sample Type"
+  base_type: 0
+  host_genomes: [human]
+
+sex:
+  name: "sex"
+  display_name: "Sex"
+  base_type: 0
+  host_genomes: [human]
+  force_options: 1
+  options: "[\"Female\", \"Male\"]"
+
+reported_sex:
+  name: "reported_sex"
+  base_type: 0
+  force_options: 1
+  options: "[\"Female\", \"Male\"]"
+
+age:
+  name: "age"
+  base_type: 1
+
+admission_date:
+  name: "admission_date"
+  base_type: 2
+
+blood_fed:
+  name: "blood_fed"
+  base_type: 0

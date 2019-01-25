@@ -14,7 +14,7 @@ export const HUMAN_METADATA_SECTIONS = [
     name: "Donor Info",
     keys: [
       "age",
-      "gender",
+      "sex",
       "race",
       "primary_diagnosis",
       "antibiotic_administered",
@@ -106,7 +106,7 @@ export const VECTOR_METADATA_SECTIONS = [
   },
   {
     name: "Specimen Info",
-    keys: ["gender", "life_stage", "genus_species", "id_method"]
+    keys: ["sex", "life_stage", "genus_species", "id_method"]
   },
   {
     name: "Infection Info",
