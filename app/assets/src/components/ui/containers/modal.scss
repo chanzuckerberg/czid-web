@@ -1,5 +1,6 @@
 .modal {
   padding: 40px;
+  max-height: 70vh;
   left: auto;
   right: auto;
 
@@ -17,8 +18,19 @@
     }
   }
 
+  &.narrow {
+    width: 500px;
+  }
+
   &.tall {
-    max-height: 85% !important;
+    /* Overwrite semantic ui */
+    max-height: 85vh !important;
+  }
+
+  &.fixedHeight {
+    :global(.content) {
+      height: calc(70vh - 80px);
+    }
   }
 
   :global(.content) {
