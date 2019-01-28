@@ -8,7 +8,7 @@ import Tabs from "~/components/ui/controls/Tabs";
 import {
   getSampleMetadata,
   saveSampleMetadata,
-  getSampleMetadataTypes,
+  getSampleMetadataFields,
   saveSampleName,
   saveSampleNotes
 } from "~/api";
@@ -70,7 +70,7 @@ class SampleDetailsSidebar extends React.Component {
     } else {
       [metadata, metadataTypes] = await Promise.all([
         getSampleMetadata(this.props.sampleId, this.props.pipelineVersion),
-        getSampleMetadataTypes(this.props.sampleId)
+        getSampleMetadataFields(this.props.sampleId)
       ]);
     }
 

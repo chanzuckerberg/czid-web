@@ -576,4 +576,9 @@ class Sample < ApplicationRecord
       )
     end
   end
+
+  # Get field info for fields that are appropriate for both the project and the host genome
+  def metadata_fields_info
+    (project.metadata_fields & host_genome.metadata_fields).map(&:field_info)
+  end
 end

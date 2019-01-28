@@ -43,7 +43,7 @@ const getSampleMetadata = (id, pipelineVersion) => {
   );
 };
 
-const getSampleMetadataTypes = id => get(`/samples/${id}/metadata_types`);
+const getSampleMetadataFields = id => get(`/samples/${id}/metadata_fields`);
 
 const saveSampleMetadata = (id, field, value) =>
   postWithCSRF(`/samples/${id}/save_metadata_v2`, {
@@ -151,7 +151,7 @@ const uploadMetadataForProject = (id, metadata) =>
 export {
   get,
   getSampleMetadata,
-  getSampleMetadataTypes,
+  getSampleMetadataFields,
   getSampleReportInfo,
   saveSampleMetadata,
   getMetadataTypesByHostGenomeName,

@@ -16,7 +16,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
-                  :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :metadata_types, :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
+                  :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :metadata_fields, :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap,
@@ -224,8 +224,8 @@ class SamplesController < ApplicationController
     }
   end
 
-  def metadata_types
-    render json: @sample.project.metadata_fields.map(&:field_info)
+  def metadata_fields
+    render json: @sample.metadata_fields_info
   end
 
   # POST /samples/1/save_metadata_v2
