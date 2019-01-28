@@ -207,7 +207,12 @@ class SamplesController < ApplicationController
     end
 
     render json: {
-      metadata: @sample.metadata,
+      # Pass down base_type for the frontend
+      metadata: @sample.metadata.map do |m|
+        m.attributes.merge(
+          "base_type" => Metadatum.convert_type_to_string(m.metadata_field.base_type)
+        )
+      end,
       additional_info: {
         name: @sample.name,
         editable: editable,
@@ -225,18 +230,20 @@ class SamplesController < ApplicationController
 
   # POST /samples/1/save_metadata_v2
   def save_metadata_v2
-    @sample.metadatum_add_or_update(params[:field], params[:value])
-    render json: {
-      status: "success",
-      message: "Saved successfully"
-    }
-  rescue
-    error_messages = @sample ? @sample.errors.full_messages : []
-    render json: {
-      status: 'failed',
-      message: 'Unable to update sample',
-      errors: error_messages
-    }
+    saved = @sample.metadatum_add_or_update(params[:field], params[:value])
+    if saved
+      render json: {
+        status: "success",
+        message: "Saved successfully"
+      }
+    else
+      error_messages = @sample ? @sample.errors.full_messages : []
+      render json: {
+        status: 'failed',
+        message: 'Unable to update sample',
+        errors: error_messages
+      }
+    end
   end
 
   # GET /samples/metadata_types_by_host_genome_name
@@ -337,7 +344,7 @@ class SamplesController < ApplicationController
   end
 
   def samples_going_public
-    ahead = params[:ahead].to_i || 10
+    ahead = (params[:ahead] || 10).to_i
     behind = params[:behind].to_i
 
     start = Time.current - behind.days

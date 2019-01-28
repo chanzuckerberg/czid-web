@@ -378,16 +378,17 @@ module SamplesHelper
   end
 
   def get_metadata_types_by_host_genome_name(host_genome_name)
-    metadata_keys = Metadatum.valid_keys_by_host_genome_name(host_genome_name)
-
-    metadata_keys.map do |key|
-      key_sym = key.to_sym
-      {
-        key: key,
-        dataType: Metadatum.convert_type_to_string(Metadatum::KEY_TO_TYPE[key_sym]),
-        name: Metadatum::KEY_TO_DISPLAY_NAME[key_sym],
-        options: Metadatum.get_string_options(key_sym, host_genome_name)
-      }
+    host_genome = HostGenome.find_by(name: host_genome_name)
+    if host_genome
+      host_genome.metadata_fields.map do |field|
+        {
+          key: field.name,
+          dataType: Metadatum.convert_type_to_string(field.base_type),
+          name: field.display_name,
+          options: field.options && JSON.parse(field.options),
+          group: field.group
+        }
+      end
     end
   end
 end

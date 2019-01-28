@@ -469,7 +469,12 @@ module ReportHelper
         results[sample_id] = {
           sample_id: sample_id,
           name: samples_by_id[sample_id].name,
-          metadata: samples_by_id[sample_id].metadata,
+          metadata: samples_by_id[sample_id].metadata.map do |m|
+            # Throw in MetadataField base_type
+            m.attributes.merge(
+              "base_type" => Metadatum.convert_type_to_string(m.metadata_field.base_type)
+            )
+          end,
           host_genome_name: samples_by_id[sample_id].host_genome_name,
           taxons: filtered_rows
         }
@@ -482,7 +487,12 @@ module ReportHelper
         results[sample.id] = {
           sample_id: sample.id,
           name: sample.name,
-          metadata: sample.metadata,
+          metadata: sample.metadata.map do |m|
+            # Throw in MetadataField base_type
+            m.attributes.merge(
+              "base_type" => Metadatum.convert_type_to_string(m.metadata_field.base_type)
+            )
+          end,
           host_genome_name: sample.host_genome_name
         }
       end
