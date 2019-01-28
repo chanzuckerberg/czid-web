@@ -18,6 +18,9 @@
 ## Update taxon_lineages table in idseq-web and switch to new index 
 
 
+## Self-termination mechanisms
+
+
 ## Bonus: Adding a New Host Genome
 
 
