@@ -108,6 +108,7 @@ class UserManagementForm extends React.Component {
             <Input
               fluid
               type="text"
+              placeholder="Full Name"
               onChange={this.handleChangeName}
               value={this.state.name}
             />
@@ -116,6 +117,7 @@ class UserManagementForm extends React.Component {
             <Input
               fluid
               type="text"
+              placeholder="Email"
               onChange={this.handleChangeEmail}
               value={this.state.email}
             />
