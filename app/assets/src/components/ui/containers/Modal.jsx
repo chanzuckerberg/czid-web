@@ -12,7 +12,14 @@ class Modal extends React.Component {
   }
 
   render() {
-    const { fixedHeight, narrow, tall, className, ...extraProps } = this.props;
+    const {
+      fixedHeight,
+      narrow,
+      narrowest,
+      tall,
+      className,
+      ...extraProps
+    } = this.props;
 
     return (
       <SemanticModal
@@ -21,6 +28,7 @@ class Modal extends React.Component {
           cs.modal,
           className,
           narrow && cs.narrow,
+          narrowest && cs.narrowest,
           tall && cs.tall,
           fixedHeight && cs.fixedHeight
         )}
@@ -48,6 +56,7 @@ Modal.propTypes = forbidExtraProps({
   open: PropTypes.bool,
   fixedHeight: PropTypes.bool,
   narrow: PropTypes.bool, // Decrease the width of the Modal for smaller modals.
+  narrowest: PropTypes.bool, // Decrease the width of the Modal for the smallest modals.
   tall: PropTypes.bool, // Increase the max-height of the Modal for tall content.
   title: PropTypes.string
 });

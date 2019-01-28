@@ -29,7 +29,7 @@ class PublicProjectConfirmationModal extends React.Component {
       <div>
         <div onClick={this.openModal}>{trigger}</div>
         {this.state.modalOpen && (
-          <Modal className={cs.publicProjectConfirmation} narrow open>
+          <Modal className={cs.publicProjectConfirmation} narrowest open>
             <div className={cs.title}>
               Make <span className={cs.highlight}>{project.name}</span> public
             </div>

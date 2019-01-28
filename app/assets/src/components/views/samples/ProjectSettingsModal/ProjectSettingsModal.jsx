@@ -14,8 +14,7 @@ class ProjectSettingsModal extends React.Component {
     super(props);
 
     this.state = {
-      modalOpen: true,
-      project: this.props.project
+      modalOpen: false
     };
   }
 
@@ -23,17 +22,15 @@ class ProjectSettingsModal extends React.Component {
   closeModal = () => this.setState({ modalOpen: false });
 
   makeProjectPublic = () => {
-    const { csrf, project } = this.props;
+    const { csrf, onProjectPublished, project } = this.props;
 
     axios
-      .put(`/projects/${project}.json`, {
+      .put(`/projects/${project.id}.json`, {
         public_access: true,
         authenticity_token: csrf
       })
       .then(() => {
-        this.setState({
-          projectPublic: true
-        });
+        onProjectPublished();
       });
   };
 
@@ -48,13 +45,13 @@ class ProjectSettingsModal extends React.Component {
 
     return (
       <div>
-        <div className={cs.trigger} onClick={this.openModal}>
+        <div className={cs.projectSettingsTrigger} onClick={this.openModal}>
           Settings
         </div>
         {this.state.modalOpen && (
           <Modal
             open
-            fixedHeight={true}
+            narrow
             onClose={this.closeModal}
             className={cs.projectSettingsModal}
           >
@@ -107,6 +104,7 @@ class ProjectSettingsModal extends React.Component {
 ProjectSettingsModal.propTypes = {
   csrf: PropTypes.string.isRequired,
   onUserAdded: PropTypes.func,
+  onProjectPublished: PropTypes.func,
   project: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string,

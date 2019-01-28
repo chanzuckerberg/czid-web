@@ -34,6 +34,9 @@ import TableColumnHeader from "./views/samples/TableColumnHeader";
 import PipelineStatusFilter from "./views/samples/PipelineStatusFilter";
 import ProjectUploadMenu from "./views/samples/ProjectUploadMenu";
 import ProjectSettingsModal from "./views/samples/ProjectSettingsModal";
+import GlobeIcon from "~ui/icons/GlobeIcon";
+import LockIcon from "~ui/icons/LockIcon";
+import UserIcon from "~ui/icons/UserIcon";
 import {
   SAMPLE_TABLE_COLUMNS,
   INITIAL_COLUMNS,
@@ -345,6 +348,14 @@ class Samples extends React.Component {
       this.setState({ project_users: new_project_users });
     }
   }
+
+  handleProjectPublished = () => {
+    this.setState({
+      project: Object.assign(this.state.project, {
+        public_access: true
+      })
+    });
+  };
 
   handleSearchChange(e) {
     let val = e.target.value;
@@ -1594,53 +1605,48 @@ function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
     : null;
 
   return (
-    <div className="right col s12">
-      <ul className="project-menu">
-        <li>
-          {proj ? (
-            proj.public_access ? (
-              <span>
-                <i className="tiny material-icons">lock_open</i> Public project
-              </span>
-            ) : (
-              <span>
-                <i className="tiny material-icons">lock</i> Private project
-              </span>
-            )
-          ) : null}
-        </li>
-        <li>
-          {proj && parent.canEditProject(proj.id) ? (
-            proj_users_count ? (
-              <span>
-                <i className="tiny material-icons">people</i>{" "}
-                {parent.state.project_users.length}
-                {parent.state.project_users.length > 1 ? " members" : " member"}
-              </span>
-            ) : (
-              <span>No member</span>
-            )
-          ) : null}
-        </li>
-        {proj &&
-          parent.canEditProject(proj.id) && (
-            <li className="add-member">
-              <ProjectSettingsModal
-                csrf={parent.csrf}
-                nextPublicSampleDate={nextPublicSampleDate}
-                onUserAdded={parent.updateUserDisplay}
-                project={proj}
-                users={parent.state.project_users}
-              />
-            </li>
-          )}
-        {/* TODO(mark): Change admin to canEditProject when launch */}
-        {showUploadMenu && (
-          <li className="">
-            <ProjectUploadMenu project={proj} />
-          </li>
+    <div className={cs.projectMenu}>
+      <div className={cs.fillIn} />
+      {proj &&
+        (proj.public_access ? (
+          <div className={cs.projectMenuItem}>
+            <GlobeIcon className={cs.smallIcon} /> Public project
+          </div>
+        ) : (
+          <div className={cs.projectMenuItem}>
+            <LockIcon className={cs.smallIcon} /> Private project
+          </div>
+        ))}
+      {proj &&
+        parent.canEditProject(proj.id) && (
+          <div className={cs.projectMenuItem}>
+            <UserIcon className={cs.smallUserIcon} />{" "}
+            {proj_users_count
+              ? `${parent.state.project_users.length} member${parent.state
+                  .project_users.length > 1 && "s"}`
+              : "No members"}
+          </div>
         )}
-      </ul>
+      {proj &&
+        parent.canEditProject(proj.id) && (
+          <div className={cs.projectMenuItem}>
+            <ProjectSettingsModal
+              csrf={parent.csrf}
+              nextPublicSampleDate={nextPublicSampleDate}
+              onUserAdded={parent.updateUserDisplay}
+              onProjectPublished={parent.handleProjectPublished}
+              project={proj}
+              users={parent.state.project_users}
+            />
+          </div>
+        )}
+
+      {/* TODO(mark): Change admin to canEditProject when launch */}
+      {showUploadMenu && (
+        <div className={cs.projectMenuItem}>
+          <ProjectUploadMenu project={proj} />
+        </div>
+      )}
     </div>
   );
 }

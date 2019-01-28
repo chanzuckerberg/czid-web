@@ -9,11 +9,10 @@ $box-shadow-bottom-right: 0px 2px 8px $box-shadow-light;
   }
 
   &::-webkit-scrollbar-track {
-    background-color: $lightest-grey;
-    border-radius: 3px;
+    background: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: $medium-grey;
+    background-color: $transparent-light-grey;
   }
 }

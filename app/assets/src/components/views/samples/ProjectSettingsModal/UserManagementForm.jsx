@@ -6,13 +6,13 @@ import StringHelper from "~/helpers/StringHelper";
 import cs from "./user_management_form.scss";
 import cx from "classnames";
 import axios from "axios";
-import UserIcon from "../../../ui/icons/UserIcon";
+import UserIcon from "~ui/icons/UserIcon";
 
 class UserManagementForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: "",
+      name: "",
       email: "",
       statusMessage: "",
       statusClass: null
@@ -21,36 +21,48 @@ class UserManagementForm extends React.Component {
 
   handleAddUser = () => {
     const { csrf, onUserAdded, project } = this.props;
-    const { username, email } = this.state;
+    const { name, email } = this.state;
 
-    if (StringHelper.validateEmail(email) && StringHelper.validateName(name)) {
+    const fieldsValidation = {
+      email: StringHelper.validateEmail(email),
+      name: StringHelper.validateName(name)
+    };
+
+    if (Object.values(fieldsValidation).every(valid => !!valid)) {
       this.setState({
         statusClass: cs.infoMessage,
         statusMessage: "Sending invitation"
       });
       axios
         .put(`/projects/${project.id}}/add_user`, {
-          user_name_to_add: username,
+          user_name_to_add: name,
           user_email_to_add: email,
           authenticity_token: csrf
         })
         .then(() => {
-          onUserAdded({ username, email });
+          onUserAdded(name, email);
           this.setState({
-            inviteStatus: "Invitation sent! User added."
+            statusClass: cs.successMessage,
+            statusMessage: "Invitation sent! User added.",
+            name: "",
+            email: ""
           });
         });
     } else {
+      let invalidFieldsString = Object.keys(fieldsValidation)
+        .filter(fieldName => !fieldsValidation[fieldName])
+        .join(" and ");
+
       this.setState({
         statusClass: cs.errorMessage,
-        statusMessage: "Invalid name or email address"
+        statusMessage: `Invalid ${invalidFieldsString} address`
       });
     }
   };
 
-  handleChangeUsername = username => {
+  handleChangeName = name => {
     this.setState({
-      username,
+      name,
       statusClass: cs.infoMessage,
       statusMessage: ""
     });
@@ -66,7 +78,6 @@ class UserManagementForm extends React.Component {
 
   render() {
     const { users } = this.props;
-
     return (
       <div className={cs.userManagementForm}>
         <div className={cs.title}>
@@ -95,13 +106,15 @@ class UserManagementForm extends React.Component {
         <div className={cs.addMemberForm}>
           <div className={cs.addMemberFormField}>
             <Input
+              fluid
               type="text"
-              onChange={this.handleChangeUsername}
-              value={this.state.username}
+              onChange={this.handleChangeName}
+              value={this.state.name}
             />
           </div>
           <div className={cs.addMemberFormField}>
             <Input
+              fluid
               type="text"
               onChange={this.handleChangeEmail}
               value={this.state.email}
