@@ -61,11 +61,11 @@
 .smallIcon {
   height: 16px;
   margin-right: 5px;
-}
+  fill: black;
 
-.smallUserIcon {
-  height: 14px;
-  margin-right: 5px;
+  &User {
+    height: 14px;
+  }
 }
 
 .projectMenu {

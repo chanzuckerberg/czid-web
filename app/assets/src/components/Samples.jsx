@@ -1620,7 +1620,7 @@ function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
       {proj &&
         parent.canEditProject(proj.id) && (
           <div className={cs.projectMenuItem}>
-            <UserIcon className={cs.smallUserIcon} />{" "}
+            <UserIcon className={cx(cs.smallIcon, cs.smallIconUser)} />{" "}
             {proj_users_count
               ? `${parent.state.project_users.length} member${
                   parent.state.project_users.length > 1 ? "s" : ""
