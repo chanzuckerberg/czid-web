@@ -225,7 +225,7 @@ class SamplesController < ApplicationController
   end
 
   def metadata_types
-    render json: @sample.project.metadata_fields_info
+    render json: @sample.project.metadata_fields.map(&:field_info)
   end
 
   # POST /samples/1/save_metadata_v2
@@ -250,7 +250,7 @@ class SamplesController < ApplicationController
   def metadata_types_by_host_genome_name
     metadata_types_by_host_genome_name = {}
     HostGenome.all.each do |hg|
-      metadata_types_by_host_genome_name[hg.name] = hg.get_metadata_types
+      metadata_types_by_host_genome_name[hg.name] = hg.metadata_fields.map(&:field_info)
     end
 
     render json: metadata_types_by_host_genome_name
