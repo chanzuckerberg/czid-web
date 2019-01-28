@@ -1622,8 +1622,9 @@ function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
           <div className={cs.projectMenuItem}>
             <UserIcon className={cs.smallUserIcon} />{" "}
             {proj_users_count
-              ? `${parent.state.project_users.length} member${parent.state
-                  .project_users.length > 1 && "s"}`
+              ? `${parent.state.project_users.length} member${
+                  parent.state.project_users.length > 1 ? "s" : ""
+                }`
               : "No members"}
           </div>
         )}
