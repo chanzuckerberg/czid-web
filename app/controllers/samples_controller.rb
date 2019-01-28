@@ -225,16 +225,7 @@ class SamplesController < ApplicationController
   end
 
   def metadata_types
-    results = @sample.project.metadata_fields.map do |field|
-      {
-        key: field.name,
-        dataType: Metadatum.convert_type_to_string(field.base_type),
-        name: field.display_name,
-        options: field.options && JSON.parse(field.options),
-        group: field.group
-      }
-    end
-    render json: results
+    render json: @sample.project.metadata_fields_info
   end
 
   # POST /samples/1/save_metadata_v2

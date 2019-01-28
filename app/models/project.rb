@@ -131,4 +131,16 @@ class Project < ApplicationRecord
     samples.each(&:destroy)
     super
   end
+
+  def metadata_fields_info
+    metadata_fields.map do |field|
+      {
+        key: field.name,
+        dataType: Metadatum.convert_type_to_string(field.base_type),
+        name: field.display_name,
+        options: field.options && JSON.parse(field.options),
+        group: field.group
+      }
+    end
+  end
 end
