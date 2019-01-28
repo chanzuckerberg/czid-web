@@ -376,19 +376,4 @@ module SamplesHelper
       .pluck(:string_validated_value)
       .uniq
   end
-
-  def get_metadata_types_by_host_genome_name(host_genome_name)
-    host_genome = HostGenome.find_by(name: host_genome_name)
-    if host_genome
-      host_genome.metadata_fields.map do |field|
-        {
-          key: field.name,
-          dataType: Metadatum.convert_type_to_string(field.base_type),
-          name: field.display_name,
-          options: field.options && JSON.parse(field.options),
-          group: field.group
-        }
-      end
-    end
-  end
 end
