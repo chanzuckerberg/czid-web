@@ -32,6 +32,7 @@ Rails.application.routes.draw do
     get :download_heatmap, on: :collection
     get :metadata_types_by_host_genome_name, on: :collection
     get :metadata, on: :member
+    get :metadata_types, on: :member
     get :contig_taxid_list, on: :member
     get :taxid_contigs, on: :member
     get :summary_contig_counts, on: :member

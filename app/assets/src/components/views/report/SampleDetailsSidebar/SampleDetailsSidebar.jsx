@@ -8,7 +8,7 @@ import Tabs from "~/components/ui/controls/Tabs";
 import {
   getSampleMetadata,
   saveSampleMetadata,
-  getMetadataTypesByHostGenomeName,
+  getSampleMetadataTypes,
   saveSampleName,
   saveSampleNotes
 } from "~/api";
@@ -70,10 +70,8 @@ class SampleDetailsSidebar extends React.Component {
     } else {
       [metadata, metadataTypes] = await Promise.all([
         getSampleMetadata(this.props.sampleId, this.props.pipelineVersion),
-        getMetadataTypesByHostGenomeName()
+        getSampleMetadataTypes(this.props.sampleId)
       ]);
-
-      metadataTypes = metadataTypes[metadata.additional_info.host_genome_name];
     }
 
     this.setState({

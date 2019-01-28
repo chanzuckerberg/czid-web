@@ -567,4 +567,13 @@ class Sample < ApplicationRecord
   def private_until
     return created_at + project.days_to_keep_sample_private.days
   end
+
+  # Get Metadata objects augmented with MetadataField.base_type
+  def metadata_with_base_type
+    metadata.map do |m|
+      m.attributes.merge(
+        "base_type" => Metadatum.convert_type_to_string(m.metadata_field.base_type)
+      )
+    end
+  end
 end
