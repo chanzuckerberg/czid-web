@@ -3,12 +3,14 @@ one:
 
 two:
   name: Human
+  metadata_fields: [sample_type, sex, age, admission_date]
 
 human:
   name: Human
 
 mosquito:
   name: Mosquito
+  metadata_fields: [sample_type, sex, reported_sex, blood_fed]
 
 tick:
   name: Tick

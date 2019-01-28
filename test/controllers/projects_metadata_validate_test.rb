@@ -241,7 +241,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
 
     post validate_metadata_csv_project_url(@metadata_validation_project), params: {
       metadata: {
-        headers: ['sample_name', 'gender'],
+        headers: ['sample_name', 'sex'],
         rows: [
           ['metadata_validation_sample_human', 'Female'],
           ['metadata_validation_sample_human', 'Male']
@@ -256,6 +256,6 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     # Warning should throw if user is overwriting existing metadata with different value.
     assert_equal 1, @response.parsed_body['issues']['warnings'].length
 
-    assert_match "#{MetadataValidationWarnings.value_already_exists('Female', 'Male', 'gender')} (row 1)", @response.parsed_body['issues']['warnings'][0]
+    assert_match "#{MetadataValidationWarnings.value_already_exists('Female', 'Male', 'sex')} (row 1)", @response.parsed_body['issues']['warnings'][0]
   end
 end
