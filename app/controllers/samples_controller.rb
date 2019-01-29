@@ -34,7 +34,6 @@ class SamplesController < ApplicationController
   end
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
   power :samples, map: { EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
-  # power :samples, map: { READ_ACTIONS => :viewable_samples, EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
 
   before_action :set_sample, only: READ_ACTIONS + EDIT_ACTIONS
   before_action :assert_access, only: OTHER_ACTIONS # Actions which don't require access control check
