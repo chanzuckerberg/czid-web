@@ -175,6 +175,8 @@ class ProjectsController < ApplicationController
   def create
     @project = Project.new(project_params)
     @project.users << current_user
+    # New projects get the current set of default fields
+    @project.metadata_fields << MetadataField.where(is_default: 1)
 
     respond_to do |format|
       if @project.save

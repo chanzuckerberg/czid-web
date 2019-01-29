@@ -14,18 +14,21 @@ class MetadataTab extends React.Component {
   constructor(props) {
     super(props);
 
+    const sections = this.getMetadataSections();
     this.state = {
       sectionOpen: {
         // Open the first section by default.
-        [this.getMetadataSections()[0].name]: true
+        [sections[0].name]: true
       },
-      sectionEditing: {}
+      sectionEditing: {},
+      sections
     };
   }
 
   getMetadataSections = () => {
     // Group the MetadataFields by group name
-    let nameToFields = {};
+    // Include Sample Info by default so that special cases in SAMPLE_ADDITIONAL_INFO always show
+    let nameToFields = { "Sample Info": [] };
     values(this.props.metadataTypes).forEach(field => {
       const name = field.group + " Info";
       if (nameToFields.hasOwnProperty(name)) {
@@ -139,6 +142,8 @@ class MetadataTab extends React.Component {
       includes(Object.keys(metadataTypes), key)
     );
     const isSectionEditing = sectionEditing[section.name];
+
+    // TODO: Consider refactoring so SAMPLE_ADDITIONAL_INFO doesn't have to be special.
     return (
       <div>
         {/* Special section for Sample Info */}
@@ -188,7 +193,7 @@ class MetadataTab extends React.Component {
   render() {
     return (
       <div>
-        {this.getMetadataSections().map(section => (
+        {this.state.sections.map(section => (
           <MetadataSection
             key={section.name}
             editable={this.props.additionalInfo.editable}
