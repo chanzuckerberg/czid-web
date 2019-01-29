@@ -14,10 +14,11 @@ class MetadataTab extends React.Component {
   constructor(props) {
     super(props);
 
+    const sections = this.getMetadataSections();
     this.state = {
       sectionOpen: {
         // Open the first section by default.
-        [this.getMetadataSections()[0].name]: true
+        [(sections && sections[0] && sections[0].name) || "Sample Info"]: true
       },
       sectionEditing: {}
     };
@@ -25,7 +26,8 @@ class MetadataTab extends React.Component {
 
   getMetadataSections = () => {
     // Group the MetadataFields by group name
-    let nameToFields = {};
+    // Include Sample Info by default for special cases in SAMPLE_ADDITIONAL_INFO
+    let nameToFields = { "Sample Info": [] };
     values(this.props.metadataTypes).forEach(field => {
       const name = field.group + " Info";
       if (nameToFields.hasOwnProperty(name)) {
