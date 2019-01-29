@@ -4,6 +4,7 @@ require 'rbconfig'
 require 'rubygems'
 require 'bundler/setup'
 require 'pp'
+require 'json'
 
 def system!(cmd, err = nil)
   system(cmd) || abort("\n== Command #{cmd} failed ==\n\n#{err}\n\n====")
@@ -32,6 +33,13 @@ def notify_slack(env, image, stage)
       puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":ghost:", "text": "starting to deploy #{image} to #{env}"}' #{slack_hook}`
     elsif stage=="end"
       puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":sharkdance:", "text": "finished deploying #{image} to #{env}"}' #{slack_hook}`
+      if env=="staging"
+        definition_list = JSON.parse(`aws ecs list-task-definitions --family-prefix idseq-prod-web --sort DESC --max-items 1`)
+        definition = JSON.parse(`aws ecs describe-task-definition --task-definition #{definition_list["taskDefinitionArns"][0]}`)
+        prod_image = definition["taskDefinition"]["containerDefinitions"][0]["image"].split(':')[1].split("-")[1]
+        log_history = `git log #{prod_image}..#{image} --pretty=short`
+        puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":sharkdance:", "text": "Please test these changes:\n#{log_history}"}' #{slack_hook}`
+      end
     elsif stage=="failure"
       puts `curl -X POST --data-urlencode 'payload={"icon_emoji": ":sob:", "text": "deploy of #{image} to #{env} failed"}' #{slack_hook}`
     end
