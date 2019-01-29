@@ -58,9 +58,6 @@ class SamplesController < ApplicationController
 
     results = current_power.samples
 
-    Rails.logger.warn("CHARLES2:")
-    Rails.logger.warn(params.keys)
-
     results = results.where(id: samples_query) if samples_query.present?
 
     results = results.where(project_id: project_id) if project_id.present?

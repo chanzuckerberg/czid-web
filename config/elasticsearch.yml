@@ -1,5 +1,0 @@
-development: &default
-  host: 'http://elasticsearch:9200'
-  log: true
-test:
-  host: 'http://elasticsearch:9200'

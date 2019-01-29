@@ -3,6 +3,7 @@
 x-web-variables: &web-variables
   ? ALIGNMENT_CONFIG_DEFAULT_NAME=2018-12-01
   ? SAMPLES_BUCKET_NAME=idseq-samples-development
+  ? ES_ADDRESS=http://elasticsearch:9200
   ? AIRBRAKE_PROJECT_ID
   ? AIRBRAKE_PROJECT_KEY
   ? MAIL_GUN_API_KEY
