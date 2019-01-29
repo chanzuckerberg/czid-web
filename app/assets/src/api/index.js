@@ -18,7 +18,6 @@ const postWithCSRF = async (url, params) => {
 // TODO: add error handling
 const get = async (url, config) => {
   const resp = await axios.get(url, config);
-
   return resp.data;
 };
 
@@ -43,7 +42,13 @@ const getSampleMetadata = (id, pipelineVersion) => {
   );
 };
 
-const getSampleMetadataFields = id => get(`/samples/${id}/metadata_fields`);
+// Get MetadataField info for the sample(s) (either one ID or an array)
+const getSampleMetadataFields = ids =>
+  get("/samples/metadata_fields", {
+    params: {
+      sampleIds: [ids].flat()
+    }
+  });
 
 const saveSampleMetadata = (id, field, value) =>
   postWithCSRF(`/samples/${id}/save_metadata_v2`, {

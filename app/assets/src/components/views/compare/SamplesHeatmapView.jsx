@@ -20,10 +20,9 @@ import {
   MultipleNestedDropdown
 } from "~ui/controls/dropdowns";
 import { processMetadata } from "~utils/metadata";
-import { get, getMetadataTypesByHostGenomeName } from "~/api";
+import { get, getSampleMetadataFields } from "~/api";
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
-import { extractMetadataTypesByHostGenomes } from "../../utils/metadata";
 
 class SamplesHeatmapView extends React.Component {
   constructor(props) {
@@ -173,31 +172,24 @@ class SamplesHeatmapView extends React.Component {
     });
   }
 
-  fetchMetadataTypesByHostGenomeName() {
+  fetchMetadataFieldsBySampleIds() {
     if (this.state.metadataTypes) return null;
-    return getMetadataTypesByHostGenomeName();
+    return getSampleMetadataFields(this.state.sampleIds);
   }
 
   async fetchViewData() {
     this.setState({ loading: true });
 
-    let [heatmapData, metadataTypesByHostGenomeName] = await Promise.all([
+    let [heatmapData, metadataFields] = await Promise.all([
       this.fetchHeatmapData(),
-      this.fetchMetadataTypesByHostGenomeName()
+      this.fetchMetadataFieldsBySampleIds()
     ]);
 
     let newState = this.extractData(heatmapData);
 
     // Only calculate the metadataTypes once.
-    if (metadataTypesByHostGenomeName !== null) {
-      const distinctHostGenomeNames = uniq(
-        pluck("host_genome_name", values(newState.sampleDetails))
-      );
-
-      newState.metadataTypes = extractMetadataTypesByHostGenomes(
-        metadataTypesByHostGenomeName,
-        distinctHostGenomeNames
-      );
+    if (metadataFields !== null) {
+      newState.metadataTypes = metadataFields;
     }
 
     newState.loading = false;
