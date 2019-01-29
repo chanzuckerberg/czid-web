@@ -5,4 +5,21 @@ $font-family-sans-serif: "Open Sans", "Helvetica Neue", Arial, Helvetica,
 $font-family-serif: Georgia, "Times New Roman", Times, serif !default;
 $font-family-monospace: Menlo, Monaco, Consolas, "Courier New", monospace !default;
 $font-family-default: $font-family-sans-serif !default;
-$font-size: 13px !default;
+
+// Size
+$font-size-smallest: 11px;
+$font-size-small: 12px;
+$font-size: 13px;
+$font-size-h1: 40px;
+$font-size-h2: 34px;
+$font-size-h3: 28px;
+$font-size-h4: 22px;
+$font-size-h5: 16px;
+$font-size-h6: 14px;
+
+// Weights
+$font-weight-thin: 300;
+$font-weight-regular: 400;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-heavy: 800;
