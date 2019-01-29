@@ -663,12 +663,14 @@ input[type="button"] {
 
       padding-top: 15px;
 
-      .button-container {
-        float: right;
-        padding-top: 20px;
+      .buttons-row {
+        .button-container {
+          float: right;
+          padding-top: 20px;
 
-        &:not(:first-child) {
-          margin-left: 10px;
+          &:not(:last-child) {
+            margin-left: 10px;
+          }
         }
       }
     }

@@ -1709,19 +1709,21 @@ function ProjectInfoHeading({
       </div>
       <div className="col s7 download-section-btns">
         {state.selectedProjectId ? project_menu : null}
-        {table_download_dropdown}
-        {phyloModalTrigger}
-        {compare_button}
-        <BackgroundModal
-          parent={parent}
-          selectedSampleIds={selectedSampleIds}
-        />
-        {state.selectedProjectId &&
-        canEditProject(state.selectedProjectId) &&
-        state.project &&
-        state.project.total_sample_count == 0
-          ? delete_project_button
-          : null}
+        <div className="buttons-row">
+          {table_download_dropdown}
+          {phyloModalTrigger}
+          {compare_button}
+          <BackgroundModal
+            parent={parent}
+            selectedSampleIds={selectedSampleIds}
+          />
+          {state.selectedProjectId &&
+          canEditProject(state.selectedProjectId) &&
+          state.project &&
+          state.project.total_sample_count == 0
+            ? delete_project_button
+            : null}
+        </div>
       </div>
       {state.phyloTreeCreationModalOpen && (
         <PhyloTreeCreationModal
