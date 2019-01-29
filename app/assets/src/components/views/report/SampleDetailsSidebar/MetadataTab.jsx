@@ -17,7 +17,7 @@ class MetadataTab extends React.Component {
     this.state = {
       sectionOpen: {
         // Open the first section by default.
-        [this.getMetadataSections()[0]]: true
+        [this.getMetadataSections()[0].name]: true
       },
       sectionEditing: {}
     };
