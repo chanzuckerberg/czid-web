@@ -14,11 +14,10 @@ class MetadataTab extends React.Component {
   constructor(props) {
     super(props);
 
-    const sections = this.getMetadataSections();
     this.state = {
       sectionOpen: {
         // Open the first section by default.
-        [(sections && sections[0] && sections[0].name) || "Sample Info"]: true
+        [this.getMetadataSections()[0]]: true
       },
       sectionEditing: {}
     };
