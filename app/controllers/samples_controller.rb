@@ -15,6 +15,7 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
+  # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
@@ -31,7 +32,9 @@ class SamplesController < ApplicationController
   current_power do # Put this here for CLI
     Power.new(current_user)
   end
+  # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
   power :samples, map: { EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
+  # power :samples, map: { READ_ACTIONS => :viewable_samples, EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
 
   before_action :set_sample, only: READ_ACTIONS + EDIT_ACTIONS
   before_action :assert_access, only: OTHER_ACTIONS # Actions which don't require access control check
@@ -229,11 +232,11 @@ class SamplesController < ApplicationController
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
 
     if sample_ids.length == 1
-      @sample = samples_scope.find(sample_ids[0])
+      @sample = current_power.viewable_samples.find(sample_ids[0])
       results = @sample.metadata_fields_info
     else
       # Get the MetadataFields that are on the Samples' Projects and HostGenomes
-      samples = samples_scope.where(id: sample_ids)
+      samples = current_power.viewable_samples.where(id: sample_ids)
       project_ids = samples.distinct.pluck(:project_id)
       host_genome_ids = samples.distinct.pluck(:host_genome_id)
 
