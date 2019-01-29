@@ -18,6 +18,7 @@ const postWithCSRF = async (url, params) => {
 // TODO: add error handling
 const get = async (url, config) => {
   const resp = await axios.get(url, config);
+
   return resp.data;
 };
 

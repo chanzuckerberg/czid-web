@@ -233,8 +233,9 @@ class SamplesController < ApplicationController
       results = @sample.metadata_fields_info
     else
       # Get the MetadataFields that are on the Samples' Projects and HostGenomes
-      project_ids = samples_scope.where(id: sample_ids).distinct.pluck(:project_id)
-      host_genome_ids = samples_scope.where(id: sample_ids).distinct.pluck(:host_genome_id)
+      samples = samples_scope.where(id: sample_ids)
+      project_ids = samples.distinct.pluck(:project_id)
+      host_genome_ids = samples.distinct.pluck(:host_genome_id)
 
       project_fields = Project.where(id: project_ids).map(&:metadata_fields)
       host_genome_fields = HostGenome.where(id: host_genome_ids).map(&:metadata_fields)
