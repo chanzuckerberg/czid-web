@@ -224,7 +224,7 @@ class SamplesController < ApplicationController
     }
   end
 
-  # sampleIds is an array
+  # Get MetadataFields for the array of sampleIds (could be 1)
   def metadata_fields
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
 
@@ -232,16 +232,13 @@ class SamplesController < ApplicationController
       @sample = samples_scope.find(sample_ids[0])
       results = @sample.metadata_fields_info
     else
-      # INCLUDE samples_scope
-      puts "IN METADATA FIELDS"
-      puts params
-      puts sample_ids
-      project_ids, host_genome_ids = Sample.where(id: sample_ids).distinct.pluck(:project_id, :host_genome_id)
-      puts "these are the project ids: #{project_ids.to_s}"
-      puts "these are the host genome ids: #{host_genome_ids.to_s}"
+      # Get the MetadataFields that are on the Samples' Projects and HostGenomes
+      project_ids = samples_scope.where(id: sample_ids).distinct.pluck(:project_id)
+      host_genome_ids = samples_scope.where(id: sample_ids).distinct.pluck(:host_genome_id)
+
       project_fields = Project.where(id: project_ids).map(&:metadata_fields)
       host_genome_fields = HostGenome.where(id: host_genome_ids).map(&:metadata_fields)
-      results = (project_fields & host_genome_fields).flatten.map(&:field_info)
+      results = (project_fields.flatten & host_genome_fields.flatten).map(&:field_info)
     end
 
     render json: results
