@@ -7,8 +7,10 @@ require 'elasticsearch/model'
 require 'constants/metadata'
 
 class Sample < ApplicationRecord
-  include Elasticsearch::Model
-  include Elasticsearch::Model::Callbacks
+  unless Rails.env == 'test'
+    include Elasticsearch::Model
+    include Elasticsearch::Model::Callbacks
+  end
   include TestHelper
 
   STATUS_CREATED = 'created'.freeze

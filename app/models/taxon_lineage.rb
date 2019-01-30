@@ -2,8 +2,10 @@
 require 'elasticsearch/model'
 
 class TaxonLineage < ApplicationRecord
-  include Elasticsearch::Model
-  include Elasticsearch::Model::Callbacks
+  unless Rails.env == 'test'
+    include Elasticsearch::Model
+    include Elasticsearch::Model::Callbacks
+  end
   include TaxonLineageHelper
 
   INVALID_CALL_BASE_ID = -100_000_000 # don't run into -2e9 limit (not common, mostly a concern for fp32 or int32)
