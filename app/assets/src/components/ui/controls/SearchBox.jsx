@@ -55,7 +55,9 @@ class SearchBox extends React.Component {
     const { isLoading, value, results } = this.state;
     return (
       <Search
-        className="idseq-ui input search"
+        className={`idseq-ui input search ${
+          this.props.rounded ? "rounded" : ""
+        }`}
         loading={isLoading}
         category={this.props.category}
         onSearchChange={debounce(
@@ -80,6 +82,7 @@ SearchBox.propTypes = {
   // If serverSearchAction is provided, query matching will happen on the server side (use for large data).
   clientSearchSource: PropTypes.array,
   serverSearchAction: PropTypes.string,
+  rounded: PropTypes.bool,
   category: PropTypes.bool,
   initialValue: PropTypes.string,
   onResultSelect: PropTypes.func,

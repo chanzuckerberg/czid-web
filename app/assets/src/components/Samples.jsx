@@ -974,6 +974,7 @@ class Samples extends React.Component {
         {this.admin !== 0 ||
         this.allowedFeatures.includes("structuredSearch") ? (
           <SearchBox
+            rounded
             category
             serverSearchAction="search_suggestions"
             onResultSelect={this.handleSuggestSelect}
