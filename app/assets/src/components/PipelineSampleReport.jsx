@@ -1290,11 +1290,7 @@ class RenderMarkup extends React.Component {
               <Icon name="fork" />
             </Menu.Item>
           }
-          content={
-            <div>
-              Taxonomic Tree View <BetaLabel />
-            </div>
-          }
+          content={<div>Taxonomic Tree View</div>}
           inverted
         />
       </Menu>
