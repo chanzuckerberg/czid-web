@@ -224,6 +224,12 @@ module SamplesHelper
     samples.where(host_genome_id: query)
   end
 
+  def filter_by_taxid(samples, taxid)
+    pr_ids = TaxonByterange.where(taxid: taxid).pluck(:pipeline_run_id)
+    sample_ids = PipelineRun.top_completed_runs.where(id: pr_ids).pluck(:sample_id)
+    samples.where(id: sample_ids)
+  end
+
   def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
     pipeline_run_entry = {}
     if pipeline_run

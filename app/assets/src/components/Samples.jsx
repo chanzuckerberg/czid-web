@@ -562,32 +562,9 @@ class Samples extends React.Component {
       });
   }
 
-  //fetch project, filter and search params
   getParams() {
-    let params = `filter=${this.state.filterParams}&page=${this.state
-      .pagesLoaded + 1}&search=${this.state.searchParams}&sort_by=${
-      this.state.sort_by
-    }`;
-    let projectId = parseInt(this.state.selectedProjectId);
-
-    if (projectId) {
-      params += `&project_id=${projectId}`;
-    }
-    if (this.state.sampleIdsParams.length) {
-      let sampleParams = this.state.sampleIdsParams.join(",");
-      params += `&ids=${sampleParams}`;
-    }
-
-    if (this.state.selectedTissueFilters.length) {
-      let tissueParams = this.state.selectedTissueFilters.join(",");
-      params += `&tissue=${tissueParams}`;
-    }
-
-    if (this.state.selectedHostIndices.length) {
-      let hostParams = this.state.selectedHostIndices.join(",");
-      params += `&host=${hostParams}`;
-    }
-
+    let url_parts = window.location.href.split("?");
+    let params = url_parts[url_parts.length - 1];
     return params;
   }
 
@@ -1085,9 +1062,7 @@ class Samples extends React.Component {
         "selectedTaxid",
         "selectedUploaderId"
       ].some(param => {
-        return (
-          prevState[param].toString() !== this.state.sampleIdsParams.toString()
-        );
+        return prevState[param].toString() !== this.state[param].toString();
       });
 
       if (

@@ -60,8 +60,8 @@ class SamplesController < ApplicationController
 
     results = results.where(id: samples_query) if samples_query.present?
     results = results.where(project_id: project_id) if project_id.present?
-    results = results.where(user_id: params[:uploader]) if params[:uploader].present?
-    # TODO: params[:taxid]
+    results = results.where(user_id: params[:uploader].to_i) if params[:uploader].present?
+    results = filter_by_taxid(results, params[:taxid].to_i) if params[:taxid].present?
 
     @count_project = results.size
 
@@ -74,7 +74,8 @@ class SamplesController < ApplicationController
     host_genome_ids = results.select("distinct(host_genome_id)").map(&:host_genome_id).compact.sort
     @host_genomes = HostGenome.find(host_genome_ids)
 
-    # Query by name for a Sample attribute or pathogen name in the Sample
+    # Query by name for a Sample attribute or pathogen name in the Sample.
+    # APPLIES TO OLD SEARCH BOX ONLY. Remove after switch.
     if name_search_query.present?
       # Pass in a scope of pipeline runs using current_power
       pipeline_run_ids = current_power.pipeline_runs.top_completed_runs.pluck(:id)
