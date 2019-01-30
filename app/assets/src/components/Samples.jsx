@@ -125,8 +125,13 @@ class Samples extends React.Component {
       displayDropdown: false,
 
       // For structured search suggestions
-      selectedTaxid: this.fetchParams("taxid") || "",
-      selectedUploaderId: this.fetchParams("selectedUploaderId") || "",
+      selectedTaxids: this.fetchParams("taxid")
+        ? this.fetchParams("taxid").split(",")
+        : [],
+      selectedUploaderIds: this.fetchParams("selectedUploaderIds")
+        ? this.fetchParams("selectedUploaderIds").split(",")
+        : [],
+      searchTags: [],
 
       selectedTissueFilters: this.fetchParams("tissue")
         ? this.fetchParams("tissue").split(",")
@@ -190,20 +195,55 @@ class Samples extends React.Component {
 
   handleSuggestSelect = (e, { result }) => {
     if (result.category == "Tissue") {
-      this.selectTissueFilter([result.id]);
+      this.selectTissueFilter(
+        this.state.selectedTissueFilters.concat([result.id])
+      );
     } else if (result.category == "Host") {
-      this.selectHostFilter([result.id]);
+      this.selectHostFilter(this.state.selectedHostIndices.concat([result.id]));
     } else if (result.category == "Sample" || result.category == "Location") {
-      this.setState({ sampleIdsParams: result.sample_ids }, () =>
-        this.setUrlLocation()
+      let cat = result.category;
+      this.setState(
+        {
+          sampleIdsParams: this.state.sampleIdsParams.concat(result.sample_ids),
+          searchTags: this.state.searchTags.concat([
+            {
+              display: cat + ": " + result.title,
+              key: "sampleIdsParams",
+              values: result.sample_ids
+            }
+          ])
+        },
+        () => this.setUrlLocation()
       );
     } else if (result.category == "Taxon") {
-      this.setState({ selectedTaxid: result.taxid }, () =>
-        this.setUrlLocation()
+      this.setState(
+        {
+          selectedTaxids: this.state.selectedTaxids.concat([result.taxid]),
+          searchTags: this.state.searchTags.concat([
+            {
+              display: "Taxon: " + result.title,
+              key: "selectedTaxids",
+              values: [result.taxid]
+            }
+          ])
+        },
+        () => this.setUrlLocation()
       );
     } else if (result.category == "Uploader") {
-      this.setState({ selectedUploaderId: result.id }, () =>
-        this.setUrlLocation()
+      this.setState(
+        {
+          selectedUploaderIds: this.state.selectedUploaderIds.concat([
+            result.id
+          ]),
+          searchTags: this.state.searchTags.concat([
+            {
+              display: "Uploader: " + result.title,
+              key: "selectedUploaderIds",
+              values: [result.id]
+            }
+          ])
+        },
+        () => this.setUrlLocation()
       );
     }
   };
@@ -897,6 +937,38 @@ class Samples extends React.Component {
       "Sample Type: "
     );
 
+    const search_tag_list = this.state.searchTags.map((entry, i) => {
+      return (
+        <Label className="label-tags" size="tiny">
+          {entry.display}
+          <Icon
+            name="close"
+            onClick={e => {
+              let selected = this.state[entry.key];
+              for (let val of entry.values) {
+                let idx = selected.indexOf(val);
+                if (idx > -1) {
+                  selected.splice(idx, 1);
+                }
+              }
+              let newTags = this.state.searchTags;
+              newTags.splice(i, 1);
+              this.setState(
+                {
+                  [entry.key]: selected,
+                  searchTags: newTags
+                },
+                () => {
+                  this.setUrlLocation();
+                  this.fetchResults();
+                }
+              );
+            }}
+          />
+        </Label>
+      );
+    });
+
     const search_box = (
       <div className="row search-box-row">
         {this.admin !== 0 ||
@@ -982,6 +1054,7 @@ class Samples extends React.Component {
         search_box={search_box}
         host_filter_tag_list={host_filter_tag_list}
         tissue_filter_tag_list={tissue_filter_tag_list}
+        search_tag_list={search_tag_list}
         tableHead={tableHead}
         samples={samples}
         parent={this}
@@ -1023,8 +1096,8 @@ class Samples extends React.Component {
 
       let searchFilterChange = [
         "sampleIdsParams",
-        "selectedTaxid",
-        "selectedUploaderId"
+        "selectedTaxids",
+        "selectedUploaderIds"
       ].some(param => {
         return prevState[param].toString() !== this.state[param].toString();
       });
@@ -1172,8 +1245,8 @@ class Samples extends React.Component {
       ),
       search: this.state.searchParams,
       ids: this.selectionToParamsOrNone(this.state.sampleIdsParams),
-      taxid: this.state.selectedTaxid,
-      uploader: this.state.selectedUploaderId,
+      taxid: this.selectionToParamsOrNone(this.state.selectedTaxids),
+      uploader: this.selectionToParamsOrNone(this.state.selectedUploaderIds),
       sort_by: this.state.sort_by,
       type: this.state.projectType
     };
@@ -1312,6 +1385,7 @@ function FilterListMarkup({
   search_box,
   host_filter_tag_list,
   tissue_filter_tag_list,
+  search_tag_list,
   tableHead,
   samples,
   parent
@@ -1323,7 +1397,7 @@ function FilterListMarkup({
       <div className="sample-container no-padding col s12">
         {search_box}
         <div className="filter-tags-list">
-          {host_filter_tag_list} {tissue_filter_tag_list}
+          {host_filter_tag_list} {tissue_filter_tag_list} {search_tag_list}
         </div>
         <div className={cs.statusLabels}>
           {parent.state.areSamplesFiltered && (
