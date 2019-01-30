@@ -1,8 +1,14 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const HumanIcon = () => {
+const HumanIcon = props => {
   return (
-    <svg x="0px" y="0px" viewBox="0 0 511.997 511.997">
+    <svg
+      className={props.className}
+      x="0px"
+      y="0px"
+      viewBox="0 0 511.997 511.997"
+    >
       <g>
         <g>
           <path
@@ -139,6 +145,10 @@ const HumanIcon = () => {
       </g>
     </svg>
   );
+};
+
+HumanIcon.propTypes = {
+  className: PropTypes.string
 };
 
 export default HumanIcon;

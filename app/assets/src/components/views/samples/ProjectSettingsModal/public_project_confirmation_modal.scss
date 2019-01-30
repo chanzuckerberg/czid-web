@@ -1,0 +1,43 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.publicProjectConfirmation {
+  .title {
+    font-size: $font-size-h4;
+  }
+
+  .highlight {
+    font-weight: $font-weight-semibold;
+  }
+
+  .text {
+    margin-top: 10px;
+    margin-bottom: 30px;
+
+    p:not(:first-child) {
+      margin-top: 10px;
+    }
+
+    .link {
+      // important to override _header.scss
+      color: $primary-light !important;
+      cursor: pointer;
+    }
+  }
+
+  .actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+
+    .item {
+      &:not(:first-child) {
+        margin-left: 5px;
+      }
+
+      &:not(:last-child) {
+        margin-right: 5px;
+      }
+    }
+  }
+}

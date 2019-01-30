@@ -1,8 +1,8 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-sample_human_gender:
-  key: "gender"
-  data_type: "string"
+sample_human_sex:
+  key: "sex"
   raw_value: "Male"
   string_validated_value: "Male"
   sample: metadata_validation_sample_human
+  metadata_field: sex

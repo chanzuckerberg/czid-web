@@ -32,9 +32,11 @@ Rails.application.routes.draw do
     get :download_heatmap, on: :collection
     get :metadata_types_by_host_genome_name, on: :collection
     get :metadata, on: :member
+    get :metadata_fields, on: :collection
     get :contig_taxid_list, on: :member
     get :taxid_contigs, on: :member
     get :summary_contig_counts, on: :member
+    get :samples_going_public, on: :collection
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
   end
@@ -80,6 +82,7 @@ Rails.application.routes.draw do
 
   namespace :playground do
     get :controls
+    get :icons
   end
 
   authenticate :user, ->(u) { u.admin? } do

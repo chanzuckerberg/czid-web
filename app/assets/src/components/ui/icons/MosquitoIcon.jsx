@@ -1,8 +1,14 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const MosquitoIcon = () => {
+const MosquitoIcon = props => {
   return (
-    <svg x="0px" y="0px" viewBox="0 0 463.003 463.003">
+    <svg
+      className={props.className}
+      x="0px"
+      y="0px"
+      viewBox="0 0 463.003 463.003"
+    >
       <path
         d="M359.418,189.996c12.73-3.407,35.161-10.159,42.347-17.101c5.774-5.578,7.161-13.759,3.62-21.351
           c-5.167-11.076-18.691-17.164-34.458-15.502c-10.467,1.102-33.561,7.968-58.011,15.238c-20.258,6.023-44.515,13.235-57.914,15.777
@@ -37,6 +43,10 @@ const MosquitoIcon = () => {
       />
     </svg>
   );
+};
+
+MosquitoIcon.propTypes = {
+  className: PropTypes.string
 };
 
 export default MosquitoIcon;

@@ -211,6 +211,7 @@ class Sample < ApplicationRecord
       file_list += list_outputs(sample_output_s3_path)
       file_list += list_outputs(pr.postprocess_output_s3_path)
       file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLY_DIR)
+      file_list += list_outputs(pr.expt_output_s3_path)
     else
       stage1_files = list_outputs(pr.host_filter_output_s3_path)
       stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
@@ -322,8 +323,9 @@ class Sample < ApplicationRecord
     host_genome && host_genome.default_background ? host_genome.default_background.id : Background.find_by(public_access: 1).id
   end
 
-  def as_json(_options = {})
-    super(methods: [:input_files, :host_genome_name])
+  def as_json(options = {})
+    options[:methods] = [:input_files, :host_genome_name, :private_until]
+    super(options)
   end
 
   def check_host_genome
@@ -386,7 +388,7 @@ class Sample < ApplicationRecord
       all
     else
       project_ids = Project.editable(user).select("id").pluck(:id)
-      joins("INNER JOIN projects ON samples.project_id = projects.id")
+      joins(:project)
         .where("(project_id in (?) or
                 projects.public_access = 1 or
                 DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < ?)",
@@ -419,10 +421,21 @@ class Sample < ApplicationRecord
   end
 
   def self.public_samples
-    joins("INNER JOIN projects ON samples.project_id = projects.id")
+    joins(:project)
       .where("(projects.public_access = 1 or
               DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < ?)",
              Time.current)
+  end
+
+  def self.samples_going_public_in_period(range, user = nil, project = nil)
+    query = joins(:project)
+            .where("projects.public_access != 1")
+            .where("DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) BETWEEN ? AND ?", range[0], range[1])
+
+    query = query.where(user: user) if user
+    query = query.where(project: project) if project
+
+    return query
   end
 
   def archive_old_pipeline_runs
@@ -503,21 +516,20 @@ class Sample < ApplicationRecord
       # Create the entry
       m = Metadatum.new
       m.key = key
-      m.data_type = Metadatum::KEY_TO_TYPE[key.to_sym]
       m.sample = self
+      # Fail if MetadataField doesn't exist
+      m.metadata_field = MetadataField.find_by!(name: key.to_s)
     end
     if val.blank?
       m.destroy
     else
       m.raw_value = val
-      begin
-        m.save!
-      rescue ActiveRecord::RecordInvalid
-        return false
-      end
+      m.save!
     end
-
     true
+  rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid => e
+    Rails.logger.error(e)
+    false
   end
 
   # Validate metadatum entry on this sample, without saving.
@@ -529,7 +541,6 @@ class Sample < ApplicationRecord
 
     m = Metadatum.new
     m.key = key
-    m.data_type = Metadatum::KEY_TO_TYPE[key.to_sym]
     m.sample = self
     m.raw_value = val
 
@@ -556,5 +567,23 @@ class Sample < ApplicationRecord
     from_path = "s3://idseq-samples-prod/#{sample_path}"
     to_path = "s3://idseq-samples-staging/#{sample_path}"
     Syscall.run("aws", "s3", "cp", "--recursive", from_path, to_path)
+  end
+
+  def private_until
+    return created_at + project.days_to_keep_sample_private.days
+  end
+
+  # Get Metadata objects augmented with MetadataField.base_type
+  def metadata_with_base_type
+    metadata.map do |m|
+      m.attributes.merge(
+        "base_type" => Metadatum.convert_type_to_string(m.metadata_field.base_type)
+      )
+    end
+  end
+
+  # Get field info for fields that are appropriate for both the project and the host genome
+  def metadata_fields_info
+    (project.metadata_fields & host_genome.metadata_fields).map(&:field_info)
   end
 end

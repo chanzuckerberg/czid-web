@@ -43,6 +43,14 @@ const getSampleMetadata = (id, pipelineVersion) => {
   );
 };
 
+// Get MetadataField info for the sample(s) (either one ID or an array)
+const getSampleMetadataFields = ids =>
+  get("/samples/metadata_fields", {
+    params: {
+      sampleIds: [ids].flat()
+    }
+  });
+
 const saveSampleMetadata = (id, field, value) =>
   postWithCSRF(`/samples/${id}/save_metadata_v2`, {
     field,
@@ -149,6 +157,7 @@ const uploadMetadataForProject = (id, metadata) =>
 export {
   get,
   getSampleMetadata,
+  getSampleMetadataFields,
   getSampleReportInfo,
   saveSampleMetadata,
   getMetadataTypesByHostGenomeName,

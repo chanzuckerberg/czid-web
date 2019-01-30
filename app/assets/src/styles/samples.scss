@@ -99,29 +99,6 @@ $break-large: 1070px;
   }
 }
 
-.project-menu {
-  li {
-    display: inline-block;
-    margin-left: 8px;
-    color: $dark-grey;
-    .material-icons {
-      position: relative;
-      top: 2px;
-      font-size: 16px;
-    }
-
-    &.add-member {
-      cursor: pointer;
-      color: $primary-light;
-    }
-    i {
-      &.material-icons {
-        color: $dark-grey;
-      }
-    }
-  }
-}
-
 .sample-container {
   [type="checkbox"].filled-in:not(:checked) + label:after,
   [type="checkbox"].filled-in + label:after {
@@ -681,18 +658,20 @@ input[type="button"] {
           padding: 0 16px;
           width: 100%;
           text-align: right;
-          ul.project-menu {
-            margin-bottom: 0;
-          }
         }
       }
 
       padding-top: 15px;
 
-      .button-container {
-        float: right;
-        padding-right: 10px;
-        padding-top: 20px;
+      .buttons-row {
+        .button-container {
+          float: right;
+          padding-top: 20px;
+
+          &:not(:last-child) {
+            margin-left: 10px;
+          }
+        }
       }
     }
   }

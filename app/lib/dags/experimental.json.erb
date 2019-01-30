@@ -4,9 +4,23 @@
   "targets": {
     "srst2_out": ["output.log", "output__genes__ARGannot_r2__results.txt", "output__fullgenes__ARGannot_r2__results.txt", "amr_processed_results.csv", "amr_summary_results.csv"],
     <% if @attribute_dict[:fastq2] %>
-      "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"]
+      "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
     <% else %>
-      "fastqs": ["<%= @attribute_dict[:fastq1] %>"]
+      "fastqs": ["<%= @attribute_dict[:fastq1] %>"],
+    <% end %>
+    "nonhost_fasta": ["refined_taxid_annot.fasta"],
+    <% if @attribute_dict[:file_type] == "fastq" %>
+      <% if @attribute_dict[:fastq2] %>
+        "nonhost_fastq_out": ["nonhost_R1.fastq", "nonhost_R2.fastq"]
+      <% else %>
+        "nonhost_fastq_out": ["nonhost_R1.fastq"]
+      <% end %>
+    <% else %>
+      <% if @attribute_dict[:fastq2] %>
+        "nonhost_fastq_out": ["nonhost_R1.fasta", "nonhost_R2.fasta"]
+      <% else %>
+        "nonhost_fastq_out": ["nonhost_R1.fasta"]
+      <% end %>
     <% end %>
   },
   "steps": [
@@ -19,13 +33,24 @@
       "additional_attributes": {
         "min_cov": 0,
         "n_threads": 16,
-        "file_type": "<%= @attribute_dict[:file_type] %>"
+        "file_ext": "<%= @attribute_dict[:file_ext] %>"
       }
+    },
+    {
+      "in": ["fastqs", "nonhost_fasta"],
+      "out": "nonhost_fastq_out",
+      "class": "PipelineStepNonhostFastq",
+      "module": "idseq_dag.steps.nonhost_fastq",
+      "additional_files": {},
+      "additional_attributes": {}
     }
   ],
   "given_targets": {
     "fastqs": {
       "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/fastqs"
+    },
+    "nonhost_fasta": {
+      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/postprocess/<%= @attribute_dict[:pipeline_version] %>/assembly"
     }
   }
 }

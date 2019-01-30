@@ -1,1 +1,18 @@
-$box-shadow-bottom-right: 2px 2px 5px $box-shadow-light;
+@import "~styles/themes/colors";
+
+$box-shadow-bottom-right: 0px 2px 8px $box-shadow-light;
+
+// Customized scroll bar
+.scrollable {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $transparent-light-grey;
+  }
+}

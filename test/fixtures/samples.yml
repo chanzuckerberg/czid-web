@@ -25,6 +25,7 @@ deletable_sample:
 joe_sample:
   name: sample Joe
   project: joe_project
+  host_genome: two
 
 six:
   name: RR004_water_2_S23-20180208

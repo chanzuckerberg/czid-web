@@ -57,3 +57,31 @@
 .nameHeader {
   position: relative;
 }
+
+.smallIcon {
+  height: 16px;
+  margin-right: 5px;
+  fill: black;
+
+  &User {
+    height: 14px;
+  }
+}
+
+.projectMenu {
+  display: flex;
+  margin-top: 14px;
+
+  .fillIn {
+    flex: 1;
+  }
+
+  &Item {
+    display: flex;
+    align-items: center;
+
+    &:not(:first-child) {
+      margin-left: 10px;
+    }
+  }
+}

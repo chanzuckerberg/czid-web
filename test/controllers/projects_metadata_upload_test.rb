@@ -17,7 +17,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
       metadata: [
         {
           'sample_name' => 'metadata_validation_sample_human',
-          'gender' => 'Female',
+          'sex' => 'Female',
           'age' => 100,
           'admission_date' => '2018-01-01'
         }
@@ -35,7 +35,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
     post upload_metadata_project_url(@metadata_validation_project), params: {
       metadata: [
         {
-          'gender' => 'Female',
+          'sex' => 'Female',
           'age' => 100,
           'admission_date' => '2018-01-01'
         }
@@ -55,7 +55,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
       metadata: [
         {
           'sample_name' => 'foobar',
-          'gender' => 'Female',
+          'sex' => 'Female',
           'age' => 100,
           'admission_date' => '2018-01-01'
         }
@@ -75,7 +75,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
       metadata: [
         {
           'sample_name' => 'metadata_validation_sample_human',
-          'gender' => 'foobar',
+          'sex' => 'foobar',
           'age' => 'foobar',
           'admission_date' => 'foobar'
         }
@@ -85,7 +85,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_equal 3, @response.parsed_body['errors'].length
-    assert_match MetadataUploadErrors.save_error('gender', 'foobar', 1), @response.parsed_body['errors'][0]
+    assert_match MetadataUploadErrors.save_error('sex', 'foobar', 1), @response.parsed_body['errors'][0]
     assert_match MetadataUploadErrors.save_error('age', 'foobar', 1), @response.parsed_body['errors'][1]
     assert_match MetadataUploadErrors.save_error('admission_date', 'foobar', 1), @response.parsed_body['errors'][2]
   end

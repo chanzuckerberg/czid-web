@@ -382,18 +382,4 @@ module SamplesHelper
       .pluck(:string_validated_value)
       .uniq
   end
-
-  def get_metadata_types_by_host_genome_name(host_genome_name)
-    metadata_keys = Metadatum.valid_keys_by_host_genome_name(host_genome_name)
-
-    metadata_keys.map do |key|
-      key_sym = key.to_sym
-      {
-        key: key,
-        dataType: Metadatum.convert_type_to_string(Metadatum::KEY_TO_TYPE[key_sym]),
-        name: Metadatum::KEY_TO_DISPLAY_NAME[key_sym],
-        options: Metadatum.get_string_options(key_sym, host_genome_name)
-      }
-    end
-  end
 end
