@@ -103,6 +103,7 @@ services:
     volumes:
       - .:/app:ro
       - ./log:/app/log
+      - ./tmp:/app/tmp
       - ~/.aws:/root/.aws:ro
       - ~/.aws/cli/cache:/root/.aws/cli/cache
     depends_on:
@@ -118,6 +119,7 @@ services:
     volumes:
       - .:/app:ro
       - ./log:/app/log
+      - ./tmp:/app/tmp
       - ~/.aws:/root/.aws:ro
       - ~/.aws/cli/cache:/root/.aws/cli/cache
     depends_on:
@@ -133,6 +135,7 @@ services:
     volumes:
       - .:/app:ro
       - ./log:/app/log
+      - ./tmp:/app/tmp
       - ~/.aws:/root/.aws:ro
       - ~/.aws/cli/cache:/root/.aws/cli/cache
     depends_on:
