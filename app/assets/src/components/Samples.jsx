@@ -946,14 +946,18 @@ class Samples extends React.Component {
 
     const search_box = (
       <div className="row search-box-row">
-        <div className="search-box">{search_field}</div>
-        <SearchBox
-          category
-          serverSearchAction="search_suggestions"
-          onResultSelect={this.handleSuggestSelect}
-          initialValue=""
-          placeholder=""
-        />
+        {this.admin !== 0 ||
+        this.allowedFeatures.includes("structuredSearch") ? (
+          <SearchBox
+            category
+            serverSearchAction="search_suggestions"
+            onResultSelect={this.handleSuggestSelect}
+            initialValue=""
+            placeholder=""
+          />
+        ) : (
+          <div className="search-box">{search_field}</div>
+        )}
         <div className="filter-container">
           <MultipleDropdown
             label="Hosts:"
