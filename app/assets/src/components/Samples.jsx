@@ -573,18 +573,18 @@ class Samples extends React.Component {
   }
 
   hasFilters = () => {
-    const {
-      filterParams,
-      searchParams,
-      selectedHostIndices,
-      selectedTissueFilters
-    } = this.state;
-    return (
-      filterParams.length > 0 ||
-      searchParams.length > 0 ||
-      selectedHostIndices.length > 0 ||
-      selectedTissueFilters.length > 0
-    );
+    const fields = [
+      "filterParams",
+      "searchParams",
+      "selectedHostIndices",
+      "selectedTissueFilters",
+      "selectedTaxids",
+      "selectedUploaderIds",
+      "sampleIdsParams"
+    ];
+    return fields.some(key => {
+      return this.state[key].length > 0;
+    });
   };
 
   allTissueTypes(all_tissues) {

@@ -62,8 +62,8 @@ class SamplesController < ApplicationController
 
     results = results.where(id: samples_query) if samples_query.present?
     results = results.where(project_id: project_id) if project_id.present?
-    results = results.where(user_id: params[:uploader].to_i) if params[:uploader].present?
-    results = filter_by_taxid(results, params[:taxid].to_i) if params[:taxid].present?
+    results = results.where(user_id: params[:uploader].split(",")) if params[:uploader].present?
+    results = filter_by_taxid(results, params[:taxid].split(",")) if params[:taxid].present?
 
     @count_project = results.size
 
