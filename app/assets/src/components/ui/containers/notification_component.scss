@@ -1,0 +1,70 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+
+.notification {
+  border-left: 5px solid $black;
+  border-radius: 5px;
+  box-shadow: $box-shadow-bottom-right;
+  color: $black;
+  display: flex;
+  font-family: $font-family-default;
+  font-size: $font-size;
+  padding: 14px 14px 14px 9px;
+
+  .content {
+  }
+
+  .icon {
+    flex-grow: 0;
+    margin-right: 14px;
+
+    svg {
+      width: 20px;
+    }
+  }
+
+  .actions {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-top: 14px;
+    text-transform: uppercase;
+  }
+
+  &.error {
+    border-color: $error;
+    background-color: $error-bg;
+
+    .icon {
+      fill: $error;
+    }
+  }
+
+  &.warn {
+    border-color: $warning;
+    background-color: $warning-bg;
+
+    .icon {
+      fill: $warning;
+    }
+  }
+
+  &.info {
+    border-color: $info;
+    background-color: $info-bg;
+
+    .icon {
+      fill: $info;
+    }
+  }
+
+  &.success {
+    border-color: $success;
+    background-color: $success-bg;
+
+    .icon {
+      fill: $success;
+    }
+  }
+}

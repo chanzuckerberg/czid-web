@@ -1,48 +1,47 @@
 import React from "react";
 import { mapValues, isArray, filter, includes } from "lodash";
 // TODO(mark): Refactor all calls to lodash/fp.
-import { set } from "lodash/fp";
+import { set, values } from "lodash/fp";
 import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 import DateInput from "~/components/ui/controls/DateInput";
 import MetadataSection from "./MetadataSection";
-import {
-  SAMPLE_ADDITIONAL_INFO,
-  HUMAN_METADATA_SECTIONS,
-  MOSQUITO_METADATA_SECTIONS,
-  VECTOR_METADATA_SECTIONS
-} from "./constants";
+import { SAMPLE_ADDITIONAL_INFO } from "./constants";
 import cs from "./sample_details_sidebar.scss";
 
 class MetadataTab extends React.Component {
   constructor(props) {
     super(props);
 
+    const sections = this.getMetadataSections();
     this.state = {
       sectionOpen: {
         // Open the first section by default.
-        [this.getMetadataSections()[0].name]: true
+        [sections[0].name]: true
       },
-      sectionEditing: {}
+      sectionEditing: {},
+      sections
     };
   }
 
   getMetadataSections = () => {
-    if (
-      this.props.additionalInfo.host_genome_name.toLowerCase().includes("human")
-    ) {
-      return HUMAN_METADATA_SECTIONS;
-    }
+    // Group the MetadataFields by group name
+    // Include Sample Info by default so that special cases in SAMPLE_ADDITIONAL_INFO always show
+    let nameToFields = { "Sample Info": [] };
+    values(this.props.metadataTypes).forEach(field => {
+      const name = field.group + " Info";
+      if (nameToFields.hasOwnProperty(name)) {
+        nameToFields[name].push(field.key);
+      } else {
+        nameToFields[name] = [field.key];
+      }
+    });
 
-    if (
-      this.props.additionalInfo.host_genome_name
-        .toLowerCase()
-        .includes("mosquito")
-    ) {
-      return MOSQUITO_METADATA_SECTIONS;
-    }
-    return VECTOR_METADATA_SECTIONS;
+    // Format as [{name: "Sample Info", keys: ["sample_type"], {name: "Host Info", keys: ["age"]}]
+    return Object.entries(nameToFields).map(entry => {
+      return { name: entry[0], keys: entry[1].sort() };
+    });
   };
 
   toggleSection = section => {
@@ -143,6 +142,8 @@ class MetadataTab extends React.Component {
       includes(Object.keys(metadataTypes), key)
     );
     const isSectionEditing = sectionEditing[section.name];
+
+    // TODO: Consider refactoring so SAMPLE_ADDITIONAL_INFO doesn't have to be special.
     return (
       <div>
         {/* Special section for Sample Info */}
@@ -192,7 +193,7 @@ class MetadataTab extends React.Component {
   render() {
     return (
       <div>
-        {this.getMetadataSections().map(section => (
+        {this.state.sections.map(section => (
           <MetadataSection
             key={section.name}
             editable={this.props.additionalInfo.editable}

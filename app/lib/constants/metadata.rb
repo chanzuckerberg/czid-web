@@ -1,5 +1,9 @@
 # Errors and warnings for metadata.
 module MetadataValidationErrors
+  def self.missing_sample
+    "Sample not found, may have been deleted"
+  end
+
   def self.missing_sample_name_column
     "sample_name column is required"
   end

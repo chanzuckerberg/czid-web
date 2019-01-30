@@ -1,6 +1,7 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const TickIcon = () => {
+const TickIcon = props => {
   return (
     <svg
       version="1.1"
@@ -8,6 +9,7 @@ const TickIcon = () => {
       x="0px"
       y="0px"
       viewBox="0 0 611.998 611.998"
+      className={props.className}
     >
       <g>
         <path
@@ -47,6 +49,10 @@ const TickIcon = () => {
       </g>
     </svg>
   );
+};
+
+TickIcon.propTypes = {
+  className: PropTypes.string
 };
 
 export default TickIcon;

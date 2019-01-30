@@ -1,0 +1,62 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.projectSettingsTrigger {
+  color: $primary-light;
+  cursor: pointer;
+}
+
+.projectSettingsContent {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .title {
+    font-size: $font-size-h4;
+
+    .highlight {
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  .projectVisibility {
+    margin-bottom: 10px;
+
+    .visibility {
+      color: $medium-grey;
+      display: flex;
+      align-items: center;
+      font-weight: $font-weight-semibold;
+      margin-top: 8px;
+      height: 22px;
+
+      .icon {
+        width: 14px;
+        height: 14px;
+        fill: $medium-grey;
+      }
+
+      .label {
+        margin-left: 8px;
+      }
+
+      .toggle {
+        margin-left: 10px;
+        color: $primary-light;
+        cursor: pointer;
+      }
+    }
+
+    .note {
+      margin-top: 4px;
+      font-size: $font-size-small;
+    }
+  }
+
+  .userManagementFormContainer {
+    height: 300px;
+    margin-top: 10px;
+    flex: 1;
+    display: flex;
+  }
+}

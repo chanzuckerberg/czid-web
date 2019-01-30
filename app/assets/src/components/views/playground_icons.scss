@@ -1,0 +1,50 @@
+@import "~styles/themes/colors";
+
+.playgroundIcons {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 36px;
+  line-height: 1.4em;
+  padding: 0 5px;
+  padding-top: 20px;
+}
+
+.iconContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 120px;
+  max-height: 120px;
+  padding: 10px;
+
+  .icon {
+    width: 50px;
+    height: 50px;
+    fill: $primary-light;
+  }
+
+  .loadingIcon {
+    background-color: $black;
+    width: 100px;
+    height: 100px;
+  }
+
+  .faIconContainer {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .iconLabel {
+    font-size: 16px;
+    margin-top: 5px;
+    letter-spacing: 0.4px;
+    color: $dark-grey;
+  }
+}
