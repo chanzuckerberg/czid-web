@@ -39,6 +39,8 @@ class SearchBoxList extends React.Component {
   };
 
   sortOptions(options, selected) {
+    const sortByLabel = (a, b) => (a.label > b.label ? 1 : -1);
+
     // TODO(tcarvalho): review data structures to simplify this function
     let selectedOptions = {};
     let unselectedOptions = [];
@@ -49,11 +51,11 @@ class SearchBoxList extends React.Component {
         unselectedOptions.push(option);
       }
     });
-    unselectedOptions.sort((a, b) => (a.label > b.label ? 1 : -1));
+    unselectedOptions.sort(sortByLabel);
 
     return Array.from(selected)
       .map(optionValue => selectedOptions[optionValue])
-      .sort((a, b) => (a.label > b.label ? 1 : -1))
+      .sort(sortByLabel)
       .concat(unselectedOptions);
   }
 

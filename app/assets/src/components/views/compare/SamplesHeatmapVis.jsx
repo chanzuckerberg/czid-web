@@ -224,12 +224,14 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   getSelectedMetadata() {
+    const sortByLabel = (a, b) => (a.label > b.label ? 1 : -1);
+
     return Array.from(this.state.selectedMetadata)
       .filter(metadatum => !!this.metadataTypes[metadatum])
       .map(metadatum => {
         return { value: metadatum, label: this.metadataTypes[metadatum].name };
       })
-      .sort((a, b) => (a.label > b.label ? 1 : -1));
+      .sort(sortByLabel);
   }
 
   getAvailableMetadataOptions() {
