@@ -17,7 +17,6 @@ import {
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
-import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import PathogenPreview from "./views/report/PathogenPreview";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
