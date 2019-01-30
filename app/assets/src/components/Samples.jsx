@@ -113,6 +113,9 @@ class Samples extends React.Component {
       selectedTissueFilters: this.fetchParams("tissue")
         ? this.fetchParams("tissue").split(",")
         : [],
+      sampleIdsParams: this.fetchParams("ids")
+        ? this.fetchParams("ids").split(",")
+        : [],
       selectedHostIndices: this.fetchParams("host")
         ? this.fetchParams("host")
             .split(",")
@@ -559,7 +562,7 @@ class Samples extends React.Component {
       params += `&project_id=${projectId}`;
     }
     if (this.state.sampleIdsParams.length) {
-      let sampleParams = this.state.sampleIdsParams;
+      let sampleParams = this.state.sampleIdsParams.join(",");
       params += `&ids=${sampleParams}`;
     }
 
@@ -1061,7 +1064,15 @@ class Samples extends React.Component {
         });
       }
 
-      if (this.state.hostFilterChange || this.state.tissueFilterChange) {
+      let sampleIdsParamsChange =
+        prevState.sampleIdsParams.toString() !==
+        this.state.sampleIdsParams.toString();
+
+      if (
+        this.state.hostFilterChange ||
+        this.state.tissueFilterChange ||
+        sampleIdsParamsChange
+      ) {
         this.setUrlLocation();
         this.fetchResults();
         this.state.hostFilterChange = false;
@@ -1168,7 +1179,7 @@ class Samples extends React.Component {
         value_when_empty
       ),
       search: this.state.searchParams,
-      ids: this.state.sampleIdsParams,
+      ids: this.selectionToParamsOrNone(this.state.sampleIdsParams),
       sort_by: this.state.sort_by,
       type: this.state.projectType
     };

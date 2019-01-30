@@ -53,8 +53,8 @@ class SamplesController < ApplicationController
     page = params[:page]
     tissue_type_query = params[:tissue].split(',') if params[:tissue].present?
     host_query = params[:host].split(',') if params[:host].present?
+    samples_query = params[:ids].split(',') if params[:ids].present?
     sort = params[:sort_by]
-    samples_query = JSON.parse(params[:ids]) if params[:ids].present?
 
     results = current_power.samples
 

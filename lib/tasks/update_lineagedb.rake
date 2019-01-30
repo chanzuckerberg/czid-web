@@ -75,6 +75,10 @@ task update_lineage_db: :environment do
   TaxonLineage.where(started_at: current_date).update_all(version_start: current_lineage_version) # rubocop:disable Rails/SkipsModelValidations
   TaxonLineage.where(ended_at: TaxonLineage.column_defaults["ended_at"]).update_all(version_end: current_lineage_version) # rubocop:disable Rails/SkipsModelValidations
 
+  ## Update Elasticsearch index
+  ## TODO: test if this works
+  TaxonLineage.__elasticsearch__.refresh_index!
+
   ## Instructions on next steps
   raise "lineage database update failed" unless $CHILD_STATUS.success?
   puts "To complete this lineage update, you should now update PHAGE_FAMILIES_TAXIDS and PHAGE_TAXIDS in TaxonLineageHelper using the queries described therein."
