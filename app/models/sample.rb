@@ -207,6 +207,7 @@ class Sample < ApplicationRecord
       file_list += list_outputs(sample_output_s3_path)
       file_list += list_outputs(pr.postprocess_output_s3_path)
       file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLY_DIR)
+      file_list += list_outputs(pr.expt_output_s3_path)
     else
       stage1_files = list_outputs(pr.host_filter_output_s3_path)
       stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
