@@ -49,8 +49,11 @@ class SearchBoxList extends React.Component {
         unselectedOptions.push(option);
       }
     });
+    unselectedOptions.sort((a, b) => (a.label > b.label ? 1 : -1));
+
     return Array.from(selected)
       .map(optionValue => selectedOptions[optionValue])
+      .sort((a, b) => (a.label > b.label ? 1 : -1))
       .concat(unselectedOptions);
   }
 
