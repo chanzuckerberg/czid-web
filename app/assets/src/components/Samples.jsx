@@ -183,7 +183,7 @@ class Samples extends React.Component {
       this.selectTissueFilter([result.id]);
     } else if (result.category == "Host") {
       this.selectHostFilter([result.id]);
-    } else if (result.category == "Sample") {
+    } else if (result.category == "Sample" || result.category == "Location") {
       this.setState({ sampleIdsParams: result.sample_ids }, () =>
         this.setUrlLocation()
       );

@@ -128,7 +128,7 @@ class SamplesController < ApplicationController
     # TODO: filter by permissions
     samples = prefix_match(Sample, "name", query)
     tissues = prefix_match(Metadatum, "string_validated_value", query).where(key: "sample_type")
-    # locations = prefix_match(Metadatum, "string_validated_value", query).where(key: "collection_location")
+    locations = prefix_match(Metadatum, "string_validated_value", query).where(key: "collection_location")
     hosts = HostGenome.where("name LIKE :search", search: "#{query}%")
     users = prefix_match(User, "name", query)
 
@@ -143,12 +143,12 @@ class SamplesController < ApplicationController
         { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id) }
       end
     }
-    # results["Location"] = {
-    #  "name" => "Location",
-    #  "results" => locations.group_by(&:string_validated_value).map do |val, metadata|
-    #    { "category" => "Location", "title" => val, "id" => val, "sample_ids" => metadata.pluck(:sample_id) }
-    #  end
-    # }
+    results["Location"] = {
+      "name" => "Location",
+      "results" => locations.group_by(&:string_validated_value).map do |val, metadata|
+                     { "category" => "Location", "title" => val, "id" => val, "sample_ids" => metadata.pluck(:sample_id) }
+                   end
+    }
     results["Tissue"] = {
       "name" => "Tissue",
       "results" => tissues.group_by(&:string_validated_value).map do |val, metadata|
