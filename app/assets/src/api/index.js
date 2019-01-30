@@ -154,6 +154,11 @@ const uploadMetadataForProject = (id, metadata) =>
     metadata
   });
 
+const getOfficialMetadataFields = () =>
+  get("/metadata/official_metadata_fields");
+
+const getAllHostGenomes = () => get("/host_genomes.json");
+
 export {
   get,
   getSampleMetadata,
@@ -169,5 +174,7 @@ export {
   getSummaryContigCounts,
   createSample,
   validateMetadataCSVForProject,
-  uploadMetadataForProject
+  uploadMetadataForProject,
+  getOfficialMetadataFields,
+  getAllHostGenomes
 };
