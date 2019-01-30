@@ -93,7 +93,9 @@ class Samples extends React.Component {
       selectedProjectId: this.fetchParams("project_id") || null,
       filterParams: this.fetchParams("filter") || "",
       searchParams: this.fetchParams("search") || "",
-      sampleIdsParams: this.fetchParams("ids") || [],
+      sampleIdsParams: this.fetchParams("ids")
+        ? this.fetchParams("ids").split(",")
+        : [],
       // The list of fetched sample ids, in the order to be displayed
       fetchedSampleIds: [],
       // A map of fetched sample id to sample data.
@@ -110,11 +112,13 @@ class Samples extends React.Component {
       readySampleIdsForFilter: [],
       selectedSampleIds: [],
       displayDropdown: false,
+
+      // For structured search suggestions
+      selectedTaxid: this.fetchParams("taxid") || "",
+      selectedUploaderId: this.fetchParams("selectedUploaderId") || "",
+
       selectedTissueFilters: this.fetchParams("tissue")
         ? this.fetchParams("tissue").split(",")
-        : [],
-      sampleIdsParams: this.fetchParams("ids")
-        ? this.fetchParams("ids").split(",")
         : [],
       selectedHostIndices: this.fetchParams("host")
         ? this.fetchParams("host")
@@ -181,6 +185,14 @@ class Samples extends React.Component {
       this.selectHostFilter([result.id]);
     } else if (result.category == "Sample") {
       this.setState({ sampleIdsParams: result.sample_ids }, () =>
+        this.setUrlLocation()
+      );
+    } else if (result.category == "Taxon") {
+      this.setState({ selectedTaxid: result.taxid }, () =>
+        this.setUrlLocation()
+      );
+    } else if (result.category == "Uploader") {
+      this.setState({ selectedUploaderId: result.id }, () =>
         this.setUrlLocation()
       );
     }
@@ -1068,14 +1080,20 @@ class Samples extends React.Component {
         });
       }
 
-      let sampleIdsParamsChange =
-        prevState.sampleIdsParams.toString() !==
-        this.state.sampleIdsParams.toString();
+      let searchFilterChange = [
+        "sampleIdsParams",
+        "selectedTaxid",
+        "selectedUploaderId"
+      ].some(param => {
+        return (
+          prevState[param].toString() !== this.state.sampleIdsParams.toString()
+        );
+      });
 
       if (
         this.state.hostFilterChange ||
         this.state.tissueFilterChange ||
-        sampleIdsParamsChange
+        searchFilterChange
       ) {
         this.setUrlLocation();
         this.fetchResults();
@@ -1184,6 +1202,8 @@ class Samples extends React.Component {
       ),
       search: this.state.searchParams,
       ids: this.selectionToParamsOrNone(this.state.sampleIdsParams),
+      taxid: this.state.selectedTaxid,
+      uploader: this.state.selectedUploaderId,
       sort_by: this.state.sort_by,
       type: this.state.projectType
     };

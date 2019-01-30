@@ -126,25 +126,27 @@ class SamplesController < ApplicationController
     # TODO: filter by permissions
     samples = prefix_match(Sample, "name", query)
     tissues = prefix_match(Metadatum, "string_validated_value", query).where(key: "sample_type")
-    locations = prefix_match(Metadatum, "string_validated_value", query).where(key: "collection_location")
+    # locations = prefix_match(Metadatum, "string_validated_value", query).where(key: "collection_location")
     hosts = HostGenome.where("name LIKE :search", search: "#{query}%")
     users = prefix_match(User, "name", query)
 
     results = {}
     results["Taxon"] = { "name" => "Taxon",
-                         "results" => taxon_list }
+                         "results" => taxon_list.map do |entry|
+                           entry.merge("category" => "Taxon")
+                         end }
     results["Sample"] = {
       "name" => "Sample",
       "results" => samples.group_by(&:name).map do |val, records|
         { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id) }
       end
     }
-    results["Location"] = {
-      "name" => "Location",
-      "results" => locations.group_by(&:string_validated_value).map do |val, metadata|
-        { "category" => "Location", "title" => val, "id" => val, "sample_ids" => metadata.pluck(:sample_id) }
-      end
-    }
+    # results["Location"] = {
+    #  "name" => "Location",
+    #  "results" => locations.group_by(&:string_validated_value).map do |val, metadata|
+    #    { "category" => "Location", "title" => val, "id" => val, "sample_ids" => metadata.pluck(:sample_id) }
+    #  end
+    # }
     results["Tissue"] = {
       "name" => "Tissue",
       "results" => tissues.group_by(&:string_validated_value).map do |val, metadata|
@@ -157,10 +159,10 @@ class SamplesController < ApplicationController
         { "category" => "Host", "title" => h.name, "id" => h.id }
       end
     }
-    results["User"] = {
-      "name" => "User",
+    results["Uploader"] = {
+      "name" => "Uploader",
       "results" => users.index_by(&:name).map do |_, u|
-        { "category" => "User", "title" => u.name, "id" => u.id }
+        { "category" => "Uploader", "title" => u.name, "id" => u.id }
       end
     }
     render json: JSON.dump(results)
