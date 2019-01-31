@@ -135,40 +135,52 @@ class SamplesController < ApplicationController
     users = prefix_match(User, "name", query)
 
     results = {}
-    results["Taxon"] = { "name" => "Taxon",
-                         "results" => taxon_list.map do |entry|
-                           entry.merge("category" => "Taxon")
-                         end }
-    results["Sample"] = {
-      "name" => "Sample",
-      "results" => samples.group_by(&:name).map do |val, records|
-        { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id) }
-      end
-    }
-    results["Location"] = {
-      "name" => "Location",
-      "results" => locations.group_by(&:string_validated_value).map do |val, metadata|
-                     { "category" => "Location", "title" => val, "id" => val, "sample_ids" => metadata.pluck(:sample_id) }
-                   end
-    }
-    results["Tissue"] = {
-      "name" => "Tissue",
-      "results" => tissues.group_by(&:string_validated_value).map do |val, metadata|
-        { "category" => "Tissue", "title" => val, "id" => val, "sample_ids" => metadata.pluck(:sample_id) }
-      end
-    }
-    results["Host"] = {
-      "name" => "Host",
-      "results" => hosts.map do |h|
-        { "category" => "Host", "title" => h.name, "id" => h.id }
-      end
-    }
-    results["Uploader"] = {
-      "name" => "Uploader",
-      "results" => users.index_by(&:name).map do |_, u|
-        { "category" => "Uploader", "title" => u.name, "id" => u.id }
-      end
-    }
+    unless taxon_list.empty?
+      results["Taxon"] = { "name" => "Taxon",
+                           "results" => taxon_list.map do |entry|
+                             entry.merge("category" => "Taxon")
+                           end }
+    end
+    unless samples.empty?
+      results["Sample"] = {
+        "name" => "Sample",
+        "results" => samples.group_by(&:name).map do |val, records|
+          { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id) }
+        end
+      }
+    end
+    unless locations.empty?
+      results["Location"] = {
+        "name" => "Location",
+        "results" => locations.group_by(&:string_validated_value).map do |val, metadata|
+                       { "category" => "Location", "title" => val, "id" => val, "sample_ids" => metadata.pluck(:sample_id) }
+                     end
+      }
+    end
+    unless tissues.empty?
+      results["Tissue"] = {
+        "name" => "Tissue",
+        "results" => tissues.group_by(&:string_validated_value).map do |val, metadata|
+          { "category" => "Tissue", "title" => val, "id" => val, "sample_ids" => metadata.pluck(:sample_id) }
+        end
+      }
+    end
+    unless hosts.empty?
+      results["Host"] = {
+        "name" => "Host",
+        "results" => hosts.map do |h|
+          { "category" => "Host", "title" => h.name, "id" => h.id }
+        end
+      }
+    end
+    unless users.empty?
+      results["Uploader"] = {
+        "name" => "Uploader",
+        "results" => users.index_by(&:name).map do |_, u|
+          { "category" => "Uploader", "title" => u.name, "id" => u.id }
+        end
+      }
+    end
     render json: JSON.dump(results)
   end
 

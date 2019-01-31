@@ -14,6 +14,7 @@ class SearchBox extends React.Component {
 
     this.placeholder = this.props.placeholder;
     this.handleResultSelect = this.handleResultSelect.bind(this);
+    this.blankState = { isLoading: false, results: [], value: "" };
 
     this.state = {
       isLoading: false,
@@ -31,6 +32,10 @@ class SearchBox extends React.Component {
     this.setState({ isLoading: true, value });
 
     setTimeout(async () => {
+      if (this.state.value.length == 0) {
+        this.setState(this.blankState);
+        return;
+      }
       if (this.state.value.length < this.minChars) return;
 
       let searchResults;

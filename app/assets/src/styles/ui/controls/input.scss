@@ -26,3 +26,12 @@
     }
   }
 }
+
+:global(.search) {
+  :global(.category),
+  :global(.name),
+  :global(.results.visible) {
+    /* Overwrite semantic-ui */
+    display: block !important;
+  }
+}
