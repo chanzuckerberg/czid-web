@@ -75,4 +75,18 @@ class MetadataField < ApplicationRecord
   # When a user creates a new project, they'll basically get a list of all the meta-fields marked
   # "default". Then they can add and subtract from their set of meta-fields from there.
   # create_join_table :projects, :metadata_fields
+
+  # Important attributes for the frontend
+  def field_info
+    {
+      key: name,
+      dataType: Metadatum.convert_type_to_string(base_type),
+      name: display_name,
+      options: options && JSON.parse(options),
+      group: group,
+      host_genome_ids: host_genome_ids,
+      description: description,
+      is_required: is_required
+    }
+  end
 end

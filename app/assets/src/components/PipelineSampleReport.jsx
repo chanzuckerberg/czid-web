@@ -17,7 +17,6 @@ import {
 import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
-import BetaLabel from "./ui/labels/BetaLabel";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import PathogenPreview from "./views/report/PathogenPreview";
 import ReportInsightIcon from "./views/report/ReportInsightIcon";
@@ -1290,11 +1289,7 @@ class RenderMarkup extends React.Component {
               <Icon name="fork" />
             </Menu.Item>
           }
-          content={
-            <div>
-              Taxonomic Tree View <BetaLabel />
-            </div>
-          }
+          content={<div>Taxonomic Tree View</div>}
           inverted
         />
       </Menu>

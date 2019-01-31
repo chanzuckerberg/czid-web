@@ -13,6 +13,7 @@ class CreateUser extends React.Component {
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
     this.handlePConfirmChange = this.handlePConfirmChange.bind(this);
+    this.handleInstitutionChange = this.handleInstitutionChange.bind(this);
     this.clearError = this.clearError.bind(this);
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.selectedUser = {

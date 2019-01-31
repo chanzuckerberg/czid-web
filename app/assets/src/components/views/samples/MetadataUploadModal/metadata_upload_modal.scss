@@ -1,3 +1,5 @@
+@import "~styles/themes/colors";
+
 .metadataUploadModal {
   min-height: 500px;
 
@@ -8,6 +10,7 @@
 
 .metadataCSVUpload {
   margin-top: 40px;
+  margin-bottom: 20px;
 
   &.hasIssues {
     height: 400px;
@@ -17,4 +20,48 @@
 .tableContainer {
   overflow: auto;
   max-height: 300px;
+}
+
+.uploadPage {
+  .link {
+    // Overwrite <a> inherit rule in header.scss
+    color: $primary-light !important;
+    cursor: pointer;
+  }
+}
+
+.uploadInstructions {
+  .backButton {
+    color: $primary-light;
+    letter-spacing: 0.4px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .title {
+    font-size: 22px;
+    letter-spacing: 0.4px;
+    line-height: 30px;
+  }
+
+  .sectionTitle {
+    margin-top: 40px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .section {
+    padding-left: 16px;
+    line-height: 25px;
+
+    li {
+      padding-left: 2px;
+    }
+
+    .link {
+      // Overwrite <a> inherit rule in header.scss
+      color: $primary-light !important;
+      cursor: pointer;
+    }
+  }
 }

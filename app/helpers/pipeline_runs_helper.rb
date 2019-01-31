@@ -5,6 +5,7 @@ module PipelineRunsHelper
     PipelineRunStage::HOST_FILTERING_STAGE_NAME => {
       "stage" => "Filter out host reads and conduct quality control.",
       "steps" => {
+        "validate_input_out" => "Validates the input files and truncates to max fragments.",
         "star_out" => "Remove host reads using STAR.",
         "trimmomatic_out" => "Trim Illumina adapters using trimmomatic.",
         "priceseq_out" => "Remove low-quality reads using PriceSeqFilter.",
@@ -40,6 +41,12 @@ module PipelineRunsHelper
         "contig_summary_out" => "Record statistics on the assembled contigs.",
         "refined_annotated_out" => "Annotate non-host FASTA with NCBI accession IDs after the BLAST-based match refinement.",
         "refined_taxid_locator_out" => "Annotate non-host FASTA with revised Taxonomy IDs after the BLAST-based match refinement."
+      }
+    },
+    PipelineRunStage::EXPT_STAGE_NAME => {
+      "stage" => "Generate additional experimental output.",
+      "steps" => {
+        "nonhost_fastq_out" => "Filter original fastq/fasta input files to only contain non-host reads processed by IdSeq."
       }
     }
   }.freeze

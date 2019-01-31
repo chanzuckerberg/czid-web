@@ -15,12 +15,13 @@ class SamplesController < ApplicationController
   ##########################################
   skip_before_action :verify_authenticity_token, only: [:create, :update]
 
+  # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap,
-                   :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :samples_going_public].freeze
+                   :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields, :samples_going_public].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
@@ -31,6 +32,7 @@ class SamplesController < ApplicationController
   current_power do # Put this here for CLI
     Power.new(current_user)
   end
+  # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
   power :samples, map: { EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
 
   before_action :set_sample, only: READ_ACTIONS + EDIT_ACTIONS
@@ -207,7 +209,8 @@ class SamplesController < ApplicationController
     end
 
     render json: {
-      metadata: @sample.metadata,
+      # Pass down base_type for the frontend
+      metadata: @sample.metadata_with_base_type,
       additional_info: {
         name: @sample.name,
         editable: editable,
@@ -223,27 +226,50 @@ class SamplesController < ApplicationController
     }
   end
 
+  # Get MetadataFields for the array of sampleIds (could be 1)
+  def metadata_fields
+    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+
+    if sample_ids.length == 1
+      @sample = current_power.viewable_samples.find(sample_ids[0])
+      results = @sample.metadata_fields_info
+    else
+      # Get the MetadataFields that are on the Samples' Projects and HostGenomes
+      samples = current_power.viewable_samples.where(id: sample_ids)
+      project_ids = samples.distinct.pluck(:project_id)
+      host_genome_ids = samples.distinct.pluck(:host_genome_id)
+
+      project_fields = Project.where(id: project_ids).map(&:metadata_fields)
+      host_genome_fields = HostGenome.where(id: host_genome_ids).map(&:metadata_fields)
+      results = (project_fields.flatten & host_genome_fields.flatten).map(&:field_info)
+    end
+
+    render json: results
+  end
+
   # POST /samples/1/save_metadata_v2
   def save_metadata_v2
-    @sample.metadatum_add_or_update(params[:field], params[:value])
-    render json: {
-      status: "success",
-      message: "Saved successfully"
-    }
-  rescue
-    error_messages = @sample ? @sample.errors.full_messages : []
-    render json: {
-      status: 'failed',
-      message: 'Unable to update sample',
-      errors: error_messages
-    }
+    saved = @sample.metadatum_add_or_update(params[:field], params[:value])
+    if saved
+      render json: {
+        status: "success",
+        message: "Saved successfully"
+      }
+    else
+      error_messages = @sample ? @sample.errors.full_messages : []
+      render json: {
+        status: 'failed',
+        message: 'Unable to update sample',
+        errors: error_messages
+      }
+    end
   end
 
   # GET /samples/metadata_types_by_host_genome_name
   def metadata_types_by_host_genome_name
     metadata_types_by_host_genome_name = {}
-    HostGenome.all.pluck(:name).each do |host_genome_name|
-      metadata_types_by_host_genome_name[host_genome_name] = get_metadata_types_by_host_genome_name(host_genome_name)
+    HostGenome.all.each do |hg|
+      metadata_types_by_host_genome_name[hg.name] = hg.metadata_fields.map(&:field_info)
     end
 
     render json: metadata_types_by_host_genome_name
@@ -337,7 +363,7 @@ class SamplesController < ApplicationController
   end
 
   def samples_going_public
-    ahead = params[:ahead].to_i || 10
+    ahead = (params[:ahead] || 10).to_i
     behind = params[:behind].to_i
 
     start = Time.current - behind.days

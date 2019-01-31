@@ -1,0 +1,75 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.userManagementForm {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+
+  .title {
+    display: flex;
+    align-items: center;
+    font-size: $font-size-h5;
+    font-weight: $font-weight-semibold;
+    min-height: 20px;
+
+    .icon {
+      margin-right: 10px;
+      height: 20px;
+    }
+  }
+
+  .userList {
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+
+    .userEntry {
+      font-size: $font-size;
+      line-height: 25px;
+    }
+  }
+
+  .addMemberForm {
+    margin-top: 5px;
+    display: flex;
+
+    .addMemberFormField:not(:first-child) {
+      margin-left: 10px;
+    }
+
+    .addMemberFormField:not(:last-child) {
+      flex-grow: 1;
+    }
+
+    .addMemberFormField:last-child {
+      flex: 0 0 auto;
+    }
+  }
+
+  .fillIn {
+    flex: 1;
+  }
+
+  .statusMessage {
+    margin-top: 10px;
+    height: 16px;
+    font-size: $font-size-small;
+
+    &.errorMessage {
+      color: $error;
+    }
+
+    &.infoMessage {
+      color: $dark-grey;
+    }
+
+    &.successMessage {
+      color: $success;
+    }
+  }
+}

@@ -6,6 +6,11 @@ class HostGenomesController < ApplicationController
   # GET /host_genomes.json
   def index
     @host_genomes = HostGenome.all
+
+    respond_to do |format|
+      format.html { render :index }
+      format.json { render json: @host_genomes }
+    end
   end
 
   # GET /host_genomes/1

@@ -12,13 +12,25 @@ class Modal extends React.Component {
   }
 
   render() {
+    const {
+      fixedHeight,
+      narrow,
+      narrowest,
+      tall,
+      className,
+      ...extraProps
+    } = this.props;
+
     return (
       <SemanticModal
-        {...this.props}
+        {...extraProps}
         className={cx(
           cs.modal,
-          this.props.className,
-          this.props.tall && cs.tall
+          className,
+          narrow && cs.narrow,
+          narrowest && cs.narrowest,
+          tall && cs.tall,
+          fixedHeight && cs.fixedHeight
         )}
         trigger={<span />}
       >
@@ -39,11 +51,14 @@ Modal.propTypes = forbidExtraProps({
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node
   ]).isRequired,
-  onClose: PropTypes.func,
-  title: PropTypes.string,
-  open: PropTypes.bool,
   className: PropTypes.string,
-  tall: PropTypes.bool // Increase the max-height of the Modal for tall content.
+  onClose: PropTypes.func,
+  open: PropTypes.bool,
+  fixedHeight: PropTypes.bool,
+  narrow: PropTypes.bool, // Decrease the width of the Modal for smaller modals.
+  narrowest: PropTypes.bool, // Decrease the width of the Modal for the smallest modals.
+  tall: PropTypes.bool, // Increase the max-height of the Modal for tall content.
+  title: PropTypes.string
 });
 
 export default Modal;

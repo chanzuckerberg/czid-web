@@ -84,6 +84,11 @@ const SummaryStats = PropTypes.shape({
   last_processed_at: PropTypes.string
 });
 
+const HostGenome = PropTypes.shape({
+  id: PropTypes.number,
+  name: PropTypes.string
+});
+
 export default {
   ReportDetails,
   Taxon,
@@ -94,5 +99,6 @@ export default {
   PipelineRun,
   Project,
   SummaryStats,
+  HostGenome,
   ...PropTypes
 };
