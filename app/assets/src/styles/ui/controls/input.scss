@@ -5,12 +5,9 @@
   input[type="number"] {
     height: 34px;
     font-size: 13px;
+    border-radius: 4px;
     box-sizing: border-box;
     border: 1px solid $light-grey;
-
-    :not(.rounded) {
-      border-radius: 4px;
-    }
 
     &:focus {
       border: 1px solid $primary-light;
@@ -24,14 +21,5 @@
     input[type="text"] {
       border: 1px solid red;
     }
-  }
-}
-
-:global(.search) {
-  :global(.category),
-  :global(.name),
-  :global(.results.visible) {
-    /* Overwrite semantic-ui */
-    display: block !important;
   }
 }

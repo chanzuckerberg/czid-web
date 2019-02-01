@@ -1,0 +1,39 @@
+@import "~styles/themes/colors";
+
+:global(.prompt) {
+  width: 260px !important;
+  border-radius: 19px !important;
+}
+
+:global(.search) {
+  :global(.category),
+  :global(.name),
+  :global(.results.visible),
+  :global(.result) {
+    /* Overwrite semantic-ui */
+    display: block !important;
+    border-bottom: none !important;
+  }
+  :global(.category) {
+    background: none !important;
+    border-bottom: none !important;
+  }
+  :global(.name) {
+    text-transform: uppercase !important;
+    font-size: 12px !important;
+    padding-left: 16px !important;
+  }
+  :global(.results) {
+    border-left: none !important;
+  }
+  :global(.result) {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+  :global(.title) {
+    font-weight: normal !important;
+  }
+  :global(.description) {
+    font-size: 10px !important;
+  }
+}

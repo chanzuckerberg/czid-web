@@ -60,9 +60,7 @@ class SearchBox extends React.Component {
     const { isLoading, value, results } = this.state;
     return (
       <Search
-        className={`idseq-ui input search ${
-          this.props.rounded ? "rounded" : ""
-        }`}
+        className="idseq-ui input search"
         loading={isLoading}
         category={this.props.category}
         onSearchChange={debounce(

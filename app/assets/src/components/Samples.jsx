@@ -33,7 +33,7 @@ import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import TableColumnHeader from "./views/samples/TableColumnHeader";
 import PipelineStatusFilter from "./views/samples/PipelineStatusFilter";
 import ProjectUploadMenu from "./views/samples/ProjectUploadMenu";
-import SearchBox from "./ui/controls/SearchBox";
+import CategorySearchBox from "./ui/controls/CategorySearchBox";
 import ProjectSettingsModal from "./views/samples/ProjectSettingsModal";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
@@ -1000,9 +1000,7 @@ class Samples extends React.Component {
     const search_box =
       this.admin !== 0 || this.allowedFeatures.includes("structuredSearch") ? (
         <div className="row search-box-row">
-          <SearchBox
-            rounded
-            category
+          <CategorySearchBox
             serverSearchAction="search_suggestions"
             onResultSelect={this.handleSuggestSelect}
             initialValue=""
