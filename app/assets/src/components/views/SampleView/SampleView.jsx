@@ -12,7 +12,7 @@ import PipelineSampleReport from "~/components/PipelineSampleReport";
 import ViewHeader from "~/components/layout/ViewHeader";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
-import SampleDetailsSidebar from "~/components/views/report/SampleDetailsSidebar";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
 import Controls from "./Controls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
 
@@ -25,7 +25,9 @@ class SampleView extends React.Component {
     this.state = {
       sampleName: props.sample.name,
       currentTab: "Report",
-      sampleDetailsSidebarVisible: false
+      sidebarMode: null,
+      sidebarVisible: false,
+      sidebarTaxonModeConfig: null
     };
 
     this.gsnapFilterStatus = this.generateGsnapFilterStatus();
@@ -79,8 +81,50 @@ class SampleView extends React.Component {
   };
 
   toggleSampleDetailsSidebar = () => {
+    if (
+      this.state.sidebarMode === "sampleDetails" &&
+      this.state.sidebarVisible
+    ) {
+      this.setState({
+        sidebarVisible: false
+      });
+    } else {
+      this.setState({
+        sidebarMode: "sampleDetails",
+        sidebarVisible: true
+      });
+    }
+  };
+
+  handleTaxonClick = sidebarTaxonModeConfig => {
+    if (!sidebarTaxonModeConfig) {
+      this.setState({
+        sidebarVisible: false
+      });
+      return;
+    }
+
+    if (
+      this.state.sidebarMode === "taxonDetails" &&
+      this.state.sidebarVisible &&
+      get("taxonId", sidebarTaxonModeConfig) ===
+        get("taxonId", this.state.sidebarTaxonModeConfig)
+    ) {
+      this.setState({
+        sidebarVisible: false
+      });
+    } else {
+      this.setState({
+        sidebarMode: "taxonDetails",
+        sidebarTaxonModeConfig,
+        sidebarVisible: true
+      });
+    }
+  };
+
+  closeSidebar = () => {
     this.setState({
-      sampleDetailsSidebarVisible: !this.state.sampleDetailsSidebarVisible
+      sidebarVisible: false
     });
   };
 
@@ -183,6 +227,7 @@ class SampleView extends React.Component {
             gsnapFilterStatus={this.gsnapFilterStatus}
             // Needs to be passed down to set the background dropdown properly.
             reportPageParams={this.props.reportPageParams}
+            onTaxonClick={this.handleTaxonClick}
           />
         );
       } else if (this.pipelineInProgress()) {
@@ -199,6 +244,23 @@ class SampleView extends React.Component {
       return <AMRView amr={this.props.amr} />;
     }
     return null;
+  };
+
+  getSidebarParams = () => {
+    if (this.state.sidebarMode === "taxonDetails") {
+      return this.state.sidebarTaxonModeConfig;
+    }
+    if (this.state.sidebarMode === "sampleDetails") {
+      return {
+        sampleId: this.props.sample.id,
+        pipelineVersion: get(
+          "pipeline_info.pipeline_version",
+          this.props.reportDetails
+        ),
+        onMetadataUpdate: this.handleMetadataUpdate
+      };
+    }
+    return {};
   };
 
   render() {
@@ -282,12 +344,11 @@ class SampleView extends React.Component {
           )}
           {this.renderTab()}
         </NarrowContainer>
-        <SampleDetailsSidebar
-          visible={this.state.sampleDetailsSidebarVisible}
-          onClose={this.toggleSampleDetailsSidebar}
-          sampleId={sample.id}
-          pipelineVersion={get("pipeline_info.pipeline_version", reportDetails)}
-          onMetadataUpdate={this.handleMetadataUpdate}
+        <DetailsSidebar
+          visible={this.state.sidebarVisible}
+          mode={this.state.sidebarMode}
+          onClose={this.closeSidebar}
+          params={this.getSidebarParams()}
         />
       </div>
     );

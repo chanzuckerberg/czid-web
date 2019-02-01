@@ -9,4 +9,18 @@
   &:global(.visible) {
     box-shadow: 0 0 25px $box-shadow-dark;
   }
+
+  .closeIcon {
+    position: absolute;
+    right: 40px;
+    top: 80px;
+    opacity: 0.3;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
 }

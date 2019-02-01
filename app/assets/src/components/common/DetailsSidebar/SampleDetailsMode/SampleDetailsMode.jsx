@@ -2,8 +2,6 @@ import React from "react";
 import { some } from "lodash";
 import { set } from "lodash/fp";
 import PropTypes from "~/components/utils/propTypes";
-import Sidebar from "~/components/ui/containers/Sidebar";
-import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 import Tabs from "~/components/ui/controls/Tabs";
 import {
   getSampleMetadata,
@@ -17,11 +15,11 @@ import PipelineTab from "./PipelineTab";
 import NotesTab from "./NotesTab";
 import { processMetadata, processMetadataTypes } from "~utils/metadata";
 import { processPipelineInfo, processAdditionalInfo } from "./utils";
-import cs from "./sample_details_sidebar.scss";
+import cs from "./sample_details_mode.scss";
 
 const TABS = ["Metadata", "Pipeline", "Notes"];
 
-class SampleDetailsSidebar extends React.Component {
+class SampleDetailsMode extends React.Component {
   state = {
     metadata: null,
     additionalInfo: null,
@@ -195,48 +193,43 @@ class SampleDetailsSidebar extends React.Component {
   };
 
   render() {
-    const { visible, showReportLink, sampleId } = this.props;
+    const { showReportLink, sampleId } = this.props;
     const { metadata, metadataTypes, additionalInfo } = this.state;
 
     const loading = !metadata || !metadataTypes;
 
     return (
-      <Sidebar visible={visible} width="very wide">
-        <div className={cs.content}>
-          <RemoveIcon className={cs.closeIcon} onClick={this.props.onClose} />
-          {loading ? (
-            <div className={cs.loadingMsg}>Loading...</div>
-          ) : (
-            <div className={cs.title}>{additionalInfo.name}</div>
+      <div className={cs.content}>
+        {loading ? (
+          <div className={cs.loadingMsg}>Loading...</div>
+        ) : (
+          <div className={cs.title}>{additionalInfo.name}</div>
+        )}
+        {!loading &&
+          showReportLink && (
+            <div className={cs.reportLink}>
+              <a href={`/samples/${sampleId}`}>See Report</a>
+            </div>
           )}
-          {!loading &&
-            showReportLink && (
-              <div className={cs.reportLink}>
-                <a href={`/samples/${sampleId}`}>See Report</a>
-              </div>
-            )}
-          {!loading && (
-            <Tabs
-              className={cs.tabs}
-              tabs={TABS}
-              value={this.state.currentTab}
-              onChange={this.onTabChange}
-            />
-          )}
-          {!loading && this.renderTab()}
-        </div>
-      </Sidebar>
+        {!loading && (
+          <Tabs
+            className={cs.tabs}
+            tabs={TABS}
+            value={this.state.currentTab}
+            onChange={this.onTabChange}
+          />
+        )}
+        {!loading && this.renderTab()}
+      </div>
     );
   }
 }
 
-SampleDetailsSidebar.propTypes = {
-  visible: PropTypes.bool,
-  onClose: PropTypes.func.isRequired,
+SampleDetailsMode.propTypes = {
   sampleId: PropTypes.number,
   pipelineVersion: PropTypes.string, // Needs to be string for 3.1 vs. 3.10.
   onMetadataUpdate: PropTypes.func,
   showReportLink: PropTypes.bool
 };
 
-export default SampleDetailsSidebar;
+export default SampleDetailsMode;

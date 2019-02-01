@@ -789,7 +789,7 @@ class PipelineSampleReport extends React.Component {
     );
   };
 
-  renderName = (tax_info, report_details, backgroundData, openTaxonModal) => {
+  renderName = (tax_info, report_details, backgroundData, onTaxonClick) => {
     let taxCommonName = tax_info["common_name"];
     const taxonName = getTaxonName(tax_info, this.state.name_type);
 
@@ -800,8 +800,8 @@ class PipelineSampleReport extends React.Component {
       <span className={grayOut ? "count-info" : ""}>{taxonName}</span>
     );
 
-    const openTaxonModalHandler = () =>
-      openTaxonModal({
+    const onTaxonClickHandler = () =>
+      onTaxonClick({
         taxInfo: tax_info,
         backgroundData,
         taxonName
@@ -810,13 +810,13 @@ class PipelineSampleReport extends React.Component {
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
         taxonNameDisplay = (
-          <span className="taxon-modal-link" onClick={openTaxonModalHandler}>
+          <span className="taxon-sidebar-link" onClick={onTaxonClickHandler}>
             <a>{taxonNameDisplay}</a>
           </span>
         );
       } else {
         taxonNameDisplay = (
-          <span className="taxon-modal-link" onClick={openTaxonModalHandler}>
+          <span className="taxon-sidebar-link" onClick={onTaxonClickHandler}>
             {taxonNameDisplay}
           </span>
         );
@@ -1309,6 +1309,7 @@ class RenderMarkup extends React.Component {
           metric={parent.state.treeMetric}
           nameType={parent.state.name_type}
           backgroundData={parent.state.backgroundData}
+          onTaxonClick={parent.props.onTaxonClick}
         />
       </div>
     );
@@ -1411,6 +1412,7 @@ class RenderMarkup extends React.Component {
         showAssemblyColumns={pipelineVersionHasAssembly(
           parent.props.reportPageParams.pipeline_version
         )}
+        onTaxonClick={parent.props.onTaxonClick}
       />
     );
   }

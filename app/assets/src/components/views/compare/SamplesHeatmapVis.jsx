@@ -55,6 +55,7 @@ class SamplesHeatmapVis extends React.Component {
         onColumnMetadataLabelMove: this.handleMouseHoverMove,
         onRemoveRow: this.props.onRemoveTaxon,
         onColumnLabelClick: this.props.onSampleLabelClick,
+        onRowLabelClick: this.props.onTaxonLabelClick,
         onCellClick: this.handleCellClick,
         onAddColumnMetadataClick: this.handleAddColumnMetadataClick,
         columnMetadata: this.getSelectedMetadata()
@@ -305,6 +306,7 @@ SamplesHeatmapVis.propTypes = {
   metric: PropTypes.string,
   onRemoveTaxon: PropTypes.func,
   onSampleLabelClick: PropTypes.func,
+  onTaxonLabelClick: PropTypes.func,
   sampleDetails: PropTypes.object,
   sampleIds: PropTypes.array,
   scale: PropTypes.string,
