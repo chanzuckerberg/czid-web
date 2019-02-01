@@ -15,8 +15,11 @@
     border-bottom: none !important;
   }
   :global(.category) {
+    padding-top: 5px !important;
     background: none !important;
-    border-bottom: none !important;
+    max-height: 150px;
+    overflow-y: scroll;
+    border-bottom: 1px solid $light-grey !important;
   }
   :global(.name) {
     text-transform: uppercase !important;
@@ -25,6 +28,7 @@
   }
   :global(.results) {
     border-left: none !important;
+    border-bottom: none !important;
   }
   :global(.result) {
     padding-top: 5px !important;
