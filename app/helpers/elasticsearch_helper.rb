@@ -1,10 +1,21 @@
 module ElasticsearchHelper
-  def prefix_match(model, field, prefix)
+  def prefix_match(model, field, prefix, condition)
     search_params = { query: { query_string: { query: "#{prefix}*", fields: [field] } } }
-    model.__elasticsearch__.search(search_params).records
+    results = if Rails.env == "test"
+                # Return all records. Tests don't have access to elasticsearch.
+                # They focus on whether access control is enforced.
+                model.all
+              else
+                model.__elasticsearch__.search(search_params).records
+              end
+    condition.each do |key, values|
+      results = results.where(key => values)
+    end
+    results
   end
 
   def taxon_search(prefix)
+    return {} if Rails.env == "test"
     matching_taxa = {}
     %w[species genus].each do |level|
       search_params = { query: { query_string: { query: "#{prefix}*", fields: ["#{level}_name"] } } }

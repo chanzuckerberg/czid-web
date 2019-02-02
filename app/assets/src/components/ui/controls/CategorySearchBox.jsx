@@ -1,8 +1,7 @@
 import PropTypes from "prop-types";
-import cx from "classnames";
 import React from "react";
-import cs from "./category_search_box.scss";
 import SearchBox from "./SearchBox";
+import cs from "./category_search_box.scss"; /* eslint-disable-line */
 
 const CategorySearchBox = props => {
   return <SearchBox category {...props} />;

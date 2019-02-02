@@ -80,6 +80,21 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # search suggestions
+  test 'joe sees public_sample in search suggestions' do
+    get "/search_suggestions"
+    res = JSON.parse(@response.body)
+    samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
+    assert samples_shown.include?(samples(:public_sample).id)
+  end
+
+  test 'joe does not see sample one in search suggestions' do
+    get "/search_suggestions"
+    res = JSON.parse(@response.body)
+    samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
+    assert !samples_shown.include?(samples(:one).id)
+  end
+
   # public projects
 
   test 'joe cannot add users to public_project ' do

@@ -126,14 +126,20 @@ class SamplesController < ApplicationController
   def search_suggestions
     query = params[:query]
 
+    # Not permission-dependent
     taxon_list = taxon_search(query)
-    # TODO: filter by permissions
-    samples = prefix_match(Sample, "name", query)
-    tissues = prefix_match(Metadatum, "string_validated_value", query).where(key: "sample_type")
-    locations = prefix_match(Metadatum, "string_validated_value", query).where(key: "collection_location")
     hosts = HostGenome.where("name LIKE :search", search: "#{query}%")
-    users = prefix_match(User, "name", query)
 
+    # Admin-only for now: needs permissions scoping
+    users = current_user.admin ? prefix_match(User, "name", query, {}) : []
+
+    # Permission-dependent
+    viewable_sample_ids = current_power.samples.pluck(:id)
+    samples = prefix_match(Sample, "name", query, id: viewable_sample_ids)
+    tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "sample_type")
+    locations = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "collection_location")
+
+    # Generate structure required by CategorySearchBox
     results = {}
     unless taxon_list.empty?
       results["Taxon"] = { "name" => "Taxon",
