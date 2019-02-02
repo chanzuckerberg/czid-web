@@ -77,7 +77,6 @@ class SamplesController < ApplicationController
     @host_genomes = HostGenome.find(host_genome_ids)
 
     # Query by name for a Sample attribute or pathogen name in the Sample.
-    # APPLIES TO OLD SEARCH BOX ONLY. Remove after switch.
     if name_search_query.present?
       # Pass in a scope of pipeline runs using current_power
       pipeline_run_ids = current_power.pipeline_runs.top_completed_runs.pluck(:id)

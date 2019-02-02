@@ -8,9 +8,6 @@ const CategorySearchBox = props => {
 };
 
 CategorySearchBox.propTypes = {
-  // Provide either clientSearchSource or serverSearchAction.
-  // If clientSearchSource is provided, query matching will happen on the client side (use for small data).
-  // If serverSearchAction is provided, query matching will happen on the server side (use for large data).
   clientSearchSource: PropTypes.array,
   serverSearchAction: PropTypes.string,
   rounded: PropTypes.bool,
