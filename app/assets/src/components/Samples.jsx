@@ -213,7 +213,9 @@ class Samples extends React.Component {
     } else if (result.category == "Host") {
       this.setState(
         {
-          selectedHostIndices: this.state.selectHostFilter.concat([result.id]),
+          selectedHostIndices: this.state.selectedHostIndices.concat([
+            result.id
+          ]),
           searchTags: this.state.searchTags.concat([
             {
               display: "Host: " + result.title,
