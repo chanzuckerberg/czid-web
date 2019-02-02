@@ -14,11 +14,13 @@
     display: block !important;
     border-bottom: none !important;
   }
+  :global(.results.visible) {
+    max-height: 300px;
+    overflow-y: scroll;
+  }
   :global(.category) {
     padding-top: 5px !important;
     background: none !important;
-    max-height: 150px;
-    overflow-y: scroll;
     border-bottom: 1px solid $light-grey !important;
   }
   :global(.name) {

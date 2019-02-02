@@ -13,6 +13,7 @@ class SearchBox extends React.Component {
     this.minChars = 2;
 
     this.placeholder = this.props.placeholder;
+    this.handleEnter = this.props.onEnter;
     this.handleResultSelect = this.handleResultSelect.bind(this);
     this.blankState = { isLoading: false, results: [], value: "" };
 
@@ -22,6 +23,12 @@ class SearchBox extends React.Component {
       value: this.props.initialValue
     };
   }
+
+  onKeyDown = e => {
+    if (e.key == "Enter") {
+      this.props.onEnter(e);
+    }
+  };
 
   handleResultSelect(e, { result }) {
     this.setState({ value: result.title });
@@ -74,6 +81,7 @@ class SearchBox extends React.Component {
         value={value}
         placeholder={this.placeholder}
         onResultSelect={this.handleResultSelect}
+        onKeyDown={this.onKeyDown}
       />
     );
   }

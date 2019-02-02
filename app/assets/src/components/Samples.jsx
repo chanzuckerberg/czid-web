@@ -1003,6 +1003,7 @@ class Samples extends React.Component {
           <CategorySearchBox
             serverSearchAction="search_suggestions"
             onResultSelect={this.handleSuggestSelect}
+            onEnter={this.handleSearch}
             initialValue=""
             placeholder=""
           />
