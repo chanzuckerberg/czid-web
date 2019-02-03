@@ -3,4 +3,12 @@
 .divider {
   height: 0px;
   border-bottom: 2px solid $off-white;
+
+  &.thin {
+    border-bottom: 2px solid $off-white;
+  }
+
+  &.medium {
+    border-bottom: 6px solid $off-white;
+  }
 }

@@ -319,7 +319,7 @@ class Sample < ApplicationRecord
   end
 
   def as_json(options = {})
-    options[:methods] = [:input_files, :host_genome_name, :private_until]
+    options[:methods] ||= [:input_files, :host_genome_name, :private_until]
     super(options)
   end
 
@@ -395,9 +395,13 @@ class Sample < ApplicationRecord
     if user.admin?
       all
     else
-      project_ids = Project.editable(user).select("id").pluck(:id)
-      where("project_id in (?)", project_ids)
+      library(user)
     end
+  end
+
+  def self.library(user)
+    project_ids = Project.library_projects(user).pluck(:id)
+    where("project_id in (?)", project_ids)
   end
 
   def deletable?(user)
