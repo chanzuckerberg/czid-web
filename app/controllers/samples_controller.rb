@@ -133,6 +133,7 @@ class SamplesController < ApplicationController
     users = current_user.admin ? prefix_match(User, "name", query, {}) : []
 
     # Permission-dependent
+    projects = prefix_match(Project, "name", query, id: current_power.projects.pluck(:id))
     viewable_sample_ids = current_power.samples.pluck(:id)
     samples = prefix_match(Sample, "name", query, id: viewable_sample_ids)
     tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "sample_type")
@@ -146,11 +147,19 @@ class SamplesController < ApplicationController
                              entry.merge("category" => "Taxon")
                            end }
     end
+    unless projects.empty?
+      results["Project"] = {
+        "name" => "Project",
+        "results" => projects.index_by(&:name).map do |_, p|
+          { "category" => "Project", "title" => p.name, "id" => p.id }
+        end
+      }
+    end
     unless samples.empty?
       results["Sample"] = {
         "name" => "Sample",
-        "results" => samples.group_by(&:name).map do |val, records|
-          { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id) }
+        "results" => samples.index_by(&:name).map do |val, record|
+          { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => [record.id], "project_id" => record.project_id }
         end
       }
     end

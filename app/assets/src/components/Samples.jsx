@@ -193,84 +193,43 @@ class Samples extends React.Component {
     return value;
   }
 
+  applySuggestFilter = (result, stateVar, resultVar) => {
+    let cat = result.category;
+    let values = result[resultVar];
+    if (values.constructor !== Array) {
+      values = [values];
+    }
+    this.setState(
+      {
+        [stateVar]: this.state[stateVar].concat(values),
+        searchTags: this.state.searchTags.concat([
+          {
+            display: cat + ": " + result.title,
+            key: stateVar,
+            values: values
+          }
+        ])
+      },
+      () => this.setUrlLocation()
+    );
+  };
+
   handleSuggestSelect = (e, { result }) => {
-    if (result.category == "Tissue") {
-      this.setState(
-        {
-          selectedTissueFilters: this.state.selectedTissueFilters.concat([
-            result.id
-          ]),
-          searchTags: this.state.searchTags.concat([
-            {
-              display: "Tissue: " + result.title,
-              key: "selectedTissueFilters",
-              values: [result.id]
-            }
-          ])
-        },
-        () => this.setUrlLocation()
-      );
+    if (result.category == "Project") {
+      this.handleProjectSelection(result.id);
+    } else if (result.category == "Sample") {
+      this.handleProjectSelection(result.project_id);
+      this.applySuggestFilter(result, "sampleIdsParams", "sample_ids");
+    } else if (result.category == "Tissue") {
+      this.applySuggestFilter(result, "selectedTissueFilters", "id");
     } else if (result.category == "Host") {
-      this.setState(
-        {
-          selectedHostIndices: this.state.selectedHostIndices.concat([
-            result.id
-          ]),
-          searchTags: this.state.searchTags.concat([
-            {
-              display: "Host: " + result.title,
-              key: "selectedHostIndices",
-              values: [result.id]
-            }
-          ])
-        },
-        () => this.setUrlLocation()
-      );
-    } else if (result.category == "Sample" || result.category == "Location") {
-      let cat = result.category;
-      this.setState(
-        {
-          sampleIdsParams: this.state.sampleIdsParams.concat(result.sample_ids),
-          searchTags: this.state.searchTags.concat([
-            {
-              display: cat + ": " + result.title,
-              key: "sampleIdsParams",
-              values: result.sample_ids
-            }
-          ])
-        },
-        () => this.setUrlLocation()
-      );
+      this.applySuggestFilter(result, "selectedHostIndices", "id");
+    } else if (result.category == "Location") {
+      this.applySuggestFilter(result, "sampleIdsParams", "sample_ids");
     } else if (result.category == "Taxon") {
-      this.setState(
-        {
-          selectedTaxids: this.state.selectedTaxids.concat([result.taxid]),
-          searchTags: this.state.searchTags.concat([
-            {
-              display: "Taxon: " + result.title,
-              key: "selectedTaxids",
-              values: [result.taxid]
-            }
-          ])
-        },
-        () => this.setUrlLocation()
-      );
+      this.applySuggestFilter(result, "selectedTaxids", "taxid");
     } else if (result.category == "Uploader") {
-      this.setState(
-        {
-          selectedUploaderIds: this.state.selectedUploaderIds.concat([
-            result.id
-          ]),
-          searchTags: this.state.searchTags.concat([
-            {
-              display: "Uploader: " + result.title,
-              key: "selectedUploaderIds",
-              values: [result.id]
-            }
-          ])
-        },
-        () => this.setUrlLocation()
-      );
+      this.applySuggestFilter(result, "selectedUploaderIds", "id");
     }
   };
 
@@ -952,7 +911,7 @@ class Samples extends React.Component {
     if (this.admin !== 0 || this.allowedFeatures.includes("structuredSearch")) {
       search_tag_list = this.state.searchTags.map((entry, i) => {
         return (
-          <Label className="label-tags" size="tiny">
+          <Label className="label-tags" size="tiny" key={`search-tag-${i}`}>
             {entry.display}
             <Icon
               name="close"
