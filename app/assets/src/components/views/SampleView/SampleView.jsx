@@ -30,12 +30,6 @@ class SampleView extends React.Component {
     };
 
     this.gsnapFilterStatus = this.generateGsnapFilterStatus();
-
-    console.log(window.analytics);
-    console.log(window.analytics.track("foobar 12:22pm"), () => {
-      console.log("SENT");
-    });
-    console.log("after");
   }
 
   componentDidMount() {
