@@ -25,7 +25,9 @@ class PhyloTreeListView extends React.Component {
       phyloTreeMap: fromPairs(props.phyloTrees.map(tree => [tree.id, tree])),
       sidebarMode: null,
       sidebarVisible: false,
-      sidebarConfig: null
+      sidebarConfig: null,
+      selectedSampleId: null,
+      selectedPipelineRunId: null
     };
   }
 
@@ -55,14 +57,14 @@ class PhyloTreeListView extends React.Component {
     });
   };
 
-  handleMetadataUpdate = (key, newValue, pipelineRunId) => {
+  handleMetadataUpdate = (key, newValue) => {
     // Update the metadata stored locally.
     this.setState({
       phyloTreeMap: set(
         [
           this.state.selectedPhyloTreeId,
           "sampleDetailsByNodeName",
-          pipelineRunId,
+          this.state.selectedPipelineRunId,
           "metadata",
           key
         ],
@@ -132,10 +134,11 @@ class PhyloTreeListView extends React.Component {
     } else {
       this.setState({
         selectedSampleId: sampleId,
+        selectedPipelineRunId: pipelineRunId,
         sidebarConfig: {
           sampleId,
-          pipelineRunId,
-          onMetadataUpdate: this.handleMetadataUpdate
+          onMetadataUpdate: this.handleMetadataUpdate,
+          showReportLink: true
         },
         sidebarMode: "sampleDetails",
         sidebarVisible: true

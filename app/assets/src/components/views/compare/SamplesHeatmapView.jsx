@@ -680,7 +680,8 @@ class SamplesHeatmapView extends React.Component {
     if (this.state.sidebarMode === "sampleDetails") {
       return {
         sampleId: this.state.selectedSampleId,
-        onMetadataUpdate: this.handleMetadataUpdate
+        onMetadataUpdate: this.handleMetadataUpdate,
+        showReportLink: true
       };
     }
     return {};
