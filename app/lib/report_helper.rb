@@ -1092,10 +1092,11 @@ module ReportHelper
   end
 
   def select_pipeline_run(sample, params)
-    if params[:pipeline_version].blank?
-      sample.pipeline_runs.first
-    else
+    pipeline_version = params[:pipeline_version].to_f
+    if pipeline_version > 0.0
       sample.pipeline_run_by_version(params[:pipeline_version])
+    else
+      sample.pipeline_runs.first
     end
   end
 end

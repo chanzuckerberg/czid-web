@@ -15,7 +15,8 @@ class Wizard extends React.Component {
 
     this.state = {
       currentPage: 0,
-      continueEnabled: true
+      continueEnabled: true,
+      overlay: null
     };
 
     this.showPageInfo = this.props.showPageInfo || true;
@@ -54,6 +55,14 @@ class Wizard extends React.Component {
   handleContinueEnabled = enabled => {
     this.setState({
       continueEnabled: enabled
+    });
+  };
+
+  // This will set an overlay over the wizard, covering all controls, the title, and other wizard elements.
+  // Used for things like the Metadata Instructions page.
+  setOverlay = overlay => {
+    this.setState({
+      overlay
     });
   };
 
@@ -104,6 +113,10 @@ class Wizard extends React.Component {
         1} of ${this.props.children.length - this.skipPageInfoNPages}`;
     }
 
+    if (this.state.overlay) {
+      return this.state.overlay;
+    }
+
     return (
       <WizardContext.Provider
         value={{ currentPage: this.state.currentPage, actions: wizardActions }}
@@ -123,7 +136,8 @@ class Wizard extends React.Component {
             )}
           >
             {React.cloneElement(currentPage, {
-              wizardEnableContinue: this.handleContinueEnabled
+              wizardEnableContinue: this.handleContinueEnabled,
+              wizardSetOverlay: this.setOverlay
             })}
           </div>
           {!currentPage.props.skipDefaultButtons && (

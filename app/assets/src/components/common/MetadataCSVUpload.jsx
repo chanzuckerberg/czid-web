@@ -57,6 +57,8 @@ class MetadataCSVUpload extends React.Component {
 
   render() {
     const hasMetadata = !isNull(this.state.metadata);
+    const hasErrors = this.state.issues.errors.length > 0;
+    const hasWarnings = this.state.issues.warnings.length > 0;
     return (
       <div className={cx(cs.metadataCSVUpload, this.props.className)}>
         <CSVUpload
@@ -64,40 +66,42 @@ class MetadataCSVUpload extends React.Component {
           onCSV={this.onCSV}
           className={cx(cs.csvUpload, hasMetadata && cs.uploaded)}
         />
-        <div className={cs.issues}>
-          {this.state.issues.errors.length > 0 && (
-            <div className={cs.errors}>
-              <div className={cs.header}>
-                <AlertIcon className={cs.icon} />
-                Fix these errors and upload your CSV again.
+        {(hasErrors || hasWarnings) && (
+          <div className={cs.issues}>
+            {hasErrors && (
+              <div className={cs.errors}>
+                <div className={cs.header}>
+                  <AlertIcon className={cs.icon} />
+                  Fix these errors and upload your CSV again.
+                </div>
+                <div>
+                  {this.state.issues.errors.map((error, index) => (
+                    <div key={index} className={cs.item}>
+                      <span className={cs.dot}>&bull;</span>
+                      <span>{error}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div>
-                {this.state.issues.errors.map((error, index) => (
-                  <div key={index} className={cs.item}>
-                    <span className={cs.dot}>&bull;</span>
-                    <span>{error}</span>
-                  </div>
-                ))}
+            )}
+            {hasWarnings && (
+              <div className={cs.warnings}>
+                <div className={cs.header}>
+                  <AlertIcon className={cs.icon} />
+                  Warnings
+                </div>
+                <div>
+                  {this.state.issues.warnings.map((warning, index) => (
+                    <div key={index} className={cs.item}>
+                      <span className={cs.dot}>&bull;</span>
+                      <span>{warning}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-          {this.state.issues.warnings.length > 0 && (
-            <div className={cs.warnings}>
-              <div className={cs.header}>
-                <AlertIcon className={cs.icon} />
-                Warnings
-              </div>
-              <div>
-                {this.state.issues.warnings.map((warning, index) => (
-                  <div key={index} className={cs.item}>
-                    <span className={cs.dot}>&bull;</span>
-                    <span>{warning}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     );
   }

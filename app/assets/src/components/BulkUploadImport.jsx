@@ -3,11 +3,11 @@ import ReactDOM from "react-dom";
 import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
+import PropTypes from "~/components/utils/propTypes";
 import SampleUpload from "./SampleUpload";
 import ObjectHelper from "../helpers/ObjectHelper";
 import { merge, omit, isEmpty, get, size } from "lodash/fp";
 
-import { createSample } from "~/api";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import FilePicker from "~ui/controls/FilePicker";
 import BulkSampleUploadTable from "~ui/controls/BulkSampleUploadTable";
@@ -39,7 +39,7 @@ class BulkUploadImport extends React.Component {
     this.adminGenomes = this.hostGenomes.map(g => {
       return g.name.toLowerCase().indexOf("test") >= 0 ? g.name : "";
     });
-    this.userDetails = props.loggedin_user;
+    this.admin = props.admin;
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.state = {
       submitting: false,
@@ -176,12 +176,71 @@ class BulkUploadImport extends React.Component {
     this.clearError();
     if (!this.isImportFormInvalid()) {
       if (this.state.localUploadMode) {
-        this.bulkUploadLocal(this.state.sampleNamesToFiles);
+        this.setState({
+          submitting: true
+        });
+        this.props.onBulkUploadLocal({
+          sampleNamesToFiles: this.state.sampleNamesToFiles,
+          project: this.state.project,
+          hostId: this.state.hostId,
+          onCreateSampleError: this.handleCreateLocalSampleError,
+          onUploadProgress: this.handleLocalUploadProgress,
+          onUploadError: this.handleLocalUploadError,
+          onAllUploadsComplete: this.handleAllLocalUploadsComplete,
+          onMarkSampleUploadedError: this.handleMarkSampleUploadedError
+        });
       } else {
         this.bulkUploadRemoteImport();
       }
     }
   }
+
+  handleCreateLocalSampleError = (error, sampleName) => {
+    // Remove samples that couldn't be created from the current list and
+    // show error message
+    this.setState({
+      invalid: true,
+      errorMessage: `${
+        this.state.errorMessage
+      }\n\n${sampleName}: ${joinServerError(error.response.data)}`
+    });
+    this.onRemoved(sampleName);
+  };
+
+  handleLocalUploadProgress = (percent, file) => {
+    // Update the UI on progress
+    // TODO: Maybe a circular progress indicator that will fill up.
+    const newProgress = merge(this.state.fileNamesToProgress, {
+      [file.name]: percent
+    });
+    this.setState({ fileNamesToProgress: newProgress });
+  };
+
+  handleLocalUploadError = (file, error) => {
+    this.setState({
+      invalid: true,
+      errorMessage: `${file.name}: ${joinServerError(error.response.data)}`
+    });
+  };
+
+  handleAllLocalUploadsComplete = () => {
+    this.setState({
+      submitting: false,
+      successMessage: "All uploads finished!",
+      success: true,
+      invalid: false
+    });
+
+    openUrlWithTimeout(`/home?project_id=${this.state.projectId}`);
+  };
+
+  handleMarkSampleUploadedError = error => {
+    this.setState({
+      errorMessage: `${this.state.errorMessage}. ${joinServerError(
+        error.response.data
+      )}`
+    });
+  };
 
   initializeSelectTag() {
     $("select").material_select();
@@ -302,16 +361,13 @@ class BulkUploadImport extends React.Component {
     this.state.selectedSampleIndices.map(idx => {
       samples.push(this.state.samples[idx]);
     });
-    axios
-      .post("/samples/bulk_upload.json", {
-        samples: samples,
-        authenticity_token: this.csrf
-      })
+    this.props
+      .onBulkUploadRemote(samples)
       .then(response => {
         that.setState({
           success: true,
           successMessage: "Samples created. Redirecting...",
-          createdSampleIds: response.data.sample_ids,
+          createdSampleIds: response.sample_ids,
           submitting: false
         });
         openUrlWithTimeout(`/home?project_id=${that.state.projectId}`);
@@ -321,10 +377,10 @@ class BulkUploadImport extends React.Component {
           submitting: false,
           invalid: true,
           errorMessage:
-            error.response.data.status ||
+            error.data.status ||
             "Unable to process sample(s), " +
               "ensure sample is not a duplicate in the selected project",
-          serverErrors: error.response.data
+          serverErrors: error.data
         });
       });
   }
@@ -522,7 +578,7 @@ class BulkUploadImport extends React.Component {
                                 if (
                                   this.adminGenomes.indexOf(host_genome.name) <
                                     0 ||
-                                  this.userDetails.admin
+                                  this.admin
                                 ) {
                                   return (
                                     <li
@@ -669,117 +725,6 @@ class BulkUploadImport extends React.Component {
         }
       }
     );
-  };
-
-  // Upload a dict of sample names to input files
-  bulkUploadLocal = sampleNamesToFiles => {
-    this.setState({
-      submitting: true
-    });
-
-    // Latest browsers will only show a generic warning
-    window.onbeforeunload = () =>
-      "Uploading is in progress. Are you sure you want to exit?";
-
-    // Send an API call to create new samples with the expected files
-    for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
-      createSample(
-        sampleName,
-        this.state.project,
-        this.state.hostId,
-        files,
-        "local"
-      )
-        .then(response => {
-          // After successful sample creation, upload to the presigned URLs returned
-          const sampleId = response.data.id;
-          files.map((file, i) => {
-            const url = response.data.input_files[i].presigned_url;
-            this.uploadFileToURL(sampleName, sampleId, file, url);
-          });
-        })
-        .catch(error => {
-          // Remove samples that couldn't be created from the current list and
-          // show error message
-          this.setState({
-            invalid: true,
-            errorMessage: `${
-              this.state.errorMessage
-            }\n\n${sampleName}: ${joinServerError(error.response.data)}`
-          });
-          this.onRemoved(sampleName);
-        });
-    }
-  };
-
-  // Upload a file for a sample to a URL
-  uploadFileToURL = (sampleName, sampleId, file, url) => {
-    const config = {
-      // Update the UI on progress
-      // TODO: Maybe a circular progress indicator that will fill up.
-      onUploadProgress: e => {
-        const percent = Math.round(e.loaded * 100 / e.total);
-        const newProgress = merge(this.state.fileNamesToProgress, {
-          [file.name]: percent
-        });
-        this.setState({ fileNamesToProgress: newProgress });
-      }
-    };
-
-    axios
-      .put(url, file, config)
-      .then(() => {
-        // On completion the table will also show a checkmark
-        this.onUploadSuccess(sampleName, sampleId);
-      })
-      .catch(error => {
-        this.setState({
-          invalid: true,
-          errorMessage: `${file.name}: ${joinServerError(error.response.data)}`
-        });
-      });
-  };
-
-  // onUploadSuccess when a local file finishes uploading
-  onUploadSuccess = (sampleName, sampleId) => {
-    // If every file in the sample is complete
-    const sampleFiles = this.state.sampleNamesToFiles[sampleName];
-    if (
-      sampleFiles.every(f => this.state.fileNamesToProgress[f.name] === 100)
-    ) {
-      // Mark the sample as uploaded
-      axios
-        .put(`/samples/${sampleId}.json`, {
-          sample: {
-            id: sampleId,
-            status: "uploaded"
-          },
-          authenticity_token: this.csrf
-        })
-        .then(() => {
-          // If every file-to-upload in this batch is done uploading
-          if (
-            Object.values(this.state.fileNamesToProgress).every(p => p === 100)
-          ) {
-            this.setState({
-              submitting: false,
-              successMessage: "All uploads finished!",
-              success: true,
-              invalid: false
-            });
-
-            window.onbeforeunload = null;
-            openUrlWithTimeout(`/home?project_id=${this.state.projectId}`);
-          }
-        })
-        .catch(error => {
-          this.setState({
-            errorMessage: `${this.state.errorMessage}. ${joinServerError(
-              error.response.data
-            )}`
-          });
-        });
-    }
   };
 
   renderBulkUploadImportForm() {
@@ -1069,12 +1014,12 @@ class BulkUploadImport extends React.Component {
                         Select host genome
                       </div>
                     </Tipsy>
-                    {this.userDetails.admin ? (
+                    {this.admin ? (
                       <div className="col s7 right-align no-padding right admin-genomes">
                         {this.state.hostGenomes.map(g => {
                           if (
                             this.adminGenomes.indexOf(g.name) > 0 &&
-                            this.userDetails.admin
+                            this.admin
                           ) {
                             return (
                               <div
@@ -1193,5 +1138,14 @@ class BulkUploadImport extends React.Component {
     );
   }
 }
+
+BulkUploadImport.propTypes = {
+  onBulkUploadRemote: PropTypes.func.isRequired,
+  onBulkUploadLocal: PropTypes.func.isRequired,
+  projects: PropTypes.arrayOf(PropTypes.Project),
+  csrf: PropTypes.string,
+  host_genomes: PropTypes.arrayOf(PropTypes.HostGenome),
+  admin: PropTypes.bool
+};
 
 export default BulkUploadImport;

@@ -15,6 +15,19 @@ const postWithCSRF = async (url, params) => {
   return resp.data;
 };
 
+// TODO(mark): Remove redundancy in CSRF methods.
+const putWithCSRF = async (url, params) => {
+  const resp = await axios.put(url, {
+    ...params,
+    // Fetch the CSRF token from the DOM.
+    authenticity_token: document.getElementsByName("csrf-token")[0].content
+  });
+
+  // Just return the data.
+  // resp also contains headers, status, etc. that we might use later.
+  return resp.data;
+};
+
 // TODO: add error handling
 const get = async (url, config) => {
   const resp = await axios.get(url, config);
@@ -154,6 +167,39 @@ const uploadMetadataForProject = (id, metadata) =>
     metadata
   });
 
+const getOfficialMetadataFields = () =>
+  get("/metadata/official_metadata_fields");
+
+const getAllHostGenomes = () => get("/host_genomes.json");
+
+const bulkUploadRemoteSamples = samples =>
+  postWithCSRF(`/samples/bulk_upload.json`, {
+    samples
+  });
+
+const markSampleUploaded = sampleId =>
+  putWithCSRF(`/samples/${sampleId}.json`, {
+    sample: {
+      id: sampleId,
+      status: "uploaded"
+    }
+  });
+
+const uploadFileToUrl = async (
+  file,
+  url,
+  { onUploadProgress, onSuccess, onError }
+) => {
+  const config = {
+    onUploadProgress
+  };
+
+  return axios
+    .put(url, file, config)
+    .then(onSuccess)
+    .catch(onError);
+};
+
 export {
   get,
   getSampleMetadata,
@@ -169,5 +215,10 @@ export {
   getSummaryContigCounts,
   createSample,
   validateMetadataCSVForProject,
-  uploadMetadataForProject
+  uploadMetadataForProject,
+  getOfficialMetadataFields,
+  getAllHostGenomes,
+  bulkUploadRemoteSamples,
+  markSampleUploaded,
+  uploadFileToUrl
 };

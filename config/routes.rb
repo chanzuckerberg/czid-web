@@ -85,6 +85,12 @@ Rails.application.routes.draw do
     get :icons
   end
 
+  resource :metadata do
+    get :dictionary, on: :collection
+    get :official_metadata_fields, on: :collection
+    get :metadata_template_csv, on: :collection
+  end
+
   authenticate :user, ->(u) { u.admin? } do
     mount Resque::Server.new, at: "/resque"
   end
