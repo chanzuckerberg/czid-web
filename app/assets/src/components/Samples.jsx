@@ -102,11 +102,9 @@ class Samples extends React.Component {
       projectId: null,
       displaySelectSamples: true, // this.checkURLContent(),
       selectedProjectId: this.fetchParams("project_id") || null,
-      filterParams: this.fetchParams("filter") || "",
-      searchParams: this.fetchParams("search") || "",
-      sampleIdsParams: this.fetchParams("ids")
-        ? this.fetchParams("ids").split(",")
-        : [],
+      filterParams: this.fetchParams("filter"),
+      searchParams: this.fetchParams("search"),
+      sampleIdsParams: this.fetchParams("ids", true),
       // The list of fetched sample ids, in the order to be displayed
       fetchedSampleIds: [],
       // A map of fetched sample id to sample data.
@@ -125,17 +123,11 @@ class Samples extends React.Component {
       displayDropdown: false,
 
       // For structured search suggestions
-      selectedTaxids: this.fetchParams("taxid")
-        ? this.fetchParams("taxid").split(",")
-        : [],
-      selectedUploaderIds: this.fetchParams("selectedUploaderIds")
-        ? this.fetchParams("selectedUploaderIds").split(",")
-        : [],
+      selectedTaxids: this.fetchParams("taxid", true),
+      selectedUploaderIds: this.fetchParams("selectedUploaderIds", true),
       searchTags: [],
 
-      selectedTissueFilters: this.fetchParams("tissue")
-        ? this.fetchParams("tissue").split(",")
-        : [],
+      selectedTissueFilters: this.fetchParams("tissue", true),
       selectedHostIndices: this.fetchParams("host")
         ? this.fetchParams("host")
             .split(",")
@@ -363,9 +355,13 @@ class Samples extends React.Component {
     SortHelper.applySort(sort_query);
   }
 
-  fetchParams(param) {
+  fetchParams(param, asArray = false) {
     let urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
+    let result = urlParams.get(param) || "";
+    if (asArray) {
+      result = result ? result.split(",") : [];
+    }
+    return result;
   }
 
   updateProjectUserState(user_array) {
