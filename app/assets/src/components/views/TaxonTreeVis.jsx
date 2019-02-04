@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import TidyTree from "../visualizations/TidyTree";
-import TaxonModal from "../views/report/TaxonModal";
 import PathogenLabel from "../ui/labels/PathogenLabel";
 import { getTaxonName } from "../../helpers/taxon";
 
@@ -21,7 +20,7 @@ class TaxonTreeVis extends React.Component {
 
     this.state = {
       nodeHover: null,
-      taxonModalData: null
+      taxonSidebarData: null
     };
 
     this.nameType = this.props.nameType;
@@ -44,7 +43,6 @@ class TaxonTreeVis extends React.Component {
 
     this.handleNodeHover = this.handleNodeHover.bind(this);
     this.handleNodeLabelClick = this.handleNodeLabelClick.bind(this);
-    this.handleTaxonModalClose = this.handleTaxonModalClose.bind(this);
     this.fillNodeValues = this.fillNodeValues.bind(this);
     this.renderTooltip = this.renderTooltip.bind(this);
   }
@@ -99,14 +97,23 @@ class TaxonTreeVis extends React.Component {
   }
 
   handleNodeLabelClick(node) {
-    this.setState({
-      taxonModalData: node.data.modalData || null
-    });
-  }
+    if (!node.data.modalData) {
+      this.props.onTaxonNodeClick(null);
+      return;
+    }
 
-  handleTaxonModalClose() {
-    this.setState({
-      taxonModalData: null
+    const { taxInfo } = node.data.modalData;
+    const taxonName = getTaxonName(taxInfo, this.props.nameType);
+    // Pass config for taxon details sidebar.
+    this.props.onTaxonNodeClick({
+      background: this.props.backgroundData,
+      parentTaxonId: taxInfo.tax_level === 1 ? taxInfo.genus_taxid : undefined,
+      taxonId: taxInfo.tax_id,
+      taxonName,
+      taxonValues: {
+        NT: taxInfo.NT,
+        NR: taxInfo.NR
+      }
     });
   }
 
@@ -286,31 +293,6 @@ class TaxonTreeVis extends React.Component {
     ));
   }
 
-  renderTaxonModal() {
-    const { taxonModalData } = this.state;
-    if (!taxonModalData) return;
-
-    const { taxInfo } = taxonModalData;
-
-    const taxonName = getTaxonName(taxInfo, this.props.nameType);
-
-    return (
-      <TaxonModal
-        taxonId={taxInfo.tax_id}
-        taxonValues={{
-          NT: taxInfo.NT,
-          NR: taxInfo.NR
-        }}
-        parentTaxonId={
-          taxInfo.tax_level === 1 ? taxInfo.genus_taxid : undefined
-        }
-        background={this.props.backgroundData}
-        taxonName={taxonName}
-        onClose={this.handleTaxonModalClose}
-      />
-    );
-  }
-
   render() {
     return (
       <div className="taxon-tree-vis">
@@ -330,7 +312,6 @@ class TaxonTreeVis extends React.Component {
         >
           {this.renderTooltip()}
         </div>
-        {this.renderTaxonModal()}
       </div>
     );
   }
@@ -344,7 +325,8 @@ TaxonTreeVis.propTypes = {
   backgroundData: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string
-  })
+  }),
+  onTaxonNodeClick: PropTypes.func.isRequired
 };
 
 export default TaxonTreeVis;

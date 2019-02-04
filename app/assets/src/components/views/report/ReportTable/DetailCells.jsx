@@ -11,7 +11,7 @@ const DetailCells = ({
   renderNumber,
   showConcordance,
   getRowClass,
-  openTaxonModal,
+  onTaxonClick,
   reportDetails,
   backgroundData,
   showAssemblyColumns
@@ -26,7 +26,7 @@ const DetailCells = ({
       className={getRowClass(taxInfo)}
     >
       <td>
-        {renderName(taxInfo, reportDetails, backgroundData, openTaxonModal)}
+        {renderName(taxInfo, reportDetails, backgroundData, onTaxonClick)}
       </td>
       {renderNumber(
         taxInfo.NT.aggregatescore,
@@ -72,7 +72,7 @@ DetailCells.propTypes = {
   renderName: PropTypes.func.isRequired,
   renderNumber: PropTypes.func.isRequired,
   showConcordance: PropTypes.bool.isRequired,
-  openTaxonModal: PropTypes.func.isRequired,
+  onTaxonClick: PropTypes.func.isRequired,
   getRowClass: PropTypes.func.isRequired,
   reportDetails: PropTypes.ReportDetails,
   backgroundData: PropTypes.BackgroundData,

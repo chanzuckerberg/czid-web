@@ -2,50 +2,25 @@ import React from "react";
 import Tipsy from "react-tipsy";
 
 import PropTypes from "../../../utils/propTypes";
-import TaxonModal from "../TaxonModal";
 
 import DetailCells from "./DetailCells";
 
 export default class ReportTable extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      taxonModalData: null
-    };
   }
 
-  renderTaxonModal() {
-    const { taxonModalData } = this.state;
-    if (!taxonModalData) return;
-
-    const { taxInfo, backgroundData, taxonName } = taxonModalData;
-    return (
-      <TaxonModal
-        taxonId={taxInfo.tax_id}
-        taxonValues={{
-          NT: taxInfo.NT,
-          NR: taxInfo.NR
-        }}
-        parentTaxonId={
-          taxInfo.tax_level === 1 ? taxInfo.genus_taxid : undefined
-        }
-        background={backgroundData}
-        taxonName={taxonName}
-        onClose={this.handleTaxonModalClose}
-      />
-    );
-  }
-
-  handleTaxonModalOpen = taxonModalData => {
-    this.setState({
-      taxonModalData
-    });
-  };
-
-  handleTaxonModalClose = () => {
-    this.setState({
-      taxonModalData: null
+  handleTaxonClick = taxonSidebarData => {
+    const { taxInfo, backgroundData, taxonName } = taxonSidebarData;
+    this.props.onTaxonClick({
+      background: backgroundData,
+      parentTaxonId: taxInfo.tax_level === 1 ? taxInfo.genus_taxid : undefined,
+      taxonId: taxInfo.tax_id,
+      taxonName,
+      taxonValues: {
+        NT: taxInfo.NT,
+        NR: taxInfo.NR
+      }
     });
   };
 
@@ -69,7 +44,6 @@ export default class ReportTable extends React.Component {
 
     return (
       <div className="reports-main">
-        {this.renderTaxonModal()}
         <table id="report-table" className="bordered report-table">
           <thead>
             <tr className="report-header">
@@ -166,7 +140,7 @@ export default class ReportTable extends React.Component {
               renderNumber={renderNumber}
               showConcordance={showConcordance}
               getRowClass={getRowClass}
-              openTaxonModal={this.handleTaxonModalOpen}
+              onTaxonClick={this.handleTaxonClick}
               reportDetails={reportDetails}
               backgroundData={backgroundData}
               showAssemblyColumns={showAssemblyColumns}
@@ -192,5 +166,6 @@ ReportTable.propTypes = {
   renderColumnHeader: PropTypes.func.isRequired,
   countType: PropTypes.string.isRequired,
   setCountType: PropTypes.func.isRequired,
-  showAssemblyColumns: PropTypes.bool
+  showAssemblyColumns: PropTypes.bool,
+  onTaxonClick: PropTypes.func
 };

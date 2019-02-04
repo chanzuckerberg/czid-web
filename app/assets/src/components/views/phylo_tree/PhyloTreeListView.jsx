@@ -4,6 +4,7 @@ import Divider from "../../layout/Divider";
 import PhyloTreeVis from "./PhyloTreeVis";
 import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
 import PropTypes from "prop-types";
 import { resetUrl, parseUrlParams } from "~/helpers/url";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
@@ -21,7 +22,10 @@ class PhyloTreeListView extends React.Component {
         urlParams,
         props.phyloTrees
       ),
-      phyloTreeMap: fromPairs(props.phyloTrees.map(tree => [tree.id, tree]))
+      phyloTreeMap: fromPairs(props.phyloTrees.map(tree => [tree.id, tree])),
+      sidebarMode: null,
+      sidebarVisible: false,
+      sidebarConfig: null
     };
   }
 
@@ -46,7 +50,8 @@ class PhyloTreeListView extends React.Component {
   handleTreeChange = newPhyloTreeId => {
     window.sessionStorage.setItem("treeId", newPhyloTreeId);
     this.setState({
-      selectedPhyloTreeId: newPhyloTreeId
+      selectedPhyloTreeId: newPhyloTreeId,
+      sidebarVisible: false
     });
   };
 
@@ -85,6 +90,65 @@ class PhyloTreeListView extends React.Component {
     return statusMessage;
   }
 
+  handleTaxonModeOpen = () => {
+    const currentTree = this.state.phyloTreeMap[this.state.selectedPhyloTreeId];
+    if (
+      this.state.sidebarMode === "taxonDetails" &&
+      this.state.sidebarVisible &&
+      currentTree.taxid === this.state.sidebarConfig.taxonId
+    ) {
+      this.setState({
+        sidebarVisible: false
+      });
+    } else {
+      this.setState({
+        sidebarVisible: true,
+        sidebarConfig: {
+          parentTaxonId: currentTree.parent_taxid,
+          taxonId: currentTree.taxid,
+          taxonName: currentTree.tax_name
+        },
+        sidebarMode: "taxonDetails"
+      });
+    }
+  };
+
+  handleSampleNodeClick = (sampleId, pipelineRunId) => {
+    if (!sampleId) {
+      this.setState({
+        sidebarVisible: false
+      });
+      return;
+    }
+
+    if (
+      this.state.sidebarVisible &&
+      this.state.sidebarMode === "sampleDetails" &&
+      this.state.selectedSampleId === sampleId
+    ) {
+      this.setState({
+        sidebarVisible: false
+      });
+    } else {
+      this.setState({
+        selectedSampleId: sampleId,
+        sidebarConfig: {
+          sampleId,
+          pipelineRunId,
+          onMetadataUpdate: this.handleMetadataUpdate
+        },
+        sidebarMode: "sampleDetails",
+        sidebarVisible: true
+      });
+    }
+  };
+
+  closeSidebar = () => {
+    this.setState({
+      sidebarVisible: false
+    });
+  };
+
   render() {
     if (!this.state.selectedPhyloTreeId) {
       return (
@@ -102,7 +166,17 @@ class PhyloTreeListView extends React.Component {
           <ViewHeader.Content>
             <ViewHeader.Pretitle>
               Phylogenetic Tree{" "}
-              {currentTree.tax_name && `- ${currentTree.tax_name}`}
+              {currentTree.tax_name && (
+                <span>
+                  &nbsp;-&nbsp;
+                  <span
+                    className={cs.taxonName}
+                    onClick={this.handleTaxonModeOpen}
+                  >
+                    {currentTree.tax_name}
+                  </span>
+                </span>
+              )}
             </ViewHeader.Pretitle>
             <ViewHeader.Title
               label={currentTree.name}
@@ -119,6 +193,12 @@ class PhyloTreeListView extends React.Component {
           </ViewHeader.Controls>
         </ViewHeader>
         <Divider />
+        <DetailsSidebar
+          visible={this.state.sidebarVisible}
+          mode={this.state.sidebarMode}
+          onClose={this.closeSidebar}
+          params={this.state.sidebarConfig}
+        />
         <NarrowContainer>
           {currentTree.newick ? (
             <PhyloTreeVis
@@ -126,6 +206,7 @@ class PhyloTreeListView extends React.Component {
               nodeData={currentTree.sampleDetailsByNodeName}
               phyloTreeId={this.state.selectedPhyloTreeId}
               onMetadataUpdate={this.handleMetadataUpdate}
+              onSampleNodeClick={this.handleSampleNodeClick}
             />
           ) : (
             <p className={cs.noTreeBanner}>
