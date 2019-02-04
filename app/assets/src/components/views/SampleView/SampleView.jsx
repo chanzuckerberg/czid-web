@@ -3,7 +3,8 @@
 import React from "react";
 import cx from "classnames";
 import { get } from "lodash/fp";
-import { getURLParamString } from "~/api";
+import { getURLParamString, logAnalyticsEvent } from "~/api";
+import { ANALYTICS_EVENT_NAMES } from "~/api/constants";
 import PropTypes from "~/components/utils/propTypes";
 import { pipelineVersionHasAssembly } from "~/components/utils/sample";
 import AMRView from "~/components/AMRView";
@@ -15,6 +16,7 @@ import Tabs from "~/components/ui/controls/Tabs";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import Controls from "./Controls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
+
 import cs from "./sample_view.scss";
 
 class SampleView extends React.Component {
@@ -44,6 +46,8 @@ class SampleView extends React.Component {
         location.reload();
       }, 300000);
     }
+
+    logAnalyticsEvent(ANALYTICS_EVENT_NAMES.SAMPLE_REPORT_VIEW);
   }
 
   generateGsnapFilterStatus = jobStats => {
