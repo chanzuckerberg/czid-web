@@ -42,7 +42,6 @@ class PhyloTreeVis extends React.Component {
       // If we made the sidebar visibility depend on sampleId !== null,
       // there would be a visual flicker when sampleId is set to null as the sidebar closes.
       selectedSampleId: null,
-      selectedPipelineRunId: null,
       sidebarVisible: false,
       sampleMetadataTypesByHostGenomeName: null,
       allMetadataTypes: [],
@@ -140,16 +139,6 @@ class PhyloTreeVis extends React.Component {
     this.setState({
       sidebarVisible: false
     });
-  };
-
-  handleMetadataUpdate = (key, newValue) => {
-    if (this.props.onMetadataUpdate) {
-      this.props.onMetadataUpdate(
-        key,
-        newValue,
-        this.state.selectedPipelineRunId
-      );
-    }
   };
 
   handleMetadataTypeChange = (selectedMetadataType, name) => {
