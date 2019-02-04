@@ -18,8 +18,7 @@ import PipelineVersionSelect from "./PipelineVersionSelect";
 
 import cs from "./sample_view.scss";
 // import analytics from "~/api/segment";
-import analytics from "~/api/segment"
-
+import analytics from "~/api/segment";
 
 class SampleView extends React.Component {
   constructor(props) {
@@ -35,9 +34,13 @@ class SampleView extends React.Component {
 
     this.gsnapFilterStatus = this.generateGsnapFilterStatus();
 
-    console.log(analytics);
-    analytics.default.load("7gUE8JMXEkhEo9ioD1uHke1RgpDFxxlG");
-    analytics.default.track("foobar 6:27pm");
+    console.log(window.analytics);
+    // window.analytics.default.load("7gUE8JMXEkhEo9ioD1uHke1RgpDFxxlG");
+    // window.analytics.default.track("foobar 6:27pm");
+    console.log(window.analytics.track("foobar 11:39am"), () => {
+      console.log("SENT");
+    });
+    console.log("after");
   }
 
   componentDidMount() {

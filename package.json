@@ -10,10 +10,7 @@
     "setupTestFrameworkScriptFile": "./enzyme_config.js"
   },
   "lint-staged": {
-    "*.{js,jsx,json,css,scss}": [
-      "prettier --write",
-      "git add"
-    ],
+    "*.{js,jsx,json,css,scss}": ["prettier --write", "git add"],
     "*.rb": [
       "rubocop -R --auto-correct --config .rubocop_todo.yml --display-cop-names --display-style-guide",
       "git add"
@@ -95,7 +92,6 @@
     "react-dom": "16.4",
     "react-dropzone": "^6.2.4",
     "react-moment": "^0.7.9",
-    "react-segment": "^0.1.8",
     "react-sticky": "^6.0.1",
     "react-table": "^6.8.6",
     "react-tipsy": "^0.6.2",
