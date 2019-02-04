@@ -9,7 +9,7 @@
       "fastqs": ["<%= @attribute_dict[:fastq1] %>"],
     <% end %>
     "nonhost_fasta": ["refined_taxid_annot.fasta"],
-    <% if @attribute_dict[:file_type] == "fastq" %>
+    <% if @attribute_dict[:file_ext] == "fastq" %>
       <% if @attribute_dict[:fastq2] %>
         "nonhost_fastq_out": ["nonhost_R1.fastq", "nonhost_R2.fastq"]
       <% else %>
