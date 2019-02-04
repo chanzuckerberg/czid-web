@@ -95,6 +95,20 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert !samples_shown.include?(samples(:one).id)
   end
 
+  test 'joe sees public_project in search suggestions' do
+    get "/search_suggestions"
+    res = JSON.parse(@response.body)
+    projects_shown = res["Project"]["results"].map { |h| h["id"] }
+    assert projects_shown.include?(projects(:public_project).id)
+  end
+
+  test 'joe does not see project one in search suggestions' do
+    get "/search_suggestions"
+    res = JSON.parse(@response.body)
+    projects_shown = res["Project"]["results"].map { |h| h["id"] }
+    assert !projects_shown.include?(projects(:one).id)
+  end
+
   # public projects
 
   test 'joe cannot add users to public_project ' do
