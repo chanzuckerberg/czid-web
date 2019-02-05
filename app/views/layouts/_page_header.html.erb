@@ -10,7 +10,10 @@
         signoutEndpoint: '<%=destroy_user_session_path%>',
         signInEndpoint: '<%=new_user_session_path%>',
         contactEmail: "help@idseq.net"
-      }, 'page_header')
+      }, 'page_header');
+
+      // Associate user ID with Segment
+      analytics.identify('<%= current_user.id %>');
     <% end %>
   <% else %>
     <%= javascript_tag do %>
