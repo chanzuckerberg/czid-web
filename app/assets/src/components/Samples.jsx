@@ -34,6 +34,7 @@ import TableColumnHeader from "./views/samples/TableColumnHeader";
 import PipelineStatusFilter from "./views/samples/PipelineStatusFilter";
 import ProjectUploadMenu from "./views/samples/ProjectUploadMenu";
 import CategorySearchBox from "./ui/controls/CategorySearchBox";
+import FilterTag from "./ui/controls/FilterTag";
 import ProjectSettingsModal from "./views/samples/ProjectSettingsModal";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
@@ -184,6 +185,28 @@ class Samples extends React.Component {
     }
     return value;
   }
+
+  removeFilterTag = (entry, i) => {
+    let selected = this.state[entry.key];
+    for (let val of entry.values) {
+      let idx = selected.indexOf(val);
+      if (idx > -1) {
+        selected.splice(idx, 1);
+      }
+    }
+    let newTags = this.state.searchTags;
+    newTags.splice(i, 1);
+    this.setState(
+      {
+        [entry.key]: selected,
+        searchTags: newTags
+      },
+      () => {
+        this.setUrlLocation();
+        this.fetchResults();
+      }
+    );
+  };
 
   applySuggestFilter = (result, stateVar, resultVar) => {
     let cat = result.category;
@@ -907,33 +930,11 @@ class Samples extends React.Component {
     if (this.admin !== 0 || this.allowedFeatures.includes("structuredSearch")) {
       search_tag_list = this.state.searchTags.map((entry, i) => {
         return (
-          <Label className="label-tags" size="tiny" key={`search-tag-${i}`}>
-            {entry.display}
-            <Icon
-              name="close"
-              onClick={e => {
-                let selected = this.state[entry.key];
-                for (let val of entry.values) {
-                  let idx = selected.indexOf(val);
-                  if (idx > -1) {
-                    selected.splice(idx, 1);
-                  }
-                }
-                let newTags = this.state.searchTags;
-                newTags.splice(i, 1);
-                this.setState(
-                  {
-                    [entry.key]: selected,
-                    searchTags: newTags
-                  },
-                  () => {
-                    this.setUrlLocation();
-                    this.fetchResults();
-                  }
-                );
-              }}
-            />
-          </Label>
+          <FilterTag
+            text={entry.display}
+            onClose={e => this.removeFilterTag(entry, i)}
+            key={`filter-tag-${i}`}
+          />
         );
       });
     } else {

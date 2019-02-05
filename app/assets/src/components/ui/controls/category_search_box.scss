@@ -1,6 +1,8 @@
 @import "~styles/themes/colors";
 
 .categorySearchBox {
+  margin-bottom: 12px;
+
   :global(.prompt) {
     width: 260px !important;
     border-radius: 19px !important;
@@ -11,7 +13,6 @@
     :global(.name),
     :global(.results.visible),
     :global(.result) {
-      /* Overwrite semantic-ui */
       display: block !important;
       border-bottom: none !important;
     }
