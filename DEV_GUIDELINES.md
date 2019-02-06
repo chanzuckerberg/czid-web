@@ -126,8 +126,7 @@ Once your component has more than a single `.jsx` and .`scss` file, you should c
 Where the `index.jsx` file is a simple redirect:
 
 `// Contents of index.jsx` \
-`import Table from "./Table";` \
-`export default Table;`
+`export {default as Table} from "./Table";`
 
 
 ### Views
