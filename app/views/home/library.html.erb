@@ -1,0 +1,8 @@
+
+ <% if current_user.admin? %>
+ 
+<%= javascript_tag do %>
+  react_component('LibraryView', {}, 'page_content');
+<% end %>
+
+<% end %>

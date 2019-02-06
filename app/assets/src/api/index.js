@@ -148,11 +148,33 @@ const uploadMetadataForProject = (id, metadata) =>
     metadata
   });
 
+const getSamples = ({ projectId, onlyLibrary, excludeLibrary } = {}) => {
+  // TODO: add remaining parameters: filterm search, page, sortBy
+  return get("/samples/index_v2.json", {
+    params: {
+      projectId,
+      onlyLibrary,
+      excludeLibrary
+    }
+  });
+};
+
+const getProjects = ({ onlyLibrary, excludeLibrary } = {}) => {
+  return get("/projects.json", {
+    params: {
+      onlyLibrary,
+      excludeLibrary
+    }
+  });
+};
+
 export {
   get,
   getSampleMetadata,
   getSampleMetadataFields,
   getSampleReportInfo,
+  getSamples,
+  getProjects,
   saveSampleMetadata,
   getMetadataTypesByHostGenomeName,
   saveSampleName,

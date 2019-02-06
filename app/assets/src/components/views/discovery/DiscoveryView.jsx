@@ -5,17 +5,17 @@ import { Divider } from "~/components/layout";
 import DiscoveryHeader from "../discovery/DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
 import { sumBy } from "lodash";
-import { getSamples } from "~/api/samples";
+import { getSamples, getProjects } from "~/api";
 import cs from "./discovery_view.scss";
 
 class DiscoveryView extends React.Component {
-  // TODO: add header nav
   // TODO: Filter by selection on header nav
 
   constructor(props) {
     super(props);
 
     this.state = {
+      currentTab: "projects",
       samples: [],
       projects: []
     };
@@ -23,9 +23,16 @@ class DiscoveryView extends React.Component {
   }
 
   async fetchData() {
+    const { onlyLibrary, excludeLibrary } = this.props;
     try {
-      const data = await getSamples();
-      this.setState(data);
+      const [samples, projects] = await Promise.all([
+        getSamples({ onlyLibrary, excludeLibrary }),
+        getProjects({ onlyLibrary, excludeLibrary })
+      ]);
+      this.setState({
+        samples,
+        projects
+      });
     } catch (error) {
       console.log(error);
     }
@@ -57,28 +64,40 @@ class DiscoveryView extends React.Component {
     ];
   };
 
-  handleTabChange = () => {
-    console.log("TODO: handle tab change");
+  handleTabChange = currentTab => {
+    this.setState({ currentTab });
   };
 
   render() {
-    const { projects } = this.state;
+    const { currentTab, projects } = this.state;
     const tabs = this.computeTabs(projects);
 
     return (
       <div className={cs.layout}>
         <NarrowContainer className={cs.headerContainer}>
-          <DiscoveryHeader tabs={tabs} onTabChange={this.handleTabChange} />
+          <DiscoveryHeader
+            initialTab={currentTab}
+            tabs={tabs}
+            onTabChange={this.handleTabChange}
+          />
         </NarrowContainer>
         <Divider style="medium" />
         <NarrowContainer className={cs.viewContainer}>
-          <ProjectsView projects={projects} />
+          {currentTab == "projects" && <ProjectsView projects={projects} />}
+          {currentTab == "samples" && (
+            <div>
+              Not implemented yet. <a href="/samples">Current samples view</a>
+            </div>
+          )}
         </NarrowContainer>
       </div>
     );
   }
 }
 
-DiscoveryView.propTypes = {};
+DiscoveryView.propTypes = {
+  excludeLibrary: PropTypes.bool,
+  onlyLibrary: PropTypes.bool
+};
 
 export default DiscoveryView;

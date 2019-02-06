@@ -41,7 +41,7 @@ const react_component = (componentName, props, target) => {
   const matchedComponent = foundComponents[componentName];
   if (matchedComponent) {
     ReactDOM.render(
-      React.createElement(matchedComponent, props, null),
+      React.createElement(matchedComponent, props),
       document.getElementById(target)
     );
   } else {

@@ -37,7 +37,7 @@ Rails.application.routes.draw do
     get :taxid_contigs, on: :member
     get :summary_contig_counts, on: :member
     get :samples_going_public, on: :collection
-    get :library, on: :collection
+    get :index_v2, on: :collection
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
   end
@@ -48,7 +48,8 @@ Rails.application.routes.draw do
   get 'select', to: 'home#index'
   get 'home', to: 'home#index'
   get 'taxon_descriptions', to: 'home#taxon_descriptions'
-  get 'discovery', to: 'home#discovery'
+  get 'public', to: 'home#public'
+  get 'library', to: 'home#library'
   post 'feedback', to: 'home#feedback'
   post 'sign_up', to: 'home#sign_up'
 

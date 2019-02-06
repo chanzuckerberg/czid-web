@@ -181,7 +181,7 @@ BareDropdown.propTypes = forbidExtraProps({
   options: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.any,
-      text: PropTypes.string
+      text: PropTypes.node
     })
   ),
   value: PropTypes.any,

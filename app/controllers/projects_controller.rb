@@ -13,7 +13,9 @@ class ProjectsController < ApplicationController
   #
   ##########################################
 
-  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status, :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, :visuals, :validate_metadata_csv, :upload_metadata].freeze
+  READ_ACTIONS = [:show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status, 
+    :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status, :send_project_reports_csv, 
+    :validate_metadata_csv, :upload_metadata].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index, :send_project_csv, :choose_project].freeze
 
@@ -31,7 +33,35 @@ class ProjectsController < ApplicationController
   # GET /projects
   # GET /projects.json
   def index
-    @projects = current_power.projects
+    respond_to do |format|
+      format.html {
+        Rails.logger.debug("Projects stuff: HTML")
+        # keep compatibility with old route
+        # TODO: remove once it is refactored
+        @projects = current_power.projects 
+      }
+      format.json {
+        onlyLibrary = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
+        excludeLibrary = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
+        @samples = nil
+        if onlyLibrary
+          @samples = current_power.library_samples
+        elsif excludeLibrary
+          @samples = Sample.public_samples
+        else 
+          @samples = current_power.samples
+        end
+    
+        @projects = @samples.group(:project).count
+        render json: @projects.map {|project, sample_count|
+          project.as_json(:only => [:id, :name, :created_at, :public_access]).merge({
+            number_of_samples: sample_count,
+            hosts: @samples.where(:project_id => project.id).includes(:host_genome).distinct.pluck("host_genomes.name").compact,
+            tissues: @samples.where(:project_id => project.id).distinct.pluck(:sample_tissue).compact
+          })
+        }
+      }
+    end
   end
 
   def choose_project

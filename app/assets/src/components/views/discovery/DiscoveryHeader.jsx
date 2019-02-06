@@ -12,8 +12,16 @@ class DiscoveryHeader extends React.Component {
     };
   }
 
+  handleTabChange = tab => {
+    const { onTabChange } = this.props;
+    this.setState({
+      currentTab: tab
+    });
+    onTabChange(tab);
+  };
+
   render() {
-    const { tabs, onTabChange } = this.props;
+    const { tabs } = this.props;
     const { currentTab } = this.state;
 
     return (
@@ -21,7 +29,7 @@ class DiscoveryHeader extends React.Component {
         className={cs.tabs}
         tabs={tabs}
         value={currentTab}
-        onChange={onTabChange}
+        onChange={this.handleTabChange}
       />
     );
   }

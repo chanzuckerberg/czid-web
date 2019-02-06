@@ -1,0 +1,60 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.header {
+  align-items: center;
+  background-color: $black;
+  display: flex;
+  flex-direction: row;
+  height: 50px;
+  margin-bottom: 10px;
+  padding: 0 15px;
+  position: relative;
+  z-index: 1000;
+
+  .logo {
+    flex: 0 0 auto;
+
+    .icon {
+      height: 35px;
+    }
+  }
+
+  .fill {
+    flex: 1 0 auto;
+  }
+
+  .userDropdown {
+    flex: 0 0 auto;
+    color: $white;
+
+    .userName {
+      align-items: center;
+      display: flex;
+      font-size: $font-size-h6;
+      font-weight: $font-weight-regular;
+      margin-right: 5px;
+      height: 36px;
+      vertical-align: middle;
+    }
+  }
+
+  .mainMenu {
+    margin-right: 100px;
+    display: flex;
+
+    .item {
+      color: $medium-grey;
+      font-size: $font-size-h6;
+      font-weight: $font-weight-semibold;
+
+      &.selected {
+        color: $white;
+      }
+    }
+
+    .item:not(:last-child) {
+      margin-right: 25px;
+    }
+  }
+}
