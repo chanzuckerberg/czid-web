@@ -65,6 +65,12 @@ class PhyloTreesController < ApplicationController
       sample_details = sample_details_map[pt["id"]]
       pt["sampleDetailsByNodeName"] = sample_details
       pt["user"] = PhyloTree.users_by_tree_id[pt["id"]]
+      if pt["tax_level"] == 1
+        taxon = TaxonLineage.where(taxid: pt["taxid"]).first
+        if taxon
+          pt["parent_taxid"] = taxon.genus_taxid
+        end
+      end
     end
 
     respond_to do |format|

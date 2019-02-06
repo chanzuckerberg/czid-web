@@ -10,6 +10,7 @@ x-web-variables: &web-variables
   ? DATADOG_API_KEY
   ? RACK_ENV
   ? RAILS_ENV
+  ? SEGMENT_ID
 
 x-aws-variables: &aws-variables
   ? AWS_ACCESS_KEY_ID

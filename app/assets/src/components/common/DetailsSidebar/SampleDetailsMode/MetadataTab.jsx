@@ -8,7 +8,7 @@ import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 import DateInput from "~/components/ui/controls/DateInput";
 import MetadataSection from "./MetadataSection";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
-import cs from "./sample_details_sidebar.scss";
+import cs from "./sample_details_mode.scss";
 
 class MetadataTab extends React.Component {
   constructor(props) {

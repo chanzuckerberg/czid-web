@@ -4,8 +4,8 @@ import { PIPELINE_INFO_FIELDS } from "./constants";
 import MetadataSection from "./MetadataSection";
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import PropTypes from "~/components/utils/propTypes";
-import { getDownloadLinks } from "../utils/download";
-import cs from "./sample_details_sidebar.scss";
+import { getDownloadLinks } from "~/components/views/report/utils/download";
+import cs from "./sample_details_mode.scss";
 
 class PipelineTab extends React.Component {
   state = {

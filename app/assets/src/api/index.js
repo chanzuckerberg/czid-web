@@ -200,6 +200,23 @@ const uploadFileToUrl = async (
     .catch(onError);
 };
 
+const getTaxonDescriptions = taxonList =>
+  get(`/taxon_descriptions.json?taxon_list=${taxonList.join(",")}`);
+
+const getTaxonDistributionForBackground = (backgroundId, taxonId) =>
+  get(`/backgrounds/${backgroundId}/show_taxon_dist.json?taxid=${taxonId}`);
+
+const getSampleTaxons = (params, cancelToken) =>
+  get("/samples/samples_taxons.json", {
+    params,
+    cancelToken
+  });
+
+const logAnalyticsEvent = (eventName, eventData = {}) => {
+  // Wrapper around Segment analytics so we can add things later
+  if (window.analytics) window.analytics.track(eventName, eventData);
+};
+
 export {
   get,
   getSampleMetadata,
@@ -220,5 +237,9 @@ export {
   getAllHostGenomes,
   bulkUploadRemoteSamples,
   markSampleUploaded,
-  uploadFileToUrl
+  uploadFileToUrl,
+  getTaxonDescriptions,
+  getTaxonDistributionForBackground,
+  getSampleTaxons,
+  logAnalyticsEvent
 };
