@@ -11,6 +11,9 @@
 /.bundle
 /config/initializers/app_environment_variables.rb
 
+# Ignore yarn.lock because we manage packages using npm
+/yarn.lock
+
 # Ignore the default SQLite database.
 /db/*.sqlite3
 /db/*.sqlite3-journal
