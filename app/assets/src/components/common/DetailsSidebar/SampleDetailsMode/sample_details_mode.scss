@@ -20,19 +20,6 @@
   margin: 30px 10px;
 }
 
-.closeIcon {
-  position: absolute;
-  right: 40px;
-  top: 30px;
-  opacity: 0.3;
-  width: 20px;
-  height: 20px;
-
-  &:hover {
-    opacity: 1;
-  }
-}
-
 .field {
   padding: 15px 0;
   display: flex;

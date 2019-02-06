@@ -55,6 +55,7 @@ class SamplesHeatmapVis extends React.Component {
         onColumnMetadataLabelMove: this.handleMouseHoverMove,
         onRemoveRow: this.props.onRemoveTaxon,
         onColumnLabelClick: this.props.onSampleLabelClick,
+        onRowLabelClick: this.props.onTaxonLabelClick,
         onCellClick: this.handleCellClick,
         onAddColumnMetadataClick: this.handleAddColumnMetadataClick,
         columnMetadata: this.getSelectedMetadata()
@@ -224,11 +225,14 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   getSelectedMetadata() {
+    const sortByLabel = (a, b) => (a.label > b.label ? 1 : -1);
+
     return Array.from(this.state.selectedMetadata)
       .filter(metadatum => !!this.metadataTypes[metadatum])
       .map(metadatum => {
         return { value: metadatum, label: this.metadataTypes[metadatum].name };
-      });
+      })
+      .sort(sortByLabel);
   }
 
   getAvailableMetadataOptions() {
@@ -302,6 +306,7 @@ SamplesHeatmapVis.propTypes = {
   metric: PropTypes.string,
   onRemoveTaxon: PropTypes.func,
   onSampleLabelClick: PropTypes.func,
+  onTaxonLabelClick: PropTypes.func,
   sampleDetails: PropTypes.object,
   sampleIds: PropTypes.array,
   scale: PropTypes.string,

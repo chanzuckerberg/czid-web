@@ -2,6 +2,7 @@ import React from "react";
 import BareDropdown from "./BareDropdown";
 import DropdownTrigger from "./common/DropdownTrigger";
 import PropTypes from "prop-types";
+import cx from "classnames";
 import cs from "./dropdown.scss";
 
 class Dropdown extends React.Component {
@@ -62,7 +63,7 @@ class Dropdown extends React.Component {
   render() {
     return (
       <BareDropdown
-        className={cs.dropdown}
+        className={cx(cs.dropdown, this.props.className)}
         arrowInsideTrigger
         placeholder={this.props.placeholder}
         disabled={this.props.disabled}
@@ -81,6 +82,7 @@ class Dropdown extends React.Component {
 }
 
 Dropdown.propTypes = {
+  className: PropTypes.string,
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
   fluid: PropTypes.bool,

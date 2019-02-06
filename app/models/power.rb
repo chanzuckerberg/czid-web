@@ -21,7 +21,12 @@ class Power
     Project.editable(@user)
   end
 
+  # TODO: Remove this one because it's vague
   power :samples do
+    Sample.viewable(@user)
+  end
+
+  power :viewable_samples do
     Sample.viewable(@user)
   end
 

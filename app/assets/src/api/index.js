@@ -15,6 +15,19 @@ const postWithCSRF = async (url, params) => {
   return resp.data;
 };
 
+// TODO(mark): Remove redundancy in CSRF methods.
+const putWithCSRF = async (url, params) => {
+  const resp = await axios.put(url, {
+    ...params,
+    // Fetch the CSRF token from the DOM.
+    authenticity_token: document.getElementsByName("csrf-token")[0].content
+  });
+
+  // Just return the data.
+  // resp also contains headers, status, etc. that we might use later.
+  return resp.data;
+};
+
 // TODO: add error handling
 const get = async (url, config) => {
   const resp = await axios.get(url, config);
@@ -43,7 +56,13 @@ const getSampleMetadata = (id, pipelineVersion) => {
   );
 };
 
-const getSampleMetadataFields = id => get(`/samples/${id}/metadata_fields`);
+// Get MetadataField info for the sample(s) (either one ID or an array)
+const getSampleMetadataFields = ids =>
+  get("/samples/metadata_fields", {
+    params: {
+      sampleIds: [ids].flat()
+    }
+  });
 
 const saveSampleMetadata = (id, field, value) =>
   postWithCSRF(`/samples/${id}/save_metadata_v2`, {
@@ -148,6 +167,51 @@ const uploadMetadataForProject = (id, metadata) =>
     metadata
   });
 
+const getOfficialMetadataFields = () =>
+  get("/metadata/official_metadata_fields");
+
+const getAllHostGenomes = () => get("/host_genomes.json");
+
+const bulkUploadRemoteSamples = samples =>
+  postWithCSRF(`/samples/bulk_upload.json`, {
+    samples
+  });
+
+const markSampleUploaded = sampleId =>
+  putWithCSRF(`/samples/${sampleId}.json`, {
+    sample: {
+      id: sampleId,
+      status: "uploaded"
+    }
+  });
+
+const uploadFileToUrl = async (
+  file,
+  url,
+  { onUploadProgress, onSuccess, onError }
+) => {
+  const config = {
+    onUploadProgress
+  };
+
+  return axios
+    .put(url, file, config)
+    .then(onSuccess)
+    .catch(onError);
+};
+
+const getTaxonDescriptions = taxonList =>
+  get(`/taxon_descriptions.json?taxon_list=${taxonList.join(",")}`);
+
+const getTaxonDistributionForBackground = (backgroundId, taxonId) =>
+  get(`/backgrounds/${backgroundId}/show_taxon_dist.json?taxid=${taxonId}`);
+
+const getSampleTaxons = (params, cancelToken) =>
+  get("/samples/samples_taxons.json", {
+    params,
+    cancelToken
+  });
+
 const getSamples = ({ projectId, onlyLibrary, excludeLibrary } = {}) => {
   // TODO: add remaining parameters: filterm search, page, sortBy
   return get("/samples/index_v2.json", {
@@ -185,5 +249,13 @@ export {
   getSummaryContigCounts,
   createSample,
   validateMetadataCSVForProject,
-  uploadMetadataForProject
+  uploadMetadataForProject,
+  getOfficialMetadataFields,
+  getAllHostGenomes,
+  bulkUploadRemoteSamples,
+  markSampleUploaded,
+  uploadFileToUrl,
+  getTaxonDescriptions,
+  getTaxonDistributionForBackground,
+  getSampleTaxons
 };

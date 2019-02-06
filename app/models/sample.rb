@@ -207,6 +207,7 @@ class Sample < ApplicationRecord
       file_list += list_outputs(sample_output_s3_path)
       file_list += list_outputs(pr.postprocess_output_s3_path)
       file_list += list_outputs(pr.postprocess_output_s3_path + '/' + ASSEMBLY_DIR)
+      file_list += list_outputs(pr.expt_output_s3_path)
     else
       stage1_files = list_outputs(pr.host_filter_output_s3_path)
       stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
@@ -383,7 +384,7 @@ class Sample < ApplicationRecord
       all
     else
       project_ids = Project.editable(user).select("id").pluck(:id)
-      joins("INNER JOIN projects ON samples.project_id = projects.id")
+      joins(:project)
         .where("(project_id in (?) or
                 projects.public_access = 1 or
                 DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < ?)",
@@ -420,7 +421,7 @@ class Sample < ApplicationRecord
   end
 
   def self.public_samples
-    joins("INNER JOIN projects ON samples.project_id = projects.id")
+    joins(:project)
       .where("(projects.public_access = 1 or
               DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < ?)",
              Time.current)

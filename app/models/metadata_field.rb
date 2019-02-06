@@ -83,7 +83,10 @@ class MetadataField < ApplicationRecord
       dataType: Metadatum.convert_type_to_string(base_type),
       name: display_name,
       options: options && JSON.parse(options),
-      group: group
+      group: group,
+      host_genome_ids: host_genome_ids,
+      description: description,
+      is_required: is_required
     }
   end
 end

@@ -3,16 +3,23 @@
 $box-shadow-bottom-right: 0px 2px 8px $box-shadow-light;
 
 // Customized scroll bar
-.scrollable {
+@mixin scrollable {
   &::-webkit-scrollbar {
-    width: 6px;
+    // Overwrite semantic ui.
+    width: 8px !important;
   }
 
   &::-webkit-scrollbar-track {
-    background: transparent;
+    // Overwrite semantic ui.
+    background: transparent !important;
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: $transparent-light-grey;
+    // Overwrite semantic ui.
+    background-color: $transparent-light-grey !important;
+
+    &:hover {
+      background-color: $transparent-medium-grey !important;
+    }
   }
 }

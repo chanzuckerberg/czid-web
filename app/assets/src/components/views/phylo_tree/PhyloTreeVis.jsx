@@ -15,7 +15,6 @@ import Dendogram from "../../visualizations/dendrogram/Dendogram";
 import PropTypes from "prop-types";
 import DataTooltip from "../../ui/containers/DataTooltip";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
-import SampleDetailsSidebar from "../report/SampleDetailsSidebar";
 import { getMetadataTypesByHostGenomeName } from "~/api";
 import { extractMetadataTypesByHostGenomes } from "~/components/utils/metadata";
 import { SAMPLE_FIELDS, SAMPLE_METADATA_FIELDS } from "./constants";
@@ -43,7 +42,6 @@ class PhyloTreeVis extends React.Component {
       // If we made the sidebar visibility depend on sampleId !== null,
       // there would be a visual flicker when sampleId is set to null as the sidebar closes.
       selectedSampleId: null,
-      selectedPipelineRunId: null,
       sidebarVisible: false,
       sampleMetadataTypesByHostGenomeName: null,
       allMetadataTypes: [],
@@ -130,18 +128,10 @@ class PhyloTreeVis extends React.Component {
       let url = `https://www.ncbi.nlm.nih.gov/nuccore/${node.data.accession}`;
       window.open(url, "_blank", "noopener", "noreferrer");
     } else if (node.data.sample_id) {
-      if (
-        this.state.sidebarVisible &&
-        this.state.selectedSampleId === node.data.sample_id
-      ) {
-        this.handleSidebarClose();
-      } else {
-        this.setState({
-          selectedSampleId: node.data.sample_id,
-          selectedPipelineRunId: node.data.pipeline_run_id,
-          sidebarVisible: true
-        });
-      }
+      this.props.onSampleNodeClick(
+        node.data.sample_id,
+        node.data.pipeline_run_id
+      );
     }
   };
 
@@ -149,16 +139,6 @@ class PhyloTreeVis extends React.Component {
     this.setState({
       sidebarVisible: false
     });
-  };
-
-  handleMetadataUpdate = (key, newValue) => {
-    if (this.props.onMetadataUpdate) {
-      this.props.onMetadataUpdate(
-        key,
-        newValue,
-        this.state.selectedPipelineRunId
-      );
-    }
   };
 
   handleMetadataTypeChange = (selectedMetadataType, name) => {
@@ -271,13 +251,6 @@ class PhyloTreeVis extends React.Component {
             <DataTooltip data={this.getTooltipData()} />
           )}
         </div>
-        <SampleDetailsSidebar
-          showReportLink
-          visible={this.state.sidebarVisible}
-          onClose={this.handleSidebarClose}
-          sampleId={this.state.selectedSampleId}
-          onMetadataUpdate={this.handleMetadataUpdate}
-        />
       </div>
     );
   }
@@ -287,7 +260,8 @@ PhyloTreeVis.propTypes = {
   newick: PropTypes.string,
   nodeData: PropTypes.object,
   onMetadataUpdate: PropTypes.func,
-  phyloTreeId: PropTypes.number
+  phyloTreeId: PropTypes.number,
+  onSampleNodeClick: PropTypes.func
 };
 
 export default PhyloTreeVis;

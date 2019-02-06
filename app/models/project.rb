@@ -66,7 +66,7 @@ class Project < ApplicationRecord
     Syscall.run("mkdir", "-p", work_dir)
     output_file = host_gene_counts_tar(user_id)
     samples.each do |sample|
-      sample_name = "#{sample.name.downcase.gsub(/\W/, '-')}_#{sample.id}"
+      sample_name = "#{sample.name.gsub(/\W/, '-')}_#{sample.id}"
       _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", "#{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab")
       next unless status.exitstatus.zero?
       Syscall.run("aws", "s3", "cp", "#{sample.sample_host_filter_output_s3_path}/reads_per_gene.star.tab", "#{work_dir}/#{sample_name}")
@@ -85,7 +85,7 @@ class Project < ApplicationRecord
     sample_names_used = []
     current_power.project_samples(self).each do |sample|
       csv_data = report_csv_from_params(sample, params)
-      clean_sample_name = sample.name.downcase.gsub(/\W/, "-")
+      clean_sample_name = sample.name.gsub(/\W/, "-")
       used_before = sample_names_used.include? clean_sample_name
       sample_names_used << clean_sample_name
       clean_sample_name += "_#{sample.id}" if used_before

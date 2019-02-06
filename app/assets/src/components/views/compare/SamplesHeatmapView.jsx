@@ -2,13 +2,13 @@ import React from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import queryString from "query-string";
-import { set, min, max, uniq, pluck, values } from "lodash/fp";
+import { get, set, min, max } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
 import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
 import ErrorBoundary from "~/components/ErrorBoundary";
-import SampleDetailsSidebar from "../report/SampleDetailsSidebar";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
 import Slider from "~ui/controls/Slider";
@@ -20,10 +20,9 @@ import {
   MultipleNestedDropdown
 } from "~ui/controls/dropdowns";
 import { processMetadata } from "~utils/metadata";
-import { get, getMetadataTypesByHostGenomeName } from "~/api";
+import { getSampleTaxons, getSampleMetadataFields } from "~/api";
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
-import { extractMetadataTypesByHostGenomes } from "../../utils/metadata";
 
 class SamplesHeatmapView extends React.Component {
   constructor(props) {
@@ -82,7 +81,9 @@ class SamplesHeatmapView extends React.Component {
       // If we made the sidebar visibility depend on sampleId !== null,
       // there would be a visual flicker when sampleId is set to null as the sidebar closes.
       selectedSampleId: null,
-      sidebarVisible: false
+      sidebarMode: null,
+      sidebarVisible: false,
+      sidebarTaxonModeConfig: null
     };
 
     this.removedTaxonIds = new Set(
@@ -157,8 +158,8 @@ class SamplesHeatmapView extends React.Component {
       this.lastRequestToken.cancel("Parameters changed");
     this.lastRequestToken = axios.CancelToken.source();
 
-    return get("/samples/samples_taxons.json", {
-      params: {
+    return getSampleTaxons(
+      {
         sampleIds: this.state.sampleIds,
         removedTaxonIds: Array.from(this.removedTaxonIds),
         species: this.state.selectedOptions.species,
@@ -169,35 +170,28 @@ class SamplesHeatmapView extends React.Component {
         taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
         readSpecificity: this.state.selectedOptions.readSpecificity
       },
-      cancelToken: this.lastRequestToken.token
-    });
+      this.lastRequestToken.token
+    );
   }
 
-  fetchMetadataTypesByHostGenomeName() {
+  fetchMetadataFieldsBySampleIds() {
     if (this.state.metadataTypes) return null;
-    return getMetadataTypesByHostGenomeName();
+    return getSampleMetadataFields(this.state.sampleIds);
   }
 
   async fetchViewData() {
     this.setState({ loading: true });
 
-    let [heatmapData, metadataTypesByHostGenomeName] = await Promise.all([
+    let [heatmapData, metadataFields] = await Promise.all([
       this.fetchHeatmapData(),
-      this.fetchMetadataTypesByHostGenomeName()
+      this.fetchMetadataFieldsBySampleIds()
     ]);
 
     let newState = this.extractData(heatmapData);
 
     // Only calculate the metadataTypes once.
-    if (metadataTypesByHostGenomeName !== null) {
-      const distinctHostGenomeNames = uniq(
-        pluck("host_genome_name", values(newState.sampleDetails))
-      );
-
-      newState.metadataTypes = extractMetadataTypesByHostGenomes(
-        metadataTypesByHostGenomeName,
-        distinctHostGenomeNames
-      );
+    if (metadataFields !== null) {
+      newState.metadataTypes = metadataFields;
     }
 
     newState.loading = false;
@@ -234,6 +228,8 @@ class SamplesHeatmapView extends React.Component {
               index: taxonIndex,
               name: taxon.name,
               category: taxon.category_name,
+              parentId:
+                taxon.tax_id === taxon.species_taxid && taxon.genus_taxid,
               phage: !!taxon.is_phage
             };
             taxonDetails[taxon.name] = taxonDetails[taxon.tax_id];
@@ -287,21 +283,66 @@ class SamplesHeatmapView extends React.Component {
     this.removedTaxonIds.add(taxonId);
   };
 
+  closeSidebar = () => {
+    this.setState({
+      sidebarVisible: false
+    });
+  };
+
   handleSampleLabelClick = sampleId => {
-    if (this.state.sidebarVisible && this.state.selectedSampleId === sampleId) {
-      this.handleSidebarClose();
+    if (!sampleId) {
+      this.setState({
+        sidebarVisible: false
+      });
+      return;
+    }
+
+    if (
+      this.state.sidebarVisible &&
+      this.state.sidebarMode === "sampleDetails" &&
+      this.state.selectedSampleId === sampleId
+    ) {
+      this.setState({
+        sidebarVisible: false
+      });
     } else {
       this.setState({
         selectedSampleId: sampleId,
+        sidebarMode: "sampleDetails",
         sidebarVisible: true
       });
     }
   };
 
-  handleSidebarClose = () => {
-    this.setState({
-      sidebarVisible: false
-    });
+  handleTaxonLabelClick = taxonName => {
+    const taxonDetails = get(taxonName, this.state.taxonDetails);
+
+    if (!taxonDetails) {
+      this.setState({
+        sidebarVisible: false
+      });
+      return;
+    }
+
+    if (
+      this.state.sidebarMode === "taxonDetails" &&
+      this.state.sidebarVisible &&
+      taxonName === get("taxonName", this.state.sidebarTaxonModeConfig)
+    ) {
+      this.setState({
+        sidebarVisible: false
+      });
+    } else {
+      this.setState({
+        sidebarMode: "taxonDetails",
+        sidebarTaxonModeConfig: {
+          parentTaxonId: taxonDetails.parentId,
+          taxonId: taxonDetails.id,
+          taxonName
+        },
+        sidebarVisible: true
+      });
+    }
   };
 
   renderLegend() {
@@ -351,6 +392,7 @@ class SamplesHeatmapView extends React.Component {
           scale={this.state.availableOptions.scales[scaleIndex][1]}
           onRemoveTaxon={this.handleRemoveTaxon}
           onSampleLabelClick={this.handleSampleLabelClick}
+          onTaxonLabelClick={this.handleTaxonLabelClick}
         />
       </ErrorBoundary>
     );
@@ -631,6 +673,20 @@ class SamplesHeatmapView extends React.Component {
     }
   };
 
+  getSidebarParams = () => {
+    if (this.state.sidebarMode === "taxonDetails") {
+      return this.state.sidebarTaxonModeConfig;
+    }
+    if (this.state.sidebarMode === "sampleDetails") {
+      return {
+        sampleId: this.state.selectedSampleId,
+        onMetadataUpdate: this.handleMetadataUpdate,
+        showReportLink: true
+      };
+    }
+    return {};
+  };
+
   render() {
     let downloadOptions = [
       { text: "Download CSV", value: "csv" },
@@ -681,12 +737,11 @@ class SamplesHeatmapView extends React.Component {
           </Sticky>
           {this.renderVisualization()}
         </StickyContainer>
-        <SampleDetailsSidebar
-          showReportLink
+        <DetailsSidebar
           visible={this.state.sidebarVisible}
-          onClose={this.handleSidebarClose}
-          sampleId={this.state.selectedSampleId}
-          onMetadataUpdate={this.handleMetadataUpdate}
+          mode={this.state.sidebarMode}
+          onClose={this.closeSidebar}
+          params={this.getSidebarParams()}
         />
       </div>
     );
