@@ -5,11 +5,9 @@ require "net/http"
 class MetricUtil
   SEGMENT_ANALYTICS = if ENV["SEGMENT_RUBY_ID"]
                         Segment::Analytics.new(
-                            write_key: ENV["SEGMENT_RUBY_ID"],
-                            on_error: Rails.logger.warn("dropped event!")
+                          write_key: ENV["SEGMENT_RUBY_ID"],
+                          on_error: Rails.logger.warn("dropped event!")
                         )
-                      else
-                        nil
                       end
 
   def self.put_metric_now(name, value, tags = [], type = "count")
