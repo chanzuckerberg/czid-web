@@ -20,7 +20,6 @@ module ElasticsearchHelper
     %w[species genus].each do |level|
       search_params = { query: { query_string: { query: "#{prefix}*", fields: ["#{level}_name"] } } }
       TaxonLineage.__elasticsearch__.search(search_params).records.each do |record|
-        # TODO: add constraint on version_end
         name = record["#{level}_name"]
         taxid = record["#{level}_taxid"]
         matching_taxa[name] = {

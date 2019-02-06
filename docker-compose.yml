@@ -111,6 +111,7 @@ services:
     depends_on:
       - db
       - redis
+      - elasticsearch
     environment:
       <<: *web-variables
       <<: *aws-variables
