@@ -3,7 +3,8 @@
 import React from "react";
 import cx from "classnames";
 import { get } from "lodash/fp";
-import { getURLParamString } from "~/api";
+import { getURLParamString, logAnalyticsEvent } from "~/api";
+import { ANALYTICS_EVENT_NAMES } from "~/api/constants";
 import PropTypes from "~/components/utils/propTypes";
 import { pipelineVersionHasAssembly } from "~/components/utils/sample";
 import AMRView from "~/components/AMRView";
@@ -45,6 +46,10 @@ class SampleView extends React.Component {
         location.reload();
       }, 300000);
     }
+
+    logAnalyticsEvent(ANALYTICS_EVENT_NAMES.sampleView, {
+      sampleId: this.props.sample.id
+    });
   }
 
   generateGsnapFilterStatus = jobStats => {

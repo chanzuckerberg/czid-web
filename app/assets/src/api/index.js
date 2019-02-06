@@ -212,6 +212,11 @@ const getSampleTaxons = (params, cancelToken) =>
     cancelToken
   });
 
+const logAnalyticsEvent = (eventName, eventData = {}) => {
+  // Wrapper around Segment analytics so we can add things later
+  if (window.analytics) window.analytics.track(eventName, eventData);
+};
+
 export {
   get,
   getSampleMetadata,
@@ -235,5 +240,6 @@ export {
   uploadFileToUrl,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
-  getSampleTaxons
+  getSampleTaxons,
+  logAnalyticsEvent
 };
