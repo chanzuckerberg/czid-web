@@ -5,3 +5,5 @@
 Resque.redis = Redis.new(url: REDISCLOUD_URL)
 
 Dir[Rails.root.join('app', 'jobs', '*.rb')].each { |file| require file }
+
+Resque.logger.level = Logger::DEBUG

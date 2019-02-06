@@ -153,6 +153,7 @@ class SamplesController < ApplicationController
   end
 
   # POST /samples/bulk_upload
+  # Currently only used for web S3 uploads
   def bulk_upload
     samples = samples_params || []
     editable_project_ids = current_power.updatable_projects.pluck(:id)
@@ -165,10 +166,14 @@ class SamplesController < ApplicationController
       sample.user = current_user
       if sample.save
         @samples << sample
+        # MetricUtil.log_analytics_event("foobarH #{sample.id}", current_user)
+        Resque.enqueue(LogAnalyticsEvent)
       else
         @errors << sample.errors
       end
     end
+
+    # MetricUtil::SEGMENT_ANALYTICS.flush
 
     respond_to do |format|
       if @errors.empty? && !@samples.empty?
@@ -321,7 +326,14 @@ class SamplesController < ApplicationController
     end
 
     tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
-    MetricUtil.put_metric_now("samples.showed", 1, tags)
+    # MetricUtil.put_metric_now("samples.showed", 1, tags)
+
+    # 10.times do |i|
+    #   MetricUtil.log_analytics_event("foobarE #{i}", current_user)
+    #   sleep(0.1)
+    # end
+
+    Resque.enqueue(LogAnalyticsEvent, ENV["SEGMENT_RUBY_ID"])
   end
 
   def heatmap
