@@ -10,6 +10,11 @@
         userName: '<%= current_user.name %>',
         userSignedIn: true
       }, 'page_header', JSON.parse('<%= raw escape_json(request_context)%>'))
+
+      <% if ENV["SEGMENT_ID"] %>
+        <!-- Associate user ID with Segment -->
+        analytics.identify(<%= current_user.id %>);
+      <% end %>
     <% end %>
   <% else %>
     <%= javascript_tag do %>

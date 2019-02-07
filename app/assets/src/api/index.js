@@ -212,24 +212,27 @@ const getSampleTaxons = (params, cancelToken) =>
     cancelToken
   });
 
-const getSamples = ({ projectId, onlyLibrary, excludeLibrary } = {}) => {
-  // TODO: add remaining parameters: filterm search, page, sortBy
-  return get("/samples/index_v2.json", {
+// TODO: add remaining parameters: filterm search, page, sortBy
+const getSamples = ({ projectId, onlyLibrary, excludeLibrary } = {}) =>
+  get("/samples/index_v2.json", {
     params: {
       projectId,
       onlyLibrary,
       excludeLibrary
     }
   });
-};
 
-const getProjects = ({ onlyLibrary, excludeLibrary } = {}) => {
-  return get("/projects.json", {
+const getProjects = ({ onlyLibrary, excludeLibrary } = {}) =>
+  get("/projects.json", {
     params: {
       onlyLibrary,
       excludeLibrary
     }
   });
+
+const logAnalyticsEvent = (eventName, eventData = {}) => {
+  // Wrapper around Segment analytics so we can add things later
+  if (window.analytics) window.analytics.track(eventName, eventData);
 };
 
 export {
@@ -257,5 +260,6 @@ export {
   uploadFileToUrl,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
-  getSampleTaxons
+  getSampleTaxons,
+  logAnalyticsEvent
 };
