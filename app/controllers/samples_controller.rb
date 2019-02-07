@@ -166,14 +166,10 @@ class SamplesController < ApplicationController
       sample.user = current_user
       if sample.save
         @samples << sample
-        # MetricUtil.log_analytics_event("foobarH #{sample.id}", current_user)
-        Resque.enqueue(LogAnalyticsEvent)
       else
         @errors << sample.errors
       end
     end
-
-    # MetricUtil::SEGMENT_ANALYTICS.flush
 
     respond_to do |format|
       if @errors.empty? && !@samples.empty?
