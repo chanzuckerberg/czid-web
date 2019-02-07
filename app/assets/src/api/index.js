@@ -214,6 +214,7 @@ const getSampleTaxons = (params, cancelToken) =>
 
 const logAnalyticsEvent = (eventName, eventData = {}) => {
   // Wrapper around Segment analytics so we can add things later
+  // eventData should have keys in snake_case for the database
   if (window.analytics) window.analytics.track(eventName, eventData);
 };
 

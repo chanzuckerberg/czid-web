@@ -46,6 +46,7 @@ GEM
     airbrake (7.2.0)
       airbrake-ruby (~> 2.5)
     airbrake-ruby (2.8.0)
+    analytics-ruby (2.0.13)
     arel (8.0.0)
     ast (2.4.0)
     aws-partitions (1.56.0)
@@ -886,6 +887,7 @@ DEPENDENCIES
   activesupport
   airbrake (~> 7.0)
   airbrake-ruby
+  analytics-ruby (~> 2.0.0)
   aws-sdk
   aws-sdk-ecs
   aws-sdk-resources
@@ -935,4 +937,4 @@ DEPENDENCIES
   will_paginate
 
 BUNDLED WITH
-   1.17.1
+   1.17.2

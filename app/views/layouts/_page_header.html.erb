@@ -12,7 +12,7 @@
         contactEmail: "help@idseq.net"
       }, 'page_header');
 
-      <% if ENV["SEGMENT_ID"] %>
+      <% if ENV["SEGMENT_JS_ID"] %>
         <!-- Associate user ID with Segment -->
         analytics.identify(<%= current_user.id %>);
       <% end %>
