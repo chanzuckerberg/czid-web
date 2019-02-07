@@ -1235,11 +1235,15 @@ class Samples extends React.Component {
         filterParams: "",
         searchParams: "",
         checkInUpdate: false,
-        selectedTissueFilters: [],
-        selectedHostIndices: [],
         tissueTypes: [],
         hostGenomes: [],
-        sampleIdsParams: []
+        // clear all filters
+        searchTags: [],
+        sampleIdsParams: [],
+        selectedTissueFilters: [],
+        selectedHostIndices: [],
+        selectedTaxids: [],
+        selectedUploaderIds: []
       },
       () => {
         this.setUrlLocation();
