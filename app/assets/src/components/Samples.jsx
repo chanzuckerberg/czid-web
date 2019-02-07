@@ -124,6 +124,7 @@ class Samples extends React.Component {
       displayDropdown: false,
 
       // For structured search suggestions
+      selectedLocations: this.fetchParams("location", true),
       selectedTaxids: this.fetchParams("taxid", true),
       selectedUploaderIds: this.fetchParams("selectedUploaderIds", true),
       searchTags: [],
@@ -214,6 +215,7 @@ class Samples extends React.Component {
     if (values.constructor !== Array) {
       values = [values];
     }
+    let allowedValues;
     this.setState(
       {
         [stateVar]: this.state[stateVar].concat(values),
@@ -233,14 +235,13 @@ class Samples extends React.Component {
     if (result.category == "Project") {
       this.handleProjectSelection(result.id);
     } else if (result.category == "Sample") {
-      this.handleProjectSelection(result.project_id);
       this.applySuggestFilter(result, "sampleIdsParams", "sample_ids");
     } else if (result.category == "Tissue") {
       this.applySuggestFilter(result, "selectedTissueFilters", "id");
     } else if (result.category == "Host") {
       this.applySuggestFilter(result, "selectedHostIndices", "id");
     } else if (result.category == "Location") {
-      this.applySuggestFilter(result, "sampleIdsParams", "sample_ids");
+      this.applySuggestFilter(result, "selectedLocations", "id");
     } else if (result.category == "Taxon") {
       this.applySuggestFilter(result, "selectedTaxids", "taxid");
     } else if (result.category == "Uploader") {
@@ -583,6 +584,7 @@ class Samples extends React.Component {
       "selectedHostIndices",
       "selectedTissueFilters",
       "selectedTaxids",
+      "selectedLocations",
       "selectedUploaderIds",
       "sampleIdsParams"
     ];
@@ -1081,6 +1083,7 @@ class Samples extends React.Component {
       let searchFilterChange = [
         "sampleIdsParams",
         "selectedTaxids",
+        "selectedLocations",
         "selectedUploaderIds"
       ].some(param => {
         return prevState[param].toString() !== this.state[param].toString();
@@ -1220,6 +1223,7 @@ class Samples extends React.Component {
       search: this.state.searchParams,
       ids: this.selectionToParamsOrNone(this.state.sampleIdsParams),
       taxid: this.selectionToParamsOrNone(this.state.selectedTaxids),
+      location: this.selectionToParamsOrNone(this.state.selectedLocations),
       uploader: this.selectionToParamsOrNone(this.state.selectedUploaderIds),
       sort_by: this.state.sort_by,
       type: this.state.projectType
@@ -1242,6 +1246,7 @@ class Samples extends React.Component {
         sampleIdsParams: [],
         selectedTissueFilters: [],
         selectedHostIndices: [],
+        selectedLocations: [],
         selectedTaxids: [],
         selectedUploaderIds: []
       },
@@ -1272,6 +1277,7 @@ class Samples extends React.Component {
         allProjects={this.allProjects}
         csrf={this.csrf}
         selectProject={this.handleProjectSelection}
+        selectedProjectId={this.state.selectedProjectId}
       />
     );
 

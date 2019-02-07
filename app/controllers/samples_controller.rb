@@ -84,7 +84,8 @@ class SamplesController < ApplicationController
     end
 
     results = filter_by_status(results, filter_query) if filter_query.present?
-    results = filter_by_tissue_type(results, tissue_type_query) if tissue_type_query.present?
+    results = filter_by_metadatum(results, "sample_type", tissue_type_query) if tissue_type_query.present?
+    results = filter_by_metadatum(results, "collection_location", params[:location].split(',')) if params[:location].present?
     results = filter_by_host(results, host_query) if host_query.present?
 
     @samples = sort_by(results, sort).paginate(page: page, per_page: params[:per_page] || PAGE_SIZE).includes([:user, :host_genome, :pipeline_runs, :input_files])
@@ -158,24 +159,24 @@ class SamplesController < ApplicationController
     unless samples.empty?
       results["Sample"] = {
         "name" => "Sample",
-        "results" => samples.index_by(&:name).map do |val, record|
-          { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => [record.id], "project_id" => record.project_id }
+        "results" => samples.group_by(&:name).map do |val, records|
+          { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id), "project_id" => records.count == 1 ? records.first.project_id : nil }
         end
       }
     end
     unless locations.empty?
       results["Location"] = {
         "name" => "Location",
-        "results" => locations.group_by(&:string_validated_value).map do |val, metadata|
-                       { "category" => "Location", "title" => val, "id" => val, "sample_ids" => metadata.pluck(:sample_id) }
+        "results" => locations.pluck(:string_validated_value).uniq.map do |val|
+                       { "category" => "Location", "title" => val, "id" => val }
                      end
       }
     end
     unless tissues.empty?
       results["Tissue"] = {
         "name" => "Tissue",
-        "results" => tissues.group_by(&:string_validated_value).map do |val, metadata|
-          { "category" => "Tissue", "title" => val, "id" => val, "sample_ids" => metadata.pluck(:sample_id) }
+        "results" => tissues.pluck(:string_validated_value).uniq.map do |val|
+          { "category" => "Tissue", "title" => val, "id" => val }
         end
       }
     end

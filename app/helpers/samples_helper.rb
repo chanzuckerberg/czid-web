@@ -196,7 +196,7 @@ module SamplesHelper
     end
   end
 
-  def filter_by_tissue_type(samples, query)
+  def filter_by_metadatum(samples, key, query)
     return samples.where("false") if query == ["none"]
 
     # Use a set to speed up query.
@@ -205,7 +205,7 @@ module SamplesHelper
     include_not_set = query.include?('Not set')
 
     sample_type_metadatum = Metadatum
-                            .where(sample_id: samples.pluck(:id), key: "sample_type")
+                            .where(sample_id: samples.pluck(:id), key: key)
 
     matching_sample_ids = sample_type_metadatum
                           .select { |m| query_set.include?(m.validated_value) }
