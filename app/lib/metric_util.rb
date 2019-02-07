@@ -16,7 +16,10 @@ class MetricUtil
   # Follow object_action convention with object being the name of the core model or component name
   # if it makes sense, and a past tense action. Keep names meaningful, descriptive, and
   # non-redundant (e.g. prefer sample_viewed to sample_view_viewed).
-  ANALYTICS_EVENT_NAMES = { user_created: "user_created" }.freeze
+  ANALYTICS_EVENT_NAMES = {
+    user_created: "user_created",
+    project_created: "project_created"
+  }.freeze
 
   def self.put_metric_now(name, value, tags = [], type = "count")
     put_metric(name, value, Time.now.to_i, tags, type)

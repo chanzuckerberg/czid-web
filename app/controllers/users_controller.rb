@@ -23,7 +23,7 @@ class UsersController < ApplicationController
     respond_to do |format|
       if @user.save
         event = MetricUtil::ANALYTICS_EVENT_NAMES[:user_created]
-        MetricUtil.log_analytics_event(event, current_user, created_id: @user.id, email_domain: @user.email.split("@").last, institution: @user.institution, admin: @user.admin)
+        MetricUtil.log_analytics_event(event, current_user, id: @user.id, email_domain: @user.email.split("@").last, institution: @user.institution, admin: @user.admin)
 
         format.html { redirect_to edit_user_path(@user), notice: "User was successfully created" }
         format.json { render :show, status: :created, location: root_path }

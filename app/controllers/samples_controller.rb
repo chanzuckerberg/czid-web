@@ -320,9 +320,6 @@ class SamplesController < ApplicationController
       @report_details = report_details(@pipeline_run, current_user.id)
       @ercc_comparison = @pipeline_run.compare_ercc_counts
     end
-
-    tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
-    MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
   def heatmap
