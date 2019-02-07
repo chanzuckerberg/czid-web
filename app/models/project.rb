@@ -127,7 +127,7 @@ class Project < ApplicationRecord
   end
 
   def self.library_projects(user)
-    includes(:users).where(:users => {:id => user.id})
+    includes(:users).where(users: { id: user.id })
   end
 
   def destroy

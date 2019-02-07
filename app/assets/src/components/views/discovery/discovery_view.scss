@@ -17,15 +17,13 @@
   }
 }
 
-.tab {
-  .tabLabel {
-    font-size: $font-size-h6;
-    margin-right: 10px;
-  }
+.tabLabel {
+  font-size: $font-size-h6;
+  margin-right: 10px;
+}
 
-  .tabCounter {
-    color: $medium-grey;
-    font-size: $font-size;
-    font-weight: $font-weight-regular;
-  }
+.tabCounter {
+  color: $medium-grey;
+  font-size: $font-size;
+  font-weight: $font-weight-regular;
 }
