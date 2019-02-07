@@ -42,14 +42,14 @@
   .mainMenu {
     margin-right: 100px;
     display: flex;
+    color: $medium-grey;
 
     .item {
-      color: $medium-grey;
       font-size: $font-size-h6;
       font-weight: $font-weight-semibold;
 
       &.selected {
-        color: $white;
+        color: $white !important;
       }
     }
 

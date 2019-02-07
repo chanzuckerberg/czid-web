@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { RequestContext } from "~/components/common/RequestContext";
 import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import LogoIcon from "~ui/icons/LogoIcon";
@@ -23,7 +24,13 @@ class Header extends React.Component {
               </a>
             </div>
             <div className={cs.fill} />
-            {adminUser && <MainMenu />}
+            <RequestContext.Consumer>
+              {({ enabledFeatures }) => {
+                if (enabledFeatures.includes("data_discovery")) {
+                  return <MainMenu />;
+                }
+              }}
+            </RequestContext.Consumer>
             <UserMenuDropDown adminUser={adminUser} {...userMenuProps} />
           </div>
           {
@@ -60,17 +67,24 @@ const UserMenuDropDown = ({
 
   const userDropdownItems = [];
 
-  !demoUser &&
-    userDropdownItems.push(
-      <BareDropdown.Item
-        key="1"
-        text={<a href="/samples/new">New Sample</a>}
-      />,
-      <BareDropdown.Item
-        key="2"
-        text={<a href="/cli_user_instructions">New Sample (Command Line)</a>}
-      />
-    );
+  <RequestContext.Consumer>
+    {({ enabledFeatures }) => {
+      if (!demoUser && !enabledFeatures.includes("data_discovery")) {
+        userDropdownItems.push(
+          <BareDropdown.Item
+            key="1"
+            text={<a href="/samples/new">New Sample</a>}
+          />,
+          <BareDropdown.Item
+            key="2"
+            text={
+              <a href="/cli_user_instructions">New Sample (Command Line)</a>
+            }
+          />
+        );
+      }
+    }}
+  </RequestContext.Consumer>;
 
   adminUser &&
     userDropdownItems.push(
@@ -98,12 +112,14 @@ const UserMenuDropDown = ({
   );
 
   return (
-    <BareDropdown
-      trigger={<div className={cs.userName}>{userName}</div>}
-      className={cs.userDropdown}
-      items={userDropdownItems}
-      direction="left"
-    />
+    <div>
+      <BareDropdown
+        trigger={<div className={cs.userName}>{userName}</div>}
+        className={cs.userDropdown}
+        items={userDropdownItems}
+        direction="left"
+      />
+    </div>
   );
 };
 
@@ -117,9 +133,7 @@ UserMenuDropDown.propTypes = forbidExtraProps({
 });
 
 const MainMenu = () => {
-  const isSelected = tab => {
-    return window.location.pathname.startsWith(`/${tab}`);
-  };
+  const isSelected = tab => window.location.pathname.startsWith(`/${tab}`);
 
   return (
     <div className={cs.mainMenu}>

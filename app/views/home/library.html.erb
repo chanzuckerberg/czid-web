@@ -1,5 +1,4 @@
-
- <% if current_user.admin? %>
+<% if current_user.allowed_features.include?("data_discovery") %>
  
 <%= javascript_tag do %>
   react_component('LibraryView', {}, 'page_content');

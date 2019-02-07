@@ -9,7 +9,7 @@
         signOutEndpoint: '<%=destroy_user_session_path%>',
         userName: '<%= current_user.name %>',
         userSignedIn: true
-      }, 'page_header')
+      }, 'page_header', JSON.parse('<%= raw escape_json(request_context)%>'))
     <% end %>
   <% else %>
     <%= javascript_tag do %>

@@ -87,12 +87,6 @@ class HomeController < ApplicationController
     }
   end
 
-  def discovery
-  end
-
-  def public
-  end
-
   private
 
   def home_params

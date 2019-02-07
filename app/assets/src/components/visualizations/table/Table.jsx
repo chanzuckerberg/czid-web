@@ -93,6 +93,7 @@ class Table extends React.Component {
       <AutoSizer>
         {({ width, height }) => (
           <VirtualizedTable
+            gridClassName={cs.grid}
             headerClassName={cs.header}
             headerHeight={defaultHeaderHeight}
             height={height}

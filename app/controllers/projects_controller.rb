@@ -35,9 +35,8 @@ class ProjectsController < ApplicationController
   def index
     respond_to do |format|
       format.html {
-        Rails.logger.debug("Projects stuff: HTML")
         # keep compatibility with old route
-        # TODO: remove once it is refactored
+        # TODO: remove once data discovery is completed
         @projects = current_power.projects 
       }
       format.json {

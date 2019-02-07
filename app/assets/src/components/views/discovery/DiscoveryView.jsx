@@ -9,8 +9,6 @@ import { getSamples, getProjects } from "~/api";
 import cs from "./discovery_view.scss";
 
 class DiscoveryView extends React.Component {
-  // TODO: Filter by selection on header nav
-
   constructor(props) {
     super(props);
 
