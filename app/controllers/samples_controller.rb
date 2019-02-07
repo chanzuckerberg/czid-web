@@ -180,6 +180,9 @@ class SamplesController < ApplicationController
         format.json { render json: { samples: @samples, errors: @errors }, status: :unprocessable_entity }
       end
     end
+
+    tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
+    MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
   # GET /samples/1/report_csv
