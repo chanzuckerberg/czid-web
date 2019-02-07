@@ -5,7 +5,7 @@
   text-align: left;
   padding: 15px 0;
 
-  &Name {
+  .projectName {
     color: $black;
     font-weight: $font-weight-semibold;
     font-size: $font-size-h5;
@@ -13,7 +13,7 @@
     margin-bottom: 8px;
   }
 
-  &Description {
+  .projectDescription {
     color: $dark-grey;
     font-size: $font-size-h6;
     margin-bottom: 8px;
@@ -22,7 +22,7 @@
     vertical-align: middle;
   }
 
-  &Details {
+  .projectDetails {
     color: $medium-grey;
     font-size: $font-size-small;
 
@@ -44,11 +44,11 @@
 .icon {
   fill: $medium-grey;
 
-  &Globe {
+  .iconGlobe {
     width: 20px;
   }
 
-  &Lock {
+  .iconLock {
     width: 18px;
   }
 }
