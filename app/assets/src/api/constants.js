@@ -5,5 +5,6 @@
 // ANALYTICS_EVENT_NAMES will have the camelCase key and snake_case value.
 
 export const ANALYTICS_EVENT_NAMES = {
-  sampleViewed: "sample_viewed"
+  sampleViewed: "sample_viewed",
+  userInterestFormSubmitted: "user_interest_form_submitted"
 };
