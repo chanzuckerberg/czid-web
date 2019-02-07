@@ -382,4 +382,54 @@ module SamplesHelper
       .pluck(:string_validated_value)
       .uniq
   end
+
+  # Takes an array of samples and uploads metadata for those samples.
+  # metadata is a hash mapping sample name to hash of fields.
+  def upload_metadata_for_samples(samples, metadata)
+    errors = []
+
+    metadata.each do |sample_name, fields|
+      sample = samples.find { |s| s.name == sample_name }
+
+      unless sample
+        errors.push(MetadataUploadErrors.invalid_sample_name(sample_name))
+        next
+      end
+
+      fields.each do |key, value|
+        next if key == "sample_name"
+
+        saved = sample.metadatum_add_or_update(key, value)
+
+        unless saved
+          errors.push(MetadataUploadErrors.save_error(key, value))
+        end
+      end
+    end
+    errors
+  end
+
+  def upload_samples_with_metadata(samples_to_upload, metadata)
+    samples = []
+    errors = []
+    samples_to_upload.each do |sample_attributes|
+      sample = Sample.new(sample_attributes)
+      sample.bulk_mode = true
+      sample.user = current_user
+      if sample.save
+        samples << sample
+      else
+        errors << sample.errors
+      end
+    end
+
+    metadata_errors = upload_metadata_for_samples(samples, metadata)
+
+    errors.concat(metadata_errors)
+
+    {
+      "errors" => errors,
+      "samples" => samples
+    }
+  end
 end

@@ -3,7 +3,6 @@ import React from "react";
 import cx from "classnames";
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import Instructions from "./Instructions";
-import { openUrl } from "~utils/links";
 import cs from "./metadata_upload_modal.scss";
 
 class UploadPage extends React.Component {
@@ -35,12 +34,8 @@ class UploadPage extends React.Component {
 
   showInstructions = () => {
     this.props.wizardSetOverlay(
-      <Instructions wizardSetOverlay={this.props.wizardSetOverlay} />
+      <Instructions onClose={() => this.props.wizardSetOverlay(null)} />
     );
-  };
-
-  openDictionary = event => {
-    openUrl("/metadata/dictionary", event);
   };
 
   render() {
@@ -51,11 +46,7 @@ class UploadPage extends React.Component {
             See Instructions
           </span>
           <span> | </span>
-          <a
-            href="/metadata/dictionary"
-            className={cs.link}
-            onClick={this.openDictionary}
-          >
+          <a href="/metadata/dictionary" className={cs.link}>
             See Metadata Dictionary
           </a>
         </div>

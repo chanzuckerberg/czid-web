@@ -1,5 +1,6 @@
 // This modal contains a wizard that allows users to upload metadata to a project.
 import React from "react";
+import { keyBy } from "lodash/fp";
 import PropTypes from "prop-types";
 import Wizard from "~ui/containers/Wizard";
 import Modal from "~ui/containers/Modal";
@@ -23,7 +24,10 @@ class MetadataUploadModal extends React.Component {
   };
 
   handleComplete = () => {
-    uploadMetadataForProject(this.props.project.id, this.state.metadata.rows);
+    uploadMetadataForProject(
+      this.props.project.id,
+      keyBy("sample_name", this.state.metadata.rows)
+    );
     this.props.onClose();
   };
 

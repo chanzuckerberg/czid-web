@@ -55,4 +55,75 @@ module MetadataHelper
       end
     end
   end
+
+  # Receives an array of samples, and validates metadata from a csv.
+  def validate_metadata_csv_for_samples(samples, metadata)
+    errors = []
+    warnings = []
+
+    # Require sample_name as a column.
+    unless metadata["headers"].include?("sample_name")
+      errors.push(MetadataValidationErrors.missing_sample_name_column)
+      return { "errors" => errors, "warnings" => warnings }
+    end
+
+    # Verify that the column names are supported.
+    metadata["headers"].each_with_index do |header, index|
+      # Check for matching MetadataField or the sample_name/host_genome_name
+      unless header == "sample_name" || MetadataField.find_by(name: header)
+        errors.push(MetadataValidationErrors.column_not_supported(header, index + 1))
+      end
+    end
+
+    sample_name_index = metadata["headers"].find_index("sample_name")
+
+    metadata["rows"].each_with_index do |row, index|
+      # Check number of values in the row.
+      if row.length != metadata["headers"].length
+        errors.push(
+          MetadataValidationErrors.row_wrong_values(row.length, metadata['headers'].length, index + 1)
+        )
+      end
+
+      # Check for valid sample name and fetch sample
+      if row[sample_name_index].nil? || row[sample_name_index] == ""
+        errors.push(MetadataValidationErrors.row_missing_sample_name(index + 1))
+        next
+      end
+
+      sample = samples.find { |s| s.name == row[sample_name_index] }
+      if sample.nil?
+        errors.push(MetadataValidationErrors.row_invalid_sample_name(row[sample_name_index], index + 1))
+        next
+      end
+
+      # Validate the metadatum values with the sample.
+      row.each_with_index do |value, row_index|
+        next if row_index >= metadata["headers"].length
+
+        # Ignore empty string values.
+        next if value.nil? || value == ""
+
+        field = metadata["headers"][row_index]
+
+        # Ignore invalid columns.
+        if field != "sample_name" && MetadataField.find_by(name: field)
+          issues = sample.metadatum_validate(field, value)
+
+          issues[:errors].each do |error|
+            errors.push("#{error} (row #{index + 1})")
+          end
+
+          issues[:warnings].each do |warning|
+            warnings.push("#{warning} (row #{index + 1})")
+          end
+        end
+      end
+    end
+
+    {
+      errors: errors,
+      warnings: warnings
+    }
+  end
 end

@@ -21,14 +21,14 @@ class SamplesController < ApplicationController
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap,
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap,
                    :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields, :samples_going_public,
-                   :search_suggestions].freeze
+                   :search_suggestions, :upload, :create_with_metadata].freeze
 
-  before_action :authenticate_user!, except: [:create, :update, :bulk_upload]
-  acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload], fallback: :devise
+  before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
+  acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload, :bulk_upload_with_metadata], fallback: :devise
 
-  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
+  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :upload, :bulk_upload_with_metadata, :create_with_metadata]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
   current_power do # Put this here for CLI
@@ -200,6 +200,7 @@ class SamplesController < ApplicationController
   end
 
   # GET /samples/bulk_new
+  # TODO(mark): Remove once we launch the new sample upload flow.
   def bulk_new
     @projects = current_power.updatable_projects
     @host_genomes = host_genomes_list ? host_genomes_list : nil
@@ -234,6 +235,7 @@ class SamplesController < ApplicationController
 
   # POST /samples/bulk_upload
   # Currently only used for web S3 uploads
+  # TODO(mark): Remove once we launch the new sample upload flow.
   def bulk_upload
     samples = samples_params || []
     editable_project_ids = current_power.updatable_projects.pluck(:id)
@@ -258,6 +260,31 @@ class SamplesController < ApplicationController
         format.json { render json: { samples: @samples, sample_ids: @samples.pluck(:id) } }
       else
         format.json { render json: { samples: @samples, errors: @errors }, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # POST /samples/bulk_upload_with_metadata
+  # Used to bulk-upload samples with remote input files in S3 directory.
+  # TODO(mark): Handle required metadata fields.
+  def bulk_upload_with_metadata
+    samples_to_upload = samples_params || []
+    metadata = params[:metadata] || {}
+    editable_project_ids = current_power.updatable_projects.pluck(:id)
+
+    # Ignore samples that aren't part of editable projects.
+    # TODO(mark): Show error for samples that aren't part of project.
+    samples_to_upload = samples_to_upload.select { |sample| editable_project_ids.include?(Integer(sample["project_id"])) }
+
+    errors, samples = upload_samples_with_metadata(samples_to_upload, metadata).values_at("errors", "samples")
+
+    respond_to do |format|
+      if errors.empty? && !samples.empty?
+        tags = %W[client:web type:bulk user_id:#{current_user.id}]
+        MetricUtil.put_metric_now("samples.created", samples.count, tags)
+        format.json { render json: { samples: samples, sample_ids: samples.pluck(:id) } }
+      else
+        format.json { render json: { samples: samples, errors: errors }, status: :unprocessable_entity }
       end
     end
   end
@@ -669,10 +696,17 @@ class SamplesController < ApplicationController
   end
 
   # GET /samples/new
+  # TODO(mark): Remove once we launch the new sample upload flow.
   def new
     @sample = nil
     @projects = current_power.updatable_projects
-    @host_genomes = host_genomes_list ? host_genomes_list : nil
+    @host_genomes = host_genomes_list || nil
+  end
+
+  # GET /samples/upload
+  def upload
+    @projects = current_power.updatable_projects
+    @host_genomes = host_genomes_list || nil
   end
 
   # GET /samples/1/edit
@@ -685,6 +719,7 @@ class SamplesController < ApplicationController
 
   # POST /samples
   # POST /samples.json
+  # TODO(mark): Remove once we launch the new sample upload flow.
   def create
     # Single sample upload path
     params = sample_params
@@ -745,6 +780,89 @@ class SamplesController < ApplicationController
         format.json do
           render json: { sample_errors: @sample.errors.full_messages,
                          project_errors: project ? project.errors.full_messages : nil },
+                 status: :unprocessable_entity
+        end
+      end
+    end
+  end
+
+  # POST /create_with_metadata
+  # Used to upload samples with local input files.
+  # TODO(mark): Consolidate this with bulk_upload endpoint.
+  # TODO(mark): Handle required metadata fields.
+  def create_with_metadata
+    metadata_fields = params[:metadata]
+    params = sample_params
+
+    # Check if the client is up-to-date. "web" is always valid whereas the
+    # CLI client should provide a version string to-be-checked against the
+    # minimum version here. Bulk upload from CLI goes to this method.
+    client = params.delete(:client)
+    min_version = Gem::Version.new('0.5.0')
+    unless client && (client == "web" || Gem::Version.new(client) >= min_version)
+      render json: {
+        message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
+        status: :upgrade_required
+      }
+      return
+    end
+
+    if params[:project_name]
+      project_name = params.delete(:project_name)
+      project = Project.find_by(name: project_name)
+      unless project
+        project = Project.create(name: project_name)
+        project.users << current_user if current_user
+      end
+    end
+    if project && !current_power.updatable_project?(project)
+      respond_to do |format|
+        format.json { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
+        format.html { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
+      end
+      return
+    end
+    if params[:host_genome_name]
+      host_genome_name = params.delete(:host_genome_name)
+      host_genome = HostGenome.find_by(name: host_genome_name)
+    end
+
+    params[:input_files_attributes].reject! { |f| f["source"] == '' }
+
+    @sample = Sample.new(params)
+    @sample.project = project if project
+    @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
+    @sample.user = current_user
+    @sample.host_genome ||= (host_genome || HostGenome.first)
+    sample_saved = @sample.save
+
+    metadata_errors = []
+
+    # Upload metadata
+    if sample_saved
+      metadata_fields.each do |key, value|
+        saved = @sample.metadatum_add_or_update(key, value)
+
+        unless saved
+          metadata_errors.push(MetadataUploadErrors.save_error(key, value))
+        end
+      end
+    end
+
+    respond_to do |format|
+      if sample_saved && metadata_errors.empty?
+        tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id} client:#{client}]
+        # Currently bulk CLI upload just calls this action repeatedly so we can't
+        # distinguish between bulk or single there. Web bulk goes to bulk_upload.
+        tags << "type:single" if client == "web"
+        MetricUtil.put_metric_now("samples.created", 1, tags)
+
+        format.json { render :show, status: :created, location: @sample }
+      else
+        format.json do
+          render json: { sample_errors: @sample.errors.full_messages,
+                         project_errors: project ? project.errors.full_messages : nil,
+                         metadata_errors: metadata_errors },
                  status: :unprocessable_entity
         end
       end
