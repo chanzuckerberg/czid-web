@@ -64,13 +64,10 @@ class MetricUtil
   end
 
   def self.log_analytics_event(event, user, properties = {})
-    Rails.logger.info("I'm in log analytics event")
     if SEGMENT_ANALYTICS
       # current_user should be passed from a controller
       user_id = user ? user.id : 0
       SEGMENT_ANALYTICS.track(event: event, user_id: user_id, properties: properties)
-    else
-      Rails.logger.info("I didn't find the thing")
     end
   end
 end

@@ -326,14 +326,7 @@ class SamplesController < ApplicationController
     end
 
     tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
-    # MetricUtil.put_metric_now("samples.showed", 1, tags)
-
-    # 10.times do |i|
-    #   MetricUtil.log_analytics_event("foobarE #{i}", current_user)
-    #   sleep(0.1)
-    # end
-
-    Resque.enqueue(LogAnalyticsEvent, ENV["SEGMENT_RUBY_ID"])
+    MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
   def heatmap
