@@ -1,0 +1,65 @@
+@import "~styles/themes/colors";
+
+.sampleUploadFlow {
+  .inner {
+    margin: 0 100px;
+    padding: 60px;
+    background-color: $white;
+  }
+}
+
+.uploadMetadataStep {
+  .title {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+  }
+
+  .link {
+    // Overwrite <a> inherit rule in header.scss
+    color: $primary-light !important;
+    cursor: pointer;
+  }
+
+  .metadataCSVUpload {
+    margin-top: 40px;
+    margin-bottom: 20px;
+
+    &.hasIssues {
+      height: 400px;
+    }
+  }
+
+  .controls {
+    margin-top: 20px;
+  }
+
+  .hide {
+    display: none;
+  }
+}
+
+.reviewStep {
+  .title {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+  }
+
+  .error {
+    color: $error;
+  }
+
+  .link {
+    color: $primary-light;
+  }
+
+  .successMessage,
+  .error,
+  .uploadMessage {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+}

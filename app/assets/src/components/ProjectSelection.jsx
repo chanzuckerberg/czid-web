@@ -27,8 +27,7 @@ class ProjectSelection extends React.Component {
       formattedFavProjectList: [],
       favIds: [],
       showLess: true,
-      showLessFavorites: true,
-      selectedProjectId: this.fetchParams("project_id") || null
+      showLessFavorites: true
     };
   }
 
@@ -165,7 +164,6 @@ class ProjectSelection extends React.Component {
     let id = e.target.getAttribute("data-id");
     let listType = e.target.getAttribute("data-type") || null;
     this.props.selectProject(id, listType);
-    this.state.selectedProjectId = id;
   }
 
   renderProjectSection() {
@@ -210,7 +208,7 @@ class ProjectSelection extends React.Component {
         <div
           className={
             "project-item " +
-            (parent.state.selectedProjectId == project.id ? "highlight" : "")
+            (parent.props.selectedProjectId == project.id ? "highlight" : "")
           }
           onClick={parent.handleProjectClick}
           data-id={project.id}
@@ -286,7 +284,7 @@ class ProjectSelection extends React.Component {
               <div
                 className={
                   "all-samples project-item " +
-                  (!this.state.selectedProjectId ? "highlight" : "")
+                  (!this.props.selectedProjectId ? "highlight" : "")
                 }
                 onClick={this.handleProjectClick}
               >

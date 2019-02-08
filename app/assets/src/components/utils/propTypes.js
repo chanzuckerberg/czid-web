@@ -50,7 +50,8 @@ const Sample = PropTypes.shape({
 });
 
 const Project = PropTypes.shape({
-  id: PropTypes.number.isRequired
+  id: PropTypes.number.isRequired,
+  name: PropTypes.string.isRequired
 });
 
 const MetadataType = PropTypes.shape({

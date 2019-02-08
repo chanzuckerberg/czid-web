@@ -1,17 +1,19 @@
 import React from "react";
 import BulkUploadImport from "~/components/BulkUploadImport";
 import PropTypes from "~/components/utils/propTypes";
-import { handleBulkUploadLocal, handleBulkUploadRemote } from "./utils";
+import { bulkUploadLocal, bulkUploadRemote } from "~/api/upload";
 
 class BulkUploadImportPage extends React.Component {
   render() {
     return (
-      <div>
-        <BulkUploadImport
-          {...this.props}
-          onBulkUploadRemote={handleBulkUploadRemote}
-          onBulkUploadLocal={handleBulkUploadLocal}
-        />
+      <div id="samplesUploader" className="row">
+        <div className="col s6 offset-s3 upload-form-container">
+          <BulkUploadImport
+            {...this.props}
+            onBulkUploadRemote={bulkUploadRemote}
+            onBulkUploadLocal={bulkUploadLocal}
+          />
+        </div>
       </div>
     );
   }

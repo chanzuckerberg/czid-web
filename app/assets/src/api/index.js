@@ -98,6 +98,7 @@ const getSampleReportInfo = (id, params) =>
 const getSummaryContigCounts = (id, minContigSize) =>
   get(`/samples/${id}/summary_contig_counts?min_contig_size=${minContigSize}`);
 
+// TODO(mark): Remove this method once we launch the new sample upload flow.
 // Send a request to create a single sample. Does not upload the files.
 // sourceType can be "local" or "s3".
 const createSample = (
@@ -112,54 +113,92 @@ const createSample = (
   dagVariables = "{}",
   maxInputFragments = "",
   subsample = ""
-) =>
-  new Promise((resolve, reject) => {
-    const fileAttributes = Array.from(inputFiles, file => {
-      if (sourceType === "local") {
-        return {
-          source_type: sourceType,
-          source: cleanFilePath(file.name),
-          parts: cleanFilePath(file.name)
-        };
-      } else {
-        return {
-          source_type: sourceType,
-          source: file
-        };
-      }
-    });
-
-    axios
-      .post("/samples.json", {
-        sample: {
-          name: sampleName,
-          project_name: projectName,
-          host_genome_id: hostId,
-          input_files_attributes: fileAttributes,
-          status: "created",
-          client: "web",
-
-          // Admin options
-          s3_preload_result_path: preloadResultsPath,
-          alignment_config_name: alignmentConfig,
-          pipeline_branch: pipelineBranch,
-          dag_vars: dagVariables,
-          max_input_fragments: maxInputFragments,
-          subsample: subsample
-        },
-        authenticity_token: document.getElementsByName("csrf-token")[0].content
-      })
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => {
-        reject(error);
-      });
+) => {
+  const fileAttributes = Array.from(inputFiles, file => {
+    if (sourceType === "local") {
+      return {
+        source_type: sourceType,
+        source: cleanFilePath(file.name),
+        parts: cleanFilePath(file.name)
+      };
+    } else {
+      return {
+        source_type: sourceType,
+        source: file
+      };
+    }
   });
 
+  return postWithCSRF("/samples.json", {
+    sample: {
+      name: sampleName,
+      project_name: projectName,
+      host_genome_id: hostId,
+      input_files_attributes: fileAttributes,
+      status: "created",
+      client: "web",
+
+      // Admin options
+      s3_preload_result_path: preloadResultsPath,
+      alignment_config_name: alignmentConfig,
+      pipeline_branch: pipelineBranch,
+      dag_vars: dagVariables,
+      max_input_fragments: maxInputFragments,
+      subsample: subsample
+    }
+  });
+};
+
+// Send a request to create a single sample. Does not upload the files.
+// sourceType can be "local" or "s3".
+const createSampleWithMetadata = ({
+  sourceType,
+  inputFiles,
+  name,
+  projectName,
+  hostGenomeId,
+  metadata
+}) => {
+  const fileAttributes = Array.from(inputFiles, file => {
+    if (sourceType === "local") {
+      return {
+        source_type: sourceType,
+        source: cleanFilePath(file.name),
+        parts: cleanFilePath(file.name)
+      };
+    } else {
+      return {
+        source_type: sourceType,
+        source: file
+      };
+    }
+  });
+
+  return postWithCSRF("/samples/create_with_metadata.json", {
+    sample: {
+      name,
+      project_name: projectName,
+      host_genome_id: hostGenomeId,
+      input_files_attributes: fileAttributes,
+      status: "created",
+      client: "web"
+    },
+    metadata
+  });
+};
+
+// Validate metadata against samples in an existing project.
 const validateMetadataCSVForProject = (id, metadata) =>
   postWithCSRF(`/projects/${id}/validate_metadata_csv`, {
     metadata
+  });
+
+// Validate metadata for new samples.
+// For samples, we just require { name, host_genome_id }
+const validateMetadataCSVForNewSamples = (samples, metadata) =>
+  postWithCSRF("/metadata/validate_csv_for_new_samples", {
+    metadata,
+    samples
   });
 
 const uploadMetadataForProject = (id, metadata) =>
@@ -172,9 +211,17 @@ const getOfficialMetadataFields = () =>
 
 const getAllHostGenomes = () => get("/host_genomes.json");
 
+// TODO(mark): Remove this method once we launch the new sample upload flow.
 const bulkUploadRemoteSamples = samples =>
   postWithCSRF(`/samples/bulk_upload.json`, {
     samples
+  });
+
+// Bulk-upload samples that have files in an S3 bucket, with metadata.
+const bulkUploadRemoteSamplesWithMetadata = (samples, metadata) =>
+  postWithCSRF(`/samples/bulk_upload_with_metadata.json`, {
+    samples,
+    metadata
   });
 
 const markSampleUploaded = sampleId =>
@@ -232,6 +279,7 @@ const getProjects = ({ onlyLibrary, excludeLibrary } = {}) =>
 
 const logAnalyticsEvent = (eventName, eventData = {}) => {
   // Wrapper around Segment analytics so we can add things later
+  // eventData should have keys in snake_case for the database
   if (window.analytics) window.analytics.track(eventName, eventData);
 };
 
@@ -251,11 +299,14 @@ export {
   deleteSample,
   getSummaryContigCounts,
   createSample,
+  createSampleWithMetadata,
   validateMetadataCSVForProject,
+  validateMetadataCSVForNewSamples,
   uploadMetadataForProject,
   getOfficialMetadataFields,
   getAllHostGenomes,
   bulkUploadRemoteSamples,
+  bulkUploadRemoteSamplesWithMetadata,
   markSampleUploaded,
   uploadFileToUrl,
   getTaxonDescriptions,

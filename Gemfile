@@ -27,6 +27,8 @@ gem 'lograge'
 gem 'lograge-sql'
 gem 'multipart-post'
 gem 'silencer'
+# elasticsearch
+gem 'elasticsearch-model'
 # Use mysql as the database for Active Record
 gem 'mysql2'
 gem 'prometheus-client', '0.7.1'
@@ -65,6 +67,9 @@ gem 'stackprof'
 
 # Helps batch ActiveRecord calls
 gem 'activerecord-import'
+
+# Segment analytics for backend events
+gem 'analytics-ruby', '~> 2.0.0', require: 'segment/analytics'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

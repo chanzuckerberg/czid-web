@@ -4,17 +4,13 @@ import PropTypes from "prop-types";
 import cs from "./metadata_upload_modal.scss";
 
 class UploadInstructions extends React.Component {
-  handleBack = () => {
-    this.props.wizardSetOverlay(null);
-  };
-
   render() {
     return (
       <div className={cs.uploadInstructions}>
         <div className={cs.header}>
           <div
             className={cs.backButton}
-            onClick={this.handleBack}
+            onClick={this.props.onClose}
           >{`< Back`}</div>
           <div className={cs.title}>How to Upload a Metadata CSV</div>
         </div>
@@ -54,7 +50,7 @@ class UploadInstructions extends React.Component {
 }
 
 UploadInstructions.propTypes = {
-  wizardSetOverlay: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired
 };
 
 export default UploadInstructions;

@@ -2,11 +2,17 @@ require 'open3'
 require 'json'
 require 'tempfile'
 require 'aws-sdk'
+require 'elasticsearch/model'
 # TODO(mark): Move to an initializer. Make sure this works with Rails auto-reloading.
 require 'constants/metadata'
 
 class Sample < ApplicationRecord
+  unless Rails.env == 'test'
+    include Elasticsearch::Model
+    include Elasticsearch::Model::Callbacks
+  end
   include TestHelper
+
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
@@ -44,7 +50,7 @@ class Sample < ApplicationRecord
   has_and_belongs_to_many :backgrounds, through: :pipeline_runs
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
-  has_many :metadata
+  has_many :metadata, dependent: :destroy
 
   validate :input_files_checks
   after_create :initiate_input_file_upload

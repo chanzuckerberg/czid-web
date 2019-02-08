@@ -5,7 +5,10 @@ import cx from "classnames";
 import { map, pickBy, zipObject, isNull } from "lodash/fp";
 import CSVUpload from "~ui/controls/CSVUpload";
 import AlertIcon from "~ui/icons/AlertIcon";
-import { validateMetadataCSVForProject } from "~/api";
+import {
+  validateMetadataCSVForProject,
+  validateMetadataCSVForNewSamples
+} from "~/api";
 import cs from "./metadata_csv_upload.scss";
 import PropTypes from "prop-types";
 
@@ -43,10 +46,22 @@ class MetadataCSVUpload extends React.Component {
     });
     this.setState({ metadata: csv });
 
-    const serverResponse = await validateMetadataCSVForProject(
-      this.props.project.id,
-      csv
-    );
+    let serverResponse;
+
+    // For uploading metadata to existing samples in a project.
+    if (this.props.project) {
+      serverResponse = await validateMetadataCSVForProject(
+        this.props.project.id,
+        csv
+      );
+      // For uploading metadata together with new samples.
+    } else {
+      serverResponse = await validateMetadataCSVForNewSamples(
+        this.props.samples,
+        csv
+      );
+    }
+
     this.setState({ issues: serverResponse.issues });
 
     this.props.onMetadataChange({
@@ -108,10 +123,18 @@ class MetadataCSVUpload extends React.Component {
 }
 
 MetadataCSVUpload.propTypes = {
+  // For uploading metadata to existing samples in a project.
   project: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string
   }),
+  // For uploading metadata together with new samples.
+  samples: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string,
+      host_genome_id: PropTypes.number
+    })
+  ),
   className: PropTypes.string,
   onMetadataChange: PropTypes.func.isRequired
 };

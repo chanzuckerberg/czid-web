@@ -9,6 +9,7 @@ import ObjectHelper from "../helpers/ObjectHelper";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { openUrlWithTimeout } from "~utils/links";
 import CatIcon from "~ui/icons/CatIcon";
+import PigIcon from "~ui/icons/PigIcon";
 import ERCCIcon from "~ui/icons/ERCCIcon";
 import HumanIcon from "~ui/icons/HumanIcon";
 import Icon from "~ui/icons/Icon";
@@ -559,6 +560,8 @@ class SampleUpload extends React.Component {
         return <ERCCIcon />;
       case "cat":
         return <CatIcon />;
+      case "pig":
+        return <PigIcon />;
       default:
         return false;
     }
@@ -1337,7 +1340,11 @@ class SampleUpload extends React.Component {
     );
   }
   render() {
-    return <div>{this.renderSampleForm(this.props.selectedSample)}</div>;
+    return (
+      <div className="single-upload-import">
+        {this.renderSampleForm(this.props.selectedSample)}
+      </div>
+    );
   }
 }
 export default SampleUpload;

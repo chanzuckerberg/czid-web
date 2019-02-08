@@ -2,7 +2,7 @@ class ProjectsController < ApplicationController
   include ApplicationHelper
   include SamplesHelper
   include ReportHelper
-  include ProjectsHelper
+  include MetadataHelper
   ########################################
   # Note to developers:
   # If you are adding a new action to the project controller, you must classify your action into
@@ -212,8 +212,14 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       if @project.save
+        # Send to Datadog
+        # TODO: Replace with Segment
         tags = %W[project_id:#{@project.id} user_id:#{current_user.id}]
         MetricUtil.put_metric_now("projects.created", 1, tags)
+
+        # Send to Segment
+        event = MetricUtil::ANALYTICS_EVENT_NAMES[:project_created]
+        MetricUtil.log_analytics_event(event, current_user, id: @project.id)
 
         format.html { redirect_to @project, notice: 'Project was successfully created.' }
         format.json { render :show, status: :created, location: @project }
@@ -270,10 +276,9 @@ class ProjectsController < ApplicationController
 
   def validate_metadata_csv
     metadata = params[:metadata]
-    new_samples = params[:new_samples] == "1"
 
     project_samples = current_power.project_samples(@project)
-    issues = validate_metadata_csv_for_project(project_samples, metadata, new_samples)
+    issues = validate_metadata_csv_for_samples(project_samples.to_a, metadata)
     render json: {
       status: "success",
       issues: issues
@@ -285,7 +290,7 @@ class ProjectsController < ApplicationController
 
     project_samples = current_power.project_samples(@project)
 
-    errors = upload_metadata_for_project(project_samples, metadata)
+    errors = upload_metadata_for_samples(project_samples.to_a, metadata)
     render json: {
       status: "success",
       errors: errors

@@ -14,6 +14,7 @@ import LockIcon from "./LockIcon";
 import LogoIcon from "./LogoIcon";
 import MosquitoIcon from "./MosquitoIcon";
 import MouseIcon from "./MouseIcon";
+import PigIcon from "./PigIcon";
 import RemoveIcon from "./RemoveIcon";
 import TickIcon from "./TickIcon";
 import UserIcon from "./UserIcon";
@@ -32,6 +33,7 @@ export default {
     LockIcon,
     MosquitoIcon,
     MouseIcon,
+    PigIcon,
     RemoveIcon,
     TickIcon,
     UserIcon

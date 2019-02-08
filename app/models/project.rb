@@ -1,4 +1,9 @@
 class Project < ApplicationRecord
+  unless Rails.env == 'test'
+    include Elasticsearch::Model
+    include Elasticsearch::Model::Callbacks
+  end
+
   has_and_belongs_to_many :users
   has_many :samples
   has_many :favorite_projects
