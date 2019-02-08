@@ -3,6 +3,7 @@
 x-web-variables: &web-variables
   ? ALIGNMENT_CONFIG_DEFAULT_NAME=2018-12-01
   ? SAMPLES_BUCKET_NAME=idseq-samples-development
+  ? ES_ADDRESS=http://elasticsearch:9200
   ? AIRBRAKE_PROJECT_ID
   ? AIRBRAKE_PROJECT_KEY
   ? MAIL_GUN_API_KEY
@@ -51,6 +52,24 @@ x-honeycomb-variables: &honeycomb-variables
 
 version: '3.4'
 services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.1
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - xpack.monitoring.enabled=false
+      - xpack.graph.enabled=false
+      - xpack.watcher.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./docker_data/elasticsearch/data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
   db:
     image: mysql:5.6
     container_name: mysql
@@ -94,6 +113,7 @@ services:
     depends_on:
       - db
       - redis
+      - elasticsearch
     environment:
       <<: *web-variables
       <<: *aws-variables

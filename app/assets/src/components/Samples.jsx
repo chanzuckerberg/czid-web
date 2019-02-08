@@ -33,6 +33,8 @@ import PhyloTreeCreationModal from "./views/phylo_tree/PhyloTreeCreationModal";
 import TableColumnHeader from "./views/samples/TableColumnHeader";
 import PipelineStatusFilter from "./views/samples/PipelineStatusFilter";
 import ProjectUploadMenu from "./views/samples/ProjectUploadMenu";
+import CategorySearchBox from "./ui/controls/CategorySearchBox";
+import FilterTag from "./ui/controls/FilterTag";
 import ProjectSettingsModal from "./views/samples/ProjectSettingsModal";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
@@ -101,9 +103,9 @@ class Samples extends React.Component {
       projectId: null,
       displaySelectSamples: true, // this.checkURLContent(),
       selectedProjectId: this.fetchParams("project_id") || null,
-      filterParams: this.fetchParams("filter") || "",
-      searchParams: this.fetchParams("search") || "",
-      sampleIdsParams: this.fetchParams("ids") || [],
+      filterParams: this.fetchParams("filter"),
+      searchParams: this.fetchParams("search"),
+      sampleIdsParams: this.fetchParams("ids", true),
       // The list of fetched sample ids, in the order to be displayed
       fetchedSampleIds: [],
       // A map of fetched sample id to sample data.
@@ -120,9 +122,14 @@ class Samples extends React.Component {
       readySampleIdsForFilter: [],
       selectedSampleIds: [],
       displayDropdown: false,
-      selectedTissueFilters: this.fetchParams("tissue")
-        ? this.fetchParams("tissue").split(",")
-        : [],
+
+      // For structured search suggestions
+      selectedLocations: this.fetchParams("location", true),
+      selectedTaxids: this.fetchParams("taxid", true),
+      selectedUploaderIds: this.fetchParams("selectedUploaderIds", true),
+      searchTags: [],
+
+      selectedTissueFilters: this.fetchParams("tissue", true),
       selectedHostIndices: this.fetchParams("host")
         ? this.fetchParams("host")
             .split(",")
@@ -179,6 +186,67 @@ class Samples extends React.Component {
     }
     return value;
   }
+
+  removeFilterTag = (entry, i) => {
+    let selected = this.state[entry.key];
+    for (let val of entry.values) {
+      let idx = selected.indexOf(val);
+      if (idx > -1) {
+        selected.splice(idx, 1);
+      }
+    }
+    let newTags = this.state.searchTags;
+    newTags.splice(i, 1);
+    this.setState(
+      {
+        [entry.key]: selected,
+        searchTags: newTags
+      },
+      () => {
+        this.setUrlLocation();
+        this.fetchResults();
+      }
+    );
+  };
+
+  applySuggestFilter = (result, stateVar, resultVar) => {
+    let cat = result.category;
+    let values = result[resultVar];
+    if (values.constructor !== Array) {
+      values = [values];
+    }
+    this.setState(
+      {
+        [stateVar]: this.state[stateVar].concat(values),
+        searchTags: this.state.searchTags.concat([
+          {
+            display: cat + ": " + result.title,
+            key: stateVar,
+            values: values
+          }
+        ])
+      },
+      () => this.setUrlLocation()
+    );
+  };
+
+  handleSuggestSelect = (e, { result }) => {
+    if (result.category == "Project") {
+      this.handleProjectSelection(result.id);
+    } else if (result.category == "Sample") {
+      this.applySuggestFilter(result, "sampleIdsParams", "sample_ids");
+    } else if (result.category == "Tissue") {
+      this.applySuggestFilter(result, "selectedTissueFilters", "id");
+    } else if (result.category == "Host") {
+      this.applySuggestFilter(result, "selectedHostIndices", "id");
+    } else if (result.category == "Location") {
+      this.applySuggestFilter(result, "selectedLocations", "id");
+    } else if (result.category == "Taxon") {
+      this.applySuggestFilter(result, "selectedTaxids", "taxid");
+    } else if (result.category == "Uploader") {
+      this.applySuggestFilter(result, "selectedUploaderIds", "id");
+    }
+  };
 
   selectTissueFilter(tissues) {
     this.setState({ selectedTissueFilters: tissues }, () =>
@@ -310,9 +378,13 @@ class Samples extends React.Component {
     SortHelper.applySort(sort_query);
   }
 
-  fetchParams(param) {
+  fetchParams(param, asArray = false) {
     let urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
+    let result = urlParams.get(param) || "";
+    if (asArray) {
+      result = result ? result.split(",") : [];
+    }
+    return result;
   }
 
   updateProjectUserState(user_array) {
@@ -498,48 +570,26 @@ class Samples extends React.Component {
       });
   }
 
-  //fetch project, filter and search params
   getParams() {
-    let params = `filter=${this.state.filterParams}&page=${this.state
-      .pagesLoaded + 1}&search=${this.state.searchParams}&sort_by=${
-      this.state.sort_by
-    }`;
-    let projectId = parseInt(this.state.selectedProjectId);
-
-    if (projectId) {
-      params += `&project_id=${projectId}`;
-    }
-    if (this.state.sampleIdsParams.length) {
-      let sampleParams = this.state.sampleIdsParams;
-      params += `&ids=${sampleParams}`;
-    }
-
-    if (this.state.selectedTissueFilters.length) {
-      let tissueParams = this.state.selectedTissueFilters.join(",");
-      params += `&tissue=${tissueParams}`;
-    }
-
-    if (this.state.selectedHostIndices.length) {
-      let hostParams = this.state.selectedHostIndices.join(",");
-      params += `&host=${hostParams}`;
-    }
-
+    let url_parts = window.location.href.split("?");
+    let params = url_parts[url_parts.length - 1];
     return params;
   }
 
   hasFilters = () => {
-    const {
-      filterParams,
-      searchParams,
-      selectedHostIndices,
-      selectedTissueFilters
-    } = this.state;
-    return (
-      filterParams.length > 0 ||
-      searchParams.length > 0 ||
-      selectedHostIndices.length > 0 ||
-      selectedTissueFilters.length > 0
-    );
+    const fields = [
+      "filterParams",
+      "searchParams",
+      "selectedHostIndices",
+      "selectedTissueFilters",
+      "selectedTaxids",
+      "selectedLocations",
+      "selectedUploaderIds",
+      "sampleIdsParams"
+    ];
+    return fields.some(key => {
+      return this.state[key].length > 0;
+    });
   };
 
   allTissueTypes(all_tissues) {
@@ -877,50 +927,75 @@ class Samples extends React.Component {
       </div>
     );
 
-    const host_filter_tag_list = this.generateTagList(
-      "hostGenomes",
-      "selectedHostIndices",
-      "Host: ",
-      "id",
-      "name",
-      "int"
-    );
+    let search_tag_list;
+    if (this.admin !== 0 || this.allowedFeatures.includes("structuredSearch")) {
+      search_tag_list = this.state.searchTags.map((entry, i) => {
+        return (
+          <FilterTag
+            text={entry.display}
+            onClose={e => this.removeFilterTag(entry, i)}
+            key={`filter-tag-${i}`}
+          />
+        );
+      });
+    } else {
+      search_tag_list = [
+        this.generateTagList(
+          "hostGenomes",
+          "selectedHostIndices",
+          "Host: ",
+          "id",
+          "name",
+          "int"
+        ),
+        this.generateTagList(
+          "tissueTypes",
+          "selectedTissueFilters",
+          "Sample Type: "
+        )
+      ];
+    }
 
-    const tissue_filter_tag_list = this.generateTagList(
-      "tissueTypes",
-      "selectedTissueFilters",
-      "Sample Type: "
-    );
-
-    const search_box = (
-      <div className="row search-box-row">
-        <div className="search-box">{search_field}</div>
-        <div className="filter-container">
-          <MultipleDropdown
-            label="Hosts:"
-            disabled={this.state.hostGenomes.length == 0}
-            options={this.state.hostGenomes.map(host => {
-              return { text: host.name, value: host.id };
-            })}
-            value={this.state.selectedHostIndices}
-            onChange={this.selectHostFilter}
-            rounded
+    const search_box =
+      this.admin !== 0 || this.allowedFeatures.includes("structuredSearch") ? (
+        <div className="row search-box-row">
+          <CategorySearchBox
+            serverSearchAction="search_suggestions"
+            onResultSelect={this.handleSuggestSelect}
+            onEnter={this.handleSearch}
+            initialValue=""
+            placeholder=""
           />
         </div>
-        <div className="filter-container">
-          <MultipleDropdown
-            label="Sample Types:"
-            disabled={this.state.tissueTypes.length == 0}
-            options={this.state.tissueTypes.map(tissue => {
-              return { text: tissue, value: tissue };
-            })}
-            value={this.state.selectedTissueFilters}
-            onChange={this.selectTissueFilter}
-            rounded
-          />
+      ) : (
+        <div className="row search-box-row">
+          <div className="search-box">{search_field}</div>
+          <div className="filter-container">
+            <MultipleDropdown
+              label="Hosts:"
+              disabled={this.state.hostGenomes.length == 0}
+              options={this.state.hostGenomes.map(host => {
+                return { text: host.name, value: host.id };
+              })}
+              value={this.state.selectedHostIndices}
+              onChange={this.selectHostFilter}
+              rounded
+            />
+          </div>
+          <div className="filter-container">
+            <MultipleDropdown
+              label="Sample Types:"
+              disabled={this.state.tissueTypes.length == 0}
+              options={this.state.tissueTypes.map(tissue => {
+                return { text: tissue, value: tissue };
+              })}
+              value={this.state.selectedTissueFilters}
+              onChange={this.selectTissueFilter}
+              rounded
+            />
+          </div>
         </div>
-      </div>
-    );
+      );
 
     let proj_users_count = this.state.project_users.length;
     let proj = this.state.project;
@@ -964,8 +1039,7 @@ class Samples extends React.Component {
       <FilterListMarkup
         projInfo={projInfo}
         search_box={search_box}
-        host_filter_tag_list={host_filter_tag_list}
-        tissue_filter_tag_list={tissue_filter_tag_list}
+        search_tag_list={search_tag_list}
         tableHead={tableHead}
         samples={samples}
         parent={this}
@@ -1005,7 +1079,20 @@ class Samples extends React.Component {
         });
       }
 
-      if (this.state.hostFilterChange || this.state.tissueFilterChange) {
+      let searchFilterChange = [
+        "sampleIdsParams",
+        "selectedTaxids",
+        "selectedLocations",
+        "selectedUploaderIds"
+      ].some(param => {
+        return prevState[param].toString() !== this.state[param].toString();
+      });
+
+      if (
+        this.state.hostFilterChange ||
+        this.state.tissueFilterChange ||
+        searchFilterChange
+      ) {
         this.setUrlLocation();
         this.fetchResults();
         this.state.hostFilterChange = false;
@@ -1127,23 +1214,16 @@ class Samples extends React.Component {
   //set Url based on requests
   setUrlLocation(value_when_empty = "") {
     let projectId = parseInt(this.state.selectedProjectId);
-    let tissueFilter = this.selectionToParamsOrNone(
-      this.state.selectedTissueFilters,
-      value_when_empty
-    );
-    if (this.state.tissueTypes.length == 0) {
-      tissueFilter = "";
-    }
     const params = {
       project_id: projectId ? projectId : null,
       filter: this.state.filterParams,
-      tissue: tissueFilter,
-      host: this.selectionToParamsOrNone(
-        this.state.selectedHostIndices,
-        value_when_empty
-      ),
+      tissue: this.selectionToParamsOrNone(this.state.selectedTissueFilters),
+      host: this.selectionToParamsOrNone(this.state.selectedHostIndices),
       search: this.state.searchParams,
-      ids: this.state.sampleIdsParams,
+      ids: this.selectionToParamsOrNone(this.state.sampleIdsParams),
+      taxid: this.selectionToParamsOrNone(this.state.selectedTaxids),
+      location: this.selectionToParamsOrNone(this.state.selectedLocations),
+      uploader: this.selectionToParamsOrNone(this.state.selectedUploaderIds),
       sort_by: this.state.sort_by,
       type: this.state.projectType
     };
@@ -1158,11 +1238,16 @@ class Samples extends React.Component {
         filterParams: "",
         searchParams: "",
         checkInUpdate: false,
-        selectedTissueFilters: [],
-        selectedHostIndices: [],
         tissueTypes: [],
         hostGenomes: [],
-        sampleIdsParams: []
+        // clear all filters
+        searchTags: [],
+        sampleIdsParams: [],
+        selectedTissueFilters: [],
+        selectedHostIndices: [],
+        selectedLocations: [],
+        selectedTaxids: [],
+        selectedUploaderIds: []
       },
       () => {
         this.setUrlLocation();
@@ -1191,6 +1276,7 @@ class Samples extends React.Component {
         allProjects={this.allProjects}
         csrf={this.csrf}
         selectProject={this.handleProjectSelection}
+        selectedProjectId={this.state.selectedProjectId}
       />
     );
 
@@ -1282,6 +1368,7 @@ function FilterListMarkup({
   search_box,
   host_filter_tag_list,
   tissue_filter_tag_list,
+  search_tag_list,
   tableHead,
   samples,
   parent
@@ -1293,7 +1380,7 @@ function FilterListMarkup({
       <div className="sample-container no-padding col s12">
         {search_box}
         <div className="filter-tags-list">
-          {host_filter_tag_list} {tissue_filter_tag_list}
+          {host_filter_tag_list} {tissue_filter_tag_list} {search_tag_list}
         </div>
         <div className={cs.statusLabels}>
           {parent.state.areSamplesFiltered && (

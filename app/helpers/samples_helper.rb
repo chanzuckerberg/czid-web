@@ -196,7 +196,7 @@ module SamplesHelper
     end
   end
 
-  def filter_by_tissue_type(samples, query)
+  def filter_by_metadatum(samples, key, query)
     return samples.where("false") if query == ["none"]
 
     # Use a set to speed up query.
@@ -205,7 +205,7 @@ module SamplesHelper
     include_not_set = query.include?('Not set')
 
     sample_type_metadatum = Metadatum
-                            .where(sample_id: samples.pluck(:id), key: "sample_type")
+                            .where(sample_id: samples.pluck(:id), key: key)
 
     matching_sample_ids = sample_type_metadatum
                           .select { |m| query_set.include?(m.validated_value) }
@@ -222,6 +222,12 @@ module SamplesHelper
   def filter_by_host(samples, query)
     return samples.where("false") if query == ["none"]
     samples.where(host_genome_id: query)
+  end
+
+  def filter_by_taxid(samples, taxid)
+    pr_ids = TaxonByterange.where(taxid: taxid).pluck(:pipeline_run_id)
+    sample_ids = PipelineRun.top_completed_runs.where(id: pr_ids).pluck(:sample_id)
+    samples.where(id: sample_ids)
   end
 
   def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)

@@ -27,6 +27,8 @@ gem 'lograge'
 gem 'lograge-sql'
 gem 'multipart-post'
 gem 'silencer'
+# elasticsearch
+gem 'elasticsearch-model'
 # Use mysql as the database for Active Record
 gem 'mysql2'
 gem 'prometheus-client', '0.7.1'

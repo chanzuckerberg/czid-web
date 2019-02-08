@@ -2,6 +2,7 @@ class PhyloTreesController < ApplicationController
   include ApplicationHelper
   include PipelineRunsHelper
   include PhyloTreeHelper
+  include ElasticsearchHelper
 
   before_action :authenticate_user!
   before_action :no_demo_user, only: :create
@@ -85,7 +86,8 @@ class PhyloTreesController < ApplicationController
   end
 
   def choose_taxon
-    render json: File.read("/app/app/lib/taxon_search_list.json")
+    taxon_list = taxon_search(params[:query])
+    render json: JSON.dump(taxon_list)
   end
 
   def new

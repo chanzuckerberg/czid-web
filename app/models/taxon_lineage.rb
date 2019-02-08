@@ -1,5 +1,11 @@
 # The TaxonLineage model gives the taxids forming the taxonomic lineage of any given species-level taxid.
+require 'elasticsearch/model'
+
 class TaxonLineage < ApplicationRecord
+  unless Rails.env == 'test'
+    include Elasticsearch::Model
+    include Elasticsearch::Model::Callbacks
+  end
   include TaxonLineageHelper
 
   INVALID_CALL_BASE_ID = -100_000_000 # don't run into -2e9 limit (not common, mostly a concern for fp32 or int32)
@@ -78,21 +84,6 @@ class TaxonLineage < ApplicationRecord
   def name
     level_str = TaxonCount::LEVEL_2_NAME[tax_level]
     self["#{level_str}_name"]
-  end
-
-  def self.taxon_search_list(tax_level_str = "genus")
-    taxid_column = "#{tax_level_str}_taxid"
-    name_column = "#{tax_level_str}_name"
-    # TODO: Change to use latest/current lineage_version (e.g. from Parameter Store)
-    max_ended_at = TaxonLineage.column_defaults["ended_at"] # currently valid
-    lineages = TaxonLineage.where("#{taxid_column} > 0").where.not("#{name_column} = ''").where("ended_at = ?", max_ended_at)
-    lineages = lineages.select(taxid_column, name_column).distinct.order(name_column).index_by { |record| record[name_column] } # index_by makes sure it's unique on name by itself
-    taxon_list = lineages.map do |name, record|
-      { "title" => name,
-        "description" => "Taxonomy ID: #{record[taxid_column]}",
-        "taxid" => record[taxid_column] }
-    end
-    JSON.dump(taxon_list)
   end
 
   def self.get_genus_info(genus_tax_id)

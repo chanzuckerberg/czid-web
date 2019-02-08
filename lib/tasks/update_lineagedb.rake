@@ -78,5 +78,4 @@ task update_lineage_db: :environment do
   ## Instructions on next steps
   raise "lineage database update failed" unless $CHILD_STATUS.success?
   puts "To complete this lineage update, you should now update PHAGE_FAMILIES_TAXIDS and PHAGE_TAXIDS in TaxonLineageHelper using the queries described therein."
-  puts "You should also overwrite app/lib/taxon_search_list.json with the output of TaxonLineage.taxon_search_list."
 end
