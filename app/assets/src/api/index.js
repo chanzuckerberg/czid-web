@@ -212,7 +212,7 @@ const getSampleTaxons = (params, cancelToken) =>
     cancelToken
   });
 
-// TODO: add remaining parameters: filterm search, page, sortBy
+// TODO: add remaining parameters: filter, search, page and sortBy
 const getSamples = ({ projectId, onlyLibrary, excludeLibrary } = {}) =>
   get("/samples/index_v2.json", {
     params: {

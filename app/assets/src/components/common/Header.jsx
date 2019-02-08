@@ -73,12 +73,18 @@ const UserMenuDropDown = ({
         userDropdownItems.push(
           <BareDropdown.Item
             key="1"
-            text={<a href="/samples/new">New Sample</a>}
+            text={
+              <a className={cs.option} href="/samples/new">
+                New Sample
+              </a>
+            }
           />,
           <BareDropdown.Item
             key="2"
             text={
-              <a href="/cli_user_instructions">New Sample (Command Line)</a>
+              <a className={cs.option} href="/cli_user_instructions">
+                New Sample (Command Line)
+              </a>
             }
           />
         );
@@ -88,25 +94,43 @@ const UserMenuDropDown = ({
 
   adminUser &&
     userDropdownItems.push(
-      <BareDropdown.Item key="3" text={<a href="/users/new">Create User</a>} />
+      <BareDropdown.Item
+        key="3"
+        text={
+          <a className={cs.option} href="/users/new">
+            Create User
+          </a>
+        }
+      />
     );
 
   userDropdownItems.push(
     <BareDropdown.Item
       key="4"
       text={
-        <a href={`mailto:${email}?Subject=Report%20Feedback`}>
+        <a
+          className={cs.option}
+          href={`mailto:${email}?Subject=Report%20Feedback`}
+        >
           Report Feedback
         </a>
       }
     />,
     <BareDropdown.Item
       key="5"
-      text={<a href="https://assets.idseq.net/Terms.pdf">Terms of Use</a>}
+      text={
+        <a className={cs.option} href="https://assets.idseq.net/Terms.pdf">
+          Terms of Use
+        </a>
+      }
     />,
     <BareDropdown.Item
       key="6"
-      text={<a href="https://assets.idseq.net/Terms.pdf">Privacy Policy</a>}
+      text={
+        <a className={cs.option} href="https://assets.idseq.net/Terms.pdf">
+          Privacy Policy
+        </a>
+      }
     />,
     <BareDropdown.Item key="7" text="Logout" onClick={signOut} />
   );
