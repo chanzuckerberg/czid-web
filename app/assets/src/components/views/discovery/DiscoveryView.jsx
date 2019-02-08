@@ -32,7 +32,9 @@ class DiscoveryView extends React.Component {
         projects
       });
     } catch (error) {
-      // TODO: handle errors
+      // TODO: handle error better
+      // eslint-disable-next-line no-console
+      console.log(error);
     }
   }
 
