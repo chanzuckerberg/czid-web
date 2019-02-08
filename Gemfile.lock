@@ -43,9 +43,10 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.6.0)
       public_suffix (>= 2.0.2, < 4.0)
-    airbrake (7.4.0)
-      airbrake-ruby (~> 2.12)
-    airbrake-ruby (2.12.0)
+    airbrake (7.2.0)
+      airbrake-ruby (~> 2.5)
+    airbrake-ruby (2.8.0)
+    analytics-ruby (2.0.13)
     arel (8.0.0)
     ast (2.4.0)
     aws-eventstream (1.0.1)
@@ -1064,6 +1065,7 @@ DEPENDENCIES
   activesupport
   airbrake (~> 7.0)
   airbrake-ruby
+  analytics-ruby (~> 2.0.0)
   aws-sdk
   aws-sdk-ecs
   aws-sdk-resources
@@ -1114,4 +1116,4 @@ DEPENDENCIES
   will_paginate
 
 BUNDLED WITH
-   1.16.2
+   1.17.2

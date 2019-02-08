@@ -47,7 +47,7 @@ class SampleView extends React.Component {
       }, 300000);
     }
 
-    logAnalyticsEvent(ANALYTICS_EVENT_NAMES.sampleView, {
+    logAnalyticsEvent(ANALYTICS_EVENT_NAMES.sampleViewed, {
       sampleId: this.props.sample.id
     });
   }

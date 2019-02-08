@@ -3,6 +3,24 @@ require "net/http"
 
 # MetricUtil is currently used for posting metrics to Datadog's metrics endpoints.
 class MetricUtil
+  SEGMENT_ANALYTICS = if ENV["SEGMENT_RUBY_ID"]
+                        Segment::Analytics.new(
+                          write_key: ENV["SEGMENT_RUBY_ID"],
+                          on_error: proc do |status, msg|
+                            Rails.logger.error("Segment error: #{status}: #{msg}")
+                          end
+                        )
+                      end
+
+  # Backend event name guidelines:
+  # Follow object_action convention with object being the name of the core model or component name
+  # if it makes sense, and a past tense action. Keep names meaningful, descriptive, and
+  # non-redundant (e.g. prefer sample_viewed to sample_view_viewed).
+  ANALYTICS_EVENT_NAMES = {
+    user_created: "user_created",
+    project_created: "project_created"
+  }.freeze
+
   def self.put_metric_now(name, value, tags = [], type = "count")
     put_metric(name, value, Time.now.to_i, tags, type)
   end
@@ -53,6 +71,14 @@ class MetricUtil
       unless response.is_a?(Net::HTTPSuccess)
         Rails.logger.warn("Unable to send data: #{response.message}")
       end
+    end
+  end
+
+  def self.log_analytics_event(event, user, properties = {})
+    if SEGMENT_ANALYTICS
+      # current_user should be passed from a controller
+      user_id = user ? user.id : 0
+      SEGMENT_ANALYTICS.track(event: event, user_id: user_id, properties: properties)
     end
   end
 end

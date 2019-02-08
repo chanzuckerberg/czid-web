@@ -233,6 +233,7 @@ class SamplesController < ApplicationController
   end
 
   # POST /samples/bulk_upload
+  # Currently only used for web S3 uploads
   def bulk_upload
     samples = samples_params || []
     editable_project_ids = current_power.updatable_projects.pluck(:id)
