@@ -23,3 +23,62 @@ $font-weight-regular: 400;
 $font-weight-semibold: 600;
 $font-weight-bold: 700;
 $font-weight-heavy: 800;
+
+// Font mixins. Use these whenever possible.
+@mixin font-header-xxl {
+  font-size: 26px;
+  line-height: 34px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+@mixin font-header-xl {
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+@mixin font-header-l {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+@mixin font-header-m {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+@mixin font-body-l {
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: 0.3px;
+}
+
+@mixin font-body-m {
+  font-size: 16px;
+  line-height: 26px;
+  letter-spacing: 0.3px;
+}
+
+@mixin font-body-s {
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: 0.3px;
+}
+
+@mixin font-body-xs {
+  font-size: 13px;
+  line-height: 20px;
+  letter-spacing: 0.3px;
+}
+
+@mixin font-body-xxs {
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: 0.3px;
+}

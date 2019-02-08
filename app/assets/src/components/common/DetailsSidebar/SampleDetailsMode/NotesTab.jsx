@@ -35,6 +35,7 @@ class NotesTab extends React.Component {
         savePending={savePending}
         alwaysShowEditLink={notesEmpty}
         className={cs.notesSection}
+        toggleable={false}
       >
         {!this.state.editing &&
           (notesEmpty ? (

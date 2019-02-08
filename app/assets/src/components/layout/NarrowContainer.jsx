@@ -3,8 +3,12 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 import cs from "./narrow_container.scss";
 
-const NarrowContainer = ({ children, className }) => {
-  return <div className={cx(cs.narrowContainer, className)}>{children}</div>;
+const NarrowContainer = ({ children, className, size }) => {
+  return (
+    <div className={cx(cs.narrowContainer, className, size && cs[size])}>
+      {children}
+    </div>
+  );
 };
 
 NarrowContainer.propTypes = {
@@ -12,7 +16,8 @@ NarrowContainer.propTypes = {
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node
   ]).isRequired,
-  className: PropTypes.string
+  className: PropTypes.string,
+  size: PropTypes.oneOf(["small"])
 };
 
 export default NarrowContainer;
