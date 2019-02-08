@@ -12,7 +12,8 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
 import Slider from "~ui/controls/Slider";
-import { PrimaryButton } from "~ui/controls/buttons";
+import Icon from "~ui/icons/Icon";
+import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
 import {
   Dropdown,
   DownloadButtonDropdown,
@@ -20,7 +21,7 @@ import {
   MultipleNestedDropdown
 } from "~ui/controls/dropdowns";
 import { processMetadata } from "~utils/metadata";
-import { getSampleTaxons, getSampleMetadataFields } from "~/api";
+import { getSampleTaxons, getSampleMetadataFields, saveHeatmap } from "~/api";
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
 
@@ -28,8 +29,12 @@ class SamplesHeatmapView extends React.Component {
   constructor(props) {
     super(props);
 
-    // URL params have precedence
     this.urlParams = this.parseUrlParams();
+    // URL params have precedence
+    this.urlParams = {
+      ...props.savedParamValues,
+      ...this.urlParams
+    };
 
     this.availableOptions = {
       specificityOptions: [
@@ -146,6 +151,11 @@ class SamplesHeatmapView extends React.Component {
 
   onShareClick = () => {
     copy(this.getUrlForCurrentParams());
+  };
+
+  onSaveClick = async () => {
+    // TODO (gdingle): add analytics tracking?
+    await saveHeatmap(this.getUrlParams());
   };
 
   metricToSortField(metric) {
@@ -715,11 +725,20 @@ class SamplesHeatmapView extends React.Component {
                     text="Share"
                     onClick={this.onShareClick}
                     className={cs.controlElement}
+                    icon={
+                      <Icon size="large" className={"cloud share alternate"} />
+                    }
                   />
                 }
                 content="A shareable URL has been copied to your clipboard!"
                 on="click"
                 hideOnScroll
+              />
+              <SecondaryButton
+                text="Save"
+                onClick={this.onSaveClick}
+                className={cs.controlElement}
+                icon={<Icon size="large" className={"cloud save alternate"} />}
               />
               <DownloadButtonDropdown
                 className={cs.controlElement}
@@ -759,7 +778,8 @@ SamplesHeatmapView.propTypes = {
   subcategories: PropTypes.object,
   removedTaxonIds: PropTypes.array,
   taxonLevels: PropTypes.array,
-  thresholdFilters: PropTypes.object
+  thresholdFilters: PropTypes.object,
+  savedParamValues: PropTypes.object
 };
 
 export default SamplesHeatmapView;
