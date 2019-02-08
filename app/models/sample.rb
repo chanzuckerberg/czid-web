@@ -599,8 +599,9 @@ class Sample < ApplicationRecord
     event = MetricUtil::ANALYTICS_EVENT_NAMES[:sample_upload_batch_created]
     samples.group_by { |s| [s.project_id, s.host_genome_id] }.each do |(project_id, host_genome_id), entries|
       MetricUtil.log_analytics_event(
-        event, user, count: entries.count, project_id: project_id,
-                     host_genome_id: host_genome_id, client: client
+        event,
+        user,
+        count: entries.count, project_id: project_id, host_genome_id: host_genome_id, client: client
       )
     end
   end
