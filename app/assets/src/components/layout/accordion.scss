@@ -1,0 +1,33 @@
+@import "~styles/themes/colors";
+
+.header {
+  display: flex;
+  align-items: center;
+
+  &.toggleable {
+    cursor: pointer;
+  }
+
+  .fill {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .toggleIcon {
+    padding: 0 20px;
+    font-size: 30px;
+    color: $medium-grey;
+
+    &:hover {
+      color: $black;
+    }
+  }
+}
+
+.content {
+  margin-bottom: 20px;
+}
+
+.accordion {
+  border-bottom: 1px solid $light-grey;
+}

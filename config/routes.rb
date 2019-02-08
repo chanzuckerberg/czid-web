@@ -55,6 +55,9 @@ Rails.application.routes.draw do
   get 'library', to: 'home#library'
   post 'feedback', to: 'home#feedback'
   post 'sign_up', to: 'home#sign_up'
+  get 'privacy', to: 'support#privacy'
+  get 'terms', to: 'support#terms'
+  get 'faqs', to: 'support#faqs'
 
   resources :projects do
     get :make_project_reports_csv, on: :member

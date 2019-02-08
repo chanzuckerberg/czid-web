@@ -1,16 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/typography";
 
-.header {
-  display: flex;
-  height: 50px;
-  align-items: center;
-  border-bottom: 1px solid $light-grey;
-
-  &.toggleable {
-    cursor: pointer;
-  }
-
+.metadataSection {
   .title {
     color: $black;
     font-weight: 600;
@@ -18,21 +9,8 @@
     font-size: $font-size-body;
     text-transform: uppercase;
     padding: 0 10px;
-  }
-
-  .fill {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
-  .toggleIcon {
-    padding: 0 20px;
-    font-size: 30px;
-    color: $medium-grey;
-
-    &:hover {
-      color: $black;
-    }
+    height: 50px;
+    line-height: 50px;
   }
 
   .editLink {
@@ -56,10 +34,6 @@
     font-size: $font-size-small;
     margin-top: 1px;
   }
-}
-
-.content {
-  margin-bottom: 20px;
 
   .controls {
     text-align: right;
