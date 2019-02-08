@@ -1340,7 +1340,11 @@ class SampleUpload extends React.Component {
     );
   }
   render() {
-    return <div>{this.renderSampleForm(this.props.selectedSample)}</div>;
+    return (
+      <div className="single-upload-import">
+        {this.renderSampleForm(this.props.selectedSample)}
+      </div>
+    );
   }
 }
 export default SampleUpload;

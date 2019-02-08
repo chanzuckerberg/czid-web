@@ -181,7 +181,10 @@ class BulkUploadImport extends React.Component {
         });
         this.props.onBulkUploadLocal({
           sampleNamesToFiles: this.state.sampleNamesToFiles,
-          project: this.state.project,
+          project: {
+            name: this.state.project,
+            id: this.state.projectId
+          },
           hostId: this.state.hostId,
           onCreateSampleError: this.handleCreateLocalSampleError,
           onUploadProgress: this.handleLocalUploadProgress,
@@ -362,7 +365,13 @@ class BulkUploadImport extends React.Component {
       samples.push(this.state.samples[idx]);
     });
     this.props
-      .onBulkUploadRemote(samples)
+      .onBulkUploadRemote({
+        samples,
+        project: {
+          id: this.state.projectId,
+          name: this.state.project
+        }
+      })
       .then(response => {
         that.setState({
           success: true,
@@ -867,271 +876,255 @@ class BulkUploadImport extends React.Component {
       : remoteInputFileSection;
 
     return (
-      <div id="samplesUploader" className="row">
-        <div className="col s6 offset-s3 upload-form-container">
-          <div className="content">
-            <div>
-              <div className="form-title">Batch Upload</div>
-              <div className="upload-info">
-                Upload multiple files at one time to be processed through the
-                IDseq pipeline.
+      <div className="content">
+        <div>
+          <div className="form-title">Batch Upload</div>
+          <div className="upload-info">
+            Upload multiple files at one time to be processed through the IDseq
+            pipeline.
+          </div>
+        </div>
+        <div>
+          <p className="upload-question">
+            Only want to upload one sample?{" "}
+            <a href="/samples/new">Click here.</a>
+            <br />Rather use our command-line interface?
+            <a
+              href="/cli_user_instructions"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {" "}
+              Instructions here.
+            </a>
+          </p>
+        </div>
+        <form ref="form" onSubmit={this.handleUpload}>
+          <div className="fields">
+            <div className="field">
+              <div className="row">
+                <div className="col field-title no-padding s12">Project</div>
               </div>
-            </div>
-            <div>
-              <p className="upload-question">
-                Only want to upload one sample?{" "}
-                <a href="/samples/new">Click here.</a>
-                <br />Rather use our command-line interface?
-                <a
-                  href="/cli_user_instructions"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {" "}
-                  Instructions here.
-                </a>
-              </p>
-            </div>
-            <form ref="form" onSubmit={this.handleUpload}>
-              <div className="fields">
-                <div className="field">
-                  <div className="row">
-                    <div className="col field-title no-padding s12">
-                      Project
-                    </div>
-                  </div>
-                  <div className="row input-row">
-                    <Tipsy
-                      content="Name of experiment or project"
-                      position="top"
+              <div className="row input-row">
+                <Tipsy content="Name of experiment or project" position="top">
+                  <div
+                    className="col project-list no-padding s8"
+                    data-delay="50"
+                  >
+                    <select
+                      ref="projectSelect"
+                      disabled={
+                        this.state.disableProjectSelect ? "disabled" : ""
+                      }
+                      className="projectSelect"
+                      id="sample"
+                      onChange={this.handleProjectChange}
+                      value={this.state.project}
                     >
-                      <div
-                        className="col project-list no-padding s8"
-                        data-delay="50"
-                      >
-                        <select
-                          ref="projectSelect"
-                          disabled={
-                            this.state.disableProjectSelect ? "disabled" : ""
-                          }
-                          className="projectSelect"
-                          id="sample"
-                          onChange={this.handleProjectChange}
-                          value={this.state.project}
-                        >
-                          <option disabled defaultValue>
-                            {this.state.project}
-                          </option>
-                          {this.state.allProjects.length ? (
-                            ObjectHelper.sortByKey(
-                              this.state.allProjects,
-                              "name"
-                            ).map((project, i) => {
-                              return (
-                                <option ref="project" key={i} id={project.id}>
-                                  {project.name}
-                                </option>
-                              );
-                            })
-                          ) : (
-                            <option>No projects to display</option>
-                          )}
-                        </select>
-                        {this.state.errors.project ? (
-                          <div className="field-error">
-                            {this.state.errors.project}
-                          </div>
-                        ) : null}
-                      </div>
-                    </Tipsy>
-                    <div className="col no-padding s4">
-                      <Tipsy
-                        content="Add a new desired experiment or project name"
-                        placement="right"
-                      >
-                        <button
-                          type="button"
-                          onClick={this.toggleNewProjectInput}
-                          className="new-project-button new-button secondary-button"
-                          data-delay="50"
-                        >
-                          <i className="fa fa-plus" />
-                          <span>New project</span>
-                        </button>
-                      </Tipsy>
-                    </div>
-                    <div className="col no-padding s12 new-project-input hidden">
-                      <input
-                        type="text"
-                        ref="new_project"
-                        onFocus={this.clearError}
-                        className="browser-default"
-                        placeholder="Input new project name"
-                      />
-                      <span
-                        className="input-icon hidden"
-                        onClick={e => {
-                          if (this.refs.new_project.value.trim().length) {
-                            this.handleProjectSubmit();
-                          }
-                          $(".new-project-button").click();
-                        }}
-                      >
-                        Create project
-                      </span>
-                      {this.state.errors.new_project ? (
-                        <div className="field-error">
-                          {this.state.errors.new_project}
-                        </div>
-                      ) : null}
-                    </div>
-                    <div className="col no-padding 12 new-project-input public_access hidden">
-                      <input
-                        ref="publicChecked"
-                        type="checkbox"
-                        name="switch"
-                        id="publicChecked"
-                        className="col s8 filled-in"
-                        onChange={this.toggleCheckBox}
-                        value={this.state.publicChecked}
-                      />
-                      <label htmlFor="publicChecked" className="checkbox">
-                        Make project public
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <div className="field field-host">
-                  <div className="row">
-                    <Tipsy
-                      content="This will be subtracted by the pipeline"
-                      placement="top"
-                    >
-                      <div
-                        className="col field-title no-padding s5"
-                        data-delay="50"
-                      >
-                        Select host genome
-                      </div>
-                    </Tipsy>
-                    {this.admin ? (
-                      <div className="col s7 right-align no-padding right admin-genomes">
-                        {this.state.hostGenomes.map(g => {
-                          if (
-                            this.adminGenomes.indexOf(g.name) > 0 &&
-                            this.admin
-                          ) {
-                            return (
-                              <div
-                                key={g.id}
-                                className={`${
-                                  this.state.hostName === g.name ? "active" : ""
-                                } genome-label`}
-                                id={g.name}
-                                onClick={() =>
-                                  this.handleHostChange(g.id, g.name)
-                                }
-                              >
-                                {g.name}
-                              </div>
-                            );
-                          }
-                        })}
+                      <option disabled defaultValue>
+                        {this.state.project}
+                      </option>
+                      {this.state.allProjects.length ? (
+                        ObjectHelper.sortByKey(
+                          this.state.allProjects,
+                          "name"
+                        ).map((project, i) => {
+                          return (
+                            <option ref="project" key={i} id={project.id}>
+                              {project.name}
+                            </option>
+                          );
+                        })
+                      ) : (
+                        <option>No projects to display</option>
+                      )}
+                    </select>
+                    {this.state.errors.project ? (
+                      <div className="field-error">
+                        {this.state.errors.project}
                       </div>
                     ) : null}
                   </div>
-                  <div className="row input-row">
-                    <div className="col center no-padding s12">
-                      <ul className="host-selector">
-                        {this.state.hostGenomes.map(g => {
-                          return SampleUpload.resolveGenomeIcon(g.name) ? (
-                            <li
-                              key={g.id}
-                              className={`${
-                                this.state.hostName === g.name ? "active" : ""
-                              } `}
-                              id={g.name}
-                              onClick={() =>
-                                this.handleHostChange(g.id, g.name)
-                              }
-                            >
-                              <div className="img-container">
-                                {SampleUpload.resolveGenomeIcon(g.name)}
-                              </div>
-                              <div className="genome-label">{g.name}</div>
-                            </li>
-                          ) : null;
-                        })}
-                        {this.state.hostGenomes.length ? (
-                          ""
-                        ) : (
-                          <div>
-                            <small>No host genome found!</small>
-                          </div>
-                        )}
-                      </ul>
-                      {this.state.errors.hostName ? (
-                        <div className="field-error">
-                          {this.state.errors.hostName}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
+                </Tipsy>
+                <div className="col no-padding s4">
+                  <Tipsy
+                    content="Add a new desired experiment or project name"
+                    placement="right"
+                  >
+                    <button
+                      type="button"
+                      onClick={this.toggleNewProjectInput}
+                      className="new-project-button new-button secondary-button"
+                      data-delay="50"
+                    >
+                      <i className="fa fa-plus" />
+                      <span>New project</span>
+                    </button>
+                  </Tipsy>
                 </div>
-                <div className="upload-mode-title">Sample Input Files</div>
-                {uploadModeSwitcher}
-                {inputFilesSection}
-                {this.state.success ? (
-                  <div className="form-feedback success-message">
-                    <i className="fa fa-check-circle-o" />
-                    <span>{this.state.successMessage}</span>
-                  </div>
-                ) : null}
-                {this.state.submitting && (
-                  <div className="form-feedback error-message">
-                    {
-                      "Upload in progress... Please keep this page open until completed..."
-                    }
-                  </div>
-                )}
-                {this.state.invalid ? (
-                  <div className="form-feedback error-message">
-                    {this.state.errorMessage}
-                  </div>
-                ) : null}
-                <TermsAgreement
-                  checked={this.state.consentChecked}
-                  onChange={() =>
-                    this.setState({
-                      consentChecked: !this.state.consentChecked
-                    })
-                  }
-                />
-                <div className="field">
-                  <div className="row">
-                    <div className="col no-padding s12">
-                      {submitButton}
-                      <button
-                        type="button"
-                        onClick={() => window.history.back()}
-                        className="new-button secondary-button"
-                      >
-                        Cancel
-                      </button>
+                <div className="col no-padding s12 new-project-input hidden">
+                  <input
+                    type="text"
+                    ref="new_project"
+                    onFocus={this.clearError}
+                    className="browser-default"
+                    placeholder="Input new project name"
+                  />
+                  <span
+                    className="input-icon hidden"
+                    onClick={e => {
+                      if (this.refs.new_project.value.trim().length) {
+                        this.handleProjectSubmit();
+                      }
+                      $(".new-project-button").click();
+                    }}
+                  >
+                    Create project
+                  </span>
+                  {this.state.errors.new_project ? (
+                    <div className="field-error">
+                      {this.state.errors.new_project}
                     </div>
-                  </div>
+                  ) : null}
+                </div>
+                <div className="col no-padding 12 new-project-input public_access hidden">
+                  <input
+                    ref="publicChecked"
+                    type="checkbox"
+                    name="switch"
+                    id="publicChecked"
+                    className="col s8 filled-in"
+                    onChange={this.toggleCheckBox}
+                    value={this.state.publicChecked}
+                  />
+                  <label htmlFor="publicChecked" className="checkbox">
+                    Make project public
+                  </label>
                 </div>
               </div>
-            </form>
+            </div>
+            <div className="field field-host">
+              <div className="row">
+                <Tipsy
+                  content="This will be subtracted by the pipeline"
+                  placement="top"
+                >
+                  <div
+                    className="col field-title no-padding s5"
+                    data-delay="50"
+                  >
+                    Select host genome
+                  </div>
+                </Tipsy>
+                {this.admin ? (
+                  <div className="col s7 right-align no-padding right admin-genomes">
+                    {this.state.hostGenomes.map(g => {
+                      if (this.adminGenomes.indexOf(g.name) > 0 && this.admin) {
+                        return (
+                          <div
+                            key={g.id}
+                            className={`${
+                              this.state.hostName === g.name ? "active" : ""
+                            } genome-label`}
+                            id={g.name}
+                            onClick={() => this.handleHostChange(g.id, g.name)}
+                          >
+                            {g.name}
+                          </div>
+                        );
+                      }
+                    })}
+                  </div>
+                ) : null}
+              </div>
+              <div className="row input-row">
+                <div className="col center no-padding s12">
+                  <ul className="host-selector">
+                    {this.state.hostGenomes.map(g => {
+                      return SampleUpload.resolveGenomeIcon(g.name) ? (
+                        <li
+                          key={g.id}
+                          className={`${
+                            this.state.hostName === g.name ? "active" : ""
+                          } `}
+                          id={g.name}
+                          onClick={() => this.handleHostChange(g.id, g.name)}
+                        >
+                          <div className="img-container">
+                            {SampleUpload.resolveGenomeIcon(g.name)}
+                          </div>
+                          <div className="genome-label">{g.name}</div>
+                        </li>
+                      ) : null;
+                    })}
+                    {this.state.hostGenomes.length ? (
+                      ""
+                    ) : (
+                      <div>
+                        <small>No host genome found!</small>
+                      </div>
+                    )}
+                  </ul>
+                  {this.state.errors.hostName ? (
+                    <div className="field-error">
+                      {this.state.errors.hostName}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+            <div className="upload-mode-title">Sample Input Files</div>
+            {uploadModeSwitcher}
+            {inputFilesSection}
+            {this.state.success ? (
+              <div className="form-feedback success-message">
+                <i className="fa fa-check-circle-o" />
+                <span>{this.state.successMessage}</span>
+              </div>
+            ) : null}
+            {this.state.submitting && (
+              <div className="form-feedback error-message">
+                {
+                  "Upload in progress... Please keep this page open until completed..."
+                }
+              </div>
+            )}
+            {this.state.invalid ? (
+              <div className="form-feedback error-message">
+                {this.state.errorMessage}
+              </div>
+            ) : null}
+            <TermsAgreement
+              checked={this.state.consentChecked}
+              onChange={() =>
+                this.setState({
+                  consentChecked: !this.state.consentChecked
+                })
+              }
+            />
+            <div className="field">
+              <div className="row">
+                <div className="col no-padding s12">
+                  {submitButton}
+                  <button
+                    type="button"
+                    onClick={() => window.history.back()}
+                    className="new-button secondary-button"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </form>
       </div>
     );
   }
 
   render() {
     return (
-      <div>
+      <div className="bulk-upload-import">
         {this.state.imported ? this.renderBulkUploadSubmitForm() : null}
         {!this.state.imported ? this.renderBulkUploadImportForm() : null}
       </div>

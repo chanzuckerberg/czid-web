@@ -11,373 +11,376 @@
     background: $white;
     min-height: 400px;
     border-radius: 20px;
-    .content {
-      margin: 25px;
-      .form-feedback {
-        font-size: $font-size-base;
-        margin-bottom: 15px;
-        p {
-          word-wrap: break-word;
-          margin: 0;
-          font-size: $font-size-small;
+  }
+}
+.bulk-upload-import,
+.single-upload-import {
+  .content {
+    margin: 25px;
+    .form-feedback {
+      font-size: $font-size-base;
+      margin-bottom: 15px;
+      p {
+        word-wrap: break-word;
+        margin: 0;
+        font-size: $font-size-small;
+      }
+    }
+    .success-message {
+      color: $success;
+    }
+    .error-message {
+      color: $error;
+      white-space: pre-wrap;
+      margin-bottom: 20px;
+    }
+    .upload-page-button {
+      margin-left: 2rem;
+      top: 1rem;
+      i.icon.plus:before {
+        margin-right: 1rem;
+        padding-right: 5rem;
+      }
+    }
+    .form-title {
+      font-size: $font-size-h3;
+      color: $darkest-grey;
+      font-weight: $font-weight-bold;
+      letter-spacing: 0.28px;
+      padding-bottom: 1rem;
+    }
+    .upload-info {
+      color: $medium-grey;
+      font-size: $font-size-base;
+    }
+    .upload-question {
+      color: $darkest-grey;
+      font-size: $font-size-small;
+      margin-top: 20px;
+      margin-bottom: 25px;
+      a {
+        font-weight: $font-weight-semibold;
+      }
+      a:hover {
+        color: $primary-light !important;
+      }
+    }
+    .bulkSubmitForm {
+      margin-top: 50px;
+    }
+    .fields {
+      .field-host {
+        padding-top: 1.5rem;
+      }
+      .field {
+        .validation-info {
+          color: $medium-grey;
+        }
+
+        .row {
+          .sample-upload-box {
+            height: 120px;
+            margin-top: 15px;
+          }
+          &.input-row {
+            margin-top: -10px;
+            .browser-default {
+              width: 100%;
+              padding: 10px;
+              border: 1px solid $light-grey;
+              background: $white;
+              border-radius: 10px;
+              &.new_project_input {
+                padding-right: 45px;
+              }
+            }
+            .checkbox {
+              font-size: $font-size-small;
+              font-weight: $font-weight-semibold;
+              color: $dark-grey;
+            }
+            [disabled] {
+              background-color: $lightest-grey;
+              border: $light-grey;
+            }
+            .input-icon {
+              position: absolute;
+              margin-left: -108px;
+              margin-top: 1px;
+              font-size: 13px;
+              background: $lightest-grey;
+              padding: 10.4px;
+              height: 36px;
+              text-align: center;
+              border-radius: 10px;
+
+              &:hover {
+                cursor: pointer;
+                background: $primary-lighter;
+                color: $white;
+              }
+            }
+            .public_access {
+              margin-top: 5px;
+            }
+          }
+
+          .proj-field {
+            padding-bottom: 1.5rem;
+          }
+
+          .field-title {
+            color: $black;
+            font-size: $font-size-small;
+            font-weight: $font-weight-semibold;
+            .validation-info {
+              color: $medium-grey;
+            }
+          }
+
+          .field-error {
+            color: $error;
+            font-size: $font-size-small;
+          }
+          .no-padding {
+            padding: 0;
+          }
+          .example-link {
+            color: $medium-grey !important;
+            font-size: $font-size-small;
+          }
+          .new-button {
+            padding: 10px;
+            border: 1px solid;
+            min-width: 120px;
+            border-radius: 25px;
+            i {
+              margin-right: 5px;
+            }
+            &[disabled] {
+              background-color: $light-grey;
+              border-color: $light-grey;
+            }
+          }
+          .secondary-button {
+            background: $light-grey;
+            border-color: $light-grey;
+            color: $white;
+            i {
+              color: $primary-light;
+            }
+            &.new-project-button {
+              width: 92%;
+              float: right;
+              font-size: $font-size-base;
+              height: 45px;
+              background: $lightest-grey;
+              border-color: $lightest-grey;
+              border-radius: 25px;
+              color: $medium-grey;
+              i {
+                color: $medium-grey;
+              }
+              &:hover,
+              &.active {
+                background: $primary-lighter;
+                border-color: $primary-lighter;
+                color: $white;
+                i {
+                  color: $white;
+                }
+              }
+            }
+          }
+          .blue-button {
+            background: $primary-light;
+            border-color: $primary-light;
+            color: $white;
+          }
+          .upload-samples-button {
+            margin-right: 10px;
+          }
+          .host-selector {
+            padding-top: 0.8rem;
+            li {
+              border-radius: 2rem;
+              display: inline-block;
+              margin-right: 10px;
+              border: 1px solid transparent;
+              padding: 5px;
+              min-height: 120px;
+              min-width: 120px;
+              margin-bottom: 10px;
+              background: $lightest-grey;
+              cursor: pointer;
+
+              .genome-label {
+                color: $medium-grey;
+                text-align: center;
+                font-size: $font-size-small;
+                margin-top: 5px;
+              }
+              svg {
+                width: 65px;
+                fill: $medium-grey;
+              }
+
+              &.active,
+              &:hover {
+                .genome-label {
+                  color: $white;
+                }
+                svg {
+                  fill: $white;
+                }
+              }
+
+              &.active {
+                background: $primary-light;
+                border-color: $primary-light;
+              }
+
+              &:hover {
+                background: $primary-lighter;
+                border-color: $primary-lighter;
+              }
+
+              .img-container {
+                text-align: center;
+                background-size: contain;
+                background: no-repeat center;
+                padding: 10px;
+              }
+            }
+          }
+          .project-list {
+            .select-wrapper {
+              height: 50px;
+              width: 98%;
+              input {
+                padding-left: 2%;
+              }
+            }
+            .select-dropdown {
+              padding-left: 2px;
+              border: 1px solid $light-grey;
+              border-radius: 20px;
+            }
+            .caret {
+              color: $medium-grey;
+            }
+            li {
+              span {
+                color: $darkest-grey;
+                font-size: 13px;
+              }
+            }
+          }
+          .admin-genomes {
+            .genome-label {
+              font-size: $font-size-small;
+              color: $darkest-grey;
+              display: inline-block;
+              border-right: 1px solid $darkest-grey;
+              padding-right: 5px;
+              margin-left: 5px;
+              cursor: pointer;
+              &:hover,
+              &.active {
+                color: $primary-light;
+              }
+            }
+            .genome-label:last-child {
+              border-right: 0;
+              padding-right: 0;
+            }
+          }
+        }
+
+        .inputFileArea {
+          margin-bottom: 50px;
+
+          .bulkUploadFilePicker {
+            margin-top: 15px;
+            margin-bottom: 20px;
+            height: 120px;
+          }
         }
       }
-      .success-message {
-        color: $success;
+
+      .upload-notes {
+        font-size: 12px;
+        margin-bottom: 2rem;
+        color: $medium-grey;
+        font-weight: 600;
       }
-      .error-message {
-        color: $error;
-        white-space: pre-wrap;
-        margin-bottom: 20px;
-      }
-      .upload-page-button {
-        margin-left: 2rem;
-        top: 1rem;
-        i.icon.plus:before {
-          margin-right: 1rem;
-          padding-right: 5rem;
+
+      .custom-select-dropdown {
+        border: 1px solid transparent;
+        padding: 8px;
+        &:hover,
+        &.active {
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+            0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        }
+        &.genome-select {
+          width: inherit;
+          min-width: 75px;
+          margin-top: -1rem;
+          div {
+            display: inline-block;
+          }
+          i {
+            position: relative;
+
+            top: -5px;
+            left: 5px;
+          }
+        }
+        i {
+          color: $light-grey;
+          font-weight: $font-weight-semibold;
+        }
+        svg {
+          width: 35px;
         }
       }
-      .form-title {
-        font-size: $font-size-h3;
-        color: $darkest-grey;
-        font-weight: $font-weight-bold;
-        letter-spacing: 0.28px;
-        padding-bottom: 1rem;
+      .dropdown-content {
+        &.genomes {
+          width: initial !important;
+        }
+        li {
+          min-height: inherit;
+          padding: 10px;
+        }
       }
-      .upload-info {
+      .admin-fields {
+        &.divider {
+          margin: 20px 0;
+        }
+      }
+      .admin-input-title {
         color: $medium-grey;
         font-size: $font-size-base;
       }
-      .upload-question {
+      [type="checkbox"].filled-in:checked + label:after {
+        border: 2px solid $primary-light;
+        background-color: $primary-light;
+      }
+
+      [type="checkbox"].filled-in + label:after {
+        border: 2px solid $light-grey;
+        background-color: $white;
+      }
+      label {
         color: $darkest-grey;
-        font-size: $font-size-small;
-        margin-top: 20px;
-        margin-bottom: 25px;
-        a {
-          font-weight: $font-weight-semibold;
-        }
-        a:hover {
-          color: $primary-light !important;
-        }
       }
-      .bulkSubmitForm {
-        margin-top: 50px;
-      }
-      .fields {
-        .field-host {
-          padding-top: 1.5rem;
-        }
-        .field {
-          .validation-info {
-            color: $medium-grey;
-          }
 
-          .row {
-            .sample-upload-box {
-              height: 120px;
-              margin-top: 15px;
-            }
-            &.input-row {
-              margin-top: -10px;
-              .browser-default {
-                width: 100%;
-                padding: 10px;
-                border: 1px solid $light-grey;
-                background: $white;
-                border-radius: 10px;
-                &.new_project_input {
-                  padding-right: 45px;
-                }
-              }
-              .checkbox {
-                font-size: $font-size-small;
-                font-weight: $font-weight-semibold;
-                color: $dark-grey;
-              }
-              [disabled] {
-                background-color: $lightest-grey;
-                border: $light-grey;
-              }
-              .input-icon {
-                position: absolute;
-                margin-left: -108px;
-                margin-top: 1px;
-                font-size: 13px;
-                background: $lightest-grey;
-                padding: 10.4px;
-                height: 36px;
-                text-align: center;
-                border-radius: 10px;
-
-                &:hover {
-                  cursor: pointer;
-                  background: $primary-lighter;
-                  color: $white;
-                }
-              }
-              .public_access {
-                margin-top: 5px;
-              }
-            }
-
-            .proj-field {
-              padding-bottom: 1.5rem;
-            }
-
-            .field-title {
-              color: $black;
-              font-size: $font-size-small;
-              font-weight: $font-weight-semibold;
-              .validation-info {
-                color: $medium-grey;
-              }
-            }
-
-            .field-error {
-              color: $error;
-              font-size: $font-size-small;
-            }
-            .no-padding {
-              padding: 0;
-            }
-            .example-link {
-              color: $medium-grey !important;
-              font-size: $font-size-small;
-            }
-            .new-button {
-              padding: 10px;
-              border: 1px solid;
-              min-width: 120px;
-              border-radius: 25px;
-              i {
-                margin-right: 5px;
-              }
-              &[disabled] {
-                background-color: $light-grey;
-                border-color: $light-grey;
-              }
-            }
-            .secondary-button {
-              background: $light-grey;
-              border-color: $light-grey;
-              color: $white;
-              i {
-                color: $primary-light;
-              }
-              &.new-project-button {
-                width: 92%;
-                float: right;
-                font-size: $font-size-base;
-                height: 45px;
-                background: $lightest-grey;
-                border-color: $lightest-grey;
-                border-radius: 25px;
-                color: $medium-grey;
-                i {
-                  color: $medium-grey;
-                }
-                &:hover,
-                &.active {
-                  background: $primary-lighter;
-                  border-color: $primary-lighter;
-                  color: $white;
-                  i {
-                    color: $white;
-                  }
-                }
-              }
-            }
-            .blue-button {
-              background: $primary-light;
-              border-color: $primary-light;
-              color: $white;
-            }
-            .upload-samples-button {
-              margin-right: 10px;
-            }
-            .host-selector {
-              padding-top: 0.8rem;
-              li {
-                border-radius: 2rem;
-                display: inline-block;
-                margin-right: 10px;
-                border: 1px solid transparent;
-                padding: 5px;
-                min-height: 120px;
-                min-width: 120px;
-                margin-bottom: 10px;
-                background: $lightest-grey;
-                cursor: pointer;
-
-                .genome-label {
-                  color: $medium-grey;
-                  text-align: center;
-                  font-size: $font-size-small;
-                  margin-top: 5px;
-                }
-                svg {
-                  width: 65px;
-                  fill: $medium-grey;
-                }
-
-                &.active,
-                &:hover {
-                  .genome-label {
-                    color: $white;
-                  }
-                  svg {
-                    fill: $white;
-                  }
-                }
-
-                &.active {
-                  background: $primary-light;
-                  border-color: $primary-light;
-                }
-
-                &:hover {
-                  background: $primary-lighter;
-                  border-color: $primary-lighter;
-                }
-
-                .img-container {
-                  text-align: center;
-                  background-size: contain;
-                  background: no-repeat center;
-                  padding: 10px;
-                }
-              }
-            }
-            .project-list {
-              .select-wrapper {
-                height: 50px;
-                width: 98%;
-                input {
-                  padding-left: 2%;
-                }
-              }
-              .select-dropdown {
-                padding-left: 2px;
-                border: 1px solid $light-grey;
-                border-radius: 20px;
-              }
-              .caret {
-                color: $medium-grey;
-              }
-              li {
-                span {
-                  color: $darkest-grey;
-                  font-size: 13px;
-                }
-              }
-            }
-            .admin-genomes {
-              .genome-label {
-                font-size: $font-size-small;
-                color: $darkest-grey;
-                display: inline-block;
-                border-right: 1px solid $darkest-grey;
-                padding-right: 5px;
-                margin-left: 5px;
-                cursor: pointer;
-                &:hover,
-                &.active {
-                  color: $primary-light;
-                }
-              }
-              .genome-label:last-child {
-                border-right: 0;
-                padding-right: 0;
-              }
-            }
-          }
-
-          .inputFileArea {
-            margin-bottom: 50px;
-
-            .bulkUploadFilePicker {
-              margin-top: 15px;
-              margin-bottom: 20px;
-              height: 120px;
-            }
-          }
-        }
-
-        .upload-notes {
-          font-size: 12px;
-          margin-bottom: 2rem;
-          color: $medium-grey;
-          font-weight: 600;
-        }
-
-        .custom-select-dropdown {
-          border: 1px solid transparent;
-          padding: 8px;
-          &:hover,
-          &.active {
-            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
-              0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-          }
-          &.genome-select {
-            width: inherit;
-            min-width: 75px;
-            margin-top: -1rem;
-            div {
-              display: inline-block;
-            }
-            i {
-              position: relative;
-
-              top: -5px;
-              left: 5px;
-            }
-          }
-          i {
-            color: $light-grey;
-            font-weight: $font-weight-semibold;
-          }
-          svg {
-            width: 35px;
-          }
-        }
-        .dropdown-content {
-          &.genomes {
-            width: initial !important;
-          }
-          li {
-            min-height: inherit;
-            padding: 10px;
-          }
-        }
-        .admin-fields {
-          &.divider {
-            margin: 20px 0;
-          }
-        }
-        .admin-input-title {
-          color: $medium-grey;
-          font-size: $font-size-base;
-        }
-        [type="checkbox"].filled-in:checked + label:after {
-          border: 2px solid $primary-light;
-          background-color: $primary-light;
-        }
-
-        [type="checkbox"].filled-in + label:after {
-          border: 2px solid $light-grey;
-          background-color: $white;
-        }
-        label {
-          color: $darkest-grey;
-        }
-
-        .upload-mode-title {
-          color: $black;
-          font-size: 1.1rem;
-          font-weight: 600;
-          margin-top: 3.5rem;
-        }
+      .upload-mode-title {
+        color: $black;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-top: 3.5rem;
       }
     }
   }

@@ -1,17 +1,22 @@
 import {
   bulkUploadRemoteSamples,
+  bulkUploadRemoteSamplesWithMetadata,
   createSample,
+  createSampleWithMetadata,
   markSampleUploaded,
   uploadFileToUrl
 } from "~/api";
 
-export const handleBulkUploadRemote = samples =>
-  bulkUploadRemoteSamples(samples);
+export const bulkUploadRemote = ({ samples, metadata }) =>
+  metadata
+    ? bulkUploadRemoteSamplesWithMetadata(samples, metadata)
+    : bulkUploadRemoteSamples(samples);
 
-export const handleBulkUploadLocal = ({
+export const bulkUploadLocal = ({
   sampleNamesToFiles,
   project,
   hostId,
+  metadata,
   onCreateSampleError,
   onUploadProgress,
   onUploadError,
@@ -45,18 +50,32 @@ export const handleBulkUploadLocal = ({
 
   // Send an API call to create new samples with the expected files
   for (const [sampleName, files] of Object.entries(sampleNamesToFiles)) {
-    createSample(sampleName, project, hostId, files, "local")
+    const createSamplePromise = metadata
+      ? createSampleWithMetadata({
+          sourceType: "local",
+          inputFiles: files,
+          name: sampleName,
+          projectName: project.name,
+          hostGenomeId: hostId,
+          metadata: metadata[sampleName]
+        })
+      : // TODO(mark): Remove this endpoint once we launch the new sample upload flow.
+        createSample(sampleName, project.name, hostId, files, "local");
+
+    createSamplePromise
       .then(response => {
         // After successful sample creation, upload to the presigned URLs returned
-        const sampleId = response.data.id;
+        const sampleId = response.id;
         files.map((file, i) => {
-          const url = response.data.input_files[i].presigned_url;
+          const url = response.input_files[i].presigned_url;
 
           uploadFileToUrl(file, url, {
             onUploadProgress: e => {
               const percent = Math.round(e.loaded * 100 / e.total);
               fileNamesToProgress[file.name] = percent;
-              onUploadProgress(percent, file);
+              if (onUploadProgress) {
+                onUploadProgress(percent, file);
+              }
             },
             onSuccess: () => onFileUploadSuccess(sampleName, sampleId),
             onError: error => onUploadError(file, error)
@@ -64,7 +83,9 @@ export const handleBulkUploadLocal = ({
         });
       })
       .catch(error => {
-        onCreateSampleError(error, sampleName);
+        if (onCreateSampleError) {
+          onCreateSampleError(error, sampleName);
+        }
       });
   }
 };

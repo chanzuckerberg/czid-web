@@ -2,7 +2,7 @@ class ProjectsController < ApplicationController
   include ApplicationHelper
   include SamplesHelper
   include ReportHelper
-  include ProjectsHelper
+  include MetadataHelper
   ########################################
   # Note to developers:
   # If you are adding a new action to the project controller, you must classify your action into
@@ -244,10 +244,9 @@ class ProjectsController < ApplicationController
 
   def validate_metadata_csv
     metadata = params[:metadata]
-    new_samples = params[:new_samples] == "1"
 
     project_samples = current_power.project_samples(@project)
-    issues = validate_metadata_csv_for_project(project_samples, metadata, new_samples)
+    issues = validate_metadata_csv_for_samples(project_samples.to_a, metadata)
     render json: {
       status: "success",
       issues: issues
@@ -259,7 +258,7 @@ class ProjectsController < ApplicationController
 
     project_samples = current_power.project_samples(@project)
 
-    errors = upload_metadata_for_project(project_samples, metadata)
+    errors = upload_metadata_for_samples(project_samples.to_a, metadata)
     render json: {
       status: "success",
       errors: errors

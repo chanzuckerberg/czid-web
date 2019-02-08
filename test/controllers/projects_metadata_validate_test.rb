@@ -51,29 +51,6 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
 
-  test 'metadata validate host genome name exists if new samples' do
-    post user_session_path, params: @user_params
-
-    post validate_metadata_csv_project_url(@metadata_validation_project), params: {
-      metadata: {
-        headers: ['sample_type'],
-        rows: [
-          ['Whole Blood'],
-          ['Whole Blood']
-        ]
-      },
-      new_samples: '1'
-    }, as: :json
-
-    assert_response :success
-
-    # Error should throw if host_genome_name column is missing.
-    assert_equal 1, @response.parsed_body['issues']['errors'].length
-    assert_match MetadataValidationErrors.missing_host_genome_name_column, @response.parsed_body['issues']['errors'][0]
-
-    assert_equal 0, @response.parsed_body['issues']['warnings'].length
-  end
-
   test 'metadata validate column names valid' do
     post user_session_path, params: @user_params
 
@@ -143,32 +120,6 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
 
-  test 'metadata validate host genome names valid if new samples' do
-    post user_session_path, params: @user_params
-
-    post validate_metadata_csv_project_url(@metadata_validation_project), params: {
-      metadata: {
-        headers: ['host_genome_name', 'sample_type'],
-        rows: [
-          ['', 'Whole Blood'],
-          ['foobar', 'Whole Blood'],
-          ['Human', 'Whole Blood']
-        ]
-      },
-      new_samples: '1'
-    }, as: :json
-
-    assert_response :success
-
-    assert_equal 2, @response.parsed_body['issues']['errors'].length
-    # Error should throw if row is missing host genome name.
-    assert_match MetadataValidationErrors.row_missing_host_genome_name(1), @response.parsed_body['issues']['errors'][0]
-    # Error should throw if host genome name is invalid.
-    assert_match MetadataValidationErrors.row_invalid_host_genome_name('foobar', 2), @response.parsed_body['issues']['errors'][1]
-
-    assert_equal 0, @response.parsed_body['issues']['warnings'].length
-  end
-
   test 'metadata validate values valid' do
     post user_session_path, params: @user_params
 
@@ -182,40 +133,6 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
           ['metadata_validation_sample_mosquito', 'Whole Blood', 'foobar', 'foobar', 'foobar', 'foobar']
         ]
       }
-    }, as: :json
-
-    assert_response :success
-
-    assert_equal 7, @response.parsed_body['issues']['errors'].length
-    # Error should throw if invalid float is passed for float data type.
-    assert_match "#{MetadataValidationErrors.invalid_number('foobar')} (row 2)", @response.parsed_body['issues']['errors'][0]
-    # Error should throw if invalid date is passed for date data type.
-    assert_match "#{MetadataValidationErrors.invalid_date('foobar')} (row 2)", @response.parsed_body['issues']['errors'][1]
-    # Error should throw if metadata type is not supported for the sample's host genome.
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('blood_fed', 'Human')} (row 2)", @response.parsed_body['issues']['errors'][2]
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('reported_sex', 'Human')} (row 2)", @response.parsed_body['issues']['errors'][3]
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('age', 'Mosquito')} (row 4)", @response.parsed_body['issues']['errors'][4]
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('admission_date', 'Mosquito')} (row 4)", @response.parsed_body['issues']['errors'][5]
-    # Error should throw if string value doesn't match fixed list of string options.
-    assert_match "#{MetadataValidationErrors.invalid_option('reported_sex', 'foobar')} (row 4)", @response.parsed_body['issues']['errors'][6]
-
-    assert_equal 0, @response.parsed_body['issues']['warnings'].length
-  end
-
-  test 'metadata validate values valid if new sample' do
-    post user_session_path, params: @user_params
-
-    post validate_metadata_csv_project_url(@metadata_validation_project), params: {
-      metadata: {
-        headers: ['host_genome_name', 'sample_type', 'age', 'admission_date', 'blood_fed', 'reported_sex'],
-        rows: [
-          ['Human', 'Whole Blood', 100, '2018-01-01', '', ''],
-          ['Human', 'Whole Blood', 'foobar', 'foobar', 'foobar', 'foobar'],
-          ['Mosquito', 'Whole Blood', '', '', 'Yes', 'Male'],
-          ['Mosquito', 'Whole Blood', 'foobar', 'foobar', 'foobar', 'foobar']
-        ]
-      },
-      new_samples: '1'
     }, as: :json
 
     assert_response :success
