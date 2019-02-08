@@ -18,7 +18,10 @@ class MetricUtil
   # non-redundant (e.g. prefer sample_viewed to sample_view_viewed).
   ANALYTICS_EVENT_NAMES = {
     user_created: "user_created",
-    project_created: "project_created"
+    project_created: "project_created",
+    pipeline_run_succeeded: "pipeline_run_succeeded",
+    pipeline_run_failed: "pipeline_run_failed",
+    sample_upload_batch_created: "sample_upload_batch_created"
   }.freeze
 
   def self.put_metric_now(name, value, tags = [], type = "count")
@@ -79,6 +82,18 @@ class MetricUtil
       # current_user should be passed from a controller
       user_id = user ? user.id : 0
       SEGMENT_ANALYTICS.track(event: event, user_id: user_id, properties: properties)
+    end
+  end
+
+  # Log analytics from a batch of new samples from an upload session
+  def self.log_upload_batch_analytics(samples, user, client)
+    # Send off an event for each project and host genome combo
+    samples.group_by { |s| [s.project_id, s.host_genome_id] }.each do |(project_id, host_genome_id), entries|
+      log_analytics_event(
+        ANALYTICS_EVENT_NAMES[:sample_upload_batch_created],
+        user,
+        count: entries.count, project_id: project_id, host_genome_id: host_genome_id, client: client
+      )
     end
   end
 end
