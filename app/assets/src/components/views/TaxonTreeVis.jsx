@@ -57,7 +57,8 @@ class TaxonTreeVis extends React.Component {
         onNodeHover: this.handleNodeHover,
         onNodeLabelClick: this.handleNodeLabelClick,
         onCreatedTree: this.fillNodeValues,
-        tooltipContainer: this.treeTooltip
+        tooltipContainer: this.treeTooltip,
+        persistCollapsedInUrl: true
       }
     );
     this.treeVis.update();
@@ -85,19 +86,13 @@ class TaxonTreeVis extends React.Component {
     }
   }
 
-  static createNode() {
-    return {
-      children: [],
-      collapsed: false
-    };
-  }
-
   handleNodeHover(node) {
     this.setState({ nodeHover: node });
   }
 
   handleNodeLabelClick(node) {
     if (!node.data.modalData) {
+      // TODO (gdingle): we should show a "no description" instead of no-op
       this.props.onTaxonClick(null);
       return;
     }
