@@ -215,7 +215,6 @@ class Samples extends React.Component {
     if (values.constructor !== Array) {
       values = [values];
     }
-    let allowedValues;
     this.setState(
       {
         [stateVar]: this.state[stateVar].concat(values),
