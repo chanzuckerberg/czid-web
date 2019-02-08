@@ -778,8 +778,11 @@ class PipelineRun < ApplicationRecord
         event = MetricUtil::ANALYTICS_EVENT_NAMES[:pipeline_run_failed]
       end
 
-      MetricUtil.log_analytics_event(event, sample.user, pipeline_run_id: id,
-                                                         project_id: sample.project.id, run_time: run_time)
+      MetricUtil.log_analytics_event(
+        event,
+        sample.user,
+        pipeline_run_id: id, project_id: sample.project.id, run_time: run_time
+      )
     end
   end
 
