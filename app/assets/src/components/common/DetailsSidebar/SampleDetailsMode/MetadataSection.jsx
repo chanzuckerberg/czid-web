@@ -3,6 +3,7 @@ import cx from "classnames";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import PropTypes from "prop-types";
 import cs from "./metadata_section.scss";
+import Accordion from "~/components/layout/Accordion";
 
 class MetadataSection extends React.Component {
   state = {
@@ -59,56 +60,45 @@ class MetadataSection extends React.Component {
       alwaysShowEditLink,
       className
     } = this.props;
-    return (
-      <div className={cx(cs.metadataSection, className)}>
-        <div
-          className={cx(cs.header, toggleable && cs.toggleable)}
-          onClick={onToggle}
-        >
-          <div className={cs.title}>{title}</div>
-          {editable &&
-            (editing ? (
-              this.renderStatus()
-            ) : (
-              <div
-                className={cx(cs.editLink, alwaysShowEditLink && cs.show)}
-                onClick={e => {
-                  onEditToggle();
-                  e.stopPropagation();
-                }}
-              >
-                Edit
-              </div>
-            ))}
-          <div className={cs.fill} />
-          {toggleable && (
-            <div className={cs.toggleContainer}>
-              <i
-                className={cx(
-                  "fa",
-                  open ? "fa-angle-up" : "fa-angle-down",
-                  cs.toggleIcon
-                )}
-                onClick={onToggle}
-              />
+
+    const header = (
+      <React.Fragment>
+        <div className={cs.title}>{title}</div>
+        {editable &&
+          (editing ? (
+            this.renderStatus()
+          ) : (
+            <div
+              className={cx(cs.editLink, alwaysShowEditLink && cs.show)}
+              onClick={e => {
+                onEditToggle();
+                e.stopPropagation();
+              }}
+            >
+              Edit
             </div>
-          )}
-        </div>
-        {(open || !toggleable) && (
-          <div className={cs.content}>
-            {children}
-            {editing && (
-              <div className={cs.controls}>
-                <PrimaryButton
-                  onClick={onEditToggle}
-                  rounded={false}
-                  text="Done Editing"
-                />
-              </div>
-            )}
+          ))}
+      </React.Fragment>
+    );
+    return (
+      <Accordion
+        className={cx(cs.metadataSection, className)}
+        header={header}
+        onToggle={onToggle}
+        open={open}
+        toggleable={toggleable}
+      >
+        {children}
+        {editing && (
+          <div className={cs.controls}>
+            <PrimaryButton
+              onClick={onEditToggle}
+              rounded={false}
+              text="Done Editing"
+            />
           </div>
         )}
-      </div>
+      </Accordion>
     );
   }
 }
