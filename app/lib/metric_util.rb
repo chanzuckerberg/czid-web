@@ -18,7 +18,10 @@ class MetricUtil
   # non-redundant (e.g. prefer sample_viewed to sample_view_viewed).
   ANALYTICS_EVENT_NAMES = {
     user_created: "user_created",
-    project_created: "project_created"
+    project_created: "project_created",
+    pipeline_run_succeeded: "pipeline_run_succeeded",
+    pipeline_run_failed: "pipeline_run_failed",
+    sample_upload_batch_created: "sample_upload_batch_created"
   }.freeze
 
   def self.put_metric_now(name, value, tags = [], type = "count")
