@@ -27,5 +27,11 @@ module ApplicationHelper
     str
   end
 
+  def request_context
+    {
+      enabledFeatures: current_user && current_user.allowed_feature_list
+    }
+  end
+
   HUMAN_TAX_IDS = [9605, 9606].freeze
 end

@@ -5,7 +5,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const includedNodeModules = ["query-string", "strict-uri-encode"];
 
 const config = {
-  entry: `${path.resolve(__dirname, "app/assets/src/")}/index.js`,
+  entry: `${path.resolve(__dirname, "app/assets/src/")}/index.jsx`,
   output: {
     path: path.resolve(__dirname, "app/assets/"),
     filename: "dist/bundle.min.js"

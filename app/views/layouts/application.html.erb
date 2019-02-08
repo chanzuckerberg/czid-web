@@ -15,7 +15,11 @@
   </head>
 
   <body id="id-seq">
-    <%= render "layouts/page_header" %>
-    <%= yield %>
+    <div class="page">
+      <%= render "layouts/page_header" %>
+      <div id="page_content" class="page_content">
+        <%= yield %>
+      </div>
+    </div>
   </body>
 </html>

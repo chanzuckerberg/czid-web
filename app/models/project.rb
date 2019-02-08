@@ -131,6 +131,10 @@ class Project < ApplicationRecord
                 .pluck(:project_id))
   end
 
+  def self.library_projects(user)
+    includes(:users).where(users: { id: user.id })
+  end
+
   def destroy
     samples = Sample.find(sample_ids)
     samples.each(&:destroy)

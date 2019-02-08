@@ -18,12 +18,14 @@ class SamplesController < ApplicationController
 
   # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
-                  :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata, :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
+                  :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
+                  :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
+                  :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :all, :show_sample_names, :samples_taxons, :heatmap,
-                   :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :upload, :create_with_metadata].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :all, :show_sample_names,
+                   :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields,
+                   :samples_going_public, :search_suggestions, :upload, :create_with_metadata].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload, :bulk_upload_with_metadata], fallback: :devise
@@ -112,6 +114,28 @@ class SamplesController < ApplicationController
       render json: {
         samples: @samples_formatted
       }
+    end
+  end
+
+  def index_v2
+    only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
+    exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
+
+    @samples = if only_library
+                 current_power.library_samples
+               elsif exclude_library
+                 Sample.public_samples
+               else
+                 current_power.samples
+               end
+
+    respond_to do |format|
+      format.json do
+        render json: @samples.as_json(
+          only: [:id, :name, :sample_tissue, :host_genome_id, :project_id],
+          methods: []
+        )
+      end
     end
   end
 

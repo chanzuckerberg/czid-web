@@ -38,6 +38,10 @@ class Power
     Sample.editable(@user)
   end
 
+  power :library_samples do
+    Sample.library(@user)
+  end
+
   power :project_samples do |project|
     Sample.viewable(@user).where(project_id: project.id)
   end
