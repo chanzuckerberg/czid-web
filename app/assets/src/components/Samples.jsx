@@ -1107,7 +1107,7 @@ class Samples extends React.Component {
     $(() => {
       const win = $(window);
       const samplesHeader = $(".sample-table-container");
-      const siteHeaderHeight = $(".site-header").height();
+      const siteHeaderHeight = 50;
       const projectWrapper = $(".project-wrapper");
       let prevScrollTop = 0;
       let marginTop = 0;
