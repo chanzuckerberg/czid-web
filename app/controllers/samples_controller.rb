@@ -282,7 +282,7 @@ class SamplesController < ApplicationController
         # Send to Datadog and Segment
         tags = %W[client:web type:bulk user_id:#{current_user.id}]
         MetricUtil.put_metric_now("samples.created", @samples.count, tags)
-        Sample.log_upload_batch_analytics(@samples, current_user, "web")
+        MetricUtil.log_upload_batch_analytics(@samples, current_user, "web")
         format.json { render json: { samples: @samples, sample_ids: @samples.pluck(:id) } }
       else
         format.json { render json: { samples: @samples, errors: @errors }, status: :unprocessable_entity }
@@ -799,7 +799,7 @@ class SamplesController < ApplicationController
         tags << "type:single" if client == "web"
         # Send to Datadog and Segment
         MetricUtil.put_metric_now("samples.created", 1, tags)
-        Sample.log_upload_batch_analytics([@sample], current_user, client)
+        MetricUtil.log_upload_batch_analytics([@sample], current_user, client)
 
         format.html { redirect_to @sample, notice: 'Sample was successfully created.' }
         format.json { render :show, status: :created, location: @sample }

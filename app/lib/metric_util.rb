@@ -84,4 +84,16 @@ class MetricUtil
       SEGMENT_ANALYTICS.track(event: event, user_id: user_id, properties: properties)
     end
   end
+
+  # Log analytics from a batch of new samples from an upload session
+  def self.log_upload_batch_analytics(samples, user, client)
+    # Send off an event for each project and host genome combo
+    samples.group_by { |s| [s.project_id, s.host_genome_id] }.each do |(project_id, host_genome_id), entries|
+      log_analytics_event(
+        ANALYTICS_EVENT_NAMES[:sample_upload_batch_created],
+        user,
+        count: entries.count, project_id: project_id, host_genome_id: host_genome_id, client: client
+      )
+    end
+  end
 end

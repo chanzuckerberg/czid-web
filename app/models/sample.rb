@@ -592,17 +592,4 @@ class Sample < ApplicationRecord
   def metadata_fields_info
     (project.metadata_fields & host_genome.metadata_fields).map(&:field_info)
   end
-
-  # Log analytics from a batch of new samples from an upload session
-  def self.log_upload_batch_analytics(samples, user, client)
-    # Send off an event for each project and host genome combo
-    event = MetricUtil::ANALYTICS_EVENT_NAMES[:sample_upload_batch_created]
-    samples.group_by { |s| [s.project_id, s.host_genome_id] }.each do |(project_id, host_genome_id), entries|
-      MetricUtil.log_analytics_event(
-        event,
-        user,
-        count: entries.count, project_id: project_id, host_genome_id: host_genome_id, client: client
-      )
-    end
-  end
 end
