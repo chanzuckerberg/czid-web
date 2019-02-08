@@ -1,5 +1,8 @@
 task create_elasticsearch_indices: :environment do
   # Silence debug logging
+  silent = Logger.new(nil)
+  Rails.logger = silent
+  ActiveRecord::Base.logger = silent
   ActiveRecord::Base.logger.level = 2
 
   # Index small tables
