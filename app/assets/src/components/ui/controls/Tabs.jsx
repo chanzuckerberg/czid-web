@@ -67,7 +67,7 @@ class Tabs extends React.Component {
             style={{ left: indicatorLeft, width: indicatorWidth }}
           />
         </div>
-        {hideBorder && <div className={cs.tabBorder} />}
+        {!hideBorder && <div className={cs.tabBorder} />}
       </div>
     );
   }

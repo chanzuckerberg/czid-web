@@ -57,20 +57,10 @@ class SampleDetailsMode extends React.Component {
       return;
     }
 
-    // Metadata Types currently doesn't change, so only need to fetch it once.
-    let metadata = null;
-    let metadataTypes = null;
-    if (this.state.metadataTypes) {
-      metadata = await getSampleMetadata(
-        this.props.sampleId,
-        this.props.pipelineVersion
-      );
-    } else {
-      [metadata, metadataTypes] = await Promise.all([
-        getSampleMetadata(this.props.sampleId, this.props.pipelineVersion),
-        getSampleMetadataFields(this.props.sampleId)
-      ]);
-    }
+    const [metadata, metadataTypes] = await Promise.all([
+      getSampleMetadata(this.props.sampleId, this.props.pipelineVersion),
+      getSampleMetadataFields(this.props.sampleId)
+    ]);
 
     this.setState({
       metadata: processMetadata(metadata.metadata),

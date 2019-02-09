@@ -175,7 +175,6 @@ ActiveRecord::Schema.define(version: 20_190_116_005_251) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["group"], name: "index_metadata_fields_on_group"
-    t.index ["name"], name: "index_metadata_fields_on_name"
   end
 
   create_table "metadata_fields_projects", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
