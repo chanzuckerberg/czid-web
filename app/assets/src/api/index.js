@@ -35,6 +35,12 @@ const get = async (url, config) => {
   return resp.data;
 };
 
+const deleteAsync = async (url, config) => {
+  const resp = await axios.delete(url, config);
+
+  return resp.data;
+};
+
 const deleteWithCSRF = url =>
   axios.delete(url, {
     data: {
@@ -284,6 +290,7 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
 };
 
 export {
+  deleteAsync,
   get,
   getSampleMetadata,
   getSampleMetadataFields,
