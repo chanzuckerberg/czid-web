@@ -331,6 +331,7 @@ class SampleView extends React.Component {
               pipelineRun={pipelineRun}
               reportDetails={reportDetails}
               reportPageParams={reportPageParams}
+              canEdit={this.props.canEdit}
             />
           </ViewHeader.Controls>
         </ViewHeader>
