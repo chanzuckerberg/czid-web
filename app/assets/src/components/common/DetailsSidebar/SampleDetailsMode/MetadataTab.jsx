@@ -30,7 +30,8 @@ class MetadataTab extends React.Component {
     // Include Sample Info by default so that special cases in SAMPLE_ADDITIONAL_INFO always show
     let nameToFields = { "Sample Info": [] };
     values(this.props.metadataTypes).forEach(field => {
-      const name = field.group + " Info";
+      const name =
+        field.group === null ? "Custom Metadata" : field.group + " Info";
       if (nameToFields.hasOwnProperty(name)) {
         nameToFields[name].push(field.key);
       } else {

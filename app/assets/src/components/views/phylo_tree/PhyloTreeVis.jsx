@@ -1,22 +1,11 @@
 import React from "react";
-import {
-  get,
-  keyBy,
-  mapValues,
-  uniq,
-  pluck,
-  values,
-  sortBy,
-  concat,
-  find
-} from "lodash/fp";
+import { get, compact, pluck, values, sortBy, concat, find } from "lodash/fp";
 import Tree from "../../utils/structures/Tree";
 import Dendogram from "../../visualizations/dendrogram/Dendogram";
 import PropTypes from "prop-types";
 import DataTooltip from "../../ui/containers/DataTooltip";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
-import { getMetadataTypesByHostGenomeName } from "~/api";
-import { extractMetadataTypesByHostGenomes } from "~/components/utils/metadata";
+import { getSampleMetadataFields } from "~/api";
 import { SAMPLE_FIELDS, SAMPLE_METADATA_FIELDS } from "./constants";
 
 const getAbsentName = attribute =>
@@ -43,8 +32,7 @@ class PhyloTreeVis extends React.Component {
       // there would be a visual flicker when sampleId is set to null as the sidebar closes.
       selectedSampleId: null,
       sidebarVisible: false,
-      sampleMetadataTypesByHostGenomeName: null,
-      allMetadataTypes: [],
+      metadataFields: [],
       selectedMetadataType: EXTRA_DROPDOWN_OPTIONS[0].value
     };
 
@@ -89,6 +77,7 @@ class PhyloTreeVis extends React.Component {
         Tree.fromNewickString(this.props.newick, this.props.nodeData)
       );
       this.treeVis.update();
+      this.fetchMetadataTypes();
     }
 
     // Close the sidebar if we switch trees.
@@ -98,24 +87,12 @@ class PhyloTreeVis extends React.Component {
   }
 
   fetchMetadataTypes = async () => {
-    let metadataTypesByHostGenomeName = await getMetadataTypesByHostGenomeName();
-
-    const distinctHostGenomeNames = uniq(
-      pluck("host_genome_name", values(this.props.nodeData))
-    );
-    const allMetadataTypes = extractMetadataTypesByHostGenomes(
-      metadataTypesByHostGenomeName,
-      distinctHostGenomeNames
-    );
-
-    metadataTypesByHostGenomeName = mapValues(
-      keyBy("key"),
-      metadataTypesByHostGenomeName
-    );
+    // Get ids and remove undefined, since nodeData includes NCBI and genbank.
+    const sampleIds = compact(pluck("id", values(this.props.nodeData)));
+    let metadataFields = await getSampleMetadataFields(sampleIds);
 
     this.setState({
-      sampleMetadataTypesByHostGenomeName: metadataTypesByHostGenomeName,
-      allMetadataTypes
+      metadataFields
     });
   };
 
@@ -195,10 +172,7 @@ class PhyloTreeVis extends React.Component {
           ...SAMPLE_FIELDS.map(f => [f.label, this.getFieldValue(f) || "-"]),
           ...SAMPLE_METADATA_FIELDS.map(key => {
             return [
-              get(
-                `${this.state.hoveredNode.data.host_genome_name}.${key}.name`,
-                this.state.sampleMetadataTypesByHostGenomeName
-              ) || key,
+              get("name", find(["key", key], this.state.metadataFields)) || key,
               this.getMetadataFieldValue(key) || "-"
             ];
           })
@@ -208,7 +182,7 @@ class PhyloTreeVis extends React.Component {
   }
 
   getMetadataDropdownOptions = () => {
-    const metadataOptions = this.state.allMetadataTypes.map(metadataType => ({
+    const metadataOptions = this.state.metadataFields.map(metadataType => ({
       text: metadataType.name,
       value: metadataType.key
     }));
