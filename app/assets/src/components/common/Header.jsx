@@ -5,7 +5,7 @@ import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import LogoIcon from "~ui/icons/LogoIcon";
 import { openUrl } from "~utils/links";
-import { get } from "~/api";
+import { deleteAsync } from "~/api";
 import { forbidExtraProps } from "airbnb-prop-types";
 import cs from "./header.scss";
 import cx from "classnames";
@@ -57,8 +57,7 @@ const UserMenuDropDown = ({
   userName
 }) => {
   const signOut = () => {
-    get(`${signOutEndpoint}.json`, {
-      method: "DELETE",
+    deleteAsync(`${signOutEndpoint}.json`, {
       withCredentials: true
     }).then(_ => {
       openUrl(signInEndpoint);
