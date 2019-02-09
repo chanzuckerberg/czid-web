@@ -30,6 +30,7 @@ class DiscoveryHeader extends React.Component {
         tabs={tabs}
         value={currentTab}
         onChange={this.handleTabChange}
+        hideBorder
       />
     );
   }
