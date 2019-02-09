@@ -134,7 +134,6 @@ const UserMenuDropDown = ({
       />,
       <BareDropdown.Item key="7" text="Logout" onClick={signOut} />
     );
-    console.log(userDropdownItems);
     return userDropdownItems;
   };
 
