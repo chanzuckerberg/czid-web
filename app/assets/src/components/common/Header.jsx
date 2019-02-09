@@ -65,11 +65,10 @@ const UserMenuDropDown = ({
     });
   };
 
-  const userDropdownItems = [];
-
-  <RequestContext.Consumer>
-    {({ enabledFeatures }) => {
-      if (!demoUser && !enabledFeatures.includes("data_discovery")) {
+  const renderItems = (adminUser, demoUser, dataDiscovery) => {
+    let userDropdownItems = [];
+    if (!demoUser) {
+      if (!dataDiscovery) {
         userDropdownItems.push(
           <BareDropdown.Item
             key="1"
@@ -78,71 +77,82 @@ const UserMenuDropDown = ({
                 New Sample
               </a>
             }
-          />,
-          <BareDropdown.Item
-            key="2"
-            text={
-              <a className={cs.option} href="/cli_user_instructions">
-                New Sample (Command Line)
-              </a>
-            }
           />
         );
       }
-    }}
-  </RequestContext.Consumer>;
+      userDropdownItems.push(
+        <BareDropdown.Item
+          key="2"
+          text={
+            <a className={cs.option} href="/cli_user_instructions">
+              New Sample (Command Line)
+            </a>
+          }
+        />
+      );
+    }
 
-  adminUser &&
+    adminUser &&
+      userDropdownItems.push(
+        <BareDropdown.Item
+          key="3"
+          text={
+            <a className={cs.option} href="/users/new">
+              Create User
+            </a>
+          }
+        />
+      );
+
     userDropdownItems.push(
       <BareDropdown.Item
-        key="3"
+        key="4"
         text={
-          <a className={cs.option} href="/users/new">
-            Create User
+          <a
+            className={cs.option}
+            href={`mailto:${email}?Subject=Report%20Feedback`}
+          >
+            Report Feedback
           </a>
         }
-      />
+      />,
+      <BareDropdown.Item
+        key="5"
+        text={
+          <a className={cs.option} href="https://assets.idseq.net/Terms.pdf">
+            Terms of Use
+          </a>
+        }
+      />,
+      <BareDropdown.Item
+        key="6"
+        text={
+          <a className={cs.option} href="https://assets.idseq.net/Terms.pdf">
+            Privacy Policy
+          </a>
+        }
+      />,
+      <BareDropdown.Item key="7" text="Logout" onClick={signOut} />
     );
-
-  userDropdownItems.push(
-    <BareDropdown.Item
-      key="4"
-      text={
-        <a
-          className={cs.option}
-          href={`mailto:${email}?Subject=Report%20Feedback`}
-        >
-          Report Feedback
-        </a>
-      }
-    />,
-    <BareDropdown.Item
-      key="5"
-      text={
-        <a className={cs.option} href="https://assets.idseq.net/Terms.pdf">
-          Terms of Use
-        </a>
-      }
-    />,
-    <BareDropdown.Item
-      key="6"
-      text={
-        <a className={cs.option} href="https://assets.idseq.net/Terms.pdf">
-          Privacy Policy
-        </a>
-      }
-    />,
-    <BareDropdown.Item key="7" text="Logout" onClick={signOut} />
-  );
+    return userDropdownItems;
+  };
 
   return (
     <div>
-      <BareDropdown
-        trigger={<div className={cs.userName}>{userName}</div>}
-        className={cs.userDropdown}
-        items={userDropdownItems}
-        direction="left"
-      />
+      <RequestContext.Consumer>
+        {({ enabledFeatures }) => (
+          <BareDropdown
+            trigger={<div className={cs.userName}>{userName}</div>}
+            className={cs.userDropdown}
+            items={renderItems(
+              adminUser,
+              demoUser,
+              enabledFeatures.includes("data_discovery")
+            )}
+            direction="left"
+          />
+        )}
+      </RequestContext.Consumer>
     </div>
   );
 };
