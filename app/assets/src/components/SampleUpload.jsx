@@ -304,7 +304,7 @@ class SampleUpload extends React.Component {
           submitting: false,
           successMessage: "Sample created successfully"
         });
-        openUrlWithTimeout(`/samples/${response.data.id}`);
+        openUrlWithTimeout(`/samples/${response.id}`);
       })
       .catch(error => {
         this.setState({
