@@ -575,8 +575,40 @@ class Samples extends React.Component {
   }
 
   getParams() {
-    let url_parts = window.location.href.split("?");
-    let params = url_parts[url_parts.length - 1];
+    let params = `filter=${this.state.filterParams}&page=${this.state
+      .pagesLoaded + 1}&search=${this.state.searchParams}&sort_by=${
+      this.state.sort_by
+    }`;
+    let projectId = parseInt(this.state.selectedProjectId);
+
+    if (projectId) {
+      params += `&project_id=${projectId}`;
+    }
+    if (this.state.sampleIdsParams.length) {
+      let sampleParams = this.state.sampleIdsParams;
+      params += `&ids=${sampleParams}`;
+    }
+
+    if (this.state.selectedTissueFilters.length) {
+      let tissueParams = this.state.selectedTissueFilters.join(",");
+      params += `&tissue=${tissueParams}`;
+    }
+
+    if (this.state.selectedHostIndices.length) {
+      let hostParams = this.state.selectedHostIndices.join(",");
+      params += `&host=${hostParams}`;
+    }
+
+    params += this.state.selectedTaxids.length
+      ? `&taxid=${this.state.selectedTaxids.join(",")}`
+      : "";
+    params += this.state.selectedLocations.length
+      ? `&location=${this.state.selectedLocations.join(",")}`
+      : "";
+    params += this.state.selectedUploaderIds.length
+      ? `&uploader=${this.state.selectedUploaderIds.join(",")}`
+      : "";
+
     return params;
   }
 
