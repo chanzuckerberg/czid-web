@@ -64,6 +64,10 @@ class Samples extends React.Component {
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
 
+    // Turn all changes related to structured search off.
+    // Change this constant to (this.admin !== 0 || this.allowedFeatures.includes("structuredSearch")) when ready
+    this.STRUCTURED_SEARCH_ON = false;
+
     this.getSampleAttribute = this.getSampleAttribute.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.columnSorting = this.columnSorting.bind(this);
@@ -928,7 +932,7 @@ class Samples extends React.Component {
     );
 
     let search_tag_list;
-    if (this.admin !== 0 || this.allowedFeatures.includes("structuredSearch")) {
+    if (this.STRUCTURED_SEARCH_ON) {
       search_tag_list = this.state.searchTags.map((entry, i) => {
         return (
           <FilterTag
@@ -956,46 +960,45 @@ class Samples extends React.Component {
       ];
     }
 
-    const search_box =
-      this.admin !== 0 || this.allowedFeatures.includes("structuredSearch") ? (
-        <div className="row search-box-row">
-          <CategorySearchBox
-            serverSearchAction="search_suggestions"
-            onResultSelect={this.handleSuggestSelect}
-            onEnter={this.handleSearch}
-            initialValue=""
-            placeholder=""
+    const search_box = this.STRUCTURED_SEARCH_ON ? (
+      <div className="row search-box-row">
+        <CategorySearchBox
+          serverSearchAction="search_suggestions"
+          onResultSelect={this.handleSuggestSelect}
+          onEnter={this.handleSearch}
+          initialValue=""
+          placeholder=""
+        />
+      </div>
+    ) : (
+      <div className="row search-box-row">
+        <div className="search-box">{search_field}</div>
+        <div className="filter-container">
+          <MultipleDropdown
+            label="Hosts:"
+            disabled={this.state.hostGenomes.length == 0}
+            options={this.state.hostGenomes.map(host => {
+              return { text: host.name, value: host.id };
+            })}
+            value={this.state.selectedHostIndices}
+            onChange={this.selectHostFilter}
+            rounded
           />
         </div>
-      ) : (
-        <div className="row search-box-row">
-          <div className="search-box">{search_field}</div>
-          <div className="filter-container">
-            <MultipleDropdown
-              label="Hosts:"
-              disabled={this.state.hostGenomes.length == 0}
-              options={this.state.hostGenomes.map(host => {
-                return { text: host.name, value: host.id };
-              })}
-              value={this.state.selectedHostIndices}
-              onChange={this.selectHostFilter}
-              rounded
-            />
-          </div>
-          <div className="filter-container">
-            <MultipleDropdown
-              label="Sample Types:"
-              disabled={this.state.tissueTypes.length == 0}
-              options={this.state.tissueTypes.map(tissue => {
-                return { text: tissue, value: tissue };
-              })}
-              value={this.state.selectedTissueFilters}
-              onChange={this.selectTissueFilter}
-              rounded
-            />
-          </div>
+        <div className="filter-container">
+          <MultipleDropdown
+            label="Sample Types:"
+            disabled={this.state.tissueTypes.length == 0}
+            options={this.state.tissueTypes.map(tissue => {
+              return { text: tissue, value: tissue };
+            })}
+            value={this.state.selectedTissueFilters}
+            onChange={this.selectTissueFilter}
+            rounded
+          />
         </div>
-      );
+      </div>
+    );
 
     let proj_users_count = this.state.project_users.length;
     let proj = this.state.project;
