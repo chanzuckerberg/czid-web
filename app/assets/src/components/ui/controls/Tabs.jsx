@@ -7,6 +7,7 @@ class Tabs extends React.Component {
   constructor(props) {
     super(props);
     this._tabs = {};
+
     this.state = {
       indicatorLeft: null,
       indicatorWidth: null
@@ -39,19 +40,26 @@ class Tabs extends React.Component {
   };
 
   render() {
-    const { tabs, onChange, className } = this.props;
+    const { className, hideBorder, onChange, value, tabs } = this.props;
     const { indicatorLeft, indicatorWidth } = this.state;
+
+    // Normalize tab format since we accept both an array of strings
+    // or an array of objects with value and label attributes
+    this._normalizedTabs = tabs.map(tab => {
+      return typeof tab === "string" ? { value: tab, label: tab } : tab;
+    });
+
     return (
       <div className={cx(cs.tabs, className)}>
         <div className={cx(cs.tabWrapper)}>
-          {tabs.map(tab => (
+          {this._normalizedTabs.map(tab => (
             <div
-              key={tab}
-              ref={c => (this._tabs[tab] = c)}
-              onClick={() => onChange(tab)}
-              className={cx(cs.tab, this.props.value === tab && cs.selected)}
+              key={tab.value}
+              ref={c => (this._tabs[tab.value] = c)}
+              onClick={() => onChange(tab.value)}
+              className={cx(cs.tab, value === tab.value && cs.selected)}
             >
-              {tab}
+              {tab.label}
             </div>
           ))}
           <div
@@ -59,17 +67,26 @@ class Tabs extends React.Component {
             style={{ left: indicatorLeft, width: indicatorWidth }}
           />
         </div>
-        <div className={cs.tabBorder} />
+        {!hideBorder && <div className={cs.tabBorder} />}
       </div>
     );
   }
 }
 
 Tabs.propTypes = {
-  tabs: PropTypes.arrayOf(PropTypes.string).isRequired,
+  tabs: PropTypes.arrayOf(
+    PropTypes.oneOfType([
+      PropTypes.string.isRequired,
+      PropTypes.shape({
+        value: PropTypes.string.isRequired,
+        label: PropTypes.node.isRequired
+      })
+    ])
+  ).isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string,
-  className: PropTypes.string
+  className: PropTypes.string,
+  hideBorder: PropTypes.bool
 };
 
 export default Tabs;

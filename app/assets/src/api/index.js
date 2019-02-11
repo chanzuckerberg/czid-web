@@ -35,6 +35,12 @@ const get = async (url, config) => {
   return resp.data;
 };
 
+const deleteAsync = async (url, config) => {
+  const resp = await axios.delete(url, config);
+
+  return resp.data;
+};
+
 const deleteWithCSRF = url =>
   axios.delete(url, {
     data: {
@@ -259,6 +265,24 @@ const getSampleTaxons = (params, cancelToken) =>
     cancelToken
   });
 
+// TODO: add remaining parameters: filter, search, page and sortBy
+const getSamples = ({ projectId, onlyLibrary, excludeLibrary } = {}) =>
+  get("/samples/index_v2.json", {
+    params: {
+      projectId,
+      onlyLibrary,
+      excludeLibrary
+    }
+  });
+
+const getProjects = ({ onlyLibrary, excludeLibrary } = {}) =>
+  get("/projects.json", {
+    params: {
+      onlyLibrary,
+      excludeLibrary
+    }
+  });
+
 const logAnalyticsEvent = (eventName, eventData = {}) => {
   // Wrapper around Segment analytics so we can add things later
   // eventData should have keys in snake_case for the database
@@ -266,10 +290,13 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
 };
 
 export {
+  deleteAsync,
   get,
   getSampleMetadata,
   getSampleMetadataFields,
   getSampleReportInfo,
+  getSamples,
+  getProjects,
   saveSampleMetadata,
   getMetadataTypesByHostGenomeName,
   saveSampleName,

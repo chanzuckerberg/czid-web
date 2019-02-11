@@ -2,7 +2,7 @@
 require 'elasticsearch/model'
 
 class TaxonLineage < ApplicationRecord
-  unless Rails.env == 'test'
+  unless Rails.env == "test"
     include Elasticsearch::Model
     include Elasticsearch::Model::Callbacks
   end

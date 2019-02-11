@@ -52,6 +52,12 @@ class ApplicationController < ActionController::Base
     raise "action doesn't check against access control" unless @access_checked
   end
 
+  def request_context
+    {
+      enabledFeatures: current_user.allowed_featured_list
+    }
+  end
+
   private
 
   def check_browser

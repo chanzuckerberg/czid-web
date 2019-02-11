@@ -9,10 +9,14 @@ const openUrl = (link, currentEvent) => {
   }
 
   if (openInNewTab) {
-    window.open(link, "_blank", "noopener", "noreferrer");
+    openUrlInNewTab(link);
   } else {
     location.href = link;
   }
+};
+
+const openUrlInNewTab = link => {
+  window.open(link, "_blank", "noopener", "noreferrer");
 };
 
 const downloadStringToFile = str => {
@@ -27,4 +31,4 @@ const openUrlWithTimeout = link => {
   }, 2000);
 };
 
-export { openUrl, downloadStringToFile, openUrlWithTimeout };
+export { openUrl, openUrlInNewTab, downloadStringToFile, openUrlWithTimeout };

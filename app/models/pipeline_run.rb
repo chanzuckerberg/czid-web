@@ -764,15 +764,25 @@ class PipelineRun < ApplicationRecord
 
     # Check if run is complete:
     if all_output_states_terminal?
+      run_time = Time.current - created_at
+
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
 
-        run_time = Time.current - created_at
+        # Send to Datadog and Segment
         tags = ["sample_id:#{sample.id}"]
         MetricUtil.put_metric_now("samples.succeeded.run_time", run_time, tags, "gauge")
+        event = MetricUtil::ANALYTICS_EVENT_NAMES[:pipeline_run_succeeded]
       else
         update(results_finalized: FINALIZED_FAIL)
+        event = MetricUtil::ANALYTICS_EVENT_NAMES[:pipeline_run_failed]
       end
+
+      MetricUtil.log_analytics_event(
+        event,
+        sample.user,
+        pipeline_run_id: id, project_id: sample.project.id, run_time: run_time
+      )
     end
   end
 

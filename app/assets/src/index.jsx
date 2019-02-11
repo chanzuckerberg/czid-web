@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { RequestContext } from "~/components/common/RequestContext";
 import "babel-polyfill";
 import "url-search-params-polyfill";
 import "materialize-css";
@@ -35,14 +36,16 @@ contextKeys.forEach(key => {
     foundComponents[a.name] = a;
   }
 });
+
 // Turn off camelcase rule
 /* eslint camelcase: 0 */
-
-const react_component = (componentName, props, target) => {
+const react_component = (componentName, props, target, requestContext) => {
   const matchedComponent = foundComponents[componentName];
   if (matchedComponent) {
     ReactDOM.render(
-      React.createElement(matchedComponent, props, null),
+      <RequestContext.Provider value={requestContext}>
+        {React.createElement(matchedComponent, props)}
+      </RequestContext.Provider>,
       document.getElementById(target)
     );
   } else {

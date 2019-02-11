@@ -1,0 +1,29 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-bottom: 50px;
+
+  .headerContainer {
+    flex: 0 0 auto;
+  }
+
+  .viewContainer {
+    flex: 1 0 auto;
+    padding-top: 30px;
+  }
+}
+
+.tabLabel {
+  font-size: $font-size-h6;
+  margin-right: 10px;
+}
+
+.tabCounter {
+  color: $medium-grey;
+  font-size: $font-size;
+  font-weight: $font-weight-regular;
+}

@@ -64,6 +64,10 @@ class Samples extends React.Component {
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
 
+    // Turn all changes related to structured search off.
+    // Change this constant to (this.admin !== 0 || this.allowedFeatures.includes("structuredSearch")) when ready
+    this.STRUCTURED_SEARCH_ON = false;
+
     this.getSampleAttribute = this.getSampleAttribute.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.columnSorting = this.columnSorting.bind(this);
@@ -571,8 +575,40 @@ class Samples extends React.Component {
   }
 
   getParams() {
-    let url_parts = window.location.href.split("?");
-    let params = url_parts[url_parts.length - 1];
+    let params = `filter=${this.state.filterParams}&page=${this.state
+      .pagesLoaded + 1}&search=${this.state.searchParams}&sort_by=${
+      this.state.sort_by
+    }`;
+    let projectId = parseInt(this.state.selectedProjectId);
+
+    if (projectId) {
+      params += `&project_id=${projectId}`;
+    }
+    if (this.state.sampleIdsParams.length) {
+      let sampleParams = this.state.sampleIdsParams;
+      params += `&ids=${sampleParams}`;
+    }
+
+    if (this.state.selectedTissueFilters.length) {
+      let tissueParams = this.state.selectedTissueFilters.join(",");
+      params += `&tissue=${tissueParams}`;
+    }
+
+    if (this.state.selectedHostIndices.length) {
+      let hostParams = this.state.selectedHostIndices.join(",");
+      params += `&host=${hostParams}`;
+    }
+
+    params += this.state.selectedTaxids.length
+      ? `&taxid=${this.state.selectedTaxids.join(",")}`
+      : "";
+    params += this.state.selectedLocations.length
+      ? `&location=${this.state.selectedLocations.join(",")}`
+      : "";
+    params += this.state.selectedUploaderIds.length
+      ? `&uploader=${this.state.selectedUploaderIds.join(",")}`
+      : "";
+
     return params;
   }
 
@@ -928,7 +964,7 @@ class Samples extends React.Component {
     );
 
     let search_tag_list;
-    if (this.admin !== 0 || this.allowedFeatures.includes("structuredSearch")) {
+    if (this.STRUCTURED_SEARCH_ON) {
       search_tag_list = this.state.searchTags.map((entry, i) => {
         return (
           <FilterTag
@@ -956,46 +992,45 @@ class Samples extends React.Component {
       ];
     }
 
-    const search_box =
-      this.admin !== 0 || this.allowedFeatures.includes("structuredSearch") ? (
-        <div className="row search-box-row">
-          <CategorySearchBox
-            serverSearchAction="search_suggestions"
-            onResultSelect={this.handleSuggestSelect}
-            onEnter={this.handleSearch}
-            initialValue=""
-            placeholder=""
+    const search_box = this.STRUCTURED_SEARCH_ON ? (
+      <div className="row search-box-row">
+        <CategorySearchBox
+          serverSearchAction="search_suggestions"
+          onResultSelect={this.handleSuggestSelect}
+          onEnter={this.handleSearch}
+          initialValue=""
+          placeholder=""
+        />
+      </div>
+    ) : (
+      <div className="row search-box-row">
+        <div className="search-box">{search_field}</div>
+        <div className="filter-container">
+          <MultipleDropdown
+            label="Hosts:"
+            disabled={this.state.hostGenomes.length == 0}
+            options={this.state.hostGenomes.map(host => {
+              return { text: host.name, value: host.id };
+            })}
+            value={this.state.selectedHostIndices}
+            onChange={this.selectHostFilter}
+            rounded
           />
         </div>
-      ) : (
-        <div className="row search-box-row">
-          <div className="search-box">{search_field}</div>
-          <div className="filter-container">
-            <MultipleDropdown
-              label="Hosts:"
-              disabled={this.state.hostGenomes.length == 0}
-              options={this.state.hostGenomes.map(host => {
-                return { text: host.name, value: host.id };
-              })}
-              value={this.state.selectedHostIndices}
-              onChange={this.selectHostFilter}
-              rounded
-            />
-          </div>
-          <div className="filter-container">
-            <MultipleDropdown
-              label="Sample Types:"
-              disabled={this.state.tissueTypes.length == 0}
-              options={this.state.tissueTypes.map(tissue => {
-                return { text: tissue, value: tissue };
-              })}
-              value={this.state.selectedTissueFilters}
-              onChange={this.selectTissueFilter}
-              rounded
-            />
-          </div>
+        <div className="filter-container">
+          <MultipleDropdown
+            label="Sample Types:"
+            disabled={this.state.tissueTypes.length == 0}
+            options={this.state.tissueTypes.map(tissue => {
+              return { text: tissue, value: tissue };
+            })}
+            value={this.state.selectedTissueFilters}
+            onChange={this.selectTissueFilter}
+            rounded
+          />
         </div>
-      );
+      </div>
+    );
 
     let proj_users_count = this.state.project_users.length;
     let proj = this.state.project;
@@ -1107,7 +1142,7 @@ class Samples extends React.Component {
     $(() => {
       const win = $(window);
       const samplesHeader = $(".sample-table-container");
-      const siteHeaderHeight = $(".site-header").height();
+      const siteHeaderHeight = 50;
       const projectWrapper = $(".project-wrapper");
       let prevScrollTop = 0;
       let marginTop = 0;

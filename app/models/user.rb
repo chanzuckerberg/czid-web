@@ -1,7 +1,7 @@
 require 'elasticsearch/model'
 
 class User < ApplicationRecord
-  unless Rails.env == 'test'
+  if ELASTICSEARCH_ON
     include Elasticsearch::Model
     include Elasticsearch::Model::Callbacks
   end

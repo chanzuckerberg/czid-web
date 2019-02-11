@@ -98,14 +98,14 @@ class TaxonTreeVis extends React.Component {
 
   handleNodeLabelClick(node) {
     if (!node.data.modalData) {
-      this.props.onTaxonNodeClick(null);
+      this.props.onTaxonClick(null);
       return;
     }
 
     const { taxInfo } = node.data.modalData;
     const taxonName = getTaxonName(taxInfo, this.props.nameType);
     // Pass config for taxon details sidebar.
-    this.props.onTaxonNodeClick({
+    this.props.onTaxonClick({
       background: this.props.backgroundData,
       parentTaxonId: taxInfo.tax_level === 1 ? taxInfo.genus_taxid : undefined,
       taxonId: taxInfo.tax_id,
@@ -326,7 +326,7 @@ TaxonTreeVis.propTypes = {
     id: PropTypes.number,
     name: PropTypes.string
   }),
-  onTaxonNodeClick: PropTypes.func.isRequired
+  onTaxonClick: PropTypes.func.isRequired
 };
 
 export default TaxonTreeVis;

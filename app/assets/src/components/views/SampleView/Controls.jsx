@@ -51,7 +51,7 @@ class Controls extends React.Component {
   };
 
   render() {
-    const { reportPresent, pipelineRun, sample } = this.props;
+    const { reportPresent, pipelineRun, canEdit } = this.props;
 
     if (reportPresent) {
       const downloadOptions = [
@@ -69,8 +69,10 @@ class Controls extends React.Component {
           direction="left"
         />
       );
-    } else if (sample.status === "created" || !reportPresent) {
+    } else if (canEdit) {
       return <PrimaryButton onClick={this.deleteSample} text="Delete Sample" />;
+    } else {
+      return <div />;
     }
   }
 }
@@ -84,7 +86,8 @@ Controls.propTypes = {
   reportPageParams: PropTypes.shape({
     pipeline_version: PropTypes.string,
     background_id: PropTypes.string
-  })
+  }),
+  canEdit: PropTypes.bool
 };
 
 export default Controls;

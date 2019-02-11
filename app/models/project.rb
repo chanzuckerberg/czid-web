@@ -1,5 +1,5 @@
 class Project < ApplicationRecord
-  unless Rails.env == 'test'
+  if ELASTICSEARCH_ON
     include Elasticsearch::Model
     include Elasticsearch::Model::Callbacks
   end
@@ -129,6 +129,10 @@ class Project < ApplicationRecord
           Sample.public_samples.select("project_id, count(1)")
                 .group("project_id")
                 .pluck(:project_id))
+  end
+
+  def self.library_projects(user)
+    includes(:users).where(users: { id: user.id })
   end
 
   def destroy
