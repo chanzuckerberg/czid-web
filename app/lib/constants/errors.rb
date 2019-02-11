@@ -56,3 +56,9 @@ module MetadataUploadErrors
     "Could not save #{key}, #{value}"
   end
 end
+
+module SampleUploadErrors
+  def self.invalid_project_id(sample)
+    "Could not save sample #{sample['name']}. Invalid project id."
+  end
+end

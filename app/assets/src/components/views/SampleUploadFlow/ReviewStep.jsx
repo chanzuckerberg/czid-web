@@ -5,7 +5,7 @@ import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import TermsAgreement from "~ui/controls/TermsAgreement";
-import { bulkUploadLocal, bulkUploadRemote } from "~/api/upload";
+import { bulkUploadLocalWithMetadata, bulkUploadRemote } from "~/api/upload";
 import { joinServerError } from "~utils/sample";
 import cs from "./sample_upload_flow.scss";
 
@@ -50,7 +50,7 @@ class ReviewStep extends React.Component {
     // For uploading samples with local files
     if (this.props.localSampleNamesToFiles) {
       // TODO(mark): Handle progress indicators in UI.
-      bulkUploadLocal({
+      bulkUploadLocalWithMetadata({
         sampleNamesToFiles: this.props.localSampleNamesToFiles,
         project: this.props.project,
         hostId: this.props.hostGenomeId,
@@ -58,6 +58,12 @@ class ReviewStep extends React.Component {
         onAllUploadsComplete: () => {
           this.setState({
             submitState: "success"
+          });
+        },
+        onCreateSamplesError: errors => {
+          this.setState({
+            submitState: "review",
+            errorMessage: errors ? errors.join(" ") : "Failed to create samples"
           });
         },
         // TODO(mark): Display better errors.
@@ -74,13 +80,10 @@ class ReviewStep extends React.Component {
               : uploadError
           });
         },
-        onMarkSampleUploadedError: error => {
-          const errorMessage = joinServerError(error.response.data);
+        onMarkSampleUploadedError: sampleName => {
           this.setState({
             submitState: "review",
-            errorMessage: this.state.errorMessage
-              ? `${this.state.errorMessage}\n${errorMessage}`
-              : errorMessage
+            errorMessage: `Failed to mark sample ${sampleName} as uploaded`
           });
         }
       });
