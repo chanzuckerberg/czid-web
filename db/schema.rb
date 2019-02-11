@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_116_005_251) do
+ActiveRecord::Schema.define(version: 20_190_208_210_837) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -117,8 +117,8 @@ ActiveRecord::Schema.define(version: 20_190_116_005_251) do
   create_table "host_genomes_metadata_fields", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "host_genome_id", null: false
     t.bigint "metadata_field_id", null: false
-    t.index ["host_genome_id", "metadata_field_id"], name: "index_host_genomes_metadata_fields"
-    t.index ["metadata_field_id", "host_genome_id"], name: "index_metadata_fields_host_genomes"
+    t.index ["host_genome_id", "metadata_field_id"], name: "index_host_genomes_metadata_fields", unique: true
+    t.index ["metadata_field_id", "host_genome_id"], name: "index_metadata_fields_host_genomes", unique: true
   end
 
   create_table "input_files", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -146,7 +146,7 @@ ActiveRecord::Schema.define(version: 20_190_116_005_251) do
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "key", null: false, collation: "latin1_swedish_ci"
-    t.integer "data_type", limit: 1, null: false
+    t.integer "data_type"
     t.string "raw_value"
     t.string "string_validated_value"
     t.float "number_validated_value", limit: 24
@@ -180,7 +180,7 @@ ActiveRecord::Schema.define(version: 20_190_116_005_251) do
   create_table "metadata_fields_projects", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "project_id", null: false
     t.bigint "metadata_field_id", null: false
-    t.index ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields"
+    t.index ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields", unique: true
   end
 
   create_table "output_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -508,4 +508,6 @@ ActiveRecord::Schema.define(version: 20_190_116_005_251) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
+  add_foreign_key "samples", "users"
 end
