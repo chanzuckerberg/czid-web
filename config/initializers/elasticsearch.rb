@@ -1,7 +1,5 @@
-# Flag to turn elasticsearch related behavior on or off.
-# Change this to (Rails.env != 'test') once elasticsearch is ready to be used in dev/staging/prod.
-# Elasticsearch is already switched on for TaxonLineage searches, since that change was safer.
-ELASTICSEARCH_ON = false
+# Flag to turn elasticsearch callbacks on or off for Project/Sample/Metadatum/User models
+ELASTICSEARCH_ON = (Rails.env != 'test')
 
 # Initialize elasticsearch client
 config = {
