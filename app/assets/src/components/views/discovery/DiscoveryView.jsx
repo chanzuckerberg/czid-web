@@ -4,6 +4,7 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
 import DiscoveryHeader from "../discovery/DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
+import SamplesView from "../samples/SamplesView";
 import { sumBy } from "lodash";
 import { getSamples, getProjects } from "~/api";
 import cs from "./discovery_view.scss";
@@ -13,7 +14,7 @@ class DiscoveryView extends React.Component {
     super(props);
 
     this.state = {
-      currentTab: "projects",
+      currentTab: "samples",
       samples: [],
       projects: []
     };
@@ -84,11 +85,7 @@ class DiscoveryView extends React.Component {
         <Divider style="medium" />
         <NarrowContainer className={cs.viewContainer}>
           {currentTab == "projects" && <ProjectsView projects={projects} />}
-          {currentTab == "samples" && (
-            <div>
-              Not implemented yet. <a href="/samples">Current samples view</a>
-            </div>
-          )}
+          {currentTab == "samples" && <SamplesView />}
         </NarrowContainer>
       </div>
     );

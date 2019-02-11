@@ -260,12 +260,20 @@ const getSampleTaxons = (params, cancelToken) =>
   });
 
 // TODO: add remaining parameters: filter, search, page and sortBy
-const getSamples = ({ projectId, onlyLibrary, excludeLibrary } = {}) =>
+const getSamples = ({
+  projectId,
+  onlyLibrary,
+  excludeLibrary,
+  pageNumber,
+  pageSize
+} = {}) =>
   get("/samples/index_v2.json", {
     params: {
       projectId,
       onlyLibrary,
-      excludeLibrary
+      excludeLibrary,
+      pageNumber,
+      pageSize
     }
   });
 
