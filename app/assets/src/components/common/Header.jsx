@@ -118,7 +118,12 @@ const UserMenuDropDown = ({
       <BareDropdown.Item
         key="5"
         text={
-          <a className={cs.option} href="https://assets.idseq.net/Terms.pdf">
+          <a
+            className={cs.option}
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://assets.idseq.net/Terms.pdf"
+          >
             Terms of Use
           </a>
         }
@@ -126,7 +131,12 @@ const UserMenuDropDown = ({
       <BareDropdown.Item
         key="6"
         text={
-          <a className={cs.option} href="https://assets.idseq.net/Terms.pdf">
+          <a
+            className={cs.option}
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://assets.idseq.net/Privacy.pdf"
+          >
             Privacy Policy
           </a>
         }
