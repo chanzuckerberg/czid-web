@@ -155,44 +155,6 @@ const createSample = (
   });
 };
 
-// Send a request to create a single sample. Does not upload the files.
-// sourceType can be "local" or "s3".
-const createSampleWithMetadata = ({
-  sourceType,
-  inputFiles,
-  name,
-  projectName,
-  hostGenomeId,
-  metadata
-}) => {
-  const fileAttributes = Array.from(inputFiles, file => {
-    if (sourceType === "local") {
-      return {
-        source_type: sourceType,
-        source: cleanFilePath(file.name),
-        parts: cleanFilePath(file.name)
-      };
-    } else {
-      return {
-        source_type: sourceType,
-        source: file
-      };
-    }
-  });
-
-  return postWithCSRF("/samples/create_with_metadata.json", {
-    sample: {
-      name,
-      project_name: projectName,
-      host_genome_id: hostGenomeId,
-      input_files_attributes: fileAttributes,
-      status: "created",
-      client: "web"
-    },
-    metadata
-  });
-};
-
 // Validate metadata against samples in an existing project.
 const validateMetadataCSVForProject = (id, metadata) =>
   postWithCSRF(`/projects/${id}/validate_metadata_csv`, {
@@ -224,10 +186,11 @@ const bulkUploadRemoteSamples = samples =>
   });
 
 // Bulk-upload samples that have files in an S3 bucket, with metadata.
-const bulkUploadRemoteSamplesWithMetadata = (samples, metadata) =>
+const bulkUploadWithMetadata = (samples, metadata) =>
   postWithCSRF(`/samples/bulk_upload_with_metadata.json`, {
     samples,
-    metadata
+    metadata,
+    client: "web"
   });
 
 const markSampleUploaded = sampleId =>
@@ -306,14 +269,13 @@ export {
   deleteSample,
   getSummaryContigCounts,
   createSample,
-  createSampleWithMetadata,
   validateMetadataCSVForProject,
   validateMetadataCSVForNewSamples,
   uploadMetadataForProject,
   getOfficialMetadataFields,
   getAllHostGenomes,
   bulkUploadRemoteSamples,
-  bulkUploadRemoteSamplesWithMetadata,
+  bulkUploadWithMetadata,
   markSampleUploaded,
   uploadFileToUrl,
   getTaxonDescriptions,

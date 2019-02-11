@@ -4,7 +4,7 @@ require 'tempfile'
 require 'aws-sdk'
 require 'elasticsearch/model'
 # TODO(mark): Move to an initializer. Make sure this works with Rails auto-reloading.
-require 'constants/metadata'
+require 'constants/errors'
 
 class Sample < ApplicationRecord
   if ELASTICSEARCH_ON
