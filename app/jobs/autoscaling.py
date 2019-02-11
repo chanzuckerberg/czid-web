@@ -366,9 +366,14 @@ class ASG(object):
         return instance_ids
 
     def remove_scalein_protection(self, instance_ids):
-        cmd = "aws autoscaling set-instance-protection --instance-ids {list_instances} --auto-scaling-group-name {asg_name} --no-protected-from-scale-in"
-        cmd = cmd.format(list_instances=' '.join(instance_ids), asg_name=self.asg['AutoScalingGroupName'])
-        aws_command(cmd)
+        rate_limit = 49
+        rate_delay = 5
+        instance_groups = [instance_ids[i:(i+rate_limit)] for i in xrange(0, len(instance_ids), rate_limit)]
+        for instance_list in instance_groups:
+            cmd = "aws autoscaling set-instance-protection --instance-ids {list_instances} --auto-scaling-group-name {asg_name} --no-protected-from-scale-in"
+            cmd = cmd.format(list_instances=' '.join(instance_list), asg_name=self.asg['AutoScalingGroupName'])
+            aws_command(cmd)
+            time.sleep(rate_delay)
 
     def discard_if_safe(self):
         def count_running_alignment_jobs():
