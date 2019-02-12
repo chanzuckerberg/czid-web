@@ -74,7 +74,10 @@ class SamplesHeatmapView extends React.Component {
         thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseAndCheckInt(this.urlParams.dataScaleIdx, 0),
         taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 30),
-        readSpecificity: this.availableOptions.specificityOptions[1].value
+        readSpecificity: parseAndCheckInt(
+          this.urlParams.readSpecificity,
+          this.availableOptions.specificityOptions[1].value
+        )
       },
       loading: false,
       sampleIds: this.urlParams.sampleIds || this.props.sampleIds,
