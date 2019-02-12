@@ -26,7 +26,7 @@ class MetadataController < ApplicationController
       )
     end
 
-    issues = validate_metadata_csv_for_samples(samples, metadata)
+    issues = validate_metadata_csv_for_samples(samples, metadata, true)
 
     render json: {
       status: "success",

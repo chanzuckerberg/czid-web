@@ -3,6 +3,16 @@ sample_type:
   display_name: "Sample Type"
   base_type: 0
   host_genomes: [human]
+  is_required: 1
+
+nucleotide_type:
+  name: "nucleotide_type"
+  display_name: "Nucleotide Type"
+  base_type: 0
+  host_genomes: [human]
+  is_required: 1
+  force_options: 1
+  options: "[\"DNA\", \"RNA\"]"
 
 sex:
   name: "sex"

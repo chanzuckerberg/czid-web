@@ -20,4 +20,4 @@ joe_project:
 metadata_validation_project:
   name: Metadata Project
   users: [one]
-
+  metadata_fields: [sample_type, nucleotide_type]

@@ -24,6 +24,10 @@ module MetadataValidationErrors
     "#{invalid_name} does not match any samples in this project (row #{row_index})"
   end
 
+  def self.missing_required_metadata(missing_metadata_fields, row_index)
+    "Sample is missing required metadata: #{missing_metadata_fields.join(', ')}. (row #{row_index})"
+  end
+
   def self.invalid_key_for_host_genome(key, host_genome)
     "#{key} is not a supported metadata type for host genome #{host_genome}"
   end
@@ -60,5 +64,9 @@ end
 module SampleUploadErrors
   def self.invalid_project_id(sample)
     "Could not save sample #{sample['name']}. Invalid project id."
+  end
+
+  def self.missing_required_metadata(sample, missing_metadata_fields)
+    "Could not save sample #{sample['name']}. Missing required metadata: #{missing_metadata_fields.join(', ')}"
   end
 end

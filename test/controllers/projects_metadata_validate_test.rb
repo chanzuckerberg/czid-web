@@ -1,5 +1,4 @@
 require 'test_helper'
-require 'constants/errors'
 
 # Tests ProjectsController validate_metadata_csv endpoint
 class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
