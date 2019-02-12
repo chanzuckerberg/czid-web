@@ -169,3 +169,7 @@ export const bulkUploadLocal = ({
       });
   }
 };
+
+export const resolveSampleName = sampleName => {
+  console.log(sampleName);
+};

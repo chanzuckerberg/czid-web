@@ -15,6 +15,7 @@ import TermsAgreement from "~ui/controls/TermsAgreement";
 import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { openUrlWithTimeout } from "~utils/links";
+import { postWithCSRF } from "~/api";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -495,7 +496,16 @@ class BulkUploadImport extends React.Component {
     });
   }
 
+  resolveSampleNames = () => {
+    this.state.samples.map(sample => {
+      console.log(sample);
+      postWithCSRF(`/projects/${sample.project_id}/validate_metadata_csv`, {});
+    });
+  };
+
   renderBulkUploadSubmitForm() {
+    this.resolveSampleNames();
+
     return (
       <div id="samplesUploader" className="row">
         <div className="col s8 offset-s2 upload-form-container">
@@ -1123,8 +1133,9 @@ class BulkUploadImport extends React.Component {
   render() {
     return (
       <div className="bulk-upload-import">
-        {this.state.imported ? this.renderBulkUploadSubmitForm() : null}
-        {!this.state.imported ? this.renderBulkUploadImportForm() : null}
+        {this.state.imported
+          ? this.renderBulkUploadSubmitForm()
+          : this.renderBulkUploadImportForm()}
       </div>
     );
   }

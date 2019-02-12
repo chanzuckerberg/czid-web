@@ -72,6 +72,7 @@ Rails.application.routes.draw do
     put :add_user, on: :member
     post :validate_metadata_csv, on: :member
     post :upload_metadata, on: :member
+    post :validate_sample_name, on: :member
   end
   get 'projects/:id/csv', to: 'projects#send_project_csv'
   get 'choose_project', to: 'projects#choose_project'

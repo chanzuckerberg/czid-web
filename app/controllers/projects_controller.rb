@@ -297,6 +297,12 @@ class ProjectsController < ApplicationController
     }
   end
 
+  # TODO: Consider consolidating into a general sample validator
+  def validate_sample_name
+    puts sample_params
+    puts "foobar 5:09pm"
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.
