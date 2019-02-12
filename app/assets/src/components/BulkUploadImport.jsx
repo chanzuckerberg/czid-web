@@ -514,7 +514,7 @@ class BulkUploadImport extends React.Component {
         this.setState({
           successMessage: `${this.state.successMessage}\n\n${
             sample.name
-          } already exists, so name was updated to ${resp.sample_name}.`
+          } already exists, so name updated to ${resp.sample_name}.`
         });
         sample.name = resp.sample_name;
       }
