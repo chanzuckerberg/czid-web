@@ -94,6 +94,7 @@ module ReportHelper
   end
 
   def decode_sort_by(sort_by)
+    return nil unless sort_by
     parts = sort_by.split "_"
     return nil unless parts.length == 3
     direction = parts[0]
@@ -999,7 +1000,7 @@ module ReportHelper
     rows_passing_filters = rows.length
 
     # Compute sort key and sort.
-    sort_by = decode_sort_by(params[:sort_by] || DEFAULT_SORT_PARAM)
+    sort_by = decode_sort_by(params[:sort_by]) || decode_sort_by(DEFAULT_SORT_PARAM)
     rows.each do |tax_info|
       tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
     end

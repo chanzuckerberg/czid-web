@@ -66,19 +66,30 @@ class SampleView extends React.Component {
     return "gsnap filter on human/chimp genome was not run.";
   };
 
-  refreshPage = overrideUrlParams => {
+  refreshPage = (overrideUrlParams, reload = true) => {
     const newParams = Object.assign(
       {},
       this.props.reportPageParams,
       overrideUrlParams
     );
-    window.location =
+    const url =
       location.protocol +
       "//" +
       location.host +
       location.pathname +
       "?" +
       getURLParamString(newParams);
+    if (reload) {
+      window.location = url;
+    } else {
+      try {
+        history.pushState(window.history.state, document.title, url);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+        window.location = url;
+      }
+    }
   };
 
   handleTabChange = tab => {
@@ -134,6 +145,7 @@ class SampleView extends React.Component {
   };
 
   handlePipelineVersionSelect = version => {
+    // TODO (gdingle): do we really want to reload the page here?
     this.refreshPage({ pipeline_version: version });
   };
 
