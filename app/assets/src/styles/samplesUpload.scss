@@ -28,6 +28,8 @@
     }
     .success-message {
       color: $success;
+      white-space: pre-wrap;
+      margin-bottom: 30px;
     }
     .error-message {
       color: $error;

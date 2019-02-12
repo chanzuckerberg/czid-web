@@ -281,5 +281,6 @@ export {
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
   getSampleTaxons,
-  logAnalyticsEvent
+  logAnalyticsEvent,
+  postWithCSRF
 };

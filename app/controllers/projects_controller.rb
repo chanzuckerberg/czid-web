@@ -16,7 +16,7 @@ class ProjectsController < ApplicationController
   READ_ACTIONS = [
     :show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status,
     :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status,
-    :send_project_reports_csv, :validate_metadata_csv, :upload_metadata
+    :send_project_reports_csv, :validate_metadata_csv, :upload_metadata, :validate_sample_name
   ].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index, :send_project_csv, :choose_project].freeze
@@ -299,8 +299,12 @@ class ProjectsController < ApplicationController
 
   # TODO: Consider consolidating into a general sample validator
   def validate_sample_name
-    puts sample_params
-    puts "foobar 5:09pm"
+    sample_name = params[:sample_name]
+    # If the sample name already exists in the project, add a _2
+    while Sample.where(project: @project).where(name: sample_name).present?
+      sample_name += "_2"
+    end
+    render json: { sample_name: sample_name }
   end
 
   private

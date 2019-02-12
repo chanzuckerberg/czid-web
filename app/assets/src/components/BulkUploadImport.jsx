@@ -72,6 +72,7 @@ class BulkUploadImport extends React.Component {
       fileNamesToProgress: {}
     };
   }
+
   componentDidUpdate() {
     $(".custom-select-dropdown").dropdown({
       belowOrigin: true
@@ -91,6 +92,8 @@ class BulkUploadImport extends React.Component {
     );
     this.initializeSelectTag();
     this.initializeSelectAll();
+
+    if (this.state.imported) this.resolveSampleNames();
   }
 
   toggleNewProjectInput(e) {
@@ -250,8 +253,7 @@ class BulkUploadImport extends React.Component {
 
   clearError() {
     this.setState({
-      invalid: false,
-      success: false
+      invalid: false
     });
   }
 
@@ -346,6 +348,7 @@ class BulkUploadImport extends React.Component {
         });
         that.initializeSelectTag();
         that.initializeSelectAll();
+        that.resolveSampleNames();
       })
       .catch(error => {
         that.setState({
@@ -459,6 +462,7 @@ class BulkUploadImport extends React.Component {
     this.setState({
       samples: samples
     });
+    this.resolveSampleNames();
     this.clearError();
   }
 
@@ -496,16 +500,30 @@ class BulkUploadImport extends React.Component {
     });
   }
 
-  resolveSampleNames = () => {
-    this.state.samples.map(sample => {
-      console.log(sample);
-      postWithCSRF(`/projects/${sample.project_id}/validate_metadata_csv`, {});
+  // Update sample names if they already exist in the project
+  resolveSampleNames = async () => {
+    const updatedSamples = this.state.samples.map(async sample => {
+      // For each sample, ask the server for a validated name
+      const resp = await postWithCSRF(
+        `/projects/${sample.project_id}/validate_sample_name`,
+        {
+          sample_name: sample.name
+        }
+      );
+      if (sample.name !== resp.sample_name) {
+        this.setState({
+          successMessage: `${this.state.successMessage}\n\n${
+            sample.name
+          } already exists, so name was updated to ${resp.sample_name}.`
+        });
+        sample.name = resp.sample_name;
+      }
+      return sample;
     });
+    this.setState({ samples: await Promise.all(updatedSamples) });
   };
 
   renderBulkUploadSubmitForm() {
-    this.resolveSampleNames();
-
     return (
       <div id="samplesUploader" className="row">
         <div className="col s8 offset-s2 upload-form-container">
