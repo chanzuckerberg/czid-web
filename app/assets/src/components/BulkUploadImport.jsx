@@ -462,8 +462,8 @@ class BulkUploadImport extends React.Component {
     this.setState({
       samples: samples
     });
-    this.resolveSampleNames();
     this.clearError();
+    this.resolveSampleNames();
   }
 
   handleHostChangeForSample(samplesId, hostGenomeId) {
