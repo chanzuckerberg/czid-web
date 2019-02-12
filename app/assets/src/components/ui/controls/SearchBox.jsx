@@ -33,6 +33,7 @@ class SearchBox extends React.Component {
   onKeyDown = e => {
     if (e.key == "Enter" && !this.state.selectedResult) {
       this.props.onEnter(e);
+      this.setState({ open: false });
     }
   };
 
@@ -92,6 +93,7 @@ class SearchBox extends React.Component {
         }}
         onKeyDown={this.onKeyDown}
         showNoResults={false}
+        open={this.state.open}
       />
     );
   }
