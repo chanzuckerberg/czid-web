@@ -60,13 +60,11 @@ class Samples extends React.Component {
     this.csrf = props.csrf;
     this.admin = props.admin;
     this.allowedFeatures = props.allowedFeatures;
+    this.showStructuredSearch =
+      this.admin !== 0 || this.allowedFeatures.includes("structuredSearch");
     this.favoriteProjects = props.favorites || [];
     this.allProjects = props.projects || [];
     this.pageSize = props.pageSize || 30;
-
-    // Turn all changes related to structured search off.
-    // Change this constant to (this.admin !== 0 || this.allowedFeatures.includes("structuredSearch")) when ready
-    this.STRUCTURED_SEARCH_ON = false;
 
     this.getSampleAttribute = this.getSampleAttribute.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
@@ -964,7 +962,7 @@ class Samples extends React.Component {
     );
 
     let search_tag_list;
-    if (this.STRUCTURED_SEARCH_ON) {
+    if (this.showStructuredSearch) {
       search_tag_list = this.state.searchTags.map((entry, i) => {
         return (
           <FilterTag
@@ -992,7 +990,7 @@ class Samples extends React.Component {
       ];
     }
 
-    const search_box = this.STRUCTURED_SEARCH_ON ? (
+    const search_box = this.showStructuredSearch ? (
       <div className="row search-box-row">
         <CategorySearchBox
           serverSearchAction="search_suggestions"
