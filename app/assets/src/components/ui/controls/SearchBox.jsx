@@ -15,17 +15,23 @@ class SearchBox extends React.Component {
     this.placeholder = this.props.placeholder;
     this.handleEnter = this.props.onEnter;
     this.handleResultSelect = this.handleResultSelect.bind(this);
-    this.blankState = { isLoading: false, results: [], value: "" };
+    this.blankState = {
+      isLoading: false,
+      results: [],
+      value: "",
+      selectedResult: null
+    };
 
     this.state = {
       isLoading: false,
       results: [],
-      value: this.props.initialValue
+      value: this.props.initialValue,
+      selectedResult: null
     };
   }
 
   onKeyDown = e => {
-    if (e.key == "Enter") {
+    if (e.key == "Enter" && !this.state.selectedResult) {
       this.props.onEnter(e);
     }
   };
@@ -36,7 +42,7 @@ class SearchBox extends React.Component {
   }
 
   handleSearchChange = (e, { value }) => {
-    this.setState({ isLoading: true, value });
+    this.setState({ isLoading: true, selectedResult: null, value });
 
     setTimeout(async () => {
       if (this.state.value.length == 0) {
@@ -81,7 +87,11 @@ class SearchBox extends React.Component {
         value={value}
         placeholder={this.placeholder}
         onResultSelect={this.handleResultSelect}
+        onSelectionChange={(e, { result }) => {
+          this.setState({ selectedResult: result });
+        }}
         onKeyDown={this.onKeyDown}
+        showNoResults={false}
       />
     );
   }
