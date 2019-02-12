@@ -42,7 +42,6 @@ Rails.application.routes.draw do
     get :index_v2, on: :collection
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
-    post :create_with_metadata, on: :collection
   end
 
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'

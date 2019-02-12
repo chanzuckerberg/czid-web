@@ -25,12 +25,12 @@ class SamplesController < ApplicationController
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :all, :show_sample_names,
                    :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields,
-                   :samples_going_public, :search_suggestions, :upload, :create_with_metadata].freeze
+                   :samples_going_public, :search_suggestions, :upload].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload, :bulk_upload_with_metadata], fallback: :devise
 
-  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :upload, :bulk_upload_with_metadata, :create_with_metadata]
+  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :upload, :bulk_upload_with_metadata]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
   current_power do # Put this here for CLI
@@ -291,27 +291,41 @@ class SamplesController < ApplicationController
   end
 
   # POST /samples/bulk_upload_with_metadata
-  # Used to bulk-upload samples with remote input files in S3 directory.
   # TODO(mark): Handle required metadata fields.
   def bulk_upload_with_metadata
     samples_to_upload = samples_params || []
     metadata = params[:metadata] || {}
+    client = params[:client]
+
+    # Check if the client is up-to-date. "web" is always valid whereas the
+    # CLI client should provide a version string to-be-checked against the
+    # minimum version here. Bulk upload from CLI goes to this method.
+    min_version = Gem::Version.new('0.5.0')
+    unless client && (client == "web" || Gem::Version.new(client) >= min_version)
+      render json: {
+        message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
+        status: :upgrade_required
+      }
+      return
+    end
+
     editable_project_ids = current_power.updatable_projects.pluck(:id)
 
-    # Ignore samples that aren't part of editable projects.
-    # TODO(mark): Show error for samples that aren't part of project.
-    samples_to_upload = samples_to_upload.select { |sample| editable_project_ids.include?(Integer(sample["project_id"])) }
+    samples_to_upload, samples_invalid_projects = samples_to_upload.partition { |sample| editable_project_ids.include?(Integer(sample["project_id"])) }
 
     errors, samples = upload_samples_with_metadata(samples_to_upload, metadata).values_at("errors", "samples")
 
+    # For each sample with an invalid project ID, add an error.
+    samples_invalid_projects.each do |sample|
+      errors << SampleUploadErrors.invalid_project_id(sample)
+    end
+
     respond_to do |format|
-      if errors.empty? && !samples.empty?
+      if samples.count > 0
         tags = %W[client:web type:bulk user_id:#{current_user.id}]
         MetricUtil.put_metric_now("samples.created", samples.count, tags)
-        format.json { render json: { samples: samples, sample_ids: samples.pluck(:id) } }
-      else
-        format.json { render json: { samples: samples, errors: errors }, status: :unprocessable_entity }
       end
+      format.json { render json: { samples: samples, sample_ids: samples.pluck(:id), errors: errors } }
     end
   end
 
@@ -815,89 +829,6 @@ class SamplesController < ApplicationController
     end
   end
 
-  # POST /create_with_metadata
-  # Used to upload samples with local input files.
-  # TODO(mark): Consolidate this with bulk_upload endpoint.
-  # TODO(mark): Handle required metadata fields.
-  def create_with_metadata
-    metadata_fields = params[:metadata]
-    params = sample_params
-
-    # Check if the client is up-to-date. "web" is always valid whereas the
-    # CLI client should provide a version string to-be-checked against the
-    # minimum version here. Bulk upload from CLI goes to this method.
-    client = params.delete(:client)
-    min_version = Gem::Version.new('0.5.0')
-    unless client && (client == "web" || Gem::Version.new(client) >= min_version)
-      render json: {
-        message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
-        status: :upgrade_required
-      }
-      return
-    end
-
-    if params[:project_name]
-      project_name = params.delete(:project_name)
-      project = Project.find_by(name: project_name)
-      unless project
-        project = Project.create(name: project_name)
-        project.users << current_user if current_user
-      end
-    end
-    if project && !current_power.updatable_project?(project)
-      respond_to do |format|
-        format.json { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
-        format.html { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
-      end
-      return
-    end
-    if params[:host_genome_name]
-      host_genome_name = params.delete(:host_genome_name)
-      host_genome = HostGenome.find_by(name: host_genome_name)
-    end
-
-    params[:input_files_attributes].reject! { |f| f["source"] == '' }
-
-    @sample = Sample.new(params)
-    @sample.project = project if project
-    @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
-    @sample.user = current_user
-    @sample.host_genome ||= (host_genome || HostGenome.first)
-    sample_saved = @sample.save
-
-    metadata_errors = []
-
-    # Upload metadata
-    if sample_saved
-      metadata_fields.each do |key, value|
-        saved = @sample.metadatum_add_or_update(key, value)
-
-        unless saved
-          metadata_errors.push(MetadataUploadErrors.save_error(key, value))
-        end
-      end
-    end
-
-    respond_to do |format|
-      if sample_saved && metadata_errors.empty?
-        tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id} client:#{client}]
-        # Currently bulk CLI upload just calls this action repeatedly so we can't
-        # distinguish between bulk or single there. Web bulk goes to bulk_upload.
-        tags << "type:single" if client == "web"
-        MetricUtil.put_metric_now("samples.created", 1, tags)
-
-        format.json { render :show, status: :created, location: @sample }
-      else
-        format.json do
-          render json: { sample_errors: @sample.errors.full_messages,
-                         project_errors: project ? project.errors.full_messages : nil,
-                         metadata_errors: metadata_errors },
-                 status: :unprocessable_entity
-        end
-      end
-    end
-  end
-
   # PATCH/PUT /samples/1
   # PATCH/PUT /samples/1.json
   def update
@@ -1057,7 +988,7 @@ class SamplesController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def samples_params
     new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id,
-                                         input_files_attributes: [:name, :presigned_url, :source_type, :source]])
+                                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]])
     new_params[:samples] if new_params
   end
 
