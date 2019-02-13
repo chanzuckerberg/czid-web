@@ -92,8 +92,6 @@ class BulkUploadImport extends React.Component {
     );
     this.initializeSelectTag();
     this.initializeSelectAll();
-
-    if (this.state.imported) this.resolveSampleNames();
   }
 
   toggleNewProjectInput(e) {
