@@ -301,7 +301,7 @@ class ProjectsController < ApplicationController
   def validate_sample_name
     sample_name = params[:sample_name]
     i = 0
-    # If the sample name already exists in the project, add a _2, _3, etc.
+    # If the sample name already exists in the project, add a _1, _2, _3, etc.
     while Sample.where(project: @project).where(name: sample_name).present?
       i += 1
       sample_name = params[:sample_name] += "_#{i}"
