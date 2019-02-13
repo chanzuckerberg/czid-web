@@ -41,22 +41,11 @@ class Metadatum < ApplicationRecord
       return
     end
 
-    # Check if the key is valid
+    # Check if the key is valid. Metadata_field was supposed to be set.
     valid_keys = sample.host_genome.metadata_fields.pluck(:name, :display_name).flatten
     unless key && valid_keys.include?(key) && metadata_field
       errors.add(:key, MetadataValidationErrors.invalid_key_for_host_genome(key, sample.host_genome_name))
       return
-    end
-
-    # Associate metadata_field if not present.
-    # TODO: Require and enforce matching metadata_field
-    unless metadata_field
-      self.metadata_field = MetadataField.find_by(name: key.to_s) || MetadataField.find_by(display_name: key.to_s)
-      if key == metadata_field.display_name
-        # If matched based on display_name, set key to regular name
-        self.key = metadata_field.name
-      end
-      # Don't call save yet
     end
 
     base = self.class.convert_type_to_string(metadata_field.base_type)
