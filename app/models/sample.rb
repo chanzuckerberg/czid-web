@@ -548,6 +548,7 @@ class Sample < ApplicationRecord
     end
     true
   rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid => e
+    puts e
     Rails.logger.error(e)
     false
   end
