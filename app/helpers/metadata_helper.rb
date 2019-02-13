@@ -70,7 +70,9 @@ module MetadataHelper
     # Verify that the column names are supported.
     metadata["headers"].each_with_index do |header, index|
       # Check for matching MetadataField or the sample_name/host_genome_name
-      unless header == "sample_name" || MetadataField.find_by(name: header)
+      puts "foobar 3:59pm"
+      puts header
+      unless header == "sample_name" || MetadataField.find_by(name: header) || MetadataField.find_by(display_name: header)
         errors.push(MetadataValidationErrors.column_not_supported(header, index + 1))
       end
     end
@@ -78,6 +80,9 @@ module MetadataHelper
     sample_name_index = metadata["headers"].find_index("sample_name")
 
     metadata["rows"].each_with_index do |row, index|
+      # Deleting in Excel may leaves a row of ""s in the CSV, so ignore
+      next if row.all? {|c| c == ""}
+
       # Check number of values in the row.
       if row.length != metadata["headers"].length
         errors.push(
