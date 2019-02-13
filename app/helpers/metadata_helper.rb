@@ -81,7 +81,7 @@ module MetadataHelper
 
     metadata["rows"].each_with_index do |row, index|
       # Deleting in Excel may leaves a row of ""s in the CSV, so ignore
-      next if row.all? {|c| c == ""}
+      next if row.all? { |c| c == "" }
 
       # Check number of values in the row.
       if row.length != metadata["headers"].length
