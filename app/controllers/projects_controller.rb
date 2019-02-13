@@ -300,9 +300,11 @@ class ProjectsController < ApplicationController
   # TODO: Consider consolidating into a general sample validator
   def validate_sample_name
     sample_name = params[:sample_name]
-    # If the sample name already exists in the project, add a _2
+    i = 0
+    # If the sample name already exists in the project, add a _2, _3, etc.
     while Sample.where(project: @project).where(name: sample_name).present?
-      sample_name += "_2"
+      i += 1
+      sample_name = params[:sample_name] += "_#{i}"
     end
     render json: { sample_name: sample_name }
   end
