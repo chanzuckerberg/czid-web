@@ -160,9 +160,7 @@ class BulkUploadImport extends React.Component {
     e.preventDefault();
     $("html, body")
       .stop()
-      .animate({ scrollTop: 0 }, 200, "swing", () => {
-        this.clearError();
-      });
+      .animate({ scrollTop: 0 }, 200, "swing");
     if (!this.isUploadFormInvalid()) {
       this.setState({
         submitting: true
