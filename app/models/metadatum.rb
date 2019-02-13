@@ -44,7 +44,6 @@ class Metadatum < ApplicationRecord
     # Check if the key is valid
     # valid_keys = sample.host_genome.metadata_fields.pluck(:name, :display_name).flatten || []
     valid_keys = self.class.valid_keys_by_host_genome_name(sample.host_genome_name)
-    puts valid_keys
     unless key && valid_keys.include?(key)
       errors.add(:key, MetadataValidationErrors.invalid_key_for_host_genome(key, sample.host_genome_name))
       return
