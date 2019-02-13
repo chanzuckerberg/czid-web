@@ -4,7 +4,6 @@ require 'tempfile'
 require 'aws-sdk'
 require 'elasticsearch/model'
 # TODO(mark): Move to an initializer. Make sure this works with Rails auto-reloading.
-require 'constants/errors'
 
 class Sample < ApplicationRecord
   if ELASTICSEARCH_ON
@@ -110,6 +109,14 @@ class Sample < ApplicationRecord
         errors.add(:input_files, "have identical read 1 source and read 2 source")
       end
     end
+  end
+
+  def required_metadata_fields
+    host_genome.metadata_fields.where(is_required: 1).pluck(:name)
+  end
+
+  def missing_required_metadata_fields
+    required_metadata_fields - metadata.map(&:metadata_field).pluck(:name)
   end
 
   def set_presigned_url_for_local_upload

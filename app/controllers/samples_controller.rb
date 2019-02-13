@@ -320,6 +320,20 @@ class SamplesController < ApplicationController
       errors << SampleUploadErrors.invalid_project_id(sample)
     end
 
+    # After creation, if a sample is missing required metadata, destroy it.
+    # TODO(mark): Move this logic into a validator in the model in the future.
+    # Hard to do right now because this isn't launched yet, and also many existing samples don't have required metadata.
+    removed_samples = []
+    samples.each do |sample|
+      missing_required_metadata_fields = sample.missing_required_metadata_fields
+      unless missing_required_metadata_fields.empty?
+        errors << SampleUploadErrors.missing_required_metadata(sample, missing_required_metadata_fields)
+        sample.destroy
+        removed_samples << sample
+      end
+    end
+    samples -= removed_samples
+
     respond_to do |format|
       if samples.count > 0
         tags = %W[client:web type:bulk user_id:#{current_user.id}]

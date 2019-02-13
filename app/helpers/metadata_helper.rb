@@ -57,7 +57,7 @@ module MetadataHelper
   end
 
   # Receives an array of samples, and validates metadata from a csv.
-  def validate_metadata_csv_for_samples(samples, metadata)
+  def validate_metadata_csv_for_samples(samples, metadata, enforce_required = false)
     errors = []
     warnings = []
 
@@ -97,14 +97,16 @@ module MetadataHelper
         next
       end
 
+      validated_fields = []
+
       # Validate the metadatum values with the sample.
-      row.each_with_index do |value, row_index|
-        next if row_index >= metadata["headers"].length
+      row.each_with_index do |value, col_index|
+        next if col_index >= metadata["headers"].length
 
         # Ignore empty string values.
         next if value.nil? || value == ""
 
-        field = metadata["headers"][row_index]
+        field = metadata["headers"][col_index]
 
         # Ignore invalid columns.
         if field != "sample_name" && MetadataField.find_by(name: field)
@@ -117,7 +119,16 @@ module MetadataHelper
           issues[:warnings].each do |warning|
             warnings.push("#{warning} (row #{index + 1})")
           end
+
+          if issues[:errors].empty?
+            validated_fields << field
+          end
         end
+      end
+
+      missing_required_metadata_fields = sample.required_metadata_fields - validated_fields
+      if enforce_required && !missing_required_metadata_fields.empty?
+        errors.push(MetadataValidationErrors.missing_required_metadata(missing_required_metadata_fields, index + 1))
       end
     end
 
