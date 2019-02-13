@@ -304,7 +304,7 @@ class ProjectsController < ApplicationController
     # If the sample name already exists in the project, add a _1, _2, _3, etc.
     while Sample.where(project: @project).where(name: sample_name).present?
       i += 1
-      sample_name = params[:sample_name] += "_#{i}"
+      sample_name = params[:sample_name] + "_#{i}"
     end
     render json: { sample_name: sample_name }
   end
