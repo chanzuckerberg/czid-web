@@ -554,7 +554,7 @@ class Sample < ApplicationRecord
 
     m = Metadatum.new
     m.metadata_field = MetadataField.find_by(name: key) || MetadataField.find_by(display_name: key)
-    m.key = m.metadata_field.name
+    m.key = m.metadata_field ? m.metadata_field.name : nil
     m.sample = self
     m.raw_value = val
 

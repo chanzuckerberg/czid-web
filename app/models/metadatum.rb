@@ -221,7 +221,7 @@ class Metadatum < ApplicationRecord
     key = key.to_sym
     m = Metadatum.new
     m.metadata_field = MetadataField.find_by(name: key) || MetadataField.find_by(display_name: key)
-    m.key = m.metadata_field.name
+    m.key = m.metadata_field ? m.metadata_field.name : nil
     m.raw_value = value
     # *_validated_value field is set in the set_validated_values validator.
     m.sample = sample
