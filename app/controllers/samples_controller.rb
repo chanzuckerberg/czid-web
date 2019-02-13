@@ -25,7 +25,7 @@ class SamplesController < ApplicationController
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :all, :show_sample_names,
-                   :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields,
+                   :samples_taxons, :heatmap, :save_heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields,
                    :samples_going_public, :search_suggestions, :upload].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]

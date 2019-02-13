@@ -1,7 +1,7 @@
 class CreateVisualizations < ActiveRecord::Migration[5.1]
   def change
     create_table :visualizations do |t|
-      t.references :user, foreign_key: true
+      t.references :user
       # Can't use "type" because that is reserved by Rails
       t.string :visualization_type
       # TODO: we can use mysql json data type by upgrading to mysql 5.7

@@ -43,6 +43,7 @@ module HeatmapHelper
     send_data output_csv, filename: 'heatmap.csv'
   end
 
+  # TODO: (gdingle): access control
   def save_heatmap
     @data = params[:heatmapParams]
     vis = Visualization.create(
@@ -58,8 +59,8 @@ module HeatmapHelper
     }
   rescue => err
     render json: {
-      status: 'failed',
-      message: 'Unable to save heatmap',
+      status: "failed",
+      message: "Unable to save heatmap",
       errors: [err]
     }
   end

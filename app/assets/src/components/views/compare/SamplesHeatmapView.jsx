@@ -12,8 +12,7 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
 import Slider from "~ui/controls/Slider";
-import Icon from "~ui/icons/Icon";
-import { PrimaryButton, SecondaryButton } from "~ui/controls/buttons";
+import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import {
   Dropdown,
   DownloadButtonDropdown,
@@ -721,24 +720,18 @@ class SamplesHeatmapView extends React.Component {
             <ViewHeader.Controls className={cs.controls}>
               <Popup
                 trigger={
-                  <PrimaryButton
-                    text="Share"
+                  <ShareButton
                     onClick={this.onShareClick}
                     className={cs.controlElement}
-                    icon={
-                      <Icon size="large" className={"cloud share alternate"} />
-                    }
                   />
                 }
                 content="A shareable URL has been copied to your clipboard!"
                 on="click"
                 hideOnScroll
               />
-              <SecondaryButton
-                text="Save"
+              <SaveButton
                 onClick={this.onSaveClick}
                 className={cs.controlElement}
-                icon={<Icon size="large" className={"cloud save alternate"} />}
               />
               <DownloadButtonDropdown
                 className={cs.controlElement}
