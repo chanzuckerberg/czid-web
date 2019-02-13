@@ -159,7 +159,15 @@ class SamplesHeatmapView extends React.Component {
 
   onSaveClick = async () => {
     // TODO (gdingle): add analytics tracking?
-    await saveVisualization("heatmap", this.getUrlParams());
+    const resp = await saveVisualization("heatmap", this.getUrlParams());
+    const url =
+      location.protocol +
+      "//" +
+      location.host +
+      "/visualizations/heatmap/" +
+      resp.id;
+    // Update URL without reloading the page
+    history.pushState(window.history.state, document.title, url);
   };
 
   metricToSortField(metric) {
@@ -728,9 +736,6 @@ class SamplesHeatmapView extends React.Component {
                   <ShareButton
                     onClick={this.onShareClick}
                     className={cs.controlElement}
-                    icon={
-                      <Icon size="large" className={"cloud share alternate"} />
-                    }
                   />
                 }
                 content="A shareable URL has been copied to your clipboard!"

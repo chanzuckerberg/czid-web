@@ -18,7 +18,6 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import Controls from "./Controls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
-import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 
 import cs from "./sample_view.scss";
@@ -249,6 +248,7 @@ class SampleView extends React.Component {
             // Needs to be passed down to set the background dropdown properly.
             reportPageParams={this.props.reportPageParams}
             onTaxonClick={this.handleTaxonClick}
+            savedParamValues={this.props.savedParamValues}
           />
         );
       } else if (this.pipelineInProgress()) {
@@ -291,8 +291,9 @@ class SampleView extends React.Component {
 
   onSaveClick = async () => {
     // TODO (gdingle): add analytics tracking?
-    const params = parseUrlParams();
-    await saveVisualization(params.view, params);
+    let params = parseUrlParams();
+    params.sampleIds = [this.props.sample.id];
+    await saveVisualization(params.view || "table", params);
   };
 
   render() {
@@ -351,7 +352,7 @@ class SampleView extends React.Component {
             </div>
           </ViewHeader.Content>
           <ViewHeader.Controls>
-            <Popup
+            <BasicPopup
               trigger={<ShareButton onClick={this.onShareClick} />}
               content="A shareable URL has been copied to your clipboard!"
               on="click"
@@ -436,7 +437,8 @@ SampleView.propTypes = {
     name: PropTypes.string
   }),
   jobStatistics: PropTypes.string,
-  sampleStatus: PropTypes.string
+  sampleStatus: PropTypes.string,
+  savedParamValues: PropTypes.object
 };
 
 export default SampleView;
