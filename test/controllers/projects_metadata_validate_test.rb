@@ -65,6 +65,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Error should throw if column name is invalid.
+    puts "parsed body: #{@response.parsed_body}"
     assert_equal 1, @response.parsed_body['issues']['errors'].length
     assert_match MetadataValidationErrors.column_not_supported('foobar', 3), @response.parsed_body['issues']['errors'][0]
 
@@ -136,6 +137,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
+    puts "parsed body: #{@response.parsed_body}"
     assert_equal 7, @response.parsed_body['issues']['errors'].length
     # Error should throw if invalid float is passed for float data type.
     assert_match "#{MetadataValidationErrors.invalid_number('foobar')} (row 2)", @response.parsed_body['issues']['errors'][0]
@@ -170,6 +172,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_equal 0, @response.parsed_body['issues']['errors'].length
 
     # Warning should throw if user is overwriting existing metadata with different value.
+    puts "parsed body: #{@response.parsed_body}"
     assert_equal 1, @response.parsed_body['issues']['warnings'].length
 
     assert_match "#{MetadataValidationWarnings.value_already_exists('Female', 'Male', 'sex')} (row 1)", @response.parsed_body['issues']['warnings'][0]

@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190208210837) do
-
+ActiveRecord::Schema.define(version: 20_190_208_210_837) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -75,7 +74,7 @@ ActiveRecord::Schema.define(version: 20190208210837) do
   create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
-    t.text "sequence", limit: 4294967295
+    t.text "sequence", limit: 4_294_967_295
     t.integer "read_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -199,7 +198,7 @@ ActiveRecord::Schema.define(version: 20190208210837) do
     t.text "newick"
     t.integer "status", default: 0
     t.string "dag_version"
-    t.text "dag_json", limit: 4294967295
+    t.text "dag_json", limit: 4_294_967_295
     t.text "command_stdout"
     t.text "command_stderr"
     t.string "job_id"
@@ -505,5 +504,4 @@ ActiveRecord::Schema.define(version: 20190208210837) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
-
 end
