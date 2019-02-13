@@ -31,10 +31,12 @@ reported_sex:
 age:
   name: "age"
   base_type: 1
+  host_genomes: [human]
 
 admission_date:
   name: "admission_date"
   base_type: 2
+  host_genomes: [human]
 
 blood_fed:
   name: "blood_fed"
