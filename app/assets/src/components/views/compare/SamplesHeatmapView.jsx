@@ -728,9 +728,6 @@ class SamplesHeatmapView extends React.Component {
                   <ShareButton
                     onClick={this.onShareClick}
                     className={cs.controlElement}
-                    icon={
-                      <Icon size="large" className={"cloud share alternate"} />
-                    }
                   />
                 }
                 content="A shareable URL has been copied to your clipboard!"
