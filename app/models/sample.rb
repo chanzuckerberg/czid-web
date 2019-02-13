@@ -561,6 +561,7 @@ class Sample < ApplicationRecord
 
     m = Metadatum.new
     m.key = key
+    m.metadata_field = MetadataField.find_by(name: key) || MetadataField.find_by(display_name: key)
     m.sample = self
     m.raw_value = val
 

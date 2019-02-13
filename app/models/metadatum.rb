@@ -43,7 +43,7 @@ class Metadatum < ApplicationRecord
 
     # Check if the key is valid
     valid_keys = sample.host_genome.metadata_fields.pluck(:name, :display_name).flatten
-    unless key && valid_keys.include?(key)
+    unless key && valid_keys.include?(key) && metadata_field
       errors.add(:key, MetadataValidationErrors.invalid_key_for_host_genome(key, sample.host_genome_name))
       return
     end
@@ -232,6 +232,7 @@ class Metadatum < ApplicationRecord
     key = key.to_sym
     m = Metadatum.new
     m.key = key
+    m.metadata_field = MetadataField.find_by(name: key) || MetadataField.find_by(display_name: key)
     m.raw_value = value
     # *_validated_value field is set in the set_validated_values validator.
     m.sample = sample
