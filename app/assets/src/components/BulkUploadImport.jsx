@@ -15,7 +15,7 @@ import TermsAgreement from "~ui/controls/TermsAgreement";
 import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { openUrlWithTimeout } from "~utils/links";
-import { postWithCSRF } from "~/api";
+import { validateSampleName } from "~/api";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -502,12 +502,7 @@ class BulkUploadImport extends React.Component {
   resolveSampleNames = async () => {
     const updatedSamples = this.state.samples.map(async sample => {
       // For each sample, ask the server for a validated name
-      const resp = await postWithCSRF(
-        `/projects/${sample.project_id}/validate_sample_name`,
-        {
-          sample_name: sample.name
-        }
-      );
+      const resp = await validateSampleName(sample.project_id, sample.name);
       if (sample.name !== resp.sample_name) {
         this.setState({
           successMessage: `${this.state.successMessage}\n\n${
