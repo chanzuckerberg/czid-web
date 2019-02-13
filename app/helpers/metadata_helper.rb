@@ -70,8 +70,6 @@ module MetadataHelper
     # Verify that the column names are supported.
     metadata["headers"].each_with_index do |header, index|
       # Check for matching MetadataField or the sample_name/host_genome_name
-      puts "foobar 3:59pm"
-      puts header
       unless header == "sample_name" || MetadataField.find_by(name: header) || MetadataField.find_by(display_name: header)
         errors.push(MetadataValidationErrors.column_not_supported(header, index + 1))
       end
@@ -114,7 +112,7 @@ module MetadataHelper
         field = metadata["headers"][col_index]
 
         # Ignore invalid columns.
-        if field != "sample_name" && MetadataField.find_by(name: field)
+        if field != "sample_name" && (MetadataField.find_by(name: field) || MetadataField.find_by(display_name: field))
           issues = sample.metadatum_validate(field, value)
 
           issues[:errors].each do |error|

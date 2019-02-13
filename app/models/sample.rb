@@ -530,8 +530,15 @@ class Sample < ApplicationRecord
       m = Metadatum.new
       m.key = key
       m.sample = self
-      # Fail if MetadataField doesn't exist
-      m.metadata_field = MetadataField.find_by!(name: key.to_s)
+      if MetadataField.find_by(name: key.to_s)
+        m.metadata_field = MetadataField.find_by(name: key.to_s)
+      elsif MetadataField.find_by(display_name: key.to_s)
+        m.metadata_field = MetadataField.find_by(display_name: key.to_s)
+        # If matched based on display_name, set key to regular name
+        m.key = m.metadata_field.name
+      else
+        raise ActiveRecord::RecordNotFound("No matching field for #{key}")
+      end
     end
     if val.blank?
       m.destroy
