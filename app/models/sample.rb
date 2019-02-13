@@ -528,10 +528,10 @@ class Sample < ApplicationRecord
     unless m
       # Create the entry
       m = Metadatum.new
-      m.key = key
       m.sample = self
-      # Fail if MetadataField doesn't exist
-      m.metadata_field = MetadataField.find_by!(name: key.to_s)
+      m.metadata_field = MetadataField.find_by(name: key.to_s) || MetadataField.find_by(display_name: key.to_s)
+      raise ActiveRecord::RecordNotFound("No matching field for #{key}") unless m.metadata_field
+      m.key = m.metadata_field.name
     end
     if val.blank?
       m.destroy
@@ -553,7 +553,8 @@ class Sample < ApplicationRecord
     }
 
     m = Metadatum.new
-    m.key = key
+    m.metadata_field = MetadataField.find_by(name: key) || MetadataField.find_by(display_name: key)
+    m.key = m.metadata_field ? m.metadata_field.name : nil
     m.sample = self
     m.raw_value = val
 

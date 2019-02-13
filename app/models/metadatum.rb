@@ -41,18 +41,11 @@ class Metadatum < ApplicationRecord
       return
     end
 
-    # Check if the key is valid
-    valid_keys = self.class.valid_keys_by_host_genome_name(sample.host_genome_name)
-    unless key && valid_keys.include?(key)
+    # Check if the key is valid. Metadata_field was supposed to be set.
+    valid_keys = sample.host_genome.metadata_fields.pluck(:name, :display_name).flatten
+    unless key && valid_keys.include?(key) && metadata_field
       errors.add(:key, MetadataValidationErrors.invalid_key_for_host_genome(key, sample.host_genome_name))
       return
-    end
-
-    # Associate metadata_field if not present.
-    # TODO: Require and enforce matching metadata_field
-    unless metadata_field
-      self.metadata_field = MetadataField.find_by(name: key.to_s)
-      # Don't call save yet
     end
 
     base = self.class.convert_type_to_string(metadata_field.base_type)
@@ -227,7 +220,8 @@ class Metadatum < ApplicationRecord
   def self.new_without_save(sample, key, value)
     key = key.to_sym
     m = Metadatum.new
-    m.key = key
+    m.metadata_field = MetadataField.find_by(name: key) || MetadataField.find_by(display_name: key)
+    m.key = m.metadata_field ? m.metadata_field.name : nil
     m.raw_value = value
     # *_validated_value field is set in the set_validated_values validator.
     m.sample = sample
@@ -250,11 +244,5 @@ class Metadatum < ApplicationRecord
       return "date"
     end
     ""
-  end
-
-  def self.valid_keys_by_host_genome_name(host_genome_name)
-    # TODO: Restrict upstream functions to return only relevant fields on the project
-    hg = HostGenome.find_by(name: host_genome_name)
-    hg ? hg.metadata_fields.pluck(:name).to_a : []
   end
 end

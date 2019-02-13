@@ -36,7 +36,7 @@ class ReviewStep extends React.Component {
           });
         })
         // TODO(mark): Display better errors.
-        // For example, some samples may have successfuly saved, but not others. Should explain to user.
+        // For example, some samples may have successfully saved, but not others. Should explain to user.
         .catch(error => {
           this.setState({
             submitState: "review",
