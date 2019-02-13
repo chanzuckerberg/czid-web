@@ -42,8 +42,7 @@ class Metadatum < ApplicationRecord
     end
 
     # Check if the key is valid
-    # valid_keys = sample.host_genome.metadata_fields.pluck(:name, :display_name).flatten || []
-    valid_keys = self.class.valid_keys_by_host_genome_name(sample.host_genome_name)
+    valid_keys = sample.host_genome.metadata_fields.pluck(:name, :display_name).flatten
     unless key && valid_keys.include?(key)
       errors.add(:key, MetadataValidationErrors.invalid_key_for_host_genome(key, sample.host_genome_name))
       return
@@ -54,7 +53,7 @@ class Metadatum < ApplicationRecord
     unless metadata_field
       self.metadata_field = MetadataField.find_by(name: key.to_s) || MetadataField.find_by(display_name: key.to_s)
       if key == metadata_field.display_name
-        # If the key was matched based on display_name, set it to the regular 'name' instead
+        # If matched based on display_name, set key to regular name
         self.key = metadata_field.name
       end
       # Don't call save yet
@@ -255,11 +254,5 @@ class Metadatum < ApplicationRecord
       return "date"
     end
     ""
-  end
-
-  def self.valid_keys_by_host_genome_name(host_genome_name)
-    # TODO: Restrict upstream functions to return only relevant fields on the project
-    hg = HostGenome.find_by(name: host_genome_name)
-    hg ? hg.metadata_fields.pluck(:name).to_a : []
   end
 end
