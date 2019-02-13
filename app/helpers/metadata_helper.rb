@@ -112,7 +112,7 @@ module MetadataHelper
         field = metadata["headers"][col_index]
 
         # Ignore invalid columns.
-        unless field == "sample_name" || MetadataField.find_by(name: field) || MetadataField.find_by(display_name: field)
+        if field != "sample_name" && (MetadataField.find_by(name: field) || MetadataField.find_by(display_name: field))
           issues = sample.metadatum_validate(field, value)
 
           issues[:errors].each do |error|

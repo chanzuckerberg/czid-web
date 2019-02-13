@@ -124,6 +124,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
+    puts @response.parsed_body
     assert_equal 1, @response.parsed_body['issues']['errors'].length
     # Error should throw if row is missing required metadata.
     assert_match MetadataValidationErrors.missing_required_metadata(['nucleotide_type'], 2), @response.parsed_body['issues']['errors'][0]
