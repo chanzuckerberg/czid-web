@@ -386,10 +386,10 @@ class BulkUploadImport extends React.Component {
           submitting: false,
           invalid: true,
           errorMessage:
-            error.data.status ||
+            error.status ||
             "Unable to process sample(s), " +
               "ensure sample is not a duplicate in the selected project",
-          serverErrors: error.data
+          serverErrors: error
         });
       });
   }

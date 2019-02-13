@@ -714,9 +714,9 @@ class SampleUpload extends React.Component {
     )
       .then(response => {
         this.setState({
-          id: response.data.id
+          id: response.id
         });
-        this.uploadLocalFiles(response.data.input_files);
+        this.uploadLocalFiles(response.input_files);
       })
       .catch(error => {
         this.setState({
