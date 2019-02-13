@@ -220,8 +220,8 @@ class Metadatum < ApplicationRecord
   def self.new_without_save(sample, key, value)
     key = key.to_sym
     m = Metadatum.new
-    m.key = key
     m.metadata_field = MetadataField.find_by(name: key) || MetadataField.find_by(display_name: key)
+    m.key = m.metadata_field.name
     m.raw_value = value
     # *_validated_value field is set in the set_validated_values validator.
     m.sample = sample
