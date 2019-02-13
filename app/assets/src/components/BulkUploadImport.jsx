@@ -15,6 +15,7 @@ import TermsAgreement from "~ui/controls/TermsAgreement";
 import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { openUrlWithTimeout } from "~utils/links";
+import { validateSampleName } from "~/api";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -71,6 +72,7 @@ class BulkUploadImport extends React.Component {
       fileNamesToProgress: {}
     };
   }
+
   componentDidUpdate() {
     $(".custom-select-dropdown").dropdown({
       belowOrigin: true
@@ -249,8 +251,7 @@ class BulkUploadImport extends React.Component {
 
   clearError() {
     this.setState({
-      invalid: false,
-      success: false
+      invalid: false
     });
   }
 
@@ -345,6 +346,7 @@ class BulkUploadImport extends React.Component {
         });
         that.initializeSelectTag();
         that.initializeSelectAll();
+        that.resolveSampleNames();
       })
       .catch(error => {
         that.setState({
@@ -459,6 +461,7 @@ class BulkUploadImport extends React.Component {
       samples: samples
     });
     this.clearError();
+    this.resolveSampleNames();
   }
 
   handleHostChangeForSample(samplesId, hostGenomeId) {
@@ -494,6 +497,24 @@ class BulkUploadImport extends React.Component {
       selectedBulkPath: e.target.value.trim()
     });
   }
+
+  // Update sample names if they already exist in the project
+  resolveSampleNames = async () => {
+    const updatedSamples = this.state.samples.map(async sample => {
+      // For each sample, ask the server for a validated name
+      const resp = await validateSampleName(sample.project_id, sample.name);
+      if (sample.name !== resp.sample_name) {
+        this.setState({
+          successMessage: `${this.state.successMessage}\n\n${
+            sample.name
+          } already exists, so name updated to ${resp.sample_name}.`
+        });
+        sample.name = resp.sample_name;
+      }
+      return sample;
+    });
+    this.setState({ samples: await Promise.all(updatedSamples) });
+  };
 
   renderBulkUploadSubmitForm() {
     return (
@@ -1123,8 +1144,9 @@ class BulkUploadImport extends React.Component {
   render() {
     return (
       <div className="bulk-upload-import">
-        {this.state.imported ? this.renderBulkUploadSubmitForm() : null}
-        {!this.state.imported ? this.renderBulkUploadImportForm() : null}
+        {this.state.imported
+          ? this.renderBulkUploadSubmitForm()
+          : this.renderBulkUploadImportForm()}
       </div>
     );
   }

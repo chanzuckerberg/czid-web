@@ -252,6 +252,11 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
   if (window.analytics) window.analytics.track(eventName, eventData);
 };
 
+const validateSampleName = (projectId, sampleName) =>
+  postWithCSRF(`/projects/${projectId}/validate_sample_name`, {
+    sample_name: sampleName
+  });
+
 export {
   deleteAsync,
   get,
@@ -281,5 +286,6 @@ export {
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
   getSampleTaxons,
-  logAnalyticsEvent
+  logAnalyticsEvent,
+  validateSampleName
 };
