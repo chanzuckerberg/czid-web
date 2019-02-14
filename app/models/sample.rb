@@ -50,6 +50,7 @@ class Sample < ApplicationRecord
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
   has_many :metadata, dependent: :destroy
+  has_and_belongs_to_many :visualizations
 
   validate :input_files_checks
   after_create :initiate_input_file_upload

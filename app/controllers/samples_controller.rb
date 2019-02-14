@@ -4,6 +4,7 @@ class SamplesController < ApplicationController
   include SamplesHelper
   include PipelineOutputsHelper
   include ElasticsearchHelper
+  include HeatmapHelper
 
   ########################################
   # Note to developers:
@@ -24,7 +25,7 @@ class SamplesController < ApplicationController
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :all, :show_sample_names,
-                   :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields,
+                   :samples_taxons, :heatmap, :save_heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields,
                    :samples_going_public, :search_suggestions, :upload].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
@@ -486,44 +487,6 @@ class SamplesController < ApplicationController
     MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
-  def heatmap
-    @heatmap_data = {
-      taxonLevels: %w[Genus Species],
-      categories: ReportHelper::ALL_CATEGORIES.pluck('name'),
-      subcategories: {
-        Viruses: ["Phage"]
-      },
-      metrics: [
-        { text: "Aggregate Score", value: "NT.aggregatescore" },
-        { text: "NT Z Score", value: "NT.zscore" },
-        { text: "NT rPM", value: "NT.rpm" },
-        { text: "NT r (total reads)", value: "NT.r" },
-        { text: "NR Z Score", value: "NR.zscore" },
-        { text: "NR r (total reads)", value: "NR.r" },
-        { text: "NR rPM", value: "NR.rpm" }
-      ],
-      backgrounds: current_power.backgrounds.map do |background|
-        { name: background.name, value: background.id }
-      end,
-      thresholdFilters: {
-        targets: [
-          { text: "Aggregate Score", value: "NT_aggregatescore" },
-          { text: "NT Z Score", value: "NT_zscore" },
-          { text: "NT rPM", value: "NT_rpm" },
-          { text: "NT r (total reads)", value: "NT_r" },
-          { text: "NT %id", value: "NT_percentidentity" },
-          { text: "NT log(1/e)", value: "NT_neglogevalue" },
-          { text: "NR Z Score", value: "NR_zscore" },
-          { text: "NR r (total reads)", value: "NR_r" },
-          { text: "NR rPM", value: "NR_rpm" },
-          { text: "NR %id", value: "NR_percentidentity" },
-          { text: "R log(1/e)", value: "NR_neglogevalue" }
-        ],
-        operators: [">=", "<="]
-      }
-    }
-  end
-
   def samples_going_public
     ahead = (params[:ahead] || 10).to_i
     behind = params[:behind].to_i
@@ -540,12 +503,6 @@ class SamplesController < ApplicationController
   def samples_taxons
     @sample_taxons_dict = sample_taxons_dict(params)
     render json: @sample_taxons_dict
-  end
-
-  def download_heatmap
-    @sample_taxons_dict = sample_taxons_dict(params)
-    output_csv = generate_heatmap_csv(@sample_taxons_dict)
-    send_data output_csv, filename: 'heatmap.csv'
   end
 
   def report_info
@@ -966,7 +923,12 @@ class SamplesController < ApplicationController
                         else
                           JSON.parse(params[:thresholdFilters] || "[]")
                         end
-    include_phage = (JSON.parse(params[:subcategories]) || {}).fetch("Viruses", []).include?("Phage")
+    subcategories = if params[:subcategories].respond_to?(:to_h)
+                      params[:subcategories].permit!.to_h
+                    else
+                      JSON.parse(params[:subcategories] || "{}")
+                    end
+    include_phage = subcategories.fetch("Viruses", []).include?("Phage")
     read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
 
     # TODO: should fail if field is not well formatted and return proper error to client

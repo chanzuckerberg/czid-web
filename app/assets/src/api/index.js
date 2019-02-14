@@ -195,6 +195,11 @@ const bulkUploadWithMetadata = (samples, metadata) =>
     client: "web"
   });
 
+const saveHeatmap = heatmapParams =>
+  postWithCSRF(`/samples/save_heatmap`, {
+    heatmapParams
+  });
+
 const markSampleUploaded = sampleId =>
   putWithCSRF(`/samples/${sampleId}.json`, {
     sample: {
@@ -284,6 +289,7 @@ export {
   bulkUploadRemoteSamples,
   bulkUploadWithMetadata,
   markSampleUploaded,
+  saveHeatmap,
   uploadFileToUrl,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,

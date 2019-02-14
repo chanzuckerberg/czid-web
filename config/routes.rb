@@ -32,6 +32,7 @@ Rails.application.routes.draw do
     get :samples_taxons, on: :collection
     get :heatmap, on: :collection
     get :download_heatmap, on: :collection
+    post :save_heatmap, on: :collection
     get :metadata_types_by_host_genome_name, on: :collection
     get :metadata, on: :member
     get :metadata_fields, on: :collection
@@ -85,6 +86,7 @@ Rails.application.routes.draw do
   get 'phylo_trees/:id/download', to: 'phylo_trees#download'
   get 'choose_taxon', to: 'phylo_trees#choose_taxon'
   get 'search_suggestions', to: 'samples#search_suggestions'
+  get 'visualizations/:type(/:id)', to: 'visualizations#visualization'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
