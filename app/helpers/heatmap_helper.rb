@@ -64,4 +64,49 @@ module HeatmapHelper
       errors: [err]
     }
   end
+
+  def samples_taxons
+    @sample_taxons_dict = sample_taxons_dict(params)
+    render json: @sample_taxons_dict
+  end
+
+  def sample_taxons_dict(params)
+    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+    num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
+    removed_taxon_ids = (params[:removedTaxonIds] || []).map do |x|
+      begin
+        Integer(x)
+      rescue ArgumentError
+        nil
+      end
+    end
+    removed_taxon_ids = removed_taxon_ids.compact
+    categories = params[:categories]
+    threshold_filters = if params[:thresholdFilters].is_a?(Array)
+                          (params[:thresholdFilters] || []).map { |filter| JSON.parse(filter || "{}") }
+                        else
+                          JSON.parse(params[:thresholdFilters] || "[]")
+                        end
+    subcategories = if params[:subcategories].respond_to?(:to_h)
+                      params[:subcategories].permit!.to_h
+                    else
+                      JSON.parse(params[:subcategories] || "{}")
+                    end
+    include_phage = subcategories.fetch("Viruses", []).include?("Phage")
+    read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
+
+    # TODO: should fail if field is not well formatted and return proper error to client
+    sort_by = params[:sortBy] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
+    species_selected = params[:species] == "1" # Otherwise genus selected
+    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs, :metadata])
+    return {} if samples.empty?
+
+    first_sample = samples.first
+    background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
+
+    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
+    taxon_ids -= removed_taxon_ids
+
+    samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+  end
 end
