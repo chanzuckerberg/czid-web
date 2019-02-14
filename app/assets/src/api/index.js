@@ -1,6 +1,6 @@
 // TODO(mark): Split this file up as more API methods get added.
 import axios from "axios";
-import { toPairs } from "lodash/fp";
+import { toPairs, pickBy } from "lodash/fp";
 import { cleanFilePath } from "~utils/sample";
 
 const postWithCSRF = async (url, params) => {
@@ -49,10 +49,12 @@ const deleteWithCSRF = url =>
     }
   });
 
-const getURLParamString = params =>
-  toPairs(params)
+const getURLParamString = params => {
+  const filtered = pickBy((v, k) => typeof v !== "object", params);
+  return toPairs(filtered)
     .map(pair => pair.join("="))
     .join("&");
+};
 
 const getSampleMetadata = (id, pipelineVersion) => {
   return get(

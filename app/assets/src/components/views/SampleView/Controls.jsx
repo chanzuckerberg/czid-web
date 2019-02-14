@@ -85,7 +85,7 @@ Controls.propTypes = {
   reportDetails: PropTypes.ReportDetails,
   reportPageParams: PropTypes.shape({
     pipeline_version: PropTypes.string,
-    background_id: PropTypes.string
+    background_id: PropTypes.number
   }),
   canEdit: PropTypes.bool
 };
