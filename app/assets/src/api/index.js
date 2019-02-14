@@ -1,7 +1,6 @@
 // TODO(mark): Split this file up as more API methods get added.
 import axios from "axios";
 import { cleanFilePath } from "~utils/sample";
-import queryString from "query-string";
 
 const postWithCSRF = async (url, params) => {
   try {
