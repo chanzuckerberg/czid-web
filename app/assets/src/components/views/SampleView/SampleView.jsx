@@ -3,12 +3,9 @@
 import React from "react";
 import cx from "classnames";
 import { get } from "lodash/fp";
-import {
-  getURLParamString,
-  logAnalyticsEvent,
-  parseUrlParams,
-  saveVisualization
-} from "~/api";
+import { logAnalyticsEvent, saveVisualization } from "~/api";
+import { getURLParamString } from "~/helpers/url";
+import { parseUrlParams } from "~/helpers/url";
 import { ANALYTICS_EVENT_NAMES } from "~/api/constants";
 import PropTypes from "~/components/utils/propTypes";
 import { pipelineVersionHasAssembly } from "~/components/utils/sample";

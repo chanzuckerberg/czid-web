@@ -1,8 +1,6 @@
 // TODO(mark): Split this file up as more API methods get added.
 import axios from "axios";
-import { toPairs, pickBy } from "lodash/fp";
 import { cleanFilePath } from "~utils/sample";
-import queryString from "query-string";
 
 const postWithCSRF = async (url, params) => {
   const resp = await axios.post(url, {
@@ -49,28 +47,6 @@ const deleteWithCSRF = url =>
       authenticity_token: document.getElementsByName("csrf-token")[0].content
     }
   });
-
-const getURLParamString = params => {
-  const filtered = pickBy((v, k) => typeof v !== "object", params);
-  return toPairs(filtered)
-    .map(pair => pair.join("="))
-    .join("&");
-};
-
-// See also parseUrlParams in SamplesHeatmapView
-const parseUrlParams = () => {
-  let urlParams = queryString.parse(location.search, {
-    arrayFormat: "bracket"
-  });
-  for (var key in urlParams) {
-    try {
-      urlParams[key] = JSON.parse(urlParams[key]);
-    } catch (e) {
-      // pass
-    }
-  }
-  return urlParams;
-};
 
 const getSampleMetadata = (id, pipelineVersion) => {
   return get(
@@ -294,8 +270,6 @@ export {
   saveSampleName,
   saveSampleNotes,
   getAlignmentData,
-  getURLParamString,
-  parseUrlParams,
   deleteSample,
   getSummaryContigCounts,
   createSample,
