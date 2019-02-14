@@ -66,6 +66,10 @@ class UpdateMetadataFields < ActiveRecord::Migration[5.1]
     #########################
     # Modify existing fields
     #########################
+
+    # Replace 'participant' with 'host' in the description
+    MetadataField.find_each { |field| field.update(description: field.description.gsub("participant", "host")) }
+
     mf = MetadataField.find_by(name: "participant_id")
     mf.update(name: "host_id", display_name: "Host ID") if mf
 
@@ -77,10 +81,10 @@ class UpdateMetadataFields < ActiveRecord::Migration[5.1]
     mf.update(name: "host_life_stage", display_name: "Host Life Stage") if mf
 
     mf = MetadataField.find_by(name: "age")
-    mf.update(name: "host_age", display_name: "Host Age") if mf
+    mf.update(name: "host_age", display_name: "Host Age", description: "Age of the host (default in years)") if mf
 
     mf = MetadataField.find_by(name: "sex")
-    mf.update(name: "host_sex", display_name: "Host Sex") if mf
+    mf.update(name: "host_sex", display_name: "Host Sex", description: "Sex of the host") if mf
 
     mf = MetadataField.find_by(name: "genus_species")
     mf.update(name: "host_genus_species", display_name: "Host Genus Species") if mf
@@ -99,7 +103,7 @@ class UpdateMetadataFields < ActiveRecord::Migration[5.1]
   end
 
   def down
-    # Opposite of everything
+    # Opposite of everything (not perfect)
 
     MetadataField.where(name: ["water_control", "isolate", "gravid", "diseases_and_conditions"]).delete_all
 
@@ -124,6 +128,8 @@ class UpdateMetadataFields < ActiveRecord::Migration[5.1]
 
     hg = HostGenome.find_by(name: "Pig")
     hg.update(metadata_fields: []) if hg
+
+    MetadataField.find_each { |field| field.update(description: field.description.gsub("host", "participant")) }
 
     human_genome = HostGenome.find_by(name: "Human")
     to_create = []
