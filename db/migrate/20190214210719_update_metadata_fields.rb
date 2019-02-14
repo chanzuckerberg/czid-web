@@ -31,18 +31,20 @@ class UpdateMetadataFields < ActiveRecord::Migration[5.1]
       host_genomes: HostGenome.all
     )
 
-    to_create << MetadataField.new(
-      name: "gravid",
-      display_name: "Gravid",
-      description: "Whether or not the host(s) were gravid",
-      base_type: Metadatum::STRING_TYPE,
-      options: ["Yes", "No", "Mixed", "Unknown"],
-      force_options: 1,
-      is_core: 1,
-      is_default: 1,
-      group: "Host",
-      host_genomes: [HostGenome.find_by(name: "Mosquito")]
-    )
+    if HostGenome.find_by(name: "Mosquito")
+      to_create << MetadataField.new(
+        name: "gravid",
+        display_name: "Gravid",
+        description: "Whether or not the host(s) were gravid",
+        base_type: Metadatum::STRING_TYPE,
+        options: ["Yes", "No", "Mixed", "Unknown"],
+        force_options: 1,
+        is_core: 1,
+        is_default: 1,
+        group: "Host",
+        host_genomes: [HostGenome.find_by(name: "Mosquito")]
+      )
+    end
 
     mf = MetadataField.new(
       name: "diseases_and_conditions",
