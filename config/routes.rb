@@ -29,10 +29,6 @@ Rails.application.routes.draw do
     get :raw_results_folder, on: :member
     post :bulk_upload, on: :collection
     post :bulk_upload_with_metadata, on: :collection
-    get :samples_taxons, on: :collection
-    get :heatmap, on: :collection
-    get :download_heatmap, on: :collection
-    post :save_heatmap, on: :collection
     get :metadata_types_by_host_genome_name, on: :collection
     get :metadata, on: :member
     get :metadata_fields, on: :collection
@@ -47,6 +43,8 @@ Rails.application.routes.draw do
 
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
   get 'samples/:id/alignment_viz/:taxon_info', to: 'samples#show_taxid_alignment_viz'
+  get 'samples/heatmap', to: redirect(path: "visualizations/heatmap", status: 301)
+
   get 'cli_user_instructions', to: 'samples#cli_user_instructions'
   get 'select', to: 'home#index'
   get 'home', to: 'home#index'
@@ -86,6 +84,10 @@ Rails.application.routes.draw do
   get 'phylo_trees/:id/download', to: 'phylo_trees#download'
   get 'choose_taxon', to: 'phylo_trees#choose_taxon'
   get 'search_suggestions', to: 'samples#search_suggestions'
+
+  get 'visualizations/samples_taxons.json', to: 'visualizations#samples_taxons'
+  get 'visualizations/download_heatmap', to: 'visualizations#download_heatmap'
+  post 'visualizations/save_heatmap', to: 'visualizations#save_heatmap'
   get 'visualizations/:type(/:id)', to: 'visualizations#visualization'
 
   resources :host_genomes

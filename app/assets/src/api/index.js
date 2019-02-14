@@ -196,7 +196,7 @@ const bulkUploadWithMetadata = (samples, metadata) =>
   });
 
 const saveHeatmap = heatmapParams =>
-  postWithCSRF(`/samples/save_heatmap`, {
+  postWithCSRF(`/visualizations/save_heatmap`, {
     heatmapParams
   });
 
@@ -230,7 +230,7 @@ const getTaxonDistributionForBackground = (backgroundId, taxonId) =>
   get(`/backgrounds/${backgroundId}/show_taxon_dist.json?taxid=${taxonId}`);
 
 const getSampleTaxons = (params, cancelToken) =>
-  get("/samples/samples_taxons.json", {
+  get("/visualizations/samples_taxons.json", {
     params,
     cancelToken
   });

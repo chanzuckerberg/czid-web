@@ -25,7 +25,7 @@ class SamplesController < ApplicationController
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :all, :show_sample_names,
-                   :samples_taxons, :heatmap, :save_heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields,
+                   :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields,
                    :samples_going_public, :search_suggestions, :upload].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
@@ -500,11 +500,6 @@ class SamplesController < ApplicationController
     render json: samples.to_json(include: [{ project: { only: [:id, :name] } }])
   end
 
-  def samples_taxons
-    @sample_taxons_dict = sample_taxons_dict(params)
-    render json: @sample_taxons_dict
-  end
-
   def report_info
     expires_in 30.days
     @pipeline_run = select_pipeline_run(@sample, params)
@@ -904,56 +899,6 @@ class SamplesController < ApplicationController
     taxid_name = pipeline_run.taxon_counts.find_by(tax_id: taxid).name
     return "taxon-#{taxid}" unless taxid_name
     taxid_name.downcase.gsub(/\W/, "-")
-  end
-
-  def sample_taxons_dict(params)
-    sample_ids = (params[:sampleIds] || []).map(&:to_i)
-    num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
-    removed_taxon_ids = (params[:removedTaxonIds] || []).map do |x|
-      begin
-        Integer(x)
-      rescue ArgumentError
-        nil
-      end
-    end
-    removed_taxon_ids = removed_taxon_ids.compact
-    categories = params[:categories]
-    threshold_filters = if params[:thresholdFilters].is_a?(Array)
-                          (params[:thresholdFilters] || []).map { |filter| JSON.parse(filter || "{}") }
-                        else
-                          JSON.parse(params[:thresholdFilters] || "[]")
-                        end
-    subcategories = if params[:subcategories].respond_to?(:to_h)
-                      params[:subcategories].permit!.to_h
-                    else
-                      JSON.parse(params[:subcategories] || "{}")
-                    end
-    include_phage = subcategories.fetch("Viruses", []).include?("Phage")
-    read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
-
-    # TODO: should fail if field is not well formatted and return proper error to client
-    sort_by = params[:sortBy] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
-    species_selected = params[:species] == "1" # Otherwise genus selected
-    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs, :metadata])
-    return {} if samples.empty?
-
-    first_sample = samples.first
-    background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
-
-    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
-    taxon_ids -= removed_taxon_ids
-
-    samples_taxons_details(samples, taxon_ids, background_id, species_selected)
-  end
-
-  def get_background_id(sample)
-    if params[:background_id]
-      viewable_background_ids = current_power.backgrounds.pluck(:id)
-      if viewable_background_ids.include?(params[:background_id].to_i)
-        return params[:background_id]
-      end
-    end
-    sample.default_background_id
   end
 
   def set_sample

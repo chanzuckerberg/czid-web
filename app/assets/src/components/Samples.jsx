@@ -793,7 +793,7 @@ class Samples extends React.Component {
   compareSamples() {
     if (this.state.selectedSampleIds.length) {
       window.open(
-        `/samples/heatmap?sampleIds=${this.state.selectedSampleIds}`,
+        `/visualizations/heatmap?sampleIds=${this.state.selectedSampleIds}`,
         "_self"
       );
     }
