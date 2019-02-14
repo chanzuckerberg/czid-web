@@ -60,10 +60,11 @@ class ApplicationController < ActionController::Base
   end
 
   def get_background_id(sample)
-    if params[:background_id]
+    background_id = params[:background_id].to_i
+    if background_id > 0
       viewable_background_ids = current_power.backgrounds.pluck(:id)
-      if viewable_background_ids.include?(params[:background_id].to_i)
-        return params[:background_id]
+      if viewable_background_ids.include?(background_id)
+        return background_id
       end
     end
     sample.default_background_id
