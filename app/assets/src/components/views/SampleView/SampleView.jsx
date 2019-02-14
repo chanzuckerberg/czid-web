@@ -3,7 +3,12 @@
 import React from "react";
 import cx from "classnames";
 import { get } from "lodash/fp";
-import { getURLParamString, logAnalyticsEvent } from "~/api";
+import {
+  getURLParamString,
+  logAnalyticsEvent,
+  parseUrlParams,
+  saveVisualization
+} from "~/api";
 import { ANALYTICS_EVENT_NAMES } from "~/api/constants";
 import PropTypes from "~/components/utils/propTypes";
 import { pipelineVersionHasAssembly } from "~/components/utils/sample";
@@ -16,6 +21,9 @@ import Tabs from "~/components/ui/controls/Tabs";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import Controls from "./Controls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
+import { SaveButton, ShareButton } from "~ui/controls/buttons";
+import { Popup } from "semantic-ui-react";
+import copy from "copy-to-clipboard";
 
 import cs from "./sample_view.scss";
 
@@ -280,6 +288,17 @@ class SampleView extends React.Component {
     return {};
   };
 
+  // TODO (gdingle): refactor with onShareClick in SamplesHeatmapView?
+  onShareClick = () => {
+    copy(window.location.href);
+  };
+
+  onSaveClick = async () => {
+    // TODO (gdingle): add analytics tracking?
+    const params = parseUrlParams();
+    await saveVisualization(params.view, params);
+  };
+
   render() {
     const versionDisplay = this.renderVersionDisplay();
 
@@ -336,6 +355,13 @@ class SampleView extends React.Component {
             </div>
           </ViewHeader.Content>
           <ViewHeader.Controls>
+            <Popup
+              trigger={<ShareButton onClick={this.onShareClick} />}
+              content="A shareable URL has been copied to your clipboard!"
+              on="click"
+              hideOnScroll
+            />{" "}
+            <SaveButton onClick={this.onSaveClick} />{" "}
             <Controls
               reportPresent={reportPresent}
               sample={sample}
@@ -383,7 +409,8 @@ SampleView.propTypes = {
   summaryStats: PropTypes.SummaryStats,
   reportPageParams: PropTypes.shape({
     pipeline_version: PropTypes.string,
-    background_id: PropTypes.string
+    // TODO (gdingle): standardize on string or number
+    background_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
   }),
   amr: PropTypes.arrayOf(
     PropTypes.shape({

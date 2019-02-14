@@ -43,28 +43,6 @@ module HeatmapHelper
     send_data output_csv, filename: 'heatmap.csv'
   end
 
-  # TODO: (gdingle): access control
-  def save_heatmap
-    @data = params[:heatmapParams]
-    vis = Visualization.create(
-      user: current_user,
-      data: @data
-    )
-    vis.sample_ids = @data[:sampleIds]
-
-    render json: {
-      status: "success",
-      message: "Heatmap saved successfully",
-      data: @data
-    }
-  rescue => err
-    render json: {
-      status: "failed",
-      message: "Unable to save heatmap",
-      errors: [err]
-    }
-  end
-
   def samples_taxons
     @sample_taxons_dict = sample_taxons_dict(params)
     render json: @sample_taxons_dict

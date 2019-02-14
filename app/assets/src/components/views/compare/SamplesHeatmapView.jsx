@@ -20,7 +20,11 @@ import {
   MultipleNestedDropdown
 } from "~ui/controls/dropdowns";
 import { processMetadata } from "~utils/metadata";
-import { getSampleTaxons, getSampleMetadataFields, saveHeatmap } from "~/api";
+import {
+  getSampleTaxons,
+  getSampleMetadataFields,
+  saveVisualization
+} from "~/api";
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
 
@@ -154,7 +158,7 @@ class SamplesHeatmapView extends React.Component {
 
   onSaveClick = async () => {
     // TODO (gdingle): add analytics tracking?
-    await saveHeatmap(this.getUrlParams());
+    await saveVisualization("heatmap", this.getUrlParams());
   };
 
   metricToSortField(metric) {

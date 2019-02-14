@@ -514,7 +514,7 @@ ActiveRecord::Schema.define(version: 20_190_208_234_410) do
 
   create_table "visualizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "user_id"
-    t.string "visualization_type"
+    t.string "visualization_type", null: false
     t.text "data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

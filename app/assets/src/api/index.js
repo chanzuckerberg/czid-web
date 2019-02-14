@@ -2,6 +2,7 @@
 import axios from "axios";
 import { toPairs, pickBy } from "lodash/fp";
 import { cleanFilePath } from "~utils/sample";
+import queryString from "query-string";
 
 const postWithCSRF = async (url, params) => {
   const resp = await axios.post(url, {
@@ -54,6 +55,21 @@ const getURLParamString = params => {
   return toPairs(filtered)
     .map(pair => pair.join("="))
     .join("&");
+};
+
+// See also parseUrlParams in SamplesHeatmapView
+const parseUrlParams = () => {
+  let urlParams = queryString.parse(location.search, {
+    arrayFormat: "bracket"
+  });
+  for (var key in urlParams) {
+    try {
+      urlParams[key] = JSON.parse(urlParams[key]);
+    } catch (e) {
+      // pass
+    }
+  }
+  return urlParams;
 };
 
 const getSampleMetadata = (id, pipelineVersion) => {
@@ -195,9 +211,10 @@ const bulkUploadWithMetadata = (samples, metadata) =>
     client: "web"
   });
 
-const saveHeatmap = heatmapParams =>
-  postWithCSRF(`/visualizations/save_heatmap`, {
-    heatmapParams
+const saveVisualization = (type, data) =>
+  postWithCSRF(`/visualizations/${type}/save`, {
+    type,
+    data
   });
 
 const markSampleUploaded = sampleId =>
@@ -278,6 +295,7 @@ export {
   saveSampleNotes,
   getAlignmentData,
   getURLParamString,
+  parseUrlParams,
   deleteSample,
   getSummaryContigCounts,
   createSample,
@@ -289,7 +307,7 @@ export {
   bulkUploadRemoteSamples,
   bulkUploadWithMetadata,
   markSampleUploaded,
-  saveHeatmap,
+  saveVisualization,
   uploadFileToUrl,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
