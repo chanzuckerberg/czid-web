@@ -6,7 +6,7 @@ import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import PropTypes from "prop-types";
-import { resetUrl, parseUrlParams } from "~/helpers/url";
+import { parseUrlParams } from "~/helpers/url";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
 import cs from "./phylo_tree_list_view.scss";
 
@@ -15,7 +15,6 @@ class PhyloTreeListView extends React.Component {
     super(props);
 
     let urlParams = this.parseUrlParams();
-    resetUrl();
 
     this.state = {
       selectedPhyloTreeId: this.getDefaultSelectedTreeId(

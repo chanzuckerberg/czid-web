@@ -34,6 +34,7 @@ import LoadingLabel from "./ui/labels/LoadingLabel";
 import HoverActions from "./views/report/ReportTable/HoverActions";
 import { getSampleReportInfo, getSummaryContigCounts } from "~/api";
 import { pipelineVersionHasAssembly } from "./utils/sample";
+import queryString from "query-string";
 
 const DEFAULT_MIN_CONTIG_SIZE = 4;
 const HUMAN_TAX_IDS = [9605, 9606];
@@ -163,6 +164,12 @@ class PipelineSampleReport extends React.Component {
       minContigSize: cachedMinContigSize || DEFAULT_MIN_CONTIG_SIZE
     };
 
+    this.state = {
+      ...this.state,
+      // Override from the URL
+      ...this.parseUrlParams()
+    };
+
     this.expandAll = false;
     this.expandedGenera = [];
     this.thresholded_taxons = [];
@@ -179,6 +186,26 @@ class PipelineSampleReport extends React.Component {
 
   componentDidMount() {
     this.scrollDown();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // Set the state in the URL
+    this.props.refreshPage(this.state, false);
+  }
+
+  // See also parseUrlParams in SamplesHeatmapView
+  parseUrlParams() {
+    let urlParams = queryString.parse(location.search, {
+      arrayFormat: "bracket"
+    });
+    for (var key in urlParams) {
+      try {
+        urlParams[key] = JSON.parse(urlParams[key]);
+      } catch (e) {
+        // pass
+      }
+    }
+    return urlParams;
   }
 
   fetchSearchList = () => {
@@ -652,6 +679,7 @@ class PipelineSampleReport extends React.Component {
         }
       },
       () => {
+        // TODO (gdingle): do we really want to reload the page here?
         this.props.refreshPage({ background_id: backgroundId });
       }
     );

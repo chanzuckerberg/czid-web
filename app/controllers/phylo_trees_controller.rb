@@ -34,7 +34,8 @@ class PhyloTreesController < ApplicationController
 
   def index
     @project = []
-    @phylo_trees = current_power.phylo_trees
+    # Common use case is looking for the most recently created phylo tree
+    @phylo_trees = current_power.phylo_trees.order(updated_at: :desc)
     @taxon = {}
 
     taxid = params[:taxId]
