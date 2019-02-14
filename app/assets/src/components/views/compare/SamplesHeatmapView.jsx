@@ -4,7 +4,6 @@ import axios from "axios";
 import queryString from "query-string";
 import { get, set, min, max } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
-import { Popup } from "semantic-ui-react";
 import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
 import ErrorBoundary from "~/components/ErrorBoundary";
@@ -12,6 +11,8 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
 import Slider from "~ui/controls/Slider";
+import BasicPopup from "~/components/BasicPopup";
+
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import {
   Dropdown,
@@ -722,7 +723,7 @@ class SamplesHeatmapView extends React.Component {
               />
             </ViewHeader.Content>
             <ViewHeader.Controls className={cs.controls}>
-              <Popup
+              <BasicPopup
                 trigger={
                   <ShareButton
                     onClick={this.onShareClick}
