@@ -16,7 +16,8 @@ class ProjectsController < ApplicationController
   READ_ACTIONS = [
     :show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status,
     :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status,
-    :send_project_reports_csv, :validate_metadata_csv, :upload_metadata, :validate_sample_name
+    :send_project_reports_csv, :validate_metadata_csv, :upload_metadata,
+    :validate_sample_names
   ].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index, :send_project_csv, :choose_project].freeze
@@ -42,6 +43,15 @@ class ProjectsController < ApplicationController
         @projects = current_power.projects
       end
       format.json do
+        only_updatable = ActiveModel::Type::Boolean.new.cast(params[:onlyUpdatable])
+
+        # TODO(mark): Reconcile this with the part below.
+        # These returned projects contain different fields than the ones below.
+        if only_updatable
+          render json: current_power.updatable_projects
+          return
+        end
+
         only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
         exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
 
@@ -222,10 +232,18 @@ class ProjectsController < ApplicationController
         MetricUtil.log_analytics_event(event, current_user, id: @project.id)
 
         format.html { redirect_to @project, notice: 'Project was successfully created.' }
-        format.json { render :show, status: :created, location: @project }
+        format.json { render :show, status: :created, location: @project, project: @project }
       else
         format.html { render :new }
         format.json { render json: @project.errors.full_messages, status: :unprocessable_entity }
+      end
+    end
+  rescue ActiveRecord::RecordNotUnique
+    respond_to do |format|
+      format.html {}
+      format.json do
+        render json: "Duplicate name",
+               status: :unprocessable_entity
       end
     end
   end
@@ -298,15 +316,30 @@ class ProjectsController < ApplicationController
   end
 
   # TODO: Consider consolidating into a general sample validator
-  def validate_sample_name
-    sample_name = params[:sample_name]
-    i = 0
-    # If the sample name already exists in the project, add a _1, _2, _3, etc.
-    while Sample.where(project: @project).where(name: sample_name).present?
-      i += 1
-      sample_name = params[:sample_name] + "_#{i}"
+  # Takes an array of sample names.
+  # Returns an array of sample names that has no name collisions with existing samples or with each other.
+  def validate_sample_names
+    sample_names = params[:sample_names]
+    new_sample_names = []
+
+    existing_names = Sample.where(project: @project).pluck(:name)
+
+    sample_names.each do |sample_name|
+      i = 0
+      cur_sample_name = sample_name
+
+      # If the sample name already exists in the project, add a _1, _2, _3, etc.
+      while existing_names.include?(cur_sample_name)
+        i += 1
+        cur_sample_name = sample_name + "_#{i}"
+      end
+
+      new_sample_names << cur_sample_name
+      # Add the validated sample name to existing names, so subsequent names don't collide.
+      existing_names << cur_sample_name
     end
-    render json: { sample_name: sample_name }
+
+    render json: new_sample_names
   end
 
   private

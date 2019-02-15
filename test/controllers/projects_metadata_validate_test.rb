@@ -126,9 +126,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'sample_type', 'age', 'admission_date', 'blood_fed', 'reported_sex'],
         rows: [
-          ['metadata_validation_sample_human', 'Whole Blood', 100, '2018-01-01', '', ''],
           ['metadata_validation_sample_human', 'Whole Blood', 'foobar', 'foobar', 'foobar', 'foobar'],
-          ['metadata_validation_sample_mosquito', 'Whole Blood', '', '', 'Yes', 'Male'],
           ['metadata_validation_sample_mosquito', 'Whole Blood', 'foobar', 'foobar', 'foobar', 'foobar']
         ]
       }
@@ -138,16 +136,16 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
 
     assert_equal 7, @response.parsed_body['issues']['errors'].length
     # Error should throw if invalid float is passed for float data type.
-    assert_match "#{MetadataValidationErrors.invalid_number('foobar')} (row 2)", @response.parsed_body['issues']['errors'][0]
+    assert_match "#{MetadataValidationErrors.invalid_number('foobar')} (row 1)", @response.parsed_body['issues']['errors'][0]
     # Error should throw if invalid date is passed for date data type.
-    assert_match "#{MetadataValidationErrors.invalid_date('foobar')} (row 2)", @response.parsed_body['issues']['errors'][1]
+    assert_match "#{MetadataValidationErrors.invalid_date('foobar')} (row 1)", @response.parsed_body['issues']['errors'][1]
     # Error should throw if metadata type is not supported for the sample's host genome.
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('blood_fed', 'Human')} (row 2)", @response.parsed_body['issues']['errors'][2]
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('reported_sex', 'Human')} (row 2)", @response.parsed_body['issues']['errors'][3]
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('age', 'Mosquito')} (row 4)", @response.parsed_body['issues']['errors'][4]
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('admission_date', 'Mosquito')} (row 4)", @response.parsed_body['issues']['errors'][5]
+    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('blood_fed', 'Human')} (row 1)", @response.parsed_body['issues']['errors'][2]
+    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('reported_sex', 'Human')} (row 1)", @response.parsed_body['issues']['errors'][3]
+    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('age', 'Mosquito')} (row 2)", @response.parsed_body['issues']['errors'][4]
+    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('admission_date', 'Mosquito')} (row 2)", @response.parsed_body['issues']['errors'][5]
     # Error should throw if string value doesn't match fixed list of string options.
-    assert_match "#{MetadataValidationErrors.invalid_option('reported_sex', 'foobar')} (row 4)", @response.parsed_body['issues']['errors'][6]
+    assert_match "#{MetadataValidationErrors.invalid_option('reported_sex', 'foobar')} (row 2)", @response.parsed_body['issues']['errors'][6]
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
@@ -159,8 +157,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'sex'],
         rows: [
-          ['metadata_validation_sample_human', 'Female'],
-          ['metadata_validation_sample_human', 'Male']
+          ['metadata_validation_sample_human', 'Female']
         ]
       }
     }, as: :json

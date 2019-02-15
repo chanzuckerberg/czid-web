@@ -1,4 +1,4 @@
-import _fp from "lodash/fp";
+import { flow, keyBy, mapValues } from "lodash/fp";
 import {
   bulkUploadRemoteSamples,
   bulkUploadWithMetadata,
@@ -6,9 +6,6 @@ import {
   markSampleUploaded,
   uploadFileToUrl
 } from "~/api";
-import { cleanFilePath } from "~utils/sample";
-
-const map = _fp.map.convert({ cap: false });
 
 export const bulkUploadRemote = ({ samples, metadata }) =>
   metadata
@@ -16,9 +13,7 @@ export const bulkUploadRemote = ({ samples, metadata }) =>
     : bulkUploadRemoteSamples(samples);
 
 export const bulkUploadLocalWithMetadata = ({
-  sampleNamesToFiles,
-  project,
-  hostId,
+  samples,
   metadata,
   onCreateSamplesError,
   onUploadProgress,
@@ -29,6 +24,11 @@ export const bulkUploadLocalWithMetadata = ({
   // Store the upload progress of file names, so we can track when
   // everything is done.
   const fileNamesToProgress = {};
+
+  const sampleNamesToFiles = flow(
+    keyBy("name"),
+    mapValues(sample => sample.input_files_attributes)
+  )(samples);
 
   // This function needs access to fileNamesToProgress.
   const onFileUploadSuccess = (sampleName, sampleId) => {
@@ -51,29 +51,11 @@ export const bulkUploadLocalWithMetadata = ({
   window.onbeforeunload = () =>
     "Uploading is in progress. Are you sure you want to exit?";
 
-  // Convert sampleNamesToFiles to sample params.
-  const samples = map((files, sampleName) => {
-    const fileAttributes = Array.from(files, file => {
-      return {
-        source_type: "local",
-        source: cleanFilePath(file.name),
-        parts: cleanFilePath(file.name)
-      };
-    });
-
-    return {
-      name: sampleName,
-      project_id: project.id,
-      host_genome_id: hostId,
-      input_files_attributes: fileAttributes,
-      status: "created",
-      client: "web"
-    };
-  }, sampleNamesToFiles);
-
   bulkUploadWithMetadata(samples, metadata)
     .then(response => {
-      onCreateSamplesError(response.errors);
+      if (response.errors.length > 0) {
+        onCreateSamplesError(response.errors);
+      }
 
       // After successful sample creation, upload each sample's input files to the presigned URLs
       response.samples.forEach(sample => {
@@ -97,7 +79,7 @@ export const bulkUploadLocalWithMetadata = ({
         });
       });
     })
-    .catch(error => {
+    .catch(() => {
       if (onCreateSamplesError) {
         onCreateSamplesError();
       }
