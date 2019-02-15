@@ -11,7 +11,7 @@ class MetadataController < ApplicationController
 
   def instructions
   end
-
+  
   # TODO(mark): Factor this out into metadata_fields_controller, and add other CRUD endpoints.
   # All users get the same fields.
   def official_metadata_fields
