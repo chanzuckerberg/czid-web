@@ -5,6 +5,9 @@ class MetadataController < ApplicationController
   def dictionary
   end
 
+  def instructions
+  end
+
   # All users get the same fields.
   def official_metadata_fields
     render json: official_metadata_fields_helper

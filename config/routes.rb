@@ -102,6 +102,7 @@ Rails.application.routes.draw do
     get :dictionary, on: :collection
     get :official_metadata_fields, on: :collection
     get :metadata_template_csv, on: :collection
+    get :instructions, on: :collection
     post :validate_csv_for_new_samples, on: :collection
   end
 

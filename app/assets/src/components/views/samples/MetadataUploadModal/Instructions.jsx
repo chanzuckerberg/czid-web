@@ -2,16 +2,19 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import cs from "./metadata_upload_modal.scss";
+import NarrowContainer from "~/components/layout/NarrowContainer";
 
 class UploadInstructions extends React.Component {
   render() {
-    return (
+    const body = (
       <div className={cs.uploadInstructions}>
         <div className={cs.header}>
-          <div
-            className={cs.backButton}
-            onClick={this.props.onClose}
-          >{`< Back`}</div>
+          {!this.props.standalone && (
+            <div
+              className={cs.backButton}
+              onClick={this.props.onClose}
+            >{`< Back`}</div>
+          )}
           <div className={cs.title}>How to Upload a Metadata CSV</div>
         </div>
         <div className={cs.content}>
@@ -46,11 +49,18 @@ class UploadInstructions extends React.Component {
         </div>
       </div>
     );
+
+    return this.props.standalone ? (
+      <NarrowContainer>{body}</NarrowContainer>
+    ) : (
+      body
+    );
   }
 }
 
 UploadInstructions.propTypes = {
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  standalone: PropTypes.bool
 };
 
 export default UploadInstructions;
