@@ -139,7 +139,7 @@ class SamplesHeatmapView extends React.Component {
   }
 
   downloadCurrentViewDataURL() {
-    let url = new URL("/samples/download_heatmap", window.origin);
+    let url = new URL("/visualizations/download_heatmap", window.origin);
     location.href = `${url.toString()}?${this.prepareParams()}`;
   }
 
