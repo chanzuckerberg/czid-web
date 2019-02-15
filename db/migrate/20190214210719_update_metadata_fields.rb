@@ -91,9 +91,12 @@ class UpdateMetadataFields < ActiveRecord::Migration[5.1]
     mf = MetadataField.find_by(name: "genus_species")
     mf.update(name: "host_genus_species", display_name: "Host Genus Species") if mf
 
+    mf = MetadataField.find_by(name: "race")
+    mf.update(name: "host_race_ethnicity", display_name: "Host Race/Ethnicity") if mf
+
     # Assign all the fields on Cat to Pig (non-human defaults)
     if HostGenome.find_by(name: "Pig") && HostGenome.find_by(name: "Cat")
-      HostGenome.find_by(name: "Pig").metadata_fields << HostGenome.find_by(name: "Cat").metadata_fields
+      HostGenome.find_by(name: "Pig").metadata_fields = HostGenome.find_by(name: "Pig").metadata_fields.or(HostGenome.find_by(name: "Cat").metadata_fields)
     end
 
     #########################
@@ -127,6 +130,9 @@ class UpdateMetadataFields < ActiveRecord::Migration[5.1]
 
     mf = MetadataField.find_by(name: "host_genus_species")
     mf.update(name: "genus_species", display_name: "Genus Species") if mf
+
+    mf = MetadataField.find_by(name: "host_race_ethnicity")
+    mf.update(name: "race", display_name: "Race/Ethnicity") if mf
 
     hg = HostGenome.find_by(name: "Pig")
     hg.update(metadata_fields: []) if hg
