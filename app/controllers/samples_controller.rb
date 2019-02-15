@@ -216,8 +216,8 @@ class SamplesController < ApplicationController
     unless users.empty?
       results["Uploader"] = {
         "name" => "Uploader",
-        "results" => users.index_by(&:name).map do |_, u|
-          { "category" => "Uploader", "title" => u.name, "id" => u.id }
+        "results" => users.group_by(&:name).map do |val, records|
+          { "category" => "Uploader", "title" => val, "id" => records.pluck(:id) }
         end
       }
     end
