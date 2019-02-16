@@ -15,7 +15,7 @@ import TermsAgreement from "~ui/controls/TermsAgreement";
 import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { openUrlWithTimeout } from "~utils/links";
-import { validateSampleName } from "~/api";
+import { validateSampleNames } from "~/api";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -205,7 +205,7 @@ class BulkUploadImport extends React.Component {
       invalid: true,
       errorMessage: `${
         this.state.errorMessage
-      }\n\n${sampleName}: ${joinServerError(error.response.data)}`
+      }\n\n${sampleName}: ${joinServerError(error)}`
     });
     this.onRemoved(sampleName);
   };
@@ -222,7 +222,7 @@ class BulkUploadImport extends React.Component {
   handleLocalUploadError = (file, error) => {
     this.setState({
       invalid: true,
-      errorMessage: `${file.name}: ${joinServerError(error.response.data)}`
+      errorMessage: `${file.name}: ${joinServerError(error)}`
     });
   };
 
@@ -239,9 +239,7 @@ class BulkUploadImport extends React.Component {
 
   handleMarkSampleUploadedError = error => {
     this.setState({
-      errorMessage: `${this.state.errorMessage}. ${joinServerError(
-        error.response.data
-      )}`
+      errorMessage: `${this.state.errorMessage}. ${joinServerError(error)}`
     });
   };
 
@@ -502,14 +500,14 @@ class BulkUploadImport extends React.Component {
   resolveSampleNames = async () => {
     const updatedSamples = this.state.samples.map(async sample => {
       // For each sample, ask the server for a validated name
-      const resp = await validateSampleName(sample.project_id, sample.name);
-      if (sample.name !== resp.sample_name) {
+      const resp = await validateSampleNames(sample.project_id, [sample.name]);
+      if (sample.name !== resp[0]) {
         this.setState({
           successMessage: `${this.state.successMessage}\n\n${
             sample.name
-          } already exists, so name updated to ${resp.sample_name}.`
+          } already exists, so name updated to ${resp[0]}.`
         });
-        sample.name = resp.sample_name;
+        sample.name = resp[0];
       }
       return sample;
     });

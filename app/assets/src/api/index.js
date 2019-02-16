@@ -4,35 +4,46 @@ import { toPairs, pickBy } from "lodash/fp";
 import { cleanFilePath } from "~utils/sample";
 
 const postWithCSRF = async (url, params) => {
-  const resp = await axios.post(url, {
-    ...params,
-    // Fetch the CSRF token from the DOM.
-    authenticity_token: document.getElementsByName("csrf-token")[0].content
-  });
+  try {
+    const resp = await axios.post(url, {
+      ...params,
+      // Fetch the CSRF token from the DOM.
+      authenticity_token: document.getElementsByName("csrf-token")[0].content
+    });
 
-  // Just return the data.
-  // resp also contains headers, status, etc. that we might use later.
-  return resp.data;
+    // Just return the data.
+    // resp also contains headers, status, etc. that we might use later.
+    return resp.data;
+  } catch (e) {
+    return Promise.reject(e.response.data);
+  }
 };
 
 // TODO(mark): Remove redundancy in CSRF methods.
 const putWithCSRF = async (url, params) => {
-  const resp = await axios.put(url, {
-    ...params,
-    // Fetch the CSRF token from the DOM.
-    authenticity_token: document.getElementsByName("csrf-token")[0].content
-  });
+  try {
+    const resp = await axios.put(url, {
+      ...params,
+      // Fetch the CSRF token from the DOM.
+      authenticity_token: document.getElementsByName("csrf-token")[0].content
+    });
 
-  // Just return the data.
-  // resp also contains headers, status, etc. that we might use later.
-  return resp.data;
+    // Just return the data.
+    // resp also contains headers, status, etc. that we might use later.
+    return resp.data;
+  } catch (e) {
+    return Promise.reject(e.response.data);
+  }
 };
 
-// TODO: add error handling
 const get = async (url, config) => {
-  const resp = await axios.get(url, config);
+  try {
+    const resp = await axios.get(url, config);
 
-  return resp.data;
+    return resp.data;
+  } catch (e) {
+    return Promise.reject(e.response.data);
+  }
 };
 
 const deleteAsync = async (url, config) => {
@@ -41,13 +52,20 @@ const deleteAsync = async (url, config) => {
   return resp.data;
 };
 
-const deleteWithCSRF = url =>
-  axios.delete(url, {
-    data: {
-      // Fetch the CSRF token from the DOM.
-      authenticity_token: document.getElementsByName("csrf-token")[0].content
-    }
-  });
+const deleteWithCSRF = async url => {
+  try {
+    const resp = await axios.delete(url, {
+      data: {
+        // Fetch the CSRF token from the DOM.
+        authenticity_token: document.getElementsByName("csrf-token")[0].content
+      }
+    });
+
+    return resp.data;
+  } catch (e) {
+    return Promise.reject(e.response.data);
+  }
+};
 
 const getURLParamString = params => {
   const filtered = pickBy((v, k) => typeof v !== "object", params);
@@ -200,6 +218,15 @@ const saveHeatmap = heatmapParams =>
     heatmapParams
   });
 
+const bulkImportRemoteSamples = ({ projectId, hostGenomeId, bulkPath }) =>
+  get("/samples/bulk_import.json", {
+    params: {
+      project_id: projectId,
+      host_genome_id: hostGenomeId,
+      bulk_path: bulkPath
+    }
+  });
+
 const markSampleUploaded = sampleId =>
   putWithCSRF(`/samples/${sampleId}.json`, {
     sample: {
@@ -245,12 +272,18 @@ const getSamples = ({ projectId, onlyLibrary, excludeLibrary } = {}) =>
     }
   });
 
-const getProjects = ({ onlyLibrary, excludeLibrary } = {}) =>
+const getProjects = ({ onlyLibrary, excludeLibrary, onlyUpdatable } = {}) =>
   get("/projects.json", {
     params: {
       onlyLibrary,
-      excludeLibrary
+      excludeLibrary,
+      onlyUpdatable
     }
+  });
+
+const createProject = params =>
+  postWithCSRF("/projects.json", {
+    project: params
   });
 
 const logAnalyticsEvent = (eventName, eventData = {}) => {
@@ -259,9 +292,9 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
   if (window.analytics) window.analytics.track(eventName, eventData);
 };
 
-const validateSampleName = (projectId, sampleName) =>
-  postWithCSRF(`/projects/${projectId}/validate_sample_name`, {
-    sample_name: sampleName
+const validateSampleNames = (projectId, sampleNames) =>
+  postWithCSRF(`/projects/${projectId}/validate_sample_names`, {
+    sample_names: sampleNames
   });
 
 export {
@@ -270,6 +303,7 @@ export {
   getSampleMetadata,
   getSampleMetadataFields,
   getSampleReportInfo,
+  createProject,
   getSamples,
   getProjects,
   saveSampleMetadata,
@@ -288,6 +322,7 @@ export {
   getAllHostGenomes,
   bulkUploadRemoteSamples,
   bulkUploadWithMetadata,
+  bulkImportRemoteSamples,
   markSampleUploaded,
   saveHeatmap,
   uploadFileToUrl,
@@ -295,5 +330,5 @@ export {
   getTaxonDistributionForBackground,
   getSampleTaxons,
   logAnalyticsEvent,
-  validateSampleName
+  validateSampleNames
 };

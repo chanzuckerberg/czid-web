@@ -1,10 +1,11 @@
 @import "../../themes/colors";
+@import "~styles/themes/typography";
 
 .idseq-ui.input {
   input[type="text"],
   input[type="number"] {
+    @include font-body-xs;
     height: 34px;
-    font-size: 13px;
     border-radius: 4px;
     box-sizing: border-box;
     border: 1px solid $light-grey;
