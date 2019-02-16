@@ -21,8 +21,7 @@ class MetadataController < ApplicationController
     # Create temporary samples for metadata validation.
     samples = samples_data.map do |sample|
       Sample.new(
-        name: sample["name"],
-        host_genome_id: sample["host_genome_id"]
+        name: sample["name"]
       )
     end
 

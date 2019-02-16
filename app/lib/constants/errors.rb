@@ -8,6 +8,10 @@ module MetadataValidationErrors
     "sample_name column is required"
   end
 
+  def self.missing_host_genome_column
+    "host_genome column is required"
+  end
+
   def self.column_not_supported(column_name, column_index)
     "#{column_name} is not a supported metadata type. (column #{column_index})"
   end
@@ -20,12 +24,28 @@ module MetadataValidationErrors
     "Missing sample_name (row #{row_index})"
   end
 
+  def self.row_missing_host_genome(row_index)
+    "Missing host_genome (row #{row_index})"
+  end
+
   def self.row_invalid_sample_name(invalid_name, row_index)
     "#{invalid_name} does not match any samples in this project (row #{row_index})"
   end
 
-  def self.missing_required_metadata(missing_metadata_fields, row_index)
-    "Sample is missing required metadata: #{missing_metadata_fields.join(', ')}. (row #{row_index})"
+  def self.row_invalid_host_genome(invalid_name, row_index)
+    "#{invalid_name} is not a valid host genome (row #{row_index})"
+  end
+
+  def self.row_missing_required_metadata(sample_name, missing_metadata_fields, row_index)
+    "Sample #{sample_name} is missing required metadata: #{missing_metadata_fields.join(', ')}. (row #{row_index})"
+  end
+
+  def self.missing_sample_metadata_row(sample_name)
+    "Sample #{sample_name} is missing from the metadata CSV. Please upload required metadata."
+  end
+
+  def self.duplicate_sample(sample_name)
+    "Sample #{sample_name} appears multiple times in the metadata CSV."
   end
 
   def self.invalid_key_for_host_genome(key, host_genome)

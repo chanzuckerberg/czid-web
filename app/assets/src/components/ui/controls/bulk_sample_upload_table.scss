@@ -1,7 +1,17 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
 .bulkSampleUploadTable {
   .detectedMsg {
-    margin-top: 40px;
-    margin-bottom: 20px;
+    @include font-body-xs;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    color: $dark-grey;
+
+    .count {
+      @include font-header-xs;
+      color: $black;
+    }
   }
 
   :global {
@@ -17,6 +27,10 @@
           // Align better with the spinner
           margin-left: 2px;
         }
+      }
+
+      tbody {
+        max-height: 500px;
       }
 
       .column-removeIcon {
@@ -36,7 +50,8 @@
 
       &__data {
         &.column-sampleName {
-          font-weight: 700;
+          font-weight: 600;
+          padding-left: 5px;
         }
 
         &.column-files {

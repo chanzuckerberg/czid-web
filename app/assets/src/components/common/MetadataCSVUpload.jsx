@@ -18,7 +18,7 @@ const processCSVMetadata = csv => {
   return {
     headers,
     rows: map(
-      // Remove empty values, and convert row from array of strings to object.
+      // Remove empty values, and convert rows from array of strings to object.
       row => pickBy(value => value !== "", zipObject(headers, row)),
       rows
     )

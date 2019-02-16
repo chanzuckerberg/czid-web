@@ -4,13 +4,16 @@ import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import Instructions from "~/components/views/samples/MetadataUploadModal/Instructions";
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
+import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import cs from "./sample_upload_flow.scss";
 
 class UploadMetadataStep extends React.Component {
   state = {
     showInstructions: false,
     hasIssues: null,
-    continueDisabled: true
+    continueDisabled: true,
+    metadata: null,
+    issues: null
   };
 
   setShowInstructions = showInstructions => {
@@ -23,14 +26,22 @@ class UploadMetadataStep extends React.Component {
     const hasIssues =
       issues && (issues.errors.length > 0 || issues.warnings.length > 0);
     this.setState({
-      hasIssues
+      hasIssues,
+      metadata,
+      issues
     });
-    this.props.onMetadataChange({ metadata, issues });
 
     const metadataValid = metadata && !(issues && issues.errors.length > 0);
 
     this.setState({
       continueDisabled: !metadataValid
+    });
+  };
+
+  handleContinue = () => {
+    this.props.onUploadMetadata({
+      metadata: this.state.metadata,
+      issues: this.state.issues
     });
   };
 
@@ -42,7 +53,7 @@ class UploadMetadataStep extends React.Component {
         </div>
         <div className={cx(this.state.showInstructions && cs.hide)}>
           <div>
-            <div className={cs.title}>Metadata Upload</div>
+            <div className={cs.title}>Upload Metadata</div>
           </div>
           <div>
             <span
@@ -67,13 +78,17 @@ class UploadMetadataStep extends React.Component {
           <a className={cs.link} href="/metadata/metadata_template_csv">
             Download Metadata CSV Template
           </a>
-          <div className={cs.controls}>
+          <div className={cs.mainControls}>
             <PrimaryButton
               text="Continue"
-              onClick={this.props.onContinue}
+              onClick={this.handleContinue}
               disabled={this.state.continueDisabled}
               rounded={false}
+              className={cs.continueButton}
             />
+            <a href="/home">
+              <SecondaryButton text="Cancel" rounded={false} />
+            </a>
           </div>
         </div>
       </div>
@@ -82,12 +97,7 @@ class UploadMetadataStep extends React.Component {
 }
 
 UploadMetadataStep.propTypes = {
-  onMetadataChange: PropTypes.func.isRequired,
-  project: PropTypes.shape({
-    id: PropTypes.number,
-    name: PropTypes.string
-  }),
-  onContinue: PropTypes.func.isRequired,
+  onUploadMetadata: PropTypes.func.isRequired,
   samples: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string,

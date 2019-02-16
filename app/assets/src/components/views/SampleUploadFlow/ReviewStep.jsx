@@ -1,12 +1,11 @@
 import React from "react";
-import { get, keyBy, flow, mapValues, omit } from "lodash/fp";
+import { keyBy, flow, mapValues, omit } from "lodash/fp";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { bulkUploadLocalWithMetadata, bulkUploadRemote } from "~/api/upload";
-import { joinServerError } from "~utils/sample";
 import cs from "./sample_upload_flow.scss";
 
 const processMetadataRows = metadataRows =>
@@ -24,9 +23,9 @@ class ReviewStep extends React.Component {
       errorMessage: ""
     });
     // For uploading samples with files on S3
-    if (this.props.remoteSamples) {
+    if (this.props.uploadType === "remote") {
       bulkUploadRemote({
-        samples: this.props.remoteSamples,
+        samples: this.props.samples,
         metadata: processMetadataRows(this.props.metadata.rows)
       })
         .then(response => {
@@ -38,22 +37,19 @@ class ReviewStep extends React.Component {
         // TODO(mark): Display better errors.
         // For example, some samples may have successfully saved, but not others. Should explain to user.
         .catch(error => {
+          // eslint-disable-next-line no-console
+          console.error("onBulkUploadRemote error:", error);
           this.setState({
             submitState: "review",
-            errorMessage:
-              get("data.status", error) ||
-              "Unable to process sample(s), " +
-                "ensure sample is not a duplicate in the selected project"
+            errorMessage: "There were some issues creating your samples"
           });
         });
     }
     // For uploading samples with local files
-    if (this.props.localSampleNamesToFiles) {
+    if (this.props.uploadType === "local") {
       // TODO(mark): Handle progress indicators in UI.
       bulkUploadLocalWithMetadata({
-        sampleNamesToFiles: this.props.localSampleNamesToFiles,
-        project: this.props.project,
-        hostId: this.props.hostGenomeId,
+        samples: this.props.samples,
         metadata: processMetadataRows(this.props.metadata.rows),
         onAllUploadsComplete: () => {
           this.setState({
@@ -61,23 +57,22 @@ class ReviewStep extends React.Component {
           });
         },
         onCreateSamplesError: errors => {
+          // TODO(mark): Display better errors.
+          // eslint-disable-next-line no-console
+          console.error("onCreateSamplesError:", errors);
           this.setState({
             submitState: "review",
-            errorMessage: errors ? errors.join(" ") : "Failed to create samples"
+            errorMessage: "There were some issues creating your samples"
           });
         },
         // TODO(mark): Display better errors.
         // For example, some samples may have successfuly saved, but not others. Should explain to user.
         onUploadError: (file, error) => {
-          const uploadError = `${file.name}: ${joinServerError(
-            error.response.data
-          )}`;
-
+          // eslint-disable-next-line no-console
+          console.error("onUploadError:", error);
           this.setState({
             submitState: "review",
-            errorMessage: this.state.errorMessage
-              ? `${this.state.errorMessage}\n${uploadError}`
-              : uploadError
+            errorMessage: "There were some issues creating your samples"
           });
         },
         onMarkSampleUploadedError: sampleName => {
@@ -148,9 +143,12 @@ class ReviewStep extends React.Component {
 }
 
 ReviewStep.propTypes = {
-  metadata: PropTypes.object,
+  metadata: PropTypes.shape({
+    headers: PropTypes.arrayOf(PropTypes.string),
+    rows: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.any))
+  }),
   project: PropTypes.Project,
-  remoteSamples: PropTypes.arrayOf(
+  samples: PropTypes.arrayOf(
     PropTypes.shape({
       host_genome_id: PropTypes.number,
       input_file_attributes: PropTypes.shape({
@@ -164,10 +162,7 @@ ReviewStep.propTypes = {
     })
   ),
   onContinue: PropTypes.func.isRequired,
-  localSampleNamesToFiles: PropTypes.objectOf(
-    PropTypes.arrayOf(PropTypes.instanceOf(File))
-  ),
-  hostGenomeId: PropTypes.number
+  uploadType: PropTypes.string.isRequired
 };
 
 export default ReviewStep;

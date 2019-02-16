@@ -26,7 +26,7 @@ class DropdownTrigger extends React.Component {
         onClick={onClick}
       >
         <div className={cs.labelContainer}>
-          <span className={cs.label}>{label}</span>
+          {label && <span className={cs.label}>{label}</span>}
           {value}
         </div>
       </div>
