@@ -1,5 +1,11 @@
 class MetadataController < ApplicationController
   include MetadataHelper
+
+  # Token auth needed for CLI uploads
+  skip_before_action :verify_authenticity_token, only: [:validate_csv_for_new_samples]
+  before_action :authenticate_user!, except: [:validate_csv_for_new_samples]
+  acts_as_token_authentication_handler_for User, only: [:validate_csv_for_new_samples], fallback: :devise
+
   before_action :admin_required
 
   def dictionary
@@ -21,10 +27,17 @@ class MetadataController < ApplicationController
     metadata = params[:metadata]
     samples_data = params[:samples]
 
-    # Create temporary samples for metadata validation.
+    # Create temporary samples for metadata validation
     samples = samples_data.map do |sample|
+      # Allow specifying host genome by id (web) or name (CLI)
+      host_genome_id = if sample["host_genome_id"]
+                         sample["host_genome_id"]
+                       elsif sample["host_genome_name"]
+                         HostGenome.find_by(name: sample["host_genome_name"]).id
+                       end
       Sample.new(
-        name: sample["name"]
+        name: sample["name"],
+        host_genome_id: host_genome_id
       )
     end
 
@@ -34,5 +47,10 @@ class MetadataController < ApplicationController
       status: "success",
       issues: issues
     }
+  rescue => err
+    render json: {
+      status: "error",
+      issues: err
+    }, status: :unprocessable_entity
   end
 end
