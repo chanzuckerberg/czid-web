@@ -25,7 +25,7 @@ export default class TidyTree {
         minNonCollapsableChildren: 2,
         smallerFont: 8,
         largerFont: 12,
-        persistCollapsedInUrl: true
+        persistCollapsedInUrl: false
       },
       options || {}
     );

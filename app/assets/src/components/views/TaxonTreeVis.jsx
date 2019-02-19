@@ -57,7 +57,8 @@ class TaxonTreeVis extends React.Component {
         onNodeHover: this.handleNodeHover,
         onNodeLabelClick: this.handleNodeLabelClick,
         onCreatedTree: this.fillNodeValues,
-        tooltipContainer: this.treeTooltip
+        tooltipContainer: this.treeTooltip,
+        persistCollapsedInUrl: true
       }
     );
     this.treeVis.update();
@@ -83,13 +84,6 @@ class TaxonTreeVis extends React.Component {
       this.taxa = this.props.taxa;
       this.treeVis.setTree(this.createTree(this.props.taxa));
     }
-  }
-
-  static createNode() {
-    return {
-      children: [],
-      collapsed: false
-    };
   }
 
   handleNodeHover(node) {
