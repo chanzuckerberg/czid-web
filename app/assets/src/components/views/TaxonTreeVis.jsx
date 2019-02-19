@@ -98,6 +98,7 @@ class TaxonTreeVis extends React.Component {
 
   handleNodeLabelClick(node) {
     if (!node.data.modalData) {
+      // TODO (gdingle): we should show a "no description" instead of no-op
       this.props.onTaxonClick(null);
       return;
     }
