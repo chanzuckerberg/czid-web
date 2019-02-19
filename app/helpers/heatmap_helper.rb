@@ -33,7 +33,8 @@ module HeatmapHelper
           { text: "R log(1/e)", value: "NR_neglogevalue" }
         ],
         operators: [">=", "<="]
-      }
+      },
+      admin: current_user.admin?
     }
   end
 

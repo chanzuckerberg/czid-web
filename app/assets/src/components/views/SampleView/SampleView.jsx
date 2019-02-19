@@ -357,7 +357,8 @@ class SampleView extends React.Component {
               on="click"
               hideOnScroll
             />{" "}
-            <SaveButton onClick={this.onSaveClick} />{" "}
+            {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
+            {this.props.admin && <SaveButton onClick={this.onSaveClick} />}{" "}
             <Controls
               reportPresent={reportPresent}
               sample={sample}

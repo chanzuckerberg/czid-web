@@ -734,10 +734,12 @@ class SamplesHeatmapView extends React.Component {
                 on="click"
                 hideOnScroll
               />
-              <SaveButton
-                onClick={this.onSaveClick}
-                className={cs.controlElement}
-              />
+              {this.props.admin && (
+                <SaveButton
+                  onClick={this.onSaveClick}
+                  className={cs.controlElement}
+                />
+              )}
               <DownloadButtonDropdown
                 className={cs.controlElement}
                 options={downloadOptions}
@@ -777,7 +779,8 @@ SamplesHeatmapView.propTypes = {
   removedTaxonIds: PropTypes.array,
   taxonLevels: PropTypes.array,
   thresholdFilters: PropTypes.object,
-  savedParamValues: PropTypes.object
+  savedParamValues: PropTypes.object,
+  admin: PropTypes.bool
 };
 
 export default SamplesHeatmapView;
