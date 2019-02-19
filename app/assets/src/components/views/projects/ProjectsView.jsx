@@ -103,7 +103,7 @@ class ProjectsView extends React.Component {
         data={data}
         columns={this.columns}
         defaultRowHeight={120}
-        sortBy={"project"}
+        sortBy={"details"}
       />
     );
   }

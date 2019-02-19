@@ -71,6 +71,7 @@ class DiscoveryView extends React.Component {
 
   render() {
     const { currentTab, projects } = this.state;
+    const { onlyLibrary, excludeLibrary } = this.props;
     const tabs = this.computeTabs(projects);
 
     return (
@@ -85,7 +86,12 @@ class DiscoveryView extends React.Component {
         <Divider style="medium" />
         <NarrowContainer className={cs.viewContainer}>
           {currentTab == "projects" && <ProjectsView projects={projects} />}
-          {currentTab == "samples" && <SamplesView />}
+          {currentTab == "samples" && (
+            <SamplesView
+              onlyLibrary={onlyLibrary}
+              excludeLibrary={excludeLibrary}
+            />
+          )}
         </NarrowContainer>
       </div>
     );

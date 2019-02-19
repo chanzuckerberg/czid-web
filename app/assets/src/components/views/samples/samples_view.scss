@@ -1,0 +1,145 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1 0 auto;
+
+  .table {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .note {
+    flex: 0 0 auto;
+  }
+}
+
+.sampleHeader {
+  text-align: left;
+}
+
+.sample {
+  display: flex;
+  padding: 15px 0;
+
+  .publicAccess {
+    flex: 0 0 40px;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    margin-right: 20px;
+
+    .icon {
+      fill: $medium-grey;
+
+      &.iconGlobe {
+        width: 40px;
+      }
+
+      &.iconLock {
+        width: 36px;
+      }
+    }
+  }
+
+  .sampleRightPane {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+
+    .sampleNameAndStatus {
+      display: flex;
+      justify-items: center;
+      margin-bottom: 2px;
+
+      .sampleName {
+        @include font-body-xs;
+
+        flex: 0 1 auto;
+        text-align: left;
+        color: $black;
+      }
+
+      .sampleStatus {
+        align-self: center;
+        background-color: $light-grey;
+        border-radius: 13px;
+        color: $medium-grey;
+        flex: 0 0 auto;
+        font-size: 9px;
+        line-height: 1;
+        margin-left: 10px;
+        padding: 2px 4px;
+        text-transform: uppercase;
+
+        &.complete {
+          background-color: $success-bg;
+          color: $success;
+        }
+
+        &.failed {
+          background-color: $error-bg;
+          color: $error;
+        }
+
+        &.waiting,
+        &.uploading {
+          background-color: $warning-bg;
+          color: $warning;
+        }
+      }
+    }
+
+    .sampleDetails {
+      @include font-body-xxs;
+
+      color: $medium-grey;
+      text-align: left;
+
+      span:not(:first-child) {
+        margin-left: 10px;
+      }
+
+      span:not(:last-child) {
+        margin-right: 10px;
+      }
+    }
+  }
+}
+
+// .status {
+//   color: $medium-grey;
+
+//   &.complete {
+//     color: $success;
+//   }
+
+//   &.failed {
+//     color: $error;
+//   }
+
+//   &.waiting, &.uploading {
+//     color: $warning;
+//   }
+
+//   .statusName {
+//     @include font-body-xs;
+
+//     margin-bottom: 2px;
+//     text-transform: uppercase;
+//   }
+
+//   .totalRuntime {
+//     @include font-body-xxs;
+//   }
+// }
+
+.numberValueAndPercentage {
+  .percentage {
+    font-weight: $font-weight-regular;
+  }
+}

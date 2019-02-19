@@ -3,12 +3,13 @@ import PropTypes from "prop-types";
 import {
   AutoSizer,
   Column,
-  SortDirection,
   SortIndicator,
   Table as VirtualizedTable
 } from "react-virtualized";
 import "react-virtualized/styles.css";
-import { find, orderBy } from "lodash";
+import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
+import PlusIcon from "~ui/icons/PlusIcon";
+import { find, map } from "lodash";
 import cs from "./base_table.scss";
 import cx from "classnames";
 
@@ -18,18 +19,20 @@ class BaseTable extends React.Component {
   // tables accross the site.s
   // TODO: - limitations -
   // - needs dynamic row height (dynamic required use of CellMeasurer)
-  // - needs infinite scrolling
-  // - needs column picker
   // - needs selectable rows
 
+  // TODO BEFORE PR: (1) fix rowCount; (2) style columns
   constructor(props) {
     super(props);
 
+    // TOOD: move this to componentDidUpdate and remove from state?
     this.state = {
-      columns: this.setDefaults(this.props.columns),
-      sortBy: this.props.sortBy,
-      sortDirection: SortDirection.ASC
+      activeColumns: this.props.initialActiveColumns,
+      activeColumnsMenuOpen: false,
+      columns: this.setDefaults(this.props.columns)
     };
+
+    console.log("BaseTable:constructor");
   }
 
   humanize(key) {
@@ -51,11 +54,13 @@ class BaseTable extends React.Component {
     });
   };
 
-  _sort = ({ sortBy, sortDirection }) => {
-    this.setState({ sortBy, sortDirection });
-  };
-
   _sortableHeaderRenderer({ dataKey, label, sortBy, sortDirection }) {
+    console.log(
+      "BaseTable::_sortableHeaderRenderer",
+      dataKey,
+      sortBy,
+      sortDirection
+    );
     return (
       <div>
         {label}
@@ -64,77 +69,135 @@ class BaseTable extends React.Component {
     );
   }
 
-  render() {
-    const {
-      data,
-      defaultHeaderHeight,
-      defaultRowHeight,
-      onRowsRendered,
-      forwardRef,
-      sortable
-    } = this.props;
+  handleColumnChange = activeColumns => {
+    console.log(
+      "column change",
+      activeColumns,
+      this.state.activeColumns === activeColumns
+    );
+    this.setState({ activeColumns });
+  };
 
-    const { columns, sortBy, sortDirection } = this.state;
+  renderColumnSelector = () => {
+    const { activeColumns, activeColumnsMenuOpen, columns } = this.state;
+    const { defaultRowHeight } = this.props;
 
-    let columnSortFunction = (find(columns, { dataKey: sortBy }) || {})
-      .sortFunction;
-    const sortedData =
-      sortable && sortBy
-        ? orderBy(
-            data,
-            [
-              columnSortFunction
-                ? row => columnSortFunction(row[sortBy])
-                : sortBy
-            ],
-            [sortDirection === SortDirection.ASC ? "asc" : "desc"]
-          )
-        : data;
+    const options = columns.map(column => ({
+      value: column.dataKey,
+      text: column.label
+    }));
+
+    console.log("Basetable:renderColumnSelector", activeColumnsMenuOpen);
 
     return (
-      <AutoSizer>
-        {({ width, height }) => (
-          <VirtualizedTable
-            gridClassName={cs.grid}
-            headerClassName={cs.header}
-            headerHeight={defaultHeaderHeight}
-            height={height}
-            onRowsRendered={onRowsRendered}
-            ref={forwardRef}
-            rowClassName={cs.row}
-            rowCount={data.length}
-            rowGetter={({ index }) => sortedData[index]}
-            rowHeight={defaultRowHeight}
-            sort={sortable && this._sort}
-            sortBy={sortable && sortBy}
-            sortDirection={sortable && sortDirection}
-            width={width}
+      <MultipleDropdown
+        direction="left"
+        hideArrow
+        hideCounter
+        rounded
+        search
+        checkedOnTop
+        menuLabel="Select Columns"
+        onChange={this.handleColumnChange}
+        options={options}
+        trigger={<PlusIcon className={cs.plusIcon} />}
+        value={activeColumns}
+      />
+    );
+  };
+
+  render() {
+    const {
+      defaultHeaderHeight,
+      defaultRowHeight,
+      initialActiveColumns,
+      onRowsRendered,
+      forwardRef,
+      onSort,
+      rowCount,
+      rowGetter,
+      rowRenderer,
+      sortable,
+      sortBy,
+      sortDirection
+    } = this.props;
+    console.log("BaseTable:render");
+
+    const { activeColumns, columns } = this.state;
+    const columnOrder = activeColumns || map(columns, "dataKey");
+    return (
+      <div className={cs.tableContainer}>
+        <AutoSizer>
+          {({ width, height }) => (
+            <VirtualizedTable
+              gridClassName={cs.grid}
+              headerClassName={cs.header}
+              headerHeight={defaultHeaderHeight}
+              height={height}
+              onRowsRendered={onRowsRendered}
+              ref={forwardRef}
+              rowClassName={cs.row}
+              rowCount={rowCount}
+              rowGetter={rowGetter}
+              rowHeight={defaultRowHeight}
+              rowRenderer={rowRenderer}
+              sort={sortable && onSort}
+              sortBy={sortable && sortBy}
+              sortDirection={sortable && sortDirection}
+              width={width}
+            >
+              {columnOrder.map(dataKey => {
+                const columnProps = find(columns, { dataKey: dataKey });
+                const { className, ...extraProps } = columnProps;
+
+                return (
+                  <Column
+                    className={cx(cs.cell, className)}
+                    key={columnProps.dataKey}
+                    headerRenderer={
+                      sortable && !columnProps.disableSort
+                        ? this._sortableHeaderRenderer
+                        : undefined
+                    }
+                    {...extraProps}
+                  />
+                );
+              })}
+            </VirtualizedTable>
+          )}
+        </AutoSizer>
+        {/*
+          We cannot add these as columns because it gets rerendered every time we add a column,
+          causing the dropdown to close.
+         */}
+        {initialActiveColumns && (
+          <div
+            style={{ height: defaultHeaderHeight }}
+            className={cx(
+              cs.columnSelectorContainer,
+              cs.row,
+              "ReactVirtualized__Table__headerRow"
+            )}
           >
-            {columns.map(columnProps => {
-              const { className, ...extraProps } = columnProps;
-              return (
-                <Column
-                  className={cx(cs.cell, className)}
-                  key={columnProps.dataKey}
-                  headerRenderer={
-                    sortable && !columnProps.disableSort
-                      ? this._sortableHeaderRenderer
-                      : undefined
-                  }
-                  {...extraProps}
-                />
-              );
-            })}
-          </VirtualizedTable>
+            <div
+              style={{ height: 30 }}
+              className={cx(
+                cs.plusDropdown,
+                cs.header,
+                "ReactVirtualized__Table__headerColumn"
+              )}
+            >
+              {this.renderColumnSelector()}
+            </div>
+          </div>
         )}
-      </AutoSizer>
+      </div>
     );
   }
 }
 
 BaseTable.defaultProps = {
-  data: [],
-  defaultColumnWidth: 100,
+  defaultColumnWidth: 60,
   defaultHeaderHeight: 50,
   defaultRowHeight: 30
 };
@@ -145,17 +208,23 @@ BaseTable.propTypes = {
       dataKey: PropTypes.string.isRequired
     })
   ).isRequired,
-  data: PropTypes.array,
   defaultColumnWidth: PropTypes.number,
   defaultHeaderHeight: PropTypes.number,
   defaultRowHeight: PropTypes.number,
+  // Set of dataKeys of columns to be shown by default
+  initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
   onRowsRendered: PropTypes.func,
+  onSort: PropTypes.func,
   forwardRef: PropTypes.oneOfType([
     PropTypes.func,
     PropTypes.shape({ current: PropTypes.instanceOf(Element) })
   ]),
+  rowGetter: PropTypes.func.isRequired,
+  rowCount: PropTypes.number.isRequired,
+  rowRenderer: PropTypes.func,
   sortable: PropTypes.bool,
-  sortBy: PropTypes.string
+  sortBy: PropTypes.string,
+  sortDirection: PropTypes.string
 };
 
 export default BaseTable;

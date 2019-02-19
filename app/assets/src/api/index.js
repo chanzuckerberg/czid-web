@@ -1,4 +1,5 @@
 // TODO(mark): Split this file up as more API methods get added.
+// TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
 import { toPairs } from "lodash/fp";
 import { cleanFilePath } from "~utils/sample";
@@ -31,7 +32,6 @@ const putWithCSRF = async (url, params) => {
 // TODO: add error handling
 const get = async (url, config) => {
   const resp = await axios.get(url, config);
-
   return resp.data;
 };
 
@@ -57,12 +57,14 @@ const getSampleMetadata = (id, pipelineVersion) => {
 };
 
 // Get MetadataField info for the sample(s) (either one ID or an array)
-const getSampleMetadataFields = ids =>
-  get("/samples/metadata_fields", {
+const getSampleMetadataFields = ids => {
+  const result = get("/samples/metadata_fields", {
     params: {
       sampleIds: [ids].flat()
     }
   });
+  return result;
+};
 
 const saveSampleMetadata = (id, field, value) =>
   postWithCSRF(`/samples/${id}/save_metadata_v2`, {
@@ -264,18 +266,29 @@ const getSamples = ({
   projectId,
   onlyLibrary,
   excludeLibrary,
-  pageNumber,
-  pageSize
-} = {}) =>
-  get("/samples/index_v2.json", {
+  limit,
+  offset
+} = {}) => {
+  const result = get("/samples/index_v2.json", {
     params: {
       projectId,
       onlyLibrary,
       excludeLibrary,
-      pageNumber,
-      pageSize
+      limit,
+      offset
     }
   });
+  return result;
+};
+
+const getSampleDetails = ({ sampleIds }) => {
+  const result = get("/samples/details.json", {
+    params: {
+      sampleIds
+    }
+  });
+  return result;
+};
 
 const getProjects = ({ onlyLibrary, excludeLibrary } = {}) =>
   get("/projects.json", {
@@ -297,6 +310,7 @@ export {
   getSampleMetadataFields,
   getSampleReportInfo,
   getSamples,
+  getSampleDetails,
   getProjects,
   saveSampleMetadata,
   getMetadataTypesByHostGenomeName,

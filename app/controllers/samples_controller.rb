@@ -23,9 +23,9 @@ class SamplesController < ApplicationController
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :all, :show_sample_names,
-                   :samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields,
-                   :samples_going_public, :search_suggestions, :upload, :create_with_metadata].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details, :all,
+                   :show_sample_names,:samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name,
+                   :metadata_fields, :samples_going_public, :search_suggestions, :upload, :create_with_metadata].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload, :bulk_upload_with_metadata], fallback: :devise
@@ -45,6 +45,7 @@ class SamplesController < ApplicationController
 
   PAGE_SIZE = 30
   DEFAULT_MAX_NUM_TAXONS = 30
+  MAX_PAGE_SIZE_V2 = 100
 
   # GET /samples
   # GET /samples.json
@@ -81,7 +82,7 @@ class SamplesController < ApplicationController
     # Query by name for a Sample attribute or pathogen name in the Sample.
     if name_search_query.present?
       # Pass in a scope of pipeline runs using current_power
-      pipeline_run_ids = current_power.pipeline_runs.top_completed_runs.pluck(:id)
+      pipeline_run_ids = current_fpower.pipeline_runs.top_completed_runs.pluck(:id)
       results = results.search(name_search_query, pipeline_run_ids)
     end
 
@@ -120,7 +121,10 @@ class SamplesController < ApplicationController
   def index_v2
     only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
     exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
+    limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
+    offset = params[:offset].to_i
 
+    Rails.logger.debug("params=#{params}")
     @samples = if only_library
                  current_power.library_samples
                elsif exclude_library
@@ -131,10 +135,25 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       format.json do
-        render json: @samples.as_json(
-          only: [:id, :name, :sample_tissue, :host_genome_id, :project_id],
+        render json: @samples.offset(offset).limit(limit).as_json(
+          only: [:id, :name, :sample_tissue, :host_genome_id, :project_id, :created_at],
           methods: []
         )
+      end
+    end
+  end
+
+  def details
+    # TODO: a lot of the values return by this endpoint do not make sense on a sample controller
+    # Refactor once we have a clear API definition policy
+    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+    fetch_ready_ids = ActiveModel::Type::Boolean.new.cast(params[:readySampleIds])
+
+    @samples = current_power.viewable_samples.where(id: sample_ids)
+
+    respond_to do |format|
+      format.json do
+        render json: format_samples(@samples)
       end
     end
   end

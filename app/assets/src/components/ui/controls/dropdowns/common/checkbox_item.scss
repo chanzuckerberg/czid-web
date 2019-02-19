@@ -1,0 +1,14 @@
+@import "~styles/themes/colors";
+
+.listElement {
+  display: flex;
+  align-items: center;
+
+  .listCheckmark {
+    margin-right: 10px;
+
+    .disabled {
+      color: $off-white;
+    }
+  }
+}

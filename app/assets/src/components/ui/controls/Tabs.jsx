@@ -20,7 +20,10 @@ class Tabs extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.value !== this.props.value) {
+    if (
+      prevProps.value !== this.props.value ||
+      prevProps.tabs !== this.props.tabs
+    ) {
       this.adjustIndicator();
     }
   }
