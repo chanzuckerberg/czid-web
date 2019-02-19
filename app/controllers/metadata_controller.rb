@@ -27,17 +27,10 @@ class MetadataController < ApplicationController
     metadata = params[:metadata]
     samples_data = params[:samples]
 
-    # Create temporary samples for metadata validation
+    # Create temporary samples for metadata validation.
     samples = samples_data.map do |sample|
-      # Allow specifying host genome by id (web) or name (CLI)
-      host_genome_id = if sample["host_genome_id"]
-                         sample["host_genome_id"]
-                       elsif sample["host_genome_name"]
-                         HostGenome.find_by(name: sample["host_genome_name"]).id
-                       end
       Sample.new(
-        name: sample["name"],
-        host_genome_id: host_genome_id
+        name: sample["name"]
       )
     end
 
