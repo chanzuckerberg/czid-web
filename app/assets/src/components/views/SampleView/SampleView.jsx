@@ -4,7 +4,11 @@ import React from "react";
 import cx from "classnames";
 import { get } from "lodash/fp";
 import { logAnalyticsEvent, saveVisualization } from "~/api";
-import { getURLParamString, parseUrlParams } from "~/helpers/url";
+import {
+  getURLParamString,
+  parseUrlParams,
+  copyShortUrlToClipboard
+} from "~/helpers/url";
 import { ANALYTICS_EVENT_NAMES } from "~/api/constants";
 import PropTypes from "~/components/utils/propTypes";
 import { pipelineVersionHasAssembly } from "~/components/utils/sample";
@@ -18,7 +22,6 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import Controls from "./Controls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
-import copy from "copy-to-clipboard";
 
 import cs from "./sample_view.scss";
 
@@ -284,9 +287,8 @@ class SampleView extends React.Component {
     return {};
   };
 
-  // TODO (gdingle): refactor with onShareClick in SamplesHeatmapView?
-  onShareClick = () => {
-    copy(window.location.href);
+  onShareClick = async () => {
+    await copyShortUrlToClipboard();
   };
 
   onSaveClick = async () => {

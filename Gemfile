@@ -71,6 +71,9 @@ gem 'activerecord-import'
 # Segment analytics for backend events
 gem 'analytics-ruby', '~> 2.0.0', require: 'segment/analytics'
 
+# Url shortener
+gem 'shortener'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'bundler-audit'

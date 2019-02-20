@@ -1,5 +1,7 @@
 import QueryString from "query-string";
 import { toPairs, pickBy } from "lodash/fp";
+import { shortenUrl } from "~/api";
+import copy from "copy-to-clipboard";
 
 export const resetUrl = () => {
   // remove parameters from url
@@ -26,4 +28,10 @@ export const getURLParamString = params => {
   return toPairs(filtered)
     .map(pair => pair.join("="))
     .join("&");
+};
+
+export const copyShortUrlToClipboard = async url => {
+  url = url || window.location.href;
+  const shortUrl = await shortenUrl(url);
+  copy(window.location.origin + "/" + shortUrl.unique_key);
 };
