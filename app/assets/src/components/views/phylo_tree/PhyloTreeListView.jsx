@@ -3,6 +3,11 @@ import { fromPairs, set, find } from "lodash/fp";
 import Divider from "../../layout/Divider";
 import PhyloTreeVis from "./PhyloTreeVis";
 import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
+import { SaveButton, ShareButton } from "~ui/controls/buttons";
+import BasicPopup from "~/components/BasicPopup";
+import copy from "copy-to-clipboard";
+import { saveVisualization } from "~/api";
+
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import PropTypes from "prop-types";
@@ -14,7 +19,7 @@ class PhyloTreeListView extends React.Component {
   constructor(props) {
     super(props);
 
-    let urlParams = this.parseUrlParams();
+    let urlParams = parseUrlParams();
 
     this.state = {
       selectedPhyloTreeId: this.getDefaultSelectedTreeId(
@@ -42,12 +47,6 @@ class PhyloTreeListView extends React.Component {
     return selectedId;
   }
 
-  parseUrlParams() {
-    let urlParams = parseUrlParams();
-    urlParams.treeId = parseInt(urlParams.treeId);
-    return urlParams;
-  }
-
   handleTreeChange = newPhyloTreeId => {
     window.sessionStorage.setItem("treeId", newPhyloTreeId);
     this.setState({
@@ -71,6 +70,17 @@ class PhyloTreeListView extends React.Component {
         this.state.phyloTreeMap
       )
     });
+  };
+
+  // TODO (gdingle): use url shorten when PR is merged
+  handleShareClick = () => {
+    copy(window.location.href);
+  };
+
+  handleSaveClick = async () => {
+    // TODO (gdingle): add analytics tracking?
+    let params = parseUrlParams();
+    await saveVisualization("phylo_tree", params);
   };
 
   getTreeStatus(tree) {
@@ -191,6 +201,14 @@ class PhyloTreeListView extends React.Component {
             />
           </ViewHeader.Content>
           <ViewHeader.Controls>
+            <BasicPopup
+              trigger={<ShareButton onClick={this.handleShareClick} />}
+              content="A shareable URL will be copied to your clipboard!"
+              on="click"
+              hideOnScroll
+            />{" "}
+            {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
+            {this.props.admin && <SaveButton onClick={this.handleSaveClick} />}{" "}
             <PhyloTreeDownloadButton tree={currentTree} />
           </ViewHeader.Controls>
         </ViewHeader>
@@ -222,7 +240,8 @@ class PhyloTreeListView extends React.Component {
 }
 
 PhyloTreeListView.propTypes = {
-  phyloTrees: PropTypes.array
+  phyloTrees: PropTypes.array,
+  admin: PropTypes.bool
 };
 
 export default PhyloTreeListView;
