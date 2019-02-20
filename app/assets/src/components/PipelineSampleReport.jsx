@@ -166,6 +166,8 @@ class PipelineSampleReport extends React.Component {
 
     this.state = {
       ...this.state,
+      // Override from explicit save
+      ...props.savedParamValues,
       // Override from the URL
       ...parseUrlParams()
     };

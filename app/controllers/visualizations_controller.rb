@@ -3,20 +3,17 @@ class VisualizationsController < ApplicationController
   include HeatmapHelper
 
   def visualization
-    # TODO: (gdingle): refactor off of heatmap
-    @heatmap_data = heatmap
+    @type = params[:type]
+
+    if @type == "heatmap"
+      @visualization_data = heatmap
+    end
 
     id = params[:id]
     if id
       vis = Visualization.find(id)
-
-      # TODO: (gdingle): does this makes sense for non-heatmap?
-      sample_ids = vis.data['sampleIds']
-      if vis.visualization_type == "heatmap" && sample_ids != vis.sample_ids
-        raise "Sample IDs do not match: #{sample_ids}, #{vis.sample_ids}"
-      end
-
-      @heatmap_data[:savedParamValues] = vis.data
+      vis.data[:sampleIds] = vis.sample_ids
+      @visualization_data[:savedParamValues] = vis.data
     end
     # TODO: (gdingle): collection list view?
   end
@@ -30,6 +27,8 @@ class VisualizationsController < ApplicationController
       data: @data
     )
     vis.sample_ids = @data[:sampleIds]
+    # Delete to have single source of truth.
+    @data.delete(:sampleIds)
 
     render json: {
       status: "success",

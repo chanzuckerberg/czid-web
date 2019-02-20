@@ -22,7 +22,8 @@
       canSeeAlignViz: <%= !!@align_viz %>,
       pipelineVersions: <%= raw escape_json(@pipeline_versions) %>,
       amr: JSON.parse('<%= raw escape_json(@amr_counts) %>'),
-      allBackgrounds: JSON.parse('<%= raw escape_json(@background_models) %>')
+      allBackgrounds: JSON.parse('<%= raw escape_json(@background_models) %>'),
+      savedParamValues: JSON.parse('<%= raw escape_json(@saved_param_values) %>'),
     }, 'sample_view');
   <% end %>
 </div>

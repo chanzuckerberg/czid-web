@@ -159,7 +159,15 @@ class SamplesHeatmapView extends React.Component {
 
   onSaveClick = async () => {
     // TODO (gdingle): add analytics tracking?
-    await saveVisualization("heatmap", this.getUrlParams());
+    const resp = await saveVisualization("heatmap", this.getUrlParams());
+    const url =
+      location.protocol +
+      "//" +
+      location.host +
+      "/visualizations/heatmap/" +
+      resp.id;
+    // Update URL without reloading the page
+    history.pushState(window.history.state, document.title, url);
   };
 
   metricToSortField(metric) {

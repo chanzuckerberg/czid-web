@@ -1,6 +1,6 @@
 module HeatmapHelper
   def heatmap
-    @heatmap_data = {
+    {
       taxonLevels: %w[Genus Species],
       categories: ReportHelper::ALL_CATEGORIES.pluck('name'),
       subcategories: {

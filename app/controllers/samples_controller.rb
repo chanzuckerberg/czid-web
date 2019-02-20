@@ -483,8 +483,23 @@ class SamplesController < ApplicationController
       @ercc_comparison = @pipeline_run.compare_ercc_counts
     end
 
+    viz = last_saved_visualization
+    @saved_param_values = viz ? viz.data : {}
+
     tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
     MetricUtil.put_metric_now("samples.showed", 1, tags)
+  end
+
+  def last_saved_visualization
+    valid_viz_types = ['tree', 'table'] # See PipelineSampleReport.jsx
+    Sample
+      .includes(:visualizations)
+      .find(@sample.id)
+      .visualizations
+      .where(user: current_user)
+      .where('visualizations.visualization_type IN (?)', valid_viz_types)
+      .order('visualizations.updated_at desc')
+      .limit(1)[0]
   end
 
   def samples_going_public
