@@ -65,6 +65,7 @@ class PhyloTreeVis extends React.Component {
     this.treeVis.update();
 
     this.fetchMetadataTypes();
+    this.handleMetadataTypeChange(this.state.selectedMetadataType, "");
   }
 
   componentDidUpdate(prevProps) {
