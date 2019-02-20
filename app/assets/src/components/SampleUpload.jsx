@@ -8,6 +8,7 @@ import { find } from "lodash/fp";
 import ObjectHelper from "../helpers/ObjectHelper";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { openUrlWithTimeout } from "~utils/links";
+import BeeIcon from "~ui/icons/BeeIcon";
 import CatIcon from "~ui/icons/CatIcon";
 import PigIcon from "~ui/icons/PigIcon";
 import ERCCIcon from "~ui/icons/ERCCIcon";
@@ -16,6 +17,7 @@ import Icon from "~ui/icons/Icon";
 import MosquitoIcon from "~ui/icons/MosquitoIcon";
 import MouseIcon from "~ui/icons/MouseIcon";
 import TickIcon from "~ui/icons/TickIcon";
+import WormIcon from "~ui/icons/WormIcon";
 import UploadBox from "~ui/controls/UploadBox";
 import { resetUrl, parseUrlParams } from "~/helpers/url";
 import { Menu, MenuItem } from "~ui/controls/Menu";
@@ -562,6 +564,11 @@ class SampleUpload extends React.Component {
         return <CatIcon />;
       case "pig":
         return <PigIcon />;
+      case "bee":
+        return <BeeIcon />;
+      case "c.elegans":
+        return <WormIcon />;
+
       default:
         return false;
     }

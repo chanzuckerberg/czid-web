@@ -1,4 +1,5 @@
 import AlertIcon from "./AlertIcon";
+import BeeIcon from "./BeeIcon";
 import CatIcon from "./CatIcon";
 import CheckmarkIcon from "./CheckmarkIcon";
 import CompareIcon from "./CompareIcon";
@@ -15,6 +16,7 @@ import LogoIcon from "./LogoIcon";
 import MosquitoIcon from "./MosquitoIcon";
 import MouseIcon from "./MouseIcon";
 import PigIcon from "./PigIcon";
+import WormIcon from "./WormIcon";
 import RemoveIcon from "./RemoveIcon";
 import TickIcon from "./TickIcon";
 import UserIcon from "./UserIcon";
@@ -22,6 +24,7 @@ import UserIcon from "./UserIcon";
 export default {
   CUSTOM: {
     AlertIcon,
+    BeeIcon,
     CatIcon,
     CompareIcon,
     DecipherIcon,
@@ -36,7 +39,8 @@ export default {
     PigIcon,
     RemoveIcon,
     TickIcon,
-    UserIcon
+    UserIcon,
+    WormIcon
   },
   FONT_AWESOME: {
     CheckmarkIcon,
