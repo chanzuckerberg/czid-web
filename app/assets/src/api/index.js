@@ -51,13 +51,20 @@ const deleteAsync = async (url, config) => {
   return resp.data;
 };
 
-const deleteWithCSRF = url =>
-  axios.delete(url, {
-    data: {
-      // Fetch the CSRF token from the DOM.
-      authenticity_token: document.getElementsByName("csrf-token")[0].content
-    }
-  });
+const deleteWithCSRF = async url => {
+  try {
+    const resp = await axios.delete(url, {
+      data: {
+        // Fetch the CSRF token from the DOM.
+        authenticity_token: document.getElementsByName("csrf-token")[0].content
+      }
+    });
+
+    return resp.data;
+  } catch (e) {
+    return Promise.reject(e.response.data);
+  }
+};
 
 const getSampleMetadata = (id, pipelineVersion) => {
   return get(
