@@ -19,7 +19,7 @@ class PhyloTreeListView extends React.Component {
   constructor(props) {
     super(props);
 
-    let urlParams = parseUrlParams();
+    const urlParams = parseUrlParams();
 
     this.state = {
       selectedPhyloTreeId: this.getDefaultSelectedTreeId(
@@ -33,6 +33,7 @@ class PhyloTreeListView extends React.Component {
       selectedSampleId: null,
       selectedPipelineRunId: null
     };
+    this.selectedMetadata = urlParams.selectedMetadata;
   }
 
   getDefaultSelectedTreeId(urlParams, phyloTrees = []) {
@@ -55,6 +56,10 @@ class PhyloTreeListView extends React.Component {
       selectedPhyloTreeId: newPhyloTreeId,
       sidebarVisible: false
     });
+  };
+
+  afterSelectedMetadataChange = selectedMetadata => {
+    this.persistInUrl("selectedMetadata", selectedMetadata);
   };
 
   // TODO (gdingle): refactor to url.js once other PR merged
@@ -241,6 +246,8 @@ class PhyloTreeListView extends React.Component {
               phyloTreeId={this.state.selectedPhyloTreeId}
               onMetadataUpdate={this.handleMetadataUpdate}
               onSampleNodeClick={this.handleSampleNodeClick}
+              afterSelectedMetadataChange={this.afterSelectedMetadataChange}
+              defaultMetadata={this.selectedMetadata}
             />
           ) : (
             <p className={cs.noTreeBanner}>
