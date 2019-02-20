@@ -1,6 +1,5 @@
 // TODO(mark): Split this file up as more API methods get added.
 import axios from "axios";
-import { toPairs, pickBy } from "lodash/fp";
 import { cleanFilePath } from "~utils/sample";
 
 const postWithCSRF = async (url, params) => {
@@ -65,13 +64,6 @@ const deleteWithCSRF = async url => {
   } catch (e) {
     return Promise.reject(e.response.data);
   }
-};
-
-const getURLParamString = params => {
-  const filtered = pickBy((v, k) => typeof v !== "object", params);
-  return toPairs(filtered)
-    .map(pair => pair.join("="))
-    .join("&");
 };
 
 const getSampleMetadata = (id, pipelineVersion) => {
@@ -213,9 +205,10 @@ const bulkUploadWithMetadata = (samples, metadata) =>
     client: "web"
   });
 
-const saveHeatmap = heatmapParams =>
-  postWithCSRF(`/visualizations/save_heatmap`, {
-    heatmapParams
+const saveVisualization = (type, data) =>
+  postWithCSRF(`/visualizations/${type}/save`, {
+    type,
+    data
   });
 
 const bulkImportRemoteSamples = ({ projectId, hostGenomeId, bulkPath }) =>
@@ -311,7 +304,6 @@ export {
   saveSampleName,
   saveSampleNotes,
   getAlignmentData,
-  getURLParamString,
   deleteSample,
   getSummaryContigCounts,
   createSample,
@@ -324,7 +316,7 @@ export {
   bulkUploadWithMetadata,
   bulkImportRemoteSamples,
   markSampleUploaded,
-  saveHeatmap,
+  saveVisualization,
   uploadFileToUrl,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,

@@ -87,7 +87,7 @@ Rails.application.routes.draw do
 
   get 'visualizations/samples_taxons.json', to: 'visualizations#samples_taxons'
   get 'visualizations/download_heatmap', to: 'visualizations#download_heatmap'
-  post 'visualizations/save_heatmap', to: 'visualizations#save_heatmap'
+  post 'visualizations/:type/save', to: 'visualizations#save'
   get 'visualizations/:type(/:id)', to: 'visualizations#visualization'
 
   resources :host_genomes

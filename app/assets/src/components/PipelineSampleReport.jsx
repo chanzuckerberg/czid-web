@@ -33,8 +33,8 @@ import TaxonTreeVis from "./views/TaxonTreeVis";
 import LoadingLabel from "./ui/labels/LoadingLabel";
 import HoverActions from "./views/report/ReportTable/HoverActions";
 import { getSampleReportInfo, getSummaryContigCounts } from "~/api";
+import { parseUrlParams } from "~/helpers/url";
 import { pipelineVersionHasAssembly } from "./utils/sample";
-import queryString from "query-string";
 
 const DEFAULT_MIN_CONTIG_SIZE = 4;
 const HUMAN_TAX_IDS = [9605, 9606];
@@ -167,7 +167,7 @@ class PipelineSampleReport extends React.Component {
     this.state = {
       ...this.state,
       // Override from the URL
-      ...this.parseUrlParams()
+      ...parseUrlParams()
     };
 
     this.expandAll = false;
@@ -191,21 +191,6 @@ class PipelineSampleReport extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     // Set the state in the URL
     this.props.refreshPage(this.state, false);
-  }
-
-  // See also parseUrlParams in SamplesHeatmapView
-  parseUrlParams() {
-    let urlParams = queryString.parse(location.search, {
-      arrayFormat: "bracket"
-    });
-    for (var key in urlParams) {
-      try {
-        urlParams[key] = JSON.parse(urlParams[key]);
-      } catch (e) {
-        // pass
-      }
-    }
-    return urlParams;
   }
 
   fetchSearchList = () => {
