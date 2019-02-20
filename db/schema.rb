@@ -173,6 +173,7 @@ ActiveRecord::Schema.define(version: 20_190_220_191_436) do
     t.string "group"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "examples"
     t.index ["group"], name: "index_metadata_fields_on_group"
   end
 

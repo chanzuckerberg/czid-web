@@ -6,7 +6,9 @@ import _fp, {
   sortBy,
   partition,
   first,
-  get
+  get,
+  union,
+  compact
 } from "lodash/fp";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DataTable from "~/components/visualizations/table/DataTable";
@@ -21,9 +23,13 @@ const map = _fp.map.convert({ cap: false });
 const dictionaryHeaders = {
   name: "Name",
   description: "Description",
-  dataType: "Data Type",
-  options: "Options"
+  examples: "Examples"
 };
+
+const getExamplesForHostGenome = (field, hostGenomeId) =>
+  compact(
+    union(get("all", field.examples), get(hostGenomeId, field.examples))
+  ).join(", ") || "--";
 
 class MetadataDictionary extends React.Component {
   state = {
@@ -51,11 +57,21 @@ class MetadataDictionary extends React.Component {
     });
   }
 
-  // Move required fields to the front, and alphabetically sort both sets.
   processFields = fields => {
+    const processedFields = map(
+      field =>
+        set(
+          "examples",
+          getExamplesForHostGenome(field, this.state.currentHostGenome),
+          field
+        ),
+      fields
+    );
+
+    // Move required fields to the front, and alphabetically sort both sets.
     const [requiredFields, nonrequiredFields] = partition(
       "is_required",
-      fields
+      processedFields
     );
 
     return [
@@ -130,7 +146,7 @@ class MetadataDictionary extends React.Component {
                 <DataTable
                   data={fieldGroup.fields}
                   headers={dictionaryHeaders}
-                  columns={["name", "dataType", "options", "description"]}
+                  columns={["name", "description", "examples"]}
                 />
               </div>
             ),
