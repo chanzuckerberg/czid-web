@@ -3,7 +3,7 @@
 
 import React from "react";
 import cx from "classnames";
-import { omit, zip, filter, map, nth } from "lodash/fp";
+import { omit, zip, filter, map, nth, sortBy } from "lodash/fp";
 import { forbidExtraProps } from "airbnb-prop-types";
 import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import Input from "~ui/controls/Input";
@@ -57,6 +57,10 @@ class BareDropdown extends React.Component {
     filterString &&
     text.toLowerCase().includes(filterString.toLowerCase());
 
+  // Return 0 if starts with prefix, 1 otherwise
+  prioritizePrefixMatches = (option, prefix) =>
+    option.toLowerCase().startsWith(prefix.toLowerCase()) ? 0 : 1;
+
   getFilteredItems = filterString => {
     if (!this.props.items && !this.props.options) return;
 
@@ -72,12 +76,20 @@ class BareDropdown extends React.Component {
         pair => this.matchesFilter(pair[0], filterString),
         pairs
       );
-      return map(nth(1), filteredPairs);
+      const sortedPairs = sortBy(
+        pair => this.prioritizePrefixMatches(pair[0], filterString),
+        filteredPairs
+      );
+      return map(nth(1), sortedPairs);
     } else {
       const filteredOptions = this.props.options.filter(option =>
         this.matchesFilter(option.text, filterString)
       );
-      return this.renderItemsDefault(filteredOptions);
+      const sortedOptions = sortBy(
+        option => this.prioritizePrefixMatches(option.text, filterString),
+        filteredOptions
+      );
+      return this.renderItemsDefault(sortedOptions);
     }
   };
 
@@ -201,7 +213,6 @@ BareDropdown.propTypes = forbidExtraProps({
   disabled: PropTypes.bool,
   selectOnBlur: PropTypes.bool,
   fluid: PropTypes.bool,
-  placeholder: PropTypes.string,
   direction: PropTypes.string
 });
 

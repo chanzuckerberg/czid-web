@@ -1,10 +1,128 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .sampleUploadFlow {
   .inner {
-    margin: 0 100px;
-    padding: 60px;
+    padding: 60px 240px;
     background-color: $white;
+  }
+}
+
+.label {
+  @include font-header-s;
+  margin-bottom: 5px;
+}
+
+.uploadSampleStep {
+  .header {
+    margin-bottom: 40px;
+
+    .title {
+      @include font-header-xxl;
+    }
+
+    .subtitle {
+      margin-top: 5px;
+    }
+
+    .cliLink {
+      // Overwrite <a> inherit rule in header.scss
+      color: $primary-light !important;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+  }
+
+  .projectSelect {
+    margin-bottom: 30px;
+
+    .createProjectButton {
+      @include font-label-s;
+      color: $primary-light;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .projectCreationContainer {
+      background-color: $off-white;
+      padding: 20px;
+      margin-top: 20px;
+    }
+  }
+
+  .fileUpload {
+    position: relative;
+
+    .title {
+      @include font-header-xl;
+    }
+
+    .tabs {
+      margin-top: 20px;
+      margin-bottom: 30px;
+    }
+  }
+
+  .mainControls {
+    margin-top: 60px;
+
+    .continueButton {
+      margin-right: 10px;
+    }
+  }
+}
+
+.localFilepicker {
+  height: 120px;
+}
+
+.remoteFileUpload {
+  .info {
+    background-color: $off-white;
+    padding: 20px;
+    margin-bottom: 10px;
+
+    .title {
+      @include font-header-xs;
+    }
+
+    ul {
+      margin: 5px 0 10px 20px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      li {
+        @include font-body-xs;
+        list-style-type: disc;
+      }
+    }
+  }
+
+  .controls {
+    display: flex;
+
+    .connectButton {
+      margin-left: 10px;
+    }
+
+    .input {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+
+  .error {
+    margin-top: 5px;
+    color: $error;
+  }
+
+  .infoLink {
+    @include font-label-s;
+    margin-left: 10px;
+    color: $primary-light;
+    cursor: pointer;
   }
 }
 
@@ -31,8 +149,12 @@
     }
   }
 
-  .controls {
-    margin-top: 20px;
+  .mainControls {
+    margin-top: 60px;
+
+    .continueButton {
+      margin-right: 10px;
+    }
   }
 
   .hide {

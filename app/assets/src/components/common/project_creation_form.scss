@@ -1,0 +1,68 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.projectCreationForm {
+  .label {
+    @include font-header-s;
+    margin-bottom: 5px;
+  }
+
+  .field {
+    margin-bottom: 30px;
+  }
+
+  .sharingOption {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $lightest-grey;
+    }
+
+    .radioButton {
+      margin: 10px 20px;
+    }
+
+    .optionText {
+      .title {
+        @include font-header-s;
+      }
+
+      .description {
+        @include font-body-s;
+      }
+    }
+  }
+
+  .controls {
+    display: flex;
+  }
+
+  .error {
+    color: $error;
+    margin-left: 10px;
+    margin-bottom: 10px;
+  }
+
+  .createButton {
+    @include font-label-s;
+    color: $primary-light;
+    margin: 0px 10px;
+    cursor: pointer;
+
+    &.disabled {
+      color: $medium-grey;
+      cursor: default;
+    }
+  }
+
+  .cancelButton {
+    @include font-label-s;
+    color: $medium-grey;
+    margin: 0px 10px;
+    cursor: pointer;
+  }
+}

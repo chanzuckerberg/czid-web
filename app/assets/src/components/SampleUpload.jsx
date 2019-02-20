@@ -310,7 +310,7 @@ class SampleUpload extends React.Component {
         this.setState({
           invalid: true,
           submitting: false,
-          errorMessage: joinServerError(error.response.data)
+          errorMessage: joinServerError(error)
         });
       });
   }
@@ -722,7 +722,7 @@ class SampleUpload extends React.Component {
         this.setState({
           invalid: true,
           submitting: false,
-          errorMessage: joinServerError(error.response.data)
+          errorMessage: joinServerError(error)
         });
       });
   };

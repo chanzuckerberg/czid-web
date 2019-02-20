@@ -71,7 +71,7 @@ Rails.application.routes.draw do
     put :add_user, on: :member
     post :validate_metadata_csv, on: :member
     post :upload_metadata, on: :member
-    post :validate_sample_name, on: :member
+    post :validate_sample_names, on: :member
   end
   get 'projects/:id/csv', to: 'projects#send_project_csv'
   get 'choose_project', to: 'projects#choose_project'
@@ -102,6 +102,7 @@ Rails.application.routes.draw do
     get :dictionary, on: :collection
     get :official_metadata_fields, on: :collection
     get :metadata_template_csv, on: :collection
+    get :instructions, on: :collection
     post :validate_csv_for_new_samples, on: :collection
   end
 
