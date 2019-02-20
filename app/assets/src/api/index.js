@@ -211,6 +211,8 @@ const saveVisualization = (type, data) =>
     data
   });
 
+const shortenUrl = url => postWithCSRF("/visualizations/shorten_url", { url });
+
 const bulkImportRemoteSamples = ({ projectId, hostGenomeId, bulkPath }) =>
   get("/samples/bulk_import.json", {
     params: {
@@ -322,5 +324,6 @@ export {
   getTaxonDistributionForBackground,
   getSampleTaxons,
   logAnalyticsEvent,
-  validateSampleNames
+  validateSampleNames,
+  shortenUrl
 };

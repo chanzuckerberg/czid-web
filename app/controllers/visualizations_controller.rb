@@ -45,4 +45,19 @@ class VisualizationsController < ApplicationController
       # TODO: (gdingle): better error code?
     }, status: :internal_server_error
   end
+
+  def shorten_url
+    short_url = Shortener::ShortenedUrl.generate(params[:url])
+    render json: {
+      status: "success",
+      message: "Url shortened successfully",
+      unique_key: short_url.unique_key
+    }
+  rescue => err
+    render json: {
+      status: "failed",
+      message: "Unable to shorten",
+      errors: [err]
+    }, status: :internal_server_error
+  end
 end
