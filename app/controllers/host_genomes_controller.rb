@@ -27,14 +27,6 @@ class HostGenomesController < ApplicationController
   def edit
   end
 
-  # GET /host_genomes/add
-  def add
-  end
-
-  # POST /host_genomes/upload
-  def upload
-  end
-
   # POST /host_genomes
   # POST /host_genomes.json
   def create
