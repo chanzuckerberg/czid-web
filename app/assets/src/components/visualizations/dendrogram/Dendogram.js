@@ -69,6 +69,7 @@ export default class Dendogram {
       height: 25
     };
 
+    // TODO (gdingle): persist in URL?
     this._highlighted = new Set();
 
     // timeout to differentiate click from double click

@@ -48,11 +48,25 @@ class PhyloTreeListView extends React.Component {
   }
 
   handleTreeChange = newPhyloTreeId => {
+    // TODO (gdingle): do we want to keep using sessionStorage and cookies and urlparams and db saving?!
     window.sessionStorage.setItem("treeId", newPhyloTreeId);
+    this.persistInUrl("treeId", newPhyloTreeId);
     this.setState({
       selectedPhyloTreeId: newPhyloTreeId,
       sidebarVisible: false
     });
+  };
+
+  // TODO (gdingle): refactor to url.js once other PR merged
+  persistInUrl = (param, value) => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set(param, value);
+      history.pushState(window.history.state, document.title, url);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
   };
 
   handleMetadataUpdate = (key, newValue) => {
