@@ -38,6 +38,22 @@ class User < ApplicationRecord
     JSON.parse(allowed_features || "[]")
   end
 
+  def add_allowed_feature(feature)
+    parsed_allowed_features = JSON.parse(allowed_features)
+
+    unless parsed_allowed_features.include?(feature)
+      update(allowed_features: parsed_allowed_features + [feature])
+    end
+  end
+
+  def remove_allowed_feature(feature)
+    parsed_allowed_features = JSON.parse(allowed_features)
+
+    if parsed_allowed_features.include?(feature)
+      update(allowed_features: parsed_allowed_features - [feature])
+    end
+  end
+
   def demo_user?
     DEMO_USER_EMAILS.include?(email)
   end
