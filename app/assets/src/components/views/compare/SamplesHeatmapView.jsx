@@ -102,6 +102,9 @@ class SamplesHeatmapView extends React.Component {
       this.urlParams.removedTaxonIds || this.props.removedTaxonIds || []
     );
     this.lastRequestToken = null;
+    this.selectedMetadata = this.urlParams.selectedMetadata || [
+      "collection_location"
+    ];
   }
 
   componentDidMount() {
@@ -295,9 +298,29 @@ class SamplesHeatmapView extends React.Component {
     );
   }
 
+  afterSelectedMetadataChange = selectedMetadata => {
+    this.selectedMetadata = selectedMetadata;
+    this.persistToUrl();
+  };
+
   handleRemoveTaxon = taxonName => {
     let taxonId = this.state.taxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
+    // Need to change URL explicitly because removing does not AJAX
+    this.persistToUrl();
+  };
+
+  persistToUrl = () => {
+    try {
+      history.pushState(
+        window.history.state,
+        document.title,
+        this.getUrlForCurrentParams()
+      );
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
   };
 
   closeSidebar = () => {
@@ -410,6 +433,8 @@ class SamplesHeatmapView extends React.Component {
           onRemoveTaxon={this.handleRemoveTaxon}
           onSampleLabelClick={this.handleSampleLabelClick}
           onTaxonLabelClick={this.handleTaxonLabelClick}
+          afterSelectedMetadataChange={this.afterSelectedMetadataChange}
+          defaultMetadata={this.selectedMetadata}
         />
       </ErrorBoundary>
     );
@@ -536,7 +561,8 @@ class SamplesHeatmapView extends React.Component {
     return Object.assign(
       {
         sampleIds: this.state.sampleIds,
-        removedTaxonIds: Array.from(this.removedTaxonIds)
+        removedTaxonIds: Array.from(this.removedTaxonIds),
+        selectedMetadata: Array.from(this.selectedMetadata)
       },
       this.state.selectedOptions
     );

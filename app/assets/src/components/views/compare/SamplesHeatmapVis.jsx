@@ -164,6 +164,7 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   handleCellClick = (cell, currentEvent) => {
+    // TODO (gdingle): highlight the corresponding row on the sample report page
     openUrl(`/samples/${this.props.sampleIds[cell.columnIndex]}`, currentEvent);
   };
 
@@ -179,14 +180,11 @@ class SamplesHeatmapVis extends React.Component {
         selectedMetadata.has(metadatum)
       )
     );
-    this.setState(
-      {
-        selectedMetadata: new Set([...intersection, ...selectedMetadata])
-      },
-      () => {
-        this.heatmap.updateColumnMetadata(this.getSelectedMetadata());
-      }
-    );
+    selectedMetadata = new Set([...intersection, ...selectedMetadata]);
+    this.setState({ selectedMetadata }, () => {
+      this.heatmap.updateColumnMetadata(this.getSelectedMetadata());
+    });
+    this.props.afterSelectedMetadataChange(selectedMetadata);
   };
 
   renderColumnMetadataSelector() {
@@ -311,7 +309,8 @@ SamplesHeatmapVis.propTypes = {
   sampleIds: PropTypes.array,
   scale: PropTypes.string,
   taxonDetails: PropTypes.object,
-  taxonIds: PropTypes.array
+  taxonIds: PropTypes.array,
+  afterSelectedMetadataChange: PropTypes.func
 };
 
 export default SamplesHeatmapVis;
