@@ -85,7 +85,8 @@ Controls.propTypes = {
   reportDetails: PropTypes.ReportDetails,
   reportPageParams: PropTypes.shape({
     pipeline_version: PropTypes.string,
-    background_id: PropTypes.number
+    // TODO (gdingle): standardize on string or number
+    background_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
   }),
   canEdit: PropTypes.bool
 };

@@ -3,7 +3,12 @@
 import React from "react";
 import cx from "classnames";
 import { get } from "lodash/fp";
-import { getURLParamString, logAnalyticsEvent } from "~/api";
+import { logAnalyticsEvent, saveVisualization } from "~/api";
+import {
+  getURLParamString,
+  parseUrlParams,
+  copyShortUrlToClipboard
+} from "~/helpers/url";
 import { ANALYTICS_EVENT_NAMES } from "~/api/constants";
 import PropTypes from "~/components/utils/propTypes";
 import { pipelineVersionHasAssembly } from "~/components/utils/sample";
@@ -16,6 +21,7 @@ import Tabs from "~/components/ui/controls/Tabs";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import Controls from "./Controls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
+import { SaveButton, ShareButton } from "~ui/controls/buttons";
 
 import cs from "./sample_view.scss";
 
@@ -245,6 +251,7 @@ class SampleView extends React.Component {
             // Needs to be passed down to set the background dropdown properly.
             reportPageParams={this.props.reportPageParams}
             onTaxonClick={this.handleTaxonClick}
+            savedParamValues={this.props.savedParamValues}
           />
         );
       } else if (this.pipelineInProgress()) {
@@ -278,6 +285,17 @@ class SampleView extends React.Component {
       };
     }
     return {};
+  };
+
+  onShareClick = async () => {
+    await copyShortUrlToClipboard();
+  };
+
+  onSaveClick = async () => {
+    // TODO (gdingle): add analytics tracking?
+    let params = parseUrlParams();
+    params.sampleIds = [this.props.sample.id];
+    await saveVisualization(params.view || "table", params);
   };
 
   render() {
@@ -336,6 +354,14 @@ class SampleView extends React.Component {
             </div>
           </ViewHeader.Content>
           <ViewHeader.Controls>
+            <BasicPopup
+              trigger={<ShareButton onClick={this.onShareClick} />}
+              content="A shareable URL has been copied to your clipboard!"
+              on="click"
+              hideOnScroll
+            />{" "}
+            {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
+            {this.props.admin && <SaveButton onClick={this.onSaveClick} />}{" "}
             <Controls
               reportPresent={reportPresent}
               sample={sample}
@@ -383,7 +409,8 @@ SampleView.propTypes = {
   summaryStats: PropTypes.SummaryStats,
   reportPageParams: PropTypes.shape({
     pipeline_version: PropTypes.string,
-    background_id: PropTypes.string
+    // TODO (gdingle): standardize on string or number
+    background_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
   }),
   amr: PropTypes.arrayOf(
     PropTypes.shape({
@@ -412,7 +439,8 @@ SampleView.propTypes = {
     name: PropTypes.string
   }),
   jobStatistics: PropTypes.string,
-  sampleStatus: PropTypes.string
+  sampleStatus: PropTypes.string,
+  savedParamValues: PropTypes.object
 };
 
 export default SampleView;

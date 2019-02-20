@@ -4,14 +4,15 @@ import axios from "axios";
 import queryString from "query-string";
 import { get, set, min, max } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
-import { Popup } from "semantic-ui-react";
-import copy from "copy-to-clipboard";
 import { StickyContainer, Sticky } from "react-sticky";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
 import Slider from "~ui/controls/Slider";
+import BasicPopup from "~/components/BasicPopup";
+import { copyShortUrlToClipboard } from "~/helpers/url";
+
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import {
   Dropdown,
@@ -20,7 +21,11 @@ import {
   MultipleNestedDropdown
 } from "~ui/controls/dropdowns";
 import { processMetadata } from "~utils/metadata";
-import { getSampleTaxons, getSampleMetadataFields, saveHeatmap } from "~/api";
+import {
+  getSampleTaxons,
+  getSampleMetadataFields,
+  saveVisualization
+} from "~/api";
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
 
@@ -148,13 +153,21 @@ class SamplesHeatmapView extends React.Component {
     return `${url.toString()}?${this.prepareParams()}`;
   }
 
-  onShareClick = () => {
-    copy(this.getUrlForCurrentParams());
+  onShareClick = async () => {
+    await copyShortUrlToClipboard(this.getUrlForCurrentParams());
   };
 
   onSaveClick = async () => {
     // TODO (gdingle): add analytics tracking?
-    await saveHeatmap(this.getUrlParams());
+    const resp = await saveVisualization("heatmap", this.getUrlParams());
+    const url =
+      location.protocol +
+      "//" +
+      location.host +
+      "/visualizations/heatmap/" +
+      resp.id;
+    // Update URL without reloading the page
+    history.pushState(window.history.state, document.title, url);
   };
 
   metricToSortField(metric) {
@@ -718,7 +731,7 @@ class SamplesHeatmapView extends React.Component {
               />
             </ViewHeader.Content>
             <ViewHeader.Controls className={cs.controls}>
-              <Popup
+              <BasicPopup
                 trigger={
                   <ShareButton
                     onClick={this.onShareClick}
@@ -729,10 +742,12 @@ class SamplesHeatmapView extends React.Component {
                 on="click"
                 hideOnScroll
               />
-              <SaveButton
-                onClick={this.onSaveClick}
-                className={cs.controlElement}
-              />
+              {this.props.admin && (
+                <SaveButton
+                  onClick={this.onSaveClick}
+                  className={cs.controlElement}
+                />
+              )}
               <DownloadButtonDropdown
                 className={cs.controlElement}
                 options={downloadOptions}
@@ -772,7 +787,8 @@ SamplesHeatmapView.propTypes = {
   removedTaxonIds: PropTypes.array,
   taxonLevels: PropTypes.array,
   thresholdFilters: PropTypes.object,
-  savedParamValues: PropTypes.object
+  savedParamValues: PropTypes.object,
+  admin: PropTypes.bool
 };
 
 export default SamplesHeatmapView;
