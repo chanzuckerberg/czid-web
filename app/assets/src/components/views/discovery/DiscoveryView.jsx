@@ -42,7 +42,7 @@ class DiscoveryView extends React.Component {
     }
   }
 
-  computeTabs = (projects, analyses) => {
+  computeTabs = (projects, visualizations) => {
     const renderTab = (label, count) => {
       return (
         <div>
@@ -62,8 +62,8 @@ class DiscoveryView extends React.Component {
         value: "samples"
       },
       {
-        label: renderTab("Analyses", (analyses || []).length),
-        value: "analyses"
+        label: renderTab("Visualizations", (visualizations || []).length),
+        value: "visualizations"
       }
     ];
   };
@@ -97,7 +97,7 @@ class DiscoveryView extends React.Component {
               excludeLibrary={excludeLibrary}
             />
           )}
-          {currentTab == "analyses" && (
+          {currentTab == "visualizations" && (
             <VisualizationsView visualizations={visualizations} />
           )}
         </NarrowContainer>
