@@ -15,7 +15,7 @@ class SamplesController < ApplicationController
   #                access control should still be checked as neccessary through current_power
   #
   ##########################################
-  skip_before_action :verify_authenticity_token, only: [:create, :update]
+  skip_before_action :verify_authenticity_token, only: [:create, :update, :bulk_upload_with_metadata]
 
   # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
@@ -293,6 +293,9 @@ class SamplesController < ApplicationController
 
   # POST /samples/bulk_upload_with_metadata
   def bulk_upload_with_metadata
+    puts "foobar 12:38pm"
+    puts samples_params
+    puts params[:metadata]
     samples_to_upload = samples_params || []
     metadata = params[:metadata] || {}
     client = params[:client]
