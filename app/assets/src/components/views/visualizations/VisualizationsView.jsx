@@ -22,28 +22,24 @@ class VisualizationsView extends React.Component {
         label: "",
         cellRenderer: this.renderAccess
       },
+      // {
+      //   dataKey: "details",
+      //   label: "Visualization",
+      //   flexGrow: 1,
+      //   className: cs.detailsCell,
+      //   cellRenderer: this.renderVisualizationDetails,
+      //   headerClassName: cs.detailsHeader,
+      //   sortFunction: p => p.name
+      // },
       {
-        dataKey: "details",
-        label: "Visualization",
-        flexGrow: 1,
-        className: cs.detailsCell,
-        cellRenderer: this.renderVisualizationDetails,
-        headerClassName: cs.detailsHeader,
-        sortFunction: p => p.name
+        dataKey: "visualization_type",
+        width: 200
       },
       {
-        dataKey: "hosts",
-        width: 200,
-        disableSort: true,
-        cellRenderer: this.renderList
-      },
-      {
-        dataKey: "tissues",
-        width: 200,
-        disableSort: true,
-        cellRenderer: this.renderList
-      },
-      { dataKey: "number_of_samples", width: 140, label: "No. Of Samples" }
+        dataKey: "created_at",
+        width: 200
+      }
+      // { dataKey: "number_of_samples", width: 140, label: "No. Of Samples" }
     ];
   }
 
@@ -86,29 +82,26 @@ class VisualizationsView extends React.Component {
   render() {
     const { visualizations } = this.props;
 
-    let data = visualizations.map(visualization => {
-      return merge(
-        {
-          details: pick(visualization, [
-            "name",
-            "description",
-            "created_at",
-            "owner"
-          ])
-        },
-        pick(visualization, [
-          "public_access",
-          "hosts",
-          "tissues",
-          "number_of_samples"
-        ])
-      );
-    });
+    // let data = visualizations.map(visualization => {
+    //   return merge(
+    //     {
+    //       details: pick(visualization, [
+    //         "user",
+    //         "visualization_type",
+    //         "created_at",
+    //       ])
+    //     },
+    //     pick(visualization, [
+    //       "public_access",
+    //       // TODO (gdingle): include samples?
+    //     ])
+    //   );
+    // });
 
     return (
       <Table
         sortable
-        data={data}
+        data={visualizations}
         columns={this.columns}
         defaultRowHeight={120}
         sortBy={"visualization"}

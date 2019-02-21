@@ -10,6 +10,7 @@ class VisualizationsController < ApplicationController
     only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
     exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
 
+    # TODO: (gdingle): include samples? include projects?
     if only_library
       visualizations = current_user.visualizations
     elsif exclude_library
@@ -19,6 +20,7 @@ class VisualizationsController < ApplicationController
     else
       raise 'Visualizations must be for either "my library" or "public"'
     end
+    visualizations = visualizations.where.not(visualization_type: [nil, 'undefined'])
 
     render json: visualizations
   end
