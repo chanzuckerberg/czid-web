@@ -292,7 +292,6 @@ const getProjects = ({ onlyLibrary, excludeLibrary, onlyUpdatable } = {}) =>
     }
   });
 
-// TODO (gdingle): what is onlyUpdatable?
 const getVisualizations = ({ onlyLibrary, excludeLibrary } = {}) =>
   get("/visualizations.json", {
     params: {

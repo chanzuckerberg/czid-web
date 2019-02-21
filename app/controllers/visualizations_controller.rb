@@ -13,7 +13,9 @@ class VisualizationsController < ApplicationController
     if only_library
       visualizations = current_user.visualizations
     elsif exclude_library
-      visualizations = Visualization.where.not(user: current_user)
+      visualizations = Visualization
+                       .where(public_access: 1)
+                       .where.not(user: current_user)
     else
       raise 'Visualizations must be for either "my library" or "public"'
     end
