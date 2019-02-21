@@ -76,14 +76,12 @@ const getSampleMetadata = (id, pipelineVersion) => {
 };
 
 // Get MetadataField info for the sample(s) (either one ID or an array)
-const getSampleMetadataFields = ids => {
-  const result = get("/samples/metadata_fields", {
+const getSampleMetadataFields = ids =>
+  get("/samples/metadata_fields", {
     params: {
       sampleIds: [ids].flat()
     }
   });
-  return result;
-};
 
 const saveSampleMetadata = (id, field, value) =>
   postWithCSRF(`/samples/${id}/save_metadata_v2`, {
@@ -267,8 +265,8 @@ const getSamples = ({
   excludeLibrary,
   limit,
   offset
-} = {}) => {
-  const result = get("/samples/index_v2.json", {
+} = {}) =>
+  get("/samples/index_v2.json", {
     params: {
       projectId,
       onlyLibrary,
@@ -277,17 +275,13 @@ const getSamples = ({
       offset
     }
   });
-  return result;
-};
 
-const getSampleDetails = ({ sampleIds }) => {
-  const result = get("/samples/details.json", {
+const getSampleDetails = ({ sampleIds }) =>
+  get("/samples/details.json", {
     params: {
       sampleIds
     }
   });
-  return result;
-};
 
 const getProjects = ({ onlyLibrary, excludeLibrary, onlyUpdatable } = {}) =>
   get("/projects.json", {

@@ -292,8 +292,6 @@ module SamplesHelper
     PipelineRun.where(id: pipeline_run_ids).joins(join_clause).where("#{report_ready_clause} or #{clause_for_old_results}").pluck(:id)
   end
 
-  # compare with
-  # SELECT DISTINCT ON (sample_id) * FROM pipeline_runs ORDER BY id DESC
   def top_pipeline_runs_multiget(sample_ids)
     top_pipeline_runs = PipelineRun.where("id in (select x.id from (select max(id) as id from pipeline_runs where
                   sample_id in (#{sample_ids.join(',')}) group by sample_id) as x)")

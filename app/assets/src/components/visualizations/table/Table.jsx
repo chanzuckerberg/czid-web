@@ -7,7 +7,6 @@ import BaseTable from "./BaseTable";
 class Table extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {
       sortBy: this.props.sortBy,
       sortDirection: this.props.sortDirection || SortDirection.ASC
@@ -15,7 +14,6 @@ class Table extends React.Component {
   }
 
   handleSort = ({ sortBy, sortDirection }) => {
-    console.log("Table::handleSort", sortBy, sortDirection);
     this.setState({
       sortBy,
       sortDirection
@@ -46,8 +44,6 @@ class Table extends React.Component {
             [sortDirection === SortDirection.ASC ? "asc" : "desc"]
           )
         : data;
-
-    console.log("Table::render", sortBy, sortDirection);
 
     return (
       <BaseTable

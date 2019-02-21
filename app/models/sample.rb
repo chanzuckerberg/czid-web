@@ -40,7 +40,7 @@ class Sample < ApplicationRecord
                      :sample_template, # this refers to nucleotide type (RNA or DNA)
                      :sample_library, :sample_sequencer, :sample_notes, :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection].freeze
 
-  attr_accessor :bulk_mode∂
+  attr_accessor :bulk_mode
 
   belongs_to :project
   belongs_to :user, optional: true # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project

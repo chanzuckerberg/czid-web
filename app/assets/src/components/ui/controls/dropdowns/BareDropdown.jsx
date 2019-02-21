@@ -204,8 +204,6 @@ BareDropdown.propTypes = forbidExtraProps({
 
   // Props directly passed to semantic-ui.
   trigger: PropTypes.node.isRequired,
-  onBlur: PropTypes.func,
-  onFocus: PropTypes.func,
   onOpen: PropTypes.func,
   onClose: PropTypes.func,
   open: PropTypes.bool,
