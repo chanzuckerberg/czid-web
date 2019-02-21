@@ -145,7 +145,7 @@ class SamplesController < ApplicationController
   end
 
   def details
-    # TODO (tiago): a lot of the values return by this endpoint do not make sense on a sample controller
+    # TODO(tiago): a lot of the values return by this endpoint do not make sense on a sample controller
     # Refactor once we have a clear API definition policy
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
 
