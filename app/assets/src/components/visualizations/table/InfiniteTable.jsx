@@ -29,12 +29,10 @@ class InfiniteTable extends React.Component {
   }
 
   isRowLoadingOrLoaded = ({ index }) => {
-    // console.log("InfiniteTable::isRowLoaded", index, !!this.rows[index]);
     return !!this.loadedRowsMap[index];
   };
 
   loadMoreRows = async ({ startIndex, stopIndex }) => {
-    console.log("InfiniteTable::loadMoreRows:start", startIndex, stopIndex);
     const { onLoadRows, minimumBatchSize } = this.props;
 
     for (var i = startIndex; i <= stopIndex; i++) {
@@ -47,13 +45,8 @@ class InfiniteTable extends React.Component {
     this.rows.splice(startIndex, requestedNumberOfRows, ...newRows);
 
     if (requestedNumberOfRows != newRows.length) {
-      console.log("setting row count to current", this.rows.length);
       this.setState({ rowCount: this.rows.length });
     } else {
-      console.log(
-        "setting row count to new length",
-        this.rows.length + minimumBatchSize
-      );
       this.setState({ rowCount: this.rows.length + minimumBatchSize });
     }
 
@@ -65,13 +58,11 @@ class InfiniteTable extends React.Component {
   };
 
   getRow = ({ index }) => {
-    // console.log("InfiniteTable::getRow", this.rows[index], this.rows[index] || {});
     return this.rows[index] || {};
   };
 
   rowRenderer = rowProps => {
     const { loadingClassName } = this.props;
-    console.log(rowProps);
     if (!this.rows[rowProps.index]) {
       rowProps.className = cx(rowProps.className, cs.loading, loadingClassName);
     }
@@ -81,7 +72,6 @@ class InfiniteTable extends React.Component {
 
   defaultCellRenderer = ({ cellData }) => {
     // Guarantees that we have at least one child div in the cell
-    console.log("in defaultCellRenderer", cellData);
     return (
       <div className={cs.cellContent}>
         {cellData == null ? "" : String(cellData)}

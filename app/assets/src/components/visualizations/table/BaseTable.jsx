@@ -12,7 +12,6 @@ import PlusIcon from "~ui/icons/PlusIcon";
 import { find, map } from "lodash";
 import cs from "./base_table.scss";
 import cx from "classnames";
-import defaultCellRenderer from "react-virtualized/dist/es/Table/defaultCellRenderer";
 
 class BaseTable extends React.Component {
   // This class is a wrapper class to React Virtualized Table.
@@ -22,7 +21,6 @@ class BaseTable extends React.Component {
   // - needs dynamic row height (dynamic required use of CellMeasurer)
   // - needs selectable rows
 
-  // TODO BEFORE PR: (1) fix rowCount; (2) style columns
   constructor(props) {
     super(props);
 
@@ -32,8 +30,6 @@ class BaseTable extends React.Component {
       activeColumnsMenuOpen: false,
       columns: this.setDefaults(this.props.columns)
     };
-
-    console.log("BaseTable:constructor");
   }
 
   humanize(key) {
@@ -56,12 +52,6 @@ class BaseTable extends React.Component {
   };
 
   _sortableHeaderRenderer({ dataKey, label, sortBy, sortDirection }) {
-    console.log(
-      "BaseTable::_sortableHeaderRenderer",
-      dataKey,
-      sortBy,
-      sortDirection
-    );
     return (
       <div>
         {label}
@@ -71,11 +61,6 @@ class BaseTable extends React.Component {
   }
 
   handleColumnChange = activeColumns => {
-    console.log(
-      "column change",
-      activeColumns,
-      this.state.activeColumns === activeColumns
-    );
     this.setState({ activeColumns });
   };
 
@@ -86,8 +71,6 @@ class BaseTable extends React.Component {
       value: column.dataKey,
       text: column.label
     }));
-
-    console.log("Basetable:renderColumnSelector", activeColumnsMenuOpen);
 
     return (
       <MultipleDropdown
@@ -122,7 +105,6 @@ class BaseTable extends React.Component {
       sortBy,
       sortDirection
     } = this.props;
-    console.log("BaseTable:render");
 
     const { activeColumns, columns } = this.state;
     const columnOrder = activeColumns || map(columns, "dataKey");
@@ -150,12 +132,6 @@ class BaseTable extends React.Component {
               {columnOrder.map(dataKey => {
                 const columnProps = find(columns, { dataKey: dataKey });
                 const { cellRenderer, className, ...extraProps } = columnProps;
-                console.log(
-                  "column",
-                  dataKey,
-                  cellRenderer,
-                  defaultCellRenderer
-                );
                 return (
                   <Column
                     className={cx(cs.cell, className)}
