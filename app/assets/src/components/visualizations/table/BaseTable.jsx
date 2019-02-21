@@ -27,7 +27,6 @@ class BaseTable extends React.Component {
     // TOOD: move this to componentDidUpdate and remove from state?
     this.state = {
       activeColumns: this.props.initialActiveColumns,
-      activeColumnsMenuOpen: false,
       columns: this.setDefaults(this.props.columns)
     };
   }
@@ -65,7 +64,7 @@ class BaseTable extends React.Component {
   };
 
   renderColumnSelector = () => {
-    const { activeColumns, activeColumnsMenuOpen, columns } = this.state;
+    const { activeColumns, columns } = this.state;
 
     const options = columns.map(column => ({
       value: column.dataKey,
