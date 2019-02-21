@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { defaultTableRowRenderer, InfiniteLoader } from "react-virtualized";
 import BaseTable from "./BaseTable";
 import cs from "./infinite_table.scss";
+import cx from "classnames";
 
 const STATUS_LOADING = 1;
 const STATUS_LOADED = 2;
@@ -11,16 +12,15 @@ class InfiniteTable extends React.Component {
   // Encapsulates Table in an InfiniteLoader component.
   // - Keeps track of rows for which a load request was made,
   //   to avoid requesting the same row twice.
-  // TODO: Current limitations:
-  // - does not reload rows if they change; this needs to be addressed,
-  //   by having a clear function for certain or all rows that client will
+  // TODO(tiago): Current limitations:
+  // - does not reload rows if they change; this can be addressed,
+  //   by having a function to clear some or all rows that client can call
   //   through a ref to the component.
 
   constructor(props) {
     super(props);
 
     this.rows = [];
-    // TODO: optimize by not requesting the same row over and over
 
     (this.loadedRowsMap = []),
       (this.state = {
@@ -28,13 +28,13 @@ class InfiniteTable extends React.Component {
       });
   }
 
-  _isRowLoadingOrLoaded = ({ index }) => {
-    // console.log("InfiniteTable::_isRowLoaded", index, !!this.rows[index]);
+  isRowLoadingOrLoaded = ({ index }) => {
+    // console.log("InfiniteTable::isRowLoaded", index, !!this.rows[index]);
     return !!this.loadedRowsMap[index];
   };
 
-  _loadMoreRows = async ({ startIndex, stopIndex }) => {
-    console.log("InfiniteTable::_loadMoreRows:start", startIndex, stopIndex);
+  loadMoreRows = async ({ startIndex, stopIndex }) => {
+    console.log("InfiniteTable::loadMoreRows:start", startIndex, stopIndex);
     const { onLoadRows, minimumBatchSize } = this.props;
 
     for (var i = startIndex; i <= stopIndex; i++) {
@@ -64,34 +64,45 @@ class InfiniteTable extends React.Component {
     return true;
   };
 
-  _getRow = ({ index }) => {
-    // console.log("InfiniteTable::_getRow", this.rows[index], this.rows[index] || {});
+  getRow = ({ index }) => {
+    // console.log("InfiniteTable::getRow", this.rows[index], this.rows[index] || {});
     return this.rows[index] || {};
   };
 
-  _rowRenderer = args => {
-    const { index, key, style } = args;
-
-    if (this.rows[index]) {
-      return defaultTableRowRenderer(args);
+  rowRenderer = rowProps => {
+    const { loadingClassName } = this.props;
+    console.log(rowProps);
+    if (!this.rows[rowProps.index]) {
+      rowProps.className = cx(rowProps.className, cs.loading, loadingClassName);
     }
 
+    return defaultTableRowRenderer(rowProps);
+  };
+
+  defaultCellRenderer = ({ cellData }) => {
+    // Guarantees that we have at least one child div in the cell
+    console.log("in defaultCellRenderer", cellData);
     return (
-      <div className={cs.row} key={key} style={style}>
-        loading...
+      <div className={cs.cellContent}>
+        {cellData == null ? "" : String(cellData)}
       </div>
     );
   };
 
   render() {
-    const { minimumBatchSize, threshold, ...extraProps } = this.props;
+    const {
+      defaultCellRenderer,
+      minimumBatchSize,
+      threshold,
+      ...extraProps
+    } = this.props;
 
     const { rowCount } = this.state;
 
     return (
       <InfiniteLoader
-        isRowLoaded={this._isRowLoadingOrLoaded}
-        loadMoreRows={this._loadMoreRows}
+        isRowLoaded={this.isRowLoadingOrLoaded}
+        loadMoreRows={this.loadMoreRows}
         minimumBatchSize={minimumBatchSize}
         rowCount={rowCount}
         threshold={threshold}
@@ -100,11 +111,14 @@ class InfiniteTable extends React.Component {
           return (
             <BaseTable
               {...extraProps}
+              defaultCellRenderer={
+                defaultCellRenderer || this.defaultCellRenderer
+              }
               forwardRef={registerChild}
               onRowsRendered={onRowsRendered}
               rowCount={rowCount}
-              rowGetter={this._getRow}
-              rowRenderer={this._rowRenderer}
+              rowGetter={this.getRow}
+              rowRenderer={this.rowRenderer}
             />
           );
         }}
@@ -121,6 +135,8 @@ InfiniteTable.defaultProps = {
 };
 
 InfiniteTable.propTypes = {
+  defaultCellRenderer: PropTypes.func,
+  loadingClassName: PropTypes.string,
   minimumBatchSize: PropTypes.number,
   // function that retrieves rows from startIndex to stopIndex (inclusive),
   // if it returns less rows than requested, InfiniteTable interprets that

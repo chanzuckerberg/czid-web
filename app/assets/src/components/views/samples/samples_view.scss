@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 @import "~styles/themes/typography";
 
 .container {
@@ -111,35 +112,54 @@
   }
 }
 
-// .status {
-//   color: $medium-grey;
-
-//   &.complete {
-//     color: $success;
-//   }
-
-//   &.failed {
-//     color: $error;
-//   }
-
-//   &.waiting, &.uploading {
-//     color: $warning;
-//   }
-
-//   .statusName {
-//     @include font-body-xs;
-
-//     margin-bottom: 2px;
-//     text-transform: uppercase;
-//   }
-
-//   .totalRuntime {
-//     @include font-body-xxs;
-//   }
-// }
-
 .numberValueAndPercentage {
   .percentage {
     font-weight: $font-weight-regular;
+  }
+}
+
+.loading {
+  .publicAccess {
+    @include loadingAnimation;
+
+    height: 36px;
+    width: 36px;
+  }
+
+  .sampleRightPane {
+    .sampleNameAndStatus {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 20px;
+      width: 365px;
+    }
+
+    .sampleDetails {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 17px;
+      width: 315px;
+    }
+  }
+
+  .numberValueAndPercentage {
+    .value {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 16px;
+      padding: 2px 15%;
+    }
+    .percentage {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 15px;
+      padding: 2px 20%;
+    }
   }
 }

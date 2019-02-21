@@ -12,6 +12,7 @@ import PlusIcon from "~ui/icons/PlusIcon";
 import { find, map } from "lodash";
 import cs from "./base_table.scss";
 import cx from "classnames";
+import defaultCellRenderer from "react-virtualized/dist/es/Table/defaultCellRenderer";
 
 class BaseTable extends React.Component {
   // This class is a wrapper class to React Virtualized Table.
@@ -80,7 +81,6 @@ class BaseTable extends React.Component {
 
   renderColumnSelector = () => {
     const { activeColumns, activeColumnsMenuOpen, columns } = this.state;
-    const { defaultRowHeight } = this.props;
 
     const options = columns.map(column => ({
       value: column.dataKey,
@@ -108,6 +108,7 @@ class BaseTable extends React.Component {
 
   render() {
     const {
+      defaultCellRenderer,
       defaultHeaderHeight,
       defaultRowHeight,
       initialActiveColumns,
@@ -148,8 +149,13 @@ class BaseTable extends React.Component {
             >
               {columnOrder.map(dataKey => {
                 const columnProps = find(columns, { dataKey: dataKey });
-                const { className, ...extraProps } = columnProps;
-
+                const { cellRenderer, className, ...extraProps } = columnProps;
+                console.log(
+                  "column",
+                  dataKey,
+                  cellRenderer,
+                  defaultCellRenderer
+                );
                 return (
                   <Column
                     className={cx(cs.cell, className)}
@@ -159,6 +165,7 @@ class BaseTable extends React.Component {
                         ? this._sortableHeaderRenderer
                         : undefined
                     }
+                    cellRenderer={cellRenderer || defaultCellRenderer}
                     {...extraProps}
                   />
                 );
@@ -208,6 +215,7 @@ BaseTable.propTypes = {
       dataKey: PropTypes.string.isRequired
     })
   ).isRequired,
+  defaultCellRenderer: PropTypes.func,
   defaultColumnWidth: PropTypes.number,
   defaultHeaderHeight: PropTypes.number,
   defaultRowHeight: PropTypes.number,

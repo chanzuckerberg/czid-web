@@ -26,7 +26,8 @@ class SamplesView extends React.Component {
         dataKey: "totalReads",
         label: "Total Reads",
         flexGrow: 1,
-        cellRenderer: this.renderNumberWithCommas
+        cellDataGetter: ({ dataKey, rowData }) =>
+          this.formatNumberWithCommas(rowData[dataKey])
       },
       {
         dataKey: "nonHostReads",
@@ -38,22 +39,24 @@ class SamplesView extends React.Component {
         dataKey: "passedQC",
         label: "Passed QC",
         flexGrow: 1,
-        cellRenderer: this.renderPercentage
+        cellDataGetter: ({ dataKey, rowData }) =>
+          this.formatPercentage(rowData[dataKey])
       },
       {
         dataKey: "duplicateCompressionRatio",
         label: "DCR",
         flexGrow: 1,
-        cellRenderer: this.renderPercentage
+        cellDataGetter: ({ dataKey, rowData }) =>
+          this.formatPercentage(rowData[dataKey])
       },
       { dataKey: "host", flexGrow: 1 },
       { dataKey: "collectionLocation", label: "Location", flexGrow: 1 },
-      { dataKey: "status", flexGrow: 1, cellRenderer: this.renderStatus },
       {
         dataKey: "erccReads",
         label: "ERCC Reads",
         flexGrow: 1,
-        cellRenderer: this.renderNumberWithCommas
+        cellDataGetter: ({ dataKey, rowData }) =>
+          this.formatNumberWithCommas(rowData[dataKey])
       },
       { dataKey: "notes", flexGrow: 1 },
       { dataKey: "nucleotideType", label: "Nucleotide Type", flexGrow: 1 },
@@ -62,34 +65,31 @@ class SamplesView extends React.Component {
         dataKey: "subsampledFraction",
         label: "SubSampled Fraction",
         flexGrow: 1,
-        cellRenderer: this.renderNumber
+        cellDataGetter: ({ dataKey, rowData }) =>
+          this.formatNumber(rowData[dataKey])
       },
       {
         dataKey: "totalRuntime",
         label: "Total Runtime",
         flexGrow: 1,
-        cellRenderer: this.renderDuration
+        cellDataGetter: ({ dataKey, rowData }) =>
+          this.formatDuration(rowData[dataKey])
       }
     ];
   }
 
-  formatDuration(runtime) {
-    runtime = Number(runtime);
+  formatDuration = runtime => {
     const h = Math.floor(runtime / 3600);
     const m = Math.floor((runtime % 3600) / 60);
 
     const hDisplay = h > 0 ? h + (h === 1 ? " hour, " : " hours, ") : "";
     const mDisplay = m > 0 ? m + (m === 1 ? " minute" : " minutes") : "";
     return hDisplay + mDisplay;
-  }
-
-  renderDuration = ({ cellData: value }) => {
-    return this.formatDuration(value);
   };
 
-  renderNumberWithCommas({ cellData: value }) {
+  formatNumberWithCommas = value => {
     return numberWithCommas(value);
-  }
+  };
 
   formatNumber = value => {
     if (!value) return value;
@@ -97,58 +97,57 @@ class SamplesView extends React.Component {
     return value.toFixed(2);
   };
 
-  renderNumber = ({ cellData: value }) => {
-    return this.formatNumber(value);
-  };
-
   formatPercentage = value => {
-    if (!isFinite(value)) return value;
+    if (!value) return value;
     return `${this.formatNumber(value)}%`;
   };
 
-  renderPercentage = ({ cellData: value }) => {
-    return this.formatPercentage(value);
-  };
-
   renderNumberAndPercentage = ({ cellData: number }) => {
-    if (!number) return;
-
     return (
       <div className={cs.numberValueAndPercentage}>
-        <div className={cs.value}>{numberWithCommas(number.value)}</div>
+        <div className={cs.value}>
+          {number && numberWithCommas(number.value)}
+        </div>
         <div className={cs.percentage}>
-          {this.formatPercentage(number.percent)}
+          {number && this.formatPercentage(number.percent)}
         </div>
       </div>
     );
   };
 
   renderSample = ({ cellData: sample }) => {
-    if (!sample) return;
-
     return (
       <div className={cs.sample}>
         <div className={cs.publicAccess}>
-          {sample.publicAccess ? (
-            <GlobeIcon className={cx(cs.icon, cs.iconGlobe)} />
-          ) : (
-            <LockIcon className={cx(cs.icon, cs.iconLock)} />
-          )}
+          {sample &&
+            (sample.publicAccess ? (
+              <GlobeIcon className={cx(cs.icon, cs.iconGlobe)} />
+            ) : (
+              <LockIcon className={cx(cs.icon, cs.iconLock)} />
+            ))}
         </div>
         <div className={cs.sampleRightPane}>
-          <div className={cs.sampleNameAndStatus}>
-            <div className={cs.sampleName}>{sample.name}</div>
-            <div className={cx(cs.sampleStatus, cs[sample.status])}>
-              {sample.status}
+          {sample ? (
+            <div className={cs.sampleNameAndStatus}>
+              <div className={cs.sampleName}>{sample.name}</div>
+              <div className={cx(cs.sampleStatus, cs[sample.status])}>
+                {sample.status}
+              </div>
             </div>
-          </div>
-          <div className={cs.sampleDetails}>
-            <span className={cs.createdAt}>
-              {moment(sample.createdAt).fromNow()}
-            </span>|
-            <span className={cs.user}>{sample.user}</span>|
-            <span className={cs.project}>{sample.project}</span>
-          </div>
+          ) : (
+            <div className={cs.sampleNameAndStatus} />
+          )}
+          {sample ? (
+            <div className={cs.sampleDetails}>
+              <span className={cs.createdAt}>
+                {moment(sample.createdAt).fromNow()}
+              </span>|
+              <span className={cs.user}>{sample.user}</span>|
+              <span className={cs.project}>{sample.project}</span>
+            </div>
+          ) : (
+            <div className={cs.sampleDetails} />
+          )}
         </div>
       </div>
     );
@@ -166,7 +165,6 @@ class SamplesView extends React.Component {
     let sampleIds = map(samples, "id");
     const sampleDetails = await getSampleDetails({ sampleIds });
     const zipped = zip(samples, sampleDetails);
-    console.log(zipped);
     const mapped = map(zipped, this.processRow);
     return mapped;
   };
@@ -236,6 +234,7 @@ class SamplesView extends React.Component {
         <div className={cs.table}>
           <InfiniteTable
             columns={this.columns}
+            loadingClassName={cs.loading}
             onLoadRows={this.handleLoadRows}
             initialActiveColumns={activeColumns}
             defaultRowHeight={rowHeight}
