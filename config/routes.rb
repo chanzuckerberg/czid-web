@@ -91,6 +91,7 @@ Rails.application.routes.draw do
   post 'visualizations/:type/save', to: 'visualizations#save'
   get 'visualizations/:type(/:id)', to: 'visualizations#visualization'
   post 'visualizations/shorten_url', to: 'visualizations#shorten_url'
+  get 'visualizations.json', to: 'visualizations#index'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]

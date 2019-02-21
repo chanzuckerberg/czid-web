@@ -10,6 +10,9 @@ import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
 
+import { sumBy } from "lodash";
+import { getSamples, getProjects, getVisualizations } from "~/api";
+
 import cs from "./discovery_view.scss";
 
 class DiscoveryView extends React.Component {
@@ -19,7 +22,8 @@ class DiscoveryView extends React.Component {
     this.state = {
       currentTab: "samples",
       samples: [],
-      projects: []
+      projects: [],
+      visualizations: []
     };
     this.fetchData();
   }
@@ -27,13 +31,15 @@ class DiscoveryView extends React.Component {
   async fetchData() {
     const { onlyLibrary, excludeLibrary } = this.props;
     try {
-      const [samples, projects] = await Promise.all([
+      const [samples, projects, visualizations] = await Promise.all([
         getSamples({ onlyLibrary, excludeLibrary }),
-        getProjects({ onlyLibrary, excludeLibrary })
+        getProjects({ onlyLibrary, excludeLibrary }),
+        getVisualizations({ onlyLibrary, excludeLibrary })
       ]);
       this.setState({
         samples,
-        projects
+        projects,
+        visualizations
       });
     } catch (error) {
       // TODO: handle error better
@@ -73,12 +79,10 @@ class DiscoveryView extends React.Component {
   };
 
   render() {
-    const { currentTab, projects } = this.state;
+    const { currentTab, projects, visualizations } = this.state;
     const { onlyLibrary, excludeLibrary } = this.props;
-    const tabs = this.computeTabs(projects);
+    const tabs = this.computeTabs(projects, visualizations);
 
-    // TODO (gdingle): fetch visualizations
-    const visualizations = projects;
     return (
       <div className={cs.layout}>
         <NarrowContainer className={cs.headerContainer}>

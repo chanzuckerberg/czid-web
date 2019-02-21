@@ -292,6 +292,15 @@ const getProjects = ({ onlyLibrary, excludeLibrary, onlyUpdatable } = {}) =>
     }
   });
 
+// TODO (gdingle): what is onlyUpdatable?
+const getVisualizations = ({ onlyLibrary, excludeLibrary } = {}) =>
+  get("/visualizations.json", {
+    params: {
+      onlyLibrary,
+      excludeLibrary
+    }
+  });
+
 const createProject = params =>
   postWithCSRF("/projects.json", {
     project: params
@@ -318,6 +327,7 @@ export {
   getSamples,
   getSampleDetails,
   getProjects,
+  getVisualizations,
   saveSampleMetadata,
   getMetadataTypesByHostGenomeName,
   saveSampleName,

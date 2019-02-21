@@ -2,6 +2,25 @@ class VisualizationsController < ApplicationController
   include ReportHelper
   include HeatmapHelper
 
+  clear_respond_to
+  respond_to :json
+
+  # GET /visualizations.json
+  def index
+    only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
+    exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
+
+    if only_library
+      visualizations = current_user.visualizations
+    elsif exclude_library
+      visualizations = Visualization.where.not(user: current_user)
+    else
+      raise 'Visualizations must be for either "my library" or "public"'
+    end
+
+    render json: visualizations
+  end
+
   def visualization
     @type = params[:type]
 
