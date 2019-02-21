@@ -83,6 +83,9 @@ class MetadataField < ApplicationRecord
   # "default". Then they can add and subtract from their set of meta-fields from there.
   # create_join_table :projects, :metadata_fields
 
+  # Whether this metadata field should be added automatically to new host genomes.
+  # t.integer :default_for_new_host_genome, limit: 1, default: 0
+
   # Important attributes for the frontend
   def field_info
     {
@@ -94,7 +97,8 @@ class MetadataField < ApplicationRecord
       host_genome_ids: host_genome_ids,
       description: description,
       is_required: is_required,
-      examples: examples && JSON.parse(examples)
+      examples: examples && JSON.parse(examples),
+      default_for_new_host_genome: default_for_new_host_genome
     }
   end
 
