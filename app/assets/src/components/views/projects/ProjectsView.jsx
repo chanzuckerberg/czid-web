@@ -110,7 +110,7 @@ class ProjectsView extends React.Component {
 }
 
 ProjectsView.defaultProps = {
-  project: []
+  projects: []
 };
 
 ProjectsView.propTypes = {

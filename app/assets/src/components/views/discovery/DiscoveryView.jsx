@@ -1,12 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { sumBy } from "lodash";
+
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
+import { getSamples, getProjects } from "~/api";
 import DiscoveryHeader from "../discovery/DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
-import { sumBy } from "lodash";
-import { getSamples, getProjects } from "~/api";
+import VisualizationsView from "../visualizations/VisualizationsView";
+
 import cs from "./discovery_view.scss";
 
 class DiscoveryView extends React.Component {
@@ -74,6 +77,8 @@ class DiscoveryView extends React.Component {
     const { onlyLibrary, excludeLibrary } = this.props;
     const tabs = this.computeTabs(projects);
 
+    // TODO (gdingle): fetch visualizations
+    const visualizations = projects;
     return (
       <div className={cs.layout}>
         <NarrowContainer className={cs.headerContainer}>
@@ -91,6 +96,9 @@ class DiscoveryView extends React.Component {
               onlyLibrary={onlyLibrary}
               excludeLibrary={excludeLibrary}
             />
+          )}
+          {currentTab == "analyses" && (
+            <VisualizationsView visualizations={visualizations} />
           )}
         </NarrowContainer>
       </div>

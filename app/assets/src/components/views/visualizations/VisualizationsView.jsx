@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-// TODO (gdingle):  refactor me
+// TODO (gdingle):  refactor me?
 import { Table } from "~/components/visualizations/table";
 import { merge, pick } from "lodash";
 import GlobeIcon from "~ui/icons/GlobeIcon";
@@ -10,6 +10,7 @@ import moment from "moment";
 import cs from "./visualizations_view.scss";
 import cx from "classnames";
 
+// TODO (gdingle): refactor with ProjectsView?
 class VisualizationsView extends React.Component {
   constructor(props) {
     super(props);
