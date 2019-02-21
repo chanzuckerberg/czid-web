@@ -1,52 +1,71 @@
 // TODO(mark): Split this file up as more API methods get added.
 // TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
-import { toPairs } from "lodash/fp";
 import { cleanFilePath } from "~utils/sample";
 
 const postWithCSRF = async (url, params) => {
-  const resp = await axios.post(url, {
-    ...params,
-    // Fetch the CSRF token from the DOM.
-    authenticity_token: document.getElementsByName("csrf-token")[0].content
-  });
+  try {
+    const resp = await axios.post(url, {
+      ...params,
+      // Fetch the CSRF token from the DOM.
+      authenticity_token: document.getElementsByName("csrf-token")[0].content
+    });
 
-  // Just return the data.
-  // resp also contains headers, status, etc. that we might use later.
-  return resp.data;
+    // Just return the data.
+    // resp also contains headers, status, etc. that we might use later.
+    return resp.data;
+  } catch (e) {
+    return Promise.reject(e.response.data);
+  }
 };
 
 // TODO(mark): Remove redundancy in CSRF methods.
 const putWithCSRF = async (url, params) => {
-  const resp = await axios.put(url, {
-    ...params,
-    // Fetch the CSRF token from the DOM.
-    authenticity_token: document.getElementsByName("csrf-token")[0].content
-  });
-
-  // Just return the data.
-  // resp also contains headers, status, etc. that we might use later.
-  return resp.data;
-};
-
-// TODO: add error handling
-const get = async (url, config) => {
-  const resp = await axios.get(url, config);
-  return resp.data;
-};
-
-const deleteWithCSRF = url =>
-  axios.delete(url, {
-    data: {
+  try {
+    const resp = await axios.put(url, {
+      ...params,
       // Fetch the CSRF token from the DOM.
       authenticity_token: document.getElementsByName("csrf-token")[0].content
-    }
-  });
+    });
 
-const getURLParamString = params =>
-  toPairs(params)
-    .map(pair => pair.join("="))
-    .join("&");
+    // Just return the data.
+    // resp also contains headers, status, etc. that we might use later.
+    return resp.data;
+  } catch (e) {
+    return Promise.reject(e.response.data);
+  }
+};
+
+const get = async (url, config) => {
+  try {
+    const resp = await axios.get(url, config);
+
+    return resp.data;
+  } catch (e) {
+    return Promise.reject(e.response.data);
+  }
+};
+
+const deleteAsync = async (url, config) => {
+  const resp = await axios.delete(url, config);
+
+  return resp.data;
+};
+
+const deleteWithCSRF = async url => {
+  try {
+    const resp = await axios.delete(url, {
+      data: {
+        // Fetch the CSRF token from the DOM.
+        authenticity_token: document.getElementsByName("csrf-token")[0].content
+      }
+    });
+
+    return resp.data;
+  } catch (e) {
+    return Promise.reject(e.response.data);
+  }
+};
 
 const getSampleMetadata = (id, pipelineVersion) => {
   return get(
@@ -151,44 +170,6 @@ const createSample = (
   });
 };
 
-// Send a request to create a single sample. Does not upload the files.
-// sourceType can be "local" or "s3".
-const createSampleWithMetadata = ({
-  sourceType,
-  inputFiles,
-  name,
-  projectName,
-  hostGenomeId,
-  metadata
-}) => {
-  const fileAttributes = Array.from(inputFiles, file => {
-    if (sourceType === "local") {
-      return {
-        source_type: sourceType,
-        source: cleanFilePath(file.name),
-        parts: cleanFilePath(file.name)
-      };
-    } else {
-      return {
-        source_type: sourceType,
-        source: file
-      };
-    }
-  });
-
-  return postWithCSRF("/samples/create_with_metadata.json", {
-    sample: {
-      name,
-      project_name: projectName,
-      host_genome_id: hostGenomeId,
-      input_files_attributes: fileAttributes,
-      status: "created",
-      client: "web"
-    },
-    metadata
-  });
-};
-
 // Validate metadata against samples in an existing project.
 const validateMetadataCSVForProject = (id, metadata) =>
   postWithCSRF(`/projects/${id}/validate_metadata_csv`, {
@@ -220,10 +201,28 @@ const bulkUploadRemoteSamples = samples =>
   });
 
 // Bulk-upload samples that have files in an S3 bucket, with metadata.
-const bulkUploadRemoteSamplesWithMetadata = (samples, metadata) =>
+const bulkUploadWithMetadata = (samples, metadata) =>
   postWithCSRF(`/samples/bulk_upload_with_metadata.json`, {
     samples,
-    metadata
+    metadata,
+    client: "web"
+  });
+
+const saveVisualization = (type, data) =>
+  postWithCSRF(`/visualizations/${type}/save`, {
+    type,
+    data
+  });
+
+const shortenUrl = url => postWithCSRF("/visualizations/shorten_url", { url });
+
+const bulkImportRemoteSamples = ({ projectId, hostGenomeId, bulkPath }) =>
+  get("/samples/bulk_import.json", {
+    params: {
+      project_id: projectId,
+      host_genome_id: hostGenomeId,
+      bulk_path: bulkPath
+    }
   });
 
 const markSampleUploaded = sampleId =>
@@ -256,7 +255,7 @@ const getTaxonDistributionForBackground = (backgroundId, taxonId) =>
   get(`/backgrounds/${backgroundId}/show_taxon_dist.json?taxid=${taxonId}`);
 
 const getSampleTaxons = (params, cancelToken) =>
-  get("/samples/samples_taxons.json", {
+  get("/visualizations/samples_taxons.json", {
     params,
     cancelToken
   });
@@ -290,12 +289,18 @@ const getSampleDetails = ({ sampleIds }) => {
   return result;
 };
 
-const getProjects = ({ onlyLibrary, excludeLibrary } = {}) =>
+const getProjects = ({ onlyLibrary, excludeLibrary, onlyUpdatable } = {}) =>
   get("/projects.json", {
     params: {
       onlyLibrary,
-      excludeLibrary
+      excludeLibrary,
+      onlyUpdatable
     }
+  });
+
+const createProject = params =>
+  postWithCSRF("/projects.json", {
+    project: params
   });
 
 const logAnalyticsEvent = (eventName, eventData = {}) => {
@@ -304,11 +309,18 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
   if (window.analytics) window.analytics.track(eventName, eventData);
 };
 
+const validateSampleNames = (projectId, sampleNames) =>
+  postWithCSRF(`/projects/${projectId}/validate_sample_names`, {
+    sample_names: sampleNames
+  });
+
 export {
+  deleteAsync,
   get,
   getSampleMetadata,
   getSampleMetadataFields,
   getSampleReportInfo,
+  createProject,
   getSamples,
   getSampleDetails,
   getProjects,
@@ -317,22 +329,24 @@ export {
   saveSampleName,
   saveSampleNotes,
   getAlignmentData,
-  getURLParamString,
   deleteSample,
   getSummaryContigCounts,
   createSample,
-  createSampleWithMetadata,
   validateMetadataCSVForProject,
   validateMetadataCSVForNewSamples,
   uploadMetadataForProject,
   getOfficialMetadataFields,
   getAllHostGenomes,
   bulkUploadRemoteSamples,
-  bulkUploadRemoteSamplesWithMetadata,
+  bulkUploadWithMetadata,
+  bulkImportRemoteSamples,
   markSampleUploaded,
+  saveVisualization,
   uploadFileToUrl,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
   getSampleTaxons,
-  logAnalyticsEvent
+  logAnalyticsEvent,
+  validateSampleNames,
+  shortenUrl
 };

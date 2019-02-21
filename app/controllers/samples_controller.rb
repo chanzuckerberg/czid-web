@@ -4,6 +4,7 @@ class SamplesController < ApplicationController
   include SamplesHelper
   include PipelineOutputsHelper
   include ElasticsearchHelper
+  include HeatmapHelper
 
   ########################################
   # Note to developers:
@@ -24,13 +25,13 @@ class SamplesController < ApplicationController
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details, :all,
-                   :show_sample_names,:samples_taxons, :heatmap, :download_heatmap, :cli_user_instructions, :metadata_types_by_host_genome_name,
-                   :metadata_fields, :samples_going_public, :search_suggestions, :upload, :create_with_metadata].freeze
+                   :show_sample_names, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields, :samples_going_public,
+                   :search_suggestions, :upload].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload, :bulk_upload_with_metadata], fallback: :devise
 
-  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :upload, :bulk_upload_with_metadata, :create_with_metadata]
+  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :upload, :bulk_upload_with_metadata]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
   current_power do # Put this here for CLI
@@ -144,10 +145,9 @@ class SamplesController < ApplicationController
   end
 
   def details
-    # TODO: a lot of the values return by this endpoint do not make sense on a sample controller
+    # TODO (tiago): a lot of the values return by this endpoint do not make sense on a sample controller
     # Refactor once we have a clear API definition policy
     sample_ids = (params[:sampleIds] || []).map(&:to_i)
-    fetch_ready_ids = ActiveModel::Type::Boolean.new.cast(params[:readySampleIds])
 
     @samples = current_power.viewable_samples.where(id: sample_ids)
 
@@ -234,8 +234,8 @@ class SamplesController < ApplicationController
     unless users.empty?
       results["Uploader"] = {
         "name" => "Uploader",
-        "results" => users.index_by(&:name).map do |_, u|
-          { "category" => "Uploader", "title" => u.name, "id" => u.id }
+        "results" => users.group_by(&:name).map do |val, records|
+          { "category" => "Uploader", "title" => val, "id" => records.pluck(:id) }
         end
       }
     end
@@ -310,27 +310,55 @@ class SamplesController < ApplicationController
   end
 
   # POST /samples/bulk_upload_with_metadata
-  # Used to bulk-upload samples with remote input files in S3 directory.
   # TODO(mark): Handle required metadata fields.
   def bulk_upload_with_metadata
     samples_to_upload = samples_params || []
     metadata = params[:metadata] || {}
+    client = params[:client]
+
+    # Check if the client is up-to-date. "web" is always valid whereas the
+    # CLI client should provide a version string to-be-checked against the
+    # minimum version here. Bulk upload from CLI goes to this method.
+    min_version = Gem::Version.new('0.5.0')
+    unless client && (client == "web" || Gem::Version.new(client) >= min_version)
+      render json: {
+        message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
+        status: :upgrade_required
+      }
+      return
+    end
+
     editable_project_ids = current_power.updatable_projects.pluck(:id)
 
-    # Ignore samples that aren't part of editable projects.
-    # TODO(mark): Show error for samples that aren't part of project.
-    samples_to_upload = samples_to_upload.select { |sample| editable_project_ids.include?(Integer(sample["project_id"])) }
+    samples_to_upload, samples_invalid_projects = samples_to_upload.partition { |sample| editable_project_ids.include?(Integer(sample["project_id"])) }
 
     errors, samples = upload_samples_with_metadata(samples_to_upload, metadata).values_at("errors", "samples")
 
+    # For each sample with an invalid project ID, add an error.
+    samples_invalid_projects.each do |sample|
+      errors << SampleUploadErrors.invalid_project_id(sample)
+    end
+
+    # After creation, if a sample is missing required metadata, destroy it.
+    # TODO(mark): Move this logic into a validator in the model in the future.
+    # Hard to do right now because this isn't launched yet, and also many existing samples don't have required metadata.
+    removed_samples = []
+    samples.each do |sample|
+      missing_required_metadata_fields = sample.missing_required_metadata_fields
+      unless missing_required_metadata_fields.empty?
+        errors << SampleUploadErrors.missing_required_metadata(sample, missing_required_metadata_fields)
+        sample.destroy
+        removed_samples << sample
+      end
+    end
+    samples -= removed_samples
+
     respond_to do |format|
-      if errors.empty? && !samples.empty?
+      if samples.count > 0
         tags = %W[client:web type:bulk user_id:#{current_user.id}]
         MetricUtil.put_metric_now("samples.created", samples.count, tags)
-        format.json { render json: { samples: samples, sample_ids: samples.pluck(:id) } }
-      else
-        format.json { render json: { samples: samples, errors: errors }, status: :unprocessable_entity }
       end
+      format.json { render json: { samples: samples, sample_ids: samples.pluck(:id), errors: errors } }
     end
   end
 
@@ -473,46 +501,23 @@ class SamplesController < ApplicationController
       @ercc_comparison = @pipeline_run.compare_ercc_counts
     end
 
+    viz = last_saved_visualization
+    @saved_param_values = viz ? viz.data : {}
+
     tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
     MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
-  def heatmap
-    @heatmap_data = {
-      taxonLevels: %w[Genus Species],
-      categories: ReportHelper::ALL_CATEGORIES.pluck('name'),
-      subcategories: {
-        Viruses: ["Phage"]
-      },
-      metrics: [
-        { text: "Aggregate Score", value: "NT.aggregatescore" },
-        { text: "NT Z Score", value: "NT.zscore" },
-        { text: "NT rPM", value: "NT.rpm" },
-        { text: "NT r (total reads)", value: "NT.r" },
-        { text: "NR Z Score", value: "NR.zscore" },
-        { text: "NR r (total reads)", value: "NR.r" },
-        { text: "NR rPM", value: "NR.rpm" }
-      ],
-      backgrounds: current_power.backgrounds.map do |background|
-        { name: background.name, value: background.id }
-      end,
-      thresholdFilters: {
-        targets: [
-          { text: "Aggregate Score", value: "NT_aggregatescore" },
-          { text: "NT Z Score", value: "NT_zscore" },
-          { text: "NT rPM", value: "NT_rpm" },
-          { text: "NT r (total reads)", value: "NT_r" },
-          { text: "NT %id", value: "NT_percentidentity" },
-          { text: "NT log(1/e)", value: "NT_neglogevalue" },
-          { text: "NR Z Score", value: "NR_zscore" },
-          { text: "NR r (total reads)", value: "NR_r" },
-          { text: "NR rPM", value: "NR_rpm" },
-          { text: "NR %id", value: "NR_percentidentity" },
-          { text: "R log(1/e)", value: "NR_neglogevalue" }
-        ],
-        operators: [">=", "<="]
-      }
-    }
+  def last_saved_visualization
+    valid_viz_types = ['tree', 'table'] # See PipelineSampleReport.jsx
+    Sample
+      .includes(:visualizations)
+      .find(@sample.id)
+      .visualizations
+      .where(user: current_user)
+      .where('visualizations.visualization_type IN (?)', valid_viz_types)
+      .order('visualizations.updated_at desc')
+      .limit(1)[0]
   end
 
   def samples_going_public
@@ -526,17 +531,6 @@ class SamplesController < ApplicationController
       params[:projectId] ? Project.find(params[:projectId]) : nil
     )
     render json: samples.to_json(include: [{ project: { only: [:id, :name] } }])
-  end
-
-  def samples_taxons
-    @sample_taxons_dict = sample_taxons_dict(params)
-    render json: @sample_taxons_dict
-  end
-
-  def download_heatmap
-    @sample_taxons_dict = sample_taxons_dict(params)
-    output_csv = generate_heatmap_csv(@sample_taxons_dict)
-    send_data output_csv, filename: 'heatmap.csv'
   end
 
   def report_info
@@ -803,6 +797,7 @@ class SamplesController < ApplicationController
     end
 
     params[:input_files_attributes].reject! { |f| f["source"] == '' }
+    params[:alignment_config_name] = AlignmentConfig::DEFAULT_NAME if params[:alignment_config_name].blank?
 
     @sample = Sample.new(params)
     @sample.project = project if project
@@ -827,89 +822,6 @@ class SamplesController < ApplicationController
         format.json do
           render json: { sample_errors: @sample.errors.full_messages,
                          project_errors: project ? project.errors.full_messages : nil },
-                 status: :unprocessable_entity
-        end
-      end
-    end
-  end
-
-  # POST /create_with_metadata
-  # Used to upload samples with local input files.
-  # TODO(mark): Consolidate this with bulk_upload endpoint.
-  # TODO(mark): Handle required metadata fields.
-  def create_with_metadata
-    metadata_fields = params[:metadata]
-    params = sample_params
-
-    # Check if the client is up-to-date. "web" is always valid whereas the
-    # CLI client should provide a version string to-be-checked against the
-    # minimum version here. Bulk upload from CLI goes to this method.
-    client = params.delete(:client)
-    min_version = Gem::Version.new('0.5.0')
-    unless client && (client == "web" || Gem::Version.new(client) >= min_version)
-      render json: {
-        message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
-        status: :upgrade_required
-      }
-      return
-    end
-
-    if params[:project_name]
-      project_name = params.delete(:project_name)
-      project = Project.find_by(name: project_name)
-      unless project
-        project = Project.create(name: project_name)
-        project.users << current_user if current_user
-      end
-    end
-    if project && !current_power.updatable_project?(project)
-      respond_to do |format|
-        format.json { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
-        format.html { render json: { status: "User not authorized to update project #{project.name}" }, status: :unprocessable_entity }
-      end
-      return
-    end
-    if params[:host_genome_name]
-      host_genome_name = params.delete(:host_genome_name)
-      host_genome = HostGenome.find_by(name: host_genome_name)
-    end
-
-    params[:input_files_attributes].reject! { |f| f["source"] == '' }
-
-    @sample = Sample.new(params)
-    @sample.project = project if project
-    @sample.input_files.each { |f| f.name ||= File.basename(f.source) }
-    @sample.user = current_user
-    @sample.host_genome ||= (host_genome || HostGenome.first)
-    sample_saved = @sample.save
-
-    metadata_errors = []
-
-    # Upload metadata
-    if sample_saved
-      metadata_fields.each do |key, value|
-        saved = @sample.metadatum_add_or_update(key, value)
-
-        unless saved
-          metadata_errors.push(MetadataUploadErrors.save_error(key, value))
-        end
-      end
-    end
-
-    respond_to do |format|
-      if sample_saved && metadata_errors.empty?
-        tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id} client:#{client}]
-        # Currently bulk CLI upload just calls this action repeatedly so we can't
-        # distinguish between bulk or single there. Web bulk goes to bulk_upload.
-        tags << "type:single" if client == "web"
-        MetricUtil.put_metric_now("samples.created", 1, tags)
-
-        format.json { render :show, status: :created, location: @sample }
-      else
-        format.json do
-          render json: { sample_errors: @sample.errors.full_messages,
-                         project_errors: project ? project.errors.full_messages : nil,
-                         metadata_errors: metadata_errors },
                  status: :unprocessable_entity
         end
       end
@@ -1022,51 +934,6 @@ class SamplesController < ApplicationController
     taxid_name.downcase.gsub(/\W/, "-")
   end
 
-  def sample_taxons_dict(params)
-    sample_ids = (params[:sampleIds] || []).map(&:to_i)
-    num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
-    removed_taxon_ids = (params[:removedTaxonIds] || []).map do |x|
-      begin
-        Integer(x)
-      rescue ArgumentError
-        nil
-      end
-    end
-    removed_taxon_ids = removed_taxon_ids.compact
-    categories = params[:categories]
-    threshold_filters = if params[:thresholdFilters].is_a?(Array)
-                          (params[:thresholdFilters] || []).map { |filter| JSON.parse(filter || "{}") }
-                        else
-                          JSON.parse(params[:thresholdFilters] || "[]")
-                        end
-    include_phage = (JSON.parse(params[:subcategories]) || {}).fetch("Viruses", []).include?("Phage")
-    read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
-
-    # TODO: should fail if field is not well formatted and return proper error to client
-    sort_by = params[:sortBy] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
-    species_selected = params[:species] == "1" # Otherwise genus selected
-    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs, :metadata])
-    return {} if samples.empty?
-
-    first_sample = samples.first
-    background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
-
-    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
-    taxon_ids -= removed_taxon_ids
-
-    samples_taxons_details(samples, taxon_ids, background_id, species_selected)
-  end
-
-  def get_background_id(sample)
-    if params[:background_id]
-      viewable_background_ids = current_power.backgrounds.pluck(:id)
-      if viewable_background_ids.include?(params[:background_id].to_i)
-        return params[:background_id]
-      end
-    end
-    sample.default_background_id
-  end
-
   def set_sample
     @sample = samples_scope.find(params[:id])
     assert_access
@@ -1075,7 +942,7 @@ class SamplesController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def samples_params
     new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id,
-                                         input_files_attributes: [:name, :presigned_url, :source_type, :source]])
+                                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]])
     new_params[:samples] if new_params
   end
 

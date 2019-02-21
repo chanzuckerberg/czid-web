@@ -35,6 +35,13 @@ class MetadataField < ApplicationRecord
   # If true then only allow users to use the options (i.e. no freetext).
   # t.integer :force_options
 
+  # A hash that maps host genome ids to an array of examples for that metadata field and host genome.
+  # Stored as JSON.
+  # If the key is "all", the examples apply to all host genomes.
+  # We separate by host genome because, for example, valid sample_types are different for human vs mosquito,
+  # and the examples should reflect this.
+  # t.string :examples
+
   # +----------------------+
   # |      All fields      |
   # | +------------------+ |
@@ -86,7 +93,52 @@ class MetadataField < ApplicationRecord
       group: group,
       host_genome_ids: host_genome_ids,
       description: description,
-      is_required: is_required
+      is_required: is_required,
+      examples: examples && JSON.parse(examples)
     }
+  end
+
+  def add_examples(new_examples, host_genome = "all")
+    if host_genome == "all"
+      add_examples_helper(new_examples, "all")
+    # If a host genome is specified, make sure the metadata field applies to that host.
+    elsif host_genomes.where(name: host_genome).length == 1
+      add_examples_helper(new_examples, host_genomes.find_by(name: host_genome).id)
+    else
+      raise "Invalid host genome"
+    end
+  end
+
+  def remove_examples(examples_to_remove, host_genome = "all")
+    if host_genome == "all"
+      remove_examples_helper(examples_to_remove, "all")
+    # If a host genome is specified, make sure the metadata field applies to that host.
+    elsif host_genomes.where(name: host_genome).length == 1
+      remove_examples_helper(examples_to_remove, host_genomes.find_by(name: host_genome).id)
+    else
+      raise "Invalid host genome"
+    end
+  end
+
+  private
+
+  def add_examples_helper(new_examples, host_genome)
+    existing_examples = examples ? JSON.parse(examples) : {}
+
+    # merge new examples using a set
+    existing_examples_set = (existing_examples[host_genome] || []).to_set
+    existing_examples_set.merge(new_examples)
+    existing_examples[host_genome] = existing_examples_set.to_a
+
+    update(examples: JSON.dump(existing_examples))
+  end
+
+  def remove_examples_helper(examples_to_remove, host_genome)
+    existing_examples = examples ? JSON.parse(examples) : {}
+
+    existing_examples[host_genome] ||= []
+    existing_examples[host_genome] -= examples_to_remove
+
+    update(examples: JSON.dump(existing_examples))
   end
 end

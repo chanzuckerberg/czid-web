@@ -55,6 +55,20 @@ $font-weight-heavy: 800;
   letter-spacing: 0.3px;
 }
 
+@mixin font-header-s {
+  font-size: 14px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+@mixin font-header-xs {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
 @mixin font-body-l {
   font-size: 18px;
   line-height: 28px;
@@ -86,8 +100,14 @@ $font-weight-heavy: 800;
 }
 
 @mixin font-cell-xs {
-  font-size: 13px;
-  line-height: 20px;
-  letter-spacing: 0.3px;
+  @include font-body-xs;
   font-weight: $font-weight-semibold;
+}
+
+@mixin font-label-s {
+  font-size: 11px;
+  line-height: 24px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 600;
 }

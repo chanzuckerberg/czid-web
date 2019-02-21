@@ -29,9 +29,6 @@ Rails.application.routes.draw do
     get :raw_results_folder, on: :member
     post :bulk_upload, on: :collection
     post :bulk_upload_with_metadata, on: :collection
-    get :samples_taxons, on: :collection
-    get :heatmap, on: :collection
-    get :download_heatmap, on: :collection
     get :metadata_types_by_host_genome_name, on: :collection
     get :metadata, on: :member
     get :metadata_fields, on: :collection
@@ -43,11 +40,12 @@ Rails.application.routes.draw do
     get :details, on: :collection
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
-    post :create_with_metadata, on: :collection
   end
 
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
   get 'samples/:id/alignment_viz/:taxon_info', to: 'samples#show_taxid_alignment_viz'
+  get 'samples/heatmap', to: redirect(path: "visualizations/heatmap", status: 301)
+
   get 'cli_user_instructions', to: 'samples#cli_user_instructions'
   get 'select', to: 'home#index'
   get 'home', to: 'home#index'
@@ -74,6 +72,7 @@ Rails.application.routes.draw do
     put :add_user, on: :member
     post :validate_metadata_csv, on: :member
     post :upload_metadata, on: :member
+    post :validate_sample_names, on: :member
   end
   get 'projects/:id/csv', to: 'projects#send_project_csv'
   get 'choose_project', to: 'projects#choose_project'
@@ -87,6 +86,12 @@ Rails.application.routes.draw do
   get 'choose_taxon', to: 'phylo_trees#choose_taxon'
   get 'search_suggestions', to: 'samples#search_suggestions'
 
+  get 'visualizations/samples_taxons.json', to: 'visualizations#samples_taxons'
+  get 'visualizations/download_heatmap', to: 'visualizations#download_heatmap'
+  post 'visualizations/:type/save', to: 'visualizations#save'
+  get 'visualizations/:type(/:id)', to: 'visualizations#visualization'
+  post 'visualizations/shorten_url', to: 'visualizations#shorten_url'
+
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
 
@@ -99,12 +104,16 @@ Rails.application.routes.draw do
     get :dictionary, on: :collection
     get :official_metadata_fields, on: :collection
     get :metadata_template_csv, on: :collection
+    get :instructions, on: :collection
     post :validate_csv_for_new_samples, on: :collection
   end
 
   authenticate :user, ->(u) { u.admin? } do
     mount Resque::Server.new, at: "/resque"
   end
+
+  # Un-shorten URLs. This should go second-to-last.
+  get '/:id' => "shortener/shortened_urls#show"
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to: 'home#landing'

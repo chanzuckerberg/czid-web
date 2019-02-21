@@ -15,19 +15,36 @@ class SearchBox extends React.Component {
     this.placeholder = this.props.placeholder;
     this.handleEnter = this.props.onEnter;
     this.handleResultSelect = this.handleResultSelect.bind(this);
-    this.blankState = { isLoading: false, results: [], value: "" };
+    this.blankState = {
+      isLoading: false,
+      results: [],
+      value: "",
+      selectedResult: null
+    };
 
     this.state = {
       isLoading: false,
       results: [],
-      value: this.props.initialValue
+      value: this.props.initialValue,
+      selectedResult: null
     };
   }
 
   onKeyDown = e => {
-    if (e.key == "Enter") {
+    // Defines action to be performed when user hits Enter without selecting one of the search results
+    if (e.key == "Enter" && !this.state.selectedResult && this.props.onEnter) {
       this.props.onEnter(e);
+      this.resetComponent();
     }
+  };
+
+  resetComponent = () => {
+    this.setState({
+      isLoading: false,
+      results: [],
+      value: this.state.value, // necessary for closing dropdown but keeping text entered in input
+      selectedResult: null
+    });
   };
 
   handleResultSelect(e, { result }) {
@@ -36,7 +53,7 @@ class SearchBox extends React.Component {
   }
 
   handleSearchChange = (e, { value }) => {
-    this.setState({ isLoading: true, value });
+    this.setState({ isLoading: true, selectedResult: null, value });
 
     setTimeout(async () => {
       if (this.state.value.length == 0) {
@@ -81,7 +98,11 @@ class SearchBox extends React.Component {
         value={value}
         placeholder={this.placeholder}
         onResultSelect={this.handleResultSelect}
+        onSelectionChange={(e, { result }) => {
+          this.setState({ selectedResult: result });
+        }}
         onKeyDown={this.onKeyDown}
+        showNoResults={false}
       />
     );
   }

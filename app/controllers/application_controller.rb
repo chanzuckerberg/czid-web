@@ -52,10 +52,22 @@ class ApplicationController < ActionController::Base
     raise "action doesn't check against access control" unless @access_checked
   end
 
+  # TODO: (gdingle): how is this related to request_context in ApplicationHelper?
   def request_context
     {
       enabledFeatures: current_user.allowed_featured_list
     }
+  end
+
+  def get_background_id(sample)
+    background_id = params[:background_id].to_i
+    if background_id > 0
+      viewable_background_ids = current_power.backgrounds.pluck(:id)
+      if viewable_background_ids.include?(background_id)
+        return background_id
+      end
+    end
+    sample.default_background_id
   end
 
   private

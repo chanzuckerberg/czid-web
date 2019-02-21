@@ -1,0 +1,10 @@
+<div id="SamplesHeatmapView_page">
+</div>
+
+<%= javascript_tag do %>
+  react_component(
+    'SamplesHeatmapView',
+    JSON.parse('<%= raw escape_json(@visualization_data) %>'),
+    'SamplesHeatmapView_page',
+  );
+<% end %>

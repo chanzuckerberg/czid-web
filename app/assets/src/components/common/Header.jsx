@@ -5,7 +5,7 @@ import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import LogoIcon from "~ui/icons/LogoIcon";
 import { openUrl } from "~utils/links";
-import { get } from "~/api";
+import { deleteAsync } from "~/api";
 import { forbidExtraProps } from "airbnb-prop-types";
 import cs from "./header.scss";
 import cx from "classnames";
@@ -57,8 +57,7 @@ const UserMenuDropDown = ({
   userName
 }) => {
   const signOut = () => {
-    get(`${signOutEndpoint}.json`, {
-      method: "DELETE",
+    deleteAsync(`${signOutEndpoint}.json`, {
       withCredentials: true
     }).then(_ => {
       openUrl(signInEndpoint);
@@ -119,7 +118,12 @@ const UserMenuDropDown = ({
       <BareDropdown.Item
         key="5"
         text={
-          <a className={cs.option} href="https://assets.idseq.net/Terms.pdf">
+          <a
+            className={cs.option}
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://assets.idseq.net/Terms.pdf"
+          >
             Terms of Use
           </a>
         }
@@ -127,7 +131,12 @@ const UserMenuDropDown = ({
       <BareDropdown.Item
         key="6"
         text={
-          <a className={cs.option} href="https://assets.idseq.net/Terms.pdf">
+          <a
+            className={cs.option}
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://assets.idseq.net/Privacy.pdf"
+          >
             Privacy Policy
           </a>
         }

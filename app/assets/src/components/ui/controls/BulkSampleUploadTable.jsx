@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import DataTable from "../../visualizations/table/DataTable";
-import { isEmpty } from "lodash/fp";
+import { isEmpty, concat, size } from "lodash/fp";
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 import LoadingIcon from "~/components/ui/icons/LoadingIcon";
 import CheckmarkIcon from "~/components/ui/icons/CheckmarkIcon";
@@ -12,7 +12,12 @@ import cs from "./bulk_sample_upload_table.scss";
 // bulk upload interactions
 class BulkSampleUploadTable extends React.Component {
   render() {
-    const { sampleNamesToFiles, fileNamesToProgress, onRemoved } = this.props;
+    const {
+      sampleNamesToFiles,
+      fileNamesToProgress,
+      onRemoved,
+      hideProgressColumn
+    } = this.props;
 
     if (isEmpty(sampleNamesToFiles)) return null;
 
@@ -56,7 +61,11 @@ class BulkSampleUploadTable extends React.Component {
         }
       }
 
-      const filesList = <div>{files.map(f => <div>{f.name}</div>)}</div>;
+      const filesList = (
+        <div>
+          {files.map(f => <div key={f.source}>{f.name || f.source}</div>)}
+        </div>
+      );
 
       const entry = {
         progress: progress,
@@ -69,10 +78,19 @@ class BulkSampleUploadTable extends React.Component {
 
     return (
       <div className={cs.bulkSampleUploadTable}>
-        <div className={cs.detectedMsg}>
-          These files were detected and matched. Remove files you do not want to
-          upload:
-        </div>
+        {this.props.showCount ? (
+          <div className={cs.detectedMsg}>
+            <span className={cs.count}>
+              {size(this.props.sampleNamesToFiles)} samples detected.&nbsp;
+            </span>
+            Remove samples you do not want to upload.
+          </div>
+        ) : (
+          <div className={cs.detectedMsg}>
+            These samples were detected and matched. Remove samples you do not
+            want to upload:
+          </div>
+        )}
         <DataTable
           headers={{
             progress: "",
@@ -80,7 +98,11 @@ class BulkSampleUploadTable extends React.Component {
             files: "Files",
             removeIcon: ""
           }}
-          columns={["progress", "sampleName", "files", "removeIcon"]}
+          columns={concat(!hideProgressColumn ? ["progress"] : [], [
+            "sampleName",
+            "files",
+            "removeIcon"
+          ])}
           data={entries}
         />
       </div>
@@ -90,10 +112,18 @@ class BulkSampleUploadTable extends React.Component {
 
 BulkSampleUploadTable.propTypes = {
   // Ex: { "water_sample": [File, File], "csf_sample": [File, File] }
-  sampleNamesToFiles: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.object)),
+  sampleNamesToFiles: PropTypes.objectOf(
+    PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string
+      })
+    )
+  ),
   // Ex: { "water_file_r1": 24, "water_file_r2": 85 }
   fileNamesToProgress: PropTypes.objectOf(PropTypes.number),
-  onRemoved: PropTypes.func
+  onRemoved: PropTypes.func,
+  hideProgressColumn: PropTypes.bool,
+  showCount: PropTypes.bool
 };
 
 export default BulkSampleUploadTable;

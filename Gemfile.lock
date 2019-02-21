@@ -994,6 +994,8 @@ GEM
     selenium-webdriver (3.141.0)
       childprocess (~> 0.5)
       rubyzip (~> 1.2, >= 1.2.2)
+    shortener (0.8.0)
+      voight_kampff (~> 1.1.2)
     silencer (1.0.1)
     simple_token_authentication (1.15.1)
       actionmailer (>= 3.2.6, < 6)
@@ -1042,6 +1044,8 @@ GEM
     useragent (0.16.10)
     vegas (0.1.11)
       rack (>= 1.0.0)
+    voight_kampff (1.1.3)
+      rack (>= 1.4, < 3.0)
     warden (1.2.8)
       rack (>= 2.0.6)
     web-console (3.7.0)
@@ -1103,6 +1107,7 @@ DEPENDENCIES
   rspec-rails (>= 3.7.2)
   rubocop (= 0.49.1)
   selenium-webdriver
+  shortener
   silencer
   simple_token_authentication (~> 1.15, >= 1.15.1)
   sprockets-es6

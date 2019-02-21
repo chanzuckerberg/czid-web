@@ -416,8 +416,12 @@ module SamplesHelper
     samples = []
     errors = []
     samples_to_upload.each do |sample_attributes|
+      sample_attributes[:input_files_attributes].reject! { |f| f["source"] == '' }
       sample = Sample.new(sample_attributes)
-      sample.bulk_mode = true
+      sample.input_files.each { |f| f.name ||= File.basename(f.source) }
+
+      # If s3 upload, set "bulk_mode" to true.
+      sample.bulk_mode = sample.input_files.map(&:source_type).include?("s3")
       sample.user = current_user
       if sample.save
         samples << sample

@@ -57,7 +57,11 @@ module MetadataHelper
   end
 
   # Receives an array of samples, and validates metadata from a csv.
-  def validate_metadata_csv_for_samples(samples, metadata)
+  def validate_metadata_csv_for_samples(samples, metadata, new_samples = false)
+    # If new samples, enforce required metadata constraint, and pull the host genome from the metadata rows for validation.
+    enforce_required = new_samples
+    extract_host_genome_from_metadata = new_samples
+
     errors = []
     warnings = []
 
@@ -67,17 +71,29 @@ module MetadataHelper
       return { "errors" => errors, "warnings" => warnings }
     end
 
+    # Require host_genome as a column.
+    unless !extract_host_genome_from_metadata || metadata["headers"].include?("host_genome")
+      errors.push(MetadataValidationErrors.missing_host_genome_column)
+      return { "errors" => errors, "warnings" => warnings }
+    end
+
     # Verify that the column names are supported.
     metadata["headers"].each_with_index do |header, index|
       # Check for matching MetadataField or the sample_name/host_genome_name
-      unless header == "sample_name" || MetadataField.find_by(name: header)
+      unless header == "sample_name" || header == "host_genome" || MetadataField.find_by(name: header) || MetadataField.find_by(display_name: header)
         errors.push(MetadataValidationErrors.column_not_supported(header, index + 1))
       end
     end
 
+    processed_samples = []
+
     sample_name_index = metadata["headers"].find_index("sample_name")
+    host_genome_index = metadata["headers"].find_index("host_genome")
 
     metadata["rows"].each_with_index do |row, index|
+      # Deleting in Excel may leaves a row of ""s in the CSV, so ignore
+      next if row.all? { |c| c == "" }
+
       # Check number of values in the row.
       if row.length != metadata["headers"].length
         errors.push(
@@ -90,24 +106,49 @@ module MetadataHelper
         errors.push(MetadataValidationErrors.row_missing_sample_name(index + 1))
         next
       end
-
       sample = samples.find { |s| s.name == row[sample_name_index] }
+
       if sample.nil?
         errors.push(MetadataValidationErrors.row_invalid_sample_name(row[sample_name_index], index + 1))
         next
       end
 
+      if processed_samples.include?(sample)
+        errors.push(MetadataValidationErrors.duplicate_sample(sample.name))
+        next
+      end
+
+      processed_samples << sample
+
+      # Check for valid host genome
+      if extract_host_genome_from_metadata && (row[host_genome_index].nil? || row[host_genome_index] == "")
+        errors.push(MetadataValidationErrors.row_missing_host_genome(index + 1))
+        next
+      end
+
+      if extract_host_genome_from_metadata
+        host_genome = HostGenome.where(name: row[host_genome_index]).first
+        if host_genome.nil?
+          errors.push(MetadataValidationErrors.row_invalid_host_genome(row[host_genome_index], index + 1))
+          next
+        end
+
+        sample.host_genome = host_genome
+      end
+
+      validated_fields = []
+
       # Validate the metadatum values with the sample.
-      row.each_with_index do |value, row_index|
-        next if row_index >= metadata["headers"].length
+      row.each_with_index do |value, col_index|
+        next if col_index >= metadata["headers"].length
 
         # Ignore empty string values.
         next if value.nil? || value == ""
 
-        field = metadata["headers"][row_index]
+        field = metadata["headers"][col_index]
 
         # Ignore invalid columns.
-        if field != "sample_name" && MetadataField.find_by(name: field)
+        if field != "sample_name" && field != "host_genome" && (MetadataField.find_by(name: field) || MetadataField.find_by(display_name: field))
           issues = sample.metadatum_validate(field, value)
 
           issues[:errors].each do |error|
@@ -117,7 +158,24 @@ module MetadataHelper
           issues[:warnings].each do |warning|
             warnings.push("#{warning} (row #{index + 1})")
           end
+
+          if issues[:errors].empty?
+            validated_fields << field
+          end
         end
+      end
+
+      missing_required_metadata_fields = sample.required_metadata_fields - validated_fields
+      if enforce_required && !missing_required_metadata_fields.empty?
+        errors.push(MetadataValidationErrors.row_missing_required_metadata(sample.name, missing_required_metadata_fields, index + 1))
+      end
+    end
+
+    if enforce_required
+      missing_samples = samples - processed_samples
+
+      missing_samples.each do |sample|
+        errors.push(MetadataValidationErrors.missing_sample_metadata_row(sample.name))
       end
     end
 

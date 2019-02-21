@@ -1,0 +1,35 @@
+@import "~styles/themes/colors";
+
+.radioButton {
+  width: 15px;
+  height: 15px;
+  border-radius: 15px;
+  border: 1px solid $medium-grey;
+  padding: 2px;
+  cursor: pointer;
+
+  .inner {
+    width: 9px;
+    height: 9px;
+    border-radius: 15px;
+    background-color: transparent;
+  }
+
+  &:hover {
+    .inner {
+      background-color: $light-grey;
+    }
+  }
+
+  &.selected {
+    .inner {
+      background-color: $primary-light;
+    }
+
+    &:hover {
+      .inner {
+        background-color: $primary-lighter;
+      }
+    }
+  }
+}

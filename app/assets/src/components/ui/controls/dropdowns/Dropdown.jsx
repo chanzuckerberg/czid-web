@@ -46,9 +46,11 @@ class Dropdown extends React.Component {
   };
 
   renderTrigger = () => {
-    const text = this.state.value !== undefined &&
-      this.state.value !== null && (
+    const text =
+      this.state.value !== undefined && this.state.value !== null ? (
         <span>{this.state.labels[this.state.value.toString()]}</span>
+      ) : (
+        <span className={cs.placeholder}>{this.props.placeholder}</span>
       );
     return (
       <DropdownTrigger
@@ -65,7 +67,6 @@ class Dropdown extends React.Component {
       <BareDropdown
         className={cx(cs.dropdown, this.props.className)}
         arrowInsideTrigger
-        placeholder={this.props.placeholder}
         disabled={this.props.disabled}
         fluid={this.props.fluid}
         options={this.props.options}

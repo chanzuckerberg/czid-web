@@ -9,8 +9,7 @@
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
 # It's strongly recommended that you check this file into your version control system.
-
-ActiveRecord::Schema.define(version: 20_190_116_005_251) do
+ActiveRecord::Schema.define(version: 20_190_220_191_436) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -174,6 +173,7 @@ ActiveRecord::Schema.define(version: 20_190_116_005_251) do
     t.string "group"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "examples"
     t.index ["group"], name: "index_metadata_fields_on_group"
   end
 
@@ -344,6 +344,22 @@ ActiveRecord::Schema.define(version: 20_190_116_005_251) do
     t.index ["user_id"], name: "index_samples_on_user_id"
   end
 
+  create_table "shortened_urls", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "owner_id"
+    t.string "owner_type", limit: 20
+    t.text "url", null: false
+    t.string "unique_key", limit: 10, null: false
+    t.string "category"
+    t.integer "use_count", default: 0, null: false
+    t.datetime "expires_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["category"], name: "index_shortened_urls_on_category"
+    t.index ["owner_id", "owner_type"], name: "index_shortened_urls_on_owner_id_and_owner_type"
+    t.index ["unique_key"], name: "index_shortened_urls_on_unique_key", unique: true
+    t.index ["url"], name: "index_shortened_urls_on_url", length: { url: 254 }
+  end
+
   create_table "taxon_byteranges", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "taxid"
     t.bigint "first_byte"
@@ -507,5 +523,21 @@ ActiveRecord::Schema.define(version: 20_190_116_005_251) do
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  end
+
+  create_table "visualizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "user_id"
+    t.string "visualization_type"
+    t.text "data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_visualizations_on_user_id"
+  end
+
+  create_table "samples_visualizations", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "visualization_id", null: false
+    t.bigint "sample_id", null: false
+    t.index ["sample_id"], name: "index_samples_visualizations_on_sample_id"
+    t.index ["visualization_id"], name: "index_samples_visualizations_on_visualization_id"
   end
 end

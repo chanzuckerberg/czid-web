@@ -4,7 +4,6 @@ require 'tempfile'
 require 'aws-sdk'
 require 'elasticsearch/model'
 # TODO(mark): Move to an initializer. Make sure this works with Rails auto-reloading.
-require 'constants/metadata'
 
 class Sample < ApplicationRecord
   if ELASTICSEARCH_ON
@@ -51,6 +50,7 @@ class Sample < ApplicationRecord
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
   has_many :metadata, dependent: :destroy
+  has_and_belongs_to_many :visualizations
 
   validate :input_files_checks
   after_create :initiate_input_file_upload
@@ -110,6 +110,14 @@ class Sample < ApplicationRecord
         errors.add(:input_files, "have identical read 1 source and read 2 source")
       end
     end
+  end
+
+  def required_metadata_fields
+    host_genome.metadata_fields.where(is_required: 1).pluck(:name)
+  end
+
+  def missing_required_metadata_fields
+    required_metadata_fields - metadata.map(&:metadata_field).pluck(:name)
   end
 
   def set_presigned_url_for_local_upload
@@ -521,10 +529,10 @@ class Sample < ApplicationRecord
     unless m
       # Create the entry
       m = Metadatum.new
-      m.key = key
       m.sample = self
-      # Fail if MetadataField doesn't exist
-      m.metadata_field = MetadataField.find_by!(name: key.to_s)
+      m.metadata_field = MetadataField.find_by(name: key.to_s) || MetadataField.find_by(display_name: key.to_s)
+      raise ActiveRecord::RecordNotFound("No matching field for #{key}") unless m.metadata_field
+      m.key = m.metadata_field.name
     end
     if val.blank?
       m.destroy
@@ -546,7 +554,8 @@ class Sample < ApplicationRecord
     }
 
     m = Metadatum.new
-    m.key = key
+    m.metadata_field = MetadataField.find_by(name: key) || MetadataField.find_by(display_name: key)
+    m.key = m.metadata_field ? m.metadata_field.name : nil
     m.sample = self
     m.raw_value = val
 

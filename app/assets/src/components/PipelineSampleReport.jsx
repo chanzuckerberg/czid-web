@@ -33,6 +33,7 @@ import TaxonTreeVis from "./views/TaxonTreeVis";
 import LoadingLabel from "./ui/labels/LoadingLabel";
 import HoverActions from "./views/report/ReportTable/HoverActions";
 import { getSampleReportInfo, getSummaryContigCounts } from "~/api";
+import { parseUrlParams } from "~/helpers/url";
 import { pipelineVersionHasAssembly } from "./utils/sample";
 
 const DEFAULT_MIN_CONTIG_SIZE = 4;
@@ -163,6 +164,14 @@ class PipelineSampleReport extends React.Component {
       minContigSize: cachedMinContigSize || DEFAULT_MIN_CONTIG_SIZE
     };
 
+    this.state = {
+      ...this.state,
+      // Override from explicit save
+      ...props.savedParamValues,
+      // Override from the URL
+      ...parseUrlParams()
+    };
+
     this.expandAll = false;
     this.expandedGenera = [];
     this.thresholded_taxons = [];
@@ -179,6 +188,11 @@ class PipelineSampleReport extends React.Component {
 
   componentDidMount() {
     this.scrollDown();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // Set the state in the URL
+    this.props.refreshPage(this.state, false);
   }
 
   fetchSearchList = () => {
@@ -652,6 +666,7 @@ class PipelineSampleReport extends React.Component {
         }
       },
       () => {
+        // TODO (gdingle): do we really want to reload the page here?
         this.props.refreshPage({ background_id: backgroundId });
       }
     );
