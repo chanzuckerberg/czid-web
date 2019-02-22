@@ -74,13 +74,13 @@ class ProjectsController < ApplicationController
                      current_power.samples
                    end
 
-        if only_library || exclude_library
-          @projects = @samples.group(:project).count
-        else
-          # This check is so that we still return projects without any samples.
-          # Ex: Project listing used by the CLI.
-          @projects = current_power.projects.map {|p| [p, Sample.where(project: p).count] }
-        end
+        @projects = if only_library || exclude_library
+                      @samples.group(:project).count
+                    else
+                      # This check is so that we still return projects without any samples.
+                      # Ex: Project listing used by the CLI.
+                      current_power.projects.map { |p| [p, Sample.where(project: p).count] }
+                    end
         extended_projects = @projects.map do |project, sample_count|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
             number_of_samples: sample_count,

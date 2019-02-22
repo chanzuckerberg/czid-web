@@ -398,7 +398,7 @@ module SamplesHelper
       end
 
       fields.each do |key, value|
-        next if key == "sample_name" or key == "host_genome"
+        next if key == "sample_name" || key == "host_genome"
 
         saved = sample.metadatum_add_or_update(key, value)
 
