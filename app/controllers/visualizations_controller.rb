@@ -16,17 +16,23 @@ class VisualizationsController < ApplicationController
     elsif exclude_library
       visualizations = Visualization
                        .where(public_access: 1)
-                       .where.not(user: current_user)
+    # TODO: See https://jira.czi.team/browse/IDSEQ-866
+    # .where.not(user: current_user)
     else
       raise 'Visualizations must be for either "my library" or "public"'
     end
-    visualizations = visualizations.where.not(visualization_type: [nil, 'undefined'])
+    # TODO: (gdingle): update the table React
+    visualizations = visualizations.joins(:user)
+                                   .select("visualizations.id AS id, user_id, visualizations.created_at, visualization_type, users.name AS user_name")
+                                   .where.not(visualization_type: [nil, 'undefined'])
+                                   .order(created_at: :desc)
 
     render json: visualizations
   end
 
   def visualization
     @type = params[:type]
+    @visualization_data = {}
 
     if @type == "heatmap"
       @visualization_data = heatmap
@@ -38,6 +44,9 @@ class VisualizationsController < ApplicationController
       vis.data[:sampleIds] = vis.sample_ids
       @visualization_data[:savedParamValues] = vis.data
     end
+
+    # TODO: (gdingle): redirect to report with url params
+
     # TODO: (gdingle): collection list view?
   end
 

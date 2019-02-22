@@ -22,15 +22,15 @@ class VisualizationsView extends React.Component {
         label: "",
         cellRenderer: this.renderAccess
       },
-      // {
-      //   dataKey: "details",
-      //   label: "Visualization",
-      //   flexGrow: 1,
-      //   className: cs.detailsCell,
-      //   cellRenderer: this.renderVisualizationDetails,
-      //   headerClassName: cs.detailsHeader,
-      //   sortFunction: p => p.name
-      // },
+      {
+        dataKey: "details",
+        label: "Visualization",
+        flexGrow: 1,
+        className: cs.detailsCell,
+        cellRenderer: this.renderVisualizationDetails,
+        headerClassName: cs.detailsHeader,
+        sortFunction: p => p.created_at
+      },
       {
         dataKey: "visualization_type",
         width: 200
@@ -39,6 +39,8 @@ class VisualizationsView extends React.Component {
         dataKey: "created_at",
         width: 200
       }
+      // TODO (gdingle): link to viz page!
+
       // { dataKey: "number_of_samples", width: 140, label: "No. Of Samples" }
     ];
   }
@@ -55,19 +57,22 @@ class VisualizationsView extends React.Component {
     );
   };
 
-  renderVisualizationDetails = ({ cellData: Visualization }) => {
+  renderVisualizationDetails = ({ cellData: visualization }) => {
+    // TODO (gdingle): base to sample report for types taxon and table, or use routes redirect
+    const href = `/visualizations/${visualization.visualization_type}/${
+      visualization.id
+    }`;
     return (
-      <div className={cs.Visualization}>
-        <div className={cs.VisualizationName}>{Visualization.name}</div>
-        <div className={cs.VisualizationDescription}>
-          {Visualization.description || "No description (DELETE THIS)"}
+      <div className={cs.visualization}>
+        <div className={cs.visualizationName}>
+          <a href={href}>{visualization.visualization_type}</a>
         </div>
-        <div className={cs.VisualizationDetails}>
-          <span className={cs.VisualizationCreationDate}>
-            {moment(Visualization.created_at).fromNow()}
+        <div className={cs.visualizationDetails}>
+          <span className={cs.visualizationCreationDate}>
+            {moment(visualization.created_at).fromNow()}
           </span>|
-          <span className={cs.VisualizationOwner}>
-            {Visualization.owner || "No owner (DELETE THIS)"}
+          <span className={cs.visualizationOwner}>
+            {visualization.user_name}
           </span>
         </div>
       </div>
@@ -82,26 +87,25 @@ class VisualizationsView extends React.Component {
   render() {
     const { visualizations } = this.props;
 
-    // let data = visualizations.map(visualization => {
-    //   return merge(
-    //     {
-    //       details: pick(visualization, [
-    //         "user",
-    //         "visualization_type",
-    //         "created_at",
-    //       ])
-    //     },
-    //     pick(visualization, [
-    //       "public_access",
-    //       // TODO (gdingle): include samples?
-    //     ])
-    //   );
-    // });
+    // Pick multiple keys for one column
+    let data = visualizations.map(visualization => {
+      return merge(
+        {
+          details: pick(visualization, [
+            "user_name",
+            "visualization_type",
+            "created_at",
+            "id"
+          ])
+        },
+        visualization
+      );
+    });
 
     return (
       <Table
         sortable
-        data={visualizations}
+        data={data}
         columns={this.columns}
         defaultRowHeight={120}
         sortBy={"visualization"}
