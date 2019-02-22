@@ -8,13 +8,15 @@ import SamplesView from "../samples/SamplesView";
 import { sumBy } from "lodash";
 import { getSamples, getProjects } from "~/api";
 import cs from "./discovery_view.scss";
+import LabeledDropdown from "../../ui/controls/dropdowns/LabeledDropdown";
+import MultipleDropdown from "../../ui/controls/dropdowns/MultipleDropdown";
 
 class DiscoveryView extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      currentTab: "samples",
+      currentTab: "projects",
       samples: [],
       projects: []
     };
@@ -69,10 +71,21 @@ class DiscoveryView extends React.Component {
     this.setState({ currentTab });
   };
 
+  handleFilterSelectionChange = selectedOptions => {
+    console.log("handleFilterSelectionChange", selectedOptions);
+  };
+
   render() {
     const { currentTab, projects } = this.state;
     const { onlyLibrary, excludeLibrary } = this.props;
     const tabs = this.computeTabs(projects);
+
+    let options = [
+      { value: "value_1", text: "Value 1" },
+      { value: "value_2", text: "Value 2" },
+      { value: "value_3", text: "Value 3" }
+    ];
+    let value = ["value_2"];
 
     return (
       <div className={cs.layout}>
@@ -84,6 +97,20 @@ class DiscoveryView extends React.Component {
           />
         </NarrowContainer>
         <Divider style="medium" />
+        <NarrowContainer>
+          <LabeledDropdown>
+            <MultipleDropdown
+              hideCounter
+              rounded
+              search
+              checkedOnTop
+              menuLabel="Select Columns"
+              onChange={this.handleFilterSelectionChange}
+              value={value}
+              options={options}
+            />
+          </LabeledDropdown>
+        </NarrowContainer>
         <NarrowContainer className={cs.viewContainer}>
           {currentTab == "projects" && <ProjectsView projects={projects} />}
           {currentTab == "samples" && (
