@@ -76,6 +76,7 @@ class ProjectsController < ApplicationController
                     else
                       # This check is so that we still return projects without any samples.
                       # Ex: Project listing used by the CLI.
+                      # TODO: Optimize perf if it is an issue.
                       current_power.projects.map { |p| [p, Sample.where(project: p).count] }
                     end
         extended_projects = @projects.map do |project, sample_count|

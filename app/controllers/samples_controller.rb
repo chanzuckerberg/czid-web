@@ -922,7 +922,7 @@ class SamplesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def samples_params
-    new_params = params.permit(samples: [:name, :project_id, :project_name, :status, :host_genome_id, :host_genome_name,
+    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id, :host_genome_name,
                                          input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]])
     new_params[:samples] if new_params
   end
