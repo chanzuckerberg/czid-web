@@ -6,8 +6,6 @@ class MetadataController < ApplicationController
   before_action :authenticate_user!, except: [:validate_csv_for_new_samples]
   acts_as_token_authentication_handler_for User, only: [:validate_csv_for_new_samples], fallback: :devise
 
-  before_action :admin_required
-
   def dictionary
   end
 

@@ -1709,10 +1709,7 @@ class BackgroundModal extends React.Component {
 }
 
 function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
-  const showUploadMenu =
-    (parent.admin !== 0 ||
-      parent.allowedFeatures.includes("project_metadata_upload")) &&
-    (proj && parent.canEditProject(proj.id));
+  const showUploadMenu = proj && parent.canEditProject(proj.id);
 
   const currentTimestamp = moment();
   const nextPublicSampleTimestamp = min(
@@ -1762,7 +1759,6 @@ function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
           </div>
         )}
 
-      {/* TODO(mark): Change admin to canEditProject when launch */}
       {showUploadMenu && (
         <div className={cs.projectMenuItem}>
           <ProjectUploadMenu project={proj} />
