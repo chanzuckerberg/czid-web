@@ -21,11 +21,11 @@ class VisualizationsController < ApplicationController
     else
       raise 'Visualizations must be for either "my library" or "public"'
     end
-    # TODO: (gdingle): update the table React
-    visualizations = visualizations.joins(:user)
-                                   .select("visualizations.id AS id, user_id, visualizations.created_at, visualization_type, users.name AS user_name")
-                                   .where.not(visualization_type: [nil, 'undefined'])
-                                   .order(created_at: :desc)
+    visualizations = visualizations
+                     .joins(:user)
+                     .select("visualizations.id AS id, user_id, visualizations.created_at, visualization_type, users.name AS user_name")
+                     .where.not(visualization_type: [nil, 'undefined'])
+                     .order(created_at: :desc)
 
     render json: visualizations
   end
@@ -45,9 +45,13 @@ class VisualizationsController < ApplicationController
       @visualization_data[:savedParamValues] = vis.data
     end
 
-    # TODO: (gdingle): redirect to report with url params
-
-    # TODO: (gdingle): collection list view?
+    # Redirects until we support standalone visualizations for these types
+    if @type == "table" || @type == "tree"
+      sample_id = vis.sample_ids[0]
+      return redirect_to "/samples/#{sample_id}?" + vis.data.to_query
+    elsif @type == "phylo_tree"
+      return redirect_to "/phylo_trees/index?" + vis.data.to_query
+    end
   end
 
   def save

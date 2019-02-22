@@ -1,11 +1,11 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 
-.project {
+.visualization {
   text-align: left;
   padding: 15px 0;
 
-  .projectName {
+  .visualizationName {
     color: $black;
     font-weight: $font-weight-semibold;
     font-size: $font-size-h5;
@@ -13,16 +13,7 @@
     margin-bottom: 8px;
   }
 
-  .projectDescription {
-    color: $dark-grey;
-    font-size: $font-size-h6;
-    margin-bottom: 8px;
-    line-height: 16px;
-    height: 32px;
-    vertical-align: middle;
-  }
-
-  .projectDetails {
+  .visualizationDetails {
     color: $medium-grey;
     font-size: $font-size-small;
 

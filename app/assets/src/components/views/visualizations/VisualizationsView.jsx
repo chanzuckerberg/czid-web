@@ -1,16 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
-// TODO (gdingle):  refactor me?
 import { Table } from "~/components/visualizations/table";
 import { merge, pick } from "lodash";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
 import moment from "moment";
-// TODO (gdingle): refactor
+// TODO (gdingle): refactor with projects_view.scss?
 import cs from "./visualizations_view.scss";
 import cx from "classnames";
 
-// TODO (gdingle): refactor with ProjectsView?
 class VisualizationsView extends React.Component {
   constructor(props) {
     super(props);
@@ -30,19 +28,16 @@ class VisualizationsView extends React.Component {
         cellRenderer: this.renderVisualizationDetails,
         headerClassName: cs.detailsHeader,
         sortFunction: p => p.created_at
-      },
-      {
-        dataKey: "visualization_type",
-        width: 200
-      },
-      {
-        dataKey: "created_at",
-        width: 200
       }
-      // TODO (gdingle): link to viz page!
-
-      // { dataKey: "number_of_samples", width: 140, label: "No. Of Samples" }
+      // TODO: (gdingle): show associated samples and projects
     ];
+  }
+
+  humanize(key) {
+    return key
+      .split("_")
+      .map(str => str.charAt(0).toUpperCase() + str.slice(1))
+      .join(" ");
   }
 
   renderAccess = ({ cellData: publicAccess }) => {
@@ -58,14 +53,13 @@ class VisualizationsView extends React.Component {
   };
 
   renderVisualizationDetails = ({ cellData: visualization }) => {
-    // TODO (gdingle): base to sample report for types taxon and table, or use routes redirect
     const href = `/visualizations/${visualization.visualization_type}/${
       visualization.id
     }`;
     return (
       <div className={cs.visualization}>
         <div className={cs.visualizationName}>
-          <a href={href}>{visualization.visualization_type}</a>
+          <a href={href}>{this.humanize(visualization.visualization_type)}</a>
         </div>
         <div className={cs.visualizationDetails}>
           <span className={cs.visualizationCreationDate}>
@@ -77,11 +71,6 @@ class VisualizationsView extends React.Component {
         </div>
       </div>
     );
-  };
-
-  // TODO: move generic renderers to table component
-  renderList = ({ cellData: list }) => {
-    return list && list.length > 0 ? list.join(", ") : "N/A";
   };
 
   render() {
