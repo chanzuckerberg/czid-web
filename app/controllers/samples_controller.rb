@@ -292,7 +292,6 @@ class SamplesController < ApplicationController
   end
 
   # POST /samples/bulk_upload_with_metadata
-  # TODO(mark): Handle required metadata fields.
   def bulk_upload_with_metadata
     samples_to_upload = samples_params || []
     metadata = params[:metadata] || {}
