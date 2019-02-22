@@ -44,7 +44,6 @@ class ProjectsController < ApplicationController
   # GET /projects
   # GET /projects.json
   def index
-    puts "index was called at least"
     respond_to do |format|
       format.html do
         # keep compatibility with old route
@@ -60,8 +59,6 @@ class ProjectsController < ApplicationController
           render json: current_power.updatable_projects
           return
         end
-
-        puts "got up to here at least"
 
         only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
         exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
@@ -390,14 +387,12 @@ class ProjectsController < ApplicationController
   end
 
   def set_project
-    puts "why is set_project being called"
     @project = projects_scope.find(params[:id])
     assert_access
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def project_params
-    puts "original params here #{params}"
     result = params.require(:project).permit(:name, :public_access, user_ids: [])
     result[:name] = sanitize(result[:name]) if result[:name]
     result

@@ -387,7 +387,6 @@ module SamplesHelper
   # metadata is a hash mapping sample name to hash of fields.
   def upload_metadata_for_samples(samples, metadata)
     errors = []
-    puts "here are all the fields: #{metadata}"
 
     metadata.each do |sample_name, fields|
       sample = samples.find { |s| s.name == sample_name }
@@ -398,7 +397,7 @@ module SamplesHelper
       end
 
       fields.each do |key, value|
-        next if key == "sample_name" || key == "host_genome"
+        next if ["sample_name", "host_genome"].include?(key)
 
         saved = sample.metadatum_add_or_update(key, value)
 
@@ -414,17 +413,13 @@ module SamplesHelper
     samples = []
     errors = []
     samples_to_upload.each do |sample_attributes|
-      puts "sample attributes look like #{sample_attributes}"
       sample_attributes[:input_files_attributes].reject! { |f| f["source"] == '' }
+
       if sample_attributes[:host_genome_name]
-        sample_attributes[:host_genome_id] = HostGenome.find_by(name: sample_attributes[:host_genome_name]).id
-        sample_attributes.delete(:host_genome_name)
-        puts "the id is: #{sample_attributes[:host_genome_id]}"
-        puts "genome was resolved"
+        name = sample_attributes.delete(:host_genome_name)
+        sample_attributes[:host_genome_id] = HostGenome.find_by(name: name).id
       end
       sample = Sample.new(sample_attributes)
-      puts "sample was newed"
-      puts "host genome: #{sample.host_genome}"
       sample.input_files.each { |f| f.name ||= File.basename(f.source) }
 
       # If s3 upload, set "bulk_mode" to true.
