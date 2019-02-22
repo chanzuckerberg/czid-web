@@ -397,7 +397,7 @@ module SamplesHelper
       end
 
       fields.each do |key, value|
-        next if key == "sample_name"
+        next if ["sample_name", "host_genome"].include?(key)
 
         saved = sample.metadatum_add_or_update(key, value)
 
@@ -414,6 +414,11 @@ module SamplesHelper
     errors = []
     samples_to_upload.each do |sample_attributes|
       sample_attributes[:input_files_attributes].reject! { |f| f["source"] == '' }
+
+      if sample_attributes[:host_genome_name]
+        name = sample_attributes.delete(:host_genome_name)
+        sample_attributes[:host_genome_id] = HostGenome.find_by(name: name).id
+      end
       sample = Sample.new(sample_attributes)
       sample.input_files.each { |f| f.name ||= File.basename(f.source) }
 

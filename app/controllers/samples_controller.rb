@@ -15,7 +15,7 @@ class SamplesController < ApplicationController
   #                access control should still be checked as neccessary through current_power
   #
   ##########################################
-  skip_before_action :verify_authenticity_token, only: [:create, :update]
+  skip_before_action :verify_authenticity_token, only: [:create, :update, :bulk_upload_with_metadata]
 
   # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
@@ -31,7 +31,7 @@ class SamplesController < ApplicationController
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload, :bulk_upload_with_metadata], fallback: :devise
 
-  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs, :upload, :bulk_upload_with_metadata]
+  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
   current_power do # Put this here for CLI
@@ -922,7 +922,7 @@ class SamplesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def samples_params
-    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id,
+    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id, :host_genome_name,
                                          input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]])
     new_params[:samples] if new_params
   end
