@@ -294,8 +294,9 @@ class SamplesController < ApplicationController
   # POST /samples/bulk_upload_with_metadata
   def bulk_upload_with_metadata
     puts "foobar 12:38pm"
-    puts samples_params
-    puts params[:metadata]
+    puts "samples_params: #{samples_params}"
+    puts "metadata params: #{params[:metadata]}"
+    puts "client: #{params[:client]}"
     samples_to_upload = samples_params || []
     metadata = params[:metadata] || {}
     client = params[:client]
@@ -313,10 +314,20 @@ class SamplesController < ApplicationController
     end
 
     editable_project_ids = current_power.updatable_projects.pluck(:id)
+    editable_project_names = current_power.updatable_projects.pluck(:name)
 
-    samples_to_upload, samples_invalid_projects = samples_to_upload.partition { |sample| editable_project_ids.include?(Integer(sample["project_id"])) }
+    # CLI currently supplies project_names
+    samples_to_upload, samples_invalid_projects = samples_to_upload.partition do |sample|
+      sample["project_id"] && editable_project_ids.include?(Integer(sample["project_id"])) || sample["project_name"] && editable_project_names.include?(sample["project_name"])
+    end
+    samples_to_upload = samples_to_upload.map {|s| s.delete("project_name")}
+
+    puts "samples to upload: #{samples_to_upload}"
 
     errors, samples = upload_samples_with_metadata(samples_to_upload, metadata).values_at("errors", "samples")
+
+    puts "samples here:"
+    puts samples
 
     # For each sample with an invalid project ID, add an error.
     samples_invalid_projects.each do |sample|
@@ -925,9 +936,13 @@ class SamplesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def samples_params
-    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id,
+    puts "BEFORE: #{params}"
+    new_params = params.permit(samples: [:name, :project_id, :project_name, :status, :host_genome_id,
                                          input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]])
-    new_params[:samples] if new_params
+    if new_params
+      puts "foobar it was unwrapped 4:28pm"
+      new_params[:samples]
+    end
   end
 
   def sample_params
