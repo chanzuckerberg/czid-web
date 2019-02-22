@@ -74,8 +74,8 @@ class ProjectsController < ApplicationController
         @projects = if only_library || exclude_library
                       @samples.group(:project).count
                     else
-                      # This check is so that we still return projects without any samples.
-                      # Ex: Project listing used by the CLI.
+                      # This check is so that we still return projects without any samples in the
+                      # default case. Ex: Project listing used by the CLI.
                       # TODO: Optimize perf if it is an issue.
                       current_power.projects.map { |p| [p, Sample.where(project: p).count] }
                     end

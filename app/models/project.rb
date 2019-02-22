@@ -14,6 +14,8 @@ class Project < ApplicationRecord
   validates :name, presence: true, uniqueness: true
   include ReportHelper
 
+  before_create :add_default_metadata_fields
+
   def csv_dir(user_id)
     path = "/app/tmp/report_csvs/#{id}/#{user_id}"
     sanitize_path(path)
@@ -139,5 +141,9 @@ class Project < ApplicationRecord
     samples = Sample.find(sample_ids)
     samples.each(&:destroy)
     super
+  end
+
+  def add_default_metadata_fields
+    self.metadata_fields = MetadataField.where(is_default: 1) unless metadata_fields
   end
 end
