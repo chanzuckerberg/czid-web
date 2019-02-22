@@ -36,6 +36,10 @@ module MetadataValidationErrors
     "#{invalid_name} is not a valid host genome (row #{row_index})"
   end
 
+  def self.sample_invalid_project(sample_name, row_index)
+    "Sample #{sample_name} is assigned to an invalid project (row #{row_index})"
+  end
+
   def self.row_missing_required_metadata(sample_name, missing_metadata_fields, row_index)
     "Sample #{sample_name} is missing required metadata: #{missing_metadata_fields.join(', ')}. (row #{row_index})"
   end

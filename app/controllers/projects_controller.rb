@@ -22,6 +22,14 @@ class ProjectsController < ApplicationController
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index, :send_project_csv, :choose_project].freeze
 
+  # Required for token auth for CLI actions
+  skip_before_action :verify_authenticity_token, only: [:index, :create]
+  before_action :authenticate_user!, except: [:index, :create]
+  acts_as_token_authentication_handler_for User, only: [:index, :create], fallback: :devise
+  current_power do
+    Power.new(current_user)
+  end
+
   power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
 
   before_action :admin_required, only: [:edit, :new]
@@ -44,14 +52,6 @@ class ProjectsController < ApplicationController
       end
       format.json do
         only_updatable = ActiveModel::Type::Boolean.new.cast(params[:onlyUpdatable])
-
-        # TODO(mark): Reconcile this with the part below.
-        # These returned projects contain different fields than the ones below.
-        if only_updatable
-          render json: current_power.updatable_projects
-          return
-        end
-
         only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
         exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
 
@@ -63,7 +63,15 @@ class ProjectsController < ApplicationController
                      current_power.samples
                    end
 
-        @projects = @samples.group(:project).count
+        @projects = if only_library || exclude_library
+                      @samples.group(:project).count
+                    else
+                      # Make sure you still return projects without any samples. Ex: Project listing
+                      # used by the CLI.
+                      (only_updatable ? current_power.updatable_projects : current_power.projects).map do |p|
+                        [p, Sample.where(project: p).count]
+                      end
+                    end
         extended_projects = @projects.map do |project, sample_count|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
             number_of_samples: sample_count,
@@ -217,8 +225,6 @@ class ProjectsController < ApplicationController
   def create
     @project = Project.new(project_params)
     @project.users << current_user
-    # New projects get the current set of default fields
-    @project.metadata_fields << MetadataField.where(is_default: 1)
 
     respond_to do |format|
       if @project.save

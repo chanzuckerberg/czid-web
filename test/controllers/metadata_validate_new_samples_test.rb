@@ -7,6 +7,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     @user = users(:one)
     @mosquito_host_genome = host_genomes(:mosquito)
     @human_host_genome = host_genomes(:human)
+    @metadata_validation_project = projects(:metadata_validation_project)
     @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
   end
 
@@ -23,10 +24,12 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       },
       samples: [
         {
-          name: "Test Sample"
+          name: "Test Sample",
+          project_id: @metadata_validation_project.id
         },
         {
-          name: "Test Sample 2"
+          name: "Test Sample 2",
+          project_id: @metadata_validation_project.id
         }
       ]
     }, as: :json
@@ -50,7 +53,8 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       },
       samples: [
         {
-          name: "Test Sample"
+          name: "Test Sample",
+          project_id: @metadata_validation_project.id
         }
       ]
     }, as: :json
@@ -76,10 +80,12 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       },
       samples: [
         {
-          name: "Test Sample"
+          name: "Test Sample",
+          project_id: @metadata_validation_project.id
         },
         {
-          name: "Test Sample 2"
+          name: "Test Sample 2",
+          project_id: @metadata_validation_project.id
         }
       ]
     }, as: :json
@@ -106,10 +112,12 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       },
       samples: [
         {
-          name: "Test Sample"
+          name: "Test Sample",
+          project_id: @metadata_validation_project.id
         },
         {
-          name: "Test Sample 2"
+          name: "Test Sample 2",
+          project_id: @metadata_validation_project.id
         }
       ]
     }, as: :json
@@ -136,10 +144,12 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       },
       samples: [
         {
-          name: "Test Sample"
+          name: "Test Sample",
+          project_id: @metadata_validation_project.id
         },
         {
-          name: "Test Sample 2"
+          name: "Test Sample 2",
+          project_id: @metadata_validation_project.id
         }
       ]
     }, as: :json
@@ -151,36 +161,6 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_match MetadataValidationErrors.row_invalid_host_genome('Fake Genome', 1), @response.parsed_body['issues']['errors'][0]
     # Error should throw if host genome is missing for a row.
     assert_match MetadataValidationErrors.row_missing_host_genome(2), @response.parsed_body['issues']['errors'][1]
-
-    assert_equal 0, @response.parsed_body['issues']['warnings'].length
-  end
-
-  test 'fields valid for host genome' do
-    post user_session_path, params: @user_params
-
-    post validate_csv_for_new_samples_metadata_url, params: {
-      metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'blood_fed'],
-        rows: [
-          ['Test Sample', 'Mosquito', 'Whole Blood', '', 'Blood Fed'],
-          ['Test Sample 2', 'Human', 'Whole Blood', 'DNA', 'Blood Fed']
-        ]
-      },
-      samples: [
-        {
-          name: "Test Sample"
-        },
-        {
-          name: "Test Sample 2"
-        }
-      ]
-    }, as: :json
-
-    assert_response :success
-
-    assert_equal 1, @response.parsed_body['issues']['errors'].length
-    # Error should throw if metadata type is not supported for the sample's host genome.
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('blood_fed', 'Human')} (row 2)", @response.parsed_body['issues']['errors'][0]
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
@@ -198,10 +178,12 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       },
       samples: [
         {
-          name: "Test Sample"
+          name: "Test Sample",
+          project_id: @metadata_validation_project.id
         },
         {
-          name: "Test Sample 2"
+          name: "Test Sample 2",
+          project_id: @metadata_validation_project.id
         }
       ]
     }, as: :json
@@ -228,7 +210,8 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       },
       samples: [
         {
-          name: "Test Sample"
+          name: "Test Sample",
+          project_id: @metadata_validation_project.id
         }
       ]
     }, as: :json
@@ -240,5 +223,53 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_match MetadataValidationErrors.duplicate_sample('Test Sample'), @response.parsed_body['issues']['errors'][0]
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
+  end
+
+  test 'core and custom fields' do
+    post user_session_path, params: @user_params
+
+    post validate_csv_for_new_samples_metadata_url, params: {
+      metadata: {
+        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
+        rows: [
+          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar']
+        ]
+      },
+      samples: [
+        {
+          name: "Test Sample",
+          project_id: @metadata_validation_project.id
+        }
+      ]
+    }, as: :json
+
+    assert_response :success
+
+    assert_equal 0, @response.parsed_body['issues']['errors'].length
+  end
+
+  test 'invalid project' do
+    post user_session_path, params: @user_params
+
+    post validate_csv_for_new_samples_metadata_url, params: {
+      metadata: {
+        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
+        rows: [
+          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar']
+        ]
+      },
+      samples: [
+        {
+          name: "Test Sample",
+          project_id: 1234
+        }
+      ]
+    }, as: :json
+
+    assert_response :success
+
+    assert_equal 1, @response.parsed_body['issues']['errors'].length
+    # Error should throw if sample project is invalid
+    assert_match MetadataValidationErrors.sample_invalid_project('Test Sample', 1), @response.parsed_body['issues']['errors'][0]
   end
 end
