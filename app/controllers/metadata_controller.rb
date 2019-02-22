@@ -31,7 +31,8 @@ class MetadataController < ApplicationController
     # Create temporary samples for metadata validation.
     samples = samples_data.map do |sample|
       Sample.new(
-        name: sample["name"]
+        name: sample["name"],
+        project: current_power.projects.find_by(id: sample["project_id"])
       )
     end
 

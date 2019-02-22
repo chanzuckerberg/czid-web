@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'constants/errors'
 
 # Tests ProjectsController validate_metadata_csv endpoint
 class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
@@ -46,27 +47,6 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     # Error should throw if sample_name column is missing.
     assert_equal 1, @response.parsed_body['issues']['errors'].length
     assert_match MetadataValidationErrors.missing_sample_name_column, @response.parsed_body['issues']['errors'][0]
-
-    assert_equal 0, @response.parsed_body['issues']['warnings'].length
-  end
-
-  test 'metadata validate column names valid' do
-    post user_session_path, params: @user_params
-
-    post validate_metadata_csv_project_url(@metadata_validation_project), params: {
-      metadata: {
-        headers: ['sample_name', 'sample_type', 'foobar'],
-        rows: [
-          ['metadata_validation_sample_human', 'Whole Blood', 'foobar']
-        ]
-      }
-    }, as: :json
-
-    assert_response :success
-
-    # Error should throw if column name is invalid.
-    assert_equal 1, @response.parsed_body['issues']['errors'].length
-    assert_match MetadataValidationErrors.column_not_supported('foobar', 3), @response.parsed_body['issues']['errors'][0]
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
@@ -134,18 +114,13 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
-    assert_equal 7, @response.parsed_body['issues']['errors'].length
+    assert_equal 3, @response.parsed_body['issues']['errors'].length
     # Error should throw if invalid float is passed for float data type.
     assert_match "#{MetadataValidationErrors.invalid_number('foobar')} (row 1)", @response.parsed_body['issues']['errors'][0]
     # Error should throw if invalid date is passed for date data type.
     assert_match "#{MetadataValidationErrors.invalid_date('foobar')} (row 1)", @response.parsed_body['issues']['errors'][1]
-    # Error should throw if metadata type is not supported for the sample's host genome.
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('blood_fed', 'Human')} (row 1)", @response.parsed_body['issues']['errors'][2]
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('reported_sex', 'Human')} (row 1)", @response.parsed_body['issues']['errors'][3]
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('age', 'Mosquito')} (row 2)", @response.parsed_body['issues']['errors'][4]
-    assert_match "#{MetadataValidationErrors.invalid_key_for_host_genome('admission_date', 'Mosquito')} (row 2)", @response.parsed_body['issues']['errors'][5]
     # Error should throw if string value doesn't match fixed list of string options.
-    assert_match "#{MetadataValidationErrors.invalid_option('reported_sex', 'foobar')} (row 2)", @response.parsed_body['issues']['errors'][6]
+    assert_match "#{MetadataValidationErrors.invalid_option('reported_sex', 'foobar')} (row 2)", @response.parsed_body['issues']['errors'][2]
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
@@ -170,5 +145,23 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_equal 1, @response.parsed_body['issues']['warnings'].length
 
     assert_match "#{MetadataValidationWarnings.value_already_exists('Female', 'Male', 'sex')} (row 1)", @response.parsed_body['issues']['warnings'][0]
+  end
+
+  test 'metadata validate core and custom fields' do
+    post user_session_path, params: @user_params
+
+    post validate_metadata_csv_project_url(@metadata_validation_project), params: {
+      metadata: {
+        headers: ['sample_name', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
+        rows: [
+          ['metadata_validation_sample_human', 'Foobar', 'Foobar', 'Foobar']
+        ]
+      }
+    }, as: :json
+
+    assert_response :success
+
+    assert_equal 0, @response.parsed_body['issues']['errors'].length
+    assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
 end

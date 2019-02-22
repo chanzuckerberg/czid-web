@@ -11,6 +11,7 @@ class Sample < ApplicationRecord
     include Elasticsearch::Model::Callbacks
   end
   include TestHelper
+  include MetadataHelper
 
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
@@ -530,7 +531,32 @@ class Sample < ApplicationRecord
       # Create the entry
       m = Metadatum.new
       m.sample = self
-      m.metadata_field = MetadataField.find_by(name: key.to_s) || MetadataField.find_by(display_name: key.to_s)
+
+      # Find the appropriate metadata field. First look at existing fields on the project.
+      m.metadata_field = get_available_matching_field(self, key.to_s)
+
+      unless m.metadata_field
+        # Look for a matching core field.
+        core_matching_field = get_matching_core_field(self, key.to_s)
+
+        if core_matching_field
+          # Add to the project.
+          project.metadata_fields.append(core_matching_field)
+          m.metadata_field = core_matching_field
+        end
+      end
+
+      unless m.metadata_field
+        # Create a new custom Metadata Field.
+        mf = get_new_custom_field(key.to_s)
+        mf.save
+
+        # Add to the project and host genome.
+        host_genome.metadata_fields.append(mf)
+        project.metadata_fields.append(mf)
+        m.metadata_field = mf
+      end
+
       raise ActiveRecord::RecordNotFound("No matching field for #{key}") unless m.metadata_field
       m.key = m.metadata_field.name
     end
@@ -554,16 +580,24 @@ class Sample < ApplicationRecord
     }
 
     m = Metadatum.new
-    m.metadata_field = MetadataField.find_by(name: key) || MetadataField.find_by(display_name: key)
-    m.key = m.metadata_field ? m.metadata_field.name : nil
-    m.sample = self
-    m.raw_value = val
+    m.metadata_field = get_available_matching_field(self, key.to_s)
 
-    is_valid = m.valid?
+    unless m.metadata_field
+      m.metadata_field = get_matching_core_field(self, key.to_s)
+    end
 
-    unless is_valid
-      issues[:errors].concat(m.errors.messages[:key])
-      issues[:errors].concat(m.errors.messages[:raw_value])
+    # Only perform this validation if a metadata field was found. Otherwise, we will be creating a custom field which will accept anything.
+    if m.metadata_field
+      m.key = m.metadata_field.name
+      m.sample = self
+      m.raw_value = val
+
+      is_valid = m.valid?
+
+      unless is_valid
+        issues[:errors].concat(m.errors.messages[:key])
+        issues[:errors].concat(m.errors.messages[:raw_value])
+      end
     end
 
     existing_m = metadata.find_by(key: key.to_s)
