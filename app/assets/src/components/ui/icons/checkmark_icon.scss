@@ -1,5 +1,5 @@
 @import "~styles/themes/colors";
 
-.checkmarkIcon {
+:global(i.icon).checkmarkIcon {
   color: $primary-light;
 }

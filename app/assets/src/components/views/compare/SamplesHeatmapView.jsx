@@ -571,6 +571,7 @@ class SamplesHeatmapView extends React.Component {
 
     return (
       <MultipleNestedDropdown
+        boxed
         fluid
         rounded
         options={options}
