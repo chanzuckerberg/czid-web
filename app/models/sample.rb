@@ -557,11 +557,11 @@ class Sample < ApplicationRecord
         m.metadata_field = mf
       end
 
-      raise ActiveRecord::RecordNotFound("No matching field for #{key}") unless m.metadata_field
+      raise RecordNotFound("No matching field for #{key}") unless m.metadata_field
       m.key = m.metadata_field.name
     end
     if val.blank?
-      m.destroy
+      m.delete
     else
       m.raw_value = val
       m.save!
