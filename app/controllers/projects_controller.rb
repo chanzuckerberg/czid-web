@@ -22,6 +22,14 @@ class ProjectsController < ApplicationController
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
   OTHER_ACTIONS = [:create, :new, :index, :send_project_csv, :choose_project].freeze
 
+  # Required for token auth for CLI actions
+  skip_before_action :verify_authenticity_token, only: [:index, :create]
+  before_action :authenticate_user!, except: [:index, :create]
+  acts_as_token_authentication_handler_for User, only: [:index, :create], fallback: :devise
+  current_power do
+    Power.new(current_user)
+  end
+
   power :projects, map: { EDIT_ACTIONS => :updatable_projects }, as: :projects_scope
 
   before_action :admin_required, only: [:edit, :new]
@@ -36,6 +44,7 @@ class ProjectsController < ApplicationController
   # GET /projects
   # GET /projects.json
   def index
+    puts "index was called at least"
     respond_to do |format|
       format.html do
         # keep compatibility with old route
@@ -52,6 +61,8 @@ class ProjectsController < ApplicationController
           return
         end
 
+        puts "got up to here at least"
+
         only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
         exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
 
@@ -63,7 +74,13 @@ class ProjectsController < ApplicationController
                      current_power.samples
                    end
 
-        @projects = @samples.group(:project).count
+        if only_library || exclude_library
+          @projects = @samples.group(:project).count
+        else
+          # This check is so that we still return projects without any samples.
+          # Ex: Project listing used by the CLI.
+          @projects = current_power.projects.map {|p| [p, Sample.where(project: p).count] }
+        end
         extended_projects = @projects.map do |project, sample_count|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
             number_of_samples: sample_count,
@@ -373,12 +390,14 @@ class ProjectsController < ApplicationController
   end
 
   def set_project
+    puts "why is set_project being called"
     @project = projects_scope.find(params[:id])
     assert_access
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def project_params
+    puts "original params here #{params}"
     result = params.require(:project).permit(:name, :public_access, user_ids: [])
     result[:name] = sanitize(result[:name]) if result[:name]
     result
