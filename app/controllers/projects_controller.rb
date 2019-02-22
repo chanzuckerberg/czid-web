@@ -52,14 +52,6 @@ class ProjectsController < ApplicationController
       end
       format.json do
         only_updatable = ActiveModel::Type::Boolean.new.cast(params[:onlyUpdatable])
-
-        # TODO(mark): Reconcile this with the part below.
-        # These returned projects contain different fields than the ones below.
-        if only_updatable
-          render json: current_power.updatable_projects
-          return
-        end
-
         only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
         exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
 
@@ -74,10 +66,11 @@ class ProjectsController < ApplicationController
         @projects = if only_library || exclude_library
                       @samples.group(:project).count
                     else
-                      # This check is so that we still return projects without any samples in the
-                      # default case. Ex: Project listing used by the CLI.
-                      # TODO: Optimize perf if it is an issue.
-                      current_power.projects.map { |p| [p, Sample.where(project: p).count] }
+                      # Make sure you still return projects without any samples. Ex: Project listing
+                      # used by the CLI.
+                      (only_updatable ? current_power.updatable_projects : current_power.projects).map do |p|
+                        [p, Sample.where(project: p).count]
+                      end
                     end
         extended_projects = @projects.map do |project, sample_count|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
@@ -232,8 +225,6 @@ class ProjectsController < ApplicationController
   def create
     @project = Project.new(project_params)
     @project.users << current_user
-    # New projects get the current set of default fields
-    @project.metadata_fields << MetadataField.where(is_default: 1)
 
     respond_to do |format|
       if @project.save
