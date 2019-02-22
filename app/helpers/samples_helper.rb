@@ -259,6 +259,7 @@ module SamplesHelper
     summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, pipeline_run) : nil
     output_data[:pipeline_run] = pipeline_run
     output_data[:host_genome_name] = sample.host_genome ? sample.host_genome.name : nil
+    output_data[:project_name] = sample.project ? sample.project.name : nil
     output_data[:summary_stats] = summary_stats
 
     output_data

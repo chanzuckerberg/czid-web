@@ -1,85 +1,41 @@
 import React from "react";
 import PropTypes from "prop-types";
-import {
-  AutoSizer,
-  Column,
-  SortDirection,
-  SortIndicator,
-  Table as VirtualizedTable
-} from "react-virtualized";
-import "react-virtualized/styles.css";
 import { find, orderBy } from "lodash";
-import cs from "./table.scss";
-import cx from "classnames";
+import { SortDirection } from "react-virtualized";
+import BaseTable from "./BaseTable";
 
 class Table extends React.Component {
-  // This class is a wrapper class to React Virtualized Table.
-  // Sets some default values and style to guarantee consistency of
-  // tables accross the site.
-  // TODO: - limitations -
-  // - needs dynamic row height (dynamic required use of CellMeasurer)
-  // - needs infinite scrolling
-  // - needs column picker
-  // - needs selectable rows
-
   constructor(props) {
     super(props);
-
     this.state = {
-      columns: this.setDefaults(this.props.columns),
       sortBy: this.props.sortBy,
-      sortDirection: SortDirection.ASC
+      sortDirection: this.props.sortDirection || SortDirection.ASC
     };
   }
 
-  humanize(key) {
-    return key
-      .split("_")
-      .map(str => str.charAt(0).toUpperCase() + str.slice(1))
-      .join(" ");
-  }
-
-  setDefaults = columns => {
-    const { defaultColumnWidth } = this.props;
-    return columns.map(column => {
-      column.label =
-        column.label !== undefined
-          ? column.label
-          : this.humanize(column.dataKey);
-      column.width = column.width || defaultColumnWidth;
-      return column;
+  handleSort = ({ sortBy, sortDirection }) => {
+    this.setState({
+      sortBy,
+      sortDirection
     });
   };
 
-  _sort = ({ sortBy, sortDirection }) => {
-    this.setState({ sortBy, sortDirection });
+  handleGetRow = ({ index }) => {
+    return this.sortedData[index];
   };
 
-  _sortableHeaderRenderer({ dataKey, label, sortBy, sortDirection }) {
-    return (
-      <div>
-        {label}
-        {sortBy === dataKey && <SortIndicator sortDirection={sortDirection} />}
-      </div>
-    );
-  }
-
   render() {
-    const {
-      data,
-      defaultHeaderHeight,
-      defaultRowHeight,
-      sortable
-    } = this.props;
+    const { columns, data, sortable, ...tableProps } = this.props;
 
-    const { columns, sortBy, sortDirection } = this.state;
+    const { sortBy, sortDirection } = this.state;
 
-    let columnSortFunction = (find(columns, { dataKey: sortBy }) || {})
+    const columnSortFunction = (find(columns, { dataKey: sortBy }) || {})
       .sortFunction;
+
     const sortedData =
       sortable && sortBy
         ? orderBy(
-            data,
+            this.props.data,
             [
               columnSortFunction
                 ? row => columnSortFunction(row[sortBy])
@@ -90,49 +46,22 @@ class Table extends React.Component {
         : data;
 
     return (
-      <AutoSizer>
-        {({ width, height }) => (
-          <VirtualizedTable
-            gridClassName={cs.grid}
-            headerClassName={cs.header}
-            headerHeight={defaultHeaderHeight}
-            height={height}
-            rowClassName={cs.row}
-            rowCount={data.length}
-            rowGetter={({ index }) => sortedData[index]}
-            rowHeight={defaultRowHeight}
-            sort={sortable && this._sort}
-            sortBy={sortable && sortBy}
-            sortDirection={sortable && sortDirection}
-            width={width}
-          >
-            {columns.map(columnProps => {
-              const { className, ...extraProps } = columnProps;
-              return (
-                <Column
-                  className={cx(cs.cell, className)}
-                  key={columnProps.dataKey}
-                  headerRenderer={
-                    sortable && !columnProps.disableSort
-                      ? this._sortableHeaderRenderer
-                      : undefined
-                  }
-                  {...extraProps}
-                />
-              );
-            })}
-          </VirtualizedTable>
-        )}
-      </AutoSizer>
+      <BaseTable
+        columns={columns}
+        onSort={this.handleSort}
+        rowCount={sortedData.length}
+        rowGetter={({ index }) => sortedData[index]}
+        sortable={sortable}
+        sortBy={sortBy}
+        sortDirection={sortDirection}
+        {...tableProps}
+      />
     );
   }
 }
 
 Table.defaultProps = {
-  data: [],
-  defaultColumnWidth: 100,
-  defaultHeaderHeight: 50,
-  defaultRowHeight: 30
+  data: []
 };
 
 Table.propTypes = {
@@ -142,11 +71,9 @@ Table.propTypes = {
     })
   ).isRequired,
   data: PropTypes.array,
-  defaultColumnWidth: PropTypes.number,
-  defaultHeaderHeight: PropTypes.number,
-  defaultRowHeight: PropTypes.number,
   sortable: PropTypes.bool,
-  sortBy: PropTypes.string
+  sortBy: PropTypes.string,
+  sortDirection: PropTypes.string
 };
 
 export default Table;

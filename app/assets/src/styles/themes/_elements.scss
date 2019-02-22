@@ -23,3 +23,29 @@ $box-shadow-bottom-right: 0px 2px 8px $box-shadow-light;
     }
   }
 }
+
+@keyframes loadingBackgroundAnimation {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: 10% 0;
+  }
+}
+
+@mixin loadingAnimation {
+  animation-name: loadingBackgroundAnimation;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+
+  background: linear-gradient(
+    to right,
+    $off-white 10%,
+    $lightest-grey 18%,
+    $lightest-grey 22%,
+    $off-white 30%
+  );
+  background-position: 0% 0;
+  background-size: 200%;
+}

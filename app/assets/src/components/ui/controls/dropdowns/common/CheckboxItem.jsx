@@ -1,18 +1,23 @@
 import React from "react";
 import PropTypes from "prop-types";
 import BareDropdown from "../BareDropdown";
-import Checkbox from "../../Checkbox";
-
-const stopEventPropagation = e => e.stopPropagation();
+import CheckmarkIcon from "~ui/icons/CheckmarkIcon";
+import cs from "./checkbox_item.scss";
+import cx from "classnames";
 
 const CheckboxItem = ({ value, label, checked, onOptionClick }) => (
-  <BareDropdown.Item onClick={stopEventPropagation}>
-    <Checkbox
-      value={value}
-      label={label}
-      checked={checked}
-      onChange={onOptionClick}
-    />
+  <BareDropdown.Item
+    onClick={e => {
+      e.stopPropagation();
+      onOptionClick(value, !checked);
+    }}
+  >
+    <div className={cs.listElement}>
+      <div className={cs.listCheckmark}>
+        <CheckmarkIcon size="small" className={cx(!checked && cs.disabled)} />
+      </div>
+      <div className={cs.listLabel}>{label}</div>
+    </div>
   </BareDropdown.Item>
 );
 

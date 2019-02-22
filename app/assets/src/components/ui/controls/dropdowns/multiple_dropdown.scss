@@ -2,11 +2,6 @@
 @import "~styles/typography";
 
 :global(.ui):global(.dropdown).multipleDropdown {
-  :global(.item) {
-    /* override semantic-ui */
-    padding: 6px 14px 6px 9px !important;
-  }
-
   &:global(.active) {
     .dropdownTrigger {
       border: 1px solid $primary-light;

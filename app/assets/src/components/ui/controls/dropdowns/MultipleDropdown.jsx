@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { without, omit, includes } from "lodash/fp";
+import { find, without, includes } from "lodash/fp";
 import React from "react";
 import BareDropdown from "./BareDropdown";
 import DropdownTrigger from "./common/DropdownTrigger";
@@ -12,7 +12,8 @@ class MultipleDropdown extends React.Component {
     super(props);
 
     this.state = {
-      value: this.props.value || []
+      value: this.props.value || [],
+      valueOnOpen: this.props.value || []
     };
   }
 
@@ -29,61 +30,106 @@ class MultipleDropdown extends React.Component {
 
   handleItemClicked = event => event.stopPropagation();
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.value !== this.state.value) {
-      this.setState({ value: nextProps.value });
+  static getDerivedStateFromProps(props, state) {
+    if (props.value !== state.prevPropsValue) {
+      return {
+        value: props.value,
+        prevPropsValue: props.value
+      };
     }
+    return null;
+  }
+
+  renderMenuItem(option, checked) {
+    return (
+      <CheckboxItem
+        key={option.value}
+        value={option.value}
+        label={option.text}
+        checked={checked}
+        onOptionClick={this.handleOptionClicked}
+      />
+    );
   }
 
   renderMenuItems() {
-    let ret = [];
-    let checkedOptions = this.props.value || this.state.value;
-    for (let option of this.props.options) {
-      ret.push(
-        <CheckboxItem
-          key={option.value}
-          value={option.value}
-          label={option.text}
-          checked={includes(option.value, checkedOptions)}
-          onOptionClick={this.handleOptionClicked}
-        />
+    const { value: propsValue, options, checkedOnTop } = this.props;
+    const { value: stateValue, valueOnOpen } = this.state;
+    let checkedOptions = propsValue || stateValue;
+
+    if (checkedOnTop) {
+      const checked = valueOnOpen.map(optionValue =>
+        this.renderMenuItem(
+          find({ value: optionValue }, options),
+          includes(optionValue, checkedOptions)
+        )
+      );
+      const unchecked = options
+        .filter(option => !includes(option.value, valueOnOpen))
+        .map(option =>
+          this.renderMenuItem(option, includes(option.value, checkedOptions))
+        );
+
+      return checked.concat(unchecked);
+    } else {
+      return options.map(option =>
+        this.renderMenuItem(option, includes(option.value, checkedOptions))
       );
     }
-    return ret;
   }
 
   renderText() {
-    const label = this.state.value.length > 0 && (
-      <DropdownLabel
-        className={cs.dropdownLabel}
-        disabled={this.props.disabled}
-        text={String(this.state.value.length)}
-      />
-    );
+    const { disabled, hideCounter, label, rounded } = this.props;
+    const { value } = this.state;
+
+    const counterLabel = !hideCounter &&
+      value.length > 0 && (
+        <DropdownLabel
+          className={cs.dropdownLabel}
+          disabled={disabled}
+          text={String(value.length)}
+        />
+      );
     return (
       <DropdownTrigger
         className={cs.dropdownTrigger}
-        label={this.props.label}
-        value={label}
-        rounded={this.props.rounded}
+        label={label}
+        value={counterLabel}
+        rounded={rounded}
       />
     );
   }
 
+  handleOpen = () => {
+    const { checkedOnTop } = this.props;
+    if (checkedOnTop)
+      this.setState({
+        valueOnOpen: this.state.value.slice()
+      });
+  };
+
   render() {
-    const otherProps = omit(
-      ["label", "options", "value", "rounded", "onChange"],
-      this.props
-    );
+    const {
+      checkedOnTop,
+      hideCounter,
+      label,
+      onChange,
+      options,
+      rounded,
+      trigger,
+      value,
+      ...otherProps
+    } = this.props;
 
     return (
       <BareDropdown
+        {...otherProps}
         floating
         className={cs.multipleDropdown}
-        {...otherProps}
         arrowInsideTrigger
-        trigger={this.renderText()}
+        trigger={trigger || this.renderText()}
         items={this.renderMenuItems()}
+        onOpen={this.handleOpen}
       />
     );
   }
@@ -94,12 +140,15 @@ MultipleDropdown.defaultProps = {
 };
 
 MultipleDropdown.propTypes = {
+  checkedOnTop: PropTypes.bool,
+  disabled: PropTypes.bool,
+  hideCounter: PropTypes.bool,
   label: PropTypes.string,
+  rounded: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   options: PropTypes.arrayOf(PropTypes.object),
-  value: PropTypes.array,
-  rounded: PropTypes.bool,
-  disabled: PropTypes.bool
+  trigger: PropTypes.node,
+  value: PropTypes.array
 };
 
 export default MultipleDropdown;

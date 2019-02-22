@@ -1,4 +1,5 @@
 // TODO(mark): Split this file up as more API methods get added.
+// TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
 import { cleanFilePath } from "~utils/sample";
 
@@ -258,12 +259,27 @@ const getSampleTaxons = (params, cancelToken) =>
   });
 
 // TODO: add remaining parameters: filter, search, page and sortBy
-const getSamples = ({ projectId, onlyLibrary, excludeLibrary } = {}) =>
+const getSamples = ({
+  projectId,
+  onlyLibrary,
+  excludeLibrary,
+  limit,
+  offset
+} = {}) =>
   get("/samples/index_v2.json", {
     params: {
       projectId,
       onlyLibrary,
-      excludeLibrary
+      excludeLibrary,
+      limit,
+      offset
+    }
+  });
+
+const getSampleDetails = ({ sampleIds }) =>
+  get("/samples/details.json", {
+    params: {
+      sampleIds
     }
   });
 
@@ -300,6 +316,7 @@ export {
   getSampleReportInfo,
   createProject,
   getSamples,
+  getSampleDetails,
   getProjects,
   saveSampleMetadata,
   getMetadataTypesByHostGenomeName,

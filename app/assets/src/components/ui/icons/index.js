@@ -16,10 +16,11 @@ import LogoIcon from "./LogoIcon";
 import MosquitoIcon from "./MosquitoIcon";
 import MouseIcon from "./MouseIcon";
 import PigIcon from "./PigIcon";
-import WormIcon from "./WormIcon";
+import PlusIcon from "./PlusIcon";
 import RemoveIcon from "./RemoveIcon";
 import TickIcon from "./TickIcon";
 import UserIcon from "./UserIcon";
+import WormIcon from "./WormIcon";
 
 export default {
   CUSTOM: {
@@ -37,6 +38,7 @@ export default {
     MosquitoIcon,
     MouseIcon,
     PigIcon,
+    PlusIcon,
     RemoveIcon,
     TickIcon,
     UserIcon,

@@ -1,22 +1,50 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 
+.tableContainer {
+  flex: 1 0 auto;
+  flex-direction: column;
+  height: 100%;
+  margin-right: 20px;
+}
+
+.columnSelectorContainer {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 20px;
+
+  .plusDropdown {
+    margin: 0;
+  }
+
+  .plusIcon {
+    width: 14px;
+    fill: $medium-grey;
+  }
+}
+
 .header {
+  @include font-body-s;
+
+  align-self: center;
   color: $medium-grey;
-  font-size: $font-size-h6;
-  font-weight: $font-weight-regular;
-  line-height: 20px;
   outline: 0;
   text-align: center;
   text-transform: none;
 }
 
+.actionsHeader {
+  overflow: visible;
+}
+
 .cell {
+  @include font-body-xs;
+
   color: $darkest-grey;
-  font-size: $font-size-h6;
-  font-weight: $font-weight-regular;
-  line-height: 20px;
+  font-weight: $font-weight-semibold;
   text-align: center;
+  overflow: hidden;
 }
 
 .row {

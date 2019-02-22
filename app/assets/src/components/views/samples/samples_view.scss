@@ -1,0 +1,165 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1 0 auto;
+
+  .table {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .note {
+    flex: 0 0 auto;
+  }
+}
+
+.sampleHeader {
+  text-align: left;
+}
+
+.sample {
+  display: flex;
+  padding: 15px 0;
+
+  .publicAccess {
+    flex: 0 0 40px;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    margin-right: 20px;
+
+    .icon {
+      fill: $medium-grey;
+
+      &.iconGlobe {
+        width: 40px;
+      }
+
+      &.iconLock {
+        width: 36px;
+      }
+    }
+  }
+
+  .sampleRightPane {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+
+    .sampleNameAndStatus {
+      display: flex;
+      justify-items: center;
+      margin-bottom: 2px;
+
+      .sampleName {
+        @include font-body-xs;
+
+        flex: 0 1 auto;
+        text-align: left;
+        color: $black;
+      }
+
+      .sampleStatus {
+        align-self: center;
+        background-color: $light-grey;
+        border-radius: 13px;
+        color: $medium-grey;
+        flex: 0 0 auto;
+        font-size: 9px;
+        line-height: 1;
+        margin-left: 10px;
+        padding: 2px 4px;
+        text-transform: uppercase;
+
+        &.complete {
+          background-color: $success-bg;
+          color: $success;
+        }
+
+        &.failed {
+          background-color: $error-bg;
+          color: $error;
+        }
+
+        &.waiting,
+        &.uploading {
+          background-color: $warning-bg;
+          color: $warning;
+        }
+      }
+    }
+
+    .sampleDetails {
+      @include font-body-xxs;
+
+      color: $medium-grey;
+      text-align: left;
+
+      span:not(:first-child) {
+        margin-left: 10px;
+      }
+
+      span:not(:last-child) {
+        margin-right: 10px;
+      }
+    }
+  }
+}
+
+.numberValueAndPercentage {
+  .percentage {
+    font-weight: $font-weight-regular;
+  }
+}
+
+.loading {
+  .publicAccess {
+    @include loadingAnimation;
+
+    height: 36px;
+    width: 36px;
+  }
+
+  .sampleRightPane {
+    .sampleNameAndStatus {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 20px;
+      width: 365px;
+    }
+
+    .sampleDetails {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 17px;
+      width: 315px;
+    }
+  }
+
+  .numberValueAndPercentage {
+    .value {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 16px;
+      padding: 2px 15%;
+    }
+    .percentage {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 15px;
+      padding: 2px 20%;
+    }
+  }
+}

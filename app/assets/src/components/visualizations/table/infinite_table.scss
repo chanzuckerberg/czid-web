@@ -1,0 +1,12 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+
+.loading {
+  .cellContent {
+    @include loadingAnimation;
+
+    height: 12px;
+    margin-left: 20%;
+    margin-right: 20%;
+  }
+}
