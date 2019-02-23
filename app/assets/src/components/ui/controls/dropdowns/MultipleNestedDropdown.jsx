@@ -167,8 +167,10 @@ class MultipleNestedDropdown extends React.Component {
   }
 
   renderItem(value, text, checked, callback) {
+    const { boxed } = this.props;
     return (
       <CheckboxItem
+        boxed={boxed}
         key={value}
         value={value}
         label={text}
@@ -239,6 +241,7 @@ class MultipleNestedDropdown extends React.Component {
   render() {
     const otherProps = omit(
       [
+        "boxed",
         "selectedOptions",
         "selectedSuboptions",
         "label",
@@ -268,6 +271,7 @@ MultipleNestedDropdown.defaultProps = {
 };
 
 MultipleNestedDropdown.propTypes = {
+  boxed: PropTypes.bool,
   label: PropTypes.string,
   onChange: PropTypes.func,
   options: PropTypes.array,

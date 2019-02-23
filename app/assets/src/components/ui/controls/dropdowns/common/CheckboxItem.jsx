@@ -5,7 +5,7 @@ import CheckmarkIcon from "~ui/icons/CheckmarkIcon";
 import cs from "./checkbox_item.scss";
 import cx from "classnames";
 
-const CheckboxItem = ({ value, label, checked, onOptionClick }) => (
+const CheckboxItem = ({ value, label, checked, onOptionClick, boxed }) => (
   <BareDropdown.Item
     onClick={e => {
       e.stopPropagation();
@@ -13,8 +13,14 @@ const CheckboxItem = ({ value, label, checked, onOptionClick }) => (
     }}
   >
     <div className={cs.listElement}>
-      <div className={cs.listCheckmark}>
-        <CheckmarkIcon size="small" className={cx(!checked && cs.disabled)} />
+      <div
+        className={cx(
+          checked && cs.checked,
+          cs.listCheckmark,
+          boxed && cs.boxed
+        )}
+      >
+        <CheckmarkIcon size="small" className={cs.icon} />
       </div>
       <div className={cs.listLabel}>{label}</div>
     </div>

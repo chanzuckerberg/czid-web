@@ -16,7 +16,7 @@ import cx from "classnames";
 class BaseTable extends React.Component {
   // This class is a wrapper class to React Virtualized Table.
   // Sets some default values and style to guarantee consistency of
-  // tables accross the site.s
+  // tables accross the site.
   // TODO: - limitations -
   // - needs dynamic row height (dynamic required use of CellMeasurer)
   // - needs selectable rows
