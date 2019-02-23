@@ -58,10 +58,45 @@ class TaxonTreeVis extends React.Component {
         onNodeLabelClick: this.handleNodeLabelClick,
         onCreatedTree: this.fillNodeValues,
         tooltipContainer: this.treeTooltip,
-        persistCollapsedInUrl: true
+        onCollapsedStateChange: this.persistCollapsedInUrl,
+        collapsed: this.getCollapsedInUrl() || new Set()
       }
     );
     this.treeVis.update();
+  }
+
+  persistCollapsedInUrl(node) {
+    function hasAllChildrenCollapsed(node) {
+      return !!(!node.children && node.collapsedChildren);
+    }
+    try {
+      const href = new URL(window.location.href);
+      if (hasAllChildrenCollapsed(node)) {
+        href.searchParams.set(node.id, "c"); // 'c'ollapsed
+      } else {
+        href.searchParams.delete(node.id);
+      }
+      history.pushState(window.history.state, document.title, href);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
+  }
+
+  getCollapsedInUrl() {
+    try {
+      const href = new URL(window.location.href);
+      const collapsed = [];
+      href.searchParams.forEach((v, k) => {
+        if (v === "c") {
+          collapsed.push(k);
+        }
+      });
+      return new Set(collapsed);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
   }
 
   componentDidUpdate() {

@@ -25,7 +25,8 @@ export default class TidyTree {
         minNonCollapsableChildren: 2,
         smallerFont: 8,
         largerFont: 12,
-        persistCollapsedInUrl: false
+        onCollapsedStateChange: () => {},
+        collapsed: new Set()
       },
       options || {}
     );
@@ -69,11 +70,7 @@ export default class TidyTree {
   setOptions(options) {
     Object.assign(this.options, options);
 
-    if (
-      options.attribute ||
-      options.collapseThreshold ||
-      options.persistCollapsedInUrl
-    ) {
+    if (options.attribute || options.collapseThreshold) {
       this.sortAndScaleTree();
     }
 
@@ -126,7 +123,7 @@ export default class TidyTree {
       .domain(this.range)
       .range([0, 1]);
     this.root.eachAfter(d => {
-      if (this.options.persistCollapsedInUrl && this.isCollapsedInUrl(d)) {
+      if (this.options.collapsed.has(d.id)) {
         d.collapsedChildren = d.children;
         d.children = null;
       } else if (
@@ -179,31 +176,6 @@ export default class TidyTree {
     });
   }
 
-  persistCollapsedInUrl(node) {
-    try {
-      const href = new URL(window.location.href);
-      if (this.hasAllChildrenCollapsed(node)) {
-        href.searchParams.set(node.id, "c"); // 'c'ollapsed
-      } else {
-        href.searchParams.delete(node.id);
-      }
-      history.pushState(window.history.state, document.title, href);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error(e);
-    }
-  }
-
-  isCollapsedInUrl(node) {
-    try {
-      const href = new URL(window.location.href);
-      return href.searchParams.get(node.id) == "c"; // 'c'ollapsed
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error(e);
-    }
-  }
-
   toggleCollapseNode(node) {
     let updatedNode = node;
 
@@ -242,9 +214,7 @@ export default class TidyTree {
         y0: node.y
       })
     );
-    if (this.options.persistCollapsedInUrl) {
-      this.persistCollapsedInUrl(node);
-    }
+    this.options.onCollapsedStateChange(node);
   }
 
   expandCollapsedWithFewChildren(node) {
