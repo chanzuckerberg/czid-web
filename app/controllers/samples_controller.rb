@@ -83,7 +83,7 @@ class SamplesController < ApplicationController
     # Query by name for a Sample attribute or pathogen name in the Sample.
     if name_search_query.present?
       # Pass in a scope of pipeline runs using current_power
-      pipeline_run_ids = current_power.pipeline_runs.top_completed_runs.pluck(:id)
+      pipeline_run_ids = current_fpower.pipeline_runs.top_completed_runs.pluck(:id)
       results = results.search(name_search_query, pipeline_run_ids)
     end
 
@@ -125,6 +125,7 @@ class SamplesController < ApplicationController
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
     offset = params[:offset].to_i
 
+    Rails.logger.debug("params=#{params}")
     @samples = if only_library
                  current_power.library_samples
                elsif exclude_library
