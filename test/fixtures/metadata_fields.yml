@@ -2,14 +2,12 @@ sample_type:
   name: "sample_type"
   display_name: "Sample Type"
   base_type: 0
-  host_genomes: [human]
   is_required: 1
 
 nucleotide_type:
   name: "nucleotide_type"
   display_name: "Nucleotide Type"
   base_type: 0
-  host_genomes: [human]
   is_required: 1
   force_options: 1
   options: "[\"DNA\", \"RNA\"]"
@@ -18,7 +16,6 @@ sex:
   name: "sex"
   display_name: "Sex"
   base_type: 0
-  host_genomes: [human]
   force_options: 1
   options: "[\"Female\", \"Male\"]"
 
@@ -31,13 +28,17 @@ reported_sex:
 age:
   name: "age"
   base_type: 1
-  host_genomes: [human]
 
 admission_date:
   name: "admission_date"
   base_type: 2
-  host_genomes: [human]
 
 blood_fed:
   name: "blood_fed"
   base_type: 0
+
+core_field:
+  name: "example_core_field"
+  display_name: "Example Core Field"
+  base_type: 0
+  is_core: 1

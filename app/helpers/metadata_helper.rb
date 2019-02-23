@@ -1,6 +1,23 @@
 require 'csv'
 
 module MetadataHelper
+  def get_available_matching_field(sample, name)
+    available_fields = (sample.project.metadata_fields & sample.host_genome.metadata_fields)
+    return available_fields.find { |field| field.name == name || field.display_name == name }
+  end
+
+  def get_matching_core_field(sample, name)
+    return sample.host_genome.metadata_fields.where(is_core: true).to_a.find { |field| field.name == name || field.display_name == name }
+  end
+
+  def get_new_custom_field(name)
+    mf = MetadataField.new
+    mf.name = name
+    mf.display_name = name
+    mf.base_type = Metadatum::STRING_TYPE
+    return mf
+  end
+
   def official_metadata_fields_helper
     required = MetadataField.where(is_required: true)
     default = MetadataField.where(is_default: true)
@@ -77,14 +94,6 @@ module MetadataHelper
       return { "errors" => errors, "warnings" => warnings }
     end
 
-    # Verify that the column names are supported.
-    metadata["headers"].each_with_index do |header, index|
-      # Check for matching MetadataField or the sample_name/host_genome_name
-      unless header == "sample_name" || header == "host_genome" || MetadataField.find_by(name: header) || MetadataField.find_by(display_name: header)
-        errors.push(MetadataValidationErrors.column_not_supported(header, index + 1))
-      end
-    end
-
     processed_samples = []
 
     sample_name_index = metadata["headers"].find_index("sample_name")
@@ -120,6 +129,11 @@ module MetadataHelper
 
       processed_samples << sample
 
+      if new_samples && !sample.project
+        errors.push(MetadataValidationErrors.sample_invalid_project(sample.name, index + 1))
+        next
+      end
+
       # Check for valid host genome
       if extract_host_genome_from_metadata && (row[host_genome_index].nil? || row[host_genome_index] == "")
         errors.push(MetadataValidationErrors.row_missing_host_genome(index + 1))
@@ -148,7 +162,7 @@ module MetadataHelper
         field = metadata["headers"][col_index]
 
         # Ignore invalid columns.
-        if field != "sample_name" && field != "host_genome" && (MetadataField.find_by(name: field) || MetadataField.find_by(display_name: field))
+        if field != "sample_name" && field != "host_genome"
           issues = sample.metadatum_validate(field, value)
 
           issues[:errors].each do |error|

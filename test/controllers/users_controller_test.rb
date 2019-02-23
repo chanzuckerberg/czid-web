@@ -40,11 +40,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   # Host Genomes
 
-  test 'host genome -non admin shouldnt get index' do
-    get host_genomes_url
-    assert_redirected_to root_url
-  end
-
   test 'host genome -non admin shouldnt get new' do
     get new_host_genome_url
     assert_redirected_to root_url

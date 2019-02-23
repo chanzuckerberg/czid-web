@@ -6,8 +6,6 @@ class MetadataController < ApplicationController
   before_action :authenticate_user!, except: [:validate_csv_for_new_samples]
   acts_as_token_authentication_handler_for User, only: [:validate_csv_for_new_samples], fallback: :devise
 
-  before_action :admin_required
-
   def dictionary
   end
 
@@ -31,7 +29,8 @@ class MetadataController < ApplicationController
     # Create temporary samples for metadata validation.
     samples = samples_data.map do |sample|
       Sample.new(
-        name: sample["name"]
+        name: sample["name"],
+        project: current_power.projects.find_by(id: sample["project_id"])
       )
     end
 
@@ -44,7 +43,8 @@ class MetadataController < ApplicationController
   rescue => err
     render json: {
       status: "error",
-      issues: err
+      # Wrapped for consistency with success response
+      issues: { errors: [err] }
     }, status: :unprocessable_entity
   end
 end

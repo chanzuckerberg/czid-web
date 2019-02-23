@@ -59,7 +59,8 @@ class SampleUploadFlow extends React.Component {
 
   getSamplesForMetadataValidation = () => {
     return this.state.samples.map(sample => ({
-      name: sample.name
+      name: sample.name,
+      project_id: sample.project_id
     }));
   };
 
