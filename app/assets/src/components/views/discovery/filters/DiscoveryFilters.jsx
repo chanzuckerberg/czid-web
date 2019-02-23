@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import LabeledDropdown from "../../ui/controls/dropdowns/LabeledDropdown";
-import { MultipleDropdown } from "../../ui/controls/dropdowns";
+import LabeledDropdown from "../../../ui/controls/dropdowns/LabeledDropdown";
+import { MultipleDropdown } from "../../../ui/controls/dropdowns";
 import { find } from "lodash";
 import Label from "~ui/labels/Label";
 import cs from "./discovery_filters.scss";

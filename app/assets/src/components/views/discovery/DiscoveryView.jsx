@@ -10,6 +10,7 @@ import { getSamples, getProjects } from "~/api";
 import cs from "./discovery_view.scss";
 import LabeledDropdown from "../../ui/controls/dropdowns/LabeledDropdown";
 import MultipleDropdown from "../../ui/controls/dropdowns/MultipleDropdown";
+import AsyncFilter from "../../common/filters/AsyncFilter";
 
 class DiscoveryView extends React.Component {
   constructor(props) {
@@ -97,29 +98,33 @@ class DiscoveryView extends React.Component {
           />
         </NarrowContainer>
         <Divider style="medium" />
-        <NarrowContainer>
-          <LabeledDropdown>
-            <MultipleDropdown
-              hideCounter
-              rounded
-              search
-              checkedOnTop
-              menuLabel="Select Columns"
-              onChange={this.handleFilterSelectionChange}
-              value={value}
-              options={options}
-            />
-          </LabeledDropdown>
-        </NarrowContainer>
-        <NarrowContainer className={cs.viewContainer}>
-          {currentTab == "projects" && <ProjectsView projects={projects} />}
-          {currentTab == "samples" && (
-            <SamplesView
-              onlyLibrary={onlyLibrary}
-              excludeLibrary={excludeLibrary}
-            />
-          )}
-        </NarrowContainer>
+        <div className={cs.mainContainer}>
+          <div className={cs.leftPane}>
+            <AsyncFilter label="Pathogen" menuLabel="Select Pathogen" />
+            {/* <LabeledDropdown>
+                <MultipleDropdown
+                  hideCounter
+                  rounded
+                  search
+                  checkedOnTop
+                  menuLabel="Select Columns"
+                  onChange={this.handleFilterSelectionChange}
+                  value={value}
+                  options={options}
+                />
+              </LabeledDropdown> */}
+          </div>
+          <NarrowContainer className={cs.viewContainer}>
+            {currentTab == "projects" && <ProjectsView projects={projects} />}
+            {currentTab == "samples" && (
+              <SamplesView
+                onlyLibrary={onlyLibrary}
+                excludeLibrary={excludeLibrary}
+              />
+            )}
+          </NarrowContainer>
+          <div className={cs.rightPane} />
+        </div>
       </div>
     );
   }

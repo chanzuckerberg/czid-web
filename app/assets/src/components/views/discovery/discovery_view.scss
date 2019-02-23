@@ -11,11 +11,25 @@
     flex: 0 0 auto;
   }
 
-  .viewContainer {
+  .mainContainer {
     display: flex;
-    flex-direction: column;
     flex: 1 0 auto;
     padding-top: 30px;
+
+    .leftPane {
+      flex: 0 0 auto;
+      padding: 10px;
+    }
+
+    .viewContainer {
+      display: flex;
+      flex-direction: column;
+      flex: 1 0 auto;
+    }
+
+    .rightPane {
+      flex: 0 0 auto;
+    }
   }
 }
 
