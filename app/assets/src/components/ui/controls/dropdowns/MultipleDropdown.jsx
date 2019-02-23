@@ -124,6 +124,9 @@ class MultipleDropdown extends React.Component {
       ...otherProps
     } = this.props;
 
+    const renderedMenuItems = this.renderMenuItems();
+    const searchStrings = renderedMenuItems.map(item => item.props.label);
+
     return (
       <BareDropdown
         {...otherProps}
@@ -131,7 +134,8 @@ class MultipleDropdown extends React.Component {
         className={cs.multipleDropdown}
         arrowInsideTrigger
         trigger={trigger || this.renderText()}
-        items={this.renderMenuItems()}
+        items={renderedMenuItems}
+        itemSearchStrings={searchStrings}
         onOpen={this.handleOpen}
       />
     );
