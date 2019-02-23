@@ -46,7 +46,7 @@ class UploadPage extends React.Component {
             See Instructions
           </span>
           <span> | </span>
-          <a href="/metadata/dictionary" className={cs.link}>
+          <a href="/metadata/dictionary" className={cs.link} target="_blank">
             See Metadata Dictionary
           </a>
         </div>

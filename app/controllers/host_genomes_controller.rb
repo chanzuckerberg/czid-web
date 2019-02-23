@@ -1,6 +1,6 @@
 class HostGenomesController < ApplicationController
   before_action :set_host_genome, only: [:show, :edit, :update, :destroy]
-  before_action :admin_required
+  before_action :admin_required, except: [:index]
 
   # GET /host_genomes
   # GET /host_genomes.json
