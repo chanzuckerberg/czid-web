@@ -24,7 +24,9 @@ export default class TidyTree {
         useCommonName: false,
         minNonCollapsableChildren: 2,
         smallerFont: 8,
-        largerFont: 12
+        largerFont: 12,
+        onCollapsedStateChange: () => {},
+        collapsed: new Set()
       },
       options || {}
     );
@@ -121,7 +123,10 @@ export default class TidyTree {
       .domain(this.range)
       .range([0, 1]);
     this.root.eachAfter(d => {
-      if (
+      if (this.options.collapsed.has(d.id)) {
+        d.collapsedChildren = d.children;
+        d.children = null;
+      } else if (
         !d.data.highlight &&
         collapsedScale(d.data.values[this.options.attribute]) <
           this.options.collapseThreshold
@@ -209,6 +214,7 @@ export default class TidyTree {
         y0: node.y
       })
     );
+    this.options.onCollapsedStateChange(node);
   }
 
   expandCollapsedWithFewChildren(node) {
