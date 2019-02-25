@@ -1,12 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { sumBy } from "lodash";
+
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
+import { getSamples, getProjects, getVisualizations } from "~/api";
 import DiscoveryHeader from "../discovery/DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
-import { sumBy } from "lodash";
-import { getSamples, getProjects } from "~/api";
+import VisualizationsView from "../visualizations/VisualizationsView";
+
 import cs from "./discovery_view.scss";
 
 class DiscoveryView extends React.Component {
@@ -16,7 +19,8 @@ class DiscoveryView extends React.Component {
     this.state = {
       currentTab: "samples",
       samples: [],
-      projects: []
+      projects: [],
+      visualizations: []
     };
     this.fetchData();
   }
@@ -24,13 +28,15 @@ class DiscoveryView extends React.Component {
   async fetchData() {
     const { onlyLibrary, excludeLibrary } = this.props;
     try {
-      const [samples, projects] = await Promise.all([
+      const [samples, projects, visualizations] = await Promise.all([
         getSamples({ onlyLibrary, excludeLibrary }),
-        getProjects({ onlyLibrary, excludeLibrary })
+        getProjects({ onlyLibrary, excludeLibrary }),
+        getVisualizations({ onlyLibrary, excludeLibrary })
       ]);
       this.setState({
         samples,
-        projects
+        projects,
+        visualizations
       });
     } catch (error) {
       // TODO: handle error better
@@ -39,7 +45,7 @@ class DiscoveryView extends React.Component {
     }
   }
 
-  computeTabs = (projects, analyses) => {
+  computeTabs = (projects, visualizations) => {
     const renderTab = (label, count) => {
       return (
         <div>
@@ -59,8 +65,8 @@ class DiscoveryView extends React.Component {
         value: "samples"
       },
       {
-        label: renderTab("Analyses", (analyses || []).length),
-        value: "analyses"
+        label: renderTab("Visualizations", (visualizations || []).length),
+        value: "visualizations"
       }
     ];
   };
@@ -70,9 +76,9 @@ class DiscoveryView extends React.Component {
   };
 
   render() {
-    const { currentTab, projects } = this.state;
+    const { currentTab, projects, visualizations } = this.state;
     const { onlyLibrary, excludeLibrary } = this.props;
-    const tabs = this.computeTabs(projects);
+    const tabs = this.computeTabs(projects, visualizations);
 
     return (
       <div className={cs.layout}>
@@ -91,6 +97,9 @@ class DiscoveryView extends React.Component {
               onlyLibrary={onlyLibrary}
               excludeLibrary={excludeLibrary}
             />
+          )}
+          {currentTab == "visualizations" && (
+            <VisualizationsView visualizations={visualizations} />
           )}
         </NarrowContainer>
       </div>

@@ -3,7 +3,7 @@
   @param {Number} x
   @return {String} comma separated numbers
 */
-function numberWithCommas(x) {
+export function numberWithCommas(x) {
   if (!x) {
     return x;
   }
@@ -15,4 +15,16 @@ function numberWithCommas(x) {
   return x;
 }
 
-export default numberWithCommas;
+/**
+ * @param  {String}
+ * @return {String}
+ *
+ * > humanize('taxon_tree')
+ * "Taxon Tree"
+ */
+export function humanize(key) {
+  return key
+    .split("_")
+    .map(str => str.charAt(0).toUpperCase() + str.slice(1))
+    .join(" ");
+}

@@ -128,6 +128,7 @@ class SamplesController < ApplicationController
     @samples = if only_library
                  current_power.library_samples
                elsif exclude_library
+                 # TODO: (gdingle): does this actually exclude the user's library???
                  Sample.public_samples
                else
                  current_power.samples

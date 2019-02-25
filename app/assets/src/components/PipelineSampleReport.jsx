@@ -4,7 +4,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import $ from "jquery";
 import { Label, Menu, Icon, Popup } from "semantic-ui-react";
-import numberWithCommas from "../helpers/strings";
+import { numberWithCommas } from "../helpers/strings";
 import { getTaxonName, getGeneraContainingTags } from "../helpers/taxon";
 import ThresholdMap from "./utils/ThresholdMap";
 import {
