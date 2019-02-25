@@ -523,10 +523,14 @@ class Sample < ApplicationRecord
     pr.save
   end
 
+  def get_existing_metadatum(key)
+    return metadata.find { |metadatum| metadatum.metadata_field.name == key || metadatum.metadata_field.display_name == key }
+  end
+
   # Add or update metadatum entry on this sample.
   # Returns whether the update succeeded.
   def metadatum_add_or_update(key, val)
-    m = metadata.find_by(key: key.to_s)
+    m = get_existing_metadatum(key.to_s)
     unless m
       # Create the entry
       m = Metadatum.new
@@ -572,10 +576,8 @@ class Sample < ApplicationRecord
 
   # Validate metadatum entry on this sample, without saving.
   def metadatum_validate(key, val)
-    issues = {
-      errors: [],
-      warnings: []
-    }
+    errors = []
+    warnings = []
 
     m = Metadatum.new
     m.metadata_field = get_available_matching_field(self, key.to_s)
@@ -593,19 +595,24 @@ class Sample < ApplicationRecord
       is_valid = m.valid?
 
       unless is_valid
-        issues[:errors].concat(m.errors.messages[:key])
-        issues[:errors].concat(m.errors.messages[:raw_value])
+        errors.concat(m.errors.messages[:key])
+        errors.concat(m.errors.messages[:raw_value])
       end
     end
 
-    existing_m = metadata.find_by(key: key.to_s)
+    existing_m = get_existing_metadatum(key.to_s)
 
     # We currently compare the raw_value because val is also a raw string, so we compare equivalent things.
     if existing_m && !existing_m.raw_value.nil? && existing_m.raw_value != val
-      issues[:warnings].push(MetadataValidationWarnings.value_already_exists(val, existing_m.raw_value, key))
+      warnings.push(MetadataValidationWarnings.value_already_exists(val, existing_m.raw_value, key))
     end
 
-    issues
+    {
+      errors: errors,
+      warnings: warnings,
+      # The existing metadata field that was used to validate this metadatum.
+      metadata_field: m.metadata_field
+    }
   end
 
   def initiate_s3_prod_sync_to_staging

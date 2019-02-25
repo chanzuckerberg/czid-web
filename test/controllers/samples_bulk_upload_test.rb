@@ -155,6 +155,52 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     assert_equal 4, Metadatum.where(sample_id: sample_id).length
   end
 
+  # Test that using the display name for metadata fields also works.
+  test 'bulk upload with display names for metadata' do
+    post user_session_path, params: @user_params
+
+    post bulk_upload_with_metadata_samples_url, params: {
+      client: "web",
+      metadata: {
+        "RR004_water_2_S23A" => {
+          'Sex' => 'Female',
+          'Age' => 100,
+          'Admission Date' => '2018-01-01',
+          'Sample Type' => 'blood',
+          'Nucleotide Type' => 'DNA'
+        }
+      },
+      samples: [
+        {
+          host_genome_id: @host_genome_human.id,
+          input_files_attributes: [
+            {
+              name: "RR004_water_2_S23D_R1_001.fastq",
+              source: "s3://idseq-samples-test/markazhang/RR004_water_2_S23D_R1_001.fastq",
+              source_type: "s3"
+            },
+            {
+              name: "RR004_water_2_S23D_R2_001.fastq",
+              source: "s3://idseq-samples-test/markazhang/RR004_water_2_S23D_R2_001.fastq",
+              source_type: "s3"
+            }
+          ],
+          name: "RR004_water_2_S23A",
+          # project_id is currently passed from front-end as a string, so need to test this works.
+          project_id: String(@metadata_validation_project.id),
+          status: "created"
+        }
+      ]
+    }, as: :json
+
+    assert_response :success
+    assert_equal 0, @response.parsed_body["errors"].length
+
+    assert_equal 1, Sample.where(name: "RR004_water_2_S23A").length
+    sample_id = Sample.where(name: "RR004_water_2_S23A").first.id
+    assert_equal 5, Metadatum.where(sample_id: sample_id).length
+  end
+
   test 'bulk upload old client' do
     post user_session_path, params: @user_params
 
