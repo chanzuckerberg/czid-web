@@ -4,14 +4,11 @@ import { sumBy } from "lodash";
 
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
-import { getSamples, getProjects } from "~/api";
+import { getSamples, getProjects, getVisualizations } from "~/api";
 import DiscoveryHeader from "../discovery/DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
-
-import { sumBy } from "lodash";
-import { getSamples, getProjects, getVisualizations } from "~/api";
 
 import cs from "./discovery_view.scss";
 
