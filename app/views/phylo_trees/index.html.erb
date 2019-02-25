@@ -3,7 +3,8 @@
     react_component('PhyloTreeListView', {
       project: JSON.parse('<%= raw escape_json(@project) %>'),
       taxon: JSON.parse('<%= raw escape_json(@taxon) %>'),
-      phyloTrees: JSON.parse('<%= raw escape_json(@phylo_trees) %>')
+      phyloTrees: JSON.parse('<%= raw escape_json(@phylo_trees) %>'),
+      admin: JSON.parse('<%= raw escape_json(@current_user.admin?) %>'),
     }, 'PhyloTreeListView_page');
   <% end %>
 </div>

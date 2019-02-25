@@ -739,7 +739,7 @@ class SamplesHeatmapView extends React.Component {
                     className={cs.controlElement}
                   />
                 }
-                content="A shareable URL has been copied to your clipboard!"
+                content="A shareable URL will be copied to your clipboard!"
                 on="click"
                 hideOnScroll
               />
