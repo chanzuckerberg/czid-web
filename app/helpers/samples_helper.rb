@@ -439,7 +439,8 @@ module SamplesHelper
 
     {
       "errors" => errors,
-      "samples" => samples
+      # Need to refetch samples so sample.metadata is fresh.
+      "samples" => Sample.where(id: samples.pluck(:id))
     }
   end
 end
