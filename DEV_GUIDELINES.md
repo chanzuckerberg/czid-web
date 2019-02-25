@@ -49,9 +49,25 @@ https://blog.pragmatists.com/higher-order-functions-in-lodash-3283b7625175) for 
 
 A good rule of thumb: if you ever find yourself wanting to use a for loop, `lodash/fp` can help. 
 
-### Other Best Practices
+## Imports
 
 * **Import Aliases:** Be aware of our [Webpack aliases](https://github.com/chanzuckerberg/idseq-web/blob/master/webpack.config.common.js). Use them to avoid long relative paths (`../../../..`) in imports.
+
+* Group top-of-file imports into external libs, internal shared libs, and internal un-shared libs. For example
+
+```
+import React from "react";
+import PropTypes from "prop-types";
+import { merge, pick } from "lodash";
+import moment from "moment";
+import cx from "classnames";
+
+import { Table } from "~/components/visualizations/table";
+import GlobeIcon from "~ui/icons/GlobeIcon";
+import LockIcon from "~ui/icons/LockIcon";
+
+import cs from "./visualizations_view.scss";
+```
 
 ## _React Components_
 
@@ -147,6 +163,23 @@ Start putting fetch methods like `fetchSampleMetadata` in `/api`, so that it's e
 
 When passing complex objects as props, add the structure of the object to a `propTypes.js` file. If the object is ad-hoc and very specific to the component, put the propTypes file inside the component directory. If the object will be used widely across the app, put it in [`utils/propTypes.js`](https://github.com/chanzuckerberg/idseq-web/blob/master/app/assets/src/components/utils/propTypes.js) 
 
+Proptypes should be alphabetized unless there is a natural grouping, in which case you should add a comment explaining the grouping. For example:
+
+```
+Table.propTypes = {
+  columns: PropTypes.arrayOf(
+    PropTypes.shape({
+      dataKey: PropTypes.string.isRequired
+    })
+  ).isRequired,
+  data: PropTypes.array,
+  defaultColumnWidth: PropTypes.number,
+  defaultHeaderHeight: PropTypes.number,
+  defaultRowHeight: PropTypes.number,
+  sortable: PropTypes.bool,
+  sortBy: PropTypes.string
+};
+```
 
 ### Other Best Practices
 
