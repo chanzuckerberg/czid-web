@@ -1,13 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Table } from "~/components/visualizations/table";
 import { merge, pick } from "lodash";
+import moment from "moment";
+import cx from "classnames";
+
+import { Table } from "~/components/visualizations/table";
+import { humanize } from "~/helpers/strings";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
-import moment from "moment";
-// TODO (gdingle): refactor with projects_view.scss?
+
 import cs from "./visualizations_view.scss";
-import cx from "classnames";
 
 class VisualizationsView extends React.Component {
   constructor(props) {
@@ -33,13 +35,6 @@ class VisualizationsView extends React.Component {
     ];
   }
 
-  humanize(key) {
-    return key
-      .split("_")
-      .map(str => str.charAt(0).toUpperCase() + str.slice(1))
-      .join(" ");
-  }
-
   renderAccess = ({ cellData: publicAccess }) => {
     return (
       <div>
@@ -59,7 +54,7 @@ class VisualizationsView extends React.Component {
     return (
       <div className={cs.visualization}>
         <div className={cs.visualizationName}>
-          <a href={href}>{this.humanize(visualization.visualization_type)}</a>
+          <a href={href}>{humanize(visualization.visualization_type)}</a>
         </div>
         <div className={cs.visualizationDetails}>
           <span className={cs.visualizationCreationDate}>

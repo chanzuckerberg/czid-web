@@ -2,7 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import { find, orderBy } from "lodash";
 import { SortDirection } from "react-virtualized";
+import cx from "classnames";
+
+import { humanize } from "~/helpers/strings";
+
 import BaseTable from "./BaseTable";
+import cs from "./table.scss";
 
 class Table extends React.Component {
   constructor(props) {
@@ -13,10 +18,20 @@ class Table extends React.Component {
     };
   }
 
+<<<<<<< HEAD
   handleSort = ({ sortBy, sortDirection }) => {
     this.setState({
       sortBy,
       sortDirection
+=======
+  setDefaults = columns => {
+    const { defaultColumnWidth } = this.props;
+    return columns.map(column => {
+      column.label =
+        column.label !== undefined ? column.label : humanize(column.dataKey);
+      column.width = column.width || defaultColumnWidth;
+      return column;
+>>>>>>> extract humanize
     });
   };
 

@@ -1,5 +1,5 @@
 import moment from "moment";
-import numberWithCommas from "~/helpers/strings";
+import { numberWithCommas } from "~/helpers/strings";
 
 // Compute display values for Pipeline Info from server response.
 export const processPipelineInfo = additionalInfo => {
