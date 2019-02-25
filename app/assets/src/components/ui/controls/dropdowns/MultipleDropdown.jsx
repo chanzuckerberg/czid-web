@@ -41,6 +41,7 @@ class MultipleDropdown extends React.Component {
   }
 
   renderMenuItem(option, checked) {
+    const { boxed } = this.props;
     return (
       <CheckboxItem
         key={option.value}
@@ -48,6 +49,7 @@ class MultipleDropdown extends React.Component {
         label={option.text}
         checked={checked}
         onOptionClick={this.handleOptionClicked}
+        boxed={boxed}
       />
     );
   }
@@ -110,6 +112,7 @@ class MultipleDropdown extends React.Component {
 
   render() {
     const {
+      boxed,
       checkedOnTop,
       hideCounter,
       label,
@@ -121,6 +124,9 @@ class MultipleDropdown extends React.Component {
       ...otherProps
     } = this.props;
 
+    const renderedMenuItems = this.renderMenuItems();
+    const searchStrings = renderedMenuItems.map(item => item.props.label);
+
     return (
       <BareDropdown
         {...otherProps}
@@ -128,7 +134,8 @@ class MultipleDropdown extends React.Component {
         className={cs.multipleDropdown}
         arrowInsideTrigger
         trigger={trigger || this.renderText()}
-        items={this.renderMenuItems()}
+        items={renderedMenuItems}
+        itemSearchStrings={searchStrings}
         onOpen={this.handleOpen}
       />
     );
@@ -140,6 +147,7 @@ MultipleDropdown.defaultProps = {
 };
 
 MultipleDropdown.propTypes = {
+  boxed: PropTypes.bool,
   checkedOnTop: PropTypes.bool,
   disabled: PropTypes.bool,
   hideCounter: PropTypes.bool,

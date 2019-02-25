@@ -5,10 +5,33 @@
   align-items: center;
 
   .listCheckmark {
+    height: 16px;
     margin-right: 10px;
+    text-align: center;
+    width: 16px;
 
-    .disabled {
-      color: $off-white;
+    .icon {
+      color: transparent;
+      margin: auto;
+    }
+
+    &.boxed {
+      border: 1px solid $medium-grey;
+      border-radius: 2px;
+
+      &.checked {
+        background-color: $primary-light;
+
+        .icon {
+          color: white;
+        }
+      }
+    }
+
+    &.checked {
+      .icon {
+        color: $primary-light;
+      }
     }
   }
 }
