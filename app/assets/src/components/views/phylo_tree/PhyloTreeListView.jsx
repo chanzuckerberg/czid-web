@@ -5,14 +5,14 @@ import PhyloTreeVis from "./PhyloTreeVis";
 import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import BasicPopup from "~/components/BasicPopup";
-import copy from "copy-to-clipboard";
 import { saveVisualization } from "~/api";
 
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import PropTypes from "prop-types";
-import { parseUrlParams } from "~/helpers/url";
+import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
+
 import cs from "./phylo_tree_list_view.scss";
 
 class PhyloTreeListView extends React.Component {
@@ -91,9 +91,8 @@ class PhyloTreeListView extends React.Component {
     });
   };
 
-  // TODO (gdingle): use url shorten when PR is merged
-  handleShareClick = () => {
-    copy(window.location.href);
+  handleShareClick = async () => {
+    await copyShortUrlToClipboard();
   };
 
   handleSaveClick = async () => {
