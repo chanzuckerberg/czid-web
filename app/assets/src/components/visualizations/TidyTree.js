@@ -214,7 +214,8 @@ export default class TidyTree {
         y0: node.y
       })
     );
-    this.options.onCollapsedStateChange(node);
+    this.options.onCollapsedStateChange &&
+      this.options.onCollapsedStateChange(node);
   }
 
   expandCollapsedWithFewChildren(node) {
