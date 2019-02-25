@@ -2,9 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { find, orderBy } from "lodash";
 import { SortDirection } from "react-virtualized";
-import cx from "classnames";
-
-import { humanize } from "~/helpers/strings";
 
 import BaseTable from "./BaseTable";
 
