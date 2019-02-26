@@ -113,8 +113,11 @@ Rails.application.routes.draw do
     mount Resque::Server.new, at: "/resque"
   end
 
+  # See health_check gem
+  get 'health_check' => "health_check/health_check#index"
+
   # Un-shorten URLs. This should go second-to-last.
-  get '/:id' => "shortener/shortened_urls#show"
+  # get '/:id' => "shortener/shortened_urls#show"
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to: 'home#landing'
