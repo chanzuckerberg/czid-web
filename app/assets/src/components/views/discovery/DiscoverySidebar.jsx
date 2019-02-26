@@ -1,4 +1,5 @@
 import React from "React";
+import { Fragment } from "React";
 import PropTypes from "prop-types";
 import cx from "classnames";
 import { keyBy, countBy } from "lodash/fp";
@@ -69,7 +70,36 @@ export default class DiscoverySidebar extends React.Component {
   };
 
   render() {
-    return <div className={cx(this.props.className)}>hell ooooo</div>;
+    return (
+      <div className={cx(this.props.className)}>
+        <h4>Stats</h4>
+        <dl>
+          <dt>Samples</dt>
+          <dd>{this.state.stats.samples}</dd>
+        </dl>
+
+        <h4>Metadata</h4>
+        <dl>
+          <dt>Host</dt>
+          {Object.keys(this.state.metadata.host).map(key => (
+            <Fragment>
+              <dd>{key}</dd>
+              <dd>{this.state.metadata.host[key]}</dd>
+            </Fragment>
+          ))}
+        </dl>
+
+        <dl>
+          <dt>Tissue</dt>
+          {Object.keys(this.state.metadata.tissue).map(key => (
+            <Fragment>
+              <dd>{key}</dd>
+              <dd>{this.state.metadata.tissue[key]}</dd>
+            </Fragment>
+          ))}
+        </dl>
+      </div>
+    );
   }
 }
 
