@@ -1,6 +1,14 @@
 import React, { Fragment } from "React";
 import cx from "classnames";
-import { sumBy, map, keyBy, countBy, times, zipObject } from "lodash/fp";
+import {
+  sumBy,
+  flatten,
+  map,
+  keyBy,
+  countBy,
+  times,
+  zipObject
+} from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 import { getAllHostGenomes } from "~/api";
@@ -63,9 +71,8 @@ export default class DiscoverySidebar extends React.Component {
         return;
       }
 
-      const hosts = map("hosts", projects);
-      // TODO (gdingle): it seems like tissues field is not parsed! exists as CSV
-      const tissues = map("tissues", projects);
+      const hosts = flatten(map("hosts", projects));
+      const tissues = flatten(map("tissues", projects));
 
       this.setState({
         stats: {
@@ -74,9 +81,9 @@ export default class DiscoverySidebar extends React.Component {
           // avg_reads_per_sample: 0,
         },
         metadata: {
-          // TODO (gdingle): these are not freq counts... only sets
-          host: zipObject(hosts, times(() => 1, hosts.length)),
-          tissue: zipObject(tissues, times(() => 1, tissues.length))
+          // TODO (gdingle): these freq counts per project, not per sample
+          host: countBy(_ => _, hosts),
+          tissue: countBy(_ => _, tissues)
           // TODO (gdingle): location not in projects data yet
           // location: {},
         }
