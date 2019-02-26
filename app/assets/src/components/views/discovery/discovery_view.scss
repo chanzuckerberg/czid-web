@@ -15,11 +15,11 @@
     display: flex;
     flex-direction: row;
     flex: 1 0 auto;
+  }
 
-    .sideBar {
-      flex: 0 1 400px;
-      border-left: 6px solid $off-white;
-    }
+  .sideBar {
+    flex: 0 1 400px;
+    border-left: 6px solid $off-white;
   }
 }
 

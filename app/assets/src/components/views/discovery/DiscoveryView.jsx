@@ -9,6 +9,7 @@ import DiscoveryHeader from "../discovery/DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
+import DiscoverySidebar from "./DiscoverySidebar";
 
 import cs from "./discovery_view.scss";
 
@@ -101,7 +102,7 @@ class DiscoveryView extends React.Component {
           {currentTab == "visualizations" && (
             <VisualizationsView visualizations={visualizations} />
           )}
-          <div className={cs.sideBar}>hello world</div>
+          <DiscoverySidebar className={cs.sideBar} />
         </NarrowContainer>
       </div>
     );
