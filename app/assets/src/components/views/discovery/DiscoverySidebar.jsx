@@ -14,17 +14,17 @@ export default class DiscoverySidebar extends React.Component {
 
     this.state = {
       stats: {
-        samples: 0,
-        projects: 0
-        // TODO (gdingle):
-        // avg_reads_per_sample: 0,
+        samples: "",
+        projects: "",
+        total_reads: "",
+        adjusted_remaining_reads: ""
       },
       metadata: {
         host: {},
         tissue: {},
-        createdAt: {}
-        // TODO (gdingle):
-        // location: {},
+        createdAt: {},
+        // TODO (gdingle): is location good?
+        location: {},
       }
     };
   }
@@ -41,15 +41,17 @@ export default class DiscoverySidebar extends React.Component {
         stats: {
           samples: samples.length,
           projects: uniqBy("project", samples).length
-          // TODO (gdingle): reads not in samples data yet
-          // avg_reads_per_sample: 0,
+          // TODO (gdingle): this good?
+          // projects: uniqBy("project_id", samples).length,
+          total_reads: sumBy("total_reads", samples),
+          adjusted_remaining_reads: sumBy("adjusted_remaining_reads", samples)
         },
         metadata: {
           host: countBy("hostGenome", samples),
           tissue: countBy("sampleTissue", samples),
           createdAt: countBy("createdAt", samples)
-          // TODO (gdingle): location not in samples data yet
-          // location: {},
+          // TODO (gdingle): this good?
+          location: countBy("sample_location", samples)
         },
         _computed: currentTab
       };
@@ -60,6 +62,7 @@ export default class DiscoverySidebar extends React.Component {
 
       const hosts = flatten(map("hosts", projects));
       const tissues = flatten(map("tissues", projects));
+      const locations = flatten(map("sample_locations", projects));
 
       const createdAts = map(
         project => DiscoverySidebar.formatDate(project.created_at),
@@ -69,18 +72,16 @@ export default class DiscoverySidebar extends React.Component {
       return {
         stats: {
           samples: sumBy("number_of_samples", projects),
-          projects: projects.length
-          // TODO (gdingle): reads not in projects data yet
-          // avg_reads_per_sample: 0,
+          projects: projects.length,
+          total_reads: sumBy("total_reads", projects),
+          adjusted_remaining_reads: sumBy("adjusted_remaining_reads", projects)
         },
         metadata: {
           host: countBy(null, hosts),
           tissue: countBy(null, tissues),
           createdAt: countBy(null, createdAts)
-          // TODO (gdingle): location not in projects data yet
-          // location: {},
+          location: countBy(null, locations)
         },
-        _computed: currentTab
       };
     } else {
       // eslint-disable-next-line no-console
@@ -93,13 +94,20 @@ export default class DiscoverySidebar extends React.Component {
     return moment(createdAt).format("YYYY-MM-DD");
   }
 
+  formatNumber(number) {
+    const samples = this.state.stats.samples;
+    if (!samples) {
+      return "";
+    }
+    return Math.round(number / samples).toLocaleString();
+  }
+
   static processSamples(newSamples) {
     return newSamples.map(sample => ({
       hostGenome: sample.host || "Unknown",
       project: sample.sample.project,
       sampleTissue: sample.sampleType || "Unknown",
-      // TODO (gdingle): this is broken... always getting current date
-      createdAt: DiscoverySidebar.formatDate(sample.sample.createdAt)
+      createdAt: DiscoverySidebar.formatDate(sample.sample.createdAt),
     }));
   }
 
@@ -120,14 +128,16 @@ export default class DiscoverySidebar extends React.Component {
           return [
             <dt key={key + i + "label"}>
               <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
-                {key}
+                {key == "unknown" ? <i>{key}</i> : key}
               </a>
             </dt>,
             <dd key={key + i + "number"}>
-              <span className={cs.bar} style={{ width: percent + "px" }}>
-                {percent > 10 ? count : ""}
-              </span>
-              {percent}%
+              <span
+                className={cs.bar}
+                // TODO (gdingle): make width depend on container
+                style={{ width: percent * 2 - 14 + "px" }}
+              />
+              {count}
             </dd>
           ];
         })}
@@ -141,14 +151,14 @@ export default class DiscoverySidebar extends React.Component {
         <div className={cs.metadataContainer}>
           <Accordion
             open={true}
-            header={<div className={cs.header}>Overall</div>}
+            header={<div className={cs.title}>Overall</div>}
           >
             <div className={cs.hasBackground}>
               <dl className={cx(cs.dataList)}>
                 <dt>
                   <strong>Samples</strong>
                 </dt>
-                <dd>{this.state.stats.samples}</dd>
+                <dd>{this.state.stats.samples.toLocaleString()}</dd>
               </dl>
             </div>
             <div className={cs.hasBackground}>
@@ -156,7 +166,28 @@ export default class DiscoverySidebar extends React.Component {
                 <dt>
                   <strong>Projects</strong>
                 </dt>
-                <dd>{this.state.stats.projects}</dd>
+                <dd>{this.state.stats.projects.toLocaleString()}</dd>
+              </dl>
+            </div>
+            <div className={cs.hasBackground}>
+              <dl className={cx(cs.dataList)}>
+                <dt>
+                  <strong>Reads per sample</strong>
+                </dt>
+                <dd>{this.formatNumber(this.state.stats.total_reads)}</dd>
+              </dl>
+            </div>
+            <div className={cs.hasBackground}>
+              <dl className={cx(cs.dataList)}>
+                <dt>
+                  <strong>
+                    Non-host
+                    <br />reads per sample
+                  </strong>
+                </dt>
+                <dd>
+                  {this.formatNumber(this.state.stats.adjusted_remaining_reads)}
+                </dd>
               </dl>
             </div>
           </Accordion>
@@ -164,7 +195,7 @@ export default class DiscoverySidebar extends React.Component {
         <div className={cs.metadataContainer}>
           <Accordion
             open={true}
-            header={<div className={cs.header}>By Metadata</div>}
+            header={<div className={cs.title}>Metadata</div>}
           >
             <div className={cs.hasBackground}>
               <strong>Date created</strong>
@@ -177,6 +208,10 @@ export default class DiscoverySidebar extends React.Component {
             <div className={cs.hasBackground}>
               <strong>Tissue</strong>
               {this.buildMetadataRows("tissue")}
+            </div>
+            <div className={cs.hasBackground}>
+              <strong>Location</strong>
+              {this.buildMetadataRows("location")}
             </div>
           </Accordion>
         </div>

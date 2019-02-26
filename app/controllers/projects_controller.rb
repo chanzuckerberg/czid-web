@@ -82,12 +82,15 @@ class ProjectsController < ApplicationController
           end
         end
         extended_projects = projects.map do |project|
-          project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
+          project.as_json(only: [:id, :name, :created_at, :public_access]).merge({
             number_of_samples: sample_count_by_project_id[project.id] || 0,
             hosts: host_genome_names_by_project_id[project.id] || [],
             tissues: tissues_by_project_id[project.id] || [],
-            owner: owner_by_project_id[project.id]
-          )
+            owner: owner_by_project_id[project.id],
+            sample_locations: @samples.where(project_id: project.id).distinct.pluck(:sample_location).compact,
+            total_reads: @samples.where(project_id: project.id).left_joins(:pipeline_runs).select(:total_reads)[0].total_reads,
+            adjusted_remaining_reads: @samples.where(project_id: project.id).left_joins(:pipeline_runs).select(:adjusted_remaining_reads)[0].adjusted_remaining_reads,
+          })
         end
         render json: extended_projects
       end
