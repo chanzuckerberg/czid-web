@@ -101,6 +101,7 @@ class DiscoveryView extends React.Component {
           {currentTab == "visualizations" && (
             <VisualizationsView visualizations={visualizations} />
           )}
+          <div className={cs.sideBar}>hello world</div>
         </NarrowContainer>
       </div>
     );
