@@ -1,9 +1,8 @@
-import React from "React";
-import { Fragment } from "React";
-import PropTypes from "prop-types";
+import React, { Fragment } from "React";
 import cx from "classnames";
 import { keyBy, countBy } from "lodash/fp";
 
+import PropTypes from "~/components/utils/propTypes";
 import { getAllHostGenomes, getSamples } from "~/api";
 
 import cs from "./discovery_sidebar.scss";
@@ -28,7 +27,20 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   async componentDidMount() {
-    const samples = await this.getSamples();
+    this.genomes = await getAllHostGenomes();
+  }
+
+  componentDidUpdate() {
+    if (this.state.stats.samples > 0) {
+      // Only update once because of
+      // Uncaught Invariant Violation: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
+      // TODO (gdingle): fix
+      return;
+    }
+    const samples = this.getSamples();
+    if (!samples.length) {
+      return;
+    }
     this.setState({
       stats: {
         samples: samples.length
@@ -44,30 +56,18 @@ export default class DiscoverySidebar extends React.Component {
     });
   }
 
-  // TODO (gdingle): this is double-fetching along with SamplesView
-  // and maybe should be replaced by elasticsearch bucket counts anyway
-  getSamples = async () => {
-    const { excludeLibrary, onlyLibrary } = this.props;
-    const samples = await getSamples({
-      excludeLibrary,
-      onlyLibrary,
-      // TODO (gdingle): what is a reasonable limit?
-      limit: 10000,
-      offset: 0
-    });
-
+  getSamples() {
     // TODO (gdingle): why not include genome name in payload from getSamples?
-    let genomes = await getAllHostGenomes();
-    genomes = keyBy("id", genomes);
+    const genomes = keyBy("id", this.genomes);
 
-    samples.forEach(sample => {
+    const samples = this.props.samples.map(sample => {
       const genome = genomes[sample.host_genome_id];
       sample.host_genome = genome ? genome.name : "unknown";
-
       sample.sample_tissue = sample.sample_tissue || "unknown";
+      return sample;
     });
     return samples;
-  };
+  }
 
   render() {
     return (
@@ -103,8 +103,13 @@ export default class DiscoverySidebar extends React.Component {
   }
 }
 
+DiscoverySidebar.defaultProps = {
+  projects: [],
+  samples: []
+};
+
 DiscoverySidebar.propTypes = {
   className: PropTypes.string,
-  excludeLibrary: PropTypes.bool,
-  onlyLibrary: PropTypes.bool
+  projects: PropTypes.arrayOf(PropTypes.Project),
+  samples: PropTypes.arrayOf(PropTypes.Sample)
 };
