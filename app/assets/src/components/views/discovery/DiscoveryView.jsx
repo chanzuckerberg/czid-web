@@ -81,7 +81,6 @@ class DiscoveryView extends React.Component {
     const { onlyLibrary, excludeLibrary } = this.props;
     const tabs = this.computeTabs(projects, visualizations);
 
-    console.log(samples, "render");
     return (
       <div className={cs.layout}>
         <NarrowContainer className={cs.headerContainer}>
