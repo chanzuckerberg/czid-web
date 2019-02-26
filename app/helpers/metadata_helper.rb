@@ -82,22 +82,22 @@ module MetadataHelper
     errors = []
     warnings = []
 
-    # Require sample_name as a column.
-    unless metadata["headers"].include?("sample_name")
+    # Require sample_name or Sample Name column.
+    if (metadata["headers"] & ["sample_name", "Sample Name"]).blank?
       errors.push(MetadataValidationErrors.missing_sample_name_column)
       return { "errors" => errors, "warnings" => warnings }
     end
 
-    # Require host_genome as a column.
-    unless !extract_host_genome_from_metadata || metadata["headers"].include?("host_genome")
+    # Require host_genome or Host Genome column.
+    unless !extract_host_genome_from_metadata || (metadata["headers"] & ["host_genome", "Host Genome"]).present?
       errors.push(MetadataValidationErrors.missing_host_genome_column)
       return { "errors" => errors, "warnings" => warnings }
     end
 
     processed_samples = []
 
-    sample_name_index = metadata["headers"].find_index("sample_name")
-    host_genome_index = metadata["headers"].find_index("host_genome")
+    sample_name_index = metadata["headers"].find_index("sample_name") || metadata["headers"].find_index("Sample Name")
+    host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
 
     metadata["rows"].each_with_index do |row, index|
       # Deleting in Excel may leaves a row of ""s in the CSV, so ignore
@@ -164,7 +164,7 @@ module MetadataHelper
         field = metadata["headers"][col_index]
 
         # Ignore invalid columns.
-        if field != "sample_name" && field != "host_genome"
+        unless ["sample_name", "Sample Name", "host_genome", "Host Genome"].include?(field)
           val_errors, val_warnings, val_field = sample.metadatum_validate(field, value).values_at(
             :errors, :warnings, :metadata_field
           )
