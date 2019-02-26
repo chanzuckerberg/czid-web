@@ -71,7 +71,7 @@ export default class DiscoverySidebar extends React.Component {
 
   render() {
     return (
-      <div className={cx(this.props.className)}>
+      <div className={cx(this.props.className, cs.sideBar)}>
         <h4>Stats</h4>
         <dl>
           <dt>Samples</dt>
