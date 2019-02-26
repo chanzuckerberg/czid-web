@@ -1,5 +1,5 @@
-<!-- Global site tags for Segment analytics-->
-<% if ENV["SEGMENT_JS_ID"] %>
+<% if ENV["SEGMENT_JS_ID"] && current_user %>
+  <!-- Global site tags for Segment analytics-->
   <script>
     // Snippet from https://segment.com/docs/sources/website/analytics.js/quickstart/
     // Segment ID is designed to be public: https://community.segment.com/t/m26sng/writekey-accessible-by-anyone
