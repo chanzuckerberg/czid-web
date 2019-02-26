@@ -6,7 +6,7 @@ import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
 import InfiniteTable from "../../visualizations/table/InfiniteTable";
 import moment from "moment";
-import numberWithCommas from "~/helpers/strings";
+import { numberWithCommas } from "~/helpers/strings";
 import cs from "./samples_view.scss";
 import cx from "classnames";
 
