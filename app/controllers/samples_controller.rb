@@ -138,11 +138,25 @@ class SamplesController < ApplicationController
                  current_power.samples
                end
 
+    # Add total_reads
+    # TODO: (gdingle): this appears to be making n+1 queries
+    @samples = @samples.left_joins(:pipeline_runs).select("*, pipeline_runs.total_reads, pipeline_runs.adjusted_remaining_reads")
+
     respond_to do |format|
       format.json do
         render json: @samples.offset(offset).limit(limit).as_json(
-          only: [:id, :name, :sample_tissue, :host_genome_id, :project_id, :created_at],
-          methods: []
+          only: [
+            :id,
+            :name,
+            :sample_tissue,
+            :host_genome_id,
+            :project_id,
+            :created_at,
+            :sample_location,
+            :total_reads,
+            :adjusted_remaining_reads
+          ],
+          methods: [:host_genome_name]
         )
       end
     end
