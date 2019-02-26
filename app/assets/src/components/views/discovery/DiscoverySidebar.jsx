@@ -1,6 +1,6 @@
 import React, { Fragment } from "React";
 import cx from "classnames";
-import { map, keyBy, countBy, times, zipObject } from "lodash/fp";
+import { sumBy, map, keyBy, countBy, times, zipObject } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 import { getAllHostGenomes } from "~/api";
@@ -64,11 +64,12 @@ export default class DiscoverySidebar extends React.Component {
       }
 
       const hosts = map("hosts", projects);
+      // TODO (gdingle): it seems like tissues field is not parsed! exists as CSV
       const tissues = map("tissues", projects);
 
       this.setState({
         stats: {
-          samples: countBy("number_of_samples", projects)
+          samples: sumBy("number_of_samples", projects)
           // TODO (gdingle): reads not in projects data yet
           // avg_reads_per_sample: 0,
         },
