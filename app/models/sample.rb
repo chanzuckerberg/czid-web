@@ -255,7 +255,7 @@ class Sample < ApplicationRecord
                   "aws s3 cp #{fastq} - | head -#{max_lines} | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
                 end
       _stdout, stderr, status = Open3.capture3(command)
-      stderr_array << stderr unless status.exitstatus.zero?
+      stderr_array << stderr unless status.exitstatus.zero? || stderr.present?
     end
     if total_reads_json_path.present?
       # For samples where we are only given fastas post host filtering, we need to input the total reads (before host filtering) from this file.
