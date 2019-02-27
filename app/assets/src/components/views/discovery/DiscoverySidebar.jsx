@@ -129,11 +129,11 @@ export default class DiscoverySidebar extends React.Component {
           const percent = Math.round(100 * count / total, 0);
           return (
             <div>
-              <dd>
+              <dt>
                 <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
                   {key}
                 </a>
-              </dd>
+              </dt>
               <dd className={cs.bar} style={{ width: percent + "px" }}>
                 {count}
               </dd>
@@ -159,15 +159,11 @@ export default class DiscoverySidebar extends React.Component {
         {this.buildMetadataRows("created_at")}
 
         <h4>Metadata</h4>
-        <dl className={cx(cs.dataList)}>
-          <dt>Host</dt>
-          {this.buildMetadataRows("host")}
-        </dl>
+        <strong>Host</strong>
+        {this.buildMetadataRows("host")}
 
-        <dl className={cx(cs.dataList)}>
-          <dt>Tissue</dt>
-          {this.buildMetadataRows("tissue")}
-        </dl>
+        <strong>Tissue</strong>
+        {this.buildMetadataRows("tissue")}
       </div>
     );
   }

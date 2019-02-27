@@ -6,7 +6,15 @@
 }
 
 .dataList {
+  display: flex;
+  flex-flow: row wrap;
+
+  dt {
+    flex: 1 0;
+  }
+
   dd {
+    flex: 0 0;
     display: inline-block;
   }
 
