@@ -1,4 +1,3 @@
-import { flow, keyBy, mapValues } from "lodash/fp";
 import {
   bulkUploadRemoteSamples,
   bulkUploadWithMetadata,
@@ -14,6 +13,7 @@ export const bulkUploadRemote = ({ samples, metadata }) =>
 
 export const bulkUploadLocalWithMetadata = ({
   samples,
+  sampleNamesToFiles,
   metadata,
   onCreateSamplesError,
   onUploadProgress,
@@ -24,11 +24,6 @@ export const bulkUploadLocalWithMetadata = ({
   // Store the upload progress of file names, so we can track when
   // everything is done.
   const fileNamesToProgress = {};
-
-  const sampleNamesToFiles = flow(
-    keyBy("name"),
-    mapValues(sample => sample.input_files_attributes)
-  )(samples);
 
   // This function needs access to fileNamesToProgress.
   const onFileUploadSuccess = (sampleName, sampleId) => {
@@ -79,9 +74,9 @@ export const bulkUploadLocalWithMetadata = ({
         });
       });
     })
-    .catch(() => {
+    .catch(e => {
       if (onCreateSamplesError) {
-        onCreateSamplesError();
+        onCreateSamplesError(e);
       }
     });
 };
