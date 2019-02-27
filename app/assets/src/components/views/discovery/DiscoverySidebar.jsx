@@ -183,9 +183,7 @@ export default class DiscoverySidebar extends React.Component {
         <div className={cs.metadataContainer}>
           <div className={cs.header}>By Metadata</div>
           <div>
-            {/*// TODO (gdingle): make date range selector as in
-              https://chanzuckerberg.invisionapp.com/share/EAQPA523SD9#/screens/348888814 */}
-            <strong>Dates created</strong>
+            <strong>Dates uploaded</strong>
             {this.buildMetadataRows("created_at")}
           </div>
           <div>
