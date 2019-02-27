@@ -9,4 +9,11 @@
   dd {
     display: inline-block;
   }
+
+  .bar {
+    background-color: $medium-grey;
+    height: 18px;
+    text-align: right;
+    color: white;
+  }
 }
