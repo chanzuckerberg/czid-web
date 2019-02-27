@@ -50,6 +50,7 @@ class ReviewStep extends React.Component {
       // TODO(mark): Handle progress indicators in UI.
       bulkUploadLocalWithMetadata({
         samples: this.props.samples,
+        sampleNamesToFiles: this.props.sampleNamesToFiles,
         metadata: processMetadataRows(this.props.metadata.rows),
         onAllUploadsComplete: () => {
           this.setState({
@@ -157,12 +158,14 @@ ReviewStep.propTypes = {
         source_type: PropTypes.string
       }),
       name: PropTypes.string,
-      project_id: PropTypes.string,
+      project_id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
       status: PropTypes.string
     })
   ),
-  onContinue: PropTypes.func.isRequired,
-  uploadType: PropTypes.string.isRequired
+  uploadType: PropTypes.string.isRequired,
+  sampleNamesToFiles: PropTypes.objectOf(
+    PropTypes.arrayOf(PropTypes.instanceOf(File))
+  )
 };
 
 export default ReviewStep;

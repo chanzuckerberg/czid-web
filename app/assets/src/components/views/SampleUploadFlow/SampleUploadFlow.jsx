@@ -15,16 +15,23 @@ class SampleUploadFlow extends React.Component {
     samples: null,
     uploadType: "", // remote or local
     project: null,
+    sampleNamesToFiles: null, // Needed for local samples.
     // Metadata upload information
     metadata: null, //
     metadataIssues: null
   };
 
-  handleUploadSamples = ({ samples, project, uploadType }) => {
+  handleUploadSamples = ({
+    samples,
+    project,
+    uploadType,
+    sampleNamesToFiles
+  }) => {
     this.setState({
       samples,
       project,
       uploadType,
+      sampleNamesToFiles,
       currentStep: "uploadMetadata"
     });
   };
@@ -87,6 +94,7 @@ class SampleUploadFlow extends React.Component {
             samples={this.state.samples}
             uploadType={this.state.uploadType}
             project={this.state.project}
+            sampleNamesToFiles={this.state.sampleNamesToFiles}
           />
         );
       default:
