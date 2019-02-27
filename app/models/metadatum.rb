@@ -235,6 +235,21 @@ class Metadatum < ApplicationRecord
     ""
   end
 
+  def self.validated_value_multiget(metadata)
+    metadata_fields = MetadataField.where(id: metadata.pluck(:metadata_field_id)).index_by(&:id)
+    validated_values = {}
+    metadata.each do |md|
+      mdf = metadata_fields[md.metadata_field_id]
+      if mdf
+        base = convert_type_to_string(mdf.base_type)
+        validated_values[md.id] = md["#{base}_validated_value"]
+      else
+        validated_values[md.id] = ""
+      end
+    end
+    validated_values
+  end
+
   def self.convert_type_to_string(type)
     if type == STRING_TYPE
       return "string"
