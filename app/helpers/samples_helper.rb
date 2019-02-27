@@ -324,6 +324,18 @@ module SamplesHelper
     records_by_parent_id
   end
 
+  def format_samples_basic(samples)
+    metadata_by_sample_id = metadata_multiget(samples.map(&:id))
+    return samples.map do |sample|
+      {
+        name: sample.name,
+        id: sample.id,
+        host_genome_id: sample.host_genome_id,
+        metadata: metadata_by_sample_id[sample.id]
+      }
+    end
+  end
+
   def format_samples(samples)
     formatted_samples = []
     return formatted_samples if samples.empty?

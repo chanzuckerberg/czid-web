@@ -1,19 +1,20 @@
 import React from "react";
 import cx from "classnames";
-import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
+import MetadataUpload from "~/components/common/MetadataUpload";
 import Instructions from "~/components/views/samples/MetadataUploadModal/Instructions";
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
+import { validateManualMetadataForNewSamples } from "~/api";
 import cs from "./sample_upload_flow.scss";
 
 class UploadMetadataStep extends React.Component {
   state = {
     showInstructions: false,
-    hasIssues: null,
     continueDisabled: true,
     metadata: null,
-    issues: null
+    issues: null,
+    wasManual: false
   };
 
   setShowInstructions = showInstructions => {
@@ -22,13 +23,11 @@ class UploadMetadataStep extends React.Component {
     });
   };
 
-  handleMetadataChange = ({ metadata, issues }) => {
-    const hasIssues =
-      issues && (issues.errors.length > 0 || issues.warnings.length > 0);
+  handleMetadataChange = ({ metadata, issues, wasManual }) => {
     this.setState({
-      hasIssues,
       metadata,
-      issues
+      issues,
+      wasManual
     });
 
     const metadataValid = metadata && !(issues && issues.errors.length > 0);
@@ -38,11 +37,36 @@ class UploadMetadataStep extends React.Component {
     });
   };
 
-  handleContinue = () => {
-    this.props.onUploadMetadata({
-      metadata: this.state.metadata,
-      issues: this.state.issues
-    });
+  handleContinue = async () => {
+    // If manual input, validate when user presses Continue.
+    if (this.state.wasManual) {
+      this.setState({
+        issues: null
+      });
+
+      const metadata = this.state.metadata;
+
+      const result = await validateManualMetadataForNewSamples(
+        this.props.samples,
+        metadata
+      );
+
+      this.setState({
+        issues: result.issues
+      });
+
+      if (metadata && !(result.issues && result.issues.errors.length > 0)) {
+        this.props.onUploadMetadata({
+          metadata,
+          issues: result.issues
+        });
+      }
+    } else {
+      this.props.onUploadMetadata({
+        metadata: this.state.metadata,
+        issues: this.state.issues
+      });
+    }
   };
 
   render() {
@@ -55,29 +79,14 @@ class UploadMetadataStep extends React.Component {
           <div>
             <div className={cs.title}>Upload Metadata</div>
           </div>
-          <div>
-            <span
-              className={cs.link}
-              onClick={() => this.setShowInstructions(true)}
-            >
-              See Instructions
-            </span>
-            <span> | </span>
-            <a href="/metadata/dictionary" className={cs.link} target="_blank">
-              See Metadata Dictionary
-            </a>
-          </div>
-          <MetadataCSVUpload
-            className={cx(
-              cs.metadataCSVUpload,
-              this.state.hasIssues && cs.hasIssues
-            )}
+          <MetadataUpload
+            onShowCSVInstructions={() => this.setShowInstructions(true)}
             samples={this.props.samples}
+            project={this.props.project}
             onMetadataChange={this.handleMetadataChange}
+            samplesAreNew
+            issues={this.state.wasManual && this.state.issues}
           />
-          <a className={cs.link} href="/metadata/metadata_template_csv">
-            Download Metadata CSV Template
-          </a>
           <div className={cs.mainControls}>
             <PrimaryButton
               text="Continue"
@@ -103,7 +112,11 @@ UploadMetadataStep.propTypes = {
       name: PropTypes.string,
       host_genome_id: PropTypes.number
     })
-  )
+  ),
+  project: PropTypes.shape({
+    id: PropTypes.number,
+    name: PropTypes.string
+  })
 };
 
 export default UploadMetadataStep;

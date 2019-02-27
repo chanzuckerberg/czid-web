@@ -109,6 +109,16 @@ class DataTable extends React.Component {
     );
   }
 
+  getCellStyle = column => {
+    if (this.props.columnWidth) {
+      return { width: this.props.columnWidth };
+    } else if (this.props.getColumnWidth) {
+      return { width: this.props.getColumnWidth(column) };
+    } else {
+      return {};
+    }
+  };
+
   render() {
     const filteredData = this.filterData(this.state.indexedData);
     const allChecked =
@@ -116,10 +126,6 @@ class DataTable extends React.Component {
       filteredData.every(row =>
         this.state.selectedRows.has(row.__originalIndex)
       );
-
-    const cellStyle = this.props.columnWidth
-      ? { width: this.props.columnWidth }
-      : {};
 
     return (
       <table
@@ -144,7 +150,7 @@ class DataTable extends React.Component {
               <th
                 className={`data-table__header column-${column}`}
                 key={idx}
-                style={cellStyle}
+                style={this.getCellStyle(column)}
               >
                 {this.props.headers ? this.props.headers[column] : column}
               </th>
@@ -166,7 +172,7 @@ class DataTable extends React.Component {
               {this.props.columns.map((column, colIdx) => (
                 <td
                   className={`data-table__data column-${column}`}
-                  style={cellStyle}
+                  style={this.getCellStyle(column)}
                   key={colIdx}
                 >
                   {row[column]}
@@ -193,7 +199,8 @@ DataTable.propTypes = {
   ]),
   striped: PropTypes.bool,
   // TODO(mark): Make column width sizing more robust.
-  columnWidth: PropTypes.number
+  columnWidth: PropTypes.number,
+  getColumnWidth: PropTypes.func
 };
 
 DataTable.defaultProps = {

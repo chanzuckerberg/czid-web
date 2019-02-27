@@ -46,7 +46,8 @@ const BackgroundData = PropTypes.shape({
 // TODO(mark): Expand signature as more fields of Sample are used in the app.
 const Sample = PropTypes.shape({
   id: PropTypes.number.isRequired,
-  name: PropTypes.string
+  name: PropTypes.string,
+  host_genome_id: PropTypes.number
 });
 
 const Project = PropTypes.shape({
