@@ -1,4 +1,4 @@
-import React from "React";
+import React, { Fragement } from "React";
 import cx from "classnames";
 import { sum, sumBy, flatten, map, keyBy, countBy, sortBy } from "lodash/fp";
 import moment from "moment";
@@ -127,19 +127,19 @@ export default class DiscoverySidebar extends React.Component {
         {sorted.map(key => {
           const count = this.state.metadata[field][key];
           const percent = Math.round(100 * count / total, 0);
-          return (
-            <div>
-              <dt>
-                <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
-                  {key}
-                </a>
-              </dt>
-              <dd className={cs.bar} style={{ width: percent + "px" }}>
-                {count}
-              </dd>
-              <dd>{percent}%</dd>
-            </div>
-          );
+          return [
+            <dt>
+              <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
+                {key}
+              </a>
+            </dt>,
+            <dd>
+              <span className={cs.bar} style={{ width: percent + "px" }}>
+                {percent > 10 ? count : ""}
+              </span>
+              {percent}%
+            </dd>
+          ];
         })}
       </dl>
     );
@@ -149,21 +149,34 @@ export default class DiscoverySidebar extends React.Component {
     // TODO (gdingle): refactor into function or component
     return (
       <div className={cx(this.props.className, cs.sideBar)}>
-        <h4>Stats</h4>
-        <dl className={cx(cs.dataList)}>
-          <dt>Samples</dt>
-          <dd>{this.state.stats.samples}</dd>
-        </dl>
-
-        <h4>Dates created</h4>
-        {this.buildMetadataRows("created_at")}
-
-        <h4>Metadata</h4>
-        <strong>Host</strong>
-        {this.buildMetadataRows("host")}
-
-        <strong>Tissue</strong>
-        {this.buildMetadataRows("tissue")}
+        <div className={cs.metadataContainer}>
+          <div className={cs.header}>Overall</div>
+          <div>
+            <dl className={cx(cs.dataList, cs.shadedBackground)}>
+              <dt>
+                <strong>Samples</strong>
+              </dt>
+              <dd>{this.state.stats.samples}</dd>
+            </dl>
+          </div>
+        </div>
+        <div className={cs.metadataContainer}>
+          <div className={cs.header}>Metadata</div>
+          <div>
+            {/*// TODO (gdingle): make date range selector as in
+              https://chanzuckerberg.invisionapp.com/share/EAQPA523SD9#/screens/348888814 */}
+            <strong>Dates created</strong>
+            {this.buildMetadataRows("created_at")}
+          </div>
+          <div>
+            <strong>Host</strong>
+            {this.buildMetadataRows("host")}
+          </div>
+          <div>
+            <strong>Tissue</strong>
+            {this.buildMetadataRows("tissue")}
+          </div>
+        </div>
       </div>
     );
   }

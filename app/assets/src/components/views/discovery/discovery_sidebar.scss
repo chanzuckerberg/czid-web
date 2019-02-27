@@ -3,24 +3,61 @@
 
 .sideBar {
   padding: 10px;
+  font-size: 12px;
+}
+
+.metadataContainer {
+  margin: 20px 0;
+  border-top: 2px solid $lightest-grey;
+
+  &:first-of-type {
+    border-top: none;
+  }
+
+  div {
+    padding: 5px;
+  }
+
+  div:nth-child(even) {
+    background-color: $off-white;
+  }
+
+  .header {
+    margin: 10px 0 15px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    font-weight: bold;
+  }
 }
 
 .dataList {
   display: flex;
   flex-flow: row wrap;
+  margin: 5px 0;
+
+  dt,
+  dd {
+    text-overflow: ellipsis;
+    min-width: 33%;
+    margin: 5px 0;
+    padding: 0px;
+  }
 
   dt {
-    flex: 1 0;
+    max-width: 33%;
   }
 
   dd {
-    flex: 0 0;
-    display: inline-block;
+    width: 66%;
   }
 
   .bar {
-    background-color: $medium-grey;
+    display: inline-block;
+    vertical-align: top;
     height: 18px;
+    margin: 0 5px;
+    padding: 0 5px;
+    background-color: $medium-grey;
     text-align: right;
     color: white;
   }
