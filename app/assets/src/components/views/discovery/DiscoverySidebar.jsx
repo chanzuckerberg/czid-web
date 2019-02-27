@@ -32,7 +32,8 @@ export default class DiscoverySidebar extends React.Component {
         created_at: {}
         // TODO (gdingle):
         // location: {},
-      }
+      },
+      _computed: null
     };
   }
 
@@ -43,6 +44,7 @@ export default class DiscoverySidebar extends React.Component {
   componentDidUpdate() {
     const { currentTab, projects } = this.props;
 
+    // TODO (gdingle): this is not working when flipping back from visualization tab
     if (this.state._computed && this.state._computed == currentTab) {
       // Only update once because of
       // Uncaught Invariant Violation: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
@@ -52,7 +54,7 @@ export default class DiscoverySidebar extends React.Component {
 
     if (currentTab == "samples") {
       const samples = this.getSamples();
-      if (!samples.length) {
+      if (!samples || !samples.length) {
         return;
       }
       this.setState({
@@ -118,43 +120,61 @@ export default class DiscoverySidebar extends React.Component {
     return samples;
   }
 
+  handleFilterClick(key) {
+    // TODO (gdingle): coordinate with filters on left sidebar
+    window.history.pushState("", "", "?" + key);
+  }
+
   render() {
+    // TODO (gdingle): refactor into function or component
     return (
       <div className={cx(this.props.className, cs.sideBar)}>
         <h4>Stats</h4>
-        <dl>
+        <dl className={cx(cs.dataList)}>
           <dt>Samples</dt>
           <dd>{this.state.stats.samples}</dd>
         </dl>
 
         <h4>Dates created</h4>
-        <dl>
+        <dl className={cx(cs.dataList)}>
           {Object.keys(this.state.metadata.created_at).map(key => (
-            <Fragment>
-              <dd>{key}</dd>
+            <div>
+              <dd>
+                <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
+                  {key}
+                </a>
+              </dd>
               <dd>{this.state.metadata.created_at[key]}</dd>
-            </Fragment>
+            </div>
           ))}
         </dl>
 
         <h4>Metadata</h4>
-        <dl>
+        <dl className={cx(cs.dataList)}>
           <dt>Host</dt>
           {Object.keys(this.state.metadata.host).map(key => (
-            <Fragment>
-              <dd>{key}</dd>
+            <div>
+              <dd>
+                <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
+                  {key}
+                </a>
+              </dd>
               <dd>{this.state.metadata.host[key]}</dd>
-            </Fragment>
+            </div>
           ))}
         </dl>
 
-        <dl>
+        <dl className={cx(cs.dataList)}>
           <dt>Tissue</dt>
           {Object.keys(this.state.metadata.tissue).map(key => (
-            <Fragment>
-              <dd>{key}</dd>
+            <div>
+              <dd>
+                <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
+                  {key}
+                </a>
+              </dd>
               <dd>{this.state.metadata.tissue[key]}</dd>
-            </Fragment>
+            </div>
           ))}
         </dl>
       </div>
