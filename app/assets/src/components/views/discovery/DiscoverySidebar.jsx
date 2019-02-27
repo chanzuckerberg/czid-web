@@ -1,14 +1,6 @@
-import React, { Fragment } from "React";
+import React from "React";
 import cx from "classnames";
-import {
-  sumBy,
-  flatten,
-  map,
-  keyBy,
-  countBy,
-  times,
-  zipObject
-} from "lodash/fp";
+import { sumBy, flatten, map, keyBy, countBy, sortBy } from "lodash/fp";
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
@@ -112,6 +104,7 @@ export default class DiscoverySidebar extends React.Component {
 
     const samples = this.props.samples.map(sample => {
       const genome = genomes[sample.host_genome_id];
+      // TODO (gdingle): best description for blanks?
       sample.host_genome = genome ? genome.name : "unknown";
       sample.sample_tissue = sample.sample_tissue || "unknown";
       sample.created_at = moment(sample.create_at).format("YYYY-MM-DD");
@@ -125,6 +118,25 @@ export default class DiscoverySidebar extends React.Component {
     window.history.pushState("", "", "?" + key);
   }
 
+  buildMetadataRow(field) {
+    // TODO (gdingle): put "unknowns" last?
+    const sorted = sortBy(a => a, Object.keys(this.state.metadata[field]));
+    return (
+      <dl className={cx(cs.dataList)}>
+        {sorted.map(key => (
+          <div>
+            <dd>
+              <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
+                {key}
+              </a>
+            </dd>
+            <dd>{this.state.metadata[field][key]}</dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
+
   render() {
     // TODO (gdingle): refactor into function or component
     return (
@@ -136,46 +148,17 @@ export default class DiscoverySidebar extends React.Component {
         </dl>
 
         <h4>Dates created</h4>
-        <dl className={cx(cs.dataList)}>
-          {Object.keys(this.state.metadata.created_at).map(key => (
-            <div>
-              <dd>
-                <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
-                  {key}
-                </a>
-              </dd>
-              <dd>{this.state.metadata.created_at[key]}</dd>
-            </div>
-          ))}
-        </dl>
+        {this.buildMetadataRow("created_at")}
 
         <h4>Metadata</h4>
         <dl className={cx(cs.dataList)}>
           <dt>Host</dt>
-          {Object.keys(this.state.metadata.host).map(key => (
-            <div>
-              <dd>
-                <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
-                  {key}
-                </a>
-              </dd>
-              <dd>{this.state.metadata.host[key]}</dd>
-            </div>
-          ))}
+          {this.buildMetadataRow("host")}
         </dl>
 
         <dl className={cx(cs.dataList)}>
           <dt>Tissue</dt>
-          {Object.keys(this.state.metadata.tissue).map(key => (
-            <div>
-              <dd>
-                <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
-                  {key}
-                </a>
-              </dd>
-              <dd>{this.state.metadata.tissue[key]}</dd>
-            </div>
-          ))}
+          {this.buildMetadataRow("tissue")}
         </dl>
       </div>
     );
