@@ -1,6 +1,15 @@
-import React, { Fragement } from "React";
+import React from "React";
 import cx from "classnames";
-import { sum, sumBy, flatten, map, keyBy, countBy, sortBy } from "lodash/fp";
+import {
+  uniqBy,
+  sum,
+  sumBy,
+  flatten,
+  map,
+  keyBy,
+  countBy,
+  sortBy
+} from "lodash/fp";
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
@@ -14,7 +23,8 @@ export default class DiscoverySidebar extends React.Component {
 
     this.state = {
       stats: {
-        samples: 0
+        samples: 0,
+        projects: 0
         // TODO (gdingle):
         // avg_reads_per_sample: 0,
       },
@@ -51,7 +61,8 @@ export default class DiscoverySidebar extends React.Component {
       }
       this.setState({
         stats: {
-          samples: samples.length
+          samples: samples.length,
+          projects: uniqBy("project_id", samples).length
           // TODO (gdingle): reads not in samples data yet
           // avg_reads_per_sample: 0,
         },
@@ -78,8 +89,9 @@ export default class DiscoverySidebar extends React.Component {
       );
 
       this.setState({
-        stats: {
-          samples: sumBy("number_of_samples", projects)
+        z: {
+          samples: sumBy("number_of_samples", projects),
+          projects: projects.length
           // TODO (gdingle): reads not in projects data yet
           // avg_reads_per_sample: 0,
         },
@@ -152,16 +164,24 @@ export default class DiscoverySidebar extends React.Component {
         <div className={cs.metadataContainer}>
           <div className={cs.header}>Overall</div>
           <div>
-            <dl className={cx(cs.dataList, cs.shadedBackground)}>
+            <dl className={cx(cs.dataList)}>
               <dt>
                 <strong>Samples</strong>
               </dt>
               <dd>{this.state.stats.samples}</dd>
             </dl>
           </div>
+          <div>
+            <dl className={cx(cs.dataList)}>
+              <dt>
+                <strong>Projects</strong>
+              </dt>
+              <dd>{this.state.stats.projects}</dd>
+            </dl>
+          </div>
         </div>
         <div className={cs.metadataContainer}>
-          <div className={cs.header}>Metadata</div>
+          <div className={cs.header}>By Metadata</div>
           <div>
             {/*// TODO (gdingle): make date range selector as in
               https://chanzuckerberg.invisionapp.com/share/EAQPA523SD9#/screens/348888814 */}
