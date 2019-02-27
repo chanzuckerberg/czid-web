@@ -2,6 +2,7 @@
 // TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
 import { cleanFilePath } from "~utils/sample";
+import { set } from "lodash/fp";
 
 const postWithCSRF = async (url, params) => {
   try {
@@ -80,6 +81,14 @@ const getSampleMetadataFields = ids =>
   get("/samples/metadata_fields", {
     params: {
       sampleIds: [ids].flat()
+    }
+  });
+
+// Get MetadataField info for the sample(s) (either one ID or an array)
+const getProjectMetadataFields = ids =>
+  get("/projects/metadata_fields", {
+    params: {
+      projectIds: [ids].flat()
     }
   });
 
@@ -168,19 +177,43 @@ const createSample = (
   });
 };
 
-// Validate metadata against samples in an existing project.
+// Validate CSV metadata against samples in an existing project.
 const validateMetadataCSVForProject = (id, metadata) =>
   postWithCSRF(`/projects/${id}/validate_metadata_csv`, {
     metadata
   });
 
-// Validate metadata for new samples.
+// Validate manually input metadata against samples in an existing project.
+const validateManualMetadataForProject = (id, metadata) => {
+  // Convert manual metadata into a csv-like format and use the csv endpoint for validation.
+  const metadataAsCSV = set(
+    "rows",
+    metadata.rows.map(row => metadata.headers.map(header => row[header] || "")),
+    metadata
+  );
+
+  return validateMetadataCSVForProject(id, metadataAsCSV);
+};
+
+// Validate CSV metadata for new samples.
 // For samples, we just require { name, host_genome_id }
 const validateMetadataCSVForNewSamples = (samples, metadata) =>
   postWithCSRF("/metadata/validate_csv_for_new_samples", {
     metadata,
     samples
   });
+
+// Validate manually input metadata for new samples.
+const validateManualMetadataForNewSamples = (samples, metadata) => {
+  // Convert manual metadata into a csv-like format and use the csv endpoint for validation.
+  const metadataAsCSV = set(
+    "rows",
+    metadata.rows.map(row => metadata.headers.map(header => row[header] || "")),
+    metadata
+  );
+
+  return validateMetadataCSVForNewSamples(samples, metadataAsCSV);
+};
 
 const uploadMetadataForProject = (id, metadata) =>
   postWithCSRF(`/projects/${id}/upload_metadata`, {
@@ -283,6 +316,8 @@ const getSampleDetails = ({ sampleIds }) =>
     }
   });
 
+const getSamplesV1 = params => get("/samples.json", { params });
+
 const getProjects = ({ onlyLibrary, excludeLibrary, onlyUpdatable } = {}) =>
   get("/projects.json", {
     params: {
@@ -321,10 +356,12 @@ export {
   get,
   getSampleMetadata,
   getSampleMetadataFields,
+  getProjectMetadataFields,
   getSampleReportInfo,
   createProject,
   getSamples,
   getSampleDetails,
+  getSamplesV1,
   getProjects,
   getVisualizations,
   saveSampleMetadata,
@@ -337,6 +374,8 @@ export {
   createSample,
   validateMetadataCSVForProject,
   validateMetadataCSVForNewSamples,
+  validateManualMetadataForProject,
+  validateManualMetadataForNewSamples,
   uploadMetadataForProject,
   getOfficialMetadataFields,
   getAllHostGenomes,

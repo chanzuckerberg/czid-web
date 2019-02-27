@@ -17,6 +17,7 @@ class Modal extends React.Component {
       narrow,
       narrowest,
       tall,
+      wide,
       className,
       ...extraProps
     } = this.props;
@@ -30,6 +31,7 @@ class Modal extends React.Component {
           narrow && cs.narrow,
           narrowest && cs.narrowest,
           tall && cs.tall,
+          wide && cs.wide,
           fixedHeight && cs.fixedHeight
         )}
         trigger={<span />}
@@ -57,6 +59,7 @@ Modal.propTypes = forbidExtraProps({
   fixedHeight: PropTypes.bool,
   narrow: PropTypes.bool, // Decrease the width of the Modal for smaller modals.
   narrowest: PropTypes.bool, // Decrease the width of the Modal for the smallest modals.
+  wide: PropTypes.bool, // Increase the width of the Modal for the wider modals.
   tall: PropTypes.bool, // Increase the max-height of the Modal for tall content.
   title: PropTypes.string
 });

@@ -3,6 +3,12 @@
 .wizard {
   font-size: 13px;
 
+  // Used for hiding the wizard page when overlay is showing.
+  // We still render the page so the page's state isn't lost.
+  &.wizard__hidden {
+    display: none;
+  }
+
   // TODO: overrides home.scss, remove after refactoring
   table thead {
     th,
@@ -29,15 +35,12 @@
     }
   }
 
-  &__page_wrapper.padding-bottom {
-    // Leave space for the nav at the bottom.
-    padding-bottom: 50px;
+  &__page_wrapper {
+    // This min-height pushes the nav to the bottom of the wizard.
+    min-height: 330px;
   }
 
   &__nav {
-    // The nav should always at the bottom of the Wizard's parent container.
-    position: fixed;
-    bottom: 40px;
     align-items: center;
     display: flex;
 
