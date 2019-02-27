@@ -1,6 +1,6 @@
 import React from "React";
 import cx from "classnames";
-import { sumBy, flatten, map, keyBy, countBy, sortBy } from "lodash/fp";
+import { sum, sumBy, flatten, map, keyBy, countBy, sortBy } from "lodash/fp";
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
@@ -45,7 +45,7 @@ export default class DiscoverySidebar extends React.Component {
     }
 
     if (currentTab == "samples") {
-      const samples = this.getSamples();
+      const samples = this.processSamples();
       if (!samples || !samples.length) {
         return;
       }
@@ -98,7 +98,7 @@ export default class DiscoverySidebar extends React.Component {
     }
   }
 
-  getSamples() {
+  processSamples() {
     // TODO (gdingle): why not include genome name in payload from getSamples?
     const genomes = keyBy("id", this.genomes);
 
@@ -118,21 +118,28 @@ export default class DiscoverySidebar extends React.Component {
     window.history.pushState("", "", "?" + key);
   }
 
-  buildMetadataRow(field) {
+  buildMetadataRows(field) {
     // TODO (gdingle): put "unknowns" last?
     const sorted = sortBy(a => a, Object.keys(this.state.metadata[field]));
+    const total = sum(Object.values(this.state.metadata[field]));
     return (
       <dl className={cx(cs.dataList)}>
-        {sorted.map(key => (
-          <div>
-            <dd>
-              <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
-                {key}
-              </a>
-            </dd>
-            <dd>{this.state.metadata[field][key]}</dd>
-          </div>
-        ))}
+        {sorted.map(key => {
+          const count = this.state.metadata[field][key];
+          const percent = Math.round(100 * count / total, 0);
+          return (
+            <div>
+              <dd>
+                <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
+                  {key}
+                </a>
+              </dd>
+              <dd>
+                {count} {percent}%
+              </dd>
+            </div>
+          );
+        })}
       </dl>
     );
   }
@@ -148,17 +155,17 @@ export default class DiscoverySidebar extends React.Component {
         </dl>
 
         <h4>Dates created</h4>
-        {this.buildMetadataRow("created_at")}
+        {this.buildMetadataRows("created_at")}
 
         <h4>Metadata</h4>
         <dl className={cx(cs.dataList)}>
           <dt>Host</dt>
-          {this.buildMetadataRow("host")}
+          {this.buildMetadataRows("host")}
         </dl>
 
         <dl className={cx(cs.dataList)}>
           <dt>Tissue</dt>
-          {this.buildMetadataRow("tissue")}
+          {this.buildMetadataRows("tissue")}
         </dl>
       </div>
     );

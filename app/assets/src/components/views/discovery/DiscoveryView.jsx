@@ -30,7 +30,7 @@ class DiscoveryView extends React.Component {
     const { onlyLibrary, excludeLibrary } = this.props;
     try {
       const [samples, projects, visualizations] = await Promise.all([
-        getSamples({ onlyLibrary, excludeLibrary }),
+        getSamples({ onlyLibrary, excludeLibrary, limit: 200 }),
         getProjects({ onlyLibrary, excludeLibrary }),
         getVisualizations({ onlyLibrary, excludeLibrary })
       ]);
