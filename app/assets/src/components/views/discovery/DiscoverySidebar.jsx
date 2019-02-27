@@ -158,7 +158,6 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
-    // TODO (gdingle): refactor into function or component
     return (
       <div className={cx(this.props.className, cs.sideBar)}>
         <div className={cs.metadataContainer}>
@@ -183,7 +182,7 @@ export default class DiscoverySidebar extends React.Component {
         <div className={cs.metadataContainer}>
           <div className={cs.header}>By Metadata</div>
           <div>
-            <strong>Dates uploaded</strong>
+            <strong>Date uploaded</strong>
             {this.buildMetadataRows("created_at")}
           </div>
           <div>
