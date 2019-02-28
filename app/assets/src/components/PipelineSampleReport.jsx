@@ -131,8 +131,6 @@ class PipelineSampleReport extends React.Component {
         name: ""
       },
       search_taxon_id: 0,
-      searchKey: "",
-      search_keys_in_sample: [],
       lineage_map: {},
       rows_passing_filters: 0,
       rows_total: 0,
@@ -266,7 +264,6 @@ class PipelineSampleReport extends React.Component {
         activeThresholds: [],
         includedCategories: [],
         includedSubcategories: [],
-        searchKey: "",
         search_taxon_id: 0,
         selected_taxons: this.state.taxonomy_details,
         selected_taxons_top: this.state.taxonomy_details.slice(
@@ -1042,12 +1039,6 @@ class PipelineSampleReport extends React.Component {
     $(".report-arrow-down").addClass("hidden");
     $(".report-arrow-right").removeClass("hidden");
     $(".table-arrow").toggleClass("hidden");
-  };
-
-  handleSearch = e => {
-    this.setState({
-      searchKey: e.target.value
-    });
   };
 
   searchSelectedTaxon = (e, { result }) => {
