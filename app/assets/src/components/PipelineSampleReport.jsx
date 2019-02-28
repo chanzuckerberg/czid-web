@@ -307,12 +307,10 @@ class PipelineSampleReport extends React.Component {
     //
     // Search filters
     //
-    console.log("searchTaxonId", searchTaxonId);
     if (searchTaxonId > 0) {
       let genus_taxon = {};
       let matched_taxons = [];
       let new_input_taxons = [];
-      let should_log = true;
       for (let i = 0; i < input_taxons.length; i++) {
         const taxon = input_taxons[i];
         if (taxon.genus_taxid == taxon.tax_id) {
@@ -326,15 +324,15 @@ class PipelineSampleReport extends React.Component {
           // species
           const match_keys = new Set([
             taxon.tax_id,
-            taxon.genus_taxid,
-            taxon.family_taxid,
-            taxon.superkingdom_taxid
+            taxon.lineage.species_taxid,
+            taxon.lineage.genus_taxid,
+            taxon.lineage.family_taxid,
+            taxon.lineage.order_taxid,
+            taxon.lineage.class_taxid,
+            taxon.lineage.phylum_taxid,
+            taxon.lineage.kingdom_taxid,
+            taxon.lineage.superkingdom_taxid
           ]);
-          if (should_log) {
-            console.log("lineage", taxon.lineage);
-            console.log("match_keys", match_keys);
-          }
-          should_log = false;
           if (match_keys && match_keys.has(searchTaxonId)) {
             matched_taxons.push(taxon);
           }
