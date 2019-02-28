@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React from "react";
-import axios from "axios";
 import Cookies from "js-cookie";
 import $ from "jquery";
 import { Label, Menu, Icon, Popup } from "semantic-ui-react";
