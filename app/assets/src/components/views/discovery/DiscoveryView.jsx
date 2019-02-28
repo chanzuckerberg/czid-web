@@ -9,6 +9,7 @@ import DiscoveryHeader from "../discovery/DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
+import DiscoverySidebar from "./DiscoverySidebar";
 
 import cs from "./discovery_view.scss";
 
@@ -29,7 +30,7 @@ class DiscoveryView extends React.Component {
     const { onlyLibrary, excludeLibrary } = this.props;
     try {
       const [samples, projects, visualizations] = await Promise.all([
-        getSamples({ onlyLibrary, excludeLibrary }),
+        getSamples({ onlyLibrary, excludeLibrary, limit: 200 }),
         getProjects({ onlyLibrary, excludeLibrary }),
         getVisualizations({ onlyLibrary, excludeLibrary })
       ]);
@@ -76,7 +77,7 @@ class DiscoveryView extends React.Component {
   };
 
   render() {
-    const { currentTab, projects, visualizations } = this.state;
+    const { currentTab, samples, projects, visualizations } = this.state;
     const { onlyLibrary, excludeLibrary } = this.props;
     const tabs = this.computeTabs(projects, visualizations);
 
@@ -100,6 +101,14 @@ class DiscoveryView extends React.Component {
           )}
           {currentTab == "visualizations" && (
             <VisualizationsView visualizations={visualizations} />
+          )}
+          {(currentTab == "samples" || currentTab == "projects") && (
+            <DiscoverySidebar
+              className={cs.sideBar}
+              samples={samples}
+              projects={projects}
+              currentTab={currentTab}
+            />
           )}
         </NarrowContainer>
       </div>
