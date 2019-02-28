@@ -14,6 +14,7 @@ import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
 import { getAllHostGenomes } from "~/api";
+import { Accordion } from "~/components/layout";
 
 import cs from "./discovery_sidebar.scss";
 
@@ -35,7 +36,7 @@ export default class DiscoverySidebar extends React.Component {
         // TODO (gdingle):
         // location: {},
       },
-      _computed: null
+      genomes: {}
     };
   }
 
@@ -81,7 +82,7 @@ export default class DiscoverySidebar extends React.Component {
       const tissues = flatten(map("tissues", projects));
 
       const created_ats = map(
-        p => moment(p.create_at).format("YYYY-MM-DD"),
+        p => DiscoverySidebar.formatDate(p.created_at),
         projects
       );
 
@@ -109,13 +110,18 @@ export default class DiscoverySidebar extends React.Component {
     }
   }
 
+  static formatDate(created_at) {
+    return moment(created_at).format("YYYY-MM-DD");
+  }
+
   static processSamples(newSamples, genomes) {
     const samples = newSamples.map(sample => {
       const genome = genomes[sample.host_genome_id];
       // TODO (gdingle): best description for blanks?
       sample.host_genome = genome ? genome.name : "unknown";
       sample.sample_tissue = sample.sample_tissue || "unknown";
-      sample.created_at = moment(sample.create_at).format("YYYY-MM-DD");
+      // TODO (gdingle): this is broken... always getting current date
+      sample.created_at = DiscoverySidebar.formatDate(sample.created_at);
       return sample;
     });
     return samples;
@@ -157,38 +163,46 @@ export default class DiscoverySidebar extends React.Component {
     return (
       <div className={cx(this.props.className, cs.sideBar)}>
         <div className={cs.metadataContainer}>
-          <div className={cs.header}>Overall</div>
-          <div>
-            <dl className={cx(cs.dataList)}>
-              <dt>
-                <strong>Samples</strong>
-              </dt>
-              <dd>{this.state.stats.samples}</dd>
-            </dl>
-          </div>
-          <div>
-            <dl className={cx(cs.dataList)}>
-              <dt>
-                <strong>Projects</strong>
-              </dt>
-              <dd>{this.state.stats.projects}</dd>
-            </dl>
-          </div>
+          <Accordion
+            open={true}
+            header={<div className={cs.header}>Overall</div>}
+          >
+            <div className={cs.hasBackground}>
+              <dl className={cx(cs.dataList)}>
+                <dt>
+                  <strong>Samples</strong>
+                </dt>
+                <dd>{this.state.stats.samples}</dd>
+              </dl>
+            </div>
+            <div className={cs.hasBackground}>
+              <dl className={cx(cs.dataList)}>
+                <dt>
+                  <strong>Projects</strong>
+                </dt>
+                <dd>{this.state.stats.projects}</dd>
+              </dl>
+            </div>
+          </Accordion>
         </div>
         <div className={cs.metadataContainer}>
-          <div className={cs.header}>By Metadata</div>
-          <div>
-            <strong>Date uploaded</strong>
-            {this.buildMetadataRows("created_at")}
-          </div>
-          <div>
-            <strong>Host</strong>
-            {this.buildMetadataRows("host")}
-          </div>
-          <div>
-            <strong>Tissue</strong>
-            {this.buildMetadataRows("tissue")}
-          </div>
+          <Accordion
+            open={true}
+            header={<div className={cs.header}>By Metadata</div>}
+          >
+            <div className={cs.hasBackground}>
+              <strong>Date uploaded</strong>
+              {this.buildMetadataRows("created_at")}
+            </div>
+            <div className={cs.hasBackground}>
+              <strong>Host</strong>
+              {this.buildMetadataRows("host")}
+            </div>
+            <div className={cs.hasBackground}>
+              <strong>Tissue</strong>
+              {this.buildMetadataRows("tissue")}
+            </div>
+          </Accordion>
         </div>
       </div>
     );
