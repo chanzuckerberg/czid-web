@@ -206,6 +206,8 @@ class MetadataManualInput extends React.Component {
                 options={this.getHostGenomeOptions()}
                 value={this.state.currentHostGenome}
                 onChange={id => this.updateHostGenome(id, sample)}
+                usePortal
+                withinModal={this.props.withinModal}
               />
             );
           }
@@ -236,6 +238,7 @@ class MetadataManualInput extends React.Component {
                 onChange={(key, value) =>
                   this.updateMetadataField(key, value, sample)
                 }
+                withinModal={this.props.withinModal}
               />
             );
           }
@@ -281,7 +284,8 @@ MetadataManualInput.propTypes = {
   project: PropTypes.Project,
   className: PropTypes.string,
   onMetadataChange: PropTypes.func.isRequired,
-  samplesAreNew: PropTypes.bool
+  samplesAreNew: PropTypes.bool,
+  withinModal: PropTypes.bool
 };
 
 export default MetadataManualInput;

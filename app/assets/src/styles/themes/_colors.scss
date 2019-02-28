@@ -13,6 +13,7 @@ $lightest-grey: #eaeaea;
 $off-white: #f8f8f8;
 $white: #ffffff;
 
+$transparent-lightest-grey: rgba(0, 0, 0, 0.05);
 $transparent-light-grey: rgba(0, 0, 0, 0.15);
 $transparent-medium-grey: rgba(0, 0, 0, 0.3);
 
@@ -31,5 +32,6 @@ $warning-bg: #fcf6ec;
 $info: $primary-light;
 $info-bg: $primary-lightest;
 
+$box-shadow-lighter: rgba(34, 36, 38, 0.15);
 $box-shadow-light: rgba(0, 0, 0, 0.22);
 $box-shadow-dark: rgba(34, 36, 38, 0.5);
