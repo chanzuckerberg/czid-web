@@ -84,7 +84,6 @@ Rails.application.routes.draw do
   post 'phylo_trees/retry', to: 'phylo_trees#retry'
   get 'phylo_trees/:id/download', to: 'phylo_trees#download'
   get 'choose_taxon', to: 'phylo_trees#choose_taxon'
-  get 'choose_taxon_all_levels', to: 'samples#choose_taxon_all_levels'
   get 'search_suggestions', to: 'samples#search_suggestions'
 
   get 'visualizations/samples_taxons.json', to: 'visualizations#samples_taxons'

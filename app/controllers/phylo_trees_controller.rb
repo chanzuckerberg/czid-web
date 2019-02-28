@@ -87,7 +87,9 @@ class PhyloTreesController < ApplicationController
   end
 
   def choose_taxon
-    taxon_list = taxon_search(params[:query])
+    taxon_search_args = [params[:query]]
+    taxon_search_args << TaxonCount::NAME_2_LEVEL.keys if params[:args] == "all_levels"
+    taxon_list = taxon_search(*taxon_search_args)
     render json: JSON.dump(taxon_list)
   end
 

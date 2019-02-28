@@ -1318,7 +1318,8 @@ class RenderMarkup extends React.Component {
           <div className="filter-lists-element">
             <SearchBox
               rounded
-              serverSearchAction="choose_taxon_all_levels"
+              serverSearchAction="choose_taxon"
+              serverSearchActionArgs="all_levels"
               onResultSelect={parent.searchSelectedTaxon}
               placeholder="Taxon name"
             />

@@ -71,8 +71,13 @@ class SearchBox extends React.Component {
         searchResults = this.props.clientSearchSource.filter(isMatch);
       } else if (this.props.serverSearchAction) {
         searchResults = await get(
-          `/${this.props.serverSearchAction}?query=${this.state.value}`
+          `/${this.props.serverSearchAction}?query=${this.state.value}&args=${
+            this.props.serverSearchActionArgs
+          }`
         );
+        for (let i = 0; i < searchResults.length; i++) {
+          searchResults[i].title += " (" + searchResults[i].level + ")";
+        }
       }
 
       this.setState({
@@ -120,6 +125,7 @@ SearchBox.propTypes = {
   // If serverSearchAction is provided, query matching will happen on the server side (use for large data).
   clientSearchSource: PropTypes.array,
   serverSearchAction: PropTypes.string,
+  serverSearchActionArgs: PropTypes.string,
   rounded: PropTypes.bool,
   category: PropTypes.bool,
   initialValue: PropTypes.string,

@@ -914,11 +914,6 @@ class SamplesController < ApplicationController
     render template: "samples/cli_user_instructions"
   end
 
-  def choose_taxon_all_levels
-    taxon_list = taxon_search(params[:query], TaxonCount::NAME_2_LEVEL.keys, true)
-    render json: JSON.dump(taxon_list)
-  end
-
   # Use callbacks to share common setup or constraints between actions.
 
   private
