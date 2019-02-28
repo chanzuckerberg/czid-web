@@ -42,7 +42,7 @@ class LocalSampleFileUpload extends React.Component {
       sampleNamesToFiles
     );
 
-    this.props.onChange(localSamples);
+    this.props.onChange(localSamples, sampleNamesToFiles);
   };
 
   onRejected = rejectedFiles =>

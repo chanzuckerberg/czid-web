@@ -82,22 +82,22 @@ module MetadataHelper
     errors = []
     warnings = []
 
-    # Require sample_name as a column.
-    unless metadata["headers"].include?("sample_name")
+    # Require sample_name or Sample Name column.
+    if (metadata["headers"] & ["sample_name", "Sample Name"]).blank?
       errors.push(MetadataValidationErrors.missing_sample_name_column)
       return { "errors" => errors, "warnings" => warnings }
     end
 
-    # Require host_genome as a column.
-    unless !extract_host_genome_from_metadata || metadata["headers"].include?("host_genome")
+    # Require host_genome or Host Genome column.
+    unless !extract_host_genome_from_metadata || (metadata["headers"] & ["host_genome", "Host Genome"]).present?
       errors.push(MetadataValidationErrors.missing_host_genome_column)
       return { "errors" => errors, "warnings" => warnings }
     end
 
     processed_samples = []
 
-    sample_name_index = metadata["headers"].find_index("sample_name")
-    host_genome_index = metadata["headers"].find_index("host_genome")
+    sample_name_index = metadata["headers"].find_index("sample_name") || metadata["headers"].find_index("Sample Name")
+    host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
 
     metadata["rows"].each_with_index do |row, index|
       # Deleting in Excel may leaves a row of ""s in the CSV, so ignore
@@ -150,6 +150,8 @@ module MetadataHelper
         sample.host_genome = host_genome
       end
 
+      # The MetadataField objects that were used to validate the metadata.
+      # Needed to verify that required metadata was submitted.
       validated_fields = []
 
       # Validate the metadatum values with the sample.
@@ -162,24 +164,26 @@ module MetadataHelper
         field = metadata["headers"][col_index]
 
         # Ignore invalid columns.
-        if field != "sample_name" && field != "host_genome"
-          issues = sample.metadatum_validate(field, value)
+        unless ["sample_name", "Sample Name", "host_genome", "Host Genome"].include?(field)
+          val_errors, val_warnings, val_field = sample.metadatum_validate(field, value).values_at(
+            :errors, :warnings, :metadata_field
+          )
 
-          issues[:errors].each do |error|
+          val_errors.each do |error|
             errors.push("#{error} (row #{index + 1})")
           end
 
-          issues[:warnings].each do |warning|
+          val_warnings.each do |warning|
             warnings.push("#{warning} (row #{index + 1})")
           end
 
-          if issues[:errors].empty?
-            validated_fields << field
+          if val_errors.empty? && val_field
+            validated_fields << val_field
           end
         end
       end
 
-      missing_required_metadata_fields = sample.required_metadata_fields - validated_fields
+      missing_required_metadata_fields = sample.required_metadata_fields - validated_fields.pluck(:name)
       if enforce_required && !missing_required_metadata_fields.empty?
         errors.push(MetadataValidationErrors.row_missing_required_metadata(sample.name, missing_required_metadata_fields, index + 1))
       end

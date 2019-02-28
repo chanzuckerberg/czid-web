@@ -40,7 +40,7 @@ class User < ApplicationRecord
   end
 
   def add_allowed_feature(feature)
-    parsed_allowed_features = JSON.parse(allowed_features)
+    parsed_allowed_features = allowed_feature_list
 
     unless parsed_allowed_features.include?(feature)
       update(allowed_features: parsed_allowed_features + [feature])
@@ -48,7 +48,7 @@ class User < ApplicationRecord
   end
 
   def remove_allowed_feature(feature)
-    parsed_allowed_features = JSON.parse(allowed_features)
+    parsed_allowed_features = allowed_feature_list
 
     if parsed_allowed_features.include?(feature)
       update(allowed_features: parsed_allowed_features - [feature])

@@ -48,13 +48,20 @@ class Wizard extends React.Component {
 
   resetPageState = () => {
     this.setState({
-      continueEnabled: true
+      continueEnabled: true,
+      onContinueValidation: null
     });
   };
 
   handleContinueEnabled = enabled => {
     this.setState({
       continueEnabled: enabled
+    });
+  };
+
+  handleSetOnContinueValidation = onContinueValidation => {
+    this.setState({
+      onContinueValidation
     });
   };
 
@@ -73,22 +80,30 @@ class Wizard extends React.Component {
     }
   }
 
-  handleContinueClick() {
+  handleContinueClick = async () => {
     let onContinue = this.props.children[this.state.currentPage].props
       .onContinue;
-    let result = true;
     if (onContinue) {
-      result = onContinue();
-    }
+      if (onContinue()) {
+        this.advancePage();
+      }
+    } else if (this.state.onContinueValidation) {
+      const result = await this.state.onContinueValidation();
 
-    if (
-      result === true &&
-      this.state.currentPage < this.props.children.length - 1
-    ) {
+      if (result) {
+        this.advancePage();
+      }
+    } else {
+      this.advancePage();
+    }
+  };
+
+  advancePage = () => {
+    if (this.state.currentPage < this.props.children.length - 1) {
       this.setState({ currentPage: this.state.currentPage + 1 });
       this.resetPageState();
     }
-  }
+  };
 
   handleFinishClick() {
     this.props.onComplete();
@@ -113,15 +128,18 @@ class Wizard extends React.Component {
         1} of ${this.props.children.length - this.skipPageInfoNPages}`;
     }
 
-    if (this.state.overlay) {
-      return this.state.overlay;
-    }
-
     return (
       <WizardContext.Provider
         value={{ currentPage: this.state.currentPage, actions: wizardActions }}
       >
-        <div className={cx("wizard", this.props.className)}>
+        {this.state.overlay}
+        <div
+          className={cx(
+            "wizard",
+            this.props.className,
+            this.state.overlay && "wizard__hidden"
+          )}
+        >
           <div className="wizard__header">
             {pageInfo && <div className="wizard__header__page">{pageInfo}</div>}
             <div className="wizard__header__title">
@@ -129,14 +147,10 @@ class Wizard extends React.Component {
             </div>
           </div>
           {/* Pass additional hooks to custom wizard pages */}
-          <div
-            className={cx(
-              "wizard__page_wrapper",
-              !currentPage.props.skipDefaultButtons && "padding-bottom"
-            )}
-          >
+          <div className={cx("wizard__page_wrapper")}>
             {React.cloneElement(currentPage, {
               wizardEnableContinue: this.handleContinueEnabled,
+              wizardSetOnContinueValidation: this.handleSetOnContinueValidation,
               wizardSetOverlay: this.setOverlay
             })}
           </div>

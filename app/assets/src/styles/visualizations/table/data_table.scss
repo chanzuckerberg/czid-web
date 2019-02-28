@@ -1,4 +1,5 @@
 @import "../../themes/colors";
+@import "~styles/themes/typography";
 
 .data-table {
   max-height: 300px;
@@ -46,9 +47,8 @@
   }
 
   &__header {
+    @include font-header-xs;
     color: $medium-grey;
-    font-weight: 600;
-    font-size: 13px;
 
     &.column-reserved-selectable {
       width: 30px;

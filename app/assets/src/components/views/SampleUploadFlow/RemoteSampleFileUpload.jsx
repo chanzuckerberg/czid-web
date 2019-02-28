@@ -109,7 +109,7 @@ class RemoteSampleFileUpload extends React.Component {
           <PrimaryButton
             className={cs.connectButton}
             rounded={false}
-            label="Connect to Bucket"
+            text="Connect to Bucket"
             disabled={
               this.state.remoteS3Path === "" ||
               this.state.remoteS3Path === this.state.lastPathChecked

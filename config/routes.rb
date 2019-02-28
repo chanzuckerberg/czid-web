@@ -73,6 +73,7 @@ Rails.application.routes.draw do
     post :validate_metadata_csv, on: :member
     post :upload_metadata, on: :member
     post :validate_sample_names, on: :member
+    get :metadata_fields, on: :collection
   end
   get 'projects/:id/csv', to: 'projects#send_project_csv'
   get 'choose_project', to: 'projects#choose_project'
@@ -112,6 +113,9 @@ Rails.application.routes.draw do
   authenticate :user, ->(u) { u.admin? } do
     mount Resque::Server.new, at: "/resque"
   end
+
+  # See health_check gem
+  get 'health_check' => "health_check/health_check#index"
 
   # Un-shorten URLs. This should go second-to-last.
   get '/:id' => "shortener/shortened_urls#show"

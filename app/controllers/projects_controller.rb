@@ -20,7 +20,7 @@ class ProjectsController < ApplicationController
     :validate_sample_names
   ].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
-  OTHER_ACTIONS = [:create, :new, :index, :send_project_csv, :choose_project].freeze
+  OTHER_ACTIONS = [:create, :new, :index, :send_project_csv, :choose_project, :metadata_fields].freeze
 
   # Required for token auth for CLI actions
   skip_before_action :verify_authenticity_token, only: [:index, :create]
@@ -319,6 +319,12 @@ class ProjectsController < ApplicationController
       status: "success",
       errors: errors
     }
+  end
+
+  def metadata_fields
+    project_ids = (params[:projectIds] || []).map(&:to_i)
+
+    render json: current_power.projects.where(id: project_ids).map(&:metadata_fields).flatten.map(&:field_info)
   end
 
   # TODO: Consider consolidating into a general sample validator

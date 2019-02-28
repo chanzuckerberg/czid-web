@@ -1,14 +1,15 @@
 @import "~styles/themes/colors";
-@import "~styles/typography";
 
 :global(.ui):global(.dropdown).dropdown {
-  .placeholder {
-    color: $light-grey;
-  }
-
   &:global(.active) {
     .dropdownTrigger {
       border: 1px solid $primary-light;
     }
+  }
+}
+
+.dropdown {
+  .placeholder {
+    color: $light-grey;
   }
 }

@@ -1,11 +1,10 @@
 import React from "react";
-import { mapValues, isArray, filter, includes } from "lodash";
+import { mapValues, filter, includes } from "lodash";
 // TODO(mark): Refactor all calls to lodash/fp.
 import { set, values } from "lodash/fp";
 import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
-import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
-import DateInput from "~/components/ui/controls/DateInput";
+import MetadataInput from "~/components/common/MetadataInput";
 import MetadataSection from "./MetadataSection";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
 import cs from "./sample_details_mode.scss";
@@ -82,39 +81,15 @@ class MetadataTab extends React.Component {
   renderInput = metadataType => {
     const { metadata, onMetadataChange, onMetadataSave } = this.props;
 
-    if (isArray(metadataType.options)) {
-      const options = metadataType.options.map(option => ({
-        text: option,
-        value: option
-      }));
-      return (
-        <Dropdown
-          fluid
-          floating
-          options={options}
-          onChange={val => onMetadataChange(metadataType.key, val, true)}
-          value={metadata[metadataType.key]}
-        />
-      );
-    } else if (metadataType.dataType == "date") {
-      return (
-        <DateInput
-          onChange={val => onMetadataChange(metadataType.key, val, true)}
-          value={metadata[metadataType.key]}
-          className={cs.input}
-        />
-      );
-    } else {
-      return (
-        <Input
-          onChange={val => onMetadataChange(metadataType.key, val)}
-          onBlur={() => onMetadataSave(metadataType.key)}
-          value={metadata[metadataType.key]}
-          type={metadataType.dataType === "number" ? "number" : "text"}
-          className={cs.input}
-        />
-      );
-    }
+    return (
+      <MetadataInput
+        className={cs.input}
+        value={metadata[metadataType.key]}
+        metadataType={metadataType}
+        onChange={onMetadataChange}
+        onSave={onMetadataSave}
+      />
+    );
   };
 
   static renderMetadataValue = val => {

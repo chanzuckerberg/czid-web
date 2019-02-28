@@ -1,0 +1,99 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.metadataUpload {
+  position: relative;
+  margin-bottom: 20px;
+
+  .tabs {
+    margin: 30px 0 10px;
+  }
+
+  .link {
+    // Overwrite <a> inherit rule in header.scss
+    color: $primary-light !important;
+    cursor: pointer;
+  }
+
+  .metadataCSVUpload {
+    margin-top: 40px;
+    margin-bottom: 10px;
+  }
+
+  .loadingMsg {
+    @include font-body-s;
+    margin-top: 10px;
+  }
+}
+
+.issues {
+  max-height: 300px;
+  margin-top: 16px;
+  overflow: auto;
+}
+
+.errors,
+.warnings {
+  padding: 14px;
+  margin-top: 12px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  .header {
+    font-size: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .dot {
+    font-size: 14px;
+    margin-right: 5px;
+  }
+
+  .icon {
+    width: 20px;
+    margin-right: 10px;
+  }
+
+  .item {
+    padding-left: 30px;
+    font-size: 12px;
+    margin-top: 2px;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    .dot {
+      font-size: 14px;
+      margin-right: 5px;
+    }
+  }
+}
+
+.errors {
+  background-color: $error-bg;
+
+  .header {
+    color: $error;
+  }
+
+  .icon {
+    fill: $error;
+  }
+}
+
+.warnings {
+  background-color: $warning-bg;
+
+  .icon {
+    fill: $warning;
+  }
+
+  .header {
+    color: $warning;
+  }
+}

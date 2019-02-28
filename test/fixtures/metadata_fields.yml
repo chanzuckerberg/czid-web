@@ -27,14 +27,17 @@ reported_sex:
 
 age:
   name: "age"
+  display_name: "Age"
   base_type: 1
 
 admission_date:
   name: "admission_date"
+  display_name: "Admission Date"
   base_type: 2
 
 blood_fed:
   name: "blood_fed"
+  display_name: "Blood Fed"
   base_type: 0
 
 core_field:
