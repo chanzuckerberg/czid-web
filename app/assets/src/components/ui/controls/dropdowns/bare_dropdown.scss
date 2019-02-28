@@ -1,6 +1,8 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
-:global(.ui):global(.dropdown).bareDropdown {
+:global(.ui):global(.dropdown).bareDropdown,
+.portalDropdown {
   // Places the arrow within the trigger.
   &.arrowInsideTrigger {
     position: relative;
@@ -44,14 +46,19 @@
     padding-left: 14px !important;
     padding-right: 14px !important;
     color: black !important;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $transparent-lightest-grey !important;
+    }
   }
 
   .menu {
     min-width: 100%;
-    padding: 6px 0;
-    // When you nest dropdowns, semantic ui applies special (unneeded) styling that must be overridden.
-    top: 100% !important;
-    margin-left: 0 !important;
+    background-color: $white;
+    box-shadow: $box-shadow-dropdown-menu;
+    border: 1px solid $box-shadow-lighter;
+    border-radius: 4px;
 
     &:global(.left) {
       .innerMenu {
@@ -79,11 +86,17 @@
     }
   }
 
+  .dropdownMenu {
+    padding: 6px 0;
+  }
+
   .innerMenu {
     /* Override semantic-ui */
     box-shadow: none !important;
     border-radius: 0 !important;
     border-top: none !important;
+    max-height: 288px;
+    overflow: auto;
 
     // TODO(mark): Move this to a global CSS file.
     &::-webkit-scrollbar {
