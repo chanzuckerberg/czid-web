@@ -1,4 +1,5 @@
 import React from "react";
+import cx from "classnames";
 import { Search } from "semantic-ui-react";
 import { escapeRegExp, debounce } from "lodash";
 import PropTypes from "prop-types";
@@ -84,7 +85,7 @@ class SearchBox extends React.Component {
     const { isLoading, value, results } = this.state;
     return (
       <Search
-        className="idseq-ui input search"
+        className={cx("idseq-ui input search", this.props.rounded && "rounded")}
         loading={isLoading}
         category={this.props.category}
         onSearchChange={debounce(
