@@ -132,16 +132,16 @@ export default class DiscoverySidebar extends React.Component {
     const total = sum(Object.values(this.state.metadata[field]));
     return (
       <dl className={cx(cs.dataList)}>
-        {sorted.map(key => {
+        {sorted.map((key, i) => {
           const count = this.state.metadata[field][key];
           const percent = Math.round(100 * count / total, 0);
           return [
-            <dt>
+            <dt key={key + i + "label"}>
               <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
                 {key}
               </a>
             </dt>,
-            <dd>
+            <dd key={key + i + "number"}>
               <span className={cs.bar} style={{ width: percent + "px" }}>
                 {percent > 10 ? count : ""}
               </span>
