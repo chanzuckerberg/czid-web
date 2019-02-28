@@ -85,7 +85,7 @@ class UploadMetadataStep extends React.Component {
             project={this.props.project}
             onMetadataChange={this.handleMetadataChange}
             samplesAreNew
-            issues={this.state.wasManual && this.state.issues}
+            issues={this.state.wasManual ? this.state.issues : null}
           />
           <div className={cs.mainControls}>
             <PrimaryButton

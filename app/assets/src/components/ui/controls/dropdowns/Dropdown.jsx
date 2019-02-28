@@ -76,7 +76,8 @@ class Dropdown extends React.Component {
         floating
         onChange={this.handleOnChange}
         trigger={this.renderTrigger()}
-        selectOnBlur={false}
+        usePortal={this.props.usePortal}
+        withinModal={this.props.withinModal}
       />
     );
   }
@@ -99,7 +100,9 @@ Dropdown.propTypes = {
   onChange: PropTypes.func.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   search: PropTypes.bool,
-  menuLabel: PropTypes.string
+  menuLabel: PropTypes.string,
+  usePortal: PropTypes.bool,
+  withinModal: PropTypes.bool
 };
 
 export default Dropdown;

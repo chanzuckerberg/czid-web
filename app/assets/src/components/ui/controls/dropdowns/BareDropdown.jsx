@@ -1,5 +1,5 @@
 // This component allows you to easily add a dropdown of options to any trigger element
-// Wraps around Semantic UI Dropdown
+// Wraps around Semantic UI Dropdown, with react-popper as an alternative.
 
 import React from "react";
 import cx from "classnames";
@@ -8,6 +8,7 @@ import { forbidExtraProps } from "airbnb-prop-types";
 import { Dropdown as BaseDropdown } from "semantic-ui-react";
 import Input from "~ui/controls/Input";
 import PropTypes from "prop-types";
+import PortalDropdown from "./PortalDropdown.jsx";
 import cs from "./bare_dropdown.scss";
 
 class BareDropdown extends React.Component {
@@ -39,6 +40,7 @@ class BareDropdown extends React.Component {
         key={option.value}
         onClick={() => this.props.onChange(option.value)}
         active={this.props.value === option.value}
+        className={cs.item}
       >
         {option.text}
       </BaseDropdown.Item>
@@ -102,6 +104,8 @@ class BareDropdown extends React.Component {
       search,
       closeOnClick,
       itemSearchStrings,
+      usePortal,
+      withinModal,
       children,
       ...otherProps
     } = this.props;
@@ -142,35 +146,64 @@ class BareDropdown extends React.Component {
       otherProps
     );
 
+    const menu = (
+      <BaseDropdown.Menu
+        className={cx(
+          cs.menu,
+          cs.dropdownMenu,
+          (menuLabel || search) && cs.extraPadding
+        )}
+        onClick={!closeOnClick ? e => e.stopPropagation() : undefined}
+      >
+        {menuLabel && <div className={cs.menuLabel}>{menuLabel}</div>}
+        {search && (
+          <div
+            onClick={e => e.stopPropagation()}
+            className={cs.searchContainer}
+          >
+            <Input
+              fluid
+              className={cs.searchInput}
+              icon="search"
+              placeholder="Search"
+              onChange={this.handleFilterChange}
+            />
+          </div>
+        )}
+        <BaseDropdown.Menu scrolling className={cs.innerMenu}>
+          {this.state.filteredItems}
+        </BaseDropdown.Menu>
+      </BaseDropdown.Menu>
+    );
+
+    if (this.props.usePortal) {
+      return (
+        <PortalDropdown
+          trigger={this.props.trigger}
+          menuClassName={cs.portalDropdown}
+          triggerClassName={className}
+          withinModal={this.props.withinModal}
+          fluid={this.props.fluid}
+          floating={this.props.floating}
+          direction={this.props.direction}
+          hideArrow={hideArrow}
+          disabled={this.props.disabled}
+          arrowInsideTrigger={arrowInsideTrigger}
+          onOpen={this.props.onOpen}
+          open={this.props.open}
+          onClose={this.props.onClose}
+          menu={menu}
+        />
+      );
+    }
+
     return (
       <BaseDropdown
         {...baseDropdownProps}
         className={dropdownClassName}
         onBlur={e => e.stopPropagation()}
       >
-        <BaseDropdown.Menu
-          className={cx(cs.menu, (menuLabel || search) && cs.extraPadding)}
-          onClick={!closeOnClick ? e => e.stopPropagation() : undefined}
-        >
-          {menuLabel && <div className={cs.menuLabel}>{menuLabel}</div>}
-          {search && (
-            <div
-              onClick={e => e.stopPropagation()}
-              className={cs.searchContainer}
-            >
-              <Input
-                fluid
-                className={cs.searchInput}
-                icon="search"
-                placeholder="Search"
-                onChange={this.handleFilterChange}
-              />
-            </div>
-          )}
-          <BaseDropdown.Menu scrolling className={cs.innerMenu}>
-            {this.state.filteredItems}
-          </BaseDropdown.Menu>
-        </BaseDropdown.Menu>
+        {menu}
       </BaseDropdown>
     );
   }
@@ -201,6 +234,11 @@ BareDropdown.propTypes = forbidExtraProps({
 
   // Custom props for rendering items
   items: PropTypes.arrayOf(PropTypes.node),
+
+  usePortal: PropTypes.bool,
+  // Whether to increase the z-index of the menu to be above the Modal z-index.
+  // Useful for PortalDropdowns.
+  withinModal: PropTypes.bool,
 
   // Props directly passed to semantic-ui.
   trigger: PropTypes.node.isRequired,
