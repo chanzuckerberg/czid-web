@@ -915,7 +915,7 @@ class SamplesController < ApplicationController
   end
 
   def choose_taxon_all_levels
-    taxon_list = taxon_search(params[:query], TaxonCount::NAME_2_LEVEL.keys)
+    taxon_list = taxon_search(params[:query], TaxonCount::NAME_2_LEVEL.keys, true)
     render json: JSON.dump(taxon_list)
   end
 
