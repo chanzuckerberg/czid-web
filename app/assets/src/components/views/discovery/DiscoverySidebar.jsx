@@ -40,26 +40,23 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   async componentDidMount() {
-    this.genomes = await getAllHostGenomes();
+    // TODO (gdingle): why not include genome name in payload from getSamples?
+    const genomes = keyBy("id", await getAllHostGenomes());
+    this.setState({ genomes });
   }
 
-  componentDidUpdate() {
-    const { currentTab, projects } = this.props;
-
-    // TODO (gdingle): this is not working when flipping back from visualization tab
-    if (this.state._computed && this.state._computed == currentTab) {
-      // Only update once because of
-      // Uncaught Invariant Violation: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
-      // TODO (gdingle): fix root cause
-      return;
-    }
+  static getDerivedStateFromProps(newProps, prevState) {
+    const { currentTab, projects } = newProps;
 
     if (currentTab == "samples") {
-      const samples = this.processSamples();
+      const samples = DiscoverySidebar.processSamples(
+        newProps.samples,
+        prevState.genomes
+      );
       if (!samples || !samples.length) {
-        return;
+        return prevState;
       }
-      this.setState({
+      return {
         stats: {
           samples: samples.length,
           projects: uniqBy("project_id", samples).length
@@ -74,10 +71,10 @@ export default class DiscoverySidebar extends React.Component {
           // location: {},
         },
         _computed: currentTab
-      });
+      };
     } else if (currentTab == "projects") {
       if (!projects || !projects.length) {
-        return;
+        return prevState;
       }
 
       const hosts = flatten(map("hosts", projects));
@@ -88,7 +85,7 @@ export default class DiscoverySidebar extends React.Component {
         projects
       );
 
-      this.setState({
+      return {
         z: {
           samples: sumBy("number_of_samples", projects),
           projects: projects.length
@@ -104,17 +101,16 @@ export default class DiscoverySidebar extends React.Component {
           // location: {},
         },
         _computed: currentTab
-      });
+      };
     } else {
+      // eslint-disable-next-line no-console
       console.error("Not supported: " + currentTab);
+      return prevState;
     }
   }
 
-  processSamples() {
-    // TODO (gdingle): why not include genome name in payload from getSamples?
-    const genomes = keyBy("id", this.genomes);
-
-    const samples = this.props.samples.map(sample => {
+  static processSamples(newSamples, genomes) {
+    const samples = newSamples.map(sample => {
       const genome = genomes[sample.host_genome_id];
       // TODO (gdingle): best description for blanks?
       sample.host_genome = genome ? genome.name : "unknown";
