@@ -50,6 +50,7 @@ class MetadataUpload extends React.Component {
           samples={this.props.samples}
           samplesAreNew={this.props.samplesAreNew}
           onMetadataChange={this.onMetadataChangeManual}
+          withinModal={this.props.withinModal}
         />
       );
     }
@@ -158,7 +159,8 @@ MetadataUpload.propTypes = {
   onShowCSVInstructions: PropTypes.func.isRequired,
   project: PropTypes.Project,
   samples: PropTypes.arrayOf(PropTypes.Sample),
-  samplesAreNew: PropTypes.bool
+  samplesAreNew: PropTypes.bool,
+  withinModal: PropTypes.bool
 };
 
 export default MetadataUpload;

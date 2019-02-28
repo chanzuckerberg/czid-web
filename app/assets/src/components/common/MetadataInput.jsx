@@ -23,6 +23,8 @@ class MetadataInput extends React.Component {
           onChange={val => onChange(metadataType.key, val, true)}
           value={value}
           className={className}
+          usePortal
+          withinModal={this.props.withinModal}
         />
       );
     } else if (metadataType.dataType == "date") {
@@ -52,13 +54,14 @@ MetadataInput.propTypes = {
   value: PropTypes.any,
   metadataType: PropTypes.shape({
     key: PropTypes.string,
-    dataType: PropTypes.oneOf(["number", "text", "date"]),
+    dataType: PropTypes.oneOf(["number", "string", "date"]),
     options: PropTypes.arrayOf(PropTypes.string)
   }),
   // Third optional parameter signals to the parent whether to immediately save. false means "wait for onSave to fire".
   // This is useful for the text input, where the parent wants to save onBlur, not onChange.
   onChange: PropTypes.func.isRequired,
-  onSave: PropTypes.func
+  onSave: PropTypes.func,
+  withinModal: PropTypes.bool
 };
 
 export default MetadataInput;
