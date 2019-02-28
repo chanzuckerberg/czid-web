@@ -14,10 +14,10 @@ module ElasticsearchHelper
     results
   end
 
-  def taxon_search(prefix)
+  def taxon_search(prefix, tax_levels = %w[species genus])
     return {} if Rails.env == "test"
     matching_taxa = {}
-    %w[species genus].each do |level|
+    tax_levels.each do |level|
       search_params = { query: { query_string: { query: "#{prefix}*", fields: ["#{level}_name"] } } }
       TaxonLineage.__elasticsearch__.search(search_params).records.each do |record|
         name = record["#{level}_name"]

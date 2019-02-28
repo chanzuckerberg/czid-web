@@ -307,10 +307,12 @@ class PipelineSampleReport extends React.Component {
     //
     // Search filters
     //
+    console.log("searchTaxonId", searchTaxonId);
     if (searchTaxonId > 0) {
       let genus_taxon = {};
       let matched_taxons = [];
       let new_input_taxons = [];
+      let should_log = true;
       for (let i = 0; i < input_taxons.length; i++) {
         const taxon = input_taxons[i];
         if (taxon.genus_taxid == taxon.tax_id) {
@@ -322,13 +324,18 @@ class PipelineSampleReport extends React.Component {
           matched_taxons = [];
         } else {
           // species
-          const match_keys = [
+          const match_keys = new Set([
             taxon.tax_id,
             taxon.genus_taxid,
             taxon.family_taxid,
             taxon.superkingdom_taxid
-          ];
-          if (match_keys && match_keys.indexOf(searchTaxonId) > -1) {
+          ]);
+          if (should_log) {
+            console.log("lineage", taxon.lineage);
+            console.log("match_keys", match_keys);
+          }
+          should_log = false;
+          if (match_keys && match_keys.has(searchTaxonId)) {
             matched_taxons.push(taxon);
           }
         }
@@ -1322,7 +1329,7 @@ class RenderMarkup extends React.Component {
         <div className="filter-lists">
           <div className="filter-lists-element">
             <SearchBox
-              serverSearchAction="choose_taxon"
+              serverSearchAction="choose_taxon_all_levels"
               onResultSelect={parent.searchSelectedTaxon}
               placeholder="Taxon name"
             />

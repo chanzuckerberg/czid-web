@@ -26,7 +26,7 @@ class SamplesController < ApplicationController
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details, :all,
                    :show_sample_names, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :upload].freeze
+                   :search_suggestions, :choose_taxon_all_levels, :upload].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload, :bulk_upload_with_metadata], fallback: :devise
@@ -924,6 +924,11 @@ class SamplesController < ApplicationController
 
   def cli_user_instructions
     render template: "samples/cli_user_instructions"
+  end
+
+  def choose_taxon_all_levels
+    taxon_list = taxon_search(params[:query], TaxonCount::NAME_2_LEVEL.keys)
+    render json: JSON.dump(taxon_list)
   end
 
   # Use callbacks to share common setup or constraints between actions.
