@@ -41,7 +41,7 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   async componentDidMount() {
-    // TODO (gdingle): why not include genome name in payload from getSamples?
+    // TODO (gdingle): include genome name in payload from getSamples
     const genomes = keyBy("id", await getAllHostGenomes());
     this.setState({ genomes });
   }
@@ -191,7 +191,7 @@ export default class DiscoverySidebar extends React.Component {
             header={<div className={cs.header}>By Metadata</div>}
           >
             <div className={cs.hasBackground}>
-              <strong>Date uploaded</strong>
+              <strong>Date created</strong>
               {this.buildMetadataRows("created_at")}
             </div>
             <div className={cs.hasBackground}>
