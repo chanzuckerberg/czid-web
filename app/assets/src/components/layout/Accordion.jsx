@@ -8,6 +8,12 @@ class Accordion extends React.Component {
     open: false
   };
 
+  componentDidMount() {
+    this.setState({
+      open: this.props.open
+    });
+  }
+
   onToggle = () => {
     this.setState({
       open: !this.state.open
@@ -17,7 +23,7 @@ class Accordion extends React.Component {
   render() {
     const { header, children, toggleable, className } = this.props;
 
-    const open = this.props.open || this.state.open;
+    const open = this.state.open;
 
     return (
       <div className={cx(cs.accordion, className)}>

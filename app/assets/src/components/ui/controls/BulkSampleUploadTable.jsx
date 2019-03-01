@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import DataTable from "../../visualizations/table/DataTable";
-import { isEmpty, concat, size } from "lodash/fp";
+import { isEmpty, concat, size, sortBy } from "lodash/fp";
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 import LoadingIcon from "~/components/ui/icons/LoadingIcon";
 import CheckmarkIcon from "~/components/ui/icons/CheckmarkIcon";
@@ -61,9 +61,12 @@ class BulkSampleUploadTable extends React.Component {
         }
       }
 
+      // Sort the file list by name.
+      const sortedFiles = sortBy(file => file.name || file.source, files);
+
       const filesList = (
         <div>
-          {files.map(f => <div key={f.source}>{f.name || f.source}</div>)}
+          {sortedFiles.map(f => <div key={f.source}>{f.name || f.source}</div>)}
         </div>
       );
 
@@ -75,6 +78,8 @@ class BulkSampleUploadTable extends React.Component {
       };
       entries.push(entry);
     }
+
+    const sortedEntries = sortBy("sampleName", entries);
 
     return (
       <div className={cs.bulkSampleUploadTable}>
@@ -103,7 +108,7 @@ class BulkSampleUploadTable extends React.Component {
             "files",
             "removeIcon"
           ])}
-          data={entries}
+          data={sortedEntries}
         />
       </div>
     );

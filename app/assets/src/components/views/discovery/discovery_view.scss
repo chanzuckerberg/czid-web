@@ -13,9 +13,13 @@
 
   .viewContainer {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     flex: 1 0 auto;
-    padding-top: 30px;
+  }
+
+  .sideBar {
+    flex: 0 1 400px;
+    border-left: 6px solid $off-white;
   }
 }
 

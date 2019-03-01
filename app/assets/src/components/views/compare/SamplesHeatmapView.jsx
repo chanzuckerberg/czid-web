@@ -220,6 +220,7 @@ class SamplesHeatmapView extends React.Component {
     }
 
     newState.loading = false;
+    // TODO (gdingle): change to pushState to preserve back button behavior?
     window.history.replaceState("", "", this.getUrlForCurrentParams());
     this.setState(newState);
   }
