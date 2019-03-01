@@ -174,7 +174,7 @@ class SamplesController < ApplicationController
     query = params[:query]
 
     # Not permission-dependent
-    taxon_list = taxon_search(query)
+    taxon_list = taxon_search(query, ["species", "genus"])
     hosts = HostGenome.where("name LIKE :search", search: "#{query}%")
 
     # Admin-only for now: needs permissions scoping
