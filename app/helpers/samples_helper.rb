@@ -304,11 +304,12 @@ module SamplesHelper
 
   def metadata_multiget(sample_ids)
     metadata = Metadatum.where(sample_id: sample_ids)
+    validated_value_map = Metadatum.validated_value_multiget(metadata)
 
     metadata_by_sample_id = {}
     metadata.each do |metadatum|
       metadata_by_sample_id[metadatum.sample_id] ||= {}
-      metadata_by_sample_id[metadatum.sample_id][metadatum.key.to_sym] = metadatum.validated_value
+      metadata_by_sample_id[metadatum.sample_id][metadatum.key.to_sym] = validated_value_map[metadatum.id]
     end
 
     metadata_by_sample_id
@@ -325,7 +326,7 @@ module SamplesHelper
   end
 
   def format_samples_basic(samples)
-    metadata_by_sample_id = metadata_multiget(samples.map(&:id))
+    metadata_by_sample_id = metadata_multiget(samples.pluck(:id))
     return samples.map do |sample|
       {
         name: sample.name,
