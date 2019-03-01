@@ -1,0 +1,7 @@
+.searchBox {
+  &.rounded {
+    input[type="text"] {
+      border-radius: 19px;
+    }
+  }
+}

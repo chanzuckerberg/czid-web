@@ -1,6 +1,5 @@
 import cx from "classnames";
 import React from "react";
-import axios from "axios";
 import Cookies from "js-cookie";
 import $ from "jquery";
 import { Label, Menu, Icon, Popup } from "semantic-ui-react";
@@ -27,7 +26,7 @@ import MetricPicker from "./views/report/filters/MetricPicker";
 import SpecificityFilter from "./views/report/filters/SpecificityFilter";
 import NameTypeFilter from "./views/report/filters/NameTypeFilter";
 import MinContigSizeFilter from "./views/report/filters/MinContigSizeFilter";
-import ReportSearchBox from "./views/report/filters/ReportSearchBox";
+import SearchBox from "./ui/controls/SearchBox";
 import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
 import LoadingLabel from "./ui/labels/LoadingLabel";
@@ -131,8 +130,6 @@ class PipelineSampleReport extends React.Component {
         name: ""
       },
       search_taxon_id: 0,
-      searchKey: "",
-      search_keys_in_sample: [],
       lineage_map: {},
       rows_passing_filters: 0,
       rows_total: 0,
@@ -183,7 +180,6 @@ class PipelineSampleReport extends React.Component {
     this.fillUrlParams();
     // Fetch the actual report data via axios calls to fill in the page.
     this.fetchReportData();
-    this.fetchSearchList();
   }
 
   componentDidMount() {
@@ -194,23 +190,6 @@ class PipelineSampleReport extends React.Component {
     // Set the state in the URL
     this.props.refreshPage(this.state, false);
   }
-
-  fetchSearchList = () => {
-    axios
-      .get(
-        `/samples/${this.sample_id}/search_list?report_ts=${
-          this.report_ts
-        }&version=${this.gitVersion}`
-      )
-      .then(res => {
-        const search_list = res.data.search_list;
-        search_list.splice(0, 0, ["Show All", 0]);
-        this.setState({
-          lineage_map: res.data.lineage_map,
-          search_keys_in_sample: search_list
-        });
-      });
-  };
 
   // fetchReportData loads the actual report information with another call to
   // the API endpoint.
@@ -284,7 +263,6 @@ class PipelineSampleReport extends React.Component {
         activeThresholds: [],
         includedCategories: [],
         includedSubcategories: [],
-        searchKey: "",
         search_taxon_id: 0,
         selected_taxons: this.state.taxonomy_details,
         selected_taxons_top: this.state.taxonomy_details.slice(
@@ -340,8 +318,18 @@ class PipelineSampleReport extends React.Component {
           matched_taxons = [];
         } else {
           // species
-          const match_keys = this.state.lineage_map[taxon.tax_id.toString()];
-          if (match_keys && match_keys.indexOf(searchTaxonId) > -1) {
+          const match_keys = new Set([
+            taxon.tax_id,
+            taxon.lineage.species_taxid,
+            taxon.lineage.genus_taxid,
+            taxon.lineage.family_taxid,
+            taxon.lineage.order_taxid,
+            taxon.lineage.class_taxid,
+            taxon.lineage.phylum_taxid,
+            taxon.lineage.kingdom_taxid,
+            taxon.lineage.superkingdom_taxid
+          ]);
+          if (match_keys && match_keys.has(searchTaxonId)) {
             matched_taxons.push(taxon);
           }
         }
@@ -1052,18 +1040,10 @@ class PipelineSampleReport extends React.Component {
     $(".table-arrow").toggleClass("hidden");
   };
 
-  handleSearch = e => {
-    this.setState({
-      searchKey: e.target.value
-    });
-  };
-
-  searchSelectedTaxon = (value, item) => {
-    let searchId = item[1];
+  searchSelectedTaxon = (e, { result }) => {
     this.setState(
       {
-        searchKey: searchId > 0 ? item[0] : "",
-        search_taxon_id: searchId
+        search_taxon_id: result.taxid
       },
       () => {
         this.applyFilters();
@@ -1336,13 +1316,12 @@ class RenderMarkup extends React.Component {
       <div className="report-top-filters">
         <div className="filter-lists">
           <div className="filter-lists-element">
-            <ReportSearchBox
-              searchKeysInSample={parent.state.search_keys_in_sample}
-              searchKey={parent.state.searchKey}
-              onSelect={(value, item) =>
-                parent.searchSelectedTaxon(value, item)
-              }
-              onChange={parent.handleSearch}
+            <SearchBox
+              rounded
+              levelLabel
+              serverSearchAction="choose_taxon"
+              onResultSelect={parent.searchSelectedTaxon}
+              placeholder="Taxon name"
             />
           </div>
           <div className="filter-lists-element">

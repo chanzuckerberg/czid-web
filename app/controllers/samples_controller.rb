@@ -18,7 +18,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update, :bulk_upload_with_metadata]
 
   # Read action meant for single samples with set_sample before_action
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
+  READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
@@ -174,7 +174,7 @@ class SamplesController < ApplicationController
     query = params[:query]
 
     # Not permission-dependent
-    taxon_list = taxon_search(query)
+    taxon_list = taxon_search(query, ["species", "genus"])
     hosts = HostGenome.where("name LIKE :search", search: "#{query}%")
 
     # Admin-only for now: needs permissions scoping
@@ -560,18 +560,6 @@ class SamplesController < ApplicationController
     @report_info[:contig_taxid_list] = @pipeline_run.get_taxid_list_with_contigs
 
     render json: JSON.dump(@report_info)
-  end
-
-  def search_list
-    expires_in 30.days
-
-    @pipeline_run = select_pipeline_run(@sample, params)
-    if @pipeline_run
-      @search_list = fetch_lineage_info(@pipeline_run.id)
-      render json: JSON.dump(@search_list)
-    else
-      render json: { lineage_map: {}, search_list: [] }
-    end
   end
 
   def save_metadata

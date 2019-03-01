@@ -3,7 +3,6 @@ require 'open3'
 
 module ReportHelper
   # Truncate report table past this number of rows.
-  TAXON_CATEGORY_OFFSET = 100_000_000
   ZSCORE_MIN = -99
   ZSCORE_MAX =  99
   ZSCORE_WHEN_ABSENT_FROM_SAMPLE = -100
@@ -571,37 +570,6 @@ module ReportHelper
       'percentconcordant' => DEFAULT_SAMPLE_PERCENTCONCORDANT,
       'aggregatescore' => nil
     }
-  end
-
-  def fetch_lineage_info(pipeline_run_id)
-    lineage_records = TaxonLineage.connection.select_all(TaxonLineage.where(
-      "taxid in (select tax_id from taxon_counts
-                 where pipeline_run_id = #{pipeline_run_id}
-                   and tax_level = #{TaxonCount::TAX_LEVEL_SPECIES})"
-    ).to_sql).to_a
-    result_map = {}
-    search_key_list = Set.new
-    sort_map = {}
-
-    n2la = TaxonCount::NAME_2_LEVEL.to_a
-    lineage_records.each do |lr|
-      key_array = []
-      n2la.each do |category, level|
-        tax_name = lr["#{category}_name"]
-        tax_id = lr["#{category}_taxid"]
-        next unless tax_name && tax_name.strip.present?
-        display_name = "#{tax_name} (#{category})"
-        sort_key = "#{(10 - level)}-#{tax_name}"
-        search_id = level * TAXON_CATEGORY_OFFSET + tax_id
-        sort_map[search_id] = sort_key
-        key_array << search_id
-        search_key_list.add([display_name, search_id])
-      end
-      result_map[lr['taxid']] = key_array
-    end
-
-    search_key_list = search_key_list.sort_by { |u| sort_map[u[1]] }
-    { lineage_map: result_map, search_list: search_key_list }
   end
 
   def tax_info_base(taxon)
