@@ -460,6 +460,7 @@ class PhyloTreeCreation extends React.Component {
             <div className="wizard__page-2__searchbar__container">
               <SearchBox
                 serverSearchAction="choose_taxon"
+                serverSearchActionArgs="species,genus"
                 onResultSelect={this.handleSelectTaxon}
                 initialValue={this.state.taxonName}
                 placeholder="Taxon name"

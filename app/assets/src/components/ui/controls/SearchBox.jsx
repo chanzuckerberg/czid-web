@@ -70,13 +70,15 @@ class SearchBox extends React.Component {
         const isMatch = result => re.test(result.title);
         searchResults = this.props.clientSearchSource.filter(isMatch);
       } else if (this.props.serverSearchAction) {
-        searchResults = await get(
-          `/${this.props.serverSearchAction}?query=${this.state.value}&args=${
-            this.props.serverSearchActionArgs
-          }`
-        );
-        for (let i = 0; i < searchResults.length; i++) {
-          searchResults[i].title += " (" + searchResults[i].level + ")";
+        let url = `/${this.props.serverSearchAction}?query=${this.state.value}`;
+        if (this.props.serverSearchActionArgs) {
+          url += `&args=${this.props.serverSearchActionArgs}`;
+        }
+        searchResults = await get(url);
+        if (this.props.levelLabel) {
+          for (let i = 0; i < searchResults.length; i++) {
+            searchResults[i].title += " (" + searchResults[i].level + ")";
+          }
         }
       }
 
@@ -128,6 +130,7 @@ SearchBox.propTypes = {
   serverSearchActionArgs: PropTypes.string,
   rounded: PropTypes.bool,
   category: PropTypes.bool,
+  levelLabel: PropTypes.bool,
   initialValue: PropTypes.string,
   onResultSelect: PropTypes.func,
   placeholder: PropTypes.string

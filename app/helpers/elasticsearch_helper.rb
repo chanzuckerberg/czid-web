@@ -14,7 +14,7 @@ module ElasticsearchHelper
     results
   end
 
-  def taxon_search(prefix, tax_levels = %w[species genus])
+  def taxon_search(prefix, tax_levels = TaxonCount::NAME_2_LEVEL.keys)
     return {} if Rails.env == "test"
     matching_taxa = {}
     tax_levels.each do |level|
