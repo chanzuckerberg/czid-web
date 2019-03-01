@@ -1,0 +1,57 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.sideBar {
+  padding: 10px;
+  font-size: 12px;
+}
+
+.metadataContainer {
+  .hasBackground {
+    padding: 5px;
+  }
+
+  .hasBackground:nth-child(odd) {
+    background-color: $off-white;
+  }
+
+  .header {
+    margin: 10px 0 15px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    font-weight: bold;
+  }
+}
+
+.dataList {
+  display: flex;
+  flex-flow: row wrap;
+  margin: 0;
+
+  dt,
+  dd {
+    text-overflow: ellipsis;
+    min-width: 33%;
+    margin: 5px 0;
+    padding: 0px;
+  }
+
+  dt {
+    max-width: 33%;
+  }
+
+  dd {
+    width: 66%;
+  }
+
+  .bar {
+    display: inline-block;
+    vertical-align: top;
+    height: 18px;
+    margin: 0 5px;
+    padding: 0 5px;
+    background-color: $medium-grey;
+    text-align: right;
+    color: white;
+  }
+}

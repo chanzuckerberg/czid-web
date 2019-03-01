@@ -59,19 +59,16 @@ class PhyloTreesController < ApplicationController
                  name: taxon_lineage.name }
     end
 
-    # Augment tree data with sample attributes, number of pipeline_runs and user name
+    # Augment tree data with sample attributes, number of pipeline_runs, user name, and parent taxid
+    species_taxids = @phylo_trees.where(tax_level: 1).pluck(:taxid)
+    parent_map = Hash[TaxonLineage.where(taxid: species_taxids).map { |record| [record.taxid, record.genus_taxid] }]
+    sample_details_map = sample_details_by_tree_id
+    users_map = PhyloTree.users_by_tree_id
     @phylo_trees = @phylo_trees.as_json
-    sample_details_map = sample_details_by_tree_id()
     @phylo_trees.each do |pt|
-      sample_details = sample_details_map[pt["id"]]
-      pt["sampleDetailsByNodeName"] = sample_details
-      pt["user"] = PhyloTree.users_by_tree_id[pt["id"]]
-      if pt["tax_level"] == 1
-        taxon = TaxonLineage.where(taxid: pt["taxid"]).first
-        if taxon
-          pt["parent_taxid"] = taxon.genus_taxid
-        end
-      end
+      pt["sampleDetailsByNodeName"] = sample_details_map[pt["id"]]
+      pt["user"] = users_map[pt["id"]]
+      pt["parent_taxid"] = parent_map[pt["taxid"]]
     end
 
     respond_to do |format|
