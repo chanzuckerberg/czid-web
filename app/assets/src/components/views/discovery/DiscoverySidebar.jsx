@@ -32,9 +32,8 @@ export default class DiscoverySidebar extends React.Component {
       metadata: {
         host: {},
         tissue: {},
-        created_at: {}
-        // TODO (gdingle):
-        // location: {},
+        created_at: {},
+        location: {}
       },
       genomes: {}
     };
@@ -67,9 +66,8 @@ export default class DiscoverySidebar extends React.Component {
         metadata: {
           host: countBy("host_genome", samples),
           tissue: countBy("sample_tissue", samples),
-          created_at: countBy("created_at", samples)
-          // TODO (gdingle): location not in samples data yet
-          // location: {},
+          created_at: countBy("created_at", samples),
+          location: countBy("sample_location", samples)
         },
         _computed: currentTab
       };
@@ -80,6 +78,7 @@ export default class DiscoverySidebar extends React.Component {
 
       const hosts = flatten(map("hosts", projects));
       const tissues = flatten(map("tissues", projects));
+      const locations = flatten(map("sample_locations", projects));
 
       const created_ats = map(
         p => DiscoverySidebar.formatDate(p.created_at),
@@ -97,9 +96,8 @@ export default class DiscoverySidebar extends React.Component {
           // TODO (gdingle): these freq counts per project, not per sample
           host: countBy(_ => _, hosts),
           tissue: countBy(_ => _, tissues),
-          created_at: countBy(_ => _, created_ats)
-          // TODO (gdingle): location not in projects data yet
-          // location: {},
+          created_at: countBy(_ => _, created_ats),
+          location: countBy(_ => _, locations)
         },
         _computed: currentTab
       };
@@ -120,6 +118,7 @@ export default class DiscoverySidebar extends React.Component {
       // TODO (gdingle): best description for blanks?
       sample.host_genome = genome ? genome.name : "unknown";
       sample.sample_tissue = sample.sample_tissue || "unknown";
+      sample.location = sample.sample_location || "unknown";
       // TODO (gdingle): this is broken... always getting current date
       sample.created_at = DiscoverySidebar.formatDate(sample.created_at);
       return sample;
@@ -204,6 +203,10 @@ export default class DiscoverySidebar extends React.Component {
             <div className={cs.hasBackground}>
               <strong>Tissue</strong>
               {this.buildMetadataRows("tissue")}
+            </div>
+            <div className={cs.hasBackground}>
+              <strong>Location</strong>
+              {this.buildMetadataRows("location")}
             </div>
           </Accordion>
         </div>
