@@ -72,15 +72,15 @@ class ProjectsController < ApplicationController
                         [p, Sample.where(project: p).count]
                       end
                     end
-        # TODO: (gdingle): this seems inefficient... 3 extra queries * projects.length
+        # TODO: (gdingle): this seems inefficient... 5 extra queries * projects.length
         extended_projects = @projects.map do |project, sample_count|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
             number_of_samples: sample_count,
             hosts: @samples.where(project_id: project.id).includes(:host_genome).distinct.pluck("host_genomes.name").compact,
             tissues: @samples.where(project_id: project.id).distinct.pluck(:sample_tissue).compact,
             sample_locations: @samples.where(project_id: project.id).distinct.pluck(:sample_location).compact,
-            # TODO: (gdingle): check performance and and-or add total reads as method to sample model
-            total_reads: @samples.where(project_id: project.id).joins(:pipeline_runs).select(:total_reads)[0].total_reads
+            total_reads: @samples.where(project_id: project.id).left_joins(:pipeline_runs).select(:total_reads)[0].total_reads,
+            adjusted_remaining_reads: @samples.where(project_id: project.id).left_joins(:pipeline_runs).select(:adjusted_remaining_reads)[0].adjusted_remaining_reads
           )
         end
         render json: extended_projects

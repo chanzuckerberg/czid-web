@@ -24,10 +24,10 @@ export default class DiscoverySidebar extends React.Component {
 
     this.state = {
       stats: {
-        samples: 0,
-        projects: 0
-        // TODO (gdingle):
-        // avg_reads_per_sample: 0,
+        samples: "",
+        projects: "",
+        total_reads: "",
+        adjusted_remaining_reads: ""
       },
       metadata: {
         host: {},
@@ -59,7 +59,9 @@ export default class DiscoverySidebar extends React.Component {
       return {
         stats: {
           samples: samples.length,
-          projects: uniqBy("project_id", samples).length
+          projects: uniqBy("project_id", samples).length,
+          total_reads: sumBy("total_reads", samples),
+          adjusted_remaining_reads: sumBy("adjusted_remaining_reads", samples)
           // TODO (gdingle): reads not in samples data yet
           // avg_reads_per_sample: 0,
         },
@@ -86,9 +88,11 @@ export default class DiscoverySidebar extends React.Component {
       );
 
       return {
-        z: {
+        stats: {
           samples: sumBy("number_of_samples", projects),
-          projects: projects.length
+          projects: projects.length,
+          total_reads: sumBy("total_reads", projects),
+          adjusted_remaining_reads: sumBy("adjusted_remaining_reads", projects)
           // TODO (gdingle): reads not in projects data yet
           // avg_reads_per_sample: 0,
         },
@@ -110,6 +114,15 @@ export default class DiscoverySidebar extends React.Component {
 
   static formatDate(created_at) {
     return moment(created_at).format("YYYY-MM-DD");
+  }
+
+  // TODO (gdingle): humanize better into M such as 34M
+  formatNumber(number) {
+    const samples = this.state.stats.samples;
+    if (!samples) {
+      return "";
+    }
+    return Math.round(number / samples).toLocaleString();
   }
 
   static processSamples(newSamples, genomes) {
@@ -174,7 +187,7 @@ export default class DiscoverySidebar extends React.Component {
                 <dt>
                   <strong>Samples</strong>
                 </dt>
-                <dd>{this.state.stats.samples}</dd>
+                <dd>{this.state.stats.samples.toLocaleString()}</dd>
               </dl>
             </div>
             <div className={cs.hasBackground}>
@@ -182,7 +195,27 @@ export default class DiscoverySidebar extends React.Component {
                 <dt>
                   <strong>Projects</strong>
                 </dt>
-                <dd>{this.state.stats.projects}</dd>
+                <dd>{this.state.stats.projects.toLocaleString()}</dd>
+              </dl>
+            </div>
+            <div className={cs.hasBackground}>
+              <dl className={cx(cs.dataList)}>
+                <dt>
+                  <strong>Reads per sample</strong>
+                </dt>
+                <dd>{this.formatNumber(this.state.stats.total_reads)}</dd>
+              </dl>
+            </div>
+            <div className={cs.hasBackground}>
+              <dl className={cx(cs.dataList)}>
+                <dt>
+                  <strong>
+                    Non-host reads <br />per sample
+                  </strong>
+                </dt>
+                <dd>
+                  {this.formatNumber(this.state.stats.adjusted_remaining_reads)}
+                </dd>
               </dl>
             </div>
           </Accordion>
