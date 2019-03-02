@@ -78,7 +78,9 @@ class ProjectsController < ApplicationController
             number_of_samples: sample_count,
             hosts: @samples.where(project_id: project.id).includes(:host_genome).distinct.pluck("host_genomes.name").compact,
             tissues: @samples.where(project_id: project.id).distinct.pluck(:sample_tissue).compact,
-            sample_locations: @samples.where(project_id: project.id).distinct.pluck(:sample_location).compact
+            sample_locations: @samples.where(project_id: project.id).distinct.pluck(:sample_location).compact,
+            # TODO: (gdingle): check performance and and-or add total reads as method to sample model
+            total_reads: @samples.where(project_id: project.id).joins(:pipeline_runs).select(:total_reads)[0].total_reads
           )
         end
         render json: extended_projects
