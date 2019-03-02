@@ -148,7 +148,10 @@ export default class DiscoverySidebar extends React.Component {
               </a>
             </dt>,
             <dd key={key + i + "number"}>
-              <span className={cs.bar} style={{ width: percent + "px" }}>
+              <span
+                className={cs.bar}
+                style={{ width: percent * 2 - 4 + "px" }}
+              >
                 {percent > 10 ? count : ""}
               </span>
               {percent}%

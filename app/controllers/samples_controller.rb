@@ -136,10 +136,16 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       format.json do
-        render json: @samples.offset(offset).limit(limit).as_json(
-          only: [:id, :name, :sample_tissue, :host_genome_id, :project_id, :created_at],
-          methods: []
-        )
+        render json: @samples.offset(offset).limit(limit).as_json(only: [
+                                                                    :id,
+                                                                    :name,
+                                                                    :sample_tissue,
+                                                                    :host_genome_id,
+                                                                    :project_id,
+                                                                    :created_at,
+                                                                    :sample_location
+                                                                  ],
+                                                                  methods: [:host_genome_name])
       end
     end
   end
