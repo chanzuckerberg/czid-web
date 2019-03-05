@@ -537,6 +537,7 @@ class SamplesController < ApplicationController
     )
 
     # Efficiently fetch auxiliary information from Project model
+    # TODO: test if "going public" notification still appears
     samples_resp = []
     samples.includes(:project).each do |s|
       entry = s.as_json

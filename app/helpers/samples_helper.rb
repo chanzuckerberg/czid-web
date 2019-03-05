@@ -352,7 +352,9 @@ module SamplesHelper
     metadata_by_sample_id = metadata_multiget(sample_ids)
 
     # Massage data into the right format
-    samples.each_with_index do |sample|
+    # 'includes(:pipeline_runs, :host_genome, :project)' is necessary because sample_derived_data
+    # uses those associated models and we need to avoid firing a db query for each sample
+    samples.includes(:pipeline_runs, :host_genome, :project).each_with_index do |sample|
       job_info = {}
       job_info[:db_sample] = sample # TODO: here
       job_info[:metadata] = metadata_by_sample_id[sample.id]
