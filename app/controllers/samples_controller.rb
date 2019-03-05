@@ -837,16 +837,15 @@ class SamplesController < ApplicationController
     respond_to do |format|
       if @sample.update(sample_params)
         format.html { redirect_to @sample, notice: 'Sample was successfully updated.' }
-        format.json { render :show, status: :ok, location: @sample }
-        # format.json do
-        #  # For CLI uploads
-        #  sample_json = @sample.as_json.slice("id", "name", "status", "created_at", "updated_at")
-        #  @sample.input_files.each do |f|
-        #    (sample_json["input_files"] ||= []) << f.as_json.slice("name", "presigned_url", "source", "parts")
-        #  end
-        #  render json: sample_json,
-        #         status: :ok
-        # end
+        format.json do
+          # For CLI uploads
+          sample_json = @sample.as_json.slice("id", "name", "status", "created_at", "updated_at")
+          @sample.input_files.each do |f|
+            (sample_json["input_files"] ||= []) << f.as_json.slice("name", "presigned_url", "source", "parts")
+          end
+          render json: sample_json,
+                 status: :ok
+        end
       else
         format.html { render :edit }
         format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }
