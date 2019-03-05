@@ -132,6 +132,9 @@ class MetadataUpload extends React.Component {
   render() {
     return (
       <div className={cx(cs.metadataUpload, this.props.className)}>
+        <a href="/metadata/dictionary" className={cs.link} target="_blank">
+          See Metadata Dictionary
+        </a>
         <Tabs
           className={cs.tabs}
           tabs={["Manual Input", "CSV Upload"]}
