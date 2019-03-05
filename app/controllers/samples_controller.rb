@@ -535,16 +535,16 @@ class SamplesController < ApplicationController
       params[:userId] ? User.find(params[:userId]) : current_user,
       params[:projectId] ? Project.find(params[:projectId]) : nil
     )
-    render json: samples.to_json(include: [{ project: { only: [:id, :name] } }])
-    ## Efficiently fetch auxiliary information from Project model
-    # samples_resp = []
-    # samples.includes(:project).each do |s|
-    #  entry = s.as_json
-    #  entry["project"] = { "id" => s.project.id, "name" => s.project.name }
-    #  #entry["private_until"] = s.private_until # Note: this method uses s.project under the hood
-    #  samples_resp << entry
-    # end
-    # render json: samples_resp
+
+    # Efficiently fetch auxiliary information from Project model
+    samples_resp = []
+    samples.includes(:project).each do |s|
+      entry = s.as_json
+      entry["project"] = { "id" => s.project.id, "name" => s.project.name }
+      entry["private_until"] = s.private_until # Note: this method uses s.project under the hood
+      samples_resp << entry
+    end
+    render json: samples_resp
   end
 
   def report_info
