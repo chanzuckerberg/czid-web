@@ -141,6 +141,8 @@ class SamplesController < ApplicationController
     respond_to do |format|
       format.json do
         render json: @samples.offset(offset).limit(limit).as_json(
+          # TODO: sample_tissue column is deprecated, use Metadatum model instead
+          # TODO: add: input_files, host_genome_name, private_until
           only: [:id, :name, :sample_tissue, :host_genome_id, :project_id, :created_at],
           methods: []
         )
@@ -534,6 +536,15 @@ class SamplesController < ApplicationController
       params[:projectId] ? Project.find(params[:projectId]) : nil
     )
     render json: samples.to_json(include: [{ project: { only: [:id, :name] } }])
+    ## Efficiently fetch auxiliary information from Project model
+    # samples_resp = []
+    # samples.includes(:project).each do |s|
+    #  entry = s.as_json
+    #  entry["project"] = { "id" => s.project.id, "name" => s.project.name }
+    #  #entry["private_until"] = s.private_until # Note: this method uses s.project under the hood
+    #  samples_resp << entry
+    # end
+    # render json: samples_resp
   end
 
   def report_info
@@ -826,6 +837,15 @@ class SamplesController < ApplicationController
       if @sample.update(sample_params)
         format.html { redirect_to @sample, notice: 'Sample was successfully updated.' }
         format.json { render :show, status: :ok, location: @sample }
+        # format.json do
+        #  # For CLI uploads
+        #  sample_json = @sample.as_json.slice("id", "name", "status", "created_at", "updated_at")
+        #  @sample.input_files.each do |f|
+        #    (sample_json["input_files"] ||= []) << f.as_json.slice("name", "presigned_url", "source", "parts")
+        #  end
+        #  render json: sample_json,
+        #         status: :ok
+        # end
       else
         format.html { render :edit }
         format.json { render json: @sample.errors.full_messages, status: :unprocessable_entity }

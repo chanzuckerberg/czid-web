@@ -354,7 +354,7 @@ module SamplesHelper
     # Massage data into the right format
     samples.each_with_index do |sample|
       job_info = {}
-      job_info[:db_sample] = sample
+      job_info[:db_sample] = sample # TODO: here
       job_info[:metadata] = metadata_by_sample_id[sample.id]
       top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
       job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}

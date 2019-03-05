@@ -330,13 +330,18 @@ class Sample < ApplicationRecord
     host_genome.name if host_genome
   end
 
+  # def self.host_genome_name_multiget(samples)
+  #  result = {}
+  #  samples.includes(:host_genome).each do |s|
+  #    # 'includes(:host_genome)' retrieves the host_genome info needed in host_genome_name
+  #    # using a single SQL query for all samples
+  #    result[s.id] = s.host_genome_name
+  #  end
+  #  result
+  # end
+
   def default_background_id
     host_genome && host_genome.default_background ? host_genome.default_background.id : Background.find_by(public_access: 1).id
-  end
-
-  def as_json(options = {})
-    options[:methods] ||= [:input_files, :host_genome_name, :private_until]
-    super(options)
   end
 
   def check_host_genome
@@ -626,6 +631,16 @@ class Sample < ApplicationRecord
   def private_until
     return created_at + project.days_to_keep_sample_private.days
   end
+
+  # def self.private_until_multiget(samples)
+  #  result = {}
+  #  samples.includes(:project).each do |s|
+  #    # 'includes(:project)' retrieves the project info needed in private_until
+  #    # using a single SQL query for all samples
+  #    result[s.id] = s.private_until
+  #  end
+  #  result
+  # end
 
   # Get Metadata objects augmented with MetadataField.base_type
   def metadata_with_base_type
