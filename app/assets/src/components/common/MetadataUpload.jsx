@@ -65,10 +65,6 @@ class MetadataUpload extends React.Component {
             >
               See Instructions
             </span>
-            <span> | </span>
-            <a href="/metadata/dictionary" className={cs.link} target="_blank">
-              See Metadata Dictionary
-            </a>
           </div>
           <MetadataCSVUpload
             className={cs.metadataCSVUpload}
