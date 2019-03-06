@@ -349,19 +349,6 @@ class UploadSampleStep extends React.Component {
   render() {
     return (
       <div className={cs.uploadSampleStep}>
-        <div className={cs.header}>
-          <div className={cs.title}>Upload Samples</div>
-          <div className={cs.subtitle}>
-            Rather use our command-line interface?
-            <a
-              href="/cli_user_instructions"
-              target="_blank"
-              className={cs.cliLink}
-            >
-              Instructions here.
-            </a>
-          </div>
-        </div>
         <div className={cs.projectSelect}>
           <div className={cs.label}>Project</div>
           <ProjectSelect
