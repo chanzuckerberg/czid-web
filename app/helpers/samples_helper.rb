@@ -354,9 +354,13 @@ module SamplesHelper
     # Massage data into the right format
     # 'includes(:pipeline_runs, :host_genome, :project)' is necessary because sample_derived_data
     # uses those associated models and we need to avoid firing a db query for each sample
-    samples.includes(:pipeline_runs, :host_genome, :project).each_with_index do |sample|
+    samples.includes(:pipeline_runs, :host_genome, :project, :input_files).each_with_index do |sample|
       job_info = {}
-      job_info[:db_sample] = sample # TODO: here
+      job_info[:db_sample] = sample.as_json.merge(
+        input_files: sample.input_files.as_json, # NOTE: can probably be removed, but ported from legacy code just in case
+        host_genome_name: sample.host_genome_name, # uses sample.host_genome under the hood
+        private_until: sample.private_until # uses sample.project under the hood
+      )
       job_info[:metadata] = metadata_by_sample_id[sample.id]
       top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
       job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}
