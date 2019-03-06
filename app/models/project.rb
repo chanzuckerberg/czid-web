@@ -144,6 +144,6 @@ class Project < ApplicationRecord
   end
 
   def add_default_metadata_fields
-    self.metadata_fields = MetadataField.where(is_default: 1) unless metadata_fields
+    metadata_fields.push(MetadataField.where(is_default: 1) - metadata_fields)
   end
 end
