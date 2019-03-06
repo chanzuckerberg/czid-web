@@ -143,7 +143,7 @@ export default class DiscoverySidebar extends React.Component {
           return [
             <dt key={key + i + "label"}>
               <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
-                {key}
+                {key == "unknown" ? <i>{key}</i> : key}
               </a>
             </dt>,
             <dd key={key + i + "number"}>
