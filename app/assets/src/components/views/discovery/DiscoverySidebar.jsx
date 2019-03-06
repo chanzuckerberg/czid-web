@@ -6,8 +6,8 @@ import {
   sumBy,
   flatten,
   map,
-  keyBy,
   countBy,
+  groupBy,
   sortBy
 } from "lodash/fp";
 import moment from "moment";
@@ -101,8 +101,8 @@ export default class DiscoverySidebar extends React.Component {
     }
   }
 
-  static formatDate(created_at) {
-    return moment(created_at).format("YYYY-MM-DD");
+  static formatDate(createdAt) {
+    return moment(createdAt).format("YYYY-MM-DD");
   }
 
   // TODO (gdingle): humanize better into M such as 34M
@@ -119,7 +119,6 @@ export default class DiscoverySidebar extends React.Component {
       // TODO (gdingle): best description for blanks?
       sample.sample_tissue = sample.sample_tissue || "unknown";
       sample.location = sample.sample_location || "unknown";
-      // TODO (gdingle): this is broken... always getting current date
       sample.created_at = DiscoverySidebar.formatDate(sample.created_at);
       return sample;
     });
@@ -129,6 +128,41 @@ export default class DiscoverySidebar extends React.Component {
   handleFilterClick(key) {
     // TODO (gdingle): coordinate with filters on left sidebar
     window.history.pushState("", "", "?" + key);
+  }
+
+  buildDateHistogram(field) {
+    // TODO (gdingle): format date with moment?
+    // TODO (gdingle): style spacing, color, scale
+    // TODO (gdingle): onclick handlers
+    // TODO (gdingle): degenerate cases
+    // TODO (gdingle): auto scale to day week or month
+    // TODO (gdingle): gaps in date range?
+    // TODO (gdingle): click on empty space?
+    const dates = this.state.metadata[field];
+    const dateKeys = Object.keys(dates);
+    dateKeys.sort();
+    return (
+      <div className={cx(cs.dataList)}>
+        {dateKeys[0]}
+        {dateKeys.map(key => {
+          // const count = this.state.metadata[field][key];
+          // const percent = Math.round(100 * count / total, 0);
+          return (
+            <div
+              key={key}
+              style={{
+                height: dates[key],
+                backgroundColor: "red",
+                display: "inline-block"
+              }}
+            >
+              &nbsp;
+            </div>
+          );
+        })}
+        {dateKeys[dateKeys.length - 1]}
+      </div>
+    );
   }
 
   buildMetadataRows(field) {
@@ -205,6 +239,14 @@ export default class DiscoverySidebar extends React.Component {
                 </dd>
               </dl>
             </div>
+          </Accordion>
+        </div>
+        <div className={cs.metadataContainer}>
+          <Accordion
+            open={true}
+            header={<div className={cs.header}>Date created</div>}
+          >
+            <div>{this.buildDateHistogram("created_at")}</div>
           </Accordion>
         </div>
         <div className={cs.metadataContainer}>
