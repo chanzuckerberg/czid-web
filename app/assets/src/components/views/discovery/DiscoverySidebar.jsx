@@ -1,15 +1,6 @@
 import React from "react";
 import cx from "classnames";
-import {
-  uniqBy,
-  sum,
-  sumBy,
-  flatten,
-  map,
-  keyBy,
-  countBy,
-  sortBy
-} from "lodash/fp";
+import { uniqBy, sum, sumBy, flatten, map, countBy, sortBy } from "lodash/fp";
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
