@@ -13,6 +13,20 @@ class PhyloTree < ApplicationRecord
   STATUS_FAILED = 2
   STATUS_IN_PROGRESS = 3
 
+  after_create :create_visualization
+
+  # We need to create a visualization object here to register the new phylo_tree
+  # as a generic visualization. Other types of visualizations are saved on-demand only.
+  # Because phylo_trees are created explictly, the user will expect them to persist.
+  # TODO: (gdingle): destroy visualization objects when phylo_tree is destroyed.
+  def create_visualization
+    Visualization.create(
+      user: current_user,
+      visualization_type: "phylo_tree",
+      data: { treeId: id }
+    )
+  end
+
   def self.in_progress
     where(status: STATUS_IN_PROGRESS)
   end
