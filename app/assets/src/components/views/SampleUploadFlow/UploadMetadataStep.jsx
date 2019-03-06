@@ -78,15 +78,6 @@ class UploadMetadataStep extends React.Component {
         <div className={cx(this.state.showInstructions && cs.hide)}>
           <div>
             <div className={cs.title}>Upload Metadata</div>
-            <div className={cs.dictionary}>
-              <a
-                href="/metadata/dictionary"
-                className={cs.link}
-                target="_blank"
-              >
-                See Metadata Dictionary
-              </a>
-            </div>
           </div>
           <MetadataUpload
             onShowCSVInstructions={() => this.setShowInstructions(true)}
