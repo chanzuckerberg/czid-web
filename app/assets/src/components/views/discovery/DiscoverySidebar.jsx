@@ -101,6 +101,7 @@ export default class DiscoverySidebar extends React.Component {
     }
   }
 
+  // TODO (gdingle): format date with moment?
   static formatDate(createdAt) {
     return moment(createdAt).format("YYYY-MM-DD");
   }
@@ -130,37 +131,36 @@ export default class DiscoverySidebar extends React.Component {
     window.history.pushState("", "", "?" + key);
   }
 
+  // TODO (gdingle): auto scale to day week or month?
   buildDateHistogram(field) {
-    // TODO (gdingle): format date with moment?
-    // TODO (gdingle): style spacing, color, scale
-    // TODO (gdingle): onclick handlers
-    // TODO (gdingle): degenerate cases
-    // TODO (gdingle): auto scale to day week or month
-    // TODO (gdingle): gaps in date range?
-    // TODO (gdingle): click on empty space?
     const dates = this.state.metadata[field];
+
+    const total = sum(Object.values(dates));
     const dateKeys = Object.keys(dates);
     dateKeys.sort();
+    const firstDate = dateKeys[0];
+    const lastDate = dateKeys[dateKeys.length - 1];
     return (
-      <div className={cx(cs.dataList)}>
-        {dateKeys[0]}
-        {dateKeys.map(key => {
-          // const count = this.state.metadata[field][key];
-          // const percent = Math.round(100 * count / total, 0);
-          return (
-            <div
-              key={key}
-              style={{
-                height: dates[key],
-                backgroundColor: "red",
-                display: "inline-block"
-              }}
-            >
-              &nbsp;
-            </div>
-          );
-        })}
-        {dateKeys[dateKeys.length - 1]}
+      <div>
+        <div className={cx(cs.dateHistogram)}>
+          {dateKeys.map(key => {
+            const percent = Math.round(100 * dates[key] / total, 0);
+            return (
+              <div
+                className={cx(cs.bar)}
+                key={key}
+                style={{ height: percent * 2 + "px" }}
+                onClick={() => this.handleFilterClick(key)}
+              >
+                &nbsp;
+              </div>
+            );
+          })}
+        </div>
+        <div className={cx(cs.dateHistogram)}>
+          <div className={cx(cs.label)}>{firstDate}</div>
+          <div className={cx(cs.label)}>{lastDate}</div>
+        </div>
       </div>
     );
   }
@@ -195,12 +195,16 @@ export default class DiscoverySidebar extends React.Component {
     );
   }
 
+  hasData() {
+    return !!(this.state.stats.samples || this.state.stats.projects);
+  }
+
   render() {
     return (
       <div className={cx(this.props.className, cs.sideBar)}>
         <div className={cs.metadataContainer}>
           <Accordion
-            open={true}
+            open={this.hasData()}
             header={<div className={cs.header}>Overall</div>}
           >
             <div className={cs.hasBackground}>
@@ -243,7 +247,7 @@ export default class DiscoverySidebar extends React.Component {
         </div>
         <div className={cs.metadataContainer}>
           <Accordion
-            open={true}
+            open={this.hasData()}
             header={<div className={cs.header}>Date created</div>}
           >
             <div>{this.buildDateHistogram("created_at")}</div>
@@ -251,7 +255,7 @@ export default class DiscoverySidebar extends React.Component {
         </div>
         <div className={cs.metadataContainer}>
           <Accordion
-            open={true}
+            open={this.hasData()}
             header={<div className={cs.header}>By Metadata</div>}
           >
             <div className={cs.hasBackground}>

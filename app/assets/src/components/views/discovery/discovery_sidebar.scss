@@ -22,6 +22,27 @@
     font-weight: bold;
   }
 }
+.dateHistogram {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin: 0;
+
+  .bar {
+    margin: 0 1px;
+    flex: 1 0;
+    background-color: $medium-grey;
+    cursor: pointer;
+  }
+
+  .label {
+    margin: 4px 0;
+    flex: 0 0;
+    white-space: nowrap;
+    font-size: smaller;
+  }
+}
 
 .dataList {
   display: flex;

@@ -8,10 +8,11 @@ class Accordion extends React.Component {
     open: false
   };
 
-  componentDidMount() {
-    this.setState({
-      open: this.props.open
-    });
+  static getDerivedStateFromProps(newProps, prevState) {
+    return {
+      ...prevState,
+      open: newProps.open
+    };
   }
 
   onToggle = () => {
