@@ -21,7 +21,7 @@ class PhyloTree < ApplicationRecord
   # TODO: (gdingle): destroy visualization objects when phylo_tree is destroyed.
   def create_visualization
     Visualization.create(
-      user: current_user,
+      user: user,
       visualization_type: "phylo_tree",
       data: { treeId: id }
     )
