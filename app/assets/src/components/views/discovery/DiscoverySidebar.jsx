@@ -259,10 +259,6 @@ export default class DiscoverySidebar extends React.Component {
             header={<div className={cs.header}>By Metadata</div>}
           >
             <div className={cs.hasBackground}>
-              <strong>Date created</strong>
-              {this.buildMetadataRows("created_at")}
-            </div>
-            <div className={cs.hasBackground}>
               <strong>Host</strong>
               {this.buildMetadataRows("host")}
             </div>
