@@ -63,20 +63,28 @@ class ProjectsController < ApplicationController
                      current_power.samples
                    end
 
-        @projects = if only_library || exclude_library
-                      @samples.group(:project).count
+        # Retrieve a json of projects associated with samples;
+        # augment with number_of_samples, hosts, tissues.
+        # TODO: Why are we passing host / tissue for each individual sample, with a lot of duplication?
+        #       Can't we tally the hosts and tissues up on the server side, since only summary counts are shown on the page?
+        @projects = if only_updatable
+                      current_power.updatable_projects
                     else
-                      # Make sure you still return projects without any samples. Ex: Project listing
-                      # used by the CLI.
-                      (only_updatable ? current_power.updatable_projects : current_power.projects).map do |p|
-                        [p, Sample.where(project: p).count]
-                      end
+                      current_power.projects
                     end
-        extended_projects = @projects.map do |project, sample_count|
+        sample_count_by_project_id = Hash[@samples.group_by(&:project_id).map { |k, v| [k, v.count] }]
+        host_genome_names_by_project_id = {}
+        tissues_by_project_id = {}
+        @samples.includes(:host_genome).each do |s|
+          (host_genome_names_by_project_id[s.project_id] ||= []) << s.host_genome_name
+          # TODO: sample_tissue column is deprecated, retrieve sample_type from Metadatum model instead
+          (tissues_by_project_id[s.project_id] ||= []) << s.sample_tissue
+        end
+        extended_projects = @projects.map do |project|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
-            number_of_samples: sample_count,
-            hosts: @samples.where(project_id: project.id).includes(:host_genome).distinct.pluck("host_genomes.name").compact,
-            tissues: @samples.where(project_id: project.id).distinct.pluck(:sample_tissue).compact
+            number_of_samples: sample_count_by_project_id[project.id] || 0,
+            hosts: host_genome_names_by_project_id[project.id] || [],
+            tissues: tissues_by_project_id[project.id] || []
           )
         end
         render json: extended_projects

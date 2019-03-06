@@ -124,6 +124,7 @@ class SamplesController < ApplicationController
   end
 
   def index_v2
+    # TODO: WE NEED TO WRITE A UNIT TEST FOR THIS ACTION AND IN GENERAL ANY NEW ACTIONS THAT NEED TO BE ACCESS-CONTROLLED
     only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
     exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
@@ -138,16 +139,19 @@ class SamplesController < ApplicationController
                  current_power.samples
                end
 
-    respond_to do |format|
-      format.json do
-        render json: @samples.offset(offset).limit(limit).as_json(
-          # TODO: sample_tissue column is deprecated, use Metadatum model instead
-          # TODO: add: input_files, host_genome_name, private_until
-          only: [:id, :name, :sample_tissue, :host_genome_id, :project_id, :created_at],
-          methods: []
-        )
-      end
+    @samples = @samples.offset(offset).limit(limit)
+
+    # Efficiently fetch auxiliary information from associated models
+    samples_resp = []
+    @samples.includes(:project, :host_genome, :input_files).each do |s|
+      # TODO: sample_tissue column is deprecated, use Metadatum model instead
+      entry = s.as_json(only: [:id, :name, :sample_tissue, :host_genome_id, :project_id, :created_at])
+      entry["host_genome_name"] = s.host_genome_name # this method uses s.host_genome under the hood
+      entry["private_until"] = s.private_until # this method uses s.project under the hood
+      entry["input_files"] = s.input_files.as_json # TODO: can probably be removed, but I ported it from the legacy code just in case
+      samples_resp << entry
     end
+    render json: samples_resp
   end
 
   def details
