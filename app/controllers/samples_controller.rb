@@ -135,6 +135,7 @@ class SamplesController < ApplicationController
                end
 
     # Add total_reads
+    # TODO: (gdingle): this appears to be making n+1 queries
     @samples = @samples.left_joins(:pipeline_runs).select("*, pipeline_runs.total_reads, pipeline_runs.adjusted_remaining_reads")
 
     respond_to do |format|

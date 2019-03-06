@@ -13,7 +13,6 @@ import {
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
-import { getAllHostGenomes } from "~/api";
 import { Accordion } from "~/components/layout";
 
 import cs from "./discovery_sidebar.scss";
@@ -34,25 +33,15 @@ export default class DiscoverySidebar extends React.Component {
         tissue: {},
         created_at: {},
         location: {}
-      },
-      genomes: {}
+      }
     };
-  }
-
-  async componentDidMount() {
-    // TODO (gdingle): include genome name in payload from getSamples
-    const genomes = keyBy("id", await getAllHostGenomes());
-    this.setState({ genomes });
   }
 
   static getDerivedStateFromProps(newProps, prevState) {
     const { currentTab, projects } = newProps;
 
     if (currentTab == "samples") {
-      const samples = DiscoverySidebar.processSamples(
-        newProps.samples,
-        prevState.genomes
-      );
+      const samples = DiscoverySidebar.processSamples(newProps.samples);
       if (!samples || !samples.length) {
         return prevState;
       }
@@ -66,7 +55,7 @@ export default class DiscoverySidebar extends React.Component {
           // avg_reads_per_sample: 0,
         },
         metadata: {
-          host: countBy("host_genome", samples),
+          host: countBy("host_genome_name", samples),
           tissue: countBy("sample_tissue", samples),
           created_at: countBy("created_at", samples),
           location: countBy("sample_location", samples)
@@ -125,11 +114,9 @@ export default class DiscoverySidebar extends React.Component {
     return Math.round(number / samples).toLocaleString();
   }
 
-  static processSamples(newSamples, genomes) {
+  static processSamples(newSamples) {
     const samples = newSamples.map(sample => {
-      const genome = genomes[sample.host_genome_id];
       // TODO (gdingle): best description for blanks?
-      sample.host_genome = genome ? genome.name : "unknown";
       sample.sample_tissue = sample.sample_tissue || "unknown";
       sample.location = sample.sample_location || "unknown";
       // TODO (gdingle): this is broken... always getting current date
