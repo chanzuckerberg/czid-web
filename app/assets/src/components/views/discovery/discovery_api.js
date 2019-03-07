@@ -1,12 +1,17 @@
 import { get, map } from "lodash/fp";
-import { getSamples, getProjects, getSampleDimensions } from "~/api";
+import {
+  getProjects,
+  getSamples,
+  getProjectDimensions,
+  getSampleDimensions
+} from "~/api";
 
 const DISCOVERY_DOMAIN_LIBRARY = "library";
 const DISCOVERY_DOMAIN_PUBLIC = "public";
 
 const getDiscoveryData = async ({ domain, filters }) => {
   try {
-    // Todo(tiago): split these: we actually should process them independently, otherwise
+    // Todo(tiago): maybe we should process them independently, otherwise
     // our response time will be the same as the worst case.
     const [samples, projects] = await Promise.all([
       getDiscoverySamples({ domain, filters, includeIds: true }),
@@ -28,7 +33,11 @@ const getDiscoveryData = async ({ domain, filters }) => {
 
 const getDiscoveryDimensions = async ({ domain }) => {
   try {
-    return await getSampleDimensions({ domain });
+    const [sampleDimensions, projectDimensions] = await Promise.all([
+      getSampleDimensions({ domain }),
+      getProjectDimensions({ domain })
+    ]);
+    return { sampleDimensions, projectDimensions };
   } catch (error) {
     // eslint-disable-next-line no-console
     console.log(error);
@@ -41,7 +50,7 @@ const processRawSample = sample => {
     sample: {
       name: sample.name,
       // TODO(tiago): replace by real value
-      publicAccess: false,
+      publicAccess: !!sample.public,
       user: get("uploader.name", sample.details),
       project: get("derived_sample_output.project_name", sample.details),
       createdAt: sample.created_at,

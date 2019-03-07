@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import {
   BaseFilter,
+  BaseSingleFilter,
   TaxonFilter,
   TimeFilter
 } from "~/components/common/filters";
@@ -12,6 +13,7 @@ class DiscoveryFilters extends React.Component {
   constructor(props) {
     super(props);
 
+    // TODO(tiago): refactor to store only values (not options)
     this.state = {
       taxonSelected: [],
       locationSelected: [],
@@ -27,9 +29,7 @@ class DiscoveryFilters extends React.Component {
 
     const newState = [];
     newState[selectedKey] = selected;
-    this.setState(newState, () => {
-      onFilterChange && onFilterChange(this.state);
-    });
+    this.setState(newState, () => onFilterChange && onFilterChange(this.state));
     console.log(
       "DiscoveryFilters:handleChange",
       selectedKey,
@@ -59,7 +59,7 @@ class DiscoveryFilters extends React.Component {
     );
     let newState = {};
     newState[selectedKey] = newSelected;
-    this.setState(newState, onFilterChange && onFilterChange(this.state));
+    this.setState(newState, () => onFilterChange && onFilterChange(this.state));
   }
 
   renderTags(optionsKey) {
@@ -119,11 +119,11 @@ class DiscoveryFilters extends React.Component {
           {this.renderTags("timeSelected")}
         </div>
         <div className={cs.filterContainer}>
-          <BaseFilter
-            onChange={this.handleChange.bind(this, "visibilitySelected")}
-            selected={visibilitySelected}
-            options={visibility}
+          <BaseSingleFilter
             label="Visibility"
+            options={visibility}
+            onChange={this.handleChange.bind(this, "visibilitySelected")}
+            value={visibilitySelected}
           />
           {this.renderTags("visibilitySelected")}
         </div>

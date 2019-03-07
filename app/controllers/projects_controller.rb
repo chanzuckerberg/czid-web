@@ -20,7 +20,7 @@ class ProjectsController < ApplicationController
     :validate_sample_names
   ].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
-  OTHER_ACTIONS = [:create, :new, :index, :send_project_csv, :choose_project].freeze
+  OTHER_ACTIONS = [:create, :dimensions, :new, :index, :send_project_csv, :choose_project].freeze
 
   # Required for token auth for CLI actions
   skip_before_action :verify_authenticity_token, only: [:index, :create]
@@ -53,27 +53,28 @@ class ProjectsController < ApplicationController
       format.json do
         domain = params[:domain]
 
-        @samples = samples_by_domain(domain)
+        samples = samples_by_domain(domain)
+        samples = filter_samples(samples, params)
 
         # Retrieve a json of projects associated with samples;
         # augment with number_of_samples, hosts, tissues.
-        @projects = if ["library", "public"].include?(domain)
-                      current_power.projects.where(id: @samples.pluck(:project_id).uniq)
+        projects = if ["library", "public"].include?(domain)
+                      current_power.projects.where(id: samples.pluck(:project_id).uniq)
                     elsif domain == "updatable"
                       current_power.updatable_projects
                     else
                       current_power.projects
                     end
 
-        sample_count_by_project_id = Hash[@samples.group_by(&:project_id).map { |k, v| [k, v.count] }]
+        sample_count_by_project_id = Hash[samples.group_by(&:project_id).map { |k, v| [k, v.count] }]
         host_genome_names_by_project_id = {}
         tissues_by_project_id = {}
-        @samples.includes(:host_genome).each do |s|
+        samples.includes(:host_genome).each do |s|
           (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome.name
           # TODO: sample_tissue column is deprecated, retrieve sample_type from Metadatum model instead
           (tissues_by_project_id[s.project_id] ||= Set.new) << s.sample_tissue if s.sample_tissue
         end
-        extended_projects = @projects.map do |project|
+        extended_projects = projects.map do |project|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
             number_of_samples: sample_count_by_project_id[project.id] || 0,
             hosts: host_genome_names_by_project_id[project.id] || [],
@@ -81,27 +82,89 @@ class ProjectsController < ApplicationController
           )
           end
         render json: extended_projects
+      end
+    end
+  end
 
-        # @projects = if ["library", "public"].include?(domain)
-        #               @samples.group(:project).count
-        #             else
-        #               # Make sure you still return projects without any samples. Ex: Project listing
-        #               # used by the CLI.
-        #               (domain == "updatable" ? current_power.updatable_projects : current_power.projects).map do |p|
-        #                 [p, Sample.where(project: p).count]
-        #               end
-        #             end
+  def dimensions
+    # TODO(tiago): consider split into specific controllers / models
+    domain = params[:domain]
 
-        # @samples.includes(:host_genome, :project)
+    samples = samples_by_domain(domain)
+    # Filter by access control
+    sample_ids = samples.pluck(:id)
 
-        # extended_projects = @projects.map do |project, sample_count|
-        #   project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
-        #     number_of_samples: sample_count,
-        #     hosts: @samples.where(project_id: project.id).includes(:host_genome).distinct.pluck("host_genomes.name").compact,
-        #     tissues: @samples.where(project_id: project.id).distinct.pluck(:sample_tissue).compact
-        #   )
-        # end
-        # render json: extended_projects
+    project_ids = samples.distinct(:project_id).pluck(:project_id)
+    projects = Project.where(id: project_ids)
+
+    # locations
+    locations = Metadatum
+      .joins(
+        :metadata_field,
+        :sample)
+      .where(
+        metadata_fields: {name: "collection_location"},
+        sample_id: sample_ids)
+      .group(:string_validated_value)
+      .distinct
+      .count(:project_id)
+
+    # for metadata fields we need to send both value and text
+    locations = locations.map do |location, count|
+      {value: location, text: location, count: count}
+    end
+
+    tissues = Metadatum
+      .joins(
+        :metadata_field,
+        :sample)
+      .where(
+        metadata_fields: {name: "sample_type"},
+        sample_id: sample_ids)
+      .group(:string_validated_value)
+      .distinct
+      .count(:project_id)
+
+    tissues = tissues.map do |tissue, count|
+      {value: tissue, text: tissue, count: count}
+    end
+
+    # visibility
+    # TODO(tiago): should this be public projects or projects with public samples?
+    public_count = samples.joins(:project).distinct(:project_id).where(projects: {public_access: 1}).pluck(:project_id).count
+    private_count = samples.distinct(:project_id).pluck(:project_id).count - public_count
+    visibility = [
+      {value: "public", text: "Public", count: public_count},
+      {value: "private", text: "Private", count: private_count}
+    ]
+
+    times = [
+      {value: "1_week", text: "Last Week",
+       count: projects.where("projects.created_at >= ?", 1.week.ago.utc).count},
+      {value: "1_month", text: "Last Month",
+       count: projects.where("projects.created_at >= ?", 1.month.ago.utc).count},
+      {value: "3_month", text: "Last 3 Months",
+       count: projects.where("projects.created_at >= ?", 3.month.ago.utc).count},
+      {value: "6_month", text: "Last 6 Months",
+       count: projects.where("projects.created_at >= ?", 6.month.ago.utc).count},
+      {value: "1_year", text: "Last Year",
+       count: projects.where("projects.created_at >= ?", 1.year.ago.utc).count},
+    ]
+
+    hosts = samples.includes(:host_genome).group(:host_genome).distinct.count(:project_id)
+    hosts = hosts.map do |host, count|
+      {value: host.id, text: host.name, count: count}
+    end
+
+    respond_to do |format|
+      format.json do
+        render json: [
+          { dimension: "location", values: locations},
+          { dimension: "visibility", values: visibility},
+          { dimension: "time", values: times},
+          { dimension: "host", values: hosts},
+          { dimension: "tissue", values: tissues}
+        ]
       end
     end
   end

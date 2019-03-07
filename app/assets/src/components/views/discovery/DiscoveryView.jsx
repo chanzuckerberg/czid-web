@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import moment from "moment";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
 import DiscoveryHeader from "../discovery/DiscoveryHeader";
@@ -31,7 +32,7 @@ class DiscoveryView extends React.Component {
 
     this.state = {
       showFilters: true,
-      currentTab: "samples",
+      currentTab: "projects",
       dimensions: [],
       samples: [],
       projects: [],
@@ -48,9 +49,9 @@ class DiscoveryView extends React.Component {
   }
 
   preparedFilters = () => {
-    // TODO: refactor DiscoveryFilters to simplify how we store filter state
     const { filters } = this.state;
-    return flow([
+
+    let preparedFilters = flow([
       mapKeys(key => replace("Selected", "", key)),
       mapValues(
         values =>
@@ -61,6 +62,25 @@ class DiscoveryView extends React.Component {
               : values.value
       )
     ])(filters);
+
+    // Time is an exception: we translate values into date ranges
+    if (preparedFilters.time) {
+      const startDate = {
+        "1_week": () => moment().subtract(7, "days"),
+        "1_month": () => moment().subtract(1, "months"),
+        "3_month": () => moment().subtract(3, "months"),
+        "6_month": () => moment().subtract(6, "months"),
+        "1_year": () => moment().subtract(1, "years")
+      };
+
+      preparedFilters.time = [
+        startDate[preparedFilters.time]().format("YYYYMMDD"),
+        moment().format("YYYYMMDD")
+      ];
+    }
+
+    console.log("DiscoveryView:preparedFilters", preparedFilters);
+    return preparedFilters;
   };
 
   resetData = () => {
@@ -102,18 +122,16 @@ class DiscoveryView extends React.Component {
   refreshDimensions = async () => {
     const { domain } = this.props;
 
-    const dimensions = await getDiscoveryDimensions({ domain });
+    const {
+      projectDimensions = {},
+      sampleDimensions = {}
+    } = await getDiscoveryDimensions({ domain });
 
-    if (dimensions) {
-      this.setState({ dimensions });
-    }
-
-    console.log("dimensions", dimensions);
+    this.setState({ projectDimensions, sampleDimensions });
+    console.log("dimensions", projectDimensions, sampleDimensions);
   };
 
-  computeTabs = () => {
-    const { projects, allSampleIds, analyses } = this.state;
-
+  computeTabs = (projects, analyses) => {
     const renderTab = (label, count) => {
       return (
         <div>
@@ -129,7 +147,7 @@ class DiscoveryView extends React.Component {
         value: "projects"
       },
       {
-        label: renderTab("Samples", (allSampleIds || []).length),
+        label: renderTab("Samples", sumBy("number_of_samples", projects)),
         value: "samples"
       },
       {
@@ -199,13 +217,19 @@ class DiscoveryView extends React.Component {
   render() {
     const {
       currentTab,
-      dimensions,
+      projectDimensions,
+      sampleDimensions,
       filterCount,
       projects,
       samples,
       showFilters
     } = this.state;
-    const tabs = this.computeTabs();
+    const tabs = this.computeTabs(projects);
+
+    let dimensions = {
+      projects: projectDimensions,
+      samples: sampleDimensions
+    }[currentTab];
 
     return (
       <div className={cs.layout}>

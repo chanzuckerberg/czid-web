@@ -168,6 +168,25 @@ module SamplesHelper
     sample_list
   end
 
+  def filter_samples(samples, params)
+    host = params[:host]
+    location = params[:location]
+    taxon = params[:taxon]
+    time = params[:time]
+    tissue = params[:tissue]
+    visibility = params[:visibility]
+
+    # # TODO(tiago): check performance
+    samples = filter_by_taxid(samples, taxon) if taxon.present?
+    samples = filter_by_host(samples, host) if host.present?
+    samples = filter_by_string_metadatum(samples, "collection_location", location) if location.present?
+    samples = filter_by_time(samples, Date.parse(time[0]), Date.parse(time[1])) if time.present?
+    samples = filter_by_string_metadatum(samples, "sample_type", tissue) if tissue.present?
+    samples = filter_by_visibility(samples, visibility) if visibility.present?
+
+    return samples
+  end
+
   def filter_by_status(samples, query)
     top_pipeline_run_clause = "pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)"
     if query == 'In Progress'
@@ -197,7 +216,7 @@ module SamplesHelper
   end
 
   def filter_by_time(samples, start_date, end_date)
-    samples.where("samples.created_at >= ? AND samples_created_at <= ?", start_date, end_date)
+    samples.where("samples.created_at >= ? AND samples.created_at <= ?", start_date, end_date)
   end
 
   def filter_by_visibility(samples, visibility)
@@ -386,6 +405,17 @@ module SamplesHelper
       formatted_samples.push(job_info)
     end
     formatted_samples
+  end
+
+  def visibility(samples)
+    # When in conjunction with some filters, the query below was not returning the public property,
+    # thus we need to get ids and redo the query independently
+    sample_ids = samples.pluck(:id)
+    return current_power.samples
+      .where(id: sample_ids)
+      .joins(:project)
+      .select("samples.*", "IF(projects.public_access = 1 OR DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < '#{Time.current.strftime("%y-%m-%d")}', true, false) AS public")
+      .map{|sample| sample.public}
   end
 
   # From the list of samples, return the ids of all samples whose top pipeline run is report ready.

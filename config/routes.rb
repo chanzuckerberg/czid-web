@@ -67,6 +67,7 @@ Rails.application.routes.draw do
     get :host_gene_counts_status, on: :member
     get :send_host_gene_counts, on: :member
     get :all_users, on: :member
+    get :dimensions, on: :collection
     put :add_favorite, on: :member
     put :remove_favorite, on: :member
     put :update_project_visibility, on: :member

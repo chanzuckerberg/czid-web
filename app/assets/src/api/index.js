@@ -279,15 +279,15 @@ const getSamples = ({
   });
 };
 
-// const getSampleDetails = ({ sampleIds }) =>
-//   get("/samples/details.json", {
-//     params: {
-//       sampleIds
-//     }
-//   });
-
 const getSampleDimensions = ({ domain }) =>
   get("/samples/dimensions.json", {
+    params: {
+      domain
+    }
+  });
+
+const getProjectDimensions = ({ domain }) =>
+  get("/projects/dimensions.json", {
     params: {
       domain
     }
@@ -326,40 +326,40 @@ const getSearchSuggestions = ({ categories, query }) =>
   });
 
 export {
+  bulkImportRemoteSamples,
+  bulkUploadRemoteSamples,
+  bulkUploadWithMetadata,
+  createProject,
+  createSample,
   deleteAsync,
+  deleteSample,
   get,
+  getAlignmentData,
+  getAllHostGenomes,
+  getMetadataTypesByHostGenomeName,
+  getOfficialMetadataFields,
+  getProjectDimensions,
+  getProjects,
+  getSampleDimensions,
   getSampleMetadata,
   getSampleMetadataFields,
   getSampleReportInfo,
-  createProject,
+  getSampleTaxons,
   getSamples,
-  // getSampleDetails,
-  getSampleDimensions,
-  getProjects,
-  saveSampleMetadata,
-  getMetadataTypesByHostGenomeName,
-  saveSampleName,
-  saveSampleNotes,
-  getAlignmentData,
-  deleteSample,
+  getSearchSuggestions,
   getSummaryContigCounts,
-  createSample,
-  validateMetadataCSVForProject,
-  validateMetadataCSVForNewSamples,
-  uploadMetadataForProject,
-  getOfficialMetadataFields,
-  getAllHostGenomes,
-  bulkUploadRemoteSamples,
-  bulkUploadWithMetadata,
-  bulkImportRemoteSamples,
-  markSampleUploaded,
-  saveVisualization,
-  uploadFileToUrl,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
-  getSampleTaxons,
   logAnalyticsEvent,
-  validateSampleNames,
+  markSampleUploaded,
+  saveSampleMetadata,
+  saveSampleName,
+  saveSampleNotes,
+  saveVisualization,
   shortenUrl,
-  getSearchSuggestions
+  validateMetadataCSVForNewSamples,
+  validateMetadataCSVForProject,
+  uploadMetadataForProject,
+  uploadFileToUrl,
+  validateSampleNames
 };

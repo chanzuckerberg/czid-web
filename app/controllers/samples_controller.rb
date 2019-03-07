@@ -121,11 +121,6 @@ class SamplesController < ApplicationController
 
   def index_v2
     domain = params[:domain]
-    host = params[:host]
-    location = params[:location]
-    time = params[:time]
-    tissue = params[:tissue]
-    visibility = params[:visibility]
     include_ids = ActiveModel::Type::Boolean.new.cast(params[:includeIds])
 
 
@@ -133,22 +128,19 @@ class SamplesController < ApplicationController
     offset = params[:offset].to_i
 
     samples = samples_by_domain(domain)
-
-    # # TODO(tiago): check performance
-    samples = filter_by_host(samples, host) if host.present?
-    samples = filter_by_string_metadatum(samples, "collection_location", location) if location.present?
-    samples = filter_by_time(samples, start_date, end_date) if time.present?
-    samples = filter_by_string_metadatum(samples, "sample_type", tissue) if tissue.present?
-    samples = filter_by_visibility(samples, visibility) if visibility.present?
+    samples = filter_samples(samples, params)
 
     limited_samples = samples.offset(offset).limit(limit)
 
     limited_samples_json = limited_samples.as_json(
-      only: [:id, :name, :sample_tissue, :host_genome_id, :project_id, :created_at],
+      only: [:id, :name, :sample_tissue, :host_genome_id, :project_id, :created_at, :public],
       methods: []
     )
+    samples_visibility = visibility(limited_samples)
+
     details_json = format_samples(limited_samples).as_json()
-    limited_samples_json.zip(details_json).map do |sample, details|
+    limited_samples_json.zip(details_json, samples_visibility).map do |sample, details, visibility|
+      sample[:public] = visibility
       sample[:details] = details
     end
 
@@ -219,7 +211,6 @@ class SamplesController < ApplicationController
     ]
 
     hosts = samples.joins(:host_genome).group(:host_genome).count
-    Rails.logger.debug(hosts);
     hosts = hosts.map do |host, count|
       {value: host.id, text: host.name, count: count}
     end
