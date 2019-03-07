@@ -183,10 +183,14 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
+    // This represents the unique dataset loaded and will force a refresh of the
+    // Accordions when it changes.
+    const dataKey = this.state.stats.totalReads;
     return (
       <div className={cx(this.props.className, cs.sideBar)}>
         <div className={cs.metadataContainer}>
           <Accordion
+            key={dataKey}
             open={this.hasData()}
             header={<div className={cs.header}>Overall</div>}
           >
@@ -230,6 +234,7 @@ export default class DiscoverySidebar extends React.Component {
         </div>
         <div className={cs.metadataContainer}>
           <Accordion
+            key={dataKey}
             open={this.hasData()}
             header={<div className={cs.header}>Date created</div>}
           >
@@ -238,6 +243,7 @@ export default class DiscoverySidebar extends React.Component {
         </div>
         <div className={cs.metadataContainer}>
           <Accordion
+            key={dataKey}
             open={this.hasData()}
             header={<div className={cs.header}>By Metadata</div>}
           >

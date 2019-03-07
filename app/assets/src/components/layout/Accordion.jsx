@@ -4,14 +4,10 @@ import cx from "classnames";
 import cs from "./accordion.scss";
 
 class Accordion extends React.Component {
-  state = {
-    open: false
-  };
-
-  static getDerivedStateFromProps(newProps, prevState) {
-    return {
-      ...prevState,
-      open: newProps.open
+  constructor(props) {
+    super(props);
+    this.state = {
+      open: this.props.open
     };
   }
 
@@ -63,7 +59,8 @@ Accordion.propTypes = {
 };
 
 Accordion.defaultProps = {
-  toggleable: true
+  toggleable: true,
+  open: false
 };
 
 export default Accordion;
