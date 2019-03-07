@@ -1,15 +1,6 @@
 import React from "react";
 import cx from "classnames";
-import {
-  uniqBy,
-  sum,
-  sumBy,
-  flatten,
-  map,
-  countBy,
-  groupBy,
-  sortBy
-} from "lodash/fp";
+import { uniqBy, sum, sumBy, flatten, map, countBy, sortBy } from "lodash/fp";
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
@@ -23,15 +14,15 @@ export default class DiscoverySidebar extends React.Component {
 
     this.state = {
       stats: {
-        samples: "",
-        projects: "",
-        total_reads: "",
-        adjusted_remaining_reads: ""
+        numSamples: "",
+        numProjects: "",
+        totalReads: "",
+        adjustedRemainingReads: ""
       },
       metadata: {
         host: {},
         tissue: {},
-        created_at: {},
+        createdAt: {},
         location: {}
       }
     };
@@ -41,26 +32,23 @@ export default class DiscoverySidebar extends React.Component {
     const { currentTab, projects } = newProps;
 
     if (currentTab == "samples") {
-      const samples = DiscoverySidebar.processSamples(newProps.samples);
+      const samples = DiscoverySidebar.getAverageOverSamples(newProps.samples);
       if (!samples || !samples.length) {
         return prevState;
       }
       return {
         stats: {
-          samples: samples.length,
-          projects: uniqBy("project_id", samples).length,
-          total_reads: sumBy("total_reads", samples),
-          adjusted_remaining_reads: sumBy("adjusted_remaining_reads", samples)
-          // TODO (gdingle): reads not in samples data yet
-          // avg_reads_per_sample: 0,
+          numSamples: samples.length,
+          numProjects: uniqBy("project_id", samples).length,
+          totalReads: sumBy("total_reads", samples),
+          adjustedRemainingReads: sumBy("adjusted_remaining_reads", samples)
         },
         metadata: {
           host: countBy("host_genome_name", samples),
           tissue: countBy("sample_tissue", samples),
-          created_at: countBy("created_at", samples),
+          createdAt: countBy("created_at", samples),
           location: countBy("sample_location", samples)
-        },
-        _computed: currentTab
+        }
       };
     } else if (currentTab == "projects") {
       if (!projects || !projects.length) {
@@ -71,28 +59,25 @@ export default class DiscoverySidebar extends React.Component {
       const tissues = flatten(map("tissues", projects));
       const locations = flatten(map("sample_locations", projects));
 
-      const created_ats = map(
+      const createdAts = map(
         p => DiscoverySidebar.formatDate(p.created_at),
         projects
       );
 
       return {
         stats: {
-          samples: sumBy("number_of_samples", projects),
-          projects: projects.length,
-          total_reads: sumBy("total_reads", projects),
-          adjusted_remaining_reads: sumBy("adjusted_remaining_reads", projects)
-          // TODO (gdingle): reads not in projects data yet
-          // avg_reads_per_sample: 0,
+          numSamples: sumBy("number_of_samples", projects),
+          numProjects: projects.length,
+          totalReads: sumBy("total_reads", projects),
+          adjustedRemainingReads: sumBy("adjusted_remaining_reads", projects)
         },
         metadata: {
           // TODO (gdingle): these freq counts per project, not per sample
           host: countBy(_ => _, hosts),
           tissue: countBy(_ => _, tissues),
-          created_at: countBy(_ => _, created_ats),
+          createdAt: countBy(_ => _, createdAts),
           location: countBy(_ => _, locations)
-        },
-        _computed: currentTab
+        }
       };
     } else {
       // eslint-disable-next-line no-console
@@ -106,18 +91,16 @@ export default class DiscoverySidebar extends React.Component {
     return moment(createdAt).format("YYYY-MM-DD");
   }
 
-  // TODO (gdingle): humanize better into M such as 34M
   formatNumber(number) {
-    const samples = this.state.stats.samples;
+    const samples = this.state.stats.numSamples;
     if (!samples) {
       return "";
     }
     return Math.round(number / samples).toLocaleString();
   }
 
-  static processSamples(newSamples) {
+  static getAverageOverSamples(newSamples) {
     const samples = newSamples.map(sample => {
-      // TODO (gdingle): best description for blanks?
       sample.sample_tissue = sample.sample_tissue || "unknown";
       sample.location = sample.sample_location || "unknown";
       sample.created_at = DiscoverySidebar.formatDate(sample.created_at);
@@ -196,7 +179,7 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   hasData() {
-    return !!(this.state.stats.samples || this.state.stats.projects);
+    return !!(this.state.stats.numSamples || this.state.stats.numProjects);
   }
 
   render() {
@@ -212,7 +195,7 @@ export default class DiscoverySidebar extends React.Component {
                 <dt>
                   <strong>Samples</strong>
                 </dt>
-                <dd>{this.state.stats.samples.toLocaleString()}</dd>
+                <dd>{this.state.stats.numSamples.toLocaleString()}</dd>
               </dl>
             </div>
             <div className={cs.hasBackground}>
@@ -220,7 +203,7 @@ export default class DiscoverySidebar extends React.Component {
                 <dt>
                   <strong>Projects</strong>
                 </dt>
-                <dd>{this.state.stats.projects.toLocaleString()}</dd>
+                <dd>{this.state.stats.numProjects.toLocaleString()}</dd>
               </dl>
             </div>
             <div className={cs.hasBackground}>
@@ -228,7 +211,7 @@ export default class DiscoverySidebar extends React.Component {
                 <dt>
                   <strong>Reads per sample</strong>
                 </dt>
-                <dd>{this.formatNumber(this.state.stats.total_reads)}</dd>
+                <dd>{this.formatNumber(this.state.stats.totalReads)}</dd>
               </dl>
             </div>
             <div className={cs.hasBackground}>
@@ -239,7 +222,7 @@ export default class DiscoverySidebar extends React.Component {
                   </strong>
                 </dt>
                 <dd>
-                  {this.formatNumber(this.state.stats.adjusted_remaining_reads)}
+                  {this.formatNumber(this.state.stats.adjustedRemainingReads)}
                 </dd>
               </dl>
             </div>
@@ -250,7 +233,7 @@ export default class DiscoverySidebar extends React.Component {
             open={this.hasData()}
             header={<div className={cs.header}>Date created</div>}
           >
-            <div>{this.buildDateHistogram("created_at")}</div>
+            <div>{this.buildDateHistogram("createdAt")}</div>
           </Accordion>
         </div>
         <div className={cs.metadataContainer}>
