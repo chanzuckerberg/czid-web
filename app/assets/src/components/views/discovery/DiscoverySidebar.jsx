@@ -5,6 +5,7 @@ import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
 import { Accordion } from "~/components/layout";
+import BasicPopup from "~/components/BasicPopup";
 
 import cs from "./discovery_sidebar.scss";
 
@@ -128,7 +129,7 @@ export default class DiscoverySidebar extends React.Component {
         <div className={cx(cs.dateHistogram)}>
           {dateKeys.map(key => {
             const percent = Math.round(100 * dates[key] / total, 0);
-            return (
+            const element = (
               <div
                 className={cx(cs.bar)}
                 key={key}
@@ -137,6 +138,20 @@ export default class DiscoverySidebar extends React.Component {
               >
                 &nbsp;
               </div>
+            );
+            const tooltipMessage = (
+              <span>
+                {key}
+                <br />
+                {dates[key]}
+              </span>
+            );
+            return (
+              <BasicPopup
+                key={key}
+                trigger={element}
+                content={tooltipMessage}
+              />
             );
           })}
         </div>
