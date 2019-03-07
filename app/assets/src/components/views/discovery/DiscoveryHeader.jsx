@@ -37,7 +37,7 @@ class DiscoveryHeader extends React.Component {
   };
 
   render() {
-    const { filterCount, onFilterToggle, tabs } = this.props;
+    const { filterCount, onFilterToggle, onStatsToggle, tabs } = this.props;
     const { currentTab } = this.state;
 
     return (
@@ -67,6 +67,10 @@ class DiscoveryHeader extends React.Component {
           onChange={this.handleTabChange}
           hideBorder
         />
+        <div className={cs.blankFill} />
+        <div className={cs.statsTrigger} onClick={onStatsToggle}>
+          <FiltersIcon className={cs.statsIcon} />
+        </div>
       </div>
     );
   }
@@ -90,7 +94,8 @@ DiscoveryHeader.propTypes = {
   ).isRequired,
   initialTab: PropTypes.string,
   onTabChange: PropTypes.func,
-  onFilterToggle: PropTypes.func
+  onFilterToggle: PropTypes.func,
+  onStatsToggle: PropTypes.func
 };
 
 export default DiscoveryHeader;

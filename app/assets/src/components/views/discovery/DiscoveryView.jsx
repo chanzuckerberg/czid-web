@@ -33,13 +33,14 @@ class DiscoveryView extends React.Component {
     super(props);
 
     this.state = {
-      showFilters: true,
       currentTab: "projects",
       dimensions: [],
-      samples: [],
-      projects: [],
       filters: {},
       filterCount: 0,
+      projects: [],
+      samples: [],
+      showFilters: true,
+      showStats: true,
       visualizations: []
     };
 
@@ -185,6 +186,10 @@ class DiscoveryView extends React.Component {
     this.setState({ showFilters: !this.state.showFilters });
   };
 
+  handleStatsToggle = () => {
+    this.setState({ showStats: !this.state.showStats });
+  };
+
   handleLoadSampleRows = async ({ startIndex, stopIndex }) => {
     const { domain } = this.props;
     const { samples } = this.state;
@@ -228,6 +233,7 @@ class DiscoveryView extends React.Component {
       projects,
       samples,
       showFilters,
+      showStats,
       visualizations
     } = this.state;
     const tabs = this.computeTabs(projects, visualizations);
@@ -245,6 +251,7 @@ class DiscoveryView extends React.Component {
           onTabChange={this.handleTabChange}
           filterCount={filterCount}
           onFilterToggle={this.handleFilterToggle}
+          onStatsToggle={this.handleStatsToggle}
         />
         <Divider style="medium" />
         <div className={cs.mainContainer}>
@@ -273,14 +280,15 @@ class DiscoveryView extends React.Component {
             )}
           </NarrowContainer>
           <div className={cs.rightPane}>
-            {(currentTab == "samples" || currentTab == "projects") && (
-              <DiscoverySidebar
-                className={cs.sidebar}
-                samples={samples}
-                projects={projects}
-                currentTab={currentTab}
-              />
-            )}
+            {showStats &&
+              ["samples", "projects"].includes(currentTab) && (
+                <DiscoverySidebar
+                  className={cs.sidebar}
+                  samples={samples}
+                  projects={projects}
+                  currentTab={currentTab}
+                />
+              )}
           </div>
         </div>
       </div>
