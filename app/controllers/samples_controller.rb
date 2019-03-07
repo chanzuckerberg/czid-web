@@ -139,8 +139,10 @@ class SamplesController < ApplicationController
                end
 
     # Add total_reads
-    # TODO: (gdingle): this appears to be making n+1 queries
-    @samples = @samples.left_joins(:pipeline_runs).select("*, pipeline_runs.total_reads, pipeline_runs.adjusted_remaining_reads")
+    @samples = @samples
+               .left_joins(:pipeline_runs)
+               .joins(:host_genome)
+               .select("*, pipeline_runs.total_reads, pipeline_runs.adjusted_remaining_reads, host_genomes.name AS host_genome_name")
 
     respond_to do |format|
       format.json do
@@ -154,9 +156,9 @@ class SamplesController < ApplicationController
             :created_at,
             :sample_location,
             :total_reads,
-            :adjusted_remaining_reads
-          ],
-          methods: [:host_genome_name]
+            :adjusted_remaining_reads,
+            :host_genome_name
+          ]
         )
       end
     end

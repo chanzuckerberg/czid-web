@@ -140,11 +140,10 @@ export default class DiscoverySidebar extends React.Component {
             <dd key={key + i + "number"}>
               <span
                 className={cs.bar}
-                style={{ width: percent * 2 - 4 + "px" }}
-              >
-                {percent > 10 ? count : ""}
-              </span>
-              {percent}%
+                // TODO (gdingle): make width depend on container
+                style={{ width: percent * 2 - 14 + "px" }}
+              />
+              {count}
             </dd>
           ];
         })}
@@ -158,7 +157,7 @@ export default class DiscoverySidebar extends React.Component {
         <div className={cs.metadataContainer}>
           <Accordion
             open={true}
-            header={<div className={cs.header}>Overall</div>}
+            header={<div className={cs.title}>Overall</div>}
           >
             <div className={cs.hasBackground}>
               <dl className={cx(cs.dataList)}>
@@ -188,7 +187,8 @@ export default class DiscoverySidebar extends React.Component {
               <dl className={cx(cs.dataList)}>
                 <dt>
                   <strong>
-                    Non-host reads <br />per sample
+                    Non-host
+                    <br />reads per sample
                   </strong>
                 </dt>
                 <dd>
@@ -201,7 +201,7 @@ export default class DiscoverySidebar extends React.Component {
         <div className={cs.metadataContainer}>
           <Accordion
             open={true}
-            header={<div className={cs.header}>By Metadata</div>}
+            header={<div className={cs.title}>Metadata</div>}
           >
             <div className={cs.hasBackground}>
               <strong>Date created</strong>

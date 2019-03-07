@@ -1,36 +1,46 @@
 @import "~styles/themes/colors";
-@import "~styles/themes/typography";
+@import "~styles/typography";
 
 .sideBar {
-  padding: 10px;
-  font-size: 12px;
+  padding: 10px 20px;
 }
 
 .metadataContainer {
   .hasBackground {
-    padding: 5px;
+    padding: 5px 10px;
+
+    strong {
+      display: block;
+      margin: 5px 0;
+    }
   }
 
   .hasBackground:nth-child(odd) {
     background-color: $off-white;
   }
 
-  .header {
-    margin: 10px 0 15px 0;
+  // See SampleDetailsMode/metadata_section.scss
+  .title {
+    color: $black;
+    font-weight: 600;
+    letter-spacing: 1.45px;
+    font-size: $font-size-body;
     text-transform: uppercase;
-    letter-spacing: 0.25em;
-    font-weight: bold;
+    padding: 0 10px;
+    height: 50px;
+    line-height: 50px;
   }
 }
 
 .dataList {
   display: flex;
   flex-flow: row wrap;
+  align-items: center;
   margin: 0;
 
   dt,
   dd {
-    text-overflow: ellipsis;
+    word-break: break-word;
     min-width: 33%;
     margin: 5px 0;
     padding: 0px;
