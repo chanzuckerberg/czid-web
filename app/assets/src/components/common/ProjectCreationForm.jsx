@@ -9,7 +9,7 @@ import cs from "./project_creation_form.scss";
 class ProjectCreationForm extends React.Component {
   state = {
     name: "",
-    publicAccess: 1,
+    publicAccess: -1, // No selection by default
     error: ""
   };
 

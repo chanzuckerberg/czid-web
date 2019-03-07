@@ -260,7 +260,7 @@ class MetadataManualInput extends React.Component {
                 <Dropdown
                   className={inputClasses}
                   options={this.getHostGenomeOptions()}
-                  value={this.state.currentHostGenome}
+                  value={this.state.currentHostGenome || 1}
                   onChange={id => this.updateHostGenome(id, sample)}
                   usePortal
                   withinModal={this.props.withinModal}
