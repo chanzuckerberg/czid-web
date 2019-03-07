@@ -33,7 +33,12 @@ class MetadataManualInput extends React.Component {
     headers: null,
     metadataFieldsToEdit: {},
     headersToEdit: [],
-    hostGenomes: []
+    hostGenomes: [],
+    // Which cell the "Apply to All" button should appear on.
+    applyToAllCell: {
+      sampleName: null,
+      column: null
+    }
   };
 
   async componentDidMount() {
@@ -101,9 +106,39 @@ class MetadataManualInput extends React.Component {
     );
     this.setState({
       metadataFieldsToEdit: newFields,
-      headersToEdit: newHeaders
+      headersToEdit: newHeaders,
+      applyToAllCell: {
+        sampleName: sample.name,
+        column: key
+      }
     });
 
+    this.onMetadataChange(newHeaders, newFields);
+  };
+
+  applyToAll = (column, sample) => {
+    const newValue = this.getMetadataValue(sample, column);
+
+    let newFields = this.state.metadataFieldsToEdit;
+    this.props.samples.forEach(curSample => {
+      newFields = set([curSample.name, column], newValue, newFields);
+    });
+
+    const newHeaders = union([column], this.state.headersToEdit);
+    this.setState({
+      metadataFieldsToEdit: newFields,
+      headersToEdit: newHeaders,
+      applyToAllCell: {
+        sampleName: null,
+        column: null
+      }
+    });
+
+    this.onMetadataChange(newHeaders, newFields);
+  };
+
+  // Convert metadata headers and fields to a CSV-like format before passing to parent.
+  onMetadataChange = (newHeaders, newFields) => {
     this.props.onMetadataChange({
       metadata: {
         headers: ["sample_name", ...newHeaders],
@@ -179,6 +214,18 @@ class MetadataManualInput extends React.Component {
     );
   };
 
+  renderApplyToAll = (sample, column) => {
+    return this.state.applyToAllCell.sampleName === sample.name &&
+      this.state.applyToAllCell.column === column ? (
+      <div
+        className={cs.applyToAll}
+        onClick={() => this.applyToAll(column, sample)}
+      >
+        Apply to All
+      </div>
+    ) : null;
+  };
+
   // Create form fields for the table.
   getManualInputData = () => {
     if (!this.props.samples) {
@@ -199,16 +246,27 @@ class MetadataManualInput extends React.Component {
             );
           }
 
+          const inputClasses = cx(
+            cs.input,
+            // Add extra bottom padding to get inputs to align with the input that has Apply to All under it.
+            column !== this.state.applyToAllCell.column &&
+              sample.name === this.state.applyToAllCell.sampleName &&
+              cs.extraPadding
+          );
+
           if (column === "Host Genome") {
             return (
-              <Dropdown
-                className={cs.input}
-                options={this.getHostGenomeOptions()}
-                value={this.state.currentHostGenome}
-                onChange={id => this.updateHostGenome(id, sample)}
-                usePortal
-                withinModal={this.props.withinModal}
-              />
+              <div>
+                <Dropdown
+                  className={inputClasses}
+                  options={this.getHostGenomeOptions()}
+                  value={this.state.currentHostGenome}
+                  onChange={id => this.updateHostGenome(id, sample)}
+                  usePortal
+                  withinModal={this.props.withinModal}
+                />
+                {this.renderApplyToAll(sample, column)}
+              </div>
             );
           }
 
@@ -230,16 +288,19 @@ class MetadataManualInput extends React.Component {
             )
           ) {
             return (
-              <MetadataInput
-                key={column}
-                className={cs.input}
-                value={this.getMetadataValue(sample, column)}
-                metadataType={this.state.projectMetadataFields[column]}
-                onChange={(key, value) =>
-                  this.updateMetadataField(key, value, sample)
-                }
-                withinModal={this.props.withinModal}
-              />
+              <div>
+                <MetadataInput
+                  key={column}
+                  className={inputClasses}
+                  value={this.getMetadataValue(sample, column)}
+                  metadataType={this.state.projectMetadataFields[column]}
+                  onChange={(key, value) =>
+                    this.updateMetadataField(key, value, sample)
+                  }
+                  withinModal={this.props.withinModal}
+                />
+                {this.renderApplyToAll(sample, column)}
+              </div>
             );
           }
           return (
