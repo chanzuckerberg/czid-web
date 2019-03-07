@@ -1,0 +1,21 @@
+.filtersContainer {
+  width: 200px;
+
+  .filterContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    &:not(:first-child) {
+      margin-top: 5px;
+    }
+
+    .filterTag {
+      flex: 0 0 auto;
+
+      &:not(:first-child) {
+        margin-top: 5px;
+      }
+    }
+  }
+}

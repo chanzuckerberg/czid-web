@@ -51,35 +51,57 @@ class ProjectsController < ApplicationController
         @projects = current_power.projects
       end
       format.json do
-        only_updatable = ActiveModel::Type::Boolean.new.cast(params[:onlyUpdatable])
-        only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
-        exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
+        domain = params[:domain]
 
-        @samples = if only_library
-                     current_power.library_samples
-                   elsif exclude_library
-                     Sample.public_samples
-                   else
-                     current_power.samples
-                   end
+        @samples = samples_by_domain(domain)
 
-        @projects = if only_library || exclude_library
-                      @samples.group(:project).count
+        # Retrieve a json of projects associated with samples;
+        # augment with number_of_samples, hosts, tissues.
+        @projects = if ["library", "public"].include?(domain)
+                      current_power.projects.where(id: @samples.pluck(:project_id).uniq)
+                    elsif domain == "updatable"
+                      current_power.updatable_projects
                     else
-                      # Make sure you still return projects without any samples. Ex: Project listing
-                      # used by the CLI.
-                      (only_updatable ? current_power.updatable_projects : current_power.projects).map do |p|
-                        [p, Sample.where(project: p).count]
-                      end
+                      current_power.projects
                     end
-        extended_projects = @projects.map do |project, sample_count|
-          project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
-            number_of_samples: sample_count,
-            hosts: @samples.where(project_id: project.id).includes(:host_genome).distinct.pluck("host_genomes.name").compact,
-            tissues: @samples.where(project_id: project.id).distinct.pluck(:sample_tissue).compact
-          )
+
+        sample_count_by_project_id = Hash[@samples.group_by(&:project_id).map { |k, v| [k, v.count] }]
+        host_genome_names_by_project_id = {}
+        tissues_by_project_id = {}
+        @samples.includes(:host_genome).each do |s|
+          (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome.name
+          # TODO: sample_tissue column is deprecated, retrieve sample_type from Metadatum model instead
+          (tissues_by_project_id[s.project_id] ||= Set.new) << s.sample_tissue if s.sample_tissue
         end
+        extended_projects = @projects.map do |project|
+          project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
+            number_of_samples: sample_count_by_project_id[project.id] || 0,
+            hosts: host_genome_names_by_project_id[project.id] || [],
+            tissues: tissues_by_project_id[project.id] || []
+          )
+          end
         render json: extended_projects
+
+        # @projects = if ["library", "public"].include?(domain)
+        #               @samples.group(:project).count
+        #             else
+        #               # Make sure you still return projects without any samples. Ex: Project listing
+        #               # used by the CLI.
+        #               (domain == "updatable" ? current_power.updatable_projects : current_power.projects).map do |p|
+        #                 [p, Sample.where(project: p).count]
+        #               end
+        #             end
+
+        # @samples.includes(:host_genome, :project)
+
+        # extended_projects = @projects.map do |project, sample_count|
+        #   project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
+        #     number_of_samples: sample_count,
+        #     hosts: @samples.where(project_id: project.id).includes(:host_genome).distinct.pluck("host_genomes.name").compact,
+        #     tissues: @samples.where(project_id: project.id).distinct.pluck(:sample_tissue).compact
+        #   )
+        # end
+        # render json: extended_projects
       end
     end
   end

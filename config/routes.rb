@@ -38,6 +38,7 @@ Rails.application.routes.draw do
     get :samples_going_public, on: :collection
     get :index_v2, on: :collection
     get :details, on: :collection
+    get :dimensions, on: :collection
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
   end

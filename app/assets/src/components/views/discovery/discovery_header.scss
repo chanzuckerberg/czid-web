@@ -1,4 +1,85 @@
-.tabs {
-  margin-top: 30px;
-  margin-bottom: 15px;
+@import "~styles/themes/colors";
+
+.header {
+  display: flex;
+  flex-direction: row;
+  margin: 20px 20px 18px 15px;
+  align-items: center;
+
+  .filtersTrigger {
+    cursor: pointer;
+    flex: 0 0 auto;
+    position: relative;
+    margin-right: 25px;
+
+    .filtersIcon {
+      color: $primary-light;
+      width: 30px;
+    }
+
+    .filtersCounter {
+      background-color: $lightest-grey;
+      color: $primary-light;
+      font-size: 11px;
+      min-height: 18px;
+      min-width: 18px;
+      // Override semantic-ui
+      padding: 3px !important;
+      position: absolute;
+      top: -8px;
+      right: -12px;
+      vertical-align: middle;
+    }
+  }
+
+  .tabs {
+    flex: 1 0 auto;
+  }
+
+  .searchContainer {
+    margin-right: 25px;
+
+    :global(.prompt) {
+      width: 260px !important;
+      border-radius: 19px !important;
+    }
+
+    :global(.search) {
+      :global(.category),
+      :global(.name),
+      :global(.results.visible),
+      :global(.result) {
+        display: block !important;
+        border-bottom: none !important;
+      }
+      :global(.results.visible) {
+        max-height: 300px;
+        overflow-y: scroll;
+      }
+      :global(.category) {
+        padding-top: 5px !important;
+        background: none !important;
+        border-bottom: 1px solid $light-grey !important;
+      }
+      :global(.name) {
+        text-transform: uppercase !important;
+        font-size: 12px !important;
+        padding-left: 16px !important;
+      }
+      :global(.results) {
+        border-left: none !important;
+        border-bottom: none !important;
+      }
+      :global(.result) {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+      }
+      :global(.title) {
+        font-weight: normal !important;
+      }
+      :global(.description) {
+        font-size: 10px !important;
+      }
+    }
+  }
 }

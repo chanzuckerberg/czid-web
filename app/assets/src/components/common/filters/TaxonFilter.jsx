@@ -4,18 +4,18 @@ import { AsyncMultipleDropdown } from "~ui/controls/dropdowns";
 import { getSearchSuggestions } from "~/api";
 import cs from "./filters.scss";
 
-class LocationFilter extends React.Component {
+class TaxonFilter extends React.Component {
   handleFilterChange = async query => {
     const searchResults = await getSearchSuggestions({
       query: query,
-      categories: ["location"]
+      categories: ["taxon"]
     });
-    const options = (((searchResults || {}).Location || {}).results || []).map(
-      result => ({
-        value: result.id,
+    const options = (((searchResults || {}).Taxon || {}).results || [])
+      .filter(result => result.taxid > 0)
+      .map(result => ({
+        value: result.taxid,
         text: result.title
-      })
-    );
+      }));
     return options;
   };
 
@@ -25,8 +25,8 @@ class LocationFilter extends React.Component {
     return (
       <AsyncMultipleDropdown
         arrowInsideTrigger={false}
-        trigger={<div className={cs.filterLabel}>Location</div>}
-        menuLabel="Select Location"
+        trigger={<div className={cs.filterLabel}>Taxon</div>}
+        menuLabel="Select Taxon"
         selectedOptions={selectedOptions}
         onFilterChange={this.handleFilterChange}
         onChange={onChange}
@@ -35,10 +35,9 @@ class LocationFilter extends React.Component {
   }
 }
 
-LocationFilter.propTypes = {
+TaxonFilter.propTypes = {
   selectedOptions: PropTypes.array,
-  onChange: PropTypes.func,
-  counters: PropTypes.object
+  onChange: PropTypes.func
 };
 
-export default LocationFilter;
+export default TaxonFilter;

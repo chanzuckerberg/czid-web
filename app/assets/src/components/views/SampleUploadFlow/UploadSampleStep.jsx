@@ -37,7 +37,7 @@ class UploadSampleStep extends React.Component {
 
   async componentDidMount() {
     const projects = await getProjects({
-      onlyUpdatable: true
+      domain: "updatable"
     });
 
     this.setState({

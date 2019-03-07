@@ -7,6 +7,7 @@ import DecipherIcon from "./DecipherIcon";
 import DetectIcon from "./DetectIcon";
 import DiscoverIcon from "./DiscoverIcon";
 import ERCCIcon from "./ERCCIcon";
+import FiltersIcon from "./FiltersIcon";
 import GlobeIcon from "./GlobeIcon";
 import HumanIcon from "./HumanIcon";
 import InsightIcon from "./InsightIcon";
@@ -32,6 +33,7 @@ export default {
     DetectIcon,
     DiscoverIcon,
     ERCCIcon,
+    FiltersIcon,
     GlobeIcon,
     HumanIcon,
     LockIcon,

@@ -261,34 +261,43 @@ const getSampleTaxons = (params, cancelToken) =>
 // TODO: add remaining parameters: filter, search, page and sortBy
 const getSamples = ({
   projectId,
-  onlyLibrary,
-  excludeLibrary,
+  domain,
   limit,
-  offset
-} = {}) =>
-  get("/samples/index_v2.json", {
+  offset,
+  filters,
+  includeIds
+} = {}) => {
+  return get("/samples/index_v2.json", {
     params: {
       projectId,
-      onlyLibrary,
-      excludeLibrary,
+      domain,
       limit,
-      offset
+      offset,
+      includeIds,
+      ...filters
     }
   });
+};
 
-const getSampleDetails = ({ sampleIds }) =>
-  get("/samples/details.json", {
+// const getSampleDetails = ({ sampleIds }) =>
+//   get("/samples/details.json", {
+//     params: {
+//       sampleIds
+//     }
+//   });
+
+const getSampleDimensions = ({ domain }) =>
+  get("/samples/dimensions.json", {
     params: {
-      sampleIds
+      domain
     }
   });
 
-const getProjects = ({ onlyLibrary, excludeLibrary, onlyUpdatable } = {}) =>
+const getProjects = ({ domain, filters } = {}) =>
   get("/projects.json", {
     params: {
-      onlyLibrary,
-      excludeLibrary,
-      onlyUpdatable
+      domain,
+      ...filters
     }
   });
 
@@ -308,6 +317,14 @@ const validateSampleNames = (projectId, sampleNames) =>
     sample_names: sampleNames
   });
 
+const getSearchSuggestions = ({ categories, query }) =>
+  get("/search_suggestions", {
+    params: {
+      categories,
+      query
+    }
+  });
+
 export {
   deleteAsync,
   get,
@@ -316,7 +333,8 @@ export {
   getSampleReportInfo,
   createProject,
   getSamples,
-  getSampleDetails,
+  // getSampleDetails,
+  getSampleDimensions,
   getProjects,
   saveSampleMetadata,
   getMetadataTypesByHostGenomeName,
@@ -342,5 +360,6 @@ export {
   getSampleTaxons,
   logAnalyticsEvent,
   validateSampleNames,
-  shortenUrl
+  shortenUrl,
+  getSearchSuggestions
 };

@@ -196,8 +196,42 @@ module SamplesHelper
     end
   end
 
+  def filter_by_time(samples, start_date, end_date)
+    samples.where("samples.created_at >= ? AND samples_created_at <= ?", start_date, end_date)
+  end
+
+  def filter_by_visibility(samples, visibility)
+    if visibility
+      public = visibility.include?("public")
+      private = visibility.include?("private")
+
+      if public ^ private
+        if public
+          return samples.public_samples
+        else
+          return samples.private_samples
+        end
+      end
+    end
+
+    samples
+  end
+
+  def filter_by_string_metadatum(samples, key, query)
+    # TODO(tiago): make this method generic to any data type and replace 'filter_by_metadatum'
+    # Should it add include_not_set?
+    samples
+      .includes(:metadata => :metadata_field)
+      .where(
+        metadata: {
+          metadata_fields: {name: key},
+          string_validated_value: query
+        })
+  end
+
   def filter_by_metadatum(samples, key, query)
     return samples.where("false") if query == ["none"]
+
 
     # Use a set to speed up query.
     query_set = query.to_set
@@ -303,7 +337,7 @@ module SamplesHelper
   end
 
   def metadata_multiget(sample_ids)
-    metadata = Metadatum.where(sample_id: sample_ids)
+    metadata = Metadatum.includes(:metadata_field).where(sample_id: sample_ids)
 
     metadata_by_sample_id = {}
     metadata.each do |metadatum|
@@ -339,7 +373,7 @@ module SamplesHelper
     metadata_by_sample_id = metadata_multiget(sample_ids)
 
     # Massage data into the right format
-    samples.each_with_index do |sample|
+    samples.includes(:pipeline_runs, :host_genome, :project, :input_files).each_with_index do |sample|
       job_info = {}
       job_info[:db_sample] = sample
       job_info[:metadata] = metadata_by_sample_id[sample.id]
@@ -441,5 +475,19 @@ module SamplesHelper
       "errors" => errors,
       "samples" => samples
     }
+  end
+
+  def samples_by_domain(domain)
+    samples = case domain
+              when "library"
+                # samples for projects that user owns
+                current_power.library_samples
+              when "public"
+                # samples for public projects
+                Sample.public_samples
+              else
+                # all samples user can see
+                current_power.samples
+              end
   end
 end
