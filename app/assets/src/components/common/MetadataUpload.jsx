@@ -30,9 +30,6 @@ class MetadataUpload extends React.Component {
       getProjectMetadataFields(this.props.project.id),
       getAllHostGenomes()
     ]);
-
-    console.log("fetched!");
-
     this.setState({
       projectMetadataFields: keyBy("key", projectMetadataFields),
       hostGenomes
