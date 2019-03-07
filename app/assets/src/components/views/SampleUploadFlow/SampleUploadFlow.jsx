@@ -3,11 +3,11 @@ import cx from "classnames";
 import { get, without, flow, omit, set, find } from "lodash/fp";
 import UploadSampleStep from "./UploadSampleStep";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import Divider from "~/components/layout/Divider";
 import PropTypes from "~/components/utils/propTypes";
 import UploadMetadataStep from "./UploadMetadataStep";
 import ReviewStep from "./ReviewStep";
 import cs from "./sample_upload_flow.scss";
+import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
 
 class SampleUploadFlow extends React.Component {
   state = {
@@ -76,40 +76,6 @@ class SampleUploadFlow extends React.Component {
     }));
   };
 
-  renderHeader = () => {
-    switch (this.state.currentStep) {
-      case "uploadSamples":
-        return (
-          <div className={cs.header}>
-            <div className={cs.title}>Upload Samples</div>
-            <div className={cs.subtitle}>
-              Rather use our command-line interface?
-              <a
-                href="/cli_user_instructions"
-                target="_blank"
-                className={cs.link}
-              >
-                Instructions here.
-              </a>
-            </div>
-            <div className={cs.subtitle}>
-              Need help?
-              <a className={cs.link} href="mailto:help@idseq.com">
-                Message us.
-              </a>
-            </div>
-            <div className={cs.border} />
-          </div>
-        );
-      case "uploadMetadata":
-        return <div />;
-      case "review":
-        return <div />;
-      default:
-        return <div />;
-    }
-  };
-
   renderStep = () => {
     switch (this.state.currentStep) {
       case "uploadSamples":
@@ -140,7 +106,7 @@ class SampleUploadFlow extends React.Component {
   render() {
     return (
       <div>
-        {this.renderHeader()}
+        <SampleUploadFlowHeader currentStep={this.state.currentStep} />
         <NarrowContainer
           className={cx(
             cs.sampleUploadFlow,

@@ -89,7 +89,6 @@ class ReviewStep extends React.Component {
   render() {
     return (
       <div className={cs.reviewStep}>
-        <div className={cs.title}>Review</div>
         <DataTable
           className={cs.metadataTable}
           columns={this.props.metadata.headers}

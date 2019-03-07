@@ -76,9 +76,6 @@ class UploadMetadataStep extends React.Component {
           <Instructions onClose={() => this.setShowInstructions(false)} />
         </div>
         <div className={cx(this.state.showInstructions && cs.hide)}>
-          <div>
-            <div className={cs.title}>Upload Metadata</div>
-          </div>
           <MetadataUpload
             onShowCSVInstructions={() => this.setShowInstructions(true)}
             samples={this.props.samples}
@@ -86,6 +83,9 @@ class UploadMetadataStep extends React.Component {
             onMetadataChange={this.handleMetadataChange}
             samplesAreNew
             issues={this.state.wasManual ? this.state.issues : null}
+            handleRequiredMetadataFields={
+              this.props.handleRequiredMetadataFields
+            }
           />
           <div className={cs.mainControls}>
             <PrimaryButton
@@ -116,7 +116,8 @@ UploadMetadataStep.propTypes = {
   project: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string
-  })
+  }),
+  handleRequiredMetadataFields: PropTypes.func
 };
 
 export default UploadMetadataStep;

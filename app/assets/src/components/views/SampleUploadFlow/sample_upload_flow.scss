@@ -25,13 +25,12 @@
 }
 
 .header {
-  margin-left: 200px;
-  margin-top: 20px;
-  margin-bottom: 40px;
+  margin: 20px auto 40px;
+  width: 85%;
 
   .title {
     @include font-header-xxl;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
   }
 
   .subtitle {
