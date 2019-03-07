@@ -40,12 +40,8 @@ class MetadataManualInput extends React.Component {
     }
   };
 
-  componentDidUpdate() {
-    const { projectMetadataFields, hostGenomes } = this.props;
-    // Only update if fields not set already
-    if (this.state.projectMetadataFields && this.state.hostGenomes.length > 0) {
-      return;
-    }
+  componentDidMount() {
+    const { projectMetadataFields, hostGenomes, samplesAreNew } = this.props;
 
     this.setState({
       projectMetadataFields: projectMetadataFields,
@@ -57,7 +53,7 @@ class MetadataManualInput extends React.Component {
       hostGenomes,
       headers: {
         "Sample Name": "Sample Name",
-        ...(this.props.samplesAreNew
+        ...(samplesAreNew
           ? {
               "Host Genome": (
                 <div>
@@ -68,7 +64,7 @@ class MetadataManualInput extends React.Component {
           : {}),
         ...mapValues(
           field =>
-            this.props.samplesAreNew && field.is_required ? (
+            samplesAreNew && field.is_required ? (
               <div>
                 {field.name}
                 <span className={cs.requiredStar}>*</span>
@@ -169,16 +165,14 @@ class MetadataManualInput extends React.Component {
   getHostGenomeOptions = () =>
     sortBy(
       "text",
-      this.state.hostGenomes.map(hostGenome => ({
+      this.props.hostGenomes.map(hostGenome => ({
         text: hostGenome.name,
         value: hostGenome.id
       }))
     );
 
   renderColumnSelector = () => {
-    const { projectMetadataFields, selectedFieldNames } = this.state;
-
-    const options = values(projectMetadataFields).map(field => ({
+    const options = values(this.props.projectMetadataFields).map(field => ({
       value: field.key,
       text: field.name
     }));
@@ -195,7 +189,7 @@ class MetadataManualInput extends React.Component {
         onChange={this.handleColumnChange}
         options={options}
         trigger={<PlusIcon className={cs.plusIcon} />}
-        value={selectedFieldNames}
+        value={this.state.selectedFieldNames}
         className={cs.columnPicker}
       />
     );
@@ -206,7 +200,7 @@ class MetadataManualInput extends React.Component {
     this.updateMetadataField(
       "Host Genome",
       // Convert the id to a name.
-      find(["id", hostGenomeId], this.state.hostGenomes).name,
+      find(["id", hostGenomeId], this.props.hostGenomes).name,
       sample
     );
   };
@@ -256,7 +250,7 @@ class MetadataManualInput extends React.Component {
                 "id",
                 find(
                   ["name", this.getMetadataValue(sample, "Host Genome")],
-                  this.state.hostGenomes
+                  this.props.hostGenomes
                 )
               )
             : sample.host_genome_id;
@@ -281,10 +275,11 @@ class MetadataManualInput extends React.Component {
           if (
             includes(
               sampleHostGenomeId,
-              this.state.projectMetadataFields[column].host_genome_ids
+              this.props.projectMetadataFields[column].host_genome_ids
             )
           ) {
             return (
+<<<<<<< HEAD
               <div>
                 <MetadataInput
                   key={column}
@@ -298,6 +293,18 @@ class MetadataManualInput extends React.Component {
                 />
                 {this.renderApplyToAll(sample, column)}
               </div>
+=======
+              <MetadataInput
+                key={column}
+                className={cs.input}
+                value={this.getMetadataValue(sample, column)}
+                metadataType={this.props.projectMetadataFields[column]}
+                onChange={(key, value) =>
+                  this.updateMetadataField(key, value, sample)
+                }
+                withinModal={this.props.withinModal}
+              />
+>>>>>>> Fix bug
             );
           }
           return (
@@ -311,10 +318,6 @@ class MetadataManualInput extends React.Component {
   };
 
   render() {
-    if (!this.props.samples || !this.state.projectMetadataFields) {
-      return <div className={cs.loadingMsg}>Loading...</div>;
-    }
-
     return (
       <div className={cx(cs.metadataManualInput, this.props.className)}>
         {this.props.samplesAreNew && (

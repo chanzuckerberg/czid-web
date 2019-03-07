@@ -31,6 +31,8 @@ class MetadataUpload extends React.Component {
       getAllHostGenomes()
     ]);
 
+    console.log("fetched!");
+
     this.setState({
       projectMetadataFields: keyBy("key", projectMetadataFields),
       hostGenomes
@@ -63,17 +65,21 @@ class MetadataUpload extends React.Component {
 
   renderTab = () => {
     if (this.state.currentTab === "Manual Input") {
-      return (
-        <MetadataManualInput
-          project={this.props.project}
-          samples={this.props.samples}
-          samplesAreNew={this.props.samplesAreNew}
-          onMetadataChange={this.onMetadataChangeManual}
-          withinModal={this.props.withinModal}
-          projectMetadataFields={this.state.projectMetadataFields}
-          hostGenomes={this.state.hostGenomes}
-        />
-      );
+      if (!this.props.samples || !this.state.projectMetadataFields) {
+        return <div className={cs.loadingMsg}>Loading...</div>;
+      } else {
+        return (
+          <MetadataManualInput
+            project={this.props.project}
+            samples={this.props.samples}
+            samplesAreNew={this.props.samplesAreNew}
+            onMetadataChange={this.onMetadataChangeManual}
+            withinModal={this.props.withinModal}
+            projectMetadataFields={this.state.projectMetadataFields}
+            hostGenomes={this.state.hostGenomes}
+          />
+        );
+      }
     }
 
     if (this.state.currentTab === "CSV Upload") {
