@@ -29,6 +29,25 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
 
+  # Test that using the display name for metadata fields also works.
+  test 'metadata validate with display name' do
+    post user_session_path, params: @user_params
+
+    post validate_metadata_csv_project_url(@metadata_validation_project), params: {
+      metadata: {
+        headers: ['sample_name', 'Sample Type'],
+        rows: [
+          ['metadata_validation_sample_human', 'Whole Blood'],
+          ['metadata_validation_sample_mosquito', 'Whole Blood']
+        ]
+      }
+    }, as: :json
+
+    assert_response :success
+    assert_equal 0, @response.parsed_body['issues']['errors'].length
+    assert_equal 0, @response.parsed_body['issues']['warnings'].length
+  end
+
   test 'metadata validate sample name exists' do
     post user_session_path, params: @user_params
 
@@ -130,9 +149,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
 
     post validate_metadata_csv_project_url(@metadata_validation_project), params: {
       metadata: {
-        headers: ['sample_name', 'sex'],
+        headers: ['sample_name', 'sex', 'Nucleotide Type'],
         rows: [
-          ['metadata_validation_sample_human', 'Female']
+          ['metadata_validation_sample_human_existing_metadata', 'Female', "DNA"]
         ]
       }
     }, as: :json
@@ -142,9 +161,10 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_equal 0, @response.parsed_body['issues']['errors'].length
 
     # Warning should throw if user is overwriting existing metadata with different value.
-    assert_equal 1, @response.parsed_body['issues']['warnings'].length
+    assert_equal 2, @response.parsed_body['issues']['warnings'].length
 
     assert_match "#{MetadataValidationWarnings.value_already_exists('Female', 'Male', 'sex')} (row 1)", @response.parsed_body['issues']['warnings'][0]
+    assert_match "#{MetadataValidationWarnings.value_already_exists('DNA', 'RNA', 'Nucleotide Type')} (row 1)", @response.parsed_body['issues']['warnings'][1]
   end
 
   test 'metadata validate core and custom fields' do

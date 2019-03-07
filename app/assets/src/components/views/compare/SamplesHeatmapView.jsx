@@ -220,6 +220,7 @@ class SamplesHeatmapView extends React.Component {
     }
 
     newState.loading = false;
+    // TODO (gdingle): change to pushState to preserve back button behavior?
     window.history.replaceState("", "", this.getUrlForCurrentParams());
     this.setState(newState);
   }
@@ -739,7 +740,7 @@ class SamplesHeatmapView extends React.Component {
                     className={cs.controlElement}
                   />
                 }
-                content="A shareable URL has been copied to your clipboard!"
+                content="A shareable URL will be copied to your clipboard!"
                 on="click"
                 hideOnScroll
               />

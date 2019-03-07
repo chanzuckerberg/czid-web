@@ -33,7 +33,8 @@ class PhyloTreeVis extends React.Component {
       selectedSampleId: null,
       sidebarVisible: false,
       metadataFields: [],
-      selectedMetadataType: EXTRA_DROPDOWN_OPTIONS[0].value
+      selectedMetadataType:
+        props.defaultMetadata || EXTRA_DROPDOWN_OPTIONS[0].value
     };
 
     (this.newick = props.newick),
@@ -64,6 +65,7 @@ class PhyloTreeVis extends React.Component {
     this.treeVis.update();
 
     this.fetchMetadataTypes();
+    this.handleMetadataTypeChange(this.state.selectedMetadataType, "");
   }
 
   componentDidUpdate(prevProps) {
@@ -133,6 +135,7 @@ class PhyloTreeVis extends React.Component {
       colorGroupLegendTitle: name,
       colorGroupAbsentName: getAbsentName(selectedMetadataType)
     });
+    this.props.afterSelectedMetadataChange(selectedMetadataType);
   };
 
   getFieldValue(field) {
@@ -235,7 +238,8 @@ PhyloTreeVis.propTypes = {
   nodeData: PropTypes.object,
   onMetadataUpdate: PropTypes.func,
   phyloTreeId: PropTypes.number,
-  onSampleNodeClick: PropTypes.func
+  onSampleNodeClick: PropTypes.func,
+  defaultMetadata: PropTypes.string
 };
 
 export default PhyloTreeVis;

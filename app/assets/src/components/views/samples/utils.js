@@ -1,5 +1,5 @@
 import { get, isFinite } from "lodash/fp";
-import numberWithCommas from "~/helpers/strings";
+import { numberWithCommas } from "~/helpers/strings";
 
 const roundToTwo = number => {
   if (!isFinite(number)) return number;

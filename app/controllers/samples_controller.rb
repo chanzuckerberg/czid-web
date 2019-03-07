@@ -18,7 +18,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update, :bulk_upload_with_metadata]
 
   # Read action meant for single samples with set_sample before_action
-  READ_ACTIONS = [:show, :report_info, :search_list, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
+  READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
@@ -61,6 +61,8 @@ class SamplesController < ApplicationController
     host_query = params[:host].split(',') if params[:host].present?
     samples_query = params[:ids].split(',') if params[:ids].present?
     sort = params[:sort_by]
+    # Return only some basic props for samples.
+    basic_only = ActiveModel::Type::Boolean.new.cast(params[:basic_only])
 
     results = current_power.samples
 
@@ -94,12 +96,14 @@ class SamplesController < ApplicationController
 
     @samples = sort_by(results, sort).paginate(page: page, per_page: params[:per_page] || PAGE_SIZE).includes([:user, :host_genome, :pipeline_runs, :input_files])
     @samples_count = results.size
-    @samples_formatted = format_samples(@samples)
+    @samples_formatted = basic_only ? format_samples_basic(@samples) : format_samples(@samples)
 
     @ready_sample_ids = get_ready_sample_ids(results)
 
+    if basic_only
+      render json: @samples_formatted
     # Send more information with the first page.
-    if !page || page == '1'
+    elsif !page || page == '1'
       render json: {
         # Samples in this page.
         samples: @samples_formatted,
@@ -122,7 +126,6 @@ class SamplesController < ApplicationController
   def index_v2
     domain = params[:domain]
     include_ids = ActiveModel::Type::Boolean.new.cast(params[:includeIds])
-
 
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
     offset = params[:offset].to_i
@@ -163,66 +166,68 @@ class SamplesController < ApplicationController
 
     samples = samples_by_domain(domain)
     # Filter by access control
-    if param_sample_ids.length > 0
+    unless param_sample_ids.empty?
       samples = samples.where(id: param_sample_ids)
     end
     sample_ids = samples.pluck(:id)
 
     # locations
     locations = Metadatum
-      .joins(:metadata_field)
-      .where(
-        metadata_fields: {name: "collection_location"},
-        sample_id: sample_ids)
-      .group(:string_validated_value)
-      .count
+                .joins(:metadata_field)
+                .where(
+                  metadata_fields: { name: "collection_location" },
+                  sample_id: sample_ids
+                )
+                .group(:string_validated_value)
+                .count
 
     # for metadata fields we need to send both value and text
     locations = locations.map do |location, count|
-      {value: location, text: location, count: count}
+      { value: location, text: location, count: count }
     end
 
     tissues = Metadatum
-      .joins(:metadata_field)
-      .where(
-        metadata_fields: {name: "sample_type"},
-        sample_id: sample_ids)
-      .group(:string_validated_value)
-      .count
+              .joins(:metadata_field)
+              .where(
+                metadata_fields: { name: "sample_type" },
+                sample_id: sample_ids
+              )
+              .group(:string_validated_value)
+              .count
 
     tissues = tissues.map do |tissue, count|
-      {value: tissue, text: tissue, count: count}
+      { value: tissue, text: tissue, count: count }
     end
 
     # visibility
     public_count = samples.public_samples.count
     private_count = samples.count - public_count
     visibility = [
-      {value: "public", text: "Public", count: public_count},
-      {value: "private", text: "Private", count: private_count}
+      { value: "public", text: "Public", count: public_count },
+      { value: "private", text: "Private", count: private_count }
     ]
 
     times = [
-      {value: "1_week", text: "Last Week", count: samples.where("samples.created_at >= ?", 1.week.ago.utc).count},
-      {value: "1_month", text: "Last Month", count: samples.where("samples.created_at >= ?", 1.month.ago.utc).count},
-      {value: "3_month", text: "Last 3 Months", count: samples.where("samples.created_at >= ?", 3.month.ago.utc).count},
-      {value: "6_month", text: "Last 6 Months", count: samples.where("samples.created_at >= ?", 6.month.ago.utc).count},
-      {value: "1_year", text: "Last Year", count: samples.where("samples.created_at >= ?", 1.year.ago.utc).count},
+      { value: "1_week", text: "Last Week", count: samples.where("samples.created_at >= ?", 1.week.ago.utc).count },
+      { value: "1_month", text: "Last Month", count: samples.where("samples.created_at >= ?", 1.month.ago.utc).count },
+      { value: "3_month", text: "Last 3 Months", count: samples.where("samples.created_at >= ?", 3.months.ago.utc).count },
+      { value: "6_month", text: "Last 6 Months", count: samples.where("samples.created_at >= ?", 6.months.ago.utc).count },
+      { value: "1_year", text: "Last Year", count: samples.where("samples.created_at >= ?", 1.year.ago.utc).count }
     ]
 
     hosts = samples.joins(:host_genome).group(:host_genome).count
     hosts = hosts.map do |host, count|
-      {value: host.id, text: host.name, count: count}
+      { value: host.id, text: host.name, count: count }
     end
 
     respond_to do |format|
       format.json do
         render json: [
-          { dimension: "location", values: locations},
-          { dimension: "visibility", values: visibility},
-          { dimension: "time", values: times},
-          { dimension: "host", values: hosts},
-          { dimension: "tissue", values: tissues}
+          { dimension: "location", values: locations },
+          { dimension: "visibility", values: visibility },
+          { dimension: "time", values: times },
+          { dimension: "host", values: hosts },
+          { dimension: "tissue", values: tissues }
         ]
       end
     end
@@ -245,12 +250,14 @@ class SamplesController < ApplicationController
     # Not permission-dependent
     results = {}
     if !categories || categories.include?("taxon")
-      taxon_list = taxon_search(query)
+      taxon_list = taxon_search(query, ["species", "genus"])
       unless taxon_list.empty?
-        results["Taxon"] = { "name" => "Taxon",
-                            "results" => taxon_list.map do |entry|
-                              entry.merge("category" => "Taxon")
-                            end }
+        results["Taxon"] = {
+          "name" => "Taxon",
+          "results" => taxon_list.map do |entry|
+            entry.merge("category" => "Taxon")
+          end
+        }
       end
     end
     if !categories || categories.include?("host")
@@ -267,70 +274,71 @@ class SamplesController < ApplicationController
 
     # Need users
     if !categories || ["project", "sample", "location", "tissue", "uploader"].any? { |i| categories.include? i }
-
       # Admin-only for now: needs permissions scoping
       users = current_user.admin ? prefix_match(User, "name", query, {}) : []
+    end
 
-      if !categories || categories.include?("project")
-        projects = prefix_match(Project, "name", query, id: current_power.projects.pluck(:id))
-        unless projects.empty?
-          results["Project"] = {
-            "name" => "Project",
-            "results" => projects.index_by(&:name).map do |_, p|
-              { "category" => "Project", "title" => p.name, "id" => p.id }
-            end
-          }
-        end
-      end
-      if !categories || categories.include?("uploader")
-        unless users.empty?
-          results["Uploader"] = {
-            "name" => "Uploader",
-            "results" => users.group_by(&:name).map do |val, records|
-              { "category" => "Uploader", "title" => val, "id" => records.pluck(:id) }
-            end
-          }
-        end
-      end
-
-      # Permission-dependent
-      if !categories || ["sample", "location", "tissue"].any? { |i| categories.include? i }
-        viewable_sample_ids = current_power.samples.pluck(:id)
-        if !categories || categories.include?("sample")
-          samples = prefix_match(Sample, "name", query, id: viewable_sample_ids)
-          unless samples.empty?
-            results["Sample"] = {
-              "name" => "Sample",
-              "results" => samples.group_by(&:name).map do |val, records|
-                { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id), "project_id" => records.count == 1 ? records.first.project_id : nil }
-              end
-            }
+    if !categories || categories.include?("project")
+      projects = prefix_match(Project, "name", query, id: current_power.projects.pluck(:id))
+      unless projects.empty?
+        results["Project"] = {
+          "name" => "Project",
+          "results" => projects.index_by(&:name).map do |_, p|
+            { "category" => "Project", "title" => p.name, "id" => p.id }
           end
-        end
-        if !categories || categories.include?("location")
-          locations = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "collection_location")
-          unless locations.empty?
-            results["Location"] = {
-              "name" => "Location",
-              "results" => locations.pluck(:string_validated_value).uniq.map do |val|
-                            { "category" => "Location", "title" => val, "id" => val }
-                          end
-            }
-          end
-        end
-        if !categories || categories.include?("tissue")
-          tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "sample_type")
-          unless tissues.empty?
-            results["Tissue"] = {
-              "name" => "Tissue",
-              "results" => tissues.pluck(:string_validated_value).uniq.map do |val|
-                { "category" => "Tissue", "title" => val, "id" => val }
-              end
-            }
-          end
-        end
+        }
       end
     end
+    if !categories || categories.include?("uploader")
+      unless users.empty?
+        results["Uploader"] = {
+          "name" => "Uploader",
+          "results" => users.group_by(&:name).map do |val, records|
+            { "category" => "Uploader", "title" => val, "id" => records.pluck(:id) }
+          end
+        }
+      end
+    end
+
+    # Permission-dependent
+    if !categories || ["sample", "location", "tissue"].any? { |i| categories.include? i }
+      viewable_sample_ids = current_power.samples.pluck(:id)
+    end
+
+    if !categories || categories.include?("sample")
+      samples = prefix_match(Sample, "name", query, id: viewable_sample_ids)
+      unless samples.empty?
+        results["Sample"] = {
+          "name" => "Sample",
+          "results" => samples.group_by(&:name).map do |val, records|
+            { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id), "project_id" => records.count == 1 ? records.first.project_id : nil }
+          end
+        }
+      end
+    end
+    if !categories || categories.include?("location")
+      locations = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "collection_location")
+      unless locations.empty?
+        results["Location"] = {
+          "name" => "Location",
+          "results" => locations.pluck(:string_validated_value).uniq.map do |val|
+                         { "category" => "Location", "title" => val, "id" => val }
+                       end
+        }
+      end
+    end
+    if !categories || categories.include?("tissue")
+      tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "sample_type")
+      unless tissues.empty?
+        results["Tissue"] = {
+          "name" => "Tissue",
+          "results" => tissues.pluck(:string_validated_value).uniq.map do |val|
+            { "category" => "Tissue", "title" => val, "id" => val }
+          end
+        }
+      end
+    end
+
     render json: JSON.dump(results)
   end
 
@@ -648,18 +656,6 @@ class SamplesController < ApplicationController
     @report_info[:contig_taxid_list] = @pipeline_run.get_taxid_list_with_contigs
 
     render json: JSON.dump(@report_info)
-  end
-
-  def search_list
-    expires_in 30.days
-
-    @pipeline_run = select_pipeline_run(@sample, params)
-    if @pipeline_run
-      @search_list = fetch_lineage_info(@pipeline_run.id)
-      render json: JSON.dump(@search_list)
-    else
-      render json: { lineage_map: {}, search_list: [] }
-    end
   end
 
   def save_metadata

@@ -1,4 +1,6 @@
 import React from "react";
+import cx from "classnames";
+import cs from "./search_box.scss";
 import { Search } from "semantic-ui-react";
 import { escapeRegExp, debounce } from "lodash";
 import PropTypes from "prop-types";
@@ -68,9 +70,16 @@ class SearchBox extends React.Component {
         const isMatch = result => re.test(result.title);
         searchResults = this.props.clientSearchSource.filter(isMatch);
       } else if (this.props.serverSearchAction) {
-        searchResults = await get(
-          `/${this.props.serverSearchAction}?query=${this.state.value}`
-        );
+        let url = `/${this.props.serverSearchAction}?query=${this.state.value}`;
+        if (this.props.serverSearchActionArgs) {
+          url += `&args=${this.props.serverSearchActionArgs}`;
+        }
+        searchResults = await get(url);
+        if (this.props.levelLabel) {
+          for (let i = 0; i < searchResults.length; i++) {
+            searchResults[i].title += " (" + searchResults[i].level + ")";
+          }
+        }
       }
 
       this.setState({
@@ -84,7 +93,11 @@ class SearchBox extends React.Component {
     const { isLoading, value, results } = this.state;
     return (
       <Search
-        className="idseq-ui input search"
+        className={cx(
+          "idseq-ui input search",
+          cs.searchBox,
+          this.props.rounded && cs.rounded
+        )}
         loading={isLoading}
         category={this.props.category}
         onSearchChange={debounce(
@@ -114,8 +127,10 @@ SearchBox.propTypes = {
   // If serverSearchAction is provided, query matching will happen on the server side (use for large data).
   clientSearchSource: PropTypes.array,
   serverSearchAction: PropTypes.string,
+  serverSearchActionArgs: PropTypes.string,
   rounded: PropTypes.bool,
   category: PropTypes.bool,
+  levelLabel: PropTypes.bool,
   initialValue: PropTypes.string,
   onResultSelect: PropTypes.func,
   placeholder: PropTypes.string

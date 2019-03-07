@@ -4,7 +4,7 @@ import { keyBy } from "lodash/fp";
 import PropTypes from "prop-types";
 import Wizard from "~ui/containers/Wizard";
 import Modal from "~ui/containers/Modal";
-import { uploadMetadataForProject } from "~/api";
+import { uploadMetadataForProject, getSamplesV1 } from "~/api";
 import ReviewPage from "./ReviewPage";
 import UploadPage from "./UploadPage";
 import cs from "./metadata_upload_modal.scss";
@@ -13,8 +13,19 @@ class MetadataUploadModal extends React.Component {
   state = {
     metadata: null,
     issues: null,
-    hasIssues: false
+    projectSamples: null
   };
+
+  async componentDidMount() {
+    const projectSamples = await getSamplesV1({
+      project_id: this.props.project.id,
+      basic_only: true
+    });
+
+    this.setState({
+      projectSamples
+    });
+  }
 
   handleMetadataChange = ({ metadata, issues }) => {
     this.setState({
@@ -51,6 +62,7 @@ class MetadataUploadModal extends React.Component {
         key="1"
         onMetadataChange={this.handleMetadataChange}
         project={this.props.project}
+        samples={this.state.projectSamples}
       />
     );
 
@@ -66,6 +78,7 @@ class MetadataUploadModal extends React.Component {
       <Modal
         open
         tall
+        wide
         onClose={this.props.onClose}
         className={cs.metadataUploadModal}
       >

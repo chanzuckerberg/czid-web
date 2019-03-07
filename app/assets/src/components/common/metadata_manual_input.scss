@@ -1,0 +1,51 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.metadataManualInput {
+  .columnPicker {
+    /* Override semantic ui */
+    position: absolute !important;
+    left: calc(100% + 4px);
+    top: 13px;
+
+    .plusIcon {
+      width: 14px;
+      fill: $medium-grey;
+    }
+  }
+
+  .tableContainer {
+    position: relative;
+  }
+
+  .tableScrollWrapper {
+    overflow: auto;
+    max-height: 450px;
+  }
+
+  .requiredMessage {
+    @include font-header-xs;
+    color: $medium-grey;
+  }
+
+  .inputTable {
+    margin-bottom: 20px;
+
+    .sampleName {
+      font-weight: $font-weight-semibold;
+    }
+
+    .requiredStar {
+      color: $medium-grey;
+    }
+
+    .input {
+      margin: 5px 30px 5px 0;
+      width: 130px;
+    }
+
+    .noInput {
+      color: $medium-grey;
+    }
+  }
+}

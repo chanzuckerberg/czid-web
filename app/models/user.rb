@@ -14,6 +14,7 @@ class User < ApplicationRecord
   has_many :samples
   has_many :favorite_projects
   has_many :favorites, through: :favorite_projects, source: :project
+  has_many :visualizations
   validates :email, presence: true
   validates :name, presence: true, format: { with: /\A[a-zA-Z -]+\z/, message: "only allows letters" }
   attr_accessor :email_arguments
@@ -39,7 +40,7 @@ class User < ApplicationRecord
   end
 
   def add_allowed_feature(feature)
-    parsed_allowed_features = JSON.parse(allowed_features)
+    parsed_allowed_features = allowed_feature_list
 
     unless parsed_allowed_features.include?(feature)
       update(allowed_features: parsed_allowed_features + [feature])
@@ -47,7 +48,7 @@ class User < ApplicationRecord
   end
 
   def remove_allowed_feature(feature)
-    parsed_allowed_features = JSON.parse(allowed_features)
+    parsed_allowed_features = allowed_feature_list
 
     if parsed_allowed_features.include?(feature)
       update(allowed_features: parsed_allowed_features - [feature])

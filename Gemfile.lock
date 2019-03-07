@@ -822,8 +822,8 @@ GEM
     hashie (3.6.0)
     health_check (3.0.0)
       railties (>= 5.0)
-    honeycomb-rails (0.4.1)
-      libhoney (>= 1.3.2)
+    honeycomb-rails (0.8.1)
+      libhoney (>= 1.9)
       rails (>= 3.0.0)
     http (3.3.0)
       addressable (~> 2.3)
@@ -1085,7 +1085,7 @@ DEPENDENCIES
   elasticsearch-model
   flamegraph
   health_check (>= 2.7.0)
-  honeycomb-rails (= 0.4.1)
+  honeycomb-rails (>= 0.8.1)
   jbuilder (~> 2.5)
   listen (>= 3.0.5, < 3.2)
   logging-rails

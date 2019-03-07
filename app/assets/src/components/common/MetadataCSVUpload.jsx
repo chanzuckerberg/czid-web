@@ -4,7 +4,6 @@ import React from "react";
 import cx from "classnames";
 import { map, pickBy, zipObject, isNull } from "lodash/fp";
 import CSVUpload from "~ui/controls/CSVUpload";
-import AlertIcon from "~ui/icons/AlertIcon";
 import {
   validateMetadataCSVForProject,
   validateMetadataCSVForNewSamples
@@ -29,11 +28,7 @@ class MetadataCSVUpload extends React.Component {
   // MetadataCSVUpload stores each row as arrays of strings,
   // but converts the row to objects before calling onMetadataChange.
   state = {
-    metadata: null,
-    issues: {
-      errors: [],
-      warnings: []
-    }
+    metadata: null
   };
 
   onCSV = async csv => {
@@ -48,21 +43,19 @@ class MetadataCSVUpload extends React.Component {
 
     let serverResponse;
 
-    // For uploading metadata to existing samples in a project.
-    if (this.props.project) {
-      serverResponse = await validateMetadataCSVForProject(
-        this.props.project.id,
-        csv
-      );
-      // For uploading metadata together with new samples.
-    } else {
+    // For uploading metadata together with new samples.
+    if (this.props.samplesAreNew) {
       serverResponse = await validateMetadataCSVForNewSamples(
         this.props.samples,
         csv
       );
+      // For uploading metadata to existing samples in a project.
+    } else {
+      serverResponse = await validateMetadataCSVForProject(
+        this.props.project.id,
+        csv
+      );
     }
-
-    this.setState({ issues: serverResponse.issues });
 
     this.props.onMetadataChange({
       metadata: processCSVMetadata(csv),
@@ -72,8 +65,6 @@ class MetadataCSVUpload extends React.Component {
 
   render() {
     const hasMetadata = !isNull(this.state.metadata);
-    const hasErrors = this.state.issues.errors.length > 0;
-    const hasWarnings = this.state.issues.warnings.length > 0;
     return (
       <div className={cx(cs.metadataCSVUpload, this.props.className)}>
         <CSVUpload
@@ -81,42 +72,6 @@ class MetadataCSVUpload extends React.Component {
           onCSV={this.onCSV}
           className={cx(cs.csvUpload, hasMetadata && cs.uploaded)}
         />
-        {(hasErrors || hasWarnings) && (
-          <div className={cs.issues}>
-            {hasErrors && (
-              <div className={cs.errors}>
-                <div className={cs.header}>
-                  <AlertIcon className={cs.icon} />
-                  Fix these errors and upload your CSV again.
-                </div>
-                <div>
-                  {this.state.issues.errors.map((error, index) => (
-                    <div key={index} className={cs.item}>
-                      <span className={cs.dot}>&bull;</span>
-                      <span>{error}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {hasWarnings && (
-              <div className={cs.warnings}>
-                <div className={cs.header}>
-                  <AlertIcon className={cs.icon} />
-                  Warnings
-                </div>
-                <div>
-                  {this.state.issues.warnings.map((warning, index) => (
-                    <div key={index} className={cs.item}>
-                      <span className={cs.dot}>&bull;</span>
-                      <span>{warning}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     );
   }
@@ -132,11 +87,13 @@ MetadataCSVUpload.propTypes = {
   samples: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string,
+      project_id: PropTypes.number,
       host_genome_id: PropTypes.number
     })
   ),
   className: PropTypes.string,
-  onMetadataChange: PropTypes.func.isRequired
+  onMetadataChange: PropTypes.func.isRequired,
+  samplesAreNew: PropTypes.bool
 };
 
 export default MetadataCSVUpload;

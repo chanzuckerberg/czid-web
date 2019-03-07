@@ -5,6 +5,7 @@ import {
   getProjectDimensions,
   getSampleDimensions
 } from "~/api";
+import { getVisualizations } from "../../../api";
 
 const DISCOVERY_DOMAIN_LIBRARY = "library";
 const DISCOVERY_DOMAIN_PUBLIC = "public";
@@ -13,16 +14,18 @@ const getDiscoveryData = async ({ domain, filters }) => {
   try {
     // Todo(tiago): maybe we should process them independently, otherwise
     // our response time will be the same as the worst case.
-    const [samples, projects] = await Promise.all([
+    const [samples, projects, visualizations] = await Promise.all([
       getDiscoverySamples({ domain, filters, includeIds: true }),
-      getProjects({ domain, filters })
+      getProjects({ domain, filters }),
+      getVisualizations({ domain, filters })
     ]);
 
     console.log("discovrey_api:getDiscoveryData", samples);
     return {
       samples: samples.samples,
       sampleIds: samples.all_samples_ids,
-      projects
+      projects,
+      visualizations
     };
   } catch (error) {
     // eslint-disable-next-line no-console

@@ -7,11 +7,14 @@ import {
   Table as VirtualizedTable
 } from "react-virtualized";
 import "react-virtualized/styles.css";
+import { find, map } from "lodash";
+import cx from "classnames";
+
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import PlusIcon from "~ui/icons/PlusIcon";
-import { find, map } from "lodash";
+import { humanize } from "~/helpers/strings";
+
 import cs from "./base_table.scss";
-import cx from "classnames";
 
 class BaseTable extends React.Component {
   // This class is a wrapper class to React Virtualized Table.
@@ -31,20 +34,11 @@ class BaseTable extends React.Component {
     };
   }
 
-  humanize(key) {
-    return key
-      .split("_")
-      .map(str => str.charAt(0).toUpperCase() + str.slice(1))
-      .join(" ");
-  }
-
   setDefaults = columns => {
     const { defaultColumnWidth } = this.props;
     return columns.map(column => {
       column.label =
-        column.label !== undefined
-          ? column.label
-          : this.humanize(column.dataKey);
+        column.label !== undefined ? column.label : humanize(column.dataKey);
       column.width = column.width || defaultColumnWidth;
       return column;
     });

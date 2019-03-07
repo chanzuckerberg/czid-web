@@ -20,7 +20,7 @@ class ProjectsController < ApplicationController
     :validate_sample_names
   ].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
-  OTHER_ACTIONS = [:create, :dimensions, :new, :index, :send_project_csv, :choose_project].freeze
+  OTHER_ACTIONS = [:choose_project, :create, :dimensions, :index, :metadata_fields, :new, :send_project_csv].freeze
 
   # Required for token auth for CLI actions
   skip_before_action :verify_authenticity_token, only: [:index, :create]
@@ -59,12 +59,12 @@ class ProjectsController < ApplicationController
         # Retrieve a json of projects associated with samples;
         # augment with number_of_samples, hosts, tissues.
         projects = if ["library", "public"].include?(domain)
-                      current_power.projects.where(id: samples.pluck(:project_id).uniq)
-                    elsif domain == "updatable"
-                      current_power.updatable_projects
-                    else
-                      current_power.projects
-                    end
+                     current_power.projects.where(id: samples.pluck(:project_id).uniq)
+                   elsif domain == "updatable"
+                     current_power.updatable_projects
+                   else
+                     current_power.projects
+                   end
 
         sample_count_by_project_id = Hash[samples.group_by(&:project_id).map { |k, v| [k, v.count] }]
         host_genome_names_by_project_id = {}
@@ -80,7 +80,7 @@ class ProjectsController < ApplicationController
             hosts: host_genome_names_by_project_id[project.id] || [],
             tissues: tissues_by_project_id[project.id] || []
           )
-          end
+        end
         render json: extended_projects
       end
     end
@@ -99,71 +99,75 @@ class ProjectsController < ApplicationController
 
     # locations
     locations = Metadatum
-      .joins(
-        :metadata_field,
-        :sample)
-      .where(
-        metadata_fields: {name: "collection_location"},
-        sample_id: sample_ids)
-      .group(:string_validated_value)
-      .distinct
-      .count(:project_id)
+                .joins(
+                  :metadata_field,
+                  :sample
+                )
+                .where(
+                  metadata_fields: { name: "collection_location" },
+                  sample_id: sample_ids
+                )
+                .group(:string_validated_value)
+                .distinct
+                .count(:project_id)
 
     # for metadata fields we need to send both value and text
     locations = locations.map do |location, count|
-      {value: location, text: location, count: count}
+      { value: location, text: location, count: count }
     end
 
     tissues = Metadatum
-      .joins(
-        :metadata_field,
-        :sample)
-      .where(
-        metadata_fields: {name: "sample_type"},
-        sample_id: sample_ids)
-      .group(:string_validated_value)
-      .distinct
-      .count(:project_id)
+              .joins(
+                :metadata_field,
+                :sample
+              )
+              .where(
+                metadata_fields: { name: "sample_type" },
+                sample_id: sample_ids
+              )
+              .group(:string_validated_value)
+              .distinct
+              .count(:project_id)
 
     tissues = tissues.map do |tissue, count|
-      {value: tissue, text: tissue, count: count}
+      { value: tissue, text: tissue, count: count }
     end
 
     # visibility
     # TODO(tiago): should this be public projects or projects with public samples?
-    public_count = samples.joins(:project).distinct(:project_id).where(projects: {public_access: 1}).pluck(:project_id).count
+    public_count = samples.joins(:project).distinct(:project_id).where(projects: { public_access: 1 }).pluck(:project_id).count
     private_count = samples.distinct(:project_id).pluck(:project_id).count - public_count
     visibility = [
-      {value: "public", text: "Public", count: public_count},
-      {value: "private", text: "Private", count: private_count}
+      { value: "public", text: "Public", count: public_count },
+      { value: "private", text: "Private", count: private_count }
     ]
 
     times = [
-      {value: "1_week", text: "Last Week",
-       count: projects.where("projects.created_at >= ?", 1.week.ago.utc).count},
-      {value: "1_month", text: "Last Month",
-       count: projects.where("projects.created_at >= ?", 1.month.ago.utc).count},
-      {value: "3_month", text: "Last 3 Months",
-       count: projects.where("projects.created_at >= ?", 3.month.ago.utc).count},
-      {value: "6_month", text: "Last 6 Months",
-       count: projects.where("projects.created_at >= ?", 6.month.ago.utc).count},
-      {value: "1_year", text: "Last Year",
-       count: projects.where("projects.created_at >= ?", 1.year.ago.utc).count},
+      { value: "1_week", text: "Last Week",
+        count: projects.where("projects.created_at >= ?", 1.week.ago.utc).count },
+      { value: "1_month", text: "Last Month",
+        count: projects.where("projects.created_at >= ?", 1.month.ago.utc).count },
+      { value: "3_month", text: "Last 3 Months",
+        count: projects.where("projects.created_at >= ?", 3.months.ago.utc).count },
+      { value: "6_month", text: "Last 6 Months",
+        count: projects.where("projects.created_at >= ?", 6.months.ago.utc).count },
+      { value: "1_year", text: "Last Year",
+        count: projects.where("projects.created_at >= ?", 1.year.ago.utc).count }
     ]
 
     hosts = samples.includes(:host_genome).group(:host_genome).distinct.count(:project_id)
     hosts = hosts.map do |host, count|
-      {value: host.id, text: host.name, count: count}
+      { value: host.id, text: host.name, count: count }
     end
 
     respond_to do |format|
       format.json do
         render json: [
-          { dimension: "location", values: locations},
-          { dimension: "visibility", values: visibility},
-          { dimension: "time", values: times},
-          { dimension: "host", values: hosts},
-          { dimension: "tissue", values: tissues}
+          { dimension: "location", values: locations },
+          { dimension: "visibility", values: visibility },
+          { dimension: "time", values: times },
+          { dimension: "host", values: hosts },
+          { dimension: "tissue", values: tissues }
         ]
       end
     end
@@ -404,6 +408,12 @@ class ProjectsController < ApplicationController
       status: "success",
       errors: errors
     }
+  end
+
+  def metadata_fields
+    project_ids = (params[:projectIds] || []).map(&:to_i)
+
+    render json: current_power.projects.where(id: project_ids).map(&:metadata_fields).flatten.map(&:field_info)
   end
 
   # TODO: Consider consolidating into a general sample validator

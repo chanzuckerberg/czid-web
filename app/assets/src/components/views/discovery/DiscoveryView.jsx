@@ -1,11 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import moment from "moment";
-import NarrowContainer from "~/components/layout/NarrowContainer";
-import { Divider } from "~/components/layout";
-import DiscoveryHeader from "../discovery/DiscoveryHeader";
-import ProjectsView from "../projects/ProjectsView";
-import SamplesView from "../samples/SamplesView";
 import {
   flow,
   keyBy,
@@ -16,6 +11,13 @@ import {
   sumBy,
   values
 } from "lodash/fp";
+import NarrowContainer from "~/components/layout/NarrowContainer";
+import { Divider } from "~/components/layout";
+import DiscoveryHeader from "../discovery/DiscoveryHeader";
+import ProjectsView from "../projects/ProjectsView";
+import SamplesView from "../samples/SamplesView";
+import VisualizationsView from "../visualizations/VisualizationsView";
+import DiscoverySidebar from "./DiscoverySidebar";
 import cs from "./discovery_view.scss";
 import DiscoveryFilters from "./DiscoveryFilters";
 import {
@@ -37,7 +39,8 @@ class DiscoveryView extends React.Component {
       samples: [],
       projects: [],
       filters: {},
-      filterCount: 0
+      filterCount: 0,
+      visualizations: []
     };
 
     this.data = null;
@@ -103,7 +106,8 @@ class DiscoveryView extends React.Component {
     const {
       projects = [],
       samples = [],
-      sampleIds = []
+      sampleIds = [],
+      visualizations = []
     } = await getDiscoveryData({
       domain,
       filters: this.preparedFilters()
@@ -112,7 +116,8 @@ class DiscoveryView extends React.Component {
     this.setState({
       projects,
       samples,
-      sampleIds
+      sampleIds,
+      visualizations
     });
     console.log("DiscoveryView:refreshData - projects", projects);
     console.log("DiscoveryView:refreshData - samples", samples);
@@ -131,7 +136,7 @@ class DiscoveryView extends React.Component {
     console.log("dimensions", projectDimensions, sampleDimensions);
   };
 
-  computeTabs = (projects, analyses) => {
+  computeTabs = (projects, visualizations) => {
     const renderTab = (label, count) => {
       return (
         <div>
@@ -151,8 +156,8 @@ class DiscoveryView extends React.Component {
         value: "samples"
       },
       {
-        label: renderTab("Analyses", (analyses || []).length),
-        value: "analyses"
+        label: renderTab("Visualizations", (visualizations || []).length),
+        value: "visualizations"
       }
     ];
   };
@@ -222,9 +227,10 @@ class DiscoveryView extends React.Component {
       filterCount,
       projects,
       samples,
-      showFilters
+      showFilters,
+      visualizations
     } = this.state;
-    const tabs = this.computeTabs(projects);
+    const tabs = this.computeTabs(projects, visualizations);
 
     let dimensions = {
       projects: projectDimensions,
@@ -262,8 +268,20 @@ class DiscoveryView extends React.Component {
                 onLoadRows={this.handleLoadSampleRows}
               />
             )}
+            {currentTab == "visualizations" && (
+              <VisualizationsView visualizations={visualizations} />
+            )}
           </NarrowContainer>
-          <div className={cs.rightPane} />
+          <div className={cs.rightPane}>
+            {(currentTab == "samples" || currentTab == "projects") && (
+              <DiscoverySidebar
+                className={cs.sidebar}
+                samples={samples}
+                projects={projects}
+                currentTab={currentTab}
+              />
+            )}
+          </div>
         </div>
       </div>
     );

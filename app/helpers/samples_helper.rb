@@ -240,17 +240,17 @@ module SamplesHelper
     # TODO(tiago): make this method generic to any data type and replace 'filter_by_metadatum'
     # Should it add include_not_set?
     samples
-      .includes(:metadata => :metadata_field)
+      .includes(metadata: metadata_field)
       .where(
         metadata: {
-          metadata_fields: {name: key},
+          metadata_fields: { name: key },
           string_validated_value: query
-        })
+        }
+      )
   end
 
   def filter_by_metadatum(samples, key, query)
     return samples.where("false") if query == ["none"]
-
 
     # Use a set to speed up query.
     query_set = query.to_set
@@ -377,6 +377,18 @@ module SamplesHelper
     records_by_parent_id
   end
 
+  def format_samples_basic(samples)
+    metadata_by_sample_id = metadata_multiget(samples.map(&:id))
+    return samples.map do |sample|
+      {
+        name: sample.name,
+        id: sample.id,
+        host_genome_id: sample.host_genome_id,
+        metadata: metadata_by_sample_id[sample.id]
+      }
+    end
+  end
+
   def format_samples(samples)
     formatted_samples = []
     return formatted_samples if samples.empty?
@@ -411,11 +423,12 @@ module SamplesHelper
     # When in conjunction with some filters, the query below was not returning the public property,
     # thus we need to get ids and redo the query independently
     sample_ids = samples.pluck(:id)
-    return current_power.samples
-      .where(id: sample_ids)
-      .joins(:project)
-      .select("samples.*", "IF(projects.public_access = 1 OR DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < '#{Time.current.strftime("%y-%m-%d")}', true, false) AS public")
-      .map{|sample| sample.public}
+    return current_power
+           .samples
+           .where(id: sample_ids)
+           .joins(:project)
+           .select("samples.*", "IF(projects.public_access = 1 OR DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < '#{Time.current.strftime('%y-%m-%d')}', true, false) AS public")
+           .map(&:public)
   end
 
   # From the list of samples, return the ids of all samples whose top pipeline run is report ready.
@@ -503,21 +516,22 @@ module SamplesHelper
 
     {
       "errors" => errors,
-      "samples" => samples
+      # Need to refetch samples so sample.metadata is fresh.
+      "samples" => Sample.where(id: samples.pluck(:id))
     }
   end
 
   def samples_by_domain(domain)
-    samples = case domain
-              when "library"
-                # samples for projects that user owns
-                current_power.library_samples
-              when "public"
-                # samples for public projects
-                Sample.public_samples
-              else
-                # all samples user can see
-                current_power.samples
-              end
+    case domain
+    when "library"
+      # samples for projects that user owns
+      current_power.library_samples
+    when "public"
+      # samples for public projects
+      Sample.public_samples
+    else
+      # all samples user can see
+      current_power.samples
+    end
   end
 end

@@ -9,7 +9,7 @@
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
 # It's strongly recommended that you check this file into your version control system.
-ActiveRecord::Schema.define(version: 20_190_220_191_436) do
+ActiveRecord::Schema.define(version: 20_190_221_230_200) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -530,6 +530,7 @@ ActiveRecord::Schema.define(version: 20_190_220_191_436) do
     t.bigint "user_id"
     t.string "visualization_type"
     t.text "data"
+    t.integer "public_access", limit: 1
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_visualizations_on_user_id"

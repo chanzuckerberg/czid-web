@@ -1,4 +1,5 @@
 import React from "react";
+import cx from "classnames";
 import { get, without, flow, omit, set, find } from "lodash/fp";
 import UploadSampleStep from "./UploadSampleStep";
 import NarrowContainer from "~/components/layout/NarrowContainer";
@@ -14,16 +15,23 @@ class SampleUploadFlow extends React.Component {
     samples: null,
     uploadType: "", // remote or local
     project: null,
+    sampleNamesToFiles: null, // Needed for local samples.
     // Metadata upload information
     metadata: null, //
     metadataIssues: null
   };
 
-  handleUploadSamples = ({ samples, project, uploadType }) => {
+  handleUploadSamples = ({
+    samples,
+    project,
+    uploadType,
+    sampleNamesToFiles
+  }) => {
     this.setState({
       samples,
       project,
       uploadType,
+      sampleNamesToFiles,
       currentStep: "uploadMetadata"
     });
   };
@@ -33,7 +41,10 @@ class SampleUploadFlow extends React.Component {
     const newSamples = this.state.samples.map(sample => {
       const metadataRow = find(["sample_name", sample.name], metadata.rows);
       const hostGenomeId = find(
-        ["name", get("host_genome", metadataRow)],
+        [
+          "name",
+          get("host_genome", metadataRow) || get("Host Genome", metadataRow)
+        ],
         this.props.host_genomes
       ).id;
 
@@ -45,8 +56,8 @@ class SampleUploadFlow extends React.Component {
 
     // Remove host_genome from metadata.
     const newMetadata = flow(
-      set("rows", metadata.rows.map(omit("host_genome"))),
-      set("headers", without(["host_genome"], metadata.headers))
+      set("rows", metadata.rows.map(omit(["host_genome", "Host Genome"]))),
+      set("headers", without(["host_genome", "Host Genome"], metadata.headers))
     )(metadata);
 
     this.setState({
@@ -73,6 +84,7 @@ class SampleUploadFlow extends React.Component {
           <UploadMetadataStep
             onUploadMetadata={this.handleUploadMetadata}
             samples={this.getSamplesForMetadataValidation()}
+            project={this.state.project}
           />
         );
       case "review":
@@ -82,6 +94,7 @@ class SampleUploadFlow extends React.Component {
             samples={this.state.samples}
             uploadType={this.state.uploadType}
             project={this.state.project}
+            sampleNamesToFiles={this.state.sampleNamesToFiles}
           />
         );
       default:
@@ -91,7 +104,12 @@ class SampleUploadFlow extends React.Component {
 
   render() {
     return (
-      <NarrowContainer className={cs.sampleUploadFlow}>
+      <NarrowContainer
+        className={cx(
+          cs.sampleUploadFlow,
+          this.state.currentStep === "uploadSamples" && cs.narrow
+        )}
+      >
         <div className={cs.inner}>{this.renderStep()}</div>
       </NarrowContainer>
     );

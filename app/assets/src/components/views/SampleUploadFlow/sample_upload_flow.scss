@@ -3,8 +3,12 @@
 
 .sampleUploadFlow {
   .inner {
-    padding: 60px 240px;
+    padding: 60px;
     background-color: $white;
+  }
+
+  &.narrow .inner {
+    padding: 60px 240px;
   }
 }
 
@@ -132,21 +136,6 @@
     font-weight: 600;
     letter-spacing: 0.4px;
     margin-bottom: 8px;
-  }
-
-  .link {
-    // Overwrite <a> inherit rule in header.scss
-    color: $primary-light !important;
-    cursor: pointer;
-  }
-
-  .metadataCSVUpload {
-    margin-top: 40px;
-    margin-bottom: 20px;
-
-    &.hasIssues {
-      height: 400px;
-    }
   }
 
   .mainControls {

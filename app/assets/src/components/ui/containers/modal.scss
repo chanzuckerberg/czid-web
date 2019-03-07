@@ -26,6 +26,10 @@
     width: 400px;
   }
 
+  &.wide {
+    width: 1080px;
+  }
+
   &.tall {
     /* Overwrite semantic ui */
     max-height: 85vh !important;

@@ -1,0 +1,72 @@
+@import "~styles/themes/colors";
+
+.triggerContainer {
+  outline: none;
+  cursor: pointer;
+  text-align: left;
+  display: inline-block;
+
+  &.fluid {
+    display: block;
+    width: 100%;
+  }
+
+  &.disabled {
+    cursor: default;
+    pointer-events: none;
+    opacity: 0.45;
+  }
+
+  &.arrowOutsideTrigger {
+    display: flex;
+    align-items: center;
+
+    .arrow {
+      margin-left: 0;
+    }
+  }
+
+  &.arrowInsideTrigger {
+    position: relative;
+
+    .arrow {
+      margin: 0;
+      padding: 0;
+      position: absolute;
+      right: 10px;
+      top: 5px;
+      line-height: 24px;
+      pointer-events: none;
+      font-size: 20px;
+    }
+  }
+}
+
+.arrow {
+  font-style: normal;
+  font-size: 0.85em;
+  -webkit-font-smoothing: antialiased;
+
+  &:before {
+    font-family: FontAwesome;
+    content: "\f107";
+  }
+
+  &.active {
+    color: $primary-light;
+  }
+}
+
+.popperMenu {
+  // Higher than the Header
+  z-index: 901;
+
+  &.floating {
+    margin-top: 7px;
+  }
+
+  &.withinModal {
+    // Higher than the Modal
+    z-index: 1002;
+  }
+}

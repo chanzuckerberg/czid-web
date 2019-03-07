@@ -1,0 +1,45 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.visualization {
+  text-align: left;
+  padding: 15px 0;
+
+  .visualizationName {
+    color: $black;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-h5;
+    line-height: 22px;
+    margin-bottom: 8px;
+  }
+
+  .visualizationDetails {
+    color: $medium-grey;
+    font-size: $font-size-small;
+
+    span:not(:last-child) {
+      margin-right: 8px;
+    }
+
+    span:not(:first-child) {
+      margin-left: 8px;
+    }
+  }
+}
+
+.detailsCell,
+.detailsHeader {
+  text-align: left;
+}
+
+.icon {
+  fill: $medium-grey;
+
+  .iconGlobe {
+    width: 20px;
+  }
+
+  .iconLock {
+    width: 18px;
+  }
+}

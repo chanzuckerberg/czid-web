@@ -3,18 +3,23 @@ import { fromPairs, set, find } from "lodash/fp";
 import Divider from "../../layout/Divider";
 import PhyloTreeVis from "./PhyloTreeVis";
 import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
+import { SaveButton, ShareButton } from "~ui/controls/buttons";
+import BasicPopup from "~/components/BasicPopup";
+import { saveVisualization } from "~/api";
+
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import PropTypes from "prop-types";
-import { parseUrlParams } from "~/helpers/url";
+import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
 import ViewHeader from "../../layout/ViewHeader/ViewHeader";
+
 import cs from "./phylo_tree_list_view.scss";
 
 class PhyloTreeListView extends React.Component {
   constructor(props) {
     super(props);
 
-    let urlParams = this.parseUrlParams();
+    const urlParams = parseUrlParams();
 
     this.state = {
       selectedPhyloTreeId: this.getDefaultSelectedTreeId(
@@ -28,6 +33,7 @@ class PhyloTreeListView extends React.Component {
       selectedSampleId: null,
       selectedPipelineRunId: null
     };
+    this.selectedMetadata = urlParams.selectedMetadata;
   }
 
   getDefaultSelectedTreeId(urlParams, phyloTrees = []) {
@@ -42,18 +48,30 @@ class PhyloTreeListView extends React.Component {
     return selectedId;
   }
 
-  parseUrlParams() {
-    let urlParams = parseUrlParams();
-    urlParams.treeId = parseInt(urlParams.treeId);
-    return urlParams;
-  }
-
   handleTreeChange = newPhyloTreeId => {
+    // TODO (gdingle): do we want to keep using sessionStorage and cookies and urlparams and db saving?!
     window.sessionStorage.setItem("treeId", newPhyloTreeId);
+    this.persistInUrl("treeId", newPhyloTreeId);
     this.setState({
       selectedPhyloTreeId: newPhyloTreeId,
       sidebarVisible: false
     });
+  };
+
+  afterSelectedMetadataChange = selectedMetadata => {
+    this.persistInUrl("selectedMetadata", selectedMetadata);
+  };
+
+  // TODO (gdingle): refactor to url.js once other PR merged
+  persistInUrl = (param, value) => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set(param, value);
+      history.pushState(window.history.state, document.title, url);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
   };
 
   handleMetadataUpdate = (key, newValue) => {
@@ -71,6 +89,16 @@ class PhyloTreeListView extends React.Component {
         this.state.phyloTreeMap
       )
     });
+  };
+
+  handleShareClick = async () => {
+    await copyShortUrlToClipboard();
+  };
+
+  handleSaveClick = async () => {
+    // TODO (gdingle): add analytics tracking?
+    let params = parseUrlParams();
+    await saveVisualization("phylo_tree", params);
   };
 
   getTreeStatus(tree) {
@@ -191,6 +219,14 @@ class PhyloTreeListView extends React.Component {
             />
           </ViewHeader.Content>
           <ViewHeader.Controls>
+            <BasicPopup
+              trigger={<ShareButton onClick={this.handleShareClick} />}
+              content="A shareable URL will be copied to your clipboard!"
+              on="click"
+              hideOnScroll
+            />{" "}
+            {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
+            {this.props.admin && <SaveButton onClick={this.handleSaveClick} />}{" "}
             <PhyloTreeDownloadButton tree={currentTree} />
           </ViewHeader.Controls>
         </ViewHeader>
@@ -209,6 +245,8 @@ class PhyloTreeListView extends React.Component {
               phyloTreeId={this.state.selectedPhyloTreeId}
               onMetadataUpdate={this.handleMetadataUpdate}
               onSampleNodeClick={this.handleSampleNodeClick}
+              afterSelectedMetadataChange={this.afterSelectedMetadataChange}
+              defaultMetadata={this.selectedMetadata}
             />
           ) : (
             <p className={cs.noTreeBanner}>
@@ -222,7 +260,8 @@ class PhyloTreeListView extends React.Component {
 }
 
 PhyloTreeListView.propTypes = {
-  phyloTrees: PropTypes.array
+  phyloTrees: PropTypes.array,
+  admin: PropTypes.bool
 };
 
 export default PhyloTreeListView;

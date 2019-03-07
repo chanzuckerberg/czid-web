@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { find, orderBy } from "lodash";
 import { SortDirection } from "react-virtualized";
+
 import BaseTable from "./BaseTable";
 
 class Table extends React.Component {

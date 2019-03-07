@@ -4,5 +4,12 @@ sample_human_sex:
   key: "sex"
   raw_value: "Male"
   string_validated_value: "Male"
-  sample: metadata_validation_sample_human
+  sample: metadata_validation_sample_human_existing_metadata
   metadata_field: sex
+
+sample_human_nucleotide_type:
+  key: "nucleotide_type"
+  raw_value: "RNA"
+  string_validated_value: "RNA"
+  sample: metadata_validation_sample_human_existing_metadata
+  metadata_field: nucleotide_type

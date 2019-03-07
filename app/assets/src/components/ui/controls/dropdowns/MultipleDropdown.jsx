@@ -1,3 +1,4 @@
+import cx from "classnames";
 import PropTypes from "prop-types";
 import { find, without, includes } from "lodash/fp";
 import React from "react";
@@ -122,6 +123,7 @@ class MultipleDropdown extends React.Component {
       rounded,
       trigger,
       value,
+      className,
       ...otherProps
     } = this.props;
 
@@ -132,7 +134,7 @@ class MultipleDropdown extends React.Component {
       <BareDropdown
         {...otherProps}
         floating
-        className={cs.multipleDropdown}
+        className={cx(cs.multipleDropdown, className)}
         arrowInsideTrigger={arrowInsideTrigger}
         trigger={trigger || this.renderText()}
         items={renderedMenuItems}
@@ -159,7 +161,8 @@ MultipleDropdown.propTypes = {
   onChange: PropTypes.func.isRequired,
   options: PropTypes.arrayOf(PropTypes.object),
   trigger: PropTypes.node,
-  value: PropTypes.array
+  value: PropTypes.array,
+  className: PropTypes.string
 };
 
 export default MultipleDropdown;
