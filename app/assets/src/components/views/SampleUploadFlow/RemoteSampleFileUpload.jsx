@@ -66,7 +66,7 @@ class RemoteSampleFileUpload extends React.Component {
     return (
       <div className={cs.remoteFileUpload}>
         <div className={cs.label}>
-          Path to S3 Bucket
+          <span className={cs.labelTitle}>Path to S3 Bucket</span>
           <span className={cs.infoLink} onClick={this.toggleInfo}>
             {this.state.showInfo ? "Hide" : "More"} Info
           </span>

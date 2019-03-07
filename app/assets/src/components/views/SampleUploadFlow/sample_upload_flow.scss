@@ -130,6 +130,38 @@
   }
 }
 
+.localFileUpload {
+  .info {
+    background-color: $off-white;
+    padding: 20px;
+    margin-bottom: 10px;
+
+    .title {
+      @include font-header-xs;
+    }
+
+    ul {
+      margin: 5px 0 10px 20px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      li {
+        @include font-body-xs;
+        list-style-type: disc;
+      }
+    }
+  }
+
+  .infoLink {
+    @include font-label-s;
+    color: $primary-light;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+}
+
 .uploadMetadataStep {
   .title {
     font-size: 26px;

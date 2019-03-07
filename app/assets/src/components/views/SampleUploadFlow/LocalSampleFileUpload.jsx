@@ -16,6 +16,10 @@ import cs from "./sample_upload_flow.scss";
 const map = _fp.map.convert({ cap: false });
 
 class LocalSampleFileUpload extends React.Component {
+  state = {
+    showInfo: false
+  };
+
   onDrop = acceptedFiles => {
     // Group files by sample name.
     const sampleNamesToFiles = flow(
@@ -54,6 +58,12 @@ class LocalSampleFileUpload extends React.Component {
         )} cannot be uploaded. Size must be under 5GB for local uploads. For larger files, please try our CLI.`
     );
 
+  toggleInfo = () => {
+    this.setState({
+      showInfo: !this.state.showInfo
+    });
+  };
+
   render() {
     let filePickerTitle = "Upload Your Input Files:";
     const sampleLen = size(this.props.samples);
@@ -64,13 +74,33 @@ class LocalSampleFileUpload extends React.Component {
     }
 
     return (
-      <FilePicker
-        className={cs.localFilepicker}
-        title={filePickerTitle}
-        onChange={this.onDrop}
-        onRejected={this.onRejected}
-        multiFile={true}
-      />
+      <div className={cs.localFileUpload}>
+        <div className={cs.infoLink} onClick={this.toggleInfo}>
+          {this.state.showInfo ? "Hide" : "More"} Info
+        </div>
+        {this.state.showInfo && (
+          <div className={cs.info}>
+            <div className={cs.title}>File Instructions</div>
+            <ul>
+              <li>
+                Accepted file formats: fastq (.fq), fastq.gz (.fq.gz), fasta
+                (.fa), fasta.gz (.fa.gz).
+              </li>
+              <li>
+                Paired files must be labeled with &quot;_R1&quot; or
+                &quot;_R2&quot; at the end of the basename.
+              </li>
+            </ul>
+          </div>
+        )}
+        <FilePicker
+          className={cs.localFilepicker}
+          title={filePickerTitle}
+          onChange={this.onDrop}
+          onRejected={this.onRejected}
+          multiFile={true}
+        />
+      </div>
     );
   }
 }
