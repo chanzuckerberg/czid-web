@@ -24,6 +24,14 @@
     @include font-body-s;
     margin-top: 10px;
   }
+
+  .details {
+    margin-bottom: 10px;
+
+    .label {
+      font-weight: 600;
+    }
+  }
 }
 
 .issues {

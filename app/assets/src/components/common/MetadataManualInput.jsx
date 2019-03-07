@@ -18,7 +18,6 @@ import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
 import { Dropdown } from "~ui/controls/dropdowns";
-import { getProjectMetadataFields, getAllHostGenomes } from "~/api";
 import PlusIcon from "~ui/icons/PlusIcon";
 
 import cs from "./metadata_manual_input.scss";
@@ -41,14 +40,15 @@ class MetadataManualInput extends React.Component {
     }
   };
 
-  async componentDidMount() {
-    const [projectMetadataFields, hostGenomes] = await Promise.all([
-      getProjectMetadataFields(this.props.project.id),
-      getAllHostGenomes()
-    ]);
+  componentDidUpdate() {
+    const { projectMetadataFields, hostGenomes } = this.props;
+    // Only update if fields not set already
+    if (this.state.projectMetadataFields && this.state.hostGenomes.length > 0) {
+      return;
+    }
 
     this.setState({
-      projectMetadataFields: keyBy("key", projectMetadataFields),
+      projectMetadataFields: projectMetadataFields,
       // Default to the required fields.
       selectedFieldNames: map(
         "key",
@@ -343,7 +343,9 @@ MetadataManualInput.propTypes = {
   className: PropTypes.string,
   onMetadataChange: PropTypes.func.isRequired,
   samplesAreNew: PropTypes.bool,
-  withinModal: PropTypes.bool
+  withinModal: PropTypes.bool,
+  projectMetadataFields: PropTypes.object,
+  hostGenomes: PropTypes.array
 };
 
 export default MetadataManualInput;
