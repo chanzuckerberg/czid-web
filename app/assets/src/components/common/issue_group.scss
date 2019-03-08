@@ -1,0 +1,62 @@
+@import "~styles/themes/colors";
+
+.issueGroup {
+  border-bottom: none !important;
+
+  &.warning {
+    background-color: $warning-bg;
+
+    tbody {
+      tr:nth-child(odd) {
+        background-color: $warning-dark;
+      }
+    }
+  }
+
+  &.error {
+    background-color: $error-bg;
+
+    tbody {
+      tr:nth-child(odd) {
+        background-color: $error-dark;
+      }
+    }
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+
+    &.warning {
+      fill: $warning;
+    }
+
+    &.error {
+      fill: $error;
+    }
+  }
+}
+
+.tableContainer {
+  margin: 0 40px;
+  padding-bottom: 20px;
+
+  td {
+    border-bottom: none !important;
+  }
+
+  thead {
+    border-bottom: none;
+  }
+
+  th {
+    color: $darkest-grey;
+  }
+}

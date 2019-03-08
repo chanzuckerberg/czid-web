@@ -15,6 +15,10 @@
       padding: 0;
       padding-right: 10px;
       height: 40px;
+
+      &:first-child {
+        padding-left: 15px;
+      }
     }
   }
 
@@ -35,6 +39,10 @@
       line-height: normal;
       padding: 5px 10px 5px 0;
       height: 40px;
+
+      &:first-child {
+        padding-left: 15px;
+      }
     }
 
     &::-webkit-scrollbar-track {

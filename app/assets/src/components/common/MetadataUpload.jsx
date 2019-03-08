@@ -8,6 +8,7 @@ import Tabs from "~/components/ui/controls/Tabs";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
+import IssueGroup from "./IssueGroup";
 
 class MetadataUpload extends React.Component {
   state = {
@@ -82,6 +83,30 @@ class MetadataUpload extends React.Component {
     return null;
   };
 
+  // issueType is "error" or "warning".
+  renderIssue = (issue, issueType, index) => {
+    if (issue.isGroup) {
+      return (
+        <IssueGroup
+          caption={issue.caption}
+          headers={issue.headers}
+          rows={issue.rows}
+          key={index}
+          type={issueType}
+          className={cs.issueGroup}
+        />
+      );
+    } else {
+      // Some issues are still plain strings.
+      return (
+        <div className={cx(cs.issue, cs[issueType])} key={index}>
+          <AlertIcon className={cx(cs.icon, cs[issueType])} />
+          {issue}
+        </div>
+      );
+    }
+  };
+
   renderIssues = () => {
     const issues = this.props.issues || this.state.issues;
     const hasErrors = issues && issues.errors.length > 0;
@@ -94,34 +119,24 @@ class MetadataUpload extends React.Component {
         {hasErrors && (
           <div className={cs.errors}>
             <div className={cs.header}>
-              <AlertIcon className={cs.icon} />
               {this.state.currentTab === "Manual Input"
-                ? "Fix the following errors"
+                ? "Fix the following errors."
                 : "Fix these errors and upload your CSV again."}
             </div>
             <div>
-              {issues.errors.map((error, index) => (
-                <div key={index} className={cs.item}>
-                  <span className={cs.dot}>&bull;</span>
-                  <span>{error}</span>
-                </div>
-              ))}
+              {issues.errors.map((error, index) =>
+                this.renderIssue(error, "error", index)
+              )}
             </div>
           </div>
         )}
         {hasWarnings && (
           <div className={cs.warnings}>
-            <div className={cs.header}>
-              <AlertIcon className={cs.icon} />
-              Warnings
-            </div>
+            <div className={cs.header}>Warnings</div>
             <div>
-              {issues.warnings.map((warning, index) => (
-                <div key={index} className={cs.item}>
-                  <span className={cs.dot}>&bull;</span>
-                  <span>{warning}</span>
-                </div>
-              ))}
+              {issues.warnings.map((warning, index) =>
+                this.renderIssue(warning, "warning", index)
+              )}
             </div>
           </div>
         )}

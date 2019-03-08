@@ -1,8 +1,9 @@
 require 'test_helper'
-require 'constants/errors'
 
 # Tests SamplesController bulk_upload_with_metadata
 class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
+  include ErrorHelper
+
   setup do
     @metadata_validation_project = projects(:metadata_validation_project)
     @user = users(:one)
