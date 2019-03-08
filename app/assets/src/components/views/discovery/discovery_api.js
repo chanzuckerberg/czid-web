@@ -20,7 +20,6 @@ const getDiscoveryData = async ({ domain, filters }) => {
       getVisualizations({ domain, filters })
     ]);
 
-    console.log("discovrey_api:getDiscoveryData", samples);
     return {
       samples: samples.samples,
       sampleIds: samples.all_samples_ids,
@@ -29,7 +28,7 @@ const getDiscoveryData = async ({ domain, filters }) => {
     };
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.log(error);
+    console.error(error);
     return {};
   }
 };
@@ -43,7 +42,7 @@ const getDiscoveryDimensions = async ({ domain }) => {
     return { sampleDimensions, projectDimensions };
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.log(error);
+    console.error(error);
     return {};
   }
 };
@@ -109,13 +108,6 @@ const getDiscoverySamples = async ({
   offset = 0,
   includeIds = false
 } = {}) => {
-  console.log("discovery_api:getDiscoverySamples", "params", {
-    domain,
-    filters,
-    limit,
-    offset,
-    includeIds
-  });
   const sampleResults = await getSamples({
     domain,
     filters,
@@ -123,7 +115,6 @@ const getDiscoverySamples = async ({
     offset,
     includeIds
   });
-  console.log("discovery_api:getDiscoverySamples", "results", sampleResults);
   return {
     samples: map(processRawSample, sampleResults.samples),
     all_samples_ids: sampleResults.all_samples_ids

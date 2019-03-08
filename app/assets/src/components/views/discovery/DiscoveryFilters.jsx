@@ -75,8 +75,6 @@ class DiscoveryFilters extends React.Component {
 
     const { host, location, time, tissue, visibility } = this.props;
 
-    console.log("DiscoveryFilters:render", locationSelected);
-
     return (
       <div className={cs.filtersContainer}>
         <div className={cs.filterContainer}>

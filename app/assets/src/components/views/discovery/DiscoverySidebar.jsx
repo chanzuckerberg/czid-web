@@ -12,8 +12,6 @@ export default class DiscoverySidebar extends React.Component {
   constructor(props) {
     super(props);
 
-    console.log(props);
-
     this.state = {
       stats: {
         samples: 0,
@@ -34,10 +32,8 @@ export default class DiscoverySidebar extends React.Component {
   static getDerivedStateFromProps(newProps, prevState) {
     const { currentTab, projects } = newProps;
 
-    console.log("DiscoverySidebar:getDerivedStateFromProps", newProps);
     if (currentTab == "samples") {
       const samples = DiscoverySidebar.processSamples(newProps.samples);
-      console.log("samples after processing", samples, samples.length);
       if (!samples || !samples.length) {
         return prevState;
       }
@@ -99,7 +95,6 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   static processSamples(newSamples) {
-    console.log(newSamples);
     return newSamples.map(sample => ({
       hostGenome: sample.host || "Unknown",
       project: sample.sample.project,

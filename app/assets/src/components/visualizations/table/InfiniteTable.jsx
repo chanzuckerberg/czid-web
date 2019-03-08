@@ -39,27 +39,15 @@ class InfiniteTable extends React.Component {
     }
 
     const newRows = await onLoadRows({ startIndex, stopIndex });
-    console.log("InfiniteTable:Returned rows", newRows);
     const requestedNumberOfRows = stopIndex - startIndex + 1;
-    console.log(
-      "InfiniteTable:Number of rows returned/asked",
-      newRows.length,
-      requestedNumberOfRows
-    );
     this.rows.splice(startIndex, requestedNumberOfRows, ...newRows);
 
     if (requestedNumberOfRows != newRows.length) {
-      console.log("InfiniteTable:Current row count: ", this.rows.length);
       this.setState({ rowCount: this.rows.length });
     } else {
-      console.log(
-        "InfiniteTable:Current row count: ",
-        this.rows.length + minimumBatchSize
-      );
       this.setState({ rowCount: this.rows.length + minimumBatchSize });
     }
 
-    console.log("InfiniteTable:Loaded rows: ", this.rows);
     for (i = startIndex; i <= stopIndex; i++) {
       this.loadedRowsMap[i] = STATUS_LOADED;
     }
@@ -91,7 +79,6 @@ class InfiniteTable extends React.Component {
 
   reset = () => {
     const { rowCount } = this.props;
-    console.log("Reseting infinite table");
     this.rows = [];
     this.loadedRowsMap = [];
     this.setState(
