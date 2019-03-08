@@ -32,7 +32,7 @@ module PipelineRunsHelper
         "taxid_locator_out" => "Sort preliminary annotated FASTA by Taxonomy IDs and store the byte range of each Taxonomy ID in a JSON.",
         "alignment_viz_out" => "Record number of unique accessions matched.",
         "assembly_out" => "Assemble non-host reads using SPAdes.",
-        "coverage_out" => "Calculate converage statistics for assembled contigs",
+        "coverage_out" => "Calculate coverage statistics for assembled contigs",
         "gsnap_accessions_out" => "Generate FASTA of candidate references matched during GSNAP / NT alignment.",
         "rapsearch2_accessions_out" => "Generate FASTA of candidate references matched during RAPSearch2 / NR alignment.",
         "refined_gsnap_out" => "BLAST assembled contigs against candidate references from NT; reassign corresponding reads to the matched taxon.",

@@ -326,7 +326,7 @@ module SamplesHelper
   end
 
   def format_samples_basic(samples)
-    metadata_by_sample_id = metadata_multiget(samples.pluck(:id))
+    metadata_by_sample_id = metadata_multiget(samples.map(&:id))
     return samples.map do |sample|
       {
         name: sample.name,

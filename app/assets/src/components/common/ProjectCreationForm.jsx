@@ -34,9 +34,13 @@ class ProjectCreationForm extends React.Component {
 
       this.props.onCreate(newProject);
     } catch (e) {
-      if (e === "Duplicate name") {
+      if (e[0] === "Name has already been taken") {
         this.setState({
           error: "Project name is already taken."
+        });
+      } else {
+        this.setState({
+          error: "There was an error creating your project."
         });
       }
     }
