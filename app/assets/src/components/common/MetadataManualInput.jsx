@@ -38,7 +38,8 @@ class MetadataManualInput extends React.Component {
     applyToAllCell: {
       sampleName: null,
       column: null
-    }
+    },
+    currentHostGenome: 1
   };
 
   async componentDidMount() {
@@ -80,6 +81,9 @@ class MetadataManualInput extends React.Component {
         )
       }
     });
+
+    // Default to the first host genome (Human)
+    this.props.samples.map(sample => this.updateHostGenome(1, sample));
   }
 
   getManualInputColumns = () => {
@@ -260,7 +264,7 @@ class MetadataManualInput extends React.Component {
                 <Dropdown
                   className={inputClasses}
                   options={this.getHostGenomeOptions()}
-                  value={this.state.currentHostGenome || 1}
+                  value={this.state.currentHostGenome}
                   onChange={id => this.updateHostGenome(id, sample)}
                   usePortal
                   withinModal={this.props.withinModal}
