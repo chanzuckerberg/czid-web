@@ -24,50 +24,19 @@ class DiscoveryHeader extends React.Component {
     onTabChange(tab);
   };
 
-  handleSuggestSelect = (a, { result }) => {
-    console.log("DiscoveryHeader:handleSuggestSelect", a, result);
-
-    // if (result.category == "Project") {
-    //   this.handleProjectSelection(result.id);
-    // } else if (result.category == "Sample") {
-    //   this.applySuggestFilter(result, "sampleIdsParams", "sample_ids");
-    // } else if (result.category == "Tissue") {
-    //   this.applySuggestFilter(result, "selectedTissueFilters", "id");
-    // } else if (result.category == "Host") {
-    //   this.applySuggestFilter(result, "selectedHostIndices", "id");
-    // } else if (result.category == "Location") {
-    //   this.applySuggestFilter(result, "selectedLocations", "id");
-    // } else if (result.category == "Taxon") {
-    //   this.applySuggestFilter(result, "selectedTaxids", "taxid");
-    // } else if (result.category == "Uploader") {
-    //   this.applySuggestFilter(result, "selectedUploaderIds", "id");
-    // }
-  };
-
-  handleEnter = evt => {
-    console.log(
-      "DiscoveryHeader:handleEnter - ?",
-      evt,
-      evt.target.value,
-      evt.key
-    );
-
-    // if (e.target.value !== "" && e.key === "Enter") {
-    //   this.nanobar.go(30);
-    //   this.setState(
-    //     {
-    //       searchParams: e.target.value
-    //     },
-    //     () => {
-    //       this.setUrlLocation();
-    //       this.fetchResults();
-    //     }
-    //   );
-    // }
+  handleSuggestionSelected = (_, { result }) => {
+    const { onSuggestionSelected } = this.props;
+    onSuggestionSelected && onSuggestionSelected(result);
   };
 
   render() {
-    const { filterCount, onFilterToggle, onStatsToggle, tabs } = this.props;
+    const {
+      filterCount,
+      onEnter,
+      onFilterToggle,
+      onStatsToggle,
+      tabs
+    } = this.props;
     const { currentTab } = this.state;
 
     return (
@@ -84,8 +53,8 @@ class DiscoveryHeader extends React.Component {
           <SearchBox
             category
             serverSearchAction="search_suggestions"
-            onResultSelect={this.handleSuggestSelect}
-            onEnter={this.handleSearch}
+            onResultSelect={this.handleSuggestionSelected}
+            onEnter={onEnter}
             initialValue=""
             placeholder="Search"
           />
@@ -123,9 +92,11 @@ DiscoveryHeader.propTypes = {
     ])
   ).isRequired,
   initialTab: PropTypes.string,
-  onTabChange: PropTypes.func,
   onFilterToggle: PropTypes.func,
-  onStatsToggle: PropTypes.func
+  onEnter: PropTypes.func,
+  onStatsToggle: PropTypes.func,
+  onSuggestionSelected: PropTypes.func,
+  onTabChange: PropTypes.func
 };
 
 export default DiscoveryHeader;
