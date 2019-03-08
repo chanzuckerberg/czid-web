@@ -199,29 +199,7 @@ class BareDropdown extends React.Component {
         className={dropdownClassName}
         onBlur={e => e.stopPropagation()}
       >
-        <BaseDropdown.Menu
-          className={cx(cs.menu, (menuLabel || search) && cs.extraPadding)}
-          onClick={!closeOnClick ? e => e.stopPropagation() : undefined}
-        >
-          {menuLabel && <div className={cs.menuLabel}>{menuLabel}</div>}
-          {search && (
-            <div
-              onClick={e => e.stopPropagation()}
-              className={cs.searchContainer}
-            >
-              <Input
-                fluid
-                className={cs.searchInput}
-                icon="search"
-                placeholder="Search"
-                onChange={this.handleFilterChange}
-              />
-            </div>
-          )}
-          <BaseDropdown.Menu scrolling className={cs.innerMenu}>
-            {filteredItems}
-          </BaseDropdown.Menu>
-        </BaseDropdown.Menu>
+        {menu}
       </BaseDropdown>
     );
   }

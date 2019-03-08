@@ -22,13 +22,6 @@ class TimeFilter extends React.Component {
 
     const selectedOption = find({ value: selected }, this.options);
     onChange && onChange(selectedOption);
-
-    // if (selectedOption.value !== "all_time") {
-    //   let end = moment();
-    //   let start = this.starts[selected](end);
-    //   onChange && onChange(selectedOption, [start, end]);
-    // } else {
-    // }
   };
 
   render() {
