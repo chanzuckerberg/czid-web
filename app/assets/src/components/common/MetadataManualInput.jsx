@@ -279,7 +279,6 @@ class MetadataManualInput extends React.Component {
             )
           ) {
             return (
-<<<<<<< HEAD
               <div>
                 <MetadataInput
                   key={column}
@@ -293,18 +292,6 @@ class MetadataManualInput extends React.Component {
                 />
                 {this.renderApplyToAll(sample, column)}
               </div>
-=======
-              <MetadataInput
-                key={column}
-                className={cs.input}
-                value={this.getMetadataValue(sample, column)}
-                metadataType={this.props.projectMetadataFields[column]}
-                onChange={(key, value) =>
-                  this.updateMetadataField(key, value, sample)
-                }
-                withinModal={this.props.withinModal}
-              />
->>>>>>> Fix bug
             );
           }
           return (
