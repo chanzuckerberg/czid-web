@@ -25,7 +25,7 @@
 }
 
 .header {
-  margin: 20px auto 40px;
+  margin: 20px auto 40px 130px;
   width: 85%;
 
   .title {
@@ -169,6 +169,10 @@
       }
     }
   }
+}
+
+.tallBody {
+  min-height: 600px;
 }
 
 .uploadMetadataStep {

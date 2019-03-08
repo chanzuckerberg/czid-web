@@ -89,12 +89,14 @@ class ReviewStep extends React.Component {
   render() {
     return (
       <div className={cs.reviewStep}>
-        <DataTable
-          className={cs.metadataTable}
-          columns={this.props.metadata.headers}
-          data={this.props.metadata.rows}
-          columnWidth={120}
-        />
+        <div className={cs.tallBody}>
+          <DataTable
+            className={cs.metadataTable}
+            columns={this.props.metadata.headers}
+            data={this.props.metadata.rows}
+            columnWidth={120}
+          />
+        </div>
         {this.state.submitState === "review" && (
           <TermsAgreement
             checked={this.state.consentChecked}
