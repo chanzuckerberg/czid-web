@@ -84,8 +84,12 @@
   }
 }
 
-.localFilepicker {
+.localFilePicker {
   height: 120px;
+
+  &.short {
+    height: 90px;
+  }
 }
 
 .remoteFileUpload {

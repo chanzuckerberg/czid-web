@@ -13,6 +13,7 @@ import { sampleNameFromFileName, cleanFilePath } from "~utils/sample";
 import FilePicker from "~ui/controls/FilePicker";
 import PropTypes from "~/components/utils/propTypes";
 import cs from "./sample_upload_flow.scss";
+import cx from "classnames";
 
 const map = _fp.map.convert({ cap: false });
 
@@ -72,7 +73,7 @@ class LocalSampleFileUpload extends React.Component {
     );
     const filePickerTitle = fileCount
       ? `${fileCount} File${fileCount > 1 ? "s" : ""} To Upload`
-      : "";
+      : null;
 
     return (
       <div className={cs.localFileUpload}>
@@ -98,7 +99,7 @@ class LocalSampleFileUpload extends React.Component {
           </div>
         )}
         <FilePicker
-          className={cs.localFilepicker}
+          className={cx(cs.localFilePicker, !filePickerTitle && cs.short)}
           title={filePickerTitle}
           onChange={this.onDrop}
           onRejected={this.onRejected}

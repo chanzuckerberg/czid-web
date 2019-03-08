@@ -20,7 +20,7 @@ class ProjectCreationForm extends React.Component {
   };
 
   handleCreateProject = async () => {
-    if (this.state.name === "") {
+    if (this.state.name === "" || this.state.publicAccess === -1) {
       return;
     }
     this.setState({
@@ -96,8 +96,7 @@ class ProjectCreationForm extends React.Component {
           <div
             className={cx(
               cs.createButton,
-              this.state.name === "" &&
-                this.state.publicAccess === -1 &&
+              (this.state.name === "" || this.state.publicAccess === -1) &&
                 cs.disabled
             )}
             onClick={this.handleCreateProject}
