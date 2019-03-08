@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import {
-  BaseFilter,
+  BaseMultipleFilter,
   BaseSingleFilter,
   TaxonFilter,
   TimeFilter
@@ -30,12 +30,6 @@ class DiscoveryFilters extends React.Component {
     const newState = [];
     newState[selectedKey] = selected;
     this.setState(newState, () => onFilterChange && onFilterChange(this.state));
-    console.log(
-      "DiscoveryFilters:handleChange",
-      selectedKey,
-      selected,
-      newState
-    );
   }
 
   handleRemoveTag(selectedKey, removedValue) {
@@ -43,20 +37,11 @@ class DiscoveryFilters extends React.Component {
 
     let newSelected = null;
     if (Array.isArray(this.state[selectedKey])) {
-      console.log(
-        this.state[selectedKey],
-        this.state[selectedKey].filter(option => option.value !== removedValue)
-      );
       newSelected = this.state[selectedKey].filter(
         option => option.value !== removedValue
       );
     }
-    console.log(
-      "DiscoveryFilters:handleRemoveTag",
-      selectedKey,
-      removedValue,
-      newSelected
-    );
+
     let newState = {};
     newState[selectedKey] = newSelected;
     this.setState(newState, () => onFilterChange && onFilterChange(this.state));
@@ -102,7 +87,7 @@ class DiscoveryFilters extends React.Component {
           {this.renderTags("taxonSelected")}
         </div>
         <div className={cs.filterContainer}>
-          <BaseFilter
+          <BaseMultipleFilter
             onChange={this.handleChange.bind(this, "locationSelected")}
             selected={locationSelected}
             options={location}
@@ -128,7 +113,7 @@ class DiscoveryFilters extends React.Component {
           {this.renderTags("visibilitySelected")}
         </div>
         <div className={cs.filterContainer}>
-          <BaseFilter
+          <BaseMultipleFilter
             onChange={this.handleChange.bind(this, "hostSelected")}
             selected={hostSelected}
             options={host}
@@ -137,7 +122,7 @@ class DiscoveryFilters extends React.Component {
           {this.renderTags("hostSelected")}
         </div>
         <div className={cs.filterContainer}>
-          <BaseFilter
+          <BaseMultipleFilter
             onChange={this.handleChange.bind(this, "tissueSelected")}
             selected={tissueSelected}
             options={tissue}

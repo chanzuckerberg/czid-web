@@ -4,7 +4,7 @@ import { find, map } from "lodash/fp";
 import { MultipleDropdown } from "~ui/controls/dropdowns";
 import cs from "./filters.scss";
 
-class BaseFilter extends React.Component {
+class BaseMultipleFilter extends React.Component {
   handleChange = selected => {
     const { onChange, options } = this.props;
     onChange && onChange(selected.map(value => find({ value }, options)));
@@ -29,7 +29,7 @@ class BaseFilter extends React.Component {
   }
 }
 
-BaseFilter.propTypes = {
+BaseMultipleFilter.propTypes = {
   selected: PropTypes.array,
   onChange: PropTypes.func,
   options: PropTypes.array,
@@ -37,4 +37,4 @@ BaseFilter.propTypes = {
   label: PropTypes.string
 };
 
-export default BaseFilter;
+export default BaseMultipleFilter;
