@@ -404,9 +404,8 @@ module SamplesHelper
     metadata_by_sample_id = metadata_multiget(sample_ids)
 
     # Massage data into the right format
-    # samples.includes(:pipeline_runs, :host_genome, :project, :input_files).each_with_index do |sample|
-    samples.includes(:pipeline_runs, :host_genome, :input_files).each_with_index do |sample|
-        job_info = {}
+    samples.includes(:pipeline_runs, :host_genome, :project, :input_files).each_with_index do |sample|
+      job_info = {}
       job_info[:db_sample] = sample
       job_info[:metadata] = metadata_by_sample_id[sample.id]
       top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]

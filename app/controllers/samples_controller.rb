@@ -1049,7 +1049,7 @@ class SamplesController < ApplicationController
     default_dir = 'id,desc'
     dir ||= default_dir
     column, direction = dir.split(',')
-    samples = samples.order("#{column} #{direction}") if column && direction
+    samples = samples.order("samples.#{column} #{direction}") if column && direction
     samples
   end
 end
