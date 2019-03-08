@@ -400,7 +400,7 @@ class UploadSampleStep extends React.Component {
           sampleNamesToFiles={this.getSampleNamesToFiles()}
           onRemoved={this.handleSampleRemoved}
           hideProgressColumn
-          showExplanation={this.state.currentTab === REMOTE_UPLOAD_TAB}
+          showCount={this.state.currentTab === REMOTE_UPLOAD_TAB}
         />
         <div className={cs.mainControls}>
           <PrimaryButton

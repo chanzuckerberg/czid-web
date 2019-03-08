@@ -830,7 +830,7 @@ class BulkUploadImport extends React.Component {
             sampleNamesToFiles={this.state.sampleNamesToFiles}
             fileNamesToProgress={this.state.fileNamesToProgress}
             onRemoved={this.onRemoved}
-            showExplanation={true}
+            showCount={true}
           />
         </div>
       </div>
