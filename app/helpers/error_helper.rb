@@ -132,7 +132,7 @@ module ErrorHelper
         if field.base_type == 2
           @supported_errors[error_type] = {
             headers: ["Row #", "Sample Name", "Invalid Value"],
-            title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). Please input a date in the format YYYY-MM-DD, YYYY-MM, MM/DD/YY, or MM/YY" }
+            title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). Please input a date in the format YYYY-MM-DD, YYYY-MM, MM/DD/YY, or MM/YYYY" }
           }
         end
 
