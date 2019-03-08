@@ -83,7 +83,6 @@ class DiscoveryView extends React.Component {
       ];
     }
 
-    console.log("DiscoveryView:preparedFilters", preparedFilters);
     return preparedFilters;
   };
 
@@ -120,9 +119,6 @@ class DiscoveryView extends React.Component {
       sampleIds,
       visualizations
     });
-    console.log("DiscoveryView:refreshData - projects", projects);
-    console.log("DiscoveryView:refreshData - samples", samples);
-    console.log("DiscoveryView:refreshData - sampleIds", sampleIds);
   };
 
   refreshDimensions = async () => {
@@ -134,7 +130,6 @@ class DiscoveryView extends React.Component {
     } = await getDiscoveryDimensions({ domain });
 
     this.setState({ projectDimensions, sampleDimensions });
-    console.log("dimensions", projectDimensions, sampleDimensions);
   };
 
   computeTabs = (projects, visualizations) => {
@@ -168,7 +163,6 @@ class DiscoveryView extends React.Component {
   };
 
   handleFilterChange = selectedFilters => {
-    console.log("DiscoveryView:handleFilterChange - selected", selectedFilters);
     const filterCount = sumBy(
       filters => (Array.isArray(filters) ? filters.length : !filters ? 0 : 1),
       values(selectedFilters)
@@ -194,45 +188,24 @@ class DiscoveryView extends React.Component {
     const { domain } = this.props;
     const { samples } = this.state;
 
-    console.log("DiscoveryView:handleLoadSampleRows", startIndex, stopIndex);
     const previousLoadedSamples = samples.slice(startIndex, stopIndex + 1);
-    console.log("DiscoveryView:previouslyLoaded", previousLoadedSamples.length);
     const neededStartIndex = Math.max(startIndex, samples.length);
-    console.log("DiscoveryView:neededStartIndex", neededStartIndex);
 
     let newlyFetchedSamples = [];
     if (stopIndex >= neededStartIndex) {
-      console.log("Calling getDiscoverySamples with ", {
-        domain,
-        filters: this.preparedFilters(),
-        limit: stopIndex - neededStartIndex + 1,
-        offset: neededStartIndex
-      });
       let { samples: fetchedSamples } = await getDiscoverySamples({
         domain,
         filters: this.preparedFilters(),
         limit: stopIndex - neededStartIndex + 1,
         offset: neededStartIndex
       });
-      console.log("CONCATENATING", samples, fetchedSamples);
+
       this.setState({
         samples: samples.concat(fetchedSamples)
       });
       newlyFetchedSamples = fetchedSamples;
-      // let newSamples = samples.slice();
-      // // cannot use splice to respect possible gaps
-      // fetchedSamples.forEach((fetchedSample, i) => {
-      //   newSamples[neededStartIndex + i] = fetchedSample;
-      // })
-      // this.setState({samples: newSamples});
     }
 
-    console.log("DiscoveryView:fetched", previousLoadedSamples);
-    console.log("DiscoveryView:fetched", newlyFetchedSamples);
-    console.log(
-      "DiscoveryView:fetched",
-      previousLoadedSamples.concat(newlyFetchedSamples)
-    );
     return previousLoadedSamples.concat(newlyFetchedSamples);
   };
 
@@ -255,7 +228,6 @@ class DiscoveryView extends React.Component {
       samples: sampleDimensions
     }[currentTab];
 
-    console.log("DiscoveryView:render", samples, projects);
     return (
       <div className={cs.layout}>
         <DiscoveryHeader
