@@ -176,16 +176,15 @@ class MetadataUpload extends React.Component {
     return (
       <div className={cx(cs.metadataUpload, this.props.className)}>
         <div className={cs.details}>
-          Add metadata details to use in analyzing your data.
-        </div>
-        <div className={cs.details}>
-          <span className={cs.label}>{`Host Genome Options: `}</span>
-          {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
-        </div>
-        <div className={cs.details}>
-          <span className={cs.label}>{`Required Fields: `}</span>
+          <span className={cs.label}>{`Required fields: `}</span>
           {requiredFields && requiredFields.join(", ")}
         </div>
+        {currentTab === "CSV Upload" && (
+          <div className={cs.details}>
+            <span className={cs.label}>{`Host genomes: `}</span>
+            {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
+          </div>
+        )}
         <a href="/metadata/dictionary" className={cs.link} target="_blank">
           See Metadata Dictionary
         </a>
