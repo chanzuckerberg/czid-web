@@ -15,6 +15,13 @@
 .label {
   @include font-header-s;
   margin-bottom: 5px;
+
+  .infoLink {
+    @include font-label-s;
+    margin-left: 10px;
+    color: $primary-light;
+    cursor: pointer;
+  }
 }
 
 .uploadSampleStep {
@@ -56,6 +63,7 @@
 
   .fileUpload {
     position: relative;
+    margin-bottom: 10px;
 
     .title {
       @include font-header-xl;
@@ -121,13 +129,6 @@
     margin-top: 5px;
     color: $error;
   }
-
-  .infoLink {
-    @include font-label-s;
-    margin-left: 10px;
-    color: $primary-light;
-    cursor: pointer;
-  }
 }
 
 .localFileUpload {
@@ -152,13 +153,6 @@
         list-style-type: disc;
       }
     }
-  }
-
-  .infoLink {
-    @include font-label-s;
-    color: $primary-light;
-    cursor: pointer;
-    margin-bottom: 10px;
   }
 }
 

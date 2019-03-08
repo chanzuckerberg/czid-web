@@ -331,7 +331,7 @@ class UploadSampleStep extends React.Component {
           <LocalSampleFileUpload
             onChange={this.handleLocalSampleChange}
             project={this.state.selectedProject}
-            sampleNamesToFiles={this.state.localSamples}
+            samples={this.state.localSamples}
           />
         );
       case REMOTE_UPLOAD_TAB:
@@ -400,7 +400,6 @@ class UploadSampleStep extends React.Component {
           sampleNamesToFiles={this.getSampleNamesToFiles()}
           onRemoved={this.handleSampleRemoved}
           hideProgressColumn
-          showCount={this.state.currentTab === REMOTE_UPLOAD_TAB}
         />
         <div className={cs.mainControls}>
           <PrimaryButton

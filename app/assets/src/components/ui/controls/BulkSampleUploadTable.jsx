@@ -83,14 +83,7 @@ class BulkSampleUploadTable extends React.Component {
 
     return (
       <div className={cs.bulkSampleUploadTable}>
-        {this.props.showCount ? (
-          <div className={cs.detectedMsg}>
-            <span className={cs.count}>
-              {size(this.props.sampleNamesToFiles)} samples detected.&nbsp;
-            </span>
-            Remove samples you do not want to upload.
-          </div>
-        ) : (
+        {this.props.showExplanation && (
           <div className={cs.detectedMsg}>
             These samples were detected and matched. Remove samples you do not
             want to upload:
@@ -128,7 +121,7 @@ BulkSampleUploadTable.propTypes = {
   fileNamesToProgress: PropTypes.objectOf(PropTypes.number),
   onRemoved: PropTypes.func,
   hideProgressColumn: PropTypes.bool,
-  showCount: PropTypes.bool
+  showExplanation: PropTypes.bool
 };
 
 export default BulkSampleUploadTable;

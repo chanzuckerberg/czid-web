@@ -93,12 +93,6 @@ class MetadataManualInput extends React.Component {
     ];
   };
 
-  handleHostGenomeChange = id => {
-    this.setState({
-      currentHostGenome: id
-    });
-  };
-
   // Update metadata field based on user's manual input.
   updateMetadataField = (key, value, sample) => {
     const newHeaders = union([key], this.state.headersToEdit);
@@ -257,22 +251,6 @@ class MetadataManualInput extends React.Component {
               cs.extraPadding
           );
 
-          if (column === "Host Genome") {
-            return (
-              <div>
-                <Dropdown
-                  className={inputClasses}
-                  options={this.getHostGenomeOptions()}
-                  value={this.state.currentHostGenome}
-                  onChange={id => this.updateHostGenome(id, sample)}
-                  usePortal
-                  withinModal={this.props.withinModal}
-                />
-                {this.renderApplyToAll(sample, column)}
-              </div>
-            );
-          }
-
           const sampleHostGenomeId = this.props.samplesAreNew
             ? get(
                 "id",
@@ -282,6 +260,22 @@ class MetadataManualInput extends React.Component {
                 )
               )
             : sample.host_genome_id;
+
+          if (column === "Host Genome") {
+            return (
+              <div>
+                <Dropdown
+                  className={inputClasses}
+                  options={this.getHostGenomeOptions()}
+                  value={sampleHostGenomeId}
+                  onChange={id => this.updateHostGenome(id, sample)}
+                  usePortal
+                  withinModal={this.props.withinModal}
+                />
+                {this.renderApplyToAll(sample, column)}
+              </div>
+            );
+          }
 
           // Only show a MetadataInput if this metadata field matches the sample's host genome.
           if (

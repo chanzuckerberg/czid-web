@@ -6,7 +6,8 @@ import _fp, {
   groupBy,
   mapValues,
   sortBy,
-  slice
+  slice,
+  sumBy
 } from "lodash/fp";
 import { sampleNameFromFileName, cleanFilePath } from "~utils/sample";
 import FilePicker from "~ui/controls/FilePicker";
@@ -65,18 +66,21 @@ class LocalSampleFileUpload extends React.Component {
   };
 
   render() {
-    let filePickerTitle = "Upload Your Input Files:";
-    const sampleLen = size(this.props.samples);
-    if (sampleLen > 0) {
-      filePickerTitle = `${sampleLen} Sample${
-        sampleLen > 1 ? "s" : ""
-      } To Upload`;
-    }
+    const fileCount = sumBy(
+      s => size(s.input_files_attributes),
+      this.props.samples
+    );
+    const filePickerTitle = fileCount
+      ? `${fileCount} File${fileCount > 1 ? "s" : ""} To Upload`
+      : "";
 
     return (
       <div className={cs.localFileUpload}>
-        <div className={cs.infoLink} onClick={this.toggleInfo}>
-          {this.state.showInfo ? "Hide" : "More"} Info
+        <div className={cs.label}>
+          Upload Your Input Files
+          <span className={cs.infoLink} onClick={this.toggleInfo}>
+            {this.state.showInfo ? "Hide" : "More"} Info
+          </span>
         </div>
         {this.state.showInfo && (
           <div className={cs.info}>
