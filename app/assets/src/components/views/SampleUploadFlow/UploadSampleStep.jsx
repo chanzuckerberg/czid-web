@@ -331,7 +331,7 @@ class UploadSampleStep extends React.Component {
           <LocalSampleFileUpload
             onChange={this.handleLocalSampleChange}
             project={this.state.selectedProject}
-            sampleNamesToFiles={this.state.localSamples}
+            samples={this.state.localSamples}
           />
         );
       case REMOTE_UPLOAD_TAB:
