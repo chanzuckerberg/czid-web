@@ -1,8 +1,9 @@
 require 'test_helper'
-require 'constants/errors'
 
 # Tests ProjectsController validate_metadata_csv endpoint
 class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
+  include ErrorHelper
+
   setup do
     @project = projects(:one)
     @metadata_validation_project = projects(:metadata_validation_project)
@@ -65,7 +66,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
 
     # Error should throw if sample_name column is missing.
     assert_equal 1, @response.parsed_body['issues']['errors'].length
-    assert_match MetadataValidationErrors.missing_sample_name_column, @response.parsed_body['issues']['errors'][0]
+    assert_match MetadataValidationErrors::MISSING_SAMPLE_NAME_COLUMN, @response.parsed_body['issues']['errors'][0]
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
@@ -86,9 +87,10 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Error should throw if row has wrong number of values.
-    assert_equal 2, @response.parsed_body['issues']['errors'].length
-    assert_match MetadataValidationErrors.row_wrong_values(3, 2, 1), @response.parsed_body['issues']['errors'][0]
-    assert_match MetadataValidationErrors.row_wrong_values(1, 2, 2), @response.parsed_body['issues']['errors'][1]
+    assert_equal 1, @response.parsed_body['issues']['errors'].length
+    assert @response.parsed_body['issues']['errors'][0]['isGroup']
+    assert_equal ErrorAggregator::ERRORS[:row_wrong_num_values][:title].call(2, "num_cols" => 2), @response.parsed_body['issues']['errors'][0]['caption']
+    assert_equal [[1, "metadata_validation_sample_human", 3], [2, "metadata_validation_sample_mosquito", 1]], @response.parsed_body['issues']['errors'][0]['rows']
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
@@ -111,9 +113,13 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
 
     assert_equal 2, @response.parsed_body['issues']['errors'].length
     # Error should throw if row is missing sample name.
-    assert_match MetadataValidationErrors.row_missing_sample_name(1), @response.parsed_body['issues']['errors'][0]
+    assert @response.parsed_body['issues']['errors'][0]['isGroup']
+    assert_equal ErrorAggregator::ERRORS[:row_missing_sample_name][:title].call(1, nil), @response.parsed_body['issues']['errors'][0]['caption']
+    assert_equal [[1]], @response.parsed_body['issues']['errors'][0]['rows']
     # Error should throw if row sample name doesn't exist in this project.
-    assert_match MetadataValidationErrors.row_invalid_sample_name('foobar', 2), @response.parsed_body['issues']['errors'][1]
+    assert @response.parsed_body['issues']['errors'][1]['isGroup']
+    assert_equal ErrorAggregator::ERRORS[:no_matching_sample_existing][:title].call(1, nil), @response.parsed_body['issues']['errors'][1]['caption']
+    assert_equal [[2, "foobar"]], @response.parsed_body['issues']['errors'][1]['rows']
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
@@ -134,12 +140,19 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_equal 3, @response.parsed_body['issues']['errors'].length
+    #    assert_equal "", @response.parsed_body['issues']['errors'][0]['caption']
     # Error should throw if invalid float is passed for float data type.
-    assert_match "#{MetadataValidationErrors.invalid_number('foobar')} (row 1)", @response.parsed_body['issues']['errors'][0]
+    assert @response.parsed_body['issues']['errors'][0]['isGroup']
+    assert @response.parsed_body['issues']['errors'][0]['caption'].starts_with?("1 invalid values for \"Age\" (column 3)")
+    assert_equal [[1, "metadata_validation_sample_human", "foobar"]], @response.parsed_body['issues']['errors'][0]['rows']
     # Error should throw if invalid date is passed for date data type.
-    assert_match "#{MetadataValidationErrors.invalid_date('foobar')} (row 1)", @response.parsed_body['issues']['errors'][1]
+    assert @response.parsed_body['issues']['errors'][1]['isGroup']
+    assert @response.parsed_body['issues']['errors'][1]['caption'].starts_with?("1 invalid values for \"Admission Date\" (column 4)")
+    assert_equal [[1, "metadata_validation_sample_human", "foobar"]], @response.parsed_body['issues']['errors'][1]['rows']
     # Error should throw if string value doesn't match fixed list of string options.
-    assert_match "#{MetadataValidationErrors.invalid_option('reported_sex', 'foobar')} (row 2)", @response.parsed_body['issues']['errors'][2]
+    assert @response.parsed_body['issues']['errors'][2]['isGroup']
+    assert @response.parsed_body['issues']['errors'][2]['caption'].starts_with?("1 invalid values for \"Reported Sex\" (column 6)")
+    assert_equal [[2, "metadata_validation_sample_mosquito", "foobar"]], @response.parsed_body['issues']['errors'][2]['rows']
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
@@ -161,10 +174,14 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_equal 0, @response.parsed_body['issues']['errors'].length
 
     # Warning should throw if user is overwriting existing metadata with different value.
-    assert_equal 2, @response.parsed_body['issues']['warnings'].length
+    assert_equal 1, @response.parsed_body['issues']['warnings'].length
 
-    assert_match "#{MetadataValidationWarnings.value_already_exists('Female', 'Male', 'sex')} (row 1)", @response.parsed_body['issues']['warnings'][0]
-    assert_match "#{MetadataValidationWarnings.value_already_exists('DNA', 'RNA', 'Nucleotide Type')} (row 1)", @response.parsed_body['issues']['warnings'][1]
+    assert @response.parsed_body['issues']['warnings'][0]['isGroup']
+    assert_equal ErrorAggregator::ERRORS[:value_already_exists][:title].call(2, nil), @response.parsed_body['issues']['warnings'][0]['caption']
+    assert_equal [
+      [1, "metadata_validation_sample_human_existing_metadata", "sex", "Male", "Female"],
+      [1, "metadata_validation_sample_human_existing_metadata", "Nucleotide Type", "RNA", "DNA"]
+    ], @response.parsed_body['issues']['warnings'][0]['rows']
   end
 
   test 'metadata validate core and custom fields' do
@@ -182,6 +199,13 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_equal 0, @response.parsed_body['issues']['errors'].length
-    assert_equal 0, @response.parsed_body['issues']['warnings'].length
+    assert_equal 1, @response.parsed_body['issues']['warnings'].length
+
+    assert @response.parsed_body['issues']['warnings'][0]['isGroup']
+    assert_equal ErrorAggregator::ERRORS[:custom_field_creation][:title].call(2, nil), @response.parsed_body['issues']['warnings'][0]['caption']
+    assert_equal [
+      [3, "Custom Field 1"],
+      [4, "Custom Field 2"]
+    ], @response.parsed_body['issues']['warnings'][0]['rows']
   end
 end
