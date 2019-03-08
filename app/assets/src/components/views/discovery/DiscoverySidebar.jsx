@@ -1,19 +1,9 @@
 import React from "react";
 import cx from "classnames";
-import {
-  uniqBy,
-  sum,
-  sumBy,
-  flatten,
-  map,
-  keyBy,
-  countBy,
-  sortBy
-} from "lodash/fp";
+import { uniqBy, sum, sumBy, flatten, map, countBy, sortBy } from "lodash/fp";
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
-import { getAllHostGenomes } from "~/api";
 import { Accordion } from "~/components/layout";
 
 import cs from "./discovery_sidebar.scss";
@@ -21,6 +11,8 @@ import cs from "./discovery_sidebar.scss";
 export default class DiscoverySidebar extends React.Component {
   constructor(props) {
     super(props);
+
+    console.log(props);
 
     this.state = {
       stats: {
@@ -32,42 +24,34 @@ export default class DiscoverySidebar extends React.Component {
       metadata: {
         host: {},
         tissue: {},
-        created_at: {}
+        createdAt: {}
         // TODO (gdingle):
         // location: {},
-      },
-      genomes: {}
+      }
     };
-  }
-
-  async componentDidMount() {
-    // TODO (gdingle): include genome name in payload from getSamples
-    const genomes = keyBy("id", await getAllHostGenomes());
-    this.setState({ genomes });
   }
 
   static getDerivedStateFromProps(newProps, prevState) {
     const { currentTab, projects } = newProps;
 
+    console.log("DiscoverySidebar:getDerivedStateFromProps", newProps);
     if (currentTab == "samples") {
-      const samples = DiscoverySidebar.processSamples(
-        newProps.samples,
-        prevState.genomes
-      );
+      const samples = DiscoverySidebar.processSamples(newProps.samples);
+      console.log("samples after processing", samples, samples.length);
       if (!samples || !samples.length) {
         return prevState;
       }
       return {
         stats: {
           samples: samples.length,
-          projects: uniqBy("project_id", samples).length
+          projects: uniqBy("project", samples).length
           // TODO (gdingle): reads not in samples data yet
           // avg_reads_per_sample: 0,
         },
         metadata: {
-          host: countBy("host_genome", samples),
-          tissue: countBy("sample_tissue", samples),
-          created_at: countBy("created_at", samples)
+          host: countBy("hostGenome", samples),
+          tissue: countBy("sampleTissue", samples),
+          createdAt: countBy("createdAt", samples)
           // TODO (gdingle): location not in samples data yet
           // location: {},
         },
@@ -81,13 +65,13 @@ export default class DiscoverySidebar extends React.Component {
       const hosts = flatten(map("hosts", projects));
       const tissues = flatten(map("tissues", projects));
 
-      const created_ats = map(
+      const createdAts = map(
         p => DiscoverySidebar.formatDate(p.created_at),
         projects
       );
 
       return {
-        z: {
+        stats: {
           samples: sumBy("number_of_samples", projects),
           projects: projects.length
           // TODO (gdingle): reads not in projects data yet
@@ -95,9 +79,9 @@ export default class DiscoverySidebar extends React.Component {
         },
         metadata: {
           // TODO (gdingle): these freq counts per project, not per sample
-          host: countBy(_ => _, hosts),
-          tissue: countBy(_ => _, tissues),
-          created_at: countBy(_ => _, created_ats)
+          host: hosts.length,
+          tissue: tissues.length,
+          createdAt: createdAts.length
           // TODO (gdingle): location not in projects data yet
           // location: {},
         },
@@ -110,21 +94,19 @@ export default class DiscoverySidebar extends React.Component {
     }
   }
 
-  static formatDate(created_at) {
-    return moment(created_at).format("YYYY-MM-DD");
+  static formatDate(createdAt) {
+    return moment(createdAt).format("YYYY-MM-DD");
   }
 
-  static processSamples(newSamples, genomes) {
-    const samples = newSamples.map(sample => {
-      const genome = genomes[sample.host_genome_id];
-      // TODO (gdingle): best description for blanks?
-      sample.host_genome = genome ? genome.name : "unknown";
-      sample.sample_tissue = sample.sample_tissue || "unknown";
+  static processSamples(newSamples) {
+    console.log(newSamples);
+    return newSamples.map(sample => ({
+      hostGenome: sample.host || "Unknown",
+      project: sample.sample.project,
+      sampleTissue: sample.sampleType || "Unknown",
       // TODO (gdingle): this is broken... always getting current date
-      sample.created_at = DiscoverySidebar.formatDate(sample.created_at);
-      return sample;
-    });
-    return samples;
+      createdAt: DiscoverySidebar.formatDate(sample.sample.createdAt)
+    }));
   }
 
   handleFilterClick(key) {
@@ -160,6 +142,7 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
+    console.log(this.props);
     return (
       <div className={cx(this.props.className, cs.sideBar)}>
         <div className={cs.metadataContainer}>
@@ -192,7 +175,7 @@ export default class DiscoverySidebar extends React.Component {
           >
             <div className={cs.hasBackground}>
               <strong>Date created</strong>
-              {this.buildMetadataRows("created_at")}
+              {this.buildMetadataRows("createdAt")}
             </div>
             <div className={cs.hasBackground}>
               <strong>Host</strong>

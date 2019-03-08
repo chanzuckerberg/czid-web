@@ -52,7 +52,6 @@ const processRawSample = sample => {
   const row = {
     sample: {
       name: sample.name,
-      // TODO(tiago): replace by real value
       publicAccess: !!sample.public,
       user: get("uploader.name", sample.details),
       project: get("derived_sample_output.project_name", sample.details),
@@ -90,7 +89,6 @@ const processRawSample = sample => {
       sample.details
     ),
     sampleType: get("metadata.sample_type", sample.details),
-    totalRuntime: get("run_info.total_runtime", sample.details),
     subsampledFraction: get(
       "derived_sample_output.pipeline_run.fraction_subsampled",
       sample.details
@@ -98,7 +96,8 @@ const processRawSample = sample => {
     totalReads: get(
       "derived_sample_output.pipeline_run.total_reads",
       sample.details
-    )
+    ),
+    totalRuntime: get("run_info.total_runtime", sample.details)
   };
   return row;
 };

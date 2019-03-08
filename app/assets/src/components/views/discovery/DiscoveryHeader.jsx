@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import FiltersIcon from "~ui/icons/FiltersIcon";
+import InfoIcon from "~ui/icons/InfoIcon";
 import Label from "~/components/ui/labels/Label";
 import Tabs from "~ui/controls/Tabs";
 import SearchBox from "~ui/controls/SearchBox";
@@ -23,8 +24,24 @@ class DiscoveryHeader extends React.Component {
     onTabChange(tab);
   };
 
-  handleSuggestSelect = (_, { result }) => {
-    console.log("DiscoveryHeader:handleSuggestSelect", result);
+  handleSuggestSelect = (a, { result }) => {
+    console.log("DiscoveryHeader:handleSuggestSelect", a, result);
+
+    // if (result.category == "Project") {
+    //   this.handleProjectSelection(result.id);
+    // } else if (result.category == "Sample") {
+    //   this.applySuggestFilter(result, "sampleIdsParams", "sample_ids");
+    // } else if (result.category == "Tissue") {
+    //   this.applySuggestFilter(result, "selectedTissueFilters", "id");
+    // } else if (result.category == "Host") {
+    //   this.applySuggestFilter(result, "selectedHostIndices", "id");
+    // } else if (result.category == "Location") {
+    //   this.applySuggestFilter(result, "selectedLocations", "id");
+    // } else if (result.category == "Taxon") {
+    //   this.applySuggestFilter(result, "selectedTaxids", "taxid");
+    // } else if (result.category == "Uploader") {
+    //   this.applySuggestFilter(result, "selectedUploaderIds", "id");
+    // }
   };
 
   handleEnter = evt => {
@@ -34,6 +51,19 @@ class DiscoveryHeader extends React.Component {
       evt.target.value,
       evt.key
     );
+
+    // if (e.target.value !== "" && e.key === "Enter") {
+    //   this.nanobar.go(30);
+    //   this.setState(
+    //     {
+    //       searchParams: e.target.value
+    //     },
+    //     () => {
+    //       this.setUrlLocation();
+    //       this.fetchResults();
+    //     }
+    //   );
+    // }
   };
 
   render() {
@@ -54,7 +84,7 @@ class DiscoveryHeader extends React.Component {
           <SearchBox
             category
             serverSearchAction="search_suggestions"
-            onResultSelect={this.handleResultSelect}
+            onResultSelect={this.handleSuggestSelect}
             onEnter={this.handleSearch}
             initialValue=""
             placeholder="Search"
@@ -69,7 +99,7 @@ class DiscoveryHeader extends React.Component {
         />
         <div className={cs.blankFill} />
         <div className={cs.statsTrigger} onClick={onStatsToggle}>
-          <FiltersIcon className={cs.statsIcon} />
+          <InfoIcon className={cs.statsIcon} />
         </div>
       </div>
     );

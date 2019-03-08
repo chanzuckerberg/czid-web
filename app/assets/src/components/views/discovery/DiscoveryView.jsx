@@ -33,7 +33,7 @@ class DiscoveryView extends React.Component {
     super(props);
 
     this.state = {
-      currentTab: "projects",
+      currentTab: "samples",
       dimensions: [],
       filters: {},
       filterCount: 0,
@@ -200,7 +200,7 @@ class DiscoveryView extends React.Component {
     const neededStartIndex = Math.max(startIndex, samples.length);
     console.log("DiscoveryView:neededStartIndex", neededStartIndex);
 
-    let fetchedSamples = [];
+    let newlyFetchedSamples = [];
     if (stopIndex >= neededStartIndex) {
       console.log("Calling getDiscoverySamples with ", {
         domain,
@@ -208,20 +208,32 @@ class DiscoveryView extends React.Component {
         limit: stopIndex - neededStartIndex + 1,
         offset: neededStartIndex
       });
-      const { samples } = await getDiscoverySamples({
+      let { samples: fetchedSamples } = await getDiscoverySamples({
         domain,
         filters: this.preparedFilters(),
         limit: stopIndex - neededStartIndex + 1,
         offset: neededStartIndex
       });
-      fetchedSamples = samples;
+      console.log("CONCATENATING", samples, fetchedSamples);
       this.setState({
         samples: samples.concat(fetchedSamples)
       });
+      newlyFetchedSamples = fetchedSamples;
+      // let newSamples = samples.slice();
+      // // cannot use splice to respect possible gaps
+      // fetchedSamples.forEach((fetchedSample, i) => {
+      //   newSamples[neededStartIndex + i] = fetchedSample;
+      // })
+      // this.setState({samples: newSamples});
     }
 
-    console.log("DiscoveryView:fetched", fetchedSamples.length);
-    return previousLoadedSamples.concat(fetchedSamples);
+    console.log("DiscoveryView:fetched", previousLoadedSamples);
+    console.log("DiscoveryView:fetched", newlyFetchedSamples);
+    console.log(
+      "DiscoveryView:fetched",
+      previousLoadedSamples.concat(newlyFetchedSamples)
+    );
+    return previousLoadedSamples.concat(newlyFetchedSamples);
   };
 
   render() {
@@ -243,6 +255,7 @@ class DiscoveryView extends React.Component {
       samples: sampleDimensions
     }[currentTab];
 
+    console.log("DiscoveryView:render", samples, projects);
     return (
       <div className={cs.layout}>
         <DiscoveryHeader

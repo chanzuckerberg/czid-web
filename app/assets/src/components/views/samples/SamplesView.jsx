@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import GlobeIcon from "~ui/icons/GlobeIcon";
-import LockIcon from "~ui/icons/LockIcon";
+import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
+import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
 import InfiniteTable from "../../visualizations/table/InfiniteTable";
 import moment from "moment";
 import { numberWithCommas } from "~/helpers/strings";
@@ -119,9 +119,9 @@ class SamplesView extends React.Component {
         <div className={cs.publicAccess}>
           {sample &&
             (sample.publicAccess ? (
-              <GlobeIcon className={cx(cs.icon, cs.iconGlobe)} />
+              <SamplePublicIcon className={cx(cs.icon, cs.iconPublic)} />
             ) : (
-              <LockIcon className={cx(cs.icon, cs.iconLock)} />
+              <SamplePrivateIcon className={cx(cs.icon, cs.iconPrivate)} />
             ))}
         </div>
         <div className={cs.sampleRightPane}>
@@ -152,7 +152,6 @@ class SamplesView extends React.Component {
   };
 
   reset = () => {
-    console.log("Reseting samples view");
     this.infiniteTable.reset();
   };
 

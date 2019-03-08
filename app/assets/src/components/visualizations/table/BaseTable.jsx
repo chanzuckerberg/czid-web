@@ -143,8 +143,8 @@ class BaseTable extends React.Component {
           )}
         </AutoSizer>
         {/*
-          We cannot add these as columns because it gets rerendered every time we add a column,
-          causing the dropdown to close.
+          We cannot add these as columns because it gets rerendered every time we add
+          a column, causing the dropdown to close.
          */}
         {initialActiveColumns && (
           <div
