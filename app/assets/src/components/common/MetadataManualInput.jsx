@@ -38,8 +38,7 @@ class MetadataManualInput extends React.Component {
     applyToAllCell: {
       sampleName: null,
       column: null
-    },
-    currentHostGenome: 1
+    }
   };
 
   async componentDidMount() {
