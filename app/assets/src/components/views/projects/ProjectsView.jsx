@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Table } from "~/components/visualizations/table";
+// import { selectColumn } from "~/components/visualizations/columns";
 import { merge, pick } from "lodash";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
@@ -13,6 +14,10 @@ class ProjectsView extends React.Component {
     super(props);
 
     this.columns = [
+      // selectColumn({
+      //   onSelectRow: this.handleSelectRow,
+      //   onSelectAllRows: this.handleSelectAllRows
+      // }),
       {
         dataKey: "public_access",
         width: 30,
@@ -43,6 +48,14 @@ class ProjectsView extends React.Component {
       { dataKey: "number_of_samples", width: 140, label: "No. Of Samples" }
     ];
   }
+
+  handleSelectRow = (a, b, c) => {
+    console.log(a, b, c);
+  };
+
+  handleSelectAllRows = (a, b, c) => {
+    console.log(a, b, c);
+  };
 
   renderAccess = ({ cellData: publicAccess }) => {
     return (
@@ -99,7 +112,6 @@ class ProjectsView extends React.Component {
 
     return (
       <Table
-        selectable
         sortable
         data={data}
         columns={this.columns}

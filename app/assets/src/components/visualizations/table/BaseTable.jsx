@@ -10,6 +10,7 @@ import "react-virtualized/styles.css";
 import { find, map } from "lodash";
 import cx from "classnames";
 
+import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import PlusIcon from "~ui/icons/PlusIcon";
 import { humanize } from "~/helpers/strings";
@@ -215,7 +216,7 @@ BaseTable.propTypes = {
   rowGetter: PropTypes.func.isRequired,
   rowCount: PropTypes.number.isRequired,
   rowRenderer: PropTypes.func,
-  selectable: PropTypes.bool,
+  selectableBy: PropTypes.bool,
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string
