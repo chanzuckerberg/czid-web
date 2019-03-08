@@ -99,6 +99,7 @@ class ProjectsView extends React.Component {
 
     return (
       <Table
+        selectable
         sortable
         data={data}
         columns={this.columns}

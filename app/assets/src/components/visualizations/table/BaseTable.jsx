@@ -82,6 +82,14 @@ class BaseTable extends React.Component {
     );
   };
 
+  renderSelectableCell = () => {
+    return <div>s</div>;
+  };
+
+  renderSelectableHeader = () => {
+    return <div>S</div>;
+  };
+
   render() {
     const {
       defaultCellRenderer,
@@ -94,6 +102,7 @@ class BaseTable extends React.Component {
       rowCount,
       rowGetter,
       rowRenderer,
+      selectable,
       sortable,
       sortBy,
       sortDirection
@@ -122,6 +131,13 @@ class BaseTable extends React.Component {
               sortDirection={sortable && sortDirection}
               width={width}
             >
+              {selectable && (
+                <Column
+                  className={cs.selectableColumn}
+                  headerRenderer={this.renderSelectableHeader}
+                  cellRenderer={this.renderSelectableCell}
+                />
+              )}
               {columnOrder.map(dataKey => {
                 const columnProps = find(columns, { dataKey: dataKey });
                 const { cellRenderer, className, ...extraProps } = columnProps;
@@ -199,6 +215,7 @@ BaseTable.propTypes = {
   rowGetter: PropTypes.func.isRequired,
   rowCount: PropTypes.number.isRequired,
   rowRenderer: PropTypes.func,
+  selectable: PropTypes.bool,
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string
