@@ -16,6 +16,8 @@ class UploadPage extends React.Component {
   componentDidMount() {
     if (this.props.wizardEnableContinue) {
       this.props.wizardEnableContinue(false);
+    }
+    if (this.props.wizardSetOnContinueValidation) {
       this.props.wizardSetOnContinueValidation(this.verifyMetadata);
     }
   }
@@ -59,9 +61,11 @@ class UploadPage extends React.Component {
   };
 
   showInstructions = () => {
-    this.props.wizardSetOverlay(
-      <Instructions onClose={() => this.props.wizardSetOverlay(null)} />
-    );
+    if (this.props.wizardSetOverlay) {
+      this.props.wizardSetOverlay(
+        <Instructions onClose={() => this.props.wizardSetOverlay(null)} />
+      );
+    }
   };
 
   render() {
@@ -72,7 +76,7 @@ class UploadPage extends React.Component {
           project={this.props.project}
           onMetadataChange={this.handleMetadataChange}
           onShowCSVInstructions={this.showInstructions}
-          issues={this.state.wasManual && this.state.issues}
+          issues={this.state.wasManual ? this.state.issues : null}
           withinModal
         />
       </div>
@@ -86,9 +90,9 @@ UploadPage.propTypes = {
     id: PropTypes.number,
     name: PropTypes.string
   }),
-  wizardEnableContinue: PropTypes.func.isRequired,
-  wizardSetOnContinueValidation: PropTypes.func.isRequired,
-  wizardSetOverlay: PropTypes.func.isRequired,
+  wizardEnableContinue: PropTypes.func,
+  wizardSetOnContinueValidation: PropTypes.func,
+  wizardSetOverlay: PropTypes.func,
   samples: PropTypes.arrayOf(PropTypes.Sample)
 };
 

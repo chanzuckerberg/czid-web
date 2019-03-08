@@ -22,7 +22,7 @@ class Dropdown extends React.Component {
     // Also guard against NaN.
     if (
       prevProps.value !== this.props.value &&
-      !(isNaN(prevProps.value) && isNaN(this.props.value))
+      !(Number.isNaN(prevProps.value) && Number.isNaN(this.props.value))
     ) {
       this.setState({ value: this.props.value });
     }

@@ -42,10 +42,19 @@
     .input {
       margin: 5px 30px 5px 0;
       width: 130px;
+
+      &.extraPadding {
+        margin-bottom: 22px;
+      }
     }
 
     .noInput {
       color: $medium-grey;
+    }
+
+    .applyToAll {
+      color: $primary-light;
+      cursor: pointer;
     }
   }
 }

@@ -12,16 +12,8 @@ import { forbidExtraProps } from "airbnb-prop-types";
 // user clicks a date onBlur fires before onChange (triggering onBlur
 // manually would create problems with async setState)
 class DateInput extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      value: this.props.value || ""
-    };
-  }
-
   handleChange = (_, { value }) => {
-    this.setState({ value }, () => this.props.onChange(value));
+    this.props.onChange(value);
   };
 
   render() {
@@ -32,7 +24,7 @@ class DateInput extends React.Component {
         closable
         className={cx("idseq-ui", "input", cs.dateInput, className)}
         onChange={this.handleChange}
-        value={this.state.value}
+        value={this.props.value || ""}
         dateFormat="YYYY-MM-DD"
         popupPosition="bottom right"
       />

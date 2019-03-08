@@ -194,6 +194,7 @@ class ProjectSelection extends React.Component {
                   parent={this}
                   project={project}
                   i={i}
+                  key={project.id}
                   favorite={true}
                 />
               );
