@@ -22,7 +22,8 @@ class MetadataUpload extends React.Component {
       warnings: []
     },
     projectMetadataFields: null,
-    hostGenomes: []
+    hostGenomes: [],
+    showInfo: false
   };
 
   async componentDidMount() {
@@ -58,6 +59,12 @@ class MetadataUpload extends React.Component {
   // This happens when Continue is clicked in the parent component.
   onMetadataChangeManual = ({ metadata }) => {
     this.props.onMetadataChange({ metadata, wasManual: true });
+  };
+
+  toggleInfo = () => {
+    this.setState({
+      showInfo: !this.state.showInfo
+    });
   };
 
   renderTab = () => {
@@ -168,26 +175,41 @@ class MetadataUpload extends React.Component {
   };
 
   render() {
-    const { hostGenomes, projectMetadataFields, currentTab } = this.state;
+    const {
+      hostGenomes,
+      projectMetadataFields,
+      currentTab,
+      showInfo
+    } = this.state;
     const requiredFields = map(
       "name",
       filter(["is_required", 1], projectMetadataFields)
     );
     return (
       <div className={cx(cs.metadataUpload, this.props.className)}>
-        <div className={cs.details}>
-          <span className={cs.label}>{`Required fields: `}</span>
-          {requiredFields && requiredFields.join(", ")}
+        <div>
+          <span>
+            <a href="/metadata/dictionary" className={cs.link} target="_blank">
+              See Metadata Dictionary
+            </a>
+          </span>
+          {` | `}
+          <span className={cs.link} onClick={this.toggleInfo}>
+            {showInfo ? "Hide" : "See"} Required Fields and Host Genomes
+          </span>
         </div>
-        {currentTab === "CSV Upload" && (
-          <div className={cs.details}>
-            <span className={cs.label}>{`Host genomes: `}</span>
-            {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
+        {this.state.showInfo && (
+          <div className={cs.info}>
+            <div className={cs.details}>
+              <span className={cs.label}>{`Required fields: `}</span>
+              {requiredFields && requiredFields.join(", ")}
+            </div>
+            <div className={cs.details}>
+              <span className={cs.label}>{`Host genomes: `}</span>
+              {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
+            </div>
           </div>
         )}
-        <a href="/metadata/dictionary" className={cs.link} target="_blank">
-          See Metadata Dictionary
-        </a>
         <Tabs
           className={cs.tabs}
           tabs={["Manual Input", "CSV Upload"]}

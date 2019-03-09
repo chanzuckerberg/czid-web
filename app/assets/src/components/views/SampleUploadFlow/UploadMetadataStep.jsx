@@ -84,9 +84,6 @@ class UploadMetadataStep extends React.Component {
               onMetadataChange={this.handleMetadataChange}
               samplesAreNew
               issues={this.state.wasManual ? this.state.issues : null}
-              handleRequiredMetadataFields={
-                this.props.handleRequiredMetadataFields
-              }
             />
           </div>
           <div className={cs.mainControls}>
@@ -118,8 +115,7 @@ UploadMetadataStep.propTypes = {
   project: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string
-  }),
-  handleRequiredMetadataFields: PropTypes.func
+  })
 };
 
 export default UploadMetadataStep;
