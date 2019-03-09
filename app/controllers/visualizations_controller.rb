@@ -16,7 +16,7 @@ class VisualizationsController < ApplicationController
       visualizations = Visualization
                        .where(public_access: 1)
     else
-      Visualizations.where(public_access: 1, user: current_user)
+      visualizations = Visualization.where("public_access = 1 OR user_id = ?", current_user.id)
     end
     visualizations = visualizations
                      .joins(:user)
