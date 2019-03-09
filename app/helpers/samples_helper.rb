@@ -473,7 +473,7 @@ module SamplesHelper
              metadata_fields: { name: field_name },
              sample_id: sample_ids
            )
-           .group("#{Metadatum.where(key: field_name).first.validated_field}")
+           .group(Metadatum.where(key: field_name).first.validated_field)
   end
 
   private
