@@ -34,7 +34,7 @@ class SamplesView extends React.Component {
         cellRenderer: this.renderNumberAndPercentage
       },
       {
-        dataKey: "passedQC",
+        dataKey: "qcPercent",
         label: "Passed QC",
         flexGrow: 1,
         cellDataGetter: ({ dataKey, rowData }) =>
@@ -182,7 +182,7 @@ SamplesView.defaultProps = {
     "sample",
     "totalReads",
     "nonHostReads",
-    "passedQC",
+    "qcPercent",
     "duplicateCompressionRatio",
     "collectionLocation",
     "host",

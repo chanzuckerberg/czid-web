@@ -51,6 +51,7 @@ class SamplesController < ApplicationController
   # GET /samples
   # GET /samples.json
   def index
+    # this endpoint will be replaced in the future by index_v2
     @all_project = current_power.projects
     @page_size = PAGE_SIZE
     project_id = params[:project_id]
@@ -124,8 +125,11 @@ class SamplesController < ApplicationController
   end
 
   def index_v2
+    # this method is going to replace 'index' once we fully migrate to the
+    # discovery views (old one was kept to avoid breaking the current inteface
+    # without sacrificing speed of development and avoid breaking the current interface)
     domain = params[:domain]
-    include_ids = ActiveModel::Type::Boolean.new.cast(params[:includeIds])
+    list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
     offset = params[:offset].to_i
@@ -141,6 +145,9 @@ class SamplesController < ApplicationController
     )
     samples_visibility = visibility(limited_samples)
 
+    # format_samples loads a lot of information about samples
+    # There many ways we can refactor: multiple endoints for client to ask for the informaion
+    # they actually need or at least a configurable function to get only certain data
     details_json = format_samples(limited_samples).as_json()
     limited_samples_json.zip(details_json, samples_visibility).map do |sample, details, visibility|
       sample[:public] = visibility
@@ -148,7 +155,7 @@ class SamplesController < ApplicationController
     end
 
     results = { samples: limited_samples_json }
-    results[:all_samples_ids] = samples.pluck(:id) if include_ids
+    results[:all_samples_ids] = samples.pluck(:id) if list_all_sample_ids
 
     # Refactor once we have a clear API definition policy
     respond_to do |format|
@@ -171,30 +178,12 @@ class SamplesController < ApplicationController
     end
     sample_ids = samples.pluck(:id)
 
-    # locations
-    locations = Metadatum
-                .joins(:metadata_field)
-                .where(
-                  metadata_fields: { name: "collection_location" },
-                  sample_id: sample_ids
-                )
-                .group(:string_validated_value)
-                .count
-
-    # for metadata fields we need to send both value and text
+    locations = samples_count_by_metadata_field(sample_ids, "collection_location")
     locations = locations.map do |location, count|
       { value: location, text: location, count: count }
     end
 
-    tissues = Metadatum
-              .joins(:metadata_field)
-              .where(
-                metadata_fields: { name: "sample_type" },
-                sample_id: sample_ids
-              )
-              .group(:string_validated_value)
-              .count
-
+    tissues = samples_count_by_metadata_field(sample_ids, "sample_type")
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
     end

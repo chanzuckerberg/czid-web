@@ -176,7 +176,6 @@ module SamplesHelper
     tissue = params[:tissue]
     visibility = params[:visibility]
 
-    # # TODO(tiago): check performance
     samples = filter_by_taxid(samples, taxon) if taxon.present?
     samples = filter_by_host(samples, host) if host.present?
     samples = filter_by_string_metadatum(samples, "collection_location", location) if location.present?
@@ -533,5 +532,16 @@ module SamplesHelper
       # all samples user can see
       current_power.samples
     end
+  end
+
+  def samples_count_by_metadata_field(sample_ids, field_name)
+    return Metadatum
+           .joins(:metadata_field)
+           .where(
+             metadata_fields: { name: field_name },
+             sample_id: sample_ids
+           )
+           .group("#{Metadatum.convert_type_to_string(field_name)}_validate_value")
+           .count
   end
 end
