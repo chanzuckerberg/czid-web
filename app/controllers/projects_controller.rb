@@ -97,7 +97,7 @@ class ProjectsController < ApplicationController
     project_ids = samples.distinct(:project_id).pluck(:project_id)
     projects = Project.where(id: project_ids)
 
-    locations = sample_count_by_project_id(samples_ids, "collection_location")
+    locations = samples_by_metadata_field(sample_ids, "collection_location")
                 .joins(:sample)
                 .distinct
                 .count(:project_id)
@@ -105,7 +105,7 @@ class ProjectsController < ApplicationController
       { value: location, text: location, count: count }
     end
 
-    tissues = projects_count_by_metadata_field(samples_ids, "sample_type")
+    tissues = samples_by_metadata_field(sample_ids, "sample_type")
               .joins(:sample)
               .distinct
               .count(:project_id)

@@ -178,12 +178,12 @@ class SamplesController < ApplicationController
     end
     sample_ids = samples.pluck(:id)
 
-    locations = samples_count_by_metadata_field(sample_ids, "collection_location")
+    locations = samples_by_metadata_field(sample_ids, "collection_location").count
     locations = locations.map do |location, count|
       { value: location, text: location, count: count }
     end
 
-    tissues = samples_count_by_metadata_field(sample_ids, "sample_type")
+    tissues = samples_by_metadata_field(sample_ids, "sample_type").count
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
     end

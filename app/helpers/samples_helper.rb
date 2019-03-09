@@ -466,15 +466,14 @@ module SamplesHelper
     end
   end
 
-  def samples_count_by_metadata_field(sample_ids, field_name)
+  def samples_by_metadata_field(sample_ids, field_name)
     return Metadatum
            .joins(:metadata_field)
            .where(
              metadata_fields: { name: field_name },
              sample_id: sample_ids
            )
-           .group("#{Metadatum.convert_type_to_string(field_name)}_validate_value")
-           .count
+           .group("#{Metadatum.where(key: field_name).first.validated_field}")
   end
 
   private

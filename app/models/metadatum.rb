@@ -235,6 +235,11 @@ class Metadatum < ApplicationRecord
     ""
   end
 
+  def validated_field
+    base = self.class.convert_type_to_string(metadata_field.base_type)
+    return "#{base}_validated_value"
+  end
+
   def self.validated_value_multiget(metadata)
     metadata_fields = MetadataField.where(id: metadata.pluck(:metadata_field_id)).index_by(&:id)
     validated_values = {}
