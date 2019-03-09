@@ -3,6 +3,7 @@ require 'elasticsearch/model'
 
 class Metadatum < ApplicationRecord
   include ErrorHelper
+  include DateHelper
 
   if ELASTICSEARCH_ON
     include Elasticsearch::Model
@@ -89,7 +90,10 @@ class Metadatum < ApplicationRecord
   end
 
   def check_and_set_date_type
-    self.date_validated_value = Date.parse(raw_value)
+    # TODO(mark): Reject dates with a day if host genome is human.
+    # We are actually blocked on having a good FRONT-END date picker for MetadataInput,
+    # since semantic-ui-calendar-react is missing a month + year picker.
+    self.date_validated_value = parse_date(raw_value)
   rescue ArgumentError
     errors.add(:raw_value, MetadataValidationErrors::INVALID_DATE)
   end

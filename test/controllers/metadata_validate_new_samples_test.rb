@@ -371,4 +371,43 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
+
+  test 'metadata validate accepts various date formats' do
+    post user_session_path, params: @user_params
+
+    post validate_csv_for_new_samples_metadata_url(@metadata_validation_project), params: {
+      metadata: {
+        headers: ['sample_name', 'host_genome', 'sample_type', 'age', 'admission_date', 'nucleotide_type'],
+        rows: [
+          ['Test Sample Human', 'Human', 'Whole Blood', '12', '2018-01', 'DNA'],
+          ['Test Sample Human 2', 'Human', 'Whole Blood', '12', '2018-01-01', 'DNA'],
+          ['Test Sample Human 3', 'Human', 'Whole Blood', '12', '01/2018', 'DNA'],
+          ['Test Sample Human 4', 'Human', 'Whole Blood', '12', '01/01/2018', 'DNA']
+        ]
+      },
+      samples: [
+        {
+          name: "Test Sample Human",
+          project_id: @metadata_validation_project.id
+        },
+        {
+          name: "Test Sample Human 2",
+          project_id: @metadata_validation_project.id
+        },
+        {
+          name: "Test Sample Human 3",
+          project_id: @metadata_validation_project.id
+        },
+        {
+          name: "Test Sample Human 4",
+          project_id: @metadata_validation_project.id
+        }
+      ]
+    }, as: :json
+
+    assert_response :success
+
+    assert_equal 0, @response.parsed_body['issues']['errors'].length
+    assert_equal 0, @response.parsed_body['issues']['warnings'].length
+  end
 end
