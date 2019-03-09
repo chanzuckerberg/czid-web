@@ -27,14 +27,28 @@
 }
 
 .issues {
-  max-height: 300px;
-  margin-top: 16px;
-  overflow: auto;
+  margin-top: 25px;
+}
+
+.issueGroup {
+  margin-top: 6px;
+  border-radius: 4px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.errors .header {
+  color: $error;
+}
+
+.warnings .header {
+  color: $warning;
 }
 
 .errors,
 .warnings {
-  padding: 14px;
   margin-top: 12px;
 
   &:first-child {
@@ -42,58 +56,43 @@
   }
 
   .header {
-    font-size: 14px;
+    @include font-header-s;
     margin-bottom: 10px;
     display: flex;
     align-items: flex-start;
   }
+}
 
-  .dot {
-    font-size: 14px;
-    margin-right: 5px;
+.issue {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 6px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  &.warning {
+    background-color: $warning-bg;
+  }
+
+  &.error {
+    background-color: $error-bg;
   }
 
   .icon {
     width: 20px;
+    height: 20px;
     margin-right: 10px;
-  }
 
-  .item {
-    padding-left: 30px;
-    font-size: 12px;
-    margin-top: 2px;
-
-    &:first-child {
-      margin-top: 0;
+    &.warning {
+      fill: $warning;
     }
 
-    .dot {
-      font-size: 14px;
-      margin-right: 5px;
+    &.error {
+      fill: $error;
     }
-  }
-}
-
-.errors {
-  background-color: $error-bg;
-
-  .header {
-    color: $error;
-  }
-
-  .icon {
-    fill: $error;
-  }
-}
-
-.warnings {
-  background-color: $warning-bg;
-
-  .icon {
-    fill: $warning;
-  }
-
-  .header {
-    color: $warning;
   }
 }

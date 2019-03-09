@@ -5,6 +5,7 @@ class SamplesController < ApplicationController
   include PipelineOutputsHelper
   include ElasticsearchHelper
   include HeatmapHelper
+  include ErrorHelper
 
   ########################################
   # Note to developers:
@@ -434,7 +435,7 @@ class SamplesController < ApplicationController
     samples.each do |sample|
       missing_required_metadata_fields = sample.missing_required_metadata_fields
       unless missing_required_metadata_fields.empty?
-        errors << SampleUploadErrors.missing_required_metadata(sample, missing_required_metadata_fields)
+        errors << SampleUploadErrors.missing_required_metadata(sample, missing_required_metadata_fields.pluck(:name))
         sample.destroy
         removed_samples << sample
       end

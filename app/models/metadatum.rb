@@ -2,6 +2,9 @@ require 'csv'
 require 'elasticsearch/model'
 
 class Metadatum < ApplicationRecord
+  include ErrorHelper
+  include DateHelper
+
   if ELASTICSEARCH_ON
     include Elasticsearch::Model
     include Elasticsearch::Model::Callbacks
@@ -37,14 +40,14 @@ class Metadatum < ApplicationRecord
     # Fail if sample resolves to nil (probably a deleted sample)
     # TODO: Replace this with MetadataField validators
     unless sample
-      errors.add(:key, MetadataValidationErrors.missing_sample)
+      errors.add(:sample_not_found, MetadataValidationErrors::SAMPLE_NOT_FOUND)
       return
     end
 
     # Check if the key is valid. Metadata_field was supposed to be set.
     valid_keys = sample.host_genome.metadata_fields.pluck(:name, :display_name).flatten
     unless key && valid_keys.include?(key) && metadata_field
-      errors.add(:key, MetadataValidationErrors.invalid_key_for_host_genome(key, sample.host_genome_name))
+      errors.add(:invalid_host_genome, MetadataValidationErrors::INVALID_FIELD_FOR_HOST_GENOME)
       return
     end
 
@@ -54,8 +57,6 @@ class Metadatum < ApplicationRecord
 
   # Called by set_validated_values custom validator
   def check_and_set_string_type
-    key = self.key.to_sym
-
     if metadata_field && metadata_field.force_options == 1
       matched = false
       JSON.parse(metadata_field.options || "[]").each do |opt|
@@ -68,7 +69,7 @@ class Metadatum < ApplicationRecord
         end
       end
       unless matched
-        errors.add(:raw_value, MetadataValidationErrors.invalid_option(key, raw_value))
+        errors.add(:raw_value, MetadataValidationErrors::INVALID_OPTION)
       end
     else
       self.string_validated_value = raw_value
@@ -79,19 +80,22 @@ class Metadatum < ApplicationRecord
     # If the raw-value doesn't match a number regex.
     # This regex matches things like +0.2. Plus or minus, one or more digits, an optional decimal, and more digits.
     if /\A[+-]?\d+(\.\d+)?\z/.match(raw_value).nil?
-      errors.add(:raw_value, MetadataValidationErrors.invalid_number(raw_value))
+      errors.add(:raw_value, MetadataValidationErrors::INVALID_NUMBER)
     else
       # to_f will convert "abc" to 0.0, so we need the regex
       self.number_validated_value = raw_value.to_f
     end
   rescue ArgumentError
-    errors.add(:raw_value, MetadataValidationErrors.invalid_number(raw_value))
+    errors.add(:raw_value, MetadataValidationErrors::INVALID_NUMBER)
   end
 
   def check_and_set_date_type
-    self.date_validated_value = Date.parse(raw_value)
+    # TODO(mark): Reject dates with a day if host genome is human.
+    # We are actually blocked on having a good FRONT-END date picker for MetadataInput,
+    # since semantic-ui-calendar-react is missing a month + year picker.
+    self.date_validated_value = parse_date(raw_value)
   rescue ArgumentError
-    errors.add(:raw_value, MetadataValidationErrors.invalid_date(raw_value))
+    errors.add(:raw_value, MetadataValidationErrors::INVALID_DATE)
   end
 
   def self.str_to_basic_chars(res)

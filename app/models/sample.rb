@@ -114,11 +114,11 @@ class Sample < ApplicationRecord
   end
 
   def required_metadata_fields
-    host_genome.metadata_fields.where(is_required: 1).pluck(:name)
+    host_genome.metadata_fields.where(is_required: 1)
   end
 
   def missing_required_metadata_fields
-    required_metadata_fields - metadata.map(&:metadata_field).pluck(:name)
+    required_metadata_fields - metadata.map(&:metadata_field)
   end
 
   def set_presigned_url_for_local_upload
@@ -583,9 +583,6 @@ class Sample < ApplicationRecord
 
   # Validate metadatum entry on this sample, without saving.
   def metadatum_validate(key, val)
-    errors = []
-    warnings = []
-
     m = Metadatum.new
     m.metadata_field = get_available_matching_field(self, key.to_s)
 
@@ -598,25 +595,10 @@ class Sample < ApplicationRecord
       m.key = m.metadata_field.name
       m.sample = self
       m.raw_value = val
-
-      is_valid = m.valid?
-
-      unless is_valid
-        errors.concat(m.errors.messages[:key])
-        errors.concat(m.errors.messages[:raw_value])
-      end
-    end
-
-    existing_m = get_existing_metadatum(key.to_s)
-
-    # We currently compare the raw_value because val is also a raw string, so we compare equivalent things.
-    if existing_m && !existing_m.raw_value.nil? && existing_m.raw_value != val
-      warnings.push(MetadataValidationWarnings.value_already_exists(val, existing_m.raw_value, key))
     end
 
     {
-      errors: errors,
-      warnings: warnings,
+      errors: m.valid? ? {} : m.errors,
       # The existing metadata field that was used to validate this metadatum.
       metadata_field: m.metadata_field
     }

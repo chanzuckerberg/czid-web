@@ -21,6 +21,7 @@ sex:
 
 reported_sex:
   name: "reported_sex"
+  display_name: "Reported Sex"
   base_type: 0
   force_options: 1
   options: "[\"Female\", \"Male\"]"

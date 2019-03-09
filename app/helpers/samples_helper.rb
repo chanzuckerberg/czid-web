@@ -3,6 +3,7 @@ require 'csv'
 
 module SamplesHelper
   include PipelineOutputsHelper
+  include ErrorHelper
 
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
