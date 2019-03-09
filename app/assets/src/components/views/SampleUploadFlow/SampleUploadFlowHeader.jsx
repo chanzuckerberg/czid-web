@@ -23,12 +23,6 @@ class SampleUploadFlowHeader extends React.Component {
               </a>
             </div>
           )}
-          <div className={cs.subtitle}>
-            Need help?
-            <a className={cs.link} href="mailto:help@idseq.com">
-              Message us.
-            </a>
-          </div>
           <div className={cs.border} />
         </div>
       </NarrowContainer>
