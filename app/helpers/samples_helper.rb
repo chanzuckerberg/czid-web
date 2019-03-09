@@ -214,74 +214,6 @@ module SamplesHelper
     end
   end
 
-  def filter_by_time(samples, start_date, end_date)
-    samples.where("samples.created_at >= ? AND samples.created_at <= ?", start_date, end_date)
-  end
-
-  def filter_by_visibility(samples, visibility)
-    if visibility
-      public = visibility.include?("public")
-      private = visibility.include?("private")
-
-      if public ^ private
-        if public
-          return samples.public_samples
-        else
-          return samples.private_samples
-        end
-      end
-    end
-
-    samples
-  end
-
-  def filter_by_string_metadatum(samples, key, query)
-    # TODO(tiago): make this method generic to any data type and replace 'filter_by_metadatum'
-    # Should it add include_not_set?
-    samples
-      .includes(metadata: metadata_field)
-      .where(
-        metadata: {
-          metadata_fields: { name: key },
-          string_validated_value: query
-        }
-      )
-  end
-
-  def filter_by_metadatum(samples, key, query)
-    return samples.where("false") if query == ["none"]
-
-    # Use a set to speed up query.
-    query_set = query.to_set
-
-    include_not_set = query.include?('Not set')
-
-    sample_type_metadatum = Metadatum
-                            .where(sample_id: samples.pluck(:id), key: key)
-
-    matching_sample_ids = sample_type_metadatum
-                          .select { |m| query_set.include?(m.validated_value) }
-                          .pluck(:sample_id)
-
-    if include_not_set
-      not_set_ids = samples.pluck(:id) - sample_type_metadatum.pluck(:sample_id)
-      matching_sample_ids.concat(not_set_ids)
-    end
-
-    samples.where(id: matching_sample_ids)
-  end
-
-  def filter_by_host(samples, query)
-    return samples.where("false") if query == ["none"]
-    samples.where(host_genome_id: query)
-  end
-
-  def filter_by_taxid(samples, taxid)
-    pr_ids = TaxonByterange.where(taxid: taxid).pluck(:pipeline_run_id)
-    sample_ids = PipelineRun.top_completed_runs.where(id: pr_ids).pluck(:sample_id)
-    samples.where(id: sample_ids)
-  end
-
   def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
     pipeline_run_entry = {}
     if pipeline_run
@@ -543,5 +475,75 @@ module SamplesHelper
            )
            .group("#{Metadatum.convert_type_to_string(field_name)}_validate_value")
            .count
+  end
+
+  private
+
+  def filter_by_time(samples, start_date, end_date)
+    samples.where("samples.created_at >= ? AND samples.created_at <= ?", start_date, end_date)
+  end
+
+  def filter_by_visibility(samples, visibility)
+    if visibility
+      public = visibility.include?("public")
+      private = visibility.include?("private")
+
+      if public ^ private
+        if public
+          return samples.public_samples
+        else
+          return samples.private_samples
+        end
+      end
+    end
+
+    samples
+  end
+
+  def filter_by_string_metadatum(samples, key, query)
+    # TODO(tiago): make this method generic to any data type and replace 'filter_by_metadatum'
+    # Should it add include_not_set?
+    samples
+      .includes(metadata: metadata_field)
+      .where(
+        metadata: {
+          metadata_fields: { name: key },
+          string_validated_value: query
+        }
+      )
+  end
+
+  def filter_by_metadatum(samples, key, query)
+    return samples.where("false") if query == ["none"]
+
+    # Use a set to speed up query.
+    query_set = query.to_set
+
+    include_not_set = query.include?('Not set')
+
+    sample_type_metadatum = Metadatum
+                            .where(sample_id: samples.pluck(:id), key: key)
+
+    matching_sample_ids = sample_type_metadatum
+                          .select { |m| query_set.include?(m.validated_value) }
+                          .pluck(:sample_id)
+
+    if include_not_set
+      not_set_ids = samples.pluck(:id) - sample_type_metadatum.pluck(:sample_id)
+      matching_sample_ids.concat(not_set_ids)
+    end
+
+    samples.where(id: matching_sample_ids)
+  end
+
+  def filter_by_host(samples, query)
+    return samples.where("false") if query == ["none"]
+    samples.where(host_genome_id: query)
+  end
+
+  def filter_by_taxid(samples, taxid)
+    pr_ids = TaxonByterange.where(taxid: taxid).pluck(:pipeline_run_id)
+    sample_ids = PipelineRun.top_completed_runs.where(id: pr_ids).pluck(:sample_id)
+    samples.where(id: sample_ids)
   end
 end
