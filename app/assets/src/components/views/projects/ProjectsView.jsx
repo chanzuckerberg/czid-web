@@ -13,6 +13,10 @@ class ProjectsView extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      selected: Set()
+    };
+
     this.columns = [
       // selectColumn({
       //   onSelectRow: this.handleSelectRow,
@@ -95,13 +99,15 @@ class ProjectsView extends React.Component {
 
   render() {
     const { projects } = this.props;
-
+    const { selected } = this.state;
+    console.log(projects);
     let data = projects.map(project => {
       return merge(
         {
           details: pick(project, ["name", "description", "created_at", "owner"])
         },
         pick(project, [
+          "id",
           "public_access",
           "hosts",
           "tissues",
@@ -117,6 +123,8 @@ class ProjectsView extends React.Component {
         columns={this.columns}
         defaultRowHeight={120}
         sortBy={"details"}
+        selectableKey="id"
+        selected={selected}
       />
     );
   }

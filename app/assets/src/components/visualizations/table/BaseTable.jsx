@@ -83,11 +83,11 @@ class BaseTable extends React.Component {
     );
   };
 
-  renderSelectableCell = () => {
+  renderSelectableCell = (a, b, c) => {
     return <div>s</div>;
   };
 
-  renderSelectableHeader = () => {
+  renderSelectableHeader = ({}) => {
     return <div>S</div>;
   };
 
@@ -103,7 +103,8 @@ class BaseTable extends React.Component {
       rowCount,
       rowGetter,
       rowRenderer,
-      selectable,
+      selectableKey,
+      selected,
       sortable,
       sortBy,
       sortDirection
@@ -132,9 +133,10 @@ class BaseTable extends React.Component {
               sortDirection={sortable && sortDirection}
               width={width}
             >
-              {selectable && (
+              {selectableKey && (
                 <Column
                   className={cs.selectableColumn}
+                  dataKey={selectableKey}
                   headerRenderer={this.renderSelectableHeader}
                   cellRenderer={this.renderSelectableCell}
                 />
@@ -192,7 +194,8 @@ class BaseTable extends React.Component {
 BaseTable.defaultProps = {
   defaultColumnWidth: 60,
   defaultHeaderHeight: 50,
-  defaultRowHeight: 30
+  defaultRowHeight: 30,
+  selected: Set()
 };
 
 BaseTable.propTypes = {
@@ -216,10 +219,16 @@ BaseTable.propTypes = {
   rowGetter: PropTypes.func.isRequired,
   rowCount: PropTypes.number.isRequired,
   rowRenderer: PropTypes.func,
-  selectableBy: PropTypes.bool,
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
-  sortDirection: PropTypes.string
+  sortDirection: PropTypes.string,
+
+  // make the table selectable, by setting a selectable key
+  // the tables will check for the selectable key in the selected set/array
+  selectableKey: PropTypes.string,
+  selected: PropTypes.oneOfType([PropTypes.array, PropTypes.instanceof(Set)]),
+  // indicates if selected all is checked: should be used only by Table and InfiniteTable
+  selectedAllChecked: PropTypes.bool
 };
 
 export default BaseTable;
