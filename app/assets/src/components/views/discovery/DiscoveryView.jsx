@@ -95,7 +95,7 @@ class DiscoveryView extends React.Component {
       },
       () => {
         this.refreshData();
-        this.samplesView.reset();
+        this.samplesView && this.samplesView.reset();
       }
     );
   };
@@ -256,7 +256,6 @@ class DiscoveryView extends React.Component {
             {currentTab == "samples" && (
               <SamplesView
                 ref={samplesView => (this.samplesView = samplesView)}
-                samples={samples}
                 onLoadRows={this.handleLoadSampleRows}
               />
             )}

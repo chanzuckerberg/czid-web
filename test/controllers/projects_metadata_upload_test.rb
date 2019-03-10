@@ -1,8 +1,9 @@
 require 'test_helper'
-require 'constants/errors'
 
 # Tests ProjectsController upload_metadata endpoint
 class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
+  include ErrorHelper
+
   setup do
     @project = projects(:one)
     @metadata_validation_project = projects(:metadata_validation_project)

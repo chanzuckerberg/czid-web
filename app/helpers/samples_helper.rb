@@ -3,6 +3,7 @@ require 'csv'
 
 module SamplesHelper
   include PipelineOutputsHelper
+  include ErrorHelper
 
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
@@ -176,12 +177,11 @@ module SamplesHelper
     tissue = params[:tissue]
     visibility = params[:visibility]
 
-    # # TODO(tiago): check performance
     samples = filter_by_taxid(samples, taxon) if taxon.present?
     samples = filter_by_host(samples, host) if host.present?
-    samples = filter_by_string_metadatum(samples, "collection_location", location) if location.present?
+    samples = filter_by_metadata_key(samples, "collection_location", location) if location.present?
     samples = filter_by_time(samples, Date.parse(time[0]), Date.parse(time[1])) if time.present?
-    samples = filter_by_string_metadatum(samples, "sample_type", tissue) if tissue.present?
+    samples = filter_by_metadata_key(samples, "sample_type", tissue) if tissue.present?
     samples = filter_by_visibility(samples, visibility) if visibility.present?
 
     return samples
@@ -205,51 +205,9 @@ module SamplesHelper
     end
   end
 
-  def get_total_runtime(pipeline_run, run_stages)
-    if pipeline_run.finalized?
-      # total processing time (without time spent waiting), for performance evaluation
-      (run_stages || []).map { |rs| pipeline_run.ready_step && rs.step_number > pipeline_run.ready_step ? 0 : (rs.updated_at - rs.created_at) }.sum
-    else
-      # time since pipeline kickoff (including time spent waiting), for run diagnostics
-      (Time.current - pipeline_run.created_at)
-    end
-  end
-
-  def filter_by_time(samples, start_date, end_date)
-    samples.where("samples.created_at >= ? AND samples.created_at <= ?", start_date, end_date)
-  end
-
-  def filter_by_visibility(samples, visibility)
-    if visibility
-      public = visibility.include?("public")
-      private = visibility.include?("private")
-
-      if public ^ private
-        if public
-          return samples.public_samples
-        else
-          return samples.private_samples
-        end
-      end
-    end
-
-    samples
-  end
-
-  def filter_by_string_metadatum(samples, key, query)
-    # TODO(tiago): make this method generic to any data type and replace 'filter_by_metadatum'
-    # Should it add include_not_set?
-    samples
-      .includes(metadata: metadata_field)
-      .where(
-        metadata: {
-          metadata_fields: { name: key },
-          string_validated_value: query
-        }
-      )
-  end
-
   def filter_by_metadatum(samples, key, query)
+    # !DEPRECATED
+    # TODO(tiago): This filter will be replaced by filter_by_metadata_key
     return samples.where("false") if query == ["none"]
 
     # Use a set to speed up query.
@@ -272,15 +230,14 @@ module SamplesHelper
     samples.where(id: matching_sample_ids)
   end
 
-  def filter_by_host(samples, query)
-    return samples.where("false") if query == ["none"]
-    samples.where(host_genome_id: query)
-  end
-
-  def filter_by_taxid(samples, taxid)
-    pr_ids = TaxonByterange.where(taxid: taxid).pluck(:pipeline_run_id)
-    sample_ids = PipelineRun.top_completed_runs.where(id: pr_ids).pluck(:sample_id)
-    samples.where(id: sample_ids)
+  def get_total_runtime(pipeline_run, run_stages)
+    if pipeline_run.finalized?
+      # total processing time (without time spent waiting), for performance evaluation
+      (run_stages || []).map { |rs| pipeline_run.ready_step && rs.step_number > pipeline_run.ready_step ? 0 : (rs.updated_at - rs.created_at) }.sum
+    else
+      # time since pipeline kickoff (including time spent waiting), for run diagnostics
+      (Time.current - pipeline_run.created_at)
+    end
   end
 
   def pipeline_run_info(pipeline_run, report_ready_pipeline_run_ids, pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
@@ -533,5 +490,62 @@ module SamplesHelper
       # all samples user can see
       current_power.samples
     end
+  end
+
+  def samples_by_metadata_field(sample_ids, field_name)
+    return Metadatum
+           .joins(:metadata_field)
+           .where(
+             metadata_fields: { name: field_name },
+             sample_id: sample_ids
+           )
+           .group(Metadatum.where(key: field_name).first.validated_field)
+  end
+
+  private
+
+  def filter_by_time(samples, start_date, end_date)
+    samples.where("samples.created_at >= ? AND samples.created_at <= ?", start_date, end_date)
+  end
+
+  def filter_by_visibility(samples, visibility)
+    if visibility
+      public = visibility.include?("public")
+      private = visibility.include?("private")
+
+      if public ^ private
+        if public
+          return samples.public_samples
+        else
+          return samples.private_samples
+        end
+      end
+    end
+
+    samples
+  end
+
+  def filter_by_metadata_key(samples, key, query)
+    # TODO(tiago): replace 'filter_by_metadatum' once we decide to includeing not set values
+    metadata_field = Metadatum.where(key: key).first
+    samples
+      .includes(metadata: :metadata_field)
+      .where(
+        metadata: {
+          metadata_field_id: metadata_field.metadata_field_id,
+          metadata_field.validated_field => query
+        }
+      )
+  end
+
+  def filter_by_host(samples, query)
+    return samples.where("false") if query == ["none"]
+    samples.where(host_genome_id: query)
+  end
+
+  def filter_by_taxid(samples, taxid)
+    pr_ids = TaxonByterange.where(taxid: taxid).pluck(:pipeline_run_id)
+    sample_ids = PipelineRun.top_completed_runs.where(id: pr_ids).pluck(:sample_id)
+    samples.where(id: sample_ids)
   end
 end

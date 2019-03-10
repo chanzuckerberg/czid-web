@@ -97,38 +97,18 @@ class ProjectsController < ApplicationController
     project_ids = samples.distinct(:project_id).pluck(:project_id)
     projects = Project.where(id: project_ids)
 
-    # locations
-    locations = Metadatum
-                .joins(
-                  :metadata_field,
-                  :sample
-                )
-                .where(
-                  metadata_fields: { name: "collection_location" },
-                  sample_id: sample_ids
-                )
-                .group(:string_validated_value)
+    locations = samples_by_metadata_field(sample_ids, "collection_location")
+                .joins(:sample)
                 .distinct
                 .count(:project_id)
-
-    # for metadata fields we need to send both value and text
     locations = locations.map do |location, count|
       { value: location, text: location, count: count }
     end
 
-    tissues = Metadatum
-              .joins(
-                :metadata_field,
-                :sample
-              )
-              .where(
-                metadata_fields: { name: "sample_type" },
-                sample_id: sample_ids
-              )
-              .group(:string_validated_value)
+    tissues = samples_by_metadata_field(sample_ids, "sample_type")
+              .joins(:sample)
               .distinct
               .count(:project_id)
-
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
     end

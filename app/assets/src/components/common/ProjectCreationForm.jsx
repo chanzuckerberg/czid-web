@@ -9,7 +9,7 @@ import cs from "./project_creation_form.scss";
 class ProjectCreationForm extends React.Component {
   state = {
     name: "",
-    publicAccess: 1,
+    publicAccess: -1, // No selection by default
     error: ""
   };
 
@@ -20,7 +20,7 @@ class ProjectCreationForm extends React.Component {
   };
 
   handleCreateProject = async () => {
-    if (this.state.name === "") {
+    if (this.state.name === "" || this.state.publicAccess === -1) {
       return;
     }
     this.setState({
@@ -96,7 +96,8 @@ class ProjectCreationForm extends React.Component {
           <div
             className={cx(
               cs.createButton,
-              this.state.name === "" && cs.disabled
+              (this.state.name === "" || this.state.publicAccess === -1) &&
+                cs.disabled
             )}
             onClick={this.handleCreateProject}
           >
