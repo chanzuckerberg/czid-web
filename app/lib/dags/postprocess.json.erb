@@ -27,19 +27,11 @@
     <% if @attribute_dict[:pipeline_version].to_f >= 3.1 %> 
 
     ,"host_filter_out": [
-      <% if @host_genome == "human" %>
-        "gsnap_filter_1.fa"
-        <% if @attribute_dict[:input_file_count] > 1 %>
-          , "gsnap_filter_2.fa"
-          , "gsnap_filter_merged.fa"
-        <% end %>
-     <% else %>
-        "subsampled_1.fa"
-        <% if @attribute_dict[:input_file_count] > 1 %>
-          , "subsampled_2.fa"
-          , "subsampled_merged.fa"
-        <% end %>
-     <% end %>
+      "gsnap_filter_1.fa"
+      <% if @attribute_dict[:input_file_count] > 1 %>
+        , "gsnap_filter_2.fa"
+        , "gsnap_filter_merged.fa"
+      <% end %>
     ],
     "gsnap_out": [
         "gsnap.m8",
