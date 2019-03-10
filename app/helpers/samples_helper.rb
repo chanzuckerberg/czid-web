@@ -205,6 +205,29 @@ module SamplesHelper
     end
   end
 
+  def filter_by_metadatum(samples, key, query)
+    return samples.where("false") if query == ["none"]
+
+    # Use a set to speed up query.
+    query_set = query.to_set
+
+    include_not_set = query.include?('Not set')
+
+    sample_type_metadatum = Metadatum
+                            .where(sample_id: samples.pluck(:id), key: key)
+
+    matching_sample_ids = sample_type_metadatum
+                          .select { |m| query_set.include?(m.validated_value) }
+                          .pluck(:sample_id)
+
+    if include_not_set
+      not_set_ids = samples.pluck(:id) - sample_type_metadatum.pluck(:sample_id)
+      matching_sample_ids.concat(not_set_ids)
+    end
+
+    samples.where(id: matching_sample_ids)
+  end
+
   def get_total_runtime(pipeline_run, run_stages)
     if pipeline_run.finalized?
       # total processing time (without time spent waiting), for performance evaluation
@@ -475,29 +498,6 @@ module SamplesHelper
              sample_id: sample_ids
            )
            .group(Metadatum.where(key: field_name).first.validated_field)
-  end
-
-  def filter_by_metadatum(samples, key, query)
-    return samples.where("false") if query == ["none"]
-
-    # Use a set to speed up query.
-    query_set = query.to_set
-
-    include_not_set = query.include?('Not set')
-
-    sample_type_metadatum = Metadatum
-                            .where(sample_id: samples.pluck(:id), key: key)
-
-    matching_sample_ids = sample_type_metadatum
-                          .select { |m| query_set.include?(m.validated_value) }
-                          .pluck(:sample_id)
-
-    if include_not_set
-      not_set_ids = samples.pluck(:id) - sample_type_metadatum.pluck(:sample_id)
-      matching_sample_ids.concat(not_set_ids)
-    end
-
-    samples.where(id: matching_sample_ids)
   end
 
   private
