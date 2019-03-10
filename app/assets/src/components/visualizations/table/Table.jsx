@@ -28,7 +28,8 @@ class Table extends React.Component {
   isSelectedAllChecked = () => {
     const { data, selectableKey, selected } = this.props;
     return (
-      !isEmpty(data) && isEmpty(difference(map(selectableKey, data), selected))
+      !isEmpty(data) &&
+      isEmpty(difference(map(selectableKey, data), Array.from(selected)))
     );
   };
 
@@ -62,7 +63,7 @@ class Table extends React.Component {
         : data;
 
     const selectAllChecked = this.isSelectedAllChecked();
-
+    console.log("Table:render", selectAllChecked);
     return (
       <BaseTable
         columns={columns}

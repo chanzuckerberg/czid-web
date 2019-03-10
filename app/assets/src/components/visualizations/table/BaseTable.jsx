@@ -125,6 +125,10 @@ class BaseTable extends React.Component {
       sortDirection
     } = this.props;
 
+    console.log(
+      "BaseTable:render - selectAllChecked",
+      this.props.selectAllChecked
+    );
     const { activeColumns, columns } = this.state;
     const columnOrder = activeColumns || map(columns, "dataKey");
     return (
