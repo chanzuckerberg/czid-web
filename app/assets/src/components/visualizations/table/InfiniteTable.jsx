@@ -77,6 +77,7 @@ class InfiniteTable extends React.Component {
     );
   };
 
+  // !Attention!: reset function must be called if previously loaded data changes
   reset = () => {
     const { rowCount } = this.props;
     this.rows = [];

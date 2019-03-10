@@ -179,9 +179,9 @@ module SamplesHelper
 
     samples = filter_by_taxid(samples, taxon) if taxon.present?
     samples = filter_by_host(samples, host) if host.present?
-    samples = filter_by_string_metadatum(samples, "collection_location", location) if location.present?
+    samples = filter_by_metadata_key(samples, "collection_location", location) if location.present?
     samples = filter_by_time(samples, Date.parse(time[0]), Date.parse(time[1])) if time.present?
-    samples = filter_by_string_metadatum(samples, "sample_type", tissue) if tissue.present?
+    samples = filter_by_metadata_key(samples, "sample_type", tissue) if tissue.present?
     samples = filter_by_visibility(samples, visibility) if visibility.present?
 
     return samples
@@ -477,6 +477,29 @@ module SamplesHelper
            .group(Metadatum.where(key: field_name).first.validated_field)
   end
 
+  def filter_by_metadatum(samples, key, query)
+    return samples.where("false") if query == ["none"]
+
+    # Use a set to speed up query.
+    query_set = query.to_set
+
+    include_not_set = query.include?('Not set')
+
+    sample_type_metadatum = Metadatum
+                            .where(sample_id: samples.pluck(:id), key: key)
+
+    matching_sample_ids = sample_type_metadatum
+                          .select { |m| query_set.include?(m.validated_value) }
+                          .pluck(:sample_id)
+
+    if include_not_set
+      not_set_ids = samples.pluck(:id) - sample_type_metadatum.pluck(:sample_id)
+      matching_sample_ids.concat(not_set_ids)
+    end
+
+    samples.where(id: matching_sample_ids)
+  end
+
   private
 
   def filter_by_time(samples, start_date, end_date)
@@ -500,40 +523,17 @@ module SamplesHelper
     samples
   end
 
-  def filter_by_string_metadatum(samples, key, query)
-    # TODO(tiago): make this method generic to any data type and replace 'filter_by_metadatum'
-    # Should it add include_not_set?
+  def filter_by_metadata_key(samples, key, query)
+    # TODO(tiago): replace 'filter_by_metadatum' once we decide to includeing not set values
+    metadata_field = Metadatum.where(key: key).first
     samples
-      .includes(metadata: metadata_field)
+      .includes(metadata: :metadata_field)
       .where(
         metadata: {
-          metadata_fields: { name: key },
-          string_validated_value: query
+          metadata_field_id: metadata_field.metadata_field_id,
+          metadata_field.validated_field => query
         }
       )
-  end
-
-  def filter_by_metadatum(samples, key, query)
-    return samples.where("false") if query == ["none"]
-
-    # Use a set to speed up query.
-    query_set = query.to_set
-
-    include_not_set = query.include?('Not set')
-
-    sample_type_metadatum = Metadatum
-                            .where(sample_id: samples.pluck(:id), key: key)
-
-    matching_sample_ids = sample_type_metadatum
-                          .select { |m| query_set.include?(m.validated_value) }
-                          .pluck(:sample_id)
-
-    if include_not_set
-      not_set_ids = samples.pluck(:id) - sample_type_metadatum.pluck(:sample_id)
-      matching_sample_ids.concat(not_set_ids)
-    end
-
-    samples.where(id: matching_sample_ids)
   end
 
   def filter_by_host(samples, query)
