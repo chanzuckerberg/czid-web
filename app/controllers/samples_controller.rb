@@ -148,7 +148,6 @@ class SamplesController < ApplicationController
       entry = s.as_json(only: [:id, :name, :sample_tissue, :host_genome_id, :project_id, :created_at])
       entry["host_genome_name"] = s.host_genome_name # this method uses s.host_genome under the hood
       entry["private_until"] = s.private_until # this method uses s.project under the hood
-      entry["input_files"] = s.input_files.as_json # TODO: can probably be removed, but I ported it from the legacy code just in case
       samples_resp << entry
     end
     render json: samples_resp

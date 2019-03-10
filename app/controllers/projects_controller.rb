@@ -63,6 +63,26 @@ class ProjectsController < ApplicationController
                      current_power.samples
                    end
 
+        ############ OLD ####################
+        @projects = if only_library || exclude_library
+                      @samples.group(:project).count
+                    else
+                      # Make sure you still return projects without any samples. Ex: Project listing
+                      # used by the CLI.
+                      (only_updatable ? current_power.updatable_projects : current_power.projects).map do |p|
+                        [p, Sample.where(project: p).count]
+                      end
+                    end
+        extended_projects = @projects.map do |project, sample_count|
+          project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
+            number_of_samples: sample_count,
+            hosts: @samples.where(project_id: project.id).includes(:host_genome).distinct.pluck("host_genomes.name").compact,
+            tissues: @samples.where(project_id: project.id).distinct.pluck(:sample_tissue).compact
+          )
+        end
+        old_extended_projects = extended_projects
+
+        ############ NEW #######################
         # Retrieve a json of projects associated with samples;
         # augment with number_of_samples, hosts, tissues.
         # TODO: Why are we passing host / tissue for each individual sample, with a lot of duplication?
@@ -76,17 +96,24 @@ class ProjectsController < ApplicationController
         host_genome_names_by_project_id = {}
         tissues_by_project_id = {}
         @samples.includes(:host_genome).each do |s|
-          (host_genome_names_by_project_id[s.project_id] ||= []) << s.host_genome_name
+          host_genome_names_by_project_id[s.project_id] ||= []
+          host_genome_names_by_project_id[s.project_id] |= [s.host_genome_name]
           # TODO: sample_tissue column is deprecated, retrieve sample_type from Metadatum model instead
-          (tissues_by_project_id[s.project_id] ||= []) << s.sample_tissue
+          tissues_by_project_id[s.project_id] ||= []
+          tissues_by_project_id[s.project_id] |= [s.sample_tissue]
         end
         extended_projects = @projects.map do |project|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
             number_of_samples: sample_count_by_project_id[project.id] || 0,
-            hosts: host_genome_names_by_project_id[project.id] || [],
-            tissues: tissues_by_project_id[project.id] || []
+            hosts: (host_genome_names_by_project_id[project.id] || []).compact,
+            tissues: (tissues_by_project_id[project.id] || []).compact
           )
         end
+        Rails.logger.warn("CHARLES:")
+        Rails.logger.warn("IDENTICAL? #{old_extended_projects == extended_projects}")
+        Rails.logger.warn("OLD: #{old_extended_projects}")
+        Rails.logger.warn("NEW: #{extended_projects}")
+
         render json: extended_projects
       end
     end
