@@ -206,6 +206,8 @@ module SamplesHelper
   end
 
   def filter_by_metadatum(samples, key, query)
+    # !DEPRECATED
+    # TODO(tiago): This filter will be replaced by filter_by_metadata_key
     return samples.where("false") if query == ["none"]
 
     # Use a set to speed up query.
