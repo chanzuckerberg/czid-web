@@ -1,8 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Table } from "~/components/visualizations/table";
-// import { selectColumn } from "~/components/visualizations/columns";
-import { merge, pick } from "lodash";
+import { difference, map, merge, pick, union } from "lodash/fp";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
 import moment from "moment";
@@ -14,14 +13,10 @@ class ProjectsView extends React.Component {
     super(props);
 
     this.state = {
-      selected: Set()
+      selected: new Set()
     };
 
     this.columns = [
-      // selectColumn({
-      //   onSelectRow: this.handleSelectRow,
-      //   onSelectAllRows: this.handleSelectAllRows
-      // }),
       {
         dataKey: "public_access",
         width: 30,
@@ -53,12 +48,29 @@ class ProjectsView extends React.Component {
     ];
   }
 
-  handleSelectRow = (a, b, c) => {
-    console.log(a, b, c);
+  handleSelectRow = (value, checked) => {
+    console.log("Table: handleSelectRow", value, checked);
+    const { selected } = this.state;
+    let newSelected = new Set(selected);
+    if (checked) {
+      newSelected.add(value);
+    } else {
+      newSelected.delete(value);
+    }
+    this.setState({ selected: newSelected });
   };
 
-  handleSelectAllRows = (a, b, c) => {
-    console.log(a, b, c);
+  handleSelectAllRows = (value, checked) => {
+    console.log("Table: handleSelectAllRows", value, checked);
+    const { projects } = this.props;
+    const { selected } = this.state;
+    let newSelected = new Set(
+      checked
+        ? union(selected, map("id", projects))
+        : difference(selected, map("id", projects))
+    );
+
+    this.setState({ selected: newSelected });
   };
 
   renderAccess = ({ cellData: publicAccess }) => {
@@ -77,16 +89,12 @@ class ProjectsView extends React.Component {
     return (
       <div className={cs.project}>
         <div className={cs.projectName}>{project.name}</div>
-        <div className={cs.projectDescription}>
-          {project.description || "No description (DELETE THIS)"}
-        </div>
+        <div className={cs.projectDescription}>{project.description}</div>
         <div className={cs.projectDetails}>
           <span className={cs.projectCreationDate}>
             {moment(project.created_at).fromNow()}
           </span>|
-          <span className={cs.projectOwner}>
-            {project.owner || "No owner (DELETE THIS)"}
-          </span>
+          <span className={cs.projectOwner}>{project.owner}</span>
         </div>
       </div>
     );
@@ -104,15 +112,12 @@ class ProjectsView extends React.Component {
     let data = projects.map(project => {
       return merge(
         {
-          details: pick(project, ["name", "description", "created_at", "owner"])
+          details: pick(["name", "description", "created_at", "owner"], project)
         },
-        pick(project, [
-          "id",
-          "public_access",
-          "hosts",
-          "tissues",
-          "number_of_samples"
-        ])
+        pick(
+          ["id", "public_access", "hosts", "tissues", "number_of_samples"],
+          project
+        )
       );
     });
 
@@ -122,6 +127,8 @@ class ProjectsView extends React.Component {
         data={data}
         columns={this.columns}
         defaultRowHeight={120}
+        onSelectAllRows={this.handleSelectAllRows}
+        onSelectRow={this.handleSelectRow}
         sortBy={"details"}
         selectableKey="id"
         selected={selected}

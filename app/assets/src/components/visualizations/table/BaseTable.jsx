@@ -83,12 +83,27 @@ class BaseTable extends React.Component {
     );
   };
 
-  renderSelectableCell = (a, b, c) => {
-    return <div>s</div>;
+  renderSelectableCell = ({ cellData }) => {
+    const { selected, onSelectRow } = this.props;
+    return (
+      <Checkbox
+        checked={selected.has(cellData)}
+        onChange={onSelectRow}
+        value={cellData}
+      />
+    );
   };
 
-  renderSelectableHeader = ({}) => {
-    return <div>S</div>;
+  renderSelectableHeader = () => {
+    const { selectAllChecked, onSelectAllRows } = this.props;
+    console.log("renderSelectableHeader", selectAllChecked);
+    return (
+      <Checkbox
+        checked={selectAllChecked}
+        onChange={onSelectAllRows}
+        value={"all"}
+      />
+    );
   };
 
   render() {
@@ -96,6 +111,7 @@ class BaseTable extends React.Component {
       defaultCellRenderer,
       defaultHeaderHeight,
       defaultRowHeight,
+      defaultSelectColumnWidth,
       initialActiveColumns,
       onRowsRendered,
       forwardRef,
@@ -104,7 +120,6 @@ class BaseTable extends React.Component {
       rowGetter,
       rowRenderer,
       selectableKey,
-      selected,
       sortable,
       sortBy,
       sortDirection
@@ -139,6 +154,8 @@ class BaseTable extends React.Component {
                   dataKey={selectableKey}
                   headerRenderer={this.renderSelectableHeader}
                   cellRenderer={this.renderSelectableCell}
+                  disableSort={true}
+                  width={defaultSelectColumnWidth}
                 />
               )}
               {columnOrder.map(dataKey => {
@@ -195,7 +212,8 @@ BaseTable.defaultProps = {
   defaultColumnWidth: 60,
   defaultHeaderHeight: 50,
   defaultRowHeight: 30,
-  selected: Set()
+  defaultSelectColumnWidth: 30,
+  selected: new Set()
 };
 
 BaseTable.propTypes = {
@@ -208,6 +226,7 @@ BaseTable.propTypes = {
   defaultColumnWidth: PropTypes.number,
   defaultHeaderHeight: PropTypes.number,
   defaultRowHeight: PropTypes.number,
+  defaultSelectColumnWidth: PropTypes.number,
   // Set of dataKeys of columns to be shown by default
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
   onRowsRendered: PropTypes.func,
@@ -226,9 +245,11 @@ BaseTable.propTypes = {
   // make the table selectable, by setting a selectable key
   // the tables will check for the selectable key in the selected set/array
   selectableKey: PropTypes.string,
-  selected: PropTypes.oneOfType([PropTypes.array, PropTypes.instanceof(Set)]),
+  selected: PropTypes.instanceOf(Set),
+  onSelectRow: PropTypes.func,
+  onSelectAllRows: PropTypes.func,
   // indicates if selected all is checked: should be used only by Table and InfiniteTable
-  selectedAllChecked: PropTypes.bool
+  selectAllChecked: PropTypes.bool
 };
 
 export default BaseTable;
