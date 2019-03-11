@@ -1,8 +1,12 @@
 import React from "react";
 import { intersection, map, take } from "lodash/fp";
+import { Modal, Form } from "semantic-ui-react";
 import cx from "classnames";
-import cs from "collection_modal.scss";
+import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
+import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
+import cs from "./collection_modal.scss";
 
+// TODO(tiago): complete refactor by migrating to ui/containers/modal
 class CollectionModal extends React.Component {
   constructor(props) {
     super(props);
@@ -20,11 +24,13 @@ class CollectionModal extends React.Component {
   }
 
   renderSampleList() {
+    const { fetchedSampleIds, samples, selectedSampleIds } = this.props;
+
     const MAX_SAMPLES_TO_SHOW = 10;
 
     const availableSampleIds = intersection(
-      this.props.selectedSampleIds,
-      this.props.parent.state.fetchedSampleIds
+      selectedSampleIds,
+      fetchedSampleIds
     );
 
     const samplesToShow = map(
