@@ -298,7 +298,7 @@ const getSamples = ({
   limit,
   offset,
   filters,
-  includeIds
+  listAllIds
 } = {}) => {
   return get("/samples/index_v2.json", {
     params: {
@@ -306,7 +306,7 @@ const getSamples = ({
       domain,
       limit,
       offset,
-      includeIds,
+      listAllIds,
       ...filters
     }
   });

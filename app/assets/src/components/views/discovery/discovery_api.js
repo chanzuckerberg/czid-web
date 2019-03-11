@@ -15,7 +15,7 @@ const getDiscoveryData = async ({ domain, filters }) => {
     // Todo(tiago): maybe we should process them independently, otherwise
     // our response time will be the same as the worst case.
     const [samples, projects, visualizations] = await Promise.all([
-      getDiscoverySamples({ domain, filters, includeIds: true }),
+      getDiscoverySamples({ domain, filters, listAllIds: true }),
       getProjects({ domain, filters }),
       getVisualizations({ domain, filters })
     ]);
@@ -106,14 +106,14 @@ const getDiscoverySamples = async ({
   filters,
   limit = 100,
   offset = 0,
-  includeIds = false
+  listAllIds = false
 } = {}) => {
   const sampleResults = await getSamples({
     domain,
     filters,
     limit,
     offset,
-    includeIds
+    listAllIds
   });
   return {
     samples: map(processRawSample, sampleResults.samples),
