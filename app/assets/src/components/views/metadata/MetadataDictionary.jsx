@@ -119,6 +119,8 @@ class MetadataDictionary extends React.Component {
       }))
     );
 
+  getColumnWidth = column => (column === "name" ? 250 : "");
+
   render() {
     const fieldGroupsToDisplay = this.getFieldGroups();
     return (
@@ -147,6 +149,7 @@ class MetadataDictionary extends React.Component {
                   data={fieldGroup.fields}
                   headers={dictionaryHeaders}
                   columns={["name", "description", "examples"]}
+                  getColumnWidth={this.getColumnWidth}
                 />
               </div>
             ),
