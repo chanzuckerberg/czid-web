@@ -9,7 +9,7 @@ class SampleUploadFlowHeader extends React.Component {
     const { currentStep } = this.props;
     return (
       <NarrowContainer>
-        <div className={cs.header}>
+        <div className={cs.sampleUploadFlowHeader}>
           <div className={cs.title}>{startCase(currentStep)}</div>
           {currentStep === "uploadSamples" && (
             <div className={cs.subtitle}>
@@ -23,6 +23,18 @@ class SampleUploadFlowHeader extends React.Component {
               </a>
             </div>
           )}
+          {currentStep === "uploadMetadata" && (
+            <div className={cs.subtitle}>
+              Add custom metadata to leverage in our heatmap and other
+              visualizations.
+            </div>
+          )}
+          {currentStep === "review" && (
+            <div className={cs.subtitle}>
+              Uploading {this.props.samples.length} samples to{" "}
+              {this.props.project.name}
+            </div>
+          )}
           <div className={cs.border} />
         </div>
       </NarrowContainer>
@@ -31,7 +43,9 @@ class SampleUploadFlowHeader extends React.Component {
 }
 
 SampleUploadFlowHeader.propTypes = {
-  currentStep: PropTypes.string.isRequired
+  currentStep: PropTypes.string.isRequired,
+  samples: PropTypes.arrayOf(PropTypes.Sample),
+  project: PropTypes.Project
 };
 
 export default SampleUploadFlowHeader;

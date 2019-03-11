@@ -3,7 +3,7 @@
 
 .sampleUploadFlow {
   .inner {
-    padding: 60px;
+    padding: 0 60px;
     background-color: $white;
   }
 
@@ -24,9 +24,8 @@
   }
 }
 
-.header {
-  margin: 20px auto 40px;
-  width: 91%;
+.sampleUploadFlowHeader {
+  margin: 20px 60px 40px 60px;
 
   .title {
     @include font-header-xxl;
@@ -35,11 +34,12 @@
 
   .subtitle {
     margin-top: 5px;
+    color: $medium-grey;
   }
 
   .link {
     // Overwrite <a> inherit rule in header.scss
-    color: $primary-light !important;
+    color: $primary-lighter !important;
     cursor: pointer;
     margin-left: 5px;
   }
@@ -50,11 +50,13 @@
     left: 0;
     right: 0;
     margin-top: 15px;
-    background-color: $lightest-grey;
+    background-color: $off-white;
   }
 }
 
 .uploadSampleStep {
+  margin-top: 20px;
+
   .projectSelect {
     margin-bottom: 30px;
 
@@ -198,10 +200,65 @@
 
 .reviewStep {
   .title {
-    font-size: 26px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-    margin-bottom: 8px;
+    @include font-header-xxl;
+  }
+
+  .uploadMsg {
+    @include font-body-m;
+    margin-bottom: 40px;
+    color: $medium-grey;
+  }
+
+  .smallHeader {
+    @include font-header-l;
+    margin: 10px 0;
+  }
+
+  .projectContainer {
+    margin-top: 40px;
+  }
+
+  .sampleContainer {
+    margin-top: 50px;
+  }
+
+  .project {
+    background-color: $off-white;
+    padding: 25px;
+    display: flex;
+
+    .header {
+      display: flex;
+    }
+
+    .name {
+      @include font-header-m;
+    }
+
+    .publicAccess {
+      @include font-body-s;
+      margin-left: 10px;
+    }
+
+    .existingSamples {
+      @include font-body-xs;
+      color: $medium-grey;
+    }
+
+    .projectIcon {
+      height: 40px;
+      width: 40px;
+      margin-right: 15px;
+    }
+  }
+
+  .tableScrollWrapper {
+    overflow: auto;
+    max-height: 450px;
+  }
+
+  .sampleName {
+    @include font-header-s;
   }
 
   .error {
@@ -212,10 +269,36 @@
     color: $primary-light;
   }
 
+  .files {
+    padding: 10px 0;
+
+    .file {
+      padding: 5px 0;
+
+      &:first-child {
+        padding-top: 0;
+      }
+
+      &:last-child {
+        padding-bottom: 0;
+      }
+    }
+  }
+
   .successMessage,
   .error,
   .uploadMessage {
-    margin-top: 10px;
+    @include font-body-xs;
+    margin-top: 30px;
     margin-bottom: 10px;
+  }
+
+  .uploadMessage,
+  .successMessage {
+    color: $medium-grey;
+  }
+
+  .loadingIcon {
+    margin-right: 5px;
   }
 }

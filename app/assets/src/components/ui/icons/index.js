@@ -22,6 +22,8 @@ import MouseIcon from "./MouseIcon";
 import PhyloTreeIcon from "./PhyloTreeIcon";
 import PigIcon from "./PigIcon";
 import PlusIcon from "./PlusIcon";
+import PublicProjectIcon from "./PublicProjectIcon";
+import PrivateProjectIcon from "./PrivateProjectIcon";
 import RemoveIcon from "./RemoveIcon";
 import SamplePublicIcon from "./SamplePublicIcon";
 import SamplePrivateIcon from "./SamplePrivateIcon";
@@ -56,7 +58,9 @@ export default {
     SamplePrivateIcon,
     TickIcon,
     UserIcon,
-    WormIcon
+    WormIcon,
+    PublicProjectIcon,
+    PrivateProjectIcon
   },
   FONT_AWESOME: {
     CheckmarkIcon,

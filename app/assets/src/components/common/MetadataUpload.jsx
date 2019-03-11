@@ -94,7 +94,7 @@ class MetadataUpload extends React.Component {
               className={cs.link}
               onClick={this.props.onShowCSVInstructions}
             >
-              See Instructions
+              View CSV Upload Instructions
             </span>
           </div>
           <MetadataCSVUpload
@@ -190,12 +190,12 @@ class MetadataUpload extends React.Component {
         <div>
           <span>
             <a href="/metadata/dictionary" className={cs.link} target="_blank">
-              See Metadata Dictionary
+              View Metadata Dictionary
             </a>
           </span>
           {` | `}
           <span className={cs.link} onClick={this.toggleInfo}>
-            {showInfo ? "Hide" : "See"} Required Fields and Host Genomes
+            {showInfo ? "Hide" : "Show"} Required Fields and Host Genomes
           </span>
         </div>
         {this.state.showInfo && (
@@ -205,7 +205,7 @@ class MetadataUpload extends React.Component {
               {requiredFields && requiredFields.join(", ")}
             </div>
             <div className={cs.details}>
-              <span className={cs.label}>{`Host genomes: `}</span>
+              <span className={cs.label}>{`Available host genomes: `}</span>
               {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
             </div>
           </div>

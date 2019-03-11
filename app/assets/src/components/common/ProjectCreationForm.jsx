@@ -1,9 +1,13 @@
 import React from "react";
+import cx from "classnames";
+import PropTypes from "prop-types";
+
 import Input from "~ui/controls/Input";
 import RadioButton from "~ui/controls/RadioButton";
-import PropTypes from "prop-types";
-import cx from "classnames";
 import { createProject } from "~/api";
+import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
+import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
+
 import cs from "./project_creation_form.scss";
 
 class ProjectCreationForm extends React.Component {
@@ -67,6 +71,7 @@ class ProjectCreationForm extends React.Component {
               selected={this.state.publicAccess === 1}
               className={cs.radioButton}
             />
+            <PublicProjectIcon className={cs.projectIcon} />
             <div className={cs.optionText}>
               <div className={cs.title}>Public Project</div>
               <div className={cs.description}>
@@ -82,6 +87,7 @@ class ProjectCreationForm extends React.Component {
               selected={this.state.publicAccess === 0}
               className={cs.radioButton}
             />
+            <PrivateProjectIcon className={cs.projectIcon} />
             <div className={cs.optionText}>
               <div className={cs.title}>Private Project</div>
               <div className={cs.description}>
