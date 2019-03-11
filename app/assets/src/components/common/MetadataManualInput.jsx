@@ -77,8 +77,17 @@ class MetadataManualInput extends React.Component {
       }
     });
 
-    // Default to the first host genome (Human)
-    this.props.samples.map(sample => this.updateHostGenome(1, sample));
+    // Set all to Human by default
+    const newHeaders = union(["Host Genome"], this.state.headersToEdit);
+    let newFields = this.state.metadataFieldsToEdit;
+    this.props.samples.map(sample => {
+      newFields = set([sample.name, "Host Genome"], "Human", newFields);
+    });
+    this.setState({
+      headersToEdit: newHeaders,
+      metadataFieldsToEdit: newFields
+    });
+    this.onMetadataChange(newHeaders, newFields);
   }
 
   getManualInputColumns = () => {
