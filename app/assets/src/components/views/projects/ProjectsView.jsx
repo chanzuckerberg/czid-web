@@ -2,8 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Table } from "~/components/visualizations/table";
 import { merge, pick } from "lodash/fp";
-import GlobeIcon from "~ui/icons/GlobeIcon";
-import LockIcon from "~ui/icons/LockIcon";
 import moment from "moment";
 import cs from "./projects_view.scss";
 import cx from "classnames";
@@ -17,7 +15,7 @@ class ProjectsView extends React.Component {
     this.columns = [
       {
         dataKey: "public_access",
-        width: 30,
+        width: 36,
         label: "",
         cellRenderer: this.renderAccess
       },
