@@ -1,17 +1,17 @@
 import React from "react";
 import cx from "classnames";
+import _fp, { filter, keyBy, concat } from "lodash/fp";
 
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
+import { getProjectMetadataFields, getAllHostGenomes } from "~/api";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
 import IssueGroup from "./IssueGroup";
-import { getProjectMetadataFields, getAllHostGenomes } from "~/api";
 
-import _fp, { filter, keyBy } from "lodash/fp";
 const map = _fp.map.convert({ cap: false });
 
 class MetadataUpload extends React.Component {
@@ -181,9 +181,9 @@ class MetadataUpload extends React.Component {
       currentTab,
       showInfo
     } = this.state;
-    const requiredFields = map(
-      "name",
-      filter(["is_required", 1], projectMetadataFields)
+    const requiredFields = concat(
+      "Host Genome",
+      map("name", filter(["is_required", 1], projectMetadataFields))
     );
     return (
       <div className={cx(cs.metadataUpload, this.props.className)}>
@@ -193,10 +193,14 @@ class MetadataUpload extends React.Component {
               View Metadata Dictionary
             </a>
           </span>
-          {` | `}
-          <span className={cs.link} onClick={this.toggleInfo}>
-            {showInfo ? "Hide" : "Show"} Required Fields and Host Genomes
-          </span>
+          {this.props.samplesAreNew && (
+            <React.Fragment>
+              {` | `}
+              <span className={cs.link} onClick={this.toggleInfo}>
+                {showInfo ? "Hide" : "Show"} Required Fields and Host Genomes
+              </span>
+            </React.Fragment>
+          )}
         </div>
         {this.state.showInfo && (
           <div className={cs.info}>

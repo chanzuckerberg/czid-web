@@ -55,8 +55,8 @@
   }
 
   &__header {
-    @include font-header-xs;
-    color: $medium-grey;
+    @include font-header-s;
+    color: $black;
 
     &.column-reserved-selectable {
       width: 30px;

@@ -1,11 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
-import DataTable from "../../visualizations/table/DataTable";
+import cx from "classnames";
 import { isEmpty, concat, size, sortBy } from "lodash/fp";
+
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 import LoadingIcon from "~/components/ui/icons/LoadingIcon";
 import CheckmarkIcon from "~/components/ui/icons/CheckmarkIcon";
 import BasicPopup from "~/components/BasicPopup";
+import DataTable from "../../visualizations/table/DataTable";
+
 import cs from "./bulk_sample_upload_table.scss";
 
 // BulkSampleUploadTable is a table showing Sample Names and Files for local
@@ -82,7 +85,7 @@ class BulkSampleUploadTable extends React.Component {
     const sortedEntries = sortBy("sampleName", entries);
 
     return (
-      <div className={cs.bulkSampleUploadTable}>
+      <div className={cx(cs.bulkSampleUploadTable, this.props.className)}>
         {this.props.showCount && (
           <div className={cs.detectedMsg}>
             <span className={cs.count}>
@@ -123,7 +126,8 @@ BulkSampleUploadTable.propTypes = {
   fileNamesToProgress: PropTypes.objectOf(PropTypes.number),
   onRemoved: PropTypes.func,
   hideProgressColumn: PropTypes.bool,
-  showCount: PropTypes.bool
+  showCount: PropTypes.bool,
+  className: PropTypes.string
 };
 
 export default BulkSampleUploadTable;
