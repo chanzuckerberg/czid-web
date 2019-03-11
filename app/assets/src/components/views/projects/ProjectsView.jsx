@@ -12,10 +12,6 @@ class ProjectsView extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      selected: new Set()
-    };
-
     this.columns = [
       {
         dataKey: "public_access",
@@ -47,31 +43,6 @@ class ProjectsView extends React.Component {
       { dataKey: "number_of_samples", width: 140, label: "No. Of Samples" }
     ];
   }
-
-  handleSelectRow = (value, checked) => {
-    console.log("Table: handleSelectRow", value, checked);
-    const { selected } = this.state;
-    let newSelected = new Set(selected);
-    if (checked) {
-      newSelected.add(value);
-    } else {
-      newSelected.delete(value);
-    }
-    this.setState({ selected: newSelected });
-  };
-
-  handleSelectAllRows = (value, checked) => {
-    console.log("Table: handleSelectAllRows", value, checked);
-    const { projects } = this.props;
-    const { selected } = this.state;
-    let newSelected = new Set(
-      checked
-        ? union(selected, map("id", projects))
-        : difference(selected, map("id", projects))
-    );
-
-    this.setState({ selected: newSelected });
-  };
 
   renderAccess = ({ cellData: publicAccess }) => {
     return (
@@ -107,8 +78,6 @@ class ProjectsView extends React.Component {
 
   render() {
     const { projects } = this.props;
-    const { selected } = this.state;
-    console.log(projects);
     let data = projects.map(project => {
       return merge(
         {
@@ -127,11 +96,7 @@ class ProjectsView extends React.Component {
         data={data}
         columns={this.columns}
         defaultRowHeight={120}
-        onSelectAllRows={this.handleSelectAllRows}
-        onSelectRow={this.handleSelectRow}
         sortBy={"details"}
-        selectableKey="id"
-        selected={selected}
       />
     );
   }
