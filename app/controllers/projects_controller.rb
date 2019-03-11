@@ -70,7 +70,7 @@ class ProjectsController < ApplicationController
         host_genome_names_by_project_id = {}
         tissues_by_project_id = {}
         samples.includes(:host_genome).each do |s|
-          (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome.name
+          (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome && s.host_genome.name
           # TODO: sample_tissue column is deprecated, retrieve sample_type from Metadatum model instead
           (tissues_by_project_id[s.project_id] ||= Set.new) << s.sample_tissue if s.sample_tissue
         end

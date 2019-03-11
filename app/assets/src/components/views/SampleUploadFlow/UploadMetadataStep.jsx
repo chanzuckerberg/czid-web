@@ -76,17 +76,16 @@ class UploadMetadataStep extends React.Component {
           <Instructions onClose={() => this.setShowInstructions(false)} />
         </div>
         <div className={cx(this.state.showInstructions && cs.hide)}>
-          <div>
-            <div className={cs.title}>Upload Metadata</div>
+          <div className={cs.tallBody}>
+            <MetadataUpload
+              onShowCSVInstructions={() => this.setShowInstructions(true)}
+              samples={this.props.samples}
+              project={this.props.project}
+              onMetadataChange={this.handleMetadataChange}
+              samplesAreNew
+              issues={this.state.wasManual ? this.state.issues : null}
+            />
           </div>
-          <MetadataUpload
-            onShowCSVInstructions={() => this.setShowInstructions(true)}
-            samples={this.props.samples}
-            project={this.props.project}
-            onMetadataChange={this.handleMetadataChange}
-            samplesAreNew
-            issues={this.state.wasManual ? this.state.issues : null}
-          />
           <div className={cs.mainControls}>
             <PrimaryButton
               text="Continue"

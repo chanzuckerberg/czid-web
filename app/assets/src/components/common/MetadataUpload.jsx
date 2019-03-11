@@ -9,6 +9,10 @@ import Tabs from "~/components/ui/controls/Tabs";
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
 import IssueGroup from "./IssueGroup";
+import { getProjectMetadataFields, getAllHostGenomes } from "~/api";
+
+import _fp, { filter, keyBy } from "lodash/fp";
+const map = _fp.map.convert({ cap: false });
 
 class MetadataUpload extends React.Component {
   state = {
@@ -16,8 +20,22 @@ class MetadataUpload extends React.Component {
     issues: {
       errors: [],
       warnings: []
-    }
+    },
+    projectMetadataFields: null,
+    hostGenomes: [],
+    showInfo: false
   };
+
+  async componentDidMount() {
+    const [projectMetadataFields, hostGenomes] = await Promise.all([
+      getProjectMetadataFields(this.props.project.id),
+      getAllHostGenomes()
+    ]);
+    this.setState({
+      projectMetadataFields: keyBy("key", projectMetadataFields),
+      hostGenomes
+    });
+  }
 
   handleTabChange = tab => {
     this.setState({ currentTab: tab, issues: null });
@@ -43,17 +61,29 @@ class MetadataUpload extends React.Component {
     this.props.onMetadataChange({ metadata, wasManual: true });
   };
 
+  toggleInfo = () => {
+    this.setState({
+      showInfo: !this.state.showInfo
+    });
+  };
+
   renderTab = () => {
     if (this.state.currentTab === "Manual Input") {
-      return (
-        <MetadataManualInput
-          project={this.props.project}
-          samples={this.props.samples}
-          samplesAreNew={this.props.samplesAreNew}
-          onMetadataChange={this.onMetadataChangeManual}
-          withinModal={this.props.withinModal}
-        />
-      );
+      if (!this.props.samples || !this.state.projectMetadataFields) {
+        return <div className={cs.loadingMsg}>Loading...</div>;
+      } else {
+        return (
+          <MetadataManualInput
+            project={this.props.project}
+            samples={this.props.samples}
+            samplesAreNew={this.props.samplesAreNew}
+            onMetadataChange={this.onMetadataChangeManual}
+            withinModal={this.props.withinModal}
+            projectMetadataFields={this.state.projectMetadataFields}
+            hostGenomes={this.state.hostGenomes}
+          />
+        );
+      }
     }
 
     if (this.state.currentTab === "CSV Upload") {
@@ -145,15 +175,45 @@ class MetadataUpload extends React.Component {
   };
 
   render() {
+    const {
+      hostGenomes,
+      projectMetadataFields,
+      currentTab,
+      showInfo
+    } = this.state;
+    const requiredFields = map(
+      "name",
+      filter(["is_required", 1], projectMetadataFields)
+    );
     return (
       <div className={cx(cs.metadataUpload, this.props.className)}>
-        <a href="/metadata/dictionary" className={cs.link} target="_blank">
-          See Metadata Dictionary
-        </a>
+        <div>
+          <span>
+            <a href="/metadata/dictionary" className={cs.link} target="_blank">
+              See Metadata Dictionary
+            </a>
+          </span>
+          {` | `}
+          <span className={cs.link} onClick={this.toggleInfo}>
+            {showInfo ? "Hide" : "See"} Required Fields and Host Genomes
+          </span>
+        </div>
+        {this.state.showInfo && (
+          <div className={cs.info}>
+            <div className={cs.details}>
+              <span className={cs.label}>{`Required fields: `}</span>
+              {requiredFields && requiredFields.join(", ")}
+            </div>
+            <div className={cs.details}>
+              <span className={cs.label}>{`Host genomes: `}</span>
+              {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
+            </div>
+          </div>
+        )}
         <Tabs
           className={cs.tabs}
           tabs={["Manual Input", "CSV Upload"]}
-          value={this.state.currentTab}
+          value={currentTab}
           onChange={this.handleTabChange}
         />
         {this.renderTab()}
