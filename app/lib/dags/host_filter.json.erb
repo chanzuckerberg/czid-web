@@ -58,7 +58,6 @@
       <% end %>
     ]
     <% if @host_genome != "human" %>
-      <% # filter human reads using STAR/bowtie2 if that was not already specified by the host choice: %>
       ,
       "star_human_out": [
         "unmapped_human_1.<%= @attribute_dict[:file_ext] %>"
@@ -73,7 +72,6 @@
         <% end %>
       ]
     <% end %>
-    <% # supplementary chimp filter: %>
     ,
     "gsnap_filter_out": [
       "gsnap_filter_1.fa"
