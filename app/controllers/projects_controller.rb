@@ -71,6 +71,9 @@ class ProjectsController < ApplicationController
         tissues_by_project_id = {}
         min_sample_by_project_id = {}
         owner_by_project_id = {}
+        locations_by_project_id = {}
+        total_reads = 0
+        adjusted_remaining_reads = 0
         samples.includes(:host_genome, :user).each do |s|
           (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome && s.host_genome.name
           # TODO: sample_tissue column is deprecated, retrieve sample_type from Metadatum model instead
@@ -80,17 +83,19 @@ class ProjectsController < ApplicationController
             min_sample_by_project_id[s.project_id] = s.id
             owner_by_project_id[s.project_id] = s.user ? s.user.name : nil
           end
+          (locations_by_project_id[s.project_id] ||= Set.new) << s.sample_location if s.sample_location
+          total_reads += s.pipeline_runs[0].total_reads || 0
+          adjusted_remaining_reads += s.pipeline_runs[0].adjusted_remaining_reads || 0
         end
         extended_projects = projects.map do |project|
-          project.as_json(only: [:id, :name, :created_at, :public_access]).merge({
+          project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
             number_of_samples: sample_count_by_project_id[project.id] || 0,
             hosts: host_genome_names_by_project_id[project.id] || [],
             tissues: tissues_by_project_id[project.id] || [],
-            owner: owner_by_project_id[project.id],
-            sample_locations: @samples.where(project_id: project.id).distinct.pluck(:sample_location).compact,
-            total_reads: @samples.where(project_id: project.id).left_joins(:pipeline_runs).select(:total_reads)[0].total_reads,
-            adjusted_remaining_reads: @samples.where(project_id: project.id).left_joins(:pipeline_runs).select(:adjusted_remaining_reads)[0].adjusted_remaining_reads,
-          })
+            locations: locations_by_project_id[project.id] || [],
+            total_reads: total_reads,
+            adjusted_remaining_reads: adjusted_remaining_reads
+          )
         end
         render json: extended_projects
       end

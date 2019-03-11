@@ -1,9 +1,10 @@
 @import "~styles/themes/colors";
 @import "~styles/typography";
 
+// TODO (gdingle): fix me!!!!z
+
 .sideBar {
-  font-size: 12px;
-  width: 300px;
+  width: 400px;
   padding: 10px 20px;
 }
 
@@ -33,6 +34,27 @@
     line-height: 50px;
   }
 }
+.dateHistogram {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin: 0;
+
+  .bar {
+    margin: 0 1px;
+    flex: 1 0;
+    background-color: $medium-grey;
+    cursor: pointer;
+  }
+
+  .label {
+    margin: 4px 0;
+    flex: 0 0;
+    white-space: nowrap;
+    font-size: smaller;
+  }
+}
 
 .dataList {
   display: flex;
@@ -53,6 +75,7 @@
   }
 
   dd {
+    padding: 0 0 0 10px;
     width: 66%;
   }
 

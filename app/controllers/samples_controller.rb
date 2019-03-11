@@ -160,13 +160,6 @@ class SamplesController < ApplicationController
     results = { samples: limited_samples_json }
     results[:all_samples_ids] = samples.pluck(:id) if list_all_sample_ids
 
-    # TODO: (gdingle): fix me!!!
-    # Add total_reads
-    # @samples = @samples
-    #            .left_joins(:pipeline_runs)
-    #            .joins(:host_genome)
-    #            .select("*, pipeline_runs.total_reads, pipeline_runs.adjusted_remaining_reads, host_genomes.name AS host_genome_name")
-
     # Refactor once we have a clear API definition policy
     respond_to do |format|
       format.json do
