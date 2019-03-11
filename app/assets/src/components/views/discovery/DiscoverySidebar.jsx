@@ -138,7 +138,7 @@ export default class DiscoverySidebar extends React.Component {
 
   render() {
     return (
-      <div className={cx(this.props.className, cs.sideBar)}>
+      <div className={cx(this.props.className, cs.sidebar)}>
         <div className={cs.metadataContainer}>
           <Accordion
             open={true}

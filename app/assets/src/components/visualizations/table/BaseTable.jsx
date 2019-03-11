@@ -85,18 +85,19 @@ class BaseTable extends React.Component {
 
   renderSelectableCell = ({ cellData }) => {
     const { selected, onSelectRow } = this.props;
+    const disabled = cellData === null || cellData === undefined;
     return (
       <Checkbox
         checked={selected.has(cellData)}
         onChange={onSelectRow}
-        value={cellData}
+        value={disabled ? -1 : cellData}
+        disabled={disabled}
       />
     );
   };
 
   renderSelectableHeader = () => {
     const { selectAllChecked, onSelectAllRows } = this.props;
-    console.log("renderSelectableHeader", selectAllChecked);
     return (
       <Checkbox
         checked={selectAllChecked}
@@ -125,10 +126,6 @@ class BaseTable extends React.Component {
       sortDirection
     } = this.props;
 
-    console.log(
-      "BaseTable:render - selectAllChecked",
-      this.props.selectAllChecked
-    );
     const { activeColumns, columns } = this.state;
     const columnOrder = activeColumns || map(columns, "dataKey");
     return (
@@ -252,7 +249,6 @@ BaseTable.propTypes = {
   selected: PropTypes.instanceOf(Set),
   onSelectRow: PropTypes.func,
   onSelectAllRows: PropTypes.func,
-  // indicates if selected all is checked: should be used only by Table and InfiniteTable
   selectAllChecked: PropTypes.bool
 };
 

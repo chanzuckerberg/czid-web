@@ -19,6 +19,59 @@
   }
 }
 
+.samplesToolbar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+
+  .fluidBlank {
+    flex: 1 1 auto;
+  }
+
+  .counterContainer {
+    flex: 0 0 auto;
+
+    .counter {
+      color: $primary-light;
+    }
+
+    .label {
+      @include font-body-xs;
+
+      flex: 0 0 auto;
+      margin-left: 20px;
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  .separator {
+    flex: 0 0 auto;
+    height: 100%;
+    margin: 0 30px;
+    border-right: 1px solid $medium-grey;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+
+    .action {
+      &:not(.disabled) {
+        cursor: pointer;
+      }
+
+      &:not(:first-child) {
+        margin-left: 30px;
+      }
+
+      .icon {
+        flex: 0 0 auto;
+        width: 25px;
+      }
+    }
+  }
+}
+
 .sampleHeader {
   text-align: left;
 }

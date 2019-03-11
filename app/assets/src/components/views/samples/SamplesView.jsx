@@ -1,16 +1,28 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { difference, isEmpty, union } from "lodash/fp";
 import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
 import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
 import InfiniteTable from "../../visualizations/table/InfiniteTable";
+import Label from "~ui/labels/Label";
 import moment from "moment";
 import { numberWithCommas } from "~/helpers/strings";
 import cs from "./samples_view.scss";
 import cx from "classnames";
+import HeatmapIcon from "~ui/icons/HeatmapIcon";
+import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
+import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import { DownloadIconDropdown } from "~ui/controls/dropdowns";
+import ReportsDownloader from "./ReportsDownloader";
 
 class SamplesView extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      phyloTreeCreationModalOpen: false,
+      selected: new Set()
+    };
 
     this.columns = [
       {
@@ -100,6 +112,39 @@ class SamplesView extends React.Component {
     return `${this.formatNumber(value)}%`;
   };
 
+  handleSelectRow = (value, checked) => {
+    const { selected } = this.state;
+    let newSelected = new Set(selected);
+    if (checked) {
+      newSelected.add(value);
+    } else {
+      newSelected.delete(value);
+    }
+    this.setState({ selected: newSelected });
+  };
+
+  handleSelectAllRows = (value, checked) => {
+    const { selectableIds } = this.props;
+    const { selected } = this.state;
+
+    let newSelected = new Set(
+      checked
+        ? union(selected, selectableIds)
+        : difference(selected, selectableIds)
+    );
+    this.setState({ selected: newSelected });
+  };
+
+  isSelectAllChecked = () => {
+    const { selected } = this.state;
+    const { selectableIds } = this.props;
+
+    return (
+      !isEmpty(selectableIds) &&
+      isEmpty(difference(selectableIds, Array.from(selected)))
+    );
+  };
+
   renderNumberAndPercentage = ({ cellData: number }) => {
     return (
       <div className={cs.numberValueAndPercentage}>
@@ -155,23 +200,102 @@ class SamplesView extends React.Component {
     this.infiniteTable.reset();
   };
 
+  renderHeatmapTrigger = () => {
+    const { selected } = this.state;
+    return (
+      <a href={`/visualizations/heatmap?sampleIds=${Array.from(selected)}`}>
+        <HeatmapIcon className={cs.icon} />
+      </a>
+    );
+  };
+
+  renderDownloadTrigger = () => {
+    const { projectId } = this.props;
+    const downloadOptions = [{ text: "Sample Table", value: "samples_table" }];
+    if (projectId) {
+      downloadOptions.push({
+        text: "Sample Reports",
+        value: "project_reports"
+      });
+    }
+
+    return (
+      <DownloadIconDropdown
+        options={downloadOptions}
+        onClick={downloadOption => {
+          console.log(downloadOption);
+          new ReportsDownloader({
+            projectId,
+            downloadOption
+          });
+        }}
+      />
+    );
+  };
+
+  renderToolbar = () => {
+    const { selected } = this.state;
+    return (
+      <div className={cs.samplesToolbar}>
+        <div className={cs.fluidBlank} />
+        <div className={cs.counterContainer}>
+          <Label circular className={cs.counter} text={`${selected.size}`} />
+          <span className={cs.label}>Selected</span>
+        </div>
+        <div className={cs.separator} />
+        <div className={cs.actions}>
+          <div className={cs.action}>{this.renderHeatmapTrigger()}</div>
+          <div className={cs.action} onClick={this.handlePhyloModalOpen}>
+            <PhyloTreeIcon className={cs.icon} />
+          </div>
+          <div className={cs.action}>{this.renderDownloadTrigger()}</div>
+        </div>
+      </div>
+    );
+  };
+
+  handlePhyloModalOpen = () => {
+    this.setState({ phyloTreeCreationModalOpen: true });
+  };
+
+  handlePhyloModalClose = () => {
+    this.setState({ phyloTreeCreationModalOpen: false });
+  };
+
   render() {
     const { activeColumns, onLoadRows } = this.props;
+    const { phyloTreeCreationModalOpen, selected } = this.state;
+
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 70;
 
+    const selectAllChecked = this.isSelectAllChecked();
+    console.log("SamplesView:render - state=", this.state);
     return (
       <div className={cs.container}>
+        {this.renderToolbar()}
         <div className={cs.table}>
           <InfiniteTable
             ref={infiniteTable => (this.infiniteTable = infiniteTable)}
             columns={this.columns}
+            defaultRowHeight={rowHeight}
+            initialActiveColumns={activeColumns}
             loadingClassName={cs.loading}
             onLoadRows={onLoadRows}
-            initialActiveColumns={activeColumns}
-            defaultRowHeight={rowHeight}
+            onSelectAllRows={this.handleSelectAllRows}
+            onSelectRow={this.handleSelectRow}
+            selectableKey="id"
+            selected={selected}
+            selectAllChecked={selectAllChecked}
           />
         </div>
+        {phyloTreeCreationModalOpen && (
+          <PhyloTreeCreationModal
+            // TODO(tiago): migrate phylo tree to use api (or read csrf from context) and remove this
+            csrf={document.getElementsByName("csrf-token")[0].content}
+            onClose={this.handlePhyloModalClose}
+          />
+        )}
       </div>
     );
   }
@@ -192,7 +316,9 @@ SamplesView.defaultProps = {
 
 SamplesView.propTypes = {
   activeColumns: PropTypes.arrayOf(PropTypes.string),
-  onLoadRows: PropTypes.func.isRequired
+  onLoadRows: PropTypes.func.isRequired,
+  projectId: PropTypes.number,
+  selectableIds: PropTypes.array.isRequired
 };
 
 export default SamplesView;

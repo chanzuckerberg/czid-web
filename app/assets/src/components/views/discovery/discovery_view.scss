@@ -16,8 +16,8 @@
     flex: 1 0 auto;
 
     .leftPane:not(:empty) {
-      border-right: 2px solid $off-white;
       flex: 0 0 auto;
+      border-right: 2px solid $off-white;
       padding: 30px 20px;
     }
 
@@ -29,9 +29,14 @@
     }
 
     .rightPane:not(:empty) {
-      border-left: 2px solid $off-white;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
       flex: 0 0 auto;
+      border-left: 2px solid $off-white;
       padding: 30px 20px;
+      height: 100%;
+      overflow-y: scroll;
     }
   }
 }

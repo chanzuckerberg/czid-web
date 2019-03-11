@@ -31,7 +31,7 @@ class Checkbox extends React.Component {
   }
 
   render() {
-    const { value, label } = this.props;
+    const { disabled, label, value } = this.props;
     const { isChecked } = this.state;
 
     return (
@@ -41,6 +41,7 @@ class Checkbox extends React.Component {
           value={value}
           checked={isChecked}
           readOnly={true}
+          disabled={disabled}
         />
         <span className="checkmark" />
         <span className="label">{label}</span>
@@ -55,9 +56,10 @@ Checkbox.defaultProps = {
 
 Checkbox.propTypes = {
   checked: PropTypes.bool,
+  disabled: PropTypes.bool,
   label: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 };
 
 export default Checkbox;

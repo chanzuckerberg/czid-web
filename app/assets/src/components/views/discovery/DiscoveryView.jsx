@@ -38,6 +38,7 @@ class DiscoveryView extends React.Component {
       filters: {},
       filterCount: 0,
       projects: [],
+      sampleIds: [],
       samples: [],
       showFilters: true,
       showStats: true,
@@ -216,6 +217,7 @@ class DiscoveryView extends React.Component {
       sampleDimensions,
       filterCount,
       projects,
+      sampleIds,
       samples,
       showFilters,
       showStats,
@@ -257,6 +259,7 @@ class DiscoveryView extends React.Component {
               <SamplesView
                 ref={samplesView => (this.samplesView = samplesView)}
                 onLoadRows={this.handleLoadSampleRows}
+                selectableIds={sampleIds}
               />
             )}
             {currentTab == "visualizations" && (

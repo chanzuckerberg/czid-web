@@ -25,7 +25,7 @@ class Table extends React.Component {
     return this.sortedData[index];
   };
 
-  isSelectedAllChecked = () => {
+  isSelectAllChecked = () => {
     const { data, selectableKey, selected } = this.props;
     return (
       !isEmpty(data) &&
@@ -62,7 +62,7 @@ class Table extends React.Component {
           )
         : data;
 
-    const selectAllChecked = this.isSelectedAllChecked();
+    const selectAllChecked = this.isSelectAllChecked();
     console.log("Table:render", selectAllChecked);
     return (
       <BaseTable
