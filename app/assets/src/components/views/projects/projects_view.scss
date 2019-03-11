@@ -17,7 +17,8 @@
     color: $dark-grey;
     font-size: $font-size-h6;
     line-height: 16px;
-    // remove description for now:
+    // remove description for now
+    // (we have no descriptions yet, but want to keep the placeholder)
     height: 0;
     overflow: hidden;
     // height: 32px;
