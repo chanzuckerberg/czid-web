@@ -184,7 +184,7 @@ const MainMenu = () => {
         className={cx(cs.item, isSelected("library") && cs.selected)}
         href="/library"
       >
-        My Library
+        My Data
       </a>
       <a
         className={cx(cs.item, isSelected("public") && cs.selected)}
