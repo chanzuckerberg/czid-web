@@ -40,7 +40,13 @@ class SampleUploadFlow extends React.Component {
   handleUploadMetadata = ({ metadata, issues }) => {
     // Populate host_genome_id in sample using metadata.
     const newSamples = this.state.samples.map(sample => {
-      const metadataRow = find(["sample_name", sample.name], metadata.rows);
+      const metadataRow = find(
+        row =>
+          get("sample_name", row) === sample.name ||
+          get("Sample Name", row) === sample.name,
+        metadata.rows
+      );
+
       const hostGenomeId = find(
         [
           "name",
@@ -96,6 +102,7 @@ class SampleUploadFlow extends React.Component {
             uploadType={this.state.uploadType}
             project={this.state.project}
             sampleNamesToFiles={this.state.sampleNamesToFiles}
+            hostGenomes={this.props.host_genomes}
           />
         );
       default:
@@ -106,11 +113,14 @@ class SampleUploadFlow extends React.Component {
   render() {
     return (
       <div>
-        <SampleUploadFlowHeader currentStep={this.state.currentStep} />
+        <SampleUploadFlowHeader
+          currentStep={this.state.currentStep}
+          samples={this.state.samples}
+          project={this.state.project}
+        />
         <NarrowContainer
           className={cx(
             cs.sampleUploadFlow,
-            this.state.currentStep === "uploadSamples" && cs.narrow
           )}
         >
           <div className={cs.inner}>{this.renderStep()}</div>

@@ -1,11 +1,16 @@
 import React from "react";
-import { keyBy, flow, mapValues, omit } from "lodash/fp";
+import { get, without, map, keyBy, flow, mapValues, omit } from "lodash/fp";
+
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { bulkUploadLocalWithMetadata, bulkUploadRemote } from "~/api/upload";
+import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
+import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
+import LoadingIcon from "~ui/icons/LoadingIcon";
+
 import cs from "./sample_upload_flow.scss";
 
 const processMetadataRows = metadataRows =>
@@ -86,16 +91,90 @@ class ReviewStep extends React.Component {
     }
   };
 
+  getDataHeaders = () => {
+    return [
+      "Sample Name",
+      "Input Files",
+      "Host Genome",
+      // Omit sample name, which is the first header.
+      ...without(["Sample Name", "sample_name"], this.props.metadata.headers)
+    ];
+  };
+
+  getDataRows = () => {
+    const metadataBySample = keyBy(
+      row => row["Sample Name"] || row.sample_name,
+      this.props.metadata.rows
+    );
+    const hostGenomesById = keyBy("id", this.props.hostGenomes);
+
+    return map(
+      sample => ({
+        ...metadataBySample[sample.name],
+        "Sample Name": <div className={cs.sampleName}>{sample.name}</div>,
+        "Host Genome": get("name", hostGenomesById[sample.host_genome_id]),
+        "Input Files": (
+          <div className={cs.files}>
+            {sample.input_files_attributes.map(file => (
+              <div key={file.source} className={cs.file}>
+                {file.name || file.source}
+              </div>
+            ))}
+          </div>
+        )
+      }),
+      this.props.samples
+    );
+  };
+
+  getColumnWidth = column => {
+    switch (column) {
+      case "Sample Name":
+        return 200;
+      case "Input Files":
+        return 300;
+      default:
+        return 160;
+    }
+  };
+
   render() {
     return (
       <div className={cs.reviewStep}>
-        <div className={cs.tallBody}>
-          <DataTable
-            className={cs.metadataTable}
-            columns={this.props.metadata.headers}
-            data={this.props.metadata.rows}
-            columnWidth={120}
-          />
+        <div className={cs.projectContainer}>
+          <div className={cs.smallHeader}>Project Info</div>
+          <div className={cs.project}>
+            {this.props.project.public_access === 1 ? (
+              <PublicProjectIcon className={cs.projectIcon} />
+            ) : (
+              <PrivateProjectIcon className={cs.projectIcon} />
+            )}
+            <div className={cs.text}>
+              <div className={cs.header}>
+                <div className={cs.name}>{this.props.project.name}</div>
+                <div className={cs.publicAccess}>
+                  {this.props.project.public_access
+                    ? "Public Project"
+                    : "Private Project"}
+                </div>
+              </div>
+              <div className={cs.existingSamples}>
+                {this.props.project.number_of_samples} existing samples in
+                project
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className={cs.sampleContainer}>
+          <div className={cs.smallHeader}>Sample Info</div>
+          <div className={cs.tableScrollWrapper}>
+            <DataTable
+              className={cs.metadataTable}
+              columns={this.getDataHeaders()}
+              data={this.getDataRows()}
+              getColumnWidth={this.getColumnWidth}
+            />
+          </div>
         </div>
         {this.state.submitState === "review" && (
           <TermsAgreement
@@ -110,6 +189,7 @@ class ReviewStep extends React.Component {
         <div className={cs.controls}>
           {this.state.submitState === "submitting" && (
             <div className={cs.uploadMessage}>
+              <LoadingIcon className={cs.loadingIcon} />
               Upload in progress... Please keep this page open until
               completed...
             </div>
@@ -166,7 +246,8 @@ ReviewStep.propTypes = {
   uploadType: PropTypes.string.isRequired,
   sampleNamesToFiles: PropTypes.objectOf(
     PropTypes.arrayOf(PropTypes.instanceOf(File))
-  )
+  ),
+  hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome)
 };
 
 export default ReviewStep;
