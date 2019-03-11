@@ -38,7 +38,9 @@ class DiscoveryView extends React.Component {
       filters: {},
       filterCount: 0,
       projects: [],
+      sampleIds: [],
       samples: [],
+      samplesAllLoaded: false,
       showFilters: true,
       showStats: true,
       visualizations: []
@@ -90,8 +92,9 @@ class DiscoveryView extends React.Component {
     this.setState(
       {
         projects: [],
+        sampleIds: [],
         samples: [],
-        sampleIds: []
+        samplesAllLoaded: false
       },
       () => {
         this.refreshData();
@@ -186,13 +189,14 @@ class DiscoveryView extends React.Component {
 
   handleLoadSampleRows = async ({ startIndex, stopIndex }) => {
     const { domain } = this.props;
-    const { samples } = this.state;
+    const { samples, samplesAllLoaded } = this.state;
 
     const previousLoadedSamples = samples.slice(startIndex, stopIndex + 1);
     const neededStartIndex = Math.max(startIndex, samples.length);
 
     let newlyFetchedSamples = [];
-    if (stopIndex >= neededStartIndex) {
+    if (!samplesAllLoaded && stopIndex >= neededStartIndex) {
+      const numRequestedSamples = stopIndex - neededStartIndex + 1;
       let { samples: fetchedSamples } = await getDiscoverySamples({
         domain,
         filters: this.preparedFilters(),
@@ -201,7 +205,10 @@ class DiscoveryView extends React.Component {
       });
 
       this.setState({
-        samples: samples.concat(fetchedSamples)
+        // add newly fetched samples to the list (assumes that samples are requested in order)
+        samples: samples.concat(fetchedSamples),
+        // if returned samples are less than requested, we assume all data was loaded
+        samplesAllLoaded: fetchedSamples.length < numRequestedSamples
       });
       newlyFetchedSamples = fetchedSamples;
     }

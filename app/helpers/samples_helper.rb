@@ -361,7 +361,7 @@ module SamplesHelper
     metadata_by_sample_id = metadata_multiget(sample_ids)
 
     # Massage data into the right format
-    samples.includes(:pipeline_runs, :host_genome, :project, :input_files).each_with_index do |sample|
+    samples.includes(:pipeline_runs, :host_genome, :project, :input_files, :user).each_with_index do |sample|
       job_info = {}
       job_info[:db_sample] = sample
       job_info[:metadata] = metadata_by_sample_id[sample.id]
