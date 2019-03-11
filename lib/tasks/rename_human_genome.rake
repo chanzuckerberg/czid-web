@@ -9,6 +9,7 @@ task create_elasticsearch_indices: :environment do
   HostGenome.all.each do |host_genome|
     ["s3_star_index_path", "s3_bowtie2_index_path"].each do |path_column|
       old_path, new_path = old_new(path_column, host_genome)
+      puts "aws s3 cp #{old_path} #{new_path}"
       Syscall.s3_cp(old_path, new_path)
       host_genome.update(path_column.to_sym => new_path)
     end
