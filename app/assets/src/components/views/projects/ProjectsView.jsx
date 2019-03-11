@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Table } from "~/components/visualizations/table";
-import { difference, map, merge, pick, union } from "lodash/fp";
+import { merge, pick } from "lodash/fp";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
 import moment from "moment";

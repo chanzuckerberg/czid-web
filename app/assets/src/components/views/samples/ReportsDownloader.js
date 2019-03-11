@@ -9,12 +9,6 @@ import { openUrl } from "~utils/links";
 
 export default class ReportsDownloader {
   constructor({ projectId = "all", onDownloadFail = null, downloadOption }) {
-    console.log(
-      "ReportsDownloader:constructor",
-      projectId,
-      onDownloadFail,
-      downloadOption
-    );
     this.projectId = projectId;
     this.onDownloadFail = onDownloadFail;
 
@@ -22,8 +16,9 @@ export default class ReportsDownloader {
   }
 
   checkReportDownload = ({ statusAction, retrieveAction }) => {
+    const url = `/projects/${this.projectId}/${statusAction}`;
     axios
-      .get(`/projects/${this.projectId}/${statusAction}`)
+      .get(url)
       .then(res => {
         let downloadStatus = res.data.status_display;
         if (downloadStatus === "complete") {
@@ -43,7 +38,6 @@ export default class ReportsDownloader {
   };
 
   scheduleCheckReportDownload({ statusAction, retrieveAction }) {
-    console.log("ReportsDownloader:constructor - schedule check");
     setTimeout(() => {
       this.checkReportDownload(statusAction, retrieveAction);
     }, 2000);
@@ -60,7 +54,6 @@ export default class ReportsDownloader {
   };
 
   startReportGeneration = ({ downloadOption }) => {
-    console.log(downloadOption);
     switch (downloadOption) {
       case "samples_table":
         openUrl(`/projects/${this.projectId}/csv`);

@@ -223,7 +223,6 @@ class SamplesView extends React.Component {
       <DownloadIconDropdown
         options={downloadOptions}
         onClick={downloadOption => {
-          console.log(downloadOption);
           new ReportsDownloader({
             projectId,
             downloadOption
@@ -270,7 +269,6 @@ class SamplesView extends React.Component {
     const rowHeight = 70;
 
     const selectAllChecked = this.isSelectAllChecked();
-    console.log("SamplesView:render - state=", this.state);
     return (
       <div className={cs.container}>
         {this.renderToolbar()}
