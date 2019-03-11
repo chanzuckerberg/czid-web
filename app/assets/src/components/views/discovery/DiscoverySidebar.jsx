@@ -74,7 +74,6 @@ export default class DiscoverySidebar extends React.Component {
           // avg_reads_per_sample: 0,
         },
         metadata: {
-          // TODO (gdingle): these freq counts per project, not per sample
           host: countBy(null, hosts),
           tissue: countBy(null, tissues),
           createdAt: countBy(null, createdAts)

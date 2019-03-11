@@ -78,7 +78,6 @@ class ProjectsView extends React.Component {
 
   render() {
     const { projects } = this.props;
-
     let data = projects.map(project => {
       return merge(
         {
