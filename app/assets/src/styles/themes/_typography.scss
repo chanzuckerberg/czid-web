@@ -99,11 +99,6 @@ $font-weight-heavy: 800;
   letter-spacing: 0.3px;
 }
 
-@mixin font-cell-xs {
-  @include font-body-xs;
-  font-weight: $font-weight-semibold;
-}
-
 @mixin font-label-s {
   font-size: 11px;
   line-height: 24px;
