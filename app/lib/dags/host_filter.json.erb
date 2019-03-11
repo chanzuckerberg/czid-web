@@ -164,7 +164,7 @@
       "out": "bowtie2_human_out",
       "class": "PipelineStepRunBowtie2",
       "module": "idseq_dag.steps.run_bowtie2",
-      "additional_files": { "bowtie2_genome": "<%= @attribute_dict[:human_star_genome] %>" },
+      "additional_files": { "bowtie2_genome": "<%= @attribute_dict[:human_bowtie2_genome] %>" },
       "additional_attributes": { "output_sam_file": "bowtie2_human.sam" }
     }
     <% end %>
