@@ -7,6 +7,8 @@ import LockIcon from "~ui/icons/LockIcon";
 import moment from "moment";
 import cs from "./projects_view.scss";
 import cx from "classnames";
+import PrivateProjectIcon from "../../ui/icons/PrivateProjectIcon";
+import PublicProjectIcon from "../../ui/icons/PublicProjectIcon";
 
 class ProjectsView extends React.Component {
   constructor(props) {
@@ -48,9 +50,9 @@ class ProjectsView extends React.Component {
     return (
       <div>
         {publicAccess ? (
-          <GlobeIcon className={cx(cs.icon, cs.iconGlobe)} />
+          <PublicProjectIcon className={cx(cs.icon, cs.iconPublic)} />
         ) : (
-          <LockIcon className={cx(cs.icon, cs.iconLock)} />
+          <PrivateProjectIcon className={cx(cs.icon, cs.iconPrivate)} />
         )}
       </div>
     );
