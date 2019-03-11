@@ -159,7 +159,7 @@ class ReviewStep extends React.Component {
                 </div>
               </div>
               <div className={cs.existingSamples}>
-                {this.props.project.number_of_samples} existing samples in
+                {this.props.project.number_of_samples || 0} existing samples in
                 project
               </div>
             </div>
