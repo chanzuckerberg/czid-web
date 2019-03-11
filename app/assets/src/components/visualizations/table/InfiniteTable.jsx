@@ -21,11 +21,10 @@ class InfiniteTable extends React.Component {
     super(props);
 
     this.rows = [];
-
-    (this.loadedRowsMap = []),
-      (this.state = {
-        rowCount: this.props.rowCount
-      });
+    this.loadedRowsMap = [];
+    this.state = {
+      rowCount: this.props.rowCount
+    };
   }
 
   isRowLoadingOrLoaded = ({ index }) => {
@@ -41,7 +40,6 @@ class InfiniteTable extends React.Component {
 
     const newRows = await onLoadRows({ startIndex, stopIndex });
     const requestedNumberOfRows = stopIndex - startIndex + 1;
-
     this.rows.splice(startIndex, requestedNumberOfRows, ...newRows);
 
     if (requestedNumberOfRows != newRows.length) {
@@ -79,6 +77,18 @@ class InfiniteTable extends React.Component {
     );
   };
 
+  // !Attention!: reset function must be called if previously loaded data changes
+  reset = () => {
+    const { rowCount } = this.props;
+    this.rows = [];
+    this.loadedRowsMap = [];
+    this.setState(
+      { rowCount },
+      // reset infinite loader cache with autoReload
+      () => this.infiniteLoader.resetLoadMoreRowsCache(true)
+    );
+  };
+
   render() {
     const {
       defaultCellRenderer,
@@ -91,6 +101,7 @@ class InfiniteTable extends React.Component {
 
     return (
       <InfiniteLoader
+        ref={infiniteLoader => (this.infiniteLoader = infiniteLoader)}
         isRowLoaded={this.isRowLoadingOrLoaded}
         loadMoreRows={this.loadMoreRows}
         minimumBatchSize={minimumBatchSize}

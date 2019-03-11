@@ -1,6 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
+import FiltersIcon from "~ui/icons/FiltersIcon";
+import InfoIcon from "~ui/icons/InfoIcon";
+import Label from "~/components/ui/labels/Label";
 import Tabs from "~ui/controls/Tabs";
+import SearchBox from "~ui/controls/SearchBox";
 import cs from "./discovery_header.scss";
 
 class DiscoveryHeader extends React.Component {
@@ -20,24 +24,64 @@ class DiscoveryHeader extends React.Component {
     onTabChange(tab);
   };
 
+  handleSuggestionSelected = (_, { result }) => {
+    const { onSuggestionSelected } = this.props;
+    onSuggestionSelected && onSuggestionSelected(result);
+  };
+
   render() {
-    const { tabs } = this.props;
+    const {
+      filterCount,
+      onEnter,
+      onFilterToggle,
+      onStatsToggle,
+      tabs
+    } = this.props;
     const { currentTab } = this.state;
 
     return (
-      <Tabs
-        className={cs.tabs}
-        tabs={tabs}
-        value={currentTab}
-        onChange={this.handleTabChange}
-        hideBorder
-      />
+      <div className={cs.header}>
+        <div className={cs.filtersTrigger} onClick={onFilterToggle}>
+          <FiltersIcon className={cs.filtersIcon} />
+          <Label
+            className={cs.filtersCounter}
+            circular
+            text={`${filterCount}`}
+          />
+        </div>
+        <div className={cs.searchContainer}>
+          <SearchBox
+            category
+            serverSearchAction="search_suggestions"
+            onResultSelect={this.handleSuggestionSelected}
+            onEnter={onEnter}
+            initialValue=""
+            placeholder="Search"
+          />
+        </div>
+        <Tabs
+          className={cs.tabs}
+          tabs={tabs}
+          value={currentTab}
+          onChange={this.handleTabChange}
+          hideBorder
+        />
+        <div className={cs.blankFill} />
+        <div className={cs.statsTrigger} onClick={onStatsToggle}>
+          <InfoIcon className={cs.statsIcon} />
+        </div>
+      </div>
     );
   }
 }
 
+DiscoveryHeader.defaultProps = {
+  filterCount: 0
+};
+
 DiscoveryHeader.propTypes = {
   currentTab: PropTypes.string,
+  filterCount: PropTypes.number,
   tabs: PropTypes.arrayOf(
     PropTypes.oneOfType([
       PropTypes.string.isRequired,
@@ -48,6 +92,10 @@ DiscoveryHeader.propTypes = {
     ])
   ).isRequired,
   initialTab: PropTypes.string,
+  onFilterToggle: PropTypes.func,
+  onEnter: PropTypes.func,
+  onStatsToggle: PropTypes.func,
+  onSuggestionSelected: PropTypes.func,
   onTabChange: PropTypes.func
 };
 

@@ -7,20 +7,16 @@ class VisualizationsController < ApplicationController
 
   # GET /visualizations.json
   def index
-    only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
-    exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
+    domain = params[:domain]
 
     # TODO: (gdingle): include samples? include projects?
-    if only_library
-      visualizations = current_user.visualizations
-    elsif exclude_library
-      visualizations = Visualization
-                       .where(public_access: 1)
-    # TODO: See https://jira.czi.team/browse/IDSEQ-866
-    # .where.not(user: current_user)
-    else
-      raise 'Visualizations must be for either "my library" or "public"'
-    end
+    visualizations = if domain == "library"
+                       current_user.visualizations
+                     elsif domain == "public"
+                       Visualization.where(public_access: 1)
+                     else
+                       Visualization.where("public_access = 1 OR user_id = ?", current_user.id)
+                     end
     visualizations = visualizations
                      .joins(:user)
                      .select("visualizations.id AS id, user_id, visualizations.created_at, visualization_type, users.name AS user_name")

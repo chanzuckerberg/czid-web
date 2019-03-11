@@ -25,7 +25,7 @@ class SamplesController < ApplicationController
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details, :all,
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details, :dimensions, :all,
                    :show_sample_names, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields, :samples_going_public,
                    :search_suggestions, :upload].freeze
 
@@ -52,6 +52,7 @@ class SamplesController < ApplicationController
   # GET /samples
   # GET /samples.json
   def index
+    # this endpoint will be replaced in the future by index_v2
     @all_project = current_power.projects
     @page_size = PAGE_SIZE
     project_id = params[:project_id]
@@ -125,40 +126,99 @@ class SamplesController < ApplicationController
   end
 
   def index_v2
-    only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
-    exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
+    # this method is going to replace 'index' once we fully migrate to the
+    # discovery views (old one was kept to avoid breaking the current inteface
+    # without sacrificing speed of development and avoid breaking the current interface)
+    domain = params[:domain]
+    list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
+
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
     offset = params[:offset].to_i
 
-    @samples = if only_library
-                 current_power.library_samples
-               elsif exclude_library
-                 # TODO: (gdingle): does this actually exclude the user's library???
-                 Sample.public_samples
-               else
-                 current_power.samples
-               end
+    samples = samples_by_domain(domain)
+    samples = filter_samples(samples, params)
 
+    limited_samples = samples.offset(offset).limit(limit)
+
+    limited_samples_json = limited_samples.as_json(
+      only: [:id, :name, :sample_tissue, :host_genome_id, :project_id, :created_at, :public],
+      methods: []
+    )
+    samples_visibility = visibility(limited_samples)
+
+    # format_samples loads a lot of information about samples
+    # There many ways we can refactor: multiple endoints for client to ask for the informaion
+    # they actually need or at least a configurable function to get only certain data
+    details_json = format_samples(limited_samples).as_json()
+    limited_samples_json.zip(details_json, samples_visibility).map do |sample, details, visibility|
+      sample[:public] = visibility
+      sample[:details] = details
+    end
+
+    results = { samples: limited_samples_json }
+    results[:all_samples_ids] = samples.pluck(:id) if list_all_sample_ids
+
+    # Refactor once we have a clear API definition policy
     respond_to do |format|
       format.json do
-        render json: @samples.offset(offset).limit(limit).as_json(
-          only: [:id, :name, :sample_tissue, :host_genome_id, :project_id, :created_at],
-          methods: []
-        )
+        # TODO(tiago): a lot of the values return by format_sample do not make sense on a sample controller
+        render json: results
       end
     end
   end
 
-  def details
-    # TODO(tiago): a lot of the values return by this endpoint do not make sense on a sample controller
-    # Refactor once we have a clear API definition policy
-    sample_ids = (params[:sampleIds] || []).map(&:to_i)
+  def dimensions
+    # TODO(tiago): consider split into specific controllers / models
+    domain = params[:domain]
+    param_sample_ids = (params[:sampleIds] || []).map(&:to_i)
 
-    @samples = current_power.viewable_samples.where(id: sample_ids)
+    samples = samples_by_domain(domain)
+    # Filter by access control
+    unless param_sample_ids.empty?
+      samples = samples.where(id: param_sample_ids)
+    end
+    sample_ids = samples.pluck(:id)
+
+    locations = samples_by_metadata_field(sample_ids, "collection_location").count
+    locations = locations.map do |location, count|
+      { value: location, text: location, count: count }
+    end
+
+    tissues = samples_by_metadata_field(sample_ids, "sample_type").count
+    tissues = tissues.map do |tissue, count|
+      { value: tissue, text: tissue, count: count }
+    end
+
+    # visibility
+    public_count = samples.public_samples.count
+    private_count = samples.count - public_count
+    visibility = [
+      { value: "public", text: "Public", count: public_count },
+      { value: "private", text: "Private", count: private_count }
+    ]
+
+    times = [
+      { value: "1_week", text: "Last Week", count: samples.where("samples.created_at >= ?", 1.week.ago.utc).count },
+      { value: "1_month", text: "Last Month", count: samples.where("samples.created_at >= ?", 1.month.ago.utc).count },
+      { value: "3_month", text: "Last 3 Months", count: samples.where("samples.created_at >= ?", 3.months.ago.utc).count },
+      { value: "6_month", text: "Last 6 Months", count: samples.where("samples.created_at >= ?", 6.months.ago.utc).count },
+      { value: "1_year", text: "Last Year", count: samples.where("samples.created_at >= ?", 1.year.ago.utc).count }
+    ]
+
+    hosts = samples.joins(:host_genome).group(:host_genome).count
+    hosts = hosts.map do |host, count|
+      { value: host.id, text: host.name, count: count }
+    end
 
     respond_to do |format|
       format.json do
-        render json: format_samples(@samples)
+        render json: [
+          { dimension: "location", values: locations },
+          { dimension: "visibility", values: visibility },
+          { dimension: "time", values: times },
+          { dimension: "host", values: hosts },
+          { dimension: "tissue", values: tissues }
+        ]
       end
     end
   end
@@ -173,77 +233,102 @@ class SamplesController < ApplicationController
 
   def search_suggestions
     query = params[:query]
-
-    # Not permission-dependent
-    taxon_list = taxon_search(query, ["species", "genus"])
-    hosts = HostGenome.where("name LIKE :search", search: "#{query}%")
-
-    # Admin-only for now: needs permissions scoping
-    users = current_user.admin ? prefix_match(User, "name", query, {}) : []
-
-    # Permission-dependent
-    projects = prefix_match(Project, "name", query, id: current_power.projects.pluck(:id))
-    viewable_sample_ids = current_power.samples.pluck(:id)
-    samples = prefix_match(Sample, "name", query, id: viewable_sample_ids)
-    tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "sample_type")
-    locations = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "collection_location")
+    # TODO: consider moving into a search_controller or into separate controllers/models
+    categories = params[:categories]
 
     # Generate structure required by CategorySearchBox
+    # Not permission-dependent
     results = {}
-    unless taxon_list.empty?
-      results["Taxon"] = { "name" => "Taxon",
-                           "results" => taxon_list.map do |entry|
-                             entry.merge("category" => "Taxon")
-                           end }
+    if !categories || categories.include?("taxon")
+      taxon_list = taxon_search(query, ["species", "genus"])
+      unless taxon_list.empty?
+        results["Taxon"] = {
+          "name" => "Taxon",
+          "results" => taxon_list.map do |entry|
+            entry.merge("category" => "Taxon")
+          end
+        }
+      end
     end
-    unless projects.empty?
-      results["Project"] = {
-        "name" => "Project",
-        "results" => projects.index_by(&:name).map do |_, p|
-          { "category" => "Project", "title" => p.name, "id" => p.id }
-        end
-      }
+    if !categories || categories.include?("host")
+      hosts = HostGenome.where("name LIKE :search", search: "#{query}%")
+      unless hosts.empty?
+        results["Host"] = {
+          "name" => "Host",
+          "results" => hosts.map do |h|
+            { "category" => "Host", "title" => h.name, "id" => h.id }
+          end
+        }
+      end
     end
-    unless samples.empty?
-      results["Sample"] = {
-        "name" => "Sample",
-        "results" => samples.group_by(&:name).map do |val, records|
-          { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id), "project_id" => records.count == 1 ? records.first.project_id : nil }
-        end
-      }
+
+    # Need users
+    if !categories || ["project", "sample", "location", "tissue", "uploader"].any? { |i| categories.include? i }
+      # Admin-only for now: needs permissions scoping
+      users = current_user.admin ? prefix_match(User, "name", query, {}) : []
     end
-    unless locations.empty?
-      results["Location"] = {
-        "name" => "Location",
-        "results" => locations.pluck(:string_validated_value).uniq.map do |val|
-                       { "category" => "Location", "title" => val, "id" => val }
-                     end
-      }
+
+    if !categories || categories.include?("project")
+      projects = prefix_match(Project, "name", query, id: current_power.projects.pluck(:id))
+      unless projects.empty?
+        results["Project"] = {
+          "name" => "Project",
+          "results" => projects.index_by(&:name).map do |_, p|
+            { "category" => "Project", "title" => p.name, "id" => p.id }
+          end
+        }
+      end
     end
-    unless tissues.empty?
-      results["Tissue"] = {
-        "name" => "Tissue",
-        "results" => tissues.pluck(:string_validated_value).uniq.map do |val|
-          { "category" => "Tissue", "title" => val, "id" => val }
-        end
-      }
+    if !categories || categories.include?("uploader")
+      unless users.empty?
+        results["Uploader"] = {
+          "name" => "Uploader",
+          "results" => users.group_by(&:name).map do |val, records|
+            { "category" => "Uploader", "title" => val, "id" => records.pluck(:id) }
+          end
+        }
+      end
     end
-    unless hosts.empty?
-      results["Host"] = {
-        "name" => "Host",
-        "results" => hosts.map do |h|
-          { "category" => "Host", "title" => h.name, "id" => h.id }
-        end
-      }
+
+    # Permission-dependent
+    if !categories || ["sample", "location", "tissue"].any? { |i| categories.include? i }
+      viewable_sample_ids = current_power.samples.pluck(:id)
     end
-    unless users.empty?
-      results["Uploader"] = {
-        "name" => "Uploader",
-        "results" => users.group_by(&:name).map do |val, records|
-          { "category" => "Uploader", "title" => val, "id" => records.pluck(:id) }
-        end
-      }
+
+    if !categories || categories.include?("sample")
+      samples = prefix_match(Sample, "name", query, id: viewable_sample_ids)
+      unless samples.empty?
+        results["Sample"] = {
+          "name" => "Sample",
+          "results" => samples.group_by(&:name).map do |val, records|
+            { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id), "project_id" => records.count == 1 ? records.first.project_id : nil }
+          end
+        }
+      end
     end
+    if !categories || categories.include?("location")
+      locations = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "collection_location")
+      unless locations.empty?
+        results["Location"] = {
+          "name" => "Location",
+          "results" => locations.pluck(:string_validated_value).uniq.map do |val|
+                         { "category" => "Location", "title" => val, "id" => val }
+                       end
+        }
+      end
+    end
+    if !categories || categories.include?("tissue")
+      tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "sample_type")
+      unless tissues.empty?
+        results["Tissue"] = {
+          "name" => "Tissue",
+          "results" => tissues.pluck(:string_validated_value).uniq.map do |val|
+            { "category" => "Tissue", "title" => val, "id" => val }
+          end
+        }
+      end
+    end
+
     render json: JSON.dump(results)
   end
 
@@ -954,7 +1039,7 @@ class SamplesController < ApplicationController
     default_dir = 'id,desc'
     dir ||= default_dir
     column, direction = dir.split(',')
-    samples = samples.order("#{column} #{direction}") if column && direction
+    samples = samples.order("samples.#{column} #{direction}") if column && direction
     samples
   end
 end

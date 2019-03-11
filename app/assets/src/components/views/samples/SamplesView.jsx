@@ -1,9 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { getSamples, getSampleDetails } from "~/api";
-import { get, map, zip } from "lodash";
-import GlobeIcon from "~ui/icons/GlobeIcon";
-import LockIcon from "~ui/icons/LockIcon";
+import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
+import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
 import InfiniteTable from "../../visualizations/table/InfiniteTable";
 import moment from "moment";
 import { numberWithCommas } from "~/helpers/strings";
@@ -36,7 +34,7 @@ class SamplesView extends React.Component {
         cellRenderer: this.renderNumberAndPercentage
       },
       {
-        dataKey: "passedQC",
+        dataKey: "qcPercent",
         label: "Passed QC",
         flexGrow: 1,
         cellDataGetter: ({ dataKey, rowData }) =>
@@ -121,9 +119,9 @@ class SamplesView extends React.Component {
         <div className={cs.publicAccess}>
           {sample &&
             (sample.publicAccess ? (
-              <GlobeIcon className={cx(cs.icon, cs.iconGlobe)} />
+              <SamplePublicIcon className={cx(cs.icon, cs.iconPublic)} />
             ) : (
-              <LockIcon className={cx(cs.icon, cs.iconLock)} />
+              <SamplePrivateIcon className={cx(cs.icon, cs.iconPrivate)} />
             ))}
         </div>
         <div className={cs.sampleRightPane}>
@@ -153,89 +151,23 @@ class SamplesView extends React.Component {
     );
   };
 
-  handleLoadRows = async ({ startIndex, stopIndex }) => {
-    const { excludeLibrary, onlyLibrary } = this.props;
-
-    const samples = await getSamples({
-      excludeLibrary,
-      onlyLibrary,
-      limit: stopIndex - startIndex + 1,
-      offset: startIndex
-    });
-    let sampleIds = map(samples, "id");
-    const sampleDetails = await getSampleDetails({ sampleIds });
-    const zipped = zip(samples, sampleDetails);
-    const mapped = map(zipped, this.processRow);
-    return mapped;
-  };
-
-  processRow = ([sampleInfo, sampleDetails]) => {
-    const row = {
-      sample: {
-        name: sampleInfo.name,
-        // TODO(tiago): replace by real value
-        publicAccess: false,
-        user: get(sampleDetails, "uploader.name"),
-        project: get(sampleDetails, "derived_sample_output.project_name"),
-        createdAt: sampleInfo.created_at,
-        status: get(
-          sampleDetails,
-          "run_info.result_status_description"
-        ).toLowerCase()
-      },
-      collectionLocation: get(sampleDetails, "metadata.collection_location"),
-      duplicateCompressionRatio: get(
-        sampleDetails,
-        "derived_sample_output.summary_stats.compression_ratio"
-      ),
-      erccReads: get(
-        sampleDetails,
-        "derived_sample_output.pipeline_run.total_ercc_reads"
-      ),
-      host: get(sampleDetails, "db_sample.host_genome_name"),
-      id: sampleInfo.id,
-      nonHostReads: {
-        value: get(
-          sampleDetails,
-          "derived_sample_output.summary_stats.adjusted_remaining_reads"
-        ),
-        percent: get(
-          sampleDetails,
-          "derived_sample_output.summary_stats.percent_remaining"
-        )
-      },
-      notes: sampleInfo.sample_notes,
-      nucleotideType: get(sampleDetails, "metadata.nucleotide_type"),
-      passedQC: get(
-        sampleDetails,
-        "derived_sample_output.summary_stats.qc_percent"
-      ),
-      sampleType: get(sampleDetails, "metadata.sample_type"),
-      totalRuntime: get(sampleDetails, "run_info.total_runtime"),
-      subsampledFraction: get(
-        sampleDetails,
-        "derived_sample_output.pipeline_run.fraction_subsampled"
-      ),
-      totalReads: get(
-        sampleDetails,
-        "derived_sample_output.pipeline_run.total_reads"
-      )
-    };
-    return row;
+  reset = () => {
+    this.infiniteTable.reset();
   };
 
   render() {
-    const { activeColumns } = this.props;
-    // TODO(tiago): replace by automated cell renderer
+    const { activeColumns, onLoadRows } = this.props;
+    // TODO(tiago): replace by automated cell height computing
     const rowHeight = 70;
 
     return (
       <div className={cs.container}>
         <div className={cs.table}>
           <InfiniteTable
+            ref={infiniteTable => (this.infiniteTable = infiniteTable)}
             columns={this.columns}
             loadingClassName={cs.loading}
-            onLoadRows={this.handleLoadRows}
+            onLoadRows={onLoadRows}
             initialActiveColumns={activeColumns}
             defaultRowHeight={rowHeight}
           />
@@ -250,7 +182,7 @@ SamplesView.defaultProps = {
     "sample",
     "totalReads",
     "nonHostReads",
-    "passedQC",
+    "qcPercent",
     "duplicateCompressionRatio",
     "collectionLocation",
     "host",
@@ -260,8 +192,7 @@ SamplesView.defaultProps = {
 
 SamplesView.propTypes = {
   activeColumns: PropTypes.arrayOf(PropTypes.string),
-  excludeLibrary: PropTypes.bool,
-  onlyLibrary: PropTypes.bool
+  onLoadRows: PropTypes.func.isRequired
 };
 
 export default SamplesView;

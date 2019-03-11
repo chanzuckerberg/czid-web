@@ -20,7 +20,7 @@ class ProjectsController < ApplicationController
     :validate_sample_names
   ].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
-  OTHER_ACTIONS = [:create, :new, :index, :send_project_csv, :choose_project, :metadata_fields].freeze
+  OTHER_ACTIONS = [:choose_project, :create, :dimensions, :index, :metadata_fields, :new, :send_project_csv].freeze
 
   # Required for token auth for CLI actions
   skip_before_action :verify_authenticity_token, only: [:index, :create]
@@ -51,35 +51,104 @@ class ProjectsController < ApplicationController
         @projects = current_power.projects
       end
       format.json do
-        only_updatable = ActiveModel::Type::Boolean.new.cast(params[:onlyUpdatable])
-        only_library = ActiveModel::Type::Boolean.new.cast(params[:onlyLibrary])
-        exclude_library = ActiveModel::Type::Boolean.new.cast(params[:excludeLibrary])
+        domain = params[:domain]
 
-        @samples = if only_library
-                     current_power.library_samples
-                   elsif exclude_library
-                     Sample.public_samples
+        samples = samples_by_domain(domain)
+        samples = filter_samples(samples, params)
+
+        # Retrieve a json of projects associated with samples;
+        # augment with number_of_samples, hosts, tissues.
+        projects = if ["library", "public"].include?(domain)
+                     current_power.projects.where(id: samples.pluck(:project_id).uniq)
+                   elsif domain == "updatable"
+                     current_power.updatable_projects
                    else
-                     current_power.samples
+                     current_power.projects
                    end
 
-        @projects = if only_library || exclude_library
-                      @samples.group(:project).count
-                    else
-                      # Make sure you still return projects without any samples. Ex: Project listing
-                      # used by the CLI.
-                      (only_updatable ? current_power.updatable_projects : current_power.projects).map do |p|
-                        [p, Sample.where(project: p).count]
-                      end
-                    end
-        extended_projects = @projects.map do |project, sample_count|
+        sample_count_by_project_id = Hash[samples.group_by(&:project_id).map { |k, v| [k, v.count] }]
+        host_genome_names_by_project_id = {}
+        tissues_by_project_id = {}
+        samples.includes(:host_genome).each do |s|
+          (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome.name
+          # TODO: sample_tissue column is deprecated, retrieve sample_type from Metadatum model instead
+          (tissues_by_project_id[s.project_id] ||= Set.new) << s.sample_tissue if s.sample_tissue
+        end
+        extended_projects = projects.map do |project|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
-            number_of_samples: sample_count,
-            hosts: @samples.where(project_id: project.id).includes(:host_genome).distinct.pluck("host_genomes.name").compact,
-            tissues: @samples.where(project_id: project.id).distinct.pluck(:sample_tissue).compact
+            number_of_samples: sample_count_by_project_id[project.id] || 0,
+            hosts: host_genome_names_by_project_id[project.id] || [],
+            tissues: tissues_by_project_id[project.id] || []
           )
         end
         render json: extended_projects
+      end
+    end
+  end
+
+  def dimensions
+    # TODO(tiago): consider split into specific controllers / models
+    domain = params[:domain]
+
+    samples = samples_by_domain(domain)
+    # Filter by access control
+    sample_ids = samples.pluck(:id)
+
+    project_ids = samples.distinct(:project_id).pluck(:project_id)
+    projects = Project.where(id: project_ids)
+
+    locations = samples_by_metadata_field(sample_ids, "collection_location")
+                .joins(:sample)
+                .distinct
+                .count(:project_id)
+    locations = locations.map do |location, count|
+      { value: location, text: location, count: count }
+    end
+
+    tissues = samples_by_metadata_field(sample_ids, "sample_type")
+              .joins(:sample)
+              .distinct
+              .count(:project_id)
+    tissues = tissues.map do |tissue, count|
+      { value: tissue, text: tissue, count: count }
+    end
+
+    # visibility
+    # TODO(tiago): should this be public projects or projects with public samples?
+    public_count = samples.joins(:project).distinct(:project_id).where(projects: { public_access: 1 }).pluck(:project_id).count
+    private_count = samples.distinct(:project_id).pluck(:project_id).count - public_count
+    visibility = [
+      { value: "public", text: "Public", count: public_count },
+      { value: "private", text: "Private", count: private_count }
+    ]
+
+    times = [
+      { value: "1_week", text: "Last Week",
+        count: projects.where("projects.created_at >= ?", 1.week.ago.utc).count },
+      { value: "1_month", text: "Last Month",
+        count: projects.where("projects.created_at >= ?", 1.month.ago.utc).count },
+      { value: "3_month", text: "Last 3 Months",
+        count: projects.where("projects.created_at >= ?", 3.months.ago.utc).count },
+      { value: "6_month", text: "Last 6 Months",
+        count: projects.where("projects.created_at >= ?", 6.months.ago.utc).count },
+      { value: "1_year", text: "Last Year",
+        count: projects.where("projects.created_at >= ?", 1.year.ago.utc).count }
+    ]
+
+    hosts = samples.includes(:host_genome).group(:host_genome).distinct.count(:project_id)
+    hosts = hosts.map do |host, count|
+      { value: host.id, text: host.name, count: count }
+    end
+
+    respond_to do |format|
+      format.json do
+        render json: [
+          { dimension: "location", values: locations },
+          { dimension: "visibility", values: visibility },
+          { dimension: "time", values: times },
+          { dimension: "host", values: hosts },
+          { dimension: "tissue", values: tissues }
+        ]
       end
     end
   end

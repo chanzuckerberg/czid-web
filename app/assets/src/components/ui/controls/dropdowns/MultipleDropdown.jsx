@@ -113,6 +113,7 @@ class MultipleDropdown extends React.Component {
 
   render() {
     const {
+      arrowInsideTrigger,
       boxed,
       checkedOnTop,
       hideCounter,
@@ -134,7 +135,7 @@ class MultipleDropdown extends React.Component {
         {...otherProps}
         floating
         className={cx(cs.multipleDropdown, className)}
-        arrowInsideTrigger
+        arrowInsideTrigger={arrowInsideTrigger}
         trigger={trigger || this.renderText()}
         items={renderedMenuItems}
         itemSearchStrings={searchStrings}
@@ -145,10 +146,12 @@ class MultipleDropdown extends React.Component {
 }
 
 MultipleDropdown.defaultProps = {
+  arrowInsideTrigger: true,
   value: []
 };
 
 MultipleDropdown.propTypes = {
+  arrowInsideTrigger: PropTypes.bool,
   boxed: PropTypes.bool,
   checkedOnTop: PropTypes.bool,
   disabled: PropTypes.bool,
