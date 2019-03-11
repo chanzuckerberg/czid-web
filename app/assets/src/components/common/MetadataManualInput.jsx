@@ -18,7 +18,6 @@ import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
 import { Dropdown } from "~ui/controls/dropdowns";
-import { getProjectMetadataFields, getAllHostGenomes } from "~/api";
 import PlusIcon from "~ui/icons/PlusIcon";
 
 import cs from "./metadata_manual_input.scss";
@@ -41,14 +40,11 @@ class MetadataManualInput extends React.Component {
     }
   };
 
-  async componentDidMount() {
-    const [projectMetadataFields, hostGenomes] = await Promise.all([
-      getProjectMetadataFields(this.props.project.id),
-      getAllHostGenomes()
-    ]);
+  componentDidMount() {
+    const { projectMetadataFields, hostGenomes, samplesAreNew } = this.props;
 
     this.setState({
-      projectMetadataFields: keyBy("key", projectMetadataFields),
+      projectMetadataFields: projectMetadataFields,
       // Default to the required fields.
       selectedFieldNames: map(
         "key",
@@ -57,7 +53,7 @@ class MetadataManualInput extends React.Component {
       hostGenomes,
       headers: {
         "Sample Name": "Sample Name",
-        ...(this.props.samplesAreNew
+        ...(samplesAreNew
           ? {
               "Host Genome": (
                 <div>
@@ -68,7 +64,7 @@ class MetadataManualInput extends React.Component {
           : {}),
         ...mapValues(
           field =>
-            this.props.samplesAreNew && field.is_required ? (
+            samplesAreNew && field.is_required ? (
               <div>
                 {field.name}
                 <span className={cs.requiredStar}>*</span>
@@ -81,8 +77,17 @@ class MetadataManualInput extends React.Component {
       }
     });
 
-    // Default to the first host genome (Human)
-    this.props.samples.map(sample => this.updateHostGenome(1, sample));
+    // Set all to Human by default. Can't use updateHostGenome/updateMetadataField for bulk update.
+    const newHeaders = union(["Host Genome"], this.state.headersToEdit);
+    let newFields = this.state.metadataFieldsToEdit;
+    this.props.samples.forEach(sample => {
+      newFields = set([sample.name, "Host Genome"], "Human", newFields);
+    });
+    this.setState({
+      headersToEdit: newHeaders,
+      metadataFieldsToEdit: newFields
+    });
+    this.onMetadataChange(newHeaders, newFields);
   }
 
   getManualInputColumns = () => {
@@ -169,16 +174,14 @@ class MetadataManualInput extends React.Component {
   getHostGenomeOptions = () =>
     sortBy(
       "text",
-      this.state.hostGenomes.map(hostGenome => ({
+      this.props.hostGenomes.map(hostGenome => ({
         text: hostGenome.name,
         value: hostGenome.id
       }))
     );
 
   renderColumnSelector = () => {
-    const { projectMetadataFields, selectedFieldNames } = this.state;
-
-    const options = values(projectMetadataFields).map(field => ({
+    const options = values(this.props.projectMetadataFields).map(field => ({
       value: field.key,
       text: field.name
     }));
@@ -195,7 +198,7 @@ class MetadataManualInput extends React.Component {
         onChange={this.handleColumnChange}
         options={options}
         trigger={<PlusIcon className={cs.plusIcon} />}
-        value={selectedFieldNames}
+        value={this.state.selectedFieldNames}
         className={cs.columnPicker}
       />
     );
@@ -206,7 +209,7 @@ class MetadataManualInput extends React.Component {
     this.updateMetadataField(
       "Host Genome",
       // Convert the id to a name.
-      find(["id", hostGenomeId], this.state.hostGenomes).name,
+      find(["id", hostGenomeId], this.props.hostGenomes).name,
       sample
     );
   };
@@ -256,7 +259,7 @@ class MetadataManualInput extends React.Component {
                 "id",
                 find(
                   ["name", this.getMetadataValue(sample, "Host Genome")],
-                  this.state.hostGenomes
+                  this.props.hostGenomes
                 )
               )
             : sample.host_genome_id;
@@ -281,7 +284,7 @@ class MetadataManualInput extends React.Component {
           if (
             includes(
               sampleHostGenomeId,
-              this.state.projectMetadataFields[column].host_genome_ids
+              this.props.projectMetadataFields[column].host_genome_ids
             )
           ) {
             return (
@@ -311,10 +314,6 @@ class MetadataManualInput extends React.Component {
   };
 
   render() {
-    if (!this.props.samples || !this.state.projectMetadataFields) {
-      return <div className={cs.loadingMsg}>Loading...</div>;
-    }
-
     return (
       <div className={cx(cs.metadataManualInput, this.props.className)}>
         {this.props.samplesAreNew && (
@@ -343,7 +342,9 @@ MetadataManualInput.propTypes = {
   className: PropTypes.string,
   onMetadataChange: PropTypes.func.isRequired,
   samplesAreNew: PropTypes.bool,
-  withinModal: PropTypes.bool
+  withinModal: PropTypes.bool,
+  projectMetadataFields: PropTypes.object,
+  hostGenomes: PropTypes.array
 };
 
 export default MetadataManualInput;

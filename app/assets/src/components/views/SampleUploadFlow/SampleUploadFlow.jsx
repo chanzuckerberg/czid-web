@@ -7,6 +7,7 @@ import PropTypes from "~/components/utils/propTypes";
 import UploadMetadataStep from "./UploadMetadataStep";
 import ReviewStep from "./ReviewStep";
 import cs from "./sample_upload_flow.scss";
+import SampleUploadFlowHeader from "./SampleUploadFlowHeader";
 
 class SampleUploadFlow extends React.Component {
   state = {
@@ -104,14 +105,17 @@ class SampleUploadFlow extends React.Component {
 
   render() {
     return (
-      <NarrowContainer
-        className={cx(
-          cs.sampleUploadFlow,
-          this.state.currentStep === "uploadSamples" && cs.narrow
-        )}
-      >
-        <div className={cs.inner}>{this.renderStep()}</div>
-      </NarrowContainer>
+      <div>
+        <SampleUploadFlowHeader currentStep={this.state.currentStep} />
+        <NarrowContainer
+          className={cx(
+            cs.sampleUploadFlow,
+            this.state.currentStep === "uploadSamples" && cs.narrow
+          )}
+        >
+          <div className={cs.inner}>{this.renderStep()}</div>
+        </NarrowContainer>
+      </div>
     );
   }
 }
