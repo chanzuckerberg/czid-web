@@ -24,6 +24,21 @@
     @include font-body-s;
     margin-top: 10px;
   }
+
+  .details {
+    margin-bottom: 10px;
+
+    .label {
+      font-weight: 600;
+    }
+  }
+
+  .info {
+    background-color: $off-white;
+    padding: 20px 20px 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
 }
 
 .issues {

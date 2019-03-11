@@ -349,59 +349,48 @@ class UploadSampleStep extends React.Component {
   render() {
     return (
       <div className={cs.uploadSampleStep}>
-        <div className={cs.header}>
-          <div className={cs.title}>Upload Samples</div>
-          <div className={cs.subtitle}>
-            Rather use our command-line interface?
-            <a
-              href="/cli_user_instructions"
-              target="_blank"
-              className={cs.cliLink}
-            >
-              Instructions here.
-            </a>
+        <div className={cs.tallBody}>
+          <div className={cs.projectSelect}>
+            <div className={cs.label}>Project</div>
+            <ProjectSelect
+              projects={this.state.projects}
+              value={get("id", this.state.selectedProject)}
+              onChange={this.handleProjectChange}
+              disabled={this.state.createProjectOpen}
+            />
+            {this.state.createProjectOpen ? (
+              <div className={cs.projectCreationContainer}>
+                <ProjectCreationForm
+                  onCancel={this.closeCreateProject}
+                  onCreate={this.handleProjectCreate}
+                />
+              </div>
+            ) : (
+              <div
+                className={cs.createProjectButton}
+                onClick={this.openCreateProject}
+              >
+                + Create Project
+              </div>
+            )}
           </div>
-        </div>
-        <div className={cs.projectSelect}>
-          <div className={cs.label}>Project</div>
-          <ProjectSelect
-            projects={this.state.projects}
-            value={get("id", this.state.selectedProject)}
-            onChange={this.handleProjectChange}
-            disabled={this.state.createProjectOpen}
+          <div className={cs.fileUpload}>
+            <div className={cs.title}>Upload Files</div>
+            <Tabs
+              className={cs.tabs}
+              tabs={[LOCAL_UPLOAD_TAB, REMOTE_UPLOAD_TAB]}
+              value={this.state.currentTab}
+              onChange={this.handleTabChange}
+            />
+            {this.renderTab()}
+          </div>
+          <BulkSampleUploadTable
+            sampleNamesToFiles={this.getSampleNamesToFiles()}
+            onRemoved={this.handleSampleRemoved}
+            hideProgressColumn
+            showCount={this.state.currentTab === REMOTE_UPLOAD_TAB}
           />
-          {this.state.createProjectOpen ? (
-            <div className={cs.projectCreationContainer}>
-              <ProjectCreationForm
-                onCancel={this.closeCreateProject}
-                onCreate={this.handleProjectCreate}
-              />
-            </div>
-          ) : (
-            <div
-              className={cs.createProjectButton}
-              onClick={this.openCreateProject}
-            >
-              + Create Project
-            </div>
-          )}
         </div>
-        <div className={cs.fileUpload}>
-          <div className={cs.title}>Upload Files</div>
-          <Tabs
-            className={cs.tabs}
-            tabs={[LOCAL_UPLOAD_TAB, REMOTE_UPLOAD_TAB]}
-            value={this.state.currentTab}
-            onChange={this.handleTabChange}
-          />
-          {this.renderTab()}
-        </div>
-        <BulkSampleUploadTable
-          sampleNamesToFiles={this.getSampleNamesToFiles()}
-          onRemoved={this.handleSampleRemoved}
-          hideProgressColumn
-          showCount={this.state.currentTab === REMOTE_UPLOAD_TAB}
-        />
         <div className={cs.mainControls}>
           <PrimaryButton
             text="Continue"

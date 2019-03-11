@@ -16,15 +16,20 @@
   .projectDescription {
     color: $dark-grey;
     font-size: $font-size-h6;
-    margin-bottom: 8px;
     line-height: 16px;
-    height: 32px;
+    // remove description for now:
+    height: 0;
+    overflow: hidden;
+    // height: 32px;
+    // margin-bottom: 8px;
     vertical-align: middle;
   }
 
   .projectDetails {
+    @include font-body-xxs;
+
     color: $medium-grey;
-    font-size: $font-size-small;
+    font-weight: $font-weight-regular;
 
     span:not(:last-child) {
       margin-right: 8px;

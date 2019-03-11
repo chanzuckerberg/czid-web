@@ -41,7 +41,9 @@ class BareDropdown extends React.Component {
       {
         filterString
       },
-      () => onFilterChange(filterString)
+      () => {
+        onFilterChange && onFilterChange(filterString);
+      }
     );
   };
 
