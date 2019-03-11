@@ -151,6 +151,7 @@
     .sampleDetails {
       @include font-body-xxs;
 
+      font-weight: $font-weight-regular;
       color: $medium-grey;
       text-align: left;
 
