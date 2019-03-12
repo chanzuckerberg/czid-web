@@ -65,13 +65,16 @@ class MinContigSizeFilter extends React.Component {
   };
 
   render() {
+    const labelText =
+      "Min Contig Size" +
+      (this.state.value !== undefined && this.state.value !== null ? ":" : "");
     return (
       <BareDropdown
         className={cs.minContigSizeFilter}
         trigger={
           <DropdownTrigger
             className={cs.dropdownTrigger}
-            label="Min Contig Size:"
+            label={labelText}
             value={this.state.value}
             rounded
           />
