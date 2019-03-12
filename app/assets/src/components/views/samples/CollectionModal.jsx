@@ -24,7 +24,11 @@ class CollectionModal extends React.Component {
   }
 
   renderSampleList() {
-    const { fetchedSampleIds, samples, selectedSampleIds } = this.props;
+    const {
+      fetchedSampleIds,
+      // samples,
+      selectedSampleIds
+    } = this.props;
 
     const MAX_SAMPLES_TO_SHOW = 10;
 
