@@ -3,6 +3,7 @@ import { Form, TextArea } from "semantic-ui-react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 import cs from "./cli_user_instructions.scss";
+import { openUrlInNewTab } from "~utils/links";
 
 class CliUserInstructions extends React.Component {
   render() {
@@ -107,6 +108,47 @@ class CliUserInstructions extends React.Component {
           {
             "- Supported file types: .fastq/.fq/.fasta/.fa or .fastq.gz/.fq.gz/.fasta.gz/.fa.gz"
           }
+        </p>
+        <p>
+          - You will be prompted to upload metadata in a CSV file with your
+          samples. This is also where you will specify the Host Genome.
+        </p>
+        <p>
+          <div className={cs.firstIndent}>
+            {"- "}
+            <span
+              onClick={() =>
+                openUrlInNewTab("https://idseq.net/metadata/instructions")
+              }
+              className={cs.link}
+            >
+              Metadata Instructions
+            </span>
+          </div>
+          <div className={cs.firstIndent}>
+            {"- "}
+            <span
+              onClick={() =>
+                openUrlInNewTab("https://idseq.net/metadata/dictionary")
+              }
+              className={cs.link}
+            >
+              Metadata Dictionary
+            </span>
+          </div>
+          <div className={cs.firstIndent}>
+            {"- "}
+            <span
+              onClick={() =>
+                openUrlInNewTab(
+                  "https://idseq.net/metadata/metadata_template_csv"
+                )
+              }
+              className={cs.link}
+            >
+              Metadata CSV Template
+            </span>
+          </div>
         </p>
         <p>{`- Supported host genome values: ${genomesList}`}</p>
         <p>
