@@ -9,11 +9,11 @@ class CliUserInstructions extends React.Component {
   render() {
     const singleUploadCmd = `idseq -e='${this.props.email}' -t='${
       this.props.authToken
-    }' -p='Your Project Name' -s='Your Sample Name' --r1=your_sample_R1.fastq.gz --r2=your_sample_R2.fastq.gz --host-genome-name='Human'`;
+    }' -p='Your Project Name' -s='Your Sample Name' --r1=your_sample_R1.fastq.gz --r2=your_sample_R2.fastq.gz`;
 
     const bulkUploadCmd = `idseq -e='${this.props.email}' -t='${
       this.props.authToken
-    }' -p='Your Project Name' --bulk=. --host-genome-name='Human'`;
+    }' -p='Your Project Name' --bulk=.`;
 
     const genomesList = `'${this.props.hostGenomes.join("', '")}'`;
 
@@ -87,11 +87,7 @@ class CliUserInstructions extends React.Component {
               your_sample_R1
             </span>.fastq.gz --r2=<span className={cs.codeToEdit}>
               your_sample_R2
-            </span>.fastq.gz --host-genome-name='<span
-              className={cs.codeToEdit}
-            >
-              Human
-            </span>'
+            </span>.fastq.gz
           </p>
         </div>
         <div className={cs.instructionMediumMarginTop}>
@@ -202,8 +198,7 @@ class CliUserInstructions extends React.Component {
             </span>' \
             <br /> --bulk=<span className={cs.codeToEdit}>
               /path/to/your/folder
-            </span>{" "}
-            --host-genome-name='<span className={cs.codeToEdit}>Human</span>'
+            </span>
           </p>
         </div>
         <div className={cs.instructionMediumMarginTop}>
