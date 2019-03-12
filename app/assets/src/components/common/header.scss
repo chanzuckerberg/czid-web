@@ -29,9 +29,10 @@
     color: $white;
 
     .userName {
+      @include font-body-xs;
+
       align-items: center;
       display: flex;
-      font-size: $font-size-h6;
       font-weight: $font-weight-regular;
       margin-right: 5px;
       height: 36px;
@@ -45,12 +46,12 @@
   }
 
   .mainMenu {
+    @include font-body-xs;
     margin-right: 100px;
     display: flex;
     color: $medium-grey;
 
     .item {
-      font-size: $font-size-h6;
       font-weight: $font-weight-semibold;
 
       &.selected {

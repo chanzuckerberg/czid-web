@@ -1,6 +1,6 @@
 import React from "react";
 import cx from "classnames";
-import { uniqBy, sum, sumBy, flatten, map, countBy, sortBy } from "lodash/fp";
+import { countBy, flatten, map, sortBy, sum, sumBy, uniqBy } from "lodash/fp";
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
@@ -62,7 +62,7 @@ export default class DiscoverySidebar extends React.Component {
       const tissues = flatten(map("tissues", projects));
 
       const createdAts = map(
-        p => DiscoverySidebar.formatDate(p.created_at),
+        project => DiscoverySidebar.formatDate(project.created_at),
         projects
       );
 
@@ -74,10 +74,9 @@ export default class DiscoverySidebar extends React.Component {
           // avg_reads_per_sample: 0,
         },
         metadata: {
-          // TODO (gdingle): these freq counts per project, not per sample
-          host: hosts.length,
-          tissue: tissues.length,
-          createdAt: createdAts.length
+          host: countBy(null, hosts),
+          tissue: countBy(null, tissues),
+          createdAt: countBy(null, createdAts)
           // TODO (gdingle): location not in projects data yet
           // location: {},
         },

@@ -58,17 +58,20 @@ class MetadataManualInput extends React.Component {
       }
     });
 
-    // Set all to Human by default. Can't use updateHostGenome/updateMetadataField for bulk update.
-    const newHeaders = union(["Host Genome"], this.state.headersToEdit);
-    let newFields = this.state.metadataFieldsToEdit;
-    this.props.samples.forEach(sample => {
-      newFields = set([sample.name, "Host Genome"], "Human", newFields);
-    });
-    this.setState({
-      headersToEdit: newHeaders,
-      metadataFieldsToEdit: newFields
-    });
-    this.onMetadataChange(newHeaders, newFields);
+    // If samples are new, set all host genomes to Human by default.
+    // Can't use updateHostGenome/updateMetadataField for bulk update.
+    if (this.props.samplesAreNew) {
+      const newHeaders = union(["Host Genome"], this.state.headersToEdit);
+      let newFields = this.state.metadataFieldsToEdit;
+      this.props.samples.forEach(sample => {
+        newFields = set([sample.name, "Host Genome"], "Human", newFields);
+      });
+      this.setState({
+        headersToEdit: newHeaders,
+        metadataFieldsToEdit: newFields
+      });
+      this.onMetadataChange(newHeaders, newFields);
+    }
   }
 
   getManualInputColumns = () => {
