@@ -117,6 +117,7 @@ class BaseTable extends React.Component {
       onRowsRendered,
       forwardRef,
       onSort,
+      rowClassName,
       rowCount,
       rowGetter,
       rowRenderer,
@@ -139,7 +140,7 @@ class BaseTable extends React.Component {
               height={height}
               onRowsRendered={onRowsRendered}
               ref={forwardRef}
-              rowClassName={cs.row}
+              rowClassName={cx(rowClassName, cs.row)}
               rowCount={rowCount}
               rowGetter={rowGetter}
               rowHeight={defaultRowHeight}
@@ -236,6 +237,7 @@ BaseTable.propTypes = {
     PropTypes.func,
     PropTypes.shape({ current: PropTypes.instanceOf(Element) })
   ]),
+  rowClassName: PropTypes.string,
   rowGetter: PropTypes.func.isRequired,
   rowCount: PropTypes.number.isRequired,
   rowRenderer: PropTypes.func,

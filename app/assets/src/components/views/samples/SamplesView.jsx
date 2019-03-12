@@ -28,7 +28,7 @@ class SamplesView extends React.Component {
       {
         dataKey: "sample",
         flexGrow: 1,
-        width: 500,
+        width: 350,
         cellRenderer: this.renderSample,
         headerClassName: cs.sampleHeader
       },
@@ -282,6 +282,7 @@ class SamplesView extends React.Component {
             onLoadRows={onLoadRows}
             onSelectAllRows={this.handleSelectAllRows}
             onSelectRow={this.handleSelectRow}
+            rowClassName={cs.tableDataRow}
             selectableKey="id"
             selected={selected}
             selectAllChecked={selectAllChecked}

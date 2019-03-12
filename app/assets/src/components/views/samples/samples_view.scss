@@ -19,6 +19,11 @@
   }
 }
 
+.tableDataRow {
+  align-items: flex-start;
+  padding: 15px 0;
+}
+
 .samplesToolbar {
   display: flex;
   align-items: center;
@@ -78,7 +83,6 @@
 
 .sample {
   display: flex;
-  padding: 15px 0;
 
   .publicAccess {
     flex: 0 0 40px;

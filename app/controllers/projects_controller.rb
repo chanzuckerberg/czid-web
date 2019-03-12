@@ -77,7 +77,7 @@ class ProjectsController < ApplicationController
           (tissues_by_project_id[s.project_id] ||= Set.new) << s.sample_tissue if s.sample_tissue
           if !min_sample_by_project_id[s.project_id] || min_sample_by_project_id[s.project_id] < s.id
             min_sample_by_project_id[s.project_id] = s.id
-            owner_by_project_id[s.project_id] = s.user.name
+            owner_by_project_id[s.project_id] = s.user ? s.user.name : nil
           end
         end
         extended_projects = projects.map do |project|
