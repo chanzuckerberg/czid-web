@@ -19,6 +19,7 @@ class CliUserInstructions extends React.Component {
 
     return (
       <div className={cs.instructionContainer}>
+        <div className={cs.title}>Command Line Interface Instructions</div>
         <p className={cs.instructionHeading}>
           {
             "(1) Install and configure the Amazon Web Services Command Line Interface (AWS CLI): "
