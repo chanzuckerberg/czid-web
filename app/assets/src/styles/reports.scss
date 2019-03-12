@@ -62,12 +62,10 @@ input[type="number"] {
     font-weight: normal !important;
   }
 
+  // NOTE: Show/hide on hover is now handled by JS for perf. See isRowHovered in
+  // PipelineSampleReport.
   tr:hover {
     .hover-wrapper {
-      .link-tag {
-        visibility: visible;
-      }
-
       span.taxon-sidebar-link {
         color: $primary-light;
       }
@@ -360,12 +358,10 @@ input[type="number"] {
   cursor: pointer;
   &:hover {
     .link-tag {
-      visibility: visible;
       color: $primary-light;
     }
   }
   .link-tag {
-    visibility: hidden;
     padding-left: 10px;
   }
 }
