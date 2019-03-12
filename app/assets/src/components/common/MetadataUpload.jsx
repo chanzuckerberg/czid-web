@@ -22,8 +22,7 @@ class MetadataUpload extends React.Component {
       warnings: []
     },
     projectMetadataFields: null,
-    hostGenomes: [],
-    showInfo: false
+    hostGenomes: []
   };
 
   async componentDidMount() {
@@ -59,12 +58,6 @@ class MetadataUpload extends React.Component {
   // This happens when Continue is clicked in the parent component.
   onMetadataChangeManual = ({ metadata }) => {
     this.props.onMetadataChange({ metadata, wasManual: true });
-  };
-
-  toggleInfo = () => {
-    this.setState({
-      showInfo: !this.state.showInfo
-    });
   };
 
   renderTab = () => {
@@ -175,34 +168,22 @@ class MetadataUpload extends React.Component {
   };
 
   render() {
-    const {
-      hostGenomes,
-      projectMetadataFields,
-      currentTab,
-      showInfo
-    } = this.state;
+    const { hostGenomes, projectMetadataFields, currentTab } = this.state;
+    const { samplesAreNew } = this.props;
     const requiredFields = concat(
       "Host Genome",
       map("name", filter(["is_required", 1], projectMetadataFields))
     );
+    const metadataDictionaryTag = (
+      <span>
+        <a href="/metadata/dictionary" className={cs.link} target="_blank">
+          View Full Metadata Dictionary
+        </a>
+      </span>
+    );
     return (
       <div className={cx(cs.metadataUpload, this.props.className)}>
-        <div>
-          <span>
-            <a href="/metadata/dictionary" className={cs.link} target="_blank">
-              View Metadata Dictionary
-            </a>
-          </span>
-          {this.props.samplesAreNew && (
-            <React.Fragment>
-              {` | `}
-              <span className={cs.link} onClick={this.toggleInfo}>
-                {showInfo ? "Hide" : "Show"} Required Fields and Host Genomes
-              </span>
-            </React.Fragment>
-          )}
-        </div>
-        {this.state.showInfo && (
+        {samplesAreNew && (
           <div className={cs.info}>
             <div className={cs.details}>
               <span className={cs.label}>{`Required fields: `}</span>
@@ -212,8 +193,10 @@ class MetadataUpload extends React.Component {
               <span className={cs.label}>{`Available host genomes: `}</span>
               {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
             </div>
+            <div className={cs.details}>{metadataDictionaryTag}</div>
           </div>
         )}
+        <div>{!samplesAreNew && metadataDictionaryTag}</div>
         <Tabs
           className={cs.tabs}
           tabs={["Manual Input", "CSV Upload"]}
