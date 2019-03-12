@@ -53,7 +53,7 @@ export default class Dendogram {
         tooltipContainer: null,
         scaleLabel: null,
         // This is needed for downloading PNG and SVG on solid background
-        backgroundColor: "white"
+        svgBackgroundColor: "white"
       },
       options || {}
     );
@@ -95,7 +95,7 @@ export default class Dendogram {
         "style",
         // Not standard but it works for downloads and svgsaver. See
         // https://stackoverflow.com/questions/11293026/default-background-color-of-svg-root-element
-        "background-color: " + this.options.backgroundColor
+        `background-color: ${this.options.svgBackgroundColor}`
       );
 
     this.viz = this.svg
