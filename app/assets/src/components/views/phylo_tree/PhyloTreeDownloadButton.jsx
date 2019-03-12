@@ -1,7 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown";
 import SvgSaver from "svgsaver";
+
+import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown";
 
 class PhyloTreeDownloadButton extends React.Component {
   constructor(props) {
