@@ -17,6 +17,7 @@ class PhyloTreeDownloadButton extends React.Component {
     ];
     this.download = this.download.bind(this);
     this.svgSaver = new SvgSaver();
+    this.node = document.getElementsByClassName("phylo-tree-vis")[0];
   }
 
   download(option) {
@@ -25,10 +26,13 @@ class PhyloTreeDownloadButton extends React.Component {
         this.props.tree.id
       }/download?output=${option}`;
       return;
-    } else if (this.imageOptions.map(o => o.value).includes(option)) {
-      const elem = document.getElementsByClassName("phylo-tree-vis")[0];
-      // TODO (gdingle): custom filename
-      this.svgSaver.asSvg(elem, "phylo_tree.svg");
+    } else if (option == "svg") {
+      // TODO (gdingle): filename per tree?
+      this.svgSaver.asSvg(this.node, "phylo_tree.svg");
+      return;
+    } else if (option == "png") {
+      // TODO (gdingle): filename per tree?
+      this.svgSaver.asPng(this.node, "phylo_tree.png");
       return;
     } else {
       // eslint-disable-next-line no-console
