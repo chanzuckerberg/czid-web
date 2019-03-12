@@ -39,6 +39,7 @@ class PhyloTreeDownloadButton extends React.Component {
     }
   }
 
+  // TODO (gdingle): should we pass in a reference with React somehow?
   getNode() {
     return document.getElementsByClassName("phylo-tree-vis")[0];
   }
