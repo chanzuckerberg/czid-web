@@ -130,12 +130,14 @@ class SamplesController < ApplicationController
     # discovery views (old one was kept to avoid breaking the current inteface
     # without sacrificing speed of development and avoid breaking the current interface)
     domain = params[:domain]
+    project_id = params[:projectId]
     list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
     offset = params[:offset].to_i
 
     samples = samples_by_domain(domain)
+    samples = samples.where(project_id: project_id) if project_id.present?
     samples = filter_samples(samples, params)
 
     limited_samples = samples.offset(offset).limit(limit)
