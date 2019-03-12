@@ -243,7 +243,7 @@ class PlaygroundControls extends React.Component {
                 fluid
                 rounded
                 options={this.dropdownOptions}
-                label="Option:"
+                label="Option"
                 onChange={() => this.setState({ event: "Dropdown:Change" })}
               />,
               <Dropdown
@@ -252,7 +252,7 @@ class PlaygroundControls extends React.Component {
                 disabled
                 rounded
                 options={this.dropdownOptions}
-                label="Option:"
+                label="Option"
                 onChange={() => this.setState({ event: "Dropdown:Change" })}
               />
             ]}
@@ -266,7 +266,7 @@ class PlaygroundControls extends React.Component {
                 fluid
                 rounded
                 options={this.dropdownOptions}
-                label="Options: "
+                label="Options"
                 onChange={() =>
                   this.setState({ event: "MultipleDropdown:Change" })
                 }
@@ -277,7 +277,7 @@ class PlaygroundControls extends React.Component {
                 rounded
                 disabled
                 options={this.dropdownOptions}
-                label="Options: "
+                label="Options"
                 onChange={() =>
                   this.setState({ event: "MultipleDropdown:Change" })
                 }

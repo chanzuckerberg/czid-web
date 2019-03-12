@@ -18,7 +18,7 @@ class ThresholdFilterDropdown extends React.Component {
 
     this.metrics = (this.props.options || {}).targets || [];
     this.operators = (this.props.options || {}).operators || [];
-    this.label = this.props.label || "Threshold Filters:";
+    this.label = this.props.label || "Threshold Filters";
 
     this.state = {
       popupIsOpen: false,
@@ -135,10 +135,15 @@ class ThresholdFilterDropdown extends React.Component {
       />
     );
 
+    const labelText =
+      this.label && this.props.thresholds.length > 0
+        ? this.label + ":"
+        : this.label;
+
     return (
       <DropdownTrigger
         className={cs.dropdownTrigger}
-        label={this.label}
+        label={labelText}
         value={label}
         rounded
       />
