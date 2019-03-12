@@ -36,7 +36,7 @@ class PhyloTreeDownloadButton extends React.Component {
       return;
     } else {
       // eslint-disable-next-line no-console
-      console.error("Bad download option: " + option);
+      console.error(`Bad download option: ${option}`);
     }
   }
 
