@@ -86,7 +86,6 @@ export default class DiscoverySidebar extends React.Component {
     }
   }
 
-  // TODO (gdingle): format date with moment?
   static formatDate(createdAt) {
     return moment(createdAt).format("YYYY-MM-DD");
   }
