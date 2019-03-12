@@ -72,13 +72,13 @@ class ProjectsController < ApplicationController
         min_sample_by_project_id = {}
         owner_by_project_id = {}
         samples.includes(:host_genome, :user).each do |s|
-          (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome.name
+          (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome && s.host_genome.name
           # TODO: sample_tissue column is deprecated, retrieve sample_type from Metadatum model instead
           (tissues_by_project_id[s.project_id] ||= Set.new) << s.sample_tissue if s.sample_tissue
           # TODO: assume project owner is the uploader of the project's first sample
           if !min_sample_by_project_id[s.project_id] || min_sample_by_project_id[s.project_id] < s.id
             min_sample_by_project_id[s.project_id] = s.id
-            owner_by_project_id[s.project_id] = s.user.name
+            owner_by_project_id[s.project_id] = s.user ? s.user.name : nil
           end
         end
         extended_projects = projects.map do |project|

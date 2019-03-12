@@ -147,7 +147,7 @@ class PipelineSampleReport extends React.Component {
             return category in this.categoryChildParent;
           })
         : [],
-      name_type: cached_name_type ? cached_name_type : "Scientific Name",
+      name_type: cached_name_type ? cached_name_type : "Scientific name",
       rendering: false,
       loading: true,
       activeThresholds: savedThresholdFilters,

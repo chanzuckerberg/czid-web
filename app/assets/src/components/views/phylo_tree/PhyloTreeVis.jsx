@@ -206,7 +206,7 @@ class PhyloTreeVis extends React.Component {
             rounded
             search
             options={this.getMetadataDropdownOptions()}
-            label="Color by: "
+            label="Color by"
             onChange={this.handleMetadataTypeChange}
             value={this.state.selectedMetadataType}
             menuLabel="Select Metadata Field"
