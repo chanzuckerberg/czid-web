@@ -57,7 +57,7 @@ export default class TidyTree {
         `background-color: ${this.options.svgBackgroundColor}`
       );
 
-    this.pathContainer = this.svgq
+    this.pathContainer = this.svg
       .append("g")
       .attr(
         "transform",
