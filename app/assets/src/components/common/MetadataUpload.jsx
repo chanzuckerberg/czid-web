@@ -174,13 +174,6 @@ class MetadataUpload extends React.Component {
       "Host Genome",
       map("name", filter(["is_required", 1], projectMetadataFields))
     );
-    const metadataDictionaryTag = (
-      <span>
-        <a href="/metadata/dictionary" className={cs.link} target="_blank">
-          View Full Metadata Dictionary
-        </a>
-      </span>
-    );
     return (
       <div className={cx(cs.metadataUpload, this.props.className)}>
         {samplesAreNew && (
@@ -193,10 +186,32 @@ class MetadataUpload extends React.Component {
               <span className={cs.label}>{`Available host genomes: `}</span>
               {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
             </div>
-            <div className={cs.details}>{metadataDictionaryTag}</div>
+            <div className={cs.details}>
+              <span>
+                <a
+                  href="/metadata/dictionary"
+                  className={cs.link}
+                  target="_blank"
+                >
+                  View Full Metadata Dictionary
+                </a>
+              </span>
+            </div>
           </div>
         )}
-        <div>{!samplesAreNew && metadataDictionaryTag}</div>
+        <div>
+          {!samplesAreNew && (
+            <span>
+              <a
+                href="/metadata/dictionary"
+                className={cs.link}
+                target="_blank"
+              >
+                View Metadata Dictionary
+              </a>
+            </span>
+          )}
+        </div>
         <Tabs
           className={cs.tabs}
           tabs={["Manual Input", "CSV Upload"]}
