@@ -690,7 +690,12 @@ class SamplesHeatmapView extends React.Component {
   handleDownloadClick = fileType => {
     switch (fileType) {
       case "svg":
+        // TODO (gdingle): pass in filename per sample?
         this.heatmapVis.download();
+        break;
+      case "png":
+        // TODO (gdingle): pass in filename per sample?
+        this.heatmapVis.downloadAsPng();
         break;
       case "csv":
         this.downloadCurrentViewDataURL();
@@ -717,7 +722,8 @@ class SamplesHeatmapView extends React.Component {
   render() {
     let downloadOptions = [
       { text: "Download CSV", value: "csv" },
-      { text: "Download SVG", value: "svg" }
+      { text: "Download SVG", value: "svg" },
+      { text: "Download PNG", value: "png" }
     ];
 
     return (
