@@ -75,8 +75,13 @@ class UploadMetadataStep extends React.Component {
         <div className={cx(!this.state.showInstructions && cs.hide)}>
           <Instructions onClose={() => this.setShowInstructions(false)} />
         </div>
-        <div className={cx(this.state.showInstructions && cs.hide)}>
-          <div className={cs.tallBody}>
+        <div
+          className={cx(
+            cs.uploadFlowStep,
+            this.state.showInstructions && cs.hide
+          )}
+        >
+          <div className={cs.flexContent}>
             <MetadataUpload
               onShowCSVInstructions={() => this.setShowInstructions(true)}
               samples={this.props.samples}
@@ -86,7 +91,7 @@ class UploadMetadataStep extends React.Component {
               issues={this.state.wasManual ? this.state.issues : null}
             />
           </div>
-          <div className={cs.mainControls}>
+          <div className={cs.controls}>
             <PrimaryButton
               text="Continue"
               onClick={this.handleContinue}
