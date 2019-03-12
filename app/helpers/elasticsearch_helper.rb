@@ -38,6 +38,6 @@ module ElasticsearchHelper
   private
 
   def sanitize(prefix)
-    prefix.gsub(/[^a-zA-Z0-9 _|]/, "")
+    prefix.gsub(/[^a-zA-Z0-9 _|]/, "") if prefix
   end
 end
