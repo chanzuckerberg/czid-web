@@ -58,7 +58,7 @@ export default class Heatmap {
         enableColumnMetadata: false,
         iconPath: "/assets/icons",
         // This is needed for downloading PNG and SVG on solid background
-        backgroundColor: "white"
+        svgBackgroundColor: "white"
       },
       options
     );
@@ -209,7 +209,7 @@ export default class Heatmap {
       .attr("xmlns", "http://www.w3.org/2000/svg")
       // Not standard but it works for downloads and svgsaver. See:
       // https://stackoverflow.com/questions/11293026/default-background-color-of-svg-root-element
-      .attr("style", "background-color: " + this.options.backgroundColor);
+      .attr("style", `background-color: ${this.options.svgBackgroundColor}`);
 
     this.g = this.svg.append("g");
     this.gRowLabels = this.g.append("g").attr("class", cs.rowLabels);
