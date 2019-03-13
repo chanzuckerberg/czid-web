@@ -4,23 +4,19 @@ import cx from "classnames";
 import cs from "./accordion.scss";
 
 class Accordion extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      open: this.props.open
-    };
-  }
+  state = {};
 
   onToggle = () => {
     this.setState({
-      open: !this.state.open
+      open: !this.state.open,
+      wasToggled: true
     });
   };
 
   render() {
     const { header, children, toggleable, className } = this.props;
 
-    const open = this.state.open;
+    const open = this.state.wasToggled ? this.state.open : this.props.open;
 
     return (
       <div className={cx(cs.accordion, className)}>
