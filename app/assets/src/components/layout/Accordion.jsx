@@ -4,9 +4,12 @@ import cx from "classnames";
 import cs from "./accordion.scss";
 
 class Accordion extends React.Component {
-  state = {
-    open: false
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      open: this.props.open
+    };
+  }
 
   onToggle = () => {
     this.setState({
@@ -17,7 +20,7 @@ class Accordion extends React.Component {
   render() {
     const { header, children, toggleable, className } = this.props;
 
-    const open = this.props.open || this.state.open;
+    const open = this.state.open;
 
     return (
       <div className={cx(cs.accordion, className)}>
@@ -56,7 +59,8 @@ Accordion.propTypes = {
 };
 
 Accordion.defaultProps = {
-  toggleable: true
+  toggleable: true,
+  open: false
 };
 
 export default Accordion;
