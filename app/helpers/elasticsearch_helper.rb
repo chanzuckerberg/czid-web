@@ -38,6 +38,7 @@ module ElasticsearchHelper
   private
 
   def sanitize(prefix)
-    prefix.gsub(/[^a-zA-Z0-9 _|]/, "") if prefix
+    # Add \\ to escape special characters. Four \ to escape the backslahes.
+    prefix.gsub(/([^a-zA-Z0-9])/, '\\\\\1') if prefix
   end
 end
