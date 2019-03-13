@@ -7,7 +7,6 @@ import _fp, {
   partition,
   first,
   get,
-  union,
   compact
 } from "lodash/fp";
 import NarrowContainer from "~/components/layout/NarrowContainer";
@@ -27,9 +26,9 @@ const dictionaryHeaders = {
 };
 
 const getExamplesForHostGenome = (field, hostGenomeId) =>
-  compact(
-    union(get("all", field.examples), get(hostGenomeId, field.examples))
-  ).join(", ") || "--";
+  compact(get(hostGenomeId, field.examples) || get("all", field.examples)).join(
+    ", "
+  ) || "--";
 
 class MetadataDictionary extends React.Component {
   state = {
