@@ -29,7 +29,7 @@ module MetadataHelper
   end
 
   # TODO(mark): Generate more realistic default values.
-  def generate_metadata_default_value(field)
+  def generate_metadata_default_value(field, host_genome_name)
     if field.base_type == Metadatum::STRING_TYPE
       if field.options.present?
         options = JSON.parse(field.options)
@@ -44,7 +44,7 @@ module MetadataHelper
     end
 
     if field.base_type == Metadatum::DATE_TYPE
-      return String(Time.zone.today)
+      return Time.zone.today.strftime(host_genome_name == "Human" ? "%Y-%m" : "%Y-%m-%d")
     end
   end
 
@@ -102,7 +102,7 @@ module MetadataHelper
       samples.each do |sample|
         values = fields.map do |field|
           if host_genomes_by_name[sample[:host_genome_name]].metadata_fields.include?(field)
-            generate_metadata_default_value(field)
+            generate_metadata_default_value(field, sample[:host_genome_name])
           end
         end
 
