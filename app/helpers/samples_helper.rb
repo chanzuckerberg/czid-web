@@ -190,11 +190,9 @@ module SamplesHelper
   def filter_by_status(samples, query)
     top_pipeline_run_clause = "pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)"
     if query == 'In Progress'
-      join_clause = "LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id"
-      samples.joins(join_clause).where("#{top_pipeline_run_clause} or pipeline_runs.id is NULL").where("samples.status = ? or pipeline_runs.job_status is NULL or (pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1)", Sample::STATUS_CREATED, [PipelineRun::STATUS_CHECKED, PipelineRun::STATUS_FAILED])
+      samples.joins(:pipeline_runs).where("#{top_pipeline_run_clause} or pipeline_runs.id is NULL").where("samples.status = ? or pipeline_runs.job_status is NULL or (pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1)", Sample::STATUS_CREATED, [PipelineRun::STATUS_CHECKED, PipelineRun::STATUS_FAILED])
     else
-      join_clause = "INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id"
-      samples_pipeline_runs = samples.joins(join_clause).where(status: Sample::STATUS_CHECKED).where(top_pipeline_run_clause)
+      samples_pipeline_runs = samples.joins(:pipeline_runs).where(status: Sample::STATUS_CHECKED).where(top_pipeline_run_clause)
       if query == 'Failed'
         samples_pipeline_runs.where("pipeline_runs.job_status like '%FAILED'")
       elsif query == 'Complete'

@@ -3,21 +3,23 @@ import { Form, TextArea } from "semantic-ui-react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 import cs from "./cli_user_instructions.scss";
+import { openUrlInNewTab } from "~utils/links";
 
 class CliUserInstructions extends React.Component {
   render() {
     const singleUploadCmd = `idseq -e='${this.props.email}' -t='${
       this.props.authToken
-    }' -p='Your Project Name' -s='Your Sample Name' --r1=your_sample_R1.fastq.gz --r2=your_sample_R2.fastq.gz --host-genome-name='Human'`;
+    }' -p='Your Project Name' -s='Your Sample Name' --r1=your_sample_R1.fastq.gz --r2=your_sample_R2.fastq.gz`;
 
     const bulkUploadCmd = `idseq -e='${this.props.email}' -t='${
       this.props.authToken
-    }' -p='Your Project Name' --bulk=. --host-genome-name='Human'`;
+    }' -p='Your Project Name' --bulk=.`;
 
     const genomesList = `'${this.props.hostGenomes.join("', '")}'`;
 
     return (
       <div className={cs.instructionContainer}>
+        <div className={cs.title}>Command Line Interface Instructions</div>
         <p className={cs.instructionHeading}>
           {
             "(1) Install and configure the Amazon Web Services Command Line Interface (AWS CLI): "
@@ -86,11 +88,7 @@ class CliUserInstructions extends React.Component {
               your_sample_R1
             </span>.fastq.gz --r2=<span className={cs.codeToEdit}>
               your_sample_R2
-            </span>.fastq.gz --host-genome-name='<span
-              className={cs.codeToEdit}
-            >
-              Human
-            </span>'
+            </span>.fastq.gz
           </p>
         </div>
         <div className={cs.instructionMediumMarginTop}>
@@ -107,6 +105,47 @@ class CliUserInstructions extends React.Component {
           {
             "- Supported file types: .fastq/.fq/.fasta/.fa or .fastq.gz/.fq.gz/.fasta.gz/.fa.gz"
           }
+        </p>
+        <p>
+          - You will be prompted to upload metadata in a CSV file with your
+          samples. This is also where you will specify the Host Genome.
+        </p>
+        <p>
+          <div className={cs.firstIndent}>
+            {"- "}
+            <span
+              onClick={() =>
+                openUrlInNewTab("https://idseq.net/metadata/instructions")
+              }
+              className={cs.link}
+            >
+              Metadata Instructions
+            </span>
+          </div>
+          <div className={cs.firstIndent}>
+            {"- "}
+            <span
+              onClick={() =>
+                openUrlInNewTab("https://idseq.net/metadata/dictionary")
+              }
+              className={cs.link}
+            >
+              Metadata Dictionary
+            </span>
+          </div>
+          <div className={cs.firstIndent}>
+            {"- "}
+            <span
+              onClick={() =>
+                openUrlInNewTab(
+                  "https://idseq.net/metadata/metadata_template_csv"
+                )
+              }
+              className={cs.link}
+            >
+              Metadata CSV Template
+            </span>
+          </div>
         </p>
         <p>{`- Supported host genome values: ${genomesList}`}</p>
         <p>
@@ -160,8 +199,7 @@ class CliUserInstructions extends React.Component {
             </span>' \
             <br /> --bulk=<span className={cs.codeToEdit}>
               /path/to/your/folder
-            </span>{" "}
-            --host-genome-name='<span className={cs.codeToEdit}>Human</span>'
+            </span>
           </p>
         </div>
         <div className={cs.instructionMediumMarginTop}>
