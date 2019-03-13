@@ -6,6 +6,7 @@ import { Label, Menu, Icon, Popup } from "semantic-ui-react";
 import { numberWithCommas } from "../helpers/strings";
 import { getTaxonName, getGeneraContainingTags } from "../helpers/taxon";
 import ThresholdMap from "./utils/ThresholdMap";
+import { omit } from "lodash/fp";
 import {
   computeThresholdedTaxons,
   isTaxonIncluded,
@@ -188,7 +189,11 @@ class PipelineSampleReport extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     // Set the state in the URL
-    this.props.refreshPage(this.state, false);
+    // Omit contigTaxidList and taxonomy_details, which are large arrays that shouldn't be put into the URL.
+    this.props.refreshPage(
+      omit(["contigTaxidList", "taxonomy_details"], this.state),
+      false
+    );
   }
 
   // fetchReportData loads the actual report information with another call to
