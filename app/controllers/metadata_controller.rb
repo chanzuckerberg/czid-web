@@ -22,7 +22,11 @@ class MetadataController < ApplicationController
   end
 
   def metadata_template_csv
-    send_data metadata_template_csv_helper, filename: 'metadata_template.csv'
+    # The project to pull metadata_fields and existing samples (if applicable) from.
+    project_id = params[:project_id]
+    # The names of new samples that are being created.
+    new_sample_names = params[:new_sample_names]
+    send_data metadata_template_csv_helper(project_id, new_sample_names), filename: 'metadata_template.csv'
   end
 
   def validate_csv_for_new_samples
