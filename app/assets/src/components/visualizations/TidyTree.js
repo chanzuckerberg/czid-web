@@ -26,7 +26,8 @@ export default class TidyTree {
         smallerFont: 8,
         largerFont: 12,
         onCollapsedStateChange: () => {},
-        collapsed: new Set()
+        collapsed: new Set(),
+        svgBackgroundColor: "white"
       },
       options || {}
     );
@@ -48,7 +49,13 @@ export default class TidyTree {
       .append("svg")
       .attr("class", "tidy-tree")
       .attr("width", this.options.width)
-      .attr("height", this.options.height);
+      .attr("height", this.options.height)
+      .attr(
+        "style",
+        // Not standard but it works for downloads and svgsaver. See
+        // https://stackoverflow.com/questions/11293026/default-background-color-of-svg-root-element
+        `background-color: ${this.options.svgBackgroundColor}`
+      );
 
     this.pathContainer = this.svg
       .append("g")
