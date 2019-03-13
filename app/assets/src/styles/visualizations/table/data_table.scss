@@ -69,6 +69,17 @@
     }
   }
 
+  &.selectable {
+    // If the table has checkboxes on the first column, don't pad the first column.
+    th:first-child {
+      padding-left: 0;
+    }
+
+    td:first-child {
+      padding-left: 0;
+    }
+  }
+
   &.striped {
     // Undo materialize striping
     tr:nth-child(odd) {
