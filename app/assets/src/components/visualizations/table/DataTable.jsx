@@ -132,7 +132,8 @@ class DataTable extends React.Component {
         className={cx(
           "idseq-ui data-table",
           this.props.striped && "striped",
-          this.props.className
+          this.props.className,
+          this.props.onSelectedRowsChanged && "selectable"
         )}
       >
         <thead>
