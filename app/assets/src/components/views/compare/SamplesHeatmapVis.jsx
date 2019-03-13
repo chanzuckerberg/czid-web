@@ -23,7 +23,7 @@ class SamplesHeatmapVis extends React.Component {
     this.heatmap = null;
     this.scale = this.props.scale;
 
-    // TODO: yet another metric name conversion to removeccjehkfnecelbufngkdckgvhckeujrrrreufdu
+    // TODO: yet another metric name conversion to remove
     this.metrics = [
       { key: "NT.aggregatescore", label: "Score" },
       { key: "NT.zscore", label: "NT Z Score" },

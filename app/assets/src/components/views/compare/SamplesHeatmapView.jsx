@@ -213,7 +213,6 @@ class SamplesHeatmapView extends React.Component {
     ]);
 
     let newState = this.extractData(heatmapData);
-    newState = this.filterData();
 
     // Only calculate the metadataTypes once.
     if (metadataFields !== null) {
@@ -285,15 +284,6 @@ class SamplesHeatmapView extends React.Component {
       data
     };
   }
-
-  filterData = data => {
-    // filter data inmplements client filtering to identify cells that do not pass the filters
-    console.log("SamplesHeatmapView:filterData :: data=", data);
-    console.log(
-      "SamplesHeatmapView:filterData :: selectedOptions=",
-      this.state.selectedOptions
-    );
-  };
 
   handleMetadataUpdate = (key, value) => {
     this.setState({
