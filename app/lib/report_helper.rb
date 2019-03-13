@@ -442,7 +442,7 @@ module ReportHelper
     result_hash
   end
 
-  def samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+  def samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)
     results = {}
 
     # Get sample results for the taxon ids
@@ -461,10 +461,12 @@ module ReportHelper
         tax_2d.each { |_tax_id, tax_info| rows << tax_info }
         compute_aggregate_scores_v2!(rows)
 
-        filtered_rows = []
-        rows.each do |row|
-          filtered_rows << row if taxon_ids.include?(row["tax_id"])
+        filtered_rows = rows.select do |row|
+          taxon_ids.include?(row["tax_id"]) && check_custom_filters(row, threshold_filters)
         end
+
+        # filter cells that do not pass threshold filters
+        threshold_filters
 
         results[sample_id] = {
           sample_id: sample_id,

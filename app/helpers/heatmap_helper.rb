@@ -86,6 +86,6 @@ module HeatmapHelper
     taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
     taxon_ids -= removed_taxon_ids
 
-    samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+    samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)
   end
 end
