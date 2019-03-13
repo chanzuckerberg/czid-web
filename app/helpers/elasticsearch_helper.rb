@@ -1,5 +1,6 @@
 module ElasticsearchHelper
   def prefix_match(model, field, prefix, condition)
+    prefix = sanitize(prefix)
     search_params = { query: { query_string: { query: "#{prefix}*", analyze_wildcard: true, fields: [field] } } }
     results = if Rails.env == "test"
                 # Return all records. Tests can't use elasticsearch.
@@ -16,6 +17,7 @@ module ElasticsearchHelper
 
   def taxon_search(prefix, tax_levels = TaxonCount::NAME_2_LEVEL.keys)
     return {} if Rails.env == "test"
+    prefix = sanitize(prefix)
     matching_taxa = {}
     tax_levels.each do |level|
       search_params = { query: { query_string: { query: "#{prefix}*", fields: ["#{level}_name"] } } }
@@ -31,5 +33,13 @@ module ElasticsearchHelper
       end
     end
     matching_taxa.values
+  end
+
+  private
+
+  def sanitize(prefix)
+    # Add \\ to escape special characters. Four \ to escape the backslashes.
+    # Escape anything that isn't in "a-zA-Z0-9 ._|'/"
+    prefix.gsub(%r{([^a-zA-Z0-9 ._|'\/])}, '\\\\\1') if prefix
   end
 end
