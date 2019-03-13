@@ -465,9 +465,6 @@ module ReportHelper
           taxon_ids.include?(row["tax_id"]) && check_custom_filters(row, threshold_filters)
         end
 
-        # filter cells that do not pass threshold filters
-        threshold_filters
-
         results[sample_id] = {
           sample_id: sample_id,
           name: samples_by_id[sample_id].name,
