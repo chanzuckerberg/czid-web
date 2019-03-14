@@ -574,7 +574,7 @@ class Sample < ApplicationRecord
       raise RecordNotFound("No matching field for #{key}") unless m.metadata_field
       m.key = m.metadata_field.name
     end
-    if val.present?
+    if val.present? && m.raw_value != val
       m.raw_value = val
       m.save!
     end
