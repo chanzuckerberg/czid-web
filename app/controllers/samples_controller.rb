@@ -511,8 +511,8 @@ class SamplesController < ApplicationController
       project_ids = samples.distinct.pluck(:project_id)
       host_genome_ids = samples.distinct.pluck(:host_genome_id)
 
-      project_fields = Project.where(id: project_ids).map(&:metadata_fields)
-      host_genome_fields = HostGenome.where(id: host_genome_ids).map(&:metadata_fields)
+      project_fields = Project.where(id: project_ids).includes(metadata_fields: [:host_genomes]).map(&:metadata_fields)
+      host_genome_fields = HostGenome.where(id: host_genome_ids).includes(metadata_fields: [:host_genomes]).map(&:metadata_fields)
       results = (project_fields.flatten & host_genome_fields.flatten).map(&:field_info)
     end
 
