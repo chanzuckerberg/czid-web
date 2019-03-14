@@ -6,7 +6,6 @@ import { orderBy } from "lodash";
 import { DataTooltip, ContextPlaceholder } from "~ui/containers";
 import { SearchBoxList } from "~ui/controls";
 import { openUrl } from "~utils/links";
-import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import cs from "./samples_heatmap_vis.scss";
 
@@ -255,16 +254,6 @@ class SamplesHeatmapVis extends React.Component {
     return this.props.metadataTypes.map(metadata => {
       return { value: metadata.key, label: metadata.name };
     });
-  }
-
-  getLegend() {
-    return (
-      <SequentialLegendVis
-        min={this.heatmap.scaleLimits.min}
-        max={this.heatmap.scaleLimits.max}
-        scale={this.scale}
-      />
-    );
   }
 
   render() {

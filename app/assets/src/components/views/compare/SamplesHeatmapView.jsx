@@ -2,12 +2,13 @@ import React from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import queryString from "query-string";
-import { get, set } from "lodash/fp";
+import { get, set, min, max } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
 import { StickyContainer, Sticky } from "react-sticky";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
+import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
 import Slider from "~ui/controls/Slider";
 import BasicPopup from "~/components/BasicPopup";
 import { copyShortUrlToClipboard } from "~/helpers/url";
@@ -375,16 +376,23 @@ class SamplesHeatmapView extends React.Component {
   };
 
   renderLegend() {
+    console.log("heatmap vis ref", !!this.heatmapVis);
     if (
       this.state.loading ||
       !this.state.data ||
-      !(this.state.data[this.state.selectedOptions.metric] || []).length ||
-      !this.heatmapVis
+      !(this.state.data[this.state.selectedOptions.metric] || []).length
     ) {
       return;
     }
-
-    return this.heatmapVis.getLegend();
+    let values = this.state.data[this.state.selectedOptions.metric];
+    let scaleIndex = this.state.selectedOptions.dataScaleIdx;
+    return (
+      <SequentialLegendVis
+        min={Math.max(0, min(values.map(array => min(array))))}
+        max={max(values.map(array => max(array)))}
+        scale={this.state.availableOptions.scales[scaleIndex][1]}
+      />
+    );
   }
 
   renderHeatmap() {
