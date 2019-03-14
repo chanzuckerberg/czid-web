@@ -2,7 +2,7 @@
 // Sends uploaded to server for validation and displays errors and warnings.
 import React from "react";
 import cx from "classnames";
-import { map, pickBy, zipObject, isNull } from "lodash/fp";
+import { filter, map, zip, fromPairs, isNull } from "lodash/fp";
 import CSVUpload from "~ui/controls/CSVUpload";
 import {
   validateMetadataCSVForProject,
@@ -18,7 +18,13 @@ const processCSVMetadata = csv => {
     headers,
     rows: map(
       // Remove empty values, and convert rows from array of strings to object.
-      row => pickBy(value => value !== "", zipObject(headers, row)),
+      // It's possible to have two different MetadataFields with the same name, but for different host genomes.
+      // In this case, only one of the two fields will have a value for any given sample
+      // (since only one of them will the sample's host genome).
+      // There is a risk if you naively zipObject that you will overwrite the actual value with an empty value
+      // (from the other metadata field with the same name), since precedence is based on the order.
+      // The below code makes sure this case is handled correctly by filtering before converting to an object.
+      row => fromPairs(filter(pair => pair[1] !== "", zip(headers, row))),
       rows
     )
   };
