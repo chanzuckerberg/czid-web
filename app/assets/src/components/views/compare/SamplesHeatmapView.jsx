@@ -270,6 +270,10 @@ class SamplesHeatmapView extends React.Component {
               data[metric.value][taxonIndex] || [];
             data[metric.value][taxonIndex][i] = taxon[metricType][metricName];
           });
+
+          data.filtered = data.filtered || {};
+          data.filtered[taxonIndex] = data.filtered[taxonIndex] || {};
+          data.filtered[taxonIndex][i] = taxon.filtered;
         }
       }
     }
@@ -381,10 +385,9 @@ class SamplesHeatmapView extends React.Component {
     }
     let values = this.state.data[this.state.selectedOptions.metric];
     let scaleIndex = this.state.selectedOptions.dataScaleIdx;
-
     return (
       <SequentialLegendVis
-        min={min(values.map(array => min(array)))}
+        min={Math.max(0, min(values.map(array => min(array))))}
         max={max(values.map(array => max(array)))}
         scale={this.state.availableOptions.scales[scaleIndex][1]}
       />
