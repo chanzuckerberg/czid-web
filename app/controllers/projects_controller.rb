@@ -388,7 +388,11 @@ class ProjectsController < ApplicationController
   def validate_metadata_csv
     metadata = params[:metadata]
 
-    project_samples = current_power.project_samples(@project)
+    project_samples = current_power.project_samples(@project).includes(
+      project: [:metadata_fields],
+      host_genome: [:metadata_fields],
+      metadata: [:metadata_field]
+    )
     issues = validate_metadata_csv_for_samples(project_samples.to_a, metadata)
     render json: {
       status: "success",
