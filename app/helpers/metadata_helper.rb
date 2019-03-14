@@ -62,7 +62,9 @@ module MetadataHelper
              elsif samples_are_new
                HostGenome.find_by(name: "Human").metadata_fields & project.metadata_fields
              else
-               project.metadata_fields
+               # Only use fields from the project that correspond to the host genomes of existing samples.
+               host_genome_ids = Sample.where(id: project.sample_ids).pluck(:host_genome_id).uniq
+               project.metadata_fields.includes(:host_genomes).reject { |field| (field.host_genome_ids & host_genome_ids).empty? }
              end
 
     field_names = ["Sample Name"] + (samples_are_new ? ["Host Genome"] : []) + fields.pluck(:display_name)
