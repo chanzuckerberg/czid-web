@@ -415,7 +415,9 @@ class ProjectsController < ApplicationController
   def metadata_fields
     project_ids = (params[:projectIds] || []).map(&:to_i)
 
-    render json: current_power.projects.where(id: project_ids).map(&:metadata_fields).flatten.map(&:field_info)
+    render json: current_power.projects.where(id: project_ids)
+      .includes(metadata_fields: [:host_genomes])
+                              .map(&:metadata_fields).flatten.map(&:field_info)
   end
 
   # TODO: Consider consolidating into a general sample validator
