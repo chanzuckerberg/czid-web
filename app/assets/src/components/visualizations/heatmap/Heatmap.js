@@ -34,8 +34,6 @@ export default class Heatmap {
       {
         numberOfLevels: 10,
         scale: "linear",
-        colors: null,
-        colorNoValue: "#eaeaea",
         fontSize: "9pt",
         textRotation: -65,
         marginTop: 30,
@@ -54,14 +52,22 @@ export default class Heatmap {
         transitionDuration: 200,
         nullValue: 0,
         columnMetadata: [],
-        metadataColorScale: new CategoricalColormap(),
         enableColumnMetadata: false,
-        iconPath: "/assets/icons"
+        metadataColorScale: new CategoricalColormap(),
+        iconPath: "/assets/icons",
+        // This is needed for downloading PNG and SVG on solid background
+        svgBackgroundColor: "white",
+        // data color scale settings
+        // if the colorScale funciton is set, the other parameters will not have any effect
+        // the callback should be used when we need a very particular color scheme
+        colorScale: null,
+        colors: null,
+        colorNoValue: "#eaeaea"
       },
       options
     );
 
-    if (!this.options.colors) {
+    if (!this.options.colors && !this.options.colorScaleCallback) {
       let defaultColorScale = scaleSequential(interpolateYlOrRd);
       this.options.colors = this.range(this.options.numberOfLevels).map(i =>
         defaultColorScale(i / (this.options.numberOfLevels - 1))
@@ -529,6 +535,12 @@ export default class Heatmap {
   }
 
   renderHeatmap() {
+    let colorScale =
+      this.options.colorScaleCallback ||
+      this.scaleType()
+        .domain([this.limits.min, this.limits.max])
+        .range([0, this.options.colors.length - 1]);
+
     let applyFormat = nodes => {
       nodes
         .attr("width", this.cell.width - 2)
@@ -546,10 +558,6 @@ export default class Heatmap {
           return this.options.colors[colorIndex];
         });
     };
-
-    let colorScale = this.scaleType()
-      .domain([this.limits.min, this.limits.max])
-      .range([0, this.options.colors.length - 1]);
 
     let cells = this.gCells
       .selectAll(`.${cs.cell}`)
