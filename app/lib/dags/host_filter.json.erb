@@ -150,10 +150,10 @@
     <% if @host_genome != "human" %>
     ,
     {
-      "in": ["bowtie2_out"],
+      "in": ["bowtie2_out", validate_input_out"],
       "out": "star_human_out",
-      "class": "PipelineStepRunStar",
-      "module": "idseq_dag.steps.run_star",
+      "class": "PipelineStepRunStarDownstream",
+      "module": "idseq_dag.steps.run_star_downstream",
       "additional_files": { "star_genome": "<%= @attribute_dict[:human_star_genome] %>" },
       "additional_attributes": {}
     },
