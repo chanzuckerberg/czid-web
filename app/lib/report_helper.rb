@@ -461,9 +461,9 @@ module ReportHelper
         tax_2d.each { |_tax_id, tax_info| rows << tax_info }
         compute_aggregate_scores_v2!(rows)
 
-        filtered_rows = rows.select do |row|
-          taxon_ids.include?(row["tax_id"]) && check_custom_filters(row, threshold_filters)
-        end
+        filtered_rows = rows
+                        .select { |row| taxon_ids.include?(row["tax_id"]) }
+                        .each { |row| row[:filtered] = check_custom_filters(row, threshold_filters) }
 
         results[sample_id] = {
           sample_id: sample_id,

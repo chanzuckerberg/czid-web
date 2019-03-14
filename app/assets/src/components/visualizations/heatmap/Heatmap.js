@@ -57,17 +57,21 @@ export default class Heatmap {
         iconPath: "/assets/icons",
         // This is needed for downloading PNG and SVG on solid background
         svgBackgroundColor: "white",
+        // force limits
+        scaleMin: null,
+        scaleMax: null,
         // data color scale settings
-        // if the colorScale funciton is set, the other parameters will not have any effect
-        // the callback should be used when we need a very particular color scheme
-        colorScale: null,
+        // if the customColor function is set, it will be called with value and
+        // the original color assigned to it.
+        // This will allow the client to override any color if necessary.
+        // The signature of customColor is customColor(value, data_node, originalColor, colors, colorNoValue)
+        customColorCallback: null,
         colors: null,
         colorNoValue: "#eaeaea"
       },
       options
     );
-
-    if (!this.options.colors && !this.options.colorScaleCallback) {
+    if (!this.options.colors) {
       let defaultColorScale = scaleSequential(interpolateYlOrRd);
       this.options.colors = this.range(this.options.numberOfLevels).map(i =>
         defaultColorScale(i / (this.options.numberOfLevels - 1))
@@ -174,6 +178,8 @@ export default class Heatmap {
     this.rowLabelsWidth += this.options.spacing + 2 * this.options.spacing;
     this.columnLabelsHeight += this.options.spacing;
 
+    // do not impose options.scaleMin, and options.scaleMax here,
+    // because it can mess up clustering
     this.limits = {
       min: Math.min(
         d3.min(this.data.values, array => d3.min(array)),
@@ -183,6 +189,17 @@ export default class Heatmap {
         d3.max(this.data.values, array => d3.max(array)),
         this.options.nullValue
       )
+    };
+
+    this.scaleLimits = {
+      min:
+        this.options.scaleMin || this.options.scaleMin === 0
+          ? this.options.scaleMin
+          : this.limits.min,
+      max:
+        this.options.scaleMax || this.options.scaleMax === 0
+          ? this.options.scaleMax
+          : this.limits.max
     };
 
     this.cells = [];
@@ -541,12 +558,15 @@ export default class Heatmap {
     this.processData("cluster");
   }
 
+  applyScale(scale, value, min, max) {
+    value = Math.min(Math.max(value, min), max);
+    return Math.round(scale(value));
+  }
+
   renderHeatmap() {
-    let colorScale =
-      this.options.colorScaleCallback ||
-      this.scaleType()
-        .domain([this.limits.min, this.limits.max])
-        .range([0, this.options.colors.length - 1]);
+    let colorScale = this.scaleType()
+      .domain([this.scaleLimits.min, this.scaleLimits.max])
+      .range([0, this.options.colors.length - 1]);
 
     let applyFormat = nodes => {
       nodes
@@ -561,8 +581,24 @@ export default class Heatmap {
           if (!d.value && d.value !== 0) {
             return this.options.colorNoValue;
           }
-          let colorIndex = Math.round(colorScale(d.value));
-          return this.options.colors[colorIndex];
+          let colorIndex = this.applyScale(
+            colorScale,
+            d.value,
+            this.scaleLimits.min,
+            this.scaleLimits.max
+          );
+          // let colorIndex = Math.round(
+          //   colorScale(d.value));
+          let color = this.options.customColorCallback
+            ? this.options.customColorCallback(
+                d.value,
+                d,
+                this.options.colors[colorIndex],
+                this.options.colors,
+                this.options.colorNoValue
+              )
+            : this.options.colors[colorIndex];
+          return color;
         });
     };
 

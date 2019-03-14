@@ -6,6 +6,7 @@ import { orderBy } from "lodash";
 import { DataTooltip, ContextPlaceholder } from "~ui/containers";
 import { SearchBoxList } from "~ui/controls";
 import { openUrl } from "~utils/links";
+import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import cs from "./samples_heatmap_vis.scss";
 
@@ -47,6 +48,8 @@ class SamplesHeatmapVis extends React.Component {
       },
       {
         scale: this.props.scale,
+        // only display colors to positive values
+        scaleMin: 0,
         onNodeHover: this.handleNodeHover,
         onNodeHoverOut: this.handleNodeHoverOut,
         onNodeHoverMove: this.handleMouseHoverMove,
@@ -58,7 +61,8 @@ class SamplesHeatmapVis extends React.Component {
         onRowLabelClick: this.props.onTaxonLabelClick,
         onCellClick: this.handleCellClick,
         onAddColumnMetadataClick: this.handleAddColumnMetadataClick,
-        columnMetadata: this.getSelectedMetadata()
+        columnMetadata: this.getSelectedMetadata(),
+        customColorCallback: this.colorScale
       }
     );
     this.heatmap.start();
@@ -85,6 +89,13 @@ class SamplesHeatmapVis extends React.Component {
       };
     });
   }
+
+  colorScale = (value, node, originalColor, _, colorNoValue) => {
+    const { data } = this.props;
+    const filtered = data.filtered[node.rowIndex][node.columnIndex];
+    return value && filtered ? originalColor : colorNoValue;
+    // return value > 0 && filtered ? originalColor : colorNoValue;
+  };
 
   extractTaxonLabels() {
     return this.props.taxonIds.map(id => {
@@ -142,8 +153,10 @@ class SamplesHeatmapVis extends React.Component {
     let values = null;
     if (nodeHasData) {
       values = this.metrics.map(metric => {
-        let data = this.props.data[metric.key];
-        let value = (data[node.rowIndex][node.columnIndex] || 0).toFixed(0);
+        const data = this.props.data[metric.key];
+        const value = parseFloat(
+          (data[node.rowIndex][node.columnIndex] || 0).toFixed(4)
+        );
         return [
           metric.label,
           metric.key === this.props.metric ? <b>{value}</b> : value
@@ -243,6 +256,16 @@ class SamplesHeatmapVis extends React.Component {
     return this.props.metadataTypes.map(metadata => {
       return { value: metadata.key, label: metadata.name };
     });
+  }
+
+  getLegend() {
+    return (
+      <SequentialLegendVis
+        min={this.heatmap.scaleLimits.min}
+        max={this.heatmap.scaleLimits.max}
+        scale={this.scale}
+      />
+    );
   }
 
   render() {
