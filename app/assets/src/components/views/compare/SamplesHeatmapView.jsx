@@ -376,7 +376,6 @@ class SamplesHeatmapView extends React.Component {
   };
 
   renderLegend() {
-    console.log("heatmap vis ref", !!this.heatmapVis);
     if (
       this.state.loading ||
       !this.state.data ||
