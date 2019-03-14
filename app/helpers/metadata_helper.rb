@@ -29,11 +29,7 @@ module MetadataHelper
   end
 
   # TODO(mark): Generate more realistic default values.
-  def generate_metadata_default_value(host_genome, field)
-    unless host_genome.metadata_fields.include?(field)
-      return nil
-    end
-
+  def generate_metadata_default_value(field, host_genome_name)
     if field.base_type == Metadatum::STRING_TYPE
       if field.options.present?
         options = JSON.parse(field.options)
@@ -48,29 +44,71 @@ module MetadataHelper
     end
 
     if field.base_type == Metadatum::DATE_TYPE
-      return String(Time.zone.today)
+      return Time.zone.today.strftime(host_genome_name == "Human" ? "%Y-%m" : "%Y-%m-%d")
     end
   end
 
-  def metadata_template_csv_helper
-    required = MetadataField.where(is_required: true)
-    default = MetadataField.where(is_default: true)
+  def metadata_template_csv_helper(project_id, new_sample_names)
+    samples_are_new = !new_sample_names.nil?
+    project = Project.where(id: project_id)[0]
 
-    fields = (required | default)
+    # If project is nil, use global default and required fields.
+    fields = if project.nil?
+               required = MetadataField.where(is_required: true)
+               default = MetadataField.where(is_default: true)
 
-    field_names = ["sample_name"] + fields.pluck(:display_name)
+               (required | default)
+             # If samples are new, just use Human metadata fields since we default to Human.
+             elsif samples_are_new
+               HostGenome.find_by(name: "Human").metadata_fields & project.metadata_fields
+             else
+               # Only use fields from the project that correspond to the host genomes of existing samples.
+               host_genome_ids = Sample.where(id: project.sample_ids).pluck(:host_genome_id).uniq
+               project.metadata_fields.includes(:host_genomes).reject { |field| (field.host_genome_ids & host_genome_ids).empty? }
+             end
 
-    host_genomes = HostGenome.all.reject { |x| x.metadata_fields.empty? }
+    field_names = ["Sample Name"] + (samples_are_new ? ["Host Genome"] : []) + fields.pluck(:display_name)
+
+    host_genomes_by_name = HostGenome.all.includes(:metadata_fields).reject { |x| x.metadata_fields.empty? }.index_by(&:name)
+
+    # Assemble sample objects based on params.
+    samples = if samples_are_new
+                # Use new sample names if provided.
+                new_sample_names.map do |sample_name|
+                  {
+                    name: sample_name,
+                    # For now, always default to Human for new samples.
+                    host_genome_name: "Human"
+                  }
+                end
+              elsif project.nil?
+                # If the project is nil, construct a sample for each host genome.
+                host_genomes_by_name.map do |name, _|
+                  {
+                    name: "Example #{name} Sample",
+                    host_genome_name: name
+                  }
+                end
+              else
+                # Use existing samples in the project.
+                Sample.includes(:host_genome).where(id: project.sample_ids).map do |sample|
+                  {
+                    name: sample.name,
+                    host_genome_name: sample.host_genome_name
+                  }
+                end
+              end
 
     CSV.generate(headers: true) do |csv|
       csv << field_names
-      host_genomes.each do |host_genome|
-        default_values = fields.map do |field|
-          generate_metadata_default_value(host_genome, field)
+      samples.each do |sample|
+        values = fields.map do |field|
+          if host_genomes_by_name[sample[:host_genome_name]].metadata_fields.include?(field)
+            generate_metadata_default_value(field, sample[:host_genome_name])
+          end
         end
 
-        row_name = "Example " + host_genome.name + " Sample"
-        csv << [row_name] + default_values
+        csv << [sample[:name]] + (samples_are_new ? [sample[:host_genome_name]] : []) + values
       end
     end
   end

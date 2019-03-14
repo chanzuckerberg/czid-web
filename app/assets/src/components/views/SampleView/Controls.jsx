@@ -1,4 +1,6 @@
 import React from "react";
+import SvgSaver from "svgsaver";
+
 import PropTypes from "~/components/utils/propTypes";
 import { deleteSample } from "~/api";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
@@ -39,6 +41,14 @@ class Controls extends React.Component {
     if (option === "download_csv") {
       this.downloadCSV();
       return;
+    } else if (option == "taxon_svg") {
+      // TODO (gdingle): filename per tree?
+      new SvgSaver().asSvg(this.getNode(), "taxon_tree.svg");
+      return;
+    } else if (option == "taxon_png") {
+      // TODO (gdingle): filename per tree?
+      new SvgSaver().asPng(this.getNode(), "taxon_tree.png");
+      return;
     }
     const linkInfo = getLinkInfoForDownloadOption(
       option,
@@ -50,6 +60,11 @@ class Controls extends React.Component {
     }
   };
 
+  // TODO (gdingle): should we pass in a reference with React somehow?
+  getNode() {
+    return document.getElementsByClassName("taxon-tree-vis")[0];
+  }
+
   render() {
     const { reportPresent, pipelineRun, canEdit } = this.props;
 
@@ -59,7 +74,9 @@ class Controls extends React.Component {
           text: "Download Report Table (.csv)",
           value: "download_csv"
         },
-        ...getDownloadDropdownOptions(pipelineRun)
+        ...getDownloadDropdownOptions(pipelineRun),
+        { text: "Download Taxon Tree as SVG", value: "taxon_svg" },
+        { text: "Download Taxon Tree as PNG", value: "taxon_png" }
       ];
 
       return (

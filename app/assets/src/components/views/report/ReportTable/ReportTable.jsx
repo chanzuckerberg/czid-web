@@ -144,6 +144,8 @@ export default class ReportTable extends React.Component {
               reportDetails={reportDetails}
               backgroundData={backgroundData}
               showAssemblyColumns={showAssemblyColumns}
+              handleMouseEnter={this.props.handleMouseEnter}
+              handleMouseLeave={this.props.handleMouseLeave}
             />
           </tbody>
         </table>
@@ -167,5 +169,7 @@ ReportTable.propTypes = {
   countType: PropTypes.string.isRequired,
   setCountType: PropTypes.func.isRequired,
   showAssemblyColumns: PropTypes.bool,
-  onTaxonClick: PropTypes.func
+  onTaxonClick: PropTypes.func,
+  handleMouseEnter: PropTypes.func,
+  handleMouseLeave: PropTypes.func
 };

@@ -11,6 +11,7 @@ import { getProjectMetadataFields, getAllHostGenomes } from "~/api";
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
 import IssueGroup from "./IssueGroup";
+import { getURLParamString } from "~/helpers/url";
 
 const map = _fp.map.convert({ cap: false });
 
@@ -60,6 +61,17 @@ class MetadataUpload extends React.Component {
     this.props.onMetadataChange({ metadata, wasManual: true });
   };
 
+  getCSVUrl = () => {
+    const params = {
+      ...(this.props.samplesAreNew
+        ? { new_sample_names: map("name", this.props.samples) }
+        : {}),
+      project_id: this.props.project.id
+    };
+
+    return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
+  };
+
   renderTab = () => {
     if (this.state.currentTab === "Manual Input") {
       if (!this.props.samples || !this.state.projectMetadataFields) {
@@ -97,7 +109,7 @@ class MetadataUpload extends React.Component {
             project={this.props.project}
             samplesAreNew={this.props.samplesAreNew}
           />
-          <a className={cs.link} href="/metadata/metadata_template_csv">
+          <a className={cs.link} href={this.getCSVUrl()}>
             Download Metadata CSV Template
           </a>
         </React.Fragment>

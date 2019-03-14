@@ -125,6 +125,10 @@ class SamplesHeatmapVis extends React.Component {
     this.heatmap.download();
   }
 
+  downloadAsPng() {
+    this.heatmap.downloadAsPng();
+  }
+
   getTooltipData(node) {
     let sampleId = this.props.sampleIds[node.columnIndex];
     let taxonId = this.props.taxonIds[node.rowIndex];

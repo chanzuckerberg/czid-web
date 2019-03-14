@@ -210,7 +210,10 @@ export default class Heatmap {
       .append("svg")
       .attr("class", cs.heatmap)
       .attr("id", "visualization")
-      .attr("xmlns", "http://www.w3.org/2000/svg");
+      .attr("xmlns", "http://www.w3.org/2000/svg")
+      // Not standard but it works for downloads and svgsaver. See:
+      // https://stackoverflow.com/questions/11293026/default-background-color-of-svg-root-element
+      .attr("style", `background-color: ${this.options.svgBackgroundColor}`);
 
     this.g = this.svg.append("g");
     this.gRowLabels = this.g.append("g").attr("class", cs.rowLabels);
@@ -497,6 +500,10 @@ export default class Heatmap {
 
   download(filename) {
     this.svgSaver.asSvg(this.svg.node(), filename || "heatmap.svg");
+  }
+
+  downloadAsPng(filename) {
+    this.svgSaver.asPng(this.svg.node(), filename || "heatmap.png");
   }
 
   removeRow = row => {

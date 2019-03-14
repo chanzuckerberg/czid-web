@@ -15,7 +15,10 @@ import LoadingIcon from "~ui/icons/LoadingIcon";
 import cs from "./sample_upload_flow.scss";
 
 const processMetadataRows = metadataRows =>
-  flow(keyBy("sample_name"), mapValues(omit("sample_name")))(metadataRows);
+  flow(
+    keyBy(row => row.sample_name || row["Sample Name"]),
+    mapValues(omit(["sample_name", "Sample Name"]))
+  )(metadataRows);
 
 class ReviewStep extends React.Component {
   state = {
