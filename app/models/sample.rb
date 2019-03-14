@@ -114,7 +114,8 @@ class Sample < ApplicationRecord
   end
 
   def required_metadata_fields
-    host_genome.metadata_fields.where(is_required: 1)
+    # Don't use "where", as this will trigger another SQL query when used inside loops.
+    host_genome.metadata_fields.select { |x| x.is_required == 1 }
   end
 
   def missing_required_metadata_fields

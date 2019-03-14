@@ -33,11 +33,15 @@ class MetadataController < ApplicationController
     metadata = params[:metadata]
     samples_data = params[:samples]
 
+    projects = current_power.projects
+                            .where(id: samples_data.map { |sample| sample["project_id"] }.uniq)
+                            .includes(:metadata_fields).to_a
+
     # Create temporary samples for metadata validation.
     samples = samples_data.map do |sample|
       Sample.new(
         name: sample["name"],
-        project: current_power.projects.find_by(id: sample["project_id"])
+        project: projects.select { |project| project.id == sample["project_id"] }.first
       )
     end
 
