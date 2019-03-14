@@ -93,8 +93,7 @@ class SamplesHeatmapVis extends React.Component {
   colorScale = (value, node, originalColor, _, colorNoValue) => {
     const { data } = this.props;
     const filtered = data.filtered[node.rowIndex][node.columnIndex];
-    return value && filtered ? originalColor : colorNoValue;
-    // return value > 0 && filtered ? originalColor : colorNoValue;
+    return value > 0 && filtered ? originalColor : colorNoValue;
   };
 
   extractTaxonLabels() {
