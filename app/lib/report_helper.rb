@@ -957,8 +957,11 @@ module ReportHelper
 
     # Compute all species aggregate scores.  These are used in filtering.
     compute_species_aggregate_scores!(rows, tax_2d, params[:scoring_model])
+    t2 = wall_clock_ms
+
     # Compute all genus aggregate scores.  These are used only in sorting.
     compute_genera_aggregate_scores!(rows, tax_2d)
+    t3 = wall_clock_ms
 
     # Total number of rows for view level, before application of filters.
     rows_total = tax_2d.length
@@ -981,7 +984,8 @@ module ReportHelper
     end
 
     t5 = wall_clock_ms
-    Rails.logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
+    Rails.logger.info "Data processing took #{(t5 - t1).round(2)}s (#{(t5 - t0).round(2)}s with I/O)."
+    Rails.logger.info "Agg scoring took #{(t2 - t1).round(2)}s,  #{(t3 - t2).round(2)}s."
 
     [rows_passing_filters, rows_total, rows]
   end

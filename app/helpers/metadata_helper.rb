@@ -136,10 +136,15 @@ module MetadataHelper
       return { "errors" => errors, "warnings" => [] }
     end
 
-    processed_samples = []
-
     sample_name_index = metadata["headers"].find_index("sample_name") || metadata["headers"].find_index("Sample Name")
-    host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
+
+    if extract_host_genome_from_metadata
+      host_genome_index = metadata["headers"].find_index("host_genome") || metadata["headers"].find_index("Host Genome")
+      host_genomes = HostGenome.where(name: metadata["rows"].map { |row| row[host_genome_index] }.uniq)
+                               .includes(:metadata_fields).to_a
+    end
+
+    processed_samples = []
 
     # Make a best effort to guess which custom fields will be created.
     # This validation actually misses one non-critical edge case:
@@ -207,7 +212,8 @@ module MetadataHelper
       end
 
       if extract_host_genome_from_metadata
-        host_genome = HostGenome.where(name: row[host_genome_index]).first
+        host_genome = host_genomes.select { |cur_host_genome| cur_host_genome.name == row[host_genome_index] }.first
+
         if host_genome.nil?
           error_aggregator.add_error(:row_invalid_host_genome, [index + 1, sample.name, row[host_genome_index]])
           next
@@ -262,9 +268,11 @@ module MetadataHelper
         end
       end
 
-      missing_required_metadata_fields = sample.required_metadata_fields.pluck(:display_name) - validated_fields.pluck(:display_name)
-      if enforce_required && !missing_required_metadata_fields.empty?
-        error_aggregator.add_error(:row_missing_required_metadata, [index + 1, sample.name, missing_required_metadata_fields.join(", ")])
+      if enforce_required
+        missing_required_metadata_fields = sample.required_metadata_fields.pluck(:display_name) - validated_fields.pluck(:display_name)
+        unless missing_required_metadata_fields.empty?
+          error_aggregator.add_error(:row_missing_required_metadata, [index + 1, sample.name, missing_required_metadata_fields.join(", ")])
+        end
       end
     end
 

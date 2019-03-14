@@ -388,7 +388,11 @@ class ProjectsController < ApplicationController
   def validate_metadata_csv
     metadata = params[:metadata]
 
-    project_samples = current_power.project_samples(@project)
+    project_samples = current_power.project_samples(@project).includes(
+      project: [:metadata_fields],
+      host_genome: [:metadata_fields],
+      metadata: [:metadata_field]
+    )
     issues = validate_metadata_csv_for_samples(project_samples.to_a, metadata)
     render json: {
       status: "success",
@@ -411,7 +415,9 @@ class ProjectsController < ApplicationController
   def metadata_fields
     project_ids = (params[:projectIds] || []).map(&:to_i)
 
-    render json: current_power.projects.where(id: project_ids).map(&:metadata_fields).flatten.map(&:field_info)
+    render json: current_power.projects.where(id: project_ids)
+      .includes(metadata_fields: [:host_genomes])
+                              .map(&:metadata_fields).flatten.map(&:field_info)
   end
 
   # TODO: Consider consolidating into a general sample validator
