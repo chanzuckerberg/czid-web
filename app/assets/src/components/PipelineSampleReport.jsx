@@ -6,6 +6,7 @@ import { Label, Menu, Icon, Popup } from "semantic-ui-react";
 import { numberWithCommas } from "../helpers/strings";
 import { getTaxonName, getGeneraContainingTags } from "../helpers/taxon";
 import ThresholdMap from "./utils/ThresholdMap";
+import { omit } from "lodash/fp";
 import {
   computeThresholdedTaxons,
   isTaxonIncluded,
@@ -158,7 +159,8 @@ class PipelineSampleReport extends React.Component {
       treeMetric: cachedTreeMetric || this.treeMetrics[0].value,
       phyloTreeModalOpen: true,
       contigTaxidList: [],
-      minContigSize: cachedMinContigSize || DEFAULT_MIN_CONTIG_SIZE
+      minContigSize: cachedMinContigSize || DEFAULT_MIN_CONTIG_SIZE,
+      hoverRowId: null
     };
 
     this.state = {
@@ -188,7 +190,11 @@ class PipelineSampleReport extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     // Set the state in the URL
-    this.props.refreshPage(this.state, false);
+    // Omit contigTaxidList and taxonomy_details, which are large arrays that shouldn't be put into the URL.
+    this.props.refreshPage(
+      omit(["contigTaxidList", "taxonomy_details"], this.state),
+      false
+    );
   }
 
   // fetchReportData loads the actual report information with another call to
@@ -835,7 +841,8 @@ class PipelineSampleReport extends React.Component {
           />
         )}
         {tax_info.pathogenTag && <PathogenLabel type={tax_info.pathogenTag} />}
-        {this.displayHoverActions(tax_info, report_details)}
+        {this.isRowHovered(tax_info) &&
+          this.displayHoverActions(tax_info, report_details)}
       </span>
     );
     let taxonDescription;
@@ -871,6 +878,20 @@ class PipelineSampleReport extends React.Component {
       );
     }
     return taxonDescription;
+  };
+
+  // Use JS events for hover state to so we can avoid rendering many hidden
+  // elements which was taking >500ms.
+  isRowHovered = taxInfo => {
+    return this.state.hoverRowId === taxInfo.tax_id;
+  };
+
+  handleMouseEnter = taxID => {
+    this.setState({ hoverRowId: taxID });
+  };
+
+  handleMouseLeave = () => {
+    this.setState({ hoverRowId: null });
   };
 
   renderNumber = (
@@ -1407,6 +1428,8 @@ class RenderMarkup extends React.Component {
           parent.props.reportPageParams.pipeline_version
         )}
         onTaxonClick={parent.props.onTaxonClick}
+        handleMouseEnter={parent.handleMouseEnter}
+        handleMouseLeave={parent.handleMouseLeave}
       />
     );
   }

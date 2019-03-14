@@ -1,5 +1,12 @@
 import QueryString from "query-string";
-import { toPairs, pickBy } from "lodash/fp";
+import {
+  filter,
+  isObject,
+  isArray,
+  toPairs,
+  pickBy,
+  isPlainObject
+} from "lodash/fp";
 import { shortenUrl } from "~/api";
 import copy from "copy-to-clipboard";
 
@@ -24,9 +31,21 @@ export const parseUrlParams = () => {
 };
 
 export const getURLParamString = params => {
-  const filtered = pickBy((v, k) => typeof v !== "object", params);
+  // Use isPlainObject to remove objects, but keep arrays.
+  const filtered = pickBy((v, k) => !isPlainObject(v), params);
   return toPairs(filtered)
-    .map(pair => pair.join("="))
+    .map(
+      ([key, value]) =>
+        isArray(value)
+          ? // Convert array parameters correctly.
+            // Filter out objects and nested arrays within the array.
+            // We only parse one level deep for now.
+            filter(val => !isObject(val), value).map(
+              eachValue => `${key}[]=${eachValue}`
+            )
+          : `${key}=${value}`
+    )
+    .flat()
     .join("&");
 };
 
