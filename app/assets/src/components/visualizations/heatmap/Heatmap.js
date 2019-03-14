@@ -587,8 +587,6 @@ export default class Heatmap {
             this.scaleLimits.min,
             this.scaleLimits.max
           );
-          // let colorIndex = Math.round(
-          //   colorScale(d.value));
           let color = this.options.customColorCallback
             ? this.options.customColorCallback(
                 d.value,
