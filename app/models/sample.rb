@@ -272,12 +272,14 @@ class Sample < ApplicationRecord
       stderr_array << stderr unless status.exitstatus.zero?
     end
     unless stderr_array.empty?
-      LogUtil.log_err_and_airbrake("Failed to upload sample #{id} with error #{stderr_array[0]}")
+      LogUtil.log_err_and_airbrake("Failed to upload S3 sample '#{name}' (#{id}): #{stderr_array[0]}")
       raise stderr_array[0]
     end
 
     self.status = STATUS_UPLOADED
     save # this triggers pipeline command
+  rescue => e
+    LogUtil.log_err_and_airbrake("Failed to upload S3 sample '#{name}' (#{id}): #{e}")
   end
 
   def sample_input_s3_path
