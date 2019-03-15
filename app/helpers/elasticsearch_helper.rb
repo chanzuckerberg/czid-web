@@ -15,15 +15,13 @@ module ElasticsearchHelper
     results
   end
 
-  def taxon_search(prefix, tax_levels = TaxonCount::NAME_2_LEVEL.keys)
+  def taxon_search(prefix, tax_levels = TaxonCount::NAME_2_LEVEL.keys, project_id = nil)
     return {} if Rails.env == "test"
     prefix = sanitize(prefix)
     matching_taxa = {}
 
     tax_levels.each do |level|
-      # TODO: (gdingle): pass in project filter here
       search_params = { query: { query_string: { query: "#{prefix}*", fields: ["#{level}_name"] } } }
-      # TODO: (gdingle): query taxon counts and see how expensive?
       TaxonLineage.__elasticsearch__.search(search_params).records.each do |record|
         name = record["#{level}_name"]
         taxid = record["#{level}_taxid"]
@@ -35,22 +33,30 @@ module ElasticsearchHelper
         }
       end
     end
-    filter_by_project(matching_taxa.values)
+
+    if project_id.present?
+      filter_by_project(matching_taxa.values, project_id)
+    else
+      matching_taxa.values
+    end
   end
 
   private
 
+  # Took 250ms in local testing on real data
   def filter_by_project(matching_taxa, project_id)
-    # taxon_counts.pipeline_run_id -> pipeline_runs->sample_id -> samples.project_id
-    project_id = 70 # medical detectives
-    tax_ids = TaxonCount
-              .joins(:pipeline_run)
-              .joins(:sample)
-              .joins(:project)
-              .where(project: project_id)
-              .pluck(:taxid)
-    tax_ids = Set[tax_ids]
-    matching_taxa.filter { |_taxa| tax_ids.includes?(taxid) }
+    # TODO: (gdingle): do we want both species and genus? only genus appears to be returned by TaxonCount
+    project_tax_ids = Set.new(TaxonCount
+      .joins(pipeline_run: { sample: :project })
+      .where(samples: { project_id: project_id })
+      .where(tax_id: [matching_taxa.map { |taxa| taxa["taxid"] }])
+      .where("tax_id > 0") # negative numbers mean unknown... see TaxonLineage
+      .where(count_type: ["NT", "NR"])
+      .where("count > #{ReportHelper::MINIMUM_READ_THRESHOLD}")
+      .distinct()
+      .pluck(:tax_id))
+
+    matching_taxa.select { |taxa| project_tax_ids.include?(taxa["taxid"]) }
   end
 
   def sanitize(prefix)

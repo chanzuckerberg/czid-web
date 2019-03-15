@@ -85,8 +85,8 @@ class PhyloTreesController < ApplicationController
 
   def choose_taxon
     taxon_search_args = [params[:query]]
-    # TODO: (gdingle): pass in project filter here
     taxon_search_args << params[:args].split(",") if params[:args].present?
+    taxon_search_args << params[:project_id]
     taxon_list = taxon_search(*taxon_search_args)
     render json: JSON.dump(taxon_list)
   end
