@@ -1,4 +1,4 @@
-task create_elasticsearch_indices: :environment do
+task rename_human_genome: :environment do
   def old_new(path_column, host_genome)
     prefix = host_genome.name.downcase.gsub(/\W/, '-')
     old_path = host_genome[path_column]
