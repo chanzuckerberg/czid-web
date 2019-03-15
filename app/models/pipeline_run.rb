@@ -652,6 +652,10 @@ class PipelineRun < ApplicationRecord
   end
 
   def s3_file_for(output)
+    # This function assumes that pipeline_version has been set and is assembly-enabled (>=3.1) for
+    # taxon_counts/taxon_byteranges/contigs/contig_counts.
+    LogUtil.log_err_and_airbrake("s3_file_for was called without a pipeline_version for PR #{id}")
+
     case output
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
