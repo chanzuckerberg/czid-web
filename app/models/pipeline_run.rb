@@ -652,26 +652,15 @@ class PipelineRun < ApplicationRecord
   end
 
   def s3_file_for(output)
-    # Just return if version is not yet set (likely a run just starting)
-    return if pipeline_version.blank?
-
     case output
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     when "amr_counts"
       "#{expt_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
     when "taxon_counts"
-      if pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
-        "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
-      else
-        "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
-      end
+      "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
     when "taxon_byteranges"
-      if pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
-        "#{postprocess_output_s3_path}/#{REFINED_TAXID_BYTERANGE_JSON_NAME}"
-      else
-        "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
-      end
+      "#{postprocess_output_s3_path}/#{REFINED_TAXID_BYTERANGE_JSON_NAME}"
     when "contigs"
       "#{postprocess_output_s3_path}/#{ASSEMBLED_STATS_NAME}"
     when "contig_counts"
