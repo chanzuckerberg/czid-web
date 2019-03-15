@@ -3,8 +3,8 @@ class ResultMonitorLoader
   @queue = :q03_pipeline_run
 
   def self.perform(pipeline_run_id, output)
-    Rails.logger.info("Loading #{output} for pipeline run #{pipeline_run_id}")
     pr = PipelineRun.find(pipeline_run_id)
+    Rails.logger.info("Loading #{output} for pipeline run #{pipeline_run_id} (v#{pr.pipeline_version})")
     output_state = pr.output_states.find_by(output: output)
     begin
       output_state.update(state: PipelineRun::STATUS_LOADING)
