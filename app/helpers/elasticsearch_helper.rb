@@ -51,7 +51,7 @@ module ElasticsearchHelper
       .where(tax_id: [matching_taxa.map { |taxa| taxa["taxid"] }])
       .where("tax_id > 0") # negative numbers mean unknown... see TaxonLineage
       .where(count_type: ["NT", "NR"])
-      .where("count > #{ReportHelper::MINIMUM_READ_THRESHOLD}")
+      .where("count > ?", ReportHelper::MINIMUM_READ_THRESHOLD)
       .distinct()
       .pluck(:tax_id))
 
