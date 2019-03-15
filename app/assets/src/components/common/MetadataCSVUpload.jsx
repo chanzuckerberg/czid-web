@@ -34,7 +34,8 @@ class MetadataCSVUpload extends React.Component {
   // MetadataCSVUpload stores each row as arrays of strings,
   // but converts the row to objects before calling onMetadataChange.
   state = {
-    metadata: null
+    metadata: null,
+    validatingCSV: false
   };
 
   onCSV = async csv => {
@@ -43,7 +44,8 @@ class MetadataCSVUpload extends React.Component {
       issues: {
         errors: [],
         warnings: []
-      }
+      },
+      validatingCSV: true
     });
     this.setState({ metadata: csv });
 
@@ -65,7 +67,8 @@ class MetadataCSVUpload extends React.Component {
 
     this.props.onMetadataChange({
       metadata: processCSVMetadata(csv),
-      issues: serverResponse.issues
+      issues: serverResponse.issues,
+      validatingCSV: false
     });
   };
 

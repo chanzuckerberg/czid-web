@@ -39,6 +39,16 @@
     margin-top: 10px;
     margin-bottom: 10px;
   }
+
+  .validationMessage {
+    @include font-body-s;
+    color: $medium-grey;
+    margin-top: 25px;
+
+    .loadingIcon {
+      margin-right: 5px;
+    }
+  }
 }
 
 .issues {

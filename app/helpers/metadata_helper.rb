@@ -21,9 +21,9 @@ module MetadataHelper
   end
 
   def official_metadata_fields_helper
-    required = MetadataField.where(is_required: true)
-    default = MetadataField.where(is_default: true)
-    core = MetadataField.where(is_core: true)
+    required = MetadataField.where(is_required: true).includes(:host_genomes)
+    default = MetadataField.where(is_default: true).includes(:host_genomes)
+    core = MetadataField.where(is_core: true).includes(:host_genomes)
 
     (required | default | core).map(&:field_info)
   end
