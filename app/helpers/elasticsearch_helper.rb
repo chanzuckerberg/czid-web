@@ -45,7 +45,6 @@ module ElasticsearchHelper
 
   # Took 250ms in local testing on real data
   def filter_by_project(matching_taxa, project_id)
-    # TODO: (gdingle): do we want both species and genus? only genus appears to be returned by TaxonCount
     project_tax_ids = Set.new(TaxonCount
       .joins(pipeline_run: { sample: :project })
       .where(samples: { project_id: project_id })

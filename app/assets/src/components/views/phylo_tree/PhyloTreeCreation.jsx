@@ -139,7 +139,6 @@ class PhyloTreeCreation extends React.Component {
   }
 
   loadProjectSearchContext() {
-    // TODO (gdingle): add filter
     axios
       .get("/choose_project.json")
       .then(response => this.handleProjectSearchContextResponse(response))
