@@ -19,6 +19,7 @@ import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
 import DiscoverySidebar from "./DiscoverySidebar";
 import cs from "./discovery_view.scss";
+import cx from "classnames";
 import DiscoveryFilters from "./DiscoveryFilters";
 import {
   getDiscoveryData,
@@ -249,15 +250,11 @@ class DiscoveryView extends React.Component {
         <Divider style="medium" />
         <div className={cs.mainContainer}>
           <div className={cs.leftPane}>
-            {showFilters && (
-              <DiscoveryFilters
-                {...mapValues(
-                  dim => dim.values,
-                  keyBy("dimension", dimensions)
-                )}
-                onFilterChange={this.handleFilterChange}
-              />
-            )}
+            <DiscoveryFilters
+              className={cx(showFilters || cs.hiddenPane)}
+              {...mapValues(dim => dim.values, keyBy("dimension", dimensions))}
+              onFilterChange={this.handleFilterChange}
+            />
           </div>
           <NarrowContainer className={cs.viewContainer}>
             {currentTab == "projects" && <ProjectsView projects={projects} />}
@@ -273,15 +270,14 @@ class DiscoveryView extends React.Component {
             )}
           </NarrowContainer>
           <div className={cs.rightPane}>
-            {showStats &&
-              ["samples", "projects"].includes(currentTab) && (
-                <DiscoverySidebar
-                  className={cs.sidebar}
-                  samples={samples}
-                  projects={projects}
-                  currentTab={currentTab}
-                />
-              )}
+            {["samples", "projects"].includes(currentTab) && (
+              <DiscoverySidebar
+                className={cx(cs.sidebar, showStats || cs.hiddenPane)}
+                samples={samples}
+                projects={projects}
+                currentTab={currentTab}
+              />
+            )}
           </div>
         </div>
       </div>

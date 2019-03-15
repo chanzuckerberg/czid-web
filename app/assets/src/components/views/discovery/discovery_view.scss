@@ -41,6 +41,11 @@
   }
 }
 
+.hiddenPane {
+  display: none;
+  padding: 0;
+}
+
 .tabLabel {
   font-size: $font-size-h6;
   margin-right: 10px;
