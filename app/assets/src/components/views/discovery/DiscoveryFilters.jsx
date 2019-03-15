@@ -68,7 +68,7 @@ class DiscoveryFilters extends React.Component {
     let newSelected = null;
     if (Array.isArray(this.state[selectedKey])) {
       newSelected = this.state[selectedKey].filter(
-        option => option.value !== removedValue
+        option => (option.value || option) !== removedValue
       );
     }
 
@@ -83,7 +83,7 @@ class DiscoveryFilters extends React.Component {
 
     if (!selectedOptions) return;
     if (!Array.isArray(selectedOptions)) selectedOptions = [selectedOptions];
-    console.log(optionsKey, selectedOptions, options);
+    console.log(optionsKey, selectedOptions, options, this.props);
     return selectedOptions.map(option => (
       <FilterTag
         className={cs.filterTag}
