@@ -150,7 +150,7 @@
     <% if @host_genome != "human" %>
     ,
     {
-      "in": ["bowtie2_out", validate_input_out"],
+      "in": ["bowtie2_out", "validate_input_out"],
       "out": "star_human_out",
       "class": "PipelineStepRunStarDownstream",
       "module": "idseq_dag.steps.run_star_downstream",
