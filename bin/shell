@@ -21,7 +21,7 @@ service = "idseq-#{env}-web"
 resp = ecs_client.describe_services(cluster: env, services: [service])
 service = resp.services.first
 
-task = ecs_client.list_tasks(cluster: env, service_name: "idseq-#{env}-web").task_arns[7]
+task = ecs_client.list_tasks(cluster: env, service_name: "idseq-#{env}-web").task_arns.first
 
 tasks = ecs_client.describe_tasks(cluster: env, tasks: [task])
 instances = ecs_client.describe_container_instances(cluster: env,
@@ -30,7 +30,5 @@ instances = ecs_client.describe_container_instances(cluster: env,
 resp = ec2_client.describe_instances(instance_ids: [instances.container_instances[0].ec2_instance_id])
 
 private_ip = resp.reservations.first.instances.first.private_ip_address
-
-puts private_ip
 
 exec %(ssh -t #{private_ip} "sudo docker exec -it \\`sudo docker ps | grep ecs-idseq-#{env}-web | head -1 | awk '{print \\$NF}'\\` bin/entrypoint.sh #{command} ")
