@@ -1340,6 +1340,7 @@ class RenderMarkup extends React.Component {
             <SearchBox
               rounded
               levelLabel
+              // TODO (gdingle): add filter?
               serverSearchAction="choose_taxon"
               onResultSelect={parent.searchSelectedTaxon}
               placeholder="Taxon name"

@@ -70,6 +70,7 @@ class SearchBox extends React.Component {
         const isMatch = result => re.test(result.title);
         searchResults = this.props.clientSearchSource.filter(isMatch);
       } else if (this.props.serverSearchAction) {
+        // TODO: (gdingle): pass in project filter here... append to CSV?
         let url = `/${this.props.serverSearchAction}?query=${this.state.value}`;
         if (this.props.serverSearchActionArgs) {
           url += `&args=${this.props.serverSearchActionArgs}`;

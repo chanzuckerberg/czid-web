@@ -20,6 +20,7 @@ module ElasticsearchHelper
     prefix = sanitize(prefix)
     matching_taxa = {}
     tax_levels.each do |level|
+      # TODO: (gdingle): pass in project filter here
       search_params = { query: { query_string: { query: "#{prefix}*", fields: ["#{level}_name"] } } }
       TaxonLineage.__elasticsearch__.search(search_params).records.each do |record|
         name = record["#{level}_name"]
