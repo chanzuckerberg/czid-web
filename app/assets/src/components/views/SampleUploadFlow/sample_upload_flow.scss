@@ -12,6 +12,27 @@
   }
 }
 
+.uploadFlowStep {
+  // In order to make the flex-content take up the remaining height on the page,
+  // we need to place it in a parent container that expands to fill up the page height.
+  // This min-height takes up the remaining viewport height besides the header and the sample upload flow header.
+  min-height: calc(100vh - 180px);
+  display: flex;
+  flex-direction: column;
+
+  .flexContent {
+    flex: 1 1 0;
+  }
+
+  .controls {
+    margin: 30px 0 60px;
+
+    .continueButton {
+      margin-right: 10px;
+    }
+  }
+}
+
 .label {
   @include font-header-s;
   margin-bottom: 5px;
@@ -88,12 +109,8 @@
     }
   }
 
-  .mainControls {
-    margin-top: 60px;
-
-    .continueButton {
-      margin-right: 10px;
-    }
+  .uploadTable {
+    margin-top: 30px;
   }
 }
 
@@ -173,24 +190,12 @@
   }
 }
 
-.tallBody {
-  min-height: 600px;
-}
-
 .uploadMetadataStep {
   .title {
     font-size: 26px;
     font-weight: 600;
     letter-spacing: 0.4px;
     margin-bottom: 8px;
-  }
-
-  .mainControls {
-    margin-top: 60px;
-
-    .continueButton {
-      margin-right: 10px;
-    }
   }
 
   .hide {

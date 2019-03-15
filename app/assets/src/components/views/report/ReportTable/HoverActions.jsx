@@ -82,17 +82,13 @@ class HoverActions extends React.Component {
           data-tax-id={taxId}
           onClick={hoverAction.handleClick}
           className={cx("fa", hoverAction.icon, cs.actionDot)}
-          aria-hidden="true"
           {...hoverAction.extraProps}
         />
       );
       tooltipMessage = hoverAction.message;
     } else {
       trigger = (
-        <i
-          className={cx("fa", hoverAction.icon, cs.actionDot, cs.disabled)}
-          aria-hidden="true"
-        />
+        <i className={cx("fa", hoverAction.icon, cs.actionDot, cs.disabled)} />
       );
       tooltipMessage = hoverAction.disabledMessage;
     }

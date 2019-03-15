@@ -53,41 +53,25 @@ class MetadataManualInput extends React.Component {
       hostGenomes,
       headers: {
         "Sample Name": "Sample Name",
-        ...(samplesAreNew
-          ? {
-              "Host Genome": (
-                <div>
-                  Host Genome<span className={cs.requiredStar}>*</span>
-                </div>
-              )
-            }
-          : {}),
-        ...mapValues(
-          field =>
-            samplesAreNew && field.is_required ? (
-              <div>
-                {field.name}
-                <span className={cs.requiredStar}>*</span>
-              </div>
-            ) : (
-              field.name
-            ),
-          keyBy("key", projectMetadataFields)
-        )
+        ...(samplesAreNew ? { "Host Genome": "Host Genome" } : {}),
+        ...mapValues("name", keyBy("key", projectMetadataFields))
       }
     });
 
-    // Set all to Human by default. Can't use updateHostGenome/updateMetadataField for bulk update.
-    const newHeaders = union(["Host Genome"], this.state.headersToEdit);
-    let newFields = this.state.metadataFieldsToEdit;
-    this.props.samples.forEach(sample => {
-      newFields = set([sample.name, "Host Genome"], "Human", newFields);
-    });
-    this.setState({
-      headersToEdit: newHeaders,
-      metadataFieldsToEdit: newFields
-    });
-    this.onMetadataChange(newHeaders, newFields);
+    // If samples are new, set all host genomes to Human by default.
+    // Can't use updateHostGenome/updateMetadataField for bulk update.
+    if (this.props.samplesAreNew) {
+      const newHeaders = union(["Host Genome"], this.state.headersToEdit);
+      let newFields = this.state.metadataFieldsToEdit;
+      this.props.samples.forEach(sample => {
+        newFields = set([sample.name, "Host Genome"], "Human", newFields);
+      });
+      this.setState({
+        headersToEdit: newHeaders,
+        metadataFieldsToEdit: newFields
+      });
+      this.onMetadataChange(newHeaders, newFields);
+    }
   }
 
   getManualInputColumns = () => {
@@ -316,9 +300,6 @@ class MetadataManualInput extends React.Component {
   render() {
     return (
       <div className={cx(cs.metadataManualInput, this.props.className)}>
-        {this.props.samplesAreNew && (
-          <div className={cs.requiredMessage}>* = Required Field</div>
-        )}
         <div className={cs.tableContainer}>
           <div className={cs.tableScrollWrapper}>
             <DataTable

@@ -1,17 +1,18 @@
 import React from "react";
 import cx from "classnames";
+import _fp, { filter, keyBy, concat } from "lodash/fp";
 
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
+import { getProjectMetadataFields, getAllHostGenomes } from "~/api";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
 import IssueGroup from "./IssueGroup";
-import { getProjectMetadataFields, getAllHostGenomes } from "~/api";
+import { getURLParamString } from "~/helpers/url";
 
-import _fp, { filter, keyBy } from "lodash/fp";
 const map = _fp.map.convert({ cap: false });
 
 class MetadataUpload extends React.Component {
@@ -22,8 +23,7 @@ class MetadataUpload extends React.Component {
       warnings: []
     },
     projectMetadataFields: null,
-    hostGenomes: [],
-    showInfo: false
+    hostGenomes: []
   };
 
   async componentDidMount() {
@@ -61,10 +61,15 @@ class MetadataUpload extends React.Component {
     this.props.onMetadataChange({ metadata, wasManual: true });
   };
 
-  toggleInfo = () => {
-    this.setState({
-      showInfo: !this.state.showInfo
-    });
+  getCSVUrl = () => {
+    const params = {
+      ...(this.props.samplesAreNew
+        ? { new_sample_names: map("name", this.props.samples) }
+        : {}),
+      project_id: this.props.project.id
+    };
+
+    return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
   };
 
   renderTab = () => {
@@ -104,7 +109,7 @@ class MetadataUpload extends React.Component {
             project={this.props.project}
             samplesAreNew={this.props.samplesAreNew}
           />
-          <a className={cs.link} href="/metadata/metadata_template_csv">
+          <a className={cs.link} href={this.getCSVUrl()}>
             Download Metadata CSV Template
           </a>
         </React.Fragment>
@@ -175,30 +180,15 @@ class MetadataUpload extends React.Component {
   };
 
   render() {
-    const {
-      hostGenomes,
-      projectMetadataFields,
-      currentTab,
-      showInfo
-    } = this.state;
-    const requiredFields = map(
-      "name",
-      filter(["is_required", 1], projectMetadataFields)
+    const { hostGenomes, projectMetadataFields, currentTab } = this.state;
+    const { samplesAreNew } = this.props;
+    const requiredFields = concat(
+      "Host Genome",
+      map("name", filter(["is_required", 1], projectMetadataFields))
     );
     return (
       <div className={cx(cs.metadataUpload, this.props.className)}>
-        <div>
-          <span>
-            <a href="/metadata/dictionary" className={cs.link} target="_blank">
-              View Metadata Dictionary
-            </a>
-          </span>
-          {` | `}
-          <span className={cs.link} onClick={this.toggleInfo}>
-            {showInfo ? "Hide" : "Show"} Required Fields and Host Genomes
-          </span>
-        </div>
-        {this.state.showInfo && (
+        {samplesAreNew && (
           <div className={cs.info}>
             <div className={cs.details}>
               <span className={cs.label}>{`Required fields: `}</span>
@@ -208,8 +198,32 @@ class MetadataUpload extends React.Component {
               <span className={cs.label}>{`Available host genomes: `}</span>
               {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
             </div>
+            <div className={cs.details}>
+              <span>
+                <a
+                  href="/metadata/dictionary"
+                  className={cs.link}
+                  target="_blank"
+                >
+                  View Full Metadata Dictionary
+                </a>
+              </span>
+            </div>
           </div>
         )}
+        <div>
+          {!samplesAreNew && (
+            <span>
+              <a
+                href="/metadata/dictionary"
+                className={cs.link}
+                target="_blank"
+              >
+                View Metadata Dictionary
+              </a>
+            </span>
+          )}
+        </div>
         <Tabs
           className={cs.tabs}
           tabs={["Manual Input", "CSV Upload"]}

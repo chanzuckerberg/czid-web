@@ -1,4 +1,5 @@
 import React from "react";
+import cx from "classnames";
 import { get, without, map, keyBy, flow, mapValues, omit } from "lodash/fp";
 
 import DataTable from "~/components/visualizations/table/DataTable";
@@ -14,7 +15,10 @@ import LoadingIcon from "~ui/icons/LoadingIcon";
 import cs from "./sample_upload_flow.scss";
 
 const processMetadataRows = metadataRows =>
-  flow(keyBy("sample_name"), mapValues(omit("sample_name")))(metadataRows);
+  flow(
+    keyBy(row => row.sample_name || row["Sample Name"]),
+    mapValues(omit(["sample_name", "Sample Name"]))
+  )(metadataRows);
 
 class ReviewStep extends React.Component {
   state = {
@@ -140,53 +144,55 @@ class ReviewStep extends React.Component {
 
   render() {
     return (
-      <div className={cs.reviewStep}>
-        <div className={cs.projectContainer}>
-          <div className={cs.smallHeader}>Project Info</div>
-          <div className={cs.project}>
-            {this.props.project.public_access === 1 ? (
-              <PublicProjectIcon className={cs.projectIcon} />
-            ) : (
-              <PrivateProjectIcon className={cs.projectIcon} />
-            )}
-            <div className={cs.text}>
-              <div className={cs.header}>
-                <div className={cs.name}>{this.props.project.name}</div>
-                <div className={cs.publicAccess}>
-                  {this.props.project.public_access
-                    ? "Public Project"
-                    : "Private Project"}
+      <div className={cx(cs.reviewStep, cs.uploadFlowStep)}>
+        <div className={cs.flexContent}>
+          <div className={cs.projectContainer}>
+            <div className={cs.smallHeader}>Project Info</div>
+            <div className={cs.project}>
+              {this.props.project.public_access === 1 ? (
+                <PublicProjectIcon className={cs.projectIcon} />
+              ) : (
+                <PrivateProjectIcon className={cs.projectIcon} />
+              )}
+              <div className={cs.text}>
+                <div className={cs.header}>
+                  <div className={cs.name}>{this.props.project.name}</div>
+                  <div className={cs.publicAccess}>
+                    {this.props.project.public_access
+                      ? "Public Project"
+                      : "Private Project"}
+                  </div>
                 </div>
-              </div>
-              <div className={cs.existingSamples}>
-                {this.props.project.number_of_samples} existing samples in
-                project
+                <div className={cs.existingSamples}>
+                  {this.props.project.number_of_samples || 0} existing samples
+                  in project
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div className={cs.sampleContainer}>
-          <div className={cs.smallHeader}>Sample Info</div>
-          <div className={cs.tableScrollWrapper}>
-            <DataTable
-              className={cs.metadataTable}
-              columns={this.getDataHeaders()}
-              data={this.getDataRows()}
-              getColumnWidth={this.getColumnWidth}
-            />
+          <div className={cs.sampleContainer}>
+            <div className={cs.smallHeader}>Sample Info</div>
+            <div className={cs.tableScrollWrapper}>
+              <DataTable
+                className={cs.metadataTable}
+                columns={this.getDataHeaders()}
+                data={this.getDataRows()}
+                getColumnWidth={this.getColumnWidth}
+              />
+            </div>
           </div>
         </div>
-        {this.state.submitState === "review" && (
-          <TermsAgreement
-            checked={this.state.consentChecked}
-            onChange={() =>
-              this.setState({
-                consentChecked: !this.state.consentChecked
-              })
-            }
-          />
-        )}
         <div className={cs.controls}>
+          {this.state.submitState === "review" && (
+            <TermsAgreement
+              checked={this.state.consentChecked}
+              onChange={() =>
+                this.setState({
+                  consentChecked: !this.state.consentChecked
+                })
+              }
+            />
+          )}
           {this.state.submitState === "submitting" && (
             <div className={cs.uploadMessage}>
               <LoadingIcon className={cs.loadingIcon} />

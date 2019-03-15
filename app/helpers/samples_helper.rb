@@ -190,11 +190,9 @@ module SamplesHelper
   def filter_by_status(samples, query)
     top_pipeline_run_clause = "pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)"
     if query == 'In Progress'
-      join_clause = "LEFT OUTER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id"
-      samples.joins(join_clause).where("#{top_pipeline_run_clause} or pipeline_runs.id is NULL").where("samples.status = ? or pipeline_runs.job_status is NULL or (pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1)", Sample::STATUS_CREATED, [PipelineRun::STATUS_CHECKED, PipelineRun::STATUS_FAILED])
+      samples.joins(:pipeline_runs).where("#{top_pipeline_run_clause} or pipeline_runs.id is NULL").where("samples.status = ? or pipeline_runs.job_status is NULL or (pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1)", Sample::STATUS_CREATED, [PipelineRun::STATUS_CHECKED, PipelineRun::STATUS_FAILED])
     else
-      join_clause = "INNER JOIN pipeline_runs ON pipeline_runs.sample_id = samples.id"
-      samples_pipeline_runs = samples.joins(join_clause).where(status: Sample::STATUS_CHECKED).where(top_pipeline_run_clause)
+      samples_pipeline_runs = samples.joins(:pipeline_runs).where(status: Sample::STATUS_CHECKED).where(top_pipeline_run_clause)
       if query == 'Failed'
         samples_pipeline_runs.where("pipeline_runs.job_status like '%FAILED'")
       elsif query == 'Complete'
@@ -423,6 +421,8 @@ module SamplesHelper
   def upload_metadata_for_samples(samples, metadata)
     errors = []
 
+    metadata_to_save = []
+
     metadata.each do |sample_name, fields|
       sample = samples.find { |s| s.name == sample_name }
 
@@ -432,15 +432,29 @@ module SamplesHelper
       end
 
       fields.each do |key, value|
-        next if ["sample_name", "host_genome"].include?(key)
+        next if ["Sample Name", "Host Genome", "sample_name", "host_genome"].include?(key)
 
-        saved = sample.metadatum_add_or_update(key, value)
+        result = sample.get_metadatum_to_save(key, value)
 
-        unless saved
+        if result[:status] == "ok"
+          if result[:metadatum]
+            metadata_to_save << result[:metadatum]
+          end
+        else
           errors.push(MetadataUploadErrors.save_error(key, value))
         end
       end
     end
+
+    # Use activerecord-import to bulk import the metadata.
+    # With on_duplicate_key_update, activerecord-import will correct update existing rows.
+    # Rails model validations are also checked.
+    update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value]
+    results = Metadatum.import metadata_to_save, validate: true, on_duplicate_key_update: update_keys
+    results.failed_instances.each do |model|
+      errors.push(MetadataUploadErrors.save_error(model.key, model.raw_value))
+    end
+
     errors
   end
 

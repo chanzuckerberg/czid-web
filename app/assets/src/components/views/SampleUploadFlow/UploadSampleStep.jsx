@@ -1,5 +1,6 @@
 // TODO(mark): Verify that sample name is not duplicate for local uploads at this step.
 import React from "react";
+import cx from "classnames";
 import PropTypes from "~/components/utils/propTypes";
 import ProjectSelect from "~/components/common/ProjectSelect";
 import Tabs from "~/components/ui/controls/Tabs";
@@ -348,8 +349,8 @@ class UploadSampleStep extends React.Component {
 
   render() {
     return (
-      <div className={cs.uploadSampleStep}>
-        <div className={cs.tallBody}>
+      <div className={cx(cs.uploadSampleStep, cs.uploadFlowStep)}>
+        <div className={cs.flexContent}>
           <div className={cs.projectSelect}>
             <div className={cs.label}>Project</div>
             <ProjectSelect
@@ -389,9 +390,10 @@ class UploadSampleStep extends React.Component {
             onRemoved={this.handleSampleRemoved}
             hideProgressColumn
             showCount={this.state.currentTab === REMOTE_UPLOAD_TAB}
+            className={cs.uploadTable}
           />
         </div>
-        <div className={cs.mainControls}>
+        <div className={cs.controls}>
           <PrimaryButton
             text="Continue"
             onClick={this.handleContinue}

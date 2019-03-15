@@ -55,8 +55,8 @@
   }
 
   &__header {
-    @include font-header-xs;
-    color: $medium-grey;
+    @include font-header-s;
+    color: $black;
 
     &.column-reserved-selectable {
       width: 30px;
@@ -66,6 +66,17 @@
   &__data {
     &.column-reserved-selectable {
       width: 30px;
+    }
+  }
+
+  &.selectable {
+    // If the table has checkboxes on the first column, don't pad the first column.
+    th:first-child {
+      padding-left: 0;
+    }
+
+    td:first-child {
+      padding-left: 0;
     }
   }
 

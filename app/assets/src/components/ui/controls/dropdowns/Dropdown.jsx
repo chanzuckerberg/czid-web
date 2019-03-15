@@ -52,9 +52,17 @@ class Dropdown extends React.Component {
       ) : (
         <span className={cs.placeholder}>{this.props.placeholder}</span>
       );
+
+    const hasText =
+      this.state.value !== undefined &&
+      this.state.value !== null &&
+      this.state.labels[this.state.value.toString()];
+    const labelText =
+      this.props.label && hasText ? this.props.label + ":" : this.props.label;
+
     return (
       <DropdownTrigger
-        label={this.props.label}
+        label={labelText}
         value={text}
         rounded={this.props.rounded}
         className={cs.dropdownTrigger}

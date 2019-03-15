@@ -5,6 +5,7 @@ import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
 import { Accordion } from "~/components/layout";
+import BasicPopup from "~/components/BasicPopup";
 
 import cs from "./discovery_sidebar.scss";
 
@@ -14,17 +15,16 @@ export default class DiscoverySidebar extends React.Component {
 
     this.state = {
       stats: {
-        samples: 0,
-        projects: 0
-        // TODO (gdingle):
-        // avg_reads_per_sample: 0,
+        numSamples: "",
+        numProjects: "",
+        totalReads: "",
+        nonHostReads: ""
       },
       metadata: {
         host: {},
         tissue: {},
-        createdAt: {}
-        // TODO (gdingle):
-        // location: {},
+        createdAt: {},
+        location: {}
       }
     };
   }
@@ -33,25 +33,23 @@ export default class DiscoverySidebar extends React.Component {
     const { currentTab, projects } = newProps;
 
     if (currentTab == "samples") {
-      const samples = DiscoverySidebar.processSamples(newProps.samples);
+      const samples = DiscoverySidebar.selectSampleData(newProps.samples);
       if (!samples || !samples.length) {
         return prevState;
       }
       return {
         stats: {
-          samples: samples.length,
-          projects: uniqBy("project", samples).length
-          // TODO (gdingle): reads not in samples data yet
-          // avg_reads_per_sample: 0,
+          numSamples: samples.length,
+          numProjects: uniqBy("project_id", samples).length,
+          totalReads: sumBy("totalReads", samples),
+          nonHostReads: sumBy("nonHostReads", samples)
         },
         metadata: {
           host: countBy("hostGenome", samples),
           tissue: countBy("sampleTissue", samples),
-          createdAt: countBy("createdAt", samples)
-          // TODO (gdingle): location not in samples data yet
-          // location: {},
-        },
-        _computed: currentTab
+          createdAt: countBy("createdAt", samples),
+          location: countBy("sampleLocation", samples)
+        }
       };
     } else if (currentTab == "projects") {
       if (!projects || !projects.length) {
@@ -60,6 +58,7 @@ export default class DiscoverySidebar extends React.Component {
 
       const hosts = flatten(map("hosts", projects));
       const tissues = flatten(map("tissues", projects));
+      const locations = flatten(map("locations", projects));
 
       const createdAts = map(
         project => DiscoverySidebar.formatDate(project.created_at),
@@ -68,19 +67,17 @@ export default class DiscoverySidebar extends React.Component {
 
       return {
         stats: {
-          samples: sumBy("number_of_samples", projects),
-          projects: projects.length
-          // TODO (gdingle): reads not in projects data yet
-          // avg_reads_per_sample: 0,
+          numSamples: sumBy("number_of_samples", projects),
+          numProjects: projects.length,
+          totalReads: sumBy("total_reads", projects),
+          nonHostReads: sumBy("adjusted_remaining_reads", projects)
         },
         metadata: {
           host: countBy(null, hosts),
           tissue: countBy(null, tissues),
-          createdAt: countBy(null, createdAts)
-          // TODO (gdingle): location not in projects data yet
-          // location: {},
-        },
-        _computed: currentTab
+          createdAt: countBy(null, createdAts),
+          location: countBy(null, locations)
+        }
       };
     } else {
       // eslint-disable-next-line no-console
@@ -93,19 +90,77 @@ export default class DiscoverySidebar extends React.Component {
     return moment(createdAt).format("YYYY-MM-DD");
   }
 
-  static processSamples(newSamples) {
+  formatNumber(number) {
+    const samples = this.state.stats.numSamples;
+    if (!samples) {
+      return "";
+    }
+    return Math.round(number / samples).toLocaleString();
+  }
+
+  static selectSampleData(newSamples) {
     return newSamples.map(sample => ({
       hostGenome: sample.host || "Unknown",
       project: sample.sample.project,
       sampleTissue: sample.sampleType || "Unknown",
-      // TODO (gdingle): this is broken... always getting current date
-      createdAt: DiscoverySidebar.formatDate(sample.sample.createdAt)
+      createdAt: DiscoverySidebar.formatDate(sample.sample.createdAt),
+      sampleLocation: sample.sampleLocation,
+      totalReads: sample.totalReads,
+      nonHostReads: sample.nonHostReads.value
     }));
   }
 
   handleFilterClick(key) {
     // TODO (gdingle): coordinate with filters on left sidebar
     window.history.pushState("", "", "?" + key);
+  }
+
+  // TODO (gdingle): auto scale to day week or month?
+  buildDateHistogram(field) {
+    const dates = this.state.metadata[field];
+
+    const total = sum(Object.values(dates));
+    const dateKeys = Object.keys(dates);
+    dateKeys.sort();
+    const firstDate = dateKeys[0];
+    const lastDate = dateKeys[dateKeys.length - 1];
+    return (
+      <div>
+        <div className={cx(cs.dateHistogram)}>
+          {dateKeys.map(key => {
+            const percent = Math.round(100 * dates[key] / total, 0);
+            const element = (
+              <div
+                className={cx(cs.bar)}
+                key={key}
+                style={{ height: percent * 2 + "px" }}
+                onClick={() => this.handleFilterClick(key)}
+              >
+                &nbsp;
+              </div>
+            );
+            const tooltipMessage = (
+              <span>
+                {key}
+                <br />
+                {dates[key]}
+              </span>
+            );
+            return (
+              <BasicPopup
+                key={key}
+                trigger={element}
+                content={tooltipMessage}
+              />
+            );
+          })}
+        </div>
+        <div className={cx(cs.dateHistogram)}>
+          <div className={cx(cs.label)}>{firstDate}</div>
+          <div className={cx(cs.label)}>{lastDate}</div>
+        </div>
+      </div>
+    );
   }
 
   buildMetadataRows(field) {
@@ -120,14 +175,16 @@ export default class DiscoverySidebar extends React.Component {
           return [
             <dt key={key + i + "label"}>
               <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
-                {key}
+                {key.toLowerCase() == "unknown" ? <i>{key}</i> : key}
               </a>
             </dt>,
             <dd key={key + i + "number"}>
-              <span className={cs.bar} style={{ width: percent + "px" }}>
-                {percent > 10 ? count : ""}
-              </span>
-              {percent}%
+              <span
+                className={cs.bar}
+                // TODO (gdingle): make width depend on container
+                style={{ width: percent * 2 - 14 + "px" }}
+              />
+              {count}
             </dd>
           ];
         })}
@@ -135,20 +192,28 @@ export default class DiscoverySidebar extends React.Component {
     );
   }
 
+  hasData() {
+    return !!(this.state.stats.numSamples || this.state.stats.numProjects);
+  }
+
   render() {
+    // This represents the unique dataset loaded and will force a refresh of the
+    // Accordions when it changes.
+    const dataKey = this.state.stats.totalReads;
     return (
       <div className={cx(this.props.className, cs.sidebar)}>
         <div className={cs.metadataContainer}>
           <Accordion
-            open={true}
-            header={<div className={cs.header}>Overall</div>}
+            key={dataKey}
+            open={this.hasData()}
+            header={<div className={cs.title}>Overall</div>}
           >
             <div className={cs.hasBackground}>
               <dl className={cx(cs.dataList)}>
                 <dt>
                   <strong>Samples</strong>
                 </dt>
-                <dd>{this.state.stats.samples}</dd>
+                <dd>{this.state.stats.numSamples.toLocaleString()}</dd>
               </dl>
             </div>
             <div className={cs.hasBackground}>
@@ -156,20 +221,45 @@ export default class DiscoverySidebar extends React.Component {
                 <dt>
                   <strong>Projects</strong>
                 </dt>
-                <dd>{this.state.stats.projects}</dd>
+                <dd>{this.state.stats.numProjects.toLocaleString()}</dd>
+              </dl>
+            </div>
+            <div className={cs.hasBackground}>
+              <dl className={cx(cs.dataList)}>
+                <dt>
+                  <strong>Reads per sample</strong>
+                </dt>
+                <dd>{this.formatNumber(this.state.stats.totalReads)}</dd>
+              </dl>
+            </div>
+            <div className={cs.hasBackground}>
+              <dl className={cx(cs.dataList)}>
+                <dt>
+                  <strong>
+                    Non-host
+                    <br />reads per sample
+                  </strong>
+                </dt>
+                <dd>{this.formatNumber(this.state.stats.nonHostReads)}</dd>
               </dl>
             </div>
           </Accordion>
         </div>
         <div className={cs.metadataContainer}>
           <Accordion
-            open={true}
-            header={<div className={cs.header}>By Metadata</div>}
+            key={dataKey}
+            open={this.hasData()}
+            header={<div className={cs.title}>Date created</div>}
           >
-            <div className={cs.hasBackground}>
-              <strong>Date created</strong>
-              {this.buildMetadataRows("createdAt")}
-            </div>
+            <div>{this.buildDateHistogram("createdAt")}</div>
+          </Accordion>
+        </div>
+        <div className={cs.metadataContainer}>
+          <Accordion
+            key={dataKey}
+            open={this.hasData()}
+            header={<div className={cs.title}>By Metadata</div>}
+          >
             <div className={cs.hasBackground}>
               <strong>Host</strong>
               {this.buildMetadataRows("host")}
@@ -177,6 +267,10 @@ export default class DiscoverySidebar extends React.Component {
             <div className={cs.hasBackground}>
               <strong>Tissue</strong>
               {this.buildMetadataRows("tissue")}
+            </div>
+            <div className={cs.hasBackground}>
+              <strong>Location</strong>
+              {this.buildMetadataRows("location")}
             </div>
           </Accordion>
         </div>

@@ -77,7 +77,7 @@ module HeatmapHelper
     # TODO: should fail if field is not well formatted and return proper error to client
     sort_by = params[:sortBy] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
     species_selected = params[:species] == "1" # Otherwise genus selected
-    samples = current_power.samples.where(id: sample_ids).includes([:pipeline_runs, :metadata])
+    samples = current_power.samples.where(id: sample_ids).includes([:host_genome, :pipeline_runs, metadata: [:metadata_field]])
     return {} if samples.empty?
 
     first_sample = samples.first
@@ -86,6 +86,6 @@ module HeatmapHelper
     taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
     taxon_ids -= removed_taxon_ids
 
-    samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+    samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)
   end
 end

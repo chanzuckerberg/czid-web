@@ -85,6 +85,9 @@ class MultipleDropdown extends React.Component {
     const { disabled, hideCounter, label, rounded } = this.props;
     const { value } = this.state;
 
+    const labelText =
+      !hideCounter && value.length > 0 && label ? label + ":" : label;
+
     const counterLabel = !hideCounter &&
       value.length > 0 && (
         <DropdownLabel
@@ -96,7 +99,7 @@ class MultipleDropdown extends React.Component {
     return (
       <DropdownTrigger
         className={cs.dropdownTrigger}
-        label={label}
+        label={labelText}
         value={counterLabel}
         rounded={rounded}
       />

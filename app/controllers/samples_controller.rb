@@ -130,12 +130,14 @@ class SamplesController < ApplicationController
     # discovery views (old one was kept to avoid breaking the current inteface
     # without sacrificing speed of development and avoid breaking the current interface)
     domain = params[:domain]
+    project_id = params[:projectId]
     list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
     offset = params[:offset].to_i
 
     samples = samples_by_domain(domain)
+    samples = samples.where(project_id: project_id) if project_id.present?
     samples = filter_samples(samples, params)
 
     limited_samples = samples.offset(offset).limit(limit)
@@ -509,8 +511,8 @@ class SamplesController < ApplicationController
       project_ids = samples.distinct.pluck(:project_id)
       host_genome_ids = samples.distinct.pluck(:host_genome_id)
 
-      project_fields = Project.where(id: project_ids).map(&:metadata_fields)
-      host_genome_fields = HostGenome.where(id: host_genome_ids).map(&:metadata_fields)
+      project_fields = Project.where(id: project_ids).includes(metadata_fields: [:host_genomes]).map(&:metadata_fields)
+      host_genome_fields = HostGenome.where(id: host_genome_ids).includes(metadata_fields: [:host_genomes]).map(&:metadata_fields)
       results = (project_fields.flatten & host_genome_fields.flatten).map(&:field_info)
     end
 
