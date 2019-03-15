@@ -7,6 +7,7 @@ import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
 import { getProjectMetadataFields, getAllHostGenomes } from "~/api";
+import LoadingIcon from "~ui/icons/LoadingIcon";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
@@ -23,7 +24,8 @@ class MetadataUpload extends React.Component {
       warnings: []
     },
     projectMetadataFields: null,
-    hostGenomes: []
+    hostGenomes: [],
+    validatingCSV: false
   };
 
   async componentDidMount() {
@@ -48,10 +50,11 @@ class MetadataUpload extends React.Component {
   };
 
   // MetadataCSVUpload validates metadata before calling onMetadataChangeCSV.
-  onMetadataChangeCSV = ({ metadata, issues }) => {
+  onMetadataChangeCSV = ({ metadata, issues, validatingCSV }) => {
     this.props.onMetadataChange({ metadata, issues, wasManual: false });
     this.setState({
-      issues
+      issues,
+      validatingCSV
     });
   };
 
@@ -112,6 +115,12 @@ class MetadataUpload extends React.Component {
           <a className={cs.link} href={this.getCSVUrl()}>
             Download Metadata CSV Template
           </a>
+          {this.state.validatingCSV && (
+            <div className={cs.validationMessage}>
+              <LoadingIcon className={cs.loadingIcon} />
+              Validating metadata...
+            </div>
+          )}
         </React.Fragment>
       );
     }
