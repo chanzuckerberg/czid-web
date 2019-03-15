@@ -129,7 +129,7 @@ SearchBox.propTypes = {
   // If serverSearchAction is provided, query matching will happen on the server side (use for large data).
   clientSearchSource: PropTypes.array,
   serverSearchAction: PropTypes.string,
-  serverSearchActionArgs: PropTypes.string,
+  serverSearchActionArgs: PropTypes.object,
   rounded: PropTypes.bool,
   category: PropTypes.bool,
   levelLabel: PropTypes.bool,

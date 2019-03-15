@@ -1343,6 +1343,7 @@ class RenderMarkup extends React.Component {
               serverSearchAction="choose_taxon"
               serverSearchActionArgs={{
                 // TODO (gdingle): change backend to support filter by sample_id
+                args: "species,genus",
                 project_id: parent.projectId
               }}
               onResultSelect={parent.searchSelectedTaxon}
