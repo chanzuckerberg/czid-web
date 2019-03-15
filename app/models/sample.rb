@@ -537,9 +537,9 @@ class Sample < ApplicationRecord
     return metadata.find { |metadatum| metadatum.metadata_field.name == key || metadatum.metadata_field.display_name == key }
   end
 
-  # Add or update metadatum entry on this sample.
-  # Returns whether the update succeeded.
-  def metadatum_add_or_update(key, val)
+  # Create or update the Metadatum ActiveRecord object, but do not save.
+  # This allows us to do this in batch.
+  def get_metadatum_to_save(key, val)
     m = get_existing_metadatum(key.to_s)
     unless m
       # Create the entry
@@ -576,10 +576,37 @@ class Sample < ApplicationRecord
     end
     if val.present? && m.raw_value != val
       m.raw_value = val
-      m.save!
+      return {
+        metadatum: m,
+        status: "ok"
+      }
+    else
+      # If the value didn't change or isn't present, don't re-save the metadata field.
+      return {
+        metadatum: nil,
+        status: "ok"
+      }
+    end
+  rescue ActiveRecord::RecordNotFound => e
+    Rails.logger.error(e)
+    return {
+      metadatum: nil,
+      status: "error"
+    }
+  end
+
+  # Add or update metadatum entry on this sample.
+  # Returns whether the update succeeded.
+  def metadatum_add_or_update(key, val)
+    result = get_metadatum_to_save(key, val)
+
+    if result[:status] == "error"
+      return false
+    elsif result[:metadatum]
+      result[:metadatum].save!
     end
     true
-  rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid => e
+  rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error(e)
     false
   end

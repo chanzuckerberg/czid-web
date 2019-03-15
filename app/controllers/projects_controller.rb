@@ -403,7 +403,7 @@ class ProjectsController < ApplicationController
   def upload_metadata
     metadata = params[:metadata]
 
-    project_samples = current_power.project_samples(@project)
+    project_samples = current_power.project_samples(@project).includes(host_genome: [:metadata_fields], metadata: :metadata_field)
 
     errors = upload_metadata_for_samples(project_samples.to_a, metadata)
     render json: {

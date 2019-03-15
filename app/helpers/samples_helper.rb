@@ -421,6 +421,8 @@ module SamplesHelper
   def upload_metadata_for_samples(samples, metadata)
     errors = []
 
+    metadata_to_save = []
+
     metadata.each do |sample_name, fields|
       sample = samples.find { |s| s.name == sample_name }
 
@@ -432,13 +434,27 @@ module SamplesHelper
       fields.each do |key, value|
         next if ["Sample Name", "Host Genome", "sample_name", "host_genome"].include?(key)
 
-        saved = sample.metadatum_add_or_update(key, value)
+        result = sample.get_metadatum_to_save(key, value)
 
-        unless saved
+        if result[:status] == "ok"
+          if result[:metadatum]
+            metadata_to_save << result[:metadatum]
+          end
+        else
           errors.push(MetadataUploadErrors.save_error(key, value))
         end
       end
     end
+
+    # Use activerecord-import to bulk import the metadata.
+    # With on_duplicate_key_update, activerecord-import will correct update existing rows.
+    # Rails model validations are also checked.
+    update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value]
+    results = Metadatum.import metadata_to_save, validate: true, on_duplicate_key_update: update_keys
+    results.failed_instances.each do |model|
+      errors.push(MetadataUploadErrors.save_error(model.key, model.raw_value))
+    end
+
     errors
   end
 
