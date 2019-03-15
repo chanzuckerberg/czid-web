@@ -60,9 +60,9 @@
     <% if @host_genome != "human" %>
       ,
       "star_human_out": [
-        "unmapped_human_1.<%= @attribute_dict[:file_ext] %>"
+        "unmapped_human_1.fa"
         <% if @attribute_dict[:fastq2] %>
-          , "unmapped_human_2.<%= @attribute_dict[:file_ext] %>"
+          , "unmapped_human_2.fa"
         <% end %>
       ],
       "bowtie2_human_out": [
