@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import moment from "moment";
 import {
-  flow,
   keyBy,
   map,
   mapKeys,
@@ -56,18 +55,7 @@ class DiscoveryView extends React.Component {
 
   preparedFilters = () => {
     const { filters } = this.state;
-
-    let preparedFilters = flow([
-      mapKeys(key => replace("Selected", "", key)),
-      mapValues(
-        values =>
-          !values
-            ? null
-            : Array.isArray(values)
-              ? map("value", values)
-              : values.value
-      )
-    ])(filters);
+    let preparedFilters = mapKeys(replace("Selected", ""), filters);
 
     // Time is an exception: we translate values into date ranges
     if (preparedFilters.time) {
@@ -83,6 +71,11 @@ class DiscoveryView extends React.Component {
         startDate[preparedFilters.time]().format("YYYYMMDD"),
         moment().format("YYYYMMDD")
       ];
+    }
+
+    // Taxon is an exception: this filter needs to store complete option, so need to convert to values only
+    if (preparedFilters.taxon && preparedFilters.taxon.length) {
+      preparedFilters.taxon = map("value", preparedFilters.taxon);
     }
 
     return preparedFilters;
@@ -166,6 +159,10 @@ class DiscoveryView extends React.Component {
   };
 
   handleFilterChange = selectedFilters => {
+    console.log(
+      "DiscoveryView:handleFilterChange - selectedFilters",
+      selectedFilters
+    );
     const filterCount = sumBy(
       filters => (Array.isArray(filters) ? filters.length : !filters ? 0 : 1),
       values(selectedFilters)
@@ -221,6 +218,7 @@ class DiscoveryView extends React.Component {
       currentTab,
       projectDimensions,
       sampleDimensions,
+      filters,
       filterCount,
       projects,
       samples,
@@ -235,6 +233,7 @@ class DiscoveryView extends React.Component {
       samples: sampleDimensions
     }[currentTab];
 
+    console.log("DiscoveryView:render - filters", filters);
     return (
       <div className={cs.layout}>
         <DiscoveryHeader
@@ -254,6 +253,7 @@ class DiscoveryView extends React.Component {
                   dim => dim.values,
                   keyBy("dimension", dimensions)
                 )}
+                {...filters}
                 onFilterChange={this.handleFilterChange}
               />
             )}

@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { find } from "lodash/fp";
 import { BareDropdown as Dropdown } from "~ui/controls/dropdowns";
 import cs from "./filters.scss";
 
@@ -17,22 +16,15 @@ class TimeFilter extends React.Component {
     ];
   }
 
-  handleChange = selected => {
-    const { onChange } = this.props;
-
-    const selectedOption = find({ value: selected }, this.options);
-    onChange && onChange(selectedOption);
-  };
-
   render() {
-    const { selected } = this.props;
+    const { onChange, selected } = this.props;
     return (
       <Dropdown
         trigger={<div className={cs.filterLabel}>Time</div>}
         menuLabel="Timeframe"
         options={this.options}
-        onChange={this.handleChange}
-        value={selected && selected.value}
+        onChange={onChange}
+        value={selected}
       />
     );
   }
