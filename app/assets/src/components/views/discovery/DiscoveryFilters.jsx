@@ -25,9 +25,9 @@ class DiscoveryFilters extends React.Component {
     };
   }
 
-  componentDidUpdate() {
-    console.log("DiscoveryFilters:componentDidUpdate - props=", this.props);
-  }
+  // componentDidUpdate() {
+  //   console.log("DiscoveryFilters:componentDidUpdate - props=", this.props);
+  // }
 
   handleChange(selectedKey, selected) {
     const { onFilterChange } = this.props;
