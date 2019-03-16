@@ -46,12 +46,12 @@ module ElasticsearchHelper
   # Took 250ms in local testing on real data
   def filter_by_project(matching_taxa, project_id)
     project_tax_ids = Set.new(TaxonCount
-      .joins(pipeline_run: { sample: :project })
+      .joins(pipeline_run: :sample)
       .where(samples: { project_id: project_id })
       .where(tax_id: [matching_taxa.map { |taxa| taxa["taxid"] }])
       .where("tax_id > 0") # negative numbers mean unknown... see TaxonLineage
       .where(count_type: ["NT", "NR"])
-      .where("count > ?", ReportHelper::MINIMUM_READ_THRESHOLD)
+      .where("count > 0")
       .distinct()
       .pluck(:tax_id))
 
