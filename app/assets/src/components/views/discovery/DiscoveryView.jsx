@@ -37,7 +37,7 @@ class DiscoveryView extends React.Component {
     super(props);
 
     this.state = {
-      currentTab: "samples",
+      currentTab: "projects",
       dimensions: [],
       filters: {},
       projects: [],
