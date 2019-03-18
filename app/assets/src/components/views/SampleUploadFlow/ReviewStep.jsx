@@ -26,11 +26,22 @@ class ReviewStep extends React.Component {
     submitState: "review"
   };
 
+  onUploadError = error => {
+    this.setState({
+      submitState: "review",
+      errorMessage: error
+    });
+    this.props.onUploadStatusChange(false);
+  };
+
   uploadSamplesAndMetadata = () => {
+    this.props.onUploadStatusChange(true);
+
     this.setState({
       submitState: "submitting",
       errorMessage: ""
     });
+
     // For uploading samples with files on S3
     if (this.props.uploadType === "remote") {
       bulkUploadRemote({
@@ -48,10 +59,7 @@ class ReviewStep extends React.Component {
         .catch(error => {
           // eslint-disable-next-line no-console
           console.error("onBulkUploadRemote error:", error);
-          this.setState({
-            submitState: "review",
-            errorMessage: "There were some issues creating your samples"
-          });
+          this.onUploadError("There were some issues creating your samples.");
         });
     }
     // For uploading samples with local files
@@ -70,26 +78,19 @@ class ReviewStep extends React.Component {
           // TODO(mark): Display better errors.
           // eslint-disable-next-line no-console
           console.error("onCreateSamplesError:", errors);
-          this.setState({
-            submitState: "review",
-            errorMessage: "There were some issues creating your samples"
-          });
+          this.onUploadError("There were some issues creating your samples.");
         },
         // TODO(mark): Display better errors.
         // For example, some samples may have successfuly saved, but not others. Should explain to user.
         onUploadError: (file, error) => {
           // eslint-disable-next-line no-console
           console.error("onUploadError:", error);
-          this.setState({
-            submitState: "review",
-            errorMessage: "There were some issues creating your samples"
-          });
+          this.onUploadError("There were some issues creating your samples.");
         },
         onMarkSampleUploadedError: sampleName => {
-          this.setState({
-            submitState: "review",
-            errorMessage: `Failed to mark sample ${sampleName} as uploaded`
-          });
+          this.onUploadError(
+            `Failed to mark sample ${sampleName} as uploaded.`
+          );
         }
       });
     }
@@ -131,6 +132,14 @@ class ReviewStep extends React.Component {
     );
   };
 
+  linksEnabled = () => this.state.submitState === "review";
+
+  onLinkClick = link => {
+    if (this.linksEnabled()) {
+      this.props.onStepSelect(link);
+    }
+  };
+
   getColumnWidth = column => {
     switch (column) {
       case "Sample Name":
@@ -144,10 +153,26 @@ class ReviewStep extends React.Component {
 
   render() {
     return (
-      <div className={cx(cs.reviewStep, cs.uploadFlowStep)}>
+      <div
+        className={cx(
+          cs.reviewStep,
+          cs.uploadFlowStep,
+          this.props.visible && cs.visible
+        )}
+      >
         <div className={cs.flexContent}>
           <div className={cs.projectContainer}>
-            <div className={cs.smallHeader}>Project Info</div>
+            <div className={cs.reviewHeader}>
+              <span className={cs.text}>Project Info</span>
+              <div className={cx(cs.links, this.linksEnabled() && cs.enabled)}>
+                <div
+                  className={cs.link}
+                  onClick={() => this.onLinkClick("uploadSamples")}
+                >
+                  Edit Project
+                </div>
+              </div>
+            </div>
             <div className={cs.project}>
               {this.props.project.public_access === 1 ? (
                 <PublicProjectIcon className={cs.projectIcon} />
@@ -171,7 +196,24 @@ class ReviewStep extends React.Component {
             </div>
           </div>
           <div className={cs.sampleContainer}>
-            <div className={cs.smallHeader}>Sample Info</div>
+            <div className={cs.reviewHeader}>
+              <span className={cs.text}>Sample Info</span>
+              <div className={cx(cs.links, this.linksEnabled() && cs.enabled)}>
+                <div
+                  className={cs.link}
+                  onClick={() => this.onLinkClick("uploadSamples")}
+                >
+                  Edit Samples
+                </div>
+                <div className={cs.divider}>|</div>
+                <div
+                  className={cs.link}
+                  onClick={() => this.onLinkClick("uploadMetadata")}
+                >
+                  Edit Metadata
+                </div>
+              </div>
+            </div>
             <div className={cs.tableScrollWrapper}>
               <DataTable
                 className={cs.metadataTable}
@@ -253,7 +295,11 @@ ReviewStep.propTypes = {
   sampleNamesToFiles: PropTypes.objectOf(
     PropTypes.arrayOf(PropTypes.instanceOf(File))
   ),
-  hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome)
+  hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome),
+  visible: PropTypes.bool,
+  // Triggers when we start or stop uploading. Lets the parent know to disable header link.
+  onUploadStatusChange: PropTypes.func,
+  onStepSelect: PropTypes.func
 };
 
 export default ReviewStep;

@@ -412,7 +412,13 @@ class UploadSampleStep extends React.Component {
 
   render() {
     return (
-      <div className={cx(cs.uploadSampleStep, cs.uploadFlowStep)}>
+      <div
+        className={cx(
+          cs.uploadSampleStep,
+          cs.uploadFlowStep,
+          this.props.visible && cs.visible
+        )}
+      >
         <div className={cs.flexContent}>
           <div className={cs.projectSelect}>
             <div className={cs.label}>Project</div>
@@ -485,7 +491,8 @@ class UploadSampleStep extends React.Component {
 }
 
 UploadSampleStep.propTypes = {
-  onUploadSamples: PropTypes.func.isRequired
+  onUploadSamples: PropTypes.func.isRequired,
+  visible: PropTypes.bool
 };
 
 export default UploadSampleStep;

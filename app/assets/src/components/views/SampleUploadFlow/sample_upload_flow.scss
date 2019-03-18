@@ -17,7 +17,8 @@
   // we need to place it in a parent container that expands to fill up the page height.
   // This min-height takes up the remaining viewport height besides the header and the sample upload flow header.
   min-height: calc(100vh - 180px);
-  display: flex;
+  padding-top: 20px;
+  display: none;
   flex-direction: column;
 
   .flexContent {
@@ -30,6 +31,10 @@
     .continueButton {
       margin-right: 10px;
     }
+  }
+
+  &.visible {
+    display: flex;
   }
 }
 
@@ -45,8 +50,17 @@
   }
 }
 
+.headerWrapper {
+  border-bottom: 4px solid $off-white;
+}
+
 .sampleUploadFlowHeader {
-  margin: 20px 60px 40px 60px;
+  padding: 20px 60px;
+  display: flex;
+
+  .fill {
+    flex: 1 1 0;
+  }
 
   .title {
     @include font-header-xxl;
@@ -65,19 +79,49 @@
     margin-left: 5px;
   }
 
-  .border {
-    height: 4px;
-    position: absolute;
-    left: 0;
-    right: 0;
-    margin-top: 15px;
-    background-color: $off-white;
+  .menu {
+    display: flex;
+
+    .option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 110px;
+
+      &.active .circle {
+        color: $white;
+        background-color: $primary-light;
+      }
+
+      &.enabled {
+        cursor: pointer;
+
+        .circle {
+          color: $white;
+          background-color: $primary-light;
+          opacity: 0.3;
+        }
+      }
+    }
+
+    .circle {
+      @include font-header-xs;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+    }
+
+    .text {
+      @include font-header-xxs;
+      color: $darkest-grey;
+    }
   }
 }
 
 .uploadSampleStep {
-  margin-top: 20px;
-
   .projectSelect {
     margin-bottom: 30px;
 
@@ -214,13 +258,37 @@
     color: $medium-grey;
   }
 
-  .smallHeader {
-    @include font-header-l;
+  .reviewHeader {
     margin: 10px 0;
-  }
+    display: flex;
 
-  .projectContainer {
-    margin-top: 40px;
+    .text {
+      @include font-header-l;
+    }
+
+    .links {
+      @include font-body-xs;
+      display: flex;
+      margin-left: 10px;
+      align-items: center;
+      margin-top: 5px;
+
+      &.enabled {
+        .link {
+          color: $primary-light;
+          cursor: pointer;
+        }
+      }
+
+      .divider {
+        margin: 0 5px;
+      }
+
+      .link {
+        color: $light-grey;
+        cursor: default;
+      }
+    }
   }
 
   .sampleContainer {
