@@ -2,46 +2,83 @@
   "output_dir_s3":
     "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results",
   "targets": {
-    <% if @attribute_dict[:fastq2] %>
-      "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
-      "validate_input_out": [ "validate_input_summary.json",
-                              "valid_input1.<%= @attribute_dict[:file_ext] %>",
-                              "valid_input2.<%= @attribute_dict[:file_ext] %>"],
-      "star_out": ["unmapped1.<%= @attribute_dict[:file_ext] %>", "unmapped2.<%= @attribute_dict[:file_ext] %>"],
-      "trimmomatic_out": ["trimmomatic1.<%= @attribute_dict[:file_ext] %>", "trimmomatic2.<%= @attribute_dict[:file_ext] %>"],
-      "priceseq_out": ["priceseq1.fa", "priceseq2.fa"],
-      "cdhitdup_out": ["dedup1.fa", "dedup2.fa"],
-      "lzw_out": ["lzw1.fa", "lzw2.fa"],
-      "bowtie2_out": ["bowtie2_1.fa", "bowtie2_2.fa", "bowtie2_merged.fa"],
-      "subsampled_out": [
-        "subsampled_1.fa",
-        "subsampled_2.fa",
-        "subsampled_merged.fa"
+    "fastqs": [
+      "<%= @attribute_dict[:fastq1] %>"
+      <% if @attribute_dict[:fastq2] %>
+        , "<%= @attribute_dict[:fastq2] %>"
+      <% end %>
+    ],
+    "validate_input_out": [
+      "validate_input_summary.json",
+      "valid_input1.<%= @attribute_dict[:file_ext] %>"
+      <% if @attribute_dict[:fastq2] %>
+        , "valid_input2.<%= @attribute_dict[:file_ext] %>"
+      <% end %>
+      ],
+    "star_out": [
+      "unmapped1.<%= @attribute_dict[:file_ext] %>"
+      <% if @attribute_dict[:fastq2] %>
+        , "unmapped2.<%= @attribute_dict[:file_ext] %>"
+      <% end %>
+    ],
+    "trimmomatic_out": [
+      "trimmomatic1.<%= @attribute_dict[:file_ext] %>"
+      <% if @attribute_dict[:fastq2] %>
+        , "trimmomatic2.<%= @attribute_dict[:file_ext] %>"
+      <% end %>
+    ],
+    "priceseq_out": [
+      "priceseq1.fa"
+      <% if @attribute_dict[:fastq2] %>
+        , "priceseq2.fa"
+      <% end %>
+    ],
+    "cdhitdup_out": [
+      "dedup1.fa"
+      <% if @attribute_dict[:fastq2] %>
+        , "dedup2.fa"
+      <% end %>
+    ],
+    "lzw_out": [
+      "lzw1.fa"
+      <% if @attribute_dict[:fastq2] %>
+        , "lzw2.fa"
+      <% end %>
+    ],
+    "bowtie2_out": [
+      "bowtie2_1.fa"
+      <% if @attribute_dict[:fastq2] %>
+        , "bowtie2_2.fa", "bowtie2_merged.fa"
+      <% end %>
+    ],
+    "subsampled_out": [
+      "subsampled_1.fa"
+      <% if @attribute_dict[:fastq2] %>
+        , "subsampled_2.fa", "subsampled_merged.fa"
+      <% end %>
+    ]
+    <% if @host_genome != "human" %>
+      ,
+      "star_human_out": [
+        "unmapped_human_1.fa"
+        <% if @attribute_dict[:fastq2] %>
+          , "unmapped_human_2.fa"
+        <% end %>
+      ],
+      "bowtie2_human_out": [
+        "bowtie2_human_1.fa"
+        <% if @attribute_dict[:fastq2] %>
+          , "bowtie2_human_2.fa", "bowtie2_human_merged.fa"
+        <% end %>
       ]
-      <% if @host_genome == "human" %>
-        ,
-        "gsnap_filter_out": [
-          "gsnap_filter_1.fa",
-          "gsnap_filter_2.fa",
-          "gsnap_filter_merged.fa"
-        ]
-      <% end %>
-    <% else %>
-      "fastqs": ["<%= @attribute_dict[:fastq1] %>"],
-      "validate_input_out": [ "validate_input_summary.json",
-                              "valid_input1.<%= @attribute_dict[:file_ext] %>"],
-      "star_out": ["unmapped1.<%= @attribute_dict[:file_ext] %>"],
-      "trimmomatic_out": ["trimmomatic1.<%= @attribute_dict[:file_ext] %>"],
-      "priceseq_out": ["priceseq1.fa"],
-      "cdhitdup_out": ["dedup1.fa"],
-      "lzw_out": ["lzw1.fa"],
-      "bowtie2_out": ["bowtie2_1.fa"],
-      "subsampled_out": [ "subsampled_1.fa"]
-      <% if @host_genome == "human" %>
-        ,
-        "gsnap_filter_out": [ "gsnap_filter_1.fa"]
-      <% end %>
     <% end %>
+    ,
+    "gsnap_filter_out": [
+      "gsnap_filter_1.fa"
+      <% if @attribute_dict[:fastq2] %>
+        , "gsnap_filter_2.fa", "gsnap_filter_merged.fa"
+      <% end %>
+    ]
   },
   "steps": [
     {
@@ -109,17 +146,41 @@
         "bowtie2_genome": "<%= @attribute_dict[:bowtie2_genome] %>"
       },
       "additional_attributes": { "output_sam_file": "bowtie2.sam" }
+    }
+    <% if @host_genome != "human" %>
+    ,
+    {
+      "in": ["bowtie2_out", "validate_input_out"],
+      "out": "star_human_out",
+      "class": "PipelineStepRunStarDownstream",
+      "module": "idseq_dag.steps.run_star_downstream",
+      "additional_files": { "star_genome": "<%= @attribute_dict[:human_star_genome] %>" },
+      "additional_attributes": {}
     },
     {
-      "in": ["bowtie2_out"],
+      "in": ["star_human_out"],
+      "out": "bowtie2_human_out",
+      "class": "PipelineStepRunBowtie2",
+      "module": "idseq_dag.steps.run_bowtie2",
+      "additional_files": { "bowtie2_genome": "<%= @attribute_dict[:human_bowtie2_genome] %>" },
+      "additional_attributes": { "output_sam_file": "bowtie2_human.sam" }
+    }
+    <% end %>
+    ,
+    {
+      "in": [
+        <% if @host_genome != "human" %>
+          "bowtie2_human_out"
+        <% else %>
+          "bowtie2_out"
+        <% end %>
+      ],
       "out": "subsampled_out",
       "class": "PipelineStepRunSubsample",
       "module": "idseq_dag.steps.run_subsample",
       "additional_files": {},
       "additional_attributes": { "max_fragments": <%= @attribute_dict[:max_subsample_frag] %> }
-    }
-    <% if @host_genome == "human" %>
-    ,
+    },
     {
       "in": ["subsampled_out"],
       "out": "gsnap_filter_out",
@@ -130,7 +191,6 @@
       },
       "additional_attributes": { "output_sam_file": "gsnap_filter.sam" }
     }
-    <% end %>
   ],
   "given_targets": {
     "fastqs": {
