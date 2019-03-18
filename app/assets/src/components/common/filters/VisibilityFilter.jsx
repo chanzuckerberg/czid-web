@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { find } from "lodash/fp";
 import { BareDropdown } from "~ui/controls/dropdowns";
 import cs from "./filters.scss";
 
@@ -14,19 +13,13 @@ class VisibilityFilter extends React.Component {
     ];
   }
 
-  handleChange = selected => {
-    const { onChange } = this.props;
-    const selectedOption = find({ value: selected }, this.options);
-    onChange && onChange(selectedOption);
-  };
-
   render() {
-    const { selected } = this.props;
+    const { onChange, selected } = this.props;
     return (
       <BareDropdown
         trigger={<div className={cs.filterLabel}>Visibility</div>}
         options={this.options}
-        onChange={this.handleChange}
+        onChange={onChange}
         value={selected}
       />
     );

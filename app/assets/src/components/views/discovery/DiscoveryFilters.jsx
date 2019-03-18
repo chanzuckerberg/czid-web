@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { capitalize, endsWith, find, forEach, keys } from "lodash/fp";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
@@ -13,15 +14,33 @@ class DiscoveryFilters extends React.Component {
   constructor(props) {
     super(props);
 
-    // TODO(tiago): refactor to store only values (not options)
     this.state = {
-      taxonSelected: [],
-      locationSelected: [],
-      timeSelected: null,
-      visibilitySelected: null,
-      hostSelected: [],
-      tissueSelected: []
+      // taxon is an async dropdown and needs full options (value + label) to be stored
+      // (otherwise we would need to load the labels from values)
+      taxonSelected: this.props.taxonSelected,
+      // for the remaining filters we can store values only
+      locationSelected: this.props.locationSelected,
+      timeSelected: this.props.timeSelected,
+      visibilitySelected: this.props.visibilitySelected,
+      hostSelected: this.props.hostSelected,
+      tissueSelected: this.props.tissueSelected
     };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    let newState = state;
+    forEach(key => {
+      const value = props[key];
+      if (
+        endsWith("Selected", key) &&
+        value !== state[`prev${capitalize(key)}`]
+      ) {
+        newState[key] = value;
+        newState[`prev${capitalize(key)}`] = value;
+      }
+    }, keys(props));
+
+    return newState;
   }
 
   handleChange(selectedKey, selected) {
@@ -38,7 +57,7 @@ class DiscoveryFilters extends React.Component {
     let newSelected = null;
     if (Array.isArray(this.state[selectedKey])) {
       newSelected = this.state[selectedKey].filter(
-        option => option.value !== removedValue
+        option => (option.value || option) !== removedValue
       );
     }
 
@@ -48,19 +67,26 @@ class DiscoveryFilters extends React.Component {
   }
 
   renderTags(optionsKey) {
-    let options = this.state[optionsKey];
+    let selectedKey = `${optionsKey}Selected`;
+    let selectedOptions = this.state[selectedKey];
+    let options = this.props[optionsKey];
 
-    if (!options) return;
-    if (!Array.isArray(options)) options = [options];
-
-    return options.map(option => (
-      <FilterTag
-        className={cs.filterTag}
-        key={option.value}
-        text={option.text}
-        onClose={this.handleRemoveTag.bind(this, optionsKey, option.value)}
-      />
-    ));
+    if (!selectedOptions) return;
+    if (!Array.isArray(selectedOptions)) selectedOptions = [selectedOptions];
+    return selectedOptions.map(option => {
+      return (
+        <FilterTag
+          className={cs.filterTag}
+          key={option.value || option}
+          text={option.text || find({ value: option }, options).text}
+          onClose={this.handleRemoveTag.bind(
+            this,
+            selectedKey,
+            option.value || option
+          )}
+        />
+      );
+    });
   }
 
   render() {
@@ -82,7 +108,7 @@ class DiscoveryFilters extends React.Component {
             onChange={this.handleChange.bind(this, "taxonSelected")}
             selected={taxonSelected}
           />
-          {this.renderTags("taxonSelected")}
+          {this.renderTags("taxon")}
         </div>
         <div className={cs.filterContainer}>
           <BaseMultipleFilter
@@ -91,7 +117,7 @@ class DiscoveryFilters extends React.Component {
             options={location}
             label="Location"
           />
-          {this.renderTags("locationSelected")}
+          {this.renderTags("location")}
         </div>
         <div className={cs.filterContainer}>
           <TimeFilter
@@ -99,7 +125,7 @@ class DiscoveryFilters extends React.Component {
             selected={timeSelected}
             options={time}
           />
-          {this.renderTags("timeSelected")}
+          {this.renderTags("time")}
         </div>
         <div className={cs.filterContainer}>
           <BaseSingleFilter
@@ -108,7 +134,7 @@ class DiscoveryFilters extends React.Component {
             onChange={this.handleChange.bind(this, "visibilitySelected")}
             value={visibilitySelected}
           />
-          {this.renderTags("visibilitySelected")}
+          {this.renderTags("visibility")}
         </div>
         <div className={cs.filterContainer}>
           <BaseMultipleFilter
@@ -117,7 +143,7 @@ class DiscoveryFilters extends React.Component {
             options={host}
             label="Host"
           />
-          {this.renderTags("hostSelected")}
+          {this.renderTags("host")}
         </div>
         <div className={cs.filterContainer}>
           <BaseMultipleFilter
@@ -126,7 +152,7 @@ class DiscoveryFilters extends React.Component {
             options={tissue}
             label="Tissue"
           />
-          {this.renderTags("tissueSelected")}
+          {this.renderTags("tissue")}
         </div>
       </div>
     );
@@ -148,6 +174,14 @@ DiscoveryFilters.propTypes = {
   time: PropTypes.array,
   tissue: PropTypes.array,
   visibility: PropTypes.array,
+
+  // Selected values
+  hostSelected: PropTypes.array,
+  locationSelected: PropTypes.array,
+  taxonSelected: PropTypes.array,
+  timeSelected: PropTypes.string,
+  tissueSelected: PropTypes.array,
+  visibilitySelected: PropTypes.string,
 
   onFilterChange: PropTypes.func
 };
