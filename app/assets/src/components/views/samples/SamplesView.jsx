@@ -133,7 +133,6 @@ class SamplesView extends React.Component {
         ? union(selectedSampleIds, selectableIds)
         : difference(selectedSampleIds, selectableIds)
     );
-    console.log("SamplesView:handleSelectAllRows", value, checked, newSelected);
     this.setState({ selectedSampleIds: newSelected });
   };
 
