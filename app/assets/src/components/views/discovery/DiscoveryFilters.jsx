@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { endsWith, find, pickBy, some } from "lodash/fp";
+import { capitalize, endsWith, find, forEach, keys } from "lodash/fp";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
@@ -27,31 +27,20 @@ class DiscoveryFilters extends React.Component {
     };
   }
 
-  componentDidMount() {
-    console.log("DiscoveryFilters:componentDidMount - props", this.props);
-    console.log("DiscoveryFilters:componentDidMount - state", this.state);
-  }
+  static getDerivedStateFromProps(props, state) {
+    let newState = state;
+    forEach(key => {
+      const value = props[key];
+      if (
+        endsWith("Selected", key) &&
+        value !== state[`prev${capitalize(key)}`]
+      ) {
+        newState[key] = value;
+        newState[`prev${capitalize(key)}`] = value;
+      }
+    }, keys(props));
 
-  componentDidUpdate() {
-    console.log("DiscoveryFilters:componentDidUpdate - props", this.props);
-    console.log("DiscoveryFilters:componentDidUpdate - state", this.state);
-    const selected = pickBy(
-      (key, value) => endsWith("Selected", key) && value !== this.props[key],
-      this.state
-    );
-    console.log(
-      "DiscoveryFilters:componentDidUpdate - diff selected",
-      selected
-    );
-
-    // const changed = some(
-    //   key => this.state[`${key}Selected`] !== this.props[`${key}Selected`],
-    //   ["taxon", "location", "time", "visibility", "host", "tissue"]
-    // );
-    // if (changed) {
-    //   console.log("DiscoveryFilters:componentDidUpdate - updating state");
-    //   this.setState(filter(prop => prop.this.props);
-    // }
+    return newState;
   }
 
   handleChange(selectedKey, selected) {
@@ -78,20 +67,26 @@ class DiscoveryFilters extends React.Component {
   }
 
   renderTags(optionsKey) {
-    let selectedOptions = this.state[`${optionsKey}Selected`];
+    let selectedKey = `${optionsKey}Selected`;
+    let selectedOptions = this.state[selectedKey];
     let options = this.props[optionsKey];
 
     if (!selectedOptions) return;
     if (!Array.isArray(selectedOptions)) selectedOptions = [selectedOptions];
-    console.log(optionsKey, selectedOptions, options, this.props);
-    return selectedOptions.map(option => (
-      <FilterTag
-        className={cs.filterTag}
-        key={option.value || option}
-        text={option.text || find({ value: option }, options).text}
-        onClose={this.handleRemoveTag.bind(this, optionsKey, option.value)}
-      />
-    ));
+    return selectedOptions.map(option => {
+      return (
+        <FilterTag
+          className={cs.filterTag}
+          key={option.value || option}
+          text={option.text || find({ value: option }, options).text}
+          onClose={this.handleRemoveTag.bind(
+            this,
+            selectedKey,
+            option.value || option
+          )}
+        />
+      );
+    });
   }
 
   render() {

@@ -2,13 +2,17 @@ import React from "react";
 import PropTypes from "prop-types";
 import moment from "moment";
 import {
+  clone,
+  find,
   keyBy,
   map,
   mapKeys,
   mapValues,
   replace,
   sumBy,
-  values
+  values,
+  xor,
+  xorBy
 } from "lodash/fp";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
@@ -35,7 +39,6 @@ class DiscoveryView extends React.Component {
       currentTab: "projects",
       dimensions: [],
       filters: {},
-      filterCount: 0,
       projects: [],
       sampleIds: [],
       samples: [],
@@ -159,21 +162,42 @@ class DiscoveryView extends React.Component {
   };
 
   handleFilterChange = selectedFilters => {
-    console.log(
-      "DiscoveryView:handleFilterChange - selectedFilters",
-      selectedFilters
-    );
-    const filterCount = sumBy(
-      filters => (Array.isArray(filters) ? filters.length : !filters ? 0 : 1),
-      values(selectedFilters)
-    );
-    this.setState(
-      {
-        filters: selectedFilters,
-        filterCount
-      },
-      () => this.resetData()
-    );
+    this.setState({ filters: selectedFilters }, () => this.resetData());
+  };
+
+  handleSearchSelected = ({ key, value, text }) => {
+    const {
+      currentTab,
+      filters,
+      projectDimensions,
+      sampleDimensions
+    } = this.state;
+    const dimensions = {
+      projects: projectDimensions,
+      samples: sampleDimensions
+    }[currentTab];
+
+    let newFilters = clone(filters);
+    const selectedKey = `${key}Selected`;
+    let filtersChanged = false;
+    if (key === "taxon") {
+      newFilters[selectedKey] = xorBy(
+        "value",
+        [{ value, text }],
+        newFilters[selectedKey]
+      );
+      filtersChanged = true;
+    } else {
+      const dimension = find({ dimension: key }, dimensions);
+      // TODO(tiago): currently we check if it is a valid option. We should (preferably) change server endpoint
+      // to filter by project/sample set or at least provide feedback to the user in else branch
+      if (dimension && find({ value }, dimension.values)) {
+        newFilters[selectedKey] = xor([value], newFilters[selectedKey]);
+        filtersChanged = true;
+      }
+    }
+    filtersChanged &&
+      this.setState({ filters: newFilters }, () => this.resetData());
   };
 
   handleFilterToggle = () => {
@@ -219,7 +243,6 @@ class DiscoveryView extends React.Component {
       projectDimensions,
       sampleDimensions,
       filters,
-      filterCount,
       projects,
       samples,
       showFilters,
@@ -233,7 +256,11 @@ class DiscoveryView extends React.Component {
       samples: sampleDimensions
     }[currentTab];
 
-    console.log("DiscoveryView:render - filters", filters);
+    const filterCount = sumBy(
+      filters => (Array.isArray(filters) ? filters.length : !filters ? 0 : 1),
+      values(filters)
+    );
+
     return (
       <div className={cs.layout}>
         <DiscoveryHeader
@@ -243,6 +270,7 @@ class DiscoveryView extends React.Component {
           filterCount={filterCount}
           onFilterToggle={this.handleFilterToggle}
           onStatsToggle={this.handleStatsToggle}
+          onSearchResultSelected={this.handleSearchSelected}
         />
         <Divider style="medium" />
         <div className={cs.mainContainer}>
