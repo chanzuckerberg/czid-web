@@ -1,11 +1,7 @@
 // TODO(tiago): this is a minimal port from Samples.jsx with just the necessary refactoring.
-// Needs to be rethought, e.g.:
-// - Removed reading the cookie for background id - what is the alternative?
-// - Move axios calls to api
-// - Replace some events (openUrl) with callbacks
-
 import axios from "axios";
 import { openUrl } from "~utils/links";
+import Cookies from "js-cookie";
 
 export default class ReportsDownloader {
   constructor({ projectId = "all", onDownloadFail = null, downloadOption }) {
@@ -44,7 +40,11 @@ export default class ReportsDownloader {
   }
 
   generateReport = ({ makeAction, statusAction, retrieveAction }) => {
-    let url = `/projects/${this.projectId}/${makeAction}`;
+    // TODO(tiago): stop using cookies
+    const backgroundId = Cookies.get("background_id");
+    let url = `/projects/${this.projectId}/${makeAction}${
+      backgroundId ? `?background_id=${backgroundId}` : ""
+    }`;
     axios
       .get(url)
       .then(res => {
