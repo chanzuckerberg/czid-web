@@ -78,7 +78,8 @@ class UploadMetadataStep extends React.Component {
         <div
           className={cx(
             cs.uploadFlowStep,
-            this.state.showInstructions && cs.hide
+            this.state.showInstructions && cs.hide,
+            this.props.visible && cs.visible
           )}
         >
           <div className={cs.flexContent}>
@@ -120,7 +121,8 @@ UploadMetadataStep.propTypes = {
   project: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string
-  })
+  }),
+  visible: PropTypes.bool
 };
 
 export default UploadMetadataStep;

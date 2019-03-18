@@ -2,14 +2,17 @@ import React from "react";
 import PropTypes from "prop-types";
 import moment from "moment";
 import {
-  flow,
+  clone,
+  find,
   keyBy,
   map,
   mapKeys,
   mapValues,
   replace,
   sumBy,
-  values
+  values,
+  xor,
+  xorBy
 } from "lodash/fp";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
@@ -37,7 +40,6 @@ class DiscoveryView extends React.Component {
       currentTab: "samples",
       dimensions: [],
       filters: {},
-      filterCount: 0,
       projects: [],
       sampleIds: [],
       samples: [],
@@ -57,18 +59,7 @@ class DiscoveryView extends React.Component {
 
   preparedFilters = () => {
     const { filters } = this.state;
-
-    let preparedFilters = flow([
-      mapKeys(key => replace("Selected", "", key)),
-      mapValues(
-        values =>
-          !values
-            ? null
-            : Array.isArray(values)
-              ? map("value", values)
-              : values.value
-      )
-    ])(filters);
+    let preparedFilters = mapKeys(replace("Selected", ""), filters);
 
     // Time is an exception: we translate values into date ranges
     if (preparedFilters.time) {
@@ -84,6 +75,11 @@ class DiscoveryView extends React.Component {
         startDate[preparedFilters.time]().format("YYYYMMDD"),
         moment().format("YYYYMMDD")
       ];
+    }
+
+    // Taxon is an exception: this filter needs to store complete option, so need to convert to values only
+    if (preparedFilters.taxon && preparedFilters.taxon.length) {
+      preparedFilters.taxon = map("value", preparedFilters.taxon);
     }
 
     return preparedFilters;
@@ -167,17 +163,42 @@ class DiscoveryView extends React.Component {
   };
 
   handleFilterChange = selectedFilters => {
-    const filterCount = sumBy(
-      filters => (Array.isArray(filters) ? filters.length : !filters ? 0 : 1),
-      values(selectedFilters)
-    );
-    this.setState(
-      {
-        filters: selectedFilters,
-        filterCount
-      },
-      () => this.resetData()
-    );
+    this.setState({ filters: selectedFilters }, () => this.resetData());
+  };
+
+  handleSearchSelected = ({ key, value, text }) => {
+    const {
+      currentTab,
+      filters,
+      projectDimensions,
+      sampleDimensions
+    } = this.state;
+    const dimensions = {
+      projects: projectDimensions,
+      samples: sampleDimensions
+    }[currentTab];
+
+    let newFilters = clone(filters);
+    const selectedKey = `${key}Selected`;
+    let filtersChanged = false;
+    if (key === "taxon") {
+      newFilters[selectedKey] = xorBy(
+        "value",
+        [{ value, text }],
+        newFilters[selectedKey]
+      );
+      filtersChanged = true;
+    } else {
+      const dimension = find({ dimension: key }, dimensions);
+      // TODO(tiago): currently we check if it is a valid option. We should (preferably) change server endpoint
+      // to filter by project/sample set or at least provide feedback to the user in else branch
+      if (dimension && find({ value }, dimension.values)) {
+        newFilters[selectedKey] = xor([value], newFilters[selectedKey]);
+        filtersChanged = true;
+      }
+    }
+    filtersChanged &&
+      this.setState({ filters: newFilters }, () => this.resetData());
   };
 
   handleFilterToggle = () => {
@@ -222,7 +243,7 @@ class DiscoveryView extends React.Component {
       currentTab,
       projectDimensions,
       sampleDimensions,
-      filterCount,
+      filters,
       projects,
       sampleIds,
       samples,
@@ -237,6 +258,11 @@ class DiscoveryView extends React.Component {
       samples: sampleDimensions
     }[currentTab];
 
+    const filterCount = sumBy(
+      filters => (Array.isArray(filters) ? filters.length : !filters ? 0 : 1),
+      values(filters)
+    );
+
     return (
       <div className={cs.layout}>
         <DiscoveryHeader
@@ -246,15 +272,21 @@ class DiscoveryView extends React.Component {
           filterCount={filterCount}
           onFilterToggle={this.handleFilterToggle}
           onStatsToggle={this.handleStatsToggle}
+          onSearchResultSelected={this.handleSearchSelected}
         />
         <Divider style="medium" />
         <div className={cs.mainContainer}>
           <div className={cs.leftPane}>
-            <DiscoveryFilters
-              className={cx(showFilters || cs.hiddenPane)}
-              {...mapValues(dim => dim.values, keyBy("dimension", dimensions))}
-              onFilterChange={this.handleFilterChange}
-            />
+            {showFilters && (
+              <DiscoveryFilters
+                {...mapValues(
+                  dim => dim.values,
+                  keyBy("dimension", dimensions)
+                )}
+                {...filters}
+                onFilterChange={this.handleFilterChange}
+              />
+            )}
           </div>
           <NarrowContainer className={cs.viewContainer}>
             {currentTab == "projects" && <ProjectsView projects={projects} />}

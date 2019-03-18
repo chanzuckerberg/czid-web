@@ -19,7 +19,9 @@ class SampleUploadFlow extends React.Component {
     sampleNamesToFiles: null, // Needed for local samples.
     // Metadata upload information
     metadata: null, //
-    metadataIssues: null
+    metadataIssues: null,
+    // Once the upload has started, the user cannot return to past steps.
+    isUploading: false
   };
 
   handleUploadSamples = ({
@@ -75,6 +77,23 @@ class SampleUploadFlow extends React.Component {
     });
   };
 
+  handleStepSelect = step => {
+    this.setState({
+      currentStep: step,
+      // If the user returns to the Upload Samples step, clear the samples and metadata,
+      // so that the UploadMetadataStep is unmounted.
+      // This is for simplicity. Ideally, we'd be more intelligent about keeping metadata for
+      // samples that weren't changed.
+      ...(step === "uploadSamples"
+        ? {
+            metadata: null,
+            metadataIssues: null,
+            samples: null
+          }
+        : {})
+    });
+  };
+
   getSamplesForMetadataValidation = () => {
     return this.state.samples.map(sample => ({
       name: sample.name,
@@ -82,32 +101,45 @@ class SampleUploadFlow extends React.Component {
     }));
   };
 
-  renderStep = () => {
-    switch (this.state.currentStep) {
-      case "uploadSamples":
-        return <UploadSampleStep onUploadSamples={this.handleUploadSamples} />;
-      case "uploadMetadata":
-        return (
+  // SLIGHT HACK: Keep steps mounted, so user can return to them if needed.
+  // The internal state of some steps is difficult to recover if they are unmounted.
+  renderSteps = () => {
+    return (
+      <div>
+        <UploadSampleStep
+          onUploadSamples={this.handleUploadSamples}
+          visible={this.state.currentStep === "uploadSamples"}
+        />
+        {this.state.samples && (
           <UploadMetadataStep
             onUploadMetadata={this.handleUploadMetadata}
             samples={this.getSamplesForMetadataValidation()}
             project={this.state.project}
+            visible={this.state.currentStep === "uploadMetadata"}
           />
-        );
-      case "review":
-        return (
-          <ReviewStep
-            metadata={this.state.metadata}
-            samples={this.state.samples}
-            uploadType={this.state.uploadType}
-            project={this.state.project}
-            sampleNamesToFiles={this.state.sampleNamesToFiles}
-            hostGenomes={this.props.host_genomes}
-          />
-        );
-      default:
-        return <div />;
-    }
+        )}
+        {this.state.samples &&
+          this.state.metadata && (
+            <ReviewStep
+              metadata={this.state.metadata}
+              samples={this.state.samples}
+              uploadType={this.state.uploadType}
+              project={this.state.project}
+              sampleNamesToFiles={this.state.sampleNamesToFiles}
+              hostGenomes={this.props.host_genomes}
+              visible={this.state.currentStep === "review"}
+              onUploadStatusChange={this.onUploadStatusChange}
+              onStepSelect={this.handleStepSelect}
+            />
+          )}
+      </div>
+    );
+  };
+
+  onUploadStatusChange = uploadStatus => {
+    this.setState({
+      isUploading: uploadStatus
+    });
   };
 
   render() {
@@ -117,9 +149,11 @@ class SampleUploadFlow extends React.Component {
           currentStep={this.state.currentStep}
           samples={this.state.samples}
           project={this.state.project}
+          onStepSelect={this.handleStepSelect}
+          isUploading={this.state.isUploading}
         />
         <NarrowContainer className={cx(cs.sampleUploadFlow)}>
-          <div className={cs.inner}>{this.renderStep()}</div>
+          <div className={cs.inner}>{this.renderSteps()}</div>
         </NarrowContainer>
       </div>
     );
