@@ -1,8 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { difference, isEmpty, union } from "lodash/fp";
-import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
-import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
 import InfiniteTable from "../../visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
 import moment from "moment";
@@ -11,9 +9,13 @@ import cs from "./samples_view.scss";
 import cx from "classnames";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
+import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
+import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
+import SaveIcon from "~ui/icons/SaveIcon";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import ReportsDownloader from "./ReportsDownloader";
+import CollectionModal from "./CollectionModal";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -21,7 +23,7 @@ class SamplesView extends React.Component {
 
     this.state = {
       phyloTreeCreationModalOpen: false,
-      selected: new Set()
+      selectedSampleIds: new Set()
     };
 
     this.columns = [
@@ -113,35 +115,35 @@ class SamplesView extends React.Component {
   };
 
   handleSelectRow = (value, checked) => {
-    const { selected } = this.state;
-    let newSelected = new Set(selected);
+    const { selectedSampleIds } = this.state;
+    let newSelected = new Set(selectedSampleIds);
     if (checked) {
       newSelected.add(value);
     } else {
       newSelected.delete(value);
     }
-    this.setState({ selected: newSelected });
+    this.setState({ selectedSampleIds: newSelected });
   };
 
   handleSelectAllRows = (value, checked) => {
     const { selectableIds } = this.props;
-    const { selected } = this.state;
-
+    const { selectedSampleIds } = this.state;
     let newSelected = new Set(
       checked
-        ? union(selected, selectableIds)
-        : difference(selected, selectableIds)
+        ? union(selectedSampleIds, selectableIds)
+        : difference(selectedSampleIds, selectableIds)
     );
-    this.setState({ selected: newSelected });
+    console.log("SamplesView:handleSelectAllRows", value, checked, newSelected);
+    this.setState({ selectedSampleIds: newSelected });
   };
 
   isSelectAllChecked = () => {
-    const { selected } = this.state;
+    const { selectedSampleIds } = this.state;
     const { selectableIds } = this.props;
 
     return (
       !isEmpty(selectableIds) &&
-      isEmpty(difference(selectableIds, Array.from(selected)))
+      isEmpty(difference(selectableIds, Array.from(selectedSampleIds)))
     );
   };
 
@@ -201,9 +203,13 @@ class SamplesView extends React.Component {
   };
 
   renderHeatmapTrigger = () => {
-    const { selected } = this.state;
+    const { selectedSampleIds } = this.state;
     return (
-      <a href={`/visualizations/heatmap?sampleIds=${Array.from(selected)}`}>
+      <a
+        href={`/visualizations/heatmap?sampleIds=${Array.from(
+          selectedSampleIds
+        )}`}
+      >
         <HeatmapIcon className={cs.icon} />
       </a>
     );
@@ -221,6 +227,7 @@ class SamplesView extends React.Component {
 
     return (
       <DownloadIconDropdown
+        iconClassName={cs.icon}
         options={downloadOptions}
         onClick={downloadOption => {
           new ReportsDownloader({
@@ -232,18 +239,52 @@ class SamplesView extends React.Component {
     );
   };
 
+  renderCollectionTrigger = () => {
+    const { samples } = this.props;
+    const { selectedSampleIds } = this.state;
+
+    return (
+      <CollectionModal
+        trigger={<SaveIcon className={cs.icon} />}
+        selectedSampleIds={selectedSampleIds}
+        fetchedSamples={samples.filter(sample =>
+          selectedSampleIds.has(sample.id)
+        )}
+      />
+    );
+  };
+
   renderToolbar = () => {
-    const { selected } = this.state;
+    const { selectedSampleIds } = this.state;
     return (
       <div className={cs.samplesToolbar}>
         <div className={cs.fluidBlank} />
         <div className={cs.counterContainer}>
-          <Label circular className={cs.counter} text={`${selected.size}`} />
+          <Label
+            circular
+            className={cs.counter}
+            text={`${selectedSampleIds.size}`}
+          />
           <span className={cs.label}>Selected</span>
         </div>
         <div className={cs.separator} />
         <div className={cs.actions}>
-          <div className={cs.action}>{this.renderHeatmapTrigger()}</div>
+          <div
+            className={cx(
+              cs.action,
+              selectedSampleIds.size < 2 && cs.actionDisabled
+            )}
+          >
+            {this.renderCollectionTrigger()}
+          </div>
+          <div
+            className={cx(
+              cs.action,
+              selectedSampleIds.size < 2 && cs.actionDisabled
+            )}
+          >
+            {this.renderHeatmapTrigger()}
+          </div>
           <div className={cs.action} onClick={this.handlePhyloModalOpen}>
             <PhyloTreeIcon className={cs.icon} />
           </div>
@@ -263,7 +304,7 @@ class SamplesView extends React.Component {
 
   render() {
     const { activeColumns, onLoadRows } = this.props;
-    const { phyloTreeCreationModalOpen, selected } = this.state;
+    const { phyloTreeCreationModalOpen, selectedSampleIds } = this.state;
 
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 70;
@@ -284,7 +325,7 @@ class SamplesView extends React.Component {
             onSelectRow={this.handleSelectRow}
             rowClassName={cs.tableDataRow}
             selectableKey="id"
-            selected={selected}
+            selected={selectedSampleIds}
             selectAllChecked={selectAllChecked}
           />
         </div>
@@ -317,6 +358,7 @@ SamplesView.propTypes = {
   activeColumns: PropTypes.arrayOf(PropTypes.string),
   onLoadRows: PropTypes.func.isRequired,
   projectId: PropTypes.number,
+  samples: PropTypes.array,
   selectableIds: PropTypes.array.isRequired
 };
 

@@ -61,8 +61,11 @@
     align-items: center;
 
     .action {
-      &:not(.disabled) {
+      &:not(.actionDisabled) {
         cursor: pointer;
+        .icon {
+          fill: $primary-light;
+        }
       }
 
       &:not(:first-child) {
@@ -70,6 +73,7 @@
       }
 
       .icon {
+        fill: $light-grey;
         flex: 0 0 auto;
         width: 25px;
       }

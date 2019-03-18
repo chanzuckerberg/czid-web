@@ -7,13 +7,13 @@ import cs from "./download_icon_dropdown.scss";
 import cx from "classnames";
 
 const DownloadIconDropdown = props => {
-  const { onClick, ...extraProps } = props;
+  const { iconClassName, onClick, ...extraProps } = props;
   return (
     <BareDropdown
       {...extraProps}
       hideArrow
       onChange={onClick}
-      trigger={<DownloadIcon className={cx(cs.icon, cs.iconClassName)} />}
+      trigger={<DownloadIcon className={cx(cs.icon, iconClassName)} />}
     />
   );
 };

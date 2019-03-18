@@ -15,8 +15,8 @@ const postWithCSRF = async (url, params) => {
     // Just return the data.
     // resp also contains headers, status, etc. that we might use later.
     return resp.data;
-  } catch (e) {
-    return Promise.reject(e.response.data);
+  } catch (error) {
+    return Promise.reject(error);
   }
 };
 
@@ -368,10 +368,18 @@ const getSearchSuggestions = ({ categories, query }) =>
     }
   });
 
+const createBackground = ({ description, name, sampleIds }) =>
+  postWithCSRF("/backgrounds", {
+    name,
+    description,
+    sample_ids: sampleIds
+  });
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
   bulkUploadWithMetadata,
+  createBackground,
   createProject,
   createSample,
   deleteAsync,

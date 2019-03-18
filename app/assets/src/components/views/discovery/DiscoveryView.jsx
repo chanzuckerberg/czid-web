@@ -34,7 +34,7 @@ class DiscoveryView extends React.Component {
     super(props);
 
     this.state = {
-      currentTab: "projects",
+      currentTab: "samples",
       dimensions: [],
       filters: {},
       filterCount: 0,
@@ -262,6 +262,7 @@ class DiscoveryView extends React.Component {
               <SamplesView
                 ref={samplesView => (this.samplesView = samplesView)}
                 onLoadRows={this.handleLoadSampleRows}
+                samples={samples}
                 selectableIds={sampleIds}
               />
             )}

@@ -1,0 +1,67 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.collectionModal {
+  @include font-body-s;
+
+  .form {
+    .label {
+      @include font-body-s;
+
+      padding-top: 20px;
+      padding-bottom: 10px;
+      font-weight: $font-weight-semibold;
+
+      .optional {
+        @include font-body-xxs;
+
+        color: $light-grey;
+        margin-left: 10px;
+      }
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+
+      button {
+        &:not(:first-child) {
+          margin-left: 20px;
+        }
+      }
+    }
+  }
+
+  .sampleList {
+    margin-bottom: 20px;
+
+    .selectedSamples {
+      margin-bottom: 0;
+
+      .sampleName {
+        @include font-body-xs;
+      }
+
+      .sampleDetails {
+        @include font-body-xxs;
+
+        color: $light-grey;
+        margin-left: 10px;
+      }
+    }
+
+    .moreSamplesCount {
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  .title {
+    @include font-header-xl;
+
+    padding-bottom: 20px;
+  }
+
+  .notification {
+    margin-bottom: 20px;
+  }
+}

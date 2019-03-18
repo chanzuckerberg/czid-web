@@ -27,6 +27,7 @@ import PrivateProjectIcon from "./PrivateProjectIcon";
 import RemoveIcon from "./RemoveIcon";
 import SamplePublicIcon from "./SamplePublicIcon";
 import SamplePrivateIcon from "./SamplePrivateIcon";
+import SaveIcon from "./SaveIcon";
 import TickIcon from "./TickIcon";
 import UserIcon from "./UserIcon";
 import WormIcon from "./WormIcon";
@@ -60,7 +61,8 @@ export default {
     UserIcon,
     WormIcon,
     PublicProjectIcon,
-    PrivateProjectIcon
+    PrivateProjectIcon,
+    SaveIcon
   },
   FONT_AWESOME: {
     CheckmarkIcon,
