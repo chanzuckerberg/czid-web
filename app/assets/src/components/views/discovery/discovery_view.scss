@@ -19,6 +19,7 @@
       flex: 0 0 auto;
       border-right: 2px solid $off-white;
       padding: 30px 20px;
+      background-color: blue;
     }
 
     .viewContainer {
@@ -26,6 +27,7 @@
       flex-direction: column;
       flex: 1 1 auto;
       padding: 30px 20px;
+      background-color: red;
     }
 
     .rightPane:not(:empty) {
@@ -37,6 +39,7 @@
       padding: 30px 20px;
       height: 100%;
       overflow-y: scroll;
+      background-color: green;
     }
   }
 }

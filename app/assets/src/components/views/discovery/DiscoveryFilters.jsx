@@ -104,7 +104,7 @@ class DiscoveryFilters extends React.Component {
 
     return (
       <div className={cx(cs.filtersContainer, className)}>
-        <div className={cs.filterContainer}>
+        {/* <div className={cs.filterContainer}>
           <TaxonFilter
             onChange={this.handleChange.bind(this, "taxonSelected")}
             selected={taxonSelected}
@@ -154,7 +154,7 @@ class DiscoveryFilters extends React.Component {
             label="Tissue"
           />
           {this.renderTags("tissue")}
-        </div>
+        </div> */}
       </div>
     );
   }

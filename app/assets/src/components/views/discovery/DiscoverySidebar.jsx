@@ -202,7 +202,7 @@ export default class DiscoverySidebar extends React.Component {
     const dataKey = this.state.stats.totalReads;
     return (
       <div className={cx(this.props.className, cs.sidebar)}>
-        <div className={cs.metadataContainer}>
+        {/* <div className={cs.metadataContainer}>
           <Accordion
             key={dataKey}
             open={this.hasData()}
@@ -273,7 +273,7 @@ export default class DiscoverySidebar extends React.Component {
               {this.buildMetadataRows("location")}
             </div>
           </Accordion>
-        </div>
+        </div> */}
       </div>
     );
   }
