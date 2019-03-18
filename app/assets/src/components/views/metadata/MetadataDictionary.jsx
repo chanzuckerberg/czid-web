@@ -7,7 +7,6 @@ import _fp, {
   partition,
   first,
   get,
-  union,
   compact
 } from "lodash/fp";
 import NarrowContainer from "~/components/layout/NarrowContainer";
@@ -27,9 +26,9 @@ const dictionaryHeaders = {
 };
 
 const getExamplesForHostGenome = (field, hostGenomeId) =>
-  compact(
-    union(get("all", field.examples), get(hostGenomeId, field.examples))
-  ).join(", ") || "--";
+  compact(get(hostGenomeId, field.examples) || get("all", field.examples)).join(
+    ", "
+  ) || "--";
 
 class MetadataDictionary extends React.Component {
   state = {
@@ -119,6 +118,8 @@ class MetadataDictionary extends React.Component {
       }))
     );
 
+  getColumnWidth = column => (column === "name" ? 250 : "");
+
   render() {
     const fieldGroupsToDisplay = this.getFieldGroups();
     return (
@@ -130,7 +131,7 @@ class MetadataDictionary extends React.Component {
             <div>* = Required</div>
             <Dropdown
               className={cs.hostGenome}
-              label="Host Genome:"
+              label="Host Genome"
               options={this.getHostGenomeOptions()}
               value={this.state.currentHostGenome}
               onChange={this.handleHostGenomeChange}
@@ -147,6 +148,7 @@ class MetadataDictionary extends React.Component {
                   data={fieldGroup.fields}
                   headers={dictionaryHeaders}
                   columns={["name", "description", "examples"]}
+                  getColumnWidth={this.getColumnWidth}
                 />
               </div>
             ),

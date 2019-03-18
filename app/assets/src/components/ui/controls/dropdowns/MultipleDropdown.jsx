@@ -85,6 +85,9 @@ class MultipleDropdown extends React.Component {
     const { disabled, hideCounter, label, rounded } = this.props;
     const { value } = this.state;
 
+    const labelText =
+      !hideCounter && value.length > 0 && label ? label + ":" : label;
+
     const counterLabel = !hideCounter &&
       value.length > 0 && (
         <DropdownLabel
@@ -96,7 +99,7 @@ class MultipleDropdown extends React.Component {
     return (
       <DropdownTrigger
         className={cs.dropdownTrigger}
-        label={label}
+        label={labelText}
         value={counterLabel}
         rounded={rounded}
       />
@@ -113,6 +116,7 @@ class MultipleDropdown extends React.Component {
 
   render() {
     const {
+      arrowInsideTrigger,
       boxed,
       checkedOnTop,
       hideCounter,
@@ -134,7 +138,7 @@ class MultipleDropdown extends React.Component {
         {...otherProps}
         floating
         className={cx(cs.multipleDropdown, className)}
-        arrowInsideTrigger
+        arrowInsideTrigger={arrowInsideTrigger}
         trigger={trigger || this.renderText()}
         items={renderedMenuItems}
         itemSearchStrings={searchStrings}
@@ -145,10 +149,12 @@ class MultipleDropdown extends React.Component {
 }
 
 MultipleDropdown.defaultProps = {
+  arrowInsideTrigger: true,
   value: []
 };
 
 MultipleDropdown.propTypes = {
+  arrowInsideTrigger: PropTypes.bool,
   boxed: PropTypes.bool,
   checkedOnTop: PropTypes.bool,
   disabled: PropTypes.bool,

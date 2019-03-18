@@ -60,16 +60,12 @@ class ProjectsView extends React.Component {
     return (
       <div className={cs.project}>
         <div className={cs.projectName}>{project.name}</div>
-        <div className={cs.projectDescription}>
-          {project.description || "No description (DELETE THIS)"}
-        </div>
+        <div className={cs.projectDescription}>{project.description}</div>
         <div className={cs.projectDetails}>
           <span className={cs.projectCreationDate}>
             {moment(project.created_at).fromNow()}
           </span>|
-          <span className={cs.projectOwner}>
-            {project.owner || "No owner (DELETE THIS)"}
-          </span>
+          <span className={cs.projectOwner}>{project.owner}</span>
         </div>
       </div>
     );
@@ -82,7 +78,6 @@ class ProjectsView extends React.Component {
 
   render() {
     const { projects } = this.props;
-
     let data = projects.map(project => {
       return merge(
         {
@@ -102,7 +97,7 @@ class ProjectsView extends React.Component {
         sortable
         data={data}
         columns={this.columns}
-        defaultRowHeight={120}
+        defaultRowHeight={90}
         sortBy={"details"}
       />
     );

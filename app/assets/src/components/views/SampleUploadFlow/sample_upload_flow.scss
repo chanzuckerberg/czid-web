@@ -3,12 +3,38 @@
 
 .sampleUploadFlow {
   .inner {
-    padding: 60px;
+    padding: 0 60px;
     background-color: $white;
   }
 
   &.narrow .inner {
     padding: 60px 240px;
+  }
+}
+
+.uploadFlowStep {
+  // In order to make the flex-content take up the remaining height on the page,
+  // we need to place it in a parent container that expands to fill up the page height.
+  // This min-height takes up the remaining viewport height besides the header and the sample upload flow header.
+  min-height: calc(100vh - 180px);
+  padding-top: 20px;
+  display: none;
+  flex-direction: column;
+
+  .flexContent {
+    flex: 1 1 0;
+  }
+
+  .controls {
+    margin: 30px 0 60px;
+
+    .continueButton {
+      margin-right: 10px;
+    }
+  }
+
+  &.visible {
+    display: flex;
   }
 }
 
@@ -24,26 +50,78 @@
   }
 }
 
-.uploadSampleStep {
-  .header {
-    margin-bottom: 40px;
+.headerWrapper {
+  border-bottom: 4px solid $off-white;
+}
 
-    .title {
-      @include font-header-xxl;
-    }
+.sampleUploadFlowHeader {
+  padding: 20px 60px;
+  display: flex;
 
-    .subtitle {
-      margin-top: 5px;
-    }
-
-    .cliLink {
-      // Overwrite <a> inherit rule in header.scss
-      color: $primary-light !important;
-      cursor: pointer;
-      margin-left: 5px;
-    }
+  .fill {
+    flex: 1 1 0;
   }
 
+  .title {
+    @include font-header-xxl;
+    margin-bottom: 5px;
+  }
+
+  .subtitle {
+    margin-top: 5px;
+    color: $medium-grey;
+  }
+
+  .link {
+    // Overwrite <a> inherit rule in header.scss
+    color: $primary-lighter !important;
+    cursor: pointer;
+    margin-left: 5px;
+  }
+
+  .menu {
+    display: flex;
+
+    .option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 110px;
+
+      &.active .circle {
+        color: $white;
+        background-color: $primary-light;
+      }
+
+      &.enabled {
+        cursor: pointer;
+
+        .circle {
+          color: $white;
+          background-color: $primary-light;
+          opacity: 0.3;
+        }
+      }
+    }
+
+    .circle {
+      @include font-header-xs;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+    }
+
+    .text {
+      @include font-header-xxs;
+      color: $darkest-grey;
+    }
+  }
+}
+
+.uploadSampleStep {
   .projectSelect {
     margin-bottom: 30px;
 
@@ -75,12 +153,8 @@
     }
   }
 
-  .mainControls {
-    margin-top: 60px;
-
-    .continueButton {
-      margin-right: 10px;
-    }
+  .uploadTable {
+    margin-top: 30px;
   }
 }
 
@@ -168,14 +242,6 @@
     margin-bottom: 8px;
   }
 
-  .mainControls {
-    margin-top: 60px;
-
-    .continueButton {
-      margin-right: 10px;
-    }
-  }
-
   .hide {
     display: none;
   }
@@ -183,10 +249,89 @@
 
 .reviewStep {
   .title {
-    font-size: 26px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-    margin-bottom: 8px;
+    @include font-header-xxl;
+  }
+
+  .uploadMsg {
+    @include font-body-m;
+    margin-bottom: 40px;
+    color: $medium-grey;
+  }
+
+  .reviewHeader {
+    margin: 10px 0;
+    display: flex;
+
+    .text {
+      @include font-header-l;
+    }
+
+    .links {
+      @include font-body-xs;
+      display: flex;
+      margin-left: 10px;
+      align-items: center;
+      margin-top: 5px;
+
+      &.enabled {
+        .link {
+          color: $primary-light;
+          cursor: pointer;
+        }
+      }
+
+      .divider {
+        margin: 0 5px;
+      }
+
+      .link {
+        color: $light-grey;
+        cursor: default;
+      }
+    }
+  }
+
+  .sampleContainer {
+    margin-top: 50px;
+  }
+
+  .project {
+    background-color: $off-white;
+    padding: 25px;
+    display: flex;
+
+    .header {
+      display: flex;
+    }
+
+    .name {
+      @include font-header-m;
+    }
+
+    .publicAccess {
+      @include font-body-s;
+      margin-left: 10px;
+    }
+
+    .existingSamples {
+      @include font-body-xs;
+      color: $medium-grey;
+    }
+
+    .projectIcon {
+      height: 40px;
+      width: 40px;
+      margin-right: 15px;
+    }
+  }
+
+  .tableScrollWrapper {
+    overflow: auto;
+    max-height: 450px;
+  }
+
+  .sampleName {
+    @include font-header-s;
   }
 
   .error {
@@ -197,10 +342,36 @@
     color: $primary-light;
   }
 
+  .files {
+    padding: 10px 0;
+
+    .file {
+      padding: 5px 0;
+
+      &:first-child {
+        padding-top: 0;
+      }
+
+      &:last-child {
+        padding-bottom: 0;
+      }
+    }
+  }
+
   .successMessage,
   .error,
   .uploadMessage {
-    margin-top: 10px;
+    @include font-body-xs;
+    margin-top: 30px;
     margin-bottom: 10px;
+  }
+
+  .uploadMessage,
+  .successMessage {
+    color: $medium-grey;
+  }
+
+  .loadingIcon {
+    margin-right: 5px;
   }
 }

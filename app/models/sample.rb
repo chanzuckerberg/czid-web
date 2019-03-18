@@ -114,7 +114,8 @@ class Sample < ApplicationRecord
   end
 
   def required_metadata_fields
-    host_genome.metadata_fields.where(is_required: 1)
+    # Don't use "where", as this will trigger another SQL query when used inside loops.
+    host_genome.metadata_fields.select { |x| x.is_required == 1 }
   end
 
   def missing_required_metadata_fields
@@ -272,12 +273,14 @@ class Sample < ApplicationRecord
       stderr_array << stderr unless status.exitstatus.zero?
     end
     unless stderr_array.empty?
-      LogUtil.log_err_and_airbrake("Failed to upload sample #{id} with error #{stderr_array[0]}")
+      LogUtil.log_err_and_airbrake("Failed to upload S3 sample '#{name}' (#{id}): #{stderr_array[0]}")
       raise stderr_array[0]
     end
 
     self.status = STATUS_UPLOADED
     save # this triggers pipeline command
+  rescue => e
+    LogUtil.log_err_and_airbrake("Failed to upload S3 sample '#{name}' (#{id}): #{e}")
   end
 
   def sample_input_s3_path
@@ -437,8 +440,15 @@ class Sample < ApplicationRecord
 
   def self.public_samples
     joins(:project)
-      .where("(projects.public_access = 1 or
+      .where("(projects.public_access = 1 OR
               DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < ?)",
+             Time.current)
+  end
+
+  def self.private_samples
+    joins(:project)
+      .where("(projects.public_access = 0 AND
+              DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) >= ?)",
              Time.current)
   end
 
@@ -527,9 +537,9 @@ class Sample < ApplicationRecord
     return metadata.find { |metadatum| metadatum.metadata_field.name == key || metadatum.metadata_field.display_name == key }
   end
 
-  # Add or update metadatum entry on this sample.
-  # Returns whether the update succeeded.
-  def metadatum_add_or_update(key, val)
+  # Create or update the Metadatum ActiveRecord object, but do not save.
+  # This allows us to do this in batch.
+  def get_metadatum_to_save(key, val)
     m = get_existing_metadatum(key.to_s)
     unless m
       # Create the entry
@@ -564,12 +574,39 @@ class Sample < ApplicationRecord
       raise RecordNotFound("No matching field for #{key}") unless m.metadata_field
       m.key = m.metadata_field.name
     end
-    if val.present?
+    if val.present? && m.raw_value != val
       m.raw_value = val
-      m.save!
+      return {
+        metadatum: m,
+        status: "ok"
+      }
+    else
+      # If the value didn't change or isn't present, don't re-save the metadata field.
+      return {
+        metadatum: nil,
+        status: "ok"
+      }
+    end
+  rescue ActiveRecord::RecordNotFound => e
+    Rails.logger.error(e)
+    return {
+      metadatum: nil,
+      status: "error"
+    }
+  end
+
+  # Add or update metadatum entry on this sample.
+  # Returns whether the update succeeded.
+  def metadatum_add_or_update(key, val)
+    result = get_metadatum_to_save(key, val)
+
+    if result[:status] == "error"
+      return false
+    elsif result[:metadatum]
+      result[:metadatum].save!
     end
     true
-  rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid => e
+  rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error(e)
     false
   end

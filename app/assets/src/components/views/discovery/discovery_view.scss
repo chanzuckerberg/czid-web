@@ -11,15 +11,28 @@
     flex: 0 0 auto;
   }
 
-  .viewContainer {
+  .mainContainer {
     display: flex;
-    flex-direction: row;
     flex: 1 0 auto;
-  }
 
-  .sideBar {
-    flex: 0 1 400px;
-    border-left: 6px solid $off-white;
+    .leftPane:not(:empty) {
+      border-right: 2px solid $off-white;
+      flex: 0 0 auto;
+      padding: 30px 20px;
+    }
+
+    .viewContainer {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      padding: 30px 20px;
+    }
+
+    .rightPane:not(:empty) {
+      border-left: 2px solid $off-white;
+      flex: 0 0 auto;
+      padding: 30px 20px;
+    }
   }
 }
 

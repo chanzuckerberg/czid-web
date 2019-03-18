@@ -442,7 +442,7 @@ module ReportHelper
     result_hash
   end
 
-  def samples_taxons_details(samples, taxon_ids, background_id, species_selected)
+  def samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)
     results = {}
 
     # Get sample results for the taxon ids
@@ -461,10 +461,9 @@ module ReportHelper
         tax_2d.each { |_tax_id, tax_info| rows << tax_info }
         compute_aggregate_scores_v2!(rows)
 
-        filtered_rows = []
-        rows.each do |row|
-          filtered_rows << row if taxon_ids.include?(row["tax_id"])
-        end
+        filtered_rows = rows
+                        .select { |row| taxon_ids.include?(row["tax_id"]) }
+                        .each { |row| row[:filtered] = check_custom_filters(row, threshold_filters) }
 
         results[sample_id] = {
           sample_id: sample_id,
@@ -958,8 +957,11 @@ module ReportHelper
 
     # Compute all species aggregate scores.  These are used in filtering.
     compute_species_aggregate_scores!(rows, tax_2d, params[:scoring_model])
+    t2 = wall_clock_ms
+
     # Compute all genus aggregate scores.  These are used only in sorting.
     compute_genera_aggregate_scores!(rows, tax_2d)
+    t3 = wall_clock_ms
 
     # Total number of rows for view level, before application of filters.
     rows_total = tax_2d.length
@@ -982,7 +984,8 @@ module ReportHelper
     end
 
     t5 = wall_clock_ms
-    Rails.logger.info "Data processing took #{t5 - t1} seconds (#{t5 - t0} with I/O)."
+    Rails.logger.info "Data processing took #{(t5 - t1).round(2)}s (#{(t5 - t0).round(2)}s with I/O)."
+    Rails.logger.info "Agg scoring took #{(t2 - t1).round(2)}s,  #{(t3 - t2).round(2)}s."
 
     [rows_passing_filters, rows_total, rows]
   end

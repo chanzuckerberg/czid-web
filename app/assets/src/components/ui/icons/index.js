@@ -7,8 +7,10 @@ import DecipherIcon from "./DecipherIcon";
 import DetectIcon from "./DetectIcon";
 import DiscoverIcon from "./DiscoverIcon";
 import ERCCIcon from "./ERCCIcon";
+import FiltersIcon from "./FiltersIcon";
 import GlobeIcon from "./GlobeIcon";
 import HumanIcon from "./HumanIcon";
+import InfoIcon from "./InfoIcon";
 import InsightIcon from "./InsightIcon";
 import LoadingIcon from "./LoadingIcon";
 import LockIcon from "./LockIcon";
@@ -17,7 +19,11 @@ import MosquitoIcon from "./MosquitoIcon";
 import MouseIcon from "./MouseIcon";
 import PigIcon from "./PigIcon";
 import PlusIcon from "./PlusIcon";
+import PublicProjectIcon from "./PublicProjectIcon";
+import PrivateProjectIcon from "./PrivateProjectIcon";
 import RemoveIcon from "./RemoveIcon";
+import SamplePublicIcon from "./SamplePublicIcon";
+import SamplePrivateIcon from "./SamplePrivateIcon";
 import TickIcon from "./TickIcon";
 import UserIcon from "./UserIcon";
 import WormIcon from "./WormIcon";
@@ -32,17 +38,23 @@ export default {
     DetectIcon,
     DiscoverIcon,
     ERCCIcon,
+    FiltersIcon,
     GlobeIcon,
     HumanIcon,
+    InfoIcon,
     LockIcon,
     MosquitoIcon,
     MouseIcon,
     PigIcon,
     PlusIcon,
     RemoveIcon,
+    SamplePublicIcon,
+    SamplePrivateIcon,
     TickIcon,
     UserIcon,
-    WormIcon
+    WormIcon,
+    PublicProjectIcon,
+    PrivateProjectIcon
   },
   FONT_AWESOME: {
     CheckmarkIcon,

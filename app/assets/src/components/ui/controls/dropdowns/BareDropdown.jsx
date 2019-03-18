@@ -16,21 +16,8 @@ class BareDropdown extends React.Component {
     super(props);
 
     this.state = {
-      filterString: "",
-      filteredItems: this.getFilteredItems("")
+      filterString: ""
     };
-  }
-
-  componentDidUpdate(prevProps) {
-    if (
-      prevProps.items !== this.props.items ||
-      prevProps.options !== this.props.options ||
-      prevProps.value !== this.props.value
-    ) {
-      this.setState({
-        filteredItems: this.getFilteredItems(this.state.filterString)
-      });
-    }
   }
 
   // If the user provides us options instead of items, we will render them like this.
@@ -48,10 +35,16 @@ class BareDropdown extends React.Component {
   };
 
   handleFilterChange = filterString => {
-    this.setState({
-      filterString,
-      filteredItems: this.getFilteredItems(filterString)
-    });
+    const { onFilterChange } = this.props;
+
+    this.setState(
+      {
+        filterString
+      },
+      () => {
+        onFilterChange && onFilterChange(filterString);
+      }
+    );
   };
 
   matchesFilter = (text, filterString) =>
@@ -107,6 +100,7 @@ class BareDropdown extends React.Component {
       usePortal,
       withinModal,
       children,
+      onFilterChange,
       ...otherProps
     } = this.props;
 
@@ -117,6 +111,8 @@ class BareDropdown extends React.Component {
       className,
       hideArrow && cs.hideArrow
     );
+
+    const { filterString } = this.state;
 
     // Allows you the flexibility to put stuff OTHER than a menu of options in the dropdown.
     if (!this.props.options && !this.props.items) {
@@ -146,6 +142,8 @@ class BareDropdown extends React.Component {
       otherProps
     );
 
+    const filteredItems = this.getFilteredItems(filterString);
+
     const menu = (
       <BaseDropdown.Menu
         className={cx(
@@ -171,7 +169,7 @@ class BareDropdown extends React.Component {
           </div>
         )}
         <BaseDropdown.Menu scrolling className={cs.innerMenu}>
-          {this.state.filteredItems}
+          {filteredItems}
         </BaseDropdown.Menu>
       </BaseDropdown.Menu>
     );
@@ -221,6 +219,9 @@ BareDropdown.propTypes = forbidExtraProps({
   // If search is true, and you provide pre-rendered "items" instead of "options",
   // you must also provide a list of strings to search by.
   itemSearchStrings: PropTypes.arrayOf(PropTypes.string),
+  // If search is true, but you want to customize behavior of search function, e.g. async search,
+  // you should provide your own handler
+  onFilterChange: PropTypes.func,
 
   // Custom props for rendering options
   options: PropTypes.arrayOf(

@@ -1,5 +1,6 @@
 module ElasticsearchHelper
   def prefix_match(model, field, prefix, condition)
+    prefix = sanitize(prefix)
     search_params = { query: { query_string: { query: "#{prefix}*", analyze_wildcard: true, fields: [field] } } }
     results = if Rails.env == "test"
                 # Return all records. Tests can't use elasticsearch.
@@ -14,9 +15,11 @@ module ElasticsearchHelper
     results
   end
 
-  def taxon_search(prefix, tax_levels = TaxonCount::NAME_2_LEVEL.keys)
+  def taxon_search(prefix, tax_levels = TaxonCount::NAME_2_LEVEL.keys, project_id = nil)
     return {} if Rails.env == "test"
+    prefix = sanitize(prefix)
     matching_taxa = {}
+
     tax_levels.each do |level|
       search_params = { query: { query_string: { query: "#{prefix}*", fields: ["#{level}_name"] } } }
       TaxonLineage.__elasticsearch__.search(search_params).records.each do |record|
@@ -30,6 +33,34 @@ module ElasticsearchHelper
         }
       end
     end
-    matching_taxa.values
+
+    if project_id.present?
+      filter_by_project(matching_taxa.values, project_id)
+    else
+      matching_taxa.values
+    end
+  end
+
+  private
+
+  # Took 250ms in local testing on real data
+  def filter_by_project(matching_taxa, project_id)
+    project_tax_ids = Set.new(TaxonCount
+      .joins(pipeline_run: :sample)
+      .where(samples: { project_id: project_id })
+      .where(tax_id: [matching_taxa.map { |taxa| taxa["taxid"] }])
+      .where("tax_id > 0") # negative numbers mean unknown... see TaxonLineage
+      .where(count_type: ["NT", "NR"])
+      .where("count > 0")
+      .distinct()
+      .pluck(:tax_id))
+
+    matching_taxa.select { |taxa| project_tax_ids.include?(taxa["taxid"]) }
+  end
+
+  def sanitize(prefix)
+    # Add \\ to escape special characters. Four \ to escape the backslashes.
+    # Escape anything that isn't in "a-zA-Z0-9 ._|'/"
+    prefix.gsub(%r{([^a-zA-Z0-9 ._|'\/])}, '\\\\\1') if prefix
   end
 end

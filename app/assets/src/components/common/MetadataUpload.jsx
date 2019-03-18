@@ -1,14 +1,20 @@
 import React from "react";
 import cx from "classnames";
+import _fp, { filter, keyBy, concat } from "lodash/fp";
 
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
+import { getProjectMetadataFields, getAllHostGenomes } from "~/api";
+import LoadingIcon from "~ui/icons/LoadingIcon";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
 import IssueGroup from "./IssueGroup";
+import { getURLParamString } from "~/helpers/url";
+
+const map = _fp.map.convert({ cap: false });
 
 class MetadataUpload extends React.Component {
   state = {
@@ -16,8 +22,22 @@ class MetadataUpload extends React.Component {
     issues: {
       errors: [],
       warnings: []
-    }
+    },
+    projectMetadataFields: null,
+    hostGenomes: [],
+    validatingCSV: false
   };
+
+  async componentDidMount() {
+    const [projectMetadataFields, hostGenomes] = await Promise.all([
+      getProjectMetadataFields(this.props.project.id),
+      getAllHostGenomes()
+    ]);
+    this.setState({
+      projectMetadataFields: keyBy("key", projectMetadataFields),
+      hostGenomes
+    });
+  }
 
   handleTabChange = tab => {
     this.setState({ currentTab: tab, issues: null });
@@ -30,10 +50,11 @@ class MetadataUpload extends React.Component {
   };
 
   // MetadataCSVUpload validates metadata before calling onMetadataChangeCSV.
-  onMetadataChangeCSV = ({ metadata, issues }) => {
+  onMetadataChangeCSV = ({ metadata, issues, validatingCSV }) => {
     this.props.onMetadataChange({ metadata, issues, wasManual: false });
     this.setState({
-      issues
+      issues,
+      validatingCSV
     });
   };
 
@@ -43,17 +64,34 @@ class MetadataUpload extends React.Component {
     this.props.onMetadataChange({ metadata, wasManual: true });
   };
 
+  getCSVUrl = () => {
+    const params = {
+      ...(this.props.samplesAreNew
+        ? { new_sample_names: map("name", this.props.samples) }
+        : {}),
+      project_id: this.props.project.id
+    };
+
+    return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
+  };
+
   renderTab = () => {
     if (this.state.currentTab === "Manual Input") {
-      return (
-        <MetadataManualInput
-          project={this.props.project}
-          samples={this.props.samples}
-          samplesAreNew={this.props.samplesAreNew}
-          onMetadataChange={this.onMetadataChangeManual}
-          withinModal={this.props.withinModal}
-        />
-      );
+      if (!this.props.samples || !this.state.projectMetadataFields) {
+        return <div className={cs.loadingMsg}>Loading...</div>;
+      } else {
+        return (
+          <MetadataManualInput
+            project={this.props.project}
+            samples={this.props.samples}
+            samplesAreNew={this.props.samplesAreNew}
+            onMetadataChange={this.onMetadataChangeManual}
+            withinModal={this.props.withinModal}
+            projectMetadataFields={this.state.projectMetadataFields}
+            hostGenomes={this.state.hostGenomes}
+          />
+        );
+      }
     }
 
     if (this.state.currentTab === "CSV Upload") {
@@ -64,7 +102,7 @@ class MetadataUpload extends React.Component {
               className={cs.link}
               onClick={this.props.onShowCSVInstructions}
             >
-              See Instructions
+              View CSV Upload Instructions
             </span>
           </div>
           <MetadataCSVUpload
@@ -74,9 +112,15 @@ class MetadataUpload extends React.Component {
             project={this.props.project}
             samplesAreNew={this.props.samplesAreNew}
           />
-          <a className={cs.link} href="/metadata/metadata_template_csv">
+          <a className={cs.link} href={this.getCSVUrl()}>
             Download Metadata CSV Template
           </a>
+          {this.state.validatingCSV && (
+            <div className={cs.validationMessage}>
+              <LoadingIcon className={cs.loadingIcon} />
+              Validating metadata...
+            </div>
+          )}
         </React.Fragment>
       );
     }
@@ -145,15 +189,54 @@ class MetadataUpload extends React.Component {
   };
 
   render() {
+    const { hostGenomes, projectMetadataFields, currentTab } = this.state;
+    const { samplesAreNew } = this.props;
+    const requiredFields = concat(
+      "Host Genome",
+      map("name", filter(["is_required", 1], projectMetadataFields))
+    );
     return (
       <div className={cx(cs.metadataUpload, this.props.className)}>
-        <a href="/metadata/dictionary" className={cs.link} target="_blank">
-          See Metadata Dictionary
-        </a>
+        {samplesAreNew && (
+          <div className={cs.info}>
+            <div className={cs.details}>
+              <span className={cs.label}>{`Required fields: `}</span>
+              {requiredFields && requiredFields.join(", ")}
+            </div>
+            <div className={cs.details}>
+              <span className={cs.label}>{`Available host genomes: `}</span>
+              {hostGenomes && hostGenomes.map(h => h.name).join(", ")}
+            </div>
+            <div className={cs.details}>
+              <span>
+                <a
+                  href="/metadata/dictionary"
+                  className={cs.link}
+                  target="_blank"
+                >
+                  View Full Metadata Dictionary
+                </a>
+              </span>
+            </div>
+          </div>
+        )}
+        <div>
+          {!samplesAreNew && (
+            <span>
+              <a
+                href="/metadata/dictionary"
+                className={cs.link}
+                target="_blank"
+              >
+                View Metadata Dictionary
+              </a>
+            </span>
+          )}
+        </div>
         <Tabs
           className={cs.tabs}
           tabs={["Manual Input", "CSV Upload"]}
-          value={this.state.currentTab}
+          value={currentTab}
           onChange={this.handleTabChange}
         />
         {this.renderTab()}

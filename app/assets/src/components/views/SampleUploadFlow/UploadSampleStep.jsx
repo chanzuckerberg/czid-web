@@ -1,10 +1,16 @@
-// TODO(mark): Verify that sample name is not duplicate for local uploads at this step.
 import React from "react";
+import cx from "classnames";
 import PropTypes from "~/components/utils/propTypes";
 import ProjectSelect from "~/components/common/ProjectSelect";
 import Tabs from "~/components/ui/controls/Tabs";
-import { getProjects, validateSampleNames } from "~/api";
+import IssueGroup from "~/components/common/IssueGroup";
+import { getProjects, validateSampleNames, validateSampleFiles } from "~/api";
 import {
+  filter,
+  keys,
+  pickBy,
+  includes,
+  flatten,
   set,
   reject,
   size,
@@ -40,13 +46,14 @@ class UploadSampleStep extends React.Component {
     currentTab: LOCAL_UPLOAD_TAB,
     localSamples: [],
     remoteSamples: [],
+    removedLocalFiles: [], // Invalid local files that were removed.
     sampleNamesToFiles: {}, // Needed for local samples.
     validatingSamples: false // Disable the "Continue" button while validating samples.
   };
 
   async componentDidMount() {
     const projects = await getProjects({
-      onlyUpdatable: true
+      domain: "updatable"
     });
 
     this.setState({
@@ -119,7 +126,8 @@ class UploadSampleStep extends React.Component {
     });
   };
 
-  // Validate sample names, and update names for samples and sampleNamesToFiles if needed.
+  // Validate sample names.
+  // Update sample names in 'samples' and 'sampleNamesToFiles' if needed.
   validateSampleNames = async ({ samples, project, sampleNamesToFiles }) => {
     const selectedProject = project || this.state.selectedProject;
     if (!selectedProject || size(samples) <= 0) {
@@ -148,6 +156,59 @@ class UploadSampleStep extends React.Component {
         name => validatedNameMap[name],
         sampleNamesToFiles
       )
+    };
+  };
+
+  // Validate sample names and files
+  // Remove invalid files from sampleNamesToFiles and remove samples with no valid files.
+  validateSampleNamesAndFiles = async ({
+    samples,
+    project,
+    sampleNamesToFiles
+  }) => {
+    if (size(samples) <= 0) {
+      return Promise.resolve({
+        samples,
+        sampleNamesToFiles,
+        removedLocalFiles: []
+      });
+    }
+
+    const sampleFiles = map("name", flatten(values(sampleNamesToFiles)));
+
+    const [
+      {
+        samples: validatedSamples,
+        sampleNamesToFiles: validatedSampleNamesToFiles
+      },
+      areFilesValid
+    ] = await Promise.all([
+      // Call validateSampleNames to update sample names.
+      this.validateSampleNames({ samples, project, sampleNamesToFiles }),
+      validateSampleFiles(sampleFiles)
+    ]);
+
+    const filesValidMap = zipObject(sampleFiles, areFilesValid);
+
+    // Filter out invalid files.
+    const filteredSampleNamesToFiles = mapValues(
+      files => filter(file => filesValidMap[file.name], files),
+      validatedSampleNamesToFiles
+    );
+
+    // Filter out samples with no valid files.
+    const emptySampleNames = keys(
+      pickBy(files => files.length === 0, filteredSampleNamesToFiles)
+    );
+    const filteredSamples = filter(
+      sample => !includes(sample.name, emptySampleNames),
+      validatedSamples
+    );
+
+    return {
+      samples: filteredSamples,
+      sampleNamesToFiles: filteredSampleNamesToFiles,
+      removedLocalFiles: keys(pickBy(fileValid => !fileValid, filesValidMap))
     };
   };
 
@@ -230,13 +291,15 @@ class UploadSampleStep extends React.Component {
 
   handleLocalSampleChange = async (localSamples, sampleNamesToFiles) => {
     this.setState({
-      validatingSamples: true
+      validatingSamples: true,
+      removedLocalFiles: []
     });
 
     const {
       samples: validatedLocalSamples,
-      sampleNamesToFiles: validatedSampleNamesToFiles
-    } = await this.validateSampleNames({
+      sampleNamesToFiles: validatedSampleNamesToFiles,
+      removedLocalFiles
+    } = await this.validateSampleNamesAndFiles({
       samples: localSamples,
       sampleNamesToFiles
     });
@@ -255,7 +318,8 @@ class UploadSampleStep extends React.Component {
         },
         validatedSampleNamesToFiles,
         this.state.sampleNamesToFiles
-      )
+      ),
+      removedLocalFiles
     });
   };
 
@@ -348,61 +412,68 @@ class UploadSampleStep extends React.Component {
 
   render() {
     return (
-      <div className={cs.uploadSampleStep}>
-        <div className={cs.header}>
-          <div className={cs.title}>Upload Samples</div>
-          <div className={cs.subtitle}>
-            Rather use our command-line interface?
-            <a
-              href="/cli_user_instructions"
-              target="_blank"
-              className={cs.cliLink}
-            >
-              Instructions here.
-            </a>
+      <div
+        className={cx(
+          cs.uploadSampleStep,
+          cs.uploadFlowStep,
+          this.props.visible && cs.visible
+        )}
+      >
+        <div className={cs.flexContent}>
+          <div className={cs.projectSelect}>
+            <div className={cs.label}>Project</div>
+            <ProjectSelect
+              projects={this.state.projects}
+              value={get("id", this.state.selectedProject)}
+              onChange={this.handleProjectChange}
+              disabled={this.state.createProjectOpen}
+            />
+            {this.state.createProjectOpen ? (
+              <div className={cs.projectCreationContainer}>
+                <ProjectCreationForm
+                  onCancel={this.closeCreateProject}
+                  onCreate={this.handleProjectCreate}
+                />
+              </div>
+            ) : (
+              <div
+                className={cs.createProjectButton}
+                onClick={this.openCreateProject}
+              >
+                + Create Project
+              </div>
+            )}
           </div>
-        </div>
-        <div className={cs.projectSelect}>
-          <div className={cs.label}>Project</div>
-          <ProjectSelect
-            projects={this.state.projects}
-            value={get("id", this.state.selectedProject)}
-            onChange={this.handleProjectChange}
-            disabled={this.state.createProjectOpen}
-          />
-          {this.state.createProjectOpen ? (
-            <div className={cs.projectCreationContainer}>
-              <ProjectCreationForm
-                onCancel={this.closeCreateProject}
-                onCreate={this.handleProjectCreate}
+          <div className={cs.fileUpload}>
+            <div className={cs.title}>Upload Files</div>
+            <Tabs
+              className={cs.tabs}
+              tabs={[LOCAL_UPLOAD_TAB, REMOTE_UPLOAD_TAB]}
+              value={this.state.currentTab}
+              onChange={this.handleTabChange}
+            />
+            {this.renderTab()}
+          </div>
+          {this.state.currentTab === LOCAL_UPLOAD_TAB &&
+            this.state.removedLocalFiles.length > 0 && (
+              <IssueGroup
+                caption={`${
+                  this.state.removedLocalFiles.length
+                } files were invalid. Please check the acceptable file formats under "More Info".`}
+                headers={["Invalid File Names"]}
+                rows={this.state.removedLocalFiles.map(file => [file])}
+                type="warning"
               />
-            </div>
-          ) : (
-            <div
-              className={cs.createProjectButton}
-              onClick={this.openCreateProject}
-            >
-              + Create Project
-            </div>
-          )}
-        </div>
-        <div className={cs.fileUpload}>
-          <div className={cs.title}>Upload Files</div>
-          <Tabs
-            className={cs.tabs}
-            tabs={[LOCAL_UPLOAD_TAB, REMOTE_UPLOAD_TAB]}
-            value={this.state.currentTab}
-            onChange={this.handleTabChange}
+            )}
+          <BulkSampleUploadTable
+            sampleNamesToFiles={this.getSampleNamesToFiles()}
+            onRemoved={this.handleSampleRemoved}
+            hideProgressColumn
+            showCount={this.state.currentTab === REMOTE_UPLOAD_TAB}
+            className={cs.uploadTable}
           />
-          {this.renderTab()}
         </div>
-        <BulkSampleUploadTable
-          sampleNamesToFiles={this.getSampleNamesToFiles()}
-          onRemoved={this.handleSampleRemoved}
-          hideProgressColumn
-          showCount={this.state.currentTab === REMOTE_UPLOAD_TAB}
-        />
-        <div className={cs.mainControls}>
+        <div className={cs.controls}>
           <PrimaryButton
             text="Continue"
             onClick={this.handleContinue}
@@ -420,7 +491,8 @@ class UploadSampleStep extends React.Component {
 }
 
 UploadSampleStep.propTypes = {
-  onUploadSamples: PropTypes.func.isRequired
+  onUploadSamples: PropTypes.func.isRequired,
+  visible: PropTypes.bool
 };
 
 export default UploadSampleStep;

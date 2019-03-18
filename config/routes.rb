@@ -37,8 +37,10 @@ Rails.application.routes.draw do
     get :samples_going_public, on: :collection
     get :index_v2, on: :collection
     get :details, on: :collection
+    get :dimensions, on: :collection
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
+    post :validate_sample_files, on: :collection
   end
 
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
@@ -65,6 +67,7 @@ Rails.application.routes.draw do
     get :host_gene_counts_status, on: :member
     get :send_host_gene_counts, on: :member
     get :all_users, on: :member
+    get :dimensions, on: :collection
     put :add_favorite, on: :member
     put :remove_favorite, on: :member
     put :update_project_visibility, on: :member

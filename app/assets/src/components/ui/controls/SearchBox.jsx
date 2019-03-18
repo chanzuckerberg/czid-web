@@ -1,10 +1,12 @@
 import React from "react";
 import cx from "classnames";
-import cs from "./search_box.scss";
+import PropTypes from "prop-types";
 import { Search } from "semantic-ui-react";
 import { escapeRegExp, debounce } from "lodash";
-import PropTypes from "prop-types";
+
+import cs from "./search_box.scss";
 import { get } from "../../../api";
+import { getURLParamString } from "~/helpers/url";
 
 class SearchBox extends React.Component {
   constructor(props) {
@@ -72,7 +74,7 @@ class SearchBox extends React.Component {
       } else if (this.props.serverSearchAction) {
         let url = `/${this.props.serverSearchAction}?query=${this.state.value}`;
         if (this.props.serverSearchActionArgs) {
-          url += `&args=${this.props.serverSearchActionArgs}`;
+          url += `&${getURLParamString(this.props.serverSearchActionArgs)}`;
         }
         searchResults = await get(url);
         if (this.props.levelLabel) {
@@ -127,7 +129,7 @@ SearchBox.propTypes = {
   // If serverSearchAction is provided, query matching will happen on the server side (use for large data).
   clientSearchSource: PropTypes.array,
   serverSearchAction: PropTypes.string,
-  serverSearchActionArgs: PropTypes.string,
+  serverSearchActionArgs: PropTypes.object,
   rounded: PropTypes.bool,
   category: PropTypes.bool,
   levelLabel: PropTypes.bool,

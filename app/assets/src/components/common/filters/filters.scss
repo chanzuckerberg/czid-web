@@ -1,0 +1,8 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.filterLabel {
+  @include font-label-s;
+  color: $medium-grey;
+  margin-right: 10px;
+}

@@ -35,13 +35,13 @@
     margin-right: 20px;
 
     .icon {
-      fill: $medium-grey;
+      fill: $primary-light;
 
-      &.iconGlobe {
+      &.iconPublic {
         width: 40px;
       }
 
-      &.iconLock {
+      &.iconPrivate {
         width: 36px;
       }
     }

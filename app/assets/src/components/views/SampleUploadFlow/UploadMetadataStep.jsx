@@ -75,19 +75,24 @@ class UploadMetadataStep extends React.Component {
         <div className={cx(!this.state.showInstructions && cs.hide)}>
           <Instructions onClose={() => this.setShowInstructions(false)} />
         </div>
-        <div className={cx(this.state.showInstructions && cs.hide)}>
-          <div>
-            <div className={cs.title}>Upload Metadata</div>
+        <div
+          className={cx(
+            cs.uploadFlowStep,
+            this.state.showInstructions && cs.hide,
+            this.props.visible && cs.visible
+          )}
+        >
+          <div className={cs.flexContent}>
+            <MetadataUpload
+              onShowCSVInstructions={() => this.setShowInstructions(true)}
+              samples={this.props.samples}
+              project={this.props.project}
+              onMetadataChange={this.handleMetadataChange}
+              samplesAreNew
+              issues={this.state.wasManual ? this.state.issues : null}
+            />
           </div>
-          <MetadataUpload
-            onShowCSVInstructions={() => this.setShowInstructions(true)}
-            samples={this.props.samples}
-            project={this.props.project}
-            onMetadataChange={this.handleMetadataChange}
-            samplesAreNew
-            issues={this.state.wasManual ? this.state.issues : null}
-          />
-          <div className={cs.mainControls}>
+          <div className={cs.controls}>
             <PrimaryButton
               text="Continue"
               onClick={this.handleContinue}
@@ -116,7 +121,8 @@ UploadMetadataStep.propTypes = {
   project: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string
-  })
+  }),
+  visible: PropTypes.bool
 };
 
 export default UploadMetadataStep;

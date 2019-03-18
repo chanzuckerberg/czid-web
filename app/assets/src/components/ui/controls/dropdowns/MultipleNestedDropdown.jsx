@@ -220,6 +220,11 @@ class MultipleNestedDropdown extends React.Component {
   renderLabel() {
     const numberOfSelectedOptions = this.getNumberOfSelectedOptions();
 
+    const labelText =
+      numberOfSelectedOptions > 0 && this.props.label
+        ? this.props.label + ":"
+        : this.props.label;
+
     const label = numberOfSelectedOptions > 0 && (
       <DropdownLabel
         className={cs.dropdownLabel}
@@ -231,7 +236,7 @@ class MultipleNestedDropdown extends React.Component {
     return (
       <DropdownTrigger
         className={cs.dropdownTrigger}
-        label={this.props.label}
+        label={labelText}
         value={label}
         rounded={this.props.rounded}
       />

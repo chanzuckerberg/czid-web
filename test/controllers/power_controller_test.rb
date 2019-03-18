@@ -54,12 +54,83 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert @joe_sample.metadata.find_by(key: "sample_type").string_validated_value == 'Whole blood'
   end
 
+  # ===== START: /samples/index
   test 'joe can see samples in joe_project' do
     @joe_project = projects(:joe_project)
     get "/samples.json?project_id=#{@joe_project.id}"
     assert_response :success
     assert JSON.parse(@response.body)["count"] == 3
   end
+
+  test 'joe cannot see samples in project one' do
+    @project = projects(:one)
+    get "/samples.json?project_id=#{@project.id}"
+    assert_response :success
+    assert JSON.parse(@response.body)["count"].zero?
+  end
+
+  test 'joe can see expired samples in project two' do
+    @project = projects(:two)
+    get "/samples.json?project_id=#{@project.id}"
+    assert_response :success
+    assert JSON.parse(@response.body)["count"] == 1
+  end
+
+  test 'joe can see samples in public_project' do
+    @public_project = projects(:public_project)
+    get "/samples.json?project_id=#{@public_project.id}"
+    assert_response :success
+    assert JSON.parse(@response.body)["count"] == 3
+  end
+  # ===== END: /samples/index
+
+  # ===== START: /samples/index_v2
+  test 'joe can see samples in joe_project with index_v2' do
+    @joe_project = projects(:joe_project)
+    get "/samples/index_v2.json?projectId=#{@joe_project.id}"
+    assert_response :success
+    assert JSON.parse(@response.body)["samples"].count == 3
+  end
+
+  test 'joe cannot see samples in project one with index_v2' do
+    @project = projects(:one)
+    get "/samples/index_v2.json?projectId=#{@project.id}"
+    assert_response :success
+    assert JSON.parse(@response.body)["samples"].count.zero?
+  end
+
+  test 'joe can see expired samples in project two with index_v2' do
+    @project = projects(:two)
+    get "/samples/index_v2.json?projectId=#{@project.id}"
+    assert_response :success
+    assert JSON.parse(@response.body)["samples"].count == 1
+  end
+
+  test 'joe can see samples in public_project with index_v2' do
+    @public_project = projects(:public_project)
+    get "/samples/index_v2.json?projectId=#{@public_project.id}"
+    assert_response :success
+    assert JSON.parse(@response.body)["samples"].count == 3
+  end
+
+  test 'joe sees samples in its data set with index_v2' do
+    get "/samples/index_v2.json?domain=library"
+    assert_response :success
+    assert JSON.parse(@response.body)["samples"].count == 3
+  end
+
+  test 'joe sees samples that are public domain with index_v2' do
+    get "/samples/index_v2.json?domain=public"
+    assert_response :success
+    assert JSON.parse(@response.body)["samples"].count == 4
+  end
+
+  test 'joe sees the samples that he has access to with index_v2' do
+    get "/samples/index_v2.json"
+    assert_response :success
+    assert JSON.parse(@response.body)["samples"].count == 7
+  end
+  # ===== END: /samples/index_v2
 
   test 'joe can see joe_sample' do
     @joe_sample = samples(:joe_sample)
@@ -148,13 +219,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert @public_sample.sample_tissue != 'bone'
   end
 
-  test 'joe can see samples in public_project' do
-    @public_project = projects(:public_project)
-    get "/samples.json?project_id=#{@public_project.id}"
-    assert_response :success
-    assert JSON.parse(@response.body)["count"] == 3
-  end
-
   test 'joe can see public_sample' do
     @public_sample = samples(:public_sample)
     get sample_url(@public_sample)
@@ -225,13 +289,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert @sample.sample_tissue != 'bone'
   end
 
-  test 'joe cannot see samples in project one' do
-    @project = projects(:one)
-    get "/samples.json?project_id=#{@project.id}"
-    assert_response :success
-    assert JSON.parse(@response.body)["count"].zero?
-  end
-
   test 'joe cannot see sample one' do
     @sample = samples(:one)
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -269,13 +326,6 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     end
     @sample.reload
     assert @sample.sample_tissue != 'bone'
-  end
-
-  test 'joe can see expired samples in project two' do
-    @project = projects(:two)
-    get "/samples.json?project_id=#{@project.id}"
-    assert_response :success
-    assert JSON.parse(@response.body)["count"] == 1
   end
 
   test 'joe can see expired_sample' do

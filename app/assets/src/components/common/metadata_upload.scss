@@ -6,7 +6,7 @@
   margin-bottom: 20px;
 
   .tabs {
-    margin: 30px 0 10px;
+    margin: 20px 0 10px;
   }
 
   .link {
@@ -23,6 +23,31 @@
   .loadingMsg {
     @include font-body-s;
     margin-top: 10px;
+  }
+
+  .details {
+    margin-bottom: 10px;
+
+    .label {
+      font-weight: 600;
+    }
+  }
+
+  .info {
+    background-color: $off-white;
+    padding: 20px 20px 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  .validationMessage {
+    @include font-body-s;
+    color: $medium-grey;
+    margin-top: 25px;
+
+    .loadingIcon {
+      margin-right: 5px;
+    }
   }
 }
 

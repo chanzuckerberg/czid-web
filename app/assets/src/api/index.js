@@ -291,47 +291,56 @@ const getSampleTaxons = (params, cancelToken) =>
     cancelToken
   });
 
-// TODO: add remaining parameters: filter, search, page and sortBy
+// TODO(tiago): still needs to accepts field to sort by
 const getSamples = ({
   projectId,
-  onlyLibrary,
-  excludeLibrary,
+  domain,
   limit,
-  offset
-} = {}) =>
-  get("/samples/index_v2.json", {
+  offset,
+  filters,
+  listAllIds
+} = {}) => {
+  return get("/samples/index_v2.json", {
     params: {
       projectId,
-      onlyLibrary,
-      excludeLibrary,
+      domain,
       limit,
-      offset
+      offset,
+      listAllIds,
+      ...filters
+    }
+  });
+};
+
+const getSampleDimensions = ({ domain }) =>
+  get("/samples/dimensions.json", {
+    params: {
+      domain
     }
   });
 
-const getSampleDetails = ({ sampleIds }) =>
-  get("/samples/details.json", {
+const getProjectDimensions = ({ domain }) =>
+  get("/projects/dimensions.json", {
     params: {
-      sampleIds
+      domain
     }
   });
 
 const getSamplesV1 = params => get("/samples.json", { params });
 
-const getProjects = ({ onlyLibrary, excludeLibrary, onlyUpdatable } = {}) =>
+const getProjects = ({ domain, filters } = {}) =>
   get("/projects.json", {
     params: {
-      onlyLibrary,
-      excludeLibrary,
-      onlyUpdatable
+      domain,
+      ...filters
     }
   });
 
-const getVisualizations = ({ onlyLibrary, excludeLibrary } = {}) =>
+const getVisualizations = ({ domain, filters } = {}) =>
   get("/visualizations.json", {
     params: {
-      onlyLibrary,
-      excludeLibrary
+      domain,
+      ...filters
     }
   });
 
@@ -346,49 +355,75 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
   if (window.analytics) window.analytics.track(eventName, eventData);
 };
 
-const validateSampleNames = (projectId, sampleNames) =>
-  postWithCSRF(`/projects/${projectId}/validate_sample_names`, {
+const validateSampleNames = (projectId, sampleNames) => {
+  if (!projectId) {
+    return Promise.resolve(sampleNames);
+  }
+
+  return postWithCSRF(`/projects/${projectId}/validate_sample_names`, {
     sample_names: sampleNames
+  });
+};
+
+const validateSampleFiles = sampleFiles => {
+  if (!sampleFiles || sampleFiles.length == 0) {
+    return Promise.resolve(sampleFiles);
+  }
+
+  return postWithCSRF(`/samples/validate_sample_files`, {
+    sample_files: sampleFiles
+  });
+};
+
+const getSearchSuggestions = ({ categories, query }) =>
+  get("/search_suggestions", {
+    params: {
+      categories,
+      query
+    }
   });
 
 export {
+  bulkImportRemoteSamples,
+  bulkUploadRemoteSamples,
+  bulkUploadWithMetadata,
+  createProject,
+  createSample,
   deleteAsync,
+  deleteSample,
   get,
+  getAlignmentData,
+  getAllHostGenomes,
+  getMetadataTypesByHostGenomeName,
+  getOfficialMetadataFields,
+  getProjectDimensions,
+  getProjects,
+  getSampleDimensions,
   getSampleMetadata,
   getSampleMetadataFields,
   getProjectMetadataFields,
   getSampleReportInfo,
-  createProject,
+  getSampleTaxons,
   getSamples,
-  getSampleDetails,
   getSamplesV1,
-  getProjects,
-  getVisualizations,
-  saveSampleMetadata,
-  getMetadataTypesByHostGenomeName,
-  saveSampleName,
-  saveSampleNotes,
-  getAlignmentData,
-  deleteSample,
+  getSearchSuggestions,
   getSummaryContigCounts,
-  createSample,
-  validateMetadataCSVForProject,
-  validateMetadataCSVForNewSamples,
-  validateManualMetadataForProject,
-  validateManualMetadataForNewSamples,
-  uploadMetadataForProject,
-  getOfficialMetadataFields,
-  getAllHostGenomes,
-  bulkUploadRemoteSamples,
-  bulkUploadWithMetadata,
-  bulkImportRemoteSamples,
-  markSampleUploaded,
-  saveVisualization,
-  uploadFileToUrl,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
-  getSampleTaxons,
+  getVisualizations,
   logAnalyticsEvent,
+  markSampleUploaded,
+  saveSampleMetadata,
+  saveSampleName,
+  saveSampleNotes,
+  saveVisualization,
+  shortenUrl,
+  uploadMetadataForProject,
+  uploadFileToUrl,
+  validateManualMetadataForProject,
+  validateManualMetadataForNewSamples,
+  validateMetadataCSVForNewSamples,
+  validateMetadataCSVForProject,
   validateSampleNames,
-  shortenUrl
+  validateSampleFiles
 };
