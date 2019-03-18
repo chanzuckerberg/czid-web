@@ -128,7 +128,7 @@ module SamplesHelper
   end
 
   def parsed_samples_for_s3_path(s3_path, project_id, host_genome_id)
-    default_attributes = { project_id: project_id,
+    default_attributes = { project_id: project_id.to_i,
                            host_genome_id: host_genome_id,
                            status: 'created' }
     s3_path.chomp!('/')
