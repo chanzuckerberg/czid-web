@@ -5,7 +5,8 @@ import {
   isArray,
   toPairs,
   pickBy,
-  isPlainObject
+  isPlainObject,
+  isUndefined
 } from "lodash/fp";
 import { shortenUrl } from "~/api";
 import copy from "copy-to-clipboard";
@@ -32,7 +33,10 @@ export const parseUrlParams = () => {
 
 export const getURLParamString = params => {
   // Use isPlainObject to remove objects, but keep arrays.
-  const filtered = pickBy((v, k) => !isPlainObject(v), params);
+  const filtered = pickBy(
+    (v, k) => !isPlainObject(v) && !isUndefined(v),
+    params
+  );
   return toPairs(filtered)
     .map(
       ([key, value]) =>
