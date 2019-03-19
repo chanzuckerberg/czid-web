@@ -11,5 +11,8 @@
 
   .page_content {
     flex: 1 1 auto;
+    // TODO(tiago): remove hack. We can set display: flex, but then we need to guarantee
+    // that all pages support flexible layout and render correctly
+    height: calc(100% - 60px);
   }
 }
