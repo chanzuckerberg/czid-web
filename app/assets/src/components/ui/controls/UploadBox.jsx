@@ -1,9 +1,8 @@
 // Allows picking a file and also uploading the file to a URL.
 import PropTypes from "prop-types";
 import React from "react";
-import axios from "axios/index";
-import axiosRetry from "axios-retry";
 import FilePicker from "./FilePicker";
+import { uploadFileToUrlWithRetries } from "~/api";
 
 class UploadBox extends React.Component {
   constructor(props) {
@@ -15,31 +14,14 @@ class UploadBox extends React.Component {
   }
 
   uploadFileToURL = (file, url) => {
-    const config = {
+    uploadFileToUrlWithRetries(file, url, {
       onUploadProgress: e => {
         const percent = Math.round(e.loaded * 100 / e.total);
         this.setState({ uploadProgress: percent });
-      }
-    };
-
-    // Set a 10s response timeout
-    const client = axios.create();
-    client.defaults.timeout = 10000;
-
-    // Retry up to 5 times with a 30s delay. axiosRetry interceptor means that 'catch' won't be called until all tries happen.
-    axiosRetry(client, {
-      retries: 5,
-      retryDelay: () => 30000,
-      retryCondition: () => true
+      },
+      onSuccess: () => this.props.handleSuccess(file),
+      onError: err => this.props.handleFailure(file, err)
     });
-    client
-      .put(url, file, config)
-      .then(() => {
-        this.props.handleSuccess(file);
-      })
-      .catch(err => {
-        this.props.handleFailure(file, err);
-      });
   };
 
   render() {
