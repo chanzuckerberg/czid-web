@@ -3,43 +3,42 @@
 
 .layout {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  height: 100%;
-  padding-bottom: 50px;
 
   .headerContainer {
     flex: 0 0 auto;
   }
 
   .mainContainer {
+    flex: 1;
     display: flex;
-    flex: 1 0 auto;
 
     .leftPane:not(:empty) {
-      flex: 0 0 auto;
       border-right: 2px solid $off-white;
+      flex: 0 0 auto;
+      overflow: auto;
       padding: 30px 20px;
-      background-color: blue;
     }
 
-    .viewContainer {
+    .centerPane {
+      flex: 1 0 auto;
       display: flex;
       flex-direction: column;
-      flex: 1 1 auto;
-      padding: 30px 20px;
-      background-color: red;
+
+      .viewContainer {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        padding: 30px 20px;
+      }
     }
 
     .rightPane:not(:empty) {
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      flex: 0 0 auto;
       border-left: 2px solid $off-white;
+      flex: 0 0 auto;
+      overflow: auto;
       padding: 30px 20px;
-      height: 100%;
-      overflow-y: scroll;
-      background-color: green;
     }
   }
 }
