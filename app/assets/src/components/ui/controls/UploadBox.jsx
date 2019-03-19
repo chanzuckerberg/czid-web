@@ -22,16 +22,18 @@ class UploadBox extends React.Component {
       }
     };
 
-    // Add up to 3 retries with retry-axios
+    // Set a 10s response timeout
     const client = axios.create();
-    client.defaults.timeout = 10;
+    client.defaults.timeout = 10000;
+
+    // Retry up to 5 times with a 30s delay. axiosRetry interceptor means that 'catch' won't be called until all tries happen.
     axiosRetry(client, {
       retries: 5,
       retryDelay: () => 30000,
       retryCondition: () => true
     });
     client
-      .put("awhefoihewaf", file, config)
+      .put(url, file, config)
       .then(() => {
         this.props.handleSuccess(file);
       })
@@ -46,7 +48,6 @@ class UploadBox extends React.Component {
 
     // Check and start upload
     if (fileToUpload && this.props.startUpload && !this.state.uploadRan) {
-      console.log("1:44pm want to start upload");
       this.setState({ uploadRan: true }, () =>
         this.uploadFileToURL(fileToUpload, this.props.url)
       );
