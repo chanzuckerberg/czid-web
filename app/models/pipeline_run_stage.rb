@@ -251,6 +251,7 @@ class PipelineRunStage < ApplicationRecord
     # Upload DAG to S3
     sample = pipeline_run.sample
     file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
+    alignment_config = pipeline_run.alignment_config
     attribute_dict = {
       fastq1: sample.input_files[0].name,
       file_ext: file_ext,
