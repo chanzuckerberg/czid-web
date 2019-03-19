@@ -10,6 +10,7 @@ import "react-virtualized/styles.css";
 import { find, map } from "lodash";
 import cx from "classnames";
 
+import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import PlusIcon from "~ui/icons/PlusIcon";
 import { humanize } from "~/helpers/strings";
@@ -82,18 +83,45 @@ class BaseTable extends React.Component {
     );
   };
 
+  renderSelectableCell = ({ cellData }) => {
+    const { selected, onSelectRow } = this.props;
+    const disabled = cellData === null || cellData === undefined;
+    return (
+      <Checkbox
+        checked={selected.has(cellData)}
+        onChange={onSelectRow}
+        value={disabled ? -1 : cellData}
+        disabled={disabled}
+      />
+    );
+  };
+
+  renderSelectableHeader = () => {
+    const { selectAllChecked, onSelectAllRows } = this.props;
+    return (
+      <Checkbox
+        checked={selectAllChecked}
+        onChange={onSelectAllRows}
+        value={"all"}
+      />
+    );
+  };
+
   render() {
     const {
       defaultCellRenderer,
       defaultHeaderHeight,
       defaultRowHeight,
+      defaultSelectColumnWidth,
       initialActiveColumns,
       onRowsRendered,
       forwardRef,
       onSort,
+      rowClassName,
       rowCount,
       rowGetter,
       rowRenderer,
+      selectableKey,
       sortable,
       sortBy,
       sortDirection
@@ -112,7 +140,7 @@ class BaseTable extends React.Component {
               height={height}
               onRowsRendered={onRowsRendered}
               ref={forwardRef}
-              rowClassName={cs.row}
+              rowClassName={cx(rowClassName, cs.row)}
               rowCount={rowCount}
               rowGetter={rowGetter}
               rowHeight={defaultRowHeight}
@@ -122,6 +150,16 @@ class BaseTable extends React.Component {
               sortDirection={sortable && sortDirection}
               width={width}
             >
+              {selectableKey && (
+                <Column
+                  className={cs.selectableColumn}
+                  dataKey={selectableKey}
+                  headerRenderer={this.renderSelectableHeader}
+                  cellRenderer={this.renderSelectableCell}
+                  disableSort={true}
+                  width={defaultSelectColumnWidth}
+                />
+              )}
               {columnOrder.map(dataKey => {
                 const columnProps = find(columns, { dataKey: dataKey });
                 const { cellRenderer, className, ...extraProps } = columnProps;
@@ -175,7 +213,9 @@ class BaseTable extends React.Component {
 BaseTable.defaultProps = {
   defaultColumnWidth: 60,
   defaultHeaderHeight: 50,
-  defaultRowHeight: 30
+  defaultRowHeight: 30,
+  defaultSelectColumnWidth: 30,
+  selected: new Set()
 };
 
 BaseTable.propTypes = {
@@ -188,6 +228,7 @@ BaseTable.propTypes = {
   defaultColumnWidth: PropTypes.number,
   defaultHeaderHeight: PropTypes.number,
   defaultRowHeight: PropTypes.number,
+  defaultSelectColumnWidth: PropTypes.number,
   // Set of dataKeys of columns to be shown by default
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
   onRowsRendered: PropTypes.func,
@@ -196,12 +237,21 @@ BaseTable.propTypes = {
     PropTypes.func,
     PropTypes.shape({ current: PropTypes.instanceOf(Element) })
   ]),
+  rowClassName: PropTypes.string,
   rowGetter: PropTypes.func.isRequired,
   rowCount: PropTypes.number.isRequired,
   rowRenderer: PropTypes.func,
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
-  sortDirection: PropTypes.string
+  sortDirection: PropTypes.string,
+
+  // make the table selectable, by setting a selectable key
+  // the tables will check for the selectable key in the selected set/array
+  selectableKey: PropTypes.string,
+  selected: PropTypes.instanceOf(Set),
+  onSelectRow: PropTypes.func,
+  onSelectAllRows: PropTypes.func,
+  selectAllChecked: PropTypes.bool
 };
 
 export default BaseTable;

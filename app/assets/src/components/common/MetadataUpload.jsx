@@ -7,10 +7,12 @@ import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
 import { getProjectMetadataFields, getAllHostGenomes } from "~/api";
+import LoadingIcon from "~ui/icons/LoadingIcon";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
 import IssueGroup from "./IssueGroup";
+import { getURLParamString } from "~/helpers/url";
 
 const map = _fp.map.convert({ cap: false });
 
@@ -22,7 +24,8 @@ class MetadataUpload extends React.Component {
       warnings: []
     },
     projectMetadataFields: null,
-    hostGenomes: []
+    hostGenomes: [],
+    validatingCSV: false
   };
 
   async componentDidMount() {
@@ -47,10 +50,11 @@ class MetadataUpload extends React.Component {
   };
 
   // MetadataCSVUpload validates metadata before calling onMetadataChangeCSV.
-  onMetadataChangeCSV = ({ metadata, issues }) => {
+  onMetadataChangeCSV = ({ metadata, issues, validatingCSV }) => {
     this.props.onMetadataChange({ metadata, issues, wasManual: false });
     this.setState({
-      issues
+      issues,
+      validatingCSV
     });
   };
 
@@ -58,6 +62,17 @@ class MetadataUpload extends React.Component {
   // This happens when Continue is clicked in the parent component.
   onMetadataChangeManual = ({ metadata }) => {
     this.props.onMetadataChange({ metadata, wasManual: true });
+  };
+
+  getCSVUrl = () => {
+    const params = {
+      ...(this.props.samplesAreNew
+        ? { new_sample_names: map("name", this.props.samples) }
+        : {}),
+      project_id: this.props.project.id
+    };
+
+    return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
   };
 
   renderTab = () => {
@@ -97,9 +112,15 @@ class MetadataUpload extends React.Component {
             project={this.props.project}
             samplesAreNew={this.props.samplesAreNew}
           />
-          <a className={cs.link} href="/metadata/metadata_template_csv">
+          <a className={cs.link} href={this.getCSVUrl()}>
             Download Metadata CSV Template
           </a>
+          {this.state.validatingCSV && (
+            <div className={cs.validationMessage}>
+              <LoadingIcon className={cs.loadingIcon} />
+              Validating metadata...
+            </div>
+          )}
         </React.Fragment>
       );
     }

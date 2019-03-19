@@ -22,18 +22,26 @@ class MetadataController < ApplicationController
   end
 
   def metadata_template_csv
-    send_data metadata_template_csv_helper, filename: 'metadata_template.csv'
+    # The project to pull metadata_fields and existing samples (if applicable) from.
+    project_id = params[:project_id]
+    # The names of new samples that are being created.
+    new_sample_names = params[:new_sample_names]
+    send_data metadata_template_csv_helper(project_id, new_sample_names), filename: 'metadata_template.csv'
   end
 
   def validate_csv_for_new_samples
     metadata = params[:metadata]
     samples_data = params[:samples]
 
+    projects = current_power.projects
+                            .where(id: samples_data.map { |sample| sample["project_id"] }.uniq)
+                            .includes(:metadata_fields).to_a
+
     # Create temporary samples for metadata validation.
     samples = samples_data.map do |sample|
       Sample.new(
         name: sample["name"],
-        project: current_power.projects.find_by(id: sample["project_id"])
+        project: projects.select { |project| project.id == sample["project_id"] }.first
       )
     end
 

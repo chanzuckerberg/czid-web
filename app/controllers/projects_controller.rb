@@ -71,7 +71,10 @@ class ProjectsController < ApplicationController
         tissues_by_project_id = {}
         min_sample_by_project_id = {}
         owner_by_project_id = {}
-        samples.includes(:host_genome, :user).each do |s|
+        locations_by_project_id = {}
+        total_reads = 0
+        adjusted_remaining_reads = 0
+        samples.includes(:host_genome, :user, :pipeline_runs).each do |s|
           (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome && s.host_genome.name
           # TODO: sample_tissue column is deprecated, retrieve sample_type from Metadatum model instead
           (tissues_by_project_id[s.project_id] ||= Set.new) << s.sample_tissue if s.sample_tissue
@@ -80,13 +83,21 @@ class ProjectsController < ApplicationController
             min_sample_by_project_id[s.project_id] = s.id
             owner_by_project_id[s.project_id] = s.user ? s.user.name : nil
           end
+          (locations_by_project_id[s.project_id] ||= Set.new) << s.sample_location if s.sample_location
+          unless s.pipeline_runs.empty?
+            total_reads += s.pipeline_runs[0].total_reads || 0
+            adjusted_remaining_reads += s.pipeline_runs[0].adjusted_remaining_reads || 0
+          end
         end
         extended_projects = projects.map do |project|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
             number_of_samples: sample_count_by_project_id[project.id] || 0,
             hosts: host_genome_names_by_project_id[project.id] || [],
             tissues: tissues_by_project_id[project.id] || [],
-            owner: owner_by_project_id[project.id]
+            owner: owner_by_project_id[project.id],
+            locations: locations_by_project_id[project.id] || [],
+            total_reads: total_reads,
+            adjusted_remaining_reads: adjusted_remaining_reads
           )
         end
         render json: extended_projects
@@ -378,7 +389,11 @@ class ProjectsController < ApplicationController
   def validate_metadata_csv
     metadata = params[:metadata]
 
-    project_samples = current_power.project_samples(@project)
+    project_samples = current_power.project_samples(@project).includes(
+      project: [:metadata_fields],
+      host_genome: [:metadata_fields],
+      metadata: [:metadata_field]
+    )
     issues = validate_metadata_csv_for_samples(project_samples.to_a, metadata)
     render json: {
       status: "success",
@@ -389,7 +404,7 @@ class ProjectsController < ApplicationController
   def upload_metadata
     metadata = params[:metadata]
 
-    project_samples = current_power.project_samples(@project)
+    project_samples = current_power.project_samples(@project).includes(host_genome: [:metadata_fields], metadata: :metadata_field)
 
     errors = upload_metadata_for_samples(project_samples.to_a, metadata)
     render json: {
@@ -401,7 +416,9 @@ class ProjectsController < ApplicationController
   def metadata_fields
     project_ids = (params[:projectIds] || []).map(&:to_i)
 
-    render json: current_power.projects.where(id: project_ids).map(&:metadata_fields).flatten.map(&:field_info)
+    render json: current_power.projects.where(id: project_ids)
+      .includes(metadata_fields: [:host_genomes])
+                              .map(&:metadata_fields).flatten.map(&:field_info)
   end
 
   # TODO: Consider consolidating into a general sample validator

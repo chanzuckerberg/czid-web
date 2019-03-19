@@ -27,7 +27,7 @@ class SamplesController < ApplicationController
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details, :dimensions, :all,
                    :show_sample_names, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :upload].freeze
+                   :search_suggestions, :upload, :validate_sample_files].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload, :bulk_upload_with_metadata], fallback: :devise
@@ -511,8 +511,8 @@ class SamplesController < ApplicationController
       project_ids = samples.distinct.pluck(:project_id)
       host_genome_ids = samples.distinct.pluck(:host_genome_id)
 
-      project_fields = Project.where(id: project_ids).map(&:metadata_fields)
-      host_genome_fields = HostGenome.where(id: host_genome_ids).map(&:metadata_fields)
+      project_fields = Project.where(id: project_ids).includes(metadata_fields: [:host_genomes]).map(&:metadata_fields)
+      host_genome_fields = HostGenome.where(id: host_genome_ids).includes(metadata_fields: [:host_genomes]).map(&:metadata_fields)
       results = (project_fields.flatten & host_genome_fields.flatten).map(&:field_info)
     end
 
@@ -811,6 +811,20 @@ class SamplesController < ApplicationController
         render json: { displayed_data: @file_list }
       end
     end
+  end
+
+  def validate_sample_files
+    sample_files = params[:sample_files]
+
+    files_valid = []
+
+    if sample_files
+      files_valid = sample_files.map do |file|
+        !InputFile::FILE_REGEX.match(file).nil?
+      end
+    end
+
+    render json: files_valid
   end
 
   # GET /samples/new

@@ -355,10 +355,25 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
   if (window.analytics) window.analytics.track(eventName, eventData);
 };
 
-const validateSampleNames = (projectId, sampleNames) =>
-  postWithCSRF(`/projects/${projectId}/validate_sample_names`, {
+const validateSampleNames = (projectId, sampleNames) => {
+  if (!projectId) {
+    return Promise.resolve(sampleNames);
+  }
+
+  return postWithCSRF(`/projects/${projectId}/validate_sample_names`, {
     sample_names: sampleNames
   });
+};
+
+const validateSampleFiles = sampleFiles => {
+  if (!sampleFiles || sampleFiles.length == 0) {
+    return Promise.resolve(sampleFiles);
+  }
+
+  return postWithCSRF(`/samples/validate_sample_files`, {
+    sample_files: sampleFiles
+  });
+};
 
 const getSearchSuggestions = ({ categories, query }) =>
   get("/search_suggestions", {
@@ -368,10 +383,18 @@ const getSearchSuggestions = ({ categories, query }) =>
     }
   });
 
+const createBackground = ({ description, name, sampleIds }) =>
+  postWithCSRF("/backgrounds", {
+    name,
+    description,
+    sample_ids: sampleIds
+  });
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
   bulkUploadWithMetadata,
+  createBackground,
   createProject,
   createSample,
   deleteAsync,
@@ -409,5 +432,6 @@ export {
   validateManualMetadataForNewSamples,
   validateMetadataCSVForNewSamples,
   validateMetadataCSVForProject,
-  validateSampleNames
+  validateSampleNames,
+  validateSampleFiles
 };

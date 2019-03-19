@@ -93,6 +93,8 @@ class InfiniteTable extends React.Component {
     const {
       defaultCellRenderer,
       minimumBatchSize,
+      onSelectRow,
+      onSelectAllRows,
       threshold,
       ...extraProps
     } = this.props;
@@ -117,6 +119,8 @@ class InfiniteTable extends React.Component {
               }
               forwardRef={registerChild}
               onRowsRendered={onRowsRendered}
+              onSelectAllRows={onSelectAllRows}
+              onSelectRow={onSelectRow}
               rowCount={rowCount}
               rowGetter={this.getRow}
               rowRenderer={this.rowRenderer}
@@ -143,6 +147,8 @@ InfiniteTable.propTypes = {
   // if it returns less rows than requested, InfiniteTable interprets that
   // as end of page
   onLoadRows: PropTypes.func,
+  onSelectRow: PropTypes.func,
+  onSelectAllRows: PropTypes.func,
   rowCount: PropTypes.number,
   threshold: PropTypes.number
 };

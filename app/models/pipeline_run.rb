@@ -646,29 +646,30 @@ class PipelineRun < ApplicationRecord
     downloaded_byteranges_path = PipelineRun.download_file(byteranges_json_s3_path, local_json_path)
     taxon_byteranges_csv_file = "#{local_json_path}/taxon_byteranges"
     hash_array_json2csv(downloaded_byteranges_path, taxon_byteranges_csv_file, %w[taxid hit_type first_byte last_byte])
+
     Syscall.run_in_dir(local_json_path, "sed", "-e", "s/$/,#{id}/", "-i", "taxon_byteranges")
-    Syscall.run_in_dir(local_json_path, "mysqlimport --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --fields-terminated-by=',' --replace --local --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id idseq_#{Rails.env} taxon_byteranges")
+    success = Syscall.run_in_dir(local_json_path, "mysqlimport --user=$DB_USERNAME --host=#{rds_host} --password=$DB_PASSWORD --fields-terminated-by=',' --replace --local --columns=taxid,hit_type,first_byte,last_byte,pipeline_run_id idseq_#{Rails.env} taxon_byteranges")
+    LogUtil.log_err_and_airbrake("PipelineRun #{id} failed db_load_byteranges import") unless success
     Syscall.run("rm", "-f", downloaded_byteranges_path)
   end
 
   def s3_file_for(output)
+    # This function assumes that pipeline_version has been set and is assembly-enabled (>=3.1) for
+    # taxon_counts/taxon_byteranges/contigs/contig_counts.
+    unless pipeline_version.present? || finalized
+      # No need to warn if finalized (likely failed)
+      LogUtil.log_err_and_airbrake("s3_file_for was called without a pipeline_version for PR #{id}")
+    end
+
     case output
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     when "amr_counts"
       "#{postprocess_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
     when "taxon_counts"
-      if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
-        "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
-      else
-        "#{alignment_output_s3_path}/#{taxon_counts_json_name}"
-      end
+      "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
     when "taxon_byteranges"
-      if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
-        "#{postprocess_output_s3_path}/#{REFINED_TAXID_BYTERANGE_JSON_NAME}"
-      else
-        "#{postprocess_output_s3_path}/#{TAXID_BYTERANGE_JSON_NAME}"
-      end
+      "#{postprocess_output_s3_path}/#{REFINED_TAXID_BYTERANGE_JSON_NAME}"
     when "contigs"
       "#{postprocess_output_s3_path}/#{ASSEMBLED_STATS_NAME}"
     when "contig_counts"

@@ -36,7 +36,7 @@ class TaxonLineage < ApplicationRecord
   # category_A and category_C, for example, we will keep only category_A.
   # (When iterating over the hash key order is guaranteed to be the same as insertion order.)
   PRIORITY_PATHOGENS = {
-    "categoryA" => [
+    "categoryA" => Set[
       "Bacillus anthracis", "Clostridium botulinum", "Yersinia pestis",
       "orthopoxvirus", "Variola virus", "parapoxvirus", "yatapoxvirus", "molluscipoxvirus",
       "Francisella tularensis",
@@ -46,7 +46,7 @@ class TaxonLineage < ApplicationRecord
       "Flavivirus", "Dengue virus",
       "Filoviridae", "Ebolavirus", "Marburgvirus"
     ],
-    "categoryB" => [
+    "categoryB" => Set[
       "Burkholderia pseudomallei", "Coxiella burnetii", "Brucella", "Burkholderia mallei",
       "Chlaydia psittaci", "Ricinus communis", "Clostridium perfringens", "Staphylococcus aureus",
       "Rickettsia prowazekii", "Escherichia coli", "Vibrio cholerae", "Vibrio parahaemolyticus", "Vibrio vulnificus",
@@ -57,7 +57,7 @@ class TaxonLineage < ApplicationRecord
       "Eastern equine encephalitis virus", "Western equine encephalitis virus", "Japanese encephalitis virus",
       "Saint Louis encephalitis virus", "Yellow fever virus", "Chikungunya virus", "Zika virus"
     ],
-    "categoryC" => [
+    "categoryC" => Set[
       "Nipah henipavirus", "Hendra henipavirus", "Severe fever with thrombocytopenia virus", "Heartland virus",
       "Omsk hemorrhagic fever virus", "Kyasanur Forest disease virus", "Tick-borne encephalitis virus",
       "Powassan virus", "Mycobacterium tuberculosis",
@@ -92,26 +92,17 @@ class TaxonLineage < ApplicationRecord
   end
 
   def self.fill_lineage_details(tax_map, pipeline_run_id)
-    # Get list of tax_ids to look up in TaxonLineage rows. Include family_taxids.
-    tax_ids = tax_map.map { |x| x['tax_id'] }
-    tax_ids |= tax_map.map { |x| x['family_taxid'] }
-
-    # Find the right lineage entry to use based on the version. Lineage version_end
-    # is incremented when the index is updated and the record is still valid, so
-    # lineage_version should be between the inclusive range.
-    lineage_version = PipelineRun.find(pipeline_run_id).alignment_config.lineage_version
-    lineage_by_taxid = {}
-    TaxonLineage.where(taxid: tax_ids).where("#{lineage_version} BETWEEN version_start AND version_end").each do |x|
-      lineage_by_taxid[x.taxid] = x.as_json
-    end
+    t2 = Time.now.to_f
 
     # Set lineage info from the first positive tax_id of the species, genus, or family levels.
     # Preserve names of the negative 'non-specific' nodes.
     # Used for the tree view and sets appropriate lineage info at each node.
+    lineage_by_taxid = fetch_lineage_by_taxid(tax_map, pipeline_run_id)
 
     # Make a new hash with 'species_taxid', 'genus_taxid', etc.
     missing_vals = Hash[MISSING_LINEAGE_ID.map { |k, v| [k.to_s + "_taxid", v] }]
 
+    name_columns = column_names.select { |cn| cn.include?("_name") }
     tax_map.each do |tax|
       # Grab the appropriate lineage info by the first positive tax level
       lineage_id = most_specific_positive_id(tax)
@@ -120,7 +111,6 @@ class TaxonLineage < ApplicationRecord
                        else
                          missing_vals.dup
                        end
-
       tax['lineage']['taxid'] = tax['tax_id']
       tax['lineage']['species_taxid'] = tax['species_taxid']
       tax['lineage']['genus_taxid'] = tax['genus_taxid']
@@ -133,13 +123,16 @@ class TaxonLineage < ApplicationRecord
       # Tag pathogens
       pathogen_tags = []
       PRIORITY_PATHOGENS.each do |category, pathogen_list|
-        column_names.select { |cn| cn.include?("_name") }.each do |col|
+        name_columns.each do |col|
           pathogen_tags |= [category] if pathogen_list.include?(tax['lineage'][col])
         end
       end
       best_tag = pathogen_tags[0] # first element is highest-priority element (see PRIORITY_PATHOGENS documentation)
       tax['pathogenTag'] = best_tag
     end
+
+    t3 = Time.now.to_f
+    Rails.logger.info "tax_map took #{(t3 - t2).round(2)}s"
 
     tax_map
   end
@@ -171,5 +164,32 @@ class TaxonLineage < ApplicationRecord
     level_str = 'genus' if tax_level == TaxonCount::TAX_LEVEL_GENUS
     level_str = 'family' if tax_level == TaxonCount::TAX_LEVEL_FAMILY
     level_str
+  end
+
+  def self.fetch_lineage_by_taxid(tax_map, pipeline_run_id)
+    t0 = Time.now.to_f
+    # Get list of tax_ids to look up in TaxonLineage rows. Include family_taxids.
+
+    tax_ids = tax_map.map { |x| x['tax_id'] }
+    tax_ids |= tax_map.map { |x| x['family_taxid'] }
+
+    # Find the right lineage entry to use based on the version. Lineage version_end
+    # is incremented when the index is updated and the record is still valid, so
+    # lineage_version should be between the inclusive range.
+    lineage_version = PipelineRun.find(pipeline_run_id).alignment_config.lineage_version
+    lineage_by_taxid = {}
+
+    # Use pluck because it saved 5s on 10k rows in testing
+    # lineage_by_taxid[x.taxid] = x.as_json
+    TaxonLineage
+      .where(taxid: tax_ids).where("#{lineage_version} BETWEEN version_start AND version_end")
+      .pluck(:taxid, :species_taxid, :genus_taxid, :family_taxid)
+      .each do |arr|
+      lineage_by_taxid[arr[0]] = { taxid: arr[0], species_taxid: arr[1], genus_taxid: arr[2], family_taxid: arr[3] }
+    end
+    t1 = Time.now.to_f
+    Rails.logger.info "fetch_lineage_by_taxid took #{(t1 - t0).round(2)}s"
+
+    lineage_by_taxid
   end
 end

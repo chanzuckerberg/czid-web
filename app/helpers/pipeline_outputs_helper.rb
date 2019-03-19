@@ -146,7 +146,9 @@ module PipelineOutputsHelper
     uri_parts = uri.split("/", 4)
     bucket = uri_parts[2]
     key = uri_parts[3]
-    taxon_location = pipeline_run.taxon_byteranges.find_by(taxid: taxid, hit_type: hit_type) if pipeline_run
+    # Take the last matching taxon_byterange in case there are duplicate records due to a previous
+    # bug (see IDSEQ-881)
+    taxon_location = pipeline_run.taxon_byteranges.where(taxid: taxid, hit_type: hit_type).last if pipeline_run
     return '' if taxon_location.nil?
     resp = Client.get_object(bucket: bucket, key: key, range: "bytes=#{taxon_location.first_byte}-#{taxon_location.last_byte}")
     resp.body.read

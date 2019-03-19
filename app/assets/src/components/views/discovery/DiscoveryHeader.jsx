@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import FiltersIcon from "~ui/icons/FiltersIcon";
 import InfoIcon from "~ui/icons/InfoIcon";
-import Label from "~/components/ui/labels/Label";
+import Label from "~ui/labels/Label";
 import Tabs from "~ui/controls/Tabs";
 import SearchBox from "~ui/controls/SearchBox";
 import cs from "./discovery_header.scss";
@@ -24,21 +24,43 @@ class DiscoveryHeader extends React.Component {
     onTabChange(tab);
   };
 
-  handleSuggestionSelected = (_, { result }) => {
-    const { onSuggestionSelected } = this.props;
-    onSuggestionSelected && onSuggestionSelected(result);
+  handleSearchResultSelected = (_, { result }) => {
+    const { onSearchResultSelected } = this.props;
+
+    // TODO(tiago): refactor search suggestions endpoint to return standard format data
+    // category "Taxon": key: "taxon", value: taxid, text: title
+    // category "Project": key: "project", value: id, text: title
+    // category "Sample": key: "sample", value: sample_ids[0], text: title
+    // category "Location": key: "location", value: id, text: title
+    // category "Host": key: "host", value: id, text: title
+    // category "Tissue": key: "tissue", value: id, text: title
+    // category "Uploader": key: "uploader", value: id[0], text: title
+    const value = Array.isArray(result.id)
+      ? result.id[0]
+      : result.id ||
+        result.taxid ||
+        (result.sample_ids && result.sample_ids[0]);
+
+    const parsedResult = {
+      key: result.category.toLowerCase(),
+      value: value,
+      text: result.title
+    };
+
+    onSearchResultSelected && onSearchResultSelected(parsedResult);
   };
 
   render() {
     const {
       filterCount,
-      onEnter,
+      onSearchEnterPressed,
       onFilterToggle,
       onStatsToggle,
       tabs
     } = this.props;
     const { currentTab } = this.state;
 
+    // TODO(tiago): constrian what categories to ask for in the search box.
     return (
       <div className={cs.header}>
         <div className={cs.filtersTrigger} onClick={onFilterToggle}>
@@ -53,8 +75,8 @@ class DiscoveryHeader extends React.Component {
           <SearchBox
             category
             serverSearchAction="search_suggestions"
-            onResultSelect={this.handleSuggestionSelected}
-            onEnter={onEnter}
+            onResultSelect={this.handleSearchResultSelected}
+            onEnter={onSearchEnterPressed}
             initialValue=""
             placeholder="Search"
           />
@@ -93,9 +115,9 @@ DiscoveryHeader.propTypes = {
   ).isRequired,
   initialTab: PropTypes.string,
   onFilterToggle: PropTypes.func,
-  onEnter: PropTypes.func,
   onStatsToggle: PropTypes.func,
-  onSuggestionSelected: PropTypes.func,
+  onSearchEnterPressed: PropTypes.func,
+  onSearchResultSelected: PropTypes.func,
   onTabChange: PropTypes.func
 };
 
