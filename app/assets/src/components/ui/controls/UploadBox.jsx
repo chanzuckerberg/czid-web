@@ -2,6 +2,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 import axios from "axios/index";
+import * as retryAxios from "retry-axios";
 import FilePicker from "./FilePicker";
 
 class UploadBox extends React.Component {
@@ -20,7 +21,18 @@ class UploadBox extends React.Component {
         this.setState({ uploadProgress: percent });
       }
     };
-    axios
+
+    // Add up to 3 retries with retry-axios
+    const localAxios = axios.create();
+    localAxios.defaults.raxConfig = {
+      instance: localAxios,
+      onRetryAttempt: err => {
+        console.log("Time to retry: " + err);
+      }
+    };
+    retryAxios.attach(localAxios);
+    console.log("time is 1:31pm");
+    localAxios
       .put(url, file, config)
       .then(() => {
         this.props.handleSuccess(file);
@@ -36,6 +48,7 @@ class UploadBox extends React.Component {
 
     // Check and start upload
     if (fileToUpload && this.props.startUpload && !this.state.uploadRan) {
+      console.log("1:44pm want to start upload");
       this.setState({ uploadRan: true }, () =>
         this.uploadFileToURL(fileToUpload, this.props.url)
       );
