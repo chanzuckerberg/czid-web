@@ -280,6 +280,7 @@ const uploadFileToUrl = async (
     .catch(onError);
 };
 
+// Upload with retries with more resilient settings (e.g. for sample uploads)
 const uploadFileToUrlWithRetries = async (
   file,
   url,
