@@ -6,16 +6,19 @@
   margin: 20px 20px 18px 15px;
   align-items: center;
 
+  .icon {
+    color: $primary-light;
+    width: 30px;
+
+    &.closed {
+      color: $light-grey;
+    }
+  }
   .filtersTrigger {
     cursor: pointer;
     flex: 0 0 auto;
     position: relative;
     margin-right: 25px;
-
-    .filtersIcon {
-      color: $primary-light;
-      width: 30px;
-    }
 
     .filtersCounter {
       background-color: $lightest-grey;
@@ -40,11 +43,6 @@
     cursor: pointer;
     flex: 0 0 auto;
     margin-left: 25px;
-
-    .statsIcon {
-      color: $primary-light;
-      width: 30px;
-    }
   }
 
   .tabs {

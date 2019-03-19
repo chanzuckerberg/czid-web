@@ -6,6 +6,7 @@ import Label from "~ui/labels/Label";
 import Tabs from "~ui/controls/Tabs";
 import SearchBox from "~ui/controls/SearchBox";
 import cs from "./discovery_header.scss";
+import cx from "classnames";
 
 class DiscoveryHeader extends React.Component {
   constructor(props) {
@@ -56,6 +57,8 @@ class DiscoveryHeader extends React.Component {
       onSearchEnterPressed,
       onFilterToggle,
       onStatsToggle,
+      showFilters,
+      showStats,
       tabs
     } = this.props;
     const { currentTab } = this.state;
@@ -64,7 +67,9 @@ class DiscoveryHeader extends React.Component {
     return (
       <div className={cs.header}>
         <div className={cs.filtersTrigger} onClick={onFilterToggle}>
-          <FiltersIcon className={cs.filtersIcon} />
+          <FiltersIcon
+            className={cx(cs.filtersIcon, cs.icon, !showFilters && cs.closed)}
+          />
           <Label
             className={cs.filtersCounter}
             circular
@@ -90,7 +95,9 @@ class DiscoveryHeader extends React.Component {
         />
         <div className={cs.blankFill} />
         <div className={cs.statsTrigger} onClick={onStatsToggle}>
-          <InfoIcon className={cs.statsIcon} />
+          <InfoIcon
+            className={cx(cs.statsIcon, cs.icon, !showStats && cs.closed)}
+          />
         </div>
       </div>
     );
@@ -118,7 +125,9 @@ DiscoveryHeader.propTypes = {
   onStatsToggle: PropTypes.func,
   onSearchEnterPressed: PropTypes.func,
   onSearchResultSelected: PropTypes.func,
-  onTabChange: PropTypes.func
+  onTabChange: PropTypes.func,
+  showFilters: PropTypes.bool,
+  showStats: PropTypes.bool
 };
 
 export default DiscoveryHeader;
