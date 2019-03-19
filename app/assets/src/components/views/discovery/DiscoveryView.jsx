@@ -265,16 +265,18 @@ class DiscoveryView extends React.Component {
 
     return (
       <div className={cs.layout}>
-        <DiscoveryHeader
-          initialTab={currentTab}
-          tabs={tabs}
-          onTabChange={this.handleTabChange}
-          filterCount={filterCount}
-          onFilterToggle={this.handleFilterToggle}
-          onStatsToggle={this.handleStatsToggle}
-          onSearchResultSelected={this.handleSearchSelected}
-        />
-        <Divider style="medium" />
+        <div className={cs.headerContainer}>
+          <DiscoveryHeader
+            initialTab={currentTab}
+            tabs={tabs}
+            onTabChange={this.handleTabChange}
+            filterCount={filterCount}
+            onFilterToggle={this.handleFilterToggle}
+            onStatsToggle={this.handleStatsToggle}
+            onSearchResultSelected={this.handleSearchSelected}
+          />
+          <Divider style="medium" />
+        </div>
         <div className={cs.mainContainer}>
           <div className={cs.leftPane}>
             {showFilters && (
@@ -288,20 +290,22 @@ class DiscoveryView extends React.Component {
               />
             )}
           </div>
-          <NarrowContainer className={cs.viewContainer}>
-            {currentTab == "projects" && <ProjectsView projects={projects} />}
-            {currentTab == "samples" && (
-              <SamplesView
-                ref={samplesView => (this.samplesView = samplesView)}
-                onLoadRows={this.handleLoadSampleRows}
-                samples={samples}
-                selectableIds={sampleIds}
-              />
-            )}
-            {currentTab == "visualizations" && (
-              <VisualizationsView visualizations={visualizations} />
-            )}
-          </NarrowContainer>
+          <div className={cs.centerPane}>
+            <NarrowContainer className={cs.viewContainer}>
+              {currentTab == "projects" && <ProjectsView projects={projects} />}
+              {currentTab == "samples" && (
+                <SamplesView
+                  ref={samplesView => (this.samplesView = samplesView)}
+                  onLoadRows={this.handleLoadSampleRows}
+                  samples={samples}
+                  selectableIds={sampleIds}
+                />
+              )}
+              {currentTab == "visualizations" && (
+                <VisualizationsView visualizations={visualizations} />
+              )}
+            </NarrowContainer>
+          </div>
           <div className={cs.rightPane}>
             {["samples", "projects"].includes(currentTab) && (
               <DiscoverySidebar
