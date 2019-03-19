@@ -28,9 +28,11 @@ class NotificationComponent extends React.Component {
         <div className={cs.icon}>{this.getIcon(this.props.type)}</div>
         <div className={cs.content}>
           <div>{this.props.children}</div>
-          <div className={cs.actions} onClick={this.props.onClose}>
-            Dismiss
-          </div>
+          {this.props.onClose && (
+            <div className={cs.actions} onClick={this.props.onClose}>
+              Dismiss
+            </div>
+          )}
         </div>
       </div>
     );

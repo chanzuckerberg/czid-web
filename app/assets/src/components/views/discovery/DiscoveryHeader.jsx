@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import FiltersIcon from "~ui/icons/FiltersIcon";
 import InfoIcon from "~ui/icons/InfoIcon";
-import Label from "~/components/ui/labels/Label";
+import Label from "~ui/labels/Label";
 import Tabs from "~ui/controls/Tabs";
 import SearchBox from "~ui/controls/SearchBox";
 import cs from "./discovery_header.scss";

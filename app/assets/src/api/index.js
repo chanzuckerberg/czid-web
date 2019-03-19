@@ -383,10 +383,18 @@ const getSearchSuggestions = ({ categories, query }) =>
     }
   });
 
+const createBackground = ({ description, name, sampleIds }) =>
+  postWithCSRF("/backgrounds", {
+    name,
+    description,
+    sample_ids: sampleIds
+  });
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
   bulkUploadWithMetadata,
+  createBackground,
   createProject,
   createSample,
   deleteAsync,

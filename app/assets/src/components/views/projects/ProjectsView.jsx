@@ -1,12 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Table } from "~/components/visualizations/table";
-import { merge, pick } from "lodash";
-import GlobeIcon from "~ui/icons/GlobeIcon";
-import LockIcon from "~ui/icons/LockIcon";
+import { merge, pick } from "lodash/fp";
 import moment from "moment";
 import cs from "./projects_view.scss";
 import cx from "classnames";
+import PrivateProjectIcon from "../../ui/icons/PrivateProjectIcon";
+import PublicProjectIcon from "../../ui/icons/PublicProjectIcon";
 
 class ProjectsView extends React.Component {
   constructor(props) {
@@ -15,7 +15,7 @@ class ProjectsView extends React.Component {
     this.columns = [
       {
         dataKey: "public_access",
-        width: 30,
+        width: 36,
         label: "",
         cellRenderer: this.renderAccess
       },
@@ -48,9 +48,9 @@ class ProjectsView extends React.Component {
     return (
       <div>
         {publicAccess ? (
-          <GlobeIcon className={cx(cs.icon, cs.iconGlobe)} />
+          <PublicProjectIcon className={cx(cs.icon, cs.iconPublic)} />
         ) : (
-          <LockIcon className={cx(cs.icon, cs.iconLock)} />
+          <PrivateProjectIcon className={cx(cs.icon, cs.iconPrivate)} />
         )}
       </div>
     );
@@ -81,14 +81,12 @@ class ProjectsView extends React.Component {
     let data = projects.map(project => {
       return merge(
         {
-          details: pick(project, ["name", "description", "created_at", "owner"])
+          details: pick(["name", "description", "created_at", "owner"], project)
         },
-        pick(project, [
-          "public_access",
-          "hosts",
-          "tissues",
-          "number_of_samples"
-        ])
+        pick(
+          ["id", "public_access", "hosts", "tissues", "number_of_samples"],
+          project
+        )
       );
     });
 

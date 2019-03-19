@@ -94,6 +94,7 @@ class ProjectsController < ApplicationController
             number_of_samples: sample_count_by_project_id[project.id] || 0,
             hosts: host_genome_names_by_project_id[project.id] || [],
             tissues: tissues_by_project_id[project.id] || [],
+            owner: owner_by_project_id[project.id],
             locations: locations_by_project_id[project.id] || [],
             total_reads: total_reads,
             adjusted_remaining_reads: adjusted_remaining_reads

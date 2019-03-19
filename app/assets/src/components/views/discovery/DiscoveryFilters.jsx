@@ -9,6 +9,7 @@ import {
 } from "~/components/common/filters";
 import FilterTag from "~ui/controls/FilterTag";
 import cs from "./discovery_filters.scss";
+import cx from "classnames";
 
 class DiscoveryFilters extends React.Component {
   constructor(props) {
@@ -99,10 +100,10 @@ class DiscoveryFilters extends React.Component {
       visibilitySelected
     } = this.state;
 
-    const { host, location, time, tissue, visibility } = this.props;
+    const { className, host, location, time, tissue, visibility } = this.props;
 
     return (
-      <div className={cs.filtersContainer}>
+      <div className={cx(cs.filtersContainer, className)}>
         <div className={cs.filterContainer}>
           <TaxonFilter
             onChange={this.handleChange.bind(this, "taxonSelected")}
@@ -168,6 +169,8 @@ DiscoveryFilters.defaultProps = {
 };
 
 DiscoveryFilters.propTypes = {
+  className: PropTypes.string,
+
   // Filter options and counters
   host: PropTypes.array,
   location: PropTypes.array,

@@ -1,11 +1,11 @@
 @import "~styles/themes/colors";
-@import "~styles/typography";
+@import "~styles/themes/typography";
 
-// TODO (gdingle): fix me!!!!z
-
-.sideBar {
-  width: 400px;
-  padding: 10px 20px;
+.sidebar {
+  font-size: 12px;
+  width: 300px;
+  // flex: 1 1 0;
+  overflow-y: scroll;
 }
 
 .metadataContainer {
@@ -24,10 +24,11 @@
 
   // See SampleDetailsMode/metadata_section.scss
   .title {
+    @include font-body-s;
+
     color: $black;
     font-weight: 600;
     letter-spacing: 1.45px;
-    font-size: $font-size-body;
     text-transform: uppercase;
     padding: 0 10px;
     height: 50px;

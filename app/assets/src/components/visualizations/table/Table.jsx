@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { find, orderBy } from "lodash";
+import { difference, find, isEmpty, map, orderBy } from "lodash/fp";
 import { SortDirection } from "react-virtualized";
 
 import BaseTable from "./BaseTable";
@@ -25,33 +25,57 @@ class Table extends React.Component {
     return this.sortedData[index];
   };
 
+  isSelectAllChecked = () => {
+    const { data, selectableKey, selected } = this.props;
+
+    if (!selectableKey || !selected) return false;
+
+    return (
+      !isEmpty(data) &&
+      isEmpty(difference(map(selectableKey, data), Array.from(selected)))
+    );
+  };
+
   render() {
-    const { columns, data, sortable, ...tableProps } = this.props;
+    const {
+      columns,
+      data,
+      onSelectRow,
+      onSelectAllRows,
+      selected,
+      sortable,
+      ...tableProps
+    } = this.props;
 
     const { sortBy, sortDirection } = this.state;
 
-    const columnSortFunction = (find(columns, { dataKey: sortBy }) || {})
+    const columnSortFunction = (find({ dataKey: sortBy }, columns) || {})
       .sortFunction;
 
     const sortedData =
       sortable && sortBy
         ? orderBy(
-            this.props.data,
             [
               columnSortFunction
                 ? row => columnSortFunction(row[sortBy])
                 : sortBy
             ],
-            [sortDirection === SortDirection.ASC ? "asc" : "desc"]
+            [sortDirection === SortDirection.ASC ? "asc" : "desc"],
+            this.props.data
           )
         : data;
 
+    const selectAllChecked = this.isSelectAllChecked();
     return (
       <BaseTable
         columns={columns}
+        onSelectAllRows={onSelectAllRows}
+        onSelectRow={onSelectRow}
         onSort={this.handleSort}
         rowCount={sortedData.length}
         rowGetter={({ index }) => sortedData[index]}
+        selectAllChecked={selectAllChecked}
+        selected={selected}
         sortable={sortable}
         sortBy={sortBy}
         sortDirection={sortDirection}
@@ -62,7 +86,8 @@ class Table extends React.Component {
 }
 
 Table.defaultProps = {
-  data: []
+  data: [],
+  selected: new Set()
 };
 
 Table.propTypes = {
@@ -72,6 +97,10 @@ Table.propTypes = {
     })
   ).isRequired,
   data: PropTypes.array,
+  onSelectRow: PropTypes.func,
+  onSelectAllRows: PropTypes.func,
+  selectableKey: PropTypes.string,
+  selected: PropTypes.instanceOf(Set),
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string

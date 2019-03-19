@@ -182,7 +182,7 @@ export default class DiscoverySidebar extends React.Component {
               <span
                 className={cs.bar}
                 // TODO (gdingle): make width depend on container
-                style={{ width: percent * 2 - 14 + "px" }}
+                style={{ width: percent * 1.5 + "px" }}
               />
               {count}
             </dd>
@@ -201,7 +201,7 @@ export default class DiscoverySidebar extends React.Component {
     // Accordions when it changes.
     const dataKey = this.state.stats.totalReads;
     return (
-      <div className={cx(this.props.className, cs.sideBar)}>
+      <div className={cx(this.props.className, cs.sidebar)}>
         <div className={cs.metadataContainer}>
           <Accordion
             key={dataKey}
