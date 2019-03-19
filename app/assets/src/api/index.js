@@ -15,8 +15,8 @@ const postWithCSRF = async (url, params) => {
     // Just return the data.
     // resp also contains headers, status, etc. that we might use later.
     return resp.data;
-  } catch (error) {
-    return Promise.reject(error);
+  } catch (e) {
+    return Promise.reject(e.response.data);
   }
 };
 
