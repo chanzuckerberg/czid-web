@@ -2,19 +2,11 @@
   "output_dir_s3": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/postprocess",
   "targets": {
     "host_filter_out": [
-      <% if @host_genome == "human" %>
         "gsnap_filter_1.fa"
         <% if @attribute_dict[:input_file_count] > 1 %>
           , "gsnap_filter_2.fa"
           , "gsnap_filter_merged.fa"
         <% end %>
-     <% else %>
-        "subsampled_1.fa"
-        <% if @attribute_dict[:input_file_count] > 1 %>
-          , "subsampled_2.fa"
-          , "subsampled_merged.fa"
-        <% end %>
-     <% end %>
     ],
     "gsnap_out": [
         "gsnap.m8",
