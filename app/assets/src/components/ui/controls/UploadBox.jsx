@@ -2,7 +2,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 import axios from "axios/index";
-import * as retryAxios from "retry-axios";
+import axiosRetry from "axios-retry";
 import FilePicker from "./FilePicker";
 
 class UploadBox extends React.Component {
@@ -23,17 +23,15 @@ class UploadBox extends React.Component {
     };
 
     // Add up to 3 retries with retry-axios
-    const localAxios = axios.create();
-    localAxios.defaults.raxConfig = {
-      instance: localAxios,
-      onRetryAttempt: err => {
-        console.log("Time to retry: " + err);
-      }
-    };
-    retryAxios.attach(localAxios);
-    console.log("time is 1:31pm");
-    localAxios
-      .put(url, file, config)
+    const client = axios.create();
+    client.defaults.timeout = 10;
+    axiosRetry(client, {
+      retries: 5,
+      retryDelay: () => 30000,
+      retryCondition: () => true
+    });
+    client
+      .put("awhefoihewaf", file, config)
       .then(() => {
         this.props.handleSuccess(file);
       })

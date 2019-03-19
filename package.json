@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "axios-retry": "^3.1.2",
     "babel-eslint": "^10.0.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
@@ -98,7 +99,6 @@
     "react-tipsy": "^0.6.2",
     "react-toastify": "^4.5.2",
     "react-virtualized": "^9.21.0",
-    "retry-axios": "^0.5.0",
     "semantic-ui-calendar-react": "^0.12.1",
     "semantic-ui-css": "^2.3.0",
     "semantic-ui-react": "^0.82.1",
