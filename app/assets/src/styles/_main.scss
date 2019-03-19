@@ -10,6 +10,7 @@
   }
 
   .page_content {
-    flex: 1 1 100%;
+    display: flex;
+    flex: 1 1 auto;
   }
 }
