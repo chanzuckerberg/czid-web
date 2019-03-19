@@ -320,7 +320,8 @@ class DiscoveryView extends React.Component {
 
 DiscoveryView.propTypes = {
   domain: PropTypes.oneOf([DISCOVERY_DOMAIN_LIBRARY, DISCOVERY_DOMAIN_PUBLIC])
-    .isRequired
+    .isRequired,
+  projectId: PropTypes.number
 };
 
 export default DiscoveryView;
