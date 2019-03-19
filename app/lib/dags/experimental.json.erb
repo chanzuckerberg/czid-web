@@ -1,7 +1,30 @@
 {
   "output_dir_s3":
-    "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/expt",
+    "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/postprocess",
   "targets": {
+    "taxid_fasta_in": [
+      "annotated_merged.fa",
+      "gsnap.hitsummary.tab",
+      "rapsearch2.hitsummary.tab"
+    ],
+    "gsnap_m8": ["gsnap.deduped.m8"],
+    "taxid_fasta_out": ["taxid_annot.fasta"],
+    "taxid_locator_out": [
+      "taxid_annot_sorted_nt.fasta",
+      "taxid_locations_nt.json",
+      "taxid_annot_sorted_nr.fasta",
+      "taxid_locations_nr.json",
+      "taxid_annot_sorted_genus_nt.fasta",
+      "taxid_locations_genus_nt.json",
+      "taxid_annot_sorted_genus_nr.fasta",
+      "taxid_locations_genus_nr.json",
+      "taxid_annot_sorted_family_nt.fasta",
+      "taxid_locations_family_nt.json",
+      "taxid_annot_sorted_family_nr.fasta",
+      "taxid_locations_family_nr.json",
+      "taxid_locations_combined.json"
+    ],
+    "alignment_viz_out": ["align_viz.summary"],
     "srst2_out": ["output.log", "output__genes__ARGannot_r2__results.txt", "output__fullgenes__ARGannot_r2__results.txt", "amr_processed_results.csv", "amr_summary_results.csv"],
     <% if @attribute_dict[:fastq2] %>
       "fastqs": ["<%= @attribute_dict[:fastq1] %>", "<%= @attribute_dict[:fastq2] %>"],
@@ -25,6 +48,39 @@
   },
   "steps": [
     {
+      "in": ["taxid_fasta_in"],
+      "out": "taxid_fasta_out",
+      "class": "PipelineStepGenerateTaxidFasta",
+      "module": "idseq_dag.steps.generate_taxid_fasta",
+      "additional_files": {
+        "lineage_db":  "<%= @attribute_dict[:lineage_db] %>"
+      },
+      "additional_attributes": {}
+    },
+    {
+      "in": ["taxid_fasta_out"],
+      "out": "taxid_locator_out",
+      "class": "PipelineStepGenerateTaxidLocator",
+      "module": "idseq_dag.steps.generate_taxid_locator",
+      "additional_files": {},
+      "additional_attributes": {}
+    },
+    {
+      "in": [
+        "gsnap_m8", 
+        "taxid_locator_out"
+      ],
+      "out": "alignment_viz_out",
+      "class": "PipelineStepGenerateAlignmentViz",
+      "module": "idseq_dag.steps.generate_alignment_viz",
+      "additional_files": {
+        "nt_loc_db": "<%= @attribute_dict[:nt_loc_db] %>"
+      },
+      "additional_attributes": {
+        "nt_db": "<%= @attribute_dict[:nt_db] %>"
+      }
+    },
+    {
       "in": ["fastqs"],
       "out": "srst2_out",
       "class": "PipelineStepRunSRST2",
@@ -46,6 +102,13 @@
     }
   ],
   "given_targets": {
+    "taxid_fasta_in": {
+      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
+
+    },
+    "gsnap_m8": {
+      "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
+    },
     "fastqs": {
       "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/fastqs"
     },

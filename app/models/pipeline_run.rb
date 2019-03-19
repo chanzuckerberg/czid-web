@@ -665,7 +665,7 @@ class PipelineRun < ApplicationRecord
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     when "amr_counts"
-      "#{expt_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
+      "#{postprocess_output_s3_path}/#{AMR_FULL_RESULTS_NAME}"
     when "taxon_counts"
       "#{postprocess_output_s3_path}/#{REFINED_TAXON_COUNTS_JSON_NAME}"
     when "taxon_byteranges"
@@ -1151,6 +1151,7 @@ class PipelineRun < ApplicationRecord
   # So you could make a helper function to which you would pass
   #  sample.sample_expt_s3_path as an argument" (Charles)
   def expt_output_s3_path
+    # TODO: deprecate this function. no need for a separate dir for exp results.
     pipeline_ver_str = ""
     pipeline_ver_str = "#{pipeline_version}/" if pipeline_version
     result = "#{sample.sample_expt_s3_path}/#{pipeline_ver_str}#{subsample_suffix}"
