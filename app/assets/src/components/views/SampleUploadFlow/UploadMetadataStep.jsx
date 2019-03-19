@@ -5,7 +5,7 @@ import Instructions from "~/components/views/samples/MetadataUploadModal/Instruc
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
-import { validateManualMetadataForNewSamples } from "~/api";
+import { validateManualMetadataForNewSamples } from "~/api/metadata";
 import cs from "./sample_upload_flow.scss";
 
 class UploadMetadataStep extends React.Component {
