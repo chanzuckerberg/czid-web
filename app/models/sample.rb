@@ -271,11 +271,11 @@ class Sample < ApplicationRecord
           # errs like HeadObject Forbidden.
           # TODO: Consider refactoring this streaming copy to avoid hacks.
           break
+        else
+          Rails.logger.error("Try ##{try}: Upload of S3 sample '#{name}' (#{id}) file '#{fastq}' failed with: #{stderr}")
+          try += 1
+          sleep(10)
         end
-
-        Rails.logger.error("Try ##{try}: Upload of S3 sample '#{name}' (#{id}) file '#{fastq}' failed with: #{stderr}")
-        try += 1
-        sleep(10)
       end
 
       # Record a final stderr after max tries if needed
