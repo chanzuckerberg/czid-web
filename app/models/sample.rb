@@ -250,21 +250,36 @@ class Sample < ApplicationRecord
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
 
-      command = if fastq =~ /\.gz/
-                  "aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
-                else
-                  "aws s3 cp #{fastq} - | head -#{max_lines} | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
-                end
-      _stdout, stderr, status = Open3.capture3(command)
-      unless status.exitstatus.zero? && stderr.empty?
-        # HACK: Ignore 'Broken pipe' error because it will always be written to stderr unless you
-        # 'head' the entire file. Exitstatus would still be 0 because it is the status of the last
-        # command and the intermediate statuses are not checked. We still want to check stderr for
-        # errs like HeadObject Forbidden.
-        # TODO: Consider refactoring this streaming copy to avoid hacks.
-        unless stderr.include?(InputFile::S3_CP_PIPE_ERROR)
-          stderr_array << stderr
+      # Retry s3 cp up to 3 times
+      max_tries = 3
+      try = 0
+      stderr = ""
+      status = nil
+      while try < max_tries
+        command = if fastq =~ /\.gz/
+                    "aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
+                  else
+                    "aws s3 cp #{fastq} - | head -#{max_lines} | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
+                  end
+        _stdout, stderr, status = Open3.capture3(command)
+
+        if status.exitstatus.zero? && (stderr.empty? || stderr.include?(InputFile::S3_CP_PIPE_ERROR))
+          # Success if the status is 0 and no stderr besides pipe err.
+          # HACK: Ignore 'Broken pipe' error because it will always be written to stderr unless you
+          # 'head' the entire file. Exitstatus would still be 0 because it is the status of the last
+          # command and the intermediate statuses are not checked. We still want to check stderr for
+          # errs like HeadObject Forbidden.
+          # TODO: Consider refactoring this streaming copy to avoid hacks.
+          break
         end
+
+        try += 1
+        sleep(10)
+      end
+
+      # Log a final stderr after max tries if needed
+      unless (status && status.exitstatus.zero?) && (stderr.empty? || stderr.include?(InputFile::S3_CP_PIPE_ERROR))
+        stderr_array << stderr
       end
     end
     if total_reads_json_path.present?
