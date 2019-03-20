@@ -21,11 +21,8 @@ import {
   MultipleNestedDropdown
 } from "~ui/controls/dropdowns";
 import { processMetadata } from "~utils/metadata";
-import {
-  getSampleTaxons,
-  getSampleMetadataFields,
-  saveVisualization
-} from "~/api";
+import { getSampleTaxons, saveVisualization } from "~/api";
+import { getSampleMetadataFields } from "~/api/metadata";
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
 

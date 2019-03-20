@@ -11,7 +11,7 @@ import _fp, {
 } from "lodash/fp";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DataTable from "~/components/visualizations/table/DataTable";
-import { getOfficialMetadataFields } from "~/api";
+import { getOfficialMetadataFields } from "~/api/metadata";
 import { getGroupIndex } from "./constants";
 import { Dropdown } from "~ui/controls/dropdowns";
 import cs from "./metadata_dictionary.scss";

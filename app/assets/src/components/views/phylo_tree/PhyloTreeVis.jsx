@@ -5,7 +5,7 @@ import Dendogram from "../../visualizations/dendrogram/Dendogram";
 import PropTypes from "prop-types";
 import DataTooltip from "../../ui/containers/DataTooltip";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
-import { getSampleMetadataFields } from "~/api";
+import { getSampleMetadataFields } from "~/api/metadata";
 import { SAMPLE_FIELDS, SAMPLE_METADATA_FIELDS } from "./constants";
 
 const getAbsentName = attribute =>

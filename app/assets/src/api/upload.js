@@ -1,10 +1,11 @@
 import {
   bulkUploadRemoteSamples,
-  bulkUploadWithMetadata,
   createSample,
   markSampleUploaded,
   uploadFileToUrlWithRetries
 } from "~/api";
+
+import { bulkUploadWithMetadata } from "~/api/metadata";
 
 export const bulkUploadRemote = ({ samples, metadata }) =>
   metadata

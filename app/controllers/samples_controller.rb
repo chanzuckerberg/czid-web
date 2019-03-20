@@ -26,7 +26,7 @@ class SamplesController < ApplicationController
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details, :dimensions, :all,
-                   :show_sample_names, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields, :samples_going_public,
+                   :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :upload, :validate_sample_files].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
@@ -535,16 +535,6 @@ class SamplesController < ApplicationController
         errors: error_messages
       }
     end
-  end
-
-  # GET /samples/metadata_types_by_host_genome_name
-  def metadata_types_by_host_genome_name
-    metadata_types_by_host_genome_name = {}
-    HostGenome.all.each do |hg|
-      metadata_types_by_host_genome_name[hg.name] = hg.metadata_fields.map(&:field_info)
-    end
-
-    render json: metadata_types_by_host_genome_name
   end
 
   # GET /samples/1
