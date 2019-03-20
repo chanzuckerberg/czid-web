@@ -21,7 +21,6 @@ class Sample < ApplicationRecord
 
   TOTAL_READS_JSON = "total_reads.json".freeze
   LOG_BASENAME = 'log.txt'.freeze
-  S3_CP_PIPE_ERROR = '[Errno 32] Broken pipe'.freeze
 
   LOCAL_INPUT_PART_PATH = '/app/tmp/input_parts'.freeze
   ASSEMBLY_DIR = 'assembly'.freeze
@@ -263,7 +262,7 @@ class Sample < ApplicationRecord
         # command and the intermediate statuses are not checked. We still want to check stderr for
         # errs like HeadObject Forbidden.
         # TODO: Consider refactoring this streaming copy to avoid hacks.
-        unless stderr.include?(S3_CP_PIPE_ERROR)
+        unless stderr.include?(InputFile::S3_CP_PIPE_ERROR)
           stderr_array << stderr
         end
       end
