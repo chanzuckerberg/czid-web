@@ -273,11 +273,12 @@ class Sample < ApplicationRecord
           break
         end
 
+        Rails.logger.error("Try ##{try}: Upload of S3 sample '#{name}' (#{id}) file '#{fastq}' failed with: #{stderr}")
         try += 1
         sleep(10)
       end
 
-      # Log a final stderr after max tries if needed
+      # Record a final stderr after max tries if needed
       unless (status && status.exitstatus.zero?) && (stderr.empty? || stderr.include?(InputFile::S3_CP_PIPE_ERROR))
         stderr_array << stderr
       end
