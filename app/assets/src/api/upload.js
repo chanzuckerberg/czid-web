@@ -3,7 +3,7 @@ import {
   bulkUploadWithMetadata,
   createSample,
   markSampleUploaded,
-  uploadFileToUrl
+  uploadFileToUrlWithRetries
 } from "~/api";
 
 export const bulkUploadRemote = ({ samples, metadata }) =>
@@ -60,7 +60,7 @@ export const bulkUploadLocalWithMetadata = ({
         files.map((file, i) => {
           const url = sample.input_files[i].presigned_url;
 
-          uploadFileToUrl(file, url, {
+          uploadFileToUrlWithRetries(file, url, {
             onUploadProgress: e => {
               const percent = Math.round(e.loaded * 100 / e.total);
               fileNamesToProgress[file.name] = percent;
@@ -126,7 +126,7 @@ export const bulkUploadLocal = ({
         files.map((file, i) => {
           const url = response.input_files[i].presigned_url;
 
-          uploadFileToUrl(file, url, {
+          uploadFileToUrlWithRetries(file, url, {
             onUploadProgress: e => {
               const percent = Math.round(e.loaded * 100 / e.total);
               fileNamesToProgress[file.name] = percent;
