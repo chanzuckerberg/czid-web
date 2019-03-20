@@ -256,7 +256,16 @@ class Sample < ApplicationRecord
                   "aws s3 cp #{fastq} - | head -#{max_lines} | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
                 end
       _stdout, stderr, status = Open3.capture3(command)
-      stderr_array << stderr unless status.exitstatus.zero? && stderr.empty?
+      unless status.exitstatus.zero? && stderr.empty?
+        # HACK: Ignore 'Broken pipe' error because it will always be written to stderr unless you
+        # 'head' the entire file. Exitstatus would still be 0 because it is the status of the last
+        # command and the intermediate statuses are not checked. We still want to check stderr for
+        # errs like HeadObject Forbidden.
+        # TODO: Consider refactoring this streaming copy to avoid hacks.
+        unless stderr.include?(InputFile::S3_CP_PIPE_ERROR)
+          stderr_array << stderr
+        end
+      end
     end
     if total_reads_json_path.present?
       # For samples where we are only given fastas post host filtering, we need to input the total reads (before host filtering) from this file.
