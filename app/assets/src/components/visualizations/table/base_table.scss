@@ -59,6 +59,14 @@
     &:hover {
       background-color: $off-white-blue;
     }
+
+    &:focus {
+      outline: none;
+    }
+
+    &.clickable {
+      cursor: pointer;
+    }
   }
 }
 
