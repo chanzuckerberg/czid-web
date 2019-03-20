@@ -6,6 +6,8 @@
   background-color: $black;
   display: flex;
   flex-direction: row;
+  // Header height might influence layout on other pages that use calc to compute available height.
+  // See discovery view layout for instance
   height: 50px;
   margin-bottom: 10px;
   padding: 0 15px;
