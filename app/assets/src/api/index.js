@@ -1,6 +1,7 @@
 // TODO(mark): Split this file up as more API methods get added.
 // TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
+import axiosRetry from "axios-retry";
 import { cleanFilePath } from "~utils/sample";
 import { set } from "lodash/fp";
 
@@ -279,6 +280,34 @@ const uploadFileToUrl = async (
     .catch(onError);
 };
 
+// Upload with retries with more resilient settings (e.g. for sample uploads)
+const uploadFileToUrlWithRetries = async (
+  file,
+  url,
+  { onUploadProgress, onSuccess, onError }
+) => {
+  const config = {
+    onUploadProgress
+  };
+
+  // Set a 10s response timeout
+  const client = axios.create();
+  client.defaults.timeout = 10000;
+
+  // Retry up to 5 times with a 30s delay. axiosRetry interceptor means that 'catch' won't be
+  // called until all tries fail.
+  axiosRetry(client, {
+    retries: 5,
+    retryDelay: () => 30000,
+    retryCondition: () => true
+  });
+
+  return client
+    .put(url, file, config)
+    .then(onSuccess)
+    .catch(onError);
+};
+
 const getTaxonDescriptions = taxonList =>
   get(`/taxon_descriptions.json?taxon_list=${taxonList.join(",")}`);
 
@@ -428,6 +457,7 @@ export {
   shortenUrl,
   uploadMetadataForProject,
   uploadFileToUrl,
+  uploadFileToUrlWithRetries,
   validateManualMetadataForProject,
   validateManualMetadataForNewSamples,
   validateMetadataCSVForNewSamples,
