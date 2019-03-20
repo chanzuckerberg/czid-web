@@ -15,7 +15,7 @@ gem 'bcrypt', '~> 3.1.7'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.2', '>= 4.2.2'
 gem 'consul', '>= 0.13.1'
-gem 'devise', '4.3.0'
+gem 'devise', '>= 4.6.0'
 gem "health_check", ">= 2.7.0"
 gem 'honeycomb-rails', '>= 0.8.1'
 gem 'mailgun_rails', '>= 0.9.0'
@@ -73,6 +73,9 @@ gem 'analytics-ruby', '~> 2.0.0', require: 'segment/analytics'
 
 # Url shortener
 gem 'shortener'
+
+# Explicit load to avoid an "unable to load" warning
+gem 'http-2'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
