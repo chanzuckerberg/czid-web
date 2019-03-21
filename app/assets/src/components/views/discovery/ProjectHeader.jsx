@@ -10,22 +10,22 @@ import ProjectUploadMenu from "~/components/views/samples/ProjectUploadMenu";
 import cs from "./project_header.scss";
 import cx from "classnames";
 
-const ProjectHeader = ({ project, fetchedSamples, onProjectUpdate }) => {
+const ProjectHeader = ({ project, fetchedSamples, onProjectUpdated }) => {
   const handleProjectUserAdded = (username, email) => {
     const userFound = find({ email }, project.users);
     if (!userFound) {
       const newProject = assign(project, {
         users: [...project.users, { name: username, email }]
       });
-      onProjectUpdate && onProjectUpdate(newProject);
+      onProjectUpdated && onProjectUpdated({ project: newProject });
     }
   };
 
   const handleProjectPublished = () => {
     const newProject = assign(project, {
-      public: true
+      public_access: 1
     });
-    onProjectUpdate && onProjectUpdate(newProject);
+    onProjectUpdated && onProjectUpdated({ project: newProject });
   };
 
   const currentTimestamp = moment();

@@ -2,15 +2,16 @@ import React from "react";
 import PropTypes from "prop-types";
 import moment from "moment";
 import {
+  assign,
   clone,
   compact,
   find,
+  findIndex,
   identity,
   keyBy,
   map,
   mapKeys,
   mapValues,
-  merge,
   pick,
   pickBy,
   replace,
@@ -42,27 +43,30 @@ class DiscoveryView extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = merge(history.state, {
-      currentTab: "projects",
-      projectDimensions: [],
-      sampleDimensions: [],
-      filters: {},
-      project: this.props.project,
-      projects: [],
-      sampleIds: [],
-      samples: [],
-      samplesAllLoaded: false,
-      showFilters: true,
-      showStats: true,
-      visualizations: []
-    });
+    this.state = assign(
+      {
+        currentTab: "projects",
+        projectDimensions: [],
+        sampleDimensions: [],
+        filters: {},
+        project: this.props.project,
+        projects: [],
+        sampleIds: [],
+        samples: [],
+        samplesAllLoaded: false,
+        showFilters: true,
+        showStats: true,
+        visualizations: []
+      },
+      history.state
+    );
 
     this.data = null;
-    this.updateBrowsingHistory();
+    this.updateBrowsingHistory("replace");
   }
 
   componentDidMount() {
-    this.refreshAll();
+    this.resetData();
     window.onpopstate = () => {
       this.setState(history.state, () => {
         this.resetData();
@@ -78,7 +82,6 @@ class DiscoveryView extends React.Component {
     );
 
     if (action === "push") {
-      this.previousState = historyState;
       history.pushState(historyState, `DiscoveryView:${domain}`, `/${domain}`);
     } else {
       history.replaceState(
@@ -205,7 +208,7 @@ class DiscoveryView extends React.Component {
 
   handleFilterChange = selectedFilters => {
     this.setState({ filters: selectedFilters }, () => {
-      this.updateBrowsingHistory();
+      this.updateBrowsingHistory("replace");
       this.resetData();
     });
   };
@@ -243,7 +246,7 @@ class DiscoveryView extends React.Component {
     }
     if (filtersChanged) {
       this.setState({ filters: newFilters }, () => {
-        this.updateBrowsingHistory();
+        this.updateBrowsingHistory("replace");
         this.resetData();
       });
     }
@@ -309,6 +312,17 @@ class DiscoveryView extends React.Component {
     );
   };
 
+  handleProjectUpdated = ({ project }) => {
+    const { projects } = this.state;
+    const projectIndex = findIndex({ id: project.id }, projects);
+    let newProjects = projects.slice();
+    newProjects.splice(projectIndex, 1, project);
+    this.setState({
+      project,
+      projects: newProjects
+    });
+  };
+
   render() {
     const {
       currentTab,
@@ -340,7 +354,11 @@ class DiscoveryView extends React.Component {
       <div className={cs.layout}>
         <div className={cs.headerContainer}>
           {project && (
-            <ProjectHeader project={project} fetchedSamples={samples} />
+            <ProjectHeader
+              project={project}
+              fetchedSamples={samples}
+              onProjectUpdated={this.handleProjectUpdated}
+            />
           )}
           <DiscoveryHeader
             currentTab={currentTab}
