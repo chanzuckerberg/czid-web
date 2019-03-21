@@ -179,9 +179,8 @@ const getSamples = ({
   offset,
   filters,
   listAllIds
-} = {}) => {
-  console.log("api:getSamples", domain, filters, projectId);
-  return get("/samples/index_v2.json", {
+} = {}) =>
+  get("/samples/index_v2.json", {
     params: {
       projectId,
       domain,
@@ -191,7 +190,6 @@ const getSamples = ({
       ...filters
     }
   });
-};
 
 const getSampleDimensions = ({ domain, projectId }) =>
   get("/samples/dimensions.json", {
@@ -201,25 +199,22 @@ const getSampleDimensions = ({ domain, projectId }) =>
     }
   });
 
-const getProjectDimensions = ({ domain }) => {
-  return get("/projects/dimensions.json", {
+const getProjectDimensions = ({ domain }) =>
+  get("/projects/dimensions.json", {
     params: {
       domain
     }
   });
-};
+
 const getSamplesV1 = params => get("/samples.json", { params });
 
-const getProjects = ({ domain, filters } = {}) => {
-  return get("/projects.json", {
+const getProjects = ({ domain, filters } = {}) =>
+  get("/projects.json", {
     params: {
       domain,
       ...filters
     }
   });
-};
-
-const getProject = ({ projectId }) => get(`/projects/${projectId}.json`);
 
 const getVisualizations = ({ domain, filters } = {}) =>
   get("/visualizations.json", {

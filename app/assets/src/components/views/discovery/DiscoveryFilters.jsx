@@ -15,8 +15,6 @@ class DiscoveryFilters extends React.Component {
   constructor(props) {
     super(props);
 
-    this.s;
-
     this.state = {
       // taxon is an async dropdown and needs full options (value + label) to be stored
       // (otherwise we would need to load the labels from values)
