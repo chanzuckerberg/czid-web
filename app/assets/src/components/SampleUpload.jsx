@@ -905,7 +905,6 @@ class SampleUpload extends React.Component {
 
     return (
       <div id="samplesUploader" className="row">
-        <SampleUploadHeartbeat sampleId={10} />
         <div className="col s6 offset-s3 upload-form-container">
           <div className="content">
             <div>
@@ -1121,6 +1120,7 @@ class SampleUpload extends React.Component {
                 <div className="upload-mode-title">Sample Input Files</div>
                 {uploadModeSwitcher}
                 {inputFileSection}
+                {<SampleUploadHeartbeat sampleIds={[12549]} />}
 
                 <div className="field">
                   <div className="row">
