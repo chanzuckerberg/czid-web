@@ -130,7 +130,6 @@ class SamplesController < ApplicationController
     # discovery views (old one was kept to avoid breaking the current inteface
     # without sacrificing speed of development and avoid breaking the current interface)
     domain = params[:domain]
-    project_id = params[:projectId]
     list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
