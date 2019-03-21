@@ -7,9 +7,12 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
   setup do
     @project = projects(:one)
     @metadata_validation_project = projects(:metadata_validation_project)
-    @deletable_project = projects(:deletable_project)
+    @public_project = projects(:public_project)
+    @joe_project = projects(:joe_project)
     @user = users(:one)
     @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
+    @user_nonadmin = users(:joe)
+    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'passwordjoe' }
   end
 
   test 'metadata validate basic' do
@@ -207,5 +210,55 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
       [3, "Custom Field 1"],
       [4, "Custom Field 2"]
     ], @response.parsed_body['issues']['warnings'][0]['rows']
+  end
+
+  test 'joe cannot validate new metadata against existing project in a public project' do
+    post user_session_path, params: @user_nonadmin_params
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      post validate_metadata_csv_project_url(@public_project), params: {
+        metadata: {
+          headers: ['sample_name', 'sample_type'],
+          rows: [
+            ['public_project_sampleA', 'Whole Blood'],
+            ['public_project_sampleB', 'Whole Blood']
+          ]
+        }
+      }, as: :json
+    end
+  end
+
+  test 'joe cannot validate new metadata against existing samples in another private project' do
+    post user_session_path, params: @user_nonadmin_params
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      post validate_metadata_csv_project_url(@metadata_validation_project), params: {
+        metadata: {
+          headers: ['sample_name', 'sample_type'],
+          rows: [
+            ['metadata_validation_sample_human', 'Whole Blood'],
+            ['metadata_validation_sample_mosquito', 'Whole Blood']
+          ]
+        }
+      }, as: :json
+    end
+  end
+
+  test 'joe can validate new metadata for existing samples in a private project he is a member of' do
+    post user_session_path, params: @user_nonadmin_params
+
+    post validate_metadata_csv_project_url(@joe_project), params: {
+      metadata: {
+        headers: ['sample_name', 'sample_type'],
+        rows: [
+          ['joe_project_sampleA', 'Whole Blood'],
+          ['joe_project_sampleB', 'Whole Blood']
+        ]
+      }
+    }, as: :json
+
+    assert_response :success
+    assert_equal 0, @response.parsed_body['issues']['errors'].length
+    assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
 end

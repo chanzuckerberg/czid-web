@@ -4,12 +4,18 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @background = backgrounds(:real_background)
     @sample = samples(:one)
+    @sample_human_existing_metadata_public = samples(:sample_human_existing_metadata_public)
+    @metadata_validation_sample_human_existing_metadata = samples(:metadata_validation_sample_human_existing_metadata)
+    @sample_human_existing_metadata_joe_project = samples(:sample_human_existing_metadata_joe_project)
+    @sample_human_existing_metadata_expired = samples(:sample_human_existing_metadata_expired)
     @deletable_sample = samples(:deletable_sample)
     @project = projects(:one)
     @user = users(:one)
     @user.authentication_token = 'sdfsdfsdff'
     @user.save
     @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
+    @user_nonadmin = users(:joe)
+    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'passwordjoe' }
   end
 
   test 'should get index' do
@@ -177,5 +183,154 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
       delete sample_url(@deletable_sample)
     end
     assert_redirected_to samples_url
+  end
+
+  test 'joe can fetch metadata for a public sample' do
+    post user_session_path, params: @user_nonadmin_params
+
+    get metadata_sample_url(@sample_human_existing_metadata_public)
+    assert_response :success
+
+    assert_equal ["nucleotide_type", "sex"], @response.parsed_body['metadata'].pluck("key")
+  end
+
+  test 'joe can fetch metadata for an expired sample' do
+    post user_session_path, params: @user_nonadmin_params
+
+    get metadata_sample_url(@sample_human_existing_metadata_expired)
+    assert_response :success
+
+    assert_equal ["age", "sex"], @response.parsed_body['metadata'].pluck("key")
+  end
+
+  test 'joe can fetch metadata for his own private samples' do
+    post user_session_path, params: @user_nonadmin_params
+
+    get metadata_sample_url(@sample_human_existing_metadata_joe_project)
+    assert_response :success
+
+    assert_equal ["sample_type", "sex"], @response.parsed_body['metadata'].pluck("key")
+  end
+
+  # non-admin user should not be able to query another user's private sample.
+  test 'joe cannot fetch metadata for another user\'s private samples' do
+    post user_session_path, params: @user_nonadmin_params
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      get metadata_sample_url(@metadata_validation_sample_human_existing_metadata)
+    end
+  end
+
+  test 'joe can fetch the metadata fields for a public sample' do
+    post user_session_path, params: @user_nonadmin_params
+
+    get metadata_fields_samples_url, params: {
+      sampleIds: [@sample_human_existing_metadata_public.id]
+    }
+    assert_response :success
+
+    assert_equal ["Nucleotide Type", "Sample Type"], @response.parsed_body.pluck("name")
+  end
+
+  test 'joe can fetch the metadata fields for an expired sample' do
+    post user_session_path, params: @user_nonadmin_params
+
+    get metadata_fields_samples_url, params: {
+      sampleIds: [@sample_human_existing_metadata_expired.id]
+    }
+    assert_response :success
+
+    assert_equal ["Age"], @response.parsed_body.pluck("name")
+  end
+
+  test 'joe can fetch the metadata fields for his own private sample' do
+    post user_session_path, params: @user_nonadmin_params
+
+    get metadata_fields_samples_url, params: {
+      sampleIds: [@sample_human_existing_metadata_joe_project.id]
+    }
+    assert_response :success
+
+    assert_equal ["Nucleotide Type", "Age", "Sex", "Sample Type", "Admission Date"], @response.parsed_body.pluck("name")
+  end
+
+  test 'joe cannot fetch the metadata fields for another user\'s private sample' do
+    post user_session_path, params: @user_nonadmin_params
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      get metadata_fields_samples_url, params: {
+        sampleIds: [@metadata_validation_sample_human_existing_metadata.id]
+      }
+    end
+  end
+
+  # If multiple samples, merge the fields.
+  test 'joe can fetch the metadata fields for multiple samples' do
+    post user_session_path, params: @user_nonadmin_params
+
+    get metadata_fields_samples_url, params: {
+      sampleIds: [@sample_human_existing_metadata_public.id, @sample_human_existing_metadata_expired.id]
+    }
+    assert_response :success
+
+    assert_equal ["Age", "Nucleotide Type", "Sample Type"], @response.parsed_body.pluck("name")
+  end
+
+  # If multiple samples but one is invalid, return fields for the valid ones.
+  test 'joe can fetch the metadata fields for multiple samples, and invalid ones will be omitted' do
+    post user_session_path, params: @user_nonadmin_params
+
+    get metadata_fields_samples_url, params: {
+      sampleIds: [@sample_human_existing_metadata_public.id, @metadata_validation_sample_human_existing_metadata.id]
+    }
+    assert_response :success
+
+    assert_equal ["Nucleotide Type", "Sample Type"], @response.parsed_body.pluck("name")
+  end
+
+  test 'joe cannot save metadata to a public sample' do
+    post user_session_path, params: @user_nonadmin_params
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      post save_metadata_v2_sample_url(@sample_human_existing_metadata_public), params: {
+        field: "sample_type",
+        value: "Foobar Sample Type"
+      }
+    end
+  end
+
+  test 'joe cannot save metadata to an expired sample' do
+    post user_session_path, params: @user_nonadmin_params
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      post save_metadata_v2_sample_url(@sample_human_existing_metadata_expired), params: {
+        field: "sample_type",
+        value: "Foobar Sample Type"
+      }
+    end
+  end
+
+  test 'joe can save metadata to his own private sample' do
+    post user_session_path, params: @user_nonadmin_params
+
+    post save_metadata_v2_sample_url(@sample_human_existing_metadata_joe_project), params: {
+      field: "sample_type",
+      value: "Foobar Sample Type"
+    }
+
+    assert_response :success
+
+    assert_equal "Foobar Sample Type", @sample_human_existing_metadata_joe_project.metadata.find_by(key: "sample_type").raw_value
+  end
+
+  test 'joe cannot save metadata to another user\'s private sample' do
+    post user_session_path, params: @user_nonadmin_params
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      post save_metadata_v2_sample_url(@metadata_validation_sample_human_existing_metadata), params: {
+        field: "sample_type",
+        value: "Foobar Sample Type"
+      }
+    end
   end
 end
