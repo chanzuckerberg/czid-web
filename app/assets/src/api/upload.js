@@ -125,6 +125,7 @@ export const bulkUploadLocal = ({
       .then(response => {
         // After successful sample creation, upload to the presigned URLs returned
         const sampleId = response.id;
+        startUploadHeartbeat(sampleId);
         files.map((file, i) => {
           const url = response.input_files[i].presigned_url;
 
@@ -149,5 +150,12 @@ export const bulkUploadLocal = ({
   }
 };
 
-export const updateUploadHeartbeat = async sampleId =>
-  putWithCSRF(`/samples/${sampleId}/upload_heartbeat.json`);
+export const startUploadHeartbeat = async sampleId => {
+  console.log("started the heart beat");
+  console.log(sampleId);
+  setInterval(() => {
+    putWithCSRF(`/samples/${sampleId}/upload_heartbeat.json`)
+      .then(() => console.log("called for: ", sampleId))
+      .catch(() => console.log("Can't connect to IDseq server."));
+  }, 10000);
+};
