@@ -1,7 +1,8 @@
 import React from "react";
 import cx from "classnames";
 import { Popup } from "semantic-ui-react";
-import { getSampleMetadata, getAlignmentData } from "~/api";
+import { getAlignmentData } from "~/api";
+import { getSampleMetadata } from "~/api/metadata";
 import AccessionViz from "../AccessionViz";
 import { pipelineVersionHasAssembly } from "../utils/sample";
 import cs from "./alignment_viz.scss";

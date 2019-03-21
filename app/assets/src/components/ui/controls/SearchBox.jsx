@@ -5,7 +5,7 @@ import { Search } from "semantic-ui-react";
 import { escapeRegExp, debounce } from "lodash";
 
 import cs from "./search_box.scss";
-import { get } from "../../../api";
+import { get } from "~/api/core";
 import { getURLParamString } from "~/helpers/url";
 
 class SearchBox extends React.Component {

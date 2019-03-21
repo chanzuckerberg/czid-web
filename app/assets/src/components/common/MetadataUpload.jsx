@@ -6,7 +6,8 @@ import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
-import { getProjectMetadataFields, getAllHostGenomes } from "~/api";
+import { getAllHostGenomes } from "~/api";
+import { getProjectMetadataFields } from "~/api/metadata";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 
 import cs from "./metadata_upload.scss";

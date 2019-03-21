@@ -26,7 +26,7 @@ class SamplesController < ApplicationController
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details, :dimensions, :all,
-                   :show_sample_names, :cli_user_instructions, :metadata_types_by_host_genome_name, :metadata_fields, :samples_going_public,
+                   :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :upload, :validate_sample_files].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
@@ -406,6 +406,7 @@ class SamplesController < ApplicationController
     samples_to_upload = samples_params || []
     metadata = params[:metadata] || {}
     client = params[:client]
+    errors = []
 
     # Check if the client is up-to-date. "web" is always valid whereas the
     # CLI client should provide a version string to-be-checked against the
@@ -423,18 +424,21 @@ class SamplesController < ApplicationController
 
     samples_to_upload, samples_invalid_projects = samples_to_upload.partition { |sample| editable_project_ids.include?(Integer(sample["project_id"])) }
 
-    errors, samples = upload_samples_with_metadata(samples_to_upload, metadata).values_at("errors", "samples")
-
-    # For each sample with an invalid project ID, add an error.
+    # For invalid projects, don't attempt to upload metadata.
     samples_invalid_projects.each do |sample|
+      metadata.delete(sample["name"])
       errors << SampleUploadErrors.invalid_project_id(sample)
     end
+
+    upload_errors, samples = upload_samples_with_metadata(samples_to_upload, metadata).values_at("errors", "samples")
+
+    errors.concat(upload_errors)
 
     # After creation, if a sample is missing required metadata, destroy it.
     # TODO(mark): Move this logic into a validator in the model in the future.
     # Hard to do right now because this isn't launched yet, and also many existing samples don't have required metadata.
     removed_samples = []
-    samples.each do |sample|
+    samples.includes(host_genome: [:metadata_fields], project: [:metadata_fields], metadata: [:metadata_field]).each do |sample|
       missing_required_metadata_fields = sample.missing_required_metadata_fields
       unless missing_required_metadata_fields.empty?
         errors << SampleUploadErrors.missing_required_metadata(sample, missing_required_metadata_fields.pluck(:name))
@@ -535,16 +539,6 @@ class SamplesController < ApplicationController
         errors: error_messages
       }
     end
-  end
-
-  # GET /samples/metadata_types_by_host_genome_name
-  def metadata_types_by_host_genome_name
-    metadata_types_by_host_genome_name = {}
-    HostGenome.all.each do |hg|
-      metadata_types_by_host_genome_name[hg.name] = hg.metadata_fields.map(&:field_info)
-    end
-
-    render json: metadata_types_by_host_genome_name
   end
 
   # GET /samples/1
