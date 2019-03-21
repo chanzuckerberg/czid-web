@@ -51,10 +51,15 @@ class VisualizationsView extends React.Component {
     const href = `/visualizations/${visualization.visualization_type}/${
       visualization.id
     }`;
+    // TODO (gdingle): put name and project_name in own cols
     return (
       <div className={cs.visualization}>
         <div className={cs.visualizationName}>
-          <a href={href}>{humanize(visualization.visualization_type)}</a>
+          <a href={href}>
+            {humanize(visualization.visualization_type)}
+            {` "${visualization.name}" `}
+            from {visualization.project_name}
+          </a>
         </div>
         <div className={cs.visualizationDetails}>
           <span className={cs.visualizationCreationDate}>
@@ -79,7 +84,10 @@ class VisualizationsView extends React.Component {
             "user_name",
             "visualization_type",
             "created_at",
-            "id"
+            "id",
+            // TODO (gdingle): put name and project_name in own columns
+            "name",
+            "project_name"
           ])
         },
         visualization

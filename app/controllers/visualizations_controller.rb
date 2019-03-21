@@ -9,7 +9,7 @@ class VisualizationsController < ApplicationController
   def index
     domain = params[:domain]
 
-    # TODO: (gdingle): include samples? include projects?
+    # TODO: (gdingle): include projects?
     visualizations = if domain == "library"
                        current_user.visualizations
                      elsif domain == "public"
@@ -19,11 +19,12 @@ class VisualizationsController < ApplicationController
                      end
     visualizations = visualizations
                      .joins(:user)
-                     .select("visualizations.id AS id, user_id, visualizations.created_at, visualization_type, users.name AS user_name")
+                     .select("visualizations.id AS id, user_id, visualizations.created_at, visualization_type, users.name AS user_name, data")
                      .where.not(visualization_type: [nil, 'undefined'])
                      .order(created_at: :desc)
+                     .includes(samples: [:project])
 
-    render json: visualizations
+    render json: visualizations.as_json(methods: [:name, :project_name])
   end
 
   def visualization
