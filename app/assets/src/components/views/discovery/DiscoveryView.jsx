@@ -5,10 +5,14 @@ import {
   clone,
   compact,
   find,
+  identity,
   keyBy,
   map,
   mapKeys,
   mapValues,
+  merge,
+  pick,
+  pickBy,
   replace,
   sumBy,
   values,
@@ -38,11 +42,12 @@ class DiscoveryView extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
+    this.state = merge(history.state, {
       currentTab: "projects",
-      dimensions: [],
+      projectDimensions: [],
+      sampleDimensions: [],
       filters: {},
-      project: null,
+      project: this.props.project,
       projects: [],
       sampleIds: [],
       samples: [],
@@ -50,14 +55,39 @@ class DiscoveryView extends React.Component {
       showFilters: true,
       showStats: true,
       visualizations: []
-    };
+    });
 
     this.data = null;
+    this.updateBrowsingHistory();
   }
 
   componentDidMount() {
     this.refreshAll();
+    window.onpopstate = () => {
+      this.setState(history.state, () => {
+        this.resetData();
+      });
+    };
   }
+
+  updateBrowsingHistory = (action = "push") => {
+    const { domain } = this.props;
+    const historyState = pick(
+      ["currentTab", "filters", "project", "showFilters", "showStats"],
+      this.state
+    );
+
+    if (action === "push") {
+      this.previousState = historyState;
+      history.pushState(historyState, `DiscoveryView:${domain}`, `/${domain}`);
+    } else {
+      history.replaceState(
+        historyState,
+        `DiscoveryView:${domain}`,
+        `/${domain}`
+      );
+    }
+  };
 
   preparedFilters = () => {
     const { filters } = this.state;
@@ -88,11 +118,10 @@ class DiscoveryView extends React.Component {
   };
 
   resetData = () => {
-    console.log("DiscoveryView:resetData");
+    const { project } = this.state;
     this.setState(
       {
-        dimensions: {},
-        projects: [],
+        projects: compact([project]),
         sampleIds: [],
         samples: [],
         samplesAllLoaded: false,
@@ -106,7 +135,6 @@ class DiscoveryView extends React.Component {
   };
 
   refreshSynchronousData = async () => {
-    console.log("DiscoveryView:refreshSynchronousData");
     const { domain } = this.props;
     const { project } = this.state;
 
@@ -123,27 +151,24 @@ class DiscoveryView extends React.Component {
   };
 
   refreshDimensions = async () => {
-    console.log("DiscoveryView:refreshDimensions");
     const { domain } = this.props;
     const { project } = this.state;
 
     const {
-      projectDimensions = {},
-      sampleDimensions = {}
+      projectDimensions,
+      sampleDimensions
     } = await getDiscoveryDimensions({
       domain,
       projectId: project && project.id
     });
 
-    this.setState({ projectDimensions, sampleDimensions });
+    this.setState(pickBy(identity, { projectDimensions, sampleDimensions }));
   };
 
   refreshAll = () => {
-    console.log("DiscoveryView:refreshAll - start");
     const { project } = this.state;
     !project && this.refreshSynchronousData();
     this.refreshDimensions();
-    console.log("DiscoveryView:refreshAll - end");
   };
 
   computeTabs = () => {
@@ -159,17 +184,15 @@ class DiscoveryView extends React.Component {
     };
 
     return compact([
-      project
-        ? null
-        : {
-            label: renderTab("Projects", (projects || []).length),
-            value: "projects"
-          },
+      !project && {
+        label: renderTab("Projects", (projects || []).length),
+        value: "projects"
+      },
       {
         label: renderTab("Samples", sumBy("number_of_samples", projects)),
         value: "samples"
       },
-      {
+      !project && {
         label: renderTab("Visualizations", (visualizations || []).length),
         value: "visualizations"
       }
@@ -181,7 +204,10 @@ class DiscoveryView extends React.Component {
   };
 
   handleFilterChange = selectedFilters => {
-    this.setState({ filters: selectedFilters }, () => this.resetData());
+    this.setState({ filters: selectedFilters }, () => {
+      this.updateBrowsingHistory();
+      this.resetData();
+    });
   };
 
   handleSearchSelected = ({ key, value, text }) => {
@@ -215,8 +241,12 @@ class DiscoveryView extends React.Component {
         filtersChanged = true;
       }
     }
-    filtersChanged &&
-      this.setState({ filters: newFilters }, () => this.resetData());
+    if (filtersChanged) {
+      this.setState({ filters: newFilters }, () => {
+        this.updateBrowsingHistory();
+        this.resetData();
+      });
+    }
   };
 
   handleFilterToggle = () => {
@@ -267,13 +297,15 @@ class DiscoveryView extends React.Component {
   };
 
   handleProjectSelected = ({ project }) => {
-    console.log("DiscoveryView:handleProjectSelected", project);
     this.setState(
       {
         currentTab: "samples",
         project
       },
-      () => this.resetData()
+      () => {
+        this.updateBrowsingHistory();
+        this.resetData();
+      }
     );
   };
 
@@ -304,8 +336,6 @@ class DiscoveryView extends React.Component {
       values(filters)
     );
 
-    console.log("DiscoveryView:render - project id", project, this.state);
-
     return (
       <div className={cs.layout}>
         <div className={cs.headerContainer}>
@@ -313,7 +343,7 @@ class DiscoveryView extends React.Component {
             <ProjectHeader project={project} fetchedSamples={samples} />
           )}
           <DiscoveryHeader
-            initialTab={currentTab}
+            currentTab={currentTab}
             tabs={tabs}
             onTabChange={this.handleTabChange}
             filterCount={filterCount}
