@@ -250,23 +250,38 @@ class Sample < ApplicationRecord
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
 
-      command = if fastq =~ /\.gz/
-                  "aws s3 cp #{fastq} - |gzip -dc |head -#{max_lines} | gzip -c | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
-                else
-                  "aws s3 cp #{fastq} - | head -#{max_lines} | aws s3 cp - #{sample_input_s3_path}/#{input_file.name}"
-                end
-      _stdout, stderr, status = Open3.capture3(command)
-      unless status.exitstatus.zero? && stderr.empty?
-        # HACK: Ignore 'Broken pipe' error because it will always be written to stderr unless you
-        # 'head' the entire file. Exitstatus would still be 0 because it is the status of the last
-        # command and the intermediate statuses are not checked. We still want to check stderr for
-        # errs like HeadObject Forbidden.
-        # TODO: Consider refactoring this streaming copy to avoid hacks.
-        unless stderr.include?(InputFile::S3_CP_PIPE_ERROR)
-          stderr_array << stderr
-        end
+      # Run the piped commands and save stderr
+      err_read, err_write = IO.pipe
+      if fastq =~ /\.gz/
+        _proc_download, _proc_unzip, proc_head, proc_zip, proc_upload = Open3.pipeline(
+          ["aws", "s3", "cp", fastq, "-"],
+          "gzip -dc",
+          ["head", "-n", max_lines.to_s],
+          "gzip -c",
+          ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
+          err: err_write
+        )
+        to_check = [proc_head, proc_zip, proc_upload]
+      else
+        _proc_download, proc_head, proc_upload = Open3.pipeline(
+          ["aws", "s3", "cp", fastq, "-"],
+          ["head", "-n", max_lines.to_s],
+          ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
+          err: err_write
+        )
+        to_check = [proc_head, proc_upload]
+      end
+      err_write.close
+      stderr = err_read.read
+
+      # Ignore proc_download and proc_unzip status because they will always throw exit 1 and
+      # SIGPIPE 13 'pipe broken' unless the entire file was headed. Ignore pipe error in stderr but
+      # we still want to see errs like HeadObject Forbidden.
+      unless to_check.all? { |p| p && p.exitstatus && p.exitstatus.zero? } && (stderr.empty? || stderr.include?(InputFile::S3_CP_PIPE_ERROR))
+        stderr_array << stderr
       end
     end
+
     if total_reads_json_path.present?
       # For samples where we are only given fastas post host filtering, we need to input the total reads (before host filtering) from this file.
       _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", total_reads_json_path, "#{sample_input_s3_path}/#{TOTAL_READS_JSON}")
