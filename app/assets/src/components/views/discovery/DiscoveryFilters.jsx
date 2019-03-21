@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { capitalize, endsWith, find, forEach, keys, pick } from "lodash/fp";
+import { find, forEach, pick } from "lodash/fp";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
