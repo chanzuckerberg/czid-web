@@ -254,10 +254,18 @@ class PipelineRunStage < ApplicationRecord
     # Upload DAG to S3
     sample = pipeline_run.sample
     file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
+    alignment_config = pipeline_run.alignment_config
     attribute_dict = {
       fastq1: sample.input_files[0].name,
       file_ext: file_ext,
-      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_version
+      pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_version,
+      lineage_db: alignment_config.s3_lineage_path,
+      accession2taxid_db: alignment_config.s3_accession2taxid_path,
+      deuterostome_db: alignment_config.s3_deuterostome_db_path,
+      nt_db: alignment_config.s3_nt_db_path,
+      nt_loc_db: alignment_config.s3_nt_loc_db_path,
+      nr_db: alignment_config.s3_nr_db_path,
+      nr_loc_db: alignment_config.s3_nr_loc_db_path
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
     dag_commands = prepare_dag("experimental", attribute_dict)

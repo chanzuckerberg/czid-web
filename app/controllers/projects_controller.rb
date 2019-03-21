@@ -16,10 +16,9 @@ class ProjectsController < ApplicationController
   READ_ACTIONS = [
     :show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status,
     :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status,
-    :send_project_reports_csv, :validate_metadata_csv, :upload_metadata,
-    :validate_sample_names
+    :send_project_reports_csv, :validate_sample_names
   ].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility, :upload_metadata, :validate_metadata_csv].freeze
   OTHER_ACTIONS = [:choose_project, :create, :dimensions, :index, :metadata_fields, :new, :send_project_csv].freeze
 
   # Required for token auth for CLI actions
@@ -419,9 +418,15 @@ class ProjectsController < ApplicationController
   def metadata_fields
     project_ids = (params[:projectIds] || []).map(&:to_i)
 
-    render json: current_power.projects.where(id: project_ids)
-      .includes(metadata_fields: [:host_genomes])
-                              .map(&:metadata_fields).flatten.map(&:field_info)
+    results = if project_ids.length == 1
+                current_power.projects.find(project_ids[0]).metadata_fields.map(&:field_info)
+              else
+                current_power.projects.where(id: project_ids)
+                             .includes(metadata_fields: [:host_genomes])
+                             .map(&:metadata_fields).flatten.uniq.map(&:field_info)
+              end
+
+    render json: results
   end
 
   # TODO: Consider consolidating into a general sample validator

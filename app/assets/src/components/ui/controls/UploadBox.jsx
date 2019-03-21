@@ -1,8 +1,8 @@
 // Allows picking a file and also uploading the file to a URL.
 import PropTypes from "prop-types";
 import React from "react";
-import axios from "axios/index";
 import FilePicker from "./FilePicker";
+import { uploadFileToUrlWithRetries } from "~/api";
 
 class UploadBox extends React.Component {
   constructor(props) {
@@ -14,20 +14,14 @@ class UploadBox extends React.Component {
   }
 
   uploadFileToURL = (file, url) => {
-    const config = {
+    uploadFileToUrlWithRetries(file, url, {
       onUploadProgress: e => {
         const percent = Math.round(e.loaded * 100 / e.total);
         this.setState({ uploadProgress: percent });
-      }
-    };
-    axios
-      .put(url, file, config)
-      .then(() => {
-        this.props.handleSuccess(file);
-      })
-      .catch(err => {
-        this.props.handleFailure(file, err);
-      });
+      },
+      onSuccess: () => this.props.handleSuccess(file),
+      onError: err => this.props.handleFailure(file, err)
+    });
   };
 
   render() {

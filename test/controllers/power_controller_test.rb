@@ -59,7 +59,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @joe_project = projects(:joe_project)
     get "/samples.json?project_id=#{@joe_project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["count"] == 3
+    assert JSON.parse(@response.body)["count"] == 4
   end
 
   test 'joe cannot see samples in project one' do
@@ -73,14 +73,14 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @project = projects(:two)
     get "/samples.json?project_id=#{@project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["count"] == 1
+    assert JSON.parse(@response.body)["count"] == 2
   end
 
   test 'joe can see samples in public_project' do
     @public_project = projects(:public_project)
     get "/samples.json?project_id=#{@public_project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["count"] == 3
+    assert JSON.parse(@response.body)["count"] == 4
   end
   # ===== END: /samples/index
 
@@ -89,7 +89,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @joe_project = projects(:joe_project)
     get "/samples/index_v2.json?projectId=#{@joe_project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["samples"].count == 3
+    assert JSON.parse(@response.body)["samples"].count == 4
   end
 
   test 'joe cannot see samples in project one with index_v2' do
@@ -103,32 +103,32 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @project = projects(:two)
     get "/samples/index_v2.json?projectId=#{@project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["samples"].count == 1
+    assert JSON.parse(@response.body)["samples"].count == 2
   end
 
   test 'joe can see samples in public_project with index_v2' do
     @public_project = projects(:public_project)
     get "/samples/index_v2.json?projectId=#{@public_project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["samples"].count == 3
+    assert JSON.parse(@response.body)["samples"].count == 4
   end
 
   test 'joe sees samples in its data set with index_v2' do
     get "/samples/index_v2.json?domain=library"
     assert_response :success
-    assert JSON.parse(@response.body)["samples"].count == 3
+    assert JSON.parse(@response.body)["samples"].count == 4
   end
 
   test 'joe sees samples that are public domain with index_v2' do
     get "/samples/index_v2.json?domain=public"
     assert_response :success
-    assert JSON.parse(@response.body)["samples"].count == 4
+    assert JSON.parse(@response.body)["samples"].count == 6
   end
 
   test 'joe sees the samples that he has access to with index_v2' do
     get "/samples/index_v2.json"
     assert_response :success
-    assert JSON.parse(@response.body)["samples"].count == 7
+    assert JSON.parse(@response.body)["samples"].count == 10
   end
   # ===== END: /samples/index_v2
 

@@ -7,7 +7,7 @@ import CSVUpload from "~ui/controls/CSVUpload";
 import {
   validateMetadataCSVForProject,
   validateMetadataCSVForNewSamples
-} from "~/api";
+} from "~/api/metadata";
 import cs from "./metadata_csv_upload.scss";
 import PropTypes from "prop-types";
 

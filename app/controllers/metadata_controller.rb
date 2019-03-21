@@ -33,7 +33,7 @@ class MetadataController < ApplicationController
     metadata = params[:metadata]
     samples_data = params[:samples]
 
-    projects = current_power.projects
+    projects = current_power.updatable_projects
                             .where(id: samples_data.map { |sample| sample["project_id"] }.uniq)
                             .includes(:metadata_fields).to_a
 

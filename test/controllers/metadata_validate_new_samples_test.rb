@@ -6,10 +6,14 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
   setup do
     @user = users(:one)
+    @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
     @mosquito_host_genome = host_genomes(:mosquito)
     @human_host_genome = host_genomes(:human)
     @metadata_validation_project = projects(:metadata_validation_project)
-    @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
+    @public_project = projects(:public_project)
+    @joe_project = projects(:joe_project)
+    @user_nonadmin = users(:joe)
+    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'passwordjoe' }
   end
 
   test 'basic' do
@@ -409,5 +413,82 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     assert_equal 0, @response.parsed_body['issues']['errors'].length
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
+  end
+
+  test 'nonadmin user public project' do
+    post user_session_path, params: @user_nonadmin_params
+
+    post validate_csv_for_new_samples_metadata_url, params: {
+      metadata: {
+        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
+        rows: [
+          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar']
+        ]
+      },
+      samples: [
+        {
+          name: "Test Sample",
+          project_id: @public_project.id
+        }
+      ]
+    }, as: :json
+
+    assert_response :success
+
+    assert_equal 1, @response.parsed_body['issues']['errors'].length
+    # Error should throw if sample project is invalid
+    assert @response.parsed_body['issues']['errors'][0]['isGroup']
+    assert_equal ErrorAggregator::ERRORS[:row_invalid_project_id][:title].call(1, nil), @response.parsed_body['issues']['errors'][0]['caption']
+    assert_equal [[1, "Test Sample"]], @response.parsed_body['issues']['errors'][0]['rows']
+  end
+
+  test 'nonadmin user private project' do
+    post user_session_path, params: @user_nonadmin_params
+
+    post validate_csv_for_new_samples_metadata_url, params: {
+      metadata: {
+        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
+        rows: [
+          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar']
+        ]
+      },
+      samples: [
+        {
+          name: "Test Sample",
+          project_id: @metadata_validation_project.id
+        }
+      ]
+    }, as: :json
+
+    assert_response :success
+
+    assert_equal 1, @response.parsed_body['issues']['errors'].length
+    # Error should throw if sample project is invalid
+    assert @response.parsed_body['issues']['errors'][0]['isGroup']
+    assert_equal ErrorAggregator::ERRORS[:row_invalid_project_id][:title].call(1, nil), @response.parsed_body['issues']['errors'][0]['caption']
+    assert_equal [[1, "Test Sample"]], @response.parsed_body['issues']['errors'][0]['rows']
+  end
+
+  test 'nonadmin user own project' do
+    post user_session_path, params: @user_nonadmin_params
+
+    post validate_csv_for_new_samples_metadata_url, params: {
+      metadata: {
+        headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
+        rows: [
+          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar']
+        ]
+      },
+      samples: [
+        {
+          name: "Test Sample",
+          project_id: @joe_project.id
+        }
+      ]
+    }, as: :json
+
+    assert_response :success
+
+    assert_equal 0, @response.parsed_body['issues']['errors'].length
   end
 end
