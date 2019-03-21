@@ -50,6 +50,7 @@ class VisualizationsController < ApplicationController
     end
   end
 
+  # TODO: (gdingle): overwrite on save
   def save
     @type = params[:type]
     @data = params[:data]
