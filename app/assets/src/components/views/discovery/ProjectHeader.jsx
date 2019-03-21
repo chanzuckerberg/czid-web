@@ -10,9 +10,7 @@ import ProjectUploadMenu from "~/components/views/samples/ProjectUploadMenu";
 import cs from "./project_header.scss";
 import cx from "classnames";
 
-const ProjectHeader = ({ project, fetchedSamples, onProjectUserAdded }) => {
-  console.log("ProjectHeader:render - ", project);
-
+const ProjectHeader = ({ project, fetchedSamples, onProjectUpdate }) => {
   const handleProjectUserAdded = (username, email) => {
     const userFound = find({ email }, project.users);
     if (!userFound) {

@@ -106,7 +106,6 @@ const getDiscoverySamples = async ({
   offset = 0,
   listAllIds = false
 } = {}) => {
-  console.log("discovery_api:getDiscoverySamples", domain, filters, projectId);
   const sampleResults = await getSamples({
     domain,
     filters,
