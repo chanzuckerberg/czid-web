@@ -245,7 +245,7 @@ class Sample < ApplicationRecord
     return unless status == STATUS_CREATED
     stderr_array = []
     total_reads_json_path = nil
-    max_lines = 5000
+    max_lines = 4 * (max_input_fragments || PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS)
     input_files.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
@@ -275,10 +275,9 @@ class Sample < ApplicationRecord
       stderr = err_read.read
 
       # Ignore proc_download and proc_unzip status because they will always throw exit 1 and
-      # SIGPIPE 13 'pipe broken' unless the entire file was copied.
+      # SIGPIPE 13 'pipe broken' unless the entire file was headed. But we still want to see stderrs
+      # like HeadObject Forbidden.
       unless to_check.all? { |p| p && p.exitstatus && p.exitstatus.zero? } && (stderr.empty? || stderr.include?(InputFile::S3_CP_PIPE_ERROR))
-        # NOTE: Ignore 'Broken pipe' error because it will always be written to stderr unless you
-        # 'head' the entire file. But we still want to see stderrs like HeadObject Forbidden.
         stderr_array << stderr
       end
     end
