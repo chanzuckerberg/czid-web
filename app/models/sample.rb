@@ -245,7 +245,7 @@ class Sample < ApplicationRecord
     return unless status == STATUS_CREATED
     stderr_array = []
     total_reads_json_path = nil
-    max_lines = 4 * (max_input_fragments || PipelineRun::DEFAULT_MAX_INPUT_FRAGMENTS)
+    max_lines = 5000
     input_files.each do |input_file|
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
@@ -261,8 +261,6 @@ class Sample < ApplicationRecord
           ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
           err: err_write
         )
-        # Ignore proc_download and proc_unzip because they will always throw exit 1 and SIGPIPE 13
-        # 'pipe broken' unless the entire file is copied.
         to_check = [proc_head, proc_zip, proc_upload]
       else
         _proc_download, proc_head, proc_upload = Open3.pipeline(
@@ -276,12 +274,15 @@ class Sample < ApplicationRecord
       err_write.close
       stderr = err_read.read
 
-      unless to_check.all? { |p| p.exitstatus.zero? } && (stderr.empty? || stderr.include?(InputFile::S3_CP_PIPE_ERROR))
+      # Ignore proc_download and proc_unzip status because they will always throw exit 1 and
+      # SIGPIPE 13 'pipe broken' unless the entire file was copied.
+      unless to_check.all? { |p| p && p.exitstatus && p.exitstatus.zero? } && (stderr.empty? || stderr.include?(InputFile::S3_CP_PIPE_ERROR))
         # NOTE: Ignore 'Broken pipe' error because it will always be written to stderr unless you
         # 'head' the entire file. But we still want to see stderrs like HeadObject Forbidden.
         stderr_array << stderr
       end
     end
+
     if total_reads_json_path.present?
       # For samples where we are only given fastas post host filtering, we need to input the total reads (before host filtering) from this file.
       _stdout, _stderr, status = Open3.capture3("aws", "s3", "cp", total_reads_json_path, "#{sample_input_s3_path}/#{TOTAL_READS_JSON}")
