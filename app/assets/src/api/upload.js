@@ -6,6 +6,7 @@ import {
 } from "~/api";
 
 import { bulkUploadWithMetadata } from "~/api/metadata";
+import { putWithCSRF } from "./core";
 
 export const bulkUploadRemote = ({ samples, metadata }) =>
   metadata
@@ -147,3 +148,6 @@ export const bulkUploadLocal = ({
       });
   }
 };
+
+export const updateUploadHeartbeat = async sampleId =>
+  putWithCSRF(`/samples/${sampleId}/upload_heartbeat.json`);

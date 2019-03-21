@@ -23,6 +23,7 @@ import { resetUrl, parseUrlParams } from "~/helpers/url";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { createSample } from "~/api";
+import SampleUploadHeartbeat from "./views/SampleUploadFlow/SampleUploadHeartbeat";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -904,6 +905,7 @@ class SampleUpload extends React.Component {
 
     return (
       <div id="samplesUploader" className="row">
+        <SampleUploadHeartbeat sampleId={10} />
         <div className="col s6 offset-s3 upload-form-container">
           <div className="content">
             <div>
