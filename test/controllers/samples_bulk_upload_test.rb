@@ -6,10 +6,14 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
 
   setup do
     @metadata_validation_project = projects(:metadata_validation_project)
+    @joe_project = projects(:joe_project)
+    @public_project = projects(:public_project)
     @user = users(:one)
     @host_genome_human = host_genomes(:human)
     @core_field = metadata_fields(:core_field)
     @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
+    @user_nonadmin = users(:joe)
+    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'passwordjoe' }
   end
 
   test 'bulk upload basic remote' do
@@ -437,6 +441,132 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     assert_equal 1, MetadataField.where(name: "Custom Field 2").length
   end
 
-  # TODO(mark): Test for sample with invalid project id.
-  # Since this endpoint is currently admin-only and admins can access all projects, it's hard to test this right now.
+  # Test that a nonadmin user cannot upload to a private project he is not a member of.
+  test 'joe cannot bulk upload to a private project' do
+    post user_session_path, params: @user_nonadmin_params
+
+    post bulk_upload_with_metadata_samples_url, params: {
+      client: "0.5.0",
+      metadata: {
+        "RR004_water_2_S23A" => {
+          'sample_type' => 'blood',
+          'nucleotide_type' => 'DNA',
+          'Example Core Field' => 'Value',
+          'Custom Field' => 'Value',
+          'Custom Field 2' => 'Value'
+        }
+      },
+      samples: [
+        {
+          host_genome_id: @host_genome_human.id,
+          input_files_attributes: [
+            {
+              parts: "RR004_water_2_S23A_R1_001.fastq",
+              source: "RR004_water_2_S23A_R1_001.fastq",
+              source_type: "local"
+            },
+            {
+              parts: "RR004_water_2_S23A_R2_001.fastq",
+              source: "RR004_water_2_S23A_R2_001.fastq",
+              source_type: "local"
+            }
+          ],
+          name: "RR004_water_2_S23A",
+          project_id: String(@metadata_validation_project.id),
+          status: "created"
+        }
+      ]
+    }, as: :json
+
+    assert_response :success
+    assert_equal 1, @response.parsed_body["errors"].length
+    assert_equal SampleUploadErrors.invalid_project_id("name" => "RR004_water_2_S23A"), @response.parsed_body["errors"][0]
+
+    assert_equal 0, Sample.where(name: "RR004_water_2_S23A").length
+  end
+
+  # Test that a nonadmin user cannot upload to a public project
+  test 'joe cannot bulk upload to a public project' do
+    post user_session_path, params: @user_nonadmin_params
+
+    post bulk_upload_with_metadata_samples_url, params: {
+      client: "0.5.0",
+      metadata: {
+        "RR004_water_2_S23A" => {
+          'sample_type' => 'blood',
+          'nucleotide_type' => 'DNA',
+          'Example Core Field' => 'Value',
+          'Custom Field' => 'Value',
+          'Custom Field 2' => 'Value'
+        }
+      },
+      samples: [
+        {
+          host_genome_id: @host_genome_human.id,
+          input_files_attributes: [
+            {
+              parts: "RR004_water_2_S23A_R1_001.fastq",
+              source: "RR004_water_2_S23A_R1_001.fastq",
+              source_type: "local"
+            },
+            {
+              parts: "RR004_water_2_S23A_R2_001.fastq",
+              source: "RR004_water_2_S23A_R2_001.fastq",
+              source_type: "local"
+            }
+          ],
+          name: "RR004_water_2_S23A",
+          project_id: String(@public_project.id),
+          status: "created"
+        }
+      ]
+    }, as: :json
+
+    assert_response :success
+    assert_equal 1, @response.parsed_body["errors"].length
+    assert_equal SampleUploadErrors.invalid_project_id("name" => "RR004_water_2_S23A"), @response.parsed_body["errors"][0]
+
+    assert_equal 0, Sample.where(name: "RR004_water_2_S23A").length
+  end
+
+  # Test that a nonadmin user can upload to a project he is a member of.
+  test 'joe can bulk upload to projects he is a member of' do
+    post user_session_path, params: @user_nonadmin_params
+
+    post bulk_upload_with_metadata_samples_url, params: {
+      client: "0.5.0",
+      metadata: {
+        "RR004_water_2_S23A" => {
+          'sample_type' => 'blood',
+          'nucleotide_type' => 'DNA',
+          'Example Core Field' => 'Value',
+          'Custom Field' => 'Value',
+          'Custom Field 2' => 'Value'
+        }
+      },
+      samples: [
+        {
+          host_genome_id: @host_genome_human.id,
+          input_files_attributes: [
+            {
+              parts: "RR004_water_2_S23A_R1_001.fastq",
+              source: "RR004_water_2_S23A_R1_001.fastq",
+              source_type: "local"
+            },
+            {
+              parts: "RR004_water_2_S23A_R2_001.fastq",
+              source: "RR004_water_2_S23A_R2_001.fastq",
+              source_type: "local"
+            }
+          ],
+          name: "RR004_water_2_S23A",
+          project_id: String(@joe_project.id),
+          status: "created"
+        }
+      ]
+    }, as: :json
+
+    assert_response :success
+    assert_equal 0, @response.parsed_body["errors"].length
+  end
 end
