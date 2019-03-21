@@ -68,7 +68,7 @@ if ENV['AIRBRAKE_PROJECT_ID'] && ENV['AIRBRAKE_PROJECT_KEY']
   # It's invoked after notify_request or notify_query (but notify calls don't
   # trigger it!).
   Airbrake.add_performance_filter do |resource|
-    if resource.route == 'health_check'
+    if resource.route.include?('health_check')
       resource.ignore!
     end
   end
