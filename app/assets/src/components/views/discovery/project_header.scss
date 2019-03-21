@@ -1,0 +1,38 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.projectHeader {
+  display: flex;
+  margin-bottom: 30px;
+
+  .name {
+    @include font-header-xl;
+
+    flex: 0 1 auto;
+  }
+
+  .fillIn {
+    flex: 1;
+  }
+
+  .item {
+    @include font-body-s;
+
+    display: flex;
+    align-items: center;
+
+    &:not(:first-child) {
+      margin-left: 10px;
+    }
+  }
+}
+
+.smallIcon {
+  height: 16px;
+  margin-right: 5px;
+  fill: black;
+
+  .userIcon {
+    height: 14px;
+  }
+}
