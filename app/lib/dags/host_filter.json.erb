@@ -51,14 +51,7 @@
         , "bowtie2_2.fa", "bowtie2_merged.fa"
       <% end %>
     ],
-    "subsampled_out": [
-      "subsampled_1.fa"
-      <% if @attribute_dict[:fastq2] %>
-        , "subsampled_2.fa", "subsampled_merged.fa"
-      <% end %>
-    ]
     <% if @host_genome != "human" %>
-      ,
       "star_human_out": [
         "unmapped_human_1.fa"
         <% if @attribute_dict[:fastq2] %>
@@ -70,8 +63,14 @@
         <% if @attribute_dict[:fastq2] %>
           , "bowtie2_human_2.fa", "bowtie2_human_merged.fa"
         <% end %>
-      ]
+      ],
     <% end %>
+    "subsampled_out": [
+      "subsampled_1.fa"
+      <% if @attribute_dict[:fastq2] %>
+        , "subsampled_2.fa", "subsampled_merged.fa"
+      <% end %>
+    ]
     ,
     "gsnap_filter_out": [
       "gsnap_filter_1.fa"
