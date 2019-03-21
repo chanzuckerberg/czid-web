@@ -275,8 +275,8 @@ class Sample < ApplicationRecord
       stderr = err_read.read
 
       # Ignore proc_download and proc_unzip status because they will always throw exit 1 and
-      # SIGPIPE 13 'pipe broken' unless the entire file was headed. But we still want to see stderrs
-      # like HeadObject Forbidden.
+      # SIGPIPE 13 'pipe broken' unless the entire file was headed. Ignore pipe error in stderr but
+      # we still want to see errs like HeadObject Forbidden.
       unless to_check.all? { |p| p && p.exitstatus && p.exitstatus.zero? } && (stderr.empty? || stderr.include?(InputFile::S3_CP_PIPE_ERROR))
         stderr_array << stderr
       end
