@@ -40,6 +40,7 @@ Rails.application.routes.draw do
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
     post :validate_sample_files, on: :collection
+    get :client_upload_status, on: :member
   end
 
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
