@@ -229,7 +229,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @public_sample = samples(:public_sample)
     get "/samples/#{@public_sample.id}/results_folder.json"
     displayed_data = JSON.parse(@response.body)["displayed_data"]
-    intermediate_targets = %w[fastqs star_out trimmomatic_out priceseq_out cdhitdup_out lzw_out bowtie2_out subsampled_out]
+    intermediate_targets = %w[fastqs star_out trimmomatic_out priceseq_out cdhitdup_out lzw_out bowtie2_out subsampled_out gsnap_filter_1.fa]
     original_url_by_key = TEST_RESULT_FOLDER.map { |file_info| [file_info[:key], file_info[:url]] }.to_h
     visible_intermediate_files = []
     displayed_data.each do |target, target_info|
