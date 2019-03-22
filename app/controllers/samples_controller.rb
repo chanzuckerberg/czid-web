@@ -713,7 +713,7 @@ class SamplesController < ApplicationController
     @taxon_info = params[:taxon_info].split(".")[0]
     @taxid = @taxon_info.split("_")[2].to_i
     if HUMAN_TAX_IDS.include? @taxid.to_i
-      render json: { status: :forbidden, message: "Human taxon ids are not allowed" }
+      render json: { error: "Human taxon ids are not allowed" }
       return
     end
 
