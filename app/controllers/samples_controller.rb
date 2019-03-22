@@ -130,14 +130,17 @@ class SamplesController < ApplicationController
     # discovery views (old one was kept to avoid breaking the current inteface
     # without sacrificing speed of development and avoid breaking the current interface)
     domain = params[:domain]
-    list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
-
+    order_by = params[:orderBy] || :id
+    order_dir = params[:orderDir] || :desc
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
     offset = params[:offset].to_i
+
+    list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
     samples = samples_by_domain(domain)
     samples = filter_samples(samples, params)
 
+    samples = samples.order(Hash[order_by => order_dir])
     limited_samples = samples.offset(offset).limit(limit)
 
     limited_samples_json = limited_samples.as_json(
