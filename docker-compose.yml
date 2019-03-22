@@ -53,7 +53,8 @@ x-honeycomb-variables: &honeycomb-variables
 version: '3.4'
 services:
   elasticsearch:
-    image: elasticsearch:6.6.2
+    image: elasticsearch:6.4.3
+
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
