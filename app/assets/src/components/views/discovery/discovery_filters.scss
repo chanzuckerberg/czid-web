@@ -1,3 +1,5 @@
+@import "~styles/themes/typography";
+
 .filtersContainer {
   width: 150px;
 
@@ -11,7 +13,10 @@
     }
 
     .filterTag {
+      @include font-label-s;
+
       flex: 0 0 auto;
+      padding: 0px 8px;
 
       &:not(:first-child) {
         margin-top: 5px;
