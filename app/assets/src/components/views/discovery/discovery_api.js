@@ -1,4 +1,4 @@
-import { get, map } from "lodash/fp";
+import { compact, get, map } from "lodash/fp";
 import {
   getProjects,
   getSamples,
@@ -10,19 +10,14 @@ import { getVisualizations } from "../../../api";
 const DISCOVERY_DOMAIN_LIBRARY = "library";
 const DISCOVERY_DOMAIN_PUBLIC = "public";
 
-const getDiscoveryData = async ({ domain, filters }) => {
+const getDiscoverySyncData = async ({ domain, filters }) => {
   try {
-    // Todo(tiago): maybe we should process them independently, otherwise
-    // our response time will be the same as the worst case.
-    const [samples, projects, visualizations] = await Promise.all([
-      getDiscoverySamples({ domain, filters, listAllIds: true }),
+    const [projects, visualizations] = await Promise.all([
       getProjects({ domain, filters }),
       getVisualizations({ domain, filters })
     ]);
 
     return {
-      samples: samples.samples,
-      sampleIds: samples.all_samples_ids,
       projects,
       visualizations
     };
@@ -33,12 +28,13 @@ const getDiscoveryData = async ({ domain, filters }) => {
   }
 };
 
-const getDiscoveryDimensions = async ({ domain }) => {
+const getDiscoveryDimensions = async ({ domain, filters, projectId }) => {
   try {
-    const [sampleDimensions, projectDimensions] = await Promise.all([
-      getSampleDimensions({ domain }),
-      getProjectDimensions({ domain })
+    const actions = compact([
+      getSampleDimensions({ domain, filters, projectId }),
+      !projectId && getProjectDimensions({ domain, filters })
     ]);
+    const [sampleDimensions, projectDimensions] = await Promise.all(actions);
     return { sampleDimensions, projectDimensions };
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -105,6 +101,7 @@ const processRawSample = sample => {
 const getDiscoverySamples = async ({
   domain,
   filters,
+  projectId,
   limit = 100,
   offset = 0,
   listAllIds = false
@@ -112,20 +109,21 @@ const getDiscoverySamples = async ({
   const sampleResults = await getSamples({
     domain,
     filters,
+    projectId,
     limit,
     offset,
     listAllIds
   });
   return {
     samples: map(processRawSample, sampleResults.samples),
-    all_samples_ids: sampleResults.all_samples_ids
+    sampleIds: sampleResults.all_samples_ids
   };
 };
 
 export {
   DISCOVERY_DOMAIN_LIBRARY,
   DISCOVERY_DOMAIN_PUBLIC,
-  getDiscoveryData,
+  getDiscoverySyncData,
   getDiscoveryDimensions,
   getDiscoverySamples
 };

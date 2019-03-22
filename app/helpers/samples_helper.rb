@@ -176,7 +176,9 @@ module SamplesHelper
     time = params[:time]
     tissue = params[:tissue]
     visibility = params[:visibility]
+    project_id = params[:projectId]
 
+    samples = samples.where(project_id: project_id) if project_id.present?
     samples = filter_by_taxid(samples, taxon) if taxon.present?
     samples = filter_by_host(samples, host) if host.present?
     samples = filter_by_metadata_key(samples, "collection_location", location) if location.present?

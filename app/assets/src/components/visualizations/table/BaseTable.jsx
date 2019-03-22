@@ -114,6 +114,7 @@ class BaseTable extends React.Component {
       defaultRowHeight,
       defaultSelectColumnWidth,
       initialActiveColumns,
+      onRowClick,
       onRowsRendered,
       forwardRef,
       onSort,
@@ -124,7 +125,8 @@ class BaseTable extends React.Component {
       selectableKey,
       sortable,
       sortBy,
-      sortDirection
+      sortDirection,
+      ...extraTableProps
     } = this.props;
 
     const { activeColumns, columns } = this.state;
@@ -140,7 +142,11 @@ class BaseTable extends React.Component {
               height={height}
               onRowsRendered={onRowsRendered}
               ref={forwardRef}
-              rowClassName={cx(rowClassName, cs.row)}
+              rowClassName={cx(
+                rowClassName,
+                cs.row,
+                onRowClick && cs.clickable
+              )}
               rowCount={rowCount}
               rowGetter={rowGetter}
               rowHeight={defaultRowHeight}
@@ -149,6 +155,8 @@ class BaseTable extends React.Component {
               sortBy={sortable && sortBy}
               sortDirection={sortable && sortDirection}
               width={width}
+              onRowClick={onRowClick}
+              {...extraTableProps}
             >
               {selectableKey && (
                 <Column

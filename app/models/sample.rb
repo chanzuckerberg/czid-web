@@ -250,35 +250,49 @@ class Sample < ApplicationRecord
       fastq = input_file.source
       total_reads_json_path = File.join(File.dirname(fastq.to_s), TOTAL_READS_JSON)
 
-      # Run the piped commands and save stderr
-      err_read, err_write = IO.pipe
-      if fastq =~ /\.gz/
-        _proc_download, _proc_unzip, proc_head, proc_zip, proc_upload = Open3.pipeline(
-          ["aws", "s3", "cp", fastq, "-"],
-          "gzip -dc",
-          ["head", "-n", max_lines.to_s],
-          "gzip -c",
-          ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
-          err: err_write
-        )
-        to_check = [proc_head, proc_zip, proc_upload]
-      else
-        _proc_download, proc_head, proc_upload = Open3.pipeline(
-          ["aws", "s3", "cp", fastq, "-"],
-          ["head", "-n", max_lines.to_s],
-          ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
-          err: err_write
-        )
-        to_check = [proc_head, proc_upload]
-      end
-      err_write.close
-      stderr = err_read.read
+      # Retry s3 cp up to 3 times
+      max_tries = 3
+      try = 0
+      while try < max_tries
+        # Run the piped commands and save stderr
+        err_read, err_write = IO.pipe
+        if fastq =~ /\.gz/
+          _proc_download, _proc_unzip, proc_head, proc_zip, proc_upload = Open3.pipeline(
+            ["aws", "s3", "cp", fastq, "-"],
+            "gzip -dc",
+            ["head", "-n", max_lines.to_s],
+            "gzip -c",
+            ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
+            err: err_write
+          )
+          to_check = [proc_head, proc_zip, proc_upload]
+        else
+          _proc_download, proc_head, proc_upload = Open3.pipeline(
+            ["aws", "s3", "cp", fastq, "-"],
+            ["head", "-n", max_lines.to_s],
+            ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
+            err: err_write
+          )
+          to_check = [proc_head, proc_upload]
+        end
+        err_write.close
+        stderr = err_read.read
 
-      # Ignore proc_download and proc_unzip status because they will always throw exit 1 and
-      # SIGPIPE 13 'pipe broken' unless the entire file was headed. Ignore pipe error in stderr but
-      # we still want to see errs like HeadObject Forbidden.
-      unless to_check.all? { |p| p && p.exitstatus && p.exitstatus.zero? } && (stderr.empty? || stderr.include?(InputFile::S3_CP_PIPE_ERROR))
-        stderr_array << stderr
+        # Ignore proc_download and proc_unzip status because they will always throw exit 1 and
+        # SIGPIPE 13 'pipe broken' unless the entire file was headed. Ignore pipe error in stderr but
+        # we still want to see errs like HeadObject Forbidden.
+        if to_check.all? { |p| p && p.exitstatus && p.exitstatus.zero? } && (stderr.empty? || stderr.include?(InputFile::S3_CP_PIPE_ERROR))
+          # Success
+          break
+        else
+          # Try again
+          Rails.logger.error("Try ##{try}: Upload of S3 sample '#{name}' (#{id}) file '#{fastq}' failed with: #{stderr}")
+          try += 1
+
+          # Record final stderr if exceeding max tries
+          stderr_array << stderr if try == max_tries
+          sleep(10)
+        end
       end
     end
 
@@ -296,10 +310,8 @@ class Sample < ApplicationRecord
       _stdout, stderr, status = Open3.capture3("aws", "s3", "cp", s3_preload_result_path.to_s, sample_output_s3_path.to_s, "--recursive")
       stderr_array << stderr unless status.exitstatus.zero?
     end
-    unless stderr_array.empty?
-      LogUtil.log_err_and_airbrake("Failed to upload S3 sample '#{name}' (#{id}): #{stderr_array[0]}")
-      raise stderr_array[0]
-    end
+
+    raise stderr_array.join(" ") unless stderr_array.empty?
 
     self.status = STATUS_UPLOADED
     save # this triggers pipeline command

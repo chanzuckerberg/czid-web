@@ -65,6 +65,7 @@ class ProjectsController < ApplicationController
                      current_power.projects
                    end
 
+        updatable_projects = current_power.updatable_projects.pluck(:id).to_set
         sample_count_by_project_id = Hash[samples.group_by(&:project_id).map { |k, v| [k, v.count] }]
         host_genome_names_by_project_id = {}
         tissues_by_project_id = {}
@@ -88,7 +89,7 @@ class ProjectsController < ApplicationController
             adjusted_remaining_reads += s.pipeline_runs[0].adjusted_remaining_reads || 0
           end
         end
-        extended_projects = projects.map do |project|
+        extended_projects = projects.includes(:users).map do |project|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
             number_of_samples: sample_count_by_project_id[project.id] || 0,
             hosts: host_genome_names_by_project_id[project.id] || [],
@@ -96,7 +97,9 @@ class ProjectsController < ApplicationController
             owner: owner_by_project_id[project.id],
             locations: locations_by_project_id[project.id] || [],
             total_reads: total_reads,
-            adjusted_remaining_reads: adjusted_remaining_reads
+            adjusted_remaining_reads: adjusted_remaining_reads,
+            editable: updatable_projects.include?(project.id),
+            users: updatable_projects.include?(project.id) ? project.users.map { |user| { name: user[:name], email: user[:email] } } : []
           )
         end
         render json: extended_projects
@@ -184,7 +187,7 @@ class ProjectsController < ApplicationController
   # GET /projects/1.json
   def show
     @samples = current_power.project_samples(@project).order(id: :desc)
-    # all exisiting project are null, we ensure private projects are explicitly set to 0
+    # all existing project are null, we ensure private projects are explicitly set to 0
     respond_to do |format|
       format.html
       format.json do
