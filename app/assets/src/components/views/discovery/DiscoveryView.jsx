@@ -28,7 +28,6 @@ import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
 import DiscoverySidebar from "./DiscoverySidebar";
 import cs from "./discovery_view.scss";
-import cx from "classnames";
 import DiscoveryFilters from "./DiscoveryFilters";
 import ProjectHeader from "./ProjectHeader";
 import {
@@ -408,14 +407,15 @@ class DiscoveryView extends React.Component {
             </NarrowContainer>
           </div>
           <div className={cs.rightPane}>
-            {["samples", "projects"].includes(currentTab) && (
-              <DiscoverySidebar
-                className={cx(cs.sidebar, showStats || cs.hiddenPane)}
-                samples={samples}
-                projects={projects}
-                currentTab={currentTab}
-              />
-            )}
+            {showStats &&
+              ["samples", "projects"].includes(currentTab) && (
+                <DiscoverySidebar
+                  className={cs.sidebar}
+                  samples={samples}
+                  projects={projects}
+                  currentTab={currentTab}
+                />
+              )}
           </div>
         </div>
       </div>

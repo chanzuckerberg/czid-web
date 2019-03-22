@@ -7,7 +7,7 @@ import {
   Table as VirtualizedTable
 } from "react-virtualized";
 import "react-virtualized/styles.css";
-import { find, map } from "lodash";
+import { concat, difference, find, includes, map } from "lodash/fp";
 import cx from "classnames";
 
 import Checkbox from "~ui/controls/Checkbox";
@@ -54,17 +54,23 @@ class BaseTable extends React.Component {
     );
   }
 
-  handleColumnChange = activeColumns => {
-    this.setState({ activeColumns });
+  handleColumnChange = selectedColumns => {
+    const { protectedColumns } = this.props;
+    this.setState({ activeColumns: concat(protectedColumns, selectedColumns) });
   };
 
   renderColumnSelector = () => {
     const { activeColumns, columns } = this.state;
+    const { protectedColumns } = this.props;
 
-    const options = columns.map(column => ({
-      value: column.dataKey,
-      text: column.label
-    }));
+    const options = columns
+      .filter(column => !includes(column.dataKey, protectedColumns))
+      .map(column => ({
+        value: column.dataKey,
+        text: column.label
+      }));
+
+    const value = difference(activeColumns, protectedColumns);
 
     return (
       <MultipleDropdown
@@ -78,7 +84,7 @@ class BaseTable extends React.Component {
         onChange={this.handleColumnChange}
         options={options}
         trigger={<PlusIcon className={cs.plusIcon} />}
-        value={activeColumns}
+        value={value}
       />
     );
   };
@@ -130,7 +136,7 @@ class BaseTable extends React.Component {
     } = this.props;
 
     const { activeColumns, columns } = this.state;
-    const columnOrder = activeColumns || map(columns, "dataKey");
+    const columnOrder = activeColumns || map("dataKey", columns);
     return (
       <div className={cs.tableContainer}>
         <AutoSizer>
@@ -169,7 +175,7 @@ class BaseTable extends React.Component {
                 />
               )}
               {columnOrder.map(dataKey => {
-                const columnProps = find(columns, { dataKey: dataKey });
+                const columnProps = find({ dataKey: dataKey }, columns);
                 const { cellRenderer, className, ...extraProps } = columnProps;
                 return (
                   <Column
@@ -239,8 +245,10 @@ BaseTable.propTypes = {
   defaultSelectColumnWidth: PropTypes.number,
   // Set of dataKeys of columns to be shown by default
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
+  onRowClick: PropTypes.func,
   onRowsRendered: PropTypes.func,
   onSort: PropTypes.func,
+  protectedColumns: PropTypes.arrayOf(PropTypes.string),
   forwardRef: PropTypes.oneOfType([
     PropTypes.func,
     PropTypes.shape({ current: PropTypes.instanceOf(Element) })
