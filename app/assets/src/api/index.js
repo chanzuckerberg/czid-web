@@ -179,8 +179,8 @@ const getSamples = ({
   offset,
   filters,
   listAllIds
-} = {}) => {
-  return get("/samples/index_v2.json", {
+} = {}) =>
+  get("/samples/index_v2.json", {
     params: {
       projectId,
       domain,
@@ -190,12 +190,12 @@ const getSamples = ({
       ...filters
     }
   });
-};
 
-const getSampleDimensions = ({ domain }) =>
+const getSampleDimensions = ({ domain, projectId }) =>
   get("/samples/dimensions.json", {
     params: {
-      domain
+      domain,
+      projectId
     }
   });
 

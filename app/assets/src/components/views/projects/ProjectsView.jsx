@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Table } from "~/components/visualizations/table";
-import { merge, pick } from "lodash/fp";
+import { find, merge, pick } from "lodash/fp";
 import moment from "moment";
 import cs from "./projects_view.scss";
 import cx from "classnames";
@@ -83,6 +83,12 @@ class ProjectsView extends React.Component {
     return list && list.length > 0 ? list.join(", ") : "N/A";
   };
 
+  handleRowClick = ({ event, index, rowData }) => {
+    const { onProjectSelected, projects } = this.props;
+    const project = find({ id: rowData.id }, projects);
+    onProjectSelected && onProjectSelected({ project });
+  };
+
   render() {
     const { projects } = this.props;
     let data = projects.map(project => {
@@ -103,6 +109,7 @@ class ProjectsView extends React.Component {
         data={data}
         columns={this.columns}
         defaultRowHeight={90}
+        onRowClick={this.handleRowClick}
       />
     );
   }
@@ -113,7 +120,8 @@ ProjectsView.defaultProps = {
 };
 
 ProjectsView.propTypes = {
-  projects: PropTypes.array
+  projects: PropTypes.array,
+  onProjectSelected: PropTypes.func
 };
 
 export default ProjectsView;

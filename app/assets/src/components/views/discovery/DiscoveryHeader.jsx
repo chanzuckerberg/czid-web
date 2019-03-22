@@ -8,22 +8,6 @@ import SearchBox from "~ui/controls/SearchBox";
 import cs from "./discovery_header.scss";
 
 class DiscoveryHeader extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      currentTab: this.props.initialTab || this.props.tabs[0].value
-    };
-  }
-
-  handleTabChange = tab => {
-    const { onTabChange } = this.props;
-    this.setState({
-      currentTab: tab
-    });
-    onTabChange(tab);
-  };
-
   handleSearchResultSelected = (_, { result }) => {
     const { onSearchResultSelected } = this.props;
 
@@ -52,15 +36,16 @@ class DiscoveryHeader extends React.Component {
 
   render() {
     const {
+      currentTab,
       filterCount,
       onSearchEnterPressed,
       onFilterToggle,
       onStatsToggle,
+      onTabChange,
       tabs
     } = this.props;
-    const { currentTab } = this.state;
 
-    // TODO(tiago): constrian what categories to ask for in the search box.
+    // TODO(tiago): consider constraining what categories to ask for in the search box.
     return (
       <div className={cs.header}>
         <div className={cs.filtersTrigger} onClick={onFilterToggle}>
@@ -85,7 +70,7 @@ class DiscoveryHeader extends React.Component {
           className={cs.tabs}
           tabs={tabs}
           value={currentTab}
-          onChange={this.handleTabChange}
+          onChange={onTabChange}
           hideBorder
         />
         <div className={cs.blankFill} />
@@ -113,7 +98,6 @@ DiscoveryHeader.propTypes = {
       })
     ])
   ).isRequired,
-  initialTab: PropTypes.string,
   onFilterToggle: PropTypes.func,
   onStatsToggle: PropTypes.func,
   onSearchEnterPressed: PropTypes.func,

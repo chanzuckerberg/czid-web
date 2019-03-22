@@ -139,7 +139,6 @@ class SamplesController < ApplicationController
     list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
     samples = samples_by_domain(domain)
-    samples = samples.where(project_id: project_id) if project_id.present?
     samples = filter_samples(samples, params)
 
     samples = samples.order(Hash[order_by => order_dir])
@@ -177,12 +176,15 @@ class SamplesController < ApplicationController
     domain = params[:domain]
     param_sample_ids = (params[:sampleIds] || []).map(&:to_i)
 
+    # Access control enforced within samples_by_domain
     samples = samples_by_domain(domain)
-    # Filter by access control
+
     unless param_sample_ids.empty?
       samples = samples.where(id: param_sample_ids)
     end
     sample_ids = samples.pluck(:id)
+
+    samples = filter_samples(samples, params)
 
     locations = samples_by_metadata_field(sample_ids, "collection_location").count
     locations = locations.map do |location, count|
