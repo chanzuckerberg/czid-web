@@ -6,24 +6,9 @@ import Label from "~ui/labels/Label";
 import Tabs from "~ui/controls/Tabs";
 import SearchBox from "~ui/controls/SearchBox";
 import cs from "./discovery_header.scss";
+import cx from "classnames";
 
 class DiscoveryHeader extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      currentTab: this.props.initialTab || this.props.tabs[0].value
-    };
-  }
-
-  handleTabChange = tab => {
-    const { onTabChange } = this.props;
-    this.setState({
-      currentTab: tab
-    });
-    onTabChange(tab);
-  };
-
   handleSearchResultSelected = (_, { result }) => {
     const { onSearchResultSelected } = this.props;
 
@@ -52,19 +37,24 @@ class DiscoveryHeader extends React.Component {
 
   render() {
     const {
+      currentTab,
       filterCount,
       onSearchEnterPressed,
       onFilterToggle,
       onStatsToggle,
+      onTabChange,
+      showFilters,
+      showStats,
       tabs
     } = this.props;
-    const { currentTab } = this.state;
 
-    // TODO(tiago): constrian what categories to ask for in the search box.
+    // TODO(tiago): consider constraining what categories to ask for in the search box.
     return (
       <div className={cs.header}>
         <div className={cs.filtersTrigger} onClick={onFilterToggle}>
-          <FiltersIcon className={cs.filtersIcon} />
+          <FiltersIcon
+            className={cx(cs.filtersIcon, cs.icon, !showFilters && cs.closed)}
+          />
           <Label
             className={cs.filtersCounter}
             circular
@@ -85,12 +75,14 @@ class DiscoveryHeader extends React.Component {
           className={cs.tabs}
           tabs={tabs}
           value={currentTab}
-          onChange={this.handleTabChange}
+          onChange={onTabChange}
           hideBorder
         />
         <div className={cs.blankFill} />
         <div className={cs.statsTrigger} onClick={onStatsToggle}>
-          <InfoIcon className={cs.statsIcon} />
+          <InfoIcon
+            className={cx(cs.statsIcon, cs.icon, !showStats && cs.closed)}
+          />
         </div>
       </div>
     );
@@ -113,12 +105,13 @@ DiscoveryHeader.propTypes = {
       })
     ])
   ).isRequired,
-  initialTab: PropTypes.string,
   onFilterToggle: PropTypes.func,
   onStatsToggle: PropTypes.func,
   onSearchEnterPressed: PropTypes.func,
   onSearchResultSelected: PropTypes.func,
-  onTabChange: PropTypes.func
+  onTabChange: PropTypes.func,
+  showFilters: PropTypes.bool,
+  showStats: PropTypes.bool
 };
 
 export default DiscoveryHeader;

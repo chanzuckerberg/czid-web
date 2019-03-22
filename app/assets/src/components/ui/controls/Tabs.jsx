@@ -48,14 +48,13 @@ class Tabs extends React.Component {
 
     // Normalize tab format since we accept both an array of strings
     // or an array of objects with value and label attributes
-    this._normalizedTabs = tabs.map(tab => {
+    const normalizedTabs = tabs.map(tab => {
       return typeof tab === "string" ? { value: tab, label: tab } : tab;
     });
-
     return (
       <div className={cx(cs.tabs, className)}>
         <div className={cx(cs.tabWrapper)}>
-          {this._normalizedTabs.map(tab => (
+          {normalizedTabs.map(tab => (
             <div
               key={tab.value}
               ref={c => (this._tabs[tab.value] = c)}
