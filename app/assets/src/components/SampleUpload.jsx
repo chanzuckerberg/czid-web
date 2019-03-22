@@ -23,6 +23,7 @@ import { resetUrl, parseUrlParams } from "~/helpers/url";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { createSample } from "~/api";
+import { startUploadHeartbeat } from "~/api/upload";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -723,6 +724,7 @@ class SampleUpload extends React.Component {
         this.setState({
           id: response.id
         });
+        startUploadHeartbeat(response.id);
         this.uploadLocalFiles(response.input_files);
       })
       .catch(error => {
