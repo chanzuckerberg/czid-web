@@ -42,49 +42,55 @@ class AlignmentViz extends React.Component {
 
   render() {
     const { loading, alignmentData, pipelineRun } = this.state;
-    return loading ? (
-      <div>
-        <h2 className={cs.heading}>
-          Loading alignment data for {this.taxName} ({this.taxLevel}) ...
-        </h2>
-      </div>
-    ) : (
-      <div>
-        <h2 className={cs.heading}>
-          {this.taxName ? this.taxName + " (" + this.taxLevel + ")" : ""}
-          Alignment ({alignmentData.length} unique accessions)
-          {pipelineRun &&
-            pipelineVersionHasAssembly(pipelineRun.pipeline_version) && (
-              <Popup
-                trigger={
-                  <i
-                    className={cx("fa fa-exclamation-circle", cs.warningIcon)}
-                  />
-                }
-                position="bottom left"
-                content={`
+    if (loading) {
+      return (
+        <div>
+          <h2 className={cs.heading}>
+            Loading alignment data for {this.taxName} ({this.taxLevel}) ...
+          </h2>
+        </div>
+      );
+    } else if (Array.isArray(alignmentData)) {
+      return (
+        <div>
+          <h2 className={cs.heading}>
+            {this.taxName ? this.taxName + " (" + this.taxLevel + ")" : ""}
+            Alignment ({alignmentData.length} unique accessions)
+            {pipelineRun &&
+              pipelineVersionHasAssembly(pipelineRun.pipeline_version) && (
+                <Popup
+                  trigger={
+                    <i
+                      className={cx("fa fa-exclamation-circle", cs.warningIcon)}
+                    />
+                  }
+                  position="bottom left"
+                  content={`
                 Only alignments of individual reads are listed. Contig assembly is not currently included.
               `}
-                inverted
-                wide="very"
-                horizontalOffset={4}
-                className={cs.popup}
-              />
-            )}
-        </h2>
-        <div className={cs.accessionViz}>
-          {alignmentData.map(function(item, i) {
-            return (
-              <AccessionViz
-                key={`accession_${i}`}
-                readsPerPage={this.readsPerPage}
-                {...item}
-              />
-            );
-          }, this)}
+                  inverted
+                  wide="very"
+                  horizontalOffset={4}
+                  className={cs.popup}
+                />
+              )}
+          </h2>
+          <div className={cs.accessionViz}>
+            {alignmentData.map(function(item, i) {
+              return (
+                <AccessionViz
+                  key={`accession_${i}`}
+                  readsPerPage={this.readsPerPage}
+                  {...item}
+                />
+              );
+            }, this)}
+          </div>
         </div>
-      </div>
-    );
+      );
+    } else {
+      return <div>{alignmentData.error}</div>;
+    }
   }
 }
 
