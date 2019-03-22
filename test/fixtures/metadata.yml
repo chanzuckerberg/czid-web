@@ -13,3 +13,47 @@ sample_human_nucleotide_type:
   string_validated_value: "RNA"
   sample: metadata_validation_sample_human_existing_metadata
   metadata_field: nucleotide_type
+
+# Metadata for private joe project.
+sample_human_private_sex:
+  key: "sex"
+  raw_value: "Male"
+  string_validated_value: "Male"
+  sample: sample_human_existing_metadata_joe_project
+  metadata_field: sex
+
+sample_human_private_sample_type:
+  key: "sample_type"
+  raw_value: "Blood"
+  string_validated_value: "Blood"
+  sample: sample_human_existing_metadata_joe_project
+  metadata_field: sample_type
+
+# Metadata for public project
+sample_human_public_sex:
+  key: "sex"
+  raw_value: "Male"
+  string_validated_value: "Male"
+  sample: sample_human_existing_metadata_public
+  metadata_field: sex
+
+sample_human_public_nucleotide_type:
+  key: "nucleotide_type"
+  raw_value: "RNA"
+  string_validated_value: "RNA"
+  sample: sample_human_existing_metadata_public
+  metadata_field: nucleotide_type
+
+sample_human_expired_sex:
+  key: "sex"
+  raw_value: "Male"
+  string_validated_value: "Male"
+  sample: sample_human_existing_metadata_expired
+  metadata_field: sex
+
+sample_human_expired_age:
+  key: "age"
+  raw_value: "100"
+  number_validated_value: 100
+  sample: sample_human_existing_metadata_expired
+  metadata_field: age

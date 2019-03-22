@@ -5,6 +5,7 @@ one:
 
 two:
   name: Project 2
+  metadata_fields: [age]
 
 deletable_project:
   name: Empty project
@@ -12,10 +13,12 @@ deletable_project:
 public_project:
   name: Public Project
   public_access: 1
+  metadata_fields: [sample_type, nucleotide_type]
 
 joe_project:
   name: Project 3
   users: [joe]
+  metadata_fields: [sample_type, nucleotide_type, age, admission_date, blood_fed, reported_sex, sex]
 
 metadata_validation_project:
   name: Metadata Project

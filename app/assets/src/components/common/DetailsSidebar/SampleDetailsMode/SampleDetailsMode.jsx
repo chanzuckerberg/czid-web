@@ -3,13 +3,13 @@ import { some } from "lodash";
 import { set } from "lodash/fp";
 import PropTypes from "~/components/utils/propTypes";
 import Tabs from "~/components/ui/controls/Tabs";
+import { saveSampleName, saveSampleNotes } from "~/api";
 import {
   getSampleMetadata,
   saveSampleMetadata,
-  getSampleMetadataFields,
-  saveSampleName,
-  saveSampleNotes
-} from "~/api";
+  getSampleMetadataFields
+} from "~/api/metadata";
+
 import MetadataTab from "./MetadataTab";
 import PipelineTab from "./PipelineTab";
 import NotesTab from "./NotesTab";

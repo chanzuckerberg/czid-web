@@ -1,106 +1,11 @@
+// This file contains unsorted API endpoints.
 // TODO(mark): Split this file up as more API methods get added.
 // TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
 import axiosRetry from "axios-retry";
 import { cleanFilePath } from "~utils/sample";
-import { set } from "lodash/fp";
 
-const postWithCSRF = async (url, params) => {
-  try {
-    const resp = await axios.post(url, {
-      ...params,
-      // Fetch the CSRF token from the DOM.
-      authenticity_token: document.getElementsByName("csrf-token")[0].content
-    });
-
-    // Just return the data.
-    // resp also contains headers, status, etc. that we might use later.
-    return resp.data;
-  } catch (e) {
-    return Promise.reject(e.response.data);
-  }
-};
-
-// TODO(mark): Remove redundancy in CSRF methods.
-const putWithCSRF = async (url, params) => {
-  try {
-    const resp = await axios.put(url, {
-      ...params,
-      // Fetch the CSRF token from the DOM.
-      authenticity_token: document.getElementsByName("csrf-token")[0].content
-    });
-
-    // Just return the data.
-    // resp also contains headers, status, etc. that we might use later.
-    return resp.data;
-  } catch (e) {
-    return Promise.reject(e.response.data);
-  }
-};
-
-const get = async (url, config) => {
-  try {
-    const resp = await axios.get(url, config);
-
-    return resp.data;
-  } catch (e) {
-    return Promise.reject(e.response.data);
-  }
-};
-
-const deleteAsync = async (url, config) => {
-  const resp = await axios.delete(url, config);
-
-  return resp.data;
-};
-
-const deleteWithCSRF = async url => {
-  try {
-    const resp = await axios.delete(url, {
-      data: {
-        // Fetch the CSRF token from the DOM.
-        authenticity_token: document.getElementsByName("csrf-token")[0].content
-      }
-    });
-
-    return resp.data;
-  } catch (e) {
-    return Promise.reject(e.response.data);
-  }
-};
-
-const getSampleMetadata = (id, pipelineVersion) => {
-  return get(
-    pipelineVersion
-      ? `/samples/${id}/metadata?pipeline_version=${pipelineVersion}`
-      : `/samples/${id}/metadata`
-  );
-};
-
-// Get MetadataField info for the sample(s) (either one ID or an array)
-const getSampleMetadataFields = ids =>
-  get("/samples/metadata_fields", {
-    params: {
-      sampleIds: [ids].flat()
-    }
-  });
-
-// Get MetadataField info for the sample(s) (either one ID or an array)
-const getProjectMetadataFields = ids =>
-  get("/projects/metadata_fields", {
-    params: {
-      projectIds: [ids].flat()
-    }
-  });
-
-const saveSampleMetadata = (id, field, value) =>
-  postWithCSRF(`/samples/${id}/save_metadata_v2`, {
-    field,
-    value
-  });
-
-const getMetadataTypesByHostGenomeName = () =>
-  get("/samples/metadata_types_by_host_genome_name");
+import { get, postWithCSRF, putWithCSRF, deleteWithCSRF } from "./core";
 
 // Save fields on the sample model (NOT sample metadata)
 const saveSampleField = (id, field, value) =>
@@ -178,66 +83,12 @@ const createSample = (
   });
 };
 
-// Validate CSV metadata against samples in an existing project.
-const validateMetadataCSVForProject = (id, metadata) =>
-  postWithCSRF(`/projects/${id}/validate_metadata_csv`, {
-    metadata
-  });
-
-// Validate manually input metadata against samples in an existing project.
-const validateManualMetadataForProject = (id, metadata) => {
-  // Convert manual metadata into a csv-like format and use the csv endpoint for validation.
-  const metadataAsCSV = set(
-    "rows",
-    metadata.rows.map(row => metadata.headers.map(header => row[header] || "")),
-    metadata
-  );
-
-  return validateMetadataCSVForProject(id, metadataAsCSV);
-};
-
-// Validate CSV metadata for new samples.
-// For samples, we just require { name, host_genome_id }
-const validateMetadataCSVForNewSamples = (samples, metadata) =>
-  postWithCSRF("/metadata/validate_csv_for_new_samples", {
-    metadata,
-    samples
-  });
-
-// Validate manually input metadata for new samples.
-const validateManualMetadataForNewSamples = (samples, metadata) => {
-  // Convert manual metadata into a csv-like format and use the csv endpoint for validation.
-  const metadataAsCSV = set(
-    "rows",
-    metadata.rows.map(row => metadata.headers.map(header => row[header] || "")),
-    metadata
-  );
-
-  return validateMetadataCSVForNewSamples(samples, metadataAsCSV);
-};
-
-const uploadMetadataForProject = (id, metadata) =>
-  postWithCSRF(`/projects/${id}/upload_metadata`, {
-    metadata
-  });
-
-const getOfficialMetadataFields = () =>
-  get("/metadata/official_metadata_fields");
-
 const getAllHostGenomes = () => get("/host_genomes.json");
 
 // TODO(mark): Remove this method once we launch the new sample upload flow.
 const bulkUploadRemoteSamples = samples =>
   postWithCSRF(`/samples/bulk_upload.json`, {
     samples
-  });
-
-// Bulk-upload samples that have files in an S3 bucket, with metadata.
-const bulkUploadWithMetadata = (samples, metadata) =>
-  postWithCSRF(`/samples/bulk_upload_with_metadata.json`, {
-    samples,
-    metadata,
-    client: "web"
   });
 
 const saveVisualization = (type, data) =>
@@ -328,8 +179,8 @@ const getSamples = ({
   offset,
   filters,
   listAllIds
-} = {}) => {
-  return get("/samples/index_v2.json", {
+} = {}) =>
+  get("/samples/index_v2.json", {
     params: {
       projectId,
       domain,
@@ -339,12 +190,12 @@ const getSamples = ({
       ...filters
     }
   });
-};
 
-const getSampleDimensions = ({ domain }) =>
+const getSampleDimensions = ({ domain, projectId }) =>
   get("/samples/dimensions.json", {
     params: {
-      domain
+      domain,
+      projectId
     }
   });
 
@@ -422,23 +273,15 @@ const createBackground = ({ description, name, sampleIds }) =>
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
-  bulkUploadWithMetadata,
   createBackground,
   createProject,
   createSample,
-  deleteAsync,
   deleteSample,
-  get,
   getAlignmentData,
   getAllHostGenomes,
-  getMetadataTypesByHostGenomeName,
-  getOfficialMetadataFields,
   getProjectDimensions,
   getProjects,
   getSampleDimensions,
-  getSampleMetadata,
-  getSampleMetadataFields,
-  getProjectMetadataFields,
   getSampleReportInfo,
   getSampleTaxons,
   getSamples,
@@ -450,18 +293,12 @@ export {
   getVisualizations,
   logAnalyticsEvent,
   markSampleUploaded,
-  saveSampleMetadata,
   saveSampleName,
   saveSampleNotes,
   saveVisualization,
   shortenUrl,
-  uploadMetadataForProject,
   uploadFileToUrl,
   uploadFileToUrlWithRetries,
-  validateManualMetadataForProject,
-  validateManualMetadataForNewSamples,
-  validateMetadataCSVForNewSamples,
-  validateMetadataCSVForProject,
   validateSampleNames,
   validateSampleFiles
 };

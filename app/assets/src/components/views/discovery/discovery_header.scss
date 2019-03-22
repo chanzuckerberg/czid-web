@@ -3,8 +3,8 @@
 .header {
   display: flex;
   flex-direction: row;
-  margin: 20px 20px 18px 15px;
   align-items: center;
+  margin-bottom: 20px;
 
   .icon {
     fill: $primary-light;

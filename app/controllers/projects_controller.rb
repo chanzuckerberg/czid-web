@@ -16,10 +16,9 @@ class ProjectsController < ApplicationController
   READ_ACTIONS = [
     :show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status,
     :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status,
-    :send_project_reports_csv, :validate_metadata_csv, :upload_metadata,
-    :validate_sample_names
+    :send_project_reports_csv, :validate_sample_names
   ].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility].freeze
+  EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility, :upload_metadata, :validate_metadata_csv].freeze
   OTHER_ACTIONS = [:choose_project, :create, :dimensions, :index, :metadata_fields, :new, :send_project_csv].freeze
 
   # Required for token auth for CLI actions
@@ -66,6 +65,7 @@ class ProjectsController < ApplicationController
                      current_power.projects
                    end
 
+        updatable_projects = current_power.updatable_projects.pluck(:id).to_set
         sample_count_by_project_id = Hash[samples.group_by(&:project_id).map { |k, v| [k, v.count] }]
         host_genome_names_by_project_id = {}
         tissues_by_project_id = {}
@@ -89,7 +89,7 @@ class ProjectsController < ApplicationController
             adjusted_remaining_reads += s.pipeline_runs[0].adjusted_remaining_reads || 0
           end
         end
-        extended_projects = projects.map do |project|
+        extended_projects = projects.includes(:users).map do |project|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
             number_of_samples: sample_count_by_project_id[project.id] || 0,
             hosts: host_genome_names_by_project_id[project.id] || [],
@@ -97,7 +97,9 @@ class ProjectsController < ApplicationController
             owner: owner_by_project_id[project.id],
             locations: locations_by_project_id[project.id] || [],
             total_reads: total_reads,
-            adjusted_remaining_reads: adjusted_remaining_reads
+            adjusted_remaining_reads: adjusted_remaining_reads,
+            editable: updatable_projects.include?(project.id),
+            users: updatable_projects.include?(project.id) ? project.users.map { |user| { name: user[:name], email: user[:email] } } : []
           )
         end
         render json: extended_projects
@@ -185,7 +187,7 @@ class ProjectsController < ApplicationController
   # GET /projects/1.json
   def show
     @samples = current_power.project_samples(@project).order(id: :desc)
-    # all exisiting project are null, we ensure private projects are explicitly set to 0
+    # all existing project are null, we ensure private projects are explicitly set to 0
     respond_to do |format|
       format.html
       format.json do
@@ -416,9 +418,15 @@ class ProjectsController < ApplicationController
   def metadata_fields
     project_ids = (params[:projectIds] || []).map(&:to_i)
 
-    render json: current_power.projects.where(id: project_ids)
-      .includes(metadata_fields: [:host_genomes])
-                              .map(&:metadata_fields).flatten.map(&:field_info)
+    results = if project_ids.length == 1
+                current_power.projects.find(project_ids[0]).metadata_fields.map(&:field_info)
+              else
+                current_power.projects.where(id: project_ids)
+                             .includes(metadata_fields: [:host_genomes])
+                             .map(&:metadata_fields).flatten.uniq.map(&:field_info)
+              end
+
+    render json: results
   end
 
   # TODO: Consider consolidating into a general sample validator

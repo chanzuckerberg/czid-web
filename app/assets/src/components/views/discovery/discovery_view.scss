@@ -9,6 +9,7 @@
 
   .headerContainer {
     flex: 0 0 auto;
+    margin: 10px 20px 0 20px;
   }
 
   .mainContainer {
@@ -16,10 +17,10 @@
     display: flex;
 
     .leftPane:not(:empty) {
-      border-right: 2px solid $off-white;
+      border-right: 3px solid $lightest-grey;
       flex: 0 0 auto;
-      overflow: auto;
       padding: 30px 20px;
+      overflow-x: visible;
     }
 
     .centerPane {
@@ -36,7 +37,7 @@
     }
 
     .rightPane:not(:empty) {
-      border-left: 2px solid $off-white;
+      border-left: 3px solid $lightest-grey;
       flex: 0 0 auto;
       overflow: auto;
       padding: 30px 20px;

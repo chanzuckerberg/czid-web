@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { capitalize, endsWith, find, forEach, keys } from "lodash/fp";
+import { find, forEach, pick } from "lodash/fp";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
@@ -30,31 +30,50 @@ class DiscoveryFilters extends React.Component {
 
   static getDerivedStateFromProps(props, state) {
     let newState = state;
-    forEach(key => {
-      const value = props[key];
-      if (
-        endsWith("Selected", key) &&
-        value !== state[`prev${capitalize(key)}`]
-      ) {
-        newState[key] = value;
-        newState[`prev${capitalize(key)}`] = value;
-      }
-    }, keys(props));
+    forEach(
+      key => {
+        if (!state.prev || props[key] !== state.prev[key]) {
+          newState.prev = newState.prev || {};
+          newState[key] = props[key];
+          newState.prev[key] = props[key];
+        }
+      },
+      [
+        "hostSelected",
+        "locationSelected",
+        "taxonSelected",
+        "timeSelected",
+        "tissueSelected",
+        "visibilitySelected"
+      ]
+    );
 
     return newState;
   }
 
-  handleChange(selectedKey, selected) {
+  notifyFilterChangeHandler = () => {
     const { onFilterChange } = this.props;
+    const selected = pick(
+      [
+        "hostSelected",
+        "locationSelected",
+        "taxonSelected",
+        "timeSelected",
+        "tissueSelected",
+        "visibilitySelected"
+      ],
+      this.state
+    );
+    onFilterChange && onFilterChange(selected);
+  };
 
+  handleChange(selectedKey, selected) {
     const newState = [];
     newState[selectedKey] = selected;
-    this.setState(newState, () => onFilterChange && onFilterChange(this.state));
+    this.setState(newState, this.notifyFilterChangeHandler);
   }
 
   handleRemoveTag(selectedKey, removedValue) {
-    const { onFilterChange } = this.props;
-
     let newSelected = null;
     if (Array.isArray(this.state[selectedKey])) {
       newSelected = this.state[selectedKey].filter(
@@ -64,7 +83,7 @@ class DiscoveryFilters extends React.Component {
 
     let newState = {};
     newState[selectedKey] = newSelected;
-    this.setState(newState, () => onFilterChange && onFilterChange(this.state));
+    this.setState(newState, this.notifyFilterChangeHandler);
   }
 
   renderTags(optionsKey) {
@@ -74,20 +93,19 @@ class DiscoveryFilters extends React.Component {
 
     if (!selectedOptions) return;
     if (!Array.isArray(selectedOptions)) selectedOptions = [selectedOptions];
-    return selectedOptions.map(option => {
-      return (
-        <FilterTag
-          className={cs.filterTag}
-          key={option.value || option}
-          text={option.text || find({ value: option }, options).text}
-          onClose={this.handleRemoveTag.bind(
-            this,
-            selectedKey,
-            option.value || option
-          )}
-        />
-      );
-    });
+    return selectedOptions
+      .map(option => option.text || find({ value: option }, options))
+      .filter(option => option)
+      .map(option => {
+        return (
+          <FilterTag
+            className={cs.filterTag}
+            key={option.value}
+            text={option.text}
+            onClose={this.handleRemoveTag.bind(this, selectedKey, option.value)}
+          />
+        );
+      });
   }
 
   render() {
@@ -114,7 +132,7 @@ class DiscoveryFilters extends React.Component {
         <div className={cs.filterContainer}>
           <BaseMultipleFilter
             onChange={this.handleChange.bind(this, "locationSelected")}
-            selected={locationSelected}
+            selected={location && location.length ? locationSelected : null}
             options={location}
             label="Location"
           />
@@ -123,7 +141,7 @@ class DiscoveryFilters extends React.Component {
         <div className={cs.filterContainer}>
           <TimeFilter
             onChange={this.handleChange.bind(this, "timeSelected")}
-            selected={timeSelected}
+            selected={time && !!time.length ? timeSelected : null}
             options={time}
           />
           {this.renderTags("time")}
@@ -133,14 +151,14 @@ class DiscoveryFilters extends React.Component {
             label="Visibility"
             options={visibility}
             onChange={this.handleChange.bind(this, "visibilitySelected")}
-            value={visibilitySelected}
+            value={visibility && visibility.length ? visibilitySelected : null}
           />
           {this.renderTags("visibility")}
         </div>
         <div className={cs.filterContainer}>
           <BaseMultipleFilter
             onChange={this.handleChange.bind(this, "hostSelected")}
-            selected={hostSelected}
+            selected={host && host.length ? hostSelected : null}
             options={host}
             label="Host"
           />
@@ -149,7 +167,7 @@ class DiscoveryFilters extends React.Component {
         <div className={cs.filterContainer}>
           <BaseMultipleFilter
             onChange={this.handleChange.bind(this, "tissueSelected")}
-            selected={tissueSelected}
+            selected={tissue && tissue.length ? tissueSelected : null}
             options={tissue}
             label="Tissue"
           />
