@@ -156,6 +156,7 @@ export const startUploadHeartbeat = async sampleId => {
   const interval = 60000; // 60 sec
   setInterval(() => {
     putWithCSRF(`/samples/${sampleId}/upload_heartbeat.json`).catch(() =>
+      // eslint-disable-next-line no-console
       console.log("Can't connect to IDseq server.")
     );
   }, interval);
