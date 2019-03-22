@@ -23,7 +23,7 @@ class SamplesController < ApplicationController
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
-                  :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
+                  :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder, :upload_heartbeat].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details, :dimensions, :all,
                    :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
@@ -1012,6 +1012,15 @@ class SamplesController < ApplicationController
 
   def cli_user_instructions
     render template: "samples/cli_user_instructions"
+  end
+
+  # PUT /samples/:id/upload_heartbeat
+  def upload_heartbeat
+    # Local uploads go directly from the browser to S3, so we don't know if an upload was
+    # interrupted. User's browser will update this endpoint as a client heartbeat so we know if the
+    # client is still actively uploading.
+    @sample.update(client_updated_at: Time.now.utc)
+    render json: {}, status: :ok
   end
 
   # Use callbacks to share common setup or constraints between actions.
