@@ -1337,7 +1337,7 @@ class PipelineRun < ApplicationRecord
           file_info_for_output = filename_to_info["#{output_dir_s3_key}/#{pipeline_version}/#{output}"]
           next unless file_info_for_output
           if !can_see_stage1_results && stage_idx.zero?
-            # Delete URLs for all host-filtering outputs but the last, unless user uploaded the sample.
+            # Delete URLs for all host-filtering outputs, unless user uploaded the sample.
             file_info_for_output["url"] = nil
           end
           file_info << file_info_for_output
