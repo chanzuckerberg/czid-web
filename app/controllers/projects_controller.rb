@@ -51,6 +51,8 @@ class ProjectsController < ApplicationController
       end
       format.json do
         domain = params[:domain]
+        order_by = params[:orderBy] || :id
+        order_dir = params[:orderDir] || :desc
 
         samples = samples_by_domain(domain)
         samples = filter_samples(samples, params)
@@ -64,6 +66,8 @@ class ProjectsController < ApplicationController
                    else
                      current_power.projects
                    end
+
+        projects = projects.order(Hash[order_by => order_dir])
 
         sample_count_by_project_id = Hash[samples.group_by(&:project_id).map { |k, v| [k, v.count] }]
         host_genome_names_by_project_id = {}

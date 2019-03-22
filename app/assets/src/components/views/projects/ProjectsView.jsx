@@ -26,7 +26,7 @@ class ProjectsView extends React.Component {
         className: cs.detailsCell,
         cellRenderer: this.renderProjectDetails,
         headerClassName: cs.detailsHeader,
-        sortFunction: p => p.name
+        sortFunction: p => (p.name || "").toLowerCase()
       },
       {
         dataKey: "hosts",
@@ -40,7 +40,14 @@ class ProjectsView extends React.Component {
         disableSort: true,
         cellRenderer: this.renderList
       },
-      { dataKey: "number_of_samples", width: 140, label: "No. Of Samples" }
+      {
+        dataKey: "number_of_samples",
+        width: 140,
+        label: "No. Of Samples",
+        sortFunction: numSamples => {
+          return numSamples;
+        }
+      }
     ];
   }
 
@@ -96,7 +103,6 @@ class ProjectsView extends React.Component {
         data={data}
         columns={this.columns}
         defaultRowHeight={90}
-        sortBy={"details"}
       />
     );
   }
