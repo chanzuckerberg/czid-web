@@ -28,7 +28,6 @@ import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
 import DiscoverySidebar from "./DiscoverySidebar";
 import cs from "./discovery_view.scss";
-import cx from "classnames";
 import DiscoveryFilters from "./DiscoveryFilters";
 import ProjectHeader from "./ProjectHeader";
 import {
