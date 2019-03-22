@@ -58,7 +58,7 @@ class VisualizationsView extends React.Component {
           <a href={href}>
             {humanize(visualization.visualization_type)}
             {` "${visualization.name}" `}
-            from {visualization.project_name}
+            from {visualization.project_name} ({visualization.samples_count})
           </a>
         </div>
         <div className={cs.visualizationDetails}>
@@ -87,7 +87,8 @@ class VisualizationsView extends React.Component {
             "id",
             // TODO (gdingle): put name and project_name in own columns
             "name",
-            "project_name"
+            "project_name",
+            "samples_count"
           ])
         },
         visualization

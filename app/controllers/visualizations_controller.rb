@@ -24,7 +24,9 @@ class VisualizationsController < ApplicationController
                      .order(created_at: :desc)
                      .includes(samples: [:project])
 
-    render json: visualizations.as_json(methods: [:name, :project_name])
+    render json: visualizations.as_json(
+      methods: [:name, :project_name, :samples_count]
+    )
   end
 
   def visualization

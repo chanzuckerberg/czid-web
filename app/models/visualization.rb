@@ -4,11 +4,25 @@ class Visualization < ApplicationRecord
   has_and_belongs_to_many :samples
   belongs_to :user
 
+  def samples_count
+    if visualization_type == "phylo_tree"
+      # WARNING: this could be an N+1 query
+      # TODO: (gdingle): store at write time if it is immutable
+      Sample.where(project: phylo_tree.project).count
+    else
+      samples.count
+    end
+  end
+
+  def phylo_tree
+    PhyloTree.find(data["treeId"])
+  end
+
   def name
     if visualization_type == "phylo_tree"
       # WARNING: this could be an N+1 query
       # TODO: (gdingle): store name at write time if it is immutable
-      PhyloTree.find(data["treeId"]).name
+      phylo_tree.name
     elsif samples.length == 1
       samples[0].name
     elsif samples.length > 1
@@ -33,7 +47,7 @@ class Visualization < ApplicationRecord
     # WARNING: this could be an N+1 query
     # TODO: (gdingle): store name at write time if it is immutable
     if visualization_type == "phylo_tree"
-      PhyloTree.find(data["treeId"]).project.name
+      phylo_tree.project.name
     elsif samples.length == 1
       samples[0].project.name
     elsif samples.length > 1
