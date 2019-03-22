@@ -368,6 +368,8 @@ class DiscoveryView extends React.Component {
             onFilterToggle={this.handleFilterToggle}
             onStatsToggle={this.handleStatsToggle}
             onSearchResultSelected={this.handleSearchSelected}
+            showStats={showStats}
+            showFilters={showFilters}
           />
         </div>
         <Divider style="medium" />
