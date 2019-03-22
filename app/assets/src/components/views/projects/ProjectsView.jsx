@@ -43,10 +43,7 @@ class ProjectsView extends React.Component {
       {
         dataKey: "number_of_samples",
         width: 140,
-        label: "No. Of Samples",
-        sortFunction: numSamples => {
-          return numSamples;
-        }
+        label: "No. Of Samples"
       }
     ];
   }
