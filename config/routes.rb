@@ -40,7 +40,6 @@ Rails.application.routes.draw do
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
     post :validate_sample_files, on: :collection
-    get :view_beat, on: :member
     put :upload_heartbeat, on: :member
   end
 

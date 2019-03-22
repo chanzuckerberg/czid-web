@@ -150,12 +150,12 @@ export const bulkUploadLocal = ({
   }
 };
 
+// Local uploads go directly from the browser to S3, so we don't know if an upload was interrupted.
+// Ping the heartbeat endpoint periodically to say the browser is actively uploading this sample.
 export const startUploadHeartbeat = async sampleId => {
-  console.log("started the heart beat");
-  console.log(sampleId);
   setInterval(() => {
-    putWithCSRF(`/samples/${sampleId}/upload_heartbeat.json`)
-      .then(() => console.log("called for: ", sampleId))
-      .catch(() => console.log("Can't connect to IDseq server."));
+    putWithCSRF(`/samples/${sampleId}/upload_heartbeat.json`).catch(() =>
+      console.log("Can't connect to IDseq server.")
+    );
   }, 10000);
 };
