@@ -31,7 +31,6 @@ class VisualizationsView extends React.Component {
         headerClassName: cs.detailsHeader,
         sortFunction: p => p.created_at
       }
-      // TODO: (gdingle): show associated samples and projects
     ];
   }
 
