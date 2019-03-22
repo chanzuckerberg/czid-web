@@ -9,7 +9,6 @@ class VisualizationsController < ApplicationController
   def index
     domain = params[:domain]
 
-    # TODO: (gdingle): include projects?
     visualizations = if domain == "library"
                        current_user.visualizations
                      elsif domain == "public"
