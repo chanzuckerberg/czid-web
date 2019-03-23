@@ -91,10 +91,11 @@ module MetadataHelper
                 end
               else
                 # Use existing samples in the project.
-                Sample.includes(:host_genome).where(id: project.sample_ids).map do |sample|
+                Sample.includes(:host_genome, :metadata).where(id: project.sample_ids).map do |sample|
                   {
                     name: sample.name,
-                    host_genome_name: sample.host_genome_name
+                    host_genome_name: sample.host_genome_name,
+                    metadata: sample.metadata.index_by(&:key)
                   }
                 end
               end
@@ -104,7 +105,13 @@ module MetadataHelper
       samples.each do |sample|
         values = fields.map do |field|
           if host_genomes_by_name[sample[:host_genome_name]].metadata_fields.include?(field)
-            generate_metadata_default_value(field, sample[:host_genome_name])
+            if samples_are_new
+              nil
+            elsif project.nil?
+              generate_metadata_default_value(field, sample[:host_genome_name])
+            else
+              sample[:metadata][field.name] ? sample[:metadata][field.name].raw_value : nil
+            end
           end
         end
 
