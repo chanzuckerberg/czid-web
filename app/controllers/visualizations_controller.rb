@@ -56,21 +56,29 @@ class VisualizationsController < ApplicationController
   def save
     @type = params[:type]
     @data = params[:data]
-    vis = Visualization.create(
-      user: current_user,
-      visualization_type: @type,
-      data: @data
-    )
-    vis.sample_ids = @data[:sampleIds]
+
+    sample_ids = @data[:sampleIds]
     # Delete to have single source of truth.
     @data.delete(:sampleIds)
+
+    vis = Visualization.new(
+      user: current_user,
+      visualization_type: @type,
+      data: @data,
+      sample_ids: sample_ids
+    )
+    if @type != "phylo_tree"
+      vis.name = get_name(sample_ids)
+    end
+    vis.save!
 
     render json: {
       status: "success",
       message: "#{@type} saved successfully",
       type: @type,
       id: vis.id,
-      data: @data
+      data: @data,
+      name: vis.name
     }
   rescue => err
     render json: {
@@ -94,5 +102,36 @@ class VisualizationsController < ApplicationController
       message: "Unable to shorten",
       errors: [err]
     }, status: :internal_server_error
+  end
+
+  private
+
+  def get_name(sample_ids)
+    samples = Sample.where(id: sample_ids)
+    if samples.length == 1
+      samples[0].name
+    elsif samples.length > 1
+      names = samples.map(&:name)
+      # make a string such as "Patient 016 (CSF) and 015 (CSF)"
+      prefix = longest_common_prefix(names)
+      if prefix.include?(' ')
+        # Use whole words only
+        # TODO: (gdingle): add other delimiters than space
+        prefix = prefix.split(' ')[0..-2].join(' ')
+      end
+      names.each_with_index.map do |name, i|
+        i > 0 ? name.delete_prefix(prefix) : name
+      end.to_sentence
+    else
+      "unknown"
+    end
+  end
+
+  # See https://rosettacode.org/wiki/Longest_common_prefix#Ruby
+  def longest_common_prefix(strs)
+    return "" if strs.empty?
+    min, max = strs.minmax
+    idx = min.size.times { |i| break i if min[i] != max[i] }
+    min[0...idx]
   end
 end

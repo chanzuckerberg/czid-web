@@ -7,13 +7,12 @@ class PhyloTree < ApplicationRecord
   belongs_to :user
   belongs_to :project
   validates :name, presence: true, uniqueness: true
+  after_create :create_visualization
 
   STATUS_INITIALIZED = 0
   STATUS_READY = 1
   STATUS_FAILED = 2
   STATUS_IN_PROGRESS = 3
-
-  after_create :create_visualization
 
   def self.in_progress
     where(status: STATUS_IN_PROGRESS)
@@ -151,12 +150,16 @@ class PhyloTree < ApplicationRecord
   # We need to create a visualization object here to register the new phylo_tree
   # as a generic visualization. Other types of visualizations are saved on-demand only.
   # Because phylo_trees are created explictly, the user will expect them to persist.
-  # TODO: (gdingle): destroy visualization objects when phylo_tree is destroyed.
+  # TODO: (gdingle): destroy visualization objects when phylo_tree is destroyed,
+  # and rename when renamed.
   def create_visualization
     Visualization.create(
       user: user,
       visualization_type: "phylo_tree",
-      data: { treeId: id }
+      data: { treeId: id },
+      name: name,
+      # Samples of a PhyloTree are all samples of the project at the time of creation.
+      samples: Sample.where(project: project)
     )
   end
 
