@@ -18,13 +18,13 @@ class VisualizationsController < ApplicationController
                      end
     visualizations = visualizations
                      .joins(:user)
-                     .select("visualizations.id AS id, user_id, visualizations.created_at, visualization_type, users.name AS user_name, data")
-                     .where.not(visualization_type: [nil, 'undefined'])
+                     .select("visualizations.id AS id, user_id, visualizations.created_at, visualization_type, users.name AS user_name, visualizations.name")
+                     .where.not(visualization_type: [nil, 'undefined'], name: nil)
                      .order(created_at: :desc)
                      .includes(samples: [:project])
 
     render json: visualizations.as_json(
-      methods: [:name, :project_name, :samples_count]
+      methods: [:project_name, :samples_count]
     )
   end
 
