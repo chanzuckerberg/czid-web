@@ -89,7 +89,7 @@ class SampleView extends React.Component {
       window.location = url;
     } else {
       try {
-        history.pushState(window.history.state, document.title, url);
+        history.replaceState(window.history.state, document.title, url);
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error(e);
