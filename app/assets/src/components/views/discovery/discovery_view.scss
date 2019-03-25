@@ -62,14 +62,15 @@
   flex: 1 0 auto;
 
   .dataContainer {
-    flex: 1 0 auto;
+    flex: 1 0 50px;
 
     &:not(:only-child) {
-      flex: 0 0 auto;
+      flex: 0 0 50px;
     }
   }
 
   .noResultsContainer {
     flex: 1 0 auto;
+    max-height: 400px;
   }
 }
