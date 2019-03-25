@@ -5,7 +5,10 @@ export const processMetadata = metadata => {
   let newMetadata = keyBy("key", metadata);
 
   newMetadata = mapValues(
-    val => val[`${val.base_type}_validated_value`],
+    val =>
+      val.base_type === "date"
+        ? val.raw_value
+        : val[`${val.base_type}_validated_value`],
     newMetadata
   );
   return newMetadata;

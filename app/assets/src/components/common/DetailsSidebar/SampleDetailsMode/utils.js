@@ -57,7 +57,7 @@ export const processPipelineInfo = additionalInfo => {
     pipelineInfo.compressionRatio = compressionRatio;
     pipelineInfo.lastProcessedAt = moment(
       summaryStats.last_processed_at
-    ).format("MM/DD/YYYY");
+    ).format("YYYY-MM-DD");
   }
 
   return pipelineInfo;
@@ -66,5 +66,5 @@ export const processPipelineInfo = additionalInfo => {
 // Format the upload date.
 export const processAdditionalInfo = additionalInfo => ({
   ...additionalInfo,
-  upload_date: moment(additionalInfo.upload_date).format("MM/DD/YYYY")
+  upload_date: moment(additionalInfo.upload_date).format("YYYY-MM-DD")
 });
