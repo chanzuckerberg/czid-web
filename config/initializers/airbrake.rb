@@ -62,6 +62,17 @@ if ENV['AIRBRAKE_PROJECT_ID'] && ENV['AIRBRAKE_PROJECT_KEY']
   # https://github.com/airbrake/airbrake#requestbodyfilter
   # Airbrake.add_filter(Airbrake::Rack::RequestBodyFilter.new)
 
+  # Adds a performance filter that filters performance data. Works exactly like
+  # Airbrake.add_filter. The only difference is that instead of Airbrake::Notice
+  # it yields performance data (such as Airbrake::Query or Airbrake::Request).
+  # It's invoked after notify_request or notify_query (but notify calls don't
+  # trigger it!).
+  Airbrake.add_performance_filter do |resource|
+    if resource.route.include?('health_check')
+      resource.ignore!
+    end
+  end
+
   # If you want to convert your log messages to Airbrake errors, we offer an
   # integration with the Logger class from stdlib.
   # https://github.com/airbrake/airbrake#logger
