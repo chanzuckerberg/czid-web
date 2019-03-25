@@ -10,7 +10,12 @@ import ProjectUploadMenu from "~/components/views/samples/ProjectUploadMenu";
 import cs from "./project_header.scss";
 import cx from "classnames";
 
-const ProjectHeader = ({ project, fetchedSamples, onProjectUpdated }) => {
+const ProjectHeader = ({
+  project,
+  fetchedSamples,
+  onProjectUpdated,
+  newSampleUpload
+}) => {
   const handleProjectUserAdded = (username, email) => {
     const userFound = find({ email }, project.users);
     if (!userFound) {
@@ -78,7 +83,10 @@ const ProjectHeader = ({ project, fetchedSamples, onProjectUpdated }) => {
 
       {project.editable && (
         <div className={cs.item}>
-          <ProjectUploadMenu project={project} />
+          <ProjectUploadMenu
+            project={project}
+            newSampleUpload={newSampleUpload}
+          />
         </div>
       )}
     </div>
@@ -88,7 +96,8 @@ const ProjectHeader = ({ project, fetchedSamples, onProjectUpdated }) => {
 ProjectHeader.propTypes = {
   fetchedSamples: PropTypes.array,
   project: PropTypes.object.isRequired,
-  onProjectUpdated: PropTypes.func
+  onProjectUpdated: PropTypes.func,
+  newSampleUpload: PropTypes.bool
 };
 
 export default ProjectHeader;

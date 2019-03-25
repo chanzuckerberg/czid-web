@@ -1761,7 +1761,12 @@ function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
 
       {showUploadMenu && (
         <div className={cs.projectMenuItem}>
-          <ProjectUploadMenu project={proj} />
+          <ProjectUploadMenu
+            project={proj}
+            newSampleUpload={parent.allowedFeatures.includes(
+              "new_sample_upload"
+            )}
+          />
         </div>
       )}
     </div>

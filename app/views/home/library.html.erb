@@ -1,7 +1,9 @@
 <% if current_user.allowed_features.include?("data_discovery") %>
- 
+
   <%= javascript_tag do %>
-    react_component('LibraryView', {}, 'page_content');
+    react_component('LibraryView', {
+      allowedFeatures: JSON.parse('<%= raw escape_json(current_user.allowed_feature_list) %>'),
+    }, 'page_content');
   <% end %>
 
 <% end %>
