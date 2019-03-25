@@ -52,7 +52,6 @@ class VisualizationsController < ApplicationController
     end
   end
 
-  # TODO: (gdingle): use strong params
   # TODO: (gdingle): overwrite on save
   def save
     @type = visualization_params[:type]
@@ -81,13 +80,6 @@ class VisualizationsController < ApplicationController
       data: @data,
       name: vis.name
     }
-  rescue => err
-    render json: {
-      status: "failed",
-      message: "Unable to save #{@type}",
-      errors: [err]
-      # TODO: (gdingle): better error code?
-    }, status: :internal_server_error
   end
 
   def shorten_url
@@ -108,7 +100,7 @@ class VisualizationsController < ApplicationController
   private
 
   def visualization_params
-    params.permit(:domain, :type, :id, :data, :url)
+    params.permit(:domain, :type, :id, :url, data: {})
   end
 
   def get_name(sample_ids)
@@ -128,7 +120,7 @@ class VisualizationsController < ApplicationController
     names = samples.map(&:name)
     prefix = longest_common_prefix(names)
     # Use whole words only, cut off any last partial word
-    prefix = s[0, s.rindex(/[-_|\s]/)]
+    prefix = prefix[0, prefix.rindex(/[-_|\s]/)]
     names.each_with_index.map do |name, i|
       i > 0 ? name.delete_prefix(prefix) : name
     end.to_sentence
