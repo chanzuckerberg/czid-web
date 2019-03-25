@@ -1,0 +1,31 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.container {
+  display: flex;
+  width: 400px;
+  align-items: center;
+  margin: 0 auto;
+
+  .text {
+    flex: 22 22 0;
+    margin-right: 10%;
+
+    .message {
+      @include font-header-l;
+
+      color: $black;
+    }
+
+    .suggestion {
+      @include font-body-s;
+
+      color: $dark-grey;
+      font-weight: $font-weight-regular;
+      margin-top: 5px;
+    }
+  }
+  .icon {
+    flex: 14 14 0;
+  }
+}

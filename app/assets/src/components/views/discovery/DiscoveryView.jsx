@@ -37,6 +37,7 @@ import {
   DISCOVERY_DOMAIN_LIBRARY,
   DISCOVERY_DOMAIN_PUBLIC
 } from "./discovery_api";
+import NoResultsBanner from "./NoResultsBanner";
 
 class DiscoveryView extends React.Component {
   constructor(props) {
@@ -45,11 +46,13 @@ class DiscoveryView extends React.Component {
     this.state = assign(
       {
         currentTab: "projects",
-        projectDimensions: [],
-        sampleDimensions: [],
         filters: {},
+        loadingProjects: true,
+        loadingVisualizations: true,
         project: this.props.project,
+        projectDimensions: [],
         projects: [],
+        sampleDimensions: [],
         sampleIds: [],
         samples: [],
         samplesAllLoaded: false,
@@ -140,6 +143,11 @@ class DiscoveryView extends React.Component {
     const { domain } = this.props;
     const { project } = this.state;
 
+    this.setState({
+      loadingProjects: true,
+      loadingVisualizations: true
+    });
+
     const { projects = [], visualizations = [] } = await getDiscoverySyncData({
       domain,
       filters: this.preparedFilters(),
@@ -148,7 +156,9 @@ class DiscoveryView extends React.Component {
 
     this.setState({
       projects,
-      visualizations
+      visualizations,
+      loadingProjects: false,
+      loadingVisualizations: false
     });
   };
 
@@ -328,6 +338,8 @@ class DiscoveryView extends React.Component {
       projectDimensions,
       sampleDimensions,
       filters,
+      loadingProjects,
+      loadingVisualizations,
       project,
       projects,
       sampleIds,
@@ -388,10 +400,18 @@ class DiscoveryView extends React.Component {
           <div className={cs.centerPane}>
             <NarrowContainer className={cs.viewContainer}>
               {currentTab == "projects" && (
-                <ProjectsView
-                  projects={projects}
-                  onProjectSelected={this.handleProjectSelected}
-                />
+                <div className={cs.tableContainer}>
+                  <div className={cs.dataContainer}>
+                    <ProjectsView
+                      projects={projects}
+                      onProjectSelected={this.handleProjectSelected}
+                    />
+                  </div>
+                  {!projects.length &&
+                    !loadingProjects && (
+                      <NoResultsBanner className={cs.noResultsContainer} />
+                    )}
+                </div>
               )}
               {currentTab == "samples" && (
                 <SamplesView
@@ -402,7 +422,15 @@ class DiscoveryView extends React.Component {
                 />
               )}
               {currentTab == "visualizations" && (
-                <VisualizationsView visualizations={visualizations} />
+                <div className={cs.tableContainer}>
+                  <div className={cs.dataContainer}>
+                    <VisualizationsView visualizations={visualizations} />
+                  </div>
+                  {!visualizations.length &&
+                    !loadingVisualizations && (
+                      <NoResultsBanner className={cs.noResultsContainer} />
+                    )}
+                </div>
               )}
             </NarrowContainer>
           </div>
