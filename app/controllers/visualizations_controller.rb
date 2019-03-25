@@ -7,7 +7,7 @@ class VisualizationsController < ApplicationController
 
   # GET /visualizations.json
   def index
-    domain = params[:domain]
+    domain = visualization_params[:domain]
 
     visualizations = if domain == "library"
                        current_user.visualizations
@@ -29,14 +29,14 @@ class VisualizationsController < ApplicationController
   end
 
   def visualization
-    @type = params[:type]
+    @type = visualization_params[:type]
     @visualization_data = {}
 
     if @type == "heatmap"
       @visualization_data = heatmap
     end
 
-    id = params[:id]
+    id = visualization_params[:id]
     if id
       vis = Visualization.find(id)
       vis.data[:sampleIds] = vis.sample_ids
@@ -55,8 +55,8 @@ class VisualizationsController < ApplicationController
   # TODO: (gdingle): use strong params
   # TODO: (gdingle): overwrite on save
   def save
-    @type = params[:type]
-    @data = params[:data]
+    @type = visualization_params[:type]
+    @data = visualization_params[:data]
 
     sample_ids = @data[:sampleIds]
     # Delete to have single source of truth.
@@ -91,7 +91,7 @@ class VisualizationsController < ApplicationController
   end
 
   def shorten_url
-    short_url = Shortener::ShortenedUrl.generate(params[:url])
+    short_url = Shortener::ShortenedUrl.generate(visualization_params[:url])
     render json: {
       status: "success",
       message: "Url shortened successfully",
@@ -106,6 +106,10 @@ class VisualizationsController < ApplicationController
   end
 
   private
+
+  def visualization_params
+    params.permit(:domain, :type, :id, :data, :url)
+  end
 
   def get_name(sample_ids)
     samples = Sample.where(id: sample_ids)

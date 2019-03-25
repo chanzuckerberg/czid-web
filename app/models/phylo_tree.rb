@@ -158,10 +158,10 @@ class PhyloTree < ApplicationRecord
       visualization_type: "phylo_tree",
       data: { treeId: id },
       name: name,
-      # Samples of a PhyloTree are all samples of the project at the time of creation.
-      samples: Sample.where(project: project)
+      samples: Sample.joins(:pipeline_runs)
+        .where(pipeline_runs: { id: [pipeline_run_ids] })
+        .distinct
     )
-    # TODO: (gdingle): choose only the selected samples!!
   end
 
   def phylo_tree_output_s3_path
