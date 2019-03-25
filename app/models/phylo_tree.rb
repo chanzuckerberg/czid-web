@@ -161,6 +161,7 @@ class PhyloTree < ApplicationRecord
       # Samples of a PhyloTree are all samples of the project at the time of creation.
       samples: Sample.where(project: project)
     )
+    # TODO: (gdingle): choose only the selected samples!!
   end
 
   def phylo_tree_output_s3_path

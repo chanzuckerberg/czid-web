@@ -52,6 +52,7 @@ class VisualizationsController < ApplicationController
     end
   end
 
+  # TODO: (gdingle): use strong params
   # TODO: (gdingle): overwrite on save
   def save
     @type = params[:type]
@@ -109,22 +110,24 @@ class VisualizationsController < ApplicationController
   def get_name(sample_ids)
     samples = Sample.where(id: sample_ids)
     if samples.length == 1
-      samples[0].name
+      samples[0].name.to_sentence
     elsif samples.length > 1
-      names = samples.map(&:name)
-      # make a string such as "Patient 016 (CSF) and 015 (CSF)"
-      prefix = longest_common_prefix(names)
-      if prefix.include?(' ')
-        # Use whole words only
-        # TODO: (gdingle): add other delimiters than space
-        prefix = prefix.split(' ')[0..-2].join(' ')
-      end
-      names.each_with_index.map do |name, i|
-        i > 0 ? name.delete_prefix(prefix) : name
-      end.to_sentence
+      combine_sample_names(samples)
     else
       "unknown"
     end
+  end
+
+  # Makes a string such as "Patient 016 (CSF) and 015 (CSF)"
+  # from "Patient 016 (CSF)", "Patient 015 (CSF)"
+  def combine_sample_names(samples)
+    names = samples.map(&:name)
+    prefix = longest_common_prefix(names)
+    # Use whole words only, cut off any last partial word
+    prefix = s[0, s.rindex(/[-_|\s]/)]
+    names.each_with_index.map do |name, i|
+      i > 0 ? name.delete_prefix(prefix) : name
+    end.to_sentence
   end
 
   # See https://rosettacode.org/wiki/Longest_common_prefix#Ruby
