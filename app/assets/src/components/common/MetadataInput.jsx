@@ -4,11 +4,17 @@ import { isArray } from "lodash";
 
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
-import DateInput from "~/components/ui/controls/DateInput";
 
 class MetadataInput extends React.Component {
   render() {
-    const { value, onChange, onSave, metadataType, className } = this.props;
+    const {
+      value,
+      onChange,
+      onSave,
+      metadataType,
+      className,
+      isHuman
+    } = this.props;
 
     if (isArray(metadataType.options)) {
       const options = metadataType.options.map(option => ({
@@ -29,10 +35,13 @@ class MetadataInput extends React.Component {
       );
     } else if (metadataType.dataType == "date") {
       return (
-        <DateInput
+        <Input
           className={className}
-          onChange={val => onChange(metadataType.key, val, true)}
+          onChange={val => onChange(metadataType.key, val)}
+          onBlur={() => onSave && onSave(metadataType.key)}
           value={value}
+          placeholder={isHuman ? "YYYY-MM" : "YYYY-MM-DD"}
+          type="text"
         />
       );
     } else {
@@ -61,7 +70,8 @@ MetadataInput.propTypes = {
   // This is useful for the text input, where the parent wants to save onBlur, not onChange.
   onChange: PropTypes.func.isRequired,
   onSave: PropTypes.func,
-  withinModal: PropTypes.bool
+  withinModal: PropTypes.bool,
+  isHuman: PropTypes.bool
 };
 
 export default MetadataInput;

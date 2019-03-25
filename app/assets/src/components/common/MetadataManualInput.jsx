@@ -282,6 +282,7 @@ class MetadataManualInput extends React.Component {
                     this.updateMetadataField(key, value, sample)
                   }
                   withinModal={this.props.withinModal}
+                  isHuman={sampleHostGenomeId === 1}
                 />
                 {this.renderApplyToAll(sample, column)}
               </div>
