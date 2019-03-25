@@ -1,11 +1,13 @@
 import React from "react";
 import cx from "classnames";
+import QueryString from "query-string";
 import PropTypes from "~/components/utils/propTypes";
 import ProjectSelect from "~/components/common/ProjectSelect";
 import Tabs from "~/components/ui/controls/Tabs";
 import IssueGroup from "~/components/common/IssueGroup";
 import { getProjects, validateSampleNames, validateSampleFiles } from "~/api";
 import {
+  find,
   filter,
   keys,
   pickBy,
@@ -59,6 +61,23 @@ class UploadSampleStep extends React.Component {
     this.setState({
       projects
     });
+
+    // Pre-populate the selected project from URL params.
+    let urlParams = QueryString.parse(location.search, {
+      arrayFormat: "bracket"
+    });
+
+    const projectId = parseInt(urlParams.projectId);
+    if (projectId && !this.state.selectedProject) {
+      const selectedProject = find(["id", projectId], projects);
+
+      if (selectedProject) {
+        this.handleProjectChange(selectedProject);
+      }
+    }
+
+    // Clear all URL params.
+    window.history.replaceState({}, document.title, location.pathname);
   }
 
   getCurrentSamples = () => {

@@ -28,9 +28,13 @@ class ProjectUploadMenu extends React.Component {
       <BareDropdown.Item
         text="Upload Samples"
         key="1"
-        onClick={() =>
-          this.goToPage(`/samples/new?projectId=${this.props.project.id}`)
-        }
+        onClick={() => {
+          if (this.props.newSampleUpload) {
+            this.goToPage(`/samples/upload?projectId=${this.props.project.id}`);
+          } else {
+            this.goToPage(`/samples/new?projectId=${this.props.project.id}`);
+          }
+        }}
       />,
       <BareDropdown.Item
         text="Upload Metadata"
@@ -61,7 +65,8 @@ ProjectUploadMenu.propTypes = {
   project: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string
-  })
+  }),
+  newSampleUpload: PropTypes.bool
 };
 
 export default ProjectUploadMenu;
