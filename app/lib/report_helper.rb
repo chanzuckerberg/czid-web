@@ -279,7 +279,7 @@ module ReportHelper
   end
 
   def fetch_top_taxons(samples, background_id, categories, read_specificity = false, include_phage = false)
-    pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
+    pipeline_run_ids = samples.map { |s| s.first_pipeline_run ? s.first_pipeline_run.id : nil }.compact
 
     categories_clause = ""
     if categories.present?
@@ -372,7 +372,7 @@ module ReportHelper
   end
 
   def fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
-    pipeline_run_ids = samples.map { |s| s.pipeline_runs.first ? s.pipeline_runs.first.id : nil }.compact
+    pipeline_run_ids = samples.map { |s| s.first_pipeline_run ? s.first_pipeline_run.id : nil }.compact
     parent_ids = parent_ids.to_a
     parent_ids_clause = parent_ids.empty? ? "" : " OR taxon_counts.tax_id in (#{parent_ids.join(',')}) "
 
@@ -1068,7 +1068,7 @@ module ReportHelper
     if pipeline_version > 0.0
       sample.pipeline_run_by_version(params[:pipeline_version])
     else
-      sample.pipeline_runs.first
+      sample.first_pipeline_run
     end
   end
 end

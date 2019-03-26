@@ -4,7 +4,7 @@ task :download_non_host_reads_for_project, [:project_id, :output_s3_path] => :en
   samples = Sample.where(project_id: args[:project_id])
   s3_output_path = args[:output_s3_path]
   samples.each do |s|
-    pr = s.pipeline_runs.first
+    pr = s.first_pipeline_run
     if pr && pr.pipeline_run_stages[1] && pr.pipeline_run_stages[1].dag_json
       alignment_json = JSON.parse(pr.pipeline_run_stages[1].dag_json)
       host_filter_out = alignment_json["targets"]["host_filter_out"]

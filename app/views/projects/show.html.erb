@@ -48,7 +48,7 @@
             <% end %>
           </td>
           <td>
-            <% pipeline_run = sample.pipeline_runs.first %>
+            <% pipeline_run = sample.first_pipeline_run %>
             <% pipeline_run_submitted = 'N/A' %>
             <% pipeline_job_id = 'N/A' %>
             <% if pipeline_run %>
