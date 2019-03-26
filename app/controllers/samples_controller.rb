@@ -64,7 +64,8 @@ class SamplesController < ApplicationController
     samples_query = params[:ids].split(',') if params[:ids].present?
     sort = params[:sort_by]
     # Return only some basic props for samples.
-    basic_only = ActiveModel::Type::Boolean.new.cast(params[:basic_only])
+    # TODO(mark): Make "basic" the default. This involves refactoring all the callers of this endpoint.
+    basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
 
     results = current_power.samples
 
@@ -98,11 +99,11 @@ class SamplesController < ApplicationController
 
     @samples = sort_by(results, sort).paginate(page: page, per_page: params[:per_page] || PAGE_SIZE).includes([:user, :host_genome, :pipeline_runs, :input_files])
     @samples_count = results.size
-    @samples_formatted = basic_only ? format_samples_basic(@samples) : format_samples(@samples)
+    @samples_formatted = basic ? format_samples_basic(@samples) : format_samples(@samples)
 
     @ready_sample_ids = get_ready_sample_ids(results)
 
-    if basic_only
+    if basic
       render json: @samples_formatted
     # Send more information with the first page.
     elsif !page || page == '1'
