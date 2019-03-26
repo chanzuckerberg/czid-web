@@ -179,7 +179,7 @@ class TaxonLineage < ApplicationRecord
     lineage_version = PipelineRun.find(pipeline_run_id).alignment_config.lineage_version
     lineage_by_taxid = {}
 
-    TaxonLineage.where(taxid: tax_ids).where("#{lineage_version} BETWEEN version_start AND version_end").each do |x|
+    TaxonLineage.where(taxid: tax_ids).where("? BETWEEN version_start AND version_end", lineage_version).each do |x|
       # Extra fields for levels of _taxid and _name are used in the taxon tree
       lineage_by_taxid[x.taxid] = x.as_json
     end
