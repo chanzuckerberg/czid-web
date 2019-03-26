@@ -246,7 +246,7 @@ export default class DiscoverySidebar extends React.Component {
                 <dt>
                   <strong>Avg. reads per sample</strong>
                 </dt>
-                <dd>{this.state.stats.avgTotalReads.toLocaleString()}</dd>
+                <dd>{this.state.stats.avgTotalReads}</dd>
               </dl>
             </div>
             <div className={cs.hasBackground}>
@@ -257,7 +257,7 @@ export default class DiscoverySidebar extends React.Component {
                     <br />reads per sample
                   </strong>
                 </dt>
-                <dd>{this.state.stats.avgNonHostReads.toLocaleString()}</dd>
+                <dd>{this.state.stats.avgNonHostReads}</dd>
               </dl>
             </div>
           </Accordion>
