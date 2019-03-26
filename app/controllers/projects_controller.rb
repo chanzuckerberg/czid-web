@@ -77,21 +77,24 @@ class ProjectsController < ApplicationController
         locations_by_project_id = {}
         total_reads = 0
         adjusted_remaining_reads = 0
+
+        metadata = metadata_multiget(samples.pluck(:id))
+        Rails.logger.debug("metadata: #{metadata}")
         samples.includes(:host_genome, :user, :pipeline_runs).each do |s|
           (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome && s.host_genome.name
-          # TODO: sample_tissue column is deprecated, retrieve sample_type from Metadatum model instead
-          (tissues_by_project_id[s.project_id] ||= Set.new) << s.sample_tissue if s.sample_tissue
-          # TODO: assume project owner is the uploader of the project's first sample
+          (tissues_by_project_id[s.project_id] ||= Set.new) << metadata[s.id][:sample_type] if (metadata[s.id] || {})[:sample_type]
+          (locations_by_project_id[s.project_id] ||= Set.new) << metadata[s.id][:collection_location] if (metadata[s.id] || {})[:collection_location]
+          # Assumes project owner is the uploader of the project's first sample
           if !min_sample_by_project_id[s.project_id] || min_sample_by_project_id[s.project_id] < s.id
             min_sample_by_project_id[s.project_id] = s.id
             owner_by_project_id[s.project_id] = s.user ? s.user.name : nil
           end
-          (locations_by_project_id[s.project_id] ||= Set.new) << s.sample_location if s.sample_location
           unless s.pipeline_runs.empty?
             total_reads += s.pipeline_runs[0].total_reads || 0
             adjusted_remaining_reads += s.pipeline_runs[0].adjusted_remaining_reads || 0
           end
         end
+
         extended_projects = projects.includes(:users).map do |project|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
             number_of_samples: sample_count_by_project_id[project.id] || 0,

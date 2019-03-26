@@ -144,7 +144,7 @@ class SamplesController < ApplicationController
     limited_samples = samples.offset(offset).limit(limit)
 
     limited_samples_json = limited_samples.as_json(
-      only: [:id, :name, :sample_tissue, :host_genome_id, :project_id, :created_at, :public],
+      only: [:id, :name, :host_genome_id, :project_id, :created_at, :public],
       methods: []
     )
     samples_visibility = visibility(limited_samples)
