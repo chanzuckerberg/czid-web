@@ -343,6 +343,7 @@ class DiscoveryView extends React.Component {
       filters,
       loadingProjects,
       loadingVisualizations,
+      loadingSamples,
       project,
       projects,
       sampleIds,
