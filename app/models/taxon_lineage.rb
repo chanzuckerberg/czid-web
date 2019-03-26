@@ -181,11 +181,8 @@ class TaxonLineage < ApplicationRecord
 
     # Use pluck because it saved 5s on 10k rows in testing
     # lineage_by_taxid[x.taxid] = x.as_json
-    TaxonLineage
-      .where(taxid: tax_ids).where("#{lineage_version} BETWEEN version_start AND version_end")
-      .pluck(:taxid, :species_taxid, :genus_taxid, :family_taxid)
-      .each do |arr|
-      lineage_by_taxid[arr[0]] = { taxid: arr[0], species_taxid: arr[1], genus_taxid: arr[2], family_taxid: arr[3] }
+    TaxonLineage.where(taxid: tax_ids).where("#{lineage_version} BETWEEN version_start AND version_end").each do |x|
+      lineage_by_taxid[x.taxid] = x.as_json
     end
     t1 = Time.now.to_f
     Rails.logger.info "fetch_lineage_by_taxid took #{(t1 - t0).round(2)}s"
