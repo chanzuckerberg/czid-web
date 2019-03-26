@@ -52,7 +52,9 @@ class VisualizationsController < ApplicationController
     end
   end
 
-  # TODO: (gdingle): overwrite on save
+  # This will create a new visualization object or overwite the most recent
+  # existing one, based on the key of (user, type, sample_ids).
+  # TODO: (gdingle): support forking by renaming
   def save
     @type = visualization_params[:type]
     @data = visualization_params[:data]
@@ -61,14 +63,24 @@ class VisualizationsController < ApplicationController
     # Delete to have single source of truth.
     @data.delete(:sampleIds)
 
-    vis = Visualization.new(
+    vis = Visualization.joins(:samples).where(
       user: current_user,
       visualization_type: @type,
-      data: @data,
-      sample_ids: sample_ids
-    )
-    if @type != "phylo_tree"
-      vis.name = get_name(sample_ids)
+      samples: { id: [sample_ids] }
+    ).order(created_at: :desc)
+                       .select { |v| v.sample_ids.to_set == sample_ids.to_set }
+                       .first
+
+    if vis.present?
+      vis.data = @data
+    else
+      vis = Visualization.new(
+        user: current_user,
+        visualization_type: @type,
+        sample_ids: sample_ids,
+        data: @data,
+        name: get_name(sample_ids)
+      )
     end
     vis.save!
 
@@ -78,8 +90,15 @@ class VisualizationsController < ApplicationController
       type: @type,
       id: vis.id,
       data: @data,
-      name: vis.name
+      name: vis.name,
+      sample_ids: vis.sample_ids
     }
+  rescue => err
+    render json: {
+      status: "failed",
+      message: "Unable to save",
+      errors: [err]
+    }, status: :internal_server_error
   end
 
   def shorten_url

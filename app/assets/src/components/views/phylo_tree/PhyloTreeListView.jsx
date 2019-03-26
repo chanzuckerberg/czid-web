@@ -98,6 +98,12 @@ class PhyloTreeListView extends React.Component {
   handleSaveClick = async () => {
     // TODO (gdingle): add analytics tracking?
     let params = parseUrlParams();
+    const sampleIds = Object.values(
+      this.getCurrentTree().sampleDetailsByNodeName
+    )
+      .map(details => details.sample_id)
+      .filter(s => !!s);
+    params.sampleIds = new Set(sampleIds);
     await saveVisualization("phylo_tree", params);
   };
 
@@ -120,7 +126,7 @@ class PhyloTreeListView extends React.Component {
   }
 
   handleTaxonModeOpen = () => {
-    const currentTree = this.state.phyloTreeMap[this.state.selectedPhyloTreeId];
+    const currentTree = this.getCurrentTree();
     if (
       this.state.sidebarMode === "taxonDetails" &&
       this.state.sidebarVisible &&
@@ -179,6 +185,10 @@ class PhyloTreeListView extends React.Component {
     });
   };
 
+  getCurrentTree = () => {
+    return this.state.phyloTreeMap[this.state.selectedPhyloTreeId];
+  };
+
   render() {
     if (!this.state.selectedPhyloTreeId) {
       return (
@@ -189,7 +199,7 @@ class PhyloTreeListView extends React.Component {
       );
     }
 
-    let currentTree = this.state.phyloTreeMap[this.state.selectedPhyloTreeId];
+    let currentTree = this.getCurrentTree();
     return (
       <div className={cs.phyloTreeListView}>
         <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
