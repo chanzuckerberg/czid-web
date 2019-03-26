@@ -448,6 +448,7 @@ class DiscoveryView extends React.Component {
                   samples={samples}
                   projects={projects}
                   currentTab={currentTab}
+                  loading={loadingSamples || loadingProjects}
                 />
               )}
           </div>
