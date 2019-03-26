@@ -43,9 +43,10 @@ export default class DiscoverySidebar extends React.Component {
 
     if (currentTab == "samples") {
       const samples = DiscoverySidebar.selectSampleData(newProps.samples);
-      if (!samples || !samples.length) {
-        return prevState;
-      }
+      // if (!samples || !samples.length) {
+      //   console.log("zeroed out");
+      //   return prevState;
+      // }
       return {
         stats: {
           numSamples: samples.length,

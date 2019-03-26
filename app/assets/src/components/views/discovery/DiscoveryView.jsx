@@ -166,6 +166,8 @@ class DiscoveryView extends React.Component {
     const { domain } = this.props;
     const { project } = this.state;
 
+    console.log("hi from refreshDimensions 10:49am");
+
     const {
       projectDimensions,
       sampleDimensions
@@ -174,12 +176,19 @@ class DiscoveryView extends React.Component {
       projectId: project && project.id
     });
 
+    console.log("end of refreshDimensions");
+    console.log(projectDimensions);
+    console.log(sampleDimensions);
+
     this.setState(pickBy(identity, { projectDimensions, sampleDimensions }));
   };
 
   refreshAll = () => {
     const { project } = this.state;
+    console.log("refreshAll called");
+    console.log("project is: ", project);
     !project && this.refreshSynchronousData();
+    console.log("finished refresh sync data");
     this.refreshDimensions();
   };
 
