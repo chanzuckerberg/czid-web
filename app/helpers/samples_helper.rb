@@ -113,7 +113,7 @@ module SamplesHelper
     if sample.status == Sample::STATUS_CREATED
       'uploading'
     elsif sample.status == Sample::STATUS_CHECKED
-      pipeline_run = sample.pipeline_runs.first
+      pipeline_run = sample.first_pipeline_run
       return '' unless pipeline_run
       if pipeline_run.job_status == PipelineRun::STATUS_CHECKED
         return 'complete'
@@ -265,7 +265,7 @@ module SamplesHelper
 
   def sample_derived_data(sample, job_stats_hash)
     output_data = {}
-    pipeline_run = sample.pipeline_runs.first
+    pipeline_run = sample.first_pipeline_run
     summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, pipeline_run) : nil
     output_data[:pipeline_run] = pipeline_run
     output_data[:host_genome_name] = sample.host_genome ? sample.host_genome.name : nil

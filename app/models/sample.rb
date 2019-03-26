@@ -215,7 +215,7 @@ class Sample < ApplicationRecord
   end
 
   def results_folder_files
-    pr = pipeline_runs.first
+    pr = first_pipeline_run
     return list_outputs(sample_output_s3_path) unless pr
     file_list = []
     if pr.pipeline_version.to_f >= 2.0
@@ -336,21 +336,21 @@ class Sample < ApplicationRecord
   end
 
   def sample_alignment_output_s3_path
-    pr = pipeline_runs.first
+    pr = first_pipeline_run
     return pr.alignment_output_s3_path
   rescue
     return sample_output_s3_path
   end
 
   def sample_host_filter_output_s3_path
-    pr = pipeline_runs.first
+    pr = first_pipeline_run
     return pr.host_filter_output_s3_path
   rescue
     return sample_output_s3_path
   end
 
   def subsample_suffix
-    pr = pipeline_runs.first
+    pr = first_pipeline_run
     pr.subsample_suffix
   end
 
@@ -415,7 +415,7 @@ class Sample < ApplicationRecord
 
   def check_status
     return unless [STATUS_UPLOADED, STATUS_RERUN, STATUS_RETRY_PR].include?(status)
-    pr = pipeline_runs.first
+    pr = first_pipeline_run
     transient_status = status
     self.status = STATUS_CHECKED
 
@@ -713,5 +713,11 @@ class Sample < ApplicationRecord
   # Get field info for fields that are appropriate for both the project and the host genome
   def metadata_fields_info
     (project.metadata_fields & host_genome.metadata_fields).map(&:field_info)
+  end
+
+  # Explicit getter because we had issues with ":pipeline_runs, -> { order(created_at: :desc) }"
+  # not being applied with the non-admin path in self.viewable.
+  def first_pipeline_run
+    pipeline_runs.order(created_at: :desc).first
   end
 end

@@ -88,8 +88,8 @@ class ProjectsController < ApplicationController
           end
           (locations_by_project_id[s.project_id] ||= Set.new) << s.sample_location if s.sample_location
           unless s.pipeline_runs.empty?
-            total_reads += s.pipeline_runs[0].total_reads || 0
-            adjusted_remaining_reads += s.pipeline_runs[0].adjusted_remaining_reads || 0
+            total_reads += s.first_pipeline_run.total_reads || 0
+            adjusted_remaining_reads += s.first_pipeline_run.adjusted_remaining_reads || 0
           end
         end
         extended_projects = projects.includes(:users).map do |project|
