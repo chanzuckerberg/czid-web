@@ -182,7 +182,7 @@ class TaxonLineage < ApplicationRecord
     # Use pluck because it saved 5s on 10k rows in testing
     # lineage_by_taxid[x.taxid] = x.as_json
     TaxonLineage.where(taxid: tax_ids).where("#{lineage_version} BETWEEN version_start AND version_end").each do |x|
-      # Extra fields for levels of _taxid and _name are used in the phylo tree
+      # Extra fields for levels of _taxid and _name are used in the taxon tree
       lineage_by_taxid[x.taxid] = x.as_json
     end
     t1 = Time.now.to_f
