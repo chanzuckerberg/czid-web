@@ -139,7 +139,7 @@ class VisualizationsController < ApplicationController
     names = samples.map(&:name)
     prefix = longest_common_prefix(names)
     # Use whole words only, cut off any last partial word
-    prefix = prefix[0, prefix.rindex(/[-_|\s]/)]
+    prefix = prefix[0, prefix.rindex(/[-_|\s]/) + 1]
     names.each_with_index.map do |name, i|
       i > 0 ? name.delete_prefix(prefix) : name
     end.to_sentence
