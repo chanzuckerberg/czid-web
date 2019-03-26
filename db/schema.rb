@@ -9,7 +9,8 @@
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
 # It's strongly recommended that you check this file into your version control system.
-ActiveRecord::Schema.define(version: 20_190_221_230_200) do
+
+ActiveRecord::Schema.define(version: 20_190_321_214_445) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -145,7 +146,6 @@ ActiveRecord::Schema.define(version: 20_190_221_230_200) do
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "key", null: false, collation: "latin1_swedish_ci"
-    t.integer "data_type", limit: 1, null: false
     t.string "raw_value"
     t.string "string_validated_value"
     t.float "number_validated_value", limit: 24
@@ -341,6 +341,7 @@ ActiveRecord::Schema.define(version: 20_190_221_230_200) do
     t.string "pipeline_commit", default: ""
     t.text "dag_vars"
     t.integer "max_input_fragments"
+    t.datetime "client_updated_at"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end

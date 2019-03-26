@@ -91,10 +91,11 @@ module MetadataHelper
                 end
               else
                 # Use existing samples in the project.
-                Sample.includes(:host_genome).where(id: project.sample_ids).map do |sample|
+                Sample.includes(:host_genome, :metadata).where(id: project.sample_ids).map do |sample|
                   {
                     name: sample.name,
-                    host_genome_name: sample.host_genome_name
+                    host_genome_name: sample.host_genome_name,
+                    metadata: sample.metadata.index_by(&:key)
                   }
                 end
               end
@@ -104,7 +105,13 @@ module MetadataHelper
       samples.each do |sample|
         values = fields.map do |field|
           if host_genomes_by_name[sample[:host_genome_name]].metadata_fields.include?(field)
-            generate_metadata_default_value(field, sample[:host_genome_name])
+            if samples_are_new
+              nil
+            elsif project.nil?
+              generate_metadata_default_value(field, sample[:host_genome_name])
+            else
+              sample[:metadata][field.name] ? sample[:metadata][field.name].raw_value : nil
+            end
           end
         end
 
@@ -252,7 +259,7 @@ module MetadataHelper
 
         if val_errors[:raw_value].present?
           # Create a custom error group if it hasn't already been done.
-          error_key = error_aggregator.create_raw_value_error_group_for_metadata_field(val_field, col_index + 1)
+          error_key = error_aggregator.create_raw_value_error_group_for_metadata_field(val_field, col_index + 1, sample.host_genome_name == "Human")
           error_aggregator.add_error(error_key, [index + 1, sample.name, value])
         end
 
@@ -263,7 +270,7 @@ module MetadataHelper
         existing_m = sample.get_existing_metadatum(field.to_s)
 
         # We currently compare the raw_value because val is also a raw string, so we compare equivalent things.
-        if existing_m && !existing_m.raw_value.nil? && existing_m.raw_value != value
+        if existing_m && val_errors.empty? && !existing_m.raw_value.nil? && existing_m.raw_value != value
           warning_aggregator.add_error(:value_already_exists, [index + 1, sample.name, field, existing_m.raw_value, value])
         end
       end

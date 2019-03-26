@@ -40,7 +40,7 @@
     "file-loader": "^1.1.11",
     "husky": "^1.1.2",
     "import-glob-loader": "^1.1.0",
-    "jest": "^23.0.0",
+    "jest": "^23.6.0",
     "lint-staged": "^7.3.0",
     "node-sass": "^4.9.4",
     "prettier": "^1.12.1",

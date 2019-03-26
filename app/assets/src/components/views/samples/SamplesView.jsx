@@ -302,7 +302,7 @@ class SamplesView extends React.Component {
   };
 
   render() {
-    const { activeColumns, onLoadRows } = this.props;
+    const { activeColumns, onLoadRows, protectedColumns } = this.props;
     const { phyloTreeCreationModalOpen, selectedSampleIds } = this.state;
 
     // TODO(tiago): replace by automated cell height computing
@@ -322,6 +322,7 @@ class SamplesView extends React.Component {
             onLoadRows={onLoadRows}
             onSelectAllRows={this.handleSelectAllRows}
             onSelectRow={this.handleSelectRow}
+            protectedColumns={protectedColumns}
             rowClassName={cs.tableDataRow}
             selectableKey="id"
             selected={selectedSampleIds}
@@ -343,20 +344,19 @@ class SamplesView extends React.Component {
 SamplesView.defaultProps = {
   activeColumns: [
     "sample",
-    "totalReads",
-    "nonHostReads",
-    "qcPercent",
-    "duplicateCompressionRatio",
-    "collectionLocation",
     "host",
-    "totalRuntime"
-  ]
+    "collectionLocation",
+    "nonHostReads",
+    "qcPercent"
+  ],
+  protectedColumns: ["sample"]
 };
 
 SamplesView.propTypes = {
   activeColumns: PropTypes.arrayOf(PropTypes.string),
   onLoadRows: PropTypes.func.isRequired,
   projectId: PropTypes.number,
+  protectedColumns: PropTypes.array,
   samples: PropTypes.array,
   selectableIds: PropTypes.array.isRequired
 };

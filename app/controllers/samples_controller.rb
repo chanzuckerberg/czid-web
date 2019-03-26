@@ -23,7 +23,7 @@ class SamplesController < ApplicationController
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
-                  :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder].freeze
+                  :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder, :upload_heartbeat].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details, :dimensions, :all,
                    :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
@@ -130,14 +130,17 @@ class SamplesController < ApplicationController
     # discovery views (old one was kept to avoid breaking the current inteface
     # without sacrificing speed of development and avoid breaking the current interface)
     domain = params[:domain]
-    list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
-
+    order_by = params[:orderBy] || :id
+    order_dir = params[:orderDir] || :desc
     limit = params[:limit] ? params[:limit].to_i : MAX_PAGE_SIZE_V2
     offset = params[:offset].to_i
+
+    list_all_sample_ids = ActiveModel::Type::Boolean.new.cast(params[:listAllIds])
 
     samples = samples_by_domain(domain)
     samples = filter_samples(samples, params)
 
+    samples = samples.order(Hash[order_by => order_dir])
     limited_samples = samples.offset(offset).limit(limit)
 
     limited_samples_json = limited_samples.as_json(
@@ -526,18 +529,16 @@ class SamplesController < ApplicationController
 
   # POST /samples/1/save_metadata_v2
   def save_metadata_v2
-    saved = @sample.metadatum_add_or_update(params[:field], params[:value])
-    if saved
+    result = @sample.metadatum_add_or_update(params[:field], params[:value])
+    if result[:status] == "ok"
       render json: {
         status: "success",
         message: "Saved successfully"
       }
     else
-      error_messages = @sample ? @sample.errors.full_messages : []
       render json: {
         status: 'failed',
-        message: 'Unable to update sample',
-        errors: error_messages
+        message: result[:error]
       }
     end
   end
@@ -710,7 +711,7 @@ class SamplesController < ApplicationController
     @taxon_info = params[:taxon_info].split(".")[0]
     @taxid = @taxon_info.split("_")[2].to_i
     if HUMAN_TAX_IDS.include? @taxid.to_i
-      render json: { status: :forbidden, message: "Human taxon ids are not allowed" }
+      render json: { error: "Human taxon ids are not allowed" }
       return
     end
 
@@ -1008,6 +1009,15 @@ class SamplesController < ApplicationController
 
   def cli_user_instructions
     render template: "samples/cli_user_instructions"
+  end
+
+  # PUT /samples/:id/upload_heartbeat
+  def upload_heartbeat
+    # Local uploads go directly from the browser to S3, so we don't know if an upload was
+    # interrupted. User's browser will update this endpoint as a client heartbeat so we know if the
+    # client is still actively uploading.
+    @sample.update(client_updated_at: Time.now.utc)
+    render json: {}, status: :ok
   end
 
   # Use callbacks to share common setup or constraints between actions.

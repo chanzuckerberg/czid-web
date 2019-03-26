@@ -23,4 +23,4 @@ joe_project:
 metadata_validation_project:
   name: Metadata Project
   users: [one]
-  metadata_fields: [sample_type, nucleotide_type, age, admission_date, blood_fed, reported_sex, sex]
+  metadata_fields: [sample_type, nucleotide_type, collection_date, age, admission_date, blood_fed, reported_sex, sex]

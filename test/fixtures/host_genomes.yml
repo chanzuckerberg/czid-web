@@ -3,15 +3,15 @@ one:
 
 two:
   name: Human
-  metadata_fields: [sample_type, sex, age, admission_date, nucleotide_type]
+  metadata_fields: [collection_date, sample_type, sex, age, admission_date, nucleotide_type]
 
 human:
   name: Human
-  metadata_fields: [sample_type, sex, age, admission_date, nucleotide_type, core_field]
+  metadata_fields: [collection_date, sample_type, sex, age, admission_date, nucleotide_type, core_field]
 
 mosquito:
   name: Mosquito
-  metadata_fields: [sample_type, sex, reported_sex, blood_fed]
+  metadata_fields: [collection_date, sample_type, sex, reported_sex, blood_fed]
 
 tick:
   name: Tick

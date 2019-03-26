@@ -25,7 +25,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
         "RR004_water_2_S23A" => {
           'sex' => 'Female',
           'age' => 100,
-          'admission_date' => '2018-01-01',
+          'admission_date' => '2018-01',
           'sample_type' => 'blood',
           'nucleotide_type' => 'DNA'
         },
@@ -98,7 +98,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
         "RR004_water_2_S23A" => {
           'sex' => 'Female',
           'age' => 100,
-          'admission_date' => '2018-01-01',
+          'admission_date' => '2018-01',
           'sample_type' => 'blood',
           'nucleotide_type' => 'DNA'
         },
@@ -170,7 +170,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
         "RR004_water_2_S23A" => {
           'Sex' => 'Female',
           'Age' => 100,
-          'Admission Date' => '2018-01-01',
+          'Admission Date' => '2018-01',
           'Sample Type' => 'blood',
           'Nucleotide Type' => 'DNA'
         }
@@ -215,7 +215,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
         "RR004_water_2_S23A" => {
           'sex' => 'Female',
           'age' => 100,
-          'admission_date' => '2018-01-01',
+          'admission_date' => '2018-01',
           'sample_type' => 'blood',
           'nucleotide_type' => 'DNA'
         }
@@ -255,7 +255,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
         "RR004_water_2_S23A" => {
           'sex' => 'Female',
           'age' => 100,
-          'admission_date' => '2018-01-01',
+          'admission_date' => '2018-01',
           'sample_type' => 'blood',
           'nucleotide_type' => 'DNA'
         }
@@ -299,7 +299,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
         "RR004_water_2_S23A" => {
           'sex' => 'Female',
           'age' => 100,
-          'admission_date' => '2018-01-01'
+          'admission_date' => '2018-01'
         }
       },
       samples: [

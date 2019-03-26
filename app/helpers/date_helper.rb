@@ -1,10 +1,36 @@
 module DateHelper
-  def parse_date(date_string)
-    # YYYY-MM-DD, YYYY-MM, MM/DD/YY, MM/YYYY
-    # %Y-%m-%d must come before %Y-%m because %Y-%m will parse 2018-01-01 and throw away the day,
-    # so we need to parse %Y-%m-%d first.
-    ["%Y-%m-%d", "%Y-%m", "%m/%d/%y", "%m/%Y"].each do |format|
-      date = parse_date_helper(date_string, format)
+  # Ruby's strptime is too lenient, and will accept 2001-01-foobar and just parse out 2001-01.
+  # We match against regex first, then use strptime
+  DATE_STANDARD = {
+    format: "%Y-%m-%d",
+    regex: /(^\d{4}-\d{1,2}-\d{1,2}$)/
+  }.freeze
+
+  DATE_STANDARD_MONTH = {
+    format: "%Y-%m",
+    regex: /(^\d{4}-\d{1,2}$)/
+  }.freeze
+
+  DATE_ALT = {
+    format: "%m/%d/%y",
+    regex: %r{^\d{1,2}\/\d{1,2}\/\d{2}$}
+  }.freeze
+
+  DATE_ALT_MONTH = {
+    format: "%m/%Y",
+    regex: %r{^\d{1,2}\/\d{4}$}
+  }.freeze
+
+  def parse_date(date_string, allow_day = true)
+    allowed_formats =
+      if allow_day
+        [DATE_STANDARD, DATE_STANDARD_MONTH, DATE_ALT, DATE_ALT_MONTH]
+      else
+        [DATE_STANDARD_MONTH, DATE_ALT_MONTH]
+      end
+
+    allowed_formats.each do |date_obj|
+      date = parse_date_helper(date_string, date_obj)
 
       if date
         return date
@@ -15,9 +41,13 @@ module DateHelper
     raise ArgumentError, "Date could not be parsed"
   end
 
-  def parse_date_helper(date_string, date_format)
-    Date.strptime(date_string, date_format)
-  rescue
+  def parse_date_helper(date_string, date_obj)
+    unless date_obj[:regex].match(date_string)
+      return nil
+    end
+
+    Date.strptime(date_string, date_obj[:format])
+  rescue ArgumentError
     nil
   end
 end

@@ -6,6 +6,7 @@ import {
 } from "~/api";
 
 import { bulkUploadWithMetadata } from "~/api/metadata";
+import { putWithCSRF } from "./core";
 
 export const bulkUploadRemote = ({ samples, metadata }) =>
   metadata
@@ -124,6 +125,7 @@ export const bulkUploadLocal = ({
       .then(response => {
         // After successful sample creation, upload to the presigned URLs returned
         const sampleId = response.id;
+        startUploadHeartbeat(sampleId);
         files.map((file, i) => {
           const url = response.input_files[i].presigned_url;
 
@@ -146,4 +148,16 @@ export const bulkUploadLocal = ({
         }
       });
   }
+};
+
+// Local uploads go directly from the browser to S3, so we don't know if an upload was interrupted.
+// Ping the heartbeat endpoint periodically to say the browser is actively uploading this sample.
+export const startUploadHeartbeat = async sampleId => {
+  const interval = 60000; // 60 sec
+  setInterval(() => {
+    putWithCSRF(`/samples/${sampleId}/upload_heartbeat.json`).catch(() =>
+      // eslint-disable-next-line no-console
+      console.log("Can't connect to IDseq server.")
+    );
+  }, interval);
 };

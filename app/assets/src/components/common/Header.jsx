@@ -27,7 +27,13 @@ class Header extends React.Component {
             <RequestContext.Consumer>
               {({ enabledFeatures }) => {
                 if (enabledFeatures.includes("data_discovery")) {
-                  return <MainMenu />;
+                  return (
+                    <MainMenu
+                      newSampleUpload={enabledFeatures.includes(
+                        "new_sample_upload"
+                      )}
+                    />
+                  );
                 }
               }}
             </RequestContext.Consumer>
@@ -64,7 +70,7 @@ const UserMenuDropDown = ({
     });
   };
 
-  const renderItems = (adminUser, demoUser, dataDiscovery) => {
+  const renderItems = (adminUser, demoUser, dataDiscovery, newSampleUpload) => {
     let userDropdownItems = [];
     if (!demoUser) {
       if (!dataDiscovery) {
@@ -72,7 +78,10 @@ const UserMenuDropDown = ({
           <BareDropdown.Item
             key="1"
             text={
-              <a className={cs.option} href="/samples/new">
+              <a
+                className={cs.option}
+                href={newSampleUpload ? "/samples/upload" : "/samples/new"}
+              >
                 New Sample
               </a>
             }
@@ -156,7 +165,8 @@ const UserMenuDropDown = ({
             items={renderItems(
               adminUser,
               demoUser,
-              enabledFeatures.includes("data_discovery")
+              enabledFeatures.includes("data_discovery"),
+              enabledFeatures.includes("new_sample_upload")
             )}
             direction="left"
           />
@@ -175,7 +185,7 @@ UserMenuDropDown.propTypes = forbidExtraProps({
   userName: PropTypes.string.isRequired
 });
 
-const MainMenu = () => {
+const MainMenu = ({ newSampleUpload }) => {
   const isSelected = tab => window.location.pathname.startsWith(`/${tab}`);
 
   return (
@@ -193,13 +203,21 @@ const MainMenu = () => {
         Public
       </a>
       <a
-        className={cx(cs.item, isSelected("samples/new") && cs.selected)}
-        href="/samples/new"
+        className={cx(
+          cs.item,
+          isSelected(newSampleUpload ? "samples/upload" : "samples/new") &&
+            cs.selected
+        )}
+        href={newSampleUpload ? "/samples/upload" : "/samples/new"}
       >
         Upload
       </a>
     </div>
   );
+};
+
+MainMenu.propTypes = {
+  newSampleUpload: PropTypes.bool
 };
 
 export default Header;

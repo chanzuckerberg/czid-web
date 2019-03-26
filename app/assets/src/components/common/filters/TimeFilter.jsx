@@ -31,7 +31,7 @@ class TimeFilter extends React.Component {
 }
 
 TimeFilter.propTypes = {
-  selected: PropTypes.object,
+  selected: PropTypes.string,
   onChange: PropTypes.func,
   counters: PropTypes.object
 };

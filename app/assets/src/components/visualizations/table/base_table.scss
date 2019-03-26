@@ -72,4 +72,12 @@
 
 .grid {
   outline: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &:hover::-webkit-scrollbar {
+    display: block;
+  }
 }
