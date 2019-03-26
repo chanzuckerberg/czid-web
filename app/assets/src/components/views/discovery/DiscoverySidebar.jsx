@@ -43,10 +43,6 @@ export default class DiscoverySidebar extends React.Component {
 
     if (currentTab == "samples") {
       const samples = DiscoverySidebar.selectSampleData(newProps.samples);
-      // if (!samples || !samples.length) {
-      //   console.log("zeroed out");
-      //   return prevState;
-      // }
       return {
         stats: {
           numSamples: samples.length,
@@ -68,10 +64,6 @@ export default class DiscoverySidebar extends React.Component {
         }
       };
     } else if (currentTab == "projects") {
-      if (!projects || !projects.length) {
-        return prevState;
-      }
-
       const hosts = flatten(map("hosts", projects));
       const tissues = flatten(map("tissues", projects));
       const locations = flatten(map("locations", projects));
@@ -215,6 +207,16 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
+    if (!this.hasData()) {
+      return (
+        <div className={cx(this.props.className, cs.sidebar)}>
+          <div className={cs.emptyMessage}>
+            Try another search to see summary info.
+          </div>
+        </div>
+      );
+    }
+
     // This represents the unique dataset loaded and will force a refresh of the
     // Accordions when it changes.
     const dataKey = this.state.stats.avgTotalReads;

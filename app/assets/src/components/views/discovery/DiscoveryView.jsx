@@ -166,7 +166,7 @@ class DiscoveryView extends React.Component {
     const { domain } = this.props;
     const { project } = this.state;
 
-    console.log("hi from refreshDimensions 10:49am");
+    console.log("hi from refreshDimensions 2:13pm");
 
     const {
       projectDimensions,
