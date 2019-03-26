@@ -1,4 +1,5 @@
 @import "~styles/typography";
+@import "~styles/themes/typography";
 @import "~styles/themes/colors";
 
 .content {
@@ -38,9 +39,20 @@
     margin-left: 10px;
   }
 
-  .input {
+  .inputWrapper,
+  .sampleNameInput {
     flex: 1 1 0;
     min-width: 0;
+
+    .metadataInput {
+      width: 100%;
+    }
+
+    .error {
+      @include font-body-xxs;
+      color: $error;
+      margin-top: 5px;
+    }
   }
 
   .metadataValue {

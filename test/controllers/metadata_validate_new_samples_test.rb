@@ -381,12 +381,20 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
 
     post validate_csv_for_new_samples_metadata_url(@metadata_validation_project), params: {
       metadata: {
-        headers: ['sample_name', 'host_genome', 'sample_type', 'age', 'admission_date', 'nucleotide_type'],
+        headers: ['sample_name', 'host_genome', 'sample_type', 'age', 'collection_date', 'nucleotide_type'],
         rows: [
           ['Test Sample Human', 'Human', 'Whole Blood', '12', '2018-01', 'DNA'],
           ['Test Sample Human 2', 'Human', 'Whole Blood', '12', '2018-01-01', 'DNA'],
           ['Test Sample Human 3', 'Human', 'Whole Blood', '12', '01/2018', 'DNA'],
-          ['Test Sample Human 4', 'Human', 'Whole Blood', '12', '01/01/2018', 'DNA']
+          ['Test Sample Human 4', 'Human', 'Whole Blood', '12', '01/01/18', 'DNA'],
+          ['Test Sample Human 5', 'Human', 'Whole Blood', '12', '2018-01abc', 'DNA'],
+          ['Test Sample Human 6', 'Human', 'Whole Blood', '12', 'abc01/2018', 'DNA'],
+          ['Test Sample Mosquito', 'Mosquito', 'Abdomen', '12', '2018-01', 'DNA'],
+          ['Test Sample Mosquito 2', 'Mosquito', 'Abdomen', '12', '2018-01-01', 'DNA'],
+          ['Test Sample Mosquito 3', 'Mosquito', 'Abdomen', '12', '01/2018', 'DNA'],
+          ['Test Sample Mosquito 4', 'Mosquito', 'Abdomen', '12', '01/01/18', 'DNA'],
+          ['Test Sample Mosquito 5', 'Mosquito', 'Abdomen', '12', '2018-01abc', 'DNA'],
+          ['Test Sample Mosquito 6', 'Mosquito', 'Abdomen', '12', 'abc01/2018', 'DNA']
         ]
       },
       samples: [
@@ -405,17 +413,68 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
         {
           name: "Test Sample Human 4",
           project_id: @metadata_validation_project.id
+        },
+        {
+          name: "Test Sample Human 5",
+          project_id: @metadata_validation_project.id
+        },
+        {
+          name: "Test Sample Human 6",
+          project_id: @metadata_validation_project.id
+        },
+        {
+          name: "Test Sample Mosquito",
+          project_id: @metadata_validation_project.id
+        },
+        {
+          name: "Test Sample Mosquito 2",
+          project_id: @metadata_validation_project.id
+        },
+        {
+          name: "Test Sample Mosquito 3",
+          project_id: @metadata_validation_project.id
+        },
+        {
+          name: "Test Sample Mosquito 4",
+          project_id: @metadata_validation_project.id
+        },
+        {
+          name: "Test Sample Mosquito 5",
+          project_id: @metadata_validation_project.id
+        },
+        {
+          name: "Test Sample Mosquito 6",
+          project_id: @metadata_validation_project.id
         }
       ]
     }, as: :json
 
     assert_response :success
 
-    assert_equal 0, @response.parsed_body['issues']['errors'].length
+    assert_equal 2, @response.parsed_body['issues']['errors'].length
+    # Error should throw if invalid float is passed for float data type.
+    assert @response.parsed_body['issues']['errors'][0]['isGroup']
+    assert @response.parsed_body['issues']['errors'][0]['caption'].starts_with?("4 invalid values for \"Collection Date\" (column 5)")
+    assert @response.parsed_body['issues']['errors'][0]['caption'].ends_with?("(for human samples)")
+    assert_equal [
+      [2, "Test Sample Human 2", "2018-01-01"],
+      [4, "Test Sample Human 4", "01/01/18"],
+      [5, "Test Sample Human 5", "2018-01abc"],
+      [6, "Test Sample Human 6", "abc01/2018"]
+    ], @response.parsed_body['issues']['errors'][0]['rows']
+
+    assert @response.parsed_body['issues']['errors'][1]['isGroup']
+    assert @response.parsed_body['issues']['errors'][1]['caption'].starts_with?("2 invalid values for \"Collection Date\" (column 5)")
+    assert !@response.parsed_body['issues']['errors'][1]['caption'].ends_with?("(for human samples)")
+    assert_equal [
+      [11, "Test Sample Mosquito 5", "2018-01abc"],
+      [12, "Test Sample Mosquito 6", "abc01/2018"]
+    ], @response.parsed_body['issues']['errors'][1]['rows']
+
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
 
-  test 'nonadmin user public project' do
+  test 'joe cannot vaidate metadata for new samples against a public project' do
     post user_session_path, params: @user_nonadmin_params
 
     post validate_csv_for_new_samples_metadata_url, params: {
@@ -442,7 +501,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_equal [[1, "Test Sample"]], @response.parsed_body['issues']['errors'][0]['rows']
   end
 
-  test 'nonadmin user private project' do
+  test 'joe cannot validate metadata for new samples against a private project' do
     post user_session_path, params: @user_nonadmin_params
 
     post validate_csv_for_new_samples_metadata_url, params: {
@@ -469,7 +528,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_equal [[1, "Test Sample"]], @response.parsed_body['issues']['errors'][0]['rows']
   end
 
-  test 'nonadmin user own project' do
+  test 'joe can validate metadata for new samples against a project that he is a member of' do
     post user_session_path, params: @user_nonadmin_params
 
     post validate_csv_for_new_samples_metadata_url, params: {

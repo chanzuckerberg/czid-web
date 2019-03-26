@@ -2,9 +2,11 @@ import React from "react";
 import { mapValues, filter, includes } from "lodash";
 // TODO(mark): Refactor all calls to lodash/fp.
 import { set, values } from "lodash/fp";
+
 import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
 import MetadataInput from "~/components/common/MetadataInput";
+
 import MetadataSection from "./MetadataSection";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
 import cs from "./sample_details_mode.scss";
@@ -38,7 +40,7 @@ class MetadataTab extends React.Component {
       }
     });
 
-    // Format as [{name: "Sample Info", keys: ["sample_type"], {name: "Host Info", keys: ["age"]}]
+    // Format as [{name: "Sample Info", keys: ["sample_type"]}, {name: "Host Info", keys: ["age"]}]
     return Object.entries(nameToFields).map(entry => {
       return { name: entry[0], keys: entry[1].sort() };
     });
@@ -79,16 +81,28 @@ class MetadataTab extends React.Component {
   };
 
   renderInput = metadataType => {
-    const { metadata, onMetadataChange, onMetadataSave } = this.props;
+    const {
+      metadata,
+      onMetadataChange,
+      onMetadataSave,
+      metadataErrors,
+      additionalInfo
+    } = this.props;
 
     return (
-      <MetadataInput
-        className={cs.input}
-        value={metadata[metadataType.key]}
-        metadataType={metadataType}
-        onChange={onMetadataChange}
-        onSave={onMetadataSave}
-      />
+      <div className={cs.inputWrapper}>
+        <MetadataInput
+          className={cs.metadataInput}
+          value={metadata[metadataType.key]}
+          metadataType={metadataType}
+          onChange={onMetadataChange}
+          onSave={onMetadataSave}
+          isHuman={additionalInfo.host_genome_name === "Human"}
+        />
+        {metadataErrors[metadataType.key] && (
+          <div className={cs.error}>{metadataErrors[metadataType.key]}</div>
+        )}
+      </div>
     );
   };
 
@@ -150,7 +164,7 @@ class MetadataTab extends React.Component {
                 onBlur={() => onMetadataSave("name")}
                 value={additionalInfo.name}
                 type="text"
-                className={cs.input}
+                className={cs.sampleNameInput}
               />
             </div>
           )}
@@ -204,7 +218,8 @@ MetadataTab.propTypes = {
     upload_date: PropTypes.string,
     host_genome_name: PropTypes.string,
     editable: PropTypes.bool
-  }).isRequired
+  }).isRequired,
+  metadataErrors: PropTypes.objectOf(PropTypes.string)
 };
 
 export default MetadataTab;

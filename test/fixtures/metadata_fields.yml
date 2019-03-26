@@ -12,6 +12,11 @@ nucleotide_type:
   force_options: 1
   options: "[\"DNA\", \"RNA\"]"
 
+collection_date:
+  name: "collection_date"
+  display_name: "Collection Date"
+  base_type: 2
+
 sex:
   name: "sex"
   display_name: "Sex"

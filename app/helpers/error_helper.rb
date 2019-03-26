@@ -29,6 +29,32 @@ module ErrorHelper
     end
   end
 
+  DATE_INVALID_ERROR_HUMAN = "Please input a date in the format YYYY-MM or MM/YYYY. (for human samples)".freeze
+  DATE_INVALID_ERROR = "Please input a date in the format YYYY-MM-DD, YYYY-MM, MM/DD/YY, or MM/YYYY.".freeze
+  NUMBER_INVALID_ERROR = "Please input a number.".freeze
+
+  def get_field_error(field, is_human = false)
+    if field.base_type == 2
+      if is_human
+        return DATE_INVALID_ERROR_HUMAN
+      else
+        return DATE_INVALID_ERROR
+      end
+    end
+
+    if field.base_type == 1
+      return NUMBER_INVALID_ERROR
+    end
+
+    if field.base_type.zero?
+      if field.force_options
+        return "The valid options are #{JSON.parse(field.options).join(', ')}."
+      else
+        return "There was an error. Please contact us for help."
+      end
+    end
+  end
+
   # Aggregates errors (and warnings) into groups
   class ErrorAggregator
     ERRORS = {
@@ -123,23 +149,34 @@ module ErrorHelper
     # This is a special-case function that adds an error group to this aggregator,
     # which groups "invalid raw value" validation errors for a particular metadata field.
     # For example: for collection_date, a "Please input a valid date" message.
-    def create_raw_value_error_group_for_metadata_field(field, col_index)
+    def create_raw_value_error_group_for_metadata_field(field, col_index, is_human = false)
       error_type = "#{field.name}_invalid_raw_value"
+
+      if field.base_type == 2 && is_human
+        error_type = "#{field.name}_invalid_raw_value_human"
+      end
 
       # Add an error type if it doesn't already exist.
       unless @supported_errors[error_type]
         # Automatically determine the kind of error to display based on the field.
         if field.base_type == 2
-          @supported_errors[error_type] = {
-            headers: ["Row #", "Sample Name", "Invalid Value"],
-            title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). Please input a date in the format YYYY-MM-DD, YYYY-MM, MM/DD/YY, or MM/YYYY" }
-          }
+          @supported_errors[error_type] = if is_human
+                                            {
+                                              headers: ["Row #", "Sample Name", "Invalid Value"],
+                                              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{DATE_INVALID_ERROR_HUMAN}" }
+                                            }
+                                          else
+                                            {
+                                              headers: ["Row #", "Sample Name", "Invalid Value"],
+                                              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{DATE_INVALID_ERROR}" }
+                                            }
+                                          end
         end
 
         if field.base_type == 1
           @supported_errors[error_type] = {
             headers: ["Row #", "Sample Name", "Invalid Value"],
-            title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). Please input a number." }
+            title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{NUMBER_INVALID_ERROR}" }
           }
         end
 

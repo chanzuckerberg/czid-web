@@ -27,6 +27,8 @@ class SampleDetailsMode extends React.Component {
     metadataTypes: null,
     metadataChanged: {},
     metadataSavePending: {},
+    lastValidMetadata: null,
+    metadataErrors: {},
     currentTab: TABS[0]
   };
 
@@ -62,8 +64,11 @@ class SampleDetailsMode extends React.Component {
       getSampleMetadataFields(this.props.sampleId)
     ]);
 
+    const processedMetadata = processMetadata(metadata.metadata);
+
     this.setState({
-      metadata: processMetadata(metadata.metadata),
+      metadata: processedMetadata,
+      lastValidMetadata: processedMetadata,
       additionalInfo: processAdditionalInfo(metadata.additional_info),
       pipelineInfo: processPipelineInfo(metadata.additional_info),
       pipelineRun: metadata.additional_info.pipeline_run,
@@ -88,7 +93,8 @@ class SampleDetailsMode extends React.Component {
 
     this.setState({
       metadata: set(key, value, this.state.metadata),
-      metadataChanged: set(key, !shouldSave, this.state.metadataChanged)
+      metadataChanged: set(key, !shouldSave, this.state.metadataChanged),
+      metadataErrors: set(key, null, this.state.metadataErrors)
     });
 
     if (shouldSave) {
@@ -121,16 +127,35 @@ class SampleDetailsMode extends React.Component {
       metadataSavePending: set(key, true, this.state.metadataSavePending)
     });
 
+    let lastValidMetadata = this.state.lastValidMetadata;
+    let metadataErrors = this.state.metadataErrors;
+    let metadata = this.state.metadata;
+
     if (key === "name") {
       await saveSampleName(id, value);
     } else if (key === "notes") {
       await saveSampleNotes(id, value);
     } else {
-      await saveSampleMetadata(this.props.sampleId, key, value);
+      const response = await saveSampleMetadata(
+        this.props.sampleId,
+        key,
+        value
+      );
+
+      // If the save fails, immediately revert to the last valid metadata value.
+      if (response.status === "failed") {
+        metadataErrors = set(key, response.message, metadataErrors);
+        metadata = set(key, lastValidMetadata[key], metadata);
+      } else {
+        lastValidMetadata = set(key, value, lastValidMetadata);
+      }
     }
 
     this.setState({
-      metadataSavePending: set(key, false, this.state.metadataSavePending)
+      metadataSavePending: set(key, false, this.state.metadataSavePending),
+      metadataErrors,
+      metadata,
+      lastValidMetadata
     });
   };
 
@@ -141,7 +166,8 @@ class SampleDetailsMode extends React.Component {
       metadataSavePending,
       additionalInfo,
       pipelineInfo,
-      pipelineRun
+      pipelineRun,
+      metadataErrors
     } = this.state;
 
     const savePending = some(metadataSavePending);
@@ -155,6 +181,7 @@ class SampleDetailsMode extends React.Component {
           onMetadataChange={this.handleMetadataChange}
           onMetadataSave={this.handleMetadataSave}
           savePending={savePending}
+          metadataErrors={metadataErrors}
         />
       );
     }

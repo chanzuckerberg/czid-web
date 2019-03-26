@@ -627,24 +627,43 @@ class Sample < ApplicationRecord
     Rails.logger.error(e)
     return {
       metadatum: nil,
-      status: "error"
+      status: "error",
+      error: e
     }
   end
 
   # Add or update metadatum entry on this sample.
-  # Returns whether the update succeeded.
+  # Returns whether the update succeeded and any errors.
   def metadatum_add_or_update(key, val)
     result = get_metadatum_to_save(key, val)
 
     if result[:status] == "error"
-      return false
+      return {
+        status: "error",
+        error: result[:error]
+      }
     elsif result[:metadatum]
-      result[:metadatum].save!
+      if result[:metadatum].valid?
+        result[:metadatum].save!
+        return {
+          status: "ok"
+        }
+      else
+        return {
+          status: "error",
+          # Get the error from ErrorHelper, instead of using the error from metadatum model.
+          # The error from ErrorHelper is more user-friendly ("Please input a number") whereas metadatum model is "Invalid number for field"
+          error: get_field_error(result[:metadatum].metadata_field, host_genome_name == "Human")
+        }
+      end
+    else
+      return {
+        status: "ok"
+      }
     end
-    true
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error(e)
-    false
+    return e
   end
 
   # Validate metadatum entry on this sample, without saving.

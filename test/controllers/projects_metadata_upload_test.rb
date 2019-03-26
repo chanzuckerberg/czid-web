@@ -27,7 +27,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
         'metadata_validation_sample_human' => {
           'sex' => 'Female',
           'age' => 100,
-          'admission_date' => '2018-01-01'
+          'admission_date' => '2018-01'
         }
       }
     }, as: :json
@@ -48,7 +48,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
           'foobar' => {
             'sex' => 'Female',
             'age' => 100,
-            'admission_date' => '2018-01-01'
+            'admission_date' => '2018-01'
           }
         }
       }, as: :json
@@ -98,7 +98,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
         'metadata_validation_sample_human' => {
           'sex' => 'Female',
           'age' => 100,
-          'admission_date' => '2018-01-01',
+          'admission_date' => '2018-01',
           'Example Core Field' => 'Value',
           'Custom Field' => 'Value',
           'Custom Field 2' => 'Value'
@@ -131,7 +131,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
           'metadata_validation_sample_human' => {
             'sex' => 'Female',
             'age' => 100,
-            'admission_date' => '2018-01-01'
+            'admission_date' => '2018-01'
           }
         }
       }, as: :json
@@ -147,7 +147,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
           'metadata_validation_sample_human' => {
             'sex' => 'Female',
             'age' => 100,
-            'admission_date' => '2018-01-01'
+            'admission_date' => '2018-01'
           }
         }
       }, as: :json
@@ -162,7 +162,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
         'joe_project_sampleA' => {
           'sex' => 'Female',
           'age' => 100,
-          'admission_date' => '2018-01-01'
+          'admission_date' => '2018-01'
         }
       }
     }, as: :json

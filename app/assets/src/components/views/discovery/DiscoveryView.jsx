@@ -369,6 +369,9 @@ class DiscoveryView extends React.Component {
               project={project}
               fetchedSamples={samples}
               onProjectUpdated={this.handleProjectUpdated}
+              newSampleUpload={this.props.allowedFeatures.includes(
+                "new_sample_upload"
+              )}
             />
           )}
           <DiscoveryHeader
@@ -454,7 +457,8 @@ class DiscoveryView extends React.Component {
 DiscoveryView.propTypes = {
   domain: PropTypes.oneOf([DISCOVERY_DOMAIN_LIBRARY, DISCOVERY_DOMAIN_PUBLIC])
     .isRequired,
-  project: PropTypes.object
+  project: PropTypes.object,
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string)
 };
 
 export default DiscoveryView;

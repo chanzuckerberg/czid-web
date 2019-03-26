@@ -529,18 +529,16 @@ class SamplesController < ApplicationController
 
   # POST /samples/1/save_metadata_v2
   def save_metadata_v2
-    saved = @sample.metadatum_add_or_update(params[:field], params[:value])
-    if saved
+    result = @sample.metadatum_add_or_update(params[:field], params[:value])
+    if result[:status] == "ok"
       render json: {
         status: "success",
         message: "Saved successfully"
       }
     else
-      error_messages = @sample ? @sample.errors.full_messages : []
       render json: {
         status: 'failed',
-        message: 'Unable to update sample',
-        errors: error_messages
+        message: result[:error]
       }
     end
   end

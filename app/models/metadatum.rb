@@ -90,10 +90,8 @@ class Metadatum < ApplicationRecord
   end
 
   def check_and_set_date_type
-    # TODO(mark): Reject dates with a day if host genome is human.
-    # We are actually blocked on having a good FRONT-END date picker for MetadataInput,
-    # since semantic-ui-calendar-react is missing a month + year picker.
-    self.date_validated_value = parse_date(raw_value)
+    # Only allow day in the date if host genome is not Human.
+    self.date_validated_value = parse_date(raw_value, sample.host_genome_name != "Human")
   rescue ArgumentError
     errors.add(:raw_value, MetadataValidationErrors::INVALID_DATE)
   end
