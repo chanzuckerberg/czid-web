@@ -1,6 +1,15 @@
 import React from "react";
 import cx from "classnames";
-import { countBy, flatten, map, sortBy, sum, sumBy, uniqBy, meanBy } from "lodash/fp";
+import {
+  countBy,
+  flatten,
+  map,
+  sortBy,
+  sum,
+  sumBy,
+  uniqBy,
+  meanBy
+} from "lodash/fp";
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
@@ -37,8 +46,6 @@ export default class DiscoverySidebar extends React.Component {
       if (!samples || !samples.length) {
         return prevState;
       }
-      console.log("total reads:", sumBy("totalReads", samples));
-      console.log("count:", samples.length);
       return {
         stats: {
           numSamples: samples.length,
@@ -72,7 +79,8 @@ export default class DiscoverySidebar extends React.Component {
           numSamples: sumBy("number_of_samples", projects),
           numProjects: projects.length,
           avgTotalReads: Math.round(meanBy("total_reads", projects)) || "",
-          avgNonHostReads: Math.round(meanBy("adjusted_remaining_reads", projects)) || ""
+          avgNonHostReads:
+            Math.round(meanBy("adjusted_remaining_reads", projects)) || ""
         },
         metadata: {
           host: countBy(null, hosts),
@@ -194,7 +202,6 @@ export default class DiscoverySidebar extends React.Component {
     // This represents the unique dataset loaded and will force a refresh of the
     // Accordions when it changes.
     const dataKey = this.state.stats.avgTotalReads;
-    console.log("data key: ", dataKey);
     return (
       <div className={cx(this.props.className, cs.sidebar)}>
         <div className={cs.metadataContainer}>
