@@ -55,3 +55,22 @@
   font-size: $font-size;
   font-weight: $font-weight-regular;
 }
+
+.tableContainer {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+
+  .dataContainer {
+    flex: 1 0 50px;
+
+    &:not(:only-child) {
+      flex: 0 0 50px;
+    }
+  }
+
+  .noResultsContainer {
+    flex: 1 0 auto;
+    max-height: 400px;
+  }
+}

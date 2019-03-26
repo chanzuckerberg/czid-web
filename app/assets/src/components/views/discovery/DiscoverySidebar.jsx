@@ -1,6 +1,15 @@
 import React from "react";
 import cx from "classnames";
-import { countBy, flatten, map, sortBy, sum, sumBy, uniqBy } from "lodash/fp";
+import {
+  countBy,
+  flatten,
+  map,
+  sortBy,
+  sum,
+  sumBy,
+  uniqBy,
+  meanBy
+} from "lodash/fp";
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
@@ -17,8 +26,8 @@ export default class DiscoverySidebar extends React.Component {
       stats: {
         numSamples: "",
         numProjects: "",
-        totalReads: "",
-        nonHostReads: ""
+        avgTotalReads: "",
+        avgNonHostReads: ""
       },
       metadata: {
         host: {},
@@ -41,8 +50,14 @@ export default class DiscoverySidebar extends React.Component {
         stats: {
           numSamples: samples.length,
           numProjects: uniqBy("project_id", samples).length,
-          totalReads: sumBy("totalReads", samples),
-          nonHostReads: sumBy("nonHostReads", samples)
+          avgTotalReads: DiscoverySidebar.meanByAndFormat(
+            samples,
+            "totalReads"
+          ),
+          avgNonHostReads: DiscoverySidebar.meanByAndFormat(
+            samples,
+            "nonHostReads"
+          )
         },
         metadata: {
           host: countBy("hostGenome", samples),
@@ -69,8 +84,14 @@ export default class DiscoverySidebar extends React.Component {
         stats: {
           numSamples: sumBy("number_of_samples", projects),
           numProjects: projects.length,
-          totalReads: sumBy("total_reads", projects),
-          nonHostReads: sumBy("adjusted_remaining_reads", projects)
+          avgTotalReads: DiscoverySidebar.meanByAndFormat(
+            projects,
+            "total_reads"
+          ),
+          avgNonHostReads: DiscoverySidebar.meanByAndFormat(
+            projects,
+            "adjusted_remaining_reads"
+          )
         },
         metadata: {
           host: countBy(null, hosts),
@@ -90,12 +111,8 @@ export default class DiscoverySidebar extends React.Component {
     return moment(createdAt).format("YYYY-MM-DD");
   }
 
-  formatNumber(number) {
-    const samples = this.state.stats.numSamples;
-    if (!samples) {
-      return "";
-    }
-    return Math.round(number / samples).toLocaleString();
+  static meanByAndFormat(data, field) {
+    return (Math.round(meanBy(field, data)) || "").toLocaleString();
   }
 
   static selectSampleData(newSamples) {
@@ -199,7 +216,7 @@ export default class DiscoverySidebar extends React.Component {
   render() {
     // This represents the unique dataset loaded and will force a refresh of the
     // Accordions when it changes.
-    const dataKey = this.state.stats.totalReads;
+    const dataKey = this.state.stats.avgTotalReads;
     return (
       <div className={cx(this.props.className, cs.sidebar)}>
         <div className={cs.metadataContainer}>
@@ -227,20 +244,20 @@ export default class DiscoverySidebar extends React.Component {
             <div className={cs.hasBackground}>
               <dl className={cx(cs.dataList)}>
                 <dt>
-                  <strong>Reads per sample</strong>
+                  <strong>Avg. reads per sample</strong>
                 </dt>
-                <dd>{this.formatNumber(this.state.stats.totalReads)}</dd>
+                <dd>{this.state.stats.avgTotalReads}</dd>
               </dl>
             </div>
             <div className={cs.hasBackground}>
               <dl className={cx(cs.dataList)}>
                 <dt>
                   <strong>
-                    Non-host
+                    Avg. non-host
                     <br />reads per sample
                   </strong>
                 </dt>
-                <dd>{this.formatNumber(this.state.stats.nonHostReads)}</dd>
+                <dd>{this.state.stats.avgNonHostReads}</dd>
               </dl>
             </div>
           </Accordion>
