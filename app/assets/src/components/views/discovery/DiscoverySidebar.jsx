@@ -50,8 +50,14 @@ export default class DiscoverySidebar extends React.Component {
         stats: {
           numSamples: samples.length,
           numProjects: uniqBy("project_id", samples).length,
-          avgTotalReads: Math.round(meanBy("totalReads", samples)) || "",
-          avgNonHostReads: Math.round(meanBy("nonHostReads", samples)) || ""
+          avgTotalReads: DiscoverySidebar.meanByAndFormat(
+            samples,
+            "totalReads"
+          ),
+          avgNonHostReads: DiscoverySidebar.meanByAndFormat(
+            samples,
+            "nonHostReads"
+          )
         },
         metadata: {
           host: countBy("hostGenome", samples),
@@ -78,9 +84,14 @@ export default class DiscoverySidebar extends React.Component {
         stats: {
           numSamples: sumBy("number_of_samples", projects),
           numProjects: projects.length,
-          avgTotalReads: Math.round(meanBy("total_reads", projects)) || "",
-          avgNonHostReads:
-            Math.round(meanBy("adjusted_remaining_reads", projects)) || ""
+          avgTotalReads: DiscoverySidebar.meanByAndFormat(
+            projects,
+            "total_reads"
+          ),
+          avgNonHostReads: DiscoverySidebar.meanByAndFormat(
+            projects,
+            "adjusted_remaining_reads"
+          )
         },
         metadata: {
           host: countBy(null, hosts),
@@ -98,6 +109,10 @@ export default class DiscoverySidebar extends React.Component {
 
   static formatDate(createdAt) {
     return moment(createdAt).format("YYYY-MM-DD");
+  }
+
+  static meanByAndFormat(data, field) {
+    return (Math.round(meanBy(field, data)) || "").toLocaleString();
   }
 
   static selectSampleData(newSamples) {
