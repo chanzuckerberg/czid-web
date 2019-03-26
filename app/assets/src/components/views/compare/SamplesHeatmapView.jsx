@@ -37,6 +37,14 @@ class SamplesHeatmapView extends React.Component {
       ...this.urlParams
     };
 
+    // TODO (gdingle): keep working on me
+    this.lastSavedParamValues = Object.assign({}, props.savedParamValues);
+    window.onbeforeunload = () => {
+      if (DeepEqual(this.getUrlParams(), this.lastSavedParamValues)) {
+        return "You have unsaved changes. Are you sure you want to leave this page?";
+      }
+    };
+
     this.availableOptions = {
       specificityOptions: [
         { text: "All", value: 0 },
@@ -155,8 +163,8 @@ class SamplesHeatmapView extends React.Component {
   };
 
   onSaveClick = async () => {
-    // TODO (gdingle): add analytics tracking?
     const resp = await saveVisualization("heatmap", this.getUrlParams());
+    this.lastSavedParamValues = Object.assign({}, this.getUrlParams());
     const url =
       location.protocol +
       "//" +
