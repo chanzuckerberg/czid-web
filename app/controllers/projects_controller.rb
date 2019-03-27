@@ -99,7 +99,7 @@ class ProjectsController < ApplicationController
         locations_by_project_id = {}
         total_reads = 0
         adjusted_remaining_reads = 0
-        samples.includes(:host_genome, :user, :pipeline_runs).each do |s|
+        samples.includes(:host_genome, :user, :pipeline_runs).order('pipeline_runs.created_at DESC').each do |s|
           (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome && s.host_genome.name
           # TODO: sample_tissue column is deprecated, retrieve sample_type from Metadatum model instead
           (tissues_by_project_id[s.project_id] ||= Set.new) << s.sample_tissue if s.sample_tissue
@@ -110,8 +110,10 @@ class ProjectsController < ApplicationController
           end
           (locations_by_project_id[s.project_id] ||= Set.new) << s.sample_location if s.sample_location
           unless s.pipeline_runs.empty?
-            total_reads += s.first_pipeline_run.total_reads || 0
-            adjusted_remaining_reads += s.first_pipeline_run.adjusted_remaining_reads || 0
+            # Note, using sample.first_pipeline_run would generate a mass of queries to order. The
+            # order('pipeline_runs.created_at DESC') above handles this sort.
+            total_reads += s.pipeline_runs.first.total_reads || 0
+            adjusted_remaining_reads += s.pipeline_runs.first.adjusted_remaining_reads || 0
           end
         end
         extended_projects = projects.includes(:users).map do |project|
