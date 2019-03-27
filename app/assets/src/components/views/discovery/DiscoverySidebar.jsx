@@ -179,7 +179,7 @@ export default class DiscoverySidebar extends React.Component {
     );
 
     // Display N fields and show/hide the rest
-    const defaultN = 4;
+    const defaultN = this.props.defaultNumberOfMetadataRows;
     const defaultRows = sorted.slice(0, defaultN);
     const extraRows = sorted.slice(defaultN);
     const total = sum(Object.values(fieldData));
@@ -332,7 +332,8 @@ export default class DiscoverySidebar extends React.Component {
 DiscoverySidebar.defaultProps = {
   projects: [],
   samples: [],
-  currentTab: "samples"
+  currentTab: "samples",
+  defaultNumberOfMetadataRows: 4
 };
 
 DiscoverySidebar.propTypes = {
@@ -340,5 +341,6 @@ DiscoverySidebar.propTypes = {
   projects: PropTypes.arrayOf(PropTypes.Project),
   samples: PropTypes.arrayOf(PropTypes.Sample),
   currentTab: PropTypes.string,
-  loading: PropTypes.bool
+  loading: PropTypes.bool,
+  defaultNumberOfMetadataRows: PropTypes.number
 };
