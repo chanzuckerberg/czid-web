@@ -35,7 +35,6 @@ Outline the steps required to see the intended effect of your PR:
 ## Reviewer template (please paste into your review):
 - [ ] I have made sure I understand which parts of the codebase could be affected by this change.
 - [ ] I have proposed additional tests to prevent side effects, if appropriate.
-- [ ] I have 
 
 ## Old testing script for inspiration:
 
