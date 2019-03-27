@@ -1,6 +1,6 @@
 task genus_aggregation: :environment do
   Sample.all.each do |s|
-    pr = s.pipeline_runs.first
+    pr = s.first_pipeline_run
     next unless pr
     ActiveRecord::Base.transaction do
       TaxonCount.connection.execute(

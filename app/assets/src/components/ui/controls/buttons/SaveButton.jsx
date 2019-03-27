@@ -1,13 +1,22 @@
 import React from "react";
+
 import Icon from "~ui/icons/Icon";
+import BasicPopup from "~/components/BasicPopup";
+
 import SecondaryButton from "./SecondaryButton";
 
-// TODO (gdingle): add tooltip explaining what save does
 export const SaveButton = props => (
-  <SecondaryButton
-    text="Save"
-    {...props}
-    icon={<Icon size="large" className={"save alternate"} />}
+  <BasicPopup
+    trigger={
+      <SecondaryButton
+        text="Save"
+        {...props}
+        icon={<Icon size="large" className={"save alternate"} />}
+      />
+    }
+    content="Your visualization was saved!"
+    on="click"
+    hideOnScroll
   />
 );
 

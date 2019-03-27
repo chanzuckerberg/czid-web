@@ -5,6 +5,11 @@
   font-size: 12px;
   width: 300px;
   overflow-y: scroll;
+
+  .noData {
+    color: $medium-grey;
+    margin: 20px;
+  }
 }
 
 .metadataContainer {

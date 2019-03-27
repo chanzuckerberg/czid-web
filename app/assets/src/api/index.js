@@ -205,10 +205,11 @@ const getProjectDimensions = ({ domain }) =>
 
 const getSamplesV1 = params => get("/samples.json", { params });
 
-const getProjects = ({ domain, filters } = {}) =>
+const getProjects = ({ domain, filters, basic } = {}) =>
   get("/projects.json", {
     params: {
       domain,
+      basic,
       ...filters
     }
   });

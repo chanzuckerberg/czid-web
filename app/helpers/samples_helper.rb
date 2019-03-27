@@ -113,7 +113,7 @@ module SamplesHelper
     if sample.status == Sample::STATUS_CREATED
       'uploading'
     elsif sample.status == Sample::STATUS_CHECKED
-      pipeline_run = sample.pipeline_runs.first
+      pipeline_run = sample.first_pipeline_run
       return '' unless pipeline_run
       if pipeline_run.job_status == PipelineRun::STATUS_CHECKED
         return 'complete'
@@ -263,9 +263,8 @@ module SamplesHelper
     user
   end
 
-  def sample_derived_data(sample, job_stats_hash)
+  def sample_derived_data(sample, pipeline_run, job_stats_hash)
     output_data = {}
-    pipeline_run = sample.pipeline_runs.first
     summary_stats = job_stats_hash.present? ? get_summary_stats(job_stats_hash, pipeline_run) : nil
     output_data[:pipeline_run] = pipeline_run
     output_data[:host_genome_name] = sample.host_genome ? sample.host_genome.name : nil
@@ -367,7 +366,7 @@ module SamplesHelper
       job_info[:metadata] = metadata_by_sample_id[sample.id]
       top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
       job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}
-      job_info[:derived_sample_output] = sample_derived_data(sample, job_stats_hash)
+      job_info[:derived_sample_output] = sample_derived_data(sample, top_pipeline_run, job_stats_hash)
       job_info[:run_info] = pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids,
                                               pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
       job_info[:uploader] = sample_uploader(sample)

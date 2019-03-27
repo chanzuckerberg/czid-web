@@ -8,7 +8,7 @@ class Accordion extends React.Component {
 
   onToggle = () => {
     this.setState({
-      open: !this.state.open,
+      open: this.state.wasToggled ? !this.state.open : !this.props.open,
       wasToggled: true
     });
   };
