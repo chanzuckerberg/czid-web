@@ -37,7 +37,10 @@ class SamplesHeatmapView extends React.Component {
       ...this.urlParams
     };
 
-    this.initOnBeforeUnload(props.savedParamValues);
+    // TODO (gdingle): remove admin gating when we go live with saved visualizations
+    if (this.props.admin) {
+      this.initOnBeforeUnload(props.savedParamValues);
+    }
 
     this.availableOptions = {
       specificityOptions: [
