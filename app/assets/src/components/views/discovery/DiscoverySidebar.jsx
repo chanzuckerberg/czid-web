@@ -259,36 +259,44 @@ export default class DiscoverySidebar extends React.Component {
           >
             <div className={cs.hasBackground}>
               <dl className={cx(cs.dataList)}>
-                <dt>
+                <dt className={cs.statsDt}>
                   <strong>Samples</strong>
                 </dt>
-                <dd>{this.state.stats.numSamples.toLocaleString()}</dd>
+                <dd className={cs.statsDd}>
+                  {this.state.stats.numSamples.toLocaleString()}
+                </dd>
               </dl>
             </div>
             <div className={cs.hasBackground}>
               <dl className={cx(cs.dataList)}>
-                <dt>
+                <dt className={cs.statsDt}>
                   <strong>Projects</strong>
                 </dt>
-                <dd>{this.state.stats.numProjects.toLocaleString()}</dd>
+                <dd className={cs.statsDd}>
+                  {this.state.stats.numProjects.toLocaleString()}
+                </dd>
               </dl>
             </div>
             {currentTab === "samples" && (
               <div>
                 <div className={cs.hasBackground}>
                   <dl className={cx(cs.dataList)}>
-                    <dt>
+                    <dt className={cs.statsDt}>
                       <strong>Avg. reads per sample</strong>
                     </dt>
-                    <dd>{this.state.stats.avgTotalReads}</dd>
+                    <dd className={cs.statsDd}>
+                      {this.state.stats.avgTotalReads}
+                    </dd>
                   </dl>
                 </div>
                 <div className={cs.hasBackground}>
                   <dl className={cx(cs.dataList)}>
-                    <dt>
+                    <dt className={cs.statsDt}>
                       <strong>Avg. non-host reads per sample</strong>
                     </dt>
-                    <dd>{this.state.stats.avgNonHostReads}</dd>
+                    <dd className={cs.statsDd}>
+                      {this.state.stats.avgNonHostReads}
+                    </dd>
                   </dl>
                 </div>
               </div>
