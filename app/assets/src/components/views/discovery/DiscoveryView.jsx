@@ -49,6 +49,7 @@ class DiscoveryView extends React.Component {
         filters: {},
         loadingProjects: true,
         loadingVisualizations: true,
+        loadingSamples: true,
         project: this.props.project,
         projectDimensions: [],
         projects: [],
@@ -145,7 +146,8 @@ class DiscoveryView extends React.Component {
 
     this.setState({
       loadingProjects: true,
-      loadingVisualizations: true
+      loadingVisualizations: true,
+      loadingSamples: true
     });
 
     const { projects = [], visualizations = [] } = await getDiscoverySyncData({
@@ -158,7 +160,8 @@ class DiscoveryView extends React.Component {
       projects,
       visualizations,
       loadingProjects: false,
-      loadingVisualizations: false
+      loadingVisualizations: false,
+      loadingSamples: false
     });
   };
 
@@ -340,6 +343,7 @@ class DiscoveryView extends React.Component {
       filters,
       loadingProjects,
       loadingVisualizations,
+      loadingSamples,
       project,
       projects,
       sampleIds,
@@ -445,6 +449,7 @@ class DiscoveryView extends React.Component {
                   samples={samples}
                   projects={projects}
                   currentTab={currentTab}
+                  loading={loadingSamples || loadingProjects}
                 />
               )}
           </div>
