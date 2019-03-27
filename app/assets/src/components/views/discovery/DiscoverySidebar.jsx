@@ -107,7 +107,7 @@ export default class DiscoverySidebar extends React.Component {
       project: sample.sample.project,
       sampleTissue: sample.sampleType || "Unknown",
       createdAt: DiscoverySidebar.formatDate(sample.sample.createdAt),
-      sampleLocation: sample.sampleLocation || "Unknown",
+      sampleLocation: sample.sampleLocation || "Unknownj",
       totalReads: sample.totalReads,
       nonHostReads: sample.nonHostReads.value
     }));
