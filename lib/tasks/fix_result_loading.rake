@@ -5,7 +5,7 @@ require 'open3'
 task fix_result_loading: :environment do
   Sample.all.each do |sample|
     puts sample.id
-    pr = sample.pipeline_runs.first
+    pr = sample.first_pipeline_run
     if pr
       pr.check_job_status
       pr.save

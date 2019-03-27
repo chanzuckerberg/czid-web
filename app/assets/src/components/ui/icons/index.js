@@ -19,6 +19,7 @@ import LockIcon from "./LockIcon";
 import LogoIcon from "./LogoIcon";
 import MosquitoIcon from "./MosquitoIcon";
 import MouseIcon from "./MouseIcon";
+import NoResultsIcon from "./NoResultsIcon";
 import PhyloTreeIcon from "./PhyloTreeIcon";
 import PigIcon from "./PigIcon";
 import PlusIcon from "./PlusIcon";
@@ -51,6 +52,7 @@ export default {
     LockIcon,
     MosquitoIcon,
     MouseIcon,
+    NoResultsIcon,
     PhyloTreeIcon,
     PigIcon,
     PlusIcon,
