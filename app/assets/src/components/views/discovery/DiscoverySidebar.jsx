@@ -4,7 +4,7 @@ import {
   countBy,
   flatten,
   map,
-  sortBy,
+  orderBy,
   sum,
   sumBy,
   uniqBy,
@@ -34,18 +34,17 @@ export default class DiscoverySidebar extends React.Component {
         tissue: {},
         createdAt: {},
         location: {}
-      }
+      },
+      expandedMetadataGroups: new Set()
     };
   }
 
   static getDerivedStateFromProps(newProps, prevState) {
-    const { currentTab, projects } = newProps;
+    const { currentTab, projects, loading } = newProps;
+    if (loading) return prevState;
 
-    if (currentTab == "samples") {
+    if (currentTab === "samples") {
       const samples = DiscoverySidebar.selectSampleData(newProps.samples);
-      if (!samples || !samples.length) {
-        return prevState;
-      }
       return {
         stats: {
           numSamples: samples.length,
@@ -66,11 +65,7 @@ export default class DiscoverySidebar extends React.Component {
           location: countBy("sampleLocation", samples)
         }
       };
-    } else if (currentTab == "projects") {
-      if (!projects || !projects.length) {
-        return prevState;
-      }
-
+    } else if (currentTab === "projects") {
       const hosts = flatten(map("hosts", projects));
       const tissues = flatten(map("tissues", projects));
       const locations = flatten(map("locations", projects));
@@ -83,15 +78,7 @@ export default class DiscoverySidebar extends React.Component {
       return {
         stats: {
           numSamples: sumBy("number_of_samples", projects),
-          numProjects: projects.length,
-          avgTotalReads: DiscoverySidebar.meanByAndFormat(
-            projects,
-            "total_reads"
-          ),
-          avgNonHostReads: DiscoverySidebar.meanByAndFormat(
-            projects,
-            "adjusted_remaining_reads"
-          )
+          numProjects: projects.length
         },
         metadata: {
           host: countBy(null, hosts),
@@ -121,7 +108,7 @@ export default class DiscoverySidebar extends React.Component {
       project: sample.sample.project,
       sampleTissue: sample.sampleType || "Unknown",
       createdAt: DiscoverySidebar.formatDate(sample.sample.createdAt),
-      sampleLocation: sample.sampleLocation,
+      sampleLocation: sample.sampleLocation || "Unknown",
       totalReads: sample.totalReads,
       nonHostReads: sample.nonHostReads.value
     }));
@@ -181,32 +168,66 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   buildMetadataRows(field) {
-    // TODO (gdingle): put "unknowns" last?
-    const sorted = sortBy(a => a, Object.keys(this.state.metadata[field]));
-    const total = sum(Object.values(this.state.metadata[field]));
+    const { metadata, expandedMetadataGroups } = this.state;
+    const fieldData = metadata[field];
+
+    // Sort by the value desc and then by the label alphabetically
+    const sorted = orderBy(
+      [k => k[1], k => k[0]],
+      ["desc", "asc"],
+      Object.entries(fieldData)
+    );
+
+    // Display N fields and show/hide the rest
+    const defaultN = this.props.defaultNumberOfMetadataRows;
+    const defaultRows = sorted.slice(0, defaultN);
+    const extraRows = sorted.slice(defaultN);
+    const total = sum(Object.values(fieldData));
     return (
       <dl className={cx(cs.dataList)}>
-        {sorted.map((key, i) => {
-          const count = this.state.metadata[field][key];
-          const percent = Math.round(100 * count / total, 0);
-          return [
-            <dt key={key + i + "label"}>
-              <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
-                {key.toLowerCase() == "unknown" ? <i>{key}</i> : key}
-              </a>
-            </dt>,
-            <dd key={key + i + "number"}>
-              <span
-                className={cs.bar}
-                // TODO (gdingle): make width depend on container
-                style={{ width: percent * 1.5 + "px" }}
-              />
-              {count}
-            </dd>
-          ];
-        })}
+        {this.renderMetadataRowBlock(defaultRows, total)}
+        {expandedMetadataGroups.has(field) &&
+          this.renderMetadataRowBlock(extraRows, total)}
+        {extraRows.length > 0 && (
+          <div
+            className={cs.showHide}
+            onClick={() => this.toggleExpandedMetadataGroup(field)}
+          >
+            {expandedMetadataGroups.has(field) ? "Show Less" : "Show More"}
+          </div>
+        )}
       </dl>
     );
+  }
+
+  toggleExpandedMetadataGroup(field) {
+    const groups = new Set(this.state.expandedMetadataGroups);
+    groups.has(field) ? groups.delete(field) : groups.add(field);
+    this.setState({
+      expandedMetadataGroups: groups
+    });
+  }
+
+  renderMetadataRowBlock(rows, total) {
+    return rows.map((entry, i) => {
+      const [key, count] = entry;
+      const percent = Math.round(100 * count / total, 0);
+      return [
+        <dt key={key + i + "label"}>
+          <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
+            {key.toLowerCase() == "unknown" ? <i>{key}</i> : key}
+          </a>
+        </dt>,
+        <dd key={key + i + "number"}>
+          <span
+            className={cs.bar}
+            // TODO (gdingle): make width depend on container
+            style={{ width: percent * 1.5 + "px" }}
+          />
+          {count}
+        </dd>
+      ];
+    });
   }
 
   hasData() {
@@ -214,11 +235,22 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
+    const { className, currentTab, loading } = this.props;
+    if (!loading && !this.hasData()) {
+      return (
+        <div className={cx(className, cs.sidebar)}>
+          <div className={cs.noData}>
+            Try another search to see summary info.
+          </div>
+        </div>
+      );
+    }
+
     // This represents the unique dataset loaded and will force a refresh of the
     // Accordions when it changes.
     const dataKey = this.state.stats.avgTotalReads;
     return (
-      <div className={cx(this.props.className, cs.sidebar)}>
+      <div className={cx(className, cs.sidebar)}>
         <div className={cs.metadataContainer}>
           <Accordion
             key={dataKey}
@@ -241,25 +273,26 @@ export default class DiscoverySidebar extends React.Component {
                 <dd>{this.state.stats.numProjects.toLocaleString()}</dd>
               </dl>
             </div>
-            <div className={cs.hasBackground}>
-              <dl className={cx(cs.dataList)}>
-                <dt>
-                  <strong>Avg. reads per sample</strong>
-                </dt>
-                <dd>{this.state.stats.avgTotalReads}</dd>
-              </dl>
-            </div>
-            <div className={cs.hasBackground}>
-              <dl className={cx(cs.dataList)}>
-                <dt>
-                  <strong>
-                    Avg. non-host
-                    <br />reads per sample
-                  </strong>
-                </dt>
-                <dd>{this.state.stats.avgNonHostReads}</dd>
-              </dl>
-            </div>
+            {currentTab === "samples" && (
+              <div>
+                <div className={cs.hasBackground}>
+                  <dl className={cx(cs.dataList)}>
+                    <dt>
+                      <strong>Avg. reads per sample</strong>
+                    </dt>
+                    <dd>{this.state.stats.avgTotalReads}</dd>
+                  </dl>
+                </div>
+                <div className={cs.hasBackground}>
+                  <dl className={cx(cs.dataList)}>
+                    <dt>
+                      <strong>Avg. non-host reads per sample</strong>
+                    </dt>
+                    <dd>{this.state.stats.avgNonHostReads}</dd>
+                  </dl>
+                </div>
+              </div>
+            )}
           </Accordion>
         </div>
         <div className={cs.metadataContainer}>
@@ -299,12 +332,15 @@ export default class DiscoverySidebar extends React.Component {
 DiscoverySidebar.defaultProps = {
   projects: [],
   samples: [],
-  currentTab: "samples"
+  currentTab: "samples",
+  defaultNumberOfMetadataRows: 4
 };
 
 DiscoverySidebar.propTypes = {
   className: PropTypes.string,
   projects: PropTypes.arrayOf(PropTypes.Project),
   samples: PropTypes.arrayOf(PropTypes.Sample),
-  currentTab: PropTypes.string
+  currentTab: PropTypes.string,
+  loading: PropTypes.bool,
+  defaultNumberOfMetadataRows: PropTypes.number
 };
