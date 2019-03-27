@@ -39,13 +39,11 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   static getDerivedStateFromProps(newProps, prevState) {
-    const { currentTab, projects } = newProps;
+    const { currentTab, projects, loading } = newProps;
+    if (loading) return prevState;
 
-    if (currentTab == "samples") {
+    if (currentTab === "samples") {
       const samples = DiscoverySidebar.selectSampleData(newProps.samples);
-      if (!samples || !samples.length) {
-        return prevState;
-      }
       return {
         stats: {
           numSamples: samples.length,
@@ -66,11 +64,7 @@ export default class DiscoverySidebar extends React.Component {
           location: countBy("sampleLocation", samples)
         }
       };
-    } else if (currentTab == "projects") {
-      if (!projects || !projects.length) {
-        return prevState;
-      }
-
+    } else if (currentTab === "projects") {
       const hosts = flatten(map("hosts", projects));
       const tissues = flatten(map("tissues", projects));
       const locations = flatten(map("locations", projects));
@@ -214,6 +208,16 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
+    if (!this.props.loading && !this.hasData()) {
+      return (
+        <div className={cx(this.props.className, cs.sidebar)}>
+          <div className={cs.noData}>
+            Try another search to see summary info.
+          </div>
+        </div>
+      );
+    }
+
     // This represents the unique dataset loaded and will force a refresh of the
     // Accordions when it changes.
     const dataKey = this.state.stats.avgTotalReads;
@@ -306,5 +310,6 @@ DiscoverySidebar.propTypes = {
   className: PropTypes.string,
   projects: PropTypes.arrayOf(PropTypes.Project),
   samples: PropTypes.arrayOf(PropTypes.Sample),
-  currentTab: PropTypes.string
+  currentTab: PropTypes.string,
+  loading: PropTypes.bool
 };
