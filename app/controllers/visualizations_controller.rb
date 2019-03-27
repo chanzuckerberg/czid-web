@@ -79,7 +79,9 @@ class VisualizationsController < ApplicationController
         visualization_type: @type,
         sample_ids: sample_ids,
         data: @data,
-        name: get_name(sample_ids)
+        # Simply use the type as a placeholder.
+        # TODO: (gdingle): support naming on first save and renaming
+        name: @type.titleize
       )
     end
     vis.save!
@@ -120,36 +122,5 @@ class VisualizationsController < ApplicationController
 
   def visualization_params
     params.permit(:domain, :type, :id, :url, data: {})
-  end
-
-  def get_name(sample_ids)
-    samples = Sample.where(id: sample_ids)
-    if samples.length == 1
-      samples[0].name.to_sentence
-    elsif samples.length > 1
-      combine_sample_names(samples)
-    else
-      "unknown"
-    end
-  end
-
-  # Makes a string such as "Patient 016 (CSF) and 015 (CSF)"
-  # from "Patient 016 (CSF)", "Patient 015 (CSF)"
-  def combine_sample_names(samples)
-    names = samples.map(&:name)
-    prefix = longest_common_prefix(names)
-    # Use whole words only, cut off any last partial word
-    prefix = prefix[0, prefix.rindex(/[-_|\s]/) + 1]
-    names.each_with_index.map do |name, i|
-      i > 0 ? name.delete_prefix(prefix) : name
-    end.to_sentence
-  end
-
-  # See https://rosettacode.org/wiki/Longest_common_prefix#Ruby
-  def longest_common_prefix(strs)
-    return "" if strs.empty?
-    min, max = strs.minmax
-    idx = min.size.times { |i| break i if min[i] != max[i] }
-    min[0...idx]
   end
 end
