@@ -10,11 +10,16 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable and :omniauthable, :registerable
   devise :database_authenticatable, :recoverable,
          :rememberable, :trackable, :validatable
+
   has_and_belongs_to_many :projects
+  # All one-to-many assocs are counter cached for per-user analytics.
+  # See traits_for_segment.
   has_many :samples
   has_many :favorite_projects
   has_many :favorites, through: :favorite_projects, source: :project
   has_many :visualizations
+  has_many :phylo_trees
+
   validates :email, presence: true
   validates :name, presence: true, format: { with: /\A[a-zA-Z -]+\z/, message: "only allows letters" }
   attr_accessor :email_arguments
@@ -113,6 +118,21 @@ class User < ApplicationRecord
       demo_user: demo_user?,
       biohub_user: biohub_user?,
       czi_user: czi_user?,
+      # Counts (should be cached in the users table for perf)
+      projects: projects.size, # projects counter is NOT cached because has_and_belongs_to_many
+      samples: samples.size,
+      favorite_projects: favorite_projects.size,
+      favorites: favorites.size,
+      visualizations: visualizations.size,
+      phylo_trees: phylo_trees.size,
+      # Has-some (this is important for Google Custom Dimensions)
+      # See https://segment.com/docs/destinations/google-analytics/#custom-dimensions
+      has_projects: !projects.empty?,
+      has_samples: !samples.empty?,
+      has_favorite_projects: !favorite_projects.empty?,
+      has_favorites: !favorites.empty?,
+      has_visualizations: !visualizations.empty?,
+      has_phylo_trees: !phylo_trees.empty?,
       # Segment special fields
       createdAt: created_at.iso8601, # currently same as created_at
       firstName: first_name,

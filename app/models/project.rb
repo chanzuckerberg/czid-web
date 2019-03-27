@@ -4,6 +4,7 @@ class Project < ApplicationRecord
     include Elasticsearch::Model::Callbacks
   end
 
+  # TODO: (gdingle): add counter_cache if we ever migrate user assoc to "has_many :through"
   has_and_belongs_to_many :users
   has_many :samples
   has_many :favorite_projects

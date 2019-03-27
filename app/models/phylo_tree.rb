@@ -4,7 +4,7 @@ class PhyloTree < ApplicationRecord
   include SamplesHelper
   include ActionView::Helpers::DateHelper
   has_and_belongs_to_many :pipeline_runs
-  belongs_to :user
+  belongs_to :user, counter_cache: true # count for analytics
   belongs_to :project
   validates :name, presence: true, uniqueness: true
   after_create :create_visualization
