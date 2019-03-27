@@ -169,21 +169,20 @@ export default class DiscoverySidebar extends React.Component {
 
   buildMetadataRows(field) {
     const { metadata, expandedMetadataGroups } = this.state;
-
-    // TODO (gdingle): put "unknowns" last?
     const fieldData = metadata[field];
+
     // Sort by the value desc and then by the label alphabetically
     const sorted = orderBy(
       [k => k[1], k => k[0]],
       ["desc", "asc"],
       Object.entries(fieldData)
     );
-    const total = sum(Object.values(fieldData));
 
     // Display N fields and show/hide the rest
     const defaultN = 4;
     const defaultRows = sorted.slice(0, defaultN);
     const extraRows = sorted.slice(defaultN);
+    const total = sum(Object.values(fieldData));
     return (
       <dl className={cx(cs.dataList)}>
         {this.renderMetadataRowBlock(defaultRows, total)}
