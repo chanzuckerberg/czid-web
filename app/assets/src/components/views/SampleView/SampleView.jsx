@@ -356,7 +356,7 @@ class SampleView extends React.Component {
           <ViewHeader.Controls>
             <BasicPopup
               trigger={<ShareButton onClick={this.onShareClick} />}
-              content="A shareable URL will be copied to your clipboard!"
+              content="A shareable URL was copied to your clipboard!"
               on="click"
               hideOnScroll
             />{" "}

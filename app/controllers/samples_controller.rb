@@ -64,7 +64,8 @@ class SamplesController < ApplicationController
     samples_query = params[:ids].split(',') if params[:ids].present?
     sort = params[:sort_by]
     # Return only some basic props for samples.
-    basic_only = ActiveModel::Type::Boolean.new.cast(params[:basic_only])
+    # TODO(mark): Make "basic" the default. This involves refactoring all the callers of this endpoint.
+    basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
 
     results = current_power.samples
 
@@ -98,11 +99,11 @@ class SamplesController < ApplicationController
 
     @samples = sort_by(results, sort).paginate(page: page, per_page: params[:per_page] || PAGE_SIZE).includes([:user, :host_genome, :pipeline_runs, :input_files])
     @samples_count = results.size
-    @samples_formatted = basic_only ? format_samples_basic(@samples) : format_samples(@samples)
+    @samples_formatted = basic ? format_samples_basic(@samples) : format_samples(@samples)
 
     @ready_sample_ids = get_ready_sample_ids(results)
 
-    if basic_only
+    if basic
       render json: @samples_formatted
     # Send more information with the first page.
     elsif !page || page == '1'
@@ -798,7 +799,7 @@ class SamplesController < ApplicationController
     can_edit = current_power.updatable_samples.include?(@sample)
     @exposed_raw_results_url = can_edit ? raw_results_folder_sample_url(@sample) : nil
     can_see_stage1_results = can_edit
-    @file_list = @sample.pipeline_runs.first.outputs_by_step(can_see_stage1_results)
+    @file_list = @sample.first_pipeline_run.outputs_by_step(can_see_stage1_results)
     @file_path = "#{@sample.sample_path}/results/"
     respond_to do |format|
       format.html do

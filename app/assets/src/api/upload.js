@@ -26,16 +26,28 @@ export const bulkUploadLocalWithMetadata = ({
   // Store the upload progress of file names, so we can track when
   // everything is done.
   const fileNamesToProgress = {};
+  const markedUploaded = {};
+  let allUploadsCompleteRan = false;
 
   // This function needs access to fileNamesToProgress.
   const onFileUploadSuccess = (sampleName, sampleId) => {
     const sampleFiles = sampleNamesToFiles[sampleName];
     // If every file for this sample is uploaded, mark it as uploaded.
-    if (sampleFiles.every(f => fileNamesToProgress[f.name] === 100)) {
+    if (
+      !markedUploaded[sampleName] &&
+      sampleFiles.every(f => fileNamesToProgress[f.name] === 100)
+    ) {
+      markedUploaded[sampleName] = true;
       markSampleUploaded(sampleId)
         .then(() => {
           // If every file-to-upload in this batch is done uploading
-          if (Object.values(fileNamesToProgress).every(p => p === 100)) {
+          if (
+            !allUploadsCompleteRan &&
+            Object.keys(sampleNamesToFiles).every(
+              sampleName => markedUploaded[sampleName]
+            )
+          ) {
+            allUploadsCompleteRan = true;
             window.onbeforeunload = null;
             onAllUploadsComplete();
           }
@@ -97,16 +109,28 @@ export const bulkUploadLocal = ({
   // Store the upload progress of file names, so we can track when
   // everything is done.
   const fileNamesToProgress = {};
+  const markedUploaded = {};
+  let allUploadsCompleteRan = false;
 
   // This function needs access to fileNamesToProgress.
   const onFileUploadSuccess = (sampleName, sampleId) => {
     const sampleFiles = sampleNamesToFiles[sampleName];
     // If every file for this sample is uploaded, mark it as uploaded.
-    if (sampleFiles.every(f => fileNamesToProgress[f.name] === 100)) {
+    if (
+      !markedUploaded[sampleName] &&
+      sampleFiles.every(f => fileNamesToProgress[f.name] === 100)
+    ) {
+      markedUploaded[sampleName] = true;
       markSampleUploaded(sampleId)
         .then(() => {
           // If every file-to-upload in this batch is done uploading
-          if (Object.values(fileNamesToProgress).every(p => p === 100)) {
+          if (
+            !allUploadsCompleteRan &&
+            Object.keys(sampleNamesToFiles).every(
+              sampleName => markedUploaded[sampleName]
+            )
+          ) {
+            allUploadsCompleteRan = true;
             window.onbeforeunload = null;
             onAllUploadsComplete();
           }

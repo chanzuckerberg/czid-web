@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import queryString from "query-string";
-import { get, set, min, max } from "lodash/fp";
+import { get, set, min, max, isEmpty } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
 import { StickyContainer, Sticky } from "react-sticky";
 import ErrorBoundary from "~/components/ErrorBoundary";
@@ -36,6 +36,11 @@ class SamplesHeatmapView extends React.Component {
       ...props.savedParamValues,
       ...this.urlParams
     };
+
+    // TODO (gdingle): remove admin gating when we go live with saved visualizations
+    if (this.props.admin) {
+      this.initOnBeforeUnload(props.savedParamValues);
+    }
 
     this.availableOptions = {
       specificityOptions: [
@@ -101,6 +106,26 @@ class SamplesHeatmapView extends React.Component {
     this.lastRequestToken = null;
   }
 
+  initOnBeforeUnload(savedParamValues) {
+    // Initialize to the params passed from the database, then onSaveClick will
+    // update on save.
+    this.lastSavedParamValues = Object.assign({}, savedParamValues);
+    window.onbeforeunload = () => {
+      const urlParams = this.getUrlParams();
+      // urlParams will be empty before the heatmap data has been fetched.
+      if (
+        !isEmpty(urlParams) &&
+        !DeepEqual(urlParams, this.lastSavedParamValues)
+      ) {
+        // NOTE: Starting with Firefox 44, Chrome 51, Opera 38, and Safari 9.1,
+        // a generic string not under the control of the webpage will be shown
+        // instead of the returned string. See
+        // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
+        return "You have unsaved changes. Are you sure you want to leave this page?";
+      }
+    };
+  }
+
   componentDidMount() {
     this.fetchViewData();
   }
@@ -155,8 +180,8 @@ class SamplesHeatmapView extends React.Component {
   };
 
   onSaveClick = async () => {
-    // TODO (gdingle): add analytics tracking?
     const resp = await saveVisualization("heatmap", this.getUrlParams());
+    this.lastSavedParamValues = Object.assign({}, this.getUrlParams());
     const url =
       location.protocol +
       "//" +
@@ -164,7 +189,8 @@ class SamplesHeatmapView extends React.Component {
       "/visualizations/heatmap/" +
       resp.id;
     // Update URL without reloading the page
-    history.pushState(window.history.state, document.title, url);
+    // TODO (gdingle): make back button load previous vis state
+    history.replaceState(window.history.state, document.title, url);
   };
 
   metricToSortField(metric) {
@@ -746,16 +772,17 @@ class SamplesHeatmapView extends React.Component {
                     className={cs.controlElement}
                   />
                 }
-                content="A shareable URL will be copied to your clipboard!"
+                content="A shareable URL was copied to your clipboard!"
                 on="click"
                 hideOnScroll
               />
+              {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
               {this.props.admin && (
                 <SaveButton
                   onClick={this.onSaveClick}
                   className={cs.controlElement}
                 />
-              )}
+              )}{" "}
               <DownloadButtonDropdown
                 className={cs.controlElement}
                 options={downloadOptions}

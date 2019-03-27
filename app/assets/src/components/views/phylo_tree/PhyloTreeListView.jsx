@@ -62,12 +62,12 @@ class PhyloTreeListView extends React.Component {
     this.persistInUrl("selectedMetadata", selectedMetadata);
   };
 
-  // TODO (gdingle): refactor to url.js once other PR merged
   persistInUrl = (param, value) => {
     try {
       const url = new URL(window.location.href);
       url.searchParams.set(param, value);
-      history.pushState(window.history.state, document.title, url);
+      // TODO (gdingle): make back button load previous vis state
+      history.replaceState(window.history.state, document.title, url);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
@@ -231,7 +231,7 @@ class PhyloTreeListView extends React.Component {
           <ViewHeader.Controls>
             <BasicPopup
               trigger={<ShareButton onClick={this.handleShareClick} />}
-              content="A shareable URL will be copied to your clipboard!"
+              content="A shareable URL was copied to your clipboard!"
               on="click"
               hideOnScroll
             />{" "}
