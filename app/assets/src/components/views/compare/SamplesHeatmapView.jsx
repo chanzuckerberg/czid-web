@@ -164,7 +164,8 @@ class SamplesHeatmapView extends React.Component {
       "/visualizations/heatmap/" +
       resp.id;
     // Update URL without reloading the page
-    history.pushState(window.history.state, document.title, url);
+    // TODO (gdingle): make back button load previous vis state
+    history.replaceState(window.history.state, document.title, url);
   };
 
   metricToSortField(metric) {
@@ -746,16 +747,24 @@ class SamplesHeatmapView extends React.Component {
                     className={cs.controlElement}
                   />
                 }
-                content="A shareable URL will be copied to your clipboard!"
+                content="A shareable URL was copied to your clipboard!"
                 on="click"
                 hideOnScroll
               />
+              {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
               {this.props.admin && (
-                <SaveButton
-                  onClick={this.onSaveClick}
-                  className={cs.controlElement}
+                <BasicPopup
+                  trigger={
+                    <SaveButton
+                      onClick={this.onSaveClick}
+                      className={cs.controlElement}
+                    />
+                  }
+                  content="Your visualization was saved!"
+                  on="click"
+                  hideOnScroll
                 />
-              )}
+              )}{" "}
               <DownloadButtonDropdown
                 className={cs.controlElement}
                 options={downloadOptions}

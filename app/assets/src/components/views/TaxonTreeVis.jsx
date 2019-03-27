@@ -76,7 +76,8 @@ class TaxonTreeVis extends React.Component {
       } else {
         href.searchParams.delete(node.id);
       }
-      history.pushState(window.history.state, document.title, href);
+      // TODO (gdingle): make back button load previous vis state
+      history.replaceState(window.history.state, document.title, href);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e);
