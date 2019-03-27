@@ -1,6 +1,7 @@
 require "uri"
 require "net/http"
 
+# TODO: (gdingle): update description
 # MetricUtil is currently used for posting metrics to Datadog's metrics endpoints.
 class MetricUtil
   SEGMENT_ANALYTICS = if ENV["SEGMENT_RUBY_ID"]
@@ -24,16 +25,19 @@ class MetricUtil
     sample_upload_batch_created: "sample_upload_batch_created"
   }.freeze
 
+  # TODO: (gdingle): mark as deprecated and all callers
   def self.put_metric_now(name, value, tags = [], type = "count")
     put_metric(name, value, Time.now.to_i, tags, type)
   end
 
+  # TODO: (gdingle): make private
   def self.put_metric(name, value, time, tags = [], type = "count")
     # Time = POSIX time with just seconds
     points = [[time, value]]
     put_metric_point_series(name, points, tags, type)
   end
 
+  # TODO: (gdingle): make private
   def self.put_metric_point_series(name, points, tags = [], type = "count")
     # Tags look like: ["environment:test", "type:bulk"]
     name = "idseq.web.#{Rails.env}.#{name}"
@@ -46,6 +50,7 @@ class MetricUtil
     post_to_datadog(data)
   end
 
+  # TODO: (gdingle): make private
   def self.post_to_datadog(data)
     if ENV["DATADOG_API_KEY"]
       endpoint = "https://api.datadoghq.com/api/v1/series"
@@ -57,6 +62,7 @@ class MetricUtil
     end
   end
 
+  # TODO: (gdingle): make private
   def self.https_post(uri, data)
     # Don't block the rest of the flow
     Thread.new do
@@ -77,6 +83,8 @@ class MetricUtil
     end
   end
 
+  # TODO: (gdingle): make public
+  # TODO: (gdingle): add more from https://segment.com/docs/sources/server/ruby/
   def self.log_analytics_event(event, user, properties = {})
     if SEGMENT_ANALYTICS
       # current_user should be passed from a controller
@@ -85,6 +93,7 @@ class MetricUtil
     end
   end
 
+  # TODO: (gdingle): make public
   # Log analytics from a batch of new samples from an upload session
   def self.log_upload_batch_analytics(samples, user, client)
     # Send off an event for each project and host genome combo

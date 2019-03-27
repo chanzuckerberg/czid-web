@@ -13,6 +13,7 @@
 
       <% if ENV["SEGMENT_JS_ID"] %>
         <!-- Associate user ID with Segment -->
+        TODO: add stuff: traits, options
         analytics.identify(<%= current_user.id %>);
       <% end %>
     <% end %>
