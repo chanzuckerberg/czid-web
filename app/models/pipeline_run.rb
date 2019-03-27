@@ -159,7 +159,7 @@ class PipelineRun < ApplicationRecord
   #        +-----v------+                              |    !output_ready?
   #        | QUEUED FOR |                              |    && pipeline_finalized
   #        | LOADING    |                              |    (RM)
-  #        +-----+------+                              |P
+  #        +-----+------+                              |
   #              |                                     |
   #              | (Resque)                            |
   #              |                                     |

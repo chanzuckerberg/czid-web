@@ -79,7 +79,6 @@ class ProjectsController < ApplicationController
         adjusted_remaining_reads = 0
 
         metadata = metadata_multiget(samples.pluck(:id))
-        Rails.logger.debug("metadata: #{metadata}")
         samples.includes(:host_genome, :user, :pipeline_runs).each do |s|
           (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome && s.host_genome.name
           (tissues_by_project_id[s.project_id] ||= Set.new) << metadata[s.id][:sample_type] if (metadata[s.id] || {})[:sample_type]
