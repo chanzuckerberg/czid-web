@@ -77,15 +77,7 @@ export default class DiscoverySidebar extends React.Component {
       return {
         stats: {
           numSamples: sumBy("number_of_samples", projects),
-          numProjects: projects.length,
-          avgTotalReads: DiscoverySidebar.meanByAndFormat(
-            projects,
-            "total_reads"
-          ),
-          avgNonHostReads: DiscoverySidebar.meanByAndFormat(
-            projects,
-            "adjusted_remaining_reads"
-          )
+          numProjects: projects.length
         },
         metadata: {
           host: countBy(null, hosts),
@@ -208,9 +200,10 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
-    if (!this.props.loading && !this.hasData()) {
+    const { className, currentTab, loading } = this.props;
+    if (!loading && !this.hasData()) {
       return (
-        <div className={cx(this.props.className, cs.sidebar)}>
+        <div className={cx(className, cs.sidebar)}>
           <div className={cs.noData}>
             Try another search to see summary info.
           </div>
@@ -222,7 +215,7 @@ export default class DiscoverySidebar extends React.Component {
     // Accordions when it changes.
     const dataKey = this.state.stats.avgTotalReads;
     return (
-      <div className={cx(this.props.className, cs.sidebar)}>
+      <div className={cx(className, cs.sidebar)}>
         <div className={cs.metadataContainer}>
           <Accordion
             key={dataKey}
@@ -245,25 +238,26 @@ export default class DiscoverySidebar extends React.Component {
                 <dd>{this.state.stats.numProjects.toLocaleString()}</dd>
               </dl>
             </div>
-            <div className={cs.hasBackground}>
-              <dl className={cx(cs.dataList)}>
-                <dt>
-                  <strong>Avg. reads per sample</strong>
-                </dt>
-                <dd>{this.state.stats.avgTotalReads}</dd>
-              </dl>
-            </div>
-            <div className={cs.hasBackground}>
-              <dl className={cx(cs.dataList)}>
-                <dt>
-                  <strong>
-                    Avg. non-host
-                    <br />reads per sample
-                  </strong>
-                </dt>
-                <dd>{this.state.stats.avgNonHostReads}</dd>
-              </dl>
-            </div>
+            {currentTab === "samples" && (
+              <div>
+                <div className={cs.hasBackground}>
+                  <dl className={cx(cs.dataList)}>
+                    <dt>
+                      <strong>Avg. reads per sample</strong>
+                    </dt>
+                    <dd>{this.state.stats.avgTotalReads}</dd>
+                  </dl>
+                </div>
+                <div className={cs.hasBackground}>
+                  <dl className={cx(cs.dataList)}>
+                    <dt>
+                      <strong>Avg. non-host reads per sample</strong>
+                    </dt>
+                    <dd>{this.state.stats.avgNonHostReads}</dd>
+                  </dl>
+                </div>
+              </div>
+            )}
           </Accordion>
         </div>
         <div className={cs.metadataContainer}>
