@@ -63,11 +63,14 @@ class VisualizationsController < ApplicationController
     # Delete to have single source of truth.
     @data.delete(:sampleIds)
 
-    vis = Visualization.joins(:samples).where(
-      user: current_user,
-      visualization_type: @type,
-      samples: { id: [sample_ids] }
-    ).order(created_at: :desc)
+    vis = Visualization.joins(:samples)
+                       .where(
+                         user: current_user,
+                         visualization_type: @type,
+                         samples: { id: [sample_ids] }
+                       )
+                       .where.not(visualization_type: [nil, 'undefined'], name: nil)
+                       .order(created_at: :desc)
                        .select { |v| v.sample_ids.to_set == sample_ids.to_set }
                        .first
 
