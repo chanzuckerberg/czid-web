@@ -22,11 +22,11 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       if @user.save
-        # Send event to Datadog and Segment
+        # Send event to Datadog (DEPRECATED) and Segment
         # TODO: Remove Datadog once Segment pipeline is set up
         MetricUtil.put_metric_now("users.created", 1, ["user_id:#{@user.id}"])
         event = MetricUtil::ANALYTICS_EVENT_NAMES[:user_created]
-        MetricUtil.log_analytics_event(event, current_user, id: @user.id, email_domain: @user.email.split("@").last, institution: @user.institution, admin: @user.admin)
+        MetricUtil.log_analytics_event(event, current_user, id: @user.id, email_domain: @user.email.split("@").last, institution: @user.institution, admin: @user.admin, request: request)
 
         format.html { redirect_to edit_user_path(@user), notice: "User was successfully created" }
         format.json { render :show, status: :created, location: root_path }

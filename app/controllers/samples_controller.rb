@@ -395,10 +395,10 @@ class SamplesController < ApplicationController
 
     respond_to do |format|
       if @errors.empty? && !@samples.empty?
-        # Send to Datadog and Segment
+        # Send to Datadog (DEPRECATED) and Segment
         tags = %W[client:web type:bulk user_id:#{current_user.id}]
         MetricUtil.put_metric_now("samples.created", @samples.count, tags)
-        MetricUtil.log_upload_batch_analytics(@samples, current_user, "web")
+        MetricUtil.log_upload_batch_analytics(@samples, current_user, "web", request)
         format.json { render json: { samples: @samples, sample_ids: @samples.pluck(:id) } }
       else
         format.json { render json: { samples: @samples, errors: @errors }, status: :unprocessable_entity }
@@ -456,6 +456,7 @@ class SamplesController < ApplicationController
     respond_to do |format|
       if samples.count > 0
         tags = %W[client:web type:bulk user_id:#{current_user.id}]
+        # DEPRECATED. Use log_analytics_event.
         MetricUtil.put_metric_now("samples.created", samples.count, tags)
       end
       format.json { render json: { samples: samples, sample_ids: samples.pluck(:id), errors: errors } }
@@ -593,6 +594,7 @@ class SamplesController < ApplicationController
     @saved_param_values = viz ? viz.data : {}
 
     tags = %W[sample_id:#{@sample.id} user_id:#{current_user.id}]
+    # DEPRECATED. Use log_analytics_event.
     MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
@@ -901,9 +903,9 @@ class SamplesController < ApplicationController
         # Currently bulk CLI upload just calls this action repeatedly so we can't
         # distinguish between bulk or single there. Web bulk goes to bulk_upload.
         tags << "type:single" if client == "web"
-        # Send to Datadog and Segment
+        # Send to Datadog (DEPRECATED) and Segment
         MetricUtil.put_metric_now("samples.created", 1, tags)
-        MetricUtil.log_upload_batch_analytics([@sample], current_user, client)
+        MetricUtil.log_upload_batch_analytics([@sample], current_user, client, request)
 
         format.html { redirect_to @sample, notice: 'Sample was successfully created.' }
         format.json { render :show, status: :created, location: @sample }
