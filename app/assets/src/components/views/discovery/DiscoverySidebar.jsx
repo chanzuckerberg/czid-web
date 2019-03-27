@@ -211,7 +211,7 @@ export default class DiscoverySidebar extends React.Component {
     if (!this.props.loading && !this.hasData()) {
       return (
         <div className={cx(this.props.className, cs.sidebar)}>
-          <div className={cs.emptyMessage}>
+          <div className={cs.noData}>
             Try another search to see summary info.
           </div>
         </div>
