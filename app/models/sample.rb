@@ -717,6 +717,7 @@ class Sample < ApplicationRecord
 
   # Explicit getter because we had issues with ":pipeline_runs, -> { order(created_at: :desc) }"
   # not being applied with the non-admin path in self.viewable when combined with an 'includes'.
+  # Be careful when using this because it may cause an extra query for each of your samples!
   def first_pipeline_run
     pipeline_runs.order(created_at: :desc).first
   end
