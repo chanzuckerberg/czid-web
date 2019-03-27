@@ -94,4 +94,13 @@
     text-align: right;
     color: white;
   }
+
+  .showHide {
+    text-transform: uppercase;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: $primary-light;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
 }

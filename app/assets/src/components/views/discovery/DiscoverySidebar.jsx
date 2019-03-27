@@ -34,7 +34,8 @@ export default class DiscoverySidebar extends React.Component {
         tissue: {},
         createdAt: {},
         location: {}
-      }
+      },
+      expandedMetadataGroups: new Set()
     };
   }
 
@@ -167,8 +168,10 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   buildMetadataRows(field) {
+    const { metadata, expandedMetadataGroups } = this.state;
+
     // TODO (gdingle): put "unknowns" last?
-    const fieldData = this.state.metadata[field];
+    const fieldData = metadata[field];
     // Sort by the value desc and then by the label alphabetically
     const sorted = orderBy(
       [k => k[1], k => k[0]],
@@ -177,36 +180,36 @@ export default class DiscoverySidebar extends React.Component {
     );
     const total = sum(Object.values(fieldData));
 
+    // Display N fields and show/hide the rest
     const defaultN = 4;
     const defaultRows = sorted.slice(0, defaultN);
     const extraRows = sorted.slice(defaultN);
-
     return (
       <dl className={cx(cs.dataList)}>
-        {defaultRows.map((entry, i) => {
-          const [key, count] = entry;
-          const percent = Math.round(100 * count / total, 0);
-          return [
-            <dt key={key + i + "label"}>
-              <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
-                {key.toLowerCase() == "unknown" ? <i>{key}</i> : key}
-              </a>
-            </dt>,
-            <dd key={key + i + "number"}>
-              <span
-                className={cs.bar}
-                // TODO (gdingle): make width depend on container
-                style={{ width: percent * 1.5 + "px" }}
-              />
-              {count}
-            </dd>
-          ];
-        })}
+        {this.renderMetadataRowBlock(defaultRows, total)}
+        {expandedMetadataGroups.has(field) &&
+          this.renderMetadataRowBlock(extraRows, total)}
+        {extraRows.length > 0 && (
+          <div
+            className={cs.showHide}
+            onClick={() => this.toggleExpandedMetadataGroup(field)}
+          >
+            {expandedMetadataGroups.has(field) ? "Show Less" : "Show More"}
+          </div>
+        )}
       </dl>
     );
   }
 
-  renderMetadataRows(rows) {
+  toggleExpandedMetadataGroup(field) {
+    const groups = new Set(this.state.expandedMetadataGroups);
+    groups.has(field) ? groups.delete(field) : groups.add(field);
+    this.setState({
+      expandedMetadataGroups: groups
+    });
+  }
+
+  renderMetadataRowBlock(rows, total) {
     return rows.map((entry, i) => {
       const [key, count] = entry;
       const percent = Math.round(100 * count / total, 0);
