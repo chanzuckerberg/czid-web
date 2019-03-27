@@ -46,13 +46,15 @@ class ProjectsController < ApplicationController
     respond_to do |format|
       format.html do
         # keep compatibility with old route
-        # TODO: remove once data discovery is completed
+        # TODO(tiago): remove once data discovery is completed
         @projects = current_power.projects
       end
       format.json do
         domain = params[:domain]
         order_by = params[:orderBy] || :id
         order_dir = params[:orderDir] || :desc
+        # If basic, just return a few fields for the project.
+        basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
 
         samples = samples_by_domain(domain)
         samples = filter_samples(samples, params)
@@ -68,6 +70,23 @@ class ProjectsController < ApplicationController
                    end
 
         projects = projects.order(Hash[order_by => order_dir])
+
+        if basic
+          # Use group_by for performance.
+          samples_by_project_id = samples.group_by(&:project_id)
+          projects_formatted = projects.map do |project|
+            {
+              id: project.id,
+              name: project.name,
+              created_at: project.created_at,
+              public_access: project.public_access,
+              number_of_samples: (samples_by_project_id[project.id] || []).length
+            }
+          end
+          render json: projects_formatted
+          return
+        end
+
         updatable_projects = current_power.updatable_projects.pluck(:id).to_set
         sample_count_by_project_id = Hash[samples.group_by(&:project_id).map { |k, v| [k, v.count] }]
         host_genome_names_by_project_id = {}
@@ -77,9 +96,9 @@ class ProjectsController < ApplicationController
         locations_by_project_id = {}
         total_reads = 0
         adjusted_remaining_reads = 0
-
         metadata = metadata_multiget(samples.pluck(:id))
-        samples.includes(:host_genome, :user, :pipeline_runs).each do |s|
+        top_pipeline_run_by_sample_id = top_pipeline_runs_multiget(samples.pluck(:id))
+        samples.includes(:host_genome, :user).each do |s|
           (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome && s.host_genome.name
           (tissues_by_project_id[s.project_id] ||= Set.new) << metadata[s.id][:sample_type] if (metadata[s.id] || {})[:sample_type]
           (locations_by_project_id[s.project_id] ||= Set.new) << metadata[s.id][:collection_location] if (metadata[s.id] || {})[:collection_location]
@@ -88,9 +107,10 @@ class ProjectsController < ApplicationController
             min_sample_by_project_id[s.project_id] = s.id
             owner_by_project_id[s.project_id] = s.user ? s.user.name : nil
           end
-          unless s.pipeline_runs.empty?
-            total_reads += s.pipeline_runs[0].total_reads || 0
-            adjusted_remaining_reads += s.pipeline_runs[0].adjusted_remaining_reads || 0
+          if top_pipeline_run_by_sample_id.key?(s.id)
+            pipeline_run = top_pipeline_run_by_sample_id[s.id]
+            total_reads += pipeline_run.total_reads || 0
+            adjusted_remaining_reads += pipeline_run.adjusted_remaining_reads || 0
           end
         end
 
