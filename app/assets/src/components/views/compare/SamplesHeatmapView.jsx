@@ -753,16 +753,9 @@ class SamplesHeatmapView extends React.Component {
               />
               {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
               {this.props.admin && (
-                <BasicPopup
-                  trigger={
-                    <SaveButton
-                      onClick={this.onSaveClick}
-                      className={cs.controlElement}
-                    />
-                  }
-                  content="Your visualization was saved!"
-                  on="click"
-                  hideOnScroll
+                <SaveButton
+                  onClick={this.onSaveClick}
+                  className={cs.controlElement}
                 />
               )}{" "}
               <DownloadButtonDropdown

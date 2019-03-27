@@ -226,14 +226,7 @@ class PhyloTreeListView extends React.Component {
               hideOnScroll
             />{" "}
             {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
-            {this.props.admin && (
-              <BasicPopup
-                trigger={<SaveButton onClick={this.handleSaveClick} />}
-                content="Your visualization was saved!"
-                on="click"
-                hideOnScroll
-              />
-            )}{" "}
+            {this.props.admin && <SaveButton onClick={this.handleSaveClick} />}{" "}
             <PhyloTreeDownloadButton tree={currentTree} />
           </ViewHeader.Controls>
         </ViewHeader>
