@@ -54,6 +54,11 @@ class ProjectsController < ApplicationController
         order_by = params[:orderBy] || :id
         order_dir = params[:orderDir] || :desc
 
+        # If basic, just return a few fields for the project.
+        # The complete response is quite slow.
+        # TODO(mark): Make "basic" the default. This involves refactoring all the callers of this endpoint.
+        basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
+
         samples = samples_by_domain(domain)
         samples = filter_samples(samples, params)
 
@@ -68,6 +73,23 @@ class ProjectsController < ApplicationController
                    end
 
         projects = projects.order(Hash[order_by => order_dir])
+
+        if basic
+          # Use group_by for performance.
+          samples_by_project_id = samples.group_by(&:project_id)
+          projects_formatted = projects.map do |project|
+            {
+              id: project.id,
+              name: project.name,
+              created_at: project.created_at,
+              public_access: project.public_access,
+              number_of_samples: (samples_by_project_id[project.id] || []).length
+            }
+          end
+          render json: projects_formatted
+          return
+        end
+
         updatable_projects = current_power.updatable_projects.pluck(:id).to_set
         sample_count_by_project_id = Hash[samples.group_by(&:project_id).map { |k, v| [k, v.count] }]
         host_genome_names_by_project_id = {}

@@ -20,7 +20,7 @@ class MetadataUploadModal extends React.Component {
   async componentDidMount() {
     const projectSamples = await getSamplesV1({
       project_id: this.props.project.id,
-      basic_only: true
+      basic: true
     });
 
     this.setState({
