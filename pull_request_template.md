@@ -1,35 +1,39 @@
 # Description
 
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change. Explain both the expected functionality and the edge cases. 
+## Summary of the change / which issue is fixed / motivation / context:
 
-## Type of change
-
+## Type of change:
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix a feature that knowingly causes existing functionality to not work as expected)
 
-# Test and Reproduce
-Outline the steps to test or reproduce the PR here.
+## Reproduce:
+Outline the steps required to see the intended effect of your PR:
 
-1. 
+## Related code:
+- Which code (which methods/actions/components) could this change interact with? Please trace dependencies for every method/action/component that was modified:
 
-## Impacted Areas in Application
-List general components of the application that this PR will affect:
+- Who would be the best person to review each one of these code parts?
 
-Which pages?
+- Which tests have you carried out to ensure none of the dependencies cause problems?
 
-- [ ] Login Screen
-- [ ] Single Upload Page
-- [ ] Batch Upload Page
-- [ ] All Projects Page
-- [ ] Sample Details Page
-- [ ] Report Page
+## Impacted areas in application:
+- Which pages of the application could this PR affect?
 
-Specific components 
+- Which features should be given particular attention during testing on staging?
 
-* 
+- Which potential side effects should the team watch out for after this change is pushed?
 
-# Testing Script:
+## Checklist:
+- [ ] I have run through the testing script to make sure current functionality is unchanged
+- [ ] I have done relevant tests that prove my fix is effective or that my feature works
+- [ ] I have spent time testing out edge cases for my feature
+- [ ] I have updated the test script or pull request template if necessary
+- [ ] New and existing unit tests pass locally with my changes
+
+
+
+## Old testing script for inspiration:
 
 ###Login Page
 * Successfully login to the application and get taken to the project page
@@ -69,12 +73,3 @@ Specific components
 * Filters work as expected
 * Disabling Filters works
 * Filtering by column works 
-
-# Checklist:
-
-- [ ] I have run through the testing script to make sure current functionality is unchanged
-- [ ] I have done relevant tests that prove my fix is effective or that my feature works
-- [ ] I have spent time testing out edge cases for my feature
-- [ ] I have updated the test script or pull request template if necessary
-- [ ] New and existing unit tests pass locally with my changes
-
