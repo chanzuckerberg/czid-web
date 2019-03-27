@@ -25,13 +25,17 @@ Outline the steps required to see the intended effect of your PR:
 - Which potential side effects should the team watch out for after this change is pushed?
 
 ## Checklist:
+- [ ] I have requested reviews from the authors of features that are implicated in my change (or other developers familiar with the same code).
 - [ ] I have run through the testing script to make sure current functionality is unchanged
 - [ ] I have done relevant tests that prove my fix is effective or that my feature works
 - [ ] I have spent time testing out edge cases for my feature
 - [ ] I have updated the test script or pull request template if necessary
 - [ ] New and existing unit tests pass locally with my changes
 
-
+## Reviewer template (please paste into your review):
+- [ ] I have made sure I understand which parts of the codebase could be affected by this change.
+- [ ] I have proposed additional tests to prevent side effects, if appropriate.
+- [ ] I have 
 
 ## Old testing script for inspiration:
 
