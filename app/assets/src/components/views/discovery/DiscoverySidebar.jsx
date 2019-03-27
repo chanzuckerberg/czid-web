@@ -4,7 +4,7 @@ import {
   countBy,
   flatten,
   map,
-  sortBy,
+  orderBy,
   sum,
   sumBy,
   uniqBy,
@@ -168,12 +168,23 @@ export default class DiscoverySidebar extends React.Component {
 
   buildMetadataRows(field) {
     // TODO (gdingle): put "unknowns" last?
-    const sorted = sortBy(a => a, Object.keys(this.state.metadata[field]));
-    const total = sum(Object.values(this.state.metadata[field]));
+    const fieldData = this.state.metadata[field];
+    // Sort by the value desc and then by the label alphabetically
+    const sorted = orderBy(
+      [k => k[1], k => k[0]],
+      ["desc", "asc"],
+      Object.entries(fieldData)
+    );
+    const total = sum(Object.values(fieldData));
+
+    const defaultN = 4;
+    const defaultRows = sorted.slice(0, defaultN);
+    const extraRows = sorted.slice(defaultN);
+
     return (
       <dl className={cx(cs.dataList)}>
-        {sorted.map((key, i) => {
-          const count = this.state.metadata[field][key];
+        {defaultRows.map((entry, i) => {
+          const [key, count] = entry;
           const percent = Math.round(100 * count / total, 0);
           return [
             <dt key={key + i + "label"}>
@@ -193,6 +204,28 @@ export default class DiscoverySidebar extends React.Component {
         })}
       </dl>
     );
+  }
+
+  renderMetadataRows(rows) {
+    return rows.map((entry, i) => {
+      const [key, count] = entry;
+      const percent = Math.round(100 * count / total, 0);
+      return [
+        <dt key={key + i + "label"}>
+          <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
+            {key.toLowerCase() == "unknown" ? <i>{key}</i> : key}
+          </a>
+        </dt>,
+        <dd key={key + i + "number"}>
+          <span
+            className={cs.bar}
+            // TODO (gdingle): make width depend on container
+            style={{ width: percent * 1.5 + "px" }}
+          />
+          {count}
+        </dd>
+      ];
+    });
   }
 
   hasData() {
