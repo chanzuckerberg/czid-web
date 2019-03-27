@@ -39,9 +39,10 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   static getDerivedStateFromProps(newProps, prevState) {
-    const { currentTab, projects } = newProps;
+    const { currentTab, projects, loading } = newProps;
+    if (loading) return prevState;
 
-    if (currentTab == "samples") {
+    if (currentTab === "samples") {
       const samples = DiscoverySidebar.selectSampleData(newProps.samples);
       return {
         stats: {
@@ -63,7 +64,7 @@ export default class DiscoverySidebar extends React.Component {
           location: countBy("sampleLocation", samples)
         }
       };
-    } else if (currentTab == "projects") {
+    } else if (currentTab === "projects") {
       const hosts = flatten(map("hosts", projects));
       const tissues = flatten(map("tissues", projects));
       const locations = flatten(map("locations", projects));
@@ -207,7 +208,7 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
-    if (!this.hasData()) {
+    if (!this.props.loading && !this.hasData()) {
       return (
         <div className={cx(this.props.className, cs.sidebar)}>
           <div className={cs.emptyMessage}>
@@ -309,5 +310,6 @@ DiscoverySidebar.propTypes = {
   className: PropTypes.string,
   projects: PropTypes.arrayOf(PropTypes.Project),
   samples: PropTypes.arrayOf(PropTypes.Sample),
-  currentTab: PropTypes.string
+  currentTab: PropTypes.string,
+  loading: PropTypes.bool
 };
