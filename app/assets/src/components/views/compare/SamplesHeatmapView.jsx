@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import queryString from "query-string";
-import { get, set, min, max } from "lodash/fp";
+import { get, set, min, max, isEmpty } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
 import { StickyContainer, Sticky } from "react-sticky";
 import ErrorBoundary from "~/components/ErrorBoundary";
@@ -37,13 +37,7 @@ class SamplesHeatmapView extends React.Component {
       ...this.urlParams
     };
 
-    // TODO (gdingle): keep working on me
-    this.lastSavedParamValues = Object.assign({}, props.savedParamValues);
-    window.onbeforeunload = () => {
-      if (DeepEqual(this.getUrlParams(), this.lastSavedParamValues)) {
-        return "You have unsaved changes. Are you sure you want to leave this page?";
-      }
-    };
+    this.initOnBeforeUnload(props.savedParamValues);
 
     this.availableOptions = {
       specificityOptions: [
@@ -107,6 +101,26 @@ class SamplesHeatmapView extends React.Component {
       this.urlParams.removedTaxonIds || this.props.removedTaxonIds || []
     );
     this.lastRequestToken = null;
+  }
+
+  initOnBeforeUnload(savedParamValues) {
+    // Initialize to the params passed from the database, then onSaveClick will
+    // update on save.
+    this.lastSavedParamValues = Object.assign({}, savedParamValues);
+    window.onbeforeunload = () => {
+      const urlParams = this.getUrlParams();
+      // urlParams will be empty before the heatmap data has been fetched.
+      if (
+        !isEmpty(urlParams) &&
+        !DeepEqual(urlParams, this.lastSavedParamValues)
+      ) {
+        // NOTE: Starting with Firefox 44, Chrome 51, Opera 38, and Safari 9.1,
+        // a generic string not under the control of the webpage will be shown
+        // instead of the returned string. See
+        // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
+        return "You have unsaved changes. Are you sure you want to leave this page?";
+      }
+    };
   }
 
   componentDidMount() {
