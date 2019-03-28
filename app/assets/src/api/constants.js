@@ -3,8 +3,8 @@
 // if it makes sense, and a past tense action. Keep names meaningful, descriptive, and non-redundant
 // (e.g. prefer sample_viewed to sample_view_viewed).
 // ANALYTICS_EVENT_NAMES will have the camelCase key and snake_case value.
+// See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 // TODO: (gdingle): coordinate with ANALYTICS_EVENT_NAMES in server ruby
-
 export const ANALYTICS_EVENT_NAMES = {
   sampleViewed: "sample_viewed",
   userInterestFormSubmitted: "user_interest_form_submitted"

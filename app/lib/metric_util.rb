@@ -4,6 +4,7 @@ require "net/http"
 # MetricUtil is currently used for:
 #  * tracking user initiated actions with Segment
 #  * posting metrics to Datadog's metrics endpoints (DEPRECATED)
+# See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 class MetricUtil
   SEGMENT_ANALYTICS = if ENV["SEGMENT_RUBY_ID"]
                         Segment::Analytics.new(
