@@ -11,6 +11,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :recoverable,
          :rememberable, :trackable, :validatable
 
+  # NOTE: counter_cache is not supported for has_and_belongs_to_many.
   has_and_belongs_to_many :projects
   # All one-to-many assocs are counter cached for per-user analytics.
   # See traits_for_segment.
@@ -125,8 +126,9 @@ class User < ApplicationRecord
       favorites: favorites.size,
       visualizations: visualizations.size,
       phylo_trees: phylo_trees.size,
-      # Has-some (this is important for Google Custom Dimensions)
-      # See https://segment.com/docs/destinations/google-analytics/#custom-dimensions
+      # Has-some (this is important for Google Custom Dimensions, which require
+      # categorical values--there is no way to derive them from raw counts.) See
+      # https://segment.com/docs/destinations/google-analytics/#custom-dimensions
       has_projects: !projects.empty?,
       has_samples: !samples.empty?,
       has_favorite_projects: !favorite_projects.empty?,

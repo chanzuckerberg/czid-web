@@ -2,7 +2,7 @@
 class Visualization < ApplicationRecord
   serialize :data, JSON
   has_and_belongs_to_many :samples
-  belongs_to :user, counter_cache: true # count for analytics
+  belongs_to :user, counter_cache: true # use .size for cache, use .count to force COUNT query
   validates :name, presence: true
   validates :data, presence: true
 
