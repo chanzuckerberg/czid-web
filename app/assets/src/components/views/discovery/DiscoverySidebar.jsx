@@ -292,7 +292,7 @@ export default class DiscoverySidebar extends React.Component {
                 <div className={cs.hasBackground}>
                   <dl className={cx(cs.dataList)}>
                     <dt className={cs.statsDt}>
-                      <strong>Avg. non-host reads per sample</strong>
+                      <strong>Avg. reads passing filters per sample</strong>
                     </dt>
                     <dd className={cs.statsDd}>
                       {this.state.stats.avgNonHostReads}

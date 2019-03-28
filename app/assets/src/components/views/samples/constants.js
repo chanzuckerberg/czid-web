@@ -6,7 +6,7 @@ export const SAMPLE_TABLE_COLUMNS = {
     type: "pipeline_data"
   },
   nonhost_reads: {
-    display_name: "Non-host reads",
+    display_name: "Passed filters",
     type: "pipeline_data"
   },
   total_ercc_reads: {
