@@ -1140,7 +1140,7 @@ class PipelineSampleReport extends React.Component {
           subsampled_reads +
           " out of " +
           this.report_details.pipeline_info.adjusted_remaining_reads +
-          " non-host reads."
+          " reads passing filters."
         : "";
     const disable_filter = this.anyFilterSet() ? (
       <span className="disable" onClick={e => this.resetAllFilters()}>

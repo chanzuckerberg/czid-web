@@ -27,7 +27,7 @@ export const PIPELINE_INFO_FIELDS = [
     key: "totalErccReads"
   },
   {
-    name: "Non-host Reads",
+    name: "Passed Filters",
     key: "nonhostReads"
   },
   {
