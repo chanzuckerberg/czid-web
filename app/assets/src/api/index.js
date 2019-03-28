@@ -227,6 +227,7 @@ const createProject = params =>
     project: params
   });
 
+// See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 const logAnalyticsEvent = (eventName, eventData = {}) => {
   // Wrapper around Segment analytics so we can add things later
   // eventData should have keys in snake_case for the database
