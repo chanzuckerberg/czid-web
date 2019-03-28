@@ -122,10 +122,12 @@ export default class DiscoverySidebar extends React.Component {
   // TODO (gdingle): auto scale to day week or month?
   buildDateHistogram(field) {
     const dates = this.state.metadata[field];
+    console.log("dates: ", dates);
 
     const total = sum(Object.values(dates));
     const dateKeys = Object.keys(dates);
     dateKeys.sort();
+    console.log("dateKeys: ", dateKeys);
     const firstDate = dateKeys[0];
     const lastDate = dateKeys[dateKeys.length - 1];
     return (
@@ -137,7 +139,7 @@ export default class DiscoverySidebar extends React.Component {
               <div
                 className={cx(cs.bar)}
                 key={key}
-                style={{ height: percent * 2 + "px" }}
+                style={{ height: percent + "px" }}
                 onClick={() => this.handleFilterClick(key)}
               >
                 &nbsp;
@@ -159,9 +161,11 @@ export default class DiscoverySidebar extends React.Component {
             );
           })}
         </div>
-        <div className={cx(cs.dateHistogram)}>
+        <div className={cx(cs.dateHistogramLabels)}>
           <div className={cx(cs.label)}>{firstDate}</div>
-          <div className={cx(cs.label)}>{lastDate}</div>
+          {firstDate !== lastDate && (
+            <div className={cx(cs.label)}>{lastDate}</div>
+          )}
         </div>
       </div>
     );
