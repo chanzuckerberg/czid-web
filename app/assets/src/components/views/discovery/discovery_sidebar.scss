@@ -52,8 +52,7 @@
     align-items: flex-end;
 
     .bar {
-      margin-left: auto;
-      margin-right: auto;
+      margin: 0 1px;
       flex: 1 0;
       background-color: $melrose;
       cursor: pointer;
@@ -61,10 +60,10 @@
     }
   }
 
-  .dateHistogramLabels {
+  .histogramLabels {
     display: flex;
     flex-flow: row nowrap;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: flex-end;
 
     .label {
@@ -72,6 +71,10 @@
       flex: 0 0;
       white-space: nowrap;
       font-size: smaller;
+    }
+
+    &.evenly {
+      justify-content: space-evenly;
     }
   }
 }
