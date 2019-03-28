@@ -74,6 +74,7 @@ class HomeController < ApplicationController
       body += "#{k}: #{v}\n"
     end
     Rails.logger.info("New sign up:\n#{body}")
+    # DEPRECATED. Use log_analytics_event.
     MetricUtil.put_metric_now("users.sign_ups", 1)
 
     UserMailer.landing_sign_up_email(body).deliver_now
