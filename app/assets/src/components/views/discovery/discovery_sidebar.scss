@@ -39,25 +39,31 @@
     line-height: 50px;
   }
 }
-.dateHistogram {
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin: 0;
 
-  .bar {
-    margin: 0 1px;
-    flex: 1 0;
-    background-color: $medium-grey;
-    cursor: pointer;
-  }
+.histogramContainer {
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
 
-  .label {
-    margin: 4px 0;
-    flex: 0 0;
-    white-space: nowrap;
-    font-size: smaller;
+  .dateHistogram {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    .bar {
+      margin: 0 1px;
+      flex: 1 0;
+      background-color: $melrose;
+      cursor: pointer;
+    }
+
+    .label {
+      margin: 4px 0;
+      flex: 0 0;
+      white-space: nowrap;
+      font-size: smaller;
+    }
   }
 }
 
@@ -84,24 +90,43 @@
     width: 66%;
   }
 
+  .statsDt {
+    min-width: 50%;
+  }
+
+  .statsDd {
+    max-width: 50%;
+  }
+
+  .barLabel {
+    text-align: right;
+  }
+
   .bar {
     display: inline-block;
     vertical-align: top;
     height: 18px;
-    margin: 0 5px;
+    margin-top: 1px;
+    margin-left: 5px;
+    margin-right: 7px;
     padding: 0 5px;
-    background-color: $medium-grey;
+    background-color: $melrose;
     text-align: right;
     color: white;
   }
 
   .showHide {
     text-transform: uppercase;
-    margin-top: 10px;
+    margin-top: 15px;
     margin-bottom: 10px;
     color: $primary-light;
     font-size: $font-size-smallest;
     letter-spacing: 0.5px;
     cursor: pointer;
+  }
+
+  .count {
+    color: $dark-grey;
+    font-weight: 600;
   }
 }

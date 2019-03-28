@@ -129,7 +129,7 @@ export default class DiscoverySidebar extends React.Component {
     const firstDate = dateKeys[0];
     const lastDate = dateKeys[dateKeys.length - 1];
     return (
-      <div>
+      <div className={cs.histogramContainer}>
         <div className={cx(cs.dateHistogram)}>
           {dateKeys.map(key => {
             const percent = Math.round(100 * dates[key] / total, 0);
@@ -213,7 +213,7 @@ export default class DiscoverySidebar extends React.Component {
       const [key, count] = entry;
       const percent = Math.round(100 * count / total, 0);
       return [
-        <dt key={key + i + "label"}>
+        <dt className={cs.barLabel} key={key + i + "label"}>
           <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
             {key.toLowerCase() == "unknown" ? <i>{key}</i> : key}
           </a>
@@ -222,9 +222,9 @@ export default class DiscoverySidebar extends React.Component {
           <span
             className={cs.bar}
             // TODO (gdingle): make width depend on container
-            style={{ width: percent * 1.5 + "px" }}
+            style={{ width: percent * 1.3 + "px" }}
           />
-          {count}
+          <span className={cs.count}>{count}</span>
         </dd>
       ];
     });
@@ -259,36 +259,44 @@ export default class DiscoverySidebar extends React.Component {
           >
             <div className={cs.hasBackground}>
               <dl className={cx(cs.dataList)}>
-                <dt>
+                <dt className={cs.statsDt}>
                   <strong>Samples</strong>
                 </dt>
-                <dd>{this.state.stats.numSamples.toLocaleString()}</dd>
+                <dd className={cs.statsDd}>
+                  {this.state.stats.numSamples.toLocaleString()}
+                </dd>
               </dl>
             </div>
             <div className={cs.hasBackground}>
               <dl className={cx(cs.dataList)}>
-                <dt>
+                <dt className={cs.statsDt}>
                   <strong>Projects</strong>
                 </dt>
-                <dd>{this.state.stats.numProjects.toLocaleString()}</dd>
+                <dd className={cs.statsDd}>
+                  {this.state.stats.numProjects.toLocaleString()}
+                </dd>
               </dl>
             </div>
             {currentTab === "samples" && (
               <div>
                 <div className={cs.hasBackground}>
                   <dl className={cx(cs.dataList)}>
-                    <dt>
+                    <dt className={cs.statsDt}>
                       <strong>Avg. reads per sample</strong>
                     </dt>
-                    <dd>{this.state.stats.avgTotalReads}</dd>
+                    <dd className={cs.statsDd}>
+                      {this.state.stats.avgTotalReads}
+                    </dd>
                   </dl>
                 </div>
                 <div className={cs.hasBackground}>
                   <dl className={cx(cs.dataList)}>
-                    <dt>
+                    <dt className={cs.statsDt}>
                       <strong>Avg. non-host reads per sample</strong>
                     </dt>
-                    <dd>{this.state.stats.avgNonHostReads}</dd>
+                    <dd className={cs.statsDd}>
+                      {this.state.stats.avgNonHostReads}
+                    </dd>
                   </dl>
                 </div>
               </div>
@@ -308,7 +316,7 @@ export default class DiscoverySidebar extends React.Component {
           <Accordion
             key={dataKey}
             open={this.hasData()}
-            header={<div className={cs.title}>By Metadata</div>}
+            header={<div className={cs.title}>Metadata</div>}
           >
             <div className={cs.hasBackground}>
               <strong>Host</strong>
