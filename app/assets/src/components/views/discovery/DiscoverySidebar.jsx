@@ -130,12 +130,12 @@ export default class DiscoverySidebar extends React.Component {
     const lastDate = dateKeys[dateKeys.length - 1];
     return (
       <div className={cs.histogramContainer}>
-        <div className={cx(cs.dateHistogram)}>
+        <div className={cs.dateHistogram}>
           {dateKeys.map(key => {
             const percent = Math.round(100 * dates[key] / total, 0);
             const element = (
               <div
-                className={cx(cs.bar)}
+                className={cs.bar}
                 key={key}
                 style={{ height: percent + "px" }}
                 onClick={() => this.handleFilterClick(key)}
@@ -162,10 +162,8 @@ export default class DiscoverySidebar extends React.Component {
         <div
           className={cx(cs.histogramLabels, dateKeys.length < 3 && cs.evenly)}
         >
-          <div className={cx(cs.label)}>{firstDate}</div>
-          {firstDate !== lastDate && (
-            <div className={cx(cs.label)}>{lastDate}</div>
-          )}
+          <div className={cs.label}>{firstDate}</div>
+          {firstDate !== lastDate && <div className={cs.label}>{lastDate}</div>}
         </div>
       </div>
     );
@@ -188,7 +186,7 @@ export default class DiscoverySidebar extends React.Component {
     const extraRows = sorted.slice(defaultN);
     const total = sum(Object.values(fieldData));
     return (
-      <dl className={cx(cs.dataList)}>
+      <dl className={cs.dataList}>
         {this.renderMetadataRowBlock(defaultRows, total)}
         {expandedMetadataGroups.has(field) &&
           this.renderMetadataRowBlock(extraRows, total)}
@@ -262,7 +260,7 @@ export default class DiscoverySidebar extends React.Component {
             header={<div className={cs.title}>Overall</div>}
           >
             <div className={cs.hasBackground}>
-              <dl className={cx(cs.dataList)}>
+              <dl className={cs.dataList}>
                 <dt className={cs.statsDt}>
                   <strong>Samples</strong>
                 </dt>
@@ -272,7 +270,7 @@ export default class DiscoverySidebar extends React.Component {
               </dl>
             </div>
             <div className={cs.hasBackground}>
-              <dl className={cx(cs.dataList)}>
+              <dl className={cs.dataList}>
                 <dt className={cs.statsDt}>
                   <strong>Projects</strong>
                 </dt>
@@ -284,7 +282,7 @@ export default class DiscoverySidebar extends React.Component {
             {currentTab === "samples" && (
               <div>
                 <div className={cs.hasBackground}>
-                  <dl className={cx(cs.dataList)}>
+                  <dl className={cs.dataList}>
                     <dt className={cs.statsDt}>
                       <strong>Avg. reads per sample</strong>
                     </dt>
@@ -294,7 +292,7 @@ export default class DiscoverySidebar extends React.Component {
                   </dl>
                 </div>
                 <div className={cs.hasBackground}>
-                  <dl className={cx(cs.dataList)}>
+                  <dl className={cs.dataList}>
                     <dt className={cs.statsDt}>
                       <strong>Avg. reads passing filters per sample</strong>
                     </dt>
