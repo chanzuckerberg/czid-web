@@ -772,6 +772,7 @@ class PipelineRun < ApplicationRecord
 
         # Send to Datadog and Segment
         tags = ["sample_id:#{sample.id}"]
+        # DEPRECATED. Use log_analytics_event.
         MetricUtil.put_metric_now("samples.succeeded.run_time", run_time, tags, "gauge")
         event = MetricUtil::ANALYTICS_EVENT_NAMES[:pipeline_run_succeeded]
       else
@@ -849,6 +850,7 @@ class PipelineRun < ApplicationRecord
     # Check for long-running pipeline runs and log/alert if needed:
     run_time = Time.current - created_at
     tags = ["sample_id:#{sample.id}"]
+    # DEPRECATED. Use log_analytics_event.
     MetricUtil.put_metric_now("samples.running.run_time", run_time, tags, "gauge")
 
     if alert_sent.zero?
