@@ -43,7 +43,7 @@ class SamplesView extends React.Component {
       },
       {
         dataKey: "nonHostReads",
-        label: "Non Host Reads",
+        label: "Passed Filters",
         flexGrow: 1,
         cellRenderer: this.renderNumberAndPercentage
       },
