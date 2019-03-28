@@ -380,6 +380,10 @@ class DiscoveryView extends React.Component {
     });
   };
 
+  handleSampleSelected = () => {
+    console.log("yoyo");
+  };
+
   render() {
     const {
       currentTab,
