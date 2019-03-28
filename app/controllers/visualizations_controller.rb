@@ -7,9 +7,8 @@ class VisualizationsController < ApplicationController
 
   # GET /visualizations.json
   def index
-    domain = params[:domain]
+    domain = visualization_params[:domain]
 
-    # TODO: (gdingle): include samples? include projects?
     visualizations = if domain == "library"
                        current_user.visualizations
                      elsif domain == "public"
@@ -19,22 +18,25 @@ class VisualizationsController < ApplicationController
                      end
     visualizations = visualizations
                      .joins(:user)
-                     .select("visualizations.id AS id, user_id, visualizations.created_at, visualization_type, users.name AS user_name")
-                     .where.not(visualization_type: [nil, 'undefined'])
+                     .select("visualizations.id AS id, user_id, visualizations.created_at, visualization_type, users.name AS user_name, visualizations.name")
+                     .where.not(visualization_type: [nil, 'undefined'], name: nil)
                      .order(created_at: :desc)
+                     .includes(samples: [:project])
 
-    render json: visualizations
+    render json: visualizations.as_json(
+      methods: [:project_name, :samples_count]
+    )
   end
 
   def visualization
-    @type = params[:type]
+    @type = visualization_params[:type]
     @visualization_data = {}
 
     if @type == "heatmap"
       @visualization_data = heatmap
     end
 
-    id = params[:id]
+    id = visualization_params[:id]
     if id
       vis = Visualization.find(id)
       vis.data[:sampleIds] = vis.sample_ids
@@ -50,36 +52,62 @@ class VisualizationsController < ApplicationController
     end
   end
 
+  # This will create a new visualization object or overwite the most recent
+  # existing one, based on the key of (user, type, sample_ids).
+  # TODO: (gdingle): support forking by renaming
   def save
-    @type = params[:type]
-    @data = params[:data]
-    vis = Visualization.create(
-      user: current_user,
-      visualization_type: @type,
-      data: @data
-    )
-    vis.sample_ids = @data[:sampleIds]
+    @type = visualization_params[:type]
+    @data = visualization_params[:data]
+
+    sample_ids = @data[:sampleIds]
     # Delete to have single source of truth.
     @data.delete(:sampleIds)
+
+    vis = Visualization.joins(:samples)
+                       .where(
+                         user: current_user,
+                         visualization_type: @type,
+                         samples: { id: [sample_ids] }
+                       )
+                       .where.not(visualization_type: [nil, 'undefined'], name: nil)
+                       .order(created_at: :desc)
+                       .select { |v| v.sample_ids.to_set == sample_ids.to_set }
+                       .first
+
+    if vis.present?
+      vis.data = @data
+    else
+      vis = Visualization.new(
+        user: current_user,
+        visualization_type: @type,
+        sample_ids: sample_ids,
+        data: @data,
+        # Simply use the type as a placeholder.
+        # TODO: (gdingle): support naming on first save and renaming
+        name: @type.titleize
+      )
+    end
+    vis.save!
 
     render json: {
       status: "success",
       message: "#{@type} saved successfully",
       type: @type,
       id: vis.id,
-      data: @data
+      data: @data,
+      name: vis.name,
+      sample_ids: vis.sample_ids
     }
   rescue => err
     render json: {
       status: "failed",
-      message: "Unable to save #{@type}",
+      message: "Unable to save",
       errors: [err]
-      # TODO: (gdingle): better error code?
     }, status: :internal_server_error
   end
 
   def shorten_url
-    short_url = Shortener::ShortenedUrl.generate(params[:url])
+    short_url = Shortener::ShortenedUrl.generate(visualization_params[:url])
     render json: {
       status: "success",
       message: "Url shortened successfully",
@@ -91,5 +119,11 @@ class VisualizationsController < ApplicationController
       message: "Unable to shorten",
       errors: [err]
     }, status: :internal_server_error
+  end
+
+  private
+
+  def visualization_params
+    params.permit(:domain, :type, :id, :url, data: {})
   end
 end

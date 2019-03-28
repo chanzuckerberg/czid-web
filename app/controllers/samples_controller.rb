@@ -598,6 +598,7 @@ class SamplesController < ApplicationController
     MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
+  # TODO: (gdingle): remove this if we are not going to allow saving reports as visualizations
   def last_saved_visualization
     valid_viz_types = ['tree', 'table'] # See PipelineSampleReport.jsx
     Sample
