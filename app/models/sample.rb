@@ -144,7 +144,6 @@ class Sample < ApplicationRecord
     if search
       search = search.strip
       results = where('samples.name LIKE :search
-        OR samples.sample_tissue LIKE :search
         OR samples.sample_location LIKE :search
         OR samples.sample_notes LIKE :search
         OR samples.sample_unique_id LIKE :search', search: "%#{search}%")

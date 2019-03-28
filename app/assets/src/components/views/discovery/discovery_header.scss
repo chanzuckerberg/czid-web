@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 
   .icon {
     fill: $primary-light;
@@ -29,7 +29,7 @@
       // Override semantic-ui
       padding: 3px !important;
       position: absolute;
-      top: -8px;
+      top: -5px;
       right: -12px;
       vertical-align: middle;
     }

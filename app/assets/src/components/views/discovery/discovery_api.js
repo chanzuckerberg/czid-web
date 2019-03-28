@@ -3,18 +3,18 @@ import {
   getProjects,
   getSamples,
   getProjectDimensions,
-  getSampleDimensions
+  getSampleDimensions,
+  getVisualizations
 } from "~/api";
-import { getVisualizations } from "../../../api";
 
 const DISCOVERY_DOMAIN_LIBRARY = "library";
 const DISCOVERY_DOMAIN_PUBLIC = "public";
 
-const getDiscoverySyncData = async ({ domain, filters }) => {
+const getDiscoverySyncData = async ({ domain, filters, search }) => {
   try {
     const [projects, visualizations] = await Promise.all([
-      getProjects({ domain, filters }),
-      getVisualizations({ domain, filters })
+      getProjects({ domain, filters, search }),
+      getVisualizations({ domain, filters, search })
     ]);
 
     return {
@@ -28,11 +28,16 @@ const getDiscoverySyncData = async ({ domain, filters }) => {
   }
 };
 
-const getDiscoveryDimensions = async ({ domain, filters, projectId }) => {
+const getDiscoveryDimensions = async ({
+  domain,
+  filters,
+  projectId,
+  search
+}) => {
   try {
     const actions = compact([
-      getSampleDimensions({ domain, filters, projectId }),
-      !projectId && getProjectDimensions({ domain, filters })
+      getSampleDimensions({ domain, filters, projectId, search }),
+      !projectId && getProjectDimensions({ domain, filters, search })
     ]);
     const [sampleDimensions, projectDimensions] = await Promise.all(actions);
     return { sampleDimensions, projectDimensions };
@@ -102,6 +107,7 @@ const getDiscoverySamples = async ({
   domain,
   filters,
   projectId,
+  search,
   limit = 100,
   offset = 0,
   listAllIds = false
@@ -110,6 +116,7 @@ const getDiscoverySamples = async ({
     domain,
     filters,
     projectId,
+    search,
     limit,
     offset,
     listAllIds
