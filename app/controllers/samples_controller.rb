@@ -48,6 +48,7 @@ class SamplesController < ApplicationController
   PAGE_SIZE = 30
   DEFAULT_MAX_NUM_TAXONS = 30
   MAX_PAGE_SIZE_V2 = 100
+  MAX_BINS_SAMPLE_TIME = 34
 
   # GET /samples
   # GET /samples.json
@@ -215,7 +216,36 @@ class SamplesController < ApplicationController
     ]
     times << { value: "older_1_year", text: "Older Than 1 Year", count: samples.count - times.map(&:count).reduce(:+) }
 
-    min, max = samples.minimum(:created_at), samples.maximum(:created_at)
+    min_date, max_date = samples.minimum(:created_at).to_date, samples.maximum(:created_at).to_date
+    span = (max_date - min_date + 1).to_i
+    # we group by day if the span is shorter than MAX_BINS_SAMPLE_TIME days (determined by frontend)
+    if span <= MAX_BINS_SAMPLE_TIME
+      bins = samples.group("DATE(samples.created_at)").count
+      time_bins = bins.sort.map do |timestamp, count|
+        {
+          value: timestamp.strftime("%Y-%m-%d"),
+          text: timestamp.strftime("%Y-%m-%d"),
+          count: count
+        }
+      end
+    else
+      step = (span.to_f / MAX_BINS_SAMPLE_TIME).ceil
+      bins_map = Sample.group(
+        ActiveRecord::Base.send(:sanitize_sql_array,
+          ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, created_at)/:step)", min_date: min_date, step: step]
+        )).count
+      time_bins = (0...MAX_BINS_SAMPLE_TIME).map do |bucket|
+        start_date = min_date + (bucket * step).days
+        end_date = start_date + step - 1
+        {
+          interval: {start: start_date, end: end_date},
+          count: bins_map[bucket],
+          value: "#{start_date}:#{end_date}",
+          text: "#{start_date}:#{end_date}"
+        }
+      end
+    end
+
 
     hosts = samples.joins(:host_genome).group(:host_genome).count
     hosts = hosts.map do |host, count|
@@ -228,6 +258,7 @@ class SamplesController < ApplicationController
           { dimension: "location", values: locations },
           { dimension: "visibility", values: visibility },
           { dimension: "time", values: times },
+          { dimension: "time_bins", values: time_bins },
           { dimension: "host", values: hosts },
           { dimension: "tissue", values: tissues }
         ]
