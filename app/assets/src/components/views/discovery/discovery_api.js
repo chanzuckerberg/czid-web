@@ -6,6 +6,7 @@ import {
   getSampleDimensions,
   getVisualizations
 } from "~/api";
+import { filterLocation } from "~utils/metadata";
 
 const DISCOVERY_DOMAIN_LIBRARY = "library";
 const DISCOVERY_DOMAIN_PUBLIC = "public";
@@ -61,7 +62,9 @@ const processRawSample = sample => {
         sample.details
       ).toLowerCase()
     },
-    collectionLocation: get("metadata.collection_location", sample.details),
+    collectionLocation: filterLocation(
+      get("metadata.collection_location", sample.details)
+    ),
     duplicateCompressionRatio: get(
       "derived_sample_output.summary_stats.compression_ratio",
       sample.details
