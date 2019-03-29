@@ -19,6 +19,7 @@
   }
 
   .plusIcon {
+    padding-top: 8px;
     width: 14px;
     fill: $medium-grey;
   }
@@ -40,6 +41,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    margin-top: 7px;
   }
 }
 

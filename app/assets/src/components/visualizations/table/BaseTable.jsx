@@ -59,7 +59,7 @@ class BaseTable extends React.Component {
     return (
       <BasicPopup
         trigger={
-          <div>
+          <div className={cs.text}>
             {label}
             {sortBy === dataKey && (
               <SortIndicator sortDirection={sortDirection} />
@@ -90,18 +90,23 @@ class BaseTable extends React.Component {
     const value = difference(activeColumns, protectedColumns);
 
     return (
-      <MultipleDropdown
-        direction="left"
-        hideArrow
-        hideCounter
-        rounded
-        search
-        checkedOnTop
-        menuLabel="Select Columns"
-        onChange={this.handleColumnChange}
-        options={options}
-        trigger={<PlusIcon className={cs.plusIcon} />}
-        value={value}
+      <BasicPopup
+        trigger={
+          <MultipleDropdown
+            direction="left"
+            hideArrow
+            hideCounter
+            rounded
+            search
+            checkedOnTop
+            menuLabel="Select Columns"
+            onChange={this.handleColumnChange}
+            options={options}
+            trigger={<PlusIcon className={cs.plusIcon} />}
+            value={value}
+          />
+        }
+        content="Select Columns"
       />
     );
   };
