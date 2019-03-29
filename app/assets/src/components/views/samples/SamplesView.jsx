@@ -358,7 +358,7 @@ SamplesView.defaultProps = {
   ],
   protectedColumns: ["sample"]
 };
-//
+
 SamplesView.propTypes = {
   activeColumns: PropTypes.arrayOf(PropTypes.string),
   onLoadRows: PropTypes.func.isRequired,
