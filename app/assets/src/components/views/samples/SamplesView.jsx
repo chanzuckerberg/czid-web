@@ -208,13 +208,18 @@ class SamplesView extends React.Component {
   renderHeatmapTrigger = () => {
     const { selectedSampleIds } = this.state;
     return (
-      <a
-        href={`/visualizations/heatmap?sampleIds=${Array.from(
-          selectedSampleIds
-        )}`}
-      >
-        <HeatmapIcon className={cs.icon} />
-      </a>
+      <BasicPopup
+        trigger={
+          <a
+            href={`/visualizations/heatmap?sampleIds=${Array.from(
+              selectedSampleIds
+            )}`}
+          >
+            <HeatmapIcon className={cs.icon} />
+          </a>
+        }
+        content="Heatmap"
+      />
     );
   };
 
@@ -227,7 +232,6 @@ class SamplesView extends React.Component {
         value: "project_reports"
       });
     }
-
     return (
       <DownloadIconDropdown
         iconClassName={cs.icon}
@@ -248,7 +252,16 @@ class SamplesView extends React.Component {
 
     return (
       <CollectionModal
-        trigger={<SaveIcon className={cs.icon} />}
+        trigger={
+          <BasicPopup
+            trigger={
+              <span>
+                <SaveIcon className={cs.icon} />
+              </span>
+            }
+            content="Save a Collection"
+          />
+        }
         selectedSampleIds={selectedSampleIds}
         fetchedSamples={samples.filter(sample =>
           selectedSampleIds.has(sample.id)
@@ -288,9 +301,14 @@ class SamplesView extends React.Component {
           >
             {this.renderHeatmapTrigger()}
           </div>
-          <div className={cs.action} onClick={this.handlePhyloModalOpen}>
-            <PhyloTreeIcon className={cs.icon} />
-          </div>
+          <BasicPopup
+            trigger={
+              <div className={cs.action} onClick={this.handlePhyloModalOpen}>
+                <PhyloTreeIcon className={cs.icon} />
+              </div>
+            }
+            content="Phylogenetic Tree"
+          />
           <div className={cs.action}>{this.renderDownloadTrigger()}</div>
         </div>
       </div>
