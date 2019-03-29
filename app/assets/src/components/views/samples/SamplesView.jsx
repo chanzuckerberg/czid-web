@@ -304,7 +304,7 @@ class SamplesView extends React.Component {
   handleRowClick = ({ event, index, rowData }) => {
     const { onSampleSelected, samples } = this.props;
     const sample = find({ id: rowData.id }, samples);
-    onSampleSelected && onSampleSelected({ sample, event });
+    onSampleSelected && onSampleSelected({ sample, currentEvent: event });
   };
 
   render() {
