@@ -190,11 +190,13 @@ class SamplesController < ApplicationController
     locations = locations.map do |location, count|
       { value: location, text: location, count: count }
     end
+    locations << { value: 0, text: "Unknown", count: samples.count - locations.map(&:count).reduce(:+) }
 
     tissues = samples_by_metadata_field(sample_ids, "sample_type").count
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
     end
+    tissues << { value: 0, text: "Unknown", count: samples.count - tissues.map(&:count).reduce(:+) }
 
     # visibility
     public_count = samples.public_samples.count
@@ -209,8 +211,11 @@ class SamplesController < ApplicationController
       { value: "1_month", text: "Last Month", count: samples.where("samples.created_at >= ?", 1.month.ago.utc).count },
       { value: "3_month", text: "Last 3 Months", count: samples.where("samples.created_at >= ?", 3.months.ago.utc).count },
       { value: "6_month", text: "Last 6 Months", count: samples.where("samples.created_at >= ?", 6.months.ago.utc).count },
-      { value: "1_year", text: "Last Year", count: samples.where("samples.created_at >= ?", 1.year.ago.utc).count }
+      { value: "1_year", text: "Last Year", count: samples.where("samples.created_at >= ?", 1.year.ago.utc).count },
     ]
+    times << { value: "older_1_year", text: "Older Than 1 Year", count: samples.count - times.map(&:count).reduce(:+) }
+
+    min, max = samples.minimum(:created_at), samples.maximum(:created_at)
 
     hosts = samples.joins(:host_genome).group(:host_genome).count
     hosts = hosts.map do |host, count|
