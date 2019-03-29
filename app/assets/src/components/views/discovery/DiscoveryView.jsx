@@ -472,6 +472,7 @@ class DiscoveryView extends React.Component {
                   onLoadRows={this.handleLoadSampleRows}
                   samples={samples}
                   selectableIds={sampleIds}
+                  onSampleSelected={this.handleSampleSelected}
                 />
               )}
               {currentTab == "visualizations" && (

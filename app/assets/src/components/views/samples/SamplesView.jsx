@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { difference, isEmpty, union } from "lodash/fp";
+import { difference, find, isEmpty, union } from "lodash/fp";
 import InfiniteTable from "../../visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
 import moment from "moment";
@@ -301,6 +301,12 @@ class SamplesView extends React.Component {
     this.setState({ phyloTreeCreationModalOpen: false });
   };
 
+  handleRowClick = ({ event, index, rowData }) => {
+    const { onSampleSelected, samples } = this.props;
+    const sample = find({ id: rowData.id }, samples);
+    onSampleSelected && onSampleSelected({ sample, currentEvent: event });
+  };
+
   render() {
     const { activeColumns, onLoadRows, protectedColumns } = this.props;
     const { phyloTreeCreationModalOpen, selectedSampleIds } = this.state;
@@ -322,6 +328,7 @@ class SamplesView extends React.Component {
             onLoadRows={onLoadRows}
             onSelectAllRows={this.handleSelectAllRows}
             onSelectRow={this.handleSelectRow}
+            onRowClick={this.handleRowClick}
             protectedColumns={protectedColumns}
             rowClassName={cs.tableDataRow}
             selectableKey="id"
@@ -358,7 +365,8 @@ SamplesView.propTypes = {
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
   samples: PropTypes.array,
-  selectableIds: PropTypes.array.isRequired
+  selectableIds: PropTypes.array.isRequired,
+  onSampleSelected: PropTypes.func
 };
 
 export default SamplesView;
