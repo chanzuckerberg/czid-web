@@ -1,4 +1,4 @@
-import { compact, get, map, pickBy } from "lodash/fp";
+import { compact, get, map } from "lodash/fp";
 import {
   getProjects,
   getSamples,
@@ -6,7 +6,6 @@ import {
   getSampleDimensions,
   getVisualizations
 } from "~/api";
-import { filterLocation, filterLocationDimension } from "~utils/metadata";
 
 const DISCOVERY_DOMAIN_LIBRARY = "library";
 const DISCOVERY_DOMAIN_PUBLIC = "public";
@@ -40,8 +39,7 @@ const getDiscoveryDimensions = async ({
       getSampleDimensions({ domain, filters, projectId, search }),
       !projectId && getProjectDimensions({ domain, filters, search })
     ]);
-    let [sampleDimensions, projectDimensions] = await Promise.all(actions);
-    [sampleDimensions, projectDimensions].map(d => filterLocationDimension(d));
+    const [sampleDimensions, projectDimensions] = await Promise.all(actions);
     return { sampleDimensions, projectDimensions };
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -63,9 +61,7 @@ const processRawSample = sample => {
         sample.details
       ).toLowerCase()
     },
-    collectionLocation: filterLocation(
-      get("metadata.collection_location", sample.details)
-    ),
+    collectionLocation: get("metadata.collection_location", sample.details),
     duplicateCompressionRatio: get(
       "derived_sample_output.summary_stats.compression_ratio",
       sample.details
