@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_321_214_445) do
+ActiveRecord::Schema.define(version: 20_190_325_215_059) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -146,7 +146,6 @@ ActiveRecord::Schema.define(version: 20_190_321_214_445) do
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "key", null: false, collation: "latin1_swedish_ci"
-    t.integer "data_type", limit: 1, null: false
     t.string "raw_value"
     t.string "string_validated_value"
     t.float "number_validated_value", limit: 24
@@ -347,6 +346,13 @@ ActiveRecord::Schema.define(version: 20_190_321_214_445) do
     t.index ["user_id"], name: "index_samples_on_user_id"
   end
 
+  create_table "samples_visualizations", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "visualization_id", null: false
+    t.bigint "sample_id", null: false
+    t.index ["sample_id"], name: "index_samples_visualizations_on_sample_id"
+    t.index ["visualization_id"], name: "index_samples_visualizations_on_visualization_id"
+  end
+
   create_table "shortened_urls", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "owner_id"
     t.string "owner_type", limit: 20
@@ -535,13 +541,7 @@ ActiveRecord::Schema.define(version: 20_190_321_214_445) do
     t.integer "public_access", limit: 1
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "name"
     t.index ["user_id"], name: "index_visualizations_on_user_id"
-  end
-
-  create_table "samples_visualizations", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "visualization_id", null: false
-    t.bigint "sample_id", null: false
-    t.index ["sample_id"], name: "index_samples_visualizations_on_sample_id"
-    t.index ["visualization_id"], name: "index_samples_visualizations_on_visualization_id"
   end
 end
