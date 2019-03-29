@@ -798,9 +798,8 @@ class SamplesController < ApplicationController
   end
 
   def results_folder
-    can_edit = current_power.updatable_samples.include?(@sample)
-    @exposed_raw_results_url = can_edit ? raw_results_folder_sample_url(@sample) : nil
-    can_see_stage1_results = can_edit
+    can_see_stage1_results = (current_user.id == @sample.user_id)
+    @exposed_raw_results_url = can_see_stage1_results ? raw_results_folder_sample_url(@sample) : nil
     @file_list = @sample.first_pipeline_run.outputs_by_step(can_see_stage1_results)
     @file_path = "#{@sample.sample_path}/results/"
     respond_to do |format|
