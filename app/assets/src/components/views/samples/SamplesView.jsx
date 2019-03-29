@@ -16,6 +16,7 @@ import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreat
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import ReportsDownloader from "./ReportsDownloader";
 import CollectionModal from "./CollectionModal";
+import BasicPopup from "~/components/BasicPopup";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -173,7 +174,10 @@ class SamplesView extends React.Component {
         <div className={cs.sampleRightPane}>
           {sample ? (
             <div className={cs.sampleNameAndStatus}>
-              <div className={cs.sampleName}>{sample.name}</div>
+              <BasicPopup
+                trigger={<div className={cs.sampleName}>{sample.name}</div>}
+                content={sample.name}
+              />
               <div className={cx(cs.sampleStatus, cs[sample.status])}>
                 {sample.status}
               </div>
