@@ -380,8 +380,8 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleSampleSelected = () => {
-    console.log("yoyo");
+  handleSampleSelected = ({ sample, event }) => {
+    openUrl(`/samples/${sample.id}`, event);
   };
 
   render() {
@@ -476,6 +476,7 @@ class DiscoveryView extends React.Component {
                   onLoadRows={this.handleLoadSampleRows}
                   samples={samples}
                   selectableIds={sampleIds}
+                  onSampleSelected={this.handleSampleSelected}
                 />
               )}
               {currentTab == "visualizations" && (
