@@ -1,4 +1,4 @@
-import { compact, get, map } from "lodash/fp";
+import { compact, get, map, pickBy, keys } from "lodash/fp";
 import {
   getProjects,
   getSamples,
@@ -41,6 +41,15 @@ const getDiscoveryDimensions = async ({
       !projectId && getProjectDimensions({ domain, filters, search })
     ]);
     const [sampleDimensions, projectDimensions] = await Promise.all(actions);
+    // console.log(projectDimensions);
+    // const locationGroup = pickBy(d => d.dimension === "location", projectDimensions);
+    // const i = keys(locationGroup)[0];
+    // const locations = locationGroup[0].values;
+    // const filtered = locations.filter(p => p.value.match(/[a-z]/i));
+    // projectDimensions[i].values = filtered;
+    // console.log(projectDimensions);
+    // console.log("sampleDimensions: ", projectDimensions);
+
     return { sampleDimensions, projectDimensions };
   } catch (error) {
     // eslint-disable-next-line no-console
