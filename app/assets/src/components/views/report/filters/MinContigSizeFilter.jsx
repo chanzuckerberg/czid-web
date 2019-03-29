@@ -6,6 +6,8 @@ import cs from "./min_contig_size_filter.scss";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import DropdownTrigger from "../../../ui/controls/dropdowns/common/DropdownTrigger";
 
+const MIN_CONTIG_SIZE_LOWER_BOUND = 4;
+
 class MinContigSizeFilter extends React.Component {
   state = {
     value: this.props.value,
@@ -28,7 +30,7 @@ class MinContigSizeFilter extends React.Component {
   handleBlur = () => {
     const newValue = Number(this.state.value);
 
-    if (isNaN(newValue)) {
+    if (isNaN(newValue) || newValue < MIN_CONTIG_SIZE_LOWER_BOUND) {
       // Reset back to the previous value.
       this.setState({
         value: this.state.previousValue
@@ -42,9 +44,8 @@ class MinContigSizeFilter extends React.Component {
 
   renderContents = () => {
     const helpText = `
-      The contig and contig r columns will ignore contigs less than the Min Contig Size.
-      For example, if a single contig with 10 reads is assembled for a taxon but the Min Contig Size
-      is larger than 10, then contig and contig r will show 0 for that taxon.
+      Contig Size refers to the number of reads that covered the contig.
+      Only contigs that were assembled from at least {Min Contig Size} reads will be counted in the contig and contig r columns.
     `;
 
     return (
