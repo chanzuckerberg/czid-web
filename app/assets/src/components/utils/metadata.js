@@ -19,7 +19,6 @@ export const processMetadataTypes = metadataTypes =>
 
 export const filterLocation = location => {
   // Remove locations that don't have any a-z characters (e.g. coordinates)
-  console.log(location);
   if (location && location.match(/[a-z]/i)) {
     return location;
   } else {

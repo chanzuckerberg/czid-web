@@ -92,7 +92,6 @@ const processRawSample = sample => {
       sample.details
     ),
     sampleType: get("metadata.sample_type", sample.details),
-    sampleLocation: get("db_sample.sample_location", sample.details),
     subsampledFraction: get(
       "derived_sample_output.pipeline_run.fraction_subsampled",
       sample.details
