@@ -160,6 +160,14 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 12_583.63, species_result["NR"]["aggregatescore"].round(2)
     assert_equal 9.3000002, species_result["NR"]["neglogevalue"]
 
+    assert_equal "Streptococcus pneumoniae", species_result["lineage"]["species_name"]
+    assert_equal "Streptococcus", species_result["lineage"]["genus_name"]
+    assert_equal "Streptococcaceae", species_result["lineage"]["family_name"]
+    assert_equal "Lactobacillales", species_result["lineage"]["order_name"]
+    assert_equal "Bacilli", species_result["lineage"]["class_name"]
+    assert_equal "Firmicutes", species_result["lineage"]["phylum_name"]
+    assert_equal "Bacteria", species_result["lineage"]["superkingdom_name"]
+
     assert_equal 4.0, genus_result["NT"]["r"]
     assert_equal "3565.062", genus_result["NT"]["rpm"]
     assert_equal 2.2081236, genus_result["NT"]["zscore"]
