@@ -126,6 +126,14 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 2_428_411_754.8, species_result["NR"]["aggregatescore"].round(1)
     assert_equal 16.9101009, species_result["NR"]["neglogevalue"]
 
+    assert_equal "Klebsiella pneumoniae", species_result["lineage"]["species_name"]
+    assert_equal "Klebsiella", species_result["lineage"]["genus_name"]
+    assert_equal "Enterobacteriaceae", species_result["lineage"]["family_name"]
+    assert_equal "Enterobacterales", species_result["lineage"]["order_name"]
+    assert_equal "Gammaproteobacteria", species_result["lineage"]["class_name"]
+    assert_equal "Proteobacteria", species_result["lineage"]["phylum_name"]
+    assert_equal "Bacteria", species_result["lineage"]["superkingdom_name"]
+
     assert_equal 217.0, genus_result["NT"]["r"]
     assert_equal "193404.634", genus_result["NT"]["rpm"]
     assert_equal 99.0, genus_result["NT"]["zscore"]
@@ -151,6 +159,14 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 4.2099668, species_result["NR"]["zscore"]
     assert_equal 12_583.63, species_result["NR"]["aggregatescore"].round(2)
     assert_equal 9.3000002, species_result["NR"]["neglogevalue"]
+
+    assert_equal "Streptococcus pneumoniae", species_result["lineage"]["species_name"]
+    assert_equal "Streptococcus", species_result["lineage"]["genus_name"]
+    assert_equal "Streptococcaceae", species_result["lineage"]["family_name"]
+    assert_equal "Lactobacillales", species_result["lineage"]["order_name"]
+    assert_equal "Bacilli", species_result["lineage"]["class_name"]
+    assert_equal "Firmicutes", species_result["lineage"]["phylum_name"]
+    assert_equal "Bacteria", species_result["lineage"]["superkingdom_name"]
 
     assert_equal 4.0, genus_result["NT"]["r"]
     assert_equal "3565.062", genus_result["NT"]["rpm"]

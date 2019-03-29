@@ -1,2 +1,58 @@
 one:
   taxid: 1
+
+kleb_pneumo:
+  version_start: 1
+  version_end: 1
+  taxid: 573
+  species_taxid: 573
+  genus_taxid: 570
+  family_taxid: 543
+  order_taxid: 91347
+  class_taxid: 1236
+  phylum_taxid: 1224
+  superkingdom_taxid: 2
+  species_name: "Klebsiella pneumoniae"
+  genus_name: "Klebsiella"
+  family_name: "Enterobacteriaceae"
+  order_name: "Enterobacterales"
+  class_name: "Gammaproteobacteria"
+  phylum_name: "Proteobacteria"
+  superkingdom_name: "Bacteria"
+  superkingdom_common_name: "eubacteria"
+  phylum_common_name: ""
+  class_common_name: ""
+  order_common_name: ""
+  family_common_name: ""
+  genus_common_name: ""
+  species_common_name: ""
+
+strep_pneumo:
+  taxid: 1313
+  superkingdom_taxid: 2
+  phylum_taxid: 1239
+  class_taxid: 91061
+  order_taxid: 186826
+  family_taxid: 1300
+  genus_taxid: 1301
+  species_taxid: 1313
+  superkingdom_name: "Bacteria"
+  phylum_name: "Firmicutes"
+  class_name: "Bacilli"
+  order_name: "Lactobacillales"
+  family_name: "Streptococcaceae"
+  genus_name: "Streptococcus"
+  species_name: "Streptococcus pneumoniae"
+  superkingdom_common_name: "eubacteria"
+  phylum_common_name: ""
+  class_common_name: ""
+  order_common_name: ""
+  family_common_name: ""
+  genus_common_name: ""
+  species_common_name: ""
+  kingdom_taxid: -650
+  kingdom_name: ""
+  kingdom_common_name: ""
+  tax_name: "Streptococcus pneumoniae"
+  version_start: 1
+  version_end: 3
