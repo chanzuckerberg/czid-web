@@ -69,11 +69,62 @@ class User < ApplicationRecord
 
     # Don't allow any non-Biohub users to upload from czbiohub buckets
     if CZBIOHUB_BUCKET_PREFIXES.any? { |prefix| user_bucket.downcase.starts_with?(prefix) }
-      unless ["czbiohub.org", "ucsf.edu"].include?(email.split("@").last)
+      unless biohub_user?
         return false
       end
     end
 
     true
+  end
+
+  def biohub_user?
+    ["czbiohub.org", "ucsf.edu"].include?(email.split("@").last)
+  end
+
+  def czi_user?
+    ["chanzuckerberg.com"].include?(email.split("@").last)
+  end
+
+  # "Greg  L.  Dingle" -> "Greg L."
+  def first_name
+    name.split[0..-2].join " "
+  end
+
+  # "Greg  L.  Dingle" -> "Dingle"
+  def last_name
+    name.split[-1]
+  end
+
+  # This returns a hash of interesting optional data for Segment user tracking.
+  # Make sure you use any reserved names as intended by Segment!
+  # See https://segment.com/docs/spec/identify/#traits .
+  def traits_for_segment
+    {
+      # DB fields
+      email: email,
+      name: name,
+      created_at: created_at,
+      updated_at: updated_at,
+      role: role,
+      allowed_features: allowed_feature_list,
+      institution: institution,
+      # Derived fields
+      admin: admin?,
+      demo_user: demo_user?,
+      biohub_user: biohub_user?,
+      czi_user: czi_user?,
+      # Segment special fields
+      createdAt: created_at.iso8601, # currently same as created_at
+      firstName: first_name,
+      lastName: last_name,
+      # Devise fields
+      sign_in_count: sign_in_count,
+      current_sign_in_at: current_sign_in_at,
+      last_sign_in_at: last_sign_in_at,
+      current_sign_in_ip: current_sign_in_ip,
+      last_sign_in_ip: last_sign_in_ip,
+      # TODO: (gdingle): get more useful data on signup
+      # title, phone, website, address, company
+    }
   end
 end

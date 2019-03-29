@@ -171,6 +171,7 @@ const getSampleTaxons = (params, cancelToken) =>
 // TODO(tiago): still needs to accepts field to sort by
 const getSamples = ({
   projectId,
+  search,
   domain,
   limit,
   offset,
@@ -180,6 +181,7 @@ const getSamples = ({
   get("/samples/index_v2.json", {
     params: {
       projectId,
+      search,
       domain,
       limit,
       offset,
@@ -188,36 +190,40 @@ const getSamples = ({
     }
   });
 
-const getSampleDimensions = ({ domain, projectId }) =>
+const getSampleDimensions = ({ domain, projectId, search }) =>
   get("/samples/dimensions.json", {
     params: {
       domain,
-      projectId
+      projectId,
+      search
     }
   });
 
-const getProjectDimensions = ({ domain }) =>
+const getProjectDimensions = ({ domain, search }) =>
   get("/projects/dimensions.json", {
     params: {
-      domain
+      domain,
+      search
     }
   });
 
 const getSamplesV1 = params => get("/samples.json", { params });
 
-const getProjects = ({ domain, filters, basic } = {}) =>
+const getProjects = ({ domain, filters, search, basic } = {}) =>
   get("/projects.json", {
     params: {
       domain,
+      search,
       basic,
       ...filters
     }
   });
 
-const getVisualizations = ({ domain, filters } = {}) =>
+const getVisualizations = ({ domain, filters, search } = {}) =>
   get("/visualizations.json", {
     params: {
       domain,
+      search,
       ...filters
     }
   });
@@ -227,6 +233,7 @@ const createProject = params =>
     project: params
   });
 
+// See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 const logAnalyticsEvent = (eventName, eventData = {}) => {
   // Wrapper around Segment analytics so we can add things later
   // eventData should have keys in snake_case for the database

@@ -7,28 +7,46 @@ class PhyloTree < ApplicationRecord
   belongs_to :user
   belongs_to :project
   validates :name, presence: true, uniqueness: true
+  after_create :create_visualization
 
   STATUS_INITIALIZED = 0
   STATUS_READY = 1
   STATUS_FAILED = 2
   STATUS_IN_PROGRESS = 3
 
-  after_create :create_visualization
-
-  # We need to create a visualization object here to register the new phylo_tree
-  # as a generic visualization. Other types of visualizations are saved on-demand only.
-  # Because phylo_trees are created explictly, the user will expect them to persist.
-  # TODO: (gdingle): destroy visualization objects when phylo_tree is destroyed.
-  def create_visualization
-    Visualization.create(
-      user: user,
-      visualization_type: "phylo_tree",
-      data: { treeId: id }
-    )
-  end
-
   def self.in_progress
     where(status: STATUS_IN_PROGRESS)
+  end
+
+  def self.users_by_tree_id
+    ActiveRecord::Base.connection.select_all("
+      select phylo_trees.id as phylo_tree_id, users.id, users.name
+      from phylo_trees, users
+      where phylo_trees.user_id = users.id
+      order by phylo_tree_id
+    ").index_by { |entry| entry["phylo_tree_id"] }
+  end
+
+  def self.viewable(user)
+    if user.admin?
+      all
+    else
+      # user can see tree iff user can see all pipeline_runs
+      viewable_pipeline_run_ids = PipelineRun.viewable(user).pluck(:id)
+      where("id not in (select phylo_tree_id
+                        from phylo_trees_pipeline_runs
+                        where pipeline_run_id not in (#{viewable_pipeline_run_ids.join(',')}))")
+    end
+  end
+
+  def self.editable(user)
+    if user.admin?
+      all
+    else
+      # user can edit tree iff user can see tree and user can edit project
+      editable_project_ids = Project.editable(user).pluck(:id)
+      viewable(user).where("project_id in (?)", editable_project_ids)
+    end
   end
 
   def s3_outputs
@@ -54,18 +72,6 @@ class PhyloTree < ApplicationRecord
         "remote" => true
       }
     }
-  end
-
-  def select_outputs(property, value = true)
-    s3_outputs.select { |_output, props| props[property] == value }.keys
-  end
-
-  def dag_version_file
-    "#{phylo_tree_output_s3_path}/#{PipelineRun::PIPELINE_VERSION_FILE}"
-  end
-
-  def parse_dag_vars
-    JSON.parse(dag_vars || "{}")
   end
 
   def runtime(human_readable = true)
@@ -123,6 +129,51 @@ class PhyloTree < ApplicationRecord
       LogUtil.log_err_and_airbrake("Phylo tree creation failed for #{name} (#{id}).")
     end
     save
+  end
+
+  def kickoff
+    return unless [STATUS_INITIALIZED, STATUS_FAILED].include?(status)
+    self.command_stdout, self.command_stderr, command_status = Open3.capture3(job_command)
+    if command_status.exitstatus.zero?
+      output = JSON.parse(command_stdout)
+      self.job_id = output['jobId']
+      self.status = STATUS_IN_PROGRESS
+    else
+      self.status = STATUS_FAILED
+      LogUtil.log_err_and_airbrake("Phylo tree failed to kick off for #{name} (#{id}).")
+    end
+    save
+  end
+
+  private
+
+  # We need to create a visualization object here to register the new phylo_tree
+  # as a generic visualization. Other types of visualizations are saved on-demand only.
+  # Because phylo_trees are created explictly, the user will expect them to persist.
+  # TODO: (gdingle): destroy visualization objects when phylo_tree is destroyed,
+  # and rename when renamed.
+  def create_visualization
+    Visualization.create(
+      user: user,
+      visualization_type: "phylo_tree",
+      data: { treeId: id },
+      name: name,
+      samples: Sample.joins(:pipeline_runs)
+        .where(pipeline_runs: { id: [pipeline_run_ids] })
+        .distinct
+    )
+  end
+
+  def phylo_tree_output_s3_path
+    "s3://#{SAMPLES_BUCKET_NAME}/phylo_trees/#{id}"
+  end
+
+  def versioned_output_s3_path
+    "#{phylo_tree_output_s3_path}/#{dag_version}"
+  end
+
+  def select_outputs(property, value = true)
+    s3_outputs.select { |_output, props| props[property] == value }.keys
   end
 
   def job_command
@@ -190,14 +241,6 @@ class PhyloTree < ApplicationRecord
     aegea_batch_submit_command(base_command)
   end
 
-  def phylo_tree_output_s3_path
-    "s3://#{SAMPLES_BUCKET_NAME}/phylo_trees/#{id}"
-  end
-
-  def versioned_output_s3_path
-    "#{phylo_tree_output_s3_path}/#{dag_version}"
-  end
-
   def prepare_dag(dag_name, attribute_dict)
     dag_s3 = "#{phylo_tree_output_s3_path}/#{dag_name}.json"
     dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.erb",
@@ -208,29 +251,6 @@ class PhyloTree < ApplicationRecord
                            parse_dag_vars)
     self.dag_json = dag.render
     upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name)
-  end
-
-  def kickoff
-    return unless [STATUS_INITIALIZED, STATUS_FAILED].include?(status)
-    self.command_stdout, self.command_stderr, command_status = Open3.capture3(job_command)
-    if command_status.exitstatus.zero?
-      output = JSON.parse(command_stdout)
-      self.job_id = output['jobId']
-      self.status = STATUS_IN_PROGRESS
-    else
-      self.status = STATUS_FAILED
-      LogUtil.log_err_and_airbrake("Phylo tree failed to kick off for #{name} (#{id}).")
-    end
-    save
-  end
-
-  def self.users_by_tree_id
-    ActiveRecord::Base.connection.select_all("
-      select phylo_trees.id as phylo_tree_id, users.id, users.name
-      from phylo_trees, users
-      where phylo_trees.user_id = users.id
-      order by phylo_tree_id
-    ").index_by { |entry| entry["phylo_tree_id"] }
   end
 
   def sample_names_by_run_ids
@@ -247,25 +267,11 @@ class PhyloTree < ApplicationRecord
     result
   end
 
-  def self.viewable(user)
-    if user.admin?
-      all
-    else
-      # user can see tree iff user can see all pipeline_runs
-      viewable_pipeline_run_ids = PipelineRun.viewable(user).pluck(:id)
-      where("id not in (select phylo_tree_id
-                        from phylo_trees_pipeline_runs
-                        where pipeline_run_id not in (#{viewable_pipeline_run_ids.join(',')}))")
-    end
+  def dag_version_file
+    "#{phylo_tree_output_s3_path}/#{PipelineRun::PIPELINE_VERSION_FILE}"
   end
 
-  def self.editable(user)
-    if user.admin?
-      all
-    else
-      # user can edit tree iff user can see tree and user can edit project
-      editable_project_ids = Project.editable(user).pluck(:id)
-      viewable(user).where("project_id in (?)", editable_project_ids)
-    end
+  def parse_dag_vars
+    JSON.parse(dag_vars || "{}")
   end
 end

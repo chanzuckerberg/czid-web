@@ -11,9 +11,12 @@
         userSignedIn: true
       }, 'page_header', JSON.parse('<%= raw escape_json(request_context)%>'))
 
+
       <% if ENV["SEGMENT_JS_ID"] %>
         <!-- Associate user ID with Segment -->
-        analytics.identify(<%= current_user.id %>);
+        analytics.identify(
+          <%= current_user.id %>,
+          <%= raw escape_json(current_user.traits_for_segment) %>);
       <% end %>
     <% end %>
   <% else %>
