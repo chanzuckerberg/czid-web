@@ -62,7 +62,7 @@ export default class DiscoverySidebar extends React.Component {
           host: countBy("hostGenome", samples),
           tissue: countBy("sampleTissue", samples),
           createdAt: countBy("createdAt", samples),
-          location: countBy("sampleLocation", samples)
+          location: countBy("collectionLocation", samples)
         }
       };
     } else if (currentTab === "projects") {
@@ -108,7 +108,7 @@ export default class DiscoverySidebar extends React.Component {
       project: sample.sample.project,
       sampleTissue: sample.sampleType || "Unknown",
       createdAt: DiscoverySidebar.formatDate(sample.sample.createdAt),
-      sampleLocation: sample.sampleLocation || "Unknown",
+      collectionLocation: sample.collectionLocation || "Unknown",
       totalReads: sample.totalReads,
       nonHostReads: sample.nonHostReads.value
     }));
