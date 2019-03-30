@@ -23,9 +23,9 @@ class Checkbox extends React.Component {
   }
 
   handleClick(event) {
-    event.stopPropagation();
-
     const { value, onChange } = this.props;
+
+    event.stopPropagation();
     this.setState({ isChecked: !this.state.isChecked }, () => {
       onChange(value, this.state.isChecked, event);
     });
