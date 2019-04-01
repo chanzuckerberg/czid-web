@@ -288,19 +288,22 @@ class SamplesController < ApplicationController
     samples = filter_samples(samples, params)
     sample_ids = samples.pluck(:id)
 
-    pipeline_run_ids = top_pipeline_runs_multiget(sample_ids).values
-    avg_total_reads, avg_remaining_reads = PipelineRun
-                                           .where(id: pipeline_run_ids)
-                                           .pluck("ROUND(AVG(`pipeline_runs`.`total_reads`)), ROUND(AVG(`pipeline_runs`.`adjusted_remaining_reads`))")
-                                           .first
-                                           .map(&:to_i)
+
+    if sample_ids.count > 0
+      pipeline_run_ids = top_pipeline_runs_multiget(sample_ids).values
+      avg_total_reads, avg_remaining_reads = PipelineRun
+                                            .where(id: pipeline_run_ids)
+                                            .pluck("ROUND(AVG(`pipeline_runs`.`total_reads`)), ROUND(AVG(`pipeline_runs`.`adjusted_remaining_reads`))")
+                                            .first
+                                            .map(&:to_i)
+    end
 
     respond_to do |format|
       format.json do
         render json: {
           count: sample_ids.count,
-          avgTotalReads: avg_total_reads,
-          avgAdjustedRemainingReads: avg_remaining_reads
+          avgTotalReads: avg_total_reads.present? ? avg_total_reads : 0,
+          avgAdjustedRemainingReads: avg_remaining_reads.present? ? avg_remaining_reads : 0
         }
       end
     end
