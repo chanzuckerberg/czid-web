@@ -8,6 +8,7 @@ import { Table } from "~/components/visualizations/table";
 import { humanize } from "~/helpers/strings";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
+import BasicPopup from "~/components/BasicPopup";
 
 import cs from "./visualizations_view.scss";
 
@@ -51,14 +52,18 @@ class VisualizationsView extends React.Component {
       visualization.id
     }`;
     // TODO (gdingle): put name and project_name in own cols
+    const visualizationTitle = `${humanize(
+      visualization.visualization_type
+    )} "${visualization.name}" from ${visualization.project_name} (${
+      visualization.samples_count
+    })`;
     return (
       <div className={cs.visualization}>
         <div className={cs.visualizationName}>
-          <a href={href}>
-            {humanize(visualization.visualization_type)}
-            {` "${visualization.name}" `}
-            from {visualization.project_name} ({visualization.samples_count})
-          </a>
+          <BasicPopup
+            trigger={<a href={href}>{visualizationTitle}</a>}
+            content={visualizationTitle}
+          />
         </div>
         <div className={cs.visualizationDetails}>
           <span className={cs.visualizationCreationDate}>

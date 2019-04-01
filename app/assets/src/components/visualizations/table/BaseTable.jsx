@@ -7,15 +7,16 @@ import {
   Table as VirtualizedTable
 } from "react-virtualized";
 import "react-virtualized/styles.css";
-import { concat, difference, find, includes, map } from "lodash/fp";
 import cx from "classnames";
+import cs from "./base_table.scss";
 
+import BasicPopup from "~/components/BasicPopup";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import PlusIcon from "~ui/icons/PlusIcon";
-import { humanize } from "~/helpers/strings";
 
-import cs from "./base_table.scss";
+import { concat, difference, find, includes, map } from "lodash/fp";
+import { humanize } from "~/helpers/strings";
 
 class BaseTable extends React.Component {
   // This class is a wrapper class to React Virtualized Table.
@@ -45,12 +46,28 @@ class BaseTable extends React.Component {
     });
   };
 
+  basicHeaderRenderer({ label }) {
+    return (
+      <BasicPopup
+        trigger={<span className={cs.tooltipText}>{label}</span>}
+        content={label}
+      />
+    );
+  }
+
   _sortableHeaderRenderer({ dataKey, label, sortBy, sortDirection }) {
     return (
-      <div>
-        {label}
-        {sortBy === dataKey && <SortIndicator sortDirection={sortDirection} />}
-      </div>
+      <BasicPopup
+        trigger={
+          <div className={cs.tooltipText}>
+            {label}
+            {sortBy === dataKey && (
+              <SortIndicator sortDirection={sortDirection} />
+            )}
+          </div>
+        }
+        content={label}
+      />
     );
   }
 
@@ -73,18 +90,23 @@ class BaseTable extends React.Component {
     const value = difference(activeColumns, protectedColumns);
 
     return (
-      <MultipleDropdown
-        direction="left"
-        hideArrow
-        hideCounter
-        rounded
-        search
-        checkedOnTop
-        menuLabel="Select Columns"
-        onChange={this.handleColumnChange}
-        options={options}
-        trigger={<PlusIcon className={cs.plusIcon} />}
-        value={value}
+      <BasicPopup
+        trigger={
+          <MultipleDropdown
+            direction="left"
+            hideArrow
+            hideCounter
+            rounded
+            search
+            checkedOnTop
+            menuLabel="Select Columns"
+            onChange={this.handleColumnChange}
+            options={options}
+            trigger={<PlusIcon className={cs.plusIcon} />}
+            value={value}
+          />
+        }
+        content="Select Columns"
       />
     );
   };
@@ -184,7 +206,7 @@ class BaseTable extends React.Component {
                     headerRenderer={
                       sortable && !columnProps.disableSort
                         ? this._sortableHeaderRenderer
-                        : undefined
+                        : this.basicHeaderRenderer
                     }
                     cellRenderer={cellRenderer || defaultCellRenderer}
                     {...extraProps}

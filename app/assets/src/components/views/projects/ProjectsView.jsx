@@ -1,12 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Table } from "~/components/visualizations/table";
-import { find, merge, pick } from "lodash/fp";
-import moment from "moment";
-import cs from "./projects_view.scss";
 import cx from "classnames";
+import cs from "./projects_view.scss";
+
+import { Table } from "~/components/visualizations/table";
 import PrivateProjectIcon from "../../ui/icons/PrivateProjectIcon";
 import PublicProjectIcon from "../../ui/icons/PublicProjectIcon";
+import BasicPopup from "~/components/BasicPopup";
+
+import { find, merge, pick } from "lodash/fp";
+import moment from "moment";
 
 class ProjectsView extends React.Component {
   constructor(props) {
@@ -63,7 +66,10 @@ class ProjectsView extends React.Component {
   renderProjectDetails = ({ cellData: project }) => {
     return (
       <div className={cs.project}>
-        <div className={cs.projectName}>{project.name}</div>
+        <BasicPopup
+          trigger={<div className={cs.projectName}>{project.name}</div>}
+          content={project.name}
+        />
         <div className={cs.projectDescription}>{project.description}</div>
         <div className={cs.projectDetails}>
           <span className={cs.projectCreationDate}>
