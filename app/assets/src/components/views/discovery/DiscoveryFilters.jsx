@@ -4,8 +4,7 @@ import { find, forEach, pick } from "lodash/fp";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
-  TaxonFilter,
-  TimeFilter
+  TaxonFilter
 } from "~/components/common/filters";
 import FilterTag from "~ui/controls/FilterTag";
 import cs from "./discovery_filters.scss";
@@ -150,10 +149,11 @@ class DiscoveryFilters extends React.Component {
           {this.renderTags("location")}
         </div>
         <div className={cs.filterContainer}>
-          <TimeFilter
-            onChange={this.handleChange.bind(this, "timeSelected")}
-            selected={time && !!time.length ? timeSelected : null}
+          <BaseSingleFilter
+            label="Timeframe"
             options={time}
+            onChange={this.handleChange.bind(this, "timeSelected")}
+            value={time && !!time.length ? timeSelected : null}
           />
           {this.renderTags("time")}
         </div>

@@ -47,6 +47,8 @@ class DiscoveryView extends React.Component {
     this.state = assign(
       {
         currentTab: "projects",
+        filteredProjectDimensions: [],
+        filteredSampleDimensions: [],
         filters: {},
         loadingProjects: true,
         loadingVisualizations: true,
@@ -72,6 +74,7 @@ class DiscoveryView extends React.Component {
 
   componentDidMount() {
     this.resetData();
+    this.refreshDimensions();
     window.onpopstate = () => {
       this.setState(history.state, () => {
         this.resetData();
@@ -129,6 +132,8 @@ class DiscoveryView extends React.Component {
     const { project } = this.state;
     this.setState(
       {
+        filteredProjectDimensions: [],
+        filteredSampleDimensions: [],
         projects: compact([project]),
         sampleIds: [],
         samples: [],
@@ -184,10 +189,28 @@ class DiscoveryView extends React.Component {
     this.setState(pickBy(identity, { projectDimensions, sampleDimensions }));
   };
 
+  refreshFilteredDimensions = async () => {
+    const { domain } = this.props;
+    const { project } = this.state;
+
+    const {
+      projectDimensions: filteredProjectDimensions,
+      sampleDimensions: filteredSampleDimensions
+    } = await getDiscoveryDimensions({
+      domain,
+      projectId: project && project.id,
+      filters: this.preparedFilters()
+    });
+
+    this.setState(
+      pickBy(identity, { filteredProjectDimensions, filteredSampleDimensions })
+    );
+  };
+
   refreshAll = () => {
     const { project } = this.state;
     !project && this.refreshSynchronousData();
-    this.refreshDimensions();
+    this.refreshFilteredDimensions();
   };
 
   computeTabs = () => {
@@ -383,14 +406,16 @@ class DiscoveryView extends React.Component {
   render() {
     const {
       currentTab,
-      projectDimensions,
-      sampleDimensions,
+      filteredProjectDimensions,
+      filteredSampleDimensions,
       filters,
       loadingProjects,
       loadingVisualizations,
       loadingSamples,
       project,
+      projectDimensions,
       projects,
+      sampleDimensions,
       sampleIds,
       samples,
       showFilters,
@@ -495,6 +520,8 @@ class DiscoveryView extends React.Component {
                   className={cs.sidebar}
                   samples={samples}
                   projects={projects}
+                  sampleDimensions={filteredSampleDimensions}
+                  projectDimensions={filteredProjectDimensions}
                   currentTab={currentTab}
                   loading={loadingSamples || loadingProjects}
                 />
