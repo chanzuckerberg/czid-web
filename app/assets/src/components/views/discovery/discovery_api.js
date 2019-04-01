@@ -37,11 +37,13 @@ const getDiscoveryDimensions = async ({
   includeStats = false
 }) => {
   try {
-    const actions = compact([
+    const actions = [
       getSampleDimensions({ domain, filters, projectId, search }),
-      !projectId && getProjectDimensions({ domain, filters, search }),
-      includeStats && getSampleStats({ domain, filters, projectId, search })
-    ]);
+      !projectId ? getProjectDimensions({ domain, filters, search }) : null,
+      includeStats
+        ? getSampleStats({ domain, filters, projectId, search })
+        : null
+    ];
     const [
       sampleDimensions,
       projectDimensions,

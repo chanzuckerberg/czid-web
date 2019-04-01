@@ -40,7 +40,6 @@ export default class DiscoverySidebar extends React.Component {
       sampleStats
     } = newProps;
     if (loading) return prevState;
-
     const dimensions =
       currentTab === "projects" ? projectDimensions : sampleDimensions;
 

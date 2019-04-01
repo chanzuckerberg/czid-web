@@ -542,9 +542,13 @@ class DiscoveryView extends React.Component {
                   className={cs.sidebar}
                   samples={samples}
                   projects={projects}
-                  sampleDimensions={filteredSampleDimensions}
+                  sampleDimensions={
+                    filterCount ? filteredSampleDimensions : sampleDimensions
+                  }
                   sampleStats={filteredSampleStats}
-                  projectDimensions={filteredProjectDimensions}
+                  projectDimensions={
+                    filterCount ? filteredProjectDimensions : projectDimensions
+                  }
                   currentTab={currentTab}
                   loading={loadingSamples || loadingProjects}
                 />
