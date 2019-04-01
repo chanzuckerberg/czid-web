@@ -301,7 +301,7 @@ class SamplesView extends React.Component {
     this.setState({ phyloTreeCreationModalOpen: false });
   };
 
-  handleRowClick = ({ event, index, rowData }) => {
+  handleRowClick = ({ event, rowData }) => {
     const { onSampleSelected, samples } = this.props;
     const sample = find({ id: rowData.id }, samples);
     onSampleSelected && onSampleSelected({ sample, currentEvent: event });

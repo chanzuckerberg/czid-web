@@ -80,7 +80,7 @@ class ProjectsView extends React.Component {
     return list && list.length > 0 ? list.join(", ") : "N/A";
   };
 
-  handleRowClick = ({ event, index, rowData }) => {
+  handleRowClick = ({ rowData }) => {
     const { onProjectSelected, projects } = this.props;
     const project = find({ id: rowData.id }, projects);
     onProjectSelected && onProjectSelected({ project });

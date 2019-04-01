@@ -190,7 +190,7 @@ class SamplesController < ApplicationController
     locations = locations.map do |location, count|
       { value: location, text: location, count: count }
     end
-    not_set_count = samples.count - locations.map { |l| l[:count] }.reduce(:+)
+    not_set_count = samples.count - locations.sum { |l| l[:count] }
     if not_set_count > 0
       locations << { value: "not_set", text: "Unknown", count: not_set_count }
     end
@@ -199,7 +199,7 @@ class SamplesController < ApplicationController
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
     end
-    not_set_count = samples.count - tissues.map { |l| l[:count] }.reduce(:+)
+    not_set_count = samples.count - tissues.sum { |l| l[:count] }
     if not_set_count > 0
       tissues << { value: "not_set", text: "Unknown", count: not_set_count }
     end
@@ -221,8 +221,8 @@ class SamplesController < ApplicationController
     ]
 
     # TODO(tiago): move grouping to a helper function (similar code in projects_controller)
-    min_date = samples.minimum(:created_at).to_date
-    max_date = samples.maximum(:created_at).to_date
+    min_date = samples.minimum(:created_at).utc.to_date
+    max_date = samples.maximum(:created_at).utc.to_date
     span = (max_date - min_date + 1).to_i
     if span <= MAX_BINS
       # we group by day if the span is shorter than MAX_BINS days

@@ -55,13 +55,16 @@ export default class DiscoverySidebar extends React.Component {
         )
       },
       metadata: {
-        host: (find({ dimension: "host" }, dimensions) || {}).values || [],
-        tissue: (find({ dimension: "tissue" }, dimensions) || {}).values || [],
-        location:
-          (find({ dimension: "location" }, dimensions) || {}).values || [],
-        time: (find({ dimension: "time_bins" }, dimensions) || {}).values || []
+        host: DiscoverySidebar.loadDimension(dimensions, "host"),
+        tissue: DiscoverySidebar.loadDimension(dimensions, "tissue"),
+        location: DiscoverySidebar.loadDimension(dimensions, "location"),
+        time: DiscoverySidebar.loadDimension(dimensions, "time_bins")
       }
     };
+  }
+
+  static loadDimension(dimensions, dimensionKey) {
+    return (find({ dimension: dimensionKey }, dimensions) || {}).values || [];
   }
 
   static formatDate(createdAt) {
@@ -78,9 +81,17 @@ export default class DiscoverySidebar extends React.Component {
 
     const dates = metadata[field];
     const total = (maxBy("count", dates) || {}).count;
-
-    const firstDate = dates.length ? dates[0].interval.start : null;
-    const lastDate = dates.length ? dates[dates.length - 1].interval.end : null;
+    const isIntervalBased = !!dates.length && dates[0].interval;
+    const firstDate = dates.length
+      ? isIntervalBased
+        ? dates[0].interval.start
+        : dates[0].value
+      : null;
+    const lastDate = dates.length
+      ? isIntervalBased
+        ? dates[dates.length - 1].interval.end
+        : dates[0].value
+      : null;
     return (
       <div className={cs.histogramContainer}>
         <div className={cs.dateHistogram}>
