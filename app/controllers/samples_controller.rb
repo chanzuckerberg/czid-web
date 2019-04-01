@@ -291,10 +291,10 @@ class SamplesController < ApplicationController
     if sample_ids.count > 0
       pipeline_run_ids = top_pipeline_runs_multiget(sample_ids).values
       avg_total_reads, avg_remaining_reads = PipelineRun
-                                            .where(id: pipeline_run_ids)
-                                            .pluck("ROUND(AVG(`pipeline_runs`.`total_reads`)), ROUND(AVG(`pipeline_runs`.`adjusted_remaining_reads`))")
-                                            .first
-                                            .map(&:to_i)
+                                             .where(id: pipeline_run_ids)
+                                             .pluck("ROUND(AVG(`pipeline_runs`.`total_reads`)), ROUND(AVG(`pipeline_runs`.`adjusted_remaining_reads`))")
+                                             .first
+                                             .map(&:to_i)
     end
 
     respond_to do |format|
