@@ -32,7 +32,6 @@ import DiscoveryFilters from "./DiscoveryFilters";
 import ProjectHeader from "./ProjectHeader";
 import {
   getDiscoverySyncData,
-  getDiscoveryDimensions,
   getDiscoveryDimensionsAndStats,
   getDiscoverySamples,
   DISCOVERY_DOMAIN_LIBRARY,
@@ -75,8 +74,10 @@ class DiscoveryView extends React.Component {
   }
 
   componentDidMount() {
-    this.resetData();
     this.refreshDimensions();
+    this.refreshSynchronousData();
+    this.getFilterCount() && this.refreshFilteredDimensions();
+
     window.onpopstate = () => {
       this.setState(history.state, () => {
         this.resetData();
@@ -222,29 +223,10 @@ class DiscoveryView extends React.Component {
     );
   };
 
-  refreshFilteredDimensions = async () => {
-    const { domain } = this.props;
-    const { project } = this.state;
-
-    const {
-      projectDimensions: filteredProjectDimensions,
-      sampleDimensions: filteredSampleDimensions
-    } = await getDiscoveryDimensions({
-      domain,
-      projectId: project && project.id,
-      filters: this.preparedFilters()
-    });
-
-    this.setState(
-      pickBy(identity, { filteredProjectDimensions, filteredSampleDimensions })
-    );
-  };
-
   refreshAll = () => {
     const { project } = this.state;
-
     !project && this.refreshSynchronousData();
-    !!this.getFilterCount() && this.refreshFilteredDimensions();
+    this.refreshFilteredDimensions();
   };
 
   computeTabs = () => {
