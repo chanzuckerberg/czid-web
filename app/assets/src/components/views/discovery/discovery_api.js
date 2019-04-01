@@ -1,4 +1,4 @@
-import { compact, get, map } from "lodash/fp";
+import { get, map } from "lodash/fp";
 import {
   getProjects,
   getSamples,
