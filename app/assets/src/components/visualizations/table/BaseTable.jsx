@@ -49,7 +49,7 @@ class BaseTable extends React.Component {
   basicHeaderRenderer({ label }) {
     return (
       <BasicPopup
-        trigger={<span className={cs.columnHeaderTooltipText}>{label}</span>}
+        trigger={<span className={cs.tooltipText}>{label}</span>}
         content={label}
       />
     );
@@ -59,7 +59,7 @@ class BaseTable extends React.Component {
     return (
       <BasicPopup
         trigger={
-          <div className={cs.columnHeaderTooltipText}>
+          <div className={cs.tooltipText}>
             {label}
             {sortBy === dataKey && (
               <SortIndicator sortDirection={sortDirection} />
