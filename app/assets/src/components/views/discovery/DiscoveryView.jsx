@@ -138,6 +138,7 @@ class DiscoveryView extends React.Component {
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
         filteredSampleStats: {},
+        loadingSamples: true,
         projects: compact([project]),
         sampleIds: [],
         samples: [],
