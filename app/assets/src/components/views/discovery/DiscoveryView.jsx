@@ -248,7 +248,12 @@ class DiscoveryView extends React.Component {
   };
 
   computeTabs = () => {
-    const { project, projects, visualizations } = this.state;
+    const {
+      project,
+      projects,
+      visualizations,
+      filteredSampleStats
+    } = this.state;
 
     const renderTab = (label, count) => {
       return (
@@ -265,7 +270,7 @@ class DiscoveryView extends React.Component {
         value: "projects"
       },
       {
-        label: renderTab("Samples", sumBy("number_of_samples", projects)),
+        label: renderTab("Samples", filteredSampleStats.count || 0),
         value: "samples"
       },
       !project && {
