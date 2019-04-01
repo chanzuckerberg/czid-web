@@ -288,7 +288,6 @@ class SamplesController < ApplicationController
     samples = filter_samples(samples, params)
     sample_ids = samples.pluck(:id)
 
-
     if sample_ids.count > 0
       pipeline_run_ids = top_pipeline_runs_multiget(sample_ids).values
       avg_total_reads, avg_remaining_reads = PipelineRun
