@@ -135,6 +135,7 @@ class ProjectsController < ApplicationController
 
     project_ids = samples.distinct(:project_id).pluck(:project_id)
     projects = Project.where(id: project_ids)
+    projects_count = projects.count
 
     locations = samples_by_metadata_field(sample_ids, "collection_location")
                 .joins(:sample)
@@ -175,40 +176,43 @@ class ProjectsController < ApplicationController
     ]
 
     # TODO(tiago): move grouping to a helper function (similar code in samples_controller)
-    min_date = projects.minimum(:created_at).utc.to_date
-    max_date = projects.maximum(:created_at).utc.to_date
-    span = (max_date - min_date + 1).to_i
-    if span <= MAX_BINS
-      # we group by day if the span is shorter than MAX_BINS days
-      bins_map = projects.group("DATE(`projects`.`created_at`)").count.map do |timestamp, count|
-        [timestamp.strftime("%Y-%m-%d"), count]
-      end.to_h
-      time_bins = (0...span).map do |offset|
-        date = (min_date + offset.days).to_s
-        {
-          value: date,
-          text: date,
-          count: bins_map[date] || 0
-        }
-      end
-    else
-      # we group by equally spaced MAX_BINS bins to cover the necessary span
-      step = (span.to_f / MAX_BINS).ceil
-      bins_map = projects.group(
-        ActiveRecord::Base.send(
-          :sanitize_sql_array,
-          ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, `projects`.`created_at`)/:step)", min_date: min_date, step: step]
-        )
-      ).count
-      time_bins = (0...MAX_BINS).map do |bucket|
-        start_date = min_date + (bucket * step).days
-        end_date = start_date + step - 1
-        {
-          interval: { start: start_date, end: end_date },
-          count: bins_map[bucket] || 0,
-          value: "#{start_date}:#{end_date}",
-          text: "#{start_date} - #{end_date}"
-        }
+    time_bins = []
+    if projects_count > 0
+      min_date = projects.minimum(:created_at).utc.to_date
+      max_date = projects.maximum(:created_at).utc.to_date
+      span = (max_date - min_date + 1).to_i
+      if span <= MAX_BINS
+        # we group by day if the span is shorter than MAX_BINS days
+        bins_map = projects.group("DATE(`projects`.`created_at`)").count.map do |timestamp, count|
+          [timestamp.strftime("%Y-%m-%d"), count]
+        end.to_h
+        time_bins = (0...span).map do |offset|
+          date = (min_date + offset.days).to_s
+          {
+            value: date,
+            text: date,
+            count: bins_map[date] || 0
+          }
+        end
+      else
+        # we group by equally spaced MAX_BINS bins to cover the necessary span
+        step = (span.to_f / MAX_BINS).ceil
+        bins_map = projects.group(
+          ActiveRecord::Base.send(
+            :sanitize_sql_array,
+            ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, `projects`.`created_at`)/:step)", min_date: min_date, step: step]
+          )
+        ).count
+        time_bins = (0...MAX_BINS).map do |bucket|
+          start_date = min_date + (bucket * step).days
+          end_date = start_date + step - 1
+          {
+            interval: { start: start_date, end: end_date },
+            count: bins_map[bucket] || 0,
+            value: "#{start_date}:#{end_date}",
+            text: "#{start_date} - #{end_date}"
+          }
+        end
       end
     end
 
