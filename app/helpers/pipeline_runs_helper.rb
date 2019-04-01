@@ -12,8 +12,10 @@ module PipelineRunsHelper
         "cdhitdup_out" => "Remove duplicate reads using CD-HIT-DUP.",
         "lzw_out" => "Remove low-complexity reads using LZW compression filter.",
         "bowtie2_out" => "Remove remaining host reads using Bowtie2.",
+        "star_human_out" => "Remove human reads using STAR.",
+        "bowtie2_human_out" => "Remove residual human reads using Bowtie2.",
         "subsampled_out" => "Subsample if there are too many remaining reads.",
-        "gsnap_filter_out" => "Remove remaining host reads using GSNAP."
+        "gsnap_filter_out" => "Remove residual human reads using GSNAP."
       }
     },
     PipelineRunStage::ALIGNMENT_STAGE_NAME => {

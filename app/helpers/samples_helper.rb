@@ -177,6 +177,7 @@ module SamplesHelper
     tissue = params[:tissue]
     visibility = params[:visibility]
     project_id = params[:projectId]
+    search_string = params[:search]
 
     samples = samples.where(project_id: project_id) if project_id.present?
     samples = filter_by_taxid(samples, taxon) if taxon.present?
@@ -185,6 +186,7 @@ module SamplesHelper
     samples = filter_by_time(samples, Date.parse(time[0]), Date.parse(time[1])) if time.present?
     samples = filter_by_metadata_key(samples, "sample_type", tissue) if tissue.present?
     samples = filter_by_visibility(samples, visibility) if visibility.present?
+    samples = filter_by_search_string(samples, search_string) if search_string.present?
 
     return samples
   end
@@ -568,5 +570,12 @@ module SamplesHelper
     pr_ids = TaxonByterange.where(taxid: taxid).pluck(:pipeline_run_id)
     sample_ids = PipelineRun.top_completed_runs.where(id: pr_ids).pluck(:sample_id)
     samples.where(id: sample_ids)
+  end
+
+  def filter_by_search_string(samples, search_string)
+    # query by name for a Sample attribute or pathogen name in the Sample.
+    # pass in a scope of pipeline runs using current_power
+    pipeline_run_ids = current_power.pipeline_runs.top_completed_runs.pluck(:id)
+    samples.search(search_string, pipeline_run_ids)
   end
 end

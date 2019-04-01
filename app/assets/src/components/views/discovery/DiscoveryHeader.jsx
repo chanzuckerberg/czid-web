@@ -8,10 +8,17 @@ import SearchBox from "~ui/controls/SearchBox";
 import cs from "./discovery_header.scss";
 import cx from "classnames";
 
+const SEARCH_CATEGORIES = [
+  "taxon",
+  "project",
+  "sample",
+  "location",
+  "host",
+  "tissue"
+];
 class DiscoveryHeader extends React.Component {
-  handleSearchResultSelected = (_, { result }) => {
+  handleSearchResultSelected = (currentEvent, { result }) => {
     const { onSearchResultSelected } = this.props;
-
     // TODO(tiago): refactor search suggestions endpoint to return standard format data
     // category "Taxon": key: "taxon", value: taxid, text: title
     // category "Project": key: "project", value: id, text: title
@@ -19,27 +26,44 @@ class DiscoveryHeader extends React.Component {
     // category "Location": key: "location", value: id, text: title
     // category "Host": key: "host", value: id, text: title
     // category "Tissue": key: "tissue", value: id, text: title
-    // category "Uploader": key: "uploader", value: id[0], text: title
-    const value = Array.isArray(result.id)
-      ? result.id[0]
-      : result.id ||
-        result.taxid ||
-        (result.sample_ids && result.sample_ids[0]);
+    const category = result.category.toLowerCase();
+    let value = result.id;
+    switch (category) {
+      case "taxon": {
+        value = result.taxid;
+        break;
+      }
+      case "sample": {
+        value = result.sample_ids[0];
+        break;
+      }
+      default: {
+        value = result.id;
+        break;
+      }
+    }
 
     const parsedResult = {
-      key: result.category.toLowerCase(),
+      key: category,
       value: value,
       text: result.title
     };
 
-    onSearchResultSelected && onSearchResultSelected(parsedResult);
+    onSearchResultSelected &&
+      onSearchResultSelected(parsedResult, currentEvent);
+  };
+
+  handleSearchEnterPressed = currentEvent => {
+    const { onSearchEnterPressed } = this.props;
+
+    const search = currentEvent.target.value;
+    onSearchEnterPressed && onSearchEnterPressed(search);
   };
 
   render() {
     const {
       currentTab,
       filterCount,
-      onSearchEnterPressed,
       onFilterToggle,
       onStatsToggle,
       onTabChange,
@@ -65,8 +89,9 @@ class DiscoveryHeader extends React.Component {
           <SearchBox
             category
             serverSearchAction="search_suggestions"
+            serverSearchActionArgs={{ categories: SEARCH_CATEGORIES }}
             onResultSelect={this.handleSearchResultSelected}
-            onEnter={onSearchEnterPressed}
+            onEnter={this.handleSearchEnterPressed}
             initialValue=""
             placeholder="Search"
           />

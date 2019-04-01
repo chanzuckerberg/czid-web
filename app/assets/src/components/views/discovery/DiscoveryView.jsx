@@ -38,6 +38,7 @@ import {
   DISCOVERY_DOMAIN_PUBLIC
 } from "./discovery_api";
 import NoResultsBanner from "./NoResultsBanner";
+import { openUrl } from "~utils/links";
 
 class DiscoveryView extends React.Component {
   constructor(props) {
@@ -59,6 +60,7 @@ class DiscoveryView extends React.Component {
         sampleIds: [],
         samples: [],
         samplesAllLoaded: false,
+        search: null,
         showFilters: true,
         showStats: true,
         visualizations: []
@@ -147,7 +149,7 @@ class DiscoveryView extends React.Component {
 
   refreshSynchronousData = async () => {
     const { domain } = this.props;
-    const { project } = this.state;
+    const { project, search } = this.state;
 
     this.setState({
       loadingProjects: true,
@@ -158,7 +160,8 @@ class DiscoveryView extends React.Component {
     const { projects = [], visualizations = [] } = await getDiscoverySyncData({
       domain,
       filters: this.preparedFilters(),
-      projectId: project && project.id
+      projectId: project && project.id,
+      search
     });
 
     this.setState({
@@ -172,14 +175,15 @@ class DiscoveryView extends React.Component {
 
   refreshDimensions = async () => {
     const { domain } = this.props;
-    const { project } = this.state;
+    const { project, search } = this.state;
 
     const {
       projectDimensions,
       sampleDimensions
     } = await getDiscoveryDimensions({
       domain,
-      projectId: project && project.id
+      projectId: project && project.id,
+      search
     });
 
     this.setState(pickBy(identity, { projectDimensions, sampleDimensions }));
@@ -187,7 +191,7 @@ class DiscoveryView extends React.Component {
 
   refreshFilteredDimensions = async () => {
     const { domain } = this.props;
-    const { filters, project } = this.state;
+    const { project } = this.state;
 
     const {
       projectDimensions: filteredProjectDimensions,
@@ -197,11 +201,7 @@ class DiscoveryView extends React.Component {
       projectId: project && project.id,
       filters: this.preparedFilters()
     });
-    console.log(
-      "DiscoveryView:refreshFilteredDimensions",
-      filteredProjectDimensions,
-      filteredSampleDimensions
-    );
+
     this.setState(
       pickBy(identity, { filteredProjectDimensions, filteredSampleDimensions })
     );
@@ -252,10 +252,11 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleSearchSelected = ({ key, value, text }) => {
+  handleSearchSelected = ({ key, value, text }, currentEvent) => {
     const {
       currentTab,
       filters,
+      projects,
       projectDimensions,
       sampleDimensions
     } = this.state;
@@ -267,24 +268,53 @@ class DiscoveryView extends React.Component {
     let newFilters = clone(filters);
     const selectedKey = `${key}Selected`;
     let filtersChanged = false;
-    if (key === "taxon") {
-      newFilters[selectedKey] = xorBy(
-        "value",
-        [{ value, text }],
-        newFilters[selectedKey]
-      );
-      filtersChanged = true;
-    } else {
-      const dimension = find({ dimension: key }, dimensions);
-      // TODO(tiago): currently we check if it is a valid option. We should (preferably) change server endpoint
-      // to filter by project/sample set or at least provide feedback to the user in else branch
-      if (dimension && find({ value }, dimension.values)) {
-        newFilters[selectedKey] = xor([value], newFilters[selectedKey]);
+    switch (key) {
+      case "taxon": {
+        // If the user selected a taxon we add it to the dropdown
+        // (since we do know which options are available, we always added)
+        newFilters[selectedKey] = xorBy(
+          "value",
+          [{ value, text }],
+          newFilters[selectedKey]
+        );
         filtersChanged = true;
+        break;
+      }
+      case "sample": {
+        this.handleSampleSelected({ sample: { id: value }, currentEvent });
+        break;
+      }
+      case "project": {
+        const project = find({ id: value }, projects);
+        this.handleProjectSelected({ project });
+        break;
+      }
+      default: {
+        // For other 'dimension' types of search we check if it is a valid option
+        // If so, we add a new filter, otherwise we ignore it
+        const dimension = find({ dimension: key }, dimensions);
+        // TODO(tiago): currently we check if it is a valid option. We should (preferably) change server endpoint
+        // to filter by project/sample set or at least provide feedback to the user in else branch
+        if (dimension && find({ value }, dimension.values)) {
+          newFilters[selectedKey] = xor([value], newFilters[selectedKey]);
+          filtersChanged = true;
+        }
       }
     }
     if (filtersChanged) {
       this.setState({ filters: newFilters }, () => {
+        this.updateBrowsingHistory("replace");
+        this.resetData();
+      });
+    }
+  };
+
+  handleStringSearch = search => {
+    const { search: currentSearch } = this.state;
+
+    let parsedSearch = search.trim() || null;
+    if (currentSearch !== parsedSearch) {
+      this.setState({ search: parsedSearch }, () => {
         this.updateBrowsingHistory("replace");
         this.resetData();
       });
@@ -301,7 +331,13 @@ class DiscoveryView extends React.Component {
 
   handleLoadSampleRows = async ({ startIndex, stopIndex }) => {
     const { domain } = this.props;
-    const { project, samples, sampleIds, samplesAllLoaded } = this.state;
+    const {
+      project,
+      samples,
+      sampleIds,
+      samplesAllLoaded,
+      search
+    } = this.state;
 
     const previousLoadedSamples = samples.slice(startIndex, stopIndex + 1);
     const neededStartIndex = Math.max(startIndex, samples.length);
@@ -316,6 +352,7 @@ class DiscoveryView extends React.Component {
         domain,
         filters: this.preparedFilters(),
         projectId: project && project.id,
+        search,
         limit: stopIndex - neededStartIndex + 1,
         offset: neededStartIndex,
         listAllIds: sampleIds.length == 0
@@ -349,6 +386,10 @@ class DiscoveryView extends React.Component {
         this.resetData();
       }
     );
+  };
+
+  handleSampleSelected = ({ sample, currentEvent }) => {
+    openUrl(`/samples/${sample.id}`, currentEvent);
   };
 
   handleProjectUpdated = ({ project }) => {
@@ -415,6 +456,7 @@ class DiscoveryView extends React.Component {
             onFilterToggle={this.handleFilterToggle}
             onStatsToggle={this.handleStatsToggle}
             onSearchResultSelected={this.handleSearchSelected}
+            onSearchEnterPressed={this.handleStringSearch}
             showStats={showStats}
             showFilters={showFilters}
           />
@@ -455,6 +497,7 @@ class DiscoveryView extends React.Component {
                   onLoadRows={this.handleLoadSampleRows}
                   samples={samples}
                   selectableIds={sampleIds}
+                  onSampleSelected={this.handleSampleSelected}
                 />
               )}
               {currentTab == "visualizations" && (
