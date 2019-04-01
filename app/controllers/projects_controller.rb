@@ -175,8 +175,8 @@ class ProjectsController < ApplicationController
     ]
 
     # TODO(tiago): move grouping to a helper function (similar code in samples_controller)
-    min_date = projects.minimum(:created_at).to_date
-    max_date = projects.maximum(:created_at).to_date
+    min_date = projects.minimum(:created_at).utc.to_date
+    max_date = projects.maximum(:created_at).utc.to_date
     span = (max_date - min_date + 1).to_i
     if span <= MAX_BINS
       # we group by day if the span is shorter than MAX_BINS days
