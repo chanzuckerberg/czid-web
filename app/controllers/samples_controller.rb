@@ -48,7 +48,7 @@ class SamplesController < ApplicationController
   PAGE_SIZE = 30
   DEFAULT_MAX_NUM_TAXONS = 30
   MAX_PAGE_SIZE_V2 = 100
-  MAX_BINS_SAMPLE_TIME = 34
+  MAX_BINS = 34
 
   # GET /samples
   # GET /samples.json
@@ -179,25 +179,30 @@ class SamplesController < ApplicationController
 
     # Access control enforced within samples_by_domain
     samples = samples_by_domain(domain)
-
     unless param_sample_ids.empty?
       samples = samples.where(id: param_sample_ids)
     end
-    sample_ids = samples.pluck(:id)
-
     samples = filter_samples(samples, params)
+
+    sample_ids = samples.pluck(:id)
 
     locations = samples_by_metadata_field(sample_ids, "collection_location").count
     locations = locations.map do |location, count|
       { value: location, text: location, count: count }
     end
-    locations << { value: 0, text: "Unknown", count: samples.count - locations.map(&:count).reduce(:+) }
+    not_set_count = samples.count - locations.map{|l| l[:count]}.reduce(:+)
+    if not_set_count > 0
+      locations << { value: "not_set", text: "Unknown", count: not_set_count }
+    end
 
     tissues = samples_by_metadata_field(sample_ids, "sample_type").count
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
     end
-    tissues << { value: 0, text: "Unknown", count: samples.count - tissues.map(&:count).reduce(:+) }
+    not_set_count = samples.count - tissues.map{|l| l[:count]}.reduce(:+)
+    if not_set_count > 0
+      tissues << { value: "not_set", text: "Unknown", count: not_set_count }
+    end
 
     # visibility
     public_count = samples.public_samples.count
@@ -214,38 +219,41 @@ class SamplesController < ApplicationController
       { value: "6_month", text: "Last 6 Months", count: samples.where("samples.created_at >= ?", 6.months.ago.utc).count },
       { value: "1_year", text: "Last Year", count: samples.where("samples.created_at >= ?", 1.year.ago.utc).count },
     ]
-    times << { value: "older_1_year", text: "Older Than 1 Year", count: samples.count - times.map(&:count).reduce(:+) }
 
+    # TODO(tiago): move grouping to a helper function (similar code in projects_controller)
     min_date, max_date = samples.minimum(:created_at).to_date, samples.maximum(:created_at).to_date
     span = (max_date - min_date + 1).to_i
-    # we group by day if the span is shorter than MAX_BINS_SAMPLE_TIME days (determined by frontend)
-    if span <= MAX_BINS_SAMPLE_TIME
-      bins = samples.group("DATE(samples.created_at)").count
-      time_bins = bins.sort.map do |timestamp, count|
+    if span <- MAX_BINS
+      # we group by day if the span is shorter than MAX_BINS days
+      bins_map = samples.group("DATE(`samples`.`created_at`)").count.map do |timestamp, count|
+        [timestamp.strftime("%Y-%m-%d"), count]
+      end.to_h
+      time_bins = (0...span).map do |offset|
+        date = (min_date + offset.days).to_s
         {
-          value: timestamp.strftime("%Y-%m-%d"),
-          text: timestamp.strftime("%Y-%m-%d"),
-          count: count
+          value: date,
+          text: date,
+          count: bins_map[date] || 0
         }
       end
     else
-      step = (span.to_f / MAX_BINS_SAMPLE_TIME).ceil
-      bins_map = Sample.group(
+      # we group by equally spaced MAX_BINS bins to cover the necessary span
+      step = (span.to_f / MAX_BINS).ceil
+      bins_map = samples.group(
         ActiveRecord::Base.send(:sanitize_sql_array,
-          ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, created_at)/:step)", min_date: min_date, step: step]
+          ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, `samples`.`created_at`)/:step)", min_date: min_date, step: step]
         )).count
-      time_bins = (0...MAX_BINS_SAMPLE_TIME).map do |bucket|
+      time_bins = (0...MAX_BINS).map do |bucket|
         start_date = min_date + (bucket * step).days
         end_date = start_date + step - 1
         {
           interval: {start: start_date, end: end_date},
-          count: bins_map[bucket],
+          count: bins_map[bucket] || 0,
           value: "#{start_date}:#{end_date}",
-          text: "#{start_date}:#{end_date}"
+          text: "#{start_date} - #{end_date}"
         }
       end
     end
-
 
     hosts = samples.joins(:host_genome).group(:host_genome).count
     hosts = hosts.map do |host, count|
@@ -276,7 +284,7 @@ class SamplesController < ApplicationController
 
   def search_suggestions
     query = params[:query]
-    # TODO: consider moving into a search_controller or into separate controllers/models
+    # TODO: move into a search_controller or into separate controllers/models
     categories = params[:categories]
 
     # Generate structure required by CategorySearchBox

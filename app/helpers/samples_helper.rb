@@ -543,14 +543,20 @@ module SamplesHelper
   def filter_by_metadata_key(samples, key, query)
     # TODO(tiago): replace 'filter_by_metadatum' once we decide to includeing not set values
     metadata_field = Metadatum.where(key: key).first
-    samples
+
+    samples_with_metadata = samples
       .includes(metadata: :metadata_field)
-      .where(
-        metadata: {
-          metadata_field_id: metadata_field.metadata_field_id,
-          metadata_field.validated_field => query
-        }
-      )
+      .where(metadata: { metadata_field_id: metadata_field.metadata_field_id })
+
+    samples_filtered = samples_with_metadata
+      .where(metadata: { metadata_field.validated_field => query })
+
+    not_set_ids = []
+    if query.include?("not_set")
+      not_set_ids = samples.pluck(:id) - samples_with_metadata.pluck(:id)
+    end
+
+    samples.where(id: [samples_filtered.pluck(:id)].concat(not_set_ids))
   end
 
   def filter_by_host(samples, query)

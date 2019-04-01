@@ -40,6 +40,8 @@ class ProjectsController < ApplicationController
   clear_respond_to
   respond_to :json
 
+  MAX_BINS = 34
+
   # GET /projects
   # GET /projects.json
   def index
@@ -127,7 +129,8 @@ class ProjectsController < ApplicationController
     domain = params[:domain]
 
     samples = samples_by_domain(domain)
-    # Filter by access control
+    samples = filter_samples(samples, params)
+
     sample_ids = samples.pluck(:id)
 
     project_ids = samples.distinct(:project_id).pluck(:project_id)
@@ -171,6 +174,41 @@ class ProjectsController < ApplicationController
         count: projects.where("projects.created_at >= ?", 1.year.ago.utc).count }
     ]
 
+    # TODO(tiago): move grouping to a helper function (similar code in samples_controller)
+    min_date, max_date = projects.minimum(:created_at).to_date, projects.maximum(:created_at).to_date
+    span = (max_date - min_date + 1).to_i
+    if span <- MAX_BINS
+      # we group by day if the span is shorter than MAX_BINS days
+      bins_map = projects.group("DATE(`projects`.`created_at`)").count.map do |timestamp, count|
+        [timestamp.strftime("%Y-%m-%d"), count]
+      end.to_h
+      time_bins = (0...span).map do |offset|
+        date = (min_date + offset.days).to_s
+        {
+          value: date,
+          text: date,
+          count: bins_map[date] || 0
+        }
+      end
+    else
+      # we group by equally spaced MAX_BINS bins to cover the necessary span
+      step = (span.to_f / MAX_BINS).ceil
+      bins_map = projects.group(
+        ActiveRecord::Base.send(:sanitize_sql_array,
+          ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, `projects`.`created_at`)/:step)", min_date: min_date, step: step]
+        )).count
+      time_bins = (0...MAX_BINS).map do |bucket|
+        start_date = min_date + (bucket * step).days
+        end_date = start_date + step - 1
+        {
+          interval: {start: start_date, end: end_date},
+          count: bins_map[bucket] || 0,
+          value: "#{start_date}:#{end_date}",
+          text: "#{start_date} - #{end_date}"
+        }
+      end
+    end
+
     hosts = samples.includes(:host_genome).group(:host_genome).distinct.count(:project_id)
     hosts = hosts.map do |host, count|
       { value: host.id, text: host.name, count: count }
@@ -182,6 +220,7 @@ class ProjectsController < ApplicationController
           { dimension: "location", values: locations },
           { dimension: "visibility", values: visibility },
           { dimension: "time", values: times },
+          { dimension: "time_bins", values: time_bins },
           { dimension: "host", values: hosts },
           { dimension: "tissue", values: tissues }
         ]

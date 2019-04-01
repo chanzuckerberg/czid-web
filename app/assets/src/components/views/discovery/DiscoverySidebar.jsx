@@ -1,15 +1,6 @@
 import React from "react";
 import cx from "classnames";
-import {
-  countBy,
-  flatten,
-  map,
-  orderBy,
-  sum,
-  sumBy,
-  uniqBy,
-  meanBy
-} from "lodash/fp";
+import { find, get, maxBy, meanBy, orderBy, sumBy } from "lodash/fp";
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
@@ -30,68 +21,49 @@ export default class DiscoverySidebar extends React.Component {
         avgNonHostReads: ""
       },
       metadata: {
-        host: {},
-        tissue: {},
-        createdAt: {},
-        location: {}
+        host: [],
+        tissue: [],
+        time: [],
+        location: []
       },
       expandedMetadataGroups: new Set()
     };
   }
 
   static getDerivedStateFromProps(newProps, prevState) {
-    const { currentTab, projects, loading } = newProps;
+    const {
+      currentTab,
+      loading,
+      projectDimensions,
+      projects,
+      sampleDimensions
+    } = newProps;
     if (loading) return prevState;
 
-    if (currentTab === "samples") {
-      const samples = DiscoverySidebar.selectSampleData(newProps.samples);
-      return {
-        stats: {
-          numSamples: samples.length,
-          numProjects: uniqBy("project_id", samples).length,
-          avgTotalReads: DiscoverySidebar.meanByAndFormat(
-            samples,
-            "totalReads"
-          ),
-          avgNonHostReads: DiscoverySidebar.meanByAndFormat(
-            samples,
-            "nonHostReads"
-          )
-        },
-        metadata: {
-          host: countBy("hostGenome", samples),
-          tissue: countBy("sampleTissue", samples),
-          createdAt: countBy("createdAt", samples),
-          location: countBy("sampleLocation", samples)
-        }
-      };
-    } else if (currentTab === "projects") {
-      const hosts = flatten(map("hosts", projects));
-      const tissues = flatten(map("tissues", projects));
-      const locations = flatten(map("locations", projects));
+    const dimensions =
+      currentTab === "projects" ? projectDimensions : sampleDimensions;
 
-      const createdAts = map(
-        project => DiscoverySidebar.formatDate(project.created_at),
-        projects
-      );
-
-      return {
-        stats: {
-          numSamples: sumBy("number_of_samples", projects),
-          numProjects: projects.length
-        },
-        metadata: {
-          host: countBy(null, hosts),
-          tissue: countBy(null, tissues),
-          createdAt: countBy(null, createdAts),
-          location: countBy(null, locations)
-        }
-      };
-    } else {
-      // eslint-disable-next-line no-console
-      console.error("Not supported: " + currentTab);
-      return prevState;
-    }
+    return {
+      stats: {
+        numSamples: sumBy("number_of_samples", projects),
+        numProjects: projects.length,
+        avgTotalReads: DiscoverySidebar.meanByAndFormat(
+          newProps.samples,
+          "totalReads"
+        ),
+        avgNonHostReads: DiscoverySidebar.meanByAndFormat(
+          newProps.samples,
+          "nonHostReads.value"
+        )
+      },
+      metadata: {
+        host: (find({ dimension: "host" }, dimensions) || {}).values || [],
+        tissue: (find({ dimension: "tissue" }, dimensions) || {}).values || [],
+        location:
+          (find({ dimension: "location" }, dimensions) || {}).values || [],
+        time: (find({ dimension: "time_bins" }, dimensions) || {}).values || []
+      }
+    };
   }
 
   static formatDate(createdAt) {
@@ -99,69 +71,50 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   static meanByAndFormat(data, field) {
-    return (Math.round(meanBy(field, data)) || "").toLocaleString();
+    return (Math.round(meanBy(get(field), data)) || "").toLocaleString();
   }
 
-  static selectSampleData(newSamples) {
-    return newSamples.map(sample => ({
-      hostGenome: sample.host || "Unknown",
-      project: sample.sample.project,
-      sampleTissue: sample.sampleType || "Unknown",
-      createdAt: DiscoverySidebar.formatDate(sample.sample.createdAt),
-      sampleLocation: sample.sampleLocation || "Unknown",
-      totalReads: sample.totalReads,
-      nonHostReads: sample.nonHostReads.value
-    }));
-  }
-
-  handleFilterClick(key) {
-    // TODO (gdingle): coordinate with filters on left sidebar
-    window.history.pushState("", "", "?" + key);
-  }
-
-  // TODO (gdingle): auto scale to day week or month?
   buildDateHistogram(field) {
-    const dates = this.state.metadata[field];
+    const { onFilterClick } = this.props;
+    const { metadata } = this.state;
 
-    const total = sum(Object.values(dates));
-    const dateKeys = Object.keys(dates);
-    dateKeys.sort();
-    const firstDate = dateKeys[0];
-    const lastDate = dateKeys[dateKeys.length - 1];
+    const dates = metadata[field];
+    const total = (maxBy("count", dates) || {}).count;
+
+    const firstDate = dates.length ? dates[0].interval.start : null;
+    const lastDate = dates.length ? dates[dates.length - 1].interval.end : null;
     return (
       <div className={cs.histogramContainer}>
         <div className={cs.dateHistogram}>
-          {dateKeys.map(key => {
-            const percent = Math.round(100 * dates[key] / total, 0);
+          {dates.map(entry => {
+            const percent = Math.round(100 * entry.count / total, 0);
             const element = (
               <div
                 className={cs.bar}
-                key={key}
+                key={entry.value}
                 style={{ height: percent + "px" }}
-                onClick={() => this.handleFilterClick(key)}
+                onClick={() => onFilterClick && onFilterClick(entry)}
               >
                 &nbsp;
               </div>
             );
             const tooltipMessage = (
               <span>
-                {key}
+                {entry.text}
                 <br />
-                {dates[key]}
+                {entry.count}
               </span>
             );
             return (
               <BasicPopup
-                key={key}
+                key={entry.value}
                 trigger={element}
                 content={tooltipMessage}
               />
             );
           })}
         </div>
-        <div
-          className={cx(cs.histogramLabels, dateKeys.length < 3 && cs.evenly)}
-        >
+        <div className={cx(cs.histogramLabels, dates.length < 3 && cs.evenly)}>
           <div className={cs.label}>{firstDate}</div>
           {firstDate !== lastDate && <div className={cs.label}>{lastDate}</div>}
         </div>
@@ -171,20 +124,15 @@ export default class DiscoverySidebar extends React.Component {
 
   buildMetadataRows(field) {
     const { metadata, expandedMetadataGroups } = this.state;
-    const fieldData = metadata[field];
-
+    const dataRows = metadata[field];
     // Sort by the value desc and then by the label alphabetically
-    const sorted = orderBy(
-      [k => k[1], k => k[0]],
-      ["desc", "asc"],
-      Object.entries(fieldData)
-    );
+    const sorted = orderBy(["count", "text"], ["desc", "asc"], dataRows);
 
     // Display N fields and show/hide the rest
     const defaultN = this.props.defaultNumberOfMetadataRows;
     const defaultRows = sorted.slice(0, defaultN);
     const extraRows = sorted.slice(defaultN);
-    const total = sum(Object.values(fieldData));
+    const total = sumBy("count", dataRows);
     return (
       <dl className={cs.dataList}>
         {this.renderMetadataRowBlock(defaultRows, total)}
@@ -212,18 +160,18 @@ export default class DiscoverySidebar extends React.Component {
 
   renderMetadataRowBlock(rows, total) {
     return rows.map((entry, i) => {
-      const [key, count] = entry;
+      const { count, text, value } = entry;
       const percent = Math.round(100 * count / total, 0);
       return [
-        <dt className={cs.barLabel} key={key + i + "label"}>
-          <a href={"#" + key} onClick={() => this.handleFilterClick(key)}>
-            {key.toLowerCase() == "unknown" ? <i>{key}</i> : key}
+        <dt className={cs.barLabel} key={`${value}_label_${i}`}>
+          <a onClick={() => this.handleFilterClick(value)}>
+            {value == "not_set" ? <i>{text}</i> : text}
           </a>
         </dt>,
-        <dd key={key + i + "number"}>
+        <dd key={`${value}_value_${i}`}>
           <span
             className={cs.bar}
-            // TODO (gdingle): make width depend on container
+            // TODO(gdingle): make width depend on container
             style={{ width: percent * 1.3 + "px" }}
           />
           <span className={cs.count}>{count}</span>
@@ -311,7 +259,7 @@ export default class DiscoverySidebar extends React.Component {
             open={this.hasData()}
             header={<div className={cs.title}>Date created</div>}
           >
-            <div>{this.buildDateHistogram("createdAt")}</div>
+            <div>{this.buildDateHistogram("time")}</div>
           </Accordion>
         </div>
         <div className={cs.metadataContainer}>
@@ -342,15 +290,17 @@ export default class DiscoverySidebar extends React.Component {
 DiscoverySidebar.defaultProps = {
   projects: [],
   samples: [],
-  currentTab: "samples",
   defaultNumberOfMetadataRows: 4
 };
 
 DiscoverySidebar.propTypes = {
   className: PropTypes.string,
-  projects: PropTypes.arrayOf(PropTypes.Project),
-  samples: PropTypes.arrayOf(PropTypes.Sample),
-  currentTab: PropTypes.string,
+  currentTab: PropTypes.string.isRequired,
+  defaultNumberOfMetadataRows: PropTypes.number,
   loading: PropTypes.bool,
-  defaultNumberOfMetadataRows: PropTypes.number
+  onFilterClick: PropTypes.func,
+  projectDimensions: PropTypes.array,
+  projects: PropTypes.arrayOf(PropTypes.Project),
+  sampleDimensions: PropTypes.array,
+  samples: PropTypes.arrayOf(PropTypes.Sample)
 };
