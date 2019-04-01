@@ -190,7 +190,7 @@ class SamplesController < ApplicationController
     locations = locations.map do |location, count|
       { value: location, text: location, count: count }
     end
-    not_set_count = samples.count - locations.map{|l| l[:count]}.reduce(:+)
+    not_set_count = samples.count - locations.map { |l| l[:count] }.reduce(:+)
     if not_set_count > 0
       locations << { value: "not_set", text: "Unknown", count: not_set_count }
     end
@@ -199,7 +199,7 @@ class SamplesController < ApplicationController
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
     end
-    not_set_count = samples.count - tissues.map{|l| l[:count]}.reduce(:+)
+    not_set_count = samples.count - tissues.map { |l| l[:count] }.reduce(:+)
     if not_set_count > 0
       tissues << { value: "not_set", text: "Unknown", count: not_set_count }
     end
@@ -217,13 +217,14 @@ class SamplesController < ApplicationController
       { value: "1_month", text: "Last Month", count: samples.where("samples.created_at >= ?", 1.month.ago.utc).count },
       { value: "3_month", text: "Last 3 Months", count: samples.where("samples.created_at >= ?", 3.months.ago.utc).count },
       { value: "6_month", text: "Last 6 Months", count: samples.where("samples.created_at >= ?", 6.months.ago.utc).count },
-      { value: "1_year", text: "Last Year", count: samples.where("samples.created_at >= ?", 1.year.ago.utc).count },
+      { value: "1_year", text: "Last Year", count: samples.where("samples.created_at >= ?", 1.year.ago.utc).count }
     ]
 
     # TODO(tiago): move grouping to a helper function (similar code in projects_controller)
-    min_date, max_date = samples.minimum(:created_at).to_date, samples.maximum(:created_at).to_date
+    min_date = samples.minimum(:created_at).to_date
+    max_date = samples.maximum(:created_at).to_date
     span = (max_date - min_date + 1).to_i
-    if span <- MAX_BINS
+    if span <= MAX_BINS
       # we group by day if the span is shorter than MAX_BINS days
       bins_map = samples.group("DATE(`samples`.`created_at`)").count.map do |timestamp, count|
         [timestamp.strftime("%Y-%m-%d"), count]
@@ -240,14 +241,16 @@ class SamplesController < ApplicationController
       # we group by equally spaced MAX_BINS bins to cover the necessary span
       step = (span.to_f / MAX_BINS).ceil
       bins_map = samples.group(
-        ActiveRecord::Base.send(:sanitize_sql_array,
+        ActiveRecord::Base.send(
+          :sanitize_sql_array,
           ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, `samples`.`created_at`)/:step)", min_date: min_date, step: step]
-        )).count
+        )
+      ).count
       time_bins = (0...MAX_BINS).map do |bucket|
         start_date = min_date + (bucket * step).days
         end_date = start_date + step - 1
         {
-          interval: {start: start_date, end: end_date},
+          interval: { start: start_date, end: end_date },
           count: bins_map[bucket] || 0,
           value: "#{start_date}:#{end_date}",
           text: "#{start_date} - #{end_date}"

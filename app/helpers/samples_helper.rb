@@ -547,11 +547,11 @@ module SamplesHelper
     metadata_field = Metadatum.where(key: key).first
 
     samples_with_metadata = samples
-      .includes(metadata: :metadata_field)
-      .where(metadata: { metadata_field_id: metadata_field.metadata_field_id })
+                            .includes(metadata: :metadata_field)
+                            .where(metadata: { metadata_field_id: metadata_field.metadata_field_id })
 
     samples_filtered = samples_with_metadata
-      .where(metadata: { metadata_field.validated_field => query })
+                       .where(metadata: { metadata_field.validated_field => query })
 
     not_set_ids = []
     if query.include?("not_set")
