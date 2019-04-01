@@ -17,10 +17,11 @@ class VisualizationsController < ApplicationController
                        Visualization.where("public_access = 1 OR user_id = ?", current_user.id)
                      end
     visualizations = visualizations
-                     .joins(:user)
-                     .select("visualizations.id AS id, user_id, visualizations.created_at, visualization_type, users.name AS user_name, visualizations.name")
+                     .joins(:user, :samples)
+                     .select("DISTINCT visualizations.id AS id, users.id AS user_id, visualization_type, users.name AS user_name, visualizations.name, visualizations.updated_at") \
+                     # filter out legacy data
                      .where.not(visualization_type: [nil, 'undefined'], name: nil)
-                     .order(created_at: :desc)
+                     .order(updated_at: :desc)
                      .includes(samples: [:project])
 
     render json: visualizations.as_json(
@@ -68,7 +69,8 @@ class VisualizationsController < ApplicationController
                          user: current_user,
                          visualization_type: @type,
                          samples: { id: [sample_ids] }
-                       )
+                       ) \
+                       # filter out legacy data
                        .where.not(visualization_type: [nil, 'undefined'], name: nil)
                        .order(created_at: :desc)
                        .select { |v| v.sample_ids.to_set == sample_ids.to_set }
