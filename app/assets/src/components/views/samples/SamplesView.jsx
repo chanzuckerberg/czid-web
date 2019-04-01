@@ -208,18 +208,13 @@ class SamplesView extends React.Component {
   renderHeatmapTrigger = () => {
     const { selectedSampleIds } = this.state;
     return (
-      <BasicPopup
-        trigger={
-          <a
-            href={`/visualizations/heatmap?sampleIds=${Array.from(
-              selectedSampleIds
-            )}`}
-          >
-            <HeatmapIcon className={cs.icon} />
-          </a>
-        }
-        content="Heatmap"
-      />
+      <a
+        href={`/visualizations/heatmap?sampleIds=${Array.from(
+          selectedSampleIds
+        )}`}
+      >
+        <HeatmapIcon className={cs.icon} />
+      </a>
     );
   };
 
@@ -253,14 +248,7 @@ class SamplesView extends React.Component {
     return (
       <CollectionModal
         trigger={
-          <BasicPopup
-            trigger={
-              <span>
-                <SaveIcon className={cs.icon} />
-              </span>
-            }
-            content="Save a Collection"
-          />
+          <SaveIcon className={cs.icon} popupText={"Save a Collection"} />
         }
         selectedSampleIds={selectedSampleIds}
         fetchedSamples={samples.filter(sample =>
@@ -301,14 +289,9 @@ class SamplesView extends React.Component {
           >
             {this.renderHeatmapTrigger()}
           </div>
-          <BasicPopup
-            trigger={
-              <div className={cs.action} onClick={this.handlePhyloModalOpen}>
-                <PhyloTreeIcon className={cs.icon} />
-              </div>
-            }
-            content="Phylogenetic Tree"
-          />
+          <div className={cs.action} onClick={this.handlePhyloModalOpen}>
+            <PhyloTreeIcon className={cs.icon} />
+          </div>
           <div className={cs.action}>{this.renderDownloadTrigger()}</div>
         </div>
       </div>

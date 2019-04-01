@@ -35,13 +35,13 @@
   text-align: center;
   text-transform: none;
 
-  .text {
+  .columnHeaderTooltipText {
     display: inline-block;
     max-width: 100%;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    margin-top: 7px;
+    vertical-align: middle;
   }
 }
 
