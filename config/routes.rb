@@ -37,6 +37,7 @@ Rails.application.routes.draw do
     get :index_v2, on: :collection
     get :details, on: :collection
     get :dimensions, on: :collection
+    get :stats, on: :collection
     post :save_metadata, on: :member
     post :save_metadata_v2, on: :member
     post :validate_sample_files, on: :collection
