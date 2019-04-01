@@ -25,9 +25,9 @@ class SamplesController < ApplicationController
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder, :upload_heartbeat].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details, :dimensions, :all,
-                   :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :upload, :validate_sample_files].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
+                   :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
+                   :search_suggestions, :stats, :upload, :validate_sample_files].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload, :bulk_upload_with_metadata], fallback: :devise
@@ -273,6 +273,31 @@ class SamplesController < ApplicationController
           { dimension: "host", values: hosts },
           { dimension: "tissue", values: tissues }
         ]
+      end
+    end
+  end
+
+  def stats
+    domain = params[:domain]
+
+    samples = samples_by_domain(domain)
+    samples = filter_samples(samples, params)
+    sample_ids = samples.pluck(:id)
+
+    pipeline_run_ids = top_pipeline_runs_multiget(sample_ids).values
+    avg_total_reads, avg_remaining_reads = PipelineRun
+                                           .where(id: pipeline_run_ids)
+                                           .pluck("ROUND(AVG(`pipeline_runs`.`total_reads`)), ROUND(AVG(`pipeline_runs`.`adjusted_remaining_reads`))")
+                                           .first
+                                           .map(&:to_i)
+
+    respond_to do |format|
+      format.json do
+        render json: {
+          count: sample_ids.count,
+          avgTotalReads: avg_total_reads,
+          avgAdjustedRemainingReads: avg_remaining_reads
+        }
       end
     end
   end

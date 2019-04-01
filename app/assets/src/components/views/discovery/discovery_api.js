@@ -4,6 +4,7 @@ import {
   getSamples,
   getProjectDimensions,
   getSampleDimensions,
+  getSampleStats,
   getVisualizations
 } from "~/api";
 
@@ -32,20 +33,30 @@ const getDiscoveryDimensions = async ({
   domain,
   filters,
   projectId,
-  search
+  search,
+  includeStats = false
 }) => {
   try {
     const actions = compact([
       getSampleDimensions({ domain, filters, projectId, search }),
-      !projectId && getProjectDimensions({ domain, filters, search })
+      !projectId && getProjectDimensions({ domain, filters, search }),
+      includeStats && getSampleStats({ domain, filters, projectId, search })
     ]);
-    const [sampleDimensions, projectDimensions] = await Promise.all(actions);
-    return { sampleDimensions, projectDimensions };
+    const [
+      sampleDimensions,
+      projectDimensions,
+      sampleStats
+    ] = await Promise.all(actions);
+    return { sampleDimensions, projectDimensions, sampleStats };
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
     return {};
   }
+};
+
+const getDiscoveryDimensionsAndStats = async options => {
+  return getDiscoveryDimensions({ ...options, includeStats: true });
 };
 
 const processRawSample = sample => {
@@ -131,5 +142,6 @@ export {
   DISCOVERY_DOMAIN_PUBLIC,
   getDiscoverySyncData,
   getDiscoveryDimensions,
+  getDiscoveryDimensionsAndStats,
   getDiscoverySamples
 };

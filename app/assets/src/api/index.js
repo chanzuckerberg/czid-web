@@ -200,6 +200,16 @@ const getSampleDimensions = ({ domain, filters, projectId, search }) =>
     }
   });
 
+const getSampleStats = ({ domain, filters, projectId, search }) =>
+  get("/samples/stats.json", {
+    params: {
+      domain,
+      projectId,
+      search,
+      ...filters
+    }
+  });
+
 const getProjectDimensions = ({ domain, filters, search }) =>
   get("/projects/dimensions.json", {
     params: {
@@ -290,6 +300,7 @@ export {
   getProjects,
   getSampleDimensions,
   getSampleReportInfo,
+  getSampleStats,
   getSampleTaxons,
   getSamples,
   getSamplesV1,

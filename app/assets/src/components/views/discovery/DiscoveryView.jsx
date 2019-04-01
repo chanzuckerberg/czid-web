@@ -33,6 +33,7 @@ import ProjectHeader from "./ProjectHeader";
 import {
   getDiscoverySyncData,
   getDiscoveryDimensions,
+  getDiscoveryDimensionsAndStats,
   getDiscoverySamples,
   DISCOVERY_DOMAIN_LIBRARY,
   DISCOVERY_DOMAIN_PUBLIC
@@ -49,6 +50,7 @@ class DiscoveryView extends React.Component {
         currentTab: "projects",
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
+        filteredSampleStats: {},
         filters: {},
         loadingProjects: true,
         loadingVisualizations: true,
@@ -134,6 +136,7 @@ class DiscoveryView extends React.Component {
       {
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
+        filteredSampleStats: {},
         projects: compact([project]),
         sampleIds: [],
         samples: [],
@@ -179,14 +182,21 @@ class DiscoveryView extends React.Component {
 
     const {
       projectDimensions,
-      sampleDimensions
-    } = await getDiscoveryDimensions({
+      sampleDimensions,
+      sampleStats: filteredSampleStats
+    } = await getDiscoveryDimensionsAndStats({
       domain,
       projectId: project && project.id,
       search
     });
 
-    this.setState(pickBy(identity, { projectDimensions, sampleDimensions }));
+    this.setState(
+      pickBy(identity, {
+        projectDimensions,
+        sampleDimensions,
+        filteredSampleStats
+      })
+    );
   };
 
   refreshFilteredDimensions = async () => {
@@ -195,22 +205,28 @@ class DiscoveryView extends React.Component {
 
     const {
       projectDimensions: filteredProjectDimensions,
-      sampleDimensions: filteredSampleDimensions
-    } = await getDiscoveryDimensions({
+      sampleDimensions: filteredSampleDimensions,
+      sampleStats: filteredSampleStats
+    } = await getDiscoveryDimensionsAndStats({
       domain,
       projectId: project && project.id,
       filters: this.preparedFilters()
     });
 
     this.setState(
-      pickBy(identity, { filteredProjectDimensions, filteredSampleDimensions })
+      pickBy(identity, {
+        filteredProjectDimensions,
+        filteredSampleDimensions,
+        filteredSampleStats
+      })
     );
   };
 
   refreshAll = () => {
     const { project } = this.state;
+
     !project && this.refreshSynchronousData();
-    this.refreshFilteredDimensions();
+    !!this.getFilterCount() && this.refreshFilteredDimensions();
   };
 
   computeTabs = () => {
@@ -403,11 +419,20 @@ class DiscoveryView extends React.Component {
     });
   };
 
+  getFilterCount = () => {
+    const { filters } = this.state;
+    return sumBy(
+      filters => (Array.isArray(filters) ? filters.length : !filters ? 0 : 1),
+      values(filters)
+    );
+  };
+
   render() {
     const {
       currentTab,
       filteredProjectDimensions,
       filteredSampleDimensions,
+      filteredSampleStats,
       filters,
       loadingProjects,
       loadingVisualizations,
@@ -430,10 +455,7 @@ class DiscoveryView extends React.Component {
       samples: sampleDimensions
     }[currentTab];
 
-    const filterCount = sumBy(
-      filters => (Array.isArray(filters) ? filters.length : !filters ? 0 : 1),
-      values(filters)
-    );
+    const filterCount = this.getFilterCount();
 
     return (
       <div className={cs.layout}>
@@ -521,6 +543,7 @@ class DiscoveryView extends React.Component {
                   samples={samples}
                   projects={projects}
                   sampleDimensions={filteredSampleDimensions}
+                  sampleStats={filteredSampleStats}
                   projectDimensions={filteredProjectDimensions}
                   currentTab={currentTab}
                   loading={loadingSamples || loadingProjects}

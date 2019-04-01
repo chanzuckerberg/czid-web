@@ -18,7 +18,7 @@ export default class DiscoverySidebar extends React.Component {
         numSamples: "",
         numProjects: "",
         avgTotalReads: "",
-        avgNonHostReads: ""
+        avgAdjustedRemainingReads: ""
       },
       metadata: {
         host: [],
@@ -36,7 +36,8 @@ export default class DiscoverySidebar extends React.Component {
       loading,
       projectDimensions,
       projects,
-      sampleDimensions
+      sampleDimensions,
+      sampleStats
     } = newProps;
     if (loading) return prevState;
 
@@ -45,15 +46,13 @@ export default class DiscoverySidebar extends React.Component {
 
     return {
       stats: {
-        numSamples: sumBy("number_of_samples", projects),
-        numProjects: projects.length,
-        avgTotalReads: DiscoverySidebar.meanByAndFormat(
-          newProps.samples,
-          "totalReads"
+        numSamples: DiscoverySidebar.formatNumber((sampleStats || {}).count),
+        numProjects: DiscoverySidebar.formatNumber(projects.length),
+        avgTotalReads: DiscoverySidebar.formatNumber(
+          (sampleStats || {}).avgTotalReads
         ),
-        avgNonHostReads: DiscoverySidebar.meanByAndFormat(
-          newProps.samples,
-          "nonHostReads.value"
+        avgAdjustedRemainingReads: DiscoverySidebar.formatNumber(
+          (sampleStats || {}).avgAdjustedRemainingReads
         )
       },
       metadata: {
@@ -70,8 +69,8 @@ export default class DiscoverySidebar extends React.Component {
     return moment(createdAt).format("YYYY-MM-DD");
   }
 
-  static meanByAndFormat(data, field) {
-    return (Math.round(meanBy(get(field), data)) || "").toLocaleString();
+  static formatNumber(value) {
+    return (Math.round(value) || "").toLocaleString();
   }
 
   buildDateHistogram(field) {
@@ -212,9 +211,7 @@ export default class DiscoverySidebar extends React.Component {
                 <dt className={cs.statsDt}>
                   <strong>Samples</strong>
                 </dt>
-                <dd className={cs.statsDd}>
-                  {this.state.stats.numSamples.toLocaleString()}
-                </dd>
+                <dd className={cs.statsDd}>{this.state.stats.numSamples}</dd>
               </dl>
             </div>
             <div className={cs.hasBackground}>
@@ -222,9 +219,7 @@ export default class DiscoverySidebar extends React.Component {
                 <dt className={cs.statsDt}>
                   <strong>Projects</strong>
                 </dt>
-                <dd className={cs.statsDd}>
-                  {this.state.stats.numProjects.toLocaleString()}
-                </dd>
+                <dd className={cs.statsDd}>{this.state.stats.numProjects}</dd>
               </dl>
             </div>
             {currentTab === "samples" && (
@@ -245,7 +240,7 @@ export default class DiscoverySidebar extends React.Component {
                       <strong>Avg. reads passing filters per sample</strong>
                     </dt>
                     <dd className={cs.statsDd}>
-                      {this.state.stats.avgNonHostReads}
+                      {this.state.stats.avgAdjustedRemainingReads}
                     </dd>
                   </dl>
                 </div>
@@ -302,5 +297,6 @@ DiscoverySidebar.propTypes = {
   projectDimensions: PropTypes.array,
   projects: PropTypes.arrayOf(PropTypes.Project),
   sampleDimensions: PropTypes.array,
+  sampleStats: PropTypes.object,
   samples: PropTypes.arrayOf(PropTypes.Sample)
 };
