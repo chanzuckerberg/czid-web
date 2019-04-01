@@ -44,7 +44,8 @@ class Sample < ApplicationRecord
   attr_accessor :bulk_mode
 
   belongs_to :project
-  belongs_to :user, optional: true # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
+  # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
+  belongs_to :user, optional: true, counter_cache: true # use .size for cache, use .count to force COUNT query
   belongs_to :host_genome, optional: true
   has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
   has_and_belongs_to_many :backgrounds, through: :pipeline_runs
