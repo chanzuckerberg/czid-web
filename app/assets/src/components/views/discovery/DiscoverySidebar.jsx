@@ -57,13 +57,16 @@ export default class DiscoverySidebar extends React.Component {
         )
       },
       metadata: {
-        host: (find({ dimension: "host" }, dimensions) || {}).values || [],
-        tissue: (find({ dimension: "tissue" }, dimensions) || {}).values || [],
-        location:
-          (find({ dimension: "location" }, dimensions) || {}).values || [],
-        time: (find({ dimension: "time_bins" }, dimensions) || {}).values || []
+        host: DiscoverySidebar.loadDimension(dimensions, "host"),
+        tissue: DiscoverySidebar.loadDimension(dimensions, "tissue"),
+        location: DiscoverySidebar.loadDimension(dimensions, "location"),
+        time: DiscoverySidebar.loadDimension(dimensions, "time")
       }
     };
+  }
+
+  static loadDimension(dimensions, dimensionKey) {
+    return (find({ dimension: dimensionKey }, dimensions) || {}).values || [];
   }
 
   static formatDate(createdAt) {

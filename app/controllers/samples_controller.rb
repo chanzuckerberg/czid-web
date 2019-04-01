@@ -190,7 +190,7 @@ class SamplesController < ApplicationController
     locations = locations.map do |location, count|
       { value: location, text: location, count: count }
     end
-    not_set_count = samples.count - locations.map { |l| l[:count] }.reduce(:+)
+    not_set_count = samples.count - locations.sum { |l| l[:count] }
     if not_set_count > 0
       locations << { value: "not_set", text: "Unknown", count: not_set_count }
     end
@@ -199,7 +199,7 @@ class SamplesController < ApplicationController
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
     end
-    not_set_count = samples.count - tissues.map { |l| l[:count] }.reduce(:+)
+    not_set_count = samples.count - tissues.sum { |l| l[:count] }
     if not_set_count > 0
       tissues << { value: "not_set", text: "Unknown", count: not_set_count }
     end
