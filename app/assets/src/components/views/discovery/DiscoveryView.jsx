@@ -222,6 +222,24 @@ class DiscoveryView extends React.Component {
     );
   };
 
+  refreshFilteredDimensions = async () => {
+    const { domain } = this.props;
+    const { project } = this.state;
+
+    const {
+      projectDimensions: filteredProjectDimensions,
+      sampleDimensions: filteredSampleDimensions
+    } = await getDiscoveryDimensions({
+      domain,
+      projectId: project && project.id,
+      filters: this.preparedFilters()
+    });
+
+    this.setState(
+      pickBy(identity, { filteredProjectDimensions, filteredSampleDimensions })
+    );
+  };
+
   refreshAll = () => {
     const { project } = this.state;
 

@@ -1,6 +1,6 @@
 import React from "react";
 import cx from "classnames";
-import { find, get, maxBy, meanBy, orderBy, sumBy } from "lodash/fp";
+import { find, maxBy, orderBy, sumBy } from "lodash/fp";
 import moment from "moment";
 
 import PropTypes from "~/components/utils/propTypes";
