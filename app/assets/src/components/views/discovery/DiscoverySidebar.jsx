@@ -176,7 +176,7 @@ export default class DiscoverySidebar extends React.Component {
       return [
         <dt className={cs.barLabel} key={`${value}_label_${i}`}>
           <a onClick={() => this.handleFilterClick(value)}>
-            {value == "not_set" ? <i>{text}</i> : text}
+            {value === "not_set" ? <i>{text}</i> : text}
           </a>
         </dt>,
         <dd key={`${value}_value_${i}`}>
