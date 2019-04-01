@@ -1,6 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 
+// NOTE: this is almost a line-for-line copy of projects_view.scss
 .visualization {
   text-align: left;
   padding: 15px 0;
@@ -14,8 +15,10 @@
   }
 
   .visualizationDetails {
+    @include font-body-xxs;
+
     color: $medium-grey;
-    font-size: $font-size-small;
+    font-weight: $font-weight-regular;
 
     span:not(:last-child) {
       margin-right: 8px;
@@ -33,13 +36,5 @@
 }
 
 .icon {
-  fill: $medium-grey;
-
-  .iconGlobe {
-    width: 20px;
-  }
-
-  .iconLock {
-    width: 18px;
-  }
+  width: 36px;
 }
