@@ -12,14 +12,18 @@
       margin-top: 5px;
     }
 
-    .filterTag {
-      @include font-label-s;
-
+    .tags {
       flex: 0 0 auto;
-      padding: 0px 8px;
 
-      &:not(:first-child) {
-        margin-top: 5px;
+      .filterTag {
+        @include font-label-xs;
+
+        margin: 0;
+        padding: 0px 8px;
+
+        &:not(:first-child) {
+          margin-top: 2px;
+        }
       }
     }
   }

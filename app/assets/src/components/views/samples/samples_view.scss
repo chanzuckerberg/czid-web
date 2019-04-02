@@ -21,7 +21,13 @@
 
 .tableDataRow {
   align-items: flex-start;
-  padding: 15px 0;
+  padding: 11px 0;
+}
+
+.basicCell {
+  // this is adjusted to align the baseline of
+  // content of basic cells with the sample name.
+  margin-top: 2px;
 }
 
 .samplesToolbar {
@@ -93,7 +99,7 @@
     display: flex;
     align-items: center;
     justify-items: center;
-    margin-right: 20px;
+    margin-right: 12px;
 
     .icon {
       fill: $primary-light;
@@ -116,10 +122,10 @@
     .sampleNameAndStatus {
       display: flex;
       justify-items: center;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
 
       .sampleName {
-        @include font-body-xs;
+        @include font-body-s;
 
         flex: 0 1 auto;
         text-align: left;
@@ -176,6 +182,7 @@
 
 .numberValueAndPercentage {
   .percentage {
+    @include font-body-xxs;
     font-weight: $font-weight-regular;
   }
 }

@@ -17,7 +17,7 @@
     display: flex;
 
     .leftPane:not(:empty) {
-      border-right: 3px solid $lightest-grey;
+      border-right: 2px solid $lightest-grey;
       flex: 0 0 auto;
       padding: 20px 20px 0 20px;
       overflow-x: visible;
@@ -37,7 +37,7 @@
     }
 
     .rightPane:not(:empty) {
-      border-left: 3px solid $lightest-grey;
+      border-left: 2px solid $lightest-grey;
       flex: 0 0 auto;
       overflow: auto;
       padding: 10px 20px 0 20px;

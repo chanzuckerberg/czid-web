@@ -15,7 +15,9 @@
     }
   }
   .filtersTrigger {
+    align-items: center;
     cursor: pointer;
+    display: flex;
     flex: 0 0 auto;
     position: relative;
     margin-right: 25px;
@@ -40,13 +42,16 @@
   }
 
   .statsTrigger {
+    align-items: center;
     cursor: pointer;
+    display: flex;
     flex: 0 0 auto;
     margin-left: 25px;
   }
 
   .tabs {
     flex: 1 0 auto;
+    margin-top: 10px;
   }
 
   .searchContainer {

@@ -24,7 +24,6 @@ class BaseTable extends React.Component {
   // tables accross the site.
   // TODO: - limitations -
   // - needs dynamic row height (dynamic required use of CellMeasurer)
-  // - needs selectable rows
 
   constructor(props) {
     super(props);

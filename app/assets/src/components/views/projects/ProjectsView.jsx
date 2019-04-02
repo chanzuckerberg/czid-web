@@ -111,7 +111,7 @@ class ProjectsView extends React.Component {
         sortable
         data={data}
         columns={this.columns}
-        defaultRowHeight={90}
+        defaultRowHeight={68}
         onRowClick={this.handleRowClick}
       />
     );
