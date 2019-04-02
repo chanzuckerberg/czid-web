@@ -138,6 +138,7 @@ class DiscoveryView extends React.Component {
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
         filteredSampleStats: {},
+        loadingSamples: true,
         projects: compact([project]),
         sampleIds: [],
         samples: [],
@@ -172,8 +173,7 @@ class DiscoveryView extends React.Component {
       projects,
       visualizations,
       loadingProjects: false,
-      loadingVisualizations: false,
-      loadingSamples: false
+      loadingVisualizations: false
     });
   };
 
@@ -383,7 +383,8 @@ class DiscoveryView extends React.Component {
         // add newly fetched samples to the list (assumes that samples are requested in order)
         samples: samples.concat(fetchedSamples),
         // if returned samples are less than requested, we assume all data was loaded
-        samplesAllLoaded: fetchedSamples.length < numRequestedSamples
+        samplesAllLoaded: fetchedSamples.length < numRequestedSamples,
+        loadingSamples: false
       };
       if (fetchedSampleIds) {
         newState.sampleIds = fetchedSampleIds;
@@ -519,13 +520,21 @@ class DiscoveryView extends React.Component {
                 </div>
               )}
               {currentTab == "samples" && (
-                <SamplesView
-                  ref={samplesView => (this.samplesView = samplesView)}
-                  onLoadRows={this.handleLoadSampleRows}
-                  samples={samples}
-                  selectableIds={sampleIds}
-                  onSampleSelected={this.handleSampleSelected}
-                />
+                <div className={cs.tableContainer}>
+                  <div className={cs.dataContainer}>
+                    <SamplesView
+                      ref={samplesView => (this.samplesView = samplesView)}
+                      onLoadRows={this.handleLoadSampleRows}
+                      samples={samples}
+                      selectableIds={sampleIds}
+                      onSampleSelected={this.handleSampleSelected}
+                    />
+                  </div>
+                  {!samples.length &&
+                    !loadingSamples && (
+                      <NoResultsBanner className={cs.noResultsContainer} />
+                    )}
+                </div>
               )}
               {currentTab == "visualizations" && (
                 <div className={cs.tableContainer}>
