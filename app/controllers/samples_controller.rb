@@ -25,9 +25,9 @@ class SamplesController < ApplicationController
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder, :upload_heartbeat].freeze
 
-  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details, :dimensions, :all,
-                   :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :upload, :validate_sample_files].freeze
+  OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
+                   :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
+                   :search_suggestions, :stats, :upload, :validate_sample_files].freeze
 
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
   acts_as_token_authentication_handler_for User, only: [:create, :update, :bulk_upload, :bulk_upload_with_metadata], fallback: :devise
@@ -185,12 +185,13 @@ class SamplesController < ApplicationController
     samples = filter_samples(samples, params)
 
     sample_ids = samples.pluck(:id)
+    samples_count = samples.count
 
     locations = samples_by_metadata_field(sample_ids, "collection_location").count
     locations = locations.map do |location, count|
       { value: location, text: location, count: count }
     end
-    not_set_count = samples.count - locations.sum { |l| l[:count] }
+    not_set_count = samples_count - locations.sum { |l| l[:count] }
     if not_set_count > 0
       locations << { value: "not_set", text: "Unknown", count: not_set_count }
     end
@@ -199,14 +200,14 @@ class SamplesController < ApplicationController
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
     end
-    not_set_count = samples.count - tissues.sum { |l| l[:count] }
+    not_set_count = samples_count - tissues.sum { |l| l[:count] }
     if not_set_count > 0
       tissues << { value: "not_set", text: "Unknown", count: not_set_count }
     end
 
     # visibility
     public_count = samples.public_samples.count
-    private_count = samples.count - public_count
+    private_count = samples_count - public_count
     visibility = [
       { value: "public", text: "Public", count: public_count },
       { value: "private", text: "Private", count: private_count }
@@ -221,40 +222,43 @@ class SamplesController < ApplicationController
     ]
 
     # TODO(tiago): move grouping to a helper function (similar code in projects_controller)
-    min_date = samples.minimum(:created_at).utc.to_date
-    max_date = samples.maximum(:created_at).utc.to_date
-    span = (max_date - min_date + 1).to_i
-    if span <= MAX_BINS
-      # we group by day if the span is shorter than MAX_BINS days
-      bins_map = samples.group("DATE(`samples`.`created_at`)").count.map do |timestamp, count|
-        [timestamp.strftime("%Y-%m-%d"), count]
-      end.to_h
-      time_bins = (0...span).map do |offset|
-        date = (min_date + offset.days).to_s
-        {
-          value: date,
-          text: date,
-          count: bins_map[date] || 0
-        }
-      end
-    else
-      # we group by equally spaced MAX_BINS bins to cover the necessary span
-      step = (span.to_f / MAX_BINS).ceil
-      bins_map = samples.group(
-        ActiveRecord::Base.send(
-          :sanitize_sql_array,
-          ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, `samples`.`created_at`)/:step)", min_date: min_date, step: step]
-        )
-      ).count
-      time_bins = (0...MAX_BINS).map do |bucket|
-        start_date = min_date + (bucket * step).days
-        end_date = start_date + step - 1
-        {
-          interval: { start: start_date, end: end_date },
-          count: bins_map[bucket] || 0,
-          value: "#{start_date}:#{end_date}",
-          text: "#{start_date} - #{end_date}"
-        }
+    time_bins = []
+    if samples_count > 0
+      min_date = samples.minimum(:created_at).utc.to_date
+      max_date = samples.maximum(:created_at).utc.to_date
+      span = (max_date - min_date + 1).to_i
+      if span <= MAX_BINS
+        # we group by day if the span is shorter than MAX_BINS days
+        bins_map = samples.group("DATE(`samples`.`created_at`)").count.map do |timestamp, count|
+          [timestamp.strftime("%Y-%m-%d"), count]
+        end.to_h
+        time_bins = (0...span).map do |offset|
+          date = (min_date + offset.days).to_s
+          {
+            value: date,
+            text: date,
+            count: bins_map[date] || 0
+          }
+        end
+      else
+        # we group by equally spaced MAX_BINS bins to cover the necessary span
+        step = (span.to_f / MAX_BINS).ceil
+        bins_map = samples.group(
+          ActiveRecord::Base.send(
+            :sanitize_sql_array,
+            ["FLOOR(TIMESTAMPDIFF(DAY, :min_date, `samples`.`created_at`)/:step)", min_date: min_date, step: step]
+          )
+        ).count
+        time_bins = (0...MAX_BINS).map do |bucket|
+          start_date = min_date + (bucket * step).days
+          end_date = start_date + step - 1
+          {
+            interval: { start: start_date, end: end_date },
+            count: bins_map[bucket] || 0,
+            value: "#{start_date}:#{end_date}",
+            text: "#{start_date} - #{end_date}"
+          }
+        end
       end
     end
 
@@ -273,6 +277,33 @@ class SamplesController < ApplicationController
           { dimension: "host", values: hosts },
           { dimension: "tissue", values: tissues }
         ]
+      end
+    end
+  end
+
+  def stats
+    domain = params[:domain]
+
+    samples = samples_by_domain(domain)
+    samples = filter_samples(samples, params)
+    sample_ids = samples.pluck(:id)
+
+    if sample_ids.count > 0
+      pipeline_run_ids = top_pipeline_runs_multiget(sample_ids).values
+      avg_total_reads, avg_remaining_reads = PipelineRun
+                                             .where(id: pipeline_run_ids)
+                                             .pluck("ROUND(AVG(`pipeline_runs`.`total_reads`)), ROUND(AVG(`pipeline_runs`.`adjusted_remaining_reads`))")
+                                             .first
+                                             .map(&:to_i)
+    end
+
+    respond_to do |format|
+      format.json do
+        render json: {
+          count: sample_ids.count,
+          avgTotalReads: avg_total_reads.present? ? avg_total_reads : 0,
+          avgAdjustedRemainingReads: avg_remaining_reads.present? ? avg_remaining_reads : 0
+        }
       end
     end
   end
