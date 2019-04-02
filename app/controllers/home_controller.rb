@@ -3,7 +3,6 @@ require 'will_paginate/array'
 class HomeController < ApplicationController
   include SamplesHelper
   before_action :login_required, except: [:landing, :sign_up]
-  before_action :admin_required, only: [:library, :public]
   skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up]
   power :projects, except: [:landing, :sign_up]
 
