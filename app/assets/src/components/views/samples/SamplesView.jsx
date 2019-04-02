@@ -317,7 +317,7 @@ class SamplesView extends React.Component {
     const { phyloTreeCreationModalOpen, selectedSampleIds } = this.state;
 
     // TODO(tiago): replace by automated cell height computing
-    const rowHeight = 70;
+    const rowHeight = 66;
 
     const selectAllChecked = this.isSelectAllChecked();
     return (

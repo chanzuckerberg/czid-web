@@ -21,7 +21,7 @@
 
 .tableDataRow {
   align-items: flex-start;
-  padding: 15px 0;
+  padding: 13px 0;
 }
 
 .samplesToolbar {
@@ -93,7 +93,7 @@
     display: flex;
     align-items: center;
     justify-items: center;
-    margin-right: 20px;
+    margin-right: 12px;
 
     .icon {
       fill: $primary-light;
@@ -116,10 +116,10 @@
     .sampleNameAndStatus {
       display: flex;
       justify-items: center;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
 
       .sampleName {
-        @include font-body-xs;
+        @include font-body-s;
 
         flex: 0 1 auto;
         text-align: left;

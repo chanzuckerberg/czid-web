@@ -52,7 +52,7 @@
 .cell {
   @include font-body-xs;
 
-  color: $darkest-grey;
+  color: $black;
   font-weight: $font-weight-semibold;
   text-align: center;
   overflow: hidden;
@@ -60,7 +60,7 @@
 
 .row {
   &:global(.ReactVirtualized__Table__headerRow) {
-    border-bottom: 4px solid $off-white;
+    border-bottom: 4px solid $lightest-grey;
   }
 
   &:global(.ReactVirtualized__Table__row) {

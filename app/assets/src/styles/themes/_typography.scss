@@ -113,3 +113,10 @@ $font-weight-heavy: 800;
   text-transform: uppercase;
   font-weight: $font-weight-semibold;
 }
+
+@mixin font-label-xs {
+  font-size: 10px;
+  line-height: 24px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}

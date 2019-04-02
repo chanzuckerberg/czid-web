@@ -92,30 +92,24 @@ class DiscoveryFilters extends React.Component {
 
     if (!selectedOptions) return;
     if (!Array.isArray(selectedOptions)) selectedOptions = [selectedOptions];
-    return (
-      selectedOptions
-        // check if filter is on option format or just value (taxon are hashes with text and value)
-        .map(
-          option => (option.text ? option : find({ value: option }, options))
-        )
-        // filter out options that do not exist in the dropdown (although this should be avoided, option might have been chosen in another component)
-        .filter(option => option)
-        // create the filter tag
-        .map(option => {
-          return (
-            <FilterTag
-              className={cs.filterTag}
-              key={option.value}
-              text={option.text}
-              onClose={this.handleRemoveTag.bind(
-                this,
-                selectedKey,
-                option.value
-              )}
-            />
-          );
-        })
-    );
+
+    const tags = selectedOptions
+      // check if filter is on option format or just value (taxon are hashes with text and value)
+      .map(option => (option.text ? option : find({ value: option }, options)))
+      // filter out options that do not exist in the dropdown (although this should be avoided, option might have been chosen in another component)
+      .filter(option => option)
+      // create the filter tag
+      .map(option => {
+        return (
+          <FilterTag
+            className={cs.filterTag}
+            key={option.value}
+            text={option.text}
+            onClose={this.handleRemoveTag.bind(this, selectedKey, option.value)}
+          />
+        );
+      });
+    return <div className={cs.tags}>{tags}</div>;
   }
 
   render() {

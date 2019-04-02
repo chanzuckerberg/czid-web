@@ -25,16 +25,16 @@
 
   .indicator {
     position: absolute;
-    height: 4px;
+    height: 3px;
     background-color: $primary-light;
     transition: all 0.2s;
-    transform: translateY(25px);
+    transform: translateY(22px);
     z-index: 1;
   }
 
   /* The tab border extends OUTSIDE of the tab container */
   .tabBorder {
-    height: 4px;
+    height: 3px;
     position: absolute;
     left: 0;
     right: 0;
