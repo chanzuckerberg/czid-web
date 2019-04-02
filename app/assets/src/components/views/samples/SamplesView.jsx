@@ -36,9 +36,21 @@ class SamplesView extends React.Component {
         headerClassName: cs.sampleHeader
       },
       {
+        dataKey: "host",
+        flexGrow: 1,
+        className: cs.basicCell
+      },
+      {
+        dataKey: "collectionLocation",
+        label: "Location",
+        flexGrow: 1,
+        className: cs.basicCell
+      },
+      {
         dataKey: "totalReads",
         label: "Total Reads",
         flexGrow: 1,
+        className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
           this.formatNumberWithCommas(rowData[dataKey])
       },
@@ -46,12 +58,14 @@ class SamplesView extends React.Component {
         dataKey: "nonHostReads",
         label: "Passed Filters",
         flexGrow: 1,
+        className: cs.basicCell,
         cellRenderer: this.renderNumberAndPercentage
       },
       {
         dataKey: "qcPercent",
         label: "Passed QC",
         flexGrow: 1,
+        className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
           this.formatPercentage(rowData[dataKey])
       },
@@ -59,25 +73,40 @@ class SamplesView extends React.Component {
         dataKey: "duplicateCompressionRatio",
         label: "DCR",
         flexGrow: 1,
+        className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
           this.formatPercentage(rowData[dataKey])
       },
-      { dataKey: "host", flexGrow: 1 },
-      { dataKey: "collectionLocation", label: "Location", flexGrow: 1 },
       {
         dataKey: "erccReads",
         label: "ERCC Reads",
         flexGrow: 1,
+        className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
           this.formatNumberWithCommas(rowData[dataKey])
       },
-      { dataKey: "notes", flexGrow: 1 },
-      { dataKey: "nucleotideType", label: "Nucleotide Type", flexGrow: 1 },
-      { dataKey: "sampleType", label: "Sample Type", flexGrow: 1 },
+      {
+        dataKey: "notes",
+        flexGrow: 1,
+        className: cs.basicCell
+      },
+      {
+        dataKey: "nucleotideType",
+        label: "Nucleotide Type",
+        flexGrow: 1,
+        className: cs.basicCell
+      },
+      {
+        dataKey: "sampleType",
+        label: "Sample Type",
+        flexGrow: 1,
+        className: cs.basicCell
+      },
       {
         dataKey: "subsampledFraction",
         label: "SubSampled Fraction",
         flexGrow: 1,
+        className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
           this.formatNumber(rowData[dataKey])
       },
@@ -85,6 +114,7 @@ class SamplesView extends React.Component {
         dataKey: "totalRuntime",
         label: "Total Runtime",
         flexGrow: 1,
+        className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
           this.formatDuration(rowData[dataKey])
       }
