@@ -50,6 +50,14 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
       get external_search_locations_path, params: { query: "ahsdlfkjasfk" }
       assert_response :success
       assert_equal "[]", @response.body
+
+      get external_search_locations_path, params: { query: "" }
+      assert_response :success
+      assert_equal "[]", @response.body
+
+      get external_search_locations_path
+      assert_response :success
+      assert_equal "[]", @response.body
     end
   end
 
