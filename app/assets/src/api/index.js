@@ -210,22 +210,24 @@ const getSampleStats = ({ domain, filters, projectId, search }) =>
     }
   });
 
-const getProjectDimensions = ({ domain, filters, search }) =>
+const getProjectDimensions = ({ domain, filters, projectId, search }) =>
   get("/projects/dimensions.json", {
     params: {
       domain,
       search,
+      projectId,
       ...filters
     }
   });
 
 const getSamplesV1 = params => get("/samples.json", { params });
 
-const getProjects = ({ domain, filters, search, basic } = {}) =>
+const getProjects = ({ domain, filters, search, projectId, basic } = {}) =>
   get("/projects.json", {
     params: {
       domain,
       search,
+      projectId,
       basic,
       ...filters
     }
