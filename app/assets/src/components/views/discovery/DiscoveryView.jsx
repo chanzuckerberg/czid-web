@@ -54,6 +54,7 @@ class DiscoveryView extends React.Component {
         loadingProjects: true,
         loadingVisualizations: true,
         loadingSamples: true,
+        loadingDimensions: true,
         project: this.props.project,
         projectDimensions: [],
         projects: [],
@@ -133,11 +134,13 @@ class DiscoveryView extends React.Component {
 
   resetData = () => {
     const { project } = this.state;
+
     this.setState(
       {
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
         filteredSampleStats: {},
+        loadingDimensions: true,
         loadingSamples: true,
         projects: compact([project]),
         sampleIds: [],
@@ -181,6 +184,10 @@ class DiscoveryView extends React.Component {
     const { domain } = this.props;
     const { project, search } = this.state;
 
+    this.setState({
+      loadingDimensions: true
+    });
+
     const {
       projectDimensions,
       sampleDimensions,
@@ -198,11 +205,18 @@ class DiscoveryView extends React.Component {
         filteredSampleStats
       })
     );
+    this.setState({
+      loadingDimensions: false
+    });
   };
 
   refreshFilteredDimensions = async () => {
     const { domain } = this.props;
     const { project } = this.state;
+
+    this.setState({
+      loadingDimensions: true
+    });
 
     const {
       projectDimensions: filteredProjectDimensions,
@@ -221,6 +235,9 @@ class DiscoveryView extends React.Component {
         filteredSampleStats
       })
     );
+    this.setState({
+      loadingDimensions: false
+    });
   };
 
   refreshAll = () => {
@@ -440,6 +457,7 @@ class DiscoveryView extends React.Component {
       filteredSampleDimensions,
       filteredSampleStats,
       filters,
+      loadingDimensions,
       loadingProjects,
       loadingVisualizations,
       loadingSamples,
@@ -564,7 +582,7 @@ class DiscoveryView extends React.Component {
                     filterCount ? filteredProjectDimensions : projectDimensions
                   }
                   currentTab={currentTab}
-                  loading={loadingSamples || loadingProjects}
+                  loading={loadingDimensions}
                 />
               )}
           </div>
