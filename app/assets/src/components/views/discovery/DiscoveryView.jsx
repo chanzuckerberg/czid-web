@@ -93,11 +93,11 @@ class DiscoveryView extends React.Component {
   }
 
   componentDidMount() {
-    this.resetDataFormInitialLoad();
+    this.resetDataFromInitialLoad();
 
     window.onpopstate = () => {
       this.setState(history.state, () => {
-        this.resetDataFormInitialLoad();
+        this.resetDataFromInitialLoad();
       });
     };
   }
@@ -172,7 +172,7 @@ class DiscoveryView extends React.Component {
     );
   };
 
-  resetDataFormInitialLoad = () => {
+  resetDataFromInitialLoad = () => {
     const { project } = this.state;
     this.resetData({
       callback: () => {
