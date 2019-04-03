@@ -64,6 +64,11 @@ export default class DetailCells extends React.Component {
           taxInfo.NR.percentidentity,
           1
         )}
+        {renderNumber(
+          taxInfo.NT.alignmentlength,
+          taxInfo.NR.alignmentlength,
+          1
+        )}
         {renderNumber(taxInfo.NT.neglogevalue, taxInfo.NR.neglogevalue, 0)}
         {renderNumber(
           taxInfo.NT.percentconcordant,
