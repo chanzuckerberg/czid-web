@@ -307,9 +307,7 @@ class DiscoveryView extends React.Component {
 
     this.setState({
       filteredProjectDimensions,
-      filteredSampleDimensions
-    });
-    this.setState({
+      filteredSampleDimensions,
       loadingDimensions: false
     });
   };

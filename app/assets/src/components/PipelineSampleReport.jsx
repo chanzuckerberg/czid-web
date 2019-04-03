@@ -97,6 +97,7 @@ class PipelineSampleReport extends React.Component {
       { text: "NT contigs", value: "NT_contigs" },
       { text: "NT contig reads", value: "NT_contigreads" },
       { text: "NT %id", value: "NT_percentidentity" },
+      { text: "NT L (alignment length in bp)", value: "NT_alignmentlength" },
       { text: "NT log(1/e)", value: "NT_neglogevalue" },
       { text: "NR Z Score", value: "NR_zscore" },
       { text: "NR rPM", value: "NR_rpm" },
@@ -104,6 +105,7 @@ class PipelineSampleReport extends React.Component {
       { text: "NR contigs", value: "NR_contigs" },
       { text: "NR contig reads", value: "NR_contigreads" },
       { text: "NR %id", value: "NR_percentidentity" },
+      { text: "NR L (alignment length in bp)", value: "NR_alignmentlength" },
       { text: "NR log(1/e)", value: "NR_neglogevalue" }
     ];
     this.categoryChildParent = { Phage: "Viruses" };
