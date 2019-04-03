@@ -53,6 +53,7 @@ class ReviewStep extends React.Component {
             submitState: "success",
             createdSampleIds: response.sample_ids
           });
+          this.props.onUploadComplete();
         })
         // TODO(mark): Display better errors.
         // For example, some samples may have successfully saved, but not others. Should explain to user.
@@ -73,6 +74,7 @@ class ReviewStep extends React.Component {
           this.setState({
             submitState: "success"
           });
+          this.props.onUploadComplete();
         },
         onCreateSamplesError: errors => {
           // TODO(mark): Display better errors.
@@ -299,7 +301,8 @@ ReviewStep.propTypes = {
   visible: PropTypes.bool,
   // Triggers when we start or stop uploading. Lets the parent know to disable header link.
   onUploadStatusChange: PropTypes.func,
-  onStepSelect: PropTypes.func
+  onStepSelect: PropTypes.func,
+  onUploadComplete: PropTypes.func.isRequired
 };
 
 export default ReviewStep;

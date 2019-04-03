@@ -118,7 +118,12 @@ class MetadataUpload extends React.Component {
             visible={this.props.visible}
             onDirty={this.props.onDirty}
           />
-          <a className={cs.link} href={this.getCSVUrl()}>
+          <a
+            className={cs.link}
+            href={this.getCSVUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Download Metadata CSV Template
           </a>
           {this.state.validatingCSV && (

@@ -29,6 +29,16 @@ class SampleUploadFlow extends React.Component {
     }
   };
 
+  componentDidMount() {
+    // Latest browsers will only show a generic warning
+    window.onbeforeunload = () =>
+      "Are you sure you want to leave? All data will be lost.";
+  }
+
+  onUploadComplete = () => {
+    window.onbeforeunload = null;
+  };
+
   handleUploadSamples = ({
     samples,
     project,
@@ -148,6 +158,7 @@ class SampleUploadFlow extends React.Component {
               visible={this.state.currentStep === "review"}
               onUploadStatusChange={this.onUploadStatusChange}
               onStepSelect={this.handleStepSelect}
+              onUploadComplete={this.onUploadComplete}
             />
           )}
       </div>

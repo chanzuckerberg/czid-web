@@ -72,7 +72,12 @@ class UploadMetadataStep extends React.Component {
   render() {
     return (
       <div className={cs.uploadMetadataStep}>
-        <div className={cx(!this.state.showInstructions && cs.hide)}>
+        <div
+          className={cx(
+            cs.uploadInstructions,
+            !this.state.showInstructions && cs.hide
+          )}
+        >
           <Instructions onClose={() => this.setShowInstructions(false)} />
         </div>
         <div
