@@ -8,8 +8,9 @@ class Location < ApplicationRecord
     query_url = "#{base_url}&q=#{query}"
     uri = URI.parse(query_url)
     request = Net::HTTP::Get.new(uri)
-    Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |http|
+    resp = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |http|
       http.request(request)
     end
+    [resp.is_a?(Net::HTTPSuccess), JSON.parse(resp.body)]
   end
 end

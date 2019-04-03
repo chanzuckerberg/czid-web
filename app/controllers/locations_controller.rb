@@ -3,10 +3,9 @@ class LocationsController < ApplicationController
     results = []
     query = location_params[:query]
     if query.present?
-      resp = Location.geosearch(query)
-      if resp.is_a?(Net::HTTPSuccess)
-        candidates = JSON.parse(resp.body)
-        candidates.each do |c|
+      success, resp = Location.geosearch(query)
+      if success
+        resp.each do |c|
           name_parts = c["display_name"].partition(", ")
           results << {
             title: name_parts[0],
