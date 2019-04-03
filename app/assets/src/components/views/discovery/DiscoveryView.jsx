@@ -569,7 +569,7 @@ class DiscoveryView extends React.Component {
             onStatsToggle={this.handleStatsToggle}
             onSearchResultSelected={this.handleSearchSelected}
             onSearchEnterPressed={this.handleStringSearch}
-            showStats={showStats}
+            showStats={showStats && !!dimensions}
             showFilters={showFilters && !!dimensions}
           />
         </div>
