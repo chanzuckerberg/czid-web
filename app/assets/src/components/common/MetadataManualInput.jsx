@@ -11,7 +11,9 @@ import _fp, {
   values,
   includes,
   sortBy,
-  find
+  find,
+  pickBy,
+  isEqual
 } from "lodash/fp";
 
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
@@ -58,13 +60,27 @@ class MetadataManualInput extends React.Component {
       }
     });
 
+    this.setDefaultHostGenomes();
+  }
+
+  componentDidUpdate(prevProps) {
+    const prevSampleNames = map("name", prevProps.samples);
+    const sampleNames = map("name", this.props.samples);
+    if (!isEqual(prevSampleNames, sampleNames)) {
+      this.setDefaultHostGenomes();
+    }
+  }
+
+  setDefaultHostGenomes = () => {
     // If samples are new, set all host genomes to Human by default.
     // Can't use updateHostGenome/updateMetadataField for bulk update.
     if (this.props.samplesAreNew) {
       const newHeaders = union(["Host Genome"], this.state.headersToEdit);
       let newFields = this.state.metadataFieldsToEdit;
       this.props.samples.forEach(sample => {
-        newFields = set([sample.name, "Host Genome"], "Human", newFields);
+        if (!get([sample.name, "Host Genome"], newFields)) {
+          newFields = set([sample.name, "Host Genome"], "Human", newFields);
+        }
       });
       this.setState({
         headersToEdit: newHeaders,
@@ -72,7 +88,7 @@ class MetadataManualInput extends React.Component {
       });
       this.onMetadataChange(newHeaders, newFields);
     }
-  }
+  };
 
   getManualInputColumns = () => {
     return [
@@ -125,6 +141,14 @@ class MetadataManualInput extends React.Component {
 
   // Convert metadata headers and fields to a CSV-like format before passing to parent.
   onMetadataChange = (newHeaders, newFields) => {
+    // Only send fields for the selected samples to the parent component.
+    // If a sample was added, and then later removed, that sample's metadata will not be sent up,
+    // but will still persist in this component.
+    const sampleNames = map("name", this.props.samples);
+    const fieldsForSamples = pickBy(
+      (fields, sampleName) => includes(sampleName, sampleNames),
+      newFields
+    );
     this.props.onMetadataChange({
       metadata: {
         headers: ["sample_name", ...newHeaders],
@@ -133,7 +157,7 @@ class MetadataManualInput extends React.Component {
             ...mapValues(value => value || "", fields),
             sample_name: sampleName
           }),
-          newFields
+          fieldsForSamples
         )
       }
     });
