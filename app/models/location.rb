@@ -1,4 +1,4 @@
-class Location < ApplicationRecord
+class Location
   # Search request to Location IQ API
   def self.geosearch(query)
     raise ArgumentError, "No query for geosearch" if query.blank?
