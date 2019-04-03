@@ -11,10 +11,10 @@ import {
 const DISCOVERY_DOMAIN_LIBRARY = "library";
 const DISCOVERY_DOMAIN_PUBLIC = "public";
 
-const getDiscoverySyncData = async ({ domain, filters, search }) => {
+const getDiscoverySyncData = async ({ domain, filters, projectId, search }) => {
   try {
     const [projects, visualizations] = await Promise.all([
-      getProjects({ domain, filters, search }),
+      getProjects({ domain, filters, projectId, search }),
       getVisualizations({ domain, filters, search })
     ]);
 
@@ -33,23 +33,15 @@ const getDiscoveryDimensions = async ({
   domain,
   filters,
   projectId,
-  search,
-  includeStats = false
+  search
 }) => {
   try {
     const actions = [
       getSampleDimensions({ domain, filters, projectId, search }),
-      !projectId ? getProjectDimensions({ domain, filters, search }) : null,
-      includeStats
-        ? getSampleStats({ domain, filters, projectId, search })
-        : null
+      getProjectDimensions({ domain, filters, projectId, search })
     ];
-    const [
-      sampleDimensions,
-      projectDimensions,
-      sampleStats
-    ] = await Promise.all(actions);
-    return { sampleDimensions, projectDimensions, sampleStats };
+    const [sampleDimensions, projectDimensions] = await Promise.all(actions);
+    return { sampleDimensions, projectDimensions };
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
@@ -57,8 +49,20 @@ const getDiscoveryDimensions = async ({
   }
 };
 
-const getDiscoveryDimensionsAndStats = async options => {
-  return getDiscoveryDimensions({ ...options, includeStats: true });
+const getDiscoveryStats = async ({ domain, filters, projectId, search }) => {
+  try {
+    const sampleStats = await getSampleStats({
+      domain,
+      filters,
+      projectId,
+      search
+    });
+    return { sampleStats };
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+    return {};
+  }
 };
 
 const processRawSample = sample => {
@@ -144,6 +148,6 @@ export {
   DISCOVERY_DOMAIN_PUBLIC,
   getDiscoverySyncData,
   getDiscoveryDimensions,
-  getDiscoveryDimensionsAndStats,
+  getDiscoveryStats,
   getDiscoverySamples
 };
