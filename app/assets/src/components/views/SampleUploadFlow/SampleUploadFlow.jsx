@@ -20,8 +20,21 @@ class SampleUploadFlow extends React.Component {
     // Metadata upload information
     metadata: null, //
     metadataIssues: null,
-    // Once the upload has started, the user cannot return to past steps.
-    isUploading: false
+    stepsEnabled: {
+      uploadSamples: true,
+      uploadMetadata: false,
+      review: false
+    }
+  };
+
+  componentDidMount() {
+    // Latest browsers will only show a generic warning
+    window.onbeforeunload = () =>
+      "Are you sure you want to leave? All data will be lost.";
+  }
+
+  onUploadComplete = () => {
+    window.onbeforeunload = null;
   };
 
   handleUploadSamples = ({
@@ -35,7 +48,8 @@ class SampleUploadFlow extends React.Component {
       project,
       uploadType,
       sampleNamesToFiles,
-      currentStep: "uploadMetadata"
+      currentStep: "uploadMetadata",
+      stepsEnabled: set("uploadMetadata", true, this.state.stepsEnabled)
     });
   };
 
@@ -73,24 +87,34 @@ class SampleUploadFlow extends React.Component {
       samples: newSamples,
       metadata: newMetadata,
       metadataIssues: issues,
-      currentStep: "review"
+      currentStep: "review",
+      stepsEnabled: set("review", true, this.state.stepsEnabled)
+    });
+  };
+
+  samplesChanged = () => {
+    this.setState({
+      stepsEnabled: {
+        uploadSamples: true,
+        uploadMetadata: false,
+        review: false
+      }
+    });
+  };
+
+  metadataChanged = () => {
+    this.setState({
+      stepsEnabled: {
+        uploadSamples: true,
+        uploadMetadata: true,
+        review: false
+      }
     });
   };
 
   handleStepSelect = step => {
     this.setState({
-      currentStep: step,
-      // If the user returns to the Upload Samples step, clear the samples and metadata,
-      // so that the UploadMetadataStep is unmounted.
-      // This is for simplicity. Ideally, we'd be more intelligent about keeping metadata for
-      // samples that weren't changed.
-      ...(step === "uploadSamples"
-        ? {
-            metadata: null,
-            metadataIssues: null,
-            samples: null
-          }
-        : {})
+      currentStep: step
     });
   };
 
@@ -107,6 +131,7 @@ class SampleUploadFlow extends React.Component {
     return (
       <div>
         <UploadSampleStep
+          onDirty={this.samplesChanged}
           onUploadSamples={this.handleUploadSamples}
           visible={this.state.currentStep === "uploadSamples"}
         />
@@ -116,6 +141,7 @@ class SampleUploadFlow extends React.Component {
             samples={this.getSamplesForMetadataValidation()}
             project={this.state.project}
             visible={this.state.currentStep === "uploadMetadata"}
+            onDirty={this.metadataChanged}
           />
         )}
         {this.state.samples &&
@@ -130,6 +156,7 @@ class SampleUploadFlow extends React.Component {
               visible={this.state.currentStep === "review"}
               onUploadStatusChange={this.onUploadStatusChange}
               onStepSelect={this.handleStepSelect}
+              onUploadComplete={this.onUploadComplete}
             />
           )}
       </div>
@@ -138,7 +165,11 @@ class SampleUploadFlow extends React.Component {
 
   onUploadStatusChange = uploadStatus => {
     this.setState({
-      isUploading: uploadStatus
+      stepsEnabled: {
+        uploadSamples: !uploadStatus,
+        uploadMetadata: !uploadStatus,
+        review: !uploadStatus
+      }
     });
   };
 
@@ -150,7 +181,7 @@ class SampleUploadFlow extends React.Component {
           samples={this.state.samples}
           project={this.state.project}
           onStepSelect={this.handleStepSelect}
-          isUploading={this.state.isUploading}
+          stepsEnabled={this.state.stepsEnabled}
         />
         <NarrowContainer className={cx(cs.sampleUploadFlow)}>
           <div className={cs.inner}>{this.renderSteps()}</div>

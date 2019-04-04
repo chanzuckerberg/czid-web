@@ -94,6 +94,11 @@ export default class ReportTable extends React.Component {
                 `Average percent-identity of alignments to NCBI NT/NR`
               )}
               {renderColumnHeader(
+                "L",
+                `${countType}_alignmentlength`,
+                `Average length (bp) of alignments to NCBI NT/NR`
+              )}
+              {renderColumnHeader(
                 "log(1/E)",
                 `${countType}_neglogevalue`,
                 `Average log-10-transformed expect value for alignments to NCBI NT/NR`

@@ -118,6 +118,7 @@ class UploadSampleStep extends React.Component {
   };
 
   handleProjectChange = async project => {
+    this.props.onDirty();
     this.setState({
       validatingSamples: true
     });
@@ -245,6 +246,7 @@ class UploadSampleStep extends React.Component {
   };
 
   handleProjectCreate = async project => {
+    this.props.onDirty();
     this.setState({
       validatingSamples: true
     });
@@ -276,6 +278,7 @@ class UploadSampleStep extends React.Component {
   };
 
   handleTabChange = tab => {
+    this.props.onDirty();
     this.setState({ currentTab: tab });
   };
 
@@ -310,6 +313,7 @@ class UploadSampleStep extends React.Component {
   };
 
   handleLocalSampleChange = async (localSamples, sampleNamesToFiles) => {
+    this.props.onDirty();
     this.setState({
       validatingSamples: true,
       removedLocalFiles: []
@@ -344,6 +348,7 @@ class UploadSampleStep extends React.Component {
   };
 
   handleRemoteSampleChange = async remoteSamples => {
+    this.props.onDirty();
     this.setState({
       validatingSamples: true
     });
@@ -362,6 +367,7 @@ class UploadSampleStep extends React.Component {
   };
 
   handleSampleRemoved = sampleName => {
+    this.props.onDirty();
     const newSamples = reject(["name", sampleName], this.getCurrentSamples());
     const newSampleNamesToFiles = omit(
       sampleName,
@@ -512,6 +518,9 @@ class UploadSampleStep extends React.Component {
 
 UploadSampleStep.propTypes = {
   onUploadSamples: PropTypes.func.isRequired,
+  // Immediately called when the user changes anything, even before validation has returned.
+  // Can be used to disable the header navigation.
+  onDirty: PropTypes.func.isRequired,
   visible: PropTypes.bool
 };
 

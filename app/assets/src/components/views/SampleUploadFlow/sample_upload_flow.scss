@@ -112,6 +112,8 @@
       align-items: center;
       justify-content: center;
       margin-bottom: 6px;
+      // Disable semantic-ui transition.
+      transition: none;
     }
 
     .text {
@@ -240,6 +242,10 @@
     font-weight: 600;
     letter-spacing: 0.4px;
     margin-bottom: 8px;
+  }
+
+  .uploadInstructions {
+    margin-top: 10px;
   }
 
   .hide {

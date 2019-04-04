@@ -72,7 +72,12 @@ class UploadMetadataStep extends React.Component {
   render() {
     return (
       <div className={cs.uploadMetadataStep}>
-        <div className={cx(!this.state.showInstructions && cs.hide)}>
+        <div
+          className={cx(
+            cs.uploadInstructions,
+            !this.state.showInstructions && cs.hide
+          )}
+        >
           <Instructions onClose={() => this.setShowInstructions(false)} />
         </div>
         <div
@@ -90,6 +95,8 @@ class UploadMetadataStep extends React.Component {
               onMetadataChange={this.handleMetadataChange}
               samplesAreNew
               issues={this.state.wasManual ? this.state.issues : null}
+              visible={this.props.visible}
+              onDirty={this.props.onDirty}
             />
           </div>
           <div className={cs.controls}>
@@ -122,7 +129,10 @@ UploadMetadataStep.propTypes = {
     id: PropTypes.number,
     name: PropTypes.string
   }),
-  visible: PropTypes.bool
+  visible: PropTypes.bool,
+  // Immediately called when the user changes anything, even before validation has returned.
+  // Can be used to disable the header navigation.
+  onDirty: PropTypes.func.isRequired
 };
 
 export default UploadMetadataStep;

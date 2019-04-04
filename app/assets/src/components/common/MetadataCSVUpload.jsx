@@ -2,7 +2,7 @@
 // Sends uploaded to server for validation and displays errors and warnings.
 import React from "react";
 import cx from "classnames";
-import { filter, map, zip, fromPairs, isNull } from "lodash/fp";
+import { filter, map, zip, fromPairs, isNull, isEqual } from "lodash/fp";
 import CSVUpload from "~ui/controls/CSVUpload";
 import {
   validateMetadataCSVForProject,
@@ -35,10 +35,37 @@ class MetadataCSVUpload extends React.Component {
   // but converts the row to objects before calling onMetadataChange.
   state = {
     metadata: null,
-    validatingCSV: false
+    validatingCSV: false,
+    // Keep track of the last sample names and project id validated so we can re-validate if the samples changed.
+    lastSampleNamesValidated: null,
+    lastProjectIdValidated: null
   };
 
-  onCSV = async csv => {
+  componentDidUpdate(prevProps) {
+    // When the CSV Upload becomes visible again, validate the CSV if the samples have changed.
+    if (
+      !prevProps.visible &&
+      this.props.visible &&
+      this.state.metadata &&
+      (!isEqual(
+        map("name", this.props.samples),
+        this.state.lastSampleNamesValidated
+      ) ||
+        this.props.project.id !== this.state.lastProjectIdValidated)
+    ) {
+      this.validateCSV(this.state.metadata);
+    }
+  }
+
+  onCSV = csv => {
+    if (this.props.onDirty) {
+      this.props.onDirty();
+    }
+    this.setState({ metadata: csv });
+    this.validateCSV(csv);
+  };
+
+  validateCSV = async csv => {
     this.props.onMetadataChange({
       metadata: null,
       issues: {
@@ -47,12 +74,17 @@ class MetadataCSVUpload extends React.Component {
       },
       validatingCSV: true
     });
-    this.setState({ metadata: csv });
 
     let serverResponse;
 
     // For uploading metadata together with new samples.
     if (this.props.samplesAreNew) {
+      // We assume that all samples are being uploaded to this.props.project.
+      this.setState({
+        lastSampleNamesValidated: map("name", this.props.samples),
+        lastProjectIdValidated: this.props.project.id
+      });
+
       serverResponse = await validateMetadataCSVForNewSamples(
         this.props.samples,
         csv
@@ -102,7 +134,11 @@ MetadataCSVUpload.propTypes = {
   ),
   className: PropTypes.string,
   onMetadataChange: PropTypes.func.isRequired,
-  samplesAreNew: PropTypes.bool
+  samplesAreNew: PropTypes.bool,
+  visible: PropTypes.bool,
+  // Immediately called when the user changes anything, even before validation has returned.
+  // Can be used to disable the header navigation.
+  onDirty: PropTypes.func.isRequired
 };
 
 export default MetadataCSVUpload;

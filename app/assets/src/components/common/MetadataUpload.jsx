@@ -62,6 +62,9 @@ class MetadataUpload extends React.Component {
   // MetadataManualInput doesn't validate metadata before calling onMetadataChangeManual.
   // This happens when Continue is clicked in the parent component.
   onMetadataChangeManual = ({ metadata }) => {
+    if (this.props.onDirty) {
+      this.props.onDirty();
+    }
     this.props.onMetadataChange({ metadata, wasManual: true });
   };
 
@@ -112,8 +115,15 @@ class MetadataUpload extends React.Component {
             onMetadataChange={this.onMetadataChangeCSV}
             project={this.props.project}
             samplesAreNew={this.props.samplesAreNew}
+            visible={this.props.visible}
+            onDirty={this.props.onDirty}
           />
-          <a className={cs.link} href={this.getCSVUrl()}>
+          <a
+            className={cs.link}
+            href={this.getCSVUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Download Metadata CSV Template
           </a>
           {this.state.validatingCSV && (
@@ -258,7 +268,11 @@ MetadataUpload.propTypes = {
   project: PropTypes.Project,
   samples: PropTypes.arrayOf(PropTypes.Sample),
   samplesAreNew: PropTypes.bool,
-  withinModal: PropTypes.bool
+  withinModal: PropTypes.bool,
+  visible: PropTypes.bool,
+  // Immediately called when the user changes anything, even before validation has returned.
+  // Can be used to disable the header navigation.
+  onDirty: PropTypes.func
 };
 
 export default MetadataUpload;

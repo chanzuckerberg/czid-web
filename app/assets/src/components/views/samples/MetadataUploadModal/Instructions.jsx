@@ -24,7 +24,8 @@ class UploadInstructions extends React.Component {
               Review the fields in our{" "}
               <a
                 href="/metadata/dictionary"
-                onClick={this.openDictionary}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={cs.link}
               >
                 metadata dictionary
@@ -34,7 +35,12 @@ class UploadInstructions extends React.Component {
             </li>
             <li>
               You can use your own CSV or copy your metadata into our{" "}
-              <a className={cs.link} href="/metadata/metadata_template_csv">
+              <a
+                href="/metadata/metadata_template_csv"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cs.link}
+              >
                 CSV template.
               </a>
             </li>

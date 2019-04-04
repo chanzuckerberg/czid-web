@@ -1,5 +1,5 @@
 import React from "react";
-import { startCase, findIndex } from "lodash/fp";
+import { startCase } from "lodash/fp";
 import cx from "classnames";
 
 import PropTypes from "~/components/utils/propTypes";
@@ -25,10 +25,7 @@ const MENU_OPTIONS = [
 
 class SampleUploadFlowHeader extends React.Component {
   isStepEnabled = step => {
-    const index = findIndex(["step", step], MENU_OPTIONS);
-    const curIndex = findIndex(["step", this.props.currentStep], MENU_OPTIONS);
-
-    return index < curIndex && !this.props.isUploading;
+    return this.props.stepsEnabled[step];
   };
 
   onStepSelect = step => {
@@ -77,7 +74,9 @@ class SampleUploadFlowHeader extends React.Component {
                   className={cx(
                     cs.option,
                     currentStep === val.step && cs.active,
-                    this.isStepEnabled(val.step) && cs.enabled
+                    currentStep !== val.step &&
+                      this.isStepEnabled(val.step) &&
+                      cs.enabled
                   )}
                   key={val.text}
                   onClick={() => this.onStepSelect(val.step)}
@@ -99,7 +98,7 @@ SampleUploadFlowHeader.propTypes = {
   samples: PropTypes.arrayOf(PropTypes.Sample),
   project: PropTypes.Project,
   onStepSelect: PropTypes.func.isRequired,
-  isUploading: PropTypes.bool
+  stepsEnabled: PropTypes.objectOf(PropTypes.bool)
 };
 
 export default SampleUploadFlowHeader;

@@ -37,8 +37,8 @@ class SamplesHeatmapView extends React.Component {
       ...this.urlParams
     };
 
-    // TODO (gdingle): remove admin gating when we go live with saved visualizations
-    if (this.props.admin) {
+    // TODO (gdingle): remove gating when we go live with data discovery
+    if (this.props.allowedFeatures.includes("data_discovery")) {
       this.initOnBeforeUnload(props.savedParamValues);
     }
 
@@ -752,6 +752,7 @@ class SamplesHeatmapView extends React.Component {
       { text: "Download PNG", value: "png" }
     ];
 
+    const { allowedFeatures } = this.props;
     return (
       <div className={cs.heatmap}>
         <div>
@@ -776,13 +777,13 @@ class SamplesHeatmapView extends React.Component {
                 on="click"
                 hideOnScroll
               />
-              {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
-              {this.props.admin && (
+              {/* TODO: (gdingle): this is gated until we release data discovery */}
+              {allowedFeatures.includes("data_discovery") && (
                 <SaveButton
                   onClick={this.onSaveClick}
                   className={cs.controlElement}
                 />
-              )}{" "}
+              )}
               <DownloadButtonDropdown
                 className={cs.controlElement}
                 options={downloadOptions}
@@ -814,16 +815,16 @@ class SamplesHeatmapView extends React.Component {
 }
 
 SamplesHeatmapView.propTypes = {
+  allowedFeatures: PropTypes.object,
   backgrounds: PropTypes.array,
   categories: PropTypes.array,
   metrics: PropTypes.array,
   sampleIds: PropTypes.array,
+  savedParamValues: PropTypes.object,
   subcategories: PropTypes.object,
   removedTaxonIds: PropTypes.array,
   taxonLevels: PropTypes.array,
-  thresholdFilters: PropTypes.object,
-  savedParamValues: PropTypes.object,
-  admin: PropTypes.bool
+  thresholdFilters: PropTypes.object
 };
 
 export default SamplesHeatmapView;
