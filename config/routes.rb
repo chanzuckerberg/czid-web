@@ -113,6 +113,10 @@ Rails.application.routes.draw do
     post :validate_csv_for_new_samples, on: :collection
   end
 
+  resource :locations do
+    get :external_search, on: :collection
+  end
+
   authenticate :user, ->(u) { u.admin? } do
     mount Resque::Server.new, at: "/resque"
   end
