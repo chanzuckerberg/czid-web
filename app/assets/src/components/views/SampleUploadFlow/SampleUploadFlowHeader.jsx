@@ -98,7 +98,6 @@ SampleUploadFlowHeader.propTypes = {
   samples: PropTypes.arrayOf(PropTypes.Sample),
   project: PropTypes.Project,
   onStepSelect: PropTypes.func.isRequired,
-  isUploading: PropTypes.bool,
   stepsEnabled: PropTypes.objectOf(PropTypes.bool)
 };
 

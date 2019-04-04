@@ -20,8 +20,6 @@ class SampleUploadFlow extends React.Component {
     // Metadata upload information
     metadata: null, //
     metadataIssues: null,
-    // Once the upload has started, the user cannot return to past steps.
-    isUploading: false,
     stepsEnabled: {
       uploadSamples: true,
       uploadMetadata: false,
@@ -167,7 +165,11 @@ class SampleUploadFlow extends React.Component {
 
   onUploadStatusChange = uploadStatus => {
     this.setState({
-      isUploading: uploadStatus
+      stepsEnabled: {
+        uploadSamples: !uploadStatus,
+        uploadMetadata: !uploadStatus,
+        review: !uploadStatus
+      }
     });
   };
 
@@ -179,7 +181,6 @@ class SampleUploadFlow extends React.Component {
           samples={this.state.samples}
           project={this.state.project}
           onStepSelect={this.handleStepSelect}
-          isUploading={this.state.isUploading}
           stepsEnabled={this.state.stepsEnabled}
         />
         <NarrowContainer className={cx(cs.sampleUploadFlow)}>
