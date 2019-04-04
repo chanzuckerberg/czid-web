@@ -37,7 +37,7 @@ class SamplesHeatmapView extends React.Component {
       ...this.urlParams
     };
 
-    // TODO (gdingle): remove admin gating when we go live with saved visualizations
+    // TODO (gdingle): remove gating when we go live with data discovery
     if (this.props.allowedFeatures.includes("data_discovery")) {
       this.initOnBeforeUnload(props.savedParamValues);
     }
@@ -777,7 +777,7 @@ class SamplesHeatmapView extends React.Component {
                 on="click"
                 hideOnScroll
               />
-              {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
+              {/* TODO: (gdingle): this is gated until we release data discovery */}
               {allowedFeatures.includes("data_discovery") && (
                 <SaveButton
                   onClick={this.onSaveClick}

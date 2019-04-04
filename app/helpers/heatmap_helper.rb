@@ -36,7 +36,6 @@ module HeatmapHelper
         ],
         operators: [">=", "<="]
       },
-      admin: current_user.admin?,
       allowedFeatures: current_user.allowed_features
     }
   end
