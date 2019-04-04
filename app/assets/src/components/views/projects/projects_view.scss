@@ -5,6 +5,9 @@
   text-align: left;
   padding: 13px 0;
 
+  .visibility {
+  }
+
   .projectName {
     color: $black;
     font-weight: $font-weight-semibold;
@@ -40,11 +43,6 @@
       margin-left: 8px;
     }
   }
-}
-
-.detailsCell,
-.detailsHeader {
-  text-align: left;
 }
 
 .icon {

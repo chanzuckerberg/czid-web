@@ -16,19 +16,27 @@ class ProjectsView extends React.Component {
     super(props);
 
     this.columns = [
+      // {
+      //   dataKey: "public_access",
+      //   width: 36,
+      //   label: "",
+      //   cellRenderer: this.renderAccess
+      // },
+      // {
+      //   dataKey: "details",
+      //   label: "Project",
+      //   flexGrow: 1,
+      //   className: cs.detailsCell,
+      //   cellRenderer: this.renderProjectDetails,
+      //   headerClassName: cs.detailsHeader,
+      //   sortFunction: p => (p.name || "").toLowerCase()
+      // },
       {
-        dataKey: "public_access",
-        width: 36,
-        label: "",
-        cellRenderer: this.renderAccess
-      },
-      {
-        dataKey: "details",
+        dataKey: "project",
         label: "Project",
         flexGrow: 1,
-        className: cs.detailsCell,
+        width: 250,
         cellRenderer: this.renderProjectDetails,
-        headerClassName: cs.detailsHeader,
         sortFunction: p => (p.name || "").toLowerCase()
       },
       {
@@ -51,31 +59,28 @@ class ProjectsView extends React.Component {
     ];
   }
 
-  renderAccess = ({ cellData: publicAccess }) => {
-    return (
-      <div>
-        {publicAccess ? (
-          <PublicProjectIcon className={cx(cs.icon, cs.iconPublic)} />
-        ) : (
-          <PrivateProjectIcon className={cx(cs.icon, cs.iconPrivate)} />
-        )}
-      </div>
-    );
-  };
-
   renderProjectDetails = ({ cellData: project }) => {
     return (
       <div className={cs.project}>
-        <BasicPopup
-          trigger={<div className={cs.projectName}>{project.name}</div>}
-          content={project.name}
-        />
-        <div className={cs.projectDescription}>{project.description}</div>
-        <div className={cs.projectDetails}>
-          <span className={cs.projectCreationDate}>
-            {moment(project.created_at).fromNow()}
-          </span>|
-          <span className={cs.projectOwner}>{project.owner}</span>
+        <div className={cs.visibility}>
+          {project && project.publicAccess ? (
+            <PublicProjectIcon className={cx(cs.icon, cs.iconPublic)} />
+          ) : (
+            <PrivateProjectIcon className={cx(cs.icon, cs.iconPrivate)} />
+          )}
+        </div>
+        <div className={cs.projectRightPane}>
+          <BasicPopup
+            trigger={<div className={cs.projectName}>{project.name}</div>}
+            content={project.name}
+          />
+          <div className={cs.projectDescription}>{project.description}</div>
+          <div className={cs.projectDetails}>
+            <span className={cs.projectCreationDate}>
+              {moment(project.created_at).fromNow()}
+            </span>|
+            <span className={cs.projectOwner}>{project.owner}</span>
+          </div>
         </div>
       </div>
     );
