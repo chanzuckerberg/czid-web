@@ -20,6 +20,8 @@ class LocationsController < ApplicationController
         end
       end
     end
+    event = MetricUtil::ANALYTICS_EVENT_NAMES[:location_geosearched]
+    MetricUtil.log_analytics_event(event, current_user, query: query, request: request)
     render json: results
   rescue => err
     render json: {
