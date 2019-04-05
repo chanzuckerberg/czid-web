@@ -291,9 +291,9 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
  * The eventData should be used for extra data that would be useful for an
  * analysis specific to the event.
  **/
-const withAnalytics = (func, eventName, eventData = {}) => {
+const withAnalytics = (handleEvent, eventName, eventData = {}) => {
   return (...args) => {
-    const ret = func.apply(null, args);
+    const ret = handleEvent.apply(null, args);
     logAnalyticsEvent(eventName, eventData);
     return ret;
   };
