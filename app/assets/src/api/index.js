@@ -251,7 +251,22 @@ const createProject = params =>
 const logAnalyticsEvent = (eventName, eventData = {}) => {
   // Wrapper around Segment analytics so we can add things later
   // eventData should have keys in snake_case for the database
-  if (window.analytics) window.analytics.track(eventName, eventData);
+  if (window.analytics) {
+    // Include high value user groups in event properties to avoid JOINs downstream.
+    if (window.analytics.user) {
+      const traits = window.analytics.user().traits();
+      eventData = {
+        // see traits_for_segment
+        admin: traits.admin,
+        biohub_user: traits.biohub_user,
+        czi_user: traits.biohub_user,
+        demo_user: traits.demo_user,
+        has_samples: traits.has_samples,
+        ...eventData
+      };
+    }
+    window.analytics.track(eventName, eventData);
+  }
 };
 
 /**
