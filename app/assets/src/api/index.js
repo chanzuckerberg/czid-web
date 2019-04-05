@@ -254,6 +254,32 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
   if (window.analytics) window.analytics.track(eventName, eventData);
 };
 
+/**
+ * For wrapping event handlers in React. The first part of the name should be
+ * the React component. The middle part should be user-friendly UI name. The
+ * last part should be the action taken. In this way, we can easily discern the
+ * context and meaning of an analytics event in a report and locate it in the
+ * codebase.
+ *
+ * For example:
+ *
+ *    withAnalytics(
+ *      this.renderMoreReads,
+ *      "AccessionViz_more_reads_link_clicked",
+ *      { reads: this.state.reads.length, allReads: this.allReads.length }
+ *    )
+ *
+ * React events should have have a single callsite, so there is no need to put
+ * them in ANALYTICS_EVENT_NAMES.
+ **/
+const withAnalytics = (func, eventName, eventData = {}) => {
+  return args => {
+    const ret = func(args);
+    logAnalyticsEvent(eventName, eventData);
+    return ret;
+  };
+};
+
 const validateSampleNames = (projectId, sampleNames) => {
   if (!projectId) {
     return Promise.resolve(sampleNames);
@@ -296,16 +322,17 @@ export {
   createProject,
   createSample,
   deleteSample,
+  withAnalytics,
   getAlignmentData,
   getAllHostGenomes,
   getProjectDimensions,
   getProjects,
   getSampleDimensions,
   getSampleReportInfo,
-  getSampleStats,
-  getSampleTaxons,
   getSamples,
+  getSampleStats,
   getSamplesV1,
+  getSampleTaxons,
   getSearchSuggestions,
   getSummaryContigCounts,
   getTaxonDescriptions,
@@ -319,6 +346,6 @@ export {
   shortenUrl,
   uploadFileToUrl,
   uploadFileToUrlWithRetries,
-  validateSampleNames,
-  validateSampleFiles
+  validateSampleFiles,
+  validateSampleNames
 };

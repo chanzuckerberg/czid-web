@@ -3,9 +3,6 @@ import ReactDOM from "react-dom";
 import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
-import PropTypes from "~/components/utils/propTypes";
-import SampleUpload from "./SampleUpload";
-import ObjectHelper from "../helpers/ObjectHelper";
 import { merge, omit, isEmpty, get, size } from "lodash/fp";
 
 import { Menu, MenuItem } from "~ui/controls/Menu";
@@ -15,7 +12,11 @@ import TermsAgreement from "~ui/controls/TermsAgreement";
 import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { openUrlWithTimeout } from "~utils/links";
-import { validateSampleNames } from "~/api";
+import { validateSampleNames, withAnalytics } from "~/api";
+import PropTypes from "~/components/utils/propTypes";
+
+import SampleUpload from "./SampleUpload";
+import ObjectHelper from "../helpers/ObjectHelper";
 
 class BulkUploadImport extends React.Component {
   constructor(props, context) {
@@ -610,6 +611,13 @@ class BulkUploadImport extends React.Component {
                                     <li
                                       onClick={() => {
                                         this.handleHostChangeForSample(i, j);
+                                        logAnalyticsEvent(
+                                          "BulkUploadImport_host_dropdown_clicked",
+                                          {
+                                            samplesId,
+                                            hostGenomeId
+                                          }
+                                        );
                                       }}
                                       ref="genome"
                                       key={j}
@@ -652,6 +660,13 @@ class BulkUploadImport extends React.Component {
                                           j,
                                           e
                                         );
+                                        logAnalyticsEvent(
+                                          "BulkUploadImport_project_dropdown_clicked",
+                                          {
+                                            samplesId,
+                                            hostGenomeId
+                                          }
+                                        );
                                       }}
                                       ref="project"
                                       key={j}
@@ -685,7 +700,10 @@ class BulkUploadImport extends React.Component {
                         ) : (
                           <button
                             type="submit"
-                            onClick={this.handleRemoteUploadSubmit}
+                            onClick={withAnalytics(
+                              this.handleRemoteUploadSubmit,
+                              "BulkUploadImport_run_samples_button_clicked"
+                            )}
                             className="new-button blue-button upload-samples-button"
                           >
                             Run Samples
@@ -693,7 +711,12 @@ class BulkUploadImport extends React.Component {
                         )}
                         <button
                           type="button"
-                          onClick={() => window.history.back()}
+                          onClick={() => {
+                            window.history.back();
+                            logAnalyticsEvent(
+                              "BulkUploadImport_back_button_clicked"
+                            );
+                          }}
                           className="new-button secondary-button"
                         >
                           Cancel
