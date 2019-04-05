@@ -38,7 +38,10 @@ class SamplesHeatmapView extends React.Component {
     };
 
     // TODO (gdingle): remove gating when we go live with data discovery
-    if (this.props.allowedFeatures.includes("data_discovery")) {
+    if (
+      this.props.allowedFeatures &&
+      this.props.allowedFeatures.includes("data_discovery")
+    ) {
       this.initOnBeforeUnload(props.savedParamValues);
     }
 
@@ -778,12 +781,13 @@ class SamplesHeatmapView extends React.Component {
                 hideOnScroll
               />
               {/* TODO: (gdingle): this is gated until we release data discovery */}
-              {allowedFeatures.includes("data_discovery") && (
-                <SaveButton
-                  onClick={this.onSaveClick}
-                  className={cs.controlElement}
-                />
-              )}
+              {allowedFeatures &&
+                allowedFeatures.includes("data_discovery") && (
+                  <SaveButton
+                    onClick={this.onSaveClick}
+                    className={cs.controlElement}
+                  />
+                )}
               <DownloadButtonDropdown
                 className={cs.controlElement}
                 options={downloadOptions}
@@ -815,7 +819,7 @@ class SamplesHeatmapView extends React.Component {
 }
 
 SamplesHeatmapView.propTypes = {
-  allowedFeatures: PropTypes.object,
+  allowedFeatures: PropTypes.array,
   backgrounds: PropTypes.array,
   categories: PropTypes.array,
   metrics: PropTypes.array,

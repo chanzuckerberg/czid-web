@@ -25,7 +25,8 @@ class MetricUtil
     project_created: "project_created",
     pipeline_run_succeeded: "pipeline_run_succeeded",
     pipeline_run_failed: "pipeline_run_failed",
-    sample_upload_batch_created: "sample_upload_batch_created"
+    sample_upload_batch_created: "sample_upload_batch_created",
+    location_geosearched: "location_geosearched"
   }.freeze
 
   # DEPRECATED. Use log_analytics_event.
