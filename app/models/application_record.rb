@@ -1,6 +1,8 @@
 class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 
+  # NOTE: Batch ActiveRecord operations such as update_all and delete_all do not
+  # fire callbacks.
   after_create { |record| log_analytics record, "created" }
   after_update { |record| log_analytics record, "updated" }
   after_destroy { |record| log_analytics record, "destroyed" }
@@ -27,6 +29,7 @@ class ApplicationRecord < ActiveRecord::Base
     Thread.current[:_current_request]
   end
 
+  # See also ANALYTICS_EVENT_NAMES
   def log_analytics(record, action)
     # example: "visualization_updated"
     event = "#{record.class.name.underscore}_#{action}"
