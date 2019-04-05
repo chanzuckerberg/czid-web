@@ -12,7 +12,7 @@ import TermsAgreement from "~ui/controls/TermsAgreement";
 import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { openUrlWithTimeout } from "~utils/links";
-import { validateSampleNames, withAnalytics } from "~/api";
+import { validateSampleNames, withAnalytics, logAnalyticsEvent } from "~/api";
 import PropTypes from "~/components/utils/propTypes";
 
 import SampleUpload from "./SampleUpload";
@@ -614,8 +614,8 @@ class BulkUploadImport extends React.Component {
                                         logAnalyticsEvent(
                                           "BulkUploadImport_host_dropdown_clicked",
                                           {
-                                            samplesId,
-                                            hostGenomeId
+                                            samplesId: i,
+                                            hostGenomeId: j
                                           }
                                         );
                                       }}
@@ -663,8 +663,8 @@ class BulkUploadImport extends React.Component {
                                         logAnalyticsEvent(
                                           "BulkUploadImport_project_dropdown_clicked",
                                           {
-                                            samplesId,
-                                            hostGenomeId
+                                            samplesId: i,
+                                            hostGenomeId: j
                                           }
                                         );
                                       }}
