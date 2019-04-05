@@ -79,7 +79,7 @@ export default class DiscoverySidebar extends React.Component {
     const { onFilterClick } = this.props;
     const { metadata } = this.state;
 
-    const dates = metadata[field];
+    let dates = metadata[field];
     const total = (maxBy("count", dates) || {}).count;
     const isIntervalBased = !!dates.length && dates[0].interval;
     const firstDate = dates.length
@@ -92,6 +92,9 @@ export default class DiscoverySidebar extends React.Component {
         ? dates[dates.length - 1].interval.end
         : dates[0].value
       : null;
+    // Special case design to show 1 or 2 bars just side-by-side.
+    const realBars = dates.filter(d => d.count > 0);
+    if (realBars.length < 3) dates = realBars;
     return (
       <div className={cs.histogramContainer}>
         <div className={cs.dateHistogram}>

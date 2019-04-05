@@ -50,6 +50,7 @@
     flex-flow: row nowrap;
     justify-content: space-evenly;
     align-items: flex-end;
+    border-bottom: 1px solid $lightest-grey;
 
     .bar {
       margin: 0 1px;
