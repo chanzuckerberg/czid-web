@@ -262,6 +262,7 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
         czi_user: traits.biohub_user,
         demo_user: traits.demo_user,
         has_samples: traits.has_samples,
+        // caller can override above traits if they know what they are doing
         ...eventData
       };
     }
@@ -286,10 +287,13 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
  *
  * React events should have have a single callsite, so there is no need to put
  * them in ANALYTICS_EVENT_NAMES.
+ *
+ * The eventData should be used for extra data that would be useful for an
+ * analysis specific to the event.
  **/
 const withAnalytics = (func, eventName, eventData = {}) => {
-  return args => {
-    const ret = func(args);
+  return (...args) => {
+    const ret = func.apply(null, args);
     logAnalyticsEvent(eventName, eventData);
     return ret;
   };
