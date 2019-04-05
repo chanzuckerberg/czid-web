@@ -273,7 +273,11 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
 /**
  * For wrapping event handlers in React. The first part of the name should be
  * the React component. The middle part should be user-friendly UI name. The
- * last part should be the action taken. In this way, we can easily discern the
+ * last part should be the action taken.
+ *
+ * <ReactComponent>_<friendly_name_of_ui_element>_<past_tense_action>
+ *
+ * In this way, we can easily discern the
  * context and meaning of an analytics event in a report and locate it in the
  * codebase.
  *
