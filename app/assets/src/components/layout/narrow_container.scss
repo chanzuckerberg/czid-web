@@ -1,7 +1,7 @@
 .narrowContainer {
-  max-width: 1280px;
+  max-width: 1308px;
   margin: 0 auto;
-  width: 100%;
+  width: calc(100% - 28px);
 
   &.small {
     max-width: 800px;

@@ -202,44 +202,48 @@ class PhyloTreeListView extends React.Component {
     let currentTree = this.getCurrentTree();
     return (
       <div className={cs.phyloTreeListView}>
-        <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
-          <ViewHeader.Content>
-            <ViewHeader.Pretitle>
-              Phylogenetic Tree{" "}
-              {currentTree.tax_name && (
-                <span>
-                  &nbsp;-&nbsp;
-                  <span
-                    className={cs.taxonName}
-                    onClick={this.handleTaxonModeOpen}
-                  >
-                    {currentTree.tax_name}
+        <NarrowContainer>
+          <ViewHeader title="Phylogenetic Trees" className={cs.viewHeader}>
+            <ViewHeader.Content>
+              <ViewHeader.Pretitle>
+                Phylogenetic Tree{" "}
+                {currentTree.tax_name && (
+                  <span>
+                    &nbsp;-&nbsp;
+                    <span
+                      className={cs.taxonName}
+                      onClick={this.handleTaxonModeOpen}
+                    >
+                      {currentTree.tax_name}
+                    </span>
                   </span>
-                </span>
-              )}
-            </ViewHeader.Pretitle>
-            <ViewHeader.Title
-              label={currentTree.name}
-              id={this.state.selectedPhyloTreeId}
-              options={this.props.phyloTrees.map(tree => ({
-                label: tree.name,
-                id: tree.id,
-                onClick: () => this.handleTreeChange(tree.id)
-              }))}
-            />
-          </ViewHeader.Content>
-          <ViewHeader.Controls>
-            <BasicPopup
-              trigger={<ShareButton onClick={this.handleShareClick} />}
-              content="A shareable URL was copied to your clipboard!"
-              on="click"
-              hideOnScroll
-            />{" "}
-            {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
-            {this.props.admin && <SaveButton onClick={this.handleSaveClick} />}{" "}
-            <PhyloTreeDownloadButton tree={currentTree} />
-          </ViewHeader.Controls>
-        </ViewHeader>
+                )}
+              </ViewHeader.Pretitle>
+              <ViewHeader.Title
+                label={currentTree.name}
+                id={this.state.selectedPhyloTreeId}
+                options={this.props.phyloTrees.map(tree => ({
+                  label: tree.name,
+                  id: tree.id,
+                  onClick: () => this.handleTreeChange(tree.id)
+                }))}
+              />
+            </ViewHeader.Content>
+            <ViewHeader.Controls>
+              <BasicPopup
+                trigger={<ShareButton onClick={this.handleShareClick} />}
+                content="A shareable URL was copied to your clipboard!"
+                on="click"
+                hideOnScroll
+              />{" "}
+              {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
+              {this.props.admin && (
+                <SaveButton onClick={this.handleSaveClick} />
+              )}{" "}
+              <PhyloTreeDownloadButton tree={currentTree} />
+            </ViewHeader.Controls>
+          </ViewHeader>
+        </NarrowContainer>
         <Divider />
         <DetailsSidebar
           visible={this.state.sidebarVisible}

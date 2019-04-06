@@ -318,61 +318,63 @@ class SampleView extends React.Component {
 
     return (
       <div>
-        <ViewHeader className={cs.viewHeader}>
-          <ViewHeader.Content>
-            <div className={cs.pipelineInfo}>
-              <span>PIPELINE {versionDisplay}</span>
-              <PipelineVersionSelect
-                pipelineRun={pipelineRun}
-                pipelineVersions={pipelineVersions}
-                lastProcessedAt={get("last_processed_at", summaryStats)}
-                onPipelineVersionSelect={this.handlePipelineVersionSelect}
-              />
-              {this.renderPipelineWarnings()}
-            </div>
-            <ViewHeader.Pretitle
-              breadcrumbLink={`/home?project_id=${project.id}`}
-            >
-              {project.name}
-            </ViewHeader.Pretitle>
-            <ViewHeader.Title
-              label={this.state.sampleName}
-              id={sample.id}
-              options={Object.keys(sampleIdToNameMap).map(sampleId => ({
-                label: sampleIdToNameMap[sampleId],
-                id: sampleId,
-                onClick: () => window.open(`/samples/${sampleId}`, "_self")
-              }))}
-            />
-            <div className={cs.sampleDetailsLinkContainer}>
-              <span
-                className={cs.sampleDetailsLink}
-                onClick={this.toggleSampleDetailsSidebar}
+        <NarrowContainer>
+          <ViewHeader className={cs.viewHeader}>
+            <ViewHeader.Content>
+              <div className={cs.pipelineInfo}>
+                <span>PIPELINE {versionDisplay}</span>
+                <PipelineVersionSelect
+                  pipelineRun={pipelineRun}
+                  pipelineVersions={pipelineVersions}
+                  lastProcessedAt={get("last_processed_at", summaryStats)}
+                  onPipelineVersionSelect={this.handlePipelineVersionSelect}
+                />
+                {this.renderPipelineWarnings()}
+              </div>
+              <ViewHeader.Pretitle
+                breadcrumbLink={`/home?project_id=${project.id}`}
               >
-                Sample Details
-              </span>
-            </div>
-          </ViewHeader.Content>
-          <ViewHeader.Controls>
-            <BasicPopup
-              trigger={<ShareButton onClick={this.onShareClick} />}
-              content="A shareable URL was copied to your clipboard!"
-              on="click"
-              hideOnScroll
-            />{" "}
-            {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
-            {this.props.admin && <SaveButton onClick={this.onSaveClick} />}{" "}
-            <Controls
-              reportPresent={reportPresent}
-              sample={sample}
-              project={project}
-              pipelineRun={pipelineRun}
-              reportDetails={reportDetails}
-              reportPageParams={reportPageParams}
-              canEdit={this.props.canEdit}
-            />
-          </ViewHeader.Controls>
-        </ViewHeader>
+                {project.name}
+              </ViewHeader.Pretitle>
+              <ViewHeader.Title
+                label={this.state.sampleName}
+                id={sample.id}
+                options={Object.keys(sampleIdToNameMap).map(sampleId => ({
+                  label: sampleIdToNameMap[sampleId],
+                  id: sampleId,
+                  onClick: () => window.open(`/samples/${sampleId}`, "_self")
+                }))}
+              />
+              <div className={cs.sampleDetailsLinkContainer}>
+                <span
+                  className={cs.sampleDetailsLink}
+                  onClick={this.toggleSampleDetailsSidebar}
+                >
+                  Sample Details
+                </span>
+              </div>
+            </ViewHeader.Content>
+            <ViewHeader.Controls>
+              <BasicPopup
+                trigger={<ShareButton onClick={this.onShareClick} />}
+                content="A shareable URL was copied to your clipboard!"
+                on="click"
+                hideOnScroll
+              />{" "}
+              {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
+              {this.props.admin && <SaveButton onClick={this.onSaveClick} />}{" "}
+              <Controls
+                reportPresent={reportPresent}
+                sample={sample}
+                project={project}
+                pipelineRun={pipelineRun}
+                reportDetails={reportDetails}
+                reportPageParams={reportPageParams}
+                canEdit={this.props.canEdit}
+              />
+            </ViewHeader.Controls>
+          </ViewHeader>
+        </NarrowContainer>
         <NarrowContainer>
           {showAMR ? (
             <Tabs
