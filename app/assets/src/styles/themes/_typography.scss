@@ -120,3 +120,9 @@ $font-weight-heavy: 800;
   letter-spacing: 1.4px;
   text-transform: uppercase;
 }
+
+@mixin viz-label {
+  font-size: 9px;
+  line-height: 13px;
+  font-weight: $font-weight-semibold;
+}
