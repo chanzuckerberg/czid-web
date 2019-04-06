@@ -188,7 +188,7 @@ export default class DiscoverySidebar extends React.Component {
             <span
               className={cs.bar}
               // TODO(gdingle): make width depend on container
-              style={{ width: percent * 1.6 + "px" }}
+              style={{ width: percent * 1.4 + "px" }}
             />
             <span className={cs.count}>{count}</span>
           </dd>
