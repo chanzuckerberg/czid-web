@@ -103,6 +103,7 @@
       min-width: 33%;
       margin: 5px 0;
       padding: 0px;
+      display: inline-block;
     }
 
     dt {
@@ -111,51 +112,49 @@
 
     dd {
       width: 66%;
+      vertical-align: top;
     }
+  }
 
-    .statsDt {
-      min-width: 50%;
-    }
+  .statsDt {
+    min-width: 50%;
+  }
 
-    .statsDd {
-      max-width: 50%;
-    }
+  .statsDd {
+    max-width: 50%;
+  }
 
-    .barChartRow {
-    }
+  .barLabel {
+    text-align: right;
+    padding-right: 3px;
+  }
 
-    .barLabel {
-      text-align: right;
-      padding-right: 3px;
-    }
+  .bar {
+    display: inline-block;
+    vertical-align: middle;
+    height: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
+    padding-left: 1px;
+    background-color: $melrose;
+    text-align: right;
+    color: white;
+  }
 
-    .bar {
-      display: inline-block;
-      vertical-align: middle;
-      height: 10px;
-      margin-left: 5px;
-      margin-right: 5px;
-      padding-left: 1px;
-      background-color: $melrose;
-      text-align: right;
-      color: white;
-    }
+  .showHide {
+    text-transform: uppercase;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    color: $primary-light;
+    font-size: $font-size-smallest;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  }
 
-    .showHide {
-      text-transform: uppercase;
-      margin-top: 15px;
-      margin-bottom: 10px;
-      color: $primary-light;
-      font-size: $font-size-smallest;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-    }
-
-    .count {
-      vertical-align: middle;
-      color: $dark-grey;
-      font-weight: 600;
-    }
+  .count {
+    vertical-align: middle;
+    color: $dark-grey;
+    font-weight: 600;
   }
 }
 
