@@ -758,7 +758,7 @@ class SamplesHeatmapView extends React.Component {
     const { allowedFeatures } = this.props;
     return (
       <div className={cs.heatmap}>
-        <div>
+        <NarrowContainer>
           <ViewHeader className={cs.viewHeader}>
             <ViewHeader.Content>
               <ViewHeader.Pretitle>Heatmap</ViewHeader.Pretitle>
@@ -796,7 +796,7 @@ class SamplesHeatmapView extends React.Component {
               />
             </ViewHeader.Controls>
           </ViewHeader>
-        </div>
+        </NarrowContainer>
         <StickyContainer>
           <Sticky>
             {({ style }) => (
