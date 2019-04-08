@@ -1,6 +1,8 @@
 import React from "react";
 import axios from "axios";
+
 import { openUrl } from "~utils/links";
+import { withAnalytics } from "~/api";
 
 class CreateUser extends React.Component {
   constructor(props, context) {
@@ -219,10 +221,10 @@ class CreateUser extends React.Component {
       });
   }
 
-  displayError(failedStatus, serverError, formattedError) {
+  displayError(failedStatus, serverErrors, formattedError) {
     if (failedStatus) {
-      return serverError.length ? (
-        serverError.map((error, i) => {
+      const ret = serverErrors.length ? (
+        serverErrors.map((error, i) => {
           return (
             <p className="error center-align" key={i}>
               {error}
@@ -232,6 +234,12 @@ class CreateUser extends React.Component {
       ) : (
         <span>{formattedError}</span>
       );
+      const form = this.props.selectedUser ? "update" : "create";
+      logAnalyticsEvent(`CreateUser_${form}_errors_displayed`, {
+        serverErrors: serverErrors,
+        errorMessage: formattedError
+      });
+      return ret;
     } else {
       return null;
     }
@@ -268,7 +276,13 @@ class CreateUser extends React.Component {
                 <i className="fa fa-envelope" aria-hidden="true" />
                 <input
                   type="email"
-                  onChange={this.handleEmailChange}
+                  onChange={withAnalytics(
+                    this.handleEmailChange,
+                    "CreateUser_email_changed",
+                    {
+                      email: this.state.email
+                    }
+                  )}
                   className=""
                   onFocus={this.clearError}
                   value={this.state.email}
@@ -279,7 +293,13 @@ class CreateUser extends React.Component {
                 <i className="fa fa-envelope" aria-hidden="true" />
                 <input
                   type="text"
-                  onChange={this.handleNameChange}
+                  onChange={withAnalytics(
+                    this.handleNameChange,
+                    "CreateUser_name_changed",
+                    {
+                      name: this.state.name
+                    }
+                  )}
                   className=""
                   onFocus={this.clearError}
                   value={this.state.name}
@@ -290,7 +310,13 @@ class CreateUser extends React.Component {
                 <i className="fa fa-building" aria-hidden="true" />
                 <input
                   type="text"
-                  onChange={this.handleInstitutionChange}
+                  onChange={withAnalytics(
+                    this.handleInstitutionChange,
+                    "CreateUser_institution_changed",
+                    {
+                      institution: this.state.institution
+                    }
+                  )}
                   onFocus={this.clearError}
                   value={this.state.institution}
                 />
@@ -300,7 +326,13 @@ class CreateUser extends React.Component {
                 <i className="fa fa-key" aria-hidden="true" />
                 <input
                   type="password"
-                  onChange={this.handlePasswordChange}
+                  onChange={withAnalytics(
+                    this.handlePasswordChange,
+                    "CreateUser_password_changed",
+                    {
+                      password: this.state.password
+                    }
+                  )}
                   className=""
                   onFocus={this.clearError}
                   value={this.state.password}
@@ -311,7 +343,13 @@ class CreateUser extends React.Component {
                 <i className="fa fa-check-circle" aria-hidden="true" />
                 <input
                   type="password"
-                  onChange={this.handlePConfirmChange}
+                  onChange={withAnalytics(
+                    this.handlePConfirmChange,
+                    "CreateUser_pconfirm_changed",
+                    {
+                      p_confirm: this.state.pConfirm
+                    }
+                  )}
                   className=""
                   onFocus={this.clearError}
                   value={this.state.pConfirm}
@@ -326,7 +364,13 @@ class CreateUser extends React.Component {
                   id="admin"
                   className="filled-in"
                   checked={this.state.isAdmin ? "checked" : ""}
-                  onChange={this.toggleCheckBox}
+                  onChange={withAnalytics(
+                    this.toggleCheckBox,
+                    "CreateUser_admin_changed",
+                    {
+                      admin: this.state.isAdmin
+                    }
+                  )}
                   value={this.state.isAdmin}
                 />
                 <label htmlFor="admin">Admin</label>
@@ -353,8 +397,20 @@ class CreateUser extends React.Component {
     return (
       <div>
         {this.props.selectedUser
-          ? this.renderUserForm(this.handleUpdate, "Update")
-          : this.renderUserForm(this.handleCreate, "Create")}
+          ? this.renderUserForm(
+              withAnalytics(
+                this.handleUpdate,
+                "CreateUser_update_form_submitted",
+                "Update"
+              )
+            )
+          : this.renderUserForm(
+              withAnalytics(
+                this.handleCreate,
+                "CreateUser_create_form_submitted",
+                "Create"
+              )
+            )}
         <div className="bottom">
           <span
             className="back"

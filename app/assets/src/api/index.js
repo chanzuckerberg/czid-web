@@ -297,7 +297,7 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
  **/
 const withAnalytics = (handleEvent, eventName, eventData = {}) => {
   return (...args) => {
-    const ret = handleEvent.apply(null, args);
+    const ret = handleEvent(...args);
     logAnalyticsEvent(eventName, eventData);
     return ret;
   };
