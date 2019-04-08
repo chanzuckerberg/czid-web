@@ -76,6 +76,14 @@ $font-weight-heavy: 800;
   letter-spacing: 0.3px;
 }
 
+@mixin font-header-accordion {
+  font-size: 12px;
+  line-height: 40px;
+  font-weight: 600;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+}
+
 @mixin font-body-l {
   font-size: 18px;
   line-height: 28px;

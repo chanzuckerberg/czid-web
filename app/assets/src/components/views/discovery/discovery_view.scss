@@ -40,7 +40,8 @@
       border-left: 2px solid $lightest-grey;
       flex: 0 0 auto;
       overflow: auto;
-      padding: 10px 20px 0 20px;
+      padding-left: 10px;
+      padding-right: 5px;
     }
   }
 }
