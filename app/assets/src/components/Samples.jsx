@@ -1657,7 +1657,10 @@ class BackgroundModal extends React.Component {
           <div className="button-container">
             <PrimaryButton
               text="Create Collection"
-              onClick={this.handleOpen}
+              onClick={withAnalytics(
+                this.handleOpen,
+                "Samples_collection_create_button_clicked"
+              )}
               disabled={!this.props.selectedSampleIds.length}
             />
           </div>
@@ -1676,7 +1679,18 @@ class BackgroundModal extends React.Component {
             update the calculated z-score to indicate how much the the sample
             deviates from the norm for that collection.
           </div>
-          <Form onSubmit={this.handleSubmit}>
+          <Form
+            onSubmit={withAnalytics(
+              this.handleSubmit,
+              "Samples_collection_form_submitted",
+              {
+                new_background_name: this.state.new_background_name,
+                new_background_description: this.state
+                  .new_background_description,
+                selectedSampleIds: this.props.parent.state.selectedSampleIds
+              }
+            )}
+          >
             {this.renderTextField("Name", false, "new_background_name", 1)}
             {this.renderTextField(
               "Description",
@@ -1687,7 +1701,13 @@ class BackgroundModal extends React.Component {
             {this.renderSampleList()}
             <div className="background-button-section">
               <PrimaryButton text="Create" type="submit" />
-              <SecondaryButton text="Cancel" onClick={this.handleClose} />
+              <SecondaryButton
+                text="Cancel"
+                onClick={withAnalytics(
+                  this.handleClose,
+                  "Samples_collection_form_cancel_button_clicked"
+                )}
+              />
             </div>
           </Form>
           {background_creation_response.status === "ok" ? (
