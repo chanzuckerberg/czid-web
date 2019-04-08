@@ -19,10 +19,16 @@ import {
 import { merge, sortBy } from "lodash/fp";
 import { Sidebar, Label, Icon, Modal, Form } from "semantic-ui-react";
 import Nanobar from "nanobar";
+import Cookies from "js-cookie";
+
+import GlobeIcon from "~ui/icons/GlobeIcon";
+import LockIcon from "~ui/icons/LockIcon";
+import UserIcon from "~ui/icons/UserIcon";
+import { withAnalytics } from "~/api";
+
 import SortHelper from "./SortHelper";
 import ProjectSelection from "./ProjectSelection";
 import BasicPopup from "./BasicPopup";
-import Cookies from "js-cookie";
 import CompareButton from "./ui/controls/buttons/CompareButton";
 import PhylogenyButton from "./ui/controls/buttons/PhylogenyButton";
 import DownloadButtonDropdown from "./ui/controls/dropdowns/DownloadButtonDropdown";
@@ -36,9 +42,6 @@ import ProjectUploadMenu from "./views/samples/ProjectUploadMenu";
 import CategorySearchBox from "./ui/controls/CategorySearchBox";
 import FilterTag from "./ui/controls/FilterTag";
 import ProjectSettingsModal from "./views/samples/ProjectSettingsModal";
-import GlobeIcon from "~ui/icons/GlobeIcon";
-import LockIcon from "~ui/icons/LockIcon";
-import UserIcon from "~ui/icons/UserIcon";
 import {
   SAMPLE_TABLE_COLUMNS,
   INITIAL_COLUMNS,
