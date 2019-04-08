@@ -1,16 +1,10 @@
 @import "~styles/themes/colors";
 @import "~styles/typography";
+@import "~styles/themes/typography";
 
 .metadataSection {
   .title {
-    color: $black;
-    font-weight: 600;
-    letter-spacing: 1.3px;
-    font-size: $font-size-caption;
-    text-transform: uppercase;
-    padding: 0 10px;
-    height: 40px;
-    line-height: 40px;
+    @include font-header-tall-section-title;
   }
 
   .editLink {

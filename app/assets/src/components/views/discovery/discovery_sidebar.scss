@@ -29,22 +29,13 @@
 
   // See SampleDetailsMode/metadata_section.scss
   .title {
-    @include font-body-s;
-
-    color: $black;
-    font-weight: 600;
-    font-size: 12px;
-    letter-spacing: 1.3px;
-    text-transform: uppercase;
-    padding: 0 10px;
-    height: 40px;
-    line-height: 40px;
+    @include font-header-tall-section-title;
   }
 
   .rowLabel {
+    @include font-header-xxs;
     display: block;
     margin: 3px 0;
-    @include font-header-xxs;
   }
 }
 
