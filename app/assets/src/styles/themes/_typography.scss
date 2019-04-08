@@ -76,15 +76,12 @@ $font-weight-heavy: 800;
   letter-spacing: 0.3px;
 }
 
-@mixin font-header-tall-section-title {
+@mixin font-header-accordion {
   font-size: 12px;
   line-height: 40px;
   font-weight: 600;
   letter-spacing: 1.3px;
-  color: $black;
   text-transform: uppercase;
-  padding: 0 10px;
-  height: 40px;
 }
 
 @mixin font-body-l {

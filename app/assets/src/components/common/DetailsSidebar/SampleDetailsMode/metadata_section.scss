@@ -4,7 +4,11 @@
 
 .metadataSection {
   .title {
-    @include font-header-tall-section-title;
+    @include font-header-accordion;
+
+    color: $black;
+    padding: 0 10px;
+    height: 40px;
   }
 
   .editLink {
