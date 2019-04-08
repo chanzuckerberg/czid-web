@@ -1,0 +1,32 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.xAxis {
+  stroke: $light-grey;
+}
+
+.xAxisTickText,
+.yAxisTickText {
+  @include viz-label;
+  color: $dark-grey;
+  font-family: $font-family-sans-serif;
+}
+
+.yAxisTickLine,
+.xAxisTickLine {
+  color: $light-grey;
+}
+
+.labelX {
+  font-family: $font-family-sans-serif;
+}
+
+.labelY {
+  color: $black;
+  font-family: $font-family-sans-serif;
+
+  &.large {
+    @include font-body-xxs;
+    font-weight: 400;
+  }
+}

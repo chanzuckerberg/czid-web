@@ -1,8 +1,12 @@
 import { histogram, extent, min, max, mean, deviation } from "d3-array";
+import cx from "classnames";
 import { axisBottom, axisLeft } from "d3-axis";
 import { select } from "d3-selection";
 import { scaleLinear } from "d3-scale";
+import { map } from "lodash/fp";
+
 import { CategoricalColormap } from "../utils/colormaps/CategoricalColormap";
+import cs from "./histogram.scss";
 
 export default class Histogram {
   constructor(container, data, options) {
@@ -10,7 +14,7 @@ export default class Histogram {
     this.container = select(container);
     this.data = this.parseData(data);
 
-    this.margins = {
+    this.margins = options.margins || {
       top: 20,
       right: 40,
       bottom: 40,
@@ -29,7 +33,10 @@ export default class Histogram {
         labelY: "",
         seriesNames: null,
         showStatistics: true,
-        refValues: []
+        refValues: [],
+        // If true, the data is already binned, i.e. the data is an array of
+        // { x0, length }
+        skipBin: false
       },
       options
     );
@@ -68,28 +75,44 @@ export default class Histogram {
       .attr("fill", "#000")
       .attr("font-weight", "bold")
       .attr("text-anchor", "end")
+      .attr("class", cs.labelX)
       .text(this.options.labelX);
+
+    g.select(".domain").attr("class", cs.xAxis);
+
+    g.selectAll(".tick line").attr("class", cs.xAxisTickLine);
+
+    g.selectAll(".tick text").attr("class", cs.xAxisTickText);
   }
 
   yAxis(g, y) {
-    g.attr("transform", `translate(${this.margins.left},0)`).call(axisLeft(y));
+    const axis = this.options.numTicksY
+      ? axisLeft(y).ticks(this.options.numTicksY)
+      : axisLeft(y);
+
+    g.attr("transform", `translate(${this.margins.left},0)`).call(axis);
 
     g.select(".domain").remove();
+
+    g.selectAll(".tick text").attr("class", cs.yAxisTickText);
+    g.selectAll(".tick line").attr("class", cs.yAxisTickLine);
+
     g
       .select(".tick:last-of-type text")
       .clone()
       .attr("x", 4)
-      .attr("y", -30)
+      .attr("y", -30 - (this.options.labelYOffset || 0))
       .attr("transform", "rotate(-90)")
       .attr("text-anchor", "end")
       .attr("font-weight", "bold")
+      .attr("class", cx(cs.labelY, this.options.labelYLarge && cs.large))
       .text(this.options.labelY);
   }
 
-  update() {
-    if (!this.data) return;
-
-    let colors = new CategoricalColormap().getNScale(this.data.length + 1);
+  getDomain = () => {
+    if (this.options.domain) {
+      return this.options.domain;
+    }
 
     let mins = [];
     let maxs = [];
@@ -107,10 +130,13 @@ export default class Histogram {
       }
     }
 
-    let x = scaleLinear()
-      .domain([min(mins), max(maxs)])
-      .nice()
-      .range([this.margins.left, this.size.width - this.margins.right]);
+    return [min(mins), max(maxs)];
+  };
+
+  getBins = x => {
+    if (this.options.skipBins) {
+      return this.data;
+    }
 
     let bins = [];
     for (let i = 0; i < this.data.length; i++) {
@@ -118,15 +144,60 @@ export default class Histogram {
         .domain(x.domain())
         .thresholds(x.ticks(20))(this.data[i]);
     }
+    return bins;
+  };
+
+  getBarWidth = () => {
+    if (this.options.skipBins) {
+      return (
+        (this.size.width - this.margins.right - this.margins.left) /
+        max(map(seriesData => seriesData.length, this.data))
+      );
+    }
+
+    return (
+      (this.size.width - this.margins.right - this.margins.left) /
+      (this.data.length * 20)
+    );
+  };
+
+  getColors = () => {
+    if (this.options.colors) {
+      return this.options.colors;
+    }
+
+    return new CategoricalColormap().getNScale(this.data.length + 1);
+  };
+
+  getBarOpacity = () => {
+    return this.options.barOpacity || 0.8;
+  };
+
+  update() {
+    if (!this.data) return;
+
+    let colors = this.getColors();
+
+    const domain = this.getDomain();
+
+    let x = scaleLinear()
+      .domain(domain)
+      .nice()
+      .range([this.margins.left, this.size.width - this.margins.right]);
+
+    const bins = this.getBins(x);
 
     let y = scaleLinear()
       .domain([0, max(bins.map(seriesBins => max(seriesBins, d => d.length)))])
       .nice()
       .range([this.size.height - this.margins.bottom, this.margins.top]);
 
-    let barWidth =
-      (this.size.width - this.margins.right - this.margins.left) /
-      (this.data.length * 20);
+    this.svg.append("g").call(this.xAxis.bind(this), x);
+    this.svg.append("g").call(this.yAxis.bind(this), y);
+
+    let barWidth = this.getBarWidth();
+    const barOpacity = this.getBarOpacity();
+
     for (let i = 0; i < bins.length; i++) {
       this.svg
         .append("g")
@@ -140,7 +211,7 @@ export default class Histogram {
         .attr("width", d => barWidth)
         .attr("y", d => y(d.length))
         .attr("height", d => y(0) - y(d.length))
-        .style("opacity", 0.8);
+        .style("opacity", barOpacity);
 
       if (this.options.showStatistics) {
         let avg = mean(this.data[i]);
@@ -199,9 +270,6 @@ export default class Histogram {
         }
       }
     }
-    this.svg.append("g").call(this.xAxis.bind(this), x);
-
-    this.svg.append("g").call(this.yAxis.bind(this), y);
 
     if (this.options.seriesNames) {
       let legend = this.svg

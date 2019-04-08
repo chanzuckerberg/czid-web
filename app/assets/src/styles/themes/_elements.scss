@@ -4,6 +4,9 @@ $box-shadow-bottom-right: 0px 2px 8px $box-shadow-light;
 $box-shadow-dropdown-menu: 0 2px 4px 0 $box-shadow-lighter,
   0 2px 10px 0 $box-shadow-lighter;
 
+$narrow-container-width: 1280px;
+$narrow-container-margin: 14px;
+
 // Customized scroll bar
 @mixin scrollable {
   &::-webkit-scrollbar {
