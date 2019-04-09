@@ -13,13 +13,14 @@
   }
 
   .mainContainer {
-    flex: 1;
+    flex: 1 0 0;
     display: flex;
+    min-height: 0;
 
     .leftPane:not(:empty) {
       border-right: 2px solid $lightest-grey;
       flex: 0 0 auto;
-      padding: 20px 20px 0 20px;
+      padding: 14px 20px 14 20px;
       overflow-x: visible;
     }
 
@@ -27,6 +28,7 @@
       flex: 1 0 auto;
       display: flex;
       flex-direction: column;
+      overflow: auto;
 
       .viewContainer {
         display: flex;
@@ -39,9 +41,16 @@
     .rightPane:not(:empty) {
       border-left: 2px solid $lightest-grey;
       flex: 0 0 auto;
-      overflow: auto;
-      padding-left: 10px;
-      padding-right: 5px;
+      overflow: overlay;
+      padding: 0 5px 0 10px;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      &:hover::-webkit-scrollbar {
+        display: block;
+      }
     }
   }
 }
