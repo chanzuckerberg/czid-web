@@ -72,7 +72,7 @@ class Landing extends React.Component {
           institution: "",
           usage: "",
           submitMessage:
-            "Thanks dfor your interest! Our product team will be in touch about accessing IDseq. If your team is already on IDseq, ask a collaborator to add you to a project to get immediate access."
+            "Thanks for your interest! Our product team will be in touch about accessing IDseq. If your team is already on IDseq, ask a collaborator to add you to a project to get immediate access."
         });
       })
       .catch(() => {
