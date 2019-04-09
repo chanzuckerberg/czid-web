@@ -281,7 +281,7 @@ class CreateUser extends React.Component {
                     this.handleEmailChange,
                     "CreateUser_email_changed",
                     {
-                      email: this.state.email
+                      email: () => this.state.email
                     }
                   )}
                   className=""
@@ -298,7 +298,7 @@ class CreateUser extends React.Component {
                     this.handleNameChange,
                     "CreateUser_name_changed",
                     {
-                      name: this.state.name
+                      name: () => this.state.name
                     }
                   )}
                   className=""
@@ -315,7 +315,7 @@ class CreateUser extends React.Component {
                     this.handleInstitutionChange,
                     "CreateUser_institution_changed",
                     {
-                      institution: this.state.institution
+                      institution: () => this.state.institution
                     }
                   )}
                   onFocus={this.clearError}
@@ -331,7 +331,7 @@ class CreateUser extends React.Component {
                     this.handlePasswordChange,
                     "CreateUser_password_changed",
                     {
-                      password: this.state.password
+                      password: () => this.state.password.length
                     }
                   )}
                   className=""
@@ -348,7 +348,7 @@ class CreateUser extends React.Component {
                     this.handlePConfirmChange,
                     "CreateUser_pconfirm_changed",
                     {
-                      pConfirm: this.state.pConfirm
+                      pConfirm: () => this.state.pConfirm.length
                     }
                   )}
                   className=""
@@ -369,7 +369,7 @@ class CreateUser extends React.Component {
                     this.toggleCheckBox,
                     "CreateUser_admin_changed",
                     {
-                      isAdmin: this.state.isAdmin
+                      isAdmin: () => this.state.isAdmin
                     }
                   )}
                   value={this.state.isAdmin}
