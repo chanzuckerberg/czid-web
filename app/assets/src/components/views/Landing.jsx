@@ -71,7 +71,8 @@ class Landing extends React.Component {
           email: "",
           institution: "",
           usage: "",
-          submitMessage: "Form completed. Thanks for your interest!"
+          submitMessage:
+            "Thanks for your interest! Our product team will be in touch about accessing IDseq. If your team is already on IDseq, ask a collaborator to add you to a project to get immediate access."
         });
       })
       .catch(() => {
@@ -97,7 +98,11 @@ class Landing extends React.Component {
           <div className="fill" />
           <div className="hiring-ad">
             {"Join our team! We're hiring "}
-            <a href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/1003911">
+            <a
+              href="https://boards.greenhouse.io/chanzuckerberginitiative/jobs/1620152"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               engineers
             </a>
             !
