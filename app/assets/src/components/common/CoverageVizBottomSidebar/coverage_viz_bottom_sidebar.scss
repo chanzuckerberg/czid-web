@@ -1,0 +1,141 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.contents {
+  margin-top: 30px;
+  margin-bottom: 40px;
+  text-align: left;
+
+  // Leave a place for the sidebar close button on narrow screens.
+  // 160px is based on the close button position and size. (multipled by 2)
+  @media (max-width: $narrow-container-width + 160px) {
+    padding-top: 50px;
+  }
+}
+
+.header {
+  margin-bottom: 30px;
+  display: flex;
+
+  .headerText {
+    .title {
+      @include font-header-l;
+    }
+
+    .subtitle {
+      @include font-body-xs;
+    }
+  }
+
+  .fill {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .headerControls {
+    .vizLinkContainer {
+      text-align: right;
+      margin-top: 2px;
+      margin-right: 2px;
+    }
+
+    .vizLink {
+      @include font-header-xxs;
+      // Override color: inherit in _header.scss.
+      color: $primary-light !important;
+    }
+  }
+}
+
+.body {
+  .stats {
+    display: flex;
+    margin-bottom: 30px;
+
+    .column {
+      flex: 1 1 0;
+      min-width: 0;
+      margin-right: 10px;
+
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+
+    .metric {
+      display: flex;
+      align-items: center;
+      height: 30px;
+      padding: 0 10px;
+
+      &:first-child {
+        background-color: $off-white;
+      }
+
+      .label,
+      .value {
+        flex: 1 1 0;
+        min-width: 0;
+      }
+
+      .label {
+        @include font-header-xxs;
+      }
+
+      .value {
+        @include font-body-xxs;
+      }
+
+      .ncbiLink {
+        // Override color: inherit in _header.scss.
+        color: $primary-light !important;
+      }
+    }
+  }
+
+  .coverageVizHistogram {
+    height: 110px;
+    background-color: $off-white;
+  }
+
+  .genomeVizRow {
+    height: 18px;
+    margin-top: 10px;
+    display: flex;
+
+    .rowLabel {
+      @include font-body-xxs;
+      width: 170px;
+      text-align: right;
+      padding-right: 30px;
+      color: $darkest-grey;
+    }
+
+    .genomeViz {
+      margin-right: 40px;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+
+  .referenceAccession {
+    background-color: $lightest-grey;
+  }
+}
+
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: $medium-grey;
+
+  .loadingMessage {
+    margin-bottom: 20px;
+  }
+
+  .loadingIcon {
+    margin-right: 5px;
+  }
+}

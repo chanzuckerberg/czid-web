@@ -2,18 +2,26 @@
 
 :global(.ui):global(.sidebar).sidebar {
   background-color: white;
-  // So the content doesn't overlap with the Header.
-  padding-top: 50px;
   transition: transform 0.5s ease;
 
   &:global(.visible) {
     box-shadow: 0 0 25px $box-shadow-dark;
   }
 
+  &.left,
+  &.right {
+    // So the content doesn't overlap with the Header.
+    padding-top: 50px;
+  }
+
+  &.bottom {
+    cursor: auto; // Override .bottom in samples.scss
+  }
+
   .closeIcon {
     position: absolute;
     right: 40px;
-    top: 80px;
+    top: 30px;
     opacity: 0.3;
     width: 20px;
     height: 20px;
@@ -21,6 +29,13 @@
 
     &:hover {
       opacity: 1;
+    }
+  }
+
+  &.left,
+  &.right {
+    .closeIcon {
+      top: 80px;
     }
   }
 }
