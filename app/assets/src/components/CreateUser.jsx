@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 
 import { openUrl } from "~utils/links";
-import { withAnalytics } from "~/api";
+import { withAnalytics, logAnalyticsEvent } from "~/api";
 
 class CreateUser extends React.Component {
   constructor(props, context) {
@@ -236,8 +236,8 @@ class CreateUser extends React.Component {
       );
       const form = this.props.selectedUser ? "update" : "create";
       logAnalyticsEvent(`CreateUser_${form}_errors_displayed`, {
-        serverErrors: serverErrors,
-        errorMessage: formattedError
+        serverErrors,
+        formattedError
       });
       return ret;
     } else {
