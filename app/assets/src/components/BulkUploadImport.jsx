@@ -482,7 +482,6 @@ class BulkUploadImport extends React.Component {
         ) : (
           <p>{formattedError}</p>
         );
-      const form = this.props.selectedUser ? "update" : "create";
       logAnalyticsEvent(`BulkUploadImport_errors_displayed`, {
         serverErrors,
         formattedError

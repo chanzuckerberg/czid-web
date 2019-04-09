@@ -236,6 +236,7 @@ class CreateUser extends React.Component {
       );
       const form = this.props.selectedUser ? "update" : "create";
       logAnalyticsEvent(`CreateUser_${form}_errors_displayed`, {
+        form,
         serverErrors,
         formattedError
       });
