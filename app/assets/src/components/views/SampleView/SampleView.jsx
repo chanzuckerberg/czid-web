@@ -19,6 +19,7 @@ import ViewHeader from "~/components/layout/ViewHeader";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
+import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import Controls from "./Controls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
@@ -139,7 +140,8 @@ class SampleView extends React.Component {
       this.setState({
         sidebarMode: "taxonDetails",
         sidebarTaxonModeConfig,
-        sidebarVisible: true
+        sidebarVisible: true,
+        coverageVizVisible: false
       });
     }
   };
@@ -147,6 +149,38 @@ class SampleView extends React.Component {
   closeSidebar = () => {
     this.setState({
       sidebarVisible: false
+    });
+  };
+
+  handleCoverageVizClick = params => {
+    const { coverageVizParams, coverageVizVisible } = this.state;
+
+    if (!params.taxId) {
+      this.setState({
+        coverageVizVisible: false
+      });
+      return;
+    }
+
+    if (
+      coverageVizVisible &&
+      get("taxId", coverageVizParams) === params.taxId
+    ) {
+      this.setState({
+        coverageVizVisible: false
+      });
+    } else {
+      this.setState({
+        coverageVizParams: params,
+        coverageVizVisible: true,
+        sidebarVisible: false
+      });
+    }
+  };
+
+  closeCoverageViz = () => {
+    this.setState({
+      coverageVizVisible: false
     });
   };
 
@@ -251,6 +285,7 @@ class SampleView extends React.Component {
             // Needs to be passed down to set the background dropdown properly.
             reportPageParams={this.props.reportPageParams}
             onTaxonClick={this.handleTaxonClick}
+            onCoverageVizClick={this.handleCoverageVizClick}
             savedParamValues={this.props.savedParamValues}
           />
         );
@@ -285,6 +320,47 @@ class SampleView extends React.Component {
       };
     }
     return {};
+  };
+
+  // Temporary fake data. Always the same data.
+  // TODO(mark): Fetch this from the server.
+  getCoverageVizParams = () => {
+    const { coverageVizParams } = this.state;
+
+    return {
+      ...coverageVizParams,
+      taxonId: "1747",
+      taxonName: "Cutibacterium acnes",
+      accessionSummaries: [
+        {
+          id: "CP012352.1",
+          n_contig: 0,
+          n_read: 2,
+          name:
+            "Cutibacterium acnes strain PA_15_2_L1 chromosome, complete genome"
+        },
+        {
+          id: "CP012647.1",
+          n_contig: 1,
+          n_read: 4,
+          name:
+            "Cutibacterium acnes strain KCOM 1861 (= ChDC B594) chromosome, complete genome"
+        },
+        {
+          id: "AE017283.1",
+          n_contig: 0,
+          n_read: 10,
+          name: "Propionibacterium acnes KPA171202, complete genome"
+        },
+        {
+          id: "CP012350.1",
+          n_contig: 0,
+          n_read: 2,
+          name:
+            "Cutibacterium acnes strain PA_30_2_L1 chromosome, complete genome"
+        }
+      ]
+    };
   };
 
   onShareClick = async () => {
@@ -396,6 +472,14 @@ class SampleView extends React.Component {
           onClose={this.closeSidebar}
           params={this.getSidebarParams()}
         />
+        {(this.props.admin ||
+          this.props.allowedFeatures.includes("coverage_viz")) && (
+          <CoverageVizBottomSidebar
+            visible={this.state.coverageVizVisible}
+            onClose={this.closeCoverageViz}
+            params={this.getCoverageVizParams()}
+          />
+        )}
       </div>
     );
   }
