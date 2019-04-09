@@ -484,8 +484,8 @@ class BulkUploadImport extends React.Component {
         );
       const form = this.props.selectedUser ? "update" : "create";
       logAnalyticsEvent(`BulkUploadImport_errors_displayed`, {
-        serverErrors: serverErrors,
-        errorMessage: formattedError
+        serverErrors,
+        formattedError
       });
       return ret;
     } else {
@@ -540,8 +540,8 @@ class BulkUploadImport extends React.Component {
                   "BulkUploadImport_upload_form_submitted",
                   {
                     samples: this.state.samples.length,
-                    project_id: this.state.projectId,
-                    host_genome_id: this.state.hostId
+                    projectId: this.state.projectId,
+                    hostId: this.state.hostId
                   }
                 )}
               >
@@ -808,9 +808,9 @@ class BulkUploadImport extends React.Component {
           this.handleImportSubmit,
           "BulkUploadImport_import_button_clicked",
           {
-            project_id: this.state.projectId,
-            host_genome_id: this.state.hostId,
-            bulk_path: this.state.selectedBulkPath
+            projectId: this.state.projectId,
+            hostId: this.state.hostId,
+            selectedBulkPath: this.state.selectedBulkPath
           }
         )}
       >
@@ -919,7 +919,7 @@ class BulkUploadImport extends React.Component {
                   this.handleBulkPathChange,
                   "BulkUploadImport_bulk_path_changed",
                   {
-                    bulk_path: this.state.selectedBulkPath
+                    selectedBulkPath: this.state.selectedBulkPath
                   }
                 )}
                 onFocus={this.clearError}
@@ -1062,13 +1062,13 @@ class BulkUploadImport extends React.Component {
                   <span
                     className="input-icon hidden"
                     onClick={e => {
-                      const new_project = this.refs.new_project.value.trim();
-                      if (new_project.length) {
+                      const newProject = this.refs.new_project.value.trim();
+                      if (newProject.length) {
                         this.handleProjectSubmit();
                         logAnalyticsEvent(
                           "BulkUploadImport_project_button_clicked",
                           {
-                            new_project
+                            newProject
                           }
                         );
                       }
@@ -1155,8 +1155,8 @@ class BulkUploadImport extends React.Component {
                             logAnalyticsEvent(
                               "BulkUploadImport_host_selector_clicked",
                               {
-                                host_id: g.id,
-                                host: g.name
+                                hostId: g.id,
+                                hostName: g.name
                               }
                             );
                           }}

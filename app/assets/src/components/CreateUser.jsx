@@ -347,7 +347,7 @@ class CreateUser extends React.Component {
                     this.handlePConfirmChange,
                     "CreateUser_pconfirm_changed",
                     {
-                      p_confirm: this.state.pConfirm
+                      pConfirm: this.state.pConfirm
                     }
                   )}
                   className=""
@@ -368,7 +368,7 @@ class CreateUser extends React.Component {
                     this.toggleCheckBox,
                     "CreateUser_admin_changed",
                     {
-                      admin: this.state.isAdmin
+                      isAdmin: this.state.isAdmin
                     }
                   )}
                   value={this.state.isAdmin}

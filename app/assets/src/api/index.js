@@ -248,9 +248,9 @@ const createProject = params =>
   });
 
 // See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
+// See also documentation for withAnalytics below.
 const logAnalyticsEvent = (eventName, eventData = {}) => {
   // Wrapper around Segment analytics so we can add things later
-  // eventData should have keys in snake_case for the database
   if (window.analytics) {
     // Include high value user groups in event properties to avoid JOINs downstream.
     if (window.analytics.user) {
@@ -281,19 +281,22 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
  * context and meaning of an analytics event in a report and locate it in the
  * codebase.
  *
+ * The eventData should be used for extra data that would be useful for an
+ * analysis specific to the event. The keys in should be named the same as in
+ * the calling context for easy interpretation. Only scalars should be passed to
+ * keep things simple downstream. Arrays should be replaced by their lengths.
+ *
  * For example:
  *
  *    withAnalytics(
  *      this.renderMoreReads,
  *      "AccessionViz_more_reads_link_clicked",
- *      { reads: this.state.reads.length, allReads: this.allReads.length }
+ *      { projectId: this.state.projectId, reads: this.state.reads.length }
  *    )
  *
  * React events should have have a single callsite, so there is no need to put
  * them in ANALYTICS_EVENT_NAMES.
  *
- * The eventData should be used for extra data that would be useful for an
- * analysis specific to the event.
  **/
 const withAnalytics = (handleEvent, eventName, eventData = {}) => {
   return (...args) => {
