@@ -31,10 +31,6 @@ class LocationsController < ApplicationController
     }, status: :internal_server_error
   end
 
-  def map_demo
-    render json: "Hello world"
-  end
-
   private
 
   def location_params
