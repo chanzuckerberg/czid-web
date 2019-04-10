@@ -3,10 +3,13 @@ import React from "react";
 import Cookies from "js-cookie";
 import $ from "jquery";
 import { Label, Menu, Icon, Popup } from "semantic-ui-react";
-import { numberWithCommas } from "../helpers/strings";
-import { getTaxonName, getGeneraContainingTags } from "../helpers/taxon";
-import ThresholdMap from "./utils/ThresholdMap";
 import { omit } from "lodash/fp";
+import Nanobar from "nanobar";
+
+import { getSampleReportInfo, getSummaryContigCounts } from "~/api";
+import { parseUrlParams } from "~/helpers/url";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+
 import {
   computeThresholdedTaxons,
   isTaxonIncluded,
@@ -14,7 +17,6 @@ import {
   getCategoryAdjective,
   addContigCountsToTaxonomyDetails
 } from "./views/report/utils/taxon";
-import Nanobar from "nanobar";
 import BasicPopup from "./BasicPopup";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import PathogenLabel from "./ui/labels/PathogenLabel";
@@ -32,8 +34,9 @@ import PhyloTreeChecks from "./views/phylo_tree/PhyloTreeChecks";
 import TaxonTreeVis from "./views/TaxonTreeVis";
 import LoadingLabel from "./ui/labels/LoadingLabel";
 import HoverActions from "./views/report/ReportTable/HoverActions";
-import { getSampleReportInfo, getSummaryContigCounts } from "~/api";
-import { parseUrlParams } from "~/helpers/url";
+import { numberWithCommas } from "../helpers/strings";
+import { getTaxonName, getGeneraContainingTags } from "../helpers/taxon";
+import ThresholdMap from "./utils/ThresholdMap";
 import { pipelineVersionHasAssembly } from "./utils/sample";
 
 const DEFAULT_MIN_CONTIG_SIZE = 4;
@@ -50,7 +53,7 @@ class PipelineSampleReport extends React.Component {
     this.allowedFeatures = props.allowedFeatures;
     this.allowPhyloTree = props.can_edit;
     this.report_ts = props.report_ts;
-    this.sample_id = props.sample_id;
+    this.sampleId = props.sample_id;
     this.projectId = props.projectId;
     this.projectName = props.projectName;
     this.gitVersion = props.git_version;
@@ -211,8 +214,8 @@ class PipelineSampleReport extends React.Component {
     }&version=${this.gitVersion}`;
 
     const [sampleReportInfo, summaryContigCounts] = await Promise.all([
-      getSampleReportInfo(this.sample_id, params),
-      getSummaryContigCounts(this.sample_id, this.state.minContigSize)
+      getSampleReportInfo(this.sampleId, params),
+      getSummaryContigCounts(this.sampleId, this.state.minContigSize)
     ]);
 
     this.nanobar.go(100);
@@ -586,6 +589,10 @@ class PipelineSampleReport extends React.Component {
           JSON.stringify(includedSubcategories)
         );
         this.applyFilters();
+        logAnalyticsEvent("PipelineSampleReport_included-categories_changed", {
+          includedCategories: this.state.includedCategories.length,
+          includedSubcategories: includedSubcategories.length
+        });
       }
     );
   };
@@ -662,6 +669,13 @@ class PipelineSampleReport extends React.Component {
         }
       },
       () => {
+        logAnalyticsEvent(
+          "PipelineSampleReport_background-model-filter_changed",
+          {
+            backgroundName,
+            backgroundId
+          }
+        );
         // TODO (gdingle): do we really want to reload the page here?
         this.props.refreshPage({ background_id: backgroundId });
       }
@@ -670,28 +684,43 @@ class PipelineSampleReport extends React.Component {
 
   handleNameTypeChange = nameType => {
     Cookies.set("name_type", nameType);
-    this.setState({ name_type: nameType });
+    this.setState({ name_type: nameType }, () =>
+      logAnalyticsEvent("PipelineSampleReport_name-type-filter_changed", {
+        nameType
+      })
+    );
   };
 
-  handleSpecificityChange = specificity => {
-    Cookies.set("readSpecificity", specificity);
-    this.setState({ readSpecificity: specificity }, () => {
+  handleSpecificityChange = readSpecificity => {
+    Cookies.set("readSpecificity", readSpecificity);
+    this.setState({ readSpecificity }, () => {
       this.applyFilters();
+      logAnalyticsEvent("PipelineSampleReport_specificity-filter_changed", {
+        readSpecificity
+      });
     });
   };
 
   handleTreeMetricChange = treeMetric => {
     Cookies.set("treeMetric", treeMetric);
-    this.setState({ treeMetric });
+    this.setState({ treeMetric }, () => {
+      logAnalyticsEvent("PipelineSampleReport_tree-metric-picker_changed", {
+        treeMetric
+      });
+    });
   };
 
   handleMinContigSizeChange = async minContigSize => {
     Cookies.set("minContigSize", minContigSize);
-    this.setState({ minContigSize });
+    this.setState({ minContigSize }, () => {
+      logAnalyticsEvent("PipelineSampleReport_min-contig-size-filter_changed", {
+        minContigSize
+      });
+    });
 
     // Refetch the summary contig counts based on the new value.
     const summaryContigCounts = await getSummaryContigCounts(
-      this.sample_id,
+      this.sampleId,
       minContigSize
     );
 
@@ -713,6 +742,9 @@ class PipelineSampleReport extends React.Component {
 
   handleViewClicked = (_, data) => {
     this.setState({ view: data.name });
+    logAnalyticsEvent("PipelineSampleReport_view-menu_clicked", {
+      name: data.name
+    });
   };
 
   // path to NCBI
@@ -733,7 +765,7 @@ class PipelineSampleReport extends React.Component {
     const taxLevel = e.target.getAttribute("data-tax-level");
     const taxId = e.target.getAttribute("data-tax-id");
     location.href = `/samples/${
-      this.sample_id
+      this.sampleId
     }/fasta/${taxLevel}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
   };
 
@@ -742,7 +774,7 @@ class PipelineSampleReport extends React.Component {
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
     const taxId = e.target.getAttribute("data-tax-id");
     location.href = `/samples/${
-      this.sample_id
+      this.sampleId
     }/taxid_contigs?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
   };
 
@@ -752,7 +784,7 @@ class PipelineSampleReport extends React.Component {
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
 
     const alignmentVizUrl = `/samples/${
-      this.sample_id
+      this.sampleId
     }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
     // TODO(mark): Open the coverage viz with an "empty data" screen for taxons with no data.
@@ -789,6 +821,14 @@ class PipelineSampleReport extends React.Component {
       taxInfo.tax_id > 0 &&
       PhyloTreeChecks.passesCreateCondition(taxInfo.NT.r, taxInfo.NR.r);
 
+    const analyticsContext = {
+      projectId: this.projectId,
+      projectName: this.projectName,
+      sampleId: this.sampleId,
+      taxId: taxInfo.tax_id,
+      taxLevel: taxInfo.tax_level,
+      taxName: taxInfo.name
+    };
     return (
       <HoverActions
         className="link-tag"
@@ -800,13 +840,25 @@ class PipelineSampleReport extends React.Component {
         taxLevel={taxInfo.tax_level}
         taxName={taxInfo.name}
         ncbiEnabled={ncbiEnabled}
-        onNcbiActionClick={this.gotoNCBI}
+        onNcbiActionClick={withAnalytics(
+          this.gotoNCBI,
+          "PipelineSampleReport_ncbi-link_clicked",
+          analyticsContext
+        )}
         fastaEnabled={fastaEnabled}
-        onFastaActionClick={this.downloadFastaUrl}
+        onFastaActionClick={withAnalytics(
+          this.downloadFastaUrl,
+          "PipelineSampleReport_fasta-link_clicked",
+          analyticsContext
+        )}
         alignmentVizEnabled={alignmentVizEnabled}
         onAlignmentVizClick={this.gotoAlignmentVizLink}
         contigVizEnabled={contigVizEnabled}
-        onContigVizClick={this.downloadContigUrl}
+        onContigVizClick={withAnalytics(
+          this.downloadContigUrl,
+          "PipelineSampleReport_contig-link_clicked",
+          analyticsContext
+        )}
         phyloTreeEnabled={phyloTreeEnabled}
       />
     );
@@ -833,13 +885,25 @@ class PipelineSampleReport extends React.Component {
     if (tax_info.tax_id > 0) {
       if (report_details.taxon_fasta_flag) {
         taxonNameDisplay = (
-          <span className="taxon-sidebar-link" onClick={onTaxonClickHandler}>
+          <span
+            className="taxon-sidebar-link"
+            onClick={withAnalytics(
+              onTaxonClickHandler,
+              "PipelineSampleReport_taxon-sidebar-link_clicked"
+            )}
+          >
             <a>{taxonNameDisplay}</a>
           </span>
         );
       } else {
         taxonNameDisplay = (
-          <span className="taxon-sidebar-link" onClick={onTaxonClickHandler}>
+          <span
+            className="taxon-sidebar-link"
+            onClick={withAnalytics(
+              onTaxonClickHandler,
+              "PipelineSampleReport_taxon-sidebar-link_clicked"
+            )}
+          >
             {taxonNameDisplay}
           </span>
         );
@@ -911,19 +975,19 @@ class PipelineSampleReport extends React.Component {
   renderNumber = (
     ntCount,
     nrCount,
-    num_decimals,
+    numDecimals,
     isAggregate = false,
-    visible_flag = true,
+    visibleFlag = true,
     showInsight = false,
     className = ""
   ) => {
-    if (!visible_flag) {
+    if (!visibleFlag) {
       return null;
     }
-    let ntCountStr = numberWithCommas(Number(ntCount).toFixed(num_decimals));
+    let ntCountStr = numberWithCommas(Number(ntCount).toFixed(numDecimals));
     let nrCountStr =
       nrCount !== null
-        ? numberWithCommas(Number(nrCount).toFixed(num_decimals))
+        ? numberWithCommas(Number(nrCount).toFixed(numDecimals))
         : null;
     const ntCountLabel = isAggregate ? (
       <div className={`active ${this.switchClassName("NT", ntCount)}`}>
@@ -959,13 +1023,20 @@ class PipelineSampleReport extends React.Component {
     return this.state.sort_by == desiredSort ? "active" : "";
   };
 
-  render_sort_arrow = (column, desired_sort_direction, arrow_direction) => {
+  render_sort_arrow = (column, desiredSortDirection, arrowDirection) => {
     let className = `${this.isSortedActive(
       column
-    )} fa fa-chevron-${arrow_direction}`;
+    )} fa fa-chevron-${arrowDirection}`;
     return (
       <i
-        onClick={() => this.applySort(column)}
+        onClick={() => {
+          this.applySort(column);
+          logAnalyticsEvent("PipelineSampleReport_column-sort-arrow_clicked", {
+            column,
+            desiredSortDirection,
+            arrowDirection
+          });
+        }}
         className={className}
         key={column.toLowerCase()}
       />
@@ -973,30 +1044,33 @@ class PipelineSampleReport extends React.Component {
   };
 
   renderColumnHeader = (
-    visible_metric,
-    column_name,
-    tooltip_message,
-    visible_flag = true
+    visibleMetric,
+    columnName,
+    tooltipMessage,
+    visibleFlag = true
   ) => {
     let element = (
       <div
         className="sort-controls"
-        onClick={() => this.applySort(column_name)}
+        onClick={() => {
+          this.applySort(columnName);
+          logAnalyticsEvent("PipelineSampleReport_column-header_clicked", {
+            columnName
+          });
+        }}
       >
-        <span
-          className={`${this.isSortedActive(column_name)} table-head-label`}
-        >
-          {visible_metric}
+        <span className={`${this.isSortedActive(columnName)} table-head-label`}>
+          {visibleMetric}
         </span>
-        {this.render_sort_arrow(column_name, "highest", "up")}
+        {this.render_sort_arrow(columnName, "highest", "up")}
       </div>
     );
-    const className = column_name === "NT_aggregatescore" && "score-column";
+    const className = columnName === "NT_aggregatescore" && "score-column";
 
-    if (!visible_flag) return null;
+    if (!visibleFlag) return null;
     return (
       <th className={cx(className)}>
-        <BasicPopup trigger={element} content={tooltip_message} />
+        <BasicPopup trigger={element} content={tooltipMessage} />
       </th>
     );
   };
@@ -1082,6 +1156,9 @@ class PipelineSampleReport extends React.Component {
       },
       () => {
         this.applyFilters();
+        logAnalyticsEvent("PipelineSampleReport_taxon-search_returned", {
+          search_taxon_id: result.taxid
+        });
       }
     );
   };
@@ -1157,7 +1234,13 @@ class PipelineSampleReport extends React.Component {
           " reads passing filters."
         : "";
     const disable_filter = this.anyFilterSet() ? (
-      <span className="disable" onClick={e => this.resetAllFilters()}>
+      <span
+        className="disable"
+        onClick={e => {
+          this.resetAllFilters();
+          logAnalyticsEvent("PipelineSampleReport_clear-filters-link_clicked");
+        }}
+      >
         Clear all filters
       </span>
     ) : null;
@@ -1190,6 +1273,12 @@ class PipelineSampleReport extends React.Component {
               name="close"
               onClick={e => {
                 this.handleRemoveCategory(category);
+                logAnalyticsEvent(
+                  "PipelineSampleReport_categories-filter_removed",
+                  {
+                    category
+                  }
+                );
               }}
             />
           </Label>
@@ -1206,6 +1295,12 @@ class PipelineSampleReport extends React.Component {
               name="close"
               onClick={e => {
                 this.handleRemoveSubcategory(subcat);
+                logAnalyticsEvent(
+                  "PipelineSampleReport_subcategories-filter_removed",
+                  {
+                    subcat
+                  }
+                );
               }}
             />
           </Label>
@@ -1238,7 +1333,13 @@ function CollapseExpand({ tax_info, parent }) {
       >
         <i
           className={`fa fa-angle-down ${tax_info.tax_id}`}
-          onClick={parent.collapseGenus}
+          onClick={withAnalytics(
+            parent.collapseGenus,
+            "PipelineSampleReport_collapse-genus_clicked",
+            {
+              tax_id: tax_info.tax_id
+            }
+          )}
         />
       </span>
       <span
@@ -1248,7 +1349,13 @@ function CollapseExpand({ tax_info, parent }) {
       >
         <i
           className={`fa fa-angle-right ${tax_info.tax_id}`}
-          onClick={parent.expandGenusClick}
+          onClick={withAnalytics(
+            parent.expandGenusClick,
+            "PipelineSampleReport_expand-genus_clicked",
+            {
+              tax_id: tax_info.tax_id
+            }
+          )}
         />
       </span>
     </span>
@@ -1269,6 +1376,11 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
           name="close"
           onClick={() => {
             parent.handleRemoveThresholdFilter(i);
+            logAnalyticsEvent("PipelineSampleReport_threshold-filter_removed", {
+              metric: threshold["metric"],
+              operator: threshold["operator"],
+              value: threshold["value"]
+            });
           }}
         />
       </Label>
@@ -1356,7 +1468,7 @@ class RenderMarkup extends React.Component {
               levelLabel
               serverSearchAction="choose_taxon"
               serverSearchActionArgs={{
-                // TODO (gdingle): change backend to support filter by sample_id
+                // TODO (gdingle): change backend to support filter by sampleId
                 args: "species,genus",
                 project_id: parent.projectId
               }}
@@ -1395,7 +1507,13 @@ class RenderMarkup extends React.Component {
                 operators: [">=", "<="]
               }}
               thresholds={parent.state.activeThresholds}
-              onApply={parent.handleThresholdFiltersChange}
+              onApply={withAnalytics(
+                parent.handleThresholdFiltersChange,
+                "PipelineSampleReport_threshold-filter_applied",
+                {
+                  activeThresholds: parent.state.activeThresholds
+                }
+              )}
             />
           </div>
           <div className="filter-lists-element">
@@ -1438,8 +1556,14 @@ class RenderMarkup extends React.Component {
         getRowClass={parent.getRowClass}
         reportDetails={parent.report_details}
         backgroundData={parent.state.backgroundData}
-        expandTable={parent.expandTable}
-        collapseTable={parent.collapseTable}
+        expandTable={withAnalytics(
+          parent.expandTable,
+          "PipelineSampleReport_expand-table_clicked"
+        )}
+        collapseTable={withAnalytics(
+          parent.collapseTable,
+          "PipelineSampleReport_collapse-table_clicked"
+        )}
         renderColumnHeader={parent.renderColumnHeader}
         countType={parent.state.countType}
         setCountType={countType => parent.setState({ countType })}

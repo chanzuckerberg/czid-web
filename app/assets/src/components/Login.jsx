@@ -1,8 +1,11 @@
 import React from "react";
 import axios from "axios";
 import $ from "jquery";
-import LogoIcon from "./ui/icons/LogoIcon";
+
 import { openUrl } from "~utils/links";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+
+import LogoIcon from "./ui/icons/LogoIcon";
 
 class Login extends React.Component {
   constructor(props, context) {

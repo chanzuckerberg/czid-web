@@ -1,8 +1,9 @@
 import React from "react";
 import Tipsy from "react-tipsy";
 
-import PropTypes from "../../../utils/propTypes";
+import { logAnalyticsEvent } from "~/api/analytics";
 
+import PropTypes from "../../../utils/propTypes";
 import DetailCells from "./DetailCells";
 
 export default class ReportTable extends React.Component {
@@ -118,7 +119,10 @@ export default class ReportTable extends React.Component {
                           ? "active column-switcher"
                           : "column-switcher"
                       }
-                      onClick={() => setCountType("NT")}
+                      onClick={() => {
+                        setCountType("NT");
+                        logAnalyticsEvent("ReportTable_count-type-nt_clicked");
+                      }}
                     >
                       NT
                     </div>
@@ -128,7 +132,10 @@ export default class ReportTable extends React.Component {
                           ? "active column-switcher"
                           : "column-switcher"
                       }
-                      onClick={() => setCountType("NR")}
+                      onClick={() => {
+                        setCountType("NR");
+                        logAnalyticsEvent("ReportTable_count-type-nr_clicked");
+                      }}
                     >
                       NR
                     </div>

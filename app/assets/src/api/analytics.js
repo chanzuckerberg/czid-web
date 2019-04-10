@@ -70,6 +70,11 @@ export const logAnalyticsEvent = (eventName, eventData = {}) => {
  *
  **/
 export const withAnalytics = (handleEvent, eventName, eventData = {}) => {
+  if (typeof handleEvent !== "function") {
+    // eslint-disable-next-line no-console
+    console.error(`Missing event handler function "${handleEvent}"`);
+  }
+
   const [componentName, friendlyName, ...actionType] = eventName.split("_");
 
   if (!(componentName && friendlyName && actionType.length)) {
