@@ -3,6 +3,8 @@
 // TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
 import axiosRetry from "axios-retry";
+import { camelCase, snakeCase, lowerFirst } from "lodash/fp";
+
 import { cleanFilePath } from "~utils/sample";
 
 import { get, postWithCSRF, putWithCSRF, deleteWithCSRF } from "./core";
@@ -250,7 +252,6 @@ const createProject = params =>
 // See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 // See also documentation for withAnalytics below.
 const logAnalyticsEvent = (eventName, eventData = {}) => {
-  // Wrapper around Segment analytics so we can add things later
   if (window.analytics) {
     // Include high value user groups in event properties to avoid JOINs downstream.
     if (window.analytics.user) {
@@ -303,6 +304,31 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
  *
  **/
 const withAnalytics = (handleEvent, eventName, eventData = {}) => {
+  const [componentName, friendlyName, ...actionType] = eventName.split("_");
+
+  if (!(componentName && friendlyName && actionType.length)) {
+    // eslint-disable-next-line no-console
+    console.warn(`Missing one part of analytics event name in "${eventName}"`);
+  }
+  if (camelCase(componentName) != lowerFirst(componentName)) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Component name "${componentName}" should be CamelCase in "${eventName}"`
+    );
+  }
+  if (snakeCase(friendlyName).replace(/_/g, "-") != friendlyName) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Friendly name "${friendlyName}" should be dash-case in "${eventName}"`
+    );
+  }
+  if (actionType.length > 1) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Action type "${actionType}" should be single word in "${eventName}"`
+    );
+  }
+
   return (...args) => {
     const ret = handleEvent(...args);
     logAnalyticsEvent(eventName, eventData);
