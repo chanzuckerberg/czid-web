@@ -3,7 +3,7 @@
 // TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
 import axiosRetry from "axios-retry";
-import { camelCase, snakeCase, lowerFirst } from "lodash/fp";
+import { isArray, isObject, camelCase, snakeCase, lowerFirst } from "lodash/fp";
 
 import { cleanFilePath } from "~utils/sample";
 
@@ -327,6 +327,14 @@ const withAnalytics = (handleEvent, eventName, eventData = {}) => {
     console.warn(
       `Action type "${actionType}" should be single word in "${eventName}"`
     );
+  }
+
+  for (var k in eventData) {
+    const val = eventData[k];
+    if (isArray(val) || isObject(val)) {
+      // eslint-disable-next-line no-console
+      console.warn(`${val} should be a scalar value`);
+    }
   }
 
   return (...args) => {
