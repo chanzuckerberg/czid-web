@@ -212,6 +212,9 @@ class BaseTable extends React.Component {
                   />
                 );
               })}
+              {initialActiveColumns && (
+                <Column dataKey={"plusPlaceholder"} width={20} />
+              )}
             </VirtualizedTable>
           )}
         </AutoSizer>
@@ -223,21 +226,12 @@ class BaseTable extends React.Component {
           <div
             style={{ height: defaultHeaderHeight }}
             className={cx(
-              cs.columnSelectorContainer,
+              cs.columnSelector,
               cs.row,
               "ReactVirtualized__Table__headerRow"
             )}
           >
-            <div
-              style={{ height: 30 }}
-              className={cx(
-                cs.plusDropdown,
-                cs.header,
-                "ReactVirtualized__Table__headerColumn"
-              )}
-            >
-              {this.renderColumnSelector()}
-            </div>
+            {this.renderColumnSelector()}
           </div>
         )}
       </div>
