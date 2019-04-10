@@ -243,7 +243,7 @@ class SamplesView extends React.Component {
           selectedSampleIds
         )}`}
       >
-        <HeatmapIcon className={cs.icon} />
+        <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
       </a>
     );
   };
@@ -259,7 +259,7 @@ class SamplesView extends React.Component {
     }
     return (
       <DownloadIconDropdown
-        iconClassName={cs.icon}
+        iconClassName={cx(cs.icon, cs.download)}
         options={downloadOptions}
         onClick={downloadOption => {
           new ReportsDownloader({
@@ -278,7 +278,10 @@ class SamplesView extends React.Component {
     return (
       <CollectionModal
         trigger={
-          <SaveIcon className={cs.icon} popupText={"Save a Collection"} />
+          <SaveIcon
+            className={cx(cs.icon, cs.save)}
+            popupText={"Save a Collection"}
+          />
         }
         selectedSampleIds={selectedSampleIds}
         fetchedSamples={samples.filter(sample =>
