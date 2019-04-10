@@ -3,9 +3,7 @@ import PropTypes from "prop-types";
 import { merge, pick } from "lodash/fp";
 import moment from "moment";
 
-import { Table } from "~/components/visualizations/table";
 import { humanize } from "~/helpers/strings";
-import BasicPopup from "~/components/BasicPopup";
 import { openUrl } from "~utils/links";
 import HeatmapPublic from "~ui/icons/HeatmapPublic";
 import HeatmapPrivate from "~ui/icons/HeatmapPrivate";
