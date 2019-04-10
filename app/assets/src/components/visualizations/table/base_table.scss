@@ -5,23 +5,22 @@
   flex: 1 0 auto;
   flex-direction: column;
   height: 100%;
-  margin-right: 20px;
 }
 
-.columnSelectorContainer {
+.columnSelector {
   position: absolute;
   top: 0;
-  left: 100%;
-  width: 20px;
-
-  .plusDropdown {
-    margin: 0;
-  }
+  right: 0;
+  width: 30px;
+  display: flex;
+  align-content: center;
+  justify-content: center;
 
   .plusIcon {
-    padding-top: 8px;
+    flex: 1 0 auto;
     width: 14px;
     fill: $medium-grey;
+    vertical-align: center;
   }
 }
 
