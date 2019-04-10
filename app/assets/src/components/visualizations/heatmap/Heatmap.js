@@ -913,15 +913,23 @@ export default class Heatmap {
       .duration(this.options.transitionDuration);
     applyFormatForRows(rowsUpdate);
 
+    console.log("columnnMetadataCells: ", columnnMetadataCells);
     let rowsEnter = columnnMetadataCells
       .enter()
       .append("g")
-      .attr("class", d => cx("columnMetadataCells", d.value));
+      .attr("class", d =>
+        cx("columnMetadataCells", d.value.replace(/ /g, "_"))
+      );
     applyFormatForRows(rowsEnter);
 
+    console.log("columnMetadata: ", this.options.columnMetadata);
     this.options.columnMetadata.forEach(metadata => {
       let columnMetadataCell = this.gColumnMetadata
-        .select(`.columnMetadataCells.${metadata.value}`)
+        .select(
+          `.columnMetadataCells.${CSS.escape(
+            metadata.value.replace(/ /g, "_")
+          )}`
+        )
         .selectAll(".columnMetadataCell")
         .data(this.columnLabels, d => d.label);
 

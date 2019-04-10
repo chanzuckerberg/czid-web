@@ -242,6 +242,7 @@ class SamplesHeatmapVis extends React.Component {
   getSelectedMetadata() {
     const sortByLabel = (a, b) => (a.label > b.label ? 1 : -1);
 
+    console.log("this.metadataTypes: ", this.metadataTypes);
     return Array.from(this.state.selectedMetadata)
       .filter(metadatum => !!this.metadataTypes[metadatum])
       .map(metadatum => {
