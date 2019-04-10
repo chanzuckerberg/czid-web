@@ -4,8 +4,14 @@
 .project {
   text-align: left;
   padding: 13px 0;
+  display: flex;
 
   .visibility {
+    display: flex;
+    flex: 0 0 40px;
+    align-items: center;
+    justify-items: center;
+    margin-right: 12px;
   }
 
   .projectName {
@@ -45,7 +51,11 @@
   }
 }
 
+.projectHeader {
+  text-align: left;
+}
+
 .icon {
-  fill: $medium-grey;
+  fill: $primary-light;
   width: 36px;
 }

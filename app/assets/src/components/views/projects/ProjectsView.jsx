@@ -1,12 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
-import cs from "./projects_view.scss";
 
 import { Table } from "~/components/visualizations/table";
 import PrivateProjectIcon from "../../ui/icons/PrivateProjectIcon";
 import PublicProjectIcon from "../../ui/icons/PublicProjectIcon";
 import BasicPopup from "~/components/BasicPopup";
+// CSS file must be loaded after any elements you might want to override
+import cs from "./projects_view.scss";
 
 import { find, merge, pick } from "lodash/fp";
 import moment from "moment";
@@ -16,27 +17,12 @@ class ProjectsView extends React.Component {
     super(props);
 
     this.columns = [
-      // {
-      //   dataKey: "public_access",
-      //   width: 36,
-      //   label: "",
-      //   cellRenderer: this.renderAccess
-      // },
-      // {
-      //   dataKey: "details",
-      //   label: "Project",
-      //   flexGrow: 1,
-      //   className: cs.detailsCell,
-      //   cellRenderer: this.renderProjectDetails,
-      //   headerClassName: cs.detailsHeader,
-      //   sortFunction: p => (p.name || "").toLowerCase()
-      // },
       {
         dataKey: "project",
-        label: "Project",
         flexGrow: 1,
         width: 250,
         cellRenderer: this.renderProjectDetails,
+        headerClassName: cs.projectHeader,
         sortFunction: p => (p.name || "").toLowerCase()
       },
       {
@@ -102,12 +88,12 @@ class ProjectsView extends React.Component {
     let data = projects.map(project => {
       return merge(
         {
-          details: pick(["name", "description", "created_at", "owner"], project)
+          project: pick(
+            ["name", "description", "created_at", "owner", "public_access"],
+            project
+          )
         },
-        pick(
-          ["id", "public_access", "hosts", "tissues", "number_of_samples"],
-          project
-        )
+        pick(["id", "hosts", "tissues", "number_of_samples"], project)
       );
     });
 
