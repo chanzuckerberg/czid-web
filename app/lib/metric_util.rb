@@ -55,7 +55,9 @@ class MetricUtil
       SEGMENT_ANALYTICS.track(
         event: event,
         user_id: user_id,
-        properties: properties.merge( # For Google Analytics. See https://segment.com/docs/destinations/google-analytics/#track
+        properties: properties.merge(
+          # For Google Analytics. See
+          # https://segment.com/docs/destinations/google-analytics/#track
           label: properties.to_json,
           category: event.split("_")[0]
         ),
