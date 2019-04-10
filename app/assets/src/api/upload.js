@@ -48,17 +48,12 @@ export const bulkUploadLocalWithMetadata = ({
             )
           ) {
             allUploadsCompleteRan = true;
-            window.onbeforeunload = null;
             onAllUploadsComplete();
           }
         })
         .catch(() => onMarkSampleUploadedError(sampleName));
     }
   };
-
-  // Latest browsers will only show a generic warning
-  window.onbeforeunload = () =>
-    "Uploading is in progress. Are you sure you want to exit?";
 
   bulkUploadWithMetadata(samples, metadata)
     .then(response => {

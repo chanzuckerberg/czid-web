@@ -151,6 +151,8 @@ Views represent a page or a section of a page in IDSeq. Views are stored in the 
 When designing your view, try to make as much use of the components in the `ui `and `visualizations` folders. This should be mostly plug-and-play components. 
 If you need to place a ui component in a customized place for your view (i.e. if the layout elements cannot help you), wrap it in a `div` with a proper class name, and style it in the view's css file.
 
+Views content should be inside of a `NarrowContainer` for standard width. 
+
 ### Shared Files
 
 **API calls**

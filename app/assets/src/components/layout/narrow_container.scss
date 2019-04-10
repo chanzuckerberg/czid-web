@@ -1,7 +1,13 @@
+@import "~styles/themes/elements";
+
 .narrowContainer {
-  max-width: 1280px;
+  // Per design, narrow container has a max-width of 1280px with a minimum margin of 14px.
+  // Since there is no min-margin property we set max-width to 2xmin_margin and
+  // ensure the min margin by removing the margin width from the actual width of
+  // the component (i.e. 100% - 2xmin_margin)
+  max-width: $narrow-container-width + 2 * $narrow-container-margin;
   margin: 0 auto;
-  width: 100%;
+  width: calc(100% - #{2 * $narrow-container-margin});
 
   &.small {
     max-width: 800px;

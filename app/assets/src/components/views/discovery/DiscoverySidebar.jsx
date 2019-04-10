@@ -79,7 +79,7 @@ export default class DiscoverySidebar extends React.Component {
     const { onFilterClick } = this.props;
     const { metadata } = this.state;
 
-    const dates = metadata[field];
+    let dates = metadata[field];
     const total = (maxBy("count", dates) || {}).count;
     const isIntervalBased = !!dates.length && dates[0].interval;
     const firstDate = dates.length
@@ -92,6 +92,9 @@ export default class DiscoverySidebar extends React.Component {
         ? dates[dates.length - 1].interval.end
         : dates[0].value
       : null;
+    // Special case design to show 1 or 2 bars just side-by-side.
+    const realBars = dates.filter(d => d.count > 0);
+    if (realBars.length < 3) dates = realBars;
     return (
       <div className={cs.histogramContainer}>
         <div className={cs.dateHistogram}>
@@ -109,8 +112,11 @@ export default class DiscoverySidebar extends React.Component {
             );
             const tooltipMessage = (
               <span>
-                {entry.text}
+                <span className={cs.boldText}>Date:</span> {entry.text}
                 <br />
+                <span className={cs.boldText}>{`Sample${
+                  entry.count > 1 ? "s" : ""
+                }: `}</span>
                 {entry.count}
               </span>
             );
@@ -171,21 +177,19 @@ export default class DiscoverySidebar extends React.Component {
     return rows.map((entry, i) => {
       const { count, text, value } = entry;
       const percent = Math.round(100 * count / total, 0);
-      return [
-        <dt className={cs.barLabel} key={`${value}_label_${i}`}>
-          <a onClick={() => this.handleFilterClick(value)}>
-            {value === "not_set" ? <i>{text}</i> : text}
-          </a>
-        </dt>,
-        <dd key={`${value}_value_${i}`}>
-          <span
-            className={cs.bar}
-            // TODO(gdingle): make width depend on container
-            style={{ width: percent * 1.3 + "px" }}
-          />
-          <span className={cs.count}>{count}</span>
-        </dd>
-      ];
+      return (
+        <div className={cs.barChartRow} key={`${value}_row_${i}`}>
+          <dt className={cs.barLabel} key={`${value}_label_${i}`}>
+            <a onClick={() => this.handleFilterClick(value)}>
+              {value === "not_set" ? <i>{text}</i> : text}
+            </a>
+          </dt>
+          <dd key={`${value}_value_${i}`}>
+            <span className={cs.bar} style={{ width: percent * 1.4 + "px" }} />
+            <span className={cs.count}>{count}</span>
+          </dd>
+        </div>
+      );
     });
   }
 
@@ -216,38 +220,40 @@ export default class DiscoverySidebar extends React.Component {
             open={this.hasData()}
             header={<div className={cs.title}>Overall</div>}
           >
-            <div className={cs.hasBackground}>
+            <div className={cx(cs.hasBackground, cs.statsRow)}>
               <dl className={cs.dataList}>
                 <dt className={cs.statsDt}>
-                  <strong>Samples</strong>
+                  <span className={cs.rowLabel}>Samples</span>
                 </dt>
                 <dd className={cs.statsDd}>{this.state.stats.numSamples}</dd>
               </dl>
             </div>
-            <div className={cs.hasBackground}>
+            <div className={cx(cs.hasBackground, cs.statsRow)}>
               <dl className={cs.dataList}>
                 <dt className={cs.statsDt}>
-                  <strong>Projects</strong>
+                  <span className={cs.rowLabel}>Projects</span>
                 </dt>
                 <dd className={cs.statsDd}>{this.state.stats.numProjects}</dd>
               </dl>
             </div>
             {currentTab === "samples" && (
               <div>
-                <div className={cs.hasBackground}>
+                <div className={cx(cs.hasBackground, cs.statsRow)}>
                   <dl className={cs.dataList}>
                     <dt className={cs.statsDt}>
-                      <strong>Avg. reads per sample</strong>
+                      <span className={cs.rowLabel}>Avg. reads per sample</span>
                     </dt>
                     <dd className={cs.statsDd}>
                       {this.state.stats.avgTotalReads}
                     </dd>
                   </dl>
                 </div>
-                <div className={cs.hasBackground}>
+                <div className={cx(cs.hasBackground, cs.statsRow)}>
                   <dl className={cs.dataList}>
                     <dt className={cs.statsDt}>
-                      <strong>Avg. reads passing filters per sample</strong>
+                      <span className={cs.rowLabel}>
+                        Avg. reads passing filters per sample
+                      </span>
                     </dt>
                     <dd className={cs.statsDd}>
                       {this.state.stats.avgAdjustedRemainingReads}
@@ -274,15 +280,15 @@ export default class DiscoverySidebar extends React.Component {
             header={<div className={cs.title}>Metadata</div>}
           >
             <div className={cs.hasBackground}>
-              <strong>Host</strong>
+              <span className={cs.rowLabel}>Host</span>
               {this.buildMetadataRows("host")}
             </div>
             <div className={cs.hasBackground}>
-              <strong>Tissue</strong>
+              <span className={cs.rowLabel}>Tissue</span>
               {this.buildMetadataRows("tissue")}
             </div>
             <div className={cs.hasBackground}>
-              <strong>Location</strong>
+              <span className={cs.rowLabel}>Location</span>
               {this.buildMetadataRows("location")}
             </div>
           </Accordion>

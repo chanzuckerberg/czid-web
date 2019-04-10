@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_user!
   before_action :check_rack_mini_profiler
   before_action :check_browser
+  before_action :set_current_user_for_logging!
 
   include Consul::Controller
 
@@ -26,12 +27,6 @@ class ApplicationController < ActionController::Base
   def no_demo_user
     login_required
     redirect_to root_path if current_user.demo_user?
-  end
-
-  def check_rack_mini_profiler
-    if current_user && current_user.admin?
-      Rack::MiniProfiler.authorize_request
-    end
   end
 
   # Rails method for adding to logging
@@ -78,5 +73,21 @@ class ApplicationController < ActionController::Base
       browser: browser,
       supported: browser != "Internet Explorer"
     }
+  end
+
+  # Disabled by default. Add param ?pp=enable to enable or ?pp=disable to disable for your session.
+  # See https://github.com/chanzuckerberg/idseq-web/wiki/%5BDev%5D-Profiling-and-performance-optimization
+  def check_rack_mini_profiler
+    if current_user && current_user.admin?
+      Rack::MiniProfiler.authorize_request
+    end
+  end
+
+  # Set current user to global for use in logging in ActiveRecord.
+  # See https://stackoverflow.com/a/11670283/200312
+  def set_current_user_for_logging!
+    ApplicationRecord._current_user = current_user if current_user
+  rescue => e
+    Rails.logger.error(e)
   end
 end

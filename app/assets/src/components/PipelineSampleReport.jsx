@@ -750,11 +750,23 @@ class PipelineSampleReport extends React.Component {
     const taxId = e.target.getAttribute("data-tax-id");
     const taxLevel = e.target.getAttribute("data-tax-level");
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
-    window.open(
-      `/samples/${
-        this.sample_id
-      }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`
-    );
+
+    const alignmentVizUrl = `/samples/${
+      this.sample_id
+    }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
+
+    // TODO(mark): Open the coverage viz with an "empty data" screen for taxons with no data.
+    if (
+      (this.admin || this.allowedFeatures.includes("coverage_viz")) &&
+      taxLevel === "species"
+    ) {
+      this.props.onCoverageVizClick({
+        taxId,
+        alignmentVizUrl
+      });
+    } else {
+      window.open(alignmentVizUrl);
+    }
   };
 
   displayHoverActions = (taxInfo, reportDetails) => {

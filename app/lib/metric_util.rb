@@ -20,12 +20,15 @@ class MetricUtil
   # if it makes sense, and a past tense action. Keep names meaningful, descriptive, and
   # non-redundant (e.g. prefer sample_viewed to sample_view_viewed).
   # TODO: (gdingle): coordinate with ANALYTICS_EVENT_NAMES in client JS
+  # See also auto named events in ApplicationRecord#log_analytics.
   ANALYTICS_EVENT_NAMES = {
+    # TODO: (gdingle): remove user_created and project_created when auto events are working
     user_created: "user_created",
     project_created: "project_created",
     pipeline_run_succeeded: "pipeline_run_succeeded",
     pipeline_run_failed: "pipeline_run_failed",
-    sample_upload_batch_created: "sample_upload_batch_created"
+    sample_upload_batch_created: "sample_upload_batch_created",
+    location_geosearched: "location_geosearched"
   }.freeze
 
   # DEPRECATED. Use log_analytics_event.
@@ -34,6 +37,11 @@ class MetricUtil
   end
 
   # This should never block on error.
+
+  # Anything less than 500 r/s should be fine. See
+  # https://segment.com/docs/sources/server/http/#rate-limits. In addition,
+  # segment says the server lib batches automatically. See
+  # https://segment.com/docs/sources/server/http/#batch.
   def self.log_analytics_event(event, user, properties = {}, request = nil)
     if SEGMENT_ANALYTICS
       # current_user should be passed from a controller

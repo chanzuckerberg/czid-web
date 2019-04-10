@@ -613,6 +613,7 @@ class DiscoveryView extends React.Component {
                       samples={samples}
                       selectableIds={sampleIds}
                       onSampleSelected={this.handleSampleSelected}
+                      projectId={project && project.id}
                     />
                   </div>
                   {!samples.length &&
