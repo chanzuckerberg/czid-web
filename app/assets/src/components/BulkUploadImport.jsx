@@ -536,7 +536,7 @@ class BulkUploadImport extends React.Component {
                 ref="form"
                 onSubmit={withAnalytics(
                   this.handleRemoteUploadSubmit,
-                  "BulkUploadImport_upload_form_submitted",
+                  "BulkUploadImport_upload-form_submitted",
                   {
                     samples: this.state.samples.length,
                     projectId: this.state.projectId,
@@ -593,11 +593,7 @@ class BulkUploadImport extends React.Component {
                               }
                               onChange={withAnalytics(
                                 this.selectSample,
-                                "BulkUploadImport_samples_checkbox_changed",
-                                {
-                                  selectedSampleIndices: this.state
-                                    .selectedSampleIndices.length
-                                }
+                                "BulkUploadImport_samples-checkbox_changed"
                               )}
                             />
                             <label htmlFor={i}> {sample.name}</label>
@@ -633,7 +629,7 @@ class BulkUploadImport extends React.Component {
                                       onClick={() => {
                                         this.handleHostChangeForSample(i, j);
                                         logAnalyticsEvent(
-                                          "BulkUploadImport_host_dropdown_clicked",
+                                          "BulkUploadImport_host-dropdown_clicked",
                                           {
                                             samplesId: i,
                                             hostGenomeId: j
@@ -682,7 +678,7 @@ class BulkUploadImport extends React.Component {
                                           e
                                         );
                                         logAnalyticsEvent(
-                                          "BulkUploadImport_project_dropdown_clicked",
+                                          "BulkUploadImport_project-dropdown_clicked",
                                           {
                                             samplesId: i,
                                             hostGenomeId: j
@@ -723,7 +719,7 @@ class BulkUploadImport extends React.Component {
                             type="submit"
                             onClick={withAnalytics(
                               this.handleRemoteUploadSubmit,
-                              "BulkUploadImport_run_samples_button_clicked"
+                              "BulkUploadImport_run-samples-button_clicked"
                             )}
                             className="new-button blue-button upload-samples-button"
                           >
@@ -735,7 +731,7 @@ class BulkUploadImport extends React.Component {
                           onClick={() => {
                             window.history.back();
                             logAnalyticsEvent(
-                              "BulkUploadImport_back_button_clicked"
+                              "BulkUploadImport_back-button_clicked"
                             );
                           }}
                           className="new-button secondary-button"
@@ -805,7 +801,7 @@ class BulkUploadImport extends React.Component {
         className="new-button blue-button upload-samples-button"
         onClick={withAnalytics(
           this.handleImportSubmit,
-          "BulkUploadImport_import_button_clicked",
+          "BulkUploadImport_import-button_clicked",
           {
             projectId: this.state.projectId,
             hostId: this.state.hostId,
@@ -916,10 +912,7 @@ class BulkUploadImport extends React.Component {
               <input
                 onChange={withAnalytics(
                   this.handleBulkPathChange,
-                  "BulkUploadImport_bulk_path_changed",
-                  {
-                    selectedBulkPath: this.state.selectedBulkPath
-                  }
+                  "BulkUploadImport_bulk-path_changed"
                 )}
                 onFocus={this.clearError}
                 type="text"
@@ -996,10 +989,7 @@ class BulkUploadImport extends React.Component {
                       id="sample"
                       onChange={withAnalytics(
                         this.handleProjectChange,
-                        "BulkUploadImport_project_select_changed",
-                        {
-                          project: this.state.project
-                        }
+                        "BulkUploadImport_project-select_changed"
                       )}
                       value={this.state.project}
                     >
@@ -1037,10 +1027,7 @@ class BulkUploadImport extends React.Component {
                       type="button"
                       onClick={withAnalytics(
                         this.toggleNewProjectInput,
-                        "BulkUploadImport_new_project_button_clicked",
-                        {
-                          disableProjectSelect: this.state.disableProjectSelect
-                        }
+                        "BulkUploadImport_new-project-button_clicked"
                       )}
                       className="new-project-button new-button secondary-button"
                       data-delay="50"
@@ -1065,7 +1052,7 @@ class BulkUploadImport extends React.Component {
                       if (newProject.length) {
                         this.handleProjectSubmit();
                         logAnalyticsEvent(
-                          "BulkUploadImport_project_button_clicked",
+                          "BulkUploadImport_project-button_clicked",
                           {
                             newProject
                           }
@@ -1091,10 +1078,7 @@ class BulkUploadImport extends React.Component {
                     className="col s8 filled-in"
                     onChange={withAnalytics(
                       this.toggleCheckBox,
-                      "BulkUploadImport_public_checkbox_changed",
-                      {
-                        publicChecked: this.state.publicChecked
-                      }
+                      "BulkUploadImport_public-checkbox_changed"
                     )}
                     value={this.state.publicChecked}
                   />
@@ -1152,7 +1136,7 @@ class BulkUploadImport extends React.Component {
                           onClick={() => {
                             this.handleHostChange(g.id, g.name);
                             logAnalyticsEvent(
-                              "BulkUploadImport_host_selector_clicked",
+                              "BulkUploadImport_host-selector_clicked",
                               {
                                 hostId: g.id,
                                 hostName: g.name

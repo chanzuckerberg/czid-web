@@ -95,7 +95,7 @@ class AccessionViz extends React.Component {
           <a
             onClick={withAnalytics(
               this.renderMoreReads,
-              "AccessionViz_more_reads_link_clicked",
+              "AccessionViz_more-reads-link_clicked",
               { reads: this.state.reads.length, allReads: this.allReads.length }
             )}
             style={{ cursor: "pointer" }}

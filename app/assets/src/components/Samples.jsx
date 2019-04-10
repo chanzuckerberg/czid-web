@@ -1662,7 +1662,7 @@ class BackgroundModal extends React.Component {
               text="Create Collection"
               onClick={withAnalytics(
                 this.handleOpen,
-                "Samples_collection_create_button_clicked"
+                "Samples_collection-create-button_clicked"
               )}
               disabled={!this.props.selectedSampleIds.length}
             />
@@ -1685,7 +1685,7 @@ class BackgroundModal extends React.Component {
           <Form
             onSubmit={withAnalytics(
               this.handleSubmit,
-              "Samples_collection_form_submitted",
+              "Samples_collection-form-submitted",
               {
                 new_background_name: this.state.new_background_name,
                 new_background_description: this.state
@@ -1708,7 +1708,7 @@ class BackgroundModal extends React.Component {
                 text="Cancel"
                 onClick={withAnalytics(
                   this.handleClose,
-                  "Samples_collection_form_cancel_button_clicked"
+                  "Samples_collection-form-cancel-button_clicked"
                 )}
               />
             </div>

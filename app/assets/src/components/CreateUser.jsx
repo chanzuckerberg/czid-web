@@ -235,7 +235,7 @@ class CreateUser extends React.Component {
         <span>{formattedError}</span>
       );
       const form = this.props.selectedUser ? "update" : "create";
-      logAnalyticsEvent(`CreateUser_${form}_errors_displayed`, {
+      logAnalyticsEvent(`CreateUser_${form}-errors_displayed`, {
         form,
         serverErrors,
         formattedError
@@ -279,10 +279,7 @@ class CreateUser extends React.Component {
                   type="email"
                   onChange={withAnalytics(
                     this.handleEmailChange,
-                    "CreateUser_email_changed",
-                    {
-                      email: () => this.state.email
-                    }
+                    "CreateUser_email_changed"
                   )}
                   className=""
                   onFocus={this.clearError}
@@ -296,10 +293,7 @@ class CreateUser extends React.Component {
                   type="text"
                   onChange={withAnalytics(
                     this.handleNameChange,
-                    "CreateUser_name_changed",
-                    {
-                      name: () => this.state.name
-                    }
+                    "CreateUser_name_changed"
                   )}
                   className=""
                   onFocus={this.clearError}
@@ -313,10 +307,7 @@ class CreateUser extends React.Component {
                   type="text"
                   onChange={withAnalytics(
                     this.handleInstitutionChange,
-                    "CreateUser_institution_changed",
-                    {
-                      institution: () => this.state.institution
-                    }
+                    "CreateUser_institution_changed"
                   )}
                   onFocus={this.clearError}
                   value={this.state.institution}
@@ -329,10 +320,7 @@ class CreateUser extends React.Component {
                   type="password"
                   onChange={withAnalytics(
                     this.handlePasswordChange,
-                    "CreateUser_password_changed",
-                    {
-                      password: () => this.state.password.length
-                    }
+                    "CreateUser_password_changed"
                   )}
                   className=""
                   onFocus={this.clearError}
@@ -346,10 +334,7 @@ class CreateUser extends React.Component {
                   type="password"
                   onChange={withAnalytics(
                     this.handlePConfirmChange,
-                    "CreateUser_pconfirm_changed",
-                    {
-                      pConfirm: () => this.state.pConfirm.length
-                    }
+                    "CreateUser_pconfirm_changed"
                   )}
                   className=""
                   onFocus={this.clearError}
@@ -367,10 +352,7 @@ class CreateUser extends React.Component {
                   checked={this.state.isAdmin ? "checked" : ""}
                   onChange={withAnalytics(
                     this.toggleCheckBox,
-                    "CreateUser_admin_changed",
-                    {
-                      isAdmin: () => this.state.isAdmin
-                    }
+                    "CreateUser_admin_changed"
                   )}
                   value={this.state.isAdmin}
                 />
@@ -401,14 +383,14 @@ class CreateUser extends React.Component {
           ? this.renderUserForm(
               withAnalytics(
                 this.handleUpdate,
-                "CreateUser_update_form_submitted",
+                "CreateUser_update-form_submitted",
                 "Update"
               )
             )
           : this.renderUserForm(
               withAnalytics(
                 this.handleCreate,
-                "CreateUser_create_form_submitted",
+                "CreateUser_create-form_submitted",
                 "Create"
               )
             )}

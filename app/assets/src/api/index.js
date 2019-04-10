@@ -266,21 +266,7 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
         ...eventData
       };
     }
-
-    // Evaluate lazy values, giving some time for React to set state
-    // See https://reactjs.org/docs/react-component.html#setstate
-    let shouldWait = false;
-    for (var k in eventData) {
-      if (typeof eventData[k] === "function") {
-        shouldWait = true;
-        setTimeout(() => (eventData[k] = eventData[k]()), 1);
-      }
-    }
-    if (shouldWait) {
-      setTimeout(() => window.analytics.track(eventName, eventData), 2);
-    } else {
-      window.analytics.track(eventName, eventData);
-    }
+    window.analytics.track(eventName, eventData);
   }
 };
 
@@ -299,8 +285,6 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
  * analysis specific to the event. The keys in should be named the same as in
  * the calling context for easy interpretation. Only scalars should be passed to
  * keep things simple downstream. Arrays should be replaced by their lengths.
- * Values may be functions, in which case they are evaluated just before logging.
- * This is useful to get state changes that happen inside "handleEvent".
  *
  * For example:
  *
