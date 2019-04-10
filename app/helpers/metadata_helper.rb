@@ -14,7 +14,7 @@ module MetadataHelper
 
   def get_new_custom_field(name)
     mf = MetadataField.new
-    mf.name = Metadatum.str_to_basic_chars(name)
+    mf.name = name
     mf.display_name = name
     mf.base_type = Metadatum::STRING_TYPE
     return mf

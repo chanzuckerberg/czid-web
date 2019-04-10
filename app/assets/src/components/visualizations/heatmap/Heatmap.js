@@ -913,7 +913,6 @@ export default class Heatmap {
       .duration(this.options.transitionDuration);
     applyFormatForRows(rowsUpdate);
 
-    console.log("columnnMetadataCells: ", columnnMetadataCells);
     let rowsEnter = columnnMetadataCells
       .enter()
       .append("g")
@@ -922,7 +921,6 @@ export default class Heatmap {
       );
     applyFormatForRows(rowsEnter);
 
-    console.log("columnMetadata: ", this.options.columnMetadata);
     this.options.columnMetadata.forEach(metadata => {
       let columnMetadataCell = this.gColumnMetadata
         .select(

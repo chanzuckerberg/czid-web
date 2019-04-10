@@ -114,12 +114,12 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
     assert_equal 6, Metadatum.where(sample_id: @metadata_validation_sample_human.id).length
 
     # Custom fields should be created and added to project and host genome.
-    assert_equal 1, MetadataField.where(display_name: "Custom Field").length
-    assert_equal 1, MetadataField.where(display_name: "Custom Field 2").length
-    assert @metadata_validation_project.metadata_fields.pluck(:display_name).include?("Custom Field")
-    assert @metadata_validation_project.metadata_fields.pluck(:display_name).include?("Custom Field 2")
-    assert @host_genome_human.metadata_fields.pluck(:display_name).include?("Custom Field")
-    assert @host_genome_human.metadata_fields.pluck(:display_name).include?("Custom Field 2")
+    assert_equal 1, MetadataField.where(name: "Custom Field").length
+    assert_equal 1, MetadataField.where(name: "Custom Field 2").length
+    assert @metadata_validation_project.metadata_fields.pluck(:name).include?("Custom Field")
+    assert @metadata_validation_project.metadata_fields.pluck(:name).include?("Custom Field 2")
+    assert @host_genome_human.metadata_fields.pluck(:name).include?("Custom Field")
+    assert @host_genome_human.metadata_fields.pluck(:name).include?("Custom Field 2")
   end
 
   test 'joe cannot upload metadata to a public project' do

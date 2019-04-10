@@ -338,8 +338,8 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_params
 
     # Prior to upload, the custom fields shouldn't exist.
-    assert_equal 0, MetadataField.where(display_name: "Custom Field").length
-    assert_equal 0, MetadataField.where(display_name: "Custom Field 2").length
+    assert_equal 0, MetadataField.where(name: "Custom Field").length
+    assert_equal 0, MetadataField.where(name: "Custom Field 2").length
 
     # Prior to upload, the core field shouldn't be associated with the project.
     assert !@metadata_validation_project.metadata_fields.include?(@core_field)
@@ -389,12 +389,12 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     assert @metadata_validation_project.metadata_fields.include?(@core_field)
 
     # Custom fields should be created and added to project and host genome.
-    assert_equal 1, MetadataField.where(display_name: "Custom Field").length
-    assert_equal 1, MetadataField.where(display_name: "Custom Field 2").length
-    assert @metadata_validation_project.metadata_fields.pluck(:display_name).include?("Custom Field")
-    assert @metadata_validation_project.metadata_fields.pluck(:display_name).include?("Custom Field 2")
-    assert @host_genome_human.metadata_fields.pluck(:display_name).include?("Custom Field")
-    assert @host_genome_human.metadata_fields.pluck(:display_name).include?("Custom Field 2")
+    assert_equal 1, MetadataField.where(name: "Custom Field").length
+    assert_equal 1, MetadataField.where(name: "Custom Field 2").length
+    assert @metadata_validation_project.metadata_fields.pluck(:name).include?("Custom Field")
+    assert @metadata_validation_project.metadata_fields.pluck(:name).include?("Custom Field 2")
+    assert @host_genome_human.metadata_fields.pluck(:name).include?("Custom Field")
+    assert @host_genome_human.metadata_fields.pluck(:name).include?("Custom Field 2")
 
     post bulk_upload_with_metadata_samples_url, params: {
       client: "0.5.0",
@@ -437,8 +437,8 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     assert_equal 5, Metadatum.where(sample_id: sample_id).length
 
     # The previous custom field should be used. No new field should be created.
-    assert_equal 1, MetadataField.where(display_name: "Custom Field").length
-    assert_equal 1, MetadataField.where(display_name: "Custom Field 2").length
+    assert_equal 1, MetadataField.where(name: "Custom Field").length
+    assert_equal 1, MetadataField.where(name: "Custom Field 2").length
   end
 
   # Test that a nonadmin user cannot upload to a private project he is not a member of.
