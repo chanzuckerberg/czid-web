@@ -1,3 +1,5 @@
+import { isArray, isObject, camelCase, snakeCase, lowerFirst } from "lodash/fp";
+
 // Event name guidelines: Follow object_action convention with object being the
 // name of the core model if it makes sense, and a past tense action. Keep names
 // meaningful, descriptive, and non-redundant (e.g. prefer sample_viewed to

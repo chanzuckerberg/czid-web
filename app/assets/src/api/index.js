@@ -3,7 +3,6 @@
 // TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
 import axiosRetry from "axios-retry";
-import { isArray, isObject, camelCase, snakeCase, lowerFirst } from "lodash/fp";
 
 import { cleanFilePath } from "~utils/sample";
 
