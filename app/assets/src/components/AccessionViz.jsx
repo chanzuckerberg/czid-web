@@ -1,6 +1,6 @@
 import React from "react";
 import ReadViz from "./ReadViz";
-import { withAnalytics } from "~/api";
+import { withAnalytics } from "~/api/analytics";
 
 class AccessionViz extends React.Component {
   constructor(props) {
