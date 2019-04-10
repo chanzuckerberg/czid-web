@@ -3,13 +3,14 @@
 import React from "react";
 import cx from "classnames";
 import { get } from "lodash/fp";
-import { logAnalyticsEvent, saveVisualization } from "~/api";
+
+import { saveVisualization } from "~/api";
 import {
   getURLParamString,
   parseUrlParams,
   copyShortUrlToClipboard
 } from "~/helpers/url";
-import { ANALYTICS_EVENT_NAMES } from "~/api/constants";
+import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import { pipelineVersionHasAssembly } from "~/components/utils/sample";
 import AMRView from "~/components/AMRView";

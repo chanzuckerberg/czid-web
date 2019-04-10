@@ -3,6 +3,7 @@
 // TODO(tiago): Consolidate the way we accept input parameters
 import axios from "axios";
 import axiosRetry from "axios-retry";
+
 import { cleanFilePath } from "~utils/sample";
 
 import { get, postWithCSRF, putWithCSRF, deleteWithCSRF } from "./core";
@@ -247,13 +248,6 @@ const createProject = params =>
     project: params
   });
 
-// See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
-const logAnalyticsEvent = (eventName, eventData = {}) => {
-  // Wrapper around Segment analytics so we can add things later
-  // eventData should have keys in snake_case for the database
-  if (window.analytics) window.analytics.track(eventName, eventData);
-};
-
 const validateSampleNames = (projectId, sampleNames) => {
   if (!projectId) {
     return Promise.resolve(sampleNames);
@@ -302,16 +296,15 @@ export {
   getProjects,
   getSampleDimensions,
   getSampleReportInfo,
-  getSampleStats,
-  getSampleTaxons,
   getSamples,
+  getSampleStats,
   getSamplesV1,
+  getSampleTaxons,
   getSearchSuggestions,
   getSummaryContigCounts,
   getTaxonDescriptions,
   getTaxonDistributionForBackground,
   getVisualizations,
-  logAnalyticsEvent,
   markSampleUploaded,
   saveSampleName,
   saveSampleNotes,
@@ -319,6 +312,6 @@ export {
   shortenUrl,
   uploadFileToUrl,
   uploadFileToUrlWithRetries,
-  validateSampleNames,
-  validateSampleFiles
+  validateSampleFiles,
+  validateSampleNames
 };
