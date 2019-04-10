@@ -20,7 +20,7 @@ class ProjectsView extends React.Component {
       {
         dataKey: "project",
         flexGrow: 1,
-        width: 250,
+        width: 350,
         cellRenderer: this.renderProjectDetails,
         headerClassName: cs.projectHeader,
         sortFunction: p => (p.name || "").toLowerCase()
