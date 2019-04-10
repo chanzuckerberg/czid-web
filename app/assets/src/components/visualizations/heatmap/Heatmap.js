@@ -916,12 +916,18 @@ export default class Heatmap {
     let rowsEnter = columnnMetadataCells
       .enter()
       .append("g")
-      .attr("class", d => cx("columnMetadataCells", d.value));
+      .attr("class", d =>
+        cx("columnMetadataCells", d.value.replace(/ /g, "_"))
+      );
     applyFormatForRows(rowsEnter);
 
     this.options.columnMetadata.forEach(metadata => {
       let columnMetadataCell = this.gColumnMetadata
-        .select(`.columnMetadataCells.${metadata.value}`)
+        .select(
+          `.columnMetadataCells.${CSS.escape(
+            metadata.value.replace(/ /g, "_")
+          )}`
+        )
         .selectAll(".columnMetadataCell")
         .data(this.columnLabels, d => d.label);
 
