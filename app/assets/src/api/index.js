@@ -275,7 +275,7 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
  * the React component. The middle part should be user-friendly UI name. The
  * last part should be the action taken.
  *
- * <ReactComponent>_<friendly_name_of_ui_element>_<past_tense_action>
+ * <ReactComponent>_<friendly-name-of-ui-element>_<past_tense_action>
  *
  * In this way, we can easily discern the
  * context and meaning of an analytics event in a report and locate it in the
@@ -290,7 +290,7 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
  *
  *    withAnalytics(
  *      this.renderMoreReads,
- *      "AccessionViz_more_reads_link_clicked",
+ *      "AccessionViz_more-reads-link_clicked",
  *      { projectId: this.state.projectId, reads: this.state.reads.length }
  *    )
  *

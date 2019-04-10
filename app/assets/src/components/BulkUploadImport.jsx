@@ -1052,7 +1052,7 @@ class BulkUploadImport extends React.Component {
                       if (newProject.length) {
                         this.handleProjectSubmit();
                         logAnalyticsEvent(
-                          "BulkUploadImport_project-button_clicked",
+                          "BulkUploadImport_create-project-button_clicked",
                           {
                             newProject
                           }
