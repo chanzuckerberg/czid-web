@@ -213,7 +213,7 @@ class BaseTable extends React.Component {
                 );
               })}
               {initialActiveColumns && (
-                <Column dataKey={"plusP  laceholder"} width={20} />
+                <Column dataKey={"plusPlaceholder"} width={20} />
               )}
             </VirtualizedTable>
           )}
