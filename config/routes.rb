@@ -115,6 +115,7 @@ Rails.application.routes.draw do
 
   resource :locations do
     get :external_search, on: :collection
+    get :map_demo, on: :collection
   end
 
   authenticate :user, ->(u) { u.admin? } do

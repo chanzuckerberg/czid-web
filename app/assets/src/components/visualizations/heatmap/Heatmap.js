@@ -335,6 +335,7 @@ export default class Heatmap {
     let metadatumCount = 0;
     this.options.columnMetadata.forEach(metadata => {
       let metadataSet = new Set();
+      console.log(metadata.value);
       this.columnLabels.forEach(column => {
         let metadatumValue = (column.metadata || {})[metadata.value];
         if (metadatumValue) metadataSet.add(metadatumValue);

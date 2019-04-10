@@ -35,6 +35,7 @@ class SamplesHeatmapVis extends React.Component {
     ];
 
     this.metadataTypes = keyBy("key", this.props.metadataTypes);
+    console.log(this.metadataTypes);
   }
 
   componentDidMount() {
