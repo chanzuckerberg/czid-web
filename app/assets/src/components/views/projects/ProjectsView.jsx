@@ -1,11 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
-import cx from "classnames";
 
-import { Table } from "~/components/visualizations/table";
-import PrivateProjectIcon from "../../ui/icons/PrivateProjectIcon";
-import PublicProjectIcon from "../../ui/icons/PublicProjectIcon";
-import BasicPopup from "~/components/BasicPopup";
+import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
+import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
+import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
 
@@ -21,7 +19,17 @@ class ProjectsView extends React.Component {
         dataKey: "project",
         flexGrow: 1,
         width: 350,
-        cellRenderer: this.renderProjectDetails,
+        cellRenderer: ({ cellData }) =>
+          BaseDiscoveryView.renderItemDetails(
+            merge(
+              { cellData },
+              {
+                nameRenderer: this.nameRenderer,
+                detailsRenderer: this.detailsRenderer,
+                visibilityIconRenderer: this.visibilityIconRenderer
+              }
+            )
+          ),
         headerClassName: cs.projectHeader,
         sortFunction: p => (p.name || "").toLowerCase()
       },
@@ -35,7 +43,7 @@ class ProjectsView extends React.Component {
         dataKey: "tissues",
         width: 200,
         disableSort: true,
-        cellRenderer: this.renderList
+        cellRenderer: BaseDiscoveryView.renderList
       },
       {
         dataKey: "number_of_samples",
@@ -45,37 +53,26 @@ class ProjectsView extends React.Component {
     ];
   }
 
-  renderProjectDetails = ({ cellData: project }) => {
+  nameRenderer(project) {
+    return project.name;
+  }
+
+  visibilityIconRenderer(project) {
+    return project && project.publicAccess ? (
+      <PublicProjectIcon />
+    ) : (
+      <PrivateProjectIcon />
+    );
+  }
+
+  detailsRenderer(project) {
     return (
-      <div className={cs.project}>
-        <div className={cs.visibility}>
-          {project && project.publicAccess ? (
-            <PublicProjectIcon className={cx(cs.icon, cs.iconPublic)} />
-          ) : (
-            <PrivateProjectIcon className={cx(cs.icon, cs.iconPrivate)} />
-          )}
-        </div>
-        <div className={cs.projectRightPane}>
-          <BasicPopup
-            trigger={<div className={cs.projectName}>{project.name}</div>}
-            content={project.name}
-          />
-          <div className={cs.projectDescription}>{project.description}</div>
-          <div className={cs.projectDetails}>
-            <span className={cs.projectCreationDate}>
-              {moment(project.created_at).fromNow()}
-            </span>|
-            <span className={cs.projectOwner}>{project.owner}</span>
-          </div>
-        </div>
+      <div>
+        <span>{moment(project.created_at).fromNow()}</span>|
+        <span>{project.owner}</span>
       </div>
     );
-  };
-
-  // TODO: move generic renderers to table component
-  renderList = ({ cellData: list }) => {
-    return list && list.length > 0 ? list.join(", ") : "N/A";
-  };
+  }
 
   handleRowClick = ({ rowData }) => {
     const { onProjectSelected, projects } = this.props;
@@ -98,12 +95,10 @@ class ProjectsView extends React.Component {
     });
 
     return (
-      <Table
-        sortable
-        data={data}
+      <BaseDiscoveryView
         columns={this.columns}
-        defaultRowHeight={68}
-        onRowClick={this.handleRowClick}
+        data={data}
+        handleRowClick={this.handleRowClick}
       />
     );
   }
