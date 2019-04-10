@@ -18,8 +18,7 @@ import DiscoverIcon from "../ui/icons/DiscoverIcon";
 import DetectIcon from "../ui/icons/DetectIcon";
 import DecipherIcon from "../ui/icons/DecipherIcon";
 import LogoIcon from "../ui/icons/LogoIcon";
-import { logAnalyticsEvent } from "~/api";
-import { ANALYTICS_EVENT_NAMES } from "~/api/constants";
+import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 
 class Landing extends React.Component {
   constructor(props) {

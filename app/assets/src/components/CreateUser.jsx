@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 
 import { openUrl } from "~utils/links";
-import { withAnalytics, logAnalyticsEvent } from "~/api";
+import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 
 class CreateUser extends React.Component {
   constructor(props, context) {

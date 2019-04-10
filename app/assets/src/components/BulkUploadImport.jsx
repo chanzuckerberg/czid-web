@@ -12,7 +12,8 @@ import TermsAgreement from "~ui/controls/TermsAgreement";
 import Icon from "~ui/icons/Icon";
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { openUrlWithTimeout } from "~utils/links";
-import { validateSampleNames, withAnalytics, logAnalyticsEvent } from "~/api";
+import { validateSampleNames } from "~/api";
+import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 
 import SampleUpload from "./SampleUpload";

@@ -24,7 +24,7 @@ import Cookies from "js-cookie";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
 import UserIcon from "~ui/icons/UserIcon";
-import { withAnalytics } from "~/api";
+import { withAnalytics } from "~/api/analytics";
 
 import SortHelper from "./SortHelper";
 import ProjectSelection from "./ProjectSelection";
