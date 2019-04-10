@@ -67,13 +67,6 @@
     align-items: center;
 
     .action {
-      &:not(.actionDisabled) {
-        cursor: pointer;
-        .icon {
-          fill: $primary-light;
-        }
-      }
-
       &:not(:first-child) {
         margin-left: 20px;
       }
@@ -82,6 +75,11 @@
         fill: $light-grey;
         flex: 0 0 auto;
         width: 22px;
+
+        &:not(.disabled) {
+          cursor: pointer;
+          fill: $primary-light;
+        }
 
         &.save {
           margin-top: 1px;
