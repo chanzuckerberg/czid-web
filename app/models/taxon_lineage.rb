@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # The TaxonLineage model gives the taxids forming the taxonomic lineage of any given species-level taxid.
 require 'elasticsearch/model'
 
@@ -176,13 +178,26 @@ class TaxonLineage < ApplicationRecord
     # Find the right lineage entry to use based on the version. Lineage version_end
     # is incremented when the index is updated and the record is still valid, so
     # lineage_version should be between the inclusive range.
-    lineage_version = PipelineRun.find(pipeline_run_id).alignment_config.lineage_version
-    lineage_by_taxid = {}
+    lineage_version = PipelineRun
+                      .select("alignment_configs.lineage_version")
+                      .joins(:alignment_config)
+                      .find(pipeline_run_id)[:lineage_version]
 
-    TaxonLineage.where(taxid: tax_ids).where("? BETWEEN version_start AND version_end", lineage_version).each do |x|
-      # Extra fields for levels of _taxid and _name are used in the taxon tree
-      lineage_by_taxid[x.taxid] = x.as_json
-    end
+    # Extra fields for levels of _taxid and _name are used in the taxon tree
+    required_columns = %w[
+      taxid id superkingdom_taxid phylum_taxid class_taxid order_taxid family_taxid
+      genus_taxid species_taxid superkingdom_name phylum_name class_name order_name
+      family_name genus_name species_name superkingdom_common_name phylum_common_name
+      class_common_name order_common_name family_common_name genus_common_name
+      species_common_name kingdom_taxid kingdom_name kingdom_common_name tax_name
+    ]
+    lineage_by_taxid = TaxonLineage
+                       .where(taxid: tax_ids)
+                       .where('? BETWEEN version_start AND version_end', lineage_version)
+                       .pluck(*required_columns)
+                       .map { |r| [r[0], required_columns.zip(r).to_h] }
+                       .to_h
+
     t1 = Time.now.to_f
     Rails.logger.info "fetch_lineage_by_taxid took #{(t1 - t0).round(2)}s"
 
