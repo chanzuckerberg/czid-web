@@ -262,6 +262,9 @@ const logAnalyticsEvent = (eventName, eventData = {}) => {
         czi_user: traits.biohub_user,
         demo_user: traits.demo_user,
         has_samples: traits.has_samples,
+        // For Google Analytics. See https://segment.com/docs/destinations/google-analytics/#track
+        label: JSON.stringify(eventData),
+        category: eventName.split("_")[0],
         // caller can override above traits if they know what they are doing
         ...eventData
       };
