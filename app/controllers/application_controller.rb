@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_user!
   before_action :check_rack_mini_profiler
   before_action :check_browser
-  before_action :set_current_user_for_logging!
+  before_action :set_current_context_for_logging!
 
   include Consul::Controller
 
@@ -83,10 +83,11 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Set current user to global for use in logging in ActiveRecord.
+  # Set current user and request to global for use in logging in ActiveRecord.
   # See https://stackoverflow.com/a/11670283/200312
-  def set_current_user_for_logging!
+  def set_current_context_for_logging!
     ApplicationRecord._current_user = current_user if current_user
+    ApplicationRecord._current_request = request if request
   rescue => e
     Rails.logger.error(e)
   end
