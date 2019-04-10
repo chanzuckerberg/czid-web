@@ -1,5 +1,6 @@
 import React from "react";
 import ReadViz from "./ReadViz";
+import { withAnalytics } from "~/api";
 
 class AccessionViz extends React.Component {
   constructor(props) {
@@ -91,7 +92,14 @@ class AccessionViz extends React.Component {
       this.state.reads.length < this.allReads.length &&
       !this.state.rendering ? (
         <div style={{ textAlign: "right" }}>
-          <a onClick={this.renderMoreReads} style={{ cursor: "pointer" }}>
+          <a
+            onClick={withAnalytics(
+              this.renderMoreReads,
+              "AccessionViz_more-reads-link_clicked",
+              { reads: this.state.reads.length, allReads: this.allReads.length }
+            )}
+            style={{ cursor: "pointer" }}
+          >
             View more reads
           </a>
         </div>

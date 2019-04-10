@@ -19,10 +19,16 @@ import {
 import { merge, sortBy } from "lodash/fp";
 import { Sidebar, Label, Icon, Modal, Form } from "semantic-ui-react";
 import Nanobar from "nanobar";
+import Cookies from "js-cookie";
+
+import GlobeIcon from "~ui/icons/GlobeIcon";
+import LockIcon from "~ui/icons/LockIcon";
+import UserIcon from "~ui/icons/UserIcon";
+import { withAnalytics } from "~/api";
+
 import SortHelper from "./SortHelper";
 import ProjectSelection from "./ProjectSelection";
 import BasicPopup from "./BasicPopup";
-import Cookies from "js-cookie";
 import CompareButton from "./ui/controls/buttons/CompareButton";
 import PhylogenyButton from "./ui/controls/buttons/PhylogenyButton";
 import DownloadButtonDropdown from "./ui/controls/dropdowns/DownloadButtonDropdown";
@@ -36,9 +42,6 @@ import ProjectUploadMenu from "./views/samples/ProjectUploadMenu";
 import CategorySearchBox from "./ui/controls/CategorySearchBox";
 import FilterTag from "./ui/controls/FilterTag";
 import ProjectSettingsModal from "./views/samples/ProjectSettingsModal";
-import GlobeIcon from "~ui/icons/GlobeIcon";
-import LockIcon from "~ui/icons/LockIcon";
-import UserIcon from "~ui/icons/UserIcon";
 import {
   SAMPLE_TABLE_COLUMNS,
   INITIAL_COLUMNS,
@@ -1657,7 +1660,10 @@ class BackgroundModal extends React.Component {
           <div className="button-container">
             <PrimaryButton
               text="Create Collection"
-              onClick={this.handleOpen}
+              onClick={withAnalytics(
+                this.handleOpen,
+                "Samples_collection-create-button_clicked"
+              )}
               disabled={!this.props.selectedSampleIds.length}
             />
           </div>
@@ -1676,7 +1682,18 @@ class BackgroundModal extends React.Component {
             update the calculated z-score to indicate how much the the sample
             deviates from the norm for that collection.
           </div>
-          <Form onSubmit={this.handleSubmit}>
+          <Form
+            onSubmit={withAnalytics(
+              this.handleSubmit,
+              "Samples_collection-form-submitted",
+              {
+                new_background_name: this.state.new_background_name,
+                new_background_description: this.state
+                  .new_background_description,
+                selectedSampleIds: this.props.parent.state.selectedSampleIds
+              }
+            )}
+          >
             {this.renderTextField("Name", false, "new_background_name", 1)}
             {this.renderTextField(
               "Description",
@@ -1687,7 +1704,13 @@ class BackgroundModal extends React.Component {
             {this.renderSampleList()}
             <div className="background-button-section">
               <PrimaryButton text="Create" type="submit" />
-              <SecondaryButton text="Cancel" onClick={this.handleClose} />
+              <SecondaryButton
+                text="Cancel"
+                onClick={withAnalytics(
+                  this.handleClose,
+                  "Samples_collection-form-cancel-button_clicked"
+                )}
+              />
             </div>
           </Form>
           {background_creation_response.status === "ok" ? (
