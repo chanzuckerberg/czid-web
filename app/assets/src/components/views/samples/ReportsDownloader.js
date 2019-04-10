@@ -15,12 +15,16 @@ export default class ReportsDownloader {
     const url = `/projects/${this.projectId}/${statusAction}`;
     axios
       .get(url)
-      .then(res => {
-        let downloadStatus = res.data.status_display;
+      .then(result => {
+        let downloadStatus = result.data.status_display;
         if (downloadStatus === "complete") {
           openUrl(`/projects/${this.projectId}/${retrieveAction}`);
         } else {
-          this.scheduleCheckReportDownload(res, statusAction, retrieveAction);
+          this.scheduleCheckReportDownload({
+            result,
+            statusAction,
+            retrieveAction
+          });
         }
       })
       .catch(() => {
@@ -35,7 +39,7 @@ export default class ReportsDownloader {
 
   scheduleCheckReportDownload({ statusAction, retrieveAction }) {
     setTimeout(() => {
-      this.checkReportDownload(statusAction, retrieveAction);
+      this.checkReportDownload({ statusAction, retrieveAction });
     }, 2000);
   }
 
@@ -47,8 +51,8 @@ export default class ReportsDownloader {
     }`;
     axios
       .get(url)
-      .then(res => {
-        this.checkReportDownload(res, statusAction, retrieveAction);
+      .then(result => {
+        this.checkReportDownload({ result, statusAction, retrieveAction });
       })
       .catch(() => {});
   };

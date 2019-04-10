@@ -20,7 +20,7 @@
     .leftPane:not(:empty) {
       border-right: 2px solid $lightest-grey;
       flex: 0 0 auto;
-      padding: 20px 20px 0 20px;
+      padding: 14px 20px 14 20px;
       overflow-x: visible;
     }
 
@@ -42,7 +42,7 @@
       border-left: 2px solid $lightest-grey;
       flex: 0 0 auto;
       overflow: overlay;
-      padding: 10px 20px 0 20px;
+      padding: 0 5px 0 10px;
 
       &::-webkit-scrollbar {
         display: none;
