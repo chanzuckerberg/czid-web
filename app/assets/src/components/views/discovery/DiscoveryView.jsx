@@ -20,7 +20,7 @@ import {
 } from "lodash/fp";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
-import DiscoveryHeader from "../discovery/DiscoveryHeader";
+import DiscoveryHeader from "./DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";

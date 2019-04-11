@@ -1,12 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { difference, find, isEmpty, union } from "lodash/fp";
-import InfiniteTable from "../../visualizations/table/InfiniteTable";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
-import moment from "moment";
 import { numberWithCommas } from "~/helpers/strings";
-import cs from "./samples_view.scss";
-import cx from "classnames";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
@@ -17,6 +14,9 @@ import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import ReportsDownloader from "./ReportsDownloader";
 import CollectionModal from "./CollectionModal";
 import BasicPopup from "~/components/BasicPopup";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import cs from "./samples_view.scss";
+import cx from "classnames";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -34,6 +34,13 @@ class SamplesView extends React.Component {
         width: 350,
         cellRenderer: this.renderSample,
         headerClassName: cs.sampleHeader
+      },
+      {
+        dataKey: "createdAt",
+        label: "Uploaded On",
+        width: 120,
+        className: cs.basicCell,
+        cellRenderer: TableRenderers.renderDateWithElapsed
       },
       {
         dataKey: "host",
@@ -217,9 +224,6 @@ class SamplesView extends React.Component {
           )}
           {sample ? (
             <div className={cs.sampleDetails}>
-              <span className={cs.createdAt}>
-                {moment(sample.createdAt).fromNow()}
-              </span>|
               <span className={cs.user}>{sample.user}</span>|
               <span className={cs.project}>{sample.project}</span>
             </div>
@@ -382,6 +386,7 @@ class SamplesView extends React.Component {
 SamplesView.defaultProps = {
   activeColumns: [
     "sample",
+    "createdAt",
     "host",
     "collectionLocation",
     "nonHostReads",

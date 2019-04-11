@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { merge, pick } from "lodash/fp";
-import moment from "moment";
 
 import { humanize } from "~/helpers/strings";
 import { openUrl } from "~utils/links";
@@ -9,8 +8,9 @@ import HeatmapPublic from "~ui/icons/HeatmapPublic";
 import HeatmapPrivate from "~ui/icons/HeatmapPrivate";
 import PhyloTreePublic from "~ui/icons/PhyloTreePublic";
 import PhyloTreePrivate from "~ui/icons/PhyloTreePrivate";
-import cs from "./visualizations_view.scss";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import cs from "./visualizations_view.scss";
 
 // See also ProjectsView which is very similar
 class VisualizationsView extends React.Component {
@@ -23,7 +23,7 @@ class VisualizationsView extends React.Component {
         flexGrow: 1,
         width: 350,
         cellRenderer: ({ cellData }) =>
-          BaseDiscoveryView.renderItemDetails(
+          TableRenderers.renderItemDetails(
             merge(
               { cellData },
               {
@@ -35,6 +35,12 @@ class VisualizationsView extends React.Component {
           ),
         headerClassName: cs.visualizationHeader,
         sortFunction: p => p.updated_at
+      },
+      {
+        dataKey: "updated_at",
+        label: "Updated On",
+        width: 120,
+        cellRenderer: TableRenderers.renderDate
       },
       {
         dataKey: "project_name",
@@ -79,7 +85,6 @@ class VisualizationsView extends React.Component {
   detailsRenderer(visualization) {
     return (
       <div>
-        <span>{moment(visualization.updated_at).fromNow()}</span>|
         <span>{visualization.user_name}</span>
       </div>
     );
@@ -98,17 +103,14 @@ class VisualizationsView extends React.Component {
       return merge(
         {
           visualization: pick(
-            [
-              "user_name",
-              "visualization_type",
-              "updated_at",
-              "name",
-              "publicAccess"
-            ],
+            ["user_name", "visualization_type", "name", "publicAccess"],
             visualization
           )
         },
-        pick(["id", "project_name", "samples_count"], visualization)
+        pick(
+          ["id", "updated_at", "project_name", "samples_count"],
+          visualization
+        )
       );
     });
 

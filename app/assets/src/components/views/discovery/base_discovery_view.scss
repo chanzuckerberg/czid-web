@@ -1,61 +1,7 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 
-.item {
-  text-align: left;
+.tableDataRow {
+  align-items: flex-start;
   padding: 13px 0;
-  display: flex;
-
-  .visibility {
-    display: flex;
-    flex: 0 0 40px;
-    align-items: center;
-    justify-items: center;
-    margin-right: 12px;
-  }
-
-  .itemName {
-    color: $black;
-    font-weight: $font-weight-semibold;
-    font-size: $font-size-h5;
-    line-height: 22px;
-    margin-bottom: 2px;
-  }
-
-  .itemDescription {
-    color: $dark-grey;
-    font-size: $font-size-h6;
-    line-height: 16px;
-    // remove description for now
-    // (we have no descriptions yet, but want to keep the placeholder)
-    height: 0;
-    overflow: hidden;
-    // height: 32px;
-    // margin-bottom: 8px;
-    vertical-align: middle;
-  }
-
-  .itemDetails {
-    @include font-body-xxs;
-
-    color: $medium-grey;
-    font-weight: $font-weight-regular;
-
-    span:not(:last-child) {
-      margin-right: 8px;
-    }
-
-    span:not(:first-child) {
-      margin-left: 8px;
-    }
-  }
-}
-
-.itemHeader {
-  text-align: left;
-}
-
-.icon {
-  fill: $primary-light;
-  width: 36px;
 }
