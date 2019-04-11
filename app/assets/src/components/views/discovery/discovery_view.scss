@@ -20,7 +20,7 @@
     .leftPane:not(:empty) {
       border-right: 2px solid $lightest-grey;
       flex: 0 0 auto;
-      padding: 14px 20px 14 20px;
+      padding: 10px 20px 10px 20px;
       overflow-x: visible;
     }
 
@@ -28,7 +28,7 @@
       flex: 1 0 auto;
       display: flex;
       flex-direction: column;
-      overflow: auto;
+      overflow: visible;
 
       .viewContainer {
         display: flex;
