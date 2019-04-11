@@ -42,7 +42,7 @@ class TableRenderers extends React.Component {
   static renderDate = ({ cellData: date }) => {
     return (
       <div className={cs.date}>
-        {date ? moment(date).format("DD-MM-YYYY") : ""}
+        {date ? moment(date).format("YYYY-MM-DD") : ""}
       </div>
     );
   };

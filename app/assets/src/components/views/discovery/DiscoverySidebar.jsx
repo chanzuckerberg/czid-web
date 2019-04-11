@@ -68,7 +68,7 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   static formatDate(date) {
-    return moment(date).format("DD-MM-YYYY");
+    return moment(date).format("YYYY-MM-DD");
   }
 
   static formatNumber(value) {
