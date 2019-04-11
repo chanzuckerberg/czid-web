@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { difference, find, isEmpty, union } from "lodash/fp";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
-import moment from "moment";
 import { numberWithCommas } from "~/helpers/strings";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
