@@ -4,11 +4,11 @@ import PropTypes from "prop-types";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
 
 import { find, merge, pick } from "lodash/fp";
-import moment from "moment";
 
 class ProjectsView extends React.Component {
   constructor(props) {
@@ -20,7 +20,7 @@ class ProjectsView extends React.Component {
         flexGrow: 1,
         width: 350,
         cellRenderer: ({ cellData }) =>
-          BaseDiscoveryView.renderItemDetails(
+          TableRenderers.renderItemDetails(
             merge(
               { cellData },
               {
@@ -34,21 +34,27 @@ class ProjectsView extends React.Component {
         sortFunction: p => (p.name || "").toLowerCase()
       },
       {
+        dataKey: "created_at",
+        label: "Created On",
+        width: 120,
+        cellRenderer: TableRenderers.renderDateWithElapsed
+      },
+      {
         dataKey: "hosts",
         width: 200,
         disableSort: true,
-        cellRenderer: this.renderList
+        cellRenderer: TableRenderers.renderList
       },
       {
         dataKey: "tissues",
         width: 200,
         disableSort: true,
-        cellRenderer: BaseDiscoveryView.renderList
+        cellRenderer: TableRenderers.renderList
       },
       {
         dataKey: "number_of_samples",
         width: 140,
-        label: "No. of Samples"
+        label: "No. of Samples!!"
       }
     ];
   }
@@ -68,7 +74,6 @@ class ProjectsView extends React.Component {
   detailsRenderer(project) {
     return (
       <div>
-        <span>{moment(project.created_at).fromNow()}</span>|
         <span>{project.owner}</span>
       </div>
     );
@@ -86,11 +91,14 @@ class ProjectsView extends React.Component {
       return merge(
         {
           project: pick(
-            ["name", "description", "created_at", "owner", "public_access"],
+            ["name", "description", "owner", "public_access"],
             project
           )
         },
-        pick(["id", "hosts", "tissues", "number_of_samples"], project)
+        pick(
+          ["id", "created_at", "hosts", "tissues", "number_of_samples"],
+          project
+        )
       );
     });
 

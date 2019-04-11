@@ -67,8 +67,8 @@ export default class DiscoverySidebar extends React.Component {
     return (find({ dimension: dimensionKey }, dimensions) || {}).values || [];
   }
 
-  static formatDate(createdAt) {
-    return moment(createdAt).format("YYYY-MM-DD");
+  static formatDate(date) {
+    return moment(date).format("DD-MM-YYYY");
   }
 
   static formatNumber(value) {
@@ -92,6 +92,9 @@ export default class DiscoverySidebar extends React.Component {
         ? dates[dates.length - 1].interval.end
         : dates[0].value
       : null;
+    const formattedFirstDate = DiscoverySidebar.formatDate(firstDate);
+    const formattedLastDate = DiscoverySidebar.formatDate(lastDate);
+
     // Special case design to show 1 or 2 bars just side-by-side.
     const realBars = dates.filter(d => d.count > 0);
     if (realBars.length < 3) dates = realBars;
@@ -110,9 +113,11 @@ export default class DiscoverySidebar extends React.Component {
                 &nbsp;
               </div>
             );
+
+            const text = `${formattedFirstDate} - ${formattedLastDate};`;
             const tooltipMessage = (
               <span>
-                <span className={cs.boldText}>Date:</span> {entry.text}
+                <span className={cs.boldText}>Date:</span> {text}
                 <br />
                 <span className={cs.boldText}>{`Sample${
                   entry.count > 1 ? "s" : ""
@@ -130,8 +135,10 @@ export default class DiscoverySidebar extends React.Component {
           })}
         </div>
         <div className={cx(cs.histogramLabels, dates.length < 3 && cs.evenly)}>
-          <div className={cs.label}>{firstDate}</div>
-          {firstDate !== lastDate && <div className={cs.label}>{lastDate}</div>}
+          <div className={cs.label}>{formattedFirstDate}</div>
+          {firstDate !== lastDate && (
+            <div className={cs.label}>{formattedLastDate}</div>
+          )}
         </div>
       </div>
     );
