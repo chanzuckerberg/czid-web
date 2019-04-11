@@ -8,6 +8,15 @@
   }
 }
 
+.controls {
+  display: flex;
+
+  .controlElement {
+    margin-left: 10px;
+    margin-right: 0;
+  }
+}
+
 .noTreeBanner {
   margin-top: 50px;
   text-align: center;
