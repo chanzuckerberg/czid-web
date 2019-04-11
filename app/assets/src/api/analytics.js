@@ -104,7 +104,7 @@ export const withAnalytics = (handleEvent, eventName, eventData = {}) => {
     const val = eventData[k];
     if (isArray(val) || isObject(val)) {
       // eslint-disable-next-line no-console
-      console.warn(`${val} should be a scalar value`);
+      console.warn(`${val} should be a scalar in "${eventName}"`);
     }
   }
 

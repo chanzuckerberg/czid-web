@@ -1,16 +1,19 @@
+import React from "react";
 import { Grid } from "semantic-ui-react";
 import { forbidExtraProps } from "airbnb-prop-types";
-import PrimaryButton from "../buttons/PrimaryButton";
-import SecondaryButton from "../buttons/SecondaryButton";
+import PropTypes from "prop-types";
+
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import Input from "~/components/ui/controls/Input";
-import PropTypes from "prop-types";
+import { logAnalyticsEvent } from "~/api/analytics";
+
+import PrimaryButton from "../buttons/PrimaryButton";
+import SecondaryButton from "../buttons/SecondaryButton";
 import RemoveIcon from "../../icons/RemoveIcon";
 import DropdownTrigger from "./common/DropdownTrigger";
 import DropdownLabel from "./common/DropdownLabel";
 import cs from "./threshold_filter_dropdown.scss";
-import React from "react";
 
 class ThresholdFilterDropdown extends React.Component {
   constructor(props) {
@@ -114,8 +117,15 @@ class ThresholdFilterDropdown extends React.Component {
       );
       this.setState({ thresholds: newThresholds });
       this.props.onApply(newThresholds);
+
+      logAnalyticsEvent("ThresholdFilterDropdown_apply-button_clicked", {
+        thresholds: newThresholds.length
+      });
     } else {
       this.setState({ thresholds: this.props.thresholds });
+      logAnalyticsEvent("ThresholdFilterDropdown_cancel-button_clicked", {
+        thresholds: this.props.thresholds.length
+      });
     }
   };
 

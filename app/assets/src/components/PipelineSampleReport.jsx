@@ -1376,11 +1376,6 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
           name="close"
           onClick={() => {
             parent.handleRemoveThresholdFilter(i);
-            logAnalyticsEvent("PipelineSampleReport_threshold-filter_removed", {
-              metric: threshold["metric"],
-              operator: threshold["operator"],
-              value: threshold["value"]
-            });
           }}
         />
       </Label>
@@ -1507,13 +1502,7 @@ class RenderMarkup extends React.Component {
                 operators: [">=", "<="]
               }}
               thresholds={parent.state.activeThresholds}
-              onApply={withAnalytics(
-                parent.handleThresholdFiltersChange,
-                "PipelineSampleReport_threshold-filter_applied",
-                {
-                  activeThresholds: parent.state.activeThresholds
-                }
-              )}
+              onApply={parent.handleThresholdFiltersChange}
             />
           </div>
           <div className="filter-lists-element">
