@@ -6,7 +6,6 @@ import BasicPopup from "~/components/BasicPopup";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
 import PropTypes from "~/components/utils/propTypes";
-import { withAnalytics } from "~/api/analytics";
 
 import cs from "./hover_actions.scss";
 
