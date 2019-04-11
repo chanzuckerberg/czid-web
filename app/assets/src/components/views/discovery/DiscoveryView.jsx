@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import QueryString from "query-string";
 import moment from "moment";
 import {
   assign,
@@ -11,6 +12,7 @@ import {
   map,
   mapKeys,
   mapValues,
+  merge,
   pick,
   replace,
   sumBy,
@@ -61,6 +63,10 @@ class DiscoveryView extends React.Component {
   constructor(props) {
     super(props);
 
+    const urlState = this.loadStateFromUrl();
+    // TODO: parse url parameters to state
+    console.log("DiscoveryView:constructor", history.state, urlState);
+
     this.state = assign(
       {
         currentTab: "projects",
@@ -93,9 +99,11 @@ class DiscoveryView extends React.Component {
   }
 
   componentDidMount() {
+    console.log("DiscoveryView:componentDidMount", history);
     this.resetDataFromInitialLoad();
 
     window.onpopstate = () => {
+      console.log("DiscoveryView:componentDidMount - onpopstate", history);
       this.setState(history.state, () => {
         this.resetDataFromInitialLoad();
       });
@@ -108,16 +116,35 @@ class DiscoveryView extends React.Component {
       ["currentTab", "filters", "project", "showFilters", "showStats"],
       this.state
     );
-
+    const urlQuery = this.stringifyState(historyState);
+    console.log("DiscoveryView:updateBrowsingHistory", action);
+    // TODO: load state to url
     if (action === "push") {
-      history.pushState(historyState, `DiscoveryView:${domain}`, `/${domain}`);
+      history.pushState(
+        historyState,
+        `DiscoveryView:${domain}`,
+        `/${domain}?${urlQuery}`
+      );
     } else {
       history.replaceState(
         historyState,
         `DiscoveryView:${domain}`,
-        `/${domain}`
+        `/${domain}?${urlQuery}`
       );
     }
+  };
+
+  stringifyState = state => {
+    const { filters, otherState } = state;
+    return QueryString.stringify(
+      merge({ filters: JSON.stringify(filters) }, otherState)
+    );
+  };
+
+  loadStateFromUrl = () => {
+    const searchParams = QueryString.parseUrl(location.search);
+    searchParams.filters = JSON.parse(searchParams.filters);
+    console.log("searchParams", searchParams);
   };
 
   preparedFilters = () => {
@@ -346,7 +373,9 @@ class DiscoveryView extends React.Component {
   };
 
   handleTabChange = currentTab => {
-    this.setState({ currentTab });
+    this.setState({ currentTab }, () => {
+      this.updateBrowsingHistory("replace");
+    });
   };
 
   handleFilterChange = selectedFilters => {
