@@ -87,8 +87,6 @@ const UserMenuDropDown = ({
             }
           />
         );
-      }
-      if (!newSampleUpload) {
         userDropdownItems.push(
           <BareDropdown.Item
             key="2"
