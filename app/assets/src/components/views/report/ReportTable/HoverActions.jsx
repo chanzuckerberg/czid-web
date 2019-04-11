@@ -17,7 +17,7 @@ class HoverActions extends React.Component {
 
   handlePhyloModalOpen = () => {
     this.setState({ phyloTreeCreationModalOpen: true });
-    this.onPhyloTreeModalOpened && this.onPhyloTreeModalOpened();
+    this.props.onPhyloTreeModalOpened && this.props.onPhyloTreeModalOpened();
   };
 
   handlePhyloModalClose = () => {

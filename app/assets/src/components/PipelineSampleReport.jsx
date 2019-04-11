@@ -863,10 +863,12 @@ class PipelineSampleReport extends React.Component {
           analyticsContext
         )}
         phyloTreeEnabled={phyloTreeEnabled}
-        onPhyloTreeModalOpened={logAnalyticsEvent(
-          "PipelineSampleReport_phylotree-link_clicked",
-          analyticsContext
-        )}
+        onPhyloTreeModalOpened={() =>
+          logAnalyticsEvent(
+            "PipelineSampleReport_phylotree-link_clicked",
+            analyticsContext
+          )
+        }
       />
     );
   };
