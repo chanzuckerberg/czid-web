@@ -56,7 +56,7 @@
 }
 
 .body {
-  .stats {
+  .metrics {
     display: flex;
     margin-bottom: 30px;
 
@@ -182,4 +182,12 @@
   .loadingIcon {
     margin-right: 5px;
   }
+}
+
+.hoverTooltip {
+  position: absolute;
+  background-color: white;
+  z-index: 104;
+  // So the tooltip appears on the top-right instead of bottom-right of mouse.
+  transform: translateY(-100%);
 }

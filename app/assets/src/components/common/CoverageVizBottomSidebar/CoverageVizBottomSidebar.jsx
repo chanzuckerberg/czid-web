@@ -1,6 +1,7 @@
 import React from "react";
-import { min, max, find, get } from "lodash/fp";
+import { find, get } from "lodash/fp";
 import cx from "classnames";
+import ReactDOM from "react-dom";
 
 import Sidebar from "~/components/ui/containers/Sidebar";
 import PropTypes from "~/components/utils/propTypes";
@@ -11,7 +12,14 @@ import LoadingIcon from "~ui/icons/LoadingIcon";
 import BasicPopup from "~/components/BasicPopup";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import NoResultsBacteriaIcon from "~ui/icons/NoResultsBacteriaIcon";
+import { DataTooltip } from "~ui/containers";
 
+import {
+  getHistogramTooltipData,
+  getGenomeVizTooltipData,
+  generateCoverageVizData,
+  generateContigReadVizData
+} from "./utils";
 import cs from "./coverage_viz_bottom_sidebar.scss";
 
 // Temporary data.
@@ -27,6 +35,9 @@ const ACCESSION_COVERAGE_DATA = {
   "AE017283.1": CUTI_ACCESSION_THREE,
   "CP012350.1": CUTI_ACCESSION_FOUR
 };
+
+const READ_FILL_COLOR = "#A9BDFC";
+const CONTIG_FILL_COLOR = "#3768FA";
 
 const METRIC_COLUMNS = [
   [
@@ -83,13 +94,15 @@ const METRIC_COLUMNS = [
   ]
 ];
 
-const alignRange = range => [min(range), max(range)];
-
 export default class CoverageVizBottomSidebar extends React.Component {
   _accessionDataCache = {};
 
   state = {
-    currentAccessionSummary: null
+    currentAccessionSummary: null,
+    histogramTooltipLocation: null,
+    histogramTooltipData: null,
+    genomeVizTooltipData: null,
+    genomeVizTooltipLocation: null
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -144,21 +157,66 @@ export default class CoverageVizBottomSidebar extends React.Component {
     }
   };
 
-  generateCoverageVizData = (coverageData, coverageBinSize) =>
-    coverageData.map((value, index) => ({
-      x0: index * coverageBinSize,
-      length: value
-    }));
+  handleHistogramBarEnter = hoverData => {
+    const { currentAccessionData } = this.state;
 
-  generateContigReadVizData = (contigs, reads) => {
-    return [
-      contigs.map(contig => alignRange([contig[1], contig[2]])),
-      reads.map(read => alignRange([read[1], read[2]]))
-    ];
+    if (hoverData && hoverData[0] === 0) {
+      this.setState({
+        histogramTooltipData: getHistogramTooltipData(
+          currentAccessionData,
+          hoverData[1]
+        )
+      });
+    }
+  };
+
+  handleHistogramBarHover = (pageX, pageY) => {
+    this.setState({
+      histogramTooltipLocation: {
+        left: pageX,
+        top: pageY
+      }
+    });
+  };
+
+  handleHistogramBarExit = () => {
+    this.setState({
+      histogramTooltipLocation: null,
+      histogramTooltipData: null
+    });
+  };
+
+  handleGenomeVizBarEnter = hoverData => {
+    const { currentAccessionData } = this.state;
+
+    if (hoverData !== null) {
+      this.setState({
+        genomeVizTooltipData: getGenomeVizTooltipData(
+          currentAccessionData,
+          hoverData
+        )
+      });
+    }
+  };
+
+  handleGenomeVizBarHover = (pageX, pageY) => {
+    this.setState({
+      genomeVizTooltipLocation: {
+        left: pageX,
+        top: pageY
+      }
+    });
+  };
+
+  handleGenomeVizBarExit = () => {
+    this.setState({
+      genomeVizTooltipLocation: null,
+      genomeVizTooltipData: null
+    });
   };
 
   renderHistogram = data => {
-    const coverageVizData = this.generateCoverageVizData(
+    const coverageVizData = generateCoverageVizData(
       data.coverage,
       data.coverage_bin_size
     );
@@ -170,8 +228,9 @@ export default class CoverageVizBottomSidebar extends React.Component {
         labelY: "Coverage",
         domain: [0, data.total_length],
         skipBins: true,
+        numBins: Math.round(data.total_length / data.coverage_bin_size),
         showStatistics: false,
-        colors: ["#A9BDFC"],
+        colors: [READ_FILL_COLOR],
         barOpacity: 1,
         margins: {
           left: 170,
@@ -181,23 +240,30 @@ export default class CoverageVizBottomSidebar extends React.Component {
         },
         numTicksY: 2,
         labelYOffset: 15,
-        labelYLarge: true
+        labelYLarge: true,
+        onHistogramBarHover: this.handleHistogramBarHover,
+        onHistogramBarEnter: this.handleHistogramBarEnter,
+        onHistogramBarExit: this.handleHistogramBarExit
       }
     );
     this.coverageViz.update();
   };
 
   renderGenomeViz = data => {
-    const contigReadVizData = this.generateContigReadVizData(
-      data.contigs,
-      data.reads
+    const contigReadVizData = generateContigReadVizData(
+      data.hit_groups,
+      data.coverage_bin_size
     );
 
     this.contigReadViz = new GenomeViz(
       this.contigReadVizContainer,
       contigReadVizData,
       {
-        domain: [0, data.total_length]
+        domain: [0, data.total_length],
+        colors: [READ_FILL_COLOR, CONTIG_FILL_COLOR],
+        onGenomeVizBarHover: this.handleGenomeVizBarHover,
+        onGenomeVizBarEnter: this.handleGenomeVizBarEnter,
+        onGenomeVizBarExit: this.handleGenomeVizBarExit
       }
     );
     this.contigReadViz.update();
@@ -243,13 +309,50 @@ export default class CoverageVizBottomSidebar extends React.Component {
     return {
       referenceAccession,
       referenceLength: currentAccessionData.total_length,
-      alignedContigs: currentAccessionSummary.n_contig,
-      maxAlignedLength: "--",
-      avgCoverageDepth: "--",
-      coverageBreadth: "--",
-      alignedReads: currentAccessionSummary.n_read,
-      avgMismatchedPercent: "--"
+      alignedContigs: currentAccessionSummary.num_contigs,
+      maxAlignedLength: currentAccessionData.max_aligned_length,
+      avgCoverageDepth: currentAccessionData.avg_coverage_depth,
+      coverageBreadth: currentAccessionData.coverage_breadth,
+      alignedReads: currentAccessionSummary.num_reads,
+      avgMismatchedPercent: currentAccessionData.avg_prop_mismatch
     };
+  };
+
+  renderContentHeader = () => {
+    const { params } = this.props;
+    const { currentAccessionSummary } = this.state;
+
+    return (
+      <div className={cs.header}>
+        <div className={cs.headerText}>
+          <div className={cs.title}>{params.taxonName} Coverage</div>
+          <div className={cs.subtitle}>
+            {params.accessionSummaries.length} unique accessions
+          </div>
+        </div>
+        <div className={cs.fill} />
+        <div className={cs.headerControls}>
+          <Dropdown
+            options={this.getAccessionOptions()}
+            value={get("id", currentAccessionSummary)}
+            label="Accession"
+            onChange={this.setCurrentAccession}
+            rounded
+          />
+          <div className={cs.vizLinkContainer}>
+            <a
+              className={cs.vizLink}
+              href={params.alignmentVizUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View read-level visualization
+              <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+            </a>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   renderContentBody = () => {
@@ -269,7 +372,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
     return (
       <div className={cs.body}>
-        <div className={cs.stats}>
+        <div className={cs.metrics}>
           {METRIC_COLUMNS.map((col, index) => (
             <div className={cs.column} key={index}>
               {col.map(metric => (
@@ -312,41 +415,45 @@ export default class CoverageVizBottomSidebar extends React.Component {
   };
 
   renderSidebarContents() {
-    const { params } = this.props;
-    const { currentAccessionSummary } = this.state;
+    const {
+      histogramTooltipLocation,
+      histogramTooltipData,
+      genomeVizTooltipLocation,
+      genomeVizTooltipData
+    } = this.state;
 
     return (
       <NarrowContainer className={cs.contents}>
-        <div className={cs.header}>
-          <div className={cs.headerText}>
-            <div className={cs.title}>{params.taxonName} Coverage</div>
-            <div className={cs.subtitle}>
-              {params.accessionSummaries.length} unique accessions
-            </div>
-          </div>
-          <div className={cs.fill} />
-          <div className={cs.headerControls}>
-            <Dropdown
-              options={this.getAccessionOptions()}
-              value={get("id", currentAccessionSummary)}
-              label="Accession"
-              onChange={this.setCurrentAccession}
-              rounded
-            />
-            <div className={cs.vizLinkContainer}>
-              <a
-                className={cs.vizLink}
-                href={params.alignmentVizUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View read-level visualization
-                <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
-              </a>
-            </div>
-          </div>
-        </div>
+        {this.renderContentHeader()}
         {this.renderContentBody()}
+        {histogramTooltipLocation &&
+          histogramTooltipData &&
+          ReactDOM.createPortal(
+            <div
+              style={{
+                left: histogramTooltipLocation.left + 10,
+                top: histogramTooltipLocation.top - 10
+              }}
+              className={cs.hoverTooltip}
+            >
+              <DataTooltip data={histogramTooltipData} />
+            </div>,
+            document.body
+          )}
+        {genomeVizTooltipLocation &&
+          genomeVizTooltipData &&
+          ReactDOM.createPortal(
+            <div
+              style={{
+                left: genomeVizTooltipLocation.left + 10,
+                top: genomeVizTooltipLocation.top - 10
+              }}
+              className={cs.hoverTooltip}
+            >
+              <DataTooltip data={genomeVizTooltipData} />
+            </div>,
+            document.body
+          )}
       </NarrowContainer>
     );
   }
@@ -413,8 +520,8 @@ CoverageVizBottomSidebar.propTypes = {
     accessionSummaries: PropTypes.arrayOf(
       PropTypes.shape({
         id: PropTypes.string,
-        n_contig: PropTypes.number,
-        n_read: PropTypes.number,
+        num_contigs: PropTypes.number,
+        num_reads: PropTypes.number,
         name: PropTypes.string
       })
     ),
