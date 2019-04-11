@@ -742,9 +742,8 @@ class PipelineSampleReport extends React.Component {
 
   handleViewClicked = (_, data) => {
     this.setState({ view: data.name });
-    logAnalyticsEvent("PipelineSampleReport_view-menu_clicked", {
-      name: data.name
-    });
+    const friendlyName = data.name.replace(/_/g, "-");
+    logAnalyticsEvent(`PipelineSampleReport_${friendlyName}_view-menu_clicked`);
   };
 
   // path to NCBI
@@ -852,14 +851,22 @@ class PipelineSampleReport extends React.Component {
           analyticsContext
         )}
         alignmentVizEnabled={alignmentVizEnabled}
-        onAlignmentVizClick={this.gotoAlignmentVizLink}
+        onAlignmentVizClick={withAnalytics(
+          this.gotoAlignmentVizLink,
+          "PipelineSampleReport_alignment-vis-link_clicked",
+          analyticsContext
+        )}
         contigVizEnabled={contigVizEnabled}
         onContigVizClick={withAnalytics(
           this.downloadContigUrl,
-          "PipelineSampleReport_contig-link_clicked",
+          "PipelineSampleReport_contig-viz-link_clicked",
           analyticsContext
         )}
         phyloTreeEnabled={phyloTreeEnabled}
+        onPhyloTreeModalOpened={logAnalyticsEvent(
+          "PipelineSampleReport_phylotree-link_clicked",
+          analyticsContext
+        )}
       />
     );
   };
