@@ -241,13 +241,15 @@ class SamplesView extends React.Component {
 
   renderHeatmapTrigger = () => {
     const { selectedSampleIds } = this.state;
-    return (
+    return selectedSampleIds.size < 2 ? (
+      <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
+    ) : (
       <a
         href={`/visualizations/heatmap?sampleIds=${Array.from(
           selectedSampleIds
         )}`}
       >
-        <HeatmapIcon className={cs.icon} />
+        <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
       </a>
     );
   };
@@ -263,7 +265,7 @@ class SamplesView extends React.Component {
     }
     return (
       <DownloadIconDropdown
-        iconClassName={cs.icon}
+        iconClassName={cx(cs.icon, cs.download)}
         options={downloadOptions}
         onClick={downloadOption => {
           new ReportsDownloader({
@@ -279,10 +281,18 @@ class SamplesView extends React.Component {
     const { samples } = this.props;
     const { selectedSampleIds } = this.state;
 
-    return (
+    return selectedSampleIds.size < 2 ? (
+      <SaveIcon
+        className={cx(cs.icon, cs.disabled, cs.save)}
+        popupText={"Save a Collection"}
+      />
+    ) : (
       <CollectionModal
         trigger={
-          <SaveIcon className={cs.icon} popupText={"Save a Collection"} />
+          <SaveIcon
+            className={cx(cs.icon, cs.save)}
+            popupText={"Save a Collection"}
+          />
         }
         selectedSampleIds={selectedSampleIds}
         fetchedSamples={samples.filter(sample =>
@@ -307,22 +317,8 @@ class SamplesView extends React.Component {
         </div>
         <div className={cs.separator} />
         <div className={cs.actions}>
-          <div
-            className={cx(
-              cs.action,
-              selectedSampleIds.size < 2 && cs.actionDisabled
-            )}
-          >
-            {this.renderCollectionTrigger()}
-          </div>
-          <div
-            className={cx(
-              cs.action,
-              selectedSampleIds.size < 2 && cs.actionDisabled
-            )}
-          >
-            {this.renderHeatmapTrigger()}
-          </div>
+          <div className={cs.action}>{this.renderCollectionTrigger()}</div>
+          <div className={cs.action}>{this.renderHeatmapTrigger()}</div>
           <div className={cs.action} onClick={this.handlePhyloModalOpen}>
             <PhyloTreeIcon className={cs.icon} />
           </div>
