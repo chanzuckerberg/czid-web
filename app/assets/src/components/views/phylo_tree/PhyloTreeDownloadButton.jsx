@@ -46,15 +46,15 @@ class PhyloTreeDownloadButton extends React.Component {
   }
 
   render() {
-    let readyOptions = this.dataOptions.filter(
-      opt => !!this.props.tree[opt.value]
-    );
+    const { tree, ...props } = this.props;
+    let readyOptions = this.dataOptions.filter(opt => !!tree[opt.value]);
     readyOptions = readyOptions.concat(this.imageOptions);
     return (
       <DownloadButtonDropdown
         options={readyOptions}
         disabled={readyOptions.length === 0}
         onClick={this.download}
+        {...props}
       />
     );
   }
