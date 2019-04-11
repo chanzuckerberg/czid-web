@@ -54,7 +54,7 @@ class ProjectsView extends React.Component {
       {
         dataKey: "number_of_samples",
         width: 140,
-        label: "No. of Samples!!"
+        label: "No. of Samples"
       }
     ];
   }
