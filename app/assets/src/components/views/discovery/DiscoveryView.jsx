@@ -65,6 +65,7 @@ class DiscoveryView extends React.Component {
     const { project } = this.props;
     this.urlParser = new UrlQueryParser({
       filters: "object",
+      projectId: "number",
       showFilters: "boolean",
       showStats: "boolean"
     });

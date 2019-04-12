@@ -36,6 +36,8 @@ class UrlQueryParser {
         return JSON.parse(value);
       case "boolean":
         return value === "true";
+      case "number":
+        return Number(value);
       default:
         // eslint-disable-next-line no-console
         console.error(
