@@ -151,8 +151,10 @@ class Login extends React.Component {
                 this.handleSubmit,
                 "Login_login-form_submitted",
                 {
-                  email: this.refs.email.value,
-                  remember_me: this.refs.remember_me.value
+                  email: this.refs.email ? this.refs.email.value : "",
+                  remember_me: this.refs.remember_me
+                    ? this.refs.remember_me.value
+                    : ""
                 }
               )}
             >
