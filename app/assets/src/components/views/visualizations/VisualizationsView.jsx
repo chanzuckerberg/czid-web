@@ -1,18 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { merge, pick } from "lodash";
-import moment from "moment";
+import { merge, pick } from "lodash/fp";
 
-import { Table } from "~/components/visualizations/table";
 import { humanize } from "~/helpers/strings";
-import BasicPopup from "~/components/BasicPopup";
 import { openUrl } from "~utils/links";
-
-import cs from "./visualizations_view.scss";
 import HeatmapPublic from "~ui/icons/HeatmapPublic";
 import HeatmapPrivate from "~ui/icons/HeatmapPrivate";
 import PhyloTreePublic from "~ui/icons/PhyloTreePublic";
 import PhyloTreePrivate from "~ui/icons/PhyloTreePrivate";
+import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import cs from "./visualizations_view.scss";
 
 // See also ProjectsView which is very similar
 class VisualizationsView extends React.Component {
@@ -21,19 +19,28 @@ class VisualizationsView extends React.Component {
 
     this.columns = [
       {
-        dataKey: "icon",
-        width: 36,
-        label: "",
-        cellRenderer: this.renderAccess
+        dataKey: "visualization",
+        flexGrow: 1,
+        width: 350,
+        cellRenderer: ({ cellData }) =>
+          TableRenderers.renderItemDetails(
+            merge(
+              { cellData },
+              {
+                nameRenderer: this.nameRenderer,
+                detailsRenderer: this.detailsRenderer,
+                visibilityIconRenderer: this.visibilityIconRenderer
+              }
+            )
+          ),
+        headerClassName: cs.visualizationHeader,
+        sortFunction: p => p.updated_at
       },
       {
-        dataKey: "details",
-        label: "Visualization",
-        flexGrow: 1,
-        className: cs.detailsCell,
-        cellRenderer: this.renderVisualizationDetails,
-        headerClassName: cs.detailsHeader,
-        sortFunction: p => p.updated_at
+        dataKey: "updated_at",
+        label: "Updated On",
+        width: 120,
+        cellRenderer: TableRenderers.renderDate
       },
       {
         dataKey: "project_name",
@@ -48,92 +55,70 @@ class VisualizationsView extends React.Component {
     ];
   }
 
-  renderAccess = ({ cellData: visualization }) => {
-    if (visualization.visualization_type == "heatmap") {
-      return (
-        <div>
-          {visualization.publicAccess ? (
-            <HeatmapPublic className={cs.icon} />
-          ) : (
-            <HeatmapPrivate className={cs.icon} />
-          )}
-        </div>
+  nameRenderer(visualization) {
+    return visualization.name || humanize(visualization.visualization_type);
+  }
+
+  visibilityIconRenderer = visualization => {
+    const {
+      visualization_type: visualizationType,
+      publicAccess
+    } = visualization;
+    if (visualizationType == "heatmap") {
+      return publicAccess ? (
+        <HeatmapPublic className={cs.icon} />
+      ) : (
+        <HeatmapPrivate className={cs.icon} />
       );
-    } else if (visualization.visualization_type == "phylo_tree") {
-      return (
-        <div>
-          {visualization.publicAccess ? (
-            <PhyloTreePublic className={cs.icon} />
-          ) : (
-            <PhyloTreePrivate className={cs.icon} />
-          )}
-        </div>
+    } else if (visualizationType == "phylo_tree") {
+      publicAccess ? (
+        <PhyloTreePublic className={cs.icon} />
+      ) : (
+        <PhyloTreePrivate className={cs.icon} />
       );
     } else {
       // eslint-disable-next-line no-console
-      console.error(`Unknown visualization type: ${visualization.type}`);
+      console.error(`Unknown visualization type: ${visualizationType}`);
     }
   };
 
-  renderVisualizationDetails = ({ cellData: visualization }) => {
-    const href = `/visualizations/${visualization.visualization_type}/${
-      visualization.id
-    }`;
-    const visualizationTitle = visualization.name || humanize(visualization.visualization_type);
+  detailsRenderer(visualization) {
     return (
-      <div className={cs.visualization}>
-        <div className={cs.visualizationName}>
-          <BasicPopup
-            trigger={<a href={href}>{visualizationTitle}</a>}
-            content={visualizationTitle}
-          />
-        </div>
-        <div className={cs.visualizationDetails}>
-          <span className={cs.visualizationCreationDate}>
-            {moment(visualization.updated_at).fromNow()}
-          </span>|
-          <span className={cs.visualizationOwner}>
-            {visualization.user_name}
-          </span>
-        </div>
+      <div>
+        <span>{visualization.user_name}</span>
       </div>
     );
-  };
+  }
 
-  handleRowClick = ({ event, index, rowData }) => {
-    const url = `/visualizations/${rowData.visualization_type}/${rowData.id}`;
+  handleRowClick = ({ rowData }) => {
+    const url = `/visualizations/${rowData.visualization.visualization_type}/${
+      rowData.id
+    }`;
     openUrl(url, event);
   };
 
   render() {
     const { visualizations } = this.props;
-
-    // Pick multiple keys for one column
     let data = visualizations.map(visualization => {
       return merge(
         {
-          details: pick(visualization, [
-            "user_name",
-            "visualization_type",
-            "updated_at",
-            "id",
-            "name",
-            "publicAccess"
-          ]),
-          icon: pick(visualization, ["visualization_type", "publicAccess"])
+          visualization: pick(
+            ["user_name", "visualization_type", "name", "publicAccess"],
+            visualization
+          )
         },
-        visualization
+        pick(
+          ["id", "updated_at", "project_name", "samples_count"],
+          visualization
+        )
       );
     });
 
     return (
-      <Table
-        sortable
-        data={data}
+      <BaseDiscoveryView
         columns={this.columns}
-        defaultRowHeight={80}
-        sortBy={"visualization"}
-        onRowClick={this.handleRowClick}
+        data={data}
+        handleRowClick={this.handleRowClick}
       />
     );
   }

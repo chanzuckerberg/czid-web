@@ -1,12 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { difference, find, isEmpty, union } from "lodash/fp";
-import InfiniteTable from "../../visualizations/table/InfiniteTable";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
-import moment from "moment";
 import { numberWithCommas } from "~/helpers/strings";
-import cs from "./samples_view.scss";
-import cx from "classnames";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
@@ -17,6 +14,9 @@ import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import ReportsDownloader from "./ReportsDownloader";
 import CollectionModal from "./CollectionModal";
 import BasicPopup from "~/components/BasicPopup";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import cs from "./samples_view.scss";
+import cx from "classnames";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -34,6 +34,13 @@ class SamplesView extends React.Component {
         width: 350,
         cellRenderer: this.renderSample,
         headerClassName: cs.sampleHeader
+      },
+      {
+        dataKey: "createdAt",
+        label: "Uploaded On",
+        width: 120,
+        className: cs.basicCell,
+        cellRenderer: TableRenderers.renderDateWithElapsed
       },
       {
         dataKey: "host",
@@ -217,9 +224,6 @@ class SamplesView extends React.Component {
           )}
           {sample ? (
             <div className={cs.sampleDetails}>
-              <span className={cs.createdAt}>
-                {moment(sample.createdAt).fromNow()}
-              </span>|
               <span className={cs.user}>{sample.user}</span>|
               <span className={cs.project}>{sample.project}</span>
             </div>
@@ -237,13 +241,15 @@ class SamplesView extends React.Component {
 
   renderHeatmapTrigger = () => {
     const { selectedSampleIds } = this.state;
-    return (
+    return selectedSampleIds.size < 2 ? (
+      <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
+    ) : (
       <a
         href={`/visualizations/heatmap?sampleIds=${Array.from(
           selectedSampleIds
         )}`}
       >
-        <HeatmapIcon className={cs.icon} />
+        <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
       </a>
     );
   };
@@ -259,7 +265,7 @@ class SamplesView extends React.Component {
     }
     return (
       <DownloadIconDropdown
-        iconClassName={cs.icon}
+        iconClassName={cx(cs.icon, cs.download)}
         options={downloadOptions}
         onClick={downloadOption => {
           new ReportsDownloader({
@@ -275,10 +281,18 @@ class SamplesView extends React.Component {
     const { samples } = this.props;
     const { selectedSampleIds } = this.state;
 
-    return (
+    return selectedSampleIds.size < 2 ? (
+      <SaveIcon
+        className={cx(cs.icon, cs.disabled, cs.save)}
+        popupText={"Save a Collection"}
+      />
+    ) : (
       <CollectionModal
         trigger={
-          <SaveIcon className={cs.icon} popupText={"Save a Collection"} />
+          <SaveIcon
+            className={cx(cs.icon, cs.save)}
+            popupText={"Save a Collection"}
+          />
         }
         selectedSampleIds={selectedSampleIds}
         fetchedSamples={samples.filter(sample =>
@@ -303,22 +317,8 @@ class SamplesView extends React.Component {
         </div>
         <div className={cs.separator} />
         <div className={cs.actions}>
-          <div
-            className={cx(
-              cs.action,
-              selectedSampleIds.size < 2 && cs.actionDisabled
-            )}
-          >
-            {this.renderCollectionTrigger()}
-          </div>
-          <div
-            className={cx(
-              cs.action,
-              selectedSampleIds.size < 2 && cs.actionDisabled
-            )}
-          >
-            {this.renderHeatmapTrigger()}
-          </div>
+          <div className={cs.action}>{this.renderCollectionTrigger()}</div>
+          <div className={cs.action}>{this.renderHeatmapTrigger()}</div>
           <div className={cs.action} onClick={this.handlePhyloModalOpen}>
             <PhyloTreeIcon className={cs.icon} />
           </div>
@@ -386,6 +386,7 @@ class SamplesView extends React.Component {
 SamplesView.defaultProps = {
   activeColumns: [
     "sample",
+    "createdAt",
     "host",
     "collectionLocation",
     "nonHostReads",
