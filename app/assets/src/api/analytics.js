@@ -17,7 +17,7 @@ export const ANALYTICS_EVENT_NAMES = {
 
 // See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 // See also documentation for withAnalytics below.
-export const logAnalyticsEvent = (eventName, eventData = {}) => {
+export const logAnalyticsEvent = async (eventName, eventData = {}) => {
   if (window.analytics) {
     // Include high value user groups in event properties to avoid JOINs downstream.
     if (window.analytics.user) {
