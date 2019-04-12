@@ -847,7 +847,7 @@ class PipelineSampleReport extends React.Component {
         fastaEnabled={fastaEnabled}
         onFastaActionClick={withAnalytics(
           this.downloadFastaUrl,
-          "PipelineSampleReport_fasta-link_clicked",
+          "PipelineSampleReport_taxon-fasta-link_clicked",
           analyticsContext
         )}
         alignmentVizEnabled={alignmentVizEnabled}

@@ -61,10 +61,19 @@ class Login extends React.Component {
         );
       })
       .catch(error => {
-        that.setState({
-          showFailedLogin: true,
-          errorMessage: "Invalid Email and Password"
-        });
+        that.setState(
+          {
+            showFailedLogin: true,
+            errorMessage: "Invalid Email or Password"
+          },
+          () =>
+            logAnalyticsEvent(
+              "Login_invalid-email-or-password-error_displayed",
+              {
+                errorMessage: this.state.errorMessage
+              }
+            )
+        );
       });
   }
 
