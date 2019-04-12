@@ -17,6 +17,8 @@ class CustomDeviseMailer < Devise::Mailer
         LogUtil.log_err_and_airbrake("reset_password_instructions with #{@email_arguments} failed")
         LogUtil.log_backtrace(exception)
       end
+    else
+      LogUtil.log_err_and_airbrake("Couldn't send reset_password_instructions to #{record.email} failed due to missing arguments")
     end
     super
   end
