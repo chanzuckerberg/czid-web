@@ -62,6 +62,7 @@ class DiscoveryView extends React.Component {
   constructor(props) {
     super(props);
 
+    const { project } = this.props;
     this.urlParser = new UrlQueryParser({
       filters: "object",
       showFilters: "boolean",
@@ -82,7 +83,8 @@ class DiscoveryView extends React.Component {
         loadingSamples: true,
         loadingDimensions: true,
         loadingStats: true,
-        project: this.props.project,
+        project: project,
+        projectId: project && project.id,
         projectDimensions: [],
         projects: [],
         sampleDimensions: [],
@@ -101,7 +103,7 @@ class DiscoveryView extends React.Component {
     this.updateBrowsingHistory("replace");
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.resetDataFromInitialLoad();
 
     window.onpopstate = () => {
@@ -113,12 +115,25 @@ class DiscoveryView extends React.Component {
 
   updateBrowsingHistory = (action = "push") => {
     const { domain } = this.props;
+
     const historyState = pick(
-      ["currentTab", "filters", "project", "showFilters", "showStats"],
+      [
+        "currentTab",
+        "filters",
+        "project",
+        "projectId",
+        "showFilters",
+        "showStats"
+      ],
       this.state
     );
 
-    let urlQuery = this.urlParser.stringify(historyState);
+    const urlState = pick(
+      ["currentTab", "filters", "projectId", "showFilters", "showStats"],
+      this.state
+    );
+
+    let urlQuery = this.urlParser.stringify(urlState);
     if (urlQuery) {
       urlQuery = `?${urlQuery}`;
     }
@@ -236,7 +251,7 @@ class DiscoveryView extends React.Component {
 
   refreshSynchronousData = async () => {
     const { domain } = this.props;
-    const { project, search } = this.state;
+    const { projectId, search } = this.state;
 
     this.setState({
       loadingProjects: true,
@@ -247,11 +262,12 @@ class DiscoveryView extends React.Component {
     const { projects = [], visualizations = [] } = await getDiscoverySyncData({
       domain,
       filters: this.preparedFilters(),
-      projectId: project && project.id,
+      projectId: projectId,
       search
     });
 
     this.setState({
+      project: projectId ? projects[0] : null,
       projects,
       visualizations,
       loadingProjects: false,
@@ -261,7 +277,7 @@ class DiscoveryView extends React.Component {
 
   refreshDimensions = async () => {
     const { domain } = this.props;
-    const { project } = this.state;
+    const { projectId } = this.state;
 
     this.setState({
       loadingDimensions: true
@@ -272,7 +288,7 @@ class DiscoveryView extends React.Component {
       sampleDimensions
     } = await getDiscoveryDimensions({
       domain,
-      projectId: project && project.id
+      projectId
     });
 
     this.setState({
@@ -284,7 +300,7 @@ class DiscoveryView extends React.Component {
 
   refreshFilteredStats = async () => {
     const { domain } = this.props;
-    const { project, search } = this.state;
+    const { projectId, search } = this.state;
 
     this.setState({
       loadingStats: true
@@ -292,7 +308,7 @@ class DiscoveryView extends React.Component {
 
     const { sampleStats: filteredSampleStats } = await getDiscoveryStats({
       domain,
-      projectId: project && project.id,
+      projectId,
       filters: this.preparedFilters(),
       search
     });
@@ -305,7 +321,7 @@ class DiscoveryView extends React.Component {
 
   refreshFilteredDimensions = async () => {
     const { domain } = this.props;
-    const { project, search } = this.state;
+    const { projectId, search } = this.state;
 
     this.setState({
       loadingDimensions: true
@@ -316,7 +332,7 @@ class DiscoveryView extends React.Component {
       sampleDimensions: filteredSampleDimensions
     } = await getDiscoveryDimensions({
       domain,
-      projectId: project && project.id,
+      projectId,
       filters: this.preparedFilters(),
       search
     });
@@ -331,7 +347,7 @@ class DiscoveryView extends React.Component {
   computeTabs = () => {
     const { domain } = this.props;
     const {
-      project,
+      projectId,
       projects,
       visualizations,
       filteredSampleStats
@@ -347,7 +363,7 @@ class DiscoveryView extends React.Component {
     };
 
     return compact([
-      !project && {
+      !projectId && {
         label: renderTab("Projects", (projects || []).length),
         value: "projects"
       },
@@ -356,7 +372,7 @@ class DiscoveryView extends React.Component {
         value: "samples"
       },
       domain !== DISCOVERY_DOMAIN_PUBLIC &&
-        !project && {
+        !projectId && {
           label: renderTab("Visualizations", (visualizations || []).length),
           value: "visualizations"
         }
@@ -460,7 +476,7 @@ class DiscoveryView extends React.Component {
   handleLoadSampleRows = async ({ startIndex, stopIndex }) => {
     const { domain } = this.props;
     const {
-      project,
+      projectId,
       samples,
       sampleIds,
       samplesAllLoaded,
@@ -479,7 +495,7 @@ class DiscoveryView extends React.Component {
       } = await getDiscoverySamples({
         domain,
         filters: this.preparedFilters(),
-        projectId: project && project.id,
+        projectId,
         search,
         limit: stopIndex - neededStartIndex + 1,
         offset: neededStartIndex,
@@ -508,7 +524,8 @@ class DiscoveryView extends React.Component {
     this.setState(
       {
         currentTab: "samples",
-        project
+        project,
+        projectId: project.id
       },
       () => {
         this.updateBrowsingHistory();
@@ -553,6 +570,7 @@ class DiscoveryView extends React.Component {
       loadingSamples,
       loadingStats,
       project,
+      projectId,
       projectDimensions,
       projects,
       sampleDimensions,
@@ -576,9 +594,9 @@ class DiscoveryView extends React.Component {
     return (
       <div className={cs.layout}>
         <div className={cs.headerContainer}>
-          {project && (
+          {projectId && (
             <ProjectHeader
-              project={project}
+              project={project || {}}
               fetchedSamples={samples}
               onProjectUpdated={this.handleProjectUpdated}
               newSampleUpload={this.props.allowedFeatures.includes(
@@ -639,7 +657,7 @@ class DiscoveryView extends React.Component {
                       samples={samples}
                       selectableIds={sampleIds}
                       onSampleSelected={this.handleSampleSelected}
-                      projectId={project && project.id}
+                      projectId={projectId}
                     />
                   </div>
                   {!samples.length &&
