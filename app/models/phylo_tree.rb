@@ -207,11 +207,13 @@ class PhyloTree < ApplicationRecord
     end
     # Retrieve superkigdom name for idseq-dag
     superkingdom_name = TaxonLineage.where(taxid: taxid).last.superkingdom_name
-    # Get fasta paths and alignment viz paths for each pipeline_run
-    align_viz_files = {}
+    # Get fasta paths and hitsummary2 paths for each pipeline_run
+    hitsummary2_files = {}
     pipeline_runs.each do |pr|
-      level_name = TaxonCount::LEVEL_2_NAME[tax_level] # "species" or "genus"
-      align_viz_files[pr.id] = pr.alignment_viz_json_s3("nt.#{level_name}.#{taxid}") # align_viz only exists for NT
+      hitsummary2_files[pr.id] = [
+        "#{pr.postprocess_output_s3_path}/assembly/gsnap.hitsummary2.tab",
+        "#{pr.postprocess_output_s3_path}/assembly/rapsearch2.hitsummary2.tab"
+      ]
       entry = taxon_byteranges_hash[pr.id]
       entry.keys.each do |hit_type|
         entry[hit_type] += [pr.s3_paths_for_taxon_byteranges[tax_level][hit_type]]
@@ -228,7 +230,7 @@ class PhyloTree < ApplicationRecord
       reference_taxids: reference_taxids,
       superkingdom_name: superkingdom_name,
       taxon_byteranges: taxon_byteranges_hash,
-      align_viz_files: align_viz_files,
+      hitsummary2_files: hitsummary2_files,
       nt_db: alignment_config.s3_nt_db_path,
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
       sample_names_by_run_ids: sample_names_by_run_ids
