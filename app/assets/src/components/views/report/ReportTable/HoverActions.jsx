@@ -6,6 +6,7 @@ import BasicPopup from "~/components/BasicPopup";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
 import PropTypes from "~/components/utils/propTypes";
+
 import cs from "./hover_actions.scss";
 
 class HoverActions extends React.Component {
@@ -15,6 +16,7 @@ class HoverActions extends React.Component {
 
   handlePhyloModalOpen = () => {
     this.setState({ phyloTreeCreationModalOpen: true });
+    this.props.onPhyloTreeModalOpened && this.props.onPhyloTreeModalOpened();
   };
 
   handlePhyloModalClose = () => {
@@ -149,7 +151,8 @@ HoverActions.propTypes = {
   onAlignmentVizClick: PropTypes.func.isRequired,
   contigVizEnabled: PropTypes.bool,
   onContigVizClick: PropTypes.func.isRequired,
-  phyloTreeEnabled: PropTypes.bool
+  phyloTreeEnabled: PropTypes.bool,
+  onPhyloTreeModalOpened: PropTypes.func
 };
 
 export default HoverActions;

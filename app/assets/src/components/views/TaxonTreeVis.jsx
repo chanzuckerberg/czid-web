@@ -1,5 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
+
+import { logAnalyticsEvent } from "~/api/analytics";
+
 import TidyTree from "../visualizations/TidyTree";
 import PathogenLabel from "../ui/labels/PathogenLabel";
 import { getTaxonName } from "../../helpers/taxon";
@@ -124,6 +127,11 @@ class TaxonTreeVis extends React.Component {
 
   handleNodeHover(node) {
     this.setState({ nodeHover: node });
+    logAnalyticsEvent("TaxonTreeVis_node_hovered", {
+      id: node.id,
+      scientificName: node.data.scientificName,
+      commonName: node.data.commonName
+    });
   }
 
   handleNodeLabelClick(node) {
@@ -145,6 +153,11 @@ class TaxonTreeVis extends React.Component {
         NT: taxInfo.NT,
         NR: taxInfo.NR
       }
+    });
+    logAnalyticsEvent("TaxonTreeVis_node-label_clicked", {
+      taxonId: taxInfo.tax_id,
+      taxonName,
+      taxLevel: taxInfo.tax_level
     });
   }
 
