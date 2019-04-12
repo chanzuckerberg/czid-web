@@ -524,7 +524,7 @@ class ProjectsController < ApplicationController
     @user ||= User.new(user_params_with_password)
     @user.email_arguments = new_user_shared_project_email_arguments()
     if @user.save!
-      # Only returns the token sent to user
+      # Only returns the token sent to userew
       @user.send_reset_password_instructions
     end
   rescue => exception
