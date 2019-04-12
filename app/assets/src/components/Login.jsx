@@ -1,8 +1,11 @@
 import React from "react";
 import axios from "axios";
 import $ from "jquery";
-import LogoIcon from "./ui/icons/LogoIcon";
+
 import { openUrl } from "~utils/links";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+
+import LogoIcon from "./ui/icons/LogoIcon";
 
 class Login extends React.Component {
   constructor(props, context) {
@@ -58,31 +61,54 @@ class Login extends React.Component {
         );
       })
       .catch(error => {
-        that.setState({
-          showFailedLogin: true,
-          errorMessage: "Invalid Email and Password"
-        });
+        that.setState(
+          {
+            showFailedLogin: true,
+            errorMessage: "Invalid Email or Password"
+          },
+          () =>
+            logAnalyticsEvent(
+              "Login_invalid-email-or-password-error_displayed",
+              {
+                errorMessage: this.state.errorMessage
+              }
+            )
+        );
       });
   }
 
   isFormInValid() {
-    if (this.refs.email.value === "" && this.refs.password.value === "") {
-      this.setState({
-        showFailedLogin: true,
-        errorMessage: "Please enter email and password"
+    const logError = () =>
+      logAnalyticsEvent("Login_login-form-error_displayed", {
+        errorMessage: this.state.errorMessage
       });
+
+    if (this.refs.email.value === "" && this.refs.password.value === "") {
+      this.setState(
+        {
+          showFailedLogin: true,
+          errorMessage: "Please enter email and password"
+        },
+        logError
+      );
       return true;
     } else if (this.refs.email.value === "") {
-      this.setState({
-        showFailedLogin: true,
-        errorMessage: "Please enter email"
-      });
+      this.setState(
+        {
+          showFailedLogin: true,
+          errorMessage: "Please enter email"
+        },
+        logError
+      );
       return true;
     } else if (this.refs.password.value === "") {
-      this.setState({
-        showFailedLogin: true,
-        errorMessage: "Please enter password"
-      });
+      this.setState(
+        {
+          showFailedLogin: true,
+          errorMessage: "Please enter password"
+        },
+        logError
+      );
       return true;
     } else {
       return false;
@@ -121,7 +147,14 @@ class Login extends React.Component {
               ref="form"
               className="new_user"
               id="new_user"
-              onSubmit={this.handleSubmit}
+              onSubmit={withAnalytics(
+                this.handleSubmit,
+                "Login_login-form_submitted",
+                {
+                  email: this.refs.email.value,
+                  remember_me: this.refs.remember_me.value
+                }
+              )}
             >
               <div className="row title">
                 <p className="col s6 signup">Login</p>
@@ -129,7 +162,10 @@ class Login extends React.Component {
               <div className="mail">
                 <p>
                   To request access to the IDseq platform, sign up<span
-                    onClick={() => openUrl("/")}
+                    onClick={() => {
+                      openUrl("/");
+                      logAnalyticsEvent("Login_sign-up-link_clicked");
+                    }}
                   >
                     {" "}
                     here.
