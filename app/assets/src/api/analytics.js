@@ -29,6 +29,7 @@ export const logAnalyticsEvent = (eventName, eventData = {}) => {
         czi_user: traits.biohub_user,
         demo_user: traits.demo_user,
         has_samples: traits.has_samples,
+        git_version: window.GIT_VERSION,
         // label and category are for Google Analytics. See
         // https://segment.com/docs/destinations/google-analytics/#track
         label: JSON.stringify(eventData),
