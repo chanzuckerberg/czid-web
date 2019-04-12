@@ -72,13 +72,13 @@ const processRawSample = sample => {
       publicAccess: !!sample.public,
       user: get("uploader.name", sample.details),
       project: get("derived_sample_output.project_name", sample.details),
-      createdAt: sample.created_at,
       status: get(
         "run_info.result_status_description",
         sample.details
       ).toLowerCase()
     },
     collectionLocation: get("metadata.collection_location", sample.details),
+    createdAt: sample.created_at,
     duplicateCompressionRatio: get(
       "derived_sample_output.summary_stats.compression_ratio",
       sample.details
