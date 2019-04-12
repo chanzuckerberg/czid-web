@@ -1,18 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
-import QueryString from "query-string";
+import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import moment from "moment";
 import {
-  assign,
   clone,
   compact,
+  defaults,
   find,
   findIndex,
   keyBy,
   map,
   mapKeys,
   mapValues,
-  merge,
   pick,
   replace,
   sumBy,
@@ -63,11 +62,15 @@ class DiscoveryView extends React.Component {
   constructor(props) {
     super(props);
 
-    const urlState = this.loadStateFromUrl();
-    // TODO: parse url parameters to state
-    console.log("DiscoveryView:constructor", history.state, urlState);
+    this.urlParser = new UrlQueryParser({
+      filters: "object",
+      showFilters: "boolean",
+      showStats: "boolean"
+    });
 
-    this.state = assign(
+    const urlState = this.urlParser.parse(location.search);
+
+    this.state = defaults(
       {
         currentTab: "projects",
         filteredProjectDimensions: [],
@@ -91,7 +94,7 @@ class DiscoveryView extends React.Component {
         showStats: true,
         visualizations: []
       },
-      history.state
+      urlState
     );
 
     this.data = null;
@@ -99,11 +102,9 @@ class DiscoveryView extends React.Component {
   }
 
   componentDidMount() {
-    console.log("DiscoveryView:componentDidMount", history);
     this.resetDataFromInitialLoad();
 
     window.onpopstate = () => {
-      console.log("DiscoveryView:componentDidMount - onpopstate", history);
       this.setState(history.state, () => {
         this.resetDataFromInitialLoad();
       });
@@ -116,35 +117,25 @@ class DiscoveryView extends React.Component {
       ["currentTab", "filters", "project", "showFilters", "showStats"],
       this.state
     );
-    const urlQuery = this.stringifyState(historyState);
-    console.log("DiscoveryView:updateBrowsingHistory", action);
-    // TODO: load state to url
+
+    let urlQuery = this.urlParser.stringify(historyState);
+    if (urlQuery) {
+      urlQuery = `?${urlQuery}`;
+    }
+
     if (action === "push") {
       history.pushState(
         historyState,
         `DiscoveryView:${domain}`,
-        `/${domain}?${urlQuery}`
+        `/${domain}${urlQuery}`
       );
     } else {
       history.replaceState(
         historyState,
         `DiscoveryView:${domain}`,
-        `/${domain}?${urlQuery}`
+        `/${domain}${urlQuery}`
       );
     }
-  };
-
-  stringifyState = state => {
-    const { filters, otherState } = state;
-    return QueryString.stringify(
-      merge({ filters: JSON.stringify(filters) }, otherState)
-    );
-  };
-
-  loadStateFromUrl = () => {
-    const searchParams = QueryString.parseUrl(location.search);
-    searchParams.filters = JSON.parse(searchParams.filters);
-    console.log("searchParams", searchParams);
   };
 
   preparedFilters = () => {
@@ -455,11 +446,15 @@ class DiscoveryView extends React.Component {
   };
 
   handleFilterToggle = () => {
-    this.setState({ showFilters: !this.state.showFilters });
+    this.setState({ showFilters: !this.state.showFilters }, () => {
+      this.updateBrowsingHistory("replace");
+    });
   };
 
   handleStatsToggle = () => {
-    this.setState({ showStats: !this.state.showStats });
+    this.setState({ showStats: !this.state.showStats }, () => {
+      this.updateBrowsingHistory("replace");
+    });
   };
 
   handleLoadSampleRows = async ({ startIndex, stopIndex }) => {
