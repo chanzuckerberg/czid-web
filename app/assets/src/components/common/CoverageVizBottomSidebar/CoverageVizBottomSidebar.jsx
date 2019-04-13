@@ -10,6 +10,7 @@ import Dropdown from "~ui/controls/dropdowns/Dropdown";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import BasicPopup from "~/components/BasicPopup";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import NoResultsBacteriaIcon from "~ui/icons/NoResultsBacteriaIcon";
 
 import cs from "./coverage_viz_bottom_sidebar.scss";
 
@@ -32,7 +33,7 @@ const METRIC_COLUMNS = [
     {
       key: "referenceAccession",
       name: "Reference Accession",
-      tooltip: "Genbank Accession ID for the reference accession."
+      tooltip: "The reference accession name from GenBank."
     },
     {
       key: "referenceLength",
@@ -92,11 +93,12 @@ export default class CoverageVizBottomSidebar extends React.Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const { visible, params } = this.props;
+    const { params } = this.props;
     const { currentAccessionData } = this.state;
 
-    if (!prevProps.visible && visible) {
-      this.setCurrentAccession(params.accessionSummaries[2].id);
+    // TODO(mark): Select the best accessionSummary by score.
+    if (params.accessionSummaries !== prevProps.params.accessionSummaries) {
+      this.setCurrentAccession(get([2, "id"], params.accessionSummaries));
     }
 
     if (!prevState.currentAccessionData && currentAccessionData) {
@@ -128,13 +130,18 @@ export default class CoverageVizBottomSidebar extends React.Component {
   setCurrentAccession = accessionId => {
     const { params } = this.props;
 
-    const accession = find(["id", accessionId], params.accessionSummaries);
+    const accession = accessionId
+      ? find(["id", accessionId], params.accessionSummaries)
+      : null;
 
     this.setState({
       currentAccessionSummary: accession,
       currentAccessionData: null
     });
-    this.loadAccession(accession);
+
+    if (accession) {
+      this.loadAccession(accession);
+    }
   };
 
   generateCoverageVizData = (coverageData, coverageBinSize) =>
@@ -214,16 +221,18 @@ export default class CoverageVizBottomSidebar extends React.Component {
     const referenceAccession = (
       <BasicPopup
         trigger={
-          <a
-            href={`https://www.ncbi.nlm.nih.gov/nuccore/${
-              currentAccessionSummary.id
-            }?report=genbank`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cs.ncbiLink}
-          >
-            {currentAccessionSummary.id}
-          </a>
+          <div className={cs.ncbiLinkWrapper}>
+            <a
+              href={`https://www.ncbi.nlm.nih.gov/nuccore/${
+                currentAccessionSummary.id
+              }?report=genbank`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cs.ncbiLink}
+            >
+              {currentAccessionSummary.name}
+            </a>
+          </div>
         }
         inverted
         content={currentAccessionSummary.name}
@@ -310,7 +319,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       <NarrowContainer className={cs.contents}>
         <div className={cs.header}>
           <div className={cs.headerText}>
-            <div className={cs.title}>Coverage for {params.taxonName}</div>
+            <div className={cs.title}>{params.taxonName} Coverage</div>
             <div className={cs.subtitle}>
               {params.accessionSummaries.length} unique accessions
             </div>
@@ -331,7 +340,8 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                View old visualization {">"}
+                View read-level visualization
+                <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
               </a>
             </div>
           </div>
@@ -341,8 +351,43 @@ export default class CoverageVizBottomSidebar extends React.Component {
     );
   }
 
+  renderNoDataContents() {
+    const { params } = this.props;
+
+    return (
+      <NarrowContainer className={cs.contents}>
+        <div className={cs.header}>
+          <div className={cs.headerText}>
+            <div className={cs.title}>{params.taxonName} Coverage</div>
+          </div>
+          <div className={cs.fill} />
+        </div>
+        <div className={cs.noDataBody}>
+          <div className={cs.noDataContainer}>
+            <div className={cs.text}>
+              <div className={cs.message}>
+                Sorry, the coverage visualization is currently available for
+                species level taxons with at least one assembled contig in NT.
+              </div>
+              <a
+                className={cs.vizLink}
+                href={params.alignmentVizUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View read-level visualization
+                <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+              </a>
+            </div>
+            <NoResultsBacteriaIcon className={cs.icon} />
+          </div>
+        </div>
+      </NarrowContainer>
+    );
+  }
+
   render() {
-    const { visible, onClose } = this.props;
+    const { visible, onClose, params } = this.props;
 
     return (
       <Sidebar
@@ -351,7 +396,9 @@ export default class CoverageVizBottomSidebar extends React.Component {
         onClose={onClose}
         direction="bottom"
       >
-        {this.renderSidebarContents()}
+        {params.accessionSummaries && params.accessionSummaries.length > 0
+          ? this.renderSidebarContents()
+          : this.renderNoDataContents()}
       </Sidebar>
     );
   }

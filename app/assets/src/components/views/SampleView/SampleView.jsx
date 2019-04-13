@@ -328,6 +328,21 @@ class SampleView extends React.Component {
   getCoverageVizParams = () => {
     const { coverageVizParams } = this.state;
 
+    if (!coverageVizParams) {
+      return {};
+    }
+
+    // Mock a "no-data" case.
+    // TODO(mark): Remove this once we are fetching real data from the server.
+    if (coverageVizParams.taxId === -1) {
+      return {
+        ...coverageVizParams,
+        taxonId: "1747",
+        taxonName: "Cutibacterium acnes",
+        accessionSummaries: []
+      };
+    }
+
     return {
       ...coverageVizParams,
       taxonId: "1747",

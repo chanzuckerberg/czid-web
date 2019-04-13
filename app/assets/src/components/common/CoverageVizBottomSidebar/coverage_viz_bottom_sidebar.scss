@@ -34,17 +34,24 @@
   }
 
   .headerControls {
+    text-align: right;
+
     .vizLinkContainer {
       text-align: right;
       margin-top: 2px;
-      margin-right: 2px;
+      margin-right: 12px;
     }
+  }
+}
 
-    .vizLink {
-      @include font-header-xxs;
-      // Override color: inherit in _header.scss.
-      color: $primary-light !important;
-    }
+.vizLink {
+  @include font-header-xxs;
+  // Override color: inherit in _header.scss.
+  color: $primary-light !important;
+
+  .rightArrow {
+    font-size: 0.75em;
+    margin-left: 4px;
   }
 }
 
@@ -87,6 +94,12 @@
         @include font-body-xxs;
       }
 
+      .ncbiLinkWrapper {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
       .ncbiLink {
         // Override color: inherit in _header.scss.
         color: $primary-light !important;
@@ -121,6 +134,37 @@
 
   .referenceAccession {
     background-color: $lightest-grey;
+  }
+}
+
+.noDataBody {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 288px;
+
+  .noDataContainer {
+    display: flex;
+  }
+
+  .text {
+    margin-top: 8px;
+    margin-right: 18px;
+    width: 350px;
+
+    .message {
+      @include font-header-m;
+      margin-bottom: 8px;
+    }
+
+    .vizLink {
+      margin-top: 10px;
+    }
+  }
+
+  .icon {
+    width: 105px;
+    height: 128px;
   }
 }
 
