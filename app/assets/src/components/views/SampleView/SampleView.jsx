@@ -345,33 +345,34 @@ class SampleView extends React.Component {
 
     return {
       ...coverageVizParams,
+      // TODO(mark): Use getTaxonName to get the taxonName.
       taxonId: "1747",
       taxonName: "Cutibacterium acnes",
       accessionSummaries: [
         {
           id: "CP012352.1",
-          n_contig: 0,
-          n_read: 2,
+          num_contigs: 0,
+          num_reads: 2,
           name:
             "Cutibacterium acnes strain PA_15_2_L1 chromosome, complete genome"
         },
         {
           id: "CP012647.1",
-          n_contig: 1,
-          n_read: 4,
+          num_contigs: 1,
+          num_reads: 4,
           name:
             "Cutibacterium acnes strain KCOM 1861 (= ChDC B594) chromosome, complete genome"
         },
         {
           id: "AE017283.1",
-          n_contig: 0,
-          n_read: 10,
+          num_contigs: 0,
+          num_reads: 10,
           name: "Propionibacterium acnes KPA171202, complete genome"
         },
         {
           id: "CP012350.1",
-          n_contig: 0,
-          n_read: 2,
+          num_contigs: 0,
+          num_reads: 2,
           name:
             "Cutibacterium acnes strain PA_30_2_L1 chromosome, complete genome"
         }
