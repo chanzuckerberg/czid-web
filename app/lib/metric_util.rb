@@ -59,7 +59,8 @@ class MetricUtil
           # For Google Analytics. See
           # https://segment.com/docs/destinations/google-analytics/#track
           label: properties.to_json,
-          category: event.split("_")[0]
+          category: event.split("_")[0],
+          git_version: ENV['GIT_VERSION']
         ),
         context: request ? context_for_segment(request) : {}
       )
