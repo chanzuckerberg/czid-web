@@ -21,7 +21,7 @@ class MapPlayground extends React.Component {
   constructor(props) {
     super(props);
     // From their website demo
-    window.unwired.key = props.mapKey;
+    window.unwired.key = props.locationIQKey;
   }
 
   componentWillMount() {
@@ -46,11 +46,10 @@ class MapPlayground extends React.Component {
   }
 
   geosearch(query) {
+    const key = this.props.locationIQKey;
     axios
       .get(
-        `https://us1.locationiq.com/v1/search.php?key=${
-          this.props.searchKey
-        }&format=json&addressdetails=1&normalizecity=1&q=${query}`
+        `https://us1.locationiq.com/v1/search.php?key=${key}&format=json&addressdetails=1&normalizecity=1&q=${query}`
       )
       .then(resp => {
         const searchResults = resp.data;
