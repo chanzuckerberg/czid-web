@@ -1,7 +1,7 @@
 import QueryString from "query-string";
 
 class UrlQueryParser {
-  // This util class enhances query-string to be enable parsing
+  // This util class enhances query-string to enable parsing
   // string values to desired object types.
   // Also takes care of stringifying nested object values.
 
