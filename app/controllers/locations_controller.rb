@@ -32,7 +32,10 @@ class LocationsController < ApplicationController
   end
 
   def map_playground
-    @results = Metadatum.where(metadata_field_id: 154).distinct.pluck(:string_validated_value)
+    # Show all viewable locations
+    field_id = MetadataField.find_by(name: "collection_location")
+    viewable = current_power.samples.pluck(:id)
+    @locations = Metadatum.where(metadata_field_id: field_id).where(sample_id: viewable).pluck(:string_validated_value)
   end
 
   private

@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import MapGL, { Marker } from "react-map-gl";
 import axios from "axios";
 
-import { get } from "~/api/core";
 import cs from "./map_playground.scss";
 import { Icon } from "semantic-ui-react";
 
@@ -20,15 +19,13 @@ class MapPlayground extends React.Component {
 
   constructor(props) {
     super(props);
-    // From their website demo
     window.unwired.key = props.locationIQKey;
   }
 
   componentWillMount() {
-    const { results: given } = this.props;
-    console.log(given);
-    let newResults = [];
-    given.forEach(loc => {
+    const { locations } = this.props;
+    let toDisplay = [];
+    locations.forEach(loc => {
       if (/\d/.test(loc)) {
         loc = loc.replace(/_/g, ", ");
         const [lat, lon] = loc.split(", ");
@@ -37,12 +34,11 @@ class MapPlayground extends React.Component {
           latitude: parseFloat(lat),
           longitude: parseFloat(lon)
         };
-        newResults.push(formatted);
+        toDisplay.push(formatted);
       }
     });
 
-    console.log(newResults);
-    this.setState({ toDisplay: newResults });
+    this.setState({ toDisplay });
   }
 
   geosearch(query) {
@@ -82,7 +78,7 @@ class MapPlayground extends React.Component {
   render() {
     return (
       <div>
-        {this.props.results}
+        {this.props.locations}
         <div className={cs.mapContainer}>
           <MapGL
             {...this.state.viewport}
@@ -98,7 +94,8 @@ class MapPlayground extends React.Component {
 }
 
 MapPlayground.propTypes = {
-  results: PropTypes.array
+  locations: PropTypes.array,
+  locationIQKey: PropTypes.string
 };
 
 export default MapPlayground;

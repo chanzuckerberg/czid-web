@@ -1,0 +1,16 @@
+<script src='https://tiles.unwiredmaps.com/v2/js/unwired-gl.js?v=0.1.6'></script>
+
+<div id="MapPlayground_page">
+</div>
+
+<%= javascript_tag do %>
+  react_component(
+  'MapPlayground',
+  {
+    locations: JSON.parse('<%= raw escape_json(@locations) %>'),
+    locationIQKey: '<%= ENV["LOCATION_IQ_API_KEY"] %>',
+
+  },
+  'MapPlayground_page'
+  );
+<% end %>
