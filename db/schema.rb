@@ -149,7 +149,7 @@ ActiveRecord::Schema.define(version: 20_190_321_214_445) do
     t.integer "data_type", limit: 1, null: false
     t.string "raw_value"
     t.string "string_validated_value"
-    t.float "number_validated_value", limit: 24
+    t.decimal "number_validated_value", precision: 36, scale: 9
     t.integer "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

@@ -82,8 +82,14 @@ class Metadatum < ApplicationRecord
     if /\A[+-]?\d+(\.\d+)?\z/.match(raw_value).nil?
       errors.add(:raw_value, MetadataValidationErrors::INVALID_NUMBER)
     else
-      # to_f will convert "abc" to 0.0, so we need the regex
-      self.number_validated_value = raw_value.to_f
+      # to_d will convert "abc" to 0.0, so we need the regex
+      val = raw_value.to_d
+      # Larger numbers will cause mysql error.
+      if val >= (10**27) || val <= (-10**27)
+        errors.add(:raw_value, MetadataValidationErrors::NUMBER_OUT_OF_RANGE)
+      else
+        self.number_validated_value = val
+      end
     end
   rescue ArgumentError
     errors.add(:raw_value, MetadataValidationErrors::INVALID_NUMBER)
