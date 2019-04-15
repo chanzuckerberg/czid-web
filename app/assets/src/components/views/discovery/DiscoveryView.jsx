@@ -20,7 +20,7 @@ import {
 } from "lodash/fp";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
-import DiscoveryHeader from "../discovery/DiscoveryHeader";
+import DiscoveryHeader from "./DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
@@ -311,6 +311,7 @@ class DiscoveryView extends React.Component {
   };
 
   computeTabs = () => {
+    const { domain } = this.props;
     const {
       project,
       projects,
@@ -336,10 +337,11 @@ class DiscoveryView extends React.Component {
         label: renderTab("Samples", filteredSampleStats.count || 0),
         value: "samples"
       },
-      !project && {
-        label: renderTab("Visualizations", (visualizations || []).length),
-        value: "visualizations"
-      }
+      domain !== DISCOVERY_DOMAIN_PUBLIC &&
+        !project && {
+          label: renderTab("Visualizations", (visualizations || []).length),
+          value: "visualizations"
+        }
     ]);
   };
 

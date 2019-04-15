@@ -516,13 +516,20 @@ class ProjectsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def create_new_user_random_password(name, email)
+    Rails.logger.info("Going to create new user via project sharing: #{email}")
     user_params_with_password = { email: email, name: name }
     random_password = SecureRandom.hex(10)
     user_params_with_password[:password] = random_password
     user_params_with_password[:password_confirmation] = random_password
     @user ||= User.new(user_params_with_password)
     @user.email_arguments = new_user_shared_project_email_arguments()
-    @user.send_reset_password_instructions if @user.save
+    if @user.save!
+      # Only returns the token sent to user
+      @user.send_reset_password_instructions
+    end
+  rescue => exception
+    LogUtil.log_err_and_airbrake("Failed to send 'new user on project' password instructions to #{email}")
+    LogUtil.log_backtrace(exception)
   end
 
   def new_user_shared_project_email_arguments

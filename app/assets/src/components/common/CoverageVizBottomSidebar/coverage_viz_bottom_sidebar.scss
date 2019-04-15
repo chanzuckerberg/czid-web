@@ -34,22 +34,29 @@
   }
 
   .headerControls {
+    text-align: right;
+
     .vizLinkContainer {
       text-align: right;
       margin-top: 2px;
-      margin-right: 2px;
-    }
-
-    .vizLink {
-      @include font-header-xxs;
-      // Override color: inherit in _header.scss.
-      color: $primary-light !important;
+      margin-right: 12px;
     }
   }
 }
 
+.vizLink {
+  @include font-header-xxs;
+  // Override color: inherit in _header.scss.
+  color: $primary-light !important;
+
+  .rightArrow {
+    font-size: 0.75em;
+    margin-left: 4px;
+  }
+}
+
 .body {
-  .stats {
+  .metrics {
     display: flex;
     margin-bottom: 30px;
 
@@ -85,6 +92,12 @@
 
       .value {
         @include font-body-xxs;
+      }
+
+      .ncbiLinkWrapper {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
       }
 
       .ncbiLink {
@@ -124,6 +137,37 @@
   }
 }
 
+.noDataBody {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 288px;
+
+  .noDataContainer {
+    display: flex;
+  }
+
+  .text {
+    margin-top: 8px;
+    margin-right: 18px;
+    width: 350px;
+
+    .message {
+      @include font-header-m;
+      margin-bottom: 8px;
+    }
+
+    .vizLink {
+      margin-top: 10px;
+    }
+  }
+
+  .icon {
+    width: 105px;
+    height: 128px;
+  }
+}
+
 .loadingContainer {
   display: flex;
   align-items: center;
@@ -138,4 +182,12 @@
   .loadingIcon {
     margin-right: 5px;
   }
+}
+
+.hoverTooltip {
+  position: absolute;
+  background-color: white;
+  z-index: 104;
+  // So the tooltip appears on the top-right instead of bottom-right of mouse.
+  transform: translateY(-100%);
 }

@@ -87,17 +87,17 @@ const UserMenuDropDown = ({
             }
           />
         );
+        userDropdownItems.push(
+          <BareDropdown.Item
+            key="2"
+            text={
+              <a className={cs.option} href="/cli_user_instructions">
+                New Sample (Command Line)
+              </a>
+            }
+          />
+        );
       }
-      userDropdownItems.push(
-        <BareDropdown.Item
-          key="2"
-          text={
-            <a className={cs.option} href="/cli_user_instructions">
-              New Sample (Command Line)
-            </a>
-          }
-        />
-      );
     }
 
     adminUser &&

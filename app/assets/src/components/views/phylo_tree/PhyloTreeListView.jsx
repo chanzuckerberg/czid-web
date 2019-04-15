@@ -190,6 +190,8 @@ class PhyloTreeListView extends React.Component {
   };
 
   render() {
+    const { allowedFeatures } = this.props;
+
     if (!this.state.selectedPhyloTreeId) {
       return (
         <div className={cs.noTreeBanner}>
@@ -229,18 +231,29 @@ class PhyloTreeListView extends React.Component {
                 }))}
               />
             </ViewHeader.Content>
-            <ViewHeader.Controls>
+            <ViewHeader.Controls className={cs.controls}>
               <BasicPopup
-                trigger={<ShareButton onClick={this.handleShareClick} />}
+                trigger={
+                  <ShareButton
+                    onClick={this.handleShareClick}
+                    className={cs.controlElement}
+                  />
+                }
                 content="A shareable URL was copied to your clipboard!"
                 on="click"
                 hideOnScroll
-              />{" "}
-              {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
-              {this.props.admin && (
-                <SaveButton onClick={this.handleSaveClick} />
-              )}{" "}
-              <PhyloTreeDownloadButton tree={currentTree} />
+              />
+              {allowedFeatures &&
+                allowedFeatures.includes("data_discovery") && (
+                  <SaveButton
+                    onClick={this.handleSaveClick}
+                    className={cs.controlElement}
+                  />
+                )}
+              <PhyloTreeDownloadButton
+                tree={currentTree}
+                className={cs.controlElement}
+              />
             </ViewHeader.Controls>
           </ViewHeader>
         </NarrowContainer>
@@ -275,7 +288,7 @@ class PhyloTreeListView extends React.Component {
 
 PhyloTreeListView.propTypes = {
   phyloTrees: PropTypes.array,
-  admin: PropTypes.bool
+  allowedFeatures: PropTypes.array
 };
 
 export default PhyloTreeListView;
