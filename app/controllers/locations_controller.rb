@@ -31,6 +31,10 @@ class LocationsController < ApplicationController
     }, status: :internal_server_error
   end
 
+  def map_playground
+    @results = Metadatum.where(metadata_field_id: 154).distinct.pluck(:string_validated_value)
+  end
+
   private
 
   def location_params

@@ -1,0 +1,11 @@
+@import url("https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css");
+@import url("https://tiles.unwiredmaps.com/v2/js/unwired-gl.css?v=0.1.6");
+
+.mapContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.marker {
+  color: red;
+}
