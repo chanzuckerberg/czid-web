@@ -786,13 +786,12 @@ class PipelineSampleReport extends React.Component {
       this.sampleId
     }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
-    // TODO(mark): Open the coverage viz with an "empty data" screen for taxons with no data.
-    if (
-      (this.admin || this.allowedFeatures.includes("coverage_viz")) &&
-      taxLevel === "species"
-    ) {
+    if (this.admin || this.allowedFeatures.includes("coverage_viz")) {
+      // Mock a "no-data" case for non-species taxons.
+      // TODO(mark): Remove this once we are fetching real data from the server.
+      const mockTaxId = taxLevel === "species" ? taxId : -1;
       this.props.onCoverageVizClick({
-        taxId,
+        taxId: mockTaxId,
         alignmentVizUrl
       });
     } else {

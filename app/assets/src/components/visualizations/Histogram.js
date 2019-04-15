@@ -1,10 +1,11 @@
 import { histogram, extent, min, max, mean, deviation } from "d3-array";
 import cx from "classnames";
 import { axisBottom, axisLeft } from "d3-axis";
-import { select } from "d3-selection";
+import { select, event as currentEvent, mouse } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { map } from "lodash/fp";
 
+import ArrayUtils from "~/components/utils/ArrayUtils";
 import { CategoricalColormap } from "../utils/colormaps/CategoricalColormap";
 import cs from "./histogram.scss";
 
@@ -36,10 +37,15 @@ export default class Histogram {
         refValues: [],
         // If true, the data is already binned, i.e. the data is an array of
         // { x0, length }
-        skipBin: false
+        skipBin: false,
+        hoverBuffer: 5
       },
       options
     );
+
+    // The x-center of the last bar that was hovered over.
+    // Since the histogram can take multiple data series, this is easier to store than [seriesIndex, dataIndex]
+    this.lastHoveredBarX = null;
 
     // remove any previous charts
     this.container.selectAll("svg").remove();
@@ -151,7 +157,8 @@ export default class Histogram {
     if (this.options.skipBins) {
       return (
         (this.size.width - this.margins.right - this.margins.left) /
-        max(map(seriesData => seriesData.length, this.data))
+        (this.options.numBins ||
+          max(map(seriesData => seriesData.length, this.data)))
       );
     }
 
@@ -171,6 +178,66 @@ export default class Histogram {
 
   getBarOpacity = () => {
     return this.options.barOpacity || 0.8;
+  };
+
+  // Find the bar x-center that is closest to hoverX, within hoverBuffer.
+  onMouseMove = () => {
+    if (this.sortedBarCenters.length == 0) {
+      return;
+    }
+
+    const hoverX = mouse(this.svg.node())[0];
+    const closestBarCenters = ArrayUtils.findClosestNeighbors(
+      this.sortedBarCenters,
+      hoverX
+    );
+
+    let closestX = null;
+
+    if (closestBarCenters.length === 1) {
+      closestX = closestBarCenters[0];
+    } else {
+      closestX =
+        Math.abs(closestBarCenters[0] - hoverX) <
+        Math.abs(closestBarCenters[1] - hoverX)
+          ? closestBarCenters[0]
+          : closestBarCenters[1];
+    }
+
+    // Only return if we are at most hoverBuffer away from the closest bar.
+    const buffer = this.getBarWidth() / 2 + this.options.hoverBuffer;
+
+    const dataIndices =
+      Math.abs(closestX - hoverX) < buffer
+        ? this.barCentersToIndices[closestX]
+        : null;
+
+    if (
+      this.lastHoveredBarX !== closestX &&
+      dataIndices !== null &&
+      this.options.onHistogramBarEnter
+    ) {
+      this.options.onHistogramBarEnter(dataIndices);
+      this.lastHoveredBarX = closestX;
+    } else if (
+      dataIndices === null &&
+      this.lastHoveredBarX &&
+      this.options.onHistogramBarExit
+    ) {
+      this.options.onHistogramBarExit();
+      this.lastHoveredBarX = null;
+    }
+
+    if (dataIndices !== null && this.options.onHistogramBarHover) {
+      this.options.onHistogramBarHover(currentEvent.pageX, currentEvent.pageY);
+    }
+  };
+
+  onMouseLeave = () => {
+    if (this.options.onHistogramBarExit) {
+      this.options.onHistogramBarExit();
+      this.lastHoveredBarX = null;
+    }
   };
 
   update() {
@@ -198,6 +265,11 @@ export default class Histogram {
     let barWidth = this.getBarWidth();
     const barOpacity = this.getBarOpacity();
 
+    // Maps from x-coordinate to the data plotted at that x-coordinate.
+    // Used for hovering.
+    const barCentersToIndices = {};
+    const barCenters = [];
+
     for (let i = 0; i < bins.length; i++) {
       this.svg
         .append("g")
@@ -212,6 +284,12 @@ export default class Histogram {
         .attr("y", d => y(d.length))
         .attr("height", d => y(0) - y(d.length))
         .style("opacity", barOpacity);
+
+      bins[i].forEach((bin, index) => {
+        const xMidpoint = x(bin.x0) + i * barWidth + barWidth / 2;
+        barCentersToIndices[xMidpoint] = [i, index];
+        barCenters.push(xMidpoint);
+      });
 
       if (this.options.showStatistics) {
         let avg = mean(this.data[i]);
@@ -270,6 +348,18 @@ export default class Histogram {
         }
       }
     }
+
+    this.barCentersToIndices = barCentersToIndices;
+    this.sortedBarCenters = barCenters.sort((a, b) => a - b);
+
+    this.svg
+      .append("rect")
+      .attr("class", cs.hoverRect)
+      .attr("transform", `translate(${this.margins.left}, ${this.margins.top})`)
+      .attr("width", this.size.width - this.margins.right - this.margins.left)
+      .attr("height", this.size.height - this.margins.top - this.margins.bottom)
+      .on("mousemove", this.onMouseMove)
+      .on("mouseleave", this.onMouseLeave);
 
     if (this.options.seriesNames) {
       let legend = this.svg
