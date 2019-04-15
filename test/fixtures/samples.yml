@@ -52,6 +52,11 @@ joe_project_sampleA:
   project: joe_project
   host_genome: human
 
+joe_project_sample_mosquito:
+  name: joe_project_sample_mosquito
+  project: joe_project
+  host_genome: mosquito
+
 project_one_sampleA:
   name: project_one_sampleA_run
   project: one

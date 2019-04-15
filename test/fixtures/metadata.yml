@@ -57,3 +57,18 @@ sample_human_expired_age:
   number_validated_value: 100
   sample: sample_human_existing_metadata_expired
   metadata_field: age
+
+# Mosquito fields
+sample_mosquito_collection_location:
+  key: "collection_location"
+  raw_value: "37.4852, -122.2364"
+  string_validated_value: "37.4852, -122.2364"
+  sample: project_one_sampleA
+  metadata_field: collection_location
+
+sample_mosquito_joe_collection_location:
+  key: "collection_location"
+  raw_value: "37.773972, -122.431297"
+  string_validated_value: "37.773972, -122.431297"
+  sample: joe_project_sample_mosquito
+  metadata_field: collection_location

@@ -36,6 +36,17 @@ class LocationsController < ApplicationController
     field_id = MetadataField.find_by(name: "collection_location")
     viewable = current_power.samples.pluck(:id)
     @locations = Metadatum.where(metadata_field_id: field_id).where(sample_id: viewable).pluck(:string_validated_value)
+
+    respond_to do |format|
+      format.html { render :map_playground }
+      format.json { render json: @locations }
+    end
+  rescue => err
+    render json: {
+      status: "failed",
+      message: "Unable to load sample locations",
+      errors: [err]
+    }, status: :internal_server_error
   end
 
   private
