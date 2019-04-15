@@ -15,7 +15,6 @@ class CustomDeviseMailer < Devise::Mailer
       @shared_project_name = Project.find(@email_arguments[:shared_project_id]).name
       @shared_project_id = @email_arguments[:shared_project_id]
     end
-
     super # Calls DeviseMailer
   rescue => exception
     LogUtil.log_err_and_airbrake("Error sending reset_password_instructions to #{record.email} #{@email_arguments || ''}")
