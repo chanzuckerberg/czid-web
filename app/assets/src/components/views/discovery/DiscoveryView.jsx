@@ -398,12 +398,7 @@ class DiscoveryView extends React.Component {
   };
 
   handleSearchSelected = ({ key, value, text }, currentEvent) => {
-    const {
-      filters,
-      projects,
-      projectDimensions,
-      sampleDimensions
-    } = this.state;
+    const { filters, projects } = this.state;
 
     const dimensions = this.getCurrentDimensions();
 
@@ -615,16 +610,6 @@ class DiscoveryView extends React.Component {
   };
 
   handleSearchTriggered = async query => {
-    const {
-      currentTab,
-      projectDimensions,
-      projects,
-      sampleDimensions,
-      sampleIds
-    } = this.state;
-
-    const dimensions = this.getCurrentDimensions();
-
     const [clientSideSuggestions, serverSideSuggestions] = await Promise.all([
       // client side: for dimensions (host, location, tissue) and projects search
       this.getClientSideSuggestions(query),

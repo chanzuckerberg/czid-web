@@ -4,20 +4,10 @@ import FiltersIcon from "~ui/icons/FiltersIcon";
 import InfoIcon from "~ui/icons/InfoIcon";
 import Label from "~ui/labels/Label";
 import Tabs from "~ui/controls/Tabs";
-import { mapKeys } from "lodash/fp";
-import { getSearchSuggestions } from "~/api";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";
 import cx from "classnames";
 import cs from "./discovery_header.scss";
 
-const SEARCH_CATEGORIES = [
-  "taxon",
-  "project",
-  "sample",
-  "location",
-  "host",
-  "tissue"
-];
 class DiscoveryHeader extends React.Component {
   handleSearchResultSelected = (currentEvent, { result }) => {
     const { onSearchResultSelected } = this.props;
@@ -28,7 +18,6 @@ class DiscoveryHeader extends React.Component {
     // category "Location": key: "location", value: id, text: title
     // category "Host": key: "host", value: id, text: title
     // category "Tissue": key: "tissue", value: id, text: title
-    console.log(result);
     const category = result.category.toLowerCase();
     let value = result.id;
     switch (category) {
