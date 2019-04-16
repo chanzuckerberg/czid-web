@@ -17,7 +17,7 @@ export const ANALYTICS_EVENT_NAMES = {
 
 // See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06
 // See also documentation for withAnalytics below.
-export const logAnalyticsEvent = (eventName, eventData = {}) => {
+export const logAnalyticsEvent = async (eventName, eventData = {}) => {
   if (window.analytics) {
     // Include high value user groups in event properties to avoid JOINs downstream.
     if (window.analytics.user) {
@@ -29,6 +29,7 @@ export const logAnalyticsEvent = (eventName, eventData = {}) => {
         czi_user: traits.biohub_user,
         demo_user: traits.demo_user,
         has_samples: traits.has_samples,
+        git_version: window.GIT_VERSION,
         // label and category are for Google Analytics. See
         // https://segment.com/docs/destinations/google-analytics/#track
         label: JSON.stringify(eventData),
@@ -70,6 +71,11 @@ export const logAnalyticsEvent = (eventName, eventData = {}) => {
  *
  **/
 export const withAnalytics = (handleEvent, eventName, eventData = {}) => {
+  if (typeof handleEvent !== "function") {
+    // eslint-disable-next-line no-console
+    console.error(`Missing event handler function "${handleEvent}"`);
+  }
+
   const [componentName, friendlyName, ...actionType] = eventName.split("_");
 
   if (!(componentName && friendlyName && actionType.length)) {
@@ -99,7 +105,7 @@ export const withAnalytics = (handleEvent, eventName, eventData = {}) => {
     const val = eventData[k];
     if (isArray(val) || isObject(val)) {
       // eslint-disable-next-line no-console
-      console.warn(`${val} should be a scalar value`);
+      console.warn(`${val} should be a scalar in "${eventName}"`);
     }
   }
 

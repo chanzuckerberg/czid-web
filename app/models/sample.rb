@@ -662,7 +662,18 @@ class Sample < ApplicationRecord
     end
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error(e)
-    return e
+    # Don't send the detailed error message to the user.
+    return {
+      status: "error",
+      error: "There was an error saving your metadata."
+    }
+  rescue ActiveRecord::RangeError => e
+    Rails.logger.error(e)
+    # Don't send the detailed error message to the user.
+    return {
+      status: "error",
+      error: "The value you provided was too large."
+    }
   end
 
   # Validate metadatum entry on this sample, without saving.
