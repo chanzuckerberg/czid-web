@@ -1,19 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import MapGL, { Marker } from "react-map-gl";
+import { Marker } from "react-map-gl";
 
 import CheckmarkIcon from "~ui/icons/CheckmarkIcon";
-import cs from "./map_playground.scss";
+import BaseMap from "~/components/views/discovery/BaseMap";
 
 class MapPlayground extends React.Component {
   state = {
-    viewport: {
-      width: 1000,
-      height: 1000,
-      latitude: 37.7577,
-      longitude: -122.4376,
-      zoom: 8
-    }
+    toDisplay: []
   };
 
   componentDidMount() {
@@ -51,21 +45,15 @@ class MapPlayground extends React.Component {
 
   render() {
     const { mapTilerKey } = this.props;
-    const { viewport, toDisplay } = this.state;
+    const { toDisplay } = this.state;
 
-    return toDisplay ? (
-      <div>
-        <div className={cs.mapContainer}>
-          <MapGL
-            {...viewport}
-            onViewportChange={viewport => this.setState({ viewport })}
-            mapStyle={`https://api.maptiler.com/maps/f18295ae-cc7c-4b79-a146-24c503367ffd/style.json?key=${mapTilerKey}`}
-          >
-            {toDisplay.map(this.renderMarker)}
-          </MapGL>
-        </div>
-      </div>
-    ) : null;
+    return (
+      <BaseMap
+        markers={toDisplay}
+        mapTilerKey={mapTilerKey}
+        renderMarker={this.renderMarker}
+      />
+    );
   }
 }
 
