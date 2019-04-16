@@ -50,7 +50,7 @@ class SampleUploadFlowHeader extends React.Component {
                     target="_blank"
                     className={cs.link}
                   >
-                    Instructions here.
+                    View CLI Instructions.
                   </a>
                 </div>
               )}
