@@ -1,4 +1,6 @@
 module ElasticsearchHelper
+  MAX_SEARCH_RESULTS = 50
+
   def prefix_match(model, field, prefix, condition)
     prefix = sanitize(prefix)
     search_params = { query: { query_string: { query: "#{prefix}*", analyze_wildcard: true, fields: [field] } } }
@@ -23,7 +25,7 @@ module ElasticsearchHelper
     taxon_ids = []
     tax_levels.each do |level|
       search_params = {
-        size: 50,
+        size: ElasticsearchHelper::MAX_SEARCH_RESULTS,
         query: {
           query_string: {
             query: "#{prefix}*",
