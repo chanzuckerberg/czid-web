@@ -37,8 +37,9 @@ class ApplicationRecord < ActiveRecord::Base
     properties = {
       # There should always be an id but just in case...
       id: record.respond_to?(:id) ? record.id : nil,
-      # Add string name for convenience if available
-      name: record.respond_to?(:name) ? record.name : nil,
+      # Add string name for convenience if available, except for people's names,
+      # which are PII and thus prohibited from Google Analytics.
+      name: record.respond_to?(:name) && record.class.name != :User ? record.name : nil,
       # Set common belongs_to IDs if available
       user_id: record.respond_to?(:user_id) ? record.user_id : nil,
       project_id: record.respond_to?(:project_id) ? record.project_id : nil,
