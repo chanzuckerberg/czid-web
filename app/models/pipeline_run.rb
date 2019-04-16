@@ -991,6 +991,8 @@ class PipelineRun < ApplicationRecord
   end
 
   def self.download_file(s3_path, destination, dest_is_dir = true)
+    # If the destination path is a directory, create the directory if necessary and append the file name to the end of the destination path.
+    # If the destination path is a file name, assume that the parent directories already exist.
     Syscall.run("mkdir", "-p", destination) if dest_is_dir
     destination_path = dest_is_dir ? "#{destination}/#{File.basename(s3_path)}" : destination
     success = Syscall.s3_cp(s3_path, destination_path)
