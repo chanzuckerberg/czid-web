@@ -75,8 +75,8 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert JSON.parse(@response.body).count == 1
     result = JSON.parse(@response.body)[0]
-    assert_equal result, metadata(:sample_mosquito_joe_collection_location).string_validated_value
-    assert_not_equal result, metadata(:sample_mosquito_collection_location).string_validated_value
+    assert_equal result, metadata(:sample_joe_collection_location).string_validated_value
+    assert_not_equal result, metadata(:sample_collection_location).string_validated_value
   end
 
   test "user can see a map playground error" do
