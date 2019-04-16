@@ -350,31 +350,39 @@ class SampleView extends React.Component {
       taxonName: "Cutibacterium acnes",
       accessionSummaries: [
         {
-          id: "CP012352.1",
-          num_contigs: 0,
-          num_reads: 2,
-          name:
-            "Cutibacterium acnes strain PA_15_2_L1 chromosome, complete genome"
-        },
-        {
           id: "CP012647.1",
+          name:
+            "Cutibacterium acnes strain KCOM 1861 (= ChDC B594) chromosome, complete genome",
           num_contigs: 1,
           num_reads: 4,
-          name:
-            "Cutibacterium acnes strain KCOM 1861 (= ChDC B594) chromosome, complete genome"
+          score: 478,
+          coverage_depth: 0.001
         },
         {
           id: "AE017283.1",
+          name: "Propionibacterium acnes KPA171202, complete genome",
           num_contigs: 0,
           num_reads: 10,
-          name: "Propionibacterium acnes KPA171202, complete genome"
+          score: 0,
+          coverage_depth: 0
         },
         {
           id: "CP012350.1",
+          name:
+            "Cutibacterium acnes strain PA_30_2_L1 chromosome, complete genome",
           num_contigs: 0,
           num_reads: 2,
+          score: 0,
+          coverage_depth: 0
+        },
+        {
+          id: "CP012352.1",
           name:
-            "Cutibacterium acnes strain PA_30_2_L1 chromosome, complete genome"
+            "Cutibacterium acnes strain PA_15_2_L1 chromosome, complete genome",
+          num_contigs: 0,
+          num_reads: 2,
+          score: 0,
+          coverage_depth: 0
         }
       ]
     };

@@ -54,6 +54,18 @@
     }
   }
 
+  .item {
+    cursor: pointer;
+
+    &:hover {
+      background-color: $transparent-lightest-grey;
+    }
+
+    &.active {
+      font-weight: bold;
+    }
+  }
+
   .menu {
     min-width: 100%;
     background-color: $white;

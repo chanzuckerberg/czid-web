@@ -13,6 +13,7 @@ x-web-variables: &web-variables
   ? SEGMENT_JS_ID
   ? SEGMENT_RUBY_ID
   ? LOCATION_IQ_API_KEY
+  ? MAPTILER_API_KEY
 
 x-aws-variables: &aws-variables
   ? AWS_ACCESS_KEY_ID
