@@ -7,6 +7,7 @@ module ErrorHelper
     INVALID_OPTION = "Invalid option for metadata field.".freeze
     INVALID_DATE = "Invalid date for metadata field.".freeze
     INVALID_NUMBER = "Invalid number for metadata field.".freeze
+    NUMBER_OUT_OF_RANGE = "Number is out of range.".freeze
   end
 
   module MetadataUploadErrors
