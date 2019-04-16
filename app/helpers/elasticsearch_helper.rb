@@ -42,7 +42,7 @@ module ElasticsearchHelper
       search_taxon_ids = search_response.aggregations.distinct_taxa.buckets.pluck(:key)
 
       taxon_data = TaxonLineage
-        .where("#{level}_taxid": search_taxon_ids)
+        .where("#{level}_taxid" => search_taxon_ids)
         .order(id: :desc)
         .distinct("#{level}_taxid")
         .pluck("#{level}_name", "#{level}_taxid")
@@ -59,7 +59,7 @@ module ElasticsearchHelper
       taxon_ids += search_taxon_ids
     end
 
-    taxon_ids = filter_by_samples(taxon_ids, filters[:sample_ids]) if filters[:sample_ids]
+    taxon_ids = filter_by_samples(taxon_ids, filters[:samples]) if filters[:samples]
     taxon_ids = filter_by_project(taxon_ids, filters[:project_id]) if filters[:project_id]
 
     return matching_taxa.select{|taxon| taxon_ids.include? taxon["taxid"]}
@@ -68,15 +68,17 @@ module ElasticsearchHelper
   private
 
   def filter_by_samples(taxon_ids, samples)
-    return Set.new(TaxonCount
-      .joins(pipeline_run: :sample)
-      .where(
+    return samples
+      .joins(:pipeline_runs)
+      .includes(pipeline_runs: :taxon_counts)
+      .where(taxon_counts: { 
         tax_id: taxon_ids,
-        samples: samples)
-      .where(count_type: ["NT", "NR"])
+        count_type: ["NT", "NR"],
+        count: 0...Float::INFINITY
+      })
       .where("`taxon_counts`.count > 0")
-      .distinct(:tax_id)
-      .pluck(:tax_id))
+      .distinct(taxon_counts: :tax_id)
+      .pluck(:tax_id)
   end
 
   # Took 250ms in local testing on real data

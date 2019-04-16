@@ -362,10 +362,10 @@ class SamplesController < ApplicationController
 
     if !categories || categories.include?("host")
       hosts = Samples
-        .where(id: viewable_sample_ids)
-        .joins(:host_genome)
-        .where("`host_genmes`.name LIKE :search", search: "#{query}%")
-        .distinct(:host_genome)
+              .where(id: viewable_sample_ids)
+              .joins(:host_genome)
+              .where("`host_genmes`.name LIKE :search", search: "#{query}%")
+              .distinct(:host_genome)
       unless hosts.empty?
         results["Host"] = {
           "name" => "Host",
@@ -387,7 +387,7 @@ class SamplesController < ApplicationController
         }
       end
     end
-    
+
     if !categories || categories.include?("location")
       locations = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "collection_location")
       unless locations.empty?
@@ -399,7 +399,7 @@ class SamplesController < ApplicationController
         }
       end
     end
-    
+
     if !categories || categories.include?("tissue")
       tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "sample_type")
       unless tissues.empty?
@@ -413,7 +413,7 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("taxon")
-      taxon_list = taxon_search(query, ["species", "genus"], {samples: viewable_samples})
+      taxon_list = taxon_search(query, ["species", "genus"], samples: viewable_samples)
       unless taxon_list.empty?
         results["Taxon"] = {
           "name" => "Taxon",
