@@ -18,7 +18,8 @@ import {
   getHistogramTooltipData,
   getGenomeVizTooltipData,
   generateCoverageVizData,
-  generateContigReadVizData
+  generateContigReadVizData,
+  getSortedAccessionSummaries
 } from "./utils";
 import cs from "./coverage_viz_bottom_sidebar.scss";
 
@@ -67,7 +68,7 @@ const METRIC_COLUMNS = [
   ],
   [
     {
-      key: "avgCoverageDepth",
+      key: "coverageDepth",
       name: "Avg. Coverage Depth",
       tooltip:
         "The total length of all aligned contigs and reads, divided by the accession length."
@@ -111,7 +112,9 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
     // TODO(mark): Select the best accessionSummary by score.
     if (params.accessionSummaries !== prevProps.params.accessionSummaries) {
-      this.setCurrentAccession(get([2, "id"], params.accessionSummaries));
+      this.setCurrentAccession(
+        get([0, "id"], getSortedAccessionSummaries(params.accessionSummaries))
+      );
     }
 
     if (!prevState.currentAccessionData && currentAccessionData) {
@@ -271,10 +274,29 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
   getAccessionOptions = () => {
     const { params } = this.props;
-    return params.accessionSummaries.map(summary => ({
-      text: summary.id,
-      value: summary.id
-    }));
+    return getSortedAccessionSummaries(params.accessionSummaries).map(
+      summary => ({
+        value: summary.id,
+        text: summary.id,
+        customNode: (
+          <BasicPopup
+            trigger={
+              <div className={cs.option}>
+                <div className={cs.optionText}>{summary.id}</div>
+                <div className={cs.optionSubtext}>
+                  {summary.num_contigs} contigs, {summary.coverage_depth}x
+                  coverage
+                </div>
+              </div>
+            }
+            inverted
+            content={summary.name}
+            horizontalOffset={5}
+            position="left center"
+          />
+        )
+      })
+    );
   };
 
   getAccessionMetrics = () => {
@@ -311,7 +333,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       referenceLength: currentAccessionData.total_length,
       alignedContigs: currentAccessionSummary.num_contigs,
       maxAlignedLength: currentAccessionData.max_aligned_length,
-      avgCoverageDepth: currentAccessionData.avg_coverage_depth,
+      coverageDepth: currentAccessionData.coverage_depth,
       coverageBreadth: currentAccessionData.coverage_breadth,
       alignedReads: currentAccessionSummary.num_reads,
       avgMismatchedPercent: currentAccessionData.avg_prop_mismatch

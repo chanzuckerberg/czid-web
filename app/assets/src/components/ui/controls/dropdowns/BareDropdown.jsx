@@ -1,6 +1,15 @@
 // This component allows you to easily add a dropdown of options to any trigger element
 // Wraps around Semantic UI Dropdown, with react-popper as an alternative.
 
+// NOTE ABOUT CUSTOMIZING THE DROPDOWN:
+// If you don't want the user to be able to select a value, and you want to specify
+// custom onClick behavior yourself, use props.options. For example, if you want to provide the user
+// with a menu of options.
+// If you do want the user to be able to select a value, and you want the option to be rendered in a
+// custom way, use props.items and specify a "customNode" for each item.
+
+// TODO(mark): Refactor this component to remove props.options and props.itemSearchStrings, which are confusing and
+// redundant with props.items.customNode and props.children.
 import React from "react";
 import cx from "classnames";
 import { omit, zip, filter, map, nth, sortBy } from "lodash/fp";
@@ -22,16 +31,30 @@ class BareDropdown extends React.Component {
 
   // If the user provides us options instead of items, we will render them like this.
   renderItemsDefault = options => {
-    return options.map(option => (
-      <BaseDropdown.Item
-        key={option.value}
-        onClick={() => this.props.onChange(option.value)}
-        active={this.props.value === option.value}
-        className={cs.item}
-      >
-        {option.text}
-      </BaseDropdown.Item>
-    ));
+    return options.map(
+      option =>
+        option.customNode ? (
+          <div
+            key={option.value}
+            onClick={() => this.props.onChange(option.value)}
+            className={cx(
+              cs.item,
+              this.props.value === option.value && cs.active
+            )}
+          >
+            {option.customNode}
+          </div>
+        ) : (
+          <BaseDropdown.Item
+            key={option.value}
+            onClick={() => this.props.onChange(option.value)}
+            active={this.props.value === option.value}
+            className={cs.item}
+          >
+            {option.text}
+          </BaseDropdown.Item>
+        )
+    );
   };
 
   handleFilterChange = filterString => {
@@ -227,7 +250,9 @@ BareDropdown.propTypes = forbidExtraProps({
   options: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.any,
-      text: PropTypes.node
+      text: PropTypes.node,
+      // Custom node to render for the option.
+      customNode: PropTypes.node
     })
   ),
   value: PropTypes.any,
