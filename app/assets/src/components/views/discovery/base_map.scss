@@ -2,4 +2,17 @@
 
 .mapContainer {
   display: inline-block;
+
+  .zoomControl {
+    position: absolute;
+    bottom: 45px;
+    right: 25px;
+
+    button {
+      &:focus {
+        // Override materialize.css
+        background-color: transparent !important;
+      }
+    }
+  }
 }
