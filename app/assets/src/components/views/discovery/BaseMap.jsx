@@ -40,8 +40,8 @@ class BaseMap extends React.Component {
 }
 
 BaseMap.propTypes = {
-  markers: PropTypes.array,
   mapTilerKey: PropTypes.string.isRequired,
+  markers: PropTypes.array,
   renderMarker: PropTypes.func,
   width: PropTypes.number,
   height: PropTypes.number,
