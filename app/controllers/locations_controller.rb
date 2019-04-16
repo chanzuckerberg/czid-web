@@ -33,9 +33,10 @@ class LocationsController < ApplicationController
 
   def map_playground
     # Show all viewable locations
-    field_id = MetadataField.find_by(name: "collection_location")
-    viewable = current_power.samples.pluck(:id)
-    @locations = Metadatum.where(metadata_field_id: field_id).where(sample_id: viewable).pluck(:string_validated_value)
+    field_id = MetadataField.find_by(name: "collection_location").id
+    @locations = current_power.samples
+                              .includes(metadata: :metadata_field)
+                              .where(metadata: { metadata_field_id: field_id }).pluck(:string_validated_value)
 
     respond_to do |format|
       format.html { render :map_playground }
