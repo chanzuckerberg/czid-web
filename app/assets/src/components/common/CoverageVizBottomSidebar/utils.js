@@ -1,5 +1,6 @@
 import memoize from "memoize-one";
 import { sortBy } from "lodash/fp";
+import { formatPercent } from "~/components/utils/format";
 
 // Gets called on every mouse move, so need to memoize.
 export const getHistogramTooltipData = memoize(
@@ -15,12 +16,13 @@ export const getHistogramTooltipData = memoize(
         data: [
           [
             "Base Pair Range",
-            `${Math.round(coverageObj[0] * binSize)} - ${Math.round(
+            // \u2013 is en-dash
+            `${Math.round(coverageObj[0] * binSize)}\u2013${Math.round(
               (coverageObj[0] + 1) * binSize
             )}`
           ],
-          ["Average Coverage Depth", coverageObj[1]],
-          ["Coverage Breadth", coverageObj[2]],
+          ["Average Coverage Depth", `${coverageObj[1]}x`],
+          ["Coverage Breadth", formatPercent(coverageObj[2])],
           ["Overlapping Contigs", coverageObj[3]],
           ["Overlapping Reads", coverageObj[4]]
         ]
@@ -59,10 +61,10 @@ export const getGenomeVizTooltipData = memoize((accessionData, dataIndex) => {
     name = "Read";
   } else if (numContigs > 1) {
     name = "Aggregated Contigs";
-    counts = [["# Contigs", numContigs], ["Read Count", hitObj[2]]];
+    counts = [["# Contigs", numContigs], ["Contig Read Count", hitObj[2]]];
   } else if (numContigs == 1) {
     name = "Contig";
-    counts = [["Read Count", hitObj[2]]];
+    counts = [["Contig Read Count", hitObj[2]]];
   }
 
   const averagePrefix = multipleHits ? "Avg. " : "";
@@ -74,7 +76,8 @@ export const getGenomeVizTooltipData = memoize((accessionData, dataIndex) => {
         ...counts,
         [
           "Reference Alignment Range",
-          `${Math.round(hitObj[3])} - ${Math.round(hitObj[4])}`
+          // \u2013 is en-dash
+          `${Math.round(hitObj[3])}\u2013${Math.round(hitObj[4])}`
         ],
         [averagePrefix + "Alignment Length", hitObj[5]],
         [averagePrefix + "Percentage Matched", hitObj[6]],
@@ -119,5 +122,5 @@ export const generateContigReadVizData = (hitGroups, coverageBinSize) => {
 };
 
 // Sort by score descending.
-export const getSortedAccessionSummaries = summaries =>
-  sortBy(summary => -summary.score, summaries);
+export const getSortedAccessionSummaries = data =>
+  sortBy(summary => -summary.score, data.best_accessions);

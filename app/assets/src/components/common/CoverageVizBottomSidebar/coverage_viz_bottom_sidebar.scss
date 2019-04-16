@@ -26,6 +26,15 @@
     .subtitle {
       @include font-body-xs;
     }
+
+    .notShownMsg {
+      color: $light-grey;
+      margin-left: 5px;
+    }
+
+    .helpIcon {
+      margin-left: 5px;
+    }
   }
 
   .fill {
