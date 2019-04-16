@@ -361,10 +361,9 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("host")
-      hosts = Samples
-              .where(id: viewable_sample_ids)
+      hosts = viewable_samples
               .joins(:host_genome)
-              .where("`host_genmes`.name LIKE :search", search: "#{query}%")
+              .where("`host_genomes`.name LIKE :search", search: "#{query}%")
               .distinct(:host_genome)
       unless hosts.empty?
         results["Host"] = {

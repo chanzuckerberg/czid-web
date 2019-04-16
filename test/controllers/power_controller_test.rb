@@ -180,6 +180,31 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     assert !projects_shown.include?(projects(:one).id)
   end
 
+  test 'joe sees only library samples in search suggestions in library domain' do
+    get "/search_suggestions?domain=library"
+    res = JSON.parse(@response.body)
+    samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
+    assert samples_shown.include?(samples(:joe_sample).id)
+    assert !samples_shown.include?(samples(:public_sample).id)
+  end
+
+  test 'joe sees only public samples in search suggestions in my data domain' do
+    get "/search_suggestions?domain=public"
+    res = JSON.parse(@response.body)
+    samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
+    assert samples_shown.include?(samples(:public_sample).id)
+    assert !samples_shown.include?(samples(:joe_sample).id)
+  end
+
+  test 'joe sees library and public samples in search suggestions in default domain' do
+    get "/search_suggestions"
+    res = JSON.parse(@response.body)
+    samples_shown = res["Sample"]["results"].map { |h| h["sample_ids"] }.flatten
+    assert samples_shown.include?(samples(:public_sample).id)
+    assert samples_shown.include?(samples(:joe_sample).id)
+    assert !samples_shown.include?(samples(:project_one_sampleA).id)
+  end
+
   # public projects
 
   test 'joe cannot add users to public_project ' do
