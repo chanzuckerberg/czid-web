@@ -24,7 +24,7 @@ class BaseMap extends React.Component {
     const { mapTilerKey, renderMarker, markers } = this.props;
     const { viewport } = this.state;
 
-    const styleID = "a63d8846-0896-4fd0-b062-c9d992a49b63";
+    const styleID = "6041e288-ea0e-4a64-b0f6-78172d56a657";
     const styleURL = `https://api.maptiler.com/maps/${styleID}/style.json?key=${mapTilerKey}`;
     return (
       <div className={cs.mapContainer}>
