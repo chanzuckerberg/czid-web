@@ -120,7 +120,8 @@ class PhyloTree < ApplicationRecord
     # Detect if batch job has failed so we can stop polling for results.
     # Also, populate job_log_id.
     return if throttle && rand >= 0.1 # if throttling, do time-consuming aegea checks only 10% of the time
-    job_status, self.job_log_id, _job_hash, self.job_description = job_info(job_id, id)
+    job_status, job_log_id_response, _job_hash, self.job_description = job_info(job_id, id)
+    self.job_log_id = job_log_id_response unless job_log_id # don't overwrite once it's been set (job_log_id_response could be nil after job has terminated)
     required_outputs = select_outputs("required")
     update_pipeline_version(self, :dag_version, dag_version_file) if job_status == "SUCCEEDED" && dag_version.blank?
     if job_status == PipelineRunStage::STATUS_FAILED ||
@@ -207,11 +208,13 @@ class PhyloTree < ApplicationRecord
     end
     # Retrieve superkigdom name for idseq-dag
     superkingdom_name = TaxonLineage.where(taxid: taxid).last.superkingdom_name
-    # Get fasta paths and alignment viz paths for each pipeline_run
-    align_viz_files = {}
+    # Get fasta paths and hitsummary2 paths for each pipeline_run
+    hitsummary2_files = {}
     pipeline_runs.each do |pr|
-      level_name = TaxonCount::LEVEL_2_NAME[tax_level] # "species" or "genus"
-      align_viz_files[pr.id] = pr.alignment_viz_json_s3("nt.#{level_name}.#{taxid}") # align_viz only exists for NT
+      hitsummary2_files[pr.id] = [
+        "#{pr.postprocess_output_s3_path}/assembly/gsnap.hitsummary2.tab",
+        "#{pr.postprocess_output_s3_path}/assembly/rapsearch2.hitsummary2.tab"
+      ]
       entry = taxon_byteranges_hash[pr.id]
       entry.keys.each do |hit_type|
         entry[hit_type] += [pr.s3_paths_for_taxon_byteranges[tax_level][hit_type]]
@@ -228,7 +231,7 @@ class PhyloTree < ApplicationRecord
       reference_taxids: reference_taxids,
       superkingdom_name: superkingdom_name,
       taxon_byteranges: taxon_byteranges_hash,
-      align_viz_files: align_viz_files,
+      hitsummary2_files: hitsummary2_files,
       nt_db: alignment_config.s3_nt_db_path,
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
       sample_names_by_run_ids: sample_names_by_run_ids
