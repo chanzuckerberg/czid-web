@@ -1,4 +1,7 @@
 class LocationsController < ApplicationController
+  GEOSEARCH_ERR_MSG = "Unable to perform geosearch".freeze
+  LOCATION_LOAD_ERR_MSG = "Unable to load sample locations".freeze
+
   def external_search
     results = []
     query = location_params[:query]
@@ -26,7 +29,7 @@ class LocationsController < ApplicationController
   rescue => err
     render json: {
       status: "failed",
-      message: "Unable to perform geosearch",
+      message: GEOSEARCH_ERR_MSG,
       errors: [err]
     }, status: :internal_server_error
   end
@@ -45,7 +48,7 @@ class LocationsController < ApplicationController
   rescue => err
     render json: {
       status: "failed",
-      message: "Unable to load sample locations",
+      message: LOCATION_LOAD_ERR_MSG,
       errors: [err]
     }, status: :internal_server_error
   end
