@@ -191,3 +191,20 @@
   // So the tooltip appears on the top-right instead of bottom-right of mouse.
   transform: translateY(-100%);
 }
+
+// TODO(mark):
+// If text-subtext options become more common, add this to BareDropdown as an official alternative option.
+.option {
+  padding: 6px 16px;
+
+  .optionText {
+    @include font-body-xs;
+    color: $darkest-grey;
+  }
+
+  .optionSubtext {
+    @include font-body-xxs;
+    color: $light-grey;
+    font-weight: $font-weight-regular;
+  }
+}

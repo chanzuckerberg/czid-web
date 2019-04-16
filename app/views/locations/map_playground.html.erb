@@ -1,0 +1,15 @@
+<div id="MapPlayground_page">
+
+<%= javascript_tag do %>
+  react_component(
+  'MapPlayground',
+  {
+    locations: JSON.parse('<%= raw escape_json(@locations) %>'),
+    mapTilerKey: '<%= ENV["MAPTILER_API_KEY"] %>',
+
+  },
+  'MapPlayground_page'
+  );
+<% end %>
+
+</div>
