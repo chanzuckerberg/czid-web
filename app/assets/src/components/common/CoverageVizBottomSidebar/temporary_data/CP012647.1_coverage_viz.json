@@ -64,7 +64,7 @@
   ],
   "coverage_bin_size": 5044.876,
   "max_aligned_length": 239,
-  "avg_coverage_depth": 0.001,
+  "coverage_depth": 0.001,
   "coverage_breadth": 0,
   "avg_prop_mismatch": 0.003
 }

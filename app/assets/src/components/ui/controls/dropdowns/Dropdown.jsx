@@ -86,6 +86,8 @@ class Dropdown extends React.Component {
         trigger={this.renderTrigger()}
         usePortal={this.props.usePortal}
         withinModal={this.props.withinModal}
+        items={this.props.items}
+        itemSearchStrings={this.props.itemSearchStrings}
       />
     );
   }
@@ -102,9 +104,17 @@ Dropdown.propTypes = {
     PropTypes.shape({
       text: PropTypes.string.isRequired,
       value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-        .isRequired
+        .isRequired,
+      // Optional node element will be rendered instead of text.
+      // Text will still be used in the <DropdownTrigger>
+      customNode: PropTypes.node
     })
   ).isRequired,
+  // Custom props for rendering items
+  items: PropTypes.arrayOf(PropTypes.node),
+  // If search is true, and you provide pre-rendered "items" instead of "options",
+  // you must also provide a list of strings to search by.
+  itemSearchStrings: PropTypes.arrayOf(PropTypes.string),
   onChange: PropTypes.func.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   search: PropTypes.bool,

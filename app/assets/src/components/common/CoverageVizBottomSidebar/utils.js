@@ -1,4 +1,5 @@
 import memoize from "memoize-one";
+import { sortBy } from "lodash/fp";
 
 // Gets called on every mouse move, so need to memoize.
 export const getHistogramTooltipData = memoize(
@@ -116,3 +117,7 @@ export const generateContigReadVizData = (hitGroups, coverageBinSize) => {
 
   return hitGroups.map(hit => getDisplayNumbers(hit));
 };
+
+// Sort by score descending.
+export const getSortedAccessionSummaries = summaries =>
+  sortBy(summary => -summary.score, summaries);
