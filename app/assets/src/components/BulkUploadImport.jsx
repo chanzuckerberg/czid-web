@@ -965,7 +965,7 @@ class BulkUploadImport extends React.Component {
               rel="noopener noreferrer"
             >
               {" "}
-              Instructions here.
+              View CLI Instructions.
             </a>
           </p>
         </div>
