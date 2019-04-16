@@ -397,9 +397,9 @@ class PipelineRun < ApplicationRecord
 
   def db_load_input_validations
     file = Tempfile.new
-    Syscall.s3_cp(s3_file_for("input_validations"), file.path)
-    dict = JSON.parse(File.read(file))
-    error_message = dict["Validation error"]
+    downloaded = PipelineRun.download_file_with_retries(s3_file_for("input_validations"),
+                                                        file.path, 3, false)
+    error_message = downloaded ? JSON.parse(File.read(file))["Validation error"] : nil
     update(error_message: error_message) if error_message
     file.unlink
   end
@@ -980,22 +980,25 @@ class PipelineRun < ApplicationRecord
     "#{LOCAL_AMR_DRUG_SUMMARY_PATH}/#{id}"
   end
 
-  def self.download_file_with_retries(s3_path, destination_dir, max_tries)
+  def self.download_file_with_retries(s3_path, destination, max_tries, dest_is_dir = true)
     round = 0
     while round < max_tries
-      downloaded = PipelineRun.download_file(s3_path, destination_dir)
+      downloaded = PipelineRun.download_file(s3_path, destination, dest_is_dir)
       return downloaded if downloaded
       round += 1
       sleep(15)
     end
   end
 
-  def self.download_file(s3_path, destination_dir)
-    command = "mkdir -p #{destination_dir};"
-    command += "aws s3 cp #{s3_path} #{destination_dir}/;"
-    _stdout, _stderr, status = Open3.capture3(command)
-    return nil unless status.exitstatus.zero?
-    "#{destination_dir}/#{File.basename(s3_path)}"
+  def self.download_file(s3_path, destination, dest_is_dir = true)
+    Syscall.run("mkdir", "-p", destination) if dest_is_dir
+    destination_path = dest_is_dir ? "#{destination}/#{File.basename(s3_path)}" : destination
+    success = Syscall.s3_cp(s3_path, destination_path)
+    if success
+      return destination_path
+    else
+      return nil
+    end
   end
 
   def file_generated(s3_path)
