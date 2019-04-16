@@ -3,7 +3,8 @@ import PropTypes from "prop-types";
 import { Marker } from "react-map-gl";
 
 import CheckmarkIcon from "~ui/icons/CheckmarkIcon";
-import BaseMap from "~/components/views/discovery/BaseMap";
+import BaseMap from "~/components/views/discovery/mapping/BaseMap";
+import BubbleMarker from "./BubbleMarker";
 
 class MapPlayground extends React.Component {
   state = {
@@ -43,6 +44,18 @@ class MapPlayground extends React.Component {
     );
   };
 
+  renderMarkerBubble = (point, index) => {
+    return (
+      <Marker
+        key={`marker-${index}`}
+        longitude={point.longitude}
+        latitude={point.latitude}
+      >
+        <BubbleMarker />
+      </Marker>
+    );
+  };
+
   render() {
     const { mapTilerKey } = this.props;
     const { toDisplay } = this.state;
@@ -51,7 +64,7 @@ class MapPlayground extends React.Component {
       <BaseMap
         markers={toDisplay}
         mapTilerKey={mapTilerKey}
-        renderMarker={this.renderMarker}
+        renderMarker={this.renderMarkerBubble}
       />
     );
   }
