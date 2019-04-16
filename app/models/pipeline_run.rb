@@ -55,6 +55,7 @@ class PipelineRun < ApplicationRecord
   OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
+  INPUT_VALIDATION_NAME = "validate_input_summary.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
@@ -127,7 +128,8 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADING_QUEUED = 'LOADING_QUEUED'.freeze
   STATUS_LOADING_ERROR = 'LOADING_ERROR'.freeze
 
-  LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
+  LOADERS_BY_OUTPUT = { "input_validations" => "db_load_input_validations",
+                        "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
@@ -294,7 +296,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
+    target_outputs = %w[input_validations ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
 
     # Then, generate output_states
     output_state_entries = []
@@ -391,6 +393,15 @@ class PipelineRun < ApplicationRecord
 
   def succeeded?
     job_status == STATUS_CHECKED
+  end
+
+  def db_load_input_validations
+    file = Tempfile.new
+    Syscall.s3_cp(s3_file_for("input_validations"), file.path)
+    dict = JSON.parse(File.read(file))
+    error_message = dict["Validation error"]
+    update(error_message: error_message) if error_message
+    file.unlink
   end
 
   def db_load_ercc_counts
@@ -662,6 +673,8 @@ class PipelineRun < ApplicationRecord
     end
 
     case output
+    when "input_validations"
+      "#{host_filter_output_s3_path}/#{INPUT_VALIDATION_NAME}"
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     when "amr_counts"
