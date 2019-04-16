@@ -4,9 +4,11 @@ import FiltersIcon from "~ui/icons/FiltersIcon";
 import InfoIcon from "~ui/icons/InfoIcon";
 import Label from "~ui/labels/Label";
 import Tabs from "~ui/controls/Tabs";
-import SearchBox from "~ui/controls/SearchBox";
-import cs from "./discovery_header.scss";
+import { mapKeys } from "lodash/fp";
+import { getSearchSuggestions } from "~/api";
+import LiveSearchBox from "~ui/controls/LiveSearchBox";
 import cx from "classnames";
+import cs from "./discovery_header.scss";
 
 const SEARCH_CATEGORIES = [
   "taxon",
@@ -26,6 +28,7 @@ class DiscoveryHeader extends React.Component {
     // category "Location": key: "location", value: id, text: title
     // category "Host": key: "host", value: id, text: title
     // category "Tissue": key: "tissue", value: id, text: title
+    console.log(result);
     const category = result.category.toLowerCase();
     let value = result.id;
     switch (category) {
@@ -65,6 +68,7 @@ class DiscoveryHeader extends React.Component {
       currentTab,
       filterCount,
       onFilterToggle,
+      onSearchTriggered,
       onStatsToggle,
       onTabChange,
       showFilters,
@@ -86,10 +90,9 @@ class DiscoveryHeader extends React.Component {
           />
         </div>
         <div className={cs.searchContainer}>
-          <SearchBox
+          <LiveSearchBox
             category
-            serverSearchAction="search_suggestions"
-            serverSearchActionArgs={{ categories: SEARCH_CATEGORIES }}
+            onSearchTriggered={onSearchTriggered}
             onResultSelect={this.handleSearchResultSelected}
             onEnter={this.handleSearchEnterPressed}
             initialValue=""
@@ -134,6 +137,7 @@ DiscoveryHeader.propTypes = {
   onStatsToggle: PropTypes.func,
   onSearchEnterPressed: PropTypes.func,
   onSearchResultSelected: PropTypes.func,
+  onSearchTriggered: PropTypes.func,
   onTabChange: PropTypes.func,
   showFilters: PropTypes.bool,
   showStats: PropTypes.bool

@@ -1,0 +1,73 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.liveSearchBox {
+  input[type="text"] {
+    @include font-body-xs;
+
+    height: 34px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    border: 1px solid $light-grey;
+
+    &:focus {
+      border: 1px solid $primary-light;
+      box-shadow: none !important;
+    }
+  }
+
+  :global(.prompt) {
+    width: 260px !important;
+    border-radius: 19px !important;
+  }
+
+  &:global(.ui.category.search) {
+    > :global(.results) {
+      > :global(.category) {
+        background-color: transparent;
+        margin-top: 10px;
+        padding: 0 16px;
+
+        &:last-child {
+          margin-bottom: 10px;
+        }
+
+        > :global(.name) {
+          @include font-label-s;
+
+          padding: 0;
+          text-transform: uppercase;
+        }
+
+        :global(.results) {
+          border: 0px;
+        }
+      }
+    }
+
+    :global(.category),
+    :global(.name),
+    :global(.results.visible),
+    :global(.result) {
+      display: block !important;
+      border-bottom: none !important;
+    }
+
+    :global(.results.visible) {
+      max-height: 300px;
+      overflow-y: scroll;
+    }
+
+    :global(.result) {
+      padding: 5px 0 !important;
+    }
+
+    :global(.title) {
+      font-weight: normal !important;
+    }
+
+    :global(.description) {
+      font-size: 10px;
+    }
+  }
+}

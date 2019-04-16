@@ -15,47 +15,80 @@ module ElasticsearchHelper
     results
   end
 
-  def taxon_search(prefix, tax_levels = TaxonCount::NAME_2_LEVEL.keys, project_id = nil)
+  def taxon_search(prefix, tax_levels = TaxonCount::NAME_2_LEVEL.keys, filters = {})
     return {} if Rails.env == "test"
     prefix = sanitize(prefix)
-    matching_taxa = {}
-
+    
+    matching_taxa = []
+    taxon_ids = []
     tax_levels.each do |level|
-      search_params = { query: { query_string: { query: "#{prefix}*", fields: ["#{level}_name"] } } }
-      TaxonLineage.__elasticsearch__.search(search_params).records.each do |record|
-        name = record["#{level}_name"]
-        taxid = record["#{level}_taxid"]
-        matching_taxa[name] = {
-          "title" => name,
-          "description" => "Taxonomy ID: #{taxid}",
-          "taxid" => taxid,
-          "level" => level
+      search_params = { 
+        size: 50,
+        query: { 
+          query_string: { 
+            query: "#{prefix}*", 
+            fields: ["#{level}_name"] 
+          },
+        },
+        aggs: {
+          distinct_taxa: {
+            terms: {
+              field: "#{level}_taxid"
+            }
+          }
         }
-      end
+      }
+      search_response = TaxonLineage.search(search_params)
+      search_taxon_ids = search_response.aggregations.distinct_taxa.buckets.pluck(:key)
+
+      taxon_data = TaxonLineage
+        .where("#{level}_taxid": search_taxon_ids)
+        .order(id: :desc)
+        .distinct("#{level}_taxid")
+        .pluck("#{level}_name", "#{level}_taxid")
+        .map do |name, taxid|
+          {
+            "title" => name,
+            "description" => "Taxonomy ID: #{taxid}",
+            "taxid" => taxid,
+            "level" => level
+          }
+        end
+
+      matching_taxa += taxon_data
+      taxon_ids += search_taxon_ids
     end
 
-    if project_id.present?
-      filter_by_project(matching_taxa.values, project_id)
-    else
-      matching_taxa.values
-    end
+    taxon_ids = filter_by_samples(taxon_ids, filters[:sample_ids]) if filters[:sample_ids]
+    taxon_ids = filter_by_project(taxon_ids, filters[:project_id]) if filters[:project_id]
+
+    return matching_taxa.select{|taxon| taxon_ids.include? taxon["taxid"]}
   end
 
   private
 
+  def filter_by_samples(taxon_ids, samples)
+    return Set.new(TaxonCount
+      .joins(pipeline_run: :sample)
+      .where(
+        tax_id: taxon_ids,
+        samples: samples)
+      .where(count_type: ["NT", "NR"])
+      .where("`taxon_counts`.count > 0")
+      .distinct(:tax_id)
+      .pluck(:tax_id))
+  end
+
   # Took 250ms in local testing on real data
-  def filter_by_project(matching_taxa, project_id)
-    project_tax_ids = Set.new(TaxonCount
+  def filter_by_project(taxon_ids, project_id)
+    return Set.new(TaxonCount
       .joins(pipeline_run: :sample)
       .where(samples: { project_id: project_id })
-      .where(tax_id: [matching_taxa.map { |taxa| taxa["taxid"] }])
-      .where("tax_id > 0") # negative numbers mean unknown... see TaxonLineage
+      .where(tax_id: taxon_ids)
       .where(count_type: ["NT", "NR"])
       .where("count > 0")
       .distinct()
       .pluck(:tax_id))
-
-    matching_taxa.select { |taxa| project_tax_ids.include?(taxa["taxid"]) }
   end
 
   def sanitize(prefix)

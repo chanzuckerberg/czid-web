@@ -268,11 +268,12 @@ const validateSampleFiles = sampleFiles => {
   });
 };
 
-const getSearchSuggestions = ({ categories, query }) =>
+const getSearchSuggestions = ({ categories, query, domain }) =>
   get("/search_suggestions", {
     params: {
       categories,
-      query
+      query,
+      domain
     }
   });
 

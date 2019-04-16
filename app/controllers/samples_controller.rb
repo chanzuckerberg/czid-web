@@ -320,32 +320,11 @@ class SamplesController < ApplicationController
     query = params[:query]
     # TODO: move into a search_controller or into separate controllers/models
     categories = params[:categories]
+    domain = params[:domain]
 
     # Generate structure required by CategorySearchBox
     # Not permission-dependent
     results = {}
-    if !categories || categories.include?("taxon")
-      taxon_list = taxon_search(query, ["species", "genus"])
-      unless taxon_list.empty?
-        results["Taxon"] = {
-          "name" => "Taxon",
-          "results" => taxon_list.map do |entry|
-            entry.merge("category" => "Taxon")
-          end
-        }
-      end
-    end
-    if !categories || categories.include?("host")
-      hosts = HostGenome.where("name LIKE :search", search: "#{query}%")
-      unless hosts.empty?
-        results["Host"] = {
-          "name" => "Host",
-          "results" => hosts.map do |h|
-            { "category" => "Host", "title" => h.name, "id" => h.id }
-          end
-        }
-      end
-    end
 
     # Need users
     if !categories || ["project", "sample", "location", "tissue", "uploader"].any? { |i| categories.include? i }
@@ -376,8 +355,25 @@ class SamplesController < ApplicationController
     end
 
     # Permission-dependent
-    if !categories || ["sample", "location", "tissue"].any? { |i| categories.include? i }
-      viewable_sample_ids = current_power.samples.pluck(:id)
+    if !categories || ["sample", "location", "tissue", "taxon"].any? { |i| categories.include? i }
+      viewable_samples = samples_by_domain(domain)
+      viewable_sample_ids = viewable_samples.pluck(:id)
+    end
+
+    if !categories || categories.include?("host")
+      hosts = Samples
+        .where(id: viewable_sample_ids)
+        .joins(:host_genome)
+        .where("`host_genmes`.name LIKE :search", search: "#{query}%")
+        .distinct(:host_genome)
+      unless hosts.empty?
+        results["Host"] = {
+          "name" => "Host",
+          "results" => hosts.map do |h|
+            { "category" => "Host", "title" => h.name, "id" => h.id }
+          end
+        }
+      end
     end
 
     if !categories || categories.include?("sample")
@@ -391,6 +387,7 @@ class SamplesController < ApplicationController
         }
       end
     end
+    
     if !categories || categories.include?("location")
       locations = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "collection_location")
       unless locations.empty?
@@ -402,6 +399,7 @@ class SamplesController < ApplicationController
         }
       end
     end
+    
     if !categories || categories.include?("tissue")
       tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "sample_type")
       unless tissues.empty?
@@ -409,6 +407,18 @@ class SamplesController < ApplicationController
           "name" => "Tissue",
           "results" => tissues.pluck(:string_validated_value).uniq.map do |val|
             { "category" => "Tissue", "title" => val, "id" => val }
+          end
+        }
+      end
+    end
+
+    if !categories || categories.include?("taxon")
+      taxon_list = taxon_search(query, ["species", "genus"], {samples: viewable_samples})
+      unless taxon_list.empty?
+        results["Taxon"] = {
+          "name" => "Taxon",
+          "results" => taxon_list.map do |entry|
+            entry.merge("category" => "Taxon")
           end
         }
       end

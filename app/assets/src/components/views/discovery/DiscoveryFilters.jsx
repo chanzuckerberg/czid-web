@@ -122,12 +122,21 @@ class DiscoveryFilters extends React.Component {
       visibilitySelected
     } = this.state;
 
-    const { className, host, location, time, tissue, visibility } = this.props;
+    const {
+      className,
+      domain,
+      host,
+      location,
+      time,
+      tissue,
+      visibility
+    } = this.props;
 
     return (
       <div className={cx(cs.filtersContainer, className)}>
         <div className={cs.filterContainer}>
           <TaxonFilter
+            domain={domain}
             onChange={this.handleChange.bind(this, "taxonSelected")}
             selected={taxonSelected}
           />
@@ -193,6 +202,7 @@ DiscoveryFilters.defaultProps = {
 
 DiscoveryFilters.propTypes = {
   className: PropTypes.string,
+  domain: PropTypes.string,
 
   // Filter options and counters
   host: PropTypes.array,
