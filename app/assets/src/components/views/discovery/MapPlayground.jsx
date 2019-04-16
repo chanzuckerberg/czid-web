@@ -17,8 +17,7 @@ class MapPlayground extends React.Component {
   };
 
   componentDidMount() {
-    const { locations, locationIQKey } = this.props;
-    window.unwired.key = locationIQKey;
+    const { locations } = this.props;
 
     let toDisplay = [];
     locations.forEach(loc => {
@@ -51,6 +50,7 @@ class MapPlayground extends React.Component {
   };
 
   render() {
+    const { mapTilerKey } = this.props;
     const { viewport, toDisplay } = this.state;
 
     return toDisplay ? (
@@ -59,7 +59,7 @@ class MapPlayground extends React.Component {
           <MapGL
             {...viewport}
             onViewportChange={viewport => this.setState({ viewport })}
-            mapStyle={window.unwired.getLayer("streets")}
+            mapStyle={`https://api.maptiler.com/maps/f18295ae-cc7c-4b79-a146-24c503367ffd/style.json?key=${mapTilerKey}`}
           >
             {toDisplay.map(this.renderMarker)}
           </MapGL>
@@ -71,8 +71,8 @@ class MapPlayground extends React.Component {
 
 MapPlayground.propTypes = {
   locations: PropTypes.array,
-  // Access token safe for clients (https://locationiq.com/docs-html/index.html#access-tokens)
-  locationIQKey: PropTypes.string
+  // Access tokens safe for clients
+  mapTilerKey: PropTypes.string
 };
 
 export default MapPlayground;
