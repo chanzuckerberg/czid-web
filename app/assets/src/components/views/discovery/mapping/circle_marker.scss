@@ -8,7 +8,8 @@
 
   &.hoverable {
     &:hover {
-      fill: $primary-dark;
+      fill: $primary-medium;
+      opacity: 1;
     }
   }
 }

@@ -4,7 +4,7 @@ import { Marker } from "react-map-gl";
 import { get } from "lodash/fp";
 
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
-import BubbleMarker from "~/components/views/discovery/mapping/BubbleMarker";
+import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 
 class MapPlayground extends React.Component {
   state = {
@@ -54,7 +54,7 @@ class MapPlayground extends React.Component {
         latitude={parseFloat(lat)}
         longitude={parseFloat(lon)}
       >
-        <BubbleMarker
+        <CircleMarker
           size={markerSize}
           hoverContent={`${pointCount} sample${pointCount > 1 ? "s" : ""}`}
         />

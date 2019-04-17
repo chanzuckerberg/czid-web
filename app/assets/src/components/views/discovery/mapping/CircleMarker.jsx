@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 
 import BasicPopup from "~/components/BasicPopup";
-import cs from "./bubble_marker.scss";
+import cs from "./circle_marker.scss";
 
-class BubbleMarker extends React.Component {
+class CircleMarker extends React.Component {
   render() {
     const { size, onClick, hoverContent } = this.props;
 
@@ -36,14 +36,14 @@ class BubbleMarker extends React.Component {
   }
 }
 
-BubbleMarker.propTypes = {
+CircleMarker.propTypes = {
   size: PropTypes.number,
   onClick: PropTypes.func,
   hoverContent: PropTypes.string
 };
 
-BubbleMarker.defaultProps = {
+CircleMarker.defaultProps = {
   size: 20
 };
 
-export default BubbleMarker;
+export default CircleMarker;
