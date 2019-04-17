@@ -22,8 +22,7 @@ class MapPlayground extends React.Component {
       if (loc.match(/^[-0-9.]+,(\s)?[-0-9.]+?$/)) {
         const formatted = {
           name: result.name,
-          id: result.id,
-          location: loc
+          id: result.id
         };
 
         if (locationsToSamples.hasOwnProperty(loc)) {
