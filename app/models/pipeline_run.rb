@@ -597,8 +597,7 @@ class PipelineRun < ApplicationRecord
 
   def load_taxons(downloaded_json_path, refined = false)
     json_dict = JSON.parse(File.read(downloaded_json_path))
-    pipeline_output_dict = json_dict['pipeline_output']
-    pipeline_output_dict.slice!('taxon_counts_attributes')
+    taxon_counts_attributes = json_dict.dig('pipeline_output', 'taxon_counts_attributes')
 
     # check if there's any record loaded into taxon_counts. If so, skip
     check_count_type = refined ? 'NT+' : 'NT'
@@ -607,24 +606,25 @@ class PipelineRun < ApplicationRecord
     return if loaded_records > 0
 
     # only keep counts at certain taxonomic levels
-    taxon_counts_attributes_filtered = []
     acceptable_tax_levels = [TaxonCount::TAX_LEVEL_SPECIES]
     acceptable_tax_levels << TaxonCount::TAX_LEVEL_GENUS if multihit?
     acceptable_tax_levels << TaxonCount::TAX_LEVEL_FAMILY if multihit?
-    pipeline_output_dict['taxon_counts_attributes'].each do |tcnt|
+    taxon_counts_attributes_filtered = taxon_counts_attributes.select do |tcnt|
       # TODO:  Better family support.
-      if acceptable_tax_levels.include?(tcnt['tax_level'].to_i) && !invalid_family_call?(tcnt)
-        taxon_counts_attributes_filtered << tcnt
-      end
+      acceptable_tax_levels.include?(tcnt['tax_level'].to_i) && !invalid_family_call?(tcnt)
     end
     # Set created_at and updated_at
     current_time = Time.now.utc # to match TaxonLineage date range comparison
+    tcnt_attrs_to_merge = {
+      'created_at' => current_time,
+      'updated_at' => current_time,
+      'pipeline_run_id' => id
+    }
     taxon_counts_attributes_filtered.each do |tcnt|
-      tcnt["created_at"] = current_time
-      tcnt["updated_at"] = current_time
       tcnt["count_type"] += "+" if refined
+      tcnt.merge!(tcnt_attrs_to_merge)
     end
-    update(taxon_counts_attributes: taxon_counts_attributes_filtered)
+    TaxonCount.import!(taxon_counts_attributes_filtered)
 
     # aggregate the data at genus level
     generate_aggregate_counts('genus') unless multihit?
