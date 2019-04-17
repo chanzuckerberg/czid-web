@@ -55,6 +55,7 @@ class PipelineRun < ApplicationRecord
   OUTPUT_JSON_NAME = 'taxon_counts.json'.freeze
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
+  INPUT_VALIDATION_NAME = "validate_input_summary.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
@@ -127,7 +128,8 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADING_QUEUED = 'LOADING_QUEUED'.freeze
   STATUS_LOADING_ERROR = 'LOADING_ERROR'.freeze
 
-  LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
+  LOADERS_BY_OUTPUT = { "input_validations" => "db_load_input_validations",
+                        "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
@@ -294,7 +296,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
+    target_outputs = %w[input_validations ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
 
     # Then, generate output_states
     output_state_entries = []
@@ -391,6 +393,15 @@ class PipelineRun < ApplicationRecord
 
   def succeeded?
     job_status == STATUS_CHECKED
+  end
+
+  def db_load_input_validations
+    file = Tempfile.new
+    downloaded = PipelineRun.download_file_with_retries(s3_file_for("input_validations"),
+                                                        file.path, 3, false)
+    error_message = downloaded ? JSON.parse(File.read(file))["Validation error"] : nil
+    update(error_message: error_message) if error_message
+    file.unlink
   end
 
   def db_load_ercc_counts
@@ -662,6 +673,8 @@ class PipelineRun < ApplicationRecord
     end
 
     case output
+    when "input_validations"
+      "#{host_filter_output_s3_path}/#{INPUT_VALIDATION_NAME}"
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     when "amr_counts"
@@ -967,22 +980,27 @@ class PipelineRun < ApplicationRecord
     "#{LOCAL_AMR_DRUG_SUMMARY_PATH}/#{id}"
   end
 
-  def self.download_file_with_retries(s3_path, destination_dir, max_tries)
+  def self.download_file_with_retries(s3_path, destination, max_tries, dest_is_dir = true)
     round = 0
     while round < max_tries
-      downloaded = PipelineRun.download_file(s3_path, destination_dir)
+      downloaded = PipelineRun.download_file(s3_path, destination, dest_is_dir)
       return downloaded if downloaded
       round += 1
       sleep(15)
     end
   end
 
-  def self.download_file(s3_path, destination_dir)
-    command = "mkdir -p #{destination_dir};"
-    command += "aws s3 cp #{s3_path} #{destination_dir}/;"
-    _stdout, _stderr, status = Open3.capture3(command)
-    return nil unless status.exitstatus.zero?
-    "#{destination_dir}/#{File.basename(s3_path)}"
+  def self.download_file(s3_path, destination, dest_is_dir = true)
+    # If the destination path is a directory, create the directory if necessary and append the file name to the end of the destination path.
+    # If the destination path is a file name, assume that the parent directories already exist.
+    Syscall.run("mkdir", "-p", destination) if dest_is_dir
+    destination_path = dest_is_dir ? "#{destination}/#{File.basename(s3_path)}" : destination
+    success = Syscall.s3_cp(s3_path, destination_path)
+    if success
+      return destination_path
+    else
+      return nil
+    end
   end
 
   def file_generated(s3_path)
