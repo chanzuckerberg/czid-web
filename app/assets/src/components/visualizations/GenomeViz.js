@@ -71,7 +71,7 @@ export default class GenomeViz {
 
   // Find the bar that is closest to hoverX, within hoverBuffer.
   onMouseMove = () => {
-    if (this.sortedEndpoints.length == 0) {
+    if (this.sortedEndpoints.length == 0 || !this.endpointToDataIndex) {
       return;
     }
 
@@ -86,16 +86,24 @@ export default class GenomeViz {
     if (closestEndpoints.length === 1) {
       closestDataIndex =
         Math.abs(closestEndpoints[0] - hoverX) < this.options.hoverBuffer
-          ? this.endpointToDataIndex[closestEndpoints[0]]
+          ? this.endpointToDataIndex[closestEndpoints[0]][0]
           : null;
     } else {
-      const barOne = this.endpointToDataIndex[closestEndpoints[0]];
-      const barTwo = this.endpointToDataIndex[closestEndpoints[1]];
+      const [dataIndexOne, otherEndpointOne] = this.endpointToDataIndex[
+        closestEndpoints[0]
+      ];
+      const [dataIndexTwo, otherEndpointTwo] = this.endpointToDataIndex[
+        closestEndpoints[1]
+      ];
 
-      // Assuming that the bars don't overlap,
-      // if the two neighbors correspond to the same bar, then the mouse must currently be within the bar.
-      if (barOne === barTwo) {
-        closestDataIndex = barOne;
+      // Check if the mouse is currently within either bar corresponding to the closest endpoints.
+      // This assumes that whenever the mouse is within a bar, one of the two closest endpoints will
+      // belong to the bar, which is not always true if there is one bar completely covered by another.
+      // For now, we assume this is never the case.
+      if (closestEndpoints[0] <= hoverX && hoverX <= otherEndpointOne) {
+        closestDataIndex = dataIndexOne;
+      } else if (otherEndpointTwo <= hoverX && hoverX <= closestEndpoints[1]) {
+        closestDataIndex = dataIndexTwo;
       } else {
         const closestX =
           Math.abs(closestEndpoints[0] - hoverX) <
@@ -105,7 +113,7 @@ export default class GenomeViz {
 
         closestDataIndex =
           Math.abs(closestX - hoverX) < this.options.hoverBuffer
-            ? this.endpointToDataIndex[closestX]
+            ? this.endpointToDataIndex[closestX][0]
             : null;
       }
     }
@@ -127,7 +135,7 @@ export default class GenomeViz {
       this.lastHoveredDataIndex = closestDataIndex;
     } else if (
       closestDataIndex === null &&
-      this.lastHoveredDataIndex &&
+      this.lastHoveredDataIndex !== null &&
       this.options.onGenomeVizBarExit
     ) {
       this.options.onGenomeVizBarExit();
@@ -173,9 +181,10 @@ export default class GenomeViz {
       .attr("height", () => this.size.height);
 
     this.data.forEach((datum, dataIndex) => {
-      endpointToDataIndex[x(datum[0])] = dataIndex;
+      // Include the data index, and also the other endpoint.
+      endpointToDataIndex[x(datum[0])] = [dataIndex, x(datum[1])];
       endpoints.push(x(datum[0]));
-      endpointToDataIndex[x(datum[1])] = dataIndex;
+      endpointToDataIndex[x(datum[1])] = [dataIndex, x(datum[0])];
       endpoints.push(x(datum[1]));
     });
 
