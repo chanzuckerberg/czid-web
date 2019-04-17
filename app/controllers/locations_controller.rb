@@ -35,7 +35,7 @@ class LocationsController < ApplicationController
   end
 
   def map_playground
-    # Show all viewable locations
+    # Show all viewable locations in a demo format
     field_id = MetadataField.find_by(name: "collection_location").id
     sample_info = current_power.samples
                                .includes(metadata: :metadata_field)
