@@ -19,7 +19,7 @@ class MapPlayground extends React.Component {
     results.forEach(result => {
       // Match locations that look like coordinates separated by a comma
       const loc = result.location.replace(/_/g, ", ");
-      if (result.location.match(/^[-0-9.]+,(\s)?[-0-9.]+?$/)) {
+      if (loc.match(/^[-0-9.]+,(\s)?[-0-9.]+?$/)) {
         const formatted = {
           name: result.name,
           id: result.id,
