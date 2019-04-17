@@ -43,6 +43,7 @@ class MapPlayground extends React.Component {
     const [lat, lon] = markerData[0].split(",");
     const pointCount = markerData[1].length;
     const minSize = 14;
+    // Scale based on the zoom and point count (zoomed-in = higher zoom)
     const markerSize = Math.max(
       pointCount * (get("zoom", this.state.viewport) || 3),
       minSize
