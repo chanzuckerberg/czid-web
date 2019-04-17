@@ -17,9 +17,9 @@ class MapPlayground extends React.Component {
 
     const locationsToSamples = Object.assign({}, this.state.locationsToSamples);
     results.forEach(result => {
-      // Display existing coordinate strings
-      if (/\d/.test(result.location)) {
-        const loc = result.location.replace(/_/g, ", ");
+      // Match locations that look like coordinates separated by a comma
+      const loc = result.location.replace(/_/g, ", ");
+      if (result.location.match(/^[-0-9.]+,(\s)?[-0-9.]+?$/)) {
         const formatted = {
           name: result.name,
           id: result.id,
@@ -41,7 +41,7 @@ class MapPlayground extends React.Component {
   };
 
   renderMarker = (markerData, index) => {
-    const [lat, lon] = markerData[0].split(", ");
+    const [lat, lon] = markerData[0].split(",");
     const pointCount = markerData[1].length;
     const minSize = 14;
     const markerSize = Math.max(
