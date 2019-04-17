@@ -64,7 +64,7 @@ class ProjectsView extends React.Component {
   }
 
   visibilityIconRenderer(project) {
-    return project && project.publicAccess ? (
+    return project && project.public_access ? (
       <PublicProjectIcon />
     ) : (
       <PrivateProjectIcon />
