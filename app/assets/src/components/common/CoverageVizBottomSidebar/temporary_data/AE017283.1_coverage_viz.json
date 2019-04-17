@@ -102,7 +102,7 @@
   ],
   "coverage_bin_size": 5120.53,
   "max_aligned_length": 151,
-  "avg_coverage_depth": 0,
+  "coverage_depth": 0,
   "coverage_breadth": 0,
   "avg_prop_mismatch": 0
 }

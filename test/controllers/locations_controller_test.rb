@@ -30,7 +30,6 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
         "lon" => "-122.45"
       }
     ]
-    @api_key_error = { "status" => "failed", "message" => "Unable to perform geosearch", "errors" => ["No API key for geosearch"] }
   end
 
   test "user can geosearch with results" do
@@ -65,6 +64,34 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_params
     get external_search_locations_path, params: { query: "UCSF" }
     assert_response :error
-    assert_equal JSON.dump(@api_key_error), @response.body
+    assert_equal LocationsController::GEOSEARCH_ERR_MSG, JSON.parse(@response.body)["message"]
+  end
+
+  test "user can see their map playground results" do
+    post user_session_path, params: @user_params
+    get map_playground_locations_path, as: :json
+
+    assert_response :success
+    results = JSON.parse(@response.body)
+    assert results.count == 1
+    assert_equal metadata(:sample_joe_collection_location).string_validated_value, results[0]
+  end
+
+  test "user can see a map playground error" do
+    post user_session_path, params: @user_params
+    MetadataField.stub :find_by, nil do
+      get map_playground_locations_path, as: :json
+      assert_response :error
+      assert_equal LocationsController::LOCATION_LOAD_ERR_MSG, JSON.parse(@response.body)["message"]
+    end
+  end
+
+  test "joe cannot see someone else's private map playground results" do
+    post user_session_path, params: @user_params
+    get map_playground_locations_path, as: :json
+
+    assert_response :success
+    results = JSON.parse(@response.body)
+    assert_not results.include?(metadata(:sample_collection_location).string_validated_value)
   end
 end
