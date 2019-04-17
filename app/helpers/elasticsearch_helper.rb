@@ -71,9 +71,7 @@ module ElasticsearchHelper
 
   def filter_by_samples(taxon_ids, samples)
     return samples
-           .includes(
-             :pipeline_runs,
-             pipeline_runs: :taxon_counts)
+           .includes(:pipeline_runs, pipeline_runs: :taxon_counts)
            .where(pipeline_runs: { id: PipelineRun.select("max(id)").where(job_status: "CHECKED").group(:sample_id) })
            .where(taxon_counts:
              {
