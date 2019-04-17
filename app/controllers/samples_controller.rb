@@ -98,7 +98,14 @@ class SamplesController < ApplicationController
     results = filter_by_metadatum(results, "collection_location", params[:location].split(',')) if params[:location].present?
     results = filter_by_host(results, host_query) if host_query.present?
 
-    @samples = sort_by(results, sort).paginate(page: page, per_page: params[:per_page] || PAGE_SIZE).includes([:user, :host_genome, :pipeline_runs, :input_files])
+    page_size = params[:per_page] || PAGE_SIZE
+
+    # If just returning basic fields, return all samples.
+    if basic
+      page_size = results.length
+    end
+
+    @samples = sort_by(results, sort).paginate(page: page, per_page: page_size).includes([:user, :host_genome, :pipeline_runs, :input_files])
     @samples_count = results.size
     @samples_formatted = basic ? format_samples_basic(@samples) : format_samples(@samples)
 
