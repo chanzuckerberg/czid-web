@@ -1,7 +1,9 @@
 @import url("https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css");
+@import "~styles/themes/colors";
 
 .mapContainer {
   display: inline-block;
+  border: 1px solid $dark-grey;
 
   .zoomControl {
     position: absolute;
