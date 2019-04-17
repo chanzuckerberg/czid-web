@@ -21,7 +21,9 @@ class BaseMap extends React.Component {
   }
 
   updateViewport = viewport => {
+    const { updateViewport } = this.props;
     this.setState({ viewport });
+    updateViewport && updateViewport(viewport);
   };
 
   render() {
@@ -52,6 +54,7 @@ class BaseMap extends React.Component {
 
 BaseMap.propTypes = {
   mapTilerKey: PropTypes.string.isRequired,
+  updateViewport: PropTypes.func,
   markers: PropTypes.array,
   renderMarker: PropTypes.func,
   width: PropTypes.number,

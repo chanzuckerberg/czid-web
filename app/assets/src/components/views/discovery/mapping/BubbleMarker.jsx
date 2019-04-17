@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 export default class BubbleMarker extends React.Component {
   render() {
     const { size, onClick, fill, stroke, opacity } = this.props;
-
     return (
       <svg
         height={size}
@@ -21,7 +20,7 @@ export default class BubbleMarker extends React.Component {
           cx="50%"
           cy="50%"
           // Edges get cut off
-          r={(size - 5) / 2}
+          r={Math.max(size - 5, 1) / 2}
           onClick={onClick}
           style={{ cursor: "pointer" }}
         />
@@ -32,10 +31,10 @@ export default class BubbleMarker extends React.Component {
 
 BubbleMarker.propTypes = {
   size: PropTypes.number,
-  onClick: PropTypes.func,
   fill: PropTypes.string,
   stroke: PropTypes.string,
-  opacity: PropTypes.number
+  opacity: PropTypes.number,
+  onClick: PropTypes.func
 };
 
 BubbleMarker.defaultProps = {

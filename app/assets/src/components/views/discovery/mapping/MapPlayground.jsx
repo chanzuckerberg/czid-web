@@ -1,77 +1,78 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Marker } from "react-map-gl";
+import { get } from "lodash/fp";
 
-import CheckmarkIcon from "~ui/icons/CheckmarkIcon";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
-import BubbleMarker from "./BubbleMarker";
+import BubbleMarker from "~/components/views/discovery/mapping//BubbleMarker";
 
 class MapPlayground extends React.Component {
   state = {
-    toDisplay: []
+    locationsToSamples: {},
+    viewport: {}
   };
 
   componentDidMount() {
-    const { locations } = this.props;
+    const { results } = this.props;
 
-    let toDisplay = [];
-    locations.forEach(loc => {
+    const locationsToSamples = Object.assign({}, this.state.locationsToSamples);
+    results.forEach(result => {
       // Display existing coordinate strings
-      if (/\d/.test(loc)) {
-        loc = loc.replace(/_/g, ", ");
-        const [lat, lon] = loc.split(", ");
+      if (/\d/.test(result.location)) {
+        const loc = result.location.replace(/_/g, ", ");
         const formatted = {
-          name: loc,
-          latitude: parseFloat(lat),
-          longitude: parseFloat(lon)
+          name: result.name,
+          id: result.id,
+          location: loc
         };
-        toDisplay.push(formatted);
+
+        if (locationsToSamples.hasOwnProperty(loc)) {
+          locationsToSamples[loc].push(formatted);
+        } else {
+          locationsToSamples[loc] = [formatted];
+        }
       }
     });
-
-    this.setState({ toDisplay });
+    this.setState({ locationsToSamples });
   }
 
-  renderMarker = (sample, index) => {
-    return (
-      <Marker
-        key={`marker-${index}`}
-        longitude={sample.longitude}
-        latitude={sample.latitude}
-      >
-        <CheckmarkIcon size="small" />
-      </Marker>
-    );
+  updateViewport = viewport => {
+    this.setState({ viewport });
   };
 
-  renderMarkerBubble = (point, index) => {
+  renderMarker = (marker, index) => {
+    const [lat, lon] = marker[0].split(", ");
+    const pointCount = marker[1].length;
     return (
       <Marker
         key={`marker-${index}`}
-        longitude={point.longitude}
-        latitude={point.latitude}
+        latitude={parseFloat(lat)}
+        longitude={parseFloat(lon)}
       >
-        <BubbleMarker />
+        <BubbleMarker
+          size={pointCount * (get("zoom", this.state.viewport) || 3)}
+        />
       </Marker>
     );
   };
 
   render() {
     const { mapTilerKey } = this.props;
-    const { toDisplay } = this.state;
+    const { locationsToSamples } = this.state;
 
     return (
       <BaseMap
-        markers={toDisplay}
+        markers={Object.entries(locationsToSamples)}
         mapTilerKey={mapTilerKey}
-        renderMarker={this.renderMarkerBubble}
+        renderMarker={this.renderMarker}
+        updateViewport={this.updateViewport}
       />
     );
   }
 }
 
 MapPlayground.propTypes = {
-  locations: PropTypes.array,
+  results: PropTypes.array,
   // Access tokens safe for clients
   mapTilerKey: PropTypes.string
 };
