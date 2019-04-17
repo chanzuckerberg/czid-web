@@ -71,13 +71,14 @@ module ElasticsearchHelper
 
   def filter_by_samples(taxon_ids, samples)
     return samples
-           .joins(:pipeline_runs)
-           .includes(pipeline_runs: :taxon_counts)
+           .includes(
+             :pipeline_runs,
+             pipeline_runs: :taxon_counts)
+           .where(pipeline_runs: { id: PipelineRun.select("max(id)").where(job_status: "CHECKED").group(:sample_id) })
            .where(taxon_counts:
              {
                tax_id: taxon_ids,
-               count_type: ["NT", "NR"],
-               count: 0...Float::INFINITY
+               count_type: ["NT", "NR"]
              })
            .where("`taxon_counts`.count > 0")
            .distinct(taxon_counts: :tax_id)
@@ -87,7 +88,8 @@ module ElasticsearchHelper
   # Took 250ms in local testing on real data
   def filter_by_project(taxon_ids, project_id)
     return Set.new(TaxonCount
-      .joins(pipeline_run: :sample)
+      .includes(pipeline_run: :sample)
+      .where(pipeline_runs: { id: PipelineRun.select("max(id)").where(job_status: "CHECKED").group(:sample_id) })
       .where(samples: { project_id: project_id })
       .where(tax_id: taxon_ids)
       .where(count_type: ["NT", "NR"])
