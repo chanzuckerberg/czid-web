@@ -4,18 +4,10 @@ import FiltersIcon from "~ui/icons/FiltersIcon";
 import InfoIcon from "~ui/icons/InfoIcon";
 import Label from "~ui/labels/Label";
 import Tabs from "~ui/controls/Tabs";
-import SearchBox from "~ui/controls/SearchBox";
-import cs from "./discovery_header.scss";
+import LiveSearchBox from "~ui/controls/LiveSearchBox";
 import cx from "classnames";
+import cs from "./discovery_header.scss";
 
-const SEARCH_CATEGORIES = [
-  "taxon",
-  "project",
-  "sample",
-  "location",
-  "host",
-  "tissue"
-];
 class DiscoveryHeader extends React.Component {
   handleSearchResultSelected = (currentEvent, { result }) => {
     const { onSearchResultSelected } = this.props;
@@ -65,6 +57,7 @@ class DiscoveryHeader extends React.Component {
       currentTab,
       filterCount,
       onFilterToggle,
+      onSearchTriggered,
       onStatsToggle,
       onTabChange,
       showFilters,
@@ -86,10 +79,9 @@ class DiscoveryHeader extends React.Component {
           />
         </div>
         <div className={cs.searchContainer}>
-          <SearchBox
+          <LiveSearchBox
             category
-            serverSearchAction="search_suggestions"
-            serverSearchActionArgs={{ categories: SEARCH_CATEGORIES }}
+            onSearchTriggered={onSearchTriggered}
             onResultSelect={this.handleSearchResultSelected}
             onEnter={this.handleSearchEnterPressed}
             initialValue=""
@@ -134,6 +126,7 @@ DiscoveryHeader.propTypes = {
   onStatsToggle: PropTypes.func,
   onSearchEnterPressed: PropTypes.func,
   onSearchResultSelected: PropTypes.func,
+  onSearchTriggered: PropTypes.func,
   onTabChange: PropTypes.func,
   showFilters: PropTypes.bool,
   showStats: PropTypes.bool
