@@ -6,9 +6,12 @@ import cs from "./filters.scss";
 
 class TaxonFilter extends React.Component {
   handleFilterChange = async query => {
+    const { domain } = this.props;
+
     const searchResults = await getSearchSuggestions({
-      query: query,
-      categories: ["taxon"]
+      query,
+      categories: ["taxon"],
+      domain
     });
     const options = (((searchResults || {}).Taxon || {}).results || [])
       .filter(result => result.taxid > 0)
@@ -36,6 +39,7 @@ class TaxonFilter extends React.Component {
 }
 
 TaxonFilter.propTypes = {
+  domain: PropTypes.string,
   selectedOptions: PropTypes.array,
   onChange: PropTypes.func
 };

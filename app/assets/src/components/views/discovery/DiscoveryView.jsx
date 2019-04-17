@@ -3,15 +3,18 @@ import PropTypes from "prop-types";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import moment from "moment";
 import {
+  capitalize,
   clone,
   compact,
   defaults,
+  escapeRegExp,
   find,
   findIndex,
   keyBy,
   map,
   mapKeys,
   mapValues,
+  merge,
   pick,
   replace,
   sumBy,
@@ -37,6 +40,7 @@ import {
   DISCOVERY_DOMAIN_LIBRARY,
   DISCOVERY_DOMAIN_PUBLIC
 } from "./discovery_api";
+import { getSearchSuggestions } from "~/api";
 import NoResultsBanner from "./NoResultsBanner";
 import { openUrl } from "~utils/links";
 
@@ -394,17 +398,9 @@ class DiscoveryView extends React.Component {
   };
 
   handleSearchSelected = ({ key, value, text }, currentEvent) => {
-    const {
-      currentTab,
-      filters,
-      projects,
-      projectDimensions,
-      sampleDimensions
-    } = this.state;
-    const dimensions = {
-      projects: projectDimensions,
-      samples: sampleDimensions
-    }[currentTab];
+    const { filters, projects } = this.state;
+
+    const dimensions = this.getCurrentDimensions();
 
     let newFilters = clone(filters);
     const selectedKey = `${key}Selected`;
@@ -427,7 +423,9 @@ class DiscoveryView extends React.Component {
       }
       case "project": {
         const project = find({ id: value }, projects);
-        this.handleProjectSelected({ project });
+        if (project) {
+          this.handleProjectSelected({ project });
+        }
         break;
       }
       default: {
@@ -550,6 +548,78 @@ class DiscoveryView extends React.Component {
     });
   };
 
+  getCurrentDimensions = () => {
+    const { currentTab, projectDimensions, sampleDimensions } = this.state;
+
+    return {
+      projects: projectDimensions,
+      samples: sampleDimensions
+    }[currentTab];
+  };
+
+  getClientSideSuggestions = async query => {
+    const { projects } = this.state;
+    const dimensions = this.getCurrentDimensions();
+
+    let suggestions = {};
+    const re = new RegExp(escapeRegExp(query), "i");
+    ["host", "tissue", "location"].forEach(category => {
+      let dimension = find({ dimension: category }, dimensions);
+      if (dimension) {
+        const results = dimension.values
+          .filter(entry => re.test(entry.text))
+          .map(entry => ({
+            category,
+            id: entry.value,
+            title: entry.text
+          }));
+
+        if (results.length) {
+          suggestions[category] = {
+            name: capitalize(category),
+            results
+          };
+        }
+      }
+    });
+
+    const filteredProjects = projects.filter(project => re.test(project.name));
+    if (filteredProjects.length) {
+      suggestions["project"] = {
+        name: "Project",
+        results: filteredProjects.map(project => ({
+          category: "project",
+          title: project.name,
+          id: project.id
+        }))
+      };
+    }
+
+    return suggestions;
+  };
+
+  getServerSideSuggestions = async query => {
+    const { domain } = this.props;
+
+    let results = await getSearchSuggestions({
+      categories: ["sample", "taxon"],
+      query,
+      domain
+    });
+    return results;
+  };
+
+  handleSearchTriggered = async query => {
+    const [clientSideSuggestions, serverSideSuggestions] = await Promise.all([
+      // client side: for dimensions (host, location, tissue) and projects search
+      this.getClientSideSuggestions(query),
+      // server side: for taxa and samples search (filter by domain)
+      this.getServerSideSuggestions(query)
+    ]);
+
+    return merge(clientSideSuggestions, serverSideSuggestions);
+  };
+
   getFilterCount = () => {
     const { filters } = this.state;
     return sumBy(
@@ -583,13 +653,10 @@ class DiscoveryView extends React.Component {
       visualizations
     } = this.state;
 
+    const { domain } = this.props;
+
     const tabs = this.computeTabs();
-
-    let dimensions = {
-      projects: projectDimensions,
-      samples: sampleDimensions
-    }[currentTab];
-
+    const dimensions = this.getCurrentDimensions();
     const filterCount = this.getFilterCount();
 
     return (
@@ -612,6 +679,8 @@ class DiscoveryView extends React.Component {
             filterCount={filterCount}
             onFilterToggle={this.handleFilterToggle}
             onStatsToggle={this.handleStatsToggle}
+            onSearchTriggered={this.handleSearchTriggered}
+            onSearchSuggestionsReceived={this.handleSearchSuggestionsReceived}
             onSearchResultSelected={this.handleSearchSelected}
             onSearchEnterPressed={this.handleStringSearch}
             showStats={showStats && !!dimensions}
@@ -629,6 +698,7 @@ class DiscoveryView extends React.Component {
                     keyBy("dimension", dimensions)
                   )}
                   {...filters}
+                  domain={domain}
                   onFilterChange={this.handleFilterChange}
                 />
               )}
