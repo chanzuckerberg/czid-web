@@ -4,7 +4,7 @@ import { Marker } from "react-map-gl";
 import { get } from "lodash/fp";
 
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
-import BubbleMarker from "~/components/views/discovery/mapping//BubbleMarker";
+import BubbleMarker from "~/components/views/discovery/mapping/BubbleMarker";
 
 class MapPlayground extends React.Component {
   state = {
@@ -40,9 +40,14 @@ class MapPlayground extends React.Component {
     this.setState({ viewport });
   };
 
-  renderMarker = (marker, index) => {
-    const [lat, lon] = marker[0].split(", ");
-    const pointCount = marker[1].length;
+  renderMarker = (markerData, index) => {
+    const [lat, lon] = markerData[0].split(", ");
+    const pointCount = markerData[1].length;
+    const minSize = 14;
+    const markerSize = Math.max(
+      pointCount * (get("zoom", this.state.viewport) || 3),
+      minSize
+    );
     return (
       <Marker
         key={`marker-${index}`}
@@ -50,7 +55,8 @@ class MapPlayground extends React.Component {
         longitude={parseFloat(lon)}
       >
         <BubbleMarker
-          size={pointCount * (get("zoom", this.state.viewport) || 3)}
+          size={markerSize}
+          hoverContent={`${pointCount} sample${pointCount > 1 ? "s" : ""}`}
         />
       </Marker>
     );

@@ -1,29 +1,36 @@
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 
-export default class BubbleMarker extends React.Component {
+import BasicPopup from "~/components/BasicPopup";
+import cs from "./bubble_marker.scss";
+
+class BubbleMarker extends React.Component {
   render() {
-    const { size, onClick, fill, stroke, opacity } = this.props;
+    const { size, onClick, hoverContent } = this.props;
+
+    const circleBody = (
+      <circle
+        cx="50%"
+        cy="50%"
+        // Don't let edges get cut off in the viewBox
+        r={Math.max(size - 4, 1) / 2}
+        onClick={onClick}
+        className={cx(cs.circle, hoverContent && cs.hoverable)}
+      />
+    );
     return (
       <svg
         height={size}
         viewBox={`0 0 ${size} ${size}`}
-        style={{
-          fill,
-          stroke,
-          opacity,
-          // Proper centering
-          transform: `translate(${-size / 2}px,${-size / 2}px)`
-        }}
+        // Proper centering
+        style={{ transform: `translate(${-size / 2}px, ${-size / 2}px)` }}
       >
-        <circle
-          cx="50%"
-          cy="50%"
-          // Edges get cut off
-          r={Math.max(size - 5, 1) / 2}
-          onClick={onClick}
-          style={{ cursor: "pointer" }}
-        />
+        {hoverContent ? (
+          <BasicPopup trigger={circleBody} content={hoverContent} />
+        ) : (
+          circleBody
+        )}
       </svg>
     );
   }
@@ -31,15 +38,12 @@ export default class BubbleMarker extends React.Component {
 
 BubbleMarker.propTypes = {
   size: PropTypes.number,
-  fill: PropTypes.string,
-  stroke: PropTypes.string,
-  opacity: PropTypes.number,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
+  hoverContent: PropTypes.string
 };
 
 BubbleMarker.defaultProps = {
-  size: 20,
-  fill: "#FF0000",
-  stroke: "#000000",
-  opacity: 0.5
+  size: 20
 };
+
+export default BubbleMarker;
