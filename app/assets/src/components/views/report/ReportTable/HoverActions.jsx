@@ -57,7 +57,8 @@ class HoverActions extends React.Component {
       disabledMessage:
         "Alignment Visualization Not Available - requires reads in NT",
       extraProps: {
-        "data-tax-level": this.props.taxLevel === 1 ? "species" : "genus"
+        "data-tax-level": this.props.taxLevel === 1 ? "species" : "genus",
+        "data-tax-name": this.props.taxName
       }
     },
     {

@@ -421,6 +421,16 @@ class PipelineRun < ApplicationRecord
     update(total_ercc_reads: total_ercc_reads)
   end
 
+  def coverage_viz_summary_s3_path
+    # TODO(mark): Replace mock data with real data once we are running the sample.
+    return "s3://assets.idseq.net/coverage_viz_summary.json"
+  end
+
+  def coverage_viz_data_s3_path(accession_id)
+    # TODO(mark): Replace mock data with real data once we are running the sample.
+    return "s3://assets.idseq.net/coverage_viz/#{accession_id}_coverage_viz.json"
+  end
+
   def contigs_fasta_s3_path
     return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
   end

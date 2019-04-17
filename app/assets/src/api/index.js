@@ -284,6 +284,12 @@ const createBackground = ({ description, name, sampleIds }) =>
     sample_ids: sampleIds
   });
 
+const getCoverageVizSummary = sampleId =>
+  get(`/samples/${sampleId}/coverage_viz_summary`);
+
+const getCoverageVizData = (sampleId, accessionId) =>
+  get(`/samples/${sampleId}/coverage_viz_data?accessionId=${accessionId}`);
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
@@ -314,5 +320,7 @@ export {
   uploadFileToUrl,
   uploadFileToUrlWithRetries,
   validateSampleFiles,
-  validateSampleNames
+  validateSampleNames,
+  getCoverageVizSummary,
+  getCoverageVizData
 };
