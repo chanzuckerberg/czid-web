@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import MapGL from "react-map-gl";
+import MapGL, { NavigationControl } from "react-map-gl";
 
 import cs from "./base_map.scss";
 
@@ -20,6 +20,12 @@ class BaseMap extends React.Component {
     };
   }
 
+  updateViewport = viewport => {
+    const { updateViewport } = this.props;
+    this.setState({ viewport });
+    updateViewport && updateViewport(viewport);
+  };
+
   render() {
     const { mapTilerKey, renderMarker, markers } = this.props;
     const { viewport } = this.state;
@@ -30,10 +36,16 @@ class BaseMap extends React.Component {
       <div className={cs.mapContainer}>
         <MapGL
           {...viewport}
-          onViewportChange={viewport => this.setState({ viewport })}
+          onViewportChange={this.updateViewport}
           mapStyle={styleURL}
         >
           {markers && markers.map(renderMarker)}
+
+          <NavigationControl
+            onViewportChange={this.updateViewport}
+            showCompass={false}
+            className={cs.zoomControl}
+          />
         </MapGL>
       </div>
     );
@@ -42,6 +54,7 @@ class BaseMap extends React.Component {
 
 BaseMap.propTypes = {
   mapTilerKey: PropTypes.string.isRequired,
+  updateViewport: PropTypes.func,
   markers: PropTypes.array,
   renderMarker: PropTypes.func,
   width: PropTypes.number,

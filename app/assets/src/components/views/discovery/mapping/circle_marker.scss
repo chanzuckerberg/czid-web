@@ -1,0 +1,16 @@
+@import "~styles/themes/colors";
+
+.circle {
+  cursor: pointer;
+  fill: $primary-light;
+  stroke: $darkest-grey;
+  stroke-width: 1px;
+  opacity: 0.5;
+
+  &.hoverable {
+    &:hover {
+      fill: $primary-medium;
+      opacity: 1;
+    }
+  }
+}

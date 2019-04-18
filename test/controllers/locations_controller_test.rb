@@ -74,7 +74,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     results = JSON.parse(@response.body)
     assert results.count == 1
-    assert_equal metadata(:sample_joe_collection_location).string_validated_value, results[0]
+    assert_equal metadata(:sample_joe_collection_location).string_validated_value, results[0]["location"]
   end
 
   test "user can see a map playground error" do
@@ -91,7 +91,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     get map_playground_locations_path, as: :json
 
     assert_response :success
-    results = JSON.parse(@response.body)
+    results = JSON.parse(@response.body).map { |r| r["location"] }
     assert_not results.include?(metadata(:sample_collection_location).string_validated_value)
   end
 end

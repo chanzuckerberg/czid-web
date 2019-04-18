@@ -35,15 +35,17 @@ class LocationsController < ApplicationController
   end
 
   def map_playground
-    # Show all viewable locations
+    # Show all viewable locations in a demo format
     field_id = MetadataField.find_by(name: "collection_location").id
-    @locations = current_power.samples
-                              .includes(metadata: :metadata_field)
-                              .where(metadata: { metadata_field_id: field_id }).pluck(:string_validated_value)
+    sample_info = current_power.samples
+                               .includes(metadata: :metadata_field)
+                               .where(metadata: { metadata_field_id: field_id })
+                               .pluck(:id, :name, :string_validated_value)
+    @results = sample_info.map { |s| { id: s[0], name: s[1], location: s[2] } }
 
     respond_to do |format|
       format.html { render :map_playground }
-      format.json { render json: @locations }
+      format.json { render json: @results }
     end
   rescue => err
     render json: {
