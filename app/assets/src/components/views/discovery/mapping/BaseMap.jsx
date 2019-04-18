@@ -21,8 +21,9 @@ class BaseMap extends React.Component {
   }
 
   updateViewport = viewport => {
+    const { updateViewport } = this.props;
     this.setState({ viewport });
-    this.props.updateViewport && this.props.updateViewport(viewport);
+    updateViewport && updateViewport(viewport);
   };
 
   render() {

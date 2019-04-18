@@ -7,15 +7,12 @@ import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 
 class MapPlayground extends React.Component {
-  state = {
-    locationsToSamples: {},
-    viewport: {}
-  };
+  constructor(props) {
+    super(props);
 
-  componentDidMount() {
+    // Load demo data as locations->samples
     const { results } = this.props;
-
-    const locationsToSamples = Object.assign({}, this.state.locationsToSamples);
+    const locationsToSamples = {};
     results.forEach(result => {
       // Match locations that look like coordinates separated by a comma
       const loc = result.location.replace(/_/g, ", ");
@@ -24,7 +21,6 @@ class MapPlayground extends React.Component {
           name: result.name,
           id: result.id
         };
-
         if (locationsToSamples.hasOwnProperty(loc)) {
           locationsToSamples[loc].push(formatted);
         } else {
@@ -32,7 +28,11 @@ class MapPlayground extends React.Component {
         }
       }
     });
-    this.setState({ locationsToSamples });
+
+    this.state = {
+      locationsToSamples,
+      viewport: {}
+    };
   }
 
   updateViewport = viewport => {
@@ -40,12 +40,13 @@ class MapPlayground extends React.Component {
   };
 
   renderMarker = (markerData, index) => {
+    const { viewport } = this.state;
     const [lat, lon] = markerData[0].split(",");
     const pointCount = markerData[1].length;
     const minSize = 14;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
     const markerSize = Math.max(
-      pointCount * (get("zoom", this.state.viewport) || 3),
+      pointCount * (get("zoom", viewport) || 3),
       minSize
     );
     return (

@@ -7,14 +7,15 @@ import cs from "./circle_marker.scss";
 
 class CircleMarker extends React.Component {
   render() {
-    const { size, onClick, hoverContent } = this.props;
+    const { size, onClick, hoverContent, edgeSize } = this.props;
 
     const circleBody = (
       <circle
+        // Circle in the center of the viewBox
         cx="50%"
         cy="50%"
         // Don't let edges get cut off in the viewBox
-        r={Math.max(size - 4, 1) / 2}
+        r={Math.max(size - edgeSize, 1) / 2}
         onClick={onClick}
         className={cx(cs.circle, hoverContent && cs.hoverable)}
       />
@@ -23,7 +24,7 @@ class CircleMarker extends React.Component {
       <svg
         height={size}
         viewBox={`0 0 ${size} ${size}`}
-        // Proper centering
+        // Place the viewBox over the point
         style={{ transform: `translate(${-size / 2}px, ${-size / 2}px)` }}
       >
         {hoverContent ? (
@@ -39,11 +40,13 @@ class CircleMarker extends React.Component {
 CircleMarker.propTypes = {
   size: PropTypes.number,
   onClick: PropTypes.func,
-  hoverContent: PropTypes.string
+  hoverContent: PropTypes.string,
+  edgeSize: PropTypes.number
 };
 
 CircleMarker.defaultProps = {
-  size: 20
+  size: 20,
+  edgeSize: 4
 };
 
 export default CircleMarker;
