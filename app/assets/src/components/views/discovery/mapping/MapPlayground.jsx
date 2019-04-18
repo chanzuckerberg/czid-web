@@ -1,10 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Marker } from "react-map-gl";
-import { get } from "lodash/fp";
+import { Marker, Popup as MapPopup } from "react-map-gl";
+import { get, remove } from "lodash/fp";
 
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
+import CheckmarkIcon from "../../../ui/icons/CheckmarkIcon";
 
 class MapPlayground extends React.Component {
   constructor(props) {
@@ -31,7 +32,8 @@ class MapPlayground extends React.Component {
 
     this.state = {
       locationsToSamples,
-      viewport: {}
+      viewport: {},
+      popups: []
     };
   }
 
@@ -58,21 +60,57 @@ class MapPlayground extends React.Component {
         <CircleMarker
           size={markerSize}
           hoverContent={`${pointCount} sample${pointCount > 1 ? "s" : ""}`}
+          onClick={() =>
+            this.openPopup({
+              latitude: parseFloat(lat),
+              longitude: parseFloat(lon),
+              markerIndex: index
+            })
+          }
         />
       </Marker>
     );
   };
 
+  openPopup(popupInfo) {
+    const popups = Object.assign([], this.state.popups);
+    popups.push(popupInfo);
+    this.setState({ popups });
+  }
+
+  closePopup(popupInfo) {
+    let popups = Object.assign([], this.state.popups);
+    popups = remove({ markerIndex: popupInfo.markerIndex }, popups);
+    this.setState({ popups });
+  }
+
+  renderPopupBox = popupInfo => {
+    return (
+      <MapPopup
+        anchor="left"
+        latitude={popupInfo.latitude}
+        longitude={popupInfo.longitude}
+        onClose={() => this.closePopup(popupInfo)}
+      >
+        <div>
+          <CheckmarkIcon />
+        </div>
+      </MapPopup>
+    );
+  };
+
   render() {
     const { mapTilerKey } = this.props;
-    const { locationsToSamples } = this.state;
+    const { locationsToSamples, popups } = this.state;
 
     return (
       <BaseMap
-        markers={Object.entries(locationsToSamples)}
         mapTilerKey={mapTilerKey}
-        renderMarker={this.renderMarker}
         updateViewport={this.updateViewport}
+        markers={Object.entries(locationsToSamples)}
+        renderMarker={this.renderMarker}
+        popups={popups}
+        renderPopup={this.renderPopupBox}
       />
     );
   }
