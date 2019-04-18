@@ -118,14 +118,6 @@ export default class GenomeViz {
       }
     }
 
-    if (this.options.onGenomeVizHover) {
-      this.options.onGenomeVizHover(
-        currentEvent.pageX,
-        currentEvent.pageY,
-        closestDataIndex
-      );
-    }
-
     if (
       this.lastHoveredDataIndex !== closestDataIndex &&
       closestDataIndex !== null &&

@@ -780,6 +780,7 @@ class PipelineSampleReport extends React.Component {
   gotoAlignmentVizLink = e => {
     const taxId = e.target.getAttribute("data-tax-id");
     const taxLevel = e.target.getAttribute("data-tax-level");
+    const taxName = e.target.getAttribute("data-tax-name");
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
 
     const alignmentVizUrl = `/samples/${
@@ -787,11 +788,9 @@ class PipelineSampleReport extends React.Component {
     }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
     if (this.admin || this.allowedFeatures.includes("coverage_viz")) {
-      // Mock a "no-data" case for non-species taxons.
-      // TODO(mark): Remove this once we are fetching real data from the server.
-      const mockTaxId = taxLevel === "species" ? taxId : -1;
       this.props.onCoverageVizClick({
-        taxId: mockTaxId,
+        taxId,
+        taxName,
         alignmentVizUrl
       });
     } else {

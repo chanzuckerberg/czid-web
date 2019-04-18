@@ -15,6 +15,7 @@ import BasicPopup from "~/components/BasicPopup";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import NoResultsBacteriaIcon from "~ui/icons/NoResultsBacteriaIcon";
 import { DataTooltip } from "~ui/containers";
+import { getCoverageVizData } from "~/api";
 
 import {
   getHistogramTooltipData,
@@ -24,20 +25,6 @@ import {
   getSortedAccessionSummaries
 } from "./utils";
 import cs from "./coverage_viz_bottom_sidebar.scss";
-
-// Temporary data.
-// TODO(mark): Fetch data from the server.
-import CUTI_ACCESSION_ONE from "./temporary_data/CP012352.1_coverage_viz.json";
-import CUTI_ACCESSION_TWO from "./temporary_data/CP012647.1_coverage_viz.json";
-import CUTI_ACCESSION_THREE from "./temporary_data/AE017283.1_coverage_viz.json";
-import CUTI_ACCESSION_FOUR from "./temporary_data/CP012350.1_coverage_viz.json";
-
-const ACCESSION_COVERAGE_DATA = {
-  "CP012352.1": CUTI_ACCESSION_ONE,
-  "CP012647.1": CUTI_ACCESSION_TWO,
-  "AE017283.1": CUTI_ACCESSION_THREE,
-  "CP012350.1": CUTI_ACCESSION_FOUR
-};
 
 const READ_FILL_COLOR = "#A9BDFC";
 const CONTIG_FILL_COLOR = "#3768FA";
@@ -112,7 +99,10 @@ export default class CoverageVizBottomSidebar extends React.Component {
     const { params } = this.props;
     const { currentAccessionData } = this.state;
 
-    if (params.accessionData !== prevProps.params.accessionData) {
+    if (
+      params.accessionData !== prevProps.params.accessionData &&
+      params.accessionData
+    ) {
       this.setCurrentAccession(
         get([0, "id"], getSortedAccessionSummaries(params.accessionData))
       );
@@ -125,11 +115,13 @@ export default class CoverageVizBottomSidebar extends React.Component {
   }
 
   getDataForAccession = async accessionId => {
+    const { sampleId } = this.props;
+
     if (this._accessionDataCache[accessionId]) {
       return this._accessionDataCache[accessionId];
     } else {
       // Replace with network fetch.
-      const data = ACCESSION_COVERAGE_DATA[accessionId];
+      const data = await getCoverageVizData(sampleId, accessionId);
 
       this._accessionDataCache[accessionId] = data;
       return data;
@@ -576,5 +568,6 @@ CoverageVizBottomSidebar.propTypes = {
     }),
     // Link to the old alignment viz.
     alignmentVizUrl: PropTypes.string
-  })
+  }),
+  sampleId: PropTypes.number
 };
