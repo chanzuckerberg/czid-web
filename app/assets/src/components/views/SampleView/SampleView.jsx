@@ -4,7 +4,7 @@ import React from "react";
 import cx from "classnames";
 import { get } from "lodash/fp";
 
-import { saveVisualization } from "~/api";
+import { saveVisualization, getCoverageVizSummary } from "~/api";
 import {
   getURLParamString,
   parseUrlParams,
@@ -36,7 +36,8 @@ class SampleView extends React.Component {
       currentTab: "Report",
       sidebarMode: null,
       sidebarVisible: false,
-      sidebarTaxonModeConfig: null
+      sidebarTaxonModeConfig: null,
+      coverageVizDataByTaxon: null
     };
 
     this.gsnapFilterStatus = this.generateGsnapFilterStatus();
@@ -53,12 +54,23 @@ class SampleView extends React.Component {
       setTimeout(() => {
         location.reload();
       }, 300000);
+    } else {
+      this.fetchAdditionalData();
     }
 
     logAnalyticsEvent(ANALYTICS_EVENT_NAMES.sampleViewed, {
       sampleId: this.props.sample.id
     });
   }
+
+  fetchAdditionalData = async () => {
+    const { sample } = this.props;
+    const coverageVizSummary = await getCoverageVizSummary(sample.id);
+
+    this.setState({
+      coverageVizDataByTaxon: coverageVizSummary
+    });
+  };
 
   generateGsnapFilterStatus = jobStats => {
     const { jobStatistics, hostGenome } = this.props;
@@ -326,71 +338,18 @@ class SampleView extends React.Component {
     return {};
   };
 
-  // Temporary fake data. Always the same data.
-  // TODO(mark): Fetch this from the server.
   getCoverageVizParams = () => {
-    const { coverageVizParams } = this.state;
+    const { coverageVizParams, coverageVizDataByTaxon } = this.state;
 
     if (!coverageVizParams) {
       return {};
     }
 
-    // Mock a "no-data" case.
-    // TODO(mark): Remove this once we are fetching real data from the server.
-    if (coverageVizParams.taxId === -1) {
-      return {
-        ...coverageVizParams,
-        taxonId: "1747",
-        taxonName: "Cutibacterium acnes",
-        accessionData: null
-      };
-    }
-
     return {
-      ...coverageVizParams,
-      // TODO(mark): Use getTaxonName to get the taxonName.
-      taxonId: "1747",
-      taxonName: "Cutibacterium acnes",
-      accessionData: {
-        best_accessions: [
-          {
-            id: "CP012647.1",
-            name:
-              "Cutibacterium acnes strain KCOM 1861 (= ChDC B594) chromosome, complete genome",
-            num_contigs: 1,
-            num_reads: 4,
-            score: 478,
-            coverage_depth: 0.001
-          },
-          {
-            id: "AE017283.1",
-            name: "Propionibacterium acnes KPA171202, complete genome",
-            num_contigs: 0,
-            num_reads: 10,
-            score: 0,
-            coverage_depth: 0
-          },
-          {
-            id: "CP012350.1",
-            name:
-              "Cutibacterium acnes strain PA_30_2_L1 chromosome, complete genome",
-            num_contigs: 0,
-            num_reads: 2,
-            score: 0,
-            coverage_depth: 0
-          },
-          {
-            id: "CP012352.1",
-            name:
-              "Cutibacterium acnes strain PA_15_2_L1 chromosome, complete genome",
-            num_contigs: 0,
-            num_reads: 2,
-            score: 0,
-            coverage_depth: 0
-          }
-        ],
-        num_accessions: 4
-      }
+      taxonId: coverageVizParams.taxId,
+      taxonName: coverageVizParams.taxName,
+      alignmentVizUrl: coverageVizParams.alignmentVizUrl,
+      accessionData: get(coverageVizParams.taxId, coverageVizDataByTaxon)
     };
   };
 
@@ -509,6 +468,7 @@ class SampleView extends React.Component {
             visible={this.state.coverageVizVisible}
             onClose={this.closeCoverageViz}
             params={this.getCoverageVizParams()}
+            sampleId={sample.id}
           />
         )}
       </div>

@@ -21,7 +21,7 @@ class SamplesController < ApplicationController
   # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
-                  :contig_taxid_list, :taxid_contigs, :summary_contig_counts].freeze
+                  :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder, :upload_heartbeat].freeze
 
@@ -1116,6 +1116,44 @@ class SamplesController < ApplicationController
     # client is still actively uploading.
     @sample.update(client_updated_at: Time.now.utc)
     render json: {}, status: :ok
+  end
+
+  def coverage_viz_summary
+    pr = select_pipeline_run(@sample, params)
+    coverage_viz_summary_s3_path = pr.coverage_viz_summary_s3_path
+
+    if coverage_viz_summary_s3_path
+      @coverage_viz_summary = get_s3_file(coverage_viz_summary_s3_path)
+      render json: @coverage_viz_summary
+    else
+      render json: {
+        error: "coverage viz summary file does not exist for this sample"
+      }
+    end
+  # For safety.
+  rescue
+    render json: {
+      error: "There was an error fetching the coverage viz summary file."
+    }
+  end
+
+  def coverage_viz_data
+    pr = select_pipeline_run(@sample, params)
+    coverage_viz_data_s3_path = pr.coverage_viz_data_s3_path(params[:accessionId])
+
+    if coverage_viz_data_s3_path
+      @coverage_viz_data = get_s3_file(coverage_viz_data_s3_path)
+      render json: @coverage_viz_data
+    else
+      render json: {
+        error: "coverage viz data file does not exist for this sample and accession id"
+      }
+    end
+  # For safety.
+  rescue
+    render json: {
+      error: "There was an error fetching the coverage viz data file."
+    }
   end
 
   # Use callbacks to share common setup or constraints between actions.

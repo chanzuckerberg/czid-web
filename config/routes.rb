@@ -42,6 +42,8 @@ Rails.application.routes.draw do
     post :save_metadata_v2, on: :member
     post :validate_sample_files, on: :collection
     put :upload_heartbeat, on: :member
+    get :coverage_viz_summary, on: :member
+    get :coverage_viz_data, on: :member
   end
 
   get 'samples/:id/fasta/:tax_level/:taxid/:hit_type', to: 'samples#show_taxid_fasta'
