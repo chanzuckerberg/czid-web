@@ -2,6 +2,7 @@ import { select, event as currentEvent, mouse } from "d3-selection";
 import { extent, min, max } from "d3-array";
 import { flatten } from "lodash/fp";
 import { scaleLinear } from "d3-scale";
+import { color } from "d3-color";
 
 import ArrayUtils from "~/components/utils/ArrayUtils";
 import { CategoricalColormap } from "../utils/colormaps/CategoricalColormap";
@@ -28,7 +29,8 @@ export default class GenomeViz {
     this.options = Object.assign(
       {
         colors: null,
-        hoverBuffer: 5
+        hoverBuffer: 5,
+        hoverDarkenFactor: 0.25
       },
       options
     );
@@ -120,17 +122,23 @@ export default class GenomeViz {
 
     if (
       this.lastHoveredDataIndex !== closestDataIndex &&
-      closestDataIndex !== null &&
-      this.options.onGenomeVizBarEnter
+      closestDataIndex !== null
     ) {
-      this.options.onGenomeVizBarEnter(closestDataIndex);
+      if (this.options.onGenomeVizBarEnter) {
+        this.options.onGenomeVizBarEnter(closestDataIndex);
+      }
+      this.highlightBar(closestDataIndex, true);
+      this.highlightBar(this.lastHoveredDataIndex, false);
       this.lastHoveredDataIndex = closestDataIndex;
     } else if (
       closestDataIndex === null &&
       this.lastHoveredDataIndex !== null &&
       this.options.onGenomeVizBarExit
     ) {
-      this.options.onGenomeVizBarExit();
+      if (this.options.onGenomeVizBarExit) {
+        this.options.onGenomeVizBarExit();
+      }
+      this.highlightBar(this.lastHoveredDataIndex, false);
       this.lastHoveredDataIndex = null;
     }
 
@@ -142,8 +150,28 @@ export default class GenomeViz {
   onMouseLeave = () => {
     if (this.options.onGenomeVizBarExit) {
       this.options.onGenomeVizBarExit();
-      this.lastHoveredDataIndex = null;
     }
+    this.highlightBar(this.lastHoveredDataIndex, false);
+    this.lastHoveredDataIndex = null;
+  };
+
+  highlightBar = (barIndex, shouldHighlight) => {
+    if (barIndex === null) {
+      return;
+    }
+    const colors = this.getColors();
+
+    let highlightColor = colors[this.data[barIndex][2]];
+
+    if (shouldHighlight) {
+      highlightColor = color(highlightColor).darker(
+        this.options.hoverDarkenFactor
+      );
+    }
+
+    this.svg
+      .select(`.bar-container .rect-${barIndex}`)
+      .attr("fill", highlightColor);
   };
 
   update() {
@@ -162,10 +190,12 @@ export default class GenomeViz {
 
     this.svg
       .append("g")
+      .attr("class", "bar-container")
       .selectAll("rect")
       .data(this.data)
       .enter()
       .append("rect")
+      .attr("class", (_, index) => `rect-${index}`)
       .attr("fill", d => colors[d[2]])
       .attr("x", d => x(d[0]))
       .attr("width", d => x(d[1]) - x(d[0]))
