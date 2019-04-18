@@ -122,8 +122,17 @@ class MetadataManualInput extends React.Component {
     const newValue = this.getMetadataValue(sample, column);
 
     let newFields = this.state.metadataFieldsToEdit;
+
     this.props.samples.forEach(curSample => {
-      newFields = set([curSample.name, column], newValue, newFields);
+      // Only change the metadata value for samples where that field is valid.
+      if (
+        this.isHostGenomeIdValidForField(
+          this.getSampleHostGenomeId(curSample),
+          column
+        )
+      ) {
+        newFields = set([curSample.name, column], newValue, newFields);
+      }
     });
 
     const newHeaders = union([column], this.state.headersToEdit);
@@ -234,6 +243,23 @@ class MetadataManualInput extends React.Component {
     ) : null;
   };
 
+  getSampleHostGenomeId = sample =>
+    this.props.samplesAreNew
+      ? get(
+          "id",
+          find(
+            ["name", this.getMetadataValue(sample, "Host Genome")],
+            this.props.hostGenomes
+          )
+        )
+      : sample.host_genome_id;
+
+  isHostGenomeIdValidForField = (hostGenomeId, field) =>
+    includes(
+      hostGenomeId,
+      this.props.projectMetadataFields[field].host_genome_ids
+    );
+
   // Create form fields for the table.
   getManualInputData = () => {
     if (!this.props.samples) {
@@ -262,15 +288,7 @@ class MetadataManualInput extends React.Component {
               cs.extraPadding
           );
 
-          const sampleHostGenomeId = this.props.samplesAreNew
-            ? get(
-                "id",
-                find(
-                  ["name", this.getMetadataValue(sample, "Host Genome")],
-                  this.props.hostGenomes
-                )
-              )
-            : sample.host_genome_id;
+          const sampleHostGenomeId = this.getSampleHostGenomeId(sample);
 
           if (column === "Host Genome") {
             return (
@@ -289,12 +307,7 @@ class MetadataManualInput extends React.Component {
           }
 
           // Only show a MetadataInput if this metadata field matches the sample's host genome.
-          if (
-            includes(
-              sampleHostGenomeId,
-              this.props.projectMetadataFields[column].host_genome_ids
-            )
-          ) {
+          if (this.isHostGenomeIdValidForField(sampleHostGenomeId, column)) {
             return (
               <div>
                 <MetadataInput

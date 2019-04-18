@@ -3,7 +3,9 @@ import { find, get } from "lodash/fp";
 import cx from "classnames";
 import ReactDOM from "react-dom";
 
-import Sidebar from "~/components/ui/containers/Sidebar";
+import { formatPercent } from "~/components/utils/format";
+import Sidebar from "~ui/containers/Sidebar";
+import HelpIcon from "~ui/containers/HelpIcon";
 import PropTypes from "~/components/utils/propTypes";
 import Histogram from "~/components/visualizations/Histogram";
 import GenomeViz from "~/components/visualizations/GenomeViz";
@@ -50,7 +52,7 @@ const METRIC_COLUMNS = [
     {
       key: "referenceLength",
       name: "Reference Length",
-      tooltip: "Length in bp of the reference accession sequence."
+      tooltip: "Length in base pairs of the reference accession."
     }
   ],
   [
@@ -60,18 +62,17 @@ const METRIC_COLUMNS = [
       tooltip: "Number of contigs for which this accession was the best match."
     },
     {
-      key: "maxAlignedLength",
-      name: "Max Aligned Length",
-      tooltip:
-        "Length of the longest aligned region over all reads and contigs."
+      key: "alignedReads",
+      name: "Aligned Reads",
+      tooltip: "Number of reads for which this accession was the best match."
     }
   ],
   [
     {
       key: "coverageDepth",
-      name: "Avg. Coverage Depth",
+      name: "Coverage Depth",
       tooltip:
-        "The total length of all aligned contigs and reads, divided by the accession length."
+        "The average read depth of aligned contigs and reads over the length of the accession."
     },
     {
       key: "coverageBreadth",
@@ -82,9 +83,10 @@ const METRIC_COLUMNS = [
   ],
   [
     {
-      key: "alignedReads",
-      name: "Aligned Reads",
-      tooltip: "Number of reads for which this accession was the best match."
+      key: "maxAlignedLength",
+      name: "Max Aligned Length",
+      tooltip:
+        "Length of the longest aligned region over all reads and contigs."
     },
     {
       key: "avgMismatchedPercent",
@@ -110,10 +112,9 @@ export default class CoverageVizBottomSidebar extends React.Component {
     const { params } = this.props;
     const { currentAccessionData } = this.state;
 
-    // TODO(mark): Select the best accessionSummary by score.
-    if (params.accessionSummaries !== prevProps.params.accessionSummaries) {
+    if (params.accessionData !== prevProps.params.accessionData) {
       this.setCurrentAccession(
-        get([0, "id"], getSortedAccessionSummaries(params.accessionSummaries))
+        get([0, "id"], getSortedAccessionSummaries(params.accessionData))
       );
     }
 
@@ -147,7 +148,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
     const { params } = this.props;
 
     const accession = accessionId
-      ? find(["id", accessionId], params.accessionSummaries)
+      ? find(["id", accessionId], get("best_accessions", params.accessionData))
       : null;
 
     this.setState({
@@ -274,29 +275,27 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
   getAccessionOptions = () => {
     const { params } = this.props;
-    return getSortedAccessionSummaries(params.accessionSummaries).map(
-      summary => ({
-        value: summary.id,
-        text: summary.id,
-        customNode: (
-          <BasicPopup
-            trigger={
-              <div className={cs.option}>
-                <div className={cs.optionText}>{summary.id}</div>
-                <div className={cs.optionSubtext}>
-                  {summary.num_contigs} contigs, {summary.coverage_depth}x
-                  coverage
-                </div>
+    return getSortedAccessionSummaries(params.accessionData).map(summary => ({
+      value: summary.id,
+      text: summary.id,
+      customNode: (
+        <BasicPopup
+          trigger={
+            <div className={cs.option}>
+              <div className={cs.optionText}>{summary.id}</div>
+              <div className={cs.optionSubtext}>
+                {summary.num_contigs} contigs, {summary.coverage_depth}x
+                coverage
               </div>
-            }
-            inverted
-            content={summary.name}
-            horizontalOffset={5}
-            position="left center"
-          />
-        )
-      })
-    );
+            </div>
+          }
+          inverted
+          content={summary.name}
+          horizontalOffset={5}
+          position="left center"
+        />
+      )
+    }));
   };
 
   getAccessionMetrics = () => {
@@ -333,10 +332,12 @@ export default class CoverageVizBottomSidebar extends React.Component {
       referenceLength: currentAccessionData.total_length,
       alignedContigs: currentAccessionSummary.num_contigs,
       maxAlignedLength: currentAccessionData.max_aligned_length,
-      coverageDepth: currentAccessionData.coverage_depth,
-      coverageBreadth: currentAccessionData.coverage_breadth,
+      coverageDepth: `${currentAccessionData.coverage_depth}x`,
+      coverageBreadth: formatPercent(currentAccessionData.coverage_breadth),
       alignedReads: currentAccessionSummary.num_reads,
-      avgMismatchedPercent: currentAccessionData.avg_prop_mismatch
+      avgMismatchedPercent: formatPercent(
+        currentAccessionData.avg_prop_mismatch
+      )
     };
   };
 
@@ -344,12 +345,32 @@ export default class CoverageVizBottomSidebar extends React.Component {
     const { params } = this.props;
     const { currentAccessionSummary } = this.state;
 
+    const numBestAccessions = params.accessionData.best_accessions.length;
+    const numAccessions = params.accessionData.num_accessions;
+
+    const onlySomeAccessionsShown = numBestAccessions < numAccessions;
+
+    let helpText = `
+        ${numAccessions -
+          numBestAccessions} poor-quality accessions are not shown, as they have
+        no contig alignments and few read alignments.
+        To see them, go to the read-level visualization.
+      `;
+
     return (
       <div className={cs.header}>
         <div className={cs.headerText}>
           <div className={cs.title}>{params.taxonName} Coverage</div>
           <div className={cs.subtitle}>
-            {params.accessionSummaries.length} unique accessions
+            {numBestAccessions} unique accessions
+            {onlySomeAccessionsShown && (
+              <React.Fragment>
+                <span className={cs.notShownMsg}>
+                  ({numAccessions - numBestAccessions} not shown)
+                </span>
+                <HelpIcon text={helpText} className={cs.helpIcon} />
+              </React.Fragment>
+            )}
           </div>
         </div>
         <div className={cs.fill} />
@@ -525,7 +546,8 @@ export default class CoverageVizBottomSidebar extends React.Component {
         onClose={onClose}
         direction="bottom"
       >
-        {params.accessionSummaries && params.accessionSummaries.length > 0
+        {get("accessionData.best_accessions", params) &&
+        params.accessionData.best_accessions.length > 0
           ? this.renderSidebarContents()
           : this.renderNoDataContents()}
       </Sidebar>
@@ -539,14 +561,19 @@ CoverageVizBottomSidebar.propTypes = {
   params: PropTypes.shape({
     taxonId: PropTypes.string,
     taxonName: PropTypes.string,
-    accessionSummaries: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.string,
-        num_contigs: PropTypes.number,
-        num_reads: PropTypes.number,
-        name: PropTypes.string
-      })
-    ),
+    accessionData: PropTypes.shape({
+      best_accessions: PropTypes.arrayOf(
+        PropTypes.shape({
+          id: PropTypes.string,
+          num_contigs: PropTypes.number,
+          num_reads: PropTypes.number,
+          name: PropTypes.string,
+          score: PropTypes.number,
+          coverage_depth: PropTypes.number
+        })
+      ),
+      num_accessions: PropTypes.number
+    }),
     // Link to the old alignment viz.
     alignmentVizUrl: PropTypes.string
   })
