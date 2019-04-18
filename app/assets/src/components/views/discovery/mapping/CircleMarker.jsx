@@ -14,7 +14,7 @@ class CircleMarker extends React.Component {
         // Circle in the center of the viewBox
         cx="50%"
         cy="50%"
-        // Don't let edges get cut off in the viewBox. Adjust stroke-width in CSS.
+        // Don't let edges get cut off of the viewBox. Adjust stroke-width in CSS.
         r={(size - 2) / 2}
         onClick={onClick}
         className={cx(cs.circle, hoverContent && cs.hoverable)}
