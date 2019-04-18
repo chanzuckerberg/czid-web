@@ -7,15 +7,15 @@ import cs from "./circle_marker.scss";
 
 class CircleMarker extends React.Component {
   render() {
-    const { size, onClick, hoverContent, edgeSize } = this.props;
+    const { size, onClick, hoverContent } = this.props;
 
     const circleBody = (
       <circle
         // Circle in the center of the viewBox
         cx="50%"
         cy="50%"
-        // Don't let edges get cut off in the viewBox
-        r={Math.max(size - edgeSize, 1) / 2}
+        // Don't let edges get cut off in the viewBox. Adjust stroke-width in CSS.
+        r={(size - 2) / 2}
         onClick={onClick}
         className={cx(cs.circle, hoverContent && cs.hoverable)}
       />
@@ -40,13 +40,11 @@ class CircleMarker extends React.Component {
 CircleMarker.propTypes = {
   size: PropTypes.number,
   onClick: PropTypes.func,
-  hoverContent: PropTypes.string,
-  edgeSize: PropTypes.number
+  hoverContent: PropTypes.string
 };
 
 CircleMarker.defaultProps = {
-  size: 20,
-  edgeSize: 4
+  size: 20
 };
 
 export default CircleMarker;
