@@ -7,6 +7,8 @@ import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import CheckmarkIcon from "../../../ui/icons/CheckmarkIcon";
 
+import cs from "./map_playground.scss";
+
 class MapPlayground extends React.Component {
   constructor(props) {
     super(props);
@@ -59,9 +61,17 @@ class MapPlayground extends React.Component {
       >
         <CircleMarker
           size={markerSize}
-          hoverContent={`${pointCount} sample${pointCount > 1 ? "s" : ""}`}
+          // hoverContent={`${pointCount} sample${pointCount > 1 ? "s" : ""}`}
+          hoverContent={
+            <div>
+              <div>{markerData[0]}</div>
+              <div>{"Samples:"}</div>
+            </div>
+          }
+          className={cs.hoverTooltip}
           onClick={() =>
             this.openPopup({
+              name: markerData[0],
               latitude: parseFloat(lat),
               longitude: parseFloat(lon),
               markerIndex: index
@@ -93,7 +103,7 @@ class MapPlayground extends React.Component {
         onClose={() => this.closePopup(popupInfo)}
       >
         <div>
-          <CheckmarkIcon />
+          <div>{popupInfo.name}</div>
         </div>
       </MapPopup>
     );

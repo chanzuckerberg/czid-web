@@ -28,7 +28,11 @@ class CircleMarker extends React.Component {
         style={{ transform: `translate(${-size / 2}px, ${-size / 2}px)` }}
       >
         {hoverContent ? (
-          <BasicPopup trigger={circleBody} content={hoverContent} />
+          <BasicPopup
+            trigger={circleBody}
+            content={hoverContent}
+            inverted={false}
+          />
         ) : (
           circleBody
         )}
@@ -40,7 +44,7 @@ class CircleMarker extends React.Component {
 CircleMarker.propTypes = {
   size: PropTypes.number,
   onClick: PropTypes.func,
-  hoverContent: PropTypes.string
+  hoverContent: PropTypes.node
 };
 
 CircleMarker.defaultProps = {

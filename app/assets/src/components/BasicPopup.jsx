@@ -4,17 +4,19 @@ import PropTypes from "prop-types";
 
 class BasicPopup extends React.Component {
   render() {
-    return <Popup on="hover" {...this.props} basic inverted />;
+    return <Popup on="hover" {...this.props} basic />;
   }
 }
 
 BasicPopup.propTypes = {
   size: PropTypes.string,
-  wide: PropTypes.string
+  wide: PropTypes.string,
+  inverted: PropTypes.bool
 };
 
 BasicPopup.defaultProps = {
-  size: "tiny"
+  size: "tiny",
+  inverted: true
 };
 
 export default BasicPopup;
