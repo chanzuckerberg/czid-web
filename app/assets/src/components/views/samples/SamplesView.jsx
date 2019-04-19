@@ -247,10 +247,15 @@ class SamplesView extends React.Component {
 
   renderHeatmapTrigger = () => {
     const { selectedSampleIds } = this.state;
+    const log = () =>
+      logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
+        selectedSampleIds: selectedSampleIds.length
+      });
     return selectedSampleIds.size < 2 ? (
       <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
     ) : (
       <a
+        onClick={log}
         href={`/visualizations/heatmap?sampleIds=${Array.from(
           selectedSampleIds
         )}`}
@@ -399,6 +404,7 @@ class SamplesView extends React.Component {
             // TODO(tiago): migrate phylo tree to use api (or read csrf from context) and remove this
             csrf={document.getElementsByName("csrf-token")[0].content}
             onClose={withAnalytics(
+              this.handlePhyloModalClose,
               "SamplesView_phylo-tree-modal-close_clicked"
             )}
           />
