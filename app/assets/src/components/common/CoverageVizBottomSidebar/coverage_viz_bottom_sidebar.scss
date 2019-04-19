@@ -64,6 +64,10 @@
   }
 }
 
+.refAccessionVizLink {
+  display: inline-block;
+}
+
 .body {
   .metrics {
     display: flex;
@@ -138,6 +142,10 @@
       margin-right: 40px;
       flex: 1 1 0;
       min-width: 0;
+
+      .genomeVizInner {
+        height: 100%;
+      }
     }
   }
 

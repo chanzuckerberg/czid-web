@@ -212,19 +212,22 @@ export default class Histogram {
         ? this.barCentersToIndices[closestX]
         : null;
 
-    if (
-      this.lastHoveredBarX !== closestX &&
-      dataIndices !== null &&
-      this.options.onHistogramBarEnter
-    ) {
-      this.options.onHistogramBarEnter(dataIndices);
+    const lastDataIndices = this.lastHoveredBarX
+      ? this.barCentersToIndices[this.lastHoveredBarX]
+      : null;
+
+    if (this.lastHoveredBarX !== closestX && dataIndices !== null) {
+      if (this.options.onHistogramBarEnter) {
+        this.options.onHistogramBarEnter(dataIndices);
+      }
+      this.highlightBar(dataIndices, true);
+      this.highlightBar(lastDataIndices, false);
       this.lastHoveredBarX = closestX;
-    } else if (
-      dataIndices === null &&
-      this.lastHoveredBarX &&
-      this.options.onHistogramBarExit
-    ) {
-      this.options.onHistogramBarExit();
+    } else if (dataIndices === null && this.lastHoveredBarX) {
+      if (this.options.onHistogramBarExit) {
+        this.options.onHistogramBarExit();
+      }
+      this.highlightBar(lastDataIndices, false);
       this.lastHoveredBarX = null;
     }
 
@@ -236,8 +239,29 @@ export default class Histogram {
   onMouseLeave = () => {
     if (this.options.onHistogramBarExit) {
       this.options.onHistogramBarExit();
-      this.lastHoveredBarX = null;
     }
+
+    const lastDataIndices = this.lastHoveredBarX
+      ? this.barCentersToIndices[this.lastHoveredBarX]
+      : null;
+    this.highlightBar(lastDataIndices, false);
+    this.lastHoveredBarX = null;
+  };
+
+  highlightBar = (dataIndices, shouldHighlight) => {
+    if (!dataIndices || !this.options.hoverColors) {
+      return;
+    }
+
+    const [seriesIndex, barIndex] = dataIndices;
+
+    const highlightColor = shouldHighlight
+      ? this.options.hoverColors[seriesIndex]
+      : this.getColors()[seriesIndex];
+
+    this.svg
+      .select(`.bar-${seriesIndex} .rect-${barIndex}`)
+      .attr("fill", highlightColor);
   };
 
   update() {
@@ -279,6 +303,7 @@ export default class Histogram {
         .data(bins[i])
         .enter()
         .append("rect")
+        .attr("class", (_, index) => `rect-${index}`)
         .attr("x", d => x(d.x0) + i * barWidth)
         .attr("width", d => barWidth)
         .attr("y", d => y(d.length))

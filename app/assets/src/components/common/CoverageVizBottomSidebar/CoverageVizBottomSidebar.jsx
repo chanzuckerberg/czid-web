@@ -26,8 +26,10 @@ import {
 } from "./utils";
 import cs from "./coverage_viz_bottom_sidebar.scss";
 
+// Lighter shade of primary blue.
 const READ_FILL_COLOR = "#A9BDFC";
-const CONTIG_FILL_COLOR = "#3768FA";
+const CONTIG_FILL_COLOR = "#3867FA";
+const REF_ACC_COLOR = "#EAEAEA";
 
 const METRIC_COLUMNS = [
   [
@@ -110,6 +112,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
     if (!prevState.currentAccessionData && currentAccessionData) {
       this.renderHistogram(currentAccessionData);
+      this.renderRefAccessionViz(currentAccessionData);
       this.renderGenomeViz(currentAccessionData);
     }
   }
@@ -227,6 +230,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
         numBins: Math.round(data.total_length / data.coverage_bin_size),
         showStatistics: false,
         colors: [READ_FILL_COLOR],
+        hoverColors: [CONTIG_FILL_COLOR],
         barOpacity: 1,
         margins: {
           left: 170,
@@ -245,6 +249,18 @@ export default class CoverageVizBottomSidebar extends React.Component {
     this.coverageViz.update();
   };
 
+  renderRefAccessionViz = data => {
+    this.refAccesssionViz = new GenomeViz(
+      this.refAccessionVizContainer,
+      [[0, data.total_length, 0]],
+      {
+        domain: [0, data.total_length],
+        colors: [REF_ACC_COLOR]
+      }
+    );
+    this.refAccesssionViz.update();
+  };
+
   renderGenomeViz = data => {
     const contigReadVizData = generateContigReadVizData(
       data.hit_groups,
@@ -259,7 +275,8 @@ export default class CoverageVizBottomSidebar extends React.Component {
         colors: [READ_FILL_COLOR, CONTIG_FILL_COLOR],
         onGenomeVizBarHover: this.handleGenomeVizBarHover,
         onGenomeVizBarEnter: this.handleGenomeVizBarEnter,
-        onGenomeVizBarExit: this.handleGenomeVizBarExit
+        onGenomeVizBarExit: this.handleGenomeVizBarExit,
+        hoverDarkenFactor: 0.4
       }
     );
     this.contigReadViz.update();
@@ -391,7 +408,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
   };
 
   renderContentBody = () => {
-    const { currentAccessionData } = this.state;
+    const { currentAccessionData, currentAccessionSummary } = this.state;
 
     if (!currentAccessionData) {
       return (
@@ -434,7 +451,28 @@ export default class CoverageVizBottomSidebar extends React.Component {
         />
         <div className={cs.genomeVizRow}>
           <div className={cs.rowLabel}>Reference Accession</div>
-          <div className={cx(cs.genomeViz, cs.referenceAccession)} />
+          <BasicPopup
+            trigger={
+              <a
+                className={cx(cs.refAccessionVizLink, cs.genomeViz)}
+                href={`https://www.ncbi.nlm.nih.gov/nuccore/${
+                  currentAccessionSummary.id
+                }?report=genbank`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div
+                  className={cs.genomeVizInner}
+                  ref={refAccessionVizContainer => {
+                    this.refAccessionVizContainer = refAccessionVizContainer;
+                  }}
+                />
+              </a>
+            }
+            inverted
+            wide="very"
+            content={currentAccessionSummary.name}
+          />
         </div>
         <div className={cs.genomeVizRow}>
           <div className={cs.rowLabel}>Contigs and Reads</div>
