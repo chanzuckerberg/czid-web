@@ -27,7 +27,7 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 
-import Controls from "./Controls";
+import SampleViewControls from "./SampleViewControls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
 import cs from "./sample_view.scss";
 
@@ -472,7 +472,7 @@ class SampleView extends React.Component {
                   )}
                 />
               )}{" "}
-              <Controls
+              <SampleViewControls
                 reportPresent={reportPresent}
                 sample={sample}
                 project={project}
