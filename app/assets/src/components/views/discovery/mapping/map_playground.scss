@@ -1,3 +1,18 @@
-.hoverTooltip {
-  background-color: white;
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.title {
+  @include font-header-xs;
+  margin-bottom: 5px;
+}
+
+.description {
+  @include font-body-xs;
+}
+
+.dataBox {
+  background-color: $white;
+  border: 1px solid $light-grey;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 }

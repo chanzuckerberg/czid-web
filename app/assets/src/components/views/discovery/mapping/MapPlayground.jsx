@@ -5,7 +5,6 @@ import { get, remove } from "lodash/fp";
 
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
-import CheckmarkIcon from "../../../ui/icons/CheckmarkIcon";
 
 import cs from "./map_playground.scss";
 
@@ -18,8 +17,12 @@ class MapPlayground extends React.Component {
     const locationsToSamples = {};
     results.forEach(result => {
       // Match locations that look like coordinates separated by a comma
-      const loc = result.location.replace(/_/g, ", ");
-      if (loc.match(/^[-0-9.]+,(\s)?[-0-9.]+?$/)) {
+      let loc = result.location.replace(/_/g, ", ");
+      const match = /^([-0-9.]+),\s?([-0-9.]+)$/g.exec(loc);
+      if (match) {
+        loc = `${parseFloat(match[1]).toFixed(2)}, ${parseFloat(
+          match[2]
+        ).toFixed(2)}`;
         const formatted = {
           name: result.name,
           id: result.id
@@ -47,12 +50,29 @@ class MapPlayground extends React.Component {
     const { viewport } = this.state;
     const [lat, lon] = markerData[0].split(",");
     const pointCount = markerData[1].length;
-    const minSize = 14;
+    const minSize = 12;
+    const maxSize = 500;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
-    const markerSize = Math.max(
-      pointCount * (get("zoom", viewport) || 3),
-      minSize
+    const markerSize = Math.min(
+      Math.max(
+        Math.log(pointCount) / Math.log(1.5) * (get("zoom", viewport) || 3),
+        minSize
+      ),
+      maxSize
     );
+    const hoverContent = (
+      <div>
+        <div className={cs.title}>{markerData[0]}</div>
+        <div className={cs.description}>{`Samples: ${pointCount}`}</div>
+      </div>
+    );
+    const popupInfo = {
+      name: markerData[0],
+      latitude: parseFloat(lat),
+      longitude: parseFloat(lon),
+      markerIndex: index,
+      samples: markerData[1]
+    };
     return (
       <Marker
         key={`marker-${index}`}
@@ -61,22 +81,8 @@ class MapPlayground extends React.Component {
       >
         <CircleMarker
           size={markerSize}
-          // hoverContent={`${pointCount} sample${pointCount > 1 ? "s" : ""}`}
-          hoverContent={
-            <div>
-              <div>{markerData[0]}</div>
-              <div>{"Samples:"}</div>
-            </div>
-          }
-          className={cs.hoverTooltip}
-          onClick={() =>
-            this.openPopup({
-              name: markerData[0],
-              latitude: parseFloat(lat),
-              longitude: parseFloat(lon),
-              markerIndex: index
-            })
-          }
+          hoverContent={hoverContent}
+          onClick={() => this.openPopup(popupInfo)}
         />
       </Marker>
     );
@@ -97,13 +103,18 @@ class MapPlayground extends React.Component {
   renderPopupBox = popupInfo => {
     return (
       <MapPopup
-        anchor="left"
+        anchor="bottom"
+        tipSize={0}
         latitude={popupInfo.latitude}
         longitude={popupInfo.longitude}
         onClose={() => this.closePopup(popupInfo)}
+        className={cs.dataBox}
       >
         <div>
-          <div>{popupInfo.name}</div>
+          <div className={cs.title}>{popupInfo.name}</div>
+          {popupInfo.samples.map(sample => (
+            <div className={cs.description}>{sample.name}</div>
+          ))}
         </div>
       </MapPopup>
     );
