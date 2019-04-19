@@ -73,8 +73,7 @@ class DiscoveryFilters extends React.Component {
     const newState = [];
     newState[selectedKey] = selected;
     this.setState(newState, this.notifyFilterChangeHandler);
-    const name = selectedKey.replace(/\W+/g, "-").toLowerCase();
-    logAnalyticsEvent(`DiscoveryFilters_${name}-selection_changed`, {
+    logAnalyticsEvent(`DiscoveryFilters_${selectedKey.toLowerCase()}_changed`, {
       selectedKey: selected
     });
   }
