@@ -20,7 +20,6 @@ class MapPlayground extends React.Component {
       let locationName = result.location.replace(/_/g, ", ");
       const match = /^([-0-9.]+),\s?([-0-9.]+)$/g.exec(locationName);
       if (match) {
-        // Round the coordinates for some minimal aggregation
         let [lat, lon] = this.parseLatLon(match[1], match[2]);
         if (!(lat && lon)) return;
         locationName = `${lat}, ${lon}`;
@@ -50,8 +49,10 @@ class MapPlayground extends React.Component {
   }
 
   parseLatLon = (lat, lon) => {
+    // Round the coordinates for some minimal aggregation
     lat = parseFloat(parseFloat(lat).toFixed(2));
     lon = parseFloat(parseFloat(lon).toFixed(2));
+    // Reject invalid coordinates
     if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
       return [null, null];
     } else {
