@@ -56,6 +56,9 @@ class Landing extends React.Component {
         }
       })
       .then(() => {
+        // Although this event does not follow current naming conventions for
+        // frontend events, we keep it for continuity. See
+        // https://czi.quip.com/67RCAIiHN0Qc/IDseq-product-analytics-How-to-log
         logAnalyticsEvent(ANALYTICS_EVENT_NAMES.userInterestFormSubmitted, {
           first_name: this.state.firstName,
           last_name: this.state.lastName,

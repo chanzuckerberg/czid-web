@@ -164,7 +164,7 @@ class SamplesView extends React.Component {
       newSelected.delete(value);
     }
     this.setState({ selectedSampleIds: newSelected });
-    logAnalyticsEvent("SamplesView_select-row_clicked", {
+    logAnalyticsEvent("SamplesView_row_selected", {
       selectedSampleIds: newSelected
     });
   };
@@ -405,7 +405,7 @@ class SamplesView extends React.Component {
             csrf={document.getElementsByName("csrf-token")[0].content}
             onClose={withAnalytics(
               this.handlePhyloModalClose,
-              "SamplesView_phylo-tree-modal-close_clicked"
+              "SamplesView_phylo-tree-modal_closed"
             )}
           />
         )}

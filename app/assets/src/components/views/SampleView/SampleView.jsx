@@ -63,7 +63,8 @@ class SampleView extends React.Component {
     }
 
     // Although this event does not follow current naming conventions for
-    // frontend events, we keep it for continuity.
+    // frontend events, we keep it for continuity. See
+    // https://czi.quip.com/67RCAIiHN0Qc/IDseq-product-analytics-How-to-log
     logAnalyticsEvent(ANALYTICS_EVENT_NAMES.sampleViewed, {
       sampleId: this.props.sample.id
     });
@@ -505,7 +506,7 @@ class SampleView extends React.Component {
           mode={this.state.sidebarMode}
           onClose={withAnalytics(
             this.closeSidebar,
-            "SampleView_details-sidebar-close_clicked",
+            "SampleView_details-sidebar_closed",
             {
               sampleId: sample.id,
               sampleName: sample.name
@@ -519,7 +520,7 @@ class SampleView extends React.Component {
             visible={this.state.coverageVizVisible}
             onClose={withAnalytics(
               this.closeCoverageViz,
-              "SampleView_coverage-viz-sidebar-close_clicked",
+              "SampleView_coverage-viz-sidebar_closed",
               {
                 sampleId: sample.id,
                 sampleName: sample.name

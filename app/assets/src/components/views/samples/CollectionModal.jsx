@@ -120,7 +120,7 @@ class CollectionModal extends React.Component {
             text="Cancel"
             onClick={withAnalytics(
               this.closeModal,
-              "CollectionModal_close-link_clicked"
+              "CollectionModal_cancel-button_clicked"
             )}
           />
         </div>

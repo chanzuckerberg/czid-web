@@ -52,7 +52,7 @@ class ProjectSettingsModal extends React.Component {
           className={cs.projectSettingsTrigger}
           onClick={withAnalytics(
             this.openModal,
-            "ProjectSettingsModal_settings-link_click",
+            "ProjectSettingsModal_open-link_click",
             {
               projectId: project.id,
               projectName: project.name

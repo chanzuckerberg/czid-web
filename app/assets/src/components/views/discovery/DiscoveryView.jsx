@@ -455,13 +455,13 @@ class DiscoveryView extends React.Component {
         this.updateBrowsingHistory("replace");
         this.resetDataFromFilterChange();
       });
-
-      logAnalyticsEvent("DiscoveryView_search_selected", {
-        key,
-        value,
-        text
-      });
     }
+    logAnalyticsEvent("DiscoveryView_search_selected", {
+      key,
+      value,
+      text,
+      filtersChanged
+    });
   };
 
   handleStringSearch = search => {
@@ -740,7 +740,10 @@ class DiscoveryView extends React.Component {
                   </div>
                   {!projects.length &&
                     !loadingProjects && (
-                      <NoResultsBanner className={cs.noResultsContainer} />
+                      <NoResultsBanner
+                        className={cs.noResultsContainer}
+                        type="projects"
+                      />
                     )}
                 </div>
               )}
@@ -758,12 +761,11 @@ class DiscoveryView extends React.Component {
                   </div>
                   {!samples.length &&
                     !loadingSamples && (
-                      <NoResultsBanner className={cs.noResultsContainer} />
-                    ) &&
-                    (logAnalyticsEvent(
-                      "DiscoveryView_no-results-banner_displayed"
-                    ) ||
-                      true)}
+                      <NoResultsBanner
+                        className={cs.noResultsContainer}
+                        type="samples"
+                      />
+                    )}
                 </div>
               )}
               {currentTab == "visualizations" && (
@@ -773,7 +775,10 @@ class DiscoveryView extends React.Component {
                   </div>
                   {!visualizations.length &&
                     !loadingVisualizations && (
-                      <NoResultsBanner className={cs.noResultsContainer} />
+                      <NoResultsBanner
+                        className={cs.noResultsContainer}
+                        type="visualizations"
+                      />
                     )}
                 </div>
               )}
