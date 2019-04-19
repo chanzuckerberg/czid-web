@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { merge, pick } from "lodash/fp";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { logAnalyticsEvent } from "~/api/analytics";
 import { humanize } from "~/helpers/strings";
 import { openUrl } from "~utils/links";
 import HeatmapPublic from "~ui/icons/HeatmapPublic";
@@ -96,6 +96,11 @@ class VisualizationsView extends React.Component {
       rowData.id
     }`;
     openUrl(url, event);
+    logAnalyticsEvent("VisualizationsView_row_clicked", {
+      visualizationType: rowData.visualization.visualization_type,
+      visualizationId: rowData.id,
+      url
+    });
   };
 
   render() {

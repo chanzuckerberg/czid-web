@@ -164,6 +164,9 @@ class SamplesView extends React.Component {
       newSelected.delete(value);
     }
     this.setState({ selectedSampleIds: newSelected });
+    logAnalyticsEvent("SamplesView_select-row_clicked", {
+      selectedSampleIds: newSelected
+    });
   };
 
   handleSelectAllRows = (value, checked) => {
@@ -275,6 +278,10 @@ class SamplesView extends React.Component {
             projectId,
             downloadOption
           });
+          logAnalyticsEvent("SamplesView_download-dropdown-option_clicked", {
+            projectId,
+            downloadOption
+          });
         }}
       />
     );
@@ -322,7 +329,13 @@ class SamplesView extends React.Component {
         <div className={cs.actions}>
           <div className={cs.action}>{this.renderCollectionTrigger()}</div>
           <div className={cs.action}>{this.renderHeatmapTrigger()}</div>
-          <div className={cs.action} onClick={this.handlePhyloModalOpen}>
+          <div
+            className={cs.action}
+            onClick={withAnalytics(
+              this.handlePhyloModalOpen,
+              "SamplesView_phylo-tree-modal-open_clicked"
+            )}
+          >
             <PhyloTreeIcon className={cs.icon} />
           </div>
           <div className={cs.action}>{this.renderDownloadTrigger()}</div>
@@ -343,6 +356,10 @@ class SamplesView extends React.Component {
     const { onSampleSelected, samples } = this.props;
     const sample = find({ id: rowData.id }, samples);
     onSampleSelected && onSampleSelected({ sample, currentEvent: event });
+    logAnalyticsEvent("SamplesView_row_clicked", {
+      sampleId: sample.id,
+      sampleName: sample.name
+    });
   };
 
   render() {
@@ -363,8 +380,11 @@ class SamplesView extends React.Component {
             defaultRowHeight={rowHeight}
             initialActiveColumns={activeColumns}
             loadingClassName={cs.loading}
-            onLoadRows={onLoadRows}
-            onSelectAllRows={this.handleSelectAllRows}
+            onLoadRows={withAnalytics(onLoadRows, "SamplesView_rows_loaded")}
+            onSelectAllRows={withAnalytics(
+              this.handleSelectAllRows,
+              "SamplesView_select-all-rows_clicked"
+            )}
             onSelectRow={this.handleSelectRow}
             onRowClick={this.handleRowClick}
             protectedColumns={protectedColumns}
@@ -378,7 +398,9 @@ class SamplesView extends React.Component {
           <PhyloTreeCreationModal
             // TODO(tiago): migrate phylo tree to use api (or read csrf from context) and remove this
             csrf={document.getElementsByName("csrf-token")[0].content}
-            onClose={this.handlePhyloModalClose}
+            onClose={withAnalytics(
+              "SamplesView_phylo-tree-modal-close_clicked"
+            )}
           />
         )}
       </div>
