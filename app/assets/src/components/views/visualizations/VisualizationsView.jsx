@@ -11,7 +11,6 @@ import PhyloTreePublic from "~ui/icons/PhyloTreePublic";
 import PhyloTreePrivate from "~ui/icons/PhyloTreePrivate";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
-
 import cs from "./visualizations_view.scss";
 
 // See also ProjectsView which is very similar
