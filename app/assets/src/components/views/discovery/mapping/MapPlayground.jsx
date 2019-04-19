@@ -11,46 +11,62 @@ import cs from "./map_playground.scss";
 class MapPlayground extends React.Component {
   constructor(props) {
     super(props);
+    const { results } = this.props;
 
     // Load demo data as locations->samples
-    const { results } = this.props;
-    const locationsToSamples = {};
+    const locationsToItems = {};
     results.forEach(result => {
       // Match locations that look like coordinates separated by a comma
       let locationName = result.location.replace(/_/g, ", ");
       const match = /^([-0-9.]+),\s?([-0-9.]+)$/g.exec(locationName);
       if (match) {
-        const lat = parseFloat(match[1]).toFixed(2);
-        const lon = parseFloat(match[2]).toFixed(2);
+        // Round the coordinates for some minimal aggregation
+        let [lat, lon] = this.parseLatLon(match[1], match[2]);
+        if (!(lat && lon)) return;
         locationName = `${lat}, ${lon}`;
-        const formatted = {
+        const item = {
           name: result.name,
           id: result.id
         };
-        if (locationsToSamples.hasOwnProperty(locationName)) {
-          locationsToSamples[locationName].push(formatted);
+
+        // Group items under the location name
+        if (locationsToItems.hasOwnProperty(locationName)) {
+          locationsToItems[locationName].items.push(item);
         } else {
-          locationsToSamples[locationName] = [formatted];
+          locationsToItems[locationName] = {
+            lat: lat,
+            lon: lon,
+            items: [item]
+          };
         }
       }
     });
 
     this.state = {
-      locationsToSamples,
+      locationsToItems: locationsToItems,
       viewport: {},
       popups: []
     };
   }
 
+  parseLatLon = (lat, lon) => {
+    lat = parseFloat(parseFloat(lat).toFixed(2));
+    lon = parseFloat(parseFloat(lon).toFixed(2));
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      return [null, null];
+    } else {
+      return [lat, lon];
+    }
+  };
+
   updateViewport = viewport => {
     this.setState({ viewport });
   };
 
-  renderMarker = (markerData, index) => {
+  renderMarker = (marker, index) => {
     const { viewport } = this.state;
-    const [locationName, samples] = markerData;
-    const [lat, lon] = locationName.split(",").map(parseFloat);
-    const pointCount = samples.length;
+    const [locationName, markerData] = marker;
+    const pointCount = markerData.items.length;
     const minSize = 12;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
     const markerSize = Math.max(
@@ -65,13 +81,17 @@ class MapPlayground extends React.Component {
     );
     const popupInfo = {
       name: locationName,
-      latitude: lat,
-      longitude: lon,
+      lat: markerData.lat,
+      lon: markerData.lon,
       markerIndex: index,
-      samples: samples
+      items: markerData.items
     };
     return (
-      <Marker key={`marker-${index}`} latitude={lat} longitude={lon}>
+      <Marker
+        key={`marker-${index}`}
+        latitude={markerData.lat}
+        longitude={markerData.lon}
+      >
         <CircleMarker
           size={markerSize}
           hoverContent={hoverContent}
@@ -98,14 +118,14 @@ class MapPlayground extends React.Component {
       <MapPopup
         anchor="bottom"
         tipSize={0}
-        latitude={popupInfo.latitude}
-        longitude={popupInfo.longitude}
+        latitude={popupInfo.lat}
+        longitude={popupInfo.lon}
         onClose={() => this.closePopup(popupInfo)}
         className={cs.dataBox}
       >
         <div>
           <div className={cs.title}>{popupInfo.name}</div>
-          {popupInfo.samples.map((sample, i) => (
+          {popupInfo.items.map((sample, i) => (
             <div className={cs.description} key={`popup-${i}`}>
               {sample.name}
             </div>
@@ -117,13 +137,13 @@ class MapPlayground extends React.Component {
 
   render() {
     const { mapTilerKey } = this.props;
-    const { locationsToSamples, popups } = this.state;
+    const { locationsToItems, popups } = this.state;
 
     return (
       <BaseMap
         mapTilerKey={mapTilerKey}
         updateViewport={this.updateViewport}
-        markers={Object.entries(locationsToSamples)}
+        markers={Object.entries(locationsToItems)}
         renderMarker={this.renderMarker}
         popups={popups}
         renderPopup={this.renderPopupBox}
