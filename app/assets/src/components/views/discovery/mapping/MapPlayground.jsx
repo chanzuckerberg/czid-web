@@ -17,20 +17,20 @@ class MapPlayground extends React.Component {
     const locationsToSamples = {};
     results.forEach(result => {
       // Match locations that look like coordinates separated by a comma
-      let loc = result.location.replace(/_/g, ", ");
-      const match = /^([-0-9.]+),\s?([-0-9.]+)$/g.exec(loc);
+      let locationName = result.location.replace(/_/g, ", ");
+      const match = /^([-0-9.]+),\s?([-0-9.]+)$/g.exec(locationName);
       if (match) {
         const lat = parseFloat(match[1]).toFixed(2);
         const lon = parseFloat(match[2]).toFixed(2);
-        loc = `${lat}, ${lon}`;
+        locationName = `${lat}, ${lon}`;
         const formatted = {
           name: result.name,
           id: result.id
         };
-        if (locationsToSamples.hasOwnProperty(loc)) {
-          locationsToSamples[loc].push(formatted);
+        if (locationsToSamples.hasOwnProperty(locationName)) {
+          locationsToSamples[locationName].push(formatted);
         } else {
-          locationsToSamples[loc] = [formatted];
+          locationsToSamples[locationName] = [formatted];
         }
       }
     });
@@ -105,8 +105,10 @@ class MapPlayground extends React.Component {
       >
         <div>
           <div className={cs.title}>{popupInfo.name}</div>
-          {popupInfo.samples.map(sample => (
-            <div className={cs.description}>{sample.name}</div>
+          {popupInfo.samples.map((sample, i) => (
+            <div className={cs.description} key={`popup-${i}`}>
+              {sample.name}
+            </div>
           ))}
         </div>
       </MapPopup>
