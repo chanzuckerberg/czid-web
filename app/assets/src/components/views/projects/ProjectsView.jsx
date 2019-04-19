@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { find, merge, pick } from "lodash/fp";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { logAnalyticsEvent } from "~/api/analytics";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
@@ -83,6 +83,10 @@ class ProjectsView extends React.Component {
     const { onProjectSelected, projects } = this.props;
     const project = find({ id: rowData.id }, projects);
     onProjectSelected && onProjectSelected({ project });
+    logAnalyticsEvent("ProjectsView_row_clicked", {
+      projectId: project.id,
+      projectName: project.name
+    });
   };
 
   render() {
