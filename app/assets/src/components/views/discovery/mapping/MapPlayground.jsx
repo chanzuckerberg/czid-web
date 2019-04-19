@@ -20,9 +20,9 @@ class MapPlayground extends React.Component {
       let loc = result.location.replace(/_/g, ", ");
       const match = /^([-0-9.]+),\s?([-0-9.]+)$/g.exec(loc);
       if (match) {
-        loc = `${parseFloat(match[1]).toFixed(2)}, ${parseFloat(
-          match[2]
-        ).toFixed(2)}`;
+        const lat = parseFloat(match[1]).toFixed(2);
+        const lon = parseFloat(match[2]).toFixed(2);
+        loc = `${lat}, ${lon}`;
         const formatted = {
           name: result.name,
           id: result.id
@@ -48,37 +48,30 @@ class MapPlayground extends React.Component {
 
   renderMarker = (markerData, index) => {
     const { viewport } = this.state;
-    const [lat, lon] = markerData[0].split(",");
-    const pointCount = markerData[1].length;
+    const [locationName, samples] = markerData;
+    const [lat, lon] = locationName.split(",").map(parseFloat);
+    const pointCount = samples.length;
     const minSize = 12;
-    const maxSize = 500;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
-    const markerSize = Math.min(
-      Math.max(
-        Math.log(pointCount) / Math.log(1.5) * (get("zoom", viewport) || 3),
-        minSize
-      ),
-      maxSize
+    const markerSize = Math.max(
+      Math.log(pointCount) / Math.log(1.5) * (get("zoom", viewport) || 3),
+      minSize
     );
     const hoverContent = (
       <div>
-        <div className={cs.title}>{markerData[0]}</div>
+        <div className={cs.title}>{locationName}</div>
         <div className={cs.description}>{`Samples: ${pointCount}`}</div>
       </div>
     );
     const popupInfo = {
-      name: markerData[0],
-      latitude: parseFloat(lat),
-      longitude: parseFloat(lon),
+      name: locationName,
+      latitude: lat,
+      longitude: lon,
       markerIndex: index,
-      samples: markerData[1]
+      samples: samples
     };
     return (
-      <Marker
-        key={`marker-${index}`}
-        latitude={parseFloat(lat)}
-        longitude={parseFloat(lon)}
-      >
+      <Marker key={`marker-${index}`} latitude={lat} longitude={lon}>
         <CircleMarker
           size={markerSize}
           hoverContent={hoverContent}
