@@ -385,7 +385,7 @@ class SamplesView extends React.Component {
             defaultRowHeight={rowHeight}
             initialActiveColumns={activeColumns}
             loadingClassName={cs.loading}
-            onLoadRows={withAnalytics(onLoadRows, "SamplesView_rows_loaded")}
+            onLoadRows={onLoadRows}
             onSelectAllRows={withAnalytics(
               this.handleSelectAllRows,
               "SamplesView_select-all-rows_clicked"
