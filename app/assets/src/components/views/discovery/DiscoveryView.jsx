@@ -22,8 +22,13 @@ import {
   xor,
   xorBy
 } from "lodash/fp";
+
+import { getSearchSuggestions } from "~/api";
+import { logAnalyticsEvent } from "~/api/analytics";
+import { openUrl } from "~utils/links";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
+
 import DiscoveryHeader from "./DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
@@ -40,9 +45,7 @@ import {
   DISCOVERY_DOMAIN_LIBRARY,
   DISCOVERY_DOMAIN_PUBLIC
 } from "./discovery_api";
-import { getSearchSuggestions } from "~/api";
 import NoResultsBanner from "./NoResultsBanner";
-import { openUrl } from "~utils/links";
 
 // Data available
 // (A) non-filtered dimensions: for filter options
@@ -387,6 +390,10 @@ class DiscoveryView extends React.Component {
   handleTabChange = currentTab => {
     this.setState({ currentTab }, () => {
       this.updateBrowsingHistory("replace");
+      const name = currentTab.replace(/\W+/g, "-").toLowerCase();
+      logAnalyticsEvent(`DiscoveryView_tab_${name}_clicked`, {
+        currentTab: currentTab
+      });
     });
   };
 
@@ -394,6 +401,9 @@ class DiscoveryView extends React.Component {
     this.setState({ filters: selectedFilters }, () => {
       this.updateBrowsingHistory("replace");
       this.resetDataFromFilterChange();
+      logAnalyticsEvent(`DiscoveryView_filters_changed`, {
+        filters: this.getFilterCount()
+      });
     });
   };
 
@@ -445,6 +455,12 @@ class DiscoveryView extends React.Component {
         this.updateBrowsingHistory("replace");
         this.resetDataFromFilterChange();
       });
+
+      logAnalyticsEvent("DiscoveryView_search_selected", {
+        key,
+        value,
+        text
+      });
     }
   };
 
@@ -456,6 +472,9 @@ class DiscoveryView extends React.Component {
       this.setState({ search: parsedSearch }, () => {
         this.updateBrowsingHistory("replace");
         this.resetDataFromFilterChange();
+        logAnalyticsEvent("DiscoveryView_string_search_selected", {
+          search: parsedSearch
+        });
       });
     }
   };
@@ -463,12 +482,18 @@ class DiscoveryView extends React.Component {
   handleFilterToggle = () => {
     this.setState({ showFilters: !this.state.showFilters }, () => {
       this.updateBrowsingHistory("replace");
+      logAnalyticsEvent("DiscoveryView_show-filters_toggled", {
+        showFilters: this.state.showFilters
+      });
     });
   };
 
   handleStatsToggle = () => {
     this.setState({ showStats: !this.state.showStats }, () => {
       this.updateBrowsingHistory("replace");
+      logAnalyticsEvent("DiscoveryView_show-stats_toggled", {
+        showFilters: this.state.showStats
+      });
     });
   };
 
@@ -734,7 +759,11 @@ class DiscoveryView extends React.Component {
                   {!samples.length &&
                     !loadingSamples && (
                       <NoResultsBanner className={cs.noResultsContainer} />
-                    )}
+                    ) &&
+                    (logAnalyticsEvent(
+                      "DiscoveryView_no-results-banner_displayed"
+                    ) ||
+                      true)}
                 </div>
               )}
               {currentTab == "visualizations" && (
