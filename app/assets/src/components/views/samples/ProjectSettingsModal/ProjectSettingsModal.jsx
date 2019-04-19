@@ -1,13 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
+import axios from "axios";
+
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import Modal from "~ui/containers/Modal";
 import GlobeIcon from "~ui/icons/GlobeIcon";
 import LockIcon from "~ui/icons/LockIcon";
 import Divider from "~/components/layout/Divider";
+
 import UserManagementForm from "./UserManagementForm";
 import PublicProjectConfirmationModal from "./PublicProjectConfirmationModal";
 import cs from "./project_settings_modal.scss";
-import axios from "axios";
 
 class ProjectSettingsModal extends React.Component {
   constructor(props) {

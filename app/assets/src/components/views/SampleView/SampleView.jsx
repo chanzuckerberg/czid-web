@@ -21,10 +21,10 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
-import Controls from "./Controls";
-import PipelineVersionSelect from "./PipelineVersionSelect";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 
+import Controls from "./Controls";
+import PipelineVersionSelect from "./PipelineVersionSelect";
 import cs from "./sample_view.scss";
 
 class SampleView extends React.Component {

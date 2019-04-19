@@ -1,14 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 import { find, forEach, pick } from "lodash/fp";
+
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
   TaxonFilter
 } from "~/components/common/filters";
 import FilterTag from "~ui/controls/FilterTag";
+
 import cs from "./discovery_filters.scss";
-import cx from "classnames";
 
 class DiscoveryFilters extends React.Component {
   constructor(props) {

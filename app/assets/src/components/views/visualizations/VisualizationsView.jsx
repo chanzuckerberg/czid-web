@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { merge, pick } from "lodash/fp";
 
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { humanize } from "~/helpers/strings";
 import { openUrl } from "~utils/links";
 import HeatmapPublic from "~ui/icons/HeatmapPublic";
@@ -10,6 +11,7 @@ import PhyloTreePublic from "~ui/icons/PhyloTreePublic";
 import PhyloTreePrivate from "~ui/icons/PhyloTreePrivate";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
+
 import cs from "./visualizations_view.scss";
 
 // See also ProjectsView which is very similar

@@ -1,6 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { difference, find, isEmpty, union } from "lodash/fp";
+import cx from "classnames";
+
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
 import { numberWithCommas } from "~/helpers/strings";
@@ -11,12 +14,12 @@ import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
 import SaveIcon from "~ui/icons/SaveIcon";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
-import ReportsDownloader from "./ReportsDownloader";
-import CollectionModal from "./CollectionModal";
 import BasicPopup from "~/components/BasicPopup";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
+
+import ReportsDownloader from "./ReportsDownloader";
+import CollectionModal from "./CollectionModal";
 import cs from "./samples_view.scss";
-import cx from "classnames";
 
 class SamplesView extends React.Component {
   constructor(props) {

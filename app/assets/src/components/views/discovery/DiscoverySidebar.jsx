@@ -3,6 +3,7 @@ import cx from "classnames";
 import { find, maxBy, orderBy, sumBy } from "lodash/fp";
 import moment from "moment";
 
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import { Accordion } from "~/components/layout";
 import BasicPopup from "~/components/BasicPopup";
