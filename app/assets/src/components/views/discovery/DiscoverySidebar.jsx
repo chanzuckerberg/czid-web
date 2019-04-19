@@ -250,7 +250,18 @@ export default class DiscoverySidebar extends React.Component {
           <Accordion
             key={dataKey}
             open={this.hasData()}
-            header={<div className={cs.title}>Overall</div>}
+            header={
+              <div
+                className={cs.title}
+                onClick={() =>
+                  logAnalyticsEvent(
+                    "DiscoverySidebar_accordion-overall_clicked"
+                  )
+                }
+              >
+                Overall
+              </div>
+            }
           >
             <div className={cx(cs.hasBackground, cs.statsRow)}>
               <dl className={cs.dataList}>
@@ -300,7 +311,16 @@ export default class DiscoverySidebar extends React.Component {
           <Accordion
             key={dataKey}
             open={this.hasData()}
-            header={<div className={cs.title}>Date created</div>}
+            header={
+              <div
+                className={cs.title}
+                onClick={() =>
+                  logAnalyticsEvent("DiscoverySidebar_accordion-date_clicked")
+                }
+              >
+                Date created
+              </div>
+            }
           >
             <div>{this.buildDateHistogram("time")}</div>
           </Accordion>
@@ -309,7 +329,18 @@ export default class DiscoverySidebar extends React.Component {
           <Accordion
             key={dataKey}
             open={this.hasData()}
-            header={<div className={cs.title}>Metadata</div>}
+            header={
+              <div
+                className={cs.title}
+                onClick={() =>
+                  logAnalyticsEvent(
+                    "DiscoverySidebar_accordion-metadata_clicked"
+                  )
+                }
+              >
+                Metadata
+              </div>
+            }
           >
             <div className={cs.hasBackground}>
               <span className={cs.rowLabel}>Host</span>
