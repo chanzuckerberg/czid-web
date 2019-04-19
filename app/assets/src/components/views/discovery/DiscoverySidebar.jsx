@@ -3,7 +3,7 @@ import cx from "classnames";
 import { find, maxBy, orderBy, sumBy } from "lodash/fp";
 import moment from "moment";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { logAnalyticsEvent } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import { Accordion } from "~/components/layout";
 import BasicPopup from "~/components/BasicPopup";
@@ -109,7 +109,15 @@ export default class DiscoverySidebar extends React.Component {
                 className={cs.bar}
                 key={entry.value}
                 style={{ height: percent + "px" }}
-                onClick={() => onFilterClick && onFilterClick(entry)}
+                onClick={() => {
+                  onFilterClick && onFilterClick(entry);
+                  logAnalyticsEvent("DiscoverySidebar_date_filter_clicked", {
+                    dateValue: entry.value,
+                    dates: dates.length,
+                    count: entry.count,
+                    percent
+                  });
+                }}
               >
                 &nbsp;
               </div>
@@ -164,7 +172,13 @@ export default class DiscoverySidebar extends React.Component {
         {extraRows.length > 0 && (
           <div
             className={cs.showHide}
-            onClick={() => this.toggleExpandedMetadataGroup(field)}
+            onClick={() => {
+              this.toggleExpandedMetadataGroup(field);
+              logAnalyticsEvent("DiscoverySidebar_show-more-toggle_clicked", {
+                field,
+                extraRows: extraRows.length
+              });
+            }}
           >
             {expandedMetadataGroups.has(field) ? "Show Less" : "Show More"}
           </div>
@@ -188,7 +202,17 @@ export default class DiscoverySidebar extends React.Component {
       return (
         <div className={cs.barChartRow} key={`${value}_row_${i}`}>
           <dt className={cs.barLabel} key={`${value}_label_${i}`}>
-            <a onClick={() => this.handleFilterClick(value)}>
+            <a
+              onClick={() => {
+                this.handleFilterClick(value);
+                logAnalyticsEvent("DiscoverySidebar_metadata-filter_clicked", {
+                  value,
+                  count,
+                  percent,
+                  rows: rows.length
+                });
+              }}
+            >
               {value === "not_set" ? <i>{text}</i> : text}
             </a>
           </dt>
