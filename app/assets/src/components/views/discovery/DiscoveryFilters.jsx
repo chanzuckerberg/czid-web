@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 import { find, forEach, pick } from "lodash/fp";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { withAnalytics } from "~/api/analytics";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
@@ -108,7 +108,14 @@ class DiscoveryFilters extends React.Component {
             className={cs.filterTag}
             key={option.value}
             text={option.text}
-            onClose={this.handleRemoveTag.bind(this, selectedKey, option.value)}
+            onClose={withAnalytics(
+              this.handleRemoveTag.bind(this, selectedKey, option.value),
+              "DiscoveryFilters_tag_removed",
+              {
+                value: option.value,
+                text: option.text
+              }
+            )}
           />
         );
       });
@@ -140,14 +147,20 @@ class DiscoveryFilters extends React.Component {
         <div className={cs.filterContainer}>
           <TaxonFilter
             domain={domain}
-            onChange={this.handleChange.bind(this, "taxonSelected")}
+            onChange={withAnalytics(
+              this.handleChange.bind(this, "taxonSelected"),
+              "DiscoveryFilters_taxon-selected_changed"
+            )}
             selected={taxonSelected}
           />
           {this.renderTags("taxon")}
         </div>
         <div className={cs.filterContainer}>
           <BaseMultipleFilter
-            onChange={this.handleChange.bind(this, "locationSelected")}
+            onChange={withAnalytics(
+              this.handleChange.bind(this, "locationSelected"),
+              "DiscoveryFilters_location-selected_changed"
+            )}
             selected={location && location.length ? locationSelected : null}
             options={location}
             label="Location"
@@ -158,7 +171,10 @@ class DiscoveryFilters extends React.Component {
           <BaseSingleFilter
             label="Timeframe"
             options={time}
-            onChange={this.handleChange.bind(this, "timeSelected")}
+            onChange={withAnalytics(
+              this.handleChange.bind(this, "timeSelected"),
+              "DiscoveryFilters_time-selected_changed"
+            )}
             value={time && !!time.length ? timeSelected : null}
           />
           {this.renderTags("time")}
@@ -167,14 +183,20 @@ class DiscoveryFilters extends React.Component {
           <BaseSingleFilter
             label="Visibility"
             options={visibility}
-            onChange={this.handleChange.bind(this, "visibilitySelected")}
+            onChange={withAnalytics(
+              this.handleChange.bind(this, "visibilitySelected"),
+              "DiscoveryFilters_visibility-selected_changed"
+            )}
             value={visibility && visibility.length ? visibilitySelected : null}
           />
           {this.renderTags("visibility")}
         </div>
         <div className={cs.filterContainer}>
           <BaseMultipleFilter
-            onChange={this.handleChange.bind(this, "hostSelected")}
+            onChange={withAnalytics(
+              this.handleChange.bind(this, "hostSelected"),
+              "DiscoveryFilters_host-selected_changed"
+            )}
             selected={host && host.length ? hostSelected : null}
             options={host}
             label="Host"
@@ -183,7 +205,10 @@ class DiscoveryFilters extends React.Component {
         </div>
         <div className={cs.filterContainer}>
           <BaseMultipleFilter
-            onChange={this.handleChange.bind(this, "tissueSelected")}
+            onChange={withAnalytics(
+              this.handleChange.bind(this, "tissueSelected"),
+              "DiscoveryFilters_tissue-selected_changed"
+            )}
             selected={tissue && tissue.length ? tissueSelected : null}
             options={tissue}
             label="Tissue"

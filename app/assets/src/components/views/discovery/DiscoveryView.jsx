@@ -472,7 +472,7 @@ class DiscoveryView extends React.Component {
       this.setState({ search: parsedSearch }, () => {
         this.updateBrowsingHistory("replace");
         this.resetDataFromFilterChange();
-        logAnalyticsEvent("DiscoveryView_string_search_selected", {
+        logAnalyticsEvent("DiscoveryView_string_search_entered", {
           search: parsedSearch
         });
       });

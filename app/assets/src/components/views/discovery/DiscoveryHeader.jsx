@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 
-import { withAnalytics } from "~/api/analytics";
 import FiltersIcon from "~ui/icons/FiltersIcon";
 import InfoIcon from "~ui/icons/InfoIcon";
 import Label from "~ui/labels/Label";
@@ -71,13 +70,7 @@ class DiscoveryHeader extends React.Component {
     // TODO(tiago): consider constraining what categories to ask for in the search box.
     return (
       <div className={cs.header}>
-        <div
-          className={cs.filtersTrigger}
-          onClick={withAnalytics(
-            onFilterToggle,
-            "DiscoveryHeader_filter-toggle_clicked"
-          )}
-        >
+        <div className={cs.filtersTrigger} onClick={onFilterToggle}>
           <FiltersIcon
             className={cx(cs.filtersIcon, cs.icon, !showFilters && cs.closed)}
           />
@@ -105,13 +98,7 @@ class DiscoveryHeader extends React.Component {
           hideBorder
         />
         <div className={cs.blankFill} />
-        <div
-          className={cs.statsTrigger}
-          onClick={withAnalytics(
-            onStatsToggle,
-            "DiscoveryHeader_stats-toggle_clicked"
-          )}
-        >
+        <div className={cs.statsTrigger} onClick={onStatsToggle}>
           <InfoIcon
             className={cx(cs.statsIcon, cs.icon, !showStats && cs.closed)}
           />
