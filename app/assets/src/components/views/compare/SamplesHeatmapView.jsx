@@ -5,6 +5,7 @@ import queryString from "query-string";
 import { get, set, min, max, isEmpty } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
 import { StickyContainer, Sticky } from "react-sticky";
+
 import ErrorBoundary from "~/components/ErrorBoundary";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import { Divider, NarrowContainer, ViewHeader } from "~/components/layout";
@@ -12,7 +13,6 @@ import SequentialLegendVis from "~/components/visualizations/legends/SequentialL
 import Slider from "~ui/controls/Slider";
 import BasicPopup from "~/components/BasicPopup";
 import { copyShortUrlToClipboard } from "~/helpers/url";
-
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import {
   Dropdown,
@@ -23,6 +23,8 @@ import {
 import { processMetadata } from "~utils/metadata";
 import { getSampleTaxons, saveVisualization } from "~/api";
 import { getSampleMetadataFields } from "~/api/metadata";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+
 import cs from "./samples_heatmap_view.scss";
 import SamplesHeatmapVis from "./SamplesHeatmapVis";
 
@@ -337,6 +339,10 @@ class SamplesHeatmapView extends React.Component {
   handleRemoveTaxon = taxonName => {
     let taxonId = this.state.taxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
+    logAnalyticsEvent("SamplesHeatmapView_taxon_removed", {
+      taxonId,
+      taxonName
+    });
   };
 
   closeSidebar = () => {
@@ -361,11 +367,19 @@ class SamplesHeatmapView extends React.Component {
       this.setState({
         sidebarVisible: false
       });
+      logAnalyticsEvent("SamplesHeatmapView_sample-details-sidebar_closed", {
+        sampleId: sampleId,
+        sidebarMode: "sampleDetails"
+      });
     } else {
       this.setState({
         selectedSampleId: sampleId,
         sidebarMode: "sampleDetails",
         sidebarVisible: true
+      });
+      logAnalyticsEvent("SamplesHeatmapView_sample-details-sidebar_opened", {
+        sampleId: sampleId,
+        sidebarMode: "sampleDetails"
       });
     }
   };
@@ -388,6 +402,12 @@ class SamplesHeatmapView extends React.Component {
       this.setState({
         sidebarVisible: false
       });
+      logAnalyticsEvent("SamplesHeatmapView_taxon-details-sidebar_closed", {
+        parentTaxonId: taxonDetails.parentId,
+        taxonId: taxonDetails.id,
+        taxonName,
+        sidebarMode: "taxonDetails"
+      });
     } else {
       this.setState({
         sidebarMode: "taxonDetails",
@@ -397,6 +417,12 @@ class SamplesHeatmapView extends React.Component {
           taxonName
         },
         sidebarVisible: true
+      });
+      logAnalyticsEvent("SamplesHeatmapView_taxon-details-sidebar_opened", {
+        parentTaxonId: taxonDetails.parentId,
+        taxonId: taxonDetails.id,
+        taxonName,
+        sidebarMode: "taxonDetails"
       });
     }
   };
@@ -472,6 +498,9 @@ class SamplesHeatmapView extends React.Component {
     }
 
     this.setSelectedOptionsState({ metric }, this.updateHeatmap);
+    logAnalyticsEvent("SamplesHeatmapView_metric-picker_changed", {
+      metric
+    });
   };
 
   renderMetricPicker() {
@@ -497,6 +526,9 @@ class SamplesHeatmapView extends React.Component {
       { thresholdFilters: filters },
       this.updateHeatmap
     );
+    logAnalyticsEvent("SamplesHeatmapView_threshold-filters_applied", {
+      filters: filters.length
+    });
   };
 
   renderAdvancedFilterPicker() {
@@ -516,6 +548,9 @@ class SamplesHeatmapView extends React.Component {
     }
 
     this.setSelectedOptionsState({ species: taxonLevel }, this.updateHeatmap);
+    logAnalyticsEvent("SamplesHeatmapView_taxon-picker_changed", {
+      taxonLevel
+    });
   };
 
   renderTaxonLevelPicker() {
@@ -539,6 +574,9 @@ class SamplesHeatmapView extends React.Component {
 
     this.recluster = true;
     this.setSelectedOptionsState({ dataScaleIdx: scaleIdx });
+    logAnalyticsEvent("SamplesHeatmapView_data-scale-picker_changed", {
+      dataScaleIdx: scaleIdx
+    });
   };
 
   renderScalePicker() {
@@ -585,6 +623,10 @@ class SamplesHeatmapView extends React.Component {
       { categories, subcategories },
       this.updateHeatmap
     );
+    logAnalyticsEvent("SamplesHeatmapView_category-filter_changed", {
+      categories: categories.length,
+      subcategories: subcategories.length
+    });
   };
 
   renderCategoryFilter() {
@@ -620,6 +662,9 @@ class SamplesHeatmapView extends React.Component {
     }
 
     this.setSelectedOptionsState({ background }, this.updateHeatmap);
+    logAnalyticsEvent("SamplesHeatmapView_background-picker_changed", {
+      background
+    });
   };
 
   renderBackgroundPicker() {
@@ -647,6 +692,9 @@ class SamplesHeatmapView extends React.Component {
       { taxonsPerSample: newValue },
       this.updateHeatmap
     );
+    logAnalyticsEvent("SamplesHeatmapView_taxons-per-sample-slider_changed", {
+      taxonsPerSample: newValue
+    });
   };
 
   renderTaxonsPerSampleSlider() {
@@ -671,6 +719,9 @@ class SamplesHeatmapView extends React.Component {
       { readSpecificity: specificity },
       this.updateHeatmap
     );
+    logAnalyticsEvent("SamplesHeatmapView_specificity-filter_changed", {
+      readspecificity: specificity
+    });
   };
 
   renderSpecificityFilter() {
@@ -732,6 +783,10 @@ class SamplesHeatmapView extends React.Component {
       default:
         break;
     }
+    logAnalyticsEvent("SamplesHeatmapView_download-button_clicked", {
+      sampleIds: this.state.sampleIds.length,
+      fileType
+    });
   };
 
   getSidebarParams = () => {
@@ -772,7 +827,13 @@ class SamplesHeatmapView extends React.Component {
               <BasicPopup
                 trigger={
                   <ShareButton
-                    onClick={this.onShareClick}
+                    onClick={withAnalytics(
+                      this.onShareClick,
+                      "SamplesHeatmapView_share-button_clicked",
+                      {
+                        sampleIds: this.state.sampleIds.length
+                      }
+                    )}
                     className={cs.controlElement}
                   />
                 }
@@ -784,7 +845,14 @@ class SamplesHeatmapView extends React.Component {
               {allowedFeatures &&
                 allowedFeatures.includes("data_discovery") && (
                   <SaveButton
-                    onClick={this.onSaveClick}
+                    onClick={withAnalytics(
+                      this.onSaveClick,
+                      "SamplesHeatmapView_save-button_clicked",
+                      {
+                        sampleIds: this.state.sampleIds.length,
+                        path: window.location.pathname
+                      }
+                    )}
                     className={cs.controlElement}
                   />
                 )}
@@ -810,7 +878,14 @@ class SamplesHeatmapView extends React.Component {
         <DetailsSidebar
           visible={this.state.sidebarVisible}
           mode={this.state.sidebarMode}
-          onClose={this.closeSidebar}
+          onClose={withAnalytics(
+            this.closeSidebar,
+            "SamplesHeatmapView_details-sidebar_closed",
+            {
+              sampleId: this.state.selectedSampleId,
+              sidebarMode: this.state.sidebarMode
+            }
+          )}
           params={this.getSidebarParams()}
         />
       </div>
