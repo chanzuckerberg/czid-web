@@ -8,12 +8,13 @@ import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
 import { getAllHostGenomes } from "~/api";
 import { getProjectMetadataFields } from "~/api/metadata";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import LoadingIcon from "~ui/icons/LoadingIcon";
+import { getURLParamString } from "~/helpers/url";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
 import IssueGroup from "./IssueGroup";
-import { getURLParamString } from "~/helpers/url";
 
 const map = _fp.map.convert({ cap: false });
 
@@ -48,6 +49,9 @@ class MetadataUpload extends React.Component {
       issues: null,
       wasManual: tab === "Manual Input"
     });
+    logAnalyticsEvent("MetadataUpload_tab_changed", {
+      tab
+    });
   };
 
   // MetadataCSVUpload validates metadata before calling onMetadataChangeCSV.
@@ -55,6 +59,11 @@ class MetadataUpload extends React.Component {
     this.props.onMetadataChange({ metadata, issues, wasManual: false });
     this.setState({
       issues,
+      validatingCSV
+    });
+    logAnalyticsEvent("MetadataUpload_csv-metadata_changed", {
+      errors: issues.errors.length,
+      warnings: issues.warnings.length,
       validatingCSV
     });
   };
@@ -66,6 +75,7 @@ class MetadataUpload extends React.Component {
       this.props.onDirty();
     }
     this.props.onMetadataChange({ metadata, wasManual: true });
+    logAnalyticsEvent("MetadataUpload_manual-metadata_changed");
   };
 
   getCSVUrl = () => {
@@ -104,7 +114,10 @@ class MetadataUpload extends React.Component {
           <div>
             <span
               className={cs.link}
-              onClick={this.props.onShowCSVInstructions}
+              onClick={withAnalytics(
+                this.props.onShowCSVInstructions,
+                "MetadataUpload_instruction-link_clicked"
+              )}
             >
               View CSV Upload Instructions
             </span>
@@ -224,6 +237,11 @@ class MetadataUpload extends React.Component {
                   href="/metadata/dictionary"
                   className={cs.link}
                   target="_blank"
+                  onClick={() =>
+                    logAnalyticsEvent(
+                      "MetadataUpload_full-dictionary-link_clicked"
+                    )
+                  }
                 >
                   View Full Metadata Dictionary
                 </a>
@@ -238,6 +256,9 @@ class MetadataUpload extends React.Component {
                 href="/metadata/dictionary"
                 className={cs.link}
                 target="_blank"
+                onClick={() =>
+                  logAnalyticsEvent("MetadataUpload_dictionary-link_clicked")
+                }
               >
                 View Metadata Dictionary
               </a>
