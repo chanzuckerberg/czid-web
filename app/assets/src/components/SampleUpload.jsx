@@ -542,12 +542,14 @@ class SampleUpload extends React.Component {
     this.clearError();
   }
 
+  // TODO (gdingle): is this used anywhere?
   handleNameChange(e) {
     this.setState({
       sampleName: e.target.value.trim()
     });
   }
 
+  // TODO (gdingle): is this used anywhere?
   handleResultChange(e) {
     this.setState({
       selectedResultPath: e.target.value.trim()
@@ -610,10 +612,16 @@ class SampleUpload extends React.Component {
           const simplified = sampleNameFromFileName(value);
           this.refs.sample_name.value = simplified;
           this.setState({ sampleName: simplified });
+          logAnalyticsEvent("SampleUpload_sample-name_changed", {
+            sampleName: simplified
+          });
         }
       }
     } else {
       this.setState({ sampleName: sampleField });
+      logAnalyticsEvent("SampleUpload_sample-name_changed", {
+        sampleName: sampleField
+      });
     }
   }
 
@@ -647,6 +655,7 @@ class SampleUpload extends React.Component {
         this.setState({ sampleName: simplified });
       }
       logAnalyticsEvent("SampleUpload_files_dropped", {
+        pos,
         accepted: accepted.length,
         newFiles: newFiles.length,
         // eslint-disable-next-line no-undef
@@ -655,6 +664,7 @@ class SampleUpload extends React.Component {
       return;
     }
     logAnalyticsEvent("SampleUpload_files_dropped", {
+      pos,
       accepted: accepted.length
     });
   };
@@ -1377,9 +1387,18 @@ class SampleUpload extends React.Component {
                   <TermsAgreement
                     checked={this.state.consentChecked}
                     onChange={() =>
-                      this.setState({
-                        consentChecked: !this.state.consentChecked
-                      })
+                      this.setState(
+                        {
+                          consentChecked: !this.state.consentChecked
+                        },
+                        () =>
+                          logAnalyticsEvent(
+                            "SampleUpload_consent-checkbox_clicked",
+                            {
+                              consentChecked: this.state.consentChecked
+                            }
+                          )
+                      )
                     }
                   />
                   <div className="row">
@@ -1398,7 +1417,10 @@ class SampleUpload extends React.Component {
                       {submitButton}
                       <button
                         type="button"
-                        onClick={() => window.history.back()}
+                        onClick={withAnalytics(
+                          () => window.history.back(),
+                          "SampleUpload_cancel-button_clicked"
+                        )}
                         className="new-button secondary-button"
                       >
                         Cancel
