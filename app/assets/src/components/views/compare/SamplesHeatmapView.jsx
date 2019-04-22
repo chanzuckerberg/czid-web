@@ -720,7 +720,7 @@ class SamplesHeatmapView extends React.Component {
       this.updateHeatmap
     );
     logAnalyticsEvent("SamplesHeatmapView_specificity-filter_changed", {
-      readspecificity: specificity
+      readSpecificity: specificity
     });
   };
 
