@@ -18,7 +18,6 @@ import DiscoverIcon from "../ui/icons/DiscoverIcon";
 import DetectIcon from "../ui/icons/DetectIcon";
 import DecipherIcon from "../ui/icons/DecipherIcon";
 import LogoIcon from "../ui/icons/LogoIcon";
-import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
 
 class Landing extends React.Component {
   constructor(props) {
@@ -56,17 +55,6 @@ class Landing extends React.Component {
         }
       })
       .then(() => {
-        // Although this event does not follow current naming conventions for
-        // frontend events, we keep it for continuity. See
-        // https://czi.quip.com/67RCAIiHN0Qc/IDseq-product-analytics-How-to-log
-        logAnalyticsEvent(ANALYTICS_EVENT_NAMES.userInterestFormSubmitted, {
-          first_name: this.state.firstName,
-          last_name: this.state.lastName,
-          email: this.state.email,
-          institution: this.state.institution,
-          usage: this.state.usage
-        });
-
         this.setState({
           firstName: "",
           lastName: "",
