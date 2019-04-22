@@ -267,7 +267,7 @@ class MetadataManualInput extends React.Component {
   isHostGenomeIdValidForField = (hostGenomeId, field) =>
     includes(
       hostGenomeId,
-      get([field, "host_genome_ids"], this.props.projectMetadataFields) || false
+      get([field, "host_genome_ids"], this.props.projectMetadataFields)
     );
 
   // Create form fields for the table.
