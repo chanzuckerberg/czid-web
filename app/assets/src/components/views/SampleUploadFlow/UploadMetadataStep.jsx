@@ -1,11 +1,14 @@
 import React from "react";
 import cx from "classnames";
+
 import MetadataUpload from "~/components/common/MetadataUpload";
 import Instructions from "~/components/views/samples/MetadataUploadModal/Instructions";
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import { validateManualMetadataForNewSamples } from "~/api/metadata";
+import { withAnalytics } from "~/api/analytics";
+
 import cs from "./sample_upload_flow.scss";
 
 class UploadMetadataStep extends React.Component {
@@ -102,7 +105,10 @@ class UploadMetadataStep extends React.Component {
           <div className={cs.controls}>
             <PrimaryButton
               text="Continue"
-              onClick={this.handleContinue}
+              onClick={withAnalytics(
+                this.handleContinue,
+                "UploadMetadataStep_continue-button_clicked"
+              )}
               disabled={this.state.continueDisabled}
               rounded={false}
               className={cs.continueButton}

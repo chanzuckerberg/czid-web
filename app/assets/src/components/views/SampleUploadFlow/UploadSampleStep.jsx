@@ -1,6 +1,7 @@
 import React from "react";
 import cx from "classnames";
 import QueryString from "query-string";
+
 import PropTypes from "~/components/utils/propTypes";
 import ProjectSelect from "~/components/common/ProjectSelect";
 import Tabs from "~/components/ui/controls/Tabs";
@@ -33,6 +34,7 @@ import BulkSampleUploadTable from "~ui/controls/BulkSampleUploadTable";
 import ProjectCreationForm from "~/components/common/ProjectCreationForm";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
+
 import LocalSampleFileUpload from "./LocalSampleFileUpload";
 import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
 import cs from "./sample_upload_flow.scss";

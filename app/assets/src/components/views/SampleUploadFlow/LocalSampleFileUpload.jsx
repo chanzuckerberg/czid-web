@@ -9,11 +9,13 @@ import _fp, {
   slice,
   sumBy
 } from "lodash/fp";
+import cx from "classnames";
+
 import { sampleNameFromFileName, cleanFilePath } from "~utils/sample";
 import FilePicker from "~ui/controls/FilePicker";
 import PropTypes from "~/components/utils/propTypes";
+
 import cs from "./sample_upload_flow.scss";
-import cx from "classnames";
 
 const map = _fp.map.convert({ cap: false });
 

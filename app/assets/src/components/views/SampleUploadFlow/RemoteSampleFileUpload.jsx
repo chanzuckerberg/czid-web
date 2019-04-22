@@ -1,9 +1,11 @@
 import React from "react";
 import { compact } from "lodash/fp";
+
 import Input from "~ui/controls/Input";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import PropTypes from "~/components/utils/propTypes";
 import { bulkImportRemoteSamples } from "~/api";
+
 import cs from "./sample_upload_flow.scss";
 
 class RemoteSampleFileUpload extends React.Component {
