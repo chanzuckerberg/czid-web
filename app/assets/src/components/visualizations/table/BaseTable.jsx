@@ -8,15 +8,16 @@ import {
 } from "react-virtualized";
 import "react-virtualized/styles.css";
 import cx from "classnames";
-import cs from "./base_table.scss";
+import { concat, difference, find, includes, map } from "lodash/fp";
 
 import BasicPopup from "~/components/BasicPopup";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import PlusIcon from "~ui/icons/PlusIcon";
-
-import { concat, difference, find, includes, map } from "lodash/fp";
 import { humanize } from "~/helpers/strings";
+import { logAnalyticsEvent } from "~/api/analytics";
+
+import cs from "./base_table.scss";
 
 class BaseTable extends React.Component {
   // This class is a wrapper class to React Virtualized Table.
@@ -73,6 +74,10 @@ class BaseTable extends React.Component {
   handleColumnChange = selectedColumns => {
     const { protectedColumns } = this.props;
     this.setState({ activeColumns: concat(protectedColumns, selectedColumns) });
+    logAnalyticsEvent("BaseTable_column-selector_changed", {
+      selectedColumns: selectedColumns.length,
+      protectedColumns: protectedColumns.length
+    });
   };
 
   renderColumnSelector = () => {

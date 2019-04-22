@@ -16,6 +16,7 @@ import _fp, {
   isEqual
 } from "lodash/fp";
 
+import { logAnalyticsEvent } from "~/api/analytics";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
@@ -151,7 +152,7 @@ class MetadataManualInput extends React.Component {
   // Convert metadata headers and fields to a CSV-like format before passing to parent.
   onMetadataChange = (newHeaders, newFields) => {
     // Only send fields for the selected samples to the parent component.
-    // If a sample was added, and then later removed, that sample's metadata will not be sent up,
+    // If a sample was added, and then later removed, that sample's metadata thll not be sent up,
     // but will still persist in this component.
     const sampleNames = map("name", this.props.samples);
     const fieldsForSamples = pickBy(
@@ -186,6 +187,9 @@ class MetadataManualInput extends React.Component {
 
   handleColumnChange = selectedFieldNames => {
     this.setState({ selectedFieldNames });
+    logAnalyticsEvent("MetadataManualInput_column-selector_changed", {
+      selectedFieldNames: selectedFieldNames.length
+    });
   };
 
   getHostGenomeOptions = () =>
@@ -236,7 +240,13 @@ class MetadataManualInput extends React.Component {
       this.state.applyToAllCell.column === column ? (
       <div
         className={cs.applyToAll}
-        onClick={() => this.applyToAll(column, sample)}
+        onClick={() => {
+          this.applyToAll(column, sample);
+          logAnalyticsEvent("MetadataManualInput_apply-all_clicked", {
+            sampleName: sample.name,
+            column
+          });
+        }}
       >
         Apply to All
       </div>
@@ -257,7 +267,7 @@ class MetadataManualInput extends React.Component {
   isHostGenomeIdValidForField = (hostGenomeId, field) =>
     includes(
       hostGenomeId,
-      this.props.projectMetadataFields[field].host_genome_ids
+      get([field, "host_genome_ids"], this.props.projectMetadataFields) || false
     );
 
   // Create form fields for the table.
@@ -315,9 +325,14 @@ class MetadataManualInput extends React.Component {
                   className={inputClasses}
                   value={this.getMetadataValue(sample, column)}
                   metadataType={this.state.projectMetadataFields[column]}
-                  onChange={(key, value) =>
-                    this.updateMetadataField(key, value, sample)
-                  }
+                  onChange={(key, value) => {
+                    this.updateMetadataField(key, value, sample);
+                    logAnalyticsEvent("MetadataManualInput_input_changed", {
+                      key,
+                      value,
+                      sampleName: sample.name
+                    });
+                  }}
                   withinModal={this.props.withinModal}
                   isHuman={sampleHostGenomeId === 1}
                 />

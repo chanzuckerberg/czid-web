@@ -61,10 +61,15 @@ class MetadataUpload extends React.Component {
       issues,
       validatingCSV
     });
+    if (validatingCSV) {
+      logAnalyticsEvent("MetadataUpload_csv-metadata_validated", {
+        errors: issues.errors.length,
+        warnings: issues.warnings.length
+      });
+    }
     logAnalyticsEvent("MetadataUpload_csv-metadata_changed", {
       errors: issues.errors.length,
-      warnings: issues.warnings.length,
-      validatingCSV
+      warnings: issues.warnings.length
     });
   };
 
@@ -75,7 +80,7 @@ class MetadataUpload extends React.Component {
       this.props.onDirty();
     }
     this.props.onMetadataChange({ metadata, wasManual: true });
-    logAnalyticsEvent("MetadataUpload_manual-metadata_changed");
+    logAnalyticsEvent("MetadataUpload_manual-metadata_changed", metadata);
   };
 
   getCSVUrl = () => {
@@ -136,6 +141,9 @@ class MetadataUpload extends React.Component {
             href={this.getCSVUrl()}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() =>
+              logAnalyticsEvent("MetadataUpload_download-csv-template_clicked")
+            }
           >
             Download Metadata CSV Template
           </a>

@@ -5,6 +5,7 @@ import Input from "~ui/controls/Input";
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import PropTypes from "~/components/utils/propTypes";
 import { bulkImportRemoteSamples } from "~/api";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./sample_upload_flow.scss";
 
@@ -16,9 +17,15 @@ class RemoteSampleFileUpload extends React.Component {
   };
 
   toggleInfo = () => {
-    this.setState({
-      showInfo: !this.state.showInfo
-    });
+    this.setState(
+      {
+        showInfo: !this.state.showInfo
+      },
+
+      logAnalyticsEvent("RemoteSampleFileUpload_more-info-toggle_clicked", {
+        showInfo: this.state.showInfo
+      })
+    );
   };
 
   handleRemotePathChange = remoteS3Path => {
@@ -55,12 +62,26 @@ class RemoteSampleFileUpload extends React.Component {
       }));
 
       this.props.onChange(newSamples);
+
+      logAnalyticsEvent("RemoteSampleFileUpload_connect_succeeded", {
+        projectId: this.props.project.id,
+        bulkPath: this.state.remoteS3Path,
+        newSamples: newSamples.length
+      });
     } catch (e) {
       if (e.status.startsWith("No samples imported")) {
         this.setState({
+          // TODO (gdingle): we should have an error state for
+          // bucket not found as well.
           error: "No valid samples were found."
         });
       }
+
+      logAnalyticsEvent("RemoteSampleFileUpload_connect_failed", {
+        projectId: this.props.project.id,
+        bulkPath: this.state.remoteS3Path,
+        error: e.status
+      });
     }
   };
 

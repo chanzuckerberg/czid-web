@@ -14,6 +14,7 @@ import cx from "classnames";
 import { sampleNameFromFileName, cleanFilePath } from "~utils/sample";
 import FilePicker from "~ui/controls/FilePicker";
 import PropTypes from "~/components/utils/propTypes";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./sample_upload_flow.scss";
 
@@ -63,9 +64,14 @@ class LocalSampleFileUpload extends React.Component {
     );
 
   toggleInfo = () => {
-    this.setState({
-      showInfo: !this.state.showInfo
-    });
+    this.setState(
+      {
+        showInfo: !this.state.showInfo
+      },
+      logAnalyticsEvent("LocalSampleFileUpload_more-info-toggle_clicked", {
+        showInfo: this.state.showInfo
+      })
+    );
   };
 
   render() {
