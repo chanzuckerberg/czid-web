@@ -300,7 +300,13 @@ class ReviewStep extends React.Component {
                 className={cs.link}
                 href={`/home?project_id=${this.props.project.id}`}
               >
-                <SecondaryButton text="Go to Project" rounded={false} />
+                <SecondaryButton
+                  text="Go to Project"
+                  rounded={false}
+                  onClick={() =>
+                    logAnalyticsEvent("ReviewStep_go-to-project-button_clicked")
+                  }
+                />
               </a>
             </div>
           )}

@@ -7,7 +7,7 @@ import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import { validateManualMetadataForNewSamples } from "~/api/metadata";
-import { withAnalytics } from "~/api/analytics";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
 import cs from "./sample_upload_flow.scss";
 
@@ -114,7 +114,13 @@ class UploadMetadataStep extends React.Component {
               className={cs.continueButton}
             />
             <a href="/home">
-              <SecondaryButton text="Cancel" rounded={false} />
+              <SecondaryButton
+                text="Cancel"
+                rounded={false}
+                onClick={() =>
+                  logAnalyticsEvent("UploadMetadataStep_cancel-button_clicked")
+                }
+              />
             </a>
           </div>
         </div>
