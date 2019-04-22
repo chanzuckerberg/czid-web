@@ -819,8 +819,9 @@ class SampleUpload extends React.Component {
           <Menu compact>
             <MenuItem
               active={this.state.localUploadMode}
-              onClick={withAnalytics("SampleUpload_upload-local_clicked", () =>
-                this.setState({ localUploadMode: true })
+              onClick={withAnalytics(
+                () => this.setState({ localUploadMode: true }),
+                "SampleUpload_upload-local_clicked"
               )}
               disabled={this.state.submitting}
             >
@@ -829,8 +830,9 @@ class SampleUpload extends React.Component {
             </MenuItem>
             <MenuItem
               active={!this.state.localUploadMode}
-              onClick={withAnalytics("SampleUpload_upload-remote_clicked", () =>
-                this.setState({ localUploadMode: false })
+              onClick={withAnalytics(
+                () => this.setState({ localUploadMode: false }),
+                "SampleUpload_upload-remote_clicked"
               )}
               disabled={this.state.submitting}
             >
