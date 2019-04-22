@@ -3,10 +3,13 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 import { keyBy } from "lodash/fp";
 import { orderBy } from "lodash";
+
+import { logAnalyticsEvent } from "~/api/analytics";
 import { DataTooltip, ContextPlaceholder } from "~ui/containers";
 import { SearchBoxList } from "~ui/controls";
 import { openUrl } from "~utils/links";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
+
 import cs from "./samples_heatmap_vis.scss";
 
 class SamplesHeatmapVis extends React.Component {
@@ -114,6 +117,9 @@ class SamplesHeatmapVis extends React.Component {
 
   handleNodeHover = node => {
     this.setState({ nodeHoverInfo: this.getTooltipData(node) });
+    logAnalyticsEvent("SamplesHeatmapVis_node_hovered", {
+      nodeValue: node.value
+    });
   };
 
   handleNodeHoverOut = () => {
@@ -121,8 +127,13 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   handleColumnMetadataLabelHover = node => {
+    const legend = this.heatmap.getColumnMetadataLegend(node.value);
     this.setState({
-      columnMetadataLegend: this.heatmap.getColumnMetadataLegend(node.value)
+      columnMetadataLegend: legend
+    });
+    logAnalyticsEvent("SamplesHeatmapVis_column-metadata_hovered", {
+      nodeValue: node.value,
+      columnMetadataLegend: legend
     });
   };
 
@@ -179,11 +190,18 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   handleCellClick = (cell, currentEvent) => {
-    openUrl(`/samples/${this.props.sampleIds[cell.columnIndex]}`, currentEvent);
+    const sampleId = this.props.sampleIds[cell.columnIndex];
+    openUrl(`/samples/${sampleId}`, currentEvent);
+    logAnalyticsEvent("SamplesHeatmapVis_cell_clicked", {
+      sampleId
+    });
   };
 
   handleAddColumnMetadataClick = trigger => {
     this.setState({
+      addMetadataTrigger: trigger
+    });
+    logAnalyticsEvent("SamplesHeatmapVis_column-metadata_clicked", {
       addMetadataTrigger: trigger
     });
   };
@@ -194,12 +212,16 @@ class SamplesHeatmapVis extends React.Component {
         selectedMetadata.has(metadatum)
       )
     );
+    const current = new Set([...intersection, ...selectedMetadata]);
     this.setState(
       {
-        selectedMetadata: new Set([...intersection, ...selectedMetadata])
+        selectedMetadata: current
       },
       () => {
         this.heatmap.updateColumnMetadata(this.getSelectedMetadata());
+        logAnalyticsEvent("SamplesHeatmapVis_selected-metadata_changed", {
+          selectedMetadata: current.length
+        });
       }
     );
   };
