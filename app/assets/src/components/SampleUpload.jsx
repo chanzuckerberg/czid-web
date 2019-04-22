@@ -5,7 +5,7 @@ import axios from "axios";
 import $ from "jquery";
 import Tipsy from "react-tipsy";
 import { find } from "lodash/fp";
-import ObjectHelper from "../helpers/ObjectHelper";
+
 import { sampleNameFromFileName, joinServerError } from "~utils/sample";
 import { openUrlWithTimeout } from "~utils/links";
 import BeeIcon from "~ui/icons/BeeIcon";
@@ -24,6 +24,9 @@ import { Menu, MenuItem } from "~ui/controls/Menu";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { createSample } from "~/api";
 import { startUploadHeartbeat } from "~/api/upload";
+import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
+
+import ObjectHelper from "../helpers/ObjectHelper";
 
 class SampleUpload extends React.Component {
   constructor(props, context) {
@@ -211,12 +214,19 @@ class SampleUpload extends React.Component {
   }
 
   toggleCheckBox(e) {
-    this.setState({
-      [e.target.id]: e.target.value == "true" ? false : true
-      /* Note: "[e.target.id]" indicates a "computed property name".
+    this.setState(
+      {
+        [e.target.id]: e.target.value == "true" ? false : true
+        /* Note: "[e.target.id]" indicates a "computed property name".
          This allows us to use toggleCheckBox(event) to set different state variables
          depending on the id attached to the event. */
-    });
+      },
+      () => {
+        logAnalyticsEvent("SampleUpload_public-checkbox_toggled", {
+          [e.target.id]: this.state[e.target.id]
+        });
+      }
+    );
   }
 
   handleProjectSubmit(e) {
@@ -227,6 +237,11 @@ class SampleUpload extends React.Component {
     if (!this.isProjectInvalid()) {
       this.addProject();
     }
+    logAnalyticsEvent("SampleUpload_create-project-link_clicked", {
+      name: this.refs.new_project.value,
+      publicChecked: this.state.publicChecked,
+      isProjectInvalid: this.isProjectInvalid()
+    });
   }
 
   addProject() {
@@ -471,6 +486,11 @@ class SampleUpload extends React.Component {
         selectedPId: this.state.allProjects[selectedIndex].id,
         errors: Object.assign({}, this.state.errors, { selectedProject: null })
       });
+      logAnalyticsEvent("SampleUpload_project-selector_changed", {
+        project: e.target.value.trim(),
+        projectId: this.state.allProjects[selectedIndex].id,
+        errors: Object.keys(this.state.errors).length
+      });
     }
     this.clearError();
   }
@@ -481,6 +501,10 @@ class SampleUpload extends React.Component {
       selectedHostGenomeId: hostId
     });
     this.clearError();
+    logAnalyticsEvent("SampleUpload_host-genome_changed", {
+      selectedHostGenome: hostName,
+      selectedHostGenomeId: hostId
+    });
   }
 
   handleBranchChange(e) {
@@ -541,6 +565,9 @@ class SampleUpload extends React.Component {
       },
       () => {
         this.initializeSelectTag();
+        logAnalyticsEvent("SampleUpload_new-project-input_toggled", {
+          disableProjectSelect: this.state.disableProjectSelect
+        });
       }
     );
   }
@@ -619,7 +646,17 @@ class SampleUpload extends React.Component {
         this.refs.sample_name.value = simplified;
         this.setState({ sampleName: simplified });
       }
+      logAnalyticsEvent("SampleUpload_files_dropped", {
+        accepted: accepted.length,
+        newFiles: newFiles.length,
+        // eslint-disable-next-line no-undef
+        sampleName: this.state.sampleName || simplified
+      });
+      return;
     }
+    logAnalyticsEvent("SampleUpload_files_dropped", {
+      accepted: accepted.length
+    });
   };
 
   uploadBoxHandleSuccess = file => {
@@ -742,7 +779,20 @@ class SampleUpload extends React.Component {
         type="submit"
         disabled={!this.state.consentChecked || this.state.submitting}
         className="new-button blue-button upload-samples-button"
-        onClick={updateExistingSample ? this.handleUpdate : this.handleUpload}
+        onClick={
+          updateExistingSample
+            ? withAnalytics(
+                this.handleUpdate,
+                "SampleUpload_update-button_clicked"
+              )
+            : withAnalytics(
+                this.handleUpload,
+                "SampleUpload_upload-button_clicked",
+                {
+                  localUploadMode: this.state.localUploadMode
+                }
+              )
+        }
       >
         {this.state.submitting ? (
           <i className="fa fa-spinner fa-spin fa-lg" />
@@ -759,7 +809,9 @@ class SampleUpload extends React.Component {
           <Menu compact>
             <MenuItem
               active={this.state.localUploadMode}
-              onClick={() => this.setState({ localUploadMode: true })}
+              onClick={withAnalytics("SampleUpload_upload-local_clicked", () =>
+                this.setState({ localUploadMode: true })
+              )}
               disabled={this.state.submitting}
             >
               <Icon size="large" name="folder open outline" />
@@ -767,7 +819,9 @@ class SampleUpload extends React.Component {
             </MenuItem>
             <MenuItem
               active={!this.state.localUploadMode}
-              onClick={() => this.setState({ localUploadMode: false })}
+              onClick={withAnalytics("SampleUpload_upload-remote_clicked", () =>
+                this.setState({ localUploadMode: false })
+              )}
               disabled={this.state.submitting}
             >
               <Icon size="large" name="server" />
@@ -933,7 +987,18 @@ class SampleUpload extends React.Component {
             <form
               ref="form"
               onSubmit={
-                updateExistingSample ? this.handleUpdate : this.handleUpload
+                updateExistingSample
+                  ? withAnalytics(
+                      this.handleUpdate,
+                      "SampleUpload_update-form_submitted"
+                    )
+                  : withAnalytics(
+                      this.handleUpload,
+                      "SampleUpload_upload-form_submitted",
+                      {
+                        localUploadMode: this.state.localUploadMode
+                      }
+                    )
               }
             >
               <div className="fields">
