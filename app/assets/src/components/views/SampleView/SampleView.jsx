@@ -10,7 +10,11 @@ import {
   parseUrlParams,
   copyShortUrlToClipboard
 } from "~/helpers/url";
-import { logAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "~/api/analytics";
+import {
+  withAnalytics,
+  logAnalyticsEvent,
+  ANALYTICS_EVENT_NAMES
+} from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import { pipelineVersionHasAssembly } from "~/components/utils/sample";
 import AMRView from "~/components/AMRView";
@@ -21,10 +25,10 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
-import Controls from "./Controls";
-import PipelineVersionSelect from "./PipelineVersionSelect";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 
+import SampleViewControls from "./SampleViewControls";
+import PipelineVersionSelect from "./PipelineVersionSelect";
 import cs from "./sample_view.scss";
 
 class SampleView extends React.Component {
@@ -58,6 +62,9 @@ class SampleView extends React.Component {
       this.fetchAdditionalData();
     }
 
+    // Although this event does not follow current naming conventions for
+    // frontend events, we keep it for continuity. See
+    // https://czi.quip.com/67RCAIiHN0Qc/IDseq-product-analytics-How-to-log
     logAnalyticsEvent(ANALYTICS_EVENT_NAMES.sampleViewed, {
       sampleId: this.props.sample.id
     });
@@ -114,6 +121,10 @@ class SampleView extends React.Component {
 
   handleTabChange = tab => {
     this.setState({ currentTab: tab });
+    const name = tab.replace(/\W+/g, "-").toLowerCase();
+    logAnalyticsEvent(`SampleView_tab_${name}_clicked`, {
+      tab: tab
+    });
   };
 
   toggleSampleDetailsSidebar = () => {
@@ -408,13 +419,25 @@ class SampleView extends React.Component {
                 options={Object.keys(sampleIdToNameMap).map(sampleId => ({
                   label: sampleIdToNameMap[sampleId],
                   id: sampleId,
-                  onClick: () => window.open(`/samples/${sampleId}`, "_self")
+                  onClick: () => {
+                    window.open(`/samples/${sampleId}`, "_self");
+                    logAnalyticsEvent("SampleView_header-title_clicked", {
+                      sampleId
+                    });
+                  }
                 }))}
               />
               <div className={cs.sampleDetailsLinkContainer}>
                 <span
                   className={cs.sampleDetailsLink}
-                  onClick={this.toggleSampleDetailsSidebar}
+                  onClick={withAnalytics(
+                    this.toggleSampleDetailsSidebar,
+                    "SampleView_sample-details-link_clicked",
+                    {
+                      sampleId: sample.id,
+                      sampleName: sample.name
+                    }
+                  )}
                 >
                   Sample Details
                 </span>
@@ -422,14 +445,36 @@ class SampleView extends React.Component {
             </ViewHeader.Content>
             <ViewHeader.Controls>
               <BasicPopup
-                trigger={<ShareButton onClick={this.onShareClick} />}
+                trigger={
+                  <ShareButton
+                    onClick={withAnalytics(
+                      this.onShareClick,
+                      "SampleView_share-button_clicked",
+                      {
+                        sampleId: sample.id,
+                        sampleName: sample.name
+                      }
+                    )}
+                  />
+                }
                 content="A shareable URL was copied to your clipboard!"
                 on="click"
                 hideOnScroll
               />{" "}
               {/* TODO: (gdingle): this is admin-only until we have a way of browsing visualizations */}
-              {this.props.admin && <SaveButton onClick={this.onSaveClick} />}{" "}
-              <Controls
+              {this.props.admin && (
+                <SaveButton
+                  onClick={withAnalytics(
+                    this.onSaveClick,
+                    "SampleView_save-button_clicked",
+                    {
+                      sampleId: sample.id,
+                      sampleName: sample.name
+                    }
+                  )}
+                />
+              )}{" "}
+              <SampleViewControls
                 reportPresent={reportPresent}
                 sample={sample}
                 project={project}
@@ -459,14 +504,28 @@ class SampleView extends React.Component {
         <DetailsSidebar
           visible={this.state.sidebarVisible}
           mode={this.state.sidebarMode}
-          onClose={this.closeSidebar}
+          onClose={withAnalytics(
+            this.closeSidebar,
+            "SampleView_details-sidebar_closed",
+            {
+              sampleId: sample.id,
+              sampleName: sample.name
+            }
+          )}
           params={this.getSidebarParams()}
         />
         {(this.props.admin ||
           this.props.allowedFeatures.includes("coverage_viz")) && (
           <CoverageVizBottomSidebar
             visible={this.state.coverageVizVisible}
-            onClose={this.closeCoverageViz}
+            onClose={withAnalytics(
+              this.closeCoverageViz,
+              "SampleView_coverage-viz-sidebar_closed",
+              {
+                sampleId: sample.id,
+                sampleName: sample.name
+              }
+            )}
             params={this.getCoverageVizParams()}
             sampleId={sample.id}
           />

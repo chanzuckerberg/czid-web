@@ -1,14 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 import { find, forEach, pick } from "lodash/fp";
+
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
   TaxonFilter
 } from "~/components/common/filters";
 import FilterTag from "~ui/controls/FilterTag";
+
 import cs from "./discovery_filters.scss";
-import cx from "classnames";
 
 class DiscoveryFilters extends React.Component {
   constructor(props) {
@@ -70,6 +73,9 @@ class DiscoveryFilters extends React.Component {
     const newState = [];
     newState[selectedKey] = selected;
     this.setState(newState, this.notifyFilterChangeHandler);
+    logAnalyticsEvent(`DiscoveryFilters_${selectedKey.toLowerCase()}_changed`, {
+      selectedKey: selected
+    });
   }
 
   handleRemoveTag(selectedKey, removedValue) {
@@ -105,7 +111,14 @@ class DiscoveryFilters extends React.Component {
             className={cs.filterTag}
             key={option.value}
             text={option.text}
-            onClose={this.handleRemoveTag.bind(this, selectedKey, option.value)}
+            onClose={withAnalytics(
+              this.handleRemoveTag.bind(this, selectedKey, option.value),
+              "DiscoveryFilters_tag_removed",
+              {
+                value: option.value,
+                text: option.text
+              }
+            )}
           />
         );
       });

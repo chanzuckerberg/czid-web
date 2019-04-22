@@ -11,8 +11,7 @@ import { isArray, isObject, camelCase, snakeCase, lowerFirst } from "lodash/fp";
 // ANALYTICS_EVENT_NAMES, which does not require registration here and uses a
 // more elaborate naming convention.
 export const ANALYTICS_EVENT_NAMES = {
-  sampleViewed: "sample_viewed",
-  userInterestFormSubmitted: "user_interest_form_submitted"
+  sampleViewed: "sample_viewed"
 };
 
 // See https://czi.quip.com/bKDnAITc6CbE/How-to-start-instrumenting-analytics-2019-03-06

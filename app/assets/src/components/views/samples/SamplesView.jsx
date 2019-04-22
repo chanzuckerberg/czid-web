@@ -1,6 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { difference, find, isEmpty, union } from "lodash/fp";
+import cx from "classnames";
+
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
 import { numberWithCommas } from "~/helpers/strings";
@@ -11,12 +14,12 @@ import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
 import SaveIcon from "~ui/icons/SaveIcon";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
-import ReportsDownloader from "./ReportsDownloader";
-import CollectionModal from "./CollectionModal";
 import BasicPopup from "~/components/BasicPopup";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
+
+import ReportsDownloader from "./ReportsDownloader";
+import CollectionModal from "./CollectionModal";
 import cs from "./samples_view.scss";
-import cx from "classnames";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -161,6 +164,9 @@ class SamplesView extends React.Component {
       newSelected.delete(value);
     }
     this.setState({ selectedSampleIds: newSelected });
+    logAnalyticsEvent("SamplesView_row_selected", {
+      selectedSampleIds: newSelected
+    });
   };
 
   handleSelectAllRows = (value, checked) => {
@@ -241,10 +247,15 @@ class SamplesView extends React.Component {
 
   renderHeatmapTrigger = () => {
     const { selectedSampleIds } = this.state;
+    const log = () =>
+      logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
+        selectedSampleIds: selectedSampleIds.length
+      });
     return selectedSampleIds.size < 2 ? (
       <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
     ) : (
       <a
+        onClick={log}
         href={`/visualizations/heatmap?sampleIds=${Array.from(
           selectedSampleIds
         )}`}
@@ -269,6 +280,10 @@ class SamplesView extends React.Component {
         options={downloadOptions}
         onClick={downloadOption => {
           new ReportsDownloader({
+            projectId,
+            downloadOption
+          });
+          logAnalyticsEvent("SamplesView_download-dropdown-option_clicked", {
             projectId,
             downloadOption
           });
@@ -319,7 +334,13 @@ class SamplesView extends React.Component {
         <div className={cs.actions}>
           <div className={cs.action}>{this.renderCollectionTrigger()}</div>
           <div className={cs.action}>{this.renderHeatmapTrigger()}</div>
-          <div className={cs.action} onClick={this.handlePhyloModalOpen}>
+          <div
+            className={cs.action}
+            onClick={withAnalytics(
+              this.handlePhyloModalOpen,
+              "SamplesView_phylo-tree-modal-open_clicked"
+            )}
+          >
             <PhyloTreeIcon className={cs.icon} />
           </div>
           <div className={cs.action}>{this.renderDownloadTrigger()}</div>
@@ -340,6 +361,10 @@ class SamplesView extends React.Component {
     const { onSampleSelected, samples } = this.props;
     const sample = find({ id: rowData.id }, samples);
     onSampleSelected && onSampleSelected({ sample, currentEvent: event });
+    logAnalyticsEvent("SamplesView_row_clicked", {
+      sampleId: sample.id,
+      sampleName: sample.name
+    });
   };
 
   render() {
@@ -361,7 +386,10 @@ class SamplesView extends React.Component {
             initialActiveColumns={activeColumns}
             loadingClassName={cs.loading}
             onLoadRows={onLoadRows}
-            onSelectAllRows={this.handleSelectAllRows}
+            onSelectAllRows={withAnalytics(
+              this.handleSelectAllRows,
+              "SamplesView_select-all-rows_clicked"
+            )}
             onSelectRow={this.handleSelectRow}
             onRowClick={this.handleRowClick}
             protectedColumns={protectedColumns}
@@ -375,7 +403,10 @@ class SamplesView extends React.Component {
           <PhyloTreeCreationModal
             // TODO(tiago): migrate phylo tree to use api (or read csrf from context) and remove this
             csrf={document.getElementsByName("csrf-token")[0].content}
-            onClose={this.handlePhyloModalClose}
+            onClose={withAnalytics(
+              this.handlePhyloModalClose,
+              "SamplesView_phylo-tree-modal_closed"
+            )}
           />
         )}
       </div>
