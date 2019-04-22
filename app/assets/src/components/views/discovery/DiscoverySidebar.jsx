@@ -164,6 +164,9 @@ export default class DiscoverySidebar extends React.Component {
     const defaultRows = sorted.slice(0, defaultN);
     const extraRows = sorted.slice(defaultN);
     const total = sumBy("count", dataRows);
+    const linkText = expandedMetadataGroups.has(field)
+      ? "Show Less"
+      : "Show More";
     return (
       <dl className={cs.dataList}>
         {this.renderMetadataRowBlock(defaultRows, total)}
@@ -176,11 +179,12 @@ export default class DiscoverySidebar extends React.Component {
               this.toggleExpandedMetadataGroup(field);
               logAnalyticsEvent("DiscoverySidebar_show-more-toggle_clicked", {
                 field,
-                extraRows: extraRows.length
+                extraRows: extraRows.length,
+                linkText
               });
             }}
           >
-            {expandedMetadataGroups.has(field) ? "Show Less" : "Show More"}
+            {linkText}
           </div>
         )}
       </dl>
