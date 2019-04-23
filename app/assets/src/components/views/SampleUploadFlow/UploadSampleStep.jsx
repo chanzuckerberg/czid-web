@@ -369,7 +369,9 @@ class UploadSampleStep extends React.Component {
     logAnalyticsEvent("UploadSampleStep_local-sample_changed", {
       localSamples: localSamples.length,
       validatedLocalSamples: validatedLocalSamples.length,
-      removedLocalFiles: removedLocalFiles.length
+      removedLocalFiles: removedLocalFiles.length,
+      projectId: this.state.selectedProject.id,
+      projectName: this.state.selectedProject.name
     });
   };
 
@@ -393,7 +395,9 @@ class UploadSampleStep extends React.Component {
 
     logAnalyticsEvent("UploadSampleStep_remote-sample_changed", {
       remoteSamples: remoteSamples.length,
-      validatedRemoteSamples: validatedRemoteSamples.length
+      validatedRemoteSamples: validatedRemoteSamples.length,
+      projectId: this.state.selectedProject.id,
+      projectName: this.state.selectedProject.name
     });
   };
 
@@ -419,7 +423,9 @@ class UploadSampleStep extends React.Component {
     }
     logAnalyticsEvent("UploadSampleStep_sample_removed", {
       sampleName,
-      currentTab: this.state.currentTab
+      currentTab: this.state.currentTab,
+      projectId: this.state.selectedProject.id,
+      projectName: this.state.selectedProject.name
     });
   };
 
@@ -564,7 +570,10 @@ class UploadSampleStep extends React.Component {
               text="Cancel"
               rounded={false}
               onClick={() =>
-                logAnalyticsEvent("UploadSampleStep_cancel-button_clicked")
+                logAnalyticsEvent("UploadSampleStep_cancel-button_clicked", {
+                  projectId: this.state.selectedProject.id,
+                  projectName: this.state.selectedProject.name
+                })
               }
             />
           </a>

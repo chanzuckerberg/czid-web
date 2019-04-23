@@ -122,7 +122,13 @@ class UploadMetadataStep extends React.Component {
                 text="Cancel"
                 rounded={false}
                 onClick={() =>
-                  logAnalyticsEvent("UploadMetadataStep_cancel-button_clicked")
+                  logAnalyticsEvent(
+                    "UploadMetadataStep_cancel-button_clicked",
+                    {
+                      projectId: this.props.project.id,
+                      projectName: this.props.project.name
+                    }
+                  )
                 }
               />
             </a>
