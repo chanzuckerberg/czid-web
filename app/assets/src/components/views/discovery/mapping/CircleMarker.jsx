@@ -8,19 +8,6 @@ class CircleMarker extends React.Component {
   render() {
     const { size, onMouseOver, onMouseOut, onClick } = this.props;
 
-    const circleBody = (
-      <circle
-        // Circle in the center of the viewBox
-        cx="50%"
-        cy="50%"
-        // Don't let edges get cut off of the viewBox. Adjust stroke-width in CSS.
-        r={size / 2 - 1}
-        onMouseOver={onMouseOver}
-        onMouseOut={onMouseOut}
-        onClick={onClick}
-        className={cx(cs.circle, cs.hoverable)}
-      />
-    );
     return (
       <svg
         height={size}
@@ -28,7 +15,17 @@ class CircleMarker extends React.Component {
         // Place the viewBox over the point
         style={{ transform: `translate(${-size / 2}px, ${-size / 2}px)` }}
       >
-        {circleBody}
+        <circle
+          className={cx(cs.circle, onMouseOver && cs.hoverable)}
+          // Circle in the center of the viewBox
+          cx="50%"
+          cy="50%"
+          // Don't let edges get cut off of the viewBox. Adjust stroke-width in CSS.
+          r={size / 2 - 1}
+          onMouseOver={onMouseOver}
+          onMouseOut={onMouseOut}
+          onClick={onClick}
+        />
       </svg>
     );
   }

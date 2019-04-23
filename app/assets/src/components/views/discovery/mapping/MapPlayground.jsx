@@ -104,11 +104,11 @@ class MapPlayground extends React.Component {
   handleMarkerMouseOver = hoverInfo => {
     const hoverTooltip = (
       <MapPopup
+        className={cs.dataTooltipContainer}
         anchor="top-left"
         tipSize={0}
         latitude={hoverInfo.lat}
         longitude={hoverInfo.lon}
-        className={cs.dataTooltipContainer}
         closeButton={false}
         offsetLeft={15}
         offsetTop={15}
@@ -143,11 +143,11 @@ class MapPlayground extends React.Component {
   renderPopupBox = popupInfo => {
     return (
       <MapPopup
+        className={cs.dataTooltipContainer}
         anchor="top-left"
         tipSize={0}
         latitude={popupInfo.lat}
         longitude={popupInfo.lon}
-        className={cs.dataTooltipContainer}
         offsetLeft={15}
         offsetTop={15}
         onClose={() => this.closePopup(popupInfo)}
