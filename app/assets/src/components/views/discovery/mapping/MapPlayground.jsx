@@ -56,6 +56,7 @@ class MapPlayground extends React.Component {
     lon = parseFloat(parseFloat(lon).toFixed(2));
     // Reject invalid coordinates
     if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      console.log(`Skipping invalid coordinates ${lat}, ${lon}`);
       return [null, null];
     } else {
       return [lat, lon];
@@ -74,6 +75,7 @@ class MapPlayground extends React.Component {
     const pointCount = markerData.items.length;
     const minSize = 12;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
+    // Log1.5 of the count looked nice visually for not getting too large with many points.
     const markerSize = Math.max(
       Math.log(pointCount) / Math.log(1.5) * (get("zoom", viewport) || 3),
       minSize
