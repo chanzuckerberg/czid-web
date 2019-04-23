@@ -17,12 +17,12 @@ import NoResultsBacteriaIcon from "~ui/icons/NoResultsBacteriaIcon";
 import { DataTooltip } from "~ui/containers";
 import { getCoverageVizData } from "~/api";
 
+import HitGroupViz from "./HitGroupViz";
 import {
   getHistogramTooltipData,
-  getGenomeVizTooltipData,
   generateCoverageVizData,
-  generateContigReadVizData,
-  getSortedAccessionSummaries
+  getSortedAccessionSummaries,
+  getTooltipStyle
 } from "./utils";
 import cs from "./coverage_viz_bottom_sidebar.scss";
 
@@ -92,13 +92,11 @@ export default class CoverageVizBottomSidebar extends React.Component {
   state = {
     currentAccessionSummary: null,
     histogramTooltipLocation: null,
-    histogramTooltipData: null,
-    genomeVizTooltipData: null,
-    genomeVizTooltipLocation: null
+    histogramTooltipData: null
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const { params } = this.props;
+    const { params, visible } = this.props;
     const { currentAccessionData } = this.state;
 
     if (
@@ -113,7 +111,14 @@ export default class CoverageVizBottomSidebar extends React.Component {
     if (!prevState.currentAccessionData && currentAccessionData) {
       this.renderHistogram(currentAccessionData);
       this.renderRefAccessionViz(currentAccessionData);
-      this.renderGenomeViz(currentAccessionData);
+    }
+
+    // Ensure that tooltips are hidden when sidebar closes.
+    if (prevProps.visible && !visible) {
+      this.setState({
+        histogramTooltipLocation: null,
+        histogramTooltipData: null
+      });
     }
   }
 
@@ -169,11 +174,11 @@ export default class CoverageVizBottomSidebar extends React.Component {
     }
   };
 
-  handleHistogramBarHover = (pageX, pageY) => {
+  handleHistogramBarHover = (clientX, clientY) => {
     this.setState({
       histogramTooltipLocation: {
-        left: pageX,
-        top: pageY
+        left: clientX,
+        top: clientY
       }
     });
   };
@@ -182,35 +187,6 @@ export default class CoverageVizBottomSidebar extends React.Component {
     this.setState({
       histogramTooltipLocation: null,
       histogramTooltipData: null
-    });
-  };
-
-  handleGenomeVizBarEnter = hoverData => {
-    const { currentAccessionData } = this.state;
-
-    if (hoverData !== null) {
-      this.setState({
-        genomeVizTooltipData: getGenomeVizTooltipData(
-          currentAccessionData,
-          hoverData
-        )
-      });
-    }
-  };
-
-  handleGenomeVizBarHover = (pageX, pageY) => {
-    this.setState({
-      genomeVizTooltipLocation: {
-        left: pageX,
-        top: pageY
-      }
-    });
-  };
-
-  handleGenomeVizBarExit = () => {
-    this.setState({
-      genomeVizTooltipLocation: null,
-      genomeVizTooltipData: null
     });
   };
 
@@ -259,27 +235,6 @@ export default class CoverageVizBottomSidebar extends React.Component {
       }
     );
     this.refAccesssionViz.update();
-  };
-
-  renderGenomeViz = data => {
-    const contigReadVizData = generateContigReadVizData(
-      data.hit_groups,
-      data.coverage_bin_size
-    );
-
-    this.contigReadViz = new GenomeViz(
-      this.contigReadVizContainer,
-      contigReadVizData,
-      {
-        domain: [0, data.total_length],
-        colors: [READ_FILL_COLOR, CONTIG_FILL_COLOR],
-        onGenomeVizBarHover: this.handleGenomeVizBarHover,
-        onGenomeVizBarEnter: this.handleGenomeVizBarEnter,
-        onGenomeVizBarExit: this.handleGenomeVizBarExit,
-        hoverDarkenFactor: 0.4
-      }
-    );
-    this.contigReadViz.update();
   };
 
   getAccessionOptions = () => {
@@ -409,6 +364,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
   renderContentBody = () => {
     const { currentAccessionData, currentAccessionSummary } = this.state;
+    const { pipelineVersion, sampleId } = this.props;
 
     if (!currentAccessionData) {
       return (
@@ -474,26 +430,17 @@ export default class CoverageVizBottomSidebar extends React.Component {
             content={currentAccessionSummary.name}
           />
         </div>
-        <div className={cs.genomeVizRow}>
-          <div className={cs.rowLabel}>Contigs and Reads</div>
-          <div
-            className={cs.genomeViz}
-            ref={contigReadVizContainer => {
-              this.contigReadVizContainer = contigReadVizContainer;
-            }}
-          />
-        </div>
+        <HitGroupViz
+          accessionData={currentAccessionData}
+          sampleId={sampleId}
+          pipelineVersion={pipelineVersion}
+        />
       </div>
     );
   };
 
   renderSidebarContents() {
-    const {
-      histogramTooltipLocation,
-      histogramTooltipData,
-      genomeVizTooltipLocation,
-      genomeVizTooltipData
-    } = this.state;
+    const { histogramTooltipLocation, histogramTooltipData } = this.state;
 
     return (
       <NarrowContainer className={cs.contents}>
@@ -503,27 +450,10 @@ export default class CoverageVizBottomSidebar extends React.Component {
           histogramTooltipData &&
           ReactDOM.createPortal(
             <div
-              style={{
-                left: histogramTooltipLocation.left + 10,
-                top: histogramTooltipLocation.top - 10
-              }}
+              style={getTooltipStyle(histogramTooltipLocation)}
               className={cs.hoverTooltip}
             >
               <DataTooltip data={histogramTooltipData} />
-            </div>,
-            document.body
-          )}
-        {genomeVizTooltipLocation &&
-          genomeVizTooltipData &&
-          ReactDOM.createPortal(
-            <div
-              style={{
-                left: genomeVizTooltipLocation.left + 10,
-                top: genomeVizTooltipLocation.top - 10
-              }}
-              className={cs.hoverTooltip}
-            >
-              <DataTooltip data={genomeVizTooltipData} />
             </div>,
             document.body
           )}
@@ -607,5 +537,6 @@ CoverageVizBottomSidebar.propTypes = {
     // Link to the old alignment viz.
     alignmentVizUrl: PropTypes.string
   }),
-  sampleId: PropTypes.number
+  sampleId: PropTypes.number,
+  pipelineVersion: PropTypes.string
 };

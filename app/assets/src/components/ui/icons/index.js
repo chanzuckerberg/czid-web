@@ -3,6 +3,7 @@ import BeeIcon from "./BeeIcon";
 import CatIcon from "./CatIcon";
 import CheckmarkIcon from "./CheckmarkIcon";
 import CompareIcon from "./CompareIcon";
+import CopyIcon from "./CopyIcon";
 import DecipherIcon from "./DecipherIcon";
 import DetectIcon from "./DetectIcon";
 import DiscoverIcon from "./DiscoverIcon";
@@ -39,6 +40,7 @@ export default {
     BeeIcon,
     CatIcon,
     CompareIcon,
+    CopyIcon,
     DecipherIcon,
     DetectIcon,
     DiscoverIcon,
