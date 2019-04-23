@@ -7,7 +7,7 @@ import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import { validateManualMetadataForNewSamples } from "~/api/metadata";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./sample_upload_flow.scss";
 
