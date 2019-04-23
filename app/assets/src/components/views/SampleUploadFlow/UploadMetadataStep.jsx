@@ -42,6 +42,7 @@ class UploadMetadataStep extends React.Component {
 
   handleContinue = async () => {
     // If manual input, validate when user presses Continue.
+    let result = null;
     if (this.state.wasManual) {
       this.setState({
         issues: null
@@ -49,7 +50,7 @@ class UploadMetadataStep extends React.Component {
 
       const metadata = this.state.metadata;
 
-      const result = await validateManualMetadataForNewSamples(
+      result = await validateManualMetadataForNewSamples(
         this.props.samples,
         metadata
       );
@@ -71,8 +72,9 @@ class UploadMetadataStep extends React.Component {
       });
     }
     logAnalyticsEvent("UploadMetadataStep_continue-button_clicked", {
-      errors: this.state.issues.errors.length,
-      warnings: this.state.issues.warnings.length,
+      wasManual: this.state.wasManual,
+      errors: (result || this.state).issues.errors.length,
+      warnings: (result || this.state).issues.warnings.length,
       samples: this.props.samples.length,
       projectId: this.props.project.id,
       projectName: this.props.project.name
