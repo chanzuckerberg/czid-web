@@ -37,7 +37,10 @@ import HoverActions from "./views/report/ReportTable/HoverActions";
 import { numberWithCommas } from "../helpers/strings";
 import { getTaxonName, getGeneraContainingTags } from "../helpers/taxon";
 import ThresholdMap from "./utils/ThresholdMap";
-import { pipelineVersionHasAssembly } from "./utils/sample";
+import {
+  pipelineVersionHasAssembly,
+  pipelineVersionHasCoverageViz
+} from "./utils/sample";
 
 const DEFAULT_MIN_CONTIG_SIZE = 4;
 const HUMAN_TAX_IDS = [9605, 9606];
@@ -787,7 +790,10 @@ class PipelineSampleReport extends React.Component {
       this.sampleId
     }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
-    if (this.admin || this.allowedFeatures.includes("coverage_viz")) {
+    if (
+      (this.admin || this.allowedFeatures.includes("coverage_viz")) &&
+      pipelineVersionHasCoverageViz(pipelineVersion)
+    ) {
       this.props.onCoverageVizClick({
         taxId,
         taxName,

@@ -1,12 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
+import axios from "axios";
+
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import { Input } from "~ui/controls";
 import StringHelper from "~/helpers/StringHelper";
-import cs from "./user_management_form.scss";
-import cx from "classnames";
-import axios from "axios";
 import UserIcon from "~ui/icons/UserIcon";
+import { withAnalytics } from "~/api/analytics";
+
+import cs from "./user_management_form.scss";
 
 class UserManagementForm extends React.Component {
   constructor(props) {
@@ -123,7 +126,13 @@ class UserManagementForm extends React.Component {
             />
           </div>
           <div className={cs.addMemberFormField}>
-            <PrimaryButton text="Add member" onClick={this.handleAddUser} />
+            <PrimaryButton
+              text="Add member"
+              onClick={withAnalytics(
+                this.handleAddUser,
+                "UserManagementForm_add-member-button_clicked"
+              )}
+            />
           </div>
         </div>
       </div>

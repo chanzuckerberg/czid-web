@@ -1,18 +1,19 @@
 import React from "react";
 import { fromPairs, set, find } from "lodash/fp";
-import Divider from "../../layout/Divider";
-import PhyloTreeVis from "./PhyloTreeVis";
-import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
+import PropTypes from "prop-types";
+
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import BasicPopup from "~/components/BasicPopup";
 import { saveVisualization } from "~/api";
-
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
-import PropTypes from "prop-types";
 import { copyShortUrlToClipboard, parseUrlParams } from "~/helpers/url";
-import ViewHeader from "../../layout/ViewHeader/ViewHeader";
 
+import Divider from "../../layout/Divider";
+import ViewHeader from "../../layout/ViewHeader/ViewHeader";
+import PhyloTreeDownloadButton from "./PhyloTreeDownloadButton";
+import PhyloTreeVis from "./PhyloTreeVis";
 import cs from "./phylo_tree_list_view.scss";
 
 class PhyloTreeListView extends React.Component {
@@ -55,6 +56,9 @@ class PhyloTreeListView extends React.Component {
     this.setState({
       selectedPhyloTreeId: newPhyloTreeId,
       sidebarVisible: false
+    });
+    logAnalyticsEvent("PhyloTreeListView_phylo-tree_changed", {
+      selectedPhyloTreeId: newPhyloTreeId
     });
   };
 
@@ -135,6 +139,11 @@ class PhyloTreeListView extends React.Component {
       this.setState({
         sidebarVisible: false
       });
+      logAnalyticsEvent("PhyloTreeListView_taxon-details-sidebar_closed", {
+        sidebarMode: "taxonDetails",
+        treeName: currentTree.name,
+        treeId: currentTree.id
+      });
     } else {
       this.setState({
         sidebarVisible: true,
@@ -144,6 +153,14 @@ class PhyloTreeListView extends React.Component {
           taxonName: currentTree.tax_name
         },
         sidebarMode: "taxonDetails"
+      });
+      logAnalyticsEvent("PhyloTreeListView_taxon-details-sidebar_opened", {
+        sidebarMode: "taxonDetails",
+        treeName: currentTree.name,
+        treeId: currentTree.id,
+        parentTaxonId: currentTree.parent_taxid,
+        taxonId: currentTree.taxid,
+        taxonName: currentTree.tax_name
       });
     }
   };
@@ -164,6 +181,10 @@ class PhyloTreeListView extends React.Component {
       this.setState({
         sidebarVisible: false
       });
+      logAnalyticsEvent("PhyloTreeListView_sample-details-sidebar_closed", {
+        sidebarMode: "sampleDetails",
+        selectedSampleId: sampleId
+      });
     } else {
       this.setState({
         selectedSampleId: sampleId,
@@ -175,6 +196,10 @@ class PhyloTreeListView extends React.Component {
         },
         sidebarMode: "sampleDetails",
         sidebarVisible: true
+      });
+      logAnalyticsEvent("PhyloTreeListView_sample-details-sidebar_opened", {
+        sidebarMode: "sampleDetails",
+        selectedSampleId: sampleId
       });
     }
   };
@@ -235,7 +260,14 @@ class PhyloTreeListView extends React.Component {
               <BasicPopup
                 trigger={
                   <ShareButton
-                    onClick={this.handleShareClick}
+                    onClick={withAnalytics(
+                      this.handleShareClick,
+                      "PhyloTreeListView_share-button_clicked",
+                      {
+                        treeName: currentTree.name,
+                        treeId: currentTree.id
+                      }
+                    )}
                     className={cs.controlElement}
                   />
                 }
@@ -246,7 +278,14 @@ class PhyloTreeListView extends React.Component {
               {allowedFeatures &&
                 allowedFeatures.includes("data_discovery") && (
                   <SaveButton
-                    onClick={this.handleSaveClick}
+                    onClick={withAnalytics(
+                      this.handleSaveClick,
+                      "PhyloTreeListView_save-button_clicked",
+                      {
+                        treeName: currentTree.name,
+                        treeId: currentTree.id
+                      }
+                    )}
                     className={cs.controlElement}
                   />
                 )}
@@ -261,7 +300,14 @@ class PhyloTreeListView extends React.Component {
         <DetailsSidebar
           visible={this.state.sidebarVisible}
           mode={this.state.sidebarMode}
-          onClose={this.closeSidebar}
+          onClose={withAnalytics(
+            this.closeSidebar,
+            "PhyloTreeListView_details-sidebar_closed",
+            {
+              treeName: currentTree.name,
+              treeId: currentTree.id
+            }
+          )}
           params={this.state.sidebarConfig}
         />
         <NarrowContainer>

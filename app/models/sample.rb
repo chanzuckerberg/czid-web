@@ -12,6 +12,7 @@ class Sample < ApplicationRecord
   end
   include TestHelper
   include MetadataHelper
+  include PipelineRunsHelper
 
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
@@ -217,7 +218,7 @@ class Sample < ApplicationRecord
     pr = first_pipeline_run
     return list_outputs(sample_output_s3_path) unless pr
     file_list = []
-    if pr.pipeline_version.to_f >= 2.0
+    if pipeline_version_at_least_2(pr.pipeline_version)
       file_list = list_outputs(pr.output_s3_path_with_version)
       file_list += list_outputs(sample_output_s3_path)
       file_list += list_outputs(pr.postprocess_output_s3_path)

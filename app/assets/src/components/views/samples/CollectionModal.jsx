@@ -1,14 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Modal from "~ui/containers/Modal";
-import cs from "./collection_modal.scss";
 
 import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~ui/controls/buttons/SecondaryButton";
 import Input from "~ui/controls/Input";
 import Textarea from "~ui/controls/Textarea";
 import { createBackground } from "~/api";
+import { withAnalytics } from "~/api/analytics";
+import Modal from "~ui/containers/Modal";
+
 import NotificationComponent from "../../ui/containers/NotificationComponent";
+import cs from "./collection_modal.scss";
 
 class CollectionModal extends React.Component {
   constructor(props) {
@@ -104,8 +106,23 @@ class CollectionModal extends React.Component {
         />
         {this.renderSampleList()}
         <div className={cs.buttons}>
-          <PrimaryButton text="Create" onClick={this.handleCreateBackground} />
-          <SecondaryButton text="Cancel" onClick={this.handleClose} />
+          <PrimaryButton
+            text="Create"
+            onClick={withAnalytics(
+              this.handleCreateBackground,
+              "CollectionModal_create-collection-button_clicked",
+              {
+                selectedSampleIds: this.props.selectedSampleIds.length
+              }
+            )}
+          />
+          <SecondaryButton
+            text="Cancel"
+            onClick={withAnalytics(
+              this.closeModal,
+              "CollectionModal_cancel-button_clicked"
+            )}
+          />
         </div>
       </div>
     );
@@ -135,12 +152,22 @@ class CollectionModal extends React.Component {
 
     return (
       <div>
-        <div onClick={this.openModal}>{trigger}</div>
+        <div
+          onClick={withAnalytics(
+            this.openModal,
+            "CollectionModal_open-link_clicked"
+          )}
+        >
+          {trigger}
+        </div>
         {this.state.modalOpen && (
           <Modal
             open
             narrow
-            onClose={this.closeModal}
+            onClose={withAnalytics(
+              this.closeModal,
+              "CollectionModal_close-link_clicked"
+            )}
             className={cs.collectionModal}
           >
             <div className={cs.title}>Create a Collection</div>

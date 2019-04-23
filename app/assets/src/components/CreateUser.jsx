@@ -384,14 +384,14 @@ class CreateUser extends React.Component {
               withAnalytics(
                 this.handleUpdate,
                 "CreateUser_update-form_submitted",
-                "Update"
+                { form: "Update" }
               )
             )
           : this.renderUserForm(
               withAnalytics(
                 this.handleCreate,
                 "CreateUser_create-form_submitted",
-                "Create"
+                { form: "Create" }
               )
             )}
         <div className="bottom">

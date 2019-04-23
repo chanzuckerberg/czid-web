@@ -47,6 +47,12 @@ class ApplicationRecord < ActiveRecord::Base
       pipeline_run_id: record.respond_to?(:pipeline_run_id) ? record.pipeline_run_id : nil
     }
 
+    # Merge status changes, important for updates, for example:
+    # "status", "job_status", "command_status"
+    properties = properties.merge(
+      record.attributes.select { |k, _v| k.include?("status") }
+    )
+
     # Remove empty keys
     properties = properties.delete_if { |_k, v| v.nil? }
 

@@ -3,6 +3,7 @@ import SvgSaver from "svgsaver";
 
 import PropTypes from "~/components/utils/propTypes";
 import { deleteSample } from "~/api";
+import { logAnalyticsEvent } from "~/api/analytics";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import {
@@ -10,7 +11,7 @@ import {
   getLinkInfoForDownloadOption
 } from "~/components/views/report/utils/download";
 
-class Controls extends React.Component {
+class SampleViewControls extends React.Component {
   downloadCSV = () => {
     const { reportPageParams, pipelineRun, sample } = this.props;
 
@@ -35,19 +36,37 @@ class Controls extends React.Component {
     const { sample, project } = this.props;
     await deleteSample(sample.id);
     location.href = `/home?project_id=${project.id}`;
+    logAnalyticsEvent("SampleViewControls_delete-sample-button_clicked", {
+      sampleId: sample.id,
+      sampleName: sample.name
+    });
   };
 
   handleDownload = option => {
+    const log = () =>
+      logAnalyticsEvent(
+        `SampleViewControls_download-${option
+          .replace(/\W+/g, "-")
+          .toLowerCase()}_clicked`,
+        {
+          sampleId: this.props.sample.id,
+          sampleName: this.props.sample.name
+        }
+      );
+
     if (option === "download_csv") {
       this.downloadCSV();
+      log();
       return;
     } else if (option == "taxon_svg") {
       // TODO (gdingle): filename per tree?
       new SvgSaver().asSvg(this.getNode(), "taxon_tree.svg");
+      log();
       return;
     } else if (option == "taxon_png") {
       // TODO (gdingle): filename per tree?
       new SvgSaver().asPng(this.getNode(), "taxon_tree.png");
+      log();
       return;
     }
     const linkInfo = getLinkInfoForDownloadOption(
@@ -57,6 +76,7 @@ class Controls extends React.Component {
     );
     if (linkInfo) {
       window.open(linkInfo.path, linkInfo.newPage ? "_blank" : "_self");
+      log();
     }
   };
 
@@ -94,7 +114,7 @@ class Controls extends React.Component {
   }
 }
 
-Controls.propTypes = {
+SampleViewControls.propTypes = {
   reportPresent: PropTypes.bool,
   sample: PropTypes.Sample,
   project: PropTypes.Project,
@@ -108,4 +128,4 @@ Controls.propTypes = {
   canEdit: PropTypes.bool
 };
 
-export default Controls;
+export default SampleViewControls;
