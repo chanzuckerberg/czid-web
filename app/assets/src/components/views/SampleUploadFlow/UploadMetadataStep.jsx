@@ -70,6 +70,13 @@ class UploadMetadataStep extends React.Component {
         issues: this.state.issues
       });
     }
+    logAnalyticsEvent("UploadMetadataStep_continue-button_clicked", {
+      errors: this.state.issues.errors.length,
+      warnings: this.state.issues.warnings.length,
+      samples: this.props.samples.length,
+      projectId: this.props.project.id,
+      projectName: this.props.project.name
+    });
   };
 
   render() {
@@ -105,10 +112,7 @@ class UploadMetadataStep extends React.Component {
           <div className={cs.controls}>
             <PrimaryButton
               text="Continue"
-              onClick={withAnalytics(
-                this.handleContinue,
-                "UploadMetadataStep_continue-button_clicked"
-              )}
+              onClick={this.handleContinue}
               disabled={this.state.continueDisabled}
               rounded={false}
               className={cs.continueButton}

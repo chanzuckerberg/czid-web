@@ -440,6 +440,17 @@ class UploadSampleStep extends React.Component {
         uploadType: "remote"
       });
     }
+
+    logAnalyticsEvent("UploadSampleStep_continue-button_clicked", {
+      errors: this.state.issues.errors.length,
+      warnings: this.state.issues.warnings.length,
+      localSamples: this.state.localSamples.length,
+      remoteSamples: this.state.remoteSamples.length,
+      project: this.state.selectedProject,
+      currentTab: this.state.currentTab,
+      projectId: this.state.selectedProject.id,
+      projectName: this.state.selectedProject.name
+    });
   };
 
   getSampleNamesToFiles = () => {
@@ -543,10 +554,7 @@ class UploadSampleStep extends React.Component {
         <div className={cs.controls}>
           <PrimaryButton
             text="Continue"
-            onClick={withAnalytics(
-              this.handleContinue,
-              "UploadSampleStep_continue-button_clicked"
-            )}
+            onClick={this.handleContinue}
             disabled={!this.isValid()}
             rounded={false}
             className={cs.continueButton}

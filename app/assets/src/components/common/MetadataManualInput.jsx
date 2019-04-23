@@ -152,7 +152,7 @@ class MetadataManualInput extends React.Component {
   // Convert metadata headers and fields to a CSV-like format before passing to parent.
   onMetadataChange = (newHeaders, newFields) => {
     // Only send fields for the selected samples to the parent component.
-    // If a sample was added, and then later removed, that sample's metadata thll not be sent up,
+    // If a sample was added, and then later removed, that sample's metadata will not be sent up,
     // but will still persist in this component.
     const sampleNames = map("name", this.props.samples);
     const fieldsForSamples = pickBy(
