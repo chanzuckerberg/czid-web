@@ -27,13 +27,7 @@ class BaseMap extends React.Component {
   };
 
   render() {
-    const {
-      mapTilerKey,
-      markers,
-      renderMarker,
-      popups,
-      renderPopup
-    } = this.props;
+    const { mapTilerKey, markers, popups } = this.props;
     const { viewport } = this.state;
 
     const styleID = "6041e288-ea0e-4a64-b0f6-78172d56a657";
@@ -45,8 +39,8 @@ class BaseMap extends React.Component {
           onViewportChange={this.updateViewport}
           mapStyle={styleURL}
         >
-          {markers && markers.map(renderMarker)}
-          {popups && renderPopup && popups.map(renderPopup)}
+          {markers}
+          {popups}
 
           <NavigationControl
             onViewportChange={this.updateViewport}
@@ -68,9 +62,7 @@ BaseMap.propTypes = {
   longitude: PropTypes.number,
   zoom: PropTypes.number,
   markers: PropTypes.array,
-  renderMarker: PropTypes.func,
-  popups: PropTypes.array,
-  renderPopup: PropTypes.func
+  popups: PropTypes.array
 };
 
 BaseMap.defaultProps = {

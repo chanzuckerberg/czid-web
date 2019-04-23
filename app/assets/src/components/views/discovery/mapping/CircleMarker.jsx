@@ -2,12 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 
-import BasicPopup from "~/components/BasicPopup";
 import cs from "./circle_marker.scss";
 
 class CircleMarker extends React.Component {
   render() {
-    const { size, onClick, hoverContent } = this.props;
+    const { size, onMouseOver, onMouseOut, onClick } = this.props;
 
     const circleBody = (
       <circle
@@ -16,8 +15,10 @@ class CircleMarker extends React.Component {
         cy="50%"
         // Don't let edges get cut off of the viewBox. Adjust stroke-width in CSS.
         r={size / 2 - 1}
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
         onClick={onClick}
-        className={cx(cs.circle, hoverContent && cs.hoverable)}
+        className={cx(cs.circle, cs.hoverable)}
       />
     );
     return (
@@ -27,15 +28,7 @@ class CircleMarker extends React.Component {
         // Place the viewBox over the point
         style={{ transform: `translate(${-size / 2}px, ${-size / 2}px)` }}
       >
-        {hoverContent ? (
-          <BasicPopup
-            trigger={circleBody}
-            content={hoverContent}
-            inverted={false}
-          />
-        ) : (
-          circleBody
-        )}
+        {circleBody}
       </svg>
     );
   }
@@ -43,8 +36,9 @@ class CircleMarker extends React.Component {
 
 CircleMarker.propTypes = {
   size: PropTypes.number,
-  onClick: PropTypes.func,
-  hoverContent: PropTypes.node
+  onMouseOver: PropTypes.func,
+  onMouseOut: PropTypes.func,
+  onClick: PropTypes.func
 };
 
 CircleMarker.defaultProps = {

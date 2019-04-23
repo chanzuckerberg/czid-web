@@ -6,7 +6,7 @@ const DataTooltip = ({ data, subtitle, title }) => {
   // DataTooltip receives:
   // - title
   // - subtitle
-  // - an object(section_name: array([label, value], [..]))
+  // - an array of object(section_name, data: array([label, value], [..]))
 
   const renderSection = (sectionName, dataValues) => {
     return (
@@ -45,4 +45,5 @@ DataTooltip.propTypes = {
   subtitle: PropTypes.string,
   title: PropTypes.string
 };
+
 export default DataTooltip;

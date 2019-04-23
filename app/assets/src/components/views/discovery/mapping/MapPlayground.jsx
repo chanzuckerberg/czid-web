@@ -1,10 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Marker, Popup as MapPopup } from "react-map-gl";
-import { get, remove } from "lodash/fp";
+import { get, concat, reject } from "lodash/fp";
 
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
+import { DataTooltip } from "~ui/containers";
 
 import cs from "./map_playground.scss";
 
@@ -44,7 +45,8 @@ class MapPlayground extends React.Component {
     this.state = {
       locationsToItems: locationsToItems,
       viewport: {},
-      popups: []
+      popups: [],
+      hoverTooltip: null
     };
   }
 
@@ -74,11 +76,17 @@ class MapPlayground extends React.Component {
       Math.log(pointCount) / Math.log(1.5) * (get("zoom", viewport) || 3),
       minSize
     );
-    const hoverContent = (
+    let hoverContent = (
       <div>
         <div className={cs.title}>{locationName}</div>
         <div className={cs.description}>{`Samples: ${pointCount}`}</div>
       </div>
+    );
+    hoverContent = (
+      <DataTooltip
+        title={locationName}
+        data={[{ data: [[`Samples: ${pointCount}`, "val"]] }]}
+      />
     );
     const popupInfo = {
       name: locationName,
@@ -96,6 +104,7 @@ class MapPlayground extends React.Component {
         <CircleMarker
           size={markerSize}
           hoverContent={hoverContent}
+          onHover={this.handleMarkerHover}
           onClick={() => this.openPopup(popupInfo)}
         />
       </Marker>
@@ -103,16 +112,24 @@ class MapPlayground extends React.Component {
   };
 
   openPopup(popupInfo) {
-    const popups = Object.assign([], this.state.popups);
-    popups.push(popupInfo);
-    this.setState({ popups });
+    this.setState({
+      popups: concat(this.state.popups, popupInfo)
+    });
   }
 
   closePopup(popupInfo) {
-    let popups = Object.assign([], this.state.popups);
-    popups = remove({ markerIndex: popupInfo.markerIndex }, popups);
-    this.setState({ popups });
+    this.setState({
+      popups: reject({ markerIndex: popupInfo.markerIndex }, this.state.popups)
+    });
   }
+
+  handleMarkerHover = node => {
+    this.setState({ hoverTooltip: this.getTooltipData(node) });
+  };
+
+  handleMarkerHoverOut = () => {
+    this.setState({ hoverTooltip: null });
+  };
 
   renderPopupBox = popupInfo => {
     return (
@@ -144,10 +161,8 @@ class MapPlayground extends React.Component {
       <BaseMap
         mapTilerKey={mapTilerKey}
         updateViewport={this.updateViewport}
-        markers={Object.entries(locationsToItems)}
-        renderMarker={this.renderMarker}
-        popups={popups}
-        renderPopup={this.renderPopupBox}
+        markers={Object.entries(locationsToItems).map(this.renderMarker)}
+        popups={popups.map(this.renderPopupBox)}
       />
     );
   }
