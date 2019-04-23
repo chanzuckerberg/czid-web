@@ -16,10 +16,14 @@
   box-shadow: 0 2px 4px 0 $light-grey;
 }
 
-.dataTooltipPopup {
+.dataTooltipContainer {
+  // Stay above regular markers
+  z-index: 1;
+
   :global(.mapboxgl-popup-content) {
     // Override some MapboxGL styling
     padding: 0;
     box-shadow: none;
+    background: transparent;
   }
 }

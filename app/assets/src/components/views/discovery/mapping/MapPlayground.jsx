@@ -82,11 +82,13 @@ class MapPlayground extends React.Component {
         tipSize={0}
         latitude={markerData.lat}
         longitude={markerData.lon}
-        className={cs.dataTooltipPopup}
+        className={cs.dataTooltipContainer}
         closeButton={false}
+        offsetLeft={15}
+        offsetTop={15}
       >
         <DataTooltip
-          data={[{ name: locationName, data: [["Samples:", pointCount]] }]}
+          data={[{ name: locationName, data: [["Samples", pointCount]] }]}
         />
       </MapPopup>
     );
@@ -123,7 +125,8 @@ class MapPlayground extends React.Component {
 
   openPopup(popupInfo) {
     this.setState({
-      popups: concat(this.state.popups, popupInfo)
+      popups: concat(this.state.popups, popupInfo),
+      hoverTooltip: null // Replace the tooltip open
     });
   }
 
@@ -136,21 +139,23 @@ class MapPlayground extends React.Component {
   renderPopupBox = popupInfo => {
     return (
       <MapPopup
-        anchor="bottom"
+        anchor="top-left"
         tipSize={0}
         latitude={popupInfo.lat}
         longitude={popupInfo.lon}
+        className={cs.dataTooltipContainer}
+        offsetLeft={15}
+        offsetTop={15}
         onClose={() => this.closePopup(popupInfo)}
-        className={cs.dataBox}
       >
-        <div>
-          <div className={cs.title}>{popupInfo.name}</div>
-          {popupInfo.items.map((sample, i) => (
-            <div className={cs.description} key={`popup-${i}`}>
-              {sample.name}
-            </div>
-          ))}
-        </div>
+        <DataTooltip
+          data={[
+            {
+              name: popupInfo.name,
+              data: popupInfo.items.map(sample => [sample.name])
+            }
+          ]}
+        />
       </MapPopup>
     );
   };

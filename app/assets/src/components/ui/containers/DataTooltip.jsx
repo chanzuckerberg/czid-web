@@ -19,7 +19,9 @@ const DataTooltip = ({ data, subtitle, title }) => {
               key={`value-${sectionName}-${keyValuePair[0]}`}
             >
               <div className={cs.dataTooltipLabel}>{keyValuePair[0]}</div>
-              <div className={cs.dataTooltipValue}>{keyValuePair[1]}</div>
+              {keyValuePair[1] && (
+                <div className={cs.dataTooltipValue}>{keyValuePair[1]}</div>
+              )}
             </div>
           );
         })}
