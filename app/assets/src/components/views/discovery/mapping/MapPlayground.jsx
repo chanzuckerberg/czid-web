@@ -56,6 +56,7 @@ class MapPlayground extends React.Component {
     lon = parseFloat(parseFloat(lon).toFixed(2));
     // Reject invalid coordinates
     if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      // eslint-disable-next-line no-console
       console.log(`Skipping invalid coordinates ${lat}, ${lon}`);
       return [null, null];
     } else {
