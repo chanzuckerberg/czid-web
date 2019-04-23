@@ -62,6 +62,7 @@ BaseMap.propTypes = {
   latitude: PropTypes.number,
   longitude: PropTypes.number,
   zoom: PropTypes.number,
+  hoverTooltip: PropTypes.node,
   markers: PropTypes.array,
   popups: PropTypes.array
 };

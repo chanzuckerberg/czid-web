@@ -68,7 +68,9 @@ class MapPlayground extends React.Component {
 
   renderMarker = (marker, index) => {
     const { viewport } = this.state;
-    const [locationName, markerData] = marker;
+    const [name, markerData] = marker;
+    const lat = markerData.lat;
+    const lon = markerData.lon;
     const pointCount = markerData.items.length;
     const minSize = 12;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
@@ -76,46 +78,48 @@ class MapPlayground extends React.Component {
       Math.log(pointCount) / Math.log(1.5) * (get("zoom", viewport) || 3),
       minSize
     );
+
+    return (
+      <Marker key={`marker-${index}`} latitude={lat} longitude={lon}>
+        <CircleMarker
+          size={markerSize}
+          onMouseOver={() =>
+            this.handleMarkerMouseOver({ lat, lon, name, pointCount })
+          }
+          onMouseOut={this.handleMarkerMouseOut}
+          onClick={() =>
+            this.openPopup({
+              lat,
+              lon,
+              name,
+              index,
+              items: markerData.items
+            })
+          }
+        />
+      </Marker>
+    );
+  };
+
+  handleMarkerMouseOver = hoverInfo => {
     const hoverTooltip = (
       <MapPopup
         anchor="top-left"
         tipSize={0}
-        latitude={markerData.lat}
-        longitude={markerData.lon}
+        latitude={hoverInfo.lat}
+        longitude={hoverInfo.lon}
         className={cs.dataTooltipContainer}
         closeButton={false}
         offsetLeft={15}
         offsetTop={15}
       >
         <DataTooltip
-          data={[{ name: locationName, data: [["Samples", pointCount]] }]}
+          data={[
+            { name: hoverInfo.name, data: [["Samples", hoverInfo.pointCount]] }
+          ]}
         />
       </MapPopup>
     );
-    const popupInfo = {
-      name: locationName,
-      lat: markerData.lat,
-      lon: markerData.lon,
-      markerIndex: index,
-      items: markerData.items
-    };
-    return (
-      <Marker
-        key={`marker-${index}`}
-        latitude={markerData.lat}
-        longitude={markerData.lon}
-      >
-        <CircleMarker
-          size={markerSize}
-          onMouseOver={() => this.handleMarkerMouseOver(hoverTooltip)}
-          onMouseOut={this.handleMarkerMouseOut}
-          onClick={() => this.openPopup(popupInfo)}
-        />
-      </Marker>
-    );
-  };
-
-  handleMarkerMouseOver = hoverTooltip => {
     this.setState({ hoverTooltip });
   };
 
@@ -123,18 +127,18 @@ class MapPlayground extends React.Component {
     this.setState({ hoverTooltip: null });
   };
 
-  openPopup(popupInfo) {
+  openPopup = popupInfo => {
     this.setState({
       popups: concat(this.state.popups, popupInfo),
-      hoverTooltip: null // Replace the tooltip open
+      hoverTooltip: null // Replace the open tooltip
     });
-  }
+  };
 
-  closePopup(popupInfo) {
+  closePopup = popupInfo => {
     this.setState({
-      popups: reject({ markerIndex: popupInfo.markerIndex }, this.state.popups)
+      popups: reject({ index: popupInfo.index }, this.state.popups)
     });
-  }
+  };
 
   renderPopupBox = popupInfo => {
     return (

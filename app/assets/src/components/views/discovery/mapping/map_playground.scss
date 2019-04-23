@@ -1,21 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 
-.title {
-  @include font-header-xs;
-  margin-bottom: 5px;
-}
-
-.description {
-  @include font-body-xs;
-}
-
-.dataBox {
-  border: 1px solid $light-grey;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px 0 $light-grey;
-}
-
 .dataTooltipContainer {
   // Stay above regular markers
   z-index: 1;
