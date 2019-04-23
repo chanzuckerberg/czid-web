@@ -1691,6 +1691,7 @@ class BackgroundModal extends React.Component {
                 new_background_description: this.state
                   .new_background_description,
                 selectedSampleIds: this.props.parent.state.selectedSampleIds
+                  .length
               }
             )}
           >
