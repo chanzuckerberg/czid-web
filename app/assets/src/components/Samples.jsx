@@ -1685,7 +1685,7 @@ class BackgroundModal extends React.Component {
           <Form
             onSubmit={withAnalytics(
               this.handleSubmit,
-              "Samples_collection-form-submitted",
+              "Samples_collection-form_submitted",
               {
                 new_background_name: this.state.new_background_name,
                 new_background_description: this.state
