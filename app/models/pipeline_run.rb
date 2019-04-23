@@ -76,8 +76,6 @@ class PipelineRun < ApplicationRecord
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
 
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
-  ASSEMBLY_PIPELINE_VERSION = 3.1
-  COVERAGE_VIZ_PIPELINE_VERSION = 3.6
   MIN_CONTIG_SIZE = 4 # minimal # reads mapped to the  contig
   M8_FIELDS = ["Query", "Accession", "Percentage Identity", "Alignment Length",
                "Number of mismatches", "Number of gap openings",
@@ -424,11 +422,11 @@ class PipelineRun < ApplicationRecord
   end
 
   def coverage_viz_summary_s3_path
-    return "#{postprocess_output_s3_path}/#{COVERAGE_VIZ_SUMMARY_JSON_NAME}" if pipeline_version && pipeline_version.to_f >= COVERAGE_VIZ_PIPELINE_VERSION
+    return "#{postprocess_output_s3_path}/#{COVERAGE_VIZ_SUMMARY_JSON_NAME}" if pipeline_version_has_coverage_viz(pipeline_version)
   end
 
   def coverage_viz_data_s3_path(accession_id)
-    "#{coverage_viz_output_s3_path}/#{accession_id}_coverage_viz.json" if pipeline_version && pipeline_version.to_f >= COVERAGE_VIZ_PIPELINE_VERSION
+    "#{coverage_viz_output_s3_path}/#{accession_id}_coverage_viz.json" if pipeline_version_has_coverage_viz(pipeline_version)
   end
 
   def coverage_viz_output_s3_path
@@ -436,23 +434,23 @@ class PipelineRun < ApplicationRecord
   end
 
   def contigs_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
+    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if pipeline_version_has_assembly(pipeline_version)
   end
 
   def contigs_summary_s3_path
-    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
+    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if pipeline_version_has_assembly(pipeline_version)
   end
 
   def annotated_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 3.1
-    return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 2.0
+    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_has_assembly(pipeline_version)
+    return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
 
     multihit? ? "#{alignment_output_s3_path}/#{ple::MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
 
   def unidentified_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 3.1
-    return "#{output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 2.0
+    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_has_assembly(pipeline_version)
+    return "#{output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
     "#{alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
 
@@ -1170,7 +1168,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def subsample_suffix
-    if pipeline_version && pipeline_version.to_f >= 2.0
+    if pipeline_version_at_least_2(pipeline_version)
       # New dag pipeline. no subsample folder
       return nil
     end
@@ -1222,7 +1220,7 @@ class PipelineRun < ApplicationRecord
 
   def s3_paths_for_taxon_byteranges
     file_prefix = ''
-    file_prefix = ASSEMBLY_PREFIX if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
+    file_prefix = ASSEMBLY_PREFIX if pipeline_version_has_assembly(pipeline_version)
     # by tax_level and hit_type
     { TaxonCount::TAX_LEVEL_SPECIES => {
       'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",
