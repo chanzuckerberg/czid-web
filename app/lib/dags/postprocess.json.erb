@@ -36,15 +36,25 @@
       "assembly/gsnap.blast.m8",
       "assembly/gsnap.reassigned.m8",
       "assembly/gsnap.hitsummary2.tab",
-      "assembly/refined_gsnap_counts.json", 
-      "assembly/gsnap_contig_summary.json"
+      "assembly/refined_gsnap_counts.json",
+      <% if attribute_dict[:pipeline_version].to_f >= 3.6 %>
+        "assembly/gsnap_contig_summary.json",
+        "assembly/gsnap.blast.top.m8"
+      <% else %>
+        "assembly/gsnap_contig_summary.json"
+      <% end %>
     ],
     "refined_rapsearch2_out": [
       "assembly/rapsearch2.blast.m8",
       "assembly/rapsearch2.reassigned.m8",
       "assembly/rapsearch2.hitsummary2.tab",
       "assembly/refined_rapsearch2_counts.json",
-      "assembly/rapsearch2_contig_summary.json"
+      <% if attribute_dict[:pipeline_version].to_f >= 3.6 %>
+        "assembly/rapsearch2_contig_summary.json",
+        "assembly/rapsearch2.blast.top.m8"
+      <% else %>
+        "assembly/rapsearch2_contig_summary.json"
+      <% end %>
     ],
     "refined_taxon_count_out": ["assembly/refined_taxon_counts.json"],
     "contig_summary_out": ["assembly/combined_contig_summary.json"],
@@ -188,7 +198,7 @@
   "given_targets": {
       "host_filter_out": {
         "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
-      } 
+      }
       ,"gsnap_out": {
         "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
       },
