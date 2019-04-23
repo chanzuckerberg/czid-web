@@ -162,6 +162,7 @@ class MapPlayground extends React.Component {
               data: popupInfo.items.map(sample => [sample.name])
             }
           ]}
+          singleColumn={true}
         />
       </MapPopup>
     );
