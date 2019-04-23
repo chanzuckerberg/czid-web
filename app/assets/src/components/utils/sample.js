@@ -3,7 +3,17 @@ import { last } from "lodash/fp";
 export const pipelineVersionHasAssembly = pipelineVersion => {
   if (!pipelineVersion) return false;
   const versionNums = pipelineVersion.split(".");
-  return +versionNums[0] >= 3 && +versionNums[1] >= 1;
+  return (
+    +versionNums[0] >= 4 || (+versionNums[0] === 3 && +versionNums[1] >= 1)
+  );
+};
+
+export const pipelineVersionHasCoverageViz = pipelineVersion => {
+  if (!pipelineVersion) return false;
+  const versionNums = pipelineVersion.split(".");
+  return (
+    +versionNums[0] >= 4 || (+versionNums[0] === 3 && +versionNums[1] >= 6)
+  );
 };
 
 // Get the basename from a file path
