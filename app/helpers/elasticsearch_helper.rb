@@ -72,7 +72,7 @@ module ElasticsearchHelper
   def filter_by_samples(taxon_ids, samples)
     return samples
            .includes(:pipeline_runs, pipeline_runs: :taxon_counts)
-           .where(pipeline_runs: { id: PipelineRun.select("max(id)").where(job_status: "CHECKED").group(:sample_id) })
+           .where(pipeline_runs: { id: PipelineRun.joins(:sample).where(sample: samples, job_status: "CHECKED").group(:sample_id).select("MAX(`pipeline_runs`.id) AS id") })
            .where(taxon_counts:
              {
                tax_id: taxon_ids,
@@ -87,7 +87,7 @@ module ElasticsearchHelper
   def filter_by_project(taxon_ids, project_id)
     return Set.new(TaxonCount
       .includes(pipeline_run: :sample)
-      .where(pipeline_runs: { id: PipelineRun.select("max(id)").where(job_status: "CHECKED").group(:sample_id) })
+      .where(pipeline_runs: { id: PipelineRun.joins(:sample).where(sample: samples, job_status: "CHECKED").group(:sample_id).select("MAX(`pipeline_runs`.id) AS id") })
       .where(samples: { project_id: project_id })
       .where(tax_id: taxon_ids)
       .where(count_type: ["NT", "NR"])
