@@ -76,17 +76,19 @@ class MapPlayground extends React.Component {
       Math.log(pointCount) / Math.log(1.5) * (get("zoom", viewport) || 3),
       minSize
     );
-    let hoverContent = (
-      <div>
-        <div className={cs.title}>{locationName}</div>
-        <div className={cs.description}>{`Samples: ${pointCount}`}</div>
-      </div>
-    );
-    hoverContent = (
-      <DataTooltip
-        title={locationName}
-        data={[{ data: [[`Samples: ${pointCount}`, "val"]] }]}
-      />
+    const hoverTooltip = (
+      <MapPopup
+        anchor="top-left"
+        tipSize={0}
+        latitude={markerData.lat}
+        longitude={markerData.lon}
+        className={cs.dataTooltipPopup}
+        closeButton={false}
+      >
+        <DataTooltip
+          data={[{ name: locationName, data: [["Samples:", pointCount]] }]}
+        />
+      </MapPopup>
     );
     const popupInfo = {
       name: locationName,
@@ -103,12 +105,20 @@ class MapPlayground extends React.Component {
       >
         <CircleMarker
           size={markerSize}
-          hoverContent={hoverContent}
-          onHover={this.handleMarkerHover}
+          onMouseOver={() => this.handleMarkerMouseOver(hoverTooltip)}
+          onMouseOut={this.handleMarkerMouseOut}
           onClick={() => this.openPopup(popupInfo)}
         />
       </Marker>
     );
+  };
+
+  handleMarkerMouseOver = hoverTooltip => {
+    this.setState({ hoverTooltip });
+  };
+
+  handleMarkerMouseOut = () => {
+    this.setState({ hoverTooltip: null });
   };
 
   openPopup(popupInfo) {
@@ -122,14 +132,6 @@ class MapPlayground extends React.Component {
       popups: reject({ markerIndex: popupInfo.markerIndex }, this.state.popups)
     });
   }
-
-  handleMarkerHover = node => {
-    this.setState({ hoverTooltip: this.getTooltipData(node) });
-  };
-
-  handleMarkerHoverOut = () => {
-    this.setState({ hoverTooltip: null });
-  };
 
   renderPopupBox = popupInfo => {
     return (
@@ -155,12 +157,13 @@ class MapPlayground extends React.Component {
 
   render() {
     const { mapTilerKey } = this.props;
-    const { locationsToItems, popups } = this.state;
+    const { locationsToItems, hoverTooltip, popups } = this.state;
 
     return (
       <BaseMap
         mapTilerKey={mapTilerKey}
         updateViewport={this.updateViewport}
+        hoverTooltip={hoverTooltip}
         markers={Object.entries(locationsToItems).map(this.renderMarker)}
         popups={popups.map(this.renderPopupBox)}
       />

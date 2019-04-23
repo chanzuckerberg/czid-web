@@ -27,7 +27,7 @@ class BaseMap extends React.Component {
   };
 
   render() {
-    const { mapTilerKey, markers, popups } = this.props;
+    const { mapTilerKey, hoverTooltip, markers, popups } = this.props;
     const { viewport } = this.state;
 
     const styleID = "6041e288-ea0e-4a64-b0f6-78172d56a657";
@@ -39,6 +39,7 @@ class BaseMap extends React.Component {
           onViewportChange={this.updateViewport}
           mapStyle={styleURL}
         >
+          {hoverTooltip}
           {markers}
           {popups}
 
