@@ -150,10 +150,9 @@ class UploadSampleStep extends React.Component {
     });
 
     logAnalyticsEvent("UploadSampleStep_project-selector_changed", {
-      selectedProjectId: project.id,
-      selectedProjectName: project.name,
       localSamples: newLocalSamples.length,
-      remoteSamples: newRemoteSamples.length
+      remoteSamples: newRemoteSamples.length,
+      ...this.getAnalyticsContext()
     });
   };
 
@@ -287,10 +286,9 @@ class UploadSampleStep extends React.Component {
     });
 
     logAnalyticsEvent("UploadSampleStep_project_created", {
-      selectedProjectId: project.id,
-      selectedProjectName: project.name,
       localSamples: newLocalSamples.length,
-      remoteSamples: newRemoteSamples.length
+      remoteSamples: newRemoteSamples.length,
+      ...this.getAnalyticsContext()
     });
   };
 
@@ -370,8 +368,7 @@ class UploadSampleStep extends React.Component {
       localSamples: localSamples.length,
       validatedLocalSamples: validatedLocalSamples.length,
       removedLocalFiles: removedLocalFiles.length,
-      projectId: this.state.selectedProject.id,
-      projectName: this.state.selectedProject.name
+      ...this.getAnalyticsContext()
     });
   };
 
@@ -396,8 +393,7 @@ class UploadSampleStep extends React.Component {
     logAnalyticsEvent("UploadSampleStep_remote-sample_changed", {
       remoteSamples: remoteSamples.length,
       validatedRemoteSamples: validatedRemoteSamples.length,
-      projectId: this.state.selectedProject.id,
-      projectName: this.state.selectedProject.name
+      ...this.getAnalyticsContext()
     });
   };
 
@@ -424,8 +420,7 @@ class UploadSampleStep extends React.Component {
     logAnalyticsEvent("UploadSampleStep_sample_removed", {
       sampleName,
       currentTab: this.state.currentTab,
-      projectId: this.state.selectedProject.id,
-      projectName: this.state.selectedProject.name
+      ...this.getAnalyticsContext()
     });
   };
 
@@ -454,8 +449,7 @@ class UploadSampleStep extends React.Component {
       remoteSamples: this.state.remoteSamples.length,
       project: this.state.selectedProject,
       currentTab: this.state.currentTab,
-      projectId: this.state.selectedProject.id,
-      projectName: this.state.selectedProject.name
+      ...this.getAnalyticsContext()
     });
   };
 
@@ -486,6 +480,14 @@ class UploadSampleStep extends React.Component {
       default:
         return <div />;
     }
+  };
+
+  getAnalyticsContext = () => {
+    const project = this.state.selectedProject;
+    return {
+      projectId: project && project.id,
+      projectName: project && project.name
+    };
   };
 
   render() {
@@ -571,8 +573,7 @@ class UploadSampleStep extends React.Component {
               rounded={false}
               onClick={() =>
                 logAnalyticsEvent("UploadSampleStep_cancel-button_clicked", {
-                  projectId: this.state.selectedProject.id,
-                  projectName: this.state.selectedProject.name
+                  ...this.getAnalyticsContext()
                 })
               }
             />
