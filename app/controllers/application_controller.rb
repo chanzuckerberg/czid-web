@@ -26,7 +26,7 @@ class ApplicationController < ActionController::Base
 
   def no_demo_user
     login_required
-    redirect_to root_path if current_user && current_user.demo_user?
+    redirect_to root_path if current_user.demo_user?
   end
 
   # Rails method for adding to logging
