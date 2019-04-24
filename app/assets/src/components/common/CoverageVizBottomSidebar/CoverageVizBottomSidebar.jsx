@@ -9,7 +9,7 @@ import HelpIcon from "~ui/containers/HelpIcon";
 import PropTypes from "~/components/utils/propTypes";
 import Histogram from "~/components/visualizations/Histogram";
 import GenomeViz from "~/components/visualizations/GenomeViz";
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import BasicPopup from "~/components/BasicPopup";
 import NarrowContainer from "~/components/layout/NarrowContainer";
@@ -34,9 +34,9 @@ const REF_ACC_COLOR = "#EAEAEA";
 const METRIC_COLUMNS = [
   [
     {
-      key: "referenceAccession",
-      name: "Reference Accession",
-      tooltip: "The reference accession name from GenBank."
+      key: "referenceNCBIEntry",
+      name: "Reference NCBI Entry",
+      tooltip: "The NCBI Genbank entry for the reference accession."
     },
     {
       key: "referenceLength",
@@ -73,7 +73,7 @@ const METRIC_COLUMNS = [
   [
     {
       key: "maxAlignedLength",
-      name: "Max Aligned Length",
+      name: "Max Alignment Length",
       tooltip:
         "Length of the longest aligned region over all reads and contigs."
     },
@@ -241,23 +241,17 @@ export default class CoverageVizBottomSidebar extends React.Component {
     const { params } = this.props;
     return getSortedAccessionSummaries(params.accessionData).map(summary => ({
       value: summary.id,
-      text: summary.id,
+      text: `${summary.id} - ${summary.name}`,
       customNode: (
-        <BasicPopup
-          trigger={
-            <div className={cs.option}>
-              <div className={cs.optionText}>{summary.id}</div>
-              <div className={cs.optionSubtext}>
-                {summary.num_contigs} contigs, {summary.coverage_depth}x
-                coverage
-              </div>
-            </div>
-          }
-          inverted
-          content={summary.name}
-          horizontalOffset={5}
-          position="left center"
-        />
+        <div className={cs.option}>
+          <div className={cs.optionText}>
+            {summary.id} - {summary.name}
+          </div>
+          <div className={cs.optionSubtext}>
+            {summary.num_contigs} contigs, {summary.num_reads} reads,{" "}
+            {summary.coverage_depth}x coverage
+          </div>
+        </div>
       )
     }));
   };
@@ -269,7 +263,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       return {};
     }
 
-    const referenceAccession = (
+    const referenceNCBIEntry = (
       <BasicPopup
         trigger={
           <div className={cs.ncbiLinkWrapper}>
@@ -281,18 +275,20 @@ export default class CoverageVizBottomSidebar extends React.Component {
               rel="noopener noreferrer"
               className={cs.ncbiLink}
             >
-              {currentAccessionSummary.name}
+              {currentAccessionSummary.id} - {currentAccessionSummary.name}
             </a>
           </div>
         }
         inverted
-        content={currentAccessionSummary.name}
+        content={`${currentAccessionSummary.id} - ${
+          currentAccessionSummary.name
+        }`}
         horizontalOffset={13}
       />
     );
 
     return {
-      referenceAccession,
+      referenceNCBIEntry,
       referenceLength: currentAccessionData.total_length,
       alignedContigs: currentAccessionSummary.num_contigs,
       maxAlignedLength: currentAccessionData.max_aligned_length,
@@ -316,7 +312,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
     let helpText = `
         ${numAccessions -
-          numBestAccessions} poor-quality accessions are not shown, as they have
+          numBestAccessions} poor-quality accessions are omitted, as they have
         no contig alignments and few read alignments.
         To see them, go to the read-level visualization.
       `;
@@ -324,14 +320,26 @@ export default class CoverageVizBottomSidebar extends React.Component {
     return (
       <div className={cs.header}>
         <div className={cs.headerText}>
-          <div className={cs.title}>{params.taxonName} Coverage</div>
-          <div className={cs.subtitle}>
-            {numBestAccessions} unique accessions
+          <div className={cs.taxonLabel}>{params.taxonName} Coverage</div>
+          <BareDropdown
+            options={this.getAccessionOptions()}
+            value={get("id", currentAccessionSummary)}
+            label="Accession"
+            trigger={
+              <div className={cs.accessionLabel}>
+                {get("id", currentAccessionSummary)} -{" "}
+                {get("name", currentAccessionSummary)}
+              </div>
+            }
+            onChange={this.setCurrentAccession}
+            rounded
+            menuClassName={cs.accessionSelectMenu}
+          />
+          <div className={cs.accessionCountLabel}>
+            {numBestAccessions} viewable accessions
             {onlySomeAccessionsShown && (
               <React.Fragment>
-                <span className={cs.notShownMsg}>
-                  ({numAccessions - numBestAccessions} not shown)
-                </span>
+                <span className={cs.notShownMsg}>({numAccessions} total)</span>
                 <HelpIcon text={helpText} className={cs.helpIcon} />
               </React.Fragment>
             )}
@@ -339,13 +347,6 @@ export default class CoverageVizBottomSidebar extends React.Component {
         </div>
         <div className={cs.fill} />
         <div className={cs.headerControls}>
-          <Dropdown
-            options={this.getAccessionOptions()}
-            value={get("id", currentAccessionSummary)}
-            label="Accession"
-            onChange={this.setCurrentAccession}
-            rounded
-          />
           <div className={cs.vizLinkContainer}>
             <a
               className={cs.vizLink}
@@ -468,7 +469,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       <NarrowContainer className={cs.contents}>
         <div className={cs.header}>
           <div className={cs.headerText}>
-            <div className={cs.title}>{params.taxonName} Coverage</div>
+            <div className={cs.taxonLabel}>{params.taxonName} Coverage</div>
           </div>
           <div className={cs.fill} />
         </div>
