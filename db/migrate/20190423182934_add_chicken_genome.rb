@@ -1,5 +1,7 @@
 class AddChickenGenome < ActiveRecord::Migration[5.1]
   def up
+    return if HostGenome.find_by(name: "Chicken")
+
     hg = HostGenome.new
     hg.name = "Chicken"
     hg.s3_star_index_path = "s3://idseq-database/host_filter/chicken/2019-04-18/STAR_genome.tar"
