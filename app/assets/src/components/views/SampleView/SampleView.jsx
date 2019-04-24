@@ -382,7 +382,9 @@ class SampleView extends React.Component {
 
   coverageVizEnabled = () =>
     (this.props.admin || this.props.allowedFeatures.includes("coverage_viz")) &&
-    pipelineVersionHasCoverageViz(this.props.pipelineRun.pipeline_version);
+    pipelineVersionHasCoverageViz(
+      get("pipeline_version", this.props.reportPageParams)
+    );
 
   render() {
     const versionDisplay = this.renderVersionDisplay();
