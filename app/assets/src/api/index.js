@@ -5,6 +5,7 @@ import axios from "axios";
 import axiosRetry from "axios-retry";
 
 import { cleanFilePath } from "~utils/sample";
+import { getURLParamString } from "~/helpers/url";
 
 import { get, postWithCSRF, putWithCSRF, deleteWithCSRF } from "./core";
 
@@ -290,6 +291,18 @@ const getCoverageVizSummary = sampleId =>
 const getCoverageVizData = (sampleId, accessionId) =>
   get(`/samples/${sampleId}/coverage_viz_data?accessionId=${accessionId}`);
 
+const getContigsSequencesByByteranges = (
+  sampleId,
+  byteranges,
+  pipelineVersion
+) => {
+  const params = getURLParamString({
+    byteranges: byteranges.map(byterange => byterange.join(",")),
+    pipelineVersion
+  });
+  return get(`/samples/${sampleId}/contigs_sequences_by_byteranges?${params}`);
+};
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
@@ -322,5 +335,6 @@ export {
   validateSampleFiles,
   validateSampleNames,
   getCoverageVizSummary,
-  getCoverageVizData
+  getCoverageVizData,
+  getContigsSequencesByByteranges
 };

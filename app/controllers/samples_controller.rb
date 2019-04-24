@@ -20,7 +20,8 @@ class SamplesController < ApplicationController
 
   # Read action meant for single samples with set_sample before_action
   READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
-                  :contigs_fasta, :contigs_summary, :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
+                  :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
+                  :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder, :upload_heartbeat].freeze
@@ -871,6 +872,52 @@ class SamplesController < ApplicationController
 
     @contigs_summary = File.read(local_file)
     send_data @contigs_summary, filename: @sample.name + '_contigs_summary.csv'
+  end
+
+  # TODO(mark): Factor out into S3Helper file.
+  def get_s3_file_byterange(s3_path, byterange)
+    uri_parts = s3_path.split("/", 4)
+    bucket = uri_parts[2]
+    key = uri_parts[3]
+    byterange_parts = byterange.split(",")
+
+    # get_object fetches the last byte, so we must subtract one.
+    resp = Client.get_object(bucket: bucket, key: key, range: "bytes=#{byterange_parts[0]}-#{byterange_parts[0].to_i + byterange_parts[1].to_i - 1}")
+
+    return resp.body.read
+  end
+
+  def contigs_fasta_by_byteranges
+    pr = select_pipeline_run(@sample, params)
+    byteranges = params[:byteranges]
+
+    contig_fasta = pr.contigs_fasta_s3_path
+
+    data = ""
+
+    byteranges.each do |byterange|
+      resp =  get_s3_file_byterange(contig_fasta, byterange)
+      data += resp
+    end
+
+    send_data data, filename: 'contigs.fasta'
+  end
+
+  def contigs_sequences_by_byteranges
+    pr = select_pipeline_run(@sample, params)
+    byteranges = params[:byteranges]
+
+    contig_fasta = pr.contigs_fasta_s3_path
+
+    contig_sequences = {}
+
+    byteranges.each do |byterange|
+      data = get_s3_file_byterange(contig_fasta, byterange)
+      parts = data.split("\n", 2)
+      contig_sequences[parts[0]] = parts[1]
+    end
+
+    render json: contig_sequences
   end
 
   def nonhost_fasta

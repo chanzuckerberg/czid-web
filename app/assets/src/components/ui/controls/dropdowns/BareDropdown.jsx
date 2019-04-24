@@ -124,6 +124,7 @@ class BareDropdown extends React.Component {
       withinModal,
       children,
       onFilterChange,
+      menuClassName,
       ...otherProps
     } = this.props;
 
@@ -172,7 +173,8 @@ class BareDropdown extends React.Component {
         className={cx(
           cs.menu,
           cs.dropdownMenu,
-          (menuLabel || search) && cs.extraPadding
+          (menuLabel || search) && cs.extraPadding,
+          menuClassName
         )}
         onClick={!closeOnClick ? e => e.stopPropagation() : undefined}
       >
@@ -272,12 +274,13 @@ BareDropdown.propTypes = forbidExtraProps({
   onClose: PropTypes.func,
   open: PropTypes.bool,
   children: PropTypes.node,
-  className: PropTypes.string,
   floating: PropTypes.bool,
   disabled: PropTypes.bool,
   selectOnBlur: PropTypes.bool,
   fluid: PropTypes.bool,
-  direction: PropTypes.string
+  direction: PropTypes.string,
+  className: PropTypes.string,
+  menuClassName: PropTypes.string
 });
 
 BareDropdown.defaultProps = {
