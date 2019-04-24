@@ -141,4 +141,44 @@ module PipelineRunsHelper
   def exists_in_s3?(s3_path)
     Open3.capture3("aws", "s3", "ls", s3_path)[2].success?
   end
+
+  PIPELINE_VERSION_2 = '2.0'.freeze
+  ASSEMBLY_PIPELINE_VERSION = '3.1'.freeze
+  COVERAGE_VIZ_PIPELINE_VERSION = '3.6'.freeze
+
+  def pipeline_version_at_least(pipeline_version, test_version)
+    unless pipeline_version
+      return false
+    end
+
+    pipeline_nums = pipeline_version.split(".")
+    test_nums = test_version.split(".")
+
+    # nil.to_i = 0, so we don't need to special-case versions like 3 and 3.1.
+    if pipeline_nums[0].to_i > test_nums[0].to_i
+      return true
+    elsif pipeline_nums[0].to_i == test_nums[0].to_i
+      if pipeline_nums[1].to_i > test_nums[1].to_i
+        return true
+      elsif pipeline_nums[1].to_i == test_nums[1].to_i
+        if pipeline_nums[2].to_i >= test_nums[2].to_i
+          return true
+        end
+      end
+    end
+
+    return false
+  end
+
+  def pipeline_version_has_assembly(pipeline_version)
+    pipeline_version_at_least(pipeline_version, ASSEMBLY_PIPELINE_VERSION)
+  end
+
+  def pipeline_version_has_coverage_viz(pipeline_version)
+    pipeline_version_at_least(pipeline_version, COVERAGE_VIZ_PIPELINE_VERSION)
+  end
+
+  def pipeline_version_at_least_2(pipeline_version)
+    pipeline_version_at_least(pipeline_version, PIPELINE_VERSION_2)
+  end
 end

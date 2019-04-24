@@ -1,11 +1,14 @@
 import React from "react";
 import cx from "classnames";
+
 import MetadataUpload from "~/components/common/MetadataUpload";
 import Instructions from "~/components/views/samples/MetadataUploadModal/Instructions";
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import { validateManualMetadataForNewSamples } from "~/api/metadata";
+import { logAnalyticsEvent } from "~/api/analytics";
+
 import cs from "./sample_upload_flow.scss";
 
 class UploadMetadataStep extends React.Component {
@@ -39,6 +42,7 @@ class UploadMetadataStep extends React.Component {
 
   handleContinue = async () => {
     // If manual input, validate when user presses Continue.
+    let result = null;
     if (this.state.wasManual) {
       this.setState({
         issues: null
@@ -46,7 +50,7 @@ class UploadMetadataStep extends React.Component {
 
       const metadata = this.state.metadata;
 
-      const result = await validateManualMetadataForNewSamples(
+      result = await validateManualMetadataForNewSamples(
         this.props.samples,
         metadata
       );
@@ -67,6 +71,14 @@ class UploadMetadataStep extends React.Component {
         issues: this.state.issues
       });
     }
+    logAnalyticsEvent("UploadMetadataStep_continue-button_clicked", {
+      wasManual: this.state.wasManual,
+      errors: (result || this.state).issues.errors.length,
+      warnings: (result || this.state).issues.warnings.length,
+      samples: this.props.samples.length,
+      projectId: this.props.project.id,
+      projectName: this.props.project.name
+    });
   };
 
   render() {
@@ -108,7 +120,19 @@ class UploadMetadataStep extends React.Component {
               className={cs.continueButton}
             />
             <a href="/home">
-              <SecondaryButton text="Cancel" rounded={false} />
+              <SecondaryButton
+                text="Cancel"
+                rounded={false}
+                onClick={() =>
+                  logAnalyticsEvent(
+                    "UploadMetadataStep_cancel-button_clicked",
+                    {
+                      projectId: this.props.project.id,
+                      projectName: this.props.project.name
+                    }
+                  )
+                }
+              />
             </a>
           </div>
         </div>

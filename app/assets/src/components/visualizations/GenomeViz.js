@@ -71,23 +71,20 @@ export default class GenomeViz {
     return [min(mins), max(maxs)];
   };
 
-  // Find the bar that is closest to hoverX, within hoverBuffer.
-  onMouseMove = () => {
-    if (this.sortedEndpoints.length == 0 || !this.endpointToDataIndex) {
-      return;
-    }
-
-    const hoverX = mouse(this.svg.node())[0];
+  // Find the bar that is closest to svgX, within hoverBuffer.
+  // svgX is an x coordinate relative to the svg container.
+  // All the bar "endpoints" are within this same coordinate space.
+  getDataIndexForSvgX = svgX => {
     const closestEndpoints = ArrayUtils.findClosestNeighbors(
       this.sortedEndpoints,
-      hoverX
+      svgX
     );
 
     let closestDataIndex = null;
 
     if (closestEndpoints.length === 1) {
       closestDataIndex =
-        Math.abs(closestEndpoints[0] - hoverX) < this.options.hoverBuffer
+        Math.abs(closestEndpoints[0] - svgX) < this.options.hoverBuffer
           ? this.endpointToDataIndex[closestEndpoints[0]][0]
           : null;
     } else {
@@ -102,23 +99,34 @@ export default class GenomeViz {
       // This assumes that whenever the mouse is within a bar, one of the two closest endpoints will
       // belong to the bar, which is not always true if there is one bar completely covered by another.
       // For now, we assume this is never the case.
-      if (closestEndpoints[0] <= hoverX && hoverX <= otherEndpointOne) {
+      if (closestEndpoints[0] <= svgX && svgX <= otherEndpointOne) {
         closestDataIndex = dataIndexOne;
-      } else if (otherEndpointTwo <= hoverX && hoverX <= closestEndpoints[1]) {
+      } else if (otherEndpointTwo <= svgX && svgX <= closestEndpoints[1]) {
         closestDataIndex = dataIndexTwo;
       } else {
         const closestX =
-          Math.abs(closestEndpoints[0] - hoverX) <
-          Math.abs(closestEndpoints[1] - hoverX)
+          Math.abs(closestEndpoints[0] - svgX) <
+          Math.abs(closestEndpoints[1] - svgX)
             ? closestEndpoints[0]
             : closestEndpoints[1];
 
         closestDataIndex =
-          Math.abs(closestX - hoverX) < this.options.hoverBuffer
+          Math.abs(closestX - svgX) < this.options.hoverBuffer
             ? this.endpointToDataIndex[closestX][0]
             : null;
       }
     }
+
+    return closestDataIndex;
+  };
+
+  onMouseMove = () => {
+    if (this.sortedEndpoints.length == 0 || !this.endpointToDataIndex) {
+      return;
+    }
+
+    const svgX = mouse(this.svg.node())[0];
+    const closestDataIndex = this.getDataIndexForSvgX(svgX);
 
     if (
       this.lastHoveredDataIndex !== closestDataIndex &&
@@ -141,9 +149,39 @@ export default class GenomeViz {
       this.highlightBar(this.lastHoveredDataIndex, false);
       this.lastHoveredDataIndex = null;
     }
-
     if (closestDataIndex !== null && this.options.onGenomeVizBarHover) {
-      this.options.onGenomeVizBarHover(currentEvent.pageX, currentEvent.pageY);
+      this.options.onGenomeVizBarHover(
+        currentEvent.clientX,
+        currentEvent.clientY
+      );
+    }
+  };
+
+  onMouseClick = () => {
+    if (this.sortedEndpoints.length == 0 || !this.endpointToDataIndex) {
+      return;
+    }
+
+    const svgX = mouse(this.svg.node())[0];
+    const closestDataIndex = this.getDataIndexForSvgX(svgX);
+
+    if (this.options.onGenomeVizBarClick) {
+      if (closestDataIndex !== null) {
+        const barBBox = this.svg
+          .select(`.bar-container .rect-${closestDataIndex}`)
+          .node()
+          .getBoundingClientRect();
+        this.options.onGenomeVizBarClick(
+          closestDataIndex,
+          barBBox.right,
+          barBBox.top
+        );
+        this.outlineBar(closestDataIndex, true);
+      } else {
+        this.options.onGenomeVizBarClick(null);
+        // Hide the outline around the bar.
+        this.outlineBar(null, false);
+      }
     }
   };
 
@@ -174,6 +212,37 @@ export default class GenomeViz {
       .attr("fill", highlightColor);
   };
 
+  // We require a separate rectangle to show the black border when a bar is clicked because we need
+  // to shrink the rectangle by outlineBuffer.
+  // Otherwise, the top and bottom border will overflow out of the parent <svg> (and be partially hidden),
+  // but the left and right will not, which results in an uneven border around the bar.
+  outlineBar = (barIndex, shouldHighlight) => {
+    // Remove all previous outline bars.
+    this.svg.selectAll(".outline-container rect").remove();
+
+    if (shouldHighlight) {
+      if (barIndex === null) {
+        return;
+      }
+      const d = this.data[barIndex];
+      let colors = this.getColors();
+
+      // Shrink the rectangle by outlineBuffer so the border isn't partially cut off.
+      const outlineBuffer = 1;
+
+      this.svg
+        .select(".outline-container")
+        .append("rect")
+        .attr("fill", colors[d[2]])
+        .attr("x", this.x(d[0]) + outlineBuffer)
+        .attr("width", this.x(d[1]) - this.x(d[0]) - outlineBuffer * 2)
+        .attr("y", outlineBuffer)
+        .attr("height", this.size.height - outlineBuffer * 2)
+        .attr("stroke", "#000")
+        .attr("stroke-width", 2);
+    }
+  };
+
   update() {
     if (!this.data) return;
 
@@ -184,6 +253,8 @@ export default class GenomeViz {
       .domain(domain)
       .nice()
       .range([this.margins.left, this.size.width - this.margins.right]);
+
+    this.x = x;
 
     const endpointToDataIndex = {};
     const endpoints = [];
@@ -213,6 +284,8 @@ export default class GenomeViz {
     this.endpointToDataIndex = endpointToDataIndex;
     this.sortedEndpoints = endpoints.sort((a, b) => a - b);
 
+    this.svg.append("g").attr("class", "outline-container");
+
     this.svg
       .append("rect")
       .attr("style", "fill: transparent")
@@ -220,6 +293,7 @@ export default class GenomeViz {
       .attr("width", this.size.width - this.margins.right - this.margins.left)
       .attr("height", this.size.height - this.margins.top - this.margins.bottom)
       .on("mousemove", this.onMouseMove)
+      .on("click", this.onMouseClick)
       .on("mouseleave", this.onMouseLeave);
   }
 }

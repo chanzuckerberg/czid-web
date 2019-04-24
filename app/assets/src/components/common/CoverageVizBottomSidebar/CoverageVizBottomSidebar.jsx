@@ -9,7 +9,7 @@ import HelpIcon from "~ui/containers/HelpIcon";
 import PropTypes from "~/components/utils/propTypes";
 import Histogram from "~/components/visualizations/Histogram";
 import GenomeViz from "~/components/visualizations/GenomeViz";
-import Dropdown from "~ui/controls/dropdowns/Dropdown";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import BasicPopup from "~/components/BasicPopup";
 import NarrowContainer from "~/components/layout/NarrowContainer";
@@ -17,12 +17,12 @@ import NoResultsBacteriaIcon from "~ui/icons/NoResultsBacteriaIcon";
 import { DataTooltip } from "~ui/containers";
 import { getCoverageVizData } from "~/api";
 
+import HitGroupViz from "./HitGroupViz";
 import {
   getHistogramTooltipData,
-  getGenomeVizTooltipData,
   generateCoverageVizData,
-  generateContigReadVizData,
-  getSortedAccessionSummaries
+  getSortedAccessionSummaries,
+  getTooltipStyle
 } from "./utils";
 import cs from "./coverage_viz_bottom_sidebar.scss";
 
@@ -34,9 +34,9 @@ const REF_ACC_COLOR = "#EAEAEA";
 const METRIC_COLUMNS = [
   [
     {
-      key: "referenceAccession",
-      name: "Reference Accession",
-      tooltip: "The reference accession name from GenBank."
+      key: "referenceNCBIEntry",
+      name: "Reference NCBI Entry",
+      tooltip: "The NCBI Genbank entry for the reference accession."
     },
     {
       key: "referenceLength",
@@ -73,7 +73,7 @@ const METRIC_COLUMNS = [
   [
     {
       key: "maxAlignedLength",
-      name: "Max Aligned Length",
+      name: "Max Alignment Length",
       tooltip:
         "Length of the longest aligned region over all reads and contigs."
     },
@@ -92,13 +92,11 @@ export default class CoverageVizBottomSidebar extends React.Component {
   state = {
     currentAccessionSummary: null,
     histogramTooltipLocation: null,
-    histogramTooltipData: null,
-    genomeVizTooltipData: null,
-    genomeVizTooltipLocation: null
+    histogramTooltipData: null
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const { params } = this.props;
+    const { params, visible } = this.props;
     const { currentAccessionData } = this.state;
 
     if (
@@ -113,7 +111,14 @@ export default class CoverageVizBottomSidebar extends React.Component {
     if (!prevState.currentAccessionData && currentAccessionData) {
       this.renderHistogram(currentAccessionData);
       this.renderRefAccessionViz(currentAccessionData);
-      this.renderGenomeViz(currentAccessionData);
+    }
+
+    // Ensure that tooltips are hidden when sidebar closes.
+    if (prevProps.visible && !visible) {
+      this.setState({
+        histogramTooltipLocation: null,
+        histogramTooltipData: null
+      });
     }
   }
 
@@ -169,11 +174,11 @@ export default class CoverageVizBottomSidebar extends React.Component {
     }
   };
 
-  handleHistogramBarHover = (pageX, pageY) => {
+  handleHistogramBarHover = (clientX, clientY) => {
     this.setState({
       histogramTooltipLocation: {
-        left: pageX,
-        top: pageY
+        left: clientX,
+        top: clientY
       }
     });
   };
@@ -182,35 +187,6 @@ export default class CoverageVizBottomSidebar extends React.Component {
     this.setState({
       histogramTooltipLocation: null,
       histogramTooltipData: null
-    });
-  };
-
-  handleGenomeVizBarEnter = hoverData => {
-    const { currentAccessionData } = this.state;
-
-    if (hoverData !== null) {
-      this.setState({
-        genomeVizTooltipData: getGenomeVizTooltipData(
-          currentAccessionData,
-          hoverData
-        )
-      });
-    }
-  };
-
-  handleGenomeVizBarHover = (pageX, pageY) => {
-    this.setState({
-      genomeVizTooltipLocation: {
-        left: pageX,
-        top: pageY
-      }
-    });
-  };
-
-  handleGenomeVizBarExit = () => {
-    this.setState({
-      genomeVizTooltipLocation: null,
-      genomeVizTooltipData: null
     });
   };
 
@@ -261,48 +237,21 @@ export default class CoverageVizBottomSidebar extends React.Component {
     this.refAccesssionViz.update();
   };
 
-  renderGenomeViz = data => {
-    const contigReadVizData = generateContigReadVizData(
-      data.hit_groups,
-      data.coverage_bin_size
-    );
-
-    this.contigReadViz = new GenomeViz(
-      this.contigReadVizContainer,
-      contigReadVizData,
-      {
-        domain: [0, data.total_length],
-        colors: [READ_FILL_COLOR, CONTIG_FILL_COLOR],
-        onGenomeVizBarHover: this.handleGenomeVizBarHover,
-        onGenomeVizBarEnter: this.handleGenomeVizBarEnter,
-        onGenomeVizBarExit: this.handleGenomeVizBarExit,
-        hoverDarkenFactor: 0.4
-      }
-    );
-    this.contigReadViz.update();
-  };
-
   getAccessionOptions = () => {
     const { params } = this.props;
     return getSortedAccessionSummaries(params.accessionData).map(summary => ({
       value: summary.id,
-      text: summary.id,
+      text: `${summary.id} - ${summary.name}`,
       customNode: (
-        <BasicPopup
-          trigger={
-            <div className={cs.option}>
-              <div className={cs.optionText}>{summary.id}</div>
-              <div className={cs.optionSubtext}>
-                {summary.num_contigs} contigs, {summary.coverage_depth}x
-                coverage
-              </div>
-            </div>
-          }
-          inverted
-          content={summary.name}
-          horizontalOffset={5}
-          position="left center"
-        />
+        <div className={cs.option}>
+          <div className={cs.optionText}>
+            {summary.id} - {summary.name}
+          </div>
+          <div className={cs.optionSubtext}>
+            {summary.num_contigs} contigs, {summary.num_reads} reads,{" "}
+            {summary.coverage_depth}x coverage
+          </div>
+        </div>
       )
     }));
   };
@@ -314,7 +263,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       return {};
     }
 
-    const referenceAccession = (
+    const referenceNCBIEntry = (
       <BasicPopup
         trigger={
           <div className={cs.ncbiLinkWrapper}>
@@ -326,18 +275,20 @@ export default class CoverageVizBottomSidebar extends React.Component {
               rel="noopener noreferrer"
               className={cs.ncbiLink}
             >
-              {currentAccessionSummary.name}
+              {currentAccessionSummary.id} - {currentAccessionSummary.name}
             </a>
           </div>
         }
         inverted
-        content={currentAccessionSummary.name}
+        content={`${currentAccessionSummary.id} - ${
+          currentAccessionSummary.name
+        }`}
         horizontalOffset={13}
       />
     );
 
     return {
-      referenceAccession,
+      referenceNCBIEntry,
       referenceLength: currentAccessionData.total_length,
       alignedContigs: currentAccessionSummary.num_contigs,
       maxAlignedLength: currentAccessionData.max_aligned_length,
@@ -361,7 +312,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
     let helpText = `
         ${numAccessions -
-          numBestAccessions} poor-quality accessions are not shown, as they have
+          numBestAccessions} poor-quality accessions are omitted, as they have
         no contig alignments and few read alignments.
         To see them, go to the read-level visualization.
       `;
@@ -369,14 +320,26 @@ export default class CoverageVizBottomSidebar extends React.Component {
     return (
       <div className={cs.header}>
         <div className={cs.headerText}>
-          <div className={cs.title}>{params.taxonName} Coverage</div>
-          <div className={cs.subtitle}>
-            {numBestAccessions} unique accessions
+          <div className={cs.taxonLabel}>{params.taxonName} Coverage</div>
+          <BareDropdown
+            options={this.getAccessionOptions()}
+            value={get("id", currentAccessionSummary)}
+            label="Accession"
+            trigger={
+              <div className={cs.accessionLabel}>
+                {get("id", currentAccessionSummary)} -{" "}
+                {get("name", currentAccessionSummary)}
+              </div>
+            }
+            onChange={this.setCurrentAccession}
+            rounded
+            menuClassName={cs.accessionSelectMenu}
+          />
+          <div className={cs.accessionCountLabel}>
+            {numBestAccessions} viewable accessions
             {onlySomeAccessionsShown && (
               <React.Fragment>
-                <span className={cs.notShownMsg}>
-                  ({numAccessions - numBestAccessions} not shown)
-                </span>
+                <span className={cs.notShownMsg}>({numAccessions} total)</span>
                 <HelpIcon text={helpText} className={cs.helpIcon} />
               </React.Fragment>
             )}
@@ -384,13 +347,6 @@ export default class CoverageVizBottomSidebar extends React.Component {
         </div>
         <div className={cs.fill} />
         <div className={cs.headerControls}>
-          <Dropdown
-            options={this.getAccessionOptions()}
-            value={get("id", currentAccessionSummary)}
-            label="Accession"
-            onChange={this.setCurrentAccession}
-            rounded
-          />
           <div className={cs.vizLinkContainer}>
             <a
               className={cs.vizLink}
@@ -409,6 +365,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
   renderContentBody = () => {
     const { currentAccessionData, currentAccessionSummary } = this.state;
+    const { pipelineVersion, sampleId } = this.props;
 
     if (!currentAccessionData) {
       return (
@@ -474,26 +431,17 @@ export default class CoverageVizBottomSidebar extends React.Component {
             content={currentAccessionSummary.name}
           />
         </div>
-        <div className={cs.genomeVizRow}>
-          <div className={cs.rowLabel}>Contigs and Reads</div>
-          <div
-            className={cs.genomeViz}
-            ref={contigReadVizContainer => {
-              this.contigReadVizContainer = contigReadVizContainer;
-            }}
-          />
-        </div>
+        <HitGroupViz
+          accessionData={currentAccessionData}
+          sampleId={sampleId}
+          pipelineVersion={pipelineVersion}
+        />
       </div>
     );
   };
 
   renderSidebarContents() {
-    const {
-      histogramTooltipLocation,
-      histogramTooltipData,
-      genomeVizTooltipLocation,
-      genomeVizTooltipData
-    } = this.state;
+    const { histogramTooltipLocation, histogramTooltipData } = this.state;
 
     return (
       <NarrowContainer className={cs.contents}>
@@ -503,27 +451,10 @@ export default class CoverageVizBottomSidebar extends React.Component {
           histogramTooltipData &&
           ReactDOM.createPortal(
             <div
-              style={{
-                left: histogramTooltipLocation.left + 10,
-                top: histogramTooltipLocation.top - 10
-              }}
+              style={getTooltipStyle(histogramTooltipLocation)}
               className={cs.hoverTooltip}
             >
               <DataTooltip data={histogramTooltipData} />
-            </div>,
-            document.body
-          )}
-        {genomeVizTooltipLocation &&
-          genomeVizTooltipData &&
-          ReactDOM.createPortal(
-            <div
-              style={{
-                left: genomeVizTooltipLocation.left + 10,
-                top: genomeVizTooltipLocation.top - 10
-              }}
-              className={cs.hoverTooltip}
-            >
-              <DataTooltip data={genomeVizTooltipData} />
             </div>,
             document.body
           )}
@@ -538,7 +469,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       <NarrowContainer className={cs.contents}>
         <div className={cs.header}>
           <div className={cs.headerText}>
-            <div className={cs.title}>{params.taxonName} Coverage</div>
+            <div className={cs.taxonLabel}>{params.taxonName} Coverage</div>
           </div>
           <div className={cs.fill} />
         </div>
@@ -607,5 +538,6 @@ CoverageVizBottomSidebar.propTypes = {
     // Link to the old alignment viz.
     alignmentVizUrl: PropTypes.string
   }),
-  sampleId: PropTypes.number
+  sampleId: PropTypes.number,
+  pipelineVersion: PropTypes.string
 };
