@@ -202,11 +202,52 @@
 }
 
 .hoverTooltip {
-  position: absolute;
+  position: fixed;
   background-color: white;
   z-index: 104;
   // So the tooltip appears on the top-right instead of bottom-right of mouse.
   transform: translateY(-100%);
+}
+
+.contigDownloader {
+  position: fixed;
+  z-index: 105;
+  // So the tooltip appears on the top-left instead of bottom-right of the top-right corner of bar.
+  transform: translate(-100%, -100%);
+  background-color: $white;
+  box-shadow: $box-shadow-dropdown-menu;
+  border: 1px solid $box-shadow-lighter;
+  border-radius: 4px;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+
+  .icon {
+    cursor: pointer;
+
+    svg {
+      width: 100%;
+      height: 100%;
+      fill: $medium-grey;
+    }
+
+    &:hover {
+      svg {
+        fill: $primary-light;
+      }
+    }
+  }
+
+  .downloadIcon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+  }
+
+  .copyIcon {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 // TODO(mark):

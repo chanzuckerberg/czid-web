@@ -538,6 +538,7 @@ class SampleView extends React.Component {
             )}
             params={this.getCoverageVizParams()}
             sampleId={sample.id}
+            pipelineVersion={this.props.pipelineRun.pipeline_version}
           />
         )}
       </div>
