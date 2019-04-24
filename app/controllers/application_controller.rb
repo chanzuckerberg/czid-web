@@ -69,8 +69,8 @@ class ApplicationController < ActionController::Base
 
   # Modified from https://gist.github.com/josevalim/fb706b1e933ef01e4fb6
   def authenticate_user_from_token!
-    user_email = request.headers['X-User-Email'] || params[:user_token]
-    user_token = request.headers['X-User-Token'] || params[:user_email.presence]
+    user_email = request.headers['X-User-Email'] || params[:user_email]
+    user_token = request.headers['X-User-Token'] || params[:user_token]
 
     user = user_email && User.find_by(email: user_email)
 
