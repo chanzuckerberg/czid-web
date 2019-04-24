@@ -66,6 +66,7 @@ class PipelineRun < ApplicationRecord
   ASSEMBLY_PREFIX = 'assembly/refined_'.freeze
   ASSEMBLED_CONTIGS_NAME = 'assembly/contigs.fasta'.freeze
   ASSEMBLED_STATS_NAME = 'assembly/contig_stats.json'.freeze
+  COVERAGE_VIZ_SUMMARY_JSON_NAME = 'coverage_viz_summary.json'.freeze
   CONTIG_SUMMARY_JSON_NAME = 'assembly/combined_contig_summary.json'.freeze
   CONTIG_NT_TOP_M8 = 'assembly/gsnap.blast.top.m8'.freeze
   CONTIG_NR_TOP_M8 = 'assembly/rapsearch2.blast.top.m8'.freeze
@@ -75,7 +76,6 @@ class PipelineRun < ApplicationRecord
   LOCAL_AMR_FULL_RESULTS_PATH = '/app/tmp/amr_full_results'.freeze
 
   PIPELINE_VERSION_WHEN_NULL = '1.0'.freeze
-  ASSEMBLY_PIPELINE_VERSION = 3.1
   MIN_CONTIG_SIZE = 4 # minimal # reads mapped to the  contig
   M8_FIELDS = ["Query", "Accession", "Percentage Identity", "Alignment Length",
                "Number of mismatches", "Number of gap openings",
@@ -422,33 +422,35 @@ class PipelineRun < ApplicationRecord
   end
 
   def coverage_viz_summary_s3_path
-    # TODO(mark): Replace mock data with real data once we are running the sample.
-    return "s3://assets.idseq.net/coverage_viz_summary.json"
+    return "#{postprocess_output_s3_path}/#{COVERAGE_VIZ_SUMMARY_JSON_NAME}" if pipeline_version_has_coverage_viz(pipeline_version)
   end
 
   def coverage_viz_data_s3_path(accession_id)
-    # TODO(mark): Replace mock data with real data once we are running the sample.
-    return "s3://assets.idseq.net/coverage_viz/#{accession_id}_coverage_viz.json"
+    "#{coverage_viz_output_s3_path}/#{accession_id}_coverage_viz.json" if pipeline_version_has_coverage_viz(pipeline_version)
+  end
+
+  def coverage_viz_output_s3_path
+    "#{postprocess_output_s3_path}/coverage_viz"
   end
 
   def contigs_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
+    return "#{postprocess_output_s3_path}/#{ASSEMBLED_CONTIGS_NAME}" if pipeline_version_has_assembly(pipeline_version)
   end
 
   def contigs_summary_s3_path
-    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
+    return "#{postprocess_output_s3_path}/#{CONTIG_MAPPING_NAME}" if pipeline_version_has_assembly(pipeline_version)
   end
 
   def annotated_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 3.1
-    return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 2.0
+    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_has_assembly(pipeline_version)
+    return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
 
     multihit? ? "#{alignment_output_s3_path}/#{ple::MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
 
   def unidentified_fasta_s3_path
-    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 3.1
-    return "#{output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version && pipeline_version.to_f >= 2.0
+    return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_has_assembly(pipeline_version)
+    return "#{output_s3_path_with_version}/#{DAG_UNIDENTIFIED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
     "#{alignment_output_s3_path}/#{UNIDENTIFIED_FASTA_BASENAME}"
   end
 
@@ -1166,7 +1168,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def subsample_suffix
-    if pipeline_version && pipeline_version.to_f >= 2.0
+    if pipeline_version_at_least_2(pipeline_version)
       # New dag pipeline. no subsample folder
       return nil
     end
@@ -1218,7 +1220,7 @@ class PipelineRun < ApplicationRecord
 
   def s3_paths_for_taxon_byteranges
     file_prefix = ''
-    file_prefix = ASSEMBLY_PREFIX if pipeline_version && pipeline_version.to_f >= ASSEMBLY_PIPELINE_VERSION
+    file_prefix = ASSEMBLY_PREFIX if pipeline_version_has_assembly(pipeline_version)
     # by tax_level and hit_type
     { TaxonCount::TAX_LEVEL_SPECIES => {
       'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",

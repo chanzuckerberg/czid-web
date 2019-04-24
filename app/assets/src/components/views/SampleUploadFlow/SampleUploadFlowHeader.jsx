@@ -5,6 +5,7 @@ import cx from "classnames";
 import PropTypes from "~/components/utils/propTypes";
 import Label from "~ui/labels/Label";
 import NarrowContainer from "~/components/layout/NarrowContainer";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./sample_upload_flow.scss";
 
@@ -79,7 +80,16 @@ class SampleUploadFlowHeader extends React.Component {
                       cs.enabled
                   )}
                   key={val.text}
-                  onClick={() => this.onStepSelect(val.step)}
+                  onClick={() => {
+                    this.onStepSelect(val.step);
+                    logAnalyticsEvent(
+                      "SampleUploadFlowHeader_step-option_clicked",
+                      {
+                        step: val.step,
+                        text: val.text
+                      }
+                    );
+                  }}
                 >
                   <Label className={cs.circle} circular text={index + 1} />
                   <div className={cs.text}>{val.text}</div>

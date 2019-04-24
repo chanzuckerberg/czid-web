@@ -1,14 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { forbidExtraProps } from "airbnb-prop-types";
+import cx from "classnames";
+
 import { RequestContext } from "~/components/common/RequestContext";
 import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import LogoIcon from "~ui/icons/LogoIcon";
 import { openUrl } from "~utils/links";
 import { deleteAsync } from "~/api/core";
-import { forbidExtraProps } from "airbnb-prop-types";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+
 import cs from "./header.scss";
-import cx from "classnames";
 
 class Header extends React.Component {
   render() {
@@ -119,6 +122,9 @@ const UserMenuDropDown = ({
           <a
             className={cs.option}
             href={`mailto:${email}?Subject=Report%20Feedback`}
+            onClick={() =>
+              logAnalyticsEvent("Header_dropdown-feedback-option_clicked")
+            }
           >
             Report Feedback
           </a>
@@ -132,6 +138,9 @@ const UserMenuDropDown = ({
             target="_blank"
             rel="noopener noreferrer"
             href="https://assets.idseq.net/Terms.pdf"
+            onClick={() =>
+              logAnalyticsEvent("Header_dropdown-terms-option_clicked")
+            }
           >
             Terms of Use
           </a>
@@ -145,12 +154,22 @@ const UserMenuDropDown = ({
             target="_blank"
             rel="noopener noreferrer"
             href="https://assets.idseq.net/Privacy.pdf"
+            onClick={() =>
+              logAnalyticsEvent("Header_dropdown-privacy-policy-option_clicked")
+            }
           >
             Privacy Policy
           </a>
         }
       />,
-      <BareDropdown.Item key="7" text="Logout" onClick={signOut} />
+      <BareDropdown.Item
+        key="7"
+        text="Logout"
+        onClick={withAnalytics(
+          signOut,
+          "Header_dropdown-logout-option_clicked"
+        )}
+      />
     );
     return userDropdownItems;
   };

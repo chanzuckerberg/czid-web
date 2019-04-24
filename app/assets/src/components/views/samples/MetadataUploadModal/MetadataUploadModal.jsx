@@ -2,10 +2,13 @@
 import React from "react";
 import { keyBy, flow, mapValues, omit } from "lodash/fp";
 import PropTypes from "prop-types";
+
 import Wizard from "~ui/containers/Wizard";
 import Modal from "~ui/containers/Modal";
 import { getSamplesV1 } from "~/api";
 import { uploadMetadataForProject } from "~/api/metadata";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+
 import ReviewPage from "./ReviewPage";
 import UploadPage from "./UploadPage";
 import cs from "./metadata_upload_modal.scss";
@@ -44,6 +47,10 @@ class MetadataUploadModal extends React.Component {
       )(this.state.metadata.rows)
     );
     this.props.onClose();
+    logAnalyticsEvent("MetadataUploadModal_modal_completed", {
+      projectId: this.props.project.id,
+      projectSamples: this.state.projectSamples.length
+    });
   };
 
   getPages = () => {
@@ -83,7 +90,10 @@ class MetadataUploadModal extends React.Component {
         open
         tall
         wide
-        onClose={this.props.onClose}
+        onClose={withAnalytics(
+          this.props.onClose,
+          "MetadataUploadModal_modal_closed"
+        )}
         className={cs.metadataUploadModal}
       >
         <Wizard onComplete={this.handleComplete}>{this.getPages()}</Wizard>

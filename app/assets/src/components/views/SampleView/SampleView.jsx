@@ -16,7 +16,10 @@ import {
   ANALYTICS_EVENT_NAMES
 } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
-import { pipelineVersionHasAssembly } from "~/components/utils/sample";
+import {
+  pipelineVersionHasAssembly,
+  pipelineVersionHasCoverageViz
+} from "~/components/utils/sample";
 import AMRView from "~/components/AMRView";
 import BasicPopup from "~/components/BasicPopup";
 import PipelineSampleReport from "~/components/PipelineSampleReport";
@@ -71,12 +74,14 @@ class SampleView extends React.Component {
   }
 
   fetchAdditionalData = async () => {
-    const { sample } = this.props;
-    const coverageVizSummary = await getCoverageVizSummary(sample.id);
+    if (this.coverageVizEnabled()) {
+      const { sample } = this.props;
+      const coverageVizSummary = await getCoverageVizSummary(sample.id);
 
-    this.setState({
-      coverageVizDataByTaxon: coverageVizSummary
-    });
+      this.setState({
+        coverageVizDataByTaxon: coverageVizSummary
+      });
+    }
   };
 
   generateGsnapFilterStatus = jobStats => {
@@ -375,6 +380,12 @@ class SampleView extends React.Component {
     await saveVisualization(params.view || "table", params);
   };
 
+  coverageVizEnabled = () =>
+    (this.props.admin || this.props.allowedFeatures.includes("coverage_viz")) &&
+    pipelineVersionHasCoverageViz(
+      get("pipeline_version", this.props.reportPageParams)
+    );
+
   render() {
     const versionDisplay = this.renderVersionDisplay();
 
@@ -514,8 +525,7 @@ class SampleView extends React.Component {
           )}
           params={this.getSidebarParams()}
         />
-        {(this.props.admin ||
-          this.props.allowedFeatures.includes("coverage_viz")) && (
+        {this.coverageVizEnabled() && (
           <CoverageVizBottomSidebar
             visible={this.state.coverageVizVisible}
             onClose={withAnalytics(
@@ -528,6 +538,7 @@ class SampleView extends React.Component {
             )}
             params={this.getCoverageVizParams()}
             sampleId={sample.id}
+            pipelineVersion={this.props.pipelineRun.pipeline_version}
           />
         )}
       </div>

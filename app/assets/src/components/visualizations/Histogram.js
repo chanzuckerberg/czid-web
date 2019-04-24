@@ -180,16 +180,18 @@ export default class Histogram {
     return this.options.barOpacity || 0.8;
   };
 
-  // Find the bar x-center that is closest to hoverX, within hoverBuffer.
+  // Find the bar x-center that is closest to svgX, within hoverBuffer.
   onMouseMove = () => {
     if (this.sortedBarCenters.length == 0) {
       return;
     }
 
-    const hoverX = mouse(this.svg.node())[0];
+    // svgX is an x coordinate relative to the svg container.
+    // All the bar "endpoints" are within this same coordinate space.
+    const svgX = mouse(this.svg.node())[0];
     const closestBarCenters = ArrayUtils.findClosestNeighbors(
       this.sortedBarCenters,
-      hoverX
+      svgX
     );
 
     let closestX = null;
@@ -198,8 +200,8 @@ export default class Histogram {
       closestX = closestBarCenters[0];
     } else {
       closestX =
-        Math.abs(closestBarCenters[0] - hoverX) <
-        Math.abs(closestBarCenters[1] - hoverX)
+        Math.abs(closestBarCenters[0] - svgX) <
+        Math.abs(closestBarCenters[1] - svgX)
           ? closestBarCenters[0]
           : closestBarCenters[1];
     }
@@ -208,7 +210,7 @@ export default class Histogram {
     const buffer = this.getBarWidth() / 2 + this.options.hoverBuffer;
 
     const dataIndices =
-      Math.abs(closestX - hoverX) < buffer
+      Math.abs(closestX - svgX) < buffer
         ? this.barCentersToIndices[closestX]
         : null;
 
@@ -232,7 +234,11 @@ export default class Histogram {
     }
 
     if (dataIndices !== null && this.options.onHistogramBarHover) {
-      this.options.onHistogramBarHover(currentEvent.pageX, currentEvent.pageY);
+      // Coordinates with respect to the viewport.
+      this.options.onHistogramBarHover(
+        currentEvent.clientX,
+        currentEvent.clientY
+      );
     }
   };
 
