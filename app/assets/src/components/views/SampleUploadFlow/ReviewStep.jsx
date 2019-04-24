@@ -8,6 +8,7 @@ import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import TermsAgreement from "~ui/controls/TermsAgreement";
 import { bulkUploadLocalWithMetadata, bulkUploadRemote } from "~/api/upload";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import LoadingIcon from "~ui/icons/LoadingIcon";
@@ -54,6 +55,9 @@ class ReviewStep extends React.Component {
             createdSampleIds: response.sample_ids
           });
           this.props.onUploadComplete();
+          logAnalyticsEvent("ReviewStep_remote-upload_succeeded", {
+            createdSampleIds: response.sample_ids.length
+          });
         })
         // TODO(mark): Display better errors.
         // For example, some samples may have successfully saved, but not others. Should explain to user.
@@ -61,6 +65,9 @@ class ReviewStep extends React.Component {
           // eslint-disable-next-line no-console
           console.error("onBulkUploadRemote error:", error);
           this.onUploadError("There were some issues creating your samples.");
+          logAnalyticsEvent("ReviewStep_remote-upload_failed", {
+            error
+          });
         });
     }
     // For uploading samples with local files
@@ -75,12 +82,18 @@ class ReviewStep extends React.Component {
             submitState: "success"
           });
           this.props.onUploadComplete();
+          logAnalyticsEvent("ReviewStep_local-upload_succeeded", {
+            samples: this.props.samples.length
+          });
         },
         onCreateSamplesError: errors => {
           // TODO(mark): Display better errors.
           // eslint-disable-next-line no-console
           console.error("onCreateSamplesError:", errors);
           this.onUploadError("There were some issues creating your samples.");
+          logAnalyticsEvent("ReviewStep_local-upload_failed", {
+            errors: errors.length
+          });
         },
         // TODO(mark): Display better errors.
         // For example, some samples may have successfuly saved, but not others. Should explain to user.
@@ -88,11 +101,18 @@ class ReviewStep extends React.Component {
           // eslint-disable-next-line no-console
           console.error("onUploadError:", error);
           this.onUploadError("There were some issues creating your samples.");
+          logAnalyticsEvent("ReviewStep_local-upload_failed", {
+            fileName: file.name,
+            error
+          });
         },
         onMarkSampleUploadedError: sampleName => {
           this.onUploadError(
             `Failed to mark sample ${sampleName} as uploaded.`
           );
+          logAnalyticsEvent("ReviewStep_local-upload_failed", {
+            sampleName
+          });
         }
       });
     }
@@ -169,7 +189,13 @@ class ReviewStep extends React.Component {
               <div className={cx(cs.links, this.linksEnabled() && cs.enabled)}>
                 <div
                   className={cs.link}
-                  onClick={() => this.onLinkClick("uploadSamples")}
+                  onClick={() => {
+                    this.onLinkClick("uploadSamples");
+                    logAnalyticsEvent("ReviewStep_edit-project-link_clicked", {
+                      projectId: this.props.project.id,
+                      projectName: this.props.project.name
+                    });
+                  }}
                 >
                   Edit Project
                 </div>
@@ -203,14 +229,26 @@ class ReviewStep extends React.Component {
               <div className={cx(cs.links, this.linksEnabled() && cs.enabled)}>
                 <div
                   className={cs.link}
-                  onClick={() => this.onLinkClick("uploadSamples")}
+                  onClick={() => {
+                    this.onLinkClick("uploadSamples");
+                    logAnalyticsEvent("ReviewStep_edit-samples-link_clicked", {
+                      projectId: this.props.project.id,
+                      projectName: this.props.project.name
+                    });
+                  }}
                 >
                   Edit Samples
                 </div>
                 <div className={cs.divider}>|</div>
                 <div
                   className={cs.link}
-                  onClick={() => this.onLinkClick("uploadMetadata")}
+                  onClick={() => {
+                    this.onLinkClick("uploadMetadata");
+                    logAnalyticsEvent("ReviewStep_edit-metadata-link_clicked", {
+                      projectId: this.props.project.id,
+                      projectName: this.props.project.name
+                    });
+                  }}
                 >
                   Edit Metadata
                 </div>
@@ -231,9 +269,15 @@ class ReviewStep extends React.Component {
             <TermsAgreement
               checked={this.state.consentChecked}
               onChange={() =>
-                this.setState({
-                  consentChecked: !this.state.consentChecked
-                })
+                this.setState(
+                  {
+                    consentChecked: !this.state.consentChecked
+                  },
+                  () =>
+                    logAnalyticsEvent("ReviewStep_consent-checkbox_checked", {
+                      consentChecked: this.state.consentChecked
+                    })
+                )
               }
             />
           )}
@@ -256,7 +300,13 @@ class ReviewStep extends React.Component {
                 className={cs.link}
                 href={`/home?project_id=${this.props.project.id}`}
               >
-                <SecondaryButton text="Go to Project" rounded={false} />
+                <SecondaryButton
+                  text="Go to Project"
+                  rounded={false}
+                  onClick={() =>
+                    logAnalyticsEvent("ReviewStep_go-to-project-button_clicked")
+                  }
+                />
               </a>
             </div>
           )}
@@ -264,7 +314,13 @@ class ReviewStep extends React.Component {
             <PrimaryButton
               text="Start Upload"
               disabled={!this.state.consentChecked}
-              onClick={this.uploadSamplesAndMetadata}
+              onClick={withAnalytics(
+                this.uploadSamplesAndMetadata,
+                "ReviewStep_start-upload-button_clicked",
+                {
+                  samples: this.props.samples.length
+                }
+              )}
               rounded={false}
             />
           )}

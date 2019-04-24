@@ -1,11 +1,6 @@
 import React from "react";
 import cx from "classnames";
 import QueryString from "query-string";
-import PropTypes from "~/components/utils/propTypes";
-import ProjectSelect from "~/components/common/ProjectSelect";
-import Tabs from "~/components/ui/controls/Tabs";
-import IssueGroup from "~/components/common/IssueGroup";
-import { getProjects, validateSampleNames, validateSampleFiles } from "~/api";
 import {
   find,
   filter,
@@ -29,10 +24,18 @@ import {
   mergeWith,
   uniqBy
 } from "lodash/fp";
+
+import PropTypes from "~/components/utils/propTypes";
+import ProjectSelect from "~/components/common/ProjectSelect";
+import Tabs from "~/components/ui/controls/Tabs";
+import IssueGroup from "~/components/common/IssueGroup";
+import { getProjects, validateSampleNames, validateSampleFiles } from "~/api";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import BulkSampleUploadTable from "~ui/controls/BulkSampleUploadTable";
 import ProjectCreationForm from "~/components/common/ProjectCreationForm";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
+
 import LocalSampleFileUpload from "./LocalSampleFileUpload";
 import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
 import cs from "./sample_upload_flow.scss";
@@ -144,6 +147,13 @@ class UploadSampleStep extends React.Component {
       localSamples: newLocalSamples,
       remoteSamples: newRemoteSamples,
       sampleNamesToFiles: newSampleNamesToFiles
+    });
+
+    logAnalyticsEvent("UploadSampleStep_project-selector_changed", {
+      selectedProjectId: project.id,
+      selectedProjectName: project.name,
+      localSamples: newLocalSamples.length,
+      remoteSamples: newRemoteSamples.length
     });
   };
 
@@ -275,11 +285,21 @@ class UploadSampleStep extends React.Component {
       remoteSamples: newRemoteSamples,
       sampleNamesToFiles: newSampleNamesToFiles
     });
+
+    logAnalyticsEvent("UploadSampleStep_project_created", {
+      selectedProjectId: project.id,
+      selectedProjectName: project.name,
+      localSamples: newLocalSamples.length,
+      remoteSamples: newRemoteSamples.length
+    });
   };
 
   handleTabChange = tab => {
     this.props.onDirty();
     this.setState({ currentTab: tab });
+    logAnalyticsEvent("UploadSampleStep_tab_changed", {
+      tab
+    });
   };
 
   // Merge newly added samples with the list of samples already added.
@@ -345,6 +365,14 @@ class UploadSampleStep extends React.Component {
       ),
       removedLocalFiles
     });
+
+    logAnalyticsEvent("UploadSampleStep_local-sample_changed", {
+      localSamples: localSamples.length,
+      validatedLocalSamples: validatedLocalSamples.length,
+      removedLocalFiles: removedLocalFiles.length,
+      projectId: this.state.selectedProject.id,
+      projectName: this.state.selectedProject.name
+    });
   };
 
   handleRemoteSampleChange = async remoteSamples => {
@@ -363,6 +391,13 @@ class UploadSampleStep extends React.Component {
         this.state.remoteSamples,
         validatedRemoteSamples
       )
+    });
+
+    logAnalyticsEvent("UploadSampleStep_remote-sample_changed", {
+      remoteSamples: remoteSamples.length,
+      validatedRemoteSamples: validatedRemoteSamples.length,
+      projectId: this.state.selectedProject.id,
+      projectName: this.state.selectedProject.name
     });
   };
 
@@ -386,6 +421,12 @@ class UploadSampleStep extends React.Component {
         sampleNamesToFiles: newSampleNamesToFiles
       });
     }
+    logAnalyticsEvent("UploadSampleStep_sample_removed", {
+      sampleName,
+      currentTab: this.state.currentTab,
+      projectId: this.state.selectedProject.id,
+      projectName: this.state.selectedProject.name
+    });
   };
 
   handleContinue = () => {
@@ -405,6 +446,17 @@ class UploadSampleStep extends React.Component {
         uploadType: "remote"
       });
     }
+
+    logAnalyticsEvent("UploadSampleStep_continue-button_clicked", {
+      errors: this.state.issues.errors.length,
+      warnings: this.state.issues.warnings.length,
+      localSamples: this.state.localSamples.length,
+      remoteSamples: this.state.remoteSamples.length,
+      project: this.state.selectedProject,
+      currentTab: this.state.currentTab,
+      projectId: this.state.selectedProject.id,
+      projectName: this.state.selectedProject.name
+    });
   };
 
   getSampleNamesToFiles = () => {
@@ -457,14 +509,20 @@ class UploadSampleStep extends React.Component {
             {this.state.createProjectOpen ? (
               <div className={cs.projectCreationContainer}>
                 <ProjectCreationForm
-                  onCancel={this.closeCreateProject}
+                  onCancel={withAnalytics(
+                    this.closeCreateProject,
+                    "UploadSampleStep_project-creation-form_closed"
+                  )}
                   onCreate={this.handleProjectCreate}
                 />
               </div>
             ) : (
               <div
                 className={cs.createProjectButton}
-                onClick={this.openCreateProject}
+                onClick={withAnalytics(
+                  this.openCreateProject,
+                  "UploadSampleStep_create-project_opened"
+                )}
               >
                 + Create Project
               </div>
@@ -508,7 +566,16 @@ class UploadSampleStep extends React.Component {
             className={cs.continueButton}
           />
           <a href="/home">
-            <SecondaryButton text="Cancel" rounded={false} />
+            <SecondaryButton
+              text="Cancel"
+              rounded={false}
+              onClick={() =>
+                logAnalyticsEvent("UploadSampleStep_cancel-button_clicked", {
+                  projectId: this.state.selectedProject.id,
+                  projectName: this.state.selectedProject.name
+                })
+              }
+            />
           </a>
         </div>
       </div>

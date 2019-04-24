@@ -2,11 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 import cs from "./data_tooltip.scss";
 
-const DataTooltip = ({ data, subtitle, title }) => {
+const DataTooltip = ({ data, subtitle, title, singleColumn }) => {
   // DataTooltip receives:
   // - title
   // - subtitle
-  // - an object(section_name: array([label, value], [..]))
+  // - an array of object(section_name, data: array([label, value], [..]))
 
   const renderSection = (sectionName, dataValues) => {
     return (
@@ -18,8 +18,14 @@ const DataTooltip = ({ data, subtitle, title }) => {
               className={cs.dataTooltipValuePair}
               key={`value-${sectionName}-${keyValuePair[0]}`}
             >
-              <div className={cs.dataTooltipLabel}>{keyValuePair[0]}</div>
-              <div className={cs.dataTooltipValue}>{keyValuePair[1]}</div>
+              {singleColumn ? (
+                <div className={cs.dataTooltipValue}>{keyValuePair[0]}</div>
+              ) : (
+                <React.Fragment>
+                  <div className={cs.dataTooltipLabel}>{keyValuePair[0]}</div>
+                  <div className={cs.dataTooltipValue}>{keyValuePair[1]}</div>
+                </React.Fragment>
+              )}
             </div>
           );
         })}
@@ -43,6 +49,12 @@ const DataTooltip = ({ data, subtitle, title }) => {
 DataTooltip.propTypes = {
   data: PropTypes.array,
   subtitle: PropTypes.string,
-  title: PropTypes.string
+  title: PropTypes.string,
+  singleColumn: PropTypes.bool
 };
+
+DataTooltip.defaultProps = {
+  singleColumn: false
+};
+
 export default DataTooltip;

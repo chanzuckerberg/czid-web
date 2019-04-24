@@ -8,12 +8,13 @@ import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
 import { getAllHostGenomes } from "~/api";
 import { getProjectMetadataFields } from "~/api/metadata";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import LoadingIcon from "~ui/icons/LoadingIcon";
+import { getURLParamString } from "~/helpers/url";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
 import IssueGroup from "./IssueGroup";
-import { getURLParamString } from "~/helpers/url";
 
 const map = _fp.map.convert({ cap: false });
 
@@ -48,6 +49,11 @@ class MetadataUpload extends React.Component {
       issues: null,
       wasManual: tab === "Manual Input"
     });
+    logAnalyticsEvent("MetadataUpload_tab_changed", {
+      tab,
+      projectId: this.props.project.id,
+      projectName: this.props.project.name
+    });
   };
 
   // MetadataCSVUpload validates metadata before calling onMetadataChangeCSV.
@@ -57,6 +63,15 @@ class MetadataUpload extends React.Component {
       issues,
       validatingCSV
     });
+    if (!validatingCSV) {
+      // We only want to log on the second call when issues are present
+      logAnalyticsEvent("MetadataUpload_csv-metadata_changed", {
+        errors: issues.errors.length,
+        warnings: issues.warnings.length,
+        projectId: this.props.project.id,
+        projectName: this.props.project.name
+      });
+    }
   };
 
   // MetadataManualInput doesn't validate metadata before calling onMetadataChangeManual.
@@ -66,6 +81,10 @@ class MetadataUpload extends React.Component {
       this.props.onDirty();
     }
     this.props.onMetadataChange({ metadata, wasManual: true });
+    logAnalyticsEvent("MetadataUpload_manual-metadata_changed", {
+      projectId: this.props.project.id,
+      projectName: this.props.project.name
+    });
   };
 
   getCSVUrl = () => {
@@ -104,7 +123,10 @@ class MetadataUpload extends React.Component {
           <div>
             <span
               className={cs.link}
-              onClick={this.props.onShowCSVInstructions}
+              onClick={withAnalytics(
+                this.props.onShowCSVInstructions,
+                "MetadataUpload_instruction-link_clicked"
+              )}
             >
               View CSV Upload Instructions
             </span>
@@ -123,6 +145,15 @@ class MetadataUpload extends React.Component {
             href={this.getCSVUrl()}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() =>
+              logAnalyticsEvent(
+                "MetadataUpload_download-csv-template_clicked",
+                {
+                  projectId: this.props.project.id,
+                  projectName: this.props.project.name
+                }
+              )
+            }
           >
             Download Metadata CSV Template
           </a>
@@ -224,6 +255,15 @@ class MetadataUpload extends React.Component {
                   href="/metadata/dictionary"
                   className={cs.link}
                   target="_blank"
+                  onClick={() =>
+                    logAnalyticsEvent(
+                      "MetadataUpload_full-dictionary-link_clicked",
+                      {
+                        projectId: this.props.project.id,
+                        projectName: this.props.project.name
+                      }
+                    )
+                  }
                 >
                   View Full Metadata Dictionary
                 </a>
@@ -238,6 +278,12 @@ class MetadataUpload extends React.Component {
                 href="/metadata/dictionary"
                 className={cs.link}
                 target="_blank"
+                onClick={() =>
+                  logAnalyticsEvent("MetadataUpload_dictionary-link_clicked", {
+                    projectId: this.props.project.id,
+                    projectName: this.props.project.name
+                  })
+                }
               >
                 View Metadata Dictionary
               </a>
