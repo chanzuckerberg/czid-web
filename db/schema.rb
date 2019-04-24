@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_416_003_917) do
+ActiveRecord::Schema.define(version: 20_190_424_003_917) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -133,6 +133,25 @@ ActiveRecord::Schema.define(version: 20_190_416_003_917) do
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
   end
 
+  create_table "locations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name", default: "", null: false, comment: "Full display name, such as a complete address"
+    t.string "geo_level", limit: 20, default: "", null: false, comment: "Level of specificity (country, state, subdivision, or city)"
+    t.string "country_name", limit: 100, default: "", null: false, comment: "Country (or equivalent) of this location if available"
+    t.string "country_code", limit: 5, default: "", null: false, comment: "ISO 3166 alpha-2 country codes. Can be used to resolve country_name if data sources ever change."
+    t.string "state_name", limit: 100, default: "", null: false, comment: "State (or equivalent) of this location if available"
+    t.string "subdivision_name", limit: 100, default: "", null: false, comment: "Second-level administrative division (e.g. county/district/division/province/etc.) of this location if available"
+    t.string "city_name", limit: 100, default: "", null: false, comment: "City (or equivalent) of this location if available"
+    t.integer "osm_id", comment: "OpenStreetMap ID for traceability. May change at any time."
+    t.integer "locationiq_id", comment: "Data provider API ID for traceability."
+    t.decimal "lat", precision: 10, scale: 6, comment: "The latitude of this location if available"
+    t.decimal "lng", precision: 10, scale: 6, comment: "The longitude of this location if available"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["country_name", "state_name", "subdivision_name", "city_name"], name: "index_locations_levels", comment: "Index for lookup within regions. Composite works for any left subset of columns."
+    t.index ["geo_level"], name: "index_locations_on_geo_level", comment: "Index for lookup by level of specificity"
+    t.index ["name"], name: "index_locations_on_name", comment: "Index for lookup by location name"
+  end
+
   create_table "job_stats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "task"
     t.integer "reads_before"
@@ -146,7 +165,6 @@ ActiveRecord::Schema.define(version: 20_190_416_003_917) do
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "key", null: false, collation: "latin1_swedish_ci"
-    t.integer "data_type", limit: 1, null: false
     t.string "raw_value"
     t.string "string_validated_value"
     t.decimal "number_validated_value", precision: 36, scale: 9

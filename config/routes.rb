@@ -23,6 +23,8 @@ Rails.application.routes.draw do
     get :nonhost_fasta, on: :member
     get :unidentified_fasta, on: :member
     get :contigs_fasta, on: :member
+    get :contigs_fasta_by_byteranges, on: :member
+    get :contigs_sequences_by_byteranges, on: :member
     get :contigs_summary, on: :member
     get :results_folder, on: :member
     get :raw_results_folder, on: :member

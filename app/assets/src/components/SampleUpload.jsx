@@ -629,7 +629,7 @@ class SampleUpload extends React.Component {
   onDrop = pos => accepted => {
     let newFiles;
     if (accepted.length > 0) {
-      const sampleName = accepted[0].name;
+      const fileName = accepted[0].name;
 
       if (accepted.length > 1) {
         // Fill in both boxes if they try to upload 2 at the same time.
@@ -648,18 +648,20 @@ class SampleUpload extends React.Component {
         localFilesToUpload: newFiles
       });
 
+      let sampleNameFromFile = null;
+
       // Set Sample Name field
       if (!this.state.sampleName) {
-        const simplified = sampleNameFromFileName(sampleName);
-        this.refs.sample_name.value = simplified;
-        this.setState({ sampleName: simplified });
+        sampleNameFromFile = sampleNameFromFileName(fileName);
+        this.refs.sample_name.value = sampleNameFromFile;
+        this.setState({ sampleName: sampleNameFromFile });
       }
       logAnalyticsEvent("SampleUpload_files_dropped", {
         pos,
         accepted: accepted.length,
         newFiles: newFiles.length,
         // eslint-disable-next-line no-undef
-        sampleName: this.state.sampleName || simplified
+        sampleName: this.state.sampleName || sampleNameFromFile
       });
       return;
     }
