@@ -1,4 +1,4 @@
-import { set } from "lodash/fp";
+import { set, flatten } from "lodash/fp";
 
 import { get, postWithCSRF } from "./core";
 
@@ -16,7 +16,7 @@ const getSampleMetadata = (id, pipelineVersion) => {
 const getSampleMetadataFields = ids =>
   get("/samples/metadata_fields", {
     params: {
-      sampleIds: [ids].flat()
+      sampleIds: flatten([ids])
     }
   });
 
@@ -24,7 +24,7 @@ const getSampleMetadataFields = ids =>
 const getProjectMetadataFields = ids =>
   get("/projects/metadata_fields", {
     params: {
-      projectIds: [ids].flat()
+      projectIds: flatten([ids])
     }
   });
 
