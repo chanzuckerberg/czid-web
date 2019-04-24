@@ -377,7 +377,7 @@ module SamplesHelper
     formatted_samples
   end
 
-  def visibility(samples)
+  def get_visibility(samples)
     # When in conjunction with some filters, the query below was not returning the public property,
     # thus we need to get ids and redo the query independently
     sample_ids = samples.pluck(:id)
@@ -567,9 +567,15 @@ module SamplesHelper
   end
 
   def filter_by_taxid(samples, taxid)
-    pr_ids = TaxonByterange.where(taxid: taxid).pluck(:pipeline_run_id)
-    sample_ids = PipelineRun.top_completed_runs.where(id: pr_ids).pluck(:sample_id)
-    samples.where(id: sample_ids)
+    # Nested query guarantees that we will not get duplicate samples
+    # despite joins to pipeline_runs and taxon_counts
+    samples
+      .where(id: samples
+        .distinct(:id)
+        .joins(:pipeline_runs, pipeline_runs: :taxon_counts)
+        .where(pipeline_runs: { id: PipelineRun.joins(:sample).where(sample: samples, job_status: "CHECKED").group(:sample_id).select("MAX(`pipeline_runs`.id) AS id") })
+        .where(taxon_counts: { tax_id: taxid, count_type: ["NT", "NR"] })
+        .where("`taxon_counts`.count > 0"))
   end
 
   def filter_by_search_string(samples, search_string)

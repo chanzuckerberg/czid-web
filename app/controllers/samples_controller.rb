@@ -157,7 +157,7 @@ class SamplesController < ApplicationController
       only: [:id, :name, :host_genome_id, :project_id, :created_at, :public],
       methods: []
     )
-    samples_visibility = visibility(limited_samples)
+    samples_visibility = get_visibility(limited_samples)
 
     # format_samples loads a lot of information about samples
     # There many ways we can refactor: multiple endoints for client to ask for the informaion
@@ -364,12 +364,13 @@ class SamplesController < ApplicationController
 
     # Permission-dependent
     if !categories || ["sample", "location", "tissue", "taxon"].any? { |i| categories.include? i }
-      viewable_samples = samples_by_domain(domain)
-      viewable_sample_ids = viewable_samples.pluck(:id)
+      constrained_samples = samples_by_domain(domain)
+      constrained_sample_ids = constrained_samples.pluck(:id)
+
     end
 
     if !categories || categories.include?("host")
-      hosts = viewable_samples
+      hosts = constrained_samples
               .joins(:host_genome)
               .where("`host_genomes`.name LIKE :search", search: "#{query}%")
               .distinct(:host_genome)
@@ -384,7 +385,7 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("sample")
-      samples = prefix_match(Sample, "name", query, id: viewable_sample_ids)
+      samples = prefix_match(Sample, "name", query, id: constrained_sample_ids)
       unless samples.empty?
         results["Sample"] = {
           "name" => "Sample",
@@ -396,7 +397,7 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("location")
-      locations = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "collection_location")
+      locations = prefix_match(Metadatum, "string_validated_value", query, sample_id: constrained_sample_ids).where(key: "collection_location")
       unless locations.empty?
         results["Location"] = {
           "name" => "Location",
@@ -408,7 +409,7 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("tissue")
-      tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: viewable_sample_ids).where(key: "sample_type")
+      tissues = prefix_match(Metadatum, "string_validated_value", query, sample_id: constrained_sample_ids).where(key: "sample_type")
       unless tissues.empty?
         results["Tissue"] = {
           "name" => "Tissue",
@@ -420,7 +421,7 @@ class SamplesController < ApplicationController
     end
 
     if !categories || categories.include?("taxon")
-      taxon_list = taxon_search(query, ["species", "genus"], samples: viewable_samples)
+      taxon_list = taxon_search(query, ["species", "genus"], samples: constrained_samples)
       unless taxon_list.empty?
         results["Taxon"] = {
           "name" => "Taxon",
