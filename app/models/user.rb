@@ -6,17 +6,7 @@ class User < ApplicationRecord
     include Elasticsearch::Model::Callbacks
   end
 
-  # Copied from https://gist.github.com/josevalim/fb706b1e933ef01e4fb6
   before_save :ensure_authentication_token
-  # TODO: (gdingle): should we cycle tokens automatically after some time period?
-  def ensure_authentication_token
-    if authentication_token.blank?
-      self.authentication_token = generate_authentication_token
-    end
-  end
-
-  # TODO: (gdingle): replace me with above
-  # acts_as_token_authenticatable
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable, :registerable
@@ -165,6 +155,12 @@ class User < ApplicationRecord
   private
 
   # Copied from https://gist.github.com/josevalim/fb706b1e933ef01e4fb6
+  def ensure_authentication_token
+    if authentication_token.blank?
+      self.authentication_token = generate_authentication_token
+    end
+  end
+
   def generate_authentication_token
     loop do
       token = Devise.friendly_token
