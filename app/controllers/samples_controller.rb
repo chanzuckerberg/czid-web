@@ -156,7 +156,7 @@ class SamplesController < ApplicationController
       only: [:id, :name, :host_genome_id, :project_id, :created_at, :public],
       methods: []
     )
-    samples_visibility = visibility(limited_samples)
+    samples_visibility = get_visibility(limited_samples)
 
     # format_samples loads a lot of information about samples
     # There many ways we can refactor: multiple endoints for client to ask for the informaion
