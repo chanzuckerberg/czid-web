@@ -6,7 +6,11 @@ import {
   toPairs,
   pickBy,
   isPlainObject,
-  isUndefined
+  isUndefined,
+  flow,
+  map,
+  flatten,
+  join
 } from "lodash/fp";
 import { shortenUrl } from "~/api";
 import copy from "copy-to-clipboard";
@@ -37,8 +41,9 @@ export const getURLParamString = params => {
     (v, k) => !isPlainObject(v) && !isUndefined(v),
     params
   );
-  return toPairs(filtered)
-    .map(
+  return flow(
+    toPairs,
+    map(
       ([key, value]) =>
         isArray(value)
           ? // Convert array parameters correctly.
@@ -48,9 +53,10 @@ export const getURLParamString = params => {
               eachValue => `${key}[]=${eachValue}`
             )
           : `${key}=${value}`
-    )
-    .flat()
-    .join("&");
+    ),
+    flatten,
+    join("&")
+  )(filtered);
 };
 
 export const copyShortUrlToClipboard = async url => {
