@@ -1,8 +1,6 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
-  # TODO: (gdingle): apply selectively based on acts_as_token_authentication_handler_for
-  before_action :authenticate_user_from_token!
   before_action :authenticate_user!
   before_action :check_rack_mini_profiler
   before_action :check_browser
@@ -28,7 +26,7 @@ class ApplicationController < ActionController::Base
 
   def no_demo_user
     login_required
-    redirect_to root_path if current_user.demo_user?
+    redirect_to root_path if current_user && current_user.demo_user?
   end
 
   # Rails method for adding to logging
@@ -81,6 +79,9 @@ class ApplicationController < ActionController::Base
     # timing attacks.
     if user && Devise.secure_compare(user.authentication_token, user_token)
       sign_in user, store: false
+    # Redirect if no current user by other auth
+    elsif !current_user
+      redirect_to(new_user_session_path)
     end
   end
 
