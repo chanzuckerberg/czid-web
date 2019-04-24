@@ -21,9 +21,9 @@ class MapPlayground extends React.Component {
       let locationName = result.location.replace(/_/g, ", ");
       const match = /^([-0-9.]+),\s?([-0-9.]+)$/g.exec(locationName);
       if (match) {
-        let [lat, lon] = this.parseLatLon(match[1], match[2]);
-        if (!(lat && lon)) return;
-        locationName = `${lat}, ${lon}`;
+        let [lat, lng] = this.parseLatLng(match[1], match[2]);
+        if (!(lat && lng)) return;
+        locationName = `${lat}, ${lng}`;
         const item = {
           name: result.name,
           id: result.id
@@ -35,7 +35,7 @@ class MapPlayground extends React.Component {
         } else {
           locationsToItems[locationName] = {
             lat: lat,
-            lon: lon,
+            lng: lng,
             items: [item]
           };
         }
@@ -50,17 +50,17 @@ class MapPlayground extends React.Component {
     };
   }
 
-  parseLatLon = (lat, lon) => {
+  parseLatLng = (lat, lng) => {
     // Round the coordinates for some minimal aggregation
     lat = parseFloat(parseFloat(lat).toFixed(2));
-    lon = parseFloat(parseFloat(lon).toFixed(2));
+    lng = parseFloat(parseFloat(lng).toFixed(2));
     // Reject invalid coordinates
-    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
       // eslint-disable-next-line no-console
-      console.log(`Skipping invalid coordinates ${lat}, ${lon}`);
+      console.log(`Skipping invalid coordinates ${lat}, ${lng}`);
       return [null, null];
     } else {
-      return [lat, lon];
+      return [lat, lng];
     }
   };
 
@@ -72,7 +72,7 @@ class MapPlayground extends React.Component {
     const { viewport } = this.state;
     const [name, markerData] = marker;
     const lat = markerData.lat;
-    const lon = markerData.lon;
+    const lng = markerData.lng;
     const pointCount = markerData.items.length;
     const minSize = 12;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
@@ -83,17 +83,17 @@ class MapPlayground extends React.Component {
     );
 
     return (
-      <Marker key={`marker-${index}`} latitude={lat} longitude={lon}>
+      <Marker key={`marker-${index}`} latitude={lat} longitude={lng}>
         <CircleMarker
           size={markerSize}
           onMouseOver={() =>
-            this.handleMarkerMouseOver({ lat, lon, name, pointCount })
+            this.handleMarkerMouseOver({ lat, lng, name, pointCount })
           }
           onMouseOut={this.handleMarkerMouseOut}
           onClick={() =>
             this.openPopup({
               lat,
-              lon,
+              lng,
               name,
               index,
               items: markerData.items
@@ -111,7 +111,7 @@ class MapPlayground extends React.Component {
         anchor="top-left"
         tipSize={0}
         latitude={hoverInfo.lat}
-        longitude={hoverInfo.lon}
+        longitude={hoverInfo.lng}
         closeButton={false}
         offsetLeft={15}
         offsetTop={15}
@@ -150,7 +150,7 @@ class MapPlayground extends React.Component {
         anchor="top-left"
         tipSize={0}
         latitude={popupInfo.lat}
-        longitude={popupInfo.lon}
+        longitude={popupInfo.lng}
         offsetLeft={15}
         offsetTop={15}
         onClose={() => this.closePopup(popupInfo)}
