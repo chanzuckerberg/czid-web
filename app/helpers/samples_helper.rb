@@ -574,7 +574,7 @@ module SamplesHelper
         .distinct(:id)
         .joins(:pipeline_runs, pipeline_runs: :taxon_counts)
         .where(pipeline_runs: { id: PipelineRun.joins(:sample).where(sample: samples, job_status: "CHECKED").group(:sample_id).select("MAX(`pipeline_runs`.id) AS id") })
-        .where(taxon_counts: {tax_id: taxid, count_type: ["NT", "NR"]})
+        .where(taxon_counts: { tax_id: taxid, count_type: ["NT", "NR"] })
         .where("`taxon_counts`.count > 0"))
   end
 

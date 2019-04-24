@@ -72,13 +72,12 @@ module ElasticsearchHelper
 
   def filter_by_samples(taxon_ids, samples)
     return samples
-      .joins(:pipeline_runs, pipeline_runs: :taxon_counts)
-      .where(pipeline_runs: { id: PipelineRun.joins(:sample).where(sample: samples, job_status: "CHECKED").group(:sample_id).select("MAX(`pipeline_runs`.id) AS id") })
-      .where(taxon_counts: {tax_id: taxid, count_type: ["NT", "NR"]})
-      .where("`taxon_counts`.count > 0")
-      .distinct(taxon_counts: :tax_id)
-      .pluck(:tax_id)
-
+           .joins(:pipeline_runs, pipeline_runs: :taxon_counts)
+           .where(pipeline_runs: { id: PipelineRun.joins(:sample).where(sample: samples, job_status: "CHECKED").group(:sample_id).select("MAX(`pipeline_runs`.id) AS id") })
+           .where(taxon_counts: { tax_id: taxon_ids, count_type: ["NT", "NR"] })
+           .where("`taxon_counts`.count > 0")
+           .distinct(taxon_counts: :tax_id)
+           .pluck(:tax_id)
   end
 
   def filter_by_project(taxon_ids, project_id)
