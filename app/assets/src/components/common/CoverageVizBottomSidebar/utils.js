@@ -21,7 +21,7 @@ export const getHistogramTooltipData = memoize(
               (coverageObj[0] + 1) * binSize
             )}`
           ],
-          ["Average Coverage Depth", `${coverageObj[1]}x`],
+          ["Coverage Depth", `${coverageObj[1]}x`],
           ["Coverage Breadth", formatPercent(coverageObj[2])],
           ["Overlapping Contigs", coverageObj[3]],
           ["Overlapping Reads", coverageObj[4]]
@@ -80,7 +80,7 @@ export const getGenomeVizTooltipData = memoize((accessionData, dataIndex) => {
           `${Math.round(hitObj[3])}\u2013${Math.round(hitObj[4])}`
         ],
         [averagePrefix + "Alignment Length", hitObj[5]],
-        [averagePrefix + "Percentage Matched", hitObj[6]],
+        [averagePrefix + "Percentage Matched", formatPercent(hitObj[6])],
         [averagePrefix + "# Mismatches", hitObj[7]],
         [averagePrefix + "# Gaps", hitObj[8]]
       ]

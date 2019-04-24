@@ -4,6 +4,7 @@ import CatIcon from "./CatIcon";
 import CheckmarkIcon from "./CheckmarkIcon";
 import CompareIcon from "./CompareIcon";
 import CopyIcon from "./CopyIcon";
+import CoverageIcon from "./CoverageIcon";
 import DecipherIcon from "./DecipherIcon";
 import DetectIcon from "./DetectIcon";
 import DiscoverIcon from "./DiscoverIcon";
@@ -41,6 +42,7 @@ export default {
     CatIcon,
     CompareIcon,
     CopyIcon,
+    CoverageIcon,
     DecipherIcon,
     DetectIcon,
     DiscoverIcon,

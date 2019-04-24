@@ -5,7 +5,9 @@ import cx from "classnames";
 import BasicPopup from "~/components/BasicPopup";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import BetaLabel from "~/components/ui/labels/BetaLabel";
+import CoverageIcon from "~ui/icons/CoverageIcon";
 import PropTypes from "~/components/utils/propTypes";
+import { pipelineVersionHasCoverageViz } from "~/components/utils/sample";
 
 import cs from "./hover_actions.scss";
 
@@ -24,75 +26,120 @@ class HoverActions extends React.Component {
   };
 
   // Metadata for each of the hover actions.
-  getHoverActions = () => [
-    {
-      message: "NCBI Taxonomy Browser",
-      icon: "fa-link",
-      handleClick: this.props.onNcbiActionClick,
-      enabled: this.props.ncbiEnabled,
-      disabledMessage: "NCBI Taxonomy Not Found"
-    },
-    {
-      message: "FASTA Download",
-      icon: "fa-download",
-      handleClick: this.props.onFastaActionClick,
-      enabled: this.props.fastaEnabled,
-      disabledMessage: "FASTA Download Not Available",
-      extraProps: {
-        "data-tax-level": this.props.taxLevel
+  getHoverActions = () => {
+    const { pipelineVersion } = this.props;
+    const hasCoverageViz = pipelineVersionHasCoverageViz(pipelineVersion);
+
+    return [
+      {
+        message: "NCBI Taxonomy Browser",
+        icon: "fa-link",
+        handleClick: this.props.onNcbiActionClick,
+        enabled: this.props.ncbiEnabled,
+        disabledMessage: "NCBI Taxonomy Not Found",
+        params: {
+          taxId: this.props.taxId
+        }
+      },
+      {
+        message: "FASTA Download",
+        icon: "fa-download",
+        handleClick: this.props.onFastaActionClick,
+        enabled: this.props.fastaEnabled,
+        disabledMessage: "FASTA Download Not Available",
+        params: {
+          taxId: this.props.taxId,
+          taxLevel: this.props.taxLevel
+        }
+      },
+      {
+        message: "Contigs Download",
+        icon: "fa-puzzle-piece",
+        handleClick: this.props.onContigVizClick,
+        enabled: this.props.contigVizEnabled,
+        disabledMessage: "No Contigs Available",
+        params: {
+          taxId: this.props.taxId
+        }
+      },
+      hasCoverageViz
+        ? {
+            message: "Coverage Visualization",
+            iconComponentClass: CoverageIcon,
+            handleClick: this.props.onCoverageVizClick,
+            enabled: this.props.coverageVizEnabled,
+            disabledMessage:
+              "Coverage Visualization Not Available - requires reads in NT",
+            params: {
+              taxId: this.props.taxId,
+              taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
+              taxName: this.props.taxName
+            }
+          }
+        : {
+            message: "Alignment Visualization",
+            icon: "fa-bars",
+            handleClick: this.props.onCoverageVizClick,
+            enabled: this.props.coverageVizEnabled,
+            disabledMessage:
+              "Alignment Visualization Not Available - requires reads in NT",
+            params: {
+              taxId: this.props.taxId,
+              taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
+              taxName: this.props.taxName
+            }
+          },
+      {
+        message: (
+          <div>
+            Phylogenetic Analysis <BetaLabel />
+          </div>
+        ),
+        icon: "fa-code-fork",
+        handleClick: this.handlePhyloModalOpen,
+        enabled: this.props.phyloTreeEnabled,
+        disabledMessage:
+          "Phylogenetic Analysis Not Available - requires 100+ reads in NT/NR"
       }
-    },
-    {
-      message: "Contigs Download",
-      icon: "fa-puzzle-piece",
-      handleClick: this.props.onContigVizClick,
-      enabled: this.props.contigVizEnabled,
-      disabledMessage: "No Contigs Available"
-    },
-    {
-      message: "Alignment Visualization",
-      icon: "fa-bars",
-      handleClick: this.props.onAlignmentVizClick,
-      enabled: this.props.alignmentVizEnabled,
-      disabledMessage:
-        "Alignment Visualization Not Available - requires reads in NT",
-      extraProps: {
-        "data-tax-level": this.props.taxLevel === 1 ? "species" : "genus",
-        "data-tax-name": this.props.taxName
-      }
-    },
-    {
-      message: (
-        <div>
-          Phylogenetic Analysis <BetaLabel />
-        </div>
-      ),
-      icon: "fa-code-fork",
-      handleClick: this.handlePhyloModalOpen,
-      enabled: this.props.phyloTreeEnabled,
-      disabledMessage:
-        "Phylogenetic Analysis Not Available - requires 100+ reads in NT/NR"
-    }
-  ];
+    ];
+  };
 
   // Render the hover action according to metadata.
   renderHoverAction = hoverAction => {
-    const { taxId } = this.props;
     let trigger, tooltipMessage;
+    const IconComponent = hoverAction.iconComponentClass;
     if (hoverAction.enabled) {
-      trigger = (
-        <i
-          data-tax-id={taxId}
-          onClick={hoverAction.handleClick}
-          className={cx("fa", hoverAction.icon, cs.actionDot)}
-          {...hoverAction.extraProps}
-        />
-      );
+      const onClickFn = () => hoverAction.handleClick(hoverAction.params || {});
+      if (IconComponent) {
+        trigger = (
+          <div onClick={onClickFn} className={cs.actionDot}>
+            <IconComponent className={cs.icon} />
+          </div>
+        );
+      } else {
+        trigger = (
+          <i
+            onClick={onClickFn}
+            className={cx("fa", hoverAction.icon, cs.actionDot)}
+          />
+        );
+      }
       tooltipMessage = hoverAction.message;
     } else {
-      trigger = (
-        <i className={cx("fa", hoverAction.icon, cs.actionDot, cs.disabled)} />
-      );
+      if (IconComponent) {
+        trigger = (
+          <div className={cs.actionDot}>
+            <IconComponent className={cx(cs.icon, cs.disabled)} />
+          </div>
+        );
+      } else {
+        trigger = (
+          <i
+            className={cx("fa", hoverAction.icon, cs.actionDot, cs.disabled)}
+          />
+        );
+      }
+
       tooltipMessage = hoverAction.disabledMessage;
     }
 
@@ -148,12 +195,13 @@ HoverActions.propTypes = {
   onNcbiActionClick: PropTypes.func.isRequired,
   fastaEnabled: PropTypes.bool,
   onFastaActionClick: PropTypes.func.isRequired,
-  alignmentVizEnabled: PropTypes.bool,
-  onAlignmentVizClick: PropTypes.func.isRequired,
+  coverageVizEnabled: PropTypes.bool,
+  onCoverageVizClick: PropTypes.func.isRequired,
   contigVizEnabled: PropTypes.bool,
   onContigVizClick: PropTypes.func.isRequired,
   phyloTreeEnabled: PropTypes.bool,
-  onPhyloTreeModalOpened: PropTypes.func
+  onPhyloTreeModalOpened: PropTypes.func,
+  pipelineVersion: PropTypes.string
 };
 
 export default HoverActions;

@@ -750,8 +750,8 @@ class PipelineSampleReport extends React.Component {
   };
 
   // path to NCBI
-  gotoNCBI = e => {
-    const taxId = e.target.getAttribute("data-tax-id");
+  gotoNCBI = params => {
+    const { taxId } = params;
     let num = parseInt(taxId);
     if (num < -1e8) {
       num = -num % -1e8;
@@ -762,28 +762,25 @@ class PipelineSampleReport extends React.Component {
   };
 
   // download Fasta
-  downloadFastaUrl = e => {
+  downloadFastaUrl = params => {
+    const { taxLevel, taxId } = params;
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
-    const taxLevel = e.target.getAttribute("data-tax-level");
-    const taxId = e.target.getAttribute("data-tax-id");
     location.href = `/samples/${
       this.sampleId
     }/fasta/${taxLevel}/${taxId}/NT_or_NR?pipeline_version=${pipelineVersion}`;
   };
 
   // download Contig
-  downloadContigUrl = e => {
+  downloadContigUrl = params => {
+    const { taxId } = params;
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
-    const taxId = e.target.getAttribute("data-tax-id");
     location.href = `/samples/${
       this.sampleId
     }/taxid_contigs?taxid=${taxId}&pipeline_version=${pipelineVersion}`;
   };
 
-  gotoAlignmentVizLink = e => {
-    const taxId = e.target.getAttribute("data-tax-id");
-    const taxLevel = e.target.getAttribute("data-tax-level");
-    const taxName = e.target.getAttribute("data-tax-name");
+  handleCoverageVizClick = params => {
+    const { taxId, taxLevel, taxName } = params;
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
 
     const alignmentVizUrl = `/samples/${
@@ -805,6 +802,7 @@ class PipelineSampleReport extends React.Component {
   };
 
   displayHoverActions = (taxInfo, reportDetails) => {
+    const { reportPageParams } = this.props;
     const validTaxId =
       taxInfo.tax_id < this.INVALID_CALL_BASE_TAXID || taxInfo.tax_id > 0;
     const ncbiEnabled = validTaxId;
@@ -813,7 +811,7 @@ class PipelineSampleReport extends React.Component {
     const contigVizEnabled =
       !HUMAN_TAX_IDS.includes(taxInfo.tax_id) &&
       this.state.contigTaxidList.indexOf(taxInfo.tax_id) >= 0;
-    const alignmentVizEnabled =
+    const coverageVizEnabled =
       !HUMAN_TAX_IDS.includes(taxInfo.tax_id) &&
       this.canSeeAlignViz &&
       validTaxId &&
@@ -854,10 +852,10 @@ class PipelineSampleReport extends React.Component {
           "PipelineSampleReport_taxon-fasta-link_clicked",
           analyticsContext
         )}
-        alignmentVizEnabled={alignmentVizEnabled}
-        onAlignmentVizClick={withAnalytics(
-          this.gotoAlignmentVizLink,
-          "PipelineSampleReport_alignment-vis-link_clicked",
+        coverageVizEnabled={coverageVizEnabled}
+        onCoverageVizClick={withAnalytics(
+          this.handleCoverageVizClick,
+          "PipelineSampleReport_coverage-vis-link_clicked",
           analyticsContext
         )}
         contigVizEnabled={contigVizEnabled}
@@ -873,6 +871,7 @@ class PipelineSampleReport extends React.Component {
             analyticsContext
           )
         }
+        pipelineVersion={reportPageParams.pipeline_version}
       />
     );
   };
