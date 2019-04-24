@@ -328,7 +328,6 @@ class SamplesController < ApplicationController
     # TODO: move into a search_controller or into separate controllers/models
     categories = params[:categories]
     domain = params[:domain]
-    project = params[:projectId]
 
     # Generate structure required by CategorySearchBox
     # Not permission-dependent
