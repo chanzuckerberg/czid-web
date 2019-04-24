@@ -24,7 +24,8 @@ class ProjectsController < ApplicationController
   # Required for token auth for CLI actions
   skip_before_action :verify_authenticity_token, only: [:index, :create]
   before_action :authenticate_user!, except: [:index, :create]
-  acts_as_token_authentication_handler_for User, only: [:index, :create], fallback: :devise
+  # TODO: (gdingle): replace me
+  # acts_as_token_authentication_handler_for User, only: [:index, :create], fallback: :devise
   current_power do
     Power.new(current_user)
   end
