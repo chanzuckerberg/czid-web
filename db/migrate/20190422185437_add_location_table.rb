@@ -11,7 +11,7 @@ class AddLocationTable < ActiveRecord::Migration[5.1]
       t.integer :osm_id, comment: "OpenStreetMap ID for traceability. May change at any time."
       t.integer :locationiq_id, comment: "Data provider API ID for traceability."
 
-      # Recommended settings for lat/lon
+      # Recommended settings for lat/lng
       t.decimal :lat, precision: 10, scale: 6, comment: "The latitude of this location if available"
       t.decimal :lng, precision: 10, scale: 6, comment: "The longitude of this location if available"
 
