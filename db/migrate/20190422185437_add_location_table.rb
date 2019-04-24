@@ -20,7 +20,7 @@ class AddLocationTable < ActiveRecord::Migration[5.1]
 
     # Add indexes
     add_index :locations, :name, comment: "Index for lookup by location name"
-    add_index :locations, :level_name, comment: "Index for lookup by level of specificity"
+    add_index :locations, :geo_level, comment: "Index for lookup by level of specificity"
     add_index :locations, [:country_name, :state_name, :subdivision_name, :city_name], name: "index_locations_levels", comment: "Index for lookup within regions. Composite works for any left subset of columns."
   end
 
