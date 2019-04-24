@@ -67,6 +67,24 @@ class ApplicationController < ActionController::Base
 
   private
 
+  # Modified from https://gist.github.com/josevalim/fb706b1e933ef01e4fb6
+  def authenticate_user_from_token!
+    user_email = request.headers['X-User-Email'] || params[:user_email]
+    user_token = request.headers['X-User-Token'] || params[:user_token]
+
+    user = user_email && User.find_by(email: user_email)
+
+    # Notice how we use Devise.secure_compare to compare the token
+    # in the database with the token given in the params, mitigating
+    # timing attacks.
+    if user && Devise.secure_compare(user.authentication_token, user_token)
+      sign_in user, store: false
+    # Redirect if no current user by other auth
+    elsif !current_user
+      redirect_to(new_user_session_path)
+    end
+  end
+
   def check_browser
     browser = UserAgent.parse(request.user_agent).browser
     @browser_info = {
