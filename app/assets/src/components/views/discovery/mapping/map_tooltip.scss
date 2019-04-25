@@ -14,7 +14,7 @@
     border: $tooltip-border-width solid $tooltip-border-color;
     border-radius: 5px;
     border-bottom: none;
-    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);
 
     // Make a CSS tip triangle https://css-tricks.com/snippets/css/css-triangle/
     &:after,
