@@ -6,15 +6,7 @@ import cs from "./map_tooltip.scss";
 
 class MapTooltip extends React.Component {
   render() {
-    const {
-      lat,
-      lng,
-      title,
-      body,
-      onTitleClick,
-      onMouseEnter,
-      onMouseLeave
-    } = this.props;
+    const { lat, lng, title, body, onMouseEnter, onMouseLeave } = this.props;
 
     return (
       <Popup
@@ -31,8 +23,8 @@ class MapTooltip extends React.Component {
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
         >
-          <div>{title}</div>
-          <div>{body}</div>
+          <div className={cs.title}>{title}</div>
+          <div className={cs.body}>{body}</div>
         </div>
       </Popup>
     );
@@ -44,7 +36,6 @@ MapTooltip.propTypes = {
   lng: PropTypes.number.isRequired,
   title: PropTypes.string,
   body: PropTypes.string,
-  onTitleClick: PropTypes.func,
   onMouseEnter: PropTypes.func,
   onMouseLeave: PropTypes.func
 };

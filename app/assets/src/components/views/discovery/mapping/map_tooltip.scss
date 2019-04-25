@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .mapTooltip {
   z-index: 1;
@@ -11,12 +12,9 @@
 
     padding: 0;
     border: $tooltip-border-width solid $tooltip-border-color;
+    border-radius: 5px;
     border-bottom: none;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-
-    .content {
-      padding: 10px;
-    }
+    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
 
     // Make a CSS tip triangle https://css-tricks.com/snippets/css/css-triangle/
     &:after,
@@ -40,6 +38,18 @@
       border-top-color: $tooltip-border-color;
       border-width: $tooltip-tip-size + $tooltip-border-width;
       margin-left: -($tooltip-tip-size + $tooltip-border-width);
+    }
+
+    .content {
+      padding: 15px;
+
+      .title {
+        @include font-header-s;
+      }
+
+      .body {
+        @include font-body-s;
+      }
     }
   }
 }

@@ -1,13 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Marker } from "react-map-gl";
-import { get, concat, reject } from "lodash/fp";
+import { get } from "lodash/fp";
 
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
-import { DataTooltip } from "~ui/containers";
 
-import cs from "./map_playground.scss";
 import MapTooltip from "./MapTooltip";
 
 class MapPlayground extends React.Component {
@@ -46,8 +44,8 @@ class MapPlayground extends React.Component {
     this.state = {
       locationsToItems: locationsToItems,
       viewport: {},
-      hoverTooltip: null,
-      hoverTooltipShouldClose: false
+      tooltip: null,
+      tooltipShouldClose: false
     };
   }
 
@@ -97,40 +95,46 @@ class MapPlayground extends React.Component {
   };
 
   handleMarkerMouseEnter = hoverInfo => {
-    const hoverTooltip = (
+    const title = `${hoverInfo.pointCount} Sample${
+      hoverInfo.pointCount > 1 ? "s" : ""
+    }`;
+    const tooltip = (
       <MapTooltip
         lat={hoverInfo.lat}
         lng={hoverInfo.lng}
-        title={`${hoverInfo.pointCount} Samples`}
+        title={title}
         body={hoverInfo.name}
         onMouseEnter={this.handleTooltipMouseEnter}
         onMouseLeave={this.handleMarkerMouseLeave}
       />
     );
-    this.setState({ hoverTooltip, hoverTooltipShouldClose: false });
+    this.setState({ tooltip, tooltipShouldClose: false });
   };
 
   handleMarkerMouseLeave = () => {
-    this.setState({ hoverTooltipShouldClose: true });
+    // Flag the tooltip to close after a timeout, which could be unflagged by another event (entering a marker or tooltip).
+    this.setState({ tooltipShouldClose: true });
+
+    const delayTimeMs = 2000;
     setTimeout(() => {
-      const { hoverTooltipShouldClose } = this.state;
-      hoverTooltipShouldClose && this.setState({ hoverTooltip: null });
-    }, 2000);
+      const { tooltipShouldClose } = this.state;
+      tooltipShouldClose && this.setState({ tooltip: null });
+    }, delayTimeMs);
   };
 
   handleTooltipMouseEnter = () => {
-    this.setState({ hoverTooltipShouldClose: false });
+    this.setState({ tooltipShouldClose: false });
   };
 
   render() {
     const { mapTilerKey } = this.props;
-    const { locationsToItems, hoverTooltip } = this.state;
+    const { locationsToItems, tooltip } = this.state;
 
     return (
       <BaseMap
         mapTilerKey={mapTilerKey}
         updateViewport={this.updateViewport}
-        hoverTooltip={hoverTooltip}
+        tooltip={tooltip}
         markers={Object.entries(locationsToItems).map(this.renderMarker)}
       />
     );
