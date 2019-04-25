@@ -73,6 +73,8 @@
 
   .dataContainer {
     flex: 1 0 50px;
+    display: flex;
+    flex-direction: column;
 
     &:not(:only-child) {
       flex: 0 0 50px;
