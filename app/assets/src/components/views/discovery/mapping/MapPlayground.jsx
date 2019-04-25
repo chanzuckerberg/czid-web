@@ -5,8 +5,7 @@ import { get } from "lodash/fp";
 
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
-
-import MapTooltip from "./MapTooltip";
+import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
 
 class MapPlayground extends React.Component {
   constructor(props) {
