@@ -4,7 +4,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 
-import NotificationComponent from "~ui/containers/NotificationComponent";
+import Notification from "~ui/notifications/Notification";
 import cs from "./list_notification.scss";
 import Accordion from "~/components/layout/Accordion";
 
@@ -19,7 +19,7 @@ class ListNotification extends React.Component {
       listItemName
     } = this.props;
     return (
-      <NotificationComponent
+      <Notification
         type={type}
         onClose={onClose}
         className={cx(className, cs.listNotification, cs[type])}
@@ -43,7 +43,7 @@ class ListNotification extends React.Component {
             ))}
           </div>
         </Accordion>
-      </NotificationComponent>
+      </Notification>
     );
   }
 }

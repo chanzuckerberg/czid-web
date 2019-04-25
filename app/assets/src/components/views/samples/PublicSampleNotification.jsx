@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { minBy, map } from "lodash/fp";
 import moment from "moment";
 import cs from "./public_sample_notification.scss";
-import ListNotification from "~ui/containers/ListNotification";
+import ListNotification from "~ui/notifications/ListNotification";
 
 class PublicSampleNotification extends React.Component {
   render() {

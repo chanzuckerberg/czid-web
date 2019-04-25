@@ -5,12 +5,12 @@ import PropTypes from "prop-types";
 
 import Wizard from "~ui/containers/Wizard";
 import Modal from "~ui/containers/Modal";
-import NotificationComponent from "~ui/containers/NotificationComponent";
+import Notification from "~ui/notifications/Notification";
 import { getSamplesV1 } from "~/api";
 import { uploadMetadataForProject } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import { showNotification } from "~/components/views/samples/notifications";
-import ListNotification from "~ui/containers/ListNotification";
+import { showToast } from "~/components/utils/toast";
+import ListNotification from "~ui/notifications/ListNotification";
 
 import ReviewPage from "./ReviewPage";
 import UploadPage from "./UploadPage";
@@ -53,7 +53,7 @@ class MetadataUploadModal extends React.Component {
     );
 
     if (response.errors && response.errors.length > 0) {
-      showNotification(({ closeToast }) => (
+      showToast(({ closeToast }) => (
         <ListNotification
           className={cs.publicSampleNotification}
           onClose={closeToast}
@@ -70,11 +70,11 @@ class MetadataUploadModal extends React.Component {
         errors: response.errors.length
       });
     } else {
-      showNotification(
+      showToast(
         ({ closeToast }) => (
-          <NotificationComponent type="success" onClose={closeToast}>
+          <Notification type="success" onClose={closeToast}>
             Metadata was successfully uploaded.
-          </NotificationComponent>
+          </Notification>
         ),
         {
           autoClose: 3000

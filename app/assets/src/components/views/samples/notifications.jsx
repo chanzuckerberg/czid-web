@@ -1,19 +1,9 @@
 import React from "react";
 import PublicSampleNotification from "./PublicSampleNotification";
-import { toast } from "react-toastify";
-
-const showNotification = (notificationComponent, params = {}) => {
-  toast(notificationComponent, {
-    closeButton: false,
-    closeOnClick: false,
-    draggable: false,
-    hideProgressBar: true,
-    ...params
-  });
-};
+import { showToast } from "~/components/utils/toast";
 
 const publicSampleNotification = (samples, projectName, onClose) => {
-  showNotification(
+  showToast(
     ({ closeToast }) => (
       <PublicSampleNotification
         samples={samples}
@@ -56,8 +46,4 @@ const publicSampleNotificationsByProject = samples => {
   }
 };
 
-export {
-  publicSampleNotification,
-  publicSampleNotificationsByProject,
-  showNotification
-};
+export { publicSampleNotification, publicSampleNotificationsByProject };
