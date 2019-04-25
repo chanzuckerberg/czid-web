@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .minContigSizeFilter {
   &:global(.active) {
@@ -25,5 +26,11 @@
     margin-right: 3px;
     font-size: 13px;
     letter-spacing: 0.4px;
+  }
+
+  .error {
+    @include font-body-xxs;
+    color: $error;
+    margin-top: 5px;
   }
 }

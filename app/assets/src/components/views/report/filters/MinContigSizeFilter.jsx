@@ -11,6 +11,7 @@ const MIN_CONTIG_SIZE_LOWER_BOUND = 4;
 class MinContigSizeFilter extends React.Component {
   state = {
     value: this.props.value,
+    error: "",
     previousValue: this.props.value
   };
 
@@ -33,9 +34,13 @@ class MinContigSizeFilter extends React.Component {
     if (isNaN(newValue) || newValue < MIN_CONTIG_SIZE_LOWER_BOUND) {
       // Reset back to the previous value.
       this.setState({
-        value: this.state.previousValue
+        value: this.state.previousValue,
+        error: "Size must be at least 4."
       });
     } else {
+      this.setState({
+        error: ""
+      });
       if (this.props.onChange) {
         this.props.onChange(newValue);
       }
@@ -61,6 +66,7 @@ class MinContigSizeFilter extends React.Component {
           type="number"
           className={cs.input}
         />
+        {this.state.error && <div className={cs.error}>{this.state.error}</div>}
       </div>
     );
   };
