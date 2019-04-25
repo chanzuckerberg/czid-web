@@ -117,8 +117,8 @@ class MapPlayground extends React.Component {
         offsetTop={-15}
       >
         <div
-          onMouseOver={() => console.log("hello 5:27pm")}
-          onMouseEnter={() => console.log("hello 5:27pm")}
+          onMouseEnter={this.handleTooltipMouseEnter}
+          onMouseLeave={this.handleMarkerMouseLeave}
         >
           {"Hello I am div"}
         </div>
@@ -126,7 +126,7 @@ class MapPlayground extends React.Component {
         {/*data={[*/}
         {/*{ name: hoverInfo.name, data: [["Samples", hoverInfo.pointCount]] }*/}
         {/*]}*/}
-        {/*onMouseEnter={this.handleTooltipMouseEnter}*/}
+        {/*onMouseEnter={() => console.log("Hello I am data tooltip")}*/}
         {/*/>*/}
       </MapPopup>
     );

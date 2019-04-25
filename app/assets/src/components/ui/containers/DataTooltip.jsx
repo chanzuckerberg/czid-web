@@ -45,6 +45,7 @@ const DataTooltip = ({ data, subtitle, title, singleColumn, onMouseEnter }) => {
         console.log("hi");
         onMouseEnter();
       }}
+      onMouseEnter={() => console.log("Hello I am inside the component")}
       onClick={() => console.log("clicked 5:22pm")}
     >
       {title && <div className={cs.dataTooltipTitle}>{title}</div>}
