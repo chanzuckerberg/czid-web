@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import AlertIcon from "~ui/icons/AlertIcon";
+import CheckmarkIcon from "~ui/icons/CheckmarkIcon";
 import cs from "./notification_component.scss";
 import cx from "classnames";
 
@@ -10,6 +11,8 @@ class NotificationComponent extends React.Component {
       case "warn":
       case "error":
         return <AlertIcon />;
+      case "success":
+        return <CheckmarkIcon className={cs.successIcon} />;
       default:
         break;
     }

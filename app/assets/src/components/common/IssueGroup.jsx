@@ -18,6 +18,7 @@ class IssueGroup extends React.Component {
     return (
       <Accordion
         className={cx(cs.issueGroup, cs[this.props.type], this.props.className)}
+        bottomContentPadding
         header={
           <div className={cs.header}>
             <AlertIcon className={cx(cs.icon, cs[this.props.type])} />

@@ -3,6 +3,8 @@
 @import "~styles/themes/typography";
 
 .metadataSection {
+  border-bottom: 1px solid $light-grey;
+
   .title {
     @include font-header-accordion;
 

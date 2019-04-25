@@ -2,8 +2,18 @@ import React from "react";
 import PublicSampleNotification from "./PublicSampleNotification";
 import { toast } from "react-toastify";
 
+const showNotification = (notificationComponent, params = {}) => {
+  toast(notificationComponent, {
+    closeButton: false,
+    closeOnClick: false,
+    draggable: false,
+    hideProgressBar: true,
+    ...params
+  });
+};
+
 const publicSampleNotification = (samples, projectName, onClose) => {
-  toast(
+  showNotification(
     ({ closeToast }) => (
       <PublicSampleNotification
         samples={samples}
@@ -12,9 +22,7 @@ const publicSampleNotification = (samples, projectName, onClose) => {
       />
     ),
     {
-      closeButton: false,
-      closeOnClick: false,
-      onClose: onClose
+      onClose
     }
   );
 };
@@ -48,4 +56,8 @@ const publicSampleNotificationsByProject = samples => {
   }
 };
 
-export { publicSampleNotification, publicSampleNotificationsByProject };
+export {
+  publicSampleNotification,
+  publicSampleNotificationsByProject,
+  showNotification
+};

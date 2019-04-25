@@ -14,7 +14,14 @@ class Accordion extends React.Component {
   };
 
   render() {
-    const { header, children, toggleable, className } = this.props;
+    const {
+      header,
+      children,
+      toggleable,
+      className,
+      iconClassName,
+      bottomContentPadding
+    } = this.props;
 
     const open = this.state.wasToggled ? this.state.open : this.props.open;
 
@@ -32,13 +39,20 @@ class Accordion extends React.Component {
                 className={cx(
                   "fa",
                   open ? "fa-angle-up" : "fa-angle-down",
-                  cs.toggleIcon
+                  cs.toggleIcon,
+                  iconClassName
                 )}
               />
             </div>
           )}
         </div>
-        {(open || !toggleable) && <div className={cs.content}>{children}</div>}
+        {(open || !toggleable) && (
+          <div
+            className={cx(cs.content, bottomContentPadding && cs.bottomPadding)}
+          >
+            {children}
+          </div>
+        )}
       </div>
     );
   }
@@ -46,10 +60,13 @@ class Accordion extends React.Component {
 
 Accordion.propTypes = {
   className: PropTypes.string,
+  iconClassName: PropTypes.string,
   toggleable: PropTypes.bool,
   // Accordion can be controlled or non-controlled.
   onToggle: PropTypes.func,
   open: PropTypes.bool,
+  // Useful for separating the accordion content from the elements below it.
+  bottomContentPadding: PropTypes.bool,
   header: PropTypes.node,
   children: PropTypes.node
 };

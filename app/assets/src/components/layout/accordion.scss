@@ -12,22 +12,20 @@
     flex: 1 1 0;
     min-width: 0;
   }
+}
 
-  .toggleIcon {
-    padding: 0 10px;
-    font-size: 22px;
-    color: $medium-grey;
+.toggleIcon {
+  padding: 0 10px;
+  font-size: 22px;
+  color: $medium-grey;
 
-    &:hover {
-      color: $black;
-    }
+  &:hover {
+    color: $black;
   }
 }
 
 .content {
-  margin-bottom: 20px;
-}
-
-.accordion {
-  border-bottom: 1px solid $light-grey;
+  &.bottomPadding {
+    margin-bottom: 20px;
+  }
 }

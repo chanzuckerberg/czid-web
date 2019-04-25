@@ -5,9 +5,12 @@ import PropTypes from "prop-types";
 
 import Wizard from "~ui/containers/Wizard";
 import Modal from "~ui/containers/Modal";
+import NotificationComponent from "~ui/containers/NotificationComponent";
 import { getSamplesV1 } from "~/api";
 import { uploadMetadataForProject } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { showNotification } from "~/components/views/samples/notifications";
+import ListNotification from "~ui/containers/ListNotification";
 
 import ReviewPage from "./ReviewPage";
 import UploadPage from "./UploadPage";
@@ -38,19 +41,51 @@ class MetadataUploadModal extends React.Component {
     });
   };
 
-  handleComplete = () => {
-    uploadMetadataForProject(
+  handleComplete = async () => {
+    this.props.onClose();
+
+    const response = await uploadMetadataForProject(
       this.props.project.id,
       flow(
         keyBy(row => row.sample_name || row["Sample Name"]),
         mapValues(omit(["sample_name", "Sample Name"]))
       )(this.state.metadata.rows)
     );
-    this.props.onClose();
-    logAnalyticsEvent("MetadataUploadModal_modal_completed", {
-      projectId: this.props.project.id,
-      projectSamples: this.state.projectSamples.length
-    });
+
+    if (response.errors && response.errors.length > 0) {
+      showNotification(({ closeToast }) => (
+        <ListNotification
+          className={cs.publicSampleNotification}
+          onClose={closeToast}
+          type="error"
+          label="Your metadata upload failed with the following errors."
+          listItemName="error"
+          listItems={response.errors}
+        />
+      ));
+
+      logAnalyticsEvent("MetadataUploadModal_modal_error", {
+        projectId: this.props.project.id,
+        projectSamples: this.state.projectSamples.length,
+        errors: response.errors.length
+      });
+    } else {
+      showNotification(
+        ({ closeToast }) => (
+          <NotificationComponent type="success" onClose={closeToast}>
+            Metadata was successfully uploaded.
+          </NotificationComponent>
+        ),
+        {
+          autoClose: 3000
+        }
+      );
+
+      logAnalyticsEvent("MetadataUploadModal_modal_success", {
+        projectId: this.props.project.id,
+        projectSamples: this.state.projectSamples.length
+      });
+    }
   };
 
   getPages = () => {
