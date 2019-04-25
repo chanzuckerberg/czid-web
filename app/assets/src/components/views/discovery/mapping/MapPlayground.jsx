@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Marker, Popup as MapPopup } from "react-map-gl";
+import { Marker } from "react-map-gl";
 import { get, concat, reject } from "lodash/fp";
 
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
@@ -46,7 +46,6 @@ class MapPlayground extends React.Component {
     this.state = {
       locationsToItems: locationsToItems,
       viewport: {},
-      popups: [],
       hoverTooltip: null,
       hoverTooltipShouldClose: false
     };
@@ -92,15 +91,6 @@ class MapPlayground extends React.Component {
             this.handleMarkerMouseEnter({ lat, lng, name, pointCount })
           }
           onMouseLeave={this.handleMarkerMouseLeave}
-          onClick={() =>
-            this.openPopup({
-              lat,
-              lng,
-              name,
-              index,
-              items: markerData.items
-            })
-          }
         />
       </Marker>
     );
@@ -113,13 +103,14 @@ class MapPlayground extends React.Component {
         lng={hoverInfo.lng}
         title={`${hoverInfo.pointCount} Samples`}
         body={hoverInfo.name}
+        onMouseEnter={this.handleTooltipMouseEnter}
+        onMouseLeave={this.handleMarkerMouseLeave}
       />
     );
     this.setState({ hoverTooltip, hoverTooltipShouldClose: false });
   };
 
   handleMarkerMouseLeave = () => {
-    console.log("exited");
     this.setState({ hoverTooltipShouldClose: true });
     setTimeout(() => {
       const { hoverTooltipShouldClose } = this.state;
@@ -128,50 +119,12 @@ class MapPlayground extends React.Component {
   };
 
   handleTooltipMouseEnter = () => {
-    console.log("entered");
     this.setState({ hoverTooltipShouldClose: false });
-  };
-
-  openPopup = popupInfo => {
-    this.setState({
-      popups: concat(this.state.popups, popupInfo),
-      hoverTooltip: null // Replace the open tooltip
-    });
-  };
-
-  closePopup = popupInfo => {
-    this.setState({
-      popups: reject({ index: popupInfo.index }, this.state.popups)
-    });
-  };
-
-  renderPopupBox = popupInfo => {
-    return (
-      <MapPopup
-        className={cs.dataTooltipContainer}
-        anchor="bottom"
-        tipSize={10}
-        latitude={popupInfo.lat}
-        longitude={popupInfo.lng}
-        offsetTop={-15}
-        onClose={() => this.closePopup(popupInfo)}
-      >
-        <DataTooltip
-          data={[
-            {
-              name: popupInfo.name,
-              data: popupInfo.items.map(sample => [sample.name])
-            }
-          ]}
-          singleColumn={true}
-        />
-      </MapPopup>
-    );
   };
 
   render() {
     const { mapTilerKey } = this.props;
-    const { locationsToItems, hoverTooltip, popups } = this.state;
+    const { locationsToItems, hoverTooltip } = this.state;
 
     return (
       <BaseMap
@@ -179,7 +132,6 @@ class MapPlayground extends React.Component {
         updateViewport={this.updateViewport}
         hoverTooltip={hoverTooltip}
         markers={Object.entries(locationsToItems).map(this.renderMarker)}
-        popups={popups.map(this.renderPopupBox)}
       />
     );
   }
