@@ -177,7 +177,9 @@ class DiscoveryView extends React.Component {
 
       preparedFilters.time = [
         startDate[preparedFilters.time]().format("YYYYMMDD"),
-        moment().format("YYYYMMDD")
+        moment()
+          .add(1, "days")
+          .format("YYYYMMDD")
       ];
     }
 
