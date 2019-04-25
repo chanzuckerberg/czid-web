@@ -8,6 +8,7 @@ import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import { DataTooltip } from "~ui/containers";
 
 import cs from "./map_playground.scss";
+import MapTooltip from "./MapTooltip";
 
 class MapPlayground extends React.Component {
   constructor(props) {
@@ -107,28 +108,12 @@ class MapPlayground extends React.Component {
 
   handleMarkerMouseEnter = hoverInfo => {
     const hoverTooltip = (
-      <MapPopup
-        className={cs.dataTooltipContainer}
-        anchor="bottom"
-        tipSize={10}
-        latitude={hoverInfo.lat}
-        longitude={hoverInfo.lng}
-        closeButton={false}
-        offsetTop={-15}
-      >
-        <div
-          onMouseEnter={this.handleTooltipMouseEnter}
-          onMouseLeave={this.handleMarkerMouseLeave}
-        >
-          {"Hello I am div"}
-        </div>
-        {/*<DataTooltip*/}
-        {/*data={[*/}
-        {/*{ name: hoverInfo.name, data: [["Samples", hoverInfo.pointCount]] }*/}
-        {/*]}*/}
-        {/*onMouseEnter={() => console.log("Hello I am data tooltip")}*/}
-        {/*/>*/}
-      </MapPopup>
+      <MapTooltip
+        lat={hoverInfo.lat}
+        lng={hoverInfo.lng}
+        title={`${hoverInfo.pointCount} Samples`}
+        body={hoverInfo.name}
+      />
     );
     this.setState({ hoverTooltip, hoverTooltipShouldClose: false });
   };

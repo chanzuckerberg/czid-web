@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import cs from "./data_tooltip.scss";
 
-const DataTooltip = ({ data, subtitle, title, singleColumn, onMouseEnter }) => {
+const DataTooltip = ({ data, subtitle, title, singleColumn }) => {
   // DataTooltip receives:
   // - title
   // - subtitle
@@ -37,17 +37,8 @@ const DataTooltip = ({ data, subtitle, title, singleColumn, onMouseEnter }) => {
     return data.map(section => renderSection(section.name, section.data));
   };
 
-  console.log("4:29pm");
   return (
-    <div
-      className={cs.dataTooltip}
-      onMouseOver={() => {
-        console.log("hi");
-        onMouseEnter();
-      }}
-      onMouseEnter={() => console.log("Hello I am inside the component")}
-      onClick={() => console.log("clicked 5:22pm")}
-    >
+    <div className={cs.dataTooltip}>
       {title && <div className={cs.dataTooltipTitle}>{title}</div>}
       {subtitle && <div className={cs.dataTooltipSubtitle}>{subtitle}</div>}
       <div className={cs.dataTooltipData}>{renderSections(data)}</div>
@@ -59,8 +50,7 @@ DataTooltip.propTypes = {
   data: PropTypes.array,
   subtitle: PropTypes.string,
   title: PropTypes.string,
-  singleColumn: PropTypes.bool,
-  onMouseEnter: PropTypes.func
+  singleColumn: PropTypes.bool
 };
 
 DataTooltip.defaultProps = {
