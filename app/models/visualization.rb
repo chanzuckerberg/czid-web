@@ -19,4 +19,16 @@ class Visualization < ApplicationRecord
       "unknown"
     end
   end
+
+  def self.viewable(user)
+    if user.admin?
+      all
+    else
+      where(public_access: 1).or(Visualization.where(user_id: current_user.id))
+    end
+  end
+
+  def self.public
+    where(public_access: 1)
+  end
 end

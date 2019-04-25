@@ -133,7 +133,7 @@ class Project < ApplicationRecord
                 .pluck(:project_id))
   end
 
-  def self.library_projects(user)
+  def self.my_data_projects(user)
     includes(:users).where(users: { id: user.id })
   end
 

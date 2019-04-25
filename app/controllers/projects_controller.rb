@@ -63,7 +63,7 @@ class ProjectsController < ApplicationController
 
         # Retrieve a json of projects associated with samples;
         # augment with number_of_samples, hosts, tissues.
-        projects = if ["library", "public"].include?(domain)
+        projects = if ["my_data", "public"].include?(domain)
                      current_power.projects.where(id: samples.pluck(:project_id).uniq)
                    elsif domain == "updatable"
                      current_power.updatable_projects

@@ -9,12 +9,12 @@ class VisualizationsController < ApplicationController
   def index
     domain = visualization_params[:domain]
 
-    visualizations = if domain == "library"
+    visualizations = if domain == "my_data"
                        current_user.visualizations
                      elsif domain == "public"
-                       Visualization.where(public_access: 1)
+                       Visualization.public
                      else
-                       Visualization.where("public_access = 1 OR user_id = ?", current_user.id)
+                       current_power.visualizations
                      end
     visualizations = visualizations
                      .joins(:user, :samples)

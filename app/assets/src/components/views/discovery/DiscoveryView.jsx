@@ -42,7 +42,8 @@ import {
   getDiscoveryDimensions,
   getDiscoveryStats,
   getDiscoverySamples,
-  DISCOVERY_DOMAIN_LIBRARY,
+  DISCOVERY_DOMAIN_ALL_DATA,
+  DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_PUBLIC
 } from "./discovery_api";
 import NoResultsBanner from "./NoResultsBanner";
@@ -816,8 +817,11 @@ class DiscoveryView extends React.Component {
 }
 
 DiscoveryView.propTypes = {
-  domain: PropTypes.oneOf([DISCOVERY_DOMAIN_LIBRARY, DISCOVERY_DOMAIN_PUBLIC])
-    .isRequired,
+  domain: PropTypes.oneOf([
+    DISCOVERY_DOMAIN_ALL_DATA,
+    DISCOVERY_DOMAIN_MY_DATA,
+    DISCOVERY_DOMAIN_PUBLIC
+  ]).isRequired,
   project: PropTypes.object,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string)
 };

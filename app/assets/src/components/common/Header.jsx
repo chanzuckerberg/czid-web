@@ -7,6 +7,11 @@ import { RequestContext } from "~/components/common/RequestContext";
 import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import LogoIcon from "~ui/icons/LogoIcon";
+import {
+  DISCOVERY_DOMAIN_MY_DATA,
+  DISCOVERY_DOMAIN_ALL_DATA,
+  DISCOVERY_DOMAIN_PUBLIC
+} from "~/components/views/discovery/discovery_api";
 import { openUrl } from "~utils/links";
 import { deleteAsync } from "~/api/core";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -32,6 +37,7 @@ class Header extends React.Component {
                 if (enabledFeatures.includes("data_discovery")) {
                   return (
                     <MainMenu
+                      adminUser={adminUser}
                       newSampleUpload={enabledFeatures.includes(
                         "new_sample_upload"
                       )}
@@ -204,23 +210,40 @@ UserMenuDropDown.propTypes = forbidExtraProps({
   userName: PropTypes.string.isRequired
 });
 
-const MainMenu = ({ newSampleUpload }) => {
+const MainMenu = ({ adminUser, newSampleUpload }) => {
   const isSelected = tab => window.location.pathname.startsWith(`/${tab}`);
 
   return (
     <div className={cs.mainMenu}>
       <a
-        className={cx(cs.item, isSelected("library") && cs.selected)}
-        href="/library"
+        className={cx(
+          cs.item,
+          isSelected(DISCOVERY_DOMAIN_MY_DATA) && cs.selected
+        )}
+        href={`/${DISCOVERY_DOMAIN_MY_DATA}`}
       >
         My Data
       </a>
       <a
-        className={cx(cs.item, isSelected("public") && cs.selected)}
-        href="/public"
+        className={cx(
+          cs.item,
+          isSelected(DISCOVERY_DOMAIN_PUBLIC) && cs.selected
+        )}
+        href={`/${DISCOVERY_DOMAIN_PUBLIC}`}
       >
         Public
       </a>
+      {adminUser && (
+        <a
+          className={cx(
+            cs.item,
+            isSelected(DISCOVERY_DOMAIN_ALL_DATA) && cs.selected
+          )}
+          href={`/${DISCOVERY_DOMAIN_ALL_DATA}`}
+        >
+          All Data
+        </a>
+      )}
       <a
         className={cx(
           cs.item,
@@ -236,6 +259,7 @@ const MainMenu = ({ newSampleUpload }) => {
 };
 
 MainMenu.propTypes = {
+  adminUser: PropTypes.bool,
   newSampleUpload: PropTypes.bool
 };
 

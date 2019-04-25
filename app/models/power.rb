@@ -38,8 +38,8 @@ class Power
     Sample.editable(@user)
   end
 
-  power :library_samples do
-    Sample.library(@user)
+  power :my_data_samples do
+    Sample.my_data(@user)
   end
 
   power :project_samples do |project|
@@ -64,5 +64,9 @@ class Power
 
   power :pipeline_runs do
     PipelineRun.viewable(@user)
+  end
+
+  power :visualizations do
+    Visualization.viewable(@user)
   end
 end
