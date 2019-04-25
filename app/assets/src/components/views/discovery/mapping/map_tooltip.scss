@@ -1,3 +1,45 @@
-.tooltip {
+@import "~styles/themes/colors";
+
+.mapTooltip {
   z-index: 1;
+
+  // Global to override some MapboxGL styling
+  :global(.mapboxgl-popup-content) {
+    $tooltip-border-width: 1px;
+    $tooltip-border-color: $light-grey;
+    $tooltip-tip-size: 8px;
+
+    padding: 0;
+    border: $tooltip-border-width solid $tooltip-border-color;
+    border-bottom: none;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+
+    .content {
+      padding: 10px;
+    }
+
+    // Make a CSS tip triangle https://css-tricks.com/snippets/css/css-triangle/
+    &:after,
+    &:before {
+      top: 100%;
+      left: 50%;
+      border: solid transparent;
+      content: " ";
+      height: 0;
+      width: 0;
+      position: absolute;
+    }
+
+    &:after {
+      border-top-color: $white;
+      border-width: $tooltip-tip-size;
+      margin-left: -$tooltip-tip-size;
+    }
+
+    &:before {
+      border-top-color: $tooltip-border-color;
+      border-width: $tooltip-tip-size + $tooltip-border-width;
+      margin-left: -($tooltip-tip-size + $tooltip-border-width);
+    }
+  }
 }

@@ -18,15 +18,19 @@ class MapTooltip extends React.Component {
 
     return (
       <Popup
-        className={cs.tooltip}
+        className={cs.mapTooltip}
         anchor="bottom"
-        tipSize={10}
+        tipSize={0}
         latitude={lat}
         longitude={lng}
         closeButton={false}
-        offsetTop={-15}
+        offsetTop={-20}
       >
-        <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+        <div
+          className={cs.content}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+        >
           <div>{title}</div>
           <div>{body}</div>
         </div>
