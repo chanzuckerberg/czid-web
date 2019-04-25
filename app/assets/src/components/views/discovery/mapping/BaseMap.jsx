@@ -30,10 +30,15 @@ class BaseMap extends React.Component {
     const { mapTilerKey, hoverTooltip, markers, popups } = this.props;
     const { viewport } = this.state;
 
-    const styleID = "6041e288-ea0e-4a64-b0f6-78172d56a657";
+    const styleID = "f0e7922a-43cf-4dc5-b598-17ae1f56d2f4";
     const styleURL = `https://api.maptiler.com/maps/${styleID}/style.json?key=${mapTilerKey}`;
+
+    const testFn = () => {
+      console.log("this is a test 5:09pm");
+    };
+
     return (
-      <div className={cs.mapContainer}>
+      <div className={cs.mapContainer} onMouseEnter={testFn}>
         <MapGL
           {...viewport}
           onViewportChange={this.updateViewport}

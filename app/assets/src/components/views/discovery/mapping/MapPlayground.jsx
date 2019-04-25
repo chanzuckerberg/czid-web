@@ -46,7 +46,8 @@ class MapPlayground extends React.Component {
       locationsToItems: locationsToItems,
       viewport: {},
       popups: [],
-      hoverTooltip: null
+      hoverTooltip: null,
+      hoverTooltipShouldClose: false
     };
   }
 
@@ -86,10 +87,10 @@ class MapPlayground extends React.Component {
       <Marker key={`marker-${index}`} latitude={lat} longitude={lng}>
         <CircleMarker
           size={markerSize}
-          onMouseOver={() =>
-            this.handleMarkerMouseOver({ lat, lng, name, pointCount })
+          onMouseEnter={() =>
+            this.handleMarkerMouseEnter({ lat, lng, name, pointCount })
           }
-          onMouseOut={this.handleMarkerMouseOut}
+          onMouseLeave={this.handleMarkerMouseLeave}
           onClick={() =>
             this.openPopup({
               lat,
@@ -104,30 +105,46 @@ class MapPlayground extends React.Component {
     );
   };
 
-  handleMarkerMouseOver = hoverInfo => {
+  handleMarkerMouseEnter = hoverInfo => {
     const hoverTooltip = (
       <MapPopup
         className={cs.dataTooltipContainer}
-        anchor="top-left"
-        tipSize={0}
+        anchor="bottom"
+        tipSize={10}
         latitude={hoverInfo.lat}
         longitude={hoverInfo.lng}
         closeButton={false}
-        offsetLeft={15}
-        offsetTop={15}
+        offsetTop={-15}
       >
-        <DataTooltip
-          data={[
-            { name: hoverInfo.name, data: [["Samples", hoverInfo.pointCount]] }
-          ]}
-        />
+        <div
+          onMouseOver={() => console.log("hello 5:27pm")}
+          onMouseEnter={() => console.log("hello 5:27pm")}
+        >
+          {"Hello I am div"}
+        </div>
+        {/*<DataTooltip*/}
+        {/*data={[*/}
+        {/*{ name: hoverInfo.name, data: [["Samples", hoverInfo.pointCount]] }*/}
+        {/*]}*/}
+        {/*onMouseEnter={this.handleTooltipMouseEnter}*/}
+        {/*/>*/}
       </MapPopup>
     );
-    this.setState({ hoverTooltip });
+    this.setState({ hoverTooltip, hoverTooltipShouldClose: false });
   };
 
-  handleMarkerMouseOut = () => {
-    this.setState({ hoverTooltip: null });
+  handleMarkerMouseLeave = () => {
+    console.log("exited");
+    this.setState({ hoverTooltipShouldClose: true });
+    setTimeout(() => {
+      const { hoverTooltipShouldClose } = this.state;
+      hoverTooltipShouldClose && this.setState({ hoverTooltip: null });
+    }, 2000);
+  };
+
+  handleTooltipMouseEnter = () => {
+    console.log("entered");
+    this.setState({ hoverTooltipShouldClose: false });
   };
 
   openPopup = popupInfo => {
@@ -147,12 +164,11 @@ class MapPlayground extends React.Component {
     return (
       <MapPopup
         className={cs.dataTooltipContainer}
-        anchor="top-left"
-        tipSize={0}
+        anchor="bottom"
+        tipSize={10}
         latitude={popupInfo.lat}
         longitude={popupInfo.lng}
-        offsetLeft={15}
-        offsetTop={15}
+        offsetTop={-15}
         onClose={() => this.closePopup(popupInfo)}
       >
         <DataTooltip
