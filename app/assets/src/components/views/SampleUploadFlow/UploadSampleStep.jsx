@@ -445,7 +445,6 @@ class UploadSampleStep extends React.Component {
     logAnalyticsEvent("UploadSampleStep_continue-button_clicked", {
       localSamples: this.state.localSamples.length,
       remoteSamples: this.state.remoteSamples.length,
-      project: this.state.selectedProject,
       currentTab: this.state.currentTab,
       ...this.getAnalyticsContext()
     });
