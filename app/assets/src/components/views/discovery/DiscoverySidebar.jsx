@@ -122,8 +122,11 @@ export default class DiscoverySidebar extends React.Component {
                 &nbsp;
               </div>
             );
-
-            const text = `${formattedFirstDate} - ${formattedLastDate};`;
+            const text = entry.interval
+              ? `${DiscoverySidebar.formatDate(
+                  entry.interval.start
+                )} - ${DiscoverySidebar.formatDate(entry.interval.end)}`
+              : `${DiscoverySidebar.formatDate(entry.value)}`;
             const tooltipMessage = (
               <span>
                 <span className={cs.boldText}>Date:</span> {text}
