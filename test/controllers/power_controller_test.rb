@@ -516,7 +516,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   end
 
   # Visualizations
-  test 'joe can see its own visualizations and not others on my data domain' do
+  test 'joe can see own visualizations and not others on my data domain' do
     sign_in(:joe)
     @joe_visualization = visualizations(:joe_visualization)
     get "/visualizations.json?domain=my_data"
