@@ -497,9 +497,9 @@ module SamplesHelper
 
   def samples_by_domain(domain)
     case domain
-    when "library"
+    when "my_data"
       # samples for projects that user owns
-      current_power.library_samples
+      current_power.my_data_samples
     when "public"
       # samples for public projects
       Sample.public_samples

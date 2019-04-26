@@ -16,7 +16,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
     @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
     @host_genome_human = host_genomes(:human)
     @user_nonadmin = users(:joe)
-    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'passwordjoe' }
+    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'password' }
   end
 
   test 'metadata upload basic' do
