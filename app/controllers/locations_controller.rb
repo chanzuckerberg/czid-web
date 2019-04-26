@@ -18,7 +18,7 @@ class LocationsController < ApplicationController
             county: c["address"]["county"] || "",
             city: c["address"]["city"] || "",
             lat: c["lat"] || "",
-            lng: c["lng"] || ""
+            lng: c["lon"] || c["lng"] || ""
           }
         end
       end
