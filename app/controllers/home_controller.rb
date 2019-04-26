@@ -30,7 +30,7 @@ class HomeController < ApplicationController
 
   def index
     if current_user.allowed_feature_list.include?("data_discovery")
-      render 'my_data'
+      redirect_to my_data_path
     else
       legacy
     end
