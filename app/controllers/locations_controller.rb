@@ -20,7 +20,7 @@ class LocationsController < ApplicationController
             # Round coordinates to enhance privacy
             lat: c["lat"] ? c["lat"].to_f.round(2) : nil,
             # LocationIQ uses 'lon'
-            lng: c["lon"] ? c["lon"].to_f.round(2) : nil
+            lng: c["lon"] || c["lng"] ? (c["lon"] || c["lng"]).to_f.round(2) : nil
           }
         end
       end

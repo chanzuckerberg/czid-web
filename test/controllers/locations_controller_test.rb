@@ -8,7 +8,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     @api_response = true, [
       {
         "lat" => 37.76,
-        "lon" => -122.45,
+        "lng" => -122.45,
         "display_name" => "University of California, San Francisco, Parnassus Avenue, Inner Sunset, San Francisco, San Francisco City and County, California, 94131, USA",
         "address" => {
           "city" => "San Francisco",
