@@ -55,7 +55,7 @@ Rails.application.routes.draw do
   get 'cli_user_instructions', to: 'samples#cli_user_instructions'
   get 'select', to: 'home#index'
   get 'home', to: 'home#index'
-  get 'home_old', to: 'home#home_old'
+  get 'home_old', to: 'home#legacy'
   get 'taxon_descriptions', to: 'home#taxon_descriptions'
   get 'public', to: 'home#public'
   get 'my_data', to: 'home#my_data'

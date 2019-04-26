@@ -45,7 +45,7 @@ class HomeController < ApplicationController
     @background_models = current_power.backgrounds
   end
 
-  def home_old
+  def legacy
     home
     render 'home'
   end
