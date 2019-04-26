@@ -365,6 +365,7 @@ class SamplesController < ApplicationController
     # Permission-dependent
     if !categories || ["sample", "location", "tissue", "taxon"].any? { |i| categories.include? i }
       constrained_samples = samples_by_domain(domain)
+      constrained_samples = filter_samples(constrained_samples, params)
       constrained_sample_ids = constrained_samples.pluck(:id)
 
     end
