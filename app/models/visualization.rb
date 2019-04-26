@@ -24,7 +24,7 @@ class Visualization < ApplicationRecord
     if user.admin?
       all
     else
-      where(public_access: 1).or(Visualization.where(user_id: current_user.id))
+      where(public_access: 1).or(Visualization.where(user_id: user.id))
     end
   end
 

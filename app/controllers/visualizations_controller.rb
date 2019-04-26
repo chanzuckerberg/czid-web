@@ -16,6 +16,7 @@ class VisualizationsController < ApplicationController
                      else
                        current_power.visualizations
                      end
+
     visualizations = visualizations
                      .joins(:user, :samples)
                      .select("DISTINCT visualizations.id AS id, users.id AS user_id, visualization_type, users.name AS user_name, visualizations.name, visualizations.updated_at") \
