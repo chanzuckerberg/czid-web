@@ -450,12 +450,12 @@ class Sample < ApplicationRecord
     if user.admin?
       all
     else
-      library(user)
+      my_data(user)
     end
   end
 
-  def self.library(user)
-    project_ids = Project.library_projects(user).pluck(:id)
+  def self.my_data(user)
+    project_ids = Project.my_data_projects(user).pluck(:id)
     where("project_id in (?)", project_ids)
   end
 

@@ -13,7 +13,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     @public_project = projects(:public_project)
     @joe_project = projects(:joe_project)
     @user_nonadmin = users(:joe)
-    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'passwordjoe' }
+    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'password' }
   end
 
   test 'basic' do

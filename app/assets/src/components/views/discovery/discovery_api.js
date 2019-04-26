@@ -8,7 +8,8 @@ import {
   getVisualizations
 } from "~/api";
 
-const DISCOVERY_DOMAIN_LIBRARY = "library";
+const DISCOVERY_DOMAIN_MY_DATA = "my_data";
+const DISCOVERY_DOMAIN_ALL_DATA = "all_data";
 const DISCOVERY_DOMAIN_PUBLIC = "public";
 
 const getDiscoverySyncData = async ({ domain, filters, projectId, search }) => {
@@ -144,7 +145,8 @@ const getDiscoverySamples = async ({
 };
 
 export {
-  DISCOVERY_DOMAIN_LIBRARY,
+  DISCOVERY_DOMAIN_MY_DATA,
+  DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
   getDiscoverySyncData,
   getDiscoveryDimensions,
