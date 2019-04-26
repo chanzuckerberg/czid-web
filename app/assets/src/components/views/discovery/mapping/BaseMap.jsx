@@ -4,6 +4,9 @@ import MapGL, { NavigationControl } from "react-map-gl";
 
 import cs from "./base_map.scss";
 
+// MapTiler map name: "2019-04-24"
+export const MAP_STYLE_ID = "f0e7922a-43cf-4dc5-b598-17ae1f56d2f4";
+
 class BaseMap extends React.Component {
   constructor(props) {
     super(props);
@@ -27,11 +30,10 @@ class BaseMap extends React.Component {
   };
 
   render() {
-    const { mapTilerKey, hoverTooltip, markers, popups } = this.props;
+    const { mapTilerKey, tooltip, markers, popups } = this.props;
     const { viewport } = this.state;
 
-    const styleID = "6041e288-ea0e-4a64-b0f6-78172d56a657";
-    const styleURL = `https://api.maptiler.com/maps/${styleID}/style.json?key=${mapTilerKey}`;
+    const styleURL = `https://api.maptiler.com/maps/${MAP_STYLE_ID}/style.json?key=${mapTilerKey}`;
     return (
       <div className={cs.mapContainer}>
         <MapGL
@@ -39,7 +41,7 @@ class BaseMap extends React.Component {
           onViewportChange={this.updateViewport}
           mapStyle={styleURL}
         >
-          {hoverTooltip}
+          {tooltip}
           {markers}
           {popups}
 
@@ -62,7 +64,7 @@ BaseMap.propTypes = {
   latitude: PropTypes.number,
   longitude: PropTypes.number,
   zoom: PropTypes.number,
-  hoverTooltip: PropTypes.node,
+  tooltip: PropTypes.node,
   markers: PropTypes.array,
   popups: PropTypes.array
 };

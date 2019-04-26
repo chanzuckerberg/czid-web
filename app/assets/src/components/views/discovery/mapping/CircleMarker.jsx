@@ -6,7 +6,7 @@ import cs from "./circle_marker.scss";
 
 class CircleMarker extends React.Component {
   render() {
-    const { size, onMouseOver, onMouseOut, onClick } = this.props;
+    const { size, onMouseEnter, onMouseLeave, onClick } = this.props;
 
     return (
       <svg
@@ -16,14 +16,13 @@ class CircleMarker extends React.Component {
         style={{ transform: `translate(${-size / 2}px, ${-size / 2}px)` }}
       >
         <circle
-          className={cx(cs.circle, onMouseOver && cs.hoverable)}
+          className={cx(cs.circle, onMouseEnter && cs.hoverable)}
           // Circle in the center of the viewBox
           cx="50%"
           cy="50%"
-          // Don't let edges get cut off of the viewBox. Adjust stroke-width in CSS.
-          r={size / 2 - 1}
-          onMouseOver={onMouseOver}
-          onMouseOut={onMouseOut}
+          r={size / 2}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
           onClick={onClick}
         />
       </svg>
@@ -33,8 +32,8 @@ class CircleMarker extends React.Component {
 
 CircleMarker.propTypes = {
   size: PropTypes.number,
-  onMouseOver: PropTypes.func,
-  onMouseOut: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
   onClick: PropTypes.func
 };
 
