@@ -1,15 +1,15 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
 
+$tooltip-border-width: 1px;
+$tooltip-border-color: $light-grey;
+$tooltip-tip-size: 8px;
+
 .mapTooltip {
   z-index: 1;
 
   // Global to override some MapboxGL styling
   :global(.mapboxgl-popup-content) {
-    $tooltip-border-width: 1px;
-    $tooltip-border-color: $light-grey;
-    $tooltip-tip-size: 8px;
-
     padding: 0;
     border: $tooltip-border-width solid $tooltip-border-color;
     border-radius: 5px;

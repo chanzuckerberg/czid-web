@@ -7,6 +7,8 @@ import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
 
+export const TOOLTIP_TIMEOUT_MS = 1000;
+
 class MapPlayground extends React.Component {
   constructor(props) {
     super(props);
@@ -113,12 +115,10 @@ class MapPlayground extends React.Component {
   handleMarkerMouseLeave = () => {
     // Flag the tooltip to close after a timeout, which could be unflagged by another event (entering a marker or tooltip).
     this.setState({ tooltipShouldClose: true });
-
-    const delayTimeMs = 2000;
     setTimeout(() => {
       const { tooltipShouldClose } = this.state;
       tooltipShouldClose && this.setState({ tooltip: null });
-    }, delayTimeMs);
+    }, TOOLTIP_TIMEOUT_MS);
   };
 
   handleTooltipMouseEnter = () => {
