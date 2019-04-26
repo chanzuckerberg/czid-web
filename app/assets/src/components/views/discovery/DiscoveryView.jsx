@@ -6,6 +6,7 @@ import {
   capitalize,
   clone,
   compact,
+  concat,
   defaults,
   escapeRegExp,
   find,
@@ -125,22 +126,18 @@ class DiscoveryView extends React.Component {
   updateBrowsingHistory = (action = "push") => {
     const { domain } = this.props;
 
-    const historyState = pick(
-      [
-        "currentTab",
-        "filters",
-        "project",
-        "projectId",
-        "showFilters",
-        "showStats"
-      ],
-      this.state
-    );
+    const urlFields = [
+      "currentTab",
+      "filters",
+      "projectId",
+      "search",
+      "showFilters",
+      "showStats"
+    ];
+    const stateFields = concat(urlFields, ["project"]);
 
-    const urlState = pick(
-      ["currentTab", "filters", "projectId", "showFilters", "showStats"],
-      this.state
-    );
+    const historyState = pick(stateFields, this.state);
+    const urlState = pick(urlFields, this.state);
 
     let urlQuery = this.urlParser.stringify(urlState);
     if (urlQuery) {
@@ -705,6 +702,7 @@ class DiscoveryView extends React.Component {
             tabs={tabs}
             onTabChange={this.handleTabChange}
             filterCount={filterCount}
+            initialSearch={search}
             onFilterToggle={this.handleFilterToggle}
             onStatsToggle={this.handleStatsToggle}
             onSearchTriggered={this.handleSearchTriggered}

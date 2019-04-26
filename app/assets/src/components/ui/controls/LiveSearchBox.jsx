@@ -18,9 +18,10 @@ class LiveSearchBox extends React.Component {
 
   handleKeyDown = keyEvent => {
     const { onEnter } = this.props;
+    const { value } = this.state;
 
     if (keyEvent.key == "Enter") {
-      onEnter(keyEvent);
+      onEnter({ current: keyEvent, value });
     }
   };
 
@@ -28,16 +29,16 @@ class LiveSearchBox extends React.Component {
     this.setState({
       isLoading: false,
       results: [],
-      value: null
+      value: ""
     });
   };
 
-  handleResultSelect(_, { result }) {
+  handleResultSelect = (currentEvent, { result }) => {
     const { onResultSelect } = this.props;
 
     this.resetComponent();
-    onResultSelect && onResultSelect({ result });
-  }
+    onResultSelect && onResultSelect({ currentEvent, result });
+  };
 
   triggerSearch = async () => {
     const { onSearchTriggered } = this.props;
@@ -76,14 +77,14 @@ class LiveSearchBox extends React.Component {
 
   render() {
     const { isLoading, value, results } = this.state;
-    const { onResultSelect } = this.props;
+
     return (
       <Search
         category
         className={cs.liveSearchBox}
         loading={isLoading}
-        onKeyDown={this.onKeyDown}
-        onResultSelect={onResultSelect}
+        onKeyDown={this.handleKeyDown}
+        onResultSelect={this.handleResultSelect}
         onSearchChange={this.handleSearchChange}
         placeholder="Search"
         results={results}
