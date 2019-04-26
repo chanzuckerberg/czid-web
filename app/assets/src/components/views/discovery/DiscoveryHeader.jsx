@@ -11,7 +11,7 @@ import LiveSearchBox from "~ui/controls/LiveSearchBox";
 import cs from "./discovery_header.scss";
 
 class DiscoveryHeader extends React.Component {
-  handleSearchResultSelected = (currentEvent, { result }) => {
+  handleSearchResultSelected = ({ currentEvent, result }) => {
     const { onSearchResultSelected } = this.props;
     // TODO(tiago): refactor search suggestions endpoint to return standard format data
     // category "Taxon": key: "taxon", value: taxid, text: title
@@ -47,10 +47,10 @@ class DiscoveryHeader extends React.Component {
       onSearchResultSelected(parsedResult, currentEvent);
   };
 
-  handleSearchEnterPressed = currentEvent => {
+  handleSearchEnterPressed = ({ value }) => {
     const { onSearchEnterPressed } = this.props;
 
-    const search = currentEvent.target.value;
+    const search = value;
     onSearchEnterPressed && onSearchEnterPressed(search);
   };
 
@@ -58,6 +58,7 @@ class DiscoveryHeader extends React.Component {
     const {
       currentTab,
       filterCount,
+      initialSearchValue,
       onFilterToggle,
       onSearchTriggered,
       onStatsToggle,
@@ -86,7 +87,7 @@ class DiscoveryHeader extends React.Component {
             onSearchTriggered={onSearchTriggered}
             onResultSelect={this.handleSearchResultSelected}
             onEnter={this.handleSearchEnterPressed}
-            initialValue=""
+            initialValue={initialSearchValue}
             placeholder="Search"
           />
         </div>
@@ -109,12 +110,22 @@ class DiscoveryHeader extends React.Component {
 }
 
 DiscoveryHeader.defaultProps = {
-  filterCount: 0
+  filterCount: 0,
+  initialSearchValue: ""
 };
 
 DiscoveryHeader.propTypes = {
   currentTab: PropTypes.string,
   filterCount: PropTypes.number,
+  initialSearchValue: PropTypes.string,
+  onFilterToggle: PropTypes.func,
+  onStatsToggle: PropTypes.func,
+  onSearchEnterPressed: PropTypes.func,
+  onSearchResultSelected: PropTypes.func,
+  onSearchTriggered: PropTypes.func,
+  onTabChange: PropTypes.func,
+  showFilters: PropTypes.bool,
+  showStats: PropTypes.bool,
   tabs: PropTypes.arrayOf(
     PropTypes.oneOfType([
       PropTypes.string.isRequired,
@@ -123,15 +134,7 @@ DiscoveryHeader.propTypes = {
         label: PropTypes.node.isRequired
       })
     ])
-  ).isRequired,
-  onFilterToggle: PropTypes.func,
-  onStatsToggle: PropTypes.func,
-  onSearchEnterPressed: PropTypes.func,
-  onSearchResultSelected: PropTypes.func,
-  onSearchTriggered: PropTypes.func,
-  onTabChange: PropTypes.func,
-  showFilters: PropTypes.bool,
-  showStats: PropTypes.bool
+  ).isRequired
 };
 
 export default DiscoveryHeader;
