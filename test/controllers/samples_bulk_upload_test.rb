@@ -13,7 +13,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
     @core_field = metadata_fields(:core_field)
     @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
     @user_nonadmin = users(:joe)
-    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'passwordjoe' }
+    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'password' }
   end
 
   test 'bulk upload basic remote' do

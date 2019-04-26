@@ -4,7 +4,7 @@ require "minitest/mock"
 class LocationsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:joe)
-    @user_params = { "user[email]" => @user.email, "user[password]" => "passwordjoe" }
+    @user_params = { "user[email]" => @user.email, "user[password]" => "password" }
     @api_response = true, [
       {
         "lat" => "37.76",

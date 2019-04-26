@@ -15,7 +15,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     @user.save
     @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
     @user_nonadmin = users(:joe)
-    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'passwordjoe' }
+    @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'password' }
   end
 
   test 'should get index' do

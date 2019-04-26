@@ -11,4 +11,9 @@ class ActiveSupport::TestCase
   def access_sample_with_background(background, sample)
     get "/samples/#{sample.id}?background_id=#{background.id}"
   end
+
+  def sign_in(user)
+    @user = users(user)
+    post user_session_path, params: { 'user[email]' => @user.email, 'user[password]' => 'password' }
+  end
 end

@@ -13,7 +13,7 @@ two:
 
 joe:
   email: joe@gmail.com
-  encrypted_password: <%= Devise::Encryptor.digest(User, "passwordjoe") %>
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
   name: User Three
 
 admin:
