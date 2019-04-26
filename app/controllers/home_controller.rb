@@ -33,7 +33,6 @@ class HomeController < ApplicationController
       render 'my_data'
     else
       legacy
-      render 'legacy'
     end
   end
 
@@ -44,6 +43,7 @@ class HomeController < ApplicationController
     @host_genomes = HostGenome.all.reject { |hg| hg.name.downcase.include?("__test__") }
     @user_is_admin = current_user.role == 1 ? 1 : 0
     @background_models = current_power.backgrounds
+    render 'legacy'
   end
 
   def taxon_descriptions
