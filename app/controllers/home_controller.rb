@@ -29,13 +29,21 @@ class HomeController < ApplicationController
   end
 
   def index
+    if current_user.allowed_feature_list.include?("data_discovery")
+      render 'my_data'
+    else
+      legacy
+    end
+  end
+
+  def legacy
     @favorite_projects = current_user.favorites
     @projects = current_power.projects
     @editable_project_ids = current_power.updatable_projects.pluck(:id)
     @host_genomes = HostGenome.all.reject { |hg| hg.name.downcase.include?("__test__") }
     @user_is_admin = current_user.role == 1 ? 1 : 0
     @background_models = current_power.backgrounds
-    render 'home'
+    render 'legacy'
   end
 
   def taxon_descriptions
