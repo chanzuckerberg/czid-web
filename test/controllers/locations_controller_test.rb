@@ -7,8 +7,8 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     @user_params = { "user[email]" => @user.email, "user[password]" => "password" }
     @api_response = true, [
       {
-        "lat" => "37.76",
-        "lng" => "-122.45",
+        "lat" => 37.76,
+        "lng" => -122.45,
         "display_name" => "University of California, San Francisco, Parnassus Avenue, Inner Sunset, San Francisco, San Francisco City and County, California, 94131, USA",
         "address" => {
           "city" => "San Francisco",
@@ -26,8 +26,8 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
         "state" => "California",
         "county" => "San Francisco City and County",
         "city" => "San Francisco",
-        "lat" => "37.76",
-        "lng" => "-122.45"
+        "lat" => 37.76,
+        "lng" => -122.45
       }
     ]
   end

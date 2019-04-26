@@ -17,8 +17,10 @@ class LocationsController < ApplicationController
             state: c["address"]["state"] || "",
             county: c["address"]["county"] || "",
             city: c["address"]["city"] || "",
-            lat: c["lat"] || "",
-            lng: c["lon"] || c["lng"] || ""
+            # Round coordinates to enhance privacy
+            lat: c["lat"] ? c["lat"].to_f.round(2) : nil,
+            # LocationIQ uses 'lon'
+            lng: c["lon"] ? c["lon"].to_f.round(2) : nil
           }
         end
       end
