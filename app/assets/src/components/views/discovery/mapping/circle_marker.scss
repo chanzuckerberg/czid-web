@@ -3,8 +3,6 @@
 .circle {
   cursor: pointer;
   fill: $primary-light;
-  stroke: $darkest-grey;
-  stroke-width: 1px;
   opacity: 0.5;
 
   &.hoverable {
