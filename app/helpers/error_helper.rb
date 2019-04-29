@@ -59,6 +59,10 @@ module ErrorHelper
   # Aggregates errors (and warnings) into groups
   class ErrorAggregator
     ERRORS = {
+      duplicate_columns: {
+        headers: ["Column #", "Column Name", "Duplicate Column #"],
+        title: ->(num_cols, _) { "#{num_cols} duplicate columns were found. Please ensure all column names are unique." }
+      },
       no_matching_sample_existing: {
         headers: ["Row #", "Sample Name"],
         title: ->(num_rows, _) { "#{num_rows} sample names do not match any samples in this project." }

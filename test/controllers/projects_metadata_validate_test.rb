@@ -232,6 +232,28 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_equal [[1, "metadata_validation_sample_human", "Human", "blood_fed"]], @response.parsed_body['issues']['errors'][0]['rows']
   end
 
+  test 'metadata validate duplicate columns throws error' do
+    post user_session_path, params: @user_params
+
+    post validate_metadata_csv_project_url(@metadata_validation_project), params: {
+      metadata: {
+        headers: ['sample_name', 'Sample Name', 'sample_type', 'Sample Type', 'Custom Field', 'Custom Field'],
+        rows: [
+          ['metadata_validation_sample_human', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar']
+        ]
+      }
+    }, as: :json
+
+    assert_equal 1, @response.parsed_body['issues']['errors'].length
+
+    # Error should throw if there are multiple columns with the same name.
+    assert @response.parsed_body['issues']['errors'][0]['isGroup']
+    assert_equal ErrorAggregator::ERRORS[:duplicate_columns][:title].call(3, nil), @response.parsed_body['issues']['errors'][0]['caption']
+    assert_equal [[1, "Sample Name", 0], [3, "Sample Type", 2], [5, "Custom Field", 4]], @response.parsed_body['issues']['errors'][0]['rows']
+
+    assert_equal 0, @response.parsed_body['issues']['warnings'].length
+  end
+
   test 'joe cannot validate new metadata against existing project in a public project' do
     post user_session_path, params: @user_nonadmin_params
 
