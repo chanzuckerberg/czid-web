@@ -44,6 +44,11 @@ class PipelineTab extends React.Component {
     this.setState({
       sectionOpen: set(section, newValue, sectionOpen)
     });
+    logAnalyticsEvent("MetadataTab_section_toggled", {
+      section: section,
+      sectionOpen: newValue,
+      sampleId: this.props.sampleId
+    });
   };
 
   renderPipelineInfoField = field => {
@@ -106,15 +111,14 @@ class PipelineTab extends React.Component {
                   className={cs.downloadLink}
                   href={option.path}
                   target={option.newPage ? "_blank" : "_self"}
-                  onClick={logAnalyticsEvent(
-                    "PipelineTab_download-link_clicked",
-                    {
+                  onClick={() =>
+                    logAnalyticsEvent("PipelineTab_download-link_clicked", {
                       newPage: option.newPage,
                       label: option.label,
                       href: option.path,
                       sampleId: this.props.sampleId
-                    }
-                  )}
+                    })
+                  }
                 >
                   {option.label}
                 </a>
