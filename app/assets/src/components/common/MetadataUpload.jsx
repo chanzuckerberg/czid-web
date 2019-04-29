@@ -14,7 +14,7 @@ import { getURLParamString } from "~/helpers/url";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
-import IssueGroup from "./IssueGroup";
+import IssueGroup from "~ui/notifications/IssueGroup";
 
 const map = _fp.map.convert({ cap: false });
 

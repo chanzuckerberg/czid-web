@@ -87,6 +87,7 @@ class MetadataSection extends React.Component {
         onToggle={onToggle}
         open={open}
         toggleable={toggleable}
+        bottomContentPadding
       >
         {children}
         {editing && (

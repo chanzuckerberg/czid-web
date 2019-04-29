@@ -28,7 +28,7 @@ import {
 import PropTypes from "~/components/utils/propTypes";
 import ProjectSelect from "~/components/common/ProjectSelect";
 import Tabs from "~/components/ui/controls/Tabs";
-import IssueGroup from "~/components/common/IssueGroup";
+import IssueGroup from "~ui/notifications/IssueGroup";
 import { getProjects, validateSampleNames, validateSampleFiles } from "~/api";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import BulkSampleUploadTable from "~ui/controls/BulkSampleUploadTable";

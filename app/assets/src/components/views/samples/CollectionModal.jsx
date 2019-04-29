@@ -9,7 +9,7 @@ import { createBackground } from "~/api";
 import { withAnalytics } from "~/api/analytics";
 import Modal from "~ui/containers/Modal";
 
-import NotificationComponent from "../../ui/containers/NotificationComponent";
+import Notification from "~ui/notifications/Notification";
 import cs from "./collection_modal.scss";
 
 class CollectionModal extends React.Component {
@@ -37,10 +37,10 @@ class CollectionModal extends React.Component {
       <div className={cs.sampleList}>
         <div className={cs.label}>Selected samples:</div>
         <div className={cs.warning}>
-          <NotificationComponent className={cs.notification} type="warn">
+          <Notification className={cs.notification} type="warn">
             A large number of samples may increase the processing time before
             your collection can be used as a background.
-          </NotificationComponent>
+          </Notification>
         </div>
         <ul className={cs.selectedSamples}>
           {samplesToDisplay.map(sample => (
@@ -133,14 +133,14 @@ class CollectionModal extends React.Component {
     return (
       <div>
         {backgroundCreationResponse.status === "ok" ? (
-          <NotificationComponent type="success">
+          <Notification type="success">
             Collection is being created and will be visible on the report page
             once statistics have been computed.
-          </NotificationComponent>
+          </Notification>
         ) : (
-          <NotificationComponent type="error">
+          <Notification type="error">
             {backgroundCreationResponse.message}
-          </NotificationComponent>
+          </Notification>
         )}
       </div>
     );

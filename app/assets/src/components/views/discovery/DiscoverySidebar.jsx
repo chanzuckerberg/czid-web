@@ -255,6 +255,8 @@ export default class DiscoverySidebar extends React.Component {
       <div className={cx(className, cs.sidebar)}>
         <div className={cs.metadataContainer}>
           <Accordion
+            className={cs.metadataSection}
+            bottomContentPadding
             key={dataKey}
             open={this.hasData()}
             header={<div className={cs.title}>Overall</div>}
@@ -306,6 +308,8 @@ export default class DiscoverySidebar extends React.Component {
         <div className={cs.metadataContainer}>
           <Accordion
             key={dataKey}
+            className={cs.metadataSection}
+            bottomContentPadding
             open={this.hasData()}
             header={<div className={cs.title}>Date created</div>}
           >
@@ -315,6 +319,8 @@ export default class DiscoverySidebar extends React.Component {
         <div className={cs.metadataContainer}>
           <Accordion
             key={dataKey}
+            className={cs.metadataSection}
+            bottomContentPadding
             open={this.hasData()}
             header={<div className={cs.title}>Metadata</div>}
           >

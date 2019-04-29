@@ -1,15 +1,18 @@
 import React from "react";
 import PropTypes from "prop-types";
 import AlertIcon from "~ui/icons/AlertIcon";
-import cs from "./notification_component.scss";
+import CheckmarkIcon from "~ui/icons/CheckmarkIcon";
+import cs from "./notification.scss";
 import cx from "classnames";
 
-class NotificationComponent extends React.Component {
+class Notification extends React.Component {
   getIcon(type) {
     switch (type) {
       case "warn":
       case "error":
         return <AlertIcon />;
+      case "success":
+        return <CheckmarkIcon className={cs.successIcon} />;
       default:
         break;
     }
@@ -39,15 +42,15 @@ class NotificationComponent extends React.Component {
   }
 }
 
-NotificationComponent.defaultProps = {
+Notification.defaultProps = {
   type: "info"
 };
 
-NotificationComponent.propTypes = {
+Notification.propTypes = {
   className: PropTypes.string,
   children: PropTypes.node,
   onClose: PropTypes.func,
   type: PropTypes.oneOf(["success", "info", "warn", "error"])
 };
 
-export default NotificationComponent;
+export default Notification;

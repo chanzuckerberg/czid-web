@@ -1,0 +1,35 @@
+@import "~styles/themes/colors";
+
+.listNotification {
+  .accordion {
+    background-color: $transparent-lightest-grey;
+    border-radius: 5px;
+    margin-top: 10px;
+
+    .title {
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 10px;
+    }
+
+    .content {
+      max-height: 300px;
+      max-width: 340px;
+      overflow: auto;
+
+      .listItem {
+        line-height: 22px;
+        padding: 10px;
+
+        &:nth-child(odd) {
+          background-color: $transparent-lightest-grey;
+        }
+      }
+    }
+  }
+
+  .accordionIcon {
+    font-size: 20px;
+  }
+}

@@ -12,15 +12,17 @@
   font-size: $font-size;
   padding: 14px 14px 14px 9px;
 
-  .content {
-  }
-
   .icon {
     flex-grow: 0;
     margin-right: 14px;
 
     svg {
       width: 20px;
+    }
+
+    .successIcon {
+      font-size: 16px;
+      color: $success;
     }
   }
 

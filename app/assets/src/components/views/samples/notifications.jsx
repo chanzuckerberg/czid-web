@@ -1,9 +1,9 @@
 import React from "react";
 import PublicSampleNotification from "./PublicSampleNotification";
-import { toast } from "react-toastify";
+import { showToast } from "~/components/utils/toast";
 
 const publicSampleNotification = (samples, projectName, onClose) => {
-  toast(
+  showToast(
     ({ closeToast }) => (
       <PublicSampleNotification
         samples={samples}
@@ -12,9 +12,7 @@ const publicSampleNotification = (samples, projectName, onClose) => {
       />
     ),
     {
-      closeButton: false,
-      closeOnClick: false,
-      onClose: onClose
+      onClose
     }
   );
 };
