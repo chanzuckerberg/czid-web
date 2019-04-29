@@ -1,8 +1,11 @@
 import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
+
 import { getTaxonDescriptions, getTaxonDistributionForBackground } from "~/api";
 import Histogram from "~/components/visualizations/Histogram";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+
 import cs from "./taxon_details_mode.scss";
 
 const COLLAPSED_HEIGHT = 120;
@@ -204,6 +207,13 @@ export default class TaxonDetailsMode extends React.Component {
 
     if (url) {
       window.open(url, "_blank", "noopener", "noreferrer");
+      logAnalyticsEvent("TaxonDetailsMode_external-link_clicked", {
+        source,
+        url,
+        taxonId: this.props.taxonId,
+        taxonName: this.props.taxonName,
+        parentTaxonId: this.props.parentTaxonId
+      });
     }
   }
 
@@ -230,7 +240,15 @@ export default class TaxonDetailsMode extends React.Component {
               this.state.taxonDescriptionTall && (
                 <div
                   className={cs.expandLink}
-                  onClick={this.expandTaxonDescription}
+                  onClick={withAnalytics(
+                    this.expandTaxonDescription,
+                    "TaxonDetailsMode_show-more-link_clicked",
+                    {
+                      taxonId: this.props.taxonId,
+                      taxonName: this.props.taxonName,
+                      parentTaxonId: this.props.parentTaxonId
+                    }
+                  )}
                 >
                   Show More
                 </div>
@@ -259,7 +277,15 @@ export default class TaxonDetailsMode extends React.Component {
               this.state.parentDescriptionTall && (
                 <div
                   className={cs.expandLink}
-                  onClick={this.expandParentDescription}
+                  onClick={withAnalytics(
+                    this.expandParentDescription,
+                    "TaxonDetailsMode_show-more-link_clicked",
+                    {
+                      taxonId: this.props.taxonId,
+                      taxonName: this.props.taxonName,
+                      parentTaxonId: this.props.parentTaxonId
+                    }
+                  )}
                 >
                   Show More
                 </div>
