@@ -97,15 +97,18 @@ class SampleDetailsMode extends React.Component {
       return;
     }
 
-    this.setState({
-      metadata: set(key, value, this.state.metadata),
-      metadataChanged: set(key, !shouldSave, this.state.metadataChanged),
-      metadataErrors: set(key, null, this.state.metadataErrors)
-    });
-
-    if (shouldSave) {
-      this._save(this.props.sampleId, key, value);
-    }
+    this.setState(
+      {
+        metadata: set(key, value, this.state.metadata),
+        metadataChanged: set(key, !shouldSave, this.state.metadataChanged),
+        metadataErrors: set(key, null, this.state.metadataErrors)
+      },
+      () => {
+        if (shouldSave) {
+          this._save(this.props.sampleId, key, value);
+        }
+      }
+    );
 
     logAnalyticsEvent("SampleDetailsMode_metadata_changed", {
       sampleId: this.props.sampleId,
@@ -123,11 +126,15 @@ class SampleDetailsMode extends React.Component {
           ? this.state.additionalInfo[key]
           : this.state.metadata[key];
 
-      this.setState({
-        metadataChanged: set(key, false, this.state.metadataChanged)
-      });
+      this.setState(
+        {
+          metadataChanged: set(key, false, this.state.metadataChanged)
+        },
+        () => {
+          this._save(this.props.sampleId, key, newValue);
+        }
+      );
 
-      this._save(this.props.sampleId, key, newValue);
       logAnalyticsEvent("SampleDetailsMode_metadata_saved", {
         sampleId: this.props.sampleId,
         key,
