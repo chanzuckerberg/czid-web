@@ -408,7 +408,7 @@ class DiscoveryView extends React.Component {
   };
 
   handleSearchSelected = ({ key, value, text }, currentEvent) => {
-    const { filters, projects } = this.state;
+    const { filters, projects, search } = this.state;
 
     const dimensions = this.getCurrentDimensions();
 
@@ -450,11 +450,18 @@ class DiscoveryView extends React.Component {
         }
       }
     }
-    if (filtersChanged) {
-      this.setState({ filters: newFilters }, () => {
-        this.updateBrowsingHistory("replace");
-        this.resetDataFromFilterChange();
-      });
+    // We will also clear the search box if we used it to select a suggestion
+    if (filtersChanged || search != null) {
+      this.setState(
+        {
+          filters: newFilters,
+          search: null
+        },
+        () => {
+          this.updateBrowsingHistory("replace");
+          this.resetDataFromFilterChange();
+        }
+      );
     }
     logAnalyticsEvent("DiscoveryView_search_selected", {
       key,

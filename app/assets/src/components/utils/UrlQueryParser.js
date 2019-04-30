@@ -21,10 +21,12 @@ class UrlQueryParser {
 
   stringify(object) {
     const convertedObject = Object.keys(object).reduce((hash, key) => {
-      if (this._types[key]) {
-        hash[key] = this.stringifyValue(object[key], this._types[key]);
-      } else {
-        hash[key] = object[key];
+      if (object[key]) {
+        if (this._types[key]) {
+          hash[key] = this.stringifyValue(object[key], this._types[key]);
+        } else {
+          hash[key] = object[key];
+        }
       }
       return hash;
     }, {});
