@@ -327,6 +327,9 @@ class SampleView extends React.Component {
             <h6 className={cs.failed}>
               {this.props.pipelineRun.error_message}
             </h6>
+            <h6 className={cs.failed}>
+              {this.props.pipelineRun.total_reads} Total Reads
+            </h6>
           </div>
         );
       }

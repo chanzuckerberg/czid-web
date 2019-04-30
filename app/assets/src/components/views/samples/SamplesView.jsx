@@ -224,6 +224,9 @@ class SamplesView extends React.Component {
               <div className={cx(cs.sampleStatus, cs[sample.status])}>
                 {sample.status}
               </div>
+              <div className={cx(cs.sampleStatus, cs[sample.status])}>
+                {sample.status}
+              </div>
             </div>
           ) : (
             <div className={cs.sampleNameAndStatus} />
