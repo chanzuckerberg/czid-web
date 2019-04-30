@@ -24,8 +24,10 @@ class User < ApplicationRecord
   has_many :phylo_trees
 
   validates :email, presence: true
-  # TODO: (gdingle): write unit test
-  validates :name, presence: true, format: { with: /\A(\w|[ -])+\z/, message: "Name must be letters or spaces" }
+  validates :name, presence: true, format: {
+    # See https://www.ascii-code.com/
+    with: /\A[- 'a-zA-ZÀ-ÖØ-öø-ÿ]+\z/, message: "Name must contain only letters, apostrophes, dashes or spaces"
+  }
   attr_accessor :email_arguments
   ROLE_ADMIN = 1
   DEMO_USER_EMAILS = ['idseq.guest@chanzuckerberg.com'].freeze
