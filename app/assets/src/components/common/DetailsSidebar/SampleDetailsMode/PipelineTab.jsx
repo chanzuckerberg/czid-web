@@ -1,10 +1,13 @@
 import React from "react";
 import { set } from "lodash/fp";
-import { PIPELINE_INFO_FIELDS } from "./constants";
-import MetadataSection from "./MetadataSection";
+
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import PropTypes from "~/components/utils/propTypes";
 import { getDownloadLinks } from "~/components/views/report/utils/download";
+import { logAnalyticsEvent } from "~/api/analytics";
+
+import { PIPELINE_INFO_FIELDS } from "./constants";
+import MetadataSection from "./MetadataSection";
 import cs from "./sample_details_mode.scss";
 
 class PipelineTab extends React.Component {
@@ -37,8 +40,14 @@ class PipelineTab extends React.Component {
   toggleSection = section => {
     const { sectionOpen } = this.state;
 
+    const newValue = !sectionOpen[section];
     this.setState({
-      sectionOpen: set(section, !sectionOpen[section], sectionOpen)
+      sectionOpen: set(section, newValue, sectionOpen)
+    });
+    logAnalyticsEvent("PipelineTab_section_toggled", {
+      section: section,
+      sectionOpen: newValue,
+      sampleId: this.props.sampleId
     });
   };
 
@@ -102,6 +111,14 @@ class PipelineTab extends React.Component {
                   className={cs.downloadLink}
                   href={option.path}
                   target={option.newPage ? "_blank" : "_self"}
+                  onClick={() =>
+                    logAnalyticsEvent("PipelineTab_download-link_clicked", {
+                      newPage: option.newPage,
+                      label: option.label,
+                      href: option.path,
+                      sampleId: this.props.sampleId
+                    })
+                  }
                 >
                   {option.label}
                 </a>

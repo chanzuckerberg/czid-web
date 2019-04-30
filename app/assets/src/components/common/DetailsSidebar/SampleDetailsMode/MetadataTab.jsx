@@ -6,6 +6,7 @@ import { set, values } from "lodash/fp";
 import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
 import MetadataInput from "~/components/common/MetadataInput";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import MetadataSection from "./MetadataSection";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
@@ -48,8 +49,9 @@ class MetadataTab extends React.Component {
 
   toggleSection = section => {
     const { sectionOpen, sectionEditing } = this.state;
+    const newValue = !sectionOpen[section.name];
     const newState = {
-      sectionOpen: set(section.name, !sectionOpen[section.name], sectionOpen)
+      sectionOpen: set(section.name, newValue, sectionOpen)
     };
 
     // If we are closing a section, stop editing it.
@@ -58,16 +60,18 @@ class MetadataTab extends React.Component {
     }
 
     this.setState(newState);
+    logAnalyticsEvent("MetadataTab_section_toggled", {
+      section: section.name,
+      sectionOpen: newValue,
+      ...this.props.additionalInfo
+    });
   };
 
   toggleSectionEdit = section => {
     const { sectionEditing, sectionOpen } = this.state;
+    const newValue = !sectionEditing[section.name];
     const newState = {
-      sectionEditing: set(
-        section.name,
-        !sectionEditing[section.name],
-        sectionEditing
-      )
+      sectionEditing: set(section.name, newValue, sectionEditing)
     };
 
     if (!sectionEditing[section.name]) {
@@ -78,6 +82,11 @@ class MetadataTab extends React.Component {
       newState.sectionOpen = set(section.name, true, sectionOpen);
     }
     this.setState(newState);
+    logAnalyticsEvent("MetadataTab_section-edit_toggled", {
+      section: section.name,
+      sectionEditing: newValue,
+      ...this.props.additionalInfo
+    });
   };
 
   renderInput = metadataType => {

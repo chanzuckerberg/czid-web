@@ -1,6 +1,7 @@
 import React from "react";
 import { some } from "lodash";
 import { set } from "lodash/fp";
+
 import PropTypes from "~/components/utils/propTypes";
 import Tabs from "~/components/ui/controls/Tabs";
 import { saveSampleName, saveSampleNotes } from "~/api";
@@ -9,11 +10,12 @@ import {
   saveSampleMetadata,
   getSampleMetadataFields
 } from "~/api/metadata";
+import { logAnalyticsEvent } from "~/api/analytics";
+import { processMetadata, processMetadataTypes } from "~utils/metadata";
 
 import MetadataTab from "./MetadataTab";
 import PipelineTab from "./PipelineTab";
 import NotesTab from "./NotesTab";
-import { processMetadata, processMetadataTypes } from "~utils/metadata";
 import { processPipelineInfo, processAdditionalInfo } from "./utils";
 import cs from "./sample_details_mode.scss";
 
@@ -34,6 +36,10 @@ class SampleDetailsMode extends React.Component {
 
   onTabChange = tab => {
     this.setState({ currentTab: tab });
+    logAnalyticsEvent("SampleDetailsMode_tab_changed", {
+      sampleId: this.props.sampleId,
+      tab
+    });
   };
 
   componentDidMount() {
@@ -91,15 +97,26 @@ class SampleDetailsMode extends React.Component {
       return;
     }
 
-    this.setState({
-      metadata: set(key, value, this.state.metadata),
-      metadataChanged: set(key, !shouldSave, this.state.metadataChanged),
-      metadataErrors: set(key, null, this.state.metadataErrors)
-    });
+    this.setState(
+      {
+        metadata: set(key, value, this.state.metadata),
+        metadataChanged: set(key, !shouldSave, this.state.metadataChanged),
+        metadataErrors: set(key, null, this.state.metadataErrors)
+      },
+      () => {
+        if (shouldSave) {
+          this._save(this.props.sampleId, key, value);
+        }
+      }
+    );
 
-    if (shouldSave) {
-      this._save(this.props.sampleId, key, value);
-    }
+    logAnalyticsEvent("SampleDetailsMode_metadata_changed", {
+      sampleId: this.props.sampleId,
+      key,
+      value,
+      shouldSave,
+      metadataErrors: Object.keys(this.state.metadataErrors).length
+    });
   };
 
   handleMetadataSave = async key => {
@@ -109,11 +126,20 @@ class SampleDetailsMode extends React.Component {
           ? this.state.additionalInfo[key]
           : this.state.metadata[key];
 
-      this.setState({
-        metadataChanged: set(key, false, this.state.metadataChanged)
-      });
+      this.setState(
+        {
+          metadataChanged: set(key, false, this.state.metadataChanged)
+        },
+        () => {
+          this._save(this.props.sampleId, key, newValue);
+        }
+      );
 
-      this._save(this.props.sampleId, key, newValue);
+      logAnalyticsEvent("SampleDetailsMode_metadata_saved", {
+        sampleId: this.props.sampleId,
+        key,
+        newValue
+      });
     }
   };
 
