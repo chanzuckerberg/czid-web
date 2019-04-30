@@ -242,7 +242,7 @@ export default class TaxonDetailsMode extends React.Component {
                   className={cs.expandLink}
                   onClick={withAnalytics(
                     this.expandTaxonDescription,
-                    "TaxonDetailsMode_show-more-link_clicked",
+                    "TaxonDetailsMode_show-more-description-link_clicked",
                     {
                       taxonId: this.props.taxonId,
                       taxonName: this.props.taxonName,
@@ -279,7 +279,7 @@ export default class TaxonDetailsMode extends React.Component {
                   className={cs.expandLink}
                   onClick={withAnalytics(
                     this.expandParentDescription,
-                    "TaxonDetailsMode_show-more-link_clicked",
+                    "TaxonDetailsMode_show-more-parent-description-link_clicked",
                     {
                       taxonId: this.props.taxonId,
                       taxonName: this.props.taxonName,

@@ -44,7 +44,7 @@ class PipelineTab extends React.Component {
     this.setState({
       sectionOpen: set(section, newValue, sectionOpen)
     });
-    logAnalyticsEvent("MetadataTab_section_toggled", {
+    logAnalyticsEvent("PipelineTab_section_toggled", {
       section: section,
       sectionOpen: newValue,
       sampleId: this.props.sampleId
