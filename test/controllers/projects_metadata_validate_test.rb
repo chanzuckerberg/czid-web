@@ -134,8 +134,8 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'sample_type', 'age', 'admission_date', 'blood_fed', 'reported_sex'],
         rows: [
-          ['metadata_validation_sample_human', 'Whole Blood', 'foobar', 'foobar', 'foobar', 'foobar'],
-          ['metadata_validation_sample_mosquito', 'Whole Blood', 'foobar', 'foobar', 'foobar', 'foobar']
+          ['metadata_validation_sample_human', 'Whole Blood', 'foobar', 'foobar', '', ''],
+          ['metadata_validation_sample_mosquito', 'Whole Blood', '', '', 'foobar', 'foobar']
         ]
       }
     }, as: :json
@@ -210,6 +210,26 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
       [3, "Custom Field 1"],
       [4, "Custom Field 2"]
     ], @response.parsed_body['issues']['warnings'][0]['rows']
+  end
+
+  test 'metadata validate invalid field for host genome throws error' do
+    post user_session_path, params: @user_params
+
+    post validate_metadata_csv_project_url(@metadata_validation_project), params: {
+      metadata: {
+        headers: ['sample_name', 'blood_fed'],
+        rows: [
+          ['metadata_validation_sample_human', 'Foobar']
+        ]
+      }
+    }, as: :json
+
+    assert_equal 1, @response.parsed_body['issues']['errors'].length
+
+    # Error should throw if user attempts to add a metadata field that isn't compatible with the host genome.
+    assert @response.parsed_body['issues']['errors'][0]['isGroup']
+    assert_equal ErrorAggregator::ERRORS[:invalid_key_for_host_genome][:title].call(1, nil), @response.parsed_body['issues']['errors'][0]['caption']
+    assert_equal [[1, "metadata_validation_sample_human", "Human", "blood_fed"]], @response.parsed_body['issues']['errors'][0]['rows']
   end
 
   test 'joe cannot validate new metadata against existing project in a public project' do
