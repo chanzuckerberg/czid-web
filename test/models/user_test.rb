@@ -15,6 +15,9 @@ class UserTest < ActiveSupport::TestCase
 
     user.name = "foo-bar"
     assert user.valid?
+
+    user.name = "foo'bar"
+    assert user.valid?
   end
 
   test "user name special chars allowed" do
