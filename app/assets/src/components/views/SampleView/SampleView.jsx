@@ -403,7 +403,6 @@ class SampleView extends React.Component {
     } = this.props;
 
     const showAMR = amr;
-    console.log("SampleView::render", project);
     return (
       <div>
         <NarrowContainer>
