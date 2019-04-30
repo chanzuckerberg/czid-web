@@ -23,7 +23,7 @@ class SamplesController < ApplicationController
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data].freeze
-  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
+  EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging_or_development, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder, :upload_heartbeat].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
@@ -33,7 +33,7 @@ class SamplesController < ApplicationController
   before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
   before_action :authenticate_user_from_token!, only: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
 
-  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
+  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging_or_development, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
   current_power do # Put this here for CLI
@@ -1104,8 +1104,8 @@ class SamplesController < ApplicationController
     end
   end
 
-  # PUT /samples/:id/resync_prod_data_to_staging
-  def resync_prod_data_to_staging
+  # PUT /samples/:id/resync_prod_data_to_staging_or_development
+  def resync_prod_data_to_staging_or_development
     if Rails.env == 'staging'
       pr_ids = @sample.pipeline_run_ids.join(",")
       unless pr_ids.empty?
@@ -1113,7 +1113,9 @@ class SamplesController < ApplicationController
           ActiveRecord::Base.connection.execute("REPLACE INTO idseq_staging.#{table_name} SELECT * FROM idseq_prod.#{table_name} WHERE pipeline_run_id IN (#{pr_ids})")
         end
       end
-      Resque.enqueue(InitiateS3ProdSyncToStaging, @sample.id)
+    end
+    if ['staging', 'development'].include?(Rails.env)
+      Resque.enqueue(InitiateS3ProdSyncToStagingOrDevelopment, @sample.id)
     end
     respond_to do |format|
       format.html { redirect_to @sample, notice: "S3 data is being synced from prod." }

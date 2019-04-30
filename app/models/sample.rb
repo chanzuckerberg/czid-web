@@ -700,11 +700,11 @@ class Sample < ApplicationRecord
     }
   end
 
-  def initiate_s3_prod_sync_to_staging
-    return unless Rails.env == 'staging'
+  def initiate_s3_prod_sync_to_staging_or_development
+    return unless ['staging', 'development'].includes?(Rails.env)
 
     from_path = "s3://idseq-samples-prod/#{sample_path}"
-    to_path = "s3://idseq-samples-staging/#{sample_path}"
+    to_path = "s3://idseq-samples-#{Rails.env}/#{sample_path}"
     Syscall.run("aws", "s3", "cp", "--recursive", from_path, to_path)
   end
 
