@@ -579,9 +579,6 @@ module SamplesHelper
   end
 
   def filter_by_search_string(samples, search_string)
-    # query by name for a Sample attribute or pathogen name in the Sample.
-    # pass in a scope of pipeline runs using current_power
-    pipeline_run_ids = current_power.pipeline_runs.top_completed_runs.pluck(:id)
-    samples.search(search_string, pipeline_run_ids)
+    samples.search(search_string)
   end
 end

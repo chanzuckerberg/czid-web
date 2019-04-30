@@ -8,6 +8,7 @@ class VisualizationsController < ApplicationController
   # GET /visualizations.json
   def index
     domain = visualization_params[:domain]
+    search = visualization_params[:search]
 
     visualizations = if domain == "my_data"
                        current_user.visualizations
@@ -24,6 +25,8 @@ class VisualizationsController < ApplicationController
                      .where.not(visualization_type: [nil, 'undefined'], name: nil)
                      .order(updated_at: :desc)
                      .includes(samples: [:project])
+                     .search(search)
+
 
     render json: visualizations.as_json(
       methods: [:project_name, :samples_count]
@@ -127,6 +130,6 @@ class VisualizationsController < ApplicationController
   private
 
   def visualization_params
-    params.permit(:domain, :type, :id, :url, data: {})
+    params.permit(:domain, :type, :id, :url, :search, data: {})
   end
 end

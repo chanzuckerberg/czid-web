@@ -55,6 +55,7 @@ class ProjectsController < ApplicationController
         domain = params[:domain]
         order_by = params[:orderBy] || :id
         order_dir = params[:orderDir] || :desc
+        search = params.delete(:search)
         # If basic, just return a few fields for the project.
         basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
 
@@ -71,6 +72,7 @@ class ProjectsController < ApplicationController
                      current_power.projects
                    end
 
+        projects = projects.search(search) if search
         projects = projects.order(Hash[order_by => order_dir])
 
         if basic
