@@ -422,6 +422,8 @@ module SamplesHelper
   # Takes an array of samples and uploads metadata for those samples.
   # metadata is a hash mapping sample name to hash of fields.
   def upload_metadata_for_samples(samples, metadata)
+    distinct_host_genomes = samples.map(&:host_genome).uniq
+
     errors = []
 
     metadata_to_save = []
@@ -436,6 +438,16 @@ module SamplesHelper
 
       fields.each do |key, value|
         next if ["Sample Name", "Host Genome", "sample_name", "host_genome"].include?(key)
+
+        status = sample.ensure_metadata_field_for_key(key)
+
+        # Reload each host genome whenever a custom field is created,
+        # so that host_genome.metadata_fields is fresh.
+        # This is necessary because we sometimes use ActiveRecord.includes on the "samples" parameter
+        # before passing it in.
+        if status == "custom"
+          distinct_host_genomes.each(&:reload)
+        end
 
         result = sample.get_metadatum_to_save(key, value)
 
