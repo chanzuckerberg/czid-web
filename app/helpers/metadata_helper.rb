@@ -4,7 +4,7 @@ module MetadataHelper
   include ErrorHelper
 
   def get_available_matching_field(sample, name)
-    available_fields = (sample.project.metadata_fields & sample.host_genome.metadata_fields)
+    available_fields = sample.project.metadata_fields
     return available_fields.find { |field| field.name == name || field.display_name == name }
   end
 
@@ -153,17 +153,12 @@ module MetadataHelper
 
     processed_samples = []
 
-    # Make a best effort to guess which custom fields will be created.
-    # This validation actually misses one non-critical edge case:
-    # If a user uploads "Blood Fed" for a Human Sample (our default Blood Fed field is only for Mosquito),
-    # our system will create a custom field for Blood Fed for that project (assigned to Human).
-    # That custom field won't be listed here, since we don't restrict the fields to host genomes here.
-    # TODO(mark): Detect this edge case and output a warning.
     if samples[0].project
       matching_fields =
         (samples[0].project.metadata_fields | MetadataField.where(is_core: 1))
         .select { |field| metadata["headers"].include?(field.name) || metadata["headers"].include?(field.display_name) }
 
+      # Add a warning for each custom field that will be created.
       metadata["headers"].each_with_index do |col, index|
         next if ["sample_name", "Sample Name", "host_genome", "Host Genome"].include?(col)
 
@@ -253,7 +248,7 @@ module MetadataHelper
           error_aggregator.add_error(:sample_not_found, [index + 1, sample.name])
         end
 
-        if val_errors[:invalid_key_for_host_genome].present?
+        if val_errors[:invalid_field_for_host_genome].present?
           error_aggregator.add_error(:invalid_key_for_host_genome, [index + 1, sample.name, sample.host_genome_name, field])
         end
 

@@ -83,6 +83,26 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
     assert_match MetadataUploadErrors.save_error('admission_date', 'foobar'), @response.parsed_body['errors'][2]
   end
 
+  # If the metadata field isn't supported by the sample's host genome, throw an error.
+  test 'metadata upload invalid key for host genome' do
+    post user_session_path, params: @user_params
+
+    assert_no_difference('Metadatum.where(sample_id: @metadata_validation_sample_human.id).length') do
+      post upload_metadata_project_url(@metadata_validation_project), params: {
+        metadata: {
+          'metadata_validation_sample_human' => {
+            'blood_fed' => 'Yes'
+          }
+        }
+      }, as: :json
+    end
+
+    assert_response :success
+
+    assert_equal 1, @response.parsed_body['errors'].length
+    assert_match MetadataUploadErrors.save_error('blood_fed', 'Yes'), @response.parsed_body['errors'][0]
+  end
+
   test 'metadata upload core and custom fields' do
     post user_session_path, params: @user_params
 
