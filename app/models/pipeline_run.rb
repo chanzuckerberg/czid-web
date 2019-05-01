@@ -402,7 +402,7 @@ class PipelineRun < ApplicationRecord
       return true
     end
 
-    if adjusted_remaining_reads.present? && adjusted_remaining_reads < 100
+    if adjusted_remaining_reads.present? && adjusted_remaining_reads < 10
       return true
     end
 
