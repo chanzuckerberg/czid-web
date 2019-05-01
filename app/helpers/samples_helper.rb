@@ -24,6 +24,7 @@ module SamplesHelper
                         overall_job_status: run_info ? run_info[:result_status_description] : '',
                         runtime_seconds: run_info ? run_info[:total_runtime] : '',
                         total_reads: pipeline_run ? pipeline_run.total_reads : '',
+                        # TODO: (gdingle): change nonhost to "reads_passed_filters"
                         nonhost_reads: pipeline_run ? pipeline_run.adjusted_remaining_reads : '',
                         nonhost_reads_percent: derived_output[:summary_stats] && derived_output[:summary_stats][:percent_remaining] ? derived_output[:summary_stats][:percent_remaining].round(3) : '',
                         total_ercc_reads: pipeline_run ? pipeline_run.total_ercc_reads : '',
@@ -86,7 +87,8 @@ module SamplesHelper
       qc_percent: compute_qc_value(job_stats_hash),
       percent_remaining: compute_percentage_reads(pr),
       unmapped_reads: unmapped_reads,
-      last_processed_at: last_processed_at }
+      last_processed_at: last_processed_at,
+      low_reads_warning: pr.nil? ? nil : pr.low_reads_warning? }
   end
 
   def get_adjusted_remaining_reads(pr)

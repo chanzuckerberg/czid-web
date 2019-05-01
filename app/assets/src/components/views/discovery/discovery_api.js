@@ -76,7 +76,11 @@ const processRawSample = sample => {
       status: get(
         "run_info.result_status_description",
         sample.details
-      ).toLowerCase()
+      ).toLowerCase(),
+      lowReadsWarning: get(
+        "derived_sample_output.summary_stats.low_reads_warning",
+        sample.details
+      )
     },
     collectionLocation: get("metadata.collection_location", sample.details),
     createdAt: sample.created_at,

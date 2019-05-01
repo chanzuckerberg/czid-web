@@ -160,7 +160,8 @@
         }
 
         &.waiting,
-        &.uploading {
+        &.uploading,
+        &.warning {
           background-color: $warning-bg;
           color: $warning;
         }

@@ -330,6 +330,12 @@ class SampleView extends React.Component {
             <h6 className={cs.failed}>
               {this.props.pipelineRun.total_reads} Total Reads
             </h6>
+            {this.props.pipelineRun.adjusted_remaining_reads && (
+              <h6 className={cs.failed}>
+                {this.props.pipelineRun.adjusted_remaining_reads} Reads Passed
+                Filters
+              </h6>
+            )}
           </div>
         );
       }

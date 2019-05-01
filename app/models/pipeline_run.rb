@@ -395,6 +395,20 @@ class PipelineRun < ApplicationRecord
     job_status == STATUS_CHECKED
   end
 
+  # This was added to warn users of input files that are very unlikely to
+  # produce any meaningful output.
+  def low_reads_warning?
+    if total_reads.present? && total_reads < 1000
+      return true
+    end
+
+    if adjusted_remaining_reads.present? && adjusted_remaining_reads < 100
+      return true
+    end
+
+    return false
+  end
+
   def db_load_input_validations
     file = Tempfile.new
     downloaded = PipelineRun.download_file_with_retries(s3_file_for("input_validations"),
