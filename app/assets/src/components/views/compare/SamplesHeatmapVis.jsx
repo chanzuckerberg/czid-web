@@ -9,6 +9,7 @@ import { DataTooltip, ContextPlaceholder } from "~ui/containers";
 import { SearchBoxList } from "~ui/controls";
 import { openUrl } from "~utils/links";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
+import { getTooltipStyle } from "~/components/utils/tooltip";
 
 import cs from "./samples_heatmap_vis.scss";
 
@@ -20,7 +21,8 @@ class SamplesHeatmapVis extends React.Component {
       addMetadataTrigger: null,
       nodeHoverInfo: null,
       columnMetadataLegend: null,
-      selectedMetadata: new Set(this.props.defaultMetadata)
+      selectedMetadata: new Set(this.props.defaultMetadata),
+      tooltipLocation: null
     };
 
     this.heatmap = null;
@@ -109,8 +111,10 @@ class SamplesHeatmapVis extends React.Component {
   handleMouseHoverMove = (_, currentEvent) => {
     if (currentEvent) {
       this.setState({
-        tooltipX: currentEvent.pageX,
-        tooltipY: currentEvent.pageY
+        tooltipLocation: {
+          left: currentEvent.pageX,
+          top: currentEvent.pageY
+        }
       });
     }
   };
@@ -279,6 +283,13 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   render() {
+    const {
+      tooltipLocation,
+      nodeHoverInfo,
+      columnMetadataLegend,
+      addMetadataTrigger
+    } = this.state;
+
     return (
       <div className={cs.samplesHeatmapVis}>
         <div
@@ -288,35 +299,34 @@ class SamplesHeatmapVis extends React.Component {
           }}
         />
 
-        {this.state.nodeHoverInfo && (
-          <div
-            className={cx(cs.tooltip, this.state.nodeHoverInfo && cs.visible)}
-            style={{
-              left: `${this.state.tooltipX + 20}px`,
-              top: `${this.state.tooltipY + 20}px`
-            }}
-          >
-            <DataTooltip data={this.state.nodeHoverInfo} />
-          </div>
-        )}
-        {this.state.columnMetadataLegend && (
-          <div
-            className={cx(
-              cs.tooltip,
-              this.state.columnMetadataLegend && cs.visible
-            )}
-            style={{
-              left: `${this.state.tooltipX + 20}px`,
-              top: `${this.state.tooltipY + 20}px`
-            }}
-          >
-            {this.renderColumnMetadataLegend(this.state.columnMetadataLegend)}
-          </div>
-        )}
-        {this.state.addMetadataTrigger && (
+        {nodeHoverInfo &&
+          tooltipLocation && (
+            <div
+              className={cx(cs.tooltip, nodeHoverInfo && cs.visible)}
+              style={getTooltipStyle(tooltipLocation, {
+                buffer: 20,
+                below: true
+              })}
+            >
+              <DataTooltip data={nodeHoverInfo} />
+            </div>
+          )}
+        {columnMetadataLegend &&
+          tooltipLocation && (
+            <div
+              className={cx(cs.tooltip, columnMetadataLegend && cs.visible)}
+              style={getTooltipStyle(tooltipLocation, {
+                buffer: 20,
+                below: true
+              })}
+            >
+              {this.renderColumnMetadataLegend(columnMetadataLegend)}
+            </div>
+          )}
+        {addMetadataTrigger && (
           <ContextPlaceholder
             closeOnOutsideClick
-            context={this.state.addMetadataTrigger}
+            context={addMetadataTrigger}
             horizontalOffset={5}
             verticalOffset={10}
             onClose={() => {

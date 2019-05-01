@@ -11,13 +11,10 @@ import DownloadIcon from "~ui/icons/DownloadIcon";
 import CopyIcon from "~ui/icons/CopyIcon";
 import { getURLParamString } from "~/helpers/url";
 import { getContigsSequencesByByteranges } from "~/api";
+import { getTooltipStyle } from "~/components/utils/tooltip";
 
 import cs from "./coverage_viz_bottom_sidebar.scss";
-import {
-  generateContigReadVizData,
-  getGenomeVizTooltipData,
-  getTooltipStyle
-} from "./utils";
+import { generateContigReadVizData, getGenomeVizTooltipData } from "./utils";
 
 const DEFAULT_CONTIG_COPY_MESSAGE = "Copy Contig Sequence to Clipboard";
 const READ_FILL_COLOR = "#A9BDFC";
