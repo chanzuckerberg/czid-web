@@ -296,7 +296,6 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     }, as: :json
 
     assert_equal 1, @response.parsed_body['issues']['errors'].length
-
     # Error should throw if user attempts to add a metadata field that isn't compatible with the host genome.
     assert @response.parsed_body['issues']['errors'][0]['isGroup']
     assert_equal ErrorAggregator::ERRORS[:invalid_key_for_host_genome][:title].call(3, nil), @response.parsed_body['issues']['errors'][0]['caption']
@@ -305,6 +304,34 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       [2, "Mosquito Sample", "Mosquito", "nucleotide_type"],
       [2, "Mosquito Sample", "Mosquito", "age"]
     ], @response.parsed_body['issues']['errors'][0]['rows']
+  end
+
+  test 'duplicate columns' do
+    post user_session_path, params: @user_params
+
+    post validate_csv_for_new_samples_metadata_url, params: {
+      metadata: {
+        headers: ['sample_name', 'Sample Name', 'host_genome', 'sample_type', 'Sample Type', 'Host Genome', 'Custom Field', 'Custom Field'],
+        rows: [
+          ['Test Sample', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar']
+        ]
+      },
+      samples: [
+        {
+          name: "Test Sample",
+          project_id: @metadata_validation_project.id
+        }
+      ]
+    }, as: :json
+
+    assert_equal 1, @response.parsed_body['issues']['errors'].length
+
+    # Error should throw if there are multiple columns with the same name.
+    assert @response.parsed_body['issues']['errors'][0]['isGroup']
+    assert_equal ErrorAggregator::ERRORS[:duplicate_columns][:title].call(4, nil), @response.parsed_body['issues']['errors'][0]['caption']
+    assert_equal [[1, "Sample Name", 0], [4, "Sample Type", 3], [5, "Host Genome", 2], [7, "Custom Field", 6]], @response.parsed_body['issues']['errors'][0]['rows']
+
+    assert_equal 0, @response.parsed_body['issues']['warnings'].length
   end
 
   test 'core and custom fields' do
