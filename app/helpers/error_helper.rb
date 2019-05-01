@@ -59,6 +59,10 @@ module ErrorHelper
   # Aggregates errors (and warnings) into groups
   class ErrorAggregator
     ERRORS = {
+      duplicate_columns: {
+        headers: ["Column #", "Column Name", "Duplicate Column #"],
+        title: ->(num_cols, _) { "#{num_cols} duplicate columns were found. Please ensure all column names are unique." }
+      },
       no_matching_sample_existing: {
         headers: ["Row #", "Sample Name"],
         title: ->(num_rows, _) { "#{num_rows} sample names do not match any samples in this project." }
@@ -107,8 +111,8 @@ module ErrorHelper
       },
       # This should theoretically never happen since we now have custom fields.
       invalid_key_for_host_genome: {
-        headers: ["Row #", "Sample Name", "Host Genome Name", "Invalid Field"],
-        title: ->(num_rows, _) { "#{num_rows} rows specify values for fields that are incompatible with the sample's host genome." }
+        headers: ["Row #", "Sample Name", "Host Genome Name", "Incompatible Field"],
+        title: ->(num_rows, _) { "#{num_rows} metadata fields are incompatible with their sample's host genome. Please check the metadata dictionary." }
       },
       value_already_exists: {
         headers: ["Row #", "Sample Name", "Field", "Old Value", "New Value"],

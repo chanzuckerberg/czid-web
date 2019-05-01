@@ -4,7 +4,7 @@ module MetadataHelper
   include ErrorHelper
 
   def get_available_matching_field(sample, name)
-    available_fields = (sample.project.metadata_fields & sample.host_genome.metadata_fields)
+    available_fields = sample.project.metadata_fields
     return available_fields.find { |field| field.name == name || field.display_name == name }
   end
 
@@ -120,6 +120,43 @@ module MetadataHelper
     end
   end
 
+  # Determines whether a set of columns has duplicates.
+  # We account for both the name and display name of existing metadata fields when determining duplicates.
+  # We add an error to the error_aggregator for each duplicate we find.
+  def metadata_csv_has_duplicate_columns(columns, existing_fields, error_aggregator)
+    column_to_index = {}
+    has_duplicate_columns = false
+
+    # Prevent duplicate columns.
+    columns.each_with_index do |col, index|
+      if column_to_index[col].present?
+        error_aggregator.add_error(:duplicate_columns, [index, col, column_to_index[col]])
+        has_duplicate_columns = true
+      end
+
+      # Account for both the name and the display_name, as both are accepted.
+      if ["sample_name", "Sample Name"].include?(col)
+        column_to_index["sample_name"] = index
+        column_to_index["Sample Name"] = index
+      elsif ["host_genome", "Host Genome"].include?(col)
+        column_to_index["host_genome"] = index
+        column_to_index["Host Genome"] = index
+      else
+        matching_field = existing_fields.select { |field| field.name == col || field.display_name == col }
+
+        if !matching_field.empty?
+          column_to_index[matching_field[0].name] = index
+          column_to_index[matching_field[0].display_name] = index
+        # If it's a custom field, just add the name.
+        else
+          column_to_index[col] = index
+        end
+      end
+    end
+
+    return has_duplicate_columns
+  end
+
   # Receives an array of samples, and validates metadata from a csv.
   def validate_metadata_csv_for_samples(samples, metadata, new_samples = false)
     # If new samples, enforce required metadata constraint, and pull the host genome from the metadata rows for validation.
@@ -138,9 +175,31 @@ module MetadataHelper
     end
 
     # Require host_genome or Host Genome column.
-    unless !extract_host_genome_from_metadata || (metadata["headers"] & ["host_genome", "Host Genome"]).present?
+    if extract_host_genome_from_metadata && (metadata["headers"] & ["host_genome", "Host Genome"]).blank?
       errors.push(MetadataValidationErrors::MISSING_HOST_GENOME_COLUMN)
       return { "errors" => errors, "warnings" => [] }
+    end
+
+    existing_fields = MetadataField.where(is_core: 1)
+
+    if samples[0].project
+      existing_fields |= samples[0].project.metadata_fields
+    end
+
+    # If there are duplicate columns, abort and return with the errors.
+    if metadata_csv_has_duplicate_columns(metadata["headers"], existing_fields, error_aggregator)
+      return { "errors" => errors + error_aggregator.error_groups, "warnings" => [] }
+    end
+
+    # Add a warning for each custom field that will be created.
+    metadata["headers"].each_with_index do |col, index|
+      next if ["sample_name", "Sample Name", "host_genome", "Host Genome"].include?(col)
+
+      matching_field = existing_fields.select { |field| field.name == col || field.display_name == col }
+
+      if matching_field.empty?
+        warning_aggregator.add_error(:custom_field_creation, [index + 1, col])
+      end
     end
 
     sample_name_index = metadata["headers"].find_index("sample_name") || metadata["headers"].find_index("Sample Name")
@@ -152,28 +211,6 @@ module MetadataHelper
     end
 
     processed_samples = []
-
-    # Make a best effort to guess which custom fields will be created.
-    # This validation actually misses one non-critical edge case:
-    # If a user uploads "Blood Fed" for a Human Sample (our default Blood Fed field is only for Mosquito),
-    # our system will create a custom field for Blood Fed for that project (assigned to Human).
-    # That custom field won't be listed here, since we don't restrict the fields to host genomes here.
-    # TODO(mark): Detect this edge case and output a warning.
-    if samples[0].project
-      matching_fields =
-        (samples[0].project.metadata_fields | MetadataField.where(is_core: 1))
-        .select { |field| metadata["headers"].include?(field.name) || metadata["headers"].include?(field.display_name) }
-
-      metadata["headers"].each_with_index do |col, index|
-        next if ["sample_name", "Sample Name", "host_genome", "Host Genome"].include?(col)
-
-        matching_field = matching_fields.select { |field| field.name == col || field.display_name == col }
-
-        if matching_field.empty?
-          warning_aggregator.add_error(:custom_field_creation, [index + 1, col])
-        end
-      end
-    end
 
     metadata["rows"].each_with_index do |row, index|
       # Deleting in Excel may leaves a row of ""s in the CSV, so ignore
@@ -253,7 +290,7 @@ module MetadataHelper
           error_aggregator.add_error(:sample_not_found, [index + 1, sample.name])
         end
 
-        if val_errors[:invalid_key_for_host_genome].present?
+        if val_errors[:invalid_field_for_host_genome].present?
           error_aggregator.add_error(:invalid_key_for_host_genome, [index + 1, sample.name, sample.host_genome_name, field])
         end
 
