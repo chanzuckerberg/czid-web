@@ -25,7 +25,7 @@ class VisualizationsController < ApplicationController
                      .where.not(visualization_type: [nil, 'undefined'], name: nil)
                      .order(updated_at: :desc)
                      .includes(samples: [:project])
-                     .search(search)
+                     .db_search(search)
 
     render json: visualizations.as_json(
       methods: [:project_name, :samples_count]

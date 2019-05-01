@@ -20,7 +20,7 @@ class Visualization < ApplicationRecord
     end
   end
 
-  def self.search(search)
+  def self.db_search(search)
     if search
       search = search.strip
       where("visualizations.name LIKE :search OR visualizations.visualization_type LIKE :search", search: "%#{search}%")

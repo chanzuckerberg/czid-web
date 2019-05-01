@@ -72,7 +72,7 @@ class ProjectsController < ApplicationController
                      current_power.projects
                    end
 
-        projects = projects.search(search) if search
+        projects = projects.db_search(search) if search
         projects = projects.order(Hash[order_by => order_dir])
 
         if basic

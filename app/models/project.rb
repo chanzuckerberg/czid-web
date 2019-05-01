@@ -104,7 +104,8 @@ class Project < ApplicationRecord
     Syscall.run("rm", "-rf", user_csv_dir)
   end
 
-  def self.search(search)
+  # search is used by ES
+  def self.db_search(search)
     if search
       search = search.strip
       where("projects.name LIKE :search", search: "%#{search}%")
