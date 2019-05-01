@@ -27,7 +27,6 @@ class VisualizationsController < ApplicationController
                      .includes(samples: [:project])
                      .search(search)
 
-
     render json: visualizations.as_json(
       methods: [:project_name, :samples_count]
     )
