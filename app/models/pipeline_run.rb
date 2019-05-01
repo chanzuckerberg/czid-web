@@ -396,13 +396,22 @@ class PipelineRun < ApplicationRecord
   end
 
   # This was added to warn users of input files that are very unlikely to
-  # produce any meaningful output.
+  # produce any meaningful output. Thresholds determined from RR025 Pool2 iseq
+  # project:
+  #
+  # 17 failures out of 96 samples
+  #
+  # 8 failed <1000 total reads
+  # 4 succeeded <1000 total reads
+  #
+  # 9 failed <4 passed filter reads
+  # 14 succeeded <4 passed filter reads
   def low_reads_warning?
     if total_reads.present? && total_reads < 1000
       return true
     end
 
-    if adjusted_remaining_reads.present? && adjusted_remaining_reads < 10
+    if adjusted_remaining_reads.present? && adjusted_remaining_reads < 4
       return true
     end
 
