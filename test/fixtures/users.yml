@@ -16,6 +16,12 @@ joe:
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
   name: User Three
 
+joe_dd:
+  email: joe_dd@gmail.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
+  name: User Three
+  allowed_features: "[\"data_discovery\"]"
+
 admin:
   email: admin@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
