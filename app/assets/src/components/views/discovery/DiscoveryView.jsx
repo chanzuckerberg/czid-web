@@ -71,7 +71,8 @@ class DiscoveryView extends React.Component {
   constructor(props) {
     super(props);
 
-    const { project } = this.props;
+    const { projectId } = this.props;
+
     this.urlParser = new UrlQueryParser({
       filters: "object",
       projectId: "number",
@@ -93,8 +94,8 @@ class DiscoveryView extends React.Component {
         loadingSamples: true,
         loadingDimensions: true,
         loadingStats: true,
-        project: project,
-        projectId: project && project.id,
+        project: null,
+        projectId: projectId,
         projectDimensions: [],
         projects: [],
         sampleDimensions: [],
@@ -827,7 +828,7 @@ DiscoveryView.propTypes = {
     DISCOVERY_DOMAIN_MY_DATA,
     DISCOVERY_DOMAIN_PUBLIC
   ]).isRequired,
-  project: PropTypes.object,
+  projectId: PropTypes.number,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string)
 };
 

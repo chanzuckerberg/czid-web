@@ -3,6 +3,7 @@
   <%= javascript_tag do %>
     react_component('DiscoveryView', {
       domain: "my_data",
+      projectId: <%= params[:project_id] || "null" %>,
       allowedFeatures: JSON.parse('<%= raw escape_json(current_user.allowed_feature_list) %>'),
     }, 'page_content');
   <% end %>
