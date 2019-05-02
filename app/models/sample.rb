@@ -573,8 +573,43 @@ class Sample < ApplicationRecord
     return metadata.find { |metadatum| metadatum.metadata_field.name == key || metadatum.metadata_field.display_name == key }
   end
 
+  # Ensure that an appropriate metadata field exists for the given key.
+  # Add core fields to the sample's project if needed.
+  # Create custom fields if needed.
+  # Return a string describe the status of the metadata field.
+  def ensure_metadata_field_for_key(key)
+    metadata_field = get_existing_metadatum(key.to_s) || get_available_matching_field(self, key.to_s)
+
+    if metadata_field
+      # Return ok if the field already exists and no additional actions were needed.
+      return "ok"
+    end
+
+    metadata_field = get_matching_core_field(self, key.to_s)
+
+    # This is a core field that isn't currently part of the project.
+    # Add it to the project.
+    if metadata_field
+      project.metadata_fields.append(metadata_field)
+      return "core"
+    end
+
+    metadata_field = get_new_custom_field(key.to_s)
+    metadata_field.save
+
+    # Add the new custom field to the project
+    # and all host genomes.
+    project.metadata_fields.append(metadata_field)
+    HostGenome.all.each do |genome|
+      genome.metadata_fields.append(metadata_field)
+    end
+
+    return "custom"
+  end
+
   # Create or update the Metadatum ActiveRecord object, but do not save.
   # This allows us to do this in batch.
+  # NOTE: ensure_metadata_field_for_key should be called before this, to ensure a matching metadata field is available.
   def get_metadatum_to_save(key, val)
     m = get_existing_metadatum(key.to_s)
     unless m
@@ -582,30 +617,9 @@ class Sample < ApplicationRecord
       m = Metadatum.new
       m.sample = self
 
-      # Find the appropriate metadata field. First look at existing fields on the project.
+      # Find the appropriate metadata field.
+      # ensure_metadata_field_for_key should ensure that a matching field exists.
       m.metadata_field = get_available_matching_field(self, key.to_s)
-
-      unless m.metadata_field
-        # Look for a matching core field.
-        core_matching_field = get_matching_core_field(self, key.to_s)
-
-        if core_matching_field
-          # Add to the project.
-          project.metadata_fields.append(core_matching_field)
-          m.metadata_field = core_matching_field
-        end
-      end
-
-      unless m.metadata_field
-        # Create a new custom Metadata Field.
-        mf = get_new_custom_field(key.to_s)
-        mf.save
-
-        # Add to the project and host genome.
-        host_genome.metadata_fields.append(mf)
-        project.metadata_fields.append(mf)
-        m.metadata_field = mf
-      end
 
       raise RecordNotFound("No matching field for #{key}") unless m.metadata_field
       m.key = m.metadata_field.name
@@ -635,6 +649,7 @@ class Sample < ApplicationRecord
   # Add or update metadatum entry on this sample.
   # Returns whether the update succeeded and any errors.
   def metadatum_add_or_update(key, val)
+    ensure_metadata_field_for_key(key)
     result = get_metadatum_to_save(key, val)
 
     if result[:status] == "error"
