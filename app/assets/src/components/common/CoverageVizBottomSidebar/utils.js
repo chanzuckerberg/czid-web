@@ -124,23 +124,3 @@ export const generateContigReadVizData = (hitGroups, coverageBinSize) => {
 // Sort by score descending.
 export const getSortedAccessionSummaries = data =>
   sortBy(summary => -summary.score, data.best_accessions);
-
-const TOOLTIP_BUFFER = 10;
-const TOOLTIP_MAX_WIDTH = 400;
-
-// Display the tooltip in the top left, unless it is too close
-// to the right side of the screen.
-export const getTooltipStyle = location => {
-  if (location.left > window.innerWidth - TOOLTIP_MAX_WIDTH) {
-    const right = window.innerWidth - location.left;
-    return {
-      right: right + TOOLTIP_BUFFER,
-      top: location.top - TOOLTIP_BUFFER
-    };
-  } else {
-    return {
-      left: location.left + TOOLTIP_BUFFER,
-      top: location.top - TOOLTIP_BUFFER
-    };
-  }
-};

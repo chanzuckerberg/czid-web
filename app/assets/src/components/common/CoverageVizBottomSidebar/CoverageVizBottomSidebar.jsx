@@ -16,13 +16,13 @@ import NarrowContainer from "~/components/layout/NarrowContainer";
 import NoResultsBacteriaIcon from "~ui/icons/NoResultsBacteriaIcon";
 import { DataTooltip } from "~ui/containers";
 import { getCoverageVizData } from "~/api";
+import { getTooltipStyle } from "~/components/utils/tooltip";
 
 import HitGroupViz from "./HitGroupViz";
 import {
   getHistogramTooltipData,
   generateCoverageVizData,
-  getSortedAccessionSummaries,
-  getTooltipStyle
+  getSortedAccessionSummaries
 } from "./utils";
 import cs from "./coverage_viz_bottom_sidebar.scss";
 
