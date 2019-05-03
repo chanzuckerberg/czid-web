@@ -101,7 +101,13 @@ services:
       <<: *travis-variables
     command: bash
   web:
-    build: .
+    build:
+      context: .
+      # See https://testdriven.io/blog/faster-ci-builds-with-docker-cache/
+      # and https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#leverage-build-cache#leverage-build-cache
+      cache_from:
+        - chanzuckerberg/idseq-web:latest
+        - chanzuckerberg/idseq-web:compose
     image: chanzuckerberg/idseq-web:compose
     volumes:
       - .:/app:ro
