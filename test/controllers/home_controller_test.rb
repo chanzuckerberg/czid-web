@@ -1,7 +1,6 @@
 require 'test_helper'
 
 class HomeControllerTest < ActionDispatch::IntegrationTest
-
   test 'joe redirected to project page in my_data when linking to joe_project with data_discovery' do
     sign_in(:joe_dd)
     @joe_project = projects(:joe_project)
