@@ -6,7 +6,8 @@ export REPO=chanzuckerberg/idseq-web
 BRANCH="$1"
 COMMIT="$2"
 BUILD_NUMBER="$3"
-COMPOSE_TAG="chanzuckerberg/idseq-web:compose"
+COMPOSE_TAG="$REPO:compose"
+LATEST_TAG="$REPO:latest"
 
 echo $BRANCH
 echo $COMMIT
@@ -14,10 +15,14 @@ echo $REPO
 echo $TAG
 echo '--'
 
+# need to pull images for cache_from first
+docker pull $LATEST_TAG || true
+docker pull $COMPOSE_TAG || true
+
 docker-compose build --build-arg GIT_COMMIT=${COMMIT} web
 
 if [ "$BRANCH" == "master" ]; then
-  docker tag $COMPOSE_TAG $REPO:"latest"
+  docker tag $COMPOSE_TAG $LATEST_TAG
 fi
 docker tag $COMPOSE_TAG $REPO:"sha-$COMMIT"
 BRANCH_CLEANED=`echo $BRANCH | sed 's/\//-/g'`
