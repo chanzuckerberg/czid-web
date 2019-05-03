@@ -7,6 +7,7 @@ BRANCH="$1"
 COMMIT="$2"
 BUILD_NUMBER="$3"
 COMPOSE_TAG="$REPO:compose"
+LATEST_TAG="$REPO:latest"
 
 echo $BRANCH
 echo $COMMIT
@@ -14,10 +15,14 @@ echo $REPO
 echo $TAG
 echo '--'
 
+# need to pull images for cache_from first
+docker pull $LATEST_TAG
+docker pull $COMPOSE_TAG
+
 docker-compose build --pull --parallel --build-arg GIT_COMMIT=${COMMIT} web
 
 if [ "$BRANCH" == "master" ]; then
-  docker tag $COMPOSE_TAG $REPO:"latest"
+  docker tag $COMPOSE_TAG $LATEST_TAG
 fi
 docker tag $COMPOSE_TAG $REPO:"sha-$COMMIT"
 BRANCH_CLEANED=`echo $BRANCH | sed 's/\//-/g'`
