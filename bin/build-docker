@@ -19,7 +19,7 @@ echo '--'
 docker pull $LATEST_TAG || true
 docker pull $COMPOSE_TAG || true
 
-docker-compose build --pull --parallel --build-arg GIT_COMMIT=${COMMIT} web
+docker-compose build --build-arg GIT_COMMIT=${COMMIT} web
 
 if [ "$BRANCH" == "master" ]; then
   docker tag $COMPOSE_TAG $LATEST_TAG
