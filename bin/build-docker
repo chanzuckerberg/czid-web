@@ -16,8 +16,8 @@ echo $TAG
 echo '--'
 
 # need to pull images for cache_from first
-docker pull $LATEST_TAG
-docker pull $COMPOSE_TAG
+docker pull $LATEST_TAG || true
+docker pull $COMPOSE_TAG || true
 
 docker-compose build --pull --parallel --build-arg GIT_COMMIT=${COMMIT} web
 
