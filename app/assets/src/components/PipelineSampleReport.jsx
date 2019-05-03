@@ -787,10 +787,7 @@ class PipelineSampleReport extends React.Component {
       this.sampleId
     }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
-    if (
-      (this.admin || this.allowedFeatures.includes("coverage_viz")) &&
-      pipelineVersionHasCoverageViz(pipelineVersion)
-    ) {
+    if (pipelineVersionHasCoverageViz(pipelineVersion)) {
       this.props.onCoverageVizClick({
         taxId,
         taxName,

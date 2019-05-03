@@ -10,11 +10,13 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
     @joe_project = projects(:joe_project)
     @metadata_validation_project = projects(:metadata_validation_project)
     @metadata_validation_sample_human = samples(:metadata_validation_sample_human)
+    @metadata_validation_sample_mosquito = samples(:metadata_validation_sample_mosquito)
     @joe_project_sample_a = samples(:joe_project_sampleA)
     @user = users(:one)
     @core_field = metadata_fields(:core_field)
     @user_params = { 'user[email]' => @user.email, 'user[password]' => 'password' }
     @host_genome_human = host_genomes(:human)
+    @host_genome_mosquito = host_genomes(:mosquito)
     @user_nonadmin = users(:joe)
     @user_nonadmin_params = { 'user[email]' => @user_nonadmin.email, 'user[password]' => 'password' }
   end
@@ -129,6 +131,7 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert @metadata_validation_project.metadata_fields.include?(@core_field)
 
+    puts(@response.parsed_body['errors'])
     assert_equal 0, @response.parsed_body['errors'].length
 
     assert_equal 6, Metadatum.where(sample_id: @metadata_validation_sample_human.id).length
@@ -140,6 +143,43 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
     assert @metadata_validation_project.metadata_fields.pluck(:name).include?("Custom Field 2")
     assert @host_genome_human.metadata_fields.pluck(:name).include?("Custom Field")
     assert @host_genome_human.metadata_fields.pluck(:name).include?("Custom Field 2")
+  end
+
+  # When samples with different host genomes all upload the same custom field,
+  # only one custom field is created.
+  test 'metadata upload custom field on multiple host genomes' do
+    post user_session_path, params: @user_params
+
+    # Prior to upload, the custom field shouldn't exist.
+    assert_equal 0, MetadataField.where(name: "Custom Field").length
+
+    post upload_metadata_project_url(@metadata_validation_project), params: {
+      metadata: {
+        'metadata_validation_sample_human' => {
+          'Custom Field' => 'Value'
+        },
+        'metadata_validation_sample_mosquito' => {
+          'Custom Field' => 'Value'
+        }
+      }
+    }, as: :json
+
+    assert_response :success
+
+    assert_equal 0, @response.parsed_body['errors'].length
+
+    assert_equal 1, Metadatum.where(sample_id: @metadata_validation_sample_human.id).length
+    assert_equal 1, Metadatum.where(sample_id: @metadata_validation_sample_mosquito.id).length
+
+    # Custom field should be created and added to project and host genome.
+    # There should be only a single Custom Field, which has been added to both genomes.
+    assert_equal 1, MetadataField.where(name: "Custom Field").length
+    assert @metadata_validation_project.metadata_fields.pluck(:name).include?("Custom Field")
+    assert @host_genome_human.metadata_fields.pluck(:name).include?("Custom Field")
+    assert @host_genome_mosquito.metadata_fields.pluck(:name).include?("Custom Field")
+
+    # The new custom field should be added to all host genomes.
+    assert_equal MetadataField.where(name: "Custom Field").first.host_genomes.length, HostGenome.all.length
   end
 
   test 'joe cannot upload metadata to a public project' do

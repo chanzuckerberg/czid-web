@@ -546,7 +546,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal(response.count, 2)
-    assert_equal(response.pluck("id"), @visualizations.pluck(:id))
+    assert_equal(response.pluck("id").sort, @visualizations.pluck(:id).sort)
   end
 
   test 'joe should see own plus public visualizations on all data domain' do
