@@ -38,6 +38,7 @@ gem 'puma', '~> 3.7'
 # gem 'redis', '~> 3.0'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.1.5'
+gem 'rails-controller-testing'
 gem 'rake'
 # Worker/Scheduler management
 gem 'resque', '>= 1.27.4'

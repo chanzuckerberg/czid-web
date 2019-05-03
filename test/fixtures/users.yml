@@ -27,3 +27,4 @@ admin:
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
   name: Admin User
   role: 1
+  allowed_features: "[\"data_discovery\"]"
