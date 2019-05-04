@@ -62,6 +62,11 @@ class ProjectsController < ApplicationController
         samples = samples_by_domain(domain)
         samples = filter_samples(samples, params)
 
+        # if we are applying any filters that constrain project's samples, we should not show project with zero samples
+        hide_empty_projects = [:host, :location, :taxon, :time, :tissue, :visibility].any? do |key|
+          params.key? key
+        end
+
         # Retrieve a json of projects associated with samples;
         # augment with number_of_samples, hosts, tissues.
         projects = if ["my_data", "public"].include?(domain)
@@ -110,7 +115,10 @@ class ProjectsController < ApplicationController
           end
         end
 
-        extended_projects = projects.includes(:users).map do |project|
+        filtered_projects = projects.includes(:users).select do |project|
+          !hide_empty_projects || (sample_count_by_project_id[project.id] || 0) > 0
+        end
+        extended_projects = filtered_projects.map do |project|
           project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
             number_of_samples: sample_count_by_project_id[project.id] || 0,
             hosts: host_genome_names_by_project_id[project.id] || [],
