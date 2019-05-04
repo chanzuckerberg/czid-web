@@ -107,6 +107,10 @@ class User < ApplicationRecord
     name.split[-1]
   end
 
+  def owns_project?(project_id)
+    projects.exists?(project_id)
+  end
+
   # This returns a hash of interesting optional data for Segment user tracking.
   # Make sure you use any reserved names as intended by Segment!
   # See https://segment.com/docs/spec/identify/#traits .

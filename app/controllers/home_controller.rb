@@ -30,7 +30,20 @@ class HomeController < ApplicationController
 
   def index
     if current_user.allowed_feature_list.include?("data_discovery")
-      redirect_to my_data_path
+      project_id = params[:project_id]
+      project = Project.find(params[:project_id])
+
+      redirect_to my_data_path if project.blank?
+
+      if current_user.owns_project?(project.id)
+        redirect_to action: "my_data", project_id: project_id
+      elsif project.public_access != 0
+        redirect_to action: "public", project_id: project_id
+      elsif current_user.admin?
+        redirect_to action: "all_data", project_id: project_id
+      else
+        redirect_to my_data_path
+      end
     else
       legacy
     end

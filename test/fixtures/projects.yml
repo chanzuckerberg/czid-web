@@ -17,8 +17,17 @@ public_project:
 
 joe_project:
   name: Project 3
-  users: [joe]
+  users: [joe, joe_dd]
   metadata_fields: [sample_type, nucleotide_type, age, admission_date, blood_fed, reported_sex, sex]
+
+not_joe_project:
+  name: Not Joe's Project
+  public_access: 0
+
+admin_project:
+  name: Project of Admin user
+  public_access: 0
+  users: [admin]
 
 metadata_validation_project:
   name: Metadata Project
