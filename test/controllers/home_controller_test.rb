@@ -65,4 +65,20 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_template :legacy
   end
+
+  test 'joe redirected to my data path when accessing home path with data discovery' do
+    sign_in(:joe_dd)
+    get "/home"
+
+    assert_response :redirect
+    assert_redirected_to action: "my_data", controller: "home"
+  end
+
+  test 'joe redirected to home path when accessing root path with data discovery' do
+    sign_in(:joe_dd)
+    get "/"
+
+    assert_response :redirect
+    assert_redirected_to action: "home", controller: "home"
+  end
 end
