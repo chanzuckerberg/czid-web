@@ -18,6 +18,8 @@ GEM
       rack-test (>= 0.6.3)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.0, >= 1.0.2)
+    actionpack-action_caching (1.2.0)
+      actionpack (>= 4.0.0, < 6)
     actionview (5.1.6.2)
       activesupport (= 5.1.6.2)
       builder (~> 3.1)
@@ -1009,10 +1011,6 @@ GEM
     shortener (0.8.0)
       voight_kampff (~> 1.1.2)
     silencer (1.0.1)
-    simple_token_authentication (1.15.1)
-      actionmailer (>= 3.2.6, < 6)
-      actionpack (>= 3.2.6, < 6)
-      devise (>= 3.2, < 6)
     simplecov (0.16.1)
       docile (~> 1.1)
       json (>= 1.8, < 3)
@@ -1076,6 +1074,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  actionpack-action_caching
   active_record_query_trace
   activerecord-import
   activesupport
@@ -1122,7 +1121,6 @@ DEPENDENCIES
   selenium-webdriver
   shortener
   silencer
-  simple_token_authentication (~> 1.15, >= 1.15.1)
   sprockets-es6
   stackprof
   thread

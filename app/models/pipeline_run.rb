@@ -845,6 +845,7 @@ class PipelineRun < ApplicationRecord
       # all stages succeeded
       self.finalized = 1
       self.job_status = STATUS_CHECKED
+      precache_report_info!
     else
       if prs.failed?
         self.job_status = STATUS_FAILED
@@ -1389,5 +1390,36 @@ class PipelineRun < ApplicationRecord
 
   def self.viewable(user)
     where(sample_id: Sample.viewable(user).pluck(:id))
+  end
+
+  # Keys here are used as cache keys for report_info action in SamplesController.
+  # The values here are used as defaults for PipelineSampleReport.jsx.
+  def report_info_params
+    {
+      pipeline_version: pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL,
+      # TODO: (gdingle): is this good enough for cache hits? see get_background_id
+      background_id: sample.default_background_id,
+      # scoring_model is currrently static
+      scoring_model: TaxonScoringModel::DEFAULT_MODEL_NAME,
+      # TODO: (gdingle): why does PipelineSampleReport and SamplesController have different default sort_by?
+      sort_by: "nt_aggregatescore",
+      report_ts: updated_at.to_i,
+      git_version: ENV['GIT_VERSION'] || "",
+      format: "json"
+    }
+  end
+
+  def precache_report_info!
+    base_url = Rails.application.config.idseq_precache_base_url
+    url = base_url + "/samples/#{sample.id}/report_info?" + report_info_params.to_query
+    req_headers = { 'X-User-Email' => sample.user.email,
+                    'X-User-Token' => sample.user.authentication_token }
+    Rails.logger.debug("Precaching URL #{url}")
+    open(url, req_headers)
+  rescue => e
+    LogUtil.log_err_and_airbrake(
+      "PipelineRun #{id} failed to precache report_info with #{url}"
+    )
+    LogUtil.log_backtrace(e)
   end
 end
