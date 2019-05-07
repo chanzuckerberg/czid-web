@@ -14,7 +14,6 @@
       summaryStats: JSON.parse('<%= raw escape_json(@summary_stats) %>'),
       reportPresent: <%= !!@report_present %>,
       reportTime: '<%=@report_ts%>',
-
       allCategories: JSON.parse('<%= raw escape_json(@all_categories)%>'),
       reportDetails: JSON.parse('<%= raw escape_json(@report_details)%>'),
       reportPageParams: JSON.parse('<%= raw escape_json(@report_page_params) %>'),
