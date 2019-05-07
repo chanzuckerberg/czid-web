@@ -79,6 +79,6 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     get "/"
 
     assert_response :redirect
-    assert_redirected_to action: "home", controller: "home"
+    assert_redirected_to home_path
   end
 end
