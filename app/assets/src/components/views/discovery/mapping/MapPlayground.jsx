@@ -132,7 +132,14 @@ class MapPlayground extends React.Component {
   handleSearchTriggered = async query => {
     const serverSideSuggestions = await getGeoSearchSuggestions(query);
     console.log(serverSideSuggestions);
-    return serverSideSuggestions;
+    return {
+      Locations: {
+        name: "Locations",
+        results: serverSideSuggestions.map(r =>
+          Object.assign({}, r, { key: r.description })
+        )
+      }
+    };
   };
 
   render() {
@@ -147,7 +154,7 @@ class MapPlayground extends React.Component {
             // onResultSelect={this.handleSearchResultSelected}
             // onEnter={this.handleSearchEnterPressed}
             placeholder="Search"
-            hasCategories={false}
+            // hasCategories={false}
           />
         </div>
         <BaseMap

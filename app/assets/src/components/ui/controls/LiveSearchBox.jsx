@@ -78,7 +78,7 @@ class LiveSearchBox extends React.Component {
   render() {
     const { hasCategories } = this.props;
     const { isLoading, value, results } = this.state;
-
+    console.log("I want to show: ", results);
     return (
       <Search
         category={hasCategories}
