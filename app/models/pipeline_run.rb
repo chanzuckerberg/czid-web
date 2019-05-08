@@ -795,7 +795,8 @@ class PipelineRun < ApplicationRecord
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
 
-        precache_report_info! # exceptions are caught
+        # Precache reports for all backgrounds
+        Resque.enqueue(PrecacheReportInfo, id)
 
         # Send to Datadog and Segment
         tags = ["sample_id:#{sample.id}"]
@@ -1417,25 +1418,19 @@ class PipelineRun < ApplicationRecord
     }
   end
 
-  # This precaches reports for *all* backgrounds.
-  # TODO: (gdingle): narrow to most likely to be hit, narrow to constant sized set.
-  # TODO: (gdingle): move to resque
+  # This precaches reports for *all* backgrounds. Each report took between 1 and
+  # 10s in testing.
   def precache_report_info!
     params = report_info_params
     Background.where(ready: 1).pluck(:id).each do |background_id|
       params = params.merge(background_id: background_id)
-      # TODO: (gdingle): use internal method call instead somehow
       base_url = Rails.application.config.idseq_precache_base_url
       url = base_url + "/samples/#{sample.id}/report_info?" + params.to_query
       req_headers = { 'X-User-Email' => sample.user.email,
                       'X-User-Token' => sample.user.authentication_token }
       Rails.logger.debug("Precaching background #{background_id} with URL #{url}")
       open(url, req_headers)
+      MetricUtil.put_metric_now("samples.cache.precached", 1)
     end
-  rescue => e
-    LogUtil.log_err_and_airbrake(
-      "PipelineRun #{id} failed to precache report_info"
-    )
-    LogUtil.log_backtrace(e)
   end
 end
