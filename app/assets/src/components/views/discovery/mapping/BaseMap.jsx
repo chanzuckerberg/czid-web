@@ -27,11 +27,6 @@ class BaseMap extends React.Component {
   updateViewport = viewport => {
     const { updateViewport, viewBounds } = this.props;
 
-    viewport.zoom = limitToRange(
-      viewport.zoom,
-      viewBounds.minZoom,
-      viewBounds.maxZoom
-    );
     viewport.latitude = limitToRange(
       viewport.latitude,
       viewBounds.minLatitude,
@@ -41,6 +36,11 @@ class BaseMap extends React.Component {
       viewport.longitude,
       viewBounds.minLongitude,
       viewBounds.maxLongitude
+    );
+    viewport.zoom = limitToRange(
+      viewport.zoom,
+      viewBounds.minZoom,
+      viewBounds.maxZoom
     );
 
     this.setState({ viewport });
@@ -95,7 +95,7 @@ BaseMap.defaultProps = {
   latitude: 40,
   longitude: -98,
   zoom: 3,
-  // These bounds prevent panning too far north or south, although you will still see those regions at the widest zoom levels.
+  // These bounds prevent panning too far north or south, although you will still see those regions at the widest zoom levels. minZoom level frames most of the world. maxZoom level keeps you at an area about the size of a metropolitan area.
   viewBounds: {
     minLatitude: -60,
     maxLatitude: 60,
