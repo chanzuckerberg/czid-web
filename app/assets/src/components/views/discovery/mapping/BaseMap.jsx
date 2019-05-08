@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import MapGL, { NavigationControl } from "react-map-gl";
 
+import { limitToRange } from "~/components/utils/format";
 import cs from "./base_map.scss";
 
 // MapTiler map name: "2019-04-24"
@@ -24,16 +25,24 @@ class BaseMap extends React.Component {
   }
 
   updateViewport = viewport => {
-    const { updateViewport, panBounds } = this.props;
-    console.log("Before: ", viewport.latitude, viewport.longitude);
-    viewport.zoom = Math.max(1.3, viewport.zoom);
-    viewport.latitude = Math.min(50, Math.max(-40, viewport.latitude));
-    viewport.longitude = Math.min(
-      panBounds.maxLongitude,
-      Math.max(panBounds.minLongitude, viewport.longitude)
+    const { updateViewport, viewBounds } = this.props;
+
+    viewport.zoom = limitToRange(
+      viewport.zoom,
+      viewBounds.minZoom,
+      viewBounds.maxZoom
     );
-    console.log(viewport);
-    console.log(viewport.latitude, viewport.longitude);
+    viewport.latitude = limitToRange(
+      viewport.latitude,
+      viewBounds.minLatitude,
+      viewBounds.maxLatitude
+    );
+    viewport.longitude = limitToRange(
+      viewport.longitude,
+      viewBounds.minLongitude,
+      viewBounds.maxLongitude
+    );
+
     this.setState({ viewport });
     updateViewport && updateViewport(viewport);
   };
@@ -43,10 +52,6 @@ class BaseMap extends React.Component {
     const { viewport } = this.state;
 
     const styleURL = `https://api.maptiler.com/maps/${MAP_STYLE_ID}/style.json?key=${mapTilerKey}`;
-    const bounds = [
-      [-180, -70], // Southwest coordinates
-      [180, 75] // Northeast coordinates
-    ];
     return (
       <div className={cs.mapContainer}>
         <MapGL
@@ -78,7 +83,7 @@ BaseMap.propTypes = {
   latitude: PropTypes.number,
   longitude: PropTypes.number,
   zoom: PropTypes.number,
-  panBounds: PropTypes.objectOf(PropTypes.number),
+  viewBounds: PropTypes.objectOf(PropTypes.number),
   tooltip: PropTypes.node,
   markers: PropTypes.array,
   popups: PropTypes.array
@@ -91,11 +96,14 @@ BaseMap.defaultProps = {
   latitude: 40,
   longitude: -98,
   zoom: 3,
-  panBounds: {
-    minLatitude: -70,
-    maxLatitude: 75,
+  // These bounds prevent panning too far north or south, although you will still see those regions at the widest zoom levels.
+  viewBounds: {
+    minLatitude: -60,
+    maxLatitude: 60,
     minLongitude: -180,
-    maxLongitude: 180
+    maxLongitude: 180,
+    minZoom: 1.4,
+    maxZoom: 12
   }
 };
 
