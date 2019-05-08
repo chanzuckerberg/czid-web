@@ -76,11 +76,12 @@ class LiveSearchBox extends React.Component {
   };
 
   render() {
+    const { hasCategories } = this.props;
     const { isLoading, value, results } = this.state;
 
     return (
       <Search
-        category
+        category={hasCategories}
         className={cs.liveSearchBox}
         loading={isLoading}
         onKeyDown={this.handleKeyDown}
@@ -98,7 +99,8 @@ class LiveSearchBox extends React.Component {
 LiveSearchBox.defaultProps = {
   delayTriggerSearch: 1000,
   initialValue: "",
-  minChars: 2
+  minChars: 2,
+  hasCategories: true
 };
 
 LiveSearchBox.propTypes = {
@@ -107,7 +109,8 @@ LiveSearchBox.propTypes = {
   minChars: PropTypes.number,
   onEnter: PropTypes.func,
   onSearchTriggered: PropTypes.func.isRequired,
-  onResultSelect: PropTypes.func
+  onResultSelect: PropTypes.func,
+  hasCategories: PropTypes.bool
 };
 
 export default LiveSearchBox;

@@ -3,9 +3,13 @@ import PropTypes from "prop-types";
 import { Marker } from "react-map-gl";
 import { get } from "lodash/fp";
 
+import { getGeoSearchSuggestions } from "~/api/locations";
+import LiveSearchBox from "~ui/controls/LiveSearchBox";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
+
+import cs from "./map_playground.scss";
 
 export const TOOLTIP_TIMEOUT_MS = 1000;
 
@@ -125,17 +129,34 @@ class MapPlayground extends React.Component {
     this.setState({ tooltipShouldClose: false });
   };
 
+  handleSearchTriggered = async query => {
+    const serverSideSuggestions = await getGeoSearchSuggestions(query);
+    console.log(serverSideSuggestions);
+    return serverSideSuggestions;
+  };
+
   render() {
     const { mapTilerKey } = this.props;
     const { locationsToItems, tooltip } = this.state;
 
     return (
-      <BaseMap
-        mapTilerKey={mapTilerKey}
-        updateViewport={this.updateViewport}
-        tooltip={tooltip}
-        markers={Object.entries(locationsToItems).map(this.renderMarker)}
-      />
+      <div>
+        <div className={cs.searchContainer}>
+          <LiveSearchBox
+            onSearchTriggered={this.handleSearchTriggered}
+            // onResultSelect={this.handleSearchResultSelected}
+            // onEnter={this.handleSearchEnterPressed}
+            placeholder="Search"
+            hasCategories={false}
+          />
+        </div>
+        <BaseMap
+          mapTilerKey={mapTilerKey}
+          updateViewport={this.updateViewport}
+          tooltip={tooltip}
+          markers={Object.entries(locationsToItems).map(this.renderMarker)}
+        />
+      </div>
     );
   }
 }
