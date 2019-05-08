@@ -60,7 +60,10 @@ class SamplesController < ApplicationController
   # rubocop:disable Style/Lambda
   caches_action :report_info, expires_in: REPORT_INFO_CACHE_EXPIRES, cache_path: -> do
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    params.permit(pipeline_run.report_info_params.keys)
+    cache_keys = params.permit(pipeline_run.report_info_params.keys)
+    # Set background_id to a viewable background, same behavior as in report_info itself
+    cache_keys[:background_id] = get_background_id(params[:background_id])
+    cache_keys
   end
 
   # GET /samples

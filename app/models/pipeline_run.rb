@@ -1419,6 +1419,7 @@ class PipelineRun < ApplicationRecord
 
   # This precaches reports for *all* backgrounds.
   # TODO: (gdingle): narrow to most likely to be hit, narrow to constant sized set.
+  # TODO: (gdingle): move to resque
   def precache_report_info!
     params = report_info_params
     Background.where(ready: 1).pluck(:id).each do |background_id|
