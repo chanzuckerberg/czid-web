@@ -31,8 +31,9 @@ class SamplesController < ApplicationController
                    :search_suggestions, :stats, :upload, :validate_sample_files].freeze
 
   # For API-like access
-  TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata, :report_info].freeze
-  before_action :authenticate_user!, except: TOKEN_AUTH_ACTIONS
+  TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
+  before_action :authenticate_user!, except: TOKEN_AUTH_ACTIONS + [:report_info]
+  before_action :authenticate_internal_user_from_token!, only: [:report_info]
   before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
@@ -56,7 +57,8 @@ class SamplesController < ApplicationController
 
   # before_action filters placed after the caches_action directive will not run
   # when serving from the cache.
-  caches_action :report_info, expires_in: REPORT_INFO_CACHE_EXPIRES, cache_path: lambda do
+  # rubocop:disable Style/Lambda
+  caches_action :report_info, expires_in: REPORT_INFO_CACHE_EXPIRES, cache_path: -> do
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     params.permit(pipeline_run.report_info_params.keys)
   end
