@@ -1407,9 +1407,9 @@ class PipelineRun < ApplicationRecord
       sort_by: "nt_aggregatescore",
       # For invalidation when data or config changes
       report_ts: [
-        updated_at.to_i,
-        sample.updated_at.to_i,
-        alignment_config.updated_at.to_i
+        updated_at.utc.to_i,
+        sample.updated_at.utc.to_i,
+        alignment_config.updated_at.utc.to_i
       ].max,
       # For invalidation when code changes
       git_version: ENV['GIT_VERSION'] || "",

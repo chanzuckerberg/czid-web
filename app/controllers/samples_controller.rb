@@ -53,14 +53,20 @@ class SamplesController < ApplicationController
   DEFAULT_MAX_NUM_TAXONS = 30
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
-  REPORT_INFO_CACHE_EXPIRES = 365.days
 
   # before_action filters placed after the caches_action directive will not run
   # when serving from the cache.
   # rubocop:disable Style/Lambda
-  caches_action :report_info, expires_in: REPORT_INFO_CACHE_EXPIRES, cache_path: -> do
+  caches_action :report_info, cache_path: -> do
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    cache_keys = params.permit(pipeline_run.report_info_params.keys)
+    report_info_params = pipeline_run.report_info_params
+
+    # This allows 304 Not Modified to be returned so that the client can use its
+    # local cache and avoid the large download.
+    httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
+    response.headers["Last-Modified"] = httpdate
+
+    cache_keys = params.permit(report_info_params.keys)
     # Set background_id to a viewable background, same behavior as in report_info itself
     cache_keys[:background_id] = get_background_id(params[:background_id])
     cache_keys
@@ -736,7 +742,6 @@ class SamplesController < ApplicationController
   end
 
   def report_info
-    expires_in REPORT_INFO_CACHE_EXPIRES
     @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
 
     ##################################################
