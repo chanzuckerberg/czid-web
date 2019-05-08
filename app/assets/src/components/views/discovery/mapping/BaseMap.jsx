@@ -58,7 +58,6 @@ class BaseMap extends React.Component {
           {...viewport}
           onViewportChange={this.updateViewport}
           mapStyle={styleURL}
-          // mapOptions={{ maxBounds: bounds }}
         >
           {tooltip}
           {markers}
