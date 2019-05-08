@@ -795,6 +795,8 @@ class PipelineRun < ApplicationRecord
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
 
+        precache_report_info! # exceptions are caught
+
         # Send to Datadog and Segment
         tags = ["sample_id:#{sample.id}"]
         # DEPRECATED. Use log_analytics_event.
@@ -845,7 +847,6 @@ class PipelineRun < ApplicationRecord
       # all stages succeeded
       self.finalized = 1
       self.job_status = STATUS_CHECKED
-      precache_report_info!
     else
       if prs.failed?
         self.job_status = STATUS_FAILED
@@ -1397,28 +1398,42 @@ class PipelineRun < ApplicationRecord
   def report_info_params
     {
       pipeline_version: pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL,
-      # TODO: (gdingle): is this good enough for cache hits? see get_background_id
-      background_id: sample.default_background_id,
-      # scoring_model is currrently static
+      # Default background is complicated... see get_background_id. In any case,
+      # we precache all backgrounds. See precache_report_info below.
+      background_id: nil,
+      # scoring_model is currrently static and not user controlled.
       scoring_model: TaxonScoringModel::DEFAULT_MODEL_NAME,
       # TODO: (gdingle): why does PipelineSampleReport and SamplesController have different default sort_by?
       sort_by: "nt_aggregatescore",
-      report_ts: updated_at.to_i,
+      # For invalidation when data or config changes
+      report_ts: [
+        updated_at.to_i,
+        sample.updated_at.to_i,
+        alignment_config.updated_at.to_i
+      ].max,
+      # For invalidation when code changes
       git_version: ENV['GIT_VERSION'] || "",
       format: "json"
     }
   end
 
+  # This precaches reports for *all* backgrounds.
+  # TODO: (gdingle): narrow to most likely to be hit, narrow to constant sized set.
   def precache_report_info!
-    base_url = Rails.application.config.idseq_precache_base_url
-    url = base_url + "/samples/#{sample.id}/report_info?" + report_info_params.to_query
-    req_headers = { 'X-User-Email' => sample.user.email,
-                    'X-User-Token' => sample.user.authentication_token }
-    Rails.logger.debug("Precaching URL #{url}")
-    open(url, req_headers)
+    params = report_info_params
+    Background.where(ready: 1).pluck(:id).each do |background_id|
+      params = params.merge(background_id: background_id)
+      # TODO: (gdingle): use internal method call instead somehow
+      base_url = Rails.application.config.idseq_precache_base_url
+      url = base_url + "/samples/#{sample.id}/report_info?" + params.to_query
+      req_headers = { 'X-User-Email' => sample.user.email,
+                      'X-User-Token' => sample.user.authentication_token }
+      Rails.logger.debug("Precaching background #{background_id} with URL #{url}")
+      open(url, req_headers)
+    end
   rescue => e
     LogUtil.log_err_and_airbrake(
-      "PipelineRun #{id} failed to precache report_info with #{url}"
+      "PipelineRun #{id} failed to precache report_info"
     )
     LogUtil.log_backtrace(e)
   end
