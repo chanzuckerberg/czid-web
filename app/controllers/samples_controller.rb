@@ -61,6 +61,9 @@ class SamplesController < ApplicationController
     MetricUtil.put_metric_now("samples.cache.requested", 1)
 
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    if pipeline_run.nil?
+      raise "Pipeline run not found for sample #{@sample.id}"
+    end
     report_info_params = pipeline_run.report_info_params
 
     # This allows 304 Not Modified to be returned so that the client can use its
@@ -70,7 +73,7 @@ class SamplesController < ApplicationController
 
     cache_keys = params.permit(report_info_params.keys)
     # Set background_id to a viewable background, same behavior as in report_info itself
-    cache_keys[:background_id] = get_background_id(params[:background_id])
+    cache_keys[:background_id] = get_background_id(@sample)
     cache_keys
   end
 

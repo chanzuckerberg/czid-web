@@ -351,15 +351,57 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'report_info should return cached copy on second request' do
+    post user_session_path, params: @user_params
+
+    url = report_info_url
+    get(url)
+
+    assert_response :success
+
+    first_runtime = @response.headers["X-Runtime"]
+
+    get(url)
+    assert_response :success
+
+    second_runtime = @response.headers["X-Runtime"]
+
+    # Second request should always be at least 2x faster than the first
+    assert first_runtime > second_runtime * 2
+  end
+
+  test 'report_info cache should not return if sample is not visible' do
+    url = report_info_url
+
+    post user_session_path, params: @user_params
+    get(url)
+
+    post user_session_path, params: @user_nonadmin_params
+    assert_raises(ActiveRecord::RecordNotFound) do
+      # TODO: (gdingle): error here... is actually a bug?
+      get(url)
+    end
   end
 
   test 'report_info should override background when background is not viewable' do
+    post user_session_path, params: @user_params
+    # ids beyond any conceivable range
+    url = report_info_url(background_id: rand(10**10..11**10))
+    get(url)
+
+    assert_response :success
   end
 
-  test 'report_info should return max-age 365 days on first request' do
-  end
+  test 'report_info should return last-modified' do
+    post user_session_path, params: @user_params
 
-  test 'report_info should return max-age 365 days on second request' do
+    report_ts = Time.now.utc
+    url = report_info_url(report_ts: report_ts.to_i)
+    get(url)
+    last_modified = Time.httpdate(@response.headers["Last-Modified"])
+    # Last-Modified of test data will be creation time, so we just match to the day
+    assert_equal report_ts.year, last_modified.year
+    assert_equal report_ts.month, last_modified.month
+    assert_equal report_ts.day, last_modified.day
   end
 
   test 'report_info cache should invalidate on change of relevant params' do
@@ -368,6 +410,21 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'report_info cache should remain on change of irrelevant params' do
   end
 
-  test 'report_info cache should not return if sample is not visible' do
+  private
+
+  def report_info_url(params = {}, sample_name = :six)
+    # Adapted from report_info_params
+    query = {
+      pipeline_version: nil,
+      background_id: rand(10**10..11**10), # ids beyond any conceivable range
+      scoring_model: TaxonScoringModel::DEFAULT_MODEL_NAME,
+      sort_by: "nt_aggregatescore",
+      report_ts: rand(10**10),
+      git_version: "constant",
+      format: "json"
+    }.merge(params).to_query
+
+    path = "/samples/#{samples(sample_name).id}/report_info"
+    path + "?" + query
   end
 end
