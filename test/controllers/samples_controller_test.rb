@@ -349,4 +349,25 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
       }
     end
   end
+
+  test 'report_info should return cached copy on second request' do
+  end
+
+  test 'report_info should override background when background is not viewable' do
+  end
+
+  test 'report_info should return max-age 365 days on first request' do
+  end
+
+  test 'report_info should return max-age 365 days on second request' do
+  end
+
+  test 'report_info cache should invalidate on change of relevant params' do
+  end
+
+  test 'report_info cache should remain on change of irrelevant params' do
+  end
+
+  test 'report_info cache should not return if sample is not visible' do
+  end
 end

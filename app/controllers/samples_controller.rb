@@ -58,6 +58,8 @@ class SamplesController < ApplicationController
   # when serving from the cache.
   # rubocop:disable Style/Lambda
   caches_action :report_info, cache_path: -> do
+    MetricUtil.put_metric_now("samples.cache.requested", 1)
+
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     report_info_params = pipeline_run.report_info_params
 
@@ -742,6 +744,8 @@ class SamplesController < ApplicationController
   end
 
   def report_info
+    MetricUtil.put_metric_now("samples.cache.miss", 1)
+
     @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
 
     ##################################################
