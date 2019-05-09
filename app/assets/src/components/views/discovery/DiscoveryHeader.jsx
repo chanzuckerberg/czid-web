@@ -84,12 +84,10 @@ class DiscoveryHeader extends React.Component {
         </div>
         <div className={cs.searchContainer}>
           <LiveSearchBox
-            category
             onSearchTriggered={onSearchTriggered}
             onResultSelect={this.handleSearchResultSelected}
             onEnter={this.handleSearchEnterPressed}
             initialValue={initialSearchValue}
-            placeholder="Search"
           />
         </div>
         <Tabs

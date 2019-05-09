@@ -176,6 +176,7 @@ class MapPlayground extends React.Component {
             onResultSelect={this.handleSearchResultSelected}
             onEnter={this.handleSearchEnterPressed}
             placeholder="Enter a location"
+            rectangular
             inputMode
           />
           {search && `Selected: ${JSON.stringify(search)}`}
