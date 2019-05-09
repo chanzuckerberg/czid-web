@@ -21,10 +21,11 @@ class RemoteSampleFileUpload extends React.Component {
       {
         showInfo: !this.state.showInfo
       },
-
-      logAnalyticsEvent("RemoteSampleFileUpload_more-info-toggle_clicked", {
-        showInfo: this.state.showInfo
-      })
+      () => {
+        logAnalyticsEvent("RemoteSampleFileUpload_more-info-toggle_clicked", {
+          showInfo: this.state.showInfo
+        });
+      }
     );
   };
 

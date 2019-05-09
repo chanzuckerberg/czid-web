@@ -68,9 +68,11 @@ class LocalSampleFileUpload extends React.Component {
       {
         showInfo: !this.state.showInfo
       },
-      logAnalyticsEvent("LocalSampleFileUpload_more-info-toggle_clicked", {
-        showInfo: this.state.showInfo
-      })
+      () => {
+        logAnalyticsEvent("LocalSampleFileUpload_more-info-toggle_clicked", {
+          showInfo: this.state.showInfo
+        });
+      }
     );
   };
 
