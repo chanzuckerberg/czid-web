@@ -23,8 +23,6 @@ Rails.application.configure do
   # config.action_controller.perform_caching = false
 
   # Configure caching to be the same as development
-  # TODO: (gdingle): fix me
-  # see https://makandracards.com/makandra/46189-how-to-rails-cache-for-individual-rspec-tests
   config.action_controller.perform_caching = true
   config.cache_store = :file_store, "/tmp/rails_cache_store"
 
