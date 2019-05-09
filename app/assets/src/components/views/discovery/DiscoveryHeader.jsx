@@ -50,6 +50,7 @@ class DiscoveryHeader extends React.Component {
   handleSearchEnterPressed = ({ value }) => {
     const { onSearchEnterPressed } = this.props;
 
+    console.log("handleSearchEnterPressed called");
     const search = value;
     onSearchEnterPressed && onSearchEnterPressed(search);
   };

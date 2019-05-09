@@ -18,11 +18,19 @@ class LiveSearchBox extends React.Component {
   }
 
   handleKeyDown = keyEvent => {
-    const { onEnter } = this.props;
+    const { onEnter, inputMode } = this.props;
     const { value } = this.state;
 
-    if (keyEvent.key == "Enter") {
+    if (keyEvent.key === "Enter") {
+      console.log("value in handleKeyDown: ", value);
       onEnter({ current: keyEvent, value });
+
+      if (inputMode) {
+        // In input mode, close the search box after they press enter.
+        this.setState({
+          results: []
+        });
+      }
     }
   };
 
@@ -36,6 +44,8 @@ class LiveSearchBox extends React.Component {
 
   handleResultSelect = (currentEvent, { result }) => {
     const { onResultSelect } = this.props;
+
+    console.log("result selected");
 
     this.resetComponent();
     onResultSelect && onResultSelect({ currentEvent, result });
@@ -77,13 +87,13 @@ class LiveSearchBox extends React.Component {
   };
 
   render() {
-    const { rectangular } = this.props;
+    const { inputMode } = this.props;
     const { isLoading, value, results } = this.state;
 
     return (
       <Search
         category
-        className={cx(cs.liveSearchBox, rectangular && cs.rectangular)}
+        className={cx(cs.liveSearchBox, inputMode && cs.rectangular)}
         loading={isLoading}
         onKeyDown={this.handleKeyDown}
         onResultSelect={this.handleResultSelect}
@@ -101,7 +111,7 @@ LiveSearchBox.defaultProps = {
   delayTriggerSearch: 1000,
   initialValue: "",
   minChars: 2,
-  rectangular: false
+  inputMode: false
 };
 
 LiveSearchBox.propTypes = {
@@ -111,7 +121,7 @@ LiveSearchBox.propTypes = {
   onEnter: PropTypes.func,
   onSearchTriggered: PropTypes.func.isRequired,
   onResultSelect: PropTypes.func,
-  rectangular: PropTypes.bool
+  inputMode: PropTypes.bool
 };
 
 export default LiveSearchBox;
