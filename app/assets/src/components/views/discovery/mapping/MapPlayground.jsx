@@ -3,9 +3,13 @@ import PropTypes from "prop-types";
 import { Marker } from "react-map-gl";
 import { get } from "lodash/fp";
 
+import { getGeoSearchSuggestions } from "~/api/locations";
+import LiveSearchBox from "~ui/controls/LiveSearchBox";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
+
+import cs from "./map_playground.scss";
 
 export const TOOLTIP_TIMEOUT_MS = 1000;
 
@@ -46,7 +50,8 @@ class MapPlayground extends React.Component {
       locationsToItems: locationsToItems,
       viewport: {},
       tooltip: null,
-      tooltipShouldClose: false
+      tooltipShouldClose: false,
+      searchResult: null
     };
   }
 
@@ -125,17 +130,57 @@ class MapPlayground extends React.Component {
     this.setState({ tooltipShouldClose: false });
   };
 
+  handleSearchTriggered = async query => {
+    const serverSideSuggestions = await getGeoSearchSuggestions(query);
+    let categories = [];
+    if (serverSideSuggestions.length > 0) {
+      categories = [
+        {
+          name: "Location Results",
+          // LiveSearchBox/Search tries to use 'title' as 'key'. Use title + i instead.
+          results: serverSideSuggestions.map((r, i) =>
+            Object.assign({}, r, { key: `${r.title}-${i}` })
+          )
+        }
+      ];
+    }
+    // Let users select an unresolved plain text option
+    categories.push({
+      name: "Plain Text (No Location Match)",
+      results: [{ title: query }]
+    });
+    return categories;
+  };
+
+  handleSearchResultSelected = ({ result }) => {
+    this.setState({ searchResult: result });
+  };
+
   render() {
     const { mapTilerKey } = this.props;
-    const { locationsToItems, tooltip } = this.state;
+    const { locationsToItems, tooltip, searchResult } = this.state;
 
     return (
-      <BaseMap
-        mapTilerKey={mapTilerKey}
-        updateViewport={this.updateViewport}
-        tooltip={tooltip}
-        markers={Object.entries(locationsToItems).map(this.renderMarker)}
-      />
+      <div>
+        <div className={cs.container}>
+          <div className={cs.title}>Location entry demo:</div>
+          <LiveSearchBox
+            onSearchTriggered={this.handleSearchTriggered}
+            onResultSelect={this.handleSearchResultSelected}
+            placeholder="Search"
+          />
+          {searchResult && `Selected: ${JSON.stringify(searchResult)}`}
+        </div>
+        <div className={cs.container}>
+          <div className={cs.title}>Map display demo:</div>
+          <BaseMap
+            mapTilerKey={mapTilerKey}
+            updateViewport={this.updateViewport}
+            tooltip={tooltip}
+            markers={Object.entries(locationsToItems).map(this.renderMarker)}
+          />
+        </div>
+      </div>
     );
   }
 }
