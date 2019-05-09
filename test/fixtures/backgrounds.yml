@@ -2,7 +2,7 @@
 
 one:
   name: default
-  pipeline_runs: [three, four]
+  pipeline_runs: [three, four, six]
   ready: 1
 
 two:

@@ -151,7 +151,7 @@ module ReportHelper
     !validated_str.empty? ? validated_str : nil
   end
 
-  def external_report_info(pipeline_run_id, background_id, params)
+  def external_report_info(pipeline_run_id, background_id, scoring_model, sort_by)
     return {} if pipeline_run_id.nil? || background_id.nil?
     data = {}
 
@@ -165,7 +165,7 @@ module ReportHelper
       data[:background_info][:id] = bg.id
     end
 
-    data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, params)
+    data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, scoring_model, sort_by)
     data
   end
 
@@ -930,7 +930,7 @@ module ReportHelper
     end
   end
 
-  def taxonomy_details(pipeline_run_id, background_id, params)
+  def taxonomy_details(pipeline_run_id, background_id, scoring_model, sort_by)
     # Fetch and clean data.
     t0 = wall_clock_ms
     taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
@@ -956,7 +956,7 @@ module ReportHelper
     end
 
     # Compute all species aggregate scores.  These are used in filtering.
-    compute_species_aggregate_scores!(rows, tax_2d, params[:scoring_model])
+    compute_species_aggregate_scores!(rows, tax_2d, scoring_model)
     t2 = wall_clock_ms
 
     # Compute all genus aggregate scores.  These are used only in sorting.
@@ -970,7 +970,7 @@ module ReportHelper
     rows_passing_filters = rows.length
 
     # Compute sort key and sort.
-    sort_by = decode_sort_by(params[:sort_by]) || decode_sort_by(DEFAULT_SORT_PARAM)
+    sort_by = decode_sort_by(sort_by) || decode_sort_by(DEFAULT_SORT_PARAM)
     rows.each do |tax_info|
       tax_info[:sort_key] = sort_key(tax_2d, tax_info, sort_by)
     end
@@ -1033,10 +1033,10 @@ module ReportHelper
     params[:sort_by] = "highest_nt_aggregatescore"
     background_id = params[:background_id] || sample.default_background_id
     background_id = background_id.to_i
-    pipeline_run = select_pipeline_run(sample, params)
+    pipeline_run = select_pipeline_run(sample, params[:pipeline_version])
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
     return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil? || pipeline_run.adjusted_remaining_reads.nil?
-    tax_details = taxonomy_details(pipeline_run_id, background_id, params)
+    tax_details = taxonomy_details(pipeline_run_id, background_id, scoring_model, sort_by)
     generate_report_csv(tax_details)
   end
 
@@ -1063,10 +1063,10 @@ module ReportHelper
     end
   end
 
-  def select_pipeline_run(sample, params)
-    pipeline_version = params[:pipeline_version].to_f
+  def select_pipeline_run(sample, pipeline_version)
+    pipeline_version = pipeline_version.to_f
     if pipeline_version > 0.0
-      sample.pipeline_run_by_version(params[:pipeline_version])
+      sample.pipeline_run_by_version(pipeline_version)
     else
       sample.first_pipeline_run
     end

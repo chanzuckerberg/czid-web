@@ -795,6 +795,9 @@ class PipelineRun < ApplicationRecord
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
 
+        # Precache reports for all backgrounds
+        Resque.enqueue(PrecacheReportInfo, id)
+
         # Send to Datadog and Segment
         tags = ["sample_id:#{sample.id}"]
         # DEPRECATED. Use log_analytics_event.
@@ -1389,5 +1392,45 @@ class PipelineRun < ApplicationRecord
 
   def self.viewable(user)
     where(sample_id: Sample.viewable(user).pluck(:id))
+  end
+
+  # Keys here are used as cache keys for report_info action in SamplesController.
+  # The values here are used as defaults for PipelineSampleReport.jsx.
+  def report_info_params
+    {
+      pipeline_version: pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL,
+      # Default background is complicated... see get_background_id. In any case,
+      # we precache all backgrounds. See precache_report_info below.
+      background_id: nil,
+      # scoring_model is currrently static and not user controlled.
+      scoring_model: TaxonScoringModel::DEFAULT_MODEL_NAME,
+      # TODO: (gdingle): why does PipelineSampleReport and SamplesController have different default sort_by?
+      sort_by: "nt_aggregatescore",
+      # For invalidation when data or config changes
+      report_ts: [
+        updated_at.utc.to_i,
+        sample.updated_at.utc.to_i,
+        alignment_config.updated_at.utc.to_i
+      ].max,
+      # For invalidation when code changes
+      git_version: ENV['GIT_VERSION'] || "",
+      format: "json"
+    }
+  end
+
+  # This precaches reports for *all* backgrounds. Each report took between 1 and
+  # 10s in testing.
+  def precache_report_info!
+    params = report_info_params
+    Background.where(ready: 1).pluck(:id).each do |background_id|
+      params = params.merge(background_id: background_id)
+      base_url = Rails.application.config.idseq_precache_base_url
+      url = base_url + "/samples/#{sample.id}/report_info?" + params.to_query
+      req_headers = { 'X-User-Email' => sample.user.email,
+                      'X-User-Token' => sample.user.authentication_token }
+      Rails.logger.debug("Precaching background #{background_id} with URL #{url}")
+      open(url, req_headers)
+      MetricUtil.put_metric_now("samples.cache.precached", 1)
+    end
   end
 end
