@@ -359,27 +359,19 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     first_runtime = @response.headers["X-Runtime"]
+    cache_header = @response.headers["X-IDseq-Cache"]
+    assert_equal "missed", cache_header
 
     get(url)
     assert_response :success
 
     second_runtime = @response.headers["X-Runtime"]
+    cache_header = @response.headers["X-IDseq-Cache"]
+    assert_equal "requested", cache_header
 
-    # Second request should always be at least 2x faster than the first
-    assert first_runtime > second_runtime * 2
-  end
-
-  test 'report_info cache should not return if sample is not visible' do
-    url = report_info_url
-
-    post user_session_path, params: @user_params
-    get(url)
-
-    post user_session_path, params: @user_nonadmin_params
-    assert_raises(ActiveRecord::RecordNotFound) do
-      # TODO: (gdingle): error here... is actually a bug?
-      get(url)
-    end
+    # Second request should always be at least 2x faster than the first.
+    # Typically it will be 10x faster.
+    assert first_runtime.to_f > (second_runtime.to_f * 2)
   end
 
   test 'report_info should override background when background is not viewable' do
@@ -405,9 +397,20 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'report_info cache should invalidate on change of relevant params' do
+    post user_session_path, params: @user_params
+
+    test_miss("background_id")
+    test_miss("scoring_model")
+    test_miss("sort_by")
+    test_miss("report_ts")
+    test_miss("git_version")
   end
 
   test 'report_info cache should remain on change of irrelevant params' do
+    post user_session_path, params: @user_params
+
+    test_miss("asdf", "requested")
+    test_miss("zxcv", "requested")
   end
 
   private
@@ -426,5 +429,13 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
     path = "/samples/#{samples(sample_name).id}/report_info"
     path + "?" + query
+  end
+
+  def test_miss(key, miss = "missed")
+    url = report_info_url(key => rand(10**10).to_s)
+    get(url)
+    assert_response :success
+    cache_header = @response.headers["X-IDseq-Cache"]
+    assert_equal miss, cache_header
   end
 end

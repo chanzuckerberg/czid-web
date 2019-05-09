@@ -54,6 +54,7 @@ class SamplesController < ApplicationController
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
 
+  # TODO: (gdingle): refactor this to function
   # before_action filters placed after the caches_action directive will not run
   # when serving from the cache.
   # rubocop:disable Style/Lambda
@@ -62,7 +63,8 @@ class SamplesController < ApplicationController
 
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     if pipeline_run.nil?
-      raise "Pipeline run not found for sample #{@sample.id}"
+      message = "Pipeline run not found for sample #{@sample.id}"
+      raise ActiveRecord::RecordNotFound, message
     end
     report_info_params = pipeline_run.report_info_params
 
@@ -70,6 +72,8 @@ class SamplesController < ApplicationController
     # local cache and avoid the large download.
     httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
     response.headers["Last-Modified"] = httpdate
+    # This is a custom header for testing and debugg
+    response.headers["X-IDseq-Cache"] = 'requested'
 
     cache_keys = params.permit(report_info_params.keys)
     # Set background_id to a viewable background, same behavior as in report_info itself
@@ -748,6 +752,7 @@ class SamplesController < ApplicationController
 
   def report_info
     MetricUtil.put_metric_now("samples.cache.miss", 1)
+    response.headers["X-IDseq-Cache"] = 'missed'
 
     @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
 
