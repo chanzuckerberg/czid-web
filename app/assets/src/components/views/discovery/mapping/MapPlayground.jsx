@@ -168,6 +168,7 @@ class MapPlayground extends React.Component {
             onSearchTriggered={this.handleSearchTriggered}
             onResultSelect={this.handleSearchResultSelected}
             placeholder="Search"
+            rectangular
           />
           {searchResult && `Selected: ${JSON.stringify(searchResult)}`}
         </div>

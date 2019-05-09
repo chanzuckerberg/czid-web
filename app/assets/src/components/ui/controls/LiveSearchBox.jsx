@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Search } from "semantic-ui-react";
+import cx from "classnames";
 import cs from "./live_search_box.scss";
 
 class LiveSearchBox extends React.Component {
@@ -76,12 +77,13 @@ class LiveSearchBox extends React.Component {
   };
 
   render() {
+    const { rectangular } = this.props;
     const { isLoading, value, results } = this.state;
 
     return (
       <Search
         category
-        className={cs.liveSearchBox}
+        className={cx(cs.liveSearchBox, rectangular && cs.rectangular)}
         loading={isLoading}
         onKeyDown={this.handleKeyDown}
         onResultSelect={this.handleResultSelect}
@@ -98,7 +100,8 @@ class LiveSearchBox extends React.Component {
 LiveSearchBox.defaultProps = {
   delayTriggerSearch: 1000,
   initialValue: "",
-  minChars: 2
+  minChars: 2,
+  rectangular: false
 };
 
 LiveSearchBox.propTypes = {
@@ -107,7 +110,8 @@ LiveSearchBox.propTypes = {
   minChars: PropTypes.number,
   onEnter: PropTypes.func,
   onSearchTriggered: PropTypes.func.isRequired,
-  onResultSelect: PropTypes.func
+  onResultSelect: PropTypes.func,
+  rectangular: PropTypes.bool
 };
 
 export default LiveSearchBox;
