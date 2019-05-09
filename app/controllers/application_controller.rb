@@ -85,6 +85,17 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # This provides IP whitelisting on top of token authentication for added security.
+  def authenticate_internal_user_from_token!
+    if request.remote_ip == "127.0.0.1"
+      authenticate_user_from_token!
+    else
+      Rails.logger.warn(
+        "Attempted to authenticate a non-internal user from IP #{request.remote_ip}"
+      )
+    end
+  end
+
   def check_browser
     browser = UserAgent.parse(request.user_agent).browser
     @browser_info = {
