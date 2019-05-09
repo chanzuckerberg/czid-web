@@ -1,3 +1,10 @@
-.searchContainer {
-  margin: 10px;
+@import "~styles/themes/typography";
+
+.container {
+  margin: 20px;
+
+  .title {
+    @include font-header-m;
+    margin: 5px;
+  }
 }

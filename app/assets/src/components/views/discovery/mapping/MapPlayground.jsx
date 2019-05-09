@@ -50,7 +50,8 @@ class MapPlayground extends React.Component {
       locationsToItems: locationsToItems,
       viewport: {},
       tooltip: null,
-      tooltipShouldClose: false
+      tooltipShouldClose: false,
+      searchResult: null
     };
   }
 
@@ -131,38 +132,54 @@ class MapPlayground extends React.Component {
 
   handleSearchTriggered = async query => {
     const serverSideSuggestions = await getGeoSearchSuggestions(query);
-    console.log(serverSideSuggestions);
-    return {
-      Locations: {
-        name: "Locations",
-        results: serverSideSuggestions.map(r =>
-          Object.assign({}, r, { key: r.description })
-        )
-      }
-    };
+    let categories = [];
+    if (serverSideSuggestions.length > 0) {
+      categories = [
+        {
+          name: "Location Results",
+          // LiveSearchBox/Search tries to use 'title' as 'key'. Use title + i instead.
+          results: serverSideSuggestions.map((r, i) =>
+            Object.assign({}, r, { key: `${r.title}-${i}` })
+          )
+        }
+      ];
+    }
+    // Let users select an unresolved plain text option
+    categories.push({
+      name: "Plain Text (No Location Match)",
+      results: [{ title: query }]
+    });
+    return categories;
+  };
+
+  handleSearchResultSelected = ({ result }) => {
+    this.setState({ searchResult: result });
   };
 
   render() {
     const { mapTilerKey } = this.props;
-    const { locationsToItems, tooltip } = this.state;
+    const { locationsToItems, tooltip, searchResult } = this.state;
 
     return (
       <div>
-        <div className={cs.searchContainer}>
+        <div className={cs.container}>
+          <div className={cs.title}>Location entry demo:</div>
           <LiveSearchBox
             onSearchTriggered={this.handleSearchTriggered}
-            // onResultSelect={this.handleSearchResultSelected}
-            // onEnter={this.handleSearchEnterPressed}
+            onResultSelect={this.handleSearchResultSelected}
             placeholder="Search"
-            // hasCategories={false}
+          />
+          {searchResult && `Selected: ${JSON.stringify(searchResult)}`}
+        </div>
+        <div className={cs.container}>
+          <div className={cs.title}>Map display demo:</div>
+          <BaseMap
+            mapTilerKey={mapTilerKey}
+            updateViewport={this.updateViewport}
+            tooltip={tooltip}
+            markers={Object.entries(locationsToItems).map(this.renderMarker)}
           />
         </div>
-        <BaseMap
-          mapTilerKey={mapTilerKey}
-          updateViewport={this.updateViewport}
-          tooltip={tooltip}
-          markers={Object.entries(locationsToItems).map(this.renderMarker)}
-        />
       </div>
     );
   }
