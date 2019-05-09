@@ -399,18 +399,20 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'report_info cache should invalidate on change of relevant params' do
     post user_session_path, params: @user_params
 
-    test_miss("background_id")
-    test_miss("scoring_model")
-    test_miss("sort_by")
-    test_miss("report_ts")
-    test_miss("git_version")
+    url = report_info_url
+    get(url)
+    assert_response :success
+    cache_header = @response.headers["X-IDseq-Cache"]
+    assert_equal "missed", cache_header
+
+    url += "&asdf=" + rand(10**10).to_s
+    get(url)
+    assert_response :success
+    cache_header = @response.headers["X-IDseq-Cache"]
+    assert_equal "requested", cache_header
   end
 
   test 'report_info cache should remain on change of irrelevant params' do
-    post user_session_path, params: @user_params
-
-    test_miss("asdf", "requested")
-    test_miss("zxcv", "requested")
   end
 
   private
@@ -429,13 +431,5 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
     path = "/samples/#{samples(sample_name).id}/report_info"
     path + "?" + query
-  end
-
-  def test_miss(key, miss = "missed")
-    url = report_info_url(key => rand(10**10).to_s)
-    get(url)
-    assert_response :success
-    cache_header = @response.headers["X-IDseq-Cache"]
-    assert_equal miss, cache_header
   end
 end
