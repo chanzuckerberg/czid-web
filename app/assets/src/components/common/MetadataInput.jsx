@@ -4,6 +4,7 @@ import { isArray } from "lodash";
 
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
+import GeoSearchInputBox from "~ui/controls/GeoSearchInputBox";
 
 class MetadataInput extends React.Component {
   render() {
@@ -45,16 +46,7 @@ class MetadataInput extends React.Component {
         />
       );
     } else if (metadataType.dataType === "location") {
-      return (
-        <Input
-          className={className}
-          onChange={val => onChange(metadataType.key, val)}
-          onBlur={() => onSave && onSave(metadataType.key)}
-          value={value}
-          placeholder={"hi"}
-          type="text"
-        />
-      );
+      return <GeoSearchInputBox />;
     } else {
       return (
         <Input
