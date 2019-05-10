@@ -358,20 +358,14 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
-    first_runtime = @response.headers["X-Runtime"]
     cache_header = @response.headers["X-IDseq-Cache"]
     assert_equal "missed", cache_header
 
     get url
     assert_response :success
 
-    second_runtime = @response.headers["X-Runtime"]
     cache_header = @response.headers["X-IDseq-Cache"]
     assert_equal "requested", cache_header
-
-    # Second request should always be at least 2x faster than the first.
-    # Typically it will be 10x faster.
-    assert first_runtime.to_f > (second_runtime.to_f * 2)
   end
 
   test 'report_info should override background when background is not viewable' do
