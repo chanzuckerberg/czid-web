@@ -255,6 +255,7 @@ class Metadatum < ApplicationRecord
       mdf = metadata_fields[md.metadata_field_id]
       if mdf
         base = convert_type_to_string(mdf.base_type)
+        base = "string" if base == "location" # Re-use the string value
         validated_values[md.id] = md["#{base}_validated_value"]
       else
         validated_values[md.id] = ""
@@ -264,6 +265,7 @@ class Metadatum < ApplicationRecord
   end
 
   def self.convert_type_to_string(type)
+    puts "FOOBAR: " + type.to_s
     if type == STRING_TYPE
       return "string"
     elsif type == NUMBER_TYPE

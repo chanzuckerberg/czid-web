@@ -44,6 +44,17 @@ class MetadataInput extends React.Component {
           type="text"
         />
       );
+    } else if (metadataType.dataType === "location") {
+      return (
+        <Input
+          className={className}
+          onChange={val => onChange(metadataType.key, val)}
+          onBlur={() => onSave && onSave(metadataType.key)}
+          value={value}
+          placeholder={"hi"}
+          type="text"
+        />
+      );
     } else {
       return (
         <Input
@@ -63,7 +74,7 @@ MetadataInput.propTypes = {
   value: PropTypes.any,
   metadataType: PropTypes.shape({
     key: PropTypes.string,
-    dataType: PropTypes.oneOf(["number", "string", "date"]),
+    dataType: PropTypes.oneOf(["number", "string", "date", "location"]),
     options: PropTypes.arrayOf(PropTypes.string)
   }),
   // Third optional parameter signals to the parent whether to immediately save. false means "wait for onSave to fire".
