@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Marker } from "react-map-gl";
-import { get } from "lodash/fp";
+import { get, isString } from "lodash/fp";
 
 import { getGeoSearchSuggestions } from "~/api/locations";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";
@@ -152,6 +152,8 @@ class MapPlayground extends React.Component {
   };
 
   handleSearchResultSelected = ({ result }) => {
+    // Wrap the string when they don't select from the results list
+    if (isString(result)) result = { title: result };
     this.setState({ search: result });
   };
 
