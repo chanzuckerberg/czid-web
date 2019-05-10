@@ -12,7 +12,6 @@ class LiveSearchBox extends React.Component {
       isLoading: false,
       results: [],
       value: this.props.initialValue,
-      open: true,
       selectedResult: null
     };
 
@@ -25,9 +24,9 @@ class LiveSearchBox extends React.Component {
 
     if (keyEvent.key === "Enter") {
       if (inputMode && !selectedResult) {
-        // In input mode, close the results if they hit enter without selecting anything.
+        // In input mode, close the results after they hit enter without selecting anything.
         this.setState({
-          open: false
+          results: []
         });
       }
       onEnter({ current: keyEvent, value });
@@ -35,21 +34,25 @@ class LiveSearchBox extends React.Component {
   };
 
   resetComponent = () => {
-    const { inputMode } = this.props;
-
     this.setState({
       isLoading: false,
-      results: []
+      results: [],
+      value: ""
     });
-    if (!inputMode) {
-      this.setState({ value: "" });
-    }
   };
 
   handleResultSelect = (currentEvent, { result }) => {
-    const { onResultSelect } = this.props;
+    const { onResultSelect, inputMode } = this.props;
 
-    this.resetComponent();
+    if (!inputMode) {
+      this.resetComponent();
+    } else {
+      // In input mode, keep 'value' in the box.
+      this.setState({
+        isLoading: false,
+        results: []
+      });
+    }
     onResultSelect && onResultSelect({ currentEvent, result });
   };
 
@@ -57,7 +60,7 @@ class LiveSearchBox extends React.Component {
     const { onSearchTriggered } = this.props;
     const { value } = this.state;
 
-    this.setState({ isLoading: true, open: true, selectedResult: null });
+    this.setState({ isLoading: true, selectedResult: null });
 
     const timerId = this.lastestTimerId;
     const results = await onSearchTriggered(value);
@@ -94,7 +97,7 @@ class LiveSearchBox extends React.Component {
 
   render() {
     const { placeholder, rectangular } = this.props;
-    const { isLoading, value, results, open } = this.state;
+    const { isLoading, value, results } = this.state;
 
     return (
       <Search
@@ -107,7 +110,6 @@ class LiveSearchBox extends React.Component {
         onSelectionChange={this.handleSelectionChange}
         placeholder={placeholder}
         results={results}
-        open={open}
         showNoResults={false}
         value={value}
       />
