@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { get, isString } from "lodash/fp";
+import { isString } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
@@ -39,8 +39,14 @@ class GeoSearchInputBox extends React.Component {
 
   handleResultSelected = ({ result }) => {
     const { onResultSelect } = this.props;
+
+    // Wrap plain text submission
+    if (isString(result)) result = { title: result };
+
     logAnalyticsEvent("GeoSearchInputBox_result_selected", {
-      selected: isString(result) ? result : get("title", result)
+      selected: result.title,
+      // Real results will have a description
+      isMatched: !!result.description
     });
     onResultSelect && onResultSelect({ result });
   };
