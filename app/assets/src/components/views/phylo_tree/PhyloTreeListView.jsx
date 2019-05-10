@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import BasicPopup from "~/components/BasicPopup";
-import { saveVisualization } from "~/api";
+import { getPhyloTree, saveVisualization } from "~/api";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -211,7 +211,7 @@ class PhyloTreeListView extends React.Component {
   };
 
   getCurrentTree = () => {
-    return this.state.phyloTreeMap[this.state.selectedPhyloTreeId];
+    return getPhyloTree(this.state.selectedPhyloTreeId);
   };
 
   render() {

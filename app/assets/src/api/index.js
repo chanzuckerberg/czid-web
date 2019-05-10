@@ -303,6 +303,8 @@ const getContigsSequencesByByteranges = (
   return get(`/samples/${sampleId}/contigs_sequences_by_byteranges?${params}`);
 };
 
+const getPhyloTree = id => get(`/phylo_trees/${id}/show.json`);
+
 export {
   bulkImportRemoteSamples,
   bulkUploadRemoteSamples,
@@ -336,5 +338,6 @@ export {
   validateSampleNames,
   getCoverageVizSummary,
   getCoverageVizData,
-  getContigsSequencesByByteranges
+  getContigsSequencesByByteranges,
+  getPhyloTree
 };

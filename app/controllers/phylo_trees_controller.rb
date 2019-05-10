@@ -1,7 +1,7 @@
 class PhyloTreesController < ApplicationController
   include ApplicationHelper
+  include SamplesHelper
   include PipelineRunsHelper
-  include PhyloTreeHelper
   include ElasticsearchHelper
 
   before_action :authenticate_user!
