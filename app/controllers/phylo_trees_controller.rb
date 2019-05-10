@@ -85,12 +85,13 @@ class PhyloTreesController < ApplicationController
 
     nodes = {}
     metadata_by_sample_id = metadata_multiget(@phylo_tree.pipeline_runs.pluck(:sample_id).uniq)
-    @phylo_tree.pipeline_runs.each do |pr|
-      nodes[pr.id.to_s] = {
-        "name" => pr.sample.name,
-        "project_name" => pr.sample.project.name,
-        "host_genome_name" => pr.sample.host_genome_name,
-        "metadata" => metadata_by_sample_id[pr.sample_id]
+
+    @phylo_tree.pipeline_runs.joins(:sample, sample: [:project, :host_genome]).select("pipeline_runs.id, samples.name, projects.name as project_name, host_genomes.name as host_genome_name").as_json.each do |pr|
+      nodes[pr["id"]] = {
+        "name" => pr["name"],
+        "project_name" => pr["project_name"],
+        "host_genome_name" => pr["host_genome_name"],
+        "metadata" => metadata_by_sample_id[pr["sample_id"]]
       }
     end
     ncbi_metadata = JSON.parse(@phylo_tree.ncbi_metadata || "{}")
