@@ -1,8 +1,8 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 import { getGeoSearchSuggestions } from "~/api/locations";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";
-import PropTypes from "prop-types";
 
 // An input box that fetches and shows geosearch suggestions for user input of locations.
 class GeoSearchInputBox extends React.Component {
