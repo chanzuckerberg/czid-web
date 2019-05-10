@@ -131,23 +131,24 @@ class MapPlayground extends React.Component {
 
   handleSearchTriggered = async query => {
     const serverSideSuggestions = await getGeoSearchSuggestions(query);
-    let categories = [];
+    let categories = {};
     if (serverSideSuggestions.length > 0) {
-      categories = [
-        {
-          name: "Location Results",
-          // LiveSearchBox/Search tries to use 'title' as 'key'. Use title + i instead.
-          results: serverSideSuggestions.map((r, i) =>
-            Object.assign({}, r, { key: `${r.title}-${i}` })
-          )
-        }
-      ];
+      const locationsCategory = "Location Results";
+      categories[locationsCategory] = {
+        name: locationsCategory,
+        // LiveSearchBox/Search tries to use 'title' as 'key'. Use title + i instead.
+        results: serverSideSuggestions.map((r, i) =>
+          Object.assign({}, r, { key: `${r.title}-${i}` })
+        )
+      };
     }
     // Let users select an unresolved plain text option
-    categories.push({
-      name: "Plain Text (No Location Match)",
+    let noMatchName = "Plain Text (No Location Match)";
+    categories[noMatchName] = {
+      name: noMatchName,
       results: [{ title: query }]
-    });
+    };
+    console.log(categories);
     return categories;
   };
 
