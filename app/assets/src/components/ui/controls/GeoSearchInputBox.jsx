@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { get, isString } from "lodash/fp";
 
+import { logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";
 
@@ -27,15 +29,27 @@ class GeoSearchInputBox extends React.Component {
       name: noMatchName,
       results: [{ title: query }]
     };
+
+    logAnalyticsEvent("GeoSearchInputBox_location_queried", {
+      query: query,
+      numResults: serverSideSuggestions.length
+    });
     return categories;
   };
 
-  render() {
+  handleResultSelected = ({ result }) => {
     const { onResultSelect } = this.props;
+    logAnalyticsEvent("GeoSearchInputBox_result_selected", {
+      selected: isString(result) ? result : get("title", result)
+    });
+    onResultSelect && onResultSelect({ result });
+  };
+
+  render() {
     return (
       <LiveSearchBox
         onSearchTriggered={this.handleSearchTriggered}
-        onResultSelect={onResultSelect}
+        onResultSelect={this.handleResultSelected}
         placeholder="Enter a location"
         rectangular
         inputMode
