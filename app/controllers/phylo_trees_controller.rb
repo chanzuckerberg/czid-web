@@ -59,16 +59,11 @@ class PhyloTreesController < ApplicationController
                  name: taxon_lineage.name }
     end
 
-    # Augment tree data with sample attributes, number of pipeline_runs, user name, and parent taxid
-    species_taxids = @phylo_trees.where(tax_level: 1).pluck(:taxid)
-    parent_map = Hash[TaxonLineage.where(taxid: species_taxids).map { |record| [record.taxid, record.genus_taxid] }]
-    sample_details_map = sample_details_by_tree_id
+    # Augment tree data with user name
     users_map = PhyloTree.users_by_tree_id
     @phylo_trees = @phylo_trees.as_json
     @phylo_trees.each do |pt|
-      pt["sampleDetailsByNodeName"] = sample_details_map[pt["id"]]
       pt["user"] = users_map[pt["id"]]
-      pt["parent_taxid"] = parent_map[pt["taxid"]]
     end
 
     respond_to do |format|
@@ -79,6 +74,36 @@ class PhyloTreesController < ApplicationController
           taxon: @taxon,
           phyloTrees: @phylo_trees
         }
+      end
+    end
+  end
+
+  def show
+    pt = @phylo_tree.as_json
+    pt["user"] = @phylo_tree.user.name
+    pt["parent_taxid"] = TaxonLineage.where(taxid: @phylo_tree.taxid).last.genus_taxid if @phylo_tree.tax_level == 1
+
+    nodes = {}
+    metadata_by_sample_id = metadata_multiget(@phylo_tree.pipeline_runs.pluck(:sample_id).uniq)
+    @phylo_tree.pipeline_runs.each do |pr|
+      nodes[pr.id.to_s] = {
+        "name" => pr.sample.name,
+        "project_name" => pr.sample.project.name,
+        "host_genome_name" => pr.sample.host_genome_name,
+        "metadata" => metadata_by_sample_id[pr.sample_id]
+      }
+    end
+    ncbi_metadata = JSON.parse(@phylo_tree.ncbi_metadata || "{}")
+    ncbi_metadata.each do |node_id, node_metadata|
+      nodes[node_id] = node_metadata
+      nodes[node_id]["name"] ||= node_metadata["accession"]
+    end
+    pt["sampleDetailsByNodeName"] = nodes
+
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: pt
       end
     end
   end
