@@ -33,7 +33,7 @@ class MetadataInput extends React.Component {
           withinModal={this.props.withinModal}
         />
       );
-    } else if (metadataType.dataType == "date") {
+    } else if (metadataType.dataType === "date") {
       return (
         <Input
           className={className}

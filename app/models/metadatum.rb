@@ -18,6 +18,7 @@ class Metadatum < ApplicationRecord
   STRING_TYPE = 0
   NUMBER_TYPE = 1
   DATE_TYPE = 2
+  LOCATION_TYPE = 3
 
   # Validations
   validates :string_validated_value, length: { maximum: 250 }
@@ -269,6 +270,8 @@ class Metadatum < ApplicationRecord
       return "number"
     elsif type == DATE_TYPE
       return "date"
+    elsif type == LOCATION_TYPE
+      return "location"
     end
     ""
   end
