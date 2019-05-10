@@ -87,7 +87,9 @@ class ApplicationController < ActionController::Base
 
   # This provides IP whitelisting on top of token authentication for added security.
   def authenticate_internal_user_from_token!
-    if request.remote_ip == "127.0.0.1"
+    if request.remote_ip == "127.0.0.1" ||
+       # is the request coming from the server's own public IP address?
+       request.remote_ip == open('https://api.ipify.org/').read
       authenticate_user_from_token!
     else
       Rails.logger.warn(
