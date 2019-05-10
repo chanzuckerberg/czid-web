@@ -43,9 +43,9 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.6.0)
       public_suffix (>= 2.0.2, < 4.0)
-    airbrake (8.3.2)
-      airbrake-ruby (~> 4.1)
-    airbrake-ruby (4.2.1)
+    airbrake (9.2.2)
+      airbrake-ruby (~> 4.4)
+    airbrake-ruby (4.4.0)
       rbtree3 (~> 0.5)
     analytics-ruby (2.0.13)
     arel (8.0.0)
@@ -1079,8 +1079,8 @@ DEPENDENCIES
   active_record_query_trace
   activerecord-import
   activesupport
-  airbrake (~> 8.3.2)
-  airbrake-ruby
+  airbrake (~> 9.2.2)
+  airbrake-ruby (~> 4.4)
   analytics-ruby (~> 2.0.0)
   aws-sdk
   aws-sdk-ecs
