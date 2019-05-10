@@ -73,6 +73,16 @@ if ENV['AIRBRAKE_PROJECT_ID'] && ENV['AIRBRAKE_PROJECT_KEY']
     end
   end
 
+  # Ignore CZI users from perf stats because they tend to be outliers
+  Airbrake.add_performance_hook do |resource|
+    if resource.stash.key?(:user)
+      email = resource.stash[:user][:email]
+      if email.present? && ["chanzuckerberg.com"].include?(email.split("@").last)
+        resource.ignore!
+      end
+    end
+  end
+
   # If you want to convert your log messages to Airbrake errors, we offer an
   # integration with the Logger class from stdlib.
   # https://github.com/airbrake/airbrake#logger
