@@ -3,11 +3,10 @@ import PropTypes from "prop-types";
 import { Marker } from "react-map-gl";
 import { get, isString } from "lodash/fp";
 
-import { getGeoSearchSuggestions } from "~/api/locations";
-import LiveSearchBox from "~ui/controls/LiveSearchBox";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
+import GeoSearchInputBox from "~ui/controls/GeoSearchInputBox";
 
 import cs from "./map_playground.scss";
 
@@ -130,29 +129,6 @@ class MapPlayground extends React.Component {
     this.setState({ tooltipShouldClose: false });
   };
 
-  handleSearchTriggered = async query => {
-    const serverSideSuggestions = await getGeoSearchSuggestions(query);
-    // Semantic UI Search expects results as: `{ category: { name: '', results: [{ title: '', description: '' }] }`
-    let categories = {};
-    if (serverSideSuggestions.length > 0) {
-      const locationsCategory = "Location Results";
-      categories[locationsCategory] = {
-        name: locationsCategory,
-        // LiveSearchBox/Search tries to use 'title' as 'key'. Use title + i instead.
-        results: serverSideSuggestions.map((r, i) =>
-          Object.assign({}, r, { key: `${r.title}-${i}` })
-        )
-      };
-    }
-    // Let users select an unresolved plain text option
-    let noMatchName = "Plain Text (No Location Match)";
-    categories[noMatchName] = {
-      name: noMatchName,
-      results: [{ title: query }]
-    };
-    return categories;
-  };
-
   handleSearchResultSelected = ({ result }) => {
     // Wrap the string when they don't select anything from the results list
     if (isString(result)) result = { title: result };
@@ -167,13 +143,7 @@ class MapPlayground extends React.Component {
       <div>
         <div className={cs.container}>
           <div className={cs.title}>Location entry demo:</div>
-          <LiveSearchBox
-            onSearchTriggered={this.handleSearchTriggered}
-            onResultSelect={this.handleSearchResultSelected}
-            placeholder="Enter a location"
-            rectangular
-            inputMode
-          />
+          <GeoSearchInputBox onResultSelect={this.handleSearchResultSelected} />
           {searchResult && `Selected: ${JSON.stringify(searchResult)}`}
         </div>
         <div className={cs.container}>
