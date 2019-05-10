@@ -154,7 +154,7 @@ class MapPlayground extends React.Component {
   };
 
   handleSearchResultSelected = ({ result }) => {
-    // Wrap the string when they don't select from the results list
+    // Wrap the string when they don't select anything from the results list
     if (isString(result)) result = { title: result };
     this.setState({ searchResult: result });
   };
