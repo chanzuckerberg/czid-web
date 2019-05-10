@@ -24,12 +24,11 @@ class LiveSearchBox extends React.Component {
 
     if (keyEvent.key === "Enter") {
       if (inputMode && !selectedResult) {
-        // In input mode, close the results after they hit enter without selecting anything.
-        this.setState({
-          results: []
-        });
+        // In input mode, if they didn't select anything, count it as submitting what they entered.
+        this.handleResultSelect(keyEvent, { result: value });
+      } else {
+        onEnter({ current: keyEvent, value });
       }
-      onEnter({ current: keyEvent, value });
     }
   };
 

@@ -50,8 +50,7 @@ class MapPlayground extends React.Component {
       locationsToItems: locationsToItems,
       viewport: {},
       tooltip: null,
-      tooltipShouldClose: false,
-      search: null
+      tooltipShouldClose: false
     };
   }
 
@@ -156,12 +155,6 @@ class MapPlayground extends React.Component {
     this.setState({ search: result });
   };
 
-  handleSearchEnterPressed = ({ value }) => {
-    console.log("enter pressed");
-    console.log(value);
-    this.setState({ search: { title: value } });
-  };
-
   render() {
     const { mapTilerKey } = this.props;
     const { locationsToItems, tooltip, search } = this.state;
@@ -171,10 +164,8 @@ class MapPlayground extends React.Component {
         <div className={cs.container}>
           <div className={cs.title}>Location entry demo:</div>
           <LiveSearchBox
-            initialValue={search}
             onSearchTriggered={this.handleSearchTriggered}
             onResultSelect={this.handleSearchResultSelected}
-            onEnter={this.handleSearchEnterPressed}
             placeholder="Enter a location"
             rectangular
             inputMode
