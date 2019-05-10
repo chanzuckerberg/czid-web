@@ -15,7 +15,8 @@ Rails.application.configure do
   # Enable/disable caching. By default caching is disabled.
   if Rails.root.join('tmp', 'caching-dev.txt').exist?
     config.action_controller.perform_caching = true
-    config.cache_store = :file_store, "/tmp/rails_cache_store"
+
+    config.cache_store = :memory_store
     config.public_file_server.headers = {
       'Cache-Control' => "public, max-age=#{2.days.seconds.to_i}"
     }
@@ -67,9 +68,6 @@ Rails.application.configure do
   config.action_controller.asset_host = proc { |source|
     "http://localhost:8080" if source =~ /wp_bundle\.js$/i
   }
-
-  # Custom for precaching by hitting URLs internally
-  config.idseq_precache_base_url = "http://localhost:3000"
 
   ActiveRecordQueryTrace.enabled = true
 

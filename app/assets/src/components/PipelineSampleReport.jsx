@@ -214,7 +214,7 @@ class PipelineSampleReport extends React.Component {
     });
     let params = `?${window.location.search.replace("?", "")}&report_ts=${
       this.report_ts
-    }&git_version=${this.gitVersion}&format=json`;
+    }&version=${this.gitVersion}`;
 
     const [sampleReportInfo, summaryContigCounts] = await Promise.all([
       getSampleReportInfo(this.sampleId, params),
