@@ -27,6 +27,7 @@ class PhyloTreeListView extends React.Component {
         urlParams,
         props.phyloTrees
       ),
+      currentTree: null,
       phyloTreeMap: fromPairs(props.phyloTrees.map(tree => [tree.id, tree])),
       sidebarMode: null,
       sidebarVisible: false,
@@ -49,12 +50,19 @@ class PhyloTreeListView extends React.Component {
     return selectedId;
   }
 
-  handleTreeChange = newPhyloTreeId => {
+  async componentDidMount() {
+    let currentTree = await getPhyloTree(this.state.selectedPhyloTreeId);
+    this.setState({ currentTree });
+  }
+
+  handleTreeChange = async newPhyloTreeId => {
     // TODO (gdingle): do we want to keep using sessionStorage and cookies and urlparams and db saving?!
     window.sessionStorage.setItem("treeId", newPhyloTreeId);
     this.persistInUrl("treeId", newPhyloTreeId);
+    let currentTree = await getPhyloTree(newPhyloTreeId);
     this.setState({
       selectedPhyloTreeId: newPhyloTreeId,
+      currentTree: currentTree,
       sidebarVisible: false
     });
     logAnalyticsEvent("PhyloTreeListView_phylo-tree_changed", {
@@ -103,7 +111,7 @@ class PhyloTreeListView extends React.Component {
     // TODO (gdingle): add analytics tracking?
     let params = parseUrlParams();
     const sampleIds = Object.values(
-      this.getCurrentTree().sampleDetailsByNodeName
+      this.state.currentTree.sampleDetailsByNodeName
     )
       .map(details => details.sample_id)
       .filter(s => !!s);
@@ -130,7 +138,7 @@ class PhyloTreeListView extends React.Component {
   }
 
   handleTaxonModeOpen = () => {
-    const currentTree = this.getCurrentTree();
+    const currentTree = this.state.currentTree;
     if (
       this.state.sidebarMode === "taxonDetails" &&
       this.state.sidebarVisible &&
@@ -210,14 +218,10 @@ class PhyloTreeListView extends React.Component {
     });
   };
 
-  getCurrentTree = () => {
-    return getPhyloTree(this.state.selectedPhyloTreeId);
-  };
-
   render() {
     const { allowedFeatures } = this.props;
 
-    if (!this.state.selectedPhyloTreeId) {
+    if (!this.state.currentTree) {
       return (
         <div className={cs.noTreeBanner}>
           No phylogenetic trees were found. You can create trees from the report
@@ -226,7 +230,7 @@ class PhyloTreeListView extends React.Component {
       );
     }
 
-    let currentTree = this.getCurrentTree();
+    let currentTree = this.state.currentTree;
     return (
       <div className={cs.phyloTreeListView}>
         <NarrowContainer>
