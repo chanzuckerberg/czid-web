@@ -50,7 +50,8 @@ class MapPlayground extends React.Component {
       locationsToItems: locationsToItems,
       viewport: {},
       tooltip: null,
-      tooltipShouldClose: false
+      tooltipShouldClose: false,
+      searchResult: null
     };
   }
 
@@ -131,6 +132,7 @@ class MapPlayground extends React.Component {
 
   handleSearchTriggered = async query => {
     const serverSideSuggestions = await getGeoSearchSuggestions(query);
+    // Semantic UI Search expects results as: `{ category: { name: '', results: [{ title: '', description: '' }] }`
     let categories = {};
     if (serverSideSuggestions.length > 0) {
       const locationsCategory = "Location Results";
@@ -148,19 +150,18 @@ class MapPlayground extends React.Component {
       name: noMatchName,
       results: [{ title: query }]
     };
-    console.log(categories);
     return categories;
   };
 
   handleSearchResultSelected = ({ result }) => {
     // Wrap the string when they don't select from the results list
     if (isString(result)) result = { title: result };
-    this.setState({ search: result });
+    this.setState({ searchResult: result });
   };
 
   render() {
     const { mapTilerKey } = this.props;
-    const { locationsToItems, tooltip, search } = this.state;
+    const { locationsToItems, tooltip, searchResult } = this.state;
 
     return (
       <div>
@@ -173,7 +174,7 @@ class MapPlayground extends React.Component {
             rectangular
             inputMode
           />
-          {search && `Selected: ${JSON.stringify(search)}`}
+          {searchResult && `Selected: ${JSON.stringify(searchResult)}`}
         </div>
         <div className={cs.container}>
           <div className={cs.title}>Map display demo:</div>
