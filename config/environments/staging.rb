@@ -13,7 +13,6 @@ Rails.application.configure do
   # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = true
-  config.cache_store = :file_store, "/tmp/rails_cache_store"
 
   # Attempt to read encrypted secrets from `config/secrets.yml.enc`.
   # Requires an encryption key in `ENV["RAILS_MASTER_KEY"]` or
@@ -81,9 +80,6 @@ Rails.application.configure do
 
   config.action_controller.asset_host = 'staging.idseq.net'
   config.middleware.use Rack::HostRedirect, 'www.staging.idseq.net' => 'staging.idseq.net'
-
-  # Custom for precaching by hitting URLs internally
-  config.idseq_precache_base_url = "https://staging.idseq.net"
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
