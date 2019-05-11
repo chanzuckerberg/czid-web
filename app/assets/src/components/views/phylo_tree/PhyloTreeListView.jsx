@@ -89,16 +89,15 @@ class PhyloTreeListView extends React.Component {
   handleMetadataUpdate = (key, newValue) => {
     // Update the metadata stored locally.
     this.setState({
-      phyloTreeMap: set(
+      currentTree: set(
         [
-          this.state.selectedPhyloTreeId,
           "sampleDetailsByNodeName",
           this.state.selectedPipelineRunId,
           "metadata",
           key
         ],
         newValue,
-        this.state.phyloTreeMap
+        this.state.currentTree
       )
     });
   };
