@@ -84,8 +84,8 @@ class PhyloTreesController < ApplicationController
     pt["parent_taxid"] = TaxonLineage.where(taxid: @phylo_tree.taxid).last.genus_taxid if @phylo_tree.tax_level == 1
 
     nodes = {}
+    # populate metadata for sample nodes
     metadata_by_sample_id = metadata_multiget(@phylo_tree.pipeline_runs.pluck(:sample_id).uniq)
-
     @phylo_tree.pipeline_runs
                .joins(:sample, sample: [:project, :host_genome])
                .select("pipeline_runs.id, samples.name, projects.name as project_name, host_genomes.name as host_genome_name")
@@ -97,11 +97,13 @@ class PhyloTreesController < ApplicationController
         "metadata" => metadata_by_sample_id[pr["sample_id"]]
       }
     end
+    # populate metadata for NCBI nodes
     ncbi_metadata = JSON.parse(@phylo_tree.ncbi_metadata || "{}")
     ncbi_metadata.each do |node_id, node_metadata|
       nodes[node_id] = node_metadata
       nodes[node_id]["name"] ||= node_metadata["accession"]
     end
+    # add node information to phylo_tree json
     pt["sampleDetailsByNodeName"] = nodes
 
     respond_to do |format|
