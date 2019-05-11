@@ -221,13 +221,17 @@ class PhyloTreeListView extends React.Component {
   render() {
     const { allowedFeatures } = this.props;
 
-    if (!this.state.currentTree) {
+    if (!this.state.selectedPhyloTreeId) {
       return (
         <div className={cs.noTreeBanner}>
           No phylogenetic trees were found. You can create trees from the report
           page.
         </div>
       );
+    }
+
+    if (!this.state.currentTree) {
+      return null;
     }
 
     let currentTree = this.state.currentTree;
