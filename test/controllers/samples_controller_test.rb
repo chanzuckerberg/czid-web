@@ -410,7 +410,6 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_params
 
     test_miss("background_id")
-    test_miss("sort_by")
     test_miss("report_ts")
     test_miss("git_version")
   end
@@ -438,7 +437,6 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     query = {
       pipeline_version: nil,
       background_id: rand(10**10..11**10), # ids beyond any conceivable range
-      sort_by: "nt_aggregatescore",
       report_ts: rand(10**10),
       git_version: "constant",
       format: "json"
