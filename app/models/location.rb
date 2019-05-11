@@ -13,4 +13,15 @@ class Location < ApplicationRecord
     end
     [resp.is_a?(Net::HTTPSuccess), JSON.parse(resp.body)]
   end
+
+  def self.find_or_create_by_fields(location_data)
+    key_fields = [:name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng]
+    # Consider the location to already exist if it matches all these fields
+    existing = Location.find_by(key_fields.map { |f| [f, location_data[f]] }.to_h)
+
+    unless existing
+      existing = Location.create(location_data)
+    end
+    existing
+  end
 end

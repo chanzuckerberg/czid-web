@@ -102,6 +102,11 @@ class Metadatum < ApplicationRecord
     errors.add(:raw_value, MetadataValidationErrors::INVALID_DATE)
   end
 
+  def check_and_set_location_type
+    # raw_value will hold JSON location data
+    self.string_validated_value = JSON.parse(raw_value)[:title]
+  end
+
   def self.str_to_basic_chars(res)
     res.downcase.gsub(/[^0-9A-Za-z]/, '')
   end
@@ -265,7 +270,6 @@ class Metadatum < ApplicationRecord
   end
 
   def self.convert_type_to_string(type)
-    puts "FOOBAR: " + type.to_s
     if type == STRING_TYPE
       return "string"
     elsif type == NUMBER_TYPE
