@@ -5,8 +5,8 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
-gem 'airbrake', '~> 8.3.2'
-gem 'airbrake-ruby'
+gem 'airbrake', '~> 9.2.2'
+gem 'airbrake-ruby', '~> 4.4'
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
 gem 'brakeman'

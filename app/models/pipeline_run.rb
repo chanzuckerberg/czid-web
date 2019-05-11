@@ -790,7 +790,6 @@ class PipelineRun < ApplicationRecord
 
     # Check if run is complete:
     if all_output_states_terminal?
-      run_time = Time.current - created_at
 
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
@@ -849,7 +848,8 @@ class PipelineRun < ApplicationRecord
       if prs.failed?
         self.job_status = STATUS_FAILED
         self.finalized = 1
-        LogUtil.log_err_and_airbrake("SampleFailedEvent: Sample #{sample.id} failed #{prs.name}")
+        message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.email} failed #{prs.name} with #{adjusted_remaining_reads} reads remaining after #{duration_hrs}. See: #{status_url}"
+        LogUtil.log_err_and_airbrake(message)
       elsif !prs.started?
         # we're moving on to a new stage
         prs.run_job
@@ -871,9 +871,16 @@ class PipelineRun < ApplicationRecord
     stage ? "Running #{stage}" : self.job_status
   end
 
+  def run_time
+    Time.current - created_at
+  end
+
+  def duration_hrs
+    (run_time / 60 / 60).round(2)
+  end
+
   def check_and_log_long_run
     # Check for long-running pipeline runs and log/alert if needed:
-    run_time = Time.current - created_at
     tags = ["sample_id:#{sample.id}"]
     # DEPRECATED. Use log_analytics_event.
     MetricUtil.put_metric_now("samples.running.run_time", run_time, tags, "gauge")
@@ -881,7 +888,6 @@ class PipelineRun < ApplicationRecord
     if alert_sent.zero?
       threshold = 8.hours
       if run_time > threshold
-        duration_hrs = (run_time / 60 / 60).round(2)
         msg = "LongRunningSampleEvent: Sample #{sample.id} has been running for #{duration_hrs} hours. #{job_status_display}."
         LogUtil.log_err_and_airbrake(msg)
         update(alert_sent: 1)
@@ -1389,5 +1395,14 @@ class PipelineRun < ApplicationRecord
 
   def self.viewable(user)
     where(sample_id: Sample.viewable(user).pluck(:id))
+  end
+
+  def status_url
+    base_url = if Rails.env == 'staging'
+                 "https://staging.idseq.net"
+               else
+                 "https://idseq.net"
+               end
+    base_url + "/samples/#{sample.id}/pipeline_runs"
   end
 end

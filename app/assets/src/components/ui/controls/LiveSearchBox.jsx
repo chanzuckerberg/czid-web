@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Search } from "semantic-ui-react";
+import cx from "classnames";
 import cs from "./live_search_box.scss";
 
 class LiveSearchBox extends React.Component {
@@ -10,18 +11,23 @@ class LiveSearchBox extends React.Component {
     this.state = {
       isLoading: false,
       results: [],
-      value: this.props.initialValue
+      value: this.props.initialValue,
+      selectedResult: null
     };
 
     this.lastestTimerId = null;
   }
 
   handleKeyDown = keyEvent => {
-    const { onEnter } = this.props;
-    const { value } = this.state;
+    const { onEnter, inputMode } = this.props;
+    const { value, selectedResult } = this.state;
 
-    if (keyEvent.key == "Enter") {
-      onEnter({ current: keyEvent, value });
+    if (keyEvent.key === "Enter") {
+      if (inputMode && !selectedResult) {
+        // In input mode, if they didn't select anything, count it as submitting what they entered.
+        this.handleResultSelect(keyEvent, { result: value });
+      }
+      onEnter && onEnter({ current: keyEvent, value });
     }
   };
 
@@ -34,9 +40,17 @@ class LiveSearchBox extends React.Component {
   };
 
   handleResultSelect = (currentEvent, { result }) => {
-    const { onResultSelect } = this.props;
+    const { onResultSelect, inputMode } = this.props;
 
-    this.resetComponent();
+    if (!inputMode) {
+      this.resetComponent();
+    } else {
+      // In input mode, keep 'value' in the box.
+      this.setState({
+        isLoading: false,
+        results: []
+      });
+    }
     onResultSelect && onResultSelect({ currentEvent, result });
   };
 
@@ -44,7 +58,7 @@ class LiveSearchBox extends React.Component {
     const { onSearchTriggered } = this.props;
     const { value } = this.state;
 
-    this.setState({ isLoading: true });
+    this.setState({ isLoading: true, selectedResult: null });
 
     const timerId = this.lastestTimerId;
     const results = await onSearchTriggered(value);
@@ -75,18 +89,24 @@ class LiveSearchBox extends React.Component {
     }
   };
 
+  handleSelectionChange = (e, { result }) => {
+    this.setState({ selectedResult: result });
+  };
+
   render() {
+    const { placeholder, rectangular } = this.props;
     const { isLoading, value, results } = this.state;
 
     return (
       <Search
         category
-        className={cs.liveSearchBox}
+        className={cx(cs.liveSearchBox, rectangular && cs.rectangular)}
         loading={isLoading}
         onKeyDown={this.handleKeyDown}
         onResultSelect={this.handleResultSelect}
         onSearchChange={this.handleSearchChange}
-        placeholder="Search"
+        onSelectionChange={this.handleSelectionChange}
+        placeholder={placeholder}
         results={results}
         showNoResults={false}
         value={value}
@@ -98,16 +118,22 @@ class LiveSearchBox extends React.Component {
 LiveSearchBox.defaultProps = {
   delayTriggerSearch: 1000,
   initialValue: "",
-  minChars: 2
+  minChars: 2,
+  placeholder: "Search",
+  rectangular: false,
+  inputMode: false
 };
 
 LiveSearchBox.propTypes = {
   initialValue: PropTypes.string,
   delayTriggerSearch: PropTypes.number,
   minChars: PropTypes.number,
+  placeholder: PropTypes.string,
   onEnter: PropTypes.func,
   onSearchTriggered: PropTypes.func.isRequired,
-  onResultSelect: PropTypes.func
+  onResultSelect: PropTypes.func,
+  rectangular: PropTypes.bool,
+  inputMode: PropTypes.bool
 };
 
 export default LiveSearchBox;

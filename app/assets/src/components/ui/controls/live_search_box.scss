@@ -16,9 +16,17 @@
     }
   }
 
-  :global(.prompt) {
-    width: 260px !important;
-    border-radius: 19px !important;
+  &.rectangular {
+    :global(.prompt) {
+      border-radius: 4px;
+    }
+  }
+
+  &:not(.rectangular) {
+    :global(.prompt) {
+      width: 260px !important;
+      border-radius: 19px !important;
+    }
   }
 
   &:global(.ui.category.search) {

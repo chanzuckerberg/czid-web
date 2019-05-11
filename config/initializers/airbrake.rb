@@ -71,6 +71,13 @@ if ENV['AIRBRAKE_PROJECT_ID'] && ENV['AIRBRAKE_PROJECT_KEY']
     if resource.route.include?('health_check')
       resource.ignore!
     end
+    # Ignore CZI users from perf stats because they tend to be outliers
+    if resource.stash.key?(:user)
+      email = resource.stash[:user][:email]
+      if !email.nil? && ["chanzuckerberg.com"].include?(email.split("@").last)
+        resource.ignore!
+      end
+    end
   end
 
   # If you want to convert your log messages to Airbrake errors, we offer an
