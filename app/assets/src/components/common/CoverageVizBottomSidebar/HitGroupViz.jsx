@@ -3,7 +3,9 @@ import PropTypes from "prop-types";
 import ReactDOM from "react-dom";
 import cx from "classnames";
 import copy from "copy-to-clipboard";
+import { get, map, sum, size } from "lodash/fp";
 
+import { withAnalytics } from "~/api/analytics";
 import { DataTooltip } from "~ui/containers";
 import BasicPopup from "~/components/BasicPopup";
 import GenomeViz from "~/components/visualizations/GenomeViz";
@@ -19,6 +21,9 @@ import { generateContigReadVizData, getGenomeVizTooltipData } from "./utils";
 const DEFAULT_CONTIG_COPY_MESSAGE = "Copy Contig Sequence to Clipboard";
 const READ_FILL_COLOR = "#A9BDFC";
 const CONTIG_FILL_COLOR = "#3867FA";
+
+const totalByterangeLength = byteranges =>
+  sum(map(range => range[1], byteranges));
 
 export default class HitGroupViz extends React.Component {
   state = {
@@ -194,7 +199,8 @@ export default class HitGroupViz extends React.Component {
   };
 
   renderContigDownloader = () => {
-    const { contigDownloaderLocation } = this.state;
+    const { sampleId, taxonId, accessionData } = this.props;
+    const { contigDownloaderLocation, contigDownloaderData } = this.state;
 
     return ReactDOM.createPortal(
       <div
@@ -209,7 +215,21 @@ export default class HitGroupViz extends React.Component {
           trigger={
             <div
               className={cx(cs.icon, cs.downloadIcon)}
-              onClick={this.handleContigDownload}
+              onClick={withAnalytics(
+                this.handleContigDownload,
+                "HitGroupViz_contig-download-button_clicked",
+                {
+                  numBytes: totalByterangeLength(
+                    get("contigByteranges", contigDownloaderData)
+                  ),
+                  numContigs: size(
+                    get("contigByteranges", contigDownloaderData)
+                  ),
+                  accessionId: accessionData.id,
+                  taxonId,
+                  sampleId
+                }
+              )}
             >
               <DownloadIcon />
             </div>
@@ -217,13 +237,26 @@ export default class HitGroupViz extends React.Component {
           inverted
           wide="very"
           content="Download Contig FASTA"
-          onClick={this.handleContigDownload}
         />
         <BasicPopup
           trigger={
             <div
               className={cx(cs.icon, cs.copyIcon)}
-              onClick={this.handleContigCopy}
+              onClick={withAnalytics(
+                this.handleContigCopy,
+                "HitGroupViz_contig-copy-button_clicked",
+                {
+                  numBytes: totalByterangeLength(
+                    get("contigByteranges", contigDownloaderData)
+                  ),
+                  numContigs: size(
+                    get("contigByteranges", contigDownloaderData)
+                  ),
+                  accessionId: accessionData.id,
+                  taxonId,
+                  sampleId
+                }
+              )}
               onMouseEnter={this.restoreCopyIconMessage}
             >
               <CopyIcon />
@@ -281,10 +314,12 @@ HitGroupViz.propTypes = {
         ])
       )
     ),
+    id: PropTypes.number,
     max_aligned_length: PropTypes.number,
     name: PropTypes.string,
     total_length: PropTypes.number
   }),
   sampleId: PropTypes.number,
+  taxonId: PropTypes.number,
   pipelineVersion: PropTypes.string
 };

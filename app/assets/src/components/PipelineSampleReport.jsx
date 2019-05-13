@@ -852,7 +852,7 @@ class PipelineSampleReport extends React.Component {
         coverageVizEnabled={coverageVizEnabled}
         onCoverageVizClick={withAnalytics(
           this.handleCoverageVizClick,
-          "PipelineSampleReport_coverage-vis-link_clicked",
+          "PipelineSampleReport_coverage-viz-link_clicked",
           analyticsContext
         )}
         contigVizEnabled={contigVizEnabled}
