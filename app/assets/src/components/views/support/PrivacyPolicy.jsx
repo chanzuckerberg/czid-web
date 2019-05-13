@@ -60,7 +60,9 @@ export default class PrivacyPolicy extends React.Component {
           want to upload onto IDseq. Please note: IDseq is not designed for or
           directed toward children under the age of sixteen.
         </p>
-        <h3>1. Upload Data</h3>
+        <h2>
+          <span className={cs.number}>1.</span>Upload Data.
+        </h2>
         <p className={cs.large}>
           “<b>Upload Data</b>” is data that Users upload to IDseq (other than
           the information Users provide during registration to create an
@@ -75,9 +77,9 @@ export default class PrivacyPolicy extends React.Component {
           with the Services.
         </p>
         <p className={cs.large}>
-          <div>
-            <u>What Is Upload Data?</u>
-          </div>
+          <div className={cs.underlineHeader}>What Is Upload Data?</div>
+        </p>
+        <p className={cs.large}>
           Upload Data includes Sample Data and Sample Metadata.
         </p>
         <ul>
@@ -104,9 +106,9 @@ export default class PrivacyPolicy extends React.Component {
           </li>
         </ul>
         <p className={cs.large}>
-          <div>
-            <u>How We Use Upload Data</u>
-          </div>
+          <div className={cs.underlineHeader}>How We Use Upload Data</div>
+        </p>
+        <p className={cs.large}>
           Upload Data is used for the following purposes:
           <ul>
             <li>
@@ -124,9 +126,7 @@ export default class PrivacyPolicy extends React.Component {
           </b>
         </p>
         <p className={cs.large}>
-          <div>
-            <u>How We Share Upload Data</u>
-          </div>
+          <div className={cs.underlineHeader}>How We Share Upload Data</div>
         </p>
         <p className={cs.large}>
           Sample Data and Sample Metadata are shared back to the Users that
@@ -151,6 +151,122 @@ export default class PrivacyPolicy extends React.Component {
           your Sample Data will continue to remain available only to you and
           anyone you have decided to share it with.
         </p>
+        <p className={cs.large}>
+          Sample Data and Metadata is also shared as described in the section on
+          Partners, Vendors, and Other Third Parties below.
+        </p>
+        <p className={cs.large}>
+          <div className={cs.underlineHeader}>
+            What’s our legal basis to use and share Upload Data?
+          </div>
+        </p>
+        <p className={cs.large}>
+          To the extent that the European Union’s General Data Protection
+          Regulation (“GDPR”) applies, we rely on the following legal bases to
+          use and share personal data within Upload Data:
+        </p>
+        <ul>
+          <li>
+            The explicit consent of the individual whose data is being analyzed,
+            where such consent has been obtained by the User in accordance with
+            the GDPR; and
+          </li>
+          <li>
+            The public interest and our and our Users’ legitimate interest in
+            investigating and stopping the spread of infectious diseases and
+            promoting global health. The use and sharing of personal data within
+            Upload Data furthers the public interest in the area of public
+            health, particularly by helping to protect against serious
+            cross-border threats to health. The processing of personal data
+            within Upload Data is also necessary for scientific research
+            purposes.
+          </li>
+        </ul>
+        <h2>
+          <span className={cs.number}>2.</span>Report Data.
+        </h2>
+        <p className={cs.large}>
+          Report Data is information IDseq produced from Upload Data. We
+          generate Report Data by processing Upload Data through our Data
+          Pipeline. The “<b>Data Pipeline</b>” cleans (e.g., by removing
+          duplicate nucleotides) and analyzes (e.g., by matching Sample Data
+          nucleotide sequences with known pathogen sequences) the Upload Data.
+          Report Data may include, for example, data about the pathogen
+          sequences identified in the Sample Data and the frequency of such
+          identification (“<b>Pathogen Data</b>”) or raw numeric counts of
+          non-personally identifying gene expression profiles that were found in
+          the Sample Data (“<b>Gene Counts</b>”).
+        </p>
+        <p className={cs.large}>
+          Once Sample Data has been put through the Data Pipeline, the Report
+          Data that is produced no longer includes any human genetic sequence
+          data, and is not personal data, and does not, on its own, permit
+          association with any specific individual. You should not be able to
+          find any human sequence data in IDseq other than those embedded in
+          samples you yourself have uploaded. This is because we filter out and
+          remove host sequence data in order to generate Reports. If you are
+          able to find human sequence data elsewhere in IDseq, please let us
+          know at privacy@idseq.net and we will address it.
+        </p>
+        <p className={cs.large}>
+          <div className={cs.underlineHeader}>Who can see Report Data?</div>
+        </p>
+        <p className={cs.large}>
+          After 1 year from upload of originating Sample Data, Report Data is
+          visible to all IDseq Users, and they may share it with others beyond
+          IDseq.
+        </p>
+        <h2>
+          <span className={cs.number}>3.</span>Visitor and User Data.
+        </h2>
+        <p className={cs.large}>
+          Visitor and User Data is the information we collect from you and your
+          use of IDseq.
+        </p>
+        <p className={cs.large}>
+          <div className={cs.underlineHeader}>What We Collect</div>
+        </p>
+        <ul>
+          <li>
+            <span className={cs.listItemLabel}>Visitor Data.</span>
+            This is information collected from visitors to our website, whether
+            or not they are Users (“<b>Visitor Data</b>”).
+          </li>
+          <li>
+            <span className={cs.listItemLabel}>User Data.</span>
+            User Data is any information we collect from a User about that User
+            (“<b>User Data</b>”). It may include information necessary to create
+            or access your account such as your name, username, email address,
+            and login credentials.
+          </li>
+          <li>
+            When Visitors and Users visit or use our Service, we may
+            automatically collect Device Data or Analytics Information. “<b>
+              Device Data
+            </b>” includes information about your browser type and operating
+            system, IP address and/or device ID, including basic analytics from
+            your device or browser. “<b>Analytics Information</b>” relates to
+            any of your requests, queries, or use of the Services, such as the
+            amount of time spent viewing particular web pages. We use{" "}
+            <a href="">Google Analytics</a> for this service. Visitor Data may
+            also include information we collect about you when you visit our
+            website or use the Services, including through the use of cookies,
+            web beacons, and other technologies.
+          </li>
+          <li>
+            <span className={cs.listItemLabel}>
+              Cookies, Web Beacons, and other Technologies.
+            </span>
+            A cookie is a small file that may be stored on your computer or
+            other device. Web beacons and similar technologies are small bits of
+            code embedded in web pages, ads, and email that communicate with
+            third parties. We use these technologies to recognize your device
+            and browser and do things such as keep you logged in or to
+            understand usage patterns by Users and Visitors to our Services. We
+            do not use cookies to service third party ads. For more information
+            about our cookies use, please see our <a href="">FAQ</a>.
+          </li>
+        </ul>
       </NarrowContainer>
     );
   }

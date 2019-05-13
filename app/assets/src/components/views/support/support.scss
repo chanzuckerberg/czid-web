@@ -66,6 +66,12 @@
       }
     }
   }
+
+  .underlineHeader {
+    @include font-body-m;
+    margin-top: 25px;
+    text-decoration: underline;
+  }
 }
 
 .faqPage .question {
