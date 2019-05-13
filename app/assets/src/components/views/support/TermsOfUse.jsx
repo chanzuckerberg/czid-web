@@ -29,12 +29,14 @@ export default class TermsOfUse extends React.Component {
           sequencing data and to help further the study of infectious diseases.
         </p>
         <p className={cs.large}>
-          Please carefully read these terms and indicate your acceptance by
-          registering for IDseq. If you do not agree to these Terms, do not
-          register for an account or use IDseq and do not use it. For more
-          information about our privacy practices, please see the “<b>
-            <a href="">Privacy Notice</a>
-          </b>”).
+          <b>
+            Please carefully read these terms and indicate your acceptance by
+            registering for IDseq. If you do not agree to these Terms, do not
+            register for an account or use IDseq and do not use it. For more
+            information about our privacy practices, please see the “<a href="">
+              Privacy Notice
+            </a>”).
+          </b>
         </p>
         <h3>About IDseq</h3>
         <p className={cs.large}>
@@ -144,8 +146,8 @@ export default class TermsOfUse extends React.Component {
             <span className={cs.listItemLabel}>
               1.1 Use of Your Upload Data.
             </span>
-            We need limited rights to your Upload Data solely in order to offer
-            IDseq for you and other Users. Specifically, you grant to us a
+            We need limited rights to your Upload Data <u>solely</u> in order to
+            offer IDseq for you and other Users. Specifically, you grant to us a
             worldwide, non-exclusive, royalty-free, transferable (in accordance
             with Section 9.2 below), perpetual and irrevocable (except as set
             forth herein), license (with the right to grant further licenses) to
@@ -548,10 +550,15 @@ export default class TermsOfUse extends React.Component {
           </li>
         </ul>
         <h2>
-          <span className={cs.number}>10.</span>Contact Information. If you have
-          any questions, comments, or concerns with Terms, you may contact us at
-          help@idseq.net or by physical mail at the addresses in the FAQ.
+          <span className={cs.number}>10.</span> Contact Information.
         </h2>
+        <ul>
+          <li>
+            If you have any questions, comments, or concerns with Terms, you may
+            contact us at help@idseq.net or by physical mail at the addresses in
+            the FAQ.
+          </li>
+        </ul>
       </NarrowContainer>
     );
   }
