@@ -66,22 +66,6 @@
       }
     }
   }
-
-  b {
-    font-weight: $font-weight-semibold;
-  }
-
-  .quoteBold {
-    font-weight: $font-weight-semibold;
-
-    &:before {
-      content: '"';
-    }
-
-    &:after {
-      content: '"';
-    }
-  }
 }
 
 .faqPage .question {
