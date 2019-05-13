@@ -48,7 +48,8 @@
   }
 
   a {
-    color: $primary-light;
+    // Override _header.scss
+    color: $primary-light !important;
   }
 
   ul {
@@ -63,6 +64,22 @@
         font-weight: 600;
         margin-right: 5px;
       }
+    }
+  }
+
+  b {
+    font-weight: $font-weight-semibold;
+  }
+
+  .quoteBold {
+    font-weight: $font-weight-semibold;
+
+    &:before {
+      content: '"';
+    }
+
+    &:after {
+      content: '"';
     }
   }
 }
