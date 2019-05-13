@@ -71,13 +71,10 @@ if ENV['AIRBRAKE_PROJECT_ID'] && ENV['AIRBRAKE_PROJECT_KEY']
     if resource.route.include?('health_check')
       resource.ignore!
     end
-  end
-
-  # Ignore CZI users from perf stats because they tend to be outliers
-  Airbrake.add_performance_hook do |resource|
+    # Ignore CZI users from perf stats because they tend to be outliers
     if resource.stash.key?(:user)
       email = resource.stash[:user][:email]
-      if email.present? && ["chanzuckerberg.com"].include?(email.split("@").last)
+      if !email.nil? && ["chanzuckerberg.com"].include?(email.split("@").last)
         resource.ignore!
       end
     end
