@@ -24,8 +24,11 @@ Rails.application.configure do
 
   # Configure caching to be the same as development
   config.action_controller.perform_caching = true
-  # TODO: (gdingle):
-  # config.cache_store = :redis_cache_store, { url: ENV['REDIS_URL'] }
+  config.cache_store = :redis_store, 'redis://redis:6379/0/cache',
+                       {
+                         # Needed for redis to evict keys in volatile-lru mode
+                         expires_in: 365.days
+                       }
 
   # Raise exceptions instead of rendering exception templates.
   config.action_dispatch.show_exceptions = false

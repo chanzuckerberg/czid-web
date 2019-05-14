@@ -13,9 +13,11 @@ Rails.application.configure do
   # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = true
-  # TODO: (gdingle):
-  # config.cache_store = :redis_cache_store, { url: ENV['REDIS_URL'] }
-  # config.cache_store = :file_store, "/tmp/rails_cache_store"
+  config.cache_store = :redis_store, ENV['REDISCLOUD_URL'] + '/0/cache',
+                       {
+                         # Needed for redis to evict keys in volatile-lru mode
+                         expires_in: 365.days
+                       }
 
   # Attempt to read encrypted secrets from `config/secrets.yml.enc`.
   # Requires an encryption key in `ENV["RAILS_MASTER_KEY"]` or

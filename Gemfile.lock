@@ -18,8 +18,6 @@ GEM
       rack-test (>= 0.6.3)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.0, >= 1.0.2)
-    actionpack-action_caching (1.2.0)
-      actionpack (>= 4.0.0, < 6)
     actionview (5.1.6.2)
       activesupport (= 5.1.6.2)
       builder (~> 3.1)
@@ -957,8 +955,24 @@ GEM
       ffi (~> 1.0)
     rbtree3 (0.5.0)
     redis (4.1.0)
+    redis-actionpack (5.0.2)
+      actionpack (>= 4.0, < 6)
+      redis-rack (>= 1, < 3)
+      redis-store (>= 1.1.0, < 2)
+    redis-activesupport (5.0.7)
+      activesupport (>= 3, < 6)
+      redis-store (>= 1.3, < 2)
     redis-namespace (1.6.0)
       redis (>= 3.0.4)
+    redis-rack (2.0.5)
+      rack (>= 1.5, < 3)
+      redis-store (>= 1.2, < 2)
+    redis-rails (5.0.2)
+      redis-actionpack (>= 5.0, < 6)
+      redis-activesupport (>= 5.0, < 6)
+      redis-store (>= 1.2, < 2)
+    redis-store (1.6.0)
+      redis (>= 2.2, < 5)
     request_store (1.4.1)
       rack (>= 1.4)
     responders (2.4.1)
@@ -1078,7 +1092,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  actionpack-action_caching
   active_record_query_trace
   activerecord-import
   activesupport
@@ -1118,6 +1131,7 @@ DEPENDENCIES
   rails (~> 5.1.5)
   rails-controller-testing
   rake
+  redis-rails (~> 5)
   resque (>= 1.27.4)
   resque-lock
   resque-scheduler (>= 4.3.1)
