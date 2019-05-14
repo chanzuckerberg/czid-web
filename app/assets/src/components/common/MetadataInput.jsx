@@ -46,7 +46,15 @@ class MetadataInput extends React.Component {
         />
       );
     } else if (metadataType.dataType === "location") {
-      return <GeoSearchInputBox />;
+      return (
+        <GeoSearchInputBox
+          className={className}
+          onChange={val => onChange(metadataType.key, val)}
+          onBlur={() => onSave && onSave(metadataType.key)}
+          value={value}
+          type="text"
+        />
+      );
     } else {
       return (
         <Input
