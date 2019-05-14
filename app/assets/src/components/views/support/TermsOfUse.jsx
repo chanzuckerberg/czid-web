@@ -5,12 +5,12 @@ import cs from "./support.scss";
 export default class TermsOfUse extends React.Component {
   render() {
     return (
-      // TODO: Fill in all links.
       <NarrowContainer className={cs.termsOfUse} size="small">
         <div className={cs.title}>
           <h1>IDseq Terms of Use</h1>
           <h4 className={cs.subtitle}>
-            Last Updated: <a href="">May 10, 2019</a>. <a href="/faqs">FAQ</a>.
+            {/*TODO: Link to recent changes here*/}
+            Last Updated: May 13, 2019. <a href="/faqs">FAQ</a>.
           </h4>
         </div>
         <p className={cs.large}>
