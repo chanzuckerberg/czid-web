@@ -85,10 +85,17 @@
     margin-top: 0;
     margin-bottom: 0;
     padding: 0 10px;
-    line-height: 50px;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
 
     &:hover {
       color: $primary-light;
+    }
+
+    &.multiLine {
+      margin-top: 15px;
+      margin-bottom: 15px;
     }
   }
 

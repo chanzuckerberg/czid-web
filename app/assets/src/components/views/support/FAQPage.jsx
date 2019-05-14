@@ -128,7 +128,7 @@ export default class FAQPage extends React.Component {
         <Accordion
           className={cs.question}
           header={
-            <h3>
+            <h3 className={cs.multiLine}>
               What Metadata about the uploaded samples do you collect, and how
               do you make sure the metadata is non-identifiable?
             </h3>
@@ -171,7 +171,7 @@ export default class FAQPage extends React.Component {
         <Accordion
           className={cs.question}
           header={
-            <h3>
+            <h3 className={cs.multiLine}>
               Under what circumstances would IDseq transfer rights to the data?
               Why, and what choices would I have?
             </h3>
