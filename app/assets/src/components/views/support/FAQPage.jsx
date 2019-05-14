@@ -217,6 +217,142 @@ export default class FAQPage extends React.Component {
         </Accordion>
         <Accordion
           className={cs.question}
+          header={<h3>Do you use Cookies in IDseq?</h3>}
+        >
+          <p>
+            Yes, we use cookies and similar technologies to provide and improve
+            the IDseq service. We do not use cookies for advertising purposes.
+          </p>
+          <p>
+            Cookies are small text files sent by your computer or device each
+            time you visit our website. They are stored in your browser’s cache
+            or mobile device and allow a website or a third party to recognize
+            your browser. Some of the cookies we use are associated with your
+            IDSeq account (including information about you, such as the email
+            address you gave us) and other cookies are not. We use three
+            different types of cookies:
+          </p>
+          <ul>
+            <li>
+              <span className={cs.listItemLabel}>Session cookies</span> are
+              specific to a particular visit you make to IDSeq and hold certain
+              information as you browse different pages so you don’t have to
+              re-enter information every time you change pages. Session cookies
+              expire and delete themselves automatically in a short period of
+              time like after you leave IDSeq or when you close your web
+              browser.
+            </li>
+          </ul>
+          <ul>
+            <li>
+              <span className={cs.listItemLabel}>Persistent cookies</span>{" "}
+              remember certain information about your preferences for viewing
+              Meta and allow us to recognise you each time you return.
+              Persistent cookies are stored on your browser cache or mobile
+              device until you choose to delete them, and otherwise delete
+              themselves in a standard period of time.
+            </li>
+          </ul>
+          <ul>
+            <li>
+              <span className={cs.listItemLabel}>Third party cookies</span> are
+              a type of persistent cookie and are placed by someone other than
+              us. These cookies may gather browsing activity across multiple
+              websites and across multiple sessions. They are stored until you
+              delete them or expire based on the time period set in each third
+              party cookie.
+            </li>
+          </ul>
+          <p>
+            We partner with third-party analytics providers (such as Google and
+            Segment), which set cookies when you visit our websites. These
+            cookies collect information, such as how often users visit our
+            websites, what pages they visit, and what other sites they used
+            prior to coming to our websites. We use this information to improve
+            our Services. Please see how you can control or limit how we and our
+            partners use cookies below, under “Do I have choices with respect to
+            cookies?”
+          </p>
+        </Accordion>
+        <Accordion
+          className={cs.question}
+          header={<h3>Why do you use cookies?</h3>}
+        >
+          <p>
+            We use cookies to help operate and make our Services function
+            securely:
+          </p>
+          <ul>
+            <li>
+              <span className={cs.listItemLabel}>
+                Authentication and security.
+              </span>{" "}
+              Cookies and similar technologies help us verify your account and
+              device to maintain the security, safety, and integrity of our
+              Services. For example, we use cookies to help prevent the
+              fraudulent use of your login credentials.
+            </li>
+            <li>
+              <span className={cs.listItemLabel}>
+                Account and user preferences.
+              </span>{" "}
+              We use some technologies to remember your account and preferences
+              over time so that we can make it easier for you to access the
+              Services and provide you with the experiences and features you
+              desire. For example, we use cookies to persist some report
+              filtering settings.
+            </li>
+            <li>
+              <span className={cs.listItemLabel}>
+                Performance and analytics.
+              </span>{" "}
+              Cookies and similar technologies help us analyze how the Services
+              are being accessed and used, and enable us to track the
+              performance of the Services. This gives us the information we need
+              to improve your experience on our Services.
+            </li>
+          </ul>
+        </Accordion>
+        <Accordion
+          className={cs.question}
+          header={<h3>Do I have choices with respect to cookies?</h3>}
+        >
+          <p>
+            You have options to control or limit how we and our partners use
+            cookies and similar technologies.
+          </p>
+          <ul>
+            <li>
+              Although most browsers and devices accept cookies by default,
+              their settings usually allow you to clear or decline cookies. Note
+              that if you disable cookies, however, some of the features of our
+              Services may not function properly.
+            </li>
+            <li>
+              To learn more about how to opt out of Google’s use of cookies
+              either as part of AdWords or Analytics services, you may visit{" "}
+              <a href="https://adssettings.google.com/">
+                Google’s Ads Settings
+              </a>{" "}
+              and “<a href="https://policies.google.com/privacy/partners">
+                How Google Uses Information From Sites or Apps That Use Our
+                Services
+              </a>”. You will be able to prevent your data from being used by
+              Google Analytics by installing Google’s opt-out browser add-on
+              from the{" "}
+              <a href="https://tools.google.com/dlpage/gaoptout">
+                Google Analytics Opt-out Page
+              </a>.
+            </li>
+            <li>
+              To learn more about how to opt out of the use of cookies and
+              similar technologies, generally, visit the Network Advertising
+              Initiative and the Digital Advertising Alliance.
+            </li>
+          </ul>
+        </Accordion>
+        <Accordion
+          className={cs.question}
           header={
             <h3>Which Third Party Vendors Will Get Access to My Data?</h3>
           }

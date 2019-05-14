@@ -72,6 +72,10 @@
     margin-top: 25px;
     text-decoration: underline;
   }
+
+  b {
+    font-weight: $font-weight-semibold;
+  }
 }
 
 .faqPage .question {

@@ -50,7 +50,7 @@ export default class TermsOfUse extends React.Component {
           below). This data may contain human and non-human genetic sequences (“<b
           >
             Sample Data
-          </b>”; as further defined below), as well as information about those
+          </b>” as further defined below), as well as information about those
           sequences, such as the date the sample was collected and the species
           it was collected from (“<b>Sample Metadata</b>” as further defined
           below). For example, a researcher might upload genetic information
