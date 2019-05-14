@@ -1,9 +1,21 @@
 class Location < ApplicationRecord
+  def self.location_api_request(endpoint_query)
+    raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
+
+    query_url = "https://us1.locationiq.com/v1/#{endpoint_query}&key=#{ENV['LOCATION_IQ_API_KEY']}"
+    uri = URI.parse(query_url)
+    request = Net::HTTP::Get.new(uri)
+    resp = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https") do |http|
+      http.request(request)
+    end
+    [resp.is_a?(Net::HTTPSuccess), JSON.parse(resp.body)]
+  end
+
   # Search request to Location IQ API
   def self.geosearch(query)
     raise ArgumentError, "No query for geosearch" if query.blank?
-    query_strings = "&format=json&addressdetails=1&normalizecity=1&q=#{query}"
-    location_api_request(query_strings)
+    endpoint_query = "search.php?format=json&addressdetails=1&normalizecity=1&q=#{query}"
+    location_api_request(endpoint_query)
   end
 
   def self.find_by_params(location_params)
@@ -21,24 +33,21 @@ class Location < ApplicationRecord
   end
 
   def self.find_or_create_by_fields(location_params)
-    unless find_by(params: location_params)
+    unless Location.find_by(params: location_params)
       return create_from_params(location_params)
     end
   end
 
-  def self.location_api_request(query_strings)
-    raise "No API key for geosearch" unless ENV['LOCATION_IQ_API_KEY']
-
-    base_url = "https://us1.locationiq.com/v1/search.php?key=#{ENV['LOCATION_IQ_API_KEY']}"
-    query_url = base_url + query_strings
-    uri = URI.parse(query_url)
-    request = Net::HTTP::Get.new(uri)
-    resp = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |http|
-      http.request(request)
-    end
-    [resp.is_a?(Net::HTTPSuccess), JSON.parse(resp.body)]
+  def self.geosearch_by_osm_id(osm_id, osm_type)
+    osm_type = osm_type[0].capitalize # (N)ode, (W)ay, or (R)elation
+    endpoint_query = "reverse.php?osm_id=#{osm_id}&osm_type=#{osm_type}&format=json"
+    location_api_request(endpoint_query)
   end
 
-  def self.find_or_create_by_osm_id(_osm_id, _osm_type)
+  def self.find_or_create_by_osm_id(osm_id, osm_type)
+    success, resp = geosearch_by_osm_id(osm_id, osm_type)
+    raise "Couldn't fetch OSM ID #{osm_id} (#{osm_type})" unless success
+
+    find_or_create_by_fields(resp)
   end
 end
