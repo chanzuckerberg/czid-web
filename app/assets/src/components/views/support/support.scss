@@ -27,6 +27,13 @@
   h3 {
     @include font-header-m;
     margin-top: 30px;
+    position: relative;
+
+    .number {
+      position: absolute;
+      right: 100%;
+      margin-right: 8px;
+    }
   }
 
   h4.subtitle {
