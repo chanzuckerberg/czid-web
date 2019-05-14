@@ -1,9 +1,9 @@
 class AddSRosettaHost < ActiveRecord::Migration[5.1]
   def up
-    return if HostGenome.find_by(name: "Salpingoeca Rosetta")
+    return if HostGenome.find_by(name: "Salpingoeca rosetta")
 
     hg = HostGenome.new
-    hg.name = "Salpingoeca Rosetta"
+    hg.name = "Salpingoeca rosetta"
     hg.s3_star_index_path = "s3://idseq-database/host_filter/salpingoeca_rosetta/2019-05-13/s-rosetta_STAR_genome.tar"
     hg.s3_bowtie2_index_path = "s3://idseq-database/host_filter/salpingoeca_rosetta/2019-05-13/s-rosetta_bowtie2_genome.tar"
 
@@ -16,7 +16,7 @@ class AddSRosettaHost < ActiveRecord::Migration[5.1]
   end
 
   def down
-    hg = HostGenome.find_by(name: "Salpingoeca Rosetta")
+    hg = HostGenome.find_by(name: "Salpingoeca rosetta")
     hg.destroy if hg
   end
 end
