@@ -35,7 +35,9 @@ class Location < ApplicationRecord
   end
 
   def self.find_or_create_by_fields(location_params)
-    unless Location.find_by(params: location_params)
+    puts "FOOBAR"
+    puts location_params
+    unless Location.find_by_params(location_params)
       return create_from_params(location_params)
     end
   end
@@ -50,7 +52,7 @@ class Location < ApplicationRecord
     success, resp = geosearch_by_osm_id(osm_id, osm_type)
     raise "Couldn't fetch OSM ID #{osm_id} (#{osm_type})" unless success
 
-    resp = adapt_location_iq_response(resp)
+    resp = LocationHelper.adapt_location_iq_response(resp)
     find_or_create_by_fields(resp)
   end
 end
