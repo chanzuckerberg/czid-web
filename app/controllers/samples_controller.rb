@@ -58,6 +58,7 @@ class SamplesController < ApplicationController
   # before_action filters placed after the caches_action directive will not run
   # when serving from the cache.
   # caches_action :report_info, cache_path: -> do
+  # TODO: (gdingle): move me
   #   MetricUtil.put_metric_now("samples.cache.requested", 1)
 
   #   pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
@@ -750,6 +751,7 @@ class SamplesController < ApplicationController
   end
 
   def report_info
+    # TODO: (gdingle): move me
     MetricUtil.put_metric_now("samples.cache.miss", 1)
     response.headers["X-IDseq-Cache"] = 'missed'
 
@@ -767,8 +769,8 @@ class SamplesController < ApplicationController
     @report_info = external_report_info(
       pipeline_run_id,
       background_id,
-      params[:scoring_model],
-      params[:sort_by]
+      TaxonScoringModel::DEFAULT_MODEL_NAME,
+      ReportHelper::DEFAULT_SORT_PARAM
     )
 
     # Fill lineage details into report info.
