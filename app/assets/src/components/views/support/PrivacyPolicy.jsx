@@ -9,7 +9,7 @@ export default class PrivacyPolicy extends React.Component {
         <div className={cs.title}>
           <h1>IDseq Data Privacy Notice</h1>
           <h4 className={cs.subtitle}>
-            Last Updated: <a href="">May 10, 2019</a>. <a href="">FAQ</a>.
+            Last Updated: <a href="">May 10, 2019</a>. <a href="/faqs">FAQ</a>.
           </h4>
         </div>
         <p className={cs.large}>
@@ -22,10 +22,10 @@ export default class PrivacyPolicy extends React.Component {
           website visitors (“<b>Visitors</b>”) and registered users (“<b>
             Users
           </b>”), and how we use, share, and protect that information. See our{" "}
-          <a href="">FAQ</a>, which has useful information about IDSeq, and for
-          more information about our data practices, the IDseq service and the{" "}
-          <a href="">Terms of Use</a> (“<b>Terms</b>”) that applies to your
-          access and use of IDseq.
+          <a href="/faqs">FAQ</a>, which has useful information about IDSeq, and
+          for more information about our data practices, the IDseq service and
+          the <a href="/terms">Terms of Use</a> (“<b>Terms</b>”) that applies to
+          your access and use of IDseq.
         </p>
         <h3>About IDseq</h3>
         <p className={cs.large}>
@@ -248,8 +248,8 @@ export default class PrivacyPolicy extends React.Component {
             your device or browser. “<b>Analytics Information</b>” relates to
             any of your requests, queries, or use of the Services, such as the
             amount of time spent viewing particular web pages. We use{" "}
-            <a href="">Google Analytics</a> for this service. Visitor Data may
-            also include information we collect about you when you visit our
+            <a href="/faqs">Google Analytics</a> for this service. Visitor Data
+            may also include information we collect about you when you visit our
             website or use the Services, including through the use of cookies,
             web beacons, and other technologies.
           </li>
@@ -264,9 +264,241 @@ export default class PrivacyPolicy extends React.Component {
             and browser and do things such as keep you logged in or to
             understand usage patterns by Users and Visitors to our Services. We
             do not use cookies to service third party ads. For more information
-            about our cookies use, please see our <a href="">FAQ</a>.
+            about our cookies use, please see our <a href="/faqs">FAQ</a>.
           </li>
         </ul>
+        <p className={cs.large}>
+          <div className={cs.underlineHeader}>How We Use That Data</div>
+        </p>
+        <p className={cs.large}>
+          Visitor Data and User Data (including any Personal Data in the Visitor
+          Data and User Data) will be used for the following purposes:
+        </p>
+        <ul>
+          <li>
+            To identify you, create a profile for Users, and verify User’s
+            identity so you can log in to and use IDseq.
+          </li>
+          <li>
+            To provide you with notices about your account and updates about
+            IDseq.
+          </li>
+          <li>To respond to your inquiries and requests.</li>
+          <li>
+            To analyze how Users and Visitors are using IDseq so we can optimize
+            and improve it.
+          </li>
+          <li>To protect the security and integrity of IDseq.</li>
+        </ul>
+        <p className={cs.large}>
+          <div className={cs.underlineHeader}>
+            What is our legal basis for using Personal Data in Visitor Data and
+            User Data?
+          </div>
+        </p>
+        <p className={cs.large}>
+          We (along with CZI (defined below)) have a legitimate interest in
+          using personal data within Visitor Data and User Data in the ways
+          described in this Privacy Policy to provide, protect, and improve
+          IDseq. This allows us to improve the service that we provide to Users
+          which, in turn, supports research regarding the study of infectious
+          disease with the potential to benefit global public health. You can
+          contact us at privacy@idseq.net.
+        </p>
+        <h2>
+          <span className={cs.number}>4.</span>Vendors, and Other Third Parties.
+        </h2>
+        <p className={cs.large}>
+          The Chan Zuckerberg Initiative, LLC (“<b>CZI</b>”) is our primary
+          technology partner in building IDseq. CZI helps design, build, and
+          operate IDseq. As a result, all data, including any personal data, in
+          IDseq is shared with CZI, and it is a joint data controller of all
+          personal data in the Service. CZI processes data in accordance with
+          this Privacy Notice and access to any data within IDseq by CZI is
+          limited to those staff who reasonably need access to operate the
+          service.
+        </p>
+        <p className={cs.large}>
+          We also share Upload Data, Report Data, Visitor Data, and User Data
+          with service providers, including service providers to CZI, such as
+          database providers like Amazon Web Services. We may also share Visitor
+          and User data with analytics vendors that assist us to improve and
+          optimize IDseq. Learn more about our use of vendors in our{" "}
+          <a href="/faqs">FAQ</a>.
+        </p>
+        <p className={cs.large}>
+          If we can no longer keep operating IDseq or believe that its purpose
+          is better served by having another entity operating it, we will
+          transfer IDseq and all data existing therein (Upload Data, Report
+          Data, Visitor Data, and User Data) so that the Users can continue to
+          be served. We will always let you know{" "}
+          <b>
+            <i>before</i>
+          </b>{" "}
+          this happens, and you will have the option to delete your account and
+          any data you’ve uploaded. Should this occur, the entity to which we
+          transfer your data will be obliged to use it in a manner that is
+          consistent with this Privacy Notice and the Terms.
+        </p>
+        <p className={cs.large}>
+          We may disclose Upload Data, Report Data, Visitor Data, and/or User
+          Data if we believe in good faith that such disclosure is necessary (a)
+          in connection with any legal investigation; (b) to comply with
+          relevant laws or to respond to subpoenas or warrants served on us; (c)
+          to protect or defend our rights or property or those of Users; and/or
+          (d) to investigate or assist in preventing any violation or potential
+          violation of the law, this Privacy Notice, or our Terms.
+        </p>
+        <h2>
+          <span className={cs.number}>5.</span>How We Protect the Information.
+        </h2>
+        <p className={cs.large}>
+          We use industry standard security measures to ensure the
+          confidentiality, integrity and availability of data uploaded into
+          IDseq. This includes practices like encrypting connections to IDseq
+          using TLS, hosting IDseq on leading cloud providers with robust
+          physical security, and ensuring that access to any personal data
+          within IDseq by CZI and CZ Biohub staff is limited to those staff who
+          need access to operate the Service.
+        </p>
+        <p className={cs.large}>
+          Security takes ongoing work and we will continue to monitor and adjust
+          our security measures as IDSeq develops. Please notify us immediately
+          at <b>security@idseq.net</b> if you suspect your account has been
+          compromised or are aware of any other security issues relating to
+          IDseq.
+        </p>
+        <h2>
+          <span className={cs.number}>6.</span>How Long We Retain Data and Data
+          Deletion.
+        </h2>
+        <p className={cs.large}>
+          We retain your personal data only as long as is reasonably necessary:
+        </p>
+        <ul>
+          <li>
+            Sample Data and Sample Metadata is retained until Users delete it
+            from IDseq. Users may submit deletion requests by emailing
+            privacy@idseq.net and we will delete the requested Sample Data and
+            corresponding Sample Metadata within 60 days.
+          </li>
+          <li>Report Data produced by IDseq will be retained on IDseq.</li>
+          <li>
+            User Data is retained until Users delete their IDseq account as such
+            data is required to manage the service. Users may submit account
+            deletion requests by emailing privacy@idseq.net. We will delete
+            personal data within 60 days following close of your account.
+          </li>
+        </ul>
+        <p className={cs.large}>
+          Please note that we do not control, and so cannot delete, personal
+          data that Users have copied outside of IDseq.
+        </p>
+        <h2>
+          <span className={cs.number}>7.</span>Choices About Your Data.
+        </h2>
+        <p className={cs.large}>
+          If you are a User, you have the following choices:
+        </p>
+        <ul>
+          <li>
+            Users are able to request the deletion of User Data that constitutes
+            their personal data or Sample Data that they submitted to IDseq.
+          </li>
+          <li>
+            Users are able to access and download Report Data relating to Upload
+            Data they submitted within IDseq.
+          </li>
+          <li>
+            Users may also object to the processing of User Data in certain
+            circumstances by emailing privacy@idseq.net. In such cases, we will
+            stop processing that data unless we have legitimate grounds to
+            continue processing it -- for example, it is needed for legal
+            reasons.
+          </li>
+          <li>
+            Users can also contact us by emailing privacy@idseq.net should they
+            wish to access, restrict the processing of, or rectify their User
+            Data.
+          </li>
+        </ul>
+        <p className={cs.large}>
+          If a User has submitted Upload Data containing your personal data,
+          please see below:
+        </p>
+        <ul>
+          <li>
+            We require Users who submit Upload Data to ensure they have all
+            necessary consents, permissions, and authorizations to do so. We are
+            unable to relate Upload Data to identifiable individuals and so
+            cannot directly process requests from persons whose personal
+            sequencing data may be contained in Upload Data. As a result, IDseq
+            is able to receive access, restriction, rectification, objection, or
+            deletion requests only from Users.
+          </li>
+          <li>
+            If you believe your information has been uploaded to IDseq, you
+            should contact the researcher or User that uploaded this information
+            to (i) request access to the information, (ii) object to the
+            processing of the information, or (iii) seek deletion, restriction,
+            or rectification of the information. Similarly, if you previously
+            provided consent to a researcher or User, you may have the right to
+            withdraw that consent. You should contact the researcher or User to
+            make such a withdrawal or otherwise exercise your rights.
+          </li>
+        </ul>
+        <p className={cs.large}>
+          Please contact us at privacy@idseq.net if you would like to exercise
+          the privacy choices discussed above or if you have any questions. If
+          your data is subject to the EU data protection law (e.g., GDPR) and
+          you wish to raise a concern about our use of your information (and
+          without prejudice to any other rights you may have), you have the
+          right to do so with your local supervisory authority. You can always
+          contact our Data Protection Officer by emailing us at contact us at
+          privacy@idseq.net or contacting us as further described in our{" "}
+          <a href="/faqs">FAQ</a>.
+        </p>
+        <h2>
+          <span className={cs.number}>8.</span>Data Transfers.
+        </h2>
+        <p className={cs.large}>
+          IDseq is a global service. By using IDseq, Users authorize us to
+          transfer and store the uploaded data outside of your home country,
+          including to the United States, for the purposes described in this
+          Privacy Notice.
+        </p>
+        <p className={cs.large}>
+          If you want to use IDseq, you must first agree to our{" "}
+          <a href="/terms">Terms</a>, which set out the contract between IDseq
+          and our Users. We operate in countries worldwide (including in the
+          United States) and use technical infrastructure in the United States
+          to deliver the Services to you. In accordance with the contract
+          between us and our Users, we need to transfer personal data to the
+          United States and to other jurisdictions as necessary to provide the
+          Services. Such transfers are necessary for important reasons of public
+          interest, namely global health and providing information which can be
+          used by researchers to better understand the spread of infectious
+          diseases. Please note that the privacy protections and the rights of
+          authorities to access your information in these countries may not be
+          the same as in your home country. See our <a href="/faqs">FAQ</a>.
+        </p>
+        <h2>
+          <span className={cs.number}>9.</span>How to Contact Us.
+        </h2>
+        <p className={cs.large}>
+          If you have any questions, comments, or concerns with this Privacy
+          Notice, you may contact our Data Protection Officer (DPO) by email at
+          privacy@idseq.net or by physical mail at the addresses in the FAQ. You
+          can contact CZI by email at privacy@chanzuckerberg.com.
+        </p>
+        <h2>
+          <span className={cs.number}>10.</span>Changes to This Privacy Notice.
+        </h2>
+        <p className={cs.large}>
+          This Privacy Notice was last updated on the date above. We may update
+          this Privacy Notice from time to time and will provide you with notice
+          of material updates before they become effective.
+        </p>
       </NarrowContainer>
     );
   }

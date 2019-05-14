@@ -10,7 +10,7 @@ export default class TermsOfUse extends React.Component {
         <div className={cs.title}>
           <h1>IDseq Terms of Use</h1>
           <h4 className={cs.subtitle}>
-            Last Updated: <a href="">May 10, 2019</a>. <a href="">FAQ</a>.
+            Last Updated: <a href="">May 10, 2019</a>. <a href="/faqs">FAQ</a>.
           </h4>
         </div>
         <p className={cs.large}>
@@ -33,7 +33,7 @@ export default class TermsOfUse extends React.Component {
             Please carefully read these terms and indicate your acceptance by
             registering for IDseq. If you do not agree to these Terms, do not
             register for an account or use IDseq and do not use it. For more
-            information about our privacy practices, please see the “<a href="">
+            information about our privacy practices, please see the “<a href="/privacy">
               Privacy Notice
             </a>”).
           </b>
@@ -163,7 +163,7 @@ export default class TermsOfUse extends React.Component {
             it with prior to the effective date of removal and we are not able
             to require others Users to stop using Upload Data they accessed or
             downloaded prior to removal. More information about Upload Data can
-            be found in our <a href="">Privacy Notice</a>.
+            be found in our <a href="/privacy">Privacy Notice</a>.
           </li>
           <li>
             <span className={cs.listItemLabel}>
@@ -186,11 +186,12 @@ export default class TermsOfUse extends React.Component {
             (B) you have all consents, permissions, and authorizations necessary
             and sufficient to provide and export the Upload Data to us for the
             purposes described in these Terms and in our{" "}
-            <a href="">Privacy Notice</a> and to grant the rights and
+            <a href="/privacy">Privacy Notice</a> and to grant the rights and
             permissions herein; and (C) the Upload Data -- and our use of the
             Upload Data in accordance with these Terms and our{" "}
-            <a href="">Privacy Notice</a> -- does not and will not violate
-            Applicable Law or infringe or violate any third party rights.
+            <a href="/privacy">Privacy Notice</a> -- does not and will not
+            violate Applicable Law or infringe or violate any third party
+            rights.
           </li>
           <li>
             <span className={cs.listItemLabel}>1.4</span>
@@ -216,7 +217,8 @@ export default class TermsOfUse extends React.Component {
             all such notices and consents, as well as Applicable Standards and
             Applicable Law. Please note that we filter out and discard human
             sequence data as part of generating Report Data because we don’t
-            need this data for IDseq. See <a href="">here</a> for more details.
+            need this data for IDseq. See <a href="/faqs">here</a> for more
+            details.
           </li>
         </ul>
         <h2>
