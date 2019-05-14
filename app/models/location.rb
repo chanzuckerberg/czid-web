@@ -14,14 +14,23 @@ class Location < ApplicationRecord
     [resp.is_a?(Net::HTTPSuccess), JSON.parse(resp.body)]
   end
 
-  def self.find_or_create_by_fields(location_data)
-    key_fields = [:name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng]
+  def self.find_by_params(location_params)
     # Consider the location to already exist if it matches all these fields
-    existing = Location.find_by(key_fields.map { |f| [f, location_data[f]] }.to_h)
+    key_fields = [:name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng]
+    Location.find_by(key_fields.map { |f| [f, location_params[f]] }.to_h)
+  end
 
-    unless existing
-      existing = Location.create(location_data)
+  def self.create_from_params(location_params)
+    # Ignore fields that don't match columns
+    location_params = location_params.select { |x| Location.attribute_names.index(x.to_s) }
+    Location.create!(location_params)
+  rescue => err
+    raise "Couldn't save Location: #{err.message} #{location_params}"
+  end
+
+  def self.find_or_create_by_fields(location_params)
+    unless find_by(params: location_params)
+      return create_from_params(location_params)
     end
-    existing
   end
 end
