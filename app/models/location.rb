@@ -2,16 +2,8 @@ class Location < ApplicationRecord
   # Search request to Location IQ API
   def self.geosearch(query)
     raise ArgumentError, "No query for geosearch" if query.blank?
-    raise "No API key for geosearch" unless ENV['LOCATION_IQ_API_KEY']
-
-    base_url = "https://us1.locationiq.com/v1/search.php?key=#{ENV['LOCATION_IQ_API_KEY']}&format=json&addressdetails=1&normalizecity=1"
-    query_url = "#{base_url}&q=#{query}"
-    uri = URI.parse(query_url)
-    request = Net::HTTP::Get.new(uri)
-    resp = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |http|
-      http.request(request)
-    end
-    [resp.is_a?(Net::HTTPSuccess), JSON.parse(resp.body)]
+    query_strings = "&format=json&addressdetails=1&normalizecity=1&q=#{query}"
+    location_api_request(query_strings)
   end
 
   def self.find_by_params(location_params)
@@ -32,5 +24,21 @@ class Location < ApplicationRecord
     unless find_by(params: location_params)
       return create_from_params(location_params)
     end
+  end
+
+  def self.location_api_request(query_strings)
+    raise "No API key for geosearch" unless ENV['LOCATION_IQ_API_KEY']
+
+    base_url = "https://us1.locationiq.com/v1/search.php?key=#{ENV['LOCATION_IQ_API_KEY']}"
+    query_url = base_url + query_strings
+    uri = URI.parse(query_url)
+    request = Net::HTTP::Get.new(uri)
+    resp = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |http|
+      http.request(request)
+    end
+    [resp.is_a?(Net::HTTPSuccess), JSON.parse(resp.body)]
+  end
+
+  def self.find_or_create_by_osm_id(_osm_id, _osm_type)
   end
 end
