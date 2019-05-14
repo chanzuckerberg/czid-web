@@ -155,7 +155,8 @@ export default class TermsOfUse extends React.Component {
             use, reproduce, distribute, display, and create derivative works
             (e.g. phylogenetic trees) from Upload Data in connection with
             providing, developing and improving IDseq. You may request deletion
-            of your Upload Data from IDseq by emailing privacy@idseq.net and
+            of your Upload Data from IDseq by emailing{" "}
+            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and
             including a description of your Upload Data that you wish to have
             removed. We will delete the requested Upload Data within 60 days of
             your request. Please note, that our removal from IDseq will not
@@ -353,8 +354,8 @@ export default class TermsOfUse extends React.Component {
           </li>
           <li>
             <span className={cs.listItemLabel}>5.3 Closing Your Account.</span>
-            You can close your Account at any time. Just contact us at
-            privacy@idseq.net.
+            You can close your Account at any time. Just contact us at{" "}
+            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>.
           </li>
         </ul>
         <h2>
@@ -381,9 +382,10 @@ export default class TermsOfUse extends React.Component {
           <li>
             <span className={cs.listItemLabel}>6.2 Feedback.</span>
             We’d love your feedback about how to improve IDseq at
-            help@idseq.net. That said, by giving us feedback, you agree that we
-            can use and share it for any purpose without compensation to you.
-            You agree that we are not required to use your feedback.
+            <a href="mailto:help@idseq.net">help@idseq.net</a>. That said, by
+            giving us feedback, you agree that we can use and share it for any
+            purpose without compensation to you. You agree that we are not
+            required to use your feedback.
           </li>
           <li>
             <span className={cs.listItemLabel}>6.3 Security.</span>
@@ -392,9 +394,10 @@ export default class TermsOfUse extends React.Component {
             protect the security and integrity of any network or system used to
             access IDseq, including any Database records; and (b) guard against
             the accidental or unauthorized access, use, alteration or disclosure
-            of IDseq through your Account. Please notify us immediately at
-            security@idseq.net if you suspect your Account has been compromised
-            or are aware of any other security issues relating to IDseq.
+            of IDseq through your Account. Please notify us immediately at{" "}
+            <a href="mailto:security@idseq.net">security@idseq.net</a> if you
+            suspect your Account has been compromised or are aware of any other
+            security issues relating to IDseq.
           </li>
         </ul>
         <h2>
@@ -406,10 +409,10 @@ export default class TermsOfUse extends React.Component {
             In order to further infectious disease research, we rely upon Users
             to upload data to the Database. We and our service providers do not
             review or correct any data uploaded into IDseq. If you would like to
-            report any issue with IDseq or the Database please contact us
-            help@idseq.net. IDseq is not intended as a storage service, so
-            please back up your Upload Data using a secure service of your
-            choice.
+            report any issue with IDseq or the Database please contact us at{" "}
+            <a href="mailto:help@idseq.net">help@idseq.net</a>. IDseq is not
+            intended as a storage service, so please back up your Upload Data
+            using a secure service of your choice.
           </li>
           <li>
             <span className={cs.listItemLabel}>7.2</span>
@@ -558,8 +561,8 @@ export default class TermsOfUse extends React.Component {
         <ul>
           <li>
             If you have any questions, comments, or concerns with Terms, you may
-            contact us at help@idseq.net or by physical mail at the addresses in
-            the FAQ.
+            contact us at <a href="mailto:help@idseq.net">help@idseq.net</a> or
+            by physical mail at the addresses in the FAQ.
           </li>
         </ul>
       </NarrowContainer>

@@ -93,8 +93,9 @@ export default class PrivacyPolicy extends React.Component {
             than those embedded in samples you yourself have uploaded. This is
             because we filter out and discard host sequence data in order to
             generate Reports. If you are able to find human sequence data
-            elsewhere in IDseq, please let us know at privacy@idseq.net and we
-            will address it.
+            elsewhere in IDseq, please let us know at{" "}
+            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and we will
+            address it.
           </li>
           <li>
             <span className={cs.listItemLabel}>Sample Metadata:</span>
@@ -206,7 +207,8 @@ export default class PrivacyPolicy extends React.Component {
           samples you yourself have uploaded. This is because we filter out and
           remove host sequence data in order to generate Reports. If you are
           able to find human sequence data elsewhere in IDseq, please let us
-          know at privacy@idseq.net and we will address it.
+          know at <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and
+          we will address it.
         </p>
         <p className={cs.large}>
           <div className={cs.underlineHeader}>Who can see Report Data?</div>
@@ -303,7 +305,7 @@ export default class PrivacyPolicy extends React.Component {
           IDseq. This allows us to improve the service that we provide to Users
           which, in turn, supports research regarding the study of infectious
           disease with the potential to benefit global public health. You can
-          contact us at privacy@idseq.net.
+          contact us at <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>.
         </p>
         <h2>
           <span className={cs.number}>4.</span>Vendors, and Other Third Parties.
@@ -364,9 +366,12 @@ export default class PrivacyPolicy extends React.Component {
         <p className={cs.large}>
           Security takes ongoing work and we will continue to monitor and adjust
           our security measures as IDSeq develops. Please notify us immediately
-          at <b>security@idseq.net</b> if you suspect your account has been
-          compromised or are aware of any other security issues relating to
-          IDseq.
+          at{" "}
+          <a href="mailto:security@idseq.net">
+            <b>security@idseq.net</b>
+          </a>{" "}
+          if you suspect your account has been compromised or are aware of any
+          other security issues relating to IDseq.
         </p>
         <h2>
           <span className={cs.number}>6.</span>How Long We Retain Data and Data
@@ -378,16 +383,18 @@ export default class PrivacyPolicy extends React.Component {
         <ul>
           <li>
             Sample Data and Sample Metadata is retained until Users delete it
-            from IDseq. Users may submit deletion requests by emailing
-            privacy@idseq.net and we will delete the requested Sample Data and
-            corresponding Sample Metadata within 60 days.
+            from IDseq. Users may submit deletion requests by emailing{" "}
+            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> and we will
+            delete the requested Sample Data and corresponding Sample Metadata
+            within 60 days.
           </li>
           <li>Report Data produced by IDseq will be retained on IDseq.</li>
           <li>
             User Data is retained until Users delete their IDseq account as such
             data is required to manage the service. Users may submit account
-            deletion requests by emailing privacy@idseq.net. We will delete
-            personal data within 60 days following close of your account.
+            deletion requests by emailing{" "}
+            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>. We will
+            delete personal data within 60 days following close of your account.
           </li>
         </ul>
         <p className={cs.large}>
@@ -411,13 +418,15 @@ export default class PrivacyPolicy extends React.Component {
           </li>
           <li>
             Users may also object to the processing of User Data in certain
-            circumstances by emailing privacy@idseq.net. In such cases, we will
-            stop processing that data unless we have legitimate grounds to
-            continue processing it -- for example, it is needed for legal
-            reasons.
+            circumstances by emailing{" "}
+            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>. In such
+            cases, we will stop processing that data unless we have legitimate
+            grounds to continue processing it -- for example, it is needed for
+            legal reasons.
           </li>
           <li>
-            Users can also contact us by emailing privacy@idseq.net should they
+            Users can also contact us by emailing{" "}
+            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> should they
             wish to access, restrict the processing of, or rectify their User
             Data.
           </li>
@@ -448,15 +457,16 @@ export default class PrivacyPolicy extends React.Component {
           </li>
         </ul>
         <p className={cs.large}>
-          Please contact us at privacy@idseq.net if you would like to exercise
-          the privacy choices discussed above or if you have any questions. If
-          your data is subject to the EU data protection law (e.g., GDPR) and
-          you wish to raise a concern about our use of your information (and
-          without prejudice to any other rights you may have), you have the
-          right to do so with your local supervisory authority. You can always
-          contact our Data Protection Officer by emailing us at contact us at
-          privacy@idseq.net or contacting us as further described in our{" "}
-          <a href="/faqs">FAQ</a>.
+          Please contact us at{" "}
+          <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> if you would
+          like to exercise the privacy choices discussed above or if you have
+          any questions. If your data is subject to the EU data protection law
+          (e.g., GDPR) and you wish to raise a concern about our use of your
+          information (and without prejudice to any other rights you may have),
+          you have the right to do so with your local supervisory authority. You
+          can always contact our Data Protection Officer by emailing us at
+          contact us at <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>{" "}
+          or contacting us as further described in our <a href="/faqs">FAQ</a>.
         </p>
         <h2>
           <span className={cs.number}>8.</span>Data Transfers.
@@ -487,9 +497,13 @@ export default class PrivacyPolicy extends React.Component {
         </h2>
         <p className={cs.large}>
           If you have any questions, comments, or concerns with this Privacy
-          Notice, you may contact our Data Protection Officer (DPO) by email at
-          privacy@idseq.net or by physical mail at the addresses in the FAQ. You
-          can contact CZI by email at privacy@chanzuckerberg.com.
+          Notice, you may contact our Data Protection Officer (DPO) by email at{" "}
+          <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> or by
+          physical mail at the addresses in the FAQ. You can contact CZI by
+          email at{" "}
+          <a href="mailto:privacy@chanzuckerberg.com">
+            privacy@chanzuckerberg.com
+          </a>.
         </p>
         <h2>
           <span className={cs.number}>10.</span>Changes to This Privacy Notice.

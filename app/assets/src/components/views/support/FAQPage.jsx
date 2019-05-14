@@ -84,9 +84,10 @@ export default class FAQPage extends React.Component {
                 This is because we have a multi-step process in place to filter
                 out and remove host sequence data in order to generate Reports.
                 If you are able to find human sequence data elsewhere in IDseq,
-                please let us know at privacy@idseq.net, and we will remove it.
-                The fastq files you uploaded are only available to you, the
-                uploader.
+                please let us know at{" "}
+                <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>, and we
+                will remove it. The fastq files you uploaded are only available
+                to you, the uploader.
               </li>
               <li>
                 For the fastq files you yourself have uploaded, we understand
@@ -97,7 +98,7 @@ export default class FAQPage extends React.Component {
                 assessments, data loss prevention systems, and working to ensure
                 that only authorized staff have access to the data. If you need
                 more information about our security practices please contact us
-                at security@idseq.net.
+                at <a href="mailto:security@idseq.net">security@idseq.net</a>.
               </li>
             </ul>
           </p>
@@ -139,6 +140,18 @@ export default class FAQPage extends React.Component {
                 We require 4 metadata fields for uploaded samples. We believe
                 these data are necessary to fully analyze the data. The 4 fields
                 we require are:
+                <li className={cs.innerListItem}>
+                  1. Sample type (CSF, Stool, Serum, etc)
+                </li>
+                <li className={cs.innerListItem}>
+                  2. Nucleotide type (RNA or DNA)
+                </li>
+                <li className={cs.innerListItem}>
+                  3. Location (limited to state or country)
+                </li>
+                <li className={cs.innerListItem}>
+                  4. Collection Date (limited to month and year)
+                </li>
               </li>
               <li>
                 We limit the granularity of location and collection date to help
@@ -178,9 +191,11 @@ export default class FAQPage extends React.Component {
           header={<h3>Where do I go for more questions?</h3>}
         >
           <p>
-            Please contact security@idseq.net if you have any security-related
-            questions or concerns, and privacy@idseq.net if you have any other
-            questions about our practices or legal documents.
+            Please contact{" "}
+            <a href="mailto:security@idseq.net">security@idseq.net</a> if you
+            have any security-related questions or concerns, and{" "}
+            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a> if you have
+            any other questions about our practices or legal documents.
           </p>
         </Accordion>
         <Accordion
@@ -209,11 +224,12 @@ export default class FAQPage extends React.Component {
           <p>
             We rely on service providers to help us provide and improve the
             service, including Chan Zuckerberg Initiative our technology
-            partner. In our terms with third party service providers, we as
-            service providers to secure data from unauthorized access and use
-            and limit their use of data to providing and improving relevant
+            partner. In our terms with third party service providers, we work
+            with service providers to secure data from unauthorized access and
+            use and limit their use of data to providing and improving relevant
             services that we use. If you have more questions about our service
-            providers, please contact us at privacy@idseq.net.
+            providers, please contact us at{" "}
+            <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>.
           </p>
         </Accordion>
       </NarrowContainer>
