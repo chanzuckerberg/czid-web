@@ -9,8 +9,6 @@ class AddSRosettaHost < ActiveRecord::Migration[5.1]
 
     human_host = HostGenome.find_by(name: "Human")
     # For lack of a better default, use Human background.
-    # In the future, consider asking carp users to make a background model
-    # from their uninfected samples that we can substitute as the default.
     hg.default_background_id = human_host.default_background_id if human_host
     hg.save
   end
