@@ -24,7 +24,8 @@ Rails.application.configure do
 
   # Configure caching to be the same as development
   config.action_controller.perform_caching = true
-  config.cache_store = :file_store, "/tmp/rails_cache_store"
+  # TODO: (gdingle):
+  # config.cache_store = :redis_cache_store, { url: ENV['REDIS_URL'] }
 
   # Raise exceptions instead of rendering exception templates.
   config.action_dispatch.show_exceptions = false

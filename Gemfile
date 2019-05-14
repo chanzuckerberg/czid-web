@@ -77,10 +77,6 @@ gem 'shortener'
 # Explicit load to avoid an "unable to load" warning
 gem 'http-2'
 
-# Caching for action responses. Added for slow pages such sample report.
-# See https://github.com/rails/actionpack-action_caching .
-gem 'actionpack-action_caching'
-
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'bundler-audit'

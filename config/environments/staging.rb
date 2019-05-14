@@ -13,7 +13,9 @@ Rails.application.configure do
   # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = true
-  config.cache_store = :file_store, "/tmp/rails_cache_store"
+  # TODO: (gdingle):
+  # config.cache_store = :redis_cache_store, { url: ENV['REDIS_URL'] }
+  # config.cache_store = :file_store, "/tmp/rails_cache_store"
 
   # Attempt to read encrypted secrets from `config/secrets.yml.enc`.
   # Requires an encryption key in `ENV["RAILS_MASTER_KEY"]` or
