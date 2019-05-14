@@ -104,7 +104,7 @@ class Metadatum < ApplicationRecord
 
   def check_and_set_location_type
     location_data = JSON.parse(raw_value)
-    self.string_validated_value = location_data[:title]
+    self.string_validated_value = location_data[:name]
 
     Location.find_or_create_from_params(location_data)
   end

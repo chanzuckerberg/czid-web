@@ -49,11 +49,18 @@ class Location < ApplicationRecord
     location_api_request(endpoint_query)
   end
 
-  def self.find_or_create_by_osm_id(osm_id, osm_type)
-    success, resp = geosearch_by_osm_id(osm_id, osm_type)
-    raise "Couldn't fetch OSM ID #{osm_id} (#{osm_type})" unless success
+  # Find or create a location based on LocationIQ ID and OSM ID. OSM IDs can change often but
+  # LocationIQ IDs should be stable. We can't geosearch by LocationIQ ID, so we need to use both.
+  def self.find_or_create_by_api_ids(locationiq_id, osm_id, osm_type)
+    existing = Location.find_by(locationiq_id: locationiq_id)
+    if existing
+      existing
+    else
+      success, resp = geosearch_by_osm_id(osm_id, osm_type)
+      raise "Couldn't fetch OSM ID #{osm_id} (#{osm_type})" unless success
 
-    resp = LocationHelper.adapt_location_iq_response(resp)
-    find_or_create_from_params(resp)
+      resp = LocationHelper.adapt_location_iq_response(resp)
+      find_or_create_from_params(resp)
+    end
   end
 end
