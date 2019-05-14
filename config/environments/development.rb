@@ -70,9 +70,6 @@ Rails.application.configure do
     "http://localhost:8080" if source =~ /wp_bundle\.js$/i
   }
 
-  # Custom for precaching by hitting URLs internally
-  config.idseq_precache_base_url = "http://localhost:3000"
-
   ActiveRecordQueryTrace.enabled = true
 
   # Development logging configuration

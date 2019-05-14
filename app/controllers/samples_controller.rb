@@ -32,8 +32,7 @@ class SamplesController < ApplicationController
 
   # For API-like access
   TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
-  before_action :authenticate_user!, except: TOKEN_AUTH_ACTIONS + [:report_info]
-  before_action :authenticate_internal_user_from_token!, only: [:report_info]
+  before_action :authenticate_user!, except: TOKEN_AUTH_ACTIONS
   before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
@@ -54,32 +53,32 @@ class SamplesController < ApplicationController
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
 
+  # TODO: (gdingle): convert to custom cache low level
   # TODO: (gdingle): refactor this to function
   # before_action filters placed after the caches_action directive will not run
   # when serving from the cache.
-  # rubocop:disable Style/Lambda
-  caches_action :report_info, cache_path: -> do
-    MetricUtil.put_metric_now("samples.cache.requested", 1)
+  # caches_action :report_info, cache_path: -> do
+  #   MetricUtil.put_metric_now("samples.cache.requested", 1)
 
-    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    if pipeline_run.nil?
-      message = "Pipeline run not found for sample #{@sample.id}"
-      raise ActiveRecord::RecordNotFound, message
-    end
-    report_info_params = pipeline_run.report_info_params
+  #   pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+  #   if pipeline_run.nil?
+  #     message = "Pipeline run not found for sample #{@sample.id}"
+  #     raise ActiveRecord::RecordNotFound, message
+  #   end
+  #   report_info_params = pipeline_run.report_info_params
 
-    # This allows 304 Not Modified to be returned so that the client can use its
-    # local cache and avoid the large download.
-    httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
-    response.headers["Last-Modified"] = httpdate
-    # This is a custom header for testing and debugg
-    response.headers["X-IDseq-Cache"] = 'requested'
+  #   # This allows 304 Not Modified to be returned so that the client can use its
+  #   # local cache and avoid the large download.
+  #   httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
+  #   response.headers["Last-Modified"] = httpdate
+  #   # This is a custom header for testing and debugg
+  #   response.headers["X-IDseq-Cache"] = 'requested'
 
-    cache_keys = params.permit(report_info_params.keys)
-    # Set background_id to a viewable background, same behavior as in report_info itself
-    cache_keys[:background_id] = get_background_id(@sample)
-    cache_keys
-  end
+  #   cache_keys = params.permit(report_info_params.keys)
+  #   # Set background_id to a viewable background, same behavior as in report_info itself
+  #   cache_keys[:background_id] = get_background_id(@sample)
+  #   cache_keys
+  # end
 
   # GET /samples
   # GET /samples.json
@@ -697,7 +696,7 @@ class SamplesController < ApplicationController
     @host_genome = @sample.host_genome ? @sample.host_genome : nil
     @background_models = current_power.backgrounds.where(ready: 1)
     @can_edit = current_power.updatable_sample?(@sample)
-    @git_version = ENV['GIT_VERSION'] || "" # used for cache busting
+    @git_version = ENV['GIT_VERSION'] || ""
 
     @align_viz = false
     align_summary_file = @pipeline_run ? "#{@pipeline_run.alignment_viz_output_s3_path}.summary" : nil

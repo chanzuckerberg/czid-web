@@ -1411,6 +1411,7 @@ class PipelineRun < ApplicationRecord
 
   # Keys here are used as cache keys for report_info action in SamplesController.
   # The values here are used as defaults for PipelineSampleReport.jsx.
+  # TODO: (gdingle): need to remove git version and add cache key version
   def report_info_params
     {
       pipeline_version: pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL,
@@ -1435,6 +1436,7 @@ class PipelineRun < ApplicationRecord
 
   # This precaches reports for *all* backgrounds. Each report took between 1 and
   # 10s in testing.
+  # TODO: (gdingle): need to remove http open stuff and token stuff
   def precache_report_info!
     params = report_info_params
     Background.where(ready: 1).pluck(:id).each do |background_id|

@@ -1,3 +1,4 @@
+# TODO: (gdingle): need to call low level cache
 class PrecacheReportInfo
   @queue = :q03_pipeline_run
 

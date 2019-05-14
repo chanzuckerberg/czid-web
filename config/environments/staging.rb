@@ -84,9 +84,6 @@ Rails.application.configure do
   config.action_controller.asset_host = 'staging.idseq.net'
   config.middleware.use Rack::HostRedirect, 'www.staging.idseq.net' => 'staging.idseq.net'
 
-  # Custom for precaching by hitting URLs internally
-  config.idseq_precache_base_url = "https://staging.idseq.net"
-
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
   config.i18n.fallbacks = true
