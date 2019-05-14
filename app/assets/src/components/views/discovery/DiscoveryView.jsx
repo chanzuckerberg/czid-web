@@ -84,7 +84,7 @@ class DiscoveryView extends React.Component {
 
     this.state = defaults(
       {
-        currentTab: "projects",
+        currentTab: projectId ? "samples" : "projects",
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
         filteredSampleStats: {},
@@ -739,7 +739,7 @@ class DiscoveryView extends React.Component {
           </div>
           <div className={cs.centerPane}>
             <NarrowContainer className={cs.viewContainer}>
-              {currentTab == "projects" && (
+              {currentTab === "projects" && (
                 <div className={cs.tableContainer}>
                   <div className={cs.dataContainer}>
                     <ProjectsView
@@ -756,7 +756,7 @@ class DiscoveryView extends React.Component {
                     )}
                 </div>
               )}
-              {currentTab == "samples" && (
+              {currentTab === "samples" && (
                 <div className={cs.tableContainer}>
                   <div className={cs.dataContainer}>
                     <SamplesView
@@ -777,7 +777,7 @@ class DiscoveryView extends React.Component {
                     )}
                 </div>
               )}
-              {currentTab == "visualizations" && (
+              {currentTab === "visualizations" && (
                 <div className={cs.tableContainer}>
                   <div className={cs.dataContainer}>
                     <VisualizationsView visualizations={visualizations} />
