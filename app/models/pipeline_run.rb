@@ -1418,18 +1418,13 @@ class PipelineRun < ApplicationRecord
       # Default background is complicated... see get_background_id. In any case,
       # we precache all backgrounds. See precache_report_info below.
       background_id: nil,
-      # scoring_model is currrently static and not user controlled.
-      scoring_model: TaxonScoringModel::DEFAULT_MODEL_NAME,
-      # TODO: (gdingle): why does PipelineSampleReport and SamplesController have different default sort_by?
-      sort_by: "nt_aggregatescore",
       # For invalidation when data or config changes
       report_ts: [
+        # TODO: (gdingle): get latest time of all has_many relations
         updated_at.utc.to_i,
         sample.updated_at.utc.to_i,
         alignment_config.updated_at.utc.to_i
       ].max,
-      # For invalidation when code changes
-      git_version: ENV['GIT_VERSION'] || "",
       format: "json"
     }
   end

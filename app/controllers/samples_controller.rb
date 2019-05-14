@@ -53,34 +53,6 @@ class SamplesController < ApplicationController
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
 
-  # TODO: (gdingle): convert to custom cache low level
-  # TODO: (gdingle): refactor this to function
-  # before_action filters placed after the caches_action directive will not run
-  # when serving from the cache.
-  # caches_action :report_info, cache_path: -> do
-  # TODO: (gdingle): move me
-  #   MetricUtil.put_metric_now("samples.cache.requested", 1)
-
-  #   pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-  #   if pipeline_run.nil?
-  #     message = "Pipeline run not found for sample #{@sample.id}"
-  #     raise ActiveRecord::RecordNotFound, message
-  #   end
-  #   report_info_params = pipeline_run.report_info_params
-
-  #   # This allows 304 Not Modified to be returned so that the client can use its
-  #   # local cache and avoid the large download.
-  #   httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
-  #   response.headers["Last-Modified"] = httpdate
-  #   # This is a custom header for testing and debugg
-  #   response.headers["X-IDseq-Cache"] = 'requested'
-
-  #   cache_keys = params.permit(report_info_params.keys)
-  #   # Set background_id to a viewable background, same behavior as in report_info itself
-  #   cache_keys[:background_id] = get_background_id(@sample)
-  #   cache_keys
-  # end
-
   # GET /samples
   # GET /samples.json
   def index
@@ -750,38 +722,38 @@ class SamplesController < ApplicationController
     render json: samples.to_json(include: [{ project: { only: [:id, :name] } }])
   end
 
+  # The json response here should be precached in PipelineRun. Example cache key:
+  # /samples/12303/report_info?background_id=93&format=json&pipeline_version=3.3&report_ts=1549504990
   def report_info
-    # TODO: (gdingle): move me
-    MetricUtil.put_metric_now("samples.cache.miss", 1)
-    response.headers["X-IDseq-Cache"] = 'missed'
+    MetricUtil.put_metric_now("samples.cache.requested", 1)
 
-    @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    if pipeline_run.nil?
+      message = "Pipeline run not found for sample #{@sample.id}"
+      raise ActiveRecord::RecordNotFound, message
+    end
+    report_info_params = pipeline_run.report_info_params
 
-    ##################################################
-    ## Duct tape for changing background id dynamically
-    ## TODO(yf): clean the following up.
-    ####################################################
-    if @pipeline_run && (((@pipeline_run.adjusted_remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
-      background_id = get_background_id(@sample)
-      pipeline_run_id = @pipeline_run.id
+    # Set background_id to a viewable background
+    params[:background_id] = get_background_id(@sample)
+
+    cache_keys = params.permit(report_info_params.keys)
+    cache_key = request.path + "?" + cache_keys.to_h.sort.to_h.to_param
+
+    json = Rails.cache.fetch(cache_key) do
+      MetricUtil.put_metric_now("samples.cache.miss", 1)
+      response.headers["X-IDseq-Cache"] = 'missed'
+      report_info_json(background_id)
     end
 
-    @report_info = external_report_info(
-      pipeline_run_id,
-      background_id,
-      TaxonScoringModel::DEFAULT_MODEL_NAME,
-      ReportHelper::DEFAULT_SORT_PARAM
-    )
+    # This allows 304 Not Modified to be returned so that the client can use its
+    # local cache and avoid the large download.
+    httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
+    response.headers["Last-Modified"] = httpdate
+    # This is a custom header for testing and debugging
+    response.headers["X-IDseq-Cache"] = 'requested'
 
-    # Fill lineage details into report info.
-    # @report_info[:taxonomy_details][2] is the array of taxon rows (which are hashes with keys like tax_id, name, NT, etc)
-    @report_info[:taxonomy_details][2] = TaxonLineage.fill_lineage_details(@report_info[:taxonomy_details][2], pipeline_run_id)
-
-    # Label top-scoring hits for the executive summary
-    @report_info[:topScoringTaxa] = label_top_scoring_taxa!(@report_info[:taxonomy_details][2])
-    @report_info[:contig_taxid_list] = @pipeline_run.get_taxid_list_with_contigs
-
-    render json: JSON.dump(@report_info)
+    render json: json
   end
 
   def save_metadata
@@ -1283,5 +1255,36 @@ class SamplesController < ApplicationController
     column, direction = dir.split(',')
     samples = samples.order("samples.#{column} #{direction}") if column && direction
     samples
+  end
+
+  # This was originally the report_info action but it was too slow, more than
+  # 10s for some samples, so we wrapped it in a cache layer.
+  def report_info_json(background_id)
+    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+
+    ##################################################
+    ## Duct tape for changing background id dynamically
+    ## TODO(yf): clean the following up.
+    ####################################################
+    if pipeline_run && (((pipeline_run.adjusted_remaining_reads.to_i > 0 || pipeline_run.finalized?) && !pipeline_run.failed?) || pipeline_run.report_ready?)
+      pipeline_run_id = pipeline_run.id
+    end
+
+    report_info = external_report_info(
+      pipeline_run_id,
+      background_id,
+      TaxonScoringModel::DEFAULT_MODEL_NAME,
+      ReportHelper::DEFAULT_SORT_PARAM
+    )
+
+    # Fill lineage details into report info.
+    # report_info[:taxonomy_details][2] is the array of taxon rows (which are hashes with keys like tax_id, name, NT, etc)
+    report_info[:taxonomy_details][2] = TaxonLineage.fill_lineage_details(report_info[:taxonomy_details][2], pipeline_run_id)
+
+    # Label top-scoring hits for the executive summary
+    report_info[:topScoringTaxa] = label_top_scoring_taxa!(report_info[:taxonomy_details][2])
+    report_info[:contig_taxid_list] = pipeline_run.get_taxid_list_with_contigs
+
+    JSON.dump(report_info)
   end
 end
