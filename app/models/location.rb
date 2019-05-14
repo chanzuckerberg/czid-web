@@ -1,4 +1,6 @@
 class Location < ApplicationRecord
+  include LocationHelper
+
   def self.location_api_request(endpoint_query)
     raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
 
@@ -48,6 +50,7 @@ class Location < ApplicationRecord
     success, resp = geosearch_by_osm_id(osm_id, osm_type)
     raise "Couldn't fetch OSM ID #{osm_id} (#{osm_type})" unless success
 
+    resp = adapt_location_iq_response(resp)
     find_or_create_by_fields(resp)
   end
 end

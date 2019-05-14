@@ -1,6 +1,6 @@
 module LocationHelper
   # Adapter function to munge responses from Location IQ API to our format
-  def adapt_location_iq_response(body)
+  def self.adapt_location_iq_response(body)
     address = body["address"]
     geo_level = if address["city"]
                   "city"
@@ -27,7 +27,7 @@ module LocationHelper
       country_code: address["country_code"] || "",
       osm_id: body["osm_id"].to_f,
       osm_type: body["osm_type"],
-      locationiq_id: body["place_id"]
+      locationiq_id: body["place_id"].to_f
     }
   end
 end

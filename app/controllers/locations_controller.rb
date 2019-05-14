@@ -1,4 +1,6 @@
 class LocationsController < ApplicationController
+  include LocationHelper
+
   GEOSEARCH_ERR_MSG = "Unable to perform geosearch".freeze
   LOCATION_LOAD_ERR_MSG = "Unable to load sample locations".freeze
 
@@ -16,19 +18,7 @@ class LocationsController < ApplicationController
       success, resp = Location.geosearch(query)
       if success
         resp.each do |c|
-          name_parts = c["display_name"].partition(", ")
-          results << {
-            title: name_parts[0],
-            description: name_parts[-1],
-            country: c["address"]["country"] || "",
-            state: c["address"]["state"] || "",
-            county: c["address"]["county"] || "",
-            city: c["address"]["city"] || "",
-            # Round coordinates to enhance privacy
-            lat: c["lat"] ? c["lat"].to_f.round(2) : nil,
-            # LocationIQ uses 'lon'
-            lng: c["lon"] || c["lng"] ? (c["lon"] || c["lng"]).to_f.round(2) : nil
-          }
+          results << adapt_location_iq_response(c)
         end
       end
     end
