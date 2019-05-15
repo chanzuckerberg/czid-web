@@ -110,6 +110,7 @@ Rails.application.routes.draw do
   namespace :playground do
     get :controls
     get :icons
+    get :viz
   end
 
   resource :metadata do
