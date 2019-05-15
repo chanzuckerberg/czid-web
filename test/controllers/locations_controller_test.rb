@@ -1,44 +1,13 @@
 require "test_helper"
 require "minitest/mock"
+require "helpers/location_test_helper"
 
 class LocationsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:admin) # Change to non-admin user once released
     @user_params = { "user[email]" => @user.email, "user[password]" => "password" }
-    @api_response = true, [
-      {
-        "place_id" => "89640023",
-        "osm_type" => "way",
-        "osm_id" => "34324395",
-        "lat" => 37.76,
-        # LocationIQ uses 'lon'
-        "lon" => -122.45,
-        "display_name" => "University of California, San Francisco, Parnassus Avenue, Inner Sunset, San Francisco, San Francisco City and County, California, 94131, USA",
-        "address" => {
-          "city" => "San Francisco",
-          "county" => "San Francisco City and County",
-          "state" => "California",
-          "country" => "USA",
-          "country_code" => "us"
-        }
-      }
-    ]
-    @our_results = [
-      {
-        "name" => "University of California, San Francisco, Parnassus Avenue, Inner Sunset, San Francisco, San Francisco City and County, California, 94131, USA",
-        "geo_level" => "city",
-        "country_name" => "USA",
-        "state_name" => "California",
-        "subdivision_name" => "San Francisco City and County",
-        "city_name" => "San Francisco",
-        "lat" => 37.76,
-        "lng" => -122.45,
-        "country_code" => "us",
-        "osm_id" => 34_324_395,
-        "osm_type" => "way",
-        "locationiq_id" => 89_640_023
-      }
-    ]
+    @api_response = true, LocationTestHelper::API_GEOSEARCH_RESPONSE
+    @our_results = LocationTestHelper::FORMATTED_GEOSEARCH_RESPONSE
   end
 
   test "user can geosearch with results" do
