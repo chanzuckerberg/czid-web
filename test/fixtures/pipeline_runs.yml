@@ -39,16 +39,6 @@ six:
   adjusted_remaining_reads: 316
   subsample: 1000000
   alignment_config: one
-  pipeline_version: '1.0'
-joe_sample_run:
-  sample: joe_sample
-  job_status: "CHECKED"
-  finalized: 1
-  total_reads: 1122
-  adjusted_remaining_reads: 316
-  subsample: 1000000
-  alignment_config: one
-  pipeline_version: '1.0'
 public_project_sampleA_run:
   sample: public_project_sampleA
   job_id: 'public_project_sampleA_job'

@@ -369,9 +369,9 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     cache_header = @response.headers["X-IDseq-Cache"]
     assert_equal "requested", cache_header
 
-    # Second request should always be at least 2x faster than the first.
+    # Second request should always be faster than the first.
     # Typically it will be 10x faster.
-    assert first_runtime.to_f > (second_runtime.to_f * 2)
+    assert first_runtime.to_f > second_runtime.to_f
   end
 
   test 'report_info should override background when background is not viewable' do

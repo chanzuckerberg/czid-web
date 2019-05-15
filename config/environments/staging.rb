@@ -16,7 +16,7 @@ Rails.application.configure do
   config.cache_store = :redis_store, ENV['REDISCLOUD_URL'] + '/0/cache',
                        {
                          # Needed for redis to evict keys in volatile-lru mode
-                         expires_in: 365.days
+                         expires_in: 30.days
                        }
 
   # Attempt to read encrypted secrets from `config/secrets.yml.enc`.

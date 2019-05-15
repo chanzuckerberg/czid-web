@@ -851,7 +851,7 @@ class PipelineRun < ApplicationRecord
       if prs.failed?
         self.job_status = STATUS_FAILED
         self.finalized = 1
-        message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.email} failed #{prs.name} with #{adjusted_remaining_reads} reads remaining after #{duration_hrs}. See: #{status_url}"
+        message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.email} failed #{prs.name} with #{adjusted_remaining_reads || 0} reads remaining after #{duration_hrs} hours. See: #{status_url}"
         LogUtil.log_err_and_airbrake(message)
       elsif !prs.started?
         # we're moving on to a new stage
@@ -1411,37 +1411,39 @@ class PipelineRun < ApplicationRecord
 
   # Keys here are used as cache keys for report_info action in SamplesController.
   # The values here are used as defaults for PipelineSampleReport.jsx.
-  # TODO: (gdingle): need to remove git version and add cache key version
   def report_info_params
     {
       pipeline_version: pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL,
       # Default background is complicated... see get_background_id. In any case,
       # we precache all backgrounds. See precache_report_info below.
       background_id: nil,
-      # For invalidation when data or config changes
-      report_ts: [
-        # TODO: (gdingle): get latest time of all has_many relations
-        updated_at.utc.to_i,
-        sample.updated_at.utc.to_i,
-        alignment_config.updated_at.utc.to_i
-      ].max,
+      # For invalidation when underlying data changes
+      report_ts: max_updated_at.utc.to_i,
       format: "json"
     }
   end
 
+  # Gets last update time of all has_many relations and current pipeline run
+  def max_updated_at
+    assocs = PipelineRun.reflect_on_all_associations(:has_many)
+    assocs_max = assocs.map { |assoc| send(assoc.name).pluck(:updated_at).max }
+    [updated_at, assocs_max.compact.max].compact.max
+  end
+
   # This precaches reports for *all* backgrounds. Each report took between 1 and
   # 10s in testing.
-  # TODO: (gdingle): need to remove http open stuff and token stuff
   def precache_report_info!
     params = report_info_params
     Background.where(ready: 1).pluck(:id).each do |background_id|
-      params = params.merge(background_id: background_id)
-      base_url = Rails.application.config.idseq_precache_base_url
-      url = base_url + "/samples/#{sample.id}/report_info?" + params.to_query
-      req_headers = { 'X-User-Email' => sample.user.email,
-                      'X-User-Token' => sample.user.authentication_token }
-      Rails.logger.debug("Precaching background #{background_id} with URL #{url}")
-      open(url, req_headers)
+      cache_key = SamplesController.report_info_cache_key(
+        "/samples/#{sample.id}/report_info",
+        params.merge(background_id: background_id)
+      )
+      Rails.logger.debug("Precaching #{cache_key} with background #{background_id}")
+      Rails.cache.fetch(cache_key) do
+        SamplesController.report_info_json(self, background_id)
+      end
+
       MetricUtil.put_metric_now("samples.cache.precached", 1)
     end
   end
