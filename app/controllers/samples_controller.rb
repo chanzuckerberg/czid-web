@@ -761,7 +761,10 @@ class SamplesController < ApplicationController
   # Example cache key:
   # /samples/12303/report_info?background_id=93&format=json&pipeline_version=3.3&report_ts=1549504990
   def self.report_info_cache_key(path, kvs)
-    path + "?" + kvs.to_h.sort.to_h.to_param
+    kvs = kvs.to_h.sort.to_h
+    # Increment this is you ever change the response structure of report_info
+    kvs["_cache_key_version"] = 1
+    path + "?" + kvs.to_param
   end
 
   # This was originally the report_info action but it was too slow, more than
