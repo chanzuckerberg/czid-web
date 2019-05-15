@@ -1,18 +1,10 @@
 module LocationHelper
   # Adapter function to munge responses from Location IQ API to our format
-  def self.adapt_location_iq_response(body)
+  def self.adapt_locationiq_response(body)
     address = body["address"]
-    geo_level = if address["city"]
-                  "city"
-                elsif address["county"]
-                  "county"
-                elsif address["state"]
-                  "state"
-                elsif address["country"]
-                  "country"
-                else
-                  ""
-                end
+    geo_level = ["city", "county", "state", "country"].each do |n|
+      break n if address[n]
+    end || ""
     {
       name: body["display_name"],
       geo_level: geo_level,

@@ -4,7 +4,7 @@ class Location < ApplicationRecord
   def self.location_api_request(endpoint_query)
     raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
 
-    query_url = "https://us1.locationiq.com/v1/#{endpoint_query}&key=#{ENV['LOCATION_IQ_API_KEY']}"
+    query_url = "https://us1.locationiq.com/v1/#{endpoint_query}&key=#{ENV['LOCATION_IQ_API_KEY']}&format=json"
     uri = URI.parse(query_url)
     request = Net::HTTP::Get.new(uri)
     resp = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https") do |http|
@@ -16,7 +16,7 @@ class Location < ApplicationRecord
   # Search request to Location IQ API
   def self.geosearch(query)
     raise ArgumentError, "No query for geosearch" if query.blank?
-    endpoint_query = "search.php?format=json&addressdetails=1&normalizecity=1&q=#{query}"
+    endpoint_query = "search.php?addressdetails=1&normalizecity=1&q=#{query}"
     location_api_request(endpoint_query)
   end
 
@@ -30,7 +30,7 @@ class Location < ApplicationRecord
 
   def self.geosearch_by_osm_id(osm_id, osm_type)
     osm_type = osm_type[0].capitalize # (N)ode, (W)ay, or (R)elation
-    endpoint_query = "reverse.php?osm_id=#{osm_id}&osm_type=#{osm_type}&format=json"
+    endpoint_query = "reverse.php?osm_id=#{osm_id}&osm_type=#{osm_type}"
     location_api_request(endpoint_query)
   end
 
@@ -44,7 +44,7 @@ class Location < ApplicationRecord
       success, resp = geosearch_by_osm_id(osm_id, osm_type)
       raise "Couldn't fetch OSM ID #{osm_id} (#{osm_type})" unless success
 
-      resp = LocationHelper.adapt_location_iq_response(resp)
+      resp = LocationHelper.adapt_locationiq_response(resp)
       create_from_params(resp)
     end
   end

@@ -18,7 +18,7 @@ class LocationsController < ApplicationController
       success, resp = Location.geosearch(query)
       if success
         resp.each do |c|
-          results << LocationHelper.adapt_location_iq_response(c)
+          results << LocationHelper.adapt_locationiq_response(c)
         end
       end
     end

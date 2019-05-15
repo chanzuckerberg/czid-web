@@ -102,13 +102,6 @@ class Metadatum < ApplicationRecord
     errors.add(:raw_value, MetadataValidationErrors::INVALID_DATE)
   end
 
-  def check_and_set_location_type
-    location_data = JSON.parse(raw_value)
-    self.string_validated_value = location_data[:name]
-
-    Location.find_or_create_from_params(location_data)
-  end
-
   def self.str_to_basic_chars(res)
     res.downcase.gsub(/[^0-9A-Za-z]/, '')
   end
@@ -262,7 +255,6 @@ class Metadatum < ApplicationRecord
       mdf = metadata_fields[md.metadata_field_id]
       if mdf
         base = convert_type_to_string(mdf.base_type)
-        base = "string" if base == "location" # Re-use the string value
         validated_values[md.id] = md["#{base}_validated_value"]
       else
         validated_values[md.id] = ""
