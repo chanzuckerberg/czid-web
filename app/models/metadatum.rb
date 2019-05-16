@@ -102,6 +102,17 @@ class Metadatum < ApplicationRecord
     errors.add(:raw_value, MetadataValidationErrors::INVALID_DATE)
   end
 
+  def check_and_set_location_type
+    # Based on our metadata structure, the location details end up in raw_value before we commit the
+    # values in this validator.
+    loc = JSON.parse(raw_value)
+    result = Location.find_or_create_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
+    # Re-use number_validated_value column to be the foreign key to the Location table
+    self.number_validated_value = result.id
+  rescue ArgumentError # should not happen
+    errors.add(:raw_value, MetadataValidationErrors::INVALID_LOCATION)
+  end
+
   def self.str_to_basic_chars(res)
     res.downcase.gsub(/[^0-9A-Za-z]/, '')
   end
