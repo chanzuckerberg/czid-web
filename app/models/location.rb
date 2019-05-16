@@ -1,13 +1,14 @@
 class Location < ApplicationRecord
   include LocationHelper
 
+  # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)
     raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
 
     query_url = "https://us1.locationiq.com/v1/#{endpoint_query}&key=#{ENV['LOCATION_IQ_API_KEY']}&format=json"
     uri = URI.parse(query_url)
     request = Net::HTTP::Get.new(uri)
-    resp = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https") do |http|
+    resp = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
       http.request(request)
     end
     [resp.is_a?(Net::HTTPSuccess), JSON.parse(resp.body)]
@@ -20,16 +21,18 @@ class Location < ApplicationRecord
     location_api_request(endpoint_query)
   end
 
+  # Create a Location from parameters
   def self.create_from_params(location_params)
     # Ignore fields that don't match columns
     location_params = location_params.select { |x| Location.attribute_names.index(x.to_s) }
-    # Name sanitization is imperfect but we can check a few characters
+    # Name sanitization is imperfect but we can have a sanity check
     location_params.each { |_, v| v.gsub!(/[;%_^<>?\\]/, "") }
     Location.create!(location_params)
   rescue => err
     raise "Couldn't save Location: #{err.message} #{location_params}"
   end
 
+  # Geosearch by OpenStreetMap ID and type
   def self.geosearch_by_osm_id(osm_id, osm_type)
     osm_type = osm_type[0].capitalize # (N)ode, (W)ay, or (R)elation
     endpoint_query = "reverse.php?osm_id=#{osm_id}&osm_type=#{osm_type}"
