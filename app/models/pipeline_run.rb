@@ -1435,13 +1435,13 @@ class PipelineRun < ApplicationRecord
   def precache_report_info!
     params = report_info_params
     Background.where(ready: 1).pluck(:id).each do |background_id|
-      cache_key = SamplesController.report_info_cache_key(
+      cache_key = ReportHelper.report_info_cache_key(
         "/samples/#{sample.id}/report_info",
         params.merge(background_id: background_id)
       )
       Rails.logger.debug("Precaching #{cache_key} with background #{background_id}")
       Rails.cache.fetch(cache_key) do
-        SamplesController.report_info_json(self, background_id)
+        ReportHelper.report_info_json(self, background_id)
       end
 
       MetricUtil.put_metric_now("samples.cache.precached", 1)

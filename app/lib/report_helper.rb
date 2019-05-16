@@ -1,6 +1,9 @@
 require 'csv'
 require 'open3'
 
+# TODO: (gdingle): this class should be split up. Everything needed for
+# report_info_json should be extract into its own class and have its own
+# unit tests. I'm not sure about the rest.
 module ReportHelper
   # Truncate report table past this number of rows.
   ZSCORE_MIN = -99
@@ -74,6 +77,44 @@ module ReportHelper
     'r' => 'zscore',
     'rpm' => 'zscore'
   }.freeze
+
+  # Example cache key:
+  # /samples/12303/report_info?background_id=93&format=json&pipeline_version=3.3&report_ts=1549504990
+  def self.report_info_cache_key(path, kvs)
+    kvs = kvs.to_h.sort.to_h
+    # Increment this if you ever change the response structure of report_info
+    kvs["_cache_key_version"] = 1
+    path + "?" + kvs.to_param
+  end
+
+  # This was originally the report_info action but it was too slow, more than
+  # 10s for some samples, so we wrapped it in a cache layer.
+  def self.report_info_json(pipeline_run, background_id)
+    ##################################################
+    ## Duct tape for changing background id dynamically
+    ## TODO(yf): clean the following up.
+    ####################################################
+    if pipeline_run && (((pipeline_run.adjusted_remaining_reads.to_i > 0 || pipeline_run.finalized?) && !pipeline_run.failed?) || pipeline_run.report_ready?)
+      pipeline_run_id = pipeline_run.id
+    end
+
+    report_info = ReportHelper.external_report_info(
+      pipeline_run_id,
+      background_id,
+      TaxonScoringModel::DEFAULT_MODEL_NAME,
+      ReportHelper::DEFAULT_SORT_PARAM
+    )
+
+    # Fill lineage details into report info.
+    # report_info[:taxonomy_details][2] is the array of taxon rows (which are hashes with keys like tax_id, name, NT, etc)
+    report_info[:taxonomy_details][2] = TaxonLineage.fill_lineage_details(report_info[:taxonomy_details][2], pipeline_run_id)
+
+    # Label top-scoring hits for the executive summary
+    report_info[:topScoringTaxa] = ReportHelper.label_top_scoring_taxa!(report_info[:taxonomy_details][2])
+    report_info[:contig_taxid_list] = pipeline_run.get_taxid_list_with_contigs
+
+    JSON.dump(report_info)
+  end
 
   def self.label_top_scoring_taxa!(tax_map)
     # Rule:
