@@ -27,6 +27,13 @@
   h3 {
     @include font-header-m;
     margin-top: 30px;
+    position: relative;
+
+    .number {
+      position: absolute;
+      right: 100%;
+      margin-right: 8px;
+    }
   }
 
   h4.subtitle {
@@ -48,7 +55,8 @@
   }
 
   a {
-    color: $primary-light;
+    // Override _header.scss
+    color: $primary-light !important;
   }
 
   ul {
@@ -65,6 +73,16 @@
       }
     }
   }
+
+  .underlineHeader {
+    @include font-body-m;
+    margin-top: 25px;
+    text-decoration: underline;
+  }
+
+  b {
+    font-weight: $font-weight-semibold;
+  }
 }
 
 .faqPage .question {
@@ -74,15 +92,26 @@
     margin-top: 0;
     margin-bottom: 0;
     padding: 0 10px;
-    height: 50px;
-    line-height: 50px;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
 
     &:hover {
       color: $primary-light;
+    }
+
+    &.multiLine {
+      margin-top: 15px;
+      margin-bottom: 15px;
     }
   }
 
   p {
     margin: 0px 50px 10px 10px;
+  }
+
+  .innerListItem {
+    margin-top: 10px;
+    margin-left: 20px;
   }
 }
