@@ -12,8 +12,4 @@ class PipelineRunTest < ActiveSupport::TestCase
   test "duration is correct" do
     assert pipeline_runs(:four).duration_hrs >= 0.0
   end
-
-  test "precaching executes" do
-    pipeline_runs(:four).precache_report_info!
-  end
 end

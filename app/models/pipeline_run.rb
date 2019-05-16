@@ -1440,7 +1440,7 @@ class PipelineRun < ApplicationRecord
         params.merge(background_id: background_id)
       )
       Rails.logger.debug("Precaching #{cache_key} with background #{background_id}")
-      Rails.cache.fetch(cache_key) do
+      Rails.cache.fetch(cache_key, expires_in: 30.days) do
         ReportHelper.report_info_json(self, background_id)
       end
 

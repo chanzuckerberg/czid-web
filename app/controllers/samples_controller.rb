@@ -749,7 +749,7 @@ class SamplesController < ApplicationController
     response.headers["X-IDseq-Cache"] = 'requested'
 
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    json = Rails.cache.fetch(cache_key) do
+    json = Rails.cache.fetch(cache_key, expires_in: 30.days) do
       MetricUtil.put_metric_now("samples.cache.miss", 1)
       response.headers["X-IDseq-Cache"] = 'missed'
       ReportHelper.report_info_json(pipeline_run, params[:background_id])
