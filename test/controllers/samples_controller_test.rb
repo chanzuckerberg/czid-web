@@ -1,6 +1,8 @@
 require 'test_helper'
 
 class SamplesControllerTest < ActionDispatch::IntegrationTest
+  include ActiveSupport::Testing::TimeHelpers
+
   setup do
     @background = backgrounds(:real_background)
     @sample = samples(:one)
@@ -358,20 +360,20 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
 
-    first_runtime = @response.headers["X-Runtime"]
+    first_len = @response.headers["Content-Length"].to_i
+    assert first_len > 0
     cache_header = @response.headers["X-IDseq-Cache"]
     assert_equal "missed", cache_header
 
     get url
     assert_response :success
 
-    second_runtime = @response.headers["X-Runtime"]
+    second_len = @response.headers["Content-Length"].to_i
     cache_header = @response.headers["X-IDseq-Cache"]
     assert_equal "requested", cache_header
+    assert second_len > 0
 
-    # Second request should always be faster than the first.
-    # Typically it will be 10x faster.
-    assert first_runtime.to_f > second_runtime.to_f
+    assert_equal first_len, second_len
   end
 
   test 'report_info should override background when background is not viewable' do
@@ -384,16 +386,19 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'report_info should return last-modified' do
-    post user_session_path, params: @user_params
+    travel_to(Time.current) do
+      report_ts = Time.now.utc
 
-    report_ts = Time.now.utc
-    url = report_info_url(report_ts: report_ts.to_i)
-    get url
-    last_modified = Time.httpdate(@response.headers["Last-Modified"])
-    # Last-Modified of test data will be creation time, so we just match to the day
-    assert_equal report_ts.year, last_modified.year
-    assert_equal report_ts.month, last_modified.month
-    assert_equal report_ts.day, last_modified.day
+      post user_session_path, params: @user_params
+
+      url = report_info_url(report_ts: report_ts.to_i)
+      get url
+      last_modified = Time.httpdate(@response.headers["Last-Modified"])
+      # Last-Modified of test data will be creation time, so we just match to the day
+      assert_equal report_ts.year, last_modified.year
+      assert_equal report_ts.month, last_modified.month
+      assert_equal report_ts.day, last_modified.day
+    end
   end
 
   test 'report_info cache should error on bad sample' do
