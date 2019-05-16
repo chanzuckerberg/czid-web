@@ -683,8 +683,8 @@ class SamplesController < ApplicationController
     if background_id && @pipeline_run && @pipeline_run.report_ready?
       @report_present = true
       @report_ts = @pipeline_run.report_info_params[:report_ts]
-      @all_categories = all_categories
-      @report_details = report_details(@pipeline_run, current_user.id)
+      @all_categories = ReportHelper::ALL_CATEGORIES
+      @report_details = ReportHelper.report_details(@pipeline_run, current_user.id)
       @ercc_comparison = @pipeline_run.compare_ercc_counts
     end
 
