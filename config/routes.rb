@@ -64,6 +64,7 @@ Rails.application.routes.draw do
   post 'sign_up', to: 'home#sign_up'
   get 'privacy', to: 'support#privacy'
   get 'terms', to: 'support#terms'
+  get 'terms_changes', to: 'support#terms_changes'
   get 'faqs', to: 'support#faqs'
 
   resources :projects do
@@ -109,6 +110,7 @@ Rails.application.routes.draw do
   namespace :playground do
     get :controls
     get :icons
+    get :viz
   end
 
   resource :metadata do

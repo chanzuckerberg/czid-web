@@ -2,6 +2,7 @@ import React from "react";
 import { find, get } from "lodash/fp";
 import cx from "classnames";
 import ReactDOM from "react-dom";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import { formatPercent } from "~/components/utils/format";
 import Sidebar from "~ui/containers/Sidebar";
@@ -140,7 +141,10 @@ export default class CoverageVizBottomSidebar extends React.Component {
     const data = await this.getDataForAccession(accession.id);
 
     this.setState({
-      currentAccessionData: data
+      currentAccessionData: {
+        ...data,
+        id: accession.id
+      }
     });
   };
 
@@ -257,6 +261,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
   };
 
   getAccessionMetrics = () => {
+    const { sampleId, params } = this.props;
     const { currentAccessionData, currentAccessionSummary } = this.state;
 
     if (!currentAccessionData) {
@@ -274,6 +279,16 @@ export default class CoverageVizBottomSidebar extends React.Component {
               target="_blank"
               rel="noopener noreferrer"
               className={cs.ncbiLink}
+              onClick={() =>
+                logAnalyticsEvent(
+                  "CoverageVizBottomSidebar_ncbi-link_clicked",
+                  {
+                    accessionId: currentAccessionSummary.id,
+                    taxonId: params.taxonId,
+                    sampleId
+                  }
+                )
+              }
             >
               {currentAccessionSummary.id} - {currentAccessionSummary.name}
             </a>
@@ -302,7 +317,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
   };
 
   renderContentHeader = () => {
-    const { params } = this.props;
+    const { params, sampleId } = this.props;
     const { currentAccessionSummary } = this.state;
 
     const numBestAccessions = params.accessionData.best_accessions.length;
@@ -331,7 +346,17 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 {get("name", currentAccessionSummary)}
               </div>
             }
-            onChange={this.setCurrentAccession}
+            onChange={accessionId => {
+              logAnalyticsEvent(
+                "CoverageVizBottomSidebar_accession-select_changed",
+                {
+                  accessionId,
+                  taxonId: params.taxonId,
+                  sampleId
+                }
+              );
+              this.setCurrentAccession(accessionId);
+            }}
             rounded
             menuClassName={cs.accessionSelectMenu}
           />
@@ -353,6 +378,16 @@ export default class CoverageVizBottomSidebar extends React.Component {
               href={params.alignmentVizUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() =>
+                logAnalyticsEvent(
+                  "CoverageVizBottomSidebar_alignment-viz-link_clicked",
+                  {
+                    accessionId: currentAccessionSummary.id,
+                    taxonId: params.taxonId,
+                    sampleId
+                  }
+                )
+              }
             >
               View read-level visualization
               <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
@@ -365,7 +400,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
   renderContentBody = () => {
     const { currentAccessionData, currentAccessionSummary } = this.state;
-    const { pipelineVersion, sampleId } = this.props;
+    const { pipelineVersion, sampleId, params } = this.props;
 
     if (!currentAccessionData) {
       return (
@@ -417,6 +452,16 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 }?report=genbank`}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  logAnalyticsEvent(
+                    "CoverageVizBottomSidebar_ref-accession-viz-link_clicked",
+                    {
+                      accessionId: currentAccessionSummary.id,
+                      taxonId: params.taxonId,
+                      sampleId
+                    }
+                  )
+                }
               >
                 <div
                   className={cs.genomeVizInner}
@@ -433,6 +478,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
         </div>
         <HitGroupViz
           accessionData={currentAccessionData}
+          taxonId={params.taxonId}
           sampleId={sampleId}
           pipelineVersion={pipelineVersion}
         />
@@ -463,7 +509,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
   }
 
   renderNoDataContents() {
-    const { params } = this.props;
+    const { params, sampleId } = this.props;
 
     return (
       <NarrowContainer className={cs.contents}>
@@ -485,6 +531,15 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 href={params.alignmentVizUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  logAnalyticsEvent(
+                    "CoverageVizBottomSidebar_no-data-alignment-viz-link_clicked",
+                    {
+                      taxonId: params.taxonId,
+                      sampleId
+                    }
+                  )
+                }
               >
                 View read-level visualization
                 <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
@@ -520,7 +575,7 @@ CoverageVizBottomSidebar.propTypes = {
   visible: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
   params: PropTypes.shape({
-    taxonId: PropTypes.string,
+    taxonId: PropTypes.number,
     taxonName: PropTypes.string,
     accessionData: PropTypes.shape({
       best_accessions: PropTypes.arrayOf(
