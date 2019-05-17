@@ -3,6 +3,8 @@ require "aws-sdk-s3"
 DEFAULT_S3_REGION = 'us-west-2'
 BUCKET_NAME = "idseq-samples-#{Rails.env}"
 
+# Original CSV headers:
+# Source Project Name,	Source Sample Name,	Sample Name	Source,	Day, Time, Sample Type, Nucleotyde Type, Collection Date, Collection Location
 def read_input
   STDIN.binmode
   tmp_file = Tempfile.new('copy_samples_file',  Rails.root.join('tmp'))
