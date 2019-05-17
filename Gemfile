@@ -77,6 +77,8 @@ gem 'shortener'
 # Explicit load to avoid an "unable to load" warning
 gem 'http-2'
 
+gem 'deep_cloneable', '~> 2.4.0'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'bundler-audit'
