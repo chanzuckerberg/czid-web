@@ -50,7 +50,7 @@ class Location < ApplicationRecord
       success, resp = geosearch_by_osm_id(osm_id, osm_type)
       raise "Couldn't fetch OSM ID #{osm_id} (#{osm_type})" unless success
 
-      resp = LocationHelper.adapt_location_iq_response(resp)
+      resp = LocationHelper.adapt_location_iq_response(resp[0])
       create_from_params(resp)
     end
   end

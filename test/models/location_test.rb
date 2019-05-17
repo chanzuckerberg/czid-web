@@ -3,7 +3,7 @@ require "minitest/mock"
 require "helpers/location_test_helper"
 
 class LocationTest < ActiveSupport::TestCase
-  test "makes a location API request" do
+  test "should make a location API request" do
     query = "search.php?addressdetails=1&normalizecity=1&q=UCSF"
     ENV["LOCATION_IQ_API_KEY"] = "abc"
 
@@ -22,7 +22,7 @@ class LocationTest < ActiveSupport::TestCase
     assert net_start.verify
   end
 
-  test "raises an API key error" do
+  test "should raise an API key error" do
     ENV["LOCATION_IQ_API_KEY"] = nil
     err = assert_raises RuntimeError do
       Location.location_api_request("")
@@ -30,11 +30,11 @@ class LocationTest < ActiveSupport::TestCase
     assert_equal "No location API key", err.message
   end
 
-  test "performs the right geosearch query" do
+  test "should perform the right geosearch query" do
     api_response = [true, LocationTestHelper::API_GEOSEARCH_RESPONSE]
-    query = ["search.php?addressdetails=1&normalizecity=1&q=UCSF"]
+    query = "search.php?addressdetails=1&normalizecity=1&q=UCSF"
     mock = MiniTest::Mock.new
-    mock.expect(:call, api_response, query)
+    mock.expect(:call, api_response, [query])
     Location.stub :location_api_request, mock do
       res = Location.geosearch("UCSF")
       assert_equal api_response, res
@@ -42,29 +42,74 @@ class LocationTest < ActiveSupport::TestCase
     assert mock.verify
   end
 
-  test "raises an error for empty geosearch" do
+  test "should raise an error for empty geosearch" do
     err = assert_raises ArgumentError do
       Location.geosearch("")
     end
     assert_equal "No query for geosearch", err.message
   end
 
-  test "creates a Location entry from parameters" do
+  test "should create Location entry from parameters" do
     location_params = LocationTestHelper::FORMATTED_GEOSEARCH_RESPONSE[0]
+    params_with_junk = location_params.deep_dup
+    params_with_junk[:junk] = "junkvalue"
     new_location = Location.new
+
     mock_create = MiniTest::Mock.new
-    # def mock_create.call(input)
-    #   puts input
-    # end
-
-    # assert_equal location_params, {"name"=>"University of California, San Francisco, Parnassus Avenue, Inner Sunset, San Francisco, San Francisco City and County, California, 94131, USA", "geo_level"=>"city", "country_name"=>"USA", "state_name"=>"California", "subdivision_name"=>"San Francisco City and County", "city_name"=>"San Francisco", "lat"=>37.76, "lng"=>-122.45, "country_code"=>"us", "osm_id"=>34324395, "locationiq_id"=>89640023}
-
     mock_create.expect(:call, new_location, [location_params])
     Location.stub :create!, mock_create do
-      res = Location.create_from_params(location_params)
-      puts res
-      puts "hi"
+      res = Location.create_from_params(params_with_junk)
+      assert_equal new_location, res
     end
     assert mock_create.verify
+  end
+
+  test "should raise Location creation error" do
+    err = assert_raises RuntimeError do
+      Location.create_from_params("")
+    end
+    assert_match "Couldn't save Location", err.message
+  end
+
+  test "should geosearch by OSM ID and type" do
+    api_response = LocationTestHelper::API_GEOSEARCH_RESPONSE
+    osm_id = LocationTestHelper::API_GEOSEARCH_RESPONSE[0]["osm_id"]
+    osm_type = LocationTestHelper::API_GEOSEARCH_RESPONSE[0]["osm_type"]
+    query = "reverse.php?osm_id=#{osm_id}&osm_type=#{osm_type[0].capitalize}"
+    mock = MiniTest::Mock.new
+    mock.expect(:call, [true, api_response], [query])
+    Location.stub :location_api_request, mock do
+      res = Location.geosearch_by_osm_id(osm_id, osm_type)
+      assert_equal [true, api_response], res
+    end
+    assert mock.verify
+  end
+
+  test "should find existing Location by API ID" do
+    new_location = Location.new
+    mock = MiniTest::Mock.new
+    mock.expect(:call, new_location, [{ locationiq_id: "123" }])
+    Location.stub :find_by, mock do
+      res = Location.find_or_create_by_api_ids("123", nil, nil)
+      assert_equal new_location, res
+    end
+  end
+
+  test "should create new Location by OSM ID" do
+    api_response = LocationTestHelper::API_GEOSEARCH_RESPONSE
+    osm_id = LocationTestHelper::API_GEOSEARCH_RESPONSE[0]["osm_id"]
+    osm_type = LocationTestHelper::API_GEOSEARCH_RESPONSE[0]["osm_type"]
+
+    new_location = Location.new
+    mock_geosearch = MiniTest::Mock.new
+    mock_geosearch.expect(:call, [true, api_response], [osm_id, osm_type])
+    Location.stub :find_by, nil do
+      Location.stub :geosearch_by_osm_id, mock_geosearch do
+        Location.stub :create_from_params, new_location do
+          res = Location.find_or_create_by_api_ids("123", osm_id, osm_type)
+          assert_equal new_location, res
+        end
+      end
+    end
   end
 end
