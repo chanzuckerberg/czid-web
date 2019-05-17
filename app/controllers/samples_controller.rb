@@ -30,8 +30,10 @@ class SamplesController < ApplicationController
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files].freeze
 
-  before_action :authenticate_user!, except: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
-  before_action :authenticate_user_from_token!, only: [:create, :update, :bulk_upload, :bulk_upload_with_metadata]
+  # For API-like access
+  TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
+  before_action :authenticate_user!, except: TOKEN_AUTH_ACTIONS
+  before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
@@ -570,7 +572,7 @@ class SamplesController < ApplicationController
   # GET /samples/1/metadata.json
   def metadata
     # Information needed to show the samples metadata sidebar.
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     summary_stats = nil
     pr_display = nil
     ercc_comparison = nil
@@ -645,7 +647,7 @@ class SamplesController < ApplicationController
   # GET /samples/1
   # GET /samples/1.json
   def show
-    @pipeline_run = select_pipeline_run(@sample, params)
+    @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     @amr_counts = nil
     can_see_amr = (current_user.admin? || current_user.allowed_feature_list.include?("AMR"))
     if can_see_amr && @pipeline_run
@@ -654,7 +656,7 @@ class SamplesController < ApplicationController
         @amr_counts = @pipeline_run.amr_counts
       end
     end
-    @pipeline_version = @pipeline_run.pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL if @pipeline_run
+    @pipeline_version = @pipeline_run.report_info_params[:pipeline_version] if @pipeline_run
     @pipeline_versions = @sample.pipeline_versions
 
     @pipeline_run_display = curate_pipeline_run_display(@pipeline_run)
@@ -668,7 +670,6 @@ class SamplesController < ApplicationController
     @background_models = current_power.backgrounds.where(ready: 1)
     @can_edit = current_power.updatable_sample?(@sample)
     @git_version = ENV['GIT_VERSION'] || ""
-    @git_version = Time.current.to_i if @git_version.blank?
 
     @align_viz = false
     align_summary_file = @pipeline_run ? "#{@pipeline_run.alignment_viz_output_s3_path}.summary" : nil
@@ -681,9 +682,9 @@ class SamplesController < ApplicationController
     # Check if the report table should actually show
     if background_id && @pipeline_run && @pipeline_run.report_ready?
       @report_present = true
-      @report_ts = @pipeline_run.updated_at.to_i
-      @all_categories = all_categories
-      @report_details = report_details(@pipeline_run, current_user.id)
+      @report_ts = @pipeline_run.report_info_params[:report_ts]
+      @all_categories = ReportHelper::ALL_CATEGORIES
+      @report_details = ReportHelper.report_details(@pipeline_run, current_user.id)
       @ercc_comparison = @pipeline_run.compare_ercc_counts
     end
 
@@ -721,30 +722,40 @@ class SamplesController < ApplicationController
     render json: samples.to_json(include: [{ project: { only: [:id, :name] } }])
   end
 
+  # The json response here should be precached in PipelineRun.
   def report_info
-    expires_in 30.days
-    @pipeline_run = select_pipeline_run(@sample, params)
+    MetricUtil.put_metric_now("samples.cache.requested", 1)
 
-    ##################################################
-    ## Duct tape for changing background id dynamically
-    ## TODO(yf): clean the following up.
-    ####################################################
-    if @pipeline_run && (((@pipeline_run.adjusted_remaining_reads.to_i > 0 || @pipeline_run.finalized?) && !@pipeline_run.failed?) || @pipeline_run.report_ready?)
-      background_id = get_background_id(@sample)
-      pipeline_run_id = @pipeline_run.id
+    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    if pipeline_run.nil?
+      message = "Pipeline run not found for sample #{@sample.id}"
+      raise ActiveRecord::RecordNotFound, message
+    end
+    report_info_params = pipeline_run.report_info_params
+
+    # Set background_id to a viewable background
+    params[:background_id] = get_background_id(@sample)
+
+    cache_key = ReportHelper.report_info_cache_key(
+      request.path,
+      params.permit(report_info_params.keys)
+    )
+
+    # This allows 304 Not Modified to be returned so that the client can use its
+    # local cache and avoid the large download.
+    httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
+    response.headers["Last-Modified"] = httpdate
+    # This is a custom header for testing and debugging
+    response.headers["X-IDseq-Cache"] = 'requested'
+
+    pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    json = Rails.cache.fetch(cache_key, expires_in: 30.days) do
+      MetricUtil.put_metric_now("samples.cache.miss", 1)
+      response.headers["X-IDseq-Cache"] = 'missed'
+      ReportHelper.report_info_json(pipeline_run, params[:background_id])
     end
 
-    @report_info = external_report_info(pipeline_run_id, background_id, params)
-
-    # Fill lineage details into report info.
-    # @report_info[:taxonomy_details][2] is the array of taxon rows (which are hashes with keys like tax_id, name, NT, etc)
-    @report_info[:taxonomy_details][2] = TaxonLineage.fill_lineage_details(@report_info[:taxonomy_details][2], pipeline_run_id)
-
-    # Label top-scoring hits for the executive summary
-    @report_info[:topScoringTaxa] = label_top_scoring_taxa!(@report_info[:taxonomy_details][2])
-    @report_info[:contig_taxid_list] = @pipeline_run.get_taxid_list_with_contigs
-
-    render json: JSON.dump(@report_info)
+    render json: json
   end
 
   def save_metadata
@@ -773,14 +784,14 @@ class SamplesController < ApplicationController
   end
 
   def contig_taxid_list
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     render json: pr.get_taxid_list_with_contigs
   end
 
   def taxid_contigs
     taxid = params[:taxid]
     return if HUMAN_TAX_IDS.include? taxid.to_i
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     contigs = pr.get_contigs_for_taxid(taxid.to_i)
     output_fasta = ''
     contigs.each { |contig| output_fasta += contig.to_fa }
@@ -788,7 +799,7 @@ class SamplesController < ApplicationController
   end
 
   def summary_contig_counts
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     min_contig_size = params[:min_contig_size] || PipelineRun::MIN_CONTIG_SIZE
     contig_counts = pr.get_summary_contig_counts(min_contig_size)
     render json: { min_contig_size: min_contig_size, contig_counts: contig_counts }
@@ -796,7 +807,7 @@ class SamplesController < ApplicationController
 
   def show_taxid_fasta
     return if HUMAN_TAX_IDS.include? params[:taxid].to_i
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     if params[:hit_type] == "NT_or_NR"
       nt_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NT').split(">")
       nr_array = get_taxid_fasta_from_pipeline_run(pr, params[:taxid], params[:tax_level].to_i, 'NR').split(">")
@@ -816,7 +827,7 @@ class SamplesController < ApplicationController
       return
     end
 
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
 
     @tax_level = @taxon_info.split("_")[1]
     @taxon_name = taxon_name(@taxid, @tax_level)
@@ -855,7 +866,7 @@ class SamplesController < ApplicationController
   end
 
   def contigs_fasta
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     contigs_fasta_s3_path = pr.contigs_fasta_s3_path
 
     if contigs_fasta_s3_path
@@ -869,7 +880,7 @@ class SamplesController < ApplicationController
   end
 
   def contigs_summary
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     local_file = pr.generate_contig_mapping_table
 
     @contigs_summary = File.read(local_file)
@@ -890,7 +901,7 @@ class SamplesController < ApplicationController
   end
 
   def contigs_fasta_by_byteranges
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     byteranges = params[:byteranges]
 
     contig_fasta = pr.contigs_fasta_s3_path
@@ -906,7 +917,7 @@ class SamplesController < ApplicationController
   end
 
   def contigs_sequences_by_byteranges
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     byteranges = params[:byteranges]
 
     contig_fasta = pr.contigs_fasta_s3_path
@@ -923,13 +934,13 @@ class SamplesController < ApplicationController
   end
 
   def nonhost_fasta
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     @nonhost_fasta = get_s3_file(pr.annotated_fasta_s3_path)
     send_data @nonhost_fasta, filename: @sample.name + '_nonhost.fasta'
   end
 
   def unidentified_fasta
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     @unidentified_fasta = get_s3_file(pr.unidentified_fasta_s3_path)
     send_data @unidentified_fasta, filename: @sample.name + '_unidentified.fasta'
   end
@@ -1168,7 +1179,7 @@ class SamplesController < ApplicationController
   end
 
   def coverage_viz_summary
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     coverage_viz_summary_s3_path = pr.coverage_viz_summary_s3_path
 
     if coverage_viz_summary_s3_path
@@ -1187,7 +1198,7 @@ class SamplesController < ApplicationController
   end
 
   def coverage_viz_data
-    pr = select_pipeline_run(@sample, params)
+    pr = select_pipeline_run(@sample, params[:pipeline_version])
     coverage_viz_data_s3_path = pr.coverage_viz_data_s3_path(params[:accessionId])
 
     if coverage_viz_data_s3_path

@@ -794,6 +794,9 @@ class PipelineRun < ApplicationRecord
       if all_output_states_loaded? && !compiling_stats_failed
         update(results_finalized: FINALIZED_SUCCESS)
 
+        # Precache reports for all backgrounds
+        Resque.enqueue(PrecacheReportInfo, id)
+
         # Send to Datadog and Segment
         tags = ["sample_id:#{sample.id}"]
         # DEPRECATED. Use log_analytics_event.
@@ -848,7 +851,7 @@ class PipelineRun < ApplicationRecord
       if prs.failed?
         self.job_status = STATUS_FAILED
         self.finalized = 1
-        message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.email} failed #{prs.name} with #{adjusted_remaining_reads} reads remaining after #{duration_hrs}. See: #{status_url}"
+        message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.email} failed #{prs.name} with #{adjusted_remaining_reads || 0} reads remaining after #{duration_hrs} hours. See: #{status_url}"
         LogUtil.log_err_and_airbrake(message)
       elsif !prs.started?
         # we're moving on to a new stage
@@ -1404,5 +1407,44 @@ class PipelineRun < ApplicationRecord
                  "https://idseq.net"
                end
     base_url + "/samples/#{sample.id}/pipeline_runs"
+  end
+
+  # Keys here are used as cache keys for report_info action in SamplesController.
+  # The values here are used as defaults for PipelineSampleReport.jsx.
+  def report_info_params
+    {
+      pipeline_version: pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL,
+      # Default background is complicated... see get_background_id. In any case,
+      # we precache all backgrounds. See precache_report_info below.
+      background_id: nil,
+      # For invalidation when underlying data changes
+      report_ts: max_updated_at.utc.to_i,
+      format: "json"
+    }
+  end
+
+  # Gets last update time of all has_many relations and current pipeline run
+  def max_updated_at
+    assocs = PipelineRun.reflect_on_all_associations(:has_many)
+    assocs_max = assocs.map { |assoc| send(assoc.name).pluck(:updated_at).max }
+    [updated_at, assocs_max.compact.max].compact.max
+  end
+
+  # This precaches reports for *all* backgrounds. Each report took between 1 and
+  # 10s in testing.
+  def precache_report_info!
+    params = report_info_params
+    Background.where(ready: 1).pluck(:id).each do |background_id|
+      cache_key = ReportHelper.report_info_cache_key(
+        "/samples/#{sample.id}/report_info",
+        params.merge(background_id: background_id)
+      )
+      Rails.logger.debug("Precaching #{cache_key} with background #{background_id}")
+      Rails.cache.fetch(cache_key, expires_in: 30.days) do
+        ReportHelper.report_info_json(self, background_id)
+      end
+
+      MetricUtil.put_metric_now("samples.cache.precached", 1)
+    end
   end
 end

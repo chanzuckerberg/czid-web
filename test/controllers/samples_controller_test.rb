@@ -1,6 +1,8 @@
 require 'test_helper'
 
 class SamplesControllerTest < ActionDispatch::IntegrationTest
+  include ActiveSupport::Testing::TimeHelpers
+
   setup do
     @background = backgrounds(:real_background)
     @sample = samples(:one)
@@ -348,5 +350,122 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
         value: "Foobar Sample Type"
       }
     end
+  end
+
+  test 'report_info should return cached copy on second request' do
+    post user_session_path, params: @user_params
+
+    url = report_info_url
+    get url
+
+    assert_response :success
+
+    first_len = @response.headers["Content-Length"].to_i
+    assert first_len > 0
+    cache_header = @response.headers["X-IDseq-Cache"]
+    assert_equal "missed", cache_header
+
+    get url
+    assert_response :success
+
+    second_len = @response.headers["Content-Length"].to_i
+    cache_header = @response.headers["X-IDseq-Cache"]
+    assert_equal "requested", cache_header
+    assert second_len > 0
+
+    assert_equal first_len, second_len
+  end
+
+  test 'report_info should override background when background is not viewable' do
+    post user_session_path, params: @user_params
+    # ids beyond any conceivable range
+    url = report_info_url(background_id: rand(10**10..11**10))
+    get url
+
+    assert_response :success
+  end
+
+  test 'report_info should return last-modified' do
+    travel_to(Time.current) do
+      report_ts = Time.now.utc
+
+      post user_session_path, params: @user_params
+
+      url = report_info_url(report_ts: report_ts.to_i)
+      get url
+      last_modified = Time.httpdate(@response.headers["Last-Modified"])
+      # Last-Modified of test data will be creation time, so we just match to the day
+      assert_equal report_ts.year, last_modified.year
+      assert_equal report_ts.month, last_modified.month
+      assert_equal report_ts.day, last_modified.day
+    end
+  end
+
+  test 'report_info cache should error on bad sample' do
+    post user_session_path, params: @user_params
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      test_miss("pipeline_version")
+    end
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      get "/samples/123456789/report_info.json"
+    end
+    # Make sure not cached
+    assert_raises(ActiveRecord::RecordNotFound) do
+      get "/samples/123456789/report_info.json"
+    end
+  end
+
+  test 'report_info cache should invalidate on change of relevant params' do
+    post user_session_path, params: @user_params
+
+    test_miss("background_id")
+    test_miss("scoring_model")
+    test_miss("sort_by")
+    test_miss("report_ts")
+    test_miss("git_version")
+  end
+
+  test 'report_info cache should remain on change of irrelevant params' do
+    post user_session_path, params: @user_params
+
+    url = report_info_url
+    get url
+    assert_response :success
+    cache_header = @response.headers["X-IDseq-Cache"]
+    assert_equal "missed", cache_header
+
+    url += "&asdf=" + rand(10**10).to_s
+    get url
+    assert_response :success
+    cache_header = @response.headers["X-IDseq-Cache"]
+    assert_equal "requested", cache_header
+  end
+
+  private
+
+  def report_info_url(params = {}, sample_name = :six)
+    # Adapted from report_info_params
+    query = {
+      pipeline_version: nil,
+      background_id: rand(10**10..11**10), # ids beyond any conceivable range
+      scoring_model: TaxonScoringModel::DEFAULT_MODEL_NAME,
+      sort_by: "nt_aggregatescore",
+      report_ts: rand(10**10),
+      git_version: "constant",
+      format: "json"
+    }.merge(params).to_query
+
+    path = "/samples/#{samples(sample_name).id}/report_info"
+    path + "?" + query
+  end
+
+  def test_miss(key)
+    url = report_info_url(key => rand(10**10).to_s)
+    get url
+    assert_response :success
+    cache_header = @response.headers["X-IDseq-Cache"]
+    assert_equal "missed", cache_header
   end
 end
