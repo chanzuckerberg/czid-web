@@ -89,7 +89,7 @@ Rails.application.routes.draw do
   get 'choose_project', to: 'projects#choose_project'
 
   get 'phylo_trees/index', to: 'phylo_trees#index'
-  get 'phylo_trees/show', to: 'phylo_trees#show'
+  get 'phylo_trees/:id/show', to: 'phylo_trees#show'
   get 'phylo_trees/new', to: 'phylo_trees#new'
   post 'phylo_trees/create', to: 'phylo_trees#create'
   post 'phylo_trees/retry', to: 'phylo_trees#retry'

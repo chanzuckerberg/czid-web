@@ -95,8 +95,8 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   colorScale = (value, node, originalColor, _, colorNoValue) => {
-    const { data } = this.props;
-    const filtered = data.filtered[node.rowIndex][node.columnIndex];
+    const { taxonFilterState } = this.props;
+    const filtered = taxonFilterState[node.rowIndex][node.columnIndex];
     return value > 0 && filtered ? originalColor : colorNoValue;
   };
 
@@ -348,6 +348,7 @@ SamplesHeatmapVis.defaultProps = {
 
 SamplesHeatmapVis.propTypes = {
   data: PropTypes.object,
+  taxonFilterState: PropTypes.objectOf(PropTypes.objectOf(PropTypes.bool)),
   defaultMetadata: PropTypes.array,
   metadataTypes: PropTypes.array,
   metric: PropTypes.string,

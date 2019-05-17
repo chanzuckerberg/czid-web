@@ -78,6 +78,8 @@ gem 'shortener'
 gem 'http-2'
 
 gem 'deep_cloneable', '~> 2.4.0'
+# For using redis as a cache
+gem 'redis-rails', '~> 5'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

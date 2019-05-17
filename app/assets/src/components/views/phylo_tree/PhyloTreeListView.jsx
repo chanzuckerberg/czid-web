@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
 import BasicPopup from "~/components/BasicPopup";
-import { saveVisualization } from "~/api";
+import { getPhyloTree, saveVisualization } from "~/api";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
@@ -27,6 +27,7 @@ class PhyloTreeListView extends React.Component {
         urlParams,
         props.phyloTrees
       ),
+      currentTree: null,
       phyloTreeMap: fromPairs(props.phyloTrees.map(tree => [tree.id, tree])),
       sidebarMode: null,
       sidebarVisible: false,
@@ -49,12 +50,19 @@ class PhyloTreeListView extends React.Component {
     return selectedId;
   }
 
-  handleTreeChange = newPhyloTreeId => {
+  async componentDidMount() {
+    let currentTree = await getPhyloTree(this.state.selectedPhyloTreeId);
+    this.setState({ currentTree });
+  }
+
+  handleTreeChange = async newPhyloTreeId => {
     // TODO (gdingle): do we want to keep using sessionStorage and cookies and urlparams and db saving?!
     window.sessionStorage.setItem("treeId", newPhyloTreeId);
     this.persistInUrl("treeId", newPhyloTreeId);
+    let currentTree = await getPhyloTree(newPhyloTreeId);
     this.setState({
       selectedPhyloTreeId: newPhyloTreeId,
+      currentTree: currentTree,
       sidebarVisible: false
     });
     logAnalyticsEvent("PhyloTreeListView_phylo-tree_changed", {
@@ -81,16 +89,15 @@ class PhyloTreeListView extends React.Component {
   handleMetadataUpdate = (key, newValue) => {
     // Update the metadata stored locally.
     this.setState({
-      phyloTreeMap: set(
+      currentTree: set(
         [
-          this.state.selectedPhyloTreeId,
           "sampleDetailsByNodeName",
           this.state.selectedPipelineRunId,
           "metadata",
           key
         ],
         newValue,
-        this.state.phyloTreeMap
+        this.state.currentTree
       )
     });
   };
@@ -103,7 +110,7 @@ class PhyloTreeListView extends React.Component {
     // TODO (gdingle): add analytics tracking?
     let params = parseUrlParams();
     const sampleIds = Object.values(
-      this.getCurrentTree().sampleDetailsByNodeName
+      this.state.currentTree.sampleDetailsByNodeName
     )
       .map(details => details.sample_id)
       .filter(s => !!s);
@@ -130,7 +137,7 @@ class PhyloTreeListView extends React.Component {
   }
 
   handleTaxonModeOpen = () => {
-    const currentTree = this.getCurrentTree();
+    const currentTree = this.state.currentTree;
     if (
       this.state.sidebarMode === "taxonDetails" &&
       this.state.sidebarVisible &&
@@ -210,10 +217,6 @@ class PhyloTreeListView extends React.Component {
     });
   };
 
-  getCurrentTree = () => {
-    return this.state.phyloTreeMap[this.state.selectedPhyloTreeId];
-  };
-
   render() {
     const { allowedFeatures } = this.props;
 
@@ -226,7 +229,11 @@ class PhyloTreeListView extends React.Component {
       );
     }
 
-    let currentTree = this.getCurrentTree();
+    if (!this.state.currentTree) {
+      return null;
+    }
+
+    let currentTree = this.state.currentTree;
     return (
       <div className={cs.phyloTreeListView}>
         <NarrowContainer>
