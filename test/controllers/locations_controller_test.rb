@@ -1,6 +1,6 @@
 require "test_helper"
 require "minitest/mock"
-require "helpers/location_test_helper"
+require "test_helpers/location_test_helper"
 
 class LocationsControllerTest < ActionDispatch::IntegrationTest
   setup do

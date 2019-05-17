@@ -1,6 +1,6 @@
 require "test_helper"
 require "minitest/mock"
-require "helpers/location_test_helper"
+require "test_helpers/location_test_helper"
 
 class LocationTest < ActiveSupport::TestCase
   test "should make a location API request" do

@@ -106,9 +106,11 @@ class Metadatum < ApplicationRecord
     # Based on our metadata structure, the location details selected by the user will end up in
     # raw_value.
     loc = JSON.parse(raw_value, symbolize_names: true)
-    # For the sake of not trusting user input, we'll potentially re-fetch location details based on
-    # the API and OSM IDs.
+
+    # Set to existing Location or create a new one based on the external IDs. For the sake of not
+    # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
     result = Location.find_or_create_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
+
     # Re-use number_validated_value column to be the foreign key to the Location table
     self.number_validated_value = result.id
   rescue
