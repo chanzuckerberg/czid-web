@@ -1,13 +1,13 @@
 require "aws-sdk-s3"
 
-DEFAULT_S3_REGION = 'us-west-2'
-BUCKET_NAME = "idseq-samples-#{Rails.env}"
+DEFAULT_S3_REGION = "us-west-2".freeze
+BUCKET_NAME = "idseq-samples-#{Rails.env}".freeze
 
 # Original CSV headers:
 # Source Project Name,	Source Sample Name,	Sample Name	Source,	Day, Time, Sample Type, Nucleotyde Type, Collection Date, Collection Location
 def read_input
   STDIN.binmode
-  tmp_file = Tempfile.new('copy_samples_file',  Rails.root.join('tmp'))
+  tmp_file = Tempfile.new('copy_samples_file', Rails.root.join('tmp'))
   tmp_file.write(STDIN.read)
   tmp_file.close
 
@@ -22,49 +22,47 @@ def duplicate_sample(old_sample, target_project, new_sample_fields)
 end
 
 def duplicate_sample_db(old_sample, target_project, new_sample_fields)
-  begin
-    puts "Duplicating sample: #{old_sample.name} => #{new_sample_fields["Sample Name"]}"
-    puts "\t- Deep DB copy..."
-    # using: https://github.com/moiristo/deep_cloneable
-    duplicate_sample = old_sample.deep_clone include: [
-      {
-        pipeline_runs: [
-          :taxon_counts,
-          :job_stats,
-          :output_states,
-          :taxon_byteranges,
-          :ercc_counts,
-          :amr_counts,
-          :contigs,
-          :pipeline_run_stages
-        ]
-      },
-      :metadata,
-      :input_files
-    ]
-    puts "\t- Setting sample name to #{new_sample_fields["Sample Name"]}"
-    duplicate_sample.name = new_sample_fields["Sample Name"]
-    puts "\t- Setting project to #{target_project.name}"
-    duplicate_sample.project = target_project
-    # set input files to local to make sure we do not trigger s3 copy
-    puts "\t- Setting input files source to #{InputFile::SOURCE_TYPE_LOCAL}"
-    duplicate_sample.input_files.each do |input_file|
-      input_file.source_type = InputFile::SOURCE_TYPE_LOCAL
-    end
-
-    if duplicate_sample.valid?
-      duplicate_sample.save
-      puts "\t- Saved sample: #{duplicate_sample.id}"
-    else
-      puts "\t- Invalid sample when duplicating: #{duplicate_sample.name}"
-      raise InvalidDuplicateSampleError, "Invalid sample: #{duplicate_sample}"
-    end
-    return duplicate_sample
-  rescue StandardError => e
-    puts "\t[ERROR] Failed to create sample: #{e.message}"
-    # stop at the first error
-    raise e
+  puts "Duplicating sample: #{old_sample.name} => #{new_sample_fields['Sample Name']}"
+  puts "\t- Deep DB copy..."
+  # using: https://github.com/moiristo/deep_cloneable
+  duplicate_sample = old_sample.deep_clone include: [
+    {
+      pipeline_runs: [
+        :taxon_counts,
+        :job_stats,
+        :output_states,
+        :taxon_byteranges,
+        :ercc_counts,
+        :amr_counts,
+        :contigs,
+        :pipeline_run_stages
+      ]
+    },
+    :metadata,
+    :input_files
+  ]
+  puts "\t- Setting sample name to #{new_sample_fields['Sample Name']}"
+  duplicate_sample.name = new_sample_fields['Sample Name']
+  puts "\t- Setting project to #{target_project.name}"
+  duplicate_sample.project = target_project
+  # set input files to local to make sure we do not trigger s3 copy
+  puts "\t- Setting input files source to #{InputFile::SOURCE_TYPE_LOCAL}"
+  duplicate_sample.input_files.each do |input_file|
+    input_file.source_type = InputFile::SOURCE_TYPE_LOCAL
   end
+
+  if duplicate_sample.valid?
+    duplicate_sample.save
+    puts "\t- Saved sample: #{duplicate_sample.id}"
+  else
+    puts "\t- Invalid sample when duplicating: #{duplicate_sample.name}"
+    raise InvalidDuplicateSampleError, "Invalid sample: #{duplicate_sample}"
+  end
+  return duplicate_sample
+rescue StandardError => e
+  puts "\t[ERROR] Failed to create sample: #{e.message}"
+  # stop at the first error
+  raise e
 end
 
 def duplicate_sample_s3(old_sample, new_sample)
@@ -82,7 +80,6 @@ def duplicate_sample_s3(old_sample, new_sample)
       puts "\t\t* Copying #{BUCKET_NAME}/#{source_key} -> #{BUCKET_NAME}/#{target_key} ..."
       s3.copy_object(bucket: BUCKET_NAME, copy_source: "#{BUCKET_NAME}/#{source_key}", key: target_key)
     end
-
   rescue StandardError => e
     puts "\t\t[ERROR] Exception copying #{BUCKET_NAME}/#{source_prefix} -> #{BUCKET_NAME}/#{target_prefix}"
     puts "\t\t[ERROR] Please copy manually using 'aws s3 sync s3://#{BUCKET_NAME}/#{source_prefix} s3://#{BUCKET_NAME}/#{target_prefix}'"
@@ -111,9 +108,9 @@ task :copy_samples, [:project_name] => :environment do |_, args|
     if sample
       new_sample = Sample.find_by(name: row["Sample Name"])
       if new_sample
-        samples_duplicated << {old_sample: sample, new_sample: new_sample}
+        samples_duplicated << { old_sample: sample, new_sample: new_sample }
       else
-        samples_to_duplicate << {old_sample: sample, new_sample: row}
+        samples_to_duplicate << { old_sample: sample, new_sample: row }
       end
     else
       samples_not_found << source_sample_name
@@ -128,7 +125,7 @@ task :copy_samples, [:project_name] => :environment do |_, args|
 
   puts "Samples to copy:"
   samples_to_duplicate.each do |sample|
-    puts " - [CHANGE] [#{sample[:old_sample].id}]: #{sample[:old_sample].name} -> #{sample[:new_sample]["Sample Name"]}"
+    puts " - [CHANGE] [#{sample[:old_sample].id}]: #{sample[:old_sample].name} -> #{sample[:new_sample]['Sample Name']}"
   end
 
   puts "Samples already duplicated (ignored). You might want to check if s3 files are copied:"
@@ -148,7 +145,7 @@ task :copy_samples, [:project_name] => :environment do |_, args|
   puts "Do you want to continue? (yes/NO)"
   input = STDIN.gets.strip
   if input == "yes"
-    if !project.present?
+    if project.blank?
       project = Project.create(
         name: args[:project_name],
         public_access: 1
