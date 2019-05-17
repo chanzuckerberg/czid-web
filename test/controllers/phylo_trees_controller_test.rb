@@ -29,9 +29,8 @@ class PhyloTreesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should show phylo_tree' do
-    pt = phylo_trees(:one)
-    get "/phylo_trees/index.json?taxId=#{pt.taxid}&projectId=#{pt.project_id}"
-    is_tree_in_response = JSON.parse(@response.body)['phyloTrees'].select { |tree| tree['id'] == pt.id }.count == 1
-    assert_equal is_tree_in_response, true
+    pt = phylo_trees(:public_phylo_tree)
+    get "/phylo_trees/#{pt.id}/show.json"
+    assert_response :success
   end
 end

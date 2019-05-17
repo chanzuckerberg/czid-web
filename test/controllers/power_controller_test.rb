@@ -442,16 +442,16 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   # phylo_trees
   test 'joe can see joe_phylo_tree' do
     sign_in(:joe)
+    get "/phylo_trees/index.json"
     pt = phylo_trees(:joe_phylo_tree)
-    get "/phylo_trees/index.json?taxId=#{pt.taxid}&projectId=#{pt.project_id}"
     is_tree_in_response = JSON.parse(@response.body)['phyloTrees'].select { |tree| tree['id'] == pt.id }.count == 1
     assert_equal is_tree_in_response, true
   end
 
   test 'joe can see public_phylo_tree' do
     sign_in(:joe)
+    get "/phylo_trees/index.json"
     pt = phylo_trees(:public_phylo_tree)
-    get "/phylo_trees/index.json?taxId=#{pt.taxid}&projectId=#{pt.project_id}"
     is_tree_in_response = JSON.parse(@response.body)['phyloTrees'].select { |tree| tree['id'] == pt.id }.count == 1
     assert_equal is_tree_in_response, true
   end
@@ -460,8 +460,11 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     pt = phylo_trees(:one)
     assert_raises(ActiveRecord::RecordNotFound) do
-      get "/phylo_trees/index.json?taxId=#{pt.taxid}&projectId=#{pt.project_id}"
+      get "/phylo_trees/#{pt.id}/show"
     end
+    get "/phylo_trees/index.json"
+    is_tree_absent_from_response = JSON.parse(@response.body)['phyloTrees'].select { |tree| tree['id'] == pt.id }.count.zero?
+    assert_equal is_tree_absent_from_response, true
   end
 
   test 'joe cannot retry public_phylo_tree' do
