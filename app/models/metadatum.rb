@@ -103,13 +103,15 @@ class Metadatum < ApplicationRecord
   end
 
   def check_and_set_location_type
-    # Based on our metadata structure, the location details end up in raw_value before we commit the
-    # values in this validator.
-    loc = JSON.parse(raw_value)
+    # Based on our metadata structure, the location details selected by the user will end up in
+    # raw_value.
+    loc = JSON.parse(raw_value, symbolize_names: true)
+    # For the sake of not trusting user input, we'll potentially re-fetch location details based on
+    # the API and OSM IDs.
     result = Location.find_or_create_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
     # Re-use number_validated_value column to be the foreign key to the Location table
     self.number_validated_value = result.id
-  rescue ArgumentError # should not happen
+  rescue
     errors.add(:raw_value, MetadataValidationErrors::INVALID_LOCATION)
   end
 
