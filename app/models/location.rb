@@ -26,7 +26,7 @@ class Location < ApplicationRecord
     # Ignore fields that don't match columns
     location_params = location_params.select { |x| Location.attribute_names.index(x.to_s) }
     # Name sanitization is imperfect but we can have a sanity check
-    location_params.each { |_, v| v.gsub!(/[;%_^<>?\\]/, "") }
+    location_params.each { |_, v| v.is_a?(String) && v.gsub!(/[;%_^<>?\\]/, "") }
     Location.create!(location_params)
   rescue => err
     raise "Couldn't save Location: #{err.message} #{location_params}"
@@ -39,8 +39,9 @@ class Location < ApplicationRecord
     location_api_request(endpoint_query)
   end
 
-  # Find or create a location based on LocationIQ ID and OSM ID. OSM IDs can change often but
-  # LocationIQ IDs should be stable. We can't geosearch by LocationIQ ID, so we need to use both.
+  # If we already have the location (via LocationIQ ID), return that. Otherwise fetch details via
+  # OSM ID/type. OSM IDs can change often but LocationIQ IDs should be stable. We can't geosearch
+  # by LocationIQ ID, so we need to use both.
   def self.find_or_create_by_api_ids(locationiq_id, osm_id, osm_type)
     existing = Location.find_by(locationiq_id: locationiq_id)
     if existing
