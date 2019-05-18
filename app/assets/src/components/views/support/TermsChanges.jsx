@@ -20,7 +20,7 @@ export default class TermsChanges extends React.Component {
         {/*TODO: Fill in a specific date*/}
         <p className={cs.large}>
           We are planning to update our Terms of Use and Data Privacy Notice for
-          the IDseq service to be effective on June XX, 2019. We encourage our
+          the IDseq service to be effective on June 24, 2019. We encourage our
           Users to read the revised <a href="/terms">Terms</a> and{" "}
           <a href="/privacy">Privacy Notice</a>. We have also provided more
           information about our updates through a new{" "}
@@ -211,7 +211,8 @@ export default class TermsChanges extends React.Component {
         <h2>IDseq Data Privacy Notice</h2>
         <p className={cs.large}>
           This summary is intended to help you better understand the most recent
-          changes to the IDseq Data Privacy Notice and how they may impact you.
+          changes to the <a href="/privacy">IDseq Data Privacy Notice</a> and
+          how they may impact you.
         </p>
         <h3>Introduction Section.</h3>
         <ul>
