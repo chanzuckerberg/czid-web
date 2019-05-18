@@ -1,4 +1,6 @@
 class LocationsController < ApplicationController
+  before_action :admin_required
+
   GEOSEARCH_ERR_MSG = "Unable to perform geosearch".freeze
   LOCATION_LOAD_ERR_MSG = "Unable to load sample locations".freeze
 
