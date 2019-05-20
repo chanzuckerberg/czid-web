@@ -40,6 +40,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
 
   test "user can geosearch and see an error" do
     post user_session_path, params: @user_params
+    ENV["LOCATION_IQ_API_KEY"] = nil
     get external_search_locations_path, params: { query: "UCSF" }
     assert_response :error
     assert_equal LocationsController::GEOSEARCH_ERR_MSG, JSON.parse(@response.body)["message"]
