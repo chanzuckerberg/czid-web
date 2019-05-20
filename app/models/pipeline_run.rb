@@ -296,7 +296,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # If we create a sample with results, we should not trigger a new run
-    if !self.results_finalized?
+    unless results_finalized?
       # First, determine which outputs we need:
       target_outputs = %w[input_validations ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
 
