@@ -295,7 +295,6 @@ class PipelineRun < ApplicationRecord
   end
 
   def create_output_states
-    Rails.logger.debug("IN CREATE OUTPUT STATES")
     # First, determine which outputs we need:
     target_outputs = %w[input_validations ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
 
@@ -314,7 +313,6 @@ class PipelineRun < ApplicationRecord
   end
 
   def create_run_stages
-    Rails.logger.debug("IN CREATE RUN STAGES")
     run_stages = []
 
     # Host Filtering
