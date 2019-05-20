@@ -4,6 +4,7 @@ import { isArray } from "lodash";
 
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
+import GeoSearchInputBox from "../ui/controls/GeoSearchInputBox";
 
 class MetadataInput extends React.Component {
   render() {
@@ -33,7 +34,7 @@ class MetadataInput extends React.Component {
           withinModal={this.props.withinModal}
         />
       );
-    } else if (metadataType.dataType == "date") {
+    } else if (metadataType.dataType === "date") {
       return (
         <Input
           className={className}
@@ -42,6 +43,14 @@ class MetadataInput extends React.Component {
           value={value}
           placeholder={isHuman ? "YYYY-MM" : "YYYY-MM-DD"}
           type="text"
+        />
+      );
+    } else if (metadataType.dataType === "location") {
+      return (
+        <GeoSearchInputBox
+          className={className}
+          onResultSelect={({ result }) => onChange(metadataType.key, result)}
+          value={value}
         />
       );
     } else {
@@ -63,7 +72,7 @@ MetadataInput.propTypes = {
   value: PropTypes.any,
   metadataType: PropTypes.shape({
     key: PropTypes.string,
-    dataType: PropTypes.oneOf(["number", "string", "date"]),
+    dataType: PropTypes.oneOf(["number", "string", "date", "location"]),
     options: PropTypes.arrayOf(PropTypes.string)
   }),
   // Third optional parameter signals to the parent whether to immediately save. false means "wait for onSave to fire".

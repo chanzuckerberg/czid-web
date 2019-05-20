@@ -120,6 +120,7 @@ class SampleDetailsMode extends React.Component {
   };
 
   handleMetadataSave = async key => {
+    console.log("handleMetadataSave called");
     if (this.state.metadataChanged[key]) {
       const newValue =
         key === "name" || key === "notes"

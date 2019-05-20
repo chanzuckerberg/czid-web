@@ -56,11 +56,14 @@ class GeoSearchInputBox extends React.Component {
   };
 
   render() {
+    const { value: locationData } = this.props;
     return (
       <LiveSearchBox
         onSearchTriggered={this.handleSearchTriggered}
         onResultSelect={this.handleResultSelected}
         placeholder="Enter a location"
+        value={locationData && locationData.name}
+        initialValue={null}
         rectangular
         inputMode
       />
@@ -69,7 +72,8 @@ class GeoSearchInputBox extends React.Component {
 }
 
 GeoSearchInputBox.propTypes = {
-  onResultSelect: PropTypes.func
+  onResultSelect: PropTypes.func,
+  value: PropTypes.object
 };
 
 export default GeoSearchInputBox;

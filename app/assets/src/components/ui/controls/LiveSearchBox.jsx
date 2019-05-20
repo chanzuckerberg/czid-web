@@ -40,17 +40,8 @@ class LiveSearchBox extends React.Component {
   };
 
   handleResultSelect = (currentEvent, { result }) => {
-    const { onResultSelect, inputMode } = this.props;
-
-    if (!inputMode) {
-      this.resetComponent();
-    } else {
-      // In input mode, keep 'value' in the box.
-      this.setState({
-        isLoading: false,
-        results: []
-      });
-    }
+    const { onResultSelect } = this.props;
+    this.resetComponent();
     onResultSelect && onResultSelect({ currentEvent, result });
   };
 
@@ -95,7 +86,8 @@ class LiveSearchBox extends React.Component {
 
   render() {
     const { placeholder, rectangular } = this.props;
-    const { isLoading, value, results } = this.state;
+    const { isLoading, results } = this.state;
+    const value = this.state.value || this.props.value;
 
     return (
       <Search
@@ -129,6 +121,7 @@ LiveSearchBox.propTypes = {
   delayTriggerSearch: PropTypes.number,
   minChars: PropTypes.number,
   placeholder: PropTypes.string,
+  value: PropTypes.string,
   onEnter: PropTypes.func,
   onSearchTriggered: PropTypes.func.isRequired,
   onResultSelect: PropTypes.func,

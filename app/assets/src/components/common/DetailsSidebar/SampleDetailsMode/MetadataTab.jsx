@@ -125,7 +125,11 @@ class MetadataTab extends React.Component {
 
   renderMetadataType = metadataType => {
     const { metadata } = this.props;
-    return MetadataTab.renderMetadataValue(metadata[metadataType.key]);
+    let value = metadata[metadataType.key];
+    // Special-case locations
+    if (metadataType.key === "new_collection_location" && value)
+      value = value.name;
+    return MetadataTab.renderMetadataValue(value);
   };
 
   renderMetadataSectionContent = section => {
