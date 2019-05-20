@@ -87,13 +87,13 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "joe cannot see someone else's private map playground results" do
-    # TODO: Uncomment and use non-admin user once released
-    # post user_session_path, params: @user_params
-    # get map_playground_locations_path, as: :json
-    #
-    # assert_response :success
-    # results = JSON.parse(@response.body).map { |r| r["location"] }
-    # assert_not results.include?(metadata(:sample_collection_location).string_validated_value)
-  end
+  # TODO: Uncomment and use non-admin user once released
+  # test "joe cannot see someone else's private map playground results" do
+  #   post user_session_path, params: @user_params
+  #   get map_playground_locations_path, as: :json
+  #
+  #   assert_response :success
+  #   results = JSON.parse(@response.body).map { |r| r["location"] }
+  #   assert_not results.include?(metadata(:sample_collection_location).string_validated_value)
+  # end
 end
