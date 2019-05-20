@@ -17,10 +17,14 @@ class GeoSearchInputBox extends React.Component {
       const locationsCategory = "Location Results";
       categories[locationsCategory] = {
         name: locationsCategory,
-        // LiveSearchBox/Search tries to use 'title' as 'key'. Use title + i instead.
-        results: serverSideSuggestions.map((r, i) =>
-          Object.assign({}, r, { key: `${r.title}-${i}` })
-        )
+        // Format title/description for the text box.
+        results: serverSideSuggestions.map(r => {
+          const nameParts = r.name.split(", ");
+          r.title = nameParts[0];
+          r.description = nameParts.slice(1).join(", ");
+          r.key = `loc-${r.locationiq_id}`;
+          return r;
+        })
       };
     }
     // Let users select an unresolved plain text option

@@ -71,3 +71,8 @@ sample_human_expired_age:
   number_validated_value: 100
   sample: sample_human_existing_metadata_expired
   metadata_field: age
+
+sample_new_collection_location:
+  key: "new_collection_location"
+  raw_value: "{\"locationiq_id\":\"123\",\"osm_id\":\"321\",\"osm_type\":\"Way\"}"
+  metadata_field: new_collection_location

@@ -18,6 +18,7 @@ class Metadatum < ApplicationRecord
   STRING_TYPE = 0
   NUMBER_TYPE = 1
   DATE_TYPE = 2
+  LOCATION_TYPE = 3
 
   # Validations
   validates :string_validated_value, length: { maximum: 250 }
@@ -99,6 +100,19 @@ class Metadatum < ApplicationRecord
     self.date_validated_value = parse_date(raw_value, sample.host_genome_name != "Human")
   rescue ArgumentError
     errors.add(:raw_value, MetadataValidationErrors::INVALID_DATE)
+  end
+
+  def check_and_set_location_type
+    # Based on our metadata structure, the location details selected by the user will end up in
+    # raw_value.
+    loc = JSON.parse(raw_value, symbolize_names: true)
+
+    # Set to existing Location or create a new one based on the external IDs. For the sake of not
+    # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
+    result = Location.find_or_create_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
+    self.location_id = result.id
+  rescue
+    errors.add(:raw_value, MetadataValidationErrors::INVALID_LOCATION)
   end
 
   def self.str_to_basic_chars(res)
@@ -269,6 +283,8 @@ class Metadatum < ApplicationRecord
       return "number"
     elsif type == DATE_TYPE
       return "date"
+    elsif type == LOCATION_TYPE
+      return "location"
     end
     ""
   end
