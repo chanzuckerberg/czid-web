@@ -4,7 +4,7 @@ DEFAULT_S3_REGION = "us-west-2".freeze
 BUCKET_NAME = "idseq-samples-#{Rails.env}".freeze
 
 # Original CSV headers:
-# Source Project Name,	Source Sample Name,	Sample Name	Source,	Day, Time, Sample Type, Nucleotyde Type, Collection Date, Collection Location
+# Source Project Name, Source Sample Name, Sample Name Source, Sample Type, Nucleotyde Type, Collection Date, Collection Location
 def read_input
   STDIN.binmode
   tmp_file = Tempfile.new('copy_samples_file', Rails.root.join('tmp'))
@@ -123,23 +123,29 @@ task :copy_samples, [:project_name] => :environment do |_, args|
     puts "[CHANGE] Public project '#{args[:project_name]}' will be created"
   end
 
-  puts "Samples to copy:"
-  samples_to_duplicate.each do |sample|
-    puts " - [CHANGE] [#{sample[:old_sample].id}]: #{sample[:old_sample].name} -> #{sample[:new_sample]['Sample Name']}"
+  unless samples_to_duplicate.empty?
+    puts "Samples to copy:"
+    samples_to_duplicate.each do |sample|
+      puts " - [CHANGE] [#{sample[:old_sample].id}]: #{sample[:old_sample].name} -> #{sample[:new_sample]['Sample Name']}"
+    end
   end
 
-  puts "Samples already duplicated (ignored). You might want to check if s3 files are copied:"
-  samples_duplicated.each do |sample|
-    source_prefix = "samples/#{sample[:old_sample].project_id}/#{sample[:old_sample].id}"
-    target_prefix = "samples/#{sample[:new_sample].project_id}/#{sample[:new_sample].id}"
+  unless samples_duplicated.empty?
+    puts "Samples already duplicated (ignored). You might want to check if s3 files are copied:"
+    samples_duplicated.each do |sample|
+      source_prefix = "samples/#{sample[:old_sample].project_id}/#{sample[:old_sample].id}"
+      target_prefix = "samples/#{sample[:new_sample].project_id}/#{sample[:new_sample].id}"
 
-    puts " - [#{sample[:new_sample].id}]: #{sample[:new_sample].name}. To sync s3: 'aws s3 sync s3://#{BUCKET_NAME}/#{source_prefix} s3://#{BUCKET_NAME}/#{target_prefix}' "
-    puts
+      puts " - [#{sample[:new_sample].id}]: #{sample[:new_sample].name}. To sync s3: 'aws s3 sync s3://#{BUCKET_NAME}/#{source_prefix} s3://#{BUCKET_NAME}/#{target_prefix}' "
+      puts
+    end
   end
 
-  puts "Samples not found (ignored):"
-  samples_not_found.each do |sample_name|
-    puts " - #{sample_name}"
+  unless samples_not_found.empty?
+    puts "Samples not found (ignored):"
+    samples_not_found.each do |sample_name|
+      puts " - #{sample_name}"
+    end
   end
 
   puts "Do you want to continue? (yes/NO)"

@@ -295,21 +295,24 @@ class PipelineRun < ApplicationRecord
   end
 
   def create_output_states
-    # First, determine which outputs we need:
-    target_outputs = %w[input_validations ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
+    # If we create a sample with results, we should not trigger a new run
+    if !self.results_finalized?
+      # First, determine which outputs we need:
+      target_outputs = %w[input_validations ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
 
-    # Then, generate output_states
-    output_state_entries = []
-    target_outputs.each do |output|
-      output_state_entries << OutputState.new(
-        output: output,
-        state: STATUS_UNKNOWN
-      )
+      # Then, generate output_states
+      output_state_entries = []
+      target_outputs.each do |output|
+        output_state_entries << OutputState.new(
+          output: output,
+          state: STATUS_UNKNOWN
+        )
+      end
+      self.output_states = output_state_entries
+
+      # Also initialize results_finalized here.
+      self.results_finalized = IN_PROGRESS
     end
-    self.output_states = output_state_entries
-
-    # Also initialize results_finalized here.
-    self.results_finalized = IN_PROGRESS
   end
 
   def create_run_stages
