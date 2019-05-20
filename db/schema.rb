@@ -174,6 +174,7 @@ ActiveRecord::Schema.define(version: 20_190_517_183_928) do
     t.date "date_validated_value"
     t.bigint "metadata_field_id"
     t.string "specificity"
+    t.integer "location_id"
     t.index ["metadata_field_id"], name: "index_metadata_on_metadata_field_id"
     t.index ["sample_id", "key"], name: "index_metadata_on_sample_id_and_key", unique: true
   end

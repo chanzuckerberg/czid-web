@@ -27,7 +27,7 @@ class Location < ApplicationRecord
   def self.create_from_params(location_params)
     # Ignore fields that don't match columns
     location_params = location_params.select { |x| Location.attribute_names.index(x.to_s) }
-    # Name sanitization is imperfect but we can have a sanity check
+    # Light name sanitization
     location_params.each { |_, v| v.is_a?(String) && v.gsub!(/[;%_^<>?\\]/, "") }
     Location.create!(location_params)
   rescue => err
