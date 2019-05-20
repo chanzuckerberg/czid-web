@@ -3,6 +3,13 @@ class LocationsController < ApplicationController
   LOCATION_LOAD_ERR_MSG = "Unable to load sample locations".freeze
 
   def external_search
+    unless feature_access?
+      render(json: {
+               status: :unauthorized,
+               message: "No feature access"
+             }, status: :unauthorized) && return
+    end
+
     results = []
     query = location_params[:query]
     if query.present?
@@ -37,6 +44,13 @@ class LocationsController < ApplicationController
   end
 
   def map_playground
+    unless feature_access?
+      render(json: {
+               status: :unauthorized,
+               message: "No feature access"
+             }, status: :unauthorized) && return
+    end
+
     # Show all viewable locations in a demo format
     field_id = MetadataField.find_by(name: "collection_location").id
     sample_info = current_power.samples
@@ -61,5 +75,9 @@ class LocationsController < ApplicationController
 
   def location_params
     params.permit(:query)
+  end
+
+  def feature_access?
+    current_user.admin? || current_user.allowed_feature_list.include?("maps")
   end
 end
