@@ -28,7 +28,7 @@ class Location < ApplicationRecord
     # Ignore fields that don't match columns
     location_params = location_params.select { |x| Location.attribute_names.index(x.to_s) }
     # Light name sanitization
-    location_params.each { |_, v| v.is_a?(String) && v.gsub!(/[;%_^<>?\\]/, "") }
+    location_params.map { |_, v| v.is_a?(String) ? LocationHelper.sanitize_name(v) : v }
     Location.create!(location_params)
   rescue => err
     raise "Couldn't save Location: #{err.message} #{location_params}"

@@ -22,4 +22,9 @@ module LocationHelper
       locationiq_id: body["place_id"].to_i
     }
   end
+
+  # Light sanitization with SQL/HTML/JS injections in mind
+  def self.sanitize_name(name)
+    name.gsub(%r{[;%_^<>\/?\\]}, "")
+  end
 end
