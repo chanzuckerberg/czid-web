@@ -168,7 +168,7 @@ module ReportHelper
       data[:background_info][:id] = bg.id
     end
 
-    data[:taxonomy_details] = taxonomy_details(pipeline_run_id, background_id, scoring_model, sort_by)
+    data[:taxonomy_details] = ReportHelper.taxonomy_details(pipeline_run_id, background_id, scoring_model, sort_by)
     data
   end
 
@@ -187,15 +187,16 @@ module ReportHelper
 
   # TODO: (gdingle): refactor to class method
   def report_csv_from_params(sample, params)
+    scoring_model = params["scoring_model"] || TaxonScoringModel::DEFAULT_MODEL_NAME
     params[:is_csv] = 1
-    params[:sort_by] = "highest_nt_aggregatescore"
+    sort_by = params[:sort_by] || DEFAULT_SORT_PARAM
     background_id = params[:background_id] || sample.default_background_id
     background_id = background_id.to_i
     pipeline_run = select_pipeline_run(sample, params[:pipeline_version])
     pipeline_run_id = pipeline_run ? pipeline_run.id : nil
     return "" if pipeline_run_id.nil? || pipeline_run.total_reads.nil? || pipeline_run.adjusted_remaining_reads.nil?
-    tax_details = taxonomy_details(pipeline_run_id, background_id, scoring_model, sort_by)
-    generate_report_csv(tax_details)
+    tax_details = ReportHelper.taxonomy_details(pipeline_run_id, background_id, scoring_model, sort_by)
+    ReportHelper.generate_report_csv(tax_details)
   end
 
   # TODO: (gdingle): refactor to class method
