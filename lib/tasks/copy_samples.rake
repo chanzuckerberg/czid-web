@@ -1,10 +1,14 @@
 require "aws-sdk-s3"
 
+class ActiveRecord::Base
+  cattr_accessor :skip_callbacks
+end
+ActiveRecord::Base.skip_callbacks = true
+
 DEFAULT_S3_REGION = "us-west-2".freeze
-BUCKET_NAME = "idseq-samples-#{Rails.env}".freeze
 
 # Original CSV headers:
-# Source Project Name, Source Sample Name, Sample Name Source, Sample Type, Nucleotyde Type, Collection Date, Collection Location
+# Source Project Name, Source Sample Name, Sample Name Source, Sample Type, Nucleotide Type, Collection Date, Collection Location
 def read_input
   STDIN.binmode
   tmp_file = Tempfile.new('copy_samples_file', Rails.root.join('tmp'))
@@ -73,16 +77,16 @@ def duplicate_sample_s3(old_sample, new_sample)
   target_prefix = "samples/#{new_sample.project_id}/#{new_sample.id}"
 
   begin
-    resp = s3.list_objects_v2(bucket: BUCKET_NAME, prefix: source_prefix)
+    resp = s3.list_objects_v2(bucket: SAMPLES_BUCKET_NAME, prefix: source_prefix)
     resp[:contents].each do |object|
       source_key = object[:key]
       target_key = object[:key].dup.gsub(source_prefix, target_prefix)
-      puts "\t\t* Copying #{BUCKET_NAME}/#{source_key} -> #{BUCKET_NAME}/#{target_key} ..."
-      s3.copy_object(bucket: BUCKET_NAME, copy_source: "#{BUCKET_NAME}/#{source_key}", key: target_key)
+      puts "\t\t* Copying #{SAMPLES_BUCKET_NAME}/#{source_key} -> #{SAMPLES_BUCKET_NAME}/#{target_key} ..."
+      s3.copy_object(bucket: SAMPLES_BUCKET_NAME, copy_source: "#{SAMPLES_BUCKET_NAME}/#{source_key}", key: target_key)
     end
   rescue StandardError => e
-    puts "\t\t[ERROR] Exception copying #{BUCKET_NAME}/#{source_prefix} -> #{BUCKET_NAME}/#{target_prefix}"
-    puts "\t\t[ERROR] Please copy manually using 'aws s3 sync s3://#{BUCKET_NAME}/#{source_prefix} s3://#{BUCKET_NAME}/#{target_prefix}'"
+    puts "\t\t[ERROR] Exception copying #{SAMPLES_BUCKET_NAME}/#{source_prefix} -> #{SAMPLES_BUCKET_NAME}/#{target_prefix}"
+    puts "\t\t[ERROR] Please copy manually using 'aws s3 sync s3://#{SAMPLES_BUCKET_NAME}/#{source_prefix} s3://#{SAMPLES_BUCKET_NAME}/#{target_prefix}'"
     raise e
   end
 end
@@ -136,7 +140,7 @@ task :copy_samples, [:project_name] => :environment do |_, args|
       source_prefix = "samples/#{sample[:old_sample].project_id}/#{sample[:old_sample].id}"
       target_prefix = "samples/#{sample[:new_sample].project_id}/#{sample[:new_sample].id}"
 
-      puts " - [#{sample[:new_sample].id}]: #{sample[:new_sample].name}. To sync s3: 'aws s3 sync s3://#{BUCKET_NAME}/#{source_prefix} s3://#{BUCKET_NAME}/#{target_prefix}' "
+      puts " - [#{sample[:new_sample].id}]: #{sample[:new_sample].name}. To sync s3: 'aws s3 sync s3://#{SAMPLES_BUCKET_NAME}/#{source_prefix} s3://#{SAMPLES_BUCKET_NAME}/#{target_prefix}' "
       puts
     end
   end

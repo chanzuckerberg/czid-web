@@ -186,7 +186,7 @@ class PipelineRun < ApplicationRecord
   JOB_TAG_KEEP_ALIVE_SECONDS = 600
   DRAINING_TAG = "draining".freeze
 
-  before_create :create_output_states, :create_run_stages
+  before_create :create_output_states, :create_run_stages, unless: :results_finalized?
 
   def parse_dag_vars
     JSON.parse(dag_vars || "{}")
@@ -295,27 +295,26 @@ class PipelineRun < ApplicationRecord
   end
 
   def create_output_states
-    # If we create a sample with results, we should not trigger a new run
-    unless results_finalized?
-      # First, determine which outputs we need:
-      target_outputs = %w[input_validations ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
+    Rails.logger.debug("IN CREATE OUTPUT STATES")
+    # First, determine which outputs we need:
+    target_outputs = %w[input_validations ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
 
-      # Then, generate output_states
-      output_state_entries = []
-      target_outputs.each do |output|
-        output_state_entries << OutputState.new(
-          output: output,
-          state: STATUS_UNKNOWN
-        )
-      end
-      self.output_states = output_state_entries
-
-      # Also initialize results_finalized here.
-      self.results_finalized = IN_PROGRESS
+    # Then, generate output_states
+    output_state_entries = []
+    target_outputs.each do |output|
+      output_state_entries << OutputState.new(
+        output: output,
+        state: STATUS_UNKNOWN
+      )
     end
+    self.output_states = output_state_entries
+
+    # Also initialize results_finalized here.
+    self.results_finalized = IN_PROGRESS
   end
 
   def create_run_stages
+    Rails.logger.debug("IN CREATE RUN STAGES")
     run_stages = []
 
     # Host Filtering
