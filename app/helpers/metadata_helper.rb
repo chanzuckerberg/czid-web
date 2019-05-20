@@ -51,6 +51,11 @@ module MetadataHelper
   def metadata_template_csv_helper(project_id, new_sample_names)
     samples_are_new = !new_sample_names.nil?
     project = Project.where(id: project_id)[0]
+    # We should include the host genome columns if the user is downloading the template during new sample upload, or
+    # downloading it from a stand-alone upload instruction page such as /cli_user_instructions.
+    # The CLI also directs users to /metadata/metadata_template_csv when asking for metadata during new sample upload,
+    # and we should include the host genome column here as well.
+    include_host_genome = project.nil? || samples_are_new
 
     # If project is nil, use global default and required fields.
     fields = if project.nil?
@@ -67,7 +72,7 @@ module MetadataHelper
                project.metadata_fields.includes(:host_genomes).reject { |field| (field.host_genome_ids & host_genome_ids).empty? }
              end
 
-    field_names = ["Sample Name"] + (samples_are_new ? ["Host Genome"] : []) + fields.pluck(:display_name)
+    field_names = ["Sample Name"] + (include_host_genome ? ["Host Genome"] : []) + fields.pluck(:display_name)
 
     host_genomes_by_name = HostGenome.all.includes(:metadata_fields).reject { |x| x.metadata_fields.empty? }.index_by(&:name)
 
@@ -115,7 +120,7 @@ module MetadataHelper
           end
         end
 
-        csv << [sample[:name]] + (samples_are_new ? [sample[:host_genome_name]] : []) + values
+        csv << [sample[:name]] + (include_host_genome ? [sample[:host_genome_name]] : []) + values
       end
     end
   end
