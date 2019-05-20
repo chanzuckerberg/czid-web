@@ -1,11 +1,13 @@
 class Location < ApplicationRecord
   include LocationHelper
 
+  LOCATION_IQ_BASE_URL = "https://us1.locationiq.com/v1".freeze
+
   # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)
     raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
 
-    query_url = "https://us1.locationiq.com/v1/#{endpoint_query}&key=#{ENV['LOCATION_IQ_API_KEY']}&format=json"
+    query_url = "#{LOCATION_IQ_BASE_URL}/#{endpoint_query}&key=#{ENV['LOCATION_IQ_API_KEY']}&format=json"
     uri = URI.parse(query_url)
     request = Net::HTTP::Get.new(uri)
     resp = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|

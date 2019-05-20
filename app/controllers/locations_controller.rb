@@ -17,9 +17,7 @@ class LocationsController < ApplicationController
     if query.present?
       success, resp = Location.geosearch(query)
       if success
-        resp.each do |c|
-          results << LocationHelper.adapt_location_iq_response(c)
-        end
+        results = resp.map(&:LocationHelper.adapt_location_iq_response)
       end
     end
     event = MetricUtil::ANALYTICS_EVENT_NAMES[:location_geosearched]
