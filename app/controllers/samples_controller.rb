@@ -49,7 +49,6 @@ class SamplesController < ApplicationController
   before_action :check_access
 
   PAGE_SIZE = 30
-  DEFAULT_MAX_NUM_TAXONS = 30
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
 

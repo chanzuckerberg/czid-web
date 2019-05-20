@@ -259,22 +259,22 @@ module ReportHelper
     # Get sample results for the taxon ids
     unless taxon_ids.empty?
       samples_by_id = Hash[samples.map { |s| [s.id, s] }]
-      parent_ids = fetch_parent_ids(taxon_ids, samples)
-      results_by_pr = fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+      parent_ids = ReportHelper.fetch_parent_ids(taxon_ids, samples)
+      results_by_pr = ReportHelper.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
       results_by_pr.each do |_pr_id, res|
         pr = res["pr"]
         taxon_counts = res["taxon_counts"]
         sample_id = pr.sample_id
-        tax_2d = taxon_counts_cleanup(taxon_counts)
-        only_species_or_genus_counts!(tax_2d, species_selected)
+        tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
+        ReportHelper.only_species_or_genus_counts!(tax_2d, species_selected)
 
         rows = []
         tax_2d.each { |_tax_id, tax_info| rows << tax_info }
-        compute_aggregate_scores_v2!(rows)
+        ReportHelper.compute_aggregate_scores_v2!(rows)
 
         filtered_rows = rows
                         .select { |row| taxon_ids.include?(row["tax_id"]) }
-                        .each { |row| row[:filtered] = check_custom_filters(row, threshold_filters) }
+                        .each { |row| row[:filtered] = ReportHelper.check_custom_filters(row, threshold_filters) }
 
         results[sample_id] = {
           sample_id: sample_id,
@@ -651,17 +651,17 @@ module ReportHelper
       taxon_counts = res["taxon_counts"]
       sample_id = pr.sample_id
 
-      tax_2d = taxon_counts_cleanup(taxon_counts)
-      only_species_or_genus_counts!(tax_2d, species_selected)
+      tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
+      ReportHelper.only_species_or_genus_counts!(tax_2d, species_selected)
 
       rows = []
       tax_2d.each do |_tax_id, tax_info|
         rows << tax_info
       end
 
-      compute_aggregate_scores_v2!(rows)
+      ReportHelper.compute_aggregate_scores_v2!(rows)
       rows = rows.select do |row|
-        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && check_custom_filters(row, threshold_filters)
+        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && ReportHelper.check_custom_filters(row, threshold_filters)
       end
 
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
@@ -1041,7 +1041,7 @@ module ReportHelper
     # Fetch and clean data.
     t0 = wall_clock_ms
     taxon_counts = fetch_taxon_counts(pipeline_run_id, background_id)
-    tax_2d = taxon_counts_cleanup(taxon_counts)
+    tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
     t1 = wall_clock_ms
 
     # These counts are shown in the UI on each genus line.

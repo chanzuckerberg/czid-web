@@ -1,4 +1,6 @@
 module HeatmapHelper
+  DEFAULT_MAX_NUM_TAXONS = 30
+
   def heatmap
     {
       taxonLevels: %w[Genus Species],
@@ -68,7 +70,7 @@ module HeatmapHelper
                         else
                           JSON.parse(params[:thresholdFilters] || "[]")
                         end
-    subcategories = if params[:subcategories].respond_to?(:to_h)
+    subcategories = if params[:subcategories] && params[:subcategories].respond_to?(:to_h)
                       params[:subcategories].permit!.to_h
                     else
                       JSON.parse(params[:subcategories] || "{}")
