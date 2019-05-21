@@ -104,7 +104,6 @@ class Metadatum < ApplicationRecord
 
   def check_and_set_location_type
     # Skip if location was already resolved
-    puts "3:57pm I'm in check_and_set_location_type"
     return if location_id && !raw_value
 
     # Based on our metadata structure, the location details selected by the user will end up in
@@ -168,9 +167,9 @@ class Metadatum < ApplicationRecord
   def self.bulk_load_import(to_create)
     errors = []
     begin
-      # The unique key is on sample and metadata.key, so the value fields will
-      # be updated if the key exists.
-      update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value]
+      # With on_duplicate_key_update, activerecord-import will correctly update existing rows.
+      # Rails model validations are also checked.
+      update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value, :location_id]
       results = Metadatum.import to_create, on_duplicate_key_update: update_keys
       results.failed_instances.each do |model|
         # Show the errors from ActiveRecord
@@ -271,8 +270,13 @@ class Metadatum < ApplicationRecord
   end
 
   def validated_value
-    base = self.class.convert_type_to_string(metadata_field.base_type)
-    return self["#{base}_validated_value"]
+    # Special case for Location objects
+    if metadata_field.base_type == Metadatum::LOCATION_TYPE
+      location_id ? Location.find(location_id).attributes : string_validated_value
+    else
+      base = self.class.convert_type_to_string(metadata_field.base_type)
+      self["#{base}_validated_value"]
+    end
   rescue
     ""
   end

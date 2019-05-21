@@ -624,8 +624,6 @@ class Sample < ApplicationRecord
       raise RecordNotFound("No matching field for #{key}") unless m.metadata_field
       m.key = m.metadata_field.name
     end
-    puts "foobar 3:49pm. val: ", val, m.raw_value
-    puts val.class.name
     if val.present? && m.raw_value != val
       m.raw_value = val.is_a?(ActionController::Parameters) ? val.to_json : val
       return {
