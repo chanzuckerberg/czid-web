@@ -40,7 +40,7 @@ class GeoSearchInputBox extends React.Component {
     let noMatchName = "Plain Text (No Location Match)";
     categories[noMatchName] = {
       name: noMatchName,
-      results: [{ title: query }]
+      results: [{ title: query, name: query }]
     };
 
     logAnalyticsEvent("GeoSearchInputBox_location_queried", {
@@ -53,6 +53,9 @@ class GeoSearchInputBox extends React.Component {
   handleSearchChange = value => {
     // Let the inner search box change on edit
     this.setState({ value, usePropValue: false });
+
+    // Handle the case when they clear the box and hit done/submit without pressing enter
+    if (value === "") this.handleResultSelected({ result: "" });
   };
 
   handleResultSelected = ({ result }) => {
@@ -60,10 +63,10 @@ class GeoSearchInputBox extends React.Component {
     this.setState({ usePropValue: true });
 
     // Wrap plain text submission
-    if (isString(result)) result = { title: result };
+    if (isString(result)) result = { name: result };
 
     logAnalyticsEvent("GeoSearchInputBox_result_selected", {
-      selected: result.title,
+      selected: result.name,
       // Real results will have a description
       isMatched: !!result.description
     });
@@ -71,17 +74,17 @@ class GeoSearchInputBox extends React.Component {
   };
 
   render() {
-    const { value: locationData } = this.props;
+    const { className, value: locationData } = this.props;
     const { usePropValue, value } = this.state;
 
     return (
       <LiveSearchBox
+        className={className}
         onSearchTriggered={this.handleSearchTriggered}
         onSearchChange={this.handleSearchChange}
         onResultSelect={this.handleResultSelected}
         placeholder="Enter a location"
         value={usePropValue && locationData ? locationData.name : value}
-        initialValue={null}
         rectangular
         inputMode
       />
@@ -90,6 +93,7 @@ class GeoSearchInputBox extends React.Component {
 }
 
 GeoSearchInputBox.propTypes = {
+  className: PropTypes.string,
   onResultSelect: PropTypes.func,
   value: PropTypes.object
 };

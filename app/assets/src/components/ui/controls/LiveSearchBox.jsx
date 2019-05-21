@@ -86,18 +86,22 @@ class LiveSearchBox extends React.Component {
   };
 
   render() {
-    const { placeholder, rectangular } = this.props;
+    const { className, placeholder, rectangular } = this.props;
     const { isLoading, results } = this.state;
     const value = this.props.value || this.state.value;
 
     return (
       <Search
         category
-        className={cx(cs.liveSearchBox, rectangular && cs.rectangular)}
+        className={cx(
+          cs.liveSearchBox,
+          rectangular && cs.rectangular,
+          className
+        )}
         loading={isLoading}
         onKeyDown={this.handleKeyDown}
-        onSearchChange={this.handleSearchChange}
         onResultSelect={this.handleResultSelect}
+        onSearchChange={this.handleSearchChange}
         onSelectionChange={this.handleSelectionChange}
         placeholder={placeholder}
         results={results}
@@ -118,6 +122,7 @@ LiveSearchBox.defaultProps = {
 };
 
 LiveSearchBox.propTypes = {
+  className: PropTypes.string,
   initialValue: PropTypes.string,
   delayTriggerSearch: PropTypes.number,
   minChars: PropTypes.number,
