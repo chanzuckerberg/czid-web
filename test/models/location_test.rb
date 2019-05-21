@@ -72,9 +72,9 @@ class LocationTest < ActiveSupport::TestCase
   end
 
   test "should geosearch by OSM ID and type" do
-    api_response = LocationTestHelper::API_GEOSEARCH_RESPONSE
-    osm_id = LocationTestHelper::API_GEOSEARCH_RESPONSE[0]["osm_id"]
-    osm_type = LocationTestHelper::API_GEOSEARCH_RESPONSE[0]["osm_type"]
+    api_response = LocationTestHelper::API_OSM_ID_SEARCH_RESPONSE
+    osm_id = api_response["osm_id"]
+    osm_type = api_response["osm_type"]
     query = "reverse.php?osm_id=#{osm_id}&osm_type=#{osm_type[0].capitalize}"
     mock = MiniTest::Mock.new
     mock.expect(:call, [true, api_response], [query])
@@ -96,9 +96,9 @@ class LocationTest < ActiveSupport::TestCase
   end
 
   test "should create new Location by OSM ID" do
-    api_response = LocationTestHelper::API_GEOSEARCH_RESPONSE[0]
-    osm_id = LocationTestHelper::API_GEOSEARCH_RESPONSE[0]["osm_id"]
-    osm_type = LocationTestHelper::API_GEOSEARCH_RESPONSE[0]["osm_type"]
+    api_response = LocationTestHelper::API_OSM_ID_SEARCH_RESPONSE
+    osm_id = api_response["osm_id"]
+    osm_type = api_response["osm_type"]
 
     new_location = Location.new
     mock_geosearch = MiniTest::Mock.new
