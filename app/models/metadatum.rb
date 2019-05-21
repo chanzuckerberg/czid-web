@@ -104,6 +104,7 @@ class Metadatum < ApplicationRecord
 
   def check_and_set_location_type
     # Skip if location was already resolved
+    puts "3:57pm I'm in check_and_set_location_type"
     return if location_id && !raw_value
 
     # Based on our metadata structure, the location details selected by the user will end up in
