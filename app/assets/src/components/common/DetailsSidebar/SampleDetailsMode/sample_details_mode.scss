@@ -46,6 +46,10 @@
 
     .metadataInput {
       width: 100%;
+
+      :global(.ui):global(.input) {
+        width: 100%;
+      }
     }
 
     .error {

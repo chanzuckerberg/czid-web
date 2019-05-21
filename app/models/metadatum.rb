@@ -103,13 +103,33 @@ class Metadatum < ApplicationRecord
   end
 
   def check_and_set_location_type
+    # Skip if location was already resolved
+    return if location_id && !raw_value
+
     # Based on our metadata structure, the location details selected by the user will end up in
     # raw_value.
-    loc = JSON.parse(raw_value, symbolize_names: true)
+    begin
+      loc = JSON.parse(raw_value, symbolize_names: true)
+    rescue JSON::ParserError
+      # CSV uploads will be unwrapped strings
+      self.string_validated_value = raw_value
+      self.location_id = nil
+      return
+    end
+
+    unless loc[:locationiq_id]
+      # Unresolved plain text selection (wrapped 'name')
+      self.string_validated_value = loc[:name]
+      self.location_id = nil
+      return
+    end
 
     # Set to existing Location or create a new one based on the external IDs. For the sake of not
     # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
     result = Location.find_or_create_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
+    # At this point, discard raw_value (too long to store anyway)
+    self.raw_value = nil
+    self.string_validated_value = nil
     self.location_id = result.id
   rescue
     errors.add(:raw_value, MetadataValidationErrors::INVALID_LOCATION)
@@ -243,7 +263,7 @@ class Metadatum < ApplicationRecord
     m = Metadatum.new
     m.metadata_field = MetadataField.find_by(name: key) || MetadataField.find_by(display_name: key)
     m.key = m.metadata_field ? m.metadata_field.name : nil
-    m.raw_value = value
+    m.raw_value = value.is_a?(ActionController::Parameters) ? value.to_json : value
     # *_validated_value field is set in the set_validated_values validator.
     m.sample = sample
     m

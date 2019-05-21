@@ -17,6 +17,8 @@ module LocationTestHelper
       }
     }
   ].freeze
+  API_OSM_ID_SEARCH_RESPONSE = API_GEOSEARCH_RESPONSE[0].freeze
+
   FORMATTED_GEOSEARCH_RESPONSE = [
     {
       "name" => "University of California, San Francisco, Parnassus Avenue, Inner Sunset, San Francisco, San Francisco City and County, California, 94131, USA",

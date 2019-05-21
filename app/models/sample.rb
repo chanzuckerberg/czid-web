@@ -625,7 +625,7 @@ class Sample < ApplicationRecord
       m.key = m.metadata_field.name
     end
     if val.present? && m.raw_value != val
-      m.raw_value = val
+      m.raw_value = val.is_a?(ActionController::Parameters) ? val.to_json : val
       return {
         metadatum: m,
         status: "ok"
@@ -705,7 +705,7 @@ class Sample < ApplicationRecord
     if m.metadata_field
       m.key = m.metadata_field.name
       m.sample = self
-      m.raw_value = val
+      m.raw_value = val.is_a?(ActionController::Parameters) ? val.to_json : val
     end
 
     {

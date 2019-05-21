@@ -31,12 +31,17 @@ module ErrorHelper
     end
   end
 
+  LOCATION_INVALID_ERROR = "Please input a location.".freeze
   DATE_INVALID_ERROR_HUMAN = "Please input a date in the format YYYY-MM or MM/YYYY. (for human samples)".freeze
   DATE_INVALID_ERROR = "Please input a date in the format YYYY-MM-DD, YYYY-MM, MM/DD/YY, or MM/YYYY.".freeze
   NUMBER_INVALID_ERROR = "Please input a number.".freeze
 
   def get_field_error(field, is_human = false)
-    if field.base_type == 2
+    if field.base_type == Metadatum::LOCATION_TYPE
+      return LOCATION_INVALID_ERROR
+    end
+
+    if field.base_type == Metadatum::DATE_TYPE
       if is_human
         return DATE_INVALID_ERROR_HUMAN
       else
@@ -44,11 +49,11 @@ module ErrorHelper
       end
     end
 
-    if field.base_type == 1
+    if field.base_type == Metadatum::NUMBER_TYPE
       return NUMBER_INVALID_ERROR
     end
 
-    if field.base_type.zero?
+    if field.base_type == Metadatum::STRING_TYPE
       if field.force_options
         return "The valid options are #{JSON.parse(field.options).join(', ')}."
       else
@@ -158,14 +163,21 @@ module ErrorHelper
     def create_raw_value_error_group_for_metadata_field(field, col_index, is_human = false)
       error_type = "#{field.name}_invalid_raw_value"
 
-      if field.base_type == 2 && is_human
+      if field.base_type == Metadatum::DATE_TYPE && is_human
         error_type = "#{field.name}_invalid_raw_value_human"
       end
 
       # Add an error type if it doesn't already exist.
       unless @supported_errors[error_type]
         # Automatically determine the kind of error to display based on the field.
-        if field.base_type == 2
+        if field.base_type == Metadatum::LOCATION_TYPE
+          @supported_errors[error_type] = {
+            headers: ["Row #", "Sample Name", "Invalid Value"],
+            title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{LOCATION_INVALID_ERROR}" }
+          }
+        end
+
+        if field.base_type == Metadatum::DATE_TYPE
           @supported_errors[error_type] = if is_human
                                             {
                                               headers: ["Row #", "Sample Name", "Invalid Value"],
@@ -179,14 +191,14 @@ module ErrorHelper
                                           end
         end
 
-        if field.base_type == 1
+        if field.base_type == Metadatum::NUMBER_TYPE
           @supported_errors[error_type] = {
             headers: ["Row #", "Sample Name", "Invalid Value"],
             title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{NUMBER_INVALID_ERROR}" }
           }
         end
 
-        if field.base_type.zero?
+        if field.base_type == Metadatum::STRING_TYPE
           @supported_errors[error_type] = if field.force_options
                                             {
                                               headers: ["Row #", "Sample Name", "Invalid Value"],
