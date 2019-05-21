@@ -625,7 +625,9 @@ class Sample < ApplicationRecord
       m.key = m.metadata_field.name
     end
     if val.present? && m.raw_value != val
-      m.raw_value = val
+      puts "foobar in get_metadatum_to_save: ", val, val.class.name
+      m.raw_value = val.is_a?(ActionController::Parameters) ? val.to_json : val
+      puts "raw_value: ", m.raw_value
       return {
         metadatum: m,
         status: "ok"
@@ -650,7 +652,9 @@ class Sample < ApplicationRecord
   # Returns whether the update succeeded and any errors.
   def metadatum_add_or_update(key, val)
     ensure_metadata_field_for_key(key)
+    puts "foobar 8:55pm key, val", key, val
     result = get_metadatum_to_save(key, val)
+    puts "foobar result", result
 
     if result[:status] == "error"
       return {
@@ -705,7 +709,7 @@ class Sample < ApplicationRecord
     if m.metadata_field
       m.key = m.metadata_field.name
       m.sample = self
-      m.raw_value = val
+      m.raw_value = val.is_a?(Hash) ? val.to_json : val
     end
 
     {

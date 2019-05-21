@@ -49,7 +49,9 @@ class MetadataInput extends React.Component {
       return (
         <GeoSearchInputBox
           className={className}
-          onResultSelect={({ result }) => onChange(metadataType.key, result)}
+          onResultSelect={({ result }) =>
+            onChange(metadataType.key, result, true)
+          }
           value={value}
         />
       );
