@@ -13,7 +13,6 @@ class Location < ApplicationRecord
     resp = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
       http.request(request)
     end
-    puts "in location_api_request: ", query_url, resp.body
     [resp.is_a?(Net::HTTPSuccess), JSON.parse(resp.body)]
   end
 
@@ -52,10 +51,7 @@ class Location < ApplicationRecord
     else
       success, resp = geosearch_by_osm_id(osm_id, osm_type)
       raise "Couldn't fetch OSM ID #{osm_id} (#{osm_type})" unless success
-      puts "in find_or_create_by_api_ids: ", success
-      puts "resp: ", resp
 
-      puts "end"
       resp = LocationHelper.adapt_location_iq_response(resp)
       create_from_params(resp)
     end

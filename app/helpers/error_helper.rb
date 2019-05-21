@@ -170,7 +170,7 @@ module ErrorHelper
       # Add an error type if it doesn't already exist.
       unless @supported_errors[error_type]
         # Automatically determine the kind of error to display based on the field.
-        if field.base_type == 2
+        if field.base_type == 3
           @supported_errors[error_type] = {
             headers: ["Row #", "Sample Name", "Invalid Value"],
             title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{LOCATION_INVALID_ERROR}" }

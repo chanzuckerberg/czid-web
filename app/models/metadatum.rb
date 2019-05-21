@@ -103,28 +103,20 @@ class Metadatum < ApplicationRecord
   end
 
   def check_and_set_location_type
-    puts "in check_and_set_location_type 9:11pm"
-    # Skip if this already ran
+    # Skip if location was already resolved
     return if location_id && !raw_value
 
     # Based on our metadata structure, the location details selected by the user will end up in
     # raw_value.
-    puts raw_value
-    puts raw_value.class.name
     loc = JSON.parse(raw_value, symbolize_names: true)
 
     # Set to existing Location or create a new one based on the external IDs. For the sake of not
-    # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
-    puts loc
-    puts loc[:locationiq_id], loc[:osm_id], loc[:osm_type]
+    # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.]
     result = Location.find_or_create_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
-    puts result
     self.location_id = result.id
     # At this point, discard raw_value (too long to store anyway)
     self.raw_value = nil
-  rescue => e
-    puts "foobar error:", e
-    puts e.backtrace.join("\n\t")
+  rescue StandardError
     errors.add(:raw_value, MetadataValidationErrors::INVALID_LOCATION)
   end
 

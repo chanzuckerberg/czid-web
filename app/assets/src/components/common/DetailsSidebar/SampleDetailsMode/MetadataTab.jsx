@@ -1,7 +1,7 @@
 import React from "react";
 import { mapValues, filter, includes } from "lodash";
 // TODO(mark): Refactor all calls to lodash/fp.
-import { set, values } from "lodash/fp";
+import { isObject, set, values } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
@@ -119,17 +119,16 @@ class MetadataTab extends React.Component {
     return val === undefined || val === null || val === "" ? (
       <div className={cs.emptyValue}>--</div>
     ) : (
-      <div className={cs.metadataValue}>{val}</div>
+      <div className={cs.metadataValue}>
+        {/* If asked to display an arbitrary object, try the name field */}
+        {isObject(val) && val.name ? val.name : val}
+      </div>
     );
   };
 
   renderMetadataType = metadataType => {
     const { metadata } = this.props;
-    let value = metadata[metadataType.key];
-    // Special-case locations
-    if (metadataType.key === "new_collection_location" && value)
-      value = value.name;
-    return MetadataTab.renderMetadataValue(value);
+    return MetadataTab.renderMetadataValue(metadata[metadataType.key]);
   };
 
   renderMetadataSectionContent = section => {

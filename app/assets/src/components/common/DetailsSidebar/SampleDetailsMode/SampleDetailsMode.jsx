@@ -167,7 +167,6 @@ class SampleDetailsMode extends React.Component {
         key,
         value
       );
-      console.log("save response:", response);
 
       // If the save fails, immediately revert to the last valid metadata value.
       if (response.status === "failed") {

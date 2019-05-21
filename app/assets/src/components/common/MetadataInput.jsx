@@ -49,6 +49,7 @@ class MetadataInput extends React.Component {
       return (
         <GeoSearchInputBox
           className={className}
+          // Calls save on selection
           onResultSelect={({ result }) =>
             onChange(metadataType.key, result, true)
           }

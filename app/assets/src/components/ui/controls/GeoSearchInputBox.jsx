@@ -55,11 +55,12 @@ class GeoSearchInputBox extends React.Component {
     this.setState({ value, usePropValue: false });
 
     // Handle the case when they clear the box and hit done/submit without pressing enter
-    if (value === "") this.handleResultSelected({ result: "" });
+    if (value === "") this.handleResultSelected({ result: value });
   };
 
   handleResultSelected = ({ result }) => {
     const { onResultSelect } = this.props;
+    // Use parent value after they select a result
     this.setState({ usePropValue: true });
 
     // Wrap plain text submission
@@ -74,7 +75,7 @@ class GeoSearchInputBox extends React.Component {
   };
 
   render() {
-    const { className, value: locationData, onBlur } = this.props;
+    const { className, value: locationData } = this.props;
     const { usePropValue, value } = this.state;
 
     return (
@@ -83,7 +84,6 @@ class GeoSearchInputBox extends React.Component {
         onSearchTriggered={this.handleSearchTriggered}
         onSearchChange={this.handleSearchChange}
         onResultSelect={this.handleResultSelected}
-        onBlur={onBlur}
         placeholder="Enter a location"
         value={usePropValue && locationData ? locationData.name : value}
         rectangular
@@ -96,7 +96,6 @@ class GeoSearchInputBox extends React.Component {
 GeoSearchInputBox.propTypes = {
   className: PropTypes.string,
   onResultSelect: PropTypes.func,
-  onBlur: PropTypes.func,
   value: PropTypes.object
 };
 

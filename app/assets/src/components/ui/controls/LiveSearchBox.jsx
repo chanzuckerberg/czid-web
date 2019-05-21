@@ -86,7 +86,7 @@ class LiveSearchBox extends React.Component {
   };
 
   render() {
-    const { className, placeholder, rectangular, onBlur } = this.props;
+    const { className, placeholder, rectangular } = this.props;
     const { isLoading, results } = this.state;
     const value = this.props.value || this.state.value;
 
@@ -103,7 +103,6 @@ class LiveSearchBox extends React.Component {
         onResultSelect={this.handleResultSelect}
         onSearchChange={this.handleSearchChange}
         onSelectionChange={this.handleSelectionChange}
-        onBlur={onBlur}
         placeholder={placeholder}
         results={results}
         showNoResults={false}
@@ -133,7 +132,6 @@ LiveSearchBox.propTypes = {
   onSearchTriggered: PropTypes.func.isRequired,
   onSearchChange: PropTypes.func,
   onResultSelect: PropTypes.func,
-  onBlur: PropTypes.func,
   rectangular: PropTypes.bool,
   inputMode: PropTypes.bool
 };
