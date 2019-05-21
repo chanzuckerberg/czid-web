@@ -63,9 +63,10 @@ class LiveSearchBox extends React.Component {
   };
 
   handleSearchChange = (_, { value }) => {
-    const { delayTriggerSearch, minChars } = this.props;
+    const { delayTriggerSearch, minChars, onSearchChange } = this.props;
 
     this.setState({ value });
+    onSearchChange && onSearchChange(value);
     // check minimum requirements for value
     const parsedValue = value.trim();
     if (parsedValue.length >= minChars) {
@@ -87,7 +88,7 @@ class LiveSearchBox extends React.Component {
   render() {
     const { placeholder, rectangular } = this.props;
     const { isLoading, results } = this.state;
-    const value = this.state.value || this.props.value;
+    const value = this.props.value || this.state.value;
 
     return (
       <Search
@@ -95,8 +96,8 @@ class LiveSearchBox extends React.Component {
         className={cx(cs.liveSearchBox, rectangular && cs.rectangular)}
         loading={isLoading}
         onKeyDown={this.handleKeyDown}
-        onResultSelect={this.handleResultSelect}
         onSearchChange={this.handleSearchChange}
+        onResultSelect={this.handleResultSelect}
         onSelectionChange={this.handleSelectionChange}
         placeholder={placeholder}
         results={results}
@@ -124,6 +125,7 @@ LiveSearchBox.propTypes = {
   value: PropTypes.string,
   onEnter: PropTypes.func,
   onSearchTriggered: PropTypes.func.isRequired,
+  onSearchChange: PropTypes.func,
   onResultSelect: PropTypes.func,
   rectangular: PropTypes.bool,
   inputMode: PropTypes.bool

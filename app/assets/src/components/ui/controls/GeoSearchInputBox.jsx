@@ -8,6 +8,15 @@ import LiveSearchBox from "~ui/controls/LiveSearchBox";
 
 // An input box that fetches and shows geosearch suggestions for user input of locations.
 class GeoSearchInputBox extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      value: "",
+      usePropValue: true
+    };
+  }
+
   // Fetch geosearch results and format into categories for LiveSearchBox
   handleSearchTriggered = async query => {
     const serverSideSuggestions = await getGeoSearchSuggestions(query);
@@ -41,8 +50,14 @@ class GeoSearchInputBox extends React.Component {
     return categories;
   };
 
+  handleSearchChange = value => {
+    // Let the inner search box change on edit
+    this.setState({ value, usePropValue: false });
+  };
+
   handleResultSelected = ({ result }) => {
     const { onResultSelect } = this.props;
+    this.setState({ usePropValue: true });
 
     // Wrap plain text submission
     if (isString(result)) result = { title: result };
@@ -57,12 +72,15 @@ class GeoSearchInputBox extends React.Component {
 
   render() {
     const { value: locationData } = this.props;
+    const { usePropValue, value } = this.state;
+
     return (
       <LiveSearchBox
         onSearchTriggered={this.handleSearchTriggered}
+        onSearchChange={this.handleSearchChange}
         onResultSelect={this.handleResultSelected}
         placeholder="Enter a location"
-        value={locationData && locationData.name}
+        value={usePropValue && locationData ? locationData.name : value}
         initialValue={null}
         rectangular
         inputMode
