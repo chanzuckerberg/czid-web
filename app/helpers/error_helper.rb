@@ -31,7 +31,7 @@ module ErrorHelper
     end
   end
 
-  LOCATION_INVALID_ERROR = "Please input a location."
+  LOCATION_INVALID_ERROR = "Please input a location.".freeze
   DATE_INVALID_ERROR_HUMAN = "Please input a date in the format YYYY-MM or MM/YYYY. (for human samples)".freeze
   DATE_INVALID_ERROR = "Please input a date in the format YYYY-MM-DD, YYYY-MM, MM/DD/YY, or MM/YYYY.".freeze
   NUMBER_INVALID_ERROR = "Please input a number.".freeze
@@ -172,8 +172,8 @@ module ErrorHelper
         # Automatically determine the kind of error to display based on the field.
         if field.base_type == 2
           @supported_errors[error_type] = {
-              headers: ["Row #", "Sample Name", "Invalid Value"],
-              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{LOCATION_INVALID_ERROR}" }
+            headers: ["Row #", "Sample Name", "Invalid Value"],
+            title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{LOCATION_INVALID_ERROR}" }
           }
         end
 
