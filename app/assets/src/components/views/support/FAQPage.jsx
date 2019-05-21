@@ -9,7 +9,6 @@ export default class FAQPage extends React.Component {
         <div className={cs.title}>
           <h1>Frequently Asked Questions</h1>
         </div>
-        <h2>Privacy, Security, and Research</h2>
         <Accordion
           className={cs.question}
           header={<h3>Does IDseq own any of the data I upload to the tool?</h3>}

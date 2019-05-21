@@ -1,8 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
+import moment from "moment";
 import { forbidExtraProps } from "airbnb-prop-types";
 import cx from "classnames";
 
+import { showToast } from "~/components/utils/toast";
+import Notification from "~ui/notifications/Notification";
 import { RequestContext } from "~/components/common/RequestContext";
 import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
@@ -18,7 +21,59 @@ import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
 import cs from "./header.scss";
 
+// TODO(mark): Remove after this expires.
+const PRIVACY_UPDATE_DATE = moment("2019-06-24", "YYYY-MM-DD");
+
+const setPrivacyUpdateNotificationViewed = () => {
+  localStorage.setItem("dismissedPrivacyUpdateNotification", "true");
+};
+
+const showPrivacyUpdateNotification = () => {
+  const daysLeft = Math.ceil(
+    moment.duration(PRIVACY_UPDATE_DATE.diff(moment())).asDays()
+  );
+
+  if (daysLeft > 0) {
+    showToast(({ closeToast }) => (
+      <Notification
+        type="warn"
+        onClose={() => {
+          setPrivacyUpdateNotificationViewed();
+          closeToast();
+        }}
+      >
+        Our Terms of Use and Privacy Privacy will be updating in {daysLeft}{" "}
+        {daysLeft === 1 ? "day" : "days"}.{" "}
+        <a
+          href="/terms_changes"
+          onClick={setPrivacyUpdateNotificationViewed}
+          className={cs.notificationLink}
+        >
+          Read a summary of the changes here.
+        </a>
+      </Notification>
+    ));
+  }
+};
+
 class Header extends React.Component {
+  componentDidMount() {
+    const { userSignedIn } = this.props;
+    if (userSignedIn) {
+      this.displayPrivacyUpdateNotification();
+    }
+  }
+
+  displayPrivacyUpdateNotification = () => {
+    const dismissedPrivacyUpdateNotification = localStorage.getItem(
+      "dismissedPrivacyUpdateNotification"
+    );
+
+    if (dismissedPrivacyUpdateNotification !== "true") {
+      showPrivacyUpdateNotification();
+    }
+  };
+
   render() {
     const { adminUser, userSignedIn, ...userMenuProps } = this.props;
 

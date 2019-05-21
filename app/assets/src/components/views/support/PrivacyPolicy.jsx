@@ -10,7 +10,7 @@ export default class PrivacyPolicy extends React.Component {
           <h1>IDseq Data Privacy Notice</h1>
           <h4 className={cs.subtitle}>
             Last Updated: May 13, 2019.{" "}
-            <a href="/terms_changes">Recent Changes</a>. <a href="/faqs">FAQ</a>.
+            <a href="/terms_changes">See Recent Changes</a>
           </h4>
         </div>
         <p className={cs.large}>
@@ -302,11 +302,12 @@ export default class PrivacyPolicy extends React.Component {
         <p className={cs.large}>
           We (along with CZI (defined below)) have a legitimate interest in
           using personal data within Visitor Data and User Data in the ways
-          described in this Privacy Policy to provide, protect, and improve
-          IDseq. This allows us to improve the service that we provide to Users
-          which, in turn, supports research regarding the study of infectious
-          disease with the potential to benefit global public health. You can
-          contact us at <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>.
+          described in this <a href="/privacy">Privacy Policy</a> to provide,
+          protect, and improve IDseq. This allows us to improve the service that
+          we provide to Users which, in turn, supports research regarding the
+          study of infectious disease with the potential to benefit global
+          public health. You can contact us at{" "}
+          <a href="mailto:privacy@idseq.net">privacy@idseq.net</a>.
         </p>
         <h2>
           <span className={cs.number}>4.</span>Vendors, and Other Third Parties.
