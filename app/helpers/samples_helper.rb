@@ -325,14 +325,26 @@ module SamplesHelper
   end
 
   def metadata_multiget(sample_ids)
+    # rubocop:disable Style/ConditionalAssignment
     metadata = Metadatum.includes(:metadata_field).where(sample_id: sample_ids)
+    base_type_by_metadata_id = metadata.pluck(:id, :base_type).to_h
 
     metadata_by_sample_id = {}
     metadata.each do |metadatum|
       metadata_by_sample_id[metadatum.sample_id] ||= {}
-      metadata_by_sample_id[metadatum.sample_id][metadatum.key.to_sym] = metadatum.validated_value
+      # Special case Location here to preserve batched db queries.
+      if base_type_by_metadata_id[metadatum.id] == Metadatum::LOCATION_TYPE
+        metadata_by_sample_id[metadatum.sample_id][metadatum.key.to_sym] = if metadatum.location_id
+                                                                             Location.find(metadatum.location_id).attributes
+                                                                           else
+                                                                             metadatum.string_validated_value
+                                                                           end
+      else
+        metadata_by_sample_id[metadatum.sample_id][metadatum.key.to_sym] = metadatum.validated_value
+      end
     end
 
+    # rubocop:enable Style/ConditionalAssignment
     metadata_by_sample_id
   end
 

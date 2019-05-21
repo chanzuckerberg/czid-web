@@ -730,9 +730,15 @@ class Sample < ApplicationRecord
   # Get Metadata objects augmented with MetadataField.base_type
   def metadata_with_base_type
     metadata.map do |m|
-      m.attributes.merge(
-        "base_type" => Metadatum.convert_type_to_string(m.metadata_field.base_type)
-      )
+      resp = m.attributes
+      base_type = m.metadata_field.base_type
+
+      # Special-case for locations
+      if base_type == Metadatum::LOCATION_TYPE
+        resp["location_validated_value"] = m.location_id ? Location.find(m.location_id).attributes : m.string_validated_value
+      end
+      resp["base_type"] = Metadatum.convert_type_to_string(base_type)
+      resp
     end
   end
 
