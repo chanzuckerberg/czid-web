@@ -106,12 +106,18 @@ class Metadatum < ApplicationRecord
     # Skip if location was already resolved
     return if location_id && !raw_value
 
+    # Strings from CSV uploads
+    if raw_value.is_a?(String)
+      self.string_validated_value = raw_value
+      self.location_id = nil
+      return
+    end
+
     # Based on our metadata structure, the location details selected by the user will end up in
     # raw_value.
     loc = JSON.parse(raw_value, symbolize_names: true)
-
-    # If they submitted plain text, don't use a Location object but set string_validated_value.
     unless loc[:locationiq_id]
+      # Unresolved plain text selection (wrapped 'name')
       self.string_validated_value = loc[:name]
       self.location_id = nil
       return
