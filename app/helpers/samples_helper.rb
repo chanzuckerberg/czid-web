@@ -1,5 +1,5 @@
-require 'open3'
-require 'csv'
+require "open3"
+require "csv"
 
 module SamplesHelper
   include PipelineOutputsHelper
@@ -55,31 +55,31 @@ module SamplesHelper
     CSV.parse(csv_data, headers: true) do |row|
       # Find the right project and sample
       row_details = row.to_h
-      proj = Project.find_by(name: row_details['project_name'])
+      proj = Project.find_by(name: row_details["project_name"])
       next unless proj
-      sampl = Sample.find_by(project_id: proj, name: row_details['sample_name'])
+      sampl = Sample.find_by(project_id: proj, name: row_details["sample_name"])
       next unless sampl
 
       # Format the new details. Append to existing notes.
       new_details = {}
-      new_details['sample_notes'] = sampl.sample_notes || ''
+      new_details["sample_notes"] = sampl.sample_notes || ""
       row_details.each do |key, value|
-        if !key || !value || key == 'sample_name' || key == 'project_name'
+        if !key || !value || key == "sample_name" || key == "project_name"
           next
         end
         if Sample::METADATA_FIELDS.include?(key.to_sym)
           new_details[key] = value
         else # Otherwise throw in notes
-          new_details['sample_notes'] << format("\n- %s: %s", key, value)
+          new_details["sample_notes"] << format("\n- %s: %s", key, value)
         end
       end
-      new_details['sample_notes'].strip!
+      new_details["sample_notes"].strip!
       sampl.update_attributes!(new_details)
     end
   end
 
   def host_genomes_list
-    HostGenome.all.map { |h| h.slice('name', 'id') }
+    HostGenome.all.map { |h| h.slice("name", "id") }
   end
 
   def get_summary_stats(job_stats_hash, pipeline_run)
@@ -105,15 +105,15 @@ module SamplesHelper
   end
 
   def compute_compression_ratio(job_stats_hash)
-    cdhitdup_stats = job_stats_hash['cdhitdup_out']
-    priceseq_stats = job_stats_hash['priceseq_out']
-    (1.0 * priceseq_stats['reads_after']) / cdhitdup_stats['reads_after'] unless cdhitdup_stats.nil? || priceseq_stats.nil?
+    cdhitdup_stats = job_stats_hash["cdhitdup_out"]
+    priceseq_stats = job_stats_hash["priceseq_out"]
+    (1.0 * priceseq_stats["reads_after"]) / cdhitdup_stats["reads_after"] unless cdhitdup_stats.nil? || priceseq_stats.nil?
   end
 
   def compute_qc_value(job_stats_hash)
-    star_stats = job_stats_hash['star_out']
-    priceseqfilter_stats = job_stats_hash['priceseq_out']
-    (100.0 * priceseqfilter_stats['reads_after']) / star_stats['reads_after'] unless priceseqfilter_stats.nil? || star_stats.nil?
+    star_stats = job_stats_hash["star_out"]
+    priceseqfilter_stats = job_stats_hash["priceseq_out"]
+    (100.0 * priceseqfilter_stats["reads_after"]) / star_stats["reads_after"] unless priceseqfilter_stats.nil? || star_stats.nil?
   end
 
   def compute_percentage_reads(pr)
@@ -122,18 +122,18 @@ module SamplesHelper
 
   def sample_status_display_for_hidden_page(sample)
     if sample.status == Sample::STATUS_CREATED
-      'uploading'
+      "uploading"
     elsif sample.status == Sample::STATUS_CHECKED
       pipeline_run = sample.first_pipeline_run
-      return '' unless pipeline_run
+      return "" unless pipeline_run
       if pipeline_run.job_status == PipelineRun::STATUS_CHECKED
-        return 'complete'
+        return "complete"
       elsif pipeline_run.job_status == PipelineRun::STATUS_FAILED
-        return 'failed'
+        return "failed"
       elsif pipeline_run.job_status == PipelineRun::STATUS_RUNNING
-        return 'running'
+        return "running"
       else
-        return 'initializing'
+        return "initializing"
       end
     end
   end
@@ -141,9 +141,9 @@ module SamplesHelper
   def parsed_samples_for_s3_path(s3_path, project_id, host_genome_id)
     default_attributes = { project_id: project_id.to_i,
                            host_genome_id: host_genome_id,
-                           status: 'created' }
-    s3_path.chomp!('/')
-    s3_bucket = 's3://' + s3_path.sub('s3://', '').split('/')[0]
+                           status: "created" }
+    s3_path.chomp!("/")
+    s3_bucket = "s3://" + s3_path.sub("s3://", "").split("/")[0]
     s3_output, _stderr, status = Open3.capture3("aws", "s3", "ls", "--recursive", "#{s3_path}/")
     return unless status.exitstatus.zero?
     s3_output.chomp!
@@ -162,10 +162,10 @@ module SamplesHelper
         next
       end
       source = matched[0]
-      name = matched[1].split('/')[-1]
+      name = matched[1].split("/")[-1]
       samples[name] ||= default_attributes.clone
       samples[name][:input_files_attributes] ||= []
-      samples[name][:input_files_attributes][read_idx] = { name: source.split('/')[-1],
+      samples[name][:input_files_attributes][read_idx] = { name: source.split("/")[-1],
                                                            source: "#{s3_bucket}/#{source}",
                                                            source_type: InputFile::SOURCE_TYPE_S3 }
     end
@@ -204,13 +204,13 @@ module SamplesHelper
 
   def filter_by_status(samples, query)
     top_pipeline_run_clause = "pipeline_runs.id in (select max(id) from pipeline_runs group by sample_id)"
-    if query == 'In Progress'
+    if query == "In Progress"
       samples.joins(:pipeline_runs).where("#{top_pipeline_run_clause} or pipeline_runs.id is NULL").where("samples.status = ? or pipeline_runs.job_status is NULL or (pipeline_runs.job_status NOT IN (?) and pipeline_runs.finalized != 1)", Sample::STATUS_CREATED, [PipelineRun::STATUS_CHECKED, PipelineRun::STATUS_FAILED])
     else
       samples_pipeline_runs = samples.joins(:pipeline_runs).where(status: Sample::STATUS_CHECKED).where(top_pipeline_run_clause)
-      if query == 'Failed'
+      if query == "Failed"
         samples_pipeline_runs.where("pipeline_runs.job_status like '%FAILED'")
-      elsif query == 'Complete'
+      elsif query == "Complete"
         samples_pipeline_runs.where("(pipeline_runs.job_status = ? or pipeline_runs.job_status like '%READY') and pipeline_runs.finalized = 1", PipelineRun::STATUS_CHECKED)
       else # query == 'All' or something unexpected
         samples
@@ -226,7 +226,7 @@ module SamplesHelper
     # Use a set to speed up query.
     query_set = query.to_set
 
-    include_not_set = query.include?('Not set')
+    include_not_set = query.include?("Not set")
 
     sample_type_metadatum = Metadatum
                             .where(sample_id: samples.pluck(:id), key: key)
@@ -263,7 +263,7 @@ module SamplesHelper
       pipeline_run_entry[:finalized] = pipeline_run.finalized
       pipeline_run_entry[:report_ready] = report_ready_pipeline_run_ids.include?(pipeline_run.id)
     else
-      pipeline_run_entry[:result_status_description] = 'WAITING'
+      pipeline_run_entry[:result_status_description] = "WAITING"
       pipeline_run_entry[:finalized] = 0
       pipeline_run_entry[:report_ready] = 0
     end
@@ -325,7 +325,6 @@ module SamplesHelper
   end
 
   def metadata_multiget(sample_ids)
-    # rubocop:disable Style/ConditionalAssignment
     metadata = Metadatum.includes(:metadata_field).where(sample_id: sample_ids)
     base_type_by_metadata_id = metadata.pluck(:id, :base_type).to_h
 
@@ -333,18 +332,14 @@ module SamplesHelper
     metadata.each do |metadatum|
       metadata_by_sample_id[metadatum.sample_id] ||= {}
       # Special case Location here to preserve batched db queries.
-      if base_type_by_metadata_id[metadatum.id] == Metadatum::LOCATION_TYPE
-        metadata_by_sample_id[metadatum.sample_id][metadatum.key.to_sym] = if metadatum.location_id
-                                                                             Location.find(metadatum.location_id).attributes
-                                                                           else
-                                                                             metadatum.string_validated_value
-                                                                           end
-      else
-        metadata_by_sample_id[metadatum.sample_id][metadatum.key.to_sym] = metadatum.validated_value
-      end
+      val = if base_type_by_metadata_id[metadatum.id] == Metadatum::LOCATION_TYPE
+              metadatum.location_id ? Location.find(metadatum.location_id).attributes : metadatum.string_validated_value
+            else
+              metadatum.validated_value
+            end
+      metadata_by_sample_id[metadatum.sample_id][metadatum.key.to_sym] = val
     end
 
-    # rubocop:enable Style/ConditionalAssignment
     metadata_by_sample_id
   end
 
@@ -361,13 +356,13 @@ module SamplesHelper
   def format_samples_basic(samples)
     metadata_by_sample_id = metadata_multiget(samples.map(&:id))
     return samples.map do |sample|
-      {
-        name: sample.name,
-        id: sample.id,
-        host_genome_id: sample.host_genome_id,
-        metadata: metadata_by_sample_id[sample.id]
-      }
-    end
+             {
+               name: sample.name,
+               id: sample.id,
+               host_genome_id: sample.host_genome_id,
+               metadata: metadata_by_sample_id[sample.id]
+             }
+           end
   end
 
   def format_samples(samples)
@@ -500,7 +495,7 @@ module SamplesHelper
     samples = []
     errors = []
     samples_to_upload.each do |sample_attributes|
-      sample_attributes[:input_files_attributes].reject! { |f| f["source"] == '' }
+      sample_attributes[:input_files_attributes].reject! { |f| f["source"] == "" }
 
       if sample_attributes[:host_genome_name]
         name = sample_attributes.delete(:host_genome_name)
@@ -606,11 +601,11 @@ module SamplesHelper
     # despite joins to pipeline_runs and taxon_counts
     samples
       .where(id: samples
-        .distinct(:id)
-        .joins(:pipeline_runs, pipeline_runs: :taxon_counts)
-        .where(pipeline_runs: { id: PipelineRun.joins(:sample).where(sample: samples, job_status: "CHECKED").group(:sample_id).select("MAX(`pipeline_runs`.id) AS id") })
-        .where(taxon_counts: { tax_id: taxid, count_type: ["NT", "NR"] })
-        .where("`taxon_counts`.count > 0"))
+               .distinct(:id)
+               .joins(:pipeline_runs, pipeline_runs: :taxon_counts)
+               .where(pipeline_runs: { id: PipelineRun.joins(:sample).where(sample: samples, job_status: "CHECKED").group(:sample_id).select("MAX(`pipeline_runs`.id) AS id") })
+               .where(taxon_counts: { tax_id: taxid, count_type: ["NT", "NR"] })
+               .where("`taxon_counts`.count > 0"))
   end
 
   def filter_by_search_string(samples, search_string)
