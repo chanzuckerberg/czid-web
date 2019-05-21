@@ -3,3 +3,5 @@
 <p><%= @sharing_user.name %> (<%= @sharing_user.email %>) has invited you to IDseq project <b><%= @shared_project_name %>.</p>
 <p></p>
 <p><b><%= link_to 'Activate your account', edit_password_url(@user, reset_password_token: @token) %></b></p>
+<p>Please note that this activation link expires after 48 hours.</p>
+<p>After that window, you can activate your account by clicking on "Forgot password?" on the Login page.</p>
