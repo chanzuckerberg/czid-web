@@ -47,7 +47,7 @@
     .metadataInput {
       width: 100%;
 
-      .input {
+      :global(.ui):global(.input) {
         width: 100%;
       }
     }
