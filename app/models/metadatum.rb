@@ -129,6 +129,7 @@ class Metadatum < ApplicationRecord
     result = Location.find_or_create_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
     # At this point, discard raw_value (too long to store anyway)
     self.raw_value = nil
+    self.string_validated_value = nil
     self.location_id = result.id
   rescue
     errors.add(:raw_value, MetadataValidationErrors::INVALID_LOCATION)
