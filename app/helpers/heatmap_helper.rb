@@ -1,4 +1,6 @@
 module HeatmapHelper
+  DEFAULT_MAX_NUM_TAXONS = 30
+
   def heatmap
     {
       taxonLevels: %w[Genus Species],
@@ -68,7 +70,7 @@ module HeatmapHelper
                         else
                           JSON.parse(params[:thresholdFilters] || "[]")
                         end
-    subcategories = if params[:subcategories].respond_to?(:to_h)
+    subcategories = if params[:subcategories] && params[:subcategories].respond_to?(:to_h)
                       params[:subcategories].permit!.to_h
                     else
                       JSON.parse(params[:subcategories] || "{}")
@@ -85,7 +87,7 @@ module HeatmapHelper
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
 
-    taxon_ids = top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
+    taxon_ids = ReportHelper.top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
     taxon_ids -= removed_taxon_ids
 
     samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)

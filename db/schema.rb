@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_426_002_714) do
+ActiveRecord::Schema.define(version: 20_190_517_183_928) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -155,9 +155,12 @@ ActiveRecord::Schema.define(version: 20_190_426_002_714) do
     t.decimal "lng", precision: 10, scale: 6, comment: "The longitude of this location if available"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "osm_type", limit: 10, default: "", null: false, comment: "OpenStreetMap type (Node, Way, or Relation) to use OSM ID"
     t.index ["country_name", "state_name", "subdivision_name", "city_name"], name: "index_locations_levels", comment: "Index for lookup within regions. Composite works for any left subset of columns."
     t.index ["geo_level"], name: "index_locations_on_geo_level", comment: "Index for lookup by level of specificity"
+    t.index ["locationiq_id"], name: "index_locations_on_locationiq_id"
     t.index ["name"], name: "index_locations_on_name", comment: "Index for lookup by location name"
+    t.index ["osm_type", "osm_id"], name: "index_locations_on_osm_type_and_osm_id"
   end
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -171,6 +174,7 @@ ActiveRecord::Schema.define(version: 20_190_426_002_714) do
     t.date "date_validated_value"
     t.bigint "metadata_field_id"
     t.string "specificity"
+    t.integer "location_id"
     t.index ["metadata_field_id"], name: "index_metadata_on_metadata_field_id"
     t.index ["sample_id", "key"], name: "index_metadata_on_sample_id_and_key", unique: true
   end
