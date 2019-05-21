@@ -176,7 +176,7 @@ class DataTable extends React.Component {
                   style={this.getCellStyle(column)}
                   key={colIdx}
                 >
-                  {/* If asked to display an arbitrary object, try the name field */}
+                  {/* If asked to display an object, try the name field (e.g. location object) */}
                   {isObject(row[column]) ? row[column].name : row[column]}
                 </td>
               ))}
