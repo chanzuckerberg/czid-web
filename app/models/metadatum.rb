@@ -167,8 +167,8 @@ class Metadatum < ApplicationRecord
   def self.bulk_load_import(to_create)
     errors = []
     begin
-      # With on_duplicate_key_update, activerecord-import will correctly update existing rows.
-      # Rails model validations are also checked.
+      # The unique key is on sample and metadata.key, so the value fields will
+      # be updated if the key exists.
       update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value, :location_id]
       results = Metadatum.import to_create, on_duplicate_key_update: update_keys
       results.failed_instances.each do |model|
