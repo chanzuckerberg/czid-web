@@ -52,10 +52,10 @@ class GeoSearchInputBox extends React.Component {
 
   handleSearchChange = value => {
     // Let the inner search box change on edit
-    this.setState({ value, usePropValue: false });
-
-    // Handle the case when they clear the box and hit done/submit without pressing enter
-    if (value === "") this.handleResultSelected({ result: value });
+    this.setState({ value, usePropValue: false }, () => {
+      // Handle the case when they clear the box and hit done/submit without pressing enter
+      if (value === "") this.handleResultSelected({ result: value });
+    });
   };
 
   handleResultSelected = ({ result }) => {
