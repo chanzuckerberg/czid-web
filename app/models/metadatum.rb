@@ -111,12 +111,12 @@ class Metadatum < ApplicationRecord
     loc = JSON.parse(raw_value, symbolize_names: true)
 
     # Set to existing Location or create a new one based on the external IDs. For the sake of not
-    # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.]
+    # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
     result = Location.find_or_create_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
-    self.location_id = result.id
     # At this point, discard raw_value (too long to store anyway)
     self.raw_value = nil
-  rescue StandardError
+    self.location_id = result.id
+  rescue
     errors.add(:raw_value, MetadataValidationErrors::INVALID_LOCATION)
   end
 

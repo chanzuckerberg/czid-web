@@ -96,7 +96,7 @@ class LocationTest < ActiveSupport::TestCase
   end
 
   test "should create new Location by OSM ID" do
-    api_response = LocationTestHelper::API_GEOSEARCH_RESPONSE
+    api_response = LocationTestHelper::API_GEOSEARCH_RESPONSE[0]
     osm_id = LocationTestHelper::API_GEOSEARCH_RESPONSE[0]["osm_id"]
     osm_type = LocationTestHelper::API_GEOSEARCH_RESPONSE[0]["osm_type"]
 
