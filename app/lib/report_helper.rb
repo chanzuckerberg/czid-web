@@ -541,9 +541,9 @@ module ReportHelper
 
   def self.fetch_parent_ids(taxon_ids, samples)
     # Get parent (genus,family) ids for the taxon_ids based on the samples
-    pipeline_run_ids = PipelineRun.where(sample_id: samples.pluck(:id)).pluck(:id)
     TaxonCount.select("distinct genus_taxid, family_taxid")
-              .where(pipeline_run_id: pipeline_run_ids)
+              .joins(:pipeline_run)
+              .where(pipeline_runs: { sample: samples })
               .where(tax_id: taxon_ids)
               .map { |u| u.attributes.values.compact }.flatten
   end
