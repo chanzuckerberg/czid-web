@@ -709,7 +709,7 @@ class Sample < ApplicationRecord
     if m.metadata_field
       m.key = m.metadata_field.name
       m.sample = self
-      m.raw_value = val.is_a?(Hash) ? val.to_json : val
+      m.raw_value = val.is_a?(ActionController::Parameters) ? val.to_json : val
     end
 
     {
