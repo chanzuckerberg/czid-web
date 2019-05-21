@@ -120,8 +120,8 @@ class MetadataTab extends React.Component {
       <div className={cs.emptyValue}>--</div>
     ) : (
       <div className={cs.metadataValue}>
-        {/* If asked to display an object, try the name field (e.g. location object) */}
-        {isObject(val) ? val.name : val}
+        {/* If we want to display an object (e.g. location object), provide a 'name' field */}
+        {isObject(val) && val.name ? val.name : val}
       </div>
     );
   };
