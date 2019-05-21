@@ -187,7 +187,7 @@ class PipelineRun < ApplicationRecord
   DRAINING_TAG = "draining".freeze
 
   # Triggers a run for new samples by defining output states and run stages configurations.
-  # *Exception* for cloned pipeline runs that alredy have results and finalized status
+  # *Exception* for cloned pipeline runs that already have results and finalized status
   before_create :create_output_states, :create_run_stages, unless: :results_finalized?
 
   def parse_dag_vars
