@@ -105,16 +105,17 @@
       margin: 0;
       min-height: 25px;
       border-radius: 10px;
+      box-shadow: none;
 
       .menuItem {
         padding: 5px 20px;
 
         .icon {
           font-size: 15px;
+        }
 
-          &.active {
-            fill: $primary-light;
-          }
+        &:global(.active) {
+          color: $primary-light;
         }
       }
     }

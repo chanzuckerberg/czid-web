@@ -322,32 +322,7 @@ class SamplesView extends React.Component {
     const { selectedSampleIds } = this.state;
     return (
       <div className={cs.samplesToolbar}>
-        <div className={cs.displaySwitcher}>
-          <Menu compact className={cs.switcherMenu}>
-            <MenuItem
-              className={cs.menuItem}
-              // active={this.state.localUploadMode}
-              // onClick={withAnalytics(
-              //   () => this.setState({ localUploadMode: true }),
-              //   "SampleUpload_upload-local_clicked"
-              // )}
-              // disabled={this.state.submitting}
-            >
-              <i className={cx("fa fa-list-ul", cs.icon)} />
-            </MenuItem>
-            <MenuItem
-              className={cs.menuItem}
-              // active={!this.state.localUploadMode}
-              // onClick={withAnalytics(
-              //   () => this.setState({ localUploadMode: false }),
-              //   "SampleUpload_upload-remote_clicked"
-              // )}
-              // disabled={this.state.submitting}
-            >
-              <i className={cx("fa fa-globe", cs.icon)} />
-            </MenuItem>
-          </Menu>
-        </div>
+        <div className={cs.displaySwitcher}>{this.renderDisplaySwitcher()}</div>
         <div className={cs.fluidBlank} />
         <div className={cs.counterContainer}>
           <Label
@@ -373,6 +348,34 @@ class SamplesView extends React.Component {
           <div className={cs.action}>{this.renderDownloadTrigger()}</div>
         </div>
       </div>
+    );
+  };
+
+  renderDisplaySwitcher = () => {
+    const { currentDisplay } = this.props;
+    return (
+      <Menu compact className={cs.switcherMenu}>
+        <MenuItem
+          className={cs.menuItem}
+          active={currentDisplay === "table"}
+          // onClick={withAnalytics(
+          //   () => this.setState({ localUploadMode: true }),
+          //   "SampleUpload_upload-local_clicked"
+          // )}
+        >
+          <i className={cx("fa fa-list-ul", cs.icon)} />
+        </MenuItem>
+        <MenuItem
+          className={cs.menuItem}
+          active={currentDisplay === "map"}
+          // onClick={withAnalytics(
+          //   () => this.setState({ localUploadMode: false }),
+          //   "SampleUpload_upload-remote_clicked"
+          // )}
+        >
+          <i className={cx("fa fa-globe", cs.icon)} />
+        </MenuItem>
+      </Menu>
     );
   };
 
@@ -460,7 +463,9 @@ SamplesView.propTypes = {
   protectedColumns: PropTypes.array,
   samples: PropTypes.array,
   selectableIds: PropTypes.array.isRequired,
-  onSampleSelected: PropTypes.func
+  onSampleSelected: PropTypes.func,
+  currentDisplay: PropTypes.string,
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string)
 };
 
 export default SamplesView;
