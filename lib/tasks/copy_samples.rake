@@ -28,27 +28,14 @@ end
 def duplicate_sample_db(old_sample, target_project, new_sample_fields)
   puts "Duplicating sample: #{old_sample.name} => #{new_sample_fields['Sample Name']}"
   puts "\t- Deep DB copy..."
+
   # using: https://github.com/moiristo/deep_cloneable
-  duplicate_sample = old_sample.deep_clone include: [
-    {
-      pipeline_runs: [
-        :taxon_counts,
-        :job_stats,
-        :output_states,
-        :taxon_byteranges,
-        :ercc_counts,
-        :amr_counts,
-        :contigs,
-        :pipeline_run_stages
-      ]
-    },
-    :metadata,
-    :input_files
-  ]
+  duplicate_sample = old_sample.deep_clone include: [:metadata, :input_files]
   puts "\t- Setting sample name to #{new_sample_fields['Sample Name']}"
   duplicate_sample.name = new_sample_fields['Sample Name']
   puts "\t- Setting project to #{target_project.name}"
   duplicate_sample.project = target_project
+
   # set input files to local to make sure we do not trigger s3 copy
   puts "\t- Setting input files source to #{InputFile::SOURCE_TYPE_LOCAL}"
   duplicate_sample.input_files.each do |input_file|
@@ -62,6 +49,25 @@ def duplicate_sample_db(old_sample, target_project, new_sample_fields)
     puts "\t- Invalid sample when duplicating: #{duplicate_sample.name}"
     raise InvalidDuplicateSampleError, "Invalid sample: #{duplicate_sample}"
   end
+
+  new_pipeline_runs = []
+  old_sample.pipeline_runs.to_a.sort{ |a,b| a.id <=> b.id }.each do |pr|
+    new_pr = pr.deep_clone include: [
+      :taxon_counts,
+      :job_stats,
+      :output_states,
+      :taxon_byteranges,
+      :ercc_counts,
+      :amr_counts,
+      :contigs,
+      :pipeline_run_stages
+    ] do |original, copy|
+      copy.created_at = original.created_at
+    end
+    new_pr.sample_id = duplicate_sample.id
+    new_pr.save
+  end
+
   return duplicate_sample
 rescue StandardError => e
   puts "\t[ERROR] Failed to create sample: #{e.message}"
