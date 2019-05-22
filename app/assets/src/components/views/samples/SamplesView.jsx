@@ -17,6 +17,7 @@ import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import BasicPopup from "~/components/BasicPopup";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { Menu, MenuItem } from "~ui/controls/Menu";
+import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 
 import ReportsDownloader from "./ReportsDownloader";
 import CollectionModal from "./CollectionModal";
@@ -326,11 +327,8 @@ class SamplesView extends React.Component {
     return (
       <div className={cs.samplesToolbar}>
         {allowedFeatures &&
-          allowedFeatures.includes("maps") && (
-            <div className={cs.displaySwitcher}>
-              {this.renderDisplaySwitcher()}
-            </div>
-          )}
+          allowedFeatures.includes("maps") &&
+          this.renderDisplaySwitcher()}
         <div className={cs.fluidBlank} />
         <div className={cs.counterContainer}>
           <Label
@@ -359,29 +357,77 @@ class SamplesView extends React.Component {
     );
   };
 
+  renderTable = () => {
+    const { activeColumns, onLoadRows, protectedColumns } = this.props;
+    const { selectedSampleIds } = this.state;
+
+    // TODO(tiago): replace by automated cell height computing
+    const rowHeight = 66;
+    const selectAllChecked = this.isSelectAllChecked();
+    return (
+      <div className={cs.table}>
+        <InfiniteTable
+          ref={infiniteTable => (this.infiniteTable = infiniteTable)}
+          columns={this.columns}
+          defaultRowHeight={rowHeight}
+          initialActiveColumns={activeColumns}
+          loadingClassName={cs.loading}
+          onLoadRows={onLoadRows}
+          onSelectAllRows={withAnalytics(
+            this.handleSelectAllRows,
+            "SamplesView_select-all-rows_clicked"
+          )}
+          onSelectRow={this.handleSelectRow}
+          onRowClick={this.handleRowClick}
+          protectedColumns={protectedColumns}
+          rowClassName={cs.tableDataRow}
+          selectableKey="id"
+          selected={selectedSampleIds}
+          selectAllChecked={selectAllChecked}
+        />
+      </div>
+    );
+  };
+
   renderDisplaySwitcher = () => {
     const { currentDisplay, onDisplaySwitch } = this.props;
     return (
-      <Menu compact className={cs.switcherMenu}>
-        {DISPLAYS.map(display => (
-          <MenuItem
-            className={cs.menuItem}
-            active={currentDisplay === display}
-            onClick={withAnalytics(
-              () => onDisplaySwitch(display),
-              `SamplesView_${display}-switch_clicked`
-            )}
-          >
-            <i
-              className={cx(
-                "fa",
-                display === "map" ? "fa-globe" : "fa-list-ul",
-                cs.icon
+      <div className={cs.displaySwitcher}>
+        <Menu compact className={cs.switcherMenu}>
+          {DISPLAYS.map(display => (
+            <MenuItem
+              className={cs.menuItem}
+              active={currentDisplay === display}
+              onClick={withAnalytics(
+                () => onDisplaySwitch(display),
+                `SamplesView_${display}-switch_clicked`
               )}
-            />
-          </MenuItem>
-        ))}
-      </Menu>
+            >
+              <i
+                className={cx(
+                  "fa",
+                  display === "map" ? "fa-globe" : "fa-list-ul",
+                  cs.icon
+                )}
+              />
+            </MenuItem>
+          ))}
+        </Menu>
+      </div>
+    );
+  };
+
+  renderMap = () => {
+    const { mapTilerKey } = this.props;
+    return (
+      <div className={cs.map}>
+        <BaseMap
+          mapTilerKey={mapTilerKey}
+          // updateViewport={this.updateViewport}
+          // tooltip={tooltip}
+          // markers={Object.entries(locationsToItems).map(this.renderMarker)}
+        />
+      </div>
     );
   };
 
@@ -404,37 +450,12 @@ class SamplesView extends React.Component {
   };
 
   render() {
-    const { activeColumns, onLoadRows, protectedColumns } = this.props;
-    const { phyloTreeCreationModalOpen, selectedSampleIds } = this.state;
-
-    // TODO(tiago): replace by automated cell height computing
-    const rowHeight = 66;
-
-    const selectAllChecked = this.isSelectAllChecked();
+    const { currentDisplay } = this.props;
+    const { phyloTreeCreationModalOpen } = this.state;
     return (
       <div className={cs.container}>
         {this.renderToolbar()}
-        <div className={cs.table}>
-          <InfiniteTable
-            ref={infiniteTable => (this.infiniteTable = infiniteTable)}
-            columns={this.columns}
-            defaultRowHeight={rowHeight}
-            initialActiveColumns={activeColumns}
-            loadingClassName={cs.loading}
-            onLoadRows={onLoadRows}
-            onSelectAllRows={withAnalytics(
-              this.handleSelectAllRows,
-              "SamplesView_select-all-rows_clicked"
-            )}
-            onSelectRow={this.handleSelectRow}
-            onRowClick={this.handleRowClick}
-            protectedColumns={protectedColumns}
-            rowClassName={cs.tableDataRow}
-            selectableKey="id"
-            selected={selectedSampleIds}
-            selectAllChecked={selectAllChecked}
-          />
-        </div>
+        {currentDisplay === "table" ? this.renderTable() : this.renderMap()}
         {phyloTreeCreationModalOpen && (
           <PhyloTreeCreationModal
             // TODO(tiago): migrate phylo tree to use api (or read csrf from context) and remove this
@@ -459,7 +480,8 @@ SamplesView.defaultProps = {
     "nonHostReads",
     "qcPercent"
   ],
-  protectedColumns: ["sample"]
+  protectedColumns: ["sample"],
+  currentDisplay: "table"
 };
 
 SamplesView.propTypes = {
@@ -470,9 +492,10 @@ SamplesView.propTypes = {
   samples: PropTypes.array,
   selectableIds: PropTypes.array.isRequired,
   onSampleSelected: PropTypes.func,
-  currentDisplay: PropTypes.string,
+  currentDisplay: PropTypes.string.isRequired,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
-  onDisplaySwitch: PropTypes.func
+  onDisplaySwitch: PropTypes.func,
+  mapTilerKey: PropTypes.string
 };
 
 export default SamplesView;

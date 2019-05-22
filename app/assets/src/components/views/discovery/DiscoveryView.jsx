@@ -692,7 +692,7 @@ class DiscoveryView extends React.Component {
       visualizations
     } = this.state;
 
-    const { domain, allowedFeatures } = this.props;
+    const { domain, allowedFeatures, mapTilerKey } = this.props;
 
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
@@ -773,6 +773,7 @@ class DiscoveryView extends React.Component {
                       currentDisplay={currentDisplay}
                       allowedFeatures={allowedFeatures}
                       onDisplaySwitch={this.handleDisplaySwitch}
+                      mapTilerKey={mapTilerKey}
                     />
                   </div>
                   {!samples.length &&
@@ -836,7 +837,8 @@ DiscoveryView.propTypes = {
     DISCOVERY_DOMAIN_PUBLIC
   ]).isRequired,
   projectId: PropTypes.number,
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string)
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
+  mapTilerKey: PropTypes.string
 };
 
 export default DiscoveryView;
