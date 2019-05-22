@@ -16,6 +16,7 @@ import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreat
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import BasicPopup from "~/components/BasicPopup";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
+import Tabs from "~/components/ui/controls/Tabs";
 
 import ReportsDownloader from "./ReportsDownloader";
 import CollectionModal from "./CollectionModal";
@@ -321,6 +322,12 @@ class SamplesView extends React.Component {
     const { selectedSampleIds } = this.state;
     return (
       <div className={cs.samplesToolbar}>
+        <Tabs
+          // className={cs.tabs}
+          tabs={["A", "B"]}
+          // value={this.state.currentTab}
+          // onChange={this.onTabChange}
+        />
         <div className={cs.fluidBlank} />
         <div className={cs.counterContainer}>
           <Label
