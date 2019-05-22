@@ -81,12 +81,18 @@ module SamplesHelper
     pr = pipeline_run
     unmapped_reads = pr.nil? ? nil : pr.unmapped_reads
     last_processed_at = pr.nil? ? nil : pr.created_at
-    { adjusted_remaining_reads: get_adjusted_remaining_reads(pr),
+    result = {
+      adjusted_remaining_reads: get_adjusted_remaining_reads(pr),
       compression_ratio: compute_compression_ratio(job_stats_hash),
       qc_percent: compute_qc_value(job_stats_hash),
       percent_remaining: compute_percentage_reads(pr),
       unmapped_reads: unmapped_reads,
-      last_processed_at: last_processed_at }
+      last_processed_at: last_processed_at
+    }
+    ["star", "trimmomatic", "priceseq", "cdhitdup"].each do |step|
+      result["reads_after_#{step}".to_sym] = (job_stats_hash["#{step}_out"] || {})["reads_after"]
+    end
+    result
   end
 
   def get_adjusted_remaining_reads(pr)
