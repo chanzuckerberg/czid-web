@@ -9,7 +9,10 @@
 #   4. Type 'yes' if you which to continue
 #
 # Notes:
-#   * The copy of all S3 files for a sample might take some time
+#   * The copy of all S3 files for a sample might take some time (there does not seem to exist
+#     a recursive copy for the AWS Ruby SDK, or for sync command, at the moment).
+#   * You might want to consider copying the S3 files yourself using `aws s3 sync`
+#   * The task duplicates samples, pipeline runs and all results but keeps same user and stage configurations.
 # ------------------------------------------------------------------------------
 
 require "aws-sdk-s3"
