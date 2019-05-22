@@ -186,6 +186,8 @@ task :copy_samples, [:project_name] => :environment do |_, args|
     samples_to_duplicate.each do |sample_info|
       duplicate_sample(sample_info[:old_sample], project, sample_info[:new_sample])
     end
+    puts "Copy finished: #{samples_to_duplicate.count} samples copied."
+
   else
     puts "Stopped - Did not make any changes!"
   end
