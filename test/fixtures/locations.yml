@@ -1,3 +1,7 @@
 ucsf:
   name: "University of California, San Francisco, Parnassus Avenue, Inner Sunset, San Francisco, San Francisco City and County, California, 94131, USA"
   geo_level: "city"
+
+swamp:
+  name: "Swamp of Mosquitos"
+  id: 1

@@ -53,8 +53,8 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     results = JSON.parse(@response.body)
-    assert results.count == 2
-    assert_includes results.pluck("location"), metadata(:sample_joe_collection_location).string_validated_value
+    assert_equal 1, results.count
+    assert_includes @response.body, locations(:swamp).name
   end
 
   test "user can see a map playground error" do
