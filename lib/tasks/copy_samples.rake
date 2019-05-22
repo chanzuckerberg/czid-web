@@ -1,3 +1,17 @@
+# ------------------------------------------------------------------------------
+# Goal: Copy samples to a new project
+#
+# How to use:
+#   1. Run `rake copy_samples\['Clone Test Project 1'\]`
+#   2. On prompt copy/paste a CSV with the following fields "Source Project Name, Source Sample Name, Sample Name Source"
+#      Make sure to end on a new line and press CTRL+D
+#   3. Verify changes described and the desired changes
+#   4. Type 'yes' if you which to continue
+#
+# Notes:
+#   * The copy of all S3 files for a sample might take some time
+# ------------------------------------------------------------------------------
+
 require "aws-sdk-s3"
 
 class ActiveRecord::Base
@@ -7,8 +21,6 @@ ActiveRecord::Base.skip_callbacks = true
 
 DEFAULT_S3_REGION = "us-west-2".freeze
 
-# Original CSV headers:
-# Source Project Name, Source Sample Name, Sample Name Source, Sample Type, Nucleotide Type, Collection Date, Collection Location
 def read_input
   STDIN.binmode
   tmp_file = Tempfile.new('copy_samples_file', Rails.root.join('tmp'))
@@ -51,6 +63,7 @@ def duplicate_sample_db(old_sample, target_project, new_sample_fields)
   end
 
   old_sample.pipeline_runs.to_a.sort_by(&:id).each do |pr|
+    puts "\t- Copying pipeline run: #{pr.id}"
     new_pr = pr.deep_clone include: [
       :taxon_counts,
       :job_stats,
