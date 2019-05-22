@@ -50,8 +50,7 @@ def duplicate_sample_db(old_sample, target_project, new_sample_fields)
     raise InvalidDuplicateSampleError, "Invalid sample: #{duplicate_sample}"
   end
 
-  new_pipeline_runs = []
-  old_sample.pipeline_runs.to_a.sort{ |a,b| a.id <=> b.id }.each do |pr|
+  old_sample.pipeline_runs.to_a.sort_by{&:id}.each do |pr|
     new_pr = pr.deep_clone include: [
       :taxon_counts,
       :job_stats,
