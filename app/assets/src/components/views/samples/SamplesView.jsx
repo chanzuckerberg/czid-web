@@ -16,7 +16,7 @@ import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreat
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import BasicPopup from "~/components/BasicPopup";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
-import Tabs from "~/components/ui/controls/Tabs";
+import { Menu, MenuItem } from "~ui/controls/Menu";
 
 import ReportsDownloader from "./ReportsDownloader";
 import CollectionModal from "./CollectionModal";
@@ -322,12 +322,32 @@ class SamplesView extends React.Component {
     const { selectedSampleIds } = this.state;
     return (
       <div className={cs.samplesToolbar}>
-        <Tabs
-          // className={cs.tabs}
-          tabs={["A", "B"]}
-          // value={this.state.currentTab}
-          // onChange={this.onTabChange}
-        />
+        <div className={cs.displaySwitcher}>
+          <Menu compact className={cs.switcherMenu}>
+            <MenuItem
+              className={cs.menuItem}
+              // active={this.state.localUploadMode}
+              // onClick={withAnalytics(
+              //   () => this.setState({ localUploadMode: true }),
+              //   "SampleUpload_upload-local_clicked"
+              // )}
+              // disabled={this.state.submitting}
+            >
+              <i className={cx("fa fa-list-ul", cs.icon)} />
+            </MenuItem>
+            <MenuItem
+              className={cs.menuItem}
+              // active={!this.state.localUploadMode}
+              // onClick={withAnalytics(
+              //   () => this.setState({ localUploadMode: false }),
+              //   "SampleUpload_upload-remote_clicked"
+              // )}
+              // disabled={this.state.submitting}
+            >
+              <i className={cx("fa fa-globe", cs.icon)} />
+            </MenuItem>
+          </Menu>
+        </div>
         <div className={cs.fluidBlank} />
         <div className={cs.counterContainer}>
           <Label

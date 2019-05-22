@@ -97,6 +97,28 @@
       }
     }
   }
+
+  .displaySwitcher {
+    margin-left: 15px;
+
+    .switcherMenu {
+      margin: 0;
+      min-height: 25px;
+      border-radius: 10px;
+
+      .menuItem {
+        padding: 5px 20px;
+
+        .icon {
+          font-size: 15px;
+
+          &.active {
+            fill: $primary-light;
+          }
+        }
+      }
+    }
+  }
 }
 
 .sampleHeader {
