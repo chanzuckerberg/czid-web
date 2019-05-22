@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Marker } from "react-map-gl";
-import { get, isString } from "lodash/fp";
+import { get } from "lodash/fp";
 
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
