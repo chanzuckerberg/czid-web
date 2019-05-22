@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Marker } from "react-map-gl";
 import { get } from "lodash/fp";
+import cx from "classnames";
 
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
@@ -124,7 +125,7 @@ class MapPlayground extends React.Component {
           <GeoSearchInputBox onResultSelect={this.handleSearchResultSelected} />
           {searchResult && `Selected: ${JSON.stringify(searchResult)}`}
         </div>
-        <div className={cs.container}>
+        <div className={cx(cs.container, cs.mapDemo)}>
           <div className={cs.title}>Map display demo:</div>
           <BaseMap
             mapTilerKey={mapTilerKey}
