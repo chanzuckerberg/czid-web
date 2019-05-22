@@ -746,6 +746,7 @@ class SamplesController < ApplicationController
     response.headers["Last-Modified"] = httpdate
     # This is a custom header for testing and debugging
     response.headers["X-IDseq-Cache"] = 'requested'
+    Rails.logger.info("Requesting report_info #{cache_key}")
 
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     json = Rails.cache.fetch(cache_key, expires_in: 30.days) do
