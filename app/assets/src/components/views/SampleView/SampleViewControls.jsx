@@ -45,8 +45,12 @@ class SampleViewControls extends React.Component {
   handleDownload = option => {
     const log = () =>
       logAnalyticsEvent(
-        `SampleViewControls_download-${option
+        // make names like:
+        // SampleViewControls_download-download-non-host-contigs-summary-csv_clicked
+        `SampleViewControls-download-${option
           .replace(/\W+/g, "-")
+          .replace(/_/g, "-")
+          .replace("-_", "_")
           .toLowerCase()}_clicked`,
         {
           sampleId: this.props.sample.id,

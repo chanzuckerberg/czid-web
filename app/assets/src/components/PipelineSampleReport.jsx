@@ -746,7 +746,7 @@ class PipelineSampleReport extends React.Component {
   handleViewClicked = (_, data) => {
     this.setState({ view: data.name });
     const friendlyName = data.name.replace(/_/g, "-");
-    logAnalyticsEvent(`PipelineSampleReport_${friendlyName}_view-menu_clicked`);
+    logAnalyticsEvent(`PipelineSampleReport_${friendlyName}-view-menu_clicked`);
   };
 
   // path to NCBI
