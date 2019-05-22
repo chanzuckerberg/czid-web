@@ -2,7 +2,7 @@
 # Goal: Copy samples to a new project
 #
 # How to use:
-#   1. Run `rake copy_samples\['Clone Test Project 1'\]`.
+#   1. Run `rake copy_samples['<project_name>']`.
 #   2. On prompt copy/paste a CSV with the following fields "Source Project Name, Source Sample Name, Sample Name Source"
 #      Extra fields will be discarded.
 #      Make sure to end on a new line and press CTRL+D.
