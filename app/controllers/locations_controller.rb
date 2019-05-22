@@ -40,7 +40,7 @@ class LocationsController < ApplicationController
     end
 
     # Show all viewable locations in a demo format
-    field_id = MetadataField.find_by(name: "new_collection_location").id
+    field_id = MetadataField.find_by(name: "collection_location_v2").id
     sample_info = current_power.samples
                                .includes(metadata: :metadata_field)
                                .where(metadata: { metadata_field_id: field_id })

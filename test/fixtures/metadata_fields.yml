@@ -57,7 +57,7 @@ collection_location:
   display_name: "Collection Location"
   base_type: 0
 
-new_collection_location:
-  name: "new_collection_location"
-  display_name: "New Collection Location"
+collection_location_v2:
+  name: "collection_location_v2"
+  display_name: "Collection Location v2"
   base_type: 3
