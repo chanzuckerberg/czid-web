@@ -177,7 +177,7 @@ class DataTable extends React.Component {
                   key={colIdx}
                 >
                   {/* If we want to display an object (e.g. location object), provide a 'name' field */}
-                  {isObject(row[column]) && row[column].name
+                  {isObject(row[column]) && row[column].name !== undefined
                     ? row[column].name
                     : row[column]}
                 </td>
