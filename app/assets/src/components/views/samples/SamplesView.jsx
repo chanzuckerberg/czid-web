@@ -22,6 +22,8 @@ import ReportsDownloader from "./ReportsDownloader";
 import CollectionModal from "./CollectionModal";
 import cs from "./samples_view.scss";
 
+const DISPLAYS = ["table", "map"];
+
 class SamplesView extends React.Component {
   constructor(props) {
     super(props);
@@ -319,10 +321,16 @@ class SamplesView extends React.Component {
   };
 
   renderToolbar = () => {
+    const { allowedFeatures } = this.props;
     const { selectedSampleIds } = this.state;
     return (
       <div className={cs.samplesToolbar}>
-        <div className={cs.displaySwitcher}>{this.renderDisplaySwitcher()}</div>
+        {allowedFeatures &&
+          allowedFeatures.includes("maps") && (
+            <div className={cs.displaySwitcher}>
+              {this.renderDisplaySwitcher()}
+            </div>
+          )}
         <div className={cs.fluidBlank} />
         <div className={cs.counterContainer}>
           <Label
@@ -352,29 +360,27 @@ class SamplesView extends React.Component {
   };
 
   renderDisplaySwitcher = () => {
-    const { currentDisplay } = this.props;
+    const { currentDisplay, onDisplaySwitch } = this.props;
     return (
       <Menu compact className={cs.switcherMenu}>
-        <MenuItem
-          className={cs.menuItem}
-          active={currentDisplay === "table"}
-          // onClick={withAnalytics(
-          //   () => this.setState({ localUploadMode: true }),
-          //   "SampleUpload_upload-local_clicked"
-          // )}
-        >
-          <i className={cx("fa fa-list-ul", cs.icon)} />
-        </MenuItem>
-        <MenuItem
-          className={cs.menuItem}
-          active={currentDisplay === "map"}
-          // onClick={withAnalytics(
-          //   () => this.setState({ localUploadMode: false }),
-          //   "SampleUpload_upload-remote_clicked"
-          // )}
-        >
-          <i className={cx("fa fa-globe", cs.icon)} />
-        </MenuItem>
+        {DISPLAYS.map(display => (
+          <MenuItem
+            className={cs.menuItem}
+            active={currentDisplay === display}
+            onClick={withAnalytics(
+              () => onDisplaySwitch(display),
+              `SamplesView_${display}-switch_clicked`
+            )}
+          >
+            <i
+              className={cx(
+                "fa",
+                display === "map" ? "fa-globe" : "fa-list-ul",
+                cs.icon
+              )}
+            />
+          </MenuItem>
+        ))}
       </Menu>
     );
   };
@@ -465,7 +471,8 @@ SamplesView.propTypes = {
   selectableIds: PropTypes.array.isRequired,
   onSampleSelected: PropTypes.func,
   currentDisplay: PropTypes.string,
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string)
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
+  onDisplaySwitch: PropTypes.func
 };
 
 export default SamplesView;

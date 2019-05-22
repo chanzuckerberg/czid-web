@@ -662,6 +662,10 @@ class DiscoveryView extends React.Component {
     );
   };
 
+  handleDisplaySwitch = currentDisplay => {
+    this.setState({ currentDisplay });
+  };
+
   render() {
     const {
       currentDisplay,
@@ -768,6 +772,7 @@ class DiscoveryView extends React.Component {
                       projectId={projectId}
                       currentDisplay={currentDisplay}
                       allowedFeatures={allowedFeatures}
+                      onDisplaySwitch={this.handleDisplaySwitch}
                     />
                   </div>
                   {!samples.length &&
