@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Marker } from "react-map-gl";
-import { get } from "lodash/fp";
+import { get, isString } from "lodash/fp";
 
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
@@ -17,31 +17,24 @@ class MapPlayground extends React.Component {
     super(props);
     const { results } = this.props;
 
-    // Load demo data as locations->samples
+    // Load demo data as location objects with list of sample entry items
     const locationsToItems = {};
     results.forEach(result => {
-      // Match locations that look like coordinates separated by a comma
-      let locationName = result.location.replace(/_/g, ", ");
-      const match = /^([-0-9.]+),\s?([-0-9.]+)$/g.exec(locationName);
-      if (match) {
-        let [lat, lng] = this.parseLatLng(match[1], match[2]);
-        if (!(lat && lng)) return;
-        locationName = `${lat}, ${lng}`;
-        const item = {
-          name: result.name,
-          id: result.id
+      const locData = result.location_validated_value;
+      const locId = locData.id;
+      const item = {
+        sampleName: result.name,
+        sampleId: result.id
+      };
+      if (locationsToItems.hasOwnProperty(locId)) {
+        locationsToItems[locId].items.push(item);
+      } else {
+        locationsToItems[locId] = {
+          lat: parseFloat(locData.lat),
+          lng: parseFloat(locData.lng),
+          name: locData.name,
+          items: [item]
         };
-
-        // Group items under the location name
-        if (locationsToItems.hasOwnProperty(locationName)) {
-          locationsToItems[locationName].items.push(item);
-        } else {
-          locationsToItems[locationName] = {
-            lat: lat,
-            lng: lng,
-            items: [item]
-          };
-        }
       }
     });
 
@@ -54,27 +47,14 @@ class MapPlayground extends React.Component {
     };
   }
 
-  parseLatLng = (lat, lng) => {
-    // Round the coordinates for some minimal aggregation
-    lat = parseFloat(parseFloat(lat).toFixed(2));
-    lng = parseFloat(parseFloat(lng).toFixed(2));
-    // Reject invalid coordinates
-    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      // eslint-disable-next-line no-console
-      console.log(`Skipping invalid coordinates ${lat}, ${lng}`);
-      return [null, null];
-    } else {
-      return [lat, lng];
-    }
-  };
-
   updateViewport = viewport => {
     this.setState({ viewport });
   };
 
   renderMarker = (marker, index) => {
     const { viewport } = this.state;
-    const [name, markerData] = marker;
+    const markerData = marker[1];
+    const name = markerData.name;
     const lat = markerData.lat;
     const lng = markerData.lng;
     const pointCount = markerData.items.length;
