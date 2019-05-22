@@ -2,9 +2,10 @@
 # Goal: Copy samples to a new project
 #
 # How to use:
-#   1. Run `rake copy_samples\['Clone Test Project 1'\]`
+#   1. Run `rake copy_samples\['Clone Test Project 1'\]`.
 #   2. On prompt copy/paste a CSV with the following fields "Source Project Name, Source Sample Name, Sample Name Source"
-#      Make sure to end on a new line and press CTRL+D
+#      Extra fields will be discarded.
+#      Make sure to end on a new line and press CTRL+D.
 #   3. Verify changes described and the desired changes
 #   4. Type 'yes' if you which to continue
 #
@@ -45,7 +46,10 @@ def duplicate_sample_db(old_sample, target_project, new_sample_fields)
   puts "\t- Deep DB copy..."
 
   # using: https://github.com/moiristo/deep_cloneable
-  duplicate_sample = old_sample.deep_clone include: [:metadata, :input_files]
+  duplicate_sample = old_sample.deep_clone include: [:metadata, :input_files] do |original, copy|
+    # Not ideal, but we keep original creation timestamp as it is used to infer uploading timestamp
+    copy.created_at = original.created_at
+  end
   puts "\t- Setting sample name to #{new_sample_fields['Sample Name']}"
   duplicate_sample.name = new_sample_fields['Sample Name']
   puts "\t- Setting project to #{target_project.name}"
