@@ -19,7 +19,7 @@ class MetadatumTest < ActiveSupport::TestCase
 
   test "should raise Location validation/setting errors" do
     loc = metadata(:sample_new_collection_location)
-    loc.raw_value = "blah"
+    loc.raw_value = "{\"locationiq_id\":\"123\"}"
     loc.check_and_set_location_type
     assert_match MetadataValidationErrors::INVALID_LOCATION, loc.errors.full_messages[0]
   end

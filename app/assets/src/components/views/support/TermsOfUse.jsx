@@ -9,9 +9,8 @@ export default class TermsOfUse extends React.Component {
         <div className={cs.title}>
           <h1>IDseq Terms of Use</h1>
           <h4 className={cs.subtitle}>
-            {/*TODO: Link to recent changes here*/}
             Last Updated: May 13, 2019.{" "}
-            <a href="/terms_changes">Recent Changes</a>. <a href="/faqs">FAQ</a>.
+            <a href="/terms_changes">See Recent Changes</a>
           </h4>
         </div>
         <p className={cs.large}>
@@ -100,7 +99,9 @@ export default class TermsOfUse extends React.Component {
         <p className={cs.large}>
           “<b>Database</b>” refers to both the data and database(s) of IDseq.
         </p>
-        <h3>Summary of Key Things to Know (see FAQ for more)</h3>
+        <h3>
+          Summary of Key Things to Know (see <a href="/faqs">FAQ</a> for more)
+        </h3>
         <ul>
           <li>
             <span className={cs.listItemLabel}>
@@ -128,7 +129,8 @@ export default class TermsOfUse extends React.Component {
             You represent that you have obtained, and will maintain, all
             consents, permissions, and authorizations needed to collect, share,
             and export Upload Data with IDseq, and for IDseq to use and share
-            the information as described in its Privacy Notice.
+            the information as described in its{" "}
+            <a href="/privacy">Privacy Notice</a>.
           </li>
           <li>
             <span className={cs.listItemLabel}>
@@ -328,8 +330,8 @@ export default class TermsOfUse extends React.Component {
             You agree to keep your Account Information accurate and up-to-date.
             You agree that we may send to the e-mail address you provide us or
             otherwise electronically deliver notices or communications regarding
-            IDseq, including notices of updates to these terms and the Privacy
-            Notice.
+            IDseq, including notices of updates to these terms and the{" "}
+            <a href="/privacy">Privacy Notice</a>.
           </li>
         </ul>
         <h2>
@@ -382,7 +384,7 @@ export default class TermsOfUse extends React.Component {
           </li>
           <li>
             <span className={cs.listItemLabel}>6.2 Feedback.</span>
-            We’d love your feedback about how to improve IDseq at
+            We’d love your feedback about how to improve IDseq at{" "}
             <a href="mailto:help@idseq.net">help@idseq.net</a>. That said, by
             giving us feedback, you agree that we can use and share it for any
             purpose without compensation to you. You agree that we are not
@@ -550,10 +552,10 @@ export default class TermsOfUse extends React.Component {
           </li>
           <li>
             <span className={cs.listItemLabel}>9.4 Entire Agreement.</span>
-            These Terms (along with the Privacy Notice) constitute the entire
-            agreement between you and us regarding IDseq. If you wish to modify
-            these Terms, any amendment must be provided to us in writing and
-            signed by our authorized representative.
+            These Terms (along with the <a href="/privacy">Privacy Notice</a>)
+            constitute the entire agreement between you and us regarding IDseq.
+            If you wish to modify these Terms, any amendment must be provided to
+            us in writing and signed by our authorized representative.
           </li>
         </ul>
         <h2>
@@ -563,7 +565,7 @@ export default class TermsOfUse extends React.Component {
           <li>
             If you have any questions, comments, or concerns with Terms, you may
             contact us at <a href="mailto:help@idseq.net">help@idseq.net</a> or
-            by physical mail at the addresses in the FAQ.
+            by physical mail at the addresses in the <a href="/faqs">FAQ</a>.
           </li>
         </ul>
       </NarrowContainer>

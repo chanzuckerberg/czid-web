@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 import cx from "classnames";
-import { set } from "lodash/fp";
+import { set, isObject } from "lodash/fp";
 import Checkbox from "../../ui/controls/Checkbox";
 
 class DataTable extends React.Component {
@@ -176,7 +176,10 @@ class DataTable extends React.Component {
                   style={this.getCellStyle(column)}
                   key={colIdx}
                 >
-                  {row[column]}
+                  {/* If we want to display an object (e.g. location object), provide a 'name' field */}
+                  {isObject(row[column]) && row[column].name
+                    ? row[column].name
+                    : row[column]}
                 </td>
               ))}
             </tr>

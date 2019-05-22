@@ -530,20 +530,22 @@ module ReportHelper
         pr = pipeline_runs_by_id[pipeline_run_id]
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
-      row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
-      row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
-      row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
-      row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
-      result_hash[pipeline_run_id]["taxon_counts"] << row
+      if pr.total_reads
+        row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
+        row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
+        row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
+        row["zscore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
+        result_hash[pipeline_run_id]["taxon_counts"] << row
+      end
     end
     result_hash
   end
 
   def self.fetch_parent_ids(taxon_ids, samples)
     # Get parent (genus,family) ids for the taxon_ids based on the samples
-    pipeline_run_ids = PipelineRun.where(sample_id: samples.pluck(:id)).pluck(:id)
     TaxonCount.select("distinct genus_taxid, family_taxid")
-              .where(pipeline_run_id: pipeline_run_ids)
+              .joins(:pipeline_run)
+              .where(pipeline_runs: { sample: samples })
               .where(tax_id: taxon_ids)
               .map { |u| u.attributes.values.compact }.flatten
   end
@@ -609,11 +611,13 @@ module ReportHelper
         pr = pipeline_runs_by_id[pipeline_run_id]
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
-      row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
-      row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
-      row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
-      row["zcore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
-      result_hash[pipeline_run_id]["taxon_counts"] << row
+      if pr.total_reads
+        row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
+        row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
+        row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
+        row["zscore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
+        result_hash[pipeline_run_id]["taxon_counts"] << row
+      end
     end
 
     result_hash
