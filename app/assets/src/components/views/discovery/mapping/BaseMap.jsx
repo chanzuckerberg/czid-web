@@ -27,6 +27,9 @@ class BaseMap extends React.Component {
   updateViewport = viewport => {
     const { updateViewport, viewBounds, width, height } = this.props;
 
+    // Let width/height update on resize
+    viewport.width = width;
+    viewport.height = height;
     viewport.latitude = limitToRange(
       viewport.latitude,
       viewBounds.minLatitude,
@@ -43,7 +46,7 @@ class BaseMap extends React.Component {
       viewBounds.maxZoom
     );
 
-    this.setState({ viewport, width, height });
+    this.setState({ viewport });
     updateViewport && updateViewport(viewport);
   };
 
