@@ -8,7 +8,8 @@ module SamplesHelper
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
                     total_reads nonhost_reads nonhost_reads_percent total_ercc_reads subsampled_fraction
-                    quality_control compression_ratio sample_type nucleotide_type collection_location
+                    quality_control compression_ratio reads_after_star reads_after_trimmomatic reads_after_priceseq reads_after_cdhitdup
+                    sample_type nucleotide_type collection_location
                     host_genome notes]
     CSV.generate(headers: true) do |csv|
       csv << attributes
@@ -30,6 +31,10 @@ module SamplesHelper
                         subsampled_fraction: pipeline_run ? pipeline_run.fraction_subsampled : '',
                         quality_control: derived_output[:summary_stats] && derived_output[:summary_stats][:qc_percent] ? derived_output[:summary_stats][:qc_percent].round(3) : '',
                         compression_ratio: derived_output[:summary_stats] && derived_output[:summary_stats][:compression_ratio] ? derived_output[:summary_stats][:compression_ratio].round(2) : '',
+                        reads_after_star: (derived_output[:summary_stats] || {})[:reads_after_star] || '',
+                        reads_after_trimmomatic: (derived_output[:summary_stats] || {})[:reads_after_trimmomatic] || '',
+                        reads_after_priceseq: (derived_output[:summary_stats] || {})[:reads_after_priceseq] || '',
+                        reads_after_cdhitdup: (derived_output[:summary_stats] || {})[:reads_after_cdhitdup] || '',
                         sample_type: metadata && metadata[:sample_type] ? metadata[:sample_type] : '',
                         nucleotide_type: metadata && metadata[:nucleotide_type] ? metadata[:nucleotide_type] : '',
                         collection_location: metadata && metadata[:collection_location] ? metadata[:collection_location] : '',
