@@ -121,7 +121,7 @@ class MetadataTab extends React.Component {
     ) : (
       <div className={cs.metadataValue}>
         {/* If we want to display an object (e.g. location object), provide a 'name' field */}
-        {isObject(val) && val.name ? val.name : val}
+        {isObject(val) && val.name !== undefined ? val.name : val}
       </div>
     );
   };

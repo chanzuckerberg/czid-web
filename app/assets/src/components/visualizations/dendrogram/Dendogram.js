@@ -1,7 +1,7 @@
 import { cluster as d3Cluster, hierarchy } from "d3-hierarchy";
 import "d3-transition";
 import { timeout } from "d3-timer";
-import { get } from "lodash/fp";
+import { get, isObject } from "lodash/fp";
 import { select, event as currentEvent } from "d3-selection";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap";
 import cs from "./dendrogram.scss";
@@ -121,7 +121,9 @@ export default class Dendogram {
   getColorGroupAttrValForNode = node => {
     let attrPath = this.options.colorGroupAttribute;
     let absentName = this.options.colorGroupAbsentName;
-    return get(attrPath, node.data) || absentName;
+    let val = get(attrPath, node.data) || absentName;
+    // Use .name if val is an object (e.g. location object)
+    return isObject(val) ? val.name : val;
   };
 
   setTree(tree) {
