@@ -276,7 +276,7 @@ class SamplesHeatmapView extends React.Component {
         name: sample.name,
         index: i,
         host_genome_name: sample.host_genome_name,
-        metadata: processMetadata(sample.metadata)
+        metadata: processMetadata(sample.metadata, true)
       };
       if (sample.taxons) {
         for (let j = 0; j < sample.taxons.length; j++) {

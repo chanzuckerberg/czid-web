@@ -40,12 +40,13 @@ class LocationsController < ApplicationController
     end
 
     # Show all viewable locations in a demo format
-    field_id = MetadataField.find_by(name: "collection_location").id
+    field_id = MetadataField.find_by(name: "collection_location_v2").id
     sample_info = current_power.samples
                                .includes(metadata: :metadata_field)
                                .where(metadata: { metadata_field_id: field_id })
-                               .pluck(:id, :name, :string_validated_value)
-    @results = sample_info.map { |s| { id: s[0], name: s[1], location: s[2] } }
+                               .where.not(metadata: { location_id: nil })
+                               .pluck(:id, :name, :location_id)
+    @results = sample_info.map { |s| { id: s[0], name: s[1], location_validated_value: Location.find(s[2]).attributes } }
 
     respond_to do |format|
       format.html { render :map_playground }

@@ -90,7 +90,7 @@ class PhyloTreeVis extends React.Component {
 
   fetchMetadataTypes = async () => {
     // Get ids and remove undefined, since nodeData includes NCBI and genbank.
-    const sampleIds = compact(pluck("id", values(this.props.nodeData)));
+    const sampleIds = compact(pluck("sample_id", values(this.props.nodeData)));
     let metadataFields = await getSampleMetadataFields(sampleIds);
 
     this.setState({
