@@ -186,7 +186,9 @@ class PipelineRun < ApplicationRecord
   JOB_TAG_KEEP_ALIVE_SECONDS = 600
   DRAINING_TAG = "draining".freeze
 
-  before_create :create_output_states, :create_run_stages
+  # Triggers a run for new samples by defining output states and run stages configurations.
+  # *Exception* for cloned pipeline runs that already have results and finalized status
+  before_create :create_output_states, :create_run_stages, unless: :results_finalized?
 
   def parse_dag_vars
     JSON.parse(dag_vars || "{}")
@@ -1439,7 +1441,7 @@ class PipelineRun < ApplicationRecord
         "/samples/#{sample.id}/report_info",
         params.merge(background_id: background_id)
       )
-      Rails.logger.debug("Precaching #{cache_key} with background #{background_id}")
+      Rails.logger.info("Precaching #{cache_key} with background #{background_id}")
       Rails.cache.fetch(cache_key, expires_in: 30.days) do
         ReportHelper.report_info_json(self, background_id)
       end

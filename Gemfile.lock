@@ -792,6 +792,8 @@ GEM
       thor (~> 0.19.4)
       tins (~> 1.6)
     crass (1.0.4)
+    deep_cloneable (2.4.0)
+      activerecord (>= 3.1.0, < 6)
     devise (4.6.1)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
@@ -1109,6 +1111,7 @@ DEPENDENCIES
   coffee-rails (~> 4.2, >= 4.2.2)
   consul (>= 0.13.1)
   coveralls
+  deep_cloneable (~> 2.4.0)
   devise (>= 4.6.0)
   elasticsearch-model
   flamegraph

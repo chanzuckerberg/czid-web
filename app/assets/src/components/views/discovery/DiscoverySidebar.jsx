@@ -111,7 +111,7 @@ export default class DiscoverySidebar extends React.Component {
                 style={{ height: percent + "px" }}
                 onClick={() => {
                   onFilterClick && onFilterClick(entry);
-                  logAnalyticsEvent("DiscoverySidebar_date_filter_clicked", {
+                  logAnalyticsEvent("DiscoverySidebar_date-filter_clicked", {
                     dateValue: entry.value,
                     dates: dates.length,
                     count: entry.count,

@@ -169,7 +169,7 @@ class Metadatum < ApplicationRecord
     begin
       # The unique key is on sample and metadata.key, so the value fields will
       # be updated if the key exists.
-      update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value]
+      update_keys = [:raw_value, :string_validated_value, :number_validated_value, :date_validated_value, :location_id]
       results = Metadatum.import to_create, on_duplicate_key_update: update_keys
       results.failed_instances.each do |model|
         # Show the errors from ActiveRecord
@@ -270,8 +270,13 @@ class Metadatum < ApplicationRecord
   end
 
   def validated_value
-    base = self.class.convert_type_to_string(metadata_field.base_type)
-    return self["#{base}_validated_value"]
+    # Special case for Location objects
+    if metadata_field.base_type == Metadatum::LOCATION_TYPE
+      location_id ? Location.find(location_id).attributes : string_validated_value
+    else
+      base = self.class.convert_type_to_string(metadata_field.base_type)
+      self["#{base}_validated_value"]
+    end
   rescue
     ""
   end

@@ -392,7 +392,7 @@ class DiscoveryView extends React.Component {
     this.setState({ currentTab }, () => {
       this.updateBrowsingHistory("replace");
       const name = currentTab.replace(/\W+/g, "-").toLowerCase();
-      logAnalyticsEvent(`DiscoveryView_tab_${name}_clicked`, {
+      logAnalyticsEvent(`DiscoveryView_tab-${name}_clicked`, {
         currentTab: currentTab
       });
     });
@@ -480,7 +480,7 @@ class DiscoveryView extends React.Component {
       this.setState({ search: parsedSearch }, () => {
         this.updateBrowsingHistory("replace");
         this.resetDataFromFilterChange();
-        logAnalyticsEvent("DiscoveryView_string_search_entered", {
+        logAnalyticsEvent("DiscoveryView_string-search_entered", {
           search: parsedSearch
         });
       });

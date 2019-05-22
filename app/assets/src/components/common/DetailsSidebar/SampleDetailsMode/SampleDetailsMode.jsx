@@ -70,7 +70,7 @@ class SampleDetailsMode extends React.Component {
       getSampleMetadataFields(this.props.sampleId)
     ]);
 
-    const processedMetadata = processMetadata(metadata.metadata);
+    const processedMetadata = processMetadata(metadata.metadata, true);
 
     this.setState({
       metadata: processedMetadata,

@@ -77,6 +77,7 @@ gem 'shortener'
 # Explicit load to avoid an "unable to load" warning
 gem 'http-2'
 
+gem 'deep_cloneable', '~> 2.4.0'
 # For using redis as a cache
 gem 'redis-rails', '~> 5'
 

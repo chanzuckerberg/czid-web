@@ -75,9 +75,14 @@ class GeoSearchInputBox extends React.Component {
   };
 
   render() {
-    const { className, value: locationData } = this.props;
-    const { usePropValue, value } = this.state;
+    const { className, value: propValue } = this.props;
+    const { usePropValue, stateValue } = this.state;
 
+    // If using prop value, try to use .name or plain string value otherwise.
+    const value =
+      usePropValue && propValue
+        ? (isString(propValue) && propValue) || propValue.name
+        : stateValue;
     return (
       <LiveSearchBox
         className={className}
@@ -85,7 +90,7 @@ class GeoSearchInputBox extends React.Component {
         onSearchChange={this.handleSearchChange}
         onResultSelect={this.handleResultSelected}
         placeholder="Enter a location"
-        value={usePropValue && locationData ? locationData.name : value}
+        value={value}
         rectangular
         inputMode
       />
