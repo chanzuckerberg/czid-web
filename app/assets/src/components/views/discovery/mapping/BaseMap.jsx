@@ -25,7 +25,7 @@ class BaseMap extends React.Component {
   }
 
   updateViewport = viewport => {
-    const { updateViewport, viewBounds } = this.props;
+    const { updateViewport, viewBounds, width, height } = this.props;
 
     viewport.latitude = limitToRange(
       viewport.latitude,
@@ -43,7 +43,7 @@ class BaseMap extends React.Component {
       viewBounds.maxZoom
     );
 
-    this.setState({ viewport });
+    this.setState({ viewport, width, height });
     updateViewport && updateViewport(viewport);
   };
 
@@ -77,8 +77,8 @@ class BaseMap extends React.Component {
 BaseMap.propTypes = {
   mapTilerKey: PropTypes.string.isRequired,
   updateViewport: PropTypes.func,
-  width: PropTypes.number,
-  height: PropTypes.number,
+  width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   latitude: PropTypes.number,
   longitude: PropTypes.number,
   zoom: PropTypes.number,
@@ -89,8 +89,8 @@ BaseMap.propTypes = {
 };
 
 BaseMap.defaultProps = {
-  width: 1250,
-  height: 1000,
+  width: "100%",
+  height: "100%",
   // United States framed
   latitude: 40,
   longitude: -98,
