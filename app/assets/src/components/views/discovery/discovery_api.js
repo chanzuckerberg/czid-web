@@ -6,7 +6,7 @@ import {
   getSampleDimensions,
   getSampleStats,
   getVisualizations,
-  getLocations
+  getSamplesLocations
 } from "~/api";
 
 const DISCOVERY_DOMAIN_MY_DATA = "my_data";
@@ -147,7 +147,7 @@ const getDiscoverySamples = async ({
 
 const getDiscoveryLocations = async ({ domain, sampleIds }) => {
   try {
-    const result = await getLocations({
+    const result = await getSamplesLocations({
       domain,
       sampleIds
     });

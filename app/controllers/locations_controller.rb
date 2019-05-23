@@ -63,23 +63,40 @@ class LocationsController < ApplicationController
 
   def samples_locations
     domain = location_params[:domain]
-    param_sample_ids = (params[:sampleIds] || []).map(&:to_i)
+    param_sample_ids = (location_params[:sampleIds] || []).map(&:to_i)
 
     # Access control enforced within samples_by_domain
     samples = samples_by_domain(domain)
     unless param_sample_ids.empty?
       samples = samples.where(id: param_sample_ids)
     end
+
+    # Get the relevant location_ids and sample_ids
     field_id = MetadataField.find_by(name: "collection_location_v2").id
     sample_info = samples
                   .includes(metadata: :metadata_field)
                   .where(metadata: { metadata_field_id: field_id })
                   .where.not(metadata: { location_id: nil })
-                  .pluck(:id, :name, :location_id)
+                  .pluck(:location_id, :id)
+
+    # Get all the location attributes
+    location_ids = sample_info.map(&:first).uniq
+    fields = [:id, :name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng]
+    location_data = Location.where(id: location_ids).pluck(*fields).map { |p| fields.zip(p).to_h }.index_by { |loc| loc[:id] }
+
+    # Add list of sample_ids to each location
+    sample_info.each do |s|
+      entry = location_data[s[0]]
+      if entry.key?(:sample_ids)
+        entry[:sample_ids].push(s[1])
+      else
+        entry[:sample_ids] = [s[1]]
+      end
+    end
 
     respond_to do |format|
       format.json do
-        render json: sample_info
+        render json: location_data
       end
     end
   end
@@ -87,7 +104,7 @@ class LocationsController < ApplicationController
   private
 
   def location_params
-    params.permit(:query, :domain, :sampleIDs)
+    params.permit(:query, :domain, :sampleIds)
   end
 
   def feature_access?

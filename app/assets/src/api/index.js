@@ -305,7 +305,7 @@ const getContigsSequencesByByteranges = (
 
 const getPhyloTree = id => get(`/phylo_trees/${id}/show.json`);
 
-const getLocations = ({ domain, sampleIds }) =>
+const getSamplesLocations = ({ domain, sampleIds }) =>
   get("/locations/samples_locations.json", {
     params: {
       domain,
@@ -322,7 +322,7 @@ export {
   deleteSample,
   getAlignmentData,
   getAllHostGenomes,
-  getLocations,
+  getSamplesLocations,
   getProjectDimensions,
   getProjects,
   getSampleDimensions,
