@@ -1,9 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe ProjectsController, type: :controller do
-  login_admin
-
   describe "GET index" do
+    login_admin
+
     it "returns JSON with projects list" do
       get :index, params: { format: 'json' }
 
