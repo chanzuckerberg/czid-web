@@ -1,12 +1,10 @@
+# This is a class of static helper methods for generating data for the heatmap
+# visualization. See HeatmapHelperTest.
 module HeatmapHelper
   DEFAULT_MAX_NUM_TAXONS = 30
 
   MINIMUM_READ_THRESHOLD = 5
   MINIMUM_ZSCORE_THRESHOLD = 1.7
-
-  # All the methods below should be considered private, but I don't know enough
-  # about ruby to actually make a class method private and call it.
-  # private
 
   def self.sample_taxons_dict(params, samples)
     return {} if samples.empty?
