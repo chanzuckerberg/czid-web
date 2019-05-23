@@ -447,7 +447,7 @@ class PipelineRun < ApplicationRecord
     return "#{postprocess_output_s3_path}/#{ASSEMBLY_PREFIX}#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_has_assembly(pipeline_version)
     return "#{postprocess_output_s3_path}/#{DAG_ANNOTATED_FASTA_BASENAME}" if pipeline_version_at_least_2(pipeline_version)
 
-    multihit? ? "#{alignment_output_s3_path}/#{ple::MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
+    multihit? ? "#{alignment_output_s3_path}/#{MULTIHIT_FASTA_BASENAME}" : "#{alignment_output_s3_path}/#{HIT_FASTA_BASENAME}"
   end
 
   def unidentified_fasta_s3_path
