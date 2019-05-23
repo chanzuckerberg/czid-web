@@ -858,7 +858,7 @@ class PipelineSampleReport extends React.Component {
         contigVizEnabled={contigVizEnabled}
         onContigVizClick={withAnalytics(
           this.downloadContigUrl,
-          "PipelineSampleReport_contig-viz-link_clicked",
+          "PipelineSampleReport_contig-download-link_clicked",
           analyticsContext
         )}
         phyloTreeEnabled={phyloTreeEnabled}
