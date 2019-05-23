@@ -249,56 +249,6 @@ module ReportHelper
     end
   end
 
-  # TODO: (gdingle): refactor to class method
-  def samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)
-    results = {}
-
-    # Get sample results for the taxon ids
-    unless taxon_ids.empty?
-      samples_by_id = Hash[samples.map { |s| [s.id, s] }]
-      parent_ids = ReportHelper.fetch_parent_ids(taxon_ids, samples)
-      results_by_pr = ReportHelper.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
-      results_by_pr.each do |_pr_id, res|
-        pr = res["pr"]
-        taxon_counts = res["taxon_counts"]
-        sample_id = pr.sample_id
-        tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
-        ReportHelper.only_species_or_genus_counts!(tax_2d, species_selected)
-
-        rows = []
-        tax_2d.each { |_tax_id, tax_info| rows << tax_info }
-        ReportHelper.compute_aggregate_scores_v2!(rows)
-
-        filtered_rows = rows
-                        .select { |row| taxon_ids.include?(row["tax_id"]) }
-                        .each { |row| row[:filtered] = ReportHelper.check_custom_filters(row, threshold_filters) }
-
-        results[sample_id] = {
-          sample_id: sample_id,
-          name: samples_by_id[sample_id].name,
-          metadata: samples_by_id[sample_id].metadata_with_base_type,
-          host_genome_name: samples_by_id[sample_id].host_genome_name,
-          taxons: filtered_rows
-        }
-      end
-    end
-
-    # For samples that didn't have matching taxons, just throw in the metadata.
-    samples.each do |sample|
-      unless results.key?(sample.id)
-        results[sample.id] = {
-          sample_id: sample.id,
-          name: sample.name,
-          metadata: sample.metadata_with_base_type,
-          host_genome_name: sample.host_genome_name
-        }
-      end
-    end
-
-    # Flatten the hash
-    results.values
-  end
-
   # All the methods below should be considered private, but I don't know enough
   # about ruby to actually make a class method private and call it.
   # private

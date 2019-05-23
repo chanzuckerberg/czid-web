@@ -4,60 +4,13 @@ module HeatmapHelper
   MINIMUM_READ_THRESHOLD = 5
   MINIMUM_ZSCORE_THRESHOLD = 1.7
 
-  def heatmap
-    {
-      taxonLevels: %w[Genus Species],
-      categories: ReportHelper::ALL_CATEGORIES.pluck('name'),
-      subcategories: {
-        Viruses: ["Phage"]
-      },
-      metrics: [
-        { text: "Aggregate Score", value: "NT.aggregatescore" },
-        { text: "NT Z Score", value: "NT.zscore" },
-        { text: "NT rPM", value: "NT.rpm" },
-        { text: "NT r (total reads)", value: "NT.r" },
-        { text: "NR Z Score", value: "NR.zscore" },
-        { text: "NR r (total reads)", value: "NR.r" },
-        { text: "NR rPM", value: "NR.rpm" }
-      ],
-      backgrounds: current_power.backgrounds.map do |background|
-        { name: background.name, value: background.id }
-      end,
-      thresholdFilters: {
-        targets: [
-          { text: "Aggregate Score", value: "NT_aggregatescore" },
-          { text: "NT Z Score", value: "NT_zscore" },
-          { text: "NT rPM", value: "NT_rpm" },
-          { text: "NT r (total reads)", value: "NT_r" },
-          { text: "NT %id", value: "NT_percentidentity" },
-          { text: "NT L (alignment length in bp)", value: "NT_alignmentlength" },
-          { text: "NT log(1/e)", value: "NT_neglogevalue" },
-          { text: "NR Z Score", value: "NR_zscore" },
-          { text: "NR r (total reads)", value: "NR_r" },
-          { text: "NR rPM", value: "NR_rpm" },
-          { text: "NR %id", value: "NR_percentidentity" },
-          { text: "NR L (alignment length in bp)", value: "NR_alignmentlength" },
-          { text: "R log(1/e)", value: "NR_neglogevalue" }
-        ],
-        operators: [">=", "<="]
-      },
-      allowedFeatures: current_user.allowed_feature_list
-    }
-  end
+  # All the methods below should be considered private, but I don't know enough
+  # about ruby to actually make a class method private and call it.
+  # private
 
-  def download_heatmap
-    @sample_taxons_dict = sample_taxons_dict(params)
-    output_csv = generate_heatmap_csv(@sample_taxons_dict)
-    send_data output_csv, filename: 'heatmap.csv'
-  end
+  def self.sample_taxons_dict(params, samples)
+    return {} if samples.empty?
 
-  def samples_taxons
-    @sample_taxons_dict = sample_taxons_dict(params)
-    render json: @sample_taxons_dict
-  end
-
-  def sample_taxons_dict(params)
-    sample_ids = (params[:sampleIds] || []).map(&:to_i)
     num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
     removed_taxon_ids = (params[:removedTaxonIds] || []).map do |x|
       begin
@@ -84,8 +37,6 @@ module HeatmapHelper
     # TODO: should fail if field is not well formatted and return proper error to client
     sort_by = params[:sortBy] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
     species_selected = params[:species] == "1" # Otherwise genus selected
-    samples = current_power.samples.where(id: sample_ids).includes([:host_genome, :pipeline_runs, metadata: [:metadata_field]])
-    return {} if samples.empty?
 
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
@@ -93,12 +44,8 @@ module HeatmapHelper
     taxon_ids = HeatmapHelper.top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
     taxon_ids -= removed_taxon_ids
 
-    samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)
+    HeatmapHelper.samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)
   end
-
-  # All the methods below should be considered private, but I don't know enough
-  # about ruby to actually make a class method private and call it.
-  # private
 
   def self.top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {}, read_specificity = false, include_phage = false)
     # return top taxons
@@ -234,5 +181,54 @@ module HeatmapHelper
       end
     end
     result_hash
+  end
+
+  def self.samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)
+    results = {}
+
+    # Get sample results for the taxon ids
+    unless taxon_ids.empty?
+      samples_by_id = Hash[samples.map { |s| [s.id, s] }]
+      parent_ids = ReportHelper.fetch_parent_ids(taxon_ids, samples)
+      results_by_pr = ReportHelper.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+      results_by_pr.each do |_pr_id, res|
+        pr = res["pr"]
+        taxon_counts = res["taxon_counts"]
+        sample_id = pr.sample_id
+        tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
+        ReportHelper.only_species_or_genus_counts!(tax_2d, species_selected)
+
+        rows = []
+        tax_2d.each { |_tax_id, tax_info| rows << tax_info }
+        ReportHelper.compute_aggregate_scores_v2!(rows)
+
+        filtered_rows = rows
+                        .select { |row| taxon_ids.include?(row["tax_id"]) }
+                        .each { |row| row[:filtered] = ReportHelper.check_custom_filters(row, threshold_filters) }
+
+        results[sample_id] = {
+          sample_id: sample_id,
+          name: samples_by_id[sample_id].name,
+          metadata: samples_by_id[sample_id].metadata_with_base_type,
+          host_genome_name: samples_by_id[sample_id].host_genome_name,
+          taxons: filtered_rows
+        }
+      end
+    end
+
+    # For samples that didn't have matching taxons, just throw in the metadata.
+    samples.each do |sample|
+      unless results.key?(sample.id)
+        results[sample.id] = {
+          sample_id: sample.id,
+          name: sample.name,
+          metadata: sample.metadata_with_base_type,
+          host_genome_name: sample.host_genome_name
+        }
+      end
+    end
+
+    # Flatten the hash
+    results.values
   end
 end
