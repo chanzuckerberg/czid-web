@@ -61,7 +61,7 @@ class LocationsController < ApplicationController
     }, status: :internal_server_error
   end
 
-  def samples_locations
+  def sample_locations
     domain = location_params[:domain]
     param_sample_ids = (location_params[:sampleIds] || []).map(&:to_i)
 

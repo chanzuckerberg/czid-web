@@ -306,11 +306,10 @@ const getContigsSequencesByByteranges = (
 const getPhyloTree = id => get(`/phylo_trees/${id}/show.json`);
 
 const getSamplesLocations = ({ domain, sampleIds }) =>
-  get("/locations/samples_locations.json", {
-    params: {
-      domain,
-      sampleIds
-    }
+  get("/locations/sample_locations.json", {
+    params: { domain },
+    // Put in data because it can be too long for URL params
+    data: { sampleIds }
   });
 
 export {

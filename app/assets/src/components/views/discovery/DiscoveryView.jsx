@@ -96,6 +96,7 @@ class DiscoveryView extends React.Component {
         loadingSamples: true,
         loadingDimensions: true,
         loadingStats: true,
+        mapLocationData: {},
         project: null,
         projectId: projectId,
         projectDimensions: [],
@@ -666,17 +667,17 @@ class DiscoveryView extends React.Component {
   handleDisplaySwitch = currentDisplay => {
     this.setState({ currentDisplay });
     if (currentDisplay === "map") {
-      this.handleMapLoad().then(res => console.log(res));
+      this.handleLoadSampleLocations().then(res => {
+        console.log(res);
+        this.setState({ mapLocationData: res });
+      });
     }
   };
 
-  handleMapLoad = async () => {
+  handleLoadSampleLocations = async () => {
     const { domain } = this.props;
     const { sampleIds } = this.state;
-
-    let results = await getDiscoveryLocations({ domain, sampleIds });
-    console.log("foobar 1:48pm results: ", results);
-    return results;
+    return await getDiscoveryLocations({ domain, sampleIds });
   };
 
   render() {
@@ -706,6 +707,7 @@ class DiscoveryView extends React.Component {
     } = this.state;
 
     const { domain, allowedFeatures, mapTilerKey } = this.props;
+    const { mapLocationData } = this.state;
 
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
@@ -787,6 +789,7 @@ class DiscoveryView extends React.Component {
                       allowedFeatures={allowedFeatures}
                       onDisplaySwitch={this.handleDisplaySwitch}
                       mapTilerKey={mapTilerKey}
+                      mapLocationData={mapLocationData}
                     />
                   </div>
                   {!samples.length &&
