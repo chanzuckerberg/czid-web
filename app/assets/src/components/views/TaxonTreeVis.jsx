@@ -61,7 +61,6 @@ class TaxonTreeVis extends React.Component {
         onNodeLabelClick: this.handleNodeLabelClick,
         onCreatedTree: this.fillNodeValues,
         tooltipContainer: this.treeTooltip,
-        // TODO (gdingle): fix me
         onCollapsedStateChange: withAnalytics(
           this.persistCollapsedInUrl,
           "TaxonTreeVis_node-collapsed-state_changed"
