@@ -5,7 +5,8 @@ import {
   getProjectDimensions,
   getSampleDimensions,
   getSampleStats,
-  getVisualizations
+  getVisualizations,
+  getLocations
 } from "~/api";
 
 const DISCOVERY_DOMAIN_MY_DATA = "my_data";
@@ -144,6 +145,20 @@ const getDiscoverySamples = async ({
   };
 };
 
+const getDiscoveryLocations = async ({ domain, sampleIds }) => {
+  try {
+    const result = await getLocations({
+      domain,
+      sampleIds
+    });
+    return result;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+    return {};
+  }
+};
+
 export {
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_ALL_DATA,
@@ -151,5 +166,6 @@ export {
   getDiscoverySyncData,
   getDiscoveryDimensions,
   getDiscoveryStats,
-  getDiscoverySamples
+  getDiscoverySamples,
+  getDiscoveryLocations
 };

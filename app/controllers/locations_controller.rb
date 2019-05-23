@@ -1,5 +1,6 @@
 class LocationsController < ApplicationController
   include LocationHelper
+  include SamplesHelper
 
   GEOSEARCH_ERR_MSG = "Unable to perform geosearch".freeze
   LOCATION_LOAD_ERR_MSG = "Unable to load sample locations".freeze
@@ -60,10 +61,33 @@ class LocationsController < ApplicationController
     }, status: :internal_server_error
   end
 
+  def samples_locations
+    domain = location_params[:domain]
+    param_sample_ids = (params[:sampleIds] || []).map(&:to_i)
+
+    # Access control enforced within samples_by_domain
+    samples = samples_by_domain(domain)
+    unless param_sample_ids.empty?
+      samples = samples.where(id: param_sample_ids)
+    end
+    field_id = MetadataField.find_by(name: "collection_location_v2").id
+    sample_info = samples
+                  .includes(metadata: :metadata_field)
+                  .where(metadata: { metadata_field_id: field_id })
+                  .where.not(metadata: { location_id: nil })
+                  .pluck(:id, :name, :location_id)
+
+    respond_to do |format|
+      format.json do
+        render json: sample_info
+      end
+    end
+  end
+
   private
 
   def location_params
-    params.permit(:query)
+    params.permit(:query, :domain, :sampleIDs)
   end
 
   def feature_access?

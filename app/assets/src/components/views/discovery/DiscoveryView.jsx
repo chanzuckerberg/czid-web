@@ -43,6 +43,7 @@ import {
   getDiscoveryDimensions,
   getDiscoveryStats,
   getDiscoverySamples,
+  getDiscoveryLocations,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_PUBLIC
@@ -664,9 +665,19 @@ class DiscoveryView extends React.Component {
 
   handleDisplaySwitch = currentDisplay => {
     this.setState({ currentDisplay });
+    if (currentDisplay === "map") {
+      this.handleMapLoad().then(res => console.log(res));
+    }
   };
 
-  getLocationData = async sampleIds => {};
+  handleMapLoad = async () => {
+    const { domain } = this.props;
+    const { sampleIds } = this.state;
+
+    let results = await getDiscoveryLocations({ domain, sampleIds });
+    console.log("foobar 1:48pm results: ", results);
+    return results;
+  };
 
   render() {
     const {
