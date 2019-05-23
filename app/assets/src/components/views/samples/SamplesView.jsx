@@ -421,12 +421,7 @@ class SamplesView extends React.Component {
     const { mapTilerKey } = this.props;
     return (
       <div className={cs.map}>
-        <BaseMap
-          mapTilerKey={mapTilerKey}
-          // updateViewport={this.updateViewport}
-          // tooltip={tooltip}
-          // markers={Object.entries(locationsToItems).map(this.renderMarker)}
-        />
+        <BaseMap mapTilerKey={mapTilerKey} />
       </div>
     );
   };
