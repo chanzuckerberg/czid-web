@@ -131,6 +131,8 @@ class MapPlayground extends React.Component {
             updateViewport={this.updateViewport}
             tooltip={tooltip}
             markers={Object.entries(locationsToItems).map(this.renderMarker)}
+            width={1250}
+            height={1000}
           />
         </div>
       </div>
