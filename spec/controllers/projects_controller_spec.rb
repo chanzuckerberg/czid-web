@@ -5,10 +5,7 @@ RSpec.describe ProjectsController, type: :controller do
 
   describe "GET index" do
     it "returns JSON with projects list" do
-      project = Project.create
-
-      params = { :format => 'json' }
-      get :index, params
+      get :index, params: { format: 'json' }
 
       json_response = JSON.parse(response.body)
       # expect(json_response).to be_empty
