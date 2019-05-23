@@ -1,8 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { difference, find, get, isEmpty, union } from "lodash/fp";
+import { difference, find, isEmpty, union } from "lodash/fp";
 import cx from "classnames";
-import { Marker } from "react-map-gl";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
@@ -18,8 +17,7 @@ import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import BasicPopup from "~/components/BasicPopup";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { Menu, MenuItem } from "~ui/controls/Menu";
-import BaseMap from "~/components/views/discovery/mapping/BaseMap";
-import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
+import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 
 import ReportsDownloader from "./ReportsDownloader";
 import CollectionModal from "./CollectionModal";
@@ -422,40 +420,13 @@ class SamplesView extends React.Component {
     );
   };
 
-  renderMapMarker = markerData => {
-    console.log(markerData);
-    const name = markerData.name;
-    const lat = parseFloat(markerData.lat);
-    const lng = parseFloat(markerData.lng);
-    const pointCount = markerData.sample_ids.length;
-    const minSize = 12;
-    // Scale based on the zoom and point count (zoomed-in = higher zoom)
-    // Log1.5 of the count looked nice visually for not getting too large with many points.
-    // const markerSize = Math.max(
-    //   Math.log(pointCount) / Math.log(1.5) * (get("zoom", viewport) || 3),
-    //   minSize
-    // );
-
-    return (
-      <Marker key={`marker-${markerData.id}`} latitude={lat} longitude={lng}>
-        <CircleMarker
-          size={20}
-          // onMouseEnter={() =>
-          //   this.handleMarkerMouseEnter({ lat, lng, name, pointCount })
-          // }
-          // onMouseLeave={this.handleMarkerMouseLeave}
-        />
-      </Marker>
-    );
-  };
-
   renderMap = () => {
     const { mapTilerKey, mapLocationData } = this.props;
     return (
       <div className={cs.map}>
-        <BaseMap
+        <DiscoveryMap
           mapTilerKey={mapTilerKey}
-          markers={Object.values(mapLocationData).map(this.renderMapMarker)}
+          mapLocationData={mapLocationData}
         />
       </div>
     );
