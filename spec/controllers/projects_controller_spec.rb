@@ -8,8 +8,7 @@ RSpec.describe ProjectsController, type: :controller do
       get :index, params: { format: 'json' }
 
       json_response = JSON.parse(response.body)
-      # expect(json_response).to be_empty
-      expect(json_response).to eq(["teseting travis blocker"])
+      expect(json_response).to be_empty
     end
   end
 end
