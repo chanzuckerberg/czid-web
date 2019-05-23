@@ -2,8 +2,10 @@
 @import "~styles/themes/colors";
 
 .mapContainer {
-  display: inline-block;
-  border: 1px solid $dark-grey;
+  display: block;
+  position: relative;
+  flex: 1 0 auto;
+  flex-direction: column;
 
   .zoomControl {
     position: absolute;

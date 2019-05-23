@@ -84,6 +84,7 @@ class DiscoveryView extends React.Component {
 
     this.state = defaults(
       {
+        currentDisplay: "table",
         currentTab: projectId ? "samples" : "projects",
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
@@ -661,8 +662,13 @@ class DiscoveryView extends React.Component {
     );
   };
 
+  handleDisplaySwitch = currentDisplay => {
+    this.setState({ currentDisplay });
+  };
+
   render() {
     const {
+      currentDisplay,
       currentTab,
       filteredProjectDimensions,
       filteredSampleDimensions,
@@ -686,7 +692,7 @@ class DiscoveryView extends React.Component {
       visualizations
     } = this.state;
 
-    const { domain } = this.props;
+    const { domain, allowedFeatures, mapTilerKey } = this.props;
 
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
@@ -700,9 +706,7 @@ class DiscoveryView extends React.Component {
               project={project || {}}
               fetchedSamples={samples}
               onProjectUpdated={this.handleProjectUpdated}
-              newSampleUpload={this.props.allowedFeatures.includes(
-                "new_sample_upload"
-              )}
+              newSampleUpload={allowedFeatures.includes("new_sample_upload")}
             />
           )}
           <DiscoveryHeader
@@ -766,6 +770,10 @@ class DiscoveryView extends React.Component {
                       selectableIds={sampleIds}
                       onSampleSelected={this.handleSampleSelected}
                       projectId={projectId}
+                      currentDisplay={currentDisplay}
+                      allowedFeatures={allowedFeatures}
+                      onDisplaySwitch={this.handleDisplaySwitch}
+                      mapTilerKey={mapTilerKey}
                     />
                   </div>
                   {!samples.length &&
@@ -829,7 +837,8 @@ DiscoveryView.propTypes = {
     DISCOVERY_DOMAIN_PUBLIC
   ]).isRequired,
   projectId: PropTypes.number,
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string)
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
+  mapTilerKey: PropTypes.string
 };
 
 export default DiscoveryView;

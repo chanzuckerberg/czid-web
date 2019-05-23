@@ -1,6 +1,7 @@
 import { Menu as BaseMenu } from "semantic-ui-react";
 import PropTypes from "prop-types";
 import React from "react";
+import cx from "classnames";
 
 class Menu extends React.Component {
   constructor(props) {
@@ -8,8 +9,9 @@ class Menu extends React.Component {
   }
 
   render() {
+    const { className } = this.props;
     return (
-      <BaseMenu className="idseq-ui" {...this.props}>
+      <BaseMenu className={cx("idseq-ui", className)} {...this.props}>
         {this.props.children}
       </BaseMenu>
     );
@@ -17,6 +19,7 @@ class Menu extends React.Component {
 }
 
 Menu.propTypes = {
+  className: PropTypes.string,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node
@@ -29,8 +32,9 @@ class MenuItem extends React.Component {
   }
 
   render() {
+    const { className } = this.props;
     return (
-      <BaseMenu.Item className="idseq-ui" {...this.props}>
+      <BaseMenu.Item className={cx("idseq-ui", className)} {...this.props}>
         {this.props.children}
       </BaseMenu.Item>
     );
@@ -38,6 +42,7 @@ class MenuItem extends React.Component {
 }
 
 MenuItem.propTypes = {
+  className: PropTypes.string,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node

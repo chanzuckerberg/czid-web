@@ -5,6 +5,7 @@
       domain: "public",
       projectId: <%= params[:project_id] || "null" %>,
       allowedFeatures: JSON.parse('<%= raw escape_json(current_user.allowed_feature_list) %>'),
+      mapTilerKey: '<%= ENV["MAPTILER_API_KEY"] %>',
     }, 'page_content');
   <% end %>
 
