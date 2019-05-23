@@ -57,7 +57,7 @@ module PipelineRunsHelper
                                  memory: Sample::DEFAULT_MEMORY_IN_MB,
                                  vcpus: Sample::DEFAULT_VCPUS,
                                  job_queue: Sample::DEFAULT_QUEUE,
-                                 docker_image: "idseq_dag")
+                                 docker_image: (Rails.env == 'staging' ? 'idseq_dag_boris_test_2020_05_23' : 'idseq_dag'))
     command = "aegea batch submit --command=\"#{base_command}\" "
     command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image #{docker_image} --memory #{memory} --queue #{job_queue} --vcpus #{vcpus} --job-role idseq-pipeline "
     command
