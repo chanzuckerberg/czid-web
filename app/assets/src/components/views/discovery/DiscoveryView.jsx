@@ -666,6 +666,8 @@ class DiscoveryView extends React.Component {
     this.setState({ currentDisplay });
   };
 
+  getLocationData = async sampleIds => {};
+
   render() {
     const {
       currentDisplay,
