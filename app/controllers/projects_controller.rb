@@ -283,7 +283,7 @@ class ProjectsController < ApplicationController
       project_name = project.cleaned_project_name
     end
     selected_sample_ids = (params[:sampleIds] || "").split(",").map(&:to_i)
-    samples = samples.where(id: selected_sample_ids) if selected_sample_ids
+    samples = samples.where(id: selected_sample_ids) unless selected_sample_ids.empty?
     formatted_samples = format_samples(samples)
     project_csv = generate_sample_list_csv(formatted_samples)
     send_data project_csv, filename: project_name + '_sample-table.csv'

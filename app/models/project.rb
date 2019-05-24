@@ -91,7 +91,7 @@ class Project < ApplicationRecord
     Syscall.run("mkdir", "-p", user_csv_dir)
     samples_to_download = current_power.project_samples(self)
     selected_sample_ids = (params["sampleIds"] || "").split(",").map(&:to_i)
-    samples_to_download = samples_to_download.where(id: selected_sample_ids) if selected_sample_ids
+    samples_to_download = samples_to_download.where(id: selected_sample_ids) unless selected_sample_ids.empty?
     sample_names_used = []
     samples_to_download.each do |sample|
       csv_data = report_csv_from_params(sample, params)

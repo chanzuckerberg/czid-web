@@ -11,7 +11,7 @@ export default class ReportsDownloader {
     selectedSampleIds
   }) {
     this.projectId = projectId;
-    this.selectedSampleIds = selectedSampleIds;
+    this.selectedSampleIds = Array.from(selectedSampleIds);
     this.onDownloadFail = onDownloadFail;
 
     this.startReportGeneration({ downloadOption });
@@ -50,7 +50,6 @@ export default class ReportsDownloader {
   }
 
   generateReport = ({
-    selectedSampleIds,
     makeAction,
     statusAction,
     retrieveAction
@@ -61,8 +60,8 @@ export default class ReportsDownloader {
     if (backgroundId) {
       queryString.push(`background_id=${backgroundId}`);
     }
-    if (selectedSampleIds) {
-      queryString.push(`sampleIds=${Array.from(this.selectedSampleIds)}`);
+    if (this.selectedSampleIds.length > 0) {
+      queryString.push(`sampleIds=${this.selectedSampleIds}`);
     }
     queryString = queryString.join("&");
     let url = `/projects/${this.projectId}/${makeAction}${
@@ -79,15 +78,14 @@ export default class ReportsDownloader {
   startReportGeneration = ({ downloadOption }) => {
     switch (downloadOption) {
       case "samples_table":
-        openUrl(
-          `/projects/${this.projectId}/csv?sampleIds=${Array.from(
-            this.selectedSampleIds
-          )}`
-        );
+        let url = `/projects/${this.projectId}/csv`;
+        if (this.selectedSampleIds.length > 0) {
+          url += `?sampleIds=${this.selectedSampleIds}`;
+        }
+        openUrl(url);
         break;
       case "project_reports":
         this.generateReport({
-          selectedSampleIds: this.selectedSampleIds,
           makeAction: "make_project_reports_csv",
           statusAction: "project_reports_csv_status",
           retrieveAction: "send_project_reports_csv"
@@ -95,7 +93,6 @@ export default class ReportsDownloader {
         break;
       case "host_gene_counts":
         this.generateReport({
-          selectedSampleIds: this.selectedSampleIds,
           makeAction: "make_host_gene_counts",
           statusAction: "host_gene_counts_status",
           retrieveAction: "send_host_gene_counts"
