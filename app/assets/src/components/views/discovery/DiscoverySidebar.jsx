@@ -77,7 +77,7 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   buildDateHistogram(field) {
-    const { onFilterClick } = this.props;
+    const { onFilterClick, currentTab } = this.props;
     const { metadata } = this.state;
 
     let dates = metadata[field];
@@ -131,9 +131,9 @@ export default class DiscoverySidebar extends React.Component {
               <span>
                 <span className={cs.boldText}>Date:</span> {text}
                 <br />
-                <span className={cs.boldText}>{`Sample${
-                  entry.count > 1 ? "s" : ""
-                }: `}</span>
+                <span className={cs.boldText}>{`${
+                  currentTab === "samples" ? "Sample" : "Project"
+                }${entry.count > 1 ? "s" : ""}: `}</span>
                 {entry.count}
               </span>
             );
