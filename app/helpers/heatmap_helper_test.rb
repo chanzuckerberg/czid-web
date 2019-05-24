@@ -22,21 +22,13 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       taxonsPerSample: @num_results,
       readSpecificity: 1,
       species: 1,
-      subcategories: {}
+      subcategories: {},
+      minReads: 1
     }
 
     @top_taxons_details = [{ 'tax_id' => 1,
                              'samples' => { @samples[0].id => [1, 1, 100, -100], @samples[1].id => [1, 1, 100, -100] },
                              'max_aggregate_score' => 100 }]
-
-    # TODO: (gdingle): avoid warning "warning: previous definition"
-    # Temp change for allowing less test data
-    @_min_read = HeatmapHelper::MINIMUM_READ_THRESHOLD
-    HeatmapHelper::MINIMUM_READ_THRESHOLD = 1
-  end
-
-  teardown do
-    HeatmapHelper::MINIMUM_READ_THRESHOLD = @_min_read
   end
 
   test "sample_taxons_dict works" do
@@ -62,7 +54,8 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @categories,
       @threshold_filters = {},
       @read_specificity = false,
-      @include_phage = false
+      @include_phage = false,
+      1, # min_reads
     )
     assert_equal @top_taxons_details, details
   end
@@ -75,7 +68,8 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @categories,
       @read_specificity,
       @include_phage,
-      @num_results
+      @num_results,
+      1, # min_reads
     )
     assert_equal 2, top_taxons.length
     top_taxon = top_taxons[@samples[0].pipeline_runs[0].id]
