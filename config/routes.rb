@@ -124,7 +124,7 @@ Rails.application.routes.draw do
   resource :locations do
     get :external_search, on: :collection
     get :map_playground, on: :collection
-    get :sample_locations, on: :collection
+    post :sample_locations, on: :collection
   end
 
   authenticate :user, ->(u) { u.admin? } do

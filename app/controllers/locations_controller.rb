@@ -62,11 +62,15 @@ class LocationsController < ApplicationController
   end
 
   # GET /locations/sample_locations.json
-  # Get location data for a list of sample ids
+  # Get location data for a set of samples with filters
   def sample_locations
     # Get samples with domain and access control
     domain = location_params[:domain]
-    param_sample_ids = (location_params[:sampleIds] || []).map(&:to_i)
+    data = request.body.read
+    puts "foobar 8:38pm", data["data"]
+    data = data["data"]["sampleIds"]
+    param_sample_ids = data
+    # param_sample_ids = (location_params[:sampleIds] || []).map(&:to_i)
     samples = samples_by_domain(domain) # access controlled
     unless param_sample_ids.empty?
       samples = samples.where(id: param_sample_ids)
@@ -100,6 +104,12 @@ class LocationsController < ApplicationController
         render json: location_data
       end
     end
+  rescue => err
+    render json: {
+        status: "failed",
+        message: LOCATION_LOAD_ERR_MSG,
+        errors: [err]
+    }, status: :internal_server_error
   end
 
   private
