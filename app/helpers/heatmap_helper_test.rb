@@ -25,6 +25,10 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       subcategories: {}
     }
 
+    @top_taxons_details = [{ 'tax_id' => 1,
+                             'samples' => { @samples[0].id => [1, 1, 100, -100], @samples[1].id => [1, 1, 100, -100] },
+                             'max_aggregate_score' => 100 }]
+
     # TODO: (gdingle): avoid warning "warning: previous definition"
     # Temp change for allowing less test data
     @_min_read = HeatmapHelper::MINIMUM_READ_THRESHOLD
@@ -60,10 +64,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @read_specificity = false,
       @include_phage = false
     )
-    assert_equal [{ 'tax_id' => 1,
-                    'samples' => { @samples[0].id => [1, 1, 100, -100], @samples[1].id => [1, 1, 100, -100] },
-                    'max_aggregate_score' => 100 }],
-                 details
+    assert_equal @top_taxons_details, details
   end
 
   test "fetch_top_taxons works" do
@@ -86,14 +87,22 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     assert_equal 1_000_000, taxon_count["rpm"]
   end
 
-  # test "samples_taxons_details works" do
-  #   # TODO: (gdingle): num_results, sort
-  #   HeatmapHelper.samples_taxons_details(
-  #     @samples,
-  #     taxon_ids,
-  #     @background.id,
-  #     @species_selected,
-  #     @threshold_filters
-  #   )
-  # end
+  test "samples_taxons_details works" do
+    # TODO: (gdingle): num_results, sort
+    dicts = HeatmapHelper.samples_taxons_details(
+      @samples,
+      @top_taxons_details.pluck('tax_id'),
+      @background.id,
+      @species_selected,
+      @threshold_filters
+    )
+
+    dict = dicts[0]
+    assert_equal 1, dict[:taxons].length
+    taxon = dict[:taxons][0]
+    assert_equal 10, taxon["NT"].length
+    assert_equal 10, taxon["NR"].length
+    assert_equal 100, taxon["NT"]["zscore"]
+    assert_equal 100 * -1, taxon["NR"]["zscore"]
+  end
 end

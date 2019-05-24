@@ -42,7 +42,19 @@ module HeatmapHelper
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
 
-    taxon_ids = HeatmapHelper.top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters, read_specificity, include_phage).pluck("tax_id")
+    taxon_ids = HeatmapHelper.top_taxons_details(
+      samples,
+      background_id,
+      num_results,
+      sort_by,
+      species_selected,
+      categories,
+      threshold_filters,
+      read_specificity,
+      include_phage
+    )
+                             .pluck('tax_id')
+
     taxon_ids -= removed_taxon_ids
 
     HeatmapHelper.samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)
