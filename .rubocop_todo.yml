@@ -1,3 +1,5 @@
+require: rubocop-rspec
+
 AllCops:
   Include:
     - '**/*.builder'
@@ -123,6 +125,6 @@ Style/MethodCallWithoutArgsParentheses:
 
 Style/RedundantReturn:
   Enabled: false
-  
+
 Rails/FindEach:
   Enabled: false
