@@ -42,7 +42,7 @@ const showPrivacyUpdateNotification = () => {
           closeToast();
         }}
       >
-        Our Terms of Use and Privacy Privacy will be updating in {daysLeft}{" "}
+        Our Terms of Use and Privacy Policy will be updating in {daysLeft}{" "}
         {daysLeft === 1 ? "day" : "days"}.{" "}
         <a
           href="/terms_changes"
