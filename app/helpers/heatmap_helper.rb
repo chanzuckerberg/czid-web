@@ -494,9 +494,28 @@ module HeatmapHelper
     "
   end
 
-  def self.top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters = {}, read_specificity = false, include_phage = false)
+  def self.top_taxons_details(
+    samples,
+    background_id,
+    num_results,
+    sort_by,
+    species_selected,
+    categories,
+    threshold_filters = {},
+    read_specificity = false,
+    include_phage = false,
+    min_reads = MINIMUM_READ_THRESHOLD
+  )
     # return top taxons
-    results_by_pr = fetch_top_taxons(samples, background_id, categories, read_specificity, include_phage, num_results)
+    results_by_pr = fetch_top_taxons(
+      samples,
+      background_id,
+      categories,
+      read_specificity,
+      include_phage,
+      num_results,
+      min_reads
+    )
 
     sort = ReportHelper.decode_sort_by(sort_by)
     count_type = sort[:count_type]
@@ -540,7 +559,7 @@ module HeatmapHelper
     candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }
   end
 
-  def self.fetch_top_taxons(samples, background_id, categories, read_specificity = false, include_phage = false, num_results = 1_000_000)
+  def self.fetch_top_taxons(samples, background_id, categories, read_specificity = false, include_phage = false, num_results = 1_000_000, min_reads = MINIMUM_READ_THRESHOLD)
     pipeline_run_ids = samples.map { |s| s.first_pipeline_run ? s.first_pipeline_run.id : nil }.compact
 
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
@@ -593,7 +612,7 @@ module HeatmapHelper
     WHERE
       pipeline_run_id in (#{pipeline_run_ids.join(',')})
       AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
-      AND taxon_counts.count >= #{MINIMUM_READ_THRESHOLD}
+      AND taxon_counts.count >= #{min_reads}
       AND taxon_counts.count_type IN ('NT', 'NR')
       #{categories_clause}
       #{read_specificity_clause}
@@ -631,7 +650,13 @@ module HeatmapHelper
     result_hash
   end
 
-  def self.samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)
+  def self.samples_taxons_details(
+    samples,
+    taxon_ids,
+    background_id,
+    species_selected,
+    threshold_filters
+  )
     results = {}
 
     # Get sample results for the taxon ids
