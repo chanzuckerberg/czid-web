@@ -2,6 +2,8 @@
 # visualization. See HeatmapHelperTest.
 module HeatmapHelper
   DEFAULT_MAX_NUM_TAXONS = 30
+  # Zscore is best for heatmaps because it weighs the frequency against the background
+  DEFAULT_TAXON_SORT_PARAM = 'highest_nt_zscore'.freeze
 
   MINIMUM_READ_THRESHOLD = 5
   MINIMUM_ZSCORE_THRESHOLD = 1.7
@@ -25,7 +27,7 @@ module HeatmapHelper
                           JSON.parse(params[:thresholdFilters] || "[]")
                         end
     subcategories = if params[:subcategories] && params[:subcategories].respond_to?(:to_h)
-                      params[:subcategories].permit!.to_h
+                      params[:subcategories].to_h
                     else
                       JSON.parse(params[:subcategories] || "{}")
                     end
@@ -33,8 +35,9 @@ module HeatmapHelper
     read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
 
     # TODO: should fail if field is not well formatted and return proper error to client
-    sort_by = params[:sortBy] || ReportHelper::DEFAULT_TAXON_SORT_PARAM
-    species_selected = params[:species] == "1" # Otherwise genus selected
+    # TODO: (gdingle): change this to
+    sort_by = params[:sortBy] || HeatmapHelper::DEFAULT_TAXON_SORT_PARAM
+    species_selected = params[:species] ? params[:species].to_i == 1 : false # Otherwise genus selected
 
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
@@ -45,13 +48,13 @@ module HeatmapHelper
     HeatmapHelper.samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)
   end
 
-  def self.top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {}, read_specificity = false, include_phage = false)
+  def self.top_taxons_details(samples, background_id, num_results, sort_by, species_selected, categories, threshold_filters = {}, read_specificity = false, include_phage = false)
     # return top taxons
     results_by_pr = fetch_top_taxons(samples, background_id, categories, read_specificity, include_phage, num_results)
 
-    sort_by = ReportHelper.decode_sort_by(sort_by_key)
-    count_type = sort_by[:count_type]
-    metric = sort_by[:metric]
+    sort = ReportHelper.decode_sort_by(sort_by)
+    count_type = sort[:count_type]
+    metric = sort[:metric]
     candidate_taxons = {}
     results_by_pr.each do |_pr_id, res|
       pr = res["pr"]
@@ -80,7 +83,7 @@ module HeatmapHelper
                 else
                   { "tax_id" => row["tax_id"], "samples" => {} }
                 end
-        taxon["max_aggregate_score"] = row[sort_by[:count_type]][sort_by[:metric]] if taxon["max_aggregate_score"].to_f < row[sort_by[:count_type]][sort_by[:metric]].to_f
+        taxon["max_aggregate_score"] = row[sort[:count_type]][sort[:metric]] if taxon["max_aggregate_score"].to_f < row[sort[:count_type]][sort[:metric]].to_f
         taxon["samples"][sample_id] = [count, row["tax_level"], row["NT"]["zscore"], row["NR"]["zscore"]]
         candidate_taxons[row["tax_id"]] = taxon
         break if count >= num_results
@@ -94,11 +97,12 @@ module HeatmapHelper
   def self.fetch_top_taxons(samples, background_id, categories, read_specificity = false, include_phage = false, num_results = 1_000_000)
     pipeline_run_ids = samples.map { |s| s.first_pipeline_run ? s.first_pipeline_run.id : nil }.compact
 
+    categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
     categories_clause = ""
     if categories.present?
-      categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
+      categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| categories_map[category] }.compact.join(',')})"
     elsif include_phage
-      categories_clause = " AND taxon_counts.superkingdom_taxid = #{CATEGORIES_TAXID_BY_NAME['Viruses']}"
+      categories_clause = " AND taxon_counts.superkingdom_taxid = #{categories_map['Viruses']}"
     end
 
     read_specificity_clause = ""
