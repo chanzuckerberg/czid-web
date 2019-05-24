@@ -4,8 +4,14 @@ import { openUrl } from "~utils/links";
 import Cookies from "js-cookie";
 
 export default class ReportsDownloader {
-  constructor({ projectId = "all", onDownloadFail = null, downloadOption }) {
+  constructor({
+    projectId = "all",
+    onDownloadFail = null,
+    downloadOption,
+    selectedSampleIds
+  }) {
     this.projectId = projectId;
+    this.selectedSampleIds = selectedSampleIds;
     this.onDownloadFail = onDownloadFail;
 
     this.startReportGeneration({ downloadOption });
@@ -60,7 +66,11 @@ export default class ReportsDownloader {
   startReportGeneration = ({ downloadOption }) => {
     switch (downloadOption) {
       case "samples_table":
-        openUrl(`/projects/${this.projectId}/csv`);
+        openUrl(
+          `/projects/${this.projectId}/csv?sampleIds=${Array.from(
+            this.selectedSampleIds
+          )}`
+        );
         break;
       case "project_reports":
         this.generateReport({

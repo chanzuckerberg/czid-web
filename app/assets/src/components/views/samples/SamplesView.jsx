@@ -271,6 +271,7 @@ class SamplesView extends React.Component {
 
   renderDownloadTrigger = () => {
     const { projectId } = this.props;
+    const { selectedSampleIds } = this.state;
     const downloadOptions = [{ text: "Sample Table", value: "samples_table" }];
     if (projectId) {
       downloadOptions.push({
@@ -285,10 +286,12 @@ class SamplesView extends React.Component {
         onClick={downloadOption => {
           new ReportsDownloader({
             projectId,
-            downloadOption
+            downloadOption,
+            selectedSampleIds
           });
           logAnalyticsEvent("SamplesView_download-dropdown-option_clicked", {
             projectId,
+            selectedSamplesCount: selectedSampleIds.length,
             downloadOption
           });
         }}
