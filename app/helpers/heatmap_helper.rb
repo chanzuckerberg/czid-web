@@ -559,7 +559,15 @@ module HeatmapHelper
     candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }
   end
 
-  def self.fetch_top_taxons(samples, background_id, categories, read_specificity = false, include_phage = false, num_results = 1_000_000, min_reads = MINIMUM_READ_THRESHOLD)
+  def self.fetch_top_taxons(
+    samples,
+    background_id,
+    categories,
+    read_specificity = READ_SPECIFICITY,
+    include_phage = INCLUDE_PHAGE,
+    num_results = 1_000_000,
+    min_reads = MINIMUM_READ_THRESHOLD
+  )
     pipeline_run_ids = samples.map { |s| s.first_pipeline_run ? s.first_pipeline_run.id : nil }.compact
 
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME

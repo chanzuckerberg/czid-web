@@ -313,4 +313,17 @@ class HeatmapHelperTest < ActiveSupport::TestCase
                                             { "metric" => "NR_rpm", "value" => "1000", "operator" => "<=" }
                                           ])
   end
+
+  test "samples_taxons_details species_selected false" do
+    dicts = HeatmapHelper.samples_taxons_details(
+      @samples,
+      @top_taxons_details.pluck('tax_id'),
+      @background.id,
+      false,
+      @threshold_filters
+    )
+
+    dict = dicts[0]
+    assert_equal 0, dict[:taxons].length
+  end
 end
