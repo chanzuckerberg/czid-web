@@ -49,11 +49,7 @@ export default class ReportsDownloader {
     }, 2000);
   }
 
-  generateReport = ({
-    makeAction,
-    statusAction,
-    retrieveAction
-  }) => {
+  generateReport = ({ makeAction, statusAction, retrieveAction }) => {
     // TODO(tiago): stop using cookies
     const backgroundId = Cookies.get("background_id");
     let queryString = [];
@@ -77,31 +73,35 @@ export default class ReportsDownloader {
 
   startReportGeneration = ({ downloadOption }) => {
     switch (downloadOption) {
-      case "samples_table":
+      case "samples_table": {
         let url = `/projects/${this.projectId}/csv`;
         if (this.selectedSampleIds.length > 0) {
           url += `?sampleIds=${this.selectedSampleIds}`;
         }
         openUrl(url);
         break;
-      case "project_reports":
+      }
+      case "project_reports": {
         this.generateReport({
           makeAction: "make_project_reports_csv",
           statusAction: "project_reports_csv_status",
           retrieveAction: "send_project_reports_csv"
         });
         break;
-      case "host_gene_counts":
+      }
+      case "host_gene_counts": {
         this.generateReport({
           makeAction: "make_host_gene_counts",
           statusAction: "host_gene_counts_status",
           retrieveAction: "send_host_gene_counts"
         });
         break;
-      default:
+      }
+      default: {
         // eslint-disable-next-line no-console
         console.error("ReportsDownloader - Download option not set!");
         break;
+      }
     }
   };
 }
