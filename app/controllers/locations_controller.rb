@@ -61,12 +61,13 @@ class LocationsController < ApplicationController
     }, status: :internal_server_error
   end
 
+  # GET /locations/sample_locations.json
+  # Get location data for a list of sample ids
   def sample_locations
+    # Get samples with domain and access control
     domain = location_params[:domain]
     param_sample_ids = (location_params[:sampleIds] || []).map(&:to_i)
-
-    # Access control enforced within samples_by_domain
-    samples = samples_by_domain(domain)
+    samples = samples_by_domain(domain) # access controlled
     unless param_sample_ids.empty?
       samples = samples.where(id: param_sample_ids)
     end
@@ -81,7 +82,7 @@ class LocationsController < ApplicationController
 
     # Get all the location attributes
     location_ids = sample_info.map(&:first).uniq
-    fields = [:id, :name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng]
+    fields = [:id, :name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng] # pluck for efficiency
     location_data = Location.where(id: location_ids).pluck(*fields).map { |p| fields.zip(p).to_h }.index_by { |loc| loc[:id] }
 
     # Add list of sample_ids to each location

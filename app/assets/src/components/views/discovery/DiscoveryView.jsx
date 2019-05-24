@@ -11,6 +11,7 @@ import {
   escapeRegExp,
   find,
   findIndex,
+  isEmpty,
   keyBy,
   map,
   mapKeys,
@@ -666,18 +667,17 @@ class DiscoveryView extends React.Component {
 
   handleDisplaySwitch = currentDisplay => {
     this.setState({ currentDisplay });
-    if (currentDisplay === "map") {
-      this.handleLoadSampleLocations().then(res => {
-        console.log(res);
-        this.setState({ mapLocationData: res });
-      });
-    }
+    if (currentDisplay === "map") this.handleDisplaySwitchToMap();
   };
 
-  handleLoadSampleLocations = async () => {
+  handleDisplaySwitchToMap = async () => {
     const { domain } = this.props;
-    const { sampleIds } = this.state;
-    return await getDiscoveryLocations({ domain, sampleIds });
+    const { sampleIds, mapLocationData } = this.state;
+
+    if (isEmpty(mapLocationData)) {
+      const results = await getDiscoveryLocations({ domain, sampleIds });
+      this.setState({ mapLocationData: results });
+    }
   };
 
   render() {
