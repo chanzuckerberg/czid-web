@@ -1,11 +1,17 @@
 # This is a class of static helper methods for generating data for the heatmap
 # visualization. See HeatmapHelperTest.
+# See selectedOptions in SamplesHeatmapView for client-side defaults.
 module HeatmapHelper
   DEFAULT_MAX_NUM_TAXONS = 30
   # Zscore is best for heatmaps because it weighs the frequency against the background
   DEFAULT_TAXON_SORT_PARAM = 'highest_nt_zscore'.freeze
-
+  READ_SPECIFICITY = true
   MINIMUM_READ_THRESHOLD = 5
+  # Note: this is activated from the heatmap page by selecting "Viruses -
+  # Phages". The default categories are all BUT phages, though the UI does not
+  # indicate this.
+  INCLUDE_PHAGE = false
+
   MINIMUM_ZSCORE_THRESHOLD = 1.7
 
   def self.sample_taxons_dict(params, samples)
@@ -36,7 +42,6 @@ module HeatmapHelper
     read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
 
     # TODO: should fail if field is not well formatted and return proper error to client
-    # TODO: (gdingle): change this to
     sort_by = params[:sortBy] || HeatmapHelper::DEFAULT_TAXON_SORT_PARAM
     species_selected = params[:species] ? params[:species].to_i == 1 : false # Otherwise genus selected
 
@@ -75,8 +80,8 @@ module HeatmapHelper
     species_selected,
     categories,
     threshold_filters = {},
-    read_specificity = false,
-    include_phage = false,
+    read_specificity = READ_SPECIFICITY,
+    include_phage = INCLUDE_PHAGE,
     min_reads = MINIMUM_READ_THRESHOLD
   )
     # return top taxons
@@ -132,7 +137,15 @@ module HeatmapHelper
     candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }
   end
 
-  def self.fetch_top_taxons(samples, background_id, categories, read_specificity = false, include_phage = false, num_results = 1_000_000, min_reads = MINIMUM_READ_THRESHOLD)
+  def self.fetch_top_taxons(
+    samples,
+    background_id,
+    categories,
+    read_specificity = READ_SPECIFICITY,
+    include_phage = INCLUDE_PHAGE,
+    num_results = 1_000_000,
+    min_reads = MINIMUM_READ_THRESHOLD
+  )
     pipeline_run_ids = samples.map { |s| s.first_pipeline_run ? s.first_pipeline_run.id : nil }.compact
 
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
