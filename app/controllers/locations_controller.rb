@@ -106,9 +106,9 @@ class LocationsController < ApplicationController
     end
   rescue => err
     render json: {
-        status: "failed",
-        message: LOCATION_LOAD_ERR_MSG,
-        errors: [err]
+      status: "failed",
+      message: LOCATION_LOAD_ERR_MSG,
+      errors: [err]
     }, status: :internal_server_error
   end
 

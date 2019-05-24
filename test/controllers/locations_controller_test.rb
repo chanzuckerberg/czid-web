@@ -5,8 +5,8 @@ require "test_helpers/location_test_helper"
 class LocationsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:admin) # Change to non-admin user once released
-    @user_params = {"user[email]" => @user.email, "user[password]" => "password"}
-    @non_admin_user = {"user[email]" => users(:joe).email, "user[password]" => "password"}
+    @user_params = { "user[email]" => @user.email, "user[password]" => "password" }
+    @non_admin_user = { "user[email]" => users(:joe).email, "user[password]" => "password" }
     @api_response = true, LocationTestHelper::API_GEOSEARCH_RESPONSE
     @our_results = LocationTestHelper::FORMATTED_GEOSEARCH_RESPONSE
   end
@@ -15,7 +15,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_params
 
     Location.stub :geosearch, @api_response do
-      get external_search_locations_path, params: {query: "UCSF"}
+      get external_search_locations_path, params: { query: "UCSF" }
       assert_response :success
       assert_equal JSON.dump(@our_results), @response.body
     end
@@ -25,11 +25,11 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_params
 
     Location.stub :geosearch, [true, []] do
-      get external_search_locations_path, params: {query: "ahsdlfkjasfk"}
+      get external_search_locations_path, params: { query: "ahsdlfkjasfk" }
       assert_response :success
       assert_equal "[]", @response.body
 
-      get external_search_locations_path, params: {query: ""}
+      get external_search_locations_path, params: { query: "" }
       assert_response :success
       assert_equal "[]", @response.body
 
@@ -42,7 +42,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   test "user can geosearch and see an error" do
     post user_session_path, params: @user_params
     ENV["LOCATION_IQ_API_KEY"] = nil
-    get external_search_locations_path, params: {query: "UCSF"}
+    get external_search_locations_path, params: { query: "UCSF" }
     assert_response :error
     assert_equal LocationsController::GEOSEARCH_ERR_MSG, JSON.parse(@response.body)["message"]
   end
@@ -76,7 +76,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     results = JSON.parse(@response.body)
     loc = locations(:swamp)
     actual_object = results[loc.id.to_s]
-    expected_object = {"id" => loc.id, "name" => loc.name, "geo_level" => loc.geo_level, "country_name" => loc.country_name, "state_name" => loc.state_name, "subdivision_name" => loc.subdivision_name, "city_name" => loc.city_name, "lat" => loc.lat.to_s, "lng" => loc.lng.to_s, "sample_ids" => [samples(:joe_project_sample_mosquito).id]}
+    expected_object = { "id" => loc.id, "name" => loc.name, "geo_level" => loc.geo_level, "country_name" => loc.country_name, "state_name" => loc.state_name, "subdivision_name" => loc.subdivision_name, "city_name" => loc.city_name, "lat" => loc.lat.to_s, "lng" => loc.lng.to_s, "sample_ids" => [samples(:joe_project_sample_mosquito).id] }
 
     assert_equal actual_object, expected_object
   end
@@ -92,7 +92,6 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "non-admin users cannot access sample_locations" do
-
   end
 
   # TODO: Uncomment and use non-admin user once released
