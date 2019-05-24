@@ -49,11 +49,24 @@ export default class ReportsDownloader {
     }, 2000);
   }
 
-  generateReport = ({ makeAction, statusAction, retrieveAction }) => {
+  generateReport = ({
+    selectedSampleIds,
+    makeAction,
+    statusAction,
+    retrieveAction
+  }) => {
     // TODO(tiago): stop using cookies
     const backgroundId = Cookies.get("background_id");
+    let queryString = [];
+    if (backgroundId) {
+      queryString.push(`background_id=${backgroundId}`);
+    }
+    if (selectedSampleIds) {
+      queryString.push(`sampleIds=${Array.from(this.selectedSampleIds)}`);
+    }
+    queryString = queryString.join("&");
     let url = `/projects/${this.projectId}/${makeAction}${
-      backgroundId ? `?background_id=${backgroundId}` : ""
+      queryString.length > 0 ? `?${queryString}` : ""
     }`;
     axios
       .get(url)
@@ -74,6 +87,7 @@ export default class ReportsDownloader {
         break;
       case "project_reports":
         this.generateReport({
+          selectedSampleIds: this.selectedSampleIds,
           makeAction: "make_project_reports_csv",
           statusAction: "project_reports_csv_status",
           retrieveAction: "send_project_reports_csv"
@@ -81,6 +95,7 @@ export default class ReportsDownloader {
         break;
       case "host_gene_counts":
         this.generateReport({
+          selectedSampleIds: this.selectedSampleIds,
           makeAction: "make_host_gene_counts",
           statusAction: "host_gene_counts_status",
           retrieveAction: "send_host_gene_counts"
