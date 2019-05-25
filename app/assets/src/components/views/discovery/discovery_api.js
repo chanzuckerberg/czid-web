@@ -145,11 +145,18 @@ const getDiscoverySamples = async ({
   };
 };
 
-const getDiscoveryLocations = async ({ domain, sampleIds }) => {
+const getDiscoveryLocations = async ({
+  domain,
+  filters,
+  projectId,
+  search
+}) => {
   try {
     return await getSamplesLocations({
       domain,
-      sampleIds
+      filters,
+      projectId,
+      search
     });
   } catch (error) {
     // eslint-disable-next-line no-console

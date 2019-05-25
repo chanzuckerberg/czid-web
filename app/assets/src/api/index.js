@@ -305,11 +305,14 @@ const getContigsSequencesByByteranges = (
 
 const getPhyloTree = id => get(`/phylo_trees/${id}/show.json`);
 
-const getSamplesLocations = ({ domain, sampleIds }) =>
-  postWithCSRF("/locations/sample_locations.json", {
-    params: { domain },
-    // Put in data because it can be too long for URL params
-    data: { sampleIds }
+const getSamplesLocations = ({ domain, filters, projectId, search }) =>
+  get("/locations/sample_locations.json", {
+    params: {
+      domain,
+      search,
+      projectId,
+      ...filters
+    }
   });
 
 export {
