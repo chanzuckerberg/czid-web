@@ -85,6 +85,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @samples,
       @background_id,
       @num_results,
+      # TODO: (gdingle): remove aggregate score
       "highest_nt_aggregatescore",
       @species_selected,
       @categories,

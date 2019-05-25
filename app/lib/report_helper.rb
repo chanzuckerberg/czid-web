@@ -471,7 +471,7 @@ module ReportHelper
         result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
       end
       if pr.total_reads
-        row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
+        row["rpm"] = row["r"] / pr.rpm_denominator
         row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
         row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
         row["zscore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
@@ -798,6 +798,7 @@ module ReportHelper
     aggregate
   end
 
+  # TODO: (gdingle): remove aggregate score?
   def self.compute_aggregate_scores_v2!(rows)
     rows.each do |taxon_info|
       # NT and NR zscore are set to the same
@@ -809,6 +810,7 @@ module ReportHelper
     end
   end
 
+  # TODO: (gdingle): remove aggregate score?
   def self.compute_genera_aggregate_scores!(rows, tax_2d)
     rows.each do |species_info|
       next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
@@ -824,6 +826,7 @@ module ReportHelper
     end
   end
 
+  # TODO: (gdingle): remove aggregate score?
   def self.compute_species_aggregate_scores!(rows, tax_2d, scoring_model)
     scoring_model ||= TaxonScoringModel::DEFAULT_MODEL_NAME
     tsm = TaxonScoringModel.find_by(name: scoring_model)
