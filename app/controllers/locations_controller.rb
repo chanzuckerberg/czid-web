@@ -64,6 +64,13 @@ class LocationsController < ApplicationController
   # GET /locations/sample_locations.json
   # Get location data for a set of samples with filters
   def sample_locations
+    unless feature_access?
+      render(json: {
+               status: :unauthorized,
+               message: "No feature access"
+             }, status: :unauthorized) && return
+    end
+
     # Get the samples
     domain = params[:domain]
     samples = samples_by_domain(domain) # access controlled
@@ -79,7 +86,7 @@ class LocationsController < ApplicationController
 
     # Get all the location attributes
     location_ids = sample_info.map(&:first).uniq
-    fields = [:id, :name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng] # pluck for efficiency
+    fields = [:id, :name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng] # pluck for performance
     location_data = Location.where(id: location_ids).pluck(*fields).map { |p| fields.zip(p).to_h }.index_by { |loc| loc[:id] }
 
     # Add list of sample_ids to each location
@@ -108,7 +115,7 @@ class LocationsController < ApplicationController
   private
 
   def location_params
-    params.permit(:query, :domain, :sampleIds)
+    params.permit(:query)
   end
 
   def feature_access?

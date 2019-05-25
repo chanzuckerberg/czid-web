@@ -6,7 +6,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:admin) # Change to non-admin user once released
     @user_params = { "user[email]" => @user.email, "user[password]" => "password" }
-    @non_admin_user = { "user[email]" => users(:joe).email, "user[password]" => "password" }
+    @non_admin_user_params = { "user[email]" => users(:joe).email, "user[password]" => "password" }
     @api_response = true, LocationTestHelper::API_GEOSEARCH_RESPONSE
     @our_results = LocationTestHelper::FORMATTED_GEOSEARCH_RESPONSE
   end
@@ -91,7 +91,10 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "non-admin users cannot access sample_locations" do
+  test "disallowed users cannot access sample_locations" do
+    post user_session_path, params: @non_admin_user_params
+    get sample_locations_locations_path, as: :json
+    assert_response 401
   end
 
   # TODO: Uncomment and use non-admin user once released

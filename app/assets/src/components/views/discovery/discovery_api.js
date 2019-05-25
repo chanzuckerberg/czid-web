@@ -1,12 +1,12 @@
 import { get, map } from "lodash/fp";
 import {
-  getProjects,
-  getSamples,
   getProjectDimensions,
+  getProjects,
   getSampleDimensions,
   getSampleStats,
-  getVisualizations,
-  getSamplesLocations
+  getSamples,
+  getSamplesLocations,
+  getVisualizations
 } from "~/api";
 
 const DISCOVERY_DOMAIN_MY_DATA = "my_data";
@@ -169,9 +169,9 @@ export {
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
-  getDiscoverySyncData,
   getDiscoveryDimensions,
-  getDiscoveryStats,
+  getDiscoveryLocations,
   getDiscoverySamples,
-  getDiscoveryLocations
+  getDiscoveryStats,
+  getDiscoverySyncData
 };
