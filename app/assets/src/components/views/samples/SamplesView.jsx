@@ -1,8 +1,8 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { difference, find, isEmpty, union } from "lodash/fp";
 import cx from "classnames";
 
+import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
@@ -498,7 +498,7 @@ SamplesView.propTypes = {
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   onDisplaySwitch: PropTypes.func,
   mapTilerKey: PropTypes.string,
-  mapLocationData: PropTypes.object
+  mapLocationData: PropTypes.objectOf(PropTypes.Location)
 };
 
 export default SamplesView;

@@ -11,7 +11,6 @@ import {
   escapeRegExp,
   find,
   findIndex,
-  isEmpty,
   keyBy,
   map,
   mapKeys,

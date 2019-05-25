@@ -1,8 +1,8 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { Marker } from "react-map-gl";
 import { get } from "lodash/fp";
 
+import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
@@ -97,7 +97,7 @@ class DiscoveryMap extends React.Component {
 
 DiscoveryMap.propTypes = {
   mapTilerKey: PropTypes.string,
-  mapLocationData: PropTypes.object
+  mapLocationData: PropTypes.objectOf(PropTypes.Location)
 };
 
 export default DiscoveryMap;
