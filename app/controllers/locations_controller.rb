@@ -64,17 +64,10 @@ class LocationsController < ApplicationController
   # GET /locations/sample_locations.json
   # Get location data for a set of samples with filters
   def sample_locations
-    # Get samples with domain and access control
-    domain = location_params[:domain]
-    data = request.body.read
-    puts "foobar 8:38pm", data["data"]
-    data = data["data"]["sampleIds"]
-    param_sample_ids = data
-    # param_sample_ids = (location_params[:sampleIds] || []).map(&:to_i)
+    # Get the samples
+    domain = params[:domain]
     samples = samples_by_domain(domain) # access controlled
-    unless param_sample_ids.empty?
-      samples = samples.where(id: param_sample_ids)
-    end
+    samples = filter_samples(samples, params)
 
     # Get the relevant location_ids and sample_ids
     field_id = MetadataField.find_by(name: "collection_location_v2").id

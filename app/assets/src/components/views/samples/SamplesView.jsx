@@ -246,7 +246,8 @@ class SamplesView extends React.Component {
   };
 
   reset = () => {
-    this.infiniteTable.reset();
+    const { currentDisplay } = this.state;
+    if (currentDisplay === "table") this.infiniteTable.reset();
   };
 
   renderHeatmapTrigger = () => {
