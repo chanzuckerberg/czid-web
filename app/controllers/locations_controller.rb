@@ -84,7 +84,7 @@ class LocationsController < ApplicationController
                   .where.not(metadata: { location_id: nil })
                   .pluck(:location_id, :id)
 
-    # Get all the location attributes
+    # Get all the location attributes. Key by location_id for lookups.
     location_ids = sample_info.map(&:first).uniq
     fields = [:id, :name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng] # pluck for performance
     location_data = Location.where(id: location_ids).pluck(*fields).map { |p| fields.zip(p).to_h }.index_by { |loc| loc[:id] }
