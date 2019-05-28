@@ -76,28 +76,17 @@ class LocationsController < ApplicationController
     samples = samples_by_domain(domain) # access controlled
     samples = filter_samples(samples, params)
 
-    # Get the relevant location_ids and sample_ids
-    field_id = MetadataField.find_by(name: "collection_location_v2").id
-    sample_info = samples
-                  .includes(metadata: :metadata_field)
-                  .where(metadata: { metadata_field_id: field_id })
-                  .where.not(metadata: { location_id: nil })
-                  .pluck(:location_id, :id)
-
-    # Get all the location attributes. Key by location_id for lookups.
-    location_ids = sample_info.map(&:first).uniq
-    fields = [:id, :name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng] # pluck for performance
-    location_data = Location.where(id: location_ids).pluck(*fields).map { |p| fields.zip(p).to_h }.index_by { |loc| loc[:id] }
-
-    # Add list of sample_ids to each location
-    sample_info.each do |s|
-      entry = location_data[s[0]]
-      if entry.key?(:sample_ids)
-        entry[:sample_ids].push(s[1])
-      else
-        entry[:sample_ids] = [s[1]]
-      end
-    end
+    # For the samples with a location, get the location fields. Format as location hashes with lists
+    # of sample_ids, keyed by location_id.
+    location_fields = [:name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng]
+    location_data = samples
+                    .includes(metadata: [:location, :metadata_field])
+                    .where(metadata: { metadata_fields: { name: "collection_location_v2" } })
+                    .where.not(metadata: { location_id: nil })
+                    .pluck(:location_id, :id, *location_fields.map { |f| "locations.#{f}" })
+                    .map { |p| [:location_id, :sample_id, *location_fields].zip(p).to_h }
+                    .group_by { |h| h[:location_id] }.values.map { |v| v[0].merge(sample_ids: v.map { |h| h[:sample_id] }) }
+                    .index_by { |s| s[:location_id] }
 
     respond_to do |format|
       format.json do
