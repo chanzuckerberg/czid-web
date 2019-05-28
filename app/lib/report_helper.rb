@@ -225,8 +225,7 @@ module ReportHelper
 
   # TODO: (gdingle): refactor to class method
   def select_pipeline_run(sample, pipeline_version)
-    pipeline_version = pipeline_version.to_f
-    if pipeline_version > 0.0
+    if pipeline_version.to_f > 0.0
       sample.pipeline_run_by_version(pipeline_version)
     else
       sample.first_pipeline_run
