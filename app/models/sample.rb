@@ -90,7 +90,7 @@ class Sample < ApplicationRecord
 
   def pipeline_run_by_version(pipeline_version)
     # Right now we don't filter for successful pipeline runs. we should do that at some point.
-    prs = if pipeline_version == PipelineRun::PIPELINE_VERSION_WHEN_NULL
+    prs = if pipeline_version.to_f == PipelineRun::PIPELINE_VERSION_WHEN_NULL.to_f
             pipeline_runs.where(pipeline_version: nil)
           else
             pipeline_runs.where(pipeline_version: pipeline_version)
