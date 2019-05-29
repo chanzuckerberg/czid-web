@@ -1450,7 +1450,9 @@ class PipelineRun < ApplicationRecord
     end
   end
 
-  def rpm_denominator
-    ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
+  # TODO: (gdingle): write docs
+  def rpm(raw_read_count)
+    raw_read_count /
+      ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
   end
 end

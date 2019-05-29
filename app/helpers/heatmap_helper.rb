@@ -93,7 +93,8 @@ module HeatmapHelper
       read_specificity,
       include_phage,
       num_results,
-      min_reads
+      min_reads,
+      sort_by
     )
 
     sort = ReportHelper.decode_sort_by(sort_by)
@@ -120,6 +121,7 @@ module HeatmapHelper
 
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
       count = 1
+
       # get the top N for each sample
       rows.each do |row|
         taxon = if candidate_taxons[row["tax_id"]]
@@ -153,9 +155,9 @@ module HeatmapHelper
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
     categories_clause = ""
     if categories.present?
-      categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| categories_map[category] }.compact.join(',')})"
+      categories_clause = " AND superkingdom_taxid IN (#{categories.map { |category| categories_map[category] }.compact.join(',')})"
     elsif include_phage
-      categories_clause = " AND taxon_counts.superkingdom_taxid = #{categories_map['Viruses']}"
+      categories_clause = " AND superkingdom_taxid = #{categories_map['Viruses']}"
     end
 
     read_specificity_clause = ""
@@ -164,49 +166,46 @@ module HeatmapHelper
     end
 
     if !include_phage && categories.present?
-      phage_clause = " AND taxon_counts.is_phage != 1"
+      phage_clause = " AND is_phage != 1"
     elsif include_phage && categories.blank?
-      phage_clause = " AND taxon_counts.is_phage = 1"
+      phage_clause = " AND is_phage = 1"
     end
 
     sort = ReportHelper.decode_sort_by(sort_by)
 
-    # TODO: (gdingle): PipelineRun.subsample_fraction uses subsampled_reads to
-    # compute if fraction_subsampled is not in the database... is that needed
-    # going forward?
-    # TODO: (gdingle): should fraction_subsampled ever be NULL ?
-    rpm_sql = "taxon_counts.count / (
-          (pr.total_reads - pr.total_ercc_reads) *
+    # fraction_subsampled was introduced 2018-03-30. For prior runs, we assume
+    # fraction_subsampled = 1.0.
+    rpm_sql = "count / (
+          (total_reads - total_ercc_reads) *
           COALESCE(fraction_subsampled, 1.0)
         ) * 1000 * 1000"
 
     query = "
     SELECT
-      taxon_counts.pipeline_run_id     AS  pipeline_run_id,
-      taxon_counts.tax_id              AS  tax_id,
-      taxon_counts.count_type          AS  count_type,
-      taxon_counts.tax_level           AS  tax_level,
-      taxon_counts.genus_taxid         AS  genus_taxid,
-      taxon_counts.family_taxid        AS  family_taxid,
-      taxon_counts.name                AS  name,
-      taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
-      taxon_counts.is_phage            AS  is_phage,
-      taxon_counts.count               AS  r,
-      taxon_summaries.stdev            AS stdev,
-      taxon_summaries.mean             AS mean,
-      taxon_counts.percent_identity    AS  percentidentity,
-      taxon_counts.alignment_length    AS  alignmentlength,
-      IF(
-        taxon_counts.e_value IS NOT NULL,
-        (0.0 - taxon_counts.e_value),
-        #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}
-      )                                AS  neglogevalue,
-      taxon_counts.percent_concordant  AS  percentconcordant,
+      pipeline_run_id,
+      taxon_counts.tax_id,
+      taxon_counts.count_type,
+      taxon_counts.tax_level,
+      genus_taxid,
+      family_taxid,
+      taxon_counts.name,
+      superkingdom_taxid,
+      is_phage,
+      count               AS  r,
+      stdev,
+      mean,
+      percent_identity    AS  percentidentity,
+      alignment_length    AS  alignmentlength,
+      COALESCE(0.0 - e_value, #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}) AS neglogevalue,
+      percent_concordant  AS  percentconcordant,
       -- First pass of ranking in SQL. Second pass in Ruby.
       #{rpm_sql} AS rpm,
-      (#{rpm_sql} - taxon_summaries.mean) / taxon_summaries.stdev AS zscore
+      COALESCE(
+        (#{rpm_sql} - mean) / stdev,
+        #{ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
+      ) AS zscore
     FROM taxon_counts
-    JOIN pipeline_runs pr ON taxon_counts.pipeline_run_id = pr.id
+    JOIN pipeline_runs pr ON pipeline_run_id = pr.id
     LEFT OUTER JOIN taxon_summaries ON
       #{background_id.to_i}   = taxon_summaries.background_id   AND
       taxon_counts.count_type = taxon_summaries.count_type      AND
@@ -214,19 +213,41 @@ module HeatmapHelper
       taxon_counts.tax_id     = taxon_summaries.tax_id
     WHERE
       pipeline_run_id in (#{pipeline_run_ids.join(',')})
-      AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
-      AND taxon_counts.count >= #{min_reads}
+      AND genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
+      AND count >= #{min_reads}
+      -- AND taxon_counts.count_type = '#{sort[:count_type]}'
       AND taxon_counts.count_type IN ('NT', 'NR')
       #{categories_clause}
       #{read_specificity_clause}
-      #{phage_clause}
-    ORDER BY #{sort[:metric]} #{sort[:direction] == 'highest' ? 'DESC' : 'ASC'}
-    -- First pass overfetching to be filtered below in second pass.
-    LIMIT #{num_results * 2}"
-    # TODO: (gdingle): how do we protect against SQL injection?
-    sql_results = TaxonCount.connection.select_all(query).to_hash
+      #{phage_clause}"
+    # TODO: (gdingle): why select both types of count here?
 
-    # calculating rpm and zscore, organizing the results by pipeline_run_id
+    # This query:
+    # 1) assigns a rank to each row within a pipeline run
+    # 2) returns rows ranking <= num_results
+    # See http://www.sqlines.com/mysql/how-to/get_top_n_each_group
+    top_n_query = "
+      SELECT *
+      FROM (
+        SELECT
+          @rank := IF(@current_id = pipeline_run_id, @rank + 1, 1) AS rank,
+          @current_id := pipeline_run_id AS current_id,
+          a.*
+        FROM (
+          #{query}
+        ) a
+        ORDER BY
+          pipeline_run_id,
+          #{sort[:metric]} #{sort[:direction] == 'highest' ? 'DESC' : 'ASC'}
+      ) b
+      WHERE rank <= #{num_results * 16};
+    "
+    # TODO: (gdingle): do we still need to overfetch???
+
+    # TODO: (gdingle): how do we protect against SQL injection?
+    sql_results = TaxonCount.connection.select_all(top_n_query).to_hash
+
+    # organizing the results by pipeline_run_id
     result_hash = {}
 
     pipeline_run_ids = sql_results.map { |x| x['pipeline_run_id'] }
@@ -244,14 +265,8 @@ module HeatmapHelper
       if pr.total_reads
         z_max = ReportHelper::ZSCORE_MAX
         z_min = ReportHelper::ZSCORE_MIN
-        z_default = ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
-
-        # TODO: (gdingle): raise warning if ruby computed is different!
-        row["rpm"] = row["r"] / pr.rpm_denominator
-        # TODO: (gdingle): compute same in SQL... verify same
-        row["zscore"] = row["stdev"].nil? ? z_default : ((row["rpm"] - row["mean"]) / row["stdev"])
-
-        row["zscore"] = z_max if row["zscore"] > z_max && row["zscore"] != z_default
+        row["zscore"] = z_max if row["zscore"] > z_max &&
+                                 row["zscore"] != ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
         row["zscore"] = z_min if row["zscore"] < z_min
         result_hash[pipeline_run_id]["taxon_counts"] << row
       end

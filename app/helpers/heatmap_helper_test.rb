@@ -1,6 +1,5 @@
 require 'test_helper'
 
-# TODO: (gdingle): store inputs and outputs from for known good values
 class HeatmapHelperTest < ActiveSupport::TestCase
   setup do
     @samples = [samples(:one), samples(:two)]
@@ -85,8 +84,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @samples,
       @background_id,
       @num_results,
-      # TODO: (gdingle): remove aggregate score
-      "highest_nt_aggregatescore",
+      "highest_nt_rpm",
       @species_selected,
       @categories,
       @threshold_filters = {},
@@ -94,7 +92,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @include_phage,
       @min_reads
     )
-    assert_equal 200_000_000.0, details[0]["max_aggregate_score"]
+    assert_equal 2_000_000.0, details[0]["max_aggregate_score"]
   end
 
   test "top_taxons_details species_selected false" do
