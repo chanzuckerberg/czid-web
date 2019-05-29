@@ -536,13 +536,14 @@ module HeatmapHelper
 
       ReportHelper.compute_aggregate_scores_v2!(rows)
       rows = rows.select do |row|
-        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && ReportHelper.check_custom_filters(row, threshold_filters)
+        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD &&
+          ReportHelper.check_custom_filters(row, threshold_filters)
       end
 
+      # Get the top N for each sample. This re-sorts on the same metric as in
+      # fetch_top_taxons SQL. We sort there first for performance.
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
       count = 1
-
-      # get the top N for each sample
       rows.each do |row|
         taxon = if candidate_taxons[row["tax_id"]]
                   candidate_taxons[row["tax_id"]]
@@ -600,6 +601,10 @@ module HeatmapHelper
           COALESCE(fraction_subsampled, 1.0)
         ) * 1000 * 1000"
 
+    zscore_sql = "COALESCE(
+        (#{rpm_sql} - mean) / stdev,
+        #{ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND})"
+
     query = "
     SELECT
       pipeline_run_id,
@@ -620,10 +625,7 @@ module HeatmapHelper
       percent_concordant  AS  percentconcordant,
       -- First pass of ranking in SQL. Second pass in Ruby.
       #{rpm_sql} AS rpm,
-      COALESCE(
-        (#{rpm_sql} - mean) / stdev,
-        #{ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND}
-      ) AS zscore
+      #{zscore_sql} AS zscore
     FROM taxon_counts
     JOIN pipeline_runs pr ON pipeline_run_id = pr.id
     LEFT OUTER JOIN taxon_summaries ON
@@ -635,12 +637,12 @@ module HeatmapHelper
       pipeline_run_id in (#{pipeline_run_ids.join(',')})
       AND genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
       AND count >= #{min_reads}
-      -- AND taxon_counts.count_type = '#{sort[:count_type]}'
+      -- We need both types of counts for threshold filters
       AND taxon_counts.count_type IN ('NT', 'NR')
       #{categories_clause}
       #{read_specificity_clause}
-      #{phage_clause}"
-    # TODO: (gdingle): why select both types of count here?
+      #{phage_clause}
+      AND #{zscore_sql} >= #{MINIMUM_ZSCORE_THRESHOLD}"
 
     # This query:
     # 1) assigns a rank to each row within a pipeline run
@@ -658,11 +660,12 @@ module HeatmapHelper
         ) a
         ORDER BY
           pipeline_run_id,
+          count_type = '#{sort[:count_type]}' DESC,
           #{sort[:metric]} #{sort[:direction] == 'highest' ? 'DESC' : 'ASC'}
       ) b
-      WHERE rank <= #{num_results * 16};
+      -- Overfetch by a factor of 4 to allow for post-SQL threshold filters
+      WHERE rank <= #{num_results * 4};
     "
-    # TODO: (gdingle): do we still need to overfetch???
 
     # TODO: (gdingle): how do we protect against SQL injection?
     sql_results = TaxonCount.connection.select_all(top_n_query).to_hash
