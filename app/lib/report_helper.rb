@@ -700,7 +700,6 @@ module ReportHelper
     end
   end
 
-  # TODO: (gdingle): remove aggregate score?
   def self.compute_species_aggregate_scores!(rows, tax_2d, scoring_model)
     scoring_model ||= TaxonScoringModel::DEFAULT_MODEL_NAME
     tsm = TaxonScoringModel.find_by(name: scoring_model)

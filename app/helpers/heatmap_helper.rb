@@ -641,6 +641,7 @@ module HeatmapHelper
         SELECT MAX(id)
         FROM pipeline_runs
         WHERE sample_id IN (#{samples.pluck(:id).join(',')})
+          AND job_status = '#{PipelineRun::STATUS_CHECKED}'
         GROUP BY sample_id
       )
       AND genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
@@ -802,6 +803,7 @@ module HeatmapHelper
           SELECT MAX(id)
           FROM pipeline_runs
           WHERE sample_id IN (#{samples.pluck(:id).join(',')})
+            AND job_status = '#{PipelineRun::STATUS_CHECKED}'
           GROUP BY sample_id
         )
         AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
