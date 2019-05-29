@@ -397,12 +397,24 @@ class PipelineRun < ApplicationRecord
     job_status == STATUS_CHECKED
   end
 
+  def db_load_step_validations
+    file = Tempfile.new
+    downloaded = PipelineRun.download_file_with_retries(s3_file_for("step_validations"),
+                                                        file.path, 3, false)
+    if downloaded
+      error_json = JSON.parse(File.read(file))
+      new_error_message = "Step #{error_json['step']} failed because of #{error_json['error']}"
+      update(error_message: [error_message, new_error_message].compact.join(";"))
+    end
+    file.unlink
+  end
+
   def db_load_input_validations
     file = Tempfile.new
     downloaded = PipelineRun.download_file_with_retries(s3_file_for("input_validations"),
                                                         file.path, 3, false)
-    error_message = downloaded ? JSON.parse(File.read(file))["Validation error"] : nil
-    update(error_message: error_message) if error_message
+    new_error_message = downloaded ? JSON.parse(File.read(file))["Validation error"] : nil
+    update(error_message: [error_message, new_error_message].compact.join(";")) if new_error_message
     file.unlink
   end
 
