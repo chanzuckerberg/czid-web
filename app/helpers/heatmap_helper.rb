@@ -552,7 +552,8 @@ module HeatmapHelper
                 else
                   { "tax_id" => row["tax_id"], "samples" => {} }
                 end
-        taxon["max_aggregate_score"] = row[sort[:count_type]][sort[:metric]] if taxon["max_aggregate_score"].to_f < row[sort[:count_type]][sort[:metric]].to_f
+        taxon["max_aggregate_score"] = row[sort[:count_type]][sort[:metric]] if
+          taxon["max_aggregate_score"].to_f < row[sort[:count_type]][sort[:metric]].to_f
         taxon["samples"][sample_id] = [count, row["tax_level"], row["NT"]["zscore"], row["NR"]["zscore"]]
         candidate_taxons[row["tax_id"]] = taxon
         break if count >= num_results
@@ -602,7 +603,9 @@ module HeatmapHelper
         ) * 1000 * 1000"
 
     zscore_sql = "COALESCE(
-        (#{rpm_sql} - mean) / stdev,
+        GREATEST(#{ReportHelper::ZSCORE_MIN}, LEAST(#{ReportHelper::ZSCORE_MAX},
+          (#{rpm_sql} - mean) / stdev
+        )),
         #{ReportHelper::ZSCORE_WHEN_ABSENT_FROM_BACKGROUND})"
 
     query = "
