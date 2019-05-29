@@ -21,6 +21,7 @@ three:
   adjusted_remaining_reads: 1
   alignment_config: one
   total_ercc_reads: 0
+  job_status: "CHECKED"
 four:
   sample: two
   job_id: 'four'
@@ -28,6 +29,7 @@ four:
   adjusted_remaining_reads: 1
   alignment_config: one
   total_ercc_reads: 0
+  job_status: "CHECKED"
 five:
   job_id: 'five'
   total_reads: 1
