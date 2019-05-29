@@ -5,3 +5,10 @@ ucsf:
 swamp:
   name: "Swamp of Mosquitos"
   id: 1
+  geo_level: "city"
+  country_name: "USA"
+  state_name: "California"
+  subdivision_name: "San Mateo County"
+  city_name: "Redwood City"
+  lat: "37.49"
+  lng: "-122.23"

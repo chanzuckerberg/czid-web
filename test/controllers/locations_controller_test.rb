@@ -6,6 +6,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:admin) # Change to non-admin user once released
     @user_params = { "user[email]" => @user.email, "user[password]" => "password" }
+    @non_admin_user_params = { "user[email]" => users(:joe).email, "user[password]" => "password" }
     @api_response = true, LocationTestHelper::API_GEOSEARCH_RESPONSE
     @our_results = LocationTestHelper::FORMATTED_GEOSEARCH_RESPONSE
   end
@@ -64,6 +65,26 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
       assert_response :error
       assert_equal LocationsController::LOCATION_LOAD_ERR_MSG, JSON.parse(@response.body)["message"]
     end
+  end
+
+  # TODO: Add a test like this for non-admin users once released
+  test "user can load location data for the map for a set of samples" do
+    post user_session_path, params: @user_params
+    get sample_locations_locations_path, as: :json
+    assert_response :success
+
+    results = JSON.parse(@response.body)
+    loc = locations(:swamp)
+    actual_object = results[loc.id.to_s]
+    expected_object = { "id" => loc.id, "name" => loc.name, "geo_level" => loc.geo_level, "country_name" => loc.country_name, "state_name" => loc.state_name, "subdivision_name" => loc.subdivision_name, "city_name" => loc.city_name, "lat" => loc.lat.to_s, "lng" => loc.lng.to_s, "sample_ids" => [samples(:joe_project_sample_mosquito).id] }
+
+    assert_equal actual_object, expected_object
+  end
+
+  test "disallowed users cannot access sample_locations" do
+    post user_session_path, params: @non_admin_user_params
+    get sample_locations_locations_path, as: :json
+    assert_response 401
   end
 
   # TODO: Uncomment and use non-admin user once released

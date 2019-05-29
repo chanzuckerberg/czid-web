@@ -1,10 +1,11 @@
 import { get, map } from "lodash/fp";
 import {
-  getProjects,
-  getSamples,
   getProjectDimensions,
+  getProjects,
   getSampleDimensions,
   getSampleStats,
+  getSamples,
+  getSamplesLocations,
   getVisualizations
 } from "~/api";
 
@@ -144,12 +145,33 @@ const getDiscoverySamples = async ({
   };
 };
 
+const getDiscoveryLocations = async ({
+  domain,
+  filters,
+  projectId,
+  search
+}) => {
+  try {
+    return await getSamplesLocations({
+      domain,
+      filters,
+      projectId,
+      search
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+    return {};
+  }
+};
+
 export {
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_PUBLIC,
-  getDiscoverySyncData,
   getDiscoveryDimensions,
+  getDiscoveryLocations,
+  getDiscoverySamples,
   getDiscoveryStats,
-  getDiscoverySamples
+  getDiscoverySyncData
 };
