@@ -81,16 +81,6 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal actual_object, expected_object
   end
 
-  test "user can see a map location data load error" do
-    post user_session_path, params: @user_params
-
-    MetadataField.stub :find_by, nil do
-      get sample_locations_locations_path, as: :json
-      assert_response :error
-      assert_equal LocationsController::LOCATION_LOAD_ERR_MSG, JSON.parse(@response.body)["message"]
-    end
-  end
-
   test "disallowed users cannot access sample_locations" do
     post user_session_path, params: @non_admin_user_params
     get sample_locations_locations_path, as: :json
