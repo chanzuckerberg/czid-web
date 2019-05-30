@@ -5,6 +5,9 @@ class VisualizationsController < ApplicationController
   clear_respond_to
   respond_to :json
 
+  # This action takes up to 10s for 50 samples so we cache it.
+  caches_action :samples_taxons
+
   # GET /visualizations.json
   def index
     domain = visualization_params[:domain]
@@ -163,8 +166,15 @@ class VisualizationsController < ApplicationController
         ],
         operators: [">=", "<="]
       },
-      allowedFeatures: current_user.allowed_feature_list
+      allowedFeatures: current_user.allowed_feature_list,
+      heatmapTs: heatmap_ts
     }
+  end
+
+  # The most recent update time of any samples pipeline run.
+  def heatmap_ts
+    updated_ats = samples_for_heatmap.map { |sample| sample.first_pipeline_run.updated_at }
+    updated_ats.max.to_i
   end
 
   def download_heatmap
