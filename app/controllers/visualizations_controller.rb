@@ -171,12 +171,6 @@ class VisualizationsController < ApplicationController
     }
   end
 
-  # The most recent update time of any samples pipeline run.
-  def heatmap_ts
-    updated_ats = samples_for_heatmap.map { |sample| sample.first_pipeline_run.updated_at }
-    updated_ats.max.to_i
-  end
-
   def download_heatmap
     @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(params, samples_for_heatmap)
     output_csv = generate_heatmap_csv(@sample_taxons_dict)
@@ -200,5 +194,11 @@ class VisualizationsController < ApplicationController
     current_power.samples
                  .where(id: sample_ids)
                  .includes([:host_genome, :pipeline_runs, metadata: [:metadata_field]])
+  end
+
+  # The most recent update time of any samples pipeline run.
+  def heatmap_ts
+    updated_ats = samples_for_heatmap.map { |sample| sample.first_pipeline_run.updated_at }
+    updated_ats.max.to_i
   end
 end
