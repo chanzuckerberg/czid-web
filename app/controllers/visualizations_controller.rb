@@ -6,7 +6,7 @@ class VisualizationsController < ApplicationController
   respond_to :json
 
   # This action takes up to 10s for 50 samples so we cache it.
-  caches_action :samples_taxons
+  caches_action :samples_taxons, expires_in: 30.days
 
   # GET /visualizations.json
   def index
@@ -195,8 +195,10 @@ class VisualizationsController < ApplicationController
   end
 
   def samples_for_heatmap
+    id = visualization_params[:id]
+    sample_ids = id ? Visualization.find(id).sample_ids : params[:sampleIds]
     current_power.samples
-                 .where(id: params[:sampleIds])
+                 .where(id: sample_ids)
                  .includes([:host_genome, :pipeline_runs, metadata: [:metadata_field]])
   end
 end
