@@ -49,6 +49,7 @@ import {
   DISCOVERY_DOMAIN_PUBLIC
 } from "./discovery_api";
 import NoResultsBanner from "./NoResultsBanner";
+import DiscoveryMapSidebar from "./mapping/DiscoveryMapSidebar";
 
 // Data available
 // (A) non-filtered dimensions: for filter options
@@ -98,6 +99,7 @@ class DiscoveryView extends React.Component {
         loadingStats: true,
         loadingVisualizations: true,
         mapLocationData: {},
+        mapSelectedLocationId: null,
         project: null,
         projectDimensions: [],
         projectId: projectId,
@@ -691,10 +693,55 @@ class DiscoveryView extends React.Component {
   };
 
   handleMapTooltipTitleClick = locationId => {
-    console.log("foobar 1:13pm", locationId);
-    console.log(
-      "I want to load: ",
-      this.state.mapLocationData[locationId].sample_ids
+    this.setState({ mapSelectedLocationId: locationId });
+  };
+
+  renderRightPane = () => {
+    const {
+      currentDisplay,
+      currentTab,
+      filteredProjectDimensions,
+      filteredSampleDimensions,
+      filteredSampleStats,
+      loadingDimensions,
+      loadingStats,
+      projectDimensions,
+      projects,
+      sampleDimensions,
+      samples,
+      search,
+      showStats
+    } = this.state;
+
+    const filterCount = this.getFilterCount();
+
+    return (
+      <div className={cs.rightPane}>
+        {showStats &&
+          ["samples", "projects"].includes(currentTab) &&
+          (currentDisplay === "table" ? (
+            <DiscoverySidebar
+              className={cs.sidebar}
+              samples={samples}
+              projects={projects}
+              sampleDimensions={
+                filterCount || search
+                  ? filteredSampleDimensions
+                  : sampleDimensions
+              }
+              sampleStats={filteredSampleStats}
+              projectDimensions={
+                filterCount || search
+                  ? filteredProjectDimensions
+                  : projectDimensions
+              }
+              currentTab={currentTab}
+              loading={loadingDimensions || loadingStats}
+            />
+          ) : (
+            <DiscoveryMapSidebar className={cs.sidebar} />
+          ))}
+      </div>
     );
   };
 
@@ -702,20 +749,14 @@ class DiscoveryView extends React.Component {
     const {
       currentDisplay,
       currentTab,
-      filteredProjectDimensions,
-      filteredSampleDimensions,
-      filteredSampleStats,
       filters,
-      loadingDimensions,
       loadingProjects,
-      loadingVisualizations,
       loadingSamples,
-      loadingStats,
+      loadingVisualizations,
+      mapLocationData,
       project,
       projectId,
-      projectDimensions,
       projects,
-      sampleDimensions,
       sampleIds,
       samples,
       search,
@@ -725,7 +766,6 @@ class DiscoveryView extends React.Component {
     } = this.state;
 
     const { domain, allowedFeatures, mapTilerKey } = this.props;
-    const { mapLocationData } = this.state;
 
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
@@ -836,29 +876,7 @@ class DiscoveryView extends React.Component {
               )}
             </NarrowContainer>
           </div>
-          <div className={cs.rightPane}>
-            {showStats &&
-              ["samples", "projects"].includes(currentTab) && (
-                <DiscoverySidebar
-                  className={cs.sidebar}
-                  samples={samples}
-                  projects={projects}
-                  sampleDimensions={
-                    filterCount || search
-                      ? filteredSampleDimensions
-                      : sampleDimensions
-                  }
-                  sampleStats={filteredSampleStats}
-                  projectDimensions={
-                    filterCount || search
-                      ? filteredProjectDimensions
-                      : projectDimensions
-                  }
-                  currentTab={currentTab}
-                  loading={loadingDimensions || loadingStats}
-                />
-              )}
-          </div>
+          {this.renderRightPane()}
         </div>
       </div>
     );
