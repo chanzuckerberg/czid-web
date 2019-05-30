@@ -210,7 +210,8 @@ module HeatmapHelper
       #{rpm_sql} AS rpm,
       #{zscore_sql} AS zscore
     FROM taxon_counts
-    JOIN pipeline_runs pr ON pipeline_run_id = pr.id
+    -- warning!!! pipeline_runs may be missing!!!
+    LEFT OUTER JOIN pipeline_runs pr ON pipeline_run_id = pr.id
     LEFT OUTER JOIN taxon_summaries ON
       #{background_id.to_i}   = taxon_summaries.background_id   AND
       taxon_counts.count_type = taxon_summaries.count_type      AND
@@ -221,7 +222,6 @@ module HeatmapHelper
         SELECT MAX(id)
         FROM pipeline_runs
         WHERE sample_id IN (#{samples.pluck(:id).join(',')})
-          AND job_status = '#{PipelineRun::STATUS_CHECKED}'
         GROUP BY sample_id
       )
       AND genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
@@ -383,7 +383,6 @@ module HeatmapHelper
           SELECT MAX(id)
           FROM pipeline_runs
           WHERE sample_id IN (#{samples.pluck(:id).join(',')})
-            AND job_status = '#{PipelineRun::STATUS_CHECKED}'
           GROUP BY sample_id
         )
         AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
