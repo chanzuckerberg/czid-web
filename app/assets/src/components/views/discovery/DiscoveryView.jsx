@@ -690,6 +690,14 @@ class DiscoveryView extends React.Component {
     this.setState({ currentDisplay });
   };
 
+  handleMapTooltipTitleClick = locationId => {
+    console.log("foobar 1:13pm", locationId);
+    console.log(
+      "I want to load: ",
+      this.state.mapLocationData[locationId].sample_ids
+    );
+  };
+
   render() {
     const {
       currentDisplay,
@@ -789,17 +797,18 @@ class DiscoveryView extends React.Component {
                 <div className={cs.tableContainer}>
                   <div className={cs.dataContainer}>
                     <SamplesView
-                      ref={samplesView => (this.samplesView = samplesView)}
+                      allowedFeatures={allowedFeatures}
+                      currentDisplay={currentDisplay}
+                      mapLocationData={mapLocationData}
+                      mapTilerKey={mapTilerKey}
+                      onDisplaySwitch={this.handleDisplaySwitch}
                       onLoadRows={this.handleLoadSampleRows}
-                      samples={samples}
-                      selectableIds={sampleIds}
+                      onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                       onSampleSelected={this.handleSampleSelected}
                       projectId={projectId}
-                      currentDisplay={currentDisplay}
-                      allowedFeatures={allowedFeatures}
-                      onDisplaySwitch={this.handleDisplaySwitch}
-                      mapTilerKey={mapTilerKey}
-                      mapLocationData={mapLocationData}
+                      ref={samplesView => (this.samplesView = samplesView)}
+                      samples={samples}
+                      selectableIds={sampleIds}
                     />
                   </div>
                   {!samples.length &&

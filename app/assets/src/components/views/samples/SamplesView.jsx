@@ -422,12 +422,13 @@ class SamplesView extends React.Component {
   };
 
   renderMap = () => {
-    const { mapTilerKey, mapLocationData } = this.props;
+    const { mapTilerKey, mapLocationData, onMapTooltipTitleClick } = this.props;
     return (
       <div className={cs.map}>
         <DiscoveryMap
           mapTilerKey={mapTilerKey}
           mapLocationData={mapLocationData}
+          onTooltipTitleClick={onMapTooltipTitleClick}
         />
       </div>
     );
@@ -488,17 +489,18 @@ SamplesView.defaultProps = {
 
 SamplesView.propTypes = {
   activeColumns: PropTypes.arrayOf(PropTypes.string),
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
+  currentDisplay: PropTypes.string.isRequired,
+  mapLocationData: PropTypes.objectOf(PropTypes.Location),
+  mapTilerKey: PropTypes.string,
+  onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
+  onMapTooltipTitleClick: PropTypes.func,
+  onSampleSelected: PropTypes.func,
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
   samples: PropTypes.array,
-  selectableIds: PropTypes.array.isRequired,
-  onSampleSelected: PropTypes.func,
-  currentDisplay: PropTypes.string.isRequired,
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
-  onDisplaySwitch: PropTypes.func,
-  mapTilerKey: PropTypes.string,
-  mapLocationData: PropTypes.objectOf(PropTypes.Location)
+  selectableIds: PropTypes.array.isRequired
 };
 
 export default SamplesView;

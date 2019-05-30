@@ -45,6 +45,12 @@ $tooltip-tip-size: 8px;
 
       .title {
         @include font-header-s;
+
+        &.hoverable {
+          &:hover {
+            color: $primary-light;
+          }
+        }
       }
 
       .body {
