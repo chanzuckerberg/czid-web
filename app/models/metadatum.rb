@@ -4,6 +4,7 @@ require 'elasticsearch/model'
 class Metadatum < ApplicationRecord
   include ErrorHelper
   include DateHelper
+  include LocationHelper
 
   if ELASTICSEARCH_ON
     include Elasticsearch::Model
@@ -128,6 +129,8 @@ class Metadatum < ApplicationRecord
     # Set to existing Location or create a new one based on the external IDs. For the sake of not
     # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
     result = Location.find_or_create_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
+    result = Location.check_and_restrict_specificity(result, sample.host_genome_name)
+
     # At this point, discard raw_value (too long to store anyway)
     self.raw_value = nil
     self.string_validated_value = nil

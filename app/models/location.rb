@@ -23,6 +23,11 @@ class Location < ApplicationRecord
     location_api_request(endpoint_query)
   end
 
+  def self.geosearch_by_country_and_state(country_name, state_name)
+    endpoint_query = "search.php?addressdetails=1&normalizecity=1&country=#{country_name}&state=#{state_name}"
+    location_api_request(endpoint_query)
+  end
+
   # Create a Location from parameters
   def self.create_from_params(location_params)
     # Ignore fields that don't match columns
@@ -54,6 +59,19 @@ class Location < ApplicationRecord
 
       resp = LocationHelper.adapt_location_iq_response(resp)
       create_from_params(resp)
+    end
+  end
+
+  def self.check_and_restrict_specificity(location, host_genome_name)
+    if host_genome_name == "Human"
+      if location.subdivision_name.present? || location.city_name.present?
+        # Redo the search for just the state/country and pick the first result (should be unique)
+        success, results = self.geosearch("#{location.state_name}, #{location.country_name}")
+        if success
+          results = resp.map { |r| LocationHelper.adapt_location_iq_response(r) }
+        end
+        puts "foobar 11:34am", results
+      end
     end
   end
 end
