@@ -84,4 +84,4 @@ sample_human_collection_location_v2:
   raw_value: "{\"locationiq_id\":\"123\",\"osm_id\":\"321\",\"osm_type\":\"Way\"}"
   metadata_field: collection_location_v2
   location_id: 1
-  sample: sample_human_existing_metadata_joe_project
+  sample: joe_sample
