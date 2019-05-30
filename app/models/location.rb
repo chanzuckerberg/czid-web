@@ -2,6 +2,7 @@ class Location < ApplicationRecord
   include LocationHelper
 
   LOCATION_IQ_BASE_URL = "https://us1.locationiq.com/v1".freeze
+  GEOSEARCH_BASE_QUERY = "search.php?addressdetails=1&normalizecity=1".freeze
 
   # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)
@@ -16,15 +17,16 @@ class Location < ApplicationRecord
     [resp.is_a?(Net::HTTPSuccess), JSON.parse(resp.body)]
   end
 
-  # Search request to Location IQ API
+  # Search request to Location IQ API by freeform query
   def self.geosearch(query)
     raise ArgumentError, "No query for geosearch" if query.blank?
-    endpoint_query = "search.php?addressdetails=1&normalizecity=1&q=#{query}"
+    endpoint_query = "#{GEOSEARCH_BASE_QUERY}&q=#{query}"
     location_api_request(endpoint_query)
   end
 
+  # Search request to Location IQ API by country and state
   def self.geosearch_by_country_and_state(country_name, state_name)
-    endpoint_query = "search.php?addressdetails=1&normalizecity=1&country=#{country_name}&state=#{state_name}"
+    endpoint_query = "#{GEOSEARCH_BASE_QUERY}&country=#{country_name}&state=#{state_name}"
     location_api_request(endpoint_query)
   end
 
@@ -62,16 +64,20 @@ class Location < ApplicationRecord
     end
   end
 
+  # Restrict Human location specificity to State, Country. Return new Location if restriction added.
   def self.check_and_restrict_specificity(location, host_genome_name)
-    if host_genome_name == "Human"
-      if location.subdivision_name.present? || location.city_name.present?
-        # Redo the search for just the state/country and pick the first result (should be unique)
-        success, results = geosearch("#{location.state_name}, #{location.country_name}")
-        if success
-          results = resp.map { |r| LocationHelper.adapt_location_iq_response(r) }
-        end
-        puts "foobar 11:34am", results
+    # We don't want Human locations with subdivision or city
+    if host_genome_name == "Human" && (location.subdivision_name.present? || location.city_name.present?)
+      # Redo the search for just the country/state
+      success, resp = geosearch_by_country_and_state(location.country_name, location.state_name)
+      if success
+        result = LocationHelper.adapt_location_iq_response(resp[0])
+        location = create_from_params(result)
+      else
+        raise "Couldn't find #{location.state_name}, #{location.country_name} (state, country)"
       end
     end
+
+    location
   end
 end
