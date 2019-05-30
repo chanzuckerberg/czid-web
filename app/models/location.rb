@@ -70,14 +70,20 @@ class Location < ApplicationRecord
     if host_genome_name == "Human" && (location.subdivision_name.present? || location.city_name.present?)
       # Redo the search for just the country/state
       success, resp = geosearch_by_country_and_state(location.country_name, location.state_name)
-      if success
-        result = LocationHelper.adapt_location_iq_response(resp[0])
-        location = create_from_params(result)
-      else
+      unless success
         raise "Couldn't find #{location.state_name}, #{location.country_name} (state, country)"
       end
+
+      result = LocationHelper.adapt_location_iq_response(resp[0])
+      existing = Location.find_by(locationiq_id: result[:locationiq_id])
+      new_location = existing ? existing : create_from_params(result)
+
+      # Delete the overly specific location if not used anymore
+      location.delete if Metadatum.where(location: location).empty?
+    else
+      new_location = location
     end
 
-    location
+    new_location
   end
 end

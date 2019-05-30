@@ -1,6 +1,10 @@
 ucsf:
   name: "University of California, San Francisco, Parnassus Avenue, Inner Sunset, San Francisco, San Francisco City and County, California, 94131, USA"
   geo_level: "city"
+  country_name: "USA"
+  state_name: "California"
+  subdivision_name: "San Francisco City and County"
+  city_name: "San Francisco"
 
 swamp:
   name: "Swamp of Mosquitos"
@@ -12,3 +16,9 @@ swamp:
   city_name: "Redwood City"
   lat: "37.49"
   lng: "-122.23"
+
+california:
+  name: "California, USA"
+  geo_level: "state"
+  country_name: "USA"
+  state_name: "California"

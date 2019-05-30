@@ -112,4 +112,39 @@ class LocationTest < ActiveSupport::TestCase
       end
     end
   end
+
+  test "should geosearch by country and state name" do
+    api_response = [true, LocationTestHelper::API_GEOSEARCH_CALIFORNIA_RESPONSE]
+    query = "search.php?addressdetails=1&normalizecity=1&country=USA&state=California"
+    mock = MiniTest::Mock.new
+    mock.expect(:call, api_response, [query])
+    Location.stub :location_api_request, mock do
+      res = Location.geosearch_by_country_and_state("USA", "California")
+      assert_equal api_response, res
+    end
+    assert mock.verify
+  end
+
+  test "should restrict an overly specific sample location" do
+    bad_location = locations(:ucsf)
+    api_response = [true, LocationTestHelper::API_GEOSEARCH_CALIFORNIA_RESPONSE]
+    mock = MiniTest::Mock.new
+    mock.expect(:call, api_response, [bad_location.country_name, bad_location.state_name])
+    Location.stub :geosearch_by_country_and_state, mock do
+      Location.stub :create_from_params, locations(:california) do
+        new_location = Location.check_and_restrict_specificity(bad_location, "Human")
+        assert_equal locations(:california), new_location
+      end
+    end
+    assert mock.verify
+  end
+
+  test "should not restrict an appropriately specific sample location" do
+    original = locations(:ucsf)
+    mock = -> { raise "should not call geosearch" }
+    Location.stub :geosearch_by_country_and_state, mock do
+      new_location = Location.check_and_restrict_specificity(original, "Mosquito")
+      assert_equal original, new_location
+    end
+  end
 end

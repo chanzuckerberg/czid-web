@@ -23,4 +23,17 @@ class MetadatumTest < ActiveSupport::TestCase
     loc.check_and_set_location_type
     assert_match MetadataValidationErrors::INVALID_LOCATION, loc.errors.full_messages[0]
   end
+
+  test "should check and set Location Metadatum types and check specificity" do
+    mock_create = MiniTest::Mock.new
+    loc = metadata(:sample_human_collection_location_v2)
+    fields = JSON.parse(loc.raw_value, symbolize_names: true)
+    mock_create.expect(:call, locations(:ucsf), [fields[:locationiq_id], fields[:osm_id], fields[:osm_type]])
+
+    Location.stub :find_or_create_by_api_ids, mock_create do
+      res = loc.check_and_set_location_type
+      assert_equal locations(:ucsf).id, res
+    end
+    mock_create.verify
+  end
 end
