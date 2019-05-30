@@ -66,7 +66,7 @@ class Location < ApplicationRecord
     if host_genome_name == "Human"
       if location.subdivision_name.present? || location.city_name.present?
         # Redo the search for just the state/country and pick the first result (should be unique)
-        success, results = self.geosearch("#{location.state_name}, #{location.country_name}")
+        success, results = geosearch("#{location.state_name}, #{location.country_name}")
         if success
           results = resp.map { |r| LocationHelper.adapt_location_iq_response(r) }
         end
