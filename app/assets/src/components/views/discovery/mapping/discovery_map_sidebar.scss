@@ -2,4 +2,10 @@
   font-size: 12px;
   width: 300px;
   overflow-y: scroll;
+
+  .table {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
 }

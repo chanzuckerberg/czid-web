@@ -114,7 +114,7 @@ export default class DiscoveryMapSidebar extends React.Component {
 
   handleLoadSampleRows = () => {
     const { samples } = this.props;
-    console.log(samples);
+    console.log("handle load sample rows called");
     return samples;
   };
 
@@ -128,7 +128,7 @@ export default class DiscoveryMapSidebar extends React.Component {
     return (
       <div className={cs.table}>
         <InfiniteTable
-          // ref={infiniteTable => (this.infiniteTable = infiniteTable)}
+          ref={infiniteTable => (this.infiniteTable = infiniteTable)}
           columns={this.columns}
           defaultRowHeight={rowHeight}
           initialActiveColumns={activeColumns}
@@ -151,7 +151,11 @@ export default class DiscoveryMapSidebar extends React.Component {
   };
 
   render() {
-    const { className } = this.props;
+    const { className, samples } = this.props;
+
+    console.log("foobar 6:09pm", samples);
+
+    this.infiniteTable && this.infiniteTable.reset();
 
     return (
       <div className={cx(className, cs.sidebar)}>{this.renderTable()}</div>
