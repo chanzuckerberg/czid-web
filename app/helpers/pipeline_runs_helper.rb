@@ -183,7 +183,6 @@ module PipelineRunsHelper
   end
 
   def check_for_user_error(failed_stage)
-    result = [nil, nil]
     if failed_stage.step_number == 1
       user_input_validation_file = "#{failed_stage.pipeline_run.host_filter_output_s3_path}/#{PipelineRun::INPUT_VALIDATION_NAME}"
       invalid_step_input_file = "#{failed_stage.pipeline_run.host_filter_output_s3_path}/#{PipelineRun::INVALID_STEP_NAME}"
@@ -192,14 +191,15 @@ module PipelineRunsHelper
         downloaded = PipelineRun.download_file_with_retries(user_input_validation_file, file.path, 3, false)
         validation_error = downloaded ? JSON.parse(File.read(file))["Validation error"] : nil
         file.unlink
-        result = ["FAULTY_INPUT", validation_error] if validation_error
-      elsif file_generated_since_run(failed_stage, invalid_step_input_file)
+        return ["FAULTY_INPUT", validation_error] if validation_error
+      end
+      if file_generated_since_run(failed_stage, invalid_step_input_file)
         # Currently 'invalid_step_input_file' only gets produced in a single failure mode:
         # INSUFFICIENT_READS. If we extended the file to other error types in the future,
         # we would download 'invalid_step_input_file' and parse the failure mode here.
-        result = ["INSUFFICIENT_READS", nil]
+        return ["INSUFFICIENT_READS", nil]
       end
     end
-    result
+    [nil, nil]
   end
 end
