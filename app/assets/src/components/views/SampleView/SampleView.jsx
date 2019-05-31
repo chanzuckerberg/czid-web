@@ -323,10 +323,20 @@ class SampleView extends React.Component {
       } else {
         return (
           <div className={cs.failedContainer}>
-            <h6 className={cs.failed}>Sample run failed</h6>
-            <h6 className={cs.failed}>
-              {this.props.pipelineRun.error_message}
-            </h6>
+            {this.props.pipelineRun.known_user_error === "FAULTY_INPUT" ? (
+              <div>
+                Sorry, something was wrong with your file.{" "}
+                {this.props.pipelineRun.error_message}
+              </div>
+            ) : this.props.pipelineRun.known_user_error ===
+            "INSUFFICIENT_READS" ? (
+              <div>
+                Oh no! No matches were identified because there weren't any
+                reads left after filtering.
+              </div>
+            ) : (
+              <h6 className={cs.failed}>Sample run failed</h6>
+            )}
           </div>
         );
       }
