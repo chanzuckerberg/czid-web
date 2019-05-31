@@ -35,7 +35,6 @@ import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
 import DiscoverySidebar from "./DiscoverySidebar";
-import cs from "./discovery_view.scss";
 import DiscoveryFilters from "./DiscoveryFilters";
 import ProjectHeader from "./ProjectHeader";
 import {
@@ -50,6 +49,8 @@ import {
 } from "./discovery_api";
 import NoResultsBanner from "./NoResultsBanner";
 import DiscoveryMapSidebar from "./mapping/DiscoveryMapSidebar";
+
+import cs from "./discovery_view.scss";
 
 // Data available
 // (A) non-filtered dimensions: for filter options
@@ -719,6 +720,7 @@ class DiscoveryView extends React.Component {
       filteredSampleStats,
       loadingDimensions,
       loadingStats,
+      mapSelectedSamples,
       projectDimensions,
       projects,
       sampleDimensions,
@@ -753,7 +755,10 @@ class DiscoveryView extends React.Component {
               loading={loadingDimensions || loadingStats}
             />
           ) : (
-            <DiscoveryMapSidebar className={cs.sidebar} />
+            <DiscoveryMapSidebar
+              className={cs.sidebar}
+              samples={mapSelectedSamples}
+            />
           ))}
       </div>
     );

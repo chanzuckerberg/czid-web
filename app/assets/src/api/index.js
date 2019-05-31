@@ -189,6 +189,7 @@ const getSamples = ({
       limit,
       offset,
       listAllIds,
+      // &sampleIds=[1,2] instead of default &sampleIds[]=1&sampleIds[]=2 format.
       sampleIds: JSON.stringify(sampleIds),
       ...filters
     }
