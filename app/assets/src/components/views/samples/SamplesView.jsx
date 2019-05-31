@@ -1,8 +1,8 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { difference, find, isEmpty, union } from "lodash/fp";
 import cx from "classnames";
 
+import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
@@ -17,7 +17,7 @@ import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import BasicPopup from "~/components/BasicPopup";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { Menu, MenuItem } from "~ui/controls/Menu";
-import BaseMap from "~/components/views/discovery/mapping/BaseMap";
+import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 
 import ReportsDownloader from "./ReportsDownloader";
 import CollectionModal from "./CollectionModal";
@@ -246,7 +246,8 @@ class SamplesView extends React.Component {
   };
 
   reset = () => {
-    this.infiniteTable.reset();
+    const { currentDisplay } = this.state;
+    if (currentDisplay === "table") this.infiniteTable.reset();
   };
 
   renderHeatmapTrigger = () => {
@@ -421,10 +422,13 @@ class SamplesView extends React.Component {
   };
 
   renderMap = () => {
-    const { mapTilerKey } = this.props;
+    const { mapTilerKey, mapLocationData } = this.props;
     return (
       <div className={cs.map}>
-        <BaseMap mapTilerKey={mapTilerKey} />
+        <DiscoveryMap
+          mapTilerKey={mapTilerKey}
+          mapLocationData={mapLocationData}
+        />
       </div>
     );
   };
@@ -493,7 +497,8 @@ SamplesView.propTypes = {
   currentDisplay: PropTypes.string.isRequired,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   onDisplaySwitch: PropTypes.func,
-  mapTilerKey: PropTypes.string
+  mapTilerKey: PropTypes.string,
+  mapLocationData: PropTypes.objectOf(PropTypes.Location)
 };
 
 export default SamplesView;

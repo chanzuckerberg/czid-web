@@ -10,7 +10,7 @@ export default class ReportsDownloader {
     downloadOption,
     selectedSampleIds
   }) {
-    this.projectId = projectId;
+    this.projectId = projectId || "all";
     this.selectedSampleIds = Array.from(selectedSampleIds);
     this.onDownloadFail = onDownloadFail;
 

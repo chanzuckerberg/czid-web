@@ -35,4 +35,20 @@ module LocationTestHelper
       "locationiq_id" => 89_640_023
     }
   ].freeze
+  API_GEOSEARCH_CALIFORNIA_RESPONSE = [
+    {
+      "place_id" => "214330370",
+      "osm_type" => "relation",
+      "osm_id" => "165475",
+      "lat" => 36.70,
+      # LocationIQ uses 'lon'
+      "lon" => -118.76,
+      "display_name" => "California, USA",
+      "address" => {
+        "state" => "California",
+        "country" => "USA",
+        "country_code" => "us"
+      }
+    }
+  ].freeze
 end

@@ -228,7 +228,8 @@ class SamplesHeatmapView extends React.Component {
         thresholdFilters: this.state.selectedOptions.thresholdFilters,
         taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
         readSpecificity: this.state.selectedOptions.readSpecificity,
-        background: this.state.selectedOptions.background
+        background: this.state.selectedOptions.background,
+        heatmapTs: this.props.heatmapTs
       },
       this.lastRequestToken.token
     );
@@ -584,7 +585,8 @@ SamplesHeatmapView.propTypes = {
   subcategories: PropTypes.object,
   removedTaxonIds: PropTypes.array,
   taxonLevels: PropTypes.array,
-  thresholdFilters: PropTypes.object
+  thresholdFilters: PropTypes.object,
+  heatmapTs: PropTypes.number
 };
 
 export default SamplesHeatmapView;
