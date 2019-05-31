@@ -56,6 +56,7 @@ class PipelineRun < ApplicationRecord
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
   INPUT_VALIDATION_NAME = "validate_input_summary.json".freeze
+  INVALID_STEP_NAME = "invalid_step_input.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
@@ -128,8 +129,7 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADING_QUEUED = 'LOADING_QUEUED'.freeze
   STATUS_LOADING_ERROR = 'LOADING_ERROR'.freeze
 
-  LOADERS_BY_OUTPUT = { "input_validations" => "db_load_input_validations",
-                        "ercc_counts" => "db_load_ercc_counts",
+  LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
@@ -298,7 +298,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[input_validations ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
+    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
 
     # Then, generate output_states
     output_state_entries = []
@@ -395,27 +395,6 @@ class PipelineRun < ApplicationRecord
 
   def succeeded?
     job_status == STATUS_CHECKED
-  end
-
-  def db_load_step_validations
-    file = Tempfile.new
-    downloaded = PipelineRun.download_file_with_retries(s3_file_for("step_validations"),
-                                                        file.path, 3, false)
-    if downloaded
-      error_json = JSON.parse(File.read(file))
-      new_error_message = "Step #{error_json['step']} failed because of #{error_json['error']}"
-      update(error_message: [error_message, new_error_message].compact.join(";"))
-    end
-    file.unlink
-  end
-
-  def db_load_input_validations
-    file = Tempfile.new
-    downloaded = PipelineRun.download_file_with_retries(s3_file_for("input_validations"),
-                                                        file.path, 3, false)
-    new_error_message = downloaded ? JSON.parse(File.read(file))["Validation error"] : nil
-    update(error_message: [error_message, new_error_message].compact.join(";")) if new_error_message
-    file.unlink
   end
 
   def db_load_ercc_counts
@@ -699,8 +678,6 @@ class PipelineRun < ApplicationRecord
     end
 
     case output
-    when "input_validations"
-      "#{host_filter_output_s3_path}/#{INPUT_VALIDATION_NAME}"
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     when "amr_counts"
@@ -858,18 +835,21 @@ class PipelineRun < ApplicationRecord
   def check_for_user_error(failed_stage)
     if failed_stage.step_number == 1
       user_input_validation_file = "#{host_filter_output_s3_path}/#{INPUT_VALIDATION_NAME}"
-      step_input_validation_file = "#{host_filter_output_s3_path}/#{STEP_VALIDATION_NAME}"
+      invalid_step_input_file = "#{host_filter_output_s3_path}/#{INVALID_STEP_NAME}"
       if file_generated_since_run(failed_stage, user_input_validation_file)
         file = Tempfile.new
         downloaded = PipelineRun.download_file_with_retries(user_input_validation_file, file.path, 3, false)
-        validation_error_message = downloaded ? JSON.parse(File.read(file))["Validation error"] : nil
+        validation_error = downloaded ? JSON.parse(File.read(file))["Validation error"] : nil
         file.unlink
-        return FAULTY_INPUT if validation_error_message
-      elif file_generated_since_run(failed_stage, step_input_validation_file)
-        return INSUFFICIENT_READS
+        return [FAULTY_INPUT, validation_error] if validation_error
+        elif file_generated_since_run(failed_stage, invalid_step_input_file)
+        # Currently 'invalid_step_input_file' only gets produced in a single failure mode:
+        # INSUFFICIENT_READS. If we extended the file to other error types in the future,
+        # we would download 'invalid_step_input_file' and parse the failure mode here.
+        return [INSUFFICIENT_READS, nil]
       end
     end
-    nil
+    [nil, nil]
   end
 
   def update_job_status
@@ -882,13 +862,11 @@ class PipelineRun < ApplicationRecord
       if prs.failed?
         self.job_status = STATUS_FAILED
         self.finalized = 1
-        self.known_user_error = check_for_user_error(prs)
-        unless self.known_user_error
-          message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.admin? ? 'admin user' : 'non-admin user'} " \
-            "failed #{prs.name} with #{adjusted_remaining_reads || 0} reads remaining after #{duration_hrs} hours. " \
-            "See: #{status_url}"
-          LogUtil.log_err_and_airbrake(message)
-        end
+        self.known_user_error, self.error_message = check_for_user_error(prs)
+        log_message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.admin? ? 'admin user' : 'non-admin user'} " \
+          "failed #{prs.name} with #{adjusted_remaining_reads || 0} reads remaining after #{duration_hrs} hours. " \
+          "See: #{status_url}"
+        LogUtil.log_err_and_airbrake(log_message) unless known_user_error
       elsif !prs.started?
         # we're moving on to a new stage
         prs.run_job
