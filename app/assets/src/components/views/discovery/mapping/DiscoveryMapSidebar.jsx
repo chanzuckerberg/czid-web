@@ -125,6 +125,7 @@ export default class DiscoveryMapSidebar extends React.Component {
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 66;
     // const selectAllChecked = this.isSelectAllChecked();
+    console.log("I am in renderTable");
     return (
       <div className={cs.table}>
         <InfiniteTable
