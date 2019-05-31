@@ -161,7 +161,7 @@ class SamplesController < ApplicationController
     samples_visibility = get_visibility(limited_samples)
 
     # format_samples loads a lot of information about samples
-    # There many ways we can refactor: multiple endpoints for client to ask for the information
+    # There are many ways we can refactor: multiple endpoints for client to ask for the information
     # they actually need or at least a configurable function to get only certain data
     details_json = format_samples(limited_samples).as_json()
     limited_samples_json.zip(details_json, samples_visibility).map do |sample, details, visibility|

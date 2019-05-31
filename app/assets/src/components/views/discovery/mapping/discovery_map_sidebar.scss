@@ -3,9 +3,22 @@
   width: 300px;
   overflow-y: scroll;
 
-  .table {
-    flex: 1 0 auto;
+  .container {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    flex: 1 0 auto;
+
+    .table {
+      flex: 1 0 auto;
+      display: flex;
+      flex-direction: column;
+      height: 500px; // change?
+    }
   }
+}
+
+.tableDataRow {
+  align-items: flex-start;
+  padding: 11px 0;
 }

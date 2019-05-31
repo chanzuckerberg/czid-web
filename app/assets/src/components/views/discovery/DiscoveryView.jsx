@@ -708,7 +708,7 @@ class DiscoveryView extends React.Component {
       sampleIds,
       limit: 10000 // Server needs a max, 10K at one location is a good cutoff.
     });
-    this.setState({ mapSelectedSamples: fetchedSamples });
+    this.setState({ mapSelectedSamples: fetchedSamples.samples });
   };
 
   renderRightPane = () => {

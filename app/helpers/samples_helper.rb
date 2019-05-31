@@ -608,6 +608,7 @@ module SamplesHelper
   end
 
   def filter_by_sample_ids(samples, requested_sample_ids)
-    samples.where(id: JSON.parse(requested_sample_ids))
+    requested_sample_ids.class.name
+    samples.where(id: requested_sample_ids.is_a?(Array) ? requested_sample_ids : JSON.parse(requested_sample_ids))
   end
 end
