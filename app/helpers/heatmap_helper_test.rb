@@ -208,66 +208,11 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     assert_equal 1, top_taxons.length
   end
 
-  test "fetch_top_taxons threshold_filters" do
-    top_taxons = HeatmapHelper.fetch_top_taxons(
-      @samples,
-      @background.id,
-      @categories,
-      @read_specificity,
-      @include_phage,
-      @num_results,
-      @min_reads,
-      @sort_by,
-      [{ "metric" => "NT_zscore", "value" => "2000", "operator" => ">=" }]
-    )
-    assert_equal 3, top_taxons.length
-
-    top_taxons = HeatmapHelper.fetch_top_taxons(
-      @samples,
-      @background.id,
-      @categories,
-      @read_specificity,
-      @include_phage,
-      @num_results,
-      @min_reads,
-      @sort_by,
-      [{ "metric" => "NT_r", "value" => "200", "operator" => ">=" }]
-    )
-    assert_equal 3, top_taxons.length
-
-    top_taxons = HeatmapHelper.fetch_top_taxons(
-      @samples,
-      @background.id,
-      @categories,
-      @read_specificity,
-      @include_phage,
-      @num_results,
-      @min_reads,
-      @sort_by,
-      [{ "metric" => "NT_r", "value" => "1", "operator" => "<=" }]
-    )
-    assert_equal 1, top_taxons.length
-
-    top_taxons = HeatmapHelper.fetch_top_taxons(
-      @samples,
-      @background.id,
-      @categories,
-      @read_specificity,
-      @include_phage,
-      @num_results,
-      @min_reads,
-      @sort_by,
-      [{ "metric" => "NT_r", "value" => "1", "operator" => ">=" }]
-    )
-    assert_equal 3, top_taxons.length
-  end
-
   test "samples_taxons_details defaults" do
     dicts = HeatmapHelper.samples_taxons_details(
       @results_by_pr,
       @samples,
       @top_taxons_details.pluck('tax_id'),
-      @background.id,
       @species_selected,
       @threshold_filters
     )
@@ -286,7 +231,6 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @results_by_pr,
       @samples,
       @top_taxons_details.pluck('tax_id'),
-      @background.id,
       false,
       @threshold_filters
     )

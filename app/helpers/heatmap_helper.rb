@@ -79,7 +79,6 @@ module HeatmapHelper
       results_by_pr,
       samples,
       taxon_ids,
-      background_id,
       species_selected,
       threshold_filters
     )
@@ -266,7 +265,6 @@ module HeatmapHelper
     results_by_pr,
     samples,
     taxon_ids,
-    _background_id,
     species_selected,
     threshold_filters
   )
