@@ -855,6 +855,23 @@ class PipelineRun < ApplicationRecord
     _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
   end
 
+  def check_for_user_error(failed_stage)
+    if failed_stage.step_number == 1
+      user_input_validation_file = "#{host_filter_output_s3_path}/#{INPUT_VALIDATION_NAME}"
+      step_input_validation_file = "#{host_filter_output_s3_path}/#{STEP_VALIDATION_NAME}"
+      if file_generated_since_run(failed_stage, user_input_validation_file)
+        file = Tempfile.new
+        downloaded = PipelineRun.download_file_with_retries(user_input_validation_file, file.path, 3, false)
+        validation_error_message = downloaded ? JSON.parse(File.read(file))["Validation error"] : nil
+        file.unlink
+        return FAULTY_INPUT if validation_error_message
+      elif file_generated_since_run(failed_stage, step_input_validation_file)
+        return INSUFFICIENT_READS
+      end
+    end
+    nil
+  end
+
   def update_job_status
     prs = active_stage
     if prs.nil?
@@ -865,8 +882,13 @@ class PipelineRun < ApplicationRecord
       if prs.failed?
         self.job_status = STATUS_FAILED
         self.finalized = 1
-        message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.email} failed #{prs.name} with #{adjusted_remaining_reads || 0} reads remaining after #{duration_hrs} hours. See: #{status_url}"
-        LogUtil.log_err_and_airbrake(message)
+        self.known_user_error = check_for_user_error(prs)
+        unless self.known_user_error
+          message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.admin? ? 'admin user' : 'non-admin user'} " \
+            "failed #{prs.name} with #{adjusted_remaining_reads || 0} reads remaining after #{duration_hrs} hours. " \
+            "See: #{status_url}"
+          LogUtil.log_err_and_airbrake(message)
+        end
       elsif !prs.started?
         # we're moving on to a new stage
         prs.run_job
