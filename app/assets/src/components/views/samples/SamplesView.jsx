@@ -8,122 +8,121 @@ import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
-
 import SaveIcon from "~ui/icons/SaveIcon";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
-
 import ReportsDownloader from "./ReportsDownloader";
 import CollectionModal from "./CollectionModal";
-import tableCS from "~/components/views/discovery/table_renderers.scss";
 import cs from "./samples_view.scss";
 
 const DISPLAYS = ["table", "map"];
 
-const COLUMNS = [
-  {
-    dataKey: "sample",
-    flexGrow: 1,
-    width: 350,
-    cellRenderer: TableRenderers.renderSample,
-    headerClassName: cs.sampleHeader
-  },
-  {
-    dataKey: "createdAt",
-    label: "Uploaded On",
-    width: 120,
-    className: cs.basicCell,
-    cellRenderer: TableRenderers.renderDateWithElapsed
-  },
-  {
-    dataKey: "host",
-    flexGrow: 1,
-    className: cs.basicCell
-  },
-  {
-    dataKey: "collectionLocation",
-    label: "Location",
-    flexGrow: 1,
-    className: cs.basicCell
-  },
-  {
-    dataKey: "totalReads",
-    label: "Total Reads",
-    flexGrow: 1,
-    className: cs.basicCell,
-    cellDataGetter: ({ dataKey, rowData }) =>
-      TableRenderers.formatNumberWithCommas(rowData[dataKey])
-  },
-  {
-    dataKey: "nonHostReads",
-    label: "Passed Filters",
-    flexGrow: 1,
-    className: cs.basicCell,
-    cellRenderer: TableRenderers.renderNumberAndPercentage
-  },
-  {
-    dataKey: "qcPercent",
-    label: "Passed QC",
-    flexGrow: 1,
-    className: cs.basicCell,
-    cellDataGetter: ({ dataKey, rowData }) =>
-      TableRenderers.formatPercentage(rowData[dataKey])
-  },
-  {
-    dataKey: "duplicateCompressionRatio",
-    label: "DCR",
-    flexGrow: 1,
-    className: cs.basicCell,
-    cellDataGetter: ({ dataKey, rowData }) =>
-      TableRenderers.formatPercentage(rowData[dataKey])
-  },
-  {
-    dataKey: "erccReads",
-    label: "ERCC Reads",
-    flexGrow: 1,
-    className: cs.basicCell,
-    cellDataGetter: ({ dataKey, rowData }) =>
-      TableRenderers.formatNumberWithCommas(rowData[dataKey])
-  },
-  {
-    dataKey: "notes",
-    flexGrow: 1,
-    className: cs.basicCell
-  },
-  {
-    dataKey: "nucleotideType",
-    label: "Nucleotide Type",
-    flexGrow: 1,
-    className: cs.basicCell
-  },
-  {
-    dataKey: "sampleType",
-    label: "Sample Type",
-    flexGrow: 1,
-    className: cs.basicCell
-  },
-  {
-    dataKey: "subsampledFraction",
-    label: "SubSampled Fraction",
-    flexGrow: 1,
-    className: cs.basicCell,
-    cellDataGetter: ({ dataKey, rowData }) =>
-      TableRenderers.formatNumber(rowData[dataKey])
-  },
-  {
-    dataKey: "totalRuntime",
-    label: "Total Runtime",
-    flexGrow: 1,
-    className: cs.basicCell,
-    cellDataGetter: ({ dataKey, rowData }) =>
-      TableRenderers.formatDuration(rowData[dataKey])
-  }
-];
-
 class SamplesView extends React.Component {
+  static get columns() {
+    return [
+      {
+        dataKey: "sample",
+        flexGrow: 1,
+        width: 350,
+        cellRenderer: TableRenderers.renderSample,
+        headerClassName: cs.sampleHeader
+      },
+      {
+        dataKey: "createdAt",
+        label: "Uploaded On",
+        width: 120,
+        className: cs.basicCell,
+        cellRenderer: TableRenderers.renderDateWithElapsed
+      },
+      {
+        dataKey: "host",
+        flexGrow: 1,
+        className: cs.basicCell
+      },
+      {
+        dataKey: "collectionLocation",
+        label: "Location",
+        flexGrow: 1,
+        className: cs.basicCell
+      },
+      {
+        dataKey: "totalReads",
+        label: "Total Reads",
+        flexGrow: 1,
+        className: cs.basicCell,
+        cellDataGetter: ({ dataKey, rowData }) =>
+          TableRenderers.formatNumberWithCommas(rowData[dataKey])
+      },
+      {
+        dataKey: "nonHostReads",
+        label: "Passed Filters",
+        flexGrow: 1,
+        className: cs.basicCell,
+        cellRenderer: TableRenderers.renderNumberAndPercentage
+      },
+      {
+        dataKey: "qcPercent",
+        label: "Passed QC",
+        flexGrow: 1,
+        className: cs.basicCell,
+        cellDataGetter: ({ dataKey, rowData }) =>
+          TableRenderers.formatPercentage(rowData[dataKey])
+      },
+      {
+        dataKey: "duplicateCompressionRatio",
+        label: "DCR",
+        flexGrow: 1,
+        className: cs.basicCell,
+        cellDataGetter: ({ dataKey, rowData }) =>
+          TableRenderers.formatPercentage(rowData[dataKey])
+      },
+      {
+        dataKey: "erccReads",
+        label: "ERCC Reads",
+        flexGrow: 1,
+        className: cs.basicCell,
+        cellDataGetter: ({ dataKey, rowData }) =>
+          TableRenderers.formatNumberWithCommas(rowData[dataKey])
+      },
+      {
+        dataKey: "notes",
+        flexGrow: 1,
+        className: cs.basicCell
+      },
+      {
+        dataKey: "nucleotideType",
+        label: "Nucleotide Type",
+        flexGrow: 1,
+        className: cs.basicCell
+      },
+      {
+        dataKey: "sampleType",
+        label: "Sample Type",
+        flexGrow: 1,
+        className: cs.basicCell
+      },
+      {
+        dataKey: "subsampledFraction",
+        label: "SubSampled Fraction",
+        flexGrow: 1,
+        className: cs.basicCell,
+        cellDataGetter: ({ dataKey, rowData }) =>
+          TableRenderers.formatNumber(rowData[dataKey])
+      },
+      {
+        dataKey: "totalRuntime",
+        label: "Total Runtime",
+        flexGrow: 1,
+        className: cs.basicCell,
+        cellDataGetter: ({ dataKey, rowData }) =>
+          TableRenderers.formatDuration(rowData[dataKey])
+      }
+    ];
+  }
+
   constructor(props) {
     super(props);
 
@@ -295,10 +294,10 @@ class SamplesView extends React.Component {
       <div className={cs.table}>
         <InfiniteTable
           ref={infiniteTable => (this.infiniteTable = infiniteTable)}
-          columns={COLUMNS}
+          columns={SamplesView.columns}
           defaultRowHeight={rowHeight}
           initialActiveColumns={activeColumns}
-          loadingClassName={tableCS.loading}
+          loadingClassName={cs.loading}
           onLoadRows={onLoadRows}
           onSelectAllRows={withAnalytics(
             this.handleSelectAllRows,
