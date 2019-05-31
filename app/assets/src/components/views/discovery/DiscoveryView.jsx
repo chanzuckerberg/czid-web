@@ -48,7 +48,7 @@ import {
   DISCOVERY_DOMAIN_PUBLIC
 } from "./discovery_api";
 import NoResultsBanner from "./NoResultsBanner";
-import DiscoveryMapSidebar from "./mapping/DiscoveryMapSidebar";
+import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 
 import cs from "./discovery_view.scss";
 
@@ -101,6 +101,7 @@ class DiscoveryView extends React.Component {
         loadingVisualizations: true,
         mapLocationData: {},
         mapSelectedLocationId: null,
+        mapSelectedSampleIds: [],
         mapSelectedSamples: [],
         project: null,
         projectDimensions: [],
@@ -704,11 +705,17 @@ class DiscoveryView extends React.Component {
     const { mapSelectedLocationId, mapLocationData } = this.state;
     const sampleIds = mapLocationData[mapSelectedLocationId].sample_ids;
 
-    const fetchedSamples = await getDiscoverySamples({
+    const {
+      samples: fetchedSamples,
+      sampleIds: fetchedSampleIds
+    } = await getDiscoverySamples({
       sampleIds,
-      limit: 10000 // Server needs a max, 10K at one location is a good cutoff.
+      limit: 1e4 // Server needs a max, 1e4 at one location is a good cutoff.
     });
-    this.setState({ mapSelectedSamples: fetchedSamples.samples });
+    this.setState({
+      mapSelectedSamples: fetchedSamples,
+      mapSelectedSampleIds: fetchedSampleIds
+    });
   };
 
   renderRightPane = () => {
@@ -720,6 +727,7 @@ class DiscoveryView extends React.Component {
       filteredSampleStats,
       loadingDimensions,
       loadingStats,
+      mapSelectedSampleIds,
       mapSelectedSamples,
       projectDimensions,
       projects,
@@ -755,9 +763,10 @@ class DiscoveryView extends React.Component {
               loading={loadingDimensions || loadingStats}
             />
           ) : (
-            <DiscoveryMapSidebar
-              className={cs.sidebar}
+            <MapPreviewSidebar
               samples={mapSelectedSamples}
+              onSampleSelected={this.handleSampleSelected}
+              selectableIds={mapSelectedSampleIds}
             />
           ))}
       </div>

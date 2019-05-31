@@ -140,7 +140,7 @@ class SamplesView extends React.Component {
     }
     this.setState({ selectedSampleIds: newSelected });
     logAnalyticsEvent("SamplesView_row_selected", {
-      selectedSampleIds: newSelected
+      selectedSampleIds: newSelected.length
     });
   };
 

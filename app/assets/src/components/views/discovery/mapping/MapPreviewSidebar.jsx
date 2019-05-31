@@ -1,15 +1,21 @@
 import React from "react";
 import cx from "classnames";
+import { difference, find, isEmpty, union } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
-import cs from "./discovery_map_sidebar.scss";
+import cs from "./map_preview_sidebar.scss";
 
-export default class DiscoveryMapSidebar extends React.Component {
+export default class MapPreviewSidebar extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      selectedSampleIds: new Set()
+    };
 
     this.columns = [
       {
@@ -112,45 +118,87 @@ export default class DiscoveryMapSidebar extends React.Component {
     ];
   }
 
-  handleLoadSampleRows = async ({ startIndex, stopIndex }) => {
+  handleLoadSampleRows = async () => {
+    // TODO(jsheu): Add pagination for long lists of samples
     const { samples } = this.props;
-    console.log("handle load sample rows called");
     return samples;
   };
 
-  renderTable = () => {
-    const { activeColumns, samples } = this.props;
-    // const { selectedSampleIds } = this.state;
+  handleSelectRow = (value, checked) => {
+    const { selectedSampleIds } = this.state;
+    let newSelected = new Set(selectedSampleIds);
+    if (checked) {
+      newSelected.add(value);
+    } else {
+      newSelected.delete(value);
+    }
+    this.setState({ selectedSampleIds: newSelected });
+    logAnalyticsEvent("MapPreviewSidebar_row_selected", {
+      selectedSampleIds: newSelected.length
+    });
+  };
 
-    // TODO(tiago): replace by automated cell height computing
+  handleRowClick = ({ event, rowData }) => {
+    const { onSampleSelected, samples } = this.props;
+    const sample = find({ id: rowData.id }, samples);
+    onSampleSelected && onSampleSelected({ sample, currentEvent: event });
+    logAnalyticsEvent("MapPreviewSidebar_row_clicked", {
+      sampleId: sample.id,
+      sampleName: sample.name
+    });
+  };
+
+  isSelectAllChecked = () => {
+    const { selectedSampleIds } = this.state;
+    const { selectableIds } = this.props;
+
+    return (
+      !isEmpty(selectableIds) &&
+      isEmpty(difference(selectableIds, Array.from(selectedSampleIds)))
+    );
+  };
+
+  handleSelectAllRows = (value, checked) => {
+    const { selectableIds } = this.props;
+    const { selectedSampleIds } = this.state;
+    let newSelected = new Set(
+      checked
+        ? union(selectedSampleIds, selectableIds)
+        : difference(selectedSampleIds, selectableIds)
+    );
+    this.setState({ selectedSampleIds: newSelected });
+  };
+
+  renderTable = () => {
+    const { activeColumns, protectedColumns } = this.props;
+    const { selectedSampleIds } = this.state;
+
     const rowHeight = 60;
-    // const selectAllChecked = this.isSelectAllChecked();
-    console.log("I am in renderTable 3:10pm");
-    console.log("the samples are: ", samples);
+    const batchSize = 1e4;
+    const selectAllChecked = this.isSelectAllChecked();
     return (
       <div className={cs.container}>
         <div className={cs.table}>
           <InfiniteTable
-            ref={infiniteTable => (this.infiniteTable = infiniteTable)}
             columns={this.columns}
             defaultRowHeight={rowHeight}
             initialActiveColumns={activeColumns}
-            // loadingClassName={cs.loading}
+            minimumBatchSize={batchSize}
             onLoadRows={this.handleLoadSampleRows}
-            // onSelectAllRows={withAnalytics(
-            //   this.handleSelectAllRows,
-            //   "SamplesView_select-all-rows_clicked"
-            // )}
-            // onSelectRow={this.handleSelectRow}
-            // onRowClick={this.handleRowClick}
-            // protectedColumns={protectedColumns}
+            onRowClick={this.handleRowClick}
+            onSelectAllRows={withAnalytics(
+              this.handleSelectAllRows,
+              "MapPreviewSidebar_select-all-rows_clicked"
+            )}
+            onSelectRow={this.handleSelectRow}
+            protectedColumns={protectedColumns}
+            ref={infiniteTable => (this.infiniteTable = infiniteTable)}
             rowClassName={cs.tableDataRow}
-            // selectableKey="id"
-            // selected={selectedSampleIds}
-            // selectAllChecked={selectAllChecked}
-            minimumBatchSize={10000}
-            rowCount={10000}
-            threshold={10000}
+            rowCount={batchSize}
+            selectAllChecked={selectAllChecked}
+            selectableKey="id"
+            selected={selectedSampleIds}
+            threshold={batchSize}
           />
         </div>
       </div>
@@ -158,9 +206,9 @@ export default class DiscoveryMapSidebar extends React.Component {
   };
 
   render() {
-    const { className, samples } = this.props;
+    const { className } = this.props;
 
-    console.log("foobar 6:09pm", samples);
+    console.log("foobar 4:23pm");
 
     this.infiniteTable && this.infiniteTable.reset();
 
@@ -170,12 +218,16 @@ export default class DiscoveryMapSidebar extends React.Component {
   }
 }
 
-DiscoveryMapSidebar.defaultProps = {
-  activeColumns: ["sample"]
+MapPreviewSidebar.defaultProps = {
+  activeColumns: ["sample"],
+  protectedColumns: ["sample"]
 };
 
-DiscoveryMapSidebar.propTypes = {
+MapPreviewSidebar.propTypes = {
   className: PropTypes.string,
   samples: PropTypes.array,
-  activeColumns: PropTypes.array
+  activeColumns: PropTypes.array,
+  onSampleSelected: PropTypes.func,
+  protectedColumns: PropTypes.array,
+  selectableIds: PropTypes.array.isRequired
 };
