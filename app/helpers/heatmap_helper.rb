@@ -72,7 +72,7 @@ module HeatmapHelper
     taxon_ids -= removed_taxon_ids
 
     # Refetch at genus level using species level
-    parent_ids = species_selected ? [] : ReportHelper.fetch_parent_ids(taxon_ids, samples)
+    parent_ids = species_selected ? [] : HeatmapHelper.fetch_parent_ids(taxon_ids, samples)
     results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
 
     HeatmapHelper.samples_taxons_details(
