@@ -335,7 +335,7 @@ class SampleView extends React.Component {
                 reads left after filtering.
               </div>
             ) : (
-              <h6 className={cs.failed}>Sample run failed</h6>
+              <h6 className={cs.failed}>Oh no! The sample run failed.</h6>
             )}
           </div>
         );
