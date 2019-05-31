@@ -16,9 +16,6 @@ module ReportHelper
   DEFAULT_SAMPLE_ALIGNMENTLENGTH = 0.0
   DEFAULT_SAMPLE_PERCENTCONCORDANT = 0.0
 
-  MINIMUM_READ_THRESHOLD = 5
-  MINIMUM_ZSCORE_THRESHOLD = 1.7
-
   # For taxon_count 'species' rows without a corresponding 'genus' rows,
   # we create a fake singleton genus containing just that species;
   # the fake genus IDs start here:
@@ -27,7 +24,6 @@ module ReportHelper
   DECIMALS = 7
 
   DEFAULT_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
-  DEFAULT_TAXON_SORT_PARAM = 'highest_nt_aggregatescore'.freeze
   DEFAULT_PARAMS = { sort_by: DEFAULT_SORT_PARAM }.freeze
 
   IGNORED_PARAMS = [:controller, :action, :id].freeze
@@ -252,56 +248,6 @@ module ReportHelper
     end
   end
 
-  # TODO: (gdingle): refactor to class method
-  def samples_taxons_details(samples, taxon_ids, background_id, species_selected, threshold_filters)
-    results = {}
-
-    # Get sample results for the taxon ids
-    unless taxon_ids.empty?
-      samples_by_id = Hash[samples.map { |s| [s.id, s] }]
-      parent_ids = ReportHelper.fetch_parent_ids(taxon_ids, samples)
-      results_by_pr = ReportHelper.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
-      results_by_pr.each do |_pr_id, res|
-        pr = res["pr"]
-        taxon_counts = res["taxon_counts"]
-        sample_id = pr.sample_id
-        tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
-        ReportHelper.only_species_or_genus_counts!(tax_2d, species_selected)
-
-        rows = []
-        tax_2d.each { |_tax_id, tax_info| rows << tax_info }
-        ReportHelper.compute_aggregate_scores_v2!(rows)
-
-        filtered_rows = rows
-                        .select { |row| taxon_ids.include?(row["tax_id"]) }
-                        .each { |row| row[:filtered] = ReportHelper.check_custom_filters(row, threshold_filters) }
-
-        results[sample_id] = {
-          sample_id: sample_id,
-          name: samples_by_id[sample_id].name,
-          metadata: samples_by_id[sample_id].metadata_with_base_type,
-          host_genome_name: samples_by_id[sample_id].host_genome_name,
-          taxons: filtered_rows
-        }
-      end
-    end
-
-    # For samples that didn't have matching taxons, just throw in the metadata.
-    samples.each do |sample|
-      unless results.key?(sample.id)
-        results[sample.id] = {
-          sample_id: sample.id,
-          name: sample.name,
-          metadata: sample.metadata_with_base_type,
-          host_genome_name: sample.host_genome_name
-        }
-      end
-    end
-
-    # Flatten the hash
-    results.values
-  end
-
   # All the methods below should be considered private, but I don't know enough
   # about ruby to actually make a class method private and call it.
   # private
@@ -454,92 +400,6 @@ module ReportHelper
     ").to_hash
   end
 
-  def self.fetch_top_taxons(samples, background_id, categories, read_specificity = false, include_phage = false)
-    pipeline_run_ids = samples.map { |s| s.first_pipeline_run ? s.first_pipeline_run.id : nil }.compact
-
-    categories_clause = ""
-    if categories.present?
-      categories_clause = " AND taxon_counts.superkingdom_taxid IN (#{categories.map { |category| CATEGORIES_TAXID_BY_NAME[category] }.compact.join(',')})"
-    elsif include_phage
-      categories_clause = " AND taxon_counts.superkingdom_taxid = #{CATEGORIES_TAXID_BY_NAME['Viruses']}"
-    end
-
-    read_specificity_clause = ""
-    if read_specificity
-      read_specificity_clause = " AND taxon_counts.tax_id > 0"
-    end
-
-    if !include_phage && categories.present?
-      phage_clause = " AND taxon_counts.is_phage != 1"
-    elsif include_phage && categories.blank?
-      phage_clause = " AND taxon_counts.is_phage = 1"
-    end
-
-    query = "
-    SELECT
-      taxon_counts.pipeline_run_id     AS  pipeline_run_id,
-      taxon_counts.tax_id              AS  tax_id,
-      taxon_counts.count_type          AS  count_type,
-      taxon_counts.tax_level           AS  tax_level,
-      taxon_counts.genus_taxid         AS  genus_taxid,
-      taxon_counts.family_taxid        AS  family_taxid,
-      taxon_counts.name                AS  name,
-      taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
-      taxon_counts.is_phage            AS  is_phage,
-      taxon_counts.count               AS  r,
-      taxon_summaries.stdev            AS stdev,
-      taxon_summaries.mean             AS mean,
-      taxon_counts.percent_identity    AS  percentidentity,
-      taxon_counts.alignment_length    AS  alignmentlength,
-      IF(
-        taxon_counts.e_value IS NOT NULL,
-        (0.0 - taxon_counts.e_value),
-        #{DEFAULT_SAMPLE_NEGLOGEVALUE}
-      )                                AS  neglogevalue,
-      taxon_counts.percent_concordant  AS  percentconcordant
-    FROM taxon_counts
-    LEFT OUTER JOIN taxon_summaries ON
-      #{background_id.to_i}   = taxon_summaries.background_id   AND
-      taxon_counts.count_type = taxon_summaries.count_type      AND
-      taxon_counts.tax_level  = taxon_summaries.tax_level       AND
-      taxon_counts.tax_id     = taxon_summaries.tax_id
-    WHERE
-      pipeline_run_id in (#{pipeline_run_ids.join(',')})
-      AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
-      AND taxon_counts.count >= #{MINIMUM_READ_THRESHOLD}
-      AND taxon_counts.count_type IN ('NT', 'NR')
-      #{categories_clause}
-      #{read_specificity_clause}
-      #{phage_clause}
-     "
-    sql_results = TaxonCount.connection.select_all(query).to_hash
-
-    # calculating rpm and zscore, organizing the results by pipeline_run_id
-    result_hash = {}
-
-    pipeline_run_ids = sql_results.map { |x| x['pipeline_run_id'] }
-    pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
-    pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
-
-    sql_results.each do |row|
-      pipeline_run_id = row["pipeline_run_id"]
-      if result_hash[pipeline_run_id]
-        pr = result_hash[pipeline_run_id]["pr"]
-      else
-        pr = pipeline_runs_by_id[pipeline_run_id]
-        result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
-      end
-      if pr.total_reads
-        row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
-        row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
-        row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
-        row["zscore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
-        result_hash[pipeline_run_id]["taxon_counts"] << row
-      end
-    end
-    result_hash
-  end
-
   def self.fetch_parent_ids(taxon_ids, samples)
     # Get parent (genus,family) ids for the taxon_ids based on the samples
     TaxonCount.select("distinct genus_taxid, family_taxid")
@@ -547,145 +407,6 @@ module ReportHelper
               .where(pipeline_runs: { sample: samples })
               .where(tax_id: taxon_ids)
               .map { |u| u.attributes.values.compact }.flatten
-  end
-
-  def self.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
-    pipeline_run_ids = samples.map { |s| s.first_pipeline_run ? s.first_pipeline_run.id : nil }.compact
-    parent_ids = parent_ids.to_a
-    parent_ids_clause = parent_ids.empty? ? "" : " OR taxon_counts.tax_id in (#{parent_ids.join(',')}) "
-
-    # Note: subsample_fraction is of type 'float' so adjusted_total_reads is too
-    # Note: stdev is never 0
-    # Note: connection.select_all is TWICE faster than TaxonCount.select
-    # (I/O latency goes from 2 seconds -> 0.8 seconds)
-    # Had to derive rpm and zscore for each sample
-    sql_results = TaxonCount.connection.select_all("
-      SELECT
-        taxon_counts.pipeline_run_id     AS  pipeline_run_id,
-        taxon_counts.tax_id              AS  tax_id,
-        taxon_counts.count_type          AS  count_type,
-        taxon_counts.tax_level           AS  tax_level,
-        taxon_counts.genus_taxid         AS  genus_taxid,
-        taxon_counts.family_taxid        AS  family_taxid,
-        taxon_counts.name                AS  name,
-        taxon_counts.superkingdom_taxid  AS  superkingdom_taxid,
-        taxon_counts.is_phage            AS  is_phage,
-        taxon_counts.count               AS  r,
-        taxon_summaries.stdev            AS stdev,
-        taxon_summaries.mean             AS mean,
-        taxon_counts.percent_identity    AS  percentidentity,
-        taxon_counts.alignment_length    AS  alignmentlength,
-        IF(
-          taxon_counts.e_value IS NOT NULL,
-          (0.0 - taxon_counts.e_value),
-          #{DEFAULT_SAMPLE_NEGLOGEVALUE}
-        )                                AS  neglogevalue,
-        taxon_counts.percent_concordant  AS  percentconcordant
-      FROM taxon_counts
-      LEFT OUTER JOIN taxon_summaries ON
-        #{background_id.to_i}   = taxon_summaries.background_id   AND
-        taxon_counts.count_type = taxon_summaries.count_type      AND
-        taxon_counts.tax_level  = taxon_summaries.tax_level       AND
-        taxon_counts.tax_id     = taxon_summaries.tax_id
-      WHERE
-        pipeline_run_id in (#{pipeline_run_ids.join(',')}) AND
-        taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID} AND
-        taxon_counts.count_type IN ('NT', 'NR') AND
-        (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
-         #{parent_ids_clause}
-         OR taxon_counts.genus_taxid IN (#{taxon_ids.join(',')}))").to_hash
-
-    # calculating rpm and zscore, organizing the results by pipeline_run_id
-    result_hash = {}
-
-    pipeline_run_ids = sql_results.map { |x| x['pipeline_run_id'] }
-    pipeline_runs = PipelineRun.where(id: pipeline_run_ids.uniq).includes([:sample])
-    pipeline_runs_by_id = Hash[pipeline_runs.map { |x| [x.id, x] }]
-
-    sql_results.each do |row|
-      pipeline_run_id = row["pipeline_run_id"]
-      if result_hash[pipeline_run_id]
-        pr = result_hash[pipeline_run_id]["pr"]
-      else
-        pr = pipeline_runs_by_id[pipeline_run_id]
-        result_hash[pipeline_run_id] = { "pr" => pr, "taxon_counts" => [] }
-      end
-      if pr.total_reads
-        row["rpm"] = row["r"] / ((pr.total_reads - pr.total_ercc_reads.to_i) * pr.subsample_fraction) * 1_000_000.0
-        row["zscore"] = row["stdev"].nil? ? ZSCORE_WHEN_ABSENT_FROM_BACKGROUND : ((row["rpm"] - row["mean"]) / row["stdev"])
-        row["zscore"] = ZSCORE_MAX if row["zscore"] > ZSCORE_MAX && row["zscore"] != ZSCORE_WHEN_ABSENT_FROM_BACKGROUND
-        row["zscore"] = ZSCORE_MIN if row["zscore"] < ZSCORE_MIN
-        result_hash[pipeline_run_id]["taxon_counts"] << row
-      end
-    end
-
-    result_hash
-  end
-
-  def self.check_custom_filters(row, threshold_filters)
-    threshold_filters.each do |filter|
-      count_type, metric = filter["metric"].split("_")
-      begin
-        value = Float(filter["value"])
-      rescue
-        Rails.logger.warn "Bad threshold filter value."
-      else
-        if filter["operator"] == ">="
-          if row[count_type][metric] < value
-            return false
-          end
-        elsif row[count_type][metric] > value
-          return false
-        end
-      end
-    end
-    true
-  end
-
-  def self.top_taxons_details(samples, background_id, num_results, sort_by_key, species_selected, categories, threshold_filters = {}, read_specificity = false, include_phage = false)
-    # return top taxons
-    results_by_pr = fetch_top_taxons(samples, background_id, categories, read_specificity, include_phage)
-
-    sort_by = decode_sort_by(sort_by_key)
-    count_type = sort_by[:count_type]
-    metric = sort_by[:metric]
-    candidate_taxons = {}
-    results_by_pr.each do |_pr_id, res|
-      pr = res["pr"]
-      taxon_counts = res["taxon_counts"]
-      sample_id = pr.sample_id
-
-      tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
-      ReportHelper.only_species_or_genus_counts!(tax_2d, species_selected)
-
-      rows = []
-      tax_2d.each do |_tax_id, tax_info|
-        rows << tax_info
-      end
-
-      ReportHelper.compute_aggregate_scores_v2!(rows)
-      rows = rows.select do |row|
-        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD && ReportHelper.check_custom_filters(row, threshold_filters)
-      end
-
-      rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
-      count = 1
-      # get the top N for each sample
-      rows.each do |row|
-        taxon = if candidate_taxons[row["tax_id"]]
-                  candidate_taxons[row["tax_id"]]
-                else
-                  { "tax_id" => row["tax_id"], "samples" => {} }
-                end
-        taxon["max_aggregate_score"] = row[sort_by[:count_type]][sort_by[:metric]] if taxon["max_aggregate_score"].to_f < row[sort_by[:count_type]][sort_by[:metric]].to_f
-        taxon["samples"][sample_id] = [count, row["tax_level"], row["NT"]["zscore"], row["NR"]["zscore"]]
-        candidate_taxons[row["tax_id"]] = taxon
-        break if count >= num_results
-        count += 1
-      end
-    end
-
-    candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }
   end
 
   def self.zero_metrics(count_type)
@@ -874,14 +595,6 @@ module ReportHelper
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_FAMILY }
   end
 
-  def self.only_species_level_counts!(taxon_counts_2d)
-    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES }
-  end
-
-  def self.only_genus_level_counts!(taxon_counts_2d)
-    taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS }
-  end
-
   def self.taxon_counts_cleanup(taxon_counts)
     # convert_2d also does some filtering.
     tax_2d = convert_2d(taxon_counts)
@@ -970,27 +683,6 @@ module ReportHelper
       )
     end
     aggregate
-  end
-
-  def self.aggregate_score_v2(taxon_info)
-    aggregate = 0.0
-    COUNT_TYPES.each do |count_type|
-      aggregate += (
-        taxon_info[count_type]['zscore'] *
-        taxon_info[count_type]['rpm']
-      )
-    end
-    aggregate
-  end
-
-  def self.compute_aggregate_scores_v2!(rows)
-    rows.each do |taxon_info|
-      taxon_info['NT']['maxzscore'] = [taxon_info['NT']['zscore'], taxon_info['NR']['zscore']].max
-      taxon_info['NR']['maxzscore'] = taxon_info['NT']['maxzscore']
-      score = aggregate_score_v2(taxon_info)
-      taxon_info['NT']['aggregatescore'] = score.to_f
-      taxon_info['NR']['aggregatescore'] = score.to_f
-    end
   end
 
   def self.compute_genera_aggregate_scores!(rows, tax_2d)
@@ -1110,14 +802,5 @@ module ReportHelper
     #                            :e => 3 },
     #                    :f => 4 }
     # into    {[:a, :b, :c] => 1, [:a, :b, :d] => 2, [:a, :e] => 3, [:f] => 4}
-  end
-
-  def self.only_species_or_genus_counts!(tax_2d, species_selected)
-    if species_selected # Species selected
-      only_species_level_counts!(tax_2d)
-    else # Genus selected
-      only_genus_level_counts!(tax_2d)
-    end
-    tax_2d
   end
 end
