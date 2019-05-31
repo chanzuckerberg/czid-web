@@ -22,3 +22,4 @@ california:
   geo_level: "state"
   country_name: "USA"
   state_name: "California"
+  locationiq_id: 214330370

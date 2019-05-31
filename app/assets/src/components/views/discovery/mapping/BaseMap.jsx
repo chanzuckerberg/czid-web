@@ -52,9 +52,8 @@ class BaseMap extends React.Component {
 
   handleLoad = () => {
     // Show compact attribution tags
-    document
-      .getElementsByClassName("mapboxgl-ctrl-attrib")[0]
-      .classList.add("mapboxgl-compact");
+    const tag = document.getElementsByClassName("mapboxgl-ctrl-attrib")[0];
+    tag && tag.classList.add("mapboxgl-compact");
   };
 
   render() {
