@@ -1300,7 +1300,7 @@ class SampleUpload extends React.Component {
                               htmlFor="pipeline_branch"
                               className="read-count-label"
                             >
-                              Branch of idseq-pipeline to be used for processing
+                              Branch of idseq-dag to be used for processing
                             </div>
                           </div>
                         </div>
