@@ -1,0 +1,2 @@
+# because of docker read-only volume
+set noautosave

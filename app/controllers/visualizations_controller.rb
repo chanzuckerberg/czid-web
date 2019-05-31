@@ -5,6 +5,13 @@ class VisualizationsController < ApplicationController
   clear_respond_to
   respond_to :json
 
+  # This action takes up to 10s for 50 samples so we cache it.
+  caches_action(
+    :samples_taxons,
+    expires_in: 30.days,
+    cache_path: proc { |c| c.request.url }
+  )
+
   # GET /visualizations.json
   def index
     domain = visualization_params[:domain]
@@ -126,9 +133,76 @@ class VisualizationsController < ApplicationController
     }, status: :internal_server_error
   end
 
+  # START OF HEATMAP METHODS
+
+  def heatmap
+    {
+      taxonLevels: %w[Genus Species],
+      categories: ReportHelper::ALL_CATEGORIES.pluck('name'),
+      subcategories: {
+        Viruses: ["Phage"]
+      },
+      metrics: [
+        { text: "NT rPM", value: "NT.rpm" },
+        { text: "NT Z Score", value: "NT.zscore" },
+        { text: "NT r (total reads)", value: "NT.r" },
+        { text: "NR rPM", value: "NR.rpm" },
+        { text: "NR Z Score", value: "NR.zscore" },
+        { text: "NR r (total reads)", value: "NR.r" }
+      ],
+      backgrounds: current_power.backgrounds.map do |background|
+        { name: background.name, value: background.id }
+      end,
+      thresholdFilters: {
+        targets: [
+          { text: "NT Z Score", value: "NT_zscore" },
+          { text: "NT rPM", value: "NT_rpm" },
+          { text: "NT r (total reads)", value: "NT_r" },
+          { text: "NT %id", value: "NT_percentidentity" },
+          { text: "NT L (alignment length in bp)", value: "NT_alignmentlength" },
+          { text: "NT log(1/e)", value: "NT_neglogevalue" },
+          { text: "NR Z Score", value: "NR_zscore" },
+          { text: "NR r (total reads)", value: "NR_r" },
+          { text: "NR rPM", value: "NR_rpm" },
+          { text: "NR %id", value: "NR_percentidentity" },
+          { text: "NR L (alignment length in bp)", value: "NR_alignmentlength" },
+          { text: "R log(1/e)", value: "NR_neglogevalue" }
+        ],
+        operators: [">=", "<="]
+      },
+      allowedFeatures: current_user.allowed_feature_list,
+      heatmapTs: heatmap_ts
+    }
+  end
+
+  def download_heatmap
+    @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(params, samples_for_heatmap)
+    output_csv = generate_heatmap_csv(@sample_taxons_dict)
+    send_data output_csv, filename: 'heatmap.csv'
+  end
+
+  def samples_taxons
+    @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(params, samples_for_heatmap)
+    render json: @sample_taxons_dict
+  end
+
   private
 
   def visualization_params
     params.permit(:domain, :type, :id, :url, :search, data: {})
+  end
+
+  def samples_for_heatmap
+    id = visualization_params[:id]
+    sample_ids = id ? Visualization.find(id).sample_ids : params[:sampleIds]
+    current_power.samples
+                 .where(id: sample_ids)
+                 .includes([:host_genome, :pipeline_runs, metadata: [:metadata_field]])
+  end
+
+  # The most recent update time of any samples pipeline run.
+  def heatmap_ts
+    updated_ats = samples_for_heatmap.map { |sample| sample.first_pipeline_run.updated_at }
+    updated_ats.max.to_i
   end
 end

@@ -30,7 +30,6 @@ class SamplesHeatmapVis extends React.Component {
 
     // TODO: yet another metric name conversion to remove
     this.metrics = [
-      { key: "NT.aggregatescore", label: "Score" },
       { key: "NT.zscore", label: "NT Z Score" },
       { key: "NT.rpm", label: "NT rPM" },
       { key: "NT.r", label: "NT r (total reads)" },
