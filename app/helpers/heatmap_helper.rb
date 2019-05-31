@@ -4,8 +4,7 @@
 # heatmap action in VisualizationsController.
 module HeatmapHelper
   DEFAULT_MAX_NUM_TAXONS = 30
-  # Zscore is best for heatmaps because it weighs the frequency against the background
-  DEFAULT_TAXON_SORT_PARAM = 'highest_nt_zscore'.freeze
+  DEFAULT_TAXON_SORT_PARAM = 'highest_nt_rpm'.freeze
   READ_SPECIFICITY = true
   MINIMUM_READ_THRESHOLD = 5
   # Note: this is activated from the heatmap page by selecting "Viruses -
@@ -114,12 +113,14 @@ module HeatmapHelper
         rows << tax_info
       end
 
+      # NOTE: This block of code can probably be all removed because the same
+      # filtering now happens earlier in SQL.
       HeatmapHelper.compute_aggregate_scores_v2!(rows)
       rows = rows.select do |row|
         row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD &&
           # Note: these are applied *after* SQL filters, so results may not be
           # 100% as expected .
-          HeatmapHelper.check_custom_filters(row, threshold_filters)
+          HeatmapHelper.apply_custom_filters(row, threshold_filters)
       end
 
       # Get the top N for each sample. This re-sorts on the same metric as in
@@ -152,7 +153,8 @@ module HeatmapHelper
     include_phage = INCLUDE_PHAGE,
     num_results = 1_000_000,
     min_reads = MINIMUM_READ_THRESHOLD,
-    sort_by = DEFAULT_TAXON_SORT_PARAM
+    sort_by = DEFAULT_TAXON_SORT_PARAM,
+    threshold_filters = []
   )
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
     categories_clause = ""
@@ -172,6 +174,14 @@ module HeatmapHelper
     elsif include_phage && categories.blank?
       phage_clause = " AND is_phage = 1"
     end
+
+    threshold_filters_clause = if threshold_filters.present?
+                                 HeatmapHelper.parse_custom_filters(threshold_filters).map do |filter|
+                                   "AND count_type = '#{filter[:count_type]}' AND #{filter[:metric]} #{filter[:operator]} #{filter[:value]}"
+                                 end
+                               else
+                                 []
+                               end
 
     sort = ReportHelper.decode_sort_by(sort_by)
 
@@ -219,6 +229,8 @@ module HeatmapHelper
       taxon_counts.tax_id     = taxon_summaries.tax_id
     WHERE
       pipeline_run_id IN (
+        -- not the ideal way to get the current pipeline but it is consistent
+        -- with current logic elsewhere
         SELECT MAX(id)
         FROM pipeline_runs
         WHERE sample_id IN (#{samples.pluck(:id).join(',')})
@@ -252,8 +264,10 @@ module HeatmapHelper
           count_type = '#{sort[:count_type]}' DESC,
           #{sort[:metric]} #{sort[:direction] == 'highest' ? 'DESC' : 'ASC'}
       ) b
-      -- Overfetch by a factor of 4 to allow for post-SQL threshold filters
-      WHERE rank <= #{num_results * 4};
+      -- Overfetch by a factor of 4 to allow for a) both count types, and
+      -- b) any post-SQL filtering
+      WHERE rank <= #{num_results * 4}
+        #{threshold_filters_clause.join("\n")};
     "
 
     # TODO: (gdingle): how do we protect against SQL injection?
@@ -313,7 +327,7 @@ module HeatmapHelper
 
         filtered_rows = rows
                         .select { |row| taxon_ids.include?(row["tax_id"]) }
-                        .each { |row| row[:filtered] = HeatmapHelper.check_custom_filters(row, threshold_filters) }
+                        .each { |row| row[:filtered] = HeatmapHelper.apply_custom_filters(row, threshold_filters) }
 
         results[sample_id] = {
           sample_id: sample_id,
@@ -380,6 +394,8 @@ module HeatmapHelper
         taxon_counts.tax_id     = taxon_summaries.tax_id
       WHERE
         pipeline_run_id IN (
+          -- not the ideal way to get the current pipeline but it is consistent
+          -- with current logic elsewhere
           SELECT MAX(id)
           FROM pipeline_runs
           WHERE sample_id IN (#{samples.pluck(:id).join(',')})
@@ -438,7 +454,8 @@ module HeatmapHelper
     end
   end
 
-  def self.check_custom_filters(row, threshold_filters)
+  def self.parse_custom_filters(threshold_filters)
+    parsed = []
     threshold_filters.each do |filter|
       count_type, metric = filter["metric"].split("_")
       begin
@@ -446,13 +463,26 @@ module HeatmapHelper
       rescue
         Rails.logger.warn "Bad threshold filter value."
       else
-        if filter["operator"] == ">="
-          if row[count_type][metric] < value
-            return false
-          end
-        elsif row[count_type][metric] > value
+        parsed << {
+          count_type: count_type,
+          metric: metric,
+          value: value,
+          operator: filter["operator"]
+        }
+      end
+    end
+    parsed
+  end
+
+  def self.apply_custom_filters(row, threshold_filters)
+    parsed = HeatmapHelper.parse_custom_filters(threshold_filters)
+    parsed.each do |filter|
+      if filter["operator"] == ">="
+        if row[filter[:count_type]][filter[:metric]] < filter[:value]
           return false
         end
+      elsif row[filter[:count_type]][filter[:metric]] > filter[:value]
+        return false
       end
     end
     true

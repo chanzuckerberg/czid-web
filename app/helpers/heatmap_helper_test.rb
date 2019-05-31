@@ -25,7 +25,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       minReads: 1
     }
 
-    @top_taxons_details = [{ "tax_id" => 573, "samples" => { 51_848_956 => [1, 1, 100.0, 100.0] }, "max_aggregate_score" => 100.0 }, { "tax_id" => 28_037, "samples" => { 51_848_956 => [2, 1, 100.0, -100] }, "max_aggregate_score" => 100.0 }, { "tax_id" => 1, "samples" => { 980_190_962 => [1, 1, 100.0, -100], 298_486_374 => [1, 1, 100.0, -100] }, "max_aggregate_score" => 100.0 }, { "tax_id" => 1313, "samples" => { 51_848_956 => [3, 1, -100, 100.0] } }]
+    @top_taxons_details = [{ "tax_id" => 1, "samples" => { 980_190_962 => [1, 1, 100.0, -100], 298_486_374 => [1, 1, 100.0, -100] }, "max_aggregate_score" => 2_000_000.0 }, { "tax_id" => 28_037, "samples" => { 51_848_956 => [1, 1, 100.0, -100] } }, { "tax_id" => 573, "samples" => { 51_848_956 => [2, 1, 100.0, 100.0] } }, { "tax_id" => 1313, "samples" => { 51_848_956 => [3, 1, -100, 100.0] } }].sort_by! { |d| d["tax_id"] }
   end
 
   test "sample_taxons_dict defaults" do
@@ -56,9 +56,11 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @include_phage,
       @min_reads
     )
+    details.sort_by! { |d| d["tax_id"] }
     assert_equal 4, details.length
-    assert_equal 100, details[0]["max_aggregate_score"]
-    assert_equal @top_taxons_details, details
+    assert_equal 2_000_000.0, details[0]["max_aggregate_score"]
+    assert_equal @top_taxons_details[0], details[0]
+    assert_equal @top_taxons_details[2], details[2]
   end
 
   test "top_taxons_details num_results" do
@@ -106,7 +108,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @include_phage,
       @min_reads
     )
-    assert_equal 570, details[0]["tax_id"]
+    assert_equal 1_900_000_001 * -1, details[0]["tax_id"]
   end
 
   test "fetch_top_taxons defaults" do
@@ -172,7 +174,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     )
     top_taxon = top_taxons.first[1]
     taxon_count = top_taxon["taxon_counts"][0]
-    assert_equal "Streptococcus", taxon_count["name"]
+    assert_equal "Streptococcus", taxon_count["name"].split(' ')[0]
     assert_equal 4, taxon_count["r"]
   end
 
@@ -216,6 +218,60 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     assert_equal 1, top_taxons.length
   end
 
+  test "fetch_top_taxons threshold_filters" do
+    top_taxons = HeatmapHelper.fetch_top_taxons(
+      @samples,
+      @background.id,
+      @categories,
+      @read_specificity,
+      @include_phage,
+      @num_results,
+      @min_reads,
+      @sort_by,
+      [{ "metric" => "NT_zscore", "value" => "2000", "operator" => ">=" }]
+    )
+    assert_equal 0, top_taxons.length
+
+    top_taxons = HeatmapHelper.fetch_top_taxons(
+      @samples,
+      @background.id,
+      @categories,
+      @read_specificity,
+      @include_phage,
+      @num_results,
+      @min_reads,
+      @sort_by,
+      [{ "metric" => "NT_r", "value" => "200", "operator" => ">=" }]
+    )
+    assert_equal 1, top_taxons.length
+
+    top_taxons = HeatmapHelper.fetch_top_taxons(
+      @samples,
+      @background.id,
+      @categories,
+      @read_specificity,
+      @include_phage,
+      @num_results,
+      @min_reads,
+      @sort_by,
+      [{ "metric" => "NT_r", "value" => "1", "operator" => "<=" }]
+    )
+    assert_equal 1, top_taxons.length
+
+    top_taxons = HeatmapHelper.fetch_top_taxons(
+      @samples,
+      @background.id,
+      @categories,
+      @read_specificity,
+      @include_phage,
+      @num_results,
+      @min_reads,
+      @sort_by,
+      [{ "metric" => "NT_r", "value" => "1", "operator" => ">=" }]
+    )
+    assert_equal 3, top_taxons.length
+  end
+
   test "samples_taxons_details defaults" do
     # TODO: (gdingle): num_results, sort
     dicts = HeatmapHelper.samples_taxons_details(
@@ -246,5 +302,15 @@ class HeatmapHelperTest < ActiveSupport::TestCase
 
     dict = dicts[0]
     assert_equal 0, dict[:taxons].length
+  end
+
+  test "threshold filters parsing" do
+    assert_equal [
+      { count_type: "NT", metric: "zscore", value: 2.0, operator: ">=" },
+      { count_type: "NR", metric: "rpm", value: 1000.0, operator: "<=" }
+    ], HeatmapHelper.parse_custom_filters([
+                                            { "metric" => "NT_zscore", "value" => "2", "operator" => ">=" },
+                                            { "metric" => "NR_rpm", "value" => "1000", "operator" => "<=" }
+                                          ])
   end
 end
