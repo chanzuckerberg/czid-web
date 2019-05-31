@@ -48,43 +48,6 @@ module HeatmapHelper
     first_sample = samples.first
     background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
 
-    taxon_ids = HeatmapHelper.top_taxons_details(
-      samples,
-      background_id,
-      num_results,
-      sort_by,
-      species_selected,
-      categories,
-      threshold_filters,
-      read_specificity,
-      include_phage,
-      min_reads
-    ).pluck('tax_id')
-
-    taxon_ids -= removed_taxon_ids
-
-    HeatmapHelper.samples_taxons_details(
-      samples,
-      taxon_ids,
-      background_id,
-      species_selected,
-      threshold_filters
-    )
-  end
-
-  def self.top_taxons_details(
-    samples,
-    background_id,
-    num_results,
-    sort_by,
-    species_selected,
-    categories,
-    threshold_filters = {},
-    read_specificity = READ_SPECIFICITY,
-    include_phage = INCLUDE_PHAGE,
-    min_reads = MINIMUM_READ_THRESHOLD
-  )
-    # return top taxons
     results_by_pr = fetch_top_taxons(
       samples,
       background_id,
@@ -97,6 +60,38 @@ module HeatmapHelper
       threshold_filters
     )
 
+    details = top_taxons_details(
+      results_by_pr,
+      num_results,
+      sort_by,
+      species_selected,
+      threshold_filters
+    )
+
+    taxon_ids = details.pluck('tax_id')
+    taxon_ids -= removed_taxon_ids
+
+    # Refetch at genus level using species level
+    parent_ids = species_selected ? [] : ReportHelper.fetch_parent_ids(taxon_ids, samples)
+    results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+
+    HeatmapHelper.samples_taxons_details(
+      results_by_pr,
+      samples,
+      taxon_ids,
+      background_id,
+      species_selected,
+      threshold_filters
+    )
+  end
+
+  def self.top_taxons_details(
+    results_by_pr,
+    num_results,
+    sort_by,
+    species_selected,
+    threshold_filters
+  )
     sort = ReportHelper.decode_sort_by(sort_by)
     count_type = sort[:count_type]
     metric = sort[:metric]
@@ -268,9 +263,10 @@ module HeatmapHelper
   end
 
   def self.samples_taxons_details(
+    results_by_pr,
     samples,
     taxon_ids,
-    background_id,
+    _background_id,
     species_selected,
     threshold_filters
   )
@@ -279,8 +275,6 @@ module HeatmapHelper
     # Get sample results for the taxon ids
     unless taxon_ids.empty?
       samples_by_id = Hash[samples.map { |s| [s.id, s] }]
-      parent_ids = ReportHelper.fetch_parent_ids(taxon_ids, samples)
-      results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
       results_by_pr.each do |_pr_id, res|
         pr = res["pr"]
         taxon_counts = res["taxon_counts"]
