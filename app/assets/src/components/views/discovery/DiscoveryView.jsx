@@ -43,6 +43,7 @@ import {
   getDiscoveryDimensions,
   getDiscoveryStats,
   getDiscoverySamples,
+  getDiscoveryLocations,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_PUBLIC
@@ -90,14 +91,16 @@ class DiscoveryView extends React.Component {
         filteredSampleDimensions: [],
         filteredSampleStats: {},
         filters: {},
-        loadingProjects: true,
-        loadingVisualizations: true,
-        loadingSamples: true,
         loadingDimensions: true,
+        loadingLocations: true,
+        loadingProjects: true,
+        loadingSamples: true,
         loadingStats: true,
+        loadingVisualizations: true,
+        mapLocationData: {},
         project: null,
-        projectId: projectId,
         projectDimensions: [],
+        projectId: projectId,
         projects: [],
         sampleDimensions: [],
         sampleIds: [],
@@ -220,9 +223,10 @@ class DiscoveryView extends React.Component {
     this.resetData({
       callback: () => {
         // * Initial load:
-        //   - load (A) non-filtered dimensions, (C) filtered stats and (D) synchronous table data
+        //   - load (A) non-filtered dimensions, (C) filtered stats, (D) filtered locations, and (E) synchronous table data
         this.refreshDimensions();
         this.refreshFilteredStats();
+        this.refreshFilteredLocations();
         this.refreshSynchronousData();
         //   * if filter or project is set
         //     - load (B) filtered dimensions
@@ -236,11 +240,12 @@ class DiscoveryView extends React.Component {
     this.resetData({
       callback: () => {
         // * On filter change:
-        //   - load (B) filtered dimensions, (C) filtered stats
+        //   - load (B) filtered dimensions, (C) filtered stats, (D) filtered locations
         this.refreshFilteredDimensions();
         this.refreshFilteredStats();
+        this.refreshFilteredLocations();
         //  * if project not set
-        //       load (D) synchronous table data
+        //       load (E) synchronous table data
         !project && this.refreshSynchronousData();
       }
     });
@@ -255,6 +260,7 @@ class DiscoveryView extends React.Component {
         this.refreshDimensions();
         this.refreshFilteredDimensions();
         this.refreshFilteredStats();
+        this.refreshFilteredLocations();
       }
     });
   };
@@ -352,6 +358,24 @@ class DiscoveryView extends React.Component {
       filteredSampleDimensions,
       loadingDimensions: false
     });
+  };
+
+  refreshFilteredLocations = async () => {
+    const { domain } = this.props;
+    const { projectId, search } = this.state;
+
+    this.setState({
+      loadingLocations: true
+    });
+
+    const mapLocationData = await getDiscoveryLocations({
+      domain,
+      projectId,
+      filters: this.preparedFilters(),
+      search
+    });
+
+    this.setState({ mapLocationData, loadingLocations: false });
   };
 
   computeTabs = () => {
@@ -693,6 +717,7 @@ class DiscoveryView extends React.Component {
     } = this.state;
 
     const { domain, allowedFeatures, mapTilerKey } = this.props;
+    const { mapLocationData } = this.state;
 
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
@@ -774,6 +799,7 @@ class DiscoveryView extends React.Component {
                       allowedFeatures={allowedFeatures}
                       onDisplaySwitch={this.handleDisplaySwitch}
                       mapTilerKey={mapTilerKey}
+                      mapLocationData={mapLocationData}
                     />
                   </div>
                   {!samples.length &&

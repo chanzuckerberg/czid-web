@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
 import TidyTree from "../visualizations/TidyTree";
 import PathogenLabel from "../ui/labels/PathogenLabel";
@@ -61,7 +61,10 @@ class TaxonTreeVis extends React.Component {
         onNodeLabelClick: this.handleNodeLabelClick,
         onCreatedTree: this.fillNodeValues,
         tooltipContainer: this.treeTooltip,
-        onCollapsedStateChange: this.persistCollapsedInUrl,
+        onCollapsedStateChange: withAnalytics(
+          this.persistCollapsedInUrl,
+          "TaxonTreeVis_node-collapsed-state_changed"
+        ),
         collapsed: this.getCollapsedInUrl() || new Set()
       }
     );

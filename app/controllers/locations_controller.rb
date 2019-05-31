@@ -1,5 +1,6 @@
 class LocationsController < ApplicationController
   include LocationHelper
+  include SamplesHelper
 
   GEOSEARCH_ERR_MSG = "Unable to perform geosearch".freeze
   LOCATION_LOAD_ERR_MSG = "Unable to load sample locations".freeze
@@ -51,6 +52,49 @@ class LocationsController < ApplicationController
     respond_to do |format|
       format.html { render :map_playground }
       format.json { render json: @results }
+    end
+  rescue => err
+    render json: {
+      status: "failed",
+      message: LOCATION_LOAD_ERR_MSG,
+      errors: [err]
+    }, status: :internal_server_error
+  end
+
+  # GET /locations/sample_locations.json
+  # Get location data for a set of samples with filters
+  # TODO(jsheu): Consider consolidating if similar location data is loaded w/ data discovery tables.
+  def sample_locations
+    unless feature_access?
+      render(json: {
+               status: :unauthorized,
+               message: "No feature access"
+             }, status: :unauthorized) && return
+    end
+
+    # Get the samples
+    domain = params[:domain]
+    samples = samples_by_domain(domain) # access controlled
+    samples = filter_samples(samples, params)
+
+    # (a) Filter to samples with collection_location_v2 and non-nil location_id.
+    # (b) Pluck location_id, id, and location fields.
+    # (c) Map and zip the fields to a hash to convert the plucked array to an object with keys.
+    # (d) Group and key by the location_id and add a list of sample_ids to the location attributes
+    # Final result is a hash of hashes for frontend lookups.
+    location_fields = [:name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng]
+    location_data = samples
+                    .includes(metadata: [:location, :metadata_field])
+                    .where(metadata: { metadata_fields: { name: "collection_location_v2" } })
+                    .where.not(metadata: { location_id: nil })
+                    .pluck(:location_id, :id, *location_fields.map { |f| "locations.#{f}" })
+                    .map { |p| [:id, :sample_id, *location_fields].zip(p).to_h }
+                    .group_by { |h| h[:id] }.map { |k, v| [k, v[0].except(:sample_id).merge(sample_ids: v.map { |h| h[:sample_id] })] }.to_h
+
+    respond_to do |format|
+      format.json do
+        render json: location_data
+      end
     end
   rescue => err
     render json: {

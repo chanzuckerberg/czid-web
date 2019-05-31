@@ -1442,4 +1442,9 @@ class PipelineRun < ApplicationRecord
       MetricUtil.put_metric_now("samples.cache.precached", 1)
     end
   end
+
+  def rpm(raw_read_count)
+    raw_read_count /
+      ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
+  end
 end
