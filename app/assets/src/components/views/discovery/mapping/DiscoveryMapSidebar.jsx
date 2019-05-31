@@ -3,10 +3,6 @@ import cx from "classnames";
 
 import PropTypes from "~/components/utils/propTypes";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
-import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
-import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
-import BasicPopup from "~/components/BasicPopup";
 
 import cs from "./discovery_map_sidebar.scss";
 import SamplesView from "../../samples/SamplesView";
@@ -29,7 +25,7 @@ export default class DiscoveryMapSidebar extends React.Component {
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 66;
     // const selectAllChecked = this.isSelectAllChecked();
-    console.log("I am in renderTable 2:59pm");
+    console.log("I am in renderTable 3:10pm");
     console.log("the samples are: ", samples);
     console.log("columns: ", SamplesView.columns);
     return (
@@ -53,6 +49,9 @@ export default class DiscoveryMapSidebar extends React.Component {
             // selectableKey="id"
             // selected={selectedSampleIds}
             // selectAllChecked={selectAllChecked}
+            minimumBatchSize={10000}
+            rowCount={10000}
+            threshold={10000}
           />
         </div>
       </div>
@@ -73,7 +72,7 @@ export default class DiscoveryMapSidebar extends React.Component {
 }
 
 DiscoveryMapSidebar.defaultProps = {
-  activeColumns: ["sample", "nonHostReads"]
+  activeColumns: ["sample"]
 };
 
 DiscoveryMapSidebar.propTypes = {
