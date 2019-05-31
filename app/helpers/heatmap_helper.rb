@@ -93,7 +93,8 @@ module HeatmapHelper
       include_phage,
       num_results,
       min_reads,
-      sort_by
+      sort_by,
+      threshold_filters
     )
 
     sort = ReportHelper.decode_sort_by(sort_by)
@@ -175,16 +176,6 @@ module HeatmapHelper
       phage_clause = " AND is_phage = 1"
     end
 
-    threshold_filters_clause = if threshold_filters.present?
-                                 HeatmapHelper.parse_custom_filters(threshold_filters).map do |filter|
-                                   "AND count_type = '#{filter[:count_type]}' AND #{filter[:metric]} #{filter[:operator]} #{filter[:value]}"
-                                 end
-                               else
-                                 []
-                               end
-
-    sort = ReportHelper.decode_sort_by(sort_by)
-
     # fraction_subsampled was introduced 2018-03-30. For prior runs, we assume
     # fraction_subsampled = 1.0.
     rpm_sql = "count / (
@@ -242,36 +233,12 @@ module HeatmapHelper
       AND taxon_counts.count_type IN ('NT', 'NR')
       #{categories_clause}
       #{read_specificity_clause}
-      #{phage_clause}
-      AND #{zscore_sql} >= #{MINIMUM_ZSCORE_THRESHOLD}"
-
-    # This query:
-    # 1) assigns a rank to each row within a pipeline run
-    # 2) returns rows ranking <= num_results
-    # See http://www.sqlines.com/mysql/how-to/get_top_n_each_group
-    top_n_query = "
-      SELECT *
-      FROM (
-        SELECT
-          @rank := IF(@current_id = pipeline_run_id, @rank + 1, 1) AS rank,
-          @current_id := pipeline_run_id AS current_id,
-          a.*
-        FROM (
-          #{query}
-        ) a
-        ORDER BY
-          pipeline_run_id,
-          count_type = '#{sort[:count_type]}' DESC,
-          #{sort[:metric]} #{sort[:direction] == 'highest' ? 'DESC' : 'ASC'}
-      ) b
-      -- Overfetch by a factor of 4 to allow for a) both count types, and
-      -- b) any post-SQL filtering
-      WHERE rank <= #{num_results * 4}
-        #{threshold_filters_clause.join("\n")};
-    "
+      #{phage_clause}"
 
     # TODO: (gdingle): how do we protect against SQL injection?
-    sql_results = TaxonCount.connection.select_all(top_n_query).to_hash
+    sql_results = TaxonCount.connection.select_all(
+      top_n_query(query, sort_by, num_results, threshold_filters)
+    ).to_hash
 
     # organizing the results by pipeline_run_id
     result_hash = {}
@@ -477,7 +444,7 @@ module HeatmapHelper
   def self.apply_custom_filters(row, threshold_filters)
     parsed = HeatmapHelper.parse_custom_filters(threshold_filters)
     parsed.each do |filter|
-      if filter["operator"] == ">="
+      if filter[:operator] == ">="
         if row[filter[:count_type]][filter[:metric]] < filter[:value]
           return false
         end
@@ -494,5 +461,36 @@ module HeatmapHelper
 
   def self.only_genus_level_counts!(taxon_counts_2d)
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] == TaxonCount::TAX_LEVEL_GENUS }
+  end
+
+  # This query:
+  # 1) assigns a rank to each row within a pipeline run
+  # 2) returns rows ranking <= num_results
+  # See http://www.sqlines.com/mysql/how-to/get_top_n_each_group
+  def self.top_n_query(query, sort_by, num_results, threshold_filters)
+    if threshold_filters.present?
+      # custom filters are applied at the taxon level, not the count level,
+      # so we need rank entirely in ruby.
+      return query
+    end
+    sort = ReportHelper.decode_sort_by(sort_by)
+    "SELECT *
+      FROM (
+        SELECT
+          @rank := IF(@current_id = pipeline_run_id, @rank + 1, 1) AS rank,
+          @current_id := pipeline_run_id AS current_id,
+          a.*
+        FROM (
+          #{query}
+        ) a
+        ORDER BY
+          pipeline_run_id,
+          count_type = '#{sort[:count_type]}' DESC,
+          #{sort[:metric]} #{sort[:direction] == 'highest' ? 'DESC' : 'ASC'}
+      ) b
+      -- Overfetch by a factor of 4 to allow for a) both count types, and
+      -- b) any post-SQL filtering
+      WHERE rank <= #{num_results * 4}
+    "
   end
 end

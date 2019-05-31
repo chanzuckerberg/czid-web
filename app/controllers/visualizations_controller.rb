@@ -136,12 +136,12 @@ class VisualizationsController < ApplicationController
         Viruses: ["Phage"]
       },
       metrics: [
-        { text: "NT Z Score", value: "NT.zscore" },
         { text: "NT rPM", value: "NT.rpm" },
+        { text: "NT Z Score", value: "NT.zscore" },
         { text: "NT r (total reads)", value: "NT.r" },
+        { text: "NR rPM", value: "NR.rpm" },
         { text: "NR Z Score", value: "NR.zscore" },
-        { text: "NR r (total reads)", value: "NR.r" },
-        { text: "NR rPM", value: "NR.rpm" }
+        { text: "NR r (total reads)", value: "NR.r" }
       ],
       backgrounds: current_power.backgrounds.map do |background|
         { name: background.name, value: background.id }
