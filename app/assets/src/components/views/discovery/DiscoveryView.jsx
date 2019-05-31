@@ -100,6 +100,7 @@ class DiscoveryView extends React.Component {
         loadingVisualizations: true,
         mapLocationData: {},
         mapSelectedLocationId: null,
+        mapSelectedSamples: [],
         project: null,
         projectDimensions: [],
         projectId: projectId,
@@ -558,7 +559,7 @@ class DiscoveryView extends React.Component {
         search,
         limit: stopIndex - neededStartIndex + 1,
         offset: neededStartIndex,
-        listAllIds: sampleIds.length == 0
+        listAllIds: sampleIds.length === 0
       });
 
       let newState = {
@@ -693,7 +694,20 @@ class DiscoveryView extends React.Component {
   };
 
   handleMapTooltipTitleClick = locationId => {
-    this.setState({ mapSelectedLocationId: locationId });
+    this.setState({ mapSelectedLocationId: locationId }, () =>
+      this.refreshMapSelectedSamples()
+    );
+  };
+
+  refreshMapSelectedSamples = async () => {
+    const { mapSelectedLocationId, mapLocationData } = this.state;
+    const sampleIds = mapLocationData[mapSelectedLocationId].sample_ids;
+
+    const fetchedSamples = await getDiscoverySamples({
+      sampleIds,
+      limit: 10000 // Server needs a max, 10K at one location is a good cutoff.
+    });
+    this.setState({ mapSelectedSamples: fetchedSamples });
   };
 
   renderRightPane = () => {

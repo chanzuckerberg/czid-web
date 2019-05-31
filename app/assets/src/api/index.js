@@ -178,7 +178,8 @@ const getSamples = ({
   limit,
   offset,
   filters,
-  listAllIds
+  listAllIds,
+  sampleIds
 } = {}) =>
   get("/samples/index_v2.json", {
     params: {
@@ -188,6 +189,7 @@ const getSamples = ({
       limit,
       offset,
       listAllIds,
+      sampleIds: JSON.stringify(sampleIds),
       ...filters
     }
   });

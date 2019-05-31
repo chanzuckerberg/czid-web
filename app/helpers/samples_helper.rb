@@ -189,6 +189,7 @@ module SamplesHelper
     visibility = params[:visibility]
     project_id = params[:projectId]
     search_string = params[:search]
+    requested_sample_ids = params[:sampleIds]
 
     samples = samples.where(project_id: project_id) if project_id.present?
     samples = filter_by_taxid(samples, taxon) if taxon.present?
@@ -198,6 +199,7 @@ module SamplesHelper
     samples = filter_by_metadata_key(samples, "sample_type", tissue) if tissue.present?
     samples = filter_by_visibility(samples, visibility) if visibility.present?
     samples = filter_by_search_string(samples, search_string) if search_string.present?
+    samples = filter_by_sample_ids(samples, requested_sample_ids) if requested_sample_ids.present?
 
     return samples
   end
@@ -603,5 +605,9 @@ module SamplesHelper
 
   def filter_by_search_string(samples, search_string)
     samples.search(search_string)
+  end
+
+  def filter_by_sample_ids(samples, requested_sample_ids)
+    samples.where(id: JSON.parse(requested_sample_ids))
   end
 end
