@@ -707,6 +707,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def status_display(output_states_by_pipeline_run_id)
+    return "COMPLETE - ISSUE" if known_user_error
     status_display_helper(output_state_hash(output_states_by_pipeline_run_id), results_finalized)
   end
 
