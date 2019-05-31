@@ -21,8 +21,15 @@ import cs from "./samples_view.scss";
 const DISPLAYS = ["table", "map"];
 
 class SamplesView extends React.Component {
-  static get columns() {
-    return [
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      phyloTreeCreationModalOpen: false,
+      selectedSampleIds: new Set()
+    };
+
+    this.columns = [
       {
         dataKey: "sample",
         flexGrow: 1,
@@ -121,15 +128,6 @@ class SamplesView extends React.Component {
           TableRenderers.formatDuration(rowData[dataKey])
       }
     ];
-  }
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      phyloTreeCreationModalOpen: false,
-      selectedSampleIds: new Set()
-    };
   }
 
   handleSelectRow = (value, checked) => {
@@ -294,7 +292,7 @@ class SamplesView extends React.Component {
       <div className={cs.table}>
         <InfiniteTable
           ref={infiniteTable => (this.infiniteTable = infiniteTable)}
-          columns={SamplesView.columns}
+          columns={this.columns}
           defaultRowHeight={rowHeight}
           initialActiveColumns={activeColumns}
           loadingClassName={cs.loading}

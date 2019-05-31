@@ -60,17 +60,19 @@ class TableRenderers extends React.Component {
     );
   };
 
-  static renderSample = ({ cellData: sample }) => {
+  static renderSample = ({ cellData: sample }, full = true) => {
     return (
       <div className={cs.sample}>
-        <div className={cs.publicAccess}>
-          {sample &&
-            (sample.publicAccess ? (
-              <SamplePublicIcon className={cx(cs.icon)} />
-            ) : (
-              <SamplePrivateIcon className={cx(cs.icon)} />
-            ))}
-        </div>
+        {full && (
+          <div className={cs.publicAccess}>
+            {sample &&
+              (sample.publicAccess ? (
+                <SamplePublicIcon className={cx(cs.icon)} />
+              ) : (
+                <SamplePrivateIcon className={cx(cs.icon)} />
+              ))}
+          </div>
+        )}
         <div className={cs.sampleRightPane}>
           {sample ? (
             <div className={cs.sampleNameAndStatus}>
@@ -78,9 +80,11 @@ class TableRenderers extends React.Component {
                 trigger={<div className={cs.sampleName}>{sample.name}</div>}
                 content={sample.name}
               />
-              <div className={cx(cs.sampleStatus, cs[sample.status])}>
-                {sample.status}
-              </div>
+              {full && (
+                <div className={cx(cs.sampleStatus, cs[sample.status])}>
+                  {sample.status}
+                </div>
+              )}
             </div>
           ) : (
             <div className={cs.sampleNameAndStatus} />
