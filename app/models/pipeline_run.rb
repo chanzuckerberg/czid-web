@@ -1419,8 +1419,9 @@ class PipelineRun < ApplicationRecord
       # Default background is complicated... see get_background_id. In any case,
       # we precache all backgrounds. See precache_report_info below.
       background_id: nil,
-      # For invalidation when underlying data changes
-      report_ts: max_updated_at.utc.to_i,
+      # For invalidation if underlying data changes. This should only happen in
+      # exceptional situations, such as manual DB edits.
+      report_ts: max_updated_at.utc.beginning_of_day.to_i,
       format: "json"
     }
   end
