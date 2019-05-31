@@ -4,6 +4,10 @@ import cx from "classnames";
 import moment from "moment";
 
 import BasicPopup from "~/components/BasicPopup";
+import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
+import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
+import { numberWithCommas } from "~/helpers/strings";
+
 // CSS file must be loaded after any elements you might want to override
 import cs from "./table_renderers.scss";
 
@@ -54,6 +58,81 @@ class TableRenderers extends React.Component {
         <div className={cs.elapsed}>{date ? moment(date).fromNow() : ""}</div>
       </div>
     );
+  };
+
+  static renderSample = ({ cellData: sample }) => {
+    return (
+      <div className={cs.sample}>
+        <div className={cs.publicAccess}>
+          {sample &&
+            (sample.publicAccess ? (
+              <SamplePublicIcon className={cx(cs.icon)} />
+            ) : (
+              <SamplePrivateIcon className={cx(cs.icon)} />
+            ))}
+        </div>
+        <div className={cs.sampleRightPane}>
+          {sample ? (
+            <div className={cs.sampleNameAndStatus}>
+              <BasicPopup
+                trigger={<div className={cs.sampleName}>{sample.name}</div>}
+                content={sample.name}
+              />
+              <div className={cx(cs.sampleStatus, cs[sample.status])}>
+                {sample.status}
+              </div>
+            </div>
+          ) : (
+            <div className={cs.sampleNameAndStatus} />
+          )}
+          {sample ? (
+            <div className={cs.sampleDetails}>
+              <span className={cs.user}>{sample.user}</span>|
+              <span className={cs.project}>{sample.project}</span>
+            </div>
+          ) : (
+            <div className={cs.sampleDetails} />
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  static formatNumberWithCommas = value => {
+    return numberWithCommas(value);
+  };
+
+  static renderNumberAndPercentage = ({ cellData: number }) => {
+    return (
+      <div className={cs.numberValueAndPercentage}>
+        <div className={cs.value}>
+          {number && numberWithCommas(number.value)}
+        </div>
+        <div className={cs.percentage}>
+          {number && TableRenderers.formatPercentage(number.percent)}
+        </div>
+      </div>
+    );
+  };
+
+  static formatNumber = value => {
+    if (!value) return value;
+    if (!isFinite(value)) return value;
+    return value.toFixed(2);
+  };
+
+  static formatPercentage = value => {
+    if (!value) return value;
+    return `${TableRenderers.formatNumber(value)}%`;
+  };
+
+  static formatDuration = runtime => {
+    const h = Math.floor(runtime / 3600);
+    const m = Math.floor((runtime % 3600) / 60);
+
+    const hDisplay = h > 0 ? h + (h === 1 ? " hour, " : " hours, ") : "";
+    const mDisplay = m > 0 ? m + (m === 1 ? " minute" : " minutes") : "";
+    return hDisplay + mDisplay;
   };
 }
 

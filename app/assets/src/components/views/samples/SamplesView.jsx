@@ -6,15 +6,12 @@ import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
-import { numberWithCommas } from "~/helpers/strings";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
-import SamplePublicIcon from "~ui/icons/SamplePublicIcon";
-import SamplePrivateIcon from "~ui/icons/SamplePrivateIcon";
+
 import SaveIcon from "~ui/icons/SaveIcon";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
-import BasicPopup from "~/components/BasicPopup";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
@@ -39,7 +36,7 @@ class SamplesView extends React.Component {
         dataKey: "sample",
         flexGrow: 1,
         width: 350,
-        cellRenderer: this.renderSample,
+        cellRenderer: TableRenderers.renderSample,
         headerClassName: cs.sampleHeader
       },
       {
@@ -66,14 +63,14 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          this.formatNumberWithCommas(rowData[dataKey])
+          TableRenderers.formatNumberWithCommas(rowData[dataKey])
       },
       {
         dataKey: "nonHostReads",
         label: "Passed Filters",
         flexGrow: 1,
         className: cs.basicCell,
-        cellRenderer: this.renderNumberAndPercentage
+        cellRenderer: TableRenderers.renderNumberAndPercentage
       },
       {
         dataKey: "qcPercent",
@@ -81,7 +78,7 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          this.formatPercentage(rowData[dataKey])
+          TableRenderers.formatPercentage(rowData[dataKey])
       },
       {
         dataKey: "duplicateCompressionRatio",
@@ -89,7 +86,7 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          this.formatPercentage(rowData[dataKey])
+          TableRenderers.formatPercentage(rowData[dataKey])
       },
       {
         dataKey: "erccReads",
@@ -97,7 +94,7 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          this.formatNumberWithCommas(rowData[dataKey])
+          TableRenderers.formatNumberWithCommas(rowData[dataKey])
       },
       {
         dataKey: "notes",
@@ -122,7 +119,7 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          this.formatNumber(rowData[dataKey])
+          TableRenderers.formatNumber(rowData[dataKey])
       },
       {
         dataKey: "totalRuntime",
@@ -130,34 +127,10 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          this.formatDuration(rowData[dataKey])
+          TableRenderers.formatDuration(rowData[dataKey])
       }
     ];
   }
-
-  formatDuration = runtime => {
-    const h = Math.floor(runtime / 3600);
-    const m = Math.floor((runtime % 3600) / 60);
-
-    const hDisplay = h > 0 ? h + (h === 1 ? " hour, " : " hours, ") : "";
-    const mDisplay = m > 0 ? m + (m === 1 ? " minute" : " minutes") : "";
-    return hDisplay + mDisplay;
-  };
-
-  formatNumberWithCommas = value => {
-    return numberWithCommas(value);
-  };
-
-  formatNumber = value => {
-    if (!value) return value;
-    if (!isFinite(value)) return value;
-    return value.toFixed(2);
-  };
-
-  formatPercentage = value => {
-    if (!value) return value;
-    return `${this.formatNumber(value)}%`;
-  };
 
   handleSelectRow = (value, checked) => {
     const { selectedSampleIds } = this.state;
@@ -191,57 +164,6 @@ class SamplesView extends React.Component {
     return (
       !isEmpty(selectableIds) &&
       isEmpty(difference(selectableIds, Array.from(selectedSampleIds)))
-    );
-  };
-
-  renderNumberAndPercentage = ({ cellData: number }) => {
-    return (
-      <div className={cs.numberValueAndPercentage}>
-        <div className={cs.value}>
-          {number && numberWithCommas(number.value)}
-        </div>
-        <div className={cs.percentage}>
-          {number && this.formatPercentage(number.percent)}
-        </div>
-      </div>
-    );
-  };
-
-  renderSample = ({ cellData: sample }) => {
-    return (
-      <div className={cs.sample}>
-        <div className={cs.publicAccess}>
-          {sample &&
-            (sample.publicAccess ? (
-              <SamplePublicIcon className={cx(cs.icon, cs.iconPublic)} />
-            ) : (
-              <SamplePrivateIcon className={cx(cs.icon, cs.iconPrivate)} />
-            ))}
-        </div>
-        <div className={cs.sampleRightPane}>
-          {sample ? (
-            <div className={cs.sampleNameAndStatus}>
-              <BasicPopup
-                trigger={<div className={cs.sampleName}>{sample.name}</div>}
-                content={sample.name}
-              />
-              <div className={cx(cs.sampleStatus, cs[sample.status])}>
-                {sample.status}
-              </div>
-            </div>
-          ) : (
-            <div className={cs.sampleNameAndStatus} />
-          )}
-          {sample ? (
-            <div className={cs.sampleDetails}>
-              <span className={cs.user}>{sample.user}</span>|
-              <span className={cs.project}>{sample.project}</span>
-            </div>
-          ) : (
-            <div className={cs.sampleDetails} />
-          )}
-        </div>
-      </div>
     );
   };
 
