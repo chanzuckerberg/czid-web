@@ -400,15 +400,6 @@ module ReportHelper
     ").to_hash
   end
 
-  def self.fetch_parent_ids(taxon_ids, samples)
-    # Get parent (genus,family) ids for the taxon_ids based on the samples
-    TaxonCount.select("distinct genus_taxid, family_taxid")
-              .joins(:pipeline_run)
-              .where(pipeline_runs: { sample: samples })
-              .where(tax_id: taxon_ids)
-              .map { |u| u.attributes.values.compact }.flatten
-  end
-
   def self.zero_metrics(count_type)
     {
       'count_type' => count_type,

@@ -6,7 +6,11 @@ class VisualizationsController < ApplicationController
   respond_to :json
 
   # This action takes up to 10s for 50 samples so we cache it.
-  caches_action :samples_taxons, expires_in: 30.days
+  caches_action(
+    :samples_taxons,
+    expires_in: 30.days,
+    cache_path: proc { |c| c.request.url }
+  )
 
   # GET /visualizations.json
   def index
