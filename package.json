@@ -58,7 +58,7 @@
     "webpack-merge": "^4.1.2"
   },
   "dependencies": {
-    "axios": "^0.17.1",
+    "axios": "^0.19.0",
     "axios-retry": "^3.1.2",
     "babel-eslint": "^10.0.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
@@ -80,6 +80,7 @@
     "d3-transition": "^1.1.1",
     "fast-deep-equal": "^2.0.1",
     "font-awesome": "^4.7.0",
+    "fstream": "^1.0.12",
     "jquery": "^3.4.0",
     "js-cookie": "^2.2.0",
     "lodash": "^4.17.11",
