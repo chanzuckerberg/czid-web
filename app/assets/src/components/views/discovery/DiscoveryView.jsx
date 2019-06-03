@@ -713,10 +713,15 @@ class DiscoveryView extends React.Component {
       limit: 1e4, // Server needs a max, 1e4 at one location is a good cutoff.
       listAllIds: true
     });
-    this.setState({
-      mapSelectedSamples: fetchedSamples,
-      mapSelectedSampleIds: fetchedSampleIds
-    });
+    this.setState(
+      {
+        mapSelectedSamples: fetchedSamples,
+        mapSelectedSampleIds: fetchedSampleIds
+      },
+      () => {
+        this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
+      }
+    );
   };
 
   renderRightPane = () => {
@@ -768,6 +773,9 @@ class DiscoveryView extends React.Component {
               samples={mapSelectedSamples}
               onSampleSelected={this.handleSampleSelected}
               selectableIds={mapSelectedSampleIds}
+              ref={mapPreviewSidebar =>
+                (this.mapPreviewSidebar = mapPreviewSidebar)
+              }
             />
           ))}
       </div>

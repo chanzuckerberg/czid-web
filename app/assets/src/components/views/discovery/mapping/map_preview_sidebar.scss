@@ -22,3 +22,13 @@
   align-items: flex-start;
   padding: 11px 0;
 }
+
+.basicCell {
+  // this is adjusted to align the baseline of
+  // content of basic cells with the sample name.
+  margin-top: 2px;
+}
+
+.sampleHeader {
+  text-align: left;
+}

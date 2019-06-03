@@ -80,11 +80,9 @@ class TableRenderers extends React.Component {
                 trigger={<div className={cs.sampleName}>{sample.name}</div>}
                 content={sample.name}
               />
-              {full && (
-                <div className={cx(cs.sampleStatus, cs[sample.status])}>
-                  {sample.status}
-                </div>
-              )}
+              <div className={cx(cs.sampleStatus, cs[sample.status])}>
+                {sample.status}
+              </div>
             </div>
           ) : (
             <div className={cs.sampleNameAndStatus} />

@@ -21,14 +21,13 @@ export default class MapPreviewSidebar extends React.Component {
       {
         dataKey: "sample",
         flexGrow: 1,
-        width: 350,
+        width: 150,
         cellRenderer: cellData => TableRenderers.renderSample(cellData, false),
         headerClassName: cs.sampleHeader
       },
       {
         dataKey: "createdAt",
         label: "Uploaded On",
-        width: 120,
         className: cs.basicCell,
         cellRenderer: TableRenderers.renderDateWithElapsed
       },
@@ -119,7 +118,7 @@ export default class MapPreviewSidebar extends React.Component {
   }
 
   handleLoadSampleRows = async () => {
-    // TODO(jsheu): Add pagination for long lists of samples
+    // TODO(jsheu): Add pagination on the endpoint and loading for long lists of samples
     const { samples } = this.props;
     return samples;
   };
@@ -149,9 +148,8 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   isSelectAllChecked = () => {
-    const { selectedSampleIds } = this.state;
     const { selectableIds } = this.props;
-
+    const { selectedSampleIds } = this.state;
     return (
       !isEmpty(selectableIds) &&
       isEmpty(difference(selectableIds, Array.from(selectedSampleIds)))
@@ -167,6 +165,10 @@ export default class MapPreviewSidebar extends React.Component {
         : difference(selectedSampleIds, selectableIds)
     );
     this.setState({ selectedSampleIds: newSelected });
+  };
+
+  reset = () => {
+    this.infiniteTable && this.infiniteTable.reset();
   };
 
   renderTable = () => {
@@ -207,11 +209,6 @@ export default class MapPreviewSidebar extends React.Component {
 
   render() {
     const { className } = this.props;
-
-    console.log("foobar 4:23pm");
-
-    this.infiniteTable && this.infiniteTable.reset();
-
     return (
       <div className={cx(className, cs.sidebar)}>{this.renderTable()}</div>
     );
