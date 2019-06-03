@@ -14,6 +14,15 @@ module HeatmapHelper
 
   MINIMUM_ZSCORE_THRESHOLD = 1.7
 
+  ALL_METRICS = [
+    { text: "NT rPM", value: "NT.rpm" },
+    { text: "NT Z Score", value: "NT.zscore" },
+    { text: "NT r (total reads)", value: "NT.r" },
+    { text: "NR rPM", value: "NR.rpm" },
+    { text: "NR Z Score", value: "NR.zscore" },
+    { text: "NR r (total reads)", value: "NR.r" }
+  ].freeze
+
   def self.sample_taxons_dict(params, samples)
     return {} if samples.empty?
 
@@ -41,8 +50,9 @@ module HeatmapHelper
     include_phage = subcategories.fetch("Viruses", []).include?("Phage")
     read_specificity = params[:readSpecificity] ? params[:readSpecificity].to_i == 1 : false
 
-    # TODO: should fail if field is not well formatted and return proper error to client
-    sort_by = params[:sortBy] || HeatmapHelper::DEFAULT_TAXON_SORT_PARAM
+    sort_by = params[:sortBy] &&
+              HeatmapHelper::ALL_METRICS.map { |m| m["name"] }.includes(params[:sortBy]) ||
+              HeatmapHelper::DEFAULT_TAXON_SORT_PARAM
     species_selected = params[:species] ? params[:species].to_i == 1 : false # Otherwise genus selected
 
     first_sample = samples.first
