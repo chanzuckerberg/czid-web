@@ -491,10 +491,15 @@ class SamplesHeatmapView extends React.Component {
   }
 
   renderLoading() {
+    const numSamples = this.state.sampleIds.length;
+    // This was determined empirically by varying the number of samples from 4
+    // to 55 in prod.
+    const estimate = Math.round(numSamples / 2);
     return (
       <p className={cs.loadingIndicator}>
         <i className="fa fa-spinner fa-pulse fa-fw" />
-        Loading for {this.state.sampleIds.length} samples...
+        Loading for {numSamples} samples. Please wait up to {estimate}{" "}
+        seconds...
       </p>
     );
   }
