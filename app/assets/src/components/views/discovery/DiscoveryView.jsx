@@ -710,7 +710,8 @@ class DiscoveryView extends React.Component {
       sampleIds: fetchedSampleIds
     } = await getDiscoverySamples({
       sampleIds,
-      limit: 1e4 // Server needs a max, 1e4 at one location is a good cutoff.
+      limit: 1e4, // Server needs a max, 1e4 at one location is a good cutoff.
+      listAllIds: true
     });
     this.setState({
       mapSelectedSamples: fetchedSamples,

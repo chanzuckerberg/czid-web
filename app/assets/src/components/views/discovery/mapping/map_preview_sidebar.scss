@@ -2,6 +2,7 @@
   font-size: 12px;
   width: 300px;
   overflow-y: scroll;
+  height: 100%;
 
   .container {
     display: flex;
@@ -13,7 +14,6 @@
       flex: 1 0 auto;
       display: flex;
       flex-direction: column;
-      height: 500px; // change?
     }
   }
 }
