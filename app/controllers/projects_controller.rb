@@ -48,13 +48,16 @@ class ProjectsController < ApplicationController
     respond_to do |format|
       format.html do
         # keep compatibility with old route
-        # TODO(tiago): remove once data discovery is completed
+        # TODO(tiago): remove once once DD projects has a link to admin project view
         @projects = current_power.projects
       end
       format.json do
         domain = params[:domain]
+
         order_by = params[:orderBy] || :id
         order_dir = params[:orderDir] || :desc
+
+        # we do not want to search samples by name
         search = params.delete(:search)
         # If basic, just return a few fields for the project.
         basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
@@ -62,16 +65,19 @@ class ProjectsController < ApplicationController
         samples = samples_by_domain(domain)
         samples = filter_samples(samples, params)
 
-        # if we are applying any filters that constrain project's samples, we should not show project with zero samples
+        # if we are applying any filters that constrain project's samples, we should not show projects with zero samples
         hide_empty_projects = [:host, :location, :taxon, :time, :tissue, :visibility].any? do |key|
           params.key? key
         end
 
         # Retrieve a json of projects associated with samples;
         # augment with number_of_samples, hosts, tissues.
-        projects = if ["my_data", "public"].include?(domain)
+        projects = case domain
+                   when "my_data"
+                     current_user.projects
+                   when "public"
                      current_power.projects.where(id: samples.pluck(:project_id).uniq)
-                   elsif domain == "updatable"
+                   when "updatable"
                      current_power.updatable_projects
                    else
                      current_power.projects
@@ -109,24 +115,26 @@ class ProjectsController < ApplicationController
           (tissues_by_project_id[s.project_id] ||= Set.new) << metadata[s.id][:sample_type] if (metadata[s.id] || {})[:sample_type]
           (locations_by_project_id[s.project_id] ||= Set.new) << metadata[s.id][:collection_location] if (metadata[s.id] || {})[:collection_location]
           # Assumes project owner is the uploader of the project's first sample
-          if !min_sample_by_project_id[s.project_id] || min_sample_by_project_id[s.project_id] < s.id
+          if !min_sample_by_project_id[s.project_id] || min_sample_by_project_id[s.project_id] > s.id
             min_sample_by_project_id[s.project_id] = s.id
             owner_by_project_id[s.project_id] = s.user ? s.user.name : nil
           end
         end
 
+        # puts "projects: #{projects.as_json()}"
         filtered_projects = projects.includes(:users).select do |project|
           !hide_empty_projects || (sample_count_by_project_id[project.id] || 0) > 0
         end
+        # puts "filtered: #{filtered_projects}"
         extended_projects = filtered_projects.map do |project|
-          project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
-            number_of_samples: sample_count_by_project_id[project.id] || 0,
-            hosts: host_genome_names_by_project_id[project.id] || [],
-            tissues: tissues_by_project_id[project.id] || [],
-            owner: owner_by_project_id[project.id],
-            locations: locations_by_project_id[project.id] || [],
-            editable: updatable_projects.include?(project.id),
-            users: updatable_projects.include?(project.id) ? project.users.map { |user| { name: user[:name], email: user[:email] } } : []
+        project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
+          number_of_samples: sample_count_by_project_id[project.id] || 0,
+          hosts: host_genome_names_by_project_id[project.id] || [],
+          tissues: tissues_by_project_id[project.id] || [],
+          owner: owner_by_project_id[project.id],
+          locations: locations_by_project_id[project.id] || [],
+          editable: updatable_projects.include?(project.id),
+          users: updatable_projects.include?(project.id) ? project.users.map { |user| { name: user[:name], email: user[:email] } } : []
           )
         end
         render json: extended_projects
