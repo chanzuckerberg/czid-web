@@ -8,22 +8,22 @@ FactoryBot.define do
 
     sequence(:name) { |n| "Sample #{n}" }
     input_files { build_list(:local_input_file, 2) }
-    host_genome {
+    host_genome do
       if host_genome_name
         hg = HostGenome.find_by(name: host_genome_name)
         hg || build(:host_genome, name: host_genome_name)
       else
         build(:host_genome)
       end
-    }
+    end
 
     # metadata fields
     # ensure the metadata field is added to the host genome
     # TODO(tiago): will not work if the host genome was created before.
     # COuld find out why the host genome metadata fields could not be updated.
-    before(:create) do |sample, options|
+    before(:create) do |_sample, options|
       options.metadata_fields.each_key do |metadata_field_name|
-        if !MetadataField.exists?(name: metadata_field_name)
+        unless MetadataField.exists?(name: metadata_field_name)
           create(:metadata_field, name: metadata_field_name, default_for_new_host_genome: 1)
         end
       end

@@ -8,7 +8,6 @@ FactoryBot.define do
     sequence(:name) { |n| "Project #{n}" }
     public_access { 0 }
 
-
     trait :with_samples do
       after :create do |project, options|
         create(:sample, project: project, host_genome_name: options.host_genome_name)
@@ -31,5 +30,4 @@ FactoryBot.define do
       public_access { 1 }
     end
   end
-
 end

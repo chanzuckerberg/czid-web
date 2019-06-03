@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe ProjectsController, type: :controller do
-
   create_users
 
   # Admin specific behavior
@@ -18,8 +17,8 @@ RSpec.describe ProjectsController, type: :controller do
           create(:project, users: [@joe]),
           create(:project, users: [@joe, @admin]),
           create(:public_project),
-          create(:project, samples_data: [{created_at: 1.year.ago}]),
-          create(:project, users: [@admin], samples_data: [{created_at: 1.year.ago}])
+          create(:project, samples_data: [{ created_at: 1.year.ago }]),
+          create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }])
         ]
         expected_projects.reverse!
 
@@ -38,8 +37,8 @@ RSpec.describe ProjectsController, type: :controller do
           create(:project, users: [@joe]),
           create(:project, users: [@joe, @admin]),
           create(:public_project),
-          create(:project, samples_data: [{created_at: 1.year.ago}]),
-          create(:project, users: [@admin], samples_data: [{created_at: 1.year.ago}])
+          create(:project, samples_data: [{ created_at: 1.year.ago }]),
+          create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }])
         ]
         expected_projects.reverse!
 
@@ -106,8 +105,8 @@ RSpec.describe ProjectsController, type: :controller do
           expected_projects << create(:project, users: [other_user, @user])
           create(:public_project)
           expected_projects << create(:public_project, users: [@user])
-          create(:project, samples_data: [{created_at: 1.year.ago}])
-          expected_projects << create(:project, users: [@user], samples_data: [{created_at: 1.year.ago}])
+          create(:project, samples_data: [{ created_at: 1.year.ago }])
+          expected_projects << create(:project, users: [@user], samples_data: [{ created_at: 1.year.ago }])
           expected_projects.reverse!
 
           get :index, params: { format: "json", domain: "my_data" }
@@ -149,9 +148,9 @@ RSpec.describe ProjectsController, type: :controller do
         it "sees projects with public samples" do
           other_user = create(:user)
           expected_projects = []
-          create(:project, users: [@user], samples_data: [{created_at: 6.months.ago}])
-          expected_projects << create(:project, users: [other_user], samples_data: [{created_at: 1.year.ago}])
-          expected_projects << create(:project, users: [@user], samples_data: [{created_at: 1.year.ago}])
+          create(:project, users: [@user], samples_data: [{ created_at: 6.months.ago }])
+          expected_projects << create(:project, users: [other_user], samples_data: [{ created_at: 1.year.ago }])
+          expected_projects << create(:project, users: [@user], samples_data: [{ created_at: 1.year.ago }])
           expected_projects.reverse!
 
           get :index, params: { format: "json", domain: "public" }
@@ -248,69 +247,68 @@ RSpec.describe ProjectsController, type: :controller do
           it "sees all required fields" do
             extra_users = create_list(:user, 2)
             expected_projects = []
-            expected_projects << create(:public_project,  users: extra_users + [@user], samples_data: [{
-              host_genome_name: "Human",
-              user: extra_users[0],
-              metadata_fields: {collection_location: "San Francisco, USA", sample_type: "Serum"},
+            expected_projects << create(:public_project, users: extra_users + [@user], samples_data: [{
+                                          host_genome_name: "Human",
+                                          user: extra_users[0],
+                                          metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" }
 
-            },
-            {
-              host_genome_name: "Mosquito",
-              user: @user,
-              metadata_fields: {collection_location: "San Francisco, USA", sample_type: "Water"},
-            }])
+                                        },
+                                                                                                      {
+                                                                                                        host_genome_name: "Mosquito",
+                                                                                                        user: @user,
+                                                                                                        metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" }
+                                                                                                      }])
 
-            get :index, params: { format: "json", domain: domain}
+            get :index, params: { format: "json", domain: domain }
 
             json_response = JSON.parse(response.body)
             expect(json_response.count).to eq(expected_projects.count)
             expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
 
             response_project = json_response[0]
-            expect(response_project).to include_json({
-              id: expected_projects[0].id,
-              name: expected_projects[0].name,
-              created_at: expected_projects[0].created_at.as_json,
-              public_access: expected_projects[0].public_access,
-              number_of_samples: 2,
-              hosts: ["Human", "Mosquito"],
-              tissues: ["Serum", "Water"],
-              locations: ["San Francisco, USA"],
-              owner: extra_users[0].name,
-              editable: true,
-              users: (extra_users.as_json + [@user.as_json]).map{ |u| u.slice("name", "email") }
-            })
+            expect(response_project).to include_json(id: expected_projects[0].id,
+                                                     name: expected_projects[0].name,
+                                                     created_at: expected_projects[0].created_at.as_json,
+                                                     public_access: expected_projects[0].public_access,
+                                                     number_of_samples: 2,
+                                                     hosts: ["Human", "Mosquito"],
+                                                     tissues: ["Serum", "Water"],
+                                                     locations: ["San Francisco, USA"],
+                                                     owner: extra_users[0].name,
+                                                     editable: true,
+                                                     users: (extra_users.as_json + [@user.as_json]).map { |u| u.slice("name", "email") })
           end
 
           it "sees all only limited fields when setting basic mode" do
             extra_users = create_list(:user, 2)
             expected_projects = []
-            expected_projects << create(:public_project,  users: extra_users + [@user], samples_data: [{
-              host_genome_name: "Human",
-              user: extra_users[0],
-              metadata_fields: {collection_location: "San Francisco, USA", sample_type: "Serum"},
+            expected_projects << create(:public_project,
+                                        users: extra_users + [@user],
+                                        samples_data: [
+                                          {
+                                            host_genome_name: "Human",
+                                            user: extra_users[0],
+                                            metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" }
+                                          },
+                                          {
+                                            host_genome_name: "Mosquito",
+                                            user: @user,
+                                            metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" }
+                                          }
+                                        ])
 
-            },
-            {
-              host_genome_name: "Mosquito",
-              user: @user,
-              metadata_fields: {collection_location: "San Francisco, USA", sample_type: "Water"},
-            }])
-
-            get :index, params: { format: "json", domain: domain, basic: true}
+            get :index, params: { format: "json", domain: domain, basic: true }
 
             json_response = JSON.parse(response.body)
             expect(json_response.count).to eq(expected_projects.count)
             expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
 
             response_project = json_response[0]
-            expect(response_project).to include_json({
-              id: expected_projects[0].id,
-              name: expected_projects[0].name,
-              created_at: expected_projects[0].created_at.as_json,
-              public_access: expected_projects[0].public_access,
-              number_of_samples: 2,
-            })
+            expect(response_project).to include_json(id: expected_projects[0].id,
+                                                     name: expected_projects[0].name,
+                                                     created_at: expected_projects[0].created_at.as_json,
+                                                     public_access: expected_projects[0].public_access,
+                                                     number_of_samples: 2)
             # response_project.keys.should =~ [:id, :name, :created_at, :public_access, :number_of_samples]
             response_project.keys.should =~ ["id", "name", "created_at", "public_access", "number_of_samples"]
           end
@@ -326,7 +324,7 @@ RSpec.describe ProjectsController, type: :controller do
             create(:public_project, :with_samples, users: [@user])
             expected_projects << create(:project, :with_samples, users: [@user])
 
-            get :index, params: { format: "json", domain: domain, visibility: "private"}
+            get :index, params: { format: "json", domain: domain, visibility: "private" }
 
             json_response = JSON.parse(response.body)
             expect(json_response.count).to eq(expected_projects.count)
@@ -341,7 +339,7 @@ RSpec.describe ProjectsController, type: :controller do
             expected_projects << create(:public_project, :with_samples, users: [@user])
             create(:project, :with_samples, users: [@user])
 
-            get :index, params: { format: "json", domain: domain, visibility: "public"}
+            get :index, params: { format: "json", domain: domain, visibility: "public" }
 
             json_response = JSON.parse(response.body)
             expect(json_response.count).to eq(expected_projects.count)
@@ -353,10 +351,10 @@ RSpec.describe ProjectsController, type: :controller do
 
             create(:project, users: [@user])
             create(:project, :with_samples, users: [@user])
-            expected_projects << create(:project, users: [@user], samples_data: [metadata_fields: {sample_type: "Serum"}])
-            create(:project, users: [@user], samples_data: [metadata_fields: {sample_type: "Non-Serum"}])
+            expected_projects << create(:project, users: [@user], samples_data: [metadata_fields: { sample_type: "Serum" }])
+            create(:project, users: [@user], samples_data: [metadata_fields: { sample_type: "Non-Serum" }])
 
-            get :index, params: { format: "json", domain: domain, tissue: "Serum"}
+            get :index, params: { format: "json", domain: domain, tissue: "Serum" }
 
             json_response = JSON.parse(response.body)
             expect(json_response.count).to eq(expected_projects.count)
@@ -368,10 +366,10 @@ RSpec.describe ProjectsController, type: :controller do
 
             create(:project, users: [@user])
             create(:project, :with_samples, users: [@user])
-            expected_projects << create(:project, users: [@user], samples_data: [metadata_fields: {collection_location: "San Francisco, USA"}])
-            create(:project, users: [@user], samples_data: [metadata_fields: {collection_location: "Lisbon, Portugal"}])
+            expected_projects << create(:project, users: [@user], samples_data: [metadata_fields: { collection_location: "San Francisco, USA" }])
+            create(:project, users: [@user], samples_data: [metadata_fields: { collection_location: "Lisbon, Portugal" }])
 
-            get :index, params: { format: "json", domain: domain, location: "San Francisco, USA"}
+            get :index, params: { format: "json", domain: domain, location: "San Francisco, USA" }
 
             json_response = JSON.parse(response.body)
             expect(json_response.count).to eq(expected_projects.count)
@@ -386,7 +384,7 @@ RSpec.describe ProjectsController, type: :controller do
             create(:project, :with_samples, users: [@user], host_genome_name: "pig")
             expected_projects << create(:project, :with_samples, users: [@user], host_genome_name: "human")
 
-            get :index, params: { format: "json", domain: domain, host: HostGenome.find_by(name: "human").id}
+            get :index, params: { format: "json", domain: domain, host: HostGenome.find_by(name: "human").id }
 
             json_response = JSON.parse(response.body)
             expect(json_response.count).to eq(expected_projects.count)
@@ -406,13 +404,13 @@ RSpec.describe ProjectsController, type: :controller do
             travel_to 5.days.ago do
               expected_projects << create(:project, :with_samples, users: [@user])
             end
-            travel_to Time.now do
+            travel_to DateTime.current do
               expected_projects << create(:project, :with_samples, users: [@user])
             end
             # by default, most recent projects first
             expected_projects.reverse!
 
-            get :index, params: { format: "json", domain: domain, time: [(30.days.ago).strftime("%Y%m%d"), DateTime.now.strftime("%Y%m%d")]}
+            get :index, params: { format: "json", domain: domain, time: [30.days.ago.strftime("%Y%m%d"), DateTime.current.strftime("%Y%m%d")] }
 
             json_response = JSON.parse(response.body)
             expect(json_response.count).to eq(expected_projects.count)
@@ -423,11 +421,11 @@ RSpec.describe ProjectsController, type: :controller do
             expected_projects = []
             create(:project, users: [@user])
             create(:project, :with_samples, users: [@user])
-            create(:project, users: [@user], samples_data: [{pipeline_runs_data: [{taxon_counts_data: [{taxon_name: "klebsormidium", nt: 10}], job_status: "CHECKED"}]}])
-            create(:project, users: [@user], samples_data: [{pipeline_runs_data: [{taxon_counts_data: [{taxon_name: "klebsiella", nt: 0}], job_status: "CHECKED"}]}])
-            expected_projects << create(:project, users: [@user], samples_data: [{pipeline_runs_data: [{taxon_counts_data: [{taxon_name: "klebsiella", nt: 10}], job_status: "CHECKED"}]}])
+            create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsormidium", nt: 10 }], job_status: "CHECKED" }] }])
+            create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsiella", nt: 0 }], job_status: "CHECKED" }] }])
+            expected_projects << create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsiella", nt: 10 }], job_status: "CHECKED" }] }])
 
-            get :index, params: { format: "json", domain: domain, taxon: TaxonLineage.find_by(tax_name: "klebsiella").id}
+            get :index, params: { format: "json", domain: domain, taxon: TaxonLineage.find_by(tax_name: "klebsiella").id }
 
             json_response = JSON.parse(response.body)
             expect(json_response.count).to eq(expected_projects.count)
@@ -444,7 +442,7 @@ RSpec.describe ProjectsController, type: :controller do
             create(:project, :with_samples, name: "Project", users: [@user])
             expected_projects.reverse!
 
-            get :index, params: { format: "json", domain: domain, search: "find_this"}
+            get :index, params: { format: "json", domain: domain, search: "find_this" }
 
             json_response = JSON.parse(response.body)
             expect(json_response.count).to eq(expected_projects.count)

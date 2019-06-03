@@ -133,7 +133,7 @@ class ProjectsController < ApplicationController
             locations: locations_by_project_id[project.id] || [],
             editable: updatable_projects.include?(project.id),
             users: updatable_projects.include?(project.id) ? project.users.map { |user| { name: user[:name], email: user[:email] } } : []
-            )
+          )
         end
         render json: extended_projects
       end

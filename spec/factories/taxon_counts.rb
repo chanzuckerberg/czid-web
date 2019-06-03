@@ -6,21 +6,19 @@ FactoryBot.define do
       nr { nil }
     end
 
-    initialize_with {
+    initialize_with do
       if taxon_name
         taxon_lineage = TaxonLineage.find_by(tax_name: taxon_name)
-        if !taxon_lineage
-          taxon_lineage = create(:species, {tax_name: taxon_name})
+        unless taxon_lineage
+          taxon_lineage = create(:species, tax_name: taxon_name)
         end
         # Unable to edit the original hash for some reason
-        new(**attributes.dup.merge({
-          tax_id: taxon_lineage.id,
-          name: taxon_lineage.name
-        }))
+        new(**attributes.dup.merge(tax_id: taxon_lineage.id,
+                                   name: taxon_lineage.name))
       else
         new(attributes)
       end
-    }
+    end
 
     tax_level { 1 }
     count { nt || nr || 1 }
