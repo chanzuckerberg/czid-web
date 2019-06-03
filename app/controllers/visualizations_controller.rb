@@ -9,7 +9,10 @@ class VisualizationsController < ApplicationController
   caches_action(
     :samples_taxons,
     expires_in: 30.days,
-    cache_path: proc { |c| c.request.url }
+    cache_path: proc do |c|
+      sorted_params = c.request.params.to_h.sort.to_h
+      sorted_params.to_query
+    end
   )
 
   # GET /visualizations.json
