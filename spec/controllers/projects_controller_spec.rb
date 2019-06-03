@@ -247,17 +247,22 @@ RSpec.describe ProjectsController, type: :controller do
           it "sees all required fields" do
             extra_users = create_list(:user, 2)
             expected_projects = []
-            expected_projects << create(:public_project, users: extra_users + [@user], samples_data: [{
-                                          host_genome_name: "Human",
-                                          user: extra_users[0],
-                                          metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" }
-
-                                        },
-                                                                                                      {
-                                                                                                        host_genome_name: "Mosquito",
-                                                                                                        user: @user,
-                                                                                                        metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" }
-                                                                                                      }])
+            expected_projects << create(
+              :public_project,
+              users: extra_users + [@user],
+              samples_data: [
+                {
+                  host_genome_name: "Human",
+                  user: extra_users[0],
+                  metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" }
+                },
+                {
+                  host_genome_name: "Mosquito",
+                  user: @user,
+                  metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" }
+                }
+              ]
+            )
 
             get :index, params: { format: "json", domain: domain }
 
