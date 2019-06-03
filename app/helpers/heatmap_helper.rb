@@ -151,7 +151,7 @@ module HeatmapHelper
   end
 
   def self.fetch_top_taxons(
-    samples,
+    _samples,
     background_id,
     categories,
     read_specificity = READ_SPECIFICITY,
@@ -215,23 +215,16 @@ module HeatmapHelper
       #{rpm_sql} AS rpm,
       #{zscore_sql} AS zscore
     FROM taxon_counts
-    -- warning!!! pipeline_runs may be missing!!!
-    LEFT OUTER JOIN pipeline_runs pr ON pipeline_run_id = pr.id
+    JOIN (#{HeatmapHelper.latest_pipeline_runs_query}) lpr
+      ON pipeline_run_id = lpr.id
+    JOIN pipeline_runs pr ON pipeline_run_id = pr.id
     LEFT OUTER JOIN taxon_summaries ON
       #{background_id.to_i}   = taxon_summaries.background_id   AND
       taxon_counts.count_type = taxon_summaries.count_type      AND
       taxon_counts.tax_level  = taxon_summaries.tax_level       AND
       taxon_counts.tax_id     = taxon_summaries.tax_id
     WHERE
-      pipeline_run_id IN (
-        -- not the ideal way to get the current pipeline but it is consistent
-        -- with current logic elsewhere
-        SELECT MAX(id)
-        FROM pipeline_runs
-        WHERE sample_id IN (#{samples.pluck(:id).join(',')})
-        GROUP BY sample_id
-      )
-      AND genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
+      genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
       AND count >= #{min_reads}
       -- We need both types of counts for threshold filters
       AND taxon_counts.count_type IN ('NT', 'NR')
@@ -324,7 +317,7 @@ module HeatmapHelper
     results.values
   end
 
-  def self.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+  def self.fetch_samples_taxons_counts(_samples, taxon_ids, parent_ids, background_id)
     parent_ids = parent_ids.to_a
     parent_ids_clause = parent_ids.empty? ? "" : " OR taxon_counts.tax_id in (#{parent_ids.join(',')}) "
 
@@ -356,21 +349,15 @@ module HeatmapHelper
         )                                AS  neglogevalue,
         taxon_counts.percent_concordant  AS  percentconcordant
       FROM taxon_counts
+      JOIN (#{HeatmapHelper.latest_pipeline_runs_query}) lpr
+        ON pipeline_run_id = lpr.id
       LEFT OUTER JOIN taxon_summaries ON
         #{background_id.to_i}   = taxon_summaries.background_id   AND
         taxon_counts.count_type = taxon_summaries.count_type      AND
         taxon_counts.tax_level  = taxon_summaries.tax_level       AND
         taxon_counts.tax_id     = taxon_summaries.tax_id
       WHERE
-        pipeline_run_id IN (
-          -- not the ideal way to get the current pipeline but it is consistent
-          -- with current logic elsewhere
-          SELECT MAX(id)
-          FROM pipeline_runs
-          WHERE sample_id IN (#{samples.pluck(:id).join(',')})
-          GROUP BY sample_id
-        )
-        AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
+        taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
         AND taxon_counts.count_type IN ('NT', 'NR')
         AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
          #{parent_ids_clause}
@@ -503,5 +490,14 @@ module HeatmapHelper
               .where(pipeline_runs: { sample: samples })
               .where(tax_id: taxon_ids)
               .map { |u| u.attributes.values.compact }.flatten
+  end
+
+  def self.latest_pipeline_runs_query(samples)
+    # not the ideal way to get the current pipeline but it is consistent with
+    # current logic elsewhere.
+    "SELECT MAX(id)
+      FROM pipeline_runs
+      WHERE sample_id IN (#{samples.pluck(:id).join(',')})
+      GROUP BY sample_id"
   end
 end
