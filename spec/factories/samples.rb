@@ -1,8 +1,12 @@
 FactoryBot.define do
   factory :sample do
     transient do
+      # Hash of metadata_field_name => metadata_field_value to create for this sample
       metadata_fields { {} }
+      # Host genome to load or create automatically for this sample.
       host_genome_name { nil }
+      # Array of pipeline_runs entries to create.
+      # The hash elements will be passed on to pipeline_run factory as keyword arguments.
       pipeline_runs_data { [] }
     end
 

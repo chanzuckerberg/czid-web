@@ -1,6 +1,8 @@
 FactoryBot.define do
   factory :pipeline_run, class: PipelineRun do
     transient do
+      # Array of taxon_counts entries to create.
+      # The hash elements will be passed on to taxon_count factory as keyword arguments.
       taxon_counts_data { [] }
     end
 

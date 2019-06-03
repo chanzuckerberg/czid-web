@@ -1,7 +1,11 @@
 FactoryBot.define do
   factory :taxon_count, class: TaxonCount do
     transient do
+      # The taxon name for the taxon count entry.
+      # Will be loaded or created using species (taxon_lineages) factory.
       taxon_name { nil }
+      # NT or NR counts. NT will be used if defined. Otherwise, will use NR value.
+      # Count type will be filled automaticlaly.
       nt { nil }
       nr { nil }
     end

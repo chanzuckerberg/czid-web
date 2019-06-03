@@ -1,7 +1,10 @@
 FactoryBot.define do
   factory :project do
     transient do
+      # The name of the host genome to create automatically for each sample
       host_genome_name { nil }
+      # Array of samples entries to create.
+      # The hash elements will be passed on to sample factory as keyword arguments.
       samples_data { [] }
     end
 
