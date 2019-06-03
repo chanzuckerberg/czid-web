@@ -93,7 +93,6 @@ group :development, :test do
   gem 'factory_bot_rails'
   gem 'rspec-rails', '>= 3.7.2'
   gem 'rubocop', '=0.49.1'
-  gem 'rubocop-rspec'
   gem 'selenium-webdriver'
 end
 

@@ -54,8 +54,8 @@ class ProjectsController < ApplicationController
       format.json do
         domain = params[:domain]
 
-        order_by = params[:orderBy] || :id
-        order_dir = params[:orderDir] || :desc
+        order_by = sanitize_order_by(Project, params[:orderBy], :id)
+        order_dir = sanitize_order_dir(params[:orderDir], :desc)
 
         # we do not want to search samples by name
         search = params.delete(:search)

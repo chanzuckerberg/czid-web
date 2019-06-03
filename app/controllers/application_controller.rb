@@ -109,4 +109,13 @@ class ApplicationController < ActionController::Base
   rescue => e
     Rails.logger.error(e)
   end
+
+  def sanitize_order_by(model, order_by, default=nil)
+    return model.column_names.include?(params[:orderBy]) ? params[:orderBy] || default
+  end
+
+  def sanitize_order_dir(model, order_by, default=nil)
+    normalized_order_dir.downcase.to_sym
+    return [:desc, :asc].include?(normalized_order_dir) ? normalized_order_dir : default
+  end
 end
