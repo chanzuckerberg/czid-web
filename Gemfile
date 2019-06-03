@@ -5,8 +5,8 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
-gem 'airbrake', '~> 9.2.2'
-gem 'airbrake-ruby', '~> 4.4'
+gem 'airbrake', '~> 8'
+gem 'airbrake-ruby', '~> 4.2.1' # 4.4 broke perf monitoring
 gem 'aws-sdk-ecs'
 gem 'aws-sdk-resources'
 gem 'brakeman'
@@ -80,6 +80,8 @@ gem 'http-2'
 gem 'deep_cloneable', '~> 2.4.0'
 # For using redis as a cache
 gem 'redis-rails', '~> 5'
+# For caching actions by request URL
+gem 'actionpack-action_caching'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

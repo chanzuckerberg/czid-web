@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_517_183_928) do
+ActiveRecord::Schema.define(version: 20_190_531_162_647) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -309,6 +309,7 @@ ActiveRecord::Schema.define(version: 20_190_517_183_928) do
     t.integer "completed_rapsearch_chunks"
     t.integer "max_input_fragments"
     t.text "error_message"
+    t.string "known_user_error"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end

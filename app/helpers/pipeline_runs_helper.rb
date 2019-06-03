@@ -181,4 +181,32 @@ module PipelineRunsHelper
   def pipeline_version_at_least_2(pipeline_version)
     pipeline_version_at_least(pipeline_version, PIPELINE_VERSION_2)
   end
+
+  def get_key_from_s3_json(s3_file, key)
+    file = Tempfile.new
+    downloaded = PipelineRun.download_file_with_retries(s3_file, file.path, 3, false)
+    value = downloaded ? JSON.parse(File.read(file))[key] : nil
+    file.unlink
+    value
+  end
+
+  def check_for_user_error(failed_stage)
+    return [nil, nil] if failed_stage.step_number != 1
+    user_input_validation_file = "#{failed_stage.pipeline_run.host_filter_output_s3_path}/#{PipelineRun::INPUT_VALIDATION_NAME}"
+    invalid_step_input_file = "#{failed_stage.pipeline_run.host_filter_output_s3_path}/#{PipelineRun::INVALID_STEP_NAME}"
+    if file_generated_since_run(failed_stage, user_input_validation_file)
+      # Case where validation of user input format fails.
+      # The code that produces user_input_validation_file lives here:
+      # https://github.com/chanzuckerberg/idseq-dag/blob/3feaa36d85bd1c4626b363f393699c8d4c4c274c/idseq_dag/steps/run_validate_input.py#L59
+      validation_error = get_key_from_s3_json(user_input_validation_file, "Validation error")
+      return ["FAULTY_INPUT", validation_error] if validation_error
+    end
+    if file_generated_since_run(failed_stage, invalid_step_input_file)
+      # Case where an intermediate output does not meet the requirements for the next step's inputs.
+      # Possible error codes defined here: https://github.com/chanzuckerberg/idseq-dag/blob/861e4d9f1382315ae16971c6985b31f08feca501/idseq_dag/engine/pipeline_step.py#L21
+      error_code = get_key_from_s3_json(invalid_step_input_file, "error")
+      return [error_code, nil]
+    end
+    [nil, nil]
+  end
 end

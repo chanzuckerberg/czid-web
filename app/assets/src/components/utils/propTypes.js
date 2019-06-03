@@ -91,6 +91,19 @@ const HostGenome = PropTypes.shape({
   name: PropTypes.string
 });
 
+const Location = PropTypes.shape({
+  city_name: PropTypes.string,
+  country_name: PropTypes.string,
+  geo_level: PropTypes.string,
+  id: PropTypes.number,
+  lat: PropTypes.string, // Rails returns Decimal as string to avoid fp issues
+  lng: PropTypes.string,
+  name: PropTypes.string,
+  sample_ids: PropTypes.arrayOf(PropTypes.number),
+  state_name: PropTypes.string,
+  subdivision_name: PropTypes.string
+});
+
 export default {
   ReportDetails,
   Taxon,
@@ -102,5 +115,6 @@ export default {
   Project,
   SummaryStats,
   HostGenome,
+  Location,
   ...PropTypes
 };

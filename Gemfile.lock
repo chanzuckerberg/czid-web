@@ -18,6 +18,8 @@ GEM
       rack-test (>= 0.6.3)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.0, >= 1.0.2)
+    actionpack-action_caching (1.2.0)
+      actionpack (>= 4.0.0, < 6)
     actionview (5.1.6.2)
       activesupport (= 5.1.6.2)
       builder (~> 3.1)
@@ -43,9 +45,9 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.6.0)
       public_suffix (>= 2.0.2, < 4.0)
-    airbrake (9.2.2)
-      airbrake-ruby (~> 4.4)
-    airbrake-ruby (4.4.0)
+    airbrake (8.3.2)
+      airbrake-ruby (~> 4.1)
+    airbrake-ruby (4.2.5)
       rbtree3 (~> 0.5)
     analytics-ruby (2.0.13)
     arel (8.0.0)
@@ -1102,11 +1104,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  actionpack-action_caching
   active_record_query_trace
   activerecord-import
   activesupport
-  airbrake (~> 9.2.2)
-  airbrake-ruby (~> 4.4)
+  airbrake (~> 8)
+  airbrake-ruby (~> 4.2.1)
   analytics-ruby (~> 2.0.0)
   aws-sdk
   aws-sdk-ecs

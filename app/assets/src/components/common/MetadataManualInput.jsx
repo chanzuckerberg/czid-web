@@ -265,6 +265,8 @@ class MetadataManualInput extends React.Component {
       : sample.host_genome_id;
 
   isHostGenomeIdValidForField = (hostGenomeId, field) =>
+    // Special-case 'Host Genome' (the field that lets you change the Host Genome)
+    field === "Host Genome" ||
     includes(
       hostGenomeId,
       get([field, "host_genome_ids"], this.props.projectMetadataFields)

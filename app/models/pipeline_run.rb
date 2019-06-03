@@ -56,6 +56,7 @@ class PipelineRun < ApplicationRecord
   PIPELINE_VERSION_FILE = "pipeline_version.txt".freeze
   STATS_JSON_NAME = "stats.json".freeze
   INPUT_VALIDATION_NAME = "validate_input_summary.json".freeze
+  INVALID_STEP_NAME = "invalid_step_input.json".freeze
   ERCC_OUTPUT_NAME = 'reads_per_gene.star.tab'.freeze
   AMR_DRUG_SUMMARY_RESULTS = 'amr_summary_results.csv'.freeze
   AMR_FULL_RESULTS_NAME = 'amr_processed_results.csv'.freeze
@@ -128,8 +129,7 @@ class PipelineRun < ApplicationRecord
   STATUS_LOADING_QUEUED = 'LOADING_QUEUED'.freeze
   STATUS_LOADING_ERROR = 'LOADING_ERROR'.freeze
 
-  LOADERS_BY_OUTPUT = { "input_validations" => "db_load_input_validations",
-                        "ercc_counts" => "db_load_ercc_counts",
+  LOADERS_BY_OUTPUT = { "ercc_counts" => "db_load_ercc_counts",
                         "taxon_counts" => "db_load_taxon_counts",
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
@@ -298,7 +298,7 @@ class PipelineRun < ApplicationRecord
 
   def create_output_states
     # First, determine which outputs we need:
-    target_outputs = %w[input_validations ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
+    target_outputs = %w[ercc_counts taxon_counts contig_counts taxon_byteranges amr_counts]
 
     # Then, generate output_states
     output_state_entries = []
@@ -395,15 +395,6 @@ class PipelineRun < ApplicationRecord
 
   def succeeded?
     job_status == STATUS_CHECKED
-  end
-
-  def db_load_input_validations
-    file = Tempfile.new
-    downloaded = PipelineRun.download_file_with_retries(s3_file_for("input_validations"),
-                                                        file.path, 3, false)
-    error_message = downloaded ? JSON.parse(File.read(file))["Validation error"] : nil
-    update(error_message: error_message) if error_message
-    file.unlink
   end
 
   def db_load_ercc_counts
@@ -687,8 +678,6 @@ class PipelineRun < ApplicationRecord
     end
 
     case output
-    when "input_validations"
-      "#{host_filter_output_s3_path}/#{INPUT_VALIDATION_NAME}"
     when "ercc_counts"
       "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     when "amr_counts"
@@ -718,6 +707,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def status_display(output_states_by_pipeline_run_id)
+    return "COMPLETE - ISSUE" if known_user_error
     status_display_helper(output_state_hash(output_states_by_pipeline_run_id), results_finalized)
   end
 
@@ -853,8 +843,11 @@ class PipelineRun < ApplicationRecord
       if prs.failed?
         self.job_status = STATUS_FAILED
         self.finalized = 1
-        message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.email} failed #{prs.name} with #{adjusted_remaining_reads || 0} reads remaining after #{duration_hrs} hours. See: #{status_url}"
-        LogUtil.log_err_and_airbrake(message)
+        self.known_user_error, self.error_message = check_for_user_error(prs)
+        log_message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.admin? ? 'admin user' : 'non-admin user'} " \
+          "failed #{prs.name} with #{adjusted_remaining_reads || 0} reads remaining after #{duration_hrs} hours. " \
+          "See: #{status_url}"
+        LogUtil.log_err_and_airbrake(log_message) unless known_user_error
       elsif !prs.started?
         # we're moving on to a new stage
         prs.run_job
@@ -1419,8 +1412,9 @@ class PipelineRun < ApplicationRecord
       # Default background is complicated... see get_background_id. In any case,
       # we precache all backgrounds. See precache_report_info below.
       background_id: nil,
-      # For invalidation when underlying data changes
-      report_ts: max_updated_at.utc.to_i,
+      # For invalidation if underlying data changes. This should only happen in
+      # exceptional situations, such as manual DB edits.
+      report_ts: max_updated_at.utc.beginning_of_day.to_i,
       format: "json"
     }
   end
@@ -1448,5 +1442,10 @@ class PipelineRun < ApplicationRecord
 
       MetricUtil.put_metric_now("samples.cache.precached", 1)
     end
+  end
+
+  def rpm(raw_read_count)
+    raw_read_count /
+      ((total_reads - total_ercc_reads.to_i) * subsample_fraction) * 1_000_000.0
   end
 end

@@ -50,6 +50,12 @@ class BaseMap extends React.Component {
     updateViewport && updateViewport(viewport);
   };
 
+  handleLoad = () => {
+    // Show compact attribution tags
+    const tag = document.getElementsByClassName("mapboxgl-ctrl-attrib")[0];
+    tag && tag.classList.add("mapboxgl-compact");
+  };
+
   render() {
     const { mapTilerKey, tooltip, markers, popups } = this.props;
     const { viewport } = this.state;
@@ -61,6 +67,7 @@ class BaseMap extends React.Component {
           {...viewport}
           onViewportChange={this.updateViewport}
           mapStyle={styleURL}
+          onLoad={this.handleLoad}
         >
           {tooltip}
           {markers}

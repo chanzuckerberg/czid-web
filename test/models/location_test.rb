@@ -55,20 +55,20 @@ class LocationTest < ActiveSupport::TestCase
     params_with_junk[:junk] = "junkvalue"
     new_location = Location.new
 
-    mock_create = MiniTest::Mock.new
-    mock_create.expect(:call, new_location, [location_params])
-    Location.stub :create!, mock_create do
-      res = Location.create_from_params(params_with_junk)
+    mock_new = MiniTest::Mock.new
+    mock_new.expect(:call, new_location, [location_params])
+    Location.stub :new, mock_new do
+      res = Location.new_from_params(params_with_junk)
       assert_equal new_location, res
     end
-    assert mock_create.verify
+    assert mock_new.verify
   end
 
   test "should raise Location creation error" do
     err = assert_raises RuntimeError do
-      Location.create_from_params("")
+      Location.new_from_params("")
     end
-    assert_match "Couldn't save Location", err.message
+    assert_match "Couldn't make new Location", err.message
   end
 
   test "should geosearch by OSM ID and type" do
@@ -90,7 +90,7 @@ class LocationTest < ActiveSupport::TestCase
     mock = MiniTest::Mock.new
     mock.expect(:call, new_location, [{ locationiq_id: "123" }])
     Location.stub :find_by, mock do
-      res = Location.find_or_create_by_api_ids("123", nil, nil)
+      res = Location.find_or_new_by_api_ids("123", nil, nil)
       assert_equal new_location, res
     end
   end
@@ -105,11 +105,46 @@ class LocationTest < ActiveSupport::TestCase
     mock_geosearch.expect(:call, [true, api_response], [osm_id, osm_type])
     Location.stub :find_by, nil do
       Location.stub :geosearch_by_osm_id, mock_geosearch do
-        Location.stub :create_from_params, new_location do
-          res = Location.find_or_create_by_api_ids("123", osm_id, osm_type)
+        Location.stub :new_from_params, new_location do
+          res = Location.find_or_new_by_api_ids("123", osm_id, osm_type)
           assert_equal new_location, res
         end
       end
+    end
+  end
+
+  test "should geosearch by country and state name" do
+    api_response = [true, LocationTestHelper::API_GEOSEARCH_CALIFORNIA_RESPONSE]
+    query = "search.php?addressdetails=1&normalizecity=1&country=USA&state=California"
+    mock = MiniTest::Mock.new
+    mock.expect(:call, api_response, [query])
+    Location.stub :location_api_request, mock do
+      res = Location.geosearch_by_country_and_state("USA", "California")
+      assert_equal api_response, res
+    end
+    assert mock.verify
+  end
+
+  test "should restrict an overly specific sample location" do
+    bad_location = locations(:ucsf)
+    api_response = [true, LocationTestHelper::API_GEOSEARCH_CALIFORNIA_RESPONSE]
+    mock = MiniTest::Mock.new
+    mock.expect(:call, api_response, [bad_location.country_name, bad_location.state_name])
+    Location.stub :geosearch_by_country_and_state, mock do
+      Location.stub :new_from_params, locations(:california) do
+        new_location = Location.check_and_restrict_specificity(bad_location, "Human")
+        assert_equal locations(:california), new_location
+      end
+    end
+    assert mock.verify
+  end
+
+  test "should not restrict an appropriately specific sample location" do
+    original = locations(:ucsf)
+    mock = -> { raise "should not call geosearch" }
+    Location.stub :geosearch_by_country_and_state, mock do
+      new_location = Location.check_and_restrict_specificity(original, "Mosquito")
+      assert_equal original, new_location
     end
   end
 end
