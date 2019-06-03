@@ -210,6 +210,39 @@ RSpec.describe ProjectsController, type: :controller do
         end
       end
 
+      describe "GET index with malicious order direction field" do
+        it "sees projects sorted in (default) descending order" do
+          # in an exploitable query this would just work
+          expected_projects = []
+          expected_projects << create(:project, name: "Project M", users: [@user])
+          expected_projects << create(:project, name: "Project Z", users: [@user])
+          expected_projects << create(:project, name: "Project A", users: [@user])
+          expected_projects.sort_by!(&:name).reverse!
+
+          get :index, params: { format: "json", orderBy: "name", orderDir: "asc;" }
+
+          json_response = JSON.parse(response.body)
+          expect(json_response.count).to eq(expected_projects.count)
+          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+        end
+      end
+
+      describe "GET index with malicious order by field" do
+        it "sees projects sorted by default field id" do
+          # not sure how to exploit but should not crash
+          expected_projects = []
+          expected_projects << create(:project, name: "Project M", users: [@user])
+          expected_projects << create(:project, name: "Project Z", users: [@user])
+          expected_projects << create(:project, name: "Project A", users: [@user])
+
+          get :index, params: { format: "json", orderBy: "name;SELECT 1 FROM projects LIMIT 1;", orderDir: "asc" }
+
+          json_response = JSON.parse(response.body)
+          expect(json_response.count).to eq(expected_projects.count)
+          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+        end
+      end
+
       ["my_data", "all_data"].each do |domain|
         describe "GET index for #{domain} domain" do
           it "sees all required fields" do

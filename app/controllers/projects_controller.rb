@@ -121,21 +121,19 @@ class ProjectsController < ApplicationController
           end
         end
 
-        # puts "projects: #{projects.as_json()}"
         filtered_projects = projects.includes(:users).select do |project|
           !hide_empty_projects || (sample_count_by_project_id[project.id] || 0) > 0
         end
-        # puts "filtered: #{filtered_projects}"
         extended_projects = filtered_projects.map do |project|
-        project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
-          number_of_samples: sample_count_by_project_id[project.id] || 0,
-          hosts: host_genome_names_by_project_id[project.id] || [],
-          tissues: tissues_by_project_id[project.id] || [],
-          owner: owner_by_project_id[project.id],
-          locations: locations_by_project_id[project.id] || [],
-          editable: updatable_projects.include?(project.id),
-          users: updatable_projects.include?(project.id) ? project.users.map { |user| { name: user[:name], email: user[:email] } } : []
-          )
+          project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
+            number_of_samples: sample_count_by_project_id[project.id] || 0,
+            hosts: host_genome_names_by_project_id[project.id] || [],
+            tissues: tissues_by_project_id[project.id] || [],
+            owner: owner_by_project_id[project.id],
+            locations: locations_by_project_id[project.id] || [],
+            editable: updatable_projects.include?(project.id),
+            users: updatable_projects.include?(project.id) ? project.users.map { |user| { name: user[:name], email: user[:email] } } : []
+            )
         end
         render json: extended_projects
       end
