@@ -100,7 +100,7 @@ class DiscoveryView extends React.Component {
         loadingStats: true,
         loadingVisualizations: true,
         mapLocationData: {},
-        mapSelectedLocationId: null,
+        mapPreviewedLocationId: null,
         mapPreviewedSampleIds: [],
         mapPreviewedSamples: [],
         mapSidebarSelectedSampleIds: new Set(),
@@ -698,14 +698,14 @@ class DiscoveryView extends React.Component {
   };
 
   handleMapTooltipTitleClick = locationId => {
-    this.setState({ mapSelectedLocationId: locationId }, () =>
+    this.setState({ mapPreviewedLocationId: locationId }, () =>
       this.refreshMapPreviewedSamples()
     );
   };
 
   refreshMapPreviewedSamples = async () => {
-    const { mapSelectedLocationId, mapLocationData } = this.state;
-    const sampleIds = mapLocationData[mapSelectedLocationId].sample_ids;
+    const { mapPreviewedLocationId, mapLocationData } = this.state;
+    const sampleIds = mapLocationData[mapPreviewedLocationId].sample_ids;
 
     // TODO(jsheu): Consider paginating fetching for thousands of samples at a location
     const {
@@ -747,7 +747,8 @@ class DiscoveryView extends React.Component {
       sampleDimensions,
       samples,
       search,
-      showStats
+      showStats,
+      mapSidebarSelectedSampleIds
     } = this.state;
 
     const filterCount = this.getFilterCount();
@@ -765,6 +766,7 @@ class DiscoveryView extends React.Component {
                 (this.mapPreviewSidebar = mapPreviewSidebar)
               }
               onSelectionUpdate={this.handleMapSidebarSelectUpdate}
+              initialSelectedSampleIds={mapSidebarSelectedSampleIds}
             />
           )}
         {showStats &&

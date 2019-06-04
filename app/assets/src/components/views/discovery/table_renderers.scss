@@ -111,15 +111,16 @@
 
       .sampleStatus {
         align-self: center;
-        background-color: $light-grey;
+        background-color: $lightest-grey;
         border-radius: 13px;
         color: $medium-grey;
         flex: 0 0 auto;
         font-size: 9px;
         line-height: 1;
-        margin-left: 10px;
-        padding: 2px 4px;
+        margin-left: 6px;
+        padding: 3px 5px;
         text-transform: uppercase;
+        letter-spacing: 0.8px;
 
         &.success {
           background-color: $success-bg;
