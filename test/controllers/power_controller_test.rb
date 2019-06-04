@@ -86,7 +86,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @public_project = projects(:public_project)
     get "/samples.json?project_id=#{@public_project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["count"] == 4
+    assert JSON.parse(@response.body)["count"] == 5
   end
   # ===== END: /samples/index
 
@@ -120,7 +120,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @public_project = projects(:public_project)
     get "/samples/index_v2.json?projectId=#{@public_project.id}"
     assert_response :success
-    assert JSON.parse(@response.body)["samples"].count == 4
+    assert JSON.parse(@response.body)["samples"].count == 5
   end
 
   test 'joe sees samples in its data set with index_v2' do
@@ -134,14 +134,14 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     get "/samples/index_v2.json?domain=public"
     assert_response :success
-    assert JSON.parse(@response.body)["samples"].count == 6
+    assert JSON.parse(@response.body)["samples"].count == 7
   end
 
   test 'joe sees the samples that he has access to with index_v2' do
     sign_in(:joe)
     get "/samples/index_v2.json"
     assert_response :success
-    assert JSON.parse(@response.body)["samples"].count == 11
+    assert JSON.parse(@response.body)["samples"].count == 12
   end
   # ===== END: /samples/index_v2
 
