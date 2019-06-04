@@ -29,6 +29,8 @@ import Tabs from "~/components/ui/controls/Tabs";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
+import NoResultsBacteriaIcon from "~ui/icons/NoResultsBacteriaIcon";
+import AlertIcon from "~ui/icons/AlertIcon";
 
 import SampleViewControls from "./SampleViewControls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
@@ -283,6 +285,54 @@ class SampleView extends React.Component {
     return null;
   };
 
+  renderSampleReportError = () => {
+    const { pipelineRun, sample } = this.props;
+    let status, message, linkText, issueType, link;
+    switch (pipelineRun.known_user_error) {
+      case "FAULTY_INPUT":
+        status = "COMPLETE - ISSUE";
+        message = `Sorry, something was wrong with your input file. ${
+          pipelineRun.error_message
+        }.`;
+        linkText = "Please check your file format and reupload your file";
+        issueType = "warning";
+        link = "/samples/upload";
+        break;
+      case "INSUFFICIENT_READS":
+        status = "COMPLETE - ISSUE";
+        message =
+          "Oh no! No matches were identified because there weren't any reads left after host and quality filtering.";
+        linkText = "Check where your reads were filtered out";
+        issueType = "warning";
+        link = `/samples/${sample.id}/results_folder`;
+        break;
+      default:
+        status = "SAMPLE FAILED";
+        message = "Oh no! There was an issue processing your sample.";
+        linkText = "Contact us for help re-running your sample.";
+        issueType = "error";
+        link = "mailto:help@idseq.net";
+        break;
+    }
+
+    return (
+      <div className={cs.sampleReportError}>
+        <div className={cs.textContainer}>
+          <div className={cx(cs.reportStatus, cs[issueType])}>
+            <AlertIcon className={cs.icon} />
+            <span className={cs.text}>{status}</span>
+          </div>
+          <div className={cs.message}>{message}</div>
+          <a className={cs.actionLink} href={link}>
+            {linkText}
+            <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+          </a>
+        </div>
+        <NoResultsBacteriaIcon className={cs.bacteriaIcon} />
+      </div>
+    );
+  };
+
   renderTab = () => {
     if (this.state.currentTab === "Report") {
       const waitingSpinner = (
@@ -321,29 +371,7 @@ class SampleView extends React.Component {
       } else if (this.pipelineInProgress()) {
         return waitingSpinner;
       } else {
-        return (
-          <div className={cs.failedContainer}>
-            {this.props.pipelineRun.known_user_error === "FAULTY_INPUT" ? (
-              <div>
-                Sorry, something was wrong with your file ({
-                  this.props.pipelineRun.error_message
-                }). Please check the format and reupload your file.
-              </div>
-            ) : this.props.pipelineRun.known_user_error ===
-            "INSUFFICIENT_READS" ? (
-              <div>
-                Oh no! No matches were identified because there weren't any
-                reads left after filtering. Please check the quality of your
-                samples.
-              </div>
-            ) : (
-              <h6 className={cs.failed}>
-                Oh no! The sample run failed. Please contact us for help
-                rerunning your sample.
-              </h6>
-            )}
-          </div>
-        );
+        return this.renderSampleReportError();
       }
     }
     if (this.state.currentTab === "Antimicrobial Resistance") {
