@@ -14,6 +14,7 @@ class PipelineRunTest < ActiveSupport::TestCase
   end
 
   test "precaching executes report_info_json" do
+    skip
     mock = Minitest::Mock.new
 
     pr = pipeline_runs(:four)
