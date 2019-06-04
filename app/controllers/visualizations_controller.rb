@@ -9,7 +9,10 @@ class VisualizationsController < ApplicationController
   caches_action(
     :samples_taxons,
     expires_in: 30.days,
-    cache_path: proc { |c| c.request.url }
+    cache_path: proc do |c|
+      sorted_params = c.request.params.to_h.sort.to_h
+      sorted_params.to_query
+    end
   )
 
   # GET /visualizations.json
@@ -142,14 +145,7 @@ class VisualizationsController < ApplicationController
       subcategories: {
         Viruses: ["Phage"]
       },
-      metrics: [
-        { text: "NT rPM", value: "NT.rpm" },
-        { text: "NT Z Score", value: "NT.zscore" },
-        { text: "NT r (total reads)", value: "NT.r" },
-        { text: "NR rPM", value: "NR.rpm" },
-        { text: "NR Z Score", value: "NR.zscore" },
-        { text: "NR r (total reads)", value: "NR.r" }
-      ],
+      metrics: HeatmapHelper::ALL_METRICS,
       backgrounds: current_power.backgrounds.map do |background|
         { name: background.name, value: background.id }
       end,

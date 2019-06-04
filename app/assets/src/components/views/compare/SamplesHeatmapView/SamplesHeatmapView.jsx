@@ -65,7 +65,7 @@ class SamplesHeatmapView extends React.Component {
 
     this.state = {
       selectedOptions: {
-        metric: this.urlParams.metric || (this.props.metrics[0] || {}).value,
+        metric: this.getSelectedMetric(),
         categories: this.urlParams.categories || [],
         subcategories: this.urlParams.subcategories || {},
         background: parseAndCheckInt(
@@ -95,6 +95,15 @@ class SamplesHeatmapView extends React.Component {
       this.urlParams.removedTaxonIds || this.props.removedTaxonIds || []
     );
     this.lastRequestToken = null;
+  }
+
+  // For converting legacy URLs
+  getSelectedMetric() {
+    if (this.props.metrics.map(m => m.value).includes(this.urlParams.metric)) {
+      return this.urlParams.metric;
+    } else {
+      return (this.props.metrics[0] || {}).value;
+    }
   }
 
   initOnBeforeUnload(savedParamValues) {
@@ -482,10 +491,17 @@ class SamplesHeatmapView extends React.Component {
   }
 
   renderLoading() {
+    const numSamples = this.state.sampleIds.length;
+    // This was determined empirically by varying the number of samples from 4
+    // to 55 in prod. The time increased linearly close to a factor of 0.5.
+    const estimate = Math.round(numSamples / 2);
     return (
       <p className={cs.loadingIndicator}>
         <i className="fa fa-spinner fa-pulse fa-fw" />
-        Loading for {this.state.sampleIds.length} samples...
+        Loading for {numSamples} samples. Please wait up to {estimate} second{estimate >
+        1
+          ? "s"
+          : ""}...
       </p>
     );
   }
