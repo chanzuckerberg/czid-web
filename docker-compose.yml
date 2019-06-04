@@ -99,6 +99,14 @@ services:
     environment:
       <<: *web-variables
       <<: *travis-variables
+    volumes:
+      - .:/app:ro
+      - ./log:/app/log
+      - ./tmp:/app/tmp
+      - ./db:/app/db
+      - ./coverage:/app/coverage
+      - ~/.aws:/root/.aws:ro
+      - ~/.aws/cli/cache:/root/.aws/cli/cache
     command: bash
   web:
     build:
