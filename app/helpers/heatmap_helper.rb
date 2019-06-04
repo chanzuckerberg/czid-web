@@ -215,7 +215,6 @@ module HeatmapHelper
       #{rpm_sql} AS rpm,
       #{zscore_sql} AS zscore
     FROM taxon_counts
-    -- warning!!! pipeline_runs may be missing!!!
     LEFT OUTER JOIN pipeline_runs pr ON pipeline_run_id = pr.id
     LEFT OUTER JOIN taxon_summaries ON
       #{background_id.to_i}   = taxon_summaries.background_id   AND
@@ -223,14 +222,7 @@ module HeatmapHelper
       taxon_counts.tax_level  = taxon_summaries.tax_level       AND
       taxon_counts.tax_id     = taxon_summaries.tax_id
     WHERE
-      pipeline_run_id IN (
-        -- not the ideal way to get the current pipeline but it is consistent
-        -- with current logic elsewhere
-        SELECT MAX(id)
-        FROM pipeline_runs
-        WHERE sample_id IN (#{samples.pluck(:id).join(',')})
-        GROUP BY sample_id
-      )
+      pipeline_run_id IN (#{HeatmapHelper.latest_pipeline_runs_query(samples).join(', ')})
       AND genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
       AND count >= #{min_reads}
       -- We need both types of counts for threshold filters
@@ -362,14 +354,7 @@ module HeatmapHelper
         taxon_counts.tax_level  = taxon_summaries.tax_level       AND
         taxon_counts.tax_id     = taxon_summaries.tax_id
       WHERE
-        pipeline_run_id IN (
-          -- not the ideal way to get the current pipeline but it is consistent
-          -- with current logic elsewhere
-          SELECT MAX(id)
-          FROM pipeline_runs
-          WHERE sample_id IN (#{samples.pluck(:id).join(',')})
-          GROUP BY sample_id
-        )
+        pipeline_run_id IN (#{HeatmapHelper.latest_pipeline_runs_query(samples).join(', ')})
         AND taxon_counts.genus_taxid != #{TaxonLineage::BLACKLIST_GENUS_ID}
         AND taxon_counts.count_type IN ('NT', 'NR')
         AND (taxon_counts.tax_id IN (#{taxon_ids.join(',')})
@@ -503,5 +488,18 @@ module HeatmapHelper
               .where(pipeline_runs: { sample: samples })
               .where(tax_id: taxon_ids)
               .map { |u| u.attributes.values.compact }.flatten
+  end
+
+  # NOTE: This was extracted from a subquery because mysql was not using the
+  # the resulting IDs for an indexed query.
+  def self.latest_pipeline_runs_query(samples)
+    # not the ideal way to get the current pipeline but it is consistent with
+    # current logic elsewhere.
+    TaxonCount.connection.select_all(
+      "SELECT MAX(id) AS id
+        FROM pipeline_runs
+        WHERE sample_id IN (#{samples.pluck(:id).to_set.to_a.join(',')})
+        GROUP BY sample_id"
+    ).pluck("id")
   end
 end
