@@ -16,9 +16,9 @@
 # and, you'll have to watch "config/Guardfile" instead of "Guardfile"
 
 ignore %r{^ignored/path/}, /public/
-filter /\.txt$/, /.*\.zip/
+filter /\.(txt|zip)$/
 
-guard :rspec, :cmd => 'bundle exec rspec --color ' do
+guard :rspec, cmd: 'bundle exec rspec --color ' do
   watch('spec/spec_helper.rb')                                               { "spec" }
   watch('app/controllers/application_controller.rb')                         { "spec/controllers" }
   watch('config/routes.rb')                                                  { "spec/routing" }
