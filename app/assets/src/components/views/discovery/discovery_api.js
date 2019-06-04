@@ -128,7 +128,8 @@ const getDiscoverySamples = async ({
   search,
   limit = 100,
   offset = 0,
-  listAllIds = false
+  listAllIds = false,
+  sampleIds
 } = {}) => {
   const sampleResults = await getSamples({
     domain,
@@ -137,7 +138,8 @@ const getDiscoverySamples = async ({
     search,
     limit,
     offset,
-    listAllIds
+    listAllIds,
+    sampleIds
   });
   return {
     samples: map(processRawSample, sampleResults.samples),

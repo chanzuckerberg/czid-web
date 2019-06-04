@@ -1,0 +1,34 @@
+.sidebar {
+  font-size: 12px;
+  width: 300px;
+  overflow-y: scroll;
+  height: 100%;
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1 0 auto;
+
+    .table {
+      flex: 1 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+
+.tableDataRow {
+  align-items: flex-start;
+  padding: 11px 0;
+}
+
+.basicCell {
+  // this is adjusted to align the baseline of
+  // content of basic cells with the sample name.
+  margin-top: 2px;
+}
+
+.sampleHeader {
+  text-align: left;
+}

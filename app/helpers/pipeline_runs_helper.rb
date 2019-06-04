@@ -192,6 +192,14 @@ module PipelineRunsHelper
 
   def check_for_user_error(failed_stage)
     return [nil, nil] if failed_stage.step_number != 1
+    # We need to set the pipeline version in the failed pipeline run so that the host_filter_output_s3_path includes it,
+    # i.e. "/results/3.7" instead of "/results"
+    # The pipeline version is usually set in the result monitor, but that is not guaranteed to have run by this point.
+    if failed_stage.pipeline_run.pipeline_version.blank?
+      update_pipeline_version(
+        failed_stage.pipeline_run, :pipeline_version, failed_stage.pipeline_run.pipeline_version_file
+      )
+    end
     user_input_validation_file = "#{failed_stage.pipeline_run.host_filter_output_s3_path}/#{PipelineRun::INPUT_VALIDATION_NAME}"
     invalid_step_input_file = "#{failed_stage.pipeline_run.host_filter_output_s3_path}/#{PipelineRun::INVALID_STEP_NAME}"
     if file_generated_since_run(failed_stage, user_input_validation_file)
