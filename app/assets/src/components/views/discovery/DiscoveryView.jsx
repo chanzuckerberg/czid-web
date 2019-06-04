@@ -705,6 +705,7 @@ class DiscoveryView extends React.Component {
     const { mapSelectedLocationId, mapLocationData } = this.state;
     const sampleIds = mapLocationData[mapSelectedLocationId].sample_ids;
 
+    // TODO(jsheu): Consider paginating fetching for thousands of samples at a location
     const {
       samples: fetchedSamples,
       sampleIds: fetchedSampleIds

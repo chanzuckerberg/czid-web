@@ -165,6 +165,7 @@ export default class MapPreviewSidebar extends React.Component {
         : difference(selectedSampleIds, selectableIds)
     );
     this.setState({ selectedSampleIds: newSelected });
+    logAnalyticsEvent("MapPreviewSidebar_select-all-rows_clicked");
   };
 
   reset = () => {
@@ -188,10 +189,7 @@ export default class MapPreviewSidebar extends React.Component {
             minimumBatchSize={batchSize}
             onLoadRows={this.handleLoadSampleRows}
             onRowClick={this.handleRowClick}
-            onSelectAllRows={withAnalytics(
-              this.handleSelectAllRows,
-              "MapPreviewSidebar_select-all-rows_clicked"
-            )}
+            onSelectAllRows={this.handleSelectAllRows}
             onSelectRow={this.handleSelectRow}
             protectedColumns={protectedColumns}
             ref={infiniteTable => (this.infiniteTable = infiniteTable)}
