@@ -196,8 +196,15 @@ class SamplesView extends React.Component {
   };
 
   renderDownloadTrigger = () => {
-    const { projectId } = this.props;
-    const { selectedSampleIds } = this.state;
+    const {
+      projectId,
+      currentDisplay,
+      mapSidebarSelectedSampleIds
+    } = this.props;
+    let { selectedSampleIds } = this.state;
+    if (currentDisplay === "map")
+      selectedSampleIds = mapSidebarSelectedSampleIds;
+
     const downloadOptions = [{ text: "Sample Table", value: "samples_table" }];
     if (projectId) {
       downloadOptions.push({
