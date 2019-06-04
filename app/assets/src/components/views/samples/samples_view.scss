@@ -126,95 +126,25 @@
   text-align: left;
 }
 
-.sample {
-  display: flex;
-
-  .publicAccess {
-    flex: 0 0 40px;
-    display: flex;
-    align-items: center;
-    justify-items: center;
-    margin-right: 12px;
-
-    .icon {
-      fill: $primary-light;
-      width: 36px;
-    }
-  }
-
-  .sampleRightPane {
-    flex: 1 0 auto;
-    display: flex;
-    flex-direction: column;
-
-    .sampleNameAndStatus {
-      display: flex;
-      justify-items: center;
-      margin-bottom: 1px;
-
-      .sampleName {
-        @include font-body-s;
-
-        flex: 0 1 auto;
-        text-align: left;
-        color: $black;
-      }
-
-      .sampleStatus {
-        align-self: center;
-        background-color: $light-grey;
-        border-radius: 13px;
-        color: $medium-grey;
-        flex: 0 0 auto;
-        font-size: 9px;
-        line-height: 1;
-        margin-left: 10px;
-        padding: 2px 4px;
-        text-transform: uppercase;
-
-        &.success {
-          background-color: $success-bg;
-          color: $success;
-        }
-
-        &.error {
-          background-color: $error-bg;
-          color: $error;
-        }
-
-        &.warning {
-          background-color: $warning-bg;
-          color: $warning;
-        }
-      }
-    }
-
-    .sampleDetails {
-      @include font-body-xxs;
-
-      font-weight: $font-weight-regular;
-      color: $medium-grey;
-      text-align: left;
-
-      span:not(:first-child) {
-        margin-left: 10px;
-      }
-
-      span:not(:last-child) {
-        margin-right: 10px;
-      }
-    }
-  }
-}
-
-.numberValueAndPercentage {
-  .percentage {
-    @include font-body-xxs;
-    font-weight: $font-weight-regular;
-  }
-}
-
 .loading {
+  .numberValueAndPercentage {
+    .value {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 16px;
+      padding: 2px 15%;
+    }
+
+    .percentage {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 15px;
+      padding: 2px 20%;
+    }
+  }
+
   .publicAccess {
     @include loadingAnimation;
 
@@ -239,23 +169,6 @@
       padding: 4px 0;
       height: 17px;
       width: 315px;
-    }
-  }
-
-  .numberValueAndPercentage {
-    .value {
-      @include loadingAnimation;
-
-      background-clip: content-box;
-      height: 16px;
-      padding: 2px 15%;
-    }
-    .percentage {
-      @include loadingAnimation;
-
-      background-clip: content-box;
-      height: 15px;
-      padding: 2px 20%;
     }
   }
 }

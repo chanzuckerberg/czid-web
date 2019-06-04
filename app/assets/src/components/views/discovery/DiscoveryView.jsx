@@ -35,7 +35,6 @@ import ProjectsView from "../projects/ProjectsView";
 import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
 import DiscoverySidebar from "./DiscoverySidebar";
-import cs from "./discovery_view.scss";
 import DiscoveryFilters from "./DiscoveryFilters";
 import ProjectHeader from "./ProjectHeader";
 import {
@@ -49,6 +48,9 @@ import {
   DISCOVERY_DOMAIN_PUBLIC
 } from "./discovery_api";
 import NoResultsBanner from "./NoResultsBanner";
+import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
+
+import cs from "./discovery_view.scss";
 
 // Data available
 // (A) non-filtered dimensions: for filter options
@@ -98,6 +100,9 @@ class DiscoveryView extends React.Component {
         loadingStats: true,
         loadingVisualizations: true,
         mapLocationData: {},
+        mapSelectedLocationId: null,
+        mapSelectedSampleIds: [],
+        mapSelectedSamples: [],
         project: null,
         projectDimensions: [],
         projectId: projectId,
@@ -556,7 +561,7 @@ class DiscoveryView extends React.Component {
         search,
         limit: stopIndex - neededStartIndex + 1,
         offset: neededStartIndex,
-        listAllIds: sampleIds.length == 0
+        listAllIds: sampleIds.length === 0
       });
 
       let newState = {
@@ -690,24 +695,106 @@ class DiscoveryView extends React.Component {
     this.setState({ currentDisplay });
   };
 
-  render() {
+  handleMapTooltipTitleClick = locationId => {
+    this.setState({ mapSelectedLocationId: locationId }, () =>
+      this.refreshMapSelectedSamples()
+    );
+  };
+
+  refreshMapSelectedSamples = async () => {
+    const { mapSelectedLocationId, mapLocationData } = this.state;
+    const sampleIds = mapLocationData[mapSelectedLocationId].sample_ids;
+
+    // TODO(jsheu): Consider paginating fetching for thousands of samples at a location
+    const {
+      samples: fetchedSamples,
+      sampleIds: fetchedSampleIds
+    } = await getDiscoverySamples({
+      sampleIds,
+      limit: 1e4, // Server needs a max, 1e4 at one location is a good cutoff.
+      listAllIds: true
+    });
+    this.setState(
+      {
+        mapSelectedSamples: fetchedSamples,
+        mapSelectedSampleIds: fetchedSampleIds
+      },
+      () => {
+        this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
+      }
+    );
+  };
+
+  renderRightPane = () => {
     const {
       currentDisplay,
       currentTab,
       filteredProjectDimensions,
       filteredSampleDimensions,
       filteredSampleStats,
-      filters,
       loadingDimensions,
-      loadingProjects,
-      loadingVisualizations,
-      loadingSamples,
       loadingStats,
-      project,
-      projectId,
+      mapSelectedSampleIds,
+      mapSelectedSamples,
       projectDimensions,
       projects,
       sampleDimensions,
+      samples,
+      search,
+      showStats
+    } = this.state;
+
+    const filterCount = this.getFilterCount();
+
+    return (
+      <div className={cs.rightPane}>
+        {showStats &&
+          ["samples", "projects"].includes(currentTab) &&
+          (currentDisplay === "table" ? (
+            <DiscoverySidebar
+              className={cs.sidebar}
+              samples={samples}
+              projects={projects}
+              sampleDimensions={
+                filterCount || search
+                  ? filteredSampleDimensions
+                  : sampleDimensions
+              }
+              sampleStats={filteredSampleStats}
+              projectDimensions={
+                filterCount || search
+                  ? filteredProjectDimensions
+                  : projectDimensions
+              }
+              currentTab={currentTab}
+              loading={loadingDimensions || loadingStats}
+            />
+          ) : (
+            <MapPreviewSidebar
+              samples={mapSelectedSamples}
+              onSampleSelected={this.handleSampleSelected}
+              selectableIds={mapSelectedSampleIds}
+              ref={mapPreviewSidebar =>
+                (this.mapPreviewSidebar = mapPreviewSidebar)
+              }
+            />
+          ))}
+      </div>
+    );
+  };
+
+  render() {
+    const {
+      currentDisplay,
+      currentTab,
+      filters,
+      loadingProjects,
+      loadingSamples,
+      loadingVisualizations,
+      mapLocationData,
+      project,
+      projectId,
+      projects,
       sampleIds,
       samples,
       search,
@@ -717,7 +804,6 @@ class DiscoveryView extends React.Component {
     } = this.state;
 
     const { domain, allowedFeatures, mapTilerKey } = this.props;
-    const { mapLocationData } = this.state;
 
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
@@ -789,17 +875,18 @@ class DiscoveryView extends React.Component {
                 <div className={cs.tableContainer}>
                   <div className={cs.dataContainer}>
                     <SamplesView
-                      ref={samplesView => (this.samplesView = samplesView)}
+                      allowedFeatures={allowedFeatures}
+                      currentDisplay={currentDisplay}
+                      mapLocationData={mapLocationData}
+                      mapTilerKey={mapTilerKey}
+                      onDisplaySwitch={this.handleDisplaySwitch}
                       onLoadRows={this.handleLoadSampleRows}
-                      samples={samples}
-                      selectableIds={sampleIds}
+                      onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                       onSampleSelected={this.handleSampleSelected}
                       projectId={projectId}
-                      currentDisplay={currentDisplay}
-                      allowedFeatures={allowedFeatures}
-                      onDisplaySwitch={this.handleDisplaySwitch}
-                      mapTilerKey={mapTilerKey}
-                      mapLocationData={mapLocationData}
+                      ref={samplesView => (this.samplesView = samplesView)}
+                      samples={samples}
+                      selectableIds={sampleIds}
                     />
                   </div>
                   {!samples.length &&
@@ -827,29 +914,7 @@ class DiscoveryView extends React.Component {
               )}
             </NarrowContainer>
           </div>
-          <div className={cs.rightPane}>
-            {showStats &&
-              ["samples", "projects"].includes(currentTab) && (
-                <DiscoverySidebar
-                  className={cs.sidebar}
-                  samples={samples}
-                  projects={projects}
-                  sampleDimensions={
-                    filterCount || search
-                      ? filteredSampleDimensions
-                      : sampleDimensions
-                  }
-                  sampleStats={filteredSampleStats}
-                  projectDimensions={
-                    filterCount || search
-                      ? filteredProjectDimensions
-                      : projectDimensions
-                  }
-                  currentTab={currentTab}
-                  loading={loadingDimensions || loadingStats}
-                />
-              )}
-          </div>
+          {this.renderRightPane()}
         </div>
       </div>
     );

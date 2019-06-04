@@ -46,11 +46,11 @@ class BaseMap extends React.Component {
       viewBounds.maxZoom
     );
 
-    this.setState({ viewport });
+    this.setState({ viewport }, () => this.setCompactAttribution());
     updateViewport && updateViewport(viewport);
   };
 
-  handleLoad = () => {
+  setCompactAttribution = () => {
     // Show compact attribution tags
     const tag = document.getElementsByClassName("mapboxgl-ctrl-attrib")[0];
     tag && tag.classList.add("mapboxgl-compact");
@@ -67,7 +67,7 @@ class BaseMap extends React.Component {
           {...viewport}
           onViewportChange={this.updateViewport}
           mapStyle={styleURL}
-          onLoad={this.handleLoad}
+          onLoad={this.setCompactAttribution}
         >
           {tooltip}
           {markers}
