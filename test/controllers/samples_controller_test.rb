@@ -213,7 +213,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     results = @response.parsed_body["pipeline_stage_results"]
     assert_equal 4, results.length
     @pipeline_run.pipeline_run_stages.each do |stage|
-      assert_equal stage.dag_json, results[stage.name]
+      assert_equal JSON.parse(stage.dag_json), results[stage.name]
     end
   end
 
@@ -228,7 +228,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
       if stage.name == "Experimental"
         assert_nil results["Experimental"]
       else
-        assert_equal stage.dag_json, results[stage.name]
+        assert_equal JSON.parse(stage.dag_json), results[stage.name]
       end
     end
   end
