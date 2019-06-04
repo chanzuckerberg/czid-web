@@ -88,6 +88,8 @@ services:
     volumes:
       - ./redis-data:/var/lib/redis/data
   webtest:
+    # "webtest" service configuration is meant to be used only in the CI environment.
+    # To run unit tests locally, use "web" service configuration instead.
     image: chanzuckerberg/idseq-web:compose
     volumes:
       - ~/.aws:/root/.aws:ro
@@ -99,14 +101,6 @@ services:
     environment:
       <<: *web-variables
       <<: *travis-variables
-    volumes:
-      - .:/app:ro
-      - ./log:/app/log
-      - ./tmp:/app/tmp
-      - ./db:/app/db
-      - ./coverage:/app/coverage
-      - ~/.aws:/root/.aws:ro
-      - ~/.aws/cli/cache:/root/.aws/cli/cache
     command: bash
   web:
     build:
