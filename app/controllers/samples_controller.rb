@@ -973,7 +973,7 @@ class SamplesController < ApplicationController
       if stage.name == "Experimental" && !current_user.admin?
         next
       end
-      @results[stage.name] = stage.dag_json
+      @results[stage.name] = JSON.parse stage.dag_json
     end
     render json: { pipeline_stage_results: @results }
   end
