@@ -307,8 +307,7 @@ RSpec.describe ProjectsController, type: :controller do
                                                      created_at: expected_projects[0].created_at.as_json,
                                                      public_access: expected_projects[0].public_access,
                                                      number_of_samples: 2)
-            # response_project.keys.should =~ [:id, :name, :created_at, :public_access, :number_of_samples]
-            response_project.keys.should =~ ["id", "name", "created_at", "public_access", "number_of_samples"]
+            expect(response_project.keys).to contain_exactly("id", "name", "created_at", "public_access", "number_of_samples")
           end
 
           it "sees private projects when filtering by private visibility" do
