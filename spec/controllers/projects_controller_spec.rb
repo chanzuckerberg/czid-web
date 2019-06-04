@@ -20,13 +20,12 @@ RSpec.describe ProjectsController, type: :controller do
           create(:project, samples_data: [{ created_at: 1.year.ago }]),
           create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }])
         ]
-        expected_projects.reverse!
 
         get :index, params: { format: "json" }
 
         json_response = JSON.parse(response.body)
         expect(json_response.count).to eq(expected_projects.count)
-        expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+        expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
       end
     end
 
@@ -40,13 +39,12 @@ RSpec.describe ProjectsController, type: :controller do
           create(:project, samples_data: [{ created_at: 1.year.ago }]),
           create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }])
         ]
-        expected_projects.reverse!
 
         get :index, params: { format: "json", domain: "updatable" }
 
         json_response = JSON.parse(response.body)
         expect(json_response.count).to eq(expected_projects.count)
-        expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+        expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
       end
     end
   end
@@ -64,13 +62,12 @@ RSpec.describe ProjectsController, type: :controller do
         expected_projects << create(:project, users: [@joe])
         expected_projects << create(:project, users: [@joe, @admin])
         create(:public_project)
-        expected_projects.reverse!
 
         get :index, params: { format: "json" }
 
         json_response = JSON.parse(response.body)
         expect(json_response.count).to eq(expected_projects.count)
-        expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+        expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
       end
     end
 
@@ -81,13 +78,12 @@ RSpec.describe ProjectsController, type: :controller do
         expected_projects << create(:project, users: [@joe])
         expected_projects << create(:project, users: [@joe, @admin])
         create(:public_project)
-        expected_projects.reverse!
 
         get :index, params: { format: "json", domain: "updatable" }
 
         json_response = JSON.parse(response.body)
         expect(json_response.count).to eq(expected_projects.count)
-        expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+        expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
       end
     end
   end
@@ -107,13 +103,12 @@ RSpec.describe ProjectsController, type: :controller do
           expected_projects << create(:public_project, users: [@user])
           create(:project, samples_data: [{ created_at: 1.year.ago }])
           expected_projects << create(:project, users: [@user], samples_data: [{ created_at: 1.year.ago }])
-          expected_projects.reverse!
 
           get :index, params: { format: "json", domain: "my_data" }
 
           json_response = JSON.parse(response.body)
           expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+          expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
         end
       end
 
@@ -136,13 +131,12 @@ RSpec.describe ProjectsController, type: :controller do
           create(:project, :with_samples, users: [@user])
           expected_projects << create(:public_project, :with_samples, users: [other_user])
           expected_projects << create(:public_project, :with_samples, users: [@user])
-          expected_projects.reverse!
 
           get :index, params: { format: "json", domain: "public" }
 
           json_response = JSON.parse(response.body)
           expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+          expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
         end
 
         it "sees projects with public samples" do
@@ -151,13 +145,12 @@ RSpec.describe ProjectsController, type: :controller do
           create(:project, users: [@user], samples_data: [{ created_at: 6.months.ago }])
           expected_projects << create(:project, users: [other_user], samples_data: [{ created_at: 1.year.ago }])
           expected_projects << create(:project, users: [@user], samples_data: [{ created_at: 1.year.ago }])
-          expected_projects.reverse!
 
           get :index, params: { format: "json", domain: "public" }
 
           json_response = JSON.parse(response.body)
           expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+          expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
         end
       end
 
@@ -238,7 +231,7 @@ RSpec.describe ProjectsController, type: :controller do
 
           json_response = JSON.parse(response.body)
           expect(json_response.count).to eq(expected_projects.count)
-          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+          expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
         end
       end
 
@@ -445,13 +438,12 @@ RSpec.describe ProjectsController, type: :controller do
             expected_projects << create(:project, name: "Project find this", users: [@user])
             expected_projects << create(:project, :with_samples, name: "find_this_Project_with_samples", users: [@user])
             create(:project, :with_samples, name: "Project", users: [@user])
-            expected_projects.reverse!
 
             get :index, params: { format: "json", domain: domain, search: "find_this" }
 
             json_response = JSON.parse(response.body)
             expect(json_response.count).to eq(expected_projects.count)
-            expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+            expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
           end
         end
       end
