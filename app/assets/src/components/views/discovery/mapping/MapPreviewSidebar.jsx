@@ -5,7 +5,7 @@ import { difference, find, isEmpty, union } from "lodash/fp";
 import PropTypes from "~/components/utils/propTypes";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./map_preview_sidebar.scss";
 
