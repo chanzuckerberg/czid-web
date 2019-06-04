@@ -221,9 +221,18 @@ class SamplesView extends React.Component {
   };
 
   renderCollectionTrigger = () => {
-    const { samples } = this.props;
-    const { selectedSampleIds } = this.state;
+    const {
+      currentDisplay,
+      mapSidebarSelectedSampleIds,
+      mapPreviewedSamples
+    } = this.props;
+    let { samples } = this.props;
+    let { selectedSampleIds } = this.state;
 
+    if (currentDisplay === "map") {
+      samples = mapPreviewedSamples;
+      selectedSampleIds = mapSidebarSelectedSampleIds;
+    }
     return selectedSampleIds.size < 2 ? (
       <SaveIcon
         className={cx(cs.icon, cs.disabled, cs.save)}
@@ -420,7 +429,9 @@ SamplesView.propTypes = {
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
   samples: PropTypes.array,
-  selectableIds: PropTypes.array.isRequired
+  selectableIds: PropTypes.array.isRequired,
+  mapSidebarSelectedSampleIds: PropTypes.set,
+  mapPreviewedSamples: PropTypes.array
 };
 
 export default SamplesView;

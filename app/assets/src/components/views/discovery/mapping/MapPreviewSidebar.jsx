@@ -124,7 +124,9 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   handleSelectRow = (value, checked) => {
+    const { onSelectionUpdate } = this.props;
     const { selectedSampleIds } = this.state;
+
     let newSelected = new Set(selectedSampleIds);
     if (checked) {
       newSelected.add(value);
@@ -132,15 +134,17 @@ export default class MapPreviewSidebar extends React.Component {
       newSelected.delete(value);
     }
     this.setState({ selectedSampleIds: newSelected });
+    onSelectionUpdate && onSelectionUpdate(newSelected);
+
     logAnalyticsEvent("MapPreviewSidebar_row_selected", {
       selectedSampleIds: newSelected.length
     });
   };
 
   handleRowClick = ({ event, rowData }) => {
-    const { onSampleSelected, samples } = this.props;
+    const { onSampleClicked, samples } = this.props;
     const sample = find({ id: rowData.id }, samples);
-    onSampleSelected && onSampleSelected({ sample, currentEvent: event });
+    onSampleClicked && onSampleClicked({ sample, currentEvent: event });
     logAnalyticsEvent("MapPreviewSidebar_row_clicked", {
       sampleId: sample.id,
       sampleName: sample.name
@@ -157,7 +161,7 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   handleSelectAllRows = (value, checked) => {
-    const { selectableIds } = this.props;
+    const { selectableIds, onSelectionUpdate } = this.props;
     const { selectedSampleIds } = this.state;
     let newSelected = new Set(
       checked
@@ -165,6 +169,8 @@ export default class MapPreviewSidebar extends React.Component {
         : difference(selectedSampleIds, selectableIds)
     );
     this.setState({ selectedSampleIds: newSelected });
+    onSelectionUpdate && onSelectionUpdate(newSelected);
+
     logAnalyticsEvent("MapPreviewSidebar_select-all-rows_clicked");
   };
 
@@ -222,7 +228,8 @@ MapPreviewSidebar.propTypes = {
   className: PropTypes.string,
   samples: PropTypes.array,
   activeColumns: PropTypes.array,
-  onSampleSelected: PropTypes.func,
+  onSampleClicked: PropTypes.func,
   protectedColumns: PropTypes.array,
-  selectableIds: PropTypes.array.isRequired
+  selectableIds: PropTypes.array.isRequired,
+  onSelectionUpdate: PropTypes.func
 };
