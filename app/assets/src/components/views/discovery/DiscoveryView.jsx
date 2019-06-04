@@ -755,8 +755,21 @@ class DiscoveryView extends React.Component {
     return (
       <div className={cs.rightPane}>
         {showStats &&
+          currentTab === "samples" &&
+          currentDisplay === "map" && (
+            <MapPreviewSidebar
+              samples={mapPreviewedSamples}
+              onSampleClicked={this.handleSampleSelected}
+              selectableIds={mapPreviewedSampleIds}
+              ref={mapPreviewSidebar =>
+                (this.mapPreviewSidebar = mapPreviewSidebar)
+              }
+              onSelectionUpdate={this.handleMapSidebarSelectUpdate}
+            />
+          )}
+        {showStats &&
           ["samples", "projects"].includes(currentTab) &&
-          (currentDisplay === "table" ? (
+          currentDisplay === "table" && (
             <DiscoverySidebar
               className={cs.sidebar}
               samples={samples}
@@ -775,17 +788,7 @@ class DiscoveryView extends React.Component {
               currentTab={currentTab}
               loading={loadingDimensions || loadingStats}
             />
-          ) : (
-            <MapPreviewSidebar
-              samples={mapPreviewedSamples}
-              onSampleClicked={this.handleSampleSelected}
-              selectableIds={mapPreviewedSampleIds}
-              ref={mapPreviewSidebar =>
-                (this.mapPreviewSidebar = mapPreviewSidebar)
-              }
-              onSelectionUpdate={this.handleMapSidebarSelectUpdate}
-            />
-          ))}
+          )}
       </div>
     );
   };

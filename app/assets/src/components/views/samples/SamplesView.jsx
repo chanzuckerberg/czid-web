@@ -166,12 +166,17 @@ class SamplesView extends React.Component {
   };
 
   reset = () => {
-    const { currentDisplay } = this.state;
+    const { currentDisplay } = this.props;
     if (currentDisplay === "table") this.infiniteTable.reset();
   };
 
   renderHeatmapTrigger = () => {
-    const { selectedSampleIds } = this.state;
+    const { mapSidebarSelectedSampleIds, currentDisplay } = this.props;
+    let { selectedSampleIds } = this.state;
+
+    if (currentDisplay === "map")
+      selectedSampleIds = mapSidebarSelectedSampleIds;
+
     const log = () =>
       logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
         selectedSampleIds: selectedSampleIds.length
@@ -255,8 +260,16 @@ class SamplesView extends React.Component {
   };
 
   renderToolbar = () => {
-    const { allowedFeatures } = this.props;
-    const { selectedSampleIds } = this.state;
+    const {
+      allowedFeatures,
+      currentDisplay,
+      mapSidebarSelectedSampleIds
+    } = this.props;
+    let { selectedSampleIds } = this.state;
+
+    if (currentDisplay === "map")
+      selectedSampleIds = mapSidebarSelectedSampleIds;
+
     return (
       <div className={cs.samplesToolbar}>
         {allowedFeatures &&
