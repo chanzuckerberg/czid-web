@@ -25,6 +25,13 @@ import cs from "./samples_view.scss";
 
 const DISPLAYS = ["table", "map"];
 
+const STATUS_COLOR = {
+  complete: "success",
+  failed: "error",
+  "complete - issue": "warning",
+  "complete*": "warning"
+};
+
 class SamplesView extends React.Component {
   constructor(props) {
     super(props);
@@ -225,7 +232,9 @@ class SamplesView extends React.Component {
                 trigger={<div className={cs.sampleName}>{sample.name}</div>}
                 content={sample.name}
               />
-              <div className={cx(cs.sampleStatus, cs[sample.status])}>
+              <div
+                className={cx(cs.sampleStatus, cs[STATUS_COLOR[sample.status]])}
+              >
                 {sample.status}
               </div>
             </div>

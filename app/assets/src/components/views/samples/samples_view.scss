@@ -172,18 +172,17 @@
         padding: 2px 4px;
         text-transform: uppercase;
 
-        &.complete {
+        &.success {
           background-color: $success-bg;
           color: $success;
         }
 
-        &.failed {
+        &.error {
           background-color: $error-bg;
           color: $error;
         }
 
-        &.waiting,
-        &.uploading {
+        &.warning {
           background-color: $warning-bg;
           color: $warning;
         }
