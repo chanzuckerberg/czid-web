@@ -211,6 +211,7 @@ export default class MapPreviewSidebar extends React.Component {
             selectableKey="id"
             selected={selectedSampleIds}
             threshold={batchSize}
+            loadingClassName={cs.loading}
           />
         </div>
       </div>

@@ -70,7 +70,6 @@ class InfiniteTable extends React.Component {
 
   defaultCellRenderer = ({ cellData }) => {
     // Guarantees that we have at least one child div in the cell
-    console.log("foobar 3:32pm: ", cellData);
     return (
       <div className={cs.cellContent}>
         {cellData == null ? "" : String(cellData)}

@@ -32,3 +32,43 @@
 .sampleHeader {
   text-align: left;
 }
+
+.loading {
+  .numberValueAndPercentage {
+    .value {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 16px;
+      padding: 2px 15%;
+    }
+
+    .percentage {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 15px;
+      padding: 2px 20%;
+    }
+  }
+
+  .sampleRightPane {
+    .sampleNameAndStatus {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 20px;
+      width: 365px;
+    }
+
+    .sampleDetails {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 17px;
+      width: 315px;
+    }
+  }
+}
