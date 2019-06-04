@@ -18,7 +18,6 @@
 ignore %r{^ignored/path/}, /public/
 filter(/\.(txt|zip)$/)
 
-
 guard :rspec, cmd: 'bundle exec rspec --color ' do
   watch('spec/spec_helper.rb')                                               { "spec" }
   watch('app/controllers/application_controller.rb')                         { "spec/controllers" }
