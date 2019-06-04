@@ -11,6 +11,13 @@ import { numberWithCommas } from "~/helpers/strings";
 // CSS file must be loaded after any elements you might want to override
 import cs from "./table_renderers.scss";
 
+const STATUS_COLOR = {
+  complete: "success",
+  failed: "error",
+  "complete - issue": "warning",
+  "complete*": "warning"
+};
+
 class TableRenderers extends React.Component {
   static renderItemDetails = ({
     cellData: item,
@@ -80,7 +87,9 @@ class TableRenderers extends React.Component {
                 trigger={<div className={cs.sampleName}>{sample.name}</div>}
                 content={sample.name}
               />
-              <div className={cx(cs.sampleStatus, cs[sample.status])}>
+              <div
+                className={cx(cs.sampleStatus, cs[STATUS_COLOR[sample.status]])}
+              >
                 {sample.status}
               </div>
             </div>
