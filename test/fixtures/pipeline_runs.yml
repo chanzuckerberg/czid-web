@@ -100,3 +100,11 @@ public_sample_run:
   total_reads: 1
   adjusted_remaining_reads: 1
   alignment_config: one
+sample_run_with_pipeline_stages:
+  sample: sample_with_pipeline_stages
+  pipeline_version: '1.0'
+  job_id: 'pipeline_stages_sample_job'
+  job_status: 'CHECKED'
+  total_reads: 1
+  adjusted_remaining_reads: 1
+  alignment_config: one
