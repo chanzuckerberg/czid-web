@@ -36,8 +36,6 @@
 }
 
 .loading {
-  background-color: red;
-
   .numberValueAndPercentage {
     .value {
       @include loadingAnimation;
