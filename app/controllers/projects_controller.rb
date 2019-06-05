@@ -3,6 +3,7 @@ class ProjectsController < ApplicationController
   include SamplesHelper
   include ReportHelper
   include MetadataHelper
+  include ParameterSanitization
   ########################################
   # Note to developers:
   # If you are adding a new action to the project controller, you must classify your action into
@@ -48,13 +49,16 @@ class ProjectsController < ApplicationController
     respond_to do |format|
       format.html do
         # keep compatibility with old route
-        # TODO(tiago): remove once data discovery is completed
+        # TODO(tiago): remove once once DD projects has a link to admin project view
         @projects = current_power.projects
       end
       format.json do
         domain = params[:domain]
-        order_by = params[:orderBy] || :id
-        order_dir = params[:orderDir] || :desc
+
+        order_by = sanitize_order_by(Project, params[:orderBy], :id)
+        order_dir = sanitize_order_dir(params[:orderDir], :desc)
+
+        # we do not want to search samples by name
         search = params.delete(:search)
         # If basic, just return a few fields for the project.
         basic = ActiveModel::Type::Boolean.new.cast(params[:basic])
@@ -62,16 +66,19 @@ class ProjectsController < ApplicationController
         samples = samples_by_domain(domain)
         samples = filter_samples(samples, params)
 
-        # if we are applying any filters that constrain project's samples, we should not show project with zero samples
+        # if we are applying any filters that constrain project's samples, we should not show projects with zero samples
         hide_empty_projects = [:host, :location, :taxon, :time, :tissue, :visibility].any? do |key|
           params.key? key
         end
 
         # Retrieve a json of projects associated with samples;
         # augment with number_of_samples, hosts, tissues.
-        projects = if ["my_data", "public"].include?(domain)
+        projects = case domain
+                   when "my_data"
+                     current_user.projects
+                   when "public"
                      current_power.projects.where(id: samples.pluck(:project_id).uniq)
-                   elsif domain == "updatable"
+                   when "updatable"
                      current_power.updatable_projects
                    else
                      current_power.projects
@@ -109,7 +116,7 @@ class ProjectsController < ApplicationController
           (tissues_by_project_id[s.project_id] ||= Set.new) << metadata[s.id][:sample_type] if (metadata[s.id] || {})[:sample_type]
           (locations_by_project_id[s.project_id] ||= Set.new) << metadata[s.id][:collection_location] if (metadata[s.id] || {})[:collection_location]
           # Assumes project owner is the uploader of the project's first sample
-          if !min_sample_by_project_id[s.project_id] || min_sample_by_project_id[s.project_id] < s.id
+          if !min_sample_by_project_id[s.project_id] || min_sample_by_project_id[s.project_id] > s.id
             min_sample_by_project_id[s.project_id] = s.id
             owner_by_project_id[s.project_id] = s.user ? s.user.name : nil
           end

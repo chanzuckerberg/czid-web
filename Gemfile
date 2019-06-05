@@ -93,7 +93,6 @@ group :development, :test do
   gem 'factory_bot_rails'
   gem 'rspec-rails', '>= 3.7.2'
   gem 'rubocop', '=0.49.1'
-  gem 'rubocop-rspec'
   gem 'selenium-webdriver'
 end
 
@@ -102,6 +101,10 @@ group :development do
   gem 'listen', '>= 3.0.5', '< 3.2'
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
   gem 'web-console', '>= 3.5.1'
+end
+
+group :test do
+  gem 'rspec-json_expectations'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
