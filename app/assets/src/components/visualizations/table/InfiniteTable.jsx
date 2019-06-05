@@ -42,7 +42,7 @@ class InfiniteTable extends React.Component {
     const requestedNumberOfRows = stopIndex - startIndex + 1;
     this.rows.splice(startIndex, requestedNumberOfRows, ...newRows);
 
-    if (requestedNumberOfRows != newRows.length) {
+    if (requestedNumberOfRows !== newRows.length) {
       this.setState({ rowCount: this.rows.length });
     } else {
       this.setState({ rowCount: this.rows.length + minimumBatchSize });
