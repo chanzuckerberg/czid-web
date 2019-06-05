@@ -587,7 +587,8 @@ class DiscoveryView extends React.Component {
       {
         currentTab: "samples",
         project,
-        projectId: project.id
+        projectId: project.id,
+        search: null
       },
       () => {
         this.updateBrowsingHistory();
@@ -822,18 +823,18 @@ class DiscoveryView extends React.Component {
           )}
           <DiscoveryHeader
             currentTab={currentTab}
-            tabs={tabs}
-            onTabChange={this.handleTabChange}
             filterCount={filterCount}
-            initialSearch={search}
             onFilterToggle={this.handleFilterToggle}
             onStatsToggle={this.handleStatsToggle}
             onSearchTriggered={this.handleSearchTriggered}
             onSearchSuggestionsReceived={this.handleSearchSuggestionsReceived}
             onSearchResultSelected={this.handleSearchSelected}
             onSearchEnterPressed={this.handleStringSearch}
+            onTabChange={this.handleTabChange}
+            searchValue={search || ""}
             showStats={showStats && !!dimensions}
             showFilters={showFilters && !!dimensions}
+            tabs={tabs}
           />
         </div>
         <Divider style="medium" />

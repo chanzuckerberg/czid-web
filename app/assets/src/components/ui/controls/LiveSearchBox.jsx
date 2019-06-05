@@ -18,6 +18,16 @@ class LiveSearchBox extends React.Component {
     this.lastestTimerId = null;
   }
 
+  static getDerivedStateFromProps(props, state) {
+    if (props.value !== state.prevValue) {
+      return {
+        prevValue: props.value,
+        value: props.value
+      };
+    }
+    return null;
+  }
+
   handleKeyDown = keyEvent => {
     const { onEnter, inputMode } = this.props;
     const { value, selectedResult } = this.state;
@@ -87,8 +97,7 @@ class LiveSearchBox extends React.Component {
 
   render() {
     const { className, placeholder, rectangular } = this.props;
-    const { isLoading, results } = this.state;
-    const value = this.props.value || this.state.value;
+    const { isLoading, results, value } = this.state;
 
     return (
       <Search
