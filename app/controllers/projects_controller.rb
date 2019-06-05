@@ -3,6 +3,7 @@ class ProjectsController < ApplicationController
   include SamplesHelper
   include ReportHelper
   include MetadataHelper
+  include ParameterSanitization
   ########################################
   # Note to developers:
   # If you are adding a new action to the project controller, you must classify your action into
