@@ -85,7 +85,7 @@ class ProjectsController < ApplicationController
                      current_power.projects
                    end
 
-        projects = projects.where(id: params[:projectId]) if project_id
+        projects = projects.where(id: project_id) if project_id
         projects = projects.db_search(search) if search
         projects = projects.order(Hash[order_by => order_dir])
 
