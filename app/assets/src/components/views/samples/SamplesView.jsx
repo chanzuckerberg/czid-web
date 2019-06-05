@@ -25,6 +25,8 @@ class SamplesView extends React.Component {
   constructor(props) {
     super(props);
 
+    const { allowedFeatures } = this.props;
+
     this.state = {
       phyloTreeCreationModalOpen: false,
       selectedSampleIds: new Set()
@@ -129,6 +131,16 @@ class SamplesView extends React.Component {
           TableRenderers.formatDuration(rowData[dataKey])
       }
     ];
+
+    // TODO(jsheu): Upon release, replace Location 'V1'
+    if (allowedFeatures.includes("maps")) {
+      this.columns.push({
+        dataKey: "collectionLocationV2",
+        label: "Location V2",
+        flexGrow: 1,
+        className: cs.basicCell
+      });
+    }
   }
 
   handleSelectRow = (value, checked) => {

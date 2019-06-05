@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { defaultTableRowRenderer, InfiniteLoader } from "react-virtualized";
+import { isObject } from "lodash/fp";
 import BaseTable from "./BaseTable";
 import cs from "./infinite_table.scss";
 import cx from "classnames";
@@ -72,7 +73,12 @@ class InfiniteTable extends React.Component {
     // Guarantees that we have at least one child div in the cell
     return (
       <div className={cs.cellContent}>
-        {cellData == null ? "" : String(cellData)}
+        {/* Use .name if val is an object (e.g. location object) */}
+        {cellData == null
+          ? ""
+          : isObject(cellData)
+            ? cellData.name
+            : String(cellData)}
       </div>
     );
   };

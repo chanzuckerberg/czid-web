@@ -80,6 +80,10 @@ const processRawSample = sample => {
       ).toLowerCase()
     },
     collectionLocation: get("metadata.collection_location", sample.details),
+    collectionLocationV2: get(
+      "metadata.collection_location_v2",
+      sample.details
+    ),
     createdAt: sample.created_at,
     duplicateCompressionRatio: get(
       "derived_sample_output.summary_stats.compression_ratio",
