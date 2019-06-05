@@ -5,58 +5,47 @@ describe PipelineRun, type: :model do
     let(:user) { build_stubbed(:user) }
     let(:sample) { build_stubbed(:sample, user: user) }
     let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample, pipeline_version: "3.7") }
-    before { expect(pipeline_run).to receive(:save) }
-
-    subject do
-      pipeline_run.update_job_status
-    end
+    before { allow(pipeline_run).to receive(:save) }
+    after("saves to database") { expect(pipeline_run).to have_received(:save) }
 
     context "when all stages complete successfully" do
       before { allow(pipeline_run).to receive(:active_stage).and_return(nil) }
-      it "changes the status to finalized with success" do
-        subject
-        expect(pipeline_run.finalized).to eq(1)
-        expect(pipeline_run.job_status).to eq("CHECKED")
+      it "changes status to finalized" do
+        pipeline_run.update_job_status
+        expect(pipeline_run).to have_attributes(finalized: 1,
+                                                job_status: "CHECKED")
       end
     end
 
     context "when a stage completes with an error" do
       let(:pipeline_run_stage) { build_stubbed(:pipeline_run_stage_1_host_filtering, job_status: PipelineRunStage::STATUS_FAILED, pipeline_run: pipeline_run) }
-      before do
-        allow(pipeline_run).to receive(:send_sample_failed_error_message)
-        allow(pipeline_run).to receive(:active_stage).and_return(pipeline_run_stage)
-      end
+      before { allow(pipeline_run).to receive(:send_sample_failed_error_message) }
+      before { allow(pipeline_run).to receive(:active_stage).and_return(pipeline_run_stage) }
 
-      context "and when it is a known user error" do
+      context "and it is a known user error" do
         before { allow(pipeline_run).to receive(:check_for_user_error).and_return(["FAULTY_INPUT", "Some user error"]) }
-        it "changes the status to failed" do
-          subject
-          expect(pipeline_run.finalized).to eq(1)
-          expect(pipeline_run.job_status).to eq("1.Host Filtering-FAILED")
+        it "changes status to failed" do
+          pipeline_run.update_job_status
+          expect(pipeline_run).to have_attributes(finalized: 1,
+                                                  job_status: "1.Host Filtering-FAILED",
+                                                  known_user_error: "FAULTY_INPUT",
+                                                  error_message: "Some user error")
         end
-        it "saves the user error message" do
-          subject
-          expect(pipeline_run.known_user_error).to eq("FAULTY_INPUT")
-          expect(pipeline_run.error_message).to eq("Some user error")
-        end
-        it "never sends an error to airbrake" do
-          subject
+        it "doesn't send the error to airbrake" do
+          pipeline_run.update_job_status
           expect(pipeline_run).not_to have_received(:send_sample_failed_error_message)
         end
       end
 
-      context "and when it is an unexpected error" do
-        before do
-          allow(pipeline_run).to receive(:active_stage).and_return(pipeline_run_stage)
-          allow(pipeline_run).to receive(:check_for_user_error).and_return([nil, nil])
+      context "and it is an unexpected error" do
+        before { allow(pipeline_run).to receive(:check_for_user_error).and_return([nil, nil]) }
+        it "changes status to failed" do
+          pipeline_run.update_job_status
+          expect(pipeline_run).to have_attributes(finalized: 1,
+                                                  job_status: "1.Host Filtering-FAILED")
         end
-        it "changes the status to failed" do
-          subject
-          expect(pipeline_run.finalized).to eq(1)
-          expect(pipeline_run.job_status).to eq("1.Host Filtering-FAILED")
-        end
-        it "sends the error to airbrake" do
-          subject
+        it "send an error to airbrake" do
+          pipeline_run.update_job_status
           expect(pipeline_run).to have_received(:send_sample_failed_error_message)
         end
       end
