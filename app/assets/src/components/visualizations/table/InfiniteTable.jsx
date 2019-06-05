@@ -64,6 +64,7 @@ class InfiniteTable extends React.Component {
     console.log("rowProps: ", rowProps);
     if (!this.rows[rowProps.index]) {
       rowProps.className = cx(rowProps.className, cs.loading, loadingClassName);
+      console.log("I added loading");
       console.log(rowProps.className);
     }
 
