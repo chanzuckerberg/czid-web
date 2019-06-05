@@ -331,7 +331,7 @@ class SamplesHeatmapVis extends React.Component {
             onClose={() => {
               this.setState({ addMetadataTrigger: null });
             }}
-            position="bottom center"
+            position="bottom right"
           >
             {this.renderColumnMetadataSelector()}
           </ContextPlaceholder>
