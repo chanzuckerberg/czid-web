@@ -173,22 +173,24 @@ class SamplesView extends React.Component {
 
   renderHeatmapTrigger = () => {
     const { mapSidebarSelectedSampleIds, currentDisplay } = this.props;
-    let { selectedSampleIds } = this.state;
+    const { selectedSampleIds } = this.state;
 
-    if (currentDisplay === "map")
-      selectedSampleIds = mapSidebarSelectedSampleIds;
+    const targetSampleIds =
+      currentDisplay === "map"
+        ? mapSidebarSelectedSampleIds
+        : selectedSampleIds;
 
     const log = () =>
       logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
-        selectedSampleIds: selectedSampleIds.length
+        selectedSampleIds: targetSampleIds.length
       });
-    return selectedSampleIds.size < 2 ? (
+    return targetSampleIds.size < 2 ? (
       <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
     ) : (
       <a
         onClick={log}
         href={`/visualizations/heatmap?sampleIds=${Array.from(
-          selectedSampleIds
+          targetSampleIds
         )}`}
       >
         <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
@@ -202,10 +204,12 @@ class SamplesView extends React.Component {
       currentDisplay,
       mapSidebarSelectedSampleIds
     } = this.props;
-    let { selectedSampleIds } = this.state;
+    const { selectedSampleIds } = this.state;
 
-    if (currentDisplay === "map")
-      selectedSampleIds = mapSidebarSelectedSampleIds;
+    const targetSampleIds =
+      currentDisplay === "map"
+        ? mapSidebarSelectedSampleIds
+        : selectedSampleIds;
 
     const downloadOptions = [{ text: "Sample Table", value: "samples_table" }];
     if (projectId) {
@@ -222,11 +226,11 @@ class SamplesView extends React.Component {
           new ReportsDownloader({
             projectId,
             downloadOption,
-            selectedSampleIds
+            selectedSampleIds: targetSampleIds
           });
           logAnalyticsEvent("SamplesView_download-dropdown-option_clicked", {
             projectId,
-            selectedSamplesCount: selectedSampleIds.length,
+            selectedSamplesCount: targetSampleIds.length,
             downloadOption
           });
         }}
@@ -237,17 +241,20 @@ class SamplesView extends React.Component {
   renderCollectionTrigger = () => {
     const {
       currentDisplay,
+      mapPreviewedSamples,
       mapSidebarSelectedSampleIds,
-      mapPreviewedSamples
+      samples
     } = this.props;
-    let { samples } = this.props;
-    let { selectedSampleIds } = this.state;
+    const { selectedSampleIds } = this.state;
 
-    if (currentDisplay === "map") {
-      samples = mapPreviewedSamples;
-      selectedSampleIds = mapSidebarSelectedSampleIds;
-    }
-    return selectedSampleIds.size < 2 ? (
+    const targetSamples =
+      currentDisplay === "map" ? mapPreviewedSamples : samples;
+    const targetSampleIds =
+      currentDisplay === "map"
+        ? mapSidebarSelectedSampleIds
+        : selectedSampleIds;
+
+    return targetSampleIds.size < 2 ? (
       <SaveIcon
         className={cx(cs.icon, cs.disabled, cs.save)}
         popupText={"Save a Collection"}
@@ -260,9 +267,9 @@ class SamplesView extends React.Component {
             popupText={"Save a Collection"}
           />
         }
-        selectedSampleIds={selectedSampleIds}
-        fetchedSamples={samples.filter(sample =>
-          selectedSampleIds.has(sample.id)
+        selectedSampleIds={targetSampleIds}
+        fetchedSamples={targetSamples.filter(sample =>
+          targetSampleIds.has(sample.id)
         )}
       />
     );
@@ -274,10 +281,10 @@ class SamplesView extends React.Component {
       currentDisplay,
       mapSidebarSelectedSampleIds
     } = this.props;
-    let { selectedSampleIds } = this.state;
+    const { selectedSampleIds } = this.state;
 
-    if (currentDisplay === "map")
-      selectedSampleIds = mapSidebarSelectedSampleIds;
+    let targetSampleIds = selectedSampleIds;
+    if (currentDisplay === "map") targetSampleIds = mapSidebarSelectedSampleIds;
 
     return (
       <div className={cs.samplesToolbar}>
@@ -289,7 +296,7 @@ class SamplesView extends React.Component {
           <Label
             circular
             className={cs.counter}
-            text={`${selectedSampleIds.size}`}
+            text={`${targetSampleIds.size}`}
           />
           <span className={cs.label}>Selected</span>
         </div>
