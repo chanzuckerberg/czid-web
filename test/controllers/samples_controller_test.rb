@@ -218,28 +218,31 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test 'joe cannot see pipeline experimental stage results' do
-    post user_session_path, params: @user_nonadmin_params
-    get stage_results_sample_url(@public_pipeline_run_sample)
-    assert_response :success
+  # Commented since stage results are currently admin-only, to be added
+  # if released for regular users
 
-    results = @response.parsed_body["pipeline_stage_results"]
-    assert_equal 3, results.length
-    @public_pipeline_run.pipeline_run_stages.each do |stage|
-      if stage.name == "Experimental"
-        assert_nil results["Experimental"]
-      else
-        assert_equal JSON.parse(stage.dag_json), results[stage.name]
-      end
-    end
-  end
+  # test 'joe cannot see pipeline experimental stage results' do
+  #   post user_session_path, params: @user_nonadmin_params
+  #   get stage_results_sample_url(@public_pipeline_run_sample)
+  #   assert_response :success
 
-  test 'joe cannot fetch pipeline stages for another user\'s private samples' do
-    post user_session_path, params: @user_nonadmin_params
-    assert_raises(ActiveRecord::RecordNotFound) do
-      get stage_results_sample_url(@private_pipeline_run_sample)
-    end
-  end
+  #   results = @response.parsed_body["pipeline_stage_results"]
+  #   assert_equal 3, results.length
+  #   @public_pipeline_run.pipeline_run_stages.each do |stage|
+  #     if stage.name == "Experimental"
+  #       assert_nil results["Experimental"]
+  #     else
+  #       assert_equal JSON.parse(stage.dag_json), results[stage.name]
+  #     end
+  #   end
+  # end
+
+  # test 'joe cannot fetch pipeline stages for another user\'s private samples' do
+  #   post user_session_path, params: @user_nonadmin_params
+  #   assert_raises(ActiveRecord::RecordNotFound) do
+  #     get stage_results_sample_url(@private_pipeline_run_sample)
+  #   end
+  # end
 
   test 'joe can fetch metadata for a public sample' do
     post user_session_path, params: @user_nonadmin_params

@@ -36,7 +36,8 @@ class SamplesController < ApplicationController
   before_action :authenticate_user!, except: TOKEN_AUTH_ACTIONS
   before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
 
-  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
+  before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
+                                        :pipeline_runs, :stage_results]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]
 
   current_power do # Put this here for CLI
@@ -967,12 +968,10 @@ class SamplesController < ApplicationController
     end
   end
 
+  # GET /samples/:id/stage_results
   def stage_results
     @results = {}
     @sample.first_pipeline_run.pipeline_run_stages.each do |stage|
-      if stage.name == "Experimental" && !current_user.admin?
-        next
-      end
       @results[stage.name] = JSON.parse stage.dag_json
     end
     render json: { pipeline_stage_results: @results }
