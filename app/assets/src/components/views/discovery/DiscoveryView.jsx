@@ -821,6 +821,8 @@ class DiscoveryView extends React.Component {
 
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
+    console.log("dimensions: ", dimensions);
+    console.log("filters: ", filters);
     const filterCount = this.getFilterCount();
 
     return (
@@ -863,6 +865,7 @@ class DiscoveryView extends React.Component {
                   {...filters}
                   domain={domain}
                   onFilterChange={this.handleFilterChange}
+                  allowedFeatures={allowedFeatures}
                 />
               )}
           </div>

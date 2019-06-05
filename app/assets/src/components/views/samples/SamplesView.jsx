@@ -471,7 +471,7 @@ SamplesView.propTypes = {
   currentDisplay: PropTypes.string.isRequired,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedSamples: PropTypes.array,
-  mapSidebarSelectedSampleIds: PropTypes.set,
+  mapSidebarSelectedSampleIds: PropTypes.instanceOf(Set),
   mapTilerKey: PropTypes.string,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,

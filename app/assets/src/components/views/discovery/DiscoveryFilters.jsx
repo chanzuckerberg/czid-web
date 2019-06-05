@@ -129,6 +129,7 @@ class DiscoveryFilters extends React.Component {
     const {
       hostSelected,
       locationSelected,
+      locationV2Selected,
       taxonSelected,
       timeSelected,
       tissueSelected,
@@ -136,10 +137,12 @@ class DiscoveryFilters extends React.Component {
     } = this.state;
 
     const {
+      allowedFeatures,
       className,
       domain,
       host,
       location,
+      locationV2,
       time,
       tissue,
       visibility
@@ -164,6 +167,19 @@ class DiscoveryFilters extends React.Component {
           />
           {this.renderTags("location")}
         </div>
+        {allowedFeatures.includes("maps") && (
+          <div className={cs.filterContainer}>
+            <BaseMultipleFilter
+              onChange={this.handleChange.bind(this, "locationV2Selected")}
+              selected={
+                locationV2 && locationV2.length ? locationV2Selected : null
+              }
+              options={locationV2}
+              label="Location v2"
+            />
+            {/*{this.renderTags("location")}*/}
+          </div>
+        )}
         <div className={cs.filterContainer}>
           <BaseSingleFilter
             label="Timeframe"
@@ -208,18 +224,21 @@ class DiscoveryFilters extends React.Component {
 DiscoveryFilters.defaultProps = {
   host: [],
   location: [],
+  locationV2: [],
   time: [],
   tissue: [],
   visibility: []
 };
 
 DiscoveryFilters.propTypes = {
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   className: PropTypes.string,
   domain: PropTypes.string,
 
   // Filter options and counters
   host: PropTypes.array,
   location: PropTypes.array,
+  locationV2: PropTypes.array,
   time: PropTypes.array,
   tissue: PropTypes.array,
   visibility: PropTypes.array,
@@ -227,6 +246,7 @@ DiscoveryFilters.propTypes = {
   // Selected values
   hostSelected: PropTypes.array,
   locationSelected: PropTypes.array,
+  locationV2Selected: PropTypes.array,
   taxonSelected: PropTypes.array,
   timeSelected: PropTypes.string,
   tissueSelected: PropTypes.array,

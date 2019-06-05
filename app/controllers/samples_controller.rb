@@ -206,6 +206,15 @@ class SamplesController < ApplicationController
       locations << { value: "not_set", text: "Unknown", count: not_set_count }
     end
 
+    locations_v2 = samples_by_metadata_field(sample_ids, "collection_location_v2").count
+    locations_v2 = locations_v2.map do |location, count|
+      { value: location.name, text: location.name, count: count }
+    end
+    not_set_count = samples_count - locations_v2.sum { |l| l[:count] }
+    if not_set_count > 0
+      locations_v2 << { value: "not_set", text: "Unknown", count: not_set_count }
+    end
+
     tissues = samples_by_metadata_field(sample_ids, "sample_type").count
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
