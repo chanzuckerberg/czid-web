@@ -23,7 +23,8 @@ module HeatmapHelper
     { text: "NR r (total reads)", value: "NR.r" }
   ].freeze
 
-  def self.sample_taxons_dict(params, samples)
+  # Samples and background are assumed here to be vieweable.
+  def self.sample_taxons_dict(params, samples, background_id)
     return {} if samples.empty?
 
     num_results = params[:taxonsPerSample] ? params[:taxonsPerSample].to_i : DEFAULT_MAX_NUM_TAXONS
@@ -55,7 +56,7 @@ module HeatmapHelper
               HeatmapHelper::DEFAULT_TAXON_SORT_PARAM
     species_selected = params[:species] ? params[:species].to_i == 1 : false # Otherwise genus selected
 
-    background_id = params[:background] ? params[:background].to_i : samples.first.default_background_id
+    background_id = background_id && background_id > 0 ? background_id : samples.first.default_background_id
 
     results_by_pr = fetch_top_taxons(
       samples,
