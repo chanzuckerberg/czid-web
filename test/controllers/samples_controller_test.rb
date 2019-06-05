@@ -11,8 +11,9 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     @sample_human_existing_metadata_joe_project = samples(:sample_human_existing_metadata_joe_project)
     @sample_human_existing_metadata_expired = samples(:sample_human_existing_metadata_expired)
     @deletable_sample = samples(:deletable_sample)
-    @pipeline_run_sample = samples(:sample_with_pipeline_stages)
-    @pipeline_run = pipeline_runs(:sample_run_with_pipeline_stages)
+    @public_pipeline_run_sample = samples(:public_sample_with_pipeline_stages)
+    @public_pipeline_run = pipeline_runs(:public_sample_run_with_pipeline_stages)
+    @private_pipeline_run_sample = samples(:private_sample_with_pipeline_stages)
     @project = projects(:one)
     @user = users(:one)
     @user.authentication_token = 'sdfsdfsdff'
@@ -207,29 +208,36 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
   test 'should return pipeline stage results' do
     post user_session_path, params: @user_params
-    get stage_results_sample_url(@pipeline_run_sample)
+    get stage_results_sample_url(@public_pipeline_run_sample)
     assert_response :success
 
     results = @response.parsed_body["pipeline_stage_results"]
     assert_equal 4, results.length
-    @pipeline_run.pipeline_run_stages.each do |stage|
+    @public_pipeline_run.pipeline_run_stages.each do |stage|
       assert_equal JSON.parse(stage.dag_json), results[stage.name]
     end
   end
 
   test 'joe cannot see pipeline experimental stage results' do
     post user_session_path, params: @user_nonadmin_params
-    get stage_results_sample_url(@pipeline_run_sample)
+    get stage_results_sample_url(@public_pipeline_run_sample)
     assert_response :success
 
     results = @response.parsed_body["pipeline_stage_results"]
     assert_equal 3, results.length
-    @pipeline_run.pipeline_run_stages.each do |stage|
+    @public_pipeline_run.pipeline_run_stages.each do |stage|
       if stage.name == "Experimental"
         assert_nil results["Experimental"]
       else
         assert_equal JSON.parse(stage.dag_json), results[stage.name]
       end
+    end
+  end
+
+  test 'joe cannot fetch pipeline stages for another user\'s private samples' do
+    post user_session_path, params: @user_nonadmin_params
+    assert_raises(ActiveRecord::RecordNotFound) do
+      get stage_results_sample_url(@private_pipeline_run_sample)
     end
   end
 
