@@ -18,7 +18,7 @@ FactoryBot.define do
     end
 
     trait :with_public_sample do
-      days_to_keep_sample_private{ 365.days.ago }
+      days_to_keep_sample_private { 365.days.ago }
       after :create do |project, options|
         create(:sample, project: project, host_genome_name: options.host_genome_name, created_at: 366.days.ago)
       end

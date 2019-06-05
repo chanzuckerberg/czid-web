@@ -323,7 +323,6 @@ RSpec.describe ProjectsController, type: :controller do
         end
       end
 
-
       ["my_data", "all_data"].each do |domain|
         describe "GET index for #{domain} domain" do
           it "sees all required fields" do
