@@ -55,8 +55,7 @@ module HeatmapHelper
               HeatmapHelper::DEFAULT_TAXON_SORT_PARAM
     species_selected = params[:species] ? params[:species].to_i == 1 : false # Otherwise genus selected
 
-    first_sample = samples.first
-    background_id = params[:background] ? params[:background].to_i : get_background_id(first_sample)
+    background_id = params[:background] ? params[:background].to_i : samples.first.default_background_id
 
     results_by_pr = fetch_top_taxons(
       samples,
