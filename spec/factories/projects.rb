@@ -17,6 +17,8 @@ FactoryBot.define do
       end
     end
 
+    # guarantees that a samples is public by explicitly setting
+    # project's `days_to_keep_sample_private` and sample's `created_at` explicitly
     trait :with_public_sample do
       days_to_keep_sample_private { 365.days.ago }
       after :create do |project, options|
