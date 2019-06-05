@@ -96,3 +96,5 @@ RSpec.configure do |config|
 
   # =end
 end
+
+require "rspec/json_expectations"

@@ -1,16 +1,23 @@
 module ControllerMacros
-  def login_admin
+  def create_users
     before do
-      @request.env["devise.mapping"] = Devise.mappings[:admin]
-      sign_in FactoryBot.create(:admin)
+      @admin = FactoryBot.create(:admin, role: 1)
+      @joe = FactoryBot.create(:joe)
     end
   end
 
-  def login_user
+  def sign_in_by_symbol(user)
     before do
-      @request.env["devise.mapping"] = Devise.mappings[:user]
-      user = FactoryBot.create(:user)
-      sign_in user
+      @user = instance_variable_get("@#{user}".to_s)
+      sign_in @user
+    end
+  end
+
+  def with_signed_in_users(*users)
+    # users requested must have been created before hand
+    users.each do |user|
+      sign_in_by_symbol user
+      yield user
     end
   end
 end
