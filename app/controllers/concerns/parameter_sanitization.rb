@@ -1,5 +1,4 @@
 module ParameterSanitization
-
   def sanitize_order_by(model, order_by, default = nil)
     return model.column_names.include?(order_by) ? order_by : default
   end
@@ -11,5 +10,4 @@ module ParameterSanitization
     end
     return default
   end
-
 end
