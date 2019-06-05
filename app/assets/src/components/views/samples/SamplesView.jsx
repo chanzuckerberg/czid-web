@@ -132,11 +132,11 @@ class SamplesView extends React.Component {
       }
     ];
 
-    // TODO(jsheu): Upon release, replace Location 'V1'
+    // TODO(jsheu): Upon release, replace Location 'v1'
     if (allowedFeatures.includes("maps")) {
       this.columns.push({
         dataKey: "collectionLocationV2",
-        label: "Location V2",
+        label: "Location v2",
         flexGrow: 1,
         className: cs.basicCell
       });
