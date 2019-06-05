@@ -207,11 +207,10 @@ export default class MapPreviewSidebar extends React.Component {
             ref={infiniteTable => (this.infiniteTable = infiniteTable)}
             rowClassName={cs.tableDataRow}
             rowCount={batchSize}
-            selectAllChecked={selectAllChecked}
             selectableKey="id"
+            selectAllChecked={selectAllChecked}
             selected={selectedSampleIds}
             threshold={batchSize}
-            loadingClassName={cs.loading}
           />
         </div>
       </div>
