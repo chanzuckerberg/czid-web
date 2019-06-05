@@ -116,7 +116,7 @@ RSpec.describe ProjectsController, type: :controller do
         it "does not see project without samples" do
           expected_projects = []
           create(:public_project)
-          expected_projects << create(:public_project, :with_samples)
+          expected_projects << create(:public_project, :with_sample)
 
           get :index, params: { format: "json", domain: "public" }
 
@@ -128,9 +128,9 @@ RSpec.describe ProjectsController, type: :controller do
         it "sees public projects" do
           expected_projects = []
           other_user = create(:user)
-          create(:project, :with_samples, users: [@user])
-          expected_projects << create(:public_project, :with_samples, users: [other_user])
-          expected_projects << create(:public_project, :with_samples, users: [@user])
+          create(:project, :with_sample, users: [@user])
+          expected_projects << create(:public_project, :with_sample, users: [other_user])
+          expected_projects << create(:public_project, :with_sample, users: [@user])
 
           get :index, params: { format: "json", domain: "public" }
 
@@ -318,8 +318,8 @@ RSpec.describe ProjectsController, type: :controller do
             # TODO(tiago): refactor to handle this edge case and add to expected
             create(:project, users: [@user])
             create(:public_project, users: [@user])
-            create(:public_project, :with_samples, users: [@user])
-            expected_projects << create(:project, :with_samples, users: [@user])
+            create(:public_project, :with_sample, users: [@user])
+            expected_projects << create(:project, :with_sample, users: [@user])
 
             get :index, params: { format: "json", domain: domain, visibility: "private" }
 
@@ -333,8 +333,8 @@ RSpec.describe ProjectsController, type: :controller do
             # TODO(tiago): should we see public projects without samples with public filter?
             # Not useful but logically we should - currently we cannot see it due to the same edge case as in the private filter
             create(:public_project, users: [@user])
-            expected_projects << create(:public_project, :with_samples, users: [@user])
-            create(:project, :with_samples, users: [@user])
+            expected_projects << create(:public_project, :with_sample, users: [@user])
+            create(:project, :with_sample, users: [@user])
 
             get :index, params: { format: "json", domain: domain, visibility: "public" }
 
@@ -347,7 +347,7 @@ RSpec.describe ProjectsController, type: :controller do
             expected_projects = []
 
             create(:project, users: [@user])
-            create(:project, :with_samples, users: [@user])
+            create(:project, :with_sample, users: [@user])
             expected_projects << create(:project, users: [@user], samples_data: [metadata_fields: { sample_type: "Serum" }])
             create(:project, users: [@user], samples_data: [metadata_fields: { sample_type: "Non-Serum" }])
 
@@ -362,7 +362,7 @@ RSpec.describe ProjectsController, type: :controller do
             expected_projects = []
 
             create(:project, users: [@user])
-            create(:project, :with_samples, users: [@user])
+            create(:project, :with_sample, users: [@user])
             expected_projects << create(:project, users: [@user], samples_data: [metadata_fields: { collection_location: "San Francisco, USA" }])
             create(:project, users: [@user], samples_data: [metadata_fields: { collection_location: "Lisbon, Portugal" }])
 
@@ -377,9 +377,9 @@ RSpec.describe ProjectsController, type: :controller do
             expected_projects = []
 
             create(:project, users: [@user])
-            create(:project, :with_samples, users: [@user])
-            create(:project, :with_samples, users: [@user], host_genome_name: "pig")
-            expected_projects << create(:project, :with_samples, users: [@user], host_genome_name: "human")
+            create(:project, :with_sample, users: [@user])
+            create(:project, :with_sample, users: [@user], host_genome_name: "pig")
+            expected_projects << create(:project, :with_sample, users: [@user], host_genome_name: "human")
 
             get :index, params: { format: "json", domain: domain, host: HostGenome.find_by(name: "human").id }
 
@@ -393,16 +393,16 @@ RSpec.describe ProjectsController, type: :controller do
 
             create(:project, users: [@user])
             travel_to 300.days.ago do
-              create(:project, :with_samples, users: [@user])
+              create(:project, :with_sample, users: [@user])
             end
             travel_to 30.days.ago do
-              expected_projects << create(:project, :with_samples, users: [@user])
+              expected_projects << create(:project, :with_sample, users: [@user])
             end
             travel_to 5.days.ago do
-              expected_projects << create(:project, :with_samples, users: [@user])
+              expected_projects << create(:project, :with_sample, users: [@user])
             end
             travel_to DateTime.current do
-              expected_projects << create(:project, :with_samples, users: [@user])
+              expected_projects << create(:project, :with_sample, users: [@user])
             end
             # by default, most recent projects first
             expected_projects.reverse!
@@ -417,7 +417,7 @@ RSpec.describe ProjectsController, type: :controller do
           it "sees correct projects when filtering by taxon" do
             expected_projects = []
             create(:project, users: [@user])
-            create(:project, :with_samples, users: [@user])
+            create(:project, :with_sample, users: [@user])
             create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsormidium", nt: 10 }], job_status: "CHECKED" }] }])
             create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsiella", nt: 0 }], job_status: "CHECKED" }] }])
             expected_projects << create(:project, users: [@user], samples_data: [{ pipeline_runs_data: [{ taxon_counts_data: [{ taxon_name: "klebsiella", nt: 10 }], job_status: "CHECKED" }] }])
@@ -435,8 +435,8 @@ RSpec.describe ProjectsController, type: :controller do
             expected_projects << create(:project, name: "Project_find_this", users: [@user])
             expected_projects << create(:project, name: "Project find_this", users: [@user])
             expected_projects << create(:project, name: "Project find this", users: [@user])
-            expected_projects << create(:project, :with_samples, name: "find_this_Project_with_samples", users: [@user])
-            create(:project, :with_samples, name: "Project", users: [@user])
+            expected_projects << create(:project, :with_sample, name: "find_this_Project_with_sample", users: [@user])
+            create(:project, :with_sample, name: "Project", users: [@user])
 
             get :index, params: { format: "json", domain: domain, search: "find_this" }
 

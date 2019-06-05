@@ -42,9 +42,5 @@ FactoryBot.define do
         create(:pipeline_run, sample: sample, **pipeline_run_data)
       end
     end
-
-    trait :older_than_1year do
-      created_at { 2.years.ago }
-    end
   end
 end
