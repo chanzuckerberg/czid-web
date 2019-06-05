@@ -62,14 +62,14 @@ class SampleViewControls extends React.Component {
       this.downloadCSV();
       log();
       return;
-    } else if (option == "taxon_svg") {
+    } else if (option == "taxon_svg" && this.checkTaxonTreeVisible()) {
       // TODO (gdingle): filename per tree?
-      new SvgSaver().asSvg(this.getNode(), "taxon_tree.svg");
+      new SvgSaver().asSvg(this.getTaxonTreeNode(), "taxon_tree.svg");
       log();
       return;
-    } else if (option == "taxon_png") {
+    } else if (option == "taxon_png" && this.checkTaxonTreeVisible()) {
       // TODO (gdingle): filename per tree?
-      new SvgSaver().asPng(this.getNode(), "taxon_tree.png");
+      new SvgSaver().asPng(this.getTaxonTreeNode(), "taxon_tree.png");
       log();
       return;
     }
@@ -85,8 +85,25 @@ class SampleViewControls extends React.Component {
   };
 
   // TODO (gdingle): should we pass in a reference with React somehow?
-  getNode() {
+  getTaxonTreeNode() {
     return document.getElementsByClassName("taxon-tree-vis")[0];
+  }
+
+  checkTaxonTreeVisible() {
+    if (!this.getNode()) {
+      window.alert(
+        "Switch to the Taxon Tree View first before downloading it as an image."
+      );
+      return false;
+    }
+    return true;
+  }
+
+  getImageDownloadOptions() {
+    return [
+      { text: "Download Taxon Tree as SVG", value: "taxon_svg" },
+      { text: "Download Taxon Tree as PNG", value: "taxon_png" }
+    ];
   }
 
   render() {
@@ -99,8 +116,7 @@ class SampleViewControls extends React.Component {
           value: "download_csv"
         },
         ...getDownloadDropdownOptions(pipelineRun),
-        { text: "Download Taxon Tree as SVG", value: "taxon_svg" },
-        { text: "Download Taxon Tree as PNG", value: "taxon_png" }
+        ...this.getImageDownloadOptions()
       ];
 
       return (
