@@ -47,6 +47,20 @@ RSpec.describe ProjectsController, type: :controller do
         expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
       end
     end
+
+    describe "GET index by project id for not owned project" do
+      it "sees correct project id" do
+        create(:project, :with_sample, users: [@admin])
+        chosen_project = create(:project, :with_sample, users: [@joe])
+        create(:project, :with_sample, users: [@joe, @admin])
+
+        get :index, params: { format: "json", projectId: chosen_project.id }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response.count).to eq(1)
+        expect(json_response[0]["id"]).to eq(chosen_project.id)
+      end
+    end
   end
 
   # Non-admin, aka Joe, specific behavior
@@ -84,6 +98,20 @@ RSpec.describe ProjectsController, type: :controller do
         json_response = JSON.parse(response.body)
         expect(json_response.count).to eq(expected_projects.count)
         expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
+      end
+    end
+
+    describe "GET index by project id for not owned project" do
+      it "sees correct project id" do
+        create(:project, :with_sample, users: [@admin])
+        chosen_project = create(:project, :with_sample, users: [@joe])
+        create(:project, :with_sample, users: [@joe, @admin])
+
+        get :index, params: { format: "json", projectId: chosen_project.id }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response.count).to eq(1)
+        expect(json_response[0]["id"]).to eq(chosen_project.id)
       end
     end
   end
@@ -234,6 +262,67 @@ RSpec.describe ProjectsController, type: :controller do
           expect(json_response.pluck("id")).to contain_exactly(*expected_projects.pluck("id"))
         end
       end
+
+      describe "GET index by project id for owned project" do
+        it "sees correct project id" do
+          other_user = create(:user)
+          create(:project, :with_sample, users: [other_user])
+          create(:project, :with_sample, users: [@user])
+          chosen_project = create(:project, :with_sample, users: [@user, other_user])
+
+          get :index, params: { format: "json", projectId: chosen_project.id }
+
+          json_response = JSON.parse(response.body)
+          expect(json_response.count).to eq(1)
+          expect(json_response[0]["id"]).to eq(chosen_project.id)
+        end
+      end
+
+      describe "GET index by project id for public project" do
+        it "sees correct project id" do
+          other_user = create(:user)
+          create(:project, :with_sample, users: [other_user])
+          create(:project, :with_sample, users: [@user])
+          chosen_project = create(:public_project, :with_sample, users: [@user, other_user])
+
+          get :index, params: { format: "json", projectId: chosen_project.id }
+
+          json_response = JSON.parse(response.body)
+          expect(json_response.count).to eq(1)
+          expect(json_response[0]["id"]).to eq(chosen_project.id)
+        end
+      end
+
+      describe "GET index by project id for project with public samples" do
+        it "sees correct project id" do
+          other_user = create(:user)
+          create(:project, :with_sample, users: [other_user])
+          create(:project, :with_sample, users: [@user])
+          chosen_project = create(:project, :with_public_sample, users: [@user, other_user])
+
+          get :index, params: { format: "json", projectId: chosen_project.id }
+
+          json_response = JSON.parse(response.body)
+          expect(json_response.count).to eq(1)
+          expect(json_response[0]["id"]).to eq(chosen_project.id)
+        end
+      end
+
+      describe "GET index by project id for project without samples" do
+        it "sees correct project id" do
+          other_user = create(:user)
+          create(:project, :with_sample, users: [other_user])
+          chosen_project = create(:project, users: [@user])
+          create(:project, :with_sample, users: [@user, other_user])
+
+          get :index, params: { format: "json", projectId: chosen_project.id }
+
+          json_response = JSON.parse(response.body)
+          expect(json_response.count).to eq(1)
+          expect(json_response[0]["id"]).to eq(chosen_project.id)
+        end
+      end
+
 
       ["my_data", "all_data"].each do |domain|
         describe "GET index for #{domain} domain" do
