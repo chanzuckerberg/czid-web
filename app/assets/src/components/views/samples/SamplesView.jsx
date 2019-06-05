@@ -17,6 +17,7 @@ import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import ReportsDownloader from "./ReportsDownloader";
 import CollectionModal from "./CollectionModal";
 import cs from "./samples_view.scss";
+import csTableRenderer from "../discovery/table_renderers.scss";
 
 const DISPLAYS = ["table", "map"];
 
@@ -166,23 +167,30 @@ class SamplesView extends React.Component {
   };
 
   reset = () => {
-    const { currentDisplay } = this.state;
+    const { currentDisplay } = this.props;
     if (currentDisplay === "table") this.infiniteTable.reset();
   };
 
   renderHeatmapTrigger = () => {
+    const { mapSidebarSelectedSampleIds, currentDisplay } = this.props;
     const { selectedSampleIds } = this.state;
+
+    const targetSampleIds =
+      currentDisplay === "map"
+        ? mapSidebarSelectedSampleIds
+        : selectedSampleIds;
+
     const log = () =>
       logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
-        selectedSampleIds: selectedSampleIds.length
+        selectedSampleIds: targetSampleIds.length
       });
-    return selectedSampleIds.size < 2 ? (
+    return targetSampleIds.size < 2 ? (
       <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
     ) : (
       <a
         onClick={log}
         href={`/visualizations/heatmap?sampleIds=${Array.from(
-          selectedSampleIds
+          targetSampleIds
         )}`}
       >
         <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
@@ -191,8 +199,18 @@ class SamplesView extends React.Component {
   };
 
   renderDownloadTrigger = () => {
-    const { projectId } = this.props;
+    const {
+      projectId,
+      currentDisplay,
+      mapSidebarSelectedSampleIds
+    } = this.props;
     const { selectedSampleIds } = this.state;
+
+    const targetSampleIds =
+      currentDisplay === "map"
+        ? mapSidebarSelectedSampleIds
+        : selectedSampleIds;
+
     const downloadOptions = [{ text: "Sample Table", value: "samples_table" }];
     if (projectId) {
       downloadOptions.push({
@@ -208,11 +226,11 @@ class SamplesView extends React.Component {
           new ReportsDownloader({
             projectId,
             downloadOption,
-            selectedSampleIds
+            selectedSampleIds: targetSampleIds
           });
           logAnalyticsEvent("SamplesView_download-dropdown-option_clicked", {
             projectId,
-            selectedSamplesCount: selectedSampleIds.length,
+            selectedSamplesCount: targetSampleIds.length,
             downloadOption
           });
         }}
@@ -221,10 +239,22 @@ class SamplesView extends React.Component {
   };
 
   renderCollectionTrigger = () => {
-    const { samples } = this.props;
+    const {
+      currentDisplay,
+      mapPreviewedSamples,
+      mapSidebarSelectedSampleIds,
+      samples
+    } = this.props;
     const { selectedSampleIds } = this.state;
 
-    return selectedSampleIds.size < 2 ? (
+    const targetSamples =
+      currentDisplay === "map" ? mapPreviewedSamples : samples;
+    const targetSampleIds =
+      currentDisplay === "map"
+        ? mapSidebarSelectedSampleIds
+        : selectedSampleIds;
+
+    return targetSampleIds.size < 2 ? (
       <SaveIcon
         className={cx(cs.icon, cs.disabled, cs.save)}
         popupText={"Save a Collection"}
@@ -237,17 +267,27 @@ class SamplesView extends React.Component {
             popupText={"Save a Collection"}
           />
         }
-        selectedSampleIds={selectedSampleIds}
-        fetchedSamples={samples.filter(sample =>
-          selectedSampleIds.has(sample.id)
+        selectedSampleIds={targetSampleIds}
+        fetchedSamples={targetSamples.filter(sample =>
+          targetSampleIds.has(sample.id)
         )}
       />
     );
   };
 
   renderToolbar = () => {
-    const { allowedFeatures } = this.props;
+    const {
+      allowedFeatures,
+      currentDisplay,
+      mapSidebarSelectedSampleIds
+    } = this.props;
     const { selectedSampleIds } = this.state;
+
+    const targetSampleIds =
+      currentDisplay === "map"
+        ? mapSidebarSelectedSampleIds
+        : selectedSampleIds;
+
     return (
       <div className={cs.samplesToolbar}>
         {allowedFeatures &&
@@ -258,7 +298,7 @@ class SamplesView extends React.Component {
           <Label
             circular
             className={cs.counter}
-            text={`${selectedSampleIds.size}`}
+            text={`${targetSampleIds.size}`}
           />
           <span className={cs.label}>Selected</span>
         </div>
@@ -295,7 +335,7 @@ class SamplesView extends React.Component {
           columns={this.columns}
           defaultRowHeight={rowHeight}
           initialActiveColumns={activeColumns}
-          loadingClassName={cs.loading}
+          loadingClassName={csTableRenderer.loading}
           onLoadRows={onLoadRows}
           onSelectAllRows={withAnalytics(
             this.handleSelectAllRows,
@@ -412,6 +452,8 @@ SamplesView.propTypes = {
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   currentDisplay: PropTypes.string.isRequired,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
+  mapPreviewedSamples: PropTypes.array,
+  mapSidebarSelectedSampleIds: PropTypes.set,
   mapTilerKey: PropTypes.string,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
