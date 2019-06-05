@@ -742,13 +742,13 @@ class DiscoveryView extends React.Component {
       loadingStats,
       mapPreviewedSampleIds,
       mapPreviewedSamples,
+      mapSidebarSelectedSampleIds,
       projectDimensions,
       projects,
       sampleDimensions,
       samples,
       search,
-      showStats,
-      mapSidebarSelectedSampleIds
+      showStats
     } = this.state;
 
     const filterCount = this.getFilterCount();
@@ -759,14 +759,14 @@ class DiscoveryView extends React.Component {
           currentTab === "samples" &&
           currentDisplay === "map" && (
             <MapPreviewSidebar
-              samples={mapPreviewedSamples}
+              initialSelectedSampleIds={mapSidebarSelectedSampleIds}
               onSampleClicked={this.handleSampleSelected}
-              selectableIds={mapPreviewedSampleIds}
+              onSelectionUpdate={this.handleMapSidebarSelectUpdate}
               ref={mapPreviewSidebar =>
                 (this.mapPreviewSidebar = mapPreviewSidebar)
               }
-              onSelectionUpdate={this.handleMapSidebarSelectUpdate}
-              initialSelectedSampleIds={mapSidebarSelectedSampleIds}
+              samples={mapPreviewedSamples}
+              selectableIds={mapPreviewedSampleIds}
             />
           )}
         {showStats &&
@@ -892,6 +892,8 @@ class DiscoveryView extends React.Component {
                       allowedFeatures={allowedFeatures}
                       currentDisplay={currentDisplay}
                       mapLocationData={mapLocationData}
+                      mapPreviewedSamples={mapPreviewedSamples}
+                      mapSidebarSelectedSampleIds={mapSidebarSelectedSampleIds}
                       mapTilerKey={mapTilerKey}
                       onDisplaySwitch={this.handleDisplaySwitch}
                       onLoadRows={this.handleLoadSampleRows}
@@ -901,8 +903,6 @@ class DiscoveryView extends React.Component {
                       ref={samplesView => (this.samplesView = samplesView)}
                       samples={samples}
                       selectableIds={sampleIds}
-                      mapPreviewedSamples={mapPreviewedSamples}
-                      mapSidebarSelectedSampleIds={mapSidebarSelectedSampleIds}
                     />
                   </div>
                   {!samples.length &&

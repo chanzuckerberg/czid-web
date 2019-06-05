@@ -442,6 +442,8 @@ SamplesView.propTypes = {
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   currentDisplay: PropTypes.string.isRequired,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
+  mapPreviewedSamples: PropTypes.array,
+  mapSidebarSelectedSampleIds: PropTypes.set,
   mapTilerKey: PropTypes.string,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
@@ -450,9 +452,7 @@ SamplesView.propTypes = {
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
   samples: PropTypes.array,
-  selectableIds: PropTypes.array.isRequired,
-  mapSidebarSelectedSampleIds: PropTypes.set,
-  mapPreviewedSamples: PropTypes.array
+  selectableIds: PropTypes.array.isRequired
 };
 
 export default SamplesView;

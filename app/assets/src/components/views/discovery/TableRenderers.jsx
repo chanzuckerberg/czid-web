@@ -68,8 +68,6 @@ class TableRenderers extends React.Component {
   };
 
   static renderSample = ({ cellData: sample }, full = true) => {
-    console.log("render sample called");
-    return <div className={cs.sample}>"Yo"</div>;
     return (
       <div className={cs.sample}>
         {full && (

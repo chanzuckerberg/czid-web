@@ -232,12 +232,12 @@ MapPreviewSidebar.defaultProps = {
 };
 
 MapPreviewSidebar.propTypes = {
-  className: PropTypes.string,
-  samples: PropTypes.array,
   activeColumns: PropTypes.array,
+  className: PropTypes.string,
+  initialSelectedSampleIds: PropTypes.array,
   onSampleClicked: PropTypes.func,
-  protectedColumns: PropTypes.array,
-  selectableIds: PropTypes.array.isRequired,
   onSelectionUpdate: PropTypes.func,
-  initialSelectedSampleIds: PropTypes.array
+  protectedColumns: PropTypes.array,
+  samples: PropTypes.array,
+  selectableIds: PropTypes.array.isRequired
 };
