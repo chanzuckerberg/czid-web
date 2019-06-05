@@ -283,8 +283,10 @@ class SamplesView extends React.Component {
     } = this.props;
     const { selectedSampleIds } = this.state;
 
-    let targetSampleIds = selectedSampleIds;
-    if (currentDisplay === "map") targetSampleIds = mapSidebarSelectedSampleIds;
+    const targetSampleIds =
+      currentDisplay === "map"
+        ? mapSidebarSelectedSampleIds
+        : selectedSampleIds;
 
     return (
       <div className={cs.samplesToolbar}>
