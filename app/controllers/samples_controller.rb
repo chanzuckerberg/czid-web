@@ -972,12 +972,16 @@ class SamplesController < ApplicationController
     if current_user.allowed_feature_list.include?("pipeline_viz")
       @results = {}
       @sample.first_pipeline_run.pipeline_run_stages.each do |stage|
-        if stage.name == "Experimental" && !current_user.admin?
-          next
+        if stage.name != "Experimental" || current_user.admin?
+          @results[stage.name] = JSON.parse stage.dag_json
         end
-        @results[stage.name] = JSON.parse stage.dag_json
       end
       render json: { pipeline_stage_results: @results }
+    else
+      render(json: {
+               status: :unauthorized,
+               message: "No feature access"
+             }, status: :unauthorized)
     end
   end
 
