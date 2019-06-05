@@ -844,10 +844,7 @@ class PipelineRun < ApplicationRecord
         self.job_status = STATUS_FAILED
         self.finalized = 1
         self.known_user_error, self.error_message = check_for_user_error(prs)
-        log_message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.admin? ? 'admin user' : 'non-admin user'} " \
-          "failed #{prs.name} with #{adjusted_remaining_reads || 0} reads remaining after #{duration_hrs} hours. " \
-          "See: #{status_url}"
-        LogUtil.log_err_and_airbrake(log_message) unless known_user_error
+        send_sample_failed_error_message(prs) unless known_user_error
       elsif !prs.started?
         # we're moving on to a new stage
         prs.run_job
@@ -861,6 +858,13 @@ class PipelineRun < ApplicationRecord
       self.job_status += "|#{STATUS_READY}" if report_ready?
     end
     save
+  end
+
+  private def send_sample_failed_error_message(prs)
+    message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.admin? ? 'admin user' : 'non-admin user'} " \
+              "failed #{prs.name} with #{adjusted_remaining_reads || 0} reads remaining after #{duration_hrs} hours. " \
+              "See: #{status_url}"
+    LogUtil.log_err_and_airbrake(message)
   end
 
   def job_status_display
