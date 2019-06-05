@@ -535,22 +535,23 @@ module SamplesHelper
   end
 
   def samples_by_metadata_field(sample_ids, field_name)
-    # Special-case locations (and avoid a call to MetadataField.base_type)
-    group_field = if field_name == "collection_location_v2"
-                    # Plain-text locations are in string_validated_value and have null location_id
-                    [:location_id, :string_validated_value]
-                  else
-                    Metadatum.where(key: field_name).first.validated_field
-                  end
-    res = Metadatum
-          .joins(:metadata_field)
-          .where(
-            metadata_fields: { name: field_name },
-            sample_id: sample_ids
-          )
-          .group(group_field)
-    puts "3:28pm ", res.to_json
-    return res
+    # Special-case locations
+    if MetadataField.find_by(name: field_name).base_type == Metadatum::LOCATION_TYPE
+      join_fields = [:metadata_field, :location]
+      # Plain-text locations in string_validated_value
+      group_fields = [:string_validated_value, "locations.name"]
+    else
+      join_fields = :metadata_field
+      group_fields = Metadatum.where(key: field_name).first.validated_field
+    end
+
+    Metadatum
+      .joins([join_fields])
+      .where(
+        metadata_fields: { name: field_name },
+        sample_id: sample_ids
+      )
+      .group(group_fields)
   end
 
   private
@@ -620,4 +621,7 @@ module SamplesHelper
     requested_sample_ids.class.name
     samples.where(id: requested_sample_ids.is_a?(Array) ? requested_sample_ids : JSON.parse(requested_sample_ids))
   end
+
+  # Callable without include/extend
+  module_function :samples_by_metadata_field
 end

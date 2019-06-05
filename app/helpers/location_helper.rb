@@ -27,4 +27,18 @@ module LocationHelper
   def self.sanitize_name(name)
     name.gsub(%r{[;%_^<>\/?\\]}, "")
   end
+
+  def self.dimensions(sample_ids, field_name, samples_count)
+    # See pattern in SamplesController#dimensions
+    locations = SamplesHelper.samples_by_metadata_field(sample_ids, field_name).count
+    locations = locations.map do |location, count|
+      loc = location.is_a?(Array) ? (location[0] || location[1]) : location
+      { value: loc, text: loc, count: count }
+    end
+    not_set_count = samples_count - locations.sum { |l| l[:count] }
+    if not_set_count > 0
+      locations << { value: "not_set", text: "Unknown", count: not_set_count }
+    end
+    locations
+  end
 end
