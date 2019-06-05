@@ -834,6 +834,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def update_job_status
+    automatic_restart = false
     prs = active_stage
     if prs.nil?
       # all stages succeeded
@@ -844,7 +845,8 @@ class PipelineRun < ApplicationRecord
         self.job_status = STATUS_FAILED
         self.finalized = 1
         self.known_user_error, self.error_message = check_for_user_error(prs)
-        send_sample_failed_error_message(prs) unless known_user_error
+        automatic_restart = automatic_restart_allowed? unless known_user_error
+        report_failed_pipeline_run_stage(prs) unless automatic_restart || known_user_error
       elsif !prs.started?
         # we're moving on to a new stage
         prs.run_job
@@ -857,14 +859,31 @@ class PipelineRun < ApplicationRecord
       self.job_status = "#{prs.step_number}.#{prs.name}-#{prs.job_status}"
       self.job_status += "|#{STATUS_READY}" if report_ready?
     end
-    save
+    save!
+    enqueue_new_pipeline_run if automatic_restart
   end
 
-  private def send_sample_failed_error_message(prs)
+  protected def report_failed_pipeline_run_stage(prs)
     message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.admin? ? 'admin user' : 'non-admin user'} " \
               "failed #{prs.name} with #{adjusted_remaining_reads || 0} reads remaining after #{duration_hrs} hours. " \
               "See: #{status_url}"
     LogUtil.log_err_and_airbrake(message)
+  end
+
+  def automatic_restart_allowed?
+    return false if sample.user.admin?
+    previous_pipeline_runs_same_version.none?(&:failed?)
+  end
+
+  def previous_pipeline_runs_same_version
+    sample.pipeline_runs
+          .where.not(id: id)
+          .where(pipeline_version: pipeline_version)
+          .to_a
+  end
+
+  def enqueue_new_pipeline_run
+    raise "Not implemented"
   end
 
   def job_status_display
