@@ -57,6 +57,7 @@ class ProjectsController < ApplicationController
 
         order_by = sanitize_order_by(Project, params[:orderBy], :id)
         order_dir = sanitize_order_dir(params[:orderDir], :desc)
+        project_id = params[:projectId]
 
         # we do not want to search samples by name
         search = params.delete(:search)
@@ -84,6 +85,7 @@ class ProjectsController < ApplicationController
                      current_power.projects
                    end
 
+        projects = projects.where(id: project_id) if project_id
         projects = projects.db_search(search) if search
         projects = projects.order(Hash[order_by => order_dir])
 
