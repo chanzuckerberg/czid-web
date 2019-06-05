@@ -318,6 +318,7 @@ class SamplesView extends React.Component {
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 66;
     const selectAllChecked = this.isSelectAllChecked();
+    console.log("In SamplesView I see: ", cs.loading);
     return (
       <div className={cs.table}>
         <InfiniteTable

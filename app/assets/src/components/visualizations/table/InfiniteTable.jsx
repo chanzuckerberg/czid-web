@@ -40,7 +40,7 @@ class InfiniteTable extends React.Component {
 
     const newRows = await onLoadRows({ startIndex, stopIndex });
     const requestedNumberOfRows = stopIndex - startIndex + 1;
-    this.rows.splice(startIndex, requestedNumberOfRows, ...newRows);
+    // this.rows.splice(startIndex, requestedNumberOfRows, ...newRows);
 
     if (requestedNumberOfRows != newRows.length) {
       this.setState({ rowCount: this.rows.length });
@@ -62,6 +62,7 @@ class InfiniteTable extends React.Component {
   rowRenderer = rowProps => {
     const { loadingClassName } = this.props;
     if (!this.rows[rowProps.index]) {
+      console.log("In InfiniteTable I see: ", cs.loading, loadingClassName);
       rowProps.className = cx(rowProps.className, cs.loading, loadingClassName);
     }
 

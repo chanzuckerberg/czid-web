@@ -77,7 +77,6 @@
 
 .sample {
   display: flex;
-  height: 20px;
 
   .publicAccess {
     flex: 0 0 40px;
@@ -153,6 +152,82 @@
 
       span:not(:last-child) {
         margin-right: 10px;
+      }
+    }
+  }
+}
+
+.loading {
+  .numberValueAndPercentage {
+    .value {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 16px;
+      padding: 2px 15%;
+    }
+
+    .percentage {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 15px;
+      padding: 2px 20%;
+    }
+  }
+
+  .publicAccess {
+    @include loadingAnimation;
+
+    height: 36px;
+    width: 36px;
+  }
+
+  .sampleRightPane {
+    .sampleNameAndStatus {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 20px;
+      width: 365px;
+    }
+
+    .sampleDetails {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 17px;
+      width: 315px;
+    }
+  }
+
+  .sample {
+    .publicAccess {
+      @include loadingAnimation;
+
+      height: 36px;
+      width: 36px;
+    }
+
+    .sampleRightPane {
+      .sampleNameAndStatus {
+        @include loadingAnimation;
+
+        background-clip: content-box;
+        padding: 4px 0;
+        height: 20px;
+        width: 365px;
+      }
+
+      .sampleDetails {
+        @include loadingAnimation;
+
+        background-clip: content-box;
+        padding: 4px 0;
+        height: 17px;
+        width: 315px;
       }
     }
   }

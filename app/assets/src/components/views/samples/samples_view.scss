@@ -152,8 +152,8 @@
     width: 36px;
   }
 
-  .sampleRightPane {
-    .sampleNameAndStatus {
+  :global(.sampleRightPane) {
+    :global(.sampleNameAndStatus) {
       @include loadingAnimation;
 
       background-clip: content-box;
