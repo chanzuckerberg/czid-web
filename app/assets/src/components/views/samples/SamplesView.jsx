@@ -17,6 +17,7 @@ import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import ReportsDownloader from "./ReportsDownloader";
 import CollectionModal from "./CollectionModal";
 import cs from "./samples_view.scss";
+import csTableRenderer from "../discovery/table_renderers.scss";
 
 const DISPLAYS = ["table", "map"];
 
@@ -318,7 +319,6 @@ class SamplesView extends React.Component {
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 66;
     const selectAllChecked = this.isSelectAllChecked();
-    console.log("In SamplesView I see: ", cs.loading);
     return (
       <div className={cs.table}>
         <InfiniteTable
@@ -326,7 +326,7 @@ class SamplesView extends React.Component {
           columns={this.columns}
           defaultRowHeight={rowHeight}
           initialActiveColumns={activeColumns}
-          loadingClassName={cs.loading}
+          loadingClassName={csTableRenderer.loading}
           onLoadRows={onLoadRows}
           onSelectAllRows={withAnalytics(
             this.handleSelectAllRows,
