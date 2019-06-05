@@ -58,7 +58,7 @@ class DiscoveryHeader extends React.Component {
     const {
       currentTab,
       filterCount,
-      initialSearchValue,
+      searchValue,
       onFilterToggle,
       onSearchTriggered,
       onStatsToggle,
@@ -68,7 +68,6 @@ class DiscoveryHeader extends React.Component {
       tabs
     } = this.props;
 
-    // TODO(tiago): consider constraining what categories to ask for in the search box.
     return (
       <div className={cs.header}>
         <div className={cs.filtersTrigger} onClick={onFilterToggle}>
@@ -86,7 +85,7 @@ class DiscoveryHeader extends React.Component {
             onSearchTriggered={onSearchTriggered}
             onResultSelect={this.handleSearchResultSelected}
             onEnter={this.handleSearchEnterPressed}
-            initialValue={initialSearchValue}
+            value={searchValue}
           />
         </div>
         <Tabs
@@ -109,19 +108,19 @@ class DiscoveryHeader extends React.Component {
 
 DiscoveryHeader.defaultProps = {
   filterCount: 0,
-  initialSearchValue: ""
+  searchValue: ""
 };
 
 DiscoveryHeader.propTypes = {
   currentTab: PropTypes.string,
   filterCount: PropTypes.number,
-  initialSearchValue: PropTypes.string,
   onFilterToggle: PropTypes.func,
   onStatsToggle: PropTypes.func,
   onSearchEnterPressed: PropTypes.func,
   onSearchResultSelected: PropTypes.func,
   onSearchTriggered: PropTypes.func,
   onTabChange: PropTypes.func,
+  searchValue: PropTypes.string,
   showFilters: PropTypes.bool,
   showStats: PropTypes.bool,
   tabs: PropTypes.arrayOf(
