@@ -28,6 +28,7 @@ Rails.application.routes.draw do
     get :contigs_summary, on: :member
     get :results_folder, on: :member
     get :raw_results_folder, on: :member
+    get :stage_results, on: :member
     post :bulk_upload, on: :collection
     post :bulk_upload_with_metadata, on: :collection
     get :metadata, on: :member

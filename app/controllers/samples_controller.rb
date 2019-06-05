@@ -22,7 +22,8 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
-                  :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data].freeze
+                  :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,
+                  :stage_results].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
                   :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder, :upload_heartbeat].freeze
 
@@ -964,6 +965,17 @@ class SamplesController < ApplicationController
         render json: { displayed_data: @file_list }
       end
     end
+  end
+
+  def stage_results
+    @results = {}
+    @sample.first_pipeline_run.pipeline_run_stages.each do |stage|
+      if stage.name == "Experimental" && !current_user.admin?
+        next
+      end
+      @results[stage.name] = JSON.parse stage.dag_json
+    end
+    render json: { pipeline_stage_results: @results }
   end
 
   def validate_sample_files

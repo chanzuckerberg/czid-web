@@ -42,6 +42,10 @@ public_project_sampleB:
   project: public_project
   host_genome: human
 
+sample_with_pipeline_stages:
+  name: sample_with_pipeline_stages
+  project: public_project
+  
 joe_project_sampleB:
   name: joe_project_sampleB
   project: joe_project
