@@ -543,12 +543,12 @@ module SamplesHelper
                     Metadatum.where(key: field_name).first.validated_field
                   end
     res = Metadatum
-        .joins(:metadata_field)
-        .where(
+          .joins(:metadata_field)
+          .where(
             metadata_fields: { name: field_name },
             sample_id: sample_ids
-        )
-        .group(group_field)
+          )
+          .group(group_field)
     puts "3:28pm ", res.to_json
     return res
   end
