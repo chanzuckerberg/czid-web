@@ -3,8 +3,9 @@ import React from "react";
 import Cookies from "js-cookie";
 import $ from "jquery";
 import { Label, Menu, Icon, Popup } from "semantic-ui-react";
-import { omit } from "lodash/fp";
+import { omit, partition, keyBy, groupBy, map, mapValues } from "lodash/fp";
 import Nanobar from "nanobar";
+import PropTypes from "prop-types";
 
 import { getSampleReportInfo, getSummaryContigCounts } from "~/api";
 import { parseUrlParams } from "~/helpers/url";
@@ -78,7 +79,6 @@ class PipelineSampleReport extends React.Component {
     const cachedIncludedCategories = Cookies.get("includedCategories");
     const cachedIncludedSubcategories = Cookies.get("includedSubcategories");
 
-    const cached_name_type = Cookies.get("name_type");
     const cachedReadSpecificity = Cookies.get("readSpecificity");
     const cachedTreeMetric = Cookies.get("treeMetric");
     const cachedMinContigSize = parseInt(Cookies.get("minContigSize"), 10);
@@ -116,7 +116,7 @@ class PipelineSampleReport extends React.Component {
     ];
     this.categoryChildParent = { Phage: "Viruses" };
     this.categoryParentChild = { Viruses: ["Phage"] };
-    this.genus_map = {};
+    this.genusMap = {};
 
     this.INVALID_CALL_BASE_TAXID = -1e8;
 
@@ -156,7 +156,6 @@ class PipelineSampleReport extends React.Component {
             return category in this.categoryChildParent;
           })
         : [],
-      name_type: cached_name_type ? cached_name_type : "Scientific name",
       rendering: false,
       loading: true,
       activeThresholds: savedThresholdFilters,
@@ -228,16 +227,23 @@ class PipelineSampleReport extends React.Component {
       summaryContigCounts.contig_counts
     );
 
-    const genus_map = {};
+    const [genusTaxons, speciesTaxons] = partition(
+      ["tax_level", 2],
+      taxonomyDetails
+    );
 
-    for (let i = 0; i < taxonomyDetails.length; i++) {
-      const taxon = taxonomyDetails[i];
-      if (taxon.genus_taxid == taxon.tax_id) {
-        genus_map[taxon.genus_taxid] = taxon;
-      }
-    }
+    const genusMap = keyBy("genus_taxid", genusTaxons);
+    const genusToSpeciesMap = mapValues(
+      map(taxon => ({
+        taxonId: taxon.tax_id,
+        taxonName: taxon.name,
+        taxonCommonName: taxon.common_name
+      })),
+      groupBy("genus_taxid", speciesTaxons)
+    );
 
-    this.genus_map = genus_map;
+    this.genusMap = genusMap;
+    this.genusToSpeciesMap = genusToSpeciesMap;
 
     this.setState(
       {
@@ -630,7 +636,7 @@ class PipelineSampleReport extends React.Component {
     const taxonSortComparator = getTaxonSortComparator(
       this.sortParams.primary,
       this.sortParams.secondary,
-      this.genus_map
+      this.genusMap
     );
     selected_taxons = selected_taxons.sort(taxonSortComparator);
     this.setState({
@@ -686,12 +692,10 @@ class PipelineSampleReport extends React.Component {
   };
 
   handleNameTypeChange = nameType => {
-    Cookies.set("name_type", nameType);
-    this.setState({ name_type: nameType }, () =>
-      logAnalyticsEvent("PipelineSampleReport_name-type-filter_changed", {
-        nameType
-      })
-    );
+    this.props.onNameTypeChange(nameType);
+    logAnalyticsEvent("PipelineSampleReport_name-type-filter_changed", {
+      nameType
+    });
   };
 
   handleSpecificityChange = readSpecificity => {
@@ -780,18 +784,24 @@ class PipelineSampleReport extends React.Component {
   };
 
   handleCoverageVizClick = params => {
-    const { taxId, taxLevel, taxName } = params;
+    const { taxId, taxLevel, taxName, taxCommonName } = params;
     const pipelineVersion = this.props.reportPageParams.pipeline_version;
 
     const alignmentVizUrl = `/samples/${
       this.sampleId
     }/alignment_viz/nt_${taxLevel}_${taxId}?pipeline_version=${pipelineVersion}`;
 
+    const speciesTaxons =
+      taxLevel === "genus" ? this.genusToSpeciesMap[taxId] : [];
+
     if (pipelineVersionHasCoverageViz(pipelineVersion)) {
       this.props.onCoverageVizClick({
         taxId,
         taxName,
-        alignmentVizUrl
+        taxCommonName,
+        taxLevel,
+        alignmentVizUrl,
+        speciesTaxons
       });
     } else {
       window.open(alignmentVizUrl);
@@ -837,6 +847,7 @@ class PipelineSampleReport extends React.Component {
         taxId={taxInfo.tax_id}
         taxLevel={taxInfo.tax_level}
         taxName={taxInfo.name}
+        taxCommonName={taxInfo.common_name}
         ncbiEnabled={ncbiEnabled}
         onNcbiActionClick={withAnalytics(
           this.gotoNCBI,
@@ -875,10 +886,14 @@ class PipelineSampleReport extends React.Component {
 
   renderName = (tax_info, report_details, backgroundData, onTaxonClick) => {
     let taxCommonName = tax_info["common_name"];
-    const taxonName = getTaxonName(tax_info, this.state.name_type);
+    const taxonName = getTaxonName(
+      tax_info["name"],
+      taxCommonName,
+      this.props.nameType
+    );
 
     const grayOut =
-      this.state.name_type.toLowerCase() == "common name" &&
+      this.props.nameType.toLowerCase() == "common name" &&
       (!taxCommonName || taxCommonName.trim() == "");
     let taxonNameDisplay = (
       <span className={grayOut ? "count-info" : ""}>{taxonName}</span>
@@ -1453,7 +1468,7 @@ class RenderMarkup extends React.Component {
           topTaxa={parent.state.topScoringTaxa}
           sample={parent.report_details.sample_info}
           metric={parent.state.treeMetric}
-          nameType={parent.state.name_type}
+          nameType={parent.props.nameType}
           backgroundData={parent.state.backgroundData}
           onTaxonClick={parent.props.onTaxonClick}
         />
@@ -1482,7 +1497,7 @@ class RenderMarkup extends React.Component {
           </div>
           <div className="filter-lists-element">
             <NameTypeFilter
-              value={parent.state.name_type}
+              value={parent.props.nameType}
               onChange={parent.handleNameTypeChange}
             />
           </div>
@@ -1612,5 +1627,11 @@ class RenderMarkup extends React.Component {
     );
   }
 }
+
+// TODO(mark): Add other propType signatures.
+PipelineSampleReport.propTypes = {
+  nameType: PropTypes.oneOf(["Scientific name", "Common name"]),
+  onNameTypeChange: PropTypes.func.isRequired
+};
 
 export default PipelineSampleReport;
