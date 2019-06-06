@@ -53,6 +53,10 @@
         }
       }
     }
+
+    &__notifications {
+      max-height: 40px;
+    }
   }
 
   &__page-1 {
@@ -130,6 +134,25 @@
 
     &__table {
       height: 300px;
+    }
+  }
+
+  &__page-4 {
+    &__subtitle {
+      display: none;
+    }
+
+    &__table {
+      max-height: 250px;
+
+      tbody {
+        max-height: 210px;
+      }
+    }
+
+    &__notifications {
+      max-height: 40px;
+      margin-bottom: 20px;
     }
   }
 
