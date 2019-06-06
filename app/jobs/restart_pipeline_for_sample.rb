@@ -7,9 +7,7 @@ class RestartPipelineForSample
       raise Exception("Sample #{sample_id} not found")
     end
     Rails.logger.info("RestartPipelineForSample #{sample_id} is being triggered")
-    unless s.kickoff_pipeline
-      raise Exception("not restarted")
-    end
+    raise Exception("not restarted") unless s.kickoff_pipeline
     Rails.logger.info("RestartPipelineForSample #{sample_id} has started. ")
   rescue => err
     LogUtil.log_err_and_airbrake(
