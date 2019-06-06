@@ -1,5 +1,5 @@
 class PrecacheReportInfo
-  @queue = :q03_pipeline_run
+  @queue = :precache_report_info
 
   def self.perform(pipeline_run_id)
     pr = PipelineRun.find(pipeline_run_id)
