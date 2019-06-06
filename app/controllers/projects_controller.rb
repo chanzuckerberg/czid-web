@@ -68,7 +68,7 @@ class ProjectsController < ApplicationController
         samples = filter_samples(samples, params)
 
         # if we are applying any filters that constrain project's samples, we should not show projects with zero samples
-        hide_empty_projects = [:host, :location, :taxon, :time, :tissue, :visibility].any? do |key|
+        hide_empty_projects = [:host, :location, :locationV2, :taxon, :time, :tissue, :visibility].any? do |key|
           params.key? key
         end
 
@@ -156,13 +156,8 @@ class ProjectsController < ApplicationController
     projects = Project.where(id: project_ids)
     projects_count = projects.count
 
-    locations = samples_by_metadata_field(sample_ids, "collection_location")
-                .joins(:sample)
-                .distinct
-                .count(:project_id)
-    locations = locations.map do |location, count|
-      { value: location, text: location, count: count }
-    end
+    locations = LocationHelper.project_dimensions(sample_ids, "collection_location")
+    locations_v2 = LocationHelper.project_dimensions(sample_ids, "collection_location_v2")
 
     tissues = samples_by_metadata_field(sample_ids, "sample_type")
               .joins(:sample)
@@ -244,6 +239,7 @@ class ProjectsController < ApplicationController
       format.json do
         render json: [
           { dimension: "location", values: locations },
+          { dimension: "locationV2", values: locations_v2 },
           { dimension: "visibility", values: visibility },
           { dimension: "time", values: times },
           { dimension: "time_bins", values: time_bins },

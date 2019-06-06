@@ -28,18 +28,30 @@ module LocationHelper
     name.gsub(%r{[;%_^<>\/?\\]}, "")
   end
 
-  def self.dimensions(sample_ids, field_name, samples_count)
-    # See pattern in SamplesController#dimensions
+  def self.sample_dimensions(sample_ids, field_name, samples_count)
+    # See pattern in SamplesController dimensions
     locations = SamplesHelper.samples_by_metadata_field(sample_ids, field_name).count
-    locations = locations.map do |location, count|
-      loc = location.is_a?(Array) ? (location[0] || location[1]) : location
-      { value: loc, text: loc, count: count }
+    locations = locations.map do |loc, count|
+      location = loc.is_a?(Array) ? (loc[0] || loc[1]) : loc
+      { value: location, text: location, count: count }
     end
     not_set_count = samples_count - locations.sum { |l| l[:count] }
     if not_set_count > 0
       locations << { value: "not_set", text: "Unknown", count: not_set_count }
     end
     locations
+  end
+
+  def self.project_dimensions(sample_ids, field_name)
+    # See pattern in ProjectsController dimensions
+    locations = SamplesHelper.samples_by_metadata_field(sample_ids, field_name)
+                             .joins(:sample)
+                             .distinct
+                             .count(:project_id)
+    locations.map do |loc, count|
+      location = loc.is_a?(Array) ? (loc[0] || loc[1]) : loc
+      { value: location, text: location, count: count }
+    end
   end
 
   def self.filter_by_name(samples_with_metadata, query)

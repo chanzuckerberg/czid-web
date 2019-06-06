@@ -198,8 +198,8 @@ class SamplesController < ApplicationController
     sample_ids = samples.pluck(:id)
     samples_count = samples.count
 
-    locations = LocationHelper.dimensions(sample_ids, "collection_location", samples_count)
-    locations_v2 = LocationHelper.dimensions(sample_ids, "collection_location_v2", samples_count)
+    locations = LocationHelper.sample_dimensions(sample_ids, "collection_location", samples_count)
+    locations_v2 = LocationHelper.sample_dimensions(sample_ids, "collection_location_v2", samples_count)
 
     tissues = samples_by_metadata_field(sample_ids, "sample_type").count
     tissues = tissues.map do |tissue, count|
