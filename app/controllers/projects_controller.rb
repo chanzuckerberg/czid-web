@@ -159,10 +159,10 @@ class ProjectsController < ApplicationController
     locations = LocationHelper.project_dimensions(sample_ids, "collection_location")
     locations_v2 = LocationHelper.project_dimensions(sample_ids, "collection_location_v2")
 
-    tissues = samples_by_metadata_field(sample_ids, "sample_type")
-              .joins(:sample)
-              .distinct
-              .count(:project_id)
+    tissues = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type")
+                           .joins(:sample)
+                           .distinct
+                           .count(:project_id)
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
     end

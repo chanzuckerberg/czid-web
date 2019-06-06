@@ -536,7 +536,7 @@ module SamplesHelper
     end
   end
 
-  def samples_by_metadata_field(sample_ids, field_name)
+  def self.samples_by_metadata_field(sample_ids, field_name)
     # Special-case locations
     if MetadataField.find_by(name: field_name).base_type == Metadatum::LOCATION_TYPE
       include_fields = [:metadata_field, :location]
@@ -627,7 +627,4 @@ module SamplesHelper
     requested_sample_ids.class.name
     samples.where(id: requested_sample_ids.is_a?(Array) ? requested_sample_ids : JSON.parse(requested_sample_ids))
   end
-
-  # Callable without include/extend
-  module_function :samples_by_metadata_field
 end

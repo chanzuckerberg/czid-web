@@ -78,6 +78,6 @@ RSpec.describe LocationHelper, type: :helper do
   end
 
   describe "#filter_by_name" do
-    # TODO: Add tests with samples Factories or Fixtures
+    pending "add test for filtering by location names (with Factories)"
   end
 end
