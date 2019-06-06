@@ -883,7 +883,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def enqueue_new_pipeline_run
-    raise "Not implemented"
+    Resque.enqueue(RestartPipelineForSample, sample.id)
   end
 
   def job_status_display
