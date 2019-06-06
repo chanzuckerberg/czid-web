@@ -276,7 +276,7 @@ class SamplesController < ApplicationController
       format.json do
         render json: [
           { dimension: "location", values: locations },
-          { dimension: "location_v2", values: locations_v2 },
+          { dimension: "locationV2", values: locations_v2 },
           { dimension: "visibility", values: visibility },
           { dimension: "time", values: times },
           { dimension: "time_bins", values: time_bins },

@@ -183,6 +183,7 @@ module SamplesHelper
   def filter_samples(samples, params)
     host = params[:host]
     location = params[:location]
+    location_v2 = params[:locationV2]
     taxon = params[:taxon]
     time = params[:time]
     tissue = params[:tissue]
@@ -195,6 +196,7 @@ module SamplesHelper
     samples = filter_by_taxid(samples, taxon) if taxon.present?
     samples = filter_by_host(samples, host) if host.present?
     samples = filter_by_metadata_key(samples, "collection_location", location) if location.present?
+    samples = filter_by_metadata_key(samples, "collection_location_v2", location_v2) if location_v2.present?
     samples = filter_by_time(samples, Date.parse(time[0]), Date.parse(time[1])) if time.present?
     samples = filter_by_metadata_key(samples, "sample_type", tissue) if tissue.present?
     samples = filter_by_visibility(samples, visibility) if visibility.present?
@@ -578,15 +580,24 @@ module SamplesHelper
   end
 
   def filter_by_metadata_key(samples, key, query)
-    # TODO(tiago): replace 'filter_by_metadatum' once we decide to includeing not set values
-    metadata_field = Metadatum.where(key: key).first
+    # TODO(tiago): replace 'filter_by_metadatum' once we decide about including not set values
+    metadatum = Metadatum.where(key: key).first
 
     samples_with_metadata = samples
                             .includes(metadata: :metadata_field)
-                            .where(metadata: { metadata_field_id: metadata_field.metadata_field_id })
+                            .where(metadata: { metadata_field_id: metadatum.metadata_field_id })
 
-    samples_filtered = samples_with_metadata
-                       .where(metadata: { metadata_field.validated_field => query })
+    samples_filtered = if metadatum.metadata_field.base_type == Metadatum::LOCATION_TYPE
+                         samples_with_metadata
+                           .includes(metadata: :location)
+                           .where(metadata: { string_validated_value: query })
+                           .or(samples_with_metadata
+                                                        .includes(metadata: :location)
+                                                        .where(metadata: { locations: { name: query } }))
+                       else
+                         samples_with_metadata
+                           .where(metadata: { metadatum.validated_field => query })
+                       end
 
     not_set_ids = []
     if query.include?("not_set")

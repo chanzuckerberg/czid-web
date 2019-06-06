@@ -43,6 +43,8 @@ const getDiscoveryDimensions = async ({
       getProjectDimensions({ domain, filters, projectId, search })
     ];
     const [sampleDimensions, projectDimensions] = await Promise.all(actions);
+    console.log("sample dims: ", sampleDimensions);
+    console.log("project dims: ", projectDimensions);
     return { sampleDimensions, projectDimensions };
   } catch (error) {
     // eslint-disable-next-line no-console

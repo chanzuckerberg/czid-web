@@ -43,6 +43,7 @@ class DiscoveryFilters extends React.Component {
       [
         "hostSelected",
         "locationSelected",
+        "locationV2Selected",
         "taxonSelected",
         "timeSelected",
         "tissueSelected",
@@ -59,6 +60,7 @@ class DiscoveryFilters extends React.Component {
       [
         "hostSelected",
         "locationSelected",
+        "locationV2Selected",
         "taxonSelected",
         "timeSelected",
         "tissueSelected",
@@ -177,7 +179,7 @@ class DiscoveryFilters extends React.Component {
               options={locationV2}
               label="Location v2"
             />
-            {/*{this.renderTags("location")}*/}
+            {this.renderTags("locationV2")}
           </div>
         )}
         <div className={cs.filterContainer}>
