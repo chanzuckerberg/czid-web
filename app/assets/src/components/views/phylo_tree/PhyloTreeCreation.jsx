@@ -359,6 +359,7 @@ class PhyloTreeCreation extends React.Component {
   }
 
   getNumberOfSamplesWithFewReads() {
+    // Counts total number of selected samples with few reads in EITHER NT or NR
     const {
       otherSamples,
       projectSamples,
@@ -374,11 +375,11 @@ class PhyloTreeCreation extends React.Component {
       getReadsArray(projectSamples, selectedProjectSamples, "nr")
     );
 
-    const ptherSamplesWithFewReads = PhyloTreeChecks.countSamplesWithFewReads(
+    const otherSamplesWithFewReads = PhyloTreeChecks.countSamplesWithFewReads(
       getReadsArray(otherSamples, selectedOtherSamples, "nt"),
       getReadsArray(otherSamples, selectedOtherSamples, "nr")
     );
-    return projectSamplesWithFewReads + ptherSamplesWithFewReads;
+    return projectSamplesWithFewReads + otherSamplesWithFewReads;
   }
 
   canContinueWithTaxonAndProject() {

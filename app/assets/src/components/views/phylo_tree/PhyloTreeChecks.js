@@ -22,6 +22,7 @@ class PhyloTreeChecks {
     );
   }
 
+  // Counts number of samples with few reads in EITHER of the arrays
   static countSamplesWithFewReads(ntReadsArray, nrReadsArray) {
     return filter(
       nReads => PhyloTreeChecks.hasSamplesWithFewReads(nReads),
