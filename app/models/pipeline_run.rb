@@ -864,10 +864,14 @@ class PipelineRun < ApplicationRecord
   end
 
   protected def report_failed_pipeline_run_stage(prs)
-    message = "SampleFailedEvent: Sample #{sample.id} by #{sample.user.admin? ? 'admin user' : 'non-admin user'} " \
-              "failed #{prs.name} with #{adjusted_remaining_reads || 0} reads remaining after #{duration_hrs} hours. " \
-              "See: #{status_url}"
-    LogUtil.log_err_and_airbrake(message)
+    reads_remaining_text = (adjusted_remaining_reads ? "with #{adjusted_remaining_reads} reads remaining " : "")
+    log_message = "SampleFailedEvent: Sample #{sample.id} " \
+                  "by #{sample.user.role_name} " \
+                  "failed #{prs.name} " \
+                  "#{reads_remaining_text}" \
+                  "after #{duration_hrs} hours. " \
+                  "See: #{status_url}"
+    LogUtil.log_err_and_airbrake(log_message)
   end
 
   def automatic_restart_allowed?

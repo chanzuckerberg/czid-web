@@ -459,6 +459,10 @@ class Sample < ApplicationRecord
     where("project_id in (?)", project_ids)
   end
 
+  def role_name
+    user.admin? ? 'admin user' : 'non-admin user'
+  end
+
   def deletable?(user)
     if user.admin?
       true

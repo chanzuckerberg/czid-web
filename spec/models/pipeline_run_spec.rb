@@ -104,20 +104,22 @@ describe PipelineRun, type: :model do
     context "when user is not an admin" do
       let(:user) { build_stubbed(:user) }
 
-      context "and sample has no previous pipeline runs with same version" do
+      context "and sample has no previous pipeline runs with the same pipeline version" do
         it { is_expected.to be_truthy }
       end
 
-      context "and sample has previous pipeline runs same version but no failures" do
-        let(:list_of_previous_pipeline_runs_same_version) { [build_stubbed(:pipeline_run)] }
+      context "and sample has previous pipeline runs with the same pipeline version" do
+        context "and they all succeeded" do
+          let(:list_of_previous_pipeline_runs_same_version) { [build_stubbed(:pipeline_run)] }
 
-        it { is_expected.to be_truthy }
-      end
+          it { is_expected.to be_truthy }
+        end
 
-      context "and sample has previous pipeline runs same version and any previous failure" do
-        let(:list_of_previous_pipeline_runs_same_version) { [build_stubbed(:pipeline_run, job_status: 'FAILED')] }
+        context "and at least one of them failed" do
+          let(:list_of_previous_pipeline_runs_same_version) { [build_stubbed(:pipeline_run, job_status: 'FAILED')] }
 
-        it { is_expected.to be_falsy }
+          it { is_expected.to be_falsy }
+        end
       end
     end
   end
