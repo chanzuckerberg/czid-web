@@ -903,6 +903,7 @@ class DiscoveryView extends React.Component {
                       ref={samplesView => (this.samplesView = samplesView)}
                       samples={samples}
                       selectableIds={sampleIds}
+                      admin={this.props.admin}
                     />
                   </div>
                   {!samples.length &&
@@ -945,7 +946,8 @@ DiscoveryView.propTypes = {
   ]).isRequired,
   projectId: PropTypes.number,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
-  mapTilerKey: PropTypes.string
+  mapTilerKey: PropTypes.string,
+  admin: PropTypes.bool
 };
 
 export default DiscoveryView;

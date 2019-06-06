@@ -2,6 +2,7 @@
 import axios from "axios";
 import { openUrl } from "~utils/links";
 import Cookies from "js-cookie";
+import Nanobar from "nanobar";
 
 export default class ReportsDownloader {
   constructor({
@@ -10,6 +11,11 @@ export default class ReportsDownloader {
     downloadOption,
     selectedSampleIds
   }) {
+    this.nanobar = new Nanobar({
+      id: "prog-bar",
+      class: "prog-bar"
+    });
+
     this.projectId = projectId || "all";
     this.selectedSampleIds = Array.from(selectedSampleIds);
     this.onDownloadFail = onDownloadFail;
@@ -25,6 +31,7 @@ export default class ReportsDownloader {
         let downloadStatus = result.data.status_display;
         if (downloadStatus === "complete") {
           openUrl(`/projects/${this.projectId}/${retrieveAction}`);
+          this.nanobar.go(100);
         } else {
           this.scheduleCheckReportDownload({
             result,
@@ -39,6 +46,7 @@ export default class ReportsDownloader {
           console.error("ReportsDownloader - Failed report download");
           this.onDownloadFail &&
             this.onDownloadFail({ projectId: this.projectId });
+          this.nanobar.go(100);
         };
       });
   };
@@ -50,6 +58,7 @@ export default class ReportsDownloader {
   }
 
   generateReport = ({ makeAction, statusAction, retrieveAction }) => {
+    this.nanobar.go(30);
     // TODO(tiago): stop using cookies
     const backgroundId = Cookies.get("background_id");
     let queryString = [];
