@@ -539,16 +539,16 @@ module SamplesHelper
   def samples_by_metadata_field(sample_ids, field_name)
     # Special-case locations
     if MetadataField.find_by(name: field_name).base_type == Metadatum::LOCATION_TYPE
-      join_fields = [:metadata_field, :location]
+      include_fields = [:metadata_field, :location]
       # Plain-text locations in string_validated_value
       group_fields = [:string_validated_value, "locations.name"]
     else
-      join_fields = :metadata_field
+      include_fields = :metadata_field
       group_fields = Metadatum.where(key: field_name).first.validated_field
     end
 
     Metadatum
-      .joins([join_fields])
+      .includes(include_fields)
       .where(
         metadata_fields: { name: field_name },
         sample_id: sample_ids

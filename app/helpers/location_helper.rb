@@ -55,7 +55,7 @@ module LocationHelper
   def self.project_dimensions(sample_ids, field_name)
     # See pattern in ProjectsController dimensions
     locations = SamplesHelper.samples_by_metadata_field(sample_ids, field_name)
-                             .joins(:sample)
+                             .includes(:sample)
                              .distinct
                              .count(:project_id)
     locations.map do |loc, count|

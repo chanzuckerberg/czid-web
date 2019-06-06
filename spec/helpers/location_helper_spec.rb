@@ -49,7 +49,7 @@ RSpec.describe LocationHelper, type: :helper do
     it "gets and formats project location dimensions" do
       field_name = "collection_location_v2"
       mock_filtered = { [nil, "Alaska, USA"] => 1, [nil, "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece"] => 1, [nil, "Hanoi, Vietnam"] => 1, [nil, "Redwood City, San Mateo County, California, USA"] => 1, [nil, "Zimbabwe"] => 1 }
-      allow(SamplesHelper).to receive_message_chain(:samples_by_metadata_field, :joins, :distinct, :count).and_return(mock_filtered)
+      allow(SamplesHelper).to receive_message_chain(:samples_by_metadata_field, :includes, :distinct, :count).and_return(mock_filtered)
 
       expected = [{ value: "Alaska, USA", text: "Alaska, USA", count: 1 },
                   { value: "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", text: "Chania, Chania Municipality, Chania Regional ...", count: 1 },
