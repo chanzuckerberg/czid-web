@@ -47,6 +47,10 @@ class User < ApplicationRecord
     admin
   end
 
+  def role_name
+    admin? ? 'admin user' : 'non-admin user'
+  end
+
   def allowed_feature_list
     JSON.parse(allowed_features || "[]")
   end
