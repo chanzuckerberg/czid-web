@@ -124,4 +124,20 @@ describe PipelineRun, type: :model do
       end
     end
   end
+
+  context "#report_failed_pipeline_run_stage" do
+    let(:user) { build_stubbed(:admin) }
+    let(:sample) { build_stubbed(:sample, user: user, id: 123) }
+    let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample) }
+    let(:pipeline_run_stage) { build_stubbed(:pipeline_run_stage_1_host_filtering) }
+
+    before { allow(LogUtil).to receive(:log_err_and_airbrake) }
+
+    it "sends error to airbrake" do
+      pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage)
+
+      expect(LogUtil).to have_received(:log_err_and_airbrake)
+        .with('SampleFailedEvent: Sample 123 by admin user failed Host Filtering after 0.0 hours. See: https://idseq.net/samples/123/pipeline_runs')
+    end
+  end
 end
