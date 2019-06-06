@@ -144,7 +144,7 @@ services:
       <<: *web-variables
       <<: *aws-variables
       <<: *travis-variables
-    command: bundle exec "QUEUE=* COUNT=5 rake resque:workers"
+    command: bundle exec "QUEUE=q03_pipeline_run,precache_report_info,* COUNT=5 rake resque:workers"
   resque_result_monitor:
     image: chanzuckerberg/idseq-web:compose
     volumes:
