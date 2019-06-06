@@ -588,12 +588,7 @@ module SamplesHelper
                             .where(metadata: { metadata_field_id: metadatum.metadata_field_id })
 
     samples_filtered = if metadatum.metadata_field.base_type == Metadatum::LOCATION_TYPE
-                         samples_with_metadata
-                           .includes(metadata: :location)
-                           .where(metadata: { string_validated_value: query })
-                           .or(samples_with_metadata
-                                                        .includes(metadata: :location)
-                                                        .where(metadata: { locations: { name: query } }))
+                         LocationHelper.filter_by_name(samples_with_metadata, query)
                        else
                          samples_with_metadata
                            .where(metadata: { metadatum.validated_field => query })

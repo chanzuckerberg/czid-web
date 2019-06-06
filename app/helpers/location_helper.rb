@@ -41,4 +41,11 @@ module LocationHelper
     end
     locations
   end
+
+  def self.filter_by_name(samples_with_metadata, query)
+    samples = samples_with_metadata.includes(metadata: :location)
+    # Plain text locations in string_validated_value
+    samples.where(metadata: { string_validated_value: query })
+           .or(samples.where(metadata: { locations: { name: query } }))
+  end
 end
