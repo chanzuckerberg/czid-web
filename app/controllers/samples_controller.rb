@@ -1,11 +1,12 @@
 class SamplesController < ApplicationController
   include ApplicationHelper
+  include ElasticsearchHelper
+  include ErrorHelper
+  include HeatmapHelper
+  include LocationHelper
+  include PipelineOutputsHelper
   include ReportHelper
   include SamplesHelper
-  include PipelineOutputsHelper
-  include ElasticsearchHelper
-  include HeatmapHelper
-  include ErrorHelper
 
   ########################################
   # Note to developers:
@@ -197,16 +198,10 @@ class SamplesController < ApplicationController
     sample_ids = samples.pluck(:id)
     samples_count = samples.count
 
-    locations = samples_by_metadata_field(sample_ids, "collection_location").count
-    locations = locations.map do |location, count|
-      { value: location, text: location, count: count }
-    end
-    not_set_count = samples_count - locations.sum { |l| l[:count] }
-    if not_set_count > 0
-      locations << { value: "not_set", text: "Unknown", count: not_set_count }
-    end
+    locations = LocationHelper.sample_dimensions(sample_ids, "collection_location", samples_count)
+    locations_v2 = LocationHelper.sample_dimensions(sample_ids, "collection_location_v2", samples_count)
 
-    tissues = samples_by_metadata_field(sample_ids, "sample_type").count
+    tissues = SamplesHelper.samples_by_metadata_field(sample_ids, "sample_type").count
     tissues = tissues.map do |tissue, count|
       { value: tissue, text: tissue, count: count }
     end
@@ -281,6 +276,7 @@ class SamplesController < ApplicationController
       format.json do
         render json: [
           { dimension: "location", values: locations },
+          { dimension: "locationV2", values: locations_v2 },
           { dimension: "visibility", values: visibility },
           { dimension: "time", values: times },
           { dimension: "time_bins", values: time_bins },

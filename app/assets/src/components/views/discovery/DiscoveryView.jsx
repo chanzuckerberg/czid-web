@@ -863,6 +863,7 @@ class DiscoveryView extends React.Component {
                   {...filters}
                   domain={domain}
                   onFilterChange={this.handleFilterChange}
+                  allowedFeatures={allowedFeatures}
                 />
               )}
           </div>

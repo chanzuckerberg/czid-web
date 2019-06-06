@@ -25,6 +25,8 @@ class SamplesView extends React.Component {
   constructor(props) {
     super(props);
 
+    const { allowedFeatures } = this.props;
+
     this.state = {
       phyloTreeCreationModalOpen: false,
       selectedSampleIds: new Set()
@@ -129,6 +131,16 @@ class SamplesView extends React.Component {
           TableRenderers.formatDuration(rowData[dataKey])
       }
     ];
+
+    // TODO(jsheu): Upon release, replace Location 'v1'
+    if (allowedFeatures.includes("maps")) {
+      this.columns.push({
+        dataKey: "collectionLocationV2",
+        label: "Location v2",
+        flexGrow: 1,
+        className: cs.basicCell
+      });
+    }
   }
 
   handleSelectRow = (value, checked) => {
@@ -459,7 +471,7 @@ SamplesView.propTypes = {
   currentDisplay: PropTypes.string.isRequired,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedSamples: PropTypes.array,
-  mapSidebarSelectedSampleIds: PropTypes.set,
+  mapSidebarSelectedSampleIds: PropTypes.instanceOf(Set),
   mapTilerKey: PropTypes.string,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,

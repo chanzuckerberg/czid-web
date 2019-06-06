@@ -38,8 +38,9 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell
       },
+      // If you already have access to Maps, just see Location V2 here.
       {
-        dataKey: "collectionLocation",
+        dataKey: "collectionLocationV2",
         label: "Location",
         flexGrow: 1,
         className: cs.basicCell
