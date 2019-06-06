@@ -73,7 +73,8 @@ class HoverActions extends React.Component {
             params: {
               taxId: this.props.taxId,
               taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
-              taxName: this.props.taxName
+              taxName: this.props.taxName,
+              taxCommonName: this.props.taxCommonName
             }
           }
         : {
@@ -191,6 +192,7 @@ HoverActions.propTypes = {
   taxId: PropTypes.number,
   taxLevel: PropTypes.number,
   taxName: PropTypes.string,
+  taxCommonName: PropTypes.string,
   ncbiEnabled: PropTypes.bool,
   onNcbiActionClick: PropTypes.func.isRequired,
   fastaEnabled: PropTypes.bool,
