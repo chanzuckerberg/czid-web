@@ -23,12 +23,7 @@ class Notification extends React.Component {
     const { children, className, displayStyle, onClose, type } = this.props;
     return (
       <div
-        className={cx(
-          className,
-          cs.notification,
-          cs[type],
-          displayStyle && cs.flat
-        )}
+        className={cx(className, cs.notification, cs[type], cs[displayStyle])}
       >
         <div className={cs.icon}>{this.getIcon(type)}</div>
         <div className={cs.content}>
