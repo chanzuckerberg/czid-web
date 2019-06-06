@@ -876,14 +876,13 @@ class PipelineRun < ApplicationRecord
 
   def automatic_restart_allowed?
     return false if sample.user.admin?
-    previous_pipeline_runs_same_version.none?(&:failed?)
+    previous_pipeline_runs_same_version.to_a.none?(&:failed?)
   end
 
   def previous_pipeline_runs_same_version
     sample.pipeline_runs
           .where.not(id: id)
           .where(pipeline_version: pipeline_version)
-          .to_a
   end
 
   def enqueue_new_pipeline_run

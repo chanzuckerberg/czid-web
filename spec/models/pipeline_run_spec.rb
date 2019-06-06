@@ -92,7 +92,8 @@ describe PipelineRun, type: :model do
     let(:sample) { build_stubbed(:sample, user: user) }
     let(:pipeline_run) { build_stubbed(:pipeline_run, pipeline_version: "3.7", sample: sample) }
     let(:list_of_previous_pipeline_runs_same_version) { [] }
-    before { allow(pipeline_run).to receive(:previous_pipeline_runs_same_version).and_return(list_of_previous_pipeline_runs_same_version) }
+    let(:previous_pipeline_runs_same_version_relation) { instance_double("PipelineRun::ActiveRecord_Relation", to_a: list_of_previous_pipeline_runs_same_version) }
+    before { allow(pipeline_run).to receive(:previous_pipeline_runs_same_version).and_return(previous_pipeline_runs_same_version_relation) }
 
     subject { pipeline_run.automatic_restart_allowed? }
 
