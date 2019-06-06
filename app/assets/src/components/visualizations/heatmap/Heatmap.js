@@ -516,11 +516,15 @@ export default class Heatmap {
   }
 
   download(filename) {
+    this.svg.classed(cs.printMode, true);
     this.svgSaver.asSvg(this.svg.node(), filename || "heatmap.svg");
+    this.svg.classed(cs.printMode, false);
   }
 
   downloadAsPng(filename) {
+    this.svg.classed(cs.printMode, true);
     this.svgSaver.asPng(this.svg.node(), filename || "heatmap.png");
+    this.svg.classed(cs.printMode, false);
   }
 
   removeRow = row => {
@@ -964,6 +968,13 @@ export default class Heatmap {
 
   renderColumnMetadataAddLink() {
     if (this.options.onAddColumnMetadataClick) {
+      const handleAddColumnMetadataClick = () => {
+        this.options.onAddColumnMetadataClick(addMetadataTrigger.node(), {
+          x: this.rowLabelsWidth - 10,
+          y: yPos
+        });
+      };
+
       let addLink = this.gColumnMetadata
         .selectAll(`.${cs.columnMetadataAdd}`)
         .data([1]);
@@ -979,15 +990,18 @@ export default class Heatmap {
 
       addLinkEnter.append("line").attr("class", cs.metadataAddLine);
 
+      addLinkEnter
+        .append("text")
+        .text(() => "Add Metadata")
+        .attr("class", cs.metadataAddLabel)
+        .attr("x", this.rowLabelsWidth - 20)
+        .attr("y", 9)
+        .on("click", handleAddColumnMetadataClick);
+
       let addMetadataTrigger = addLinkEnter
         .append("g")
         .attr("class", cs.metadataAddTrigger)
-        .on("click", () => {
-          this.options.onAddColumnMetadataClick(addMetadataTrigger.node(), {
-            x: this.rowLabelsWidth - 10,
-            y: yPos
-          });
-        });
+        .on("click", handleAddColumnMetadataClick);
 
       addMetadataTrigger
         .append("svg:image")
@@ -996,7 +1010,7 @@ export default class Heatmap {
         .attr("height", 10)
         .attr("x", this.rowLabelsWidth - 15)
         .attr("y", yPos - 5)
-        .attr("xlink:href", `${this.options.iconPath}/edit.svg`);
+        .attr("xlink:href", `${this.options.iconPath}/plus.svg`);
 
       // setup triggers
       if (addMetadataTrigger.size())
