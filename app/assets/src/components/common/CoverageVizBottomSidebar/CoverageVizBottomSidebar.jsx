@@ -2,9 +2,10 @@ import React from "react";
 import { find, get } from "lodash/fp";
 import cx from "classnames";
 import ReactDOM from "react-dom";
-import { logAnalyticsEvent } from "~/api/analytics";
 
+import { logAnalyticsEvent } from "~/api/analytics";
 import { formatPercent } from "~/components/utils/format";
+import { getTaxonName } from "~/helpers/taxon";
 import Sidebar from "~ui/containers/Sidebar";
 import HelpIcon from "~ui/containers/HelpIcon";
 import PropTypes from "~/components/utils/propTypes";
@@ -241,6 +242,13 @@ export default class CoverageVizBottomSidebar extends React.Component {
     this.refAccesssionViz.update();
   };
 
+  getAccessionTaxonName = accessionSummary =>
+    getTaxonName(
+      accessionSummary.taxon_name,
+      accessionSummary.taxon_common_name,
+      this.props.nameType
+    );
+
   getAccessionOptions = () => {
     const { params } = this.props;
     return getSortedAccessionSummaries(params.accessionData).map(summary => ({
@@ -254,6 +262,9 @@ export default class CoverageVizBottomSidebar extends React.Component {
           <div className={cs.optionSubtext}>
             {summary.num_contigs} contigs, {summary.num_reads} reads,{" "}
             {summary.coverage_depth}x coverage
+            {params.taxonLevel === "genus" ? (
+              <span> - {this.getAccessionTaxonName(summary)}</span>
+            ) : null}
           </div>
         </div>
       )
@@ -316,6 +327,40 @@ export default class CoverageVizBottomSidebar extends React.Component {
     };
   };
 
+  renderTaxonLabel = () => {
+    const { params } = this.props;
+    const { currentAccessionSummary } = this.state;
+
+    const taxonName = getTaxonName(
+      params.taxonName,
+      params.taxonCommonName,
+      this.props.nameType
+    );
+
+    if (params.taxonLevel === "genus" && currentAccessionSummary) {
+      const speciesTaxonName = this.getAccessionTaxonName(
+        currentAccessionSummary
+      );
+      const helpText =
+        currentAccessionSummary &&
+        `
+        The accession being displayed belongs to the species ${speciesTaxonName}, a member of genus ${taxonName}
+      `;
+      return (
+        <div className={cs.taxonLabel}>
+          {taxonName} Coverage
+          <span>
+            {" "}
+            - {speciesTaxonName}
+            <HelpIcon text={helpText} className={cs.helpIcon} />
+          </span>
+        </div>
+      );
+    } else {
+      return <div className={cs.taxonLabel}>{taxonName} Coverage</div>;
+    }
+  };
+
   renderContentHeader = () => {
     const { params, sampleId } = this.props;
     const { currentAccessionSummary } = this.state;
@@ -335,7 +380,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
     return (
       <div className={cs.header}>
         <div className={cs.headerText}>
-          <div className={cs.taxonLabel}>{params.taxonName} Coverage</div>
+          {this.renderTaxonLabel()}
           <BareDropdown
             options={this.getAccessionOptions()}
             value={get("id", currentAccessionSummary)}
@@ -514,17 +559,15 @@ export default class CoverageVizBottomSidebar extends React.Component {
     return (
       <NarrowContainer className={cs.contents}>
         <div className={cs.header}>
-          <div className={cs.headerText}>
-            <div className={cs.taxonLabel}>{params.taxonName} Coverage</div>
-          </div>
+          <div className={cs.headerText}>{this.renderTaxonLabel()}</div>
           <div className={cs.fill} />
         </div>
         <div className={cs.noDataBody}>
           <div className={cs.noDataContainer}>
             <div className={cs.text}>
               <div className={cs.message}>
-                Sorry, the coverage visualization is currently available for
-                species level taxons with at least one assembled contig in NT.
+                Sorry, the coverage visualization is only available for taxons
+                with at least one assembled contig in NT.
               </div>
               <a
                 className={cs.vizLink}
@@ -577,6 +620,8 @@ CoverageVizBottomSidebar.propTypes = {
   params: PropTypes.shape({
     taxonId: PropTypes.number,
     taxonName: PropTypes.string,
+    taxonCommonName: PropTypes.string,
+    taxonLevel: PropTypes.string,
     accessionData: PropTypes.shape({
       best_accessions: PropTypes.arrayOf(
         PropTypes.shape({
@@ -585,7 +630,9 @@ CoverageVizBottomSidebar.propTypes = {
           num_reads: PropTypes.number,
           name: PropTypes.string,
           score: PropTypes.number,
-          coverage_depth: PropTypes.number
+          coverage_depth: PropTypes.number,
+          taxon_name: PropTypes.string,
+          taxon_common_name: PropTypes.string
         })
       ),
       num_accessions: PropTypes.number
@@ -594,5 +641,6 @@ CoverageVizBottomSidebar.propTypes = {
     alignmentVizUrl: PropTypes.string
   }),
   sampleId: PropTypes.number,
-  pipelineVersion: PropTypes.string
+  pipelineVersion: PropTypes.string,
+  nameType: PropTypes.string
 };

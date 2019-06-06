@@ -145,7 +145,11 @@ class TaxonTreeVis extends React.Component {
     }
 
     const { taxInfo } = node.data.modalData;
-    const taxonName = getTaxonName(taxInfo, this.props.nameType);
+    const taxonName = getTaxonName(
+      taxInfo["name"],
+      taxInfo["common_name"],
+      this.props.nameType
+    );
     // Pass config for taxon details sidebar.
     this.props.onTaxonClick({
       background: this.props.backgroundData,
