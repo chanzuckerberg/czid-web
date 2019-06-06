@@ -8,13 +8,12 @@ import Moment from "react-moment";
 import PhyloTreeChecks from "./PhyloTreeChecks";
 import SearchBox from "../../ui/controls/SearchBox";
 import LoadingIcon from "../../ui/icons/LoadingIcon";
+import Notification from "~ui/notifications/Notification";
+import { zip } from "lodash/fp";
 
 class PhyloTreeCreation extends React.Component {
   constructor(props) {
     super(props);
-
-    this.minNumberOfSamples = 2;
-    this.maxNumberOfSamples = 100;
 
     this.state = {
       defaultPage: 0,
@@ -250,6 +249,10 @@ class PhyloTreeCreation extends React.Component {
           reads: `${(row.taxid_reads || {}).NT} | ${
             (row.taxid_reads || {}).NR
           }`,
+          rawReads: {
+            nt: (row.taxid_reads || {}).NT || 0,
+            nr: (row.taxid_reads || {}).NR || 0
+          },
           pipelineRunId: row.pipeline_run_id
         };
         if (row.project_id === this.state.projectId) {
@@ -353,9 +356,30 @@ class PhyloTreeCreation extends React.Component {
     let nSamples =
       this.state.selectedProjectSamples.size +
       this.state.selectedOtherSamples.size;
-    return (
-      nSamples >= this.minNumberOfSamples && nSamples <= this.maxNumberOfSamples
+    return PhyloTreeChecks.isNumberOfSamplesValid(nSamples);
+  }
+
+  getNumberOfSamplesWithFewReads() {
+    const {
+      otherSamples,
+      projectSamples,
+      selectedProjectSamples,
+      selectedOtherSamples
+    } = this.state;
+
+    const getReadsArray = (samples, indices, readType) =>
+      [...indices].map(i => samples[i].rawReads[readType]);
+
+    const projectSamplesWithFewReads = PhyloTreeChecks.countSamplesWithFewReads(
+      getReadsArray(projectSamples, selectedProjectSamples, "nt"),
+      getReadsArray(projectSamples, selectedProjectSamples, "nr")
     );
+
+    const ptherSamplesWithFewReads = PhyloTreeChecks.countSamplesWithFewReads(
+      getReadsArray(otherSamples, selectedOtherSamples, "nt"),
+      getReadsArray(otherSamples, selectedOtherSamples, "nr")
+    );
+    return projectSamplesWithFewReads + ptherSamplesWithFewReads;
   }
 
   canContinueWithTaxonAndProject() {
@@ -379,15 +403,35 @@ class PhyloTreeCreation extends React.Component {
     let totalSelectedSamples =
       this.state.selectedProjectSamples.size +
       this.state.selectedOtherSamples.size;
-    if (this.state.showErrorSamples && !this.isNumberOfSamplesValid()) {
-      return (
-        <span className="wizard__error">
-          {totalSelectedSamples} Total Samples (must be between{" "}
-          {this.minNumberOfSamples} and {this.maxNumberOfSamples})
-        </span>
-      );
-    }
     return `${totalSelectedSamples} Total Samples`;
+  }
+
+  renderNotifications() {
+    const { showErrorSamples } = this.state;
+
+    if (showErrorSamples && !this.isNumberOfSamplesValid()) {
+      return (
+        <Notification type="error" displayStyle="flat">
+          Phylogenetic Tree creation must have between{" "}
+          {PhyloTreeChecks.MIN_READS} and {PhyloTreeChecks.MAX_READS} reads.
+        </Notification>
+      );
+    } else {
+      const samplesWithFewReads = this.getNumberOfSamplesWithFewReads();
+      if (samplesWithFewReads > 0) {
+        return (
+          <Notification type="warn" displayStyle="flat">
+            You have {samplesWithFewReads} sample{samplesWithFewReads > 1
+              ? "s"
+              : ""}{" "}
+            that ha{samplesWithFewReads > 1 ? "ve" : "s"} too few reads (NT or
+            NR under {PhyloTreeChecks.RECOMMENDED_MIN_READS}). Tree creation
+            might fail or produce poor results.
+          </Notification>
+        );
+      }
+    }
+    return null;
   }
 
   page(action) {
@@ -480,9 +524,9 @@ class PhyloTreeCreation extends React.Component {
       selectNameAndProjectSamples: (
         <Wizard.Page
           key="wizard__page_3"
-          title={`Name phylogenetic tree and select samples from project ${
+          title={`Name phylogenetic tree and select samples from project '${
             this.state.projectName
-          }`}
+          }'`}
           onLoad={this.loadNewTreeContext}
           onContinue={this.canContinueWithTreeName}
         >
@@ -571,6 +615,9 @@ class PhyloTreeCreation extends React.Component {
             ) : (
               <LoadingIcon />
             )}
+          </div>
+          <div className="wizard__page-4__notifications">
+            {this.renderNotifications()}
           </div>
         </Wizard.Page>
       )

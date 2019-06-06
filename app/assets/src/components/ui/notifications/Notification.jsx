@@ -20,19 +20,21 @@ class Notification extends React.Component {
   }
 
   render() {
+    const { children, className, displayStyle, onClose, type } = this.props;
     return (
       <div
         className={cx(
-          this.props.className,
+          className,
           cs.notification,
-          cs[this.props.type]
+          cs[type],
+          displayStyle && cs.flat
         )}
       >
-        <div className={cs.icon}>{this.getIcon(this.props.type)}</div>
+        <div className={cs.icon}>{this.getIcon(type)}</div>
         <div className={cs.content}>
-          <div>{this.props.children}</div>
-          {this.props.onClose && (
-            <div className={cs.actions} onClick={this.props.onClose}>
+          <div>{children}</div>
+          {onClose && (
+            <div className={cs.actions} onClick={onClose}>
               Dismiss
             </div>
           )}
@@ -43,12 +45,14 @@ class Notification extends React.Component {
 }
 
 Notification.defaultProps = {
+  displayStyle: "elevated",
   type: "info"
 };
 
 Notification.propTypes = {
   className: PropTypes.string,
   children: PropTypes.node,
+  displayStyle: PropTypes.oneOf(["flat", "elevated"]),
   onClose: PropTypes.func,
   type: PropTypes.oneOf(["success", "info", "warn", "error"])
 };
