@@ -88,6 +88,8 @@ services:
     volumes:
       - ./redis-data:/var/lib/redis/data
   webtest:
+    # "webtest" service configuration is meant to be used only in the CI environment.
+    # To run unit tests locally, use "web" service configuration instead.
     image: chanzuckerberg/idseq-web:compose
     volumes:
       - ~/.aws:/root/.aws:ro
@@ -144,7 +146,7 @@ services:
       <<: *web-variables
       <<: *aws-variables
       <<: *travis-variables
-    command: bundle exec "QUEUE=* COUNT=5 rake resque:workers"
+    command: bundle exec "QUEUE=q03_pipeline_run,precache_report_info,* COUNT=5 rake resque:workers"
   resque_result_monitor:
     image: chanzuckerberg/idseq-web:compose
     volumes:

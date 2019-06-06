@@ -101,7 +101,7 @@ const processRawSample = sample => {
         sample.details
       )
     },
-    notes: sample.sample_notes,
+    notes: get("db_sample.sample_notes", sample.details),
     nucleotideType: get("metadata.nucleotide_type", sample.details),
     qcPercent: get(
       "derived_sample_output.summary_stats.qc_percent",

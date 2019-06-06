@@ -5,8 +5,8 @@ import MapGL, { NavigationControl } from "react-map-gl";
 import { limitToRange } from "~/components/utils/format";
 import cs from "./base_map.scss";
 
-// MapTiler map name: "2019-04-24"
-export const MAP_STYLE_ID = "f0e7922a-43cf-4dc5-b598-17ae1f56d2f4";
+// MapTiler map name: "2019-06-04"
+export const MAP_STYLE_ID = "e65c2178-ffbd-4e9a-bbeb-1250a61bd01b";
 
 class BaseMap extends React.Component {
   constructor(props) {

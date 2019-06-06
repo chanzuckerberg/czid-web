@@ -111,15 +111,16 @@
 
       .sampleStatus {
         align-self: center;
-        background-color: $light-grey;
+        background-color: $lightest-grey;
         border-radius: 13px;
         color: $medium-grey;
         flex: 0 0 auto;
         font-size: 9px;
         line-height: 1;
-        margin-left: 10px;
-        padding: 2px 4px;
+        margin-left: 6px;
+        padding: 3px 5px;
         text-transform: uppercase;
+        letter-spacing: 0.8px;
 
         &.success {
           background-color: $success-bg;
@@ -152,6 +153,64 @@
       span:not(:last-child) {
         margin-right: 10px;
       }
+    }
+  }
+}
+
+.loading {
+  .numberValueAndPercentage {
+    .value {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 16px;
+      padding: 2px 15%;
+    }
+
+    .percentage {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 15px;
+      padding: 2px 20%;
+    }
+  }
+
+  .publicAccess {
+    @include loadingAnimation;
+
+    height: 36px;
+    width: 36px;
+  }
+
+  .sampleRightPane {
+    .sampleNameAndStatus {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 20px;
+      width: 365px;
+    }
+
+    .sampleDetails {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 17px;
+      width: 315px;
+    }
+  }
+
+  .dateContainer {
+    .elapsed {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      height: 12px;
+      margin-left: 20%;
+      margin-right: 20%;
     }
   }
 }

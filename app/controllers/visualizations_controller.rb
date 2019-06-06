@@ -172,13 +172,21 @@ class VisualizationsController < ApplicationController
   end
 
   def download_heatmap
-    @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(params, samples_for_heatmap)
+    @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(
+      params,
+      samples_for_heatmap,
+      background_for_heatmap
+    )
     output_csv = generate_heatmap_csv(@sample_taxons_dict)
     send_data output_csv, filename: 'heatmap.csv'
   end
 
   def samples_taxons
-    @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(params, samples_for_heatmap)
+    @sample_taxons_dict = HeatmapHelper.sample_taxons_dict(
+      params,
+      samples_for_heatmap,
+      background_for_heatmap
+    )
     render json: @sample_taxons_dict
   end
 
@@ -194,6 +202,14 @@ class VisualizationsController < ApplicationController
     current_power.samples
                  .where(id: sample_ids)
                  .includes([:host_genome, :pipeline_runs, metadata: [:metadata_field]])
+  end
+
+  def background_for_heatmap
+    background_id = params["background"].to_i
+    viewable_background_ids = current_power.backgrounds.pluck(:id)
+    if viewable_background_ids.include?(background_id)
+      return background_id
+    end
   end
 
   # The most recent update time of any samples pipeline run.
