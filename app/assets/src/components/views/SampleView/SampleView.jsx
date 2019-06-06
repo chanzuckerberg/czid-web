@@ -236,7 +236,10 @@ class SampleView extends React.Component {
   };
 
   pipelineInProgress = () => {
-    if (this.props.pipelineRun && this.props.pipelineRun.finalized === 1) {
+    if (
+      this.props.pipelineRun &&
+      this.props.pipelineRun.results_finalized > 0
+    ) {
       return false;
     }
     return true;
