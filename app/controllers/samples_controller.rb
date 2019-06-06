@@ -967,15 +967,22 @@ class SamplesController < ApplicationController
     end
   end
 
+  # GET /samples/:id/stage_results
   def stage_results
-    @results = {}
-    @sample.first_pipeline_run.pipeline_run_stages.each do |stage|
-      if stage.name == "Experimental" && !current_user.admin?
-        next
+    if current_user.allowed_feature_list.include?("pipeline_viz")
+      @results = {}
+      @sample.first_pipeline_run.pipeline_run_stages.each do |stage|
+        if stage.name != "Experimental" || current_user.admin?
+          @results[stage.name] = JSON.parse stage.dag_json
+        end
       end
-      @results[stage.name] = JSON.parse stage.dag_json
+      render json: { pipeline_stage_results: @results }
+    else
+      render(json: {
+               status: :unauthorized,
+               message: "No feature access"
+             }, status: :unauthorized)
     end
-    render json: { pipeline_stage_results: @results }
   end
 
   def validate_sample_files

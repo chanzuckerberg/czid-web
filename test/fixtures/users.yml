@@ -5,6 +5,7 @@ one:
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
   name: User One
   role: 1
+  allowed_features: "[\"pipeline_viz\"]"
 
 two:
   email: email2@example.com
@@ -15,6 +16,7 @@ joe:
   email: joe@gmail.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
   name: User Three
+  allowed_features: "[\"pipeline_viz\"]"
 
 joe_dd:
   email: joe_dd@gmail.com

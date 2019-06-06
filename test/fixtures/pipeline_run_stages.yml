@@ -21,22 +21,42 @@ public_sample_run_stage:
     }
   }"
 
-sample_run_stage_host_filtering:
-  pipeline_run: sample_run_with_pipeline_stages
+public_sample_run_stage_host_filtering:
+  pipeline_run: public_sample_run_with_pipeline_stages
   name: "Host Filtering"
   dag_json: "{\"key1\": \"value1\"}"
 
-sample_run_stage_alignment:
-  pipeline_run: sample_run_with_pipeline_stages
+public_sample_run_stage_alignment:
+  pipeline_run: public_sample_run_with_pipeline_stages
   name: "GSNAPL/RAPSEARCH alignment"
   dag_json: "{\"key2\": \"value2\"}"
 
-sample_run_stage_post_processing:
-  pipeline_run: sample_run_with_pipeline_stages
+public_sample_run_stage_post_processing:
+  pipeline_run: public_sample_run_with_pipeline_stages
   name: "Post Processing"
   dag_json: "{\"key3\": \"value3\"}"
 
-sample_run_stage_experimental:
-  pipeline_run: sample_run_with_pipeline_stages
+public_sample_run_stage_experimental:
+  pipeline_run: public_sample_run_with_pipeline_stages
+  name: "Experimental"
+  dag_json: "{\"key4\": \"value4\"}"
+
+private_sample_run_stage_host_filtering:
+  pipeline_run: private_sample_run_with_pipeline_stages
+  name: "Host Filtering"
+  dag_json: "{\"key1\": \"value1\"}"
+
+private_sample_run_stage_alignment:
+  pipeline_run: private_sample_run_with_pipeline_stages
+  name: "GSNAPL/RAPSEARCH alignment"
+  dag_json: "{\"key2\": \"value2\"}"
+
+private_sample_run_stage_post_processing:
+  pipeline_run: private_sample_run_with_pipeline_stages
+  name: "Post Processing"
+  dag_json: "{\"key3\": \"value3\"}"
+
+private_sample_run_stage_experimental:
+  pipeline_run: private_sample_run_with_pipeline_stages
   name: "Experimental"
   dag_json: "{\"key4\": \"value4\"}"
