@@ -218,6 +218,12 @@ class SamplesView extends React.Component {
         value: "project_reports"
       });
     }
+    if (this.props.admin) {
+      downloadOptions.push({
+        text: "Host Gene Counts",
+        value: "host_gene_counts"
+      });
+    }
     return (
       <DownloadIconDropdown
         iconClassName={cx(cs.icon, cs.download)}
@@ -462,7 +468,8 @@ SamplesView.propTypes = {
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
   samples: PropTypes.array,
-  selectableIds: PropTypes.array.isRequired
+  selectableIds: PropTypes.array.isRequired,
+  admin: PropTypes.bool
 };
 
 export default SamplesView;
