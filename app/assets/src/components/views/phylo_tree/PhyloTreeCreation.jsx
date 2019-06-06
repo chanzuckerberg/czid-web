@@ -9,7 +9,6 @@ import PhyloTreeChecks from "./PhyloTreeChecks";
 import SearchBox from "../../ui/controls/SearchBox";
 import LoadingIcon from "../../ui/icons/LoadingIcon";
 import Notification from "~ui/notifications/Notification";
-import { zip } from "lodash/fp";
 
 class PhyloTreeCreation extends React.Component {
   constructor(props) {
