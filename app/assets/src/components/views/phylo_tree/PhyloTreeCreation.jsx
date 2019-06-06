@@ -425,7 +425,7 @@ class PhyloTreeCreation extends React.Component {
               : ""}{" "}
             that ha{samplesWithFewReads > 1 ? "ve" : "s"} too few reads (NT or
             NR under {PhyloTreeChecks.RECOMMENDED_MIN_READS}). Tree creation
-            might fail or produce poor results.
+            might fail or produce inaccurate results.
           </Notification>
         );
       }
