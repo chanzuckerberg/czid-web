@@ -91,6 +91,8 @@ group :development, :test do
   gem 'capybara', '~> 2.17', '>= 2.17.0'
   gem 'coveralls', require: false
   gem 'factory_bot_rails'
+  gem "guard", "~> 2.15"
+  gem "guard-rspec", "~> 4.7"
   gem 'rspec-rails', '>= 3.7.2'
   gem 'rubocop', '=0.49.1'
   gem 'selenium-webdriver'
