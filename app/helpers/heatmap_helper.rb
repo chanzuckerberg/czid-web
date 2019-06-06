@@ -81,9 +81,11 @@ module HeatmapHelper
     taxon_ids = details.pluck('tax_id')
     taxon_ids -= removed_taxon_ids
 
-    # Refetch at genus level using species level
-    parent_ids = species_selected ? [] : HeatmapHelper.fetch_parent_ids(taxon_ids, samples)
-    results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+    unless taxon_ids.empty?
+      # Refetch at genus level using species level
+      parent_ids = species_selected ? [] : HeatmapHelper.fetch_parent_ids(taxon_ids, samples)
+      results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
+    end
 
     HeatmapHelper.samples_taxons_details(
       results_by_pr,
