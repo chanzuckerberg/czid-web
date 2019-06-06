@@ -29,11 +29,15 @@ module LocationHelper
   end
 
   def self.truncate_name(name)
-    # Truncate long names so they look a little better downstream (e.g. in the filters)
-    # TODO(jsheu): Look into shortening names by leaving out fields like 'neighborhoods'
-    max_chars = 45
+    # For long names, just take the first and last two parts so they look a little better downstream
+    # (e.g. in dropdown filters).
+    max_chars = 40
     if name.size > max_chars
-      name = "#{name.first(max_chars)}..."
+      parts = name.split(", ")
+      if parts.size >= 4
+        parts = parts.first(2) + parts.last(2)
+      end
+      name = parts.join(", ")
     end
     name
   end
