@@ -28,12 +28,22 @@ module LocationHelper
     name.gsub(%r{[;%_^<>\/?\\]}, "")
   end
 
+  def self.truncate_name(name)
+    # Truncate long names so they look a little better downstream (e.g. in the filters)
+    # TODO(jsheu): Look into shortening names by leaving out fields like 'neighborhoods'
+    max_chars = 45
+    if name.size > max_chars
+      name = "#{name.first(max_chars)}..."
+    end
+    name
+  end
+
   def self.sample_dimensions(sample_ids, field_name, samples_count)
     # See pattern in SamplesController dimensions
     locations = SamplesHelper.samples_by_metadata_field(sample_ids, field_name).count
     locations = locations.map do |loc, count|
       location = loc.is_a?(Array) ? (loc[0] || loc[1]) : loc
-      { value: location, text: location, count: count }
+      { value: location, text: truncate_name(location), count: count }
     end
     not_set_count = samples_count - locations.sum { |l| l[:count] }
     if not_set_count > 0
@@ -50,7 +60,7 @@ module LocationHelper
                              .count(:project_id)
     locations.map do |loc, count|
       location = loc.is_a?(Array) ? (loc[0] || loc[1]) : loc
-      { value: location, text: location, count: count }
+      { value: location, text: truncate_name(location), count: count }
     end
   end
 

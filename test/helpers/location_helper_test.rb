@@ -1,3 +1,5 @@
+# DEPRECATED: Add new tests to spec/helpers/location_helper_spec.rb
+
 require "test_helper"
 require "test_helpers/location_test_helper"
 
