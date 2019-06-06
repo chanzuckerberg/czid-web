@@ -92,7 +92,8 @@
   }
 
   .sampleRightPane {
-    flex: 1 0 auto;
+    flex: 1 1 0;
+    min-width: 0;
     display: flex;
     flex-direction: column;
 
@@ -104,9 +105,12 @@
       .sampleName {
         @include font-body-s;
 
-        flex: 0 1 auto;
+        min-width: 0;
         text-align: left;
         color: $black;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
       }
 
       .sampleStatus {
