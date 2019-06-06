@@ -832,6 +832,12 @@ export default class Heatmap {
       .attr("height", this.options.minCellHeight)
       .style("text-anchor", "end");
 
+    const handleColumnMetadataLabelClick = d => {
+      this.options.onColumnMetadataLabelClick
+        ? this.options.onColumnMetadataLabelClick(d.value, d3.event)
+        : this.handleColumnMetadataLabelClick(d.value);
+    };
+
     columnMetadataLabelEnter
       .append("text")
       .text(d => d.label)
@@ -842,11 +848,7 @@ export default class Heatmap {
       )
       .style("dominant-baseline", "central")
       .style("text-anchor", "end")
-      .on("click", d => {
-        this.options.onColumnMetadataLabelClick
-          ? this.options.onColumnMetadataLabelClick(d.value, d3.event)
-          : this.handleColumnMetadataLabelClick(d.value);
-      })
+      .on("click", handleColumnMetadataLabelClick)
       .on("mouseover", d => {
         this.options.onColumnMetadataLabelHover &&
           this.options.onColumnMetadataLabelHover(d);
@@ -872,7 +874,8 @@ export default class Heatmap {
       .attr("class", "metadataSortIcon")
       .attr("width", iconSize)
       .attr("height", iconSize)
-      .attr("transform", "rotate(-90)");
+      .attr("transform", "rotate(-90)")
+      .on("click", handleColumnMetadataLabelClick);
 
     applyFormat(columnMetadataLabelEnter);
   }
