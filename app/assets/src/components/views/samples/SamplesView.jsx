@@ -1,6 +1,7 @@
 import React from "react";
 import { difference, find, isEmpty, union } from "lodash/fp";
 import cx from "classnames";
+import { Icon } from "semantic-ui-react";
 
 import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
@@ -385,12 +386,9 @@ class SamplesView extends React.Component {
                 `SamplesView_${display}-switch_clicked`
               )}
             >
-              <i
-                className={cx(
-                  "fa",
-                  display === "map" ? "fa-globe" : "fa-list-ul",
-                  cs.icon
-                )}
+              <Icon
+                name={display === "map" ? "fa-globe" : "fa-list-ul"}
+                className={cs.icon}
               />
             </MenuItem>
           ))}
