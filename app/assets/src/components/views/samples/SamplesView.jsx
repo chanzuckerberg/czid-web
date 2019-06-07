@@ -1,22 +1,24 @@
 import React from "react";
 import { difference, find, isEmpty, union } from "lodash/fp";
 import cx from "classnames";
-import { Icon } from "semantic-ui-react";
 
-import PropTypes from "~/components/utils/propTypes";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import BulletListIcon from "~ui/icons/BulletListIcon";
+import CollectionModal from "./CollectionModal";
+import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import GlobeLinedIcon from "~ui/icons/GlobeLinedIcon";
+import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
-import HeatmapIcon from "~ui/icons/HeatmapIcon";
-import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
-import SaveIcon from "~ui/icons/SaveIcon";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
-import { DownloadIconDropdown } from "~ui/controls/dropdowns";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
-import { Menu, MenuItem } from "~ui/controls/Menu";
-import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
+import PropTypes from "~/components/utils/propTypes";
 import ReportsDownloader from "./ReportsDownloader";
-import CollectionModal from "./CollectionModal";
+import SaveIcon from "~ui/icons/SaveIcon";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import { DownloadIconDropdown } from "~ui/controls/dropdowns";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { Menu, MenuItem } from "~ui/controls/Menu";
+
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
 
@@ -386,10 +388,11 @@ class SamplesView extends React.Component {
                 `SamplesView_${display}-switch_clicked`
               )}
             >
-              <Icon
-                name={display === "map" ? "fa-globe" : "fa-list-ul"}
-                className={cs.icon}
-              />
+              {display === "map" ? (
+                <GlobeLinedIcon className={cs.icon} />
+              ) : (
+                <BulletListIcon className={cs.icon} />
+              )}
             </MenuItem>
           ))}
         </Menu>
