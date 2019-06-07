@@ -68,6 +68,7 @@ class BaseMap extends React.Component {
           onViewportChange={this.updateViewport}
           mapStyle={styleURL}
           onLoad={this.setCompactAttribution}
+          style={{ position: "absolute" }} // Fixes div in Safari
         >
           {tooltip}
           {markers}
