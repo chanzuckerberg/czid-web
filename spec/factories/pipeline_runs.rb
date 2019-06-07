@@ -16,13 +16,9 @@ FactoryBot.define do
         create(:taxon_count, pipeline_run: pipeline_run, **taxon_count_data)
       end
 
-      # If data for pipeline run stages explicitly included, override default/empty
-      # pipeline run stages.
-      unless options.pipeline_run_stages_data.empty?
-        pipeline_run.pipeline_run_stages = []
-        options.pipeline_run_stages_data.each do |pipeline_run_stage_data|
-          create(:pipeline_run_stage, pipeline_run: pipeline_run, **pipeline_run_stage_data)
-        end
+      pipeline_run.pipeline_run_stages = []
+      options.pipeline_run_stages_data.each do |pipeline_run_stage_data|
+        create(:pipeline_run_stage, pipeline_run: pipeline_run, **pipeline_run_stage_data)
       end
     end
   end

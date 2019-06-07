@@ -1,8 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe SamplesController, type: :controller do
-  create_users
-
   pipeline_run_stages_data = [{
     name: "Host Filtering",
     dag_json: "{\"key1\": \"value1\"}"
@@ -17,12 +15,18 @@ RSpec.describe SamplesController, type: :controller do
     dag_json: "{\"key4\": \"value4\"}"
   }]
 
+  expected_stage_results = {
+    "Host Filtering" => { key1: "value1" },
+    "GSNAPL/RAPSEARCH alignment" => { key2: "value2" },
+    "Post Processing" => { key3: "value3" },
+    "Experimental" => { key4: "value4" }
+  }
+
   # Admin specific behavior
   context "Admin user" do
     before do
+      @admin = create(:admin, allowed_features: ["pipeline_viz"])
       sign_in @admin
-      @admin.add_allowed_feature("pipeline_viz")
-      @admin.save!
     end
 
     describe "GET pipeline stage results" do
@@ -34,22 +38,20 @@ RSpec.describe SamplesController, type: :controller do
         get :stage_results, params: { id: sample.id }
 
         json_response = JSON.parse(response.body)["pipeline_stage_results"]
-        expect(json_response.length).to eq(4)
-        expect(json_response["Experimental"]).to be_truthy
-        pipeline_run_stages_data.each do |stage|
-          expect(json_response[stage[:name]]).to eq(JSON.parse(stage[:dag_json]))
-        end
+        expect(json_response).to include_json(expected_stage_results)
+        expect(json_response.keys).to contain_exactly(*expected_stage_results.keys)
       end
     end
 
     describe "GET pipeline stage results without pipeline viz flag enabled" do
       it "cannot see stage results" do
+        # Create new admin user with a unique email.
+        @admin_disabled_flag = create(:admin, email: "admin2@example.com")
+        sign_in @admin_disabled_flag
+
         project = create(:public_project)
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
-
-        @admin.remove_allowed_feature("pipeline_viz")
-        @admin.save!
         get :stage_results, params: { id: sample.id }
 
         expect(response).to have_http_status 401
@@ -60,27 +62,45 @@ RSpec.describe SamplesController, type: :controller do
   # Non-admin, aka Joe, specific behavior
   context "Joe" do
     before do
+      @joe = create(:joe, allowed_features: ["pipeline_viz"])
       sign_in @joe
-      @joe.add_allowed_feature("pipeline_viz")
-      @joe.save!
     end
 
-    describe "GET pipeline stage results" do
+    describe "GET pipeline stage results for public sample" do
       it "can see pipeline stage results without the experimental stage results" do
         project = create(:public_project)
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
+        expected_stage_results_no_experimental = expected_stage_results.clone()
+        expected_stage_results_no_experimental.delete "Experimental"
 
         get :stage_results, params: { id: sample.id }
 
         json_response = JSON.parse(response.body)["pipeline_stage_results"]
-        expect(json_response.length).to eq(3)
-        expect(json_response["Experimental"]).to be_nil
-        pipeline_run_stages_data.each do |stage|
-          unless stage[:name] == "Experimental"
-            expect(json_response[stage[:name]]).to eq(JSON.parse(stage[:dag_json]))
-          end
-        end
+        expect(json_response).to include_json(expected_stage_results_no_experimental)
+        expect(json_response).not_to include_json(Experimental: { key4: "value4" })
+        expect(json_response.keys).to contain_exactly(
+          *expected_stage_results_no_experimental.keys
+        )
+      end
+    end
+
+    describe "GET pipeline stage results for own sample" do
+      it "can see pipeline stage results without the experimental stage results" do
+        project = create(:project, users: [@joe])
+        sample = create(:sample, project: project,
+                                 pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
+        expected_stage_results_no_experimental = expected_stage_results.clone()
+        expected_stage_results_no_experimental.delete "Experimental"
+
+        get :stage_results, params: { id: sample.id }
+
+        json_response = JSON.parse(response.body)["pipeline_stage_results"]
+        expect(json_response).to include_json(expected_stage_results_no_experimental)
+        expect(json_response).not_to include_json(Experimental: { key4: "value4" })
+        expect(json_response.keys).to contain_exactly(
+          *expected_stage_results_no_experimental.keys
+        )
       end
     end
 
@@ -97,12 +117,14 @@ RSpec.describe SamplesController, type: :controller do
 
     describe "GET pipeline stage results without pipeline viz flag enabled (nonadmin)" do
       it "cannot see stage results" do
+        # Create new user with a unique email.
+        @joe = create(:joe, email: "joe2@example.com")
+        sign_in @joe
+
         project = create(:public_project)
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
 
-        @joe.remove_allowed_feature("pipeline_viz")
-        @joe.save!
         get :stage_results, params: { id: sample.id }
 
         expect(response).to have_http_status 401
