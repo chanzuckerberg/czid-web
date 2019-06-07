@@ -111,10 +111,10 @@
         background: inherit;
 
         .icon {
-          font-size: 15px;
+          font-size: 18px;
           margin-right: 0;
           // Make the icon look thinner
-          -webkit-text-stroke: 0.5px $white;
+          -webkit-text-stroke: 0.7px $white;
         }
 
         &:hover {
