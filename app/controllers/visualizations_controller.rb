@@ -1,6 +1,6 @@
 class VisualizationsController < ApplicationController
   include ReportHelper
-  include HeatmapHelper
+  include HeatmapHelperOld
 
   clear_respond_to
   respond_to :json
@@ -145,7 +145,7 @@ class VisualizationsController < ApplicationController
       subcategories: {
         Viruses: ["Phage"],
       },
-      metrics: HeatmapHelper::ALL_METRICS,
+      metrics: HeatmapHelperOld::ALL_METRICS,
       backgrounds: current_power.backgrounds.map do |background|
         { name: background.name, value: background.id }
       end,

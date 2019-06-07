@@ -119,7 +119,7 @@ services:
         - chanzuckerberg/idseq-web:compose
     image: chanzuckerberg/idseq-web:compose
     volumes:
-      - .:/app:ro
+      - .:/app
       - ./log:/app/log
       - ./tmp:/app/tmp
       - ./db:/app/db

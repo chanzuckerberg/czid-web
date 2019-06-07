@@ -2,7 +2,7 @@ class SamplesController < ApplicationController
   include ApplicationHelper
   include ElasticsearchHelper
   include ErrorHelper
-  include HeatmapHelper
+  include HeatmapHelperOld
   include LocationHelper
   include PipelineOutputsHelper
   include ReportHelper

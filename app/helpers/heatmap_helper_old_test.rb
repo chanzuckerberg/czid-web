@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class HeatmapHelperTest < ActiveSupport::TestCase
+class HeatmapHelperTestOld < ActiveSupport::TestCase
   setup do
     @samples = [samples(:one), samples(:two), samples(:six)]
     @background = backgrounds(:real_background)

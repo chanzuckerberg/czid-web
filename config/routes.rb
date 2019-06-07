@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'heatmap/index'
+
   resources :backgrounds do
     get :show_taxon_dist, on: :member
   end
