@@ -7,14 +7,14 @@ class AmrHeatmapController < ApplicationController
     Power.new(current_user)
   end
 
-  power :samples, as: :samples_scope
+  power :viewable_samples, as: :samples_scope
 
+  # first we grab the Sample from the id parameter passed to us
   before_action :set_sample
 
   # GET /amr_heatmap.json
   # Return JSON information required to create a visualization,
   # from submitted parameters
-  # (for now do some hardcoded sampling)
   def index
     @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     @amr_counts = nil
