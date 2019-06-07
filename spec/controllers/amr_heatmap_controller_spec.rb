@@ -71,18 +71,18 @@ RSpec.describe AmrHeatmapController, type: :controller do
     describe "GET index" do
       it "should not see any AMR information" do
         # As above
-        expected_project = create(:project, users: [@admin, @joe], samples_data: [{
-                                    pipeline_runs_data: [{
-                                      amr_counts_data: [{
-                                        gene: "IamA_Gene"
-                                      }],
-                                      job_status: PipelineRun::STATUS_CHECKED,
-                                      output_states_data: [{
-                                        output: "amr_counts",
-                                        state: PipelineRun::STATUS_LOADED
-                                      }]
-                                    }]
-                                  }])
+        create(:project, users: [@admin, @joe], samples_data: [{
+                 pipeline_runs_data: [{
+                   amr_counts_data: [{
+                     gene: "IamA_Gene"
+                   }],
+                   job_status: PipelineRun::STATUS_CHECKED,
+                   output_states_data: [{
+                     output: "amr_counts",
+                     state: PipelineRun::STATUS_LOADED
+                   }]
+                 }]
+               }])
 
         # Now that the sample has been created, grab it from the test db
         power = Power.new(@joe) # for safe access
@@ -91,7 +91,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
         @amr_counts = @sample.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
 
         # Hit the controller, expect a redirect
-        get :index, params: { id: expected_project.id }
+        get :index, params: { id: @sample["id"] }
         expect(response).to redirect_to("/")
       end
     end
