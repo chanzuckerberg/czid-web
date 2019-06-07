@@ -4,7 +4,7 @@ import { Icon } from "semantic-ui-react";
 
 const BulletListIcon = props => {
   const { className } = props;
-  return <Icon name="fa-list-ul" className={className} />;
+  return <Icon name="list ul" className={className} />;
 };
 
 BulletListIcon.propTypes = {
