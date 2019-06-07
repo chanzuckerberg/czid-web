@@ -732,6 +732,7 @@ class DiscoveryView extends React.Component {
   };
 
   renderRightPane = () => {
+    const { allowedFeatures } = this.props;
     const {
       currentDisplay,
       currentTab,
@@ -773,6 +774,7 @@ class DiscoveryView extends React.Component {
           ["samples", "projects"].includes(currentTab) &&
           currentDisplay === "table" && (
             <DiscoverySidebar
+              allowedFeatures={allowedFeatures}
               className={cs.sidebar}
               samples={samples}
               projects={projects}
