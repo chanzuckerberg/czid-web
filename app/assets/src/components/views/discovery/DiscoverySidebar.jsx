@@ -59,6 +59,7 @@ export default class DiscoverySidebar extends React.Component {
         host: DiscoverySidebar.loadDimension(dimensions, "host"),
         tissue: DiscoverySidebar.loadDimension(dimensions, "tissue"),
         location: DiscoverySidebar.loadDimension(dimensions, "location"),
+        locationV2: DiscoverySidebar.loadDimension(dimensions, "locationV2"),
         time: DiscoverySidebar.loadDimension(dimensions, "time_bins")
       }
     };
@@ -335,6 +336,10 @@ export default class DiscoverySidebar extends React.Component {
             <div className={cs.hasBackground}>
               <span className={cs.rowLabel}>Location</span>
               {this.buildMetadataRows("location")}
+            </div>
+            <div className={cs.hasBackground}>
+              <span className={cs.rowLabel}>Location v2</span>
+              {this.buildMetadataRows("locationV2")}
             </div>
           </Accordion>
         </div>
