@@ -13,20 +13,8 @@ FactoryBot.define do
   end
 
   factory :user do
-    transient do
-      # Array of strings to enable feature flags.
-      allowed_features { [] }
-    end
-
     sequence(:email, 'a') { |n| "user-#{n}@example.com" }
     sequence(:password, 'a') { |n| "user_#{n}_password" }
     sequence(:name, 'a') { |n| "User-#{n}" }
-
-    after :create do |user, options|
-      options.allowed_features.each do |allowed_feature|
-        user.add_allowed_feature allowed_feature
-        user.save!
-      end
-    end
   end
 end
