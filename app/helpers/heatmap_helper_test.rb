@@ -39,10 +39,11 @@ class HeatmapHelperTest < ActiveSupport::TestCase
   end
 
   test "sample_taxons_dict defaults" do
-    dicts = HeatmapHelper.sample_taxons_dict(@params, @samples)
+    dicts = HeatmapHelper.sample_taxons_dict(@params, @samples, @background.id)
 
     assert_equal @samples.length, dicts.length
     dict = dicts[0]
+    assert dict.key?(:taxons)
     assert_equal 3, dict[:taxons].length
     taxon = dict[:taxons][0]
     assert_equal 10, taxon["NT"].length
@@ -51,6 +52,36 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     assert_equal 99, taxon["NR"]["zscore"]
     assert_equal "Klebsiella pneumoniae", taxon["name"]
     assert_equal "Bacteria", taxon["category_name"]
+  end
+
+  # If no taxons pass the threshold filter, the samples should still be returned in the response.
+  test "sample_taxons_dict no filtered results" do
+    params = {
+      background: @background.id,
+      sortBy: @sort_by,
+      taxonsPerSample: @num_results,
+      readSpecificity: 1,
+      species: 1,
+      subcategories: {},
+      minReads: 1,
+      thresholdFilters: [
+        {
+          metric: "NT_zscore",
+          value: "10000",
+          operator: ">="
+        }
+      ].to_json
+    }
+
+    response = HeatmapHelper.sample_taxons_dict(params, @samples, @background.id)
+
+    assert_equal @samples.length, response.length
+    assert_equal "sample1", response[0][:name]
+    assert_equal "sample2", response[1][:name]
+    assert_equal "RR004_water_2_S23-20180208", response[2][:name]
+    assert !response[0].key?(:taxons)
+    assert !response[1].key?(:taxons)
+    assert !response[2].key?(:taxons)
   end
 
   test "top_taxons_details defaults" do
