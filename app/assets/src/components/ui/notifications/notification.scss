@@ -12,6 +12,12 @@
   font-size: $font-size;
   padding: 14px 14px 14px 9px;
 
+  &.flat {
+    border: 0;
+    box-shadow: none;
+    padding: 9px;
+  }
+
   .icon {
     flex-grow: 0;
     margin-right: 14px;

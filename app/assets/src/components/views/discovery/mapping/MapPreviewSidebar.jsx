@@ -38,8 +38,9 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell
       },
+      // If you already have access to Maps, just see Location V2 here.
       {
-        dataKey: "collectionLocation",
+        dataKey: "collectionLocationV2",
         label: "Location",
         flexGrow: 1,
         className: cs.basicCell
@@ -217,10 +218,20 @@ export default class MapPreviewSidebar extends React.Component {
     );
   };
 
-  render() {
-    const { className } = this.props;
+  renderNoData = () => {
     return (
-      <div className={cx(className, cs.sidebar)}>{this.renderTable()}</div>
+      <div className={cs.noData}>
+        Select a location to see summary info and samples.
+      </div>
+    );
+  };
+
+  render() {
+    const { className, samples } = this.props;
+    return (
+      <div className={cx(className, cs.sidebar)}>
+        {samples.length === 0 ? this.renderNoData() : this.renderTable()}
+      </div>
     );
   }
 }

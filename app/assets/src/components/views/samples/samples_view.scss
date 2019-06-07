@@ -103,19 +103,36 @@
     .switcherMenu {
       margin: 0;
       min-height: 25px;
-      border-radius: 10px;
       box-shadow: none;
+      border: none;
 
       .menuItem {
-        padding: 5px 20px;
+        padding: 5px 10px;
+        background: inherit;
 
         .icon {
-          font-size: 15px;
+          font-size: 18px;
+          margin-right: 0;
+          // Make the icon look thinner
+          -webkit-text-stroke: 0.7px $white;
+        }
+
+        &:hover {
+          background: inherit;
         }
 
         &:global(.active) {
-          // Important due to a { color: inherit !important; } in header.scss.
-          color: $primary-light !important;
+          // Underline the icon
+          &:after {
+            position: absolute;
+            content: "";
+            border-bottom: 2px solid $primary-medium;
+            width: 50%;
+            bottom: 0;
+            // Move left edge to center and then center to midpoint
+            left: 50%;
+            transform: translateX(-50%);
+          }
         }
       }
     }

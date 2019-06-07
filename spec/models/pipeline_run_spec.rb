@@ -18,7 +18,7 @@ describe PipelineRun, type: :model do
     end
 
     context "when a stage completes with an error" do
-      let(:pipeline_run_stage) { build_stubbed(:pipeline_run_stage_1_host_filtering, job_status: PipelineRunStage::STATUS_FAILED, pipeline_run: pipeline_run) }
+      let(:pipeline_run_stage) { build_stubbed(:pipeline_run_stage, job_status: PipelineRunStage::STATUS_FAILED, pipeline_run: pipeline_run) }
       before { allow(pipeline_run).to receive(:active_stage).and_return(pipeline_run_stage) }
       before { allow(pipeline_run).to receive(:report_failed_pipeline_run_stage) }
       before { allow(pipeline_run).to receive(:enqueue_new_pipeline_run) }
@@ -129,7 +129,7 @@ describe PipelineRun, type: :model do
     let(:user) { build_stubbed(:admin) }
     let(:sample) { build_stubbed(:sample, user: user, id: 123) }
     let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample) }
-    let(:pipeline_run_stage) { build_stubbed(:pipeline_run_stage_1_host_filtering, pipeline_run: pipeline_run) }
+    let(:pipeline_run_stage) { build_stubbed(:pipeline_run_stage, pipeline_run: pipeline_run) }
 
     before { allow(LogUtil).to receive(:log_err_and_airbrake) }
 

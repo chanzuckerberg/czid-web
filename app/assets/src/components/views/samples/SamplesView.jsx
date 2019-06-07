@@ -1,21 +1,24 @@
-import React from "react";
-import { difference, find, isEmpty, union } from "lodash/fp";
 import cx from "classnames";
+import { difference, find, isEmpty, union } from "lodash/fp";
+import React from "react";
 
-import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import PropTypes from "~/components/utils/propTypes";
+import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import CollectionModal from "~/components/views/samples/CollectionModal";
+import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import Label from "~ui/labels/Label";
+import { DownloadIconDropdown } from "~ui/controls/dropdowns";
+import { Menu, MenuItem } from "~ui/controls/Menu";
+import BulletListIcon from "~ui/icons/BulletListIcon";
+import GlobeLinedIcon from "~ui/icons/GlobeLinedIcon";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import SaveIcon from "~ui/icons/SaveIcon";
-import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
-import { DownloadIconDropdown } from "~ui/controls/dropdowns";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
-import { Menu, MenuItem } from "~ui/controls/Menu";
-import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
-import ReportsDownloader from "./ReportsDownloader";
-import CollectionModal from "./CollectionModal";
+import Label from "~ui/labels/Label";
+
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
 
@@ -24,6 +27,8 @@ const DISPLAYS = ["table", "map"];
 class SamplesView extends React.Component {
   constructor(props) {
     super(props);
+
+    const { allowedFeatures } = this.props;
 
     this.state = {
       phyloTreeCreationModalOpen: false,
@@ -129,6 +134,16 @@ class SamplesView extends React.Component {
           TableRenderers.formatDuration(rowData[dataKey])
       }
     ];
+
+    // TODO(jsheu): Upon release, replace Location 'v1'
+    if (allowedFeatures.includes("maps")) {
+      this.columns.push({
+        dataKey: "collectionLocationV2",
+        label: "Location v2",
+        flexGrow: 1,
+        className: cs.basicCell
+      });
+    }
   }
 
   handleSelectRow = (value, checked) => {
@@ -373,13 +388,11 @@ class SamplesView extends React.Component {
                 `SamplesView_${display}-switch_clicked`
               )}
             >
-              <i
-                className={cx(
-                  "fa",
-                  display === "map" ? "fa-globe" : "fa-list-ul",
-                  cs.icon
-                )}
-              />
+              {display === "map" ? (
+                <GlobeLinedIcon className={cs.icon} />
+              ) : (
+                <BulletListIcon className={cs.icon} />
+              )}
             </MenuItem>
           ))}
         </Menu>
@@ -459,7 +472,7 @@ SamplesView.propTypes = {
   currentDisplay: PropTypes.string.isRequired,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedSamples: PropTypes.array,
-  mapSidebarSelectedSampleIds: PropTypes.set,
+  mapSidebarSelectedSampleIds: PropTypes.instanceOf(Set),
   mapTilerKey: PropTypes.string,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
