@@ -122,7 +122,7 @@
         }
 
         &:global(.active) {
-          // Underline
+          // Underline the icon
           &:after {
             position: absolute;
             content: "";
