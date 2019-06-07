@@ -5,21 +5,23 @@ import cs from "./pathogen_label.scss";
 
 const NIAID_URL =
   "https://www.niaid.nih.gov/research/emerging-infectious-diseases-pathogens";
+const BASE_LABEL = "NIAID priority";
+
 export const CATEGORIES = {
   categoryA: {
-    text: "pathogenic | a",
+    text: BASE_LABEL + " | a",
     color: "red",
     tooltip: "NIAID pathogen priority list | category A",
     url: NIAID_URL
   },
   categoryB: {
-    text: "pathogenic | b",
+    text: BASE_LABEL + " | b",
     color: "orange",
     tooltip: "NIAID pathogen priority list | category B",
     url: NIAID_URL
   },
   categoryC: {
-    text: "pathogenic | c",
+    text: BASE_LABEL + " | c",
     color: "yellow",
     tooltip: "NIAID pathogen priority list | category C",
     url: NIAID_URL
