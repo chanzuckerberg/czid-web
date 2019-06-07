@@ -2,7 +2,8 @@
 // Also handles the sidebar and tabs logic.
 import React from "react";
 import cx from "classnames";
-import { get } from "lodash/fp";
+import Cookies from "js-cookie";
+import { get, flatten, compact, map, sum } from "lodash/fp";
 
 import { saveVisualization, getCoverageVizSummary } from "~/api";
 import {
@@ -46,7 +47,8 @@ class SampleView extends React.Component {
       sidebarMode: null,
       sidebarVisible: false,
       sidebarTaxonModeConfig: null,
-      coverageVizDataByTaxon: null
+      coverageVizDataByTaxon: null,
+      nameType: Cookies.get("name_type") || "Scientific name" // "Scientific name" or "Common name"
     };
 
     this.gsnapFilterStatus = this.generateGsnapFilterStatus();
@@ -132,6 +134,11 @@ class SampleView extends React.Component {
     logAnalyticsEvent(`SampleView_tab-${name}_clicked`, {
       tab: tab
     });
+  };
+
+  handleNameTypeChange = nameType => {
+    Cookies.set("name_type", nameType);
+    this.setState({ nameType });
   };
 
   toggleSampleDetailsSidebar = () => {
@@ -229,7 +236,10 @@ class SampleView extends React.Component {
   };
 
   pipelineInProgress = () => {
-    if (this.props.pipelineRun && this.props.pipelineRun.finalized === 1) {
+    if (
+      this.props.pipelineRun &&
+      this.props.pipelineRun.results_finalized > 0
+    ) {
       return false;
     }
     return true;
@@ -366,6 +376,8 @@ class SampleView extends React.Component {
             onTaxonClick={this.handleTaxonClick}
             onCoverageVizClick={this.handleCoverageVizClick}
             savedParamValues={this.props.savedParamValues}
+            nameType={this.state.nameType}
+            onNameTypeChange={this.handleNameTypeChange}
           />
         );
       } else if (this.pipelineInProgress()) {
@@ -397,6 +409,44 @@ class SampleView extends React.Component {
     return {};
   };
 
+  // Aggregate the accessions from multiple species into a single data object.
+  // Used for coverage viz.
+  getCombinedAccessionDataForSpecies = speciesTaxons => {
+    const { coverageVizDataByTaxon } = this.state;
+
+    // This helper function gets the best accessions for a species taxon.
+    const getSpeciesBestAccessions = taxon => {
+      const speciesBestAccessions = get(
+        [taxon.taxonId, "best_accessions"],
+        coverageVizDataByTaxon
+      );
+      // Add the species taxon name to each accession.
+      return map(
+        accession => ({
+          ...accession,
+          // Use snake_case for consistency with other fields.
+          taxon_name: taxon.taxonName,
+          taxon_common_name: taxon.taxonCommonName
+        }),
+        speciesBestAccessions
+      );
+    };
+
+    const speciesTaxIds = map("taxonId", speciesTaxons);
+
+    return {
+      best_accessions: flatten(
+        compact(map(getSpeciesBestAccessions, speciesTaxons))
+      ),
+      num_accessions: sum(
+        map(
+          taxId => get([taxId, "num_accessions"], coverageVizDataByTaxon),
+          speciesTaxIds
+        )
+      )
+    };
+  };
+
   getCoverageVizParams = () => {
     const { coverageVizParams, coverageVizDataByTaxon } = this.state;
 
@@ -404,11 +454,24 @@ class SampleView extends React.Component {
       return {};
     }
 
+    let accessionData = null;
+
+    // For genus-level taxons, we aggregate all the available species-level taxons for that genus.
+    if (coverageVizParams.taxLevel === "genus") {
+      accessionData = this.getCombinedAccessionDataForSpecies(
+        coverageVizParams.speciesTaxons
+      );
+    } else {
+      accessionData = get(coverageVizParams.taxId, coverageVizDataByTaxon);
+    }
+
     return {
       taxonId: coverageVizParams.taxId,
       taxonName: coverageVizParams.taxName,
+      taxonCommonName: coverageVizParams.taxCommonName,
+      taxonLevel: coverageVizParams.taxLevel,
       alignmentVizUrl: coverageVizParams.alignmentVizUrl,
-      accessionData: get(coverageVizParams.taxId, coverageVizDataByTaxon)
+      accessionData
     };
   };
 
@@ -580,6 +643,7 @@ class SampleView extends React.Component {
             params={this.getCoverageVizParams()}
             sampleId={sample.id}
             pipelineVersion={this.props.pipelineRun.pipeline_version}
+            nameType={this.state.nameType}
           />
         )}
       </div>

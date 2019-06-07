@@ -285,14 +285,18 @@ $accession-count-label-height: 20px;
   .optionText {
     @include font-body-xs;
     color: $darkest-grey;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
   }
 
   .optionSubtext {
     @include font-body-xxs;
     color: $light-grey;
     font-weight: $font-weight-regular;
+  }
+
+  .optionText,
+  .optionSubtext {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 }

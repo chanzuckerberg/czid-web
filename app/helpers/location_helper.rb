@@ -27,4 +27,53 @@ module LocationHelper
   def self.sanitize_name(name)
     name.gsub(%r{[;%_^<>\/?\\]}, "")
   end
+
+  def self.truncate_name(name)
+    # Shorten long names so they look a little better downstream (e.g. in dropdown filters). Try to take the first 2 + last 2 parts, or just the first + last 2 parts.
+    max_chars = 30
+    if name.size > max_chars
+      parts = name.split(", ")
+      if parts.size >= 4
+        last = parts[-2..-1]
+        name = parts[0..1].concat(last).join(", ")
+        if name.size > max_chars
+          name = [parts[0]].concat(last).join(", ")
+        end
+      end
+    end
+    name
+  end
+
+  def self.sample_dimensions(sample_ids, field_name, samples_count)
+    # See pattern in SamplesController dimensions
+    locations = SamplesHelper.samples_by_metadata_field(sample_ids, field_name).count
+    locations = locations.map do |loc, count|
+      location = loc.is_a?(Array) ? (loc[0] || loc[1]) : loc
+      { value: location, text: truncate_name(location), count: count }
+    end
+    not_set_count = samples_count - locations.sum { |l| l[:count] }
+    if not_set_count > 0
+      locations << { value: "not_set", text: "Unknown", count: not_set_count }
+    end
+    locations
+  end
+
+  def self.project_dimensions(sample_ids, field_name)
+    # See pattern in ProjectsController dimensions
+    locations = SamplesHelper.samples_by_metadata_field(sample_ids, field_name)
+                             .includes(:sample)
+                             .distinct
+                             .count(:project_id)
+    locations.map do |loc, count|
+      location = loc.is_a?(Array) ? (loc[0] || loc[1]) : loc
+      { value: location, text: truncate_name(location), count: count }
+    end
+  end
+
+  def self.filter_by_name(samples_with_metadata, query)
+    samples = samples_with_metadata.includes(metadata: :location)
+    # Plain text locations in string_validated_value
+    samples.where(metadata: { string_validated_value: query })
+           .or(samples.where(metadata: { locations: { name: query } }))
+  end
 end

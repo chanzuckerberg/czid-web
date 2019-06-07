@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .heatmap {
   .cells {
@@ -79,8 +80,6 @@
     }
 
     .columnMetadataAdd {
-      visibility: hidden;
-
       .metadataAddTrigger {
         cursor: pointer;
       }
@@ -91,15 +90,41 @@
         fill: transparent;
       }
 
+      .metadataAddIcon {
+        opacity: 0.3;
+      }
+
       rect {
         opacity: 0;
       }
-    }
 
-    &:hover {
-      .columnMetadataAdd {
-        visibility: visible;
+      .metadataAddLabel {
+        @include font-label-xs;
+        fill: $medium-grey;
+        opacity: 0;
+        cursor: pointer;
+        text-anchor: end;
       }
+
+      &:hover {
+        .metadataAddLine {
+          stroke: $medium-grey;
+        }
+
+        .metadataAddIcon {
+          opacity: 0.5;
+        }
+
+        .metadataAddLabel {
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  &.printMode {
+    .columnMetadataAdd {
+      opacity: 0;
     }
   }
 }
