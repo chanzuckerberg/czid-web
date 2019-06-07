@@ -1,23 +1,23 @@
-import React from "react";
-import { difference, find, isEmpty, union } from "lodash/fp";
 import cx from "classnames";
+import { difference, find, isEmpty, union } from "lodash/fp";
+import React from "react";
 
-import BulletListIcon from "~ui/icons/BulletListIcon";
-import CollectionModal from "./CollectionModal";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import PropTypes from "~/components/utils/propTypes";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import CollectionModal from "~/components/views/samples/CollectionModal";
+import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
+import { DownloadIconDropdown } from "~ui/controls/dropdowns";
+import { Menu, MenuItem } from "~ui/controls/Menu";
+import BulletListIcon from "~ui/icons/BulletListIcon";
 import GlobeLinedIcon from "~ui/icons/GlobeLinedIcon";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
-import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import Label from "~ui/labels/Label";
-import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
-import PropTypes from "~/components/utils/propTypes";
-import ReportsDownloader from "./ReportsDownloader";
 import SaveIcon from "~ui/icons/SaveIcon";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
-import { DownloadIconDropdown } from "~ui/controls/dropdowns";
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import { Menu, MenuItem } from "~ui/controls/Menu";
+import Label from "~ui/labels/Label";
 
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
