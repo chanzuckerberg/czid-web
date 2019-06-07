@@ -238,7 +238,7 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
-    const { className, currentTab, loading } = this.props;
+    const { allowedFeatures, className, currentTab, loading } = this.props;
     if (!loading && !this.hasData()) {
       return (
         <div className={cx(className, cs.sidebar)}>
@@ -337,10 +337,12 @@ export default class DiscoverySidebar extends React.Component {
               <span className={cs.rowLabel}>Location</span>
               {this.buildMetadataRows("location")}
             </div>
-            <div className={cs.hasBackground}>
-              <span className={cs.rowLabel}>Location v2</span>
-              {this.buildMetadataRows("locationV2")}
-            </div>
+            {allowedFeatures.includes("maps") && (
+              <div className={cs.hasBackground}>
+                <span className={cs.rowLabel}>Location v2</span>
+                {this.buildMetadataRows("locationV2")}
+              </div>
+            )}
           </Accordion>
         </div>
       </div>
@@ -355,6 +357,7 @@ DiscoverySidebar.defaultProps = {
 };
 
 DiscoverySidebar.propTypes = {
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   className: PropTypes.string,
   currentTab: PropTypes.string.isRequired,
   defaultNumberOfMetadataRows: PropTypes.number,
@@ -363,6 +366,6 @@ DiscoverySidebar.propTypes = {
   projectDimensions: PropTypes.array,
   projects: PropTypes.arrayOf(PropTypes.Project),
   sampleDimensions: PropTypes.array,
-  sampleStats: PropTypes.object,
-  samples: PropTypes.arrayOf(PropTypes.Sample)
+  samples: PropTypes.arrayOf(PropTypes.Sample),
+  sampleStats: PropTypes.object
 };
