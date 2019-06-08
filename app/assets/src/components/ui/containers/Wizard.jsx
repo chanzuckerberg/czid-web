@@ -83,13 +83,19 @@ class Wizard extends React.Component {
   handleContinueClick = async () => {
     let onContinue = this.props.children[this.state.currentPage].props
       .onContinue;
+    let onContinueAsync = this.props.children[this.state.currentPage].props
+      .onContinueAsync;
     if (onContinue) {
       if (onContinue()) {
         this.advancePage();
       }
+    } else if (onContinueAsync) {
+      const result = await onContinueAsync();
+      if (result) {
+        this.advancePage();
+      }
     } else if (this.state.onContinueValidation) {
       const result = await this.state.onContinueValidation();
-
       if (result) {
         this.advancePage();
       }
