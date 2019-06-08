@@ -846,7 +846,7 @@ class PipelineRun < ApplicationRecord
         self.finalized = 1
         self.known_user_error, self.error_message = check_for_user_error(prs)
         automatic_restart = automatic_restart_allowed? unless known_user_error
-        send_to_airbrake = !(automatic_restart || known_user_error)
+        send_to_airbrake = !known_user_error
         report_failed_pipeline_run_stage(prs, automatic_restart, known_user_error, send_to_airbrake)
       elsif !prs.started?
         # we're moving on to a new stage
@@ -866,11 +866,12 @@ class PipelineRun < ApplicationRecord
 
   private def pipeline_run_stage_error_message(prs, automatic_restart, known_user_error)
     reads_remaining_text = adjusted_remaining_reads ? "with #{adjusted_remaining_reads} reads remaining " : ""
-    automatic_restart_text = automatic_restart ? "Automatic restart. " : ""
+    automatic_restart_text = automatic_restart ? "Automatic restart is being triggered. " : "** Manual action required **. "
     known_user_error = known_user_error ? "Known user error #{known_user_error}. " : ""
 
-    "SampleFailedEvent: Sample #{sample.id} by #{sample.user.role_name} failed #{prs.step_number}.#{prs.name} #{reads_remaining_text}" \
-      "after #{duration_hrs} hours. #{automatic_restart_text}#{known_user_error}. See: #{status_url}"
+    "SampleFailedEvent: Sample #{sample.id} by #{sample.user.role_name} failed #{prs.step_number}-#{prs.name} #{reads_remaining_text}" \
+      "after #{duration_hrs} hours. #{automatic_restart_text}#{known_user_error}"\
+      "See: #{status_url}"
   end
 
   private def report_failed_pipeline_run_stage(prs, automatic_restart, known_user_error, send_to_airbrake)

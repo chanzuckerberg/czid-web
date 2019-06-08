@@ -76,7 +76,7 @@ describe PipelineRun, type: :model do
         context "and an automatic restart is allowed" do
           before { allow(pipeline_run).to receive(:automatic_restart_allowed?).and_return(true) }
 
-          include_examples "failing sample", reports_error: false, enqueues_new_pipeline_run: true
+          include_examples "failing sample", reports_error: true, enqueues_new_pipeline_run: true
         end
 
         context "and an automatic restart is not allowed" do
@@ -149,7 +149,7 @@ describe PipelineRun, type: :model do
       end
     end
 
-    context "when send_to_airbrake is true" do
+    context "when send_to_airbrake is false" do
       before { allow(Rails.logger).to receive(:warn) }
       it "do not send error to airbrake and log warn" do
         pipeline_run.send(:report_failed_pipeline_run_stage, pipeline_run_stage, true, nil, false)
