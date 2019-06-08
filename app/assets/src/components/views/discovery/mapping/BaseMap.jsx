@@ -102,18 +102,18 @@ BaseMap.propTypes = {
 BaseMap.defaultProps = {
   width: "100%",
   height: "100%",
-  // United States framed
-  latitude: 40,
-  longitude: -98,
-  zoom: 3,
-  // These bounds prevent panning too far north or south, although you will still see those regions at the widest zoom levels. minZoom level frames most of the world. maxZoom level keeps you at an area about the size of a metropolitan area.
+  // Frame most of the world
+  latitude: 27,
+  longitude: 0,
+  zoom: 1.4,
+  // These bounds prevent panning too far north or south, although you will still see those regions at the widest zoom levels. minZoom level frames most of the world.
   viewBounds: {
     minLatitude: -60,
     maxLatitude: 60,
     minLongitude: -180,
     maxLongitude: 180,
-    minZoom: 1.4,
-    maxZoom: 12
+    minZoom: 0.5,
+    maxZoom: 17
   }
 };
 

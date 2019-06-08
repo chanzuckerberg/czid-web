@@ -12,6 +12,16 @@ class Checkbox extends React.Component {
     this.handleClick = this.handleClick.bind(this);
   }
 
+  static getDerivedStateFromProps(props, state) {
+    if (props.checked !== state.oldIsChecked) {
+      return {
+        isChecked: props.checked,
+        oldIsChecked: props.checked
+      };
+    }
+    return null;
+  }
+
   handleClick(event) {
     const { value, onChange } = this.props;
 
