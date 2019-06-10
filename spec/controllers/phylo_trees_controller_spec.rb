@@ -1,9 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe PhyloTreesController, type: :controller do
-
   describe "GET validate_name" do
-
     before do
       joe = create(:joe)
       sign_in joe
@@ -27,7 +25,7 @@ RSpec.describe PhyloTreesController, type: :controller do
       it "is not valid" do
         name = "existing_name"
 
-        get :validate_name, params: { format: "json", name: name}
+        get :validate_name, params: { format: "json", name: name }
 
         json_response = JSON.parse(response.body)
         expect(json_response).to include_json(valid: false, sanitizedName: name)
@@ -36,13 +34,13 @@ RSpec.describe PhyloTreesController, type: :controller do
 
     context "with duplicate name after sanitization" do
       it "is not valid" do
-        unsanitizedName = "sanitize/ name'"
-        sanitizedName = "sanitize  name"
+        unsanitized_name = "sanitize/ name'"
+        sanitized_name = "sanitize  name"
 
-        get :validate_name, params: { format: "json", name: unsanitizedName }
+        get :validate_name, params: { format: "json", name: unsanitized_name }
 
         json_response = JSON.parse(response.body)
-        expect(json_response).to include_json(valid: true, sanitizedName: sanitizedName)
+        expect(json_response).to include_json(valid: true, sanitizedName: sanitized_name)
       end
     end
 
