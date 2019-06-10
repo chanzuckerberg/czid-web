@@ -122,12 +122,8 @@ export default class MapPreviewSidebar extends React.Component {
 
   handleLoadSampleRows = async () => {
     // TODO(jsheu): Add pagination on the endpoint and loading for long lists of samples
-    const { onLoadRows, samples } = this.props;
-    if (onLoadRows) {
-      onLoadRows();
-    } else {
-      return samples;
-    }
+    const { samples } = this.props;
+    return samples;
   };
 
   handleSelectRow = (value, checked) => {
@@ -190,8 +186,6 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   renderTable = () => {
-    console.log("my samples are: ", this.props.samples);
-
     const { activeColumns, protectedColumns } = this.props;
     const { selectedSampleIds } = this.state;
 
@@ -251,7 +245,6 @@ MapPreviewSidebar.propTypes = {
   activeColumns: PropTypes.array,
   className: PropTypes.string,
   initialSelectedSampleIds: PropTypes.instanceOf(Set),
-  onLoadRows: PropTypes.func,
   onSampleClicked: PropTypes.func,
   onSelectionUpdate: PropTypes.func,
   protectedColumns: PropTypes.array,

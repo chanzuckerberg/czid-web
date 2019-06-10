@@ -201,7 +201,7 @@ class DiscoveryView extends React.Component {
   };
 
   resetData = ({ callback }) => {
-    const { project, mapPreviewedLocationId } = this.state;
+    const { project } = this.state;
 
     this.setState(
       {
@@ -219,7 +219,6 @@ class DiscoveryView extends React.Component {
       },
       () => {
         this.samplesView && this.samplesView.reset();
-        this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
         callback && callback();
       }
     );
@@ -742,14 +741,12 @@ class DiscoveryView extends React.Component {
       filteredSampleStats,
       loadingDimensions,
       loadingStats,
-      mapPreviewedLocationId,
       mapPreviewedSampleIds,
       mapPreviewedSamples,
       mapSidebarSelectedSampleIds,
       projectDimensions,
       projects,
       sampleDimensions,
-      sampleIds,
       samples,
       search,
       showStats
@@ -764,16 +761,13 @@ class DiscoveryView extends React.Component {
           currentDisplay === "map" && (
             <MapPreviewSidebar
               initialSelectedSampleIds={mapSidebarSelectedSampleIds}
-              mapPreviewedLocationId={mapPreviewedLocationId}
               onSampleClicked={this.handleSampleSelected}
               onSelectionUpdate={this.handleMapSidebarSelectUpdate}
               ref={mapPreviewSidebar =>
                 (this.mapPreviewSidebar = mapPreviewSidebar)
               }
-              samples={mapPreviewedLocationId ? mapPreviewedSamples : samples}
-              selectableIds={
-                mapPreviewedLocationId ? mapPreviewedSampleIds : sampleIds
-              }
+              samples={mapPreviewedSamples}
+              selectableIds={mapPreviewedSampleIds}
             />
           )}
         {showStats &&

@@ -102,18 +102,17 @@ BaseMap.propTypes = {
 BaseMap.defaultProps = {
   width: "100%",
   height: "100%",
-  // Frame most of the world
+  // Frame most of the world by default
   latitude: 27,
   longitude: 0,
   zoom: 1.4,
-  // These bounds prevent panning too far north or south, although you will still see those regions at the widest zoom levels. minZoom level frames most of the world.
   viewBounds: {
-    minLatitude: -60,
+    minLatitude: -60, // Limit panning too far north or south
     maxLatitude: 60,
     minLongitude: -180,
     maxLongitude: 180,
-    minZoom: 0.5,
-    maxZoom: 17
+    minZoom: 0.5, // Limit to whole-world view
+    maxZoom: 17 // Limit to city-level at most
   }
 };
 
