@@ -117,7 +117,7 @@ class PhyloTreeCreation extends React.Component {
         console.error("Error loading existing phylo trees: ", error);
       });
   }
-  s;
+
   loadNewTreeContext() {
     axios
       .get("/phylo_trees/new.json", {
