@@ -244,7 +244,7 @@ MapPreviewSidebar.defaultProps = {
 MapPreviewSidebar.propTypes = {
   activeColumns: PropTypes.array,
   className: PropTypes.string,
-  initialSelectedSampleIds: PropTypes.array,
+  initialSelectedSampleIds: PropTypes.instanceOf(Set),
   onSampleClicked: PropTypes.func,
   onSelectionUpdate: PropTypes.func,
   protectedColumns: PropTypes.array,
