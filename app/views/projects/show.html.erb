@@ -43,10 +43,10 @@
     <tbody>
       <% @samples.each do |sample| %>
         <tr class=<%= sample_status_display_for_hidden_page(sample)%>>
-          <td><%= link_to sample.name, sample %></td>
+          <td><u><%= link_to sample.name, sample %></u></td>
           <td><%= sample.id %></td>
           <td class='small'><%= sample.user.email if sample.user %></td>
-          <td><%= link_to sample.project.name, sample.project %></td>
+          <td><u><%= link_to sample.project.name, sample.project %></u></td>
           <td><%= sample.status %>
             <% if sample.status.to_s == 'created' and sample.created_at < 30.minutes.ago %>
                 <%= button_to 'reupload', reupload_source_sample_path(sample), method: :put %>
@@ -72,8 +72,8 @@
           </td>
           <td><%= pipeline_job_id %></td>
           <td class="small"><%= pipeline_run_submitted %></td>
-          <td><%= link_to 'Runs', pipeline_runs_sample_path(sample) %> &nbsp;
-              <%= link_to 'Edit', edit_sample_path(sample) %></td>
+          <td><u><%= link_to 'Runs', pipeline_runs_sample_path(sample) %></u> &nbsp;
+              <u><%= link_to 'Edit', edit_sample_path(sample) %></u></td>
         </tr>
       <% end %>
     </tbody>
@@ -82,8 +82,8 @@
 <% end %>
 
 <p>
-<%= link_to 'Edit', edit_project_path(@project) %> |
-<%= link_to 'See all projects', projects_path %> |
-<%= link_to 'Front portal', root_path %>
+<u><%= link_to 'Edit', edit_project_path(@project) %></u> |
+<u><%= link_to 'See all projects', projects_path %></u> |
+<u><%= link_to 'Front portal', root_path %></u>
 </p>
 <% end %>
