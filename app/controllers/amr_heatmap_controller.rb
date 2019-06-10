@@ -3,43 +3,37 @@ class AmrHeatmapController < ApplicationController
 
   before_action :admin_required
 
-  current_power do # Put this here for CLI
-    Power.new(current_user)
-  end
-
-  power :viewable_samples, as: :samples_scope
-
-  # first we grab the Sample from the id parameter passed to us
-  before_action :set_sample
+  power :viewable_samples
 
   # GET /amr_heatmap.json
   # Return JSON information required to create a visualization,
   # from submitted parameters
-  def index
-    @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    @amr_counts = nil
-    can_see_amr = (current_user.admin? || current_user.allowed_feature_list.include?("AMR"))
-    if can_see_amr && @pipeline_run
-      amr_state = @pipeline_run.output_states.find_by(output: "amr_counts")
-      if amr_state.present? && amr_state.state == PipelineRun::STATUS_LOADED
-        @amr_counts = @pipeline_run.amr_counts
-      end
+  def amr_counts
+    samples = []
+    amr_data = []
+
+    params[:id].each do |param_id|
+      sample = current_power.viewable_samples.find(param_id)
+      assert_access
+      samples << sample
     end
 
-    # We return AMR counts nested in an object containing the sample name and id
-    @amr_data = {
-      sample_name: @sample.name,
-      sample_id: @sample.id,
-      amr_counts: @amr_counts
-    }
+    samples.each do |sample|
+      amr_counts = nil
+      pipeline_run = sample.first_pipeline_run
+      if pipeline_run
+        amr_state = pipeline_run.output_states.find_by(output: "amr_counts")
+        if amr_state.present? && amr_state.state == PipelineRun::STATUS_LOADED
+          amr_counts = pipeline_run.amr_counts
+        end
+      end
+      amr_data << {
+        sample_name: sample.name,
+        sample_id: sample.id,
+        amr_counts: amr_counts
+      }
+    end
 
-    render json: @amr_data
-  end
-
-  private
-
-  def set_sample
-    @sample = samples_scope.find(params[:id]) # general purpose
-    assert_access
+    render json: amr_data
   end
 end

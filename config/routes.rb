@@ -105,7 +105,7 @@ Rails.application.routes.draw do
   post 'visualizations/shorten_url', to: 'visualizations#shorten_url'
   get 'visualizations.json', to: 'visualizations#index'
 
-  get 'amr_heatmap.json', to: 'amr_heatmap#index'
+  get 'amr_heatmap.json', to: 'amr_heatmap#amr_counts'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]

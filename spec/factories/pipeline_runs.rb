@@ -1,23 +1,16 @@
 FactoryBot.define do
   factory :pipeline_run, class: PipelineRun do
     transient do
-      # Array of taxon_counts entries to create.
-      # The hash elements will be passed on to taxon_count factory as keyword arguments.
+      # Arrays of entries to create for their respective properties:
+      # taxon_counts, amr_counts, output_states, pipeline_run_stage
+      # The hash elements will be passed on to their respective factory as keyword arguments.
       taxon_counts_data { [] }
       amr_counts_data { [] }
       output_states_data { [] }
-      # Array of pipeline_run_stage entries to create.
-      # The hash elements will be passed on to pipeline_run_stage factory as keyword arguments.
       pipeline_run_stages_data { [] }
     end
 
     alignment_config { create(:alignment_config) }
-
-    trait :with_amr_count do
-      after :create do |pipeline_run, _options|
-        create(:amr_count, pipeline_run: pipeline_run)
-      end
-    end
 
     after :create do |pipeline_run, options|
       options.taxon_counts_data.each do |taxon_count_data|
