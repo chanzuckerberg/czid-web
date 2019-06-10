@@ -15,7 +15,7 @@ RSpec.describe LocationHelper, type: :helper do
     it "truncates a name" do
       name = "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece"
       result = LocationHelper.truncate_name(name)
-      expect(result).to eq("Chania, Chania Municipality, 73135, Greece")
+      expect(result).to eq("Chania, 73135, Greece")
     end
 
     it "doesn't truncate shorter names" do
@@ -41,9 +41,9 @@ RSpec.describe LocationHelper, type: :helper do
 
       expected = [
         { value: "Alaska, USA", text: "Alaska, USA", count: 1 },
-        { value: "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", text: "Chania, Chania Municipality, 73135, Greece", count: 1 },
+        { value: "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", text: "Chania, 73135, Greece", count: 1 },
         { value: "Hanoi, Vietnam", text: "Hanoi, Vietnam", count: 1 },
-        { value: "Redwood City, San Mateo County, California, USA", text: "Redwood City, San Mateo County, California, USA", count: 112 },
+        { value: "Redwood City, San Mateo County, California, USA", text: "Redwood City, California, USA", count: 112 },
         { value: "Zimbabwe", text: "Zimbabwe", count: 1 },
         { value: "not_set", text: "Unknown", count: 740 }
       ]
@@ -67,9 +67,9 @@ RSpec.describe LocationHelper, type: :helper do
 
       expected = [
         { value: "Alaska, USA", text: "Alaska, USA", count: 1 },
-        { value: "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", text: "Chania, Chania Municipality, 73135, Greece", count: 1 },
+        { value: "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", text: "Chania, 73135, Greece", count: 1 },
         { value: "Hanoi, Vietnam", text: "Hanoi, Vietnam", count: 1 },
-        { value: "Redwood City, San Mateo County, California, USA", text: "Redwood City, San Mateo County, California, USA", count: 1 },
+        { value: "Redwood City, San Mateo County, California, USA", text: "Redwood City, California, USA", count: 1 },
         { value: "Zimbabwe", text: "Zimbabwe", count: 1 }
       ]
       result = LocationHelper.project_dimensions([1, 2, 3], field_name)
