@@ -3,6 +3,20 @@ class AmrHeatmapController < ApplicationController
 
   # GET /amr_heatmap.json
   # Return JSON information about one or more samples' AMR counts, from submitted sample ids
+  # A samples amr_counts is an array of objects describing genes & alleles that code for
+  # antimicrobial resistance. Each object in amr_counts will look like:
+  # {
+  #   "id": 99999,
+  #   "gene": "GENE-1_Examp",
+  #   "allele": "GENE-7_777",
+  #   "coverage": 12.345,
+  #   "depth": 0.987,
+  #   "pipeline_run_id": 11111,
+  #   "drug_family": "Dru",
+  #   "created_at": "2019-01-01T01:01:01.000-01:00",
+  #   "updated_at": "2019-01-01T01:01:01.000-01:00"
+  # },
+
   def amr_counts
     samples = current_power.viewable_samples.where(id: params[:sampleIds])
     good_sample_ids = {}
