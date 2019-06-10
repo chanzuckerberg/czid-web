@@ -3,6 +3,7 @@ FactoryBot.define do
     # Should be one of the four stages:
     # Host Filtering, GSNAPLgcRAPSEARCH alignment,
     # Post Processing, Experimental
+    step_number { 1 }
     name { "Host Filtering" }
     dag_json do
       {
