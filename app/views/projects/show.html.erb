@@ -11,6 +11,14 @@
   <%= @project.created_at %>
 </p>
 
+<% if @project.users[0] %>
+<p>
+  <strong>Project owner:</strong>
+  <%= @project.users[0].name %>
+  (<%= @project.users[0].email %>)
+</p>
+<% end %>
+
 <h1>Samples</h1>
 
 <% if @samples.count == 0 %>
