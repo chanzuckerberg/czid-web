@@ -68,7 +68,7 @@
 
   &__page-3 {
     &__form {
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       height: 50px;
 
       div {
@@ -141,7 +141,10 @@
     &__subtitle {
       display: none;
     }
+  }
 
+  &__page-3,
+  &__page-4 {
     &__table {
       max-height: 250px;
 
