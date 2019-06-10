@@ -1,13 +1,16 @@
-import React from "react";
 import cx from "classnames";
 import { difference, find, isEmpty, union } from "lodash/fp";
+import React from "react";
 
-import PropTypes from "~/components/utils/propTypes";
-import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
+import Tabs from "~/components/ui/controls/Tabs";
+import PropTypes from "~/components/utils/propTypes";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 
 import cs from "./map_preview_sidebar.scss";
+
+const TABS = ["Summary Info", "Samples"];
 
 export default class MapPreviewSidebar extends React.Component {
   constructor(props) {
@@ -227,9 +230,16 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   render() {
-    const { className, samples } = this.props;
+    const { className, currentTab, onTabChange, samples } = this.props;
     return (
       <div className={cx(className, cs.sidebar)}>
+        <Tabs
+          className={cs.tabs}
+          hideBorder
+          onChange={onTabChange}
+          tabs={TABS}
+          value={currentTab}
+        />
         {samples.length === 0 ? this.renderNoData() : this.renderTable()}
       </div>
     );
@@ -238,15 +248,18 @@ export default class MapPreviewSidebar extends React.Component {
 
 MapPreviewSidebar.defaultProps = {
   activeColumns: ["sample"],
-  protectedColumns: ["sample"]
+  protectedColumns: ["sample"],
+  currentTab: "Summary Info"
 };
 
 MapPreviewSidebar.propTypes = {
   activeColumns: PropTypes.array,
   className: PropTypes.string,
+  currentTab: PropTypes.string,
   initialSelectedSampleIds: PropTypes.instanceOf(Set),
   onSampleClicked: PropTypes.func,
   onSelectionUpdate: PropTypes.func,
+  onTabChange: PropTypes.func,
   protectedColumns: PropTypes.array,
   samples: PropTypes.array,
   selectableIds: PropTypes.array.isRequired

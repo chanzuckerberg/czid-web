@@ -104,6 +104,7 @@ class DiscoveryView extends React.Component {
         mapPreviewedSampleIds: [],
         mapPreviewedSamples: [],
         mapSidebarSelectedSampleIds: new Set(),
+        mapSidebarTab: "Summary Info",
         project: null,
         projectDimensions: [],
         projectId: projectId,
@@ -731,6 +732,10 @@ class DiscoveryView extends React.Component {
     this.setState({ mapSidebarSelectedSampleIds });
   };
 
+  handleMapSidebarTabChange = mapSidebarTab => {
+    this.setState({ mapSidebarTab });
+  };
+
   renderRightPane = () => {
     const { allowedFeatures } = this.props;
     const {
@@ -744,6 +749,7 @@ class DiscoveryView extends React.Component {
       mapPreviewedSampleIds,
       mapPreviewedSamples,
       mapSidebarSelectedSampleIds,
+      mapSidebarTab,
       projectDimensions,
       projects,
       sampleDimensions,
@@ -760,9 +766,11 @@ class DiscoveryView extends React.Component {
           currentTab === "samples" &&
           currentDisplay === "map" && (
             <MapPreviewSidebar
+              currentTab={mapSidebarTab}
               initialSelectedSampleIds={mapSidebarSelectedSampleIds}
               onSampleClicked={this.handleSampleSelected}
               onSelectionUpdate={this.handleMapSidebarSelectUpdate}
+              onTabChange={this.handleMapSidebarTabChange}
               ref={mapPreviewSidebar =>
                 (this.mapPreviewSidebar = mapPreviewSidebar)
               }
