@@ -11,7 +11,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
     end
 
     describe "GET json" do
-      it "sees correct AMR data" do
+      it "sees correct AMR data from multiple samples" do
         # Create a test sample (in a project, as required) that contains Amr data.
         # Note that pipeline_runs_data needs to have two attributes in order for the sample
         # to be available for the AmrHeatmapController: a job_status equal to the constant
@@ -19,20 +19,31 @@ RSpec.describe AmrHeatmapController, type: :controller do
         # containing an OutputState for amr_counts with state equal to the constant
         # STATUS_LOADED as defined in the PipelineRun class.
         project = create(:project, users: [@admin, @joe])
-        sample = create(:sample, project: project, pipeline_runs_data: [{
-                          amr_counts_data: [{
-                            gene: "IamA_Gene"
-                          }],
-                          job_status: PipelineRun::STATUS_CHECKED,
-                          output_states_data: [{
-                            output: "amr_counts",
-                            state: PipelineRun::STATUS_LOADED
-                          }]
-                        }])
+        sample_one = create(:sample, project: project, pipeline_runs_data: [{
+                              amr_counts_data: [{
+                                gene: "IamA_Gene"
+                              }],
+                              job_status: PipelineRun::STATUS_CHECKED,
+                              output_states_data: [{
+                                output: "amr_counts",
+                                state: PipelineRun::STATUS_LOADED
+                              }]
+                            }])
+        sample_two = create(:sample, project: project, pipeline_runs_data: [{
+                              amr_counts_data: [{
+                                gene: "AnoT_Her"
+                              }],
+                              job_status: PipelineRun::STATUS_CHECKED,
+                              output_states_data: [{
+                                output: "amr_counts",
+                                state: PipelineRun::STATUS_LOADED
+                              }]
+                            }])
 
-        @amr_counts = sample.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
+        amr_counts_one = sample_one.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
+        amr_counts_two = sample_two.first_pipeline_run.amr_counts[0]
 
-        get :amr_counts, params: { id: [sample["id"]] }
+        get :amr_counts, params: { sampleIds: [sample_one["id"], sample_two["id"]] }
         expect(response.content_type).to eq("application/json")
         expect(response).to have_http_status(:ok)
 
@@ -40,23 +51,94 @@ RSpec.describe AmrHeatmapController, type: :controller do
         # The created_at and updated_at fields seem to differ in format (though not content)
         # when this is run, so they are left them out of the comparison.
         json_response = JSON.parse(response.body)
-        expect(json_response[0]).to include_json(sample_id: sample["id"],
-                                                 sample_name: sample["name"],
+        expect(json_response[0]).to include_json(sample_id: sample_one["id"],
+                                                 sample_name: sample_one["name"],
                                                  amr_counts: [{
-                                                   id: @amr_counts["id"],
-                                                   gene: @amr_counts["gene"],
-                                                   allele: @amr_counts["allele"],
-                                                   coverage: @amr_counts["coverage"],
-                                                   depth: @amr_counts["depth"],
-                                                   pipeline_run_id: @amr_counts["pipeline_run_id"],
-                                                   drug_family: @amr_counts["drug_family"]
+                                                   id: amr_counts_one["id"],
+                                                   gene: amr_counts_one["gene"],
+                                                   allele: amr_counts_one["allele"],
+                                                   coverage: amr_counts_one["coverage"],
+                                                   depth: amr_counts_one["depth"],
+                                                   pipeline_run_id: amr_counts_one["pipeline_run_id"],
+                                                   drug_family: amr_counts_one["drug_family"]
                                                  }])
+        expect(json_response[1]).to include_json(sample_id: sample_two["id"],
+                                                 sample_name: sample_two["name"],
+                                                 amr_counts: [{
+                                                   id: amr_counts_two["id"],
+                                                   gene: amr_counts_two["gene"],
+                                                   allele: amr_counts_two["allele"],
+                                                   coverage: amr_counts_two["coverage"],
+                                                   depth: amr_counts_two["depth"],
+                                                   pipeline_run_id: amr_counts_two["pipeline_run_id"],
+                                                   drug_family: amr_counts_two["drug_family"]
+                                                 }])
+      end
+      it "works even if a sample doesn't exist" do
+        # Create a test sample (in a project, as required) that contains AMR data.
+        project = create(:project, users: [@admin, @joe])
+        sample_one = create(:sample, project: project, pipeline_runs_data: [{
+                              amr_counts_data: [{
+                                gene: "IamA_Gene"
+                              }],
+                              job_status: PipelineRun::STATUS_CHECKED,
+                              output_states_data: [{
+                                output: "amr_counts",
+                                state: PipelineRun::STATUS_LOADED
+                              }]
+                            }])
+
+        amr_counts_one = sample_one.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
+
+        get :amr_counts, params: { sampleIds: [sample_one["id"], 99_999] } # Sample ID 99999 should not exist
+        expect(response.content_type).to eq("application/json")
+        expect(response).to have_http_status(:ok)
+
+        # Compare controller output to our test sample.
+        # The created_at and updated_at fields seem to differ in format (though not content)
+        # when this is run, so they are left them out of the comparison.
+        json_response = JSON.parse(response.body)
+        expect(json_response[0]).to include_json(sample_id: sample_one["id"],
+                                                 sample_name: sample_one["name"],
+                                                 amr_counts: [{
+                                                   id: amr_counts_one["id"],
+                                                   gene: amr_counts_one["gene"],
+                                                   allele: amr_counts_one["allele"],
+                                                   coverage: amr_counts_one["coverage"],
+                                                   depth: amr_counts_one["depth"],
+                                                   pipeline_run_id: amr_counts_one["pipeline_run_id"],
+                                                   drug_family: amr_counts_one["drug_family"]
+                                                 }],
+                                                 error: "")
+        expect(json_response[1]).to include_json(sample_id: "99999",
+                                                 sample_name: "",
+                                                 amr_counts: [],
+                                                 error: "sample not found")
+      end
+      it "works even if a sample doesn't have amr counts" do
+        # Create a test sample without AMR data.
+        project = create(:project, users: [@admin, @joe])
+        sample_one = create(:sample, project: project, pipeline_runs_data: [{
+                              job_status: PipelineRun::STATUS_CHECKED
+                            }])
+
+        get :amr_counts, params: { sampleIds: [sample_one["id"]] } # Sample ID 99999 should not exist
+        expect(response.content_type).to eq("application/json")
+        expect(response).to have_http_status(:ok)
+
+        # Compare controller output to our test sample.
+        json_response = JSON.parse(response.body)
+        expect(json_response[0]).to include_json(sample_id: sample_one["id"],
+                                                 sample_name: sample_one["name"],
+                                                 amr_counts: [],
+                                                 error: "")
       end
     end
   end
 
   # Regular Joe context
   # Ensure that this feature cannot be accessed by non-admin users
+  # TODO: Add a test case where the user tries to access a sample that they don't have access to.
   context 'Joe' do
     before do
       sign_in @joe
