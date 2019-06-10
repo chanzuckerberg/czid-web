@@ -22,11 +22,15 @@
   .noData {
     color: $medium-grey;
     margin: 20px;
+    text-align: center;
   }
 
   .tabs {
-    margin-top: 20px;
-    margin-left: 10px;
+    margin: 15px 10px;
+  }
+
+  .summaryInfo {
+    width: initial;
   }
 }
 

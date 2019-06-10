@@ -753,12 +753,17 @@ class DiscoveryView extends React.Component {
       projectDimensions,
       projects,
       sampleDimensions,
-      samples,
       search,
       showStats,
     } = this.state;
 
     const filterCount = this.getFilterCount();
+    const computedProjectDimensions =
+      filterCount || search ? filteredProjectDimensions : projectDimensions;
+    const computedSampleDimensions =
+      filterCount || search ? filteredSampleDimensions : sampleDimensions;
+    const loading = loadingDimensions || loadingStats;
+    const projectStats = { count: projects.length };
 
     return (
       <div className={cs.rightPane}>
@@ -766,15 +771,22 @@ class DiscoveryView extends React.Component {
           currentTab === "samples" &&
           currentDisplay === "map" && (
             <MapPreviewSidebar
+              allowedFeatures={allowedFeatures}
               currentTab={mapSidebarTab}
+              discoveryCurrentTab={currentTab}
               initialSelectedSampleIds={mapSidebarSelectedSampleIds}
+              loading={loading}
               onSampleClicked={this.handleSampleSelected}
               onSelectionUpdate={this.handleMapSidebarSelectUpdate}
               onTabChange={this.handleMapSidebarTabChange}
+              projectDimensions={computedProjectDimensions}
+              projectStats={projectStats}
               ref={mapPreviewSidebar =>
                 (this.mapPreviewSidebar = mapPreviewSidebar)
               }
+              sampleDimensions={computedSampleDimensions}
               samples={mapPreviewedSamples}
+              sampleStats={filteredSampleStats}
               selectableIds={mapPreviewedSampleIds}
             />
           )}
@@ -783,22 +795,12 @@ class DiscoveryView extends React.Component {
             currentTab === "projects") && (
             <DiscoverySidebar
               allowedFeatures={allowedFeatures}
-              className={cs.sidebar}
-              samples={samples}
-              projects={projects}
-              sampleDimensions={
-                filterCount || search
-                  ? filteredSampleDimensions
-                  : sampleDimensions
-              }
-              sampleStats={filteredSampleStats}
-              projectDimensions={
-                filterCount || search
-                  ? filteredProjectDimensions
-                  : projectDimensions
-              }
               currentTab={currentTab}
-              loading={loadingDimensions || loadingStats}
+              loading={loading}
+              projectDimensions={computedProjectDimensions}
+              projectStats={projectStats}
+              sampleDimensions={computedSampleDimensions}
+              sampleStats={filteredSampleStats}
             />
           )}
       </div>
