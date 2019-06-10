@@ -68,7 +68,8 @@ class BaseMap extends React.Component {
           onViewportChange={this.updateViewport}
           mapStyle={styleURL}
           onLoad={this.setCompactAttribution}
-          style={{ position: "absolute" }} // Fixes div in Safari
+          // Style prop applies to the container and all overlays
+          style={{ position: "absolute" }}
         >
           {tooltip}
           {markers}
@@ -107,12 +108,15 @@ BaseMap.defaultProps = {
   longitude: 0,
   zoom: 1.4,
   viewBounds: {
-    minLatitude: -60, // Limit panning too far north or south
+    // Limit panning too far north or south
+    minLatitude: -60,
     maxLatitude: 60,
     minLongitude: -180,
     maxLongitude: 180,
-    minZoom: 0.5, // Limit to whole-world view
-    maxZoom: 17 // Limit to city-level at most
+    // Limit to whole-world view
+    minZoom: 0.5,
+    // Limit to city-level at most
+    maxZoom: 17
   }
 };
 
