@@ -308,6 +308,9 @@ const getContigsSequencesByByteranges = (
 
 const getPhyloTree = id => get(`/phylo_trees/${id}/show.json`);
 
+const validatePhyloTreeName = name =>
+  get(`/phylo_trees/validate_name?name=${name}`);
+
 const getSamplesLocations = ({ domain, filters, projectId, search }) =>
   get("/locations/sample_locations.json", {
     params: {
@@ -327,12 +330,16 @@ export {
   deleteSample,
   getAlignmentData,
   getAllHostGenomes,
-  getSamplesLocations,
+  getContigsSequencesByByteranges,
+  getCoverageVizData,
+  getCoverageVizSummary,
+  getPhyloTree,
   getProjectDimensions,
   getProjects,
   getSampleDimensions,
   getSampleReportInfo,
   getSamples,
+  getSamplesLocations,
   getSampleStats,
   getSamplesV1,
   getSampleTaxons,
@@ -348,10 +355,7 @@ export {
   shortenUrl,
   uploadFileToUrl,
   uploadFileToUrlWithRetries,
+  validatePhyloTreeName,
   validateSampleFiles,
-  validateSampleNames,
-  getCoverageVizSummary,
-  getCoverageVizData,
-  getContigsSequencesByByteranges,
-  getPhyloTree
+  validateSampleNames
 };

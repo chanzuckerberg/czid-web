@@ -3,6 +3,7 @@ class PhyloTreesController < ApplicationController
   include SamplesHelper
   include PipelineRunsHelper
   include ElasticsearchHelper
+  include ParameterSanitization
 
   before_action :authenticate_user!
   before_action :no_demo_user, only: :create
@@ -24,7 +25,7 @@ class PhyloTreesController < ApplicationController
 
   READ_ACTIONS = [:show, :download].freeze
   EDIT_ACTIONS = [:retry].freeze
-  OTHER_ACTIONS = [:new, :create, :index, :choose_taxon].freeze
+  OTHER_ACTIONS = [:new, :create, :index, :choose_taxon, :validate_name].freeze
 
   power :phylo_trees, map: { EDIT_ACTIONS => :updatable_phylo_trees }, as: :phylo_trees_scope
 
@@ -162,6 +163,17 @@ class PhyloTreesController < ApplicationController
     end
   end
 
+  def validate_name
+    # since current flow uses a sanitized name, lets use the same
+    name = sanitize_title_name(params[:name])
+    pt = PhyloTree.new(name: name)
+    pt.valid?
+    render json: {
+      valid: !pt.errors.key?(:name),
+      sanitizedName: name
+    }
+  end
+
   def retry
     if @phylo_tree.status == PhyloTree::STATUS_FAILED
       @phylo_tree.update(status: PhyloTree::STATUS_INITIALIZED,
@@ -196,7 +208,7 @@ class PhyloTreesController < ApplicationController
     @project = current_power.updatable_projects.find(params[:projectId])
     pipeline_run_ids = params[:pipelineRunIds].map(&:to_i)
 
-    name = sanitize(params[:name])
+    name = sanitize_title_name(params[:name])
     tax_name = params[:taxName]
     dag_branch = if current_user.admin?
                    params[:dagBranch] || "master"
