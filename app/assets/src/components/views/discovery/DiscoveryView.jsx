@@ -104,7 +104,7 @@ class DiscoveryView extends React.Component {
         mapPreviewedSampleIds: [],
         mapPreviewedSamples: [],
         mapSidebarSelectedSampleIds: new Set(),
-        mapSidebarTab: "Summary Info",
+        mapSidebarTab: "Summary",
         project: null,
         projectDimensions: [],
         projectId: projectId,

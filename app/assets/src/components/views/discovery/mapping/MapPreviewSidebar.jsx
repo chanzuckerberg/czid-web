@@ -10,7 +10,7 @@ import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 
 import cs from "./map_preview_sidebar.scss";
 
-const TABS = ["Summary Info", "Samples"];
+const TABS = ["Summary", "Samples"];
 
 export default class MapPreviewSidebar extends React.Component {
   constructor(props) {
@@ -249,7 +249,7 @@ export default class MapPreviewSidebar extends React.Component {
 MapPreviewSidebar.defaultProps = {
   activeColumns: ["sample"],
   protectedColumns: ["sample"],
-  currentTab: "Summary Info"
+  currentTab: "Summary"
 };
 
 MapPreviewSidebar.propTypes = {
