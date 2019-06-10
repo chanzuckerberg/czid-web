@@ -16,7 +16,6 @@ RSpec.describe PhyloTreesController, type: :controller do
         get :validate_name, params: { format: "json", name: name }
 
         json_response = JSON.parse(response.body)
-        puts json_response
         expect(json_response).to include_json(valid: true, sanitizedName: name)
       end
     end

@@ -582,9 +582,9 @@ class PhyloTreeCreation extends React.Component {
             ) : (
               <LoadingIcon />
             )}
-            <div className="wizard__page-3__notifications">
-              {this.renderNotifications()}
-            </div>
+          </div>
+          <div className="wizard__page-3__notifications">
+            {this.renderNotifications()}
           </div>
         </Wizard.Page>
       ),

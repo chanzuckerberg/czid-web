@@ -164,7 +164,7 @@ class PhyloTreesController < ApplicationController
   end
 
   def validate_name
-    # since current flow uses a sanitized name, lets use the same
+    # current flow saves a sanitized name, thus use the same sanitized name to check
     name = sanitize_title_name(params[:name])
     pt = PhyloTree.new(name: name)
     pt.valid?
