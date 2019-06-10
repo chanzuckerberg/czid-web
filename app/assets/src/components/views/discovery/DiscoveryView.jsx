@@ -771,8 +771,8 @@ class DiscoveryView extends React.Component {
             />
           )}
         {showStats &&
-          ["samples", "projects"].includes(currentTab) &&
-          currentDisplay === "table" && (
+          ((currentTab === "samples" && currentDisplay === "table") ||
+            currentTab === "projects") && (
             <DiscoverySidebar
               allowedFeatures={allowedFeatures}
               className={cs.sidebar}
