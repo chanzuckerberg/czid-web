@@ -4,7 +4,7 @@ import { Icon } from "semantic-ui-react";
 
 const GlobeLinedIcon = props => {
   const { className } = props;
-  return <Icon name="fa-globe" className={className} />;
+  return <Icon name="globe" className={className} />;
 };
 
 GlobeLinedIcon.propTypes = {
