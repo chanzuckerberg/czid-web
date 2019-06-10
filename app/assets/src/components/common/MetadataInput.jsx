@@ -5,8 +5,13 @@ import { isArray } from "lodash";
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox from "../ui/controls/GeoSearchInputBox";
+import TaxonFilter from "~/components/common/filters";
 
 class MetadataInput extends React.Component {
+  testingDropdown = (a, b, c) => {
+    console.log("testingDropdown", a, b, c);
+  };
+
   render() {
     const {
       value,
@@ -16,6 +21,8 @@ class MetadataInput extends React.Component {
       className,
       isHuman
     } = this.props;
+
+    let testingSelected = [];
 
     if (isArray(metadataType.options)) {
       const options = metadataType.options.map(option => ({
@@ -47,15 +54,21 @@ class MetadataInput extends React.Component {
       );
     } else if (metadataType.dataType === "location") {
       return (
-        <GeoSearchInputBox
-          className={className}
-          // Calls save on selection
-          onResultSelect={({ result }) =>
-            onChange(metadataType.key, result, true)
-          }
-          value={value}
+        <TaxonFilter
+          onChange={this.testingDropdown}
+          selected={testingSelected}
         />
       );
+      // return (
+      //   <GeoSearchInputBox
+      //     className={className}
+      //     // Calls save on selection
+      //     onResultSelect={({ result }) =>
+      //       onChange(metadataType.key, result, true)
+      //     }
+      //     value={value}
+      //   />
+      // );
     } else {
       return (
         <Input
