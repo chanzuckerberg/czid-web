@@ -747,12 +747,6 @@ class PipelineSampleReport extends React.Component {
     );
   };
 
-  handleViewClicked = (_, data) => {
-    this.setState({ view: data.name });
-    const friendlyName = data.name.replace(/_/g, "-");
-    logAnalyticsEvent(`PipelineSampleReport_${friendlyName}-view-menu_clicked`);
-  };
-
   // path to NCBI
   gotoNCBI = params => {
     const { taxId } = params;
@@ -1338,8 +1332,14 @@ class PipelineSampleReport extends React.Component {
         advanced_filter_tag_list={advanced_filter_tag_list}
         categories_filter_tag_list={categories_filter_tag_list}
         subcats_filter_tag_list={subcats_filter_tag_list}
-        view={this.state.view}
-        onViewClicked={this.handleViewClicked}
+        view={this.props.view}
+        onViewClick={(_, data) => {
+          this.props.onViewClick(data);
+          const friendlyName = data.name.replace(/_/g, "-");
+          logAnalyticsEvent(
+            `PipelineSampleReport_${friendlyName}-view-menu_clicked`
+          );
+        }}
         parent={this}
       />
     );
@@ -1410,19 +1410,6 @@ function AdvancedFilterTagList({ threshold, i, parent }) {
 }
 
 class RenderMarkup extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      view: this.props.view || "table"
-    };
-  }
-
-  componentWillReceiveProps(newProps) {
-    if (newProps.view && this.state.view != newProps.view) {
-      this.setState({ view: newProps.view });
-    }
-  }
-
   renderMenu() {
     return (
       <Menu icon floated="right" className="report-top-menu">
@@ -1430,8 +1417,8 @@ class RenderMarkup extends React.Component {
           trigger={
             <Menu.Item
               name="table"
-              active={this.state.view == "table"}
-              onClick={this.props.onViewClicked}
+              active={this.props.view == "table"}
+              onClick={this.props.onViewClick}
             >
               <Icon name="table" />
             </Menu.Item>
@@ -1444,8 +1431,8 @@ class RenderMarkup extends React.Component {
           trigger={
             <Menu.Item
               name="tree"
-              active={this.state.view == "tree"}
-              onClick={this.props.onViewClicked}
+              active={this.props.view == "tree"}
+              onClick={this.props.onViewClick}
             >
               <Icon name="fork" />
             </Menu.Item>
@@ -1535,7 +1522,7 @@ class RenderMarkup extends React.Component {
               onChange={parent.handleSpecificityChange}
             />
           </div>
-          {this.state.view == "tree" && (
+          {this.props.view == "tree" && (
             <div className="filter-lists-element">
               <MetricPicker
                 options={parent.treeMetrics}
@@ -1544,7 +1531,7 @@ class RenderMarkup extends React.Component {
               />
             </div>
           )}
-          {this.state.view == "table" && (
+          {this.props.view == "table" && (
             <div className="filter-lists-element">
               <MinContigSizeFilter
                 value={parent.state.minContigSize}
@@ -1613,8 +1600,8 @@ class RenderMarkup extends React.Component {
                 </div>
                 {filter_row_stats}
               </div>
-              {this.state.view == "table" && this.renderTable()}
-              {this.state.view == "tree" && this.renderTree()}
+              {this.props.view == "table" && this.renderTable()}
+              {this.props.view == "tree" && this.renderTree()}
               {parent.state.loading && (
                 <div className="loading-container">
                   <LoadingLabel />

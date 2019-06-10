@@ -1,9 +1,9 @@
 import React from "react";
 import SvgSaver from "svgsaver";
 
-import PropTypes from "~/components/utils/propTypes";
 import { deleteSample } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
+import PropTypes from "~/components/utils/propTypes";
 import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadButtonDropdown";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import {
@@ -90,7 +90,7 @@ class SampleViewControls extends React.Component {
   }
 
   checkTaxonTreeVisible() {
-    if (!this.getNode()) {
+    if (!this.getTaxonTreeNode()) {
       window.alert(
         "Switch to the Taxon Tree View first before downloading it as an image."
       );
@@ -100,10 +100,13 @@ class SampleViewControls extends React.Component {
   }
 
   getImageDownloadOptions() {
-    return [
-      { text: "Download Taxon Tree as SVG", value: "taxon_svg" },
-      { text: "Download Taxon Tree as PNG", value: "taxon_png" }
-    ];
+    if (this.props.view === "tree") {
+      return [
+        { text: "Download Taxon Tree as SVG", value: "taxon_svg" },
+        { text: "Download Taxon Tree as PNG", value: "taxon_png" }
+      ];
+    }
+    return [];
   }
 
   render() {
@@ -145,7 +148,8 @@ SampleViewControls.propTypes = {
     // TODO (gdingle): standardize on string or number
     background_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
   }),
-  canEdit: PropTypes.bool
+  canEdit: PropTypes.bool,
+  view: PropTypes.string
 };
 
 export default SampleViewControls;
