@@ -24,15 +24,12 @@ class Location < ApplicationRecord
     location_api_request(endpoint_query)
   end
 
-  # Search request to Location IQ API by country and state
-  def self.geosearch_by_country_and_state(country_name, state_name)
-    endpoint_query = "#{GEOSEARCH_BASE_QUERY}&country=#{country_name}&state=#{state_name}"
-    location_api_request(endpoint_query)
-  end
-
-  # Search request to Location IQ API by country, state, and subdivision
-  def self.geosearch_by_country_state_subdivision(country_name, state_name, subdivision_name)
-    endpoint_query = "#{GEOSEARCH_BASE_QUERY}&country=#{country_name}&state=#{state_name}&county=#{subdivision_name}"
+  # Search request to Location IQ API by country, state, and subdivision (or left subset)
+  def self.geosearch_by_levels(country_name, state_name = "", subdivision_name = "")
+    # Note: Don't use field="" because provider results differ vs. not including the param at all.
+    endpoint_query = "#{GEOSEARCH_BASE_QUERY}&country=#{country_name}"
+    endpoint_query += "&state=#{state_name}" if state_name.present?
+    endpoint_query += "&county=#{subdivision_name}" if subdivision_name.present?
     location_api_request(endpoint_query)
   end
 
@@ -51,6 +48,7 @@ class Location < ApplicationRecord
   def self.geosearch_by_osm_id(osm_id, osm_type)
     osm_type = osm_type[0].capitalize # (N)ode, (W)ay, or (R)elation
     endpoint_query = "reverse.php?osm_id=#{osm_id}&osm_type=#{osm_type}"
+    puts "foobar 11:08am: ", endpoint_query
     location_api_request(endpoint_query)
   end
 
@@ -76,8 +74,8 @@ class Location < ApplicationRecord
   def self.check_and_restrict_specificity(location, host_genome_name)
     # We don't want Human locations with city
     if host_genome_name == "Human" && location.city_name.present?
-      # Redo the search for just the subdivision/country/state
-      success, resp = geosearch_by_country_state_subdivision(location.country_name, location.state_name, location.subdivision_name)
+      # Redo the search for just the subdivision/state/country
+      success, resp = geosearch_by_levels(location.country_name, location.state_name, location.subdivision_name)
       unless success && !resp.empty?
         raise "Couldn't find #{location.country_name}, #{location.state_name}, #{location.subdivision_name} (country, state, subdivision)"
       end
