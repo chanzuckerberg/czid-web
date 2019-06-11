@@ -48,7 +48,8 @@ class SampleView extends React.Component {
       sidebarVisible: false,
       sidebarTaxonModeConfig: null,
       coverageVizDataByTaxon: null,
-      nameType: Cookies.get("name_type") || "Scientific name" // "Scientific name" or "Common name"
+      nameType: Cookies.get("name_type") || "Scientific name", // "Scientific name" or "Common name"
+      view: "table"
     };
 
     this.gsnapFilterStatus = this.generateGsnapFilterStatus();
@@ -375,9 +376,11 @@ class SampleView extends React.Component {
             reportPageParams={this.props.reportPageParams}
             onTaxonClick={this.handleTaxonClick}
             onCoverageVizClick={this.handleCoverageVizClick}
+            onViewClick={this.handleViewClick}
             savedParamValues={this.props.savedParamValues}
             nameType={this.state.nameType}
             onNameTypeChange={this.handleNameTypeChange}
+            view={this.state.view}
           />
         );
       } else if (this.pipelineInProgress()) {
@@ -491,6 +494,10 @@ class SampleView extends React.Component {
       get("pipeline_version", this.props.reportPageParams)
     );
 
+  handleViewClick = data => {
+    this.setState({ view: data.name });
+  };
+
   render() {
     const versionDisplay = this.renderVersionDisplay();
 
@@ -597,6 +604,7 @@ class SampleView extends React.Component {
                 reportDetails={reportDetails}
                 reportPageParams={reportPageParams}
                 canEdit={this.props.canEdit}
+                view={this.state.view}
               />
             </ViewHeader.Controls>
           </ViewHeader>
