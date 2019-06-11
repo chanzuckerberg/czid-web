@@ -11,8 +11,6 @@ import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 
 import cs from "./map_preview_sidebar.scss";
 
-const TABS = ["Summary", "Samples"];
-
 export default class MapPreviewSidebar extends React.Component {
   constructor(props) {
     super(props);
@@ -184,6 +182,27 @@ export default class MapPreviewSidebar extends React.Component {
     onSelectionUpdate && onSelectionUpdate(selectedSampleIds);
   };
 
+  computeTabs = () => {
+    return [
+      {
+        label: (
+          <div>
+            <span className={cs.tabLabel}>Summary</span>
+          </div>
+        ),
+        value: "Summary"
+      },
+      {
+        label: (
+          <div>
+            <span className={cs.tabLabel}>Samples</span>
+          </div>
+        ),
+        value: "Samples"
+      }
+    ];
+  };
+
   reset = () => {
     this.infiniteTable && this.infiniteTable.reset();
     this.setSelectedSampleIds(new Set());
@@ -268,7 +287,7 @@ export default class MapPreviewSidebar extends React.Component {
           className={cs.tabs}
           hideBorder
           onChange={onTabChange}
-          tabs={TABS}
+          tabs={this.computeTabs()}
           value={currentTab}
         />
         {currentTab === "Summary"

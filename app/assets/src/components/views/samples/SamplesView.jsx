@@ -403,6 +403,7 @@ class SamplesView extends React.Component {
   renderMap = () => {
     const {
       mapLocationData,
+      mapPreviewedLocationId,
       mapTilerKey,
       onMapMarkerClick,
       onMapTooltipTitleClick
@@ -414,6 +415,7 @@ class SamplesView extends React.Component {
           mapTilerKey={mapTilerKey}
           onMarkerClick={onMapMarkerClick}
           onTooltipTitleClick={onMapTooltipTitleClick}
+          previewedLocationId={mapPreviewedLocationId}
         />
       </div>
     );
@@ -477,6 +479,7 @@ SamplesView.propTypes = {
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   currentDisplay: PropTypes.string.isRequired,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
+  mapPreviewedLocationId: PropTypes.number,
   mapPreviewedSamples: PropTypes.array,
   mapSidebarSelectedSampleIds: PropTypes.instanceOf(Set),
   mapTilerKey: PropTypes.string,

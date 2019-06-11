@@ -836,6 +836,7 @@ class DiscoveryView extends React.Component {
       showFilters,
       showStats,
       visualizations,
+      mapPreviewedLocationId,
       mapPreviewedSamples,
       mapSidebarSelectedSampleIds,
     } = this.state;
@@ -915,6 +916,7 @@ class DiscoveryView extends React.Component {
                       allowedFeatures={allowedFeatures}
                       currentDisplay={currentDisplay}
                       mapLocationData={mapLocationData}
+                      mapPreviewedLocationId={mapPreviewedLocationId}
                       mapPreviewedSamples={mapPreviewedSamples}
                       mapSidebarSelectedSampleIds={mapSidebarSelectedSampleIds}
                       mapTilerKey={mapTilerKey}
