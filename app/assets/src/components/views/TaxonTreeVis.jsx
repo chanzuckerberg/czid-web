@@ -352,6 +352,7 @@ class TaxonTreeVis extends React.Component {
           ref={container => {
             this.treeContainer = container;
           }}
+          style={{ overflowX: "scroll" }}
         >
           <div className="pathogen-labels">{this.renderPathogenLabels()}</div>
         </div>
