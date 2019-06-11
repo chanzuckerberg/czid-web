@@ -15,7 +15,7 @@ const TaxonLevels = [
   "class",
   "phylum",
   "kingdom",
-  "superkingdom"
+  "superkingdom",
 ];
 class TaxonTreeVis extends React.Component {
   constructor(props) {
@@ -23,7 +23,7 @@ class TaxonTreeVis extends React.Component {
 
     this.state = {
       nodeHover: null,
-      taxonSidebarData: null
+      taxonSidebarData: null,
     };
 
     this.nameType = this.props.nameType;
@@ -36,12 +36,12 @@ class TaxonTreeVis extends React.Component {
     this.metrics = {
       aggregatescore: {
         label: "Aggregate Score",
-        agg: arr => Math.max(...arr)
+        agg: arr => Math.max(...arr),
       },
       nt_r: { label: "NT r", agg: arr => arr.reduce((a, b) => a + b, 0) },
       nt_rpm: { label: "NT rpm", agg: arr => arr.reduce((a, b) => a + b, 0) },
       nr_r: { label: "NR r", agg: arr => arr.reduce((a, b) => a + b, 0) },
-      nr_rpm: { label: "NR rpm", agg: arr => arr.reduce((a, b) => a + b, 0) }
+      nr_rpm: { label: "NR rpm", agg: arr => arr.reduce((a, b) => a + b, 0) },
     };
 
     this.handleNodeHover = this.handleNodeHover.bind(this);
@@ -65,7 +65,7 @@ class TaxonTreeVis extends React.Component {
           this.persistCollapsedInUrl,
           "TaxonTreeVis_node-collapsed-state_changed"
         ),
-        collapsed: this.getCollapsedInUrl() || new Set()
+        collapsed: this.getCollapsedInUrl() || new Set(),
       }
     );
     this.treeVis.update();
@@ -133,7 +133,7 @@ class TaxonTreeVis extends React.Component {
     logAnalyticsEvent("TaxonTreeVis_node_hovered", {
       id: node.id,
       scientificName: node.data.scientificName,
-      commonName: node.data.commonName
+      commonName: node.data.commonName,
     });
   }
 
@@ -158,13 +158,13 @@ class TaxonTreeVis extends React.Component {
       taxonName,
       taxonValues: {
         NT: taxInfo.NT,
-        NR: taxInfo.NR
-      }
+        NR: taxInfo.NR,
+      },
     });
     logAnalyticsEvent("TaxonTreeVis_node-label_clicked", {
       taxonId: taxInfo.tax_id,
       taxonName,
-      taxLevel: taxInfo.tax_level
+      taxLevel: taxInfo.tax_level,
     });
   }
 
@@ -243,7 +243,7 @@ class TaxonTreeVis extends React.Component {
             scientificName:
               taxon.lineage[`${TaxonLevels[i]}_name`] ||
               `Uncategorized ${this.capitalize(TaxonLevels[i])}`,
-            lineageRank: TaxonLevels[i]
+            lineageRank: TaxonLevels[i],
           });
           seenNodes.add(nodeId);
         }
@@ -271,11 +271,11 @@ class TaxonTreeVis extends React.Component {
           nt_zscore: taxon.NT.zscore,
           nr_r: taxon.NR.r,
           nr_rpm: parseFloat(taxon.NR.rpm),
-          nr_zscore: taxon.NR.zscore
+          nr_zscore: taxon.NR.zscore,
         },
         modalData: {
-          taxInfo: taxon
-        }
+          taxInfo: taxon,
+        },
       });
       seenNodes.add(nodeId);
     });
@@ -375,9 +375,9 @@ TaxonTreeVis.propTypes = {
   topTaxa: PropTypes.array,
   backgroundData: PropTypes.shape({
     id: PropTypes.number,
-    name: PropTypes.string
+    name: PropTypes.string,
   }),
-  onTaxonClick: PropTypes.func.isRequired
+  onTaxonClick: PropTypes.func.isRequired,
 };
 
 export default TaxonTreeVis;
