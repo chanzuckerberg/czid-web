@@ -129,6 +129,13 @@ $font-weight-heavy: 800;
   text-transform: uppercase;
 }
 
+@mixin font-tag-s {
+  font-size: 11px;
+  line-height: 11px;
+  letter-spacing: 0.8px;
+  font-weight: 400;
+}
+
 @mixin viz-label {
   font-size: 9px;
   line-height: 13px;
