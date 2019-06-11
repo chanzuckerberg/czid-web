@@ -886,7 +886,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def automatic_restart_allowed?
-    return false if sample.user.admin?
+    return false unless pipeline_branch.nil?
     previous_pipeline_runs_same_version.to_a.none?(&:failed?)
   end
 
