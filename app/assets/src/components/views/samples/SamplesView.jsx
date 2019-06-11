@@ -12,8 +12,6 @@ import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import { Menu, MenuItem } from "~ui/controls/Menu";
-import BulletListIcon from "~ui/icons/BulletListIcon";
-import GlobeLinedIcon from "~ui/icons/GlobeLinedIcon";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import SaveIcon from "~ui/icons/SaveIcon";
@@ -388,11 +386,13 @@ class SamplesView extends React.Component {
                 `SamplesView_${display}-switch_clicked`
               )}
             >
-              {display === "map" ? (
-                <GlobeLinedIcon className={cs.icon} />
-              ) : (
-                <BulletListIcon className={cs.icon} />
-              )}
+              <i
+                className={cx(
+                  "fa",
+                  display === "map" ? "fa-globe" : "fa-list-ul",
+                  cs.icon
+                )}
+              />
             </MenuItem>
           ))}
         </Menu>
