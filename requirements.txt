@@ -1,0 +1,3 @@
+aegea==2.3.6
+pyOpenSSL==19.0.0
+setuptools==41.0.1
