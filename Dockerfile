@@ -8,9 +8,9 @@ RUN apt-get update && apt-get install -y build-essential nodejs mysql-client pyt
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt-get update && apt-get install -y nodejs
 RUN pip install --upgrade pip 
-RUN pip install --upgrade setuptools
-RUN pip install --upgrade pyOpenSSL
-RUN pip install --upgrade aegea
+
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
 
 # Install chamber, for pulling secrets into the container.
 ADD https://github.com/segmentio/chamber/releases/download/v2.2.0/chamber-v2.2.0-linux-amd64 /bin/chamber
