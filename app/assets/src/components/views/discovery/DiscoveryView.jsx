@@ -717,7 +717,7 @@ class DiscoveryView extends React.Component {
         mapPreviewedLocationId: locationId,
         showStats: true
       },
-      () => this.refreshMapPreviewedSamples()
+      this.refreshMapPreviewedSamples
     );
   };
 
