@@ -183,19 +183,17 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   computeTabs = () => {
+    const { sampleStats } = this.props;
     return [
       {
-        label: (
-          <div>
-            <span className={cs.tabLabel}>Summary</span>
-          </div>
-        ),
+        label: "Summary",
         value: "Summary"
       },
       {
         label: (
           <div>
             <span className={cs.tabLabel}>Samples</span>
+            <span className={cs.tabCounter}>{(sampleStats || {}).count}</span>
           </div>
         ),
         value: "Samples"
