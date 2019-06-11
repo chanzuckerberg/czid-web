@@ -184,9 +184,10 @@ class MetadataTab extends React.Component {
         {validKeys.map(key => (
           <RequestContext.Consumer>
             {({ allowedFeatures }) => {
+              // TODO(jsheu): Migrate all to location_v2 after release
               if (
                 key === "collection_location_v2" &&
-                !allowedFeatures.includes("maqwdps")
+                !allowedFeatures.includes("maps")
               ) {
                 return null;
               }

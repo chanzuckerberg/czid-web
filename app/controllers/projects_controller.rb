@@ -498,6 +498,10 @@ class ProjectsController < ApplicationController
                              .includes(metadata_fields: [:host_genomes])
                              .map(&:metadata_fields).flatten.uniq.map(&:field_info)
               end
+    # TODO(jsheu): Migrate all to location_v2 after release
+    unless current_user.allowed_features.include?("mapssdfsdf")
+      results = results.reject { |f| f[:key] == "collection_location_v2" }
+    end
 
     render json: results
   end
