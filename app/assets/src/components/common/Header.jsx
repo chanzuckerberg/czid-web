@@ -13,7 +13,7 @@ import LogoIcon from "~ui/icons/LogoIcon";
 import {
   DISCOVERY_DOMAIN_MY_DATA,
   DISCOVERY_DOMAIN_ALL_DATA,
-  DISCOVERY_DOMAIN_PUBLIC
+  DISCOVERY_DOMAIN_PUBLIC,
 } from "~/components/views/discovery/discovery_api";
 import { openUrl } from "~utils/links";
 import { deleteAsync } from "~/api/core";
@@ -88,12 +88,13 @@ class Header extends React.Component {
             </div>
             <div className={cs.fill} />
             <RequestContext.Consumer>
-              {({ enabledFeatures }) => {
-                if (enabledFeatures.includes("data_discovery")) {
+              {({ allowedFeatures }) => {
+                console.log("enabled: ", allowedFeatures);
+                if (allowedFeatures.includes("data_discovery")) {
                   return (
                     <MainMenu
                       adminUser={adminUser}
-                      newSampleUpload={enabledFeatures.includes(
+                      newSampleUpload={allowedFeatures.includes(
                         "new_sample_upload"
                       )}
                     />
@@ -115,7 +116,7 @@ class Header extends React.Component {
 
 Header.propTypes = {
   adminUser: PropTypes.bool,
-  userSignedIn: PropTypes.bool
+  userSignedIn: PropTypes.bool,
 };
 
 const UserMenuDropDown = ({
@@ -124,11 +125,11 @@ const UserMenuDropDown = ({
   email,
   signInEndpoint,
   signOutEndpoint,
-  userName
+  userName,
 }) => {
   const signOut = () => {
     deleteAsync(`${signOutEndpoint}.json`, {
-      withCredentials: true
+      withCredentials: true,
     }).then(_ => {
       openUrl(signInEndpoint);
     });
@@ -238,15 +239,15 @@ const UserMenuDropDown = ({
   return (
     <div>
       <RequestContext.Consumer>
-        {({ enabledFeatures }) => (
+        {({ allowedFeatures }) => (
           <BareDropdown
             trigger={<div className={cs.userName}>{userName}</div>}
             className={cs.userDropdown}
             items={renderItems(
               adminUser,
               demoUser,
-              enabledFeatures.includes("data_discovery"),
-              enabledFeatures.includes("new_sample_upload")
+              allowedFeatures.includes("data_discovery"),
+              allowedFeatures.includes("new_sample_upload")
             )}
             direction="left"
           />
@@ -262,7 +263,7 @@ UserMenuDropDown.propTypes = forbidExtraProps({
   email: PropTypes.string.isRequired,
   signInEndpoint: PropTypes.string.isRequired,
   signOutEndpoint: PropTypes.string.isRequired,
-  userName: PropTypes.string.isRequired
+  userName: PropTypes.string.isRequired,
 });
 
 const MainMenu = ({ adminUser, newSampleUpload }) => {
@@ -315,7 +316,7 @@ const MainMenu = ({ adminUser, newSampleUpload }) => {
 
 MainMenu.propTypes = {
   adminUser: PropTypes.bool,
-  newSampleUpload: PropTypes.bool
+  newSampleUpload: PropTypes.bool,
 };
 
 export default Header;

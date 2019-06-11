@@ -50,7 +50,7 @@ class ApplicationController < ActionController::Base
   # TODO: (gdingle): how is this related to request_context in ApplicationHelper?
   def request_context
     {
-      enabledFeatures: current_user.allowed_featured_list
+      allowedFeatures: current_user.allowed_featured_list
     }
   end
 
