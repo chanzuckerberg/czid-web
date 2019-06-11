@@ -728,7 +728,7 @@ class DiscoveryView extends React.Component {
     } = this.state;
     const sampleIds = mapLocationData[mapPreviewedLocationId].sample_ids;
 
-    // Update samples
+    // Fetch previewed samples
     // TODO(jsheu): Consider paginating fetching for thousands of samples at a location
     const {
       samples: fetchedSamples,
@@ -748,7 +748,7 @@ class DiscoveryView extends React.Component {
       }
     );
 
-    // Update stats and dimensions for the map sidebar. Special request with the current filters
+    // Fetch stats and dimensions for the map sidebar. Special request with the current filters
     // and the previewed location.
     const locationName = mapLocationData[mapPreviewedLocationId].name;
     const filters = this.preparedFilters();
