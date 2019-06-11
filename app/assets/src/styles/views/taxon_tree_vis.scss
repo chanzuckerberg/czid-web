@@ -4,6 +4,7 @@
   &__container {
     position: relative;
     margin-bottom: 15rem;
+    overflow-x: scroll;
 
     .node-overlay {
       opacity: 0;
