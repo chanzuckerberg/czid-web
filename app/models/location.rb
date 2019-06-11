@@ -48,7 +48,6 @@ class Location < ApplicationRecord
   def self.geosearch_by_osm_id(osm_id, osm_type)
     osm_type = osm_type[0].capitalize # (N)ode, (W)ay, or (R)elation
     endpoint_query = "reverse.php?osm_id=#{osm_id}&osm_type=#{osm_type}"
-    puts "foobar 11:08am: ", endpoint_query
     location_api_request(endpoint_query)
   end
 
