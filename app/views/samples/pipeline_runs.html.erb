@@ -22,7 +22,7 @@
 <% end %>
 
 <% pipeline_run = @sample.first_pipeline_run %>
-<% if pipeline_run.completed? %>
+<% if pipeline_run && pipeline_run.completed? %>
   <%= button_to 'rerun from top', kickoff_pipeline_sample_path(@sample), method: :put, form: {target: '_blank'} %>
 <% end %>
 
