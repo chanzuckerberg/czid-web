@@ -1,7 +1,7 @@
 class AmrHeatmapController < ApplicationController
   before_action :admin_required
 
-  # GET /amr_heatmap.json
+  # GET /amr_heatmap/amr_heatmap.json
   # Return JSON information about one or more samples' AMR counts, from submitted sample ids
   # A samples amr_counts is an array of objects describing genes & alleles that code for
   # antimicrobial resistance. Each object in amr_counts will look like:
@@ -52,5 +52,8 @@ class AmrHeatmapController < ApplicationController
     end
 
     render json: amr_data
+  end
+
+  def amr_heatmap
   end
 end
