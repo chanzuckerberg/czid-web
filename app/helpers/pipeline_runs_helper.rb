@@ -191,7 +191,7 @@ module PipelineRunsHelper
   end
 
   def check_for_user_error(failed_stage)
-    return [nil, nil] if failed_stage.step_number != 1
+    return [nil, nil] unless [1, 2].include? failed_stage.step_number
     # We need to set the pipeline version in the failed pipeline run so that the host_filter_output_s3_path includes it,
     # i.e. "/results/3.7" instead of "/results"
     # The pipeline version is usually set in the result monitor, but that is not guaranteed to have run by this point.
