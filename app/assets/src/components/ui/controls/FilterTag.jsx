@@ -1,23 +1,34 @@
 import React from "react";
-import PropTypes from "prop-types";
-import cs from "./filter_tag.scss";
 import cx from "classnames";
-import { Label, Icon } from "semantic-ui-react";
 
-const FilterTag = props => {
-  const { className, onClose, text } = props;
-  return (
-    <Label className={cx(className, cs.filterTag)} size="tiny">
-      {text}
-      <Icon name="close" onClick={onClose} />
-    </Label>
-  );
-};
+import PropTypes from "~/components/utils/propTypes";
+import Label from "~/components/ui/labels/Label";
+import Icon from "~ui/icons/Icon";
+
+import cs from "./filter_tag.scss";
+
+export default class FilterTag extends React.Component {
+  render() {
+    const { text, onClose, className } = this.props;
+    const labelText = (
+      <React.Fragment>
+        {text}
+        <Icon name="close" onClick={onClose} />
+      </React.Fragment>
+    );
+
+    return (
+      <Label
+        className={cx(cs.filterTag, className)}
+        size="tiny"
+        text={labelText}
+      />
+    );
+  }
+}
 
 FilterTag.propTypes = {
-  className: PropTypes.string,
   text: PropTypes.string,
-  onClose: PropTypes.func
+  onClose: PropTypes.func.isRequired,
+  className: PropTypes.string
 };
-
-export default FilterTag;

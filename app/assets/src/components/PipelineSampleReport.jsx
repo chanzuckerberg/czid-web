@@ -2,14 +2,25 @@ import cx from "classnames";
 import React from "react";
 import Cookies from "js-cookie";
 import $ from "jquery";
-import { Label, Menu, Icon, Popup } from "semantic-ui-react";
-import { omit, partition, keyBy, groupBy, map, mapValues } from "lodash/fp";
+import { Menu, Icon, Popup } from "semantic-ui-react";
+import {
+  omit,
+  partition,
+  keyBy,
+  groupBy,
+  map,
+  mapValues,
+  get,
+  find
+} from "lodash/fp";
 import Nanobar from "nanobar";
 import PropTypes from "prop-types";
 
 import { getSampleReportInfo, getSummaryContigCounts } from "~/api";
 import { parseUrlParams } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
+import FilterTag from "~ui/controls/FilterTag";
 
 import {
   computeThresholdedTaxons,
@@ -83,18 +94,6 @@ class PipelineSampleReport extends React.Component {
     const cachedTreeMetric = Cookies.get("treeMetric");
     const cachedMinContigSize = parseInt(Cookies.get("minContigSize"), 10);
 
-    const savedThresholdFilters = ThresholdMap.getSavedThresholdFilters();
-
-    this.showConcordance = false;
-
-    this.treeMetrics = [
-      { text: "Aggregate Score", value: "aggregatescore" },
-      { text: "NT r (total reads)", value: "nt_r" },
-      { text: "NT rPM", value: "nt_rpm" },
-      { text: "NR r (total reads)", value: "nr_r" },
-      { text: "NR rPM", value: "nr_rpm" }
-    ];
-
     this.allThresholds = [
       { text: "Score", value: "NT_aggregatescore" },
       { text: "NT Z Score", value: "NT_zscore" },
@@ -114,6 +113,29 @@ class PipelineSampleReport extends React.Component {
       { text: "NR L (alignment length in bp)", value: "NR_alignmentlength" },
       { text: "NR log(1/e)", value: "NR_neglogevalue" }
     ];
+
+    // If the saved threshold object doesn't have metricDisplay, add it. For backwards compatibility.
+    const savedThresholdFilters = map(
+      threshold => ({
+        metricDisplay: get(
+          "text",
+          find(["value", threshold.metric], this.allThresholds)
+        ),
+        ...threshold
+      }),
+      ThresholdMap.getSavedThresholdFilters()
+    );
+
+    this.showConcordance = false;
+
+    this.treeMetrics = [
+      { text: "Aggregate Score", value: "aggregatescore" },
+      { text: "NT r (total reads)", value: "nt_r" },
+      { text: "NT rPM", value: "nt_rpm" },
+      { text: "NR r (total reads)", value: "nr_r" },
+      { text: "NR rPM", value: "nr_rpm" }
+    ];
+
     this.categoryChildParent = { Phage: "Viruses" };
     this.categoryParentChild = { Viruses: ["Phage"] };
     this.genusMap = {};
@@ -1273,11 +1295,18 @@ class PipelineSampleReport extends React.Component {
 
     const advanced_filter_tag_list = this.state.activeThresholds.map(
       (threshold, i) => (
-        <AdvancedFilterTagList
+        <ThresholdFilterTag
+          className="filter-tag"
+          key={`threshold_filter_tag_${i}`}
           threshold={threshold}
-          key={i}
-          i={i}
-          parent={this}
+          onClose={() => {
+            this.handleRemoveThresholdFilter(i);
+            logAnalyticsEvent("PipelineSampleReport_threshold-filter_removed", {
+              value: threshold.value,
+              operator: threshold.operator,
+              metric: threshold.metric
+            });
+          }}
         />
       )
     );
@@ -1285,21 +1314,20 @@ class PipelineSampleReport extends React.Component {
     const categories_filter_tag_list = this.state.includedCategories.map(
       (category, i) => {
         return (
-          <Label className="label-tags" size="tiny" key={`category_tag_${i}`}>
-            {category}
-            <Icon
-              name="close"
-              onClick={e => {
-                this.handleRemoveCategory(category);
-                logAnalyticsEvent(
-                  "PipelineSampleReport_categories-filter_removed",
-                  {
-                    category
-                  }
-                );
-              }}
-            />
-          </Label>
+          <FilterTag
+            className="filter-tag"
+            key={`category_filter_tag_${i}`}
+            text={category}
+            onClose={() => {
+              this.handleRemoveCategory(category);
+              logAnalyticsEvent(
+                "PipelineSampleReport_categories-filter_removed",
+                {
+                  category
+                }
+              );
+            }}
+          />
         );
       }
     );
@@ -1307,21 +1335,20 @@ class PipelineSampleReport extends React.Component {
     const subcats_filter_tag_list = this.state.includedSubcategories.map(
       (subcat, i) => {
         return (
-          <Label className="label-tags" size="tiny" key={`subcat_tag_${i}`}>
-            {subcat}
-            <Icon
-              name="close"
-              onClick={e => {
-                this.handleRemoveSubcategory(subcat);
-                logAnalyticsEvent(
-                  "PipelineSampleReport_subcategories-filter_removed",
-                  {
-                    subcat
-                  }
-                );
-              }}
-            />
-          </Label>
+          <FilterTag
+            className="filter-tag"
+            key={`subcat_filter_tag_${i}`}
+            text={subcat}
+            onClose={() => {
+              this.handleRemoveSubcategory(subcat);
+              logAnalyticsEvent(
+                "PipelineSampleReport_subcategories-filter_removed",
+                {
+                  subcat
+                }
+              );
+            }}
+          />
         );
       }
     );
@@ -1384,29 +1411,6 @@ function CollapseExpand({ tax_info, parent }) {
       </span>
     </span>
   );
-}
-
-function AdvancedFilterTagList({ threshold, i, parent }) {
-  if (ThresholdMap.isThresholdValid(threshold)) {
-    return (
-      <Label
-        className="label-tags"
-        size="tiny"
-        key={`advanced_filter_tag_${i}`}
-      >
-        {parent.thresholdTextByValue[threshold["metric"]]}{" "}
-        {threshold["operator"]} {threshold["value"]}
-        <Icon
-          name="close"
-          onClick={() => {
-            parent.handleRemoveThresholdFilter(i);
-          }}
-        />
-      </Label>
-    );
-  } else {
-    return null;
-  }
 }
 
 class RenderMarkup extends React.Component {
@@ -1595,7 +1599,8 @@ class RenderMarkup extends React.Component {
                 {this.renderFilters()}
                 {this.renderMenu()}
                 <div className="filter-tags-list">
-                  {advanced_filter_tag_list} {categories_filter_tag_list}{" "}
+                  {advanced_filter_tag_list}
+                  {categories_filter_tag_list}
                   {subcats_filter_tag_list}
                 </div>
                 {filter_row_stats}

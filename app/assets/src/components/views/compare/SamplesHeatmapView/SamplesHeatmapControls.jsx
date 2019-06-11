@@ -1,6 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { isEqual, min, max } from "lodash/fp";
+import {
+  pull,
+  isEqual,
+  min,
+  max,
+  flatten,
+  values,
+  omitBy,
+  mapValues,
+  isEmpty
+} from "lodash/fp";
+import cx from "classnames";
 
 import {
   Dropdown,
@@ -11,6 +22,8 @@ import { Divider } from "~/components/layout";
 import { logAnalyticsEvent } from "~/api/analytics";
 import Slider from "~ui/controls/Slider";
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
+import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
+import FilterTag from "~ui/controls/FilterTag";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -251,6 +264,106 @@ export default class SamplesHeatmapControls extends React.Component {
     );
   }
 
+  handleRemoveThresholdFilter = threshold => {
+    const newFilters = pull(
+      threshold,
+      this.props.selectedOptions.thresholdFilters
+    );
+    this.props.onSelectedOptionsChange({ thresholdFilters: newFilters });
+  };
+
+  handleRemoveCategory = category => {
+    const newCategories = pull(category, this.props.selectedOptions.categories);
+    this.props.onSelectedOptionsChange({ categories: newCategories });
+  };
+
+  handleRemoveSubcategory = subcat => {
+    // For each category => [subcategories], remove subcat from subcategories.
+    // Then omit all categories with empty subcategories.
+    const newSubcategories = omitBy(
+      isEmpty,
+      mapValues(pull(subcat), this.props.selectedOptions.subcategories)
+    );
+    this.props.onSelectedOptionsChange({ subcategories: newSubcategories });
+  };
+
+  renderFilterTags = () => {
+    let filterTags = [];
+    const { selectedOptions } = this.props;
+
+    if (selectedOptions.thresholdFilters) {
+      filterTags = filterTags.concat(
+        selectedOptions.thresholdFilters.map((threshold, i) => (
+          <ThresholdFilterTag
+            className={cs.filterTag}
+            key={`threshold_filter_tag_${i}`}
+            threshold={threshold}
+            onClose={() => {
+              this.handleRemoveThresholdFilter(threshold);
+              logAnalyticsEvent(
+                "SamplesHeatmapControls_threshold-filter_removed",
+                {
+                  value: threshold.value,
+                  operator: threshold.operator,
+                  metric: threshold.metric
+                }
+              );
+            }}
+          />
+        ))
+      );
+    }
+
+    if (selectedOptions.categories) {
+      filterTags = filterTags.concat(
+        selectedOptions.categories.map((category, i) => {
+          return (
+            <FilterTag
+              className={cs.filterTag}
+              key={`category_filter_tag_${i}`}
+              text={category}
+              onClose={() => {
+                this.handleRemoveCategory(category);
+                logAnalyticsEvent(
+                  "SamplesHeatmapControl_categories-filter_removed",
+                  {
+                    category
+                  }
+                );
+              }}
+            />
+          );
+        })
+      );
+    }
+
+    if (selectedOptions.subcategories) {
+      const subcategoryList = flatten(values(selectedOptions.subcategories));
+      filterTags = filterTags.concat(
+        subcategoryList.map((subcat, i) => {
+          return (
+            <FilterTag
+              className={cs.filterTag}
+              key={`subcat_filter_tag_${i}`}
+              text={subcat}
+              onClose={() => {
+                this.handleRemoveSubcategory(subcat);
+                logAnalyticsEvent(
+                  "SamplesHeatmapControl_categories-filter_removed",
+                  {
+                    subcat
+                  }
+                );
+              }}
+            />
+          );
+        })
+      );
+    }
+
+    return filterTags;
+  };
+
   render() {
     return (
       <div className={cs.menu}>
@@ -267,6 +380,9 @@ export default class SamplesHeatmapControls extends React.Component {
           <div className="col s2">{this.renderScaleSelect()}</div>
           <div className="col s2">{this.renderTaxonsPerSampleSlider()}</div>
           <div className="col s2">{this.renderLegend()}</div>
+        </div>
+        <div className={cx(cs.filterTagsList, "row")}>
+          <div className="col">{this.renderFilterTags()}</div>
         </div>
         <Divider />
       </div>
