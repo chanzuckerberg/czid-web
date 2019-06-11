@@ -10,7 +10,8 @@ import {
   assign,
   get,
   set,
-  isEmpty
+  isEmpty,
+  find
 } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
 import { StickyContainer, Sticky } from "react-sticky";
@@ -151,7 +152,20 @@ class SamplesHeatmapView extends React.Component {
       urlParams.subcategories = JSON.parse(urlParams.subcategories);
     }
     if (typeof urlParams.thresholdFilters === "string") {
-      urlParams.thresholdFilters = JSON.parse(urlParams.thresholdFilters);
+      // If the saved threshold object doesn't have metricDisplay, add it. For backwards compatibility.
+      urlParams.thresholdFilters = map(
+        threshold => ({
+          metricDisplay: get(
+            "text",
+            find(
+              ["value", threshold.metric],
+              this.props.thresholdFilters.targets
+            )
+          ),
+          ...threshold
+        }),
+        JSON.parse(urlParams.thresholdFilters)
+      );
     }
     return urlParams;
   };

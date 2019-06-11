@@ -2,6 +2,7 @@ import React from "react";
 import { Grid } from "semantic-ui-react";
 import { forbidExtraProps } from "airbnb-prop-types";
 import PropTypes from "prop-types";
+import { get, find } from "lodash/fp";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
@@ -96,6 +97,7 @@ class ThresholdFilterDropdown extends React.Component {
         ...this.state.thresholds,
         {
           metric: this.metrics[0].value,
+          metricDisplay: this.metrics[0].text,
           operator: this.operators[0],
           value: ""
         }
@@ -239,18 +241,24 @@ const ThresholdFilter = ({
   onChange,
   onRemove
 }) => {
-  let { metric, value, operator } = threshold;
+  let { metric, value, operator, metricDisplay } = threshold;
 
   const handleMetricChange = newMetric => {
-    onChange({ metric: newMetric, value, operator });
+    const newMetricDisplay = get("text", find(["value", newMetric], metrics));
+    onChange({
+      metric: newMetric,
+      value,
+      operator,
+      metricDisplay: newMetricDisplay
+    });
   };
 
   const handleOperatorChange = newOperator => {
-    onChange({ metric, value, operator: newOperator });
+    onChange({ metric, value, operator: newOperator, metricDisplay });
   };
 
   const handleValueChange = newValue => {
-    onChange({ metric, value: newValue, operator });
+    onChange({ metric, value: newValue, operator, metricDisplay });
   };
 
   return (
@@ -290,7 +298,14 @@ const ThresholdFilter = ({
 };
 
 ThresholdFilter.propTypes = forbidExtraProps({
-  metrics: PropTypes.array,
+  metrics: PropTypes.arrayOf(
+    PropTypes.shape({
+      metric: PropTypes.string,
+      value: PropTypes.string,
+      operator: PropTypes.string,
+      metricDisplay: PropTypes.string
+    })
+  ),
   onChange: PropTypes.func,
   onRemove: PropTypes.func,
   operators: PropTypes.array,

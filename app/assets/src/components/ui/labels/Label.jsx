@@ -34,7 +34,7 @@ Label.propTypes = forbidExtraProps({
   size: PropTypes.string,
   circular: PropTypes.bool,
   floating: PropTypes.bool,
-  text: PropTypes.string,
+  text: PropTypes.node,
   onClick: PropTypes.func
 });
 
