@@ -76,7 +76,7 @@ class GeoSearchInputBox extends React.Component {
 
   render() {
     const { className, value: propValue } = this.props;
-    const { usePropValue, stateValue } = this.state;
+    const { usePropValue, value: stateValue } = this.state;
 
     // If using prop value, try to use .name or plain string value otherwise.
     const value =
