@@ -386,7 +386,10 @@ class DiscoveryView extends React.Component {
       search,
     });
 
-    this.setState({ mapLocationData, loadingLocations: false });
+    this.setState(
+      { mapLocationData, loadingLocations: false },
+      this.refreshMapPreviewedSamples
+    );
   };
 
   computeTabs = () => {
@@ -726,6 +729,9 @@ class DiscoveryView extends React.Component {
       projectId,
       search
     } = this.state;
+
+    if (!mapPreviewedLocationId) return;
+
     const sampleIds = mapLocationData[mapPreviewedLocationId].sample_ids;
 
     // Fetch previewed samples
@@ -834,7 +840,7 @@ class DiscoveryView extends React.Component {
               }
               // TODO: Add projectStats to getDiscoveryStats to have a project count in preview mode
               projectStats={
-                isEmpty(mapSidebarProjectDimensions) && projectStats
+                isEmpty(mapSidebarProjectDimensions) ? projectStats : null
               }
               ref={mapPreviewSidebar =>
                 (this.mapPreviewSidebar = mapPreviewSidebar)
