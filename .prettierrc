@@ -1,4 +1,0 @@
-# See https://prettier.io/docs/en/configuration.html
-
-# We prefer trailing commas to avoid merge conflicts when appending to a list
-trailingComma: "es5"
