@@ -10,17 +10,12 @@ import ProjectUploadMenu from "~/components/views/samples/ProjectUploadMenu";
 import cs from "./project_header.scss";
 import cx from "classnames";
 
-const ProjectHeader = ({
-  project,
-  fetchedSamples,
-  onProjectUpdated,
-  newSampleUpload
-}) => {
+const ProjectHeader = ({ project, fetchedSamples, onProjectUpdated }) => {
   const handleProjectUserAdded = (username, email) => {
     const userFound = find({ email }, project.users);
     if (!userFound) {
       const newProject = assign(project, {
-        users: [...project.users, { name: username, email }]
+        users: [...project.users, { name: username, email }],
       });
       onProjectUpdated && onProjectUpdated({ project: newProject });
     }
@@ -28,7 +23,7 @@ const ProjectHeader = ({
 
   const handleProjectPublished = () => {
     const newProject = assign(project, {
-      public_access: 1
+      public_access: 1,
     });
     onProjectUpdated && onProjectUpdated({ project: newProject });
   };
@@ -83,10 +78,7 @@ const ProjectHeader = ({
 
       {project.editable && (
         <div className={cs.item}>
-          <ProjectUploadMenu
-            project={project}
-            newSampleUpload={newSampleUpload}
-          />
+          <ProjectUploadMenu project={project} />
         </div>
       )}
     </div>
@@ -97,7 +89,6 @@ ProjectHeader.propTypes = {
   fetchedSamples: PropTypes.array,
   project: PropTypes.object.isRequired,
   onProjectUpdated: PropTypes.func,
-  newSampleUpload: PropTypes.bool
 };
 
 export default ProjectHeader;
