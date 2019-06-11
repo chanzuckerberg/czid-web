@@ -89,7 +89,6 @@ class Header extends React.Component {
             <div className={cs.fill} />
             <RequestContext.Consumer>
               {({ allowedFeatures }) => {
-                console.log("enabled: ", allowedFeatures);
                 if (allowedFeatures.includes("data_discovery")) {
                   return (
                     <MainMenu

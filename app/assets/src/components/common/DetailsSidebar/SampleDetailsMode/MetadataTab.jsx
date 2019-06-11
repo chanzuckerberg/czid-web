@@ -149,12 +149,6 @@ class MetadataTab extends React.Component {
     // TODO: Consider refactoring so SAMPLE_ADDITIONAL_INFO doesn't have to be special.
     return (
       <div>
-        <RequestContext.Consumer>
-          {({ allowedFeatures }) => {
-            console.log("enabled in here: ", allowedFeatures);
-          }}
-        </RequestContext.Consumer>
-
         {/* Special section for Sample Info */}
         {section.name === "Sample Info" &&
           !isSectionEditing &&
@@ -188,12 +182,24 @@ class MetadataTab extends React.Component {
             </div>
           )}
         {validKeys.map(key => (
-          <div className={cs.field} key={metadataTypes[key].key}>
-            <div className={cs.label}>{metadataTypes[key].name}</div>
-            {isSectionEditing
-              ? this.renderInput(metadataTypes[key])
-              : this.renderMetadataType(metadataTypes[key])}
-          </div>
+          <RequestContext.Consumer>
+            {({ allowedFeatures }) => {
+              if (
+                key === "collection_location_v2" &&
+                !allowedFeatures.includes("maqwdps")
+              ) {
+                return null;
+              }
+              return (
+                <div className={cs.field} key={metadataTypes[key].key}>
+                  <div className={cs.label}>{metadataTypes[key].name}</div>
+                  {isSectionEditing
+                    ? this.renderInput(metadataTypes[key])
+                    : this.renderMetadataType(metadataTypes[key])}
+                </div>
+              );
+            }}
+          </RequestContext.Consumer>
         ))}
       </div>
     );

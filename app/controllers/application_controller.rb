@@ -47,13 +47,6 @@ class ApplicationController < ActionController::Base
     raise "action doesn't check against access control" unless @access_checked
   end
 
-  # TODO: (gdingle): how is this related to request_context in ApplicationHelper?
-  def request_context
-    {
-      allowedFeatures: current_user.allowed_featured_list
-    }
-  end
-
   def get_background_id(sample)
     background_id = params[:background_id].to_i
     if background_id > 0

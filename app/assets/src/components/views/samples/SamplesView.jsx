@@ -18,7 +18,6 @@ import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import SaveIcon from "~ui/icons/SaveIcon";
 import Label from "~ui/labels/Label";
-import { RequestContext } from "~/components/common/RequestContext";
 
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
@@ -437,12 +436,6 @@ class SamplesView extends React.Component {
     const { phyloTreeCreationModalOpen } = this.state;
     return (
       <div className={cs.container}>
-        <RequestContext.Consumer>
-          {({ allowedFeatures }) => {
-            console.log("enabled in here SamplesView: ", allowedFeatures);
-          }}
-        </RequestContext.Consumer>
-
         {this.renderToolbar()}
         {currentDisplay === "table" ? this.renderTable() : this.renderMap()}
         {phyloTreeCreationModalOpen && (
