@@ -11,6 +11,7 @@ import {
   escapeRegExp,
   find,
   findIndex,
+  isEmpty,
   keyBy,
   map,
   mapKeys,
@@ -103,6 +104,9 @@ class DiscoveryView extends React.Component {
         mapPreviewedLocationId: null,
         mapPreviewedSampleIds: [],
         mapPreviewedSamples: [],
+        mapSidebarProjectDimensions: [],
+        mapSidebarSampleDimensions: [],
+        mapSidebarSampleStats: {},
         mapSidebarSelectedSampleIds: new Set(),
         mapSidebarTab: "Summary",
         project: null,
@@ -708,7 +712,6 @@ class DiscoveryView extends React.Component {
     this.setState(
       {
         mapPreviewedLocationId: locationId,
-        mapSidebarTab: "Summary",
         showStats: true
       },
       () => this.refreshMapPreviewedSamples()
@@ -716,9 +719,16 @@ class DiscoveryView extends React.Component {
   };
 
   refreshMapPreviewedSamples = async () => {
-    const { mapPreviewedLocationId, mapLocationData } = this.state;
+    const { domain } = this.props;
+    const {
+      mapLocationData,
+      mapPreviewedLocationId,
+      projectId,
+      search
+    } = this.state;
     const sampleIds = mapLocationData[mapPreviewedLocationId].sample_ids;
 
+    // Update samples
     // TODO(jsheu): Consider paginating fetching for thousands of samples at a location
     const {
       samples: fetchedSamples,
@@ -737,6 +747,30 @@ class DiscoveryView extends React.Component {
         this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
       }
     );
+
+    // Update stats and dimensions for the map sidebar. Special request with the current filters
+    // and the previewed location.
+    const locationName = mapLocationData[mapPreviewedLocationId].name;
+    const filters = this.preparedFilters();
+    filters["locationV2"] = locationName;
+
+    const params = {
+      domain,
+      projectId,
+      filters,
+      search
+    };
+    const { sampleStats } = await getDiscoveryStats(params);
+    const {
+      projectDimensions,
+      sampleDimensions
+    } = await getDiscoveryDimensions(params);
+
+    this.setState({
+      mapSidebarProjectDimensions: projectDimensions,
+      mapSidebarSampleDimensions: sampleDimensions,
+      mapSidebarSampleStats: sampleStats
+    });
   };
 
   handleMapSidebarSelectUpdate = mapSidebarSelectedSampleIds => {
@@ -759,6 +793,9 @@ class DiscoveryView extends React.Component {
       loadingStats,
       mapPreviewedSampleIds,
       mapPreviewedSamples,
+      mapSidebarProjectDimensions,
+      mapSidebarSampleDimensions,
+      mapSidebarSampleStats,
       mapSidebarSelectedSampleIds,
       mapSidebarTab,
       projectDimensions,
@@ -790,14 +827,29 @@ class DiscoveryView extends React.Component {
               onSampleClicked={this.handleSampleSelected}
               onSelectionUpdate={this.handleMapSidebarSelectUpdate}
               onTabChange={this.handleMapSidebarTabChange}
-              projectDimensions={computedProjectDimensions}
-              projectStats={projectStats}
+              projectDimensions={
+                isEmpty(mapSidebarProjectDimensions)
+                  ? computedProjectDimensions
+                  : mapSidebarProjectDimensions
+              }
+              // TODO: Add projectStats to getDiscoveryStats to have a project count in preview mode
+              projectStats={
+                isEmpty(mapSidebarProjectDimensions) && projectStats
+              }
               ref={mapPreviewSidebar =>
                 (this.mapPreviewSidebar = mapPreviewSidebar)
               }
-              sampleDimensions={computedSampleDimensions}
+              sampleDimensions={
+                isEmpty(mapSidebarSampleDimensions)
+                  ? computedSampleDimensions
+                  : mapSidebarSampleDimensions
+              }
               samples={mapPreviewedSamples}
-              sampleStats={filteredSampleStats}
+              sampleStats={
+                isEmpty(mapSidebarSampleStats)
+                  ? filteredSampleStats
+                  : mapSidebarSampleStats
+              }
               selectableIds={mapPreviewedSampleIds}
             />
           )}

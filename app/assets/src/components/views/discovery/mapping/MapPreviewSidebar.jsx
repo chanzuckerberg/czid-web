@@ -183,7 +183,7 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   computeTabs = () => {
-    const { sampleStats } = this.props;
+    const { samples } = this.props;
     return [
       {
         label: "Summary",
@@ -193,7 +193,9 @@ export default class MapPreviewSidebar extends React.Component {
         label: (
           <div>
             <span className={cs.tabLabel}>Samples</span>
-            <span className={cs.tabCounter}>{(sampleStats || {}).count}</span>
+            {samples.length > 0 && (
+              <span className={cs.tabCounter}>{samples.length}</span>
+            )}
           </div>
         ),
         value: "Samples"
@@ -241,9 +243,7 @@ export default class MapPreviewSidebar extends React.Component {
 
   renderNoData = () => {
     return (
-      <div className={cs.noData}>
-        {`Select a location's tooltip title to preview samples.`}
-      </div>
+      <div className={cs.noData}>Select a location to preview samples.</div>
     );
   };
 
