@@ -13,7 +13,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,css,scss}": [
-      "prettier --write",
+      "prettier --write --trailing-comma es5",
       "git add"
     ],
     "*.rb": [
