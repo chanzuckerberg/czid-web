@@ -119,21 +119,21 @@ class LocationTest < ActiveSupport::TestCase
     mock = MiniTest::Mock.new
     mock.expect(:call, api_response, [query])
     Location.stub :location_api_request, mock do
-      res = Location.geosearch_by_country_and_state("USA", "California")
+      res = Location.geosearch_by_levels("USA", "California")
       assert_equal api_response, res
     end
     assert mock.verify
   end
 
-  test "should restrict an overly specific sample location" do
+  test "should restrict an overly specific sample location (human city to county/subdivision)" do
     bad_location = locations(:ucsf)
-    api_response = [true, LocationTestHelper::API_GEOSEARCH_CALIFORNIA_RESPONSE]
+    api_response = [true, LocationTestHelper::API_GEOSEARCH_SF_COUNTY_RESPONSE]
     mock = MiniTest::Mock.new
-    mock.expect(:call, api_response, [bad_location.country_name, bad_location.state_name])
-    Location.stub :geosearch_by_country_and_state, mock do
-      Location.stub :new_from_params, locations(:california) do
+    mock.expect(:call, api_response, [bad_location.country_name, bad_location.state_name, bad_location.subdivision_name])
+    Location.stub :geosearch_by_levels, mock do
+      Location.stub :new_from_params, locations(:sf_county) do
         new_location = Location.check_and_restrict_specificity(bad_location, "Human")
-        assert_equal locations(:california), new_location
+        assert_equal locations(:sf_county), new_location
       end
     end
     assert mock.verify
@@ -142,7 +142,7 @@ class LocationTest < ActiveSupport::TestCase
   test "should not restrict an appropriately specific sample location" do
     original = locations(:ucsf)
     mock = -> { raise "should not call geosearch" }
-    Location.stub :geosearch_by_country_and_state, mock do
+    Location.stub :geosearch_by_levels, mock do
       new_location = Location.check_and_restrict_specificity(original, "Mosquito")
       assert_equal original, new_location
     end
