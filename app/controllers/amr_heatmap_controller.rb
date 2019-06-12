@@ -54,6 +54,7 @@ class AmrHeatmapController < ApplicationController
     render json: amr_data
   end
 
-  def amr_heatmap
+  def visualization
+    @samples = { sampleIds: params[:sampleIds] }
   end
 end

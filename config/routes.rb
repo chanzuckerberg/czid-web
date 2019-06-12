@@ -107,6 +107,7 @@ Rails.application.routes.draw do
   get 'visualizations.json', to: 'visualizations#index'
 
   get 'amr_heatmap/amr_counts.json', to: 'amr_heatmap#amr_counts'
+  get 'amr_heatmap', to: 'amr_heatmap#visualization'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
