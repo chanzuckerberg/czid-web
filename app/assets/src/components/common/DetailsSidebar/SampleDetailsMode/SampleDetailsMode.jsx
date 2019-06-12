@@ -8,7 +8,7 @@ import { saveSampleName, saveSampleNotes } from "~/api";
 import {
   getSampleMetadata,
   saveSampleMetadata,
-  getSampleMetadataFields
+  getSampleMetadataFields,
 } from "~/api/metadata";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { processMetadata, processMetadataTypes } from "~utils/metadata";
@@ -31,14 +31,14 @@ class SampleDetailsMode extends React.Component {
     metadataSavePending: {},
     lastValidMetadata: null,
     metadataErrors: {},
-    currentTab: TABS[0]
+    currentTab: TABS[0],
   };
 
   onTabChange = tab => {
     this.setState({ currentTab: tab });
     logAnalyticsEvent("SampleDetailsMode_tab_changed", {
       sampleId: this.props.sampleId,
-      tab
+      tab,
     });
   };
 
@@ -58,7 +58,7 @@ class SampleDetailsMode extends React.Component {
     this.setState({
       metadata: null,
       additionalInfo: null,
-      pipelineInfo: null
+      pipelineInfo: null,
     });
 
     if (!this.props.sampleId) {
@@ -67,7 +67,7 @@ class SampleDetailsMode extends React.Component {
 
     const [metadata, metadataTypes] = await Promise.all([
       getSampleMetadata(this.props.sampleId, this.props.pipelineVersion),
-      getSampleMetadataFields(this.props.sampleId)
+      getSampleMetadataFields(this.props.sampleId),
     ]);
 
     const processedMetadata = processMetadata(metadata.metadata, true);
@@ -80,7 +80,7 @@ class SampleDetailsMode extends React.Component {
       pipelineRun: metadata.additional_info.pipeline_run,
       metadataTypes: metadataTypes
         ? processMetadataTypes(metadataTypes)
-        : this.state.metadataTypes
+        : this.state.metadataTypes,
     });
   };
 
@@ -91,7 +91,7 @@ class SampleDetailsMode extends React.Component {
     if (key === "name" || key === "notes") {
       this.setState({
         additionalInfo: set(key, value, this.state.additionalInfo),
-        metadataChanged: set(key, true, this.state.metadataChanged)
+        metadataChanged: set(key, true, this.state.metadataChanged),
       });
 
       return;
@@ -101,7 +101,7 @@ class SampleDetailsMode extends React.Component {
       {
         metadata: set(key, value, this.state.metadata),
         metadataChanged: set(key, !shouldSave, this.state.metadataChanged),
-        metadataErrors: set(key, null, this.state.metadataErrors)
+        metadataErrors: set(key, null, this.state.metadataErrors),
       },
       () => {
         if (shouldSave) {
@@ -115,7 +115,7 @@ class SampleDetailsMode extends React.Component {
       key,
       value,
       shouldSave,
-      metadataErrors: Object.keys(this.state.metadataErrors).length
+      metadataErrors: Object.keys(this.state.metadataErrors).length,
     });
   };
 
@@ -128,7 +128,7 @@ class SampleDetailsMode extends React.Component {
 
       this.setState(
         {
-          metadataChanged: set(key, false, this.state.metadataChanged)
+          metadataChanged: set(key, false, this.state.metadataChanged),
         },
         () => {
           this._save(this.props.sampleId, key, newValue);
@@ -138,7 +138,7 @@ class SampleDetailsMode extends React.Component {
       logAnalyticsEvent("SampleDetailsMode_metadata_saved", {
         sampleId: this.props.sampleId,
         key,
-        newValue
+        newValue,
       });
     }
   };
@@ -150,7 +150,7 @@ class SampleDetailsMode extends React.Component {
     }
 
     this.setState({
-      metadataSavePending: set(key, true, this.state.metadataSavePending)
+      metadataSavePending: set(key, true, this.state.metadataSavePending),
     });
 
     let lastValidMetadata = this.state.lastValidMetadata;
@@ -181,7 +181,7 @@ class SampleDetailsMode extends React.Component {
       metadataSavePending: set(key, false, this.state.metadataSavePending),
       metadataErrors,
       metadata,
-      lastValidMetadata
+      lastValidMetadata,
     });
   };
 
@@ -193,7 +193,7 @@ class SampleDetailsMode extends React.Component {
       additionalInfo,
       pipelineInfo,
       pipelineRun,
-      metadataErrors
+      metadataErrors,
     } = this.state;
 
     const savePending = some(metadataSavePending);
@@ -272,7 +272,7 @@ SampleDetailsMode.propTypes = {
   sampleId: PropTypes.number,
   pipelineVersion: PropTypes.string, // Needs to be string for 3.1 vs. 3.10.
   onMetadataUpdate: PropTypes.func,
-  showReportLink: PropTypes.bool
+  showReportLink: PropTypes.bool,
 };
 
 export default SampleDetailsMode;

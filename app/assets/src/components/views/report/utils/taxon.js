@@ -163,7 +163,7 @@ export const addContigCountsToTaxonomyDetails = (
       [contigCount.taxid, contigCount.count_type],
       {
         contigs: contigCount.contigs,
-        contigreads: contigCount.contig_reads
+        contigreads: contigCount.contig_reads,
       },
       contigCountsMap
     );
@@ -175,7 +175,7 @@ export const addContigCountsToTaxonomyDetails = (
       contigCountsMap[detail.tax_id]
         ? {
             ...detail,
-            summaryContigCounts: contigCountsMap[detail.tax_id]
+            summaryContigCounts: contigCountsMap[detail.tax_id],
           }
         : omit("summaryContigCounts", detail)
   );

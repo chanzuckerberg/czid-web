@@ -22,7 +22,7 @@ class SamplesHeatmapVis extends React.Component {
       nodeHoverInfo: null,
       columnMetadataLegend: null,
       selectedMetadata: new Set(this.props.defaultMetadata),
-      tooltipLocation: null
+      tooltipLocation: null,
     };
 
     this.heatmap = null;
@@ -35,7 +35,7 @@ class SamplesHeatmapVis extends React.Component {
       { key: "NT.r", label: "NT r (total reads)" },
       { key: "NR.zscore", label: "NR Z Score" },
       { key: "NR.rpm", label: "NR rPM" },
-      { key: "NR.r", label: "NR r (total reads)" }
+      { key: "NR.r", label: "NR r (total reads)" },
     ];
 
     this.metadataTypes = keyBy("key", this.props.metadataTypes);
@@ -47,7 +47,7 @@ class SamplesHeatmapVis extends React.Component {
       {
         rowLabels: this.extractTaxonLabels(),
         columnLabels: this.extractSampleLabels(), // Also includes column metadata.
-        values: this.props.data[this.props.metric]
+        values: this.props.data[this.props.metric],
       },
       {
         scale: this.props.scale,
@@ -65,7 +65,7 @@ class SamplesHeatmapVis extends React.Component {
         onCellClick: this.handleCellClick,
         onAddColumnMetadataClick: this.handleAddColumnMetadataClick,
         columnMetadata: this.getSelectedMetadata(),
-        customColorCallback: this.colorScale
+        customColorCallback: this.colorScale,
       }
     );
     this.heatmap.start();
@@ -78,7 +78,7 @@ class SamplesHeatmapVis extends React.Component {
     }
     if (this.props.sampleDetails !== prevProps.sampleDetails) {
       this.heatmap.updateData({
-        columnLabels: this.extractSampleLabels() // Also includes column metadata.
+        columnLabels: this.extractSampleLabels(), // Also includes column metadata.
       });
     }
   }
@@ -88,7 +88,7 @@ class SamplesHeatmapVis extends React.Component {
       return {
         label: this.props.sampleDetails[id].name,
         metadata: this.props.sampleDetails[id].metadata,
-        id
+        id,
       };
     });
   }
@@ -102,7 +102,7 @@ class SamplesHeatmapVis extends React.Component {
   extractTaxonLabels() {
     return this.props.taxonIds.map(id => {
       return {
-        label: this.props.taxonDetails[id].name
+        label: this.props.taxonDetails[id].name,
       };
     });
   }
@@ -112,8 +112,8 @@ class SamplesHeatmapVis extends React.Component {
       this.setState({
         tooltipLocation: {
           left: currentEvent.pageX,
-          top: currentEvent.pageY
-        }
+          top: currentEvent.pageY,
+        },
       });
     }
   };
@@ -121,7 +121,7 @@ class SamplesHeatmapVis extends React.Component {
   handleNodeHover = node => {
     this.setState({ nodeHoverInfo: this.getTooltipData(node) });
     logAnalyticsEvent("SamplesHeatmapVis_node_hovered", {
-      nodeValue: node.value
+      nodeValue: node.value,
     });
   };
 
@@ -132,11 +132,11 @@ class SamplesHeatmapVis extends React.Component {
   handleColumnMetadataLabelHover = node => {
     const legend = this.heatmap.getColumnMetadataLegend(node.value);
     this.setState({
-      columnMetadataLegend: legend
+      columnMetadataLegend: legend,
     });
     logAnalyticsEvent("SamplesHeatmapVis_column-metadata_hovered", {
       nodeValue: node.value,
-      columnMetadataLegend: legend
+      columnMetadataLegend: legend,
     });
   };
 
@@ -171,7 +171,7 @@ class SamplesHeatmapVis extends React.Component {
         );
         return [
           metric.label,
-          metric.key === this.props.metric ? <b>{value}</b> : value
+          metric.key === this.props.metric ? <b>{value}</b> : value,
         ];
       });
     }
@@ -182,13 +182,13 @@ class SamplesHeatmapVis extends React.Component {
         data: [
           ["Sample", sampleDetails.name],
           ["Taxon", taxonDetails.name],
-          ["Category", taxonDetails.category]
-        ]
+          ["Category", taxonDetails.category],
+        ],
       },
       {
         name: "Values",
-        data: nodeHasData ? values : [["", "Taxon not found in Sample"]]
-      }
+        data: nodeHasData ? values : [["", "Taxon not found in Sample"]],
+      },
     ];
   }
 
@@ -196,16 +196,16 @@ class SamplesHeatmapVis extends React.Component {
     const sampleId = this.props.sampleIds[cell.columnIndex];
     openUrl(`/samples/${sampleId}`, currentEvent);
     logAnalyticsEvent("SamplesHeatmapVis_cell_clicked", {
-      sampleId
+      sampleId,
     });
   };
 
   handleAddColumnMetadataClick = trigger => {
     this.setState({
-      addMetadataTrigger: trigger
+      addMetadataTrigger: trigger,
     });
     logAnalyticsEvent("SamplesHeatmapVis_column-metadata_clicked", {
-      addMetadataTrigger: trigger
+      addMetadataTrigger: trigger,
     });
   };
 
@@ -218,12 +218,12 @@ class SamplesHeatmapVis extends React.Component {
     const current = new Set([...intersection, ...selectedMetadata]);
     this.setState(
       {
-        selectedMetadata: current
+        selectedMetadata: current,
       },
       () => {
         this.heatmap.updateColumnMetadata(this.getSelectedMetadata());
         logAnalyticsEvent("SamplesHeatmapVis_selected-metadata_changed", {
-          selectedMetadata: current.length
+          selectedMetadata: current.length,
         });
       }
     );
@@ -286,7 +286,7 @@ class SamplesHeatmapVis extends React.Component {
       tooltipLocation,
       nodeHoverInfo,
       columnMetadataLegend,
-      addMetadataTrigger
+      addMetadataTrigger,
     } = this.state;
 
     return (
@@ -304,7 +304,7 @@ class SamplesHeatmapVis extends React.Component {
               className={cx(cs.tooltip, nodeHoverInfo && cs.visible)}
               style={getTooltipStyle(tooltipLocation, {
                 buffer: 20,
-                below: true
+                below: true,
               })}
             >
               <DataTooltip data={nodeHoverInfo} />
@@ -316,7 +316,7 @@ class SamplesHeatmapVis extends React.Component {
               className={cx(cs.tooltip, columnMetadataLegend && cs.visible)}
               style={getTooltipStyle(tooltipLocation, {
                 buffer: 20,
-                below: true
+                below: true,
               })}
             >
               {this.renderColumnMetadataLegend(columnMetadataLegend)}
@@ -342,7 +342,7 @@ class SamplesHeatmapVis extends React.Component {
 }
 
 SamplesHeatmapVis.defaultProps = {
-  defaultMetadata: ["collection_location"]
+  defaultMetadata: ["collection_location"],
 };
 
 SamplesHeatmapVis.propTypes = {
@@ -358,7 +358,7 @@ SamplesHeatmapVis.propTypes = {
   sampleIds: PropTypes.array,
   scale: PropTypes.string,
   taxonDetails: PropTypes.object,
-  taxonIds: PropTypes.array
+  taxonIds: PropTypes.array,
 };
 
 export default SamplesHeatmapVis;

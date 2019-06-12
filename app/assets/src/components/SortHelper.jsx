@@ -13,7 +13,7 @@ class SortHelper {
     let currentSort = {};
     if (sortBy) {
       currentSort = {
-        sortQuery: `sort_by=${sortBy}`
+        sortQuery: `sort_by=${sortBy}`,
       };
     }
     return currentSort;

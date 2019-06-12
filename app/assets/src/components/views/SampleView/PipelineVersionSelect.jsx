@@ -27,7 +27,7 @@ class PipelineVersionSelect extends React.Component {
 
     const options = otherVersions.map(version => ({
       text: `Pipeline v${version}`,
-      value: version
+      value: version,
     }));
 
     return (
@@ -77,7 +77,7 @@ PipelineVersionSelect.propTypes = {
   pipelineRun: PropTypes.PipelineRun,
   pipelineVersions: PropTypes.arrayOf(PropTypes.string),
   lastProcessedAt: PropTypes.string, // Actually a datestring.
-  onPipelineVersionSelect: PropTypes.func.isRequired
+  onPipelineVersionSelect: PropTypes.func.isRequired,
 };
 
 export default PipelineVersionSelect;

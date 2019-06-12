@@ -50,7 +50,7 @@ class PublicSampleNotification extends React.Component {
 PublicSampleNotification.propTypes = {
   projectName: PropTypes.string.isRequired,
   samples: PropTypes.array.isRequired,
-  onClose: PropTypes.func
+  onClose: PropTypes.func,
 };
 
 export default PublicSampleNotification;

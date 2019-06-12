@@ -90,7 +90,7 @@ const DetectIcon = props => {
 };
 
 DetectIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default DetectIcon;

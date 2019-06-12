@@ -25,7 +25,7 @@ ThresholdFilterTag.propTypes = {
     metric: PropTypes.string,
     value: PropTypes.string,
     operator: PropTypes.string,
-    metricDisplay: PropTypes.string
+    metricDisplay: PropTypes.string,
   }),
-  className: PropTypes.string
+  className: PropTypes.string,
 };

@@ -16,7 +16,7 @@ class MultipleNestedDropdown extends React.Component {
       selectedOptions: this.props.selectedOptions || [],
       selectedSuboptions: this.props.selectedSuboptions || {},
       oldSelectedOptions: [],
-      oldSelectedSuboptions: {}
+      oldSelectedSuboptions: {},
     };
 
     this.suboptionsToOptionMap = {};
@@ -40,7 +40,7 @@ class MultipleNestedDropdown extends React.Component {
         {},
         {
           selectedOptions: props.selectedOptions,
-          oldSelectedOptions: props.selectedOptions
+          oldSelectedOptions: props.selectedOptions,
         }
       );
     }
@@ -54,7 +54,7 @@ class MultipleNestedDropdown extends React.Component {
     ) {
       newState = Object.assign(newState || {}, {
         selectedSuboptions: props.selectedSuboptions,
-        oldSelectedSuboptions: props.selectedSuboptions
+        oldSelectedSuboptions: props.selectedSuboptions,
       });
     }
 
@@ -77,7 +77,7 @@ class MultipleNestedDropdown extends React.Component {
       this.setState(
         prevState => {
           let stateUpdate = {
-            selectedOptions: [...prevState.selectedOptions, optionValue]
+            selectedOptions: [...prevState.selectedOptions, optionValue],
           };
           const optionClicked = this.props.options.find(
             option => option.value == optionValue
@@ -104,7 +104,7 @@ class MultipleNestedDropdown extends React.Component {
           return {
             selectedOptions: prevState.selectedOptions.filter(
               value => value != optionValue
-            )
+            ),
           };
         },
         () =>
@@ -252,7 +252,7 @@ class MultipleNestedDropdown extends React.Component {
         "label",
         "rounded",
         "onChange",
-        "options"
+        "options",
       ],
       this.props
     );
@@ -272,7 +272,7 @@ class MultipleNestedDropdown extends React.Component {
 
 MultipleNestedDropdown.defaultProps = {
   selectedOptions: [],
-  selectedSuboptions: {}
+  selectedSuboptions: {},
 };
 
 MultipleNestedDropdown.propTypes = {
@@ -283,7 +283,7 @@ MultipleNestedDropdown.propTypes = {
   selectedOptions: PropTypes.array,
   selectedSuboptions: PropTypes.object,
   disabled: PropTypes.bool,
-  rounded: PropTypes.bool
+  rounded: PropTypes.bool,
 };
 
 export default MultipleNestedDropdown;

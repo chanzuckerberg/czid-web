@@ -10,7 +10,7 @@ class UploadPage extends React.Component {
     showInstructions: false,
     metadata: null,
     wasManual: false,
-    issues: null
+    issues: null,
   };
 
   componentDidMount() {
@@ -26,7 +26,7 @@ class UploadPage extends React.Component {
   verifyMetadata = async () => {
     if (this.state.wasManual) {
       this.setState({
-        issues: null
+        issues: null,
       });
 
       const result = await validateManualMetadataForProject(
@@ -35,7 +35,7 @@ class UploadPage extends React.Component {
       );
 
       this.setState({
-        issues: result.issues
+        issues: result.issues,
       });
 
       return (
@@ -49,7 +49,7 @@ class UploadPage extends React.Component {
   handleMetadataChange = ({ metadata, issues, wasManual }) => {
     this.setState({
       wasManual,
-      metadata
+      metadata,
     });
     this.props.onMetadataChange({ metadata, issues });
 
@@ -88,12 +88,12 @@ UploadPage.propTypes = {
   onMetadataChange: PropTypes.func.isRequired,
   project: PropTypes.shape({
     id: PropTypes.number,
-    name: PropTypes.string
+    name: PropTypes.string,
   }),
   wizardEnableContinue: PropTypes.func,
   wizardSetOnContinueValidation: PropTypes.func,
   wizardSetOverlay: PropTypes.func,
-  samples: PropTypes.arrayOf(PropTypes.Sample)
+  samples: PropTypes.arrayOf(PropTypes.Sample),
 };
 
 export default UploadPage;

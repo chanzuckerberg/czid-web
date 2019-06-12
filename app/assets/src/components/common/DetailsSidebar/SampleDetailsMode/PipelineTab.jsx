@@ -15,10 +15,10 @@ class PipelineTab extends React.Component {
     sectionOpen: {
       pipelineInfo: true,
       erccScatterplot: false,
-      downloads: false
+      downloads: false,
     },
     sectionEditing: {},
-    graphWidth: 0
+    graphWidth: 0,
   };
 
   componentDidMount() {
@@ -32,7 +32,7 @@ class PipelineTab extends React.Component {
   updateGraphDimensions = () => {
     if (this._graphContainer && this.state.graphWidth === 0) {
       this.setState({
-        graphWidth: this._graphContainer.offsetWidth
+        graphWidth: this._graphContainer.offsetWidth,
       });
     }
   };
@@ -42,12 +42,12 @@ class PipelineTab extends React.Component {
 
     const newValue = !sectionOpen[section];
     this.setState({
-      sectionOpen: set(section, newValue, sectionOpen)
+      sectionOpen: set(section, newValue, sectionOpen),
     });
     logAnalyticsEvent("PipelineTab_section_toggled", {
       section: section,
       sectionOpen: newValue,
-      sampleId: this.props.sampleId
+      sampleId: this.props.sampleId,
     });
   };
 
@@ -116,7 +116,7 @@ class PipelineTab extends React.Component {
                       newPage: option.newPage,
                       label: option.label,
                       href: option.path,
-                      sampleId: this.props.sampleId
+                      sampleId: this.props.sampleId,
                     })
                   }
                 >
@@ -134,7 +134,7 @@ PipelineTab.propTypes = {
   pipelineInfo: PropTypes.objectOf(PropTypes.string).isRequired,
   sampleId: PropTypes.number.isRequired,
   erccComparison: PropTypes.ERCCComparison,
-  pipelineRun: PropTypes.PipelineRun
+  pipelineRun: PropTypes.PipelineRun,
 };
 
 export default PipelineTab;

@@ -21,7 +21,7 @@ class ReviewPage extends React.Component {
 }
 
 ReviewPage.propTypes = {
-  metadata: PropTypes.object
+  metadata: PropTypes.object,
 };
 
 export default ReviewPage;

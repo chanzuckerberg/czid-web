@@ -11,7 +11,7 @@ import {
   get,
   set,
   isEmpty,
-  find
+  find,
 } from "lodash/fp";
 import DeepEqual from "fast-deep-equal";
 import { StickyContainer, Sticky } from "react-sticky";
@@ -156,7 +156,7 @@ class SamplesHeatmapView extends React.Component {
               this.props.thresholdFilters.targets
             )
           ),
-          ...threshold
+          ...threshold,
         }),
         JSON.parse(urlParams.thresholdFilters)
       );

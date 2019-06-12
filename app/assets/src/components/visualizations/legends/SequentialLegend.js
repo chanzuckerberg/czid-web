@@ -21,7 +21,7 @@ export default class HeatmapLegend {
         levels: 10,
         cellHeight: 20,
         cellWidth: null,
-        fontSize: "9pt"
+        fontSize: "9pt",
       },
       options
     );

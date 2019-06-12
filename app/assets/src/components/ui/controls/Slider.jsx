@@ -8,7 +8,7 @@ class Slider extends React.Component {
     this.onChangeParent = this.props.onChange;
 
     this.state = {
-      value: this.props.value
+      value: this.props.value,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -44,7 +44,7 @@ Slider.propTypes = {
   disabled: PropTypes.bool,
   label: PropTypes.string,
   onChange: PropTypes.func,
-  value: PropTypes.number
+  value: PropTypes.number,
 };
 
 export default Slider;

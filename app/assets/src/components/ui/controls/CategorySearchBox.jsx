@@ -17,7 +17,7 @@ CategorySearchBox.propTypes = {
   rounded: PropTypes.bool,
   initialValue: PropTypes.string,
   onResultSelect: PropTypes.func,
-  placeholder: PropTypes.string
+  placeholder: PropTypes.string,
 };
 
 export default CategorySearchBox;

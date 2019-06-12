@@ -237,7 +237,7 @@ CliUserInstructions.propTypes = {
   trigger: PropTypes.node,
   email: PropTypes.string,
   authToken: PropTypes.string,
-  hostGenomes: PropTypes.array
+  hostGenomes: PropTypes.array,
 };
 
 export default CliUserInstructions;

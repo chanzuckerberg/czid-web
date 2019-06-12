@@ -9,7 +9,7 @@ class UploadBox extends React.Component {
     super(props);
 
     this.state = {
-      uploadRan: false
+      uploadRan: false,
     };
   }
 
@@ -20,7 +20,7 @@ class UploadBox extends React.Component {
         this.setState({ uploadProgress: percent });
       },
       onSuccess: () => this.props.handleSuccess(file),
-      onError: err => this.props.handleFailure(file, err)
+      onError: err => this.props.handleFailure(file, err),
     });
   };
 
@@ -55,7 +55,7 @@ UploadBox.propTypes = {
   startUpload: PropTypes.bool,
   onDrop: PropTypes.func,
   handleSuccess: PropTypes.func,
-  handleFailure: PropTypes.func
+  handleFailure: PropTypes.func,
 };
 
 export default UploadBox;

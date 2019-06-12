@@ -109,7 +109,7 @@ const NoResultsIcon = props => {
 };
 
 NoResultsIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default NoResultsIcon;

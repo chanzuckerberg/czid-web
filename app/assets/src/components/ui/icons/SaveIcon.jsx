@@ -35,11 +35,11 @@ const SaveIcon = props => {
 
 SaveIcon.propTypes = {
   className: PropTypes.string,
-  popupText: PropTypes.string
+  popupText: PropTypes.string,
 };
 
 SaveIcon.defaultProps = {
-  popupText: "Save"
+  popupText: "Save",
 };
 
 export default SaveIcon;

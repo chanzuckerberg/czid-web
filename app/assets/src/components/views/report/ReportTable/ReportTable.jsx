@@ -20,8 +20,8 @@ export default class ReportTable extends React.Component {
       taxonName,
       taxonValues: {
         NT: taxInfo.NT,
-        NR: taxInfo.NR
-      }
+        NR: taxInfo.NR,
+      },
     });
   };
 
@@ -40,7 +40,7 @@ export default class ReportTable extends React.Component {
       collapseTable,
       countType,
       setCountType,
-      showAssemblyColumns
+      showAssemblyColumns,
     } = this.props;
 
     return (
@@ -183,5 +183,5 @@ ReportTable.propTypes = {
   showAssemblyColumns: PropTypes.bool,
   onTaxonClick: PropTypes.func,
   handleMouseEnter: PropTypes.func,
-  handleMouseLeave: PropTypes.func
+  handleMouseLeave: PropTypes.func,
 };

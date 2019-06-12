@@ -9,7 +9,7 @@ const CategoryFilter = ({
   categoryChildParent,
   selectedCategories,
   selectedSubcategories,
-  onChange
+  onChange,
 }) => {
   let options = [];
   allCategories.forEach(category => {
@@ -19,7 +19,7 @@ const CategoryFilter = ({
     (categoryParentChild[category.name] || []).forEach(subcategory => {
       suboptions.push({
         text: subcategory,
-        value: subcategory
+        value: subcategory,
       });
     });
     if (suboptions.length > 0) {
@@ -53,7 +53,7 @@ CategoryFilter.propTypes = {
   allCategories: PropTypes.arrayOf(
     PropTypes.shape({
       taxid: PropTypes.number,
-      name: PropTypes.string
+      name: PropTypes.string,
     })
   ).isRequired,
   categoryParentChild: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string))
@@ -61,7 +61,7 @@ CategoryFilter.propTypes = {
   categoryChildParent: PropTypes.objectOf(PropTypes.string).isRequired,
   selectedCategories: PropTypes.arrayOf(PropTypes.string).isRequired,
   selectedSubcategories: PropTypes.arrayOf(PropTypes.string).isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
 };
 
 export default CategoryFilter;

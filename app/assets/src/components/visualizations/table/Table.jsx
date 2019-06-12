@@ -10,14 +10,14 @@ class Table extends React.Component {
     super(props);
     this.state = {
       sortBy: this.props.sortBy,
-      sortDirection: this.props.sortDirection || SortDirection.ASC
+      sortDirection: this.props.sortDirection || SortDirection.ASC,
     };
   }
 
   handleSort = ({ sortBy, sortDirection }) => {
     this.setState({
       sortBy,
-      sortDirection
+      sortDirection,
     });
   };
 
@@ -58,7 +58,7 @@ class Table extends React.Component {
             [
               columnSortFunction
                 ? row => columnSortFunction(row[sortBy])
-                : sortBy
+                : sortBy,
             ],
             [sortDirection === SortDirection.ASC ? "asc" : "desc"],
             this.props.data
@@ -87,13 +87,13 @@ class Table extends React.Component {
 
 Table.defaultProps = {
   data: [],
-  selected: new Set()
+  selected: new Set(),
 };
 
 Table.propTypes = {
   columns: PropTypes.arrayOf(
     PropTypes.shape({
-      dataKey: PropTypes.string.isRequired
+      dataKey: PropTypes.string.isRequired,
     })
   ).isRequired,
   data: PropTypes.array,
@@ -103,7 +103,7 @@ Table.propTypes = {
   selected: PropTypes.instanceOf(Set),
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
-  sortDirection: PropTypes.string
+  sortDirection: PropTypes.string,
 };
 
 export default Table;

@@ -9,11 +9,11 @@ export default class ReportsDownloader {
     projectId = "all",
     onDownloadFail = null,
     downloadOption,
-    selectedSampleIds
+    selectedSampleIds,
   }) {
     this.nanobar = new Nanobar({
       id: "prog-bar",
-      class: "prog-bar"
+      class: "prog-bar",
     });
 
     this.projectId = projectId || "all";
@@ -36,7 +36,7 @@ export default class ReportsDownloader {
           this.scheduleCheckReportDownload({
             result,
             statusAction,
-            retrieveAction
+            retrieveAction,
           });
         }
       })
@@ -94,7 +94,7 @@ export default class ReportsDownloader {
         this.generateReport({
           makeAction: "make_project_reports_csv",
           statusAction: "project_reports_csv_status",
-          retrieveAction: "send_project_reports_csv"
+          retrieveAction: "send_project_reports_csv",
         });
         break;
       }
@@ -102,7 +102,7 @@ export default class ReportsDownloader {
         this.generateReport({
           makeAction: "make_host_gene_counts",
           statusAction: "host_gene_counts_status",
-          retrieveAction: "send_host_gene_counts"
+          retrieveAction: "send_host_gene_counts",
         });
         break;
       }

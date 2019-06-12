@@ -406,7 +406,7 @@ class SamplesView extends React.Component {
       mapPreviewedLocationId,
       mapTilerKey,
       onMapMarkerClick,
-      onMapTooltipTitleClick
+      onMapTooltipTitleClick,
     } = this.props;
     return (
       <div className={cs.map}>

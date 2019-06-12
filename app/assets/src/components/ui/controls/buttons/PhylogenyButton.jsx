@@ -16,7 +16,7 @@ const PhylogenyButton = ({ disabled, onClick }) => {
 
 PhylogenyButton.propTypes = {
   disabled: PropTypes.bool,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
 };
 
 export default PhylogenyButton;

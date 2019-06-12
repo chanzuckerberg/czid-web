@@ -12,11 +12,11 @@ class PhyloTreeDownloadButton extends React.Component {
 
     this.dataOptions = [
       { text: "VCF", value: "vcf" },
-      { text: "SNP annotations", value: "snp_annotations" }
+      { text: "SNP annotations", value: "snp_annotations" },
     ];
     this.imageOptions = [
       { text: "SVG", value: "svg" },
-      { text: "PNG", value: "png" }
+      { text: "PNG", value: "png" },
     ];
     this.download = this.download.bind(this);
     this.svgSaver = new SvgSaver();
@@ -40,7 +40,7 @@ class PhyloTreeDownloadButton extends React.Component {
     logAnalyticsEvent("PhyloTreeDownloadButton_option_clicked", {
       option,
       treeName: this.props.tree.name,
-      treeId: this.props.tree.id
+      treeId: this.props.tree.id,
     });
   }
 
@@ -65,7 +65,7 @@ class PhyloTreeDownloadButton extends React.Component {
 }
 
 PhyloTreeDownloadButton.propTypes = {
-  tree: PropTypes.object
+  tree: PropTypes.object,
 };
 
 export default PhyloTreeDownloadButton;

@@ -22,7 +22,7 @@ import {
   zipObject,
   mapKeys,
   mergeWith,
-  uniqBy
+  uniqBy,
 } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
@@ -53,22 +53,22 @@ class UploadSampleStep extends React.Component {
     remoteSamples: [],
     removedLocalFiles: [], // Invalid local files that were removed.
     sampleNamesToFiles: {}, // Needed for local samples.
-    validatingSamples: false // Disable the "Continue" button while validating samples.
+    validatingSamples: false, // Disable the "Continue" button while validating samples.
   };
 
   async componentDidMount() {
     const projects = await getProjects({
       domain: "updatable",
-      basic: true
+      basic: true,
     });
 
     this.setState({
-      projects
+      projects,
     });
 
     // Pre-populate the selected project from URL params.
     let urlParams = QueryString.parse(location.search, {
-      arrayFormat: "bracket"
+      arrayFormat: "bracket",
     });
 
     const projectId = parseInt(urlParams.projectId);
@@ -103,42 +103,42 @@ class UploadSampleStep extends React.Component {
   processSamplesForProject = async ({
     samples,
     project,
-    sampleNamesToFiles
+    sampleNamesToFiles,
   }) => {
     const {
       samples: validatedSamples,
-      sampleNamesToFiles: validatedSampleNamesToFiles
+      sampleNamesToFiles: validatedSampleNamesToFiles,
     } = await this.validateSampleNames({
       samples,
       project,
-      sampleNamesToFiles
+      sampleNamesToFiles,
     });
 
     return {
       samples: map(set("project_id", get("id", project)), validatedSamples),
-      sampleNamesToFiles: validatedSampleNamesToFiles
+      sampleNamesToFiles: validatedSampleNamesToFiles,
     };
   };
 
   handleProjectChange = async project => {
     this.props.onDirty();
     this.setState({
-      validatingSamples: true
+      validatingSamples: true,
     });
 
     const [
       { samples: newLocalSamples, sampleNamesToFiles: newSampleNamesToFiles },
-      { samples: newRemoteSamples }
+      { samples: newRemoteSamples },
     ] = await Promise.all([
       this.processSamplesForProject({
         samples: this.state.localSamples,
         project,
-        sampleNamesToFiles: this.state.sampleNamesToFiles
+        sampleNamesToFiles: this.state.sampleNamesToFiles,
       }),
       this.processSamplesForProject({
         samples: this.state.remoteSamples,
-        project
-      })
+        project,
+      }),
     ]);
 
     this.setState({
@@ -146,13 +146,13 @@ class UploadSampleStep extends React.Component {
       validatingSamples: false,
       localSamples: newLocalSamples,
       remoteSamples: newRemoteSamples,
-      sampleNamesToFiles: newSampleNamesToFiles
+      sampleNamesToFiles: newSampleNamesToFiles,
     });
 
     logAnalyticsEvent("UploadSampleStep_project-selector_changed", {
       localSamples: newLocalSamples.length,
       remoteSamples: newRemoteSamples.length,
-      ...this.getAnalyticsContext()
+      ...this.getAnalyticsContext(),
     });
   };
 
@@ -163,7 +163,7 @@ class UploadSampleStep extends React.Component {
     if (!selectedProject || size(samples) <= 0) {
       return Promise.resolve({
         samples,
-        sampleNamesToFiles
+        sampleNamesToFiles,
       });
     }
 
@@ -180,12 +180,12 @@ class UploadSampleStep extends React.Component {
     return {
       samples: samples.map(sample => ({
         ...sample,
-        name: validatedNameMap[sample.name]
+        name: validatedNameMap[sample.name],
       })),
       sampleNamesToFiles: mapKeys(
         name => validatedNameMap[name],
         sampleNamesToFiles
-      )
+      ),
     };
   };
 
@@ -194,13 +194,13 @@ class UploadSampleStep extends React.Component {
   validateSampleNamesAndFiles = async ({
     samples,
     project,
-    sampleNamesToFiles
+    sampleNamesToFiles,
   }) => {
     if (size(samples) <= 0) {
       return Promise.resolve({
         samples,
         sampleNamesToFiles,
-        removedLocalFiles: []
+        removedLocalFiles: [],
       });
     }
 
@@ -209,13 +209,13 @@ class UploadSampleStep extends React.Component {
     const [
       {
         samples: validatedSamples,
-        sampleNamesToFiles: validatedSampleNamesToFiles
+        sampleNamesToFiles: validatedSampleNamesToFiles,
       },
-      areFilesValid
+      areFilesValid,
     ] = await Promise.all([
       // Call validateSampleNames to update sample names.
       this.validateSampleNames({ samples, project, sampleNamesToFiles }),
-      validateSampleFiles(sampleFiles)
+      validateSampleFiles(sampleFiles),
     ]);
 
     const filesValidMap = zipObject(sampleFiles, areFilesValid);
@@ -238,41 +238,41 @@ class UploadSampleStep extends React.Component {
     return {
       samples: filteredSamples,
       sampleNamesToFiles: filteredSampleNamesToFiles,
-      removedLocalFiles: keys(pickBy(fileValid => !fileValid, filesValidMap))
+      removedLocalFiles: keys(pickBy(fileValid => !fileValid, filesValidMap)),
     };
   };
 
   openCreateProject = () => {
     this.setState({
-      createProjectOpen: true
+      createProjectOpen: true,
     });
   };
 
   closeCreateProject = () => {
     this.setState({
-      createProjectOpen: false
+      createProjectOpen: false,
     });
   };
 
   handleProjectCreate = async project => {
     this.props.onDirty();
     this.setState({
-      validatingSamples: true
+      validatingSamples: true,
     });
 
     const [
       { samples: newLocalSamples, sampleNamesToFiles: newSampleNamesToFiles },
-      { samples: newRemoteSamples }
+      { samples: newRemoteSamples },
     ] = await Promise.all([
       this.processSamplesForProject({
         samples: this.state.localSamples,
         project,
-        sampleNamesToFiles: this.state.sampleNamesToFiles
+        sampleNamesToFiles: this.state.sampleNamesToFiles,
       }),
       this.processSamplesForProject({
         samples: this.state.remoteSamples,
-        project
-      })
+        project,
+      }),
     ]);
 
     this.setState({
@@ -282,13 +282,13 @@ class UploadSampleStep extends React.Component {
       createProjectOpen: false,
       localSamples: newLocalSamples,
       remoteSamples: newRemoteSamples,
-      sampleNamesToFiles: newSampleNamesToFiles
+      sampleNamesToFiles: newSampleNamesToFiles,
     });
 
     logAnalyticsEvent("UploadSampleStep_project_created", {
       localSamples: newLocalSamples.length,
       remoteSamples: newRemoteSamples.length,
-      ...this.getAnalyticsContext()
+      ...this.getAnalyticsContext(),
     });
   };
 
@@ -296,7 +296,7 @@ class UploadSampleStep extends React.Component {
     this.props.onDirty();
     this.setState({ currentTab: tab });
     logAnalyticsEvent("UploadSampleStep_tab_changed", {
-      tab
+      tab,
     });
   };
 
@@ -334,16 +334,16 @@ class UploadSampleStep extends React.Component {
     this.props.onDirty();
     this.setState({
       validatingSamples: true,
-      removedLocalFiles: []
+      removedLocalFiles: [],
     });
 
     const {
       samples: validatedLocalSamples,
       sampleNamesToFiles: validatedSampleNamesToFiles,
-      removedLocalFiles
+      removedLocalFiles,
     } = await this.validateSampleNamesAndFiles({
       samples: localSamples,
-      sampleNamesToFiles
+      sampleNamesToFiles,
     });
 
     this.setState({
@@ -361,25 +361,25 @@ class UploadSampleStep extends React.Component {
         validatedSampleNamesToFiles,
         this.state.sampleNamesToFiles
       ),
-      removedLocalFiles
+      removedLocalFiles,
     });
 
     logAnalyticsEvent("UploadSampleStep_local-sample_changed", {
       localSamples: localSamples.length,
       validatedLocalSamples: validatedLocalSamples.length,
       removedLocalFiles: removedLocalFiles.length,
-      ...this.getAnalyticsContext()
+      ...this.getAnalyticsContext(),
     });
   };
 
   handleRemoteSampleChange = async remoteSamples => {
     this.props.onDirty();
     this.setState({
-      validatingSamples: true
+      validatingSamples: true,
     });
 
     const { samples: validatedRemoteSamples } = await this.validateSampleNames({
-      samples: remoteSamples
+      samples: remoteSamples,
     });
 
     this.setState({
@@ -387,13 +387,13 @@ class UploadSampleStep extends React.Component {
       remoteSamples: this.mergeSamples(
         this.state.remoteSamples,
         validatedRemoteSamples
-      )
+      ),
     });
 
     logAnalyticsEvent("UploadSampleStep_remote-sample_changed", {
       remoteSamples: remoteSamples.length,
       validatedRemoteSamples: validatedRemoteSamples.length,
-      ...this.getAnalyticsContext()
+      ...this.getAnalyticsContext(),
     });
   };
 
@@ -407,20 +407,20 @@ class UploadSampleStep extends React.Component {
     if (this.state.currentTab === LOCAL_UPLOAD_TAB) {
       this.setState({
         localSamples: newSamples,
-        sampleNamesToFiles: newSampleNamesToFiles
+        sampleNamesToFiles: newSampleNamesToFiles,
       });
     }
 
     if (this.state.currentTab === REMOTE_UPLOAD_TAB) {
       this.setState({
         remoteSamples: newSamples,
-        sampleNamesToFiles: newSampleNamesToFiles
+        sampleNamesToFiles: newSampleNamesToFiles,
       });
     }
     logAnalyticsEvent("UploadSampleStep_sample_removed", {
       sampleName,
       currentTab: this.state.currentTab,
-      ...this.getAnalyticsContext()
+      ...this.getAnalyticsContext(),
     });
   };
 
@@ -430,7 +430,7 @@ class UploadSampleStep extends React.Component {
         samples: this.state.localSamples,
         project: this.state.selectedProject,
         sampleNamesToFiles: this.state.sampleNamesToFiles,
-        uploadType: "local"
+        uploadType: "local",
       });
     }
 
@@ -438,7 +438,7 @@ class UploadSampleStep extends React.Component {
       this.props.onUploadSamples({
         samples: this.state.remoteSamples,
         project: this.state.selectedProject,
-        uploadType: "remote"
+        uploadType: "remote",
       });
     }
 
@@ -446,7 +446,7 @@ class UploadSampleStep extends React.Component {
       localSamples: this.state.localSamples.length,
       remoteSamples: this.state.remoteSamples.length,
       currentTab: this.state.currentTab,
-      ...this.getAnalyticsContext()
+      ...this.getAnalyticsContext(),
     });
   };
 
@@ -483,7 +483,7 @@ class UploadSampleStep extends React.Component {
     const project = this.state.selectedProject;
     return {
       projectId: project && project.id,
-      projectName: project && project.name
+      projectName: project && project.name,
     };
   };
 
@@ -570,7 +570,7 @@ class UploadSampleStep extends React.Component {
               rounded={false}
               onClick={() =>
                 logAnalyticsEvent("UploadSampleStep_cancel-button_clicked", {
-                  ...this.getAnalyticsContext()
+                  ...this.getAnalyticsContext(),
                 })
               }
             />
@@ -586,7 +586,7 @@ UploadSampleStep.propTypes = {
   // Immediately called when the user changes anything, even before validation has returned.
   // Can be used to disable the header navigation.
   onDirty: PropTypes.func.isRequired,
-  visible: PropTypes.bool
+  visible: PropTypes.bool,
 };
 
 export default UploadSampleStep;

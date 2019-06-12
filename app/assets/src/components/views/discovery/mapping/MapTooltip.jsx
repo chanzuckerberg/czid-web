@@ -15,7 +15,7 @@ class MapTooltip extends React.Component {
       body,
       onMouseEnter,
       onMouseLeave,
-      onTitleClick
+      onTitleClick,
     } = this.props;
 
     return (
@@ -57,7 +57,7 @@ MapTooltip.propTypes = {
   body: PropTypes.string,
   onMouseEnter: PropTypes.func,
   onMouseLeave: PropTypes.func,
-  onTitleClick: PropTypes.func
+  onTitleClick: PropTypes.func,
 };
 
 export default MapTooltip;

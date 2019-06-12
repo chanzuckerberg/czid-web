@@ -17,7 +17,7 @@ const getDownloadOptions = pipelineRun => {
     assembled && NON_HOST_CONTIGS_LABEL,
     assembled && NON_HOST_CONTIGS_MAPPING_LABEL,
     stageTwoComplete && UNMAPPED_READS_LABEL,
-    RESULTS_FOLDER_LABEL
+    RESULTS_FOLDER_LABEL,
   ]);
 };
 
@@ -27,7 +27,7 @@ export const getDownloadDropdownOptions = pipelineRun => {
 
   return downloadOptions.map(option => ({
     text: option,
-    value: option
+    value: option,
   }));
 };
 
@@ -38,30 +38,30 @@ const getDownloadLinkInfoMap = (sampleId, pipelineRun) => ({
     path: `/samples/${sampleId}/nonhost_fasta?pipeline_version=${
       pipelineRun.pipeline_version
     }`,
-    newPage: false
+    newPage: false,
   },
   [NON_HOST_CONTIGS_LABEL]: {
     path: `/samples/${sampleId}/contigs_fasta?pipeline_version=${
       pipelineRun.pipeline_version
     }`,
-    newPage: false
+    newPage: false,
   },
   [NON_HOST_CONTIGS_MAPPING_LABEL]: {
     path: `/samples/${sampleId}/contigs_summary?pipeline_version=${
       pipelineRun.pipeline_version
     }`,
-    newPage: false
+    newPage: false,
   },
   [UNMAPPED_READS_LABEL]: {
     path: `/samples/${sampleId}/unidentified_fasta?pipeline_version=${
       pipelineRun.pipeline_version
     }`,
-    newPage: false
+    newPage: false,
   },
   [RESULTS_FOLDER_LABEL]: {
     path: `/samples/${sampleId}/results_folder`,
-    newPage: true
-  }
+    newPage: true,
+  },
 });
 
 export const getLinkInfoForDownloadOption = (option, sampleId, pipelineRun) =>
@@ -75,6 +75,6 @@ export const getDownloadLinks = (sampleId, pipelineRun) => {
   return downloadOptions.map(option => ({
     label: option,
     path: downloadLinkInfoMap[option].path,
-    newPage: downloadLinkInfoMap[option].newPage
+    newPage: downloadLinkInfoMap[option].newPage,
   }));
 };

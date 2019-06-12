@@ -24,7 +24,7 @@ class MapPlayground extends React.Component {
       const locId = locData.id;
       const item = {
         sampleName: result.name,
-        sampleId: result.id
+        sampleId: result.id,
       };
       if (locationsToItems.hasOwnProperty(locId)) {
         locationsToItems[locId].items.push(item);
@@ -33,7 +33,7 @@ class MapPlayground extends React.Component {
           lat: parseFloat(locData.lat),
           lng: parseFloat(locData.lng),
           name: locData.name,
-          items: [item]
+          items: [item],
         };
       }
     });
@@ -43,7 +43,7 @@ class MapPlayground extends React.Component {
       viewport: {},
       tooltip: null,
       tooltipShouldClose: false,
-      searchResult: null
+      searchResult: null,
     };
   }
 
@@ -143,7 +143,7 @@ class MapPlayground extends React.Component {
 MapPlayground.propTypes = {
   results: PropTypes.array,
   // Access tokens safe for clients
-  mapTilerKey: PropTypes.string
+  mapTilerKey: PropTypes.string,
 };
 
 export default MapPlayground;
