@@ -6,7 +6,6 @@ import cx from "classnames";
 
 import { showToast } from "~/components/utils/toast";
 import Notification from "~ui/notifications/Notification";
-import { RequestContext } from "~/components/common/RequestContext";
 import ToastContainer from "~ui/containers/ToastContainer";
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import LogoIcon from "~ui/icons/LogoIcon";
@@ -87,20 +86,7 @@ class Header extends React.Component {
               </a>
             </div>
             <div className={cs.fill} />
-            <RequestContext.Consumer>
-              {({ allowedFeatures }) => {
-                if (allowedFeatures.includes("data_discovery")) {
-                  return (
-                    <MainMenu
-                      adminUser={adminUser}
-                      newSampleUpload={allowedFeatures.includes(
-                        "new_sample_upload"
-                      )}
-                    />
-                  );
-                }
-              }}
-            </RequestContext.Consumer>
+            <MainMenu adminUser={adminUser} />
             <UserMenuDropDown adminUser={adminUser} {...userMenuProps} />
           </div>
           {
@@ -134,36 +120,8 @@ const UserMenuDropDown = ({
     });
   };
 
-  const renderItems = (adminUser, demoUser, dataDiscovery, newSampleUpload) => {
+  const renderItems = (adminUser, demoUser) => {
     let userDropdownItems = [];
-    if (!demoUser) {
-      if (!dataDiscovery) {
-        userDropdownItems.push(
-          <BareDropdown.Item
-            key="1"
-            text={
-              <a
-                className={cs.option}
-                href={newSampleUpload ? "/samples/upload" : "/samples/new"}
-              >
-                New Sample
-              </a>
-            }
-          />
-        );
-        userDropdownItems.push(
-          <BareDropdown.Item
-            key="2"
-            text={
-              <a className={cs.option} href="/cli_user_instructions">
-                New Sample (Command Line)
-              </a>
-            }
-          />
-        );
-      }
-    }
-
     adminUser &&
       userDropdownItems.push(
         <BareDropdown.Item
@@ -237,21 +195,12 @@ const UserMenuDropDown = ({
 
   return (
     <div>
-      <RequestContext.Consumer>
-        {({ allowedFeatures }) => (
-          <BareDropdown
-            trigger={<div className={cs.userName}>{userName}</div>}
-            className={cs.userDropdown}
-            items={renderItems(
-              adminUser,
-              demoUser,
-              allowedFeatures.includes("data_discovery"),
-              allowedFeatures.includes("new_sample_upload")
-            )}
-            direction="left"
-          />
-        )}
-      </RequestContext.Consumer>
+      <BareDropdown
+        trigger={<div className={cs.userName}>{userName}</div>}
+        className={cs.userDropdown}
+        items={renderItems(adminUser, demoUser)}
+        direction="left"
+      />
     </div>
   );
 };
@@ -265,7 +214,7 @@ UserMenuDropDown.propTypes = forbidExtraProps({
   userName: PropTypes.string.isRequired,
 });
 
-const MainMenu = ({ adminUser, newSampleUpload }) => {
+const MainMenu = ({ adminUser }) => {
   const isSelected = tab => window.location.pathname.startsWith(`/${tab}`);
 
   return (
@@ -300,12 +249,8 @@ const MainMenu = ({ adminUser, newSampleUpload }) => {
         </a>
       )}
       <a
-        className={cx(
-          cs.item,
-          isSelected(newSampleUpload ? "samples/upload" : "samples/new") &&
-            cs.selected
-        )}
-        href={newSampleUpload ? "/samples/upload" : "/samples/new"}
+        className={cx(cs.item, isSelected("samples/upload") && cs.selected)}
+        href={"/samples/upload"}
       >
         Upload
       </a>
@@ -315,7 +260,6 @@ const MainMenu = ({ adminUser, newSampleUpload }) => {
 
 MainMenu.propTypes = {
   adminUser: PropTypes.bool,
-  newSampleUpload: PropTypes.bool,
 };
 
 export default Header;

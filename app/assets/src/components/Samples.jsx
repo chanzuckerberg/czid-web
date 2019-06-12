@@ -13,7 +13,7 @@ import {
   min,
   partition,
   take,
-  union
+  union,
 } from "lodash";
 // TODO(mark): Refactor lodash/fp functions into a file of immutable utilities.
 import { merge, sortBy } from "lodash/fp";
@@ -45,7 +45,7 @@ import ProjectSettingsModal from "./views/samples/ProjectSettingsModal";
 import {
   SAMPLE_TABLE_COLUMNS,
   INITIAL_COLUMNS,
-  ALL_COLUMNS
+  ALL_COLUMNS,
 } from "./views/samples/constants";
 import { getSampleTableData } from "./views/samples/utils";
 // TODO(mark): Convert styles/samples.scss to CSS modules.
@@ -58,7 +58,7 @@ class Samples extends React.Component {
     super(props, context);
     this.nanobar = new Nanobar({
       id: "prog-bar",
-      class: "prog-bar"
+      class: "prog-bar",
     });
     this.csrf = props.csrf;
     this.admin = props.admin;
@@ -156,7 +156,7 @@ class Samples extends React.Component {
       project_id_download_in_progress: null,
       projectType: this.fetchParams("type") || "all",
       columnsShown: INITIAL_COLUMNS,
-      phyloTreeCreationModalOpen: false
+      phyloTreeCreationModalOpen: false,
     };
 
     this.sortCount = 0;
@@ -174,7 +174,7 @@ class Samples extends React.Component {
         delay: 0,
         html: true,
         placement: "top",
-        offset: "0px 50px"
+        offset: "0px 50px",
       });
     });
   }
@@ -205,7 +205,7 @@ class Samples extends React.Component {
     this.setState(
       {
         [entry.key]: selected,
-        searchTags: newTags
+        searchTags: newTags,
       },
       () => {
         this.setUrlLocation();
@@ -227,9 +227,9 @@ class Samples extends React.Component {
           {
             display: cat + ": " + result.title,
             key: stateVar,
-            values: values
-          }
-        ])
+            values: values,
+          },
+        ]),
       },
       () => this.setUrlLocation()
     );
@@ -313,7 +313,7 @@ class Samples extends React.Component {
       .get(url)
       .then(res => {
         this.setState({
-          project_id_download_in_progress: this.state.selectedProjectId
+          project_id_download_in_progress: this.state.selectedProjectId,
         });
         this.displayReportProgress(res, statusAction, retrieveAction);
       })
@@ -337,7 +337,7 @@ class Samples extends React.Component {
           );
           this.nanobar.go(100);
           this.setState({
-            project_id_download_in_progress: null
+            project_id_download_in_progress: null,
           });
         } else {
           this.displayReportProgress(res, status_action, retrieve_action);
@@ -346,7 +346,7 @@ class Samples extends React.Component {
       .catch(() => {
         this.setState(
           {
-            project_id_download_in_progress: null
+            project_id_download_in_progress: null,
           },
           () => {
             Materialize.toast(
@@ -413,7 +413,7 @@ class Samples extends React.Component {
 
   displayMetadataDropdown() {
     this.setState({
-      displayDropdown: !this.state.displayDropdown
+      displayDropdown: !this.state.displayDropdown,
     });
   }
 
@@ -429,8 +429,8 @@ class Samples extends React.Component {
   handleProjectPublished = () => {
     this.setState({
       project: Object.assign(this.state.project, {
-        public_access: true
-      })
+        public_access: true,
+      }),
     });
   };
 
@@ -441,7 +441,7 @@ class Samples extends React.Component {
     } else {
       this.setState(
         {
-          searchParams: ""
+          searchParams: "",
         },
         () => {
           this.setUrlLocation();
@@ -562,15 +562,15 @@ class Samples extends React.Component {
           ),
           fetchedSampleIds: [
             ...prevState.fetchedSampleIds,
-            ...map(res.data.samples, "db_sample.id")
+            ...map(res.data.samples, "db_sample.id"),
           ],
           pagesLoaded: prevState.pagesLoaded + 1,
-          pageEnd: res.data.samples.length < this.pageSize
+          pageEnd: res.data.samples.length < this.pageSize,
         }));
       })
       .catch(() => {
         this.setState({
-          isRequesting: false
+          isRequesting: false,
         });
       });
   }
@@ -622,7 +622,7 @@ class Samples extends React.Component {
       "selectedTaxids",
       "selectedLocations",
       "selectedUploaderIds",
-      "sampleIdsParams"
+      "sampleIdsParams",
     ];
     return fields.some(key => {
       return this.state[key].length > 0;
@@ -678,7 +678,7 @@ class Samples extends React.Component {
           pagesLoaded: prevState.pagesLoaded + 1,
           pageEnd: res.data.samples.length < this.pageSize,
           isRequesting: false,
-          areSamplesFiltered: this.hasFilters()
+          areSamplesFiltered: this.hasFilters(),
         }));
         if (!this.state.fetchedSampleIds.length) {
           this.setState({ displayEmpty: true });
@@ -694,7 +694,7 @@ class Samples extends React.Component {
           selectedSampleIds: projectChanged ? [] : prevState.selectedSampleIds,
           readySampleIdsForFilter: [],
           numFilteredSamples: 0,
-          displayEmpty: true
+          displayEmpty: true,
         }));
       });
   };
@@ -705,7 +705,7 @@ class Samples extends React.Component {
       this.nanobar.go(30);
       this.setState(
         {
-          searchParams: e.target.value
+          searchParams: e.target.value,
         },
         () => {
           this.setUrlLocation();
@@ -719,7 +719,7 @@ class Samples extends React.Component {
     if (!projId) {
       this.setState({
         selectedProjectId: null,
-        project: null
+        project: null,
       });
       this.fetchResults({ resetFilters, projectChanged: true });
     } else {
@@ -728,7 +728,7 @@ class Samples extends React.Component {
         .get(`projects/${projId}.json`)
         .then(res => {
           this.setState({
-            project: res.data
+            project: res.data,
           });
           this.fetchProjectUsers(projId);
           this.fetchResults({ resetFilters, projectChanged: true });
@@ -755,7 +755,7 @@ class Samples extends React.Component {
       gutter: 0, // Spacing from edge
       belowOrigin: true, // Displays dropdown below the button
       alignment: "left", // Displays dropdown with edge aligned to the left of button
-      stopPropagation: true // Stops event propagation
+      stopPropagation: true, // Stops event propagation
     });
   }
 
@@ -789,7 +789,7 @@ class Samples extends React.Component {
       : difference(selectedSampleIds, readySampleIdsForFilter);
 
     this.setState({
-      selectedSampleIds: newSelectedSampleIds
+      selectedSampleIds: newSelectedSampleIds,
     });
   };
 
@@ -809,16 +809,16 @@ class Samples extends React.Component {
         name: name,
         description: description,
         sample_ids: sample_ids,
-        authenticity_token: this.csrf
+        authenticity_token: this.csrf,
       })
       .then(response => {
         that.setState({
-          background_creation_response: response.data
+          background_creation_response: response.data,
         });
       })
       .catch(error => {
         that.setState({
-          background_creation_response: { message: "Something went wrong." }
+          background_creation_response: { message: "Something went wrong." },
         });
       });
   }
@@ -830,7 +830,7 @@ class Samples extends React.Component {
         searchParams: "",
         sampleIdsParams: [],
         selectedTissueFilters: [],
-        selectedHostIndices: []
+        selectedHostIndices: [],
       },
       () => {
         this.setUrlLocation();
@@ -853,7 +853,7 @@ class Samples extends React.Component {
 
     // update the state with the new array of options
     this.setState({
-      selectedSampleIds: sampleList
+      selectedSampleIds: sampleList,
     });
   }
 
@@ -867,7 +867,7 @@ class Samples extends React.Component {
     list.splice(index, 1);
     if (index >= 0) {
       let new_state = {
-        [`${state_var}`]: list
+        [`${state_var}`]: list,
       };
       this.setState(new_state, () => {
         this.setUrlLocation();
@@ -912,7 +912,7 @@ class Samples extends React.Component {
     let projectId = this.state.selectedProjectId;
     axios
       .delete(`/projects/${projectId}.json`, {
-        data: { authenticity_token: this.csrf }
+        data: { authenticity_token: this.csrf },
       })
       .then(_ => {
         openUrl("/");
@@ -936,7 +936,7 @@ class Samples extends React.Component {
       if (this.admin === 1) {
         downloadOptions.push({
           text: "Host Gene Counts",
-          value: "host_gene_counts"
+          value: "host_gene_counts",
         });
       }
     }
@@ -989,7 +989,7 @@ class Samples extends React.Component {
           "tissueTypes",
           "selectedTissueFilters",
           "Sample Type: "
-        )
+        ),
       ];
     }
 
@@ -1103,7 +1103,7 @@ class Samples extends React.Component {
       //fetchResults hasn't run since the host/tissue change
       if (prevHostIndices.length !== this.state.selectedHostIndices.length) {
         this.setState({
-          hostFilterChange: true
+          hostFilterChange: true,
         });
       }
 
@@ -1111,7 +1111,7 @@ class Samples extends React.Component {
         prevTissueFilters.length !== this.state.selectedTissueFilters.length
       ) {
         this.setState({
-          tissueFilterChange: true
+          tissueFilterChange: true,
         });
       }
 
@@ -1119,7 +1119,7 @@ class Samples extends React.Component {
         "sampleIdsParams",
         "selectedTaxids",
         "selectedLocations",
-        "selectedUploaderIds"
+        "selectedUploaderIds",
       ].some(param => {
         return prevState[param].toString() !== this.state[param].toString();
       });
@@ -1224,7 +1224,7 @@ class Samples extends React.Component {
     $(".status-dropdown, .menu-dropdown").dropdown({
       belowOrigin: true,
       stopPropagation: false,
-      constrainWidth: false
+      constrainWidth: false,
     });
   }
 
@@ -1232,7 +1232,7 @@ class Samples extends React.Component {
   handleStatusFilterSelect = status => {
     this.setState(
       {
-        filterParams: status
+        filterParams: status,
       },
       () => {
         this.setUrlLocation();
@@ -1261,7 +1261,7 @@ class Samples extends React.Component {
       location: this.selectionToParamsOrNone(this.state.selectedLocations),
       uploader: this.selectionToParamsOrNone(this.state.selectedUploaderIds),
       sort_by: this.state.sort_by,
-      type: this.state.projectType
+      type: this.state.projectType,
     };
     window.history.replaceState(null, null, `?${$.param(params)}`);
   }
@@ -1283,7 +1283,7 @@ class Samples extends React.Component {
         selectedHostIndices: [],
         selectedLocations: [],
         selectedTaxids: [],
-        selectedUploaderIds: []
+        selectedUploaderIds: [],
       },
       () => {
         this.setUrlLocation();
@@ -1298,7 +1298,7 @@ class Samples extends React.Component {
       if ($(event.target).has(".wrapper").length) {
         if (that.state.displayDropdown) {
           that.setState({
-            displayDropdown: false
+            displayDropdown: false,
           });
         }
       }
@@ -1346,7 +1346,7 @@ function LabelTagMarkup({
   id,
   id_type,
   state_selected_options,
-  parent
+  parent,
 }) {
   return (
     <Label
@@ -1372,7 +1372,7 @@ function ColumnDropdownHeader({
   onStatusFilterSelect,
   hasStatusFilter,
   columnsShown,
-  parent
+  parent,
 }) {
   const columnOptions = sortBy(
     column => SAMPLE_TABLE_COLUMNS[column].display_name,
@@ -1407,7 +1407,7 @@ function FilterListMarkup({
   search_tag_list,
   tableHead,
   samples,
-  parent
+  parent,
 }) {
   return (
     <div className="row content-wrapper">
@@ -1484,7 +1484,7 @@ function PipelineOutputCards({
   stageStatus,
   total_runtime,
   data_values,
-  parent
+  parent,
 }) {
   let dbSample = sample.db_sample;
   return (
@@ -1540,7 +1540,7 @@ class BackgroundModal extends React.Component {
     this.state = {
       modalOpen: false,
       name: "",
-      description: ""
+      description: "",
     };
     this.handleOpen = this.handleOpen.bind(this);
     this.handleClose = this.handleClose.bind(this);
@@ -1609,10 +1609,10 @@ class BackgroundModal extends React.Component {
     this.setState({
       modalOpen: true,
       name: "",
-      description: ""
+      description: "",
     });
     this.props.parent.setState({
-      background_creation_response: {}
+      background_creation_response: {},
     });
   }
   handleClose() {
@@ -1620,7 +1620,7 @@ class BackgroundModal extends React.Component {
     this.setState({
       modalOpen: false,
       name: "",
-      description: ""
+      description: "",
     });
   }
   handleChange(e, { name, value }) {
@@ -1691,7 +1691,7 @@ class BackgroundModal extends React.Component {
                 new_background_description: this.state
                   .new_background_description,
                 selectedSampleIds: this.props.parent.state.selectedSampleIds
-                  .length
+                  .length,
               }
             )}
           >
@@ -1785,12 +1785,7 @@ function ProjectHeaderMenu({ proj, proj_users_count, parent }) {
 
       {showUploadMenu && (
         <div className={cs.projectMenuItem}>
-          <ProjectUploadMenu
-            project={proj}
-            newSampleUpload={parent.allowedFeatures.includes(
-              "new_sample_upload"
-            )}
-          />
+          <ProjectUploadMenu project={proj} />
         </div>
       )}
     </div>
@@ -1807,7 +1802,7 @@ function ProjectInfoHeading({
   state,
   canEditProject,
   selectedSampleIds,
-  numTotalSamples
+  numTotalSamples,
 }) {
   const handlePhyloModalOpen = () => {
     parent.setState({ phyloTreeCreationModalOpen: true });
@@ -1819,7 +1814,7 @@ function ProjectInfoHeading({
 
   let phyloProps = {
     admin: parseInt(parent.admin),
-    csrf: parent.csrf
+    csrf: parent.csrf,
   };
 
   let phyloModalTrigger = (
@@ -1885,7 +1880,7 @@ function TableColumnHeaders({
   onStatusFilterSelect,
   hasStatusFilter,
   state,
-  parent
+  parent,
 }) {
   return (
     <div className="col s12 sample-feed-head no-padding samples-table-head">
@@ -1950,7 +1945,7 @@ function SampleCardCheckboxes({
   report_ready,
   sample_name_info,
   i,
-  parent
+  parent,
 }) {
   const checked =
     parent.state.selectedSampleIds.indexOf(sample.db_sample.id) >= 0;
@@ -1986,7 +1981,7 @@ function SampleDetailedColumns({
   stageStatus,
   total_runtime,
   data_values,
-  parent
+  parent,
 }) {
   const blankCell = <span className="blank">--</span>;
   return parent.state.columnsShown.map((column, pos) => {

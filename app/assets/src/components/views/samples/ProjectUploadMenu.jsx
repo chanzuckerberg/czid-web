@@ -6,7 +6,7 @@ import MetadataUploadModal from "./MetadataUploadModal";
 
 class ProjectUploadMenu extends React.Component {
   state = {
-    modalOpen: false
+    modalOpen: false,
   };
 
   goToPage = path => {
@@ -29,18 +29,14 @@ class ProjectUploadMenu extends React.Component {
         text="Upload Samples"
         key="1"
         onClick={() => {
-          if (this.props.newSampleUpload) {
-            this.goToPage(`/samples/upload?projectId=${this.props.project.id}`);
-          } else {
-            this.goToPage(`/samples/new?projectId=${this.props.project.id}`);
-          }
+          this.goToPage(`/samples/upload?projectId=${this.props.project.id}`);
         }}
       />,
       <BareDropdown.Item
         text="Upload Metadata"
         key="2"
         onClick={this.openModal}
-      />
+      />,
     ];
     return (
       <div>
@@ -64,9 +60,8 @@ class ProjectUploadMenu extends React.Component {
 ProjectUploadMenu.propTypes = {
   project: PropTypes.shape({
     id: PropTypes.number,
-    name: PropTypes.string
+    name: PropTypes.string,
   }),
-  newSampleUpload: PropTypes.bool
 };
 
 export default ProjectUploadMenu;
