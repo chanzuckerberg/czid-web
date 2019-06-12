@@ -11,6 +11,7 @@ import {
   escapeRegExp,
   find,
   findIndex,
+  isEmpty,
   keyBy,
   map,
   mapKeys,
@@ -103,7 +104,11 @@ class DiscoveryView extends React.Component {
         mapPreviewedLocationId: null,
         mapPreviewedSampleIds: [],
         mapPreviewedSamples: [],
+        mapSidebarProjectDimensions: [],
+        mapSidebarSampleDimensions: [],
+        mapSidebarSampleStats: {},
         mapSidebarSelectedSampleIds: new Set(),
+        mapSidebarTab: "Summary",
         project: null,
         projectDimensions: [],
         projectId: projectId,
@@ -381,7 +386,10 @@ class DiscoveryView extends React.Component {
       search,
     });
 
-    this.setState({ mapLocationData, loadingLocations: false });
+    this.setState(
+      { mapLocationData, loadingLocations: false },
+      this.refreshMapPreviewedSamples
+    );
   };
 
   computeTabs = () => {
@@ -703,10 +711,30 @@ class DiscoveryView extends React.Component {
     );
   };
 
+  handleMapMarkerClick = locationId => {
+    this.setState(
+      {
+        mapPreviewedLocationId: locationId,
+        showStats: true,
+      },
+      this.refreshMapPreviewedSamples
+    );
+  };
+
   refreshMapPreviewedSamples = async () => {
-    const { mapPreviewedLocationId, mapLocationData } = this.state;
+    const { domain } = this.props;
+    const {
+      mapLocationData,
+      mapPreviewedLocationId,
+      projectId,
+      search,
+    } = this.state;
+
+    if (!mapPreviewedLocationId) return;
+
     const sampleIds = mapLocationData[mapPreviewedLocationId].sample_ids;
 
+    // Fetch previewed samples
     // TODO(jsheu): Consider paginating fetching for thousands of samples at a location
     const {
       samples: fetchedSamples,
@@ -725,10 +753,38 @@ class DiscoveryView extends React.Component {
         this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
       }
     );
+
+    // Fetch stats and dimensions for the map sidebar. Special request with the current filters
+    // and the previewed location.
+    const locationName = mapLocationData[mapPreviewedLocationId].name;
+    const filters = this.preparedFilters();
+    filters["locationV2"] = locationName;
+
+    const params = {
+      domain,
+      projectId,
+      filters,
+      search,
+    };
+    const { sampleStats } = await getDiscoveryStats(params);
+    const {
+      projectDimensions,
+      sampleDimensions,
+    } = await getDiscoveryDimensions(params);
+
+    this.setState({
+      mapSidebarProjectDimensions: projectDimensions,
+      mapSidebarSampleDimensions: sampleDimensions,
+      mapSidebarSampleStats: sampleStats,
+    });
   };
 
   handleMapSidebarSelectUpdate = mapSidebarSelectedSampleIds => {
     this.setState({ mapSidebarSelectedSampleIds });
+  };
+
+  handleMapSidebarTabChange = mapSidebarTab => {
+    this.setState({ mapSidebarTab });
   };
 
   renderRightPane = () => {
@@ -743,16 +799,25 @@ class DiscoveryView extends React.Component {
       loadingStats,
       mapPreviewedSampleIds,
       mapPreviewedSamples,
+      mapSidebarProjectDimensions,
+      mapSidebarSampleDimensions,
+      mapSidebarSampleStats,
       mapSidebarSelectedSampleIds,
+      mapSidebarTab,
       projectDimensions,
       projects,
       sampleDimensions,
-      samples,
       search,
       showStats,
     } = this.state;
 
     const filterCount = this.getFilterCount();
+    const computedProjectDimensions =
+      filterCount || search ? filteredProjectDimensions : projectDimensions;
+    const computedSampleDimensions =
+      filterCount || search ? filteredSampleDimensions : sampleDimensions;
+    const loading = loadingDimensions || loadingStats;
+    const projectStats = { count: projects.length };
 
     return (
       <div className={cs.rightPane}>
@@ -760,13 +825,38 @@ class DiscoveryView extends React.Component {
           currentTab === "samples" &&
           currentDisplay === "map" && (
             <MapPreviewSidebar
+              allowedFeatures={allowedFeatures}
+              currentTab={mapSidebarTab}
+              discoveryCurrentTab={currentTab}
               initialSelectedSampleIds={mapSidebarSelectedSampleIds}
+              loading={loading}
               onSampleClicked={this.handleSampleSelected}
               onSelectionUpdate={this.handleMapSidebarSelectUpdate}
+              onTabChange={this.handleMapSidebarTabChange}
+              projectDimensions={
+                isEmpty(mapSidebarProjectDimensions)
+                  ? computedProjectDimensions
+                  : mapSidebarProjectDimensions
+              }
+              projectStats={
+                isEmpty(mapSidebarSampleStats)
+                  ? projectStats
+                  : { count: mapSidebarSampleStats.projectCount }
+              }
               ref={mapPreviewSidebar =>
                 (this.mapPreviewSidebar = mapPreviewSidebar)
               }
+              sampleDimensions={
+                isEmpty(mapSidebarSampleDimensions)
+                  ? computedSampleDimensions
+                  : mapSidebarSampleDimensions
+              }
               samples={mapPreviewedSamples}
+              sampleStats={
+                isEmpty(mapSidebarSampleStats)
+                  ? filteredSampleStats
+                  : mapSidebarSampleStats
+              }
               selectableIds={mapPreviewedSampleIds}
             />
           )}
@@ -775,22 +865,12 @@ class DiscoveryView extends React.Component {
             currentTab === "projects") && (
             <DiscoverySidebar
               allowedFeatures={allowedFeatures}
-              className={cs.sidebar}
-              samples={samples}
-              projects={projects}
-              sampleDimensions={
-                filterCount || search
-                  ? filteredSampleDimensions
-                  : sampleDimensions
-              }
-              sampleStats={filteredSampleStats}
-              projectDimensions={
-                filterCount || search
-                  ? filteredProjectDimensions
-                  : projectDimensions
-              }
               currentTab={currentTab}
-              loading={loadingDimensions || loadingStats}
+              loading={loading}
+              projectDimensions={computedProjectDimensions}
+              projectStats={projectStats}
+              sampleDimensions={computedSampleDimensions}
+              sampleStats={filteredSampleStats}
             />
           )}
       </div>
@@ -815,6 +895,7 @@ class DiscoveryView extends React.Component {
       showFilters,
       showStats,
       visualizations,
+      mapPreviewedLocationId,
       mapPreviewedSamples,
       mapSidebarSelectedSampleIds,
     } = this.state;
@@ -894,11 +975,13 @@ class DiscoveryView extends React.Component {
                       allowedFeatures={allowedFeatures}
                       currentDisplay={currentDisplay}
                       mapLocationData={mapLocationData}
+                      mapPreviewedLocationId={mapPreviewedLocationId}
                       mapPreviewedSamples={mapPreviewedSamples}
                       mapSidebarSelectedSampleIds={mapSidebarSelectedSampleIds}
                       mapTilerKey={mapTilerKey}
                       onDisplaySwitch={this.handleDisplaySwitch}
                       onLoadRows={this.handleLoadSampleRows}
+                      onMapMarkerClick={this.handleMapMarkerClick}
                       onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                       onSampleSelected={this.handleSampleSelected}
                       projectId={projectId}

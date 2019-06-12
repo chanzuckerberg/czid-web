@@ -1,11 +1,13 @@
-import React from "react";
 import cx from "classnames";
 import { difference, find, isEmpty, union } from "lodash/fp";
+import React from "react";
 
-import PropTypes from "~/components/utils/propTypes";
-import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
+import Tabs from "~/components/ui/controls/Tabs";
+import PropTypes from "~/components/utils/propTypes";
+import DiscoverySidebar from "~/components/views/discovery/DiscoverySidebar";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 
 import cs from "./map_preview_sidebar.scss";
 
@@ -180,6 +182,27 @@ export default class MapPreviewSidebar extends React.Component {
     onSelectionUpdate && onSelectionUpdate(selectedSampleIds);
   };
 
+  computeTabs = () => {
+    const { samples } = this.props;
+    return [
+      {
+        label: "Summary",
+        value: "Summary"
+      },
+      {
+        label: (
+          <div>
+            <span className={cs.tabLabel}>Samples</span>
+            {samples.length > 0 && (
+              <span className={cs.tabCounter}>{samples.length}</span>
+            )}
+          </div>
+        ),
+        value: "Samples"
+      }
+    ];
+  };
+
   reset = () => {
     this.infiniteTable && this.infiniteTable.reset();
     this.setSelectedSampleIds(new Set());
@@ -220,17 +243,54 @@ export default class MapPreviewSidebar extends React.Component {
 
   renderNoData = () => {
     return (
-      <div className={cs.noData}>
-        Select a location to see summary info and samples.
-      </div>
+      <div className={cs.noData}>Select a location to preview samples.</div>
     );
   };
 
+  renderSummaryTab = () => {
+    const {
+      allowedFeatures,
+      discoveryCurrentTab,
+      loading,
+      projectDimensions,
+      projectStats,
+      sampleDimensions,
+      sampleStats
+    } = this.props;
+
+    return (
+      <DiscoverySidebar
+        allowedFeatures={allowedFeatures}
+        className={cs.summaryInfo}
+        currentTab={discoveryCurrentTab}
+        loading={loading}
+        projectDimensions={projectDimensions}
+        projectStats={projectStats}
+        sampleDimensions={sampleDimensions}
+        sampleStats={sampleStats}
+      />
+    );
+  };
+
+  renderSamplesTab = () => {
+    const { samples } = this.props;
+    return samples.length === 0 ? this.renderNoData() : this.renderTable();
+  };
+
   render() {
-    const { className, samples } = this.props;
+    const { className, currentTab, onTabChange } = this.props;
     return (
       <div className={cx(className, cs.sidebar)}>
-        {samples.length === 0 ? this.renderNoData() : this.renderTable()}
+        <Tabs
+          className={cs.tabs}
+          hideBorder
+          onChange={onTabChange}
+          tabs={this.computeTabs()}
+          value={currentTab}
+        />
+        {currentTab === "Summary"
+          ? this.renderSummaryTab()
+          : this.renderSamplesTab()}
       </div>
     );
   }
@@ -238,16 +298,26 @@ export default class MapPreviewSidebar extends React.Component {
 
 MapPreviewSidebar.defaultProps = {
   activeColumns: ["sample"],
-  protectedColumns: ["sample"]
+  protectedColumns: ["sample"],
+  currentTab: "Summary"
 };
 
 MapPreviewSidebar.propTypes = {
   activeColumns: PropTypes.array,
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   className: PropTypes.string,
+  currentTab: PropTypes.string,
+  discoveryCurrentTab: PropTypes.string,
   initialSelectedSampleIds: PropTypes.instanceOf(Set),
+  loading: PropTypes.bool,
   onSampleClicked: PropTypes.func,
   onSelectionUpdate: PropTypes.func,
+  onTabChange: PropTypes.func,
+  projectDimensions: PropTypes.array,
+  projectStats: PropTypes.object,
   protectedColumns: PropTypes.array,
+  sampleDimensions: PropTypes.array,
   samples: PropTypes.array,
+  sampleStats: PropTypes.object,
   selectableIds: PropTypes.array.isRequired
 };
