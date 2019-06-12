@@ -9,7 +9,7 @@ class AsyncMultipleDropdown extends React.Component {
 
     this.state = {
       selectedOptions: [],
-      options: []
+      options: [],
     };
   }
 
@@ -18,7 +18,7 @@ class AsyncMultipleDropdown extends React.Component {
       return {
         selectedOptions: props.selectedOptions,
         prevPropsSelectedOptions: props.selectedOptions,
-        options: unionBy("value", state.options, props.selectedOptions)
+        options: unionBy("value", state.options, props.selectedOptions),
       };
     }
     return null;
@@ -42,7 +42,7 @@ class AsyncMultipleDropdown extends React.Component {
 
     this.setState(
       {
-        selectedOptions: newSelectedOptions
+        selectedOptions: newSelectedOptions,
       },
       () => onChange(this.state.selectedOptions)
     );
@@ -84,7 +84,7 @@ class AsyncMultipleDropdown extends React.Component {
 AsyncMultipleDropdown.propTypes = {
   selectedOptions: PropTypes.array,
   onChange: PropTypes.func,
-  onFilterChange: PropTypes.func
+  onFilterChange: PropTypes.func,
 };
 
 export default AsyncMultipleDropdown;

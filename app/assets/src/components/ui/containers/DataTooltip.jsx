@@ -50,11 +50,11 @@ DataTooltip.propTypes = {
   data: PropTypes.array,
   subtitle: PropTypes.string,
   title: PropTypes.string,
-  singleColumn: PropTypes.bool
+  singleColumn: PropTypes.bool,
 };
 
 DataTooltip.defaultProps = {
-  singleColumn: false
+  singleColumn: false,
 };
 
 export default DataTooltip;

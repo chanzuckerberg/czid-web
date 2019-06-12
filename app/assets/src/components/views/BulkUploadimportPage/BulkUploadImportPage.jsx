@@ -23,7 +23,7 @@ BulkUploadImportPage.propTypes = {
   projects: PropTypes.arrayOf(PropTypes.Project),
   csrf: PropTypes.string,
   host_genomes: PropTypes.arrayOf(PropTypes.HostGenome),
-  admin: PropTypes.bool
+  admin: PropTypes.bool,
 };
 
 export default BulkUploadImportPage;

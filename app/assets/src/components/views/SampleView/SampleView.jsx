@@ -9,17 +9,17 @@ import { saveVisualization, getCoverageVizSummary } from "~/api";
 import {
   getURLParamString,
   parseUrlParams,
-  copyShortUrlToClipboard
+  copyShortUrlToClipboard,
 } from "~/helpers/url";
 import {
   withAnalytics,
   logAnalyticsEvent,
-  ANALYTICS_EVENT_NAMES
+  ANALYTICS_EVENT_NAMES,
 } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import {
   pipelineVersionHasAssembly,
-  pipelineVersionHasCoverageViz
+  pipelineVersionHasCoverageViz,
 } from "~/components/utils/sample";
 import AMRView from "~/components/AMRView";
 import BasicPopup from "~/components/BasicPopup";
@@ -48,7 +48,8 @@ class SampleView extends React.Component {
       sidebarVisible: false,
       sidebarTaxonModeConfig: null,
       coverageVizDataByTaxon: null,
-      nameType: Cookies.get("name_type") || "Scientific name" // "Scientific name" or "Common name"
+      nameType: Cookies.get("name_type") || "Scientific name", // "Scientific name" or "Common name"
+      view: "table",
     };
 
     this.gsnapFilterStatus = this.generateGsnapFilterStatus();
@@ -73,7 +74,7 @@ class SampleView extends React.Component {
     // frontend events, we keep it for continuity. See
     // https://czi.quip.com/67RCAIiHN0Qc/IDseq-product-analytics-How-to-log
     logAnalyticsEvent(ANALYTICS_EVENT_NAMES.sampleViewed, {
-      sampleId: this.props.sample.id
+      sampleId: this.props.sample.id,
     });
   }
 
@@ -83,7 +84,7 @@ class SampleView extends React.Component {
       const coverageVizSummary = await getCoverageVizSummary(sample.id);
 
       this.setState({
-        coverageVizDataByTaxon: coverageVizSummary
+        coverageVizDataByTaxon: coverageVizSummary,
       });
     }
   };
@@ -132,7 +133,7 @@ class SampleView extends React.Component {
     this.setState({ currentTab: tab });
     const name = tab.replace(/\W+/g, "-").toLowerCase();
     logAnalyticsEvent(`SampleView_tab-${name}_clicked`, {
-      tab: tab
+      tab: tab,
     });
   };
 
@@ -147,12 +148,12 @@ class SampleView extends React.Component {
       this.state.sidebarVisible
     ) {
       this.setState({
-        sidebarVisible: false
+        sidebarVisible: false,
       });
     } else {
       this.setState({
         sidebarMode: "sampleDetails",
-        sidebarVisible: true
+        sidebarVisible: true,
       });
     }
   };
@@ -160,7 +161,7 @@ class SampleView extends React.Component {
   handleTaxonClick = sidebarTaxonModeConfig => {
     if (!sidebarTaxonModeConfig) {
       this.setState({
-        sidebarVisible: false
+        sidebarVisible: false,
       });
       return;
     }
@@ -172,21 +173,21 @@ class SampleView extends React.Component {
         get("taxonId", this.state.sidebarTaxonModeConfig)
     ) {
       this.setState({
-        sidebarVisible: false
+        sidebarVisible: false,
       });
     } else {
       this.setState({
         sidebarMode: "taxonDetails",
         sidebarTaxonModeConfig,
         sidebarVisible: true,
-        coverageVizVisible: false
+        coverageVizVisible: false,
       });
     }
   };
 
   closeSidebar = () => {
     this.setState({
-      sidebarVisible: false
+      sidebarVisible: false,
     });
   };
 
@@ -195,7 +196,7 @@ class SampleView extends React.Component {
 
     if (!params.taxId) {
       this.setState({
-        coverageVizVisible: false
+        coverageVizVisible: false,
       });
       return;
     }
@@ -205,20 +206,20 @@ class SampleView extends React.Component {
       get("taxId", coverageVizParams) === params.taxId
     ) {
       this.setState({
-        coverageVizVisible: false
+        coverageVizVisible: false,
       });
     } else {
       this.setState({
         coverageVizParams: params,
         coverageVizVisible: true,
-        sidebarVisible: false
+        sidebarVisible: false,
       });
     }
   };
 
   closeCoverageViz = () => {
     this.setState({
-      coverageVizVisible: false
+      coverageVizVisible: false,
     });
   };
 
@@ -230,7 +231,7 @@ class SampleView extends React.Component {
   handleMetadataUpdate = (key, newValue) => {
     if (key === "name") {
       this.setState({
-        sampleName: newValue
+        sampleName: newValue,
       });
     }
   };
@@ -375,9 +376,11 @@ class SampleView extends React.Component {
             reportPageParams={this.props.reportPageParams}
             onTaxonClick={this.handleTaxonClick}
             onCoverageVizClick={this.handleCoverageVizClick}
+            onViewClick={this.handleViewClick}
             savedParamValues={this.props.savedParamValues}
             nameType={this.state.nameType}
             onNameTypeChange={this.handleNameTypeChange}
+            view={this.state.view}
           />
         );
       } else if (this.pipelineInProgress()) {
@@ -403,7 +406,7 @@ class SampleView extends React.Component {
           "pipeline_info.pipeline_version",
           this.props.reportDetails
         ),
-        onMetadataUpdate: this.handleMetadataUpdate
+        onMetadataUpdate: this.handleMetadataUpdate,
       };
     }
     return {};
@@ -426,7 +429,7 @@ class SampleView extends React.Component {
           ...accession,
           // Use snake_case for consistency with other fields.
           taxon_name: taxon.taxonName,
-          taxon_common_name: taxon.taxonCommonName
+          taxon_common_name: taxon.taxonCommonName,
         }),
         speciesBestAccessions
       );
@@ -443,7 +446,7 @@ class SampleView extends React.Component {
           taxId => get([taxId, "num_accessions"], coverageVizDataByTaxon),
           speciesTaxIds
         )
-      )
+      ),
     };
   };
 
@@ -471,7 +474,7 @@ class SampleView extends React.Component {
       taxonCommonName: coverageVizParams.taxCommonName,
       taxonLevel: coverageVizParams.taxLevel,
       alignmentVizUrl: coverageVizParams.alignmentVizUrl,
-      accessionData
+      accessionData,
     };
   };
 
@@ -491,6 +494,10 @@ class SampleView extends React.Component {
       get("pipeline_version", this.props.reportPageParams)
     );
 
+  handleViewClick = data => {
+    this.setState({ view: data.name });
+  };
+
   render() {
     const versionDisplay = this.renderVersionDisplay();
 
@@ -504,7 +511,7 @@ class SampleView extends React.Component {
       amr,
       reportPresent,
       reportDetails,
-      reportPageParams
+      reportPageParams,
     } = this.props;
 
     const showAMR = amr;
@@ -537,9 +544,9 @@ class SampleView extends React.Component {
                   onClick: () => {
                     window.open(`/samples/${sampleId}`, "_self");
                     logAnalyticsEvent("SampleView_header-title_clicked", {
-                      sampleId
+                      sampleId,
                     });
-                  }
+                  },
                 }))}
               />
               <div className={cs.sampleDetailsLinkContainer}>
@@ -550,7 +557,7 @@ class SampleView extends React.Component {
                     "SampleView_sample-details-link_clicked",
                     {
                       sampleId: sample.id,
-                      sampleName: sample.name
+                      sampleName: sample.name,
                     }
                   )}
                 >
@@ -567,7 +574,7 @@ class SampleView extends React.Component {
                       "SampleView_share-button_clicked",
                       {
                         sampleId: sample.id,
-                        sampleName: sample.name
+                        sampleName: sample.name,
                       }
                     )}
                   />
@@ -584,7 +591,7 @@ class SampleView extends React.Component {
                     "SampleView_save-button_clicked",
                     {
                       sampleId: sample.id,
-                      sampleName: sample.name
+                      sampleName: sample.name,
                     }
                   )}
                 />
@@ -597,6 +604,7 @@ class SampleView extends React.Component {
                 reportDetails={reportDetails}
                 reportPageParams={reportPageParams}
                 canEdit={this.props.canEdit}
+                view={this.state.view}
               />
             </ViewHeader.Controls>
           </ViewHeader>
@@ -624,7 +632,7 @@ class SampleView extends React.Component {
             "SampleView_details-sidebar_closed",
             {
               sampleId: sample.id,
-              sampleName: sample.name
+              sampleName: sample.name,
             }
           )}
           params={this.getSidebarParams()}
@@ -637,7 +645,7 @@ class SampleView extends React.Component {
               "SampleView_coverage-viz-sidebar_closed",
               {
                 sampleId: sample.id,
-                sampleName: sample.name
+                sampleName: sample.name,
               }
             )}
             params={this.getCoverageVizParams()}
@@ -662,13 +670,13 @@ SampleView.propTypes = {
   reportPageParams: PropTypes.shape({
     pipeline_version: PropTypes.string,
     // TODO (gdingle): standardize on string or number
-    background_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    background_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   }),
   amr: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number,
       gene: PropTypes.string,
-      allele: PropTypes.string
+      allele: PropTypes.string,
     })
   ),
   reportPresent: PropTypes.bool,
@@ -680,7 +688,7 @@ SampleView.propTypes = {
   allCategories: PropTypes.arrayOf(
     PropTypes.shape({
       taxid: PropTypes.number,
-      name: PropTypes.string
+      name: PropTypes.string,
     })
   ),
   allBackgrounds: PropTypes.arrayOf(PropTypes.BackgroundData),
@@ -688,11 +696,11 @@ SampleView.propTypes = {
   canSeeAlignViz: PropTypes.bool,
   canEdit: PropTypes.bool,
   hostGenome: PropTypes.shape({
-    name: PropTypes.string
+    name: PropTypes.string,
   }),
   jobStatistics: PropTypes.string,
   sampleStatus: PropTypes.string,
-  savedParamValues: PropTypes.object
+  savedParamValues: PropTypes.object,
 };
 
 export default SampleView;

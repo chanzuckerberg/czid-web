@@ -9,7 +9,7 @@ class MetadataSection extends React.Component {
   state = {
     hasSaved: false,
     prevSavePending: this.props.savePending,
-    prevEditing: this.props.editing
+    prevEditing: this.props.editing,
   };
 
   static getDerivedStateFromProps(props, state) {
@@ -28,7 +28,7 @@ class MetadataSection extends React.Component {
     return {
       hasSaved,
       prevSavePending: props.savePending,
-      prevEditing: props.editing
+      prevEditing: props.editing,
     };
   }
 
@@ -58,7 +58,7 @@ class MetadataSection extends React.Component {
       children,
       onEditToggle,
       alwaysShowEditLink,
-      className
+      className,
     } = this.props;
 
     const header = (
@@ -115,7 +115,7 @@ MetadataSection.propTypes = {
   onEditToggle: PropTypes.func,
   savePending: PropTypes.bool,
   alwaysShowEditLink: PropTypes.bool,
-  children: PropTypes.node
+  children: PropTypes.node,
 };
 
 export default MetadataSection;

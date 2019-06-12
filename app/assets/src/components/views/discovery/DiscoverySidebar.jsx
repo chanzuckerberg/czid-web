@@ -19,15 +19,15 @@ export default class DiscoverySidebar extends React.Component {
         numSamples: "",
         numProjects: "",
         avgTotalReads: "",
-        avgAdjustedRemainingReads: ""
+        avgAdjustedRemainingReads: "",
       },
       metadata: {
         host: [],
         tissue: [],
         time: [],
-        location: []
+        location: [],
       },
-      expandedMetadataGroups: new Set()
+      expandedMetadataGroups: new Set(),
     };
   }
 
@@ -36,9 +36,9 @@ export default class DiscoverySidebar extends React.Component {
       currentTab,
       loading,
       projectDimensions,
-      projects,
+      projectStats,
       sampleDimensions,
-      sampleStats
+      sampleStats,
     } = newProps;
     if (loading) return prevState;
     const dimensions =
@@ -47,20 +47,21 @@ export default class DiscoverySidebar extends React.Component {
     return {
       stats: {
         numSamples: DiscoverySidebar.formatNumber((sampleStats || {}).count),
-        numProjects: DiscoverySidebar.formatNumber(projects.length),
+        numProjects: DiscoverySidebar.formatNumber((projectStats || {}).count),
         avgTotalReads: DiscoverySidebar.formatNumber(
           (sampleStats || {}).avgTotalReads
         ),
         avgAdjustedRemainingReads: DiscoverySidebar.formatNumber(
           (sampleStats || {}).avgAdjustedRemainingReads
-        )
+        ),
       },
       metadata: {
         host: DiscoverySidebar.loadDimension(dimensions, "host"),
         tissue: DiscoverySidebar.loadDimension(dimensions, "tissue"),
         location: DiscoverySidebar.loadDimension(dimensions, "location"),
-        time: DiscoverySidebar.loadDimension(dimensions, "time_bins")
-      }
+        locationV2: DiscoverySidebar.loadDimension(dimensions, "locationV2"),
+        time: DiscoverySidebar.loadDimension(dimensions, "time_bins"),
+      },
     };
   }
 
@@ -115,7 +116,7 @@ export default class DiscoverySidebar extends React.Component {
                     dateValue: entry.value,
                     dates: dates.length,
                     count: entry.count,
-                    percent
+                    percent,
                   });
                 }}
               >
@@ -183,7 +184,7 @@ export default class DiscoverySidebar extends React.Component {
               logAnalyticsEvent("DiscoverySidebar_show-more-toggle_clicked", {
                 field,
                 extraRows: extraRows.length,
-                linkText
+                linkText,
               });
             }}
           >
@@ -198,7 +199,7 @@ export default class DiscoverySidebar extends React.Component {
     const groups = new Set(this.state.expandedMetadataGroups);
     groups.has(field) ? groups.delete(field) : groups.add(field);
     this.setState({
-      expandedMetadataGroups: groups
+      expandedMetadataGroups: groups,
     });
   }
 
@@ -216,7 +217,7 @@ export default class DiscoverySidebar extends React.Component {
                   value,
                   count,
                   percent,
-                  rows: rows.length
+                  rows: rows.length,
                 });
               }}
             >
@@ -237,7 +238,7 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
-    const { className, currentTab, loading } = this.props;
+    const { allowedFeatures, className, currentTab, loading } = this.props;
     if (!loading && !this.hasData()) {
       return (
         <div className={cx(className, cs.sidebar)}>
@@ -336,6 +337,13 @@ export default class DiscoverySidebar extends React.Component {
               <span className={cs.rowLabel}>Location</span>
               {this.buildMetadataRows("location")}
             </div>
+            {allowedFeatures &&
+              allowedFeatures.includes("maps") && (
+                <div className={cs.hasBackground}>
+                  <span className={cs.rowLabel}>Location v2</span>
+                  {this.buildMetadataRows("locationV2")}
+                </div>
+              )}
           </Accordion>
         </div>
       </div>
@@ -344,20 +352,18 @@ export default class DiscoverySidebar extends React.Component {
 }
 
 DiscoverySidebar.defaultProps = {
-  projects: [],
-  samples: [],
-  defaultNumberOfMetadataRows: 4
+  defaultNumberOfMetadataRows: 4,
 };
 
 DiscoverySidebar.propTypes = {
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   className: PropTypes.string,
   currentTab: PropTypes.string.isRequired,
   defaultNumberOfMetadataRows: PropTypes.number,
   loading: PropTypes.bool,
   onFilterClick: PropTypes.func,
   projectDimensions: PropTypes.array,
-  projects: PropTypes.arrayOf(PropTypes.Project),
+  projectStats: PropTypes.object,
   sampleDimensions: PropTypes.array,
   sampleStats: PropTypes.object,
-  samples: PropTypes.arrayOf(PropTypes.Sample)
 };

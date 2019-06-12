@@ -292,8 +292,12 @@ class SamplesController < ApplicationController
 
     samples = samples_by_domain(domain)
     samples = filter_samples(samples, params)
-    sample_ids = samples.pluck(:id)
+    sample_data = samples.pluck(:id, :project_id)
+    sample_ids = sample_data.map { |s| s[0] }
+    project_ids = sample_data.map { |s| s[1] }.uniq
 
+    avg_total_reads = nil
+    avg_remaining_reads = nil
     if sample_ids.count > 0
       pipeline_run_ids = top_pipeline_runs_multiget(sample_ids).values
       avg_total_reads, avg_remaining_reads = PipelineRun
@@ -307,6 +311,7 @@ class SamplesController < ApplicationController
       format.json do
         render json: {
           count: sample_ids.count,
+          projectCount: project_ids.count,
           avgTotalReads: avg_total_reads.present? ? avg_total_reads : 0,
           avgAdjustedRemainingReads: avg_remaining_reads.present? ? avg_remaining_reads : 0
         }

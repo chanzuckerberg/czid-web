@@ -6,7 +6,7 @@ import SecondaryButton from "../controls/buttons/SecondaryButton";
 
 const WizardContext = React.createContext({
   currentPage: 0,
-  actions: {}
+  actions: {},
 });
 
 class Wizard extends React.Component {
@@ -16,7 +16,7 @@ class Wizard extends React.Component {
     this.state = {
       currentPage: 0,
       continueEnabled: true,
-      overlay: null
+      overlay: null,
     };
 
     this.showPageInfo = this.props.showPageInfo || true;
@@ -30,7 +30,7 @@ class Wizard extends React.Component {
       {
         back: "Back",
         continue: "Continue",
-        finish: "Finish"
+        finish: "Finish",
       },
       this.props.labels
     );
@@ -40,7 +40,7 @@ class Wizard extends React.Component {
     if (newProps.defaultPage !== prevState.lastDefaultPage) {
       return {
         lastDefaultPage: newProps.defaultPage,
-        currentPage: newProps.defaultPage
+        currentPage: newProps.defaultPage,
       };
     }
     return null;
@@ -49,19 +49,19 @@ class Wizard extends React.Component {
   resetPageState = () => {
     this.setState({
       continueEnabled: true,
-      onContinueValidation: null
+      onContinueValidation: null,
     });
   };
 
   handleContinueEnabled = enabled => {
     this.setState({
-      continueEnabled: enabled
+      continueEnabled: enabled,
     });
   };
 
   handleSetOnContinueValidation = onContinueValidation => {
     this.setState({
-      onContinueValidation
+      onContinueValidation,
     });
   };
 
@@ -69,7 +69,7 @@ class Wizard extends React.Component {
   // Used for things like the Metadata Instructions page.
   setOverlay = overlay => {
     this.setState({
-      overlay
+      overlay,
     });
   };
 
@@ -83,13 +83,19 @@ class Wizard extends React.Component {
   handleContinueClick = async () => {
     let onContinue = this.props.children[this.state.currentPage].props
       .onContinue;
+    let onContinueAsync = this.props.children[this.state.currentPage].props
+      .onContinueAsync;
     if (onContinue) {
       if (onContinue()) {
         this.advancePage();
       }
+    } else if (onContinueAsync) {
+      const result = await onContinueAsync();
+      if (result) {
+        this.advancePage();
+      }
     } else if (this.state.onContinueValidation) {
       const result = await this.state.onContinueValidation();
-
       if (result) {
         this.advancePage();
       }
@@ -115,7 +121,7 @@ class Wizard extends React.Component {
     const wizardActions = {
       continue: this.handleContinueClick,
       back: this.handleBackClick,
-      finish: this.handleFinishClick
+      finish: this.handleFinishClick,
     };
 
     let pageInfo = null;
@@ -151,7 +157,7 @@ class Wizard extends React.Component {
             {React.cloneElement(currentPage, {
               wizardEnableContinue: this.handleContinueEnabled,
               wizardSetOnContinueValidation: this.handleSetOnContinueValidation,
-              wizardSetOverlay: this.setOverlay
+              wizardSetOverlay: this.setOverlay,
             })}
           </div>
           {!currentPage.props.skipDefaultButtons && (
@@ -189,20 +195,20 @@ class Wizard extends React.Component {
 Wizard.propTypes = {
   children: PropTypes.oneOfType([
     PropTypes.shape({
-      type: Wizard.Page
+      type: Wizard.Page,
     }),
     PropTypes.arrayOf(
       PropTypes.shape({
-        type: Wizard.Page
+        type: Wizard.Page,
       })
-    )
+    ),
   ]).isRequired,
   labels: PropTypes.objectOf(PropTypes.string),
   onComplete: PropTypes.func,
   showPageInfo: PropTypes.bool,
   skipPageInfoNPages: PropTypes.number,
   title: PropTypes.string,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 // You can use the Page component for basic use cases, or create your own custom page class.
@@ -232,11 +238,11 @@ class Page extends React.Component {
 Page.propTypes = {
   children: PropTypes.oneOfType([
     PropTypes.PropTypes.node,
-    PropTypes.arrayOf(PropTypes.node)
+    PropTypes.arrayOf(PropTypes.node),
   ]).isRequired,
   onLoad: PropTypes.func,
   // Props are used in Wizard.
-  skipDefaultButtons: PropTypes.bool
+  skipDefaultButtons: PropTypes.bool,
 };
 
 Wizard.Page = Page;
@@ -269,7 +275,7 @@ const Action = ({ action, onAfterAction, children }) => {
 Action.propTypes = {
   action: PropTypes.oneOf(["back", "continue", "finish"]),
   children: PropTypes.node.isRequired,
-  onAfterAction: PropTypes.func
+  onAfterAction: PropTypes.func,
 };
 
 Wizard.Action = Action;

@@ -11,7 +11,8 @@ module LocationHelper
       country_name: address["country"] || "",
       state_name: address["state"] || "",
       subdivision_name: address["county"] || "",
-      city_name: address["city"] || "",
+      # Normalize extra provider fields to city. normalizecity param doesn't work all the time.
+      city_name: address[%w[city city_distrct locality town borough municipality village hamlet quarter neighbourhood state_district].find { |k| address.key?(k) }] || "",
       # Round coordinates to enhance privacy
       lat: body["lat"] ? body["lat"].to_f.round(2) : nil,
       # LocationIQ uses 'lon'
@@ -29,15 +30,17 @@ module LocationHelper
   end
 
   def self.truncate_name(name)
-    # For long names, just take the first and last two parts so they look a little better downstream
-    # (e.g. in dropdown filters).
-    max_chars = 40
+    # Shorten long names so they look a little better downstream (e.g. in dropdown filters). Try to take the first 2 + last 2 parts, or just the first + last 2 parts.
+    max_chars = 30
     if name.size > max_chars
       parts = name.split(", ")
       if parts.size >= 4
-        parts = parts.first(2) + parts.last(2)
+        last = parts[-2..-1]
+        name = parts[0..1].concat(last).join(", ")
+        if name.size > max_chars
+          name = [parts[0]].concat(last).join(", ")
+        end
       end
-      name = parts.join(", ")
     end
     name
   end

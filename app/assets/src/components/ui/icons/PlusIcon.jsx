@@ -24,7 +24,7 @@ const PlusIcon = props => {
 };
 
 PlusIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default PlusIcon;

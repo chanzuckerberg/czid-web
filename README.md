@@ -3,7 +3,7 @@
 ![logo](https://assets.idseq.net/Logo_Black.png)
 
 #### Infectious Disease Sequencing Platform
-IDseq is an unbiased global software platform that helps scientists identify pathogens in metagenomic sequencing data.
+IDseq is a hypothesis-free global software platform that helps scientists identify pathogens in metagenomic sequencing data.
 
 - **Discover** - Identify the pathogen landscape
 - **Detect** - Monitor and review potential outbreaks

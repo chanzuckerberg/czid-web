@@ -15,12 +15,17 @@ class DiscoveryMap extends React.Component {
 
     this.state = {
       tooltip: null,
-      tooltipShouldClose: false
+      tooltipShouldClose: false,
     };
   }
 
   updateViewport = viewport => {
     this.setState({ viewport });
+  };
+
+  handleMarkerClick = markerData => {
+    const { onMarkerClick } = this.props;
+    onMarkerClick && onMarkerClick(markerData);
   };
 
   handleMarkerMouseEnter = hoverInfo => {
@@ -60,6 +65,7 @@ class DiscoveryMap extends React.Component {
   };
 
   renderMarker = markerData => {
+    const { previewedLocationId } = this.props;
     const { viewport } = this.state;
     const id = markerData.id;
     const name = markerData.name;
@@ -77,7 +83,9 @@ class DiscoveryMap extends React.Component {
     return (
       <Marker key={`marker-${markerData.id}`} latitude={lat} longitude={lng}>
         <CircleMarker
+          active={id === previewedLocationId}
           size={markerSize}
+          onClick={() => this.handleMarkerClick(id)}
           onMouseEnter={() =>
             this.handleMarkerMouseEnter({ id, name, lat, lng, pointCount })
           }
@@ -103,9 +111,11 @@ class DiscoveryMap extends React.Component {
 }
 
 DiscoveryMap.propTypes = {
-  mapTilerKey: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
-  onTooltipTitleClick: PropTypes.func
+  mapTilerKey: PropTypes.string,
+  onMarkerClick: PropTypes.func,
+  onTooltipTitleClick: PropTypes.func,
+  previewedLocationId: PropTypes.number,
 };
 
 export default DiscoveryMap;

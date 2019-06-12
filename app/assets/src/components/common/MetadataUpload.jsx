@@ -23,21 +23,21 @@ class MetadataUpload extends React.Component {
     currentTab: "Manual Input",
     issues: {
       errors: [],
-      warnings: []
+      warnings: [],
     },
     projectMetadataFields: null,
     hostGenomes: [],
-    validatingCSV: false
+    validatingCSV: false,
   };
 
   async componentDidMount() {
     const [projectMetadataFields, hostGenomes] = await Promise.all([
       getProjectMetadataFields(this.props.project.id),
-      getAllHostGenomes()
+      getAllHostGenomes(),
     ]);
     this.setState({
       projectMetadataFields: keyBy("key", projectMetadataFields),
-      hostGenomes
+      hostGenomes,
     });
   }
 
@@ -47,12 +47,12 @@ class MetadataUpload extends React.Component {
     this.props.onMetadataChange({
       metadata: null,
       issues: null,
-      wasManual: tab === "Manual Input"
+      wasManual: tab === "Manual Input",
     });
     logAnalyticsEvent("MetadataUpload_tab_changed", {
       tab,
       projectId: this.props.project.id,
-      projectName: this.props.project.name
+      projectName: this.props.project.name,
     });
   };
 
@@ -61,7 +61,7 @@ class MetadataUpload extends React.Component {
     this.props.onMetadataChange({ metadata, issues, wasManual: false });
     this.setState({
       issues,
-      validatingCSV
+      validatingCSV,
     });
     if (!validatingCSV) {
       // We only want to log on the second call when issues are present
@@ -69,7 +69,7 @@ class MetadataUpload extends React.Component {
         errors: issues.errors.length,
         warnings: issues.warnings.length,
         projectId: this.props.project.id,
-        projectName: this.props.project.name
+        projectName: this.props.project.name,
       });
     }
   };
@@ -83,7 +83,7 @@ class MetadataUpload extends React.Component {
     this.props.onMetadataChange({ metadata, wasManual: true });
     logAnalyticsEvent("MetadataUpload_manual-metadata_changed", {
       projectId: this.props.project.id,
-      projectName: this.props.project.name
+      projectName: this.props.project.name,
     });
   };
 
@@ -92,7 +92,7 @@ class MetadataUpload extends React.Component {
       ...(this.props.samplesAreNew
         ? { new_sample_names: map("name", this.props.samples) }
         : {}),
-      project_id: this.props.project.id
+      project_id: this.props.project.id,
     };
 
     return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
@@ -150,7 +150,7 @@ class MetadataUpload extends React.Component {
                 "MetadataUpload_download-csv-template_clicked",
                 {
                   projectId: this.props.project.id,
-                  projectName: this.props.project.name
+                  projectName: this.props.project.name,
                 }
               )
             }
@@ -260,7 +260,7 @@ class MetadataUpload extends React.Component {
                       "MetadataUpload_full-dictionary-link_clicked",
                       {
                         projectId: this.props.project.id,
-                        projectName: this.props.project.name
+                        projectName: this.props.project.name,
                       }
                     )
                   }
@@ -281,7 +281,7 @@ class MetadataUpload extends React.Component {
                 onClick={() =>
                   logAnalyticsEvent("MetadataUpload_dictionary-link_clicked", {
                     projectId: this.props.project.id,
-                    projectName: this.props.project.name
+                    projectName: this.props.project.name,
                   })
                 }
               >
@@ -307,7 +307,7 @@ MetadataUpload.propTypes = {
   className: PropTypes.string,
   issues: PropTypes.shape({
     errors: PropTypes.arrayOf(PropTypes.string),
-    warnings: PropTypes.arrayOf(PropTypes.string)
+    warnings: PropTypes.arrayOf(PropTypes.string),
   }),
   onMetadataChange: PropTypes.func.isRequired,
   onShowCSVInstructions: PropTypes.func.isRequired,
@@ -318,7 +318,7 @@ MetadataUpload.propTypes = {
   visible: PropTypes.bool,
   // Immediately called when the user changes anything, even before validation has returned.
   // Can be used to disable the header navigation.
-  onDirty: PropTypes.func
+  onDirty: PropTypes.func,
 };
 
 export default MetadataUpload;

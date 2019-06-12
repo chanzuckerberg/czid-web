@@ -10,4 +10,9 @@ module ParameterSanitization
     end
     return default
   end
+
+  def sanitize_title_name(title)
+    # Allow letters, numbers, underscores, dashes, and spaces
+    return title.gsub(/[^A-Za-z0-9_\- ]/, ' ').strip
+  end
 end

@@ -2,7 +2,7 @@ import {
   bulkUploadRemoteSamples,
   createSample,
   markSampleUploaded,
-  uploadFileToUrlWithRetries
+  uploadFileToUrlWithRetries,
 } from "~/api";
 
 import { bulkUploadWithMetadata } from "~/api/metadata";
@@ -21,7 +21,7 @@ export const bulkUploadLocalWithMetadata = ({
   onUploadProgress,
   onUploadError,
   onAllUploadsComplete,
-  onMarkSampleUploadedError
+  onMarkSampleUploadedError,
 }) => {
   // Store the upload progress of file names, so we can track when
   // everything is done.
@@ -78,7 +78,7 @@ export const bulkUploadLocalWithMetadata = ({
               }
             },
             onSuccess: () => onFileUploadSuccess(sampleName, sample.id),
-            onError: error => onUploadError(file, error)
+            onError: error => onUploadError(file, error),
           });
         });
       });
@@ -99,7 +99,7 @@ export const bulkUploadLocal = ({
   onUploadProgress,
   onUploadError,
   onAllUploadsComplete,
-  onMarkSampleUploadedError
+  onMarkSampleUploadedError,
 }) => {
   // Store the upload progress of file names, so we can track when
   // everything is done.
@@ -157,7 +157,7 @@ export const bulkUploadLocal = ({
               }
             },
             onSuccess: () => onFileUploadSuccess(sampleName, sampleId),
-            onError: error => onUploadError(file, error)
+            onError: error => onUploadError(file, error),
           });
         });
       })

@@ -2,13 +2,15 @@
 
 .circle {
   cursor: pointer;
-  fill: $primary-light;
-  opacity: 0.5;
+  fill: $celery;
 
   &.hoverable {
     &:hover {
       fill: $primary-medium;
-      opacity: 1;
     }
+  }
+
+  &.active {
+    fill: $primary-medium;
   }
 }

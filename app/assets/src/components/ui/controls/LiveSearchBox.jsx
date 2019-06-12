@@ -12,7 +12,7 @@ class LiveSearchBox extends React.Component {
       isLoading: false,
       results: [],
       value: this.props.initialValue,
-      selectedResult: null
+      selectedResult: null,
     };
 
     this.lastestTimerId = null;
@@ -22,7 +22,7 @@ class LiveSearchBox extends React.Component {
     if (props.value !== state.prevValue) {
       return {
         prevValue: props.value,
-        value: props.value
+        value: props.value,
       };
     }
     return null;
@@ -45,7 +45,7 @@ class LiveSearchBox extends React.Component {
     this.setState({
       isLoading: false,
       results: [],
-      value: ""
+      value: "",
     });
   };
 
@@ -67,7 +67,7 @@ class LiveSearchBox extends React.Component {
     if (timerId === this.lastestTimerId) {
       this.setState({
         isLoading: false,
-        results: results
+        results: results,
       });
     }
   };
@@ -127,7 +127,7 @@ LiveSearchBox.defaultProps = {
   minChars: 2,
   placeholder: "Search",
   rectangular: false,
-  inputMode: false
+  inputMode: false,
 };
 
 LiveSearchBox.propTypes = {
@@ -142,7 +142,7 @@ LiveSearchBox.propTypes = {
   onSearchChange: PropTypes.func,
   onResultSelect: PropTypes.func,
   rectangular: PropTypes.bool,
-  inputMode: PropTypes.bool
+  inputMode: PropTypes.bool,
 };
 
 export default LiveSearchBox;

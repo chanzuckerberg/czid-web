@@ -9,7 +9,7 @@ class VisibilityFilter extends React.Component {
 
     this.options = [
       { value: "public", text: "Public" },
-      { value: "private", text: "Private" }
+      { value: "private", text: "Private" },
     ];
   }
 
@@ -29,7 +29,7 @@ class VisibilityFilter extends React.Component {
 VisibilityFilter.propTypes = {
   selected: PropTypes.string,
   onChange: PropTypes.func,
-  counters: PropTypes.object
+  counters: PropTypes.object,
 };
 
 export default VisibilityFilter;

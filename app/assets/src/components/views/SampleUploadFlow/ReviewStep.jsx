@@ -24,13 +24,13 @@ const processMetadataRows = metadataRows =>
 class ReviewStep extends React.Component {
   state = {
     consentChecked: false,
-    submitState: "review"
+    submitState: "review",
   };
 
   onUploadError = error => {
     this.setState({
       submitState: "review",
-      errorMessage: error
+      errorMessage: error,
     });
     this.props.onUploadStatusChange(false);
   };
@@ -40,23 +40,23 @@ class ReviewStep extends React.Component {
 
     this.setState({
       submitState: "submitting",
-      errorMessage: ""
+      errorMessage: "",
     });
 
     // For uploading samples with files on S3
     if (this.props.uploadType === "remote") {
       bulkUploadRemote({
         samples: this.props.samples,
-        metadata: processMetadataRows(this.props.metadata.rows)
+        metadata: processMetadataRows(this.props.metadata.rows),
       })
         .then(response => {
           this.setState({
             submitState: "success",
-            createdSampleIds: response.sample_ids
+            createdSampleIds: response.sample_ids,
           });
           this.props.onUploadComplete();
           logAnalyticsEvent("ReviewStep_remote-upload_succeeded", {
-            createdSampleIds: response.sample_ids.length
+            createdSampleIds: response.sample_ids.length,
           });
         })
         // TODO(mark): Display better errors.
@@ -66,7 +66,7 @@ class ReviewStep extends React.Component {
           console.error("onBulkUploadRemote error:", error);
           this.onUploadError("There were some issues creating your samples.");
           logAnalyticsEvent("ReviewStep_remote-upload_failed", {
-            error
+            error,
           });
         });
     }
@@ -79,11 +79,11 @@ class ReviewStep extends React.Component {
         metadata: processMetadataRows(this.props.metadata.rows),
         onAllUploadsComplete: () => {
           this.setState({
-            submitState: "success"
+            submitState: "success",
           });
           this.props.onUploadComplete();
           logAnalyticsEvent("ReviewStep_local-upload_succeeded", {
-            samples: this.props.samples.length
+            samples: this.props.samples.length,
           });
         },
         onCreateSamplesError: errors => {
@@ -92,7 +92,7 @@ class ReviewStep extends React.Component {
           console.error("onCreateSamplesError:", errors);
           this.onUploadError("There were some issues creating your samples.");
           logAnalyticsEvent("ReviewStep_local-upload_failed", {
-            errors: errors.length
+            errors: errors.length,
           });
         },
         // TODO(mark): Display better errors.
@@ -103,7 +103,7 @@ class ReviewStep extends React.Component {
           this.onUploadError("There were some issues creating your samples.");
           logAnalyticsEvent("ReviewStep_local-upload_failed", {
             fileName: file.name,
-            error
+            error,
           });
         },
         onMarkSampleUploadedError: sampleName => {
@@ -111,9 +111,9 @@ class ReviewStep extends React.Component {
             `Failed to mark sample ${sampleName} as uploaded.`
           );
           logAnalyticsEvent("ReviewStep_local-upload_failed", {
-            sampleName
+            sampleName,
           });
-        }
+        },
       });
     }
   };
@@ -124,7 +124,7 @@ class ReviewStep extends React.Component {
       "Input Files",
       "Host Genome",
       // Omit sample name, which is the first header.
-      ...without(["Sample Name", "sample_name"], this.props.metadata.headers)
+      ...without(["Sample Name", "sample_name"], this.props.metadata.headers),
     ];
   };
 
@@ -148,7 +148,7 @@ class ReviewStep extends React.Component {
               </div>
             ))}
           </div>
-        )
+        ),
       }),
       this.props.samples
     );
@@ -193,7 +193,7 @@ class ReviewStep extends React.Component {
                     this.onLinkClick("uploadSamples");
                     logAnalyticsEvent("ReviewStep_edit-project-link_clicked", {
                       projectId: this.props.project.id,
-                      projectName: this.props.project.name
+                      projectName: this.props.project.name,
                     });
                   }}
                 >
@@ -233,7 +233,7 @@ class ReviewStep extends React.Component {
                     this.onLinkClick("uploadSamples");
                     logAnalyticsEvent("ReviewStep_edit-samples-link_clicked", {
                       projectId: this.props.project.id,
-                      projectName: this.props.project.name
+                      projectName: this.props.project.name,
                     });
                   }}
                 >
@@ -246,7 +246,7 @@ class ReviewStep extends React.Component {
                     this.onLinkClick("uploadMetadata");
                     logAnalyticsEvent("ReviewStep_edit-metadata-link_clicked", {
                       projectId: this.props.project.id,
-                      projectName: this.props.project.name
+                      projectName: this.props.project.name,
                     });
                   }}
                 >
@@ -271,11 +271,11 @@ class ReviewStep extends React.Component {
               onChange={() =>
                 this.setState(
                   {
-                    consentChecked: !this.state.consentChecked
+                    consentChecked: !this.state.consentChecked,
                   },
                   () =>
                     logAnalyticsEvent("ReviewStep_consent-checkbox_checked", {
-                      consentChecked: this.state.consentChecked
+                      consentChecked: this.state.consentChecked,
                     })
                 )
               }
@@ -318,7 +318,7 @@ class ReviewStep extends React.Component {
                 this.uploadSamplesAndMetadata,
                 "ReviewStep_start-upload-button_clicked",
                 {
-                  samples: this.props.samples.length
+                  samples: this.props.samples.length,
                 }
               )}
               rounded={false}
@@ -333,7 +333,7 @@ class ReviewStep extends React.Component {
 ReviewStep.propTypes = {
   metadata: PropTypes.shape({
     headers: PropTypes.arrayOf(PropTypes.string),
-    rows: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.any))
+    rows: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.any)),
   }),
   project: PropTypes.Project,
   samples: PropTypes.arrayOf(
@@ -342,11 +342,11 @@ ReviewStep.propTypes = {
       input_file_attributes: PropTypes.shape({
         name: PropTypes.string,
         source: PropTypes.string,
-        source_type: PropTypes.string
+        source_type: PropTypes.string,
       }),
       name: PropTypes.string,
       project_id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-      status: PropTypes.string
+      status: PropTypes.string,
     })
   ),
   uploadType: PropTypes.string.isRequired,
@@ -358,7 +358,7 @@ ReviewStep.propTypes = {
   // Triggers when we start or stop uploading. Lets the parent know to disable header link.
   onUploadStatusChange: PropTypes.func,
   onStepSelect: PropTypes.func,
-  onUploadComplete: PropTypes.func.isRequired
+  onUploadComplete: PropTypes.func.isRequired,
 };
 
 export default ReviewStep;

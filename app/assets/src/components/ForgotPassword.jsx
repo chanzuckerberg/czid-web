@@ -43,14 +43,14 @@ ForgotPassword.propTypes = {
   endpoint: PropTypes.string,
   errors: PropTypes.string,
   csrf: PropTypes.string,
-  emailLabel: PropTypes.string
+  emailLabel: PropTypes.string,
 };
 
 ForgotPassword.defaultProps = {
   endpoint: PropTypes.string,
   errors: PropTypes.string,
   csrf: PropTypes.string,
-  emailLabel: PropTypes.string
+  emailLabel: PropTypes.string,
 };
 
 export default ForgotPassword;

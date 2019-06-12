@@ -13,7 +13,7 @@ class GeoSearchInputBox extends React.Component {
 
     this.state = {
       value: "",
-      usePropValue: true
+      usePropValue: true,
     };
   }
 
@@ -33,19 +33,19 @@ class GeoSearchInputBox extends React.Component {
           r.description = nameParts.slice(1).join(", ");
           r.key = `loc-${r.locationiq_id}`;
           return r;
-        })
+        }),
       };
     }
     // Let users select an unresolved plain text option
     let noMatchName = "Plain Text (No Location Match)";
     categories[noMatchName] = {
       name: noMatchName,
-      results: [{ title: query, name: query }]
+      results: [{ title: query, name: query }],
     };
 
     logAnalyticsEvent("GeoSearchInputBox_location_queried", {
       query: query,
-      numResults: serverSideSuggestions.length
+      numResults: serverSideSuggestions.length,
     });
     return categories;
   };
@@ -69,14 +69,14 @@ class GeoSearchInputBox extends React.Component {
     logAnalyticsEvent("GeoSearchInputBox_result_selected", {
       selected: result.name,
       // Real results will have a description
-      isMatched: !!result.description
+      isMatched: !!result.description,
     });
     onResultSelect && onResultSelect({ result });
   };
 
   render() {
     const { className, value: propValue } = this.props;
-    const { usePropValue, stateValue } = this.state;
+    const { usePropValue, value: stateValue } = this.state;
 
     // If using prop value, try to use .name or plain string value otherwise.
     const value =
@@ -101,7 +101,7 @@ class GeoSearchInputBox extends React.Component {
 GeoSearchInputBox.propTypes = {
   className: PropTypes.string,
   onResultSelect: PropTypes.func,
-  value: PropTypes.object
+  value: PropTypes.object,
 };
 
 export default GeoSearchInputBox;

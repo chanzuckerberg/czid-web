@@ -22,8 +22,8 @@ Menu.propTypes = {
   className: PropTypes.string,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ])
+    PropTypes.node,
+  ]),
 };
 
 class MenuItem extends React.Component {
@@ -45,8 +45,8 @@ MenuItem.propTypes = {
   className: PropTypes.string,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ])
+    PropTypes.node,
+  ]),
 };
 
 export { Menu, MenuItem };

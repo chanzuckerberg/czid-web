@@ -12,7 +12,7 @@ class DropdownTrigger extends React.Component {
       active,
       disabled,
       className,
-      onClick
+      onClick,
     } = this.props;
     return (
       <div
@@ -41,7 +41,7 @@ DropdownTrigger.propTypes = {
   rounded: PropTypes.bool,
   active: PropTypes.bool,
   disabled: PropTypes.bool,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
 };
 
 export default DropdownTrigger;

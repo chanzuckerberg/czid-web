@@ -25,7 +25,7 @@ class BareDropdown extends React.Component {
     super(props);
 
     this.state = {
-      filterString: ""
+      filterString: "",
     };
   }
 
@@ -62,7 +62,7 @@ class BareDropdown extends React.Component {
 
     this.setState(
       {
-        filterString
+        filterString,
       },
       () => {
         onFilterChange && onFilterChange(filterString);
@@ -254,7 +254,7 @@ BareDropdown.propTypes = forbidExtraProps({
       value: PropTypes.any,
       text: PropTypes.node,
       // Custom node to render for the option.
-      customNode: PropTypes.node
+      customNode: PropTypes.node,
     })
   ),
   value: PropTypes.any,
@@ -280,11 +280,11 @@ BareDropdown.propTypes = forbidExtraProps({
   fluid: PropTypes.bool,
   direction: PropTypes.string,
   className: PropTypes.string,
-  menuClassName: PropTypes.string
+  menuClassName: PropTypes.string,
 });
 
 BareDropdown.defaultProps = {
-  closeOnClick: true
+  closeOnClick: true,
 };
 
 BareDropdown.Header = BaseDropdown.Header;

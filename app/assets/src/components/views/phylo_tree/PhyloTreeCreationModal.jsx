@@ -23,7 +23,7 @@ PhyloTreeCreationModal.propTypes = forbidExtraProps({
   projectId: PropTypes.number,
   projectName: PropTypes.string,
   taxonId: PropTypes.number,
-  taxonName: PropTypes.string
+  taxonName: PropTypes.string,
 });
 
 export default PhyloTreeCreationModal;

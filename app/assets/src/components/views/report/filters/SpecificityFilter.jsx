@@ -5,7 +5,7 @@ import Dropdown from "../../../ui/controls/dropdowns/Dropdown";
 
 const SPECIFICITY_OPTIONS = [
   { text: "All", value: 0 },
-  { text: "Specific Only", value: 1 }
+  { text: "Specific Only", value: 1 },
 ];
 
 const SpecificityFilter = ({ value, onChange }) => {
@@ -22,7 +22,7 @@ const SpecificityFilter = ({ value, onChange }) => {
 
 SpecificityFilter.propTypes = {
   value: PropTypes.number.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
 };
 
 export default SpecificityFilter;

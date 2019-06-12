@@ -16,10 +16,10 @@ const NarrowContainer = ({ children, className, size }) => {
 NarrowContainer.propTypes = {
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
+    PropTypes.node,
   ]).isRequired,
   className: PropTypes.string,
-  size: PropTypes.oneOf(["small"])
+  size: PropTypes.oneOf(["small"]),
 };
 
 export default NarrowContainer;

@@ -21,7 +21,7 @@ const InfoIcon = props => {
 };
 
 InfoIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default InfoIcon;

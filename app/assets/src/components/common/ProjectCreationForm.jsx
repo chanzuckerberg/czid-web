@@ -14,12 +14,12 @@ class ProjectCreationForm extends React.Component {
   state = {
     name: "",
     publicAccess: -1, // No selection by default
-    error: ""
+    error: "",
   };
 
   handleNameChange = name => {
     this.setState({
-      name
+      name,
     });
   };
 
@@ -28,23 +28,23 @@ class ProjectCreationForm extends React.Component {
       return;
     }
     this.setState({
-      error: ""
+      error: "",
     });
     try {
       const newProject = await createProject({
         name: this.state.name,
-        public_access: this.state.publicAccess
+        public_access: this.state.publicAccess,
       });
 
       this.props.onCreate(newProject);
     } catch (e) {
       if (e[0] === "Name has already been taken") {
         this.setState({
-          error: "Project name is already taken."
+          error: "Project name is already taken.",
         });
       } else {
         this.setState({
-          error: "There was an error creating your project."
+          error: "There was an error creating your project.",
         });
       }
     }
@@ -120,7 +120,7 @@ class ProjectCreationForm extends React.Component {
 
 ProjectCreationForm.propTypes = {
   onCancel: PropTypes.func.isRequired,
-  onCreate: PropTypes.func.isRequired
+  onCreate: PropTypes.func.isRequired,
 };
 
 export default ProjectCreationForm;

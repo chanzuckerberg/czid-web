@@ -40,7 +40,7 @@ class DiscoveryHeader extends React.Component {
     const parsedResult = {
       key: category,
       value: value,
-      text: result.title
+      text: result.title,
     };
 
     onSearchResultSelected &&
@@ -65,7 +65,7 @@ class DiscoveryHeader extends React.Component {
       onTabChange,
       showFilters,
       showStats,
-      tabs
+      tabs,
     } = this.props;
 
     return (
@@ -108,7 +108,7 @@ class DiscoveryHeader extends React.Component {
 
 DiscoveryHeader.defaultProps = {
   filterCount: 0,
-  searchValue: ""
+  searchValue: "",
 };
 
 DiscoveryHeader.propTypes = {
@@ -128,10 +128,10 @@ DiscoveryHeader.propTypes = {
       PropTypes.string.isRequired,
       PropTypes.shape({
         value: PropTypes.string.isRequired,
-        label: PropTypes.node.isRequired
-      })
+        label: PropTypes.node.isRequired,
+      }),
     ])
-  ).isRequired
+  ).isRequired,
 };
 
 export default DiscoveryHeader;

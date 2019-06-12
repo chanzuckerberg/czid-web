@@ -12,7 +12,7 @@ const LoadingLabel = ({ text }) => {
 };
 
 LoadingLabel.propTypes = {
-  text: PropTypes.string
+  text: PropTypes.string,
 };
 
 export default LoadingLabel;

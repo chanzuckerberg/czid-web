@@ -1,11 +1,13 @@
-import React from "react";
 import cx from "classnames";
 import { difference, find, isEmpty, union } from "lodash/fp";
+import React from "react";
 
-import PropTypes from "~/components/utils/propTypes";
-import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
+import Tabs from "~/components/ui/controls/Tabs";
+import PropTypes from "~/components/utils/propTypes";
+import DiscoverySidebar from "~/components/views/discovery/DiscoverySidebar";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 
 import cs from "./map_preview_sidebar.scss";
 
@@ -16,7 +18,7 @@ export default class MapPreviewSidebar extends React.Component {
     const { initialSelectedSampleIds } = this.props;
 
     this.state = {
-      selectedSampleIds: initialSelectedSampleIds || new Set()
+      selectedSampleIds: initialSelectedSampleIds || new Set(),
     };
 
     this.columns = [
@@ -25,25 +27,25 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         width: 150,
         cellRenderer: cellData => TableRenderers.renderSample(cellData, false),
-        headerClassName: cs.sampleHeader
+        headerClassName: cs.sampleHeader,
       },
       {
         dataKey: "createdAt",
         label: "Uploaded On",
         className: cs.basicCell,
-        cellRenderer: TableRenderers.renderDateWithElapsed
+        cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
         dataKey: "host",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       // If you already have access to Maps, just see Location V2 here.
       {
         dataKey: "collectionLocationV2",
         label: "Location",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "totalReads",
@@ -51,14 +53,14 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumberWithCommas(rowData[dataKey])
+          TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
         dataKey: "nonHostReads",
         label: "Passed Filters",
         flexGrow: 1,
         className: cs.basicCell,
-        cellRenderer: TableRenderers.renderNumberAndPercentage
+        cellRenderer: TableRenderers.renderNumberAndPercentage,
       },
       {
         dataKey: "qcPercent",
@@ -66,7 +68,7 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatPercentage(rowData[dataKey])
+          TableRenderers.formatPercentage(rowData[dataKey]),
       },
       {
         dataKey: "duplicateCompressionRatio",
@@ -74,7 +76,7 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatPercentage(rowData[dataKey])
+          TableRenderers.formatPercentage(rowData[dataKey]),
       },
       {
         dataKey: "erccReads",
@@ -82,24 +84,24 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumberWithCommas(rowData[dataKey])
+          TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
         dataKey: "notes",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "nucleotideType",
         label: "Nucleotide Type",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "sampleType",
         label: "Sample Type",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "subsampledFraction",
@@ -107,7 +109,7 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumber(rowData[dataKey])
+          TableRenderers.formatNumber(rowData[dataKey]),
       },
       {
         dataKey: "totalRuntime",
@@ -115,8 +117,8 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatDuration(rowData[dataKey])
-      }
+          TableRenderers.formatDuration(rowData[dataKey]),
+      },
     ];
   }
 
@@ -138,7 +140,7 @@ export default class MapPreviewSidebar extends React.Component {
     this.setSelectedSampleIds(newSelected);
 
     logAnalyticsEvent("MapPreviewSidebar_row_selected", {
-      selectedSampleIds: newSelected.length
+      selectedSampleIds: newSelected.length,
     });
   };
 
@@ -148,7 +150,7 @@ export default class MapPreviewSidebar extends React.Component {
     onSampleClicked && onSampleClicked({ sample, currentEvent: event });
     logAnalyticsEvent("MapPreviewSidebar_row_clicked", {
       sampleId: sample.id,
-      sampleName: sample.name
+      sampleName: sample.name,
     });
   };
 
@@ -178,6 +180,27 @@ export default class MapPreviewSidebar extends React.Component {
     const { onSelectionUpdate } = this.props;
     this.setState({ selectedSampleIds });
     onSelectionUpdate && onSelectionUpdate(selectedSampleIds);
+  };
+
+  computeTabs = () => {
+    const { samples } = this.props;
+    return [
+      {
+        label: "Summary",
+        value: "Summary",
+      },
+      {
+        label: (
+          <div>
+            <span className={cs.tabLabel}>Samples</span>
+            {samples.length > 0 && (
+              <span className={cs.tabCounter}>{samples.length}</span>
+            )}
+          </div>
+        ),
+        value: "Samples",
+      },
+    ];
   };
 
   reset = () => {
@@ -218,26 +241,83 @@ export default class MapPreviewSidebar extends React.Component {
     );
   };
 
-  render() {
-    const { className } = this.props;
+  renderNoData = () => {
     return (
-      <div className={cx(className, cs.sidebar)}>{this.renderTable()}</div>
+      <div className={cs.noData}>Select a location to preview samples.</div>
+    );
+  };
+
+  renderSummaryTab = () => {
+    const {
+      allowedFeatures,
+      discoveryCurrentTab,
+      loading,
+      projectDimensions,
+      projectStats,
+      sampleDimensions,
+      sampleStats,
+    } = this.props;
+
+    return (
+      <DiscoverySidebar
+        allowedFeatures={allowedFeatures}
+        className={cs.summaryInfo}
+        currentTab={discoveryCurrentTab}
+        loading={loading}
+        projectDimensions={projectDimensions}
+        projectStats={projectStats}
+        sampleDimensions={sampleDimensions}
+        sampleStats={sampleStats}
+      />
+    );
+  };
+
+  renderSamplesTab = () => {
+    const { samples } = this.props;
+    return samples.length === 0 ? this.renderNoData() : this.renderTable();
+  };
+
+  render() {
+    const { className, currentTab, onTabChange } = this.props;
+    return (
+      <div className={cx(className, cs.sidebar)}>
+        <Tabs
+          className={cs.tabs}
+          hideBorder
+          onChange={onTabChange}
+          tabs={this.computeTabs()}
+          value={currentTab}
+        />
+        {currentTab === "Summary"
+          ? this.renderSummaryTab()
+          : this.renderSamplesTab()}
+      </div>
     );
   }
 }
 
 MapPreviewSidebar.defaultProps = {
   activeColumns: ["sample"],
-  protectedColumns: ["sample"]
+  protectedColumns: ["sample"],
+  currentTab: "Summary",
 };
 
 MapPreviewSidebar.propTypes = {
   activeColumns: PropTypes.array,
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   className: PropTypes.string,
-  initialSelectedSampleIds: PropTypes.array,
+  currentTab: PropTypes.string,
+  discoveryCurrentTab: PropTypes.string,
+  initialSelectedSampleIds: PropTypes.instanceOf(Set),
+  loading: PropTypes.bool,
   onSampleClicked: PropTypes.func,
   onSelectionUpdate: PropTypes.func,
+  onTabChange: PropTypes.func,
+  projectDimensions: PropTypes.array,
+  projectStats: PropTypes.object,
   protectedColumns: PropTypes.array,
+  sampleDimensions: PropTypes.array,
   samples: PropTypes.array,
-  selectableIds: PropTypes.array.isRequired
+  sampleStats: PropTypes.object,
+  selectableIds: PropTypes.array.isRequired,
 };

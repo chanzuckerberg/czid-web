@@ -7,12 +7,16 @@ import cs from "./playground_icons.scss";
 
 class PlaygroundIcons extends React.Component {
   render() {
-    const customIcons = values(Icons.CUSTOM).map(IconComponent => (
-      <IconComponent className={cs.icon} /> /* eslint-disable-line */
-    ));
-    const fontAwesomeIcons = values(Icons.FONT_AWESOME).map(IconComponent => (
-      <IconComponent className={cs.icon} /> /* eslint-disable-line */
-    ));
+    const customIcons = values(Icons.CUSTOM).map(
+      IconComponent => (
+        <IconComponent className={cs.icon} />
+      ) /* eslint-disable-line */
+    );
+    const fontAwesomeIcons = values(Icons.FONT_AWESOME).map(
+      IconComponent => (
+        <IconComponent className={cs.icon} />
+      ) /* eslint-disable-line */
+    );
     const logoIcons = values(Icons.LOGO).map(IconComponent => (
       <IconComponent /* eslint-disable-line */
         className={cx(cs.icon, cs.loadingIcon)}

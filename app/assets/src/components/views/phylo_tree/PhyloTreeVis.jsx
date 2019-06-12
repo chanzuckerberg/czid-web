@@ -14,12 +14,12 @@ const getAbsentName = attribute =>
 const EXTRA_DROPDOWN_OPTIONS = [
   {
     text: "Project Name",
-    value: "project_name"
+    value: "project_name",
   },
   {
     text: "Host Genome Name",
-    value: "host_genome_name"
-  }
+    value: "host_genome_name",
+  },
 ];
 
 class PhyloTreeVis extends React.Component {
@@ -34,7 +34,7 @@ class PhyloTreeVis extends React.Component {
       sidebarVisible: false,
       metadataFields: [],
       selectedMetadataType:
-        props.defaultMetadata || EXTRA_DROPDOWN_OPTIONS[0].value
+        props.defaultMetadata || EXTRA_DROPDOWN_OPTIONS[0].value,
     };
 
     (this.newick = props.newick),
@@ -43,7 +43,7 @@ class PhyloTreeVis extends React.Component {
 
     this.ncbiFields = [
       { name: "country", label: "Country" },
-      { name: "collection_date", label: "Collection Date" }
+      { name: "collection_date", label: "Collection Date" },
     ];
   }
 
@@ -60,7 +60,7 @@ class PhyloTreeVis extends React.Component {
       tooltipContainer: this.tooltipContainer,
       onNodeTextClick: this.handleNodeClick,
       onNodeHover: this.handleNodeHover,
-      scaleLabel: "Relative distance"
+      scaleLabel: "Relative distance",
     });
     this.treeVis.update();
 
@@ -94,7 +94,7 @@ class PhyloTreeVis extends React.Component {
     let metadataFields = await getSampleMetadataFields(sampleIds);
 
     this.setState({
-      metadataFields
+      metadataFields,
     });
   };
 
@@ -116,13 +116,13 @@ class PhyloTreeVis extends React.Component {
 
   handleSidebarClose = () => {
     this.setState({
-      sidebarVisible: false
+      sidebarVisible: false,
     });
   };
 
   handleMetadataTypeChange = (selectedMetadataType, name) => {
     this.setState({
-      selectedMetadataType
+      selectedMetadataType,
     });
 
     // This path will be used by lodash.get on the node data.
@@ -133,7 +133,7 @@ class PhyloTreeVis extends React.Component {
     this.treeVis.updateOptions({
       colorGroupAttribute: path,
       colorGroupLegendTitle: name,
-      colorGroupAbsentName: getAbsentName(selectedMetadataType)
+      colorGroupAbsentName: getAbsentName(selectedMetadataType),
     });
     this.props.afterSelectedMetadataChange(selectedMetadataType);
   };
@@ -162,9 +162,9 @@ class PhyloTreeVis extends React.Component {
           name: "NCBI Reference",
           data: this.ncbiFields.map(f => [
             f.label,
-            this.getFieldValue(f) || "-"
-          ])
-        }
+            this.getFieldValue(f) || "-",
+          ]),
+        },
       ];
     }
 
@@ -176,18 +176,18 @@ class PhyloTreeVis extends React.Component {
           ...SAMPLE_METADATA_FIELDS.map(key => {
             return [
               get("name", find(["key", key], this.state.metadataFields)) || key,
-              this.getMetadataFieldValue(key) || "-"
+              this.getMetadataFieldValue(key) || "-",
             ];
-          })
-        ]
-      }
+          }),
+        ],
+      },
     ];
   }
 
   getMetadataDropdownOptions = () => {
     const metadataOptions = this.state.metadataFields.map(metadataType => ({
       text: metadataType.name,
-      value: metadataType.key
+      value: metadataType.key,
     }));
 
     return sortBy(
@@ -239,7 +239,7 @@ PhyloTreeVis.propTypes = {
   onMetadataUpdate: PropTypes.func,
   phyloTreeId: PropTypes.number,
   onSampleNodeClick: PropTypes.func,
-  defaultMetadata: PropTypes.string
+  defaultMetadata: PropTypes.string,
 };
 
 export default PhyloTreeVis;

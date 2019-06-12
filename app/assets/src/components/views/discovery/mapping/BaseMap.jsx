@@ -19,8 +19,8 @@ class BaseMap extends React.Component {
         height,
         latitude,
         longitude,
-        zoom
-      }
+        zoom,
+      },
     };
   }
 
@@ -68,6 +68,8 @@ class BaseMap extends React.Component {
           onViewportChange={this.updateViewport}
           mapStyle={styleURL}
           onLoad={this.setCompactAttribution}
+          // Style prop applies to the container and all overlays
+          style={{ position: "absolute" }}
         >
           {tooltip}
           {markers}
@@ -95,25 +97,27 @@ BaseMap.propTypes = {
   viewBounds: PropTypes.objectOf(PropTypes.number),
   tooltip: PropTypes.node,
   markers: PropTypes.array,
-  popups: PropTypes.array
+  popups: PropTypes.array,
 };
 
 BaseMap.defaultProps = {
   width: "100%",
   height: "100%",
-  // United States framed
-  latitude: 40,
-  longitude: -98,
-  zoom: 3,
-  // These bounds prevent panning too far north or south, although you will still see those regions at the widest zoom levels. minZoom level frames most of the world. maxZoom level keeps you at an area about the size of a metropolitan area.
+  // Frame most of the world by default
+  latitude: 27,
+  longitude: 0,
+  zoom: 1.4,
   viewBounds: {
+    // Limit panning too far north or south
     minLatitude: -60,
     maxLatitude: 60,
     minLongitude: -180,
     maxLongitude: 180,
-    minZoom: 1.4,
-    maxZoom: 12
-  }
+    // Limit to whole-world view
+    minZoom: 0.5,
+    // Limit to city-level at most
+    maxZoom: 17,
+  },
 };
 
 export default BaseMap;

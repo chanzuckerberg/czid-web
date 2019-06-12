@@ -2,6 +2,7 @@ import React from "react";
 import { Grid } from "semantic-ui-react";
 import { forbidExtraProps } from "airbnb-prop-types";
 import PropTypes from "prop-types";
+import { get, find } from "lodash/fp";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import Dropdown from "~ui/controls/dropdowns/Dropdown";
@@ -25,7 +26,7 @@ class ThresholdFilterDropdown extends React.Component {
 
     this.state = {
       popupIsOpen: false,
-      thresholds: []
+      thresholds: [],
     };
   }
 
@@ -41,7 +42,7 @@ class ThresholdFilterDropdown extends React.Component {
     ) {
       return {
         thresholds: newThresholds,
-        oldThresholds: newThresholds
+        oldThresholds: newThresholds,
       };
     }
     return null;
@@ -96,10 +97,11 @@ class ThresholdFilterDropdown extends React.Component {
         ...this.state.thresholds,
         {
           metric: this.metrics[0].value,
+          metricDisplay: this.metrics[0].text,
           operator: this.operators[0],
-          value: ""
-        }
-      ]
+          value: "",
+        },
+      ],
     });
   }
 
@@ -119,12 +121,12 @@ class ThresholdFilterDropdown extends React.Component {
       this.props.onApply(newThresholds);
 
       logAnalyticsEvent("ThresholdFilterDropdown_apply-button_clicked", {
-        thresholds: newThresholds.length
+        thresholds: newThresholds.length,
       });
     } else {
       this.setState({ thresholds: this.props.thresholds });
       logAnalyticsEvent("ThresholdFilterDropdown_cancel-button_clicked", {
-        thresholds: this.props.thresholds.length
+        thresholds: this.props.thresholds.length,
       });
     }
   };
@@ -221,7 +223,7 @@ class ThresholdFilterDropdown extends React.Component {
 }
 
 ThresholdFilterDropdown.defaultProps = {
-  thresholds: []
+  thresholds: [],
 };
 
 ThresholdFilterDropdown.propTypes = forbidExtraProps({
@@ -229,7 +231,7 @@ ThresholdFilterDropdown.propTypes = forbidExtraProps({
   label: PropTypes.string,
   thresholds: PropTypes.array,
   onApply: PropTypes.func,
-  options: PropTypes.object
+  options: PropTypes.object,
 });
 
 const ThresholdFilter = ({
@@ -237,20 +239,26 @@ const ThresholdFilter = ({
   metrics,
   operators,
   onChange,
-  onRemove
+  onRemove,
 }) => {
-  let { metric, value, operator } = threshold;
+  let { metric, value, operator, metricDisplay } = threshold;
 
   const handleMetricChange = newMetric => {
-    onChange({ metric: newMetric, value, operator });
+    const newMetricDisplay = get("text", find(["value", newMetric], metrics));
+    onChange({
+      metric: newMetric,
+      value,
+      operator,
+      metricDisplay: newMetricDisplay,
+    });
   };
 
   const handleOperatorChange = newOperator => {
-    onChange({ metric, value, operator: newOperator });
+    onChange({ metric, value, operator: newOperator, metricDisplay });
   };
 
   const handleValueChange = newValue => {
-    onChange({ metric, value: newValue, operator });
+    onChange({ metric, value: newValue, operator, metricDisplay });
   };
 
   return (
@@ -290,15 +298,22 @@ const ThresholdFilter = ({
 };
 
 ThresholdFilter.propTypes = forbidExtraProps({
-  metrics: PropTypes.array,
+  metrics: PropTypes.arrayOf(
+    PropTypes.shape({
+      metric: PropTypes.string,
+      value: PropTypes.string,
+      operator: PropTypes.string,
+      metricDisplay: PropTypes.string,
+    })
+  ),
   onChange: PropTypes.func,
   onRemove: PropTypes.func,
   operators: PropTypes.array,
-  threshold: PropTypes.object
+  threshold: PropTypes.object,
 });
 
 ThresholdFilterDropdown.defaultProps = {
-  thresholds: []
+  thresholds: [],
 };
 
 export default ThresholdFilterDropdown;

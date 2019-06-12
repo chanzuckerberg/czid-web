@@ -7,6 +7,7 @@ import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
 import MetadataInput from "~/components/common/MetadataInput";
 import { logAnalyticsEvent } from "~/api/analytics";
+import { RequestContext } from "~/components/common/RequestContext";
 
 import MetadataSection from "./MetadataSection";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
@@ -20,10 +21,10 @@ class MetadataTab extends React.Component {
     this.state = {
       sectionOpen: {
         // Open the first section by default.
-        [sections[0].name]: true
+        [sections[0].name]: true,
       },
       sectionEditing: {},
-      sections
+      sections,
     };
   }
 
@@ -51,7 +52,7 @@ class MetadataTab extends React.Component {
     const { sectionOpen, sectionEditing } = this.state;
     const newValue = !sectionOpen[section.name];
     const newState = {
-      sectionOpen: set(section.name, newValue, sectionOpen)
+      sectionOpen: set(section.name, newValue, sectionOpen),
     };
 
     // If we are closing a section, stop editing it.
@@ -63,7 +64,7 @@ class MetadataTab extends React.Component {
     logAnalyticsEvent("MetadataTab_section_toggled", {
       section: section.name,
       sectionOpen: newValue,
-      ...this.props.additionalInfo
+      ...this.props.additionalInfo,
     });
   };
 
@@ -71,7 +72,7 @@ class MetadataTab extends React.Component {
     const { sectionEditing, sectionOpen } = this.state;
     const newValue = !sectionEditing[section.name];
     const newState = {
-      sectionEditing: set(section.name, newValue, sectionEditing)
+      sectionEditing: set(section.name, newValue, sectionEditing),
     };
 
     if (!sectionEditing[section.name]) {
@@ -85,7 +86,7 @@ class MetadataTab extends React.Component {
     logAnalyticsEvent("MetadataTab_section-edit_toggled", {
       section: section.name,
       sectionEditing: newValue,
-      ...this.props.additionalInfo
+      ...this.props.additionalInfo,
     });
   };
 
@@ -95,7 +96,7 @@ class MetadataTab extends React.Component {
       onMetadataChange,
       onMetadataSave,
       metadataErrors,
-      additionalInfo
+      additionalInfo,
     } = this.props;
 
     return (
@@ -136,7 +137,7 @@ class MetadataTab extends React.Component {
       metadataTypes,
       additionalInfo,
       onMetadataChange,
-      onMetadataSave
+      onMetadataSave,
     } = this.props;
     const { sectionEditing } = this.state;
 
@@ -181,12 +182,25 @@ class MetadataTab extends React.Component {
             </div>
           )}
         {validKeys.map(key => (
-          <div className={cs.field} key={metadataTypes[key].key}>
-            <div className={cs.label}>{metadataTypes[key].name}</div>
-            {isSectionEditing
-              ? this.renderInput(metadataTypes[key])
-              : this.renderMetadataType(metadataTypes[key])}
-          </div>
+          <RequestContext.Consumer>
+            {({ allowedFeatures }) => {
+              // TODO(jsheu): Migrate all to location_v2 after release
+              if (
+                key === "collection_location_v2" &&
+                !allowedFeatures.includes("maps")
+              ) {
+                return null;
+              }
+              return (
+                <div className={cs.field} key={metadataTypes[key].key}>
+                  <div className={cs.label}>{metadataTypes[key].name}</div>
+                  {isSectionEditing
+                    ? this.renderInput(metadataTypes[key])
+                    : this.renderMetadataType(metadataTypes[key])}
+                </div>
+              );
+            }}
+          </RequestContext.Consumer>
         ))}
       </div>
     );
@@ -229,9 +243,9 @@ MetadataTab.propTypes = {
     project_name: PropTypes.string.isRequired,
     upload_date: PropTypes.string,
     host_genome_name: PropTypes.string,
-    editable: PropTypes.bool
+    editable: PropTypes.bool,
   }).isRequired,
-  metadataErrors: PropTypes.objectOf(PropTypes.string)
+  metadataErrors: PropTypes.objectOf(PropTypes.string),
 };
 
 export default MetadataTab;

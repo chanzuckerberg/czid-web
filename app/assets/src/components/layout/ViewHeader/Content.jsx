@@ -9,7 +9,7 @@ class ViewHeaderContent extends React.Component {
 }
 
 ViewHeaderContent.propTypes = {
-  children: PropTypes.node
+  children: PropTypes.node,
 };
 
 ViewHeaderContent.CLASS_NAME = "ViewHeaderContent";

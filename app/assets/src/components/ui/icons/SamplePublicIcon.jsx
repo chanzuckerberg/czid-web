@@ -59,7 +59,7 @@ const PublicSampleIcon = props => {
 };
 
 PublicSampleIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default PublicSampleIcon;

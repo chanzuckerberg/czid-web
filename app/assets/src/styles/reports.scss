@@ -285,11 +285,14 @@ input[type="number"] {
       font-size: 1em !important;
     }
     .filter-tags-list {
-      padding-left: 15px;
-      .label-tags {
-        background: $primary-light !important;
-        border-color: $primary-light !important;
-        color: $white;
+      padding-top: 4px;
+
+      .filter-tag {
+        margin-right: 6px;
+
+        &:last-child {
+          margin-right: 0;
+        }
       }
     }
     .filter-btn {

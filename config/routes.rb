@@ -97,6 +97,7 @@ Rails.application.routes.draw do
   get 'phylo_trees/:id/download', to: 'phylo_trees#download'
   get 'choose_taxon', to: 'phylo_trees#choose_taxon'
   get 'search_suggestions', to: 'samples#search_suggestions'
+  get 'phylo_trees/validate_name', to: 'phylo_trees#validate_name'
 
   get 'visualizations/samples_taxons.json', to: 'visualizations#samples_taxons'
   get 'visualizations/download_heatmap', to: 'visualizations#download_heatmap'
@@ -104,6 +105,8 @@ Rails.application.routes.draw do
   get 'visualizations/:type(/:id)', to: 'visualizations#visualization'
   post 'visualizations/shorten_url', to: 'visualizations#shorten_url'
   get 'visualizations.json', to: 'visualizations#index'
+
+  get 'amr_heatmap/amr_counts.json', to: 'amr_heatmap#amr_counts'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]

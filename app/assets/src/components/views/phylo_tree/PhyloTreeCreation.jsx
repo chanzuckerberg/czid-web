@@ -9,6 +9,7 @@ import PhyloTreeChecks from "./PhyloTreeChecks";
 import SearchBox from "../../ui/controls/SearchBox";
 import LoadingIcon from "../../ui/icons/LoadingIcon";
 import Notification from "~ui/notifications/Notification";
+import { validatePhyloTreeName } from "~/api";
 
 class PhyloTreeCreation extends React.Component {
   constructor(props) {
@@ -38,17 +39,16 @@ class PhyloTreeCreation extends React.Component {
       projectId: this.props.projectId,
       projectName: this.props.projectName,
       showErrorTaxonAndProject: false,
-
       showErrorName: false,
       showErrorSamples: false,
-      treeName: ""
+      treeName: "",
     };
 
     this.phyloTreeHeaders = {
       name: "Phylogenetic Tree",
       user: "Creator",
       last_update: "Last Updated",
-      view: "View"
+      view: "View",
     };
 
     this.projectSamplesHeaders = {
@@ -57,7 +57,7 @@ class PhyloTreeCreation extends React.Component {
       tissue: "Tissue",
       location: "Location",
       date: "Date",
-      reads: "Read Count\n(NT | NR)"
+      reads: "Read Count\n(NT | NR)",
     };
 
     this.otherSamplesHeaders = {
@@ -67,7 +67,7 @@ class PhyloTreeCreation extends React.Component {
       tissue: "Tissue",
       location: "Location",
       date: "Date",
-      reads: "Read Count\n(NT | NR)"
+      reads: "Read Count\n(NT | NR)",
     };
 
     this.skipSelectProjectAndTaxon = this.props.projectId && this.props.taxonId;
@@ -78,7 +78,6 @@ class PhyloTreeCreation extends React.Component {
     this.inputTimeout = null;
     this.inputDelay = 500;
 
-    this.canContinueWithTreeName = this.canContinueWithTreeName.bind(this);
     this.canContinueWithTaxonAndProject = this.canContinueWithTaxonAndProject.bind(
       this
     );
@@ -95,7 +94,6 @@ class PhyloTreeCreation extends React.Component {
     );
     this.handleSelectProject = this.handleSelectProject.bind(this);
     this.handleSelectTaxon = this.handleSelectTaxon.bind(this);
-    this.isTreeNameValid = this.isTreeNameValid.bind(this);
     this.loadNewTreeContext = this.loadNewTreeContext.bind(this);
     this.loadProjectSearchContext = this.loadProjectSearchContext.bind(this);
   }
@@ -109,8 +107,8 @@ class PhyloTreeCreation extends React.Component {
       .get("/phylo_trees/index.json", {
         params: {
           taxId: this.state.taxonId,
-          projectId: this.state.projectId
-        }
+          projectId: this.state.projectId,
+        },
       })
       .then(response => this.handlePhyloTreeResponse(response))
       .catch(error => {
@@ -125,8 +123,8 @@ class PhyloTreeCreation extends React.Component {
       .get("/phylo_trees/new.json", {
         params: {
           taxId: this.state.taxonId,
-          projectId: this.state.projectId
-        }
+          projectId: this.state.projectId,
+        },
       })
       .then(response => this.handleNewTreeContextResponse(response))
       .catch(error => {
@@ -153,13 +151,13 @@ class PhyloTreeCreation extends React.Component {
     if (!phyloTrees || !Array.isArray(phyloTrees) || phyloTrees.length === 0) {
       this.setState({
         skipListTrees: true,
-        phyloTreesLoaded: true
+        phyloTreesLoaded: true,
       });
     } else {
       this.setState({
         phyloTrees: this.parsePhyloTreeData(response.data.phyloTrees),
         phyloTreesLoaded: true,
-        taxonName: (data.taxon || {}).name
+        taxonName: (data.taxon || {}).name,
       });
     }
   }
@@ -172,14 +170,14 @@ class PhyloTreeCreation extends React.Component {
       console.error("Error loading samples data");
     } else if (samplesData.length === 0) {
       this.setState({
-        samplesLoaded: true
+        samplesLoaded: true,
       });
     } else {
       let parsedTables = this.parseProjectSamplesData(samplesData);
       this.setState({
         projectSamples: parsedTables.projectSamples,
         otherSamples: parsedTables.otherSamples,
-        samplesLoaded: true
+        samplesLoaded: true,
       });
     }
   }
@@ -187,7 +185,7 @@ class PhyloTreeCreation extends React.Component {
   handleProjectSearchContextResponse(response) {
     this.setState({
       projectList: response.data,
-      projectsLoaded: true
+      projectsLoaded: true,
     });
   }
 
@@ -201,7 +199,7 @@ class PhyloTreeCreation extends React.Component {
       selectedProjectSamples: new Set(),
       otherSamples: [],
       selectedOtherSamples: new Set(),
-      otherSamplesFilter: ""
+      otherSamplesFilter: "",
     });
   }
 
@@ -215,7 +213,7 @@ class PhyloTreeCreation extends React.Component {
       selectedProjectSamples: new Set(),
       otherSamples: [],
       selectedOtherSamples: new Set(),
-      otherSamplesFilter: ""
+      otherSamplesFilter: "",
     });
   }
 
@@ -224,7 +222,7 @@ class PhyloTreeCreation extends React.Component {
       name: row.name,
       user: (row.user || {}).name,
       last_update: <Moment fromNow date={row.updated_at} />,
-      view: <a href={`/phylo_trees/index?treeId=${row.id}`}>View</a>
+      view: <a href={`/phylo_trees/index?treeId=${row.id}`}>View</a>,
     }));
   }
 
@@ -250,9 +248,9 @@ class PhyloTreeCreation extends React.Component {
           }`,
           rawReads: {
             nt: (row.taxid_reads || {}).NT || 0,
-            nr: (row.taxid_reads || {}).NR || 0
+            nr: (row.taxid_reads || {}).NR || 0,
           },
-          pipelineRunId: row.pipeline_run_id
+          pipelineRunId: row.pipeline_run_id,
         };
         if (row.project_id === this.state.projectId) {
           projectSamples.push(entry);
@@ -285,7 +283,7 @@ class PhyloTreeCreation extends React.Component {
   };
 
   handleNameChange = newName => {
-    this.setState({ treeName: newName.trim() });
+    this.setState({ treeName: newName.trim() }, this.isTreeNameValid);
   };
 
   handleBranchChange = newBranch => {
@@ -299,7 +297,7 @@ class PhyloTreeCreation extends React.Component {
   handleCreation() {
     if (!this.isNumberOfSamplesValid()) {
       this.setState({
-        showErrorSamples: true
+        showErrorSamples: true,
       });
       return false;
     }
@@ -321,7 +319,7 @@ class PhyloTreeCreation extends React.Component {
         taxId: this.state.taxonId,
         taxName: this.state.taxonName,
         pipelineRunIds: pipelineRunIds,
-        authenticity_token: this.props.csrf
+        authenticity_token: this.props.csrf,
       })
       .then(response => {
         let phyloTreeId = response.data.phylo_tree_id;
@@ -347,9 +345,15 @@ class PhyloTreeCreation extends React.Component {
     }
   }
 
-  isTreeNameValid() {
-    return this.state.treeName.length > 0;
-  }
+  isTreeNameValid = async () => {
+    const { treeName } = this.state;
+    const result = await validatePhyloTreeName(treeName);
+    this.setState({
+      treeName: result.sanitizedName,
+      treeNameValid: result.valid,
+    });
+    return result.valid;
+  };
 
   isNumberOfSamplesValid() {
     let nSamples =
@@ -364,7 +368,7 @@ class PhyloTreeCreation extends React.Component {
       otherSamples,
       projectSamples,
       selectedProjectSamples,
-      selectedOtherSamples
+      selectedOtherSamples,
     } = this.state;
 
     const getReadsArray = (samples, indices, readType) =>
@@ -391,13 +395,10 @@ class PhyloTreeCreation extends React.Component {
     return false;
   }
 
-  canContinueWithTreeName() {
-    if (this.isTreeNameValid()) {
-      return true;
-    }
+  canContinueWithTreeName = () => {
     this.setState({ showErrorName: true });
-    return false;
-  }
+    return this.isTreeNameValid();
+  };
 
   getTotalPageRendering() {
     let totalSelectedSamples =
@@ -407,13 +408,20 @@ class PhyloTreeCreation extends React.Component {
   }
 
   renderNotifications() {
-    const { showErrorSamples } = this.state;
+    const { treeNameValid, showErrorSamples, showErrorName } = this.state;
 
-    if (showErrorSamples && !this.isNumberOfSamplesValid()) {
+    if (showErrorName && !treeNameValid) {
+      return (
+        <Notification type="error" displayStyle="flat">
+          The current tree name is taken. Please choose a different name.
+        </Notification>
+      );
+    } else if (showErrorSamples && !this.isNumberOfSamplesValid()) {
       return (
         <Notification type="error" displayStyle="flat">
           Phylogenetic Tree creation must have between{" "}
-          {PhyloTreeChecks.MIN_READS} and {PhyloTreeChecks.MAX_READS} reads.
+          {PhyloTreeChecks.MIN_SAMPLES} and {PhyloTreeChecks.MIN_SAMPLES}{" "}
+          samples.
         </Notification>
       );
     } else {
@@ -441,7 +449,7 @@ class PhyloTreeCreation extends React.Component {
       "tissue",
       "location",
       "date",
-      "reads"
+      "reads",
     ];
     const otherSamplesColumns = [
       "name",
@@ -450,7 +458,7 @@ class PhyloTreeCreation extends React.Component {
       "tissue",
       "location",
       "date",
-      "reads"
+      "reads",
     ];
     let options = {
       listTrees: (
@@ -506,7 +514,7 @@ class PhyloTreeCreation extends React.Component {
                 serverSearchAction="choose_taxon"
                 serverSearchActionArgs={{
                   args: "species,genus",
-                  project_id: this.state.projectId
+                  project_id: this.state.projectId,
                 }}
                 onResultSelect={this.handleSelectTaxon}
                 initialValue={this.state.taxonName}
@@ -528,7 +536,7 @@ class PhyloTreeCreation extends React.Component {
             this.state.projectName
           }'`}
           onLoad={this.loadNewTreeContext}
-          onContinue={this.canContinueWithTreeName}
+          onContinueAsync={this.canContinueWithTreeName}
         >
           <div className="wizard__page-3__subtitle">{this.state.taxonName}</div>
           <div className="wizard__page-3__form">
@@ -536,7 +544,7 @@ class PhyloTreeCreation extends React.Component {
               <div className="wizard__page-3__form__label-name">Name</div>
               <Input
                 className={
-                  this.state.showErrorName && !this.isTreeNameValid()
+                  this.state.showErrorName && !this.state.treeNameValid
                     ? "error"
                     : ""
                 }
@@ -574,6 +582,9 @@ class PhyloTreeCreation extends React.Component {
             ) : (
               <LoadingIcon />
             )}
+          </div>
+          <div className="wizard__page-3__notifications">
+            {this.renderNotifications()}
           </div>
         </Wizard.Page>
       ),
@@ -620,7 +631,7 @@ class PhyloTreeCreation extends React.Component {
             {this.renderNotifications()}
           </div>
         </Wizard.Page>
-      )
+      ),
     };
     return options[action];
   }
@@ -649,7 +660,7 @@ class PhyloTreeCreation extends React.Component {
           onComplete={this.handleComplete}
           defaultPage={this.state.defaultPage}
           labels={{
-            finish: "Create Tree"
+            finish: "Create Tree",
           }}
         >
           {this.getPages()}
@@ -668,7 +679,7 @@ PhyloTreeCreation.propTypes = {
   projectId: PropTypes.number,
   projectName: PropTypes.string,
   taxonId: PropTypes.number,
-  taxonName: PropTypes.string
+  taxonName: PropTypes.string,
 };
 
 export default PhyloTreeCreation;
