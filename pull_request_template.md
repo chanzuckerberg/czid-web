@@ -6,8 +6,8 @@
 
 *Optional observations, comments or explanations.*
 
-# Test plan
+# Tests
 
 * *Server-side code should have automated tests*
 * *Client-side code and scripts should have at least a manual test plan*
-* *See also [IDSeq PR Guidelines](https://github.com/chanzuckerberg/idseq-web/blob/master/PR_GUIDELINES.md)
+* *See also [IDSeq PR Guidelines](https://github.com/chanzuckerberg/idseq-web/blob/master/PR_GUIDELINES.md)*
