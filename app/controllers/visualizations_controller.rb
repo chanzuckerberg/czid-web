@@ -214,7 +214,7 @@ class VisualizationsController < ApplicationController
 
   # The most recent update time of any samples pipeline run.
   def heatmap_ts
-    updated_ats = samples_for_heatmap.map { |sample| sample.first_pipeline_run.updated_at }
+    updated_ats = samples_for_heatmap.map { |sample| sample.first_pipeline_run && sample.first_pipeline_run.updated_at }
     updated_ats.max.to_i
   end
 end
