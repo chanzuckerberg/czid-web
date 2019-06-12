@@ -972,7 +972,14 @@ class SamplesController < ApplicationController
           @results[stage.name] = JSON.parse stage.dag_json
         end
       end
-      render json: { pipeline_stage_results: @results }
+      respond_to do |format|
+        format.html do
+          render template: "samples/stage_results"
+        end
+        format.json do
+          render json: { pipeline_stage_results: @results }
+        end
+      end
     else
       render(json: {
                status: :unauthorized,

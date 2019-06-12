@@ -1,0 +1,10 @@
+<div id="PipelineStageResults">
+  <%= javascript_tag do %>
+    // react_component('PipelineVizCytoscape', {
+    //    stageResults: JSON.parse('<%= raw escape_json(@results) %>')
+    // }, 'PipelineStageResults');
+    react_component('PipelineVizVis', {
+        stageResults: JSON.parse('<%= raw escape_json(@results) %>')
+    }, 'PipelineStageResults');
+  <% end %>
+</div>
