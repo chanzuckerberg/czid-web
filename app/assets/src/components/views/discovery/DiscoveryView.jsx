@@ -715,7 +715,7 @@ class DiscoveryView extends React.Component {
     this.setState(
       {
         mapPreviewedLocationId: locationId,
-        showStats: true
+        showStats: true,
       },
       this.refreshMapPreviewedSamples
     );
@@ -727,7 +727,7 @@ class DiscoveryView extends React.Component {
       mapLocationData,
       mapPreviewedLocationId,
       projectId,
-      search
+      search,
     } = this.state;
 
     if (!mapPreviewedLocationId) return;
@@ -764,18 +764,18 @@ class DiscoveryView extends React.Component {
       domain,
       projectId,
       filters,
-      search
+      search,
     };
     const { sampleStats } = await getDiscoveryStats(params);
     const {
       projectDimensions,
-      sampleDimensions
+      sampleDimensions,
     } = await getDiscoveryDimensions(params);
 
     this.setState({
       mapSidebarProjectDimensions: projectDimensions,
       mapSidebarSampleDimensions: sampleDimensions,
-      mapSidebarSampleStats: sampleStats
+      mapSidebarSampleStats: sampleStats,
     });
   };
 
@@ -838,9 +838,10 @@ class DiscoveryView extends React.Component {
                   ? computedProjectDimensions
                   : mapSidebarProjectDimensions
               }
-              // TODO: Add projectStats to getDiscoveryStats to have a project count in preview mode
               projectStats={
-                isEmpty(mapSidebarProjectDimensions) ? projectStats : null
+                isEmpty(mapSidebarSampleStats)
+                  ? projectStats
+                  : { count: mapSidebarSampleStats.projectCount }
               }
               ref={mapPreviewSidebar =>
                 (this.mapPreviewSidebar = mapPreviewSidebar)
