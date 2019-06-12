@@ -21,7 +21,7 @@ import {
   sumBy,
   values,
   xor,
-  xorBy
+  xorBy,
 } from "lodash/fp";
 
 import { getSearchSuggestions } from "~/api";
@@ -45,7 +45,7 @@ import {
   getDiscoveryLocations,
   DISCOVERY_DOMAIN_ALL_DATA,
   DISCOVERY_DOMAIN_MY_DATA,
-  DISCOVERY_DOMAIN_PUBLIC
+  DISCOVERY_DOMAIN_PUBLIC,
 } from "./discovery_api";
 import NoResultsBanner from "./NoResultsBanner";
 import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
@@ -80,7 +80,7 @@ class DiscoveryView extends React.Component {
       filters: "object",
       projectId: "number",
       showFilters: "boolean",
-      showStats: "boolean"
+      showStats: "boolean",
     });
 
     const urlState = this.urlParser.parse(location.search);
@@ -115,7 +115,7 @@ class DiscoveryView extends React.Component {
         search: null,
         showFilters: true,
         showStats: true,
-        visualizations: []
+        visualizations: [],
       },
       urlState
     );
@@ -143,7 +143,7 @@ class DiscoveryView extends React.Component {
       "projectId",
       "search",
       "showFilters",
-      "showStats"
+      "showStats",
     ];
     const stateFields = concat(urlFields, ["project"]);
 
@@ -181,14 +181,14 @@ class DiscoveryView extends React.Component {
         "1_month": () => moment().subtract(1, "months"),
         "3_month": () => moment().subtract(3, "months"),
         "6_month": () => moment().subtract(6, "months"),
-        "1_year": () => moment().subtract(1, "years")
+        "1_year": () => moment().subtract(1, "years"),
       };
 
       preparedFilters.time = [
         startDate[preparedFilters.time]().format("YYYYMMDD"),
         moment()
           .add(1, "days")
-          .format("YYYYMMDD")
+          .format("YYYYMMDD"),
       ];
     }
 
@@ -215,7 +215,7 @@ class DiscoveryView extends React.Component {
         sampleIds: [],
         samples: [],
         samplesAllLoaded: false,
-        visualizations: []
+        visualizations: [],
       },
       () => {
         this.samplesView && this.samplesView.reset();
@@ -237,7 +237,7 @@ class DiscoveryView extends React.Component {
         //   * if filter or project is set
         //     - load (B) filtered dimensions
         (this.getFilterCount() || project) && this.refreshFilteredDimensions();
-      }
+      },
     });
   };
 
@@ -253,7 +253,7 @@ class DiscoveryView extends React.Component {
         //  * if project not set
         //       load (E) synchronous table data
         !project && this.refreshSynchronousData();
-      }
+      },
     });
   };
 
@@ -267,7 +267,7 @@ class DiscoveryView extends React.Component {
         this.refreshFilteredDimensions();
         this.refreshFilteredStats();
         this.refreshFilteredLocations();
-      }
+      },
     });
   };
 
@@ -278,14 +278,14 @@ class DiscoveryView extends React.Component {
     this.setState({
       loadingProjects: true,
       loadingVisualizations: true,
-      loadingSamples: true
+      loadingSamples: true,
     });
 
     const { projects = [], visualizations = [] } = await getDiscoverySyncData({
       domain,
       filters: this.preparedFilters(),
       projectId: projectId,
-      search
+      search,
     });
 
     this.setState({
@@ -293,7 +293,7 @@ class DiscoveryView extends React.Component {
       projects,
       visualizations,
       loadingProjects: false,
-      loadingVisualizations: false
+      loadingVisualizations: false,
     });
   };
 
@@ -302,21 +302,21 @@ class DiscoveryView extends React.Component {
     const { projectId } = this.state;
 
     this.setState({
-      loadingDimensions: true
+      loadingDimensions: true,
     });
 
     const {
       projectDimensions,
-      sampleDimensions
+      sampleDimensions,
     } = await getDiscoveryDimensions({
       domain,
-      projectId
+      projectId,
     });
 
     this.setState({
       projectDimensions,
       sampleDimensions,
-      loadingDimensions: false
+      loadingDimensions: false,
     });
   };
 
@@ -325,19 +325,19 @@ class DiscoveryView extends React.Component {
     const { projectId, search } = this.state;
 
     this.setState({
-      loadingStats: true
+      loadingStats: true,
     });
 
     const { sampleStats: filteredSampleStats } = await getDiscoveryStats({
       domain,
       projectId,
       filters: this.preparedFilters(),
-      search
+      search,
     });
 
     this.setState({
       filteredSampleStats,
-      loadingStats: false
+      loadingStats: false,
     });
   };
 
@@ -346,23 +346,23 @@ class DiscoveryView extends React.Component {
     const { projectId, search } = this.state;
 
     this.setState({
-      loadingDimensions: true
+      loadingDimensions: true,
     });
 
     const {
       projectDimensions: filteredProjectDimensions,
-      sampleDimensions: filteredSampleDimensions
+      sampleDimensions: filteredSampleDimensions,
     } = await getDiscoveryDimensions({
       domain,
       projectId,
       filters: this.preparedFilters(),
-      search
+      search,
     });
 
     this.setState({
       filteredProjectDimensions,
       filteredSampleDimensions,
-      loadingDimensions: false
+      loadingDimensions: false,
     });
   };
 
@@ -371,14 +371,14 @@ class DiscoveryView extends React.Component {
     const { projectId, search } = this.state;
 
     this.setState({
-      loadingLocations: true
+      loadingLocations: true,
     });
 
     const mapLocationData = await getDiscoveryLocations({
       domain,
       projectId,
       filters: this.preparedFilters(),
-      search
+      search,
     });
 
     this.setState({ mapLocationData, loadingLocations: false });
@@ -390,7 +390,7 @@ class DiscoveryView extends React.Component {
       projectId,
       projects,
       visualizations,
-      filteredSampleStats
+      filteredSampleStats,
     } = this.state;
 
     const renderTab = (label, count) => {
@@ -405,17 +405,17 @@ class DiscoveryView extends React.Component {
     return compact([
       !projectId && {
         label: renderTab("Projects", (projects || []).length),
-        value: "projects"
+        value: "projects",
       },
       {
         label: renderTab("Samples", filteredSampleStats.count || 0),
-        value: "samples"
+        value: "samples",
       },
       domain !== DISCOVERY_DOMAIN_PUBLIC &&
         !projectId && {
           label: renderTab("Visualizations", (visualizations || []).length),
-          value: "visualizations"
-        }
+          value: "visualizations",
+        },
     ]);
   };
 
@@ -424,7 +424,7 @@ class DiscoveryView extends React.Component {
       this.updateBrowsingHistory("replace");
       const name = currentTab.replace(/\W+/g, "-").toLowerCase();
       logAnalyticsEvent(`DiscoveryView_tab-${name}_clicked`, {
-        currentTab: currentTab
+        currentTab: currentTab,
       });
     });
   };
@@ -434,7 +434,7 @@ class DiscoveryView extends React.Component {
       this.updateBrowsingHistory("replace");
       this.resetDataFromFilterChange();
       logAnalyticsEvent(`DiscoveryView_filters_changed`, {
-        filters: this.getFilterCount()
+        filters: this.getFilterCount(),
       });
     });
   };
@@ -487,7 +487,7 @@ class DiscoveryView extends React.Component {
       this.setState(
         {
           filters: newFilters,
-          search: null
+          search: null,
         },
         () => {
           this.updateBrowsingHistory("replace");
@@ -499,7 +499,7 @@ class DiscoveryView extends React.Component {
       key,
       value,
       text,
-      filtersChanged
+      filtersChanged,
     });
   };
 
@@ -512,7 +512,7 @@ class DiscoveryView extends React.Component {
         this.updateBrowsingHistory("replace");
         this.resetDataFromFilterChange();
         logAnalyticsEvent("DiscoveryView_string-search_entered", {
-          search: parsedSearch
+          search: parsedSearch,
         });
       });
     }
@@ -522,7 +522,7 @@ class DiscoveryView extends React.Component {
     this.setState({ showFilters: !this.state.showFilters }, () => {
       this.updateBrowsingHistory("replace");
       logAnalyticsEvent("DiscoveryView_show-filters_toggled", {
-        showFilters: this.state.showFilters
+        showFilters: this.state.showFilters,
       });
     });
   };
@@ -531,7 +531,7 @@ class DiscoveryView extends React.Component {
     this.setState({ showStats: !this.state.showStats }, () => {
       this.updateBrowsingHistory("replace");
       logAnalyticsEvent("DiscoveryView_show-stats_toggled", {
-        showFilters: this.state.showStats
+        showFilters: this.state.showStats,
       });
     });
   };
@@ -543,7 +543,7 @@ class DiscoveryView extends React.Component {
       samples,
       sampleIds,
       samplesAllLoaded,
-      search
+      search,
     } = this.state;
 
     const previousLoadedSamples = samples.slice(startIndex, stopIndex + 1);
@@ -554,7 +554,7 @@ class DiscoveryView extends React.Component {
       const numRequestedSamples = stopIndex - neededStartIndex + 1;
       let {
         samples: fetchedSamples,
-        sampleIds: fetchedSampleIds
+        sampleIds: fetchedSampleIds,
       } = await getDiscoverySamples({
         domain,
         filters: this.preparedFilters(),
@@ -562,7 +562,7 @@ class DiscoveryView extends React.Component {
         search,
         limit: stopIndex - neededStartIndex + 1,
         offset: neededStartIndex,
-        listAllIds: sampleIds.length === 0
+        listAllIds: sampleIds.length === 0,
       });
 
       let newState = {
@@ -570,7 +570,7 @@ class DiscoveryView extends React.Component {
         samples: samples.concat(fetchedSamples),
         // if returned samples are less than requested, we assume all data was loaded
         samplesAllLoaded: fetchedSamples.length < numRequestedSamples,
-        loadingSamples: false
+        loadingSamples: false,
       };
       if (fetchedSampleIds) {
         newState.sampleIds = fetchedSampleIds;
@@ -589,7 +589,7 @@ class DiscoveryView extends React.Component {
         currentTab: "samples",
         project,
         projectId: project.id,
-        search: null
+        search: null,
       },
       () => {
         this.updateBrowsingHistory();
@@ -609,7 +609,7 @@ class DiscoveryView extends React.Component {
     newProjects.splice(projectIndex, 1, project);
     this.setState({
       project,
-      projects: newProjects
+      projects: newProjects,
     });
   };
 
@@ -618,7 +618,7 @@ class DiscoveryView extends React.Component {
 
     return {
       projects: projectDimensions,
-      samples: sampleDimensions
+      samples: sampleDimensions,
     }[currentTab];
   };
 
@@ -636,13 +636,13 @@ class DiscoveryView extends React.Component {
           .map(entry => ({
             category,
             id: entry.value,
-            title: entry.text
+            title: entry.text,
           }));
 
         if (results.length) {
           suggestions[category] = {
             name: capitalize(category),
-            results
+            results,
           };
         }
       }
@@ -655,8 +655,8 @@ class DiscoveryView extends React.Component {
         results: filteredProjects.map(project => ({
           category: "project",
           title: project.name,
-          id: project.id
-        }))
+          id: project.id,
+        })),
       };
     }
 
@@ -669,7 +669,7 @@ class DiscoveryView extends React.Component {
     let results = await getSearchSuggestions({
       categories: ["sample", "taxon"],
       query,
-      domain
+      domain,
     });
     return results;
   };
@@ -679,7 +679,7 @@ class DiscoveryView extends React.Component {
       // client side: for dimensions (host, location, tissue) and projects search
       this.getClientSideSuggestions(query),
       // server side: for taxa and samples search (filter by domain)
-      this.getServerSideSuggestions(query)
+      this.getServerSideSuggestions(query),
     ]);
 
     return merge(clientSideSuggestions, serverSideSuggestions);
@@ -710,16 +710,16 @@ class DiscoveryView extends React.Component {
     // TODO(jsheu): Consider paginating fetching for thousands of samples at a location
     const {
       samples: fetchedSamples,
-      sampleIds: fetchedSampleIds
+      sampleIds: fetchedSampleIds,
     } = await getDiscoverySamples({
       sampleIds,
       limit: 1e4, // Server needs a max, 1e4 at one location is a good cutoff.
-      listAllIds: true
+      listAllIds: true,
     });
     this.setState(
       {
         mapPreviewedSamples: fetchedSamples,
-        mapPreviewedSampleIds: fetchedSampleIds
+        mapPreviewedSampleIds: fetchedSampleIds,
       },
       () => {
         this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
@@ -749,7 +749,7 @@ class DiscoveryView extends React.Component {
       sampleDimensions,
       samples,
       search,
-      showStats
+      showStats,
     } = this.state;
 
     const filterCount = this.getFilterCount();
@@ -816,7 +816,7 @@ class DiscoveryView extends React.Component {
       showStats,
       visualizations,
       mapPreviewedSamples,
-      mapSidebarSelectedSampleIds
+      mapSidebarSelectedSampleIds,
     } = this.state;
 
     const { domain, allowedFeatures, mapTilerKey } = this.props;
@@ -833,7 +833,6 @@ class DiscoveryView extends React.Component {
               project={project || {}}
               fetchedSamples={samples}
               onProjectUpdated={this.handleProjectUpdated}
-              newSampleUpload={allowedFeatures.includes("new_sample_upload")}
             />
           )}
           <DiscoveryHeader
@@ -945,12 +944,12 @@ DiscoveryView.propTypes = {
   domain: PropTypes.oneOf([
     DISCOVERY_DOMAIN_ALL_DATA,
     DISCOVERY_DOMAIN_MY_DATA,
-    DISCOVERY_DOMAIN_PUBLIC
+    DISCOVERY_DOMAIN_PUBLIC,
   ]).isRequired,
   projectId: PropTypes.number,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   mapTilerKey: PropTypes.string,
-  admin: PropTypes.bool
+  admin: PropTypes.bool,
 };
 
 export default DiscoveryView;

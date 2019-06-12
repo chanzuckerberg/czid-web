@@ -12,7 +12,7 @@ import cs from "./samples_heatmap_view.scss";
 const DOWNLOAD_OPTIONS = [
   { text: "Download CSV", value: "csv" },
   { text: "Download SVG", value: "svg" },
-  { text: "Download PNG", value: "png" }
+  { text: "Download PNG", value: "png" },
 ];
 
 export default class SamplesHeatmapHeader extends React.Component {
@@ -34,12 +34,12 @@ export default class SamplesHeatmapHeader extends React.Component {
     }
     logAnalyticsEvent("SamplesHeatmapHeader_download-button_clicked", {
       sampleIds: this.props.sampleIds.length,
-      fileType
+      fileType,
     });
   };
 
   render() {
-    const { allowedFeatures, sampleIds } = this.props;
+    const { sampleIds } = this.props;
 
     return (
       <ViewHeader className={cs.viewHeader}>
@@ -57,7 +57,7 @@ export default class SamplesHeatmapHeader extends React.Component {
                   this.props.onShareClick,
                   "SamplesHeatmapHeader_share-button_clicked",
                   {
-                    sampleIds: sampleIds.length
+                    sampleIds: sampleIds.length,
                   }
                 )}
                 className={cs.controlElement}
@@ -67,21 +67,17 @@ export default class SamplesHeatmapHeader extends React.Component {
             on="click"
             hideOnScroll
           />
-          {/* TODO: (gdingle): this is gated until we release data discovery */}
-          {allowedFeatures &&
-            allowedFeatures.includes("data_discovery") && (
-              <SaveButton
-                onClick={withAnalytics(
-                  this.props.onSaveClick,
-                  "SamplesHeatmapHeader_save-button_clicked",
-                  {
-                    sampleIds: sampleIds.length,
-                    path: window.location.pathname
-                  }
-                )}
-                className={cs.controlElement}
-              />
+          <SaveButton
+            onClick={withAnalytics(
+              this.props.onSaveClick,
+              "SamplesHeatmapHeader_save-button_clicked",
+              {
+                sampleIds: sampleIds.length,
+                path: window.location.pathname,
+              }
             )}
+            className={cs.controlElement}
+          />
           <DownloadButtonDropdown
             className={cs.controlElement}
             options={DOWNLOAD_OPTIONS}
@@ -95,7 +91,6 @@ export default class SamplesHeatmapHeader extends React.Component {
 }
 
 SamplesHeatmapHeader.propTypes = {
-  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   sampleIds: PropTypes.arrayOf(PropTypes.number),
   data: PropTypes.objectOf(
     PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number))
@@ -104,5 +99,5 @@ SamplesHeatmapHeader.propTypes = {
   onDownloadPng: PropTypes.func.isRequired,
   onDownloadCsv: PropTypes.func.isRequired,
   onShareClick: PropTypes.func.isRequired,
-  onSaveClick: PropTypes.func.isRequired
+  onSaveClick: PropTypes.func.isRequired,
 };

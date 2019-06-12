@@ -14,7 +14,7 @@ export default class TidyTree {
         addOverlays: true,
         attribute: "aggregatescore",
         leafNodeHeight: 35,
-        minWidth: 1000,
+        minWidth: 960,
         minHeight: 300,
         transitionDuration: 500,
         onNodeHover: null,
@@ -27,7 +27,7 @@ export default class TidyTree {
         largerFont: 12,
         onCollapsedStateChange: () => {},
         collapsed: new Set(),
-        svgBackgroundColor: "white"
+        svgBackgroundColor: "white",
       },
       options || {}
     );
@@ -36,7 +36,7 @@ export default class TidyTree {
       top: 20,
       right: 200,
       left: 40,
-      bottom: 20
+      bottom: 20,
     };
 
     this.range = [0, 1];
@@ -123,7 +123,7 @@ export default class TidyTree {
       Math.min(
         ...this.root.leaves().map(l => l.data.values[this.options.attribute])
       ),
-      this.root.data.values[this.options.attribute]
+      this.root.data.values[this.options.attribute],
     ];
 
     let collapsedScale = scaleLinear()
@@ -174,8 +174,8 @@ export default class TidyTree {
                 ),
                 scientificName: `(${d.collapsedChildren.length})`,
                 lineageRank: d.collapsedChildren[0].data.lineageRank,
-                values: d.collapsedChildren[0].data.values
-              }
+                values: d.collapsedChildren[0].data.values,
+              },
             });
           }
         }
@@ -218,7 +218,7 @@ export default class TidyTree {
     this.update(
       Object.assign(node, {
         x0: node.x,
-        y0: node.y
+        y0: node.y,
       })
     );
     this.options.onCollapsedStateChange &&
