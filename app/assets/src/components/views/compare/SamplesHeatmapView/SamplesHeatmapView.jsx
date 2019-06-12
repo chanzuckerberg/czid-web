@@ -33,11 +33,11 @@ import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 const SCALE_OPTIONS = [["Log", "symlog"], ["Lin", "linear"]];
 const TAXONS_PER_SAMPLE_RANGE = {
   min: 0,
-  max: 100
+  max: 100,
 };
 const SPECIFICITY_OPTIONS = [
   { text: "All", value: 0 },
-  { text: "Specific Only", value: 1 }
+  { text: "Specific Only", value: 1 },
 ];
 
 const parseAndCheckInt = (val, defaultVal) => {
@@ -53,16 +53,10 @@ class SamplesHeatmapView extends React.Component {
     // URL params have precedence
     this.urlParams = {
       ...props.savedParamValues,
-      ...this.urlParams
+      ...this.urlParams,
     };
 
-    // TODO (gdingle): remove gating when we go live with data discovery
-    if (
-      this.props.allowedFeatures &&
-      this.props.allowedFeatures.includes("data_discovery")
-    ) {
-      this.initOnBeforeUnload(props.savedParamValues);
-    }
+    this.initOnBeforeUnload(props.savedParamValues);
 
     this.state = {
       selectedOptions: {
@@ -77,7 +71,7 @@ class SamplesHeatmapView extends React.Component {
         thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseAndCheckInt(this.urlParams.dataScaleIdx, 0),
         taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 30),
-        readSpecificity: parseAndCheckInt(this.urlParams.readSpecificity, 1)
+        readSpecificity: parseAndCheckInt(this.urlParams.readSpecificity, 1),
       },
       loading: false,
       sampleIds: compact(
@@ -89,7 +83,7 @@ class SamplesHeatmapView extends React.Component {
       sidebarMode: null,
       sidebarVisible: false,
       sidebarTaxonModeConfig: null,
-      taxonFilterState: []
+      taxonFilterState: [],
     };
 
     this.removedTaxonIds = new Set(
@@ -133,7 +127,7 @@ class SamplesHeatmapView extends React.Component {
 
   parseUrlParams = () => {
     let urlParams = queryString.parse(location.search, {
-      arrayFormat: "bracket"
+      arrayFormat: "bracket",
     });
 
     // consider the cases where variables can be passed as array string
@@ -174,7 +168,7 @@ class SamplesHeatmapView extends React.Component {
     return Object.assign(
       {
         sampleIds: this.state.sampleIds,
-        removedTaxonIds: Array.from(this.removedTaxonIds)
+        removedTaxonIds: Array.from(this.removedTaxonIds),
       },
       this.state.selectedOptions
     );
@@ -252,7 +246,7 @@ class SamplesHeatmapView extends React.Component {
         taxonsPerSample: this.state.selectedOptions.taxonsPerSample,
         readSpecificity: this.state.selectedOptions.readSpecificity,
         background: this.state.selectedOptions.background,
-        heatmapTs: this.props.heatmapTs
+        heatmapTs: this.props.heatmapTs,
       },
       this.lastRequestToken.token
     );
@@ -268,7 +262,7 @@ class SamplesHeatmapView extends React.Component {
 
     let [heatmapData, metadataFields] = await Promise.all([
       this.fetchHeatmapData(),
-      this.fetchMetadataFieldsBySampleIds()
+      this.fetchMetadataFieldsBySampleIds(),
     ]);
 
     let newState = this.extractData(heatmapData);
@@ -300,7 +294,7 @@ class SamplesHeatmapView extends React.Component {
         name: sample.name,
         index: i,
         host_genome_name: sample.host_genome_name,
-        metadata: processMetadata(sample.metadata, true)
+        metadata: processMetadata(sample.metadata, true),
       };
       if (sample.taxons) {
         for (let j = 0; j < sample.taxons.length; j++) {
@@ -316,7 +310,7 @@ class SamplesHeatmapView extends React.Component {
               category: taxon.category_name,
               parentId:
                 taxon.tax_id === taxon.species_taxid && taxon.genus_taxid,
-              phage: !!taxon.is_phage
+              phage: !!taxon.is_phage,
             };
             taxonDetails[taxon.name] = taxonDetails[taxon.tax_id];
           } else {
@@ -345,7 +339,7 @@ class SamplesHeatmapView extends React.Component {
       taxonIds,
       taxonDetails,
       data,
-      taxonFilterState
+      taxonFilterState,
     };
   }
 
@@ -355,7 +349,7 @@ class SamplesHeatmapView extends React.Component {
         [this.state.selectedSampleId, "metadata", key],
         value,
         this.state.sampleDetails
-      )
+      ),
     });
   };
 
@@ -364,14 +358,14 @@ class SamplesHeatmapView extends React.Component {
     this.removedTaxonIds.add(taxonId);
     logAnalyticsEvent("SamplesHeatmapView_taxon_removed", {
       taxonId,
-      taxonName
+      taxonName,
     });
   };
 
   handleSampleLabelClick = sampleId => {
     if (!sampleId) {
       this.setState({
-        sidebarVisible: false
+        sidebarVisible: false,
       });
       return;
     }
@@ -382,21 +376,21 @@ class SamplesHeatmapView extends React.Component {
       this.state.selectedSampleId === sampleId
     ) {
       this.setState({
-        sidebarVisible: false
+        sidebarVisible: false,
       });
       logAnalyticsEvent("SamplesHeatmapView_sample-details-sidebar_closed", {
         sampleId: sampleId,
-        sidebarMode: "sampleDetails"
+        sidebarMode: "sampleDetails",
       });
     } else {
       this.setState({
         selectedSampleId: sampleId,
         sidebarMode: "sampleDetails",
-        sidebarVisible: true
+        sidebarVisible: true,
       });
       logAnalyticsEvent("SamplesHeatmapView_sample-details-sidebar_opened", {
         sampleId: sampleId,
-        sidebarMode: "sampleDetails"
+        sidebarMode: "sampleDetails",
       });
     }
   };
@@ -406,7 +400,7 @@ class SamplesHeatmapView extends React.Component {
 
     if (!taxonDetails) {
       this.setState({
-        sidebarVisible: false
+        sidebarVisible: false,
       });
       return;
     }
@@ -417,13 +411,13 @@ class SamplesHeatmapView extends React.Component {
       taxonName === get("taxonName", this.state.sidebarTaxonModeConfig)
     ) {
       this.setState({
-        sidebarVisible: false
+        sidebarVisible: false,
       });
       logAnalyticsEvent("SamplesHeatmapView_taxon-details-sidebar_closed", {
         parentTaxonId: taxonDetails.parentId,
         taxonId: taxonDetails.id,
         taxonName,
-        sidebarMode: "taxonDetails"
+        sidebarMode: "taxonDetails",
       });
     } else {
       this.setState({
@@ -431,22 +425,22 @@ class SamplesHeatmapView extends React.Component {
         sidebarTaxonModeConfig: {
           parentTaxonId: taxonDetails.parentId,
           taxonId: taxonDetails.id,
-          taxonName
+          taxonName,
         },
-        sidebarVisible: true
+        sidebarVisible: true,
       });
       logAnalyticsEvent("SamplesHeatmapView_taxon-details-sidebar_opened", {
         parentTaxonId: taxonDetails.parentId,
         taxonId: taxonDetails.id,
         taxonName,
-        sidebarMode: "taxonDetails"
+        sidebarMode: "taxonDetails",
       });
     }
   };
 
   closeSidebar = () => {
     this.setState({
-      sidebarVisible: false
+      sidebarVisible: false,
     });
   };
 
@@ -458,7 +452,7 @@ class SamplesHeatmapView extends React.Component {
       return {
         sampleId: this.state.selectedSampleId,
         onMetadataUpdate: this.handleMetadataUpdate,
-        showReportLink: true
+        showReportLink: true,
       };
     }
     return {};
@@ -472,13 +466,13 @@ class SamplesHeatmapView extends React.Component {
     backgrounds: this.props.backgrounds,
     taxonLevels: this.props.taxonLevels.map((taxonLevelName, index) => ({
       text: taxonLevelName,
-      value: index
+      value: index,
     })),
     thresholdFilters: this.props.thresholdFilters,
     // Client side options
     scales: SCALE_OPTIONS,
     taxonsPerSample: TAXONS_PER_SAMPLE_RANGE,
-    specificityOptions: SPECIFICITY_OPTIONS
+    specificityOptions: SPECIFICITY_OPTIONS,
   });
 
   handleSelectedOptionsChange = newOptions => {
@@ -486,7 +480,7 @@ class SamplesHeatmapView extends React.Component {
 
     this.setState(
       {
-        selectedOptions: assign(this.state.selectedOptions, newOptions)
+        selectedOptions: assign(this.state.selectedOptions, newOptions),
       },
       refetchData ? this.updateHeatmap : null
     );
@@ -561,7 +555,6 @@ class SamplesHeatmapView extends React.Component {
           <SamplesHeatmapHeader
             sampleIds={this.state.sampleIds}
             data={this.state.data}
-            allowedFeatures={this.props.allowedFeatures}
             onDownloadSvg={this.handleDownloadSvg}
             onDownloadPng={this.handleDownloadPng}
             onDownloadCsv={this.handleDownloadCsv}
@@ -595,7 +588,7 @@ class SamplesHeatmapView extends React.Component {
             "SamplesHeatmapView_details-sidebar_closed",
             {
               sampleId: this.state.selectedSampleId,
-              sidebarMode: this.state.sidebarMode
+              sidebarMode: this.state.sidebarMode,
             }
           )}
           params={this.getSidebarParams()}
@@ -616,7 +609,7 @@ SamplesHeatmapView.propTypes = {
   removedTaxonIds: PropTypes.array,
   taxonLevels: PropTypes.array,
   thresholdFilters: PropTypes.object,
-  heatmapTs: PropTypes.number
+  heatmapTs: PropTypes.number,
 };
 
 export default SamplesHeatmapView;
