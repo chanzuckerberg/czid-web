@@ -923,7 +923,7 @@ class PipelineRun < ApplicationRecord
     if alert_sent.zero?
       threshold = 8.hours
       if run_time > threshold
-        msg = "LongRunningSampleEvent: Sample #{sample.id} by #{sample.user.role_name} has been running #{duration_hrs} hours. #{job_status_display}" \
+        msg = "LongRunningSampleEvent: Sample #{sample.id} by #{sample.user.role_name} has been running #{duration_hrs} hours. #{job_status_display} " \
           "See: #{status_url}"
         LogUtil.log_err_and_airbrake(msg)
         update(alert_sent: 1)
