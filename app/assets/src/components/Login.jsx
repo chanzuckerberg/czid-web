@@ -19,7 +19,7 @@ class Login extends React.Component {
       success: false,
       showFailedLogin: false,
       errorMessage: "",
-      successMessage: ""
+      successMessage: "",
     };
   }
 
@@ -34,7 +34,7 @@ class Login extends React.Component {
   clearError() {
     this.setState({
       showFailedLogin: false,
-      success: false
+      success: false,
     });
   }
 
@@ -45,15 +45,15 @@ class Login extends React.Component {
         user: {
           email: this.refs.email ? this.refs.email.value : "",
           password: this.refs.password ? this.refs.password.value : "",
-          remember_me: this.refs.remember_me ? this.refs.remember_me.value : ""
+          remember_me: this.refs.remember_me ? this.refs.remember_me.value : "",
         },
-        authenticity_token: this.csrf
+        authenticity_token: this.csrf,
       })
       .then(response => {
         that.setState(
           {
             success: true,
-            successMessage: "User signed in"
+            successMessage: "User signed in",
           },
           () => {
             openUrl("/");
@@ -64,13 +64,13 @@ class Login extends React.Component {
         that.setState(
           {
             showFailedLogin: true,
-            errorMessage: "Invalid Email or Password"
+            errorMessage: "Invalid Email or Password",
           },
           () =>
             logAnalyticsEvent(
               "Login_invalid-email-or-password-error_displayed",
               {
-                errorMessage: this.state.errorMessage
+                errorMessage: this.state.errorMessage,
               }
             )
         );
@@ -80,14 +80,14 @@ class Login extends React.Component {
   isFormInValid() {
     const logError = () =>
       logAnalyticsEvent("Login_login-form-error_displayed", {
-        errorMessage: this.state.errorMessage
+        errorMessage: this.state.errorMessage,
       });
 
     if (this.refs.email.value === "" && this.refs.password.value === "") {
       this.setState(
         {
           showFailedLogin: true,
-          errorMessage: "Please enter email and password"
+          errorMessage: "Please enter email and password",
         },
         logError
       );
@@ -96,7 +96,7 @@ class Login extends React.Component {
       this.setState(
         {
           showFailedLogin: true,
-          errorMessage: "Please enter email"
+          errorMessage: "Please enter email",
         },
         logError
       );
@@ -105,7 +105,7 @@ class Login extends React.Component {
       this.setState(
         {
           showFailedLogin: true,
-          errorMessage: "Please enter password"
+          errorMessage: "Please enter password",
         },
         logError
       );
@@ -118,7 +118,7 @@ class Login extends React.Component {
   toggleCheckBox() {
     var checkboxValue = $("#remember_me").prop("checked");
     this.setState({
-      isChecked: checkboxValue
+      isChecked: checkboxValue,
     });
     this.state.isChecked = !this.state.isChecked;
   }
@@ -154,7 +154,7 @@ class Login extends React.Component {
                   email: this.refs.email ? this.refs.email.value : "",
                   remember_me: this.refs.remember_me
                     ? this.refs.remember_me.value
-                    : ""
+                    : "",
                 }
               )}
             >

@@ -100,7 +100,7 @@ const MouseIcon = props => {
 };
 
 MouseIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default MouseIcon;

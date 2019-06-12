@@ -17,7 +17,7 @@ class ProjectSettingsModal extends React.Component {
     super(props);
 
     this.state = {
-      modalOpen: false
+      modalOpen: false,
     };
   }
 
@@ -30,7 +30,7 @@ class ProjectSettingsModal extends React.Component {
     axios
       .put(`/projects/${project.id}.json`, {
         public_access: true,
-        authenticity_token: csrf
+        authenticity_token: csrf,
       })
       .then(() => {
         onProjectPublished();
@@ -43,7 +43,7 @@ class ProjectSettingsModal extends React.Component {
       nextPublicSampleDate,
       onUserAdded,
       project,
-      users
+      users,
     } = this.props;
 
     return (
@@ -55,7 +55,7 @@ class ProjectSettingsModal extends React.Component {
             "ProjectSettingsModal_open-link_click",
             {
               projectId: project.id,
-              projectName: project.name
+              projectName: project.name,
             }
           )}
         >
@@ -70,7 +70,7 @@ class ProjectSettingsModal extends React.Component {
               "ProjectSettingsModal_close-modal_clicked",
               {
                 projectId: project.id,
-                projectName: project.name
+                projectName: project.name,
               }
             )}
             className={cs.projectSettingsModal}
@@ -97,7 +97,7 @@ class ProjectSettingsModal extends React.Component {
                           "ProjectSettingsModal_public-button_confirmed",
                           {
                             projectId: project.id,
-                            projectName: project.name
+                            projectName: project.name,
                           }
                         )}
                         project={project}
@@ -135,10 +135,10 @@ ProjectSettingsModal.propTypes = {
   project: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string,
-    public_access: PropTypes.oneOfType([PropTypes.bool, PropTypes.number])
+    public_access: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
   }).isRequired,
   nextPublicSampleDate: PropTypes.string,
-  users: PropTypes.array
+  users: PropTypes.array,
 };
 
 export default ProjectSettingsModal;

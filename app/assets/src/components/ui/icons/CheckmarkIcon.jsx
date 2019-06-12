@@ -16,7 +16,7 @@ const CheckmarkIcon = ({ className, size }) => {
 
 CheckmarkIcon.propTypes = {
   className: PropTypes.string,
-  size: PropTypes.string
+  size: PropTypes.string,
 };
 
 export default CheckmarkIcon;

@@ -12,7 +12,7 @@ class SequentialLegendVis extends React.Component {
     this.legend = new SequentialLegend(this.legendContainer, {
       scale: this.props.scale,
       min: this.props.min,
-      max: this.props.max
+      max: this.props.max,
     });
     this.legend.update();
   }
@@ -33,7 +33,7 @@ class SequentialLegendVis extends React.Component {
 SequentialLegendVis.propTypes = {
   max: PropTypes.number,
   min: PropTypes.number,
-  scale: PropTypes.string
+  scale: PropTypes.string,
 };
 
 export default SequentialLegendVis;

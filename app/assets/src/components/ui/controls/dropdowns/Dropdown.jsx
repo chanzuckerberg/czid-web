@@ -10,7 +10,7 @@ class Dropdown extends React.Component {
     super(props);
     this.state = {
       value: this.props.value !== undefined ? this.props.value : null,
-      labels: {}
+      labels: {},
     };
   }
 
@@ -36,7 +36,7 @@ class Dropdown extends React.Component {
       labels: this.props.options.reduce((labelMap, option) => {
         labelMap[option.value.toString()] = option.text;
         return labelMap;
-      }, {})
+      }, {}),
     });
   };
 
@@ -107,7 +107,7 @@ Dropdown.propTypes = {
         .isRequired,
       // Optional node element will be rendered instead of text.
       // Text will still be used in the <DropdownTrigger>
-      customNode: PropTypes.node
+      customNode: PropTypes.node,
     })
   ).isRequired,
   // Custom props for rendering items
@@ -120,7 +120,7 @@ Dropdown.propTypes = {
   search: PropTypes.bool,
   menuLabel: PropTypes.string,
   usePortal: PropTypes.bool,
-  withinModal: PropTypes.bool
+  withinModal: PropTypes.bool,
 };
 
 export default Dropdown;

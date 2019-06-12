@@ -67,7 +67,7 @@ export default class Heatmap {
         // The signature of customColor is customColor(value, data_node, originalColor, colors, colorNoValue)
         customColorCallback: null,
         colors: null,
-        colorNoValue: "#eaeaea"
+        colorNoValue: "#eaeaea",
       },
       options
     );
@@ -188,7 +188,7 @@ export default class Heatmap {
       max: Math.max(
         d3.max(this.data.values, array => d3.max(array)),
         this.options.nullValue
-      )
+      ),
     };
 
     this.scaleLimits = {
@@ -199,7 +199,7 @@ export default class Heatmap {
       max:
         this.options.scaleMax || this.options.scaleMax === 0
           ? this.options.scaleMax
-          : this.limits.max
+          : this.limits.max,
     };
 
     this.cells = [];
@@ -209,7 +209,7 @@ export default class Heatmap {
           id: `${i},${j}`,
           rowIndex: i,
           columnIndex: j,
-          value: this.data.values[i][j]
+          value: this.data.values[i][j],
         });
       }
     }
@@ -269,7 +269,7 @@ export default class Heatmap {
           this.columnClusterHeight) /
           this.rowLabels.length,
         this.options.minCellHeight
-      )
+      ),
     };
 
     this.width =
@@ -971,7 +971,7 @@ export default class Heatmap {
       const handleAddColumnMetadataClick = () => {
         this.options.onAddColumnMetadataClick(addMetadataTrigger.node(), {
           x: this.rowLabelsWidth - 10,
-          y: yPos
+          y: yPos,
         });
       };
 
@@ -1204,7 +1204,7 @@ export default class Heatmap {
       )
     ) {
       return Object.assign({}, this.metadataColors[value], {
-        Unknown: this.options.colorNoValue
+        Unknown: this.options.colorNoValue,
       });
     } else {
       return this.metadataColors[value];

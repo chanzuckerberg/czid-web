@@ -19,7 +19,7 @@ class BulkSampleUploadTable extends React.Component {
       sampleNamesToFiles,
       fileNamesToProgress,
       onRemoved,
-      hideProgressColumn
+      hideProgressColumn,
     } = this.props;
 
     if (isEmpty(sampleNamesToFiles)) return null;
@@ -77,7 +77,7 @@ class BulkSampleUploadTable extends React.Component {
         progress: progress,
         sampleName: sampleName,
         files: filesList,
-        removeIcon: removeIcon
+        removeIcon: removeIcon,
       };
       entries.push(entry);
     }
@@ -99,12 +99,12 @@ class BulkSampleUploadTable extends React.Component {
             progress: "",
             sampleName: "Sample Name",
             files: "Files",
-            removeIcon: ""
+            removeIcon: "",
           }}
           columns={concat(!hideProgressColumn ? ["progress"] : [], [
             "sampleName",
             "files",
-            "removeIcon"
+            "removeIcon",
           ])}
           data={sortedEntries}
         />
@@ -118,7 +118,7 @@ BulkSampleUploadTable.propTypes = {
   sampleNamesToFiles: PropTypes.objectOf(
     PropTypes.arrayOf(
       PropTypes.shape({
-        name: PropTypes.string
+        name: PropTypes.string,
       })
     )
   ),
@@ -127,7 +127,7 @@ BulkSampleUploadTable.propTypes = {
   onRemoved: PropTypes.func,
   hideProgressColumn: PropTypes.bool,
   showCount: PropTypes.bool,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default BulkSampleUploadTable;

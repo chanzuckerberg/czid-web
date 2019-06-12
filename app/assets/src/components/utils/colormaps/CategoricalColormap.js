@@ -6,7 +6,7 @@ export class CategoricalColormap {
       "55C567",
       "BF1464",
       "E58740",
-      "AB4ECC"
+      "AB4ECC",
     ];
 
     this.gradients = this.gradients.map(c => this.hexToDec(c));

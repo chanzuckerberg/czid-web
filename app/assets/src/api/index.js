@@ -13,7 +13,7 @@ import { get, postWithCSRF, putWithCSRF, deleteWithCSRF } from "./core";
 const saveSampleField = (id, field, value) =>
   postWithCSRF(`/samples/${id}/save_metadata`, {
     field,
-    value
+    value,
   });
 
 const saveSampleName = (id, name) => saveSampleField(id, "name", name);
@@ -55,12 +55,12 @@ const createSample = (
       return {
         source_type: sourceType,
         source: cleanFilePath(file.name),
-        parts: cleanFilePath(file.name)
+        parts: cleanFilePath(file.name),
       };
     } else {
       return {
         source_type: sourceType,
-        source: file
+        source: file,
       };
     }
   });
@@ -80,8 +80,8 @@ const createSample = (
       pipeline_branch: pipelineBranch,
       dag_vars: dagVariables,
       max_input_fragments: maxInputFragments,
-      subsample: subsample
-    }
+      subsample: subsample,
+    },
   });
 };
 
@@ -90,13 +90,13 @@ const getAllHostGenomes = () => get("/host_genomes.json");
 // TODO(mark): Remove this method once we launch the new sample upload flow.
 const bulkUploadRemoteSamples = samples =>
   postWithCSRF(`/samples/bulk_upload.json`, {
-    samples
+    samples,
   });
 
 const saveVisualization = (type, data) =>
   postWithCSRF(`/visualizations/${type}/save`, {
     type,
-    data
+    data,
   });
 
 const shortenUrl = url => postWithCSRF("/visualizations/shorten_url", { url });
@@ -106,16 +106,16 @@ const bulkImportRemoteSamples = ({ projectId, hostGenomeId, bulkPath }) =>
     params: {
       project_id: projectId,
       host_genome_id: hostGenomeId,
-      bulk_path: bulkPath
-    }
+      bulk_path: bulkPath,
+    },
   });
 
 const markSampleUploaded = sampleId =>
   putWithCSRF(`/samples/${sampleId}.json`, {
     sample: {
       id: sampleId,
-      status: "uploaded"
-    }
+      status: "uploaded",
+    },
   });
 
 const uploadFileToUrl = async (
@@ -124,7 +124,7 @@ const uploadFileToUrl = async (
   { onUploadProgress, onSuccess, onError }
 ) => {
   const config = {
-    onUploadProgress
+    onUploadProgress,
   };
 
   return axios
@@ -140,7 +140,7 @@ const uploadFileToUrlWithRetries = async (
   { onUploadProgress, onSuccess, onError }
 ) => {
   const config = {
-    onUploadProgress
+    onUploadProgress,
   };
 
   // Retry up to 5 times with a 30s delay. axiosRetry interceptor means that 'catch' won't be
@@ -149,7 +149,7 @@ const uploadFileToUrlWithRetries = async (
   axiosRetry(client, {
     retries: 5,
     retryDelay: () => 30000,
-    retryCondition: () => true
+    retryCondition: () => true,
   });
 
   return client
@@ -167,7 +167,7 @@ const getTaxonDistributionForBackground = (backgroundId, taxonId) =>
 const getSampleTaxons = (params, cancelToken) =>
   get("/visualizations/samples_taxons.json", {
     params,
-    cancelToken
+    cancelToken,
   });
 
 // TODO(tiago): still needs to accepts field to sort by
@@ -179,7 +179,7 @@ const getSamples = ({
   offset,
   filters,
   listAllIds,
-  sampleIds
+  sampleIds,
 } = {}) =>
   get("/samples/index_v2.json", {
     params: {
@@ -191,8 +191,8 @@ const getSamples = ({
       listAllIds,
       // &sampleIds=[1,2] instead of default &sampleIds[]=1&sampleIds[]=2 format.
       sampleIds: JSON.stringify(sampleIds),
-      ...filters
-    }
+      ...filters,
+    },
   });
 
 const getSampleDimensions = ({ domain, filters, projectId, search }) =>
@@ -201,8 +201,8 @@ const getSampleDimensions = ({ domain, filters, projectId, search }) =>
       domain,
       projectId,
       search,
-      ...filters
-    }
+      ...filters,
+    },
   });
 
 const getSampleStats = ({ domain, filters, projectId, search }) =>
@@ -211,8 +211,8 @@ const getSampleStats = ({ domain, filters, projectId, search }) =>
       domain,
       projectId,
       search,
-      ...filters
-    }
+      ...filters,
+    },
   });
 
 const getProjectDimensions = ({ domain, filters, projectId, search }) =>
@@ -221,8 +221,8 @@ const getProjectDimensions = ({ domain, filters, projectId, search }) =>
       domain,
       search,
       projectId,
-      ...filters
-    }
+      ...filters,
+    },
   });
 
 const getSamplesV1 = params => get("/samples.json", { params });
@@ -234,8 +234,8 @@ const getProjects = ({ domain, filters, search, projectId, basic } = {}) =>
       search,
       projectId,
       basic,
-      ...filters
-    }
+      ...filters,
+    },
   });
 
 const getVisualizations = ({ domain, filters, search } = {}) =>
@@ -243,13 +243,13 @@ const getVisualizations = ({ domain, filters, search } = {}) =>
     params: {
       domain,
       search,
-      ...filters
-    }
+      ...filters,
+    },
   });
 
 const createProject = params =>
   postWithCSRF("/projects.json", {
-    project: params
+    project: params,
   });
 
 const validateSampleNames = (projectId, sampleNames) => {
@@ -258,7 +258,7 @@ const validateSampleNames = (projectId, sampleNames) => {
   }
 
   return postWithCSRF(`/projects/${projectId}/validate_sample_names`, {
-    sample_names: sampleNames
+    sample_names: sampleNames,
   });
 };
 
@@ -268,7 +268,7 @@ const validateSampleFiles = sampleFiles => {
   }
 
   return postWithCSRF(`/samples/validate_sample_files`, {
-    sample_files: sampleFiles
+    sample_files: sampleFiles,
   });
 };
 
@@ -277,15 +277,15 @@ const getSearchSuggestions = ({ categories, query, domain }) =>
     params: {
       categories,
       query,
-      domain
-    }
+      domain,
+    },
   });
 
 const createBackground = ({ description, name, sampleIds }) =>
   postWithCSRF("/backgrounds", {
     name,
     description,
-    sample_ids: sampleIds
+    sample_ids: sampleIds,
   });
 
 const getCoverageVizSummary = sampleId =>
@@ -301,7 +301,7 @@ const getContigsSequencesByByteranges = (
 ) => {
   const params = getURLParamString({
     byteranges: byteranges.map(byterange => byterange.join(",")),
-    pipelineVersion
+    pipelineVersion,
   });
   return get(`/samples/${sampleId}/contigs_sequences_by_byteranges?${params}`);
 };
@@ -317,8 +317,8 @@ const getSamplesLocations = ({ domain, filters, projectId, search }) =>
       domain,
       search,
       projectId,
-      ...filters
-    }
+      ...filters,
+    },
   });
 
 export {
@@ -357,5 +357,5 @@ export {
   uploadFileToUrlWithRetries,
   validatePhyloTreeName,
   validateSampleFiles,
-  validateSampleNames
+  validateSampleNames,
 };

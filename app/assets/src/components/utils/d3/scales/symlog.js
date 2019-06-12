@@ -27,7 +27,7 @@ function rescale(range, domain) {
     parts.push({
       domain: d,
       type: d3.scale.log,
-      extent: logScale(Math.abs(d[1] - d[0]) + 1) - logScale(1)
+      extent: logScale(Math.abs(d[1] - d[0]) + 1) - logScale(1),
     });
   }
 
@@ -37,7 +37,7 @@ function rescale(range, domain) {
     parts.push({
       domain: d,
       type: d3.scale.linear,
-      extent: Math.abs(d[1] - d[0]) * (logScale(2) - logScale(1))
+      extent: Math.abs(d[1] - d[0]) * (logScale(2) - logScale(1)),
     });
   }
 
@@ -47,7 +47,7 @@ function rescale(range, domain) {
     parts.push({
       domain: d,
       type: d3.scale.log,
-      extent: logScale(Math.abs(d[1] - d[0]) + 1) - logScale(1)
+      extent: logScale(Math.abs(d[1] - d[0]) + 1) - logScale(1),
     });
   }
 

@@ -14,7 +14,7 @@ class MultipleDropdown extends React.Component {
 
     this.state = {
       value: this.props.value || [],
-      valueOnOpen: this.props.value || []
+      valueOnOpen: this.props.value || [],
     };
   }
 
@@ -35,7 +35,7 @@ class MultipleDropdown extends React.Component {
     if (props.value !== state.prevPropsValue) {
       return {
         value: props.value,
-        prevPropsValue: props.value
+        prevPropsValue: props.value,
       };
     }
     return null;
@@ -110,7 +110,7 @@ class MultipleDropdown extends React.Component {
     const { checkedOnTop } = this.props;
     if (checkedOnTop)
       this.setState({
-        valueOnOpen: this.state.value.slice()
+        valueOnOpen: this.state.value.slice(),
       });
   };
 
@@ -150,7 +150,7 @@ class MultipleDropdown extends React.Component {
 
 MultipleDropdown.defaultProps = {
   arrowInsideTrigger: true,
-  value: []
+  value: [],
 };
 
 MultipleDropdown.propTypes = {
@@ -165,7 +165,7 @@ MultipleDropdown.propTypes = {
   options: PropTypes.arrayOf(PropTypes.object),
   trigger: PropTypes.node,
   value: PropTypes.array,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default MultipleDropdown;

@@ -30,5 +30,5 @@ export default class FilterTag extends React.Component {
 FilterTag.propTypes = {
   text: PropTypes.string,
   onClose: PropTypes.func.isRequired,
-  className: PropTypes.string
+  className: PropTypes.string,
 };

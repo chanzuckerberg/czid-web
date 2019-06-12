@@ -51,7 +51,7 @@ class Modal extends React.Component {
 Modal.propTypes = forbidExtraProps({
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
+    PropTypes.node,
   ]).isRequired,
   className: PropTypes.string,
   onClose: PropTypes.func,
@@ -61,7 +61,7 @@ Modal.propTypes = forbidExtraProps({
   narrowest: PropTypes.bool, // Decrease the width of the Modal for the smallest modals.
   wide: PropTypes.bool, // Increase the width of the Modal for the wider modals.
   tall: PropTypes.bool, // Increase the max-height of the Modal for tall content.
-  title: PropTypes.string
+  title: PropTypes.string,
 });
 
 export default Modal;

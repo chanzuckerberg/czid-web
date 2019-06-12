@@ -6,7 +6,7 @@ class Checkbox extends React.Component {
     super(props);
 
     this.state = {
-      isChecked: false
+      isChecked: false,
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -16,7 +16,7 @@ class Checkbox extends React.Component {
     if (props.checked !== state.oldIsChecked) {
       return {
         isChecked: props.checked,
-        oldIsChecked: props.checked
+        oldIsChecked: props.checked,
       };
     }
     return null;
@@ -52,7 +52,7 @@ class Checkbox extends React.Component {
 }
 
 Checkbox.defaultProps = {
-  checked: false
+  checked: false,
 };
 
 Checkbox.propTypes = {
@@ -60,7 +60,7 @@ Checkbox.propTypes = {
   disabled: PropTypes.bool,
   label: PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 export default Checkbox;

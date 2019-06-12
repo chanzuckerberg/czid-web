@@ -35,7 +35,7 @@ class DateInput extends React.Component {
 DateInput.propTypes = forbidExtraProps({
   className: PropTypes.string,
   onChange: PropTypes.func,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 });
 
 export default DateInput;

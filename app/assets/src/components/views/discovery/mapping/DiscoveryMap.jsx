@@ -15,7 +15,7 @@ class DiscoveryMap extends React.Component {
 
     this.state = {
       tooltip: null,
-      tooltipShouldClose: false
+      tooltipShouldClose: false,
     };
   }
 
@@ -115,7 +115,7 @@ DiscoveryMap.propTypes = {
   mapTilerKey: PropTypes.string,
   onMarkerClick: PropTypes.func,
   onTooltipTitleClick: PropTypes.func,
-  previewedLocationId: PropTypes.number
+  previewedLocationId: PropTypes.number,
 };
 
 export default DiscoveryMap;

@@ -27,13 +27,13 @@ class BaseDiscoveryView extends React.Component {
 
 BaseDiscoveryView.defaultProps = {
   columns: [],
-  data: []
+  data: [],
 };
 
 BaseDiscoveryView.propTypes = {
   columns: PropTypes.array,
   data: PropTypes.array,
-  handleRowClick: PropTypes.func
+  handleRowClick: PropTypes.func,
 };
 
 export default BaseDiscoveryView;

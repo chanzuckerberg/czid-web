@@ -23,7 +23,7 @@ class RadioButton extends React.Component {
 RadioButton.propTypes = {
   selected: PropTypes.bool,
   onClick: PropTypes.func,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default RadioButton;

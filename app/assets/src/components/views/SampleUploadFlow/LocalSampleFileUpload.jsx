@@ -7,7 +7,7 @@ import _fp, {
   mapValues,
   sortBy,
   slice,
-  sumBy
+  sumBy,
 } from "lodash/fp";
 import cx from "classnames";
 
@@ -22,7 +22,7 @@ const map = _fp.map.convert({ cap: false });
 
 class LocalSampleFileUpload extends React.Component {
   state = {
-    showInfo: false
+    showInfo: false,
   };
 
   onDrop = acceptedFiles => {
@@ -43,10 +43,10 @@ class LocalSampleFileUpload extends React.Component {
         input_files_attributes: files.map(file => ({
           source_type: "local",
           source: cleanFilePath(file.name),
-          parts: cleanFilePath(file.name)
+          parts: cleanFilePath(file.name),
         })),
         status: "created",
-        client: "web"
+        client: "web",
       }),
       sampleNamesToFiles
     );
@@ -66,11 +66,11 @@ class LocalSampleFileUpload extends React.Component {
   toggleInfo = () => {
     this.setState(
       {
-        showInfo: !this.state.showInfo
+        showInfo: !this.state.showInfo,
       },
       () => {
         logAnalyticsEvent("LocalSampleFileUpload_more-info-toggle_clicked", {
-          showInfo: this.state.showInfo
+          showInfo: this.state.showInfo,
         });
       }
     );
@@ -123,7 +123,7 @@ class LocalSampleFileUpload extends React.Component {
 LocalSampleFileUpload.propTypes = {
   project: PropTypes.Project,
   onChange: PropTypes.func.isRequired,
-  samples: PropTypes.arrayOf(PropTypes.object)
+  samples: PropTypes.arrayOf(PropTypes.object),
 };
 
 export default LocalSampleFileUpload;

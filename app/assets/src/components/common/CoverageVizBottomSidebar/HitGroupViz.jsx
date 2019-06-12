@@ -31,7 +31,7 @@ export default class HitGroupViz extends React.Component {
     genomeVizTooltipData: null,
     contigDownloaderLocation: null,
     contigDownloaderData: null,
-    currentCopyIconMessage: DEFAULT_CONTIG_COPY_MESSAGE
+    currentCopyIconMessage: DEFAULT_CONTIG_COPY_MESSAGE,
   };
 
   componentDidMount() {
@@ -73,7 +73,7 @@ export default class HitGroupViz extends React.Component {
 
     if (hoverData !== null) {
       this.setState({
-        genomeVizTooltipData: getGenomeVizTooltipData(accessionData, hoverData)
+        genomeVizTooltipData: getGenomeVizTooltipData(accessionData, hoverData),
       });
     }
   };
@@ -82,8 +82,8 @@ export default class HitGroupViz extends React.Component {
     this.setState({
       genomeVizTooltipLocation: {
         left: clientX,
-        top: clientY
-      }
+        top: clientY,
+      },
     });
   };
 
@@ -92,7 +92,7 @@ export default class HitGroupViz extends React.Component {
     if (dataIndex === null) {
       this.setState({
         contigDownloaderData: null,
-        contigDownloaderLocation: null
+        contigDownloaderLocation: null,
       });
     } else {
       // Only open the contig downloader if there are contigs in this hitGroup.
@@ -100,18 +100,18 @@ export default class HitGroupViz extends React.Component {
       if (hitGroup[0] > 0 && hitGroup[10].length > 0) {
         this.setState({
           contigDownloaderData: {
-            contigByteranges: hitGroup[10]
+            contigByteranges: hitGroup[10],
           },
           contigDownloaderLocation: {
             // We apply a translate 100% in CSS to move the tooltip to the correct location.
             left: barRight,
-            top: barTop
-          }
+            top: barTop,
+          },
         });
       } else {
         this.setState({
           contigDownloaderData: null,
-          contigDownloaderLocation: null
+          contigDownloaderLocation: null,
         });
       }
     }
@@ -120,7 +120,7 @@ export default class HitGroupViz extends React.Component {
   handleGenomeVizBarExit = () => {
     this.setState({
       genomeVizTooltipLocation: null,
-      genomeVizTooltipData: null
+      genomeVizTooltipData: null,
     });
   };
 
@@ -140,7 +140,7 @@ export default class HitGroupViz extends React.Component {
         onGenomeVizBarEnter: this.handleGenomeVizBarEnter,
         onGenomeVizBarExit: this.handleGenomeVizBarExit,
         onGenomeVizBarClick: this.handleGenomeVizBarClick,
-        hoverDarkenFactor: 0.4
+        hoverDarkenFactor: 0.4,
       }
     );
     this.hitGroupViz.update();
@@ -154,7 +154,7 @@ export default class HitGroupViz extends React.Component {
         byteranges: contigDownloaderData.contigByteranges.map(byterange =>
           byterange.join(",")
         ),
-        pipelineVersion: this.props.pipelineVersion
+        pipelineVersion: this.props.pipelineVersion,
       });
       location.href = `/samples/${
         this.props.sampleId
@@ -174,13 +174,13 @@ export default class HitGroupViz extends React.Component {
     copy(Object.values(data).join("\n"));
 
     this.setState({
-      currentCopyIconMessage: "Copied to clipboard!"
+      currentCopyIconMessage: "Copied to clipboard!",
     });
   };
 
   restoreCopyIconMessage = () => {
     this.setState({
-      currentCopyIconMessage: DEFAULT_CONTIG_COPY_MESSAGE
+      currentCopyIconMessage: DEFAULT_CONTIG_COPY_MESSAGE,
     });
   };
 
@@ -206,7 +206,7 @@ export default class HitGroupViz extends React.Component {
       <div
         style={{
           left: contigDownloaderLocation.left,
-          top: contigDownloaderLocation.top - 5
+          top: contigDownloaderLocation.top - 5,
         }}
         className={cs.contigDownloader}
         ref={c => (this._contigDownloader = c)}
@@ -227,7 +227,7 @@ export default class HitGroupViz extends React.Component {
                   ),
                   accessionId: accessionData.id,
                   taxonId,
-                  sampleId
+                  sampleId,
                 }
               )}
             >
@@ -254,7 +254,7 @@ export default class HitGroupViz extends React.Component {
                   ),
                   accessionId: accessionData.id,
                   taxonId,
-                  sampleId
+                  sampleId,
                 }
               )}
               onMouseEnter={this.restoreCopyIconMessage}
@@ -276,7 +276,7 @@ export default class HitGroupViz extends React.Component {
       genomeVizTooltipLocation,
       genomeVizTooltipData,
       contigDownloaderLocation,
-      contigDownloaderData
+      contigDownloaderData,
     } = this.state;
 
     return (
@@ -310,16 +310,16 @@ HitGroupViz.propTypes = {
       PropTypes.arrayOf(
         PropTypes.oneOfType([
           PropTypes.number,
-          PropTypes.arrayOf(PropTypes.number)
+          PropTypes.arrayOf(PropTypes.number),
         ])
       )
     ),
     id: PropTypes.number,
     max_aligned_length: PropTypes.number,
     name: PropTypes.string,
-    total_length: PropTypes.number
+    total_length: PropTypes.number,
   }),
   sampleId: PropTypes.number,
   taxonId: PropTypes.number,
-  pipelineVersion: PropTypes.string
+  pipelineVersion: PropTypes.string,
 };

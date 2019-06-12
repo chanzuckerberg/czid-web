@@ -29,7 +29,7 @@ class Input extends React.Component {
 Input.propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default Input;

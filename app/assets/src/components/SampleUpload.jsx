@@ -89,7 +89,7 @@ class SampleUpload extends React.Component {
       id: this.sample.id || "",
       inputFiles:
         props.inputFiles && props.inputFiles.length ? props.inputFiles : [],
-      status: this.sample.status
+      status: this.sample.status,
     };
     this.firstInput =
       this.selected.inputFiles.length && this.selected.inputFiles[0]
@@ -135,7 +135,7 @@ class SampleUpload extends React.Component {
       localFilesToUpload: [],
       localFilesDoneUploading: [],
       localUploadShouldStart: false,
-      localFileUploadURLs: ["", ""]
+      localFileUploadURLs: ["", ""],
     };
   }
 
@@ -156,7 +156,7 @@ class SampleUpload extends React.Component {
 
   parseUrlParams() {
     let urlParams = QueryString.parse(location.search, {
-      arrayFormat: "bracket"
+      arrayFormat: "bracket",
     });
     urlParams.projectId = parseInt(urlParams.projectId);
     return urlParams;
@@ -175,7 +175,7 @@ class SampleUpload extends React.Component {
         delay: 0,
         html: true,
         placement: "top",
-        offset: "0px 50px"
+        offset: "0px 50px",
       });
     });
   }
@@ -209,21 +209,21 @@ class SampleUpload extends React.Component {
     this.setState({
       invalid: false,
       success: false,
-      errors: {}
+      errors: {},
     });
   }
 
   toggleCheckBox(e) {
     this.setState(
       {
-        [e.target.id]: e.target.value == "true" ? false : true
+        [e.target.id]: e.target.value == "true" ? false : true,
         /* Note: "[e.target.id]" indicates a "computed property name".
          This allows us to use toggleCheckBox(event) to set different state variables
          depending on the id attached to the event. */
       },
       () => {
         logAnalyticsEvent("SampleUpload_public-checkbox_toggled", {
-          [e.target.id]: this.state[e.target.id]
+          [e.target.id]: this.state[e.target.id],
         });
       }
     );
@@ -240,7 +240,7 @@ class SampleUpload extends React.Component {
     logAnalyticsEvent("SampleUpload_create-project-link_clicked", {
       name: this.refs.new_project.value,
       publicChecked: this.state.publicChecked,
-      isProjectInvalid: this.isProjectInvalid()
+      isProjectInvalid: this.isProjectInvalid(),
     });
   }
 
@@ -250,9 +250,9 @@ class SampleUpload extends React.Component {
       .post("/projects.json", {
         project: {
           name: this.refs.new_project.value,
-          public_access: this.state.publicChecked ? 1 : 0
+          public_access: this.state.publicChecked ? 1 : 0,
         },
-        authenticity_token: this.csrf
+        authenticity_token: this.csrf,
       })
       .then(response => {
         var newProjectList = that.state.allProjects.slice();
@@ -263,7 +263,7 @@ class SampleUpload extends React.Component {
             selectedProject: response.data.name,
             selectedPId: response.data.id,
             success: true,
-            successMessage: "Project added successfully"
+            successMessage: "Project added successfully",
           },
           () => {
             this.refs.new_project.value = "";
@@ -274,7 +274,7 @@ class SampleUpload extends React.Component {
       .catch(error => {
         that.setState({
           invalid: true,
-          errors: { selectedProject: "Project already exists or is invalid" }
+          errors: { selectedProject: "Project already exists or is invalid" },
         });
       });
   }
@@ -286,7 +286,7 @@ class SampleUpload extends React.Component {
     ) {
       this.setState({
         invalid: true,
-        errorMessage: "Please enter valid project name"
+        errorMessage: "Please enter valid project name",
       });
       return true;
     } else {
@@ -296,12 +296,12 @@ class SampleUpload extends React.Component {
 
   uploadSampleFromRemote() {
     this.setState({
-      submitting: true
+      submitting: true,
     });
 
     const inputFiles = [
       this.refs.first_file_source.value.trim(),
-      this.refs.second_file_source.value.trim()
+      this.refs.second_file_source.value.trim(),
     ];
     createSample(
       this.state.sampleName,
@@ -320,7 +320,7 @@ class SampleUpload extends React.Component {
         this.setState({
           success: true,
           submitting: false,
-          successMessage: "Sample created successfully"
+          successMessage: "Sample created successfully",
         });
         openUrlWithTimeout(`/samples/${response.id}`);
       })
@@ -328,7 +328,7 @@ class SampleUpload extends React.Component {
         this.setState({
           invalid: true,
           submitting: false,
-          errorMessage: joinServerError(error)
+          errorMessage: joinServerError(error),
         });
       });
   }
@@ -336,7 +336,7 @@ class SampleUpload extends React.Component {
   updateSample() {
     let that = this;
     that.setState({
-      submitting: true
+      submitting: true,
     });
 
     axios
@@ -351,15 +351,15 @@ class SampleUpload extends React.Component {
           max_input_fragments: this.state.selectedMaxInputFragments,
           subsample: this.state.selectedSubsample,
           alignment_config_name: this.state.selectedAlignmentConfigName,
-          host_genome_id: this.state.selectedHostGenomeId
+          host_genome_id: this.state.selectedHostGenomeId,
         },
-        authenticity_token: this.csrf
+        authenticity_token: this.csrf,
       })
       .then(response => {
         that.setState({
           success: true,
           submitting: false,
-          successMessage: "Sample updated successfully"
+          successMessage: "Sample updated successfully",
         });
         openUrlWithTimeout(`/samples/${that.state.id}`);
       })
@@ -367,7 +367,7 @@ class SampleUpload extends React.Component {
         that.setState({
           submitting: false,
           invalid: true,
-          errorMessage: joinServerError(error.response.data)
+          errorMessage: joinServerError(error.response.data),
         });
       });
   }
@@ -386,25 +386,25 @@ class SampleUpload extends React.Component {
     ) {
       this.setState({
         invalid: true,
-        errorMessage: "Please fill in name, host genome and select a project"
+        errorMessage: "Please fill in name, host genome and select a project",
       });
       return true;
     } else if (this.state.sampleName === "") {
       this.setState({
         invalid: true,
-        errorMessage: "Please fill in Sample name"
+        errorMessage: "Please fill in Sample name",
       });
       return true;
     } else if (this.state.selectedProject === "Select a Project") {
       this.setState({
         invalid: true,
-        errorMessage: "Please select a project"
+        errorMessage: "Please select a project",
       });
       return true;
     } else if (this.state.selectedHostGenome === "") {
       this.setState({
         invalid: true,
-        errorMessage: "Please select a host genome"
+        errorMessage: "Please select a host genome",
       });
       return true;
     } else {
@@ -484,12 +484,12 @@ class SampleUpload extends React.Component {
       this.setState({
         selectedProject: e.target.value.trim(),
         selectedPId: this.state.allProjects[selectedIndex].id,
-        errors: Object.assign({}, this.state.errors, { selectedProject: null })
+        errors: Object.assign({}, this.state.errors, { selectedProject: null }),
       });
       logAnalyticsEvent("SampleUpload_project-selector_changed", {
         project: e.target.value.trim(),
         projectId: this.state.allProjects[selectedIndex].id,
-        errors: Object.keys(this.state.errors).length
+        errors: Object.keys(this.state.errors).length,
       });
     }
     this.clearError();
@@ -498,46 +498,46 @@ class SampleUpload extends React.Component {
   handleHostChange(hostId, hostName) {
     this.setState({
       selectedHostGenome: hostName,
-      selectedHostGenomeId: hostId
+      selectedHostGenomeId: hostId,
     });
     this.clearError();
     logAnalyticsEvent("SampleUpload_host-genome_changed", {
       selectedHostGenome: hostName,
-      selectedHostGenomeId: hostId
+      selectedHostGenomeId: hostId,
     });
   }
 
   handleBranchChange(e) {
     this.setState({
-      selectedBranch: e.target.value.trim()
+      selectedBranch: e.target.value.trim(),
     });
     this.clearError();
   }
 
   handleDagVarsChange = e => {
     this.setState({
-      selectedDagVars: e.target.value
+      selectedDagVars: e.target.value,
     });
     this.clearError();
   };
 
   handleSubsampleChange = e => {
     this.setState({
-      selectedSubsample: e.target.value
+      selectedSubsample: e.target.value,
     });
     this.clearError();
   };
 
   handleMaxInputFragmentsChange = e => {
     this.setState({
-      selectedMaxInputFragments: e.target.value
+      selectedMaxInputFragments: e.target.value,
     });
     this.clearError();
   };
 
   handleAlignmentConfigNameChange(e) {
     this.setState({
-      selectedAlignmentConfigName: e.target.value.trim()
+      selectedAlignmentConfigName: e.target.value.trim(),
     });
     this.clearError();
   }
@@ -545,14 +545,14 @@ class SampleUpload extends React.Component {
   // TODO (gdingle): is this used anywhere?
   handleNameChange(e) {
     this.setState({
-      sampleName: e.target.value.trim()
+      sampleName: e.target.value.trim(),
     });
   }
 
   // TODO (gdingle): is this used anywhere?
   handleResultChange(e) {
     this.setState({
-      selectedResultPath: e.target.value.trim()
+      selectedResultPath: e.target.value.trim(),
     });
   }
 
@@ -563,12 +563,12 @@ class SampleUpload extends React.Component {
     $(".new-project-button").toggleClass("active");
     this.setState(
       {
-        disableProjectSelect: !this.state.disableProjectSelect
+        disableProjectSelect: !this.state.disableProjectSelect,
       },
       () => {
         this.initializeSelectTag();
         logAnalyticsEvent("SampleUpload_new-project-input_toggled", {
-          disableProjectSelect: this.state.disableProjectSelect
+          disableProjectSelect: this.state.disableProjectSelect,
         });
       }
     );
@@ -613,14 +613,14 @@ class SampleUpload extends React.Component {
           this.refs.sample_name.value = simplified;
           this.setState({ sampleName: simplified });
           logAnalyticsEvent("SampleUpload_sample-name_changed", {
-            sampleName: simplified
+            sampleName: simplified,
           });
         }
       }
     } else {
       this.setState({ sampleName: sampleField });
       logAnalyticsEvent("SampleUpload_sample-name_changed", {
-        sampleName: sampleField
+        sampleName: sampleField,
       });
     }
   }
@@ -645,7 +645,7 @@ class SampleUpload extends React.Component {
       }
 
       this.setState({
-        localFilesToUpload: newFiles
+        localFilesToUpload: newFiles,
       });
 
       let sampleNameFromFile = null;
@@ -661,19 +661,19 @@ class SampleUpload extends React.Component {
         accepted: accepted.length,
         newFiles: newFiles.length,
         // eslint-disable-next-line no-undef
-        sampleName: this.state.sampleName || sampleNameFromFile
+        sampleName: this.state.sampleName || sampleNameFromFile,
       });
       return;
     }
     logAnalyticsEvent("SampleUpload_files_dropped", {
       pos,
-      accepted: accepted.length
+      accepted: accepted.length,
     });
   };
 
   uploadBoxHandleSuccess = file => {
     this.setState({
-      localFilesDoneUploading: this.state.localFilesDoneUploading.concat(file)
+      localFilesDoneUploading: this.state.localFilesDoneUploading.concat(file),
     });
     if (
       this.state.localFilesToUpload.length ===
@@ -683,7 +683,7 @@ class SampleUpload extends React.Component {
         submitting: false,
         successMessage: "All uploads finished!",
         success: true,
-        invalid: false
+        invalid: false,
       });
 
       // Mark as uploaded
@@ -691,9 +691,9 @@ class SampleUpload extends React.Component {
         .put(`/samples/${this.state.id}.json`, {
           sample: {
             id: this.state.id,
-            status: "uploaded"
+            status: "uploaded",
           },
-          authenticity_token: this.csrf
+          authenticity_token: this.csrf,
         })
         .then(() => {
           window.onbeforeunload = null;
@@ -703,7 +703,7 @@ class SampleUpload extends React.Component {
           this.setState({
             invalid: true,
             submitting: false,
-            errorMessage: joinServerError(error.response.data)
+            errorMessage: joinServerError(error.response.data),
           });
         });
     }
@@ -717,7 +717,7 @@ class SampleUpload extends React.Component {
         `Upload of ${
           file.name
         } failed for some reason. Please delete the created sample and try again or ask us our team for help. ` +
-        err
+        err,
     });
   };
 
@@ -731,7 +731,7 @@ class SampleUpload extends React.Component {
       } else {
         newURLs = [
           createResponse[0].presigned_url,
-          createResponse[1].presigned_url
+          createResponse[1].presigned_url,
         ];
       }
 
@@ -742,7 +742,7 @@ class SampleUpload extends React.Component {
         submitting: true,
         invalid: true,
         errorMessage:
-          "Upload in progress... Please keep this page open until completed..."
+          "Upload in progress... Please keep this page open until completed...",
       });
 
       // Chrome will show a generic message and not this message.
@@ -753,7 +753,7 @@ class SampleUpload extends React.Component {
 
   uploadSampleFromLocal = () => {
     this.setState({
-      submitting: true
+      submitting: true,
     });
 
     createSample(
@@ -771,7 +771,7 @@ class SampleUpload extends React.Component {
     )
       .then(response => {
         this.setState({
-          id: response.id
+          id: response.id,
         });
         startUploadHeartbeat(response.id);
         this.uploadLocalFiles(response.input_files);
@@ -780,7 +780,7 @@ class SampleUpload extends React.Component {
         this.setState({
           invalid: true,
           submitting: false,
-          errorMessage: joinServerError(error)
+          errorMessage: joinServerError(error),
         });
       });
   };
@@ -801,7 +801,7 @@ class SampleUpload extends React.Component {
                 this.handleUpload,
                 "SampleUpload_upload-button_clicked",
                 {
-                  localUploadMode: this.state.localUploadMode
+                  localUploadMode: this.state.localUploadMode,
                 }
               )
         }
@@ -1010,7 +1010,7 @@ class SampleUpload extends React.Component {
                       this.handleUpload,
                       "SampleUpload_upload-form_submitted",
                       {
-                        localUploadMode: this.state.localUploadMode
+                        localUploadMode: this.state.localUploadMode,
                       }
                     )
               }
@@ -1393,13 +1393,13 @@ class SampleUpload extends React.Component {
                     onChange={() =>
                       this.setState(
                         {
-                          consentChecked: !this.state.consentChecked
+                          consentChecked: !this.state.consentChecked,
                         },
                         () =>
                           logAnalyticsEvent(
                             "SampleUpload_consent-checkbox_clicked",
                             {
-                              consentChecked: this.state.consentChecked
+                              consentChecked: this.state.consentChecked,
                             }
                           )
                       )

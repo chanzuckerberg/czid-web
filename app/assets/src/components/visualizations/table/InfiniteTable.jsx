@@ -24,7 +24,7 @@ class InfiniteTable extends React.Component {
     this.rows = [];
     this.loadedRowsMap = [];
     this.state = {
-      rowCount: this.props.rowCount
+      rowCount: this.props.rowCount,
     };
   }
 
@@ -142,7 +142,7 @@ InfiniteTable.defaultProps = {
   minimumBatchSize: 50,
   // should be at least as high as the minimumBatchSize
   rowCount: 50,
-  threshold: 50
+  threshold: 50,
 };
 
 InfiniteTable.propTypes = {
@@ -156,7 +156,7 @@ InfiniteTable.propTypes = {
   onSelectRow: PropTypes.func,
   onSelectAllRows: PropTypes.func,
   rowCount: PropTypes.number,
-  threshold: PropTypes.number
+  threshold: PropTypes.number,
 };
 
 export default InfiniteTable;

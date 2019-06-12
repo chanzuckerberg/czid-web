@@ -12,7 +12,7 @@ import cs from "./view_header.scss";
 const ViewHeader = ({ className, children }) => {
   const [content, controls] = extractChildren(children, [
     Content.CLASS_NAME,
-    Controls.CLASS_NAME
+    Controls.CLASS_NAME,
   ]);
 
   return (
@@ -36,8 +36,8 @@ ViewHeader.propTypes = {
   subTitle: PropTypes.string,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
-  ])
+    PropTypes.node,
+  ]),
 };
 
 export default ViewHeader;

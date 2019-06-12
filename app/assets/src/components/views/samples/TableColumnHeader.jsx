@@ -13,7 +13,7 @@ class TableColumnHeader extends React.Component {
       columnOptions,
       columnMap,
       onColumnOptionSelect,
-      tooltip
+      tooltip,
     } = this.props;
 
     let trigger = (
@@ -31,7 +31,7 @@ class TableColumnHeader extends React.Component {
 
     const options = columnOptions.map(option => ({
       value: option,
-      text: columnMap[option].display_name
+      text: columnMap[option].display_name,
     }));
 
     return (
@@ -53,10 +53,10 @@ TableColumnHeader.propTypes = {
   columnOptions: PropTypes.arrayOf(PropTypes.string),
   columnMap: PropTypes.objectOf(
     PropTypes.shape({
-      display_name: PropTypes.string.isRequired
+      display_name: PropTypes.string.isRequired,
     })
   ),
-  onColumnOptionSelect: PropTypes.func
+  onColumnOptionSelect: PropTypes.func,
 };
 
 export default TableColumnHeader;

@@ -41,7 +41,7 @@ export default class Tree {
       // set node's new distance
       [nodeToMove.distance, previousAncestor.distance] = [
         previousAncestor.distance,
-        nodeToMove.distance
+        nodeToMove.distance,
       ];
 
       previousAncestor.children.push(nodeToMove);

@@ -15,7 +15,7 @@ class ViewHeaderControls extends React.Component {
 
 ViewHeaderControls.propTypes = {
   children: PropTypes.node,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 ViewHeaderControls.CLASS_NAME = "ViewHeaderControls";
