@@ -36,7 +36,7 @@ export default class DiscoverySidebar extends React.Component {
       currentTab,
       loading,
       projectDimensions,
-      projects,
+      projectStats,
       sampleDimensions,
       sampleStats
     } = newProps;
@@ -47,7 +47,7 @@ export default class DiscoverySidebar extends React.Component {
     return {
       stats: {
         numSamples: DiscoverySidebar.formatNumber((sampleStats || {}).count),
-        numProjects: DiscoverySidebar.formatNumber(projects.length),
+        numProjects: DiscoverySidebar.formatNumber((projectStats || {}).count),
         avgTotalReads: DiscoverySidebar.formatNumber(
           (sampleStats || {}).avgTotalReads
         ),
@@ -337,12 +337,13 @@ export default class DiscoverySidebar extends React.Component {
               <span className={cs.rowLabel}>Location</span>
               {this.buildMetadataRows("location")}
             </div>
-            {allowedFeatures.includes("maps") && (
-              <div className={cs.hasBackground}>
-                <span className={cs.rowLabel}>Location v2</span>
-                {this.buildMetadataRows("locationV2")}
-              </div>
-            )}
+            {allowedFeatures &&
+              allowedFeatures.includes("maps") && (
+                <div className={cs.hasBackground}>
+                  <span className={cs.rowLabel}>Location v2</span>
+                  {this.buildMetadataRows("locationV2")}
+                </div>
+              )}
           </Accordion>
         </div>
       </div>
@@ -351,8 +352,6 @@ export default class DiscoverySidebar extends React.Component {
 }
 
 DiscoverySidebar.defaultProps = {
-  projects: [],
-  samples: [],
   defaultNumberOfMetadataRows: 4
 };
 
@@ -364,8 +363,7 @@ DiscoverySidebar.propTypes = {
   loading: PropTypes.bool,
   onFilterClick: PropTypes.func,
   projectDimensions: PropTypes.array,
-  projects: PropTypes.arrayOf(PropTypes.Project),
+  projectStats: PropTypes.object,
   sampleDimensions: PropTypes.array,
-  samples: PropTypes.arrayOf(PropTypes.Sample),
   sampleStats: PropTypes.object
 };
