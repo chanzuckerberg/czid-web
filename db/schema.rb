@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_531_162_647) do
+ActiveRecord::Schema.define(version: 20_190_612_205_949) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -149,7 +149,7 @@ ActiveRecord::Schema.define(version: 20_190_531_162_647) do
     t.string "state_name", limit: 100, default: "", null: false, comment: "State (or equivalent) of this location if available"
     t.string "subdivision_name", limit: 100, default: "", null: false, comment: "Second-level administrative division (e.g. county/district/division/province/etc.) of this location if available"
     t.string "city_name", limit: 100, default: "", null: false, comment: "City (or equivalent) of this location if available"
-    t.integer "osm_id", comment: "OpenStreetMap ID for traceability. May change at any time."
+    t.bigint "osm_id", comment: "OpenStreetMap ID for traceability. May change at any time."
     t.integer "locationiq_id", comment: "Data provider API ID for traceability."
     t.decimal "lat", precision: 10, scale: 6, comment: "The latitude of this location if available"
     t.decimal "lng", precision: 10, scale: 6, comment: "The longitude of this location if available"
