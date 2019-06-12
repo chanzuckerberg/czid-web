@@ -15,17 +15,17 @@ const VIZ_MARGINS = {
   // includes root label on the left of the node
   left: 250,
   // includes leaf nodes labels
-  right: 150
+  right: 150,
 };
 
 const SCALE_POS = {
   top: 48,
-  left: 250
+  left: 250,
 };
 
 const LEGEND_POS = {
   top: 20,
-  left: 16
+  left: 16,
 };
 
 export default class Dendogram {
@@ -53,7 +53,7 @@ export default class Dendogram {
         tooltipContainer: null,
         scaleLabel: null,
         // This is needed for downloading PNG and SVG on solid background
-        svgBackgroundColor: "white"
+        svgBackgroundColor: "white",
       },
       options || {}
     );
@@ -61,14 +61,14 @@ export default class Dendogram {
     // sizes
     this.minTreeSize = {
       width: 600,
-      height: 500
+      height: 500,
     };
 
     this.margins = VIZ_MARGINS;
 
     this.nodeSize = {
       width: 1,
-      height: 25
+      height: 25,
     };
 
     this._highlighted = new Set();
@@ -394,7 +394,7 @@ export default class Dendogram {
         ticks.push({
           id: i + 1,
           y: yMin + i * stepSize,
-          multiplier: i % 2 ? undefined : i * multiplier / 2
+          multiplier: i % 2 ? undefined : i * multiplier / 2,
         });
       }
       return ticks;

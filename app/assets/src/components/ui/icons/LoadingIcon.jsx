@@ -7,7 +7,7 @@ const LoadingIcon = props => {
 };
 
 LoadingIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default LoadingIcon;

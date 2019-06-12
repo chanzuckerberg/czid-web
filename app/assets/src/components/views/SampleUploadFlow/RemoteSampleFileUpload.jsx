@@ -13,17 +13,17 @@ class RemoteSampleFileUpload extends React.Component {
   state = {
     showInfo: false,
     remoteS3Path: "",
-    lastPathChecked: ""
+    lastPathChecked: "",
   };
 
   toggleInfo = () => {
     this.setState(
       {
-        showInfo: !this.state.showInfo
+        showInfo: !this.state.showInfo,
       },
       () => {
         logAnalyticsEvent("RemoteSampleFileUpload_more-info-toggle_clicked", {
-          showInfo: this.state.showInfo
+          showInfo: this.state.showInfo,
         });
       }
     );
@@ -31,35 +31,35 @@ class RemoteSampleFileUpload extends React.Component {
 
   handleRemotePathChange = remoteS3Path => {
     this.setState({
-      remoteS3Path
+      remoteS3Path,
     });
   };
 
   handleConnect = async () => {
     if (!this.props.project) {
       this.setState({
-        error: "Please select a project."
+        error: "Please select a project.",
       });
       return;
     }
 
     this.setState({
       error: "",
-      lastPathChecked: this.state.remoteS3Path
+      lastPathChecked: this.state.remoteS3Path,
     });
 
     try {
       let newSamples = await bulkImportRemoteSamples({
         projectId: this.props.project.id,
         hostGenomeId: "",
-        bulkPath: this.state.remoteS3Path
+        bulkPath: this.state.remoteS3Path,
       });
 
       // Remove any nil files from input_file_attributes.
       // This happens when there is an R2 file without an R1 file.
       newSamples = newSamples.samples.map(sample => ({
         ...sample,
-        input_files_attributes: compact(sample.input_files_attributes)
+        input_files_attributes: compact(sample.input_files_attributes),
       }));
 
       this.props.onChange(newSamples);
@@ -67,21 +67,21 @@ class RemoteSampleFileUpload extends React.Component {
       logAnalyticsEvent("RemoteSampleFileUpload_connect_succeeded", {
         projectId: this.props.project.id,
         bulkPath: this.state.remoteS3Path,
-        newSamples: newSamples.length
+        newSamples: newSamples.length,
       });
     } catch (e) {
       if (e.status.startsWith("No samples imported")) {
         this.setState({
           // TODO (gdingle): we should have an error state for
           // bucket not found as well.
-          error: "No valid samples were found."
+          error: "No valid samples were found.",
         });
       }
 
       logAnalyticsEvent("RemoteSampleFileUpload_connect_failed", {
         projectId: this.props.project.id,
         bulkPath: this.state.remoteS3Path,
-        error: e.status
+        error: e.status,
       });
     }
   };
@@ -149,7 +149,7 @@ class RemoteSampleFileUpload extends React.Component {
 
 RemoteSampleFileUpload.propTypes = {
   project: PropTypes.Project,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
 };
 
 export default RemoteSampleFileUpload;

@@ -7,20 +7,20 @@ import cs from "./pipeline_status_filter.scss";
 const STATUS_OPTIONS = [
   {
     name: "In Progress",
-    class: "uploading"
+    class: "uploading",
   },
   {
     name: "Complete",
-    class: "complete"
+    class: "complete",
   },
   {
     name: "Failed",
-    class: "failed"
+    class: "failed",
   },
   {
     name: "All",
-    class: "all"
-  }
+    class: "all",
+  },
 ];
 
 class PipelineStatusFilter extends React.Component {
@@ -58,7 +58,7 @@ class PipelineStatusFilter extends React.Component {
 
 PipelineStatusFilter.propTypes = {
   className: PropTypes.string,
-  onStatusFilterSelect: PropTypes.func
+  onStatusFilterSelect: PropTypes.func,
 };
 
 export default PipelineStatusFilter;

@@ -19,7 +19,7 @@ const CoverageIcon = props => {
 };
 
 CoverageIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default CoverageIcon;

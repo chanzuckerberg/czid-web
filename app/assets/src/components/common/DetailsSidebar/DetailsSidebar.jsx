@@ -40,5 +40,5 @@ DetailsSidebar.propTypes = {
   mode: PropTypes.string,
   visible: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
-  params: PropTypes.any // the params that are required depends on the mode. See subclasses like SampleDetailsMode for needed params.
+  params: PropTypes.any, // the params that are required depends on the mode. See subclasses like SampleDetailsMode for needed params.
 };

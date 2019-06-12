@@ -11,13 +11,13 @@ export const SAMPLE_FIELDS = [
   {
     name: "created_at",
     label: "Upload Date",
-    parser: DateParser
-  }
+    parser: DateParser,
+  },
 ];
 
 export const SAMPLE_METADATA_FIELDS = [
   "collection_location",
   "collection_date",
   "sample_type",
-  "nucleotide_type"
+  "nucleotide_type",
 ];

@@ -41,7 +41,7 @@ class Notification extends React.Component {
 
 Notification.defaultProps = {
   displayStyle: "elevated",
-  type: "info"
+  type: "info",
 };
 
 Notification.propTypes = {
@@ -49,7 +49,7 @@ Notification.propTypes = {
   children: PropTypes.node,
   displayStyle: PropTypes.oneOf(["flat", "elevated"]),
   onClose: PropTypes.func,
-  type: PropTypes.oneOf(["success", "info", "warn", "error"])
+  type: PropTypes.oneOf(["success", "info", "warn", "error"]),
 };
 
 export default Notification;

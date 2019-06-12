@@ -11,7 +11,7 @@ import cs from "./heatmap_public.scss";
  */
 export default class HeatmapPublic extends Component {
   static propTypes = {
-    className: PropTypes.string
+    className: PropTypes.string,
   };
 
   render() {

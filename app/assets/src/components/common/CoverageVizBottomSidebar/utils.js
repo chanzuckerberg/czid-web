@@ -19,14 +19,14 @@ export const getHistogramTooltipData = memoize(
             // \u2013 is en-dash
             `${Math.round(coverageObj[0] * binSize)}\u2013${Math.round(
               (coverageObj[0] + 1) * binSize
-            )}`
+            )}`,
           ],
           ["Coverage Depth", `${coverageObj[1]}x`],
           ["Coverage Breadth", formatPercent(coverageObj[2])],
           ["Overlapping Contigs", coverageObj[3]],
-          ["Overlapping Reads", coverageObj[4]]
-        ]
-      }
+          ["Overlapping Reads", coverageObj[4]],
+        ],
+      },
     ];
   }
 );
@@ -52,7 +52,7 @@ export const getGenomeVizTooltipData = memoize((accessionData, dataIndex) => {
     counts = [
       ["# Contigs", numContigs],
       ["# Reads", numReads],
-      ["Contig Read Count", hitObj[2]]
+      ["Contig Read Count", hitObj[2]],
     ];
   } else if (numReads > 1) {
     name = "Aggregated Reads";
@@ -77,21 +77,21 @@ export const getGenomeVizTooltipData = memoize((accessionData, dataIndex) => {
         [
           "Reference Alignment Range",
           // \u2013 is en-dash
-          `${Math.round(hitObj[3])}\u2013${Math.round(hitObj[4])}`
+          `${Math.round(hitObj[3])}\u2013${Math.round(hitObj[4])}`,
         ],
         [averagePrefix + "Alignment Length", hitObj[5]],
         [averagePrefix + "Percentage Matched", formatPercent(hitObj[6])],
         [averagePrefix + "# Mismatches", hitObj[7]],
-        [averagePrefix + "# Gaps", hitObj[8]]
-      ]
-    }
+        [averagePrefix + "# Gaps", hitObj[8]],
+      ],
+    },
   ];
 });
 
 export const generateCoverageVizData = (coverageData, coverageBinSize) =>
   coverageData.map(valueArr => ({
     x0: valueArr[0] * coverageBinSize,
-    length: valueArr[1] // Actually the height. This is a d3-histogram naming convention.
+    length: valueArr[1], // Actually the height. This is a d3-histogram naming convention.
   }));
 
 export const generateContigReadVizData = (hitGroups, coverageBinSize) => {
@@ -111,7 +111,7 @@ export const generateContigReadVizData = (hitGroups, coverageBinSize) => {
       return [
         hitObj[9] * coverageBinSize,
         (hitObj[9] + 1) * coverageBinSize,
-        hasContig
+        hasContig,
       ];
     }
 

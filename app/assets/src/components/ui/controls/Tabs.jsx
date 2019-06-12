@@ -10,7 +10,7 @@ class Tabs extends React.Component {
 
     this.state = {
       indicatorLeft: null,
-      indicatorWidth: null
+      indicatorWidth: null,
     };
   }
 
@@ -37,7 +37,7 @@ class Tabs extends React.Component {
     if (tab) {
       this.setState({
         indicatorLeft: tab.offsetLeft,
-        indicatorWidth: tab.offsetWidth
+        indicatorWidth: tab.offsetWidth,
       });
     }
   };
@@ -81,14 +81,14 @@ Tabs.propTypes = {
       PropTypes.string.isRequired,
       PropTypes.shape({
         value: PropTypes.string.isRequired,
-        label: PropTypes.node.isRequired
-      })
+        label: PropTypes.node.isRequired,
+      }),
     ])
   ).isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string,
   className: PropTypes.string,
-  hideBorder: PropTypes.bool
+  hideBorder: PropTypes.bool,
 };
 
 export default Tabs;

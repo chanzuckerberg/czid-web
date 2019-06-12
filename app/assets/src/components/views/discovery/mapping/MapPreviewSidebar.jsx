@@ -18,7 +18,7 @@ export default class MapPreviewSidebar extends React.Component {
     const { initialSelectedSampleIds } = this.props;
 
     this.state = {
-      selectedSampleIds: initialSelectedSampleIds || new Set()
+      selectedSampleIds: initialSelectedSampleIds || new Set(),
     };
 
     this.columns = [
@@ -27,25 +27,25 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         width: 150,
         cellRenderer: cellData => TableRenderers.renderSample(cellData, false),
-        headerClassName: cs.sampleHeader
+        headerClassName: cs.sampleHeader,
       },
       {
         dataKey: "createdAt",
         label: "Uploaded On",
         className: cs.basicCell,
-        cellRenderer: TableRenderers.renderDateWithElapsed
+        cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
         dataKey: "host",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       // If you already have access to Maps, just see Location V2 here.
       {
         dataKey: "collectionLocationV2",
         label: "Location",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "totalReads",
@@ -53,14 +53,14 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumberWithCommas(rowData[dataKey])
+          TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
         dataKey: "nonHostReads",
         label: "Passed Filters",
         flexGrow: 1,
         className: cs.basicCell,
-        cellRenderer: TableRenderers.renderNumberAndPercentage
+        cellRenderer: TableRenderers.renderNumberAndPercentage,
       },
       {
         dataKey: "qcPercent",
@@ -68,7 +68,7 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatPercentage(rowData[dataKey])
+          TableRenderers.formatPercentage(rowData[dataKey]),
       },
       {
         dataKey: "duplicateCompressionRatio",
@@ -76,7 +76,7 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatPercentage(rowData[dataKey])
+          TableRenderers.formatPercentage(rowData[dataKey]),
       },
       {
         dataKey: "erccReads",
@@ -84,24 +84,24 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumberWithCommas(rowData[dataKey])
+          TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
         dataKey: "notes",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "nucleotideType",
         label: "Nucleotide Type",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "sampleType",
         label: "Sample Type",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "subsampledFraction",
@@ -109,7 +109,7 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumber(rowData[dataKey])
+          TableRenderers.formatNumber(rowData[dataKey]),
       },
       {
         dataKey: "totalRuntime",
@@ -117,8 +117,8 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatDuration(rowData[dataKey])
-      }
+          TableRenderers.formatDuration(rowData[dataKey]),
+      },
     ];
   }
 
@@ -140,7 +140,7 @@ export default class MapPreviewSidebar extends React.Component {
     this.setSelectedSampleIds(newSelected);
 
     logAnalyticsEvent("MapPreviewSidebar_row_selected", {
-      selectedSampleIds: newSelected.length
+      selectedSampleIds: newSelected.length,
     });
   };
 
@@ -150,7 +150,7 @@ export default class MapPreviewSidebar extends React.Component {
     onSampleClicked && onSampleClicked({ sample, currentEvent: event });
     logAnalyticsEvent("MapPreviewSidebar_row_clicked", {
       sampleId: sample.id,
-      sampleName: sample.name
+      sampleName: sample.name,
     });
   };
 
@@ -187,7 +187,7 @@ export default class MapPreviewSidebar extends React.Component {
     return [
       {
         label: "Summary",
-        value: "Summary"
+        value: "Summary",
       },
       {
         label: (
@@ -198,8 +198,8 @@ export default class MapPreviewSidebar extends React.Component {
             )}
           </div>
         ),
-        value: "Samples"
-      }
+        value: "Samples",
+      },
     ];
   };
 
@@ -255,7 +255,7 @@ export default class MapPreviewSidebar extends React.Component {
       projectDimensions,
       projectStats,
       sampleDimensions,
-      sampleStats
+      sampleStats,
     } = this.props;
 
     return (
@@ -299,7 +299,7 @@ export default class MapPreviewSidebar extends React.Component {
 MapPreviewSidebar.defaultProps = {
   activeColumns: ["sample"],
   protectedColumns: ["sample"],
-  currentTab: "Summary"
+  currentTab: "Summary",
 };
 
 MapPreviewSidebar.propTypes = {
@@ -319,5 +319,5 @@ MapPreviewSidebar.propTypes = {
   sampleDimensions: PropTypes.array,
   samples: PropTypes.array,
   sampleStats: PropTypes.object,
-  selectableIds: PropTypes.array.isRequired
+  selectableIds: PropTypes.array.isRequired,
 };

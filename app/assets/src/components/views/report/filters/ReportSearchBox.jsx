@@ -7,7 +7,7 @@ const ReportSearchBox = ({
   searchKeysInSample,
   searchKey,
   onSelect,
-  onChange
+  onChange,
 }) => {
   return (
     <li className="search-box genus-autocomplete-container">
@@ -27,7 +27,7 @@ const ReportSearchBox = ({
               backgroundColor: highlighted ? "#eee" : "transparent",
               fontFamily: "'Helvetica Neue', Arial, Helvetica, sans-serif",
               fontSize: "1rem",
-              overflow: "hidden"
+              overflow: "hidden",
             }}
           >
             {item[0]}
@@ -47,7 +47,7 @@ ReportSearchBox.propTypes = {
   searchKeysInSample: PropTypes.arrayOf(PropTypes.array).isRequired,
   searchKey: PropTypes.string.isRequired,
   onSelect: PropTypes.func.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
 };
 
 export default ReportSearchBox;

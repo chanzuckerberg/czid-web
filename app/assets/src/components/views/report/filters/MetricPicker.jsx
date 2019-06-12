@@ -21,9 +21,9 @@ MetricPicker.propTypes = {
   options: PropTypes.arrayOf(
     PropTypes.shape({
       text: PropTypes.string,
-      value: PropTypes.string
+      value: PropTypes.string,
     })
-  )
+  ),
 };
 
 export default MetricPicker;

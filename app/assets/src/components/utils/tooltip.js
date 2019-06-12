@@ -11,12 +11,12 @@ export const getTooltipStyle = (location, params = {}) => {
     const right = window.innerWidth - location.left;
     return {
       right: right + buffer,
-      top: location.top + topBufferSign * buffer
+      top: location.top + topBufferSign * buffer,
     };
   } else {
     return {
       left: location.left + buffer,
-      top: location.top + topBufferSign * buffer
+      top: location.top + topBufferSign * buffer,
     };
   }
 };

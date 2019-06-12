@@ -14,7 +14,7 @@ Icon.propTypes = forbidExtraProps({
   name: PropTypes.string,
   size: PropTypes.string,
   className: PropTypes.string,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
 });
 
 export default Icon;

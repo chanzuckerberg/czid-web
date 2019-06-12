@@ -15,7 +15,7 @@ export const getSampleTableData = sample => {
   const {
     derived_sample_output: derivedOutput,
     db_sample: dbSample,
-    metadata
+    metadata,
   } = sample;
 
   const data = {
@@ -42,7 +42,7 @@ export const getSampleTableData = sample => {
     nucleotide_type: get("nucleotide_type", metadata),
     collection_location: get("collection_location", metadata),
     host_genome: get("host_genome_name", dbSample),
-    notes: get("sample_notes", dbSample)
+    notes: get("sample_notes", dbSample),
   };
 
   return data;

@@ -5,7 +5,7 @@ import { parseCSVBlob } from "~/components/utils/csv";
 
 class CSVUpload extends React.Component {
   state = {
-    file: null
+    file: null,
   };
 
   onChange = accepted => {
@@ -16,7 +16,7 @@ class CSVUpload extends React.Component {
     };
     fileReader.readAsText(accepted[0]);
     this.setState({
-      file: accepted[0]
+      file: accepted[0],
     });
   };
 
@@ -37,7 +37,7 @@ class CSVUpload extends React.Component {
 CSVUpload.propTypes = {
   className: PropTypes.string,
   title: PropTypes.string,
-  onCSV: PropTypes.func.isRequired
+  onCSV: PropTypes.func.isRequired,
 };
 
 export default CSVUpload;

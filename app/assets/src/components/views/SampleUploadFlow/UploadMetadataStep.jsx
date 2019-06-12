@@ -17,12 +17,12 @@ class UploadMetadataStep extends React.Component {
     continueDisabled: true,
     metadata: null,
     issues: null,
-    wasManual: false
+    wasManual: false,
   };
 
   setShowInstructions = showInstructions => {
     this.setState({
-      showInstructions
+      showInstructions,
     });
   };
 
@@ -30,13 +30,13 @@ class UploadMetadataStep extends React.Component {
     this.setState({
       metadata,
       issues,
-      wasManual
+      wasManual,
     });
 
     const metadataValid = metadata && !(issues && issues.errors.length > 0);
 
     this.setState({
-      continueDisabled: !metadataValid
+      continueDisabled: !metadataValid,
     });
   };
 
@@ -45,7 +45,7 @@ class UploadMetadataStep extends React.Component {
     let result = null;
     if (this.state.wasManual) {
       this.setState({
-        issues: null
+        issues: null,
       });
 
       const metadata = this.state.metadata;
@@ -56,19 +56,19 @@ class UploadMetadataStep extends React.Component {
       );
 
       this.setState({
-        issues: result.issues
+        issues: result.issues,
       });
 
       if (metadata && !(result.issues && result.issues.errors.length > 0)) {
         this.props.onUploadMetadata({
           metadata,
-          issues: result.issues
+          issues: result.issues,
         });
       }
     } else {
       this.props.onUploadMetadata({
         metadata: this.state.metadata,
-        issues: this.state.issues
+        issues: this.state.issues,
       });
     }
     logAnalyticsEvent("UploadMetadataStep_continue-button_clicked", {
@@ -77,7 +77,7 @@ class UploadMetadataStep extends React.Component {
       warnings: (result || this.state).issues.warnings.length,
       samples: this.props.samples.length,
       projectId: this.props.project.id,
-      projectName: this.props.project.name
+      projectName: this.props.project.name,
     });
   };
 
@@ -128,7 +128,7 @@ class UploadMetadataStep extends React.Component {
                     "UploadMetadataStep_cancel-button_clicked",
                     {
                       projectId: this.props.project.id,
-                      projectName: this.props.project.name
+                      projectName: this.props.project.name,
                     }
                   )
                 }
@@ -146,17 +146,17 @@ UploadMetadataStep.propTypes = {
   samples: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string,
-      host_genome_id: PropTypes.number
+      host_genome_id: PropTypes.number,
     })
   ),
   project: PropTypes.shape({
     id: PropTypes.number,
-    name: PropTypes.string
+    name: PropTypes.string,
   }),
   visible: PropTypes.bool,
   // Immediately called when the user changes anything, even before validation has returned.
   // Can be used to disable the header navigation.
-  onDirty: PropTypes.func.isRequired
+  onDirty: PropTypes.func.isRequired,
 };
 
 export default UploadMetadataStep;

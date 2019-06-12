@@ -9,14 +9,14 @@ import {
   values,
   omitBy,
   mapValues,
-  isEmpty
+  isEmpty,
 } from "lodash/fp";
 import cx from "classnames";
 
 import {
   Dropdown,
   MultipleNestedDropdown,
-  ThresholdFilterDropdown
+  ThresholdFilterDropdown,
 } from "~ui/controls/dropdowns";
 import { Divider } from "~/components/layout";
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -35,7 +35,7 @@ export default class SamplesHeatmapControls extends React.Component {
 
     this.props.onSelectedOptionsChange({ species: taxonLevel });
     logAnalyticsEvent("SamplesHeatmapControls_taxon-level-select_changed", {
-      taxonLevel
+      taxonLevel,
     });
   };
 
@@ -57,7 +57,7 @@ export default class SamplesHeatmapControls extends React.Component {
     this.props.onSelectedOptionsChange({ categories, subcategories });
     logAnalyticsEvent("SamplesHeatmapControls_category-filter_changed", {
       categories: categories.length,
-      subcategories: subcategories.length
+      subcategories: subcategories.length,
     });
   };
 
@@ -95,7 +95,7 @@ export default class SamplesHeatmapControls extends React.Component {
 
     this.props.onSelectedOptionsChange({ metric });
     logAnalyticsEvent("SamplesHeatmapControls_metric-select_changed", {
-      metric
+      metric,
     });
   };
 
@@ -120,14 +120,14 @@ export default class SamplesHeatmapControls extends React.Component {
 
     this.props.onSelectedOptionsChange({ background });
     logAnalyticsEvent("SamplesHeatmapControls_background-select_changed", {
-      background
+      background,
     });
   };
 
   renderBackgroundSelect() {
     let options = this.props.options.backgrounds.map(background => ({
       text: background.name,
-      value: background.value
+      value: background.value,
     }));
 
     return (
@@ -152,7 +152,7 @@ export default class SamplesHeatmapControls extends React.Component {
     logAnalyticsEvent(
       "SamplesHeatmapControls_threshold-filter-select_applied",
       {
-        filters: filters.length
+        filters: filters.length,
       }
     );
   };
@@ -175,7 +175,7 @@ export default class SamplesHeatmapControls extends React.Component {
 
     this.props.onSelectedOptionsChange({ readSpecificity: specificity });
     logAnalyticsEvent("SamplesHeatmapControls_specificity-filter_changed", {
-      readSpecificity: specificity
+      readSpecificity: specificity,
     });
   };
 
@@ -200,14 +200,14 @@ export default class SamplesHeatmapControls extends React.Component {
 
     this.props.onSelectedOptionsChange({ dataScaleIdx: scaleIdx });
     logAnalyticsEvent("SamplesHeatmapControls_data-scale-select_changed", {
-      dataScaleIdx: scaleIdx
+      dataScaleIdx: scaleIdx,
     });
   };
 
   renderScaleSelect() {
     let options = this.props.options.scales.map((scale, index) => ({
       text: scale[0],
-      value: index
+      value: index,
     }));
 
     return (
@@ -228,7 +228,7 @@ export default class SamplesHeatmapControls extends React.Component {
     logAnalyticsEvent(
       "SamplesHeatmapControls_taxons-per-sample-slider_changed",
       {
-        taxonsPerSample: newValue
+        taxonsPerSample: newValue,
       }
     );
   };
@@ -305,7 +305,7 @@ export default class SamplesHeatmapControls extends React.Component {
                 {
                   value: threshold.value,
                   operator: threshold.operator,
-                  metric: threshold.metric
+                  metric: threshold.metric,
                 }
               );
             }}
@@ -327,7 +327,7 @@ export default class SamplesHeatmapControls extends React.Component {
                 logAnalyticsEvent(
                   "SamplesHeatmapControl_categories-filter_removed",
                   {
-                    category
+                    category,
                   }
                 );
               }}
@@ -351,7 +351,7 @@ export default class SamplesHeatmapControls extends React.Component {
                 logAnalyticsEvent(
                   "SamplesHeatmapControl_categories-filter_removed",
                   {
-                    subcat
+                    subcat,
                   }
                 );
               }}
@@ -395,7 +395,7 @@ SamplesHeatmapControls.propTypes = {
     metrics: PropTypes.arrayOf(
       PropTypes.shape({
         text: PropTypes.string,
-        value: PropTypes.string
+        value: PropTypes.string,
       })
     ),
     categories: PropTypes.arrayOf(PropTypes.string),
@@ -403,19 +403,19 @@ SamplesHeatmapControls.propTypes = {
     backgrounds: PropTypes.arrayOf(
       PropTypes.shape({
         name: PropTypes.string,
-        value: PropTypes.number
+        value: PropTypes.number,
       })
     ),
     taxonLevels: PropTypes.arrayOf(
       PropTypes.shape({
         text: PropTypes.string,
-        value: PropTypes.number
+        value: PropTypes.number,
       })
     ),
     specificityOptions: PropTypes.arrayOf(
       PropTypes.shape({
         text: PropTypes.string,
-        value: PropTypes.number
+        value: PropTypes.number,
       })
     ),
     thresholdFilters: PropTypes.shape({
@@ -423,12 +423,12 @@ SamplesHeatmapControls.propTypes = {
       targets: PropTypes.arrayOf(
         PropTypes.shape({
           text: PropTypes.string,
-          value: PropTypes.string
+          value: PropTypes.string,
         })
-      )
+      ),
     }),
     scales: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)),
-    taxonsPerSample: PropTypes.objectOf(PropTypes.number)
+    taxonsPerSample: PropTypes.objectOf(PropTypes.number),
   }),
   selectedOptions: PropTypes.shape({
     species: PropTypes.number,
@@ -440,16 +440,16 @@ SamplesHeatmapControls.propTypes = {
       PropTypes.shape({
         metric: PropTypes.string,
         value: PropTypes.string,
-        operator: PropTypes.string
+        operator: PropTypes.string,
       })
     ),
     readSpecificity: PropTypes.number,
     dataScaleIdx: PropTypes.number,
-    taxonsPerSample: PropTypes.number
+    taxonsPerSample: PropTypes.number,
   }),
   onSelectedOptionsChange: PropTypes.func.isRequired,
   loading: PropTypes.bool,
   data: PropTypes.objectOf(
     PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number))
-  )
+  ),
 };

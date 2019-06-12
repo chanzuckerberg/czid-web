@@ -97,7 +97,7 @@ const PigIcon = props => {
 };
 
 PigIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default PigIcon;

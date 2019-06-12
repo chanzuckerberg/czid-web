@@ -14,7 +14,7 @@ class SearchBoxList extends React.Component {
 
     this.state = {
       filteredOptions: this.sortedOptions,
-      selected
+      selected,
     };
   }
 
@@ -34,7 +34,7 @@ class SearchBoxList extends React.Component {
     this.setState({
       filteredOptions: this.sortedOptions.filter(option =>
         option.label.toLowerCase().includes(filter)
-      )
+      ),
     });
   };
 
@@ -76,7 +76,7 @@ class SearchBoxList extends React.Component {
           {this.state.filteredOptions.map(option => (
             <div
               className={cx(cs.listElement, {
-                active: this.state.selected.has(option.value)
+                active: this.state.selected.has(option.value),
               })}
               key={`option-${option.value}`}
               onClick={() => this.handleOptionClick(option.value)}
@@ -96,17 +96,17 @@ class SearchBoxList extends React.Component {
 }
 
 SearchBoxList.defaultProps = {
-  selected: []
+  selected: [],
 };
 
 SearchBoxList.propTypes = {
   options: PropTypes.array,
   selected: PropTypes.oneOfType([
     PropTypes.instanceOf(Set), // for sets
-    PropTypes.array
+    PropTypes.array,
   ]),
   onChange: PropTypes.func,
-  title: PropTypes.string
+  title: PropTypes.string,
 };
 
 export default SearchBoxList;

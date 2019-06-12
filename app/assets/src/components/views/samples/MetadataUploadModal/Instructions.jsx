@@ -67,7 +67,7 @@ class UploadInstructions extends React.Component {
 UploadInstructions.propTypes = {
   onClose: PropTypes.func.isRequired,
   standalone: PropTypes.bool,
-  size: PropTypes.oneOf(["small"])
+  size: PropTypes.oneOf(["small"]),
 };
 
 export default UploadInstructions;

@@ -21,7 +21,7 @@ export default class TaxonDetailsMode extends React.Component {
     collapseTaxonDescription: true,
     collapseParentDescription: true,
     taxonDescriptionTall: false,
-    parentDescriptionTall: false
+    parentDescriptionTall: false,
   };
 
   componentDidMount() {
@@ -47,7 +47,7 @@ export default class TaxonDetailsMode extends React.Component {
       !this.state.taxonDescriptionTall
     ) {
       this.setState({
-        taxonDescriptionTall: true
+        taxonDescriptionTall: true,
       });
     }
 
@@ -57,7 +57,7 @@ export default class TaxonDetailsMode extends React.Component {
       !this.state.parentDescriptionTall
     ) {
       this.setState({
-        parentDescriptionTall: true
+        parentDescriptionTall: true,
       });
     }
   }
@@ -73,13 +73,13 @@ export default class TaxonDetailsMode extends React.Component {
       collapseTaxonDescription: true,
       collapseParentDescription: true,
       taxonDescriptionTall: false,
-      parentDescriptionTall: false
+      parentDescriptionTall: false,
     });
 
     await Promise.all([this.loadTaxonInfo(), this.loadBackgroundInfo()]);
 
     this.setState({
-      loading: false
+      loading: false,
     });
   };
 
@@ -97,14 +97,14 @@ export default class TaxonDetailsMode extends React.Component {
         if (taxonInfo) {
           this.setState({
             taxonDescription: response[this.props.taxonId].summary || "",
-            wikiUrl: response[this.props.taxonId].wiki_url || ""
+            wikiUrl: response[this.props.taxonId].wiki_url || "",
           });
         }
 
         if (parentTaxonInfo) {
           this.setState({
             taxonParentName: response[this.props.parentTaxonId].title,
-            taxonParentDescription: response[this.props.parentTaxonId].summary
+            taxonParentDescription: response[this.props.parentTaxonId].summary,
           });
         }
       })
@@ -137,7 +137,7 @@ export default class TaxonDetailsMode extends React.Component {
           let rpmSeries = [data.NT.rpm_list, data.NR.rpm_list];
           this.setState({
             histogramRpmSeries: rpmSeries,
-            showHistogram: true
+            showHistogram: true,
           });
         }
       })
@@ -150,13 +150,13 @@ export default class TaxonDetailsMode extends React.Component {
 
   expandTaxonDescription = () => {
     this.setState({
-      collapseTaxonDescription: false
+      collapseTaxonDescription: false,
     });
   };
 
   expandParentDescription = () => {
     this.setState({
-      collapseParentDescription: false
+      collapseParentDescription: false,
     });
   };
 
@@ -173,10 +173,10 @@ export default class TaxonDetailsMode extends React.Component {
             name: "sample",
             values: [
               this.props.taxonValues.NT.rpm,
-              this.props.taxonValues.NR.rpm
-            ]
-          }
-        ]
+              this.props.taxonValues.NR.rpm,
+            ],
+          },
+        ],
       }
     );
     this.histogram.update();
@@ -212,7 +212,7 @@ export default class TaxonDetailsMode extends React.Component {
         url,
         taxonId: this.props.taxonId,
         taxonName: this.props.taxonName,
-        parentTaxonId: this.props.parentTaxonId
+        parentTaxonId: this.props.parentTaxonId,
       });
     }
   }
@@ -246,7 +246,7 @@ export default class TaxonDetailsMode extends React.Component {
                     {
                       taxonId: this.props.taxonId,
                       taxonName: this.props.taxonName,
-                      parentTaxonId: this.props.parentTaxonId
+                      parentTaxonId: this.props.parentTaxonId,
                     }
                   )}
                 >
@@ -283,7 +283,7 @@ export default class TaxonDetailsMode extends React.Component {
                     {
                       taxonId: this.props.taxonId,
                       taxonName: this.props.taxonName,
-                      parentTaxonId: this.props.parentTaxonId
+                      parentTaxonId: this.props.parentTaxonId,
                     }
                   )}
                 >
@@ -351,5 +351,5 @@ TaxonDetailsMode.propTypes = {
   taxonName: PropTypes.string.isRequired,
   parentTaxonId: PropTypes.number,
   taxonValues: PropTypes.object,
-  background: PropTypes.object
+  background: PropTypes.object,
 };

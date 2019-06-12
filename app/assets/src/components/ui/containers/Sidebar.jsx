@@ -28,11 +28,11 @@ Sidebar.propTypes = forbidExtraProps({
   visible: PropTypes.bool,
   children: PropTypes.node,
   className: PropTypes.string,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
 });
 
 Sidebar.defaultProps = {
-  direction: "right"
+  direction: "right",
 };
 
 export default Sidebar;

@@ -26,36 +26,36 @@ class ProjectsView extends React.Component {
               {
                 nameRenderer: this.nameRenderer,
                 detailsRenderer: this.detailsRenderer,
-                visibilityIconRenderer: this.visibilityIconRenderer
+                visibilityIconRenderer: this.visibilityIconRenderer,
               }
             )
           ),
         headerClassName: cs.projectHeader,
-        sortFunction: p => (p.name || "").toLowerCase()
+        sortFunction: p => (p.name || "").toLowerCase(),
       },
       {
         dataKey: "created_at",
         label: "Created On",
         width: 120,
-        cellRenderer: TableRenderers.renderDateWithElapsed
+        cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
         dataKey: "hosts",
         width: 200,
         disableSort: true,
-        cellRenderer: TableRenderers.renderList
+        cellRenderer: TableRenderers.renderList,
       },
       {
         dataKey: "tissues",
         width: 200,
         disableSort: true,
-        cellRenderer: TableRenderers.renderList
+        cellRenderer: TableRenderers.renderList,
       },
       {
         dataKey: "number_of_samples",
         width: 140,
-        label: "No. of Samples"
-      }
+        label: "No. of Samples",
+      },
     ];
   }
 
@@ -85,7 +85,7 @@ class ProjectsView extends React.Component {
     onProjectSelected && onProjectSelected({ project });
     logAnalyticsEvent("ProjectsView_row_clicked", {
       projectId: project.id,
-      projectName: project.name
+      projectName: project.name,
     });
   };
 
@@ -97,7 +97,7 @@ class ProjectsView extends React.Component {
           project: pick(
             ["name", "description", "owner", "public_access"],
             project
-          )
+          ),
         },
         pick(
           ["id", "created_at", "hosts", "tissues", "number_of_samples"],
@@ -117,12 +117,12 @@ class ProjectsView extends React.Component {
 }
 
 ProjectsView.defaultProps = {
-  projects: []
+  projects: [],
 };
 
 ProjectsView.propTypes = {
   projects: PropTypes.array,
-  onProjectSelected: PropTypes.func
+  onProjectSelected: PropTypes.func,
 };
 
 export default ProjectsView;

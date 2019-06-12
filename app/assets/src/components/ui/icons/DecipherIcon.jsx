@@ -32,7 +32,7 @@ const DecipherIcon = props => {
 };
 
 DecipherIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default DecipherIcon;

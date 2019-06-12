@@ -39,11 +39,11 @@ CircleMarker.propTypes = {
   size: PropTypes.number,
   onMouseEnter: PropTypes.func,
   onMouseLeave: PropTypes.func,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
 };
 
 CircleMarker.defaultProps = {
-  size: 20
+  size: 20,
 };
 
 export default CircleMarker;

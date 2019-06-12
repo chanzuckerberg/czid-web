@@ -5,7 +5,7 @@ import Dropdown from "../../../ui/controls/dropdowns/Dropdown";
 
 const NAME_TYPE_OPTIONS = [
   { text: "Scientific", value: "Scientific name" },
-  { text: "Common", value: "Common name" }
+  { text: "Common", value: "Common name" },
 ];
 
 const NameTypeFilter = ({ value, onChange }) => {
@@ -22,7 +22,7 @@ const NameTypeFilter = ({ value, onChange }) => {
 
 NameTypeFilter.propTypes = {
   value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
 };
 
 export default NameTypeFilter;
