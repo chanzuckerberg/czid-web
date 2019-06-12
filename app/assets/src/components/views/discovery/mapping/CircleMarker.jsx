@@ -6,7 +6,7 @@ import cs from "./circle_marker.scss";
 
 class CircleMarker extends React.Component {
   render() {
-    const { size, onMouseEnter, onMouseLeave, onClick } = this.props;
+    const { active, size, onMouseEnter, onMouseLeave, onClick } = this.props;
 
     return (
       <svg
@@ -16,7 +16,11 @@ class CircleMarker extends React.Component {
         style={{ transform: `translate(${-size / 2}px, ${-size / 2}px)` }}
       >
         <circle
-          className={cx(cs.circle, onMouseEnter && cs.hoverable)}
+          className={cx(
+            cs.circle,
+            onMouseEnter && cs.hoverable,
+            active && cs.active
+          )}
           // Circle in the center of the viewBox
           cx="50%"
           cy="50%"
@@ -31,6 +35,7 @@ class CircleMarker extends React.Component {
 }
 
 CircleMarker.propTypes = {
+  active: PropTypes.bool,
   size: PropTypes.number,
   onMouseEnter: PropTypes.func,
   onMouseLeave: PropTypes.func,
