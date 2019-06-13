@@ -4,10 +4,12 @@ import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
+import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import MapToggle from "~/components/views/discovery/mapping/MapToggle";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
+
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
 
@@ -93,18 +95,25 @@ class ProjectsView extends React.Component {
   renderDisplaySwitcher = () => {
     const { currentDisplay, onDisplaySwitch } = this.props;
     return (
-      <MapToggle
-        currentDisplay={currentDisplay}
-        onDisplaySwitch={display => {
-          onDisplaySwitch(display);
-          logAnalyticsEvent(`ProjectsView_${display}-switch_clicked`);
-        }}
-      />
+      <div className={cs.displaySwitcher}>
+        <MapToggle
+          currentDisplay={currentDisplay}
+          onDisplaySwitch={display => {
+            onDisplaySwitch(display);
+            logAnalyticsEvent(`ProjectsView_${display}-switch_clicked`);
+          }}
+        />
+      </div>
     );
   };
 
   render() {
-    const { allowedFeatures, projects } = this.props;
+    const {
+      allowedFeatures,
+      currentDisplay,
+      mapTilerKey,
+      projects,
+    } = this.props;
     let data = projects.map(project => {
       return merge(
         {
@@ -125,11 +134,23 @@ class ProjectsView extends React.Component {
         {allowedFeatures &&
           allowedFeatures.includes("maps") &&
           this.renderDisplaySwitcher()}
-        <BaseDiscoveryView
-          columns={this.columns}
-          data={data}
-          handleRowClick={this.handleRowClick}
-        />
+        {currentDisplay === "table" ? (
+          <BaseDiscoveryView
+            columns={this.columns}
+            data={data}
+            handleRowClick={this.handleRowClick}
+          />
+        ) : (
+          <div className={cs.map}>
+            <DiscoveryMap
+              // mapLocationData={mapLocationData}
+              mapTilerKey={mapTilerKey}
+              // onMarkerClick={onMapMarkerClick}
+              // onTooltipTitleClick={onMapTooltipTitleClick}
+              // previewedLocationId={mapPreviewedLocationId}
+            />
+          </div>
+        )}
       </div>
     );
   }
@@ -143,6 +164,7 @@ ProjectsView.defaultProps = {
 ProjectsView.propTypes = {
   allowedFeatures: PropTypes.array,
   currentDisplay: PropTypes.string.isRequired,
+  mapTilerKey: PropTypes.string,
   onDisplaySwitch: PropTypes.func,
   onProjectSelected: PropTypes.func,
   projects: PropTypes.array,

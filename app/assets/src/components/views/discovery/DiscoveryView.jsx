@@ -957,6 +957,7 @@ class DiscoveryView extends React.Component {
                     <ProjectsView
                       allowedFeatures={allowedFeatures}
                       currentDisplay={currentDisplay}
+                      mapTilerKey={mapTilerKey}
                       onDisplaySwitch={this.handleDisplaySwitch}
                       onProjectSelected={this.handleProjectSelected}
                       projects={projects}

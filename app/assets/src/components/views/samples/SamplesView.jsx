@@ -16,9 +16,9 @@ import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import SaveIcon from "~ui/icons/SaveIcon";
 import Label from "~ui/labels/Label";
-import csTableRenderer from "../discovery/table_renderers.scss";
 
 import cs from "./samples_view.scss";
+import csTableRenderer from "../discovery/table_renderers.scss";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -373,13 +373,15 @@ class SamplesView extends React.Component {
   renderDisplaySwitcher = () => {
     const { currentDisplay, onDisplaySwitch } = this.props;
     return (
-      <MapToggle
-        currentDisplay={currentDisplay}
-        onDisplaySwitch={display => {
-          onDisplaySwitch(display);
-          logAnalyticsEvent(`SamplesView_${display}-switch_clicked`);
-        }}
-      />
+      <div className={cs.displaySwitcher}>
+        <MapToggle
+          currentDisplay={currentDisplay}
+          onDisplaySwitch={display => {
+            onDisplaySwitch(display);
+            logAnalyticsEvent(`SamplesView_${display}-switch_clicked`);
+          }}
+        />
+      </div>
     );
   };
 
