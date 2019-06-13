@@ -1,8 +1,8 @@
-import { find, merge, pick } from "lodash/fp";
-import PropTypes from "prop-types";
 import React from "react";
+import { find, merge, pick } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
+import PropTypes from "~/components/utils/propTypes";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import MapToggle from "~/components/views/discovery/mapping/MapToggle";
@@ -111,6 +111,8 @@ class ProjectsView extends React.Component {
     const {
       allowedFeatures,
       currentDisplay,
+      currentTab,
+      mapLocationData,
       mapTilerKey,
       projects,
     } = this.props;
@@ -143,7 +145,8 @@ class ProjectsView extends React.Component {
         ) : (
           <div className={cs.map}>
             <DiscoveryMap
-              // mapLocationData={mapLocationData}
+              currentTab={currentTab}
+              mapLocationData={mapLocationData}
               mapTilerKey={mapTilerKey}
               // onMarkerClick={onMapMarkerClick}
               // onTooltipTitleClick={onMapTooltipTitleClick}
@@ -164,6 +167,8 @@ ProjectsView.defaultProps = {
 ProjectsView.propTypes = {
   allowedFeatures: PropTypes.array,
   currentDisplay: PropTypes.string.isRequired,
+  currentTab: PropTypes.string.isRequired,
+  mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapTilerKey: PropTypes.string,
   onDisplaySwitch: PropTypes.func,
   onProjectSelected: PropTypes.func,
