@@ -9,7 +9,10 @@ export default class AMRHeatmapVis extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      viewLevel: "alleles",
+      metric: "coverage"
+    };
 
     this.heatmap = null;
   }
@@ -19,46 +22,24 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   componentDidUpdate() {
-    let [geneValues, alleleValues] = this.computeHeatmapValues(
-      this.state.sampleLabels,
-      this.state.geneData,
-      this.state.sortedLabels.genes,
-      this.state.sortedLabels.alleles
-    );
-    let allValues = {
-      genes: geneValues,
-      alleles: alleleValues
-    };
-    let rows = this.createHeatmapLabels(this.state.viewLevel);
-    let columns = this.state.sampleLabels;
-    let values = allValues[this.state.viewLevel][this.state.metric];
+    let rows = this.createHeatmapLabels();
+    let columns = this.state.samples;
+    let values = this.computeHeatmapValues(rows);
     let options = {};
+    console.log(this.state, rows, columns, values, options);
     this.renderHeatmap(rows, columns, values, options);
-    console.log(this.state);
   }
 
   async requestAMRCountsData(sampleIds) {
     let rawResponse = await Promise.resolve(getAMRCounts(sampleIds));
-    let [geneData, sampleLabels] = this.extractData(rawResponse);
-    let [geneLabels, alleleLabels] = this.createGeneLabels(geneData);
-    let [sortedGeneLabels, sortedAlleleLabels] = this.sortGeneLabels(
-      geneLabels,
-      alleleLabels,
-      "alphabetical"
-    );
+    let [geneData, samples] = this.extractData(rawResponse);
+    let alleleToGeneMap = this.mapAllelesToGenes(geneData);
     this.setState((state, props) => {
       return {
         rawData: rawResponse,
         geneData: geneData,
-        sampleLabels: sampleLabels,
-        geneLabels: geneLabels,
-        alleleLabels: alleleLabels,
-        sortedLabels: {
-          genes: sortedGeneLabels,
-          alleles: sortedAlleleLabels
-        },
-        viewLevel: "alleles",
-        metric: "coverage"
+        samples: samples,
+        alleleToGeneMap: alleleToGeneMap
       };
     });
   }
@@ -66,7 +47,7 @@ export default class AMRHeatmapVis extends React.Component {
   extractData(rawData) {
     let genes = {};
     let sampleLabels = [];
-    rawData.forEach(sample => {
+    rawData.filter(rawSample => rawSample.error === "").forEach(sample => {
       let sampleName = sample.sample_name;
       sampleLabels.push({ label: `${sample.sample_name}` });
       sample.amr_counts.forEach(amrCount => {
@@ -113,80 +94,67 @@ export default class AMRHeatmapVis extends React.Component {
     return [genes, sampleLabels];
   }
 
-  createGeneLabels(geneData) {
-    let geneLabels = [];
-    let alleleLabels = {};
-    Object.entries(geneData).forEach(geneEntry => {
-      let [gene, entry] = geneEntry;
-      geneLabels.push({ label: `${gene}` });
-      alleleLabels[gene] = Object.keys(entry.alleles);
+  mapAllelesToGenes(geneData) {
+    let alleleToGeneMap = {};
+    Object.keys(geneData).forEach(gene => {
+      let alleles = geneData[gene].alleles;
+      Object.keys(alleles).forEach(allele => {
+        alleleToGeneMap[allele] = gene;
+      });
     });
-    return [geneLabels, alleleLabels];
+    return alleleToGeneMap;
   }
 
-  // sorts the genes, then sorts the alleles according to the gene sorting.
-  sortGeneLabels(genes, alleles, sorting) {
-    let sortedGeneLabels = genes;
-    switch (sorting) {
-      case "alphabetical":
-        sortedGeneLabels.sort((first, second) => {
-          let firstLabel = first.label.toUpperCase();
-          let secondLabel = second.label.toUpperCase();
-          if (firstLabel < secondLabel) {
-            return -1;
-          } else if (firstLabel > secondLabel) {
-            return 1;
-          }
-          return 0;
-        });
-        break;
-      default:
-        break;
-    }
-    let sortedAlleleLabels = [];
-    sortedGeneLabels.forEach(gene => {
-      let labeledAlleles = alleles[gene.label].map(allele => {
-        return {
-          label: { label: `${allele}` },
-          gene: gene.label
-        };
+  //*** Following functions must be called after the component has updated ***
+  //*** (i.e. after the component has requested AMR data and updated state) ***
+
+  createGeneLabels() {
+    let geneData = this.state.geneData;
+    let geneLabels = [];
+    Object.keys(geneData).forEach(gene => {
+      geneLabels.push({ label: `${gene}` });
+    });
+    return geneLabels;
+  }
+
+  createAlleleLabels() {
+    let geneData = this.state.geneData;
+    let alleleLabels = [];
+    let genes = Object.keys(geneData);
+    genes.forEach(gene => {
+      let geneAlleles = Object.keys(geneData[gene].alleles);
+      let labeledAlleles = geneAlleles.map(allele => {
         return { label: `${allele}` };
       });
-      sortedAlleleLabels = sortedAlleleLabels.concat(labeledAlleles);
+      alleleLabels = alleleLabels.concat(labeledAlleles);
     });
-    return [sortedGeneLabels, sortedAlleleLabels];
+    return alleleLabels;
   }
 
-  createHeatmapLabels(viewLevel) {
+  createHeatmapLabels() {
+    let viewLevel = this.state.viewLevel;
     switch (viewLevel) {
       case "alleles":
-        return this.state.sortedLabels.alleles.map(allele => {
-          return allele.label;
-        });
+        return this.createAlleleLabels();
+        break;
+      case "genes":
+        return this.createGeneLabels();
     }
   }
 
-  // It's important to pass this function the SORTED labels.
-  computeHeatmapValues(
-    samples,
-    geneData,
-    sortedGeneLabels,
-    sortedAlleleLabels
-  ) {
-    // TODO: Find out how to compute gene coverage and depth
-    let geneValues = {
-      depth: [],
-      coverage: []
-    };
+  computeAlleleValues(alleleLabels) {
+    let geneData = this.state.geneData;
+    let samples = this.state.samples;
+    let alleleToGeneMap = this.state.alleleToGeneMap;
     let alleleValues = {
       depth: [],
       coverage: []
     };
-    sortedAlleleLabels.forEach(allele => {
+    alleleLabels.forEach(allele => {
       let depth = [];
       let coverage = [];
-      let gene = allele.gene;
-      let alleleName = allele.label.label;
+      let alleleName = allele.label;
+      let gene = alleleToGeneMap[alleleName];
       let alleleData = geneData[gene].alleles[alleleName];
       samples.forEach(sample => {
         let sampleName = sample.label;
@@ -201,7 +169,22 @@ export default class AMRHeatmapVis extends React.Component {
       alleleValues.depth.push(depth);
       alleleValues.coverage.push(coverage);
     });
-    return [geneValues, alleleValues];
+    return alleleValues;
+  }
+
+  computeHeatmapValues(rows) {
+    let viewLevel = this.state.viewLevel;
+    let metric = this.state.metric;
+    switch (viewLevel) {
+      case "alleles":
+        let alleleValues = this.computeAlleleValues(rows);
+        return alleleValues[metric];
+        break;
+      case "genes":
+        return [];
+      default:
+        return [];
+    }
   }
 
   renderHeatmap(rows, columns, values, options) {
