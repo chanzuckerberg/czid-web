@@ -309,7 +309,7 @@ class CheckPipelineRuns
   end
 end
 
-task "pipeline_monitor", [:duration] => :environment do |_t, args|
+task  "pipeline_monitor", [:duration] => :environment do |_t, args|
   trap('SIGTERM') do
     CheckPipelineRuns.shutdown_requested = true
   end

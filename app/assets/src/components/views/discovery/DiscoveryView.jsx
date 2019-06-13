@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import moment from "moment";
 import {
+  at,
   capitalize,
   clone,
   compact,
@@ -102,13 +103,14 @@ class DiscoveryView extends React.Component {
         loadingVisualizations: true,
         mapLocationData: {},
         mapPreviewedLocationId: null,
+        mapPreviewedProjects: [],
         mapPreviewedSampleIds: [],
         mapPreviewedSamples: [],
         mapSidebarProjectDimensions: [],
         mapSidebarSampleDimensions: [],
         mapSidebarSampleStats: {},
         mapSidebarSelectedSampleIds: new Set(),
-        mapSidebarTab: "Summary",
+        mapSidebarTab: "summary",
         project: null,
         projectDimensions: [],
         projectId: projectId,
@@ -133,6 +135,7 @@ class DiscoveryView extends React.Component {
     this.resetDataFromInitialLoad();
 
     window.onpopstate = () => {
+      console.log("back was pressed");
       this.setState(history.state, () => {
         this.resetDataFromInitialLoad();
       });
@@ -145,6 +148,7 @@ class DiscoveryView extends React.Component {
     const urlFields = [
       "currentTab",
       "filters",
+      "mapSidebarTab",
       "projectId",
       "search",
       "showFilters",
@@ -230,6 +234,7 @@ class DiscoveryView extends React.Component {
   };
 
   resetDataFromInitialLoad = () => {
+    console.log("initial load");
     const { project } = this.state;
     this.resetData({
       callback: () => {
@@ -237,8 +242,8 @@ class DiscoveryView extends React.Component {
         //   - load (A) non-filtered dimensions, (C) filtered stats, (D) filtered locations, and (E) synchronous table data
         this.refreshDimensions();
         this.refreshFilteredStats();
-        this.refreshFilteredLocations();
         this.refreshSynchronousData();
+        this.refreshFilteredLocations();
         //   * if filter or project is set
         //     - load (B) filtered dimensions
         (this.getFilterCount() || project) && this.refreshFilteredDimensions();
@@ -247,6 +252,7 @@ class DiscoveryView extends React.Component {
   };
 
   resetDataFromFilterChange = () => {
+    console.log("filter change");
     const { project } = this.state;
     this.resetData({
       callback: () => {
@@ -263,6 +269,7 @@ class DiscoveryView extends React.Component {
   };
 
   refreshDataFromProjectChange = () => {
+    console.log("project change");
     this.resetData({
       callback: () => {
         // * On project selected
@@ -293,13 +300,16 @@ class DiscoveryView extends React.Component {
       search,
     });
 
-    this.setState({
-      project: projectId ? projects[0] : null,
-      projects,
-      visualizations,
-      loadingProjects: false,
-      loadingVisualizations: false,
-    });
+    this.setState(
+      {
+        project: projectId ? projects[0] : null,
+        projects,
+        visualizations,
+        loadingProjects: false,
+        loadingVisualizations: false,
+      },
+      this.refreshMapPreviewedProjects
+    );
   };
 
   refreshDimensions = async () => {
@@ -428,6 +438,7 @@ class DiscoveryView extends React.Component {
   };
 
   handleTabChange = currentTab => {
+    const { mapSidebarTab } = this.state;
     this.setState({ currentTab }, () => {
       this.updateBrowsingHistory("replace");
       const name = currentTab.replace(/\W+/g, "-").toLowerCase();
@@ -435,6 +446,9 @@ class DiscoveryView extends React.Component {
         currentTab: currentTab,
       });
     });
+
+    if (mapSidebarTab !== "summary")
+      this.setState({ mapSidebarTab: currentTab });
   };
 
   handleFilterChange = selectedFilters => {
@@ -592,9 +606,11 @@ class DiscoveryView extends React.Component {
   };
 
   handleProjectSelected = ({ project }) => {
+    const { mapSidebarTab } = this.state;
     this.setState(
       {
         currentTab: "samples",
+        mapSidebarTab: mapSidebarTab === "summary" ? mapSidebarTab : "samples",
         project,
         projectId: project.id,
         search: null,
@@ -746,8 +762,8 @@ class DiscoveryView extends React.Component {
     });
     this.setState(
       {
-        mapPreviewedSamples: fetchedSamples,
         mapPreviewedSampleIds: fetchedSampleIds,
+        mapPreviewedSamples: fetchedSamples,
       },
       () => {
         this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
@@ -779,6 +795,20 @@ class DiscoveryView extends React.Component {
     });
   };
 
+  // This uses 'projects' so it comes after refreshSynchronousData
+  refreshMapPreviewedProjects = async () => {
+    const { mapLocationData, mapPreviewedLocationId, projects } = this.state;
+
+    if (!mapPreviewedLocationId) return;
+
+    const projectIds = mapLocationData[mapPreviewedLocationId].project_ids;
+    const mapPreviewedProjects = at(projectIds, keyBy("id", projects));
+
+    this.setState({ mapPreviewedProjects }, () => {
+      this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
+    });
+  };
+
   handleMapSidebarSelectUpdate = mapSidebarSelectedSampleIds => {
     this.setState({ mapSidebarSelectedSampleIds });
   };
@@ -797,6 +827,7 @@ class DiscoveryView extends React.Component {
       filteredSampleStats,
       loadingDimensions,
       loadingStats,
+      mapPreviewedProjects,
       mapPreviewedSampleIds,
       mapPreviewedSamples,
       mapSidebarProjectDimensions,
@@ -822,6 +853,7 @@ class DiscoveryView extends React.Component {
     return (
       <div className={cs.rightPane}>
         {showStats &&
+          currentTab !== "visualizations" &&
           (currentDisplay === "map" ? (
             <MapPreviewSidebar
               allowedFeatures={allowedFeatures}
@@ -829,6 +861,7 @@ class DiscoveryView extends React.Component {
               discoveryCurrentTab={currentTab}
               initialSelectedSampleIds={mapSidebarSelectedSampleIds}
               loading={loading}
+              onProjectSelected={this.handleProjectSelected}
               onSampleClicked={this.handleSampleSelected}
               onSelectionUpdate={this.handleMapSidebarSelectUpdate}
               onTabChange={this.handleMapSidebarTabChange}
@@ -837,7 +870,9 @@ class DiscoveryView extends React.Component {
                   ? computedProjectDimensions
                   : mapSidebarProjectDimensions
               }
-              projects={projects}
+              projects={
+                isEmpty(mapPreviewedProjects) ? projects : mapPreviewedProjects
+              }
               projectStats={
                 isEmpty(mapSidebarSampleStats)
                   ? projectStats
