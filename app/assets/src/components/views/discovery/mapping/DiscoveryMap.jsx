@@ -103,7 +103,10 @@ class DiscoveryMap extends React.Component {
       <BaseMap
         mapTilerKey={mapTilerKey}
         updateViewport={this.updateViewport}
-        markers={Object.values(mapLocationData).map(this.renderMarker)}
+        markers={
+          mapLocationData &&
+          Object.values(mapLocationData).map(this.renderMarker)
+        }
         tooltip={tooltip}
       />
     );

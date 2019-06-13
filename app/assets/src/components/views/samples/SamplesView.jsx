@@ -373,15 +373,13 @@ class SamplesView extends React.Component {
   renderDisplaySwitcher = () => {
     const { currentDisplay, onDisplaySwitch } = this.props;
     return (
-      <div className={cs.displaySwitcher}>
-        <MapToggle
-          currentDisplay={currentDisplay}
-          onDisplaySwitch={display => {
-            onDisplaySwitch(display);
-            logAnalyticsEvent(`SamplesView_${display}-switch_clicked`);
-          }}
-        />
-      </div>
+      <MapToggle
+        currentDisplay={currentDisplay}
+        onDisplaySwitch={display => {
+          onDisplaySwitch(display);
+          logAnalyticsEvent(`SamplesView_${display}-switch_clicked`);
+        }}
+      />
     );
   };
 

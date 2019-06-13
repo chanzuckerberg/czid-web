@@ -12,23 +12,25 @@ class MapToggle extends React.Component {
   render() {
     const { currentDisplay, onDisplaySwitch } = this.props;
     return (
-      <Menu compact className={cs.switcherMenu}>
-        {DISPLAYS.map(display => (
-          <MenuItem
-            className={cs.menuItem}
-            active={currentDisplay === display}
-            onClick={() => onDisplaySwitch(display)}
-          >
-            <i
-              className={cx(
-                "fa",
-                display === "map" ? "fa-globe" : "fa-list-ul",
-                cs.icon
-              )}
-            />
-          </MenuItem>
-        ))}
-      </Menu>
+      <div className={cs.displaySwitcher}>
+        <Menu compact className={cs.switcherMenu}>
+          {DISPLAYS.map(display => (
+            <MenuItem
+              className={cs.menuItem}
+              active={currentDisplay === display}
+              onClick={() => onDisplaySwitch(display)}
+            >
+              <i
+                className={cx(
+                  "fa",
+                  display === "map" ? "fa-globe" : "fa-list-ul",
+                  cs.icon
+                )}
+              />
+            </MenuItem>
+          ))}
+        </Menu>
+      </div>
     );
   }
 }

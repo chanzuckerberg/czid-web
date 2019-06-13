@@ -1,21 +1,23 @@
 @import "~styles/themes/colors";
 
-.switcherMenu {
-  margin: 0;
-  min-height: 25px;
-  border-radius: 7px;
-  box-shadow: none;
+.displaySwitcher {
+  .switcherMenu {
+    margin: 0;
+    min-height: 25px;
+    border-radius: 7px;
+    box-shadow: none;
 
-  .menuItem {
-    padding: 5px 15px;
+    .menuItem {
+      padding: 5px 15px;
 
-    .icon {
-      font-size: 15px;
-    }
+      .icon {
+        font-size: 15px;
+      }
 
-    &:global(.active) {
-      // Important due to a { color: inherit !important; } in header.scss.
-      color: $primary-light !important;
+      &:global(.active) {
+        // Important due to a { color: inherit !important; } in header.scss.
+        color: $primary-light !important;
+      }
     }
   }
 }

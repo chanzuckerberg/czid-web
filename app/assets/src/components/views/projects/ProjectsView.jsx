@@ -95,7 +95,7 @@ class ProjectsView extends React.Component {
   renderDisplaySwitcher = () => {
     const { currentDisplay, onDisplaySwitch } = this.props;
     return (
-      <div className={cs.displaySwitcher}>
+      <div className={cs.toggleContainer}>
         <MapToggle
           currentDisplay={currentDisplay}
           onDisplaySwitch={display => {
