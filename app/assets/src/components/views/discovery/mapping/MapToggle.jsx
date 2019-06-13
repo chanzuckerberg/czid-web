@@ -19,6 +19,7 @@ class MapToggle extends React.Component {
               className={cs.menuItem}
               active={currentDisplay === display}
               onClick={() => onDisplaySwitch(display)}
+              key={`item-${display}`}
             >
               <i
                 className={cx(

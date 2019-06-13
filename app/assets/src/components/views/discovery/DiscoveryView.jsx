@@ -720,10 +720,18 @@ class DiscoveryView extends React.Component {
   };
 
   handleMapTooltipTitleClick = locationId => {
-    this.setState({ mapPreviewedLocationId: locationId }, () => {
-      this.refreshMapPreviewedSamples();
-      this.refreshMapPreviewedProjects();
-    });
+    const { currentTab } = this.state;
+    this.setState(
+      {
+        mapPreviewedLocationId: locationId,
+        mapSidebarTab: currentTab,
+        showStats: true,
+      },
+      () => {
+        this.refreshMapPreviewedSamples();
+        this.refreshMapPreviewedProjects();
+      }
+    );
   };
 
   handleMapMarkerClick = locationId => {
@@ -802,8 +810,6 @@ class DiscoveryView extends React.Component {
     const { mapLocationData, mapPreviewedLocationId, projects } = this.state;
 
     if (!mapPreviewedLocationId) return;
-
-    console.log("the projects I see are: ", projects);
 
     const projectIds = mapLocationData[mapPreviewedLocationId].project_ids;
     const mapPreviewedProjects = at(projectIds, keyBy("id", projects));
@@ -1000,6 +1006,7 @@ class DiscoveryView extends React.Component {
                       onDisplaySwitch={this.handleDisplaySwitch}
                       onMapMarkerClick={this.handleMapMarkerClick}
                       onProjectSelected={this.handleProjectSelected}
+                      onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                       projects={projects}
                     />
                   </div>

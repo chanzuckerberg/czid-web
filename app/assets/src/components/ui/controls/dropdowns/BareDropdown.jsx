@@ -269,18 +269,23 @@ BareDropdown.propTypes = forbidExtraProps({
   withinModal: PropTypes.bool,
 
   // Props directly passed to semantic-ui.
-  trigger: PropTypes.node.isRequired,
-  onOpen: PropTypes.func,
-  onClose: PropTypes.func,
-  open: PropTypes.bool,
   children: PropTypes.node,
-  floating: PropTypes.bool,
-  disabled: PropTypes.bool,
-  selectOnBlur: PropTypes.bool,
-  fluid: PropTypes.bool,
-  direction: PropTypes.string,
   className: PropTypes.string,
+  direction: PropTypes.string,
+  disabled: PropTypes.bool,
+  floating: PropTypes.bool,
+  fluid: PropTypes.bool,
   menuClassName: PropTypes.string,
+  onBlur: PropTypes.func,
+  onClick: PropTypes.func,
+  onClose: PropTypes.func,
+  onFocus: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
+  onOpen: PropTypes.func,
+  open: PropTypes.bool,
+  selectOnBlur: PropTypes.bool,
+  trigger: PropTypes.node.isRequired,
 });
 
 BareDropdown.defaultProps = {

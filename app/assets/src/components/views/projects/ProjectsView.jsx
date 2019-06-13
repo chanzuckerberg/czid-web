@@ -116,6 +116,7 @@ class ProjectsView extends React.Component {
       mapPreviewedLocationId,
       mapTilerKey,
       onMapMarkerClick,
+      onMapTooltipTitleClick,
       projects,
     } = this.props;
     let data = projects.map(project => {
@@ -151,7 +152,7 @@ class ProjectsView extends React.Component {
               mapLocationData={mapLocationData}
               mapTilerKey={mapTilerKey}
               onMarkerClick={onMapMarkerClick}
-              // onTooltipTitleClick={onMapTooltipTitleClick}
+              onTooltipTitleClick={onMapTooltipTitleClick}
               previewedLocationId={mapPreviewedLocationId}
             />
           </div>
@@ -175,6 +176,7 @@ ProjectsView.propTypes = {
   mapTilerKey: PropTypes.string,
   onDisplaySwitch: PropTypes.func,
   onMapMarkerClick: PropTypes.func,
+  onMapTooltipTitleClick: PropTypes.func,
   onProjectSelected: PropTypes.func,
   projects: PropTypes.array,
 };
