@@ -5,22 +5,20 @@ import React from "react";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import MapToggle from "~/components/views/discovery/mapping/MapToggle";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import CollectionModal from "~/components/views/samples/CollectionModal";
 import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
-import { Menu, MenuItem } from "~ui/controls/Menu";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import SaveIcon from "~ui/icons/SaveIcon";
 import Label from "~ui/labels/Label";
-
-import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
 
-const DISPLAYS = ["table", "map"];
+import cs from "./samples_view.scss";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -375,28 +373,13 @@ class SamplesView extends React.Component {
   renderDisplaySwitcher = () => {
     const { currentDisplay, onDisplaySwitch } = this.props;
     return (
-      <div className={cs.displaySwitcher}>
-        <Menu compact className={cs.switcherMenu}>
-          {DISPLAYS.map(display => (
-            <MenuItem
-              className={cs.menuItem}
-              active={currentDisplay === display}
-              onClick={withAnalytics(
-                () => onDisplaySwitch(display),
-                `SamplesView_${display}-switch_clicked`
-              )}
-            >
-              <i
-                className={cx(
-                  "fa",
-                  display === "map" ? "fa-globe" : "fa-list-ul",
-                  cs.icon
-                )}
-              />
-            </MenuItem>
-          ))}
-        </Menu>
-      </div>
+      <MapToggle
+        currentDisplay={currentDisplay}
+        onDisplaySwitch={display => {
+          onDisplaySwitch(display);
+          logAnalyticsEvent(`SamplesView_${display}-switch_clicked`);
+        }}
+      />
     );
   };
 

@@ -955,8 +955,9 @@ class DiscoveryView extends React.Component {
                 <div className={cs.tableContainer}>
                   <div className={cs.dataContainer}>
                     <ProjectsView
-                      projects={projects}
+                      allowedFeatures={allowedFeatures}
                       onProjectSelected={this.handleProjectSelected}
+                      projects={projects}
                     />
                   </div>
                   {!projects.length &&

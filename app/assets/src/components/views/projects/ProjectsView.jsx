@@ -90,7 +90,7 @@ class ProjectsView extends React.Component {
   };
 
   render() {
-    const { projects } = this.props;
+    const { allowedFeatures, projects } = this.props;
     let data = projects.map(project => {
       return merge(
         {
@@ -107,11 +107,16 @@ class ProjectsView extends React.Component {
     });
 
     return (
-      <BaseDiscoveryView
-        columns={this.columns}
-        data={data}
-        handleRowClick={this.handleRowClick}
-      />
+      <div className={cs.container}>
+        {/*{allowedFeatures &&*/}
+        {/*allowedFeatures.includes("maps") &&*/}
+        {/*this.renderDisplaySwitcher()}*/}
+        <BaseDiscoveryView
+          columns={this.columns}
+          data={data}
+          handleRowClick={this.handleRowClick}
+        />
+      </div>
     );
   }
 }
@@ -121,6 +126,7 @@ ProjectsView.defaultProps = {
 };
 
 ProjectsView.propTypes = {
+  allowedFeatures: PropTypes.array,
   projects: PropTypes.array,
   onProjectSelected: PropTypes.func,
 };
