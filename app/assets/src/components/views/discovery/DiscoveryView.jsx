@@ -135,7 +135,6 @@ class DiscoveryView extends React.Component {
     this.resetDataFromInitialLoad();
 
     window.onpopstate = () => {
-      console.log("back was pressed");
       this.setState(history.state, () => {
         this.resetDataFromInitialLoad();
       });
@@ -234,7 +233,6 @@ class DiscoveryView extends React.Component {
   };
 
   resetDataFromInitialLoad = () => {
-    console.log("initial load");
     const { project } = this.state;
     this.resetData({
       callback: () => {
@@ -242,8 +240,8 @@ class DiscoveryView extends React.Component {
         //   - load (A) non-filtered dimensions, (C) filtered stats, (D) filtered locations, and (E) synchronous table data
         this.refreshDimensions();
         this.refreshFilteredStats();
-        this.refreshSynchronousData();
         this.refreshFilteredLocations();
+        this.refreshSynchronousData();
         //   * if filter or project is set
         //     - load (B) filtered dimensions
         (this.getFilterCount() || project) && this.refreshFilteredDimensions();
@@ -252,7 +250,6 @@ class DiscoveryView extends React.Component {
   };
 
   resetDataFromFilterChange = () => {
-    console.log("filter change");
     const { project } = this.state;
     this.resetData({
       callback: () => {
@@ -269,7 +266,6 @@ class DiscoveryView extends React.Component {
   };
 
   refreshDataFromProjectChange = () => {
-    console.log("project change");
     this.resetData({
       callback: () => {
         // * On project selected
@@ -308,6 +304,7 @@ class DiscoveryView extends React.Component {
         loadingProjects: false,
         loadingVisualizations: false,
       },
+      // Uses 'projects'
       this.refreshMapPreviewedProjects
     );
   };
@@ -396,10 +393,10 @@ class DiscoveryView extends React.Component {
       search,
     });
 
-    this.setState(
-      { mapLocationData, loadingLocations: false },
-      this.refreshMapPreviewedSamples
-    );
+    this.setState({ mapLocationData, loadingLocations: false }, () => {
+      this.refreshMapPreviewedSamples();
+      this.refreshMapPreviewedProjects();
+    });
   };
 
   computeTabs = () => {
@@ -447,6 +444,7 @@ class DiscoveryView extends React.Component {
       });
     });
 
+    // Set to match 'samples' or 'projects'
     if (mapSidebarTab !== "summary")
       this.setState({ mapSidebarTab: currentTab });
   };
@@ -722,9 +720,10 @@ class DiscoveryView extends React.Component {
   };
 
   handleMapTooltipTitleClick = locationId => {
-    this.setState({ mapPreviewedLocationId: locationId }, () =>
-      this.refreshMapPreviewedSamples()
-    );
+    this.setState({ mapPreviewedLocationId: locationId }, () => {
+      this.refreshMapPreviewedSamples();
+      this.refreshMapPreviewedProjects();
+    });
   };
 
   handleMapMarkerClick = locationId => {
@@ -733,7 +732,10 @@ class DiscoveryView extends React.Component {
         mapPreviewedLocationId: locationId,
         showStats: true,
       },
-      this.refreshMapPreviewedSamples
+      () => {
+        this.refreshMapPreviewedSamples();
+        this.refreshMapPreviewedProjects();
+      }
     );
   };
 
@@ -800,6 +802,8 @@ class DiscoveryView extends React.Component {
     const { mapLocationData, mapPreviewedLocationId, projects } = this.state;
 
     if (!mapPreviewedLocationId) return;
+
+    console.log("the projects I see are: ", projects);
 
     const projectIds = mapLocationData[mapPreviewedLocationId].project_ids;
     const mapPreviewedProjects = at(projectIds, keyBy("id", projects));
