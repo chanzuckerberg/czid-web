@@ -956,6 +956,8 @@ class DiscoveryView extends React.Component {
                   <div className={cs.dataContainer}>
                     <ProjectsView
                       allowedFeatures={allowedFeatures}
+                      currentDisplay={currentDisplay}
+                      onDisplaySwitch={this.handleDisplaySwitch}
                       onProjectSelected={this.handleProjectSelected}
                       projects={projects}
                     />

@@ -1,12 +1,13 @@
-import React from "react";
-import PropTypes from "prop-types";
 import { find, merge, pick } from "lodash/fp";
+import PropTypes from "prop-types";
+import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
+import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
+import MapToggle from "~/components/views/discovery/mapping/MapToggle";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
-import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
 
@@ -89,6 +90,19 @@ class ProjectsView extends React.Component {
     });
   };
 
+  renderDisplaySwitcher = () => {
+    const { currentDisplay, onDisplaySwitch } = this.props;
+    return (
+      <MapToggle
+        currentDisplay={currentDisplay}
+        onDisplaySwitch={display => {
+          onDisplaySwitch(display);
+          logAnalyticsEvent(`ProjectsView_${display}-switch_clicked`);
+        }}
+      />
+    );
+  };
+
   render() {
     const { allowedFeatures, projects } = this.props;
     let data = projects.map(project => {
@@ -108,9 +122,9 @@ class ProjectsView extends React.Component {
 
     return (
       <div className={cs.container}>
-        {/*{allowedFeatures &&*/}
-        {/*allowedFeatures.includes("maps") &&*/}
-        {/*this.renderDisplaySwitcher()}*/}
+        {allowedFeatures &&
+          allowedFeatures.includes("maps") &&
+          this.renderDisplaySwitcher()}
         <BaseDiscoveryView
           columns={this.columns}
           data={data}
@@ -122,13 +136,16 @@ class ProjectsView extends React.Component {
 }
 
 ProjectsView.defaultProps = {
+  currentDisplay: "table",
   projects: [],
 };
 
 ProjectsView.propTypes = {
   allowedFeatures: PropTypes.array,
-  projects: PropTypes.array,
+  currentDisplay: PropTypes.string.isRequired,
+  onDisplaySwitch: PropTypes.func,
   onProjectSelected: PropTypes.func,
+  projects: PropTypes.array,
 };
 
 export default ProjectsView;
