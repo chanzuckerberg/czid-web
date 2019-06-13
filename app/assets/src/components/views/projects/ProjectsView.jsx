@@ -113,7 +113,9 @@ class ProjectsView extends React.Component {
       currentDisplay,
       currentTab,
       mapLocationData,
+      mapPreviewedLocationId,
       mapTilerKey,
+      onMapMarkerClick,
       projects,
     } = this.props;
     let data = projects.map(project => {
@@ -148,9 +150,9 @@ class ProjectsView extends React.Component {
               currentTab={currentTab}
               mapLocationData={mapLocationData}
               mapTilerKey={mapTilerKey}
-              // onMarkerClick={onMapMarkerClick}
+              onMarkerClick={onMapMarkerClick}
               // onTooltipTitleClick={onMapTooltipTitleClick}
-              // previewedLocationId={mapPreviewedLocationId}
+              previewedLocationId={mapPreviewedLocationId}
             />
           </div>
         )}
@@ -169,8 +171,10 @@ ProjectsView.propTypes = {
   currentDisplay: PropTypes.string.isRequired,
   currentTab: PropTypes.string.isRequired,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
+  mapPreviewedLocationId: PropTypes.number,
   mapTilerKey: PropTypes.string,
   onDisplaySwitch: PropTypes.func,
+  onMapMarkerClick: PropTypes.func,
   onProjectSelected: PropTypes.func,
   projects: PropTypes.array,
 };

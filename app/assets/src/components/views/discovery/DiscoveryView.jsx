@@ -822,8 +822,7 @@ class DiscoveryView extends React.Component {
     return (
       <div className={cs.rightPane}>
         {showStats &&
-          currentTab === "samples" &&
-          currentDisplay === "map" && (
+          (currentDisplay === "map" ? (
             <MapPreviewSidebar
               allowedFeatures={allowedFeatures}
               currentTab={mapSidebarTab}
@@ -838,6 +837,7 @@ class DiscoveryView extends React.Component {
                   ? computedProjectDimensions
                   : mapSidebarProjectDimensions
               }
+              projects={projects}
               projectStats={
                 isEmpty(mapSidebarSampleStats)
                   ? projectStats
@@ -859,10 +859,7 @@ class DiscoveryView extends React.Component {
               }
               selectableIds={mapPreviewedSampleIds}
             />
-          )}
-        {showStats &&
-          ((currentTab === "samples" && currentDisplay === "table") ||
-            currentTab === "projects") && (
+          ) : (
             <DiscoverySidebar
               allowedFeatures={allowedFeatures}
               currentTab={currentTab}
@@ -872,7 +869,7 @@ class DiscoveryView extends React.Component {
               sampleDimensions={computedSampleDimensions}
               sampleStats={filteredSampleStats}
             />
-          )}
+          ))}
       </div>
     );
   };
@@ -959,8 +956,10 @@ class DiscoveryView extends React.Component {
                       currentDisplay={currentDisplay}
                       currentTab={currentTab}
                       mapLocationData={mapLocationData}
+                      mapPreviewedLocationId={mapPreviewedLocationId}
                       mapTilerKey={mapTilerKey}
                       onDisplaySwitch={this.handleDisplaySwitch}
+                      onMapMarkerClick={this.handleMapMarkerClick}
                       onProjectSelected={this.handleProjectSelected}
                       projects={projects}
                     />

@@ -1,10 +1,19 @@
 import cx from "classnames";
-import { difference, find, isEmpty, union } from "lodash/fp";
+import {
+  compact,
+  difference,
+  find,
+  isEmpty,
+  merge,
+  pick,
+  union,
+} from "lodash/fp";
 import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import Tabs from "~/components/ui/controls/Tabs";
 import PropTypes from "~/components/utils/propTypes";
+import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoverySidebar from "~/components/views/discovery/DiscoverySidebar";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
@@ -21,7 +30,7 @@ export default class MapPreviewSidebar extends React.Component {
       selectedSampleIds: initialSelectedSampleIds || new Set(),
     };
 
-    this.columns = [
+    this.sampleColumns = [
       {
         dataKey: "sample",
         flexGrow: 1,
@@ -120,6 +129,62 @@ export default class MapPreviewSidebar extends React.Component {
           TableRenderers.formatDuration(rowData[dataKey]),
       },
     ];
+
+    this.projectColumns = [
+      {
+        dataKey: "project",
+        flexGrow: 1,
+        width: 350,
+        cellRenderer: ({ cellData }) =>
+          TableRenderers.renderItemDetails(
+            merge(
+              { cellData },
+              {
+                nameRenderer: this.nameRenderer,
+                detailsRenderer: this.detailsRenderer,
+                visibilityIconRenderer: () => {},
+              }
+            )
+          ),
+        headerClassName: cs.projectHeader,
+        sortFunction: p => (p.name || "").toLowerCase(),
+      },
+      {
+        dataKey: "created_at",
+        label: "Created On",
+        width: 120,
+        cellRenderer: TableRenderers.renderDateWithElapsed,
+      },
+      {
+        dataKey: "hosts",
+        width: 200,
+        disableSort: true,
+        cellRenderer: TableRenderers.renderList,
+      },
+      {
+        dataKey: "tissues",
+        width: 200,
+        disableSort: true,
+        cellRenderer: TableRenderers.renderList,
+      },
+      {
+        dataKey: "number_of_samples",
+        width: 140,
+        label: "No. of Samples",
+      },
+    ];
+  }
+
+  nameRenderer(project) {
+    return project.name;
+  }
+
+  detailsRenderer(project) {
+    return (
+      <div>
+        <span>{project.owner}</span>
+      </div>
+    );
   }
 
   handleLoadSampleRows = async () => {
@@ -183,24 +248,31 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   computeTabs = () => {
-    const { samples } = this.props;
-    return [
+    const { discoveryCurrentTab, samples } = this.props;
+
+    const renderTab = (label, count) => {
+      return (
+        <div>
+          <span className={cs.tabLabel}>{label}</span>
+          {count > 0 && <span className={cs.tabCounter}>{count}</span>}
+        </div>
+      );
+    };
+
+    return compact([
       {
         label: "Summary",
         value: "Summary",
       },
-      {
-        label: (
-          <div>
-            <span className={cs.tabLabel}>Samples</span>
-            {samples.length > 0 && (
-              <span className={cs.tabCounter}>{samples.length}</span>
-            )}
-          </div>
-        ),
+      discoveryCurrentTab === "samples" && {
+        label: renderTab("Samples", samples.length),
         value: "Samples",
       },
-    ];
+      discoveryCurrentTab === "projects" && {
+        label: renderTab("Projects", 0),
+        value: "Projects",
+      },
+    ]);
   };
 
   reset = () => {
@@ -219,7 +291,7 @@ export default class MapPreviewSidebar extends React.Component {
       <div className={cs.container}>
         <div className={cs.table}>
           <InfiniteTable
-            columns={this.columns}
+            columns={this.sampleColumns}
             defaultRowHeight={rowHeight}
             initialActiveColumns={activeColumns}
             minimumBatchSize={batchSize}
@@ -277,6 +349,44 @@ export default class MapPreviewSidebar extends React.Component {
     return samples.length === 0 ? this.renderNoData() : this.renderTable();
   };
 
+  renderProjectsTab = () => {
+    const { projects } = this.props;
+    let data = projects.map(project => {
+      return merge(
+        {
+          project: pick(
+            ["name", "description", "owner", "public_access"],
+            project
+          ),
+        },
+        pick(
+          ["id", "created_at", "hosts", "tissues", "number_of_samples"],
+          project
+        )
+      );
+    });
+
+    return (
+      <BaseDiscoveryView
+        columns={this.projectColumns}
+        initialActiveColumns={["project"]}
+        data={data}
+        // handleRowClick={this.handleRowClick}
+      />
+    );
+  };
+
+  renderTabContent = tab => {
+    switch (tab) {
+      case "Samples":
+        return this.renderSamplesTab();
+      case "Projects":
+        return this.renderProjectsTab();
+      default:
+        return this.renderSummaryTab();
+    }
+  };
+
   render() {
     const { className, currentTab, onTabChange } = this.props;
     return (
@@ -288,9 +398,7 @@ export default class MapPreviewSidebar extends React.Component {
           tabs={this.computeTabs()}
           value={currentTab}
         />
-        {currentTab === "Summary"
-          ? this.renderSummaryTab()
-          : this.renderSamplesTab()}
+        {this.renderTabContent(currentTab)}
       </div>
     );
   }
@@ -315,6 +423,7 @@ MapPreviewSidebar.propTypes = {
   onTabChange: PropTypes.func,
   projectDimensions: PropTypes.array,
   projectStats: PropTypes.object,
+  projects: PropTypes.array,
   protectedColumns: PropTypes.array,
   sampleDimensions: PropTypes.array,
   samples: PropTypes.array,

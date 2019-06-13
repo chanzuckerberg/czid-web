@@ -10,16 +10,17 @@ class BaseDiscoveryView extends React.Component {
   // between views that use it (at the time of this comment, ProjectsView and VisualizationsView)
   // We might be able to get rid of it once we implement dynamic row height on the tables.
   render() {
-    const { columns, data, handleRowClick } = this.props;
+    const { columns, data, handleRowClick, initialActiveColumns } = this.props;
 
     return (
       <Table
-        sortable
-        data={data}
         columns={columns}
+        data={data}
         defaultRowHeight={68}
+        initialActiveColumns={initialActiveColumns}
         onRowClick={handleRowClick}
         rowClassName={cs.tableDataRow}
+        sortable
       />
     );
   }
@@ -34,6 +35,7 @@ BaseDiscoveryView.propTypes = {
   columns: PropTypes.array,
   data: PropTypes.array,
   handleRowClick: PropTypes.func,
+  initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default BaseDiscoveryView;
