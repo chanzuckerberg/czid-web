@@ -11,6 +11,7 @@ import CollectionModal from "~/components/views/samples/CollectionModal";
 import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
+import HeatmapIconDropdown from "~ui/controls/dropdowns/HeatmapIconDropdown";
 import { Menu, MenuItem } from "~ui/controls/Menu";
 import BulletListIcon from "~ui/icons/BulletListIcon";
 import GlobeLinedIcon from "~ui/icons/GlobeLinedIcon";
@@ -199,17 +200,32 @@ class SamplesView extends React.Component {
       logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
         selectedSampleIds: targetSampleIds.length
       });
+
+    const heatmapOptions = [
+      { text: "Taxon Heatmap", value: "/visualizations/heatmap" }
+    ];
+    if (this.props.admin) {
+      heatmapOptions.push({
+        text: "AMR Heatmap",
+        value: "/amr_heatmap"
+      });
+    }
     return targetSampleIds.size < 2 ? (
       <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
     ) : (
-      <a
-        onClick={log}
-        href={`/visualizations/heatmap?sampleIds=${Array.from(
-          targetSampleIds
-        )}`}
-      >
-        <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
-      </a>
+      <HeatmapIconDropdown
+        className={cx(cs.icon, cs.heatmapDropdown)}
+        iconClassName={cx(cs.icon, cs.heatmap)}
+        options={heatmapOptions}
+        onClick={heatmapOption => {
+          logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
+            selectedSampleIds: targetSampleIds.length,
+            heatmapOption
+          });
+          let params = Array.from(targetSampleIds).join("&sampleIds[]=");
+          window.location.assign(`${heatmapOption}?sampleIds[]=${params}`);
+        }}
+      />
     );
   };
 
