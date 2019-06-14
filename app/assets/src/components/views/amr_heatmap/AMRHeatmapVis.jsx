@@ -10,7 +10,7 @@ export default class AMRHeatmapVis extends React.Component {
     super(props);
 
     this.state = {
-      viewLevel: "alleles",
+      viewLevel: "genes",
       metric: "coverage"
     };
 
@@ -59,7 +59,9 @@ export default class AMRHeatmapVis extends React.Component {
           name: gene,
           samples: {
             [sampleName]: {
-              name: sampleName
+              name: sampleName,
+              depth: depth,
+              coverage: coverage
             }
           },
           alleles: {
@@ -142,7 +144,7 @@ export default class AMRHeatmapVis extends React.Component {
     }
   }
 
-  computeAlleleValues(alleleLabels) {
+  assembleAlleleValues(alleleLabels) {
     let geneData = this.state.geneData;
     let samples = this.state.samples;
     let alleleToGeneMap = this.state.alleleToGeneMap;
@@ -172,16 +174,43 @@ export default class AMRHeatmapVis extends React.Component {
     return alleleValues;
   }
 
+  assembleGeneValues(geneLabels) {
+    let geneData = this.state.geneData;
+    let samples = this.state.samples;
+    let geneValues = {
+      depth: [],
+      coverage: []
+    };
+    geneLabels.forEach(gene => {
+      let depth = [];
+      let coverage = [];
+      let geneName = gene.label;
+      samples.forEach(sample => {
+        let sampleName = sample.label;
+        if (geneData[geneName].samples.hasOwnProperty(sampleName)) {
+          depth.push(geneData[geneName].samples[sampleName].depth);
+          coverage.push(geneData[geneName].samples[sampleName].coverage);
+        } else {
+          depth.push(0), coverage.push(0);
+        }
+      });
+      geneValues.depth.push(depth);
+      geneValues.coverage.push(coverage);
+    });
+    return geneValues;
+  }
+
   computeHeatmapValues(rows) {
     let viewLevel = this.state.viewLevel;
     let metric = this.state.metric;
     switch (viewLevel) {
       case "alleles":
-        let alleleValues = this.computeAlleleValues(rows);
+        let alleleValues = this.assembleAlleleValues(rows);
         return alleleValues[metric];
         break;
       case "genes":
-        return [];
+        let geneValues = this.assembleGeneValues(rows);
+        return geneValues[metric];
       default:
         return [];
     }
