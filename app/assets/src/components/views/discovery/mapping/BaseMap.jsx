@@ -114,7 +114,7 @@ BaseMap.defaultProps = {
     minLongitude: -180,
     maxLongitude: 180,
     // Limit to whole-world view
-    minZoom: 0.5,
+    minZoom: 1.2,
     // Limit to city-level at most
     maxZoom: 17,
   },
