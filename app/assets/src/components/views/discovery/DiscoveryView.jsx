@@ -747,6 +747,20 @@ class DiscoveryView extends React.Component {
     );
   };
 
+  clearMapPreview = () => {
+    const { mapPreviewedLocationId } = this.state;
+    if (mapPreviewedLocationId) {
+      this.setState({
+        mapPreviewedLocationId: null,
+        mapPreviewedSampleIds: [],
+        mapPreviewedSamples: [],
+        mapSidebarProjectDimensions: [],
+        mapSidebarSampleDimensions: [],
+        mapSidebarSampleStats: {},
+      });
+    }
+  };
+
   refreshMapPreviewedSamples = async () => {
     const { domain } = this.props;
     const {
@@ -1032,6 +1046,7 @@ class DiscoveryView extends React.Component {
                       mapTilerKey={mapTilerKey}
                       onDisplaySwitch={this.handleDisplaySwitch}
                       onLoadRows={this.handleLoadSampleRows}
+                      onMapClick={this.clearMapPreview}
                       onMapMarkerClick={this.handleMapMarkerClick}
                       onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                       onSampleSelected={this.handleSampleSelected}

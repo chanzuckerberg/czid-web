@@ -388,6 +388,7 @@ class SamplesView extends React.Component {
       mapLocationData,
       mapPreviewedLocationId,
       mapTilerKey,
+      onMapClick,
       onMapMarkerClick,
       onMapTooltipTitleClick,
     } = this.props;
@@ -396,6 +397,7 @@ class SamplesView extends React.Component {
         <DiscoveryMap
           mapLocationData={mapLocationData}
           mapTilerKey={mapTilerKey}
+          onClick={onMapClick}
           onMarkerClick={onMapMarkerClick}
           onTooltipTitleClick={onMapTooltipTitleClick}
           previewedLocationId={mapPreviewedLocationId}
@@ -468,6 +470,7 @@ SamplesView.propTypes = {
   mapTilerKey: PropTypes.string,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
+  onMapClick: PropTypes.func,
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onSampleSelected: PropTypes.func,

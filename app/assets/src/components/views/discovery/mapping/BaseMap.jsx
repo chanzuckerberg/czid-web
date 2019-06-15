@@ -57,19 +57,20 @@ class BaseMap extends React.Component {
   };
 
   render() {
-    const { mapTilerKey, tooltip, markers, popups } = this.props;
+    const { markers, mapTilerKey, onClick, popups, tooltip } = this.props;
     const { viewport } = this.state;
 
     const styleURL = `https://api.maptiler.com/maps/${MAP_STYLE_ID}/style.json?key=${mapTilerKey}`;
     return (
       <div className={cs.mapContainer}>
         <MapGL
-          {...viewport}
-          onViewportChange={this.updateViewport}
           mapStyle={styleURL}
+          onClick={onClick}
           onLoad={this.setCompactAttribution}
+          onViewportChange={this.updateViewport}
           // Style prop applies to the container and all overlays
           style={{ position: "absolute" }}
+          {...viewport}
         >
           {tooltip}
           {markers}
@@ -87,17 +88,18 @@ class BaseMap extends React.Component {
 }
 
 BaseMap.propTypes = {
-  mapTilerKey: PropTypes.string.isRequired,
-  updateViewport: PropTypes.func,
-  width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   latitude: PropTypes.number,
   longitude: PropTypes.number,
-  zoom: PropTypes.number,
-  viewBounds: PropTypes.objectOf(PropTypes.number),
-  tooltip: PropTypes.node,
+  mapTilerKey: PropTypes.string.isRequired,
   markers: PropTypes.array,
+  onClick: PropTypes.func,
   popups: PropTypes.array,
+  tooltip: PropTypes.node,
+  updateViewport: PropTypes.func,
+  viewBounds: PropTypes.objectOf(PropTypes.number),
+  width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  zoom: PropTypes.number,
 };
 
 BaseMap.defaultProps = {

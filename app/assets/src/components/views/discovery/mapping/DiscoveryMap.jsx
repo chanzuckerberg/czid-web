@@ -101,18 +101,19 @@ class DiscoveryMap extends React.Component {
   };
 
   render() {
-    const { mapTilerKey, mapLocationData } = this.props;
+    const { mapTilerKey, mapLocationData, onClick } = this.props;
     const { tooltip } = this.state;
 
     return (
       <BaseMap
         mapTilerKey={mapTilerKey}
-        updateViewport={this.updateViewport}
         markers={
           mapLocationData &&
           Object.values(mapLocationData).map(this.renderMarker)
         }
+        onClick={onClick}
         tooltip={tooltip}
+        updateViewport={this.updateViewport}
       />
     );
   }
@@ -127,6 +128,7 @@ DiscoveryMap.propTypes = {
   currentTab: PropTypes.string.isRequired,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapTilerKey: PropTypes.string,
+  onClick: PropTypes.func,
   onMarkerClick: PropTypes.func,
   onTooltipTitleClick: PropTypes.func,
   previewedLocationId: PropTypes.number,
