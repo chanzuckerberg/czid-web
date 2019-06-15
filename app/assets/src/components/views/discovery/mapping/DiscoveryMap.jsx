@@ -1,6 +1,6 @@
 import React from "react";
 import { Marker } from "react-map-gl";
-import { get } from "lodash/fp";
+import { get, upperFirst } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
@@ -29,7 +29,11 @@ class DiscoveryMap extends React.Component {
   };
 
   handleMarkerMouseEnter = hoverInfo => {
-    const title = `${hoverInfo.pointCount} Sample${
+    const { currentTab } = this.props;
+
+    // ex: samples -> Sample
+    const noun = upperFirst(currentTab).slice(0, -1);
+    const title = `${hoverInfo.pointCount} ${noun}${
       hoverInfo.pointCount > 1 ? "s" : ""
     }`;
     const tooltip = (
@@ -65,13 +69,14 @@ class DiscoveryMap extends React.Component {
   };
 
   renderMarker = markerData => {
-    const { previewedLocationId } = this.props;
+    const { currentTab, previewedLocationId } = this.props;
     const { viewport } = this.state;
     const id = markerData.id;
     const name = markerData.name;
     const lat = parseFloat(markerData.lat);
     const lng = parseFloat(markerData.lng);
-    const pointCount = markerData.sample_ids.length;
+    const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
+    const pointCount = markerData[idsField].length;
     const minSize = 12;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
     // Log1.5 of the count looked nice visually for not getting too large with many points.
@@ -103,14 +108,23 @@ class DiscoveryMap extends React.Component {
       <BaseMap
         mapTilerKey={mapTilerKey}
         updateViewport={this.updateViewport}
-        markers={Object.values(mapLocationData).map(this.renderMarker)}
+        markers={
+          mapLocationData &&
+          Object.values(mapLocationData).map(this.renderMarker)
+        }
         tooltip={tooltip}
       />
     );
   }
 }
 
+DiscoveryMap.defaultProps = {
+  currentTab: "samples",
+};
+
 DiscoveryMap.propTypes = {
+  currentDisplay: PropTypes.string,
+  currentTab: PropTypes.string.isRequired,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapTilerKey: PropTypes.string,
   onMarkerClick: PropTypes.func,
