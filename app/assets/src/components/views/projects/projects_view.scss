@@ -1,3 +1,5 @@
+@import "~styles/themes/elements";
+
 .projectHeader {
   text-align: left;
 }
@@ -10,6 +12,10 @@
 
   .toggleContainer {
     margin-bottom: 10px;
+  }
+
+  .narrow {
+    margin-left: $narrow-container-margin;
   }
 
   .map {

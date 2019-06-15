@@ -892,6 +892,7 @@ class DiscoveryView extends React.Component {
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               <SamplesView
+                admin={this.props.admin}
                 allowedFeatures={allowedFeatures}
                 currentDisplay={currentDisplay}
                 mapLocationData={mapLocationData}
@@ -909,7 +910,6 @@ class DiscoveryView extends React.Component {
                 ref={samplesView => (this.samplesView = samplesView)}
                 samples={samples}
                 selectableIds={sampleIds}
-                admin={this.props.admin}
               />
             </div>
             {!samples.length &&

@@ -2,20 +2,21 @@ import cx from "classnames";
 import { difference, find, isEmpty, union } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import PropTypes from "~/components/utils/propTypes";
-import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
-import MapToggle from "~/components/views/discovery/mapping/MapToggle";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
-import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
 import CollectionModal from "~/components/views/samples/CollectionModal";
-import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
-import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import { DownloadIconDropdown } from "~ui/controls/dropdowns";
+import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
-import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
-import SaveIcon from "~ui/icons/SaveIcon";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
+import MapToggle from "~/components/views/discovery/mapping/MapToggle";
+import NarrowContainer from "~/components/layout/NarrowContainer";
+import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
+import PropTypes from "~/components/utils/propTypes";
+import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
+import SaveIcon from "~ui/icons/SaveIcon";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import { DownloadIconDropdown } from "~ui/controls/dropdowns";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
@@ -429,7 +430,11 @@ class SamplesView extends React.Component {
     const { phyloTreeCreationModalOpen } = this.state;
     return (
       <div className={cs.container}>
-        {this.renderToolbar()}
+        {currentDisplay === "table" ? (
+          this.renderToolbar()
+        ) : (
+          <NarrowContainer>{this.renderToolbar()}</NarrowContainer>
+        )}
         {currentDisplay === "table" ? this.renderTable() : this.renderMap()}
         {phyloTreeCreationModalOpen && (
           <PhyloTreeCreationModal

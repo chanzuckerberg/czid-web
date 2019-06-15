@@ -76,7 +76,7 @@ class DiscoveryMap extends React.Component {
     const lat = parseFloat(markerData.lat);
     const lng = parseFloat(markerData.lng);
     const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
-    const pointCount = markerData[idsField].length;
+    const pointCount = markerData[idsField] && markerData[idsField].length;
     const minSize = 10;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
     // Log1.5 of the count looked nice visually for not getting too large with many points.
