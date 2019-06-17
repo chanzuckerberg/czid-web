@@ -11,7 +11,7 @@ const NoResultsBanner = ({ className, message, suggestion, type }) => {
   // This is a hack to associate the event with the parent component, DiscoveryView
   logAnalyticsEvent("DiscoveryView_no-results-banner_displayed", {
     type,
-    message
+    message,
   });
   return (
     <div className={cx(cs.container, className)}>
@@ -28,14 +28,14 @@ const NoResultsBanner = ({ className, message, suggestion, type }) => {
 
 NoResultsBanner.defaultProps = {
   message: "Sorry, no results match your search.",
-  suggestion: "Try another search"
+  suggestion: "Try another search",
 };
 
 NoResultsBanner.propTypes = {
   className: PropTypes.string,
   message: PropTypes.string,
   suggestion: PropTypes.string,
-  type: PropTypes.string
+  type: PropTypes.string,
 };
 
 export default NoResultsBanner;

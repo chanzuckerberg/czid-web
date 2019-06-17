@@ -16,28 +16,28 @@ const getSampleMetadata = (id, pipelineVersion) => {
 const getSampleMetadataFields = ids =>
   get("/samples/metadata_fields", {
     params: {
-      sampleIds: flatten([ids])
-    }
+      sampleIds: flatten([ids]),
+    },
   });
 
 // Get MetadataField info for the sample(s) (either one ID or an array)
 const getProjectMetadataFields = ids =>
   get("/projects/metadata_fields", {
     params: {
-      projectIds: flatten([ids])
-    }
+      projectIds: flatten([ids]),
+    },
   });
 
 const saveSampleMetadata = (id, field, value) =>
   postWithCSRF(`/samples/${id}/save_metadata_v2`, {
     field,
-    value
+    value,
   });
 
 // Validate CSV metadata against samples in an existing project.
 const validateMetadataCSVForProject = (id, metadata) =>
   postWithCSRF(`/projects/${id}/validate_metadata_csv`, {
-    metadata
+    metadata,
   });
 
 // Validate manually input metadata against samples in an existing project.
@@ -57,7 +57,7 @@ const validateManualMetadataForProject = (id, metadata) => {
 const validateMetadataCSVForNewSamples = (samples, metadata) =>
   postWithCSRF("/metadata/validate_csv_for_new_samples", {
     metadata,
-    samples
+    samples,
   });
 
 // Validate manually input metadata for new samples.
@@ -74,7 +74,7 @@ const validateManualMetadataForNewSamples = (samples, metadata) => {
 
 const uploadMetadataForProject = (id, metadata) =>
   postWithCSRF(`/projects/${id}/upload_metadata`, {
-    metadata
+    metadata,
   });
 
 const getOfficialMetadataFields = () =>
@@ -85,7 +85,7 @@ const bulkUploadWithMetadata = (samples, metadata) =>
   postWithCSRF(`/samples/bulk_upload_with_metadata.json`, {
     samples,
     metadata,
-    client: "web"
+    client: "web",
   });
 
 export {
@@ -99,5 +99,5 @@ export {
   validateMetadataCSVForProject,
   validateMetadataCSVForNewSamples,
   validateManualMetadataForProject,
-  validateManualMetadataForNewSamples
+  validateManualMetadataForNewSamples,
 };

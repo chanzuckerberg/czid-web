@@ -7,7 +7,7 @@ import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
-  TaxonFilter
+  TaxonFilter,
 } from "~/components/common/filters";
 import FilterTag from "~ui/controls/FilterTag";
 
@@ -26,7 +26,7 @@ class DiscoveryFilters extends React.Component {
       timeSelected: this.props.timeSelected,
       visibilitySelected: this.props.visibilitySelected,
       hostSelected: this.props.hostSelected,
-      tissueSelected: this.props.tissueSelected
+      tissueSelected: this.props.tissueSelected,
     };
   }
 
@@ -47,7 +47,7 @@ class DiscoveryFilters extends React.Component {
         "taxonSelected",
         "timeSelected",
         "tissueSelected",
-        "visibilitySelected"
+        "visibilitySelected",
       ]
     );
 
@@ -64,7 +64,7 @@ class DiscoveryFilters extends React.Component {
         "taxonSelected",
         "timeSelected",
         "tissueSelected",
-        "visibilitySelected"
+        "visibilitySelected",
       ],
       this.state
     );
@@ -76,7 +76,7 @@ class DiscoveryFilters extends React.Component {
     newState[selectedKey] = selected;
     this.setState(newState, this.notifyFilterChangeHandler);
     logAnalyticsEvent(`DiscoveryFilters_${selectedKey.toLowerCase()}_changed`, {
-      selectedKey: selected
+      selectedKey: selected,
     });
   }
 
@@ -118,7 +118,7 @@ class DiscoveryFilters extends React.Component {
               "DiscoveryFilters_tag_removed",
               {
                 value: option.value,
-                text: option.text
+                text: option.text,
               }
             )}
           />
@@ -135,7 +135,7 @@ class DiscoveryFilters extends React.Component {
       taxonSelected,
       timeSelected,
       tissueSelected,
-      visibilitySelected
+      visibilitySelected,
     } = this.state;
 
     const {
@@ -147,7 +147,7 @@ class DiscoveryFilters extends React.Component {
       locationV2,
       time,
       tissue,
-      visibility
+      visibility,
     } = this.props;
 
     return (
@@ -229,7 +229,7 @@ DiscoveryFilters.defaultProps = {
   locationV2: [],
   time: [],
   tissue: [],
-  visibility: []
+  visibility: [],
 };
 
 DiscoveryFilters.propTypes = {
@@ -254,7 +254,7 @@ DiscoveryFilters.propTypes = {
   tissueSelected: PropTypes.array,
   visibilitySelected: PropTypes.string,
 
-  onFilterChange: PropTypes.func
+  onFilterChange: PropTypes.func,
 };
 
 export default DiscoveryFilters;

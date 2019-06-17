@@ -23,3 +23,11 @@ california:
   country_name: "USA"
   state_name: "California"
   locationiq_id: 214330370
+
+sf_county:
+  name: "San Francisco City and County, California, USA"
+  geo_level: "subdivision"
+  country_name: "USA"
+  state_name: "California"
+  subdivision_name: "San Francisco City and County"
+  locationiq_id: 214379825

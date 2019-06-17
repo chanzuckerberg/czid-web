@@ -1,12 +1,15 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { find, merge, pick } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
+import PropTypes from "~/components/utils/propTypes";
+import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
+import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import MapToggle from "~/components/views/discovery/mapping/MapToggle";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
-import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
+
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
 
@@ -26,36 +29,36 @@ class ProjectsView extends React.Component {
               {
                 nameRenderer: this.nameRenderer,
                 detailsRenderer: this.detailsRenderer,
-                visibilityIconRenderer: this.visibilityIconRenderer
+                visibilityIconRenderer: this.visibilityIconRenderer,
               }
             )
           ),
         headerClassName: cs.projectHeader,
-        sortFunction: p => (p.name || "").toLowerCase()
+        sortFunction: p => (p.name || "").toLowerCase(),
       },
       {
         dataKey: "created_at",
         label: "Created On",
         width: 120,
-        cellRenderer: TableRenderers.renderDateWithElapsed
+        cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
         dataKey: "hosts",
         width: 200,
         disableSort: true,
-        cellRenderer: TableRenderers.renderList
+        cellRenderer: TableRenderers.renderList,
       },
       {
         dataKey: "tissues",
         width: 200,
         disableSort: true,
-        cellRenderer: TableRenderers.renderList
+        cellRenderer: TableRenderers.renderList,
       },
       {
         dataKey: "number_of_samples",
         width: 140,
-        label: "No. of Samples"
-      }
+        label: "No. of Samples",
+      },
     ];
   }
 
@@ -85,19 +88,44 @@ class ProjectsView extends React.Component {
     onProjectSelected && onProjectSelected({ project });
     logAnalyticsEvent("ProjectsView_row_clicked", {
       projectId: project.id,
-      projectName: project.name
+      projectName: project.name,
     });
   };
 
+  renderDisplaySwitcher = () => {
+    const { currentDisplay, onDisplaySwitch } = this.props;
+    return (
+      <div className={cs.toggleContainer}>
+        <MapToggle
+          currentDisplay={currentDisplay}
+          onDisplaySwitch={display => {
+            onDisplaySwitch(display);
+            logAnalyticsEvent(`ProjectsView_${display}-switch_clicked`);
+          }}
+        />
+      </div>
+    );
+  };
+
   render() {
-    const { projects } = this.props;
+    const {
+      allowedFeatures,
+      currentDisplay,
+      currentTab,
+      mapLocationData,
+      mapPreviewedLocationId,
+      mapTilerKey,
+      onMapMarkerClick,
+      onMapTooltipTitleClick,
+      projects,
+    } = this.props;
     let data = projects.map(project => {
       return merge(
         {
           project: pick(
             ["name", "description", "owner", "public_access"],
             project
-          )
+          ),
         },
         pick(
           ["id", "created_at", "hosts", "tissues", "number_of_samples"],
@@ -107,22 +135,50 @@ class ProjectsView extends React.Component {
     });
 
     return (
-      <BaseDiscoveryView
-        columns={this.columns}
-        data={data}
-        handleRowClick={this.handleRowClick}
-      />
+      <div className={cs.container}>
+        {allowedFeatures &&
+          allowedFeatures.includes("maps") &&
+          this.renderDisplaySwitcher()}
+        {currentDisplay === "table" ? (
+          <BaseDiscoveryView
+            columns={this.columns}
+            data={data}
+            handleRowClick={this.handleRowClick}
+          />
+        ) : (
+          <div className={cs.map}>
+            <DiscoveryMap
+              currentTab={currentTab}
+              mapLocationData={mapLocationData}
+              mapTilerKey={mapTilerKey}
+              onMarkerClick={onMapMarkerClick}
+              onTooltipTitleClick={onMapTooltipTitleClick}
+              previewedLocationId={mapPreviewedLocationId}
+            />
+          </div>
+        )}
+      </div>
     );
   }
 }
 
 ProjectsView.defaultProps = {
-  projects: []
+  currentDisplay: "table",
+  projects: [],
 };
 
 ProjectsView.propTypes = {
+  allowedFeatures: PropTypes.array,
+  currentDisplay: PropTypes.string.isRequired,
+  currentTab: PropTypes.string.isRequired,
+  mapLocationData: PropTypes.objectOf(PropTypes.Location),
+  mapPreviewedLocationId: PropTypes.number,
+  mapTilerKey: PropTypes.string,
+  onDisplaySwitch: PropTypes.func,
+  onMapMarkerClick: PropTypes.func,
+  onMapTooltipTitleClick: PropTypes.func,
+  onProjectSelected: PropTypes.func,
   projects: PropTypes.array,
-  onProjectSelected: PropTypes.func
 };
 
 export default ProjectsView;

@@ -9,7 +9,7 @@ class Accordion extends React.Component {
   onToggle = () => {
     this.setState({
       open: this.state.wasToggled ? !this.state.open : !this.props.open,
-      wasToggled: true
+      wasToggled: true,
     });
   };
 
@@ -20,7 +20,7 @@ class Accordion extends React.Component {
       toggleable,
       className,
       iconClassName,
-      bottomContentPadding
+      bottomContentPadding,
     } = this.props;
 
     const open = this.state.wasToggled ? this.state.open : this.props.open;
@@ -68,12 +68,12 @@ Accordion.propTypes = {
   // Useful for separating the accordion content from the elements below it.
   bottomContentPadding: PropTypes.bool,
   header: PropTypes.node,
-  children: PropTypes.node
+  children: PropTypes.node,
 };
 
 Accordion.defaultProps = {
   toggleable: true,
-  open: false
+  open: false,
 };
 
 export default Accordion;

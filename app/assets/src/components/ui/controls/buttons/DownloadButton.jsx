@@ -17,7 +17,7 @@ const DownloadButton = ({ disabled, onClick, ...props }) => {
 
 DownloadButton.propTypes = {
   disabled: PropTypes.bool,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
 };
 
 export default DownloadButton;

@@ -1,49 +1,49 @@
 export const SAMPLE_ADDITIONAL_INFO = [
   {
     name: "Sample Name",
-    key: "name"
+    key: "name",
   },
   {
     name: "Project",
-    key: "project_name"
+    key: "project_name",
   },
   {
     name: "Upload Date",
-    key: "upload_date"
+    key: "upload_date",
   },
   {
     name: "Host",
-    key: "host_genome_name"
-  }
+    key: "host_genome_name",
+  },
 ];
 
 export const PIPELINE_INFO_FIELDS = [
   {
     name: "Total Reads",
-    key: "totalReads"
+    key: "totalReads",
   },
   {
     name: "ERCC Reads",
-    key: "totalErccReads"
+    key: "totalErccReads",
   },
   {
     name: "Passed Filters",
-    key: "nonhostReads"
+    key: "nonhostReads",
   },
   {
     name: "Unmapped Reads",
-    key: "unmappedReads"
+    key: "unmappedReads",
   },
   {
     name: "Passed Quality Control",
-    key: "qcPercent"
+    key: "qcPercent",
   },
   {
     name: "Compression Ratio",
-    key: "compressionRatio"
+    key: "compressionRatio",
   },
   {
     name: "Date Processed",
-    key: "lastProcessedAt"
-  }
+    key: "lastProcessedAt",
+  },
 ];

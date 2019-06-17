@@ -12,20 +12,20 @@ export const CATEGORIES = {
     text: BASE_LABEL + " | a",
     color: "red",
     tooltip: "NIAID pathogen priority list | category A",
-    url: NIAID_URL
+    url: NIAID_URL,
   },
   categoryB: {
     text: BASE_LABEL + " | b",
     color: "orange",
     tooltip: "NIAID pathogen priority list | category B",
-    url: NIAID_URL
+    url: NIAID_URL,
   },
   categoryC: {
     text: BASE_LABEL + " | c",
     color: "yellow",
     tooltip: "NIAID pathogen priority list | category C",
-    url: NIAID_URL
-  }
+    url: NIAID_URL,
+  },
 };
 
 const PathogenLabel = ({ type }) => {

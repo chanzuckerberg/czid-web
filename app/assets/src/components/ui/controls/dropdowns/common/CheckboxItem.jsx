@@ -31,7 +31,7 @@ CheckboxItem.propTypes = {
   value: PropTypes.any,
   label: PropTypes.string,
   checked: PropTypes.bool,
-  onOptionClick: PropTypes.func
+  onOptionClick: PropTypes.func,
 };
 
 export default CheckboxItem;

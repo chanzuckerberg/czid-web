@@ -10,7 +10,7 @@ const BackgroundModelFilter = ({ allBackgrounds, value, onChange }) => {
   });
   if (backgroundOptions.length == 0) {
     backgroundOptions = [
-      { text: "No background models to display", value: -1 }
+      { text: "No background models to display", value: -1 },
     ];
     disabled = true;
   }
@@ -29,7 +29,7 @@ const BackgroundModelFilter = ({ allBackgrounds, value, onChange }) => {
 BackgroundModelFilter.propTypes = {
   allBackgrounds: PropTypes.arrayOf(PropTypes.BackgroundData),
   value: PropTypes.number,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
 };
 
 export default BackgroundModelFilter;

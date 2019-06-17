@@ -12,16 +12,16 @@ import cs from "./sample_upload_flow.scss";
 const MENU_OPTIONS = [
   {
     text: "Samples",
-    step: "uploadSamples"
+    step: "uploadSamples",
   },
   {
     text: "Metadata",
-    step: "uploadMetadata"
+    step: "uploadMetadata",
   },
   {
     text: "Review",
-    step: "review"
-  }
+    step: "review",
+  },
 ];
 
 class SampleUploadFlowHeader extends React.Component {
@@ -86,7 +86,7 @@ class SampleUploadFlowHeader extends React.Component {
                       "SampleUploadFlowHeader_step-option_clicked",
                       {
                         step: val.step,
-                        text: val.text
+                        text: val.text,
                       }
                     );
                   }}
@@ -108,7 +108,7 @@ SampleUploadFlowHeader.propTypes = {
   samples: PropTypes.arrayOf(PropTypes.Sample),
   project: PropTypes.Project,
   onStepSelect: PropTypes.func.isRequired,
-  stepsEnabled: PropTypes.objectOf(PropTypes.bool)
+  stepsEnabled: PropTypes.objectOf(PropTypes.bool),
 };
 
 export default SampleUploadFlowHeader;

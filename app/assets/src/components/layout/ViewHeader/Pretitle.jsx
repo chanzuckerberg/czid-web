@@ -22,7 +22,7 @@ class Pretitle extends React.Component {
 
 Pretitle.propTypes = {
   breadcrumbLink: PropTypes.string,
-  children: PropTypes.node
+  children: PropTypes.node,
 };
 
 export default Pretitle;

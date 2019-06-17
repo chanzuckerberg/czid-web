@@ -148,7 +148,7 @@ const HumanIcon = props => {
 };
 
 HumanIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default HumanIcon;

@@ -12,7 +12,7 @@ class ProjectSelection extends React.Component {
     super(props);
     this.nanobar = new Nanobar({
       id: "prog-bar",
-      class: "prog-bar"
+      class: "prog-bar",
     });
     this.csrf = props.csrf;
     this.favoriteProjects = props.favoriteProjects;
@@ -27,7 +27,7 @@ class ProjectSelection extends React.Component {
       formattedFavProjectList: [],
       favIds: [],
       showLess: true,
-      showLessFavorites: true
+      showLessFavorites: true,
     };
   }
 
@@ -46,7 +46,7 @@ class ProjectSelection extends React.Component {
 
   toggleDisplayFavProjects() {
     this.setState(prevState => ({
-      showLessFavorites: !prevState.showLessFavorites
+      showLessFavorites: !prevState.showLessFavorites,
     }));
   }
 
@@ -61,7 +61,7 @@ class ProjectSelection extends React.Component {
           favStatus == "true" ? "remove_favorite" : "add_favorite"
         }?`,
         {
-          authenticity_token: this.csrf
+          authenticity_token: this.csrf,
         }
       )
       .then(() => {
@@ -94,7 +94,7 @@ class ProjectSelection extends React.Component {
     this.setState({
       formattedProjectList: formattedList,
       formattedFavProjectList: favProjects,
-      favIds: favIds
+      favIds: favIds,
     });
 
     return formattedList;
@@ -142,7 +142,7 @@ class ProjectSelection extends React.Component {
       favIds.splice(projectIdIndex, 1);
       this.setState({
         formattedFavProjectList: updatedFavouriteProjects,
-        favIds
+        favIds,
       });
     }
   }
@@ -154,9 +154,9 @@ class ProjectSelection extends React.Component {
     this.setState({
       formattedFavProjectList: [
         ...this.state.formattedFavProjectList,
-        ...updatedProject
+        ...updatedProject,
       ],
-      favIds: [...this.state.favIds, updatedProject[0].id]
+      favIds: [...this.state.favIds, updatedProject[0].id],
     });
   }
 

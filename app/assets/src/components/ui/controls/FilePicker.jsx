@@ -7,7 +7,7 @@ import cs from "./file_picker.scss";
 
 class FilePicker extends React.Component {
   state = {
-    file: null
+    file: null,
   };
 
   // Default handler for dropped files being rejected
@@ -21,7 +21,7 @@ class FilePicker extends React.Component {
   onChange = accepted => {
     if (accepted.length > 0) {
       this.setState({
-        file: accepted[0]
+        file: accepted[0],
       });
     }
   };
@@ -33,7 +33,7 @@ class FilePicker extends React.Component {
       onRejected,
       title,
       multiFile,
-      className
+      className,
     } = this.props;
     const file = this.props.file || this.state.file;
     let content;
@@ -83,7 +83,7 @@ FilePicker.propTypes = {
   message: PropTypes.string,
   title: PropTypes.string,
   onRejected: PropTypes.func,
-  multiFile: PropTypes.bool
+  multiFile: PropTypes.bool,
 };
 
 export default FilePicker;

@@ -84,7 +84,7 @@ class ReadViz extends React.Component {
     let quality_string_display = [
       white_space_left,
       quality_string,
-      white_space_right
+      white_space_right,
     ].join("|");
 
     // generate quality string
@@ -93,7 +93,7 @@ class ReadViz extends React.Component {
       read_part: readPart,
       ref_display: ref_seq_display,
       read_display: read_seq_display,
-      quality_display: quality_string_display
+      quality_display: quality_string_display,
     };
   }
 
@@ -160,7 +160,7 @@ class ReadViz extends React.Component {
           style={{
             whiteSpace: "pre",
             fontFamily: "monospace",
-            overflow: "scroll"
+            overflow: "scroll",
           }}
         >
           <table>

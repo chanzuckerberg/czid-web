@@ -18,15 +18,8 @@ joe:
   name: User Three
   allowed_features: "[\"pipeline_viz\"]"
 
-joe_dd:
-  email: joe_dd@gmail.com
-  encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
-  name: User Three
-  allowed_features: "[\"data_discovery\"]"
-
 admin:
   email: admin@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
   name: Admin User
   role: 1
-  allowed_features: "[\"data_discovery\"]"

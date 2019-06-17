@@ -25,14 +25,14 @@ class PlaygroundControls extends React.Component {
         value: 1,
         suboptions: [
           { text: "suboption a", value: "a" },
-          { text: "suboption b", value: "b" }
-        ]
+          { text: "suboption b", value: "b" },
+        ],
       },
-      { text: "Option 3", value: 2 }
+      { text: "Option 3", value: 2 },
     ];
 
     this.state = {
-      event: ""
+      event: "",
     };
   }
 
@@ -60,7 +60,7 @@ class PlaygroundControls extends React.Component {
                 label={<BetaLabel />}
                 text="Submit"
                 onClick={() => this.setState({ event: "PrimaryButton:Click" })}
-              />
+              />,
             ]}
           />
           <ComponentCard
@@ -81,7 +81,7 @@ class PlaygroundControls extends React.Component {
                 onClick={() =>
                   this.setState({ event: "SecondaryButton:Click" })
                 }
-              />
+              />,
             ]}
           />
           <ComponentCard
@@ -97,10 +97,10 @@ class PlaygroundControls extends React.Component {
                 disabled
                 onClick={() =>
                   this.setState({
-                    event: "CompareButton:Click: should not show up!"
+                    event: "CompareButton:Click: should not show up!",
                   })
                 }
-              />
+              />,
             ]}
           />
           <ComponentCard
@@ -127,7 +127,7 @@ class PlaygroundControls extends React.Component {
                 onClick={option =>
                   this.setState({ event: "DropdownButton:Change", option })
                 }
-              />
+              />,
             ]}
           />
           <ComponentCard
@@ -154,7 +154,7 @@ class PlaygroundControls extends React.Component {
                 onClick={option =>
                   this.setState({ event: "DropdownButton:Change", option })
                 }
-              />
+              />,
             ]}
           />
           <ComponentCard
@@ -179,7 +179,7 @@ class PlaygroundControls extends React.Component {
                 onClick={option =>
                   this.setState({ event: "DropdownButton:Clicked", option })
                 }
-              />
+              />,
             ]}
           />
           <ComponentCard
@@ -204,7 +204,7 @@ class PlaygroundControls extends React.Component {
                 onClick={option =>
                   this.setState({ event: "DropdownButton:Clicked", option })
                 }
-              />
+              />,
             ]}
           />
           <ComponentCard
@@ -217,7 +217,7 @@ class PlaygroundControls extends React.Component {
                 onApply={vars => {
                   this.setState({
                     event: "ThresholdFilterDropdown:Apply",
-                    vars
+                    vars,
                   });
                 }}
               />,
@@ -228,10 +228,10 @@ class PlaygroundControls extends React.Component {
                 onApply={vars => {
                   this.setState({
                     event: "ThresholdFilterDropdown:Apply",
-                    vars
+                    vars,
                   });
                 }}
-              />
+              />,
             ]}
           />
           <ComponentCard
@@ -254,7 +254,7 @@ class PlaygroundControls extends React.Component {
                 options={this.dropdownOptions}
                 label="Option"
                 onChange={() => this.setState({ event: "Dropdown:Change" })}
-              />
+              />,
             ]}
           />
           <ComponentCard
@@ -281,7 +281,7 @@ class PlaygroundControls extends React.Component {
                 onChange={() =>
                   this.setState({ event: "MultipleDropdown:Change" })
                 }
-              />
+              />,
             ]}
           />
           <ComponentCard
@@ -297,7 +297,7 @@ class PlaygroundControls extends React.Component {
                 onChange={(a, b) => {
                   this.setState({ event: "MultipleDropdown:Change" });
                 }}
-              />
+              />,
             ]}
           />
           <ComponentCard
@@ -328,7 +328,7 @@ class PlaygroundControls extends React.Component {
                 min={0}
                 max={100}
                 value={20}
-              />
+              />,
             ]}
           />
           <ComponentCard
@@ -347,7 +347,7 @@ class PlaygroundControls extends React.Component {
                 label="Checkbox"
                 onChange={() => this.setState({ event: "Checkbox:Change" })}
                 value={1}
-              />
+              />,
             ]}
           />
         </div>
@@ -361,7 +361,7 @@ class PlaygroundControls extends React.Component {
 }
 
 PlaygroundControls.propTypes = {
-  thresholdFilters: PropTypes.object
+  thresholdFilters: PropTypes.object,
 };
 
 const ComponentCard = ({ title, components, width }) => {
@@ -383,7 +383,7 @@ const ComponentCard = ({ title, components, width }) => {
 ComponentCard.propTypes = {
   components: PropTypes.arrayOf(PropTypes.node),
   title: PropTypes.string,
-  width: PropTypes.number
+  width: PropTypes.number,
 };
 
 export default PlaygroundControls;

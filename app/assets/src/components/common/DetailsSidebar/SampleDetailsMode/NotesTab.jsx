@@ -6,12 +6,12 @@ import cs from "./sample_details_mode.scss";
 
 class NotesTab extends React.Component {
   state = {
-    editing: false
+    editing: false,
   };
 
   toggleEditing = () => {
     this.setState({
-      editing: !this.state.editing
+      editing: !this.state.editing,
     });
   };
 
@@ -21,7 +21,7 @@ class NotesTab extends React.Component {
       onNoteChange,
       onNoteSave,
       savePending,
-      editable
+      editable,
     } = this.props;
 
     const notesEmpty = !notes || notes.length === 0;
@@ -63,7 +63,7 @@ NotesTab.propTypes = {
   editable: PropTypes.bool,
   onNoteChange: PropTypes.func.isRequired,
   onNoteSave: PropTypes.func.isRequired,
-  savePending: PropTypes.bool
+  savePending: PropTypes.bool,
 };
 
 export default NotesTab;

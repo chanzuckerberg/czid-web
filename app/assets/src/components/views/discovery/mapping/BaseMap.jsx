@@ -19,8 +19,8 @@ class BaseMap extends React.Component {
         height,
         latitude,
         longitude,
-        zoom
-      }
+        zoom,
+      },
     };
   }
 
@@ -97,7 +97,7 @@ BaseMap.propTypes = {
   viewBounds: PropTypes.objectOf(PropTypes.number),
   tooltip: PropTypes.node,
   markers: PropTypes.array,
-  popups: PropTypes.array
+  popups: PropTypes.array,
 };
 
 BaseMap.defaultProps = {
@@ -116,8 +116,8 @@ BaseMap.defaultProps = {
     // Limit to whole-world view
     minZoom: 0.5,
     // Limit to city-level at most
-    maxZoom: 17
-  }
+    maxZoom: 17,
+  },
 };
 
 export default BaseMap;

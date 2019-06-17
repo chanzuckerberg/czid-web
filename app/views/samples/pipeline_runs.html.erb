@@ -22,7 +22,7 @@
 <% end %>
 
 <% pipeline_run = @sample.first_pipeline_run %>
-<% if pipeline_run.completed? %>
+<% if pipeline_run && pipeline_run.completed? %>
   <%= button_to 'rerun from top', kickoff_pipeline_sample_path(@sample), method: :put, form: {target: '_blank'} %>
 <% end %>
 
@@ -34,8 +34,9 @@
           <th> Job Id </th>
           <th> Job Log </th>
           <th>Remaining reads</th>
-          <th>Pipeline Version</th>
+          <th>Version</th>
           <th>Job Started</th>
+          <th>Duration</th>
         </tr>
       </thead>
       <tbody>
@@ -52,6 +53,7 @@
                 <td><%= pipeline_run.adjusted_remaining_reads %> &nbsp;</td>
                 <td><%= pipeline_run.pipeline_version %> &nbsp;</td>
                 <td><%= run_stage.created_at %></td>
+                <td><%= run_stage.duration_hrs %></td>
                </tr>
             <% end %>
             <% if pipeline_run.output_states.present? %>

@@ -1,11 +1,24 @@
-import React from "react";
 import cx from "classnames";
-import { difference, find, isEmpty, union } from "lodash/fp";
+import {
+  difference,
+  find,
+  isEmpty,
+  merge,
+  pick,
+  union,
+  upperFirst,
+} from "lodash/fp";
+import React from "react";
 
-import PropTypes from "~/components/utils/propTypes";
-import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
+import Tabs from "~/components/ui/controls/Tabs";
+import PropTypes from "~/components/utils/propTypes";
+import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
+import DiscoverySidebar from "~/components/views/discovery/DiscoverySidebar";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
+import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
+import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 
 import cs from "./map_preview_sidebar.scss";
 
@@ -16,34 +29,34 @@ export default class MapPreviewSidebar extends React.Component {
     const { initialSelectedSampleIds } = this.props;
 
     this.state = {
-      selectedSampleIds: initialSelectedSampleIds || new Set()
+      selectedSampleIds: initialSelectedSampleIds || new Set(),
     };
 
-    this.columns = [
+    this.sampleColumns = [
       {
         dataKey: "sample",
         flexGrow: 1,
         width: 150,
         cellRenderer: cellData => TableRenderers.renderSample(cellData, false),
-        headerClassName: cs.sampleHeader
+        headerClassName: cs.sampleHeader,
       },
       {
         dataKey: "createdAt",
         label: "Uploaded On",
         className: cs.basicCell,
-        cellRenderer: TableRenderers.renderDateWithElapsed
+        cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
         dataKey: "host",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       // If you already have access to Maps, just see Location V2 here.
       {
         dataKey: "collectionLocationV2",
         label: "Location",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "totalReads",
@@ -51,14 +64,14 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumberWithCommas(rowData[dataKey])
+          TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
         dataKey: "nonHostReads",
         label: "Passed Filters",
         flexGrow: 1,
         className: cs.basicCell,
-        cellRenderer: TableRenderers.renderNumberAndPercentage
+        cellRenderer: TableRenderers.renderNumberAndPercentage,
       },
       {
         dataKey: "qcPercent",
@@ -66,7 +79,7 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatPercentage(rowData[dataKey])
+          TableRenderers.formatPercentage(rowData[dataKey]),
       },
       {
         dataKey: "duplicateCompressionRatio",
@@ -74,7 +87,7 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatPercentage(rowData[dataKey])
+          TableRenderers.formatPercentage(rowData[dataKey]),
       },
       {
         dataKey: "erccReads",
@@ -82,24 +95,24 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumberWithCommas(rowData[dataKey])
+          TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
         dataKey: "notes",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "nucleotideType",
         label: "Nucleotide Type",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "sampleType",
         label: "Sample Type",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "subsampledFraction",
@@ -107,7 +120,7 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumber(rowData[dataKey])
+          TableRenderers.formatNumber(rowData[dataKey]),
       },
       {
         dataKey: "totalRuntime",
@@ -115,8 +128,61 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatDuration(rowData[dataKey])
-      }
+          TableRenderers.formatDuration(rowData[dataKey]),
+      },
+    ];
+
+    this.projectColumns = [
+      {
+        dataKey: "project",
+        flexGrow: 1,
+        width: 350,
+        cellRenderer: ({ cellData }) =>
+          TableRenderers.renderItemDetails(
+            merge(
+              { cellData },
+              {
+                nameRenderer: p => p.name,
+                detailsRenderer: p => (
+                  <div>
+                    <span>{p.owner}</span>
+                  </div>
+                ),
+                visibilityIconRenderer: p =>
+                  p && p.public_access ? (
+                    <PublicProjectIcon />
+                  ) : (
+                    <PrivateProjectIcon />
+                  ),
+              }
+            )
+          ),
+        headerClassName: cs.projectHeader,
+        sortFunction: p => (p.name || "").toLowerCase(),
+      },
+      {
+        dataKey: "created_at",
+        label: "Created On",
+        width: 100,
+        cellRenderer: TableRenderers.renderDateWithElapsed,
+      },
+      {
+        dataKey: "hosts",
+        width: 100,
+        disableSort: true,
+        cellRenderer: TableRenderers.renderList,
+      },
+      {
+        dataKey: "tissues",
+        width: 100,
+        disableSort: true,
+        cellRenderer: TableRenderers.renderList,
+      },
+      {
+        dataKey: "number_of_samples",
+        width: 100,
+        label: "No. of Samples",
+      },
     ];
   }
 
@@ -138,17 +204,27 @@ export default class MapPreviewSidebar extends React.Component {
     this.setSelectedSampleIds(newSelected);
 
     logAnalyticsEvent("MapPreviewSidebar_row_selected", {
-      selectedSampleIds: newSelected.length
+      selectedSampleIds: newSelected.length,
     });
   };
 
-  handleRowClick = ({ event, rowData }) => {
+  handleSampleRowClick = ({ event, rowData }) => {
     const { onSampleClicked, samples } = this.props;
     const sample = find({ id: rowData.id }, samples);
     onSampleClicked && onSampleClicked({ sample, currentEvent: event });
-    logAnalyticsEvent("MapPreviewSidebar_row_clicked", {
+    logAnalyticsEvent("MapPreviewSidebar_sample-row_clicked", {
       sampleId: sample.id,
-      sampleName: sample.name
+      sampleName: sample.name,
+    });
+  };
+
+  handleProjectRowClick = ({ rowData }) => {
+    const { onProjectSelected, projects } = this.props;
+    const project = find({ id: rowData.id }, projects);
+    onProjectSelected && onProjectSelected({ project });
+    logAnalyticsEvent("MapPreviewSidebar_project-row_clicked", {
+      projectId: project.id,
+      projectName: project.name,
     });
   };
 
@@ -180,13 +256,32 @@ export default class MapPreviewSidebar extends React.Component {
     onSelectionUpdate && onSelectionUpdate(selectedSampleIds);
   };
 
+  computeTabs = () => {
+    const { discoveryCurrentTab: tab, projects, samples } = this.props;
+    const count = (tab === "samples" ? samples : projects || []).length;
+    return [
+      {
+        label: "Summary",
+        value: "summary",
+      },
+      {
+        label: (
+          <div>
+            <span className={cs.tabLabel}>{upperFirst(tab)}</span>
+            {count > 0 && <span className={cs.tabCounter}>{count}</span>}
+          </div>
+        ),
+        value: tab,
+      },
+    ];
+  };
+
   reset = () => {
     this.infiniteTable && this.infiniteTable.reset();
     this.setSelectedSampleIds(new Set());
   };
 
   renderTable = () => {
-    const { activeColumns, protectedColumns } = this.props;
     const { selectedSampleIds } = this.state;
 
     const rowHeight = 60;
@@ -196,15 +291,15 @@ export default class MapPreviewSidebar extends React.Component {
       <div className={cs.container}>
         <div className={cs.table}>
           <InfiniteTable
-            columns={this.columns}
+            columns={this.sampleColumns}
             defaultRowHeight={rowHeight}
-            initialActiveColumns={activeColumns}
+            initialActiveColumns={["sample"]}
             minimumBatchSize={batchSize}
             onLoadRows={this.handleLoadSampleRows}
-            onRowClick={this.handleRowClick}
+            onRowClick={this.handleSampleRowClick}
             onSelectAllRows={this.handleSelectAllRows}
             onSelectRow={this.handleSelectRow}
-            protectedColumns={protectedColumns}
+            protectedColumns={["sample"]}
             ref={infiniteTable => (this.infiniteTable = infiniteTable)}
             rowClassName={cs.tableDataRow}
             rowCount={batchSize}
@@ -220,34 +315,116 @@ export default class MapPreviewSidebar extends React.Component {
 
   renderNoData = () => {
     return (
-      <div className={cs.noData}>
-        Select a location to see summary info and samples.
-      </div>
+      <div className={cs.noData}>Select a location to preview samples.</div>
     );
   };
 
+  renderSummaryTab = () => {
+    const {
+      allowedFeatures,
+      discoveryCurrentTab,
+      loading,
+      projectDimensions,
+      projectStats,
+      sampleDimensions,
+      sampleStats,
+    } = this.props;
+
+    return (
+      <DiscoverySidebar
+        allowedFeatures={allowedFeatures}
+        className={cs.summaryInfo}
+        currentTab={discoveryCurrentTab}
+        loading={loading}
+        projectDimensions={projectDimensions}
+        projectStats={projectStats}
+        sampleDimensions={sampleDimensions}
+        sampleStats={sampleStats}
+      />
+    );
+  };
+
+  renderSamplesTab = () => {
+    const { samples } = this.props;
+    return samples.length === 0 ? this.renderNoData() : this.renderTable();
+  };
+
+  renderProjectsTab = () => {
+    const { projects } = this.props;
+    let data = projects.map(project => {
+      return merge(
+        {
+          project: pick(
+            ["name", "description", "owner", "public_access"],
+            project
+          ),
+        },
+        pick(
+          ["id", "created_at", "hosts", "tissues", "number_of_samples"],
+          project
+        )
+      );
+    });
+
+    return (
+      <BaseDiscoveryView
+        columns={this.projectColumns}
+        initialActiveColumns={["project", "number_of_samples"]}
+        protectedColumns={["project"]}
+        data={data}
+        handleRowClick={this.handleProjectRowClick}
+      />
+    );
+  };
+
+  renderTabContent = tab => {
+    switch (tab) {
+      case "samples":
+        return this.renderSamplesTab();
+      case "projects":
+        return this.renderProjectsTab();
+      default:
+        return this.renderSummaryTab();
+    }
+  };
+
   render() {
-    const { className, samples } = this.props;
+    const { className, currentTab, onTabChange } = this.props;
     return (
       <div className={cx(className, cs.sidebar)}>
-        {samples.length === 0 ? this.renderNoData() : this.renderTable()}
+        <Tabs
+          className={cs.tabs}
+          hideBorder
+          onChange={onTabChange}
+          tabs={this.computeTabs()}
+          value={currentTab}
+        />
+        {this.renderTabContent(currentTab)}
       </div>
     );
   }
 }
 
 MapPreviewSidebar.defaultProps = {
-  activeColumns: ["sample"],
-  protectedColumns: ["sample"]
+  currentTab: "summary",
 };
 
 MapPreviewSidebar.propTypes = {
-  activeColumns: PropTypes.array,
+  allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   className: PropTypes.string,
+  currentTab: PropTypes.string,
+  discoveryCurrentTab: PropTypes.string,
   initialSelectedSampleIds: PropTypes.instanceOf(Set),
+  loading: PropTypes.bool,
+  onProjectSelected: PropTypes.func,
   onSampleClicked: PropTypes.func,
   onSelectionUpdate: PropTypes.func,
-  protectedColumns: PropTypes.array,
+  onTabChange: PropTypes.func,
+  projectDimensions: PropTypes.array,
+  projectStats: PropTypes.object,
+  projects: PropTypes.array,
+  sampleDimensions: PropTypes.array,
   samples: PropTypes.array,
-  selectableIds: PropTypes.array.isRequired
+  sampleStats: PropTypes.object,
+  selectableIds: PropTypes.array.isRequired,
 };

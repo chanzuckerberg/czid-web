@@ -18,7 +18,7 @@ export default class DetailCells extends React.Component {
       backgroundData,
       showAssemblyColumns,
       handleMouseEnter,
-      handleMouseLeave
+      handleMouseLeave,
     } = this.props;
 
     return taxons.map(taxInfo => (
@@ -95,5 +95,5 @@ DetailCells.propTypes = {
   backgroundData: PropTypes.BackgroundData,
   showAssemblyColumns: PropTypes.bool,
   handleMouseEnter: PropTypes.func,
-  handleMouseLeave: PropTypes.func
+  handleMouseLeave: PropTypes.func,
 };

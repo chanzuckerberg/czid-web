@@ -16,7 +16,7 @@ class ListNotification extends React.Component {
       className,
       label,
       listItems,
-      listItemName
+      listItemName,
     } = this.props;
     return (
       <Notification
@@ -55,7 +55,7 @@ ListNotification.propTypes = {
   type: PropTypes.oneOf(["success", "info", "warn", "error"]),
   label: PropTypes.node,
   listItems: PropTypes.arrayOf(PropTypes.string),
-  listItemName: PropTypes.string
+  listItemName: PropTypes.string,
 };
 
 export default ListNotification;

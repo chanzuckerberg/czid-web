@@ -24,9 +24,12 @@ class Location < ApplicationRecord
     location_api_request(endpoint_query)
   end
 
-  # Search request to Location IQ API by country and state
-  def self.geosearch_by_country_and_state(country_name, state_name)
-    endpoint_query = "#{GEOSEARCH_BASE_QUERY}&country=#{country_name}&state=#{state_name}"
+  # Search request to Location IQ API by country, state, and subdivision (or left subset)
+  def self.geosearch_by_levels(country_name, state_name = "", subdivision_name = "")
+    # Note: Don't use field="" because provider results differ vs. not including the param at all.
+    endpoint_query = "#{GEOSEARCH_BASE_QUERY}&country=#{country_name}"
+    endpoint_query += "&state=#{state_name}" if state_name.present?
+    endpoint_query += "&county=#{subdivision_name}" if subdivision_name.present?
     location_api_request(endpoint_query)
   end
 
@@ -65,14 +68,15 @@ class Location < ApplicationRecord
     end
   end
 
-  # Restrict Human location specificity to State, Country. Return new Location if restriction added.
+  # Restrict Human location specificity to Subdivision, State, Country. Return new Location if
+  # restriction added.
   def self.check_and_restrict_specificity(location, host_genome_name)
-    # We don't want Human locations with subdivision or city
-    if host_genome_name == "Human" && (location.subdivision_name.present? || location.city_name.present?)
-      # Redo the search for just the country/state
-      success, resp = geosearch_by_country_and_state(location.country_name, location.state_name)
+    # We don't want Human locations with city
+    if host_genome_name == "Human" && location.city_name.present?
+      # Redo the search for just the subdivision/state/country
+      success, resp = geosearch_by_levels(location.country_name, location.state_name, location.subdivision_name)
       unless success && !resp.empty?
-        raise "Couldn't find #{location.state_name}, #{location.country_name} (state, country)"
+        raise "Couldn't find #{location.country_name}, #{location.state_name}, #{location.subdivision_name} (country, state, subdivision)"
       end
 
       result = LocationHelper.adapt_location_iq_response(resp[0])

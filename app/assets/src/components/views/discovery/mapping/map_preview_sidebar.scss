@@ -1,4 +1,5 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .sidebar {
   font-size: 12px;
@@ -22,6 +23,26 @@
   .noData {
     color: $medium-grey;
     margin: 20px;
+    text-align: center;
+  }
+
+  .tabs {
+    margin: 15px 10px;
+
+    .tabLabel {
+      font-size: $font-size-h6;
+      margin-right: 10px;
+    }
+
+    .tabCounter {
+      color: $medium-grey;
+      font-size: $font-size;
+      font-weight: $font-weight-regular;
+    }
+  }
+
+  .summaryInfo {
+    width: initial;
   }
 }
 
@@ -36,6 +57,7 @@
   margin-top: 2px;
 }
 
-.sampleHeader {
+.sampleHeader,
+.projectHeader {
   text-align: left;
 }

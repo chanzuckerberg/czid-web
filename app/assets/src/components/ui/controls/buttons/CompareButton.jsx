@@ -16,7 +16,7 @@ const CompareButton = ({ disabled, onClick }) => {
 
 CompareButton.propTypes = {
   disabled: PropTypes.bool,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
 };
 
 export default CompareButton;

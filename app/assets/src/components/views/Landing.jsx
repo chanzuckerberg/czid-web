@@ -8,7 +8,7 @@ import {
   Grid,
   Image,
   Message,
-  Divider
+  Divider,
 } from "semantic-ui-react";
 import Container from "../ui/containers/Container";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
@@ -28,7 +28,7 @@ class Landing extends React.Component {
       email: "",
       institution: "",
       usage: "",
-      submitMessage: ""
+      submitMessage: "",
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -51,8 +51,8 @@ class Landing extends React.Component {
           lastName: this.state.lastName,
           email: this.state.email,
           institution: this.state.institution,
-          usage: this.state.usage
-        }
+          usage: this.state.usage,
+        },
       })
       .then(() => {
         this.setState({
@@ -62,13 +62,13 @@ class Landing extends React.Component {
           institution: "",
           usage: "",
           submitMessage:
-            "Thanks for your interest! Our product team will be in touch about accessing IDseq. If your team is already on IDseq, ask a collaborator to add you to a project to get immediate access."
+            "Thanks for your interest! Our product team will be in touch about accessing IDseq. If your team is already on IDseq, ask a collaborator to add you to a project to get immediate access.",
         });
       })
       .catch(() => {
         this.setState({
           submitMessage:
-            "There was an error submitting the form. Please check required fields and try again."
+            "There was an error submitting the form. Please check required fields and try again.",
         });
       });
   }
@@ -330,7 +330,7 @@ class Landing extends React.Component {
 Landing.propTypes = {
   contactEmail: PropTypes.string.isRequired,
   showBulletin: PropTypes.bool,
-  browserInfo: PropTypes.object
+  browserInfo: PropTypes.object,
 };
 
 export default Landing;

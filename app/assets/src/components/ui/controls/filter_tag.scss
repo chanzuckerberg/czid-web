@@ -1,8 +1,9 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
-.filterTag {
+:global(.ui):global(.label).filterTag {
+  @include font-tag-s;
   background: $primary-light !important;
   border-color: $primary-light !important;
   color: $white !important;
-  margin: 0.4em;
 }

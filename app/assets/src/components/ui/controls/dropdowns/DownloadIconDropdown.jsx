@@ -30,7 +30,7 @@ DownloadIconDropdown.propTypes = forbidExtraProps({
   disabled: PropTypes.bool,
   options: PropTypes.array,
   onClick: PropTypes.func,
-  direction: PropTypes.oneOf(["left", "right"])
+  direction: PropTypes.oneOf(["left", "right"]),
 });
 
 export default DownloadIconDropdown;
