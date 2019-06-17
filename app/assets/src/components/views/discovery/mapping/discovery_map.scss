@@ -5,8 +5,9 @@
   @include font-body-xxs;
 
   background: $white;
-  color: red;
   margin: 8px auto auto;
+  padding: 8px;
   text-align: center;
   width: 60%;
+  border-radius: 2px;
 }
