@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
 import moment from "moment";
 import {
+  at,
   capitalize,
   clone,
   compact,
@@ -102,13 +103,14 @@ class DiscoveryView extends React.Component {
         loadingVisualizations: true,
         mapLocationData: {},
         mapPreviewedLocationId: null,
+        mapPreviewedProjects: [],
         mapPreviewedSampleIds: [],
         mapPreviewedSamples: [],
         mapSidebarProjectDimensions: [],
         mapSidebarSampleDimensions: [],
         mapSidebarSampleStats: {},
         mapSidebarSelectedSampleIds: new Set(),
-        mapSidebarTab: "Summary",
+        mapSidebarTab: "summary",
         project: null,
         projectDimensions: [],
         projectId: projectId,
@@ -145,6 +147,7 @@ class DiscoveryView extends React.Component {
     const urlFields = [
       "currentTab",
       "filters",
+      "mapSidebarTab",
       "projectId",
       "search",
       "showFilters",
@@ -293,13 +296,17 @@ class DiscoveryView extends React.Component {
       search,
     });
 
-    this.setState({
-      project: projectId ? projects[0] : null,
-      projects,
-      visualizations,
-      loadingProjects: false,
-      loadingVisualizations: false,
-    });
+    this.setState(
+      {
+        project: projectId ? projects[0] : null,
+        projects,
+        visualizations,
+        loadingProjects: false,
+        loadingVisualizations: false,
+      },
+      // Uses 'projects'
+      this.refreshMapPreviewedProjects
+    );
   };
 
   refreshDimensions = async () => {
@@ -386,10 +393,10 @@ class DiscoveryView extends React.Component {
       search,
     });
 
-    this.setState(
-      { mapLocationData, loadingLocations: false },
-      this.refreshMapPreviewedSamples
-    );
+    this.setState({ mapLocationData, loadingLocations: false }, () => {
+      this.refreshMapPreviewedSamples();
+      this.refreshMapPreviewedProjects();
+    });
   };
 
   computeTabs = () => {
@@ -428,6 +435,7 @@ class DiscoveryView extends React.Component {
   };
 
   handleTabChange = currentTab => {
+    const { mapSidebarTab } = this.state;
     this.setState({ currentTab }, () => {
       this.updateBrowsingHistory("replace");
       const name = currentTab.replace(/\W+/g, "-").toLowerCase();
@@ -435,6 +443,10 @@ class DiscoveryView extends React.Component {
         currentTab: currentTab,
       });
     });
+
+    // Set to match 'samples' or 'projects'
+    if (mapSidebarTab !== "summary")
+      this.setState({ mapSidebarTab: currentTab });
   };
 
   handleFilterChange = selectedFilters => {
@@ -592,9 +604,11 @@ class DiscoveryView extends React.Component {
   };
 
   handleProjectSelected = ({ project }) => {
+    const { mapSidebarTab } = this.state;
     this.setState(
       {
         currentTab: "samples",
+        mapSidebarTab: mapSidebarTab === "summary" ? mapSidebarTab : "samples",
         project,
         projectId: project.id,
         search: null,
@@ -706,8 +720,17 @@ class DiscoveryView extends React.Component {
   };
 
   handleMapTooltipTitleClick = locationId => {
-    this.setState({ mapPreviewedLocationId: locationId }, () =>
-      this.refreshMapPreviewedSamples()
+    const { currentTab } = this.state;
+    this.setState(
+      {
+        mapPreviewedLocationId: locationId,
+        mapSidebarTab: currentTab,
+        showStats: true,
+      },
+      () => {
+        this.refreshMapPreviewedSamples();
+        this.refreshMapPreviewedProjects();
+      }
     );
   };
 
@@ -717,7 +740,10 @@ class DiscoveryView extends React.Component {
         mapPreviewedLocationId: locationId,
         showStats: true,
       },
-      this.refreshMapPreviewedSamples
+      () => {
+        this.refreshMapPreviewedSamples();
+        this.refreshMapPreviewedProjects();
+      }
     );
   };
 
@@ -746,8 +772,8 @@ class DiscoveryView extends React.Component {
     });
     this.setState(
       {
-        mapPreviewedSamples: fetchedSamples,
         mapPreviewedSampleIds: fetchedSampleIds,
+        mapPreviewedSamples: fetchedSamples,
       },
       () => {
         this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
@@ -779,6 +805,20 @@ class DiscoveryView extends React.Component {
     });
   };
 
+  // This uses 'projects' so it comes after refreshSynchronousData
+  refreshMapPreviewedProjects = async () => {
+    const { mapLocationData, mapPreviewedLocationId, projects } = this.state;
+
+    if (!mapPreviewedLocationId) return;
+
+    const projectIds = mapLocationData[mapPreviewedLocationId].project_ids;
+    const mapPreviewedProjects = at(projectIds, keyBy("id", projects));
+
+    this.setState({ mapPreviewedProjects }, () => {
+      this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
+    });
+  };
+
   handleMapSidebarSelectUpdate = mapSidebarSelectedSampleIds => {
     this.setState({ mapSidebarSelectedSampleIds });
   };
@@ -797,6 +837,7 @@ class DiscoveryView extends React.Component {
       filteredSampleStats,
       loadingDimensions,
       loadingStats,
+      mapPreviewedProjects,
       mapPreviewedSampleIds,
       mapPreviewedSamples,
       mapSidebarProjectDimensions,
@@ -822,14 +863,15 @@ class DiscoveryView extends React.Component {
     return (
       <div className={cs.rightPane}>
         {showStats &&
-          currentTab === "samples" &&
-          currentDisplay === "map" && (
+          currentTab !== "visualizations" &&
+          (currentDisplay === "map" ? (
             <MapPreviewSidebar
               allowedFeatures={allowedFeatures}
               currentTab={mapSidebarTab}
               discoveryCurrentTab={currentTab}
               initialSelectedSampleIds={mapSidebarSelectedSampleIds}
               loading={loading}
+              onProjectSelected={this.handleProjectSelected}
               onSampleClicked={this.handleSampleSelected}
               onSelectionUpdate={this.handleMapSidebarSelectUpdate}
               onTabChange={this.handleMapSidebarTabChange}
@@ -837,6 +879,9 @@ class DiscoveryView extends React.Component {
                 isEmpty(mapSidebarProjectDimensions)
                   ? computedProjectDimensions
                   : mapSidebarProjectDimensions
+              }
+              projects={
+                isEmpty(mapPreviewedProjects) ? projects : mapPreviewedProjects
               }
               projectStats={
                 isEmpty(mapSidebarSampleStats)
@@ -859,10 +904,7 @@ class DiscoveryView extends React.Component {
               }
               selectableIds={mapPreviewedSampleIds}
             />
-          )}
-        {showStats &&
-          ((currentTab === "samples" && currentDisplay === "table") ||
-            currentTab === "projects") && (
+          ) : (
             <DiscoverySidebar
               allowedFeatures={allowedFeatures}
               currentTab={currentTab}
@@ -872,7 +914,7 @@ class DiscoveryView extends React.Component {
               sampleDimensions={computedSampleDimensions}
               sampleStats={filteredSampleStats}
             />
-          )}
+          ))}
       </div>
     );
   };
@@ -955,8 +997,17 @@ class DiscoveryView extends React.Component {
                 <div className={cs.tableContainer}>
                   <div className={cs.dataContainer}>
                     <ProjectsView
-                      projects={projects}
+                      allowedFeatures={allowedFeatures}
+                      currentDisplay={currentDisplay}
+                      currentTab={currentTab}
+                      mapLocationData={mapLocationData}
+                      mapPreviewedLocationId={mapPreviewedLocationId}
+                      mapTilerKey={mapTilerKey}
+                      onDisplaySwitch={this.handleDisplaySwitch}
+                      onMapMarkerClick={this.handleMapMarkerClick}
                       onProjectSelected={this.handleProjectSelected}
+                      onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
+                      projects={projects}
                     />
                   </div>
                   {!projects.length &&

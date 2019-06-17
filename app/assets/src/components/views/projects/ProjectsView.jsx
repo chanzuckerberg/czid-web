@@ -1,12 +1,15 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { find, merge, pick } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
+import PropTypes from "~/components/utils/propTypes";
+import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
+import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
+import MapToggle from "~/components/views/discovery/mapping/MapToggle";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
-import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
+
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
 
@@ -89,8 +92,33 @@ class ProjectsView extends React.Component {
     });
   };
 
+  renderDisplaySwitcher = () => {
+    const { currentDisplay, onDisplaySwitch } = this.props;
+    return (
+      <div className={cs.toggleContainer}>
+        <MapToggle
+          currentDisplay={currentDisplay}
+          onDisplaySwitch={display => {
+            onDisplaySwitch(display);
+            logAnalyticsEvent(`ProjectsView_${display}-switch_clicked`);
+          }}
+        />
+      </div>
+    );
+  };
+
   render() {
-    const { projects } = this.props;
+    const {
+      allowedFeatures,
+      currentDisplay,
+      currentTab,
+      mapLocationData,
+      mapPreviewedLocationId,
+      mapTilerKey,
+      onMapMarkerClick,
+      onMapTooltipTitleClick,
+      projects,
+    } = this.props;
     let data = projects.map(project => {
       return merge(
         {
@@ -107,22 +135,50 @@ class ProjectsView extends React.Component {
     });
 
     return (
-      <BaseDiscoveryView
-        columns={this.columns}
-        data={data}
-        handleRowClick={this.handleRowClick}
-      />
+      <div className={cs.container}>
+        {allowedFeatures &&
+          allowedFeatures.includes("maps") &&
+          this.renderDisplaySwitcher()}
+        {currentDisplay === "table" ? (
+          <BaseDiscoveryView
+            columns={this.columns}
+            data={data}
+            handleRowClick={this.handleRowClick}
+          />
+        ) : (
+          <div className={cs.map}>
+            <DiscoveryMap
+              currentTab={currentTab}
+              mapLocationData={mapLocationData}
+              mapTilerKey={mapTilerKey}
+              onMarkerClick={onMapMarkerClick}
+              onTooltipTitleClick={onMapTooltipTitleClick}
+              previewedLocationId={mapPreviewedLocationId}
+            />
+          </div>
+        )}
+      </div>
     );
   }
 }
 
 ProjectsView.defaultProps = {
+  currentDisplay: "table",
   projects: [],
 };
 
 ProjectsView.propTypes = {
-  projects: PropTypes.array,
+  allowedFeatures: PropTypes.array,
+  currentDisplay: PropTypes.string.isRequired,
+  currentTab: PropTypes.string.isRequired,
+  mapLocationData: PropTypes.objectOf(PropTypes.Location),
+  mapPreviewedLocationId: PropTypes.number,
+  mapTilerKey: PropTypes.string,
+  onDisplaySwitch: PropTypes.func,
+  onMapMarkerClick: PropTypes.func,
+  onMapTooltipTitleClick: PropTypes.func,
   onProjectSelected: PropTypes.func,
+  projects: PropTypes.array,
 };
 
 export default ProjectsView;
