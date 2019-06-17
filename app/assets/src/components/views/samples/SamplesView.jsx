@@ -192,12 +192,6 @@ class SamplesView extends React.Component {
         ? mapSidebarSelectedSampleIds
         : selectedSampleIds;
 
-    // TODO: break up into two events
-    const log = () =>
-      logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
-        selectedSampleIds: targetSampleIds.length,
-      });
-
     const heatmapOptions = [
       { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
     ];
