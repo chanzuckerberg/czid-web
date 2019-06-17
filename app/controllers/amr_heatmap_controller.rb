@@ -33,18 +33,18 @@ class AmrHeatmapController < ApplicationController
       end
       amr_data << {
         sample_name: sample.name,
-        sample_id: sample.id,
+        sample_id: sample.id.to_i,
         amr_counts: amr_counts,
         error: ""
       }
-      good_sample_ids[sample.id.to_s] = true
+      good_sample_ids[sample.id.to_i] = true
     end
 
     params[:sampleIds].each do |input_id|
-      unless good_sample_ids.key?(input_id.to_s)
+      unless good_sample_ids.key?(input_id.to_i)
         amr_data << {
           sample_name: "",
-          sample_id: input_id,
+          sample_id: input_id.to_i,
           amr_counts: [],
           error: "sample not found"
         }
@@ -55,6 +55,6 @@ class AmrHeatmapController < ApplicationController
   end
 
   def visualization
-    @samples = { sampleIds: params[:sampleIds] }
+    @samples = { sampleIds: params[:sampleIds].map(&:to_i) }
   end
 end

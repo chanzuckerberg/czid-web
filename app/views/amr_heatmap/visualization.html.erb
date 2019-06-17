@@ -1,10 +1,10 @@
-<div id="AmrHeatmapVis_page">
+<div id="AmrHeatmapView_page">
 </div>
 
 <%= javascript_tag do %>
   react_component(
-    'AMRHeatmapVis',
+    'AMRHeatmapView',
     JSON.parse('<%= raw escape_json(@samples) %>'),
-    'AmrHeatmapVis_page'
+    'AmrHeatmapView_page'
   )
 <% end %>

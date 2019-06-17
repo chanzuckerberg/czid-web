@@ -15,6 +15,7 @@ export default class AMRHeatmapVis extends React.Component {
     this.state = {
       viewLevel: "genes",
       metric: "coverage",
+      loading: true,
     };
 
     this.heatmap = null;
@@ -25,6 +26,9 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   componentDidUpdate() {
+    if (this.state.loading === true) {
+      return;
+    }
     let rows = this.createHeatmapLabels();
     let columns = this.state.samples;
     let values = this.computeHeatmapValues(rows);
@@ -42,6 +46,7 @@ export default class AMRHeatmapVis extends React.Component {
         geneData: geneData,
         samples: samples,
         alleleToGeneMap: alleleToGeneMap,
+        loading: false,
       };
     });
   }
