@@ -2,7 +2,6 @@ import React from "react";
 
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import Tabs from "~/components/ui/controls/Tabs";
-import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
 import GeoSearchInputBox from "~ui/controls/GeoSearchInputBox";
 
 import cs from "./playground_components.scss";
@@ -11,7 +10,7 @@ const TABS = ["Geo Search Box"];
 
 export default class PlaygroundComponents extends React.Component {
   state = {
-    currentTab: TABS[1]
+    currentTab: TABS[1],
   };
 
   onTabChange = tab => {
