@@ -1,0 +1,12 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.banner {
+  @include font-body-xxs;
+
+  background: $white;
+  color: red;
+  margin: 8px auto auto;
+  text-align: center;
+  width: 60%;
+}

@@ -57,7 +57,14 @@ class BaseMap extends React.Component {
   };
 
   render() {
-    const { markers, mapTilerKey, onClick, popups, tooltip } = this.props;
+    const {
+      banner,
+      mapTilerKey,
+      markers,
+      onClick,
+      popups,
+      tooltip,
+    } = this.props;
     const { viewport } = this.state;
 
     const styleURL = `https://api.maptiler.com/maps/${MAP_STYLE_ID}/style.json?key=${mapTilerKey}`;
@@ -72,9 +79,10 @@ class BaseMap extends React.Component {
           style={{ position: "absolute" }}
           {...viewport}
         >
-          {tooltip}
+          {banner}
           {markers}
           {popups}
+          {tooltip}
 
           <NavigationControl
             onViewportChange={this.updateViewport}
@@ -88,6 +96,7 @@ class BaseMap extends React.Component {
 }
 
 BaseMap.propTypes = {
+  banner: PropTypes.object,
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   latitude: PropTypes.number,
   longitude: PropTypes.number,

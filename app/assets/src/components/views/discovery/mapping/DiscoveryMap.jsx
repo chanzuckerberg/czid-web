@@ -1,11 +1,13 @@
 import React from "react";
 import { Marker } from "react-map-gl";
-import { get, upperFirst } from "lodash/fp";
+import { get, isEmpty, upperFirst } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
+
+import cs from "./discovery_map.scss";
 
 export const TOOLTIP_TIMEOUT_MS = 1000;
 
@@ -100,12 +102,23 @@ class DiscoveryMap extends React.Component {
     );
   };
 
+  renderBanner = () => {
+    const { mapLocationData } = this.props;
+    if (isEmpty(mapLocationData)) {
+      return (
+        <div className={cs.banner}>
+          No samples found. Try adjusting search or filters. Clear search
+        </div>
+      );
+    }
+  };
+
   render() {
     const { mapTilerKey, mapLocationData, onClick } = this.props;
     const { tooltip } = this.state;
-
     return (
       <BaseMap
+        banner={this.renderBanner()}
         mapTilerKey={mapTilerKey}
         markers={
           mapLocationData &&
