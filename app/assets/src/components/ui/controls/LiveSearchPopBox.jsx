@@ -2,8 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import Input from "~ui/controls/Input";
 import { BareDropdown } from "~ui/controls/dropdowns";
-import { Search } from "semantic-ui-react";
-import { concat, forEach, map, sumBy, values } from "lodash/fp";
+import { forEach, sumBy, values } from "lodash/fp";
 import cx from "classnames";
 import cs from "./live_search_pop_box.scss";
 
@@ -15,7 +14,7 @@ class LiveSearchPopBox extends React.Component {
       isLoading: false,
       results: [],
       value: this.props.initialValue,
-      selectedResult: null
+      selectedResult: null,
     };
 
     this.lastestTimerId = null;
@@ -25,7 +24,7 @@ class LiveSearchPopBox extends React.Component {
     if (props.value !== state.prevPropsValue) {
       return {
         value: props.value,
-        prevPropsValue: props.value
+        prevPropsValue: props.value,
       };
     }
     return null;
@@ -48,7 +47,7 @@ class LiveSearchPopBox extends React.Component {
     this.setState({
       isLoading: false,
       results: [],
-      value: ""
+      value: "",
     });
   };
 
@@ -70,7 +69,7 @@ class LiveSearchPopBox extends React.Component {
     if (timerId === this.lastestTimerId) {
       this.setState({
         isLoading: false,
-        results: results
+        results: results,
       });
     }
   };
@@ -188,7 +187,7 @@ LiveSearchPopBox.defaultProps = {
   minChars: 2,
   placeholder: "Search",
   rectangular: false,
-  inputMode: false
+  inputMode: false,
 };
 
 LiveSearchPopBox.propTypes = {
@@ -203,7 +202,7 @@ LiveSearchPopBox.propTypes = {
   onResultSelect: PropTypes.func,
   placeholder: PropTypes.string,
   rectangular: PropTypes.bool,
-  value: PropTypes.string
+  value: PropTypes.string,
 };
 
 export default LiveSearchPopBox;

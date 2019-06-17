@@ -5,7 +5,6 @@ import { isArray } from "lodash";
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox from "../ui/controls/GeoSearchInputBox";
-import TaxonFilter from "~/components/common/filters";
 
 class MetadataInput extends React.Component {
   render() {
@@ -17,8 +16,6 @@ class MetadataInput extends React.Component {
       className,
       isHuman,
     } = this.props;
-
-    let testingSelected = [];
 
     if (isArray(metadataType.options)) {
       const options = metadataType.options.map(option => ({
