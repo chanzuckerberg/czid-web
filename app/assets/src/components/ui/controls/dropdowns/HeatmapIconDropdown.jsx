@@ -3,7 +3,6 @@ import BareDropdown from "./BareDropdown";
 import PropTypes from "prop-types";
 import React from "react";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
-import BasicPopup from "~/components/BasicPopup";
 import cs from "./heatmap_icon_dropdown.scss";
 import cx from "classnames";
 
@@ -25,7 +24,7 @@ HeatmapIconDropdown.propTypes = forbidExtraProps({
   disabled: PropTypes.bool,
   options: PropTypes.array,
   onClick: PropTypes.func,
-  direction: PropTypes.oneOf(["left", "right"])
+  direction: PropTypes.oneOf(["left", "right"]),
 });
 
 export default HeatmapIconDropdown;
