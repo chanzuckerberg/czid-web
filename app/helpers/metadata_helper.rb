@@ -271,8 +271,6 @@ module MetadataHelper
         sample.host_genome = host_genome
       end
 
-      puts "foobar 5:58pm"
-
       # The MetadataField objects that were used to validate the metadata.
       # Needed to verify that required metadata was submitted.
       validated_fields = []
@@ -299,10 +297,6 @@ module MetadataHelper
 
         if val_errors[:invalid_field_for_host_genome].present?
           error_aggregator.add_error(:invalid_key_for_host_genome, [index + 1, sample.name, sample.host_genome_name, field])
-        end
-
-        if field == "Collection Location v2"
-          warning_aggregator.add_error(:location_resolution, [index + 1, sample.name, value, "California"])
         end
 
         if val_errors[:raw_value].present?
