@@ -134,3 +134,16 @@ $font-weight-heavy: 800;
   line-height: 13px;
   font-weight: $font-weight-semibold;
 }
+
+@mixin font-search-result-title {
+  font-size: 13px;
+  line-height: 24px;
+  letter-spacing: 1px;
+  font-weight: $font-weight-semibold;
+}
+
+@mixin font-search-result-description {
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: 1px;
+}

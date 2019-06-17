@@ -202,20 +202,20 @@ class BareDropdown extends React.Component {
     if (this.props.usePortal) {
       return (
         <PortalDropdown
-          trigger={this.props.trigger}
-          menuClassName={cs.portalDropdown}
-          triggerClassName={className}
-          withinModal={this.props.withinModal}
-          fluid={this.props.fluid}
-          floating={this.props.floating}
-          direction={this.props.direction}
-          hideArrow={hideArrow}
-          disabled={this.props.disabled}
           arrowInsideTrigger={arrowInsideTrigger}
+          floating={this.props.floating}
+          fluid={this.props.fluid}
+          direction={this.props.direction}
+          disabled={this.props.disabled}
+          hideArrow={hideArrow}
+          menu={menu}
+          menuClassName={cx(cs.portalDropdown, className)}
           onOpen={this.props.onOpen}
           open={this.props.open}
           onClose={this.props.onClose}
-          menu={menu}
+          trigger={this.props.trigger}
+          triggerClassName={className}
+          withinModal={this.props.withinModal}
         />
       );
     }

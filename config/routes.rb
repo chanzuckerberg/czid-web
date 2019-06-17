@@ -111,6 +111,7 @@ Rails.application.routes.draw do
 
   namespace :playground do
     get :controls
+    get :components
     get :icons
     get :viz
   end

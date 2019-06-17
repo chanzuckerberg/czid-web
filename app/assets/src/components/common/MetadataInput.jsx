@@ -8,10 +8,6 @@ import GeoSearchInputBox from "../ui/controls/GeoSearchInputBox";
 import TaxonFilter from "~/components/common/filters";
 
 class MetadataInput extends React.Component {
-  testingDropdown = (a, b, c) => {
-    console.log("testingDropdown", a, b, c);
-  };
-
   render() {
     const {
       value,
@@ -54,21 +50,15 @@ class MetadataInput extends React.Component {
       );
     } else if (metadataType.dataType === "location") {
       return (
-        <TaxonFilter
-          onChange={this.testingDropdown}
-          selected={testingSelected}
+        <GeoSearchInputBox
+          className={className}
+          // Calls save on selection
+          onResultSelect={({ result }) =>
+            onChange(metadataType.key, result, true)
+          }
+          value={value}
         />
       );
-      // return (
-      //   <GeoSearchInputBox
-      //     className={className}
-      //     // Calls save on selection
-      //     onResultSelect={({ result }) =>
-      //       onChange(metadataType.key, result, true)
-      //     }
-      //     value={value}
-      //   />
-      // );
     } else {
       return (
         <Input
