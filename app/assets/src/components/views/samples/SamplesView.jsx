@@ -265,6 +265,8 @@ class SamplesView extends React.Component {
     } = this.props;
     const { selectedSampleIds } = this.state;
 
+    // NOTE(jsheu): For mapSidebar sample names to appear in CollectionModal,
+    // they need to be presently loaded/fetched. Otherwise the ids work but says "and more..." for un-fetched samples.
     const targetSamples =
       currentDisplay === "map" ? mapPreviewedSamples : samples;
     const targetSampleIds =

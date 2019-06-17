@@ -145,6 +145,7 @@ class DiscoveryView extends React.Component {
     const { domain } = this.props;
 
     const urlFields = [
+      "currentDisplay",
       "currentTab",
       "filters",
       "mapSidebarTab",
@@ -716,7 +717,9 @@ class DiscoveryView extends React.Component {
   };
 
   handleDisplaySwitch = currentDisplay => {
-    this.setState({ currentDisplay });
+    this.setState({ currentDisplay }, () => {
+      this.updateBrowsingHistory("replace");
+    });
   };
 
   handleMapTooltipTitleClick = locationId => {
