@@ -127,10 +127,6 @@ module ErrorHelper
       custom_field_creation: {
         headers: ["Column #", "Field"],
         title: ->(num_cols, _) { "#{num_cols} new custom fields will be created. Please check our metadata dictionary to see if your fields are listed under different names." }
-      },
-      location_resolution: {
-        headers: ["Row #", "Sample Name", "Field", "Match"],
-        title: ->(num_rows, _) { "#{num_rows} locations were matched. Please try a different name if the match was incorrect." }
       }
     }.freeze
 
