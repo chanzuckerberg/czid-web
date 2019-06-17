@@ -1,16 +1,29 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { isEqual, min, max } from "lodash/fp";
+import {
+  pull,
+  isEqual,
+  min,
+  max,
+  flatten,
+  values,
+  omitBy,
+  mapValues,
+  isEmpty,
+} from "lodash/fp";
+import cx from "classnames";
 
 import {
   Dropdown,
   MultipleNestedDropdown,
-  ThresholdFilterDropdown
+  ThresholdFilterDropdown,
 } from "~ui/controls/dropdowns";
 import { Divider } from "~/components/layout";
 import { logAnalyticsEvent } from "~/api/analytics";
 import Slider from "~ui/controls/Slider";
 import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
+import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
+import FilterTag from "~ui/controls/FilterTag";
 
 import cs from "./samples_heatmap_view.scss";
 
@@ -22,7 +35,7 @@ export default class SamplesHeatmapControls extends React.Component {
 
     this.props.onSelectedOptionsChange({ species: taxonLevel });
     logAnalyticsEvent("SamplesHeatmapControls_taxon-level-select_changed", {
-      taxonLevel
+      taxonLevel,
     });
   };
 
@@ -44,7 +57,7 @@ export default class SamplesHeatmapControls extends React.Component {
     this.props.onSelectedOptionsChange({ categories, subcategories });
     logAnalyticsEvent("SamplesHeatmapControls_category-filter_changed", {
       categories: categories.length,
-      subcategories: subcategories.length
+      subcategories: subcategories.length,
     });
   };
 
@@ -82,7 +95,7 @@ export default class SamplesHeatmapControls extends React.Component {
 
     this.props.onSelectedOptionsChange({ metric });
     logAnalyticsEvent("SamplesHeatmapControls_metric-select_changed", {
-      metric
+      metric,
     });
   };
 
@@ -107,14 +120,14 @@ export default class SamplesHeatmapControls extends React.Component {
 
     this.props.onSelectedOptionsChange({ background });
     logAnalyticsEvent("SamplesHeatmapControls_background-select_changed", {
-      background
+      background,
     });
   };
 
   renderBackgroundSelect() {
     let options = this.props.options.backgrounds.map(background => ({
       text: background.name,
-      value: background.value
+      value: background.value,
     }));
 
     return (
@@ -139,7 +152,7 @@ export default class SamplesHeatmapControls extends React.Component {
     logAnalyticsEvent(
       "SamplesHeatmapControls_threshold-filter-select_applied",
       {
-        filters: filters.length
+        filters: filters.length,
       }
     );
   };
@@ -162,7 +175,7 @@ export default class SamplesHeatmapControls extends React.Component {
 
     this.props.onSelectedOptionsChange({ readSpecificity: specificity });
     logAnalyticsEvent("SamplesHeatmapControls_specificity-filter_changed", {
-      readSpecificity: specificity
+      readSpecificity: specificity,
     });
   };
 
@@ -187,14 +200,14 @@ export default class SamplesHeatmapControls extends React.Component {
 
     this.props.onSelectedOptionsChange({ dataScaleIdx: scaleIdx });
     logAnalyticsEvent("SamplesHeatmapControls_data-scale-select_changed", {
-      dataScaleIdx: scaleIdx
+      dataScaleIdx: scaleIdx,
     });
   };
 
   renderScaleSelect() {
     let options = this.props.options.scales.map((scale, index) => ({
       text: scale[0],
-      value: index
+      value: index,
     }));
 
     return (
@@ -215,7 +228,7 @@ export default class SamplesHeatmapControls extends React.Component {
     logAnalyticsEvent(
       "SamplesHeatmapControls_taxons-per-sample-slider_changed",
       {
-        taxonsPerSample: newValue
+        taxonsPerSample: newValue,
       }
     );
   };
@@ -251,6 +264,106 @@ export default class SamplesHeatmapControls extends React.Component {
     );
   }
 
+  handleRemoveThresholdFilter = threshold => {
+    const newFilters = pull(
+      threshold,
+      this.props.selectedOptions.thresholdFilters
+    );
+    this.props.onSelectedOptionsChange({ thresholdFilters: newFilters });
+  };
+
+  handleRemoveCategory = category => {
+    const newCategories = pull(category, this.props.selectedOptions.categories);
+    this.props.onSelectedOptionsChange({ categories: newCategories });
+  };
+
+  handleRemoveSubcategory = subcat => {
+    // For each category => [subcategories], remove subcat from subcategories.
+    // Then omit all categories with empty subcategories.
+    const newSubcategories = omitBy(
+      isEmpty,
+      mapValues(pull(subcat), this.props.selectedOptions.subcategories)
+    );
+    this.props.onSelectedOptionsChange({ subcategories: newSubcategories });
+  };
+
+  renderFilterTags = () => {
+    let filterTags = [];
+    const { selectedOptions } = this.props;
+
+    if (selectedOptions.thresholdFilters) {
+      filterTags = filterTags.concat(
+        selectedOptions.thresholdFilters.map((threshold, i) => (
+          <ThresholdFilterTag
+            className={cs.filterTag}
+            key={`threshold_filter_tag_${i}`}
+            threshold={threshold}
+            onClose={() => {
+              this.handleRemoveThresholdFilter(threshold);
+              logAnalyticsEvent(
+                "SamplesHeatmapControls_threshold-filter_removed",
+                {
+                  value: threshold.value,
+                  operator: threshold.operator,
+                  metric: threshold.metric,
+                }
+              );
+            }}
+          />
+        ))
+      );
+    }
+
+    if (selectedOptions.categories) {
+      filterTags = filterTags.concat(
+        selectedOptions.categories.map((category, i) => {
+          return (
+            <FilterTag
+              className={cs.filterTag}
+              key={`category_filter_tag_${i}`}
+              text={category}
+              onClose={() => {
+                this.handleRemoveCategory(category);
+                logAnalyticsEvent(
+                  "SamplesHeatmapControl_categories-filter_removed",
+                  {
+                    category,
+                  }
+                );
+              }}
+            />
+          );
+        })
+      );
+    }
+
+    if (selectedOptions.subcategories) {
+      const subcategoryList = flatten(values(selectedOptions.subcategories));
+      filterTags = filterTags.concat(
+        subcategoryList.map((subcat, i) => {
+          return (
+            <FilterTag
+              className={cs.filterTag}
+              key={`subcat_filter_tag_${i}`}
+              text={subcat}
+              onClose={() => {
+                this.handleRemoveSubcategory(subcat);
+                logAnalyticsEvent(
+                  "SamplesHeatmapControl_categories-filter_removed",
+                  {
+                    subcat,
+                  }
+                );
+              }}
+            />
+          );
+        })
+      );
+    }
+
+    return filterTags;
+  };
+
   render() {
     return (
       <div className={cs.menu}>
@@ -268,6 +381,9 @@ export default class SamplesHeatmapControls extends React.Component {
           <div className="col s2">{this.renderTaxonsPerSampleSlider()}</div>
           <div className="col s2">{this.renderLegend()}</div>
         </div>
+        <div className={cx(cs.filterTagsList, "row")}>
+          <div className="col">{this.renderFilterTags()}</div>
+        </div>
         <Divider />
       </div>
     );
@@ -279,7 +395,7 @@ SamplesHeatmapControls.propTypes = {
     metrics: PropTypes.arrayOf(
       PropTypes.shape({
         text: PropTypes.string,
-        value: PropTypes.string
+        value: PropTypes.string,
       })
     ),
     categories: PropTypes.arrayOf(PropTypes.string),
@@ -287,19 +403,19 @@ SamplesHeatmapControls.propTypes = {
     backgrounds: PropTypes.arrayOf(
       PropTypes.shape({
         name: PropTypes.string,
-        value: PropTypes.number
+        value: PropTypes.number,
       })
     ),
     taxonLevels: PropTypes.arrayOf(
       PropTypes.shape({
         text: PropTypes.string,
-        value: PropTypes.number
+        value: PropTypes.number,
       })
     ),
     specificityOptions: PropTypes.arrayOf(
       PropTypes.shape({
         text: PropTypes.string,
-        value: PropTypes.number
+        value: PropTypes.number,
       })
     ),
     thresholdFilters: PropTypes.shape({
@@ -307,12 +423,12 @@ SamplesHeatmapControls.propTypes = {
       targets: PropTypes.arrayOf(
         PropTypes.shape({
           text: PropTypes.string,
-          value: PropTypes.string
+          value: PropTypes.string,
         })
-      )
+      ),
     }),
     scales: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)),
-    taxonsPerSample: PropTypes.objectOf(PropTypes.number)
+    taxonsPerSample: PropTypes.objectOf(PropTypes.number),
   }),
   selectedOptions: PropTypes.shape({
     species: PropTypes.number,
@@ -324,16 +440,16 @@ SamplesHeatmapControls.propTypes = {
       PropTypes.shape({
         metric: PropTypes.string,
         value: PropTypes.string,
-        operator: PropTypes.string
+        operator: PropTypes.string,
       })
     ),
     readSpecificity: PropTypes.number,
     dataScaleIdx: PropTypes.number,
-    taxonsPerSample: PropTypes.number
+    taxonsPerSample: PropTypes.number,
   }),
   onSelectedOptionsChange: PropTypes.func.isRequired,
   loading: PropTypes.bool,
   data: PropTypes.objectOf(
     PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number))
-  )
+  ),
 };

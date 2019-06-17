@@ -27,7 +27,7 @@ class HelpIcon extends React.Component {
 
 HelpIcon.propTypes = {
   className: PropTypes.string,
-  text: PropTypes.string
+  text: PropTypes.string,
 };
 
 export default HelpIcon;

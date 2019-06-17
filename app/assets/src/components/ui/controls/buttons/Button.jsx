@@ -54,11 +54,11 @@ Button.propTypes = forbidExtraProps({
   secondary: PropTypes.bool,
   rounded: PropTypes.bool,
   className: PropTypes.string,
-  hasDropdownArrow: PropTypes.bool
+  hasDropdownArrow: PropTypes.bool,
 });
 
 Button.defaultProps = {
-  rounded: true
+  rounded: true,
 };
 
 export default Button;

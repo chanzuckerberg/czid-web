@@ -2,21 +2,32 @@ import cx from "classnames";
 import React from "react";
 import Cookies from "js-cookie";
 import $ from "jquery";
-import { Label, Menu, Icon, Popup } from "semantic-ui-react";
-import { omit, partition, keyBy, groupBy, map, mapValues } from "lodash/fp";
+import { Menu, Icon, Popup } from "semantic-ui-react";
+import {
+  omit,
+  partition,
+  keyBy,
+  groupBy,
+  map,
+  mapValues,
+  get,
+  find,
+} from "lodash/fp";
 import Nanobar from "nanobar";
 import PropTypes from "prop-types";
 
 import { getSampleReportInfo, getSummaryContigCounts } from "~/api";
 import { parseUrlParams } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import ThresholdFilterTag from "~/components/common/ThresholdFilterTag";
+import FilterTag from "~ui/controls/FilterTag";
 
 import {
   computeThresholdedTaxons,
   isTaxonIncluded,
   getTaxonSortComparator,
   getCategoryAdjective,
-  addContigCountsToTaxonomyDetails
+  addContigCountsToTaxonomyDetails,
 } from "./views/report/utils/taxon";
 import BasicPopup from "./BasicPopup";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
@@ -40,7 +51,7 @@ import { getTaxonName, getGeneraContainingTags } from "../helpers/taxon";
 import ThresholdMap from "./utils/ThresholdMap";
 import {
   pipelineVersionHasAssembly,
-  pipelineVersionHasCoverageViz
+  pipelineVersionHasCoverageViz,
 } from "./utils/sample";
 
 const DEFAULT_MIN_CONTIG_SIZE = 4;
@@ -51,7 +62,7 @@ class PipelineSampleReport extends React.Component {
     super(props);
     this.nanobar = new Nanobar({
       id: "prog-bar",
-      class: "prog-bar"
+      class: "prog-bar",
     });
     this.admin = props.admin;
     this.allowedFeatures = props.allowedFeatures;
@@ -83,18 +94,6 @@ class PipelineSampleReport extends React.Component {
     const cachedTreeMetric = Cookies.get("treeMetric");
     const cachedMinContigSize = parseInt(Cookies.get("minContigSize"), 10);
 
-    const savedThresholdFilters = ThresholdMap.getSavedThresholdFilters();
-
-    this.showConcordance = false;
-
-    this.treeMetrics = [
-      { text: "Aggregate Score", value: "aggregatescore" },
-      { text: "NT r (total reads)", value: "nt_r" },
-      { text: "NT rPM", value: "nt_rpm" },
-      { text: "NR r (total reads)", value: "nr_r" },
-      { text: "NR rPM", value: "nr_rpm" }
-    ];
-
     this.allThresholds = [
       { text: "Score", value: "NT_aggregatescore" },
       { text: "NT Z Score", value: "NT_zscore" },
@@ -112,8 +111,31 @@ class PipelineSampleReport extends React.Component {
       { text: "NR contig reads", value: "NR_contigreads" },
       { text: "NR %id", value: "NR_percentidentity" },
       { text: "NR L (alignment length in bp)", value: "NR_alignmentlength" },
-      { text: "NR log(1/e)", value: "NR_neglogevalue" }
+      { text: "NR log(1/e)", value: "NR_neglogevalue" },
     ];
+
+    // If the saved threshold object doesn't have metricDisplay, add it. For backwards compatibility.
+    const savedThresholdFilters = map(
+      threshold => ({
+        metricDisplay: get(
+          "text",
+          find(["value", threshold.metric], this.allThresholds)
+        ),
+        ...threshold,
+      }),
+      ThresholdMap.getSavedThresholdFilters()
+    );
+
+    this.showConcordance = false;
+
+    this.treeMetrics = [
+      { text: "Aggregate Score", value: "aggregatescore" },
+      { text: "NT r (total reads)", value: "nt_r" },
+      { text: "NT rPM", value: "nt_rpm" },
+      { text: "NR r (total reads)", value: "nr_r" },
+      { text: "NR rPM", value: "nr_rpm" },
+    ];
+
     this.categoryChildParent = { Phage: "Viruses" };
     this.categoryParentChild = { Viruses: ["Phage"] };
     this.genusMap = {};
@@ -136,7 +158,7 @@ class PipelineSampleReport extends React.Component {
       topScoringTaxa: [],
       backgroundData: {
         id: defaultBackgroundId,
-        name: ""
+        name: "",
       },
       search_taxon_id: 0,
       lineage_map: {},
@@ -167,7 +189,7 @@ class PipelineSampleReport extends React.Component {
       phyloTreeModalOpen: true,
       contigTaxidList: [],
       minContigSize: cachedMinContigSize || DEFAULT_MIN_CONTIG_SIZE,
-      hoverRowId: null
+      hoverRowId: null,
     };
 
     this.state = {
@@ -175,7 +197,7 @@ class PipelineSampleReport extends React.Component {
       // Override from explicit save
       ...props.savedParamValues,
       // Override from the URL
-      ...parseUrlParams()
+      ...parseUrlParams(),
     };
 
     this.expandAll = false;
@@ -209,7 +231,7 @@ class PipelineSampleReport extends React.Component {
   fetchReportData = async () => {
     this.nanobar.go(30);
     this.setState({
-      loading: true
+      loading: true,
     });
     let params = `?${window.location.search.replace("?", "")}&report_ts=${
       this.report_ts
@@ -217,7 +239,7 @@ class PipelineSampleReport extends React.Component {
 
     const [sampleReportInfo, summaryContigCounts] = await Promise.all([
       getSampleReportInfo(this.sampleId, params),
-      getSummaryContigCounts(this.sampleId, this.state.minContigSize)
+      getSummaryContigCounts(this.sampleId, this.state.minContigSize),
     ]);
 
     this.nanobar.go(100);
@@ -237,7 +259,7 @@ class PipelineSampleReport extends React.Component {
       map(taxon => ({
         taxonId: taxon.tax_id,
         taxonName: taxon.name,
-        taxonCommonName: taxon.common_name
+        taxonCommonName: taxon.common_name,
       })),
       groupBy("genus_taxid", speciesTaxons)
     );
@@ -257,9 +279,9 @@ class PipelineSampleReport extends React.Component {
         topScoringTaxa: sampleReportInfo.topScoringTaxa,
         backgroundData: {
           id: sampleReportInfo.background_info.id,
-          name: sampleReportInfo.background_info.name
+          name: sampleReportInfo.background_info.name,
         },
-        contigTaxidList: sampleReportInfo.contig_taxid_list
+        contigTaxidList: sampleReportInfo.contig_taxid_list,
       },
       () => {
         this.applyFilters(true);
@@ -291,7 +313,7 @@ class PipelineSampleReport extends React.Component {
         ),
         pagesRendered: 1,
         rows_passing_filters: this.state.taxonomy_details.length,
-        readSpecificity: 0
+        readSpecificity: 0,
       },
       () => {
         ThresholdMap.saveThresholdFilters([]);
@@ -347,7 +369,7 @@ class PipelineSampleReport extends React.Component {
             taxon.lineage.class_taxid,
             taxon.lineage.phylum_taxid,
             taxon.lineage.kingdom_taxid,
-            taxon.lineage.superkingdom_taxid
+            taxon.lineage.superkingdom_taxid,
           ]);
           if (match_keys && match_keys.has(searchTaxonId)) {
             matched_taxons.push(taxon);
@@ -446,7 +468,7 @@ class PipelineSampleReport extends React.Component {
       selected_taxons,
       selected_taxons_top: selected_taxons.slice(0, this.max_rows_to_render),
       pagesRendered: 1,
-      rows_passing_filters: selected_taxons.length
+      rows_passing_filters: selected_taxons.length,
     });
   };
 
@@ -527,7 +549,7 @@ class PipelineSampleReport extends React.Component {
       );
       this.setState(prevState => ({
         selected_taxons_top: [...prevState.selected_taxons_top, ...next_page],
-        pagesRendered: currentPage + 1
+        pagesRendered: currentPage + 1,
       }));
     }
   };
@@ -540,7 +562,7 @@ class PipelineSampleReport extends React.Component {
         delay: 0,
         html: true,
         placement: "top",
-        offset: "0px 50px"
+        offset: "0px 50px",
       });
       $(".sort-controls").hover(() => {
         const selectTooltip = $(".tooltip");
@@ -566,7 +588,7 @@ class PipelineSampleReport extends React.Component {
     secondary_sort[0] = secondary_sort[0].toUpperCase();
     this.sortParams = {
       primary: primary_sort,
-      secondary: secondary_sort
+      secondary: secondary_sort,
     };
   };
 
@@ -586,7 +608,7 @@ class PipelineSampleReport extends React.Component {
     this.setState(
       {
         includedCategories: newIncludedCategories,
-        includedSubcategories
+        includedSubcategories,
       },
       () => {
         Cookies.set(
@@ -600,7 +622,7 @@ class PipelineSampleReport extends React.Component {
         this.applyFilters();
         logAnalyticsEvent("PipelineSampleReport_included-categories_changed", {
           includedCategories: this.state.includedCategories.length,
-          includedSubcategories: includedSubcategories.length
+          includedSubcategories: includedSubcategories.length,
         });
       }
     );
@@ -642,7 +664,7 @@ class PipelineSampleReport extends React.Component {
     this.setState({
       selected_taxons: selected_taxons,
       selected_taxons_top: selected_taxons.slice(0, this.max_rows_to_render),
-      pagesRendered: 1
+      pagesRendered: 1,
     });
     this.thresholded_taxons = this.thresholded_taxons.sort(taxonSortComparator);
     this.state.taxonomy_details = this.state.taxonomy_details.sort(
@@ -674,15 +696,15 @@ class PipelineSampleReport extends React.Component {
       {
         backgroundData: {
           name: backgroundName,
-          id: backgroundId
-        }
+          id: backgroundId,
+        },
       },
       () => {
         logAnalyticsEvent(
           "PipelineSampleReport_background-model-filter_changed",
           {
             backgroundName,
-            backgroundId
+            backgroundId,
           }
         );
         // TODO (gdingle): do we really want to reload the page here?
@@ -694,7 +716,7 @@ class PipelineSampleReport extends React.Component {
   handleNameTypeChange = nameType => {
     this.props.onNameTypeChange(nameType);
     logAnalyticsEvent("PipelineSampleReport_name-type-filter_changed", {
-      nameType
+      nameType,
     });
   };
 
@@ -703,7 +725,7 @@ class PipelineSampleReport extends React.Component {
     this.setState({ readSpecificity }, () => {
       this.applyFilters();
       logAnalyticsEvent("PipelineSampleReport_specificity-filter_changed", {
-        readSpecificity
+        readSpecificity,
       });
     });
   };
@@ -712,7 +734,7 @@ class PipelineSampleReport extends React.Component {
     Cookies.set("treeMetric", treeMetric);
     this.setState({ treeMetric }, () => {
       logAnalyticsEvent("PipelineSampleReport_tree-metric-picker_changed", {
-        treeMetric
+        treeMetric,
       });
     });
   };
@@ -721,7 +743,7 @@ class PipelineSampleReport extends React.Component {
     Cookies.set("minContigSize", minContigSize);
     this.setState({ minContigSize }, () => {
       logAnalyticsEvent("PipelineSampleReport_min-contig-size-filter_changed", {
-        minContigSize
+        minContigSize,
       });
     });
 
@@ -738,19 +760,13 @@ class PipelineSampleReport extends React.Component {
 
     this.setState(
       {
-        taxonomy_details: taxonomyDetails
+        taxonomy_details: taxonomyDetails,
       },
       () => {
         // Since the contig columns have changed, we need to maybe compute the thresholds again.
         this.applyFilters(true);
       }
     );
-  };
-
-  handleViewClicked = (_, data) => {
-    this.setState({ view: data.name });
-    const friendlyName = data.name.replace(/_/g, "-");
-    logAnalyticsEvent(`PipelineSampleReport_${friendlyName}-view-menu_clicked`);
   };
 
   // path to NCBI
@@ -801,7 +817,7 @@ class PipelineSampleReport extends React.Component {
         taxCommonName,
         taxLevel,
         alignmentVizUrl,
-        speciesTaxons
+        speciesTaxons,
       });
     } else {
       window.open(alignmentVizUrl);
@@ -835,7 +851,7 @@ class PipelineSampleReport extends React.Component {
       sampleId: this.sampleId,
       taxId: taxInfo.tax_id,
       taxLevel: taxInfo.tax_level,
-      taxName: taxInfo.name
+      taxName: taxInfo.name,
     };
     return (
       <HoverActions
@@ -903,7 +919,7 @@ class PipelineSampleReport extends React.Component {
       onTaxonClick({
         taxInfo: tax_info,
         backgroundData,
-        taxonName
+        taxonName,
       });
 
     if (tax_info.tax_id > 0) {
@@ -1058,7 +1074,7 @@ class PipelineSampleReport extends React.Component {
           logAnalyticsEvent("PipelineSampleReport_column-sort-arrow_clicked", {
             column,
             desiredSortDirection,
-            arrowDirection
+            arrowDirection,
           });
         }}
         className={className}
@@ -1079,7 +1095,7 @@ class PipelineSampleReport extends React.Component {
         onClick={() => {
           this.applySort(columnName);
           logAnalyticsEvent("PipelineSampleReport_column-header_clicked", {
-            columnName
+            columnName,
           });
         }}
       >
@@ -1176,12 +1192,12 @@ class PipelineSampleReport extends React.Component {
   searchSelectedTaxon = (e, { result }) => {
     this.setState(
       {
-        search_taxon_id: result.taxid
+        search_taxon_id: result.taxid,
       },
       () => {
         this.applyFilters();
         logAnalyticsEvent("PipelineSampleReport_taxon-search_returned", {
-          search_taxon_id: result.taxid
+          search_taxon_id: result.taxid,
         });
       }
     );
@@ -1279,11 +1295,18 @@ class PipelineSampleReport extends React.Component {
 
     const advanced_filter_tag_list = this.state.activeThresholds.map(
       (threshold, i) => (
-        <AdvancedFilterTagList
+        <ThresholdFilterTag
+          className="filter-tag"
+          key={`threshold_filter_tag_${i}`}
           threshold={threshold}
-          key={i}
-          i={i}
-          parent={this}
+          onClose={() => {
+            this.handleRemoveThresholdFilter(i);
+            logAnalyticsEvent("PipelineSampleReport_threshold-filter_removed", {
+              value: threshold.value,
+              operator: threshold.operator,
+              metric: threshold.metric,
+            });
+          }}
         />
       )
     );
@@ -1291,21 +1314,20 @@ class PipelineSampleReport extends React.Component {
     const categories_filter_tag_list = this.state.includedCategories.map(
       (category, i) => {
         return (
-          <Label className="label-tags" size="tiny" key={`category_tag_${i}`}>
-            {category}
-            <Icon
-              name="close"
-              onClick={e => {
-                this.handleRemoveCategory(category);
-                logAnalyticsEvent(
-                  "PipelineSampleReport_categories-filter_removed",
-                  {
-                    category
-                  }
-                );
-              }}
-            />
-          </Label>
+          <FilterTag
+            className="filter-tag"
+            key={`category_filter_tag_${i}`}
+            text={category}
+            onClose={() => {
+              this.handleRemoveCategory(category);
+              logAnalyticsEvent(
+                "PipelineSampleReport_categories-filter_removed",
+                {
+                  category,
+                }
+              );
+            }}
+          />
         );
       }
     );
@@ -1313,21 +1335,20 @@ class PipelineSampleReport extends React.Component {
     const subcats_filter_tag_list = this.state.includedSubcategories.map(
       (subcat, i) => {
         return (
-          <Label className="label-tags" size="tiny" key={`subcat_tag_${i}`}>
-            {subcat}
-            <Icon
-              name="close"
-              onClick={e => {
-                this.handleRemoveSubcategory(subcat);
-                logAnalyticsEvent(
-                  "PipelineSampleReport_subcategories-filter_removed",
-                  {
-                    subcat
-                  }
-                );
-              }}
-            />
-          </Label>
+          <FilterTag
+            className="filter-tag"
+            key={`subcat_filter_tag_${i}`}
+            text={subcat}
+            onClose={() => {
+              this.handleRemoveSubcategory(subcat);
+              logAnalyticsEvent(
+                "PipelineSampleReport_subcategories-filter_removed",
+                {
+                  subcat,
+                }
+              );
+            }}
+          />
         );
       }
     );
@@ -1338,8 +1359,14 @@ class PipelineSampleReport extends React.Component {
         advanced_filter_tag_list={advanced_filter_tag_list}
         categories_filter_tag_list={categories_filter_tag_list}
         subcats_filter_tag_list={subcats_filter_tag_list}
-        view={this.state.view}
-        onViewClicked={this.handleViewClicked}
+        view={this.props.view}
+        onViewClick={(_, data) => {
+          this.props.onViewClick(data);
+          const friendlyName = data.name.replace(/_/g, "-");
+          logAnalyticsEvent(
+            `PipelineSampleReport_${friendlyName}-view-menu_clicked`
+          );
+        }}
         parent={this}
       />
     );
@@ -1361,7 +1388,7 @@ function CollapseExpand({ tax_info, parent }) {
             parent.collapseGenus,
             "PipelineSampleReport_collapse-genus_clicked",
             {
-              tax_id: tax_info.tax_id
+              tax_id: tax_info.tax_id,
             }
           )}
         />
@@ -1377,7 +1404,7 @@ function CollapseExpand({ tax_info, parent }) {
             parent.expandGenusClick,
             "PipelineSampleReport_expand-genus_clicked",
             {
-              tax_id: tax_info.tax_id
+              tax_id: tax_info.tax_id,
             }
           )}
         />
@@ -1386,43 +1413,7 @@ function CollapseExpand({ tax_info, parent }) {
   );
 }
 
-function AdvancedFilterTagList({ threshold, i, parent }) {
-  if (ThresholdMap.isThresholdValid(threshold)) {
-    return (
-      <Label
-        className="label-tags"
-        size="tiny"
-        key={`advanced_filter_tag_${i}`}
-      >
-        {parent.thresholdTextByValue[threshold["metric"]]}{" "}
-        {threshold["operator"]} {threshold["value"]}
-        <Icon
-          name="close"
-          onClick={() => {
-            parent.handleRemoveThresholdFilter(i);
-          }}
-        />
-      </Label>
-    );
-  } else {
-    return null;
-  }
-}
-
 class RenderMarkup extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      view: this.props.view || "table"
-    };
-  }
-
-  componentWillReceiveProps(newProps) {
-    if (newProps.view && this.state.view != newProps.view) {
-      this.setState({ view: newProps.view });
-    }
-  }
-
   renderMenu() {
     return (
       <Menu icon floated="right" className="report-top-menu">
@@ -1430,8 +1421,8 @@ class RenderMarkup extends React.Component {
           trigger={
             <Menu.Item
               name="table"
-              active={this.state.view == "table"}
-              onClick={this.props.onViewClicked}
+              active={this.props.view == "table"}
+              onClick={this.props.onViewClick}
             >
               <Icon name="table" />
             </Menu.Item>
@@ -1444,8 +1435,8 @@ class RenderMarkup extends React.Component {
           trigger={
             <Menu.Item
               name="tree"
-              active={this.state.view == "tree"}
-              onClick={this.props.onViewClicked}
+              active={this.props.view == "tree"}
+              onClick={this.props.onViewClick}
             >
               <Icon name="fork" />
             </Menu.Item>
@@ -1489,7 +1480,7 @@ class RenderMarkup extends React.Component {
               serverSearchActionArgs={{
                 // TODO (gdingle): change backend to support filter by sampleId
                 args: "species,genus",
-                project_id: parent.projectId
+                project_id: parent.projectId,
               }}
               onResultSelect={parent.searchSelectedTaxon}
               placeholder="Taxon name"
@@ -1523,7 +1514,7 @@ class RenderMarkup extends React.Component {
             <ThresholdFilterDropdown
               options={{
                 targets: parent.allThresholds,
-                operators: [">=", "<="]
+                operators: [">=", "<="],
               }}
               thresholds={parent.state.activeThresholds}
               onApply={parent.handleThresholdFiltersChange}
@@ -1535,7 +1526,7 @@ class RenderMarkup extends React.Component {
               onChange={parent.handleSpecificityChange}
             />
           </div>
-          {this.state.view == "tree" && (
+          {this.props.view == "tree" && (
             <div className="filter-lists-element">
               <MetricPicker
                 options={parent.treeMetrics}
@@ -1544,7 +1535,7 @@ class RenderMarkup extends React.Component {
               />
             </div>
           )}
-          {this.state.view == "table" && (
+          {this.props.view == "table" && (
             <div className="filter-lists-element">
               <MinContigSizeFilter
                 value={parent.state.minContigSize}
@@ -1596,7 +1587,7 @@ class RenderMarkup extends React.Component {
       advanced_filter_tag_list,
       categories_filter_tag_list,
       subcats_filter_tag_list,
-      parent
+      parent,
     } = this.props;
 
     return (
@@ -1608,13 +1599,14 @@ class RenderMarkup extends React.Component {
                 {this.renderFilters()}
                 {this.renderMenu()}
                 <div className="filter-tags-list">
-                  {advanced_filter_tag_list} {categories_filter_tag_list}{" "}
+                  {advanced_filter_tag_list}
+                  {categories_filter_tag_list}
                   {subcats_filter_tag_list}
                 </div>
                 {filter_row_stats}
               </div>
-              {this.state.view == "table" && this.renderTable()}
-              {this.state.view == "tree" && this.renderTree()}
+              {this.props.view == "table" && this.renderTable()}
+              {this.props.view == "tree" && this.renderTree()}
               {parent.state.loading && (
                 <div className="loading-container">
                   <LoadingLabel />
@@ -1631,7 +1623,7 @@ class RenderMarkup extends React.Component {
 // TODO(mark): Add other propType signatures.
 PipelineSampleReport.propTypes = {
   nameType: PropTypes.oneOf(["Scientific name", "Common name"]),
-  onNameTypeChange: PropTypes.func.isRequired
+  onNameTypeChange: PropTypes.func.isRequired,
 };
 
 export default PipelineSampleReport;

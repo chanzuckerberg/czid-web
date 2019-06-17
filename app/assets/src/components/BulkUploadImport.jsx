@@ -71,13 +71,13 @@ class BulkUploadImport extends React.Component {
       // Local upload fields
       localUploadMode: false,
       sampleNamesToFiles: {},
-      fileNamesToProgress: {}
+      fileNamesToProgress: {},
     };
   }
 
   componentDidUpdate() {
     $(".custom-select-dropdown").dropdown({
-      belowOrigin: true
+      belowOrigin: true,
     });
   }
 
@@ -102,7 +102,7 @@ class BulkUploadImport extends React.Component {
     $(".new-project-button").toggleClass("active");
     this.setState(
       {
-        disableProjectSelect: !this.state.disableProjectSelect
+        disableProjectSelect: !this.state.disableProjectSelect,
       },
       () => {
         this.initializeSelectTag();
@@ -112,7 +112,7 @@ class BulkUploadImport extends React.Component {
 
   selectSample(e) {
     this.setState({
-      allChecked: false
+      allChecked: false,
     });
     // current array of options
     const sampleList = this.state.selectedSampleIndices;
@@ -138,7 +138,7 @@ class BulkUploadImport extends React.Component {
       const checkedStatus = e.target.checked;
       this.setState(
         {
-          allChecked: checkedStatus
+          allChecked: checkedStatus,
         },
         () => {
           $("input:checkbox")
@@ -167,7 +167,7 @@ class BulkUploadImport extends React.Component {
       .animate({ scrollTop: 0 }, 200, "swing");
     if (!this.isUploadFormInvalid()) {
       this.setState({
-        submitting: true
+        submitting: true,
       });
       this.bulkUploadRemoteSubmit();
     }
@@ -179,20 +179,20 @@ class BulkUploadImport extends React.Component {
     if (!this.isImportFormInvalid()) {
       if (this.state.localUploadMode) {
         this.setState({
-          submitting: true
+          submitting: true,
         });
         this.props.onBulkUploadLocal({
           sampleNamesToFiles: this.state.sampleNamesToFiles,
           project: {
             name: this.state.project,
-            id: this.state.projectId
+            id: this.state.projectId,
           },
           hostId: this.state.hostId,
           onCreateSampleError: this.handleCreateLocalSampleError,
           onUploadProgress: this.handleLocalUploadProgress,
           onUploadError: this.handleLocalUploadError,
           onAllUploadsComplete: this.handleAllLocalUploadsComplete,
-          onMarkSampleUploadedError: this.handleMarkSampleUploadedError
+          onMarkSampleUploadedError: this.handleMarkSampleUploadedError,
         });
       } else {
         this.bulkUploadRemoteImport();
@@ -207,7 +207,7 @@ class BulkUploadImport extends React.Component {
       invalid: true,
       errorMessage: `${
         this.state.errorMessage
-      }\n\n${sampleName}: ${joinServerError(error)}`
+      }\n\n${sampleName}: ${joinServerError(error)}`,
     });
     this.onRemoved(sampleName);
   };
@@ -216,7 +216,7 @@ class BulkUploadImport extends React.Component {
     // Update the UI on progress
     // TODO: Maybe a circular progress indicator that will fill up.
     const newProgress = merge(this.state.fileNamesToProgress, {
-      [file.name]: percent
+      [file.name]: percent,
     });
     this.setState({ fileNamesToProgress: newProgress });
   };
@@ -224,7 +224,7 @@ class BulkUploadImport extends React.Component {
   handleLocalUploadError = (file, error) => {
     this.setState({
       invalid: true,
-      errorMessage: `${file.name}: ${joinServerError(error)}`
+      errorMessage: `${file.name}: ${joinServerError(error)}`,
     });
   };
 
@@ -233,7 +233,7 @@ class BulkUploadImport extends React.Component {
       submitting: false,
       successMessage: "All uploads finished!",
       success: true,
-      invalid: false
+      invalid: false,
     });
 
     openUrlWithTimeout(`/home?project_id=${this.state.projectId}`);
@@ -241,7 +241,7 @@ class BulkUploadImport extends React.Component {
 
   handleMarkSampleUploadedError = error => {
     this.setState({
-      errorMessage: `${this.state.errorMessage}. ${joinServerError(error)}`
+      errorMessage: `${this.state.errorMessage}. ${joinServerError(error)}`,
     });
   };
 
@@ -251,13 +251,13 @@ class BulkUploadImport extends React.Component {
 
   clearError() {
     this.setState({
-      invalid: false
+      invalid: false,
     });
   }
 
   toggleCheckBox(e) {
     this.setState({
-      [e.target.id]: e.target.value == "true" ? false : true
+      [e.target.id]: e.target.value == "true" ? false : true,
     });
   }
 
@@ -277,9 +277,9 @@ class BulkUploadImport extends React.Component {
       .post("/projects.json", {
         project: {
           name: this.refs.new_project.value,
-          public_access: this.state.publicChecked ? 1 : 0
+          public_access: this.state.publicChecked ? 1 : 0,
         },
-        authenticity_token: this.csrf
+        authenticity_token: this.csrf,
       })
       .then(response => {
         var newProjectList = that.state.allProjects.slice();
@@ -290,7 +290,7 @@ class BulkUploadImport extends React.Component {
             project: response.data.name,
             projectId: response.data.id,
             success: true,
-            successMessage: "Project added successfully"
+            successMessage: "Project added successfully",
           },
           () => {
             this.refs.new_project.value = "";
@@ -301,7 +301,7 @@ class BulkUploadImport extends React.Component {
       .catch(error => {
         that.setState({
           invalid: true,
-          errorMessage: "Project exists already or is invalid"
+          errorMessage: "Project exists already or is invalid",
         });
       });
   }
@@ -313,7 +313,7 @@ class BulkUploadImport extends React.Component {
     ) {
       this.setState({
         invalid: true,
-        errorMessage: "Please enter valid project name"
+        errorMessage: "Please enter valid project name",
       });
       return true;
     } else {
@@ -323,7 +323,7 @@ class BulkUploadImport extends React.Component {
 
   bulkUploadRemoteImport() {
     this.setState({
-      submitting: true
+      submitting: true,
     });
 
     var that = this;
@@ -333,8 +333,8 @@ class BulkUploadImport extends React.Component {
           project_id: this.state.projectId,
           host_genome_id: this.state.hostId,
           bulk_path: this.state.selectedBulkPath,
-          authenticity_token: this.csrf
-        }
+          authenticity_token: this.csrf,
+        },
       })
       .then(response => {
         that.setState({
@@ -342,7 +342,7 @@ class BulkUploadImport extends React.Component {
           success: true,
           successMessage: "Samples imported. Pick the ones you want to submit.",
           samples: response.data.samples,
-          imported: true
+          imported: true,
         });
         that.initializeSelectTag();
         that.initializeSelectAll();
@@ -353,7 +353,7 @@ class BulkUploadImport extends React.Component {
           submitting: false,
           invalid: true,
           errorMessage: error.response.data.status || "Something went wrong",
-          serverErrors: error.response.data
+          serverErrors: error.response.data,
         });
       });
   }
@@ -369,15 +369,15 @@ class BulkUploadImport extends React.Component {
         samples,
         project: {
           id: this.state.projectId,
-          name: this.state.project
-        }
+          name: this.state.project,
+        },
       })
       .then(response => {
         that.setState({
           success: true,
           successMessage: "Samples created. Redirecting...",
           createdSampleIds: response.sample_ids,
-          submitting: false
+          submitting: false,
         });
         openUrlWithTimeout(`/home?project_id=${that.state.projectId}`);
       })
@@ -389,7 +389,7 @@ class BulkUploadImport extends React.Component {
             error.status ||
             "Unable to process sample(s), " +
               "ensure sample is not a duplicate in the selected project",
-          serverErrors: error
+          serverErrors: error,
         });
       });
   }
@@ -418,7 +418,7 @@ class BulkUploadImport extends React.Component {
     const errorsLength = Object.keys(errors).length;
     this.setState({
       invalid: errorsLength > 0,
-      errors
+      errors,
     });
     return errorsLength;
   }
@@ -427,7 +427,7 @@ class BulkUploadImport extends React.Component {
     if (!this.state.selectedSampleIndices.length) {
       this.setState({
         invalid: true,
-        errorMessage: "Please select desired samples"
+        errorMessage: "Please select desired samples",
       });
       return true;
     }
@@ -441,7 +441,7 @@ class BulkUploadImport extends React.Component {
     }
     this.setState({
       project: e.target.value.trim(),
-      projectId: projectId
+      projectId: projectId,
     });
     this.clearError();
   }
@@ -458,7 +458,7 @@ class BulkUploadImport extends React.Component {
     const samples = this.state.samples;
     samples[samplesId].project_id = this.state.allProjects[projectId].id;
     this.setState({
-      samples: samples
+      samples: samples,
     });
     this.clearError();
     this.resolveSampleNames();
@@ -468,7 +468,7 @@ class BulkUploadImport extends React.Component {
     const samples = this.state.samples;
     samples[samplesId].host_genome_id = this.state.hostGenomes[hostGenomeId].id;
     this.setState({
-      samples: samples
+      samples: samples,
     });
     this.clearError();
   }
@@ -485,7 +485,7 @@ class BulkUploadImport extends React.Component {
         );
       logAnalyticsEvent(`BulkUploadImport_errors_displayed`, {
         serverErrors,
-        formattedError
+        formattedError,
       });
       return ret;
     } else {
@@ -500,7 +500,7 @@ class BulkUploadImport extends React.Component {
 
   handleBulkPathChange(e) {
     this.setState({
-      selectedBulkPath: e.target.value.trim()
+      selectedBulkPath: e.target.value.trim(),
     });
   }
 
@@ -513,7 +513,7 @@ class BulkUploadImport extends React.Component {
         this.setState({
           successMessage: `${this.state.successMessage}\n\n${
             sample.name
-          } already exists, so name updated to ${resp[0]}.`
+          } already exists, so name updated to ${resp[0]}.`,
         });
         sample.name = resp[0];
       }
@@ -541,7 +541,7 @@ class BulkUploadImport extends React.Component {
                   {
                     samples: this.state.samples.length,
                     projectId: this.state.projectId,
-                    hostId: this.state.hostId
+                    hostId: this.state.hostId,
                   }
                 )}
               >
@@ -633,7 +633,7 @@ class BulkUploadImport extends React.Component {
                                           "BulkUploadImport_host-dropdown_clicked",
                                           {
                                             samplesId: i,
-                                            hostGenomeId: j
+                                            hostGenomeId: j,
                                           }
                                         );
                                       }}
@@ -682,7 +682,7 @@ class BulkUploadImport extends React.Component {
                                           "BulkUploadImport_project-dropdown_clicked",
                                           {
                                             samplesId: i,
-                                            hostGenomeId: j
+                                            hostGenomeId: j,
                                           }
                                         );
                                       }}
@@ -773,7 +773,7 @@ class BulkUploadImport extends React.Component {
       sampleNamesToFiles: merge(
         this.state.sampleNamesToFiles,
         sampleNamesToFiles
-      )
+      ),
     });
   };
 
@@ -783,7 +783,7 @@ class BulkUploadImport extends React.Component {
     this.setState(
       {
         sampleNamesToFiles: omit(sampleName, this.state.sampleNamesToFiles),
-        fileNamesToProgress: omit(sampleName, this.state.fileNamesToProgress)
+        fileNamesToProgress: omit(sampleName, this.state.fileNamesToProgress),
       },
       () => {
         // If there's nothing to upload anymore, submitting is no longer in progress
@@ -806,7 +806,7 @@ class BulkUploadImport extends React.Component {
           {
             projectId: this.state.projectId,
             hostId: this.state.hostId,
-            selectedBulkPath: this.state.selectedBulkPath
+            selectedBulkPath: this.state.selectedBulkPath,
           }
         )}
       >
@@ -1055,7 +1055,7 @@ class BulkUploadImport extends React.Component {
                         logAnalyticsEvent(
                           "BulkUploadImport_create-project-button_clicked",
                           {
-                            newProject
+                            newProject,
                           }
                         );
                       }
@@ -1140,7 +1140,7 @@ class BulkUploadImport extends React.Component {
                               "BulkUploadImport_host-selector_clicked",
                               {
                                 hostId: g.id,
-                                hostName: g.name
+                                hostName: g.name,
                               }
                             );
                           }}
@@ -1193,7 +1193,7 @@ class BulkUploadImport extends React.Component {
               checked={this.state.consentChecked}
               onChange={() =>
                 this.setState({
-                  consentChecked: !this.state.consentChecked
+                  consentChecked: !this.state.consentChecked,
                 })
               }
             />
@@ -1234,7 +1234,7 @@ BulkUploadImport.propTypes = {
   projects: PropTypes.arrayOf(PropTypes.Project),
   csrf: PropTypes.string,
   host_genomes: PropTypes.arrayOf(PropTypes.HostGenome),
-  admin: PropTypes.bool
+  admin: PropTypes.bool,
 };
 
 export default BulkUploadImport;

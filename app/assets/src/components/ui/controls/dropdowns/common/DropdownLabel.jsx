@@ -15,7 +15,7 @@ const DropdownLabel = ({ text, disabled, className }) => (
 DropdownLabel.propTypes = {
   disabled: PropTypes.bool,
   text: PropTypes.string,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default DropdownLabel;

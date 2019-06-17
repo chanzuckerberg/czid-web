@@ -6,9 +6,12 @@ import { orderBy, some } from "lodash";
 import { scaleSequential } from "d3-scale";
 import { interpolateYlOrRd } from "d3-scale-chromatic";
 import SvgSaver from "svgsaver";
+import cx from "classnames";
+
+import { logAnalyticsEvent } from "~/api/analytics";
+
 import symlog from "../../utils/d3/scales/symlog.js";
 import cs from "./heatmap.scss";
-import cx from "classnames";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap.js";
 
 // TODO(tcarvalho): temporary hack to send elements to the back.
@@ -67,7 +70,7 @@ export default class Heatmap {
         // The signature of customColor is customColor(value, data_node, originalColor, colors, colorNoValue)
         customColorCallback: null,
         colors: null,
-        colorNoValue: "#eaeaea"
+        colorNoValue: "#eaeaea",
       },
       options
     );
@@ -188,7 +191,7 @@ export default class Heatmap {
       max: Math.max(
         d3.max(this.data.values, array => d3.max(array)),
         this.options.nullValue
-      )
+      ),
     };
 
     this.scaleLimits = {
@@ -199,7 +202,7 @@ export default class Heatmap {
       max:
         this.options.scaleMax || this.options.scaleMax === 0
           ? this.options.scaleMax
-          : this.limits.max
+          : this.limits.max,
     };
 
     this.cells = [];
@@ -209,7 +212,7 @@ export default class Heatmap {
           id: `${i},${j}`,
           rowIndex: i,
           columnIndex: j,
-          value: this.data.values[i][j]
+          value: this.data.values[i][j],
         });
       }
     }
@@ -269,7 +272,7 @@ export default class Heatmap {
           this.columnClusterHeight) /
           this.rowLabels.length,
         this.options.minCellHeight
-      )
+      ),
     };
 
     this.width =
@@ -840,6 +843,9 @@ export default class Heatmap {
       this.options.onColumnMetadataLabelClick
         ? this.options.onColumnMetadataLabelClick(d.value, d3.event)
         : this.handleColumnMetadataLabelClick(d.value);
+      logAnalyticsEvent("Heatmap_column-metadata-label_clicked", {
+        columnMetadataSortField: d.value,
+      });
     };
 
     columnMetadataLabelEnter
@@ -971,7 +977,7 @@ export default class Heatmap {
       const handleAddColumnMetadataClick = () => {
         this.options.onAddColumnMetadataClick(addMetadataTrigger.node(), {
           x: this.rowLabelsWidth - 10,
-          y: yPos
+          y: yPos,
         });
       };
 
@@ -1204,7 +1210,7 @@ export default class Heatmap {
       )
     ) {
       return Object.assign({}, this.metadataColors[value], {
-        Unknown: this.options.colorNoValue
+        Unknown: this.options.colorNoValue,
       });
     } else {
       return this.metadataColors[value];

@@ -8,11 +8,11 @@ const Divider = ({ style }) => {
 };
 
 Divider.defaultProps = {
-  style: "thin"
+  style: "thin",
 };
 
 Divider.propTypes = {
-  style: PropTypes.oneOf(["thin", "medium"])
+  style: PropTypes.oneOf(["thin", "medium"]),
 };
 
 export default Divider;

@@ -45,7 +45,7 @@ class TermsAgreement extends React.Component {
 
 TermsAgreement.propTypes = {
   onChange: PropTypes.func,
-  checked: PropTypes.bool
+  checked: PropTypes.bool,
 };
 
 export default TermsAgreement;

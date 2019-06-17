@@ -7,37 +7,37 @@ const columns = [
   {
     Header: "Antibiotic Class",
     accessor: "drug_family",
-    filterable: false
+    filterable: false,
   },
   {
     Header: "Gene",
     accessor: "gene",
     aggregate: vals => "",
     style: {
-      textAlign: "center"
+      textAlign: "center",
     },
-    filterable: false
+    filterable: false,
   },
   {
     Header: "Coverage",
     accessor: "coverage",
     style: {
-      textAlign: "center"
+      textAlign: "center",
     },
     aggregate: vals => _.round(_.mean(vals)),
     filterMethod: (filter, row) => row[filter.id] >= filter.value,
-    Cell: props => parseFloat(props.value).toFixed(1)
+    Cell: props => parseFloat(props.value).toFixed(1),
   },
   {
     Header: "Depth",
     accessor: "depth",
     aggregate: vals => _.round(_.sum(vals)),
     style: {
-      textAlign: "center"
+      textAlign: "center",
     },
     filterMethod: (filter, row) => row[filter.id] >= filter.value,
-    Cell: props => parseFloat(props.value).toFixed(1)
-  }
+    Cell: props => parseFloat(props.value).toFixed(1),
+  },
 ];
 
 class AMRView extends React.Component {
@@ -72,8 +72,8 @@ class AMRView extends React.Component {
           defaultSorted={[
             {
               id: "coverage",
-              desc: true
-            }
+              desc: true,
+            },
           ]}
           className="-striped -highlight"
         />

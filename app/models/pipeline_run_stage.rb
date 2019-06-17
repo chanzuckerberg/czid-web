@@ -79,6 +79,18 @@ class PipelineRunStage < ApplicationRecord
     save
   end
 
+  def duration_hrs
+    (run_time / 60 / 60).round(2) if run_time
+  end
+
+  def run_time
+    if completed?
+      updated_at - created_at
+    elsif started?
+      Time.current - created_at
+    end
+  end
+
   def instance_terminated?(job_hash)
     job_hash['status'] == STATUS_FAILED &&
       job_hash['statusReason'].start_with?("Host EC2 (instance") &&

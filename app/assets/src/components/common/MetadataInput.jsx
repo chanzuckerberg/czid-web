@@ -15,7 +15,7 @@ class MetadataInput extends React.Component {
       onSave,
       metadataType,
       className,
-      isHuman
+      isHuman,
     } = this.props;
 
     let testingSelected = [];
@@ -23,7 +23,7 @@ class MetadataInput extends React.Component {
     if (isArray(metadataType.options)) {
       const options = metadataType.options.map(option => ({
         text: option,
-        value: option
+        value: option,
       }));
       return (
         <Dropdown
@@ -79,14 +79,14 @@ MetadataInput.propTypes = {
   metadataType: PropTypes.shape({
     key: PropTypes.string,
     dataType: PropTypes.oneOf(["number", "string", "date", "location"]),
-    options: PropTypes.arrayOf(PropTypes.string)
+    options: PropTypes.arrayOf(PropTypes.string),
   }),
   // Third optional parameter signals to the parent whether to immediately save. false means "wait for onSave to fire".
   // This is useful for the text input, where the parent wants to save onBlur, not onChange.
   onChange: PropTypes.func.isRequired,
   onSave: PropTypes.func,
   withinModal: PropTypes.bool,
-  isHuman: PropTypes.bool
+  isHuman: PropTypes.bool,
 };
 
 export default MetadataInput;

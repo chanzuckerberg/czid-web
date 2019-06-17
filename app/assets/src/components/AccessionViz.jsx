@@ -11,7 +11,7 @@ class AccessionViz extends React.Component {
     this.renderMoreReads = this.renderMoreReads.bind(this);
     this.state = {
       reads: this.allReads.slice(0, this.readsPerPage),
-      rendering: false
+      rendering: false,
     };
   }
 
@@ -29,7 +29,7 @@ class AccessionViz extends React.Component {
       numReads + this.readsPerPage
     );
     this.setState(prevState => ({
-      reads: [...prevState.reads, ...nextPageReads]
+      reads: [...prevState.reads, ...nextPageReads],
     }));
   }
 
@@ -96,7 +96,10 @@ class AccessionViz extends React.Component {
             onClick={withAnalytics(
               this.renderMoreReads,
               "AccessionViz_more-reads-link_clicked",
-              { reads: this.state.reads.length, allReads: this.allReads.length }
+              {
+                reads: this.state.reads.length,
+                allReads: this.allReads.length,
+              }
             )}
             style={{ cursor: "pointer" }}
           >

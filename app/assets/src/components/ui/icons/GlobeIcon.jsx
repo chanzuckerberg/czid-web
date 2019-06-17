@@ -27,7 +27,7 @@ const GlobeIcon = props => {
 };
 
 GlobeIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default GlobeIcon;

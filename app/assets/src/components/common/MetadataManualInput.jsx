@@ -13,7 +13,7 @@ import _fp, {
   sortBy,
   find,
   pickBy,
-  isEqual
+  isEqual,
 } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -39,8 +39,8 @@ class MetadataManualInput extends React.Component {
     // Which cell the "Apply to All" button should appear on.
     applyToAllCell: {
       sampleName: null,
-      column: null
-    }
+      column: null,
+    },
   };
 
   componentDidMount() {
@@ -57,8 +57,8 @@ class MetadataManualInput extends React.Component {
       headers: {
         "Sample Name": "Sample Name",
         ...(samplesAreNew ? { "Host Genome": "Host Genome" } : {}),
-        ...mapValues("name", keyBy("key", projectMetadataFields))
-      }
+        ...mapValues("name", keyBy("key", projectMetadataFields)),
+      },
     });
 
     this.setDefaultHostGenomes();
@@ -85,7 +85,7 @@ class MetadataManualInput extends React.Component {
       });
       this.setState({
         headersToEdit: newHeaders,
-        metadataFieldsToEdit: newFields
+        metadataFieldsToEdit: newFields,
       });
       this.onMetadataChange(newHeaders, newFields);
     }
@@ -95,7 +95,7 @@ class MetadataManualInput extends React.Component {
     return [
       "Sample Name",
       ...(this.props.samplesAreNew ? ["Host Genome"] : []),
-      ...this.state.selectedFieldNames
+      ...this.state.selectedFieldNames,
     ];
   };
 
@@ -112,8 +112,8 @@ class MetadataManualInput extends React.Component {
       headersToEdit: newHeaders,
       applyToAllCell: {
         sampleName: sample.name,
-        column: key
-      }
+        column: key,
+      },
     });
 
     this.onMetadataChange(newHeaders, newFields);
@@ -142,8 +142,8 @@ class MetadataManualInput extends React.Component {
       headersToEdit: newHeaders,
       applyToAllCell: {
         sampleName: null,
-        column: null
-      }
+        column: null,
+      },
     });
 
     this.onMetadataChange(newHeaders, newFields);
@@ -165,11 +165,11 @@ class MetadataManualInput extends React.Component {
         rows: map(
           (fields, sampleName) => ({
             ...mapValues(value => value || "", fields),
-            sample_name: sampleName
+            sample_name: sampleName,
           }),
           fieldsForSamples
-        )
-      }
+        ),
+      },
     });
   };
 
@@ -188,7 +188,7 @@ class MetadataManualInput extends React.Component {
   handleColumnChange = selectedFieldNames => {
     this.setState({ selectedFieldNames });
     logAnalyticsEvent("MetadataManualInput_column-selector_changed", {
-      selectedFieldNames: selectedFieldNames.length
+      selectedFieldNames: selectedFieldNames.length,
     });
   };
 
@@ -197,14 +197,14 @@ class MetadataManualInput extends React.Component {
       "text",
       this.props.hostGenomes.map(hostGenome => ({
         text: hostGenome.name,
-        value: hostGenome.id
+        value: hostGenome.id,
       }))
     );
 
   renderColumnSelector = () => {
     const options = values(this.props.projectMetadataFields).map(field => ({
       value: field.key,
-      text: field.name
+      text: field.name,
     }));
 
     return (
@@ -244,7 +244,7 @@ class MetadataManualInput extends React.Component {
           this.applyToAll(column, sample);
           logAnalyticsEvent("MetadataManualInput_apply-all_clicked", {
             sampleName: sample.name,
-            column
+            column,
           });
         }}
       >
@@ -332,7 +332,7 @@ class MetadataManualInput extends React.Component {
                     logAnalyticsEvent("MetadataManualInput_input_changed", {
                       key,
                       value,
-                      sampleName: sample.name
+                      sampleName: sample.name,
                     });
                   }}
                   withinModal={this.props.withinModal}
@@ -380,7 +380,7 @@ MetadataManualInput.propTypes = {
   samplesAreNew: PropTypes.bool,
   withinModal: PropTypes.bool,
   projectMetadataFields: PropTypes.object,
-  hostGenomes: PropTypes.array
+  hostGenomes: PropTypes.array,
 };
 
 export default MetadataManualInput;

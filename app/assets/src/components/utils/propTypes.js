@@ -13,7 +13,7 @@ const TaxonDatabaseStats = PropTypes.shape({
   // Right now, if rpm is 0, it is a number. Otherwise, a string.
   rpm: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   rpm_bg: PropTypes.number,
-  zscore: PropTypes.number.isRequired
+  zscore: PropTypes.number.isRequired,
 });
 
 const Taxon = PropTypes.shape({
@@ -30,42 +30,42 @@ const Taxon = PropTypes.shape({
   species_taxid: PropTypes.number.isRequired,
   tax_id: PropTypes.number.isRequired,
   tax_level: PropTypes.number.isRequired,
-  topScoring: PropTypes.number
+  topScoring: PropTypes.number,
 });
 
 // TODO(mark): Expand signature as more fields of ReportDetails are used in the app.
 const ReportDetails = PropTypes.shape({
-  taxon_fasta_flag: PropTypes.bool.isRequired
+  taxon_fasta_flag: PropTypes.bool.isRequired,
 });
 
 const BackgroundData = PropTypes.shape({
   id: PropTypes.number,
-  name: PropTypes.string
+  name: PropTypes.string,
 });
 
 // TODO(mark): Expand signature as more fields of Sample are used in the app.
 const Sample = PropTypes.shape({
   id: PropTypes.number,
   name: PropTypes.string,
-  host_genome_id: PropTypes.number
+  host_genome_id: PropTypes.number,
 });
 
 const Project = PropTypes.shape({
   id: PropTypes.number.isRequired,
-  name: PropTypes.string.isRequired
+  name: PropTypes.string.isRequired,
 });
 
 const MetadataType = PropTypes.shape({
   key: PropTypes.string,
   dataType: PropTypes.oneOf(["string", "number", "date", "location"]),
-  name: PropTypes.string
+  name: PropTypes.string,
 });
 
 const ERCCComparison = PropTypes.arrayOf(
   PropTypes.shape({
     name: PropTypes.string,
     actual: PropTypes.number,
-    expected: PropTypes.number
+    expected: PropTypes.number,
   })
 );
 
@@ -78,17 +78,17 @@ const PipelineRun = PropTypes.shape({
   adjusted_remaining_reads: PropTypes.number,
   version: PropTypes.shape({
     version: PropTypes.string,
-    alignment_db: PropTypes.string
-  })
+    alignment_db: PropTypes.string,
+  }),
 });
 
 const SummaryStats = PropTypes.shape({
-  last_processed_at: PropTypes.string
+  last_processed_at: PropTypes.string,
 });
 
 const HostGenome = PropTypes.shape({
   id: PropTypes.number,
-  name: PropTypes.string
+  name: PropTypes.string,
 });
 
 const Location = PropTypes.shape({
@@ -101,7 +101,7 @@ const Location = PropTypes.shape({
   name: PropTypes.string,
   sample_ids: PropTypes.arrayOf(PropTypes.number),
   state_name: PropTypes.string,
-  subdivision_name: PropTypes.string
+  subdivision_name: PropTypes.string,
 });
 
 export default {
@@ -116,5 +116,5 @@ export default {
   SummaryStats,
   HostGenome,
   Location,
-  ...PropTypes
+  ...PropTypes,
 };

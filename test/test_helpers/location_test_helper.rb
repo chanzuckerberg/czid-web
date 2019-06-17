@@ -51,4 +51,21 @@ module LocationTestHelper
       }
     }
   ].freeze
+  API_GEOSEARCH_SF_COUNTY_RESPONSE = [
+    {
+      "place_id" => "214379825",
+      "osm_type" => "relation",
+      "osm_id" => "396487",
+      "lat" => 37.76,
+      # LocationIQ uses 'lon'
+      "lon" => -122.46,
+      "display_name" => "San Francisco City and County, California, USA",
+      "address" => {
+        "county" => "San Francisco City and County",
+        "state" => "California",
+        "country" => "USA",
+        "country_code" => "us"
+      }
+    }
+  ].freeze
 end

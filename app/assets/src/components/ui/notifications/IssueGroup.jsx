@@ -43,7 +43,7 @@ IssueGroup.propTypes = {
   caption: PropTypes.string,
   headers: PropTypes.arrayOf(PropTypes.string),
   rows: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)),
-  type: PropTypes.oneOf(["error", "warning"])
+  type: PropTypes.oneOf(["error", "warning"]),
 };
 
 export default IssueGroup;

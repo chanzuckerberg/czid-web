@@ -18,7 +18,7 @@ class UserManagementForm extends React.Component {
       name: "",
       email: "",
       statusMessage: "",
-      statusClass: null
+      statusClass: null,
     };
   }
 
@@ -28,19 +28,19 @@ class UserManagementForm extends React.Component {
 
     const fieldsValidation = {
       email: StringHelper.validateEmail(email),
-      name: StringHelper.validateName(name)
+      name: StringHelper.validateName(name),
     };
 
     if (Object.values(fieldsValidation).every(valid => !!valid)) {
       this.setState({
         statusClass: cs.infoMessage,
-        statusMessage: "Sending invitation"
+        statusMessage: "Sending invitation",
       });
       axios
         .put(`/projects/${project.id}}/add_user`, {
           user_name_to_add: name,
           user_email_to_add: email,
-          authenticity_token: csrf
+          authenticity_token: csrf,
         })
         .then(() => {
           onUserAdded(name, email);
@@ -48,7 +48,7 @@ class UserManagementForm extends React.Component {
             statusClass: cs.successMessage,
             statusMessage: "Invitation sent! User added.",
             name: "",
-            email: ""
+            email: "",
           });
         });
     } else {
@@ -58,7 +58,7 @@ class UserManagementForm extends React.Component {
 
       this.setState({
         statusClass: cs.errorMessage,
-        statusMessage: `Invalid ${invalidFieldsString} address`
+        statusMessage: `Invalid ${invalidFieldsString} address`,
       });
     }
   };
@@ -67,7 +67,7 @@ class UserManagementForm extends React.Component {
     this.setState({
       name,
       statusClass: cs.infoMessage,
-      statusMessage: ""
+      statusMessage: "",
     });
   };
 
@@ -75,7 +75,7 @@ class UserManagementForm extends React.Component {
     this.setState({
       email,
       statusClass: cs.infoMessage,
-      statusMessage: ""
+      statusMessage: "",
     });
   };
 
@@ -146,9 +146,9 @@ UserManagementForm.propTypes = {
   project: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string,
-    public_access: PropTypes.oneOfType([PropTypes.bool, PropTypes.number])
+    public_access: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
   }).isRequired,
-  users: PropTypes.array
+  users: PropTypes.array,
 };
 
 export default UserManagementForm;

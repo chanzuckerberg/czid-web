@@ -17,11 +17,11 @@
   <tbody>
     <% @projects.each do |project| %>
       <tr>
-        <td><%= project.name %></td>
+        <td><u><%= link_to project.name, project %></u></td>
         <td><% project.users[0...-1].each do |u| %>
-          <%= link_to u.name, u if u %>,
+          <u><%= link_to u.name, u if u %></u>,
         <% end %>
-        <%= link_to project.users.last.name, project.users.last if project.users.last %>
+        <u><%= link_to project.users.last.name, project.users.last if project.users.last %></u>
         </td>
         <td><%= current_power.project_samples(project).count %></td>
         <td><%= project.created_at %></td>
@@ -32,7 +32,7 @@
 </table>
 
 <p>
-<%= link_to 'New Project', new_project_path %> |
-<%= link_to 'Front portal', root_path %>
+<u><%= link_to 'New Project', new_project_path %></u> |
+<u><%= link_to 'Front portal', root_path %></u>
 </p>
 <% end %>

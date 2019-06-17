@@ -7,7 +7,7 @@ import _fp, {
   partition,
   first,
   get,
-  compact
+  compact,
 } from "lodash/fp";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import DataTable from "~/components/visualizations/table/DataTable";
@@ -22,7 +22,7 @@ const map = _fp.map.convert({ cap: false });
 const dictionaryHeaders = {
   name: "Name",
   description: "Description",
-  examples: "Examples"
+  examples: "Examples",
 };
 
 const getExamplesForHostGenome = (field, hostGenomeId) =>
@@ -34,13 +34,13 @@ class MetadataDictionary extends React.Component {
   state = {
     officialFields: null,
     hostGenomes: null,
-    currentHostGenome: null
+    currentHostGenome: null,
   };
 
   async componentDidMount() {
     let [officialFields, hostGenomes] = await Promise.all([
       getOfficialMetadataFields(),
-      getAllHostGenomes()
+      getAllHostGenomes(),
     ]);
 
     officialFields = map(
@@ -52,7 +52,7 @@ class MetadataDictionary extends React.Component {
     this.setState({
       officialFields,
       hostGenomes,
-      currentHostGenome: get("id", first(hostGenomes))
+      currentHostGenome: get("id", first(hostGenomes)),
     });
   }
 
@@ -79,7 +79,7 @@ class MetadataDictionary extends React.Component {
           set("name", <div className={cs.required}>{field.name}*</div>, field),
         sortBy("name", requiredFields)
       ),
-      ...sortBy("name", nonrequiredFields)
+      ...sortBy("name", nonrequiredFields),
     ];
   };
 
@@ -95,7 +95,7 @@ class MetadataDictionary extends React.Component {
     const groups = map(
       (fields, name) => ({
         name,
-        fields: this.processFields(fields)
+        fields: this.processFields(fields),
       }),
       groupBy("group", fieldsForHostGenome)
     );
@@ -105,7 +105,7 @@ class MetadataDictionary extends React.Component {
 
   handleHostGenomeChange = id => {
     this.setState({
-      currentHostGenome: id
+      currentHostGenome: id,
     });
   };
 
@@ -114,7 +114,7 @@ class MetadataDictionary extends React.Component {
       "text",
       this.state.hostGenomes.map(hostGenome => ({
         text: hostGenome.name,
-        value: hostGenome.id
+        value: hostGenome.id,
       }))
     );
 

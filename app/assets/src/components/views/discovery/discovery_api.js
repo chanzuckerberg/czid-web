@@ -6,7 +6,7 @@ import {
   getSampleStats,
   getSamples,
   getSamplesLocations,
-  getVisualizations
+  getVisualizations,
 } from "~/api";
 
 const DISCOVERY_DOMAIN_MY_DATA = "my_data";
@@ -17,12 +17,12 @@ const getDiscoverySyncData = async ({ domain, filters, projectId, search }) => {
   try {
     const [projects, visualizations] = await Promise.all([
       getProjects({ domain, filters, projectId, search }),
-      getVisualizations({ domain, filters, search })
+      getVisualizations({ domain, filters, search }),
     ]);
 
     return {
       projects,
-      visualizations
+      visualizations,
     };
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -35,12 +35,12 @@ const getDiscoveryDimensions = async ({
   domain,
   filters,
   projectId,
-  search
+  search,
 }) => {
   try {
     const actions = [
       getSampleDimensions({ domain, filters, projectId, search }),
-      getProjectDimensions({ domain, filters, projectId, search })
+      getProjectDimensions({ domain, filters, projectId, search }),
     ];
     const [sampleDimensions, projectDimensions] = await Promise.all(actions);
     return { sampleDimensions, projectDimensions };
@@ -57,7 +57,7 @@ const getDiscoveryStats = async ({ domain, filters, projectId, search }) => {
       domain,
       filters,
       projectId,
-      search
+      search,
     });
     return { sampleStats };
   } catch (error) {
@@ -77,7 +77,7 @@ const processRawSample = sample => {
       status: get(
         "run_info.result_status_description",
         sample.details
-      ).toLowerCase()
+      ).toLowerCase(),
     },
     collectionLocation: get("metadata.collection_location", sample.details),
     collectionLocationV2: get(
@@ -103,7 +103,7 @@ const processRawSample = sample => {
       percent: get(
         "derived_sample_output.summary_stats.percent_remaining",
         sample.details
-      )
+      ),
     },
     notes: get("db_sample.sample_notes", sample.details),
     nucleotideType: get("metadata.nucleotide_type", sample.details),
@@ -120,7 +120,7 @@ const processRawSample = sample => {
       "derived_sample_output.pipeline_run.total_reads",
       sample.details
     ),
-    totalRuntime: get("run_info.total_runtime", sample.details)
+    totalRuntime: get("run_info.total_runtime", sample.details),
   };
   return row;
 };
@@ -133,7 +133,7 @@ const getDiscoverySamples = async ({
   limit = 100,
   offset = 0,
   listAllIds = false,
-  sampleIds
+  sampleIds,
 } = {}) => {
   const sampleResults = await getSamples({
     domain,
@@ -143,11 +143,11 @@ const getDiscoverySamples = async ({
     limit,
     offset,
     listAllIds,
-    sampleIds
+    sampleIds,
   });
   return {
     samples: map(processRawSample, sampleResults.samples),
-    sampleIds: sampleResults.all_samples_ids
+    sampleIds: sampleResults.all_samples_ids,
   };
 };
 
@@ -155,14 +155,14 @@ const getDiscoveryLocations = async ({
   domain,
   filters,
   projectId,
-  search
+  search,
 }) => {
   try {
     return await getSamplesLocations({
       domain,
       filters,
       projectId,
-      search
+      search,
     });
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -179,5 +179,5 @@ export {
   getDiscoveryLocations,
   getDiscoverySamples,
   getDiscoveryStats,
-  getDiscoverySyncData
+  getDiscoverySyncData,
 };

@@ -6,7 +6,7 @@ import { filter, map, zip, fromPairs, isNull, isEqual } from "lodash/fp";
 import CSVUpload from "~ui/controls/CSVUpload";
 import {
   validateMetadataCSVForProject,
-  validateMetadataCSVForNewSamples
+  validateMetadataCSVForNewSamples,
 } from "~/api/metadata";
 import cs from "./metadata_csv_upload.scss";
 import PropTypes from "prop-types";
@@ -26,7 +26,7 @@ const processCSVMetadata = csv => {
       // The below code makes sure this case is handled correctly by filtering before converting to an object.
       row => fromPairs(filter(pair => pair[1] !== "", zip(headers, row))),
       rows
-    )
+    ),
   };
 };
 
@@ -38,7 +38,7 @@ class MetadataCSVUpload extends React.Component {
     validatingCSV: false,
     // Keep track of the last sample names and project id validated so we can re-validate if the samples changed.
     lastSampleNamesValidated: null,
-    lastProjectIdValidated: null
+    lastProjectIdValidated: null,
   };
 
   componentDidUpdate(prevProps) {
@@ -70,9 +70,9 @@ class MetadataCSVUpload extends React.Component {
       metadata: null,
       issues: {
         errors: [],
-        warnings: []
+        warnings: [],
       },
-      validatingCSV: true
+      validatingCSV: true,
     });
 
     let serverResponse;
@@ -82,7 +82,7 @@ class MetadataCSVUpload extends React.Component {
       // We assume that all samples are being uploaded to this.props.project.
       this.setState({
         lastSampleNamesValidated: map("name", this.props.samples),
-        lastProjectIdValidated: this.props.project.id
+        lastProjectIdValidated: this.props.project.id,
       });
 
       serverResponse = await validateMetadataCSVForNewSamples(
@@ -100,7 +100,7 @@ class MetadataCSVUpload extends React.Component {
     this.props.onMetadataChange({
       metadata: processCSVMetadata(csv),
       issues: serverResponse.issues,
-      validatingCSV: false
+      validatingCSV: false,
     });
   };
 
@@ -122,14 +122,14 @@ MetadataCSVUpload.propTypes = {
   // For uploading metadata to existing samples in a project.
   project: PropTypes.shape({
     id: PropTypes.number,
-    name: PropTypes.string
+    name: PropTypes.string,
   }),
   // For uploading metadata together with new samples.
   samples: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string,
       project_id: PropTypes.number,
-      host_genome_id: PropTypes.number
+      host_genome_id: PropTypes.number,
     })
   ),
   className: PropTypes.string,
@@ -138,7 +138,7 @@ MetadataCSVUpload.propTypes = {
   visible: PropTypes.bool,
   // Immediately called when the user changes anything, even before validation has returned.
   // Can be used to disable the header navigation.
-  onDirty: PropTypes.func.isRequired
+  onDirty: PropTypes.func.isRequired,
 };
 
 export default MetadataCSVUpload;

@@ -30,7 +30,7 @@ class Textarea extends React.Component {
 Textarea.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default Textarea;

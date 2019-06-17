@@ -34,7 +34,7 @@ const HeatmapIcon = props => {
 };
 
 HeatmapIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default HeatmapIcon;

@@ -30,29 +30,29 @@ class VisualizationsView extends React.Component {
               {
                 nameRenderer: this.nameRenderer,
                 detailsRenderer: this.detailsRenderer,
-                visibilityIconRenderer: this.visibilityIconRenderer
+                visibilityIconRenderer: this.visibilityIconRenderer,
               }
             )
           ),
         headerClassName: cs.visualizationHeader,
-        sortFunction: p => p.updated_at
+        sortFunction: p => p.updated_at,
       },
       {
         dataKey: "updated_at",
         label: "Updated On",
         width: 120,
-        cellRenderer: TableRenderers.renderDate
+        cellRenderer: TableRenderers.renderDate,
       },
       {
         dataKey: "project_name",
         width: 280, // big enough for "mBAL-PLASMA and Medical Detectives"
-        label: "Project"
+        label: "Project",
       },
       {
         dataKey: "samples_count",
         width: 140,
-        label: "Samples"
-      }
+        label: "Samples",
+      },
     ];
   }
 
@@ -63,7 +63,7 @@ class VisualizationsView extends React.Component {
   visibilityIconRenderer = visualization => {
     const {
       visualization_type: visualizationType,
-      publicAccess
+      publicAccess,
     } = visualization;
     if (visualizationType == "heatmap") {
       return publicAccess ? (
@@ -99,7 +99,7 @@ class VisualizationsView extends React.Component {
     logAnalyticsEvent("VisualizationsView_row_clicked", {
       visualizationType: rowData.visualization.visualization_type,
       visualizationId: rowData.id,
-      url
+      url,
     });
   };
 
@@ -111,7 +111,7 @@ class VisualizationsView extends React.Component {
           visualization: pick(
             ["user_name", "visualization_type", "name", "publicAccess"],
             visualization
-          )
+          ),
         },
         pick(
           ["id", "updated_at", "project_name", "samples_count"],
@@ -131,11 +131,11 @@ class VisualizationsView extends React.Component {
 }
 
 VisualizationsView.defaultProps = {
-  visualizations: []
+  visualizations: [],
 };
 
 VisualizationsView.propTypes = {
-  visualizations: PropTypes.array
+  visualizations: PropTypes.array,
 };
 
 export default VisualizationsView;

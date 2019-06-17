@@ -11,13 +11,13 @@ class TaxonFilter extends React.Component {
     const searchResults = await getSearchSuggestions({
       query,
       categories: ["taxon"],
-      domain
+      domain,
     });
     const options = (((searchResults || {}).Taxon || {}).results || [])
       .filter(result => result.taxid > 0)
       .map(result => ({
         value: result.taxid,
-        text: result.title
+        text: result.title,
       }));
     return options;
   };
@@ -41,7 +41,7 @@ class TaxonFilter extends React.Component {
 TaxonFilter.propTypes = {
   domain: PropTypes.string,
   selectedOptions: PropTypes.array,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };
 
 export default TaxonFilter;

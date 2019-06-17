@@ -12,7 +12,7 @@ const Label = ({
   circular,
   floating,
   text,
-  onClick
+  onClick,
 }) => {
   return (
     <BaseLabel
@@ -34,8 +34,8 @@ Label.propTypes = forbidExtraProps({
   size: PropTypes.string,
   circular: PropTypes.bool,
   floating: PropTypes.bool,
-  text: PropTypes.string,
-  onClick: PropTypes.func
+  text: PropTypes.node,
+  onClick: PropTypes.func,
 });
 
 export default Label;

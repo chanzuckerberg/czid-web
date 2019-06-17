@@ -11,7 +11,8 @@ module LocationHelper
       country_name: address["country"] || "",
       state_name: address["state"] || "",
       subdivision_name: address["county"] || "",
-      city_name: address["city"] || "",
+      # Normalize extra provider fields to city. normalizecity param doesn't work all the time.
+      city_name: address[%w[city city_distrct locality town borough municipality village hamlet quarter neighbourhood state_district].find { |k| address.key?(k) }] || "",
       # Round coordinates to enhance privacy
       lat: body["lat"] ? body["lat"].to_f.round(2) : nil,
       # LocationIQ uses 'lon'

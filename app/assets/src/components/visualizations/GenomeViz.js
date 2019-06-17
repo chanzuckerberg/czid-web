@@ -18,19 +18,19 @@ export default class GenomeViz {
       top: 0,
       right: 0,
       bottom: 0,
-      left: 0
+      left: 0,
     };
 
     this.size = {
       width: container.clientWidth || 800,
-      height: container.clientHeight || 400
+      height: container.clientHeight || 400,
     };
 
     this.options = Object.assign(
       {
         colors: null,
         hoverBuffer: 5,
-        hoverDarkenFactor: 0.25
+        hoverDarkenFactor: 0.25,
       },
       options
     );

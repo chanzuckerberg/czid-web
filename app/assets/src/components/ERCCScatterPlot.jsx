@@ -14,7 +14,7 @@ class ERCCScatterPlot extends React.Component {
         data.push({
           name: row.name,
           actual: Math.log10(row.actual),
-          expected: Math.log10(row.expected)
+          expected: Math.log10(row.expected),
         });
       }
     }
@@ -39,7 +39,7 @@ class ERCCScatterPlot extends React.Component {
 ERCCScatterPlot.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
-  ercc_comparison: PropTypes.ERCCComparison
+  ercc_comparison: PropTypes.ERCCComparison,
 };
 
 export default ERCCScatterPlot;
