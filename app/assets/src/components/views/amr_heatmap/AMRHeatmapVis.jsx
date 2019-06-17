@@ -31,7 +31,7 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   async requestAMRCountsData(sampleIds) {
-    let rawResponse = await Promise.resolve(getAMRCounts(sampleIds));
+    let rawResponse = await getAMRCounts(sampleIds);
     let [geneData, samples] = this.extractData(rawResponse);
     let alleleToGeneMap = this.mapAllelesToGenes(geneData);
     this.setState((state, props) => {
