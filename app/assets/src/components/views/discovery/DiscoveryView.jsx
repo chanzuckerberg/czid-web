@@ -905,6 +905,7 @@ class DiscoveryView extends React.Component {
                 mapPreviewedSamples={mapPreviewedSamples}
                 mapSidebarSelectedSampleIds={mapSidebarSelectedSampleIds}
                 mapTilerKey={mapTilerKey}
+                onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
                 onLoadRows={this.handleLoadSampleRows}
                 onMapClick={this.clearMapPreview}

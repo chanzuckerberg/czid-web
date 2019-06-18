@@ -391,6 +391,7 @@ class SamplesView extends React.Component {
       mapLocationData,
       mapPreviewedLocationId,
       mapTilerKey,
+      onClearFilters,
       onMapClick,
       onMapMarkerClick,
       onMapTooltipTitleClick,
@@ -400,6 +401,7 @@ class SamplesView extends React.Component {
         <DiscoveryMap
           mapLocationData={mapLocationData}
           mapTilerKey={mapTilerKey}
+          onClearFilters={onClearFilters}
           onClick={onMapClick}
           onMarkerClick={onMapMarkerClick}
           onTooltipTitleClick={onMapTooltipTitleClick}
@@ -475,6 +477,7 @@ SamplesView.propTypes = {
   mapPreviewedSamples: PropTypes.array,
   mapSidebarSelectedSampleIds: PropTypes.instanceOf(Set),
   mapTilerKey: PropTypes.string,
+  onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
   onMapClick: PropTypes.func,

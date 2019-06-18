@@ -103,11 +103,16 @@ class DiscoveryMap extends React.Component {
   };
 
   renderBanner = () => {
-    const { mapLocationData } = this.props;
+    const { currentTab, mapLocationData, onClearFilters } = this.props;
     if (isEmpty(mapLocationData)) {
       return (
-        <div className={cs.banner}>
-          No samples found. Try adjusting search or filters. Clear search
+        <div className={cs.bannerContainer}>
+          <div className={cs.banner}>
+            {`No ${currentTab} found. Try adjusting search or filters. `}
+            <span className={cs.clear} onClick={onClearFilters}>
+              Clear search
+            </span>
+          </div>
         </div>
       );
     }
@@ -141,6 +146,7 @@ DiscoveryMap.propTypes = {
   currentTab: PropTypes.string.isRequired,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapTilerKey: PropTypes.string,
+  onClearFilters: PropTypes.func,
   onClick: PropTypes.func,
   onMarkerClick: PropTypes.func,
   onTooltipTitleClick: PropTypes.func,
