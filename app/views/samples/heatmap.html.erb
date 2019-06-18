@@ -5,6 +5,7 @@
   react_component(
     'SamplesHeatmapView',
     JSON.parse('<%= raw escape_json(@visualization_data) %>'),
-    'SamplesHeatmapView_page'
+    'SamplesHeatmapView_page',
+    JSON.parse('<%= raw escape_json(request_context)%>')
   );
 <% end %>

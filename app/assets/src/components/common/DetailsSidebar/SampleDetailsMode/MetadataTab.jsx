@@ -183,17 +183,21 @@ class MetadataTab extends React.Component {
           )}
         {validKeys.map(key => (
           <RequestContext.Consumer>
-            {props => {
-              if (!props) return null;
-
-              const { allowedFeatures } = props;
+            {requestContext => {
+              // Don't show collection_location_v2 unless you have maps in requestContext
+              // allowedFeatures.
               // TODO(jsheu): Migrate all to location_v2 after release
               if (
                 key === "collection_location_v2" &&
-                !allowedFeatures.includes("maps")
+                !(
+                  requestContext &&
+                  requestContext.allowedFeatures &&
+                  requestContext.allowedFeatures.includes("maps")
+                )
               ) {
                 return null;
               }
+
               return (
                 <div className={cs.field} key={metadataTypes[key].key}>
                   <div className={cs.label}>{metadataTypes[key].name}</div>
