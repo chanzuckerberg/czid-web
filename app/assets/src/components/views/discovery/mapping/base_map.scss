@@ -1,5 +1,4 @@
 @import url("https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css");
-@import "~styles/themes/colors";
 
 .mapContainer {
   display: block;
@@ -9,8 +8,8 @@
 
   .zoomControl {
     position: absolute;
-    bottom: 45px;
-    right: 25px;
+    bottom: 50px;
+    right: 15px;
 
     button {
       &:focus {
@@ -18,5 +17,9 @@
         background-color: transparent !important;
       }
     }
+  }
+
+  :global(.mapboxgl-ctrl-attrib) {
+    right: 8px;
   }
 }
