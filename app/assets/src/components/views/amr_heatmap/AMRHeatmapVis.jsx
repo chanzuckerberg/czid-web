@@ -73,11 +73,9 @@ export default class AMRHeatmapVis extends React.Component {
     switch (viewLevel) {
       case METRIC_ALLELES: {
         return this.state.alleles;
-        break;
       }
       case METRIC_GENES: {
         return this.state.genes;
-        break;
       }
     }
   }
@@ -145,12 +143,10 @@ export default class AMRHeatmapVis extends React.Component {
       case METRIC_ALLELES: {
         const alleleValues = this.assembleAlleleValues(rows);
         return alleleValues[metric];
-        break;
       }
       case METRIC_GENES: {
         const geneValues = this.assembleGeneValues(rows);
         return geneValues[metric];
-        break;
       }
       default: {
         return [];
