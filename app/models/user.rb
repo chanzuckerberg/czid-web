@@ -55,6 +55,10 @@ class User < ApplicationRecord
     JSON.parse(allowed_features || "[]")
   end
 
+  def allowed_feature?(feature)
+    allowed_feature_list.include?(feature)
+  end
+
   def add_allowed_feature(feature)
     parsed_allowed_features = allowed_feature_list
 
