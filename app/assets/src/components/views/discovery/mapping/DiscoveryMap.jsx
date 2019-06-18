@@ -2,6 +2,7 @@ import React from "react";
 import { Marker } from "react-map-gl";
 import { get, isEmpty, upperFirst } from "lodash/fp";
 
+import { withAnalytics } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
@@ -109,7 +110,16 @@ class DiscoveryMap extends React.Component {
         <div className={cs.bannerContainer}>
           <div className={cs.banner}>
             {`No ${currentTab} found. Try adjusting search or filters. `}
-            <span className={cs.clear} onClick={onClearFilters}>
+            <span
+              className={cs.clear}
+              onClick={withAnalytics(
+                onClearFilters,
+                "DiscoveryMap_clear-filters-link_clicked",
+                {
+                  currentTab,
+                }
+              )}
+            >
               Clear all
             </span>
           </div>
