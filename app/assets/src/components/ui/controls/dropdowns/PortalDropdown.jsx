@@ -68,7 +68,9 @@ class PortalDropdown extends React.Component {
 
   render() {
     const open =
-      this.props.open === undefined ? this.state.open : this.props.open;
+      this.props.open === undefined || this.props.open === null
+        ? this.state.open
+        : this.props.open;
 
     return (
       <Manager>
