@@ -79,7 +79,8 @@ class DiscoveryMap extends React.Component {
     const lat = parseFloat(markerData.lat);
     const lng = parseFloat(markerData.lng);
     const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
-    const pointCount = markerData[idsField] && markerData[idsField].length;
+    if (!markerData[idsField]) return;
+    const pointCount = markerData[idsField].length;
     const minSize = 10;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
     // Log1.5 of the count looked nice visually for not getting too large with many points.
@@ -111,7 +112,7 @@ class DiscoveryMap extends React.Component {
           <div className={cs.banner}>
             {`No ${currentTab} found. Try adjusting search or filters. `}
             <span
-              className={cs.clear}
+              className={cs.clearAll}
               onClick={withAnalytics(
                 onClearFilters,
                 "DiscoveryMap_clear-filters-link_clicked",
