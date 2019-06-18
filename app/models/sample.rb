@@ -441,7 +441,6 @@ class Sample < ApplicationRecord
     Contig.where(pipeline_run_id: pipeline_run_ids).delete_all
     input_files.delete_all
     metadata.delete_all
-    pipeline_runs.delete_all
     super
   end
 
