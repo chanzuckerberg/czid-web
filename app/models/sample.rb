@@ -15,7 +15,7 @@ class Sample < ApplicationRecord
       begin
         __elasticsearch__.delete_document
       rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
-        Rails.logger.warn("CHARLES: #{e}")
+        Rails.logger.warn(e)
       end
     end
   end
@@ -439,6 +439,9 @@ class Sample < ApplicationRecord
     TaxonByterange.where(pipeline_run_id: pipeline_run_ids).delete_all
     TaxonCount.where(pipeline_run_id: pipeline_run_ids).delete_all
     Contig.where(pipeline_run_id: pipeline_run_ids).delete_all
+    input_files.delete_all
+    metadata.delete_all
+    pipeline_runs.delete_all
     super
   end
 
