@@ -4,7 +4,6 @@ import { isString } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
-// import LiveSearchBox from "~ui/controls/LiveSearchBox";
 import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
 
 // An input box that fetches and shows geosearch suggestions for user input of locations.
