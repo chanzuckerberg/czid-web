@@ -8,7 +8,16 @@ require 'elasticsearch/model'
 class Sample < ApplicationRecord
   if ELASTICSEARCH_ON
     include Elasticsearch::Model
-    include Elasticsearch::Model::Callbacks
+    after_commit on: [:create, :update] do
+      __elasticsearch__.index_document
+    end
+    after_commit on: [:destroy] do
+      begin
+        __elasticsearch__.delete_document
+      rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
+        Rails.logger.warn("CHARLES: #{e}")
+      end
+    end
   end
   include TestHelper
   include MetadataHelper
