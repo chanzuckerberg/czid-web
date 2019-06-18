@@ -13,8 +13,6 @@ export default class AMRHeatmapVis extends React.Component {
     super(props);
 
     this.state = {
-      viewLevel: "genes",
-      metric: "coverage",
       loading: true,
     };
 
@@ -23,17 +21,18 @@ export default class AMRHeatmapVis extends React.Component {
 
   componentDidMount() {
     this.requestAMRCountsData(this.props.sampleIds);
+    console.log(this);
   }
 
   componentDidUpdate() {
     if (this.state.loading === true) {
       return;
     }
-    let rows = this.createHeatmapLabels();
-    let columns = this.state.samples;
-    let values = this.computeHeatmapValues(rows);
-    let options = {};
-    this.renderHeatmap(rows, columns, values, options);
+    if (this.heatmap != null) {
+      this.updateHeatmap();
+    } else {
+      this.createHeatmap();
+    }
   }
 
   async requestAMRCountsData(sampleIds) {
@@ -141,7 +140,7 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   createHeatmapLabels() {
-    let viewLevel = this.state.viewLevel;
+    let viewLevel = this.props.selectedOptions.viewLevel;
     switch (viewLevel) {
       case METRIC_ALLELES: {
         return this.createAlleleLabels();
@@ -211,8 +210,8 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   computeHeatmapValues(rows) {
-    let viewLevel = this.state.viewLevel;
-    let metric = this.state.metric;
+    let viewLevel = this.props.selectedOptions.viewLevel;
+    let metric = this.props.selectedOptions.metric;
     switch (viewLevel) {
       case METRIC_ALLELES: {
         let alleleValues = this.assembleAlleleValues(rows);
@@ -228,6 +227,25 @@ export default class AMRHeatmapVis extends React.Component {
         return [];
       }
     }
+  }
+
+  createHeatmap() {
+    let rows = this.createHeatmapLabels();
+    let columns = this.state.samples;
+    let values = this.computeHeatmapValues(rows);
+    let options = {};
+    this.renderHeatmap(rows, columns, values, options);
+  }
+
+  updateHeatmap() {
+    let rows = this.createHeatmapLabels();
+    let columns = this.state.samples;
+    let values = this.computeHeatmapValues(rows);
+    this.heatmap.updateData({
+      rowLabels: rows,
+      columnLabels: columns,
+      values: values,
+    });
   }
 
   renderHeatmap(rows, columns, values, options) {
@@ -264,4 +282,8 @@ export default class AMRHeatmapVis extends React.Component {
 
 AMRHeatmapVis.propTypes = {
   sampleIds: PropTypes.array,
+  selectedOptions: PropTypes.shape({
+    metric: PropTypes.string,
+    viewLevel: PropTypes.string,
+  }),
 };

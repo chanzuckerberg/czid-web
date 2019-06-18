@@ -10,9 +10,7 @@ export default class AMRHeatmapControls extends React.Component {
     super(props);
   }
 
-  componentDidMount() {
-    console.log(this.props);
-  }
+  componentDidMount() {}
 
   renderMetricSelect() {
     return (
@@ -20,13 +18,21 @@ export default class AMRHeatmapControls extends React.Component {
         fluid
         rounded
         options={this.props.options.metrics}
-        onChange={this.props.onSelectedOptionsChange}
+        onChange={this.onMetricChange}
         value={this.props.selectedOptions.metric}
         label="Metric"
         disabled={!this.props.data}
       />
     );
   }
+
+  onMetricChange = metric => {
+    if (metric === this.props.selectedOptions.metric) {
+      return;
+    }
+
+    this.props.onSelectedOptionsChange({ metric });
+  };
 
   render() {
     return (

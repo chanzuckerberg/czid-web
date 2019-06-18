@@ -22,6 +22,7 @@ export default class AMRHeatmapView extends React.Component {
       loading: true,
       selectedOptions: {
         metric: "coverage",
+        viewLevel: "genes",
       },
     };
   }
@@ -31,7 +32,7 @@ export default class AMRHeatmapView extends React.Component {
       sampleIds: this.props.sampleIds,
       loading: false,
     });
-    console.log(this.props);
+    console.log(this);
   }
 
   componentDidUpdate() {}
@@ -42,9 +43,12 @@ export default class AMRHeatmapView extends React.Component {
     };
   }
 
-  updateHeatmap() {
-    return;
-  }
+  updateOptions = options => {
+    let newOptions = Object.assign({}, this.state.selectedOptions, options);
+    this.setState({
+      selectedOptions: newOptions,
+    });
+  };
 
   renderVisualization() {
     if (this.state.loading === true) {
@@ -55,10 +59,14 @@ export default class AMRHeatmapView extends React.Component {
         </p>
       );
     }
+    // else...
     return (
       <div className="row visualization-content">
         <ErrorBoundary>
-          <AMRHeatmapVis sampleIds={this.state.sampleIds} />
+          <AMRHeatmapVis
+            sampleIds={this.state.sampleIds}
+            selectedOptions={this.state.selectedOptions}
+          />
         </ErrorBoundary>
       </div>
     );
@@ -78,7 +86,7 @@ export default class AMRHeatmapView extends React.Component {
                   <AMRHeatmapControls
                     options={this.assembleControlOptions()}
                     selectedOptions={this.state.selectedOptions}
-                    onSelectedOptionsChange={this.updateHeatmap}
+                    onSelectedOptionsChange={this.updateOptions}
                     loading={this.state.loading}
                     data={true}
                   />
