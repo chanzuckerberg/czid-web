@@ -774,8 +774,13 @@ class DiscoveryView extends React.Component {
       search,
     } = this.state;
 
-    if (!(mapPreviewedLocationId && mapLocationData[mapPreviewedLocationId]))
+    if (!mapPreviewedLocationId) return;
+
+    if (!mapLocationData[mapPreviewedLocationId]) {
+      // Previewed location has been filtered out, so exit preview mode.
+      this.clearMapPreview();
       return;
+    }
 
     const sampleIds = mapLocationData[mapPreviewedLocationId].sample_ids;
 
@@ -828,8 +833,13 @@ class DiscoveryView extends React.Component {
   refreshMapPreviewedProjects = async () => {
     const { mapLocationData, mapPreviewedLocationId, projects } = this.state;
 
-    if (!(mapPreviewedLocationId && mapLocationData[mapPreviewedLocationId]))
+    if (!mapPreviewedLocationId) return;
+
+    if (!mapLocationData[mapPreviewedLocationId]) {
+      // Previewed location has been filtered out, so exit preview mode.
+      this.clearMapPreview();
       return;
+    }
 
     const projectIds = mapLocationData[mapPreviewedLocationId].project_ids;
     const mapPreviewedProjects = at(projectIds, keyBy("id", projects));
