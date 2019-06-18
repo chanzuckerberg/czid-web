@@ -499,7 +499,7 @@ class ProjectsController < ApplicationController
                              .map(&:metadata_fields).flatten.uniq.map(&:field_info)
               end
     # TODO(jsheu): Migrate all to location_v2 after release
-    unless current_user.allowed_features.include?("maps")
+    unless current_user.allowed_feature?("maps")
       results = results.reject { |f| f[:key] == "collection_location_v2" }
     end
 
