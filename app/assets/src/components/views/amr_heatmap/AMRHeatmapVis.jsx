@@ -22,7 +22,6 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   componentDidMount() {
-    console.log(this.props);
     this.requestAMRCountsData(this.props.sampleIds);
   }
 
