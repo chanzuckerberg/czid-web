@@ -846,6 +846,13 @@ class DiscoveryView extends React.Component {
     this.setState({ mapSidebarTab });
   };
 
+  handleClearFilters = () => {
+    this.setState({ filters: {}, search: null }, () => {
+      this.updateBrowsingHistory("replace");
+      this.resetDataFromFilterChange();
+    });
+  };
+
   renderCenterPaneContent = () => {
     const {
       currentDisplay,
@@ -877,6 +884,7 @@ class DiscoveryView extends React.Component {
                 mapLocationData={mapLocationData}
                 mapPreviewedLocationId={mapPreviewedLocationId}
                 mapTilerKey={mapTilerKey}
+                onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onProjectSelected={this.handleProjectSelected}
@@ -885,7 +893,8 @@ class DiscoveryView extends React.Component {
               />
             </div>
             {!projects.length &&
-              !loadingProjects && (
+              !loadingProjects &&
+              currentDisplay === "table" && (
                 <NoResultsBanner
                   className={cs.noResultsContainer}
                   type="projects"
@@ -919,7 +928,8 @@ class DiscoveryView extends React.Component {
               />
             </div>
             {!samples.length &&
-              !loadingSamples && (
+              !loadingSamples &&
+              currentDisplay === "table" && (
                 <NoResultsBanner
                   className={cs.noResultsContainer}
                   type="samples"

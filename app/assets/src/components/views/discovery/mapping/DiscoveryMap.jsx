@@ -110,7 +110,7 @@ class DiscoveryMap extends React.Component {
           <div className={cs.banner}>
             {`No ${currentTab} found. Try adjusting search or filters. `}
             <span className={cs.clear} onClick={onClearFilters}>
-              Clear search
+              Clear all
             </span>
           </div>
         </div>
