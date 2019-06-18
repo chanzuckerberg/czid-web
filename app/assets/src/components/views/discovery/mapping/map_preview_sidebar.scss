@@ -30,7 +30,7 @@
     margin: 15px 10px;
 
     .tabLabel {
-      font-size: $font-size-h6;
+      @include font-header-xs;
       margin-right: 10px;
     }
 
@@ -49,6 +49,13 @@
 .tableDataRow {
   align-items: flex-start;
   padding: 11px 0;
+  margin-left: 0;
+
+  // Override defaults
+  :global(.ReactVirtualized__Table__rowColumn),
+  :global(.ReactVirtualized__Table__headerColumn) {
+    margin-left: 0;
+  }
 }
 
 .basicCell {
