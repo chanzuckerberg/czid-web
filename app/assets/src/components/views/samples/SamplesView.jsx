@@ -12,7 +12,7 @@ import CollectionModal from "~/components/views/samples/CollectionModal";
 import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
-import HeatmapIconDropdown from "~ui/controls/dropdowns/HeatmapIconDropdown";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
 import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
 import SaveIcon from "~ui/icons/SaveIcon";
@@ -195,29 +195,60 @@ class SamplesView extends React.Component {
     const heatmapOptions = [
       { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
     ];
+
     if (this.props.admin) {
       heatmapOptions.push({
         text: "AMR Heatmap",
         value: "/amr_heatmap",
       });
+
+      return targetSampleIds.size < 2 ? (
+        <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
+      ) : (
+        <BareDropdown
+          hideArrow
+          className={cx(cs.icon, cs.heatmapDropdown)}
+          closeOnClick={true}
+          items={heatmapOptions.map(option => {
+            const params = Array.from(targetSampleIds).join("&sampleIds[]=");
+            const log = () =>
+              logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
+                option,
+                selectedSampleIds: targetSampleIds.length,
+              });
+            return (
+              <BareDropdown.Item
+                key={option.text}
+                text={
+                  <a href={`${option.value}?sampleIds[]=${params}`}>
+                    {option.text}
+                  </a>
+                }
+                onClick={log}
+              />
+            );
+          })}
+          trigger={<HeatmapIcon className={cx(cs.icon, cs.heatmap)} />}
+        />
+      );
+    } else {
+      const log = () =>
+        logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
+          selectedSampleIds: targetSampleIds.length,
+        });
+      return targetSampleIds.size < 2 ? (
+        <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
+      ) : (
+        <a
+          onClick={log}
+          href={`/visualizations/heatmap?sampleIds=${Array.from(
+            targetSampleIds
+          )}`}
+        >
+          <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
+        </a>
+      );
     }
-    return targetSampleIds.size < 2 ? (
-      <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
-    ) : (
-      <HeatmapIconDropdown
-        className={cx(cs.icon, cs.heatmapDropdown)}
-        iconClassName={cx(cs.icon, cs.heatmap)}
-        options={heatmapOptions}
-        onClick={heatmapOption => {
-          logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
-            selectedSampleIds: targetSampleIds.length,
-            heatmapOption,
-          });
-          let params = Array.from(targetSampleIds).join("&sampleIds[]=");
-          window.location.assign(`${heatmapOption}?sampleIds[]=${params}`);
-        }}
-      />
-    );
   };
 
   renderDownloadTrigger = () => {
