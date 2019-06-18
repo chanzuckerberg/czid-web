@@ -1,0 +1,51 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.liveSearchPopBox {
+  &:not(.rectangular) {
+    input[type="text"] {
+      border-radius: 19px;
+    }
+  }
+
+  &:not(.rectangular) {
+    input[type="text"] {
+      border-radius: 4px;
+    }
+  }
+
+  :global(.menu) {
+    margin-top: 6px;
+    max-width: 400px;
+  }
+
+  :global(.item) {
+    height: auto;
+  }
+
+  .category {
+    @include font-label-s;
+
+    background-color: transparent;
+    color: $light-grey;
+    padding: 0 14px;
+    text-transform: uppercase;
+  }
+
+  .entry {
+    padding: 5px 0;
+
+    .title {
+      @include font-search-result-title;
+
+      color: $black;
+      font-weight: $font-weight-semibold;
+    }
+
+    .description {
+      @include font-search-result-description;
+
+      color: $medium-grey;
+    }
+  }
+}

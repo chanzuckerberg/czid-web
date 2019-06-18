@@ -4,7 +4,7 @@ import { isString } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
-import LiveSearchBox from "~ui/controls/LiveSearchBox";
+import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
 
 // An input box that fetches and shows geosearch suggestions for user input of locations.
 class GeoSearchInputBox extends React.Component {
@@ -13,8 +13,17 @@ class GeoSearchInputBox extends React.Component {
 
     this.state = {
       value: "",
-      usePropValue: true,
     };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.value !== state.prevPropsValue) {
+      return {
+        value: props.value,
+        prevPropsValue: props.value,
+      };
+    }
+    return null;
   }
 
   // Fetch geosearch results and format into categories for LiveSearchBox
@@ -52,7 +61,7 @@ class GeoSearchInputBox extends React.Component {
 
   handleSearchChange = value => {
     // Let the inner search box change on edit
-    this.setState({ value, usePropValue: false }, () => {
+    this.setState({ value }, () => {
       // Handle the case when they clear the box and hit done/submit without pressing enter
       if (value === "") this.handleResultSelected({ result: value });
     });
@@ -60,39 +69,35 @@ class GeoSearchInputBox extends React.Component {
 
   handleResultSelected = ({ result }) => {
     const { onResultSelect } = this.props;
-    // Use parent value after they select a result
-    this.setState({ usePropValue: true });
 
     // Wrap plain text submission
     if (isString(result)) result = { name: result };
+
+    this.setState({ value: result });
 
     logAnalyticsEvent("GeoSearchInputBox_result_selected", {
       selected: result.name,
       // Real results will have a description
       isMatched: !!result.description,
     });
+
     onResultSelect && onResultSelect({ result });
   };
 
   render() {
-    const { className, value: propValue } = this.props;
-    const { usePropValue, value: stateValue } = this.state;
+    const { className } = this.props;
+    const { value } = this.state;
 
-    // If using prop value, try to use .name or plain string value otherwise.
-    const value =
-      usePropValue && propValue
-        ? (isString(propValue) && propValue) || propValue.name
-        : stateValue;
     return (
-      <LiveSearchBox
+      <LiveSearchPopBox
         className={className}
+        inputMode
         onSearchTriggered={this.handleSearchTriggered}
         onSearchChange={this.handleSearchChange}
         onResultSelect={this.handleResultSelected}
         placeholder="Enter a location"
-        value={value}
+        value={isString(value) ? value : value.name}
         rectangular
-        inputMode
       />
     );
   }
@@ -101,7 +106,7 @@ class GeoSearchInputBox extends React.Component {
 GeoSearchInputBox.propTypes = {
   className: PropTypes.string,
   onResultSelect: PropTypes.func,
-  value: PropTypes.object,
+  value: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 };
 
 export default GeoSearchInputBox;
