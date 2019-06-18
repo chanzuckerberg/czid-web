@@ -7,7 +7,6 @@
   top: 0;
   left: 0;
   height: 100vh;
-  overflow-x: scroll;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -47,7 +46,6 @@
   background-color: $off-white;
   border-radius: 6px;
   height: 40vh;
-  width: 40vw;
   padding: 16px;
   font-weight: $font-weight-bold;
 }
