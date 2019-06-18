@@ -122,6 +122,7 @@ class ProjectsView extends React.Component {
       mapPreviewedLocationId,
       mapTilerKey,
       onClearFilters,
+      onMapClick,
       onMapMarkerClick,
       onMapTooltipTitleClick,
       projects,
@@ -159,6 +160,7 @@ class ProjectsView extends React.Component {
               mapLocationData={mapLocationData}
               mapTilerKey={mapTilerKey}
               onClearFilters={onClearFilters}
+              onClick={onMapClick}
               onMarkerClick={onMapMarkerClick}
               onTooltipTitleClick={onMapTooltipTitleClick}
               previewedLocationId={mapPreviewedLocationId}
@@ -184,6 +186,7 @@ ProjectsView.propTypes = {
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
+  onMapClick: PropTypes.func,
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onProjectSelected: PropTypes.func,

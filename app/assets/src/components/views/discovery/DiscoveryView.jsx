@@ -755,6 +755,7 @@ class DiscoveryView extends React.Component {
     if (mapPreviewedLocationId) {
       this.setState({
         mapPreviewedLocationId: null,
+        mapPreviewedProjects: [],
         mapPreviewedSampleIds: [],
         mapPreviewedSamples: [],
         mapSidebarProjectDimensions: [],
@@ -886,6 +887,7 @@ class DiscoveryView extends React.Component {
                 mapTilerKey={mapTilerKey}
                 onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
+                onMapClick={this.clearMapPreview}
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onProjectSelected={this.handleProjectSelected}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
