@@ -439,6 +439,9 @@ class Sample < ApplicationRecord
     TaxonByterange.where(pipeline_run_id: pipeline_run_ids).delete_all
     TaxonCount.where(pipeline_run_id: pipeline_run_ids).delete_all
     Contig.where(pipeline_run_id: pipeline_run_ids).delete_all
+    AmrCount.where(pipeline_run_id: pipeline_run_ids).delete_all
+    ErccCount.where(pipeline_run_id: pipeline_run_ids).delete_all
+    JobStat.where(pipeline_run_id: pipeline_run_ids).delete_all
     input_files.delete_all
     metadata.delete_all
     super
