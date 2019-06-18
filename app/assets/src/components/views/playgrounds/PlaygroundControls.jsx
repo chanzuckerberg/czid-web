@@ -1,18 +1,18 @@
-import CompareButton from "../ui/controls/buttons/CompareButton";
-import DownloadButton from "../ui/controls/buttons/DownloadButton";
-import Dropdown from "../ui/controls/dropdowns/Dropdown";
-import ButtonDropdown from "../ui/controls/dropdowns/ButtonDropdown";
-import BetaLabel from "../ui/labels/BetaLabel";
-import DownloadButtonDropdown from "../ui/controls/dropdowns/DownloadButtonDropdown";
-import MultipleDropdown from "../ui/controls/dropdowns/MultipleDropdown";
-import ThresholdFilterDropdown from "../ui/controls/dropdowns/ThresholdFilterDropdown";
-import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
+import CompareButton from "../../ui/controls/buttons/CompareButton";
+import DownloadButton from "../../ui/controls/buttons/DownloadButton";
+import Dropdown from "../../ui/controls/dropdowns/Dropdown";
+import ButtonDropdown from "../../ui/controls/dropdowns/ButtonDropdown";
+import BetaLabel from "../../ui/labels/BetaLabel";
+import DownloadButtonDropdown from "../../ui/controls/dropdowns/DownloadButtonDropdown";
+import MultipleDropdown from "../../ui/controls/dropdowns/MultipleDropdown";
+import ThresholdFilterDropdown from "../../ui/controls/dropdowns/ThresholdFilterDropdown";
+import PrimaryButton from "../../ui/controls/buttons/PrimaryButton";
 import PropTypes from "prop-types";
 import React from "react";
-import SecondaryButton from "../ui/controls/buttons/SecondaryButton";
-import Slider from "../ui/controls/Slider";
-import Checkbox from "../ui/controls/Checkbox";
-import MultipleNestedDropdown from "../ui/controls/dropdowns/MultipleNestedDropdown";
+import SecondaryButton from "../../ui/controls/buttons/SecondaryButton";
+import Slider from "../../ui/controls/Slider";
+import Checkbox from "../../ui/controls/Checkbox";
+import MultipleNestedDropdown from "../../ui/controls/dropdowns/MultipleNestedDropdown";
 
 class PlaygroundControls extends React.Component {
   constructor(props) {
