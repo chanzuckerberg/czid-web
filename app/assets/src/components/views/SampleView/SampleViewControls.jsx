@@ -10,6 +10,7 @@ import {
   getDownloadDropdownOptions,
   getLinkInfoForDownloadOption,
 } from "~/components/views/report/utils/download";
+import Nanobar from "nanobar";
 
 class SampleViewControls extends React.Component {
   downloadCSV = () => {
@@ -34,7 +35,13 @@ class SampleViewControls extends React.Component {
 
   deleteSample = async () => {
     const { sample, project } = this.props;
+    let nanobar = new Nanobar({
+      id: "prog-bar",
+      class: "prog-bar",
+    });
+    nanobar.go(30);
     await deleteSample(sample.id);
+    nanobar.go(100);
     location.href = `/home?project_id=${project.id}`;
     logAnalyticsEvent("SampleViewControls_delete-sample-button_clicked", {
       sampleId: sample.id,
