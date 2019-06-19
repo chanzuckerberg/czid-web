@@ -250,6 +250,12 @@ export default class MapPreviewSidebar extends React.Component {
     logAnalyticsEvent("MapPreviewSidebar_select-all-rows_clicked");
   };
 
+  handleTabChange = tab => {
+    const { onTabChange } = this.props;
+    onTabChange && onTabChange(tab);
+    logAnalyticsEvent("MapPreviewSidebar_tab_clicked", { tab });
+  };
+
   setSelectedSampleIds = selectedSampleIds => {
     const { onSelectionUpdate } = this.props;
     this.setState({ selectedSampleIds });
@@ -388,13 +394,13 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   render() {
-    const { className, currentTab, onTabChange } = this.props;
+    const { className, currentTab } = this.props;
     return (
       <div className={cx(className, cs.sidebar)}>
         <Tabs
           className={cs.tabs}
           hideBorder
-          onChange={onTabChange}
+          onChange={this.handleTabChange}
           tabs={this.computeTabs()}
           value={currentTab}
         />

@@ -2,7 +2,7 @@ import React from "react";
 import { Marker } from "react-map-gl";
 import { get, isEmpty, upperFirst } from "lodash/fp";
 
-import { withAnalytics } from "~/api/analytics";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
@@ -24,11 +24,15 @@ class DiscoveryMap extends React.Component {
 
   updateViewport = viewport => {
     this.setState({ viewport });
+    logAnalyticsEvent("DiscoveryMap_viewport_updated");
   };
 
-  handleMarkerClick = markerData => {
+  handleMarkerClick = id => {
     const { onMarkerClick } = this.props;
-    onMarkerClick && onMarkerClick(markerData);
+    onMarkerClick && onMarkerClick(id);
+    logAnalyticsEvent("DiscoveryMap_marker_clicked", {
+      locationId: id,
+    });
   };
 
   handleMarkerMouseEnter = hoverInfo => {
@@ -51,6 +55,10 @@ class DiscoveryMap extends React.Component {
       />
     );
     this.setState({ tooltip, tooltipShouldClose: false });
+
+    logAnalyticsEvent("DiscoveryMap_marker_hovered", {
+      locationId: hoverInfo.id,
+    });
   };
 
   handleMarkerMouseLeave = () => {
@@ -69,6 +77,16 @@ class DiscoveryMap extends React.Component {
   handleTooltipTitleClick = hoverInfo => {
     const { onTooltipTitleClick } = this.props;
     onTooltipTitleClick && onTooltipTitleClick(hoverInfo.id);
+
+    logAnalyticsEvent("DiscoveryMap_tooltip-title_clicked", {
+      locationId: hoverInfo.id,
+    });
+  };
+
+  handleMapClick = () => {
+    const { onClick } = this.props;
+    onClick && onClick();
+    logAnalyticsEvent("DiscoveryMap_blank-area_clicked");
   };
 
   renderMarker = markerData => {
@@ -130,7 +148,7 @@ class DiscoveryMap extends React.Component {
   };
 
   render() {
-    const { mapTilerKey, mapLocationData, onClick } = this.props;
+    const { mapTilerKey, mapLocationData } = this.props;
     const { tooltip } = this.state;
     return (
       <BaseMap
@@ -140,7 +158,7 @@ class DiscoveryMap extends React.Component {
           mapLocationData &&
           Object.values(mapLocationData).map(this.renderMarker)
         }
-        onClick={onClick}
+        onClick={this.handleMapClick}
         tooltip={tooltip}
         updateViewport={this.updateViewport}
       />
