@@ -12,7 +12,7 @@ class GeoSearchInputBox extends React.Component {
     super(props);
 
     this.state = {
-      value: "",
+      value: props.value,
     };
   }
 
@@ -102,6 +102,10 @@ class GeoSearchInputBox extends React.Component {
     );
   }
 }
+
+GeoSearchInputBox.defaultProps = {
+  value: "",
+};
 
 GeoSearchInputBox.propTypes = {
   className: PropTypes.string,

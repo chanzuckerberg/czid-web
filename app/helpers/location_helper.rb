@@ -5,7 +5,8 @@ module LocationHelper
     geo_level = ["city", "county", "state", "country"].each do |n|
       break n if address[n]
     end || ""
-    {
+
+    loc = {
       name: body["display_name"],
       geo_level: geo_level,
       country_name: address["country"] || "",
@@ -22,6 +23,16 @@ module LocationHelper
       osm_type: body["osm_type"],
       locationiq_id: body["place_id"].to_i
     }
+
+    if loc[:name].size > Location::DEFAULT_MAX_NAME_LENGTH
+      # The first field in the address response may have a useful place name like 'university'
+      parts = [address.first[1]]
+      fields = [:city_name, :subdivision_name, :state_name, :country_name]
+      parts += fields.map { |f| loc[f] if loc[f].present? }.compact
+      loc[:name] = parts.uniq.join(", ")
+    end
+
+    loc
   end
 
   # Light sanitization with SQL/HTML/JS injections in mind
@@ -29,9 +40,10 @@ module LocationHelper
     name.gsub(%r{[;%_^<>\/?\\]}, "")
   end
 
+  # TODO(jsheu): Remove this if the name shortening in adapt_location_iq_response is sufficient.
   def self.truncate_name(name)
     # Shorten long names so they look a little better downstream (e.g. in dropdown filters). Try to take the first 2 + last 2 parts, or just the first + last 2 parts.
-    max_chars = 30
+    max_chars = Location::DEFAULT_MAX_NAME_LENGTH
     if name.size > max_chars
       parts = name.split(", ")
       if parts.size >= 4

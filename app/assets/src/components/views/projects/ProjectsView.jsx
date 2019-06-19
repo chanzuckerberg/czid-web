@@ -1,14 +1,15 @@
 import React from "react";
 import { find, merge, pick } from "lodash/fp";
 
-import { logAnalyticsEvent } from "~/api/analytics";
-import PropTypes from "~/components/utils/propTypes";
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import MapToggle from "~/components/views/discovery/mapping/MapToggle";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
+import NarrowContainer from "~/components/layout/NarrowContainer";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
+import PropTypes from "~/components/utils/propTypes";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
@@ -94,7 +95,7 @@ class ProjectsView extends React.Component {
 
   renderDisplaySwitcher = () => {
     const { currentDisplay, onDisplaySwitch } = this.props;
-    return (
+    const renderContent = () => (
       <div className={cs.toggleContainer}>
         <MapToggle
           currentDisplay={currentDisplay}
@@ -104,6 +105,11 @@ class ProjectsView extends React.Component {
           }}
         />
       </div>
+    );
+    return currentDisplay === "table" ? (
+      renderContent()
+    ) : (
+      <NarrowContainer>{renderContent()}</NarrowContainer>
     );
   };
 
@@ -115,6 +121,8 @@ class ProjectsView extends React.Component {
       mapLocationData,
       mapPreviewedLocationId,
       mapTilerKey,
+      onClearFilters,
+      onMapClick,
       onMapMarkerClick,
       onMapTooltipTitleClick,
       projects,
@@ -151,6 +159,8 @@ class ProjectsView extends React.Component {
               currentTab={currentTab}
               mapLocationData={mapLocationData}
               mapTilerKey={mapTilerKey}
+              onClearFilters={onClearFilters}
+              onClick={onMapClick}
               onMarkerClick={onMapMarkerClick}
               onTooltipTitleClick={onMapTooltipTitleClick}
               previewedLocationId={mapPreviewedLocationId}
@@ -174,7 +184,9 @@ ProjectsView.propTypes = {
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedLocationId: PropTypes.number,
   mapTilerKey: PropTypes.string,
+  onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
+  onMapClick: PropTypes.func,
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onProjectSelected: PropTypes.func,

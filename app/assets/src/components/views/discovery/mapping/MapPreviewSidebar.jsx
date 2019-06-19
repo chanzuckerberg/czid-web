@@ -38,6 +38,7 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         width: 150,
         cellRenderer: cellData => TableRenderers.renderSample(cellData, false),
+        className: cs.sample,
         headerClassName: cs.sampleHeader,
       },
       {
@@ -158,6 +159,7 @@ export default class MapPreviewSidebar extends React.Component {
             )
           ),
         headerClassName: cs.projectHeader,
+        className: cs.project,
         sortFunction: p => (p.name || "").toLowerCase(),
       },
       {
@@ -250,6 +252,12 @@ export default class MapPreviewSidebar extends React.Component {
     logAnalyticsEvent("MapPreviewSidebar_select-all-rows_clicked");
   };
 
+  handleTabChange = tab => {
+    const { onTabChange } = this.props;
+    onTabChange && onTabChange(tab);
+    logAnalyticsEvent("MapPreviewSidebar_tab_clicked", { tab });
+  };
+
   setSelectedSampleIds = selectedSampleIds => {
     const { onSelectionUpdate } = this.props;
     this.setState({ selectedSampleIds });
@@ -261,7 +269,7 @@ export default class MapPreviewSidebar extends React.Component {
     const count = (tab === "samples" ? samples : projects || []).length;
     return [
       {
-        label: "Summary",
+        label: <span className={cs.tabLabel}>Summary</span>,
         value: "summary",
       },
       {
@@ -278,7 +286,6 @@ export default class MapPreviewSidebar extends React.Component {
 
   reset = () => {
     this.infiniteTable && this.infiniteTable.reset();
-    this.setSelectedSampleIds(new Set());
   };
 
   renderTable = () => {
@@ -293,6 +300,7 @@ export default class MapPreviewSidebar extends React.Component {
           <InfiniteTable
             columns={this.sampleColumns}
             defaultRowHeight={rowHeight}
+            headerClassName={cs.tableHeader}
             initialActiveColumns={["sample"]}
             minimumBatchSize={batchSize}
             onLoadRows={this.handleLoadSampleRows}
@@ -301,8 +309,9 @@ export default class MapPreviewSidebar extends React.Component {
             onSelectRow={this.handleSelectRow}
             protectedColumns={["sample"]}
             ref={infiniteTable => (this.infiniteTable = infiniteTable)}
-            rowClassName={cs.tableDataRow}
+            rowClassName={cs.sampleRow}
             rowCount={batchSize}
+            selectableColumnClassName={cs.selectColumn}
             selectableKey="id"
             selectAllChecked={selectAllChecked}
             selected={selectedSampleIds}
@@ -369,10 +378,13 @@ export default class MapPreviewSidebar extends React.Component {
     return (
       <BaseDiscoveryView
         columns={this.projectColumns}
-        initialActiveColumns={["project", "number_of_samples"]}
-        protectedColumns={["project"]}
         data={data}
         handleRowClick={this.handleProjectRowClick}
+        initialActiveColumns={["project", "number_of_samples"]}
+        protectedColumns={["project"]}
+        headerClassName={cs.tableHeader}
+        rowClassName={cs.projectRow}
+        rowHeight={50}
       />
     );
   };
@@ -389,13 +401,13 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   render() {
-    const { className, currentTab, onTabChange } = this.props;
+    const { className, currentTab } = this.props;
     return (
       <div className={cx(className, cs.sidebar)}>
         <Tabs
           className={cs.tabs}
           hideBorder
-          onChange={onTabChange}
+          onChange={this.handleTabChange}
           tabs={this.computeTabs()}
           value={currentTab}
         />

@@ -2,20 +2,23 @@ import cx from "classnames";
 import { difference, find, isEmpty, union } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import PropTypes from "~/components/utils/propTypes";
-import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
-import MapToggle from "~/components/views/discovery/mapping/MapToggle";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
-import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import CollectionModal from "~/components/views/samples/CollectionModal";
-import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
-import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import { DownloadIconDropdown } from "~ui/controls/dropdowns";
+import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
-import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
-import SaveIcon from "~ui/icons/SaveIcon";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
+import MapToggle from "~/components/views/discovery/mapping/MapToggle";
+import NarrowContainer from "~/components/layout/NarrowContainer";
+import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
+import PropTypes from "~/components/utils/propTypes";
+import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
+import SaveIcon from "~ui/icons/SaveIcon";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import { DownloadIconDropdown } from "~ui/controls/dropdowns";
+import { getURLParamString } from "~/helpers/url";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
@@ -191,22 +194,56 @@ class SamplesView extends React.Component {
         ? mapSidebarSelectedSampleIds
         : selectedSampleIds;
 
-    const log = () =>
-      logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
-        selectedSampleIds: targetSampleIds.length,
-      });
-    return targetSampleIds.size < 2 ? (
-      <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
-    ) : (
-      <a
-        onClick={log}
-        href={`/visualizations/heatmap?sampleIds=${Array.from(
-          targetSampleIds
-        )}`}
-      >
-        <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
-      </a>
-    );
+    if (this.props.admin) {
+      const heatmapOptions = [
+        { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
+        { text: "AMR Heatmap", value: "/amr_heatmap" },
+      ];
+
+      return targetSampleIds.size < 2 ? (
+        <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
+      ) : (
+        <BareDropdown
+          hideArrow
+          className={cx(cs.icon, cs.heatmapDropdown)}
+          items={heatmapOptions.map(option => {
+            const params = getURLParamString({
+              sampleIds: Array.from(targetSampleIds),
+            });
+            const log = () =>
+              logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
+                option,
+                selectedSampleIds: targetSampleIds.length,
+              });
+            return (
+              <BareDropdown.Item
+                key={option.text}
+                text={<a href={`${option.value}?${params}`}>{option.text}</a>}
+                onClick={log}
+              />
+            );
+          })}
+          trigger={<HeatmapIcon className={cx(cs.icon, cs.heatmap)} />}
+        />
+      );
+    } else {
+      const log = () =>
+        logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
+          selectedSampleIds: targetSampleIds.length,
+        });
+      return targetSampleIds.size < 2 ? (
+        <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
+      ) : (
+        <a
+          onClick={log}
+          href={`/visualizations/heatmap?sampleIds=${Array.from(
+            targetSampleIds
+          )}`}
+        >
+          <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
+        </a>
+      );
+    }
   };
 
   renderDownloadTrigger = () => {
@@ -264,6 +301,8 @@ class SamplesView extends React.Component {
     } = this.props;
     const { selectedSampleIds } = this.state;
 
+    // NOTE(jsheu): For mapSidebar sample names to appear in CollectionModal,
+    // they need to be presently loaded/fetched. Otherwise the ids work but says "and more..." for un-fetched samples.
     const targetSamples =
       currentDisplay === "map" ? mapPreviewedSamples : samples;
     const targetSampleIds =
@@ -388,6 +427,8 @@ class SamplesView extends React.Component {
       mapLocationData,
       mapPreviewedLocationId,
       mapTilerKey,
+      onClearFilters,
+      onMapClick,
       onMapMarkerClick,
       onMapTooltipTitleClick,
     } = this.props;
@@ -396,6 +437,8 @@ class SamplesView extends React.Component {
         <DiscoveryMap
           mapLocationData={mapLocationData}
           mapTilerKey={mapTilerKey}
+          onClearFilters={onClearFilters}
+          onClick={onMapClick}
           onMarkerClick={onMapMarkerClick}
           onTooltipTitleClick={onMapTooltipTitleClick}
           previewedLocationId={mapPreviewedLocationId}
@@ -427,7 +470,11 @@ class SamplesView extends React.Component {
     const { phyloTreeCreationModalOpen } = this.state;
     return (
       <div className={cs.container}>
-        {this.renderToolbar()}
+        {currentDisplay === "table" ? (
+          this.renderToolbar()
+        ) : (
+          <NarrowContainer>{this.renderToolbar()}</NarrowContainer>
+        )}
         {currentDisplay === "table" ? this.renderTable() : this.renderMap()}
         {phyloTreeCreationModalOpen && (
           <PhyloTreeCreationModal
@@ -466,8 +513,10 @@ SamplesView.propTypes = {
   mapPreviewedSamples: PropTypes.array,
   mapSidebarSelectedSampleIds: PropTypes.instanceOf(Set),
   mapTilerKey: PropTypes.string,
+  onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
+  onMapClick: PropTypes.func,
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onSampleSelected: PropTypes.func,
