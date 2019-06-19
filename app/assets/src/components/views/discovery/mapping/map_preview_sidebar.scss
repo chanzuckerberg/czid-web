@@ -48,6 +48,7 @@
 
 .tableHeader {
   padding: 5px 0;
+  margin-left: 0;
 }
 
 .sampleRow {
@@ -55,12 +56,15 @@
   padding: 10px 0;
   margin-left: 0;
 
+  .tableHeader {
+    margin-left: 0;
+  }
+
   // Override defaults
   &:global(.ReactVirtualized),
   :global(.ReactVirtualized) {
     &__Table {
-      &__rowColumn,
-      &__headerColumn {
+      &__rowColumn {
         margin-left: 0;
         margin-right: 5px;
       }
@@ -85,8 +89,7 @@
 
   :global(.ReactVirtualized) {
     &__Table {
-      &__rowColumn,
-      &__headerColumn {
+      &__rowColumn {
         margin-left: 5px;
         margin-right: 5px;
       }
