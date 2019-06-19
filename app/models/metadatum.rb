@@ -277,7 +277,7 @@ class Metadatum < ApplicationRecord
   def validated_value
     # Special case for Location objects
     if metadata_field.base_type == Metadatum::LOCATION_TYPE
-      Hash[Location::DEFAULT_LOCATION_FIELDS.map { |k| [k, location[k]] }]
+      location_id ? Hash[Location::DEFAULT_LOCATION_FIELDS.map { |k| [k, location[k]] }] : string_validated_value
     else
       base = self.class.convert_type_to_string(metadata_field.base_type)
       self["#{base}_validated_value"]
