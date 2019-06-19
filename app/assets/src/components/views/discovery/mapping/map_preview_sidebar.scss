@@ -81,3 +81,18 @@
 .projectHeader {
   text-align: left;
 }
+
+.projectRow {
+  margin-left: 0;
+  padding: 6px 0;
+
+  :global(.ReactVirtualized) {
+    &__Table {
+      &__rowColumn,
+      &__headerColumn {
+        margin-left: 5px;
+        margin-right: 5px;
+      }
+    }
+  }
+}

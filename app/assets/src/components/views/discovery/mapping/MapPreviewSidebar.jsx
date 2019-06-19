@@ -374,10 +374,12 @@ export default class MapPreviewSidebar extends React.Component {
     return (
       <BaseDiscoveryView
         columns={this.projectColumns}
-        initialActiveColumns={["project", "number_of_samples"]}
-        protectedColumns={["project"]}
         data={data}
         handleRowClick={this.handleProjectRowClick}
+        initialActiveColumns={["project", "number_of_samples"]}
+        protectedColumns={["project"]}
+        rowClassName={cs.projectRow}
+        rowHeight={50}
       />
     );
   };
