@@ -30,7 +30,7 @@
 }
 
 .graph {
-  height: 100%;
+  height: calc(100% - 32px);
 }
 
 .closeButton {
@@ -45,7 +45,7 @@
 .openedStage {
   background-color: $off-white;
   border-radius: 6px;
-  height: 40vh;
+  height: 50vh;
   padding: 16px;
   font-weight: $font-weight-bold;
 }
