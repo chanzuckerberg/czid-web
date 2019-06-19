@@ -27,12 +27,10 @@ class DiscoveryMap extends React.Component {
     logAnalyticsEvent("DiscoveryMap_viewport_updated");
   };
 
-  handleMarkerClick = id => {
+  handleMarkerClick = locationId => {
     const { onMarkerClick } = this.props;
-    onMarkerClick && onMarkerClick(id);
-    logAnalyticsEvent("DiscoveryMap_marker_clicked", {
-      locationId: id,
-    });
+    onMarkerClick && onMarkerClick(locationId);
+    logAnalyticsEvent("DiscoveryMap_marker_clicked", { locationId });
   };
 
   handleMarkerMouseEnter = hoverInfo => {
