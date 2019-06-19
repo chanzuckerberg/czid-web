@@ -218,11 +218,7 @@ class SamplesView extends React.Component {
             return (
               <BareDropdown.Item
                 key={option.text}
-                text={
-                  <a href={`${option.value}?sampleIds[]=${params}`}>
-                    {option.text}
-                  </a>
-                }
+                text={<a href={`${option.value}?${params}`}>{option.text}</a>}
                 onClick={log}
               />
             );
