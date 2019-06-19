@@ -79,7 +79,9 @@
       .icon {
         fill: $light-grey;
         flex: 0 0 auto;
-        width: 22px;
+        height: 21px;
+        width: 21px;
+        vertical-align: middle;
 
         &:not(.disabled) {
           cursor: pointer;
@@ -87,13 +89,11 @@
         }
 
         &.save {
-          margin-top: 1px;
           width: 21px;
         }
 
         &.heatmap {
           margin-left: 4px;
-          margin-top: 1px;
         }
 
         &.download {
