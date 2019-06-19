@@ -145,10 +145,11 @@ class BaseTable extends React.Component {
       defaultHeaderHeight,
       defaultRowHeight,
       defaultSelectColumnWidth,
+      forwardRef,
+      headerClassName,
       initialActiveColumns,
       onRowClick,
       onRowsRendered,
-      forwardRef,
       onSort,
       rowClassName,
       rowCount,
@@ -169,7 +170,7 @@ class BaseTable extends React.Component {
           {({ width, height }) => (
             <VirtualizedTable
               gridClassName={cs.grid}
-              headerClassName={cs.header}
+              headerClassName={cx(cs.header, headerClassName)}
               headerHeight={defaultHeaderHeight}
               height={height}
               onRowsRendered={onRowsRendered}
@@ -263,6 +264,7 @@ BaseTable.propTypes = {
   defaultHeaderHeight: PropTypes.number,
   defaultRowHeight: PropTypes.number,
   defaultSelectColumnWidth: PropTypes.number,
+  headerClassName: PropTypes.string,
   // Set of dataKeys of columns to be shown by default
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
   onRowClick: PropTypes.func,

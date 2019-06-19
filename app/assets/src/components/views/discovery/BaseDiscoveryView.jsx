@@ -15,6 +15,7 @@ class BaseDiscoveryView extends React.Component {
       columns,
       data,
       handleRowClick,
+      headerClassName,
       initialActiveColumns,
       protectedColumns,
       rowClassName,
@@ -25,7 +26,8 @@ class BaseDiscoveryView extends React.Component {
       <Table
         columns={columns}
         data={data}
-        defaultRowHeight={rowHeight || 68}
+        defaultRowHeight={rowHeight}
+        headerClassName={headerClassName}
         initialActiveColumns={initialActiveColumns}
         onRowClick={handleRowClick}
         protectedColumns={protectedColumns}
@@ -39,12 +41,14 @@ class BaseDiscoveryView extends React.Component {
 BaseDiscoveryView.defaultProps = {
   columns: [],
   data: [],
+  rowHeight: 68,
 };
 
 BaseDiscoveryView.propTypes = {
   columns: PropTypes.array,
   data: PropTypes.array,
   handleRowClick: PropTypes.func,
+  headerClassName: PropTypes.string,
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
   protectedColumns: PropTypes.arrayOf(PropTypes.string),
   rowClassName: PropTypes.string,

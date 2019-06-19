@@ -46,7 +46,11 @@
   }
 }
 
-.tableDataRow {
+.tableHeader {
+  padding: 5px 0;
+}
+
+.sampleRow {
   align-items: flex-start;
   padding: 10px 0;
   margin-left: 0;
@@ -55,10 +59,6 @@
   &:global(.ReactVirtualized),
   :global(.ReactVirtualized) {
     &__Table {
-      &__headerRow {
-        padding: 5px 0;
-      }
-
       &__rowColumn,
       &__headerColumn {
         margin-left: 0;

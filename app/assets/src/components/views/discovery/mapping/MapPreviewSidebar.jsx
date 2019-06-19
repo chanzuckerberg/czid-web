@@ -298,6 +298,7 @@ export default class MapPreviewSidebar extends React.Component {
           <InfiniteTable
             columns={this.sampleColumns}
             defaultRowHeight={rowHeight}
+            headerClassName={cs.tableHeader}
             initialActiveColumns={["sample"]}
             minimumBatchSize={batchSize}
             onLoadRows={this.handleLoadSampleRows}
@@ -306,7 +307,7 @@ export default class MapPreviewSidebar extends React.Component {
             onSelectRow={this.handleSelectRow}
             protectedColumns={["sample"]}
             ref={infiniteTable => (this.infiniteTable = infiniteTable)}
-            rowClassName={cs.tableDataRow}
+            rowClassName={cs.sampleRow}
             rowCount={batchSize}
             selectableKey="id"
             selectAllChecked={selectAllChecked}
@@ -378,6 +379,7 @@ export default class MapPreviewSidebar extends React.Component {
         handleRowClick={this.handleProjectRowClick}
         initialActiveColumns={["project", "number_of_samples"]}
         protectedColumns={["project"]}
+        headerClassName={cs.tableHeader}
         rowClassName={cs.projectRow}
         rowHeight={50}
       />
