@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 
 import { Table } from "~/components/visualizations/table";
 // CSS file must be loaded after any elements you might want to override
@@ -14,19 +15,23 @@ class BaseDiscoveryView extends React.Component {
       columns,
       data,
       handleRowClick,
+      headerClassName,
       initialActiveColumns,
       protectedColumns,
+      rowClassName,
+      rowHeight,
     } = this.props;
 
     return (
       <Table
         columns={columns}
         data={data}
-        defaultRowHeight={68}
+        defaultRowHeight={rowHeight}
+        headerClassName={headerClassName}
         initialActiveColumns={initialActiveColumns}
         onRowClick={handleRowClick}
         protectedColumns={protectedColumns}
-        rowClassName={cs.tableDataRow}
+        rowClassName={cx(cs.tableDataRow, rowClassName)}
         sortable
       />
     );
@@ -36,14 +41,18 @@ class BaseDiscoveryView extends React.Component {
 BaseDiscoveryView.defaultProps = {
   columns: [],
   data: [],
+  rowHeight: 68,
 };
 
 BaseDiscoveryView.propTypes = {
   columns: PropTypes.array,
   data: PropTypes.array,
   handleRowClick: PropTypes.func,
+  headerClassName: PropTypes.string,
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
   protectedColumns: PropTypes.arrayOf(PropTypes.string),
+  rowClassName: PropTypes.string,
+  rowHeight: PropTypes.number,
 };
 
 export default BaseDiscoveryView;

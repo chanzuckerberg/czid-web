@@ -608,6 +608,7 @@ class DiscoveryView extends React.Component {
     const { mapSidebarTab } = this.state;
     this.setState(
       {
+        currentDisplay: "table",
         currentTab: "samples",
         mapSidebarTab: mapSidebarTab === "summary" ? mapSidebarTab : "samples",
         project,
@@ -615,6 +616,7 @@ class DiscoveryView extends React.Component {
         search: null,
       },
       () => {
+        this.clearMapPreview();
         this.updateBrowsingHistory();
         this.refreshDataFromProjectChange();
       }
