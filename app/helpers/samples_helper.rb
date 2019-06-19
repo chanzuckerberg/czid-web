@@ -328,16 +328,6 @@ module SamplesHelper
     top_pipeline_run_by_sample_id
   end
 
-  def metadata_multiget(sample_ids)
-    metadata = Metadatum
-      .includes(:metadata_field, :location)
-      .where(sample_id: sample_ids)
-      .group_by(&:sample_id)
-      .map do |sample_id, sample_metadata|
-        [sample_id, Hash[sample_metadata.map{|m| [m.key.to_sym, m.validated_value]}]]
-      end.to_h
-  end
-
   def dependent_records_multiget(table, parent_id_column_sym, parent_ids)
     all_records = table.where(parent_id_column_sym => parent_ids)
     records_by_parent_id = {}
@@ -349,7 +339,7 @@ module SamplesHelper
   end
 
   def format_samples_basic(samples)
-    metadata_by_sample_id = metadata_multiget(samples.map(&:id))
+    metadata_by_sample_id = Metadatum.by_sample_ids(samples.map(&:id))
     return samples.map do |sample|
       {
         name: sample.name,
@@ -372,7 +362,7 @@ module SamplesHelper
     report_ready_pipeline_run_ids = report_ready_multiget(pipeline_run_ids)
     pipeline_run_stages_by_pipeline_run_id = dependent_records_multiget(PipelineRunStage, :pipeline_run_id, pipeline_run_ids)
     output_states_by_pipeline_run_id = dependent_records_multiget(OutputState, :pipeline_run_id, pipeline_run_ids)
-    metadata_by_sample_id = metadata_multiget(sample_ids)
+    metadata_by_sample_id = Metadatum.by_sample_ids(sample_ids)
 
     # Massage data into the right format
     samples.includes(:pipeline_runs, :host_genome, :project, :input_files, :user).each_with_index do |sample|

@@ -12,7 +12,7 @@ class Location < ApplicationRecord
     :city_name,
     :lat,
     :lng
-  ]
+  ].freeze
 
   # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)
