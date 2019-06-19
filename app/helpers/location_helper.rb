@@ -5,7 +5,7 @@ module LocationHelper
     geo_level = ["city", "county", "state", "country"].each do |n|
       break n if address[n]
     end || ""
-    {
+    loc = {
       name: body["display_name"],
       geo_level: geo_level,
       country_name: address["country"] || "",
@@ -22,6 +22,7 @@ module LocationHelper
       osm_type: body["osm_type"],
       locationiq_id: body["place_id"].to_i
     }
+    Location.shorten_name(loc)
   end
 
   # Light sanitization with SQL/HTML/JS injections in mind
@@ -29,6 +30,7 @@ module LocationHelper
     name.gsub(%r{[;%_^<>\/?\\]}, "")
   end
 
+  # Note: Use Location#shorten_name on the object for a shorter name before saving.
   def self.truncate_name(name)
     # Shorten long names so they look a little better downstream (e.g. in dropdown filters). Try to take the first 2 + last 2 parts, or just the first + last 2 parts.
     max_chars = Location::DEFAULT_MAX_NAME_LENGTH
