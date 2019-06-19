@@ -52,16 +52,13 @@
   margin-left: 0;
 
   // Override defaults
-  &:global(.ReactVirtualized) {
+  &:global(.ReactVirtualized),
+  :global(.ReactVirtualized) {
     &__Table {
       &__headerRow {
         padding: 5px 0;
       }
-    }
-  }
 
-  :global(.ReactVirtualized) {
-    &__Table {
       &__rowColumn,
       &__headerColumn {
         margin-left: 0;
