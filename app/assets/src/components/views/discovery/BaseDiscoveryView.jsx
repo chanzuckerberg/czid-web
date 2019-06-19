@@ -31,7 +31,7 @@ class BaseDiscoveryView extends React.Component {
         initialActiveColumns={initialActiveColumns}
         onRowClick={handleRowClick}
         protectedColumns={protectedColumns}
-        rowClassName={cx(rowClassName, cs.tableDataRow)}
+        rowClassName={cx(cs.tableDataRow, rowClassName)}
         sortable
       />
     );
