@@ -1,6 +1,8 @@
 # See deprecated test/helpers/location_helper_test.rb
 
 require "rails_helper"
+require_relative "../../test/test_helpers/location_test_helper.rb"
+include LocationTestHelper
 
 RSpec.describe LocationHelper, type: :helper do
   describe "#sanitize_name" do
@@ -79,5 +81,19 @@ RSpec.describe LocationHelper, type: :helper do
 
   describe "#filter_by_name" do
     pending "add test for filtering by location names (with Factories)"
+  end
+
+  describe "#adapt_location_iq_response" do
+    it "formats a response for a city name without subdivision" do
+      expected = LocationTestHelper::FORMATTED_GEOSEARCH_DHAKA_RESPONSE[0].symbolize_keys
+      result = LocationHelper.adapt_location_iq_response(LocationTestHelper::API_GEOSEARCH_DHAKA_RESPONSE[0])
+      expect(result).to eq(expected)
+    end
+
+    it "formats a response for a short country name without truncation" do
+      expected = LocationTestHelper::FORMATTED_GEOSEARCH_UGANDA_RESPONSE[0].symbolize_keys
+      result = LocationHelper.adapt_location_iq_response(LocationTestHelper::API_GEOSEARCH_UGANDA_RESPONSE[0])
+      expect(result).to eq(expected)
+    end
   end
 end

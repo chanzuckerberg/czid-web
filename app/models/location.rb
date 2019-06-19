@@ -13,6 +13,7 @@ class Location < ApplicationRecord
     :lat,
     :lng
   ].freeze
+  DEFAULT_MAX_NAME_LENGTH = 30
 
   # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)
