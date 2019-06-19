@@ -38,6 +38,7 @@ export default class MapPreviewSidebar extends React.Component {
         flexGrow: 1,
         width: 150,
         cellRenderer: cellData => TableRenderers.renderSample(cellData, false),
+        className: cs.sample,
         headerClassName: cs.sampleHeader,
       },
       {
@@ -158,6 +159,7 @@ export default class MapPreviewSidebar extends React.Component {
             )
           ),
         headerClassName: cs.projectHeader,
+        className: cs.project,
         sortFunction: p => (p.name || "").toLowerCase(),
       },
       {
@@ -309,6 +311,7 @@ export default class MapPreviewSidebar extends React.Component {
             ref={infiniteTable => (this.infiniteTable = infiniteTable)}
             rowClassName={cs.sampleRow}
             rowCount={batchSize}
+            selectableColumnClassName={cs.selectColumn}
             selectableKey="id"
             selectAllChecked={selectAllChecked}
             selected={selectedSampleIds}

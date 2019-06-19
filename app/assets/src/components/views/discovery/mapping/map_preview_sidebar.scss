@@ -56,19 +56,11 @@
   padding: 10px 0;
   margin-left: 0;
 
-  .tableHeader {
+  .sample,
+  .tableHeader,
+  .selectColumn {
     margin-left: 0;
-  }
-
-  // Override defaults
-  &:global(.ReactVirtualized),
-  :global(.ReactVirtualized) {
-    &__Table {
-      &__rowColumn {
-        margin-left: 0;
-        margin-right: 5px;
-      }
-    }
+    margin-right: 5px;
   }
 }
 
@@ -87,12 +79,8 @@
   margin-left: 0;
   padding: 5px 0;
 
-  :global(.ReactVirtualized) {
-    &__Table {
-      &__rowColumn {
-        margin-left: 5px;
-        margin-right: 5px;
-      }
-    }
+  .project {
+    margin-left: 5px;
+    margin-right: 5px;
   }
 }
