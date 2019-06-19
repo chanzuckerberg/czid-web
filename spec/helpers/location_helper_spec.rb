@@ -84,11 +84,15 @@ RSpec.describe LocationHelper, type: :helper do
   end
 
   describe "#adapt_location_iq_response" do
-    it "formats a response for a short city name without subdivision" do
+    it "formats a response for a city name without subdivision" do
       expected = LocationTestHelper::FORMATTED_GEOSEARCH_DHAKA_RESPONSE[0].symbolize_keys
-      puts expected
       result = LocationHelper.adapt_location_iq_response(LocationTestHelper::API_GEOSEARCH_DHAKA_RESPONSE[0])
-      puts "actual: ", result
+      expect(result).to eq(expected)
+    end
+
+    it "formats a response for a short country name without truncation" do
+      expected = LocationTestHelper::FORMATTED_GEOSEARCH_UGANDA_RESPONSE[0].symbolize_keys
+      result = LocationHelper.adapt_location_iq_response(LocationTestHelper::API_GEOSEARCH_UGANDA_RESPONSE[0])
       expect(result).to eq(expected)
     end
   end

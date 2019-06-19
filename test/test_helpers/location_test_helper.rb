@@ -75,7 +75,6 @@ module LocationTestHelper
       "osm_type" => "node",
       "osm_id" => "3442474911",
       "lat" => 23.76,
-      # LocationIQ uses 'lon'
       "lon" => 90.38,
       "display_name" => "Dhaka, Dhaka Division, 12, Bangladesh",
       "address" => {
@@ -100,6 +99,36 @@ module LocationTestHelper
       "osm_id" => 3_442_474_911,
       "osm_type" => "node",
       "locationiq_id" => 46_003_496
+    }
+  ].freeze
+  API_GEOSEARCH_UGANDA_RESPONSE = [
+    {
+      "place_id" => "214342685",
+      "osm_type" => "relation",
+      "osm_id" => "192796",
+      "lat" => 1.53,
+      "lon" => 32.22,
+      "display_name" => "Uganda",
+      "address" => {
+        "country" => "Uganda",
+        "country_code" => "ug"
+      }
+    }
+  ].freeze
+  FORMATTED_GEOSEARCH_UGANDA_RESPONSE = [
+    {
+      "name" => "Uganda",
+      "geo_level" => "country",
+      "country_name" => "Uganda",
+      "state_name" => "",
+      "subdivision_name" => "",
+      "city_name" => "",
+      "lat" => 1.53,
+      "lng" => 32.22,
+      "country_code" => "ug",
+      "osm_id" => 192_796,
+      "osm_type" => "relation",
+      "locationiq_id" => 214_342_685
     }
   ].freeze
 end
