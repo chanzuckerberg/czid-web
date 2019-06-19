@@ -2,7 +2,7 @@ class AmrHeatmapController < ApplicationController
   before_action :admin_required
 
   def index
-    @sample_ids = params[:sampleIds]
+    @sample_ids = params[:sampleIds].map(&:to_i)
   end
 
   # GET /amr_heatmap/amr_heatmap.json

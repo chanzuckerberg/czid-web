@@ -2,12 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
-import { getAMRCounts } from "~/api/amr";
 
 import cs from "./amr_heatmap_vis.scss";
 
-const METRIC_ALLELES = "alleles";
-const METRIC_GENES = "genes";
+const VIEWLEVEL_ALLELES = "alleles";
+const VIEWLEVEL_GENES = "genes";
 
 export default class AMRHeatmapVis extends React.Component {
   constructor(props) {
@@ -21,8 +20,15 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   componentDidMount() {
-    this.requestAMRCountsData(this.props.sampleIds);
-    console.log(this);
+    const samplesWithAMRCounts = this.props.samplesWithAMRCounts;
+    const [samples, genes, alleles] = this.createLabels(samplesWithAMRCounts);
+    this.setState({
+      samplesWithAMRCounts,
+      samples,
+      genes,
+      alleles,
+      loading: false,
+    });
   }
 
   componentDidUpdate() {
@@ -34,20 +40,6 @@ export default class AMRHeatmapVis extends React.Component {
     } else {
       this.createHeatmap();
     }
-  }
-
-  async requestAMRCountsData(sampleIds) {
-    const rawSampleData = await getAMRCounts(sampleIds);
-    const samplesWithAMRCounts = rawSampleData.filter(
-      sampleData => sampleData.error === ""
-    );
-    const [samples, genes, alleles] = this.createLabels(samplesWithAMRCounts);
-    this.setState({
-      samplesWithAMRCounts,
-      samples,
-      genes,
-      alleles,
-    });
   }
 
   createLabels(sampleData) {
@@ -72,15 +64,14 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   //*** Following functions must be called after the component has updated ***
-  //*** (i.e. after the component has requested AMR data and updated state) ***
 
   createHeatmapLabels() {
     let viewLevel = this.props.selectedOptions.viewLevel;
     switch (viewLevel) {
-      case METRIC_ALLELES: {
+      case VIEWLEVEL_ALLELES: {
         return this.state.alleles;
       }
-      case METRIC_GENES: {
+      case VIEWLEVEL_GENES: {
         return this.state.genes;
       }
     }
@@ -146,11 +137,11 @@ export default class AMRHeatmapVis extends React.Component {
     let viewLevel = this.props.selectedOptions.viewLevel;
     let metric = this.props.selectedOptions.metric;
     switch (viewLevel) {
-      case METRIC_ALLELES: {
+      case VIEWLEVEL_ALLELES: {
         const alleleValues = this.assembleAlleleValues(rows);
         return alleleValues[metric];
       }
-      case METRIC_GENES: {
+      case VIEWLEVEL_GENES: {
         const geneValues = this.assembleGeneValues(rows);
         return geneValues[metric];
       }
@@ -164,8 +155,7 @@ export default class AMRHeatmapVis extends React.Component {
     let rows = this.createHeatmapLabels();
     let columns = this.state.samples;
     let values = this.computeHeatmapValues(rows);
-    let options = {};
-    this.renderHeatmap(rows, columns, values, options);
+    this.renderHeatmap(rows, columns, values);
   }
 
   updateHeatmap() {
@@ -179,7 +169,7 @@ export default class AMRHeatmapVis extends React.Component {
     });
   }
 
-  renderHeatmap(rows, columns, values, options) {
+  renderHeatmap(rows, columns, values) {
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       // Data for the Heatmap
@@ -212,7 +202,14 @@ export default class AMRHeatmapVis extends React.Component {
 }
 
 AMRHeatmapVis.propTypes = {
-  sampleIds: PropTypes.array,
+  samplesWithAMRCounts: PropTypes.arrayOf(
+    PropTypes.shape({
+      sample_name: PropTypes.string,
+      sample_id: PropTypes.number,
+      amr_counts: PropTypes.array,
+      error: PropTypes.string,
+    })
+  ),
   selectedOptions: PropTypes.shape({
     metric: PropTypes.string,
     viewLevel: PropTypes.string,
