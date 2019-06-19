@@ -3,6 +3,16 @@ class Location < ApplicationRecord
 
   LOCATION_IQ_BASE_URL = "https://us1.locationiq.com/v1".freeze
   GEOSEARCH_BASE_QUERY = "search.php?addressdetails=1&normalizecity=1".freeze
+  DEFAULT_LOCATION_FIELDS = [
+    :name,
+    :geo_level,
+    :country_name,
+    :state_name,
+    :subdivision_name,
+    :city_name,
+    :lat,
+    :lng
+  ].freeze
 
   # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)

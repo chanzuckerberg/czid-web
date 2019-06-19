@@ -112,7 +112,7 @@ class ProjectsController < ApplicationController
         min_sample_by_project_id = {}
         owner_by_project_id = {}
         locations_by_project_id = {}
-        metadata = metadata_multiget(samples.pluck(:id))
+        metadata = Metadatum.by_sample_ids(samples.pluck(:id))
         samples.includes(:host_genome, :user).each do |s|
           (host_genome_names_by_project_id[s.project_id] ||= Set.new) << s.host_genome.name if s.host_genome && s.host_genome.name
           (tissues_by_project_id[s.project_id] ||= Set.new) << metadata[s.id][:sample_type] if (metadata[s.id] || {})[:sample_type]
