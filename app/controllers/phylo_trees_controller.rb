@@ -86,7 +86,7 @@ class PhyloTreesController < ApplicationController
 
     nodes = {}
     # populate metadata for sample nodes
-    metadata_by_sample_id = metadata_multiget(@phylo_tree.pipeline_runs.pluck(:sample_id).uniq)
+    metadata_by_sample_id = Metadatum.by_sample_ids(@phylo_tree.pipeline_runs.pluck(:sample_id).uniq)
     @phylo_tree.pipeline_runs
                .joins(:sample, sample: [:project, :host_genome])
                .select("pipeline_runs.id, samples.id as sample_id," \
