@@ -108,7 +108,6 @@ export default class AMRHeatmapVis extends React.Component {
     const rows = this.getHeatmapLabels();
     const columns = this.state.sampleLabels;
     const values = this.computeHeatmapValues(rows);
-    console.log(values);
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       // Data for the Heatmap
