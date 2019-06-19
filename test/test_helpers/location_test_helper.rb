@@ -69,4 +69,37 @@ module LocationTestHelper
       }
     }
   ].freeze
+  API_GEOSEARCH_DHAKA_RESPONSE = [
+    {
+      "place_id" => "46003496",
+      "osm_type" => "node",
+      "osm_id" => "3442474911",
+      "lat" => 23.76,
+      # LocationIQ uses 'lon'
+      "lon" => 90.38,
+      "display_name" => "Dhaka, Dhaka Division, 12, Bangladesh",
+      "address" => {
+        "city" => "Dhaka",
+        "state" => "Dhaka Division",
+        "country" => "Bangladesh",
+        "country_code" => "bd"
+      }
+    }
+  ].freeze
+  FORMATTED_GEOSEARCH_DHAKA_RESPONSE = [
+    {
+      "name" => "Dhaka, Dhaka Division, Bangladesh",
+      "geo_level" => "city",
+      "country_name" => "Bangladesh",
+      "state_name" => "Dhaka Division",
+      "subdivision_name" => "",
+      "city_name" => "Dhaka",
+      "lat" => 23.76,
+      "lng" => 90.38,
+      "country_code" => "bd",
+      "osm_id" => 3_442_474_911,
+      "osm_type" => "node",
+      "locationiq_id" => 46_003_496
+    }
+  ].freeze
 end
