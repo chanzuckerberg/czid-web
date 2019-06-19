@@ -96,16 +96,4 @@ class Location < ApplicationRecord
 
     location
   end
-
-  # Shorten to just City, Subdivision, State, Country if the name is long.
-  # Note this will work on ActiveRecord objects and hashes.
-  def self.shorten_name(location)
-    if location[:name].present? && location[:name].size > DEFAULT_MAX_NAME_LENGTH
-      fields = [:city_name, :subdivision_name, :state_name, :country_name]
-      parts = fields.map {|f| location[f] if location[f].present? }
-      location[:name] = parts.join(", ")
-    end
-    # No 'save' here so make sure the caller saves ActiveRecord objects.
-    location
-  end
 end

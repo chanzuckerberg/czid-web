@@ -130,7 +130,6 @@ class Metadatum < ApplicationRecord
     # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
     location = Location.find_or_new_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
     location = Location.check_and_restrict_specificity(location, sample.host_genome_name)
-    location = Location.shorten_name(location)
     location.save!
 
     # At this point, discard raw_value (too long to store anyway)

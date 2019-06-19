@@ -5,6 +5,7 @@ module LocationHelper
     geo_level = ["city", "county", "state", "country"].each do |n|
       break n if address[n]
     end || ""
+
     loc = {
       name: body["display_name"],
       geo_level: geo_level,
@@ -22,7 +23,16 @@ module LocationHelper
       osm_type: body["osm_type"],
       locationiq_id: body["place_id"].to_i
     }
-    Location.shorten_name(loc)
+
+    if loc[:name].size > Location::DEFAULT_MAX_NAME_LENGTH
+      # The first field in the address response may have a useful place name like 'university'
+      parts = [address.first[1]]
+      fields = [:city_name, :subdivision_name, :state_name, :country_name]
+      parts += fields.map { |f| loc[f] if loc[f].present? }
+      loc[:name] = parts.uniq.join(", ")
+    end
+
+    loc
   end
 
   # Light sanitization with SQL/HTML/JS injections in mind
