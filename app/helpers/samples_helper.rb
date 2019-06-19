@@ -329,15 +329,13 @@ module SamplesHelper
   end
 
   def metadata_multiget(sample_ids)
-    metadata = Metadatum.includes(:metadata_field).where(sample_id: sample_ids)
-
-    metadata_by_sample_id = {}
-    metadata.each do |metadatum|
-      metadata_by_sample_id[metadatum.sample_id] ||= {}
-      metadata_by_sample_id[metadatum.sample_id][metadatum.key.to_sym] = metadatum.validated_value
-    end
-
-    metadata_by_sample_id
+    metadata = Metadatum
+      .includes(:metadata_field, :location)
+      .where(sample_id: sample_ids)
+      .group_by(&:sample_id)
+      .map do |sample_id, sample_metadata|
+        [sample_id, Hash[sample_metadata.map{|m| [m.key.to_sym, m.validated_value]}]]
+      end.to_h
   end
 
   def dependent_records_multiget(table, parent_id_column_sym, parent_ids)

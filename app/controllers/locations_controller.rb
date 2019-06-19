@@ -84,13 +84,12 @@ class LocationsController < ApplicationController
     # (e) Add lists of sample_ids and project_ids to the location attributes.
     #
     # Final result is a hash of hashes for frontend lookups.
-    location_fields = [:name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng]
     location_data = samples
                     .includes(metadata: [:location, :metadata_field])
                     .where(metadata: { metadata_fields: { name: "collection_location_v2" } })
                     .where.not(metadata: { location_id: nil })
-                    .pluck(:location_id, :id, :project_id, *location_fields.map { |f| "locations.#{f}" })
-                    .map { |p| [:id, :sample_id, :project_id, *location_fields].zip(p).to_h }
+                    .pluck(:location_id, :id, :project_id, *DEFAULT_LOCATION_FIELDS.map { |f| "locations.#{f}" })
+                    .map { |p| [:id, :sample_id, :project_id, *DEFAULT_LOCATION_FIELDS].zip(p).to_h }
                     .group_by { |h| h[:id] }
                     .map do |k, v|
                       [k, v[0].except(:sample_id, :project_id)
