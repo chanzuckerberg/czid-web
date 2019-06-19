@@ -6,15 +6,15 @@ import { getAMRCounts } from "~/api/amr";
 
 import cs from "./amr_heatmap_vis.scss";
 
-const METRIC_ALLELES = "alleles";
-const METRIC_GENES = "genes";
+const VIEW_LEVEL_ALLELES = "allele";
+const VIEW_LEVEL_GENES = "gene";
 
 export default class AMRHeatmapVis extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      viewLevel: METRIC_GENES,
+      viewLevel: VIEW_LEVEL_GENES,
       metric: "coverage",
     };
 
@@ -34,16 +34,18 @@ export default class AMRHeatmapVis extends React.Component {
     const samplesWithAMRCounts = rawSampleData.filter(
       sampleData => sampleData.error === ""
     );
-    const [samples, genes, alleles] = this.createLabels(samplesWithAMRCounts);
+    const [sampleLabels, geneLabels, alleleLabels] = this.extractLabels(
+      samplesWithAMRCounts
+    );
     this.setState({
       samplesWithAMRCounts,
-      samples,
-      genes,
-      alleles,
+      sampleLabels,
+      geneLabels,
+      alleleLabels,
     });
   }
 
-  createLabels(sampleData) {
+  extractLabels(sampleData) {
     const sampleLabels = [];
     const genes = {};
     const alleles = {};
@@ -67,96 +69,46 @@ export default class AMRHeatmapVis extends React.Component {
   //*** Following functions must be called after the component has updated ***
   //*** (i.e. after the component has requested AMR data and updated state) ***
 
-  createHeatmapLabels() {
+  getHeatmapLabels() {
     const viewLevel = this.state.viewLevel;
     switch (viewLevel) {
-      case METRIC_ALLELES: {
-        return this.state.alleles;
+      case VIEW_LEVEL_ALLELES: {
+        return this.state.alleleLabels;
       }
-      case METRIC_GENES: {
-        return this.state.genes;
+      case VIEW_LEVEL_GENES: {
+        return this.state.geneLabels;
       }
     }
-  }
-
-  assembleAlleleValues(alleleLabels) {
-    const sampleData = this.state.samplesWithAMRCounts;
-    const alleleValues = {
-      depth: [],
-      coverage: [],
-    };
-    alleleLabels.forEach(allele => {
-      const depth = [];
-      const coverage = [];
-      const geneName = allele.label;
-      sampleData.forEach(sample => {
-        const amrCountForGene = sample.amr_counts.find(
-          amrCount => amrCount.allele === geneName
-        );
-        if (amrCountForGene != undefined) {
-          depth.push(amrCountForGene.depth);
-          coverage.push(amrCountForGene.coverage);
-        } else {
-          depth.push(0);
-          coverage.push(0);
-        }
-      });
-      alleleValues.depth.push(depth);
-      alleleValues.coverage.push(coverage);
-    });
-    return alleleValues;
-  }
-
-  assembleGeneValues(geneLabels) {
-    const sampleData = this.state.samplesWithAMRCounts;
-    const geneValues = {
-      depth: [],
-      coverage: [],
-    };
-    geneLabels.forEach(gene => {
-      const depth = [];
-      const coverage = [];
-      const geneName = gene.label;
-      sampleData.forEach(sample => {
-        const amrCountForGene = sample.amr_counts.find(
-          amrCount => amrCount.gene === geneName
-        );
-        if (amrCountForGene != undefined) {
-          depth.push(amrCountForGene.depth);
-          coverage.push(amrCountForGene.coverage);
-        } else {
-          depth.push(0);
-          coverage.push(0);
-        }
-      });
-      geneValues.depth.push(depth);
-      geneValues.coverage.push(coverage);
-    });
-    return geneValues;
   }
 
   computeHeatmapValues(rows) {
     const viewLevel = this.state.viewLevel;
     const metric = this.state.metric;
-    switch (viewLevel) {
-      case METRIC_ALLELES: {
-        const alleleValues = this.assembleAlleleValues(rows);
-        return alleleValues[metric];
-      }
-      case METRIC_GENES: {
-        const geneValues = this.assembleGeneValues(rows);
-        return geneValues[metric];
-      }
-      default: {
-        return [];
-      }
-    }
+    const sampleData = this.state.samplesWithAMRCounts;
+    const heatmapValues = [];
+    rows.forEach(label => {
+      const rowValues = [];
+      const rowName = label.label;
+      sampleData.forEach(sample => {
+        const amrCountForRow = sample.amr_counts.find(
+          amrCount => amrCount[viewLevel] === rowName
+        );
+        if (amrCountForRow != undefined) {
+          rowValues.push(amrCountForRow[metric]);
+        } else {
+          rowValues.push(0);
+        }
+      });
+      heatmapValues.push(rowValues);
+    });
+    return heatmapValues;
   }
 
   renderHeatmap() {
-    const rows = this.createHeatmapLabels();
-    const columns = this.state.samples;
+    const rows = this.getHeatmapLabels();
+    const columns = this.state.sampleLabels;
     const values = this.computeHeatmapValues(rows);
+    console.log(values);
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       // Data for the Heatmap
