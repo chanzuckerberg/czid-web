@@ -9,6 +9,7 @@ module LocationTestHelper
       "lon" => -122.45,
       "display_name" => "University of California, San Francisco, Parnassus Avenue, Inner Sunset, San Francisco, San Francisco City and County, California, 94131, USA",
       "address" => {
+        "university" => "University of California, San Francisco",
         "city" => "San Francisco",
         "county" => "San Francisco City and County",
         "state" => "California",
@@ -21,7 +22,7 @@ module LocationTestHelper
 
   FORMATTED_GEOSEARCH_RESPONSE = [
     {
-      "name" => "University of California, San Francisco, Parnassus Avenue, Inner Sunset, San Francisco, San Francisco City and County, California, 94131, USA",
+      "name" => "University of California, San Francisco, San Francisco, San Francisco City and County, California, USA",
       "geo_level" => "city",
       "country_name" => "USA",
       "state_name" => "California",

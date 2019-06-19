@@ -40,7 +40,7 @@ module LocationHelper
     name.gsub(%r{[;%_^<>\/?\\]}, "")
   end
 
-  # Note: Use Location#shorten_name on the object for a shorter name before saving.
+  # TODO(jsheu): Remove this if the name shortening in adapt_location_iq_response is sufficient.
   def self.truncate_name(name)
     # Shorten long names so they look a little better downstream (e.g. in dropdown filters). Try to take the first 2 + last 2 parts, or just the first + last 2 parts.
     max_chars = Location::DEFAULT_MAX_NAME_LENGTH
