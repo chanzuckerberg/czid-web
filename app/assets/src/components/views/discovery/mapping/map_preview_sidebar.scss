@@ -48,13 +48,26 @@
 
 .tableDataRow {
   align-items: flex-start;
-  padding: 11px 0;
+  padding: 10px 0;
   margin-left: 0;
 
   // Override defaults
-  :global(.ReactVirtualized__Table__rowColumn),
-  :global(.ReactVirtualized__Table__headerColumn) {
-    margin-left: 0;
+  &:global(.ReactVirtualized) {
+    &__Table {
+      &__headerRow {
+        padding: 5px 0;
+      }
+    }
+  }
+
+  :global(.ReactVirtualized) {
+    &__Table {
+      &__rowColumn,
+      &__headerColumn {
+        margin-left: 0;
+        margin-right: 5px;
+      }
+    }
   }
 }
 
