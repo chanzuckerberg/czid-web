@@ -278,7 +278,6 @@ export default class MapPreviewSidebar extends React.Component {
 
   reset = () => {
     this.infiniteTable && this.infiniteTable.reset();
-    this.setSelectedSampleIds(new Set());
   };
 
   renderTable = () => {

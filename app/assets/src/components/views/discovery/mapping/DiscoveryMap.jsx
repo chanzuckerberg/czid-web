@@ -1,11 +1,14 @@
 import React from "react";
 import { Marker } from "react-map-gl";
-import { get, upperFirst } from "lodash/fp";
+import { get, isEmpty, upperFirst } from "lodash/fp";
 
+import { withAnalytics } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
+
+import cs from "./discovery_map.scss";
 
 export const TOOLTIP_TIMEOUT_MS = 1000;
 
@@ -76,12 +79,13 @@ class DiscoveryMap extends React.Component {
     const lat = parseFloat(markerData.lat);
     const lng = parseFloat(markerData.lng);
     const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
+    if (!markerData[idsField]) return;
     const pointCount = markerData[idsField].length;
-    const minSize = 12;
+    const minSize = 10;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
     // Log1.5 of the count looked nice visually for not getting too large with many points.
     const markerSize = Math.max(
-      Math.log(pointCount) / Math.log(1.5) * (get("zoom", viewport) || 3),
+      Math.log(pointCount) / Math.log(1.4) * (get("zoom", viewport) || 3),
       minSize
     );
 
@@ -100,19 +104,45 @@ class DiscoveryMap extends React.Component {
     );
   };
 
-  render() {
-    const { mapTilerKey, mapLocationData } = this.props;
-    const { tooltip } = this.state;
+  renderBanner = () => {
+    const { currentTab, mapLocationData, onClearFilters } = this.props;
+    if (isEmpty(mapLocationData)) {
+      return (
+        <div className={cs.bannerContainer}>
+          <div className={cs.banner}>
+            {`No ${currentTab} found. Try adjusting search or filters. `}
+            <span
+              className={cs.clearAll}
+              onClick={withAnalytics(
+                onClearFilters,
+                "DiscoveryMap_clear-filters-link_clicked",
+                {
+                  currentTab,
+                }
+              )}
+            >
+              Clear all
+            </span>
+          </div>
+        </div>
+      );
+    }
+  };
 
+  render() {
+    const { mapTilerKey, mapLocationData, onClick } = this.props;
+    const { tooltip } = this.state;
     return (
       <BaseMap
+        banner={this.renderBanner()}
         mapTilerKey={mapTilerKey}
-        updateViewport={this.updateViewport}
         markers={
           mapLocationData &&
           Object.values(mapLocationData).map(this.renderMarker)
         }
+        onClick={onClick}
         tooltip={tooltip}
+        updateViewport={this.updateViewport}
       />
     );
   }
@@ -127,6 +157,8 @@ DiscoveryMap.propTypes = {
   currentTab: PropTypes.string.isRequired,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapTilerKey: PropTypes.string,
+  onClearFilters: PropTypes.func,
+  onClick: PropTypes.func,
   onMarkerClick: PropTypes.func,
   onTooltipTitleClick: PropTypes.func,
   previewedLocationId: PropTypes.number,
