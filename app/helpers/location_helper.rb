@@ -31,7 +31,7 @@ module LocationHelper
 
   def self.truncate_name(name)
     # Shorten long names so they look a little better downstream (e.g. in dropdown filters). Try to take the first 2 + last 2 parts, or just the first + last 2 parts.
-    max_chars = 30
+    max_chars = Location::DEFAULT_MAX_NAME_LENGTH
     if name.size > max_chars
       parts = name.split(", ")
       if parts.size >= 4
