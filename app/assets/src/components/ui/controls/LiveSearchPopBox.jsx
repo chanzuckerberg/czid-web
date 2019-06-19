@@ -47,7 +47,6 @@ class LiveSearchPopBox extends React.Component {
     this.setState({
       isLoading: false,
       results: [],
-      value: "",
     });
   };
 

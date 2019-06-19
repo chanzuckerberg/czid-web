@@ -10,7 +10,7 @@ const TABS = ["Geo Search Box"];
 
 export default class PlaygroundComponents extends React.Component {
   state = {
-    currentTab: TABS[1],
+    currentTab: TABS[0],
   };
 
   onTabChange = tab => {
@@ -30,7 +30,6 @@ export default class PlaygroundComponents extends React.Component {
           className={cs.geoSearchBox}
           // Calls save on selection
           onResultSelect={this.handleResultSelected}
-          value={"test"}
         />
       );
     }

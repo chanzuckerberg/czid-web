@@ -17,6 +17,7 @@ import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
 import SaveIcon from "~ui/icons/SaveIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
+import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
 import cs from "./samples_view.scss";
@@ -193,15 +194,11 @@ class SamplesView extends React.Component {
         ? mapSidebarSelectedSampleIds
         : selectedSampleIds;
 
-    const heatmapOptions = [
-      { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
-    ];
-
     if (this.props.admin) {
-      heatmapOptions.push({
-        text: "AMR Heatmap",
-        value: "/amr_heatmap",
-      });
+      const heatmapOptions = [
+        { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
+        { text: "AMR Heatmap", value: "/amr_heatmap" },
+      ];
 
       return targetSampleIds.size < 2 ? (
         <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
@@ -209,9 +206,10 @@ class SamplesView extends React.Component {
         <BareDropdown
           hideArrow
           className={cx(cs.icon, cs.heatmapDropdown)}
-          closeOnClick={true}
           items={heatmapOptions.map(option => {
-            const params = Array.from(targetSampleIds).join("&sampleIds[]=");
+            const params = getURLParamString({
+              sampleIds: Array.from(targetSampleIds),
+            });
             const log = () =>
               logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
                 option,
@@ -220,11 +218,7 @@ class SamplesView extends React.Component {
             return (
               <BareDropdown.Item
                 key={option.text}
-                text={
-                  <a href={`${option.value}?sampleIds[]=${params}`}>
-                    {option.text}
-                  </a>
-                }
+                text={<a href={`${option.value}?${params}`}>{option.text}</a>}
                 onClick={log}
               />
             );
