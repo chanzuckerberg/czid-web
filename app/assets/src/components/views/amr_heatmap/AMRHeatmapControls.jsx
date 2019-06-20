@@ -12,28 +12,29 @@ export default class AMRHeatmapControls extends React.Component {
   }
 
   generateChangeFunction(filter) {
+    const { selectedOptions, onSelectedOptionsChange } = this.props;
     const changeFunction = option => {
-      if (option === this.props.selectedOptions[filter]) {
-        return;
+      if (option !== selectedOptions[filter]) {
+        onSelectedOptionsChange({ [filter]: option });
       }
-      this.props.onSelectedOptionsChange({ [filter]: option });
     };
     return changeFunction;
   }
 
   renderFilterDropdowns() {
+    const { filters, selectedOptions, hasData } = this.props;
     const filtersList = [];
-    this.props.filters.forEach((_, filter) => {
+    filters.forEach((filterOptionData, filter) => {
       filtersList.push(
         <div className="col s3">
           <Dropdown
             fluid
             rounded
-            options={this.props.filters.get(filter).options}
+            options={filterOptionData.options}
             onChange={this.generateChangeFunction(filter)}
-            value={this.props.selectedOptions[filter]}
-            label={this.props.filters.get(filter).label}
-            disabled={!this.props.data}
+            value={selectedOptions[filter]}
+            label={filterOptionData.label}
+            disabled={!hasData}
           />
         </div>
       );
@@ -61,5 +62,5 @@ AMRHeatmapControls.propTypes = {
     viewLevel: PropTypes.string,
   }),
   onSelectedOptionsChange: PropTypes.func.isRequired,
-  data: PropTypes.bool,
+  hasData: PropTypes.bool,
 };

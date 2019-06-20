@@ -79,7 +79,6 @@ export default class AMRHeatmapView extends React.Component {
       <div className="row visualization-content">
         <ErrorBoundary>
           <AMRHeatmapVis
-            sampleIds={this.state.sampleIds}
             samplesWithAMRCounts={this.state.samplesWithAMRCounts}
             selectedOptions={this.state.selectedOptions}
           />
@@ -114,7 +113,7 @@ export default class AMRHeatmapView extends React.Component {
                     filters={this.assembleControlOptions()}
                     selectedOptions={this.state.selectedOptions}
                     onSelectedOptionsChange={this.updateOptions}
-                    data={!this.state.loading}
+                    hasData={!this.state.loading}
                   />
                 </NarrowContainer>
               </div>
