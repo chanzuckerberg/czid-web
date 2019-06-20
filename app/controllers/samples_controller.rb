@@ -976,7 +976,7 @@ class SamplesController < ApplicationController
       stage_info = {}
       pipeline_run.pipeline_run_stages.each do |stage|
         if stage.name != "Experimental" || current_user.admin?
-          stage_info[stage.name] = JSON.PARSE(stage.dag_json || "{}")
+          stage_info[stage.name] = JSON.parse(stage.dag_json || "{}")
           stage_info[stage.name][:job_status] = stage.job_status
         end
       end
