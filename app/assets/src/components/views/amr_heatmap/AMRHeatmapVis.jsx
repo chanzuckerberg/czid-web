@@ -5,8 +5,6 @@ import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 
 import cs from "./amr_heatmap_vis.scss";
 
-const METRIC_COVERAGE = "coverage";
-const METRIC_DEPTH = "depth";
 const VIEW_LEVEL_ALLELES = "allele";
 const VIEW_LEVEL_GENES = "gene";
 

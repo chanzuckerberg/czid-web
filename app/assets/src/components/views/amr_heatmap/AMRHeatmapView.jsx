@@ -6,8 +6,7 @@ import AMRHeatmapControls from "~/components/views/amr_heatmap/AMRHeatmapControl
 import AMRHeatmapVis from "~/components/views/amr_heatmap/AMRHeatmapVis";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import { getAMRCounts } from "~/api/amr";
-import { NarrowContainer } from "~/components/layout";
-import { ViewHeader } from "~/components/layout";
+import { ViewHeader, NarrowContainer } from "~/components/layout";
 
 import cs from "./amr_heatmap_view.scss";
 
