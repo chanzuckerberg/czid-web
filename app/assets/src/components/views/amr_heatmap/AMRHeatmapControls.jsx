@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { Dropdown } from "~ui/controls/dropdowns";
 import { Divider } from "~/components/layout";
+import { Dropdown } from "~ui/controls/dropdowns";
 
 import cs from "./amr_heatmap_view.scss";
 
@@ -10,8 +10,6 @@ export default class AMRHeatmapControls extends React.Component {
   constructor(props) {
     super(props);
   }
-
-  componentDidMount() {}
 
   generateChangeFunction(filter) {
     const changeFunction = option => {
@@ -23,32 +21,27 @@ export default class AMRHeatmapControls extends React.Component {
     return changeFunction;
   }
 
-  renderMetricSelect() {
+  generateFilterDropdown(filter) {
     return (
       <Dropdown
         fluid
         rounded
-        options={this.props.options.metrics}
-        onChange={this.generateChangeFunction("metric")}
-        value={this.props.selectedOptions.metric}
-        label="Metric"
+        options={this.props.filters.get(filter).options}
+        onChange={this.generateChangeFunction(filter)}
+        value={this.props.selectedOptions[filter]}
+        label={this.props.filters.get(filter).label}
         disabled={!this.props.data}
       />
     );
   }
 
-  renderViewLevelSelect() {
-    return (
-      <Dropdown
-        fluid
-        rounded
-        options={this.props.options.viewLevels}
-        onChange={this.generateChangeFunction("viewLevel")}
-        value={this.props.selectedOptions.viewLevel}
-        label="View Level"
-        disabled={!this.props.data}
-      />
-    );
+  renderFilterDropdowns() {
+    const filtersList = [];
+    this.props.filters.forEach((_, filter) => {
+      const dropdown = this.generateFilterDropdown(filter);
+      filtersList.push(<div className="col s3">{dropdown}</div>);
+    });
+    return filtersList;
   }
 
   render() {
@@ -56,8 +49,7 @@ export default class AMRHeatmapControls extends React.Component {
       <div className={cs.menu}>
         <Divider />
         <div className={`${cs.filterRow} row`}>
-          <div className="col s3">{this.renderViewLevelSelect()}</div>
-          <div className="col s3">{this.renderMetricSelect()}</div>
+          {this.renderFilterDropdowns()}
         </div>
         <Divider />
       </div>
@@ -66,20 +58,7 @@ export default class AMRHeatmapControls extends React.Component {
 }
 
 AMRHeatmapControls.propTypes = {
-  options: PropTypes.shape({
-    metrics: PropTypes.arrayOf(
-      PropTypes.shape({
-        text: PropTypes.string,
-        value: PropTypes.string,
-      })
-    ),
-    viewLevels: PropTypes.arrayOf(
-      PropTypes.shape({
-        text: PropTypes.string,
-        value: PropTypes.string,
-      })
-    ),
-  }),
+  filters: PropTypes.instanceOf(Map).isRequired,
   selectedOptions: PropTypes.shape({
     metric: PropTypes.string,
     viewLevel: PropTypes.string,

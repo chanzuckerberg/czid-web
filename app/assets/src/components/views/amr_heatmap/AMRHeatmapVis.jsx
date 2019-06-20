@@ -5,6 +5,8 @@ import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 
 import cs from "./amr_heatmap_vis.scss";
 
+const METRIC_COVERAGE = "coverage";
+const METRIC_DEPTH = "depth";
 const VIEW_LEVEL_ALLELES = "allele";
 const VIEW_LEVEL_GENES = "gene";
 
@@ -21,12 +23,14 @@ export default class AMRHeatmapVis extends React.Component {
 
   componentDidMount() {
     const samplesWithAMRCounts = this.props.samplesWithAMRCounts;
-    const [samples, genes, alleles] = this.createLabels(samplesWithAMRCounts);
+    const [sampleLabels, geneLabels, alleleLabels] = this.extractLabels(
+      samplesWithAMRCounts
+    );
     this.setState({
       samplesWithAMRCounts,
-      samples,
-      genes,
-      alleles,
+      sampleLabels,
+      geneLabels,
+      alleleLabels,
       loading: false,
     });
   }
@@ -67,7 +71,7 @@ export default class AMRHeatmapVis extends React.Component {
   //*** (i.e. after the component has requested AMR data and updated state) ***
 
   getHeatmapLabels() {
-    const viewLevel = this.state.viewLevel;
+    const viewLevel = this.props.selectedOptions.viewLevel;
     switch (viewLevel) {
       case VIEW_LEVEL_ALLELES: {
         return this.state.alleleLabels;
@@ -79,8 +83,8 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   computeHeatmapValues(rows) {
-    const viewLevel = this.state.viewLevel;
-    const metric = this.state.metric;
+    const viewLevel = this.props.selectedOptions.viewLevel;
+    const metric = this.props.selectedOptions.metric;
     const sampleData = this.state.samplesWithAMRCounts;
     const heatmapValues = [];
     rows.forEach(label => {
@@ -101,17 +105,20 @@ export default class AMRHeatmapVis extends React.Component {
     return heatmapValues;
   }
 
+  assembleHeatmapData() {
+    const rows = this.getHeatmapLabels();
+    const columns = this.state.sampleLabels;
+    const values = this.computeHeatmapValues(rows);
+    return [rows, columns, values];
+  }
+
   createHeatmap() {
-    let rows = this.createHeatmapLabels();
-    let columns = this.state.samples;
-    let values = this.computeHeatmapValues(rows);
+    const [rows, columns, values] = this.assembleHeatmapData();
     this.renderHeatmap(rows, columns, values);
   }
 
   updateHeatmap() {
-    let rows = this.createHeatmapLabels();
-    let columns = this.state.samples;
-    let values = this.computeHeatmapValues(rows);
+    const [rows, columns, values] = this.assembleHeatmapData();
     this.heatmap.updateData({
       rowLabels: rows,
       columnLabels: columns,
