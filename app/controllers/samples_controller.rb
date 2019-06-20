@@ -971,10 +971,9 @@ class SamplesController < ApplicationController
   # GET /samples/:id/stage_results
   # GET /samples/:id/stage_results.json
   def stage_results
-    if current_user.allowed_feature_list.include?("pipeline_viz")
-      pipeline_run = @sample.first_pipeline_run
-      pipeline_version = pipeline_run.report_info_params[:pipeline_version]
-
+    pipeline_run = @sample.first_pipeline_run
+    feature_allowed = current_user.allowed_feature_list.include?("pipeline_viz")
+    if feature_allowed && pipeline_run
       stage_info = {}
       pipeline_run.pipeline_run_stages.each do |stage|
         if stage.name != "Experimental" || current_user.admin?
@@ -983,16 +982,18 @@ class SamplesController < ApplicationController
         end
       end
 
-      @results = {
-        pipeline_version: pipeline_version,
-        stages: stage_info
+      render json: {
+        pipeline_stage_results: {
+          pipeline_version: pipeline_run.pipeline_version,
+          stages: stage_info
+        }
       }
-      render json: { pipeline_stage_results: @results }
     else
+      status = !feature_allowed ? :unauthorized : :not_found
       render(json: {
-               status: :unauthorized,
-               message: "No feature access"
-             }, status: :unauthorized)
+               status: status,
+               message: "Cannot access feature"
+             }, status: status)
     end
   end
 

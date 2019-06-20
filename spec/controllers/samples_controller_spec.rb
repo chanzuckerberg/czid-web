@@ -60,6 +60,16 @@ RSpec.describe SamplesController, type: :controller do
         expect(response).to have_http_status 401
       end
     end
+
+    describe "GET pipeline stage results from sample with no pipeline stages" do
+      it "cannot see stage results" do
+        project = create(:public_project)
+        sample = create(:sample, project: project)
+        get :stage_results, params: { id: sample.id }
+
+        expect(response).to have_http_status 404
+      end
+    end
   end
 
   # Non-admin, aka Joe, specific behavior
@@ -115,6 +125,16 @@ RSpec.describe SamplesController, type: :controller do
         expect do
           get :stage_results, params: { id: private_sample.id }
         end.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+
+    describe "GET pipeline stage results from sample with no pipeline stages (nonadmin)" do
+      it "cannot see stage results" do
+        project = create(:project, users: [@joe])
+        sample = create(:sample, project: project)
+        get :stage_results, params: { id: sample.id }
+
+        expect(response).to have_http_status 404
       end
     end
 
