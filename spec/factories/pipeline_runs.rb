@@ -1,5 +1,7 @@
 FactoryBot.define do
   factory :pipeline_run, class: PipelineRun do
+    pipeline_version { 1.0 }
+
     transient do
       # Arrays of entries to create for their respective properties:
       # taxon_counts, amr_counts, output_states, pipeline_run_stage
