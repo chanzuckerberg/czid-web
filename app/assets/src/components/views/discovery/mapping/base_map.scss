@@ -1,4 +1,5 @@
 @import url("https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css");
+@import "~styles/themes/elements";
 
 .mapContainer {
   display: block;
@@ -10,8 +11,12 @@
     position: absolute;
     bottom: 50px;
     right: 15px;
+    box-shadow: $box-shadow-dropdown-menu;
 
-    button {
+    :global(.mapboxgl-ctrl-icon) {
+      width: 25px;
+      height: 25px;
+
       &:focus {
         // Override materialize.css
         background-color: transparent !important;
@@ -20,6 +25,6 @@
   }
 
   :global(.mapboxgl-ctrl-attrib) {
-    right: 8px;
+    right: 5px;
   }
 }
