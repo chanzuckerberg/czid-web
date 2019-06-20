@@ -110,7 +110,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    drug_family: amr_counts_one["drug_family"]
                                                  }],
                                                  error: "")
-        expect(json_response[1]).to include_json(sample_id: "99999",
+        expect(json_response[1]).to include_json(sample_id: 99_999,
                                                  sample_name: "",
                                                  amr_counts: [],
                                                  error: "sample not found")
