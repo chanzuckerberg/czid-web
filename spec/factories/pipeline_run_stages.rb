@@ -5,6 +5,7 @@ FactoryBot.define do
     # Post Processing, Experimental
     step_number { 1 }
     name { "Host Filtering" }
+    job_status { "COMPLETED" }
     dag_json do
       {
         output_dir_s3: "s3:gc/someBucket/samples/theProjectId/theSampleId/results",
