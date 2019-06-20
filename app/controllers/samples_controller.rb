@@ -969,7 +969,6 @@ class SamplesController < ApplicationController
   end
 
   # GET /samples/:id/stage_results
-  # GET /samples/:id/stage_results.json
   def stage_results
     pipeline_run = @sample.first_pipeline_run
     feature_allowed = current_user.allowed_feature_list.include?("pipeline_viz")
@@ -977,7 +976,7 @@ class SamplesController < ApplicationController
       stage_info = {}
       pipeline_run.pipeline_run_stages.each do |stage|
         if stage.name != "Experimental" || current_user.admin?
-          stage_info[stage.name] = stage.dag_json.nil? ? {} : JSON.parse(stage.dag_json)
+          stage_info[stage.name] = JSON.PARSE(stage.dag_json || "{}")
           stage_info[stage.name][:job_status] = stage.job_status
         end
       end
