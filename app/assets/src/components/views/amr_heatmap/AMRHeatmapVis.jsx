@@ -34,14 +34,10 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   componentDidUpdate() {
-    if (this.state.loading === true) {
+    if (this.state.loading) {
       return;
     }
-    if (this.heatmap != null) {
-      this.updateHeatmap();
-    } else {
-      this.createHeatmap();
-    }
+    this.prepareHeatmapData();
   }
 
   extractLabels(sampleData) {
@@ -103,25 +99,19 @@ export default class AMRHeatmapVis extends React.Component {
     return heatmapValues;
   }
 
-  assembleHeatmapData() {
+  prepareHeatmapData() {
     const rows = this.getHeatmapLabels();
     const columns = this.state.sampleLabels;
     const values = this.computeHeatmapValues(rows);
-    return [rows, columns, values];
-  }
-
-  createHeatmap() {
-    const [rows, columns, values] = this.assembleHeatmapData();
-    this.renderHeatmap(rows, columns, values);
-  }
-
-  updateHeatmap() {
-    const [rows, columns, values] = this.assembleHeatmapData();
-    this.heatmap.updateData({
-      rowLabels: rows,
-      columnLabels: columns,
-      values: values,
-    });
+    if (this.heatmap != null) {
+      this.heatmap.updateData({
+        rowLabels: rows,
+        columnLabels: columns,
+        values: values,
+      });
+    } else {
+      this.renderHeatmap(rows, columns, values);
+    }
   }
 
   renderHeatmap(rows, columns, values) {

@@ -21,25 +21,23 @@ export default class AMRHeatmapControls extends React.Component {
     return changeFunction;
   }
 
-  generateFilterDropdown(filter) {
-    return (
-      <Dropdown
-        fluid
-        rounded
-        options={this.props.filters.get(filter).options}
-        onChange={this.generateChangeFunction(filter)}
-        value={this.props.selectedOptions[filter]}
-        label={this.props.filters.get(filter).label}
-        disabled={!this.props.data}
-      />
-    );
-  }
-
   renderFilterDropdowns() {
     const filtersList = [];
     this.props.filters.forEach((_, filter) => {
       const dropdown = this.generateFilterDropdown(filter);
-      filtersList.push(<div className="col s3">{dropdown}</div>);
+      filtersList.push(
+        <div className="col s3">
+          <Dropdown
+            fluid
+            rounded
+            options={this.props.filters.get(filter).options}
+            onChange={this.generateChangeFunction(filter)}
+            value={this.props.selectedOptions[filter]}
+            label={this.props.filters.get(filter).label}
+            disabled={!this.props.data}
+          />
+        </div>
+      );
     });
     return filtersList;
   }

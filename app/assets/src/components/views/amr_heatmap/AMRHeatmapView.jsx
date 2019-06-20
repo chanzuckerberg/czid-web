@@ -67,7 +67,7 @@ export default class AMRHeatmapView extends React.Component {
   };
 
   renderVisualization() {
-    if (this.state.loading === true) {
+    if (this.state.loading) {
       return (
         <p className={cs.loadingIndicator}>
           <i className="fa fa-spinner fa-pulse fa-fw" />
