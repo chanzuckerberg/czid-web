@@ -969,6 +969,7 @@ class SamplesController < ApplicationController
   end
 
   # GET /samples/:id/stage_results
+  # GET /samples/:id/stage_results.json
   def stage_results
     pipeline_run = @sample.first_pipeline_run
     feature_allowed = current_user.allowed_feature_list.include?("pipeline_viz")
