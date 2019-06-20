@@ -24,7 +24,6 @@ export default class AMRHeatmapControls extends React.Component {
   renderFilterDropdowns() {
     const filtersList = [];
     this.props.filters.forEach((_, filter) => {
-      const dropdown = this.generateFilterDropdown(filter);
       filtersList.push(
         <div className="col s3">
           <Dropdown
