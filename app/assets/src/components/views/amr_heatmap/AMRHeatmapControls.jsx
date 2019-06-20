@@ -26,7 +26,7 @@ export default class AMRHeatmapControls extends React.Component {
     const filtersList = [];
     filters.forEach((filterOptionData, filter) => {
       filtersList.push(
-        <div className="col s3">
+        <div className="col s3" key="filter">
           <Dropdown
             fluid
             rounded
