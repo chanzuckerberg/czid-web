@@ -16,10 +16,13 @@ RSpec.describe SamplesController, type: :controller do
   }]
 
   expected_stage_results = {
-    "Host Filtering" => { key1: "value1" },
-    "GSNAPL/RAPSEARCH alignment" => { key2: "value2" },
-    "Post Processing" => { key3: "value3" },
-    "Experimental" => { key4: "value4" }
+    "pipeline_version" => "1.0",
+    "stages" => {
+      "Host Filtering" => { key1: "value1", job_status: "COMPLETED" },
+      "GSNAPL/RAPSEARCH alignment" => { key2: "value2", job_status: "COMPLETED" },
+      "Post Processing" => { key3: "value3", job_status: "COMPLETED" },
+      "Experimental" => { key4: "value4", job_status: "COMPLETED" }
+    }
   }
 
   # Admin specific behavior
@@ -72,13 +75,13 @@ RSpec.describe SamplesController, type: :controller do
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
         expected_stage_results_no_experimental = expected_stage_results.clone()
-        expected_stage_results_no_experimental.delete "Experimental"
+        expected_stage_results_no_experimental["stages"].delete "Experimental"
 
         get :stage_results, params: { id: sample.id }
 
         json_response = JSON.parse(response.body)["pipeline_stage_results"]
         expect(json_response).to include_json(expected_stage_results_no_experimental)
-        expect(json_response).not_to include_json(Experimental: { key4: "value4" })
+        expect(json_response["stages"]).not_to include_json(Experimental: { key4: "value4" })
         expect(json_response.keys).to contain_exactly(
           *expected_stage_results_no_experimental.keys
         )
@@ -91,13 +94,13 @@ RSpec.describe SamplesController, type: :controller do
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
         expected_stage_results_no_experimental = expected_stage_results.clone()
-        expected_stage_results_no_experimental.delete "Experimental"
+        expected_stage_results_no_experimental["stages"].delete "Experimental"
 
         get :stage_results, params: { id: sample.id }
 
         json_response = JSON.parse(response.body)["pipeline_stage_results"]
         expect(json_response).to include_json(expected_stage_results_no_experimental)
-        expect(json_response).not_to include_json(Experimental: { key4: "value4" })
+        expect(json_response["stages"]).not_to include_json(Experimental: { key4: "value4" })
         expect(json_response.keys).to contain_exactly(
           *expected_stage_results_no_experimental.keys
         )

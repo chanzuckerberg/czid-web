@@ -214,10 +214,13 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     results = @response.parsed_body["pipeline_stage_results"]
-    assert_equal 4, results.length
-    assert_not_nil results["Experimental"]
+    stage_data = results["stages"]
+    assert_equal 4, stage_data.length
+    assert_not_nil stage_data["Experimental"]
     @public_pipeline_run.pipeline_run_stages.each do |stage|
-      assert_equal JSON.parse(stage.dag_json), results[stage.name]
+      expected = JSON.parse stage.dag_json
+      expected["job_status"] = stage.job_status
+      assert_equal expected, stage_data[stage.name]
     end
   end
 
@@ -227,12 +230,15 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     results = @response.parsed_body["pipeline_stage_results"]
-    assert_equal 3, results.length
+    stage_data = results["stages"]
+    assert_equal 3, stage_data.length
     @public_pipeline_run.pipeline_run_stages.each do |stage|
       if stage.name == "Experimental"
-        assert_nil results["Experimental"]
+        assert_nil stage_data["Experimental"]
       else
-        assert_equal JSON.parse(stage.dag_json), results[stage.name]
+        expected = JSON.parse stage.dag_json
+        expected["job_status"] = stage.job_status
+        assert_equal expected, stage_data[stage.name]
       end
     end
   end
