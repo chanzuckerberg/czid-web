@@ -15,6 +15,13 @@ class Location < ApplicationRecord
   ].freeze
   DEFAULT_MAX_NAME_LENGTH = 30
 
+  COUNTRY_LEVEL = "country".freeze
+  STATE_LEVEL = "state".freeze
+  SUBDIVISION_LEVEL = "subdivision".freeze
+  CITY_LEVEL = "city".freeze
+  PLACE_LEVEL = "place".freeze
+  GEO_LEVELS = [PLACE_LEVEL, CITY_LEVEL, SUBDIVISION_LEVEL, STATE_LEVEL, COUNTRY_LEVEL].freeze
+
   # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)
     raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
@@ -95,5 +102,53 @@ class Location < ApplicationRecord
     end
 
     location
+  end
+
+  def self.check_and_fetch_ancestors(location)
+    if location.geo_level == COUNTRY_LEVEL
+      return false
+    end
+
+    # Find if the country or state level is missing
+    country_match = Location.where(
+      geo_level: COUNTRY_LEVEL,
+      country_name: location.country_name
+    )
+    state_match = Location.where(
+      geo_level: STATE_LEVEL,
+      country_name: location.country_name,
+      state_name: location.state_name
+    )
+    parents = [country_match]
+    if location.geo_level != STATE_LEVEL
+      # Even for levels below State, clustering is supported at the State and Country level for now.
+      parents << state_match
+    end
+    present_parents = parents.inject(:or).pluck(:geo_level)
+
+    missing_parents = [COUNTRY_LEVEL, STATE_LEVEL]
+    missing_parents -= [COUNTRY_LEVEL] if location.country_name == ""
+    missing_parents -= [STATE_LEVEL] if location.state_name == ""
+    missing_parents -= present_parents
+
+    # Do a fetch for the missing levels
+    to_create = []
+    missing_parents.each do |level|
+      if level == COUNTRY_LEVEL
+        success, resp = geosearch_by_levels(location.country_name)
+      else
+        success, resp = geosearch_by_levels(location.country_name, location.state_name)
+      end
+
+      unless success && !resp.empty?
+        query = "#{location.country_name} #{level == STATE_LEVEL ? location.state_name : nil}"
+        raise "Geosearch for parent level failed: #{query}"
+      end
+
+      result = LocationHelper.adapt_location_iq_response(resp[0])
+      to_create << new_from_params(result)
+    end
+
+    Location.import! to_create
   end
 end
