@@ -17,6 +17,7 @@ class Location < ApplicationRecord
 
   COUNTRY_LEVEL = "country".freeze
   STATE_LEVEL = "state".freeze
+  SUBDIVISION_LEVEL = "subdivision".freeze
 
   # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)
