@@ -1,5 +1,6 @@
 import React from "react";
 import SvgSaver from "svgsaver";
+import Nanobar from "nanobar";
 
 import { deleteSample } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -10,7 +11,6 @@ import {
   getDownloadDropdownOptions,
   getLinkInfoForDownloadOption,
 } from "~/components/views/report/utils/download";
-import Nanobar from "nanobar";
 
 class SampleViewControls extends React.Component {
   downloadCSV = () => {
