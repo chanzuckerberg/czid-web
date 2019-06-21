@@ -32,9 +32,9 @@ class PipelineRun < ApplicationRecord
                         "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta" }.freeze
 
   GSNAP_CHUNK_SIZE = 60_000
-  RAPSEARCH_CHUNK_SIZE = 20_000
+  RAPSEARCH_CHUNK_SIZE = 80_000
   GSNAP_MAX_CONCURRENT = 2
-  RAPSEARCH_MAX_CONCURRENT = 4
+  RAPSEARCH_MAX_CONCURRENT = 8
   MAX_CHUNKS_IN_FLIGHT = 32
 
   SORTED_TAXID_ANNOTATED_FASTA = 'taxid_annot_sorted_nt.fasta'.freeze
