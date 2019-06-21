@@ -83,6 +83,27 @@ export default class TaxonDetailsMode extends React.Component {
     });
   };
 
+  renderWikipediaLicense(taxonName, wikiUrl) {
+    return (
+      <div>
+        <b>
+          This article uses material from the Wikipedia article "<a
+            href={wikiUrl}
+            className={cs.link}
+          >
+            {taxonName}
+          </a>", which is released under the{" "}
+          <a
+            href="https://creativecommons.org/licenses/by-sa/3.0/"
+            className={cs.link}
+          >
+            Creative Commons Attribution-Share-Alike License 3.0
+          </a>.
+        </b>
+      </div>
+    );
+  }
+
   loadTaxonInfo() {
     let taxonList = [this.props.taxonId];
     if (this.props.parentTaxonId) {
@@ -105,6 +126,7 @@ export default class TaxonDetailsMode extends React.Component {
           this.setState({
             taxonParentName: response[this.props.parentTaxonId].title,
             taxonParentDescription: response[this.props.parentTaxonId].summary,
+            parentWikiUrl: response[this.props.parentTaxonId].wiki_url,
           });
         }
       })
@@ -234,6 +256,10 @@ export default class TaxonDetailsMode extends React.Component {
                 ref={c => (this._taxonDescription = c)}
               >
                 {this.state.taxonDescription}
+                {this.renderWikipediaLicense(
+                  this.props.taxonName,
+                  this.state.wikiUrl
+                )}
               </div>
             </div>
             {this.state.collapseTaxonDescription &&
@@ -271,6 +297,10 @@ export default class TaxonDetailsMode extends React.Component {
                 ref={c => (this._taxonParentDescription = c)}
               >
                 {this.state.taxonParentDescription}
+                {this.renderWikipediaLicense(
+                  this.state.taxonParentName,
+                  this.state.parentWikiUrl
+                )}
               </div>
             </div>
             {this.state.collapseParentDescription &&
