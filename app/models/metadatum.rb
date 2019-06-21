@@ -130,13 +130,17 @@ class Metadatum < ApplicationRecord
     # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
     location = Location.find_or_new_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
     location = Location.check_and_restrict_specificity(location, sample.host_genome_name)
-    location.save!
+    unless location.id
+      location.save!
+      Location.check_and_fetch_parents(location)
+    end
 
     # At this point, discard raw_value (too long to store anyway)
     self.raw_value = nil
     self.string_validated_value = nil
     self.location_id = location.id
-  rescue
+  rescue => err
+    LogUtil.log_err_and_airbrake("Failed to save location metadatum: #{err.message}")
     errors.add(:raw_value, MetadataValidationErrors::INVALID_LOCATION)
   end
 

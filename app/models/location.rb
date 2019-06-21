@@ -104,36 +104,10 @@ class Location < ApplicationRecord
     location
   end
 
-  def self.check_and_fetch_ancestors(location)
-    if location.geo_level == COUNTRY_LEVEL
-      return false
-    end
-
-    # Find if the country or state level is missing
-    country_match = Location.where(
-      geo_level: COUNTRY_LEVEL,
-      country_name: location.country_name
-    )
-    state_match = Location.where(
-      geo_level: STATE_LEVEL,
-      country_name: location.country_name,
-      state_name: location.state_name
-    )
-    parents = [country_match]
-    if location.geo_level != STATE_LEVEL
-      # Even for levels below State, clustering is supported at the State and Country level for now.
-      parents << state_match
-    end
-    present_parents = parents.inject(:or).pluck(:geo_level)
-
-    missing_parents = [COUNTRY_LEVEL, STATE_LEVEL]
-    missing_parents -= [COUNTRY_LEVEL] if location.country_name == ""
-    missing_parents -= [STATE_LEVEL] if location.state_name == ""
-    missing_parents -= present_parents
-
+  def self.check_and_fetch_parents(location)
     # Do a fetch for the missing levels
     to_create = []
-    missing_parents.each do |level|
+    missing_parent_levels(location).each do |level|
       if level == COUNTRY_LEVEL
         success, resp = geosearch_by_levels(location.country_name)
       else
@@ -150,5 +124,32 @@ class Location < ApplicationRecord
     end
 
     Location.import! to_create
+  end
+
+  def self.missing_parent_levels(location)
+    return [] if location.geo_level == COUNTRY_LEVEL
+
+    # Find if the country or state level is missing
+    country_match = Location.where(
+      geo_level: COUNTRY_LEVEL,
+      country_name: location.country_name
+    )
+    state_match = Location.where(
+      geo_level: STATE_LEVEL,
+      country_name: location.country_name,
+      state_name: location.state_name
+    )
+    parents = [country_match]
+    if location.geo_level != STATE_LEVEL
+      # Even for levels below State, clustering is only at the State and Country levels for now.
+      parents << state_match
+    end
+    present_parents = parents.inject(:or).pluck(:geo_level)
+
+    missing_parents = [COUNTRY_LEVEL, STATE_LEVEL]
+    missing_parents.delete(COUNTRY_LEVEL) if location.country_name == ""
+    missing_parents.delete(STATE_LEVEL) if location.state_name == ""
+    missing_parents -= present_parents
+    missing_parents
   end
 end
