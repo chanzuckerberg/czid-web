@@ -33,6 +33,12 @@
   height: calc(100% - 32px);
 }
 
+.graphLabel {
+  display: "flex";
+  justify-content: "space-between";
+  flex-wrap: "wrap";
+}
+
 .closeButton {
   padding: 3px 12px;
   cursor: pointer;
