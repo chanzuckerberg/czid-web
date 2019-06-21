@@ -1252,7 +1252,9 @@ class PipelineSampleReport extends React.Component {
   render() {
     const filter_stats = `${
       this.state.rows_passing_filters
-    } rows passing filters, out of ${this.state.rows_total} total rows.`;
+    } rows passing the above filters, out of ${
+      this.state.rows_total
+    } total rows.`;
 
     let truncation_stats =
       this.report_details && this.report_details.pipeline_info.truncated
@@ -1267,11 +1269,11 @@ class PipelineSampleReport extends React.Component {
       subsampled_reads &&
       subsampled_reads <
         this.report_details.pipeline_info.adjusted_remaining_reads
-        ? "Randomly subsampled to " +
+        ? "The total was randomly subsampled to " +
           subsampled_reads +
           " out of " +
           this.report_details.pipeline_info.adjusted_remaining_reads +
-          " reads passing filters."
+          " reads passing host and quality filters."
         : "";
     const disable_filter = this.anyFilterSet() ? (
       <span
