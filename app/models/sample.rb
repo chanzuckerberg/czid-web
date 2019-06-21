@@ -8,7 +8,16 @@ require 'elasticsearch/model'
 class Sample < ApplicationRecord
   if ELASTICSEARCH_ON
     include Elasticsearch::Model
-    include Elasticsearch::Model::Callbacks
+    after_commit on: [:create, :update] do
+      __elasticsearch__.index_document
+    end
+    after_commit on: [:destroy] do
+      begin
+        __elasticsearch__.delete_document
+      rescue Elasticsearch::Transport::Transport::Errors::NotFound => e
+        Rails.logger.warn(e)
+      end
+    end
   end
   include TestHelper
   include MetadataHelper
@@ -430,6 +439,11 @@ class Sample < ApplicationRecord
     TaxonByterange.where(pipeline_run_id: pipeline_run_ids).delete_all
     TaxonCount.where(pipeline_run_id: pipeline_run_ids).delete_all
     Contig.where(pipeline_run_id: pipeline_run_ids).delete_all
+    AmrCount.where(pipeline_run_id: pipeline_run_ids).delete_all
+    ErccCount.where(pipeline_run_id: pipeline_run_ids).delete_all
+    JobStat.where(pipeline_run_id: pipeline_run_ids).delete_all
+    input_files.delete_all
+    metadata.delete_all
     super
   end
 
