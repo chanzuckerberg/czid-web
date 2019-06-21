@@ -104,7 +104,8 @@ class Location < ApplicationRecord
   def self.check_and_fetch_parents(location)
     # Do a fetch for the missing levels
     to_create = []
-    missing_parent_levels(location).each do |level|
+    missing_parents = missing_parent_levels(location)
+    missing_parents.each do |level|
       if level == COUNTRY_LEVEL
         success, resp = geosearch_by_levels(location.country_name)
       else
@@ -144,6 +145,7 @@ class Location < ApplicationRecord
     present_parents = parents.inject(:or).pluck(:geo_level)
 
     missing_parents = [COUNTRY_LEVEL, STATE_LEVEL]
+    missing_parents.delete(location.geo_level)
     missing_parents.delete(COUNTRY_LEVEL) if location.country_name == ""
     missing_parents.delete(STATE_LEVEL) if location.state_name == ""
     missing_parents -= present_parents
