@@ -1,7 +1,7 @@
 
 <%= javascript_tag do %>
   react_component(
-    'AMRHeatmapVis',
+    'AMRHeatmapView',
     { sampleIds: JSON.parse('<%= raw escape_json(@sample_ids) %>') },
     'page_content'
   )
