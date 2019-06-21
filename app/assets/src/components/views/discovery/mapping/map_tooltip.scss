@@ -41,10 +41,10 @@ $tooltip-tip-size: 8px;
     }
 
     .content {
-      padding: 15px;
+      padding: 12px;
 
       .title {
-        @include font-header-s;
+        @include font-header-xs;
 
         &.hoverable {
           &:hover {
@@ -54,7 +54,7 @@ $tooltip-tip-size: 8px;
       }
 
       .body {
-        @include font-body-s;
+        @include font-body-xs;
       }
     }
   }

@@ -107,12 +107,14 @@ Rails.application.routes.draw do
   get 'visualizations.json', to: 'visualizations#index'
 
   get 'amr_heatmap/amr_counts.json', to: 'amr_heatmap#amr_counts'
+  get 'amr_heatmap', to: 'amr_heatmap#index'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
 
   namespace :playground do
     get :controls
+    get :components
     get :icons
     get :viz
   end

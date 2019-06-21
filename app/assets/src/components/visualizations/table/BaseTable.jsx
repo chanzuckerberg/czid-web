@@ -145,15 +145,17 @@ class BaseTable extends React.Component {
       defaultHeaderHeight,
       defaultRowHeight,
       defaultSelectColumnWidth,
+      forwardRef,
+      headerClassName,
       initialActiveColumns,
       onRowClick,
       onRowsRendered,
-      forwardRef,
       onSort,
       rowClassName,
       rowCount,
       rowGetter,
       rowRenderer,
+      selectableColumnClassName,
       selectableKey,
       sortable,
       sortBy,
@@ -169,7 +171,7 @@ class BaseTable extends React.Component {
           {({ width, height }) => (
             <VirtualizedTable
               gridClassName={cs.grid}
-              headerClassName={cs.header}
+              headerClassName={cx(cs.header, headerClassName)}
               headerHeight={defaultHeaderHeight}
               height={height}
               onRowsRendered={onRowsRendered}
@@ -192,7 +194,7 @@ class BaseTable extends React.Component {
             >
               {selectableKey && (
                 <Column
-                  className={cs.selectableColumn}
+                  className={selectableColumnClassName}
                   dataKey={selectableKey}
                   headerRenderer={this.renderSelectableHeader}
                   cellRenderer={this.renderSelectableCell}
@@ -263,6 +265,7 @@ BaseTable.propTypes = {
   defaultHeaderHeight: PropTypes.number,
   defaultRowHeight: PropTypes.number,
   defaultSelectColumnWidth: PropTypes.number,
+  headerClassName: PropTypes.string,
   // Set of dataKeys of columns to be shown by default
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
   onRowClick: PropTypes.func,
@@ -281,6 +284,7 @@ BaseTable.propTypes = {
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string,
 
+  selectableColumnClassName: PropTypes.string,
   // make the table selectable, by setting a selectable key
   // the tables will check for the selectable key in the selected set/array
   selectableKey: PropTypes.string,

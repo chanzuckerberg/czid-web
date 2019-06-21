@@ -277,7 +277,7 @@ class Metadatum < ApplicationRecord
   def validated_value
     # Special case for Location objects
     if metadata_field.base_type == Metadatum::LOCATION_TYPE
-      location_id ? Location.find(location_id).attributes : string_validated_value
+      location_id ? Hash[Location::DEFAULT_LOCATION_FIELDS.map { |k| [k, location[k]] }] : string_validated_value
     else
       base = self.class.convert_type_to_string(metadata_field.base_type)
       self["#{base}_validated_value"]
@@ -304,6 +304,15 @@ class Metadatum < ApplicationRecord
       end
     end
     validated_values
+  end
+
+  def self.by_sample_ids(sample_ids)
+    includes(:metadata_field, :location)
+      .where(sample_id: sample_ids)
+      .group_by(&:sample_id)
+      .map do |sample_id, sample_metadata|
+        [sample_id, Hash[sample_metadata.map { |m| [m.key.to_sym, m.validated_value] }]]
+      end.to_h
   end
 
   def self.convert_type_to_string(type)

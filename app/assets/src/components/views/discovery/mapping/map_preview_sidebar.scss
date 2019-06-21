@@ -27,10 +27,10 @@
   }
 
   .tabs {
-    margin: 15px 10px;
+    margin: 15px 10px 5px;
 
     .tabLabel {
-      font-size: $font-size-h6;
+      @include font-header-xs;
       margin-right: 10px;
     }
 
@@ -46,9 +46,22 @@
   }
 }
 
-.tableDataRow {
+.tableHeader {
+  padding: 5px 0;
+  margin-left: 0;
+}
+
+.sampleRow {
   align-items: flex-start;
-  padding: 11px 0;
+  padding: 10px 0;
+  margin-left: 0;
+
+  .sample,
+  .tableHeader,
+  .selectColumn {
+    margin-left: 0;
+    margin-right: 5px;
+  }
 }
 
 .basicCell {
@@ -60,4 +73,14 @@
 .sampleHeader,
 .projectHeader {
   text-align: left;
+}
+
+.projectRow {
+  margin-left: 0;
+  padding: 5px 0;
+
+  .project {
+    margin-left: 5px;
+    margin-right: 5px;
+  }
 }
