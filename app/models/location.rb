@@ -147,22 +147,16 @@ class Location < ApplicationRecord
       end
 
       result = LocationHelper.adapt_location_iq_response(resp[0])
-      new_location = new_from_params(result)
-      new_location.save!
-
-      # Set id fields
-      present_parent_level_ids[level] = new_location.id
-      new_location = set_parent_ids(new_location, present_parent_level_ids)
-      new_location.save!
+      to_create << new_from_params(result)
     end
 
-    set_parent_ids(location, present_parent_level_ids)
+    Location.import! to_create
   end
 
-  # Identify missing Country or State location levels. Even for levels below State, clustering is
-  # only at Country+State for now.
-  def self.present_and_missing_parents(location)
-    # Find if the Country or State level is missing
+  def self.missing_parent_levels(location)
+    return [] if location.geo_level == COUNTRY_LEVEL
+
+    # Find if the country or state level is missing
     country_match = Location.where(
       geo_level: COUNTRY_LEVEL,
       country_name: location.country_name
