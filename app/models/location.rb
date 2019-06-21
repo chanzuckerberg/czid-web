@@ -27,6 +27,7 @@ class Location < ApplicationRecord
   STATE_LEVEL = "state".freeze
   SUBDIVISION_LEVEL = "subdivision".freeze
   CITY_LEVEL = "city".freeze
+<<<<<<< HEAD
   GEO_LEVELS = [COUNTRY_LEVEL, STATE_LEVEL, SUBDIVISION_LEVEL, CITY_LEVEL].freeze
 
   # See https://wiki.openstreetmap.org/wiki/Key:place
@@ -35,6 +36,10 @@ class Location < ApplicationRecord
   STATE_NAMES = %w[state province region].freeze
   SUBDIVISION_NAMES = %w[county state_district district].freeze
   CITY_NAMES = %w[city city_distrct locality town borough municipality village hamlet quarter neighbourhood suburb].freeze
+=======
+  PLACE_LEVEL = "place".freeze
+  GEO_LEVELS = [PLACE_LEVEL, CITY_LEVEL, SUBDIVISION_LEVEL, STATE_LEVEL, COUNTRY_LEVEL].freeze
+>>>>>>> Moved to new branch
 
   # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)
