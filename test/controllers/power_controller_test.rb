@@ -167,6 +167,14 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test 'joe cannot delete expired_sample' do
+    sign_in(:joe)
+    @expired_sample = samples(:expired_sample)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      delete sample_url(@expired_sample)
+    end
+  end
+
   # search suggestions
   test 'joe sees public_sample in search suggestions' do
     sign_in(:joe)

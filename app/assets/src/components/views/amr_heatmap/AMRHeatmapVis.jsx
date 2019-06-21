@@ -12,10 +12,6 @@ export default class AMRHeatmapVis extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      loading: true,
-    };
-
     this.heatmap = null;
   }
 
@@ -29,15 +25,11 @@ export default class AMRHeatmapVis extends React.Component {
       sampleLabels,
       geneLabels,
       alleleLabels,
-      loading: false,
     });
   }
 
   componentDidUpdate() {
-    if (this.state.loading) {
-      return;
-    }
-    this.prepareHeatmapData();
+    this.updateHeatmap();
   }
 
   extractLabels(sampleData) {
@@ -99,7 +91,7 @@ export default class AMRHeatmapVis extends React.Component {
     return heatmapValues;
   }
 
-  prepareHeatmapData() {
+  updateHeatmap() {
     const rows = this.getHeatmapLabels();
     const columns = this.state.sampleLabels;
     const values = this.computeHeatmapValues(rows);
@@ -110,11 +102,11 @@ export default class AMRHeatmapVis extends React.Component {
         values: values,
       });
     } else {
-      this.renderHeatmap(rows, columns, values);
+      this.initializeHeatmap(rows, columns, values);
     }
   }
 
-  renderHeatmap(rows, columns, values) {
+  initializeHeatmap(rows, columns, values) {
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       // Data for the Heatmap
