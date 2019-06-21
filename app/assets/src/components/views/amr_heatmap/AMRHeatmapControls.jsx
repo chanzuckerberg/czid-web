@@ -4,6 +4,7 @@ import cx from "classnames";
 
 import { Divider } from "~/components/layout";
 import { Dropdown } from "~ui/controls/dropdowns";
+import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
 
 import cs from "./amr_heatmap_view.scss";
 
@@ -35,12 +36,26 @@ export default class AMRHeatmapControls extends React.Component {
     return controlsList;
   }
 
+  renderLegend() {
+    if (!this.props.hasData) {
+      return;
+    }
+    return (
+      <SequentialLegendVis
+        min={0}
+        max={this.props.maxValueForLegend}
+        scale={this.props.selectedOptions.scale}
+      />
+    );
+  }
+
   render() {
     return (
       <div className={cs.menu}>
         <Divider />
         <div className={cx(cs.filterRow, "row")}>
           {this.renderControlDropdowns()}
+          {this.renderLegend()}
         </div>
         <Divider />
       </div>
@@ -64,7 +79,9 @@ AMRHeatmapControls.propTypes = {
   selectedOptions: PropTypes.shape({
     metric: PropTypes.string,
     viewLevel: PropTypes.string,
+    scale: PropTypes.string,
   }),
   onSelectedOptionsChange: PropTypes.func.isRequired,
   isDataReady: PropTypes.bool,
+  maxValueForLegend: PropTypes.number,
 };

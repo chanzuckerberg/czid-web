@@ -21,6 +21,11 @@ const VIEW_LEVELS = [
   { text: "Alleles", value: "allele" },
 ];
 
+const SCALES = [
+  { text: "Logarithmic", value: "symlog" },
+  { text: "Linear", value: "linear" },
+];
+
 export default class AMRHeatmapView extends React.Component {
   constructor(props) {
     super(props);
@@ -30,6 +35,7 @@ export default class AMRHeatmapView extends React.Component {
       selectedOptions: {
         metric: "coverage",
         viewLevel: "gene",
+        scale: "symlog",
       },
     };
   }
@@ -56,6 +62,7 @@ export default class AMRHeatmapView extends React.Component {
     return [
       { key: "viewLevel", options: VIEW_LEVELS, label: "View Level" },
       { key: "metric", options: METRICS, label: "Metric" },
+      { key: "scale", options: SCALES, label: "Scale" },
     ];
   }
 
@@ -64,6 +71,14 @@ export default class AMRHeatmapView extends React.Component {
     this.setState({
       selectedOptions: newOptions,
     });
+  };
+
+  updateMaxValue = maxValue => {
+    if (this.state.maxValue !== maxValue) {
+      this.setState({
+        maxValue,
+      });
+    }
   };
 
   renderVisualization() {
@@ -79,6 +94,7 @@ export default class AMRHeatmapView extends React.Component {
       <div className="row visualization-content">
         <ErrorBoundary>
           <AMRHeatmapVis
+            maxValueUpdater={this.updateMaxValue}
             samplesWithAMRCounts={this.state.samplesWithAMRCounts}
             selectedOptions={this.state.selectedOptions}
           />
@@ -114,6 +130,10 @@ export default class AMRHeatmapView extends React.Component {
                     selectedOptions={this.state.selectedOptions}
                     onSelectedOptionsChange={this.updateOptions}
                     isDataReady={!this.state.loading}
+                    hasData={!this.state.loading}
+                    maxValueForLegend={
+                      this.state.maxValue ? this.state.maxValue : 0
+                    }
                   />
                 </NarrowContainer>
               </div>

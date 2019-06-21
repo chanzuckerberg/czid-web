@@ -73,6 +73,7 @@ export default class AMRHeatmapVis extends React.Component {
     const metric = this.props.selectedOptions.metric;
     const sampleData = this.state.samplesWithAMRCounts;
     const heatmapValues = [];
+    let maxValue = 0;
     rows.forEach(label => {
       const rowValues = [];
       const rowName = label.label;
@@ -82,29 +83,37 @@ export default class AMRHeatmapVis extends React.Component {
         );
         if (amrCountForRow != undefined) {
           rowValues.push(amrCountForRow[metric]);
+          maxValue = Math.max(maxValue, amrCountForRow[metric]);
         } else {
           rowValues.push(0);
         }
       });
       heatmapValues.push(rowValues);
     });
-    return heatmapValues;
+    return [heatmapValues, maxValue];
   }
 
   updateHeatmap() {
     const rows = this.getHeatmapLabels();
     const columns = this.state.sampleLabels;
-    const values = this.computeHeatmapValues(rows);
+    const [values, maxValue] = this.computeHeatmapValues(rows);
+    this.props.maxValueUpdater(maxValue);
     if (this.heatmap != null) {
       this.heatmap.updateData({
         rowLabels: rows,
         columnLabels: columns,
         values: values,
       });
+      this.heatmap.updateScale(this.props.selectedOptions.scale);
     } else {
       this.initializeHeatmap(rows, columns, values);
     }
   }
+
+  colorFilter = (value, node, originalColor, _, colorNoValue) => {
+    // Leave zero values grey
+    return value > 0 ? originalColor : colorNoValue;
+  };
 
   initializeHeatmap(rows, columns, values) {
     this.heatmap = new Heatmap(
@@ -119,7 +128,11 @@ export default class AMRHeatmapVis extends React.Component {
         values: values,
       },
       // Custom options:
-      {}
+      {
+        scale: this.props.selectedOptions.scale,
+        scaleMin: 0,
+        customColorCallback: this.colorFilter,
+      }
     );
     this.heatmap.start();
   }
@@ -139,6 +152,7 @@ export default class AMRHeatmapVis extends React.Component {
 }
 
 AMRHeatmapVis.propTypes = {
+  maxValueUpdater: PropTypes.func,
   samplesWithAMRCounts: PropTypes.arrayOf(
     PropTypes.shape({
       sample_name: PropTypes.string,
@@ -150,5 +164,6 @@ AMRHeatmapVis.propTypes = {
   selectedOptions: PropTypes.shape({
     metric: PropTypes.string,
     viewLevel: PropTypes.string,
+    scale: PropTypes.string,
   }),
 };
