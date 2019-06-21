@@ -6,6 +6,7 @@ import AMRHeatmapControls from "~/components/views/amr_heatmap/AMRHeatmapControl
 import AMRHeatmapVis from "~/components/views/amr_heatmap/AMRHeatmapVis";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import { getAMRCounts } from "~/api/amr";
+import LoadingIcon from "~ui/icons/LoadingIcon";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
 
 import cs from "./amr_heatmap_view.scss";
@@ -51,12 +52,11 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   assembleControlOptions() {
-    // A Map is used here to preserve the order that the filters will be
-    // presented in the controls element
-    return new Map([
-      ["viewLevel", { options: VIEW_LEVELS, label: "View Level" }],
-      ["metric", { options: METRICS, label: "Metric" }],
-    ]);
+    // Controls are arranged in the order they are presented in
+    return [
+      { key: "viewLevel", options: VIEW_LEVELS, label: "View Level" },
+      { key: "metric", options: METRICS, label: "Metric" },
+    ];
   }
 
   updateOptions = options => {
@@ -70,7 +70,7 @@ export default class AMRHeatmapView extends React.Component {
     if (this.state.loading) {
       return (
         <p className={cs.loadingIndicator}>
-          <i className="fa fa-spinner fa-pulse fa-fw" />
+          <LoadingIcon className={cs.loadingIndicator} />
           Loading...
         </p>
       );
@@ -110,10 +110,10 @@ export default class AMRHeatmapView extends React.Component {
               <div style={style}>
                 <NarrowContainer>
                   <AMRHeatmapControls
-                    filters={this.assembleControlOptions()}
+                    controls={this.assembleControlOptions()}
                     selectedOptions={this.state.selectedOptions}
                     onSelectedOptionsChange={this.updateOptions}
-                    hasData={!this.state.loading}
+                    isDataReady={!this.state.loading}
                   />
                 </NarrowContainer>
               </div>

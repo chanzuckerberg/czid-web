@@ -22,7 +22,8 @@ class AmrHeatmapController < ApplicationController
   # },
 
   def amr_counts
-    samples = current_power.viewable_samples.where(id: params[:sampleIds])
+    sample_ids = params[:sampleIds].map(&:to_i)
+    samples = current_power.viewable_samples.where(id: sample_ids)
     good_sample_ids = {}
     amr_data = []
 
@@ -37,18 +38,18 @@ class AmrHeatmapController < ApplicationController
       end
       amr_data << {
         sample_name: sample.name,
-        sample_id: sample.id.to_i,
+        sample_id: sample.id,
         amr_counts: amr_counts,
         error: ""
       }
-      good_sample_ids[sample.id.to_i] = true
+      good_sample_ids[sample.id] = true
     end
 
-    params[:sampleIds].each do |input_id|
-      unless good_sample_ids.key?(input_id.to_i)
+    sample_ids.each do |input_id|
+      unless good_sample_ids.key?(input_id)
         amr_data << {
           sample_name: "",
-          sample_id: input_id.to_i,
+          sample_id: input_id,
           amr_counts: [],
           error: "sample not found"
         }
