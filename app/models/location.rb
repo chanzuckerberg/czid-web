@@ -103,7 +103,6 @@ class Location < ApplicationRecord
 
   def self.check_and_fetch_parents(location)
     # Do a fetch for the missing levels
-    to_create = []
     missing_parents = missing_parent_levels(location)
     missing_parents.each do |level|
       if level == COUNTRY_LEVEL
@@ -118,10 +117,14 @@ class Location < ApplicationRecord
       end
 
       result = LocationHelper.adapt_location_iq_response(resp[0])
-      to_create << new_from_params(result)
+      new_location = new_from_params(result)
+      new_location.save!
+
+      location["#{level}_id"] = new_location.id
     end
 
-    Location.import! to_create
+    location["#{location.geo_level}_id"] = location.id
+    location.save!
   end
 
   def self.missing_parent_levels(location)
