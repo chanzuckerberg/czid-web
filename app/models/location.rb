@@ -119,9 +119,11 @@ class Location < ApplicationRecord
       result = LocationHelper.adapt_location_iq_response(resp[0])
       new_location = new_from_params(result)
       new_location.save!
-
+      new_location.update_attribute("#{level}_id", new_location.id)
       location["#{level}_id"] = new_location.id
     end
+
+    # Need to also set the other one's country_id or state_id. Which means doing the country one first.
 
     location["#{location.geo_level}_id"] = location.id
     location.save!
