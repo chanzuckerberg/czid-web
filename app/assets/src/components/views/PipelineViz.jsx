@@ -9,72 +9,6 @@ import cs from "./pipeline_viz.scss";
 
 const START_NODE_ID = -1;
 const END_NODE_ID = -2;
-const STAGE_BG_COLOR = "#f8f8f8";
-const NODE_COLOR = "#eaeaea";
-const EDGE_COLOR = "#999999";
-const ZOOM_CHANGE_INTERVAL = 0.01;
-const GRAPH_OPTIONS = {
-  nodes: {
-    borderWidth: 0,
-    color: NODE_COLOR,
-    shape: "box",
-    shapeProperties: {
-      borderRadius: 6,
-    },
-    widthConstraint: {
-      minimum: 120,
-    },
-    heightConstraint: {
-      minimum: 24,
-    },
-    font: {
-      face: "Open Sans",
-    },
-  },
-  groups: {
-    startEndNodes: {
-      widthConstraint: 8,
-      heightConstraint: 0,
-      color: STAGE_BG_COLOR,
-      fixed: {
-        x: true,
-        y: true,
-      },
-    },
-  },
-  edges: {
-    arrows: {
-      to: {
-        enabled: true,
-        type: "arrow",
-        scaleFactor: 0.8,
-      },
-    },
-    smooth: {
-      type: "cubicBezier",
-      roundness: 0.8,
-    },
-    color: EDGE_COLOR,
-  },
-  layout: {
-    hierarchical: {
-      direction: "LR",
-      sortMethod: "directed",
-      levelSeparation: 200,
-      parentCentralization: false,
-      blockShifting: false,
-      edgeMinimization: false,
-    },
-  },
-  physics: {
-    enabled: false,
-  },
-  interaction: {
-    zoomView: false,
-    dragView: false,
-    dragNodes: false,
-  },
-};
 
 class PipelineViz extends React.Component {
   constructor(props) {
@@ -105,7 +39,7 @@ class PipelineViz extends React.Component {
   }
 
   onMouseWheelZoom(e) {
-    const zoomChange = (e.deltaY < 0 ? 1 : -1) * ZOOM_CHANGE_INTERVAL;
+    const zoomChange = (e.deltaY < 0 ? 1 : -1) * this.props.zoomChangeInterval;
     this.setState({ zoom: this.state.zoom + zoomChange });
   }
 
@@ -213,7 +147,7 @@ class PipelineViz extends React.Component {
           from: i,
           to: END_NODE_ID,
           color: {
-            color: STAGE_BG_COLOR,
+            color: this.props.backgroundColor,
             inherit: false,
           },
           chosen: false,
@@ -267,11 +201,74 @@ class PipelineViz extends React.Component {
 
     this.populateNodeAndEdgeData(index, nodeData, edgeData);
 
+    const options = {
+      nodes: {
+        borderWidth: 0,
+        color: this.props.nodeColor,
+        shape: "box",
+        shapeProperties: {
+          borderRadius: 6,
+        },
+        widthConstraint: {
+          minimum: 120,
+        },
+        heightConstraint: {
+          minimum: 24,
+        },
+        font: {
+          face: "Open Sans",
+        },
+      },
+      groups: {
+        startEndNodes: {
+          widthConstraint: 8,
+          heightConstraint: 0,
+          color: this.props.backgroundColor,
+          fixed: {
+            x: true,
+            y: true,
+          },
+        },
+      },
+      edges: {
+        arrows: {
+          to: {
+            enabled: true,
+            type: "arrow",
+            scaleFactor: 0.8,
+          },
+        },
+        smooth: {
+          type: "cubicBezier",
+          roundness: 0.8,
+        },
+        color: this.props.edgeColor,
+      },
+      layout: {
+        hierarchical: {
+          direction: "LR",
+          sortMethod: "directed",
+          levelSeparation: 200,
+          parentCentralization: false,
+          blockShifting: false,
+          edgeMinimization: false,
+        },
+      },
+      physics: {
+        enabled: false,
+      },
+      interaction: {
+        zoomView: false,
+        dragView: false,
+        dragNodes: false,
+      },
+    };
+
     const currStageGraph = new NetworkGraph(
       container,
       nodeData,
       edgeData,
-      GRAPH_OPTIONS
+      options
     );
     currStageGraph.minimizeWidthGivenScale(1.0);
 
@@ -324,6 +321,17 @@ class PipelineViz extends React.Component {
 
 PipelineViz.propTypes = {
   stageResults: PropTypes.object,
+  backgroundColor: PropTypes.string,
+  nodeColor: PropTypes.string,
+  edgeColor: PropTypes.string,
+  zoomChangeInterval: PropTypes.number,
+};
+
+PipelineViz.defaultProps = {
+  backgroundColor: "#f8f8f8",
+  nodeColor: "#eaeaea",
+  edgeColor: "#999999",
+  zoomChangeInterval: 0.01,
 };
 
 export default PipelineViz;
