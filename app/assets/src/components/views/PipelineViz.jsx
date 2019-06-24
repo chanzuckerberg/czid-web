@@ -1,5 +1,4 @@
 import React from "react";
-import { DataSet, Network } from "vis";
 import { forEach } from "lodash";
 import PropTypes from "prop-types";
 import ReactPanZoom from "@ajainarayanan/react-pan-zoom";
