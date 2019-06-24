@@ -31,15 +31,16 @@ class PipelineViz extends React.Component {
       zoom: 1,
     };
 
-    this.onMouseWheelZoom = this.onMouseWheelZoom.bind(this);
+    this.handleMouseWheelZoom = this.handleMouseWheelZoom.bind(this);
   }
 
   componentDidMount() {
     this.drawGraphs();
   }
 
-  onMouseWheelZoom(e) {
-    const zoomChange = (e.deltaY < 0 ? 1 : -1) * this.props.zoomChangeInterval;
+  handleMouseWheelZoom(e) {
+    const { zoomChangeInterval } = this.props;
+    const zoomChange = (e.deltaY < 0 ? 1 : -1) * zoomChangeInterval;
     this.setState({ zoom: this.state.zoom + zoomChange });
   }
 
@@ -52,7 +53,8 @@ class PipelineViz extends React.Component {
   modifyStepNames() {
     // Strips 'PipelineStep[Run/Generate]' from front of each step name.
     // TODO(ezhong): Consider adding 'name' field to dag_json later.
-    forEach(this.props.stageResults.stages, (stageData, _) => {
+    const { stageResults } = this.props;
+    forEach(stageResults.stages, (stageData, _) => {
       stageData.steps.forEach(step => {
         if (step.class.substring(0, 12) == "PipelineStep") {
           step.class = step.class.substring(12);
@@ -67,12 +69,12 @@ class PipelineViz extends React.Component {
     });
   }
 
-  populateNodeAndEdgeData(index, nodeData, edgeData) {
-    const stageData = this.props.stageResults.stages[this.stageNames[index]];
+  populateIntraNodeAndEdgeData(index, nodeData, edgeData) {
+    const { stageResults } = this.props;
+    const stageData = stageResults.stages[this.stageNames[index]];
     const stepData = stageData.steps;
 
     const outTargetOrPathToStepId = {};
-    const currFileNameToOutputtingNode = {};
     stepData.forEach((step, i) => {
       // Populate nodeData
       nodeData.push({ id: i, label: step.class, level: 1 });
@@ -80,13 +82,6 @@ class PipelineViz extends React.Component {
       if (!(step.out in outTargetOrPathToStepId)) {
         // Populate outFileToStepId for intra-stage edges
         outTargetOrPathToStepId[step.out] = i;
-        // Populate currFileNameToOutputtingNode for inter-stage edges
-        stageData.targets[step.out].forEach(fileName => {
-          const fileNameWithPath = `${stageData.output_dir_s3}/${
-            this.pipelineVersion
-          }/${fileName}`;
-          currFileNameToOutputtingNode[fileNameWithPath] = i;
-        });
       }
     });
 
@@ -113,12 +108,39 @@ class PipelineViz extends React.Component {
       });
     });
     nodeData[stepData.length + 1].level = maxLevel + 1;
+  }
 
-    if (index < this.stageNames.length - 1) {
+  populateInterEdgeData(index, edgeData) {
+    const { stageResults, backgroundColor } = this.props;
+    const stageData = stageResults.stages[this.stageNames[index]];
+    const stepData = stageData.steps;
+
+    if (index == this.stageNames.length - 1) {
+      // For final stage, create hidden edges to final node for vertical centering of nodes.
+      stepData.forEach((_, i) => {
+        edgeData.push({
+          from: i,
+          to: END_NODE_ID,
+          color: {
+            color: backgroundColor,
+            inherit: false,
+          },
+          chosen: false,
+        });
+      });
+    } else {
       // Create edges to output node if it's output files appear in next stage's inputs.
-      const nextStageData = this.props.stageResults.stages[
-        this.stageNames[index + 1]
-      ];
+      const currFileNameToOutputtingNode = {};
+      stepData.forEach((step, i) => {
+        stageData.targets[step.out].forEach(fileName => {
+          const fileNameWithPath = `${stageData.output_dir_s3}/${
+            this.pipelineVersion
+          }/${fileName}`;
+          currFileNameToOutputtingNode[fileNameWithPath] = i;
+        });
+      });
+
+      const nextStageData = stageResults.stages[this.stageNames[index + 1]];
       nextStageData.steps.forEach((step, nextNodeId) => {
         step.in.forEach(inTarget => {
           nextStageData.targets[inTarget].forEach(fileName => {
@@ -138,19 +160,6 @@ class PipelineViz extends React.Component {
               }
             }
           });
-        });
-      });
-    } else {
-      // For final stage, create hidden edges to final node for vertical centering of nodes.
-      stepData.forEach((_, i) => {
-        edgeData.push({
-          from: i,
-          to: END_NODE_ID,
-          color: {
-            color: this.props.backgroundColor,
-            inherit: false,
-          },
-          chosen: false,
         });
       });
     }
@@ -182,10 +191,11 @@ class PipelineViz extends React.Component {
   }
 
   closeNonactiveSteps() {
+    const { stageResults } = this.props;
     this.stageNames.forEach((stageName, i) => {
       const graph = this.graphs[i];
-      const stageData = this.props.stageResults.stages[stageName];
-      if (!(stageData.job_status == "STARTED")) {
+      const stageData = stageResults.stages[stageName];
+      if (stageData.job_status !== "STARTED") {
         graph.afterDrawingOnce(() => {
           this.toggleStage(i);
         });
@@ -194,17 +204,19 @@ class PipelineViz extends React.Component {
   }
 
   drawStageGraph(index) {
-    const container = this[`container${index}`];
+    const { nodeColor, backgroundColor, edgeColor } = this.props;
+    const container = this[`container-${index}`];
 
     const nodeData = [];
     const edgeData = [];
 
-    this.populateNodeAndEdgeData(index, nodeData, edgeData);
+    this.populateIntraNodeAndEdgeData(index, nodeData, edgeData);
+    this.populateInterEdgeData(index, edgeData);
 
     const options = {
       nodes: {
         borderWidth: 0,
-        color: this.props.nodeColor,
+        color: nodeColor,
         shape: "box",
         shapeProperties: {
           borderRadius: 6,
@@ -223,7 +235,7 @@ class PipelineViz extends React.Component {
         startEndNodes: {
           widthConstraint: 8,
           heightConstraint: 0,
-          color: this.props.backgroundColor,
+          color: backgroundColor,
           fixed: {
             x: true,
             y: true,
@@ -242,7 +254,7 @@ class PipelineViz extends React.Component {
           type: "cubicBezier",
           roundness: 0.8,
         },
-        color: this.props.edgeColor,
+        color: edgeColor,
       },
       layout: {
         hierarchical: {
@@ -301,7 +313,7 @@ class PipelineViz extends React.Component {
             <div
               className={cs.graph}
               ref={ref => {
-                this[`container${i}`] = ref;
+                this[`container-${i}`] = ref;
               }}
             />
           </div>
@@ -310,7 +322,7 @@ class PipelineViz extends React.Component {
     });
 
     return (
-      <div onWheel={this.onMouseWheelZoom}>
+      <div onWheel={this.handleMouseWheelZoom}>
         <ReactPanZoom zoom={this.state.zoom}>
           <div className={cs.pipelineViz}>{stageContainers}</div>
         </ReactPanZoom>

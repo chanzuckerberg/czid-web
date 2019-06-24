@@ -987,12 +987,8 @@ class SamplesController < ApplicationController
         stages: stage_info
       }
       respond_to do |format|
-        format.html do
-          render template: "samples/stage_results"
-        end
-        format.json do
-          render json: { pipeline_stage_results: @results }
-        end
+        format.html { render template: "samples/stage_results" }
+        format.json { render json: { pipeline_stage_results: @results } }
       end
     else
       status = !feature_allowed ? :unauthorized : :not_found
