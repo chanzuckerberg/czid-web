@@ -101,9 +101,11 @@ class Location < ApplicationRecord
     location
   end
 
+  # Note: We are clustering at Country+State for now so Subdivision+City ids may be nil.
   def self.check_and_fetch_parents(location)
     # Do a fetch for the missing levels
-    missing_parents = missing_parent_levels(location)
+    present_parent_ids, missing_parents = present_and_missing_parents(location)
+    present_parent_ids[location.geo_level] = location.id
     missing_parents.each do |level|
       if level == COUNTRY_LEVEL
         success, resp = geosearch_by_levels(location.country_name)
@@ -121,21 +123,18 @@ class Location < ApplicationRecord
       new_location.save!
 
       # Set id fields
-      new_location["#{level}_id"] = new_location.id
-      if level == STATE_LEVEL
-        new_location.country_id = location.country_id
-      end
+      present_parent_ids[level] = new_location.id
+      new_location = LocationHelper.set_parent_ids(new_location, present_parent_ids)
       new_location.save!
-      location["#{level}_id"] = new_location.id
     end
 
-    location["#{location.geo_level}_id"] = location.id
+    location = LocationHelper.set_parent_ids(location, present_parent_ids)
     location.save!
   end
 
   # Identify missing Country or State location levels. Even for levels below State, clustering is
   # only at Country+State for now.
-  def self.missing_parent_levels(location)
+  def self.present_and_missing_parents(location)
     return [] if location.geo_level == COUNTRY_LEVEL
 
     # Find if the country or state level is missing
@@ -148,14 +147,17 @@ class Location < ApplicationRecord
       country_name: location.country_name,
       state_name: location.state_name
     )
-    present_parents = country_match.or(state_match).pluck(:geo_level)
-    missing_parents = []
-    if !present_parents.include?(COUNTRY_LEVEL) && location.country_name.present?
-      missing_parents << COUNTRY_LEVEL
+    present_parents = country_match.or(state_match)
+    present_parent_levels = present_parents.pluck(:geo_level)
+    missing_parent_levels = []
+    if !present_parent_levels.include?(COUNTRY_LEVEL) && location.country_name.present?
+      missing_parent_levels << COUNTRY_LEVEL
     end
-    if !present_parents.include?(STATE_LEVEL) && location.state_name.present? && location.geo_level != STATE_LEVEL
-      missing_parents << STATE_LEVEL
+    if !present_parent_levels.include?(STATE_LEVEL) && location.state_name.present? && location.geo_level != STATE_LEVEL
+      missing_parent_levels << STATE_LEVEL
     end
-    missing_parents
+
+    present_parent_ids = present_parents.map { |p| [p.geo_level, p.id] }.to_h
+    [present_parent_ids, missing_parent_levels]
   end
 end

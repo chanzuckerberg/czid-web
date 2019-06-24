@@ -92,4 +92,9 @@ module LocationHelper
     samples.where(metadata: { string_validated_value: query })
            .or(samples.where(metadata: { locations: { name: query } }))
   end
+
+  def self.set_parent_ids(location, parent_level_ids)
+    parent_level_ids.each { |level, id| location["#{level}_id"] = id }
+    location
+  end
 end
