@@ -69,56 +69,86 @@ class PipelineViz extends React.Component {
     });
   }
 
-  populateIntraNodeAndEdgeData(index, nodeData, edgeData) {
+  generateNodeData(index, edgeData) {
     const { stageResults } = this.props;
     const stageData = stageResults.stages[this.stageNames[index]];
     const stepData = stageData.steps;
 
-    const outTargetOrPathToStepId = {};
+    const nodeData = [];
     stepData.forEach((step, i) => {
-      // Populate nodeData
-      nodeData.push({ id: i, label: step.class, level: 1 });
+      nodeData.push({ id: i, label: step.class });
+    });
+    nodeData.push({ id: START_NODE_ID, group: "startEndNodes" });
+    nodeData.push({ id: END_NODE_ID, group: "startEndNodes" });
 
-      if (!(step.out in outTargetOrPathToStepId)) {
-        // Populate outFileToStepId for intra-stage edges
-        outTargetOrPathToStepId[step.out] = i;
+    this.addHierarchicalLevelsToNodes(nodeData, edgeData);
+    return nodeData;
+  }
+
+  addHierarchicalLevelsToNodes(nodeData, edgeData) {
+    // This method assumes that the steps are topologically sorted already,
+    // in that each node's parent all appear in the array before it.
+    const nodeToCurrentLevel = {};
+    nodeData.forEach(node => {
+      nodeToCurrentLevel[node.id] = 1;
+    });
+
+    edgeData.forEach(edge => {
+      const newLevel = nodeToCurrentLevel[edge.from] + 1;
+      if (newLevel > nodeToCurrentLevel[edge.to]) {
+        nodeToCurrentLevel[edge.to] = newLevel;
+        if (edge.to != END_NODE_ID) {
+          nodeToCurrentLevel[END_NODE_ID] = Math.max(
+            nodeToCurrentLevel[END_NODE_ID],
+            newLevel + 1
+          );
+        }
       }
     });
 
-    // Add beginning (input) and ending (output) nodes
-    nodeData.push({ id: START_NODE_ID, level: 0, group: "startEndNodes" });
-    nodeData.push({ id: END_NODE_ID, group: "startEndNodes" });
+    nodeData.forEach(node => {
+      node.level = nodeToCurrentLevel[node.id];
+    });
+  }
 
-    let maxLevel = 1;
+  generateIntraEdgeData(index) {
+    const { stageResults } = this.props;
+    const stageData = stageResults.stages[this.stageNames[index]];
+    const stepData = stageData.steps;
+
+    const outTargetToStepId = {};
+    stepData.forEach((step, i) => {
+      if (!(step.out in outTargetToStepId)) {
+        // Populate outFileToStepId for intra-stage edges
+        outTargetToStepId[step.out] = i;
+      }
+    });
+
+    const intraEdgeData = [];
     stepData.forEach((step, i) => {
       step.in.forEach(inTarget => {
-        if (inTarget in outTargetOrPathToStepId) {
-          const fromId = outTargetOrPathToStepId[inTarget];
-          edgeData.push({ from: fromId, to: i });
-
-          nodeData[i].level = Math.max(
-            nodeData[i].level,
-            nodeData[fromId].level + 1
-          );
-          maxLevel = Math.max(maxLevel, nodeData[i].level);
+        if (inTarget in outTargetToStepId) {
+          const fromId = outTargetToStepId[inTarget];
+          intraEdgeData.push({ from: fromId, to: i });
         } else {
           // Connect beginning steps to input node
-          edgeData.push({ from: START_NODE_ID, to: i });
+          intraEdgeData.push({ from: START_NODE_ID, to: i });
         }
       });
     });
-    nodeData[stepData.length + 1].level = maxLevel + 1;
+    return intraEdgeData;
   }
 
-  populateInterEdgeData(index, edgeData) {
+  generateInterEdgeData(index) {
     const { stageResults, backgroundColor } = this.props;
     const stageData = stageResults.stages[this.stageNames[index]];
     const stepData = stageData.steps;
 
+    const interEdgeData = [];
     if (index == this.stageNames.length - 1) {
       // For final stage, create hidden edges to final node for vertical centering of nodes.
       stepData.forEach((_, i) => {
-        edgeData.push({
+        interEdgeData.push({
           from: i,
           to: END_NODE_ID,
           color: {
@@ -151,7 +181,7 @@ class PipelineViz extends React.Component {
               if (fileNameWithPath in currFileNameToOutputtingNode) {
                 const currNodeId =
                   currFileNameToOutputtingNode[fileNameWithPath];
-                edgeData.push({
+                interEdgeData.push({
                   from: currNodeId,
                   to: END_NODE_ID,
                 });
@@ -163,6 +193,7 @@ class PipelineViz extends React.Component {
         });
       });
     }
+    return interEdgeData;
   }
 
   adjustGraphNodePositions() {
@@ -207,11 +238,10 @@ class PipelineViz extends React.Component {
     const { nodeColor, backgroundColor, edgeColor } = this.props;
     const container = this[`container-${index}`];
 
-    const nodeData = [];
-    const edgeData = [];
-
-    this.populateIntraNodeAndEdgeData(index, nodeData, edgeData);
-    this.populateInterEdgeData(index, edgeData);
+    const edgeData = this.generateIntraEdgeData(index).concat(
+      this.generateInterEdgeData(index)
+    );
+    const nodeData = this.generateNodeData(index, edgeData);
 
     const options = {
       nodes: {
@@ -235,7 +265,7 @@ class PipelineViz extends React.Component {
         startEndNodes: {
           widthConstraint: 8,
           heightConstraint: 0,
-          color: backgroundColor,
+          // color: backgroundColor,
           fixed: {
             x: true,
             y: true,
@@ -271,7 +301,7 @@ class PipelineViz extends React.Component {
       },
       interaction: {
         zoomView: false,
-        dragView: false,
+        // dragView: false,
         dragNodes: false,
       },
     };
@@ -294,7 +324,7 @@ class PipelineViz extends React.Component {
       const isOpened = this.state.stagesOpened[i];
 
       stageContainers.push(
-        <div key={i} className={cs.stage}>
+        <div key={stageName} className={cs.stage}>
           <div
             className={isOpened ? cs.hidden : cs.stageButton}
             onClick={() => this.toggleStage(i)}
