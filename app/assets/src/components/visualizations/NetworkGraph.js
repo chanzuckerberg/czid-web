@@ -1,4 +1,4 @@
-import { DataSet, Network } from "visjs-network";
+import { DataSet, Network } from "vis";
 
 export default class NetworkGraph {
   constructor(container, nodeData, edgeData, options) {
