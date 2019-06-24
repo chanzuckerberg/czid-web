@@ -121,11 +121,12 @@ class Location < ApplicationRecord
       new_location.save!
 
       # Set id fields
-      new_location.update("#{level}_id" => new_location.id)
-      location["#{level}_id"] = new_location.id
+      new_location["#{level}_id"] = new_location.id
       if level == STATE_LEVEL
         new_location.country_id = location.country_id
       end
+      new_location.save!
+      location["#{level}_id"] = new_location.id
     end
 
     location["#{location.geo_level}_id"] = location.id
@@ -133,7 +134,7 @@ class Location < ApplicationRecord
   end
 
   # Identify missing Country or State location levels. Even for levels below State, clustering is
-  # only at State+Country for now.
+  # only at Country+State for now.
   def self.missing_parent_levels(location)
     return [] if location.geo_level == COUNTRY_LEVEL
 
@@ -149,7 +150,7 @@ class Location < ApplicationRecord
     )
     present_parents = country_match.or(state_match).pluck(:geo_level)
     missing_parents = []
-    if !present_parents.include?(COUNTRY_LEVEL) && location.country_name.present? && location.geo_level != COUNTRY_LEVEL
+    if !present_parents.include?(COUNTRY_LEVEL) && location.country_name.present?
       missing_parents << COUNTRY_LEVEL
     end
     if !present_parents.include?(STATE_LEVEL) && location.state_name.present? && location.geo_level != STATE_LEVEL
