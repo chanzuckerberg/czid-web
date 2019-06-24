@@ -44,8 +44,6 @@ export default class AMRHeatmapView extends React.Component {
     this.requestAMRCountsData(this.props.sampleIds);
   }
 
-  componentDidUpdate() {}
-
   async requestAMRCountsData(sampleIds) {
     const rawSampleData = await getAMRCounts(sampleIds);
     const samplesWithAMRCounts = rawSampleData.filter(

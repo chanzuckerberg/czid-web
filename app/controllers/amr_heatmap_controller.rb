@@ -38,7 +38,7 @@ class AmrHeatmapController < ApplicationController
       end
       amr_data << {
         sample_name: sample.name,
-        sample_id: sample.id.to_i,
+        sample_id: sample.id,
         amr_counts: amr_counts,
         error: ""
       }
@@ -49,7 +49,7 @@ class AmrHeatmapController < ApplicationController
       unless good_sample_ids.key?(input_id)
         amr_data << {
           sample_name: "",
-          sample_id: input_id.to_i,
+          sample_id: input_id,
           amr_counts: [],
           error: "sample not found"
         }
