@@ -21,6 +21,12 @@ class Location < ApplicationRecord
   CITY_LEVEL = "city".freeze
   GEO_LEVELS = [COUNTRY_LEVEL, STATE_LEVEL, SUBDIVISION_LEVEL, CITY_LEVEL].freeze
 
+  # See https://wiki.openstreetmap.org/wiki/Key:place
+  COUNTRY_NAMES = %w[country].freeze
+  STATE_NAMES = %w[state province region].freeze
+  SUBDIVISION_NAMES = %w[county state_district district].freeze
+  CITY_NAMES = %w[city city_distrct locality town borough municipality village hamlet quarter neighbourhood suburb].freeze
+
   # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)
     raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
