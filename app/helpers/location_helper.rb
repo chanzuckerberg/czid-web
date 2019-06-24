@@ -14,6 +14,8 @@ module LocationHelper
                   Location::STATE_LEVEL
                 elsif country_key
                   Location::COUNTRY_LEVEL
+                else
+                  ""
                 end
 
     loc = {
