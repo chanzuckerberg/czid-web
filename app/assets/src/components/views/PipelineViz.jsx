@@ -1,7 +1,6 @@
 import React from "react";
 import { forEach } from "lodash";
 import PropTypes from "prop-types";
-import ReactPanZoom from "@ajainarayanan/react-pan-zoom";
 
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 import NetworkGraph from "~/components/visualizations/NetworkGraph.js";
@@ -351,13 +350,7 @@ class PipelineViz extends React.Component {
       );
     });
 
-    return (
-      <div onWheel={this.handleMouseWheelZoom}>
-        <ReactPanZoom zoom={this.state.zoom}>
-          <div className={cs.pipelineViz}>{stageContainers}</div>
-        </ReactPanZoom>
-      </div>
-    );
+    return <div className={cs.pipelineViz}>{stageContainers}</div>;
   }
 }
 
