@@ -32,7 +32,7 @@ class Location < ApplicationRecord
     raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
 
     query_url = "#{LOCATION_IQ_BASE_URL}/#{endpoint_query}&key=#{ENV['LOCATION_IQ_API_KEY']}&format=json"
-    uri = URI.parse(query_url)
+    uri = URI.parse(URI.escape(query_url))
     request = Net::HTTP::Get.new(uri)
     resp = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
       http.request(request)
