@@ -9,6 +9,17 @@ import SequentialLegendVis from "~/components/visualizations/legends/SequentialL
 import cs from "./amr_heatmap_view.scss";
 
 export default class AMRHeatmapControls extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      legend: {
+        max: 0,
+        scale: "symlog",
+      },
+    };
+  }
+
   handleOptionChange(control, option) {
     const { selectedOptions, onSelectedOptionsChange } = this.props;
     if (option !== selectedOptions[control]) {
@@ -37,15 +48,33 @@ export default class AMRHeatmapControls extends React.Component {
   }
 
   renderLegend() {
-    if (!this.props.hasData) {
+    // Don't render a color legend if the heatmap is still loading
+    if (!this.props.isDataReady) {
+      return;
+    }
+    // This code is here so that when we need the legend to change
+    // because the scale has changed, React will unload the current
+    // legend from the DOM, and render the new, proper one when state updates.
+    if (
+      this.props.maxValueForLegend !== this.state.legend.max ||
+      this.props.selectedOptions.scale !== this.state.legend.scale
+    ) {
+      this.setState({
+        legend: {
+          max: this.props.maxValueForLegend,
+          scale: this.props.selectedOptions.scale,
+        },
+      });
       return;
     }
     return (
-      <SequentialLegendVis
-        min={0}
-        max={this.props.maxValueForLegend}
-        scale={this.props.selectedOptions.scale}
-      />
+      <div className="col s3" key="SequentialLegendVis">
+        <SequentialLegendVis
+          min={0}
+          max={this.state.legend.max}
+          scale={this.state.legend.scale}
+        />
+      </div>
     );
   }
 

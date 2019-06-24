@@ -44,6 +44,8 @@ export default class AMRHeatmapView extends React.Component {
     this.requestAMRCountsData(this.props.sampleIds);
   }
 
+  componentDidUpdate() {}
+
   async requestAMRCountsData(sampleIds) {
     const rawSampleData = await getAMRCounts(sampleIds);
     const samplesWithAMRCounts = rawSampleData.filter(
@@ -81,6 +83,35 @@ export default class AMRHeatmapView extends React.Component {
     }
   };
 
+  renderHeader() {
+    return (
+      <ViewHeader className={cs.viewHeader}>
+        <ViewHeader.Content>
+          <ViewHeader.Pretitle>
+            Antimicrobial Resistance Heatmap
+          </ViewHeader.Pretitle>
+          <ViewHeader.Title
+            label={`Comparing ${
+              this.props.sampleIds ? this.props.sampleIds.length : ""
+            } Samples`}
+          />
+        </ViewHeader.Content>
+      </ViewHeader>
+    );
+  }
+
+  renderControls() {
+    return (
+      <AMRHeatmapControls
+        controls={this.assembleControlOptions()}
+        selectedOptions={this.state.selectedOptions}
+        onSelectedOptionsChange={this.updateOptions}
+        isDataReady={!this.state.loading}
+        maxValueForLegend={this.state.maxValue ? this.state.maxValue : 0}
+      />
+    );
+  }
+
   renderVisualization() {
     if (this.state.loading) {
       return (
@@ -106,36 +137,12 @@ export default class AMRHeatmapView extends React.Component {
   render() {
     return (
       <div className={cs.AMRHeatmapView}>
-        <NarrowContainer>
-          <ViewHeader className={cs.viewHeader}>
-            <ViewHeader.Content>
-              <ViewHeader.Pretitle>
-                Antimicrobial Resistance Heatmap
-              </ViewHeader.Pretitle>
-              <ViewHeader.Title
-                label={`Comparing ${
-                  this.props.sampleIds ? this.props.sampleIds.length : ""
-                } Samples`}
-              />
-            </ViewHeader.Content>
-          </ViewHeader>
-        </NarrowContainer>
+        <NarrowContainer>{this.renderHeader()}</NarrowContainer>
         <StickyContainer>
           <Sticky>
             {({ style }) => (
               <div style={style}>
-                <NarrowContainer>
-                  <AMRHeatmapControls
-                    controls={this.assembleControlOptions()}
-                    selectedOptions={this.state.selectedOptions}
-                    onSelectedOptionsChange={this.updateOptions}
-                    isDataReady={!this.state.loading}
-                    hasData={!this.state.loading}
-                    maxValueForLegend={
-                      this.state.maxValue ? this.state.maxValue : 0
-                    }
-                  />
-                </NarrowContainer>
+                <NarrowContainer>{this.renderControls()}</NarrowContainer>
               </div>
             )}
           </Sticky>
