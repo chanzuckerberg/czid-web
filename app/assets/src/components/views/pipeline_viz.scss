@@ -2,14 +2,8 @@
 @import "~styles/themes/typography";
 
 .pipelineViz {
-  width: 100vw;
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
 }
 
 .stage {

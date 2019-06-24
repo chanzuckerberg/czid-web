@@ -13,6 +13,68 @@ const STAGE_BG_COLOR = "#f8f8f8";
 const NODE_COLOR = "#eaeaea";
 const EDGE_COLOR = "#999999";
 const ZOOM_CHANGE_INTERVAL = 0.01;
+const GRAPH_OPTIONS = {
+  nodes: {
+    borderWidth: 0,
+    color: NODE_COLOR,
+    shape: "box",
+    shapeProperties: {
+      borderRadius: 6,
+    },
+    widthConstraint: {
+      minimum: 120,
+    },
+    heightConstraint: {
+      minimum: 24,
+    },
+    font: {
+      face: "Open Sans",
+    },
+  },
+  groups: {
+    startEndNodes: {
+      widthConstraint: 8,
+      heightConstraint: 0,
+      color: STAGE_BG_COLOR,
+      fixed: {
+        x: true,
+        y: true,
+      },
+    },
+  },
+  edges: {
+    arrows: {
+      to: {
+        enabled: true,
+        type: "arrow",
+        scaleFactor: 0.8,
+      },
+    },
+    smooth: {
+      type: "cubicBezier",
+      roundness: 0.8,
+    },
+    color: EDGE_COLOR,
+  },
+  layout: {
+    hierarchical: {
+      direction: "LR",
+      sortMethod: "directed",
+      levelSeparation: 200,
+      parentCentralization: false,
+      blockShifting: false,
+      edgeMinimization: false,
+    },
+  },
+  physics: {
+    enabled: false,
+  },
+  interaction: {
+    zoomView: false,
+    dragView: false,
+    dragNodes: false,
+  },
+};
 
 class PipelineViz extends React.Component {
   constructor(props) {
@@ -205,74 +267,11 @@ class PipelineViz extends React.Component {
 
     this.populateNodeAndEdgeData(index, nodeData, edgeData);
 
-    const options = {
-      nodes: {
-        borderWidth: 0,
-        color: NODE_COLOR,
-        shape: "box",
-        shapeProperties: {
-          borderRadius: 6,
-        },
-        widthConstraint: {
-          minimum: 120,
-        },
-        heightConstraint: {
-          minimum: 24,
-        },
-        font: {
-          face: "Open Sans",
-        },
-      },
-      groups: {
-        startEndNodes: {
-          widthConstraint: 8,
-          heightConstraint: 0,
-          color: STAGE_BG_COLOR,
-          fixed: {
-            x: true,
-            y: true,
-          },
-        },
-      },
-      edges: {
-        arrows: {
-          to: {
-            enabled: true,
-            type: "arrow",
-            scaleFactor: 0.8,
-          },
-        },
-        smooth: {
-          type: "cubicBezier",
-          roundness: 0.8,
-        },
-        color: EDGE_COLOR,
-      },
-      layout: {
-        hierarchical: {
-          direction: "LR",
-          sortMethod: "directed",
-          levelSeparation: 200,
-          parentCentralization: false,
-          blockShifting: false,
-          edgeMinimization: false,
-        },
-      },
-      physics: {
-        enabled: false,
-      },
-      interaction: {
-        zoomView: false,
-        dragView: false,
-        dragNodes: false,
-      },
-    };
-
     const currStageGraph = new NetworkGraph(
       container,
       nodeData,
       edgeData,
-      options
+      GRAPH_OPTIONS
     );
     currStageGraph.minimizeWidthGivenScale(1.0);
 
