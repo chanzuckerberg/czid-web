@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import ReactPanZoom from "@ajainarayanan/react-pan-zoom";
 
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
+import NetworkGraph from "~/components/visualizations/NetworkGraph.js";
 import cs from "./pipeline_viz.scss";
 
 const START_NODE_ID = -1;
@@ -19,6 +20,7 @@ class PipelineViz extends React.Component {
     super(props);
     this.pipelineVersion = this.props.stageResults.pipeline_version;
     this.stageGraphsInfo = [];
+    this.graphs = [];
 
     this.stageNames = [
       "Host Filtering",
@@ -70,15 +72,26 @@ class PipelineViz extends React.Component {
     });
   }
 
-  populateNodeAndEdgeData(stepData, nodeData, edgeData) {
-    const outTargetToStepId = {};
+  populateNodeAndEdgeData(index, nodeData, edgeData) {
+    const stageData = this.props.stageResults.stages[this.stageNames[index]];
+    const stepData = stageData.steps;
+
+    const outTargetOrPathToStepId = {};
+    const currFileNameToOutputtingNode = {};
     stepData.forEach((step, i) => {
       // Populate nodeData
       nodeData.push({ id: i, label: step.class, level: 1 });
 
-      // Populate intermediatary outFileToStepId for edges
-      if (!(step.out in outTargetToStepId)) {
-        outTargetToStepId[step.out] = i;
+      if (!(step.out in outTargetOrPathToStepId)) {
+        // Populate outFileToStepId for intra-stage edges
+        outTargetOrPathToStepId[step.out] = i;
+        // Populate currFileNameToOutputtingNode for inter-stage edges
+        stageData.targets[step.out].forEach(fileName => {
+          const fileNameWithPath = `${stageData.output_dir_s3}/${
+            this.pipelineVersion
+          }/${fileName}`;
+          currFileNameToOutputtingNode[fileNameWithPath] = i;
+        });
       }
     });
 
@@ -89,8 +102,8 @@ class PipelineViz extends React.Component {
     let maxLevel = 1;
     stepData.forEach((step, i) => {
       step.in.forEach(inTarget => {
-        if (inTarget in outTargetToStepId) {
-          const fromId = outTargetToStepId[inTarget];
+        if (inTarget in outTargetOrPathToStepId) {
+          const fromId = outTargetOrPathToStepId[inTarget];
           edgeData.push({ from: fromId, to: i });
 
           nodeData[i].level = Math.max(
@@ -105,144 +118,93 @@ class PipelineViz extends React.Component {
       });
     });
     nodeData[stepData.length + 1].level = maxLevel + 1;
+
+    if (index < this.stageNames.length - 1) {
+      // Create edges to output node if it's output files appear in next stage's inputs.
+      const nextStageData = this.props.stageResults.stages[
+        this.stageNames[index + 1]
+      ];
+      nextStageData.steps.forEach((step, nextNodeId) => {
+        step.in.forEach(inTarget => {
+          nextStageData.targets[inTarget].forEach(fileName => {
+            if (inTarget in nextStageData.given_targets) {
+              const fileNameWithPath = `${
+                nextStageData.given_targets[inTarget].s3_dir
+              }/${fileName}`;
+              if (fileNameWithPath in currFileNameToOutputtingNode) {
+                const currNodeId =
+                  currFileNameToOutputtingNode[fileNameWithPath];
+                edgeData.push({
+                  from: currNodeId,
+                  to: END_NODE_ID,
+                });
+                // TODO(ezhong): Interactions between output of current stage (currNodeId)
+                // and input of next stage (nextNodeId) in visualization should be setup here
+              }
+            }
+          });
+        });
+      });
+    } else {
+      // For final stage, create hidden edges to final node for vertical centering of nodes.
+      stepData.forEach((_, i) => {
+        edgeData.push({
+          from: i,
+          to: END_NODE_ID,
+          color: {
+            color: STAGE_BG_COLOR,
+            inherit: false,
+          },
+          chosen: false,
+        });
+      });
+    }
   }
 
   adjustGraphNodePositions() {
-    let centerDOMCoords;
-    this.stageGraphsInfo.forEach((graphInfo, i) => {
-      const graph = graphInfo.graph;
-      this.adjustStageWidth(graph);
+    let yCenteredDOMPos;
+
+    this.graphs.forEach((graph, i) => {
       if (i == 0) {
-        const canvasCoords = graph.getPositions([START_NODE_ID])[START_NODE_ID];
-        centerDOMCoords = graph.canvasToDOM(canvasCoords);
+        yCenteredDOMPos = graph.getNodePosition(START_NODE_ID).y;
       } else {
-        const canvasYCoord = graph.DOMtoCanvas(centerDOMCoords).y;
-        graph.moveNode(
-          START_NODE_ID,
-          graph.getPositions([START_NODE_ID])[START_NODE_ID].x,
-          canvasYCoord
-        );
-        graph.moveNode(
-          END_NODE_ID,
-          graph.getPositions([END_NODE_ID])[END_NODE_ID].x,
-          canvasYCoord
-        );
+        const xStartNodePos = graph.getNodePosition(START_NODE_ID).x;
+        graph.moveNodeToPosition(START_NODE_ID, xStartNodePos, yCenteredDOMPos);
+
+        const xEndNodePos = graph.getNodePosition(END_NODE_ID).x;
+        graph.moveNodeToPosition(END_NODE_ID, xEndNodePos, yCenteredDOMPos);
       }
     });
-  }
-
-  adjustStageWidth(graph) {
-    // Set initial zoom for width calculation.
-    graph.moveTo({ scale: 1 });
-
-    // Calculate and set new canvas width.
-    const minX = graph.canvasToDOM({
-      x: graph.getBoundingBox(START_NODE_ID).right,
-    }).x;
-    // Use right instead of left to include room for edge arrow tip.
-    const maxX = graph.canvasToDOM({
-      x: graph.getBoundingBox(END_NODE_ID).right,
-    }).x;
-    graph.setSize(maxX - minX + "px", "100%");
-
-    // Reset zoom (which is adjusted in setSize).
-    graph.moveTo({ scale: 1, position: { x: 0, y: 0 } });
   }
 
   drawGraphs() {
     this.modifyStepNames();
     this.stageNames.forEach((stageName, i) => {
-      this.drawStageGraph(
-        this.props.stageResults.stages[stageName],
-        this[`container${i}`],
-        i
-      );
+      this.drawStageGraph(i);
     });
-    this.createInterStageEdges();
     this.adjustGraphNodePositions();
     this.closeNonactiveSteps();
   }
 
   closeNonactiveSteps() {
-    this.stageGraphsInfo.forEach((stageGraphInfo, i) => {
-      const graph = stageGraphInfo.graph;
-      const stageData = this.props.stageResults.stages[this.stageNames[i]];
+    this.stageNames.forEach((stageName, i) => {
+      const graph = this.graphs[i];
+      const stageData = this.props.stageResults.stages[stageName];
       if (!(stageData.job_status == "STARTED")) {
-        graph.once("afterDrawing", () => {
+        graph.afterDrawingOnce(() => {
           this.toggleStage(i);
         });
       }
     });
   }
 
-  createInterStageEdges() {
-    this.stageGraphsInfo.forEach((currStageInfo, i) => {
-      if (i == this.stageGraphsInfo.length - 1) {
-        // Create hidden edges to final node for vertical centering of nodes.
-        currStageInfo.data.nodes.forEach(nodeData => {
-          currStageInfo.data.edges.add({
-            from: nodeData.id,
-            to: END_NODE_ID,
-            color: {
-              color: STAGE_BG_COLOR,
-              inherit: false,
-            },
-            chosen: false,
-          });
-        });
-      } else {
-        const currStageData = this.props.stageResults.stages[
-          this.stageNames[i]
-        ];
+  drawStageGraph(index) {
+    const container = this[`container${index}`];
 
-        const currFileNameToOutputtingNode = {};
-        currStageData.steps.forEach((step, nodeId) => {
-          currStageData.targets[step.out].forEach(fileName => {
-            const fileNameWithPath = `${currStageData.output_dir_s3}/${
-              this.pipelineVersion
-            }/${fileName}`;
-            currFileNameToOutputtingNode[fileNameWithPath] = nodeId;
-          });
-        });
-
-        const nextStageData = this.props.stageResults.stages[
-          this.stageNames[i + 1]
-        ];
-        nextStageData.steps.forEach((step, nextNodeId) => {
-          step.in.forEach(inTarget => {
-            nextStageData.targets[inTarget].forEach(fileName => {
-              if (inTarget in nextStageData.given_targets) {
-                const fileNameWithPath = `${
-                  nextStageData.given_targets[inTarget].s3_dir
-                }/${fileName}`;
-                if (fileNameWithPath in currFileNameToOutputtingNode) {
-                  const currNodeId =
-                    currFileNameToOutputtingNode[fileNameWithPath];
-                  currStageInfo.data.edges.add({
-                    from: currNodeId,
-                    to: END_NODE_ID,
-                  });
-                  // TODO(ezhong): Interactions between output of current stage (currNodeId)
-                  // and input of next stage (nextNodeId) in visualization should be setup here
-                }
-              }
-            });
-          });
-        });
-      }
-    });
-  }
-
-  drawStageGraph(stageData, container, index) {
     const nodeData = [];
     const edgeData = [];
 
-    this.populateNodeAndEdgeData(stageData.steps, nodeData, edgeData);
-
-    const data = {
-      nodes: new DataSet(nodeData),
-      edges: new DataSet(edgeData),
-    };
+    this.populateNodeAndEdgeData(index, nodeData, edgeData);
 
     const options = {
       nodes: {
@@ -307,12 +269,15 @@ class PipelineViz extends React.Component {
       },
     };
 
-    const graph = new Network(container, data, options);
+    const currStageGraph = new NetworkGraph(
+      container,
+      nodeData,
+      edgeData,
+      options
+    );
+    currStageGraph.minimizeWidthGivenScale(1.0);
 
-    this.stageGraphsInfo.push({
-      graph: graph,
-      data: data,
-    });
+    this.graphs.push(currStageGraph);
   }
 
   render() {
