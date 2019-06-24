@@ -104,6 +104,7 @@ class Location < ApplicationRecord
   def self.check_and_fetch_parents(location)
     # Do a fetch for the missing levels
     missing_parents = missing_parent_levels(location)
+    new_parents = []
     missing_parents.each do |level|
       if level == COUNTRY_LEVEL
         success, resp = geosearch_by_levels(location.country_name)
@@ -119,11 +120,15 @@ class Location < ApplicationRecord
       result = LocationHelper.adapt_location_iq_response(resp[0])
       new_location = new_from_params(result)
       new_location.save!
-      new_location.update_attribute("#{level}_id", new_location.id)
-      location["#{level}_id"] = new_location.id
-    end
 
-    # Need to also set the other one's country_id or state_id. Which means doing the country one first.
+      # Set id fields
+      new_location.update("#{level}_id" => new_location.id)
+      location["#{level}_id"] = new_location.id
+      if level == STATE_LEVEL
+        new_location.country_id = location.country_id
+      end
+      new_parents << new_location
+    end
 
     location["#{location.geo_level}_id"] = location.id
     location.save!
