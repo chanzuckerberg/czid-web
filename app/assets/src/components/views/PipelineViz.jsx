@@ -265,7 +265,7 @@ class PipelineViz extends React.Component {
         startEndNodes: {
           widthConstraint: 8,
           heightConstraint: 0,
-          // color: backgroundColor,
+          color: backgroundColor,
           fixed: {
             x: true,
             y: true,
@@ -301,7 +301,7 @@ class PipelineViz extends React.Component {
       },
       interaction: {
         zoomView: false,
-        // dragView: false,
+        dragView: false,
         dragNodes: false,
       },
     };
