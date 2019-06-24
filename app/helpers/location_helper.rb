@@ -94,7 +94,11 @@ module LocationHelper
   end
 
   def self.set_parent_ids(location, parent_level_ids)
-    parent_level_ids.each { |level, id| location["#{level}_id"] = id }
+    parent_level_ids.each do |level, id|
+      if Location::GEO_LEVELS.index(level) <= Location::GEO_LEVELS.index(location.geo_level)
+        location["#{level}_id"] = id
+      end
+    end
     location
   end
 end
