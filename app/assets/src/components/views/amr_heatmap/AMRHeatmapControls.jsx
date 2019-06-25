@@ -4,10 +4,22 @@ import cx from "classnames";
 
 import { Divider } from "~/components/layout";
 import { Dropdown } from "~ui/controls/dropdowns";
+import SequentialLegendVis from "~/components/visualizations/legends/SequentialLegendVis.jsx";
 
 import cs from "./amr_heatmap_view.scss";
 
 export default class AMRHeatmapControls extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      legend: {
+        max: 0,
+        scale: "symlog",
+      },
+    };
+  }
+
   handleOptionChange(control, option) {
     const { selectedOptions, onSelectedOptionsChange } = this.props;
     if (option !== selectedOptions[control]) {
@@ -35,12 +47,30 @@ export default class AMRHeatmapControls extends React.Component {
     return controlsList;
   }
 
+  renderLegend() {
+    const { isDataReady, maxValueForLegend, selectedOptions } = this.props;
+    // Don't render a color legend if the heatmap is still loading
+    if (!isDataReady) {
+      return;
+    }
+    return (
+      <div className="col s3" key="SequentialLegendVis">
+        <SequentialLegendVis
+          min={0}
+          max={maxValueForLegend}
+          scale={selectedOptions.scale}
+        />
+      </div>
+    );
+  }
+
   render() {
     return (
       <div className={cs.menu}>
         <Divider />
         <div className={cx(cs.filterRow, "row")}>
           {this.renderControlDropdowns()}
+          {this.renderLegend()}
         </div>
         <Divider />
       </div>
@@ -64,7 +94,9 @@ AMRHeatmapControls.propTypes = {
   selectedOptions: PropTypes.shape({
     metric: PropTypes.string,
     viewLevel: PropTypes.string,
+    scale: PropTypes.string,
   }),
   onSelectedOptionsChange: PropTypes.func.isRequired,
   isDataReady: PropTypes.bool,
+  maxValueForLegend: PropTypes.number,
 };
