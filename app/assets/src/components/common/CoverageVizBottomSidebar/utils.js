@@ -24,7 +24,7 @@ export const getHistogramTooltipData = memoize(
           ["Coverage Depth", `${coverageObj[1]}x`],
           ["Coverage Breadth", formatPercent(coverageObj[2])],
           ["Overlapping Contigs", coverageObj[3]],
-          ["Overlapping Reads", coverageObj[4]],
+          ["Overlapping Loose Reads", coverageObj[4]],
         ],
       },
     ];
@@ -51,14 +51,14 @@ export const getGenomeVizTooltipData = memoize((accessionData, dataIndex) => {
     name = "Aggregated Contigs and Reads";
     counts = [
       ["# Contigs", numContigs],
-      ["# Reads", numReads],
+      ["# Loose Reads", numReads],
       ["Contig Read Count", hitObj[2]],
     ];
   } else if (numReads > 1) {
-    name = "Aggregated Reads";
-    counts = [["# Reads", numReads]];
+    name = "Aggregated Loose Reads";
+    counts = [["# Loose Reads", numReads]];
   } else if (numReads == 1) {
-    name = "Read";
+    name = "Loose Read";
   } else if (numContigs > 1) {
     name = "Aggregated Contigs";
     counts = [["# Contigs", numContigs], ["Contig Read Count", hitObj[2]]];
