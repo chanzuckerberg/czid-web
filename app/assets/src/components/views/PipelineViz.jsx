@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import ReactPanZoom from "@ajainarayanan/react-pan-zoom";
 
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
-import NetworkGraph from "~/components/visualizations/NetworkGraph.js";
+import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import cs from "./pipeline_viz.scss";
 
 const START_NODE_ID = -1;
