@@ -41,7 +41,8 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   componentDidMount() {
-    this.requestAMRCountsData(this.props.sampleIds);
+    const { sampleIds } = this.props;
+    this.requestAMRCountsData(sampleIds);
   }
 
   async requestAMRCountsData(sampleIds) {
@@ -49,10 +50,12 @@ export default class AMRHeatmapView extends React.Component {
     const samplesWithAMRCounts = rawSampleData.filter(
       sampleData => sampleData.error === ""
     );
+    const maxValues = this.findMaxValues(samplesWithAMRCounts);
     this.setState({
       rawSampleData,
       samplesWithAMRCounts,
       sampleIds,
+      maxValues,
       loading: false,
     });
   }
@@ -67,21 +70,29 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   updateOptions = options => {
-    let newOptions = Object.assign({}, this.state.selectedOptions, options);
+    const { selectedOptions } = this.state;
+    let newOptions = Object.assign({}, selectedOptions, options);
     this.setState({
       selectedOptions: newOptions,
     });
   };
 
-  updateMaxValue = maxValue => {
-    if (this.state.maxValue !== maxValue) {
-      this.setState({
-        maxValue,
-      });
-    }
-  };
+  findMaxValues(samplesWithAMRCounts) {
+    const maxValues = samplesWithAMRCounts.reduce(
+      (accum, currentSample) => {
+        currentSample.amr_counts.forEach(amrCount => {
+          accum.depth = Math.max(accum.depth, amrCount.depth);
+          accum.coverage = Math.max(accum.coverage, amrCount.coverage);
+        });
+        return accum;
+      },
+      { depth: 0, coverage: 0 }
+    );
+    return maxValues;
+  }
 
   renderHeader() {
+    const { sampleIds } = this.props;
     return (
       <ViewHeader className={cs.viewHeader}>
         <ViewHeader.Content>
@@ -89,9 +100,7 @@ export default class AMRHeatmapView extends React.Component {
             Antimicrobial Resistance Heatmap
           </ViewHeader.Pretitle>
           <ViewHeader.Title
-            label={`Comparing ${
-              this.props.sampleIds ? this.props.sampleIds.length : ""
-            } Samples`}
+            label={`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
           />
         </ViewHeader.Content>
       </ViewHeader>
@@ -99,19 +108,22 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   renderControls() {
+    const { selectedOptions, loading, maxValues } = this.state;
+    const maxValueForLegend = maxValues ? maxValues[selectedOptions.metric] : 0;
     return (
       <AMRHeatmapControls
         controls={this.assembleControlOptions()}
-        selectedOptions={this.state.selectedOptions}
+        selectedOptions={selectedOptions}
         onSelectedOptionsChange={this.updateOptions}
-        isDataReady={!this.state.loading}
-        maxValueForLegend={this.state.maxValue ? this.state.maxValue : 0}
+        isDataReady={!loading}
+        maxValueForLegend={maxValueForLegend}
       />
     );
   }
 
   renderVisualization() {
-    if (this.state.loading) {
+    const { loading, samplesWithAMRCounts, selectedOptions } = this.state;
+    if (loading) {
       return (
         <p className={cs.loadingIndicator}>
           <LoadingIcon className={cs.loadingIndicator} />
@@ -123,9 +135,9 @@ export default class AMRHeatmapView extends React.Component {
       <div className="row visualization-content">
         <ErrorBoundary>
           <AMRHeatmapVis
-            maxValueUpdater={this.updateMaxValue}
-            samplesWithAMRCounts={this.state.samplesWithAMRCounts}
-            selectedOptions={this.state.selectedOptions}
+            // maxValueUpdater={this.updateMaxValue}
+            samplesWithAMRCounts={samplesWithAMRCounts}
+            selectedOptions={selectedOptions}
           />
         </ErrorBoundary>
       </div>

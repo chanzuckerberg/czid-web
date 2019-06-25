@@ -16,12 +16,11 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   componentDidMount() {
-    const samplesWithAMRCounts = this.props.samplesWithAMRCounts;
+    const { samplesWithAMRCounts } = this.props;
     const [sampleLabels, geneLabels, alleleLabels] = this.extractLabels(
       samplesWithAMRCounts
     );
     this.setState({
-      samplesWithAMRCounts,
       sampleLabels,
       geneLabels,
       alleleLabels,
@@ -57,54 +56,52 @@ export default class AMRHeatmapVis extends React.Component {
   //*** (i.e. after the component has requested AMR data and updated state) ***
 
   getHeatmapLabels() {
-    const viewLevel = this.props.selectedOptions.viewLevel;
-    switch (viewLevel) {
+    const { selectedOptions } = this.props;
+    const { alleleLabels, geneLabels } = this.state;
+    switch (selectedOptions.viewLevel) {
       case VIEW_LEVEL_ALLELES: {
-        return this.state.alleleLabels;
+        return alleleLabels;
       }
       case VIEW_LEVEL_GENES: {
-        return this.state.geneLabels;
+        return geneLabels;
       }
     }
   }
 
   computeHeatmapValues(rows) {
-    const viewLevel = this.props.selectedOptions.viewLevel;
-    const metric = this.props.selectedOptions.metric;
-    const sampleData = this.state.samplesWithAMRCounts;
+    const { selectedOptions, samplesWithAMRCounts } = this.props;
     const heatmapValues = [];
-    let maxValue = 0;
     rows.forEach(label => {
       const rowValues = [];
       const rowName = label.label;
-      sampleData.forEach(sample => {
+      samplesWithAMRCounts.forEach(sample => {
         const amrCountForRow = sample.amr_counts.find(
-          amrCount => amrCount[viewLevel] === rowName
+          amrCount => amrCount[selectedOptions.viewLevel] === rowName
         );
         if (amrCountForRow != undefined) {
-          rowValues.push(amrCountForRow[metric]);
-          maxValue = Math.max(maxValue, amrCountForRow[metric]);
+          rowValues.push(amrCountForRow[selectedOptions.metric]);
         } else {
           rowValues.push(0);
         }
       });
       heatmapValues.push(rowValues);
     });
-    return [heatmapValues, maxValue];
+    return heatmapValues;
   }
 
   updateHeatmap() {
+    const { selectedOptions } = this.props;
+    const { sampleLabels } = this.state;
     const rows = this.getHeatmapLabels();
-    const columns = this.state.sampleLabels;
-    const [values, maxValue] = this.computeHeatmapValues(rows);
-    this.props.maxValueUpdater(maxValue);
-    if (this.heatmap != null) {
+    const columns = sampleLabels;
+    const values = this.computeHeatmapValues(rows);
+    if (this.heatmap !== null) {
       this.heatmap.updateData({
         rowLabels: rows,
         columnLabels: columns,
         values: values,
       });
-      this.heatmap.updateScale(this.props.selectedOptions.scale);
+      this.heatmap.updateScale(selectedOptions.scale);
     } else {
       this.initializeHeatmap(rows, columns, values);
     }
@@ -116,6 +113,7 @@ export default class AMRHeatmapVis extends React.Component {
   };
 
   initializeHeatmap(rows, columns, values) {
+    const { selectedOptions } = this.props;
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       // Data for the Heatmap
@@ -129,7 +127,7 @@ export default class AMRHeatmapVis extends React.Component {
       },
       // Custom options:
       {
-        scale: this.props.selectedOptions.scale,
+        scale: selectedOptions.scale,
         scaleMin: 0,
         customColorCallback: this.colorFilter,
       }
@@ -152,7 +150,6 @@ export default class AMRHeatmapVis extends React.Component {
 }
 
 AMRHeatmapVis.propTypes = {
-  maxValueUpdater: PropTypes.func,
   samplesWithAMRCounts: PropTypes.arrayOf(
     PropTypes.shape({
       sample_name: PropTypes.string,
