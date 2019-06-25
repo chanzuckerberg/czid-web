@@ -153,7 +153,14 @@ class Location < ApplicationRecord
       new_location.save!
     end
 
+<<<<<<< HEAD
     set_parent_ids(location, present_parent_level_ids)
+=======
+    location = set_parent_ids(location, present_parent_level_ids)
+    location.save!
+
+    location
+>>>>>>> Finish main tests
   end
 
   # Identify missing Country or State location levels. Even for levels below State, clustering is
