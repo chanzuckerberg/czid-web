@@ -116,6 +116,7 @@
     "tar": "^4.4.8",
     "text-width": "^1.2.0",
     "url-search-params-polyfill": "^3.0.0",
+    "vis": "^4.21.0",
     "visjs-network": "^4.24.7",
     "webpack-node-externals": "^1.7.2"
   },
