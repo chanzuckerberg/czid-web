@@ -2,10 +2,12 @@ module LocationHelper
   # Adapter function to munge responses from Location IQ API to our format
   def self.adapt_location_iq_response(body)
     address = body["address"]
+
     country_key = Location::COUNTRY_NAMES.find { |k| address.include?(k) }
     state_key = Location::STATE_NAMES.find { |k| address.include?(k) }
     subdivision_key = Location::SUBDIVISION_NAMES.find { |k| address.include?(k) }
     city_key = Location::CITY_NAMES.find { |k| address.key?(k) }
+
     geo_level = if city_key
                   Location::CITY_LEVEL
                 elsif subdivision_key

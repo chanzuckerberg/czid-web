@@ -119,10 +119,11 @@ class Location < ApplicationRecord
 
   # Note: We are clustering at Country+State for now so Subdivision+City ids may be nil.
   def self.check_and_fetch_parents(location)
-    # Do a fetch for the missing levels
-    present_parent_ids, missing_parents = present_and_missing_parents(location)
-    present_parent_ids[location.geo_level] = location.id
-    missing_parents.each do |level|
+    present_parent_level_ids, missing_parent_levels = present_and_missing_parents(location)
+    present_parent_level_ids[location.geo_level] = location.id
+
+    missing_parent_levels.each do |level|
+      # Geosearch for the missing parents
       if level == COUNTRY_LEVEL
         success, resp = geosearch_by_levels(location.country_name)
       else
@@ -139,12 +140,12 @@ class Location < ApplicationRecord
       new_location.save!
 
       # Set id fields
-      present_parent_ids[level] = new_location.id
-      new_location = LocationHelper.set_parent_ids(new_location, present_parent_ids)
+      present_parent_level_ids[level] = new_location.id
+      new_location = LocationHelper.set_parent_ids(new_location, present_parent_level_ids)
       new_location.save!
     end
 
-    location = LocationHelper.set_parent_ids(location, present_parent_ids)
+    location = LocationHelper.set_parent_ids(location, present_parent_level_ids)
     location.save!
   end
 
@@ -153,7 +154,7 @@ class Location < ApplicationRecord
   def self.present_and_missing_parents(location)
     return [] if location.geo_level == COUNTRY_LEVEL
 
-    # Find if the country or state level is missing
+    # Find if the Country or State level is missing
     country_match = Location.where(
       geo_level: COUNTRY_LEVEL,
       country_name: location.country_name
@@ -173,7 +174,7 @@ class Location < ApplicationRecord
       missing_parent_levels << STATE_LEVEL
     end
 
-    present_parent_ids = present_parents.map { |p| [p.geo_level, p.id] }.to_h
-    [present_parent_ids, missing_parent_levels]
+    present_parent_level_ids = present_parents.map { |p| [p.geo_level, p.id] }.to_h
+    [present_parent_level_ids, missing_parent_levels]
   end
 end
