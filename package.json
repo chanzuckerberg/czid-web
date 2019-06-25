@@ -22,6 +22,8 @@
     ]
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-es2015": "^7.0.0-beta.53",
     "airbnb-prop-types": "^2.10.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",

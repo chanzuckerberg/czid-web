@@ -1,31 +1,25 @@
-const path = require("path");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+"use strict";
+var webpack = require("webpack");
 
-// modules that are not compatible with IE11
-const includedNodeModules = ["query-string", "strict-uri-encode"];
-
-const config = {
-  entry: `${path.resolve(__dirname, "app/assets/src/")}/index.jsx`,
-  output: {
-    path: path.resolve(__dirname, "app/assets/"),
-    filename: "dist/bundle.min.js",
+var config = {
+  context: __dirname + "/src", // `__dirname` is root of project and `src` is source
+  entry: {
+    app: "./app.js",
   },
-  resolve: {
-    extensions: [".js", ".jsx"],
-    alias: {
-      "~": path.resolve(__dirname, "app/assets/src"),
-      "~ui": path.resolve(__dirname, "app/assets/src/components/ui"),
-      "~utils": path.resolve(__dirname, "app/assets/src/components/utils"),
-      styles: path.resolve(__dirname, "app/assets/src/styles"),
-    },
+  output: {
+    path: __dirname + "/dist", // `dist` is the destination
+    filename: "bundle.js",
+    publicPath: "/",
   },
   plugins: [
-    new MiniCssExtractPlugin({
-      filename: "dist/bundle.min.css",
-    }),
+    /* prevent that webpack loads momentjs-support for all languages. Only DE and EN.
+     * see http://stackoverflow.com/questions/25384360/how-to-prevent-moment-js-from-loading-locales-with-webpack
+     */
+    new webpack.ContextReplacementPlugin(
+      /moment[\\\/]locale$/,
+      /^\.\/(de|en)$/
+    ),
   ],
-  devtool: "source-map",
-  target: "web",
   module: {
     rules: [
       {
@@ -49,99 +43,43 @@ const config = {
         },
       },
       {
-        test: /.js$/,
-        exclude: new RegExp(
-          `/node_modules/(?!(${includedNodeModules.join("|")})/).*/`
-        ),
-        loader: "babel-loader",
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
       },
       {
-        test: /.jsx$/,
-        exclude: new RegExp(
-          `/node_modules/(?!(${includedNodeModules.join("|")})/).*/`
-        ),
-        loader: "babel-loader",
-      },
-      {
-        // Use CSS modules for new files.
-        test: /\.(sa|sc|c)ss$/,
-        exclude: [
-          path.resolve(__dirname, "node_modules/"),
-          path.resolve(__dirname, "app/assets/src/styles"),
-          path.resolve(__dirname, "app/assets/src/loader.scss"),
-        ],
-        use: [
-          MiniCssExtractPlugin.loader,
+        test: /.*\.png$/i,
+        loaders: [
+          "file-loader",
           {
-            loader: "css-loader",
-            options: {
-              minimize: true,
-              sourceMap: true,
-              modules: true,
-              localIdentName: "[local]-[hash:base64:5]",
-            },
-          },
-          {
-            loader: "sass-loader",
-            options: {
-              minimize: true,
-              sourceMap: true,
+            loader: "image-webpack-loader",
+            query: {
+              progressive: true,
+              pngquant: {
+                quality: "65-90",
+                speed: 4,
+              },
             },
           },
         ],
-      },
-      {
-        // Sass / Scss loader for legacy files in assets/src/styles.
-        test: /\.(sa|sc|c)ss$/,
-        include: [
-          path.resolve(__dirname, "node_modules/"),
-          path.resolve(__dirname, "app/assets/src/styles"),
-          path.resolve(__dirname, "app/assets/src/loader.scss"),
-        ],
-        use: [
-          MiniCssExtractPlugin.loader,
-          {
-            loader: "css-loader",
-            options: {
-              minimize: true,
-              sourceMap: true,
-            },
-          },
-          {
-            loader: "sass-loader",
-            options: {
-              minimize: true,
-              sourceMap: true,
-            },
-          },
-        ],
-      },
-      {
-        test: /\.(png|eot|ttf|svg)$/,
-        loader: "url-loader",
-        options: {
-          limit: 10000,
-          name: "fonts/[name].[ext]",
-          mimetype: "application/font-woff",
-          publicPath: url => {
-            return `/assets/${url.replace(/fonts/, "")}`;
-          },
-        },
-      },
-      {
-        test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-        loader: "url-loader",
-        options: {
-          limit: 10000,
-          name: "fonts/[name].[ext]",
-          mimetype: "application/font-woff",
-          publicPath: url => {
-            return `/assets/${url.replace(/fonts/, "")}`;
-          },
-        },
       },
     ],
   },
+  //To run development server
+  devServer: {
+    contentBase: __dirname + "/src",
+  },
+
+  devtool: "eval-source-map", // Default development sourcemap
 };
+
+// Check if build is running in production mode, then change the sourcemap type
+if (process.env.NODE_ENV === "production") {
+  config.devtool = "source-map";
+
+  // Can do more here
+  // JSUglify plugin
+  // Offline plugin
+  // Bundle styles seperatly using plugins etc,
+}
 
 module.exports = config;
