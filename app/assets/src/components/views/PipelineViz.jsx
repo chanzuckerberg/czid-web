@@ -54,17 +54,10 @@ class PipelineViz extends React.Component {
     const stagesWithModifiedNames = mapValues(stageData => {
       const modifiedStageData = Object.assign({}, stageData);
       modifiedStageData.steps = modifiedStageData.steps.map(step => {
-        const modifiedStep = Object.assign({}, step);
-        if (modifiedStep.class.substring(0, 12) == "PipelineStep") {
-          modifiedStep.class = modifiedStep.class.substring(12);
-        }
-        if (modifiedStep.class.substring(0, 3) == "Run") {
-          modifiedStep.class = modifiedStep.class.substring(3);
-        }
-        if (modifiedStep.class.substring(0, 8) == "Generate") {
-          modifiedStep.class = modifiedStep.class.substring(8);
-        }
-        return modifiedStep;
+        return {
+          ...step,
+          class: step.class.replace(/^(PipelineStep(Run|Generate)?)/, ""),
+        };
       });
       return modifiedStageData;
     }, stageResults.stages);
