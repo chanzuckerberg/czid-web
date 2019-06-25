@@ -141,11 +141,11 @@ class Location < ApplicationRecord
 
       # Set id fields
       present_parent_level_ids[level] = new_location.id
-      new_location = LocationHelper.set_parent_ids(new_location, present_parent_level_ids)
+      new_location = set_parent_ids(new_location, present_parent_level_ids)
       new_location.save!
     end
 
-    location = LocationHelper.set_parent_ids(location, present_parent_level_ids)
+    location = set_parent_ids(location, present_parent_level_ids)
     location.save!
   end
 
@@ -176,5 +176,14 @@ class Location < ApplicationRecord
 
     present_parent_level_ids = present_parents.map { |p| [p.geo_level, p.id] }.to_h
     [present_parent_level_ids, missing_parent_levels]
+  end
+
+  def self.set_parent_ids(location, parent_level_ids)
+    parent_level_ids.each do |level, id|
+      if Location::GEO_LEVELS.index(level) <= Location::GEO_LEVELS.index(location.geo_level)
+        location["#{level}_id"] = id
+      end
+    end
+    location
   end
 end

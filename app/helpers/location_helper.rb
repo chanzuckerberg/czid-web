@@ -103,13 +103,4 @@ module LocationHelper
     samples.where(metadata: { string_validated_value: query })
            .or(samples.where(metadata: { locations: { name: query } }))
   end
-
-  def self.set_parent_ids(location, parent_level_ids)
-    parent_level_ids.each do |level, id|
-      if Location::GEO_LEVELS.index(level) <= Location::GEO_LEVELS.index(location.geo_level)
-        location["#{level}_id"] = id
-      end
-    end
-    location
-  end
 end
