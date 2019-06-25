@@ -29,7 +29,7 @@
 
   .tabs {
     margin: 15px 10px 5px;
-    flex: 1 0 30px;
+    flex: 0 0 auto;
 
     .tabLabel {
       @include font-header-xs;
