@@ -38,7 +38,7 @@ RSpec.describe SamplesController, type: :controller do
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
 
-        get :stage_results, params: { id: sample.id }
+        get :stage_results, params: { format: "json", id: sample.id }
 
         json_response = JSON.parse(response.body)["pipeline_stage_results"]
         expect(json_response).to include_json(expected_stage_results)
@@ -87,7 +87,7 @@ RSpec.describe SamplesController, type: :controller do
         expected_stage_results_no_experimental = expected_stage_results.clone()
         expected_stage_results_no_experimental["stages"].delete "Experimental"
 
-        get :stage_results, params: { id: sample.id }
+        get :stage_results, params: { format: "json", id: sample.id }
 
         json_response = JSON.parse(response.body)["pipeline_stage_results"]
         expect(json_response).to include_json(expected_stage_results_no_experimental)
@@ -106,7 +106,7 @@ RSpec.describe SamplesController, type: :controller do
         expected_stage_results_no_experimental = expected_stage_results.clone()
         expected_stage_results_no_experimental["stages"].delete "Experimental"
 
-        get :stage_results, params: { id: sample.id }
+        get :stage_results, params: { format: "json", id: sample.id }
 
         json_response = JSON.parse(response.body)["pipeline_stage_results"]
         expect(json_response).to include_json(expected_stage_results_no_experimental)
