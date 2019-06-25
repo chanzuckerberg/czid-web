@@ -20,6 +20,20 @@ export default class AMRHeatmapControls extends React.Component {
     };
   }
 
+  componentDidUpdate() {
+    if (
+      this.props.maxValueForLegend !== this.state.legend.max ||
+      this.props.selectedOptions.scale !== this.state.legend.scale
+    ) {
+      this.setState({
+        legend: {
+          max: this.props.maxValueForLegend,
+          scale: this.props.selectedOptions.scale,
+        },
+      });
+    }
+  }
+
   handleOptionChange(control, option) {
     const { selectedOptions, onSelectedOptionsChange } = this.props;
     if (option !== selectedOptions[control]) {
@@ -59,12 +73,6 @@ export default class AMRHeatmapControls extends React.Component {
       this.props.maxValueForLegend !== this.state.legend.max ||
       this.props.selectedOptions.scale !== this.state.legend.scale
     ) {
-      this.setState({
-        legend: {
-          max: this.props.maxValueForLegend,
-          scale: this.props.selectedOptions.scale,
-        },
-      });
       return;
     }
     return (
