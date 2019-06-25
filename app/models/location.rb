@@ -100,6 +100,10 @@ class Location < ApplicationRecord
   def self.check_and_restrict_specificity(location, host_genome_name)
     # We don't want Human locations with city
     if host_genome_name == "Human" && location.city_name.present?
+      # Return our existing entry if found
+      existing = Location.find_by(country_name: location.country_name, state_name: location.state_name, subdivision_name: location.subdivision_name, city_name: "")
+      return existing if existing
+
       # Redo the search for just the subdivision/state/country
       success, resp = geosearch_by_levels(location.country_name, location.state_name, location.subdivision_name)
       unless success && !resp.empty?
