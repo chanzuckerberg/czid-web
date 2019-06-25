@@ -31,3 +31,24 @@ sf_county:
   state_name: "California"
   subdivision_name: "San Francisco City and County"
   locationiq_id: 214379825
+
+bangladesh:
+  name: "Bangladesh"
+  geo_level: "country"
+  country_name: "Bangladesh"
+  locationiq_id: 214341060
+
+rangpur:
+  name: "Rangpur Division, Bangladesh"
+  geo_level: "state"
+  country_name: "Bangladesh"
+  state_name: "Rangpur Division"
+  locationiq_id: 214799782
+
+columbus:
+  name: "Columbus, Franklin County, Ohio, USA"
+  geo_level: "city"
+  country_name: "USA"
+  state_name: "Ohio"
+  subdivision_name: "Franklin County"
+  city_name: "Columbus"

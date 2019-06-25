@@ -149,4 +149,71 @@ class LocationTest < ActiveSupport::TestCase
       assert_equal original, new_location
     end
   end
+
+  test "should fetch a missing Country parent level for a location" do
+    original = locations(:ucsf)
+    api_response = [true, LocationTestHelper::API_GEOSEARCH_USA_RESPONSE]
+    mock_geosearch = MiniTest::Mock.new
+    mock_geosearch.expect(:call, api_response, [original.country_name])
+    mock_new_from_params = MiniTest::Mock.new
+    mock_new_from_params.expect(:call, locations(:bangladesh), [Hash])
+
+    Location.stub :geosearch_by_levels, mock_geosearch do
+      Location.stub :new_from_params, mock_new_from_params do
+        result = Location.check_and_fetch_parents(original)
+        assert_equal locations(:bangladesh).id, result.country_id
+        assert_equal locations(:california).id, result.state_id
+        assert_nil result.subdivision_id
+        assert_equal original.id, result.city_id
+      end
+    end
+
+    assert mock_geosearch.verify
+    assert mock_new_from_params.verify
+  end
+
+  test "should fetch missing Country and State parent levels for a location" do
+    original = locations(:columbus)
+    api_response_usa = [true, LocationTestHelper::API_GEOSEARCH_USA_RESPONSE]
+    api_response_ca = [true, LocationTestHelper::API_GEOSEARCH_CALIFORNIA_RESPONSE]
+    mock_geosearch = MiniTest::Mock.new
+    mock_geosearch.expect(:call, api_response_usa, [original.country_name])
+    mock_geosearch.expect(:call, api_response_ca, [original.country_name, original.state_name])
+    mock_new_from_params = MiniTest::Mock.new
+    mock_new_from_params.expect(:call, locations(:bangladesh), [Hash])
+    mock_new_from_params.expect(:call, locations(:california), [Hash])
+
+    Location.stub :geosearch_by_levels, mock_geosearch do
+      Location.stub :new_from_params, mock_new_from_params do
+        result = Location.check_and_fetch_parents(original)
+        assert_equal locations(:bangladesh).id, result.country_id
+        assert_equal locations(:california).id, result.state_id
+        assert_nil result.subdivision_id
+        assert_equal original.id, result.city_id
+      end
+    end
+
+    assert mock_geosearch.verify
+    assert mock_new_from_params.verify
+  end
+
+  test "should check parent levels and not geosearch unnecessarily" do
+    original = locations(:rangpur)
+    mock_geosearch = -> { raise "should not call geosearch" }
+
+    Location.stub :geosearch_by_levels, mock_geosearch do
+      result = Location.check_and_fetch_parents(original)
+      assert_equal locations(:bangladesh).id, result.country_id
+      assert_equal locations(:rangpur).id, result.state_id
+      assert_nil result.subdivision_id
+      assert_nil result.city_id
+    end
+  end
+
+  test "should identify present and missing geographical parent levels" do
+    original = locations(:ucsf)
+    present_parent_level_ids, missing_parent_levels = Location.present_and_missing_parents(original)
+    assert_equal ["state"], present_parent_level_ids.keys
+    assert_equal ["country"], missing_parent_levels
+  end
 end

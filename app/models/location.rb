@@ -147,6 +147,8 @@ class Location < ApplicationRecord
 
     location = set_parent_ids(location, present_parent_level_ids)
     location.save!
+
+    location
   end
 
   # Identify missing Country or State location levels. Even for levels below State, clustering is
@@ -166,6 +168,7 @@ class Location < ApplicationRecord
     )
     present_parents = country_match.or(state_match)
     present_parent_levels = present_parents.pluck(:geo_level)
+
     missing_parent_levels = []
     if !present_parent_levels.include?(COUNTRY_LEVEL) && location.country_name.present?
       missing_parent_levels << COUNTRY_LEVEL
