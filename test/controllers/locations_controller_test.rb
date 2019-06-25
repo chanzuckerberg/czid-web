@@ -54,7 +54,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     results = JSON.parse(@response.body)
-    assert_equal 2, results.count
+    assert_equal 3, results.count
     assert_includes @response.body, locations(:swamp).name
   end
 
@@ -79,6 +79,18 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     expected_object = { "id" => loc.id, "name" => loc.name, "geo_level" => loc.geo_level, "country_name" => loc.country_name, "state_name" => loc.state_name, "subdivision_name" => loc.subdivision_name, "city_name" => loc.city_name, "lat" => loc.lat.to_s, "lng" => loc.lng.to_s, "country_id" => nil, "state_id" => nil, "subdivision_id" => nil, "city_id" => nil, "sample_ids" => [samples(:joe_project_sample_mosquito).id, samples(:joe_sample).id], "project_ids" => [projects(:joe_project).id] }
 
     assert_equal actual_object, expected_object
+  end
+
+  test "user can load location data including Country and State parent levels" do
+    post user_session_path, params: @user_params
+    get sample_locations_locations_path, as: :json
+    assert_response :success
+
+    results = JSON.parse(@response.body)
+    loc = locations(:kurigram)
+    assert_includes results.keys, loc.id.to_s
+    assert_includes results.keys, loc.country_id.to_s
+    assert_includes results.keys, loc.state_id.to_s
   end
 
   test "disallowed users cannot access sample_locations" do
