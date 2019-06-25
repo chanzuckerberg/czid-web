@@ -6,11 +6,12 @@
   width: 300px;
   overflow-y: scroll;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 
   .container {
     display: flex;
     flex-direction: column;
-    height: 100%;
     flex: 1 0 auto;
 
     .table {
@@ -28,6 +29,7 @@
 
   .tabs {
     margin: 15px 10px 5px;
+    flex: 0 0 auto;
 
     .tabLabel {
       @include font-header-xs;

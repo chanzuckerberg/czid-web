@@ -54,8 +54,9 @@ const METRIC_COLUMNS = [
     },
     {
       key: "alignedReads",
-      name: "Aligned Reads",
-      tooltip: "Number of reads for which this accession was the best match.",
+      name: "Aligned Loose Reads",
+      tooltip:
+        "Number of reads for which this accession was the best match. Only includes reads which did not assemble into a contig.",
     },
   ],
   [
