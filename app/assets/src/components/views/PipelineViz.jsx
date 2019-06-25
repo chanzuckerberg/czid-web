@@ -1,5 +1,5 @@
 import React from "react";
-import { forEach } from "lodash";
+import { mapValues } from "lodash/fp";
 import PropTypes from "prop-types";
 import ReactPanZoom from "@ajainarayanan/react-pan-zoom";
 
@@ -14,35 +14,32 @@ class PipelineViz extends React.Component {
   constructor(props) {
     super(props);
     this.pipelineVersion = this.props.stageResults.pipeline_version;
-    this.stageGraphsInfo = [];
+    this.stagesData = this.stagesDataWithModifiedStepNames();
     this.graphs = [];
+    this.graphContainers = [];
 
     this.stageNames = [
       "Host Filtering",
       "GSNAPL/RAPSEARCH alignment",
       "Post Processing",
+      ...(props.admin ? ["Experimental"] : []),
     ];
-    if (this.props.admin) {
-      this.stageNames.push("Experimental");
-    }
 
     this.state = {
       stagesOpened: [true, true, true, true],
       zoom: 1,
     };
-
-    this.handleMouseWheelZoom = this.handleMouseWheelZoom.bind(this);
   }
 
   componentDidMount() {
     this.drawGraphs();
   }
 
-  handleMouseWheelZoom(e) {
+  handleMouseWheelZoom = e => {
     const { zoomChangeInterval } = this.props;
     const zoomChange = (e.deltaY < 0 ? 1 : -1) * zoomChangeInterval;
     this.setState({ zoom: this.state.zoom + zoomChange });
-  }
+  };
 
   toggleStage(index) {
     const updatedStagesOpened = [...this.state.stagesOpened];
@@ -50,28 +47,32 @@ class PipelineViz extends React.Component {
     this.setState({ stagesOpened: updatedStagesOpened });
   }
 
-  modifyStepNames() {
+  stagesDataWithModifiedStepNames() {
     // Strips 'PipelineStep[Run/Generate]' from front of each step name.
     // TODO(ezhong): Consider adding 'name' field to dag_json later.
     const { stageResults } = this.props;
-    forEach(stageResults.stages, (stageData, _) => {
-      stageData.steps.forEach(step => {
-        if (step.class.substring(0, 12) == "PipelineStep") {
-          step.class = step.class.substring(12);
+    const stagesWithModifiedNames = mapValues(stageData => {
+      const modifiedStageData = Object.assign({}, stageData);
+      modifiedStageData.steps = modifiedStageData.steps.map(step => {
+        const modifiedStep = Object.assign({}, step);
+        if (modifiedStep.class.substring(0, 12) == "PipelineStep") {
+          modifiedStep.class = modifiedStep.class.substring(12);
         }
-        if (step.class.substring(0, 3) == "Run") {
-          step.class = step.class.substring(3);
+        if (modifiedStep.class.substring(0, 3) == "Run") {
+          modifiedStep.class = modifiedStep.class.substring(3);
         }
-        if (step.class.substring(0, 8) == "Generate") {
-          step.class = step.class.substring(8);
+        if (modifiedStep.class.substring(0, 8) == "Generate") {
+          modifiedStep.class = modifiedStep.class.substring(8);
         }
+        return modifiedStep;
       });
-    });
+      return modifiedStageData;
+    }, stageResults.stages);
+    return stagesWithModifiedNames;
   }
 
   generateNodeData(index, edgeData) {
-    const { stageResults } = this.props;
-    const stageData = stageResults.stages[this.stageNames[index]];
+    const stageData = this.stagesData[this.stageNames[index]];
     const stepData = stageData.steps;
 
     const nodeData = [];
@@ -112,8 +113,7 @@ class PipelineViz extends React.Component {
   }
 
   generateIntraEdgeData(index) {
-    const { stageResults } = this.props;
-    const stageData = stageResults.stages[this.stageNames[index]];
+    const stageData = this.stagesData[this.stageNames[index]];
     const stepData = stageData.steps;
 
     const outTargetToStepId = {};
@@ -140,15 +140,14 @@ class PipelineViz extends React.Component {
   }
 
   generateInterEdgeData(index) {
-    const { stageResults, backgroundColor } = this.props;
-    const stageData = stageResults.stages[this.stageNames[index]];
+    const { backgroundColor } = this.props;
+    const stageData = this.stagesData[this.stageNames[index]];
     const stepData = stageData.steps;
 
-    const interEdgeData = [];
     if (index == this.stageNames.length - 1) {
       // For final stage, create hidden edges to final node for vertical centering of nodes.
-      stepData.forEach((_, i) => {
-        interEdgeData.push({
+      return stepData.map((_, i) => {
+        return {
           from: i,
           to: END_NODE_ID,
           color: {
@@ -156,7 +155,7 @@ class PipelineViz extends React.Component {
             inherit: false,
           },
           chosen: false,
-        });
+        };
       });
     } else {
       // Create edges to output node if it's output files appear in next stage's inputs.
@@ -170,7 +169,9 @@ class PipelineViz extends React.Component {
         });
       });
 
-      const nextStageData = stageResults.stages[this.stageNames[index + 1]];
+      const interEdgeData = [];
+
+      const nextStageData = this.stagesData[this.stageNames[index + 1]];
       nextStageData.steps.forEach((step, nextNodeId) => {
         step.in.forEach(inTarget => {
           nextStageData.targets[inTarget].forEach(fileName => {
@@ -192,8 +193,9 @@ class PipelineViz extends React.Component {
           });
         });
       });
+
+      return interEdgeData;
     }
-    return interEdgeData;
   }
 
   adjustGraphNodePositions() {
@@ -213,8 +215,7 @@ class PipelineViz extends React.Component {
   }
 
   drawGraphs() {
-    this.modifyStepNames();
-    this.stageNames.forEach((stageName, i) => {
+    this.stageNames.forEach((_, i) => {
       this.drawStageGraph(i);
     });
     this.adjustGraphNodePositions();
@@ -222,10 +223,9 @@ class PipelineViz extends React.Component {
   }
 
   closeNonactiveSteps() {
-    const { stageResults } = this.props;
     this.stageNames.forEach((stageName, i) => {
       const graph = this.graphs[i];
-      const stageData = stageResults.stages[stageName];
+      const stageData = this.stagesData[stageName];
       if (stageData.job_status !== "STARTED") {
         graph.afterDrawingOnce(() => {
           this.toggleStage(i);
@@ -236,7 +236,7 @@ class PipelineViz extends React.Component {
 
   drawStageGraph(index) {
     const { nodeColor, backgroundColor, edgeColor } = this.props;
-    const container = this[`container-${index}`];
+    const container = this.graphContainers[index];
 
     const edgeData = this.generateIntraEdgeData(index).concat(
       this.generateInterEdgeData(index)
@@ -318,12 +318,10 @@ class PipelineViz extends React.Component {
   }
 
   render() {
-    const stageContainers = [];
-
-    this.stageNames.forEach((stageName, i) => {
+    const stageContainers = this.stageNames.map((stageName, i) => {
       const isOpened = this.state.stagesOpened[i];
 
-      stageContainers.push(
+      return (
         <div key={stageName} className={cs.stage}>
           <div
             className={isOpened ? cs.hidden : cs.stageButton}
@@ -343,7 +341,7 @@ class PipelineViz extends React.Component {
             <div
               className={cs.graph}
               ref={ref => {
-                this[`container-${i}`] = ref;
+                this.graphContainers[i] = ref;
               }}
             />
           </div>
