@@ -215,5 +215,35 @@ class LocationTest < ActiveSupport::TestCase
     present_parent_level_ids, missing_parent_levels = Location.present_and_missing_parents(original)
     assert_equal ["state"], present_parent_level_ids.keys
     assert_equal ["country"], missing_parent_levels
+
+    original = locations(:bangladesh)
+    present_parent_level_ids, missing_parent_levels = Location.present_and_missing_parents(original)
+    assert_equal ["country"], present_parent_level_ids.keys
+    assert_equal [], missing_parent_levels
+
+    original = locations(:columbus)
+    present_parent_level_ids, missing_parent_levels = Location.present_and_missing_parents(original)
+    assert_equal [], present_parent_level_ids.keys
+    assert_equal %w[country state], missing_parent_levels
+  end
+
+  test "should fill in parent ids on a Location" do
+    original = locations(:swamp)
+    parent_level_ids = { "country" => 10, "state" => 20, "subdivision" => 30, "city" => 40 }
+    result = Location.set_parent_ids(original, parent_level_ids)
+    assert_equal 10, result.country_id
+    assert_equal 20, result.state_id
+    assert_equal 30, result.subdivision_id
+    assert_equal 40, result.city_id
+  end
+
+  test "should not fill in a geo level id below a Location's actual level" do
+    original = locations(:california)
+    parent_level_ids = { "country" => 10, "state" => 20, "subdivision" => 30, "city" => 40 }
+    result = Location.set_parent_ids(original, parent_level_ids)
+    assert_equal 10, result.country_id
+    assert_equal 20, result.state_id
+    assert_nil result.subdivision_id
+    assert_nil result.city_id
   end
 end
