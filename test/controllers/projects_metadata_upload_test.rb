@@ -230,6 +230,6 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_equal 0, @response.parsed_body['errors'].length
-    assert_equal 3, Metadatum.where(sample_id: @joe_project_sample_a.id).length
+    assert_equal 4, Metadatum.where(sample_id: @joe_project_sample_a.id).length
   end
 end
