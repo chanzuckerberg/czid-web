@@ -156,6 +156,10 @@ ActiveRecord::Schema.define(version: 20_190_612_205_949) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "osm_type", limit: 10, default: "", null: false, comment: "OpenStreetMap type (Node, Way, or Relation) to use OSM ID"
+    t.integer "country_id", comment: "ID of the country entry in our database"
+    t.integer "state_id", comment: "ID of the state entry in our database"
+    t.integer "subdivision_id", comment: "ID of the subdivision entry in our database"
+    t.integer "city_id", comment: "ID of the city entry in our database"
     t.index ["country_name", "state_name", "subdivision_name", "city_name"], name: "index_locations_levels", comment: "Index for lookup within regions. Composite works for any left subset of columns."
     t.index ["geo_level"], name: "index_locations_on_geo_level", comment: "Index for lookup by level of specificity"
     t.index ["locationiq_id"], name: "index_locations_on_locationiq_id"
