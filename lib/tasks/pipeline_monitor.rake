@@ -12,6 +12,8 @@ IDSEQ_BENCH_MIN_FREQUENCY_HOURS = 1.0
 # by copying to the S3 location below.
 IDSEQ_BENCH_CONFIG = "s3://idseq-bench/config.json".freeze
 
+AWS_DEFAULT_REGION = ENV.fetch('AWS_DEFAULT_REGION') { "us-west-2" }
+
 class CheckPipelineRuns
   # Concurrency allowed
   MAX_SHARDS = 10
@@ -96,7 +98,19 @@ class CheckPipelineRuns
       'max_job_dispatch_lag_seconds' => PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS,
       'job_tag_prefix' => PipelineRun::JOB_TAG_PREFIX,
       'job_tag_keep_alive_seconds' => PipelineRun::JOB_TAG_KEEP_ALIVE_SECONDS,
-      'draining_tag' => PipelineRun::DRAINING_TAG
+      'draining_tag' => PipelineRun::DRAINING_TAG,
+      'batch_configurations' => [
+        {
+          'queue_name' => Sample::DEFAULT_QUEUE,
+          'vcpus' => Sample::DEFAULT_VCPUS,
+          'region_name' => AWS_DEFAULT_REGION
+        },
+        {
+          'queue_name' => Sample::DEFAULT_QUEUE_HIMEM,
+          'vcpus' => Sample::DEFAULT_VCPUS_HIMEM,
+          'region_name' => AWS_DEFAULT_REGION
+        }
+      ]
     }
     c_stdout, c_stderr, c_status = Open3.capture3("app/jobs/autoscaling.py '#{autoscaling_config.to_json}'")
     Rails.logger.info(c_stdout)
