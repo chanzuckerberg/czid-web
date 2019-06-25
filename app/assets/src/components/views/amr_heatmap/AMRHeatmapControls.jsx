@@ -49,7 +49,6 @@ export default class AMRHeatmapControls extends React.Component {
 
   renderLegend() {
     const { isDataReady, maxValueForLegend, selectedOptions } = this.props;
-    const { legend } = this.state;
     // Don't render a color legend if the heatmap is still loading
     if (!isDataReady) {
       return;
