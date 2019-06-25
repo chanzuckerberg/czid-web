@@ -38,6 +38,7 @@ RUN npm install
 COPY . ./
 
 # Generate the app's static resources using npm/webpack
+# Increase memory available to node to 6GB (from default 1.5GB). At this Travis runs on 7.5GB instances.
 ENV NODE_OPTIONS "--max_old_space_size=6144"
 RUN mkdir -p app/assets/dist && npm run build-img && ls -l app/assets/dist/
 
