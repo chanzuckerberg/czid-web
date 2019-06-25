@@ -20,22 +20,6 @@ export default class AMRHeatmapControls extends React.Component {
     };
   }
 
-  componentDidUpdate() {
-    const { maxValueForLegend, selectedOptions } = this.props;
-    const { legend } = this.state;
-    if (
-      maxValueForLegend !== legend.max ||
-      selectedOptions.scale !== legend.scale
-    ) {
-      this.setState({
-        legend: {
-          max: maxValueForLegend,
-          scale: selectedOptions.scale,
-        },
-      });
-    }
-  }
-
   handleOptionChange(control, option) {
     const { selectedOptions, onSelectedOptionsChange } = this.props;
     if (option !== selectedOptions[control]) {
@@ -70,18 +54,13 @@ export default class AMRHeatmapControls extends React.Component {
     if (!isDataReady) {
       return;
     }
-    // This code is here so that when we need the legend to change
-    // because the scale has changed, React will unload the current
-    // legend from the DOM, and render the new, proper one when state updates.
-    if (
-      maxValueForLegend !== legend.max ||
-      selectedOptions.scale !== legend.scale
-    ) {
-      return;
-    }
     return (
       <div className="col s3" key="SequentialLegendVis">
-        <SequentialLegendVis min={0} max={legend.max} scale={legend.scale} />
+        <SequentialLegendVis
+          min={0}
+          max={maxValueForLegend}
+          scale={selectedOptions.scale}
+        />
       </div>
     );
   }

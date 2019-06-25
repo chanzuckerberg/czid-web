@@ -135,7 +135,6 @@ export default class AMRHeatmapView extends React.Component {
       <div className="row visualization-content">
         <ErrorBoundary>
           <AMRHeatmapVis
-            // maxValueUpdater={this.updateMaxValue}
             samplesWithAMRCounts={samplesWithAMRCounts}
             selectedOptions={selectedOptions}
           />
