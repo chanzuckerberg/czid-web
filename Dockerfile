@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y build-essential nodejs mysql-client pyt
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt-get update && apt-get install -y nodejs
-RUN pip install --upgrade pip 
+RUN pip install --upgrade pip
 
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
@@ -38,6 +38,7 @@ RUN npm install
 COPY . ./
 
 # Generate the app's static resources using npm/webpack
+ENV NODE_OPTIONS "--max_old_space_size=6144"
 RUN mkdir -p app/assets/dist && npm run build-img && ls -l app/assets/dist/
 
 ARG GIT_COMMIT
