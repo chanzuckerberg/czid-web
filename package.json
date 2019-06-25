@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "npm install && webpack --config webpack.config.dev.js --watch",
-    "build-img": "webpack --config webpack.config.prod.js --max-old-space-size=2048",
+    "build-img": "webpack --config webpack.config.prod.js",
     "lint": "./node_modules/.bin/eslint . ./**/*.js",
     "precommit": "lint-staged",
     "test": "jest",
@@ -58,6 +58,7 @@
     "webpack-merge": "^4.1.2"
   },
   "dependencies": {
+    "@ajainarayanan/react-pan-zoom": "0.0.3",
     "axios": "^0.19.0",
     "axios-retry": "^3.1.2",
     "babel-eslint": "^10.0.1",
@@ -115,7 +116,7 @@
     "tar": "^4.4.8",
     "text-width": "^1.2.0",
     "url-search-params-polyfill": "^3.0.0",
-    "vis": "^4.21.0",
+    "visjs-network": "^4.24.7",
     "webpack-node-externals": "^1.7.2"
   },
   "resolutions": {
