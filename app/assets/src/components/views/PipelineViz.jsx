@@ -5,6 +5,7 @@ import ReactPanZoom from "@ajainarayanan/react-pan-zoom";
 
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 import NetworkGraph from "~/components/visualizations/NetworkGraph.js";
+import PlusMinusControl from "~/components/ui/controls/PlusMinusControl.jsx";
 import cs from "./pipeline_viz.scss";
 
 const START_NODE_ID = -1;
@@ -27,7 +28,9 @@ class PipelineViz extends React.Component {
 
     this.state = {
       stagesOpened: [true, true, true, true],
-      zoom: 1,
+      zoom: this.props.initialZoom,
+      zoomInDisabled: false,
+      zoomOutDisabled: true,
     };
   }
 
@@ -35,10 +38,30 @@ class PipelineViz extends React.Component {
     this.drawGraphs();
   }
 
-  handleMouseWheelZoom = e => {
-    const { zoomChangeInterval } = this.props;
-    const zoomChange = (e.deltaY < 0 ? 1 : -1) * zoomChangeInterval;
-    this.setState({ zoom: this.state.zoom + zoomChange });
+  zoomIn = () => {
+    const { zoomChangeInterval, zoomMax } = this.props;
+    const { zoom, zoomInDisabled } = this.state;
+    if (!zoomInDisabled) {
+      const newZoom = zoom + zoomChangeInterval;
+      this.setState({
+        zoom: newZoom,
+        zoomInDisabled: newZoom >= zoomMax,
+        zoomOutDisabled: false,
+      });
+    }
+  };
+
+  zoomOut = () => {
+    const { zoomChangeInterval, zoomMin } = this.props;
+    const { zoom, zoomOutDisabled } = this.state;
+    if (!zoomOutDisabled) {
+      const newZoom = zoom - zoomChangeInterval;
+      this.setState({
+        zoom: newZoom,
+        zoomInDisabled: false,
+        zoomOutDisabled: newZoom <= zoomMin,
+      });
+    }
   };
 
   toggleStage(index) {
@@ -106,6 +129,7 @@ class PipelineViz extends React.Component {
   }
 
   generateIntraEdgeData(index) {
+    const { backgroundColor } = this.props;
     const stageData = this.stagesData[this.stageNames[index]];
     const stepData = stageData.steps;
 
@@ -125,7 +149,19 @@ class PipelineViz extends React.Component {
           intraEdgeData.push({ from: fromId, to: i });
         } else {
           // Connect beginning steps to input node
-          intraEdgeData.push({ from: START_NODE_ID, to: i });
+          intraEdgeData.push({
+            from: START_NODE_ID,
+            to: i,
+            ...(index == 0
+              ? {
+                  color: {
+                    color: backgroundColor,
+                    inherit: false,
+                  },
+                  chosen: false,
+                }
+              : {}),
+          });
         }
       });
     });
@@ -191,27 +227,17 @@ class PipelineViz extends React.Component {
     }
   }
 
-  adjustGraphNodePositions() {
-    let yCenteredDOMPos;
-
-    this.graphs.forEach((graph, i) => {
-      if (i == 0) {
-        yCenteredDOMPos = graph.getNodePosition(START_NODE_ID).y;
-      } else {
-        const xStartNodePos = graph.getNodePosition(START_NODE_ID).x;
-        graph.moveNodeToPosition(START_NODE_ID, xStartNodePos, yCenteredDOMPos);
-
-        const xEndNodePos = graph.getNodePosition(END_NODE_ID).x;
-        graph.moveNodeToPosition(END_NODE_ID, xEndNodePos, yCenteredDOMPos);
-      }
-    });
+  centerEndNodeVertically(graph) {
+    // Starting for each graph node is already vertically centered.
+    const yStartNodePos = graph.getNodePosition(START_NODE_ID).y;
+    const xEndNodePos = graph.getNodePosition(END_NODE_ID).x;
+    graph.moveNodeToPosition(END_NODE_ID, xEndNodePos, yStartNodePos);
   }
 
   drawGraphs() {
     this.stageNames.forEach((_, i) => {
       this.drawStageGraph(i);
     });
-    this.adjustGraphNodePositions();
     this.closeNonactiveSteps();
   }
 
@@ -284,7 +310,6 @@ class PipelineViz extends React.Component {
           direction: "LR",
           sortMethod: "directed",
           levelSeparation: 200,
-          parentCentralization: false,
           blockShifting: false,
           edgeMinimization: false,
         },
@@ -306,11 +331,13 @@ class PipelineViz extends React.Component {
       options
     );
     currStageGraph.minimizeWidthGivenScale(1.0);
+    this.centerEndNodeVertically(currStageGraph);
 
     this.graphs.push(currStageGraph);
   }
 
   render() {
+    const { zoom, zoomInDisabled, zoomOutDisabled } = this.state;
     const stageContainers = this.stageNames.map((stageName, i) => {
       const isOpened = this.state.stagesOpened[i];
 
@@ -327,7 +354,7 @@ class PipelineViz extends React.Component {
             <div className={cs.graphLabel}>
               {stageName}
               <RemoveIcon
-                className={cs.closeButton}
+                className={cs.closeIcon}
                 onClick={() => this.toggleStage(i)}
               />
             </div>
@@ -343,10 +370,17 @@ class PipelineViz extends React.Component {
     });
 
     return (
-      <div onWheel={this.handleMouseWheelZoom}>
-        <ReactPanZoom zoom={this.state.zoom}>
+      <div onDoubleClick={this.zoomIn}>
+        <ReactPanZoom zoom={zoom} className={cs.panZoomContainer}>
           <div className={cs.pipelineViz}>{stageContainers}</div>
         </ReactPanZoom>
+        <PlusMinusControl
+          onClickPlus={this.zoomIn}
+          onClickMinus={this.zoomOut}
+          plusDisabled={zoomInDisabled}
+          minusDisabled={zoomOutDisabled}
+          className={cs.plusMinusControl}
+        />
       </div>
     );
   }
@@ -357,6 +391,9 @@ PipelineViz.propTypes = {
   backgroundColor: PropTypes.string,
   nodeColor: PropTypes.string,
   edgeColor: PropTypes.string,
+  initialZoom: PropTypes.number,
+  zoomMin: PropTypes.number,
+  zoomMax: PropTypes.number,
   zoomChangeInterval: PropTypes.number,
 };
 
@@ -364,7 +401,10 @@ PipelineViz.defaultProps = {
   backgroundColor: "#f8f8f8",
   nodeColor: "#eaeaea",
   edgeColor: "#999999",
-  zoomChangeInterval: 0.01,
+  initialZoom: 1,
+  zoomMin: 1,
+  zoomMax: 5,
+  zoomChangeInterval: 1,
 };
 
 export default PipelineViz;
