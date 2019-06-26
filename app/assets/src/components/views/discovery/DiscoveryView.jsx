@@ -799,6 +799,7 @@ class DiscoveryView extends React.Component {
     }
 
     const sampleIds = mapLocationData[mapPreviewedLocationId].sample_ids;
+    console.log("fetching: ", sampleIds.sort());
 
     // Fetch previewed samples
     // TODO(jsheu): Consider paginating fetching for thousands of samples at a location
@@ -893,13 +894,28 @@ class DiscoveryView extends React.Component {
 
     const addToAncestor = (entry, ancestorLevel) => {
       const ancestorId = entry[`${ancestorLevel}_id`];
-      const ancestor = clusteredData[ancestorId];
-      if (ancestor) {
+      if (entry.name === "Redwood County, Minnesota, USA") {
+        console.log("so far: ", clusteredData);
+      }
+      if (ancestorId) {
+        if (!clusteredData[ancestorId]) {
+          console.log("cur entry is: ", entry);
+          console.log("ancestorId: ", ancestorId);
+          console.log("going to copy: ", rawMapLocationData[ancestorId]);
+          clusteredData[ancestorId] = copyLocation(
+            rawMapLocationData[ancestorId]
+          );
+        }
+        const ancestor = clusteredData[ancestorId];
+        if (entry.name === "Redwood County, Minnesota, USA") {
+          console.log("ancestor down here: ", ancestor);
+          console.log("going to union: ", ancestor[ids], entry[ids]);
+          console.log("union: ", union(ancestor[ids], entry[ids]));
+        }
         ancestor[ids] = union(ancestor[ids], entry[ids]);
-      } else if (ancestorId) {
-        clusteredData[ancestorId] = copyLocation(
-          rawMapLocationData[ancestorId]
-        );
+        if (entry.name === "Redwood County, Minnesota, USA") {
+          console.log("set value: ", clusteredData[ancestorId]);
+        }
       }
     };
 
@@ -908,15 +924,30 @@ class DiscoveryView extends React.Component {
       const indexOfEntry = indexOf(entry.geo_level, GEO_LEVEL_ORDER);
 
       // Have a bubble if you're higher than or at the map's geo level.
-      if (indexOfEntry <= indexOfMap) clusteredData[id] = copyLocation(entry);
+      if (indexOfEntry <= indexOfMap) {
+        console.log("down here going to copy: ", entry);
+        if (!clusteredData[entry.id]) {
+          clusteredData[id] = copyLocation(entry);
+        }
+      }
 
       ["country", "state"].forEach(ancestorLevel => {
-        // If you have ancestors higher than the map's level, add yourself to them.
+        // if (ancestorLevel === geoLevel) {
+        //   addToAncestor(entry, ancestorLevel);
+        // }
+
+        // If you have ancestors higher than or at the map's level, add yourself to them.
         if (indexOf(ancestorLevel, GEO_LEVEL_ORDER) <= indexOfMap) {
           addToAncestor(entry, ancestorLevel);
         }
       });
     }
+
+    console.log("clustered: ", clusteredData);
+    console.log(
+      "samples in the USA: ",
+      clusteredData[152] && clusteredData[152].sample_ids.length
+    );
 
     this.setState({ mapLocationData: clusteredData });
   };
