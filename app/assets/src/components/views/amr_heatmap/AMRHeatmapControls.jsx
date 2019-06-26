@@ -9,17 +9,6 @@ import SequentialLegendVis from "~/components/visualizations/legends/SequentialL
 import cs from "./amr_heatmap_view.scss";
 
 export default class AMRHeatmapControls extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      legend: {
-        max: 0,
-        scale: "symlog",
-      },
-    };
-  }
-
   handleOptionChange(control, option) {
     const { selectedOptions, onSelectedOptionsChange } = this.props;
     if (option !== selectedOptions[control]) {

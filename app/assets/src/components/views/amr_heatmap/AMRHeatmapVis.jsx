@@ -1,7 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
+import { DataTooltip } from "~ui/containers";
+import { getTooltipStyle } from "~/components/utils/tooltip";
 
 import cs from "./amr_heatmap_vis.scss";
 
@@ -11,6 +14,11 @@ const VIEW_LEVEL_GENES = "gene";
 export default class AMRHeatmapVis extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      nodeHoverInfo: null,
+      tooltipLocation: null,
+    };
 
     this.heatmap = null;
   }
@@ -52,8 +60,49 @@ export default class AMRHeatmapVis extends React.Component {
     return [sampleLabels, geneLabels, alleleLabels];
   }
 
+  getTooltipData(node) {
+    const { selectedOptions } = this.props;
+    const { sampleLabels, geneLabels } = this.state;
+
+    return [
+      {
+        name: "Info",
+        data: [["Sample", sampleLabels[node.columnIndex].label]],
+      },
+      {
+        name: "Values",
+        data: [[selectedOptions.metric, node.value]],
+      },
+    ];
+  }
+
+  //*** Callback functions for other components ***
+
+  colorFilter = (value, node, originalColor, _, colorNoValue) => {
+    // Leave zero values grey
+    return value > 0 ? originalColor : colorNoValue;
+  };
+
+  onNodeHover = node => {
+    this.setState({ nodeHoverInfo: this.getTooltipData(node) });
+  };
+
+  onNodeHoverMove = (_, event) => {
+    if (event) {
+      this.setState({
+        tooltipLocation: {
+          left: event.pageX,
+          top: event.pageY,
+        },
+      });
+    }
+  };
+
+  onNodeHoverOut = () => {
+    this.setState({ nodeHoverInfo: null });
+  };
+
   //*** Following functions must be called after the component has updated ***
-  //*** (i.e. after the component has requested AMR data and updated state) ***
 
   getHeatmapLabels() {
     const { selectedOptions } = this.props;
@@ -78,7 +127,7 @@ export default class AMRHeatmapVis extends React.Component {
         const amrCountForRow = sample.amr_counts.find(
           amrCount => amrCount[selectedOptions.viewLevel] === rowName
         );
-        if (amrCountForRow != undefined) {
+        if (amrCountForRow !== undefined) {
           rowValues.push(amrCountForRow[selectedOptions.metric]);
         } else {
           rowValues.push(0);
@@ -107,11 +156,6 @@ export default class AMRHeatmapVis extends React.Component {
     }
   }
 
-  colorFilter = (value, node, originalColor, _, colorNoValue) => {
-    // Leave zero values grey
-    return value > 0 ? originalColor : colorNoValue;
-  };
-
   initializeHeatmap(rows, columns, values) {
     const { selectedOptions } = this.props;
     this.heatmap = new Heatmap(
@@ -130,9 +174,30 @@ export default class AMRHeatmapVis extends React.Component {
         scale: selectedOptions.scale,
         scaleMin: 0,
         customColorCallback: this.colorFilter,
+        onNodeHover: this.onNodeHover,
+        onNodeHoverMove: this.onNodeHoverMove,
+        onNodeHoverOut: this.onNodeHoverOut,
       }
     );
     this.heatmap.start();
+  }
+
+  renderNodeHoverTooltip() {
+    const { nodeHoverInfo, tooltipLocation } = this.state;
+    if (!(nodeHoverInfo && tooltipLocation)) {
+      return;
+    }
+    return (
+      <div
+        className={cx(cs.tooltip, nodeHoverInfo && cs.visible)}
+        style={getTooltipStyle(tooltipLocation, {
+          buffer: 20,
+          below: true,
+        })}
+      >
+        <DataTooltip data={nodeHoverInfo} />
+      </div>
+    );
   }
 
   render() {
@@ -144,6 +209,7 @@ export default class AMRHeatmapVis extends React.Component {
             this.heatmapContainer = container;
           }}
         />
+        {this.renderNodeHoverTooltip()}
       </div>
     );
   }
