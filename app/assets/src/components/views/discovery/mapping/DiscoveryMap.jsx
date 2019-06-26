@@ -1,6 +1,14 @@
 import React from "react";
 import { Marker } from "react-map-gl";
-import { cloneDeep, get, indexOf, isEmpty, union, upperFirst } from "lodash/fp";
+import {
+  cloneDeep,
+  get,
+  indexOf,
+  isEmpty,
+  union,
+  upperFirst,
+  throttle,
+} from "lodash/fp";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
@@ -11,32 +19,47 @@ import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
 import cs from "./discovery_map.scss";
 
 export const TOOLTIP_TIMEOUT_MS = 1000;
+export const DEFAULT_THROTTLE_MS = 500;
 
 class DiscoveryMap extends React.Component {
   constructor(props) {
     super(props);
+    const { onGeoLevelChange } = this.props;
 
     this.state = {
       tooltip: null,
       tooltipShouldClose: false,
     };
+
+    this.logAnalyticsEventThrottled = throttle(
+      DEFAULT_THROTTLE_MS,
+      logAnalyticsEvent
+    );
+    if (onGeoLevelChange) {
+      this.onGeoLevelChangeThrottled = throttle(
+        DEFAULT_THROTTLE_MS,
+        onGeoLevelChange
+      );
+    }
   }
 
+  // updateViewport fires many times a second, so we can throttle event calls.
   updateViewport = viewport => {
-    const { onGeoLevelChange } = this.props;
     this.setState({ viewport });
 
-    let geoLevel;
-    if (viewport.zoom < 4) {
-      geoLevel = "country";
-    } else if (viewport.zoom < 5) {
-      geoLevel = "state";
-    } else {
-      geoLevel = "city";
+    if (this.onGeoLevelChangeThrottled) {
+      let geoLevel;
+      if (viewport.zoom < 4) {
+        geoLevel = "country";
+      } else if (viewport.zoom < 5) {
+        geoLevel = "state";
+      } else {
+        geoLevel = "city";
+      }
+      this.onGeoLevelChangeThrottled(geoLevel);
     }
-    onGeoLevelChange && onGeoLevelChange(geoLevel);
 
-    logAnalyticsEvent("DiscoveryMap_viewport_updated");
+    this.logAnalyticsEventThrottled("DiscoveryMap_viewport_updated");
   };
 
   handleMarkerClick = locationId => {

@@ -34,6 +34,7 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import { openUrl } from "~utils/links";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
+import { GEO_LEVEL_ORDER } from "~/components/views/discovery/mapping/constants";
 
 import DiscoveryHeader from "./DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
@@ -98,15 +99,15 @@ class DiscoveryView extends React.Component {
         filteredSampleDimensions: [],
         filteredSampleStats: {},
         filters: {},
+        geoLevel: "country",
         loadingDimensions: true,
         loadingLocations: true,
         loadingProjects: true,
         loadingSamples: true,
         loadingStats: true,
         loadingVisualizations: true,
-        mapLevel: "country",
         mapLocationData: {},
-        mapLocationDataUnclustered: {},
+        rawMapLocationData: {},
         mapPreviewedLocationId: null,
         mapPreviewedProjects: [],
         mapPreviewedSampleIds: [],
@@ -386,7 +387,7 @@ class DiscoveryView extends React.Component {
 
   refreshFilteredLocations = async () => {
     const { domain } = this.props;
-    const { projectId, search } = this.state;
+    const { geoLevel, projectId, search } = this.state;
 
     this.setState({
       loadingLocations: true,
@@ -402,12 +403,13 @@ class DiscoveryView extends React.Component {
     this.setState(
       {
         mapLocationData,
-        mapLocationDataUnclustered: mapLocationData,
+        rawMapLocationData: mapLocationData,
         loadingLocations: false,
       },
       () => {
         this.refreshMapPreviewedSamples();
         this.refreshMapPreviewedProjects();
+        this.handleGeoLevelChange(geoLevel);
       }
     );
   };
@@ -879,31 +881,44 @@ class DiscoveryView extends React.Component {
   };
 
   handleGeoLevelChange = geoLevel => {
-    const { mapLocationDataUnclustered, currentTab } = this.state;
+    const { rawMapLocationData, currentTab } = this.state;
 
     if (!["country", "state"].includes(geoLevel)) {
-      this.setState({ mapLocationData: mapLocationDataUnclustered });
+      this.setState({ mapLocationData: rawMapLocationData });
       return;
     }
 
     const idField = currentTab === "samples" ? "sample_ids" : "project_ids";
-    const allLevels = ["country", "state", "subdivision", "city"];
 
     // Re-cluster the mapLocationData
     let clusteredData = {};
-    for (const [id, entry] of Object.entries(mapLocationDataUnclustered)) {
-      if (indexOf(entry.geo_level, allLevels) <= indexOf(geoLevel, allLevels)) {
+    for (const [id, entry] of Object.entries(rawMapLocationData)) {
+      if (
+        indexOf(entry.geo_level, GEO_LEVEL_ORDER) <
+        indexOf(geoLevel, GEO_LEVEL_ORDER)
+      ) {
+        // Higher than the current geo level
         clusteredData[id] = cloneDeep(entry);
-      } else {
-        const ancestorId = entry[`${geoLevel}_id`];
-        const ancestor = clusteredData[ancestorId];
-        if (ancestor) {
-          ancestor[idField] = union(ancestor[idField], entry[idField]);
-        } else if (ancestorId) {
-          clusteredData[ancestorId] = cloneDeep(
-            mapLocationDataUnclustered[ancestorId]
-          );
-        }
+      } else if (
+        indexOf(entry.geo_level, GEO_LEVEL_ORDER) ===
+        indexOf(geoLevel, GEO_LEVEL_ORDER)
+      ) {
+        clusteredData[id] = cloneDeep(entry);
+      } else if (
+        indexOf(entry.geo_level, GEO_LEVEL_ORDER) >
+        indexOf(geoLevel, GEO_LEVEL_ORDER)
+      ) {
+        ["country", "state"].forEach(level => {
+          const ancestorId = entry[`${level}_id`];
+          const ancestor = clusteredData[ancestorId];
+          if (ancestor) {
+            ancestor[idField] = union(ancestor[idField], entry[idField]);
+          } else if (ancestorId) {
+            clusteredData[ancestorId] = cloneDeep(
+              rawMapLocationData[ancestorId]
+            );
+          }
+        });
       }
     }
 
