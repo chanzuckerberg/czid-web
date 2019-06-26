@@ -109,6 +109,10 @@ Rails.application.routes.draw do
   get 'amr_heatmap/amr_counts.json', to: 'amr_heatmap#amr_counts'
   get 'amr_heatmap', to: 'amr_heatmap#index'
 
+  get 'basespace/oauth', to: 'basespace#oauth'
+  get 'basespace/projects', to: 'basespace#projects'
+  get 'basespace/samples_for_project', to: 'basespace#samples_for_project'
+
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
 

@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   before_action :check_rack_mini_profiler
   before_action :check_browser
   before_action :set_current_context_for_logging!
+  before_action :set_application_view_variables
 
   include Consul::Controller
 
@@ -34,6 +35,10 @@ class ApplicationController < ActionController::Base
     super
     payload[:remote_ip] = request.remote_ip
     payload[:user_id] = current_user.try(:id) if current_user
+  end
+
+  def disable_header_navigation
+    @disable_header_navigation = true
   end
 
   protected
@@ -92,6 +97,10 @@ class ApplicationController < ActionController::Base
     if current_user && current_user.admin?
       Rack::MiniProfiler.authorize_request
     end
+  end
+
+  def set_application_view_variables
+    @disable_header_navigation = false
   end
 
   # Set current user and request to global for use in logging in ActiveRecord.
