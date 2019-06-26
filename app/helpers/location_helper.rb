@@ -26,7 +26,6 @@ module LocationHelper
       country_name: address[country_key] || "",
       state_name: address[state_key] || "",
       subdivision_name: address[subdivision_key] || "",
-      # Normalize extra provider fields to city. normalizecity param doesn't work all the time.
       city_name: address[city_key] || "",
       # Round coordinates to enhance privacy
       lat: body["lat"] ? body["lat"].to_f.round(2) : nil,

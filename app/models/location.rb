@@ -26,6 +26,7 @@ class Location < ApplicationRecord
   GEO_LEVELS = [COUNTRY_LEVEL, STATE_LEVEL, SUBDIVISION_LEVEL, CITY_LEVEL].freeze
 
   # See https://wiki.openstreetmap.org/wiki/Key:place
+  # Normalize extra provider fields to each of our levels.
   COUNTRY_NAMES = %w[country].freeze
   STATE_NAMES = %w[state province region].freeze
   SUBDIVISION_NAMES = %w[county state_district district].freeze
@@ -166,11 +167,10 @@ class Location < ApplicationRecord
     present_parent_levels = present_parents.pluck(:geo_level)
 
     missing_parent_levels = []
-    if !present_parent_levels.include?(COUNTRY_LEVEL) && location.country_name.present? && location.geo_level != COUNTRY_LEVEL
-      missing_parent_levels << COUNTRY_LEVEL
-    end
-    if !present_parent_levels.include?(STATE_LEVEL) && location.state_name.present? && location.geo_level != STATE_LEVEL
-      missing_parent_levels << STATE_LEVEL
+    [COUNTRY_LEVEL, STATE_LEVEL].each do |level|
+      if !present_parent_levels.include?(level) && location.country_name.present? && location.geo_level != level
+        missing_parent_levels << level
+      end
     end
 
     present_parent_level_ids = present_parents.map { |p| [p.geo_level, p.id] }.to_h
