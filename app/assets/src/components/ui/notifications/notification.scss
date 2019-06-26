@@ -21,6 +21,7 @@
   .icon {
     flex-grow: 0;
     margin-right: 14px;
+    height: 20px;
 
     svg {
       width: 20px;
@@ -30,6 +31,11 @@
       font-size: 16px;
       color: $success;
     }
+  }
+
+  .content {
+    // Helps to center single-line text vertically.
+    margin-top: 1px;
   }
 
   .actions {

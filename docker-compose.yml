@@ -14,6 +14,9 @@ x-web-variables: &web-variables
   ? SEGMENT_RUBY_ID
   ? LOCATION_IQ_API_KEY
   ? MAPTILER_API_KEY
+  ? BASESPACE_CLIENT_ID
+  ? BASESPACE_CLIENT_SECRET
+  ? BASESPACE_OAUTH_REDIRECT_URI
 
 x-aws-variables: &aws-variables
   ? AWS_ACCESS_KEY_ID

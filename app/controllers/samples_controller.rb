@@ -1025,6 +1025,8 @@ class SamplesController < ApplicationController
   def upload
     @projects = current_power.updatable_projects
     @host_genomes = host_genomes_list || nil
+    @basespace_client_id = ENV["BASESPACE_CLIENT_ID"] || nil
+    @basespace_oauth_redirect_uri = ENV["BASESPACE_OAUTH_REDIRECT_URI"] || nil
   end
 
   # GET /samples/1/edit
