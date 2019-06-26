@@ -1,14 +1,6 @@
 import React from "react";
 import { Marker } from "react-map-gl";
-import {
-  cloneDeep,
-  get,
-  indexOf,
-  isEmpty,
-  union,
-  upperFirst,
-  throttle,
-} from "lodash/fp";
+import { get, isEmpty, throttle, upperFirst } from "lodash/fp";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
@@ -48,14 +40,8 @@ class DiscoveryMap extends React.Component {
     this.setState({ viewport });
 
     if (this.onGeoLevelChangeThrottled) {
-      let geoLevel;
-      if (viewport.zoom < 4) {
-        geoLevel = "country";
-      } else if (viewport.zoom < 5) {
-        geoLevel = "state";
-      } else {
-        geoLevel = "city";
-      }
+      const geoLevel =
+        viewport.zoom < 4 ? "country" : viewport.zoom < 5 ? "state" : "city";
       this.onGeoLevelChangeThrottled(geoLevel);
     }
 

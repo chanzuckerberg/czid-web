@@ -885,55 +885,33 @@ class DiscoveryView extends React.Component {
 
     const idField = currentTab === "samples" ? "sample_ids" : "project_ids";
 
-    // Re-cluster the mapLocationData
     let clusteredData = {};
+
+    const addToAncestor = (entry, ancestorLevel) => {
+      const ancestorId = entry[`${ancestorLevel}_id`];
+      const ancestor = clusteredData[ancestorId];
+      if (ancestor) {
+        ancestor[idField] = union(ancestor[idField], entry[idField]);
+      } else if (ancestorId) {
+        clusteredData[ancestorId] = cloneDeep(rawMapLocationData[ancestorId]);
+      }
+    };
+
+    const indexOfMap = indexOf(geoLevel, GEO_LEVEL_ORDER);
     for (const [id, entry] of Object.entries(rawMapLocationData)) {
-      if (
-        indexOf(entry.geo_level, GEO_LEVEL_ORDER) <
-        indexOf(geoLevel, GEO_LEVEL_ORDER)
-      ) {
-        console.log("higher than the current level", entry.name);
-        // Higher than the current geo level
+      const indexOfEntry = indexOf(entry.geo_level, GEO_LEVEL_ORDER);
+
+      if (indexOfEntry <= indexOfMap) {
+        // Higher than or at the current geo level
         clusteredData[id] = cloneDeep(entry);
-      } else if (
-        indexOf(entry.geo_level, GEO_LEVEL_ORDER) ===
-        indexOf(geoLevel, GEO_LEVEL_ORDER)
-      ) {
-        // At the current level
-        console.log("at level", entry.name);
-        clusteredData[id] = cloneDeep(entry);
-      } else if (
-        indexOf(entry.geo_level, GEO_LEVEL_ORDER) >
-        indexOf(geoLevel, GEO_LEVEL_ORDER)
-      ) {
+      } else {
         // Below the current level
-        console.log("below the current level", entry.name);
-        const ancestorId = entry[`${geoLevel}_id`];
-        const ancestor = clusteredData[ancestorId];
-        if (ancestor) {
-          ancestor[idField] = union(ancestor[idField], entry[idField]);
-        } else if (ancestorId) {
-          clusteredData[ancestorId] = cloneDeep(rawMapLocationData[ancestorId]);
-        }
+        addToAncestor(entry, geoLevel);
       }
 
-      console.log("Entry, view level: ", entry.name, geoLevel);
       ["country", "state"].forEach(ancestorLevel => {
-        if (
-          indexOf(ancestorLevel, GEO_LEVEL_ORDER) <=
-          indexOf(geoLevel, GEO_LEVEL_ORDER)
-        ) {
-          console.log(ancestorLevel, geoLevel);
-          // Add yourself to the country or state bubble still.
-          const ancestorId = entry[`${ancestorLevel}_id`];
-          const ancestor = clusteredData[ancestorId];
-          if (ancestor) {
-            ancestor[idField] = union(ancestor[idField], entry[idField]);
-          } else if (ancestorId) {
-            clusteredData[ancestorId] = cloneDeep(
-              rawMapLocationData[ancestorId]
-            );
-          }
+        if (indexOf(ancestorLevel, GEO_LEVEL_ORDER) <= indexOfMap) {
+          addToAncestor(entry, ancestorLevel);
         }
       });
     }
@@ -974,6 +952,7 @@ class DiscoveryView extends React.Component {
                 mapTilerKey={mapTilerKey}
                 onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
+                onGeoLevelChange={this.handleGeoLevelChange}
                 onMapClick={this.clearMapPreview}
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onProjectSelected={this.handleProjectSelected}
