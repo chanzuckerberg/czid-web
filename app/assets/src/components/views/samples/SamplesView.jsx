@@ -428,6 +428,7 @@ class SamplesView extends React.Component {
       mapPreviewedLocationId,
       mapTilerKey,
       onClearFilters,
+      onGeoLevelChange,
       onMapClick,
       onMapMarkerClick,
       onMapTooltipTitleClick,
@@ -439,6 +440,7 @@ class SamplesView extends React.Component {
           mapTilerKey={mapTilerKey}
           onClearFilters={onClearFilters}
           onClick={onMapClick}
+          onGeoLevelChange={onGeoLevelChange}
           onMarkerClick={onMapMarkerClick}
           onTooltipTitleClick={onMapTooltipTitleClick}
           previewedLocationId={mapPreviewedLocationId}
@@ -515,6 +517,7 @@ SamplesView.propTypes = {
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
+  onGeoLevelChange: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
   onMapClick: PropTypes.func,
   onMapMarkerClick: PropTypes.func,

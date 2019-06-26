@@ -6,12 +6,14 @@ import {
   at,
   capitalize,
   clone,
+  cloneDeep,
   compact,
   concat,
   defaults,
   escapeRegExp,
   find,
   findIndex,
+  indexOf,
   isEmpty,
   keyBy,
   map,
@@ -21,6 +23,7 @@ import {
   pick,
   replace,
   sumBy,
+  union,
   values,
   xor,
   xorBy,
@@ -101,7 +104,9 @@ class DiscoveryView extends React.Component {
         loadingSamples: true,
         loadingStats: true,
         loadingVisualizations: true,
+        mapLevel: "country",
         mapLocationData: {},
+        mapLocationDataUnclustered: {},
         mapPreviewedLocationId: null,
         mapPreviewedProjects: [],
         mapPreviewedSampleIds: [],
@@ -394,10 +399,17 @@ class DiscoveryView extends React.Component {
       search,
     });
 
-    this.setState({ mapLocationData, loadingLocations: false }, () => {
-      this.refreshMapPreviewedSamples();
-      this.refreshMapPreviewedProjects();
-    });
+    this.setState(
+      {
+        mapLocationData,
+        mapLocationDataUnclustered: mapLocationData,
+        loadingLocations: false,
+      },
+      () => {
+        this.refreshMapPreviewedSamples();
+        this.refreshMapPreviewedProjects();
+      }
+    );
   };
 
   computeTabs = () => {
@@ -866,6 +878,38 @@ class DiscoveryView extends React.Component {
     });
   };
 
+  handleGeoLevelChange = geoLevel => {
+    const { mapLocationDataUnclustered, currentTab } = this.state;
+
+    if (!["country", "state"].includes(geoLevel)) {
+      this.setState({ mapLocationData: mapLocationDataUnclustered });
+      return;
+    }
+
+    const idField = currentTab === "samples" ? "sample_ids" : "project_ids";
+    const allLevels = ["country", "state", "subdivision", "city"];
+
+    // Re-cluster the mapLocationData
+    let clusteredData = {};
+    for (const [id, entry] of Object.entries(mapLocationDataUnclustered)) {
+      if (indexOf(entry.geo_level, allLevels) <= indexOf(geoLevel, allLevels)) {
+        clusteredData[id] = cloneDeep(entry);
+      } else {
+        const ancestorId = entry[`${geoLevel}_id`];
+        const ancestor = clusteredData[ancestorId];
+        if (ancestor) {
+          ancestor[idField] = union(ancestor[idField], entry[idField]);
+        } else if (ancestorId) {
+          clusteredData[ancestorId] = cloneDeep(
+            mapLocationDataUnclustered[ancestorId]
+          );
+        }
+      }
+    }
+
+    this.setState({ mapLocationData: clusteredData });
+  };
+
   renderCenterPaneContent = () => {
     const {
       currentDisplay,
@@ -934,6 +978,7 @@ class DiscoveryView extends React.Component {
                 onMapClick={this.clearMapPreview}
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
+                onGeoLevelChange={this.handleGeoLevelChange}
                 onSampleSelected={this.handleSampleSelected}
                 projectId={projectId}
                 ref={samplesView => (this.samplesView = samplesView)}

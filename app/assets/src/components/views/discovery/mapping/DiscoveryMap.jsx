@@ -19,11 +19,13 @@ class DiscoveryMap extends React.Component {
     this.state = {
       tooltip: null,
       tooltipShouldClose: false,
-      geoLevel: "country",
     };
   }
 
   updateViewport = viewport => {
+    const { onGeoLevelChange } = this.props;
+    this.setState({ viewport });
+
     let geoLevel;
     if (viewport.zoom < 4) {
       geoLevel = "country";
@@ -32,8 +34,8 @@ class DiscoveryMap extends React.Component {
     } else {
       geoLevel = "city";
     }
+    onGeoLevelChange && onGeoLevelChange(geoLevel);
 
-    this.setState({ geoLevel, viewport });
     logAnalyticsEvent("DiscoveryMap_viewport_updated");
   };
 
@@ -156,43 +158,16 @@ class DiscoveryMap extends React.Component {
   };
 
   render() {
-    const { currentTab, mapTilerKey, mapLocationData } = this.props;
-    const { tooltip, viewport = {}, geoLevel } = this.state;
-
-    const idField = currentTab === "samples" ? "sample_ids" : "project_ids";
-
-    console.log(viewport.zoom, geoLevel);
-
-    const allLevels = ["country", "state", "subdivision", "city"];
-
-    // Re-cluster the mapLocationData
-    let clusteredData = {};
-    for (const [id, entry] of Object.entries(mapLocationData)) {
-      if (indexOf(entry.geo_level, allLevels) <= indexOf(geoLevel, allLevels)) {
-        clusteredData[id] = cloneDeep(entry);
-      } else {
-        const ancestorId = entry[`${geoLevel}_id`];
-        const ancestor = clusteredData[ancestorId];
-        if (ancestor) {
-          ancestor[idField] = union(ancestor[idField], entry[idField]);
-        } else if (ancestorId) {
-          clusteredData[ancestorId] = cloneDeep(mapLocationData[ancestorId]);
-        }
-      }
-    }
-
-    console.log("result: ", clusteredData);
-
-    if (!["country", "state"].includes(geoLevel)) {
-      clusteredData = mapLocationData;
-    }
+    const { mapTilerKey, mapLocationData } = this.props;
+    const { tooltip } = this.state;
 
     return (
       <BaseMap
         banner={this.renderBanner()}
         mapTilerKey={mapTilerKey}
         markers={
-          clusteredData && Object.values(clusteredData).map(this.renderMarker)
+          mapLocationData &&
+          Object.values(mapLocationData).map(this.renderMarker)
         }
         onClick={this.handleMapClick}
         tooltip={tooltip}
@@ -213,6 +188,7 @@ DiscoveryMap.propTypes = {
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
   onClick: PropTypes.func,
+  onGeoLevelChange: PropTypes.func,
   onMarkerClick: PropTypes.func,
   onTooltipTitleClick: PropTypes.func,
   previewedLocationId: PropTypes.number,
