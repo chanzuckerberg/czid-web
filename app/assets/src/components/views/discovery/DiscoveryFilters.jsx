@@ -150,6 +150,9 @@ class DiscoveryFilters extends React.Component {
       visibility,
     } = this.props;
 
+    console.log("Location V2: ", locationV2);
+    console.log("Location V2 selected: ", locationV2Selected);
+
     return (
       <div className={cx(cs.filtersContainer, className)}>
         <div className={cs.filterContainer}>
