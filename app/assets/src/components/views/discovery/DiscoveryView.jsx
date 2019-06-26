@@ -799,7 +799,6 @@ class DiscoveryView extends React.Component {
     }
 
     const sampleIds = mapLocationData[mapPreviewedLocationId].sample_ids;
-    console.log("fetching: ", sampleIds.sort());
 
     // Fetch previewed samples
     // TODO(jsheu): Consider paginating fetching for thousands of samples at a location
@@ -885,7 +884,6 @@ class DiscoveryView extends React.Component {
     const { rawMapLocationData, currentTab } = this.state;
 
     const ids = currentTab === "samples" ? "sample_ids" : "project_ids";
-
     let clusteredData = {};
 
     const copyLocation = entry => {
@@ -894,28 +892,14 @@ class DiscoveryView extends React.Component {
 
     const addToAncestor = (entry, ancestorLevel) => {
       const ancestorId = entry[`${ancestorLevel}_id`];
-      if (entry.name === "Redwood County, Minnesota, USA") {
-        console.log("so far: ", clusteredData);
-      }
       if (ancestorId) {
         if (!clusteredData[ancestorId]) {
-          console.log("cur entry is: ", entry);
-          console.log("ancestorId: ", ancestorId);
-          console.log("going to copy: ", rawMapLocationData[ancestorId]);
           clusteredData[ancestorId] = copyLocation(
             rawMapLocationData[ancestorId]
           );
         }
         const ancestor = clusteredData[ancestorId];
-        if (entry.name === "Redwood County, Minnesota, USA") {
-          console.log("ancestor down here: ", ancestor);
-          console.log("going to union: ", ancestor[ids], entry[ids]);
-          console.log("union: ", union(ancestor[ids], entry[ids]));
-        }
         ancestor[ids] = union(ancestor[ids], entry[ids]);
-        if (entry.name === "Redwood County, Minnesota, USA") {
-          console.log("set value: ", clusteredData[ancestorId]);
-        }
       }
     };
 
@@ -924,30 +908,17 @@ class DiscoveryView extends React.Component {
       const indexOfEntry = indexOf(entry.geo_level, GEO_LEVEL_ORDER);
 
       // Have a bubble if you're higher than or at the map's geo level.
-      if (indexOfEntry <= indexOfMap) {
-        console.log("down here going to copy: ", entry);
-        if (!clusteredData[entry.id]) {
-          clusteredData[id] = copyLocation(entry);
-        }
+      if (indexOfEntry <= indexOfMap && !clusteredData[entry.id]) {
+        clusteredData[id] = copyLocation(entry);
       }
 
       ["country", "state"].forEach(ancestorLevel => {
-        // if (ancestorLevel === geoLevel) {
-        //   addToAncestor(entry, ancestorLevel);
-        // }
-
         // If you have ancestors higher than or at the map's level, add yourself to them.
         if (indexOf(ancestorLevel, GEO_LEVEL_ORDER) <= indexOfMap) {
           addToAncestor(entry, ancestorLevel);
         }
       });
     }
-
-    console.log("clustered: ", clusteredData);
-    console.log(
-      "samples in the USA: ",
-      clusteredData[152] && clusteredData[152].sample_ids.length
-    );
 
     this.setState({ mapLocationData: clusteredData });
   };
@@ -956,6 +927,7 @@ class DiscoveryView extends React.Component {
     const {
       currentDisplay,
       currentTab,
+      geoLevel,
       loadingProjects,
       loadingSamples,
       loadingVisualizations,
@@ -969,7 +941,7 @@ class DiscoveryView extends React.Component {
       mapPreviewedSamples,
       mapSidebarSelectedSampleIds,
     } = this.state;
-    const { allowedFeatures, mapTilerKey } = this.props;
+    const { admin, allowedFeatures, mapTilerKey } = this.props;
 
     return (
       <React.Fragment>
@@ -980,6 +952,7 @@ class DiscoveryView extends React.Component {
                 allowedFeatures={allowedFeatures}
                 currentDisplay={currentDisplay}
                 currentTab={currentTab}
+                geoLevel={geoLevel}
                 mapLocationData={mapLocationData}
                 mapPreviewedLocationId={mapPreviewedLocationId}
                 mapTilerKey={mapTilerKey}
@@ -1007,9 +980,10 @@ class DiscoveryView extends React.Component {
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               <SamplesView
-                admin={this.props.admin}
+                admin={admin}
                 allowedFeatures={allowedFeatures}
                 currentDisplay={currentDisplay}
+                currentTab={currentTab}
                 mapLocationData={mapLocationData}
                 mapPreviewedLocationId={mapPreviewedLocationId}
                 mapPreviewedSamples={mapPreviewedSamples}
@@ -1017,11 +991,11 @@ class DiscoveryView extends React.Component {
                 mapTilerKey={mapTilerKey}
                 onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
+                onGeoLevelChange={this.handleGeoLevelChange}
                 onLoadRows={this.handleLoadSampleRows}
                 onMapClick={this.clearMapPreview}
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
-                onGeoLevelChange={this.handleGeoLevelChange}
                 onSampleSelected={this.handleSampleSelected}
                 projectId={projectId}
                 ref={samplesView => (this.samplesView = samplesView)}

@@ -194,6 +194,7 @@ DiscoveryMap.defaultProps = {
 DiscoveryMap.propTypes = {
   currentDisplay: PropTypes.string,
   currentTab: PropTypes.string.isRequired,
+  geoLevel: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,

@@ -424,6 +424,8 @@ class SamplesView extends React.Component {
 
   renderMap = () => {
     const {
+      currentTab,
+      geoLevel,
       mapLocationData,
       mapPreviewedLocationId,
       mapTilerKey,
@@ -433,9 +435,12 @@ class SamplesView extends React.Component {
       onMapMarkerClick,
       onMapTooltipTitleClick,
     } = this.props;
+
     return (
       <div className={cs.map}>
         <DiscoveryMap
+          currentTab={currentTab}
+          geoLevel={geoLevel}
           mapLocationData={mapLocationData}
           mapTilerKey={mapTilerKey}
           onClearFilters={onClearFilters}
@@ -508,8 +513,11 @@ SamplesView.defaultProps = {
 
 SamplesView.propTypes = {
   activeColumns: PropTypes.arrayOf(PropTypes.string),
+  admin: PropTypes.bool,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   currentDisplay: PropTypes.string.isRequired,
+  currentTab: PropTypes.string.isRequired,
+  geoLevel: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedLocationId: PropTypes.number,
   mapPreviewedSamples: PropTypes.array,
@@ -527,7 +535,6 @@ SamplesView.propTypes = {
   protectedColumns: PropTypes.array,
   samples: PropTypes.array,
   selectableIds: PropTypes.array.isRequired,
-  admin: PropTypes.bool,
 };
 
 export default SamplesView;
