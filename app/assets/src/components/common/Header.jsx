@@ -74,7 +74,12 @@ class Header extends React.Component {
   };
 
   render() {
-    const { adminUser, userSignedIn, ...userMenuProps } = this.props;
+    const {
+      adminUser,
+      userSignedIn,
+      disableNavigation,
+      ...userMenuProps
+    } = this.props;
 
     return (
       userSignedIn && (
@@ -86,8 +91,10 @@ class Header extends React.Component {
               </a>
             </div>
             <div className={cs.fill} />
-            <MainMenu adminUser={adminUser} />
-            <UserMenuDropDown adminUser={adminUser} {...userMenuProps} />
+            {!disableNavigation && <MainMenu adminUser={adminUser} />}
+            {!disableNavigation && (
+              <UserMenuDropDown adminUser={adminUser} {...userMenuProps} />
+            )}
           </div>
           {
             // Initialize the toast container - can be done anywhere (has absolute positioning)
@@ -102,6 +109,7 @@ class Header extends React.Component {
 Header.propTypes = {
   adminUser: PropTypes.bool,
   userSignedIn: PropTypes.bool,
+  disableNavigation: PropTypes.bool,
 };
 
 const UserMenuDropDown = ({

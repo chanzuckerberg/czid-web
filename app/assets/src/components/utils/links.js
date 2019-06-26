@@ -31,4 +31,22 @@ const openUrlWithTimeout = link => {
   }, 2000);
 };
 
-export { openUrl, openUrlInNewTab, downloadStringToFile, openUrlWithTimeout };
+// Opens a new popup window centered to the current window.
+const openUrlInPopupWindow = (url, windowName, windowWidth, windowHeight) => {
+  const left = window.screenLeft + (window.outerWidth - windowWidth) / 2;
+  const top = window.screenTop + (window.outerHeight - windowHeight) / 2;
+
+  return window.open(
+    url,
+    windowName,
+    `left=${left},top=${top},width=${windowWidth},height=${windowHeight},menubar=no,toolbar=no`
+  );
+};
+
+export {
+  openUrl,
+  openUrlInNewTab,
+  downloadStringToFile,
+  openUrlWithTimeout,
+  openUrlInPopupWindow,
+};

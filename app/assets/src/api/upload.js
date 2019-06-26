@@ -4,9 +4,17 @@ import {
   markSampleUploaded,
   uploadFileToUrlWithRetries,
 } from "~/api";
+import { map } from "lodash/fp";
 
 import { bulkUploadWithMetadata } from "~/api/metadata";
 import { putWithCSRF } from "./core";
+
+// TODO(mark): Implement back-end for basespace sample uploading.
+export const bulkUploadBasespace = async ({ samples, metadata }) => {
+  return {
+    sample_ids: map("id", samples),
+  };
+};
 
 export const bulkUploadRemote = ({ samples, metadata }) =>
   metadata

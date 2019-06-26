@@ -1,0 +1,39 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.basespaceSampleImport {
+  .projectSelectContainer {
+    display: flex;
+  }
+
+  .helpText {
+    @include font-body-xxs;
+    margin-bottom: 10px;
+    color: $medium-grey;
+  }
+
+  .connectProjectButton {
+    width: 180px;
+    margin-left: 10px;
+  }
+
+  .label {
+    @include font-header-s;
+    margin-bottom: 5px;
+  }
+
+  .loadingMessage {
+    @include font-body-xxs;
+    color: $medium-grey;
+    margin-top: 5px;
+    margin-left: 2px;
+
+    span {
+      margin-left: 5px;
+    }
+  }
+
+  .notification {
+    margin-top: 10px;
+  }
+}
