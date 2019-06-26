@@ -25,7 +25,7 @@ class DiscoveryMap extends React.Component {
 
   updateViewport = viewport => {
     let geoLevel;
-    if (viewport.zoom < 3) {
+    if (viewport.zoom < 4) {
       geoLevel = "country";
     } else if (viewport.zoom < 5) {
       geoLevel = "state";
@@ -168,13 +168,9 @@ class DiscoveryMap extends React.Component {
     // Re-cluster the mapLocationData
     let clusteredData = {};
     for (const [id, entry] of Object.entries(mapLocationData)) {
-      if (entry.geo_level === geoLevel) {
+      if (indexOf(entry.geo_level, allLevels) <= indexOf(geoLevel, allLevels)) {
         clusteredData[id] = cloneDeep(entry);
       } else {
-        console.log(
-          indexOf(geoLevel, allLevels),
-          indexOf(entry.geo_level, allLevels)
-        );
         const ancestorId = entry[`${geoLevel}_id`];
         const ancestor = clusteredData[ancestorId];
         if (ancestor) {
@@ -186,6 +182,10 @@ class DiscoveryMap extends React.Component {
     }
 
     console.log("result: ", clusteredData);
+
+    if (!["country", "state"].includes(geoLevel)) {
+      clusteredData = mapLocationData;
+    }
 
     return (
       <BaseMap
