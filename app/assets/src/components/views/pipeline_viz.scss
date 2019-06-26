@@ -12,6 +12,7 @@
   justify-content: center;
   align-items: center;
   margin: 24px;
+  cursor: default;
 }
 
 .stageButton {
@@ -53,10 +54,8 @@
 }
 
 .panZoomContainer {
-  & > div {
-    cursor: move;
-    transition: 0.1s;
-  }
+  cursor: grab !important;
+  outline: none;
 }
 
 .plusMinusControl {
