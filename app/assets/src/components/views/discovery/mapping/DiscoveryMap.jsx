@@ -23,6 +23,7 @@ class DiscoveryMap extends React.Component {
       tooltipShouldClose: false,
     };
 
+    // By default throttle includes the trailing event
     this.logAnalyticsEventThrottled = throttle(
       DEFAULT_THROTTLE_MS,
       logAnalyticsEvent
