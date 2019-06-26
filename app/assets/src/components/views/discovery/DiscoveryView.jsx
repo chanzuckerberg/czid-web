@@ -883,11 +883,6 @@ class DiscoveryView extends React.Component {
   handleGeoLevelChange = geoLevel => {
     const { rawMapLocationData, currentTab } = this.state;
 
-    if (!["country", "state"].includes(geoLevel)) {
-      this.setState({ mapLocationData: rawMapLocationData });
-      return;
-    }
-
     const idField = currentTab === "samples" ? "sample_ids" : "project_ids";
 
     // Re-cluster the mapLocationData
@@ -897,19 +892,40 @@ class DiscoveryView extends React.Component {
         indexOf(entry.geo_level, GEO_LEVEL_ORDER) <
         indexOf(geoLevel, GEO_LEVEL_ORDER)
       ) {
+        console.log("higher than the current level", entry.name);
         // Higher than the current geo level
         clusteredData[id] = cloneDeep(entry);
       } else if (
         indexOf(entry.geo_level, GEO_LEVEL_ORDER) ===
         indexOf(geoLevel, GEO_LEVEL_ORDER)
       ) {
+        // At the current level
+        console.log("at level", entry.name);
         clusteredData[id] = cloneDeep(entry);
       } else if (
         indexOf(entry.geo_level, GEO_LEVEL_ORDER) >
         indexOf(geoLevel, GEO_LEVEL_ORDER)
       ) {
-        ["country", "state"].forEach(level => {
-          const ancestorId = entry[`${level}_id`];
+        // Below the current level
+        console.log("below the current level", entry.name);
+        const ancestorId = entry[`${geoLevel}_id`];
+        const ancestor = clusteredData[ancestorId];
+        if (ancestor) {
+          ancestor[idField] = union(ancestor[idField], entry[idField]);
+        } else if (ancestorId) {
+          clusteredData[ancestorId] = cloneDeep(rawMapLocationData[ancestorId]);
+        }
+      }
+
+      console.log("Entry, view level: ", entry.name, geoLevel);
+      ["country", "state"].forEach(ancestorLevel => {
+        if (
+          indexOf(ancestorLevel, GEO_LEVEL_ORDER) <=
+          indexOf(geoLevel, GEO_LEVEL_ORDER)
+        ) {
+          console.log(ancestorLevel, geoLevel);
+          // Add yourself to the country or state bubble still.
+          const ancestorId = entry[`${ancestorLevel}_id`];
           const ancestor = clusteredData[ancestorId];
           if (ancestor) {
             ancestor[idField] = union(ancestor[idField], entry[idField]);
@@ -918,8 +934,8 @@ class DiscoveryView extends React.Component {
               rawMapLocationData[ancestorId]
             );
           }
-        });
-      }
+        }
+      });
     }
 
     this.setState({ mapLocationData: clusteredData });
