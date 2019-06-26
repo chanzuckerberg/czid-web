@@ -8,13 +8,9 @@ import botocore
 
 from mock import patch, call
 
-# This is not a python package, so we need some hack to import class under test
-project_root_dir_name = os.path.realpath(os.path.dirname(os.path.realpath(__file__)) + "/../../")
-python_file_dir_name = project_root_dir_name + "/app/jobs/" # batch_autoscaling.py
-sys.path.append(python_file_dir_name)
-
 # Class under test
-import batch_autoscaling # pylint: disable=wrong-import-position, import-error
+import batch_autoscaling # pylint: disable=import-error
+
 
 FAKE_RESPONSE_METADATA = {
     'RetryAttempts': 0,

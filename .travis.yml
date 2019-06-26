@@ -23,6 +23,7 @@ script:
   - docker-compose run webtest "rails test"
   - docker-compose run webtest "rake db:drop db:create db:migrate db:reset"
   - docker-compose run webtest "rspec"
+  - docker-compose run --rm webtest "pip install mock; python -m unittest discover -v -s /app/test/ -p 'test_*.py'"
   - brakeman --no-pager || true
 env:
   global:
