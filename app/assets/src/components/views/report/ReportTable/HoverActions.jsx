@@ -13,7 +13,7 @@ import cs from "./hover_actions.scss";
 
 class HoverActions extends React.Component {
   state = {
-    phyloTreeCreationModalOpen: false
+    phyloTreeCreationModalOpen: false,
   };
 
   handlePhyloModalOpen = () => {
@@ -38,8 +38,8 @@ class HoverActions extends React.Component {
         enabled: this.props.ncbiEnabled,
         disabledMessage: "NCBI Taxonomy Not Found",
         params: {
-          taxId: this.props.taxId
-        }
+          taxId: this.props.taxId,
+        },
       },
       {
         message: "FASTA Download",
@@ -49,8 +49,8 @@ class HoverActions extends React.Component {
         disabledMessage: "FASTA Download Not Available",
         params: {
           taxId: this.props.taxId,
-          taxLevel: this.props.taxLevel
-        }
+          taxLevel: this.props.taxLevel,
+        },
       },
       {
         message: "Contigs Download",
@@ -59,8 +59,8 @@ class HoverActions extends React.Component {
         enabled: this.props.contigVizEnabled,
         disabledMessage: "No Contigs Available",
         params: {
-          taxId: this.props.taxId
-        }
+          taxId: this.props.taxId,
+        },
       },
       hasCoverageViz
         ? {
@@ -74,8 +74,8 @@ class HoverActions extends React.Component {
               taxId: this.props.taxId,
               taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
               taxName: this.props.taxName,
-              taxCommonName: this.props.taxCommonName
-            }
+              taxCommonName: this.props.taxCommonName,
+            },
           }
         : {
             message: "Alignment Visualization",
@@ -87,8 +87,8 @@ class HoverActions extends React.Component {
             params: {
               taxId: this.props.taxId,
               taxLevel: this.props.taxLevel === 1 ? "species" : "genus",
-              taxName: this.props.taxName
-            }
+              taxName: this.props.taxName,
+            },
           },
       {
         message: (
@@ -100,8 +100,8 @@ class HoverActions extends React.Component {
         handleClick: this.handlePhyloModalOpen,
         enabled: this.props.phyloTreeEnabled,
         disabledMessage:
-          "Phylogenetic Analysis Not Available - requires 100+ reads in NT/NR"
-      }
+          "Phylogenetic Analysis Not Available - requires 100+ reads in NT/NR",
+      },
     ];
   };
 
@@ -161,7 +161,7 @@ class HoverActions extends React.Component {
       taxName,
       projectId,
       projectName,
-      className
+      className,
     } = this.props;
 
     return (
@@ -203,7 +203,7 @@ HoverActions.propTypes = {
   onContigVizClick: PropTypes.func.isRequired,
   phyloTreeEnabled: PropTypes.bool,
   onPhyloTreeModalOpened: PropTypes.func,
-  pipelineVersion: PropTypes.string
+  pipelineVersion: PropTypes.string,
 };
 
 export default HoverActions;

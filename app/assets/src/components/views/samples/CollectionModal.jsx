@@ -19,7 +19,7 @@ class CollectionModal extends React.Component {
       backgroundCreationResponse: null,
       backgroundDescription: null,
       backgroundName: null,
-      modalOpen: false
+      modalOpen: false,
     };
   }
 
@@ -78,12 +78,12 @@ class CollectionModal extends React.Component {
       backgroundCreationResponse = await createBackground({
         name: backgroundName,
         description: backgroundDescription,
-        sampleIds: Array.from(selectedSampleIds)
+        sampleIds: Array.from(selectedSampleIds),
       });
     } catch (_) {
       backgroundCreationResponse = {
         status: "error",
-        message: "Something went wrong."
+        message: "Something went wrong.",
       };
     }
     this.setState({ backgroundCreationResponse });
@@ -112,7 +112,7 @@ class CollectionModal extends React.Component {
               this.handleCreateBackground,
               "CollectionModal_create-collection-button_clicked",
               {
-                selectedSampleIds: this.props.selectedSampleIds.length
+                selectedSampleIds: this.props.selectedSampleIds.length,
               }
             )}
           />
@@ -188,7 +188,7 @@ class CollectionModal extends React.Component {
 
 CollectionModal.defaultProps = {
   maxSamplesShown: 10,
-  numDescriptionRows: 7
+  numDescriptionRows: 7,
 };
 
 CollectionModal.propTypes = {
@@ -196,7 +196,7 @@ CollectionModal.propTypes = {
   numDescriptionRows: PropTypes.number,
   fetchedSamples: PropTypes.array,
   selectedSampleIds: PropTypes.instanceOf(Set),
-  trigger: PropTypes.node.isRequired
+  trigger: PropTypes.node.isRequired,
 };
 
 export default CollectionModal;

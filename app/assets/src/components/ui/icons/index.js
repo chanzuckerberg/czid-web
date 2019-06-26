@@ -68,14 +68,14 @@ export default {
     WormIcon,
     PublicProjectIcon,
     PrivateProjectIcon,
-    SaveIcon
+    SaveIcon,
   },
   FONT_AWESOME: {
     CheckmarkIcon,
     InsightIcon,
-    LoadingIcon
+    LoadingIcon,
   },
   LOGO: {
-    LogoIcon
-  }
+    LogoIcon,
+  },
 };

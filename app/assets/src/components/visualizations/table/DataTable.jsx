@@ -13,7 +13,7 @@ class DataTable extends React.Component {
       filter: "",
       selectedRows: new Set(this.props.selectedRows || []),
       originalData: this.props.data,
-      indexedData: DataTable.indexData(this.props.data)
+      indexedData: DataTable.indexData(this.props.data),
     };
 
     this.handleCheckBoxChange = this.handleCheckBoxChange.bind(this);
@@ -199,16 +199,16 @@ DataTable.propTypes = {
   selectedRows: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.number),
     // allow Set = TODO: replace by custom function
-    PropTypes.object
+    PropTypes.object,
   ]),
   striped: PropTypes.bool,
   // TODO(mark): Make column width sizing more robust.
   columnWidth: PropTypes.number,
-  getColumnWidth: PropTypes.func
+  getColumnWidth: PropTypes.func,
 };
 
 DataTable.defaultProps = {
-  striped: true
+  striped: true,
 };
 
 export default DataTable;

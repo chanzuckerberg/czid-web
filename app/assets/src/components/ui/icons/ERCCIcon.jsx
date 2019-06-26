@@ -84,7 +84,7 @@ const ERCCIcon = props => {
 };
 
 ERCCIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default ERCCIcon;

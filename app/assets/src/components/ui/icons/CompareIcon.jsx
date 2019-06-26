@@ -23,7 +23,7 @@ const CompareIcon = props => {
 };
 
 CompareIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default CompareIcon;

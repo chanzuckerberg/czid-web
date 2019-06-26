@@ -23,8 +23,8 @@ class SampleUploadFlow extends React.Component {
     stepsEnabled: {
       uploadSamples: true,
       uploadMetadata: false,
-      review: false
-    }
+      review: false,
+    },
   };
 
   componentDidMount() {
@@ -41,7 +41,7 @@ class SampleUploadFlow extends React.Component {
     samples,
     project,
     uploadType,
-    sampleNamesToFiles
+    sampleNamesToFiles,
   }) => {
     this.setState({
       samples,
@@ -49,7 +49,7 @@ class SampleUploadFlow extends React.Component {
       uploadType,
       sampleNamesToFiles,
       currentStep: "uploadMetadata",
-      stepsEnabled: set("uploadMetadata", true, this.state.stepsEnabled)
+      stepsEnabled: set("uploadMetadata", true, this.state.stepsEnabled),
     });
   };
 
@@ -66,14 +66,14 @@ class SampleUploadFlow extends React.Component {
       const hostGenomeId = find(
         [
           "name",
-          get("host_genome", metadataRow) || get("Host Genome", metadataRow)
+          get("host_genome", metadataRow) || get("Host Genome", metadataRow),
         ],
-        this.props.host_genomes
+        this.props.hostGenomes
       ).id;
 
       return {
         ...sample,
-        host_genome_id: hostGenomeId
+        host_genome_id: hostGenomeId,
       };
     });
 
@@ -88,7 +88,7 @@ class SampleUploadFlow extends React.Component {
       metadata: newMetadata,
       metadataIssues: issues,
       currentStep: "review",
-      stepsEnabled: set("review", true, this.state.stepsEnabled)
+      stepsEnabled: set("review", true, this.state.stepsEnabled),
     });
   };
 
@@ -97,8 +97,8 @@ class SampleUploadFlow extends React.Component {
       stepsEnabled: {
         uploadSamples: true,
         uploadMetadata: false,
-        review: false
-      }
+        review: false,
+      },
     });
   };
 
@@ -107,21 +107,21 @@ class SampleUploadFlow extends React.Component {
       stepsEnabled: {
         uploadSamples: true,
         uploadMetadata: true,
-        review: false
-      }
+        review: false,
+      },
     });
   };
 
   handleStepSelect = step => {
     this.setState({
-      currentStep: step
+      currentStep: step,
     });
   };
 
   getSamplesForMetadataValidation = () => {
     return this.state.samples.map(sample => ({
       name: sample.name,
-      project_id: sample.project_id
+      project_id: sample.project_id,
     }));
   };
 
@@ -134,6 +134,9 @@ class SampleUploadFlow extends React.Component {
           onDirty={this.samplesChanged}
           onUploadSamples={this.handleUploadSamples}
           visible={this.state.currentStep === "uploadSamples"}
+          basespaceClientId={this.props.basespaceClientId}
+          basespaceOauthRedirectUri={this.props.basespaceOauthRedirectUri}
+          admin={this.props.admin}
         />
         {this.state.samples && (
           <UploadMetadataStep
@@ -152,7 +155,7 @@ class SampleUploadFlow extends React.Component {
               uploadType={this.state.uploadType}
               project={this.state.project}
               sampleNamesToFiles={this.state.sampleNamesToFiles}
-              hostGenomes={this.props.host_genomes}
+              hostGenomes={this.props.hostGenomes}
               visible={this.state.currentStep === "review"}
               onUploadStatusChange={this.onUploadStatusChange}
               onStepSelect={this.handleStepSelect}
@@ -168,8 +171,8 @@ class SampleUploadFlow extends React.Component {
       stepsEnabled: {
         uploadSamples: !uploadStatus,
         uploadMetadata: !uploadStatus,
-        review: !uploadStatus
-      }
+        review: !uploadStatus,
+      },
     });
   };
 
@@ -193,8 +196,10 @@ class SampleUploadFlow extends React.Component {
 
 SampleUploadFlow.propTypes = {
   csrf: PropTypes.string,
-  host_genomes: PropTypes.arrayOf(PropTypes.HostGenome),
-  admin: PropTypes.bool
+  hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome),
+  admin: PropTypes.bool,
+  basespaceClientId: PropTypes.string.isRequired,
+  basespaceOauthRedirectUri: PropTypes.string.isRequired,
 };
 
 export default SampleUploadFlow;

@@ -1,15 +1,17 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .sidebar {
   font-size: 12px;
   width: 300px;
   overflow-y: scroll;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 
   .container {
     display: flex;
     flex-direction: column;
-    height: 100%;
     flex: 1 0 auto;
 
     .table {
@@ -22,12 +24,46 @@
   .noData {
     color: $medium-grey;
     margin: 20px;
+    text-align: center;
+  }
+
+  .tabs {
+    margin: 15px 10px 5px;
+    flex: 0 0 auto;
+
+    .tabLabel {
+      @include font-header-xs;
+      margin-right: 10px;
+    }
+
+    .tabCounter {
+      color: $medium-grey;
+      font-size: $font-size;
+      font-weight: $font-weight-regular;
+    }
+  }
+
+  .summaryInfo {
+    width: initial;
   }
 }
 
-.tableDataRow {
+.tableHeader {
+  padding: 5px 0;
+  margin-left: 0;
+}
+
+.sampleRow {
   align-items: flex-start;
-  padding: 11px 0;
+  padding: 10px 0;
+  margin-left: 0;
+
+  .sample,
+  .tableHeader,
+  .selectColumn {
+    margin-left: 0;
+    margin-right: 5px;
+  }
 }
 
 .basicCell {
@@ -36,6 +72,17 @@
   margin-top: 2px;
 }
 
-.sampleHeader {
+.sampleHeader,
+.projectHeader {
   text-align: left;
+}
+
+.projectRow {
+  margin-left: 0;
+  padding: 5px 0;
+
+  .project {
+    margin-left: 5px;
+    margin-right: 5px;
+  }
 }

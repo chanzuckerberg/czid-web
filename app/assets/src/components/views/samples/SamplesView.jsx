@@ -2,27 +2,26 @@ import cx from "classnames";
 import { difference, find, isEmpty, union } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import PropTypes from "~/components/utils/propTypes";
-import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
-import TableRenderers from "~/components/views/discovery/TableRenderers";
-import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import CollectionModal from "~/components/views/samples/CollectionModal";
-import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
-import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
-import { DownloadIconDropdown } from "~ui/controls/dropdowns";
-import { Menu, MenuItem } from "~ui/controls/Menu";
-import BulletListIcon from "~ui/icons/BulletListIcon";
-import GlobeLinedIcon from "~ui/icons/GlobeLinedIcon";
+import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
 import HeatmapIcon from "~ui/icons/HeatmapIcon";
-import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
-import SaveIcon from "~ui/icons/SaveIcon";
+import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import Label from "~ui/labels/Label";
+import MapToggle from "~/components/views/discovery/mapping/MapToggle";
+import NarrowContainer from "~/components/layout/NarrowContainer";
+import PhyloTreeCreationModal from "~/components/views/phylo_tree/PhyloTreeCreationModal";
+import PhyloTreeIcon from "~ui/icons/PhyloTreeIcon";
+import PropTypes from "~/components/utils/propTypes";
+import ReportsDownloader from "~/components/views/samples/ReportsDownloader";
+import SaveIcon from "~ui/icons/SaveIcon";
+import TableRenderers from "~/components/views/discovery/TableRenderers";
+import { DownloadIconDropdown } from "~ui/controls/dropdowns";
+import { getURLParamString } from "~/helpers/url";
+import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
-
-const DISPLAYS = ["table", "map"];
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -32,7 +31,7 @@ class SamplesView extends React.Component {
 
     this.state = {
       phyloTreeCreationModalOpen: false,
-      selectedSampleIds: new Set()
+      selectedSampleIds: new Set(),
     };
 
     this.columns = [
@@ -41,25 +40,25 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         width: 350,
         cellRenderer: TableRenderers.renderSample,
-        headerClassName: cs.sampleHeader
+        headerClassName: cs.sampleHeader,
       },
       {
         dataKey: "createdAt",
         label: "Uploaded On",
         width: 120,
         className: cs.basicCell,
-        cellRenderer: TableRenderers.renderDateWithElapsed
+        cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
         dataKey: "host",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "collectionLocation",
         label: "Location",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "totalReads",
@@ -67,14 +66,14 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumberWithCommas(rowData[dataKey])
+          TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
         dataKey: "nonHostReads",
         label: "Passed Filters",
         flexGrow: 1,
         className: cs.basicCell,
-        cellRenderer: TableRenderers.renderNumberAndPercentage
+        cellRenderer: TableRenderers.renderNumberAndPercentage,
       },
       {
         dataKey: "qcPercent",
@@ -82,7 +81,7 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatPercentage(rowData[dataKey])
+          TableRenderers.formatPercentage(rowData[dataKey]),
       },
       {
         dataKey: "duplicateCompressionRatio",
@@ -90,7 +89,7 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatPercentage(rowData[dataKey])
+          TableRenderers.formatPercentage(rowData[dataKey]),
       },
       {
         dataKey: "erccReads",
@@ -98,24 +97,24 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumberWithCommas(rowData[dataKey])
+          TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
         dataKey: "notes",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "nucleotideType",
         label: "Nucleotide Type",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "sampleType",
         label: "Sample Type",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       },
       {
         dataKey: "subsampledFraction",
@@ -123,7 +122,7 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatNumber(rowData[dataKey])
+          TableRenderers.formatNumber(rowData[dataKey]),
       },
       {
         dataKey: "totalRuntime",
@@ -131,8 +130,8 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatDuration(rowData[dataKey])
-      }
+          TableRenderers.formatDuration(rowData[dataKey]),
+      },
     ];
 
     // TODO(jsheu): Upon release, replace Location 'v1'
@@ -141,7 +140,7 @@ class SamplesView extends React.Component {
         dataKey: "collectionLocationV2",
         label: "Location v2",
         flexGrow: 1,
-        className: cs.basicCell
+        className: cs.basicCell,
       });
     }
   }
@@ -156,7 +155,7 @@ class SamplesView extends React.Component {
     }
     this.setState({ selectedSampleIds: newSelected });
     logAnalyticsEvent("SamplesView_row_selected", {
-      selectedSampleIds: newSelected.length
+      selectedSampleIds: newSelected.length,
     });
   };
 
@@ -195,29 +194,63 @@ class SamplesView extends React.Component {
         ? mapSidebarSelectedSampleIds
         : selectedSampleIds;
 
-    const log = () =>
-      logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
-        selectedSampleIds: targetSampleIds.length
-      });
-    return targetSampleIds.size < 2 ? (
-      <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
-    ) : (
-      <a
-        onClick={log}
-        href={`/visualizations/heatmap?sampleIds=${Array.from(
-          targetSampleIds
-        )}`}
-      >
-        <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
-      </a>
-    );
+    if (this.props.admin) {
+      const heatmapOptions = [
+        { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
+        { text: "AMR Heatmap", value: "/amr_heatmap" },
+      ];
+
+      return targetSampleIds.size < 2 ? (
+        <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
+      ) : (
+        <BareDropdown
+          hideArrow
+          className={cx(cs.icon, cs.heatmapDropdown)}
+          items={heatmapOptions.map(option => {
+            const params = getURLParamString({
+              sampleIds: Array.from(targetSampleIds),
+            });
+            const log = () =>
+              logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
+                option,
+                selectedSampleIds: targetSampleIds.length,
+              });
+            return (
+              <BareDropdown.Item
+                key={option.text}
+                text={<a href={`${option.value}?${params}`}>{option.text}</a>}
+                onClick={log}
+              />
+            );
+          })}
+          trigger={<HeatmapIcon className={cx(cs.icon, cs.heatmap)} />}
+        />
+      );
+    } else {
+      const log = () =>
+        logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
+          selectedSampleIds: targetSampleIds.length,
+        });
+      return targetSampleIds.size < 2 ? (
+        <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
+      ) : (
+        <a
+          onClick={log}
+          href={`/visualizations/heatmap?sampleIds=${Array.from(
+            targetSampleIds
+          )}`}
+        >
+          <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
+        </a>
+      );
+    }
   };
 
   renderDownloadTrigger = () => {
     const {
       projectId,
       currentDisplay,
-      mapSidebarSelectedSampleIds
+      mapSidebarSelectedSampleIds,
     } = this.props;
     const { selectedSampleIds } = this.state;
 
@@ -230,13 +263,13 @@ class SamplesView extends React.Component {
     if (projectId) {
       downloadOptions.push({
         text: "Sample Reports",
-        value: "project_reports"
+        value: "project_reports",
       });
     }
     if (this.props.admin) {
       downloadOptions.push({
         text: "Host Gene Counts",
-        value: "host_gene_counts"
+        value: "host_gene_counts",
       });
     }
     return (
@@ -247,12 +280,12 @@ class SamplesView extends React.Component {
           new ReportsDownloader({
             projectId,
             downloadOption,
-            selectedSampleIds: targetSampleIds
+            selectedSampleIds: targetSampleIds,
           });
           logAnalyticsEvent("SamplesView_download-dropdown-option_clicked", {
             projectId,
             selectedSamplesCount: targetSampleIds.length,
-            downloadOption
+            downloadOption,
           });
         }}
       />
@@ -264,10 +297,12 @@ class SamplesView extends React.Component {
       currentDisplay,
       mapPreviewedSamples,
       mapSidebarSelectedSampleIds,
-      samples
+      samples,
     } = this.props;
     const { selectedSampleIds } = this.state;
 
+    // NOTE(jsheu): For mapSidebar sample names to appear in CollectionModal,
+    // they need to be presently loaded/fetched. Otherwise the ids work but says "and more..." for un-fetched samples.
     const targetSamples =
       currentDisplay === "map" ? mapPreviewedSamples : samples;
     const targetSampleIds =
@@ -300,7 +335,7 @@ class SamplesView extends React.Component {
     const {
       allowedFeatures,
       currentDisplay,
-      mapSidebarSelectedSampleIds
+      mapSidebarSelectedSampleIds,
     } = this.props;
     const { selectedSampleIds } = this.state;
 
@@ -377,37 +412,36 @@ class SamplesView extends React.Component {
   renderDisplaySwitcher = () => {
     const { currentDisplay, onDisplaySwitch } = this.props;
     return (
-      <div className={cs.displaySwitcher}>
-        <Menu compact className={cs.switcherMenu}>
-          {DISPLAYS.map(display => (
-            <MenuItem
-              className={cs.menuItem}
-              active={currentDisplay === display}
-              onClick={withAnalytics(
-                () => onDisplaySwitch(display),
-                `SamplesView_${display}-switch_clicked`
-              )}
-            >
-              {display === "map" ? (
-                <GlobeLinedIcon className={cs.icon} />
-              ) : (
-                <BulletListIcon className={cs.icon} />
-              )}
-            </MenuItem>
-          ))}
-        </Menu>
-      </div>
+      <MapToggle
+        currentDisplay={currentDisplay}
+        onDisplaySwitch={display => {
+          onDisplaySwitch(display);
+          logAnalyticsEvent(`SamplesView_${display}-switch_clicked`);
+        }}
+      />
     );
   };
 
   renderMap = () => {
-    const { mapTilerKey, mapLocationData, onMapTooltipTitleClick } = this.props;
+    const {
+      mapLocationData,
+      mapPreviewedLocationId,
+      mapTilerKey,
+      onClearFilters,
+      onMapClick,
+      onMapMarkerClick,
+      onMapTooltipTitleClick,
+    } = this.props;
     return (
       <div className={cs.map}>
         <DiscoveryMap
-          mapTilerKey={mapTilerKey}
           mapLocationData={mapLocationData}
+          mapTilerKey={mapTilerKey}
+          onClearFilters={onClearFilters}
+          onClick={onMapClick}
+          onMarkerClick={onMapMarkerClick}
           onTooltipTitleClick={onMapTooltipTitleClick}
+          previewedLocationId={mapPreviewedLocationId}
         />
       </div>
     );
@@ -427,7 +461,7 @@ class SamplesView extends React.Component {
     onSampleSelected && onSampleSelected({ sample, currentEvent: event });
     logAnalyticsEvent("SamplesView_row_clicked", {
       sampleId: sample.id,
-      sampleName: sample.name
+      sampleName: sample.name,
     });
   };
 
@@ -436,7 +470,11 @@ class SamplesView extends React.Component {
     const { phyloTreeCreationModalOpen } = this.state;
     return (
       <div className={cs.container}>
-        {this.renderToolbar()}
+        {currentDisplay === "table" ? (
+          this.renderToolbar()
+        ) : (
+          <NarrowContainer>{this.renderToolbar()}</NarrowContainer>
+        )}
         {currentDisplay === "table" ? this.renderTable() : this.renderMap()}
         {phyloTreeCreationModalOpen && (
           <PhyloTreeCreationModal
@@ -460,10 +498,10 @@ SamplesView.defaultProps = {
     "host",
     "collectionLocation",
     "nonHostReads",
-    "qcPercent"
+    "qcPercent",
   ],
   protectedColumns: ["sample"],
-  currentDisplay: "table"
+  currentDisplay: "table",
 };
 
 SamplesView.propTypes = {
@@ -471,18 +509,22 @@ SamplesView.propTypes = {
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   currentDisplay: PropTypes.string.isRequired,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
+  mapPreviewedLocationId: PropTypes.number,
   mapPreviewedSamples: PropTypes.array,
   mapSidebarSelectedSampleIds: PropTypes.instanceOf(Set),
   mapTilerKey: PropTypes.string,
+  onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
+  onMapClick: PropTypes.func,
+  onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onSampleSelected: PropTypes.func,
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
   samples: PropTypes.array,
   selectableIds: PropTypes.array.isRequired,
-  admin: PropTypes.bool
+  admin: PropTypes.bool,
 };
 
 export default SamplesView;

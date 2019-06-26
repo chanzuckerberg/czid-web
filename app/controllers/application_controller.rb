@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   before_action :check_rack_mini_profiler
   before_action :check_browser
   before_action :set_current_context_for_logging!
+  before_action :set_application_view_variables
 
   include Consul::Controller
 
@@ -36,6 +37,10 @@ class ApplicationController < ActionController::Base
     payload[:user_id] = current_user.try(:id) if current_user
   end
 
+  def disable_header_navigation
+    @disable_header_navigation = true
+  end
+
   protected
 
   def assert_access
@@ -45,13 +50,6 @@ class ApplicationController < ActionController::Base
 
   def check_access
     raise "action doesn't check against access control" unless @access_checked
-  end
-
-  # TODO: (gdingle): how is this related to request_context in ApplicationHelper?
-  def request_context
-    {
-      enabledFeatures: current_user.allowed_featured_list
-    }
   end
 
   def get_background_id(sample)
@@ -99,6 +97,10 @@ class ApplicationController < ActionController::Base
     if current_user && current_user.admin?
       Rack::MiniProfiler.authorize_request
     end
+  end
+
+  def set_application_view_variables
+    @disable_header_navigation = false
   end
 
   # Set current user and request to global for use in logging in ActiveRecord.

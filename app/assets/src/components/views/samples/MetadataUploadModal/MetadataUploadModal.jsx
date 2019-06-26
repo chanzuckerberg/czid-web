@@ -20,24 +20,24 @@ class MetadataUploadModal extends React.Component {
   state = {
     metadata: null,
     issues: null,
-    projectSamples: null
+    projectSamples: null,
   };
 
   async componentDidMount() {
     const projectSamples = await getSamplesV1({
       project_id: this.props.project.id,
-      basic: true
+      basic: true,
     });
 
     this.setState({
-      projectSamples
+      projectSamples,
     });
   }
 
   handleMetadataChange = ({ metadata, issues }) => {
     this.setState({
       metadata,
-      issues
+      issues,
     });
   };
 
@@ -67,7 +67,7 @@ class MetadataUploadModal extends React.Component {
       logAnalyticsEvent("MetadataUploadModal_modal_error", {
         projectId: this.props.project.id,
         projectSamples: this.state.projectSamples.length,
-        errors: response.errors.length
+        errors: response.errors.length,
       });
     } else {
       showToast(
@@ -77,13 +77,13 @@ class MetadataUploadModal extends React.Component {
           </Notification>
         ),
         {
-          autoClose: 3000
+          autoClose: 3000,
         }
       );
 
       logAnalyticsEvent("MetadataUploadModal_modal_success", {
         projectId: this.props.project.id,
-        projectSamples: this.state.projectSamples.length
+        projectSamples: this.state.projectSamples.length,
       });
     }
   };
@@ -141,8 +141,8 @@ MetadataUploadModal.propTypes = {
   onClose: PropTypes.func,
   project: PropTypes.shape({
     id: PropTypes.number,
-    name: PropTypes.string
-  })
+    name: PropTypes.string,
+  }),
 };
 
 export default MetadataUploadModal;

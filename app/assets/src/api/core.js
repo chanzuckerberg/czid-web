@@ -5,7 +5,7 @@ const postWithCSRF = async (url, params) => {
     const resp = await axios.post(url, {
       ...params,
       // Fetch the CSRF token from the DOM.
-      authenticity_token: document.getElementsByName("csrf-token")[0].content
+      authenticity_token: document.getElementsByName("csrf-token")[0].content,
     });
 
     // Just return the data.
@@ -22,7 +22,7 @@ const putWithCSRF = async (url, params) => {
     const resp = await axios.put(url, {
       ...params,
       // Fetch the CSRF token from the DOM.
-      authenticity_token: document.getElementsByName("csrf-token")[0].content
+      authenticity_token: document.getElementsByName("csrf-token")[0].content,
     });
 
     // Just return the data.
@@ -54,8 +54,8 @@ const deleteWithCSRF = async url => {
     const resp = await axios.delete(url, {
       data: {
         // Fetch the CSRF token from the DOM.
-        authenticity_token: document.getElementsByName("csrf-token")[0].content
-      }
+        authenticity_token: document.getElementsByName("csrf-token")[0].content,
+      },
     });
 
     return resp.data;

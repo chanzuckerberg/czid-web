@@ -8,7 +8,7 @@ const BulletListIcon = props => {
 };
 
 BulletListIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default BulletListIcon;

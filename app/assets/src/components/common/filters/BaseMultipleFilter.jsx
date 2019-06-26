@@ -28,7 +28,7 @@ BaseMultipleFilter.propTypes = {
   onChange: PropTypes.func,
   options: PropTypes.array,
   counters: PropTypes.object,
-  label: PropTypes.string
+  label: PropTypes.string,
 };
 
 export default BaseMultipleFilter;

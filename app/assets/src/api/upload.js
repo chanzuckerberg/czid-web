@@ -2,11 +2,19 @@ import {
   bulkUploadRemoteSamples,
   createSample,
   markSampleUploaded,
-  uploadFileToUrlWithRetries
+  uploadFileToUrlWithRetries,
 } from "~/api";
+import { map } from "lodash/fp";
 
 import { bulkUploadWithMetadata } from "~/api/metadata";
 import { putWithCSRF } from "./core";
+
+// TODO(mark): Implement back-end for basespace sample uploading.
+export const bulkUploadBasespace = async ({ samples, metadata }) => {
+  return {
+    sample_ids: map("id", samples),
+  };
+};
 
 export const bulkUploadRemote = ({ samples, metadata }) =>
   metadata
@@ -21,7 +29,7 @@ export const bulkUploadLocalWithMetadata = ({
   onUploadProgress,
   onUploadError,
   onAllUploadsComplete,
-  onMarkSampleUploadedError
+  onMarkSampleUploadedError,
 }) => {
   // Store the upload progress of file names, so we can track when
   // everything is done.
@@ -78,7 +86,7 @@ export const bulkUploadLocalWithMetadata = ({
               }
             },
             onSuccess: () => onFileUploadSuccess(sampleName, sample.id),
-            onError: error => onUploadError(file, error)
+            onError: error => onUploadError(file, error),
           });
         });
       });
@@ -99,7 +107,7 @@ export const bulkUploadLocal = ({
   onUploadProgress,
   onUploadError,
   onAllUploadsComplete,
-  onMarkSampleUploadedError
+  onMarkSampleUploadedError,
 }) => {
   // Store the upload progress of file names, so we can track when
   // everything is done.
@@ -157,7 +165,7 @@ export const bulkUploadLocal = ({
               }
             },
             onSuccess: () => onFileUploadSuccess(sampleName, sampleId),
-            onError: error => onUploadError(file, error)
+            onError: error => onUploadError(file, error),
           });
         });
       })
@@ -176,7 +184,7 @@ export const startUploadHeartbeat = async sampleId => {
   setInterval(() => {
     putWithCSRF(`/samples/${sampleId}/upload_heartbeat.json`).catch(() =>
       // eslint-disable-next-line no-console
-      console.log("Can't connect to IDseq server.")
+      console.error("Can't connect to IDseq server.")
     );
   }, interval);
 };

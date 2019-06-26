@@ -9,6 +9,7 @@ module LocationTestHelper
       "lon" => -122.45,
       "display_name" => "University of California, San Francisco, Parnassus Avenue, Inner Sunset, San Francisco, San Francisco City and County, California, 94131, USA",
       "address" => {
+        "university" => "University of California, San Francisco",
         "city" => "San Francisco",
         "county" => "San Francisco City and County",
         "state" => "California",
@@ -21,7 +22,7 @@ module LocationTestHelper
 
   FORMATTED_GEOSEARCH_RESPONSE = [
     {
-      "name" => "University of California, San Francisco, Parnassus Avenue, Inner Sunset, San Francisco, San Francisco City and County, California, 94131, USA",
+      "name" => "University of California, San Francisco, San Francisco, San Francisco City and County, California, USA",
       "geo_level" => "city",
       "country_name" => "USA",
       "state_name" => "California",
@@ -49,6 +50,85 @@ module LocationTestHelper
         "country" => "USA",
         "country_code" => "us"
       }
+    }
+  ].freeze
+  API_GEOSEARCH_SF_COUNTY_RESPONSE = [
+    {
+      "place_id" => "214379825",
+      "osm_type" => "relation",
+      "osm_id" => "396487",
+      "lat" => 37.76,
+      # LocationIQ uses 'lon'
+      "lon" => -122.46,
+      "display_name" => "San Francisco City and County, California, USA",
+      "address" => {
+        "county" => "San Francisco City and County",
+        "state" => "California",
+        "country" => "USA",
+        "country_code" => "us"
+      }
+    }
+  ].freeze
+  API_GEOSEARCH_DHAKA_RESPONSE = [
+    {
+      "place_id" => "46003496",
+      "osm_type" => "node",
+      "osm_id" => "3442474911",
+      "lat" => 23.76,
+      "lon" => 90.38,
+      "display_name" => "Dhaka, Dhaka Division, 12, Bangladesh",
+      "address" => {
+        "city" => "Dhaka",
+        "state" => "Dhaka Division",
+        "country" => "Bangladesh",
+        "country_code" => "bd"
+      }
+    }
+  ].freeze
+  FORMATTED_GEOSEARCH_DHAKA_RESPONSE = [
+    {
+      "name" => "Dhaka, Dhaka Division, Bangladesh",
+      "geo_level" => "city",
+      "country_name" => "Bangladesh",
+      "state_name" => "Dhaka Division",
+      "subdivision_name" => "",
+      "city_name" => "Dhaka",
+      "lat" => 23.76,
+      "lng" => 90.38,
+      "country_code" => "bd",
+      "osm_id" => 3_442_474_911,
+      "osm_type" => "node",
+      "locationiq_id" => 46_003_496
+    }
+  ].freeze
+  API_GEOSEARCH_UGANDA_RESPONSE = [
+    {
+      "place_id" => "214342685",
+      "osm_type" => "relation",
+      "osm_id" => "192796",
+      "lat" => 1.53,
+      "lon" => 32.22,
+      "display_name" => "Uganda",
+      "address" => {
+        "country" => "Uganda",
+        "country_code" => "ug"
+      }
+    }
+  ].freeze
+  FORMATTED_GEOSEARCH_UGANDA_RESPONSE = [
+    {
+      "name" => "Uganda",
+      "geo_level" => "country",
+      "country_name" => "Uganda",
+      "state_name" => "",
+      "subdivision_name" => "",
+      "city_name" => "",
+      "lat" => 1.53,
+      "lng" => 32.22,
+      "country_code" => "ug",
+      "osm_id" => 192_796,
+      "osm_type" => "relation",
+      "locationiq_id" => 214_342_685
     }
   ].freeze
 end

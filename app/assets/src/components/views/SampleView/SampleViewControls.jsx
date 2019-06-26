@@ -1,5 +1,6 @@
 import React from "react";
 import SvgSaver from "svgsaver";
+import Nanobar from "nanobar";
 
 import { deleteSample } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -8,7 +9,7 @@ import DownloadButtonDropdown from "~/components/ui/controls/dropdowns/DownloadB
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import {
   getDownloadDropdownOptions,
-  getLinkInfoForDownloadOption
+  getLinkInfoForDownloadOption,
 } from "~/components/views/report/utils/download";
 
 class SampleViewControls extends React.Component {
@@ -34,11 +35,17 @@ class SampleViewControls extends React.Component {
 
   deleteSample = async () => {
     const { sample, project } = this.props;
+    let nanobar = new Nanobar({
+      id: "prog-bar",
+      class: "prog-bar",
+    });
+    nanobar.go(30);
     await deleteSample(sample.id);
+    nanobar.go(100);
     location.href = `/home?project_id=${project.id}`;
     logAnalyticsEvent("SampleViewControls_delete-sample-button_clicked", {
       sampleId: sample.id,
-      sampleName: sample.name
+      sampleName: sample.name,
     });
   };
 
@@ -54,7 +61,7 @@ class SampleViewControls extends React.Component {
           .toLowerCase()}_clicked`,
         {
           sampleId: this.props.sample.id,
-          sampleName: this.props.sample.name
+          sampleName: this.props.sample.name,
         }
       );
 
@@ -93,7 +100,7 @@ class SampleViewControls extends React.Component {
     if (this.props.view === "tree") {
       return [
         { text: "Download Taxon Tree as SVG", value: "taxon_svg" },
-        { text: "Download Taxon Tree as PNG", value: "taxon_png" }
+        { text: "Download Taxon Tree as PNG", value: "taxon_png" },
       ];
     }
     return [];
@@ -106,10 +113,10 @@ class SampleViewControls extends React.Component {
       const downloadOptions = [
         {
           text: "Download Report Table (.csv)",
-          value: "download_csv"
+          value: "download_csv",
         },
         ...getDownloadDropdownOptions(pipelineRun),
-        ...this.getImageDownloadOptions()
+        ...this.getImageDownloadOptions(),
       ];
 
       return (
@@ -136,10 +143,10 @@ SampleViewControls.propTypes = {
   reportPageParams: PropTypes.shape({
     pipeline_version: PropTypes.string,
     // TODO (gdingle): standardize on string or number
-    background_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    background_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   }),
   canEdit: PropTypes.bool,
-  view: PropTypes.string
+  view: PropTypes.string,
 };
 
 export default SampleViewControls;

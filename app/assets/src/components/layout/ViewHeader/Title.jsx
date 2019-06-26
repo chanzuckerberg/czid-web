@@ -8,7 +8,7 @@ import cs from "./view_header.scss";
 
 class Title extends React.Component {
   state = {
-    nameOverflows: false
+    nameOverflows: false,
   };
 
   componentDidMount() {
@@ -31,7 +31,7 @@ class Title extends React.Component {
     // If-statement prevents infinite loop
     if (this.state.nameOverflows !== nameOverflows) {
       this.setState({
-        nameOverflows
+        nameOverflows,
       });
     }
   };
@@ -95,11 +95,11 @@ Title.propTypes = {
     PropTypes.shape({
       label: PropTypes.string.isRequired,
       id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      onClick: PropTypes.func.isRequired
+      onClick: PropTypes.func.isRequired,
     })
   ),
   label: PropTypes.string,
-  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 export default Title;

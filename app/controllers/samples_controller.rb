@@ -292,8 +292,12 @@ class SamplesController < ApplicationController
 
     samples = samples_by_domain(domain)
     samples = filter_samples(samples, params)
-    sample_ids = samples.pluck(:id)
+    sample_data = samples.pluck(:id, :project_id)
+    sample_ids = sample_data.map { |s| s[0] }
+    project_ids = sample_data.map { |s| s[1] }.uniq
 
+    avg_total_reads = nil
+    avg_remaining_reads = nil
     if sample_ids.count > 0
       pipeline_run_ids = top_pipeline_runs_multiget(sample_ids).values
       avg_total_reads, avg_remaining_reads = PipelineRun
@@ -307,6 +311,7 @@ class SamplesController < ApplicationController
       format.json do
         render json: {
           count: sample_ids.count,
+          projectCount: project_ids.count,
           avgTotalReads: avg_total_reads.present? ? avg_total_reads : 0,
           avgAdjustedRemainingReads: avg_remaining_reads.present? ? avg_remaining_reads : 0
         }
@@ -964,20 +969,33 @@ class SamplesController < ApplicationController
   end
 
   # GET /samples/:id/stage_results
+  # GET /samples/:id/stage_results.json
   def stage_results
-    if current_user.allowed_feature_list.include?("pipeline_viz")
-      @results = {}
-      @sample.first_pipeline_run.pipeline_run_stages.each do |stage|
+    pipeline_run = @sample.first_pipeline_run
+    feature_allowed = current_user.allowed_feature_list.include?("pipeline_viz")
+    if feature_allowed && pipeline_run
+      stage_info = {}
+      pipeline_run.pipeline_run_stages.each do |stage|
         if stage.name != "Experimental" || current_user.admin?
-          @results[stage.name] = JSON.parse stage.dag_json
+          stage_info[stage.name] = JSON.parse(stage.dag_json || "{}")
+          stage_info[stage.name][:job_status] = stage.job_status
         end
       end
-      render json: { pipeline_stage_results: @results }
+
+      @results = {
+        pipeline_version: pipeline_run.pipeline_version,
+        stages: stage_info
+      }
+      respond_to do |format|
+        format.html { render template: "samples/stage_results" }
+        format.json { render json: { pipeline_stage_results: @results } }
+      end
     else
+      status = !feature_allowed ? :unauthorized : :not_found
       render(json: {
-               status: :unauthorized,
-               message: "No feature access"
-             }, status: :unauthorized)
+               status: status,
+               message: "Cannot access feature"
+             }, status: status)
     end
   end
 
@@ -1007,6 +1025,8 @@ class SamplesController < ApplicationController
   def upload
     @projects = current_power.updatable_projects
     @host_genomes = host_genomes_list || nil
+    @basespace_client_id = ENV["BASESPACE_CLIENT_ID"] || nil
+    @basespace_oauth_redirect_uri = ENV["BASESPACE_OAUTH_REDIRECT_URI"] || nil
   end
 
   # GET /samples/1/edit

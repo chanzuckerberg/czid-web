@@ -56,7 +56,7 @@ ButtonDropdown.propTypes = {
   primary: PropTypes.bool,
   secondary: PropTypes.bool,
   text: PropTypes.string,
-  direction: PropTypes.oneOf(["left", "right"])
+  direction: PropTypes.oneOf(["left", "right"]),
 };
 
 export default ButtonDropdown;

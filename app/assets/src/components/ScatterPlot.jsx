@@ -19,7 +19,7 @@ class ScatterPlot extends React.Component {
       top: 10,
       left: 40,
       right: 10,
-      bottom: 40
+      bottom: 40,
     };
 
     this.scale = d3.scale.linear;

@@ -12,14 +12,14 @@ class MinContigSizeFilter extends React.Component {
   state = {
     value: this.props.value,
     error: "",
-    previousValue: this.props.value
+    previousValue: this.props.value,
   };
 
   componentDidUpdate(prevProps) {
     if (prevProps.value !== this.props.value) {
       this.setState({
         value: this.props.value,
-        previousValue: this.props.value
+        previousValue: this.props.value,
       });
     }
   }
@@ -35,11 +35,11 @@ class MinContigSizeFilter extends React.Component {
       // Reset back to the previous value.
       this.setState({
         value: this.state.previousValue,
-        error: "Size must be at least 4."
+        error: "Size must be at least 4.",
       });
     } else {
       this.setState({
-        error: ""
+        error: "",
       });
       if (this.props.onChange) {
         this.props.onChange(newValue);
@@ -98,7 +98,7 @@ class MinContigSizeFilter extends React.Component {
 
 MinContigSizeFilter.propTypes = {
   value: PropTypes.number,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };
 
 export default MinContigSizeFilter;

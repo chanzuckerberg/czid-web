@@ -80,16 +80,22 @@ class LocationsController < ApplicationController
     # (a) Filter to samples with collection_location_v2 and non-nil location_id.
     # (b) Pluck location_id, id, and location fields.
     # (c) Map and zip the fields to a hash to convert the plucked array to an object with keys.
-    # (d) Group and key by the location_id and add a list of sample_ids to the location attributes
+    # (d) Group and key by the location_id.
+    # (e) Add lists of sample_ids and project_ids to the location attributes.
+    #
     # Final result is a hash of hashes for frontend lookups.
-    location_fields = [:name, :geo_level, :country_name, :state_name, :subdivision_name, :city_name, :lat, :lng]
     location_data = samples
                     .includes(metadata: [:location, :metadata_field])
                     .where(metadata: { metadata_fields: { name: "collection_location_v2" } })
                     .where.not(metadata: { location_id: nil })
-                    .pluck(:location_id, :id, *location_fields.map { |f| "locations.#{f}" })
-                    .map { |p| [:id, :sample_id, *location_fields].zip(p).to_h }
-                    .group_by { |h| h[:id] }.map { |k, v| [k, v[0].except(:sample_id).merge(sample_ids: v.map { |h| h[:sample_id] })] }.to_h
+                    .pluck(:location_id, :id, :project_id, *Location::DEFAULT_LOCATION_FIELDS.map { |f| "locations.#{f}" })
+                    .map { |p| [:id, :sample_id, :project_id, *Location::DEFAULT_LOCATION_FIELDS].zip(p).to_h }
+                    .group_by { |h| h[:id] }
+                    .map do |k, v|
+                      [k, v[0].except(:sample_id, :project_id)
+                              .merge(sample_ids: v.map { |h| h[:sample_id] })
+                              .merge(project_ids: v.map { |h| h[:project_id] }.uniq)]
+                    end.to_h
 
     respond_to do |format|
       format.json do

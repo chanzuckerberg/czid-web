@@ -17,7 +17,7 @@ class PortalDropdown extends React.Component {
   state = {
     open: false,
     // Used to give the menuContainer min-width equal to the trigger element.
-    triggerWidth: null
+    triggerWidth: null,
   };
 
   componentDidMount() {
@@ -40,7 +40,7 @@ class PortalDropdown extends React.Component {
       // Measure the trigger width.
       triggerWidth: this._triggerRef
         ? this._triggerRef.getBoundingClientRect().width
-        : null
+        : null,
     });
     if (this.props.onOpen) {
       this.props.onOpen();
@@ -50,7 +50,7 @@ class PortalDropdown extends React.Component {
   close = () => {
     this._lastTransform = null;
     this.setState({
-      open: false
+      open: false,
     });
     if (this.props.onClose) {
       this.props.onClose();
@@ -68,7 +68,9 @@ class PortalDropdown extends React.Component {
 
   render() {
     const open =
-      this.props.open === undefined ? this.state.open : this.props.open;
+      this.props.open === undefined || this.props.open === null
+        ? this.state.open
+        : this.props.open;
 
     return (
       <Manager>
@@ -93,7 +95,7 @@ class PortalDropdown extends React.Component {
                 onClick={this.toggleOpen}
               >
                 {React.cloneElement(this.props.trigger, {
-                  active: open
+                  active: open,
                 })}
                 {!this.props.hideArrow && (
                   <i className={cx(cs.arrow, this.state.open && cs.active)} />
@@ -110,7 +112,7 @@ class PortalDropdown extends React.Component {
               }
               modifiers={{
                 preventOverflow: { enabled: false },
-                hide: { enabled: false }
+                hide: { enabled: false },
               }}
             >
               {({ ref, style, placement }) => {
@@ -177,11 +179,11 @@ PortalDropdown.propTypes = {
   onClose: PropTypes.func,
   open: PropTypes.bool,
   hideArrow: PropTypes.bool,
-  arrowInsideTrigger: PropTypes.bool
+  arrowInsideTrigger: PropTypes.bool,
 };
 
 PortalDropdown.defaultProps = {
-  direction: "right"
+  direction: "right",
 };
 
 export default PortalDropdown;

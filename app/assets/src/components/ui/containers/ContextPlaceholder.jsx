@@ -13,7 +13,7 @@ export default class ContextPlaceholder extends React.PureComponent {
 
     this.state = {
       style: this.getStyle(),
-      open: this.props.open
+      open: this.props.open,
     };
   }
 
@@ -128,13 +128,13 @@ ContextPlaceholder.defaultProps = {
   horizontalOffset: 0,
   verticalOffset: 0,
   closeOnOutsideClick: false,
-  open: true
+  open: true,
 };
 
 ContextPlaceholder.propTypes = {
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node
+    PropTypes.node,
   ]),
   onClose: PropTypes.func,
   horizontalOffset: PropTypes.number,
@@ -142,5 +142,5 @@ ContextPlaceholder.propTypes = {
   open: PropTypes.bool,
   position: PropTypes.string,
   closeOnOutsideClick: PropTypes.bool,
-  context: PropTypes.instanceOf(Element)
+  context: PropTypes.instanceOf(Element),
 };

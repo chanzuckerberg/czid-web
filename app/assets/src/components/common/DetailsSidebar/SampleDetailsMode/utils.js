@@ -5,7 +5,7 @@ import { numberWithCommas } from "~/helpers/strings";
 export const processPipelineInfo = additionalInfo => {
   const {
     pipeline_run: pipelineRun,
-    summary_stats: summaryStats
+    summary_stats: summaryStats,
   } = additionalInfo;
 
   const pipelineInfo = {};
@@ -66,5 +66,5 @@ export const processPipelineInfo = additionalInfo => {
 // Format the upload date.
 export const processAdditionalInfo = additionalInfo => ({
   ...additionalInfo,
-  upload_date: moment(additionalInfo.upload_date).format("YYYY-MM-DD")
+  upload_date: moment(additionalInfo.upload_date).format("YYYY-MM-DD"),
 });

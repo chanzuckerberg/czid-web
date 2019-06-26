@@ -6,6 +6,6 @@ export const showToast = (component, params = {}) => {
     closeOnClick: false,
     draggable: false,
     hideProgressBar: true,
-    ...params
+    ...params,
   });
 };

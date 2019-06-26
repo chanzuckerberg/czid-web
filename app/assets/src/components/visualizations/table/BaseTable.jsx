@@ -4,7 +4,7 @@ import {
   AutoSizer,
   Column,
   SortIndicator,
-  Table as VirtualizedTable
+  Table as VirtualizedTable,
 } from "react-virtualized";
 import "react-virtualized/styles.css";
 import cx from "classnames";
@@ -32,7 +32,7 @@ class BaseTable extends React.Component {
     // TOOD: move this to componentDidUpdate and remove from state?
     this.state = {
       activeColumns: this.props.initialActiveColumns,
-      columns: this.setDefaults(this.props.columns)
+      columns: this.setDefaults(this.props.columns),
     };
   }
 
@@ -76,7 +76,7 @@ class BaseTable extends React.Component {
     this.setState({ activeColumns: concat(protectedColumns, selectedColumns) });
     logAnalyticsEvent("BaseTable_column-selector_changed", {
       selectedColumns: selectedColumns.length,
-      protectedColumns: protectedColumns.length
+      protectedColumns: protectedColumns.length,
     });
   };
 
@@ -88,7 +88,7 @@ class BaseTable extends React.Component {
       .filter(column => !includes(column.dataKey, protectedColumns))
       .map(column => ({
         value: column.dataKey,
-        text: column.label
+        text: column.label,
       }));
 
     const value = difference(activeColumns, protectedColumns);
@@ -145,15 +145,17 @@ class BaseTable extends React.Component {
       defaultHeaderHeight,
       defaultRowHeight,
       defaultSelectColumnWidth,
+      forwardRef,
+      headerClassName,
       initialActiveColumns,
       onRowClick,
       onRowsRendered,
-      forwardRef,
       onSort,
       rowClassName,
       rowCount,
       rowGetter,
       rowRenderer,
+      selectableColumnClassName,
       selectableKey,
       sortable,
       sortBy,
@@ -169,7 +171,7 @@ class BaseTable extends React.Component {
           {({ width, height }) => (
             <VirtualizedTable
               gridClassName={cs.grid}
-              headerClassName={cs.header}
+              headerClassName={cx(cs.header, headerClassName)}
               headerHeight={defaultHeaderHeight}
               height={height}
               onRowsRendered={onRowsRendered}
@@ -192,7 +194,7 @@ class BaseTable extends React.Component {
             >
               {selectableKey && (
                 <Column
-                  className={cs.selectableColumn}
+                  className={selectableColumnClassName}
                   dataKey={selectableKey}
                   headerRenderer={this.renderSelectableHeader}
                   cellRenderer={this.renderSelectableCell}
@@ -249,13 +251,13 @@ BaseTable.defaultProps = {
   defaultHeaderHeight: 50,
   defaultRowHeight: 30,
   defaultSelectColumnWidth: 30,
-  selected: new Set()
+  selected: new Set(),
 };
 
 BaseTable.propTypes = {
   columns: PropTypes.arrayOf(
     PropTypes.shape({
-      dataKey: PropTypes.string.isRequired
+      dataKey: PropTypes.string.isRequired,
     })
   ).isRequired,
   defaultCellRenderer: PropTypes.func,
@@ -263,6 +265,7 @@ BaseTable.propTypes = {
   defaultHeaderHeight: PropTypes.number,
   defaultRowHeight: PropTypes.number,
   defaultSelectColumnWidth: PropTypes.number,
+  headerClassName: PropTypes.string,
   // Set of dataKeys of columns to be shown by default
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
   onRowClick: PropTypes.func,
@@ -271,7 +274,7 @@ BaseTable.propTypes = {
   protectedColumns: PropTypes.arrayOf(PropTypes.string),
   forwardRef: PropTypes.oneOfType([
     PropTypes.func,
-    PropTypes.shape({ current: PropTypes.instanceOf(Element) })
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
   ]),
   rowClassName: PropTypes.string,
   rowGetter: PropTypes.func.isRequired,
@@ -281,13 +284,14 @@ BaseTable.propTypes = {
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string,
 
+  selectableColumnClassName: PropTypes.string,
   // make the table selectable, by setting a selectable key
   // the tables will check for the selectable key in the selected set/array
   selectableKey: PropTypes.string,
   selected: PropTypes.instanceOf(Set),
   onSelectRow: PropTypes.func,
   onSelectAllRows: PropTypes.func,
-  selectAllChecked: PropTypes.bool
+  selectAllChecked: PropTypes.bool,
 };
 
 export default BaseTable;

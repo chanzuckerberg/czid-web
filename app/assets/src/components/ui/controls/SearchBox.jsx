@@ -23,14 +23,14 @@ class SearchBox extends React.Component {
       isLoading: false,
       results: [],
       value: "",
-      selectedResult: null
+      selectedResult: null,
     };
 
     this.state = {
       isLoading: false,
       results: [],
       value: this.props.initialValue,
-      selectedResult: null
+      selectedResult: null,
     };
   }
 
@@ -47,7 +47,7 @@ class SearchBox extends React.Component {
       isLoading: false,
       results: [],
       value: this.state.value, // necessary for closing dropdown but keeping text entered in input
-      selectedResult: null
+      selectedResult: null,
     });
   };
 
@@ -86,7 +86,7 @@ class SearchBox extends React.Component {
 
       this.setState({
         isLoading: false,
-        results: searchResults
+        results: searchResults,
       });
     }, this.delayCheckMatch);
   };
@@ -106,7 +106,7 @@ class SearchBox extends React.Component {
           this.handleSearchChange,
           this.waitHandleSearchChange,
           {
-            leading: true
+            leading: true,
           }
         )}
         results={results}
@@ -135,7 +135,7 @@ SearchBox.propTypes = {
   levelLabel: PropTypes.bool,
   initialValue: PropTypes.string,
   onResultSelect: PropTypes.func,
-  placeholder: PropTypes.string
+  placeholder: PropTypes.string,
 };
 
 export default SearchBox;

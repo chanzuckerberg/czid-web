@@ -12,7 +12,7 @@ const publicSampleNotification = (samples, projectName, onClose) => {
       />
     ),
     {
-      onClose
+      onClose,
     }
   );
 };
@@ -37,7 +37,7 @@ const publicSampleNotificationsByProject = samples => {
           JSON.stringify(
             new Set([
               ...JSON.parse(localStorage.getItem("dismissedPublicSamples")),
-              ...projectSamples.map(sample => sample.id)
+              ...projectSamples.map(sample => sample.id),
             ])
           )
         );

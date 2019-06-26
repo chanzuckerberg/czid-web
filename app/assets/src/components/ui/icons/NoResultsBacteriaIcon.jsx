@@ -45,7 +45,7 @@ const NoResultsBacteriaIcon = props => {
 };
 
 NoResultsBacteriaIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default NoResultsBacteriaIcon;

@@ -1,7 +1,11 @@
 class AmrHeatmapController < ApplicationController
   before_action :admin_required
 
-  # GET /amr_heatmap/amr_heatmap.json
+  def index
+    @sample_ids = params[:sampleIds].map(&:to_i)
+  end
+
+  # GET /amr_heatmap/amr_counts.json
   # Return JSON information about one or more samples' AMR counts, from submitted sample ids
   # A samples amr_counts is an array of objects describing genes & alleles that code for
   # antimicrobial resistance. Each object in amr_counts will look like:
@@ -18,7 +22,8 @@ class AmrHeatmapController < ApplicationController
   # },
 
   def amr_counts
-    samples = current_power.viewable_samples.where(id: params[:sampleIds])
+    sample_ids = params[:sampleIds].map(&:to_i)
+    samples = current_power.viewable_samples.where(id: sample_ids)
     good_sample_ids = {}
     amr_data = []
 
@@ -37,11 +42,11 @@ class AmrHeatmapController < ApplicationController
         amr_counts: amr_counts,
         error: ""
       }
-      good_sample_ids[sample.id.to_s] = true
+      good_sample_ids[sample.id] = true
     end
 
-    params[:sampleIds].each do |input_id|
-      unless good_sample_ids.key?(input_id.to_s)
+    sample_ids.each do |input_id|
+      unless good_sample_ids.key?(input_id)
         amr_data << {
           sample_name: "",
           sample_id: input_id,
@@ -52,8 +57,5 @@ class AmrHeatmapController < ApplicationController
     end
 
     render json: amr_data
-  end
-
-  def amr_heatmap
   end
 end

@@ -11,7 +11,7 @@ import cs from "./phylo_tree_public.scss";
  */
 export default class PhyloTreePublic extends Component {
   static propTypes = {
-    className: PropTypes.string
+    className: PropTypes.string,
   };
 
   render() {

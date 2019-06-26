@@ -21,7 +21,7 @@ const FiltersIcon = props => {
 };
 
 FiltersIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default FiltersIcon;

@@ -9,7 +9,7 @@ class PublicProjectConfirmationModal extends React.Component {
     super(props);
 
     this.state = {
-      modalOpen: false
+      modalOpen: false,
     };
   }
 
@@ -86,9 +86,9 @@ PublicProjectConfirmationModal.propTypes = {
   project: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string,
-    public_access: PropTypes.oneOfType([PropTypes.bool, PropTypes.number])
+    public_access: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
   }).isRequired,
-  trigger: PropTypes.node
+  trigger: PropTypes.node,
 };
 
 export default PublicProjectConfirmationModal;

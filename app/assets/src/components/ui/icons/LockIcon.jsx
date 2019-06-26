@@ -29,7 +29,7 @@ const LockIcon = props => {
 };
 
 LockIcon.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default LockIcon;

@@ -10,7 +10,7 @@ import {
   flow,
   map,
   flatten,
-  join
+  join,
 } from "lodash/fp";
 import { shortenUrl } from "~/api";
 import copy from "copy-to-clipboard";
@@ -23,7 +23,7 @@ export const resetUrl = () => {
 // See also parseUrlParams in SamplesHeatmapView
 export const parseUrlParams = () => {
   let urlParams = QueryString.parse(location.search, {
-    arrayFormat: "bracket"
+    arrayFormat: "bracket",
   });
   for (var key in urlParams) {
     try {

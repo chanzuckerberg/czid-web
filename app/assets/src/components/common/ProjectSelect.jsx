@@ -8,7 +8,7 @@ class ProjectSelect extends React.Component {
   getOptions = () =>
     (sortBy("name", this.props.projects) || []).map(project => ({
       value: project.id,
-      text: project.name
+      text: project.name,
     }));
 
   onChange = projectId => {
@@ -34,7 +34,7 @@ ProjectSelect.propTypes = {
   projects: PropTypes.arrayOf(PropTypes.Project),
   value: PropTypes.number, // the project id
   onChange: PropTypes.func.isRequired, // the entire project object is returned
-  disabled: PropTypes.bool
+  disabled: PropTypes.bool,
 };
 
 export default ProjectSelect;

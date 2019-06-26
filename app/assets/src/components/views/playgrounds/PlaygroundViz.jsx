@@ -10,7 +10,7 @@ const TABS = ["Heatmap"];
 
 export default class PlaygroundViz extends React.Component {
   state = {
-    currentTab: TABS[0]
+    currentTab: TABS[0],
   };
 
   componentDidMount() {
@@ -37,21 +37,21 @@ export default class PlaygroundViz extends React.Component {
           rowLabels: [
             { label: "Row 1" },
             { label: "Row 2" },
-            { label: "Row 3" }
+            { label: "Row 3" },
           ],
           columnLabels: [
             { label: "Column 1" },
             { label: "Column 2" },
             { label: "Column 3" },
             { label: "Column 4" },
-            { label: "Column 5" }
+            { label: "Column 5" },
           ],
-          values: [[0, 1, 2, 3, 4], [1, 2, 3, 4, 5], [2, 3, 4, 5, 6]]
+          values: [[0, 1, 2, 3, 4], [1, 2, 3, 4, 5], [2, 3, 4, 5, 6]],
         },
         // Custom options.
         {
           marginLeft: 0,
-          marginRight: 0
+          marginRight: 0,
         }
       );
 

@@ -72,7 +72,7 @@ ReactNouislider.propTypes = {
   // http://refreshless.com/nouislider/slider-options/#section-Connect
   connect: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.bool),
-    PropTypes.bool
+    PropTypes.bool,
   ]),
   // http://refreshless.com/nouislider/slider-options/#section-cssPrefix
   cssPrefix: PropTypes.string,
@@ -111,10 +111,10 @@ ReactNouislider.propTypes = {
     PropTypes.bool,
     PropTypes.arrayOf(
       PropTypes.shape({
-        to: PropTypes.func
+        to: PropTypes.func,
       })
-    )
-  ])
+    ),
+  ]),
 };
 
 export default ReactNouislider;

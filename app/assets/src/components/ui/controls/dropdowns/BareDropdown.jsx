@@ -25,7 +25,7 @@ class BareDropdown extends React.Component {
     super(props);
 
     this.state = {
-      filterString: ""
+      filterString: "",
     };
   }
 
@@ -62,7 +62,7 @@ class BareDropdown extends React.Component {
 
     this.setState(
       {
-        filterString
+        filterString,
       },
       () => {
         onFilterChange && onFilterChange(filterString);
@@ -202,20 +202,20 @@ class BareDropdown extends React.Component {
     if (this.props.usePortal) {
       return (
         <PortalDropdown
-          trigger={this.props.trigger}
-          menuClassName={cs.portalDropdown}
-          triggerClassName={className}
-          withinModal={this.props.withinModal}
-          fluid={this.props.fluid}
-          floating={this.props.floating}
-          direction={this.props.direction}
-          hideArrow={hideArrow}
-          disabled={this.props.disabled}
           arrowInsideTrigger={arrowInsideTrigger}
+          floating={this.props.floating}
+          fluid={this.props.fluid}
+          direction={this.props.direction}
+          disabled={this.props.disabled}
+          hideArrow={hideArrow}
+          menu={menu}
+          menuClassName={cx(cs.portalDropdown, className)}
           onOpen={this.props.onOpen}
           open={this.props.open}
           onClose={this.props.onClose}
-          menu={menu}
+          trigger={this.props.trigger}
+          triggerClassName={className}
+          withinModal={this.props.withinModal}
         />
       );
     }
@@ -254,7 +254,7 @@ BareDropdown.propTypes = forbidExtraProps({
       value: PropTypes.any,
       text: PropTypes.node,
       // Custom node to render for the option.
-      customNode: PropTypes.node
+      customNode: PropTypes.node,
     })
   ),
   value: PropTypes.any,
@@ -269,22 +269,27 @@ BareDropdown.propTypes = forbidExtraProps({
   withinModal: PropTypes.bool,
 
   // Props directly passed to semantic-ui.
-  trigger: PropTypes.node.isRequired,
-  onOpen: PropTypes.func,
-  onClose: PropTypes.func,
-  open: PropTypes.bool,
   children: PropTypes.node,
-  floating: PropTypes.bool,
-  disabled: PropTypes.bool,
-  selectOnBlur: PropTypes.bool,
-  fluid: PropTypes.bool,
-  direction: PropTypes.string,
   className: PropTypes.string,
-  menuClassName: PropTypes.string
+  direction: PropTypes.string,
+  disabled: PropTypes.bool,
+  floating: PropTypes.bool,
+  fluid: PropTypes.bool,
+  menuClassName: PropTypes.string,
+  onBlur: PropTypes.func,
+  onClick: PropTypes.func,
+  onClose: PropTypes.func,
+  onFocus: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
+  onOpen: PropTypes.func,
+  open: PropTypes.bool,
+  selectOnBlur: PropTypes.bool,
+  trigger: PropTypes.node.isRequired,
 });
 
 BareDropdown.defaultProps = {
-  closeOnClick: true
+  closeOnClick: true,
 };
 
 BareDropdown.Header = BaseDropdown.Header;

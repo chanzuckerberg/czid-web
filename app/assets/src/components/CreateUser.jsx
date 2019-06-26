@@ -25,7 +25,7 @@ class CreateUser extends React.Component {
       password: "",
       id: this.user ? this.user.id : null,
       password_confirmation: "",
-      adminStatus: this.user ? this.user.admin : null
+      adminStatus: this.user ? this.user.admin : null,
     };
     this.state = {
       submitting: false,
@@ -40,7 +40,7 @@ class CreateUser extends React.Component {
       password: this.selectedUser.password || "",
       pConfirm: this.selectedUser.password_confirmation || "",
       adminstatus: this.selectedUser.adminStatus,
-      id: this.selectedUser.id
+      id: this.selectedUser.id,
     };
   }
 
@@ -48,7 +48,7 @@ class CreateUser extends React.Component {
     e.preventDefault();
     if (!this.isCreateFormInvalid()) {
       this.setState({
-        submitting: true
+        submitting: true,
       });
       this.createUser();
     }
@@ -58,7 +58,7 @@ class CreateUser extends React.Component {
     e.preventDefault();
     if (!this.isUpdateFormValid()) {
       this.setState({
-        submitting: true
+        submitting: true,
       });
       this.updateUser();
     }
@@ -71,37 +71,37 @@ class CreateUser extends React.Component {
   toggleCheckBox(e) {
     this.setState({
       isAdmin: e.target.value == "true" ? false : true,
-      adminstatus: e.target.value == "true" ? false : true
+      adminstatus: e.target.value == "true" ? false : true,
     });
   }
 
   handlePasswordChange(e) {
     this.setState({
-      password: e.target.value
+      password: e.target.value,
     });
   }
 
   handlePConfirmChange(e) {
     this.setState({
-      pConfirm: e.target.value
+      pConfirm: e.target.value,
     });
   }
 
   handleEmailChange(e) {
     this.setState({
-      email: e.target.value
+      email: e.target.value,
     });
   }
 
   handleNameChange(e) {
     this.setState({
-      name: e.target.value
+      name: e.target.value,
     });
   }
 
   handleInstitutionChange(e) {
     this.setState({
-      institution: e.target.value
+      institution: e.target.value,
     });
   }
 
@@ -113,19 +113,19 @@ class CreateUser extends React.Component {
     ) {
       this.setState({
         showFailed: true,
-        errorMessage: "Please fill all fields"
+        errorMessage: "Please fill all fields",
       });
       return true;
     } else if (this.state.password === "") {
       this.setState({
         showFailed: true,
-        errorMessage: "Please enter password"
+        errorMessage: "Please enter password",
       });
       return true;
     } else if (this.state.password_confirmation === "") {
       this.setState({
         showFailed: true,
-        errorMessage: "Please re-enter password"
+        errorMessage: "Please re-enter password",
       });
       return true;
     } else {
@@ -137,7 +137,7 @@ class CreateUser extends React.Component {
     if (this.state.email === "") {
       this.setState({
         showFailed: true,
-        errorMessage: "Please enter valid email address"
+        errorMessage: "Please enter valid email address",
       });
       return true;
     } else {
@@ -157,8 +157,8 @@ class CreateUser extends React.Component {
             institution: this.state.institution,
             password: this.state.password,
             password_confirmation: this.state.password_confirmation,
-            role: this.state.isAdmin ? 1 : 0
-          }
+            role: this.state.isAdmin ? 1 : 0,
+          },
         },
         { headers: { "X-CSRF-TOKEN": this.csrf } }
       )
@@ -167,7 +167,7 @@ class CreateUser extends React.Component {
           {
             submitting: false,
             success: true,
-            successMessage: "User created successfully"
+            successMessage: "User created successfully",
           },
           () => {
             openUrl("/users");
@@ -178,7 +178,7 @@ class CreateUser extends React.Component {
         that.setState({
           submitting: false,
           showFailed: true,
-          serverErrors: err.response.data
+          serverErrors: err.response.data,
         });
       });
   }
@@ -195,8 +195,8 @@ class CreateUser extends React.Component {
             institution: this.state.institution,
             password: this.state.password,
             password_confirmation: this.state.pConfirm,
-            role: this.state.adminstatus ? 1 : 0
-          }
+            role: this.state.adminstatus ? 1 : 0,
+          },
         },
         { headers: { "X-CSRF-TOKEN": this.csrf } }
       )
@@ -205,7 +205,7 @@ class CreateUser extends React.Component {
           {
             success: true,
             submitting: false,
-            successMessage: "User updated successfully"
+            successMessage: "User updated successfully",
           },
           () => {
             openUrl("/users");
@@ -216,7 +216,7 @@ class CreateUser extends React.Component {
         that.setState({
           showFailed: true,
           submitting: false,
-          serverErrors: err.response.data
+          serverErrors: err.response.data,
         });
       });
   }
@@ -238,7 +238,7 @@ class CreateUser extends React.Component {
       logAnalyticsEvent(`CreateUser_${form}-errors_displayed`, {
         form,
         serverErrors,
-        formattedError
+        formattedError,
       });
       return ret;
     } else {

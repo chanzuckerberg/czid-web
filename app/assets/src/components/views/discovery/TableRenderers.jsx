@@ -15,7 +15,7 @@ const STATUS_COLOR = {
   complete: "success",
   failed: "error",
   "complete - issue": "warning",
-  "complete*": "warning"
+  "complete*": "warning",
 };
 
 class TableRenderers extends React.Component {
@@ -23,7 +23,7 @@ class TableRenderers extends React.Component {
     cellData: item,
     detailsRenderer,
     nameRenderer,
-    visibilityIconRenderer
+    visibilityIconRenderer,
   }) => {
     let icon = visibilityIconRenderer(item);
     return (
@@ -31,7 +31,7 @@ class TableRenderers extends React.Component {
         <div className={cs.visibility}>
           {icon &&
             React.cloneElement(icon, {
-              className: `${cx(cs.icon, icon.props.className)}`
+              className: `${cx(cs.icon, icon.props.className)}`,
             })}
         </div>
         <div className={cs.itemRightPane}>

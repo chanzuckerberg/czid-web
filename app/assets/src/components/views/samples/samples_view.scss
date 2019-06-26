@@ -15,6 +15,10 @@
     flex-direction: column;
   }
 
+  .map {
+    border-top: 2px solid $lightest-grey;
+  }
+
   .note {
     flex: 0 0 auto;
   }
@@ -34,7 +38,7 @@
 .samplesToolbar {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 11px;
 
   .fluidBlank {
     flex: 1 1 auto;
@@ -58,7 +62,7 @@
 
   .separator {
     flex: 0 0 auto;
-    height: 100%;
+    height: 27px;
     margin: 0 20px;
     border-right: 1px solid $medium-grey;
   }
@@ -75,7 +79,9 @@
       .icon {
         fill: $light-grey;
         flex: 0 0 auto;
-        width: 22px;
+        height: 21px;
+        width: 21px;
+        vertical-align: middle;
 
         &:not(.disabled) {
           cursor: pointer;
@@ -83,56 +89,15 @@
         }
 
         &.save {
-          margin-top: 1px;
           width: 21px;
         }
 
         &.heatmap {
           margin-left: 4px;
-          margin-top: 1px;
         }
 
         &.download {
           width: 28px;
-        }
-      }
-    }
-  }
-
-  .displaySwitcher {
-    .switcherMenu {
-      margin: 0;
-      min-height: 25px;
-      box-shadow: none;
-      border: none;
-
-      .menuItem {
-        padding: 5px 10px;
-        background: inherit;
-
-        .icon {
-          font-size: 18px;
-          margin-right: 0;
-          // Make the icon look thinner
-          -webkit-text-stroke: 0.7px $white;
-        }
-
-        &:hover {
-          background: inherit;
-        }
-
-        &:global(.active) {
-          // Underline the icon
-          &:after {
-            position: absolute;
-            content: "";
-            border-bottom: 2px solid $primary-medium;
-            width: 50%;
-            bottom: 0;
-            // Move left edge to center and then center to midpoint
-            left: 50%;
-            transform: translateX(-50%);
-          }
         }
       }
     }

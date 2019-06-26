@@ -24,7 +24,7 @@ import HitGroupViz from "./HitGroupViz";
 import {
   getHistogramTooltipData,
   generateCoverageVizData,
-  getSortedAccessionSummaries
+  getSortedAccessionSummaries,
 } from "./utils";
 import cs from "./coverage_viz_bottom_sidebar.scss";
 
@@ -38,54 +38,55 @@ const METRIC_COLUMNS = [
     {
       key: "referenceNCBIEntry",
       name: "Reference NCBI Entry",
-      tooltip: "The NCBI Genbank entry for the reference accession."
+      tooltip: "The NCBI Genbank entry for the reference accession.",
     },
     {
       key: "referenceLength",
       name: "Reference Length",
-      tooltip: "Length in base pairs of the reference accession."
-    }
+      tooltip: "Length in base pairs of the reference accession.",
+    },
   ],
   [
     {
       key: "alignedContigs",
       name: "Aligned Contigs",
-      tooltip: "Number of contigs for which this accession was the best match."
+      tooltip: "Number of contigs for which this accession was the best match.",
     },
     {
       key: "alignedReads",
-      name: "Aligned Reads",
-      tooltip: "Number of reads for which this accession was the best match."
-    }
+      name: "Aligned Loose Reads",
+      tooltip:
+        "Number of reads for which this accession was the best match. Only includes reads which did not assemble into a contig.",
+    },
   ],
   [
     {
       key: "coverageDepth",
       name: "Coverage Depth",
       tooltip:
-        "The average read depth of aligned contigs and reads over the length of the accession."
+        "The average read depth of aligned contigs and reads over the length of the accession.",
     },
     {
       key: "coverageBreadth",
       name: "Coverage Breadth",
       tooltip:
-        "The percentage of the accession that is covered by at least one read or contig."
-    }
+        "The percentage of the accession that is covered by at least one read or contig.",
+    },
   ],
   [
     {
       key: "maxAlignedLength",
       name: "Max Alignment Length",
       tooltip:
-        "Length of the longest aligned region over all reads and contigs."
+        "Length of the longest aligned region over all reads and contigs.",
     },
     {
       key: "avgMismatchedPercent",
       name: "Avg. Mismatched %",
       tooltip:
-        "Percentage of aligned regions that are mismatches, averaged over all reads and contigs."
-    }
-  ]
+        "Percentage of aligned regions that are mismatches, averaged over all reads and contigs.",
+    },
+  ],
 ];
 
 export default class CoverageVizBottomSidebar extends React.Component {
@@ -94,7 +95,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
   state = {
     currentAccessionSummary: null,
     histogramTooltipLocation: null,
-    histogramTooltipData: null
+    histogramTooltipData: null,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -119,7 +120,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
     if (prevProps.visible && !visible) {
       this.setState({
         histogramTooltipLocation: null,
-        histogramTooltipData: null
+        histogramTooltipData: null,
       });
     }
   }
@@ -144,8 +145,8 @@ export default class CoverageVizBottomSidebar extends React.Component {
     this.setState({
       currentAccessionData: {
         ...data,
-        id: accession.id
-      }
+        id: accession.id,
+      },
     });
   };
 
@@ -158,7 +159,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
 
     this.setState({
       currentAccessionSummary: accession,
-      currentAccessionData: null
+      currentAccessionData: null,
     });
 
     if (accession) {
@@ -174,7 +175,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
         histogramTooltipData: getHistogramTooltipData(
           currentAccessionData,
           hoverData[1]
-        )
+        ),
       });
     }
   };
@@ -183,15 +184,15 @@ export default class CoverageVizBottomSidebar extends React.Component {
     this.setState({
       histogramTooltipLocation: {
         left: clientX,
-        top: clientY
-      }
+        top: clientY,
+      },
     });
   };
 
   handleHistogramBarExit = () => {
     this.setState({
       histogramTooltipLocation: null,
-      histogramTooltipData: null
+      histogramTooltipData: null,
     });
   };
 
@@ -217,14 +218,14 @@ export default class CoverageVizBottomSidebar extends React.Component {
           left: 170,
           right: 40,
           top: 30,
-          bottom: 30
+          bottom: 30,
         },
         numTicksY: 2,
         labelYOffset: 15,
         labelYLarge: true,
         onHistogramBarHover: this.handleHistogramBarHover,
         onHistogramBarEnter: this.handleHistogramBarEnter,
-        onHistogramBarExit: this.handleHistogramBarExit
+        onHistogramBarExit: this.handleHistogramBarExit,
       }
     );
     this.coverageViz.update();
@@ -236,7 +237,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       [[0, data.total_length, 0]],
       {
         domain: [0, data.total_length],
-        colors: [REF_ACC_COLOR]
+        colors: [REF_ACC_COLOR],
       }
     );
     this.refAccesssionViz.update();
@@ -267,7 +268,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
             ) : null}
           </div>
         </div>
-      )
+      ),
     }));
   };
 
@@ -296,7 +297,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                   {
                     accessionId: currentAccessionSummary.id,
                     taxonId: params.taxonId,
-                    sampleId
+                    sampleId,
                   }
                 )
               }
@@ -323,7 +324,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
       alignedReads: currentAccessionSummary.num_reads,
       avgMismatchedPercent: formatPercent(
         currentAccessionData.avg_prop_mismatch
-      )
+      ),
     };
   };
 
@@ -397,7 +398,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 {
                   accessionId,
                   taxonId: params.taxonId,
-                  sampleId
+                  sampleId,
                 }
               );
               this.setCurrentAccession(accessionId);
@@ -429,7 +430,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                   {
                     accessionId: currentAccessionSummary.id,
                     taxonId: params.taxonId,
-                    sampleId
+                    sampleId,
                   }
                 )
               }
@@ -503,7 +504,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                     {
                       accessionId: currentAccessionSummary.id,
                       taxonId: params.taxonId,
-                      sampleId
+                      sampleId,
                     }
                   )
                 }
@@ -579,7 +580,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                     "CoverageVizBottomSidebar_no-data-alignment-viz-link_clicked",
                     {
                       taxonId: params.taxonId,
-                      sampleId
+                      sampleId,
                     }
                   )
                 }
@@ -632,15 +633,15 @@ CoverageVizBottomSidebar.propTypes = {
           score: PropTypes.number,
           coverage_depth: PropTypes.number,
           taxon_name: PropTypes.string,
-          taxon_common_name: PropTypes.string
+          taxon_common_name: PropTypes.string,
         })
       ),
-      num_accessions: PropTypes.number
+      num_accessions: PropTypes.number,
     }),
     // Link to the old alignment viz.
-    alignmentVizUrl: PropTypes.string
+    alignmentVizUrl: PropTypes.string,
   }),
   sampleId: PropTypes.number,
   pipelineVersion: PropTypes.string,
-  nameType: PropTypes.string
+  nameType: PropTypes.string,
 };

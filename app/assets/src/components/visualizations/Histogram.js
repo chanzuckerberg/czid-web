@@ -19,12 +19,12 @@ export default class Histogram {
       top: 20,
       right: 40,
       bottom: 40,
-      left: 40
+      left: 40,
     };
 
     this.size = {
       width: container.clientWidth || 800,
-      height: container.clientHeight || 400
+      height: container.clientHeight || 400,
     };
 
     this.options = Object.assign(
@@ -38,7 +38,7 @@ export default class Histogram {
         // If true, the data is already binned, i.e. the data is an array of
         // { x0, length }
         skipBin: false,
-        hoverBuffer: 5
+        hoverBuffer: 5,
       },
       options
     );

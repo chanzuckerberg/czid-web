@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 
 import { Table } from "~/components/visualizations/table";
 // CSS file must be loaded after any elements you might want to override
@@ -10,16 +11,28 @@ class BaseDiscoveryView extends React.Component {
   // between views that use it (at the time of this comment, ProjectsView and VisualizationsView)
   // We might be able to get rid of it once we implement dynamic row height on the tables.
   render() {
-    const { columns, data, handleRowClick } = this.props;
+    const {
+      columns,
+      data,
+      handleRowClick,
+      headerClassName,
+      initialActiveColumns,
+      protectedColumns,
+      rowClassName,
+      rowHeight,
+    } = this.props;
 
     return (
       <Table
-        sortable
-        data={data}
         columns={columns}
-        defaultRowHeight={68}
+        data={data}
+        defaultRowHeight={rowHeight}
+        headerClassName={headerClassName}
+        initialActiveColumns={initialActiveColumns}
         onRowClick={handleRowClick}
-        rowClassName={cs.tableDataRow}
+        protectedColumns={protectedColumns}
+        rowClassName={cx(cs.tableDataRow, rowClassName)}
+        sortable
       />
     );
   }
@@ -27,13 +40,19 @@ class BaseDiscoveryView extends React.Component {
 
 BaseDiscoveryView.defaultProps = {
   columns: [],
-  data: []
+  data: [],
+  rowHeight: 68,
 };
 
 BaseDiscoveryView.propTypes = {
   columns: PropTypes.array,
   data: PropTypes.array,
-  handleRowClick: PropTypes.func
+  handleRowClick: PropTypes.func,
+  headerClassName: PropTypes.string,
+  initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
+  protectedColumns: PropTypes.arrayOf(PropTypes.string),
+  rowClassName: PropTypes.string,
+  rowHeight: PropTypes.number,
 };
 
 export default BaseDiscoveryView;

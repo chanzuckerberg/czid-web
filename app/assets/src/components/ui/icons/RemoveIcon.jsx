@@ -23,7 +23,7 @@ const RemoveIcon = ({ className, onClick }) => {
 
 RemoveIcon.propTypes = {
   className: PropTypes.string,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
 };
 
 export default RemoveIcon;
