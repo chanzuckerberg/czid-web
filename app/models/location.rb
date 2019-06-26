@@ -168,7 +168,7 @@ class Location < ApplicationRecord
 
     missing_parent_levels = []
     [COUNTRY_LEVEL, STATE_LEVEL].each do |level|
-      if !present_parent_levels.include?(level) && location.country_name.present? && location.geo_level != level
+      if !present_parent_levels.include?(level) && location["#{level}_name"].present? && location.geo_level != level
         missing_parent_levels << level
       end
     end
