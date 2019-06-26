@@ -118,13 +118,13 @@ class ProjectsView extends React.Component {
       allowedFeatures,
       currentDisplay,
       currentTab,
-      geoLevel,
+      mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
       mapTilerKey,
       onClearFilters,
-      onGeoLevelChange,
       onMapClick,
+      onMapLevelChange,
       onMapMarkerClick,
       onMapTooltipTitleClick,
       projects,
@@ -159,12 +159,12 @@ class ProjectsView extends React.Component {
           <div className={cs.map}>
             <DiscoveryMap
               currentTab={currentTab}
-              geoLevel={geoLevel}
+              level={mapLevel}
               mapLocationData={mapLocationData}
               mapTilerKey={mapTilerKey}
               onClearFilters={onClearFilters}
               onClick={onMapClick}
-              onGeoLevelChange={onGeoLevelChange}
+              onLevelChange={onMapLevelChange}
               onMarkerClick={onMapMarkerClick}
               onTooltipTitleClick={onMapTooltipTitleClick}
               previewedLocationId={mapPreviewedLocationId}
@@ -185,14 +185,14 @@ ProjectsView.propTypes = {
   allowedFeatures: PropTypes.array,
   currentDisplay: PropTypes.string.isRequired,
   currentTab: PropTypes.string.isRequired,
-  geoLevel: PropTypes.string,
+  mapLevel: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedLocationId: PropTypes.number,
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
-  onGeoLevelChange: PropTypes.func,
   onMapClick: PropTypes.func,
+  onMapLevelChange: PropTypes.func,
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onProjectSelected: PropTypes.func,

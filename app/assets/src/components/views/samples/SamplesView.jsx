@@ -425,12 +425,12 @@ class SamplesView extends React.Component {
   renderMap = () => {
     const {
       currentTab,
-      geoLevel,
+      mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
       mapTilerKey,
       onClearFilters,
-      onGeoLevelChange,
+      onMapLevelChange,
       onMapClick,
       onMapMarkerClick,
       onMapTooltipTitleClick,
@@ -440,12 +440,12 @@ class SamplesView extends React.Component {
       <div className={cs.map}>
         <DiscoveryMap
           currentTab={currentTab}
-          geoLevel={geoLevel}
+          level={mapLevel}
           mapLocationData={mapLocationData}
           mapTilerKey={mapTilerKey}
           onClearFilters={onClearFilters}
           onClick={onMapClick}
-          onGeoLevelChange={onGeoLevelChange}
+          onLevelChange={onMapLevelChange}
           onMarkerClick={onMapMarkerClick}
           onTooltipTitleClick={onMapTooltipTitleClick}
           previewedLocationId={mapPreviewedLocationId}
@@ -517,7 +517,7 @@ SamplesView.propTypes = {
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   currentDisplay: PropTypes.string.isRequired,
   currentTab: PropTypes.string.isRequired,
-  geoLevel: PropTypes.string,
+  mapLevel: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedLocationId: PropTypes.number,
   mapPreviewedSamples: PropTypes.array,
@@ -525,9 +525,9 @@ SamplesView.propTypes = {
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
-  onGeoLevelChange: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
   onMapClick: PropTypes.func,
+  onMapLevelChange: PropTypes.func,
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onSampleSelected: PropTypes.func,

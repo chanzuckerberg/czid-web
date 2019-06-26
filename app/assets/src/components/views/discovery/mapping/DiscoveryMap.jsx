@@ -16,7 +16,7 @@ export const DEFAULT_THROTTLE_MS = 500;
 class DiscoveryMap extends React.Component {
   constructor(props) {
     super(props);
-    const { onGeoLevelChange } = this.props;
+    const { onLevelChange } = this.props;
 
     this.state = {
       tooltip: null,
@@ -28,10 +28,10 @@ class DiscoveryMap extends React.Component {
       DEFAULT_THROTTLE_MS,
       logAnalyticsEvent
     );
-    if (onGeoLevelChange) {
-      this.onGeoLevelChangeThrottled = throttle(
+    if (onLevelChange) {
+      this.onLevelChangeThrottled = throttle(
         DEFAULT_THROTTLE_MS,
-        onGeoLevelChange
+        onLevelChange
       );
     }
   }
@@ -40,10 +40,10 @@ class DiscoveryMap extends React.Component {
   updateViewport = viewport => {
     this.setState({ viewport });
 
-    if (this.onGeoLevelChangeThrottled) {
-      const geoLevel =
+    if (this.onLevelChangeThrottled) {
+      const level =
         viewport.zoom < 4 ? "country" : viewport.zoom < 5.5 ? "state" : "city";
-      this.onGeoLevelChangeThrottled(geoLevel);
+      this.onLevelChangeThrottled(level);
     }
 
     this.logAnalyticsEventThrottled("DiscoveryMap_viewport_updated");
@@ -110,15 +110,19 @@ class DiscoveryMap extends React.Component {
   };
 
   renderMarker = locationInfo => {
-    const { currentTab, previewedLocationId } = this.props;
+    const { currentTab, level, previewedLocationId } = this.props;
     const { viewport } = this.state;
     const id = locationInfo.id;
     const name = locationInfo.name;
     const lat = parseFloat(locationInfo.lat);
     const lng = parseFloat(locationInfo.lng);
-    const idField = currentTab === "samples" ? "sample_ids" : "project_ids";
-    if (!locationInfo[idField]) return;
-    const pointCount = locationInfo[idField].length;
+
+    const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
+    if (!locationInfo[idsField]) return;
+
+    console.log("(map, entry): ", level, locationInfo.geo_level);
+
+    const pointCount = locationInfo[idsField].length;
     const minSize = 10;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
     // Log1.5 of the count looked nice visually for not getting too large with many points.
@@ -194,12 +198,12 @@ DiscoveryMap.defaultProps = {
 DiscoveryMap.propTypes = {
   currentDisplay: PropTypes.string,
   currentTab: PropTypes.string.isRequired,
-  geoLevel: PropTypes.string,
+  level: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
   onClick: PropTypes.func,
-  onGeoLevelChange: PropTypes.func,
+  onLevelChange: PropTypes.func,
   onMarkerClick: PropTypes.func,
   onTooltipTitleClick: PropTypes.func,
   previewedLocationId: PropTypes.number,

@@ -34,7 +34,7 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import { openUrl } from "~utils/links";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
-import { GEO_LEVEL_ORDER } from "~/components/views/discovery/mapping/constants";
+import { MAP_LEVEL_ORDER } from "~/components/views/discovery/mapping/constants";
 
 import DiscoveryHeader from "./DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
@@ -99,15 +99,14 @@ class DiscoveryView extends React.Component {
         filteredSampleDimensions: [],
         filteredSampleStats: {},
         filters: {},
-        geoLevel: "country",
         loadingDimensions: true,
         loadingLocations: true,
         loadingProjects: true,
         loadingSamples: true,
         loadingStats: true,
         loadingVisualizations: true,
+        mapLevel: "country",
         mapLocationData: {},
-        rawMapLocationData: {},
         mapPreviewedLocationId: null,
         mapPreviewedProjects: [],
         mapPreviewedSampleIds: [],
@@ -117,6 +116,7 @@ class DiscoveryView extends React.Component {
         mapSidebarSampleStats: {},
         mapSidebarSelectedSampleIds: new Set(),
         mapSidebarTab: "summary",
+        rawMapLocationData: {},
         project: null,
         projectDimensions: [],
         projectId: projectId,
@@ -387,7 +387,7 @@ class DiscoveryView extends React.Component {
 
   refreshFilteredLocations = async () => {
     const { domain } = this.props;
-    const { geoLevel, projectId, search } = this.state;
+    const { mapLevel, projectId, search } = this.state;
 
     this.setState({
       loadingLocations: true,
@@ -409,7 +409,7 @@ class DiscoveryView extends React.Component {
       () => {
         this.refreshMapPreviewedSamples();
         this.refreshMapPreviewedProjects();
-        this.handleGeoLevelChange(geoLevel);
+        this.handleMapLevelChange(mapLevel);
       }
     );
   };
@@ -880,7 +880,7 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleGeoLevelChange = geoLevel => {
+  handleMapLevelChange = mapLevel => {
     const { rawMapLocationData, currentTab } = this.state;
 
     const ids = currentTab === "samples" ? "sample_ids" : "project_ids";
@@ -903,9 +903,9 @@ class DiscoveryView extends React.Component {
       }
     };
 
-    const indexOfMap = indexOf(geoLevel, GEO_LEVEL_ORDER);
+    const indexOfMap = indexOf(mapLevel, MAP_LEVEL_ORDER);
     for (const [id, entry] of Object.entries(rawMapLocationData)) {
-      const indexOfEntry = indexOf(entry.geo_level, GEO_LEVEL_ORDER);
+      const indexOfEntry = indexOf(entry.geo_level, MAP_LEVEL_ORDER);
 
       // Have a bubble if you're higher than or at the map's geo level.
       if (indexOfEntry <= indexOfMap && !clusteredData[entry.id]) {
@@ -914,7 +914,7 @@ class DiscoveryView extends React.Component {
 
       ["country", "state"].forEach(ancestorLevel => {
         // If you have ancestors higher than or at the map's level, add yourself to them.
-        if (indexOf(ancestorLevel, GEO_LEVEL_ORDER) <= indexOfMap) {
+        if (indexOf(ancestorLevel, MAP_LEVEL_ORDER) <= indexOfMap) {
           addToAncestor(entry, ancestorLevel);
         }
       });
@@ -927,19 +927,19 @@ class DiscoveryView extends React.Component {
     const {
       currentDisplay,
       currentTab,
-      geoLevel,
       loadingProjects,
       loadingSamples,
       loadingVisualizations,
+      mapLevel,
       mapLocationData,
+      mapPreviewedLocationId,
+      mapPreviewedSamples,
+      mapSidebarSelectedSampleIds,
       projectId,
       projects,
       sampleIds,
       samples,
       visualizations,
-      mapPreviewedLocationId,
-      mapPreviewedSamples,
-      mapSidebarSelectedSampleIds,
     } = this.state;
     const { admin, allowedFeatures, mapTilerKey } = this.props;
 
@@ -952,14 +952,14 @@ class DiscoveryView extends React.Component {
                 allowedFeatures={allowedFeatures}
                 currentDisplay={currentDisplay}
                 currentTab={currentTab}
-                geoLevel={geoLevel}
+                mapLevel={mapLevel}
                 mapLocationData={mapLocationData}
                 mapPreviewedLocationId={mapPreviewedLocationId}
                 mapTilerKey={mapTilerKey}
                 onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
-                onGeoLevelChange={this.handleGeoLevelChange}
                 onMapClick={this.clearMapPreview}
+                onMapLevelChange={this.handleMapLevelChange}
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onProjectSelected={this.handleProjectSelected}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
@@ -984,6 +984,7 @@ class DiscoveryView extends React.Component {
                 allowedFeatures={allowedFeatures}
                 currentDisplay={currentDisplay}
                 currentTab={currentTab}
+                mapLevel={mapLevel}
                 mapLocationData={mapLocationData}
                 mapPreviewedLocationId={mapPreviewedLocationId}
                 mapPreviewedSamples={mapPreviewedSamples}
@@ -991,9 +992,9 @@ class DiscoveryView extends React.Component {
                 mapTilerKey={mapTilerKey}
                 onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
-                onGeoLevelChange={this.handleGeoLevelChange}
                 onLoadRows={this.handleLoadSampleRows}
                 onMapClick={this.clearMapPreview}
+                onMapLevelChange={this.handleMapLevelChange}
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                 onSampleSelected={this.handleSampleSelected}
