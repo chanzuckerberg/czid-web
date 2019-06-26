@@ -13,7 +13,7 @@ def set_compute_environment_min_capacity(vcpu_min_capacity, compute_environment_
     batch_client.update_compute_environment(computeEnvironment=compute_environment_name, computeResources={'minvCpus': vcpu_min_capacity})
 
 
-def check_pending_jobs_counts(queue_name, region, job_status_list=('SUBMITTED', 'PENDING', 'RUNNABLE', 'STARTING', 'RUNNING')):
+def check_pending_jobs_counts(queue_name, region, job_status_list=('RUNNABLE', 'STARTING', 'RUNNING')):
     return {job_status: get_jobs_count(queue_name, region, job_status) for job_status in job_status_list}
 
 
