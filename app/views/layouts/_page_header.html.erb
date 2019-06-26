@@ -8,7 +8,8 @@
         signInEndpoint: '<%=new_user_session_path%>',
         signOutEndpoint: '<%=destroy_user_session_path%>',
         userName: '<%= current_user.name %>',
-        userSignedIn: true
+        userSignedIn: true,
+        disableNavigation: <%= @disable_header_navigation %>,
       }, 'page_header', JSON.parse('<%= raw escape_json(request_context)%>'))
 
 
