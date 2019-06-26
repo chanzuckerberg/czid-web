@@ -1,0 +1,8 @@
+<div id="PipelineStageResults">
+  <%= javascript_tag do %>
+    react_component('PipelineViz', {
+        admin: <%= current_user.admin %>,
+        stageResults: JSON.parse('<%= raw escape_json(@results) %>')
+    }, 'PipelineStageResults');
+  <% end %>
+</div>

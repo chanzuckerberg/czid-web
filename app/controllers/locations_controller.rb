@@ -97,6 +97,16 @@ class LocationsController < ApplicationController
                               .merge(project_ids: v.map { |h| h[:project_id] }.uniq)]
                     end.to_h
 
+    # Supply extra Country and State entries for bubble clustering
+    extra_parent_ids = location_data.values.map { |h| [h[:country_id], h[:state_id]] }.flatten.uniq - location_data.keys
+    extra_parents = Location
+                    .where(id: extra_parent_ids)
+                    .pluck(:id, *Location::DEFAULT_LOCATION_FIELDS)
+                    .map { |p| [:id, *Location::DEFAULT_LOCATION_FIELDS].zip(p).to_h }
+                    .group_by { |h| h[:id] }
+                    .transform_values { |v| v[0] }
+    location_data = location_data.merge(extra_parents)
+
     respond_to do |format|
       format.json do
         render json: location_data

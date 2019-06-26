@@ -10,6 +10,61 @@ RSpec.describe AmrHeatmapController, type: :controller do
       sign_in @admin
     end
 
+    describe "GET index" do
+      it "assigns @sample_ids" do
+        project = create(:project, users: [@admin, @joe])
+        sample_one = create(:sample, project: project, pipeline_runs_data: [{
+                              amr_counts_data: [{
+                                gene: "IamA_Gene"
+                              }],
+                              job_status: PipelineRun::STATUS_CHECKED,
+                              output_states_data: [{
+                                output: "amr_counts",
+                                state: PipelineRun::STATUS_LOADED
+                              }]
+                            }])
+        sample_two = create(:sample, project: project, pipeline_runs_data: [{
+                              amr_counts_data: [{
+                                gene: "AnoT_Her"
+                              }],
+                              job_status: PipelineRun::STATUS_CHECKED,
+                              output_states_data: [{
+                                output: "amr_counts",
+                                state: PipelineRun::STATUS_LOADED
+                              }]
+                            }])
+
+        get :index, params: { sampleIds: [sample_one["id"], sample_two["id"]] }
+        expect(assigns(:sample_ids)).to eq([sample_one["id"].to_i, sample_two["id"].to_i])
+      end
+      it "renders the index template" do
+        project = create(:project, users: [@admin, @joe])
+        sample_one = create(:sample, project: project, pipeline_runs_data: [{
+                              amr_counts_data: [{
+                                gene: "IamA_Gene"
+                              }],
+                              job_status: PipelineRun::STATUS_CHECKED,
+                              output_states_data: [{
+                                output: "amr_counts",
+                                state: PipelineRun::STATUS_LOADED
+                              }]
+                            }])
+        sample_two = create(:sample, project: project, pipeline_runs_data: [{
+                              amr_counts_data: [{
+                                gene: "AnoT_Her"
+                              }],
+                              job_status: PipelineRun::STATUS_CHECKED,
+                              output_states_data: [{
+                                output: "amr_counts",
+                                state: PipelineRun::STATUS_LOADED
+                              }]
+                            }])
+
+        get :index, params: { sampleIds: [sample_one["id"], sample_two["id"]] }
+        expect(response).to render_template("index")
+      end
+    end
+
     describe "GET json" do
       it "sees correct AMR data from multiple samples" do
         # Create a test sample (in a project, as required) that contains Amr data.
@@ -110,7 +165,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    drug_family: amr_counts_one["drug_family"]
                                                  }],
                                                  error: "")
-        expect(json_response[1]).to include_json(sample_id: "99999",
+        expect(json_response[1]).to include_json(sample_id: 99_999,
                                                  sample_name: "",
                                                  amr_counts: [],
                                                  error: "sample not found")

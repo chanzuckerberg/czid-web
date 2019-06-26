@@ -98,3 +98,4 @@ RSpec.configure do |config|
 end
 
 require "rspec/json_expectations"
+require 'webmock/rspec'
