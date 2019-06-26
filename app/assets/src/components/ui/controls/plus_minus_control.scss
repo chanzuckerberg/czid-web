@@ -1,0 +1,30 @@
+@import "~styles/themes/colors";
+
+.plusMinusContainer {
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  overflow: hidden;
+
+  button {
+    -webkit-appearance: none;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    outline: none;
+    border: none;
+    box-sizing: border-box;
+
+    &:first-child {
+      border-bottom: 1px solid $lightest-grey;
+    }
+
+    &:focus {
+      background-color: transparent;
+    }
+  }
+}
+
+.icon {
+  fill: $darkest-grey;
+}
