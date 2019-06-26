@@ -52,6 +52,10 @@ export default class HeatmapLegend {
     this.gLabels = this.g.append("g");
   }
 
+  updateOptions(newOptions) {
+    this.options = Object.assign(this.options, newOptions);
+  }
+
   update() {
     let minLabel = numberAbbreviate(Math.round(this.options.min));
     let maxLabel = numberAbbreviate(Math.round(this.options.max));
@@ -60,9 +64,15 @@ export default class HeatmapLegend {
     let cellsWidth = this.options.width - minLabelSize / 2 - maxLabelSize / 2;
     let cellWidth = cellsWidth / this.options.colors.length;
 
+    // remove svg elements leftover from old data
+    this.gLabels.selectAll("text").remove();
+
+    this.gCells.selectAll("rect").remove();
+
+    // add svg elements from new data
     this.gLabels
       .selectAll(".legend-text-min")
-      .data([this.min])
+      .data([this.options.min])
       .enter()
       .append("text")
       .attr("class", "mono")

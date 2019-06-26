@@ -2,8 +2,10 @@
   <%= javascript_tag do %>
     react_component('SampleUploadFlow', {
       csrf: '<%= form_authenticity_token %>',
-      host_genomes: JSON.parse('<%= raw escape_json(@host_genomes) %>'),
-      admin: JSON.parse('<%= raw escape_json(current_user.admin) %>')
+      hostGenomes: JSON.parse('<%= raw escape_json(@host_genomes) %>'),
+      admin: JSON.parse('<%= raw escape_json(current_user.admin) %>'),
+      basespaceClientId: '<%= @basespace_client_id %>',
+      basespaceOauthRedirectUri: '<%= @basespace_oauth_redirect_uri %>',
     }, 'upload_page');
   <% end %>
 </div>

@@ -2,18 +2,31 @@ module LocationHelper
   # Adapter function to munge responses from Location IQ API to our format
   def self.adapt_location_iq_response(body)
     address = body["address"]
-    geo_level = ["city", "county", "state", "country"].each do |n|
-      break n if address[n]
-    end || ""
+
+    country_key = Location::COUNTRY_NAMES.find { |k| address.include?(k) }
+    state_key = Location::STATE_NAMES.find { |k| address.include?(k) }
+    subdivision_key = Location::SUBDIVISION_NAMES.find { |k| address.include?(k) }
+    city_key = Location::CITY_NAMES.find { |k| address.key?(k) }
+
+    geo_level = if city_key
+                  Location::CITY_LEVEL
+                elsif subdivision_key
+                  Location::SUBDIVISION_LEVEL
+                elsif state_key
+                  Location::STATE_LEVEL
+                elsif country_key
+                  Location::COUNTRY_LEVEL
+                else
+                  ""
+                end
 
     loc = {
       name: body["display_name"],
       geo_level: geo_level,
-      country_name: address["country"] || "",
-      state_name: address["state"] || "",
-      subdivision_name: address["county"] || "",
-      # Normalize extra provider fields to city. normalizecity param doesn't work all the time.
-      city_name: address[%w[city city_distrct locality town borough municipality village hamlet quarter neighbourhood state_district].find { |k| address.key?(k) }] || "",
+      country_name: address[country_key] || "",
+      state_name: address[state_key] || "",
+      subdivision_name: address[subdivision_key] || "",
+      city_name: address[city_key] || "",
       # Round coordinates to enhance privacy
       lat: body["lat"] ? body["lat"].to_f.round(2) : nil,
       # LocationIQ uses 'lon'

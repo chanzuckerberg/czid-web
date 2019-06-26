@@ -1,0 +1,37 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.basespaceIntegration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 50px);
+
+  .content {
+    text-align: center;
+
+    .message {
+      @include font-body-m;
+      margin-bottom: 5px;
+      max-width: 350px;
+    }
+
+    .smallMessage {
+      @include font-body-xxs;
+      color: $medium-grey;
+      margin-bottom: 15px;
+      max-width: 350px;
+    }
+
+    .error {
+      @include font-body-m;
+      margin-bottom: 15px;
+      max-width: 400px;
+    }
+
+    .helpLink {
+      // Override header.scss.
+      color: $primary-light !important;
+    }
+  }
+}
