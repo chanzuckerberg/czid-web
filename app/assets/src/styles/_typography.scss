@@ -28,6 +28,7 @@ $font-size-caption: $font-size-h6 !default; // ~12px
 
 // TODO(mark): Add the other line heights as they are needed.
 $line-height-h3: ceil(($font-size-h3 * 1.4)) !default; // ~36px
+$line-height-small: ceil(($font-size-small * 1.4)) !default;
 
 //Font Weights
 $font-weight-thin: 300;

@@ -67,3 +67,15 @@
     cursor: pointer;
   }
 }
+
+.wikiLicense {
+  padding-top: 10px;
+  color: $medium-grey;
+  font-size: $font-size-small;
+  line-height: $line-height-small;
+
+  .wikiLink {
+    color: $primary-light !important;
+    cursor: pointer;
+  }
+}

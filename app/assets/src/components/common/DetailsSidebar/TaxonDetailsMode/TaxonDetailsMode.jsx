@@ -85,21 +85,17 @@ export default class TaxonDetailsMode extends React.Component {
 
   renderWikipediaLicense(taxonName, wikiUrl) {
     return (
-      <div>
-        <b>
-          This article uses material from the Wikipedia article "<a
-            href={wikiUrl}
-            className={cs.link}
-          >
-            {taxonName}
-          </a>", which is released under the{" "}
-          <a
-            href="https://creativecommons.org/licenses/by-sa/3.0/"
-            className={cs.link}
-          >
-            Creative Commons Attribution-Share-Alike License 3.0
-          </a>.
-        </b>
+      <div className={cs.wikiLicense}>
+        This article uses material from the Wikipedia article{" "}
+        <a href={wikiUrl} className={cs.wikiLink}>
+          {taxonName}
+        </a>, which is released under the{" "}
+        <a
+          href="https://creativecommons.org/licenses/by-sa/3.0/"
+          className={cs.wikiLink}
+        >
+          Creative Commons Attribution-Share-Alike License 3.0
+        </a>.
       </div>
     );
   }
