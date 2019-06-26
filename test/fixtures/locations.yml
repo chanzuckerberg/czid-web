@@ -31,3 +31,38 @@ sf_county:
   state_name: "California"
   subdivision_name: "San Francisco City and County"
   locationiq_id: 214379825
+
+bangladesh:
+  name: "Bangladesh"
+  id: 2
+  geo_level: "country"
+  country_name: "Bangladesh"
+  locationiq_id: 214341060
+
+rangpur:
+  name: "Rangpur Division, Bangladesh"
+  id: 3
+  geo_level: "state"
+  country_name: "Bangladesh"
+  state_name: "Rangpur Division"
+  locationiq_id: 214799782
+
+kurigram:
+  name: "Kurigram, Kurigram District, Rangpur Division, Bangladesh"
+  id: 4
+  geo_level: "city"
+  country_name: "Bangladesh"
+  state_name: "Rangpur Division"
+  subdivision_name: "Kurigram District"
+  city_name: "Kurigram"
+  country_id: 2
+  state_id: 3
+  city_id: 4
+
+columbus:
+  name: "Columbus, Franklin County, Ohio, USA"
+  geo_level: "city"
+  country_name: "USA"
+  state_name: "Ohio"
+  subdivision_name: "Franklin County"
+  city_name: "Columbus"
