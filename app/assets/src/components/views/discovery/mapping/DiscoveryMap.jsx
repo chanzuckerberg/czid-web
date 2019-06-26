@@ -1,6 +1,6 @@
 import React from "react";
 import { Marker } from "react-map-gl";
-import { cloneDeep, get, isEmpty, union, upperFirst } from "lodash/fp";
+import { cloneDeep, get, indexOf, isEmpty, union, upperFirst } from "lodash/fp";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
@@ -104,9 +104,9 @@ class DiscoveryMap extends React.Component {
     const name = locationInfo.name;
     const lat = parseFloat(locationInfo.lat);
     const lng = parseFloat(locationInfo.lng);
-    const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
-    if (!locationInfo[idsField]) return;
-    const pointCount = locationInfo[idsField].length;
+    const idField = currentTab === "samples" ? "sample_ids" : "project_ids";
+    if (!locationInfo[idField]) return;
+    const pointCount = locationInfo[idField].length;
     const minSize = 10;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
     // Log1.5 of the count looked nice visually for not getting too large with many points.
@@ -159,43 +159,40 @@ class DiscoveryMap extends React.Component {
     const { currentTab, mapTilerKey, mapLocationData } = this.props;
     const { tooltip, viewport = {}, geoLevel } = this.state;
 
-    const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
+    const idField = currentTab === "samples" ? "sample_ids" : "project_ids";
 
     console.log(viewport.zoom, geoLevel);
 
+    const allLevels = ["country", "state", "subdivision", "city"];
+
     // Re-cluster the mapLocationData
-    let clusteredLocations = {};
+    let clusteredData = {};
     for (const [id, entry] of Object.entries(mapLocationData)) {
-      if (geoLevel === "country") {
-        if (entry.geo_level === geoLevel) {
-          clusteredLocations[id] = cloneDeep(entry);
-        } else {
-          const ancestorId = entry[`${geoLevel}_id`];
-          console.log("ancestorId: ", ancestorId);
-          console.log("entry: ", entry);
-          if (clusteredLocations[ancestorId]) {
-            clusteredLocations[ancestorId][idsField] = union(
-              clusteredLocations[ancestorId][idsField] || [],
-              entry[idsField]
-            );
-          } else {
-            clusteredLocations[ancestorId] = cloneDeep(
-              mapLocationData[ancestorId]
-            );
-          }
+      if (entry.geo_level === geoLevel) {
+        clusteredData[id] = cloneDeep(entry);
+      } else {
+        console.log(
+          indexOf(geoLevel, allLevels),
+          indexOf(entry.geo_level, allLevels)
+        );
+        const ancestorId = entry[`${geoLevel}_id`];
+        const ancestor = clusteredData[ancestorId];
+        if (ancestor) {
+          ancestor[idField] = union(ancestor[idField], entry[idField]);
+        } else if (ancestorId) {
+          clusteredData[ancestorId] = cloneDeep(mapLocationData[ancestorId]);
         }
       }
     }
 
-    console.log("result: ", clusteredLocations);
+    console.log("result: ", clusteredData);
 
     return (
       <BaseMap
         banner={this.renderBanner()}
         mapTilerKey={mapTilerKey}
         markers={
-          clusteredLocations &&
-          Object.values(clusteredLocations).map(this.renderMarker)
+          clusteredData && Object.values(clusteredData).map(this.renderMarker)
         }
         onClick={this.handleMapClick}
         tooltip={tooltip}
