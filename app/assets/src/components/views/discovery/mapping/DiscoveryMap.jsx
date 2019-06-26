@@ -1,12 +1,14 @@
 import React from "react";
 import { Marker } from "react-map-gl";
-import { get, isEmpty, throttle, upperFirst } from "lodash/fp";
+import { get, indexOf, isEmpty, throttle, upperFirst } from "lodash/fp";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
+import { MAP_LEVEL_ORDER } from "~/components/views/discovery/mapping/constants";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
+import RectangleMarker from "~/components/views/discovery/mapping/RectangleMarker";
 
 import cs from "./discovery_map.scss";
 
@@ -120,8 +122,6 @@ class DiscoveryMap extends React.Component {
     const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
     if (!locationInfo[idsField]) return;
 
-    console.log("(map, entry): ", level, locationInfo.geo_level);
-
     const pointCount = locationInfo[idsField].length;
     const minSize = 10;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
@@ -131,9 +131,26 @@ class DiscoveryMap extends React.Component {
       minSize
     );
 
+    const shapeMarkers = {
+      circle: CircleMarker,
+      rectangle: RectangleMarker,
+    };
+    let ShapeMarker = shapeMarkers["circle"];
+
+    console.log("(map, entry): ", level, locationInfo.geo_level);
+    if (
+      indexOf(locationInfo.geo_level, MAP_LEVEL_ORDER) <
+      indexOf(level, MAP_LEVEL_ORDER)
+    ) {
+      if (["country", "state"].includes(locationInfo.geo_level)) {
+        console.log("rectangle: ", locationInfo.name);
+        ShapeMarker = shapeMarkers["rectangle"];
+      }
+    }
+
     return (
       <Marker key={`marker-${locationInfo.id}`} latitude={lat} longitude={lng}>
-        <CircleMarker
+        <ShapeMarker
           active={id === previewedLocationId}
           size={markerSize}
           onClick={() => this.handleMarkerClick(id)}

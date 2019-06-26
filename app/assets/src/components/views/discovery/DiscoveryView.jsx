@@ -903,9 +903,11 @@ class DiscoveryView extends React.Component {
       }
     };
 
-    const indexOfMap = indexOf(mapLevel, MAP_LEVEL_ORDER);
+    const levelIndex = level => indexOf(level, MAP_LEVEL_ORDER);
+
+    const indexOfMap = levelIndex(mapLevel);
     for (const [id, entry] of Object.entries(rawMapLocationData)) {
-      const indexOfEntry = indexOf(entry.geo_level, MAP_LEVEL_ORDER);
+      const indexOfEntry = levelIndex(entry.geo_level);
 
       // Have a bubble if you're higher than or at the map's geo level.
       if (indexOfEntry <= indexOfMap && !clusteredData[entry.id]) {
@@ -914,13 +916,13 @@ class DiscoveryView extends React.Component {
 
       ["country", "state"].forEach(ancestorLevel => {
         // If you have ancestors higher than or at the map's level, add yourself to them.
-        if (indexOf(ancestorLevel, MAP_LEVEL_ORDER) <= indexOfMap) {
+        if (levelIndex(ancestorLevel) <= indexOfMap) {
           addToAncestor(entry, ancestorLevel);
         }
       });
     }
 
-    this.setState({ mapLocationData: clusteredData });
+    this.setState({ mapLocationData: clusteredData, mapLevel });
   };
 
   renderCenterPaneContent = () => {
