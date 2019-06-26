@@ -35,8 +35,6 @@ class Location < ApplicationRecord
   STATE_NAMES = %w[state province region].freeze
   SUBDIVISION_NAMES = %w[county state_district district].freeze
   CITY_NAMES = %w[city city_distrct locality town borough municipality village hamlet quarter neighbourhood suburb].freeze
-  PLACE_LEVEL = "place".freeze
-  GEO_LEVELS = [PLACE_LEVEL, CITY_LEVEL, SUBDIVISION_LEVEL, STATE_LEVEL, COUNTRY_LEVEL].freeze
 
   # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)
@@ -101,7 +99,7 @@ class Location < ApplicationRecord
       new_from_params(resp)
     end
   end
-  
+
   # Restrict Human location specificity to Subdivision, State, Country. Return new Location if
   # restriction added.
   def self.check_and_restrict_specificity(location, host_genome_name)
@@ -161,13 +159,13 @@ class Location < ApplicationRecord
   def self.present_and_missing_parents(location)
     # Find if the Country or State level is missing
     country_match = Location.where(
-        geo_level: COUNTRY_LEVEL,
-        country_name: location.country_name
+      geo_level: COUNTRY_LEVEL,
+      country_name: location.country_name
     )
     state_match = Location.where(
-        geo_level: STATE_LEVEL,
-        country_name: location.country_name,
-        state_name: location.state_name
+      geo_level: STATE_LEVEL,
+      country_name: location.country_name,
+      state_name: location.state_name
     )
     present_parents = country_match.or(state_match)
     present_parent_levels = present_parents.pluck(:geo_level)
