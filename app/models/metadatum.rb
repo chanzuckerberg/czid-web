@@ -131,8 +131,8 @@ class Metadatum < ApplicationRecord
     location = Location.find_or_new_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
     location = Location.check_and_restrict_specificity(location, sample.host_genome_name)
     unless location.id
+      location = Location.check_and_fetch_parents(location)
       location.save!
-      Location.check_and_fetch_parents(location)
     end
 
     # At this point, discard raw_value (too long to store anyway)

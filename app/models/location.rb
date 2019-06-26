@@ -120,6 +120,7 @@ class Location < ApplicationRecord
   # Note: We are clustering at Country+State for now so Subdivision+City ids may be nil.
   def self.check_and_fetch_parents(location)
     present_parent_level_ids, missing_parent_levels = present_and_missing_parents(location)
+    location.save! unless location.id
     present_parent_level_ids[location.geo_level] = location.id
 
     missing_parent_levels.each do |level|
@@ -145,10 +146,7 @@ class Location < ApplicationRecord
       new_location.save!
     end
 
-    location = set_parent_ids(location, present_parent_level_ids)
-    location.save!
-
-    location
+    set_parent_ids(location, present_parent_level_ids)
   end
 
   # Identify missing Country or State location levels. Even for levels below State, clustering is
