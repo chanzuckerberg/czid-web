@@ -1,7 +1,7 @@
 import React from "react";
 import { mapValues } from "lodash/fp";
 import PropTypes from "prop-types";
-import ReactPanZoom from "@ajainarayanan/react-pan-zoom";
+import { PanZoom } from "react-easy-panzoom";
 
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 import NetworkGraph from "~/components/visualizations/NetworkGraph.js";
@@ -28,9 +28,6 @@ class PipelineViz extends React.Component {
 
     this.state = {
       stagesOpened: [true, true, true, true],
-      zoom: this.props.initialZoom,
-      zoomInDisabled: false,
-      zoomOutDisabled: true,
     };
   }
 
@@ -39,29 +36,11 @@ class PipelineViz extends React.Component {
   }
 
   zoomIn = () => {
-    const { zoomChangeInterval, zoomMax } = this.props;
-    const { zoom, zoomInDisabled } = this.state;
-    if (!zoomInDisabled) {
-      const newZoom = zoom + zoomChangeInterval;
-      this.setState({
-        zoom: newZoom,
-        zoomInDisabled: newZoom >= zoomMax,
-        zoomOutDisabled: false,
-      });
-    }
+    this.panZoomContainer.zoomIn();
   };
 
   zoomOut = () => {
-    const { zoomChangeInterval, zoomMin } = this.props;
-    const { zoom, zoomOutDisabled } = this.state;
-    if (!zoomOutDisabled) {
-      const newZoom = zoom - zoomChangeInterval;
-      this.setState({
-        zoom: newZoom,
-        zoomInDisabled: false,
-        zoomOutDisabled: newZoom <= zoomMin,
-      });
-    }
+    this.panZoomContainer.zoomOut();
   };
 
   toggleStage(index) {
@@ -337,7 +316,7 @@ class PipelineViz extends React.Component {
   }
 
   render() {
-    const { zoom, zoomInDisabled, zoomOutDisabled } = this.state;
+    const { zoomMin, zoomMax } = this.props;
     const stageContainers = this.stageNames.map((stageName, i) => {
       const isOpened = this.state.stagesOpened[i];
 
@@ -370,15 +349,21 @@ class PipelineViz extends React.Component {
     });
 
     return (
-      <div onDoubleClick={this.zoomIn}>
-        <ReactPanZoom zoom={zoom} className={cs.panZoomContainer}>
+      <div>
+        <PanZoom
+          className={cs.panZoomContainer}
+          minZoom={zoomMin}
+          maxZoom={zoomMax}
+          zoomSpeed={3}
+          ref={ref => {
+            this.panZoomContainer = ref;
+          }}
+        >
           <div className={cs.pipelineViz}>{stageContainers}</div>
-        </ReactPanZoom>
+        </PanZoom>
         <PlusMinusControl
           onClickPlus={this.zoomIn}
           onClickMinus={this.zoomOut}
-          plusDisabled={zoomInDisabled}
-          minusDisabled={zoomOutDisabled}
           className={cs.plusMinusControl}
         />
       </div>
@@ -391,20 +376,16 @@ PipelineViz.propTypes = {
   backgroundColor: PropTypes.string,
   nodeColor: PropTypes.string,
   edgeColor: PropTypes.string,
-  initialZoom: PropTypes.number,
   zoomMin: PropTypes.number,
   zoomMax: PropTypes.number,
-  zoomChangeInterval: PropTypes.number,
 };
 
 PipelineViz.defaultProps = {
   backgroundColor: "#f8f8f8",
   nodeColor: "#eaeaea",
   edgeColor: "#999999",
-  initialZoom: 1,
-  zoomMin: 1,
-  zoomMax: 5,
-  zoomChangeInterval: 1,
+  zoomMin: 0.5,
+  zoomMax: 3,
 };
 
 export default PipelineViz;
