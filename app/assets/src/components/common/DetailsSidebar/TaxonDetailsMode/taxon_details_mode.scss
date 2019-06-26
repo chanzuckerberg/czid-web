@@ -75,7 +75,11 @@
   line-height: $line-height-small;
 
   .wikiLink {
-    color: $primary-light !important;
+    color: $black !important;
     cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
