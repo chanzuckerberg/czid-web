@@ -41,7 +41,7 @@ class DiscoveryMap extends React.Component {
 
     if (this.onGeoLevelChangeThrottled) {
       const geoLevel =
-        viewport.zoom < 4 ? "country" : viewport.zoom < 5 ? "state" : "city";
+        viewport.zoom < 4 ? "country" : viewport.zoom < 5.5 ? "state" : "city";
       this.onGeoLevelChangeThrottled(geoLevel);
     }
 

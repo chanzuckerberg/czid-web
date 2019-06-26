@@ -883,17 +883,23 @@ class DiscoveryView extends React.Component {
   handleGeoLevelChange = geoLevel => {
     const { rawMapLocationData, currentTab } = this.state;
 
-    const idField = currentTab === "samples" ? "sample_ids" : "project_ids";
+    const ids = currentTab === "samples" ? "sample_ids" : "project_ids";
 
     let clusteredData = {};
+
+    const copyLocation = entry => {
+      return { ...entry, [ids]: Object.assign([], entry[ids]) };
+    };
 
     const addToAncestor = (entry, ancestorLevel) => {
       const ancestorId = entry[`${ancestorLevel}_id`];
       const ancestor = clusteredData[ancestorId];
       if (ancestor) {
-        ancestor[idField] = union(ancestor[idField], entry[idField]);
+        ancestor[ids] = union(ancestor[ids], entry[ids]);
       } else if (ancestorId) {
-        clusteredData[ancestorId] = cloneDeep(rawMapLocationData[ancestorId]);
+        clusteredData[ancestorId] = copyLocation(
+          rawMapLocationData[ancestorId]
+        );
       }
     };
 
@@ -901,15 +907,11 @@ class DiscoveryView extends React.Component {
     for (const [id, entry] of Object.entries(rawMapLocationData)) {
       const indexOfEntry = indexOf(entry.geo_level, GEO_LEVEL_ORDER);
 
-      if (indexOfEntry <= indexOfMap) {
-        // Higher than or at the current geo level
-        clusteredData[id] = cloneDeep(entry);
-      } else {
-        // Below the current level
-        addToAncestor(entry, geoLevel);
-      }
+      // Have a bubble if you're higher than or at the map's geo level.
+      if (indexOfEntry <= indexOfMap) clusteredData[id] = copyLocation(entry);
 
       ["country", "state"].forEach(ancestorLevel => {
+        // If you have ancestors higher than the map's level, add yourself to them.
         if (indexOf(ancestorLevel, GEO_LEVEL_ORDER) <= indexOfMap) {
           addToAncestor(entry, ancestorLevel);
         }
