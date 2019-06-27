@@ -362,8 +362,8 @@ class PipelineViz extends React.Component {
           <div className={cs.pipelineViz}>{stageContainers}</div>
         </PanZoom>
         <PlusMinusControl
-          onClickPlus={this.zoomIn}
-          onClickMinus={this.zoomOut}
+          onPlusClick={this.zoomIn}
+          onMinusClick={this.zoomOut}
           className={cs.plusMinusControl}
         />
       </div>
