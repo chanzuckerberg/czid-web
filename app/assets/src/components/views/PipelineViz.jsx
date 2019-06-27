@@ -91,8 +91,7 @@ class PipelineViz extends React.Component {
         return {
           name: name,
           inputInfo: inputInfo,
-          outputInfo,
-          outputInfo,
+          outputInfo: outputInfo,
         };
       });
 
