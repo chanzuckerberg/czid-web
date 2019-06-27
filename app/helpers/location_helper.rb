@@ -76,7 +76,7 @@ module LocationHelper
     locations = locations.map do |loc, count|
       location = loc.is_a?(Array) ? (loc[0] || loc[1]) : loc
       parents = loc.is_a?(Array) ? loc[2..-1].compact[0..-2] : []
-      return { value: location, text: truncate_name(location), count: count, parents: parents }
+      { value: location, text: truncate_name(location), count: count, parents: parents }
     end
     not_set_count = samples_count - locations.sum { |l| l[:count] }
     if not_set_count > 0
@@ -94,7 +94,8 @@ module LocationHelper
                 .count(:project_id)
     locations.map do |loc, count|
       location = loc.is_a?(Array) ? (loc[0] || loc[1]) : loc
-      { value: location, text: truncate_name(location), count: count }
+      parents = loc.is_a?(Array) ? loc[2..-1].compact[0..-2] : []
+      { value: location, text: truncate_name(location), count: count, parents: parents }
     end
   end
 

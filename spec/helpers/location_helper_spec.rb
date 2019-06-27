@@ -33,20 +33,20 @@ RSpec.describe LocationHelper, type: :helper do
       sample_ids = [1, 2, 3]
       field_name = "collection_location_v2"
       mock_filtered = {
-        [nil, "Alaska, USA"] => 1,
-        [nil, "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece"] => 1,
-        [nil, "Hanoi, Vietnam"] => 1,
-        [nil, "Redwood City, San Mateo County, California, USA"] => 112,
+        [nil, "Alaska, USA", "USA", "Alaska, USA"] => 1,
+        [nil, "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", "Greece", "Crete, Greece", "Chania, Crete, Greece", "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece"] => 1,
+        [nil, "Hanoi, Vietnam", "Vietnam", "Hanoi, Vietnam"] => 1,
+        [nil, "Redwood City, San Mateo County, California, USA", "USA", "California", "San Mateo County, California, USA", "Redwood City, San Mateo County, California, USA"] => 112,
         [nil, "Zimbabwe"] => 1
       }
       allow(SamplesHelper).to receive_message_chain(:samples_by_metadata_field, :count).and_return(mock_filtered)
 
       expected = [
-        { value: "Alaska, USA", text: "Alaska, USA", count: 1 },
-        { value: "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", text: "Chania, 73135, Greece", count: 1 },
-        { value: "Hanoi, Vietnam", text: "Hanoi, Vietnam", count: 1 },
-        { value: "Redwood City, San Mateo County, California, USA", text: "Redwood City, California, USA", count: 112 },
-        { value: "Zimbabwe", text: "Zimbabwe", count: 1 },
+        { value: "Alaska, USA", text: "Alaska, USA", count: 1, parents: ["USA"] },
+        { value: "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", text: "Chania, 73135, Greece", count: 1, parents: ["Greece", "Crete, Greece", "Chania, Crete, Greece"] },
+        { value: "Hanoi, Vietnam", text: "Hanoi, Vietnam", count: 1, parents: ["Vietnam"] },
+        { value: "Redwood City, San Mateo County, California, USA", text: "Redwood City, California, USA", count: 112, parents: ["USA", "California", "San Mateo County, California, USA"] },
+        { value: "Zimbabwe", text: "Zimbabwe", count: 1, parents: [] },
         { value: "not_set", text: "Unknown", count: 740 }
       ]
       result = LocationHelper.sample_dimensions(sample_ids, field_name, 856)
@@ -59,20 +59,20 @@ RSpec.describe LocationHelper, type: :helper do
     it "gets and formats project location dimensions" do
       field_name = "collection_location_v2"
       mock_filtered = {
-        [nil, "Alaska, USA"] => 1,
-        [nil, "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece"] => 1,
-        [nil, "Hanoi, Vietnam"] => 1,
-        [nil, "Redwood City, San Mateo County, California, USA"] => 1,
+        [nil, "Alaska, USA", "USA", "Alaska, USA"] => 1,
+        [nil, "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", "Greece", "Crete, Greece", "Chania, Crete, Greece", "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece"] => 1,
+        [nil, "Hanoi, Vietnam", "Vietnam", "Hanoi, Vietnam"] => 1,
+        [nil, "Redwood City, San Mateo County, California, USA", "USA", "California", "San Mateo County, California, USA", "Redwood City, San Mateo County, California, USA"] => 1,
         [nil, "Zimbabwe"] => 1
       }
       allow(SamplesHelper).to receive_message_chain(:samples_by_metadata_field, :includes, :distinct, :count).and_return(mock_filtered)
 
       expected = [
-        { value: "Alaska, USA", text: "Alaska, USA", count: 1 },
-        { value: "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", text: "Chania, 73135, Greece", count: 1 },
-        { value: "Hanoi, Vietnam", text: "Hanoi, Vietnam", count: 1 },
-        { value: "Redwood City, San Mateo County, California, USA", text: "Redwood City, California, USA", count: 1 },
-        { value: "Zimbabwe", text: "Zimbabwe", count: 1 }
+        { value: "Alaska, USA", text: "Alaska, USA", count: 1, parents: ["USA"] },
+        { value: "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", text: "Chania, 73135, Greece", count: 1, parents: ["Greece", "Crete, Greece", "Chania, Crete, Greece"]},
+        { value: "Hanoi, Vietnam", text: "Hanoi, Vietnam", count: 1, parents: ["Vietnam"] },
+        { value: "Redwood City, San Mateo County, California, USA", text: "Redwood City, California, USA", count: 1, parents: ["USA", "California", "San Mateo County, California, USA"] },
+        { value: "Zimbabwe", text: "Zimbabwe", count: 1, parents: [] }
       ]
       result = LocationHelper.project_dimensions([1, 2, 3], field_name)
       expect(result).to eq(expected)

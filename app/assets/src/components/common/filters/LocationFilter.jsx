@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { BaseMultipleFilter } from "~/components/common/filters";
 import { concat, forEach, values } from "lodash/fp";
+import { BaseMultipleFilter } from "~/components/common/filters";
 
 class LocationFilter extends React.Component {
   expandParents = options => {
@@ -19,7 +19,6 @@ class LocationFilter extends React.Component {
         }
       }, option.parents || []);
     }, options);
-    console.log(parentOptions);
     return concat(options, values(parentOptions));
   };
 

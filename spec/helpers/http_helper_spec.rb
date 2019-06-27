@@ -1,5 +1,4 @@
 require "rails_helper"
-include HttpHelper
 
 RSpec.describe HttpHelper, type: :helper do
   describe "#get" do

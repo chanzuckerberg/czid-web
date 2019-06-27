@@ -3,6 +3,11 @@ require 'rails_helper'
 RSpec.describe ProjectsController, type: :controller do
   create_users
 
+  before do
+    stub_request(:post, "https://sts.amazonaws.com/")
+      .to_return(status: 200, body: "", headers: {})
+  end
+
   # Admin specific behavior
   context "Admin user" do
     # create_users
