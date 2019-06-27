@@ -17,11 +17,11 @@ def check_pending_jobs_counts(queue_name, region, job_status_list=('RUNNABLE', '
     return {job_status: get_jobs_count(queue_name, region, job_status) for job_status in job_status_list}
 
 
-def autoscale_compute_environments(batch_configurations):
+def autoscale_compute_environments(batch_configurations, dry_run=False):
     results = []
     for bc in batch_configurations:
         try:
-            process_results = process_batch_configuration(bc)
+            process_results = process_batch_configuration(bc, dry_run)
             results.append({'batch_configuration': bc, 'process_results': process_results})
         except Exception as e:
             error_type = str(type(e))
@@ -30,7 +30,7 @@ def autoscale_compute_environments(batch_configurations):
     return results
 
 
-def process_batch_configuration(batch_configuration):
+def process_batch_configuration(batch_configuration, dry_run=False):
     job_vcpus, queue_name, region = (batch_configuration[i] for i in ('vcpus', 'queue_name', 'region'))
     compute_environment_name = find_compute_environment_name(queue_name, region)
     current_capacity = get_compute_environment_capacity(compute_environment_name, region)
@@ -42,7 +42,7 @@ def process_batch_configuration(batch_configuration):
 
     new_vcpu_min = min(total_jobs_vcpu, current_vcpu_max)
 
-    if new_vcpu_min != current_vcpu_min:
+    if (new_vcpu_min != current_vcpu_min) and not dry_run:
         changed = True
         set_compute_environment_min_capacity(new_vcpu_min, compute_environment_name, region)
     else:
