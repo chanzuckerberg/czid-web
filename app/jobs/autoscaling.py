@@ -147,10 +147,10 @@ def autoscaling_update(config):
         else:
             print "No instances are ready to move from 'draining' to 'discarded' state."
 
-        if 'batch_configurations' in config:
-            print "Autoscaling batches:"
-            response_batch_autoscaling = batch_autoscaling.autoscale_compute_environments(config['batch_configurations'], dry_run=True)
-            print json.dumps(response_batch_autoscaling, default=_default_json_serializer)
+    if 'batch_configurations' in config:
+        print "Autoscaling batches:"
+        response_batch_autoscaling = batch_autoscaling.autoscale_compute_environments(config['batch_configurations'], dry_run=True)
+        print json.dumps(response_batch_autoscaling, default=_default_json_serializer)
 
 
 def _default_json_serializer(obj):

@@ -103,12 +103,12 @@ class CheckPipelineRuns
         {
           'queue_name' => Sample::DEFAULT_QUEUE,
           'vcpus' => Sample::DEFAULT_VCPUS,
-          'region_name' => AWS_DEFAULT_REGION
+          'region' => AWS_DEFAULT_REGION
         },
         {
           'queue_name' => Sample::DEFAULT_QUEUE_HIMEM,
           'vcpus' => Sample::DEFAULT_VCPUS_HIMEM,
-          'region_name' => AWS_DEFAULT_REGION
+          'region' => AWS_DEFAULT_REGION
         }
       ]
     }
