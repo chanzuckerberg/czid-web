@@ -1,9 +1,9 @@
 class Location < ApplicationRecord
   include LocationHelper
-  belongs_to :country, class_name: "Location"
-  belongs_to :state, class_name: "Location"
-  belongs_to :subdivision, class_name: "Location"
-  belongs_to :city, class_name: "Location"
+  belongs_to :country, class_name: "Location", optional: true
+  belongs_to :state, class_name: "Location", optional: true
+  belongs_to :subdivision, class_name: "Location", optional: true
+  belongs_to :city, class_name: "Location", optional: true
 
   LOCATION_IQ_BASE_URL = "https://us1.locationiq.com/v1".freeze
   GEOSEARCH_BASE_QUERY = "search.php?addressdetails=1&normalizecity=1".freeze
