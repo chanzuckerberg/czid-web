@@ -3,7 +3,6 @@ import { Marker } from "react-map-gl";
 import { get, isEmpty, upperFirst, sumBy, size, values } from "lodash/fp";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import BasicPopup from "~/components/BasicPopup";
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
@@ -145,14 +144,14 @@ class DiscoveryMap extends React.Component {
       );
     } else {
       const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
-      const total = sumBy(p => size(p[idsField]), values(mapLocationData));
+      const count = sumBy(p => size(p[idsField]), values(mapLocationData));
       return (
         <div className={cs.bannerContainer}>
           <div className={cs.banner}>
-            <span className={cs.emphasis}>{`${total} ${currentTab.slice(
+            <span className={cs.emphasis}>{`${count} ${currentTab.slice(
               0,
               -1
-            )}${total > 1 ? "s" : ""}`}</span>{" "}
+            )}${count > 1 ? "s" : ""}`}</span>{" "}
             {`with location data.`}
           </div>
         </div>
