@@ -7,18 +7,18 @@ import MinusControlIcon from "~/components/ui/icons/MinusControlIcon.jsx";
 import cs from "./plus_minus_control.scss";
 
 const PlusMinusControl = ({
-  onClickPlus,
-  onClickMinus,
+  onPlusClick,
+  onMinusClick,
   plusDisabled,
   minusDisabled,
   className,
 }) => {
   return (
     <div className={cx(className, cs.plusMinusContainer)}>
-      <button disabled={plusDisabled} onClick={onClickPlus}>
+      <button disabled={plusDisabled} onClick={onPlusClick}>
         <PlusControlIcon className={cs.icon} />
       </button>
-      <button disabled={minusDisabled} onClick={onClickMinus}>
+      <button disabled={minusDisabled} onClick={onMinusClick}>
         <MinusControlIcon className={cs.icon} />
       </button>
     </div>
@@ -26,8 +26,8 @@ const PlusMinusControl = ({
 };
 
 PlusMinusControl.propTypes = {
-  onClickPlus: PropTypes.func,
-  onClickMinus: PropTypes.func,
+  onPlusClick: PropTypes.func,
+  onMinusClick: PropTypes.func,
   plusDisabled: PropTypes.bool,
   minusDisabled: PropTypes.bool,
 };
