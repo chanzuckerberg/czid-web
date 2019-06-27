@@ -38,7 +38,7 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props !== prevProps) {
+    if (this.props !== prevProps || this.heatmap === null) {
       this.updateHeatmap();
     }
   }
