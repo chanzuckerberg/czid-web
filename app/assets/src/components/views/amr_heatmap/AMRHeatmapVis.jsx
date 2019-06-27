@@ -28,15 +28,32 @@ export default class AMRHeatmapVis extends React.Component {
     const [sampleLabels, geneLabels, alleleLabels] = this.extractLabels(
       samplesWithAMRCounts
     );
+    const alleleToGeneMap = this.mapAllelesToGenes(samplesWithAMRCounts);
     this.setState({
       sampleLabels,
       geneLabels,
       alleleLabels,
+      alleleToGeneMap,
     });
   }
 
   componentDidUpdate() {
     this.updateHeatmap();
+  }
+
+  // Sometimes, when presenting the tooltip popup as a user hovers over
+  // a node on the heatmap, they will be over a node where the row is
+  // an allele and the column is a sample with no AMR count for the allele.
+  // With no AMR count, there's no easy way to grab the name of the gene
+  // for the allele. Hence the allele-to-gene mapping.
+  mapAllelesToGenes(sampleData) {
+    const alleleToGeneMap = {};
+    sampleData.forEach(sample => {
+      sample.amr_counts.forEach(amrCount => {
+        alleleToGeneMap[amrCount.allele] = amrCount.gene;
+      });
+    });
+    return alleleToGeneMap;
   }
 
   extractLabels(sampleData) {
@@ -60,23 +77,7 @@ export default class AMRHeatmapVis extends React.Component {
     return [sampleLabels, geneLabels, alleleLabels];
   }
 
-  getTooltipData(node) {
-    const { selectedOptions } = this.props;
-    const { sampleLabels, geneLabels } = this.state;
-
-    return [
-      {
-        name: "Info",
-        data: [["Sample", sampleLabels[node.columnIndex].label]],
-      },
-      {
-        name: "Values",
-        data: [[selectedOptions.metric, node.value]],
-      },
-    ];
-  }
-
-  //*** Callback functions for other components ***
+  //*** Callback functions for the heatmap ***
 
   colorFilter = (value, node, originalColor, _, colorNoValue) => {
     // Leave zero values grey
@@ -103,6 +104,62 @@ export default class AMRHeatmapVis extends React.Component {
   };
 
   //*** Following functions must be called after the component has updated ***
+
+  getTooltipData(node) {
+    const { samplesWithAMRCounts, selectedOptions } = this.props;
+    const {
+      sampleLabels,
+      geneLabels,
+      alleleLabels,
+      alleleToGeneMap,
+    } = this.state;
+    const sampleName = sampleLabels[node.columnIndex].label;
+    let amrCountIdentifier = "";
+    let gene = "";
+    let allele = "";
+    switch (selectedOptions.viewLevel) {
+      case VIEW_LEVEL_ALLELES: {
+        amrCountIdentifier = alleleLabels[node.rowIndex].label;
+        allele = amrCountIdentifier;
+        break;
+      }
+      case VIEW_LEVEL_GENES: {
+        amrCountIdentifier = geneLabels[node.rowIndex].label;
+        gene = amrCountIdentifier;
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+
+    const sampleForColumn = samplesWithAMRCounts[node.columnIndex];
+    const amrCountForRow = sampleForColumn.amr_counts.find(
+      amrCount => amrCount[selectedOptions.viewLevel] === amrCountIdentifier
+    );
+    let coverage = 0;
+    let depth = 0;
+    if (gene === "") {
+      gene = alleleToGeneMap[allele];
+    } else if (allele === "") {
+      allele = amrCountForRow ? amrCountForRow.allele : "---";
+    }
+    if (amrCountForRow) {
+      coverage = amrCountForRow.coverage;
+      depth = amrCountForRow.depth;
+    }
+
+    return [
+      {
+        name: "Info",
+        data: [["Sample", sampleName], ["Gene", gene], ["Allele", allele]],
+      },
+      {
+        name: "Values",
+        data: [["Coverage", `${coverage} %`], ["Depth", `${depth} x`]],
+      },
+    ];
+  }
 
   getHeatmapLabels() {
     const { selectedOptions } = this.props;
