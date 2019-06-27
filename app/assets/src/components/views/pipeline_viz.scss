@@ -1,0 +1,51 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.pipelineViz {
+  display: flex;
+  justify-content: center;
+}
+
+.stage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 24px;
+}
+
+.stageButton {
+  background-color: $light-grey;
+  border-radius: 8px;
+  padding: 12px;
+  width: 120px;
+  text-align: center;
+  font-weight: $font-weight-bold;
+  cursor: pointer;
+}
+
+.graph {
+  height: calc(100% - 32px);
+}
+
+.graphLabel {
+  display: "flex";
+  justify-content: "space-between";
+  flex-wrap: "wrap";
+}
+
+.closeButton {
+  padding: 3px 12px;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+.openedStage {
+  background-color: $off-white;
+  border-radius: 6px;
+  height: 50vh;
+  padding: 16px;
+  font-weight: $font-weight-bold;
+}

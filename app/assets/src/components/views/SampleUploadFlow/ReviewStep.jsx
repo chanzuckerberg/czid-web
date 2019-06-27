@@ -1,19 +1,45 @@
 import React from "react";
 import cx from "classnames";
-import { get, without, map, keyBy, flow, mapValues, omit } from "lodash/fp";
+import {
+  pick,
+  get,
+  without,
+  map,
+  keyBy,
+  flow,
+  mapValues,
+  omit,
+} from "lodash/fp";
 
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import TermsAgreement from "~ui/controls/TermsAgreement";
-import { bulkUploadLocalWithMetadata, bulkUploadRemote } from "~/api/upload";
+import {
+  bulkUploadLocalWithMetadata,
+  bulkUploadRemote,
+  bulkUploadBasespace,
+} from "~/api/upload";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import LoadingIcon from "~ui/icons/LoadingIcon";
+import { formatFileSize } from "~/components/utils/format";
 
 import cs from "./sample_upload_flow.scss";
+
+const BASESPACE_SAMPLE_FIELDS = [
+  "name",
+  "project_id",
+  "host_genome_id",
+  "basespace_project_id",
+  "basespace_access_token",
+  "basespace_dataset_id",
+];
+
+const REVIEWSTEP_UPLOAD_FAILED = "ReviewStep_upload_failed";
+const REVIEWSTEP_UPLOAD_SUCCEEDED = "ReviewStep_upload_succeeded";
 
 const processMetadataRows = metadataRows =>
   flow(
@@ -36,54 +62,76 @@ class ReviewStep extends React.Component {
   };
 
   uploadSamplesAndMetadata = () => {
-    this.props.onUploadStatusChange(true);
+    const {
+      onUploadStatusChange,
+      onUploadComplete,
+      uploadType,
+      samples,
+      sampleNamesToFiles,
+      metadata,
+    } = this.props;
+
+    onUploadStatusChange(true);
 
     this.setState({
       submitState: "submitting",
       errorMessage: "",
     });
 
-    // For uploading samples with files on S3
-    if (this.props.uploadType === "remote") {
-      bulkUploadRemote({
-        samples: this.props.samples,
-        metadata: processMetadataRows(this.props.metadata.rows),
+    // For uploading samples with files on S3 or Basespace
+    if (uploadType === "remote" || uploadType === "basespace") {
+      let bulkUploadFn = bulkUploadRemote;
+      let bulkUploadFnName = "bulkUploadRemote";
+      let samplesToUpload = samples;
+
+      if (uploadType === "basespace") {
+        bulkUploadFn = bulkUploadBasespace;
+        bulkUploadFnName = "bulkUploadBasespace";
+        samplesToUpload = map(pick(BASESPACE_SAMPLE_FIELDS), samplesToUpload);
+      }
+
+      bulkUploadFn({
+        samples: samplesToUpload,
+        metadata: processMetadataRows(metadata.rows),
       })
         .then(response => {
           this.setState({
             submitState: "success",
             createdSampleIds: response.sample_ids,
           });
-          this.props.onUploadComplete();
-          logAnalyticsEvent("ReviewStep_remote-upload_succeeded", {
+          onUploadComplete();
+          logAnalyticsEvent(REVIEWSTEP_UPLOAD_SUCCEEDED, {
             createdSampleIds: response.sample_ids.length,
+            uploadType,
           });
         })
         // TODO(mark): Display better errors.
         // For example, some samples may have successfully saved, but not others. Should explain to user.
         .catch(error => {
           // eslint-disable-next-line no-console
-          console.error("onBulkUploadRemote error:", error);
+          console.error(`${bulkUploadFnName} error:`, error);
           this.onUploadError("There were some issues creating your samples.");
-          logAnalyticsEvent("ReviewStep_remote-upload_failed", {
+          logAnalyticsEvent(REVIEWSTEP_UPLOAD_FAILED, {
             error,
+            uploadType,
           });
         });
     }
     // For uploading samples with local files
-    if (this.props.uploadType === "local") {
+    if (uploadType === "local") {
       // TODO(mark): Handle progress indicators in UI.
       bulkUploadLocalWithMetadata({
-        samples: this.props.samples,
-        sampleNamesToFiles: this.props.sampleNamesToFiles,
-        metadata: processMetadataRows(this.props.metadata.rows),
+        samples,
+        sampleNamesToFiles: sampleNamesToFiles,
+        metadata: processMetadataRows(metadata.rows),
         onAllUploadsComplete: () => {
           this.setState({
             submitState: "success",
           });
-          this.props.onUploadComplete();
-          logAnalyticsEvent("ReviewStep_local-upload_succeeded", {
-            samples: this.props.samples.length,
+          onUploadComplete();
+          logAnalyticsEvent(REVIEWSTEP_UPLOAD_SUCCEEDED, {
+            samples: samples.length,
+            uploadType,
           });
         },
         onCreateSamplesError: errors => {
@@ -91,8 +139,9 @@ class ReviewStep extends React.Component {
           // eslint-disable-next-line no-console
           console.error("onCreateSamplesError:", errors);
           this.onUploadError("There were some issues creating your samples.");
-          logAnalyticsEvent("ReviewStep_local-upload_failed", {
+          logAnalyticsEvent(REVIEWSTEP_UPLOAD_FAILED, {
             errors: errors.length,
+            uploadType,
           });
         },
         // TODO(mark): Display better errors.
@@ -101,17 +150,19 @@ class ReviewStep extends React.Component {
           // eslint-disable-next-line no-console
           console.error("onUploadError:", error);
           this.onUploadError("There were some issues creating your samples.");
-          logAnalyticsEvent("ReviewStep_local-upload_failed", {
+          logAnalyticsEvent(REVIEWSTEP_UPLOAD_FAILED, {
             fileName: file.name,
             error,
+            uploadType,
           });
         },
         onMarkSampleUploadedError: sampleName => {
           this.onUploadError(
             `Failed to mark sample ${sampleName} as uploaded.`
           );
-          logAnalyticsEvent("ReviewStep_local-upload_failed", {
+          logAnalyticsEvent(REVIEWSTEP_UPLOAD_FAILED, {
             sampleName,
+            uploadType,
           });
         },
       });
@@ -119,28 +170,44 @@ class ReviewStep extends React.Component {
   };
 
   getDataHeaders = () => {
-    return [
-      "Sample Name",
-      "Input Files",
-      "Host Genome",
-      // Omit sample name, which is the first header.
-      ...without(["Sample Name", "sample_name"], this.props.metadata.headers),
-    ];
+    const { uploadType } = this.props;
+    // Omit sample name, which is the first header.
+    const metadataHeaders = without(
+      ["Sample Name", "sample_name"],
+      this.props.metadata.headers
+    );
+    if (uploadType !== "basespace") {
+      return ["Sample Name", "Input Files", "Host Genome", ...metadataHeaders];
+    } else {
+      return [
+        "Sample Name",
+        "Basespace Project",
+        "File Size",
+        "File Type",
+        "Host Genome",
+        ...metadataHeaders,
+      ];
+    }
   };
 
   getDataRows = () => {
+    const { uploadType } = this.props;
     const metadataBySample = keyBy(
       row => row["Sample Name"] || row.sample_name,
       this.props.metadata.rows
     );
     const hostGenomesById = keyBy("id", this.props.hostGenomes);
 
-    return map(
-      sample => ({
+    const assembleDataForSample = sample => {
+      const sampleData = {
         ...metadataBySample[sample.name],
         "Sample Name": <div className={cs.sampleName}>{sample.name}</div>,
         "Host Genome": get("name", hostGenomesById[sample.host_genome_id]),
-        "Input Files": (
+      };
+
+      // We display different columns if the uploadType is basespace.
+      if (uploadType !== "basespace") {
+        sampleData["Input Files"] = (
           <div className={cs.files}>
             {sample.input_files_attributes.map(file => (
               <div key={file.source} className={cs.file}>
@@ -148,10 +215,17 @@ class ReviewStep extends React.Component {
               </div>
             ))}
           </div>
-        ),
-      }),
-      this.props.samples
-    );
+        );
+      } else {
+        (sampleData["File Size"] = formatFileSize(sample.file_size)),
+          (sampleData["File Type"] = sample.file_type);
+        sampleData["Basespace Project"] = sample.basespace_project_name;
+      }
+
+      return sampleData;
+    };
+
+    return map(assembleDataForSample, this.props.samples);
   };
 
   linksEnabled = () => this.state.submitState === "review";
@@ -194,6 +268,7 @@ class ReviewStep extends React.Component {
                     logAnalyticsEvent("ReviewStep_edit-project-link_clicked", {
                       projectId: this.props.project.id,
                       projectName: this.props.project.name,
+                      uploadType: this.props.uploadType,
                     });
                   }}
                 >
@@ -234,6 +309,7 @@ class ReviewStep extends React.Component {
                     logAnalyticsEvent("ReviewStep_edit-samples-link_clicked", {
                       projectId: this.props.project.id,
                       projectName: this.props.project.name,
+                      uploadType: this.props.uploadType,
                     });
                   }}
                 >
@@ -247,6 +323,7 @@ class ReviewStep extends React.Component {
                     logAnalyticsEvent("ReviewStep_edit-metadata-link_clicked", {
                       projectId: this.props.project.id,
                       projectName: this.props.project.name,
+                      uploadType: this.props.uploadType,
                     });
                   }}
                 >
@@ -304,7 +381,13 @@ class ReviewStep extends React.Component {
                   text="Go to Project"
                   rounded={false}
                   onClick={() =>
-                    logAnalyticsEvent("ReviewStep_go-to-project-button_clicked")
+                    logAnalyticsEvent(
+                      "ReviewStep_go-to-project-button_clicked",
+                      {
+                        projectId: this.props.project.id,
+                        projectName: this.props.project.name,
+                      }
+                    )
                   }
                 />
               </a>
@@ -319,6 +402,7 @@ class ReviewStep extends React.Component {
                 "ReviewStep_start-upload-button_clicked",
                 {
                   samples: this.props.samples.length,
+                  uploadType: this.props.uploadType,
                 }
               )}
               rounded={false}
@@ -347,6 +431,10 @@ ReviewStep.propTypes = {
       name: PropTypes.string,
       project_id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
       status: PropTypes.string,
+      // Basespace samples only.
+      file_size: PropTypes.number,
+      file_type: PropTypes.string,
+      basespace_project_name: PropTypes.string,
     })
   ),
   uploadType: PropTypes.string.isRequired,

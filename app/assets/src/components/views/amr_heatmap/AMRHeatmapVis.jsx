@@ -213,6 +213,11 @@ export default class AMRHeatmapVis extends React.Component {
     }
   }
 
+  colorFilter = (value, node, originalColor, _, colorNoValue) => {
+    // Leave zero values grey
+    return value > 0 ? originalColor : colorNoValue;
+  };
+
   initializeHeatmap(rows, columns, values) {
     const { selectedOptions } = this.props;
     this.heatmap = new Heatmap(
