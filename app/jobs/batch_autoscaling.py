@@ -1,4 +1,3 @@
-import sys
 import boto3
 
 def get_compute_environment_capacity(compute_environment_name, region):
@@ -26,7 +25,7 @@ def autoscale_compute_environments(batch_configurations, dry_run=False):
         except Exception as e:
             error_type = str(type(e))
             error_args = e.args
-            results.append({ 'batch_configuration': bc, "error_type": error_type, "error_args": error_args})
+            results.append({'batch_configuration': bc, "error_type": error_type, "error_args": error_args})
     return results
 
 
