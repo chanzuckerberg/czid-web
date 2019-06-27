@@ -46,7 +46,7 @@ class DiscoveryMap extends React.Component {
     if (this.onMapLevelChangeThrottled) {
       // Zoom thresholds were determined via eyeballing.
       const level =
-        viewport.zoom < 4 ? "country" : viewport.zoom < 5 ? "state" : "city";
+        viewport.zoom < 3.5 ? "country" : viewport.zoom < 5 ? "state" : "city";
       this.onMapLevelChangeThrottled(level);
     }
 
