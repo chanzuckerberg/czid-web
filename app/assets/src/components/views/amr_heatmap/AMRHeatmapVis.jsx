@@ -37,8 +37,10 @@ export default class AMRHeatmapVis extends React.Component {
     });
   }
 
-  componentDidUpdate() {
-    this.updateHeatmap();
+  componentDidUpdate(prevProps) {
+    if (this.props !== prevProps) {
+      this.updateHeatmap();
+    }
   }
 
   // Sometimes, when presenting the tooltip popup as a user hovers over
@@ -212,11 +214,6 @@ export default class AMRHeatmapVis extends React.Component {
       this.initializeHeatmap(rows, columns, values);
     }
   }
-
-  colorFilter = (value, node, originalColor, _, colorNoValue) => {
-    // Leave zero values grey
-    return value > 0 ? originalColor : colorNoValue;
-  };
 
   initializeHeatmap(rows, columns, values) {
     const { selectedOptions } = this.props;
