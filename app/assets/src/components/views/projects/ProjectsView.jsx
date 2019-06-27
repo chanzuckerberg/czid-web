@@ -159,7 +159,7 @@ class ProjectsView extends React.Component {
           <div className={cs.map}>
             <DiscoveryMap
               currentTab={currentTab}
-              level={mapLevel}
+              mapLevel={mapLevel}
               mapLocationData={mapLocationData}
               mapTilerKey={mapTilerKey}
               onClearFilters={onClearFilters}

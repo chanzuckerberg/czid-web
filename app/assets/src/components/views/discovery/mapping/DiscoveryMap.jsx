@@ -1,14 +1,15 @@
+import { get, indexOf, isEmpty, throttle, upperFirst } from "lodash/fp";
 import React from "react";
 import { Marker } from "react-map-gl";
-import { get, indexOf, isEmpty, throttle, upperFirst } from "lodash/fp";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
-import { MAP_LEVEL_ORDER } from "~/components/views/discovery/mapping/constants";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
+import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
 import RectangleMarker from "~/components/views/discovery/mapping/RectangleMarker";
+import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 
 import cs from "./discovery_map.scss";
 
@@ -44,7 +45,7 @@ class DiscoveryMap extends React.Component {
 
     if (this.onLevelChangeThrottled) {
       const level =
-        viewport.zoom < 4 ? "country" : viewport.zoom < 5.5 ? "state" : "city";
+        viewport.zoom < 4 ? "country" : viewport.zoom < 5 ? "state" : "city";
       this.onLevelChangeThrottled(level);
     }
 
@@ -112,38 +113,34 @@ class DiscoveryMap extends React.Component {
   };
 
   renderMarker = locationInfo => {
-    const { currentTab, level, previewedLocationId } = this.props;
+    const { currentTab, mapLevel, previewedLocationId } = this.props;
     const { viewport } = this.state;
     const id = locationInfo.id;
     const name = locationInfo.name;
     const lat = parseFloat(locationInfo.lat);
     const lng = parseFloat(locationInfo.lng);
+    const geoLevel = locationInfo.geo_level;
 
     const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
     if (!locationInfo[idsField]) return;
 
     const pointCount = locationInfo[idsField].length;
-    const minSize = 10;
+    const minSize = 14;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
-    // Log1.5 of the count looked nice visually for not getting too large with many points.
+    // Log1.3 of the count looked nice visually for not getting too large with many points.
     const markerSize = Math.max(
-      Math.log(pointCount) / Math.log(1.4) * (get("zoom", viewport) || 3),
+      Math.log(pointCount) / Math.log(1.3) * (get("zoom", viewport) || 3),
       minSize
     );
 
-    const shapeMarkers = {
-      circle: RectangleMarker,
-      rectangle: RectangleMarker,
-    };
-    let ShapeMarker = shapeMarkers["circle"];
-
+    let ShapeMarker;
     if (
-      indexOf(locationInfo.geo_level, MAP_LEVEL_ORDER) <
-      indexOf(level, MAP_LEVEL_ORDER)
+      MAP_CLUSTER_ENABLED_LEVELS.includes(geoLevel) &&
+      indexOfMapLevel(geoLevel) < indexOfMapLevel(mapLevel)
     ) {
-      if (["country", "state"].includes(locationInfo.geo_level)) {
-        ShapeMarker = shapeMarkers["rectangle"];
-      }
+      ShapeMarker = RectangleMarker;
+    } else {
+      ShapeMarker = CircleMarker;
     }
 
     return (
@@ -214,7 +211,7 @@ DiscoveryMap.defaultProps = {
 DiscoveryMap.propTypes = {
   currentDisplay: PropTypes.string,
   currentTab: PropTypes.string.isRequired,
-  level: PropTypes.string,
+  mapLevel: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,

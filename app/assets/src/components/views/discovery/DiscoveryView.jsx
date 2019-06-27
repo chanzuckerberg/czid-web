@@ -34,7 +34,8 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import { openUrl } from "~utils/links";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
-import { MAP_LEVEL_ORDER } from "~/components/views/discovery/mapping/constants";
+import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
+import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 
 import DiscoveryHeader from "./DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
@@ -903,20 +904,18 @@ class DiscoveryView extends React.Component {
       }
     };
 
-    const levelIndex = level => indexOf(level, MAP_LEVEL_ORDER);
-
-    const indexOfMap = levelIndex(mapLevel);
+    const indexOfMap = indexOfMapLevel(mapLevel);
     for (const [id, entry] of Object.entries(rawMapLocationData)) {
-      const indexOfEntry = levelIndex(entry.geo_level);
+      const indexOfEntry = indexOfMapLevel(entry.geo_level);
 
       // Have a bubble if you're higher than or at the map's geo level.
       if (indexOfEntry <= indexOfMap && !clusteredData[entry.id]) {
         clusteredData[id] = copyLocation(entry);
       }
 
-      ["country", "state"].forEach(ancestorLevel => {
+      MAP_CLUSTER_ENABLED_LEVELS.forEach(ancestorLevel => {
         // If you have ancestors higher than or at the map's level, add yourself to them.
-        if (levelIndex(ancestorLevel) <= indexOfMap) {
+        if (indexOfMapLevel(ancestorLevel) <= indexOfMap) {
           addToAncestor(entry, ancestorLevel);
         }
       });

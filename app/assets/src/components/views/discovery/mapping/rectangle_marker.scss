@@ -1,18 +1,25 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .rectangle {
+  @include font-header-s;
+
   cursor: pointer;
   background-color: $celery;
   border-radius: 8px;
-  padding: 4px;
+  padding: 2px 7px;
+  // Center midpoint and closer to tooltip
+  transform: translate(-50%);
 
   &.hoverable {
     &:hover {
-      fill: $primary-medium;
+      background-color: $primary-medium;
+      color: $white;
     }
   }
 
   &.active {
-    fill: $primary-medium;
+    background-color: $primary-medium;
+    color: $white;
   }
 }
