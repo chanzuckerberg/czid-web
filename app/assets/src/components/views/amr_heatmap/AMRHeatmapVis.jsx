@@ -11,6 +11,11 @@ import cs from "./amr_heatmap_vis.scss";
 const VIEW_LEVEL_ALLELES = "allele";
 const VIEW_LEVEL_GENES = "gene";
 
+const METRICS = [
+  { text: "Coverage", value: "coverage" },
+  { text: "Depth", value: "depth" },
+];
+
 export default class AMRHeatmapVis extends React.Component {
   constructor(props) {
     super(props);
@@ -139,17 +144,20 @@ export default class AMRHeatmapVis extends React.Component {
     const amrCountForRow = sampleForColumn.amr_counts.find(
       amrCount => amrCount[selectedOptions.viewLevel] === amrCountIdentifier
     );
-    let coverage = 0;
-    let depth = 0;
+
     if (gene === "") {
       gene = alleleToGeneMap[allele];
     } else if (allele === "") {
       allele = amrCountForRow ? amrCountForRow.allele : "---";
     }
-    if (amrCountForRow) {
-      coverage = amrCountForRow.coverage;
-      depth = amrCountForRow.depth;
-    }
+
+    let values = METRICS.map(metric => {
+      const value = amrCountForRow ? amrCountForRow[metric.value] : 0;
+      return [
+        metric.text,
+        metric.value === selectedOptions.metric ? <b>{value}</b> : value,
+      ];
+    });
 
     return [
       {
@@ -158,7 +166,7 @@ export default class AMRHeatmapVis extends React.Component {
       },
       {
         name: "Values",
-        data: [["Coverage", `${coverage} %`], ["Depth", `${depth} x`]],
+        data: values,
       },
     ];
   }
