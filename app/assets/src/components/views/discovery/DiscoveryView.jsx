@@ -883,7 +883,7 @@ class DiscoveryView extends React.Component {
     const { rawMapLocationData, currentTab } = this.state;
 
     const ids = currentTab === "samples" ? "sample_ids" : "project_ids";
-    let clusteredData = {};
+    const clusteredData = {};
 
     const copyLocation = entry => {
       return { ...entry, [ids]: Object.assign([], entry[ids]) };

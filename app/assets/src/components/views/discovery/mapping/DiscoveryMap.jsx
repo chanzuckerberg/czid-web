@@ -1,14 +1,12 @@
 import { get, isEmpty, throttle, upperFirst } from "lodash/fp";
 import React from "react";
-import { Marker } from "react-map-gl";
 
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
-import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
+import ShapeMarker from "~/components/views/discovery/mapping/ShapeMarker";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
-import RectangleMarker from "~/components/views/discovery/mapping/RectangleMarker";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 
 import cs from "./discovery_map.scss";
@@ -127,38 +125,25 @@ class DiscoveryMap extends React.Component {
     if (!locationInfo[idsField]) return;
 
     const pointCount = locationInfo[idsField].length;
-    // Sizing parameters determined via eyeballing.
-    const minSize = 14;
-    // Scale based on the zoom and point count (zoomed-in = higher zoom)
-    // Log1.3 of the count looked nice visually for not getting too large with many points.
-    const markerSize = Math.max(
-      Math.log(pointCount) / Math.log(1.3) * (get("zoom", viewport) || 3),
-      minSize
-    );
-
-    let ShapeMarker;
-    if (
+    const rectangular =
       MAP_CLUSTER_ENABLED_LEVELS.includes(geoLevel) &&
-      indexOfMapLevel(geoLevel) < indexOfMapLevel(mapLevel)
-    ) {
-      ShapeMarker = RectangleMarker;
-    } else {
-      ShapeMarker = CircleMarker;
-    }
+      indexOfMapLevel(geoLevel) < indexOfMapLevel(mapLevel);
 
     return (
-      <Marker key={`marker-${locationInfo.id}`} latitude={lat} longitude={lng}>
-        <ShapeMarker
-          active={id === previewedLocationId}
-          size={markerSize}
-          onClick={() => this.handleMarkerClick(id)}
-          onMouseEnter={() =>
-            this.handleMarkerMouseEnter({ id, name, lat, lng, pointCount })
-          }
-          onMouseLeave={this.handleMarkerMouseLeave}
-          title={`${name} (${pointCount})`}
-        />
-      </Marker>
+      <ShapeMarker
+        active={id === previewedLocationId}
+        lat={lat}
+        lng={lng}
+        onClick={() => this.handleMarkerClick(id)}
+        onMouseEnter={() =>
+          this.handleMarkerMouseEnter({ id, name, lat, lng, pointCount })
+        }
+        onMouseLeave={this.handleMarkerMouseLeave}
+        pointCount={pointCount}
+        rectangular={rectangular}
+        title={`${name} (${pointCount})`}
+        zoom={get("zoom", viewport)}
+      />
     );
   };
 
