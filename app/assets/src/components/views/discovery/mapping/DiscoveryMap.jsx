@@ -39,12 +39,17 @@ class DiscoveryMap extends React.Component {
 
   // updateViewport fires many times a second when moving, so we can throttle event calls.
   updateViewport = viewport => {
+    const { zoomBoundaryCountry, zoomBoundaryState } = this.props;
+
     this.setState({ viewport });
 
     if (this.onMapLevelChangeThrottled) {
-      // Zoom thresholds were determined via eyeballing.
       const level =
-        viewport.zoom < 3.5 ? "country" : viewport.zoom < 5 ? "state" : "city";
+        viewport.zoom < zoomBoundaryCountry
+          ? "country"
+          : viewport.zoom < zoomBoundaryState
+            ? "state"
+            : "city";
       this.onMapLevelChangeThrottled(level);
     }
 
@@ -192,8 +197,11 @@ class DiscoveryMap extends React.Component {
   }
 }
 
+// Zoom boundaries determined via eyeballing.
 DiscoveryMap.defaultProps = {
   currentTab: "samples",
+  zoomBoundaryCountry: 3.5,
+  zoomBoundaryState: 5,
 };
 
 DiscoveryMap.propTypes = {
@@ -208,6 +216,8 @@ DiscoveryMap.propTypes = {
   onMarkerClick: PropTypes.func,
   onTooltipTitleClick: PropTypes.func,
   previewedLocationId: PropTypes.number,
+  zoomBoundaryCountry: PropTypes.number,
+  zoomBoundaryState: PropTypes.number,
 };
 
 export default DiscoveryMap;
