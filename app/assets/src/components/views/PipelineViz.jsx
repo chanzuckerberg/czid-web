@@ -35,14 +35,6 @@ class PipelineViz extends React.Component {
     this.drawGraphs();
   }
 
-  zoomIn = () => {
-    this.panZoomContainer.zoomIn();
-  };
-
-  zoomOut = () => {
-    this.panZoomContainer.zoomOut();
-  };
-
   toggleStage(index) {
     const updatedStagesOpened = [...this.state.stagesOpened];
     updatedStagesOpened[index] = !updatedStagesOpened[index];
@@ -131,6 +123,7 @@ class PipelineViz extends React.Component {
           intraEdgeData.push({
             from: START_NODE_ID,
             to: i,
+            // Input node edges for first stage should be hidden.
             ...(index == 0
               ? {
                   color: {
@@ -362,8 +355,12 @@ class PipelineViz extends React.Component {
           <div className={cs.pipelineViz}>{stageContainers}</div>
         </PanZoom>
         <PlusMinusControl
-          onPlusClick={this.zoomIn}
-          onMinusClick={this.zoomOut}
+          onPlusClick={() =>
+            this.panZoomContainer && this.panZoomContainer.zoomIn()
+          }
+          onMinusClick={() =>
+            this.panZoomContainer && this.panZoomContainer.zoomOut()
+          }
           className={cs.plusMinusControl}
         />
       </div>
