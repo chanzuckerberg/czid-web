@@ -69,7 +69,7 @@ RSpec.describe LocationHelper, type: :helper do
 
       expected = [
         { value: "Alaska, USA", text: "Alaska, USA", count: 1, parents: ["USA"] },
-        { value: "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", text: "Chania, 73135, Greece", count: 1, parents: ["Greece", "Crete, Greece", "Chania, Crete, Greece"]},
+        { value: "Chania, Chania Municipality, Chania Regional Unit, Region of Crete, Crete, 73135, Greece", text: "Chania, 73135, Greece", count: 1, parents: ["Greece", "Crete, Greece", "Chania, Crete, Greece"] },
         { value: "Hanoi, Vietnam", text: "Hanoi, Vietnam", count: 1, parents: ["Vietnam"] },
         { value: "Redwood City, San Mateo County, California, USA", text: "Redwood City, California, USA", count: 1, parents: ["USA", "California", "San Mateo County, California, USA"] },
         { value: "Zimbabwe", text: "Zimbabwe", count: 1, parents: [] }
