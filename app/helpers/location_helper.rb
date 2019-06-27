@@ -88,10 +88,10 @@ module LocationHelper
   def self.project_dimensions(sample_ids, field_name)
     # See pattern in ProjectsController dimensions
     locations = SamplesHelper
-      .samples_by_metadata_field(sample_ids, field_name)
-      .includes(:sample)
-      .distinct
-      .count(:project_id)
+                .samples_by_metadata_field(sample_ids, field_name)
+                .includes(:sample)
+                .distinct
+                .count(:project_id)
     locations.map do |loc, count|
       location = loc.is_a?(Array) ? (loc[0] || loc[1]) : loc
       { value: location, text: truncate_name(location), count: count }
@@ -100,11 +100,11 @@ module LocationHelper
 
   def self.filter_by_name(samples_with_metadata, query)
     locations_by_geo_level = Location
-      .where(name: query)
-      .pluck(:id, :geo_level)
-      .group_by { |(_, geo_level)| geo_level }
-      .map { |field, values| [field, values.map { |id| id[0] }] }
-      .to_h
+                             .where(name: query)
+                             .pluck(:id, :geo_level)
+                             .group_by { |(_, geo_level)| geo_level }
+                             .map { |field, values| [field, values.map { |id| id[0] }] }
+                             .to_h
 
     samples = samples_with_metadata.includes(metadata: :location)
     # Plain text locations in string_validated_value + multi-geo-level location search
