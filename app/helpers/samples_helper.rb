@@ -233,11 +233,11 @@ module SamplesHelper
     include_not_set = query.include?('Not set')
 
     sample_type_metadatum = Metadatum
-                            .where(sample_id: samples.pluck(:id), key: key)
+      .where(sample_id: samples.pluck(:id), key: key)
 
     matching_sample_ids = sample_type_metadatum
-                          .select { |m| query_set.include?(m.validated_value) }
-                          .pluck(:sample_id)
+      .select { |m| query_set.include?(m.validated_value) }
+      .pluck(:sample_id)
 
     if include_not_set
       not_set_ids = samples.pluck(:id) - sample_type_metadatum.pluck(:sample_id)
@@ -385,11 +385,11 @@ module SamplesHelper
     # thus we need to get ids and redo the query independently
     sample_ids = samples.pluck(:id)
     return current_power
-           .samples
-           .where(id: sample_ids)
-           .joins(:project)
-           .select("samples.*", "IF(projects.public_access = 1 OR DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < '#{Time.current.strftime('%y-%m-%d')}', true, false) AS public")
-           .map(&:public)
+        .samples
+        .where(id: sample_ids)
+        .joins(:project)
+        .select("samples.*", "IF(projects.public_access = 1 OR DATE_ADD(samples.created_at, INTERVAL projects.days_to_keep_sample_private DAY) < '#{Time.current.strftime('%y-%m-%d')}', true, false) AS public")
+        .map(&:public)
   end
 
   # From the list of samples, return the ids of all samples whose top pipeline run is report ready.
@@ -525,23 +525,22 @@ module SamplesHelper
   end
 
   def self.samples_by_metadata_field(sample_ids, field_name)
+    query = Metadatum.where(metadata_fields: { name: field_name }, sample_id: sample_ids)
     # Special-case locations
     if MetadataField.find_by(name: field_name).base_type == Metadatum::LOCATION_TYPE
-      include_fields = [:metadata_field, :location]
-      # Plain-text locations in string_validated_value
-      group_fields = [:string_validated_value, "locations.name"]
+      query
+        .includes(:metadata_field, location: Location::GEO_LEVELS)
+        .group(
+          [
+            :string_validated_value,
+            "locations.name"
+          ] + Location::GEO_LEVELS.map { |l| "#{l.pluralize}_locations.name" }
+        )
     else
-      include_fields = :metadata_field
-      group_fields = Metadatum.where(key: field_name).first.validated_field
+      query
+        .includes(:metadata_field)
+        .group(Metadatum.where(key: field_name).first.validated_field)
     end
-
-    Metadatum
-      .includes(include_fields)
-      .where(
-        metadata_fields: { name: field_name },
-        sample_id: sample_ids
-      )
-      .group(group_fields)
   end
 
   private
@@ -572,8 +571,8 @@ module SamplesHelper
     metadatum = Metadatum.where(key: key).first
 
     samples_with_metadata = samples
-                            .includes(metadata: :metadata_field)
-                            .where(metadata: { metadata_field_id: metadatum.metadata_field_id })
+      .includes(metadata: :metadata_field)
+      .where(metadata: { metadata_field_id: metadatum.metadata_field_id })
 
     samples_filtered = if metadatum.metadata_field.base_type == Metadatum::LOCATION_TYPE
                          LocationHelper.filter_by_name(samples_with_metadata, query)
