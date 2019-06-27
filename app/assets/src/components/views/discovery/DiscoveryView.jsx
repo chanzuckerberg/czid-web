@@ -6,14 +6,12 @@ import {
   at,
   capitalize,
   clone,
-  cloneDeep,
   compact,
   concat,
   defaults,
   escapeRegExp,
   find,
   findIndex,
-  indexOf,
   isEmpty,
   keyBy,
   map,
@@ -914,7 +912,8 @@ class DiscoveryView extends React.Component {
       }
 
       MAP_CLUSTER_ENABLED_LEVELS.forEach(ancestorLevel => {
-        // If you have ancestors higher than or at the map's level, add yourself to them.
+        // If you have ancestors higher than or at the map's level, add your samples/projects to
+        // their bubble.
         if (indexOfMapLevel(ancestorLevel) <= indexOfMap) {
           addToAncestor(entry, ancestorLevel);
         }

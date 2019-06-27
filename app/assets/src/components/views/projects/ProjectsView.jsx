@@ -164,7 +164,7 @@ class ProjectsView extends React.Component {
               mapTilerKey={mapTilerKey}
               onClearFilters={onClearFilters}
               onClick={onMapClick}
-              onLevelChange={onMapLevelChange}
+              onMapLevelChange={onMapLevelChange}
               onMarkerClick={onMapMarkerClick}
               onTooltipTitleClick={onMapTooltipTitleClick}
               previewedLocationId={mapPreviewedLocationId}

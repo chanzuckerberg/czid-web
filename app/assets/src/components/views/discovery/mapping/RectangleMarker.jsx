@@ -6,14 +6,7 @@ import cs from "./rectangle_marker.scss";
 
 class RectangleMarker extends React.Component {
   render() {
-    const {
-      active,
-      size,
-      onMouseEnter,
-      onMouseLeave,
-      onClick,
-      title,
-    } = this.props;
+    const { active, onMouseEnter, onMouseLeave, onClick, title } = this.props;
 
     return (
       <div
@@ -34,15 +27,10 @@ class RectangleMarker extends React.Component {
 
 RectangleMarker.propTypes = {
   active: PropTypes.bool,
-  size: PropTypes.number,
   onMouseEnter: PropTypes.func,
   onMouseLeave: PropTypes.func,
   onClick: PropTypes.func,
   title: PropTypes.string,
-};
-
-RectangleMarker.defaultProps = {
-  size: 20,
 };
 
 export default RectangleMarker;

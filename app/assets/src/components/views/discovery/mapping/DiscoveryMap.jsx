@@ -1,4 +1,4 @@
-import { get, indexOf, isEmpty, throttle, upperFirst } from "lodash/fp";
+import { get, isEmpty, throttle, upperFirst } from "lodash/fp";
 import React from "react";
 import { Marker } from "react-map-gl";
 
@@ -19,7 +19,7 @@ export const DEFAULT_THROTTLE_MS = 500;
 class DiscoveryMap extends React.Component {
   constructor(props) {
     super(props);
-    const { onLevelChange } = this.props;
+    const { onMapLevelChange } = this.props;
 
     this.state = {
       tooltip: null,
@@ -31,22 +31,23 @@ class DiscoveryMap extends React.Component {
       DEFAULT_THROTTLE_MS,
       logAnalyticsEvent
     );
-    if (onLevelChange) {
-      this.onLevelChangeThrottled = throttle(
+    if (onMapLevelChange) {
+      this.onMapLevelChangeThrottled = throttle(
         DEFAULT_THROTTLE_MS,
-        onLevelChange
+        onMapLevelChange
       );
     }
   }
 
-  // updateViewport fires many times a second, so we can throttle event calls.
+  // updateViewport fires many times a second when moving, so we can throttle event calls.
   updateViewport = viewport => {
     this.setState({ viewport });
 
-    if (this.onLevelChangeThrottled) {
+    if (this.onMapLevelChangeThrottled) {
+      // Zoom thresholds were determined via eyeballing.
       const level =
         viewport.zoom < 4 ? "country" : viewport.zoom < 5 ? "state" : "city";
-      this.onLevelChangeThrottled(level);
+      this.onMapLevelChangeThrottled(level);
     }
 
     this.logAnalyticsEventThrottled("DiscoveryMap_viewport_updated");
@@ -115,6 +116,7 @@ class DiscoveryMap extends React.Component {
   renderMarker = locationInfo => {
     const { currentTab, mapLevel, previewedLocationId } = this.props;
     const { viewport } = this.state;
+
     const id = locationInfo.id;
     const name = locationInfo.name;
     const lat = parseFloat(locationInfo.lat);
@@ -125,6 +127,7 @@ class DiscoveryMap extends React.Component {
     if (!locationInfo[idsField]) return;
 
     const pointCount = locationInfo[idsField].length;
+    // Sizing parameters determined via eyeballing.
     const minSize = 14;
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
     // Log1.3 of the count looked nice visually for not getting too large with many points.
@@ -216,7 +219,7 @@ DiscoveryMap.propTypes = {
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
   onClick: PropTypes.func,
-  onLevelChange: PropTypes.func,
+  onMapLevelChange: PropTypes.func,
   onMarkerClick: PropTypes.func,
   onTooltipTitleClick: PropTypes.func,
   previewedLocationId: PropTypes.number,
