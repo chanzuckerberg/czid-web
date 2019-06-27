@@ -325,10 +325,7 @@ class PipelineViz extends React.Component {
           <div className={isOpened ? cs.openedStage : cs.hidden}>
             <div className={cs.graphLabel}>
               {stageName}
-              <RemoveIcon
-                className={cs.closeIcon}
-                onClick={() => this.toggleStage(i)}
-              />
+              <RemoveIcon onClick={() => this.toggleStage(i)} />
             </div>
             <div
               className={cs.graph}
@@ -355,12 +352,8 @@ class PipelineViz extends React.Component {
           <div className={cs.pipelineViz}>{stageContainers}</div>
         </PanZoom>
         <PlusMinusControl
-          onPlusClick={() =>
-            this.panZoomContainer && this.panZoomContainer.zoomIn()
-          }
-          onMinusClick={() =>
-            this.panZoomContainer && this.panZoomContainer.zoomOut()
-          }
+          onPlusClick={this.panZoomContainer && this.panZoomContainer.zoomIn}
+          onMinusClick={this.panZoomContainer && this.panZoomContainer.zoomOut}
           className={cs.plusMinusControl}
         />
       </div>
