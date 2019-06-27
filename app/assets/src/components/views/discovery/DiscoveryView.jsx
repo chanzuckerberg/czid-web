@@ -886,7 +886,11 @@ class DiscoveryView extends React.Component {
     const clusteredData = {};
 
     const copyLocation = entry => {
-      return { ...entry, [ids]: Object.assign([], entry[ids]) };
+      return {
+        ...entry,
+        [ids]: Object.assign([], entry[ids]),
+        hasOwnEntries: !isEmpty(entry[ids]),
+      };
     };
 
     const addToAncestor = (entry, ancestorLevel) => {
@@ -918,6 +922,14 @@ class DiscoveryView extends React.Component {
           addToAncestor(entry, ancestorLevel);
         }
       });
+    }
+
+    // Remove ancestor bubbles that are now fully represented in sub-bubbles
+    for (const [id, entry] of Object.entries(clusteredData)) {
+      const indexOfEntry = indexOfMapLevel(entry.geo_level);
+      if (indexOfEntry < indexOfMap && !entry.hasOwnEntries) {
+        delete clusteredData[id];
+      }
     }
 
     this.setState({ mapLocationData: clusteredData, mapLevel });
