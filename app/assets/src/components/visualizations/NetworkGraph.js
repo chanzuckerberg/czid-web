@@ -43,4 +43,8 @@ export default class NetworkGraph {
   afterDrawingOnce(f) {
     this.graph.once("afterDrawing", f);
   }
+
+  onClick(f) {
+    this.graph.on("click", f);
+  }
 }

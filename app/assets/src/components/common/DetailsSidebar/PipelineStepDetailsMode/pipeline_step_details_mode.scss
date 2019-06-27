@@ -1,0 +1,49 @@
+@import "~styles/typography";
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.content {
+  padding: 30px;
+}
+
+.title {
+  font-size: $font-size-h4;
+  font-weight: $font-weight-semibold;
+  margin-bottom: 8px;
+  margin-right: 60px;
+  word-break: break-all;
+  line-height: 1.4em;
+}
+
+.subtitle {
+  margin-top: 25px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.block {
+  margin-bottom: 25px;
+}
+
+.text {
+  line-height: 24px;
+}
+
+.link {
+  color: $primary-light;
+  line-height: 30px;
+  cursor: pointer;
+}
+
+.inputFileGroup {
+  margin-bottom: 8px;
+
+  .link {
+    margin-left: 25px;
+  }
+
+  .fileGroupHeader {
+    margin-bottom: 8px;
+  }
+}

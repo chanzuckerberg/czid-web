@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import ReactPanZoom from "@ajainarayanan/react-pan-zoom";
 
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
+import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import NetworkGraph from "~/components/visualizations/NetworkGraph.js";
 import cs from "./pipeline_viz.scss";
 
@@ -13,10 +14,6 @@ const END_NODE_ID = -2;
 class PipelineViz extends React.Component {
   constructor(props) {
     super(props);
-    this.pipelineVersion = this.props.stageResults.pipeline_version;
-    this.stagesData = this.stagesDataWithModifiedStepNames();
-    this.graphs = [];
-    this.graphContainers = [];
 
     this.stageNames = [
       "Host Filtering",
@@ -25,9 +22,16 @@ class PipelineViz extends React.Component {
       ...(props.admin ? ["Experimental"] : []),
     ];
 
+    this.pipelineVersion = this.props.stageResults.pipeline_version;
+    this.stagesData = this.getStagesData();
+    this.graphs = [];
+    this.graphContainers = [];
+
     this.state = {
       stagesOpened: [true, true, true, true],
       zoom: 1,
+      sidebarVisible: false,
+      sidebarParams: {},
     };
   }
 
@@ -35,19 +39,96 @@ class PipelineViz extends React.Component {
     this.drawGraphs();
   }
 
-  handleMouseWheelZoom = e => {
-    const { zoomChangeInterval } = this.props;
-    const zoomChange = (e.deltaY < 0 ? 1 : -1) * zoomChangeInterval;
-    this.setState({ zoom: this.state.zoom + zoomChange });
-  };
+  getStagesData() {
+    // TODO(ezhong): Include file download urls once passed up from backend.
+    const stageResults = this.stageResultsWithModifiedStepNames();
+    const filePathToOutputStep = this.generateFilePathToOutputStep();
 
-  toggleStage(index) {
-    const updatedStagesOpened = [...this.state.stagesOpened];
-    updatedStagesOpened[index] = !updatedStagesOpened[index];
-    this.setState({ stagesOpened: updatedStagesOpened });
+    const stages = Object.keys(stageResults).map(stageName => {
+      const rawStageData = stageResults[stageName];
+      const steps = rawStageData.steps.map(step => {
+        const name = step.class;
+
+        const inputInfo = step.in
+          .map(inTarget => {
+            const inTargetFiles = rawStageData.targets[inTarget].map(
+              fileName => {
+                let filePath;
+                if (inTarget in rawStageData.given_targets) {
+                  filePath = `${
+                    rawStageData.given_targets[inTarget].s3_dir
+                  }/${fileName}`;
+                } else {
+                  filePath = `${rawStageData.output_dir_s3}/${
+                    this.pipelineVersion
+                  }/${fileName}`;
+                }
+
+                const outputStepInfo = filePathToOutputStep[filePath];
+                return {
+                  fileName: fileName,
+                  url: "",
+                  ...(outputStepInfo
+                    ? {
+                        fromStepIndex: outputStepInfo.stepIndex,
+                        fromStageIndex: outputStepInfo.stageIndex,
+                      }
+                    : {}),
+                };
+              }
+            );
+            return inTargetFiles;
+          })
+          .flat();
+
+        const outputInfo = rawStageData.targets[step.out].map(fileName => {
+          return {
+            fileName: fileName,
+            url: "",
+          };
+        });
+
+        return {
+          name: name,
+          inputInfo: inputInfo,
+          outputInfo,
+          outputInfo,
+        };
+      });
+
+      return {
+        stageName: stageName,
+        jobStatus: stageResults[stageName].job_status,
+        steps: steps,
+      };
+    });
+
+    return stages;
   }
 
-  stagesDataWithModifiedStepNames() {
+  generateFilePathToOutputStep() {
+    const { stageResults } = this.props;
+    const filePathToOutputStep = {};
+    this.stageNames.forEach((stageName, stageIndex) => {
+      const stageData = stageResults.stages[stageName];
+      const targets = stageData.targets;
+      stageData.steps.forEach((step, stepIndex) => {
+        targets[step.out].forEach(fileName => {
+          const filePath = `${stageData.output_dir_s3}/${
+            this.pipelineVersion
+          }/${fileName}`;
+          filePathToOutputStep[filePath] = {
+            stageIndex: stageIndex,
+            stepIndex: stepIndex,
+            fileName: fileName,
+          };
+        });
+      });
+    });
+    return filePathToOutputStep;
+  }
+
+  stageResultsWithModifiedStepNames() {
     // Strips 'PipelineStep[Run/Generate]' from front of each step name.
     // TODO(ezhong): Consider adding 'name' field to dag_json later.
     const { stageResults } = this.props;
@@ -64,14 +145,65 @@ class PipelineViz extends React.Component {
     return stagesWithModifiedNames;
   }
 
+  handleMouseWheelZoom = e => {
+    const { zoomChangeInterval } = this.props;
+    const zoomChange = (e.deltaY < 0 ? 1 : -1) * zoomChangeInterval;
+    this.setState({ zoom: this.state.zoom + zoomChange });
+  };
+
+  handleStepClick(stageIndex, info) {
+    const clickedNodeId = info.nodes[0];
+    if (clickedNodeId == null) {
+      return;
+    }
+
+    const stageData = this.stagesData[stageIndex];
+    const stepData = stageData.steps[clickedNodeId];
+
+    const inputFiles = stepData.inputInfo.map(input => {
+      const fileInfo = {
+        fileName: input.fileName,
+        url: input.url,
+      };
+      if (input.fromStageIndex != null && input.fromStepIndex != null) {
+        fileInfo.fromStepName = this.stagesData[input.fromStageIndex].steps[
+          input.fromStepIndex
+        ].name;
+      }
+      return fileInfo;
+    });
+
+    this.setState({
+      sidebarVisible: true,
+      sidebarParams: {
+        stepName: stepData.name,
+        description: "",
+        inputFiles: inputFiles,
+        outputFiles: stepData.outputInfo,
+      },
+    });
+  }
+
+  closeSidebar = () => {
+    this.setState({
+      sidebarVisible: false,
+    });
+  };
+
+  toggleStage(index) {
+    const updatedStagesOpened = [...this.state.stagesOpened];
+    updatedStagesOpened[index] = !updatedStagesOpened[index];
+    this.setState({ stagesOpened: updatedStagesOpened });
+  }
+
   generateNodeData(index, edgeData) {
-    const stageData = this.stagesData[this.stageNames[index]];
+    const stageData = this.stagesData[index];
     const stepData = stageData.steps;
 
-    const nodeData = [];
-    stepData.forEach((step, i) => {
-      nodeData.push({ id: i, label: step.class });
+    const nodeData = stepData.map((step, i) => {
+      return { id: i, label: step.name };
     });
+
     nodeData.push({ id: START_NODE_ID, group: "startEndNodes" });
     nodeData.push({ id: END_NODE_ID, group: "startEndNodes" });
 
@@ -106,39 +238,35 @@ class PipelineViz extends React.Component {
   }
 
   generateIntraEdgeData(index) {
-    const stageData = this.stagesData[this.stageNames[index]];
-    const stepData = stageData.steps;
+    const stepData = this.stagesData[index].steps;
 
-    const outTargetToStepId = {};
-    stepData.forEach((step, i) => {
-      if (!(step.out in outTargetToStepId)) {
-        // Populate outFileToStepId for intra-stage edges
-        outTargetToStepId[step.out] = i;
-      }
-    });
+    const intraEdgeData = stepData
+      .map((step, currStepIndex) => {
+        const connectedNodes = new Set();
+        return step.inputInfo.reduce((edges, inputFile) => {
+          const fromNode =
+            inputFile.fromStageIndex == index
+              ? inputFile.fromStepIndex
+              : START_NODE_ID;
 
-    const intraEdgeData = [];
-    stepData.forEach((step, i) => {
-      step.in.forEach(inTarget => {
-        if (inTarget in outTargetToStepId) {
-          const fromId = outTargetToStepId[inTarget];
-          intraEdgeData.push({ from: fromId, to: i });
-        } else {
-          // Connect beginning steps to input node
-          intraEdgeData.push({ from: START_NODE_ID, to: i });
-        }
-      });
-    });
+          if (!connectedNodes.has(fromNode)) {
+            connectedNodes.add(fromNode);
+            edges.push({ from: fromNode, to: currStepIndex });
+          }
+          return edges;
+        }, []);
+      })
+      .flat();
+
     return intraEdgeData;
   }
 
   generateInterEdgeData(index) {
     const { backgroundColor } = this.props;
-    const stageData = this.stagesData[this.stageNames[index]];
-    const stepData = stageData.steps;
 
-    if (index == this.stageNames.length - 1) {
+    if (index == this.stagesData.length - 1) {
       // For final stage, create hidden edges to final node for vertical centering of nodes.
+      const stepData = this.stagesData[index].steps;
       return stepData.map((_, i) => {
         return {
           from: i,
@@ -151,41 +279,28 @@ class PipelineViz extends React.Component {
         };
       });
     } else {
-      // Create edges to output node if it's output files appear in next stage's inputs.
-      const currFileNameToOutputtingNode = {};
-      stepData.forEach((step, i) => {
-        stageData.targets[step.out].forEach(fileName => {
-          const fileNameWithPath = `${stageData.output_dir_s3}/${
-            this.pipelineVersion
-          }/${fileName}`;
-          currFileNameToOutputtingNode[fileNameWithPath] = i;
-        });
-      });
-
-      const interEdgeData = [];
-
-      const nextStageData = this.stagesData[this.stageNames[index + 1]];
-      nextStageData.steps.forEach((step, nextNodeId) => {
-        step.in.forEach(inTarget => {
-          nextStageData.targets[inTarget].forEach(fileName => {
-            if (inTarget in nextStageData.given_targets) {
-              const fileNameWithPath = `${
-                nextStageData.given_targets[inTarget].s3_dir
-              }/${fileName}`;
-              if (fileNameWithPath in currFileNameToOutputtingNode) {
-                const currNodeId =
-                  currFileNameToOutputtingNode[fileNameWithPath];
-                interEdgeData.push({
-                  from: currNodeId,
-                  to: END_NODE_ID,
-                });
-                // TODO(ezhong): Interactions between output of current stage (currNodeId)
-                // and input of next stage (nextNodeId) in visualization should be setup here
-              }
+      // Create edges to output node if its output files appear in next stage's inputs.
+      const nextStageData = this.stagesData[index + 1];
+      const interEdgeData = nextStageData.steps
+        .map((step, nextNodeId) => {
+          const connectedNodes = new Set();
+          return step.inputInfo.reduce((edges, inputFileInfo) => {
+            if (
+              inputFileInfo.fromStageIndex == index &&
+              !connectedNodes.has(inputFileInfo.fromStepIndex)
+            ) {
+              // TODO(ezhong): Interactions between output of current stage (inputFileInfo.fromStepIndex)
+              // and input of next stage (nextNodeId) in visualization should be setup here
+              connectedNodes.add(inputFileInfo.fromStepIndex);
+              edges.push({
+                from: inputFileInfo.fromStepIndex,
+                to: END_NODE_ID,
+              });
             }
-          });
-        });
-      });
+            return edges;
+          }, []);
+        })
+        .flat();
 
       return interEdgeData;
     }
@@ -212,14 +327,14 @@ class PipelineViz extends React.Component {
       this.drawStageGraph(i);
     });
     this.adjustGraphNodePositions();
-    this.closeNonactiveSteps();
+    this.setUpGraphEventListeners();
   }
 
-  closeNonactiveSteps() {
-    this.stageNames.forEach((stageName, i) => {
+  setUpGraphEventListeners() {
+    this.stagesData.forEach((stageData, i) => {
       const graph = this.graphs[i];
-      const stageData = this.stagesData[stageName];
-      if (stageData.job_status !== "STARTED") {
+      graph.onClick(info => this.handleStepClick(i, info));
+      if (stageData.jobStatus !== "STARTED") {
         graph.afterDrawingOnce(() => {
           this.toggleStage(i);
         });
@@ -311,8 +426,9 @@ class PipelineViz extends React.Component {
   }
 
   render() {
+    const { sidebarVisible, sidebarParams, stagesOpened } = this.state;
     const stageContainers = this.stageNames.map((stageName, i) => {
-      const isOpened = this.state.stagesOpened[i];
+      const isOpened = stagesOpened[i];
 
       return (
         <div key={stageName} className={cs.stage}>
@@ -343,10 +459,18 @@ class PipelineViz extends React.Component {
     });
 
     return (
-      <div onWheel={this.handleMouseWheelZoom}>
-        <ReactPanZoom zoom={this.state.zoom}>
-          <div className={cs.pipelineViz}>{stageContainers}</div>
-        </ReactPanZoom>
+      <div>
+        <div onWheel={this.handleMouseWheelZoom}>
+          <ReactPanZoom zoom={this.state.zoom}>
+            <div className={cs.pipelineViz}>{stageContainers}</div>
+          </ReactPanZoom>
+        </div>
+        <DetailsSidebar
+          visible={sidebarVisible}
+          mode="pipelineStepDetails"
+          params={sidebarParams}
+          onClose={this.closeSidebar}
+        />
       </div>
     );
   }
