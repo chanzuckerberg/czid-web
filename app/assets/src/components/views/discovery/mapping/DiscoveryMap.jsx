@@ -132,18 +132,16 @@ class DiscoveryMap extends React.Component {
     );
 
     const shapeMarkers = {
-      circle: CircleMarker,
+      circle: RectangleMarker,
       rectangle: RectangleMarker,
     };
     let ShapeMarker = shapeMarkers["circle"];
 
-    console.log("(map, entry): ", level, locationInfo.geo_level);
     if (
       indexOf(locationInfo.geo_level, MAP_LEVEL_ORDER) <
       indexOf(level, MAP_LEVEL_ORDER)
     ) {
       if (["country", "state"].includes(locationInfo.geo_level)) {
-        console.log("rectangle: ", locationInfo.name);
         ShapeMarker = shapeMarkers["rectangle"];
       }
     }
@@ -158,6 +156,7 @@ class DiscoveryMap extends React.Component {
             this.handleMarkerMouseEnter({ id, name, lat, lng, pointCount })
           }
           onMouseLeave={this.handleMarkerMouseLeave}
+          title={`${name} (${pointCount})`}
         />
       </Marker>
     );

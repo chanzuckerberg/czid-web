@@ -1,8 +1,10 @@
 @import "~styles/themes/colors";
 
-.circle {
+.rectangle {
   cursor: pointer;
-  fill: $celery;
+  background-color: $celery;
+  border-radius: 8px;
+  padding: 4px;
 
   &.hoverable {
     &:hover {
