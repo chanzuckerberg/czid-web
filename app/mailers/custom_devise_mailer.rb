@@ -10,7 +10,7 @@ class CustomDeviseMailer < Devise::Mailer
     # Block for adding extra arguments
     if @email_arguments
       opts[:template_name] = @email_arguments[:email_template] if @email_arguments[:email_template]
-      opts[:currentTab] = @email_arguments[:email_subject] if @email_arguments[:email_subject]
+      opts[:subject] = @email_arguments[:email_subject] if @email_arguments[:email_subject]
       @sharing_user = User.find(@email_arguments[:sharing_user_id])
       @shared_project_name = Project.find(@email_arguments[:shared_project_id]).name
       @shared_project_id = @email_arguments[:shared_project_id]
