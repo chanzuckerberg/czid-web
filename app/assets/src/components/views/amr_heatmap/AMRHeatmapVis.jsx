@@ -12,8 +12,8 @@ const VIEW_LEVEL_ALLELES = "allele";
 const VIEW_LEVEL_GENES = "gene";
 
 const METRICS = [
-  { text: "Coverage", value: "coverage" },
-  { text: "Depth", value: "depth" },
+  { text: "Coverage", key: "coverage" },
+  { text: "Depth", key: "depth" },
 ];
 
 export default class AMRHeatmapVis extends React.Component {
@@ -121,18 +121,24 @@ export default class AMRHeatmapVis extends React.Component {
       alleleToGeneMap,
     } = this.state;
     const sampleName = sampleLabels[node.columnIndex].label;
-    let amrCountIdentifier = "";
+    const rowLabel = this.getHeatmapLabels()[node.rowIndex].label;
+    const sampleForColumn = samplesWithAMRCounts[node.columnIndex];
+
+    const amrCountForNode = sampleForColumn.amr_counts.find(
+      amrCount => amrCount[selectedOptions.viewLevel] === rowLabel
+    );
+
     let gene = "";
     let allele = "";
     switch (selectedOptions.viewLevel) {
       case VIEW_LEVEL_ALLELES: {
-        amrCountIdentifier = alleleLabels[node.rowIndex].label;
-        allele = amrCountIdentifier;
+        allele = rowLabel;
+        gene = alleleToGeneMap[allele];
         break;
       }
       case VIEW_LEVEL_GENES: {
-        amrCountIdentifier = geneLabels[node.rowIndex].label;
-        gene = amrCountIdentifier;
+        gene = rowLabel;
+        allele = amrCountForNode ? amrCountForNode.allele : "---";
         break;
       }
       default: {
@@ -140,19 +146,8 @@ export default class AMRHeatmapVis extends React.Component {
       }
     }
 
-    const sampleForColumn = samplesWithAMRCounts[node.columnIndex];
-    const amrCountForRow = sampleForColumn.amr_counts.find(
-      amrCount => amrCount[selectedOptions.viewLevel] === amrCountIdentifier
-    );
-
-    if (gene === "") {
-      gene = alleleToGeneMap[allele];
-    } else if (allele === "") {
-      allele = amrCountForRow ? amrCountForRow.allele : "---";
-    }
-
     let values = METRICS.map(metric => {
-      const value = amrCountForRow ? amrCountForRow[metric.value] : 0;
+      const value = amrCountForNode ? amrCountForNode[metric.key] : 0;
       return [
         metric.text,
         metric.value === selectedOptions.metric ? <b>{value}</b> : value,
