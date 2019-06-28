@@ -107,7 +107,7 @@ class TestAutoscaling(unittest.TestCase):
 
     @patch('batch_autoscaling.boto3.client')
     def test_process_batch_configuration_1(self, _mock_boto3):
-        '''WHEN processing batch configuration THEN invoke dependencies and change the environment'''
+        '''WHEN processing batch configuration with scaling tag set THEN invoke dependencies and change the environment'''
         _mock_boto3.return_value.list_jobs.side_effect = [FAKE_LIST_JOBS_RESPONSE, FAKE_LIST_JOBS_RESPONSE_EMPTY, FAKE_LIST_JOBS_RESPONSE_EMPTY]
         _mock_boto3.return_value.describe_job_queues.return_value = FAKE_DESCRIBE_JOB_QUEUES_RESPONSE
         _mock_boto3.return_value.describe_compute_environments.return_value = FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_SCALING_TAG_SET
@@ -123,7 +123,7 @@ class TestAutoscaling(unittest.TestCase):
 
     @patch('batch_autoscaling.boto3.client')
     def test_process_batch_configuration_2(self, _mock_boto3):
-        '''WHEN processing batch configuration THEN invoke dependencies and change the environment'''
+        '''WHEN processing batch configuration with scaling tag not set THEN do not change the environment'''
         _mock_boto3.return_value.list_jobs.side_effect = [FAKE_LIST_JOBS_RESPONSE, FAKE_LIST_JOBS_RESPONSE_EMPTY, FAKE_LIST_JOBS_RESPONSE_EMPTY]
         _mock_boto3.return_value.describe_job_queues.return_value = FAKE_DESCRIBE_JOB_QUEUES_RESPONSE
         _mock_boto3.return_value.describe_compute_environments.return_value = FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_NO_SCALING_TAG
