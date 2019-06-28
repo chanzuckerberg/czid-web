@@ -7,6 +7,7 @@ import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import {
   BaseMultipleFilter,
   BaseSingleFilter,
+  LocationFilter,
   TaxonFilter,
 } from "~/components/common/filters";
 import FilterTag from "~ui/controls/FilterTag";
@@ -103,9 +104,15 @@ class DiscoveryFilters extends React.Component {
 
     const tags = selectedOptions
       // check if filter is on option format or just value (taxon are hashes with text and value)
-      .map(option => (option.text ? option : find({ value: option }, options)))
-      // filter out options that do not exist in the dropdown (although this should be avoided, option might have been chosen in another component)
-      .filter(option => option)
+      .map(
+        option =>
+          option.text
+            ? option
+            : find({ value: option }, options) || {
+                text: option,
+                value: option,
+              }
+      )
       // create the filter tag
       .map(option => {
         return (
@@ -171,7 +178,7 @@ class DiscoveryFilters extends React.Component {
         </div>
         {allowedFeatures.includes("maps") && (
           <div className={cs.filterContainer}>
-            <BaseMultipleFilter
+            <LocationFilter
               onChange={this.handleChange.bind(this, "locationV2Selected")}
               selected={
                 locationV2 && locationV2.length ? locationV2Selected : null

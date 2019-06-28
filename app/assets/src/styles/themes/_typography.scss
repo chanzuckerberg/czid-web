@@ -114,6 +114,12 @@ $font-weight-heavy: 800;
   letter-spacing: 0.3px;
 }
 
+@mixin font-body-xxxs {
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.3px;
+}
+
 @mixin font-label-s {
   font-size: 11px;
   line-height: 24px;
