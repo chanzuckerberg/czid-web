@@ -100,6 +100,7 @@ class PipelineViz extends React.Component {
   }
 
   generateIntraEdgeData(index) {
+    const { backgroundColor } = this.props;
     const stageData = this.stagesData[this.stageNames[index]];
     const stepData = stageData.steps;
 
