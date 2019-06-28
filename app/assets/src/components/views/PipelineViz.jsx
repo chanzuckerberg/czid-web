@@ -39,6 +39,15 @@ class PipelineViz extends React.Component {
     this.drawGraphs();
   }
 
+  createFilePath(filePathSections) {
+    return filePathSections
+      .filter(
+        pathSection =>
+          pathSection != null && pathSection != undefined && pathSection != ""
+      )
+      .join("/");
+  }
+
   getStagesData() {
     // TODO(ezhong): Include file download urls once passed up from backend.
     const stageResults = this.stageResultsWithModifiedStepNames();
@@ -53,17 +62,13 @@ class PipelineViz extends React.Component {
           .map(inTarget => {
             const inTargetFiles = rawStageData.targets[inTarget].map(
               fileName => {
-                let filePath;
-                if (inTarget in rawStageData.given_targets) {
-                  filePath = `${
-                    rawStageData.given_targets[inTarget].s3_dir
-                  }/${fileName}`;
-                } else {
-                  filePath = `${rawStageData.output_dir_s3}/${
-                    this.pipelineVersion
-                  }/${fileName}`;
-                }
+                const filePathSections =
+                  inTarget in rawStageData.given_targets
+                    ? [rawStageData.given_targets[inTarget].s3_dir]
+                    : [rawStageData.output_dir_s3, this.pipelineVersion];
+                filePathSections.push(fileName);
 
+                const filePath = this.createFilePath(filePathSections);
                 const outputStepInfo = filePathToOutputStep[filePath];
                 return {
                   fileName: fileName,
@@ -321,24 +326,23 @@ class PipelineViz extends React.Component {
     });
   }
 
-  drawGraphs() {
-    this.stageNames.forEach((_, i) => {
-      this.drawStageGraph(i);
-    });
-    this.adjustGraphNodePositions();
-    this.setUpGraphEventListeners();
-  }
-
-  setUpGraphEventListeners() {
+  closeNonativeSteps() {
     this.stagesData.forEach((stageData, i) => {
       const graph = this.graphs[i];
-      graph.onClick(info => this.handleStepClick(i, info));
       if (stageData.jobStatus !== "STARTED") {
         graph.afterDrawingOnce(() => {
           this.toggleStage(i);
         });
       }
     });
+  }
+
+  drawGraphs() {
+    this.stageNames.forEach((_, i) => {
+      this.drawStageGraph(i);
+    });
+    this.adjustGraphNodePositions();
+    this.closeNonativeSteps();
   }
 
   drawStageGraph(index) {
@@ -417,7 +421,8 @@ class PipelineViz extends React.Component {
       container,
       nodeData,
       edgeData,
-      options
+      options,
+      info => this.handleStepClick(index, info)
     );
     currStageGraph.minimizeWidthGivenScale(1.0);
 
@@ -425,7 +430,7 @@ class PipelineViz extends React.Component {
   }
 
   render() {
-    const { sidebarVisible, sidebarParams, stagesOpened } = this.state;
+    const { sidebarVisible, sidebarParams, stagesOpened, zoom } = this.state;
     const stageContainers = this.stageNames.map((stageName, i) => {
       const isOpened = stagesOpened[i];
 
@@ -460,7 +465,7 @@ class PipelineViz extends React.Component {
     return (
       <div>
         <div onWheel={this.handleMouseWheelZoom}>
-          <ReactPanZoom zoom={this.state.zoom}>
+          <ReactPanZoom zoom={zoom}>
             <div className={cs.pipelineViz}>{stageContainers}</div>
           </ReactPanZoom>
         </div>

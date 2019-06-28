@@ -6,40 +6,38 @@
   padding: 30px;
 }
 
-.title {
-  font-size: $font-size-h4;
-  font-weight: $font-weight-semibold;
+.stepName {
+  @include font-header-l;
   margin-bottom: 8px;
   margin-right: 60px;
   word-break: break-all;
-  line-height: 1.4em;
 }
 
-.subtitle {
+.stepFilesListBoxHeader {
+  @include font-header-s;
   margin-top: 25px;
   margin-bottom: 10px;
-  font-size: 14px;
-  font-weight: 700;
 }
 
-.block {
+.stepFilesListBox {
   margin-bottom: 25px;
 }
 
-.text {
-  line-height: 24px;
+.description,
+.fileLink {
+  @include font-body-s;
+  margin-bottom: 8px;
 }
 
-.link {
+.fileLink {
   color: $primary-light;
-  line-height: 30px;
   cursor: pointer;
 }
 
-.inputFileGroup {
+.fileGroup {
   margin-bottom: 8px;
 
-  .link {
+  .fileLink {
     margin-left: 25px;
   }
 
