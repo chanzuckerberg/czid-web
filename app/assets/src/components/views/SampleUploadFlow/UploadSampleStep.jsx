@@ -384,7 +384,7 @@ class UploadSampleStep extends React.Component {
 
   handleTabChange = tab => {
     this.props.onDirty();
-    this.setState({ subject: tab });
+    this.setState({ currentTab: tab });
     logAnalyticsEvent("UploadSampleStep_tab_changed", {
       tab,
     });
@@ -564,7 +564,7 @@ class UploadSampleStep extends React.Component {
       localSamples: this.state.localSamples.length,
       remoteSamples: this.state.remoteSamples.length,
       basespaceSamples: this.state.basespaceSamples.length,
-      subject: this.state.currentTab,
+      currentTab: this.state.currentTab,
       ...this.getAnalyticsContext(),
     });
   };

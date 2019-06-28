@@ -130,7 +130,7 @@ class SampleView extends React.Component {
   };
 
   handleTabChange = tab => {
-    this.setState({ subject: tab });
+    this.setState({ currentTab: tab });
     const name = tab.replace(/\W+/g, "-").toLowerCase();
     logAnalyticsEvent(`SampleView_tab-${name}_clicked`, {
       tab: tab,

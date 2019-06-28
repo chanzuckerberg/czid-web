@@ -42,7 +42,7 @@ class MetadataUpload extends React.Component {
   }
 
   handleTabChange = tab => {
-    this.setState({ subject: tab, issues: null });
+    this.setState({ currentTab: tab, issues: null });
     // When the tab changes, reset state.
     this.props.onMetadataChange({
       metadata: null,
