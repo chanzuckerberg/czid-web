@@ -137,6 +137,8 @@ class DiscoveryMap extends React.Component {
     return (
       <ShapeMarker
         active={id === previewedLocationId}
+        id={id}
+        key={`marker-${locationInfo.id}`}
         lat={lat}
         lng={lng}
         onClick={() => this.handleMarkerClick(id)}

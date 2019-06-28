@@ -70,9 +70,9 @@ ShapeMarker.propTypes = {
   onMouseLeave: PropTypes.func,
   pointCount: PropTypes.number,
   rectangular: PropTypes.bool,
+  sizeLogBase: PropTypes.number,
   title: PropTypes.string,
   zoom: PropTypes.number,
-  sizeLogBase: PropTypes.number,
 };
 
 export default ShapeMarker;
