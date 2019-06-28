@@ -2,6 +2,8 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { withAnalytics } from "~/api/analytics";
+import BasicPopup from "~/components/BasicPopup";
+import InfoCircleIcon from "~ui/icons/InfoCircleIcon";
 
 import cs from "./map_banner.scss";
 
@@ -37,6 +39,16 @@ class MapBanner extends React.Component {
               -1
             )}${itemCount > 1 ? "s" : ""}`}</span>{" "}
             {`with location data.`}
+            <BasicPopup
+              size="mini"
+              position="bottom left"
+              trigger={
+                <span>
+                  <InfoCircleIcon className={cs.infoIcon} />
+                </span>
+              }
+              content={"Help out by adding more location data to your samples."}
+            />
           </div>
         </div>
       );

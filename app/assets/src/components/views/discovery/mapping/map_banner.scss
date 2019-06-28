@@ -24,5 +24,13 @@
     .emphasis {
       font-weight: $font-weight-semibold;
     }
+
+    .infoIcon {
+      cursor: pointer;
+      fill: $dark-grey;
+      height: 15px;
+      margin-left: 5px;
+      vertical-align: top;
+    }
   }
 }
