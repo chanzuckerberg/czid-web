@@ -26,7 +26,8 @@ class PipelineStepDetailsMode extends React.Component {
       // provided by a user (instead of step output)
       return (
         <div className={cs.fileGroup} key={fromStepName}>
-          <div className={cs.fileGroupHeader}>{`From ${fromStepName}:`}</div>
+          <div className={cs.fileGroupHeader}>{`From ${fromStepName ||
+            "Sample"}:`}</div>
           {fileList}
         </div>
       );

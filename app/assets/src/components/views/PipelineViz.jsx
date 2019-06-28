@@ -48,6 +48,10 @@ class PipelineViz extends React.Component {
       .join("/");
   }
 
+  getStepDataAtIndices(stageIndex, stepIndex) {
+    return this.stagesData[stageIndex].steps[stepIndex];
+  }
+
   getStagesData() {
     // TODO(ezhong): Include file download urls once passed up from backend.
     const stageResults = this.stageResultsWithModifiedStepNames();
@@ -163,18 +167,19 @@ class PipelineViz extends React.Component {
       return;
     }
 
-    const stageData = this.stagesData[stageIndex];
-    const stepData = stageData.steps[clickedNodeId];
-
+    const stepData = this.getStepDataAtIndices(stageIndex, clickedNodeId);
     const inputFiles = stepData.inputInfo.map(input => {
       const fileInfo = {
         fileName: input.fileName,
         url: input.url,
       };
       if (input.fromStageIndex != null && input.fromStepIndex != null) {
-        fileInfo.fromStepName = this.stagesData[input.fromStageIndex].steps[
+        fileInfo.fromStepName = this.getStepDataAtIndices(
+          input.fromStageIndex,
           input.fromStepIndex
-        ].name;
+        ).name;
+      } else {
+        fileInfo.fromStepName = "";
       }
       return fileInfo;
     });
@@ -203,9 +208,7 @@ class PipelineViz extends React.Component {
   }
 
   generateNodeData(index, edgeData) {
-    const stageData = this.stagesData[index];
-    const stepData = stageData.steps;
-
+    const stepData = this.stagesData[index].steps;
     const nodeData = stepData.map((step, i) => {
       return { id: i, label: step.name };
     });
