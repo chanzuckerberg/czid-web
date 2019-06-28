@@ -437,7 +437,7 @@ class DiscoveryView extends React.Component {
 
   handleTabChange = currentTab => {
     const { mapSidebarTab } = this.state;
-    this.setState({ currentTab: subject }, () => {
+    this.setState({ currentTab }, () => {
       this.updateBrowsingHistory("replace");
       const name = currentTab.replace(/\W+/g, "-").toLowerCase();
       logAnalyticsEvent(`DiscoveryView_tab-${name}_clicked`, {
