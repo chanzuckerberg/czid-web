@@ -150,7 +150,7 @@ export default class AMRHeatmapVis extends React.Component {
       const value = amrCountForNode ? amrCountForNode[metric.key] : 0;
       return [
         metric.text,
-        metric.value === selectedOptions.metric ? <b>{value}</b> : value,
+        metric.key === selectedOptions.metric ? <b>{value}</b> : value,
       ];
     });
 
