@@ -1,4 +1,4 @@
-import { get, isEmpty, throttle, upperFirst } from "lodash/fp";
+import { get, throttle, upperFirst, sumBy, size, values } from "lodash/fp";
 import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -159,9 +159,9 @@ class DiscoveryMap extends React.Component {
     const itemCount = sumBy(p => size(p[idsField]), values(mapLocationData));
     return (
       <MapBanner
+        item={currentTab}
         itemCount={itemCount}
         onClearFilters={onClearFilters}
-        subject={currentTab}
       />
     );
   };

@@ -17,17 +17,16 @@ class ShapeMarker extends React.Component {
       onMouseLeave,
       pointCount,
       rectangular,
-      sizeLogBase,
+      size,
+      sizeMultiple,
       title,
       zoom,
     } = this.props;
 
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
-    // Log1.3 of the count looked nice visually for not getting too large with many points.
-    const size = Math.max(
-      Math.log(pointCount) / Math.log(sizeLogBase) * zoom,
-      minSize
-    );
+    // Log2 of the count scaled looked nice visually for not getting too large with many points.
+    const computedSize =
+      size || Math.max(Math.log2(pointCount) * sizeMultiple * zoom, minSize);
 
     return (
       <Marker latitude={lat} longitude={lng}>
@@ -45,7 +44,7 @@ class ShapeMarker extends React.Component {
             onClick={onClick}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
-            size={size}
+            size={computedSize}
           />
         )}
       </Marker>
@@ -55,9 +54,9 @@ class ShapeMarker extends React.Component {
 
 // Defaults determined via eyeballing.
 ShapeMarker.defaultProps = {
-  zoom: 3,
   minSize: 14,
-  sizeLogBase: 1.3,
+  sizeMultiple: 2,
+  zoom: 3,
 };
 
 ShapeMarker.propTypes = {
@@ -70,7 +69,9 @@ ShapeMarker.propTypes = {
   onMouseLeave: PropTypes.func,
   pointCount: PropTypes.number,
   rectangular: PropTypes.bool,
-  sizeLogBase: PropTypes.number,
+  // Size override
+  size: PropTypes.number,
+  sizeMultiple: PropTypes.number,
   title: PropTypes.string,
   zoom: PropTypes.number,
 };
