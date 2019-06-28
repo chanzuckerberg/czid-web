@@ -1,4 +1,5 @@
 require "rails_helper"
+require "webmock/rspec"
 
 RSpec.describe HttpHelper, type: :helper do
   describe "#get" do

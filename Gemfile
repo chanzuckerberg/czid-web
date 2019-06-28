@@ -1,8 +1,8 @@
 source 'https://rubygems.org'
 
 git_source(:github) do |repo_name|
-  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
-  "https://github.com/#{repo_name}.git"
+  repo_name = '#{repo_name}/#{repo_name}' unless repo_name.include?('/')
+  'https://github.com/#{repo_name}.git'
 end
 
 gem 'airbrake', '~> 8'
@@ -16,7 +16,7 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'coffee-rails', '~> 4.2', '>= 4.2.2'
 gem 'consul', '>= 0.13.1'
 gem 'devise', '>= 4.6.0'
-gem 'health_check', ">= 2.7.0"
+gem 'health_check', '>= 2.7.0'
 gem 'honeycomb-rails', '>= 0.8.1'
 gem 'mailgun_rails', '>= 0.9.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
@@ -74,7 +74,7 @@ gem 'analytics-ruby', '~> 2.0.0', require: 'segment/analytics'
 # Url shortener
 gem 'shortener'
 
-# Explicit load to avoid an "unable to load" warning
+# Explicit load to avoid an 'unable to load' warning
 gem 'http-2'
 
 gem 'deep_cloneable', '~> 2.4.0'
@@ -91,8 +91,8 @@ group :development, :test do
   gem 'capybara', '~> 2.17', '>= 2.17.0'
   gem 'coveralls', require: false
   gem 'factory_bot_rails'
-  gem "guard", "~> 2.15"
-  gem "guard-rspec", "~> 4.7"
+  gem 'guard', '~> 2.15'
+  gem 'guard-rspec', '~> 4.7'
   gem 'rspec-rails', '>= 3.7.2'
   gem 'rubocop', '=0.49.1'
   gem 'selenium-webdriver'
@@ -106,8 +106,8 @@ group :development do
 end
 
 group :test do
+  gem 'webmock', '~> 3.6'
   gem 'rspec-json_expectations'
-  gem "webmock", "~> 3.6"
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
