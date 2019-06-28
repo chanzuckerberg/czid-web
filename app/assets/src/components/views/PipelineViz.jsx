@@ -118,9 +118,11 @@ class PipelineViz extends React.Component {
       const targets = stageData.targets;
       stageData.steps.forEach((step, stepIndex) => {
         targets[step.out].forEach(fileName => {
-          const filePath = `${stageData.output_dir_s3}/${
-            this.pipelineVersion
-          }/${fileName}`;
+          const filePath = this.createFilePath([
+            stageData.output_dir_s3,
+            this.pipelineVersion,
+            fileName,
+          ]);
           filePathToOutputStep[filePath] = {
             stageIndex: stageIndex,
             stepIndex: stepIndex,
