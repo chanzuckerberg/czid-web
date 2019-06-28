@@ -1,12 +1,13 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 @import "~styles/themes/typography";
 
 .rectangle {
   @include font-header-s;
-
-  cursor: pointer;
   background-color: $white;
-  border-radius: 8px;
+  border-radius: 4px;
+  box-shadow: $box-shadow-dropdown-menu;
+  cursor: pointer;
   padding: 2px 7px;
   // Center horizontal/vertical midpoints
   transform: translate(-50%, -50%);
