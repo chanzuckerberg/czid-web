@@ -1,0 +1,27 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/elements";
+@import "~styles/themes/typography";
+
+.rectangle {
+  @include font-header-s;
+  background-color: $white;
+  border-radius: 4px;
+  box-shadow: $box-shadow-dropdown-menu;
+  cursor: pointer;
+  padding: 2px 7px;
+  text-align: center;
+  // Center horizontal/vertical midpoints
+  transform: translate(-50%, -50%);
+
+  &.hoverable {
+    &:hover {
+      background-color: $primary-medium;
+      color: $white;
+    }
+  }
+
+  &.active {
+    background-color: $primary-medium;
+    color: $white;
+  }
+}

@@ -1,29 +1,58 @@
+import { get, throttle, upperFirst, sumBy, size, values } from "lodash/fp";
 import React from "react";
-import { Marker } from "react-map-gl";
-import { get, upperFirst, sumBy, size, values } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
-import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
+import ShapeMarker from "~/components/views/discovery/mapping/ShapeMarker";
+import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import MapBanner from "~/components/views/discovery/mapping/MapBanner";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
+import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 
 export const TOOLTIP_TIMEOUT_MS = 1000;
+export const DEFAULT_THROTTLE_MS = 500;
 
 class DiscoveryMap extends React.Component {
   constructor(props) {
     super(props);
+    const { onMapLevelChange } = this.props;
 
     this.state = {
       tooltip: null,
       tooltipShouldClose: false,
     };
+
+    // By default throttle includes the trailing event
+    this.logAnalyticsEventThrottled = throttle(
+      DEFAULT_THROTTLE_MS,
+      logAnalyticsEvent
+    );
+    if (onMapLevelChange) {
+      this.onMapLevelChangeThrottled = throttle(
+        DEFAULT_THROTTLE_MS,
+        onMapLevelChange
+      );
+    }
   }
 
+  // updateViewport fires many times a second when moving, so we can throttle event calls.
   updateViewport = viewport => {
+    const { zoomBoundaryCountry, zoomBoundaryState } = this.props;
+
     this.setState({ viewport });
-    logAnalyticsEvent("DiscoveryMap_viewport_updated");
+
+    if (this.onMapLevelChangeThrottled) {
+      const level =
+        viewport.zoom < zoomBoundaryCountry
+          ? "country"
+          : viewport.zoom < zoomBoundaryState
+            ? "state"
+            : "city";
+      this.onMapLevelChangeThrottled(level);
+    }
+
+    this.logAnalyticsEventThrottled("DiscoveryMap_viewport_updated");
   };
 
   handleMarkerClick = locationId => {
@@ -87,35 +116,40 @@ class DiscoveryMap extends React.Component {
   };
 
   renderMarker = locationInfo => {
-    const { currentTab, previewedLocationId } = this.props;
+    const { currentTab, mapLevel, previewedLocationId } = this.props;
     const { viewport } = this.state;
+
     const id = locationInfo.id;
     const name = locationInfo.name;
     const lat = parseFloat(locationInfo.lat);
     const lng = parseFloat(locationInfo.lng);
+    const geoLevel = locationInfo.geo_level;
+
     const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
     if (!locationInfo[idsField]) return;
+
     const pointCount = locationInfo[idsField].length;
-    const minSize = 10;
-    // Scale based on the zoom and point count (zoomed-in = higher zoom)
-    // Log1.5 of the count looked nice visually for not getting too large with many points.
-    const markerSize = Math.max(
-      Math.log(pointCount) / Math.log(1.4) * (get("zoom", viewport) || 3),
-      minSize
-    );
+    const rectangular =
+      MAP_CLUSTER_ENABLED_LEVELS.includes(geoLevel) &&
+      indexOfMapLevel(geoLevel) < indexOfMapLevel(mapLevel);
 
     return (
-      <Marker key={`marker-${locationInfo.id}`} latitude={lat} longitude={lng}>
-        <CircleMarker
-          active={id === previewedLocationId}
-          size={markerSize}
-          onClick={() => this.handleMarkerClick(id)}
-          onMouseEnter={() =>
-            this.handleMarkerMouseEnter({ id, name, lat, lng, pointCount })
-          }
-          onMouseLeave={this.handleMarkerMouseLeave}
-        />
-      </Marker>
+      <ShapeMarker
+        active={id === previewedLocationId}
+        id={id}
+        key={`marker-${locationInfo.id}`}
+        lat={lat}
+        lng={lng}
+        onClick={() => this.handleMarkerClick(id)}
+        onMouseEnter={() =>
+          this.handleMarkerMouseEnter({ id, name, lat, lng, pointCount })
+        }
+        onMouseLeave={this.handleMarkerMouseLeave}
+        pointCount={pointCount}
+        rectangular={rectangular}
+        title={`${name} (${pointCount})`}
+        zoom={get("zoom", viewport)}
+      />
     );
   };
 
@@ -125,9 +159,9 @@ class DiscoveryMap extends React.Component {
     const itemCount = sumBy(p => size(p[idsField]), values(mapLocationData));
     return (
       <MapBanner
+        item={currentTab}
         itemCount={itemCount}
         onClearFilters={onClearFilters}
-        subject={currentTab}
       />
     );
   };
@@ -135,6 +169,7 @@ class DiscoveryMap extends React.Component {
   render() {
     const { mapTilerKey, mapLocationData } = this.props;
     const { tooltip } = this.state;
+
     return (
       <BaseMap
         banner={this.renderBanner()}
@@ -151,20 +186,27 @@ class DiscoveryMap extends React.Component {
   }
 }
 
+// Zoom boundaries determined via eyeballing.
 DiscoveryMap.defaultProps = {
   currentTab: "samples",
+  zoomBoundaryCountry: 3.5,
+  zoomBoundaryState: 5,
 };
 
 DiscoveryMap.propTypes = {
   currentDisplay: PropTypes.string,
   currentTab: PropTypes.string.isRequired,
+  mapLevel: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
   onClick: PropTypes.func,
+  onMapLevelChange: PropTypes.func,
   onMarkerClick: PropTypes.func,
   onTooltipTitleClick: PropTypes.func,
   previewedLocationId: PropTypes.number,
+  zoomBoundaryCountry: PropTypes.number,
+  zoomBoundaryState: PropTypes.number,
 };
 
 export default DiscoveryMap;

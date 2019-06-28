@@ -9,19 +9,19 @@ import cs from "./map_banner.scss";
 
 class MapBanner extends React.Component {
   render() {
-    const { subject, itemCount, onClearFilters } = this.props;
+    const { item, itemCount, onClearFilters } = this.props;
     if (!itemCount) {
       return (
         <div className={cs.bannerContainer}>
           <div className={cs.banner}>
-            {`No ${subject} found. Try adjusting search or filters. `}
+            {`No ${item} found. Try adjusting search or filters. `}
             <span
               className={cs.clearAll}
               onClick={withAnalytics(
                 onClearFilters,
                 "MapBanner_clear-filters-link_clicked",
                 {
-                  currentTab: subject,
+                  currentTab: item,
                 }
               )}
             >
@@ -34,10 +34,9 @@ class MapBanner extends React.Component {
       return (
         <div className={cs.bannerContainer}>
           <div className={cs.banner}>
-            <span className={cs.emphasis}>{`${itemCount} ${subject.slice(
-              0,
-              -1
-            )}${itemCount > 1 ? "s" : ""}`}</span>{" "}
+            <span className={cs.emphasis}>{`${itemCount} ${item.slice(0, -1)}${
+              itemCount > 1 ? "s" : ""
+            }`}</span>{" "}
             {`with location data.`}
             <BasicPopup
               content={"Help out by adding more location data to your samples."}
@@ -57,7 +56,7 @@ class MapBanner extends React.Component {
 }
 
 MapBanner.propTypes = {
-  subject: PropTypes.string,
+  item: PropTypes.string,
   itemCount: PropTypes.number,
   onClearFilters: PropTypes.func,
 };
