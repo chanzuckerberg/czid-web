@@ -5,7 +5,7 @@
   text-align: center;
 
   .banner {
-    @include font-body-xxs;
+    @include font-body-xxxs;
 
     background: $white;
     border-radius: 4px;
@@ -13,12 +13,24 @@
     cursor: default;
     display: inline-block;
     margin: 8px auto auto;
-    padding: 8px;
+    padding: 6px 8px;
     text-align: center;
 
     .clearAll {
       color: $primary-light;
       cursor: pointer;
+    }
+
+    .emphasis {
+      font-weight: $font-weight-semibold;
+    }
+
+    .infoIcon {
+      cursor: pointer;
+      fill: $dark-grey;
+      height: 15px;
+      margin-left: 5px;
+      vertical-align: top;
     }
   }
 }

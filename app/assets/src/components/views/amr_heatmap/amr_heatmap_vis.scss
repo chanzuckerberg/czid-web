@@ -1,11 +1,22 @@
 @import "~styles/themes/colors";
 
-.AMRHeatmapContainer {
-  overflow-x: auto;
-  margin-bottom: 300px;
+.AMRHeatmapVis {
+  .AMRHeatmapContainer {
+    overflow-x: auto;
+    margin-bottom: 300px;
 
-  svg {
-    display: block;
-    margin: 0 auto;
+    svg {
+      display: block;
+      margin: 0 auto;
+    }
+  }
+
+  .tooltip {
+    position: absolute;
+    display: none;
+
+    &.visible {
+      display: block;
+    }
   }
 }
