@@ -1,15 +1,14 @@
 import { get, isEmpty, throttle, upperFirst } from "lodash/fp";
 import React from "react";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { logAnalyticsEvent } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import ShapeMarker from "~/components/views/discovery/mapping/ShapeMarker";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
+import MapBanner from "~/components/views/discovery/mapping/MapBanner";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
-
-import cs from "./discovery_map.scss";
 
 export const TOOLTIP_TIMEOUT_MS = 1000;
 export const DEFAULT_THROTTLE_MS = 500;
@@ -156,27 +155,15 @@ class DiscoveryMap extends React.Component {
 
   renderBanner = () => {
     const { currentTab, mapLocationData, onClearFilters } = this.props;
-    if (isEmpty(mapLocationData)) {
-      return (
-        <div className={cs.bannerContainer}>
-          <div className={cs.banner}>
-            {`No ${currentTab} found. Try adjusting search or filters. `}
-            <span
-              className={cs.clearAll}
-              onClick={withAnalytics(
-                onClearFilters,
-                "DiscoveryMap_clear-filters-link_clicked",
-                {
-                  currentTab,
-                }
-              )}
-            >
-              Clear all
-            </span>
-          </div>
-        </div>
-      );
-    }
+    const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
+    const itemCount = sumBy(p => size(p[idsField]), values(mapLocationData));
+    return (
+      <MapBanner
+        itemCount={itemCount}
+        onClearFilters={onClearFilters}
+        subject={currentTab}
+      />
+    );
   };
 
   render() {
