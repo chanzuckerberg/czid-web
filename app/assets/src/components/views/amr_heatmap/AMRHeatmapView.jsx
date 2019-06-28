@@ -4,6 +4,7 @@ import { StickyContainer, Sticky } from "react-sticky";
 
 import AMRHeatmapControls from "~/components/views/amr_heatmap/AMRHeatmapControls";
 import AMRHeatmapVis from "~/components/views/amr_heatmap/AMRHeatmapVis";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import { getAMRCounts } from "~/api/amr";
 import LoadingIcon from "~ui/icons/LoadingIcon";
@@ -26,6 +27,8 @@ const SCALES = [
   { text: "Linear", value: "linear" },
 ];
 
+const SIDEBAR_SAMPLE_MODE = "sampleDetails";
+
 export default class AMRHeatmapView extends React.Component {
   constructor(props) {
     super(props);
@@ -37,6 +40,9 @@ export default class AMRHeatmapView extends React.Component {
         viewLevel: "gene",
         scale: "symlog",
       },
+      selectedSampleId: null,
+      sidebarVisible: false,
+      sidebarMode: null,
     };
   }
 
@@ -69,14 +75,6 @@ export default class AMRHeatmapView extends React.Component {
     ];
   }
 
-  updateOptions = options => {
-    const { selectedOptions } = this.state;
-    let newOptions = Object.assign({}, selectedOptions, options);
-    this.setState({
-      selectedOptions: newOptions,
-    });
-  };
-
   findMaxValues(samplesWithAMRCounts) {
     const maxValues = samplesWithAMRCounts.reduce(
       (accum, currentSample) => {
@@ -90,6 +88,61 @@ export default class AMRHeatmapView extends React.Component {
     );
     return maxValues;
   }
+
+  //*** Callback methods ***
+
+  updateOptions = options => {
+    const { selectedOptions } = this.state;
+    let newOptions = Object.assign({}, selectedOptions, options);
+    this.setState({
+      selectedOptions: newOptions,
+    });
+  };
+
+  onSampleLabelClick = sampleId => {
+    const { sidebarVisible, sidebarMode, selectedSampleId } = this.state;
+    if (!sampleId) {
+      this.setState({
+        sidebarVisible: false,
+      });
+      return;
+    }
+    if (
+      sidebarVisible &&
+      sidebarMode === SIDEBAR_SAMPLE_MODE &&
+      selectedSampleId === sampleId
+    ) {
+      this.setState({
+        sidebarVisible: false,
+      });
+    } else {
+      this.setState({
+        selectedSampleId: sampleId,
+        sidebarMode: SIDEBAR_SAMPLE_MODE,
+        sidebarVisible: true,
+      });
+    }
+  };
+
+  closeSidebar = () => {
+    this.setState({
+      sidebarVisible: false,
+    });
+  };
+
+  //*** Post-update methods ***
+
+  getSidebarParams() {
+    const { sidebarMode, selectedSampleId } = this.state;
+    if (sidebarMode === SIDEBAR_SAMPLE_MODE) {
+      return {
+        sampleId: selectedSampleId,
+        showReportLink: true,
+      };
+    }
+  }
+
+  //*** Render methods ***
 
   renderHeader() {
     const { sampleIds } = this.props;
@@ -137,9 +190,22 @@ export default class AMRHeatmapView extends React.Component {
           <AMRHeatmapVis
             samplesWithAMRCounts={samplesWithAMRCounts}
             selectedOptions={selectedOptions}
+            onSampleLabelClick={this.onSampleLabelClick}
           />
         </ErrorBoundary>
       </div>
+    );
+  }
+
+  renderSidebar() {
+    const { sidebarMode, sidebarVisible } = this.state;
+    return (
+      <DetailsSidebar
+        visible={sidebarVisible}
+        mode={sidebarMode}
+        onClose={this.closeSidebar}
+        params={this.getSidebarParams()}
+      />
     );
   }
 
@@ -157,6 +223,7 @@ export default class AMRHeatmapView extends React.Component {
           </Sticky>
           {this.renderVisualization()}
         </StickyContainer>
+        {this.renderSidebar()}
       </div>
     );
   }
