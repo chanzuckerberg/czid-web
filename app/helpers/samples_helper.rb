@@ -525,23 +525,22 @@ module SamplesHelper
   end
 
   def self.samples_by_metadata_field(sample_ids, field_name)
+    query = Metadatum.where(metadata_fields: { name: field_name }, sample_id: sample_ids)
     # Special-case locations
     if MetadataField.find_by(name: field_name).base_type == Metadatum::LOCATION_TYPE
-      include_fields = [:metadata_field, :location]
-      # Plain-text locations in string_validated_value
-      group_fields = [:string_validated_value, "locations.name"]
+      query
+        .includes(:metadata_field, location: Location::GEO_LEVELS)
+        .group(
+          [
+            :string_validated_value,
+            "locations.name"
+          ] + Location::GEO_LEVELS.map { |l| "#{l.pluralize}_locations.name" }
+        )
     else
-      include_fields = :metadata_field
-      group_fields = Metadatum.where(key: field_name).first.validated_field
+      query
+        .includes(:metadata_field)
+        .group(Metadatum.where(key: field_name).first.validated_field)
     end
-
-    Metadatum
-      .includes(include_fields)
-      .where(
-        metadata_fields: { name: field_name },
-        sample_id: sample_ids
-      )
-      .group(group_fields)
   end
 
   private

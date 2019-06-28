@@ -1,5 +1,7 @@
 require 'rails_helper'
 
+WebMock.allow_net_connect!
+
 RSpec.describe ProjectsController, type: :controller do
   create_users
 
