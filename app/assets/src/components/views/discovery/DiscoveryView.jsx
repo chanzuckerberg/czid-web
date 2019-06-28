@@ -1198,14 +1198,15 @@ class DiscoveryView extends React.Component {
               )}
           </div>
           <div className={cs.centerPane}>
-            {currentDisplay === "table" ? (
-              <NarrowContainer className={cs.viewContainer}>
-                {this.renderCenterPaneContent()}
-              </NarrowContainer>
-            ) : (
+            {currentDisplay === "map" &&
+            ["samples", "projects"].includes(currentTab) ? (
               <div className={cs.viewContainer}>
                 {this.renderCenterPaneContent()}
               </div>
+            ) : (
+              <NarrowContainer className={cs.viewContainer}>
+                {this.renderCenterPaneContent()}
+              </NarrowContainer>
             )}
           </div>
           {this.renderRightPane()}
