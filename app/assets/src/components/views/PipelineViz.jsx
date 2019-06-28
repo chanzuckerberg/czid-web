@@ -100,7 +100,6 @@ class PipelineViz extends React.Component {
   }
 
   generateIntraEdgeData(index) {
-    const { backgroundColor } = this.props;
     const stageData = this.stagesData[this.stageNames[index]];
     const stepData = stageData.steps;
 
@@ -127,7 +126,7 @@ class PipelineViz extends React.Component {
             ...(index == 0
               ? {
                   color: {
-                    color: backgroundColor,
+                    opacity: 0,
                     inherit: false,
                   },
                   chosen: false,
@@ -141,7 +140,6 @@ class PipelineViz extends React.Component {
   }
 
   generateInterEdgeData(index) {
-    const { backgroundColor } = this.props;
     const stageData = this.stagesData[this.stageNames[index]];
     const stepData = stageData.steps;
 
@@ -152,7 +150,7 @@ class PipelineViz extends React.Component {
           from: i,
           to: END_NODE_ID,
           color: {
-            color: backgroundColor,
+            opacity: 0,
             inherit: false,
           },
           chosen: false,
