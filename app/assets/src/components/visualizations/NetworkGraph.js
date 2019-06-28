@@ -28,8 +28,8 @@ export default class NetworkGraph {
     let maxCanvasX = Number.MIN_VALUE;
     this.data.nodes.getIds().forEach(nodeId => {
       const boundingBox = this.graph.getBoundingBox(nodeId);
-      minCanvasX = Math.min(minCanvasX, boundingBox.right);
-      maxCanvasX = Math.max(maxCanvasX, boundingBox.left);
+      minCanvasX = Math.min(minCanvasX, boundingBox.left);
+      maxCanvasX = Math.max(maxCanvasX, boundingBox.right);
     });
     const minDOMX = this.graph.canvasToDOM({ x: minCanvasX }).x;
     const maxDOMX = this.graph.canvasToDOM({ x: maxCanvasX }).x;

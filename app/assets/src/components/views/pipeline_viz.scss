@@ -4,23 +4,48 @@
 .pipelineViz {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .stage {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 24px;
+  margin: 24px 0;
 }
 
 .stageButton {
   background-color: $light-grey;
   border-radius: 8px;
   padding: 12px;
-  width: 120px;
+  width: 250px;
   text-align: center;
   font-weight: $font-weight-bold;
   cursor: pointer;
+}
+
+.stageArrow {
+  width: 50px;
+  height: 10px;
+  display: flex;
+  align-items: center;
+  overflow: visible;
+  position: relative;
+  flex-shrink: 0;
+
+  .stageArrowBody {
+    position: relative;
+    width: calc(100% - 12px);
+    padding: 0.5px 0;
+    background-color: $medium-grey;
+  }
+
+  .stageArrowHead {
+    position: absolute;
+    right: 0;
+    height: 100%;
+    fill: $medium-grey;
+  }
 }
 
 .graph {
@@ -28,14 +53,13 @@
 }
 
 .graphLabel {
-  display: "flex";
-  justify-content: "space-between";
-  flex-wrap: "wrap";
-}
-
-.closeButton {
-  padding: 3px 12px;
-  cursor: pointer;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  width: 100%;
+  position: absolute;
+  top: 0;
 }
 
 .hidden {
@@ -46,6 +70,11 @@
   background-color: $off-white;
   border-radius: 6px;
   height: 50vh;
-  padding: 16px;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   font-weight: $font-weight-bold;
+  position: relative;
 }

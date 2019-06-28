@@ -4,7 +4,9 @@ import PropTypes from "prop-types";
 import ReactPanZoom from "@ajainarayanan/react-pan-zoom";
 
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
-import NetworkGraph from "~/components/visualizations/NetworkGraph.js";
+import NetworkGraph from "~/components/visualizations/NetworkGraph";
+import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
+
 import cs from "./pipeline_viz.scss";
 
 const START_NODE_ID = -1;
@@ -256,8 +258,8 @@ class PipelineViz extends React.Component {
       },
       groups: {
         startEndNodes: {
-          widthConstraint: 8,
-          heightConstraint: 0,
+          shape: "dot",
+          size: 1,
           color: backgroundColor,
           fixed: {
             x: true,
@@ -311,7 +313,7 @@ class PipelineViz extends React.Component {
   }
 
   render() {
-    const stageContainers = this.stageNames.map((stageName, i) => {
+    let stageContainers = this.stageNames.map((stageName, i) => {
       const isOpened = this.state.stagesOpened[i];
 
       return (
@@ -326,10 +328,7 @@ class PipelineViz extends React.Component {
           <div className={isOpened ? cs.openedStage : cs.hidden}>
             <div className={cs.graphLabel}>
               {stageName}
-              <RemoveIcon
-                className={cs.closeButton}
-                onClick={() => this.toggleStage(i)}
-              />
+              <RemoveIcon onClick={() => this.toggleStage(i)} />
             </div>
             <div
               className={cs.graph}
@@ -341,6 +340,19 @@ class PipelineViz extends React.Component {
         </div>
       );
     });
+
+    stageContainers = stageContainers.reduce((containers, stage, i) => {
+      if (i > 0) {
+        containers.push(
+          <div className={cs.stageArrow} key={`stageArrow-${i}`}>
+            <div className={cs.stageArrowBody} />
+            <PipelineStageArrowheadIcon className={cs.stageArrowHead} />
+          </div>
+        );
+      }
+      containers.push(stage);
+      return containers;
+    }, []);
 
     return (
       <div onWheel={this.handleMouseWheelZoom}>
