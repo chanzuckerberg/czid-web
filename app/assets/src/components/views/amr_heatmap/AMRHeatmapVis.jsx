@@ -114,12 +114,7 @@ export default class AMRHeatmapVis extends React.Component {
 
   getTooltipData(node) {
     const { samplesWithAMRCounts, selectedOptions } = this.props;
-    const {
-      sampleLabels,
-      geneLabels,
-      alleleLabels,
-      alleleToGeneMap,
-    } = this.state;
+    const { sampleLabels, alleleToGeneMap } = this.state;
     const sampleName = sampleLabels[node.columnIndex].label;
     const rowLabel = this.getHeatmapLabels()[node.rowIndex].label;
     const sampleForColumn = samplesWithAMRCounts[node.columnIndex];
