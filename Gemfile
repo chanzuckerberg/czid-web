@@ -1,8 +1,8 @@
 source 'https://rubygems.org'
 
 git_source(:github) do |repo_name|
-  repo_name = '#{repo_name}/#{repo_name}' unless repo_name.include?('/')
-  'https://github.com/#{repo_name}.git'
+  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
+  "https://github.com/#{repo_name}.git"
 end
 
 gem 'airbrake', '~> 8'
@@ -106,8 +106,8 @@ group :development do
 end
 
 group :test do
-  gem 'webmock', '~> 3.6'
   gem 'rspec-json_expectations'
+  gem 'webmock', '~> 3.6'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
