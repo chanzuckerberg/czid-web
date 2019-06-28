@@ -35,7 +35,7 @@ class SampleDetailsMode extends React.Component {
   };
 
   onTabChange = tab => {
-    this.setState({ currentTab: tab });
+    this.setState({ subject: tab });
     logAnalyticsEvent("SampleDetailsMode_tab_changed", {
       sampleId: this.props.sampleId,
       tab,

@@ -14,7 +14,7 @@ export default class PlaygroundComponents extends React.Component {
   };
 
   onTabChange = tab => {
-    this.setState({ currentTab: tab });
+    this.setState({ subject: tab });
   };
 
   handleResultSelected = ({ result }) => {

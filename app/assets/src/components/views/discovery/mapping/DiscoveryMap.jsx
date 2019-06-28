@@ -1,14 +1,13 @@
 import React from "react";
 import { Marker } from "react-map-gl";
-import { get, isEmpty, upperFirst, sumBy, size, values } from "lodash/fp";
+import { get, upperFirst, sumBy, size, values } from "lodash/fp";
 
-import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { logAnalyticsEvent } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import BaseMap from "~/components/views/discovery/mapping/BaseMap";
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
+import MapBanner from "~/components/views/discovery/mapping/MapBanner";
 import MapTooltip from "~/components/views/discovery/mapping/MapTooltip";
-
-import cs from "./discovery_map.scss";
 
 export const TOOLTIP_TIMEOUT_MS = 1000;
 
@@ -122,41 +121,15 @@ class DiscoveryMap extends React.Component {
 
   renderBanner = () => {
     const { currentTab, mapLocationData, onClearFilters } = this.props;
-    if (isEmpty(mapLocationData)) {
-      return (
-        <div className={cs.bannerContainer}>
-          <div className={cs.banner}>
-            {`No ${currentTab} found. Try adjusting search or filters. `}
-            <span
-              className={cs.clearAll}
-              onClick={withAnalytics(
-                onClearFilters,
-                "DiscoveryMap_clear-filters-link_clicked",
-                {
-                  currentTab,
-                }
-              )}
-            >
-              Clear all
-            </span>
-          </div>
-        </div>
-      );
-    } else {
-      const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
-      const count = sumBy(p => size(p[idsField]), values(mapLocationData));
-      return (
-        <div className={cs.bannerContainer}>
-          <div className={cs.banner}>
-            <span className={cs.emphasis}>{`${count} ${currentTab.slice(
-              0,
-              -1
-            )}${count > 1 ? "s" : ""}`}</span>{" "}
-            {`with location data.`}
-          </div>
-        </div>
-      );
-    }
+    const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
+    const itemCount = sumBy(p => size(p[idsField]), values(mapLocationData));
+    return (
+      <MapBanner
+        itemCount={itemCount}
+        onClearFilters={onClearFilters}
+        subject={currentTab}
+      />
+    );
   };
 
   render() {

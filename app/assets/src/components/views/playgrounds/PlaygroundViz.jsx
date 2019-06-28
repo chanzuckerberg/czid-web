@@ -18,13 +18,13 @@ export default class PlaygroundViz extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.currentTab !== this.state.currentTab) {
+    if (prevState.subject !== this.state.currentTab) {
       this.renderViz();
     }
   }
 
   onTabChange = tab => {
-    this.setState({ currentTab: tab });
+    this.setState({ subject: tab });
   };
 
   renderViz = () => {

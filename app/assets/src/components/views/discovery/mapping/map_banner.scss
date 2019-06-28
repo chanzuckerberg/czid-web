@@ -22,7 +22,7 @@
     }
 
     .emphasis {
-      @include font-header-xxxs;
+      font-weight: $font-weight-semibold;
     }
   }
 }

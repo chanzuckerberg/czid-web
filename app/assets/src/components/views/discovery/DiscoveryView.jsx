@@ -90,7 +90,7 @@ class DiscoveryView extends React.Component {
     this.state = defaults(
       {
         currentDisplay: "table",
-        currentTab: projectId ? "samples" : "projects",
+        subject: projectId ? "samples" : "projects",
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
         filteredSampleStats: {},
@@ -437,11 +437,11 @@ class DiscoveryView extends React.Component {
 
   handleTabChange = currentTab => {
     const { mapSidebarTab } = this.state;
-    this.setState({ currentTab }, () => {
+    this.setState({ currentTab: subject }, () => {
       this.updateBrowsingHistory("replace");
       const name = currentTab.replace(/\W+/g, "-").toLowerCase();
       logAnalyticsEvent(`DiscoveryView_tab-${name}_clicked`, {
-        currentTab: currentTab,
+        subject: currentTab,
       });
     });
 
@@ -609,7 +609,7 @@ class DiscoveryView extends React.Component {
     this.setState(
       {
         currentDisplay: "table",
-        currentTab: "samples",
+        subject: "samples",
         mapSidebarTab: mapSidebarTab === "summary" ? mapSidebarTab : "samples",
         project,
         projectId: project.id,
