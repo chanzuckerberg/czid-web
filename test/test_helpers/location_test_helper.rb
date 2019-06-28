@@ -85,6 +85,20 @@ module LocationTestHelper
       }
     }
   ].freeze
+  API_GEOSEARCH_USA_RESPONSE = [
+    {
+      "place_id" => "214325471",
+      "osm_type" => "relation",
+      "osm_id" => "148838",
+      "lat" => 39.78,
+      "lon" => -100.45,
+      "display_name" => "USA",
+      "address" => {
+        "country" => "USA",
+        "country_code" => "us"
+      }
+    }
+  ].freeze
   FORMATTED_GEOSEARCH_DHAKA_RESPONSE = [
     {
       "name" => "Dhaka, Dhaka Division, Bangladesh",
