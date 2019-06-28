@@ -40,14 +40,14 @@ class MapBanner extends React.Component {
             )}${itemCount > 1 ? "s" : ""}`}</span>{" "}
             {`with location data.`}
             <BasicPopup
-              size="mini"
+              content={"Help out by adding more location data to your samples."}
               position="bottom left"
+              size="mini"
               trigger={
                 <span>
                   <InfoCircleIcon className={cs.infoIcon} />
                 </span>
               }
-              content={"Help out by adding more location data to your samples."}
             />
           </div>
         </div>
