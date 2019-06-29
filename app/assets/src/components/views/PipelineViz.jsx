@@ -1,11 +1,12 @@
 import React from "react";
 import { mapValues } from "lodash/fp";
 import PropTypes from "prop-types";
-import ReactPanZoom from "@ajainarayanan/react-pan-zoom";
+import { PanZoom } from "react-easy-panzoom";
 
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import NetworkGraph from "~/components/visualizations/NetworkGraph.js";
+import PlusMinusControl from "~/components/ui/controls/PlusMinusControl.jsx";
 import cs from "./pipeline_viz.scss";
 
 const START_NODE_ID = -1;
@@ -29,7 +30,6 @@ class PipelineViz extends React.Component {
 
     this.state = {
       stagesOpened: [true, true, true, true],
-      zoom: 1,
       sidebarVisible: false,
       sidebarParams: {},
     };
@@ -271,8 +271,6 @@ class PipelineViz extends React.Component {
   }
 
   generateInterEdgeData(index) {
-    const { backgroundColor } = this.props;
-
     if (index == this.stagesData.length - 1) {
       // For final stage, create hidden edges to final node for vertical centering of nodes.
       const stepData = this.stagesData[index].steps;
@@ -281,7 +279,7 @@ class PipelineViz extends React.Component {
           from: i,
           to: END_NODE_ID,
           color: {
-            color: backgroundColor,
+            opacity: 0,
             inherit: false,
           },
           chosen: false,
@@ -315,20 +313,11 @@ class PipelineViz extends React.Component {
     }
   }
 
-  adjustGraphNodePositions() {
-    let yCenteredDOMPos;
-
-    this.graphs.forEach((graph, i) => {
-      if (i == 0) {
-        yCenteredDOMPos = graph.getNodePosition(START_NODE_ID).y;
-      } else {
-        const xStartNodePos = graph.getNodePosition(START_NODE_ID).x;
-        graph.moveNodeToPosition(START_NODE_ID, xStartNodePos, yCenteredDOMPos);
-
-        const xEndNodePos = graph.getNodePosition(END_NODE_ID).x;
-        graph.moveNodeToPosition(END_NODE_ID, xEndNodePos, yCenteredDOMPos);
-      }
-    });
+  centerEndNodeVertically(graph) {
+    // Starting for each graph node is already vertically centered.
+    const yStartNodePos = graph.getNodePosition(START_NODE_ID).y;
+    const xEndNodePos = graph.getNodePosition(END_NODE_ID).x;
+    graph.moveNodeToPosition(END_NODE_ID, xEndNodePos, yStartNodePos);
   }
 
   closeNonativeSteps() {
@@ -346,7 +335,6 @@ class PipelineViz extends React.Component {
     this.stageNames.forEach((_, i) => {
       this.drawStageGraph(i);
     });
-    this.adjustGraphNodePositions();
     this.closeNonativeSteps();
   }
 
@@ -407,7 +395,6 @@ class PipelineViz extends React.Component {
           direction: "LR",
           sortMethod: "directed",
           levelSeparation: 200,
-          parentCentralization: false,
           blockShifting: false,
           edgeMinimization: false,
         },
@@ -430,12 +417,15 @@ class PipelineViz extends React.Component {
       options
     );
     currStageGraph.minimizeWidthGivenScale(1.0);
+    this.centerEndNodeVertically(currStageGraph);
 
     this.graphs.push(currStageGraph);
   }
 
   render() {
-    const { sidebarVisible, sidebarParams, stagesOpened, zoom } = this.state;
+    const { zoomMin, zoomMax } = this.props;
+    const { sidebarVisible, sidebarParams, stagesOpened } = this.state;
+
     const stageContainers = this.stageNames.map((stageName, i) => {
       const isOpened = stagesOpened[i];
 
@@ -451,10 +441,7 @@ class PipelineViz extends React.Component {
           <div className={isOpened ? cs.openedStage : cs.hidden}>
             <div className={cs.graphLabel}>
               {stageName}
-              <RemoveIcon
-                className={cs.closeButton}
-                onClick={() => this.toggleStage(i)}
-              />
+              <RemoveIcon onClick={() => this.toggleStage(i)} />
             </div>
             <div
               className={cs.graph}
@@ -469,11 +456,22 @@ class PipelineViz extends React.Component {
 
     return (
       <div>
-        <div onWheel={this.handleMouseWheelZoom}>
-          <ReactPanZoom zoom={zoom}>
-            <div className={cs.pipelineViz}>{stageContainers}</div>
-          </ReactPanZoom>
-        </div>
+        <PanZoom
+          className={cs.panZoomContainer}
+          minZoom={zoomMin}
+          maxZoom={zoomMax}
+          zoomSpeed={3}
+          ref={ref => {
+            this.panZoomContainer = ref;
+          }}
+        >
+          <div className={cs.pipelineViz}>{stageContainers}</div>
+        </PanZoom>
+        <PlusMinusControl
+          onPlusClick={this.panZoomContainer && this.panZoomContainer.zoomIn}
+          onMinusClick={this.panZoomContainer && this.panZoomContainer.zoomOut}
+          className={cs.plusMinusControl}
+        />
         <DetailsSidebar
           visible={sidebarVisible}
           mode="pipelineStepDetails"
@@ -490,14 +488,16 @@ PipelineViz.propTypes = {
   backgroundColor: PropTypes.string,
   nodeColor: PropTypes.string,
   edgeColor: PropTypes.string,
-  zoomChangeInterval: PropTypes.number,
+  zoomMin: PropTypes.number,
+  zoomMax: PropTypes.number,
 };
 
 PipelineViz.defaultProps = {
   backgroundColor: "#f8f8f8",
   nodeColor: "#eaeaea",
   edgeColor: "#999999",
-  zoomChangeInterval: 0.01,
+  zoomMin: 0.5,
+  zoomMax: 3,
 };
 
 export default PipelineViz;
