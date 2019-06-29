@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .pipelineViz {
   display: flex;
@@ -11,6 +12,7 @@
   justify-content: center;
   align-items: center;
   margin: 24px;
+  cursor: default;
 }
 
 .stageButton {
@@ -28,14 +30,10 @@
 }
 
 .graphLabel {
-  display: "flex";
-  justify-content: "space-between";
-  flex-wrap: "wrap";
-}
-
-.closeButton {
-  padding: 3px 12px;
-  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .hidden {
@@ -48,4 +46,16 @@
   height: 50vh;
   padding: 16px;
   font-weight: $font-weight-bold;
+}
+
+.panZoomContainer {
+  cursor: grab !important;
+  outline: none;
+}
+
+.plusMinusControl {
+  position: fixed;
+  bottom: 50px;
+  right: 15px;
+  box-shadow: $box-shadow-dropdown-menu;
 }
