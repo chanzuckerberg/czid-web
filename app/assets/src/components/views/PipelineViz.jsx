@@ -420,14 +420,14 @@ class PipelineViz extends React.Component {
         dragView: false,
         dragNodes: false,
       },
+      onClick: info => this.handleStepClick(index, info),
     };
 
     const currStageGraph = new NetworkGraph(
       container,
       nodeData,
       edgeData,
-      options,
-      info => this.handleStepClick(index, info)
+      options
     );
     currStageGraph.minimizeWidthGivenScale(1.0);
 

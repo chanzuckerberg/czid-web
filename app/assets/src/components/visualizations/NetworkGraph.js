@@ -1,13 +1,14 @@
 import { DataSet, Network } from "visjs-network";
 
 export default class NetworkGraph {
-  constructor(container, nodeData, edgeData, options, handleClick) {
+  constructor(container, nodeData, edgeData, options) {
+    const { onClick, ...networkOptions } = options;
     this.data = {
       nodes: new DataSet(nodeData),
       edges: new DataSet(edgeData),
     };
-    this.graph = new Network(container, this.data, options);
-    this.graph.on("click", handleClick);
+    this.graph = new Network(container, this.data, networkOptions);
+    this.graph.on("click", onClick);
   }
 
   moveNodeToPosition(nodeId, xDOMCoord, yDOMCoord) {
