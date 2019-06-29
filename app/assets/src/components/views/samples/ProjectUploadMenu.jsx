@@ -1,8 +1,11 @@
 import React from "react";
-import cs from "./project_upload_menu.scss";
-import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import PropTypes from "prop-types";
+
+import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
+import { logAnalyticsEvent } from "~/api/analytics";
+
 import MetadataUploadModal from "./MetadataUploadModal";
+import cs from "./project_upload_menu.scss";
 
 class ProjectUploadMenu extends React.Component {
   state = {
@@ -29,6 +32,7 @@ class ProjectUploadMenu extends React.Component {
         text="Upload Samples"
         key="1"
         onClick={() => {
+          logAnalyticsEvent("ProjectUploadMenu_upload-sample-btn_clicked");
           this.goToPage(`/samples/upload?projectId=${this.props.project.id}`);
         }}
       />,
