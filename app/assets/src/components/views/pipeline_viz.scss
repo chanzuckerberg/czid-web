@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
+@import "~styles/themes/elements";
 
 .pipelineViz {
   display: flex;
@@ -7,11 +8,13 @@
   align-items: center;
 }
 
-.stage {
+.stage,
+.stageAndArrow {
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 24px 0;
+  cursor: default;
 }
 
 .stageButton {
@@ -77,4 +80,16 @@
   align-items: center;
   font-weight: $font-weight-bold;
   position: relative;
+}
+
+.panZoomContainer {
+  cursor: grab !important;
+  outline: none;
+}
+
+.plusMinusControl {
+  position: fixed;
+  bottom: 50px;
+  right: 15px;
+  box-shadow: $box-shadow-dropdown-menu;
 }
