@@ -1,18 +1,23 @@
 import traceback
+import os
 import boto3
 
 SCALING_PERMISSION_TAG = 'IDSeqEnvsThatCanScale'
+SCALING_PERMISSION_ENV_VAR = 'ID_SEQ_ENVS_THAT_CAN_SCALE'
 
 def get_compute_environment_configuration(compute_environment_name, region):
     batch_client = boto3.client('batch', region_name=region)
     response = batch_client.describe_compute_environments(computeEnvironments=[compute_environment_name])
     compute_environment_data = response['computeEnvironments'][0]
+    compute_environment_arn = compute_environment_data['computeEnvironmentArn']
     compute_resources = compute_environment_data['computeResources']
-    scaling_permission = _get_scaling_permission(compute_resources)
+    scaling_permission = _get_scaling_permission(compute_environment_arn, compute_resources)
     return {'minvCpus': compute_resources['minvCpus'], 'maxvCpus': compute_resources['maxvCpus'], 'scaling_permission': scaling_permission}
 
-def _get_scaling_permission(compute_resources):
+def _get_scaling_permission(compute_environment_arn, compute_resources):
     scaling_permission = 'tags' in compute_resources and SCALING_PERMISSION_TAG in compute_resources['tags']
+    if not scaling_permission:
+        scaling_permission = compute_environment_arn in (s.strip() for s in os.getenv(SCALING_PERMISSION_ENV_VAR, '').split(','))
     return scaling_permission
 
 def _set_compute_environment_min_capacity(vcpu_min_capacity, compute_environment_name, region):

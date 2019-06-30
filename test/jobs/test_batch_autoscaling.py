@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 import unittest
+import os
+
 import botocore
 
-from mock import patch
+from mock import patch, mock
 
 # Class under test
 import batch_autoscaling # pylint: disable=import-error
@@ -112,10 +114,21 @@ class TestAutoscaling(unittest.TestCase):
                                                              should_have_scaling_permission=True, should_change=True)
 
     def test_process_batch_configuration_2(self):
+        '''WHEN processing batch configuration with scaling tag not set AND scaling environment variable is present AND environment is the list THEN invoke dependencies and change the environment'''
+        with mock.patch.dict(os.environ, {'ID_SEQ_ENVS_THAT_CAN_SCALE': FAKE_COMPUTE_ENVIRONMENT_ARN + ',dummy_arn'}):
+            self._parameterized_test_process_batch_configuration(batch_describe_compute_environments_return_value=FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_NO_SCALING_TAG,
+                                                                 should_have_scaling_permission=True, should_change=True)
+
+    def test_process_batch_configuration_3(self):
         '''WHEN processing batch configuration with scaling tag not set THEN do not change the environment'''
         self._parameterized_test_process_batch_configuration(batch_describe_compute_environments_return_value=FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_NO_SCALING_TAG,
                                                              should_have_scaling_permission=False, should_change=False)
 
+    def test_process_batch_configuration_4(self):
+        '''WHEN processing batch configuration with scaling tag not set AND scaling environment variable is present AND environment is not in the list THEN do not change the environment'''
+        with mock.patch.dict(os.environ, {'ID_SEQ_ENVS_THAT_CAN_SCALE': 'dummy_arn'}):
+            self._parameterized_test_process_batch_configuration(batch_describe_compute_environments_return_value=FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_NO_SCALING_TAG,
+                                                                 should_have_scaling_permission=False, should_change=False)
 
     @patch('batch_autoscaling.boto3.client', side_effect=FAKE_CANNOT_UPDATE_EXCEPTION)
     def test_autoscale_compute_environments(self, _):
