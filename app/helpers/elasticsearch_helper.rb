@@ -22,7 +22,7 @@ module ElasticsearchHelper
     query = sanitize(query)
 
     # sanitize tax_levels
-    tax_levels = tax_levels.select {|l| TaxonCount::NAME_2_LEVEL[l] }
+    tax_levels = tax_levels.select { |l| TaxonCount::NAME_2_LEVEL[l] }
 
     matching_taxa = []
     taxon_ids = []
