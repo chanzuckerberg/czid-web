@@ -149,7 +149,7 @@ def autoscaling_update(config):
 
     if 'batch_configurations' in config:
         print "Autoscaling batches:"
-        response_batch_autoscaling = batch_autoscaling.autoscale_compute_environments(config['batch_configurations'], dry_run=True)
+        response_batch_autoscaling = batch_autoscaling.autoscale_compute_environments(config['batch_configurations'])
         print json.dumps(response_batch_autoscaling, default=_default_json_serializer)
 
 
