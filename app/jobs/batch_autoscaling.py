@@ -6,10 +6,14 @@ SCALING_PERMISSION_TAG = 'IDSeqEnvsThatCanScale'
 def get_compute_environment_configuration(compute_environment_name, region):
     batch_client = boto3.client('batch', region_name=region)
     response = batch_client.describe_compute_environments(computeEnvironments=[compute_environment_name])
-    compute_resources = response['computeEnvironments'][0]['computeResources']
-    scaling_permission = 'tags' in compute_resources and SCALING_PERMISSION_TAG in compute_resources['tags']
+    compute_environment_data = response['computeEnvironments'][0]
+    compute_resources = compute_environment_data['computeResources']
+    scaling_permission = _get_scaling_permission(compute_resources)
     return {'minvCpus': compute_resources['minvCpus'], 'maxvCpus': compute_resources['maxvCpus'], 'scaling_permission': scaling_permission}
 
+def _get_scaling_permission(compute_resources):
+    scaling_permission = 'tags' in compute_resources and SCALING_PERMISSION_TAG in compute_resources['tags']
+    return scaling_permission
 
 def _set_compute_environment_min_capacity(vcpu_min_capacity, compute_environment_name, region):
     batch_client = boto3.client('batch', region_name=region)
@@ -59,7 +63,7 @@ def process_batch_configuration(batch_configuration):
     if autoscaling_recommendation['change']:
         _set_compute_environment_min_capacity(autoscaling_recommendation['new_vcpu_min'], compute_environment_name, region)
 
-    return {'current_configuration': current_configuration, 'pending_jobs_counts': pending_jobs_counts, 'autoscaling_recommendation': autoscaling_recommendation}
+    return {'current_configuration': current_configuration, 'compute_environment_name': compute_environment_name, 'pending_jobs_counts': pending_jobs_counts, 'autoscaling_recommendation': autoscaling_recommendation}
 
 
 def _get_jobs_count(queue_name, region, job_status):

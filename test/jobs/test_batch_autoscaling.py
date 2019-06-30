@@ -7,11 +7,8 @@ from mock import patch
 # Class under test
 import batch_autoscaling # pylint: disable=import-error
 
-
-FAKE_LIST_JOBS_RESPONSE = {'jobSummaryList': [
-    {'status': 'RUNNING', 'jobName': 'job-name-1', 'createdAt': 1561155711844, 'jobId': '11111111-abcd-ffff-1111-abcdabcd0001'},
-    {'status': 'RUNNING', 'jobName': 'job-name-2', 'createdAt': 1561155811844, 'jobId': '11111111-abcd-ffff-1111-abcdabcd0002'}
-]}
+FAKE_LIST_JOBS_RESPONSE = {'jobSummaryList': [{'status': 'RUNNING', 'jobName': 'job-name-1', 'createdAt': 1561155711844, 'jobId': '11111111-abcd-ffff-1111-abcdabcd0001'},
+                                              {'status': 'RUNNING', 'jobName': 'job-name-2', 'createdAt': 1561155811844, 'jobId': '11111111-abcd-ffff-1111-abcdabcd0002'}]}
 
 FAKE_LIST_JOBS_RESPONSE_EMPTY = {'jobSummaryList': []}
 
@@ -20,42 +17,28 @@ FAKE_COMPUTE_ENVIRONMENT_NAME = 'fake-compute-environment'
 FAKE_REGION = 'us-east-1'
 FAKE_ACCOUNT = '123456789012'
 
-FAKE_COMPUT_ENVIRONMENT_ARN = "arn:aws:batch:{region}:{account}:compute-environment/{compute_env}".format(region=FAKE_REGION, account=FAKE_ACCOUNT, compute_env=FAKE_COMPUTE_ENVIRONMENT_NAME)
+FAKE_COMPUTE_ENVIRONMENT_ARN = "arn:aws:batch:{region}:{account}:compute-environment/{compute_env}".format(region=FAKE_REGION, account=FAKE_ACCOUNT, compute_env=FAKE_COMPUTE_ENVIRONMENT_NAME)
 
-FAKE_DESCRIBE_JOB_QUEUES_RESPONSE = {
-    "jobQueues": [{
-        "status": "VALID",
-        "jobQueueArn": "arn:aws:batch:{region}:{account}:job-queue/{queue}".format(region=FAKE_REGION, account=FAKE_ACCOUNT, queue=FAKE_QUEUE_NAME),
-        "computeEnvironmentOrder": [
-            {"computeEnvironment": FAKE_COMPUT_ENVIRONMENT_ARN}
-        ],
-        "jobQueueName": FAKE_QUEUE_NAME
-    }]
-}
+FAKE_DESCRIBE_JOB_QUEUES_RESPONSE = {"jobQueues": [{"status": "VALID",
+                                                    "jobQueueArn": "arn:aws:batch:{region}:{account}:job-queue/{queue}".format(region=FAKE_REGION, account=FAKE_ACCOUNT, queue=FAKE_QUEUE_NAME),
+                                                    "computeEnvironmentOrder": [
+                                                        {"computeEnvironment": FAKE_COMPUTE_ENVIRONMENT_ARN}
+                                                    ],
+                                                    "jobQueueName": FAKE_QUEUE_NAME}]}
 
 FAKE_CANNOT_UPDATE_EXCEPTION = botocore.exceptions.ClientError({'Error': {'Code': 'ClientException', 'Message': 'Cannot update, compute environment ... is being modified.'}}, 'UpdateComputeEnvironment')
 
 FAKE_BATCH_CONFIGURATIONS = [{'queue_name': FAKE_QUEUE_NAME, 'vcpus': 12, 'region': FAKE_REGION}]
 
-FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_SCALING_TAG_SET = {
-    "computeEnvironments": [{
-        "computeEnvironmentName": FAKE_COMPUTE_ENVIRONMENT_NAME,
-        "computeResources": {
-            "desiredvCpus": 0, "maxvCpus": 40, "minvCpus": 0,
-            "tags": {"Name": FAKE_COMPUTE_ENVIRONMENT_NAME, "IDSeqEnvsThatCanScale": "1"}
-        }
-    }]
-}
+FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_SCALING_TAG_SET = {"computeEnvironments": [{"computeEnvironmentName": FAKE_COMPUTE_ENVIRONMENT_NAME,
+                                                                               "computeEnvironmentArn": FAKE_COMPUTE_ENVIRONMENT_ARN,
+                                                                               "computeResources": {"desiredvCpus": 0, "maxvCpus": 40, "minvCpus": 0,
+                                                                                                    "tags": {"IDSeqEnvsThatCanScale": "1"}}}]}
 
-FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_NO_SCALING_TAG = {
-    "computeEnvironments": [{
-        "computeEnvironmentName": FAKE_COMPUTE_ENVIRONMENT_NAME,
-        "computeResources": {
-            "desiredvCpus": 0, "maxvCpus": 40, "minvCpus": 0,
-            "tags": {"Name": FAKE_COMPUTE_ENVIRONMENT_NAME}
-        }
-    }]
-}
+FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_NO_SCALING_TAG = {"computeEnvironments": [{"computeEnvironmentName": FAKE_COMPUTE_ENVIRONMENT_NAME,
+                                                                              "computeEnvironmentArn": FAKE_COMPUTE_ENVIRONMENT_ARN,
+                                                                              "computeResources": {"desiredvCpus": 0, "maxvCpus": 40, "minvCpus": 0,
+                                                                                                   "tags": {}}}]}
 
 class TestAutoscaling(unittest.TestCase):
     '''Tests for /app/jobs/autoscaling.py'''
@@ -105,35 +88,33 @@ class TestAutoscaling(unittest.TestCase):
         self.assertEqual(result, {'change': False, 'new_vcpu_min': 40})
 
 
-    @patch('batch_autoscaling.boto3.client')
-    def test_process_batch_configuration_1(self, _mock_boto3):
+    def _parameterized_test_process_batch_configuration(self, batch_describe_compute_environments_return_value, should_have_scaling_permission, should_change):
+        with patch('batch_autoscaling.boto3.client') as _mock_boto3:
+            _mock_boto3.return_value.list_jobs.side_effect = [FAKE_LIST_JOBS_RESPONSE, FAKE_LIST_JOBS_RESPONSE_EMPTY, FAKE_LIST_JOBS_RESPONSE_EMPTY]
+            _mock_boto3.return_value.describe_job_queues.return_value = FAKE_DESCRIBE_JOB_QUEUES_RESPONSE
+            _mock_boto3.return_value.describe_compute_environments.return_value = batch_describe_compute_environments_return_value
+
+            result = batch_autoscaling.process_batch_configuration(FAKE_BATCH_CONFIGURATIONS[0])
+
+            if should_have_scaling_permission:
+                _mock_boto3.return_value.update_compute_environment.assert_called_once_with(computeEnvironment=FAKE_COMPUTE_ENVIRONMENT_NAME, computeResources={'minvCpus': 24})
+            else:
+                _mock_boto3.return_value.update_compute_environment.assert_not_called()
+            self.assertEqual(result, {'autoscaling_recommendation': {'change': should_change, 'new_vcpu_min': 24},
+                                      'current_configuration': {'maxvCpus': 40, 'minvCpus': 0, 'scaling_permission': should_have_scaling_permission},
+                                      'compute_environment_name': FAKE_COMPUTE_ENVIRONMENT_NAME,
+                                      'pending_jobs_counts': {'RUNNING': 2, 'STARTING': 0, 'RUNNABLE': 0}})
+
+
+    def test_process_batch_configuration_1(self):
         '''WHEN processing batch configuration with scaling tag set THEN invoke dependencies and change the environment'''
-        _mock_boto3.return_value.list_jobs.side_effect = [FAKE_LIST_JOBS_RESPONSE, FAKE_LIST_JOBS_RESPONSE_EMPTY, FAKE_LIST_JOBS_RESPONSE_EMPTY]
-        _mock_boto3.return_value.describe_job_queues.return_value = FAKE_DESCRIBE_JOB_QUEUES_RESPONSE
-        _mock_boto3.return_value.describe_compute_environments.return_value = FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_SCALING_TAG_SET
+        self._parameterized_test_process_batch_configuration(batch_describe_compute_environments_return_value=FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_SCALING_TAG_SET,
+                                                             should_have_scaling_permission=True, should_change=True)
 
-        result = batch_autoscaling.process_batch_configuration(FAKE_BATCH_CONFIGURATIONS[0])
-
-        _mock_boto3.return_value.update_compute_environment.assert_called_once_with(computeEnvironment=FAKE_COMPUTE_ENVIRONMENT_NAME,
-                                                                                    computeResources={'minvCpus': 24})
-        self.assertEqual(result, {'autoscaling_recommendation': {'change': True, 'new_vcpu_min': 24},
-                                  'current_configuration': {'maxvCpus': 40, 'minvCpus': 0, 'scaling_permission': True},
-                                  'pending_jobs_counts': {'RUNNING': 2, 'STARTING': 0, 'RUNNABLE': 0}})
-
-
-    @patch('batch_autoscaling.boto3.client')
-    def test_process_batch_configuration_2(self, _mock_boto3):
+    def test_process_batch_configuration_2(self):
         '''WHEN processing batch configuration with scaling tag not set THEN do not change the environment'''
-        _mock_boto3.return_value.list_jobs.side_effect = [FAKE_LIST_JOBS_RESPONSE, FAKE_LIST_JOBS_RESPONSE_EMPTY, FAKE_LIST_JOBS_RESPONSE_EMPTY]
-        _mock_boto3.return_value.describe_job_queues.return_value = FAKE_DESCRIBE_JOB_QUEUES_RESPONSE
-        _mock_boto3.return_value.describe_compute_environments.return_value = FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_NO_SCALING_TAG
-
-        result = batch_autoscaling.process_batch_configuration(FAKE_BATCH_CONFIGURATIONS[0])
-
-        _mock_boto3.return_value.update_compute_environment.assert_not_called()
-        self.assertEqual(result, {'autoscaling_recommendation': {'change': False, 'new_vcpu_min': 24},
-                                  'current_configuration': {'maxvCpus': 40, 'minvCpus': 0, 'scaling_permission': False},
-                                  'pending_jobs_counts': {'RUNNING': 2, 'STARTING': 0, 'RUNNABLE': 0}})
+        self._parameterized_test_process_batch_configuration(batch_describe_compute_environments_return_value=FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_NO_SCALING_TAG,
+                                                             should_have_scaling_permission=False, should_change=False)
 
 
     @patch('batch_autoscaling.boto3.client', side_effect=FAKE_CANNOT_UPDATE_EXCEPTION)
