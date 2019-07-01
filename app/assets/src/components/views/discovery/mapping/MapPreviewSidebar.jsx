@@ -242,11 +242,10 @@ export default class MapPreviewSidebar extends React.Component {
   handleSelectAllRows = (value, checked) => {
     const { selectableIds } = this.props;
     const { selectedSampleIds } = this.state;
-    console.log("selected: ", selectedSampleIds);
     let newSelected = new Set(
       checked
-        ? union(selectedSampleIds, selectableIds)
-        : difference(selectedSampleIds, selectableIds)
+        ? union(Array.from(selectedSampleIds), selectableIds)
+        : difference(Array.from(selectedSampleIds), selectableIds)
     );
     this.setSelectedSampleIds(newSelected);
 
