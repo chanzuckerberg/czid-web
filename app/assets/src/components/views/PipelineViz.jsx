@@ -168,6 +168,8 @@ class PipelineViz extends React.Component {
       return;
     }
 
+    this.graphs.forEach((graph, i) => i != stageIndex && graph.unselectAll());
+
     const stepData = this.getStepDataAtIndices(stageIndex, clickedNodeId);
     const inputFiles = stepData.inputInfo.map(input => {
       const fileInfo = {
@@ -196,7 +198,48 @@ class PipelineViz extends React.Component {
     });
   }
 
+  handleNodeHover(stageIndex, info) {
+    const { highlightColor } = this.props;
+    const graph = this.graphs[stageIndex];
+    const inputEdges = graph.getConnectedEdges(info.node, "to");
+    const outputEdges = graph.getConnectedEdges(info.node, "from");
+
+    const inputColorOptions = {
+      color: {
+        hover: "#000000",
+        inherit: false,
+      },
+      width: 2,
+    };
+    const outputColorOptions = {
+      color: {
+        hover: highlightColor,
+        inherit: false,
+      },
+      width: 2,
+    };
+
+    graph.updateEdges(inputEdges, inputColorOptions);
+    graph.updateEdges(outputEdges, outputColorOptions);
+  }
+
+  handleNodeBlur(stageIndex, info) {
+    const { edgeColor } = this.props;
+    const graph = this.graphs[stageIndex];
+    const edges = graph.getConnectedEdges(info.node);
+    console.log(edges);
+
+    graph.updateEdges(edges, {
+      color: {
+        color: edgeColor,
+        inherit: false,
+      },
+      width: 1,
+    });
+  }
+
   closeSidebar = () => {
+    this.graphs.forEach(graph => graph.unselectAll());
     this.setState({
       sidebarVisible: false,
     });
@@ -340,7 +383,12 @@ class PipelineViz extends React.Component {
   }
 
   drawStageGraph(index) {
-    const { nodeColor, backgroundColor, edgeColor } = this.props;
+    const {
+      nodeColor,
+      backgroundColor,
+      edgeColor,
+      highlightColor,
+    } = this.props;
     const container = this.graphContainers[index];
 
     const edgeData = this.generateIntraEdgeData(index).concat(
@@ -350,8 +398,23 @@ class PipelineViz extends React.Component {
 
     const options = {
       nodes: {
-        borderWidth: 0,
-        color: nodeColor,
+        borderWidth: 1,
+        borderWidthSelected: 1,
+        chosen: {
+          borderWidth: 1,
+        },
+        color: {
+          background: nodeColor,
+          border: nodeColor,
+          hover: {
+            border: highlightColor,
+            background: nodeColor,
+          },
+          highlight: {
+            border: highlightColor,
+            background: nodeColor,
+          },
+        },
         shape: "box",
         shapeProperties: {
           borderRadius: 6,
@@ -365,12 +428,17 @@ class PipelineViz extends React.Component {
         font: {
           face: "Open Sans",
         },
+        labelHighlightBold: false,
       },
       groups: {
         startEndNodes: {
           shape: "dot",
           size: 1,
-          color: backgroundColor,
+          color: {
+            background: backgroundColor,
+            border: backgroundColor,
+            inherit: false,
+          },
           fixed: {
             x: true,
             y: true,
@@ -382,14 +450,19 @@ class PipelineViz extends React.Component {
           to: {
             enabled: true,
             type: "arrow",
-            scaleFactor: 0.8,
+            scaleFactor: 0.85,
           },
         },
         smooth: {
           type: "cubicBezier",
           roundness: 0.8,
         },
-        color: edgeColor,
+        color: {
+          color: edgeColor,
+          inherit: false,
+        },
+        selectionWidth: 0,
+        hoverWidth: 0,
       },
       layout: {
         hierarchical: {
@@ -407,8 +480,12 @@ class PipelineViz extends React.Component {
         zoomView: false,
         dragView: false,
         dragNodes: false,
+        hover: true,
+        selectConnectedEdges: false,
       },
       onClick: info => this.handleStepClick(index, info),
+      onNodeHover: info => this.handleNodeHover(index, info),
+      onNodeBlur: info => this.handleNodeBlur(index, info),
     };
 
     const currStageGraph = new NetworkGraph(
@@ -506,6 +583,7 @@ PipelineViz.propTypes = {
   backgroundColor: PropTypes.string,
   nodeColor: PropTypes.string,
   edgeColor: PropTypes.string,
+  highlightColor: PropTypes.string,
   zoomMin: PropTypes.number,
   zoomMax: PropTypes.number,
 };
@@ -514,6 +592,7 @@ PipelineViz.defaultProps = {
   backgroundColor: "#f8f8f8",
   nodeColor: "#eaeaea",
   edgeColor: "#999999",
+  highlightColor: "#3768FA",
   zoomMin: 0.5,
   zoomMax: 3,
 };

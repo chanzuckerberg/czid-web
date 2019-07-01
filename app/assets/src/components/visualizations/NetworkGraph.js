@@ -2,13 +2,16 @@ import { DataSet, Network } from "visjs-network";
 
 export default class NetworkGraph {
   constructor(container, nodeData, edgeData, options) {
-    const { onClick, ...networkOptions } = options;
+    const { onClick, onNodeHover, onNodeBlur, ...networkOptions } = options;
     this.data = {
       nodes: new DataSet(nodeData),
       edges: new DataSet(edgeData),
     };
     this.graph = new Network(container, this.data, networkOptions);
+
     this.graph.on("click", onClick);
+    this.graph.on("hoverNode", onNodeHover);
+    this.graph.on("blurNode", onNodeBlur);
   }
 
   moveNodeToPosition(nodeId, xDOMCoord, yDOMCoord) {
@@ -19,6 +22,35 @@ export default class NetworkGraph {
   getNodePosition(nodeId) {
     const canvasCoords = this.graph.getPositions([nodeId])[nodeId];
     return this.graph.canvasToDOM(canvasCoords);
+  }
+
+  getConnectedEdges(nodeId, direction) {
+    let filterFunc;
+    switch (direction) {
+      case "to":
+        filterFunc = edge => edge.to == nodeId;
+        break;
+      case "from":
+        filterFunc = edge => edge.from == nodeId;
+        break;
+      default:
+        filterFunc = edge => edge.to == nodeId || edge.from == nodeId;
+    }
+
+    return this.data.edges
+      .get({
+        fields: ["id"],
+        filter: filterFunc,
+      })
+      .map(edge => edge.id);
+  }
+
+  updateEdges(edgeIds, options) {
+    const edges = this.data.edges.get(edgeIds);
+    const updateInfo = edges.map(edge => {
+      return Object.assign({ id: edge.id }, options);
+    });
+    this.data.edges.update(updateInfo);
   }
 
   minimizeWidthGivenScale(scale) {
@@ -44,5 +76,9 @@ export default class NetworkGraph {
 
   afterDrawingOnce(f) {
     this.graph.once("afterDrawing", f);
+  }
+
+  unselectAll() {
+    this.graph.unselectAll();
   }
 }
