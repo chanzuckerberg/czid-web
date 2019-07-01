@@ -1,0 +1,47 @@
+@import "~styles/typography";
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.content {
+  padding: 30px;
+}
+
+.stepName {
+  @include font-header-l;
+  margin-bottom: 8px;
+  margin-right: 60px;
+  word-break: break-all;
+}
+
+.stepFilesListBoxHeader {
+  @include font-header-s;
+  margin-top: 25px;
+  margin-bottom: 10px;
+}
+
+.stepFilesListBox {
+  margin-bottom: 25px;
+}
+
+.description,
+.fileLink {
+  @include font-body-s;
+  margin-bottom: 8px;
+}
+
+.fileLink {
+  color: $primary-light;
+  cursor: pointer;
+}
+
+.fileGroup {
+  margin-bottom: 8px;
+
+  .fileLink {
+    margin-left: 25px;
+  }
+
+  .fileGroupHeader {
+    margin-bottom: 8px;
+  }
+}
