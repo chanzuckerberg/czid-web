@@ -17,7 +17,7 @@ def get_compute_environment_configuration(compute_environment_name, region):
 def _get_scaling_permission(compute_environment_arn, compute_resources):
     scaling_permission = 'tags' in compute_resources and SCALING_PERMISSION_TAG in compute_resources['tags']
     if not scaling_permission:
-        scaling_permission = compute_environment_arn in (s.strip() for s in os.getenv(SCALING_PERMISSION_ENV_VAR, '').split(','))
+        scaling_permission = any(s for s in (s.strip() for s in os.getenv(SCALING_PERMISSION_ENV_VAR, '').split(',')) if s in compute_environment_arn)
     return scaling_permission
 
 def _set_compute_environment_min_capacity(vcpu_min_capacity, compute_environment_name, region):
