@@ -3,10 +3,11 @@ import { mapValues } from "lodash/fp";
 import PropTypes from "prop-types";
 import { PanZoom } from "react-easy-panzoom";
 
-import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
-import NetworkGraph from "~/components/visualizations/NetworkGraph.js";
-import PlusMinusControl from "~/components/ui/controls/PlusMinusControl.jsx";
+import NetworkGraph from "~/components/visualizations/NetworkGraph";
+import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
+import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
+import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 import cs from "./pipeline_viz.scss";
 
 const START_NODE_ID = -1;
@@ -367,8 +368,8 @@ class PipelineViz extends React.Component {
       },
       groups: {
         startEndNodes: {
-          widthConstraint: 8,
-          heightConstraint: 0,
+          shape: "dot",
+          size: 1,
           color: backgroundColor,
           fixed: {
             x: true,
@@ -422,34 +423,51 @@ class PipelineViz extends React.Component {
     this.graphs.push(currStageGraph);
   }
 
+  renderStageContainer(stageName, i) {
+    const isOpened = this.state.stagesOpened[i];
+    return (
+      <div className={cs.stage}>
+        <div
+          className={isOpened ? cs.hidden : cs.stageButton}
+          onClick={() => this.toggleStage(i)}
+        >
+          {stageName}
+        </div>
+
+        <div className={isOpened ? cs.openedStage : cs.hidden}>
+          <div className={cs.graphLabel}>
+            {stageName}
+            <RemoveIcon onClick={() => this.toggleStage(i)} />
+          </div>
+          <div
+            className={cs.graph}
+            ref={ref => {
+              this.graphContainers[i] = ref;
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  renderStageArrow() {
+    return (
+      <div className={cs.stageArrow}>
+        <div className={cs.stageArrowBody} />
+        <PipelineStageArrowheadIcon className={cs.stageArrowHead} />
+      </div>
+    );
+  }
+
   render() {
     const { zoomMin, zoomMax } = this.props;
-    const { sidebarVisible, sidebarParams, stagesOpened } = this.state;
+    const { sidebarVisible, sidebarParams } = this.state;
 
     const stageContainers = this.stageNames.map((stageName, i) => {
-      const isOpened = stagesOpened[i];
-
       return (
-        <div key={stageName} className={cs.stage}>
-          <div
-            className={isOpened ? cs.hidden : cs.stageButton}
-            onClick={() => this.toggleStage(i)}
-          >
-            {stageName}
-          </div>
-
-          <div className={isOpened ? cs.openedStage : cs.hidden}>
-            <div className={cs.graphLabel}>
-              {stageName}
-              <RemoveIcon onClick={() => this.toggleStage(i)} />
-            </div>
-            <div
-              className={cs.graph}
-              ref={ref => {
-                this.graphContainers[i] = ref;
-              }}
-            />
-          </div>
+        <div key={stageName} className={cs.stageAndArrow}>
+          {i > 0 && this.renderStageArrow()}
+          {this.renderStageContainer(stageName, i)}
         </div>
       );
     });
