@@ -9,6 +9,8 @@ from operator import itemgetter
 from functools import wraps
 from collections import defaultdict, Counter
 import dateutil.parser
+import batch_autoscaling
+
 
 DEBUG = False
 
@@ -144,6 +146,16 @@ def autoscaling_update(config):
             print "{num_to_discard} instances have finished draining and can be discarded: {instances_to_discard}.".format(num_to_discard=num_to_discard, instances_to_discard=instances_to_discard)
         else:
             print "No instances are ready to move from 'draining' to 'discarded' state."
+
+    if 'batch_configurations' in config:
+        print "Autoscaling batches:"
+        response_batch_autoscaling = batch_autoscaling.autoscale_compute_environments(config['batch_configurations'])
+        print json.dumps(response_batch_autoscaling, default=_default_json_serializer)
+
+
+def _default_json_serializer(obj):
+    '''Default serializer that returns string <<non-sertializable: TYPE_NAME>> for that type'''
+    return "<<non-serializable: {type_name}>>".format(type_name=str(type(obj)))
 
 class ASG(object):
     r'''

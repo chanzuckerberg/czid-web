@@ -17,6 +17,7 @@ x-web-variables: &web-variables
   ? BASESPACE_CLIENT_ID
   ? BASESPACE_CLIENT_SECRET
   ? BASESPACE_OAUTH_REDIRECT_URI
+  ? ID_SEQ_ENVS_THAT_CAN_SCALE
 
 x-aws-variables: &aws-variables
   ? AWS_ACCESS_KEY_ID
