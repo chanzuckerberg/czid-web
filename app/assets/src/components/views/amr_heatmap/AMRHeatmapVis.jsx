@@ -214,7 +214,11 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   initializeHeatmap(rows, columns, values) {
-    const { selectedOptions, onSampleLabelClick } = this.props;
+    const {
+      selectedOptions,
+      onSampleLabelClick,
+      onGeneLabelClick,
+    } = this.props;
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       // Data for the Heatmap
@@ -235,6 +239,7 @@ export default class AMRHeatmapVis extends React.Component {
         onNodeHoverMove: this.onNodeHoverMove,
         onNodeHoverOut: this.onNodeHoverOut,
         onColumnLabelClick: onSampleLabelClick,
+        onRowLabelClick: onGeneLabelClick,
       }
     );
     this.heatmap.start();
@@ -288,4 +293,5 @@ AMRHeatmapVis.propTypes = {
     scale: PropTypes.string,
   }),
   onSampleLabelClick: PropTypes.func,
+  onGeneLabelClick: PropTypes.func,
 };
