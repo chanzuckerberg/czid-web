@@ -17,9 +17,12 @@ module ElasticsearchHelper
     results
   end
 
-  def taxon_search(prefix, tax_levels = TaxonCount::NAME_2_LEVEL.keys, filters = {})
+  def taxon_search(query, tax_levels = TaxonCount::NAME_2_LEVEL.keys, filters = {})
     return {} if Rails.env == "test"
-    prefix = sanitize(prefix)
+    query = sanitize(query)
+
+    # sanitize tax_levels
+    tax_levels = tax_levels.select { |l| TaxonCount::NAME_2_LEVEL[l] }
 
     matching_taxa = []
     taxon_ids = []
@@ -28,7 +31,7 @@ module ElasticsearchHelper
         size: ElasticsearchHelper::MAX_SEARCH_RESULTS,
         query: {
           query_string: {
-            query: "#{prefix}*",
+            query: "*#{query}*",
             fields: ["#{level}_name"]
           }
         },
@@ -84,9 +87,9 @@ module ElasticsearchHelper
     return filter_by_samples(taxon_ids, Sample.joins(:project).where(project: Project.where(id: project_id)))
   end
 
-  def sanitize(prefix)
+  def sanitize(text)
     # Add \\ to escape special characters. Four \ to escape the backslashes.
     # Escape anything that isn't in "a-zA-Z0-9 ._|'/"
-    prefix.gsub(%r{([^a-zA-Z0-9 ._|'\/])}, '\\\\\1') if prefix
+    text.gsub(%r{([^a-zA-Z0-9 ._|'\/])}, '\\\\\1') if text
   end
 end
