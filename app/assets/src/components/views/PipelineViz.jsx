@@ -2,6 +2,7 @@ import React from "react";
 import { mapValues } from "lodash/fp";
 import PropTypes from "prop-types";
 import { PanZoom } from "react-easy-panzoom";
+import cx from "classnames";
 
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
@@ -31,6 +32,7 @@ class PipelineViz extends React.Component {
 
     this.state = {
       stagesOpened: [true, true, true, true],
+      interStageArrows: ["", "", ""],
       sidebarVisible: false,
       sidebarParams: {},
     };
@@ -263,14 +265,16 @@ class PipelineViz extends React.Component {
       width: 2,
     };
 
+    const updatedInterStageArrows = [...this.state.interStageArrows];
     stepInfo.inputInfo.forEach(inputFile => {
-      if (inputFile.fromStageIndex != stageIndex) {
+      if (inputFile.fromStageIndex && inputFile.fromStageIndex != stageIndex) {
         const prevGraph = this.graphs[inputFile.fromStageIndex];
         const edgeId = prevGraph.getEdgeBetweenNodes(
           inputFile.fromStepIndex,
           END_NODE_ID
         );
         prevGraph.updateEdges([edgeId], inputColorOptions);
+        updatedInterStageArrows[inputFile.fromStageIndex] = "from";
       }
     });
 
@@ -283,12 +287,16 @@ class PipelineViz extends React.Component {
             outputNode.stepIndex
           );
           nextGraph.updateEdges([edgeId], outputColorOptions);
+          updatedInterStageArrows[outputNode.stageIndex - 1] = "to";
         }
       });
     });
 
     graph.updateEdges(inputEdges, inputColorOptions);
     graph.updateEdges(outputEdges, outputColorOptions);
+    this.setState({
+      interStageArrows: updatedInterStageArrows,
+    });
   }
 
   handleNodeBlur = () => {
@@ -313,6 +321,10 @@ class PipelineViz extends React.Component {
           chosen: false,
         });
       }
+    });
+
+    this.setState({
+      interStageArrows: ["", "", ""],
     });
   };
 
@@ -600,23 +612,37 @@ class PipelineViz extends React.Component {
     );
   }
 
-  renderStageArrow() {
+  renderStageArrow(arrowValue) {
+    let coloring;
+    switch (arrowValue) {
+      case "from":
+        coloring = cs.fromColoring;
+        break;
+      case "to":
+        coloring = cs.toColoring;
+        break;
+      default:
+        coloring = "";
+    }
+
     return (
       <div className={cs.stageArrow}>
-        <div className={cs.stageArrowBody} />
-        <PipelineStageArrowheadIcon className={cs.stageArrowHead} />
+        <div className={cx(cs.stageArrowBody, coloring)} />
+        <PipelineStageArrowheadIcon
+          className={cx(cs.stageArrowHead, coloring)}
+        />
       </div>
     );
   }
 
   render() {
     const { zoomMin, zoomMax } = this.props;
-    const { sidebarVisible, sidebarParams } = this.state;
+    const { sidebarVisible, sidebarParams, interStageArrows } = this.state;
 
     const stageContainers = this.stageNames.map((stageName, i) => {
       return (
         <div key={stageName} className={cs.stageAndArrow}>
-          {i > 0 && this.renderStageArrow()}
+          {i > 0 && this.renderStageArrow(interStageArrows[i - 1])}
           {this.renderStageContainer(stageName, i)}
         </div>
       );
