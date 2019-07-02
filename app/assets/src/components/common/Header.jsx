@@ -259,6 +259,7 @@ const MainMenu = ({ adminUser }) => {
       <a
         className={cx(cs.item, isSelected("samples/upload") && cs.selected)}
         href={"/samples/upload"}
+        onClick={() => logAnalyticsEvent("Header_upload-link_clicked")}
       >
         Upload
       </a>
