@@ -50,10 +50,11 @@ export default class NetworkGraph {
 
   updateEdges(edgeIds, options) {
     const edges = this.data.edges.get(edgeIds);
-    const updateInfo = edges.map(edge => {
-      return Object.assign({ id: edge.id }, options);
+    edges.forEach(edge => {
+      const newEdge = Object.assign({ to: edge.to, from: edge.from }, options);
+      this.data.edges.add(newEdge);
+      this.data.edges.remove(edge.id);
     });
-    this.data.edges.update(updateInfo);
   }
 
   minimizeWidthGivenScale(scale) {

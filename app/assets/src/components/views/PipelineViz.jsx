@@ -300,6 +300,8 @@ class PipelineViz extends React.Component {
       });
     });
 
+    this.graphs.forEach(graph => this.centerEndNodeVertically(graph));
+
     this.setState({
       interStageArrows: updatedInterStageArrows,
     });
@@ -328,6 +330,8 @@ class PipelineViz extends React.Component {
         });
       }
     });
+
+    this.graphs.forEach(graph => this.centerEndNodeVertically(graph));
 
     this.setState({
       interStageArrows: ["", "", ""],
