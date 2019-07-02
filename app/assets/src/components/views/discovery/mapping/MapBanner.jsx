@@ -14,7 +14,7 @@ class MapBanner extends React.Component {
       return (
         <div className={cs.bannerContainer}>
           <div className={cs.banner}>
-            {`No ${item} found. Try adjusting search or filters. `}
+            {`No ${item} with locations found. Try adjusting search or filters. `}
             <span
               className={cs.clearAll}
               onClick={withAnalytics(

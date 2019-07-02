@@ -1,30 +1,43 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { concat, forEach, values } from "lodash/fp";
+import { forEach, values } from "lodash/fp";
 import { BaseMultipleFilter } from "~/components/common/filters";
 
 class LocationFilter extends React.Component {
   expandParents = options => {
-    let parentOptions = {};
+    let mergedOptions = {};
     forEach(option => {
+      // Tally parents
       forEach(parent => {
-        if (!parentOptions[parent]) {
-          parentOptions[parent] = {
+        if (!mergedOptions[parent]) {
+          mergedOptions[parent] = {
             text: parent,
             value: parent,
             count: option.count,
           };
         } else {
-          parentOptions[parent].count += option.count;
+          mergedOptions[parent].count += option.count;
         }
       }, option.parents || []);
+
+      // Tally current option
+      const val = option.value;
+      if (!mergedOptions[val]) {
+        mergedOptions[val] = {
+          text: option.text,
+          value: val,
+          count: option.count,
+        };
+      } else {
+        mergedOptions[val].count += option.count;
+      }
     }, options);
-    return concat(options, values(parentOptions));
+
+    return values(mergedOptions);
   };
 
   render() {
     const { options, ...otherProps } = this.props;
-
     return (
       <BaseMultipleFilter
         {...otherProps}
