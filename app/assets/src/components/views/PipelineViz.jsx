@@ -242,11 +242,13 @@ class PipelineViz extends React.Component {
   handleNodeHover(stageIndex, info) {
     const { highlightColor } = this.props;
     const graph = this.graphs[stageIndex];
+    const stepInfo = this.getStepDataAtIndices(stageIndex, info.node);
     const inputEdges = graph.getConnectedEdges(info.node, "to");
     const outputEdges = graph.getConnectedEdges(info.node, "from");
 
     const inputColorOptions = {
       color: {
+        color: "#000000",
         hover: "#000000",
         inherit: false,
       },
@@ -254,30 +256,65 @@ class PipelineViz extends React.Component {
     };
     const outputColorOptions = {
       color: {
+        color: highlightColor,
         hover: highlightColor,
         inherit: false,
       },
       width: 2,
     };
 
+    stepInfo.inputInfo.forEach(inputFile => {
+      if (inputFile.fromStageIndex != stageIndex) {
+        const prevGraph = this.graphs[inputFile.fromStageIndex];
+        const edgeId = prevGraph.getEdgeBetweenNodes(
+          inputFile.fromStepIndex,
+          END_NODE_ID
+        );
+        prevGraph.updateEdges([edgeId], inputColorOptions);
+      }
+    });
+
+    stepInfo.outputInfo.forEach(outputFile => {
+      outputFile.to.forEach(outputNode => {
+        if (outputNode.stageIndex != stageIndex) {
+          const nextGraph = this.graphs[outputNode.stageIndex];
+          const edgeId = nextGraph.getEdgeBetweenNodes(
+            START_NODE_ID,
+            outputNode.stepIndex
+          );
+          nextGraph.updateEdges([edgeId], outputColorOptions);
+        }
+      });
+    });
+
     graph.updateEdges(inputEdges, inputColorOptions);
     graph.updateEdges(outputEdges, outputColorOptions);
   }
 
-  handleNodeBlur(stageIndex, info) {
+  handleNodeBlur = () => {
     const { edgeColor } = this.props;
-    const graph = this.graphs[stageIndex];
-    const edges = graph.getConnectedEdges(info.node);
-    console.log(edges);
+    this.graphs.forEach((graph, graphIndex) => {
+      // Undefined selects all edges in the graph.
+      graph.updateEdges(undefined, {
+        color: {
+          color: edgeColor,
+          inherit: false,
+        },
+        width: 1,
+      });
 
-    graph.updateEdges(edges, {
-      color: {
-        color: edgeColor,
-        inherit: false,
-      },
-      width: 1,
+      if (graphIndex == this.graphs.length - 1) {
+        const hiddenCenteringEdges = graph.getConnectedEdges(END_NODE_ID, "to");
+        graph.updateEdges(hiddenCenteringEdges, {
+          color: {
+            opacity: 0,
+            inherit: false,
+          },
+          chosen: false,
+        });
+      }
     });
-  }
+  };
 
   closeSidebar = () => {
     this.graphs.forEach(graph => graph.unselectAll());
@@ -374,15 +411,13 @@ class PipelineViz extends React.Component {
       // Create edges to output node if its output files appear in next stage's inputs.
       const nextStageData = this.stagesData[index + 1];
       const interEdgeData = nextStageData.steps
-        .map((step, nextNodeId) => {
+        .map(step => {
           const connectedNodes = new Set();
           return step.inputInfo.reduce((edges, inputFileInfo) => {
             if (
               inputFileInfo.fromStageIndex == index &&
               !connectedNodes.has(inputFileInfo.fromStepIndex)
             ) {
-              // TODO(ezhong): Interactions between output of current stage (inputFileInfo.fromStepIndex)
-              // and input of next stage (nextNodeId) in visualization should be setup here
               connectedNodes.add(inputFileInfo.fromStepIndex);
               edges.push({
                 from: inputFileInfo.fromStepIndex,
@@ -523,7 +558,7 @@ class PipelineViz extends React.Component {
       },
       onClick: info => this.handleStepClick(index, info),
       onNodeHover: info => this.handleNodeHover(index, info),
-      onNodeBlur: info => this.handleNodeBlur(index, info),
+      onNodeBlur: this.handleNodeBlur,
     };
 
     const currStageGraph = new NetworkGraph(

@@ -37,12 +37,15 @@ export default class NetworkGraph {
         filterFunc = edge => edge.to == nodeId || edge.from == nodeId;
     }
 
-    return this.data.edges
-      .get({
-        fields: ["id"],
-        filter: filterFunc,
-      })
-      .map(edge => edge.id);
+    return this.data.edges.getIds({
+      filter: filterFunc,
+    });
+  }
+
+  getEdgeBetweenNodes(fromNodeId, toNodeId) {
+    return this.data.edges.getIds({
+      filter: edge => edge.from == fromNodeId && edge.to == toNodeId,
+    })[0];
   }
 
   updateEdges(edgeIds, options) {
