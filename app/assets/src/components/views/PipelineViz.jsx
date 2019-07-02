@@ -56,7 +56,7 @@ class PipelineViz extends React.Component {
   getStagesData() {
     // TODO(ezhong): Include file download urls once passed up from backend.
     const stageResults = this.stageResultsWithModifiedStepNames();
-    const filePathToOutputStep = this.generateFilePathToOutputStep();
+    const filePathToOutputInputSteps = this.generateFilePathToOutputInputSteps();
 
     const stages = Object.keys(stageResults).map(stageName => {
       const rawStageData = stageResults[stageName];
@@ -74,7 +74,8 @@ class PipelineViz extends React.Component {
                 filePathSections.push(fileName);
 
                 const filePath = this.createFilePath(filePathSections);
-                const outputStepInfo = filePathToOutputStep[filePath];
+                const outputStepInfo =
+                  filePathToOutputInputSteps[filePath].outputtingInfo;
                 return {
                   fileName: fileName,
                   url: "",
@@ -92,9 +93,18 @@ class PipelineViz extends React.Component {
           .flat();
 
         const outputInfo = rawStageData.targets[step.out].map(fileName => {
+          const filePath = this.createFilePath([
+            rawStageData.output_dir_s3,
+            this.pipelineVersion,
+            fileName,
+          ]);
+          const inputStepInfo =
+            filePathToOutputInputSteps[filePath].inputtingInfo;
+
           return {
             fileName: fileName,
             url: "",
+            to: inputStepInfo,
           };
         });
 
@@ -115,12 +125,15 @@ class PipelineViz extends React.Component {
     return stages;
   }
 
-  generateFilePathToOutputStep() {
+  generateFilePathToOutputInputSteps() {
     const { stageResults } = this.props;
-    const filePathToOutputStep = {};
+    const filePathToOutputInputSteps = {};
+
     this.stageNames.forEach((stageName, stageIndex) => {
       const stageData = stageResults.stages[stageName];
       const targets = stageData.targets;
+
+      // Populate outputting information
       stageData.steps.forEach((step, stepIndex) => {
         targets[step.out].forEach(fileName => {
           const filePath = this.createFilePath([
@@ -128,15 +141,43 @@ class PipelineViz extends React.Component {
             this.pipelineVersion,
             fileName,
           ]);
-          filePathToOutputStep[filePath] = {
-            stageIndex: stageIndex,
-            stepIndex: stepIndex,
+          filePathToOutputInputSteps[filePath] = {
             fileName: fileName,
+            outputtingInfo: {
+              stageIndex: stageIndex,
+              stepIndex: stepIndex,
+            },
+            inputtingInfo: [],
           };
+        });
+
+        // Populate inputting information. This method assumes that
+        // outputting step has already stored the filePath into the
+        // filePathToOutputInputSteps object.
+        step.in.forEach(inTarget => {
+          targets[inTarget].forEach(fileName => {
+            const filePathSections =
+              inTarget in stageData.given_targets
+                ? [stageData.given_targets[inTarget].s3_dir]
+                : [stageData.output_dir_s3, this.pipelineVersion];
+            filePathSections.push(fileName);
+
+            const filePath = this.createFilePath(filePathSections);
+            if (!filePathToOutputInputSteps[filePath]) {
+              filePathToOutputInputSteps[filePath] = {
+                fileName: fileName,
+              };
+            }
+            filePathToOutputInputSteps[filePath].inputtingInfo = [
+              { stageIndex: stageIndex, stepIndex: stepIndex },
+              ...(filePathToOutputInputSteps[filePath].inputtingInfo || []),
+            ];
+          });
         });
       });
     });
-    return filePathToOutputStep;
+
+    return filePathToOutputInputSteps;
   }
 
   stageResultsWithModifiedStepNames() {
@@ -400,9 +441,6 @@ class PipelineViz extends React.Component {
       nodes: {
         borderWidth: 1,
         borderWidthSelected: 1,
-        chosen: {
-          borderWidth: 1,
-        },
         color: {
           background: nodeColor,
           border: nodeColor,
