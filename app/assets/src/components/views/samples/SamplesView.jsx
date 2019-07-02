@@ -164,8 +164,8 @@ class SamplesView extends React.Component {
     const { selectedSampleIds } = this.state;
     let newSelected = new Set(
       checked
-        ? union(selectedSampleIds, selectableIds)
-        : difference(selectedSampleIds, selectableIds)
+        ? union(Array.from(selectedSampleIds), selectableIds)
+        : difference(Array.from(selectedSampleIds), selectableIds)
     );
     this.setState({ selectedSampleIds: newSelected });
   };

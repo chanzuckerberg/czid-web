@@ -1,4 +1,4 @@
-import { get, throttle, upperFirst, sumBy, size, values } from "lodash/fp";
+import { get, throttle, upperFirst, size, map, uniq, flatten } from "lodash/fp";
 import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -156,7 +156,8 @@ class DiscoveryMap extends React.Component {
   renderBanner = () => {
     const { currentTab, mapLocationData, onClearFilters } = this.props;
     const idsField = currentTab === "samples" ? "sample_ids" : "project_ids";
-    const itemCount = sumBy(p => size(p[idsField]), values(mapLocationData));
+    // De-dup ids so you don't double-count
+    const itemCount = size(uniq(flatten(map(idsField, mapLocationData))));
     return (
       <MapBanner
         item={currentTab}
