@@ -32,12 +32,12 @@ class LocationFilter extends React.Component {
         mergedOptions[val].count += option.count;
       }
     }, options);
-
     return values(mergedOptions);
   };
 
   render() {
     const { options, ...otherProps } = this.props;
+
     return (
       <BaseMultipleFilter
         {...otherProps}
