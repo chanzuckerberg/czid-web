@@ -20,7 +20,7 @@ class LocationsController < ApplicationController
       if success
         results = resp.map { |r| LocationHelper.adapt_location_iq_response(r) }
         # Just keep the first if you get duplicate locations
-        results = results.uniq { |r| [r[:name], r[:geo_level], r[:lat], r[:lng]] }
+        results = results.uniq { |r| [r[:name], r[:geo_level], r[:osm_type]] }
       end
     end
     event = MetricUtil::ANALYTICS_EVENT_NAMES[:location_geosearched]
