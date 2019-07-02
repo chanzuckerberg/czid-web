@@ -20,6 +20,7 @@ FAKE_REGION = 'us-east-1'
 FAKE_ACCOUNT = '123456789012'
 
 FAKE_COMPUTE_ENVIRONMENT_ARN = "arn:aws:batch:{region}:{account}:compute-environment/{compute_env}".format(region=FAKE_REGION, account=FAKE_ACCOUNT, compute_env=FAKE_COMPUTE_ENVIRONMENT_NAME)
+FAKE_ECS_CLUSTER_ARN = "arn:aws:batch:{region}:{account}:cluster/{compute_env}_Batch_fake-guid".format(region=FAKE_REGION, account=FAKE_ACCOUNT, compute_env=FAKE_COMPUTE_ENVIRONMENT_NAME)
 
 FAKE_DESCRIBE_JOB_QUEUES_RESPONSE = {"jobQueues": [{"status": "VALID",
                                                     "jobQueueArn": "arn:aws:batch:{region}:{account}:job-queue/{queue}".format(region=FAKE_REGION, account=FAKE_ACCOUNT, queue=FAKE_QUEUE_NAME),
@@ -32,15 +33,19 @@ FAKE_CANNOT_UPDATE_EXCEPTION = botocore.exceptions.ClientError({'Error': {'Code'
 
 FAKE_BATCH_CONFIGURATIONS = [{'queue_name': FAKE_QUEUE_NAME, 'vcpus': 12, 'region': FAKE_REGION}]
 
-FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_SCALING_TAG_SET = {"computeEnvironments": [{"computeEnvironmentName": FAKE_COMPUTE_ENVIRONMENT_NAME,
-                                                                               "computeEnvironmentArn": FAKE_COMPUTE_ENVIRONMENT_ARN,
-                                                                               "computeResources": {"desiredvCpus": 0, "maxvCpus": 40, "minvCpus": 0,
-                                                                                                    "tags": {"IDSeqEnvsThatCanScale": "1"}}}]}
+FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS = {"computeEnvironments": [{"computeEnvironmentName": FAKE_COMPUTE_ENVIRONMENT_NAME,
+                                                               "computeEnvironmentArn": FAKE_COMPUTE_ENVIRONMENT_ARN,
+                                                               "ecsClusterArn": FAKE_ECS_CLUSTER_ARN,
+                                                               "computeResources": {"desiredvCpus": 0, "maxvCpus": 40, "minvCpus": 0,
+                                                                                    "tags": {}}}]}
 
-FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_NO_SCALING_TAG = {"computeEnvironments": [{"computeEnvironmentName": FAKE_COMPUTE_ENVIRONMENT_NAME,
-                                                                              "computeEnvironmentArn": FAKE_COMPUTE_ENVIRONMENT_ARN,
-                                                                              "computeResources": {"desiredvCpus": 0, "maxvCpus": 40, "minvCpus": 0,
-                                                                                                   "tags": {}}}]}
+FAKE_DESCRIBE_CLUSTERS_SCALING_TAG_SET = {"clusters": [{"status": "ACTIVE",
+                                                        "tags": [{"value": "1", "key": "IDSeqEnvsThatCanScale"}],
+                                                        "clusterArn": FAKE_ECS_CLUSTER_ARN}]}
+
+FAKE_DESCRIBE_CLUSTERS_NO_SCALING_TAG = {"clusters": [{"status": "ACTIVE",
+                                                       "tags": [],
+                                                       "clusterArn": FAKE_ECS_CLUSTER_ARN}]}
 
 class TestAutoscaling(unittest.TestCase):
     '''Tests for /app/jobs/autoscaling.py'''
@@ -90,11 +95,13 @@ class TestAutoscaling(unittest.TestCase):
         self.assertEqual(result, {'change': False, 'new_vcpu_min': 40})
 
 
-    def _parameterized_test_process_batch_configuration(self, batch_describe_compute_environments_return_value, should_have_scaling_permission, should_change):
+    def _parameterized_test_process_batch_configuration(self, batch_describe_compute_environments_return_value,
+                                                        ecs_describe_clusters_return_value, should_have_scaling_permission, should_change):
         with patch('batch_autoscaling.boto3.client') as _mock_boto3:
             _mock_boto3.return_value.list_jobs.side_effect = [FAKE_LIST_JOBS_RESPONSE, FAKE_LIST_JOBS_RESPONSE_EMPTY, FAKE_LIST_JOBS_RESPONSE_EMPTY]
             _mock_boto3.return_value.describe_job_queues.return_value = FAKE_DESCRIBE_JOB_QUEUES_RESPONSE
             _mock_boto3.return_value.describe_compute_environments.return_value = batch_describe_compute_environments_return_value
+            _mock_boto3.return_value.describe_clusters.return_value = ecs_describe_clusters_return_value
 
             result = batch_autoscaling.process_batch_configuration(FAKE_BATCH_CONFIGURATIONS[0])
 
@@ -110,25 +117,15 @@ class TestAutoscaling(unittest.TestCase):
 
     def test_process_batch_configuration_1(self):
         '''WHEN processing batch configuration with scaling tag set THEN invoke dependencies and change the environment'''
-        self._parameterized_test_process_batch_configuration(batch_describe_compute_environments_return_value=FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_SCALING_TAG_SET,
+        self._parameterized_test_process_batch_configuration(batch_describe_compute_environments_return_value=FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS,
+                                                             ecs_describe_clusters_return_value=FAKE_DESCRIBE_CLUSTERS_SCALING_TAG_SET,
                                                              should_have_scaling_permission=True, should_change=True)
-
-    def test_process_batch_configuration_2(self):
-        '''WHEN processing batch configuration with scaling tag not set AND scaling environment variable is present AND partial string of compute environment ARN is the list THEN invoke dependencies and change the environment'''
-        with mock.patch.dict(os.environ, {'ID_SEQ_ENVS_THAT_CAN_SCALE': FAKE_COMPUTE_ENVIRONMENT_NAME + ',dummy_arn_fragment'}):
-            self._parameterized_test_process_batch_configuration(batch_describe_compute_environments_return_value=FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_NO_SCALING_TAG,
-                                                                 should_have_scaling_permission=True, should_change=True)
 
     def test_process_batch_configuration_3(self):
         '''WHEN processing batch configuration with scaling tag not set THEN do not change the environment'''
-        self._parameterized_test_process_batch_configuration(batch_describe_compute_environments_return_value=FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_NO_SCALING_TAG,
+        self._parameterized_test_process_batch_configuration(batch_describe_compute_environments_return_value=FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS,
+                                                             ecs_describe_clusters_return_value=FAKE_DESCRIBE_CLUSTERS_NO_SCALING_TAG,
                                                              should_have_scaling_permission=False, should_change=False)
-
-    def test_process_batch_configuration_4(self):
-        '''WHEN processing batch configuration with scaling tag not set AND scaling environment variable is present AND compute environment is not in the list THEN do not change the environment'''
-        with mock.patch.dict(os.environ, {'ID_SEQ_ENVS_THAT_CAN_SCALE': 'dummy_arn'}):
-            self._parameterized_test_process_batch_configuration(batch_describe_compute_environments_return_value=FAKE_DESCRIBE_COMPUTE_ENVIRONMENTS_NO_SCALING_TAG,
-                                                                 should_have_scaling_permission=False, should_change=False)
 
     @patch('batch_autoscaling.boto3.client', side_effect=FAKE_CANNOT_UPDATE_EXCEPTION)
     def test_autoscale_compute_environments(self, _):
