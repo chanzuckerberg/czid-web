@@ -2,6 +2,8 @@ import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
 
+import { getCARDInfo } from "~/api/amr";
+
 import { CARD_AMR_ONTOLOGY } from "./constants";
 import cs from "./gene_details_mode.scss";
 
@@ -16,20 +18,16 @@ const URL_GOOGLE_SCHOLAR = "https://scholar.google.com/scholar?q=";
 const URL_NCBI_REF_GENE =
   "https://www.ncbi.nlm.nih.gov/pathogens/isolates#/refgene/";
 
+const CARD_FAMILY = "AMR Gene Family";
+const CARD_CLASS = "Drug Class";
+const CARD_MECHANISM = "Resistance Mechanism";
+
 export default class GeneDetailsMode extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       loading: true,
-      geneName: "",
-      cardOntology: {
-        accession: "",
-        description: "---",
-        geneFamily: "---",
-        drugClass: "---",
-        resistanceMechanism: "---",
-      },
     };
   }
 
@@ -44,9 +42,15 @@ export default class GeneDetailsMode extends React.Component {
     }
   }
 
-  getGeneInfo(geneName) {
-    let description = "Not found";
-    let accession = "";
+  async getGeneInfo(geneName) {
+    const { cardOntology } = this.state;
+    const updatedCardOntology = {
+      accession: "",
+      description: "---",
+      geneFamily: "---",
+      drugClass: "---",
+      resistanceMechanism: "---",
+    };
 
     const cardOntologyEntry = CARD_AMR_ONTOLOGY.find(aroEntry => {
       const lowerCaseGeneName = geneName.toLowerCase();
@@ -63,18 +67,65 @@ export default class GeneDetailsMode extends React.Component {
       const match = regexForGeneName.test(alphaNumericEntryName);
       return match;
     });
-    if (cardOntologyEntry !== undefined) {
-      description = cardOntologyEntry.description;
-      accession = cardOntologyEntry.accession.split(":")[1];
+
+    if (cardOntologyEntry === undefined) {
+      this.setState({ loading: false });
+      return;
     }
+
+    updatedCardOntology.description = cardOntologyEntry.description;
+    updatedCardOntology.accession = cardOntologyEntry.accession.split(":")[1];
+    try {
+      const cardRequest = await getCARDInfo(updatedCardOntology.accession);
+      const cardInfo = this.parseCARDEntry(cardRequest.html);
+      updatedCardOntology.geneFamily = cardInfo.geneFamily;
+      updatedCardOntology.drugClass = cardInfo.drugClass;
+      updatedCardOntology.resistanceMechanism = cardInfo.resistanceMechanism;
+    } catch (err) {
+      console.error(err);
+    }
+
     this.setState({
       geneName: geneName,
-      cardOntology: {
-        description: description,
-        accession: accession,
-      },
+      cardOntology: updatedCardOntology,
       loading: false,
     });
+  }
+
+  parseCARDEntry(html) {
+    const domParser = new DOMParser();
+    const entry = domParser.parseFromString(html, "text/html");
+    const tableBody = entry.querySelector(
+      "table[vocab='http://dev.arpcard.mcmaster.ca/browse/data'] tbody"
+    );
+    console.log(tableBody);
+
+    const geneInfo = {};
+    tableBody.childNodes.forEach(row => {
+      const columns = [];
+      row.childNodes.forEach(column => columns.push(column.innerText));
+      const [key, value] = columns;
+
+      switch (key) {
+        case CARD_FAMILY: {
+          geneInfo.geneFamily = value;
+          break;
+        }
+        case CARD_CLASS: {
+          geneInfo.drugClass = value;
+          break;
+        }
+        case CARD_MECHANISM: {
+          geneInfo.resistanceMechanism = value;
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    });
+
+    return geneInfo;
   }
 
   //*** Functions depending on state ***
@@ -162,7 +213,6 @@ export default class GeneDetailsMode extends React.Component {
                 NCBI AMR Reference Gene Catalog
               </a>
             </li>
-            <li className={cs.link}>NCBI Nucleotide Database</li>
           </ul>
           <ul className={cs.linksList}>
             <li className={cs.link}>

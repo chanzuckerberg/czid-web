@@ -70,14 +70,19 @@ export default class AMRHeatmapVis extends React.Component {
     sampleData.forEach(sample => {
       sampleLabels.push({ label: sample.sample_name, id: sample.sample_id });
       sample.amr_counts.forEach(amrCount => {
-        genes[amrCount.gene] = true;
+        // The following three lines are a kind of hacky workaround to the fact that
+        // the amr counts stored in the db have a gene name that includes the actual gene
+        // plus the drug class. Need backend work to fix this.
+        const geneNameExtractionRegex = /[^_]+/; // matches everything before the first underscore
+        const geneName = geneNameExtractionRegex.exec(amrCount.gene)[0];
+        amrCount.gene = geneName;
+
+        genes[geneName] = true;
         alleles[amrCount.allele] = true;
       });
     });
     const geneLabels = Object.keys(genes).map(gene => {
-      const geneNameExtractionRegex = /[^_]+/; // matches everything before the first underscore
-      const geneName = geneNameExtractionRegex.exec(gene)[0];
-      return { label: geneName };
+      return { label: gene };
     });
     const alleleLabels = Object.keys(alleles).map(allele => {
       return { label: allele };
@@ -110,6 +115,18 @@ export default class AMRHeatmapVis extends React.Component {
 
   onNodeHoverOut = () => {
     this.setState({ nodeHoverInfo: null });
+  };
+
+  // mediate the callback function for clicking a row label in the heatmap,
+  // so that clicking an allele returns the proper gene
+  onRowLabelClick = rowLabel => {
+    const { selectedOptions } = this.props;
+    const { alleleToGeneMap } = this.state;
+    let geneName = rowLabel;
+    if (selectedOptions === VIEW_LEVEL_ALLELES) {
+      geneName = alleleToGeneMap[rowLabel];
+    }
+    this.props.onGeneLabelClick(geneName);
   };
 
   //*** Following functions must be called after the component has updated ***
@@ -216,11 +233,7 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   initializeHeatmap(rows, columns, values) {
-    const {
-      selectedOptions,
-      onSampleLabelClick,
-      onGeneLabelClick,
-    } = this.props;
+    const { selectedOptions, onSampleLabelClick } = this.props;
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       // Data for the Heatmap
@@ -241,7 +254,7 @@ export default class AMRHeatmapVis extends React.Component {
         onNodeHoverMove: this.onNodeHoverMove,
         onNodeHoverOut: this.onNodeHoverOut,
         onColumnLabelClick: onSampleLabelClick,
-        onRowLabelClick: onGeneLabelClick,
+        onRowLabelClick: this.onRowLabelClick,
       }
     );
     this.heatmap.start();

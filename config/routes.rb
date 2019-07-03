@@ -107,6 +107,7 @@ Rails.application.routes.draw do
   get 'visualizations.json', to: 'visualizations#index'
 
   get 'amr_heatmap/amr_counts.json', to: 'amr_heatmap#amr_counts'
+  get 'amr_heatmap/fetch_card.json', to: 'amr_heatmap#fetch_card'
   get 'amr_heatmap', to: 'amr_heatmap#index'
 
   get 'basespace/oauth', to: 'basespace#oauth'
