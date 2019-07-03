@@ -1,5 +1,4 @@
 import React from "react";
-import { groupBy } from "lodash/fp";
 import PropTypes from "prop-types";
 
 import cs from "./pipeline_step_details_mode.scss";
@@ -11,10 +10,8 @@ class PipelineStepDetailsMode extends React.Component {
       return null;
     }
 
-    const fromStepNameToFile = groupBy("fromStepName", inputFiles);
-    const fileGroupList = Object.keys(fromStepNameToFile).map(fromStepName => {
-      const fileGroup = fromStepNameToFile[fromStepName];
-      const fileList = fileGroup.map((file, i) => {
+    const fileGroupList = inputFiles.map((inputFileGroup, i) => {
+      const fileList = inputFileGroup.files.map((file, i) => {
         return (
           <div className={cs.fileLink} key={`${file.fileName}-${i}`}>
             {file.fileName}
@@ -25,9 +22,10 @@ class PipelineStepDetailsMode extends React.Component {
       // TODO(ezhong): Figure out what to put as fileGroupHeader if input is
       // provided by a user (instead of step output)
       return (
-        <div className={cs.fileGroup} key={fromStepName}>
-          <div className={cs.fileGroupHeader}>{`From ${fromStepName ||
-            "Sample"}:`}</div>
+        <div className={cs.fileGroup} key={`inputFileGroup.fromStepName-${i}`}>
+          <div
+            className={cs.fileGroupHeader}
+          >{`From ${inputFileGroup.fromStepName || "Sample"}:`}</div>
           {fileList}
         </div>
       );
@@ -77,7 +75,8 @@ PipelineStepDetailsMode.propTypes = {
   description: PropTypes.string,
   inputFiles: PropTypes.arrayOf(
     PropTypes.shape({
-      fileName: PropTypes.string,
+      fromStepName: PropTypes.string,
+      files: PropTypes.arrayOf(PropTypes.shape({ fileName: PropTypes.string })),
     })
   ),
   outputFiles: PropTypes.arrayOf(
