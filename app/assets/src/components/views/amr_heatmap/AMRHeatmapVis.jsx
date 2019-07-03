@@ -75,7 +75,9 @@ export default class AMRHeatmapVis extends React.Component {
       });
     });
     const geneLabels = Object.keys(genes).map(gene => {
-      return { label: gene };
+      const geneNameExtractionRegex = /[^_]+/; // matches everything before the first underscore
+      const geneName = geneNameExtractionRegex.exec(gene)[0];
+      return { label: geneName };
     });
     const alleleLabels = Object.keys(alleles).map(allele => {
       return { label: allele };
