@@ -1,7 +1,9 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import { groupBy } from "lodash/fp";
 import PropTypes from "prop-types";
 import { PanZoom } from "react-easy-panzoom";
+import { Matrix, inverse } from "ml-matrix";
 import cx from "classnames";
 
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
@@ -220,12 +222,45 @@ class PipelineViz extends React.Component {
     return stepClassName.replace(/^(PipelineStep(Run|Generate)?)/, "");
   }
 
-  handleStepClick(stageIndex, info) {
-    const clickedNodeId = info.nodes[0];
+  inverseTransformDOMCoordinates(x, y) {
+    const panZoomContainerDOM = ReactDOM.findDOMNode(this.panZoomContainer)
+      .firstChild;
+    const cssMatrixString = window
+      .getComputedStyle(panZoomContainerDOM)
+      .getPropertyValue("transform");
+    const [a, b, c, d] = cssMatrixString
+      .replace(/(matrix\()|(\))+/gi, "")
+      .split(", ")
+      .map(str => parseFloat(str))
+      .slice(0, 4);
+
+    const scalingMatrix = new Matrix([[a, c], [b, d]]);
+    const invScalingMatrix = inverse(scalingMatrix);
+
+    const coordinates = Matrix.columnVector([x, y]);
+    const scaledCoordinates = invScalingMatrix.mmul(coordinates);
+
+    return { x: scaledCoordinates.get(0, 0), y: scaledCoordinates.get(1, 0) };
+  }
+
+  getNodeIdAt(graph, xCoord, yCoord) {
+    const { x, y } = this.inverseTransformDOMCoordinates(xCoord, yCoord);
+    return graph.getNodeAt(x, y);
+  }
+
+  handleClick(stageIndex, info) {
+    const graph = this.graphs[stageIndex];
+    const clickedNodeId = this.getNodeIdAt(
+      graph,
+      info.pointer.DOM.x,
+      info.pointer.DOM.y
+    );
     if (clickedNodeId == null) {
       return;
     }
+
     this.graphs.forEach((graph, i) => i != stageIndex && graph.unselectAll());
+    graph.selectNodes([clickedNodeId]);
 
     const inputEdgesInfo = this.getEdgeInfoFor(
       stageIndex,
@@ -639,7 +674,7 @@ class PipelineViz extends React.Component {
         hover: true,
         selectConnectedEdges: false,
       },
-      onClick: info => this.handleStepClick(index, info),
+      onClick: info => this.handleClick(index, info),
       onNodeHover: info => this.handleNodeHover(index, info),
       onNodeBlur: this.handleNodeBlur,
     };
