@@ -24,6 +24,20 @@ export default class NetworkGraph {
     return this.graph.canvasToDOM(canvasCoords);
   }
 
+  getEdgesBetweenNodes(fromNodeId, toNodeId) {
+    if (fromNodeId != null && toNodeId != null) {
+      return this.data.edges.getIds({
+        filter: edge => edge.from == fromNodeId && edge.to == toNodeId,
+      });
+    } else if (fromNodeId != null) {
+      return this.getConnectedEdges(fromNodeId, "from");
+    } else if (toNodeId != null) {
+      return this.getConnectedEdges(toNodeId, "to");
+    } else {
+      return this.data.edges.getIds();
+    }
+  }
+
   getConnectedEdges(nodeId, direction) {
     let filterFunc;
     switch (direction) {
@@ -42,18 +56,9 @@ export default class NetworkGraph {
     });
   }
 
-  getEdgeBetweenNodes(fromNodeId, toNodeId) {
-    return this.data.edges.getIds({
-      filter: edge => edge.from == fromNodeId && edge.to == toNodeId,
-    })[0];
-  }
-
   updateEdges(edgeIds, options) {
-    const edges = this.data.edges.get(edgeIds);
-    edges.forEach(edge => {
-      const newEdge = Object.assign({ to: edge.to, from: edge.from }, options);
-      this.data.edges.add(newEdge);
-      this.data.edges.remove(edge.id);
+    edgeIds.forEach(edgeId => {
+      this.data.edges.update({ id: edgeId, ...options });
     });
   }
 
