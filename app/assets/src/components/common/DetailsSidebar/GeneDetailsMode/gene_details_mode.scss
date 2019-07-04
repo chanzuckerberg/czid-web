@@ -26,19 +26,8 @@
     font-weight: 700;
   }
 
-  .histogram {
-    width: 100%;
-    height: 160px;
-    margin: 0 auto;
-  }
-
   .text {
     line-height: 24px;
-
-    &.collapsed {
-      max-height: 120px;
-      overflow: hidden;
-    }
   }
 
   .linksSection {
@@ -68,14 +57,14 @@
   }
 }
 
-.wikiLicense {
+.cardLicense {
   padding-top: 10px;
   color: $medium-grey;
   font-size: $font-size-small;
   line-height: $line-height-small;
 
-  .wikiLink {
-    color: $black !important;
+  .cardLink {
+    color: $black;
     cursor: pointer;
 
     &:hover {

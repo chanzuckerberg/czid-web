@@ -123,7 +123,7 @@ export default class AMRHeatmapVis extends React.Component {
     const { selectedOptions } = this.props;
     const { alleleToGeneMap } = this.state;
     let geneName = rowLabel;
-    if (selectedOptions === VIEW_LEVEL_ALLELES) {
+    if (selectedOptions.viewLevel === VIEW_LEVEL_ALLELES) {
       geneName = alleleToGeneMap[rowLabel];
     }
     this.props.onGeneLabelClick(geneName);

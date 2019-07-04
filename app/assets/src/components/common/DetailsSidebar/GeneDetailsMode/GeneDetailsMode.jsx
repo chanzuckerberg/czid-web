@@ -28,6 +28,8 @@ export default class GeneDetailsMode extends React.Component {
 
     this.state = {
       loading: true,
+      cardEntryFound: false,
+      collapseOntology: true,
     };
   }
 
@@ -37,15 +39,18 @@ export default class GeneDetailsMode extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.geneName !== prevProps.geneName) {
-      this.setState({ loading: true });
+      this.setState({
+        loading: true,
+        cardEntryFound: false,
+        collapseOntology: true,
+      });
       this.getGeneInfo(this.props.geneName);
     }
   }
 
   async getGeneInfo(geneName) {
-    const { cardOntology } = this.state;
-    const updatedCardOntology = {
-      accession: "",
+    const updatedOntology = {
+      accession: undefined,
       description: "---",
       geneFamily: "---",
       drugClass: "---",
@@ -53,12 +58,12 @@ export default class GeneDetailsMode extends React.Component {
     };
 
     const cardOntologyEntry = CARD_AMR_ONTOLOGY.find(aroEntry => {
-      const lowerCaseGeneName = geneName.toLowerCase();
-      const alphaNumericGeneName = lowerCaseGeneName.replace(/\W/g, "");
+      const alphaNumericGeneName = geneName.toLowerCase().replace(/\W/g, "");
       const regexForGeneName = new RegExp(`\\b${alphaNumericGeneName}\\b`);
 
-      const lowerCaseEntryName = aroEntry.name.toLowerCase();
-      const seperatedEntryName = lowerCaseEntryName.replace(/\//g, " ");
+      const seperatedEntryName = aroEntry.name
+        .toLowerCase()
+        .replace(/\//g, " ");
       const alphaNumericEntryName = seperatedEntryName.replace(
         /[^0-9a-z_\s]/g,
         ""
@@ -69,26 +74,31 @@ export default class GeneDetailsMode extends React.Component {
     });
 
     if (cardOntologyEntry === undefined) {
-      this.setState({ loading: false });
+      this.setState({
+        loading: false,
+        ontology: updatedOntology,
+        cardEntryFound: false,
+      });
       return;
     }
 
-    updatedCardOntology.description = cardOntologyEntry.description;
-    updatedCardOntology.accession = cardOntologyEntry.accession.split(":")[1];
+    updatedOntology.description = cardOntologyEntry.description;
+    updatedOntology.accession = cardOntologyEntry.accession.split(":")[1];
     try {
-      const cardRequest = await getCARDInfo(updatedCardOntology.accession);
+      const cardRequest = await getCARDInfo(updatedOntology.accession);
       const cardInfo = this.parseCARDEntry(cardRequest.html);
-      updatedCardOntology.geneFamily = cardInfo.geneFamily;
-      updatedCardOntology.drugClass = cardInfo.drugClass;
-      updatedCardOntology.resistanceMechanism = cardInfo.resistanceMechanism;
+      updatedOntology.geneFamily = cardInfo.geneFamily;
+      updatedOntology.drugClass = cardInfo.drugClass;
+      updatedOntology.resistanceMechanism = cardInfo.resistanceMechanism;
     } catch (err) {
       console.error(err);
     }
 
     this.setState({
       geneName: geneName,
-      cardOntology: updatedCardOntology,
+      ontology: updatedOntology,
       loading: false,
+      cardEntryFound: true,
     });
   }
 
@@ -98,7 +108,6 @@ export default class GeneDetailsMode extends React.Component {
     const tableBody = entry.querySelector(
       "table[vocab='http://dev.arpcard.mcmaster.ca/browse/data'] tbody"
     );
-    console.log(tableBody);
 
     const geneInfo = {};
     tableBody.childNodes.forEach(row => {
@@ -128,14 +137,20 @@ export default class GeneDetailsMode extends React.Component {
     return geneInfo;
   }
 
+  //*** Callback functions ***
+
+  expandOntology = () => {
+    this.setState({ collapseOntology: false });
+  };
+
   //*** Functions depending on state ***
 
   generateLinkTo(source) {
-    const { cardOntology, geneName } = this.state;
+    const { ontology, geneName } = this.state;
     let link = "";
     switch (source) {
       case SOURCE_CARD: {
-        return URL_CARD_ARO + cardOntology.accession;
+        return URL_CARD_ARO + ontology.accession;
       }
       case SOURCE_PUBMED: {
         return URL_PUBMED + geneName;
@@ -154,7 +169,35 @@ export default class GeneDetailsMode extends React.Component {
 
   //*** Render methods ***
 
-  renderCARDLicense() {}
+  renderCARDLicense() {
+    const { geneName } = this.props;
+    return (
+      <div className={cs.cardLicense}>
+        This article uses material from the CARD Antibiotic Resistance Ontology
+        entry for{" "}
+        <a
+          href={this.generateLinkTo(SOURCE_CARD)}
+          className={cs.cardLink}
+          target="_blank"
+        >
+          {geneName}
+        </a>, which is released under the{" "}
+        <a
+          href="https://creativecommons.org/licenses/by/4.0/"
+          className={cs.cardLink}
+          target="_blank"
+        >
+          Creative Commons CC-BY license version 4.0
+        </a>{" "}
+        by McMaster University.
+      </div>
+    );
+  }
+
+  renderNotFound() {
+    const { geneName } = this.props;
+    return <div className={cs.cardLicense}>No data found for {geneName}</div>;
+  }
 
   renderHeader() {
     const { loading } = this.state;
@@ -164,47 +207,60 @@ export default class GeneDetailsMode extends React.Component {
     return <div className={cs.title}>{this.props.geneName}</div>;
   }
 
+  renderOntology() {
+    const { ontology, collapseOntology } = this.state;
+    return (
+      <div>
+        <div className={cs.subtitle}>Description</div>
+        <div className={cs.text}>
+          <div className={cs.textInner}>{ontology.description}</div>
+        </div>
+        {!collapseOntology && (
+          <div>
+            <div className={cs.subtitle}>AMR Gene Family</div>
+            <div className={cs.text}>
+              <div className={cs.textInner}>{ontology.geneFamily}</div>
+            </div>
+            <div className={cs.subtitle}>Drug Class</div>
+            <div className={cs.text}>
+              <div className={cs.textInner}>{ontology.drugClass}</div>
+            </div>
+            <div className={cs.subtitle}>Resistance Mechanism</div>
+            <div className={cs.text}>
+              <div className={cs.textInner}>{ontology.resistanceMechanism}</div>
+            </div>
+          </div>
+        )}
+        {collapseOntology && (
+          <div className={cs.expandLink} onClick={this.expandOntology}>
+            Show More
+          </div>
+        )}
+        <div className={cs.text}>
+          <div className={cs.textInner}>{this.renderCARDLicense()}</div>
+        </div>
+      </div>
+    );
+  }
+
   renderGeneContents() {
-    const {
-      loading,
-      cardOntology,
-      ncbiRefGeneCatalog,
-      ncbiNucleotideDB,
-    } = this.state;
+    const { loading, cardEntryFound } = this.state;
     if (loading) {
       return;
     }
     return (
       <div className={cs.geneContents}>
-        <div>
-          <div className={cs.subtitle}>Details</div>
-          <div className={cs.text}>
-            <div className={cs.textInner}>
-              <em>Description: </em>
-              {cardOntology.description}
-            </div>
-            <div className={cs.textInner}>
-              <em>Gene Family: </em>
-              {cardOntology.geneFamily}
-            </div>
-            <div className={cs.textInner}>
-              <em>Drug Class: </em>
-              {cardOntology.drugClass}
-            </div>
-            <div className={cs.textInner}>
-              <em>Resistance Mechanism: </em>
-              {cardOntology.resistanceMechanism}
-            </div>
-          </div>
-        </div>
+        {cardEntryFound ? this.renderOntology() : this.renderNotFound()}
         <div className={cs.subtitle}>Links</div>
         <div className={cs.linksSection}>
           <ul className={cs.linksList}>
-            <li className={cs.link}>
-              <a href={this.generateLinkTo(SOURCE_CARD)} target="_blank">
-                CARD Ontology
-              </a>
-            </li>
+            {cardEntryFound && (
+              <li className={cs.link}>
+                <a href={this.generateLinkTo(SOURCE_CARD)} target="_blank">
+                  CARD Ontology
+                </a>
+              </li>
+            )}
             <li className={cs.link}>
               <a
                 href={this.generateLinkTo(SOURCE_NCBI_REF_GENE)}
