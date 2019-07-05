@@ -122,6 +122,10 @@ class Location < ApplicationRecord
     location
   end
 
+  def self.check_and_restrict_specificity_v2(location_data, host_genome_name)
+
+  end
+
   # Note: We are clustering at Country+State for now so Subdivision+City ids may be nil.
   def self.check_and_fetch_parents(location)
     present_parent_level_ids, missing_parent_levels = present_and_missing_parents(location)

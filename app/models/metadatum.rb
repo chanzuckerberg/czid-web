@@ -128,6 +128,7 @@ class Metadatum < ApplicationRecord
 
     # Set to existing Location or create a new one based on the external IDs. For the sake of not
     # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
+    puts "foobar 4:09pm, our loc commands: ", loc
     location = Location.find_or_new_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
     location = Location.check_and_restrict_specificity(location, sample.host_genome_name)
     unless location.id
