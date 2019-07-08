@@ -69,3 +69,5 @@ patch:
         patched: '2019-07-04T06:40:16.402Z'
     - babel-plugin-transform-class-properties > babel-helper-function-name > babel-template > babel-traverse > babel-types > lodash:
         patched: '2019-07-04T06:40:16.402Z'
+    - snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash:
+        patched: '2019-07-08T17:31:49.052Z'
