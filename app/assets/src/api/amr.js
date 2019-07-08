@@ -7,8 +7,11 @@ export const getAMRCounts = async sampleIds =>
     },
   });
 
-export const getCARDInfo = async accession =>
-  get("amr_heatmap/fetch_card.json", {
+export const getCARDIndex = async accession =>
+  get("amr_heatmap/fetch_card_index.json");
+
+export const getAroEntry = async accession =>
+  get("amr_heatmap/fetch_aro_entry.json", {
     params: {
       accession,
     },

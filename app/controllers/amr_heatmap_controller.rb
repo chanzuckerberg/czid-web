@@ -1,4 +1,5 @@
 URL_CARD_ARO = "https://card.mcmaster.ca/aro/".freeze
+URL_CARD_INDEX = "https://raw.githubusercontent.com/arpcard/aro/master/aro.owl".freeze
 
 class AmrHeatmapController < ApplicationController
   before_action :admin_required
@@ -61,7 +62,21 @@ class AmrHeatmapController < ApplicationController
     render json: amr_data
   end
 
-  def fetch_card
+  def fetch_card_index
+    card_index_uri = URI(URL_CARD_INDEX)
+    result = { "xml" => "", "error" => "" }
+
+    response = Net::HTTP.get_response(card_index_uri)
+    if response.is_a?(Net::HTTPSuccess)
+      result["xml"] = response.body.force_encoding("utf-8")
+    else
+      result["error"] = "Error"
+    end
+
+    render json: result.to_json
+  end
+
+  def fetch_aro_entry
     accession = params[:accession]
     card_aro_uri = URI(URL_CARD_ARO + accession)
     result = { "html" => "", "error" => "" }

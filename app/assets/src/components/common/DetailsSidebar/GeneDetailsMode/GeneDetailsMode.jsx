@@ -2,9 +2,8 @@ import React from "react";
 import cx from "classnames";
 import PropTypes from "prop-types";
 
-import { getCARDInfo } from "~/api/amr";
+import { getCARDIndex, getAroEntry } from "~/api/amr";
 
-import { CARD_AMR_ONTOLOGY } from "./constants";
 import cs from "./gene_details_mode.scss";
 
 const SOURCE_CARD = "card";
@@ -22,6 +21,11 @@ const CARD_FAMILY = "AMR Gene Family";
 const CARD_CLASS = "Drug Class";
 const CARD_MECHANISM = "Resistance Mechanism";
 
+// xml tags used in the aro owl xml file
+const XML_OWL_LABEL = "rdfs:label";
+const XML_OWL_DESCRIPTION = "obo:IAO_0000115";
+const XML_OWL_ACCESSION = "oboInOwl:id";
+
 export default class GeneDetailsMode extends React.Component {
   constructor(props) {
     super(props);
@@ -29,6 +33,7 @@ export default class GeneDetailsMode extends React.Component {
     this.state = {
       loading: true,
       cardEntryFound: false,
+      cardIndex: false,
       collapseOntology: true,
     };
   }
@@ -49,6 +54,7 @@ export default class GeneDetailsMode extends React.Component {
   }
 
   async getGeneInfo(geneName) {
+    const { cardIndex } = this.state;
     const updatedOntology = {
       accession: undefined,
       description: "---",
@@ -57,27 +63,24 @@ export default class GeneDetailsMode extends React.Component {
       resistanceMechanism: "---",
     };
 
-    const cardOntologyEntry = CARD_AMR_ONTOLOGY.find(aroEntry => {
-      const alphaNumericGeneName = geneName.toLowerCase().replace(/\W/g, "");
-      const regexForGeneName = new RegExp(`\\b${alphaNumericGeneName}\\b`);
-
-      const seperatedEntryName = aroEntry.name
-        .toLowerCase()
-        .replace(/\//g, " ");
-      const alphaNumericEntryName = seperatedEntryName.replace(
-        /[^0-9a-z_\s]/g,
-        ""
-      );
-
-      const match = regexForGeneName.test(alphaNumericEntryName);
-      return match;
-    });
+    let cardOntologyEntry, latestCARDIndex;
+    try {
+      if (!cardIndex) {
+        latestCARDIndex = await getCARDIndex();
+      } else {
+        latestCARDIndex = cardIndex;
+      }
+      cardOntologyEntry = this.searchCARDIndex(geneName, latestCARDIndex.xml);
+    } catch (err) {
+      console.error(err);
+    }
 
     if (cardOntologyEntry === undefined) {
       this.setState({
         loading: false,
         ontology: updatedOntology,
         cardEntryFound: false,
+        cardIndex: latestCARDIndex,
       });
       return;
     }
@@ -85,8 +88,8 @@ export default class GeneDetailsMode extends React.Component {
     updatedOntology.description = cardOntologyEntry.description;
     updatedOntology.accession = cardOntologyEntry.accession.split(":")[1];
     try {
-      const cardRequest = await getCARDInfo(updatedOntology.accession);
-      const cardInfo = this.parseCARDEntry(cardRequest.html);
+      const cardRequest = await getAroEntry(updatedOntology.accession);
+      const cardInfo = this.parseAroEntry(cardRequest.html);
       updatedOntology.geneFamily = cardInfo.geneFamily;
       updatedOntology.drugClass = cardInfo.drugClass;
       updatedOntology.resistanceMechanism = cardInfo.resistanceMechanism;
@@ -99,10 +102,50 @@ export default class GeneDetailsMode extends React.Component {
       ontology: updatedOntology,
       loading: false,
       cardEntryFound: true,
+      cardIndex: latestCARDIndex,
     });
   }
 
-  parseCARDEntry(html) {
+  searchCARDIndex(geneName, xml) {
+    const domParser = new DOMParser();
+    const cardIndex = domParser.parseFromString(xml, "text/xml");
+    const indexLabels = cardIndex.getElementsByTagName(XML_OWL_LABEL);
+
+    let labelMatch = undefined;
+    const alphaNumericGeneName = geneName.toLowerCase().replace(/\W/g, "");
+    const regexForGeneName = new RegExp(`\\b${alphaNumericGeneName}\\b`);
+    for (let label of indexLabels) {
+      const seperatedEntryName = label.textContent
+        .toLowerCase()
+        .replace(/\//g, " ");
+      const alphaNumericEntryName = seperatedEntryName.replace(
+        /[^0-9a-z_\s]/g,
+        ""
+      );
+
+      const match = regexForGeneName.test(alphaNumericEntryName);
+      if (match) {
+        labelMatch = label;
+        break;
+      }
+    }
+
+    if (labelMatch === undefined) {
+      return undefined;
+    }
+
+    const cardOntologyEntry = {};
+    const owlClass = labelMatch.parentNode;
+    cardOntologyEntry.description = owlClass.getElementsByTagName(
+      XML_OWL_DESCRIPTION
+    )[0].textContent;
+    cardOntologyEntry.accession = owlClass.getElementsByTagName(
+      XML_OWL_ACCESSION
+    )[0].textContent;
+    return cardOntologyEntry;
+  }
+
+  parseAroEntry(html) {
     const domParser = new DOMParser();
     const entry = domParser.parseFromString(html, "text/html");
     const tableBody = entry.querySelector(
