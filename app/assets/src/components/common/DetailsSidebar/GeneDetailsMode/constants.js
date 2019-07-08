@@ -5,6 +5,8 @@ https://creativecommons.org/licenses/by/4.0/
 https://card.mcmaster.ca/download
 **/
 
+// TODO: replace this with a call to and parse of https://raw.githubusercontent.com/arpcard/aro/master/aro.owl
+
 export const CARD_AMR_ONTOLOGY = [
   {
     accession: "ARO:0000000",

@@ -146,8 +146,8 @@ export default class GeneDetailsMode extends React.Component {
   //*** Functions depending on state ***
 
   generateLinkTo(source) {
-    const { ontology, geneName } = this.state;
-    let link = "";
+    const { ontology } = this.state;
+    const { geneName } = this.props;
     switch (source) {
       case SOURCE_CARD: {
         return URL_CARD_ARO + ontology.accession;
@@ -201,10 +201,11 @@ export default class GeneDetailsMode extends React.Component {
 
   renderHeader() {
     const { loading } = this.state;
+    const { geneName } = this.props;
     if (loading) {
       return <div className={cs.loadingMsg}>Loading...</div>;
     }
-    return <div className={cs.title}>{this.props.geneName}</div>;
+    return <div className={cs.title}>{geneName}</div>;
   }
 
   renderOntology() {
