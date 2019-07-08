@@ -216,7 +216,8 @@ class PipelineViz extends React.Component {
     });
   }
 
-  getEdgesBetweenNodes(graph, fromId, toId, type) {
+  getEdgesBetweenNodes(edgeInfo) {
+    const { graph, fromId, toId, type } = edgeInfo;
     const allEdges = graph.getEdgesBetweenNodes(fromId, toId);
     if (type) {
       const edgeTypeRegex = new RegExp(`-${type}$`, "g");
@@ -385,24 +386,23 @@ class PipelineViz extends React.Component {
       hidden: false,
     };
 
-    const intraStageInputEdges = this.getEdgesBetweenNodes(
-      graph,
-      null,
-      nodeId,
-      "colored"
-    );
+    const intraStageInputEdges = this.getEdgesBetweenNodes({
+      graph: graph,
+      toId: nodeId,
+      type: "colored",
+    });
     graph.updateEdges(intraStageInputEdges, inputColorOptions);
 
     const inputEdgesInfo = this.getEdgeInfoFor(stageIndex, nodeId, "input");
     inputEdgesInfo.forEach(edgeInfo => {
       if (!edgeInfo.isIntraStage && edgeInfo.from) {
         const prevGraph = this.graphs[edgeInfo.from.stageIndex];
-        const prevGraphEdgeIds = this.getEdgesBetweenNodes(
-          prevGraph,
-          edgeInfo.from.stepIndex,
-          END_NODE_ID,
-          "colored"
-        );
+        const prevGraphEdgeIds = this.getEdgesBetweenNodes({
+          graph: prevGraph,
+          fromId: edgeInfo.from.stepIndex,
+          toId: END_NODE_ID,
+          type: "colored",
+        });
         prevGraph.updateEdges(prevGraphEdgeIds, inputColorOptions);
         updatedInterStageArrows[edgeInfo.from.stageIndex] = "from";
         this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.from.stageIndex);
@@ -419,24 +419,23 @@ class PipelineViz extends React.Component {
       hidden: false,
     };
 
-    const intraStageOutputEdges = this.getEdgesBetweenNodes(
-      graph,
-      nodeId,
-      null,
-      "colored"
-    );
+    const intraStageOutputEdges = this.getEdgesBetweenNodes({
+      graph: graph,
+      fromId: nodeId,
+      type: "colored",
+    });
     graph.updateEdges(intraStageOutputEdges, outputColorOptions);
 
     const outputEdgesInfo = this.getEdgeInfoFor(stageIndex, nodeId, "output");
     outputEdgesInfo.forEach(edgeInfo => {
       if (!edgeInfo.isIntraStage && edgeInfo.to) {
         const nextGraph = this.graphs[edgeInfo.to.stageIndex];
-        const nextGraphEdgeIds = this.getEdgesBetweenNodes(
-          nextGraph,
-          START_NODE_ID,
-          edgeInfo.to.stepIndex,
-          "colored"
-        );
+        const nextGraphEdgeIds = this.getEdgesBetweenNodes({
+          graph: nextGraph,
+          fromId: START_NODE_ID,
+          toId: edgeInfo.to.stepIndex,
+          type: "colored",
+        });
         nextGraph.updateEdges(nextGraphEdgeIds, outputColorOptions);
         updatedInterStageArrows[edgeInfo.to.stageIndex - 1] = "to";
         this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.to.stageIndex);
@@ -453,7 +452,6 @@ class PipelineViz extends React.Component {
   handleNodeBlur = () => {
     const { nodeColor } = this.props;
     const { graphIndex, nodeId, alteredGraphs } = this.lastMouseMoveInfo;
-
     if (nodeId == null) {
       return;
     }
@@ -469,12 +467,10 @@ class PipelineViz extends React.Component {
 
     alteredGraphs.forEach(i => {
       const graph = this.graphs[i];
-      const allColoredEdgeIds = this.getEdgesBetweenNodes(
-        graph,
-        null,
-        null,
-        "colored"
-      );
+      const allColoredEdgeIds = this.getEdgesBetweenNodes({
+        graph: graph,
+        type: "colored",
+      });
       graph.updateEdges(allColoredEdgeIds, { hidden: true });
       this.centerEndNodeVertically(graph);
     });
