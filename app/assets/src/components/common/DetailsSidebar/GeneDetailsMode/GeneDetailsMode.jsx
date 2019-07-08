@@ -20,6 +20,7 @@ const URL_NCBI_REF_GENE =
 const CARD_FAMILY = "AMR Gene Family";
 const CARD_CLASS = "Drug Class";
 const CARD_MECHANISM = "Resistance Mechanism";
+const CARD_SYNONYMS = "Synonym(s)";
 
 // xml tags used in the aro owl xml file
 const XML_OWL_CLASSES = "owl:Class";
@@ -59,6 +60,8 @@ export default class GeneDetailsMode extends React.Component {
     const { cardIndex } = this.state;
     const updatedOntology = {
       accession: undefined,
+      label: "---",
+      synonyms: "---",
       description: "---",
       geneFamily: "---",
       drugClass: "---",
@@ -87,14 +90,16 @@ export default class GeneDetailsMode extends React.Component {
       return;
     }
 
+    updatedOntology.label = cardOntologyEntry.label;
     updatedOntology.description = cardOntologyEntry.description;
     updatedOntology.accession = cardOntologyEntry.accession.split(":")[1];
     try {
       const cardRequest = await getAroEntry(updatedOntology.accession);
       const cardInfo = this.parseAroEntry(cardRequest.html);
-      updatedOntology.geneFamily = cardInfo.geneFamily;
+      updatedOntology.geneFamily = cardInfo.geneFamily || "---";
       updatedOntology.drugClass = cardInfo.drugClass;
       updatedOntology.resistanceMechanism = cardInfo.resistanceMechanism;
+      updatedOntology.synonyms = cardInfo.synonyms || "---";
     } catch (err) {
       console.error(err);
     }
@@ -135,14 +140,14 @@ export default class GeneDetailsMode extends React.Component {
       // then check synonyms
       const synonyms = entry.getElementsByTagName(XML_OWL_SYNONYM);
       for (let synonym of synonyms) {
-        const seperatedEntryName = synonym.textContent
+        const seperatedSynonymEntryName = synonym.textContent
           .toLowerCase()
           .replace(/\//g, " ");
-        const alphaNumericEntryName = seperatedEntryName.replace(
+        const alphaNumericSynonymEntryName = seperatedSynonymEntryName.replace(
           /[^0-9a-z_\s]/g,
           ""
         );
-        const match = regexForGeneName.test(alphaNumericEntryName);
+        const match = regexForGeneName.test(alphaNumericSynonymEntryName);
         if (match) {
           entryMatch = synonym;
           break;
@@ -156,6 +161,9 @@ export default class GeneDetailsMode extends React.Component {
 
     const cardOntologyEntry = {};
     const owlClass = entryMatch.parentNode;
+    cardOntologyEntry.label = owlClass.getElementsByTagName(
+      XML_OWL_LABEL
+    )[0].textContent;
     cardOntologyEntry.description = owlClass.getElementsByTagName(
       XML_OWL_DESCRIPTION
     )[0].textContent;
@@ -190,6 +198,9 @@ export default class GeneDetailsMode extends React.Component {
         case CARD_MECHANISM: {
           geneInfo.resistanceMechanism = value;
           break;
+        }
+        case CARD_SYNONYMS: {
+          geneInfo.synonyms = value;
         }
         default: {
           break;
@@ -233,7 +244,7 @@ export default class GeneDetailsMode extends React.Component {
   //*** Render methods ***
 
   renderCARDLicense() {
-    const { geneName } = this.props;
+    const { ontology } = this.state;
     return (
       <div className={cs.cardLicense}>
         This article uses material from the CARD Antibiotic Resistance Ontology
@@ -243,7 +254,7 @@ export default class GeneDetailsMode extends React.Component {
           className={cs.cardLink}
           target="_blank"
         >
-          {geneName}
+          {ontology.label}
         </a>, which is released under the{" "}
         <a
           href="https://creativecommons.org/licenses/by/4.0/"
@@ -263,18 +274,27 @@ export default class GeneDetailsMode extends React.Component {
   }
 
   renderHeader() {
-    const { loading } = this.state;
+    const { loading, ontology } = this.state;
     const { geneName } = this.props;
     if (loading) {
       return <div className={cs.loadingMsg}>Loading...</div>;
     }
-    return <div className={cs.title}>{geneName}</div>;
+    return (
+      <div className={cs.title}>
+        {ontology.label !== "---" ? ontology.label : geneName}
+      </div>
+    );
   }
 
   renderOntology() {
     const { ontology, collapseOntology } = this.state;
     return (
       <div>
+        <div className={cs.text}>
+          <div className={cs.textInner}>
+            Synonyms: <em>{ontology.synonyms}</em>
+          </div>
+        </div>
         <div className={cs.subtitle}>Description</div>
         <div className={cs.text}>
           <div className={cs.textInner}>{ontology.description}</div>
