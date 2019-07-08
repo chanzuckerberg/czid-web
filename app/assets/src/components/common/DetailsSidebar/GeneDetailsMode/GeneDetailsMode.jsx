@@ -22,7 +22,9 @@ const CARD_CLASS = "Drug Class";
 const CARD_MECHANISM = "Resistance Mechanism";
 
 // xml tags used in the aro owl xml file
+const XML_OWL_CLASSES = "owl:Class";
 const XML_OWL_LABEL = "rdfs:label";
+const XML_OWL_SYNONYM = "oboInOwl:hasExactSynonym";
 const XML_OWL_DESCRIPTION = "obo:IAO_0000115";
 const XML_OWL_ACCESSION = "oboInOwl:id";
 
@@ -109,12 +111,14 @@ export default class GeneDetailsMode extends React.Component {
   searchCARDIndex(geneName, xml) {
     const domParser = new DOMParser();
     const cardIndex = domParser.parseFromString(xml, "text/xml");
-    const indexLabels = cardIndex.getElementsByTagName(XML_OWL_LABEL);
 
-    let labelMatch = undefined;
+    const indexEntries = cardIndex.getElementsByTagName(XML_OWL_CLASSES);
+    let entryMatch;
     const alphaNumericGeneName = geneName.toLowerCase().replace(/\W/g, "");
     const regexForGeneName = new RegExp(`\\b${alphaNumericGeneName}\\b`);
-    for (let label of indexLabels) {
+    for (let entry of indexEntries) {
+      // first check label
+      const label = entry.getElementsByTagName(XML_OWL_LABEL)[0];
       const seperatedEntryName = label.textContent
         .toLowerCase()
         .replace(/\//g, " ");
@@ -122,20 +126,36 @@ export default class GeneDetailsMode extends React.Component {
         /[^0-9a-z_\s]/g,
         ""
       );
-
       const match = regexForGeneName.test(alphaNumericEntryName);
       if (match) {
-        labelMatch = label;
+        entryMatch = label;
         break;
+      }
+
+      // then check synonyms
+      const synonyms = entry.getElementsByTagName(XML_OWL_SYNONYM);
+      for (let synonym of synonyms) {
+        const seperatedEntryName = synonym.textContent
+          .toLowerCase()
+          .replace(/\//g, " ");
+        const alphaNumericEntryName = seperatedEntryName.replace(
+          /[^0-9a-z_\s]/g,
+          ""
+        );
+        const match = regexForGeneName.test(alphaNumericEntryName);
+        if (match) {
+          entryMatch = synonym;
+          break;
+        }
       }
     }
 
-    if (labelMatch === undefined) {
+    if (entryMatch === undefined) {
       return undefined;
     }
 
     const cardOntologyEntry = {};
-    const owlClass = labelMatch.parentNode;
+    const owlClass = entryMatch.parentNode;
     cardOntologyEntry.description = owlClass.getElementsByTagName(
       XML_OWL_DESCRIPTION
     )[0].textContent;
