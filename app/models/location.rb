@@ -102,34 +102,34 @@ class Location < ApplicationRecord
 
   # Restrict Human location specificity to Subdivision, State, Country. Return new Location if
   # restriction added.
-  def self.check_and_restrict_specificity(loc, host_genome_name)
+  def self.check_and_restrict_specificity(location, host_genome_name)
     # We don't want Human locations with city
-    if host_genome_name == "Human" && loc[:city_name].present?
+    if host_genome_name == "Human" && location[:city_name].present?
       # Return our existing entry if found
       existing = Location.find_by(
-        country_name: loc[:country_name],
-        state_name: loc[:state_name],
-        subdivision_name: loc[:subdivision_name],
+        country_name: location[:country_name],
+        state_name: location[:state_name],
+        subdivision_name: location[:subdivision_name],
         city_name: ""
       )
-      return true, existing if existing
+      return existing if existing
 
       # Redo the search for just the subdivision/state/country
       success, resp = geosearch_by_levels(
-        loc[:country_name],
-        loc[:state_name],
-        loc[:subdivision_name]
+        location[:country_name],
+        location[:state_name],
+        location[:subdivision_name]
       )
       unless success && !resp.empty?
-        raise "Couldn't find #{loc[:country_name]}, #{loc[:state_name]}, #{loc[:subdivision_name]} (country, state, subdivision)"
+        raise "Couldn't find #{location[:country_name]}, #{location[:state_name]}, #{location[:subdivision_name]} (country, state, subdivision)"
       end
 
       result = LocationHelper.adapt_location_iq_response(resp[0])
-      return true, Location.find_by(locationiq_id: result[:locationiq_id]) || new_from_params(result)
+      return Location.find_by(locationiq_id: result[:locationiq_id]) || new_from_params(result)
     end
 
     # Just return the input hash if no change
-    return false, loc
+    return location
   end
 
   # Note: We are clustering at Country+State for now so Subdivision+City ids may be nil.
