@@ -123,7 +123,24 @@ class Location < ApplicationRecord
   end
 
   def self.check_and_restrict_specificity_v2(location_data, host_genome_name)
+    # We don't want Human locations with city
+    if host_genome_name == "Human" && location_data[:city_name].present?
+      # Return our existing entry if found
+      existing = Location.find_by(country_name: location_data[:country_name], state_name: location_data[:state_name], subdivision_name: location_data[:subdivision_name], city_name: "")
+      return existing if existing
 
+      # Redo the search for just the subdivision/state/country
+      success, resp = geosearch_by_levels(location_data[:country_name], location_data[:state_name], location_data[:subdivision_name])
+      unless success && !resp.empty?
+        raise "Couldn't find #{location_data[:country_name]}, #{location_data[:state_name]}, #{location_data[:subdivision_name]} (country, state, subdivision)"
+      end
+
+      result = LocationHelper.adapt_location_iq_response(resp[0])
+      return Location.find_by(locationiq_id: result[:locationiq_id]) || new_from_params(result)
+    end
+
+    # Just return the input hash if no change
+    location_data
   end
 
   # Note: We are clustering at Country+State for now so Subdivision+City ids may be nil.
