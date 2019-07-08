@@ -6,10 +6,3 @@ export const getAMRCounts = async sampleIds =>
       sampleIds,
     },
   });
-
-export const getCARDInfo = async accession =>
-  get("amr_heatmap/fetch_card.json", {
-    params: {
-      accession,
-    },
-  });

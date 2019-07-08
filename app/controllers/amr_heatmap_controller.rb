@@ -1,5 +1,3 @@
-URL_CARD_ARO = "https://card.mcmaster.ca/aro/".freeze
-
 class AmrHeatmapController < ApplicationController
   before_action :admin_required
 
@@ -59,20 +57,5 @@ class AmrHeatmapController < ApplicationController
     end
 
     render json: amr_data
-  end
-
-  def fetch_card
-    accession = params[:accession]
-    card_aro_uri = URI(URL_CARD_ARO + accession)
-    result = { "html" => "", "error" => "" }
-
-    response = Net::HTTP.get_response(card_aro_uri)
-    if response.is_a?(Net::HTTPSuccess)
-      result["html"] = response.body
-    else
-      result["error"] = "Error"
-    end
-
-    render json: result.to_json
   end
 end
