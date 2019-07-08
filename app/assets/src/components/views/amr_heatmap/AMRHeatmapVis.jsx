@@ -70,14 +70,7 @@ export default class AMRHeatmapVis extends React.Component {
     sampleData.forEach(sample => {
       sampleLabels.push({ label: sample.sample_name, id: sample.sample_id });
       sample.amr_counts.forEach(amrCount => {
-        // The following three lines are a kind of hacky workaround to the fact that
-        // the amr counts stored in the db have a gene name that includes the actual gene
-        // plus the drug class.
-        const geneNameExtractionRegex = /[^_]+/; // matches everything before the first underscore
-        const geneName = geneNameExtractionRegex.exec(amrCount.gene)[0];
-        amrCount.gene = geneName;
-
-        genes[geneName] = true;
+        genes[amrCount.gene] = true;
         alleles[amrCount.allele] = true;
       });
     });

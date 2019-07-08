@@ -53,9 +53,10 @@ export default class AMRHeatmapView extends React.Component {
 
   async requestAMRCountsData(sampleIds) {
     const rawSampleData = await getAMRCounts(sampleIds);
-    const samplesWithAMRCounts = rawSampleData.filter(
+    const filteredSamples = rawSampleData.filter(
       sampleData => sampleData.error === ""
     );
+    const samplesWithAMRCounts = this.processAMRCounts(filteredSamples);
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
     this.setState({
       rawSampleData,
@@ -64,6 +65,21 @@ export default class AMRHeatmapView extends React.Component {
       maxValues,
       loading: false,
     });
+  }
+
+  processAMRCounts(filteredSamples) {
+    filteredSamples.forEach(sample => {
+      sample.amr_counts.forEach(amrCount => {
+        // The following three lines are a kind of hacky workaround to the fact that
+        // the amr counts stored in the db have a gene name that includes the actual gene
+        // plus the drug class.
+        const geneNameExtractionRegex = /[^_]+/; // matches everything before the first underscore
+        const geneName = geneNameExtractionRegex.exec(amrCount.gene)[0];
+        amrCount.gene = geneName;
+      })
+    })
+
+    return filteredSamples
   }
 
   assembleControlOptions() {
@@ -102,9 +118,7 @@ export default class AMRHeatmapView extends React.Component {
   onSampleLabelClick = sampleId => {
     const { sidebarVisible, sidebarMode, selectedSampleId } = this.state;
     if (!sampleId) {
-      this.setState({
-        sidebarVisible: false,
-      });
+      this.closeSidebar();
       return;
     }
     if (
