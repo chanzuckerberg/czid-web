@@ -129,7 +129,7 @@ class Location < ApplicationRecord
     end
 
     # Just return the input hash if no change
-    return location
+    location
   end
 
   # Note: We are clustering at Country+State for now so Subdivision+City ids may be nil.
