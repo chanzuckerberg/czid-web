@@ -57,6 +57,7 @@ export default class NetworkGraph {
   updateEdges(edgeIds, options) {
     edgeIds.forEach(edgeId => {
       this.data.edges.update({ id: edgeId, ...options });
+
     });
   }
 

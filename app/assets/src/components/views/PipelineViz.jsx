@@ -451,6 +451,7 @@ class PipelineViz extends React.Component {
   }
 
   handleNodeBlur = () => {
+
     const { nodeColor } = this.props;
     const { graphIndex, nodeId, alteredGraphs } = this.lastMouseMoveInfo;
 
@@ -479,7 +480,7 @@ class PipelineViz extends React.Component {
       this.centerEndNodeVertically(graph);
     });
     alteredGraphs.clear();
-
+    
     this.setState({
       interStageArrows: ["", "", ""],
     });
