@@ -2,7 +2,7 @@ import { DataSet, Network } from "visjs-network";
 
 export default class NetworkGraph {
   constructor(container, nodeData, edgeData, options) {
-    const { onClick, onNodeHover, onNodeBlur, ...networkOptions } = options;
+    const { onClick, ...networkOptions } = options;
     this.data = {
       nodes: new DataSet(nodeData),
       edges: new DataSet(edgeData),
@@ -10,8 +10,6 @@ export default class NetworkGraph {
     this.graph = new Network(container, this.data, networkOptions);
 
     this.graph.on("click", onClick);
-    this.graph.on("hoverNode", onNodeHover);
-    this.graph.on("blurNode", onNodeBlur);
   }
 
   moveNodeToPosition(nodeId, xDOMCoord, yDOMCoord) {
@@ -59,6 +57,12 @@ export default class NetworkGraph {
   updateEdges(edgeIds, options) {
     edgeIds.forEach(edgeId => {
       this.data.edges.update({ id: edgeId, ...options });
+    });
+  }
+
+  updateNodes(nodeIds, options) {
+    nodeIds.forEach(nodeId => {
+      this.data.nodes.update({ id: nodeId, ...options });
     });
   }
 
