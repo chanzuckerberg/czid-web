@@ -3,7 +3,6 @@ import ReactDOM from "react-dom";
 import { groupBy } from "lodash/fp";
 import PropTypes from "prop-types";
 import { PanZoom } from "react-easy-panzoom";
-import { Matrix, inverse } from "ml-matrix";
 import cx from "classnames";
 
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
@@ -11,6 +10,8 @@ import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
+
+import { inverseTransformDOMCoordinates } from "./utils";
 import cs from "./pipeline_viz.scss";
 
 const START_NODE_ID = -1;
@@ -219,29 +220,12 @@ class PipelineViz extends React.Component {
     return stepClassName.replace(/^(PipelineStep(Run|Generate)?)/, "");
   }
 
-  inverseTransformDOMCoordinates(x, y) {
-    const panZoomContainerDOM = ReactDOM.findDOMNode(this.panZoomContainer)
-      .firstChild;
-    const cssMatrixString = window
-      .getComputedStyle(panZoomContainerDOM)
-      .getPropertyValue("transform");
-    const [a, b, c, d] = cssMatrixString
-      .replace(/(matrix\()|(\))+/gi, "")
-      .split(", ")
-      .map(str => parseFloat(str))
-      .slice(0, 4);
-
-    const scalingMatrix = new Matrix([[a, c], [b, d]]);
-    const invScalingMatrix = inverse(scalingMatrix);
-
-    const coordinates = Matrix.columnVector([x, y]);
-    const scaledCoordinates = invScalingMatrix.mmul(coordinates);
-
-    return { x: scaledCoordinates.get(0, 0), y: scaledCoordinates.get(1, 0) };
-  }
-
   getNodeIdAtCoords(graph, xCoord, yCoord) {
-    const { x, y } = this.inverseTransformDOMCoordinates(xCoord, yCoord);
+    const { x, y } = inverseTransformDOMCoordinates(
+      ReactDOM.findDOMNode(this.panZoomContainer).firstChild,
+      xCoord,
+      yCoord
+    );
     return graph.getNodeAt(x, y);
   }
 
@@ -450,7 +434,6 @@ class PipelineViz extends React.Component {
 
     alteredGraphs.forEach(i => {
       const graph = this.graphs[i];
-
       const allColoredEdges = graph.getEdges(edge => {
         return edge.id.match(/-colored$/g);
       });
