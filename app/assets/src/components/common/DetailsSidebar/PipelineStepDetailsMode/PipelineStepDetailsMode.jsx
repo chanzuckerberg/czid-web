@@ -76,14 +76,16 @@ PipelineStepDetailsMode.propTypes = {
   inputFiles: PropTypes.arrayOf(
     PropTypes.shape({
       fromStepName: PropTypes.string,
-      files: PropTypes.arrayOf(PropTypes.shape({ fileName: PropTypes.string })),
-    })
-  ),
+      files: PropTypes.arrayOf(
+        PropTypes.shape({ fileName: PropTypes.string.isRequired })
+      ).isRequired,
+    }).isRequired
+  ).isRequired,
   outputFiles: PropTypes.arrayOf(
     PropTypes.shape({
-      fileName: PropTypes.string,
-    })
-  ),
+      fileName: PropTypes.string.isRequired,
+    }).isRequired
+  ).isRequired,
 };
 
 export default PipelineStepDetailsMode;
