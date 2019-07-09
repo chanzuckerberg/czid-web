@@ -441,7 +441,6 @@ class PipelineViz extends React.Component {
       this.centerEndNodeVertically(graph);
     });
     alteredGraphs.clear();
-
     this.setState({
       interStageArrows: ["", "", ""],
     });
