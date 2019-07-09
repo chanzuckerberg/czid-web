@@ -89,22 +89,21 @@ describe PipelineRun, type: :model do
   end
 
   context "#automatic_restart_allowed?" do
+    let(:user) { build_stubbed(:admin) }
     let(:sample) { build_stubbed(:sample, user: user) }
-    let(:pipeline_run) { build_stubbed(:pipeline_run, pipeline_version: "3.7", sample: sample) }
     let(:list_of_previous_pipeline_runs_same_version) { [] }
     let(:previous_pipeline_runs_same_version_relation) { instance_double("PipelineRun::ActiveRecord_Relation", to_a: list_of_previous_pipeline_runs_same_version) }
     before { allow(pipeline_run).to receive(:previous_pipeline_runs_same_version).and_return(previous_pipeline_runs_same_version_relation) }
 
     subject { pipeline_run.automatic_restart_allowed? }
 
-    context "when user is an admin" do
-      let(:user) { build_stubbed(:admin) }
+    context "when branch is not master" do
+      let(:pipeline_run) { build_stubbed(:pipeline_run, pipeline_version: "3.7", sample: sample, pipeline_branch: "anything_other_than_master") }
       it { is_expected.to be_falsy }
     end
 
-    context "when user is not an admin" do
-      let(:user) { build_stubbed(:user) }
-
+    context "when branch is master" do
+      let(:pipeline_run) { build_stubbed(:pipeline_run, pipeline_version: "3.7", sample: sample, pipeline_branch: nil) }
       context "and sample has no previous pipeline runs with the same pipeline version" do
         it { is_expected.to be_truthy }
       end
