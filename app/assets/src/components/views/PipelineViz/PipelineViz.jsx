@@ -293,7 +293,7 @@ class PipelineViz extends React.Component {
     });
   }
 
-  shouldUpdateMouseMove(x, y) {
+  shouldUpdateMoveMouse(x, y) {
     const { minMouseMoveUpdateDistance } = this.props;
     const distance = Math.sqrt(
       Math.pow(x - this.lastMouseMoveInfo.x, 2) +
@@ -304,7 +304,7 @@ class PipelineViz extends React.Component {
 
   handleMouseMove(stageIndex, e) {
     const graph = this.graphs[stageIndex];
-    if (!this.shouldUpdateMouseMove(e.clientX, e.clientY)) {
+    if (!this.shouldUpdateMoveMouse(e.clientX, e.clientY)) {
       return;
     }
 
