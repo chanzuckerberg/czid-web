@@ -3,11 +3,13 @@
 // You should add a new mode to this sidebar instead of adding a new sidebar.
 
 import React from "react";
+
+import Sidebar from "~/components/ui/containers/Sidebar";
+import PropTypes from "~/components/utils/propTypes";
+
 import SampleDetailsMode from "./SampleDetailsMode";
 import TaxonDetailsMode from "./TaxonDetailsMode";
 import PipelineStepDetailsMode from "./PipelineStepDetailsMode";
-import Sidebar from "~/components/ui/containers/Sidebar";
-import PropTypes from "~/components/utils/propTypes";
 
 export default class DetailsSidebar extends React.Component {
   renderContents() {
