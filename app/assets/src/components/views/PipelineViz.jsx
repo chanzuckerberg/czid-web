@@ -54,13 +54,12 @@ class PipelineViz extends React.Component {
       .join("/");
   }
 
-  getStepDataAt(stageStepIndices) {
-    const { stageIndex, stepIndex } = stageStepIndices;
+  getStepDataAtIndices({ stageIndex, stepIndex }) {
     return this.stageStepData[stageIndex].steps[stepIndex];
   }
 
   getEdgeInfoFor(stageIndex, stepIndex, direction) {
-    const stepData = this.getStepDataAt({
+    const stepData = this.getStepDataAtIndices({
       stageIndex: stageIndex,
       stepIndex: stepIndex,
     });
@@ -202,8 +201,8 @@ class PipelineViz extends React.Component {
   populateStageStepDataEdges() {
     this.edgeFileData.forEach((edgeData, edgeIndex) => {
       const { from, to } = edgeData;
-      from && this.getStepDataAt(from).outputEdges.push(edgeIndex);
-      to && this.getStepDataAt(to).inputEdges.push(edgeIndex);
+      from && this.getStepDataAtIndices(from).outputEdges.push(edgeIndex);
+      to && this.getStepDataAtIndices(to).inputEdges.push(edgeIndex);
     });
   }
 
@@ -234,7 +233,7 @@ class PipelineViz extends React.Component {
     );
     const inputInfo = inputEdgesInfo.map(edgeInfo => {
       const fromStepName = edgeInfo.from
-        ? this.getStepDataAt(edgeInfo.from).name
+        ? this.getStepDataAtIndices(edgeInfo.from).name
         : "";
       return {
         fromStepName: fromStepName,
@@ -261,7 +260,7 @@ class PipelineViz extends React.Component {
       })
       .flat();
 
-    const stepName = this.getStepDataAt({
+    const stepName = this.getStepDataAtIndices({
       stageIndex: stageIndex,
       stepIndex: clickedNodeId,
     }).name;
@@ -277,14 +276,14 @@ class PipelineViz extends React.Component {
   }
 
   handleNodeHover(stageIndex, info) {
-    const { highlightColor } = this.props;
+    const { highlightColor, inputEdgeColor } = this.props;
     const graph = this.graphs[stageIndex];
     const updatedInterStageArrows = [...this.state.interStageArrows];
 
     const inputColorOptions = {
       color: {
-        color: "#000000",
-        hover: "#000000",
+        color: inputEdgeColor,
+        hover: inputEdgeColor,
         inherit: false,
       },
       width: 2,
@@ -529,7 +528,7 @@ class PipelineViz extends React.Component {
     graph.moveNodeToPosition(END_NODE_ID, xEndNodePos, yStartNodePos);
   }
 
-  closeIfNonativeStage(graph, stageIndex) {
+  closeIfNonActiveStage(graph, stageIndex) {
     const stageData = this.stageStepData[stageIndex];
     if (stageData.jobStatus != "STARTED") {
       graph.afterDrawingOnce(() => this.toggleStage(stageIndex));
@@ -652,7 +651,7 @@ class PipelineViz extends React.Component {
     );
     currStageGraph.minimizeWidthGivenScale(1.0);
     this.centerEndNodeVertically(currStageGraph);
-    this.closeIfNonativeStage(currStageGraph, index);
+    this.closeIfNonActiveStage(currStageGraph, index);
 
     this.graphs.push(currStageGraph);
   }
@@ -750,20 +749,24 @@ class PipelineViz extends React.Component {
 }
 
 PipelineViz.propTypes = {
+  admin: PropTypes.bool,
   stageResults: PropTypes.object,
   backgroundColor: PropTypes.string,
   nodeColor: PropTypes.string,
   edgeColor: PropTypes.string,
   highlightColor: PropTypes.string,
+  inputEdgeColor: PropTypes.string,
   zoomMin: PropTypes.number,
   zoomMax: PropTypes.number,
 };
 
 PipelineViz.defaultProps = {
+  admin: false,
   backgroundColor: "#f8f8f8",
   nodeColor: "#eaeaea",
   edgeColor: "#999999",
   highlightColor: "#3867fa",
+  inputEdgeColor: "#000000",
   zoomMin: 0.5,
   zoomMax: 3,
 };
