@@ -126,9 +126,7 @@ export default class AMRHeatmapView extends React.Component {
       sidebarMode === SIDEBAR_SAMPLE_MODE &&
       selectedSampleId === sampleId
     ) {
-      this.setState({
-        sidebarVisible: false,
-      });
+      this.closeSidebar();
     } else {
       this.setState({
         selectedSampleId: sampleId,
