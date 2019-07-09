@@ -24,41 +24,15 @@ export default class NetworkGraph {
     return this.graph.canvasToDOM(canvasCoords);
   }
 
-  getEdgesBetweenNodes(fromNodeId, toNodeId) {
-    if (fromNodeId != null && toNodeId != null) {
-      return this.data.edges.getIds({
-        filter: edge => edge.from == fromNodeId && edge.to == toNodeId,
-      });
-    } else if (fromNodeId != null) {
-      return this.getConnectedEdges(fromNodeId, "from");
-    } else if (toNodeId != null) {
-      return this.getConnectedEdges(toNodeId, "to");
-    } else {
-      return this.data.edges.getIds();
-    }
-  }
-
-  getConnectedEdges(nodeId, direction) {
-    let filterFunc;
-    switch (direction) {
-      case "to":
-        filterFunc = edge => edge.to == nodeId;
-        break;
-      case "from":
-        filterFunc = edge => edge.from == nodeId;
-        break;
-      default:
-        filterFunc = edge => edge.to == nodeId || edge.from == nodeId;
-    }
-
-    return this.data.edges.getIds({
-      filter: filterFunc,
-    });
+  getEdges(filter) {
+    return this.data.edges.getIds({ filter: filter });
   }
 
   updateEdges(edgeIds, options) {
     edgeIds.forEach(edgeId => {
-      this.data.edges.update({ id: edgeId, ...options });
+      if (this.data.edges.get(edgeId)) {
+        this.data.edges.update({ id: edgeId, ...options });
+      }
     });
   }
 

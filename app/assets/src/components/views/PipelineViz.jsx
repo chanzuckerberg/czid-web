@@ -206,15 +206,6 @@ class PipelineViz extends React.Component {
     });
   }
 
-  getEdgesBetweenNodes(graph, fromId, toId, type) {
-    const allEdges = graph.getEdgesBetweenNodes(fromId, toId);
-    if (type) {
-      const edgeTypeRegex = new RegExp(`-${type}$`, "g");
-      return allEdges.filter(edgeId => edgeId.match(edgeTypeRegex));
-    }
-    return allEdges;
-  }
-
   getModifiedStepName(stepClassName) {
     return stepClassName.replace(/^(PipelineStep(Run|Generate)?)/, "");
   }
@@ -289,29 +280,24 @@ class PipelineViz extends React.Component {
       width: 2,
       hidden: false,
     };
-
-    const intraStageInputEdges = this.getEdgesBetweenNodes(
-      graph,
-      null,
-      info.node,
-      "colored"
-    );
-    graph.updateEdges(intraStageInputEdges, inputColorOptions);
-
     const inputEdgesInfo = this.getEdgeInfoFor(stageIndex, info.node, "input");
-    inputEdgesInfo.forEach(edgeInfo => {
-      if (!edgeInfo.isIntraStage && edgeInfo.from) {
-        const prevGraph = this.graphs[edgeInfo.from.stageIndex];
-        const prevGraphEdgeIds = this.getEdgesBetweenNodes(
-          prevGraph,
-          edgeInfo.from.stepIndex,
-          END_NODE_ID,
-          "colored"
-        );
-        prevGraph.updateEdges(prevGraphEdgeIds, inputColorOptions);
-        updatedInterStageArrows[edgeInfo.from.stageIndex] = "from";
+    const intraStageInputEdges = inputEdgesInfo.reduce((edgeIds, edgeInfo) => {
+      if (edgeInfo.from) {
+        if (edgeInfo.isIntraStage) {
+          edgeIds.push(`${edgeInfo.from.stepIndex}-${info.node}-colored`);
+        } else {
+          const prevGraph = this.graphs[edgeInfo.from.stageIndex];
+          const prevEdgeId = `${
+            edgeInfo.from.stepIndex
+          }-${END_NODE_ID}-colored`;
+          prevGraph.updateEdges([prevEdgeId], inputColorOptions);
+          updatedInterStageArrows[edgeInfo.from.stageIndex] = "from";
+          edgeIds.push(`${START_NODE_ID}-${info.node}-colored`);
+        }
       }
-    });
+      return edgeIds;
+    }, []);
+    graph.updateEdges(intraStageInputEdges, inputColorOptions);
 
     const outputColorOptions = {
       color: {
@@ -322,45 +308,44 @@ class PipelineViz extends React.Component {
       width: 2,
       hidden: false,
     };
-
-    const intraStageOutputEdges = this.getEdgesBetweenNodes(
-      graph,
-      info.node,
-      null,
-      "colored"
-    );
-    graph.updateEdges(intraStageOutputEdges, outputColorOptions);
-
     const outputEdgesInfo = this.getEdgeInfoFor(
       stageIndex,
       info.node,
       "output"
     );
-    outputEdgesInfo.forEach(edgeInfo => {
-      if (!edgeInfo.isIntraStage && edgeInfo.to) {
-        const nextGraph = this.graphs[edgeInfo.to.stageIndex];
-        const nextGraphEdgeIds = this.getEdgesBetweenNodes(
-          nextGraph,
-          START_NODE_ID,
-          edgeInfo.to.stepIndex,
-          "colored"
-        );
-        nextGraph.updateEdges(nextGraphEdgeIds, outputColorOptions);
-        updatedInterStageArrows[edgeInfo.to.stageIndex - 1] = "to";
-      }
-    });
+    const intraStageOutputEdges = outputEdgesInfo.reduce(
+      (edgeIds, edgeInfo) => {
+        if (edgeInfo.to) {
+          if (edgeInfo.isIntraStage) {
+            edgeIds.push(`${info.node}-${edgeInfo.to.stepIndex}-colored`);
+          } else {
+            const nextGraph = this.graphs[edgeInfo.to.stageIndex];
+            const nextGraphEdgeId = `${START_NODE_ID}-${
+              edgeInfo.to.stepIndex
+            }-colored`;
+            nextGraph.updateEdges([nextGraphEdgeId], outputColorOptions);
+            updatedInterStageArrows[edgeInfo.to.stageIndex - 1] = "to";
+            edgeIds.push(`${info.node}-${END_NODE_ID}-colored`);
+          }
+        }
+        return edgeIds;
+      },
+      []
+    );
+    graph.updateEdges(intraStageOutputEdges, outputColorOptions);
 
     this.graphs.forEach(graph => this.centerEndNodeVertically(graph));
-
     this.setState({
       interStageArrows: updatedInterStageArrows,
     });
   }
 
   handleNodeBlur = () => {
-    this.graphs.forEach(graph => {
-      const allEdges = this.getEdgesBetweenNodes(graph, null, null, "colored");
-      graph.updateEdges(allEdges, { hidden: true });
+    this.graphs.forEach((graph, i) => {
+      const allColoredEdges = graph.getEdges(edge => {
+        return edge.id.match(/-colored$/g);
+      });
+      graph.updateEdges(allColoredEdges, { hidden: true });
       this.centerEndNodeVertically(graph);
     });
 
