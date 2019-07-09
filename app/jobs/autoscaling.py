@@ -391,7 +391,7 @@ class ASG(object):
         def count_running_alignment_jobs():
             ''' returns a map of draining instance IDs to number of jobs still running on the instance '''
             instance_ids = self.draining_instances
-            count_dict = {id: 0 for id in instance_ids}
+            count_dict = defaultdict(int, {id: 0 for id in instance_ids})
             expired_jobs = []
             for item in self.tags:
                 if item['Key'].startswith(self.job_tag_prefix):
