@@ -1,5 +1,8 @@
 import React from "react";
-import { shallow } from "enzyme";
+import { shallow, configure } from "enzyme";
+import Adapter from "enzyme-adapter-react-16";
+
+configure({ adapter: new Adapter() });
 
 import Dumb from "./Dumb";
 
@@ -8,7 +11,7 @@ describe("Dumb", () => {
     it("renders correctly", () => {
       const props = {
         text1: "test-1",
-        text2: "test-2"
+        text2: "test-2",
       };
 
       const wrapper = shallow(<Dumb {...props} />);

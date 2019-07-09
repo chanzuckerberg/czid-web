@@ -1,9 +1,19 @@
 {
-  "presets": ["env", "react"],
+  "presets": [
+    [
+      "@babel/preset-env", {
+        "useBuiltIns": "entry"
+      }
+    ],
+    "@babel/preset-react"
+  ],
   "plugins": [
-    "transform-class-properties",
-    "transform-es2015-arrow-functions",
-    "transform-object-rest-spread"
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-proposal-export-default-from",
+    "@babel/plugin-proposal-object-rest-spread",
+    "@babel/transform-arrow-functions",
+    "@babel/plugin-transform-modules-commonjs",
+    "@babel/plugin-transform-regenerator",
+    "@babel/plugin-transform-runtime"
   ]
 }
-
