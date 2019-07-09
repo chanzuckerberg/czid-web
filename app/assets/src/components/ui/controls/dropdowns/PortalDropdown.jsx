@@ -72,7 +72,6 @@ class PortalDropdown extends React.Component {
         ? this.state.open
         : this.props.open;
 
-    console.log("open: ", open);
     return (
       <Manager>
         <Reference>
@@ -96,7 +95,7 @@ class PortalDropdown extends React.Component {
                 onClick={this.toggleOpen}
               >
                 {React.cloneElement(this.props.trigger, {
-                  active: open || undefined,
+                  active: open,
                 })}
                 {!this.props.hideArrow && (
                   <i className={cx(cs.arrow, this.state.open && cs.active)} />
