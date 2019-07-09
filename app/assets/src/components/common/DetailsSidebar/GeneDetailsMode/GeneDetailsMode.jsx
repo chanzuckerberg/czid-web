@@ -12,7 +12,7 @@ const SOURCE_GOOGLE_SCHOLAR = "googlescholar";
 const SOURCE_NCBI_REF_GENE = "ncbirefgene";
 
 const URL_CARD_ARO = "https://card.mcmaster.ca/aro/";
-const URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/?term=";
+const URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/";
 const URL_GOOGLE_SCHOLAR = "https://scholar.google.com/scholar?q=";
 const URL_NCBI_REF_GENE =
   "https://www.ncbi.nlm.nih.gov/pathogens/isolates#/refgene/";
@@ -21,6 +21,7 @@ const CARD_FAMILY = "AMR Gene Family";
 const CARD_CLASS = "Drug Class";
 const CARD_MECHANISM = "Resistance Mechanism";
 const CARD_SYNONYMS = "Synonym(s)";
+const CARD_PUBLICATIONS = "Publications";
 
 // xml tags used in the aro owl xml file
 const XML_OWL_CLASSES = "owl:Class";
@@ -66,6 +67,7 @@ export default class GeneDetailsMode extends React.Component {
       geneFamily: "---",
       drugClass: "---",
       resistanceMechanism: "---",
+      publications: "---",
     };
 
     let cardOntologyEntry, latestCARDIndex;
@@ -90,16 +92,15 @@ export default class GeneDetailsMode extends React.Component {
       return;
     }
 
-    updatedOntology.label = cardOntologyEntry.label;
-    updatedOntology.description = cardOntologyEntry.description;
-    updatedOntology.accession = cardOntologyEntry.accession.split(":")[1];
+    Object.keys(cardOntologyEntry).forEach(
+      property => (updatedOntology[property] = cardOntologyEntry[property])
+    );
     try {
       const cardRequest = await getAroEntry(updatedOntology.accession);
       const cardInfo = this.parseAroEntry(cardRequest.html);
-      updatedOntology.geneFamily = cardInfo.geneFamily || "---";
-      updatedOntology.drugClass = cardInfo.drugClass;
-      updatedOntology.resistanceMechanism = cardInfo.resistanceMechanism;
-      updatedOntology.synonyms = cardInfo.synonyms || "---";
+      Object.keys(cardInfo).forEach(
+        property => (updatedOntology[property] = cardInfo[property])
+      );
     } catch (err) {
       console.error(err);
     }
@@ -167,9 +168,9 @@ export default class GeneDetailsMode extends React.Component {
     cardOntologyEntry.description = owlClass.getElementsByTagName(
       XML_OWL_DESCRIPTION
     )[0].textContent;
-    cardOntologyEntry.accession = owlClass.getElementsByTagName(
-      XML_OWL_ACCESSION
-    )[0].textContent;
+    cardOntologyEntry.accession = owlClass
+      .getElementsByTagName(XML_OWL_ACCESSION)[0]
+      .textContent.split(":")[1];
     return cardOntologyEntry;
   }
 
@@ -202,6 +203,14 @@ export default class GeneDetailsMode extends React.Component {
         case CARD_SYNONYMS: {
           geneInfo.synonyms = value;
         }
+        case CARD_PUBLICATIONS: {
+          const publications = [];
+          const pubList = row.childNodes[1];
+          pubList.childNodes.forEach(publication =>
+            publications.push(publication.innerText)
+          );
+          geneInfo.publications = publications;
+        }
         default: {
           break;
         }
@@ -227,7 +236,7 @@ export default class GeneDetailsMode extends React.Component {
         return URL_CARD_ARO + ontology.accession;
       }
       case SOURCE_PUBMED: {
-        return URL_PUBMED + geneName;
+        return URL_PUBMED + "?term=" + geneName;
       }
       case SOURCE_GOOGLE_SCHOLAR: {
         return URL_GOOGLE_SCHOLAR + geneName;
@@ -292,7 +301,7 @@ export default class GeneDetailsMode extends React.Component {
       <div>
         <div className={cs.text}>
           <div className={cs.textInner}>
-            Synonyms: <em>{ontology.synonyms}</em>
+            {CARD_SYNONYMS}: <em>{ontology.synonyms}</em>
           </div>
         </div>
         <div className={cs.subtitle}>Description</div>
@@ -301,18 +310,20 @@ export default class GeneDetailsMode extends React.Component {
         </div>
         {!collapseOntology && (
           <div>
-            <div className={cs.subtitle}>AMR Gene Family</div>
+            <div className={cs.subtitle}>{CARD_FAMILY}</div>
             <div className={cs.text}>
               <div className={cs.textInner}>{ontology.geneFamily}</div>
             </div>
-            <div className={cs.subtitle}>Drug Class</div>
+            <div className={cs.subtitle}>{CARD_CLASS}</div>
             <div className={cs.text}>
               <div className={cs.textInner}>{ontology.drugClass}</div>
             </div>
-            <div className={cs.subtitle}>Resistance Mechanism</div>
+            <div className={cs.subtitle}>{CARD_MECHANISM}</div>
             <div className={cs.text}>
               <div className={cs.textInner}>{ontology.resistanceMechanism}</div>
             </div>
+            <div className={cs.subtitle}>{CARD_PUBLICATIONS}</div>
+            <div className={cs.text}>{this.renderPublications()}</div>
           </div>
         )}
         {collapseOntology && (
@@ -325,6 +336,29 @@ export default class GeneDetailsMode extends React.Component {
         </div>
       </div>
     );
+  }
+
+  renderPublications() {
+    const { ontology } = this.state;
+    return ontology.publications.map(publication => {
+      const citation = /.*(?=(\(PMID))/.exec(publication)[0];
+      const pmidText = /(PMID)\s[0-9]*/.exec(publication)[0];
+      const pubmedId = pmidText.split(" ")[1];
+      return (
+        <div className={cs.textInner} key={pubmedId}>
+          {citation}
+          <div className={cs.link}>
+            (<a
+              href={URL_PUBMED + pubmedId}
+              className={cs.link}
+              target="_blank"
+            >
+              {pmidText}
+            </a>)
+          </div>
+        </div>
+      );
+    });
   }
 
   renderGeneContents() {
@@ -357,7 +391,7 @@ export default class GeneDetailsMode extends React.Component {
           <ul className={cs.linksList}>
             <li className={cs.link}>
               <a href={this.generateLinkTo(SOURCE_PUBMED)} target="_blank">
-                Pubmed
+                Pubmed Search
               </a>
             </li>
             <li className={cs.link}>
@@ -365,7 +399,7 @@ export default class GeneDetailsMode extends React.Component {
                 href={this.generateLinkTo(SOURCE_GOOGLE_SCHOLAR)}
                 target="_blank"
               >
-                Google Scholar
+                Google Scholar Search
               </a>
             </li>
           </ul>
