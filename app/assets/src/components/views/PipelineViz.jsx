@@ -1,7 +1,8 @@
 import React from "react";
-import { mapValues } from "lodash/fp";
+import { groupBy } from "lodash/fp";
 import PropTypes from "prop-types";
 import { PanZoom } from "react-easy-panzoom";
+import cx from "classnames";
 
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
@@ -25,12 +26,16 @@ class PipelineViz extends React.Component {
     ];
 
     this.pipelineVersion = this.props.stageResults.pipeline_version;
-    this.stagesData = this.getStagesData();
+    this.edgeFileData = this.createEdgeFileData();
+    this.stageStepData = this.createStageStepData();
+    this.populateStageStepDataEdges();
+
     this.graphs = [];
     this.graphContainers = [];
 
     this.state = {
       stagesOpened: [true, true, true, true],
+      interStageArrows: ["", "", ""],
       sidebarVisible: false,
       sidebarParams: {},
     };
@@ -49,78 +54,67 @@ class PipelineViz extends React.Component {
       .join("/");
   }
 
-  getStepDataAtIndices(stageIndex, stepIndex) {
-    return this.stagesData[stageIndex].steps[stepIndex];
+  getStepDataAtIndices({ stageIndex, stepIndex }) {
+    return this.stageStepData[stageIndex].steps[stepIndex];
   }
 
-  getStagesData() {
+  getEdgeInfoFor(stageIndex, stepIndex, direction) {
+    const stepData = this.getStepDataAtIndices({
+      stageIndex: stageIndex,
+      stepIndex: stepIndex,
+    });
+    switch (direction) {
+      case "input":
+        return stepData.inputEdges.map(edgeId => this.edgeFileData[edgeId]);
+      case "output":
+        return stepData.outputEdges.map(edgeId => this.edgeFileData[edgeId]);
+      default:
+        return stepData.inputEdges
+          .concat(stepData.outputEdges)
+          .map(edgeId => this.edgeFileData[edgeId]);
+    }
+  }
+
+  createEdgeFileData() {
+    const infoPerFilePath = this.generateInfoPerFilePath();
+
+    // Group files with the same starting node and ending node
+    const filesGroupedByMatchingStartEndNodes = Object.values(
+      groupBy(filePathInfo => {
+        return JSON.stringify({ from: filePathInfo.from, to: filePathInfo.to });
+      }, infoPerFilePath)
+    );
+
+    // Coalesce redundant information (starting node and ending node)
     // TODO(ezhong): Include file download urls once passed up from backend.
-    const stageResults = this.stageResultsWithModifiedStepNames();
-    const filePathToOutputStep = this.generateFilePathToOutputStep();
-
-    const stages = Object.keys(stageResults).map(stageName => {
-      const rawStageData = stageResults[stageName];
-      const steps = rawStageData.steps.map(step => {
-        const name = step.class;
-
-        const inputInfo = step.in
-          .map(inTarget => {
-            const inTargetFiles = rawStageData.targets[inTarget].map(
-              fileName => {
-                const filePathSections =
-                  inTarget in rawStageData.given_targets
-                    ? [rawStageData.given_targets[inTarget].s3_dir]
-                    : [rawStageData.output_dir_s3, this.pipelineVersion];
-                filePathSections.push(fileName);
-
-                const filePath = this.createFilePath(filePathSections);
-                const outputStepInfo = filePathToOutputStep[filePath];
-                return {
-                  fileName: fileName,
-                  url: "",
-                  ...(outputStepInfo
-                    ? {
-                        fromStepIndex: outputStepInfo.stepIndex,
-                        fromStageIndex: outputStepInfo.stageIndex,
-                      }
-                    : {}),
-                };
-              }
-            );
-            return inTargetFiles;
-          })
-          .flat();
-
-        const outputInfo = rawStageData.targets[step.out].map(fileName => {
-          return {
-            fileName: fileName,
-            url: "",
-          };
-        });
-
+    return filesGroupedByMatchingStartEndNodes.map(filesOnSameEdge => {
+      const from = filesOnSameEdge[0].from;
+      const to = filesOnSameEdge[0].to;
+      const fileInfo = filesOnSameEdge.map(fileInfo => {
         return {
-          name: name,
-          inputInfo: inputInfo,
-          outputInfo: outputInfo,
+          fileName: fileInfo.fileName,
+          filePath: fileInfo.filePath,
+          url: "",
         };
       });
 
       return {
-        stageName: stageName,
-        jobStatus: stageResults[stageName].job_status,
-        steps: steps,
+        from: from,
+        to: to,
+        isIntraStage: from && to && from.stageIndex == to.stageIndex,
+        files: fileInfo,
       };
     });
-
-    return stages;
   }
 
-  generateFilePathToOutputStep() {
+  generateInfoPerFilePath() {
     const { stageResults } = this.props;
-    const filePathToOutputStep = {};
+
+    const filePathToOutputtingStep = {};
     this.stageNames.forEach((stageName, stageIndex) => {
       const stageData = stageResults.stages[stageName];
       const targets = stageData.targets;
+
       stageData.steps.forEach((step, stepIndex) => {
         targets[step.out].forEach(fileName => {
           const filePath = this.createFilePath([
@@ -128,75 +122,240 @@ class PipelineViz extends React.Component {
             this.pipelineVersion,
             fileName,
           ]);
-          filePathToOutputStep[filePath] = {
-            stageIndex: stageIndex,
-            stepIndex: stepIndex,
+          filePathToOutputtingStep[filePath] = {
             fileName: fileName,
+            from: {
+              stageIndex: stageIndex,
+              stepIndex: stepIndex,
+            },
           };
         });
       });
     });
-    return filePathToOutputStep;
+
+    const infoPerFilePath = [];
+    const remainingOutputFiles = new Set(Object.keys(filePathToOutputtingStep));
+    this.stageNames.forEach((stageName, stageIndex) => {
+      const stageData = stageResults.stages[stageName];
+      const targets = stageData.targets;
+
+      stageData.steps.forEach((step, stepIndex) => {
+        step.in.forEach(inTarget => {
+          targets[inTarget].forEach(fileName => {
+            const filePathSections =
+              inTarget in stageData.given_targets
+                ? [stageData.given_targets[inTarget].s3_dir]
+                : [stageData.output_dir_s3, this.pipelineVersion];
+            filePathSections.push(fileName);
+
+            const filePath = this.createFilePath(filePathSections);
+            remainingOutputFiles.delete(filePath);
+
+            infoPerFilePath.push({
+              filePath: filePath,
+              fileName: fileName,
+              to: {
+                stageIndex: stageIndex,
+                stepIndex: stepIndex,
+              },
+              ...(filePathToOutputtingStep[filePath] || {}),
+            });
+          });
+        });
+      });
+    });
+
+    // Include output files that aren't input to any steps.
+    Array.from(remainingOutputFiles).forEach(filePath => {
+      infoPerFilePath.push({
+        filePath: filePath,
+        ...filePathToOutputtingStep[filePath],
+      });
+    });
+
+    return infoPerFilePath;
   }
 
-  stageResultsWithModifiedStepNames() {
-    // Strips 'PipelineStep[Run/Generate]' from front of each step name.
-    // TODO(ezhong): Consider adding 'name' field to dag_json later.
+  createStageStepData() {
     const { stageResults } = this.props;
-    const stagesWithModifiedNames = mapValues(stageData => {
-      const modifiedStageData = Object.assign({}, stageData);
-      modifiedStageData.steps = modifiedStageData.steps.map(step => {
+
+    const stages = this.stageNames.map(stageName => {
+      const stageData = stageResults.stages[stageName];
+      const steps = stageData.steps.map(step => {
         return {
-          ...step,
-          class: step.class.replace(/^(PipelineStep(Run|Generate)?)/, ""),
+          name: this.getModifiedStepName(step.class),
+          inputEdges: [],
+          outputEdges: [],
         };
       });
-      return modifiedStageData;
-    }, stageResults.stages);
-    return stagesWithModifiedNames;
+      return {
+        stageName: stageName,
+        jobStatus: stageData.job_status,
+        steps: steps,
+      };
+    });
+
+    return stages;
   }
 
-  handleMouseWheelZoom = e => {
-    const { zoomChangeInterval } = this.props;
-    const zoomChange = (e.deltaY < 0 ? 1 : -1) * zoomChangeInterval;
-    this.setState({ zoom: this.state.zoom + zoomChange });
-  };
+  populateStageStepDataEdges() {
+    this.edgeFileData.forEach((edgeData, edgeIndex) => {
+      const { from, to } = edgeData;
+      from && this.getStepDataAtIndices(from).outputEdges.push(edgeIndex);
+      to && this.getStepDataAtIndices(to).inputEdges.push(edgeIndex);
+    });
+  }
+
+  getModifiedStepName(stepClassName) {
+    return stepClassName.replace(/^(PipelineStep(Run|Generate)?)/, "");
+  }
 
   handleStepClick(stageIndex, info) {
     const clickedNodeId = info.nodes[0];
     if (clickedNodeId == null) {
       return;
     }
+    this.graphs.forEach((graph, i) => i != stageIndex && graph.unselectAll());
 
-    const stepData = this.getStepDataAtIndices(stageIndex, clickedNodeId);
-    const inputFiles = stepData.inputInfo.map(input => {
-      const fileInfo = {
-        fileName: input.fileName,
-        url: input.url,
+    const inputEdgesInfo = this.getEdgeInfoFor(
+      stageIndex,
+      clickedNodeId,
+      "input"
+    );
+    const inputInfo = inputEdgesInfo.map(edgeInfo => {
+      const fromStepName = edgeInfo.from
+        ? this.getStepDataAtIndices(edgeInfo.from).name
+        : "";
+      return {
+        fromStepName: fromStepName,
+        files: edgeInfo.files,
       };
-      if (input.fromStageIndex != null && input.fromStepIndex != null) {
-        fileInfo.fromStepName = this.getStepDataAtIndices(
-          input.fromStageIndex,
-          input.fromStepIndex
-        ).name;
-      } else {
-        fileInfo.fromStepName = "";
-      }
-      return fileInfo;
     });
 
+    const seenFiles = new Set();
+    const outputEdgesInfo = this.getEdgeInfoFor(
+      stageIndex,
+      clickedNodeId,
+      "output"
+    );
+    const outputInfo = outputEdgesInfo
+      .map(edgeInfo => {
+        // Remove duplicate output file listings
+        return edgeInfo.files.reduce((files, fileInfo) => {
+          if (!seenFiles.has(fileInfo.fileName)) {
+            seenFiles.add(fileInfo.fileName);
+            files.push(fileInfo);
+          }
+          return files;
+        }, []);
+      })
+      .flat();
+
+    const stepName = this.getStepDataAtIndices({
+      stageIndex: stageIndex,
+      stepIndex: clickedNodeId,
+    }).name;
     this.setState({
       sidebarVisible: true,
       sidebarParams: {
-        stepName: stepData.name,
+        stepName: stepName,
         description: "",
-        inputFiles: inputFiles,
-        outputFiles: stepData.outputInfo,
+        inputFiles: inputInfo,
+        outputFiles: outputInfo,
       },
     });
   }
 
+  handleNodeHover(stageIndex, info) {
+    const { highlightColor, inputEdgeColor } = this.props;
+    const graph = this.graphs[stageIndex];
+    const updatedInterStageArrows = [...this.state.interStageArrows];
+
+    const inputColorOptions = {
+      color: {
+        color: inputEdgeColor,
+        hover: inputEdgeColor,
+        inherit: false,
+      },
+      width: 2,
+      hidden: false,
+    };
+    const inputEdgesInfo = this.getEdgeInfoFor(stageIndex, info.node, "input");
+    const intraStageInputEdges = inputEdgesInfo.reduce((edgeIds, edgeInfo) => {
+      if (edgeInfo.from) {
+        if (edgeInfo.isIntraStage) {
+          edgeIds.push(`${edgeInfo.from.stepIndex}-${info.node}-colored`);
+        } else {
+          const prevGraph = this.graphs[edgeInfo.from.stageIndex];
+          const prevEdgeId = `${
+            edgeInfo.from.stepIndex
+          }-${END_NODE_ID}-colored`;
+          prevGraph.updateEdges([prevEdgeId], inputColorOptions);
+          updatedInterStageArrows[edgeInfo.from.stageIndex] = "from";
+          edgeIds.push(`${START_NODE_ID}-${info.node}-colored`);
+        }
+      }
+      return edgeIds;
+    }, []);
+    graph.updateEdges(intraStageInputEdges, inputColorOptions);
+
+    const outputColorOptions = {
+      color: {
+        color: highlightColor,
+        hover: highlightColor,
+        inherit: false,
+      },
+      width: 2,
+      hidden: false,
+    };
+    const outputEdgesInfo = this.getEdgeInfoFor(
+      stageIndex,
+      info.node,
+      "output"
+    );
+    const intraStageOutputEdges = outputEdgesInfo.reduce(
+      (edgeIds, edgeInfo) => {
+        if (edgeInfo.to) {
+          if (edgeInfo.isIntraStage) {
+            edgeIds.push(`${info.node}-${edgeInfo.to.stepIndex}-colored`);
+          } else {
+            const nextGraph = this.graphs[edgeInfo.to.stageIndex];
+            const nextGraphEdgeId = `${START_NODE_ID}-${
+              edgeInfo.to.stepIndex
+            }-colored`;
+            nextGraph.updateEdges([nextGraphEdgeId], outputColorOptions);
+            updatedInterStageArrows[edgeInfo.to.stageIndex - 1] = "to";
+            edgeIds.push(`${info.node}-${END_NODE_ID}-colored`);
+          }
+        }
+        return edgeIds;
+      },
+      []
+    );
+    graph.updateEdges(intraStageOutputEdges, outputColorOptions);
+
+    this.graphs.forEach(graph => this.centerEndNodeVertically(graph));
+    this.setState({
+      interStageArrows: updatedInterStageArrows,
+    });
+  }
+
+  handleNodeBlur = () => {
+    this.graphs.forEach((graph, i) => {
+      const allColoredEdges = graph.getEdges(edge => {
+        return edge.id.match(/-colored$/g);
+      });
+      graph.updateEdges(allColoredEdges, { hidden: true });
+      this.centerEndNodeVertically(graph);
+    });
+
+    this.setState({
+      interStageArrows: ["", "", ""],
+    });
+  };
+
   closeSidebar = () => {
+    this.graphs.forEach(graph => graph.unselectAll());
     this.setState({
       sidebarVisible: false,
     });
@@ -208,8 +367,8 @@ class PipelineViz extends React.Component {
     this.setState({ stagesOpened: updatedStagesOpened });
   }
 
-  generateNodeData(index, edgeData) {
-    const stepData = this.stagesData[index].steps;
+  generateNodeData(stageIndex, edgeData) {
+    const stepData = this.stageStepData[stageIndex].steps;
     const nodeData = stepData.map((step, i) => {
       return { id: i, label: step.name };
     });
@@ -222,96 +381,129 @@ class PipelineViz extends React.Component {
   }
 
   addHierarchicalLevelsToNodes(nodeData, edgeData) {
-    // This method assumes that the steps are topologically sorted already,
-    // in that each node's parent all appear in the array before it.
     const nodeToCurrentLevel = {};
+    const fromToToEdgeMap = {};
     nodeData.forEach(node => {
       nodeToCurrentLevel[node.id] = 1;
+      fromToToEdgeMap[node.id] = [];
     });
 
     edgeData.forEach(edge => {
-      const newLevel = nodeToCurrentLevel[edge.from] + 1;
-      if (newLevel > nodeToCurrentLevel[edge.to]) {
-        nodeToCurrentLevel[edge.to] = newLevel;
-        if (edge.to != END_NODE_ID) {
-          nodeToCurrentLevel[END_NODE_ID] = Math.max(
-            nodeToCurrentLevel[END_NODE_ID],
-            newLevel + 1
-          );
-        }
-      }
+      fromToToEdgeMap[edge.from].push(edge.to);
     });
+
+    const bfs = [START_NODE_ID];
+    while (bfs.length) {
+      const currentNode = bfs.shift();
+
+      // Update children and add to back of bfs queue
+      const newLevel = nodeToCurrentLevel[currentNode] + 1;
+      fromToToEdgeMap[currentNode].forEach(toNodeId => {
+        if (newLevel > nodeToCurrentLevel[toNodeId]) {
+          nodeToCurrentLevel[toNodeId] = newLevel;
+          if (toNodeId != END_NODE_ID) {
+            nodeToCurrentLevel[END_NODE_ID] = Math.max(
+              nodeToCurrentLevel[END_NODE_ID],
+              newLevel + 1
+            );
+          }
+        }
+        bfs.push(toNodeId);
+      });
+    }
 
     nodeData.forEach(node => {
       node.level = nodeToCurrentLevel[node.id];
     });
   }
 
-  generateIntraEdgeData(index) {
-    const stepData = this.stagesData[index].steps;
+  generateEdgeData(stageIndex) {
+    const stepData = this.stageStepData[stageIndex].steps;
 
-    const intraEdgeData = stepData
-      .map((step, currStepIndex) => {
-        const connectedNodes = new Set();
-        return step.inputInfo.reduce((edges, inputFile) => {
-          const fromNode =
-            inputFile.fromStageIndex == index
-              ? inputFile.fromStepIndex
-              : START_NODE_ID;
-
-          if (!connectedNodes.has(fromNode)) {
-            connectedNodes.add(fromNode);
-            edges.push({ from: fromNode, to: currStepIndex });
+    const regularColoringEdgeData = stepData
+      .map((_, currStepIndex) => {
+        let connectedToEndNode = false;
+        const outputEdgeInfo = this.getEdgeInfoFor(
+          stageIndex,
+          currStepIndex,
+          "output"
+        );
+        const outputEdges = outputEdgeInfo.reduce((edges, edgeInfo) => {
+          if (edgeInfo.isIntraStage) {
+            edges.push({
+              from: currStepIndex,
+              to: edgeInfo.to.stepIndex,
+              id: `${currStepIndex}-${edgeInfo.to.stepIndex}`,
+            });
+          } else if (!connectedToEndNode && edgeInfo.to) {
+            connectedToEndNode = true;
+            edges.push({
+              from: currStepIndex,
+              to: END_NODE_ID,
+              id: `${currStepIndex}-${END_NODE_ID}`,
+            });
           }
           return edges;
         }, []);
+
+        let connectedToStartNode = false;
+        const inputEdgeInfo = this.getEdgeInfoFor(
+          stageIndex,
+          currStepIndex,
+          "input"
+        );
+        const inputEdges = inputEdgeInfo.reduce((edges, edgeInfo) => {
+          if (!edgeInfo.isIntraStage && !connectedToStartNode) {
+            connectedToStartNode = true;
+            edges.push({
+              from: START_NODE_ID,
+              to: currStepIndex,
+              id: `${START_NODE_ID}-${currStepIndex}`,
+            });
+          }
+          return edges;
+        }, []);
+
+        return outputEdges.concat(inputEdges);
       })
       .flat();
 
-    return intraEdgeData;
+    const coloringEdgeData = regularColoringEdgeData.map(edge => {
+      return Object.assign(
+        { ...edge },
+        {
+          id: `${edge.from}-${edge.to}-colored`,
+          hidden: true,
+        }
+      );
+    });
+
+    return regularColoringEdgeData.concat(
+      coloringEdgeData,
+      this.generateHiddenEdges(stageIndex)
+    );
   }
 
-  generateInterEdgeData(index) {
-    if (index == this.stagesData.length - 1) {
-      // For final stage, create hidden edges to final node for vertical centering of nodes.
-      const stepData = this.stagesData[index].steps;
-      return stepData.map((_, i) => {
+  generateHiddenEdges(stageIndex) {
+    const hiddenEdgeColorOption = {
+      color: {
+        opacity: 0,
+        inherit: false,
+      },
+    };
+
+    // For last stage, connect all nodes to end node for centering
+    if (stageIndex == this.stageNames.length - 1) {
+      return this.stageStepData[stageIndex].steps.map((_, stepIndex) => {
         return {
-          from: i,
+          from: stepIndex,
           to: END_NODE_ID,
-          color: {
-            opacity: 0,
-            inherit: false,
-          },
-          chosen: false,
+          id: `${stepIndex}-${END_NODE_ID}-hidden`,
+          ...hiddenEdgeColorOption,
         };
       });
-    } else {
-      // Create edges to output node if its output files appear in next stage's inputs.
-      const nextStageData = this.stagesData[index + 1];
-      const interEdgeData = nextStageData.steps
-        .map((step, nextNodeId) => {
-          const connectedNodes = new Set();
-          return step.inputInfo.reduce((edges, inputFileInfo) => {
-            if (
-              inputFileInfo.fromStageIndex == index &&
-              !connectedNodes.has(inputFileInfo.fromStepIndex)
-            ) {
-              // TODO(ezhong): Interactions between output of current stage (inputFileInfo.fromStepIndex)
-              // and input of next stage (nextNodeId) in visualization should be setup here
-              connectedNodes.add(inputFileInfo.fromStepIndex);
-              edges.push({
-                from: inputFileInfo.fromStepIndex,
-                to: END_NODE_ID,
-              });
-            }
-            return edges;
-          }, []);
-        })
-        .flat();
-
-      return interEdgeData;
     }
+    return [];
   }
 
   centerEndNodeVertically(graph) {
@@ -321,37 +513,48 @@ class PipelineViz extends React.Component {
     graph.moveNodeToPosition(END_NODE_ID, xEndNodePos, yStartNodePos);
   }
 
-  closeNonativeSteps() {
-    this.stagesData.forEach((stageData, i) => {
-      const graph = this.graphs[i];
-      if (stageData.jobStatus !== "STARTED") {
-        graph.afterDrawingOnce(() => {
-          this.toggleStage(i);
-        });
-      }
-    });
+  closeIfNonActiveStage(graph, stageIndex) {
+    const stageData = this.stageStepData[stageIndex];
+    if (stageData.jobStatus != "STARTED") {
+      graph.afterDrawingOnce(() => this.toggleStage(stageIndex));
+    }
   }
 
   drawGraphs() {
     this.stageNames.forEach((_, i) => {
       this.drawStageGraph(i);
     });
-    this.closeNonativeSteps();
   }
 
   drawStageGraph(index) {
-    const { nodeColor, backgroundColor, edgeColor } = this.props;
+    const {
+      nodeColor,
+      backgroundColor,
+      edgeColor,
+      highlightColor,
+    } = this.props;
+
     const container = this.graphContainers[index];
 
-    const edgeData = this.generateIntraEdgeData(index).concat(
-      this.generateInterEdgeData(index)
-    );
+    const edgeData = this.generateEdgeData(index);
     const nodeData = this.generateNodeData(index, edgeData);
 
     const options = {
       nodes: {
-        borderWidth: 0,
-        color: nodeColor,
+        borderWidth: 1,
+        borderWidthSelected: 1,
+        color: {
+          background: nodeColor,
+          border: nodeColor,
+          hover: {
+            border: highlightColor,
+            background: nodeColor,
+          },
+          highlight: {
+            border: highlightColor,
+            background: nodeColor,
+          },
+        },
         shape: "box",
         shapeProperties: {
           borderRadius: 6,
@@ -365,12 +568,17 @@ class PipelineViz extends React.Component {
         font: {
           face: "Open Sans",
         },
+        labelHighlightBold: false,
       },
       groups: {
         startEndNodes: {
           shape: "dot",
           size: 1,
-          color: backgroundColor,
+          color: {
+            background: backgroundColor,
+            border: backgroundColor,
+            inherit: false,
+          },
           fixed: {
             x: true,
             y: true,
@@ -382,14 +590,19 @@ class PipelineViz extends React.Component {
           to: {
             enabled: true,
             type: "arrow",
-            scaleFactor: 0.8,
+            scaleFactor: 0.85,
           },
         },
         smooth: {
           type: "cubicBezier",
           roundness: 0.8,
         },
-        color: edgeColor,
+        color: {
+          color: edgeColor,
+          inherit: false,
+        },
+        selectionWidth: 0,
+        hoverWidth: 0,
       },
       layout: {
         hierarchical: {
@@ -407,8 +620,12 @@ class PipelineViz extends React.Component {
         zoomView: false,
         dragView: false,
         dragNodes: false,
+        hover: true,
+        selectConnectedEdges: false,
       },
       onClick: info => this.handleStepClick(index, info),
+      onNodeHover: info => this.handleNodeHover(index, info),
+      onNodeBlur: this.handleNodeBlur,
     };
 
     const currStageGraph = new NetworkGraph(
@@ -419,6 +636,7 @@ class PipelineViz extends React.Component {
     );
     currStageGraph.minimizeWidthGivenScale(1.0);
     this.centerEndNodeVertically(currStageGraph);
+    this.closeIfNonActiveStage(currStageGraph, index);
 
     this.graphs.push(currStageGraph);
   }
@@ -450,23 +668,37 @@ class PipelineViz extends React.Component {
     );
   }
 
-  renderStageArrow() {
+  renderStageArrow(arrowValue) {
+    let coloring;
+    switch (arrowValue) {
+      case "from":
+        coloring = cs.fromColoring;
+        break;
+      case "to":
+        coloring = cs.toColoring;
+        break;
+      default:
+        coloring = "";
+    }
+
     return (
       <div className={cs.stageArrow}>
-        <div className={cs.stageArrowBody} />
-        <PipelineStageArrowheadIcon className={cs.stageArrowHead} />
+        <div className={cx(cs.stageArrowBody, coloring)} />
+        <PipelineStageArrowheadIcon
+          className={cx(cs.stageArrowHead, coloring)}
+        />
       </div>
     );
   }
 
   render() {
     const { zoomMin, zoomMax } = this.props;
-    const { sidebarVisible, sidebarParams } = this.state;
+    const { sidebarVisible, sidebarParams, interStageArrows } = this.state;
 
     const stageContainers = this.stageNames.map((stageName, i) => {
       return (
         <div key={stageName} className={cs.stageAndArrow}>
-          {i > 0 && this.renderStageArrow()}
+          {i > 0 && this.renderStageArrow(interStageArrows[i - 1])}
           {this.renderStageContainer(stageName, i)}
         </div>
       );
@@ -502,18 +734,24 @@ class PipelineViz extends React.Component {
 }
 
 PipelineViz.propTypes = {
+  admin: PropTypes.bool,
   stageResults: PropTypes.object,
   backgroundColor: PropTypes.string,
   nodeColor: PropTypes.string,
   edgeColor: PropTypes.string,
+  highlightColor: PropTypes.string,
+  inputEdgeColor: PropTypes.string,
   zoomMin: PropTypes.number,
   zoomMax: PropTypes.number,
 };
 
 PipelineViz.defaultProps = {
+  admin: false,
   backgroundColor: "#f8f8f8",
   nodeColor: "#eaeaea",
   edgeColor: "#999999",
+  highlightColor: "#3867fa",
+  inputEdgeColor: "#000000",
   zoomMin: 0.5,
   zoomMax: 3,
 };

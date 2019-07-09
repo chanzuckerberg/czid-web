@@ -2,13 +2,16 @@ import { DataSet, Network } from "visjs-network";
 
 export default class NetworkGraph {
   constructor(container, nodeData, edgeData, options) {
-    const { onClick, ...networkOptions } = options;
+    const { onClick, onNodeHover, onNodeBlur, ...networkOptions } = options;
     this.data = {
       nodes: new DataSet(nodeData),
       edges: new DataSet(edgeData),
     };
     this.graph = new Network(container, this.data, networkOptions);
+
     this.graph.on("click", onClick);
+    this.graph.on("hoverNode", onNodeHover);
+    this.graph.on("blurNode", onNodeBlur);
   }
 
   moveNodeToPosition(nodeId, xDOMCoord, yDOMCoord) {
@@ -19,6 +22,18 @@ export default class NetworkGraph {
   getNodePosition(nodeId) {
     const canvasCoords = this.graph.getPositions([nodeId])[nodeId];
     return this.graph.canvasToDOM(canvasCoords);
+  }
+
+  getEdges(filter) {
+    return this.data.edges.getIds({ filter: filter });
+  }
+
+  updateEdges(edgeIds, options) {
+    edgeIds.forEach(edgeId => {
+      if (this.data.edges.get(edgeId)) {
+        this.data.edges.update({ id: edgeId, ...options });
+      }
+    });
   }
 
   minimizeWidthGivenScale(scale) {
@@ -44,5 +59,9 @@ export default class NetworkGraph {
 
   afterDrawingOnce(f) {
     this.graph.once("afterDrawing", f);
+  }
+
+  unselectAll() {
+    this.graph.unselectAll();
   }
 }
