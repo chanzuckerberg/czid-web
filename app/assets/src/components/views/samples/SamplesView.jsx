@@ -164,8 +164,8 @@ class SamplesView extends React.Component {
     const { selectedSampleIds } = this.state;
     let newSelected = new Set(
       checked
-        ? union(selectedSampleIds, selectableIds)
-        : difference(selectedSampleIds, selectableIds)
+        ? union(Array.from(selectedSampleIds), selectableIds)
+        : difference(Array.from(selectedSampleIds), selectableIds)
     );
     this.setState({ selectedSampleIds: newSelected });
   };
@@ -424,21 +424,28 @@ class SamplesView extends React.Component {
 
   renderMap = () => {
     const {
+      currentTab,
+      mapLevel,
       mapLocationData,
       mapPreviewedLocationId,
       mapTilerKey,
       onClearFilters,
+      onMapLevelChange,
       onMapClick,
       onMapMarkerClick,
       onMapTooltipTitleClick,
     } = this.props;
+
     return (
       <div className={cs.map}>
         <DiscoveryMap
+          currentTab={currentTab}
+          mapLevel={mapLevel}
           mapLocationData={mapLocationData}
           mapTilerKey={mapTilerKey}
           onClearFilters={onClearFilters}
           onClick={onMapClick}
+          onMapLevelChange={onMapLevelChange}
           onMarkerClick={onMapMarkerClick}
           onTooltipTitleClick={onMapTooltipTitleClick}
           previewedLocationId={mapPreviewedLocationId}
@@ -506,8 +513,11 @@ SamplesView.defaultProps = {
 
 SamplesView.propTypes = {
   activeColumns: PropTypes.arrayOf(PropTypes.string),
+  admin: PropTypes.bool,
   allowedFeatures: PropTypes.arrayOf(PropTypes.string),
   currentDisplay: PropTypes.string.isRequired,
+  currentTab: PropTypes.string.isRequired,
+  mapLevel: PropTypes.string,
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedLocationId: PropTypes.number,
   mapPreviewedSamples: PropTypes.array,
@@ -517,6 +527,7 @@ SamplesView.propTypes = {
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
   onMapClick: PropTypes.func,
+  onMapLevelChange: PropTypes.func,
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onSampleSelected: PropTypes.func,
@@ -524,7 +535,6 @@ SamplesView.propTypes = {
   protectedColumns: PropTypes.array,
   samples: PropTypes.array,
   selectableIds: PropTypes.array.isRequired,
-  admin: PropTypes.bool,
 };
 
 export default SamplesView;

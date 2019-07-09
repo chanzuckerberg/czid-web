@@ -2,18 +2,31 @@ module LocationHelper
   # Adapter function to munge responses from Location IQ API to our format
   def self.adapt_location_iq_response(body)
     address = body["address"]
-    geo_level = ["city", "county", "state", "country"].each do |n|
-      break n if address[n]
-    end || ""
+
+    country_key = Location::COUNTRY_NAMES.find { |k| address.include?(k) }
+    state_key = Location::STATE_NAMES.find { |k| address.include?(k) }
+    subdivision_key = Location::SUBDIVISION_NAMES.find { |k| address.include?(k) }
+    city_key = Location::CITY_NAMES.find { |k| address.key?(k) }
+
+    geo_level = if city_key
+                  Location::CITY_LEVEL
+                elsif subdivision_key
+                  Location::SUBDIVISION_LEVEL
+                elsif state_key
+                  Location::STATE_LEVEL
+                elsif country_key
+                  Location::COUNTRY_LEVEL
+                else
+                  ""
+                end
 
     loc = {
       name: body["display_name"],
       geo_level: geo_level,
-      country_name: address["country"] || "",
-      state_name: address["state"] || "",
-      subdivision_name: address["county"] || "",
-      # Normalize extra provider fields to city. normalizecity param doesn't work all the time.
-      city_name: address[%w[city city_distrct locality town borough municipality village hamlet quarter neighbourhood state_district].find { |k| address.key?(k) }] || "",
+      country_name: address[country_key] || "",
+      state_name: address[state_key] || "",
+      subdivision_name: address[subdivision_key] || "",
+      city_name: address[city_key] || "",
       # Round coordinates to enhance privacy
       lat: body["lat"] ? body["lat"].to_f.round(2) : nil,
       # LocationIQ uses 'lon'
@@ -62,31 +75,45 @@ module LocationHelper
     locations = SamplesHelper.samples_by_metadata_field(sample_ids, field_name).count
     locations = locations.map do |loc, count|
       location = loc.is_a?(Array) ? (loc[0] || loc[1]) : loc
-      { value: location, text: truncate_name(location), count: count }
+      parents = loc.is_a?(Array) ? loc[2..-1].compact[0..-2] : []
+      { value: location, text: truncate_name(location), count: count, parents: parents }
     end
     not_set_count = samples_count - locations.sum { |l| l[:count] }
     if not_set_count > 0
       locations << { value: "not_set", text: "Unknown", count: not_set_count }
     end
-    locations
+    return locations
   end
 
   def self.project_dimensions(sample_ids, field_name)
     # See pattern in ProjectsController dimensions
-    locations = SamplesHelper.samples_by_metadata_field(sample_ids, field_name)
-                             .includes(:sample)
-                             .distinct
-                             .count(:project_id)
+    locations = SamplesHelper
+                .samples_by_metadata_field(sample_ids, field_name)
+                .includes(:sample)
+                .distinct
+                .count(:project_id)
     locations.map do |loc, count|
       location = loc.is_a?(Array) ? (loc[0] || loc[1]) : loc
-      { value: location, text: truncate_name(location), count: count }
+      parents = loc.is_a?(Array) ? loc[2..-1].compact[0..-2] : []
+      { value: location, text: truncate_name(location), count: count, parents: parents }
     end
   end
 
   def self.filter_by_name(samples_with_metadata, query)
+    locations_by_geo_level = Location
+                             .where(name: query)
+                             .pluck(:id, :geo_level)
+                             .group_by { |(_, geo_level)| geo_level }
+                             .map { |field, values| [field, values.map { |id| id[0] }] }
+                             .to_h
+
     samples = samples_with_metadata.includes(metadata: :location)
-    # Plain text locations in string_validated_value
-    samples.where(metadata: { string_validated_value: query })
-           .or(samples.where(metadata: { locations: { name: query } }))
+    # Plain text locations in string_validated_value + multi-geo-level location search
+    samples.where(
+      "`metadata`.`string_validated_value` IN (?)"\
+        " OR #{locations_by_geo_level.keys.map { |k| "`locations`.`#{k}_id` IN (?)" }.join(' OR ')}",
+      query,
+      *locations_by_geo_level.values
+    )
   end
 end

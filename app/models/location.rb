@@ -1,5 +1,9 @@
 class Location < ApplicationRecord
   include LocationHelper
+  belongs_to :country, class_name: "Location", optional: true
+  belongs_to :state, class_name: "Location", optional: true
+  belongs_to :subdivision, class_name: "Location", optional: true
+  belongs_to :city, class_name: "Location", optional: true
 
   LOCATION_IQ_BASE_URL = "https://us1.locationiq.com/v1".freeze
   GEOSEARCH_BASE_QUERY = "search.php?addressdetails=1&normalizecity=1".freeze
@@ -11,16 +15,33 @@ class Location < ApplicationRecord
     :subdivision_name,
     :city_name,
     :lat,
-    :lng
+    :lng,
+    :country_id,
+    :state_id,
+    :subdivision_id,
+    :city_id
   ].freeze
   DEFAULT_MAX_NAME_LENGTH = 30
+
+  COUNTRY_LEVEL = "country".freeze
+  STATE_LEVEL = "state".freeze
+  SUBDIVISION_LEVEL = "subdivision".freeze
+  CITY_LEVEL = "city".freeze
+  GEO_LEVELS = [COUNTRY_LEVEL, STATE_LEVEL, SUBDIVISION_LEVEL, CITY_LEVEL].freeze
+
+  # See https://wiki.openstreetmap.org/wiki/Key:place
+  # Normalize extra provider fields to each of our levels.
+  COUNTRY_NAMES = %w[country].freeze
+  STATE_NAMES = %w[state province region].freeze
+  SUBDIVISION_NAMES = %w[county state_district district].freeze
+  CITY_NAMES = %w[city city_distrct locality town borough municipality village hamlet quarter neighbourhood suburb].freeze
 
   # Base request to LocationIQ API
   def self.location_api_request(endpoint_query)
     raise "No location API key" unless ENV["LOCATION_IQ_API_KEY"]
 
     query_url = "#{LOCATION_IQ_BASE_URL}/#{endpoint_query}&key=#{ENV['LOCATION_IQ_API_KEY']}&format=json"
-    uri = URI.parse(query_url)
+    uri = URI.parse(URI.escape(query_url))
     request = Net::HTTP::Get.new(uri)
     resp = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
       http.request(request)
@@ -84,6 +105,10 @@ class Location < ApplicationRecord
   def self.check_and_restrict_specificity(location, host_genome_name)
     # We don't want Human locations with city
     if host_genome_name == "Human" && location.city_name.present?
+      # Return our existing entry if found
+      existing = Location.find_by(country_name: location.country_name, state_name: location.state_name, subdivision_name: location.subdivision_name, city_name: "")
+      return existing if existing
+
       # Redo the search for just the subdivision/state/country
       success, resp = geosearch_by_levels(location.country_name, location.state_name, location.subdivision_name)
       unless success && !resp.empty?
@@ -94,6 +119,74 @@ class Location < ApplicationRecord
       location = Location.find_by(locationiq_id: result[:locationiq_id]) || new_from_params(result)
     end
 
+    location
+  end
+
+  # Note: We are clustering at Country+State for now so Subdivision+City ids may be nil.
+  def self.check_and_fetch_parents(location)
+    present_parent_level_ids, missing_parent_levels = present_and_missing_parents(location)
+    location.save! unless location.id
+    present_parent_level_ids[location.geo_level] = location.id
+
+    missing_parent_levels.each do |level|
+      # Geosearch for the missing parents
+      if level == COUNTRY_LEVEL
+        success, resp = geosearch_by_levels(location.country_name)
+      else
+        success, resp = geosearch_by_levels(location.country_name, location.state_name)
+      end
+
+      unless success && !resp.empty?
+        query = "#{location.country_name} #{level == STATE_LEVEL ? location.state_name : nil}"
+        raise "Geosearch for parent level failed: #{query}"
+      end
+
+      result = LocationHelper.adapt_location_iq_response(resp[0])
+      new_location = new_from_params(result)
+      new_location.save!
+
+      # Set id fields
+      present_parent_level_ids[level] = new_location.id
+      new_location = set_parent_ids(new_location, present_parent_level_ids)
+      new_location.save!
+    end
+
+    set_parent_ids(location, present_parent_level_ids)
+  end
+
+  # Identify missing Country or State location levels. Even for levels below State, clustering is
+  # only at Country+State for now.
+  def self.present_and_missing_parents(location)
+    # Find if the Country or State level is missing
+    country_match = Location.where(
+      geo_level: COUNTRY_LEVEL,
+      country_name: location.country_name
+    )
+    state_match = Location.where(
+      geo_level: STATE_LEVEL,
+      country_name: location.country_name,
+      state_name: location.state_name
+    )
+    present_parents = country_match.or(state_match)
+    present_parent_levels = present_parents.pluck(:geo_level)
+
+    missing_parent_levels = []
+    [COUNTRY_LEVEL, STATE_LEVEL].each do |level|
+      if !present_parent_levels.include?(level) && location["#{level}_name"].present? && location.geo_level != level
+        missing_parent_levels << level
+      end
+    end
+
+    present_parent_level_ids = present_parents.map { |p| [p.geo_level, p.id] }.to_h
+    [present_parent_level_ids, missing_parent_levels]
+  end
+
+  def self.set_parent_ids(location, parent_level_ids)
+    parent_level_ids.each do |level, id|
+      if Location::GEO_LEVELS.index(level) <= Location::GEO_LEVELS.index(location.geo_level)
+        location["#{level}_id"] = id
+      end
+    end
     location
   end
 end

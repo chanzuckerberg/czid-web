@@ -2,11 +2,13 @@ import { DataSet, Network } from "visjs-network";
 
 export default class NetworkGraph {
   constructor(container, nodeData, edgeData, options) {
+    const { onClick, ...networkOptions } = options;
     this.data = {
       nodes: new DataSet(nodeData),
       edges: new DataSet(edgeData),
     };
-    this.graph = new Network(container, this.data, options);
+    this.graph = new Network(container, this.data, networkOptions);
+    this.graph.on("click", onClick);
   }
 
   moveNodeToPosition(nodeId, xDOMCoord, yDOMCoord) {
@@ -28,8 +30,8 @@ export default class NetworkGraph {
     let maxCanvasX = Number.MIN_VALUE;
     this.data.nodes.getIds().forEach(nodeId => {
       const boundingBox = this.graph.getBoundingBox(nodeId);
-      minCanvasX = Math.min(minCanvasX, boundingBox.right);
-      maxCanvasX = Math.max(maxCanvasX, boundingBox.left);
+      minCanvasX = Math.min(minCanvasX, boundingBox.left);
+      maxCanvasX = Math.max(maxCanvasX, boundingBox.right);
     });
     const minDOMX = this.graph.canvasToDOM({ x: minCanvasX }).x;
     const maxDOMX = this.graph.canvasToDOM({ x: maxCanvasX }).x;

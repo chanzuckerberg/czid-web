@@ -4,6 +4,7 @@ import { StickyContainer, Sticky } from "react-sticky";
 
 import AMRHeatmapControls from "~/components/views/amr_heatmap/AMRHeatmapControls";
 import AMRHeatmapVis from "~/components/views/amr_heatmap/AMRHeatmapVis";
+import DetailsSidebar from "~/components/common/DetailsSidebar";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import { getAMRCounts } from "~/api/amr";
 import LoadingIcon from "~ui/icons/LoadingIcon";
@@ -26,6 +27,8 @@ const SCALES = [
   { text: "Linear", value: "linear" },
 ];
 
+const SIDEBAR_SAMPLE_MODE = "sampleDetails";
+
 export default class AMRHeatmapView extends React.Component {
   constructor(props) {
     super(props);
@@ -37,6 +40,9 @@ export default class AMRHeatmapView extends React.Component {
         viewLevel: "gene",
         scale: "symlog",
       },
+      selectedSampleId: null,
+      sidebarVisible: false,
+      sidebarMode: null,
     };
   }
 
@@ -47,9 +53,10 @@ export default class AMRHeatmapView extends React.Component {
 
   async requestAMRCountsData(sampleIds) {
     const rawSampleData = await getAMRCounts(sampleIds);
-    const samplesWithAMRCounts = rawSampleData.filter(
+    const filteredSamples = rawSampleData.filter(
       sampleData => sampleData.error === ""
     );
+    const samplesWithAMRCounts = this.processAMRCounts(filteredSamples);
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
     this.setState({
       rawSampleData,
@@ -60,6 +67,21 @@ export default class AMRHeatmapView extends React.Component {
     });
   }
 
+  processAMRCounts(filteredSamples) {
+    filteredSamples.forEach(sample => {
+      sample.amr_counts.forEach(amrCount => {
+        // The following three lines are a kind of hacky workaround to the fact that
+        // the amr counts stored in the db have a gene name that includes the actual gene
+        // plus the drug class.
+        const geneNameExtractionRegex = /[^_]+/; // matches everything before the first underscore
+        const geneName = geneNameExtractionRegex.exec(amrCount.gene)[0];
+        amrCount.gene = geneName;
+      })
+    })
+
+    return filteredSamples
+  }
+
   assembleControlOptions() {
     // Controls are arranged in the order they are presented in
     return [
@@ -68,14 +90,6 @@ export default class AMRHeatmapView extends React.Component {
       { key: "scale", options: SCALES, label: "Scale" },
     ];
   }
-
-  updateOptions = options => {
-    const { selectedOptions } = this.state;
-    let newOptions = Object.assign({}, selectedOptions, options);
-    this.setState({
-      selectedOptions: newOptions,
-    });
-  };
 
   findMaxValues(samplesWithAMRCounts) {
     const maxValues = samplesWithAMRCounts.reduce(
@@ -90,6 +104,62 @@ export default class AMRHeatmapView extends React.Component {
     );
     return maxValues;
   }
+
+  //*** Callback methods ***
+
+  updateOptions = options => {
+    const { selectedOptions } = this.state;
+    let newOptions = Object.assign({}, selectedOptions, options);
+    this.setState({
+      selectedOptions: newOptions,
+    });
+  };
+
+  onSampleLabelClick = sampleId => {
+    const { sidebarVisible, sidebarMode, selectedSampleId } = this.state;
+    if (!sampleId) {
+      this.closeSidebar();
+      return;
+    }
+    if (
+      sidebarVisible &&
+      sidebarMode === SIDEBAR_SAMPLE_MODE &&
+      selectedSampleId === sampleId
+    ) {
+      this.closeSidebar();
+    } else {
+      this.setState({
+        selectedSampleId: sampleId,
+        sidebarMode: SIDEBAR_SAMPLE_MODE,
+        sidebarVisible: true,
+      });
+    }
+  };
+
+  closeSidebar = () => {
+    this.setState({
+      sidebarVisible: false,
+    });
+  };
+
+  //*** Post-update methods ***
+
+  getSidebarParams() {
+    const { sidebarMode, selectedSampleId } = this.state;
+    switch (sidebarMode) {
+      case SIDEBAR_SAMPLE_MODE: {
+        return {
+          sampleId: selectedSampleId,
+          showReportLink: true,
+        };
+      }
+      default: {
+        return;
+      }
+    }
+  }
+
+  //*** Render methods ***
 
   renderHeader() {
     const { sampleIds } = this.props;
@@ -137,9 +207,22 @@ export default class AMRHeatmapView extends React.Component {
           <AMRHeatmapVis
             samplesWithAMRCounts={samplesWithAMRCounts}
             selectedOptions={selectedOptions}
+            onSampleLabelClick={this.onSampleLabelClick}
           />
         </ErrorBoundary>
       </div>
+    );
+  }
+
+  renderSidebar() {
+    const { sidebarMode, sidebarVisible } = this.state;
+    return (
+      <DetailsSidebar
+        visible={sidebarVisible}
+        mode={sidebarMode}
+        onClose={this.closeSidebar}
+        params={this.getSidebarParams()}
+      />
     );
   }
 
@@ -157,6 +240,7 @@ export default class AMRHeatmapView extends React.Component {
           </Sticky>
           {this.renderVisualization()}
         </StickyContainer>
+        {this.renderSidebar()}
       </div>
     );
   }

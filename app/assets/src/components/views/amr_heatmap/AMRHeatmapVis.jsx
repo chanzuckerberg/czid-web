@@ -1,16 +1,29 @@
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
+import { DataTooltip } from "~ui/containers";
+import { getTooltipStyle } from "~/components/utils/tooltip";
 
 import cs from "./amr_heatmap_vis.scss";
 
 const VIEW_LEVEL_ALLELES = "allele";
 const VIEW_LEVEL_GENES = "gene";
 
+const METRICS = [
+  { text: "Coverage", key: "coverage" },
+  { text: "Depth", key: "depth" },
+];
+
 export default class AMRHeatmapVis extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      nodeHoverInfo: null,
+      tooltipLocation: null,
+    };
 
     this.heatmap = null;
   }
@@ -20,15 +33,34 @@ export default class AMRHeatmapVis extends React.Component {
     const [sampleLabels, geneLabels, alleleLabels] = this.extractLabels(
       samplesWithAMRCounts
     );
+    const alleleToGeneMap = this.mapAllelesToGenes(samplesWithAMRCounts);
     this.setState({
       sampleLabels,
       geneLabels,
       alleleLabels,
+      alleleToGeneMap,
     });
   }
 
-  componentDidUpdate() {
-    this.updateHeatmap();
+  componentDidUpdate(prevProps) {
+    if (this.props !== prevProps || this.heatmap === null) {
+      this.updateHeatmap();
+    }
+  }
+
+  // Sometimes, when presenting the tooltip popup as a user hovers over
+  // a node on the heatmap, they will be over a node where the row is
+  // an allele and the column is a sample with no AMR count for the allele.
+  // With no AMR count, there's no easy way to grab the name of the gene
+  // for the allele. Hence the allele-to-gene mapping.
+  mapAllelesToGenes(sampleData) {
+    const alleleToGeneMap = {};
+    sampleData.forEach(sample => {
+      sample.amr_counts.forEach(amrCount => {
+        alleleToGeneMap[amrCount.allele] = amrCount.gene;
+      });
+    });
+    return alleleToGeneMap;
   }
 
   extractLabels(sampleData) {
@@ -36,7 +68,7 @@ export default class AMRHeatmapVis extends React.Component {
     const genes = {};
     const alleles = {};
     sampleData.forEach(sample => {
-      sampleLabels.push({ label: sample.sample_name });
+      sampleLabels.push({ label: sample.sample_name, id: sample.sample_id });
       sample.amr_counts.forEach(amrCount => {
         genes[amrCount.gene] = true;
         alleles[amrCount.allele] = true;
@@ -52,8 +84,82 @@ export default class AMRHeatmapVis extends React.Component {
     return [sampleLabels, geneLabels, alleleLabels];
   }
 
+  //*** Callback functions for the heatmap ***
+
+  colorFilter = (value, node, originalColor, _, colorNoValue) => {
+    // Leave zero values grey
+    return value > 0 ? originalColor : colorNoValue;
+  };
+
+  onNodeHover = node => {
+    this.setState({ nodeHoverInfo: this.getTooltipData(node) });
+  };
+
+  onNodeHoverMove = (_, event) => {
+    if (event) {
+      this.setState({
+        tooltipLocation: {
+          left: event.pageX,
+          top: event.pageY,
+        },
+      });
+    }
+  };
+
+  onNodeHoverOut = () => {
+    this.setState({ nodeHoverInfo: null });
+  };
+
   //*** Following functions must be called after the component has updated ***
-  //*** (i.e. after the component has requested AMR data and updated state) ***
+
+  getTooltipData(node) {
+    const { samplesWithAMRCounts, selectedOptions } = this.props;
+    const { sampleLabels, alleleToGeneMap } = this.state;
+    const sampleName = sampleLabels[node.columnIndex].label;
+    const rowLabel = this.getHeatmapLabels()[node.rowIndex].label;
+    const sampleForColumn = samplesWithAMRCounts[node.columnIndex];
+
+    const amrCountForNode = sampleForColumn.amr_counts.find(
+      amrCount => amrCount[selectedOptions.viewLevel] === rowLabel
+    );
+
+    let gene = "";
+    let allele = "";
+    switch (selectedOptions.viewLevel) {
+      case VIEW_LEVEL_ALLELES: {
+        allele = rowLabel;
+        gene = alleleToGeneMap[allele];
+        break;
+      }
+      case VIEW_LEVEL_GENES: {
+        gene = rowLabel;
+        allele = amrCountForNode ? amrCountForNode.allele : "---";
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+
+    let values = METRICS.map(metric => {
+      const value = amrCountForNode ? amrCountForNode[metric.key] : 0;
+      return [
+        metric.text,
+        metric.key === selectedOptions.metric ? <b>{value}</b> : value,
+      ];
+    });
+
+    return [
+      {
+        name: "Info",
+        data: [["Sample", sampleName], ["Gene", gene], ["Allele", allele]],
+      },
+      {
+        name: "Values",
+        data: values,
+      },
+    ];
+  }
 
   getHeatmapLabels() {
     const { selectedOptions } = this.props;
@@ -78,7 +184,7 @@ export default class AMRHeatmapVis extends React.Component {
         const amrCountForRow = sample.amr_counts.find(
           amrCount => amrCount[selectedOptions.viewLevel] === rowName
         );
-        if (amrCountForRow != undefined) {
+        if (amrCountForRow !== undefined) {
           rowValues.push(amrCountForRow[selectedOptions.metric]);
         } else {
           rowValues.push(0);
@@ -107,13 +213,8 @@ export default class AMRHeatmapVis extends React.Component {
     }
   }
 
-  colorFilter = (value, node, originalColor, _, colorNoValue) => {
-    // Leave zero values grey
-    return value > 0 ? originalColor : colorNoValue;
-  };
-
   initializeHeatmap(rows, columns, values) {
-    const { selectedOptions } = this.props;
+    const { selectedOptions, onSampleLabelClick } = this.props;
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       // Data for the Heatmap
@@ -130,9 +231,31 @@ export default class AMRHeatmapVis extends React.Component {
         scale: selectedOptions.scale,
         scaleMin: 0,
         customColorCallback: this.colorFilter,
+        onNodeHover: this.onNodeHover,
+        onNodeHoverMove: this.onNodeHoverMove,
+        onNodeHoverOut: this.onNodeHoverOut,
+        onColumnLabelClick: onSampleLabelClick,
       }
     );
     this.heatmap.start();
+  }
+
+  renderNodeHoverTooltip() {
+    const { nodeHoverInfo, tooltipLocation } = this.state;
+    if (!(nodeHoverInfo && tooltipLocation)) {
+      return;
+    }
+    return (
+      <div
+        className={cx(cs.tooltip, nodeHoverInfo && cs.visible)}
+        style={getTooltipStyle(tooltipLocation, {
+          buffer: 20,
+          below: true,
+        })}
+      >
+        <DataTooltip data={nodeHoverInfo} />
+      </div>
+    );
   }
 
   render() {
@@ -144,6 +267,7 @@ export default class AMRHeatmapVis extends React.Component {
             this.heatmapContainer = container;
           }}
         />
+        {this.renderNodeHoverTooltip()}
       </div>
     );
   }
@@ -163,4 +287,5 @@ AMRHeatmapVis.propTypes = {
     viewLevel: PropTypes.string,
     scale: PropTypes.string,
   }),
+  onSampleLabelClick: PropTypes.func,
 };

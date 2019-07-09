@@ -19,6 +19,8 @@ class LocationsController < ApplicationController
       success, resp = Location.geosearch(query)
       if success
         results = resp.map { |r| LocationHelper.adapt_location_iq_response(r) }
+        # Just keep the first if you get duplicate locations
+        results = results.uniq { |r| [r[:name], r[:geo_level]] }
       end
     end
     event = MetricUtil::ANALYTICS_EVENT_NAMES[:location_geosearched]
@@ -96,6 +98,16 @@ class LocationsController < ApplicationController
                               .merge(sample_ids: v.map { |h| h[:sample_id] })
                               .merge(project_ids: v.map { |h| h[:project_id] }.uniq)]
                     end.to_h
+
+    # Supply extra Country and State entries for bubble clustering
+    extra_parent_ids = location_data.values.map { |h| [h[:country_id], h[:state_id]] }.flatten.uniq - location_data.keys
+    extra_parents = Location
+                    .where(id: extra_parent_ids)
+                    .pluck(:id, *Location::DEFAULT_LOCATION_FIELDS)
+                    .map { |p| [:id, *Location::DEFAULT_LOCATION_FIELDS].zip(p).to_h }
+                    .group_by { |h| h[:id] }
+                    .transform_values { |v| v[0] }
+    location_data = location_data.merge(extra_parents)
 
     respond_to do |format|
       format.json do

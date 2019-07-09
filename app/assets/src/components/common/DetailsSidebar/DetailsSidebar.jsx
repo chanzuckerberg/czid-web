@@ -3,26 +3,31 @@
 // You should add a new mode to this sidebar instead of adding a new sidebar.
 
 import React from "react";
-import SampleDetailsMode from "./SampleDetailsMode";
-import TaxonDetailsMode from "./TaxonDetailsMode";
+
 import Sidebar from "~/components/ui/containers/Sidebar";
 import PropTypes from "~/components/utils/propTypes";
 
+import SampleDetailsMode from "./SampleDetailsMode";
+import TaxonDetailsMode from "./TaxonDetailsMode";
+import PipelineStepDetailsMode from "./PipelineStepDetailsMode";
+
 export default class DetailsSidebar extends React.Component {
   renderContents() {
-    if (!this.props.visible) {
+    const { mode, params, visible } = this.props;
+    if (!visible) {
       return null;
     }
 
-    if (this.props.mode === "sampleDetails") {
-      return <SampleDetailsMode {...this.props.params} />;
+    switch (mode) {
+      case "sampleDetails":
+        return <SampleDetailsMode {...params} />;
+      case "taxonDetails":
+        return <TaxonDetailsMode {...params} />;
+      case "pipelineStepDetails":
+        return <PipelineStepDetailsMode {...params} />;
+      default:
+        return null;
     }
-
-    if (this.props.mode === "taxonDetails") {
-      return <TaxonDetailsMode {...this.props.params} />;
-    }
-
-    return null;
   }
 
   render() {

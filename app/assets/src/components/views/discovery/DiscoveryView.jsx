@@ -21,6 +21,7 @@ import {
   pick,
   replace,
   sumBy,
+  union,
   values,
   xor,
   xorBy,
@@ -31,6 +32,8 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import { openUrl } from "~utils/links";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
+import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
+import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
 
 import DiscoveryHeader from "./DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
@@ -101,6 +104,7 @@ class DiscoveryView extends React.Component {
         loadingSamples: true,
         loadingStats: true,
         loadingVisualizations: true,
+        mapLevel: "country",
         mapLocationData: {},
         mapPreviewedLocationId: null,
         mapPreviewedProjects: [],
@@ -111,6 +115,7 @@ class DiscoveryView extends React.Component {
         mapSidebarSampleStats: {},
         mapSidebarSelectedSampleIds: new Set(),
         mapSidebarTab: "summary",
+        rawMapLocationData: {},
         project: null,
         projectDimensions: [],
         projectId: projectId,
@@ -381,7 +386,7 @@ class DiscoveryView extends React.Component {
 
   refreshFilteredLocations = async () => {
     const { domain } = this.props;
-    const { projectId, search } = this.state;
+    const { mapLevel, projectId, search } = this.state;
 
     this.setState({
       loadingLocations: true,
@@ -394,10 +399,18 @@ class DiscoveryView extends React.Component {
       search,
     });
 
-    this.setState({ mapLocationData, loadingLocations: false }, () => {
-      this.refreshMapPreviewedSamples();
-      this.refreshMapPreviewedProjects();
-    });
+    this.setState(
+      {
+        mapLocationData,
+        rawMapLocationData: mapLocationData,
+        loadingLocations: false,
+      },
+      () => {
+        this.refreshMapPreviewedSamples();
+        this.refreshMapPreviewedProjects();
+        this.handleMapLevelChange(mapLevel);
+      }
+    );
   };
 
   computeTabs = () => {
@@ -866,6 +879,62 @@ class DiscoveryView extends React.Component {
     });
   };
 
+  handleMapLevelChange = mapLevel => {
+    const { rawMapLocationData, currentTab } = this.state;
+
+    const ids = currentTab === "samples" ? "sample_ids" : "project_ids";
+    const clusteredData = {};
+
+    const copyLocation = entry => {
+      return {
+        ...entry,
+        [ids]: Object.assign([], entry[ids]),
+        hasOwnEntries: !isEmpty(entry[ids]),
+      };
+    };
+
+    const addToAncestor = (entry, ancestorLevel) => {
+      const ancestorId = entry[`${ancestorLevel}_id`];
+      if (ancestorId) {
+        if (!clusteredData[ancestorId]) {
+          clusteredData[ancestorId] = copyLocation(
+            rawMapLocationData[ancestorId]
+          );
+        }
+        const ancestor = clusteredData[ancestorId];
+        ancestor[ids] = union(ancestor[ids], entry[ids]);
+      }
+    };
+
+    const indexOfMap = indexOfMapLevel(mapLevel);
+    for (const [id, entry] of Object.entries(rawMapLocationData)) {
+      const indexOfEntry = indexOfMapLevel(entry.geo_level);
+
+      // Have a bubble if you're higher than or at the map's geo level.
+      if (indexOfEntry <= indexOfMap && !clusteredData[entry.id]) {
+        clusteredData[id] = copyLocation(entry);
+      }
+
+      MAP_CLUSTER_ENABLED_LEVELS.forEach(ancestorLevel => {
+        // If you have ancestors higher than or at the map's level, add your samples/projects to
+        // their bubble.
+        if (indexOfMapLevel(ancestorLevel) <= indexOfMap) {
+          addToAncestor(entry, ancestorLevel);
+        }
+      });
+    }
+
+    // Remove ancestor bubbles that are now fully represented in sub-bubbles
+    for (const [id, entry] of Object.entries(clusteredData)) {
+      const indexOfEntry = indexOfMapLevel(entry.geo_level);
+      if (indexOfEntry < indexOfMap && !entry.hasOwnEntries) {
+        delete clusteredData[id];
+      }
+    }
+
+    this.setState({ mapLocationData: clusteredData, mapLevel });
+  };
+
   renderCenterPaneContent = () => {
     const {
       currentDisplay,
@@ -873,17 +942,18 @@ class DiscoveryView extends React.Component {
       loadingProjects,
       loadingSamples,
       loadingVisualizations,
+      mapLevel,
       mapLocationData,
+      mapPreviewedLocationId,
+      mapPreviewedSamples,
+      mapSidebarSelectedSampleIds,
       projectId,
       projects,
       sampleIds,
       samples,
       visualizations,
-      mapPreviewedLocationId,
-      mapPreviewedSamples,
-      mapSidebarSelectedSampleIds,
     } = this.state;
-    const { allowedFeatures, mapTilerKey } = this.props;
+    const { admin, allowedFeatures, mapTilerKey } = this.props;
 
     return (
       <React.Fragment>
@@ -894,12 +964,14 @@ class DiscoveryView extends React.Component {
                 allowedFeatures={allowedFeatures}
                 currentDisplay={currentDisplay}
                 currentTab={currentTab}
+                mapLevel={mapLevel}
                 mapLocationData={mapLocationData}
                 mapPreviewedLocationId={mapPreviewedLocationId}
                 mapTilerKey={mapTilerKey}
                 onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
                 onMapClick={this.clearMapPreview}
+                onMapLevelChange={this.handleMapLevelChange}
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onProjectSelected={this.handleProjectSelected}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
@@ -920,9 +992,11 @@ class DiscoveryView extends React.Component {
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               <SamplesView
-                admin={this.props.admin}
+                admin={admin}
                 allowedFeatures={allowedFeatures}
                 currentDisplay={currentDisplay}
+                currentTab={currentTab}
+                mapLevel={mapLevel}
                 mapLocationData={mapLocationData}
                 mapPreviewedLocationId={mapPreviewedLocationId}
                 mapPreviewedSamples={mapPreviewedSamples}
@@ -932,6 +1006,7 @@ class DiscoveryView extends React.Component {
                 onDisplaySwitch={this.handleDisplaySwitch}
                 onLoadRows={this.handleLoadSampleRows}
                 onMapClick={this.clearMapPreview}
+                onMapLevelChange={this.handleMapLevelChange}
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                 onSampleSelected={this.handleSampleSelected}
@@ -1123,14 +1198,15 @@ class DiscoveryView extends React.Component {
               )}
           </div>
           <div className={cs.centerPane}>
-            {currentDisplay === "table" ? (
-              <NarrowContainer className={cs.viewContainer}>
-                {this.renderCenterPaneContent()}
-              </NarrowContainer>
-            ) : (
+            {currentDisplay === "map" &&
+            ["samples", "projects"].includes(currentTab) ? (
               <div className={cs.viewContainer}>
                 {this.renderCenterPaneContent()}
               </div>
+            ) : (
+              <NarrowContainer className={cs.viewContainer}>
+                {this.renderCenterPaneContent()}
+              </NarrowContainer>
             )}
           </div>
           {this.renderRightPane()}
