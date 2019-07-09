@@ -1,5 +1,4 @@
 import React from "react";
-import cx from "classnames";
 import PropTypes from "prop-types";
 
 import { getCARDIndex, getAroEntry } from "~/api/amr";
@@ -71,16 +70,12 @@ export default class GeneDetailsMode extends React.Component {
     };
 
     let cardOntologyEntry, latestCARDIndex;
-    try {
-      if (!cardIndex) {
-        latestCARDIndex = await getCARDIndex();
-      } else {
-        latestCARDIndex = cardIndex;
-      }
-      cardOntologyEntry = this.searchCARDIndex(geneName, latestCARDIndex.xml);
-    } catch (err) {
-      console.error(err);
+    if (!cardIndex) {
+      latestCARDIndex = await getCARDIndex();
+    } else {
+      latestCARDIndex = cardIndex;
     }
+    cardOntologyEntry = this.searchCARDIndex(geneName, latestCARDIndex.xml);
 
     if (cardOntologyEntry === undefined) {
       this.setState({
@@ -95,15 +90,12 @@ export default class GeneDetailsMode extends React.Component {
     Object.keys(cardOntologyEntry).forEach(
       property => (updatedOntology[property] = cardOntologyEntry[property])
     );
-    try {
-      const cardRequest = await getAroEntry(updatedOntology.accession);
-      const cardInfo = this.parseAroEntry(cardRequest.html);
-      Object.keys(cardInfo).forEach(
-        property => (updatedOntology[property] = cardInfo[property])
-      );
-    } catch (err) {
-      console.error(err);
-    }
+
+    const cardRequest = await getAroEntry(updatedOntology.accession);
+    const cardInfo = this.parseAroEntry(cardRequest.html);
+    Object.keys(cardInfo).forEach(
+      property => (updatedOntology[property] = cardInfo[property])
+    );
 
     this.setState({
       geneName: geneName,
@@ -202,6 +194,7 @@ export default class GeneDetailsMode extends React.Component {
         }
         case CARD_SYNONYMS: {
           geneInfo.synonyms = value;
+          break;
         }
         case CARD_PUBLICATIONS: {
           const publications = [];
@@ -210,6 +203,7 @@ export default class GeneDetailsMode extends React.Component {
             publications.push(publication.innerText)
           );
           geneInfo.publications = publications;
+          break;
         }
         default: {
           break;
@@ -262,6 +256,7 @@ export default class GeneDetailsMode extends React.Component {
           href={this.generateLinkTo(SOURCE_CARD)}
           className={cs.cardLink}
           target="_blank"
+          rel="noopener noreferrer"
         >
           {ontology.label}
         </a>, which is released under the{" "}
@@ -269,6 +264,7 @@ export default class GeneDetailsMode extends React.Component {
           href="https://creativecommons.org/licenses/by/4.0/"
           className={cs.cardLink}
           target="_blank"
+          rel="noopener noreferrer"
         >
           Creative Commons CC-BY license version 4.0
         </a>{" "}
@@ -352,6 +348,7 @@ export default class GeneDetailsMode extends React.Component {
               href={URL_PUBMED + pubmedId}
               className={cs.link}
               target="_blank"
+              rel="noopener noreferrer"
             >
               {pmidText}
             </a>)
@@ -374,7 +371,11 @@ export default class GeneDetailsMode extends React.Component {
           <ul className={cs.linksList}>
             {cardEntryFound && (
               <li className={cs.link}>
-                <a href={this.generateLinkTo(SOURCE_CARD)} target="_blank">
+                <a
+                  href={this.generateLinkTo(SOURCE_CARD)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   CARD Ontology
                 </a>
               </li>
@@ -383,6 +384,7 @@ export default class GeneDetailsMode extends React.Component {
               <a
                 href={this.generateLinkTo(SOURCE_NCBI_REF_GENE)}
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 NCBI AMR Reference Gene Catalog
               </a>
@@ -390,7 +392,11 @@ export default class GeneDetailsMode extends React.Component {
           </ul>
           <ul className={cs.linksList}>
             <li className={cs.link}>
-              <a href={this.generateLinkTo(SOURCE_PUBMED)} target="_blank">
+              <a
+                href={this.generateLinkTo(SOURCE_PUBMED)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Pubmed Search
               </a>
             </li>
@@ -398,6 +404,7 @@ export default class GeneDetailsMode extends React.Component {
               <a
                 href={this.generateLinkTo(SOURCE_GOOGLE_SCHOLAR)}
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 Google Scholar Search
               </a>
