@@ -68,7 +68,7 @@ export default class AMRHeatmapVis extends React.Component {
     const genes = {};
     const alleles = {};
     sampleData.forEach(sample => {
-      sampleLabels.push({ label: sample.sample_name });
+      sampleLabels.push({ label: sample.sample_name, id: sample.sample_id });
       sample.amr_counts.forEach(amrCount => {
         genes[amrCount.gene] = true;
         alleles[amrCount.allele] = true;
@@ -214,7 +214,7 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   initializeHeatmap(rows, columns, values) {
-    const { selectedOptions } = this.props;
+    const { selectedOptions, onSampleLabelClick } = this.props;
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       // Data for the Heatmap
@@ -234,6 +234,7 @@ export default class AMRHeatmapVis extends React.Component {
         onNodeHover: this.onNodeHover,
         onNodeHoverMove: this.onNodeHoverMove,
         onNodeHoverOut: this.onNodeHoverOut,
+        onColumnLabelClick: onSampleLabelClick,
       }
     );
     this.heatmap.start();
@@ -286,4 +287,5 @@ AMRHeatmapVis.propTypes = {
     viewLevel: PropTypes.string,
     scale: PropTypes.string,
   }),
+  onSampleLabelClick: PropTypes.func,
 };

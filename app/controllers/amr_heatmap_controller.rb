@@ -11,7 +11,7 @@ class AmrHeatmapController < ApplicationController
   # antimicrobial resistance. Each object in amr_counts will look like:
   # {
   #   "id": 99999,
-  #   "gene": "GENE-1_Examp",
+  #   "gene": "GENE-1_DrugClass",
   #   "allele": "GENE-7_777",
   #   "coverage": 12.345,
   #   "depth": 0.987,
