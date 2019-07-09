@@ -73,6 +73,7 @@ class DiscoveryFilters extends React.Component {
   };
 
   handleChange(selectedKey, selected) {
+    console.log("selected: ", selected);
     const newState = [];
     newState[selectedKey] = selected;
     this.setState(newState, this.notifyFilterChangeHandler);
