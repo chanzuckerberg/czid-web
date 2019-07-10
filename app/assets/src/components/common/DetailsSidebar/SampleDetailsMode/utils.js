@@ -2,7 +2,7 @@ import moment from "moment";
 import { numberWithCommas } from "~/helpers/strings";
 
 // Compute display values for Pipeline Info from server response.
-export const processPipelineInfo = additionalInfo => {
+export const processPipelineInfo = (additionalInfo, showPipelineVizLink) => {
   const {
     pipeline_run: pipelineRun,
     summary_stats: summaryStats,
@@ -26,8 +26,19 @@ export const processPipelineInfo = additionalInfo => {
           ).toFixed(2)}%)`
         : "";
 
-    pipelineInfo.totalReads = numberWithCommas(pipelineRun.total_reads);
-    pipelineInfo.totalErccReads = `${totalErccReads}${erccPercent}`;
+    pipelineInfo.totalReads = {
+      text: numberWithCommas(pipelineRun.total_reads),
+    };
+    pipelineInfo.totalErccReads = { text: `${totalErccReads}${erccPercent}` };
+    pipelineInfo.pipelineVersion = {
+      text: `v${pipelineRun.version.pipeline}`,
+      ...(showPipelineVizLink
+        ? {
+            linkLabel: "View Pipeline Visualization",
+            link: `/samples/${pipelineRun.sample_id}/stage_results`,
+          }
+        : {}),
+    };
   }
 
   if (summaryStats) {
@@ -51,13 +62,15 @@ export const processPipelineInfo = additionalInfo => {
       ? summaryStats.compression_ratio.toFixed(2)
       : BLANK_TEXT;
 
-    pipelineInfo.nonhostReads = `${adjustedRemainingReads}${adjustedPercent}`;
-    pipelineInfo.unmappedReads = unmappedReads;
-    pipelineInfo.qcPercent = qcPercent;
-    pipelineInfo.compressionRatio = compressionRatio;
-    pipelineInfo.lastProcessedAt = moment(
-      summaryStats.last_processed_at
-    ).format("YYYY-MM-DD");
+    pipelineInfo.nonhostReads = {
+      text: `${adjustedRemainingReads}${adjustedPercent}`,
+    };
+    pipelineInfo.unmappedReads = { text: unmappedReads };
+    pipelineInfo.qcPercent = { text: qcPercent };
+    pipelineInfo.compressionRatio = { text: compressionRatio };
+    pipelineInfo.lastProcessedAt = {
+      text: moment(summaryStats.last_processed_at).format("YYYY-MM-DD"),
+    };
   }
 
   return pipelineInfo;

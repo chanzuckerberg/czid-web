@@ -55,19 +55,20 @@ class SampleDetailsMode extends React.Component {
   }
 
   fetchMetadata = async () => {
+    const { sampleId, showPipelineVizLink } = this.props;
     this.setState({
       metadata: null,
       additionalInfo: null,
       pipelineInfo: null,
     });
 
-    if (!this.props.sampleId) {
+    if (!sampleId) {
       return;
     }
 
     const [metadata, metadataTypes] = await Promise.all([
-      getSampleMetadata(this.props.sampleId, this.props.pipelineVersion),
-      getSampleMetadataFields(this.props.sampleId),
+      getSampleMetadata(sampleId),
+      getSampleMetadataFields(sampleId),
     ]);
 
     const processedMetadata = processMetadata(metadata.metadata, true);
@@ -76,7 +77,10 @@ class SampleDetailsMode extends React.Component {
       metadata: processedMetadata,
       lastValidMetadata: processedMetadata,
       additionalInfo: processAdditionalInfo(metadata.additional_info),
-      pipelineInfo: processPipelineInfo(metadata.additional_info),
+      pipelineInfo: processPipelineInfo(
+        metadata.additional_info,
+        showPipelineVizLink
+      ),
       pipelineRun: metadata.additional_info.pipeline_run,
       metadataTypes: metadataTypes
         ? processMetadataTypes(metadataTypes)
@@ -218,6 +222,7 @@ class SampleDetailsMode extends React.Component {
           erccComparison={additionalInfo.ercc_comparison}
           pipelineRun={pipelineRun}
           sampleId={this.props.sampleId}
+          showPipelineVizLink={this.props.showPipelineVizLink}
         />
       );
     }
@@ -273,6 +278,7 @@ SampleDetailsMode.propTypes = {
   pipelineVersion: PropTypes.string, // Needs to be string for 3.1 vs. 3.10.
   onMetadataUpdate: PropTypes.func,
   showReportLink: PropTypes.bool,
+  showPipelineVizLink: PropTypes.bool,
 };
 
 export default SampleDetailsMode;
