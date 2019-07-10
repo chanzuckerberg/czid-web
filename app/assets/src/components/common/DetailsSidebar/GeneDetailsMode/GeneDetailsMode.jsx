@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import { getCARDInfo } from "~/api/amr";
+import { formatSentenceCase } from "~/components/utils/format";
 
 import cs from "./gene_details_mode.scss";
 
@@ -171,11 +172,15 @@ export default class GeneDetailsMode extends React.Component {
             )}
             <div className={cs.subtitle}>{CARD_CLASS}</div>
             <div className={cs.text}>
-              <div className={cs.textInner}>{ontology.drugClass}</div>
+              <div className={cs.textInner}>
+                {formatSentenceCase(ontology.drugClass)}
+              </div>
             </div>
             <div className={cs.subtitle}>{CARD_MECHANISM}</div>
             <div className={cs.text}>
-              <div className={cs.textInner}>{ontology.resistanceMechanism}</div>
+              <div className={cs.textInner}>
+                {formatSentenceCase(ontology.resistanceMechanism)}
+              </div>
             </div>
             {ontology.publications !== [] && (
               <div>
@@ -205,17 +210,16 @@ export default class GeneDetailsMode extends React.Component {
       const pubmedId = pmidText.split(" ")[1];
       return (
         <div className={cs.textInner} key={pubmedId}>
-          {citation}
-          <div className={cs.link}>
-            (<a
+          {citation} (<span className={cs.link}>
+            <a
               href={URL_PUBMED + pubmedId}
               className={cs.link}
               target="_blank"
               rel="noopener noreferrer"
             >
               {pmidText}
-            </a>)
-          </div>
+            </a>
+          </span>)
         </div>
       );
     });
@@ -225,12 +229,12 @@ export default class GeneDetailsMode extends React.Component {
   renderFooterLinks() {
     const { cardEntryFound } = this.state;
     const sources = [
+      SOURCE_NCBI_REF_GENE,
       SOURCE_PUBMED,
       SOURCE_GOOGLE_SCHOLAR,
-      SOURCE_NCBI_REF_GENE,
     ];
     if (cardEntryFound) {
-      sources.push(SOURCE_CARD);
+      sources.unshift(SOURCE_CARD);
     }
     const footerLinks = sources.map(source => {
       return (
