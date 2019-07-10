@@ -3,7 +3,7 @@ import cx from "classnames";
 import { find, maxBy, orderBy, sumBy } from "lodash/fp";
 import moment from "moment";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { withAnalytics } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import { Accordion } from "~/components/layout";
 import BasicPopup from "~/components/BasicPopup";
@@ -207,26 +207,38 @@ export default class DiscoverySidebar extends React.Component {
     return rows.map((entry, i) => {
       const { count, text, value } = entry;
       const percent = Math.round(100 * count / total, 0);
-      const onClick = () => {
-        onFilterClick && onFilterClick(field, value);
-        logAnalyticsEvent("DiscoverySidebar_metadata-filter_clicked", {
-          value,
-          count,
-          percent,
-          rows: rows.length,
-        });
-      };
+      const onClick = () => onFilterClick && onFilterClick(field, value);
       return (
         <div className={cs.barChartRow} key={`${value}_row_${i}`}>
           <dt className={cs.barLabel} key={`${value}_label_${i}`}>
-            <a onClick={onClick}>
+            <a
+              onClick={withAnalytics(
+                onClick,
+                "DiscoverySidebar_metadata-label_clicked",
+                {
+                  value,
+                  count,
+                  percent,
+                  rows: rows.length,
+                }
+              )}
+            >
               {value === "not_set" ? <i>{text}</i> : text}
             </a>
           </dt>
           <dd key={`${value}_value_${i}`}>
             <span
               className={cs.bar}
-              onClick={onClick}
+              onClick={withAnalytics(
+                onClick,
+                "DiscoverySidebar_metadata-bar_clicked",
+                {
+                  value,
+                  count,
+                  percent,
+                  rows: rows.length,
+                }
+              )}
               style={{ width: percent * 1.4 + "px" }}
             />
             <span className={cs.count}>{count}</span>
