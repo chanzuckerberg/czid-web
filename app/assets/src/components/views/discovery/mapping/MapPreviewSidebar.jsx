@@ -333,6 +333,7 @@ export default class MapPreviewSidebar extends React.Component {
       allowedFeatures,
       discoveryCurrentTab,
       loading,
+      onFilterClick,
       projectDimensions,
       projectStats,
       sampleDimensions,
@@ -345,6 +346,7 @@ export default class MapPreviewSidebar extends React.Component {
         className={cs.summaryInfo}
         currentTab={discoveryCurrentTab}
         loading={loading}
+        onFilterClick={onFilterClick}
         projectDimensions={projectDimensions}
         projectStats={projectStats}
         sampleDimensions={sampleDimensions}
@@ -428,6 +430,7 @@ MapPreviewSidebar.propTypes = {
   discoveryCurrentTab: PropTypes.string,
   initialSelectedSampleIds: PropTypes.instanceOf(Set),
   loading: PropTypes.bool,
+  onFilterClick: PropTypes.func,
   onProjectSelected: PropTypes.func,
   onSampleClicked: PropTypes.func,
   onSelectionUpdate: PropTypes.func,
