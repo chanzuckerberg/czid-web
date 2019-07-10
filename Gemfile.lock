@@ -1176,6 +1176,7 @@ DEPENDENCIES
   memory_profiler
   multipart-post
   mysql2
+  nokogiri
   prometheus-client (= 0.7.1)
   puma (~> 3.7)
   rack-host-redirect

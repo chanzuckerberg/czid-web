@@ -7,8 +7,7 @@ export const getAMRCounts = sampleIds =>
     },
   });
 
-export const getCARDIndex = accession =>
-  get("amr_heatmap/fetch_card_index.json");
+export const getCARDIndex = () => get("amr_heatmap/fetch_card_index.json");
 
 export const getAroEntry = accession =>
   get("amr_heatmap/fetch_aro_entry.json", {

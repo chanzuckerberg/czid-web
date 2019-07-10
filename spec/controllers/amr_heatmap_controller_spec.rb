@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'nokogiri'
 
 RSpec.describe AmrHeatmapController, type: :controller do
   create_users
@@ -177,7 +178,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
                               job_status: PipelineRun::STATUS_CHECKED
                             }])
 
-        get :amr_counts, params: { sampleIds: [sample_one["id"]] } # Sample ID 99999 should not exist
+        get :amr_counts, params: { sampleIds: [sample_one["id"]] }
         expect(response.content_type).to eq("application/json")
         expect(response).to have_http_status(:ok)
 
@@ -187,6 +188,26 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                  sample_name: sample_one["name"],
                                                  amr_counts: [],
                                                  error: "")
+      end
+    end
+    describe "GET CARD entry information" do
+      it "should return relevant information from the CARD Ontology database" do
+        get :fetch_card_info, params: { geneName: "dfrA1" }
+        expect(response.content_type).to eq("application/json")
+        expect(response).to have_http_status(:ok)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response).to include_json(
+          accession: "3002854",
+          label: "dfrA1",
+          synonyms: "dfr1",
+          description: "dfrA1 is an integron-encoded dihydrofolate reductase",
+          gene_family: "trimethoprim resistant dihydrofolate reductase dfr",
+          drug_class: "diaminopyrimidine antibiotic",
+          resistance_mechanism: "antibiotic target replacement",
+          publications: "Saenz Y, et al. 2004. Antimicrob Agents Chemother 48(10): 3996-4001. Mechanisms of resistance in multiple-antibiotic-resistant Escherichia coli strains of human, animal, and food origins. (PMID 15388464)",
+          error: ""
+        )
       end
     end
   end

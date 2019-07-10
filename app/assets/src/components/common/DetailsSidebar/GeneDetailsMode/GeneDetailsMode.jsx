@@ -7,8 +7,8 @@ import cs from "./gene_details_mode.scss";
 
 const SOURCE_CARD = "card";
 const SOURCE_PUBMED = "pubmed";
-const SOURCE_GOOGLE_SCHOLAR = "googlescholar";
-const SOURCE_NCBI_REF_GENE = "ncbirefgene";
+const SOURCE_GOOGLE_SCHOLAR = "googleScholar";
+const SOURCE_NCBI_REF_GENE = "ncbiRefGene";
 
 const URL_CARD_ARO = "https://card.mcmaster.ca/aro/";
 const URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/";

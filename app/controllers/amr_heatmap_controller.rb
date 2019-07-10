@@ -1,7 +1,10 @@
 URL_CARD_ARO = "https://card.mcmaster.ca/aro/".freeze
-URL_CARD_INDEX = "https://raw.githubusercontent.com/arpcard/aro/master/aro.owl".freeze
+# URL_CARD_OWL = "https://raw.githubusercontent.com/arpcard/aro/master/aro.owl".freeze
+S3_CARD_OWL = "s3://idseq-database/amr/aro.2019.07.09.owl".freeze
 
 class AmrHeatmapController < ApplicationController
+  include PipelineOutputsHelper
+
   before_action :admin_required
 
   def index
@@ -62,32 +65,116 @@ class AmrHeatmapController < ApplicationController
     render json: amr_data
   end
 
-  def fetch_card_index
-    card_index_uri = URI(URL_CARD_INDEX)
-    result = { "xml" => "", "error" => "" }
+  def fetch_card_info
+    gene_name = params[:geneName]
+    ontology = {
+      "accession" => "",
+      "label" => "",
+      "synonyms" => "",
+      "description" => "",
+      "gene_family" => "",
+      "drug_class" => "",
+      "resistance_mechanism" => "",
+      "publications" => "",
+      "error" => ""
+    }
 
-    response = Net::HTTP.get_response(card_index_uri)
-    if response.is_a?(Net::HTTPSuccess)
-      result["xml"] = response.body.force_encoding("utf-8")
-    else
-      result["error"] = "Error"
+    card_owl = get_s3_file(S3_CARD_OWL)
+    if card_owl.nil?
+      ontology["error"] = "Unable to retrieve CARD ARO owl file."
+      render json: ontology
+      return
     end
 
-    render json: result.to_json
+    ## Search the CARD OWL file
+    # Mount the XML into a DOM tree
+    raw_owl_xml = card_owl.force_encoding("utf-8")
+    search_result = search_card_owl(gene_name, raw_owl_xml)
+    if !search_result["error"].nil?
+      ontology["error"] = search_result["error"]
+      render json: ontology
+      return
+    else
+      search_result.each do |key, value|
+        ontology[key] = value
+      end
+    end
+
+    ## Get info from the ARO entry
+    card_aro_uri = URI(URL_CARD_ARO + ontology["accession"])
+
+    aro_response = Net::HTTP.get_response(card_aro_uri)
+    unless aro_response.is_a?(Net::HTTPSuccess)
+      ontology["error"] = "Unable to access ARO entry from CARD website."
+      render json: ontology
+      return
+    end
+
+    parsed_aro_info = parse_aro_entry(aro_response.body)
+    parsed_aro_info.each do |key, value|
+      ontology[key] = value
+    end
+
+    render json: ontology
   end
 
-  def fetch_aro_entry
-    accession = params[:accession]
-    card_aro_uri = URI(URL_CARD_ARO + accession)
-    result = { "html" => "", "error" => "" }
+  private
 
-    response = Net::HTTP.get_response(card_aro_uri)
-    if response.is_a?(Net::HTTPSuccess)
-      result["html"] = response.body
-    else
-      result["error"] = "Error"
+  def search_card_owl(gene_name, xml)
+    search_result = {}
+
+    owl_doc = Nokogiri::XML(xml)
+    owl_classes = owl_doc.xpath(".//owl:Class")
+    matching_entry = nil
+
+    # normalize gene name
+    alphanumeric_gene_name = gene_name.downcase.gsub(/\W/, '')
+    regex_for_gene = Regexp.new("\\b#{alphanumeric_gene_name}\\b")
+
+    # search through owl classes
+    owl_classes.each do |owl_class|
+      # first we check the label
+      label = owl_class.at_xpath("./rdfs:label").content
+      separated_label = label.downcase.tr('/', ' ')
+      alphanumeric_label = separated_label.gsub(/[^0-9a-z_\s]/, '')
+      if regex_for_gene.match?(alphanumeric_label)
+        matching_entry = owl_class
+        break
+      end
+
+      # then we check the synonyms
+      synonyms = owl_class.xpath("./oboInOwl:hasExactSynonym")
+      synonyms.each do |synonym|
+        separated_synonym = synonym.content.downcase.tr('/', ' ')
+        alphanumeric_synonym = separated_synonym.gsub(/[^0-9a-z_\s]/, '')
+        if regex_for_gene.match?(alphanumeric_synonym)
+          matching_entry = owl_class
+          break
+        end
+      end
     end
 
-    render json: result.to_json
+    # abort if no matching entry
+    if matching_entry.nil?
+      search_result["error"] = "No match found for #{gene_name} in the CARD Antibiotic Resistance Ontology."
+      return search_result
+    end
+
+    search_result["label"] = matching_entry.at_xpath("./rdfs:label").content
+    search_result["accession"] = matching_entry.at_xpath("./oboInOwl:id").content.split(':')[1]
+    search_result["description"] = matching_entry.at_xpath("./obo:IAO_0000115").content
+    return search_result
+  end
+
+  def parse_aro_entry(html)
+    parsed_info = {}
+    aro_doc = Nokogiri::HTML(html)
+    aro_table = aro_doc.at_xpath(".//table[@vocab='http://dev.arpcard.mcmaster.ca/browse/data']/tbody")
+    parsed_info["synonyms"] = aro_table.at_xpath("./tr/td[text()='Synonym(s)']/following-sibling::td").content
+    parsed_info["gene_family"] = aro_table.at_xpath("./tr/td[text()='AMR Gene Family']/following-sibling::td").content
+    parsed_info["drug_class"] = aro_table.at_xpath("./tr/td[text()='Drug Class']/following-sibling::td").content
+    parsed_info["resistance_mechanism"] = aro_table.at_xpath("./tr/td[text()='Resistance Mechanism']/following-sibling::td").content
+    parsed_info["publications"] = aro_table.at_xpath("./tr/td[text()='Publications']/following-sibling::td").content
+    return parsed_info
   end
 end
