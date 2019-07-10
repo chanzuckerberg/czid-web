@@ -146,7 +146,6 @@ export default class GeneDetailsMode extends React.Component {
 
   renderOntology() {
     const { ontology, collapseOntology } = this.state;
-    console.log(ontology);
     return (
       <div>
         {ontology.synonyms !== "" && (
