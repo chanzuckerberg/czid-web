@@ -6,6 +6,7 @@ const NON_HOST_CONTIGS_MAPPING_LABEL =
   "Download Non-Host Contigs Summary (.csv)";
 const UNMAPPED_READS_LABEL = "Download Unmapped Reads (.fasta)";
 const RESULTS_FOLDER_LABEL = "See Results Folder";
+const PIPELINE_VIZ_LABEL = "See Pipeline Visualization";
 
 // Get download options based on pipeline metadata.
 const getDownloadOptions = pipelineRun => {
@@ -18,6 +19,7 @@ const getDownloadOptions = pipelineRun => {
     assembled && NON_HOST_CONTIGS_MAPPING_LABEL,
     stageTwoComplete && UNMAPPED_READS_LABEL,
     RESULTS_FOLDER_LABEL,
+    PIPELINE_VIZ_LABEL,
   ]);
 };
 
@@ -60,6 +62,10 @@ const getDownloadLinkInfoMap = (sampleId, pipelineRun) => ({
   },
   [RESULTS_FOLDER_LABEL]: {
     path: `/samples/${sampleId}/results_folder`,
+    newPage: true,
+  },
+  [PIPELINE_VIZ_LABEL]: {
+    path: `/samples/${sampleId}/stage_results`,
     newPage: true,
   },
 });

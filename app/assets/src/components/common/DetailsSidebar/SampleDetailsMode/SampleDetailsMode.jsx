@@ -218,6 +218,7 @@ class SampleDetailsMode extends React.Component {
           erccComparison={additionalInfo.ercc_comparison}
           pipelineRun={pipelineRun}
           sampleId={this.props.sampleId}
+          showPipelineVizLink={this.props.showPipelineVizLink}
         />
       );
     }
@@ -273,6 +274,7 @@ SampleDetailsMode.propTypes = {
   pipelineVersion: PropTypes.string, // Needs to be string for 3.1 vs. 3.10.
   onMetadataUpdate: PropTypes.func,
   showReportLink: PropTypes.bool,
+  showPipelineVizLink: PropTypes.bool,
 };
 
 export default SampleDetailsMode;

@@ -68,7 +68,7 @@ class PipelineTab extends React.Component {
   };
 
   render() {
-    const { pipelineRun, sampleId } = this.props;
+    const { pipelineRun, sampleId, showPipelineVizLink } = this.props;
     return (
       <div>
         <MetadataSection
@@ -105,24 +105,28 @@ class PipelineTab extends React.Component {
         >
           <div className={cs.downloadSectionContent}>
             {pipelineRun &&
-              getDownloadLinks(sampleId, pipelineRun).map(option => (
-                <a
-                  key={option.label}
-                  className={cs.downloadLink}
-                  href={option.path}
-                  target={option.newPage ? "_blank" : "_self"}
-                  onClick={() =>
-                    logAnalyticsEvent("PipelineTab_download-link_clicked", {
-                      newPage: option.newPage,
-                      label: option.label,
-                      href: option.path,
-                      sampleId: this.props.sampleId,
-                    })
-                  }
-                >
-                  {option.label}
-                </a>
-              ))}
+              getDownloadLinks(sampleId, pipelineRun).map(
+                option =>
+                  (option.label != "See Pipeline Visualization" ||
+                    showPipelineVizLink) && (
+                    <a
+                      key={option.label}
+                      className={cs.downloadLink}
+                      href={option.path}
+                      target={option.newPage ? "_blank" : "_self"}
+                      onClick={() =>
+                        logAnalyticsEvent("PipelineTab_download-link_clicked", {
+                          newPage: option.newPage,
+                          label: option.label,
+                          href: option.path,
+                          sampleId: this.props.sampleId,
+                        })
+                      }
+                    >
+                      {option.label}
+                    </a>
+                  )
+              )}
           </div>
         </MetadataSection>
       </div>
@@ -135,6 +139,7 @@ PipelineTab.propTypes = {
   sampleId: PropTypes.number.isRequired,
   erccComparison: PropTypes.ERCCComparison,
   pipelineRun: PropTypes.PipelineRun,
+  showPipelineVizLink: PropTypes.bool,
 };
 
 export default PipelineTab;
