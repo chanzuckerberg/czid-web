@@ -36,6 +36,20 @@ export default class NetworkGraph {
     });
   }
 
+  updateNodes(nodeIds, options) {
+    nodeIds.forEach(nodeId => {
+      this.data.nodes.update({ id: nodeId, ...options });
+    });
+  }
+
+  getNodeAt(xDOMCoord, yDOMCoord) {
+    return this.graph.getNodeAt({ x: xDOMCoord, y: yDOMCoord });
+  }
+
+  getEdgeAt(xDOMCoord, yDOMCoord) {
+    return this.graph.getEdgeAt({ x: xDOMCoord, y: yDOMCoord });
+  }
+
   minimizeWidthGivenScale(scale) {
     // Set initial zoom for width calculation.
     this.graph.moveTo({ scale: scale });
@@ -63,5 +77,9 @@ export default class NetworkGraph {
 
   unselectAll() {
     this.graph.unselectAll();
+  }
+
+  selectNodes(nodeIds) {
+    this.graph.selectNodes(nodeIds);
   }
 }
