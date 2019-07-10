@@ -354,6 +354,10 @@ class SamplesView extends React.Component {
           <Label
             circular
             className={cs.counter}
+            // Log this no-op so we know if users want a way to view their selected samples
+            onClick={() =>
+              logAnalyticsEvent(`SamplesView_sample-counter_clicked`)
+            }
             text={`${targetSampleIds.size}`}
           />
           <span className={cs.label}>Selected</span>
