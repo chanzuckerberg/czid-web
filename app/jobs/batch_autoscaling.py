@@ -11,7 +11,7 @@ def get_compute_environment_configuration(compute_environment_name, region):
     ecs_cluster_arn = compute_environment_data['ecsClusterArn']
     compute_resources = compute_environment_data['computeResources']
     scaling_permission = _get_scaling_permission(ecs_cluster_arn, region)
-    return {'minvCpus': compute_resources['minvCpus'], 'maxvCpus': compute_resources['maxvCpus'], 'scaling_permission': scaling_permission}
+    return {'minvCpus': compute_resources['minvCpus'], 'maxvCpus': compute_resources['maxvCpus'], 'desiredvCpus': compute_resources['desiredvCpus'], 'scaling_permission': scaling_permission}
 
 def _get_scaling_permission(ecs_cluster_arn, region):
     ecs_client = boto3.client('ecs', region_name=region)

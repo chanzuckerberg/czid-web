@@ -110,7 +110,7 @@ class TestAutoscaling(unittest.TestCase):
             else:
                 _mock_boto3.return_value.update_compute_environment.assert_not_called()
             self.assertEqual(result, {'autoscaling_recommendation': {'change': should_change, 'new_vcpu_min': 24},
-                                      'current_configuration': {'maxvCpus': 40, 'minvCpus': 0, 'scaling_permission': should_have_scaling_permission},
+                                      'current_configuration': {'maxvCpus': 40, 'minvCpus': 0, 'desiredvCpus': 0, 'scaling_permission': should_have_scaling_permission},
                                       'compute_environment_name': FAKE_COMPUTE_ENVIRONMENT_NAME,
                                       'pending_jobs_counts': {'RUNNING': 2, 'STARTING': 0, 'RUNNABLE': 0}})
 
