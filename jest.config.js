@@ -1,15 +1,17 @@
 const path = require("path");
+const webpackConfig = require("./webpack.config.common");
 
-rootFolder = __dirname;
+const rootFolder = __dirname;
+
+// Read aliases from webpack configuration and convert to a format that jest understands
+const mappedModuleAliases = Object.entries(webpackConfig.resolve.alias)
+  .map(([key, value]) => [`^${key}/(.*)$`, `${value}/$1`])
+  .reduce((acc, [key, value]) => {
+    acc[key] = value;
+    return acc;
+  }, {});
 
 module.exports = {
   verbose: true,
-  moduleNameMapper: {
-    "^~/(.*)$": path.resolve(rootFolder, "app/assets/src") + "/$1",
-    "^~ui/(.*)$":
-      path.resolve(rootFolder, "app/assets/src/components/ui") + "/$1",
-    "^~utils/(.*)$":
-      path.resolve(rootFolder, "app/assets/src/components/utils") + "/$1",
-    "^styles/(.*)$": path.resolve(rootFolder, "app/assets/src/styles") + "/$1",
-  },
+  moduleNameMapper: mappedModuleAliases,
 };
