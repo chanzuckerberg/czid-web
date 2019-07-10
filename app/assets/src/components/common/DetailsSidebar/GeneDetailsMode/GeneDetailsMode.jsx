@@ -30,6 +30,7 @@ export default class GeneDetailsMode extends React.Component {
       loading: true,
       cardEntryFound: false,
       collapseOntology: true,
+      ontology: null,
     };
   }
 
@@ -50,8 +51,8 @@ export default class GeneDetailsMode extends React.Component {
 
   async getGeneInfo(geneName) {
     let cardEntryFound;
-    ontology = await getCARDInfo(geneName);
-
+    const ontology = await getCARDInfo(geneName);
+    console.log(ontology);
     if (ontology.error !== "") {
       cardEntryFound = false;
     } else {
@@ -124,9 +125,9 @@ export default class GeneDetailsMode extends React.Component {
     );
   }
 
-  renderNotFound() {
-    const { geneName } = this.props;
-    return <div className={cs.cardLicense}>No data found for {geneName}</div>;
+  renderError() {
+    const { ontology } = this.state;
+    return <div className={cs.cardLicense}>{ontology.error}</div>;
   }
 
   renderHeader() {
@@ -137,30 +138,37 @@ export default class GeneDetailsMode extends React.Component {
     }
     return (
       <div className={cs.title}>
-        {ontology.label !== "---" ? ontology.label : geneName}
+        {ontology.label !== "" ? ontology.label : geneName}
       </div>
     );
   }
 
   renderOntology() {
     const { ontology, collapseOntology } = this.state;
+    console.log(ontology);
     return (
       <div>
-        <div className={cs.text}>
-          <div className={cs.textInner}>
-            {CARD_SYNONYMS}: <em>{ontology.synonyms}</em>
+        {ontology.synonyms !== "" && (
+          <div className={cs.text}>
+            <div className={cs.textInner}>
+              {CARD_SYNONYMS}: <em>{ontology.synonyms}</em>
+            </div>
           </div>
-        </div>
+        )}
         <div className={cs.subtitle}>Description</div>
         <div className={cs.text}>
           <div className={cs.textInner}>{ontology.description}</div>
         </div>
         {!collapseOntology && (
           <div>
-            <div className={cs.subtitle}>{CARD_FAMILY}</div>
-            <div className={cs.text}>
-              <div className={cs.textInner}>{ontology.geneFamily}</div>
-            </div>
+            {ontology.geneFamily !== "" && (
+              <div>
+                <div className={cs.subtitle}>{CARD_FAMILY}</div>
+                <div className={cs.text}>
+                  <div className={cs.textInner}>{ontology.geneFamily}</div>
+                </div>
+              </div>
+            )}
             <div className={cs.subtitle}>{CARD_CLASS}</div>
             <div className={cs.text}>
               <div className={cs.textInner}>{ontology.drugClass}</div>
@@ -169,8 +177,12 @@ export default class GeneDetailsMode extends React.Component {
             <div className={cs.text}>
               <div className={cs.textInner}>{ontology.resistanceMechanism}</div>
             </div>
-            <div className={cs.subtitle}>{CARD_PUBLICATIONS}</div>
-            <div className={cs.text}>{this.renderPublications()}</div>
+            {ontology.publications !== [] && (
+              <div>
+                <div className={cs.subtitle}>{CARD_PUBLICATIONS}</div>
+                <div className={cs.text}>{this.renderPublications()}</div>
+              </div>
+            )}
           </div>
         )}
         {collapseOntology && (
@@ -216,7 +228,7 @@ export default class GeneDetailsMode extends React.Component {
     }
     return (
       <div className={cs.geneContents}>
-        {cardEntryFound ? this.renderOntology() : this.renderNotFound()}
+        {cardEntryFound ? this.renderOntology() : this.renderError()}
         <div className={cs.subtitle}>Links</div>
         <div className={cs.linksSection}>
           <ul className={cs.linksList}>

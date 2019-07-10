@@ -86,17 +86,16 @@ class AmrHeatmapController < ApplicationController
     end
 
     ## Search the CARD OWL file
-    # Mount the XML into a DOM tree
     raw_owl_xml = card_owl.force_encoding("utf-8")
     search_result = search_card_owl(gene_name, raw_owl_xml)
-    if !search_result["error"].nil?
+    unless search_result["error"].nil?
       ontology["error"] = search_result["error"]
       render json: ontology
       return
-    else
-      search_result.each do |key, value|
-        ontology[key] = value
-      end
+    end
+
+    search_result.each do |key, value|
+      ontology[key] = value
     end
 
     ## Get info from the ARO entry
@@ -169,15 +168,29 @@ class AmrHeatmapController < ApplicationController
     parsed_info = {}
     aro_doc = Nokogiri::HTML(html)
     aro_table = aro_doc.at_xpath(".//table[@vocab='http://dev.arpcard.mcmaster.ca/browse/data']/tbody")
-    parsed_info["synonyms"] = aro_table.at_xpath("./tr/td[text()='Synonym(s)']/following-sibling::td").content
-    parsed_info["geneFamily"] = aro_table.at_xpath("./tr/td[text()='AMR Gene Family']/following-sibling::td").content
-    parsed_info["drugClass"] = aro_table.at_xpath("./tr/td[text()='Drug Class']/following-sibling::td").content
-    parsed_info["resistanceMechanism"] = aro_table.at_xpath("./tr/td[text()='Resistance Mechanism']/following-sibling::td").content
+    synonyms = aro_table.at_xpath("./tr/td[text()='Synonym(s)']/following-sibling::td")
+    unless synonyms.nil?
+      parsed_info["synonyms"] = synonyms.content
+    end
+    gene_family = aro_table.at_xpath("./tr/td[text()='AMR Gene Family']/following-sibling::td")
+    unless gene_family.nil?
+      parsed_info["geneFamily"] = gene_family.content
+    end
+    drug_class = aro_table.at_xpath("./tr/td[text()='Drug Class']/following-sibling::td")
+    unless drug_class.nil?
+      parsed_info["drugClass"] = drug_class.content
+    end
+    resistance_mechanism = aro_table.at_xpath("./tr/td[text()='Resistance Mechanism']/following-sibling::td")
+    unless resistance_mechanism.nil?
+      parsed_info["resistanceMechanism"] = resistance_mechanism.content
+    end
 
     publications = []
     pub_list = aro_table.at_xpath("./tr/td[text()='Publications']/following-sibling::td")
-    pub_list.xpath("./p").each do |publication|
-      publications.push(publication.content)
+    unless pub_list.nil?
+      pub_list.xpath("./p").each do |publication|
+        publications.push(publication.content)
+      end
     end
     parsed_info["publications"] = publications
     return parsed_info

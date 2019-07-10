@@ -208,6 +208,24 @@ RSpec.describe AmrHeatmapController, type: :controller do
           error: ""
         )
       end
+      it "should return an ontology object with an error message if no match is found" do
+        get :fetch_card_info, params: { geneName: "ImNotInCard" }
+        expect(response.content_type).to eq("application/json")
+        expect(response).to have_http_status(:ok)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response).to include_json(
+          accession: "",
+          label: "",
+          synonyms: "",
+          description: "",
+          geneFamily: "",
+          drugClass: "",
+          resistanceMechanism: "",
+          publications: [],
+          error: "No match found for ImNotInCard in the CARD Antibiotic Resistance Ontology."
+        )
+      end
     end
   end
 
