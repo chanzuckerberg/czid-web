@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { get, isArray, size } from "lodash/fp";
+import { compact, get, isArray } from "lodash/fp";
 
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
@@ -28,8 +28,11 @@ class MetadataInput extends React.Component {
 
     let warning = "";
     if (isHuman && get("geo_level", result) === "city") {
-      const match = result.name.match(/,\s(.*)/);
-      if (size(match) >= 2) result.name = match[1];
+      result.name = compact([
+        result.subdivision_name,
+        result.state_name,
+        result.country_name,
+      ]).join(", ");
       warning = LOCATION_WARNING;
     }
     this.setState({ locationWarning: warning });
