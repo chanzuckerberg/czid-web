@@ -473,6 +473,22 @@ class DiscoveryView extends React.Component {
     });
   };
 
+  // From the right pane sidebar, we'll add the filter value they click on if not already selected.
+  // Don't call this for single selection filters.
+  handleMetadataFilterClick = (field, value) => {
+    const { filters: selectedFilters } = this.state;
+
+    const key = `${field}Selected`;
+    if (selectedFilters[key]) {
+      if (selectedFilters[key].includes(value)) return;
+      selectedFilters[key].push(value);
+    } else {
+      selectedFilters[key] = [value];
+    }
+
+    this.handleFilterChange(selectedFilters);
+  };
+
   handleSearchSelected = ({ key, value, text }, currentEvent) => {
     const { filters, projects, search } = this.state;
 
@@ -1088,6 +1104,7 @@ class DiscoveryView extends React.Component {
               discoveryCurrentTab={currentTab}
               initialSelectedSampleIds={mapSidebarSelectedSampleIds}
               loading={loading}
+              onFilterClick={this.handleMetadataFilterClick}
               onProjectSelected={this.handleProjectSelected}
               onSampleClicked={this.handleSampleSelected}
               onSelectionUpdate={this.handleMapSidebarSelectUpdate}
@@ -1126,6 +1143,7 @@ class DiscoveryView extends React.Component {
               allowedFeatures={allowedFeatures}
               currentTab={currentTab}
               loading={loading}
+              onFilterClick={this.handleMetadataFilterClick}
               projectDimensions={computedProjectDimensions}
               projectStats={projectStats}
               sampleDimensions={computedSampleDimensions}
