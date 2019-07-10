@@ -396,17 +396,16 @@ class SampleView extends React.Component {
   };
 
   getSidebarParams = () => {
+    const { reportDetails, sample, allowedFeatures } = this.props;
     if (this.state.sidebarMode === "taxonDetails") {
       return this.state.sidebarTaxonModeConfig;
     }
     if (this.state.sidebarMode === "sampleDetails") {
       return {
-        sampleId: this.props.sample.id,
-        pipelineVersion: get(
-          "pipeline_info.pipeline_version",
-          this.props.reportDetails
-        ),
+        sampleId: sample.id,
+        pipelineVersion: get("pipeline_info.pipeline_version", reportDetails),
         onMetadataUpdate: this.handleMetadataUpdate,
+        showPipelineVizLink: allowedFeatures.includes("pipeline_viz"),
       };
     }
     return {};

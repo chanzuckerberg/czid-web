@@ -1,5 +1,6 @@
 import React from "react";
 import { set } from "lodash/fp";
+import cx from "classnames";
 
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import PropTypes from "~/components/utils/propTypes";
@@ -53,22 +54,38 @@ class PipelineTab extends React.Component {
 
   renderPipelineInfoField = field => {
     const { pipelineInfo } = this.props;
-    const val = pipelineInfo[field.key];
+    const { text, linkLabel, link } = pipelineInfo[field.key];
+
+    const metadataLink = linkLabel &&
+      link && (
+        <a
+          className={cs.vizLink}
+          href={link}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {linkLabel}
+          <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+        </a>
+      );
 
     return (
       <div className={cs.field} key={field.key}>
         <div className={cs.label}>{field.name}</div>
-        {val === undefined || val === null || val === "" ? (
+        {text === undefined || text === null || text === "" ? (
           <div className={cs.emptyValue}>--</div>
         ) : (
-          <div className={cs.metadataValue}>{val}</div>
+          <div className={cs.metadataValue}>
+            {text}
+            {metadataLink}
+          </div>
         )}
       </div>
     );
   };
 
   render() {
-    const { pipelineRun, sampleId } = this.props;
+    const { pipelineRun, sampleId, showPipelineVizLink } = this.props;
     return (
       <div>
         <MetadataSection
@@ -105,24 +122,26 @@ class PipelineTab extends React.Component {
         >
           <div className={cs.downloadSectionContent}>
             {pipelineRun &&
-              getDownloadLinks(sampleId, pipelineRun).map(option => (
-                <a
-                  key={option.label}
-                  className={cs.downloadLink}
-                  href={option.path}
-                  target={option.newPage ? "_blank" : "_self"}
-                  onClick={() =>
-                    logAnalyticsEvent("PipelineTab_download-link_clicked", {
-                      newPage: option.newPage,
-                      label: option.label,
-                      href: option.path,
-                      sampleId: this.props.sampleId,
-                    })
-                  }
-                >
-                  {option.label}
-                </a>
-              ))}
+              getDownloadLinks(sampleId, pipelineRun, showPipelineVizLink).map(
+                option => (
+                  <a
+                    key={option.label}
+                    className={cs.downloadLink}
+                    href={option.path}
+                    target={option.newPage ? "_blank" : "_self"}
+                    onClick={() =>
+                      logAnalyticsEvent("PipelineTab_download-link_clicked", {
+                        newPage: option.newPage,
+                        label: option.label,
+                        href: option.path,
+                        sampleId: this.props.sampleId,
+                      })
+                    }
+                  >
+                    {option.label}
+                  </a>
+                )
+              )}
           </div>
         </MetadataSection>
       </div>
@@ -131,10 +150,17 @@ class PipelineTab extends React.Component {
 }
 
 PipelineTab.propTypes = {
-  pipelineInfo: PropTypes.objectOf(PropTypes.string).isRequired,
+  pipelineInfo: PropTypes.objectOf(
+    PropTypes.shape({
+      text: PropTypes.string.isRequired,
+      link: PropTypes.string,
+      linkLabel: PropTypes.string,
+    })
+  ).isRequired,
   sampleId: PropTypes.number.isRequired,
   erccComparison: PropTypes.ERCCComparison,
   pipelineRun: PropTypes.PipelineRun,
+  showPipelineVizLink: PropTypes.bool,
 };
 
 export default PipelineTab;
