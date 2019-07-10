@@ -8,7 +8,7 @@ import GeoSearchInputBox from "../ui/controls/GeoSearchInputBox";
 
 import cs from "./metadata_input.scss";
 
-export const GEO_PRIVACY_WARNING = "Set to county/district for privacy.";
+export const LOCATION_WARNING = "Set to county/district for privacy.";
 
 class MetadataInput extends React.Component {
   constructor(props) {
@@ -28,7 +28,7 @@ class MetadataInput extends React.Component {
     if (isHuman && get("geo_level", result) === "city") {
       const match = result.name.match(/,\s(.*)/);
       if (size(match) >= 2) result.name = match[1];
-      warning = GEO_PRIVACY_WARNING;
+      warning = LOCATION_WARNING;
     }
     this.setState({ locationWarning: warning });
     return result;
