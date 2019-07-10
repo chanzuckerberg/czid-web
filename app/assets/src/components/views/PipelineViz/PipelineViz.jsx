@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import { groupBy } from "lodash/fp";
 import PropTypes from "prop-types";
 import { PanZoom } from "react-easy-panzoom";
@@ -9,6 +10,8 @@ import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
+
+import { inverseTransformDOMCoordinates } from "./utils";
 import cs from "./pipeline_viz.scss";
 
 const START_NODE_ID = -1;
@@ -32,6 +35,13 @@ class PipelineViz extends React.Component {
 
     this.graphs = [];
     this.graphContainers = [];
+    this.lastMouseMoveInfo = {
+      graphIndex: null,
+      nodeId: null,
+      x: 0,
+      y: 0,
+      alteredGraphs: new Set(),
+    };
 
     this.state = {
       stagesOpened: [true, true, true, true],
@@ -210,12 +220,29 @@ class PipelineViz extends React.Component {
     return stepClassName.replace(/^(PipelineStep(Run|Generate)?)/, "");
   }
 
-  handleStepClick(stageIndex, info) {
-    const clickedNodeId = info.nodes[0];
+  getNodeIdAtCoords(graph, xCoord, yCoord) {
+    const { x, y } = inverseTransformDOMCoordinates(
+      ReactDOM.findDOMNode(this.panZoomContainer).firstChild,
+      xCoord,
+      yCoord
+    );
+    return graph.getNodeAt(x, y);
+  }
+
+  handleClick(stageIndex, info) {
+    const graph = this.graphs[stageIndex];
+    const clickedNodeId = this.getNodeIdAtCoords(
+      graph,
+      info.pointer.DOM.x,
+      info.pointer.DOM.y
+    );
+
     if (clickedNodeId == null) {
       return;
     }
+
     this.graphs.forEach((graph, i) => i != stageIndex && graph.unselectAll());
+    graph.selectNodes([clickedNodeId]);
 
     const inputEdgesInfo = this.getEdgeInfoFor(
       stageIndex,
@@ -266,10 +293,61 @@ class PipelineViz extends React.Component {
     });
   }
 
-  handleNodeHover(stageIndex, info) {
-    const { highlightColor, inputEdgeColor } = this.props;
+  shouldUpdateMoveMouse(x, y) {
+    const { minMouseMoveUpdateDistance } = this.props;
+    const distance = Math.sqrt(
+      Math.pow(x - this.lastMouseMoveInfo.x, 2) +
+        Math.pow(y - this.lastMouseMoveInfo.y, 2)
+    );
+    return distance >= minMouseMoveUpdateDistance;
+  }
+
+  handleMouseMove(stageIndex, e) {
+    const graph = this.graphs[stageIndex];
+    if (!this.shouldUpdateMoveMouse(e.clientX, e.clientY)) {
+      return;
+    }
+
+    const rect = e.target.getBoundingClientRect();
+    const nodeId = this.getNodeIdAtCoords(
+      graph,
+      e.clientX - rect.left,
+      e.clientY - rect.top
+    );
+
+    if (
+      stageIndex != this.lastMouseMoveInfo.graphIndex ||
+      nodeId != this.lastMouseMoveInfo.nodeId
+    ) {
+      this.handleNodeBlur();
+    }
+
+    Object.assign(this.lastMouseMoveInfo, {
+      graphIndex: stageIndex,
+      nodeId: nodeId,
+      x: e.clientX,
+      y: e.clientY,
+    });
+
+    if (nodeId != null) {
+      this.handleNodeHover(stageIndex, nodeId);
+    }
+  }
+
+  handleNodeHover(stageIndex, nodeId) {
+    const { highlightColor, nodeColor, inputEdgeColor } = this.props;
     const graph = this.graphs[stageIndex];
     const updatedInterStageArrows = [...this.state.interStageArrows];
+
+    const hoveredNodeOptions = {
+      borderWidth: 1,
+      color: {
+        background: nodeColor,
+        border: highlightColor,
+      },
+    };
+    graph.updateNodes([nodeId], hoveredNodeOptions);
+    this.lastMouseMoveInfo.alteredGraphs.add(stageIndex);
 
     const inputColorOptions = {
       color: {
@@ -280,11 +358,11 @@ class PipelineViz extends React.Component {
       width: 2,
       hidden: false,
     };
-    const inputEdgesInfo = this.getEdgeInfoFor(stageIndex, info.node, "input");
+    const inputEdgesInfo = this.getEdgeInfoFor(stageIndex, nodeId, "input");
     const intraStageInputEdges = inputEdgesInfo.reduce((edgeIds, edgeInfo) => {
       if (edgeInfo.from) {
         if (edgeInfo.isIntraStage) {
-          edgeIds.push(`${edgeInfo.from.stepIndex}-${info.node}-colored`);
+          edgeIds.push(`${edgeInfo.from.stepIndex}-${nodeId}-colored`);
         } else {
           const prevGraph = this.graphs[edgeInfo.from.stageIndex];
           const prevEdgeId = `${
@@ -292,7 +370,8 @@ class PipelineViz extends React.Component {
           }-${END_NODE_ID}-colored`;
           prevGraph.updateEdges([prevEdgeId], inputColorOptions);
           updatedInterStageArrows[edgeInfo.from.stageIndex] = "from";
-          edgeIds.push(`${START_NODE_ID}-${info.node}-colored`);
+          this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.from.stageIndex);
+          edgeIds.push(`${START_NODE_ID}-${nodeId}-colored`);
         }
       }
       return edgeIds;
@@ -308,16 +387,12 @@ class PipelineViz extends React.Component {
       width: 2,
       hidden: false,
     };
-    const outputEdgesInfo = this.getEdgeInfoFor(
-      stageIndex,
-      info.node,
-      "output"
-    );
+    const outputEdgesInfo = this.getEdgeInfoFor(stageIndex, nodeId, "output");
     const intraStageOutputEdges = outputEdgesInfo.reduce(
       (edgeIds, edgeInfo) => {
         if (edgeInfo.to) {
           if (edgeInfo.isIntraStage) {
-            edgeIds.push(`${info.node}-${edgeInfo.to.stepIndex}-colored`);
+            edgeIds.push(`${nodeId}-${edgeInfo.to.stepIndex}-colored`);
           } else {
             const nextGraph = this.graphs[edgeInfo.to.stageIndex];
             const nextGraphEdgeId = `${START_NODE_ID}-${
@@ -325,7 +400,8 @@ class PipelineViz extends React.Component {
             }-colored`;
             nextGraph.updateEdges([nextGraphEdgeId], outputColorOptions);
             updatedInterStageArrows[edgeInfo.to.stageIndex - 1] = "to";
-            edgeIds.push(`${info.node}-${END_NODE_ID}-colored`);
+            this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.to.stageIndex);
+            edgeIds.push(`${nodeId}-${END_NODE_ID}-colored`);
           }
         }
         return edgeIds;
@@ -341,14 +417,30 @@ class PipelineViz extends React.Component {
   }
 
   handleNodeBlur = () => {
-    this.graphs.forEach((graph, i) => {
+    const { nodeColor } = this.props;
+    const { graphIndex, nodeId, alteredGraphs } = this.lastMouseMoveInfo;
+    if (nodeId == null) {
+      return;
+    }
+
+    const defaultNodeOptions = {
+      borderWidth: 1,
+      color: {
+        background: nodeColor,
+        border: nodeColor,
+      },
+    };
+    this.graphs[graphIndex].updateNodes([nodeId], defaultNodeOptions);
+
+    alteredGraphs.forEach(i => {
+      const graph = this.graphs[i];
       const allColoredEdges = graph.getEdges(edge => {
         return edge.id.match(/-colored$/g);
       });
       graph.updateEdges(allColoredEdges, { hidden: true });
       this.centerEndNodeVertically(graph);
     });
-
+    alteredGraphs.clear();
     this.setState({
       interStageArrows: ["", "", ""],
     });
@@ -546,10 +638,6 @@ class PipelineViz extends React.Component {
         color: {
           background: nodeColor,
           border: nodeColor,
-          hover: {
-            border: highlightColor,
-            background: nodeColor,
-          },
           highlight: {
             border: highlightColor,
             background: nodeColor,
@@ -586,6 +674,7 @@ class PipelineViz extends React.Component {
         },
       },
       edges: {
+        chosen: false,
         arrows: {
           to: {
             enabled: true,
@@ -620,12 +709,10 @@ class PipelineViz extends React.Component {
         zoomView: false,
         dragView: false,
         dragNodes: false,
-        hover: true,
+        hover: false,
         selectConnectedEdges: false,
       },
-      onClick: info => this.handleStepClick(index, info),
-      onNodeHover: info => this.handleNodeHover(index, info),
-      onNodeBlur: this.handleNodeBlur,
+      onClick: info => this.handleClick(index, info),
     };
 
     const currStageGraph = new NetworkGraph(
@@ -659,6 +746,7 @@ class PipelineViz extends React.Component {
           </div>
           <div
             className={cs.graph}
+            onMouseMove={e => this.handleMouseMove(i, e)}
             ref={ref => {
               this.graphContainers[i] = ref;
             }}
@@ -743,6 +831,7 @@ PipelineViz.propTypes = {
   inputEdgeColor: PropTypes.string,
   zoomMin: PropTypes.number,
   zoomMax: PropTypes.number,
+  minMouseMoveUpdateDistance: PropTypes.number,
 };
 
 PipelineViz.defaultProps = {
@@ -754,6 +843,7 @@ PipelineViz.defaultProps = {
   inputEdgeColor: "#000000",
   zoomMin: 0.5,
   zoomMax: 3,
+  minMouseMoveUpdateDistance: 20,
 };
 
 export default PipelineViz;
