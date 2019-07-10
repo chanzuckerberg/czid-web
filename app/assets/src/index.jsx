@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { RequestContext } from "~/components/common/RequestContext";
-import "babel-polyfill";
 import "url-search-params-polyfill";
 import "materialize-css";
 import "materialize-css/dist/css/materialize.css";

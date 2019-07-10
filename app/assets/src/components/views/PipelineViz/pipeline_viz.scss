@@ -42,6 +42,16 @@
     width: calc(100% - 12px);
     padding: 0.5px 0;
     background-color: $medium-grey;
+
+    &.fromColoring {
+      background-color: $black;
+      padding: 1px 0;
+    }
+
+    &.toColoring {
+      background-color: $primary-light;
+      padding: 1px 0;
+    }
   }
 
   .stageArrowHead {
@@ -49,6 +59,14 @@
     right: 0;
     height: 100%;
     fill: $medium-grey;
+
+    &.fromColoring {
+      fill: $black;
+    }
+
+    &.toColoring {
+      fill: $primary-medium;
+    }
   }
 }
 
