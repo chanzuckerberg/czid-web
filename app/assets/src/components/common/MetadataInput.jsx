@@ -20,7 +20,9 @@ class MetadataInput extends React.Component {
   }
 
   // For human samples, drop the city part of the name and show a warning.
-  // TODO(jsheu): Consider moving the warnings to the backend.
+  // Note that the backend will redo the geosearch for confirmation, so don't
+  // modify geo_level here.
+  // TODO(jsheu): Consider moving the warnings to the backend and generalizing.
   processLocationSelection = result => {
     const { isHuman } = this.props;
 
