@@ -1,5 +1,6 @@
 import React from "react";
 import { set } from "lodash/fp";
+import cx from "classnames";
 
 import ERCCScatterPlot from "~/components/ERCCScatterPlot";
 import PropTypes from "~/components/utils/propTypes";
@@ -53,16 +54,28 @@ class PipelineTab extends React.Component {
 
   renderPipelineInfoField = field => {
     const { pipelineInfo } = this.props;
-    const val = pipelineInfo[field.key];
+    const { text, linkLabel, link } = pipelineInfo[field.key];
 
     return (
       <div className={cs.field} key={field.key}>
         <div className={cs.label}>{field.name}</div>
-        {val === undefined || val === null || val === "" ? (
+        {text === undefined || text === null || text === "" ? (
           <div className={cs.emptyValue}>--</div>
         ) : (
-          <div className={cs.metadataValue}>{val}</div>
+          <div className={cs.metadataValue}>{text}</div>
         )}
+        {linkLabel &&
+          link && (
+            <a
+              className={cs.vizLink}
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {linkLabel}
+              <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+            </a>
+          )}
       </div>
     );
   };
@@ -135,7 +148,13 @@ class PipelineTab extends React.Component {
 }
 
 PipelineTab.propTypes = {
-  pipelineInfo: PropTypes.objectOf(PropTypes.string).isRequired,
+  pipelineInfo: PropTypes.objectOf(
+    PropTypes.objectOf({
+      text: PropTypes.string.isRequired,
+      link: PropTypes.string,
+      linkLabel: PropTypes.string,
+    })
+  ).isRequired,
   sampleId: PropTypes.number.isRequired,
   erccComparison: PropTypes.ERCCComparison,
   pipelineRun: PropTypes.PipelineRun,

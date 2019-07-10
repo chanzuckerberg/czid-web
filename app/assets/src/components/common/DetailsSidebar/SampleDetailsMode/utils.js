@@ -26,8 +26,15 @@ export const processPipelineInfo = additionalInfo => {
           ).toFixed(2)}%)`
         : "";
 
-    pipelineInfo.totalReads = numberWithCommas(pipelineRun.total_reads);
-    pipelineInfo.totalErccReads = `${totalErccReads}${erccPercent}`;
+    pipelineInfo.totalReads = {
+      text: numberWithCommas(pipelineRun.total_reads),
+    };
+    pipelineInfo.totalErccReads = { text: `${totalErccReads}${erccPercent}` };
+    pipelineInfo.pipelineVersion = {
+      text: `v${pipelineRun.version.pipeline}`,
+      linkLabel: "View Visualization",
+      link: `/samples/${pipelineRun.sample_id}/stage_results`,
+    };
   }
 
   if (summaryStats) {

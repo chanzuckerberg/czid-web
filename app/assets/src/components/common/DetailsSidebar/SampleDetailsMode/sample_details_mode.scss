@@ -139,3 +139,15 @@
     resize: vertical;
   }
 }
+
+.vizLink {
+  @include font-header-xxs;
+  // Override color: inherit in _header.scss.
+  color: $primary-light !important;
+  margin-left: 15px;
+
+  .rightArrow {
+    font-size: 0.75em;
+    margin-left: 4px;
+  }
+}
