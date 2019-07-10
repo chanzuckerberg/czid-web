@@ -20,5 +20,9 @@ export const formatWithUnits = (number, unitFactor, units) => {
 };
 
 export const formatSentenceCase = string => {
-  return string.replace(/^\w/, string[0].toUpperCase());
+  if (!/^\w/.test(string)) {
+    return string;
+  }
+  const upperCaseLetter = /^\w/.exec(string)[0].toUpperCase();
+  return string.replace(/^\w/, upperCaseLetter);
 };
