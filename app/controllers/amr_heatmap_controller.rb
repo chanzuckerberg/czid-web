@@ -167,7 +167,7 @@ class AmrHeatmapController < ApplicationController
   def parse_aro_entry(html)
     parsed_info = {}
     aro_doc = Nokogiri::HTML(html)
-    aro_table = aro_doc.at_xpath(".//table[@vocab='http://dev.arpcard.mcmaster.ca/browse/data']/tbody")
+    aro_table = aro_doc.at_xpath(".//table/tbody")
     synonyms = aro_table.at_xpath("./tr/td[text()='Synonym(s)']/following-sibling::td")
     unless synonyms.nil?
       parsed_info["synonyms"] = synonyms.content
