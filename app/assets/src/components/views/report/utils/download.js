@@ -9,7 +9,7 @@ const RESULTS_FOLDER_LABEL = "See Results Folder";
 const PIPELINE_VIZ_LABEL = "See Pipeline Visualization";
 
 // Get download options based on pipeline metadata.
-const getDownloadOptions = pipelineRun => {
+const getDownloadOptions = (pipelineRun, showPipelineVizLink) => {
   let stageTwoComplete = pipelineRun && pipelineRun.adjusted_remaining_reads;
   const assembled = pipelineRun && pipelineRun.assembled === 1;
 
@@ -19,7 +19,7 @@ const getDownloadOptions = pipelineRun => {
     assembled && NON_HOST_CONTIGS_MAPPING_LABEL,
     stageTwoComplete && UNMAPPED_READS_LABEL,
     RESULTS_FOLDER_LABEL,
-    PIPELINE_VIZ_LABEL,
+    ...(showPipelineVizLink ? [PIPELINE_VIZ_LABEL] : []),
   ]);
 };
 
@@ -73,8 +73,12 @@ const getDownloadLinkInfoMap = (sampleId, pipelineRun) => ({
 export const getLinkInfoForDownloadOption = (option, sampleId, pipelineRun) =>
   getDownloadLinkInfoMap(sampleId, pipelineRun)[option];
 
-export const getDownloadLinks = (sampleId, pipelineRun) => {
-  const downloadOptions = getDownloadOptions(pipelineRun);
+export const getDownloadLinks = (
+  sampleId,
+  pipelineRun,
+  showPipelineVizLink
+) => {
+  const downloadOptions = getDownloadOptions(pipelineRun, showPipelineVizLink);
 
   const downloadLinkInfoMap = getDownloadLinkInfoMap(sampleId, pipelineRun);
 

@@ -118,27 +118,25 @@ class PipelineTab extends React.Component {
         >
           <div className={cs.downloadSectionContent}>
             {pipelineRun &&
-              getDownloadLinks(sampleId, pipelineRun).map(
-                option =>
-                  (option.label != "See Pipeline Visualization" ||
-                    showPipelineVizLink) && (
-                    <a
-                      key={option.label}
-                      className={cs.downloadLink}
-                      href={option.path}
-                      target={option.newPage ? "_blank" : "_self"}
-                      onClick={() =>
-                        logAnalyticsEvent("PipelineTab_download-link_clicked", {
-                          newPage: option.newPage,
-                          label: option.label,
-                          href: option.path,
-                          sampleId: this.props.sampleId,
-                        })
-                      }
-                    >
-                      {option.label}
-                    </a>
-                  )
+              getDownloadLinks(sampleId, pipelineRun, showPipelineVizLink).map(
+                option => (
+                  <a
+                    key={option.label}
+                    className={cs.downloadLink}
+                    href={option.path}
+                    target={option.newPage ? "_blank" : "_self"}
+                    onClick={() =>
+                      logAnalyticsEvent("PipelineTab_download-link_clicked", {
+                        newPage: option.newPage,
+                        label: option.label,
+                        href: option.path,
+                        sampleId: this.props.sampleId,
+                      })
+                    }
+                  >
+                    {option.label}
+                  </a>
+                )
               )}
           </div>
         </MetadataSection>
@@ -149,7 +147,7 @@ class PipelineTab extends React.Component {
 
 PipelineTab.propTypes = {
   pipelineInfo: PropTypes.objectOf(
-    PropTypes.objectOf({
+    PropTypes.shape({
       text: PropTypes.string.isRequired,
       link: PropTypes.string,
       linkLabel: PropTypes.string,

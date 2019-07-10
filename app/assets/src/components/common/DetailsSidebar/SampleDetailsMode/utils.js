@@ -58,13 +58,15 @@ export const processPipelineInfo = additionalInfo => {
       ? summaryStats.compression_ratio.toFixed(2)
       : BLANK_TEXT;
 
-    pipelineInfo.nonhostReads = `${adjustedRemainingReads}${adjustedPercent}`;
-    pipelineInfo.unmappedReads = unmappedReads;
-    pipelineInfo.qcPercent = qcPercent;
-    pipelineInfo.compressionRatio = compressionRatio;
-    pipelineInfo.lastProcessedAt = moment(
-      summaryStats.last_processed_at
-    ).format("YYYY-MM-DD");
+    pipelineInfo.nonhostReads = {
+      text: `${adjustedRemainingReads}${adjustedPercent}`,
+    };
+    pipelineInfo.unmappedReads = { text: unmappedReads };
+    pipelineInfo.qcPercent = { text: qcPercent };
+    pipelineInfo.compressionRatio = { text: compressionRatio };
+    pipelineInfo.lastProcessedAt = {
+      text: moment(summaryStats.last_processed_at).format("YYYY-MM-DD"),
+    };
   }
 
   return pipelineInfo;
