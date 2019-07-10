@@ -1,5 +1,5 @@
-URL_CARD_ARO = "https://card.mcmaster.ca/aro/".freeze
-S3_CARD_OWL = "s3://idseq-database/amr/aro.2019.07.09.owl".freeze
+URL_CARD_ARO = "filler_url".freeze
+S3_CARD_OWL = "filler_s3".freeze
 
 class AmrHeatmapController < ApplicationController
   include PipelineOutputsHelper
