@@ -104,21 +104,31 @@ class Location < ApplicationRecord
   # restriction added.
   def self.check_and_restrict_specificity(location, host_genome_name)
     # We don't want Human locations with city
-    if host_genome_name == "Human" && location.city_name.present?
+    if host_genome_name == "Human" && location[:city_name].present?
       # Return our existing entry if found
-      existing = Location.find_by(country_name: location.country_name, state_name: location.state_name, subdivision_name: location.subdivision_name, city_name: "")
+      existing = Location.find_by(
+        country_name: location[:country_name],
+        state_name: location[:state_name],
+        subdivision_name: location[:subdivision_name],
+        city_name: ""
+      )
       return existing if existing
 
       # Redo the search for just the subdivision/state/country
-      success, resp = geosearch_by_levels(location.country_name, location.state_name, location.subdivision_name)
+      success, resp = geosearch_by_levels(
+        location[:country_name],
+        location[:state_name],
+        location[:subdivision_name]
+      )
       unless success && !resp.empty?
-        raise "Couldn't find #{location.country_name}, #{location.state_name}, #{location.subdivision_name} (country, state, subdivision)"
+        raise "Couldn't find #{location[:country_name]}, #{location[:state_name]}, #{location[:subdivision_name]} (country, state, subdivision)"
       end
 
       result = LocationHelper.adapt_location_iq_response(resp[0])
-      location = Location.find_by(locationiq_id: result[:locationiq_id]) || new_from_params(result)
+      return Location.find_by(locationiq_id: result[:locationiq_id]) || new_from_params(result)
     end
 
+    # Just return the input hash if no change
     location
   end
 
