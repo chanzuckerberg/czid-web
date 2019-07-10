@@ -5,10 +5,10 @@ import { getCARDInfo } from "~/api/amr";
 
 import cs from "./gene_details_mode.scss";
 
-const SOURCE_CARD = "card";
-const SOURCE_PUBMED = "pubmed";
-const SOURCE_GOOGLE_SCHOLAR = "googleScholar";
-const SOURCE_NCBI_REF_GENE = "ncbiRefGene";
+const SOURCE_CARD = "CARD Ontology";
+const SOURCE_PUBMED = "PubMed Search";
+const SOURCE_GOOGLE_SCHOLAR = "Google Scholar Search";
+const SOURCE_NCBI_REF_GENE = "NCBI AMR Reference Gene Catalog";
 
 const URL_CARD_ARO = "https://card.mcmaster.ca/aro/";
 const URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/";
@@ -199,7 +199,7 @@ export default class GeneDetailsMode extends React.Component {
 
   renderPublications() {
     const { ontology } = this.state;
-    return ontology.publications.map(publication => {
+    const publications = ontology.publications.map(publication => {
       const citation = /.*(?=(\(PMID))/.exec(publication)[0];
       const pmidText = /(PMID)\s[0-9]*/.exec(publication)[0];
       const pubmedId = pmidText.split(" ")[1];
@@ -219,6 +219,33 @@ export default class GeneDetailsMode extends React.Component {
         </div>
       );
     });
+    return publications;
+  }
+
+  renderFooterLinks() {
+    const { cardEntryFound } = this.state;
+    const sources = [
+      SOURCE_PUBMED,
+      SOURCE_GOOGLE_SCHOLAR,
+      SOURCE_NCBI_REF_GENE,
+    ];
+    if (cardEntryFound) {
+      sources.push(SOURCE_CARD);
+    }
+    const footerLinks = sources.map(source => {
+      return (
+        <li className={cs.link} key={source}>
+          <a
+            href={this.generateLinkTo(source)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {source}
+          </a>
+        </li>
+      );
+    });
+    return footerLinks;
   }
 
   renderGeneContents() {
@@ -231,48 +258,7 @@ export default class GeneDetailsMode extends React.Component {
         {cardEntryFound ? this.renderOntology() : this.renderError()}
         <div className={cs.subtitle}>Links</div>
         <div className={cs.linksSection}>
-          <ul className={cs.linksList}>
-            {cardEntryFound && (
-              <li className={cs.link}>
-                <a
-                  href={this.generateLinkTo(SOURCE_CARD)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  CARD Ontology
-                </a>
-              </li>
-            )}
-            <li className={cs.link}>
-              <a
-                href={this.generateLinkTo(SOURCE_NCBI_REF_GENE)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                NCBI AMR Reference Gene Catalog
-              </a>
-            </li>
-          </ul>
-          <ul className={cs.linksList}>
-            <li className={cs.link}>
-              <a
-                href={this.generateLinkTo(SOURCE_PUBMED)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Pubmed Search
-              </a>
-            </li>
-            <li className={cs.link}>
-              <a
-                href={this.generateLinkTo(SOURCE_GOOGLE_SCHOLAR)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Google Scholar Search
-              </a>
-            </li>
-          </ul>
+          <ul className={cs.linksList}>{this.renderFooterLinks()}</ul>
         </div>
       </div>
     );
