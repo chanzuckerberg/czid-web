@@ -1,10 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { isArray } from "lodash";
+import { get, isArray } from "lodash/fp";
 
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox from "../ui/controls/GeoSearchInputBox";
+
+import cs from "./metadata_input.scss";
+
+export const GEO_PRIVACY_WARNING = "Set to county/district for privacy.";
 
 class MetadataInput extends React.Component {
   constructor(props) {
@@ -15,21 +19,16 @@ class MetadataInput extends React.Component {
     };
   }
 
-  handleLocationSelect = result => {
-    if (result.geo_level && result.geo_level === "city") {
-      console.log(result);
-      console.log("This will be saved at the county level");
+  processLocationSelection = result => {
+    let warning;
+    if (get("geo_level", result) === "city") {
       const match = result.name.match(/,\s(.*)/);
       if (match && match.length >= 2) result.name = match[1];
-
-      result.name = result.name
-        .split(", ")
-        .shift()
-        .join(", ");
-      this.setState({
-        locationWarning: "Changed to county/district for privacy",
-      });
+      warning = GEO_PRIVACY_WARNING;
+    } else {
+      warning = "";
     }
+    this.setState({ locationWarning: warning });
     return result;
   };
 
@@ -79,12 +78,14 @@ class MetadataInput extends React.Component {
             className={className}
             // Calls save on selection
             onResultSelect={({ result }) => {
-              result = this.handleLocationSelect(result);
+              result = this.processLocationSelection(result);
               onChange(metadataType.key, result, true);
             }}
             value={value}
           />
-          {locationWarning}
+          {locationWarning && (
+            <span className={cs.warning}>{locationWarning}</span>
+          )}
         </React.Fragment>
       );
     } else {
