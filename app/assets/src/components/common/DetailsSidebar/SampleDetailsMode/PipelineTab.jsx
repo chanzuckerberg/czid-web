@@ -56,26 +56,30 @@ class PipelineTab extends React.Component {
     const { pipelineInfo } = this.props;
     const { text, linkLabel, link } = pipelineInfo[field.key];
 
+    const metadataLink = linkLabel &&
+      link && (
+        <a
+          className={cs.vizLink}
+          href={link}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {linkLabel}
+          <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+        </a>
+      );
+
     return (
       <div className={cs.field} key={field.key}>
         <div className={cs.label}>{field.name}</div>
         {text === undefined || text === null || text === "" ? (
           <div className={cs.emptyValue}>--</div>
         ) : (
-          <div className={cs.metadataValue}>{text}</div>
+          <div className={cs.metadataValue}>
+            {text}
+            {metadataLink}
+          </div>
         )}
-        {linkLabel &&
-          link && (
-            <a
-              className={cs.vizLink}
-              href={link}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {linkLabel}
-              <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
-            </a>
-          )}
       </div>
     );
   };
