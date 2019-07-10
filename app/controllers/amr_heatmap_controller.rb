@@ -1,5 +1,4 @@
 URL_CARD_ARO = "https://card.mcmaster.ca/aro/".freeze
-# URL_CARD_OWL = "https://raw.githubusercontent.com/arpcard/aro/master/aro.owl".freeze
 S3_CARD_OWL = "s3://idseq-database/amr/aro.2019.07.09.owl".freeze
 
 class AmrHeatmapController < ApplicationController
@@ -72,10 +71,10 @@ class AmrHeatmapController < ApplicationController
       "label" => "",
       "synonyms" => "",
       "description" => "",
-      "gene_family" => "",
-      "drug_class" => "",
-      "resistance_mechanism" => "",
-      "publications" => "",
+      "geneFamily" => "",
+      "drugClass" => "",
+      "resistanceMechanism" => "",
+      "publications" => [],
       "error" => ""
     }
 
@@ -171,10 +170,16 @@ class AmrHeatmapController < ApplicationController
     aro_doc = Nokogiri::HTML(html)
     aro_table = aro_doc.at_xpath(".//table[@vocab='http://dev.arpcard.mcmaster.ca/browse/data']/tbody")
     parsed_info["synonyms"] = aro_table.at_xpath("./tr/td[text()='Synonym(s)']/following-sibling::td").content
-    parsed_info["gene_family"] = aro_table.at_xpath("./tr/td[text()='AMR Gene Family']/following-sibling::td").content
-    parsed_info["drug_class"] = aro_table.at_xpath("./tr/td[text()='Drug Class']/following-sibling::td").content
-    parsed_info["resistance_mechanism"] = aro_table.at_xpath("./tr/td[text()='Resistance Mechanism']/following-sibling::td").content
-    parsed_info["publications"] = aro_table.at_xpath("./tr/td[text()='Publications']/following-sibling::td").content
+    parsed_info["geneFamily"] = aro_table.at_xpath("./tr/td[text()='AMR Gene Family']/following-sibling::td").content
+    parsed_info["drugClass"] = aro_table.at_xpath("./tr/td[text()='Drug Class']/following-sibling::td").content
+    parsed_info["resistanceMechanism"] = aro_table.at_xpath("./tr/td[text()='Resistance Mechanism']/following-sibling::td").content
+
+    publications = []
+    pub_list = aro_table.at_xpath("./tr/td[text()='Publications']/following-sibling::td")
+    pub_list.xpath("./p").each do |publication|
+      publications.push(publication.content)
+    end
+    parsed_info["publications"] = publications
     return parsed_info
   end
 end

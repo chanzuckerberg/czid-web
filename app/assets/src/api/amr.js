@@ -7,11 +7,9 @@ export const getAMRCounts = sampleIds =>
     },
   });
 
-export const getCARDIndex = () => get("amr_heatmap/fetch_card_index.json");
-
-export const getAroEntry = accession =>
-  get("amr_heatmap/fetch_aro_entry.json", {
+export const getCARDInfo = geneName =>
+  get("amr_heatmap/fetch_card_info.json", {
     params: {
-      accession,
+      geneName,
     },
   });

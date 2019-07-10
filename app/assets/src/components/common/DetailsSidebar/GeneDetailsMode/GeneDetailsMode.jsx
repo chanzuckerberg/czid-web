@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { getCARDIndex, getAroEntry } from "~/api/amr";
+import { getCARDInfo } from "~/api/amr";
 
 import cs from "./gene_details_mode.scss";
 
@@ -22,13 +22,6 @@ const CARD_MECHANISM = "Resistance Mechanism";
 const CARD_SYNONYMS = "Synonym(s)";
 const CARD_PUBLICATIONS = "Publications";
 
-// xml tags used in the aro owl xml file
-const XML_OWL_CLASSES = "owl:Class";
-const XML_OWL_LABEL = "rdfs:label";
-const XML_OWL_SYNONYM = "oboInOwl:hasExactSynonym";
-const XML_OWL_DESCRIPTION = "obo:IAO_0000115";
-const XML_OWL_ACCESSION = "oboInOwl:id";
-
 export default class GeneDetailsMode extends React.Component {
   constructor(props) {
     super(props);
@@ -36,7 +29,6 @@ export default class GeneDetailsMode extends React.Component {
     this.state = {
       loading: true,
       cardEntryFound: false,
-      cardIndex: false,
       collapseOntology: true,
     };
   }
@@ -57,161 +49,20 @@ export default class GeneDetailsMode extends React.Component {
   }
 
   async getGeneInfo(geneName) {
-    const { cardIndex } = this.state;
-    const updatedOntology = {
-      accession: undefined,
-      label: "---",
-      synonyms: "---",
-      description: "---",
-      geneFamily: "---",
-      drugClass: "---",
-      resistanceMechanism: "---",
-      publications: "---",
-    };
+    let cardEntryFound;
+    ontology = await getCARDInfo(geneName);
 
-    let cardOntologyEntry, latestCARDIndex;
-    if (!cardIndex) {
-      latestCARDIndex = await getCARDIndex();
+    if (ontology.error !== "") {
+      cardEntryFound = false;
     } else {
-      latestCARDIndex = cardIndex;
+      cardEntryFound = true;
     }
-    cardOntologyEntry = this.searchCARDIndex(geneName, latestCARDIndex.xml);
-
-    if (cardOntologyEntry === undefined) {
-      this.setState({
-        loading: false,
-        ontology: updatedOntology,
-        cardEntryFound: false,
-        cardIndex: latestCARDIndex,
-      });
-      return;
-    }
-
-    Object.keys(cardOntologyEntry).forEach(
-      property => (updatedOntology[property] = cardOntologyEntry[property])
-    );
-
-    const cardRequest = await getAroEntry(updatedOntology.accession);
-    const cardInfo = this.parseAroEntry(cardRequest.html);
-    Object.keys(cardInfo).forEach(
-      property => (updatedOntology[property] = cardInfo[property])
-    );
 
     this.setState({
-      geneName: geneName,
-      ontology: updatedOntology,
+      ontology,
       loading: false,
-      cardEntryFound: true,
-      cardIndex: latestCARDIndex,
+      cardEntryFound,
     });
-  }
-
-  searchCARDIndex(geneName, xml) {
-    const domParser = new DOMParser();
-    const cardIndex = domParser.parseFromString(xml, "text/xml");
-
-    const indexEntries = cardIndex.getElementsByTagName(XML_OWL_CLASSES);
-    let entryMatch;
-    const alphaNumericGeneName = geneName.toLowerCase().replace(/\W/g, "");
-    const regexForGeneName = new RegExp(`\\b${alphaNumericGeneName}\\b`);
-    for (let entry of indexEntries) {
-      // first check label
-      const label = entry.getElementsByTagName(XML_OWL_LABEL)[0];
-      const seperatedEntryName = label.textContent
-        .toLowerCase()
-        .replace(/\//g, " ");
-      const alphaNumericEntryName = seperatedEntryName.replace(
-        /[^0-9a-z_\s]/g,
-        ""
-      );
-      const match = regexForGeneName.test(alphaNumericEntryName);
-      if (match) {
-        entryMatch = label;
-        break;
-      }
-
-      // then check synonyms
-      const synonyms = entry.getElementsByTagName(XML_OWL_SYNONYM);
-      for (let synonym of synonyms) {
-        const seperatedSynonymEntryName = synonym.textContent
-          .toLowerCase()
-          .replace(/\//g, " ");
-        const alphaNumericSynonymEntryName = seperatedSynonymEntryName.replace(
-          /[^0-9a-z_\s]/g,
-          ""
-        );
-        const match = regexForGeneName.test(alphaNumericSynonymEntryName);
-        if (match) {
-          entryMatch = synonym;
-          break;
-        }
-      }
-    }
-
-    if (entryMatch === undefined) {
-      return undefined;
-    }
-
-    const cardOntologyEntry = {};
-    const owlClass = entryMatch.parentNode;
-    cardOntologyEntry.label = owlClass.getElementsByTagName(
-      XML_OWL_LABEL
-    )[0].textContent;
-    cardOntologyEntry.description = owlClass.getElementsByTagName(
-      XML_OWL_DESCRIPTION
-    )[0].textContent;
-    cardOntologyEntry.accession = owlClass
-      .getElementsByTagName(XML_OWL_ACCESSION)[0]
-      .textContent.split(":")[1];
-    return cardOntologyEntry;
-  }
-
-  parseAroEntry(html) {
-    const domParser = new DOMParser();
-    const entry = domParser.parseFromString(html, "text/html");
-    const tableBody = entry.querySelector(
-      "table[vocab='http://dev.arpcard.mcmaster.ca/browse/data'] tbody"
-    );
-
-    const geneInfo = {};
-    tableBody.childNodes.forEach(row => {
-      const columns = [];
-      row.childNodes.forEach(column => columns.push(column.innerText));
-      const [key, value] = columns;
-
-      switch (key) {
-        case CARD_FAMILY: {
-          geneInfo.geneFamily = value;
-          break;
-        }
-        case CARD_CLASS: {
-          geneInfo.drugClass = value;
-          break;
-        }
-        case CARD_MECHANISM: {
-          geneInfo.resistanceMechanism = value;
-          break;
-        }
-        case CARD_SYNONYMS: {
-          geneInfo.synonyms = value;
-          break;
-        }
-        case CARD_PUBLICATIONS: {
-          const publications = [];
-          const pubList = row.childNodes[1];
-          pubList.childNodes.forEach(publication =>
-            publications.push(publication.innerText)
-          );
-          geneInfo.publications = publications;
-          break;
-        }
-        default: {
-          break;
-        }
-      }
-    });
-
-    return geneInfo;
   }
 
   //*** Callback functions ***

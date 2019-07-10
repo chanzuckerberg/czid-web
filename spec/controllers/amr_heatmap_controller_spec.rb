@@ -1,5 +1,4 @@
 require 'rails_helper'
-require 'nokogiri'
 
 RSpec.describe AmrHeatmapController, type: :controller do
   create_users
@@ -202,10 +201,10 @@ RSpec.describe AmrHeatmapController, type: :controller do
           label: "dfrA1",
           synonyms: "dfr1",
           description: "dfrA1 is an integron-encoded dihydrofolate reductase",
-          gene_family: "trimethoprim resistant dihydrofolate reductase dfr",
-          drug_class: "diaminopyrimidine antibiotic",
-          resistance_mechanism: "antibiotic target replacement",
-          publications: "Saenz Y, et al. 2004. Antimicrob Agents Chemother 48(10): 3996-4001. Mechanisms of resistance in multiple-antibiotic-resistant Escherichia coli strains of human, animal, and food origins. (PMID 15388464)",
+          geneFamily: "trimethoprim resistant dihydrofolate reductase dfr",
+          drugClass: "diaminopyrimidine antibiotic",
+          resistanceMechanism: "antibiotic target replacement",
+          publications: ["Saenz Y, et al. 2004. Antimicrob Agents Chemother 48(10): 3996-4001. Mechanisms of resistance in multiple-antibiotic-resistant Escherichia coli strains of human, animal, and food origins. (PMID 15388464)"],
           error: ""
         )
       end
