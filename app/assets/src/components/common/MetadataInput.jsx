@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { get, isArray } from "lodash/fp";
+import { get, isArray, size } from "lodash/fp";
 
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
@@ -19,14 +19,16 @@ class MetadataInput extends React.Component {
     };
   }
 
+  // For human samples, drop the city part of the name and show a warning.
+  // TODO(jsheu): Consider moving the warnings to the backend.
   processLocationSelection = result => {
-    let warning;
-    if (get("geo_level", result) === "city") {
+    const { isHuman } = this.props;
+
+    let warning = "";
+    if (isHuman && get("geo_level", result) === "city") {
       const match = result.name.match(/,\s(.*)/);
-      if (match && match.length >= 2) result.name = match[1];
+      if (size(match) >= 2) result.name = match[1];
       warning = GEO_PRIVACY_WARNING;
-    } else {
-      warning = "";
     }
     this.setState({ locationWarning: warning });
     return result;
