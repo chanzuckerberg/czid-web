@@ -1,5 +1,3 @@
-import axios from "axios/index";
-import { partition } from "lodash";
 import React from "react";
 import PropTypes from "prop-types";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
@@ -20,6 +18,7 @@ import {
   mapKeys,
   mapValues,
   merge,
+  partition,
   pick,
   replace,
   sumBy,
@@ -956,12 +955,14 @@ class DiscoveryView extends React.Component {
     this.setState({ mapLocationData: clusteredData, mapLevel });
   };
 
+  // Cloned from Samples.jsx (deprecated)
   checkPublicSamples = () => {
     get("/samples/samples_going_public.json").then(res => {
       if ((res || []).length) this.displayPublicSampleNotifications(res);
     });
   };
 
+  // Cloned from Samples.jsx (deprecated)
   displayPublicSampleNotifications = samplesGoingPublic => {
     let previouslyDismissedSamples = new Set();
     try {
