@@ -106,8 +106,8 @@ module LocationHelper
                              .group_by { |(_, geo_level)| geo_level }
                              .map { |field, values| [field, values.map { |id| id[0] }] }
                              .to_h
-    samples = samples_with_metadata.includes(metadata: :location)
 
+    samples = samples_with_metadata.includes(metadata: :location)
     # Plain text locations in string_validated_value + multi-geo-level location search
     if locations_by_geo_level.present?
       samples.where(
