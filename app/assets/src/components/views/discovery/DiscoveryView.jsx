@@ -1,3 +1,5 @@
+import axios from "axios/index";
+import { partition } from "lodash";
 import React from "react";
 import PropTypes from "prop-types";
 import UrlQueryParser from "~/components/utils/UrlQueryParser";
@@ -29,11 +31,13 @@ import {
 
 import { getSearchSuggestions } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
+import { get } from "~/api/core";
 import { openUrl } from "~utils/links";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import { Divider } from "~/components/layout";
 import { MAP_CLUSTER_ENABLED_LEVELS } from "~/components/views/discovery/mapping/constants";
 import { indexOfMapLevel } from "~/components/views/discovery/mapping/utils";
+import { publicSampleNotificationsByProject } from "~/components/views/samples/notifications";
 
 import DiscoveryHeader from "./DiscoveryHeader";
 import ProjectsView from "../projects/ProjectsView";
@@ -138,6 +142,7 @@ class DiscoveryView extends React.Component {
 
   async componentDidMount() {
     this.resetDataFromInitialLoad();
+    this.checkPublicSamples();
 
     window.onpopstate = () => {
       this.setState(history.state, () => {
@@ -949,6 +954,34 @@ class DiscoveryView extends React.Component {
     }
 
     this.setState({ mapLocationData: clusteredData, mapLevel });
+  };
+
+  checkPublicSamples = () => {
+    get("/samples/samples_going_public.json").then(res => {
+      if ((res || []).length) this.displayPublicSampleNotifications(res);
+    });
+  };
+
+  displayPublicSampleNotifications = samplesGoingPublic => {
+    let previouslyDismissedSamples = new Set();
+    try {
+      previouslyDismissedSamples = new Set(
+        JSON.parse(localStorage.getItem("dismissedPublicSamples"))
+      );
+    } catch (_) {
+      // catch and ignore possible old formats
+    }
+
+    let [dismissedSamples, newSamples] = partition(samplesGoingPublic, sample =>
+      previouslyDismissedSamples.has(sample.id)
+    );
+    if (newSamples.length > 0) {
+      localStorage.setItem(
+        "dismissedPublicSamples",
+        JSON.stringify(map(dismissedSamples, "id"))
+      );
+      publicSampleNotificationsByProject(newSamples);
+    }
   };
 
   renderCenterPaneContent = () => {
