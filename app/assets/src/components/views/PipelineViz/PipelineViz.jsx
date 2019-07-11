@@ -647,6 +647,10 @@ class PipelineViz extends React.Component {
         shapeProperties: {
           borderRadius: 6,
         },
+        margin: {
+          left: 12,
+          right: 12,
+        },
         widthConstraint: {
           minimum: 120,
         },
