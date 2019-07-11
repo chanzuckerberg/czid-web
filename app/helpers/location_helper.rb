@@ -109,11 +109,15 @@ module LocationHelper
 
     samples = samples_with_metadata.includes(metadata: :location)
     # Plain text locations in string_validated_value + multi-geo-level location search
-    samples.where(
-      "`metadata`.`string_validated_value` IN (?)"\
-        " OR #{locations_by_geo_level.keys.map { |k| "`locations`.`#{k}_id` IN (?)" }.join(' OR ')}",
-      query,
-      *locations_by_geo_level.values
-    )
+    if locations_by_geo_level.present?
+      samples.where(
+        "`metadata`.`string_validated_value` IN (?)"\
+      " OR #{locations_by_geo_level.keys.map { |k| "`locations`.`#{k}_id` IN (?)" }.join(' OR ')}",
+        query,
+        *locations_by_geo_level.values
+      )
+    else
+      samples.where("`metadata`.`string_validated_value` IN (?)", query)
+    end
   end
 end
