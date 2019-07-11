@@ -667,6 +667,8 @@ class DiscoveryView extends React.Component {
     });
   };
 
+  handleProjectMetadataUpdated = () => {};
+
   getCurrentDimensions = () => {
     const { currentTab, projectDimensions, sampleDimensions } = this.state;
 
@@ -1180,6 +1182,7 @@ class DiscoveryView extends React.Component {
               project={project || {}}
               fetchedSamples={samples}
               onProjectUpdated={this.handleProjectUpdated}
+              onMetadataUpdated={this.refreshDataFromProjectChange}
             />
           )}
           <DiscoveryHeader
