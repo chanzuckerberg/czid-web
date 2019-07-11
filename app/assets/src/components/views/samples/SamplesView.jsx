@@ -31,7 +31,6 @@ class SamplesView extends React.Component {
 
     this.state = {
       phyloTreeCreationModalOpen: false,
-      selectedSampleIds: new Set(),
     };
 
     this.columns = [
@@ -146,34 +145,35 @@ class SamplesView extends React.Component {
   }
 
   handleSelectRow = (value, checked) => {
-    const { selectedSampleIds } = this.state;
-    let newSelected = new Set(selectedSampleIds);
+    const { selectedSampleIds, onSelectedSamplesUpdate } = this.props;
+    let newSelected = selectedSampleIds; // copy this?
     if (checked) {
       newSelected.add(value);
     } else {
       newSelected.delete(value);
     }
-    this.setState({ selectedSampleIds: newSelected });
+    onSelectedSamplesUpdate(newSelected);
     logAnalyticsEvent("SamplesView_row_selected", {
-      selectedSampleIds: newSelected.length,
+      selectedSampleIds: newSelected.size,
     });
   };
 
   handleSelectAllRows = (value, checked) => {
-    const { selectableIds } = this.props;
-    const { selectedSampleIds } = this.state;
+    const {
+      selectableIds,
+      selectedSampleIds,
+      onSelectedSamplesUpdate,
+    } = this.props;
     let newSelected = new Set(
       checked
         ? union(Array.from(selectedSampleIds), selectableIds)
         : difference(Array.from(selectedSampleIds), selectableIds)
     );
-    this.setState({ selectedSampleIds: newSelected });
+    onSelectedSamplesUpdate(newSelected);
   };
 
   isSelectAllChecked = () => {
-    const { selectedSampleIds } = this.state;
-    const { selectableIds } = this.props;
-
+    const { selectableIds, selectedSampleIds } = this.props;
     return (
       !isEmpty(selectableIds) &&
       isEmpty(difference(selectableIds, Array.from(selectedSampleIds)))
@@ -186,13 +186,8 @@ class SamplesView extends React.Component {
   };
 
   renderHeatmapTrigger = () => {
-    const { mapSidebarSelectedSampleIds, currentDisplay } = this.props;
-    const { selectedSampleIds } = this.state;
-
-    const targetSampleIds =
-      currentDisplay === "map"
-        ? mapSidebarSelectedSampleIds
-        : selectedSampleIds;
+    const { selectedSampleIds } = this.props;
+    const targetSampleIds = selectedSampleIds;
 
     if (this.props.admin) {
       const heatmapOptions = [
@@ -247,17 +242,9 @@ class SamplesView extends React.Component {
   };
 
   renderDownloadTrigger = () => {
-    const {
-      projectId,
-      currentDisplay,
-      mapSidebarSelectedSampleIds,
-    } = this.props;
-    const { selectedSampleIds } = this.state;
+    const { projectId, selectedSampleIds } = this.props;
 
-    const targetSampleIds =
-      currentDisplay === "map"
-        ? mapSidebarSelectedSampleIds
-        : selectedSampleIds;
+    const targetSampleIds = selectedSampleIds;
 
     const downloadOptions = [{ text: "Sample Table", value: "samples_table" }];
     if (projectId) {
@@ -296,19 +283,15 @@ class SamplesView extends React.Component {
     const {
       currentDisplay,
       mapPreviewedSamples,
-      mapSidebarSelectedSampleIds,
+      selectedSampleIds,
       samples,
     } = this.props;
-    const { selectedSampleIds } = this.state;
 
     // NOTE(jsheu): For mapSidebar sample names to appear in CollectionModal,
     // they need to be presently loaded/fetched. Otherwise the ids work but says "and more..." for un-fetched samples.
     const targetSamples =
       currentDisplay === "map" ? mapPreviewedSamples : samples;
-    const targetSampleIds =
-      currentDisplay === "map"
-        ? mapSidebarSelectedSampleIds
-        : selectedSampleIds;
+    const targetSampleIds = selectedSampleIds;
 
     return targetSampleIds.size < 2 ? (
       <SaveIcon
@@ -332,17 +315,9 @@ class SamplesView extends React.Component {
   };
 
   renderToolbar = () => {
-    const {
-      allowedFeatures,
-      currentDisplay,
-      mapSidebarSelectedSampleIds,
-    } = this.props;
-    const { selectedSampleIds } = this.state;
+    const { allowedFeatures, selectedSampleIds } = this.props;
 
-    const targetSampleIds =
-      currentDisplay === "map"
-        ? mapSidebarSelectedSampleIds
-        : selectedSampleIds;
+    const targetSampleIds = selectedSampleIds;
 
     return (
       <div className={cs.samplesToolbar}>
@@ -382,8 +357,12 @@ class SamplesView extends React.Component {
   };
 
   renderTable = () => {
-    const { activeColumns, onLoadRows, protectedColumns } = this.props;
-    const { selectedSampleIds } = this.state;
+    const {
+      activeColumns,
+      onLoadRows,
+      protectedColumns,
+      selectedSampleIds,
+    } = this.props;
 
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 66;
@@ -539,6 +518,8 @@ SamplesView.propTypes = {
   protectedColumns: PropTypes.array,
   samples: PropTypes.array,
   selectableIds: PropTypes.array.isRequired,
+  selectedSampleIds: PropTypes.instanceOf(Set),
+  onSelectedSamplesUpdate: PropTypes.func,
 };
 
 export default SamplesView;
