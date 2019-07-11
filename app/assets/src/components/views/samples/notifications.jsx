@@ -1,4 +1,5 @@
 import React from "react";
+import { union } from "lodash/fp";
 import PublicSampleNotification from "./PublicSampleNotification";
 import { showToast } from "~/components/utils/toast";
 
@@ -35,10 +36,10 @@ const publicSampleNotificationsByProject = samples => {
         localStorage.setItem(
           "dismissedPublicSamples",
           JSON.stringify(
-            new Set([
-              ...JSON.parse(localStorage.getItem("dismissedPublicSamples")),
-              ...projectSamples.map(sample => sample.id),
-            ])
+            union(
+              JSON.parse(localStorage.getItem("dismissedPublicSamples")),
+              projectSamples.map(sample => sample.id)
+            )
           )
         );
       }

@@ -957,7 +957,9 @@ class DiscoveryView extends React.Component {
 
   // Cloned from Samples.jsx (deprecated)
   checkPublicSamples = () => {
+    console.log("checkPublicSamples called");
     get("/samples/samples_going_public.json").then(res => {
+      console.log("res: ", res);
       if ((res || []).length) this.displayPublicSampleNotifications(res);
     });
   };
@@ -973,13 +975,14 @@ class DiscoveryView extends React.Component {
       // catch and ignore possible old formats
     }
 
-    let [dismissedSamples, newSamples] = partition(samplesGoingPublic, sample =>
-      previouslyDismissedSamples.has(sample.id)
+    let [dismissedSamples, newSamples] = partition(
+      sample => previouslyDismissedSamples.has(sample.id),
+      samplesGoingPublic
     );
     if (newSamples.length > 0) {
       localStorage.setItem(
         "dismissedPublicSamples",
-        JSON.stringify(map(dismissedSamples, "id"))
+        JSON.stringify(map("id", dismissedSamples))
       );
       publicSampleNotificationsByProject(newSamples);
     }
