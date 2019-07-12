@@ -54,7 +54,7 @@ class PipelineTab extends React.Component {
 
   renderPipelineInfoField = field => {
     const { pipelineInfo } = this.props;
-    const { text, linkLabel, link } = pipelineInfo[field.key];
+    const { text, linkLabel, link } = pipelineInfo[field.key] || {};
 
     const metadataLink = linkLabel &&
       link && (
@@ -152,7 +152,7 @@ class PipelineTab extends React.Component {
 PipelineTab.propTypes = {
   pipelineInfo: PropTypes.objectOf(
     PropTypes.shape({
-      text: PropTypes.string.isRequired,
+      text: PropTypes.string,
       link: PropTypes.string,
       linkLabel: PropTypes.string,
     })
