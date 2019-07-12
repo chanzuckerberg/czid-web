@@ -54,6 +54,11 @@ class PipelineViz extends React.Component {
 
   componentDidMount() {
     this.drawGraphs();
+    window.addEventListener("resize", this.handleWindowResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleWindowResize);
   }
 
   createFilePath(filePathSections) {
@@ -751,6 +756,13 @@ class PipelineViz extends React.Component {
 
     this.graphs.push(currStageGraph);
   }
+
+  handleWindowResize = () => {
+    this.graphs.forEach(graph => {
+      graph.minimizeWidthGivenScale(1.0);
+      this.centerEndNodeVertically(graph);
+    });
+  };
 
   renderStageContainer(stageName, i) {
     const isOpened = this.state.stagesOpened[i];
