@@ -21,7 +21,6 @@ const URL_NCBI_REF_GENE =
 
 const CARD_FAMILY = "AMR Gene Family";
 const CARD_RESISTANCES = "Drug Resistances";
-const CARD_MECHANISM = "Resistance Mechanism";
 const CARD_SYNONYMS = "Synonym(s)";
 const CARD_PUBLICATIONS = "Publications";
 
@@ -99,7 +98,6 @@ export default class GeneDetailsMode extends React.Component {
   //*** Render methods ***
 
   renderCARDLicense() {
-    const { ontology } = this.state;
     return (
       <div className={cs.cardLicense}>
         This article uses material from the{" "}
@@ -120,6 +118,14 @@ export default class GeneDetailsMode extends React.Component {
           Creative Commons CC-BY license version 4.0
         </a>{" "}
         by McMaster University.
+      </div>
+    );
+  }
+
+  renderPubMedLicense() {
+    return (
+      <div className={cs.cardLicense}>
+        Publication names courtesy of the U.S. National Library of Medicine.
       </div>
     );
   }
@@ -190,6 +196,7 @@ export default class GeneDetailsMode extends React.Component {
         )}
         <div className={cs.text}>
           <div className={cs.textInner}>{this.renderCARDLicense()}</div>
+          <div className={cs.textInner}>{this.renderPubMedLicense()}</div>
         </div>
       </div>
     );
