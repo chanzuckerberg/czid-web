@@ -116,18 +116,18 @@ class DiscoveryView extends React.Component {
         mapSidebarProjectDimensions: [],
         mapSidebarSampleDimensions: [],
         mapSidebarSampleStats: {},
-        mapSidebarSelectedSampleIds: new Set(),
         mapSidebarTab: "summary",
-        rawMapLocationData: {},
         project: null,
         projectDimensions: [],
         projectId: projectId,
         projects: [],
+        rawMapLocationData: {},
         sampleDimensions: [],
         sampleIds: [],
         samples: [],
         samplesAllLoaded: false,
         search: null,
+        selectedSampleIds: new Set(),
         showFilters: true,
         showStats: true,
         visualizations: [],
@@ -884,8 +884,8 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleMapSidebarSelectUpdate = mapSidebarSelectedSampleIds => {
-    this.setState({ mapSidebarSelectedSampleIds });
+  handleSelectedSamplesUpdate = selectedSampleIds => {
+    this.setState({ selectedSampleIds });
   };
 
   handleMapSidebarTabChange = mapSidebarTab => {
@@ -997,7 +997,7 @@ class DiscoveryView extends React.Component {
       mapLocationData,
       mapPreviewedLocationId,
       mapPreviewedSamples,
-      mapSidebarSelectedSampleIds,
+      selectedSampleIds,
       projectId,
       projects,
       sampleIds,
@@ -1051,7 +1051,6 @@ class DiscoveryView extends React.Component {
                 mapLocationData={mapLocationData}
                 mapPreviewedLocationId={mapPreviewedLocationId}
                 mapPreviewedSamples={mapPreviewedSamples}
-                mapSidebarSelectedSampleIds={mapSidebarSelectedSampleIds}
                 mapTilerKey={mapTilerKey}
                 onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
@@ -1061,10 +1060,12 @@ class DiscoveryView extends React.Component {
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                 onSampleSelected={this.handleSampleSelected}
+                onSelectedSamplesUpdate={this.handleSelectedSamplesUpdate}
                 projectId={projectId}
                 ref={samplesView => (this.samplesView = samplesView)}
                 samples={samples}
                 selectableIds={sampleIds}
+                selectedSampleIds={selectedSampleIds}
               />
             </div>
             {!samples.length &&
@@ -1111,7 +1112,7 @@ class DiscoveryView extends React.Component {
       mapSidebarProjectDimensions,
       mapSidebarSampleDimensions,
       mapSidebarSampleStats,
-      mapSidebarSelectedSampleIds,
+      selectedSampleIds,
       mapSidebarTab,
       projectDimensions,
       projects,
@@ -1137,12 +1138,11 @@ class DiscoveryView extends React.Component {
               allowedFeatures={allowedFeatures}
               currentTab={mapSidebarTab}
               discoveryCurrentTab={currentTab}
-              initialSelectedSampleIds={mapSidebarSelectedSampleIds}
               loading={loading}
               onFilterClick={this.handleMetadataFilterClick}
               onProjectSelected={this.handleProjectSelected}
               onSampleClicked={this.handleSampleSelected}
-              onSelectionUpdate={this.handleMapSidebarSelectUpdate}
+              onSelectionUpdate={this.handleSelectedSamplesUpdate}
               onTabChange={this.handleMapSidebarTabChange}
               projectDimensions={
                 isEmpty(mapSidebarProjectDimensions)
@@ -1172,6 +1172,7 @@ class DiscoveryView extends React.Component {
                   : mapSidebarSampleStats
               }
               selectableIds={mapPreviewedSampleIds}
+              selectedSampleIds={selectedSampleIds}
             />
           ) : (
             <DiscoverySidebar

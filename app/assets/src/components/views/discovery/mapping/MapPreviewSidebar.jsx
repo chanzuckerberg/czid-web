@@ -26,12 +26,6 @@ export default class MapPreviewSidebar extends React.Component {
   constructor(props) {
     super(props);
 
-    const { initialSelectedSampleIds } = this.props;
-
-    this.state = {
-      selectedSampleIds: initialSelectedSampleIds || new Set(),
-    };
-
     this.sampleColumns = [
       {
         dataKey: "sample",
@@ -195,18 +189,16 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   handleSelectRow = (value, checked) => {
-    const { selectedSampleIds } = this.state;
-
-    let newSelected = selectedSampleIds;
+    const { selectedSampleIds, onSelectionUpdate } = this.props;
+    let newSelected = new Set(selectedSampleIds);
     if (checked) {
       newSelected.add(value);
     } else {
       newSelected.delete(value);
     }
-    this.setSelectedSampleIds(newSelected);
-
+    onSelectionUpdate(newSelected);
     logAnalyticsEvent("MapPreviewSidebar_row_selected", {
-      selectedSampleIds: newSelected.length,
+      selectedSampleIds: newSelected.size,
     });
   };
 
@@ -231,8 +223,7 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   isSelectAllChecked = () => {
-    const { selectableIds } = this.props;
-    const { selectedSampleIds } = this.state;
+    const { selectableIds, selectedSampleIds } = this.props;
     return (
       !isEmpty(selectableIds) &&
       isEmpty(difference(selectableIds, Array.from(selectedSampleIds)))
@@ -240,14 +231,13 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   handleSelectAllRows = (value, checked) => {
-    const { selectableIds } = this.props;
-    const { selectedSampleIds } = this.state;
+    const { selectableIds, selectedSampleIds, onSelectionUpdate } = this.props;
     let newSelected = new Set(
       checked
         ? union(Array.from(selectedSampleIds), selectableIds)
         : difference(Array.from(selectedSampleIds), selectableIds)
     );
-    this.setSelectedSampleIds(newSelected);
+    onSelectionUpdate(newSelected);
 
     logAnalyticsEvent("MapPreviewSidebar_select-all-rows_clicked");
   };
@@ -256,12 +246,6 @@ export default class MapPreviewSidebar extends React.Component {
     const { onTabChange } = this.props;
     onTabChange && onTabChange(tab);
     logAnalyticsEvent("MapPreviewSidebar_tab_clicked", { tab });
-  };
-
-  setSelectedSampleIds = selectedSampleIds => {
-    const { onSelectionUpdate } = this.props;
-    this.setState({ selectedSampleIds });
-    onSelectionUpdate && onSelectionUpdate(selectedSampleIds);
   };
 
   computeTabs = () => {
@@ -289,7 +273,7 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   renderTable = () => {
-    const { selectedSampleIds } = this.state;
+    const { selectedSampleIds } = this.props;
 
     const rowHeight = 60;
     const batchSize = 1e4;
@@ -428,18 +412,18 @@ MapPreviewSidebar.propTypes = {
   className: PropTypes.string,
   currentTab: PropTypes.string,
   discoveryCurrentTab: PropTypes.string,
-  initialSelectedSampleIds: PropTypes.instanceOf(Set),
   loading: PropTypes.bool,
   onFilterClick: PropTypes.func,
   onProjectSelected: PropTypes.func,
   onSampleClicked: PropTypes.func,
-  onSelectionUpdate: PropTypes.func,
+  onSelectionUpdate: PropTypes.func.isRequired,
   onTabChange: PropTypes.func,
   projectDimensions: PropTypes.array,
-  projectStats: PropTypes.object,
   projects: PropTypes.array,
+  projectStats: PropTypes.object,
   sampleDimensions: PropTypes.array,
   samples: PropTypes.array,
   sampleStats: PropTypes.object,
   selectableIds: PropTypes.array.isRequired,
+  selectedSampleIds: PropTypes.instanceOf(Set),
 };
