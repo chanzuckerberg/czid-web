@@ -63,6 +63,7 @@ class FilePicker extends React.Component {
       <Dropzone
         acceptClassName={cs.accepted}
         maxSize={5e9}
+        minSize={1}
         onDrop={onChange || this.onChange}
         onDropRejected={onRejected || this.onRejected}
         className={cx(cs.filePicker, className, file && cs.active)}
