@@ -8,13 +8,17 @@
   align-items: center;
 }
 
-.stage,
 .stageAndArrow {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 24px 0;
+}
+
+.stage {
   cursor: default;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .stageButton {
@@ -36,6 +40,7 @@
   overflow: visible;
   position: relative;
   flex-shrink: 0;
+  pointer-events: none;
 
   .stageArrowBody {
     position: relative;
@@ -71,17 +76,23 @@
 }
 
 .graph {
-  height: calc(100% - 32px);
+  height: calc(100% - 50px);
 }
 
 .graphLabel {
   padding: 24px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   flex-wrap: wrap;
   width: 100%;
   position: absolute;
   top: 0;
+
+  .closeIcon {
+    padding: 12px;
+    box-sizing: content-box;
+  }
 }
 
 .hidden {
@@ -102,7 +113,15 @@
 }
 
 .panZoomContainer {
-  cursor: grab !important;
+  cursor: all-scroll !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: -50px; /* To offset the page header */
+  bottom: 0;
+  left: 0;
+  right: 0;
   outline: none;
 }
 

@@ -746,7 +746,10 @@ class PipelineViz extends React.Component {
         <div className={isOpened ? cs.openedStage : cs.hidden}>
           <div className={cs.graphLabel}>
             {stageName}
-            <RemoveIcon onClick={() => this.toggleStage(i)} />
+            <RemoveIcon
+              onClick={() => this.toggleStage(i)}
+              className={cs.closeIcon}
+            />
           </div>
           <div
             className={cs.graph}
