@@ -126,7 +126,7 @@ class Metadatum < ApplicationRecord
         self.location_id = nil
       else
         puts "foobar 4:16pm"
-        self.delete
+        delete
       end
       return
     end
