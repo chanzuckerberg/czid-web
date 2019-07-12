@@ -8,8 +8,6 @@ import _fp, {
   sortBy,
   slice,
   sumBy,
-  compose,
-  join,
 } from "lodash/fp";
 import cx from "classnames";
 
