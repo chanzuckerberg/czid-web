@@ -8,6 +8,8 @@ import _fp, {
   sortBy,
   slice,
   sumBy,
+  compose,
+  join,
 } from "lodash/fp";
 import cx from "classnames";
 
@@ -57,14 +59,15 @@ class LocalSampleFileUpload extends React.Component {
   onRejected = rejectedFiles => {
     const emptyFiles = rejectedFiles.filter(f => f.size === 0);
     const bigFiles = rejectedFiles.filter(f => f.size !== 0);
+    const mapNames = _fp.compose(_fp.join(", "), _fp.map("name"));
     let msg = "Some of your files cannot be uploaded.\n";
     if (emptyFiles.length > 0) {
-      const fileNames = _.map(emptyFiles, "name").join(", ");
-      msg += `- Empty files: ${fileNames}\n`;
+      msg += `- Empty files: ${mapNames(emptyFiles)}\n`;
     }
     if (bigFiles.length > 0) {
-      const fileNames = _.map(bigFiles, "name").join(", ");
-      msg += `- Too large: ${fileNames}\nSize must be under 5GB for local uploads. For larger files, please try our CLI.`;
+      msg += `- Too large: ${mapNames(
+        bigFiles
+      )}\nSize must be under 5GB for local uploads. For larger files, please try our CLI.`;
     }
     window.alert(msg);
   };
