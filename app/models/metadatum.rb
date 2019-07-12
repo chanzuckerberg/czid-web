@@ -121,8 +121,13 @@ class Metadatum < ApplicationRecord
 
     unless loc[:locationiq_id]
       # Unresolved plain text selection (wrapped 'name')
-      self.string_validated_value = loc[:name]
-      self.location_id = nil
+      if loc[:name].present?
+        self.string_validated_value = loc[:name]
+        self.location_id = nil
+      else
+        puts "foobar 4:16pm"
+        self.delete
+      end
       return
     end
 
