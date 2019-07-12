@@ -48,6 +48,7 @@ class PipelineViz extends React.Component {
       interStageArrows: ["", "", ""],
       sidebarVisible: false,
       sidebarParams: {},
+      hovered: false,
     };
   }
 
@@ -412,6 +413,7 @@ class PipelineViz extends React.Component {
 
     this.graphs.forEach(graph => this.centerEndNodeVertically(graph));
     this.setState({
+      hovered: true,
       interStageArrows: updatedInterStageArrows,
     });
   }
@@ -442,6 +444,7 @@ class PipelineViz extends React.Component {
     });
     alteredGraphs.clear();
     this.setState({
+      hovered: false,
       interStageArrows: ["", "", ""],
     });
   };
@@ -752,7 +755,7 @@ class PipelineViz extends React.Component {
             />
           </div>
           <div
-            className={cs.graph}
+            className={cx(cs.graph, this.state.hovered ? cs.hovered : "")}
             onMouseMove={e => this.handleMouseMove(i, e)}
             ref={ref => {
               this.graphContainers[i] = ref;
