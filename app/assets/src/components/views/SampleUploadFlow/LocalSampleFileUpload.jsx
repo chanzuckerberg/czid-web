@@ -54,14 +54,20 @@ class LocalSampleFileUpload extends React.Component {
     this.props.onChange(localSamples, sampleNamesToFiles);
   };
 
-  onRejected = rejectedFiles =>
-    window.alert(
-      `${rejectedFiles
-        .map(f => f.name)
-        .join(
-          ", "
-        )} cannot be uploaded. Size must be under 5GB for local uploads. For larger files, please try our CLI.`
-    );
+  onRejected = rejectedFiles => {
+    const emptyFiles = rejectedFiles.filter(f => f.size === 0);
+    const bigFiles = rejectedFiles.filter(f => f.size !== 0);
+    let msg = "Some of your files cannot be uploaded.\n";
+    if (emptyFiles.length > 0) {
+      const fileNames = _.map(emptyFiles, "name").join(", ");
+      msg += `- Empty files: ${fileNames}\n`;
+    }
+    if (bigFiles.length > 0) {
+      const fileNames = _.map(bigFiles, "name").join(", ");
+      msg += `- Too large: ${fileNames}\nSize must be under 5GB for local uploads. For larger files, please try our CLI.`;
+    }
+    window.alert(msg);
+  };
 
   toggleInfo = () => {
     this.setState(
