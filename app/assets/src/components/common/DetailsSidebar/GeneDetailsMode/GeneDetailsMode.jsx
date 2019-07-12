@@ -10,8 +10,10 @@ const SOURCE_CARD = "CARD Ontology";
 const SOURCE_PUBMED = "PubMed Search";
 const SOURCE_GOOGLE_SCHOLAR = "Google Scholar Search";
 const SOURCE_NCBI_REF_GENE = "NCBI AMR Reference Gene Catalog";
+const SOURCE_OWL = "CARD Ontology OWL";
 
 const URL_CARD_ARO = "https://card.mcmaster.ca/aro/";
+const URL_CARD_OWL = "https://github.com/arpcard/aro";
 const URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/";
 const URL_GOOGLE_SCHOLAR = "https://scholar.google.com/scholar?q=";
 const URL_NCBI_REF_GENE =
@@ -76,6 +78,9 @@ export default class GeneDetailsMode extends React.Component {
       case SOURCE_CARD: {
         return URL_CARD_ARO + ontology.accession;
       }
+      case SOURCE_OWL: {
+        return URL_CARD_OWL;
+      }
       case SOURCE_PUBMED: {
         return URL_PUBMED + "?term=" + geneName;
       }
@@ -97,15 +102,14 @@ export default class GeneDetailsMode extends React.Component {
     const { ontology } = this.state;
     return (
       <div className={cs.cardLicense}>
-        This article uses material from the CARD Antibiotic Resistance Ontology
-        entry for{" "}
+        This article uses material from the{" "}
         <a
-          href={this.generateLinkTo(SOURCE_CARD)}
+          href={this.generateLinkTo(SOURCE_OWL)}
           className={cs.cardLink}
           target="_blank"
           rel="noopener noreferrer"
         >
-          {ontology.label}
+          CARD Antibiotic Resistance Ontology
         </a>, which is released under the{" "}
         <a
           href="https://creativecommons.org/licenses/by/4.0/"
