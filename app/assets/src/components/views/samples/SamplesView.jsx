@@ -146,7 +146,7 @@ class SamplesView extends React.Component {
 
   handleSelectRow = (value, checked) => {
     const { selectedSampleIds, onSelectedSamplesUpdate } = this.props;
-    let newSelected = selectedSampleIds;
+    let newSelected = new Set(selectedSampleIds);
     if (checked) {
       newSelected.add(value);
     } else {
