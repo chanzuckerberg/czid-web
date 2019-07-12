@@ -370,7 +370,15 @@ class PipelineViz extends React.Component {
             edgeInfo.from.stepIndex
           }-${END_NODE_ID}-colored`;
           prevGraph.updateEdges([prevEdgeId], inputColorOptions);
-          updatedInterStageArrows[edgeInfo.from.stageIndex] = "from";
+
+          for (
+            let arrowIndex = edgeInfo.from.stageIndex;
+            arrowIndex < stageIndex;
+            arrowIndex++
+          ) {
+            updatedInterStageArrows[arrowIndex] = "from";
+          }
+
           this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.from.stageIndex);
           edgeIds.push(`${START_NODE_ID}-${nodeId}-colored`);
         }
@@ -400,7 +408,15 @@ class PipelineViz extends React.Component {
               edgeInfo.to.stepIndex
             }-colored`;
             nextGraph.updateEdges([nextGraphEdgeId], outputColorOptions);
-            updatedInterStageArrows[edgeInfo.to.stageIndex - 1] = "to";
+
+            for (
+              let arrowIndex = stageIndex;
+              arrowIndex < edgeInfo.to.stageIndex;
+              arrowIndex++
+            ) {
+              updatedInterStageArrows[arrowIndex] = "to";
+            }
+
             this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.to.stageIndex);
             edgeIds.push(`${nodeId}-${END_NODE_ID}-colored`);
           }
