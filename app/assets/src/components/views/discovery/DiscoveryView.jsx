@@ -955,14 +955,12 @@ class DiscoveryView extends React.Component {
     this.setState({ mapLocationData: clusteredData, mapLevel });
   };
 
-  // Cloned from Samples.jsx (deprecated)
   checkPublicSamples = () => {
     get("/samples/samples_going_public.json").then(res => {
       if ((res || []).length) this.displayPublicSampleNotifications(res);
     });
   };
 
-  // Cloned from Samples.jsx (deprecated)
   displayPublicSampleNotifications = samplesGoingPublic => {
     let previouslyDismissedSamples = new Set();
     try {
@@ -978,6 +976,8 @@ class DiscoveryView extends React.Component {
       samplesGoingPublic
     );
     if (newSamples.length > 0) {
+      // The purpose of setItem here is to keep the dismissed list from growing indefinitely. The
+      // value here will no longer include samples that went public in the past.
       localStorage.setItem(
         "dismissedPublicSamples",
         JSON.stringify(map("id", dismissedSamples))
