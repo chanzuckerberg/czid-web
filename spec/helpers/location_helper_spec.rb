@@ -80,7 +80,31 @@ RSpec.describe LocationHelper, type: :helper do
   end
 
   describe "#filter_by_name" do
-    pending "add test for filtering by location names (with Factories)"
+    it "filters samples by a location name query with location results" do
+      query_text = "Washington"
+      expected = [Sample.new]
+      samples = double()
+
+      expect(Location).to receive_message_chain(:where, :pluck, :group_by, :map, :to_h).and_return(country: [147], state: [153], city: [188])
+      expect(samples).to receive(:includes).with(metadata: :location).and_return(samples)
+      expect(samples).to receive(:where).with("`metadata`.`string_validated_value` IN (?) OR `locations`.`country_id` IN (?) OR `locations`.`state_id` IN (?) OR `locations`.`city_id` IN (?)", query_text, [147], [153], [188]).and_return(expected)
+
+      result = LocationHelper.filter_by_name(samples, query_text)
+      expect(result).to eq(expected)
+    end
+
+    it "filters samples by a location name query with NO location results" do
+      query_text = "Washington"
+      expected = [Sample.new]
+      samples = double()
+
+      expect(Location).to receive(:where).and_return([])
+      expect(samples).to receive(:includes).with(metadata: :location).and_return(samples)
+      expect(samples).to receive(:where).with("`metadata`.`string_validated_value` IN (?)", query_text).and_return(expected)
+
+      result = LocationHelper.filter_by_name(samples, query_text)
+      expect(result).to eq(expected)
+    end
   end
 
   describe "#adapt_location_iq_response" do
