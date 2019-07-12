@@ -146,7 +146,7 @@ class SamplesView extends React.Component {
 
   handleSelectRow = (value, checked) => {
     const { selectedSampleIds, onSelectedSamplesUpdate } = this.props;
-    let newSelected = selectedSampleIds; // copy this?
+    let newSelected = selectedSampleIds;
     if (checked) {
       newSelected.add(value);
     } else {
@@ -187,7 +187,6 @@ class SamplesView extends React.Component {
 
   renderHeatmapTrigger = () => {
     const { selectedSampleIds } = this.props;
-    const targetSampleIds = selectedSampleIds;
 
     if (this.props.admin) {
       const heatmapOptions = [
@@ -195,7 +194,7 @@ class SamplesView extends React.Component {
         { text: "AMR Heatmap", value: "/amr_heatmap" },
       ];
 
-      return targetSampleIds.size < 2 ? (
+      return selectedSampleIds.size < 2 ? (
         <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
       ) : (
         <BareDropdown
@@ -203,12 +202,12 @@ class SamplesView extends React.Component {
           className={cx(cs.icon, cs.heatmapDropdown)}
           items={heatmapOptions.map(option => {
             const params = getURLParamString({
-              sampleIds: Array.from(targetSampleIds),
+              sampleIds: Array.from(selectedSampleIds),
             });
             const log = () =>
               logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
                 option,
-                selectedSampleIds: targetSampleIds.length,
+                selectedSampleIds: selectedSampleIds.size,
               });
             return (
               <BareDropdown.Item
@@ -224,15 +223,15 @@ class SamplesView extends React.Component {
     } else {
       const log = () =>
         logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
-          selectedSampleIds: targetSampleIds.length,
+          selectedSampleIds: selectedSampleIds.size,
         });
-      return targetSampleIds.size < 2 ? (
+      return selectedSampleIds.size < 2 ? (
         <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
       ) : (
         <a
           onClick={log}
           href={`/visualizations/heatmap?sampleIds=${Array.from(
-            targetSampleIds
+            selectedSampleIds
           )}`}
         >
           <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
@@ -243,8 +242,6 @@ class SamplesView extends React.Component {
 
   renderDownloadTrigger = () => {
     const { projectId, selectedSampleIds } = this.props;
-
-    const targetSampleIds = selectedSampleIds;
 
     const downloadOptions = [{ text: "Sample Table", value: "samples_table" }];
     if (projectId) {
@@ -267,11 +264,11 @@ class SamplesView extends React.Component {
           new ReportsDownloader({
             projectId,
             downloadOption,
-            selectedSampleIds: targetSampleIds,
+            selectedSampleIds,
           });
           logAnalyticsEvent("SamplesView_download-dropdown-option_clicked", {
             projectId,
-            selectedSamplesCount: targetSampleIds.length,
+            selectedSamplesCount: selectedSampleIds.size,
             downloadOption,
           });
         }}
@@ -291,9 +288,7 @@ class SamplesView extends React.Component {
     // they need to be presently loaded/fetched. Otherwise the ids work but says "and more..." for un-fetched samples.
     const targetSamples =
       currentDisplay === "map" ? mapPreviewedSamples : samples;
-    const targetSampleIds = selectedSampleIds;
-
-    return targetSampleIds.size < 2 ? (
+    return selectedSampleIds.size < 2 ? (
       <SaveIcon
         className={cx(cs.icon, cs.disabled, cs.save)}
         popupText={"Save a Collection"}
@@ -306,9 +301,9 @@ class SamplesView extends React.Component {
             popupText={"Save a Collection"}
           />
         }
-        selectedSampleIds={targetSampleIds}
+        selectedSampleIds={selectedSampleIds}
         fetchedSamples={targetSamples.filter(sample =>
-          targetSampleIds.has(sample.id)
+          selectedSampleIds.has(sample.id)
         )}
       />
     );
@@ -316,9 +311,6 @@ class SamplesView extends React.Component {
 
   renderToolbar = () => {
     const { allowedFeatures, selectedSampleIds } = this.props;
-
-    const targetSampleIds = selectedSampleIds;
-
     return (
       <div className={cs.samplesToolbar}>
         {allowedFeatures &&
@@ -333,7 +325,7 @@ class SamplesView extends React.Component {
             onClick={() =>
               logAnalyticsEvent(`SamplesView_sample-counter_clicked`)
             }
-            text={`${targetSampleIds.size}`}
+            text={`${selectedSampleIds.size}`}
           />
           <span className={cs.label}>Selected</span>
         </div>
@@ -504,7 +496,6 @@ SamplesView.propTypes = {
   mapLocationData: PropTypes.objectOf(PropTypes.Location),
   mapPreviewedLocationId: PropTypes.number,
   mapPreviewedSamples: PropTypes.array,
-  mapSidebarSelectedSampleIds: PropTypes.instanceOf(Set),
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
@@ -514,12 +505,12 @@ SamplesView.propTypes = {
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onSampleSelected: PropTypes.func,
+  onSelectedSamplesUpdate: PropTypes.func,
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
   samples: PropTypes.array,
   selectableIds: PropTypes.array.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
-  onSelectedSamplesUpdate: PropTypes.func,
 };
 
 export default SamplesView;

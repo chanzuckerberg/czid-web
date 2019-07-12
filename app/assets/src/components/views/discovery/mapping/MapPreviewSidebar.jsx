@@ -190,7 +190,6 @@ export default class MapPreviewSidebar extends React.Component {
 
   handleSelectRow = (value, checked) => {
     const { selectedSampleIds, onSelectionUpdate } = this.props;
-
     let newSelected = selectedSampleIds;
     if (checked) {
       newSelected.add(value);
@@ -198,7 +197,6 @@ export default class MapPreviewSidebar extends React.Component {
       newSelected.delete(value);
     }
     onSelectionUpdate(newSelected);
-
     logAnalyticsEvent("MapPreviewSidebar_row_selected", {
       selectedSampleIds: newSelected.size,
     });
@@ -414,7 +412,6 @@ MapPreviewSidebar.propTypes = {
   className: PropTypes.string,
   currentTab: PropTypes.string,
   discoveryCurrentTab: PropTypes.string,
-  selectedSampleIds: PropTypes.instanceOf(Set),
   loading: PropTypes.bool,
   onFilterClick: PropTypes.func,
   onProjectSelected: PropTypes.func,
@@ -422,10 +419,11 @@ MapPreviewSidebar.propTypes = {
   onSelectionUpdate: PropTypes.func.isRequired,
   onTabChange: PropTypes.func,
   projectDimensions: PropTypes.array,
-  projectStats: PropTypes.object,
   projects: PropTypes.array,
+  projectStats: PropTypes.object,
   sampleDimensions: PropTypes.array,
   samples: PropTypes.array,
   sampleStats: PropTypes.object,
   selectableIds: PropTypes.array.isRequired,
+  selectedSampleIds: PropTypes.instanceOf(Set),
 };
