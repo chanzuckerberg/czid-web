@@ -609,18 +609,15 @@ class PipelineViz extends React.Component {
       },
     };
 
-    // For last stage, connect all nodes to end node for centering
-    if (stageIndex == this.stageNames.length - 1) {
-      return this.stageStepData[stageIndex].steps.map((_, stepIndex) => {
-        return {
-          from: stepIndex,
-          to: END_NODE_ID,
-          id: `${stepIndex}-${END_NODE_ID}-hidden`,
-          ...hiddenEdgeColorOption,
-        };
-      });
-    }
-    return [];
+    // Connect all nodes to end node with hidden edge for centering
+    return this.stageStepData[stageIndex].steps.map((_, stepIndex) => {
+      return {
+        from: stepIndex,
+        to: END_NODE_ID,
+        id: `${stepIndex}-${END_NODE_ID}-hidden`,
+        ...hiddenEdgeColorOption,
+      };
+    });
   }
 
   centerEndNodeVertically(graph) {
