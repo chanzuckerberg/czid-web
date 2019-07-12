@@ -18,11 +18,3 @@ export const formatWithUnits = (number, unitFactor, units) => {
 
   return `${unitIndex > 0 ? number.toFixed(1) : number} ${units[unitIndex]}`;
 };
-
-export const formatSentenceCase = string => {
-  if (!/^\w/.test(string)) {
-    return string;
-  }
-  const upperCaseLetter = /^\w/.exec(string)[0].toUpperCase();
-  return string.replace(/^\w/, upperCaseLetter);
-};
