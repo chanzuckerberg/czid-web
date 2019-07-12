@@ -20,6 +20,9 @@ class ProjectUploadMenu extends React.Component {
   closeModal = () => this.setState({ modalOpen: false });
 
   render() {
+    const { onMetadataUpdated, project } = this.props;
+    const { modalOpen } = this.state;
+
     const trigger = (
       <div className={cs.trigger}>
         <i className="fa fa-plus-circle" />
@@ -33,7 +36,7 @@ class ProjectUploadMenu extends React.Component {
         key="1"
         onClick={() => {
           logAnalyticsEvent("ProjectUploadMenu_upload-sample-btn_clicked");
-          this.goToPage(`/samples/upload?projectId=${this.props.project.id}`);
+          this.goToPage(`/samples/upload?projectId=${project.id}`);
         }}
       />,
       <BareDropdown.Item
@@ -50,10 +53,11 @@ class ProjectUploadMenu extends React.Component {
           items={projectUploadItems}
           direction="left"
         />
-        {this.state.modalOpen && (
+        {modalOpen && (
           <MetadataUploadModal
             onClose={this.closeModal}
-            project={this.props.project}
+            onComplete={onMetadataUpdated}
+            project={project}
           />
         )}
       </div>
@@ -62,6 +66,7 @@ class ProjectUploadMenu extends React.Component {
 }
 
 ProjectUploadMenu.propTypes = {
+  onMetadataUpdated: PropTypes.func,
   project: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string,
