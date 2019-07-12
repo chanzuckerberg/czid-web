@@ -51,14 +51,8 @@ export default class GeneDetailsMode extends React.Component {
   }
 
   async getGeneInfo(geneName) {
-    let cardEntryFound;
     const ontology = await getCARDInfo(geneName);
-
-    if (ontology.error !== "") {
-      cardEntryFound = false;
-    } else {
-      cardEntryFound = true;
-    }
+    const cardEntryFound = ontology.error !== "" ? false : true;
 
     this.setState({
       ontology,

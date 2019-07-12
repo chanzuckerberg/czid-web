@@ -1,4 +1,4 @@
-@import "~styles/typography";
+@import "~styles/themes/typography";
 @import "~styles/themes/colors";
 
 .content {
@@ -8,26 +8,23 @@
 
 .title,
 .loadingMsg {
-  font-size: $font-size-h4;
-  font-weight: $font-weight-semibold;
+  @include font-header-xl;
   margin: 0 10px;
   margin-right: 60px;
   word-break: break-all;
-  line-height: 1.4em;
 }
 
 .geneContents {
   padding: 0 10px;
 
   .subtitle {
+    @include font-header-s;
     padding-top: 25px;
     padding-bottom: 10px;
-    font-size: 14px;
-    font-weight: 700;
   }
 
   .text {
-    line-height: 24px;
+    @include font-body-s;
   }
 
   .linksSection {
@@ -46,7 +43,7 @@
 
   .link {
     color: $primary-light;
-    line-height: 30px;
+    // line-height: 30px;
     cursor: pointer;
   }
 
@@ -58,10 +55,9 @@
 }
 
 .cardLicense {
+  @include font-body-xxs;
   padding-top: 10px;
   color: $medium-grey;
-  font-size: $font-size-small;
-  line-height: $line-height-small;
 
   .cardLink {
     color: $black;
