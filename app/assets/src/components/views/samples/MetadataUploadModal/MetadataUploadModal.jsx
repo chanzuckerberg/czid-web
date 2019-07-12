@@ -42,7 +42,8 @@ class MetadataUploadModal extends React.Component {
   };
 
   handleComplete = async () => {
-    this.props.onClose();
+    const { onClose, onComplete } = this.props;
+    onClose();
 
     const response = await uploadMetadataForProject(
       this.props.project.id,
@@ -86,6 +87,8 @@ class MetadataUploadModal extends React.Component {
         projectSamples: this.state.projectSamples.length,
       });
     }
+
+    onComplete && onComplete();
   };
 
   getPages = () => {
@@ -139,6 +142,7 @@ class MetadataUploadModal extends React.Component {
 
 MetadataUploadModal.propTypes = {
   onClose: PropTypes.func,
+  onComplete: PropTypes.func,
   project: PropTypes.shape({
     id: PropTypes.number,
     name: PropTypes.string,
