@@ -5,7 +5,7 @@
 .pipelineViz {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: stretch;
 }
 
 .stageAndArrow {
@@ -19,6 +19,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 100%;
 }
 
 .stageButton {
@@ -75,12 +76,8 @@
   }
 }
 
-.graph {
-  height: calc(100% - 50px);
-}
-
 .graphLabel {
-  padding: 24px 24px 0;
+  padding-left: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -90,7 +87,7 @@
   top: 0;
 
   .closeIcon {
-    padding: 12px;
+    padding: 24px;
     box-sizing: content-box;
   }
 }
@@ -99,10 +96,13 @@
   display: none;
 }
 
+.graph {
+  padding: 60px 0;
+}
+
 .openedStage {
   background-color: $off-white;
   border-radius: 6px;
-  height: 50vh;
   padding: 16px 0;
   display: flex;
   flex-direction: column;
@@ -110,6 +110,7 @@
   align-items: center;
   font-weight: $font-weight-bold;
   position: relative;
+  height: 100%;
 }
 
 .panZoomContainer {

@@ -50,24 +50,34 @@ export default class NetworkGraph {
     return this.graph.getEdgeAt({ x: xDOMCoord, y: yDOMCoord });
   }
 
-  minimizeWidthGivenScale(scale) {
+  minimizeSizeGivenScale(scale) {
     // Set initial zoom for width calculation.
     this.graph.moveTo({ scale: scale });
 
     // Compute minimum and maximum x coordinates of nodes.
     let minCanvasX = Number.MAX_VALUE;
     let maxCanvasX = Number.MIN_VALUE;
+    let minCanvasY = Number.MAX_VALUE;
+    let maxCanvasY = Number.MIN_VALUE;
     this.data.nodes.getIds().forEach(nodeId => {
       const boundingBox = this.graph.getBoundingBox(nodeId);
       minCanvasX = Math.min(minCanvasX, boundingBox.left);
       maxCanvasX = Math.max(maxCanvasX, boundingBox.right);
+      minCanvasY = Math.min(minCanvasY, boundingBox.top);
+      maxCanvasY = Math.max(maxCanvasY, boundingBox.bottom);
     });
-    const minDOMX = this.graph.canvasToDOM({ x: minCanvasX }).x;
-    const maxDOMX = this.graph.canvasToDOM({ x: maxCanvasX }).x;
+    const { x: minDOMX, y: minDOMY } = this.graph.canvasToDOM({
+      x: minCanvasX,
+      y: minCanvasY,
+    });
+    const { x: maxDOMX, y: maxDOMY } = this.graph.canvasToDOM({
+      x: maxCanvasX,
+      y: maxCanvasY,
+    });
 
-    this.graph.setSize(maxDOMX - minDOMX + "px", "100%");
+    this.graph.setSize(maxDOMX - minDOMX + "px", maxDOMY - minDOMY);
 
-    // Reset zoom (which is adjust when the size is set).
+    // Reset zoom (which is adjusted when the size is set).
     this.graph.moveTo({ scale: 1, position: { x: 0, y: 0 } });
   }
 

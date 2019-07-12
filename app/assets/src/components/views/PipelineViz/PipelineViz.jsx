@@ -750,7 +750,7 @@ class PipelineViz extends React.Component {
       edgeData,
       options
     );
-    currStageGraph.minimizeWidthGivenScale(1.0);
+    currStageGraph.minimizeSizeGivenScale(1.0);
     this.centerEndNodeVertically(currStageGraph);
     this.closeIfNonActiveStage(currStageGraph, index);
 
@@ -758,9 +758,11 @@ class PipelineViz extends React.Component {
   }
 
   handleWindowResize = () => {
-    this.graphs.forEach(graph => {
-      graph.minimizeWidthGivenScale(1.0);
-      this.centerEndNodeVertically(graph);
+    this.graphs.forEach((graph, i) => {
+      if (this.state.stagesOpened[i]) {
+        graph.minimizeSizeGivenScale(1.0);
+        this.centerEndNodeVertically(graph);
+      }
     });
   };
 
