@@ -79,13 +79,16 @@ export const bulkUploadLocalWithMetadata = ({
 
           uploadFileToUrlWithRetries(file, url, {
             onUploadProgress: e => {
-              const percent = Math.round(e.loaded * 100 / e.total);
+              const percent = Math.floor(e.loaded * 100 / e.total);
               fileNamesToProgress[file.name] = percent;
               if (onUploadProgress) {
                 onUploadProgress(percent, file);
               }
             },
-            onSuccess: () => onFileUploadSuccess(sampleName, sample.id),
+            onSuccess: () => {
+              fileNamesToProgress[file.name] = 100;
+              onFileUploadSuccess(sampleName, sample.id);
+            },
             onError: error => onUploadError(file, error),
           });
         });
