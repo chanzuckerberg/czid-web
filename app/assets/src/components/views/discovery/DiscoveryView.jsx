@@ -957,9 +957,7 @@ class DiscoveryView extends React.Component {
 
   // Cloned from Samples.jsx (deprecated)
   checkPublicSamples = () => {
-    console.log("checkPublicSamples called");
     get("/samples/samples_going_public.json").then(res => {
-      console.log("res: ", res);
       if ((res || []).length) this.displayPublicSampleNotifications(res);
     });
   };
