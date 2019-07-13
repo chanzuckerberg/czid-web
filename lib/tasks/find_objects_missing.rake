@@ -103,3 +103,12 @@ task "find_objects_missing_parents" => :environment do
   end
 
 end
+
+
+# TODO: (gdingle): 
+# 1. rake task description
+# 2. verify musts with rest of team
+# 3. parameterize LIMIT
+# 4. discuss foreign key constraints
+# 5. make it a nice gem?
+# 6. write blog post? 
