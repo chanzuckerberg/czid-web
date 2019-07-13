@@ -112,6 +112,8 @@ Logging::Rails.configure do |config|
                                    layout: layout)
   end
 
-  Logging.logger.root.level = :debug
+  # Logging.logger.root.level = :debug
+  # TODO: (gdingle): change me
+  Logging.logger.root.level = :info
   Logging.logger.root.appenders = config.log_to unless config.log_to.empty?
 end
