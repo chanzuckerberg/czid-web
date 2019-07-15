@@ -69,10 +69,10 @@ class AmrHeatmapController < ApplicationController
     ontology = {
       "accession" => "",
       "label" => "",
-      "synonyms" => "",
+      "synonyms" => [],
       "description" => "",
-      "geneFamily" => "",
-      "drugClass" => "",
+      "geneFamily" => [],
+      "drugClass" => [],
       "publications" => [],
       "error" => ""
     }

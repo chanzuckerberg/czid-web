@@ -230,13 +230,11 @@ RSpec.describe AmrHeatmapController, type: :controller do
         expect(json_response).to include_json(
           accession: "",
           label: "",
-          synonyms: "",
+          synonyms: [],
           description: "",
-          geneFamily: "",
-          drugClass: "",
-          publications: [
-
-          ],
+          geneFamily: [],
+          drugClass: [],
+          publications: [],
           error: "No match found for ImNotInCard in the CARD Antibiotic Resistance Ontology."
         )
       end

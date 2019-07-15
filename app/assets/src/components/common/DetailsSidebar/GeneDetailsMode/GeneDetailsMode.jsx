@@ -35,10 +35,10 @@ export default class GeneDetailsMode extends React.Component {
       ontology: {
         accession: "",
         label: "",
-        synonyms: "",
+        synonyms: [],
         description: "",
-        geneFamily: "",
-        drugClass: "",
+        geneFamily: [],
+        drugClass: [],
         publications: [],
         error: "Placeholder",
       },
