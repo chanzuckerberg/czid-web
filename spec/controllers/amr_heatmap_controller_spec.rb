@@ -177,7 +177,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
                               job_status: PipelineRun::STATUS_CHECKED
                             }])
 
-        get :amr_counts, params: { sampleIds: [sample_one["id"]] } # Sample ID 99999 should not exist
+        get :amr_counts, params: { sampleIds: [sample_one["id"]] }
         expect(response.content_type).to eq("application/json")
         expect(response).to have_http_status(:ok)
 
@@ -187,6 +187,56 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                  sample_name: sample_one["name"],
                                                  amr_counts: [],
                                                  error: "")
+      end
+    end
+    describe "GET CARD entry information" do
+      it "should return relevant information from the CARD Ontology database" do
+        get :fetch_card_info, params: { geneName: "dfrA1" }
+        expect(response.content_type).to eq("application/json")
+        expect(response).to have_http_status(:ok)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response).to include_json(
+          accession: "3002854",
+          label: "dfrA1",
+          synonyms: [
+            "dfr1"
+          ],
+          description: "dfrA1 is an integron-encoded dihydrofolate reductase",
+          geneFamily: [
+            {
+              label: "trimethoprim resistant dihydrofolate reductase dfr",
+              description: "Alternative dihydropteroate synthase dfr present on plasmids produces alternate proteins that are less sensitive to trimethoprim from inhibiting its role in folate synthesis, thus conferring trimethoprim resistance."
+            }
+          ],
+          drugClass: [
+            {
+              label: "trimethoprim",
+              description: "Trimethoprim is a synthetic 5-(3,4,5- trimethoxybenzyl) pyrimidine inhibitor of dihydrofolate reductase, inhibiting synthesis of tetrahydrofolic acid. Tetrahydrofolic acid is an essential precursor in the de novo synthesis of the DNA nucleotide thymidine. Trimethoprim is a bacteriostatic antibiotic mainly used in the prophylaxis and treatment of urinary tract infections in combination with sulfamethoxazole, a sulfonamide antibiotic."
+            }
+          ],
+          publications: [
+            "Sáenz Y1, Briñas L, Domínguez E, Ruiz J, Zarazaga M, Vila J, Torres C. Mechanisms of resistance in multiple-antibiotic-resistant Escherichia coli strains of human, animal, and food origins. (PMID 15388464)"
+          ],
+          error: ""
+        )
+      end
+      it "should return an ontology object with an error message if no match is found" do
+        get :fetch_card_info, params: { geneName: "ImNotInCard" }
+        expect(response.content_type).to eq("application/json")
+        expect(response).to have_http_status(:ok)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response).to include_json(
+          accession: "",
+          label: "",
+          synonyms: [],
+          description: "",
+          geneFamily: [],
+          drugClass: [],
+          publications: [],
+          error: "No match found for ImNotInCard in the CARD Antibiotic Resistance Ontology."
+        )
       end
     end
   end

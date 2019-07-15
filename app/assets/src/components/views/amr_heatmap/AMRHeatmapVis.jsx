@@ -110,6 +110,18 @@ export default class AMRHeatmapVis extends React.Component {
     this.setState({ nodeHoverInfo: null });
   };
 
+  // mediate the callback function for clicking a row label in the heatmap,
+  // so that clicking an allele returns the proper gene
+  onRowLabelClick = rowLabel => {
+    const { selectedOptions, onGeneLabelClick } = this.props;
+    const { alleleToGeneMap } = this.state;
+    let geneName = rowLabel;
+    if (selectedOptions.viewLevel === VIEW_LEVEL_ALLELES) {
+      geneName = alleleToGeneMap[rowLabel];
+    }
+    onGeneLabelClick(geneName);
+  };
+
   //*** Following functions must be called after the component has updated ***
 
   getTooltipData(node) {
@@ -235,6 +247,7 @@ export default class AMRHeatmapVis extends React.Component {
         onNodeHoverMove: this.onNodeHoverMove,
         onNodeHoverOut: this.onNodeHoverOut,
         onColumnLabelClick: onSampleLabelClick,
+        onRowLabelClick: this.onRowLabelClick,
       }
     );
     this.heatmap.start();
@@ -288,4 +301,5 @@ AMRHeatmapVis.propTypes = {
     scale: PropTypes.string,
   }),
   onSampleLabelClick: PropTypes.func,
+  onGeneLabelClick: PropTypes.func,
 };
