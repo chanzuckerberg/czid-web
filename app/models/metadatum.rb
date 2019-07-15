@@ -121,8 +121,13 @@ class Metadatum < ApplicationRecord
 
     unless loc[:locationiq_id]
       # Unresolved plain text selection (wrapped 'name')
-      self.string_validated_value = loc[:name]
-      self.location_id = nil
+      if loc[:name].present?
+        self.string_validated_value = loc[:name]
+        self.location_id = nil
+      else
+        # Delete if they cleared out the field
+        delete
+      end
       return
     end
 
