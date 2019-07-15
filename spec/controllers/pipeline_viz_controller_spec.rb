@@ -38,7 +38,7 @@ RSpec.describe PipelineVizController, type: :controller do
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
 
-        get :index, params: { format: "json", sampleId: sample.id }
+        get :show, params: { format: "json", sample_id: sample.id }
 
         json_response = JSON.parse(response.body)
         expect(json_response).to include_json(expected_stage_results)
@@ -55,7 +55,7 @@ RSpec.describe PipelineVizController, type: :controller do
         project = create(:public_project)
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
-        get :index, params: { sampleId: sample.id }
+        get :show, params: { sample_id: sample.id }
 
         expect(response).to have_http_status 401
       end
@@ -65,7 +65,7 @@ RSpec.describe PipelineVizController, type: :controller do
       it "cannot see stage results" do
         project = create(:public_project)
         sample = create(:sample, project: project)
-        get :index, params: { sampleId: sample.id }
+        get :show, params: { sample_id: sample.id }
 
         expect(response).to have_http_status 404
       end
@@ -87,7 +87,7 @@ RSpec.describe PipelineVizController, type: :controller do
         expected_stage_results_no_experimental = expected_stage_results.clone()
         expected_stage_results_no_experimental["stages"].delete "Experimental"
 
-        get :index, params: { format: "json", sampleId: sample.id }
+        get :show, params: { format: "json", sample_id: sample.id }
 
         json_response = JSON.parse(response.body)
         expect(json_response).to include_json(expected_stage_results_no_experimental)
@@ -106,7 +106,7 @@ RSpec.describe PipelineVizController, type: :controller do
         expected_stage_results_no_experimental = expected_stage_results.clone()
         expected_stage_results_no_experimental["stages"].delete "Experimental"
 
-        get :index, params: { format: "json", sampleId: sample.id }
+        get :show, params: { format: "json", sample_id: sample.id }
 
         json_response = JSON.parse(response.body)
         expect(json_response).to include_json(expected_stage_results_no_experimental)
@@ -123,7 +123,7 @@ RSpec.describe PipelineVizController, type: :controller do
         private_sample = create(:sample, project: private_project,
                                          pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
 
-        get :index, params: { sampleId: private_sample.id }
+        get :show, params: { sample_id: private_sample.id }
 
         expect(response).to have_http_status 404
       end
@@ -133,7 +133,7 @@ RSpec.describe PipelineVizController, type: :controller do
       it "cannot see stage results" do
         project = create(:project, users: [@joe])
         sample = create(:sample, project: project)
-        get :index, params: { sampleId: sample.id }
+        get :show, params: { sample_id: sample.id }
 
         expect(response).to have_http_status 404
       end
@@ -149,7 +149,7 @@ RSpec.describe PipelineVizController, type: :controller do
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
 
-        get :index, params: { sampleId: sample.id }
+        get :show, params: { sample_id: sample.id }
 
         expect(response).to have_http_status 401
       end

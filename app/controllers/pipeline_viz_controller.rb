@@ -5,11 +5,11 @@ class PipelineVizController < ApplicationController
     Power.new(current_user)
   end
 
-  # GET /pipeline_viz?sampleId=:sampleId
-  # GET /pipeline_viz.json?sampleId=:sampleId
-  def index
+  # GET /sample/:sample_id/pipeline_viz
+  # GET /sample/:sample_id/pipeline_viz.json
+  def show
     feature_allowed = current_user.allowed_feature_list.include?("pipeline_viz")
-    sample = current_power.samples.find_by(id: params[:sampleId])
+    sample = current_power.samples.find_by(id: params[:sample_id])
     pipeline_run = sample && sample.first_pipeline_run
 
     if feature_allowed && pipeline_run
@@ -26,7 +26,7 @@ class PipelineVizController < ApplicationController
         stages: stage_info
       }
       respond_to do |format|
-        format.html # index.html.erb
+        format.html
         format.json { render json: @results }
       end
     else
