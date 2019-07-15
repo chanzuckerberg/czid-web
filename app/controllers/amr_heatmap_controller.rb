@@ -44,6 +44,7 @@ class AmrHeatmapController < ApplicationController
       amr_data << {
         sample_name: sample.name,
         sample_id: sample.id,
+        metadata: sample.metadata_with_base_type,
         amr_counts: amr_counts,
         error: ""
       }
@@ -55,6 +56,7 @@ class AmrHeatmapController < ApplicationController
         amr_data << {
           sample_name: "",
           sample_id: input_id,
+          metadata: {},
           amr_counts: [],
           error: "sample not found"
         }

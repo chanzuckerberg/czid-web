@@ -16,6 +16,8 @@ const METRICS = [
   { text: "Depth", key: "depth" },
 ];
 
+const DEFAULT_METADATA_TYPE = ["collection_location"];
+
 export default class AMRHeatmapVis extends React.Component {
   constructor(props) {
     super(props);
@@ -23,12 +25,23 @@ export default class AMRHeatmapVis extends React.Component {
     this.state = {
       nodeHoverInfo: null,
       tooltipLocation: null,
+      selectedMetadata: new Set(DEFAULT_METADATA_TYPE),
     };
 
     this.heatmap = null;
   }
 
   componentDidMount() {
+    this.processSampleData();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props !== prevProps || this.heatmap === null) {
+      this.updateHeatmap();
+    }
+  }
+
+  processSampleData() {
     const { samplesWithAMRCounts } = this.props;
     const [sampleLabels, geneLabels, alleleLabels] = this.extractLabels(
       samplesWithAMRCounts
@@ -40,12 +53,6 @@ export default class AMRHeatmapVis extends React.Component {
       alleleLabels,
       alleleToGeneMap,
     });
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props !== prevProps || this.heatmap === null) {
-      this.updateHeatmap();
-    }
   }
 
   // Sometimes, when presenting the tooltip popup as a user hovers over
@@ -68,7 +75,11 @@ export default class AMRHeatmapVis extends React.Component {
     const genes = {};
     const alleles = {};
     sampleData.forEach(sample => {
-      sampleLabels.push({ label: sample.sample_name, id: sample.sample_id });
+      sampleLabels.push({
+        label: sample.sample_name,
+        id: sample.sample_id,
+        metadata: sample.metadata,
+      });
       sample.amr_counts.forEach(amrCount => {
         genes[amrCount.gene] = true;
         alleles[amrCount.allele] = true;
@@ -122,7 +133,22 @@ export default class AMRHeatmapVis extends React.Component {
     onGeneLabelClick(geneName);
   };
 
-  //*** Following functions must be called after the component has updated ***
+  //*** Following functions depend on state and must be called after the component has updated ***
+
+  getSelectedMetadataFields() {
+    const { samplesMetadataTypes } = this.props;
+    const { selectedMetadata } = this.state;
+    const sortByLabel = (a, b) => (a.label > b.label ? 1 : -1); // alphabetical
+
+    return Array.from(selectedMetadata)
+      .map(metadatum => {
+        return {
+          label: samplesMetadataTypes[metadatum].name,
+          value: metadatum,
+        };
+      })
+      .sort(sortByLabel);
+  }
 
   getTooltipData(node) {
     const { samplesWithAMRCounts, selectedOptions } = this.props;
@@ -235,7 +261,7 @@ export default class AMRHeatmapVis extends React.Component {
       // in the rightmost box, and vice versa.
       {
         rowLabels: rows,
-        columnLabels: columns,
+        columnLabels: columns, // needs to contain selected metadata *values*
         values: values,
       },
       // Custom options:
@@ -248,10 +274,13 @@ export default class AMRHeatmapVis extends React.Component {
         onNodeHoverOut: this.onNodeHoverOut,
         onColumnLabelClick: onSampleLabelClick,
         onRowLabelClick: this.onRowLabelClick,
+        columnMetadata: this.getSelectedMetadataFields(), // gets the selected metadata *fields*
       }
     );
     this.heatmap.start();
   }
+
+  //*** Render functions ***
 
   renderNodeHoverTooltip() {
     const { nodeHoverInfo, tooltipLocation } = this.state;
@@ -302,4 +331,5 @@ AMRHeatmapVis.propTypes = {
   }),
   onSampleLabelClick: PropTypes.func,
   onGeneLabelClick: PropTypes.func,
+  samplesMetadataTypes: PropTypes.array,
 };
