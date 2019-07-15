@@ -85,7 +85,7 @@ class User < ApplicationRecord
     user_bucket = s3_path.split("/")[2] # get "bucket" from "s3://bucket/path/to/file"
 
     # Don't allow any users to upload from idseq buckets
-    return false if user_bucket == SAMPLES_BUCKET_NAME || IDSEQ_BUCKET_PREFIXES.any? { |prefix| user_bucket.downcase.starts_with?(prefix) }
+    return false if user_bucket.nil? || user_bucket == SAMPLES_BUCKET_NAME || IDSEQ_BUCKET_PREFIXES.any? { |prefix| user_bucket.downcase.starts_with?(prefix) }
 
     # Don't allow any non-Biohub users to upload from czbiohub buckets
     if CZBIOHUB_BUCKET_PREFIXES.any? { |prefix| user_bucket.downcase.starts_with?(prefix) }
