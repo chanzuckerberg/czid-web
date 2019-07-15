@@ -112,7 +112,7 @@ Rails.application.routes.draw do
   get 'basespace/projects', to: 'basespace#projects'
   get 'basespace/samples_for_project', to: 'basespace#samples_for_project'
 
-  get 'pipeline_viz', to: 'pipeline_viz#index'
+  get '/samples/:sample_id/pipeline_viz', to: 'pipeline_viz#show'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
