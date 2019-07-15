@@ -206,7 +206,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
           synonyms: [
             "phosphatidylglycerophosphate synthetase"
           ],
-          description: "gsA or phosphatidylglycerophosphate synthetase is an integral membrane protein involved in phospholipid biosynthesis. It is a CDP-diacylglycerol-glycerol-3-phosphate 3-phosphatidyltransferase. Laboratory experiments have detected mutations conferring daptomycin resistance in Entercoccus.",
+          description: "pgsA or phosphatidylglycerophosphate synthetase is an integral membrane protein involved in phospholipid biosynthesis. It is a CDP-diacylglycerol-glycerol-3-phosphate 3-phosphatidyltransferase. Laboratory experiments have detected mutations conferring daptomycin resistance in Entercoccus.",
           geneFamily: [
             {
               label: "determinant of resistance to lipopeptide antibiotics",
