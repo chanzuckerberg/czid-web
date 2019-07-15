@@ -1,6 +1,4 @@
 class PipelineVizController < ApplicationController
-  include ApplicationHelper
-
   before_action :authenticate_user!
 
   current_power do
