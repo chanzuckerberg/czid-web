@@ -46,17 +46,19 @@ export default class GeneDetailsMode extends React.Component {
   }
 
   componentDidMount() {
-    this.getGeneInfo(this.props.geneName);
+    const { geneName } = this.props;
+    this.getGeneInfo(geneName);
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.geneName !== prevProps.geneName) {
+    const { geneName } = this.props;
+    if (geneName !== prevProps.geneName) {
       this.setState({
         loading: true,
         cardEntryFound: false,
         collapseOntology: true,
       });
-      this.getGeneInfo(this.props.geneName);
+      this.getGeneInfo(geneName);
     }
   }
 
