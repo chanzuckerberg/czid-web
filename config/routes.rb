@@ -28,7 +28,6 @@ Rails.application.routes.draw do
     get :contigs_summary, on: :member
     get :results_folder, on: :member
     get :raw_results_folder, on: :member
-    get :stage_results, on: :member
     post :bulk_upload, on: :collection
     post :bulk_upload_with_metadata, on: :collection
     get :metadata, on: :member
@@ -112,6 +111,8 @@ Rails.application.routes.draw do
   get 'basespace/oauth', to: 'basespace#oauth'
   get 'basespace/projects', to: 'basespace#projects'
   get 'basespace/samples_for_project', to: 'basespace#samples_for_project'
+
+  get 'pipeline_viz', to: 'pipeline_viz#index'
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
