@@ -783,7 +783,7 @@ class PipelineViz extends React.Component {
             />
           </div>
           <div
-            className={cx(cs.graph, this.state.hovered ? cs.hovered : "")}
+            className={cx(cs.graph, this.state.hovered && cs.hovered)}
             onMouseMove={e => this.handleMouseMove(i, e)}
             ref={ref => {
               this.graphContainers[i] = ref;
