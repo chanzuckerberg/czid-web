@@ -25,6 +25,7 @@ export default class AMRHeatmapVis extends React.Component {
     this.state = {
       nodeHoverInfo: null,
       tooltipLocation: null,
+      columnMetadataLegend: null,
       selectedMetadata: new Set(DEFAULT_METADATA_TYPE),
     };
 
@@ -131,6 +132,17 @@ export default class AMRHeatmapVis extends React.Component {
       geneName = alleleToGeneMap[rowLabel];
     }
     onGeneLabelClick(geneName);
+  };
+
+  onMetadataLabelHover = node => {
+    const legend = this.heatmap.getColumnMetadataLegend(node.value);
+    this.setState({
+      columnMetadataLegend: legend,
+    });
+  };
+
+  onMetadataLabelOut = () => {
+    this.setState({ columnMetadataLegend: null });
   };
 
   //*** Following functions depend on state and must be called after the component has updated ***
@@ -275,12 +287,46 @@ export default class AMRHeatmapVis extends React.Component {
         onColumnLabelClick: onSampleLabelClick,
         onRowLabelClick: this.onRowLabelClick,
         columnMetadata: this.getSelectedMetadataFields(), // gets the selected metadata *fields*
+        onColumnMetadataLabelMove: this.onNodeHoverMove,
+        onColumnMetadataLabelHover: this.onMetadataLabelHover,
+        onColumnMetadataLabelOut: this.onMetadataLabelOut,
+        onAddColumnMetadataClick: null,
       }
     );
     this.heatmap.start();
   }
 
   //*** Render functions ***
+
+  renderMetadataLegend() {
+    const { columnMetadataLegend, tooltipLocation } = this.state;
+    if (!(columnMetadataLegend && tooltipLocation)) {
+      return;
+    }
+    return (
+      <div
+        className={cx(cs.tooltip, columnMetadataLegend && cs.visible)}
+        style={getTooltipStyle(tooltipLocation, {
+          buffer: 20,
+          below: true,
+        })}
+      >
+        <div className={cs.legend}>
+          {Object.keys(columnMetadataLegend)
+            .sort()
+            .map(label => (
+              <div className={cs.legendRow} key={label}>
+                <span
+                  className={cs.legendEntryColor}
+                  style={{ backgroundColor: columnMetadataLegend[label] }}
+                />
+                {label}
+              </div>
+            ))}
+        </div>
+      </div>
+    );
+  }
 
   renderNodeHoverTooltip() {
     const { nodeHoverInfo, tooltipLocation } = this.state;
@@ -310,6 +356,7 @@ export default class AMRHeatmapVis extends React.Component {
           }}
         />
         {this.renderNodeHoverTooltip()}
+        {this.renderMetadataLegend()}
       </div>
     );
   }
