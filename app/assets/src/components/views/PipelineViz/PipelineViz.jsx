@@ -48,11 +48,17 @@ class PipelineViz extends React.Component {
       interStageArrows: ["", "", ""],
       sidebarVisible: false,
       sidebarParams: {},
+      hovered: false,
     };
   }
 
   componentDidMount() {
     this.drawGraphs();
+    window.addEventListener("resize", this.handleWindowResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleWindowResize);
   }
 
   createFilePath(filePathSections) {
@@ -360,19 +366,28 @@ class PipelineViz extends React.Component {
     };
     const inputEdgesInfo = this.getEdgeInfoFor(stageIndex, nodeId, "input");
     const intraStageInputEdges = inputEdgesInfo.reduce((edgeIds, edgeInfo) => {
-      if (edgeInfo.from) {
-        if (edgeInfo.isIntraStage) {
-          edgeIds.push(`${edgeInfo.from.stepIndex}-${nodeId}-colored`);
-        } else {
+      if (edgeInfo.isIntraStage) {
+        edgeIds.push(`${edgeInfo.from.stepIndex}-${nodeId}-colored`);
+      } else {
+        if (edgeInfo.from) {
           const prevGraph = this.graphs[edgeInfo.from.stageIndex];
           const prevEdgeId = `${
             edgeInfo.from.stepIndex
           }-${END_NODE_ID}-colored`;
           prevGraph.updateEdges([prevEdgeId], inputColorOptions);
-          updatedInterStageArrows[edgeInfo.from.stageIndex] = "from";
+
+          for (
+            let arrowIndex = edgeInfo.from.stageIndex;
+            arrowIndex < stageIndex;
+            arrowIndex++
+          ) {
+            updatedInterStageArrows[arrowIndex] = "from";
+          }
+
           this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.from.stageIndex);
-          edgeIds.push(`${START_NODE_ID}-${nodeId}-colored`);
         }
+
+        edgeIds.push(`${START_NODE_ID}-${nodeId}-colored`);
       }
       return edgeIds;
     }, []);
@@ -399,7 +414,15 @@ class PipelineViz extends React.Component {
               edgeInfo.to.stepIndex
             }-colored`;
             nextGraph.updateEdges([nextGraphEdgeId], outputColorOptions);
-            updatedInterStageArrows[edgeInfo.to.stageIndex - 1] = "to";
+
+            for (
+              let arrowIndex = stageIndex;
+              arrowIndex < edgeInfo.to.stageIndex;
+              arrowIndex++
+            ) {
+              updatedInterStageArrows[arrowIndex] = "to";
+            }
+
             this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.to.stageIndex);
             edgeIds.push(`${nodeId}-${END_NODE_ID}-colored`);
           }
@@ -412,6 +435,7 @@ class PipelineViz extends React.Component {
 
     this.graphs.forEach(graph => this.centerEndNodeVertically(graph));
     this.setState({
+      hovered: true,
       interStageArrows: updatedInterStageArrows,
     });
   }
@@ -442,6 +466,7 @@ class PipelineViz extends React.Component {
     });
     alteredGraphs.clear();
     this.setState({
+      hovered: false,
       interStageArrows: ["", "", ""],
     });
   };
@@ -584,18 +609,15 @@ class PipelineViz extends React.Component {
       },
     };
 
-    // For last stage, connect all nodes to end node for centering
-    if (stageIndex == this.stageNames.length - 1) {
-      return this.stageStepData[stageIndex].steps.map((_, stepIndex) => {
-        return {
-          from: stepIndex,
-          to: END_NODE_ID,
-          id: `${stepIndex}-${END_NODE_ID}-hidden`,
-          ...hiddenEdgeColorOption,
-        };
-      });
-    }
-    return [];
+    // Connect all nodes to end node with hidden edge for centering
+    return this.stageStepData[stageIndex].steps.map((_, stepIndex) => {
+      return {
+        from: stepIndex,
+        to: END_NODE_ID,
+        id: `${stepIndex}-${END_NODE_ID}-hidden`,
+        ...hiddenEdgeColorOption,
+      };
+    });
   }
 
   centerEndNodeVertically(graph) {
@@ -646,6 +668,10 @@ class PipelineViz extends React.Component {
         shape: "box",
         shapeProperties: {
           borderRadius: 6,
+        },
+        margin: {
+          left: 12,
+          right: 12,
         },
         widthConstraint: {
           minimum: 120,
@@ -721,12 +747,21 @@ class PipelineViz extends React.Component {
       edgeData,
       options
     );
-    currStageGraph.minimizeWidthGivenScale(1.0);
+    currStageGraph.minimizeSizeGivenScale(1.0);
     this.centerEndNodeVertically(currStageGraph);
     this.closeIfNonActiveStage(currStageGraph, index);
 
     this.graphs.push(currStageGraph);
   }
+
+  handleWindowResize = () => {
+    this.graphs.forEach((graph, i) => {
+      if (this.state.stagesOpened[i]) {
+        graph.minimizeSizeGivenScale(1.0);
+        this.centerEndNodeVertically(graph);
+      }
+    });
+  };
 
   renderStageContainer(stageName, i) {
     const isOpened = this.state.stagesOpened[i];
@@ -742,10 +777,13 @@ class PipelineViz extends React.Component {
         <div className={isOpened ? cs.openedStage : cs.hidden}>
           <div className={cs.graphLabel}>
             {stageName}
-            <RemoveIcon onClick={() => this.toggleStage(i)} />
+            <RemoveIcon
+              onClick={() => this.toggleStage(i)}
+              className={cs.closeIcon}
+            />
           </div>
           <div
-            className={cs.graph}
+            className={cx(cs.graph, this.state.hovered && cs.hovered)}
             onMouseMove={e => this.handleMouseMove(i, e)}
             ref={ref => {
               this.graphContainers[i] = ref;
