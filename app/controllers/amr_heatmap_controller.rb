@@ -76,11 +76,11 @@ class AmrHeatmapController < ApplicationController
       "publications" => [],
       "error" => ""
     }
-    card_owl = get_s3_file(S3_CARD_OWL)
+
+    card_owl = fetch_card_owl()
     if card_owl.nil?
       ontology["error"] = "Unable to retrieve CARD ARO owl file."
-      render json: ontology
-      return
+      render(json: ontology) && return
     end
     ## Search the CARD OWL file
     raw_owl_xml = card_owl.force_encoding("utf-8")
@@ -88,8 +88,7 @@ class AmrHeatmapController < ApplicationController
     search_result = search_card_owl(gene_name, owl_doc)
     unless search_result["error"].nil?
       ontology["error"] = search_result["error"]
-      render json: ontology
-      return
+      render(json: ontology) && return
     end
 
     ontology_info = gather_ontology_information(search_result["matching_node"], owl_doc)
@@ -106,8 +105,16 @@ class AmrHeatmapController < ApplicationController
 
   private
 
+  def fetch_card_owl
+    card_owl = Rails.cache.fetch('card_owl_file', expires_in: 30.days) do
+      get_s3_file(S3_CARD_OWL)
+    end
+    return card_owl
+  end
+
   def search_card_owl(gene_name, xml_dom)
     search_result = {}
+    err = "No match found for %s in the CARD Antibiotic Resistance Ontology."
     owl_classes = xml_dom.xpath(".//owl:Class")
     matching_entry = nil
 
@@ -139,7 +146,7 @@ class AmrHeatmapController < ApplicationController
 
     # abort if no matching entry
     if matching_entry.nil?
-      search_result["error"] = "No match found for #{gene_name} in the CARD Antibiotic Resistance Ontology."
+      search_result["error"] = format(err, gene_name)
     else
       search_result["matching_node"] = matching_entry
     end

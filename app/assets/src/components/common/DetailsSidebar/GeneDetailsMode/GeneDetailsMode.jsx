@@ -32,7 +32,16 @@ export default class GeneDetailsMode extends React.Component {
       loading: true,
       cardEntryFound: false,
       collapseOntology: true,
-      ontology: null,
+      ontology: {
+        accession: "",
+        label: "",
+        synonyms: "",
+        description: "",
+        geneFamily: "",
+        drugClass: "",
+        publications: [],
+        error: "Placeholder",
+      },
     };
   }
 
@@ -71,11 +80,13 @@ export default class GeneDetailsMode extends React.Component {
   //*** Functions depending on state ***
 
   generateLinkTo(source) {
-    const { ontology } = this.state;
+    const {
+      ontology: { accession },
+    } = this.state;
     const { geneName } = this.props;
     switch (source) {
       case SOURCE_CARD: {
-        return URL_CARD_ARO + ontology.accession;
+        return URL_CARD_ARO + accession;
       }
       case SOURCE_OWL: {
         return URL_CARD_OWL;
@@ -131,57 +142,62 @@ export default class GeneDetailsMode extends React.Component {
   }
 
   renderError() {
-    const { ontology } = this.state;
-    return <div className={cs.cardLicense}>{ontology.error}</div>;
+    const {
+      ontology: { error },
+    } = this.state;
+    return <div className={cs.cardLicense}>{error}</div>;
   }
 
   renderHeader() {
-    const { loading, ontology } = this.state;
+    const {
+      loading,
+      ontology: { label },
+    } = this.state;
     const { geneName } = this.props;
     if (loading) {
       return <div className={cs.loadingMsg}>Loading...</div>;
     }
-    return (
-      <div className={cs.title}>
-        {ontology.label !== "" ? ontology.label : geneName}
-      </div>
-    );
+    return <div className={cs.title}>{label !== "" ? label : geneName}</div>;
   }
 
   renderOntology() {
-    const { ontology, collapseOntology } = this.state;
+    const {
+      ontology: { synonyms, description, geneFamily, drugClass, publications },
+      collapseOntology,
+    } = this.state;
     return (
       <div>
-        {ontology.synonyms.length > 0 && (
+        {synonyms.length > 0 && (
           <div className={cs.text}>
             <div className={cs.textInner}>
-              {CARD_SYNONYMS}: <em>{ontology.synonyms.join(", ")}</em>
+              {CARD_SYNONYMS}:{" "}
+              <span className={cs.textSynonym}>{synonyms.join(", ")}</span>
             </div>
           </div>
         )}
         <div className={cs.subtitle}>Description</div>
         <div className={cs.text}>
-          <div className={cs.textInner}>{ontology.description}</div>
+          <div className={cs.textInner}>{description}</div>
         </div>
         {!collapseOntology && (
           <div>
-            {ontology.geneFamily.length > 0 && (
+            {geneFamily.length > 0 && (
               <div>
                 <div className={cs.subtitle}>{CARD_FAMILY}</div>
                 <div className={cs.text}>
-                  {this.renderPropertyList(ontology.geneFamily)}
+                  {this.renderPropertyList(geneFamily)}
                 </div>
               </div>
             )}
-            {ontology.drugClass.length > 0 && (
+            {drugClass.length > 0 && (
               <div>
                 <div className={cs.subtitle}>{CARD_RESISTANCES}</div>
                 <div className={cs.text}>
-                  {this.renderPropertyList(ontology.drugClass)}
+                  {this.renderPropertyList(drugClass)}
                 </div>
               </div>
             )}
-            {ontology.publications.length > 0 && (
+            {publications.length > 0 && (
               <div>
                 <div className={cs.subtitle}>{CARD_PUBLICATIONS}</div>
                 <div className={cs.text}>{this.renderPublications()}</div>
@@ -203,7 +219,7 @@ export default class GeneDetailsMode extends React.Component {
   }
 
   renderPropertyList(array) {
-    const react = array.map(property => {
+    return array.map(property => {
       return (
         <div key={property.label}>
           <div className={cs.textInner}>
@@ -213,12 +229,13 @@ export default class GeneDetailsMode extends React.Component {
         </div>
       );
     });
-    return react;
   }
 
   renderPublications() {
-    const { ontology } = this.state;
-    const publications = ontology.publications.map(publication => {
+    const {
+      ontology: { publications },
+    } = this.state;
+    return publications.map(publication => {
       const citation = /.*(?=(\(PMID))/.exec(publication)[0];
       const pmidText = /(PMID)\s[0-9]*/.exec(publication)[0];
       const pubmedId = pmidText.split(" ")[1];
@@ -237,7 +254,6 @@ export default class GeneDetailsMode extends React.Component {
         </div>
       );
     });
-    return publications;
   }
 
   renderFooterLinks() {

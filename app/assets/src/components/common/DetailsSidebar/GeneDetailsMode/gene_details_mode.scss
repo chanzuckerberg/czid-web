@@ -27,6 +27,10 @@
     @include font-body-s;
   }
 
+  .textSynonym {
+    @include font-header-xxs;
+  }
+
   .linksSection {
     &:after {
       content: "";
@@ -43,7 +47,6 @@
 
   .link {
     color: $primary-light;
-    // line-height: 30px;
     cursor: pointer;
   }
 

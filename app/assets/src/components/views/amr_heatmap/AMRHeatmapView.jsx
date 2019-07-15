@@ -140,20 +140,14 @@ export default class AMRHeatmapView extends React.Component {
 
   onGeneLabelClick = geneName => {
     const { sidebarVisible, sidebarMode, selectedGene } = this.state;
-    if (!geneName) {
-      this.setState({
-        sidebarVisible: false,
-      });
-      return;
-    }
     if (
-      sidebarVisible &&
-      sidebarMode === SIDEBAR_GENE_MODE &&
-      selectedGene === geneName
+      !geneName ||
+      (sidebarVisible &&
+        sidebarMode === SIDEBAR_GENE_MODE &&
+        selectedGene === geneName)
     ) {
-      this.setState({
-        sidebarVisible: false,
-      });
+      this.closeSidebar();
+      return;
     } else {
       this.setState({
         selectedGene: geneName,

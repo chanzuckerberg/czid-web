@@ -113,13 +113,13 @@ export default class AMRHeatmapVis extends React.Component {
   // mediate the callback function for clicking a row label in the heatmap,
   // so that clicking an allele returns the proper gene
   onRowLabelClick = rowLabel => {
-    const { selectedOptions } = this.props;
+    const { selectedOptions, onGeneLabelClick } = this.props;
     const { alleleToGeneMap } = this.state;
     let geneName = rowLabel;
     if (selectedOptions.viewLevel === VIEW_LEVEL_ALLELES) {
       geneName = alleleToGeneMap[rowLabel];
     }
-    this.props.onGeneLabelClick(geneName);
+    onGeneLabelClick(geneName);
   };
 
   //*** Following functions must be called after the component has updated ***
