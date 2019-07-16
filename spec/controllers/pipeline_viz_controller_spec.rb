@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe SamplesController, type: :controller do
+RSpec.describe PipelineVizController, type: :controller do
   pipeline_run_stages_data = [{
     name: "Host Filtering",
     dag_json: "{\"key1\": \"value1\"}"
@@ -38,9 +38,9 @@ RSpec.describe SamplesController, type: :controller do
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
 
-        get :stage_results, params: { format: "json", id: sample.id }
+        get :show, params: { format: "json", sample_id: sample.id }
 
-        json_response = JSON.parse(response.body)["pipeline_stage_results"]
+        json_response = JSON.parse(response.body)
         expect(json_response).to include_json(expected_stage_results)
         expect(json_response.keys).to contain_exactly(*expected_stage_results.keys)
       end
@@ -55,7 +55,7 @@ RSpec.describe SamplesController, type: :controller do
         project = create(:public_project)
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
-        get :stage_results, params: { id: sample.id }
+        get :show, params: { sample_id: sample.id }
 
         expect(response).to have_http_status 401
       end
@@ -65,7 +65,7 @@ RSpec.describe SamplesController, type: :controller do
       it "cannot see stage results" do
         project = create(:public_project)
         sample = create(:sample, project: project)
-        get :stage_results, params: { id: sample.id }
+        get :show, params: { sample_id: sample.id }
 
         expect(response).to have_http_status 404
       end
@@ -87,9 +87,9 @@ RSpec.describe SamplesController, type: :controller do
         expected_stage_results_no_experimental = expected_stage_results.clone()
         expected_stage_results_no_experimental["stages"].delete "Experimental"
 
-        get :stage_results, params: { format: "json", id: sample.id }
+        get :show, params: { format: "json", sample_id: sample.id }
 
-        json_response = JSON.parse(response.body)["pipeline_stage_results"]
+        json_response = JSON.parse(response.body)
         expect(json_response).to include_json(expected_stage_results_no_experimental)
         expect(json_response["stages"]).not_to include_json(Experimental: { key4: "value4" })
         expect(json_response.keys).to contain_exactly(
@@ -106,9 +106,9 @@ RSpec.describe SamplesController, type: :controller do
         expected_stage_results_no_experimental = expected_stage_results.clone()
         expected_stage_results_no_experimental["stages"].delete "Experimental"
 
-        get :stage_results, params: { format: "json", id: sample.id }
+        get :show, params: { format: "json", sample_id: sample.id }
 
-        json_response = JSON.parse(response.body)["pipeline_stage_results"]
+        json_response = JSON.parse(response.body)
         expect(json_response).to include_json(expected_stage_results_no_experimental)
         expect(json_response["stages"]).not_to include_json(Experimental: { key4: "value4" })
         expect(json_response.keys).to contain_exactly(
@@ -122,9 +122,10 @@ RSpec.describe SamplesController, type: :controller do
         private_project = create(:project)
         private_sample = create(:sample, project: private_project,
                                          pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
-        expect do
-          get :stage_results, params: { id: private_sample.id }
-        end.to raise_error(ActiveRecord::RecordNotFound)
+
+        get :show, params: { sample_id: private_sample.id }
+
+        expect(response).to have_http_status 404
       end
     end
 
@@ -132,7 +133,7 @@ RSpec.describe SamplesController, type: :controller do
       it "cannot see stage results" do
         project = create(:project, users: [@joe])
         sample = create(:sample, project: project)
-        get :stage_results, params: { id: sample.id }
+        get :show, params: { sample_id: sample.id }
 
         expect(response).to have_http_status 404
       end
@@ -148,7 +149,7 @@ RSpec.describe SamplesController, type: :controller do
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
 
-        get :stage_results, params: { id: sample.id }
+        get :show, params: { sample_id: sample.id }
 
         expect(response).to have_http_status 401
       end
