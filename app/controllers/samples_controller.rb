@@ -158,7 +158,7 @@ class SamplesController < ApplicationController
 
     limited_samples_json = limited_samples.as_json(
       only: [:id, :name, :host_genome_id, :project_id, :created_at, :public],
-      methods: []
+      methods: [:private_until]
     )
     samples_visibility = get_visibility(limited_samples)
 
