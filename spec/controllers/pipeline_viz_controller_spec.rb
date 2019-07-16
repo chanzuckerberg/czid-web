@@ -1,28 +1,106 @@
 require 'rails_helper'
+require 'json'
 
 RSpec.describe PipelineVizController, type: :controller do
   pipeline_run_stages_data = [{
     name: "Host Filtering",
-    dag_json: "{\"key1\": \"value1\"}"
-  }, {
-    name: "GSNAPL/RAPSEARCH alignment",
-    dag_json: "{\"key2\": \"value2\"}"
-  }, {
-    name: "Post Processing",
-    dag_json: "{\"key3\": \"value3\"}"
+    dag_json: {
+      output_dir_s3: "",
+      targets: {
+        one: ["file1"],
+        two: ["file2"],
+        three: ["file3"]
+      },
+      steps: [
+        {
+          in: ["one"],
+          out: "two",
+          class: "step_one"
+        }, {
+          in: ["two"],
+          out: "three",
+          class: "step_two"
+        }
+      ],
+      given_targets: {
+        one: {
+          s3_dir: "/1.0"
+        }
+      }
+    }.to_json
   }, {
     name: "Experimental",
-    dag_json: "{\"key4\": \"value4\"}"
+    dag_json: {
+      output_dir_s3: "",
+      targets: {
+        three: ["file3"],
+        four: ["file4"]
+      },
+      steps: [
+        {
+          in: ["three"],
+          out: "four",
+          class: "step_three"
+        }
+      ],
+      given_targets: {
+        three: {
+          s3_dir: "/1.0"
+        }
+      }
+    }.to_json
   }]
 
   expected_stage_results = {
-    "pipeline_version" => "1.0",
-    "stages" => {
-      "Host Filtering" => { key1: "value1", job_status: "COMPLETED" },
-      "GSNAPL/RAPSEARCH alignment" => { key2: "value2", job_status: "COMPLETED" },
-      "Post Processing" => { key3: "value3", job_status: "COMPLETED" },
-      "Experimental" => { key4: "value4", job_status: "COMPLETED" }
-    }
+    "stages" => [
+      {
+        "steps" => [
+          {
+            "name" => "step_one",
+            "input_edges" => [1],
+            "output_edges" => [0]
+          },
+          {
+            "name" => "step_two",
+            "input_edges" => [0],
+            "output_edges" => [2]
+          }
+        ]
+      }, {
+        "steps" => [{
+          "name" => "step_three",
+          "input_edges" => [2],
+          "output_edges" => [3]
+        }]
+      }
+    ],
+    "edges" => [
+      # Edges from intra_stage_edges
+      {
+        "from" => { "stage_index" => 0, "step_index" => 0 },
+        "to" => { "stage_index" => 0, "step_index" => 1 },
+        "files" => ["file2"],
+        "is_intra_stage" => true
+      },
+      # Edges from inter_stage_edges
+      {
+        "from" => nil,
+        "to" => { "stage_index" => 0, "step_index" => 0 },
+        "files" => ["file1"],
+        "is_intra_stage" => false
+      },
+      {
+        "from" => { "stage_index" => 0, "step_index" => 1 },
+        "to" => { "stage_index" => 1, "step_index" => 0 },
+        "files" => ["file3"],
+        "is_intra_stage" => false
+      },
+      # Edges from add_final_output_edges
+      {
+        "from" => { "stage_index" => 1, "step_index" => 0 },
+        "files" => ["file4"]
+      }
+    ]
   }
 
   # Admin specific behavior
@@ -84,17 +162,18 @@ RSpec.describe PipelineVizController, type: :controller do
         project = create(:public_project)
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
-        expected_stage_results_no_experimental = expected_stage_results.clone()
-        expected_stage_results_no_experimental["stages"].delete "Experimental"
+
+        expected_stage_results_no_experimental = expected_stage_results.deep_dup
+        expected_stage_results_no_experimental["stages"].pop # Remove experimental stage data
+        expected_stage_results_no_experimental["edges"].pop(2) # Remove edges in and to experimental stage data
+        # Push new outputting edge for first (and now only) stage
+        expected_stage_results_no_experimental["edges"].push("from" => { "stage_index" => 0, "step_index" => 1 },
+                                                             "files" => ["file3"])
 
         get :show, params: { format: "json", sample_id: sample.id }
 
         json_response = JSON.parse(response.body)
         expect(json_response).to include_json(expected_stage_results_no_experimental)
-        expect(json_response["stages"]).not_to include_json(Experimental: { key4: "value4" })
-        expect(json_response.keys).to contain_exactly(
-          *expected_stage_results_no_experimental.keys
-        )
       end
     end
 
@@ -103,17 +182,18 @@ RSpec.describe PipelineVizController, type: :controller do
         project = create(:project, users: [@joe])
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
-        expected_stage_results_no_experimental = expected_stage_results.clone()
-        expected_stage_results_no_experimental["stages"].delete "Experimental"
+
+        expected_stage_results_no_experimental = expected_stage_results.deep_dup
+        expected_stage_results_no_experimental["stages"].pop # Remove experimental stage data
+        expected_stage_results_no_experimental["edges"].pop(2) # Remove edges in and to experimental stage data
+        # Push new outputting edge for first (and now only) stage
+        expected_stage_results_no_experimental["edges"].push("from" => { "stage_index" => 0, "step_index" => 1 },
+                                                             "files" => ["file3"])
 
         get :show, params: { format: "json", sample_id: sample.id }
 
         json_response = JSON.parse(response.body)
         expect(json_response).to include_json(expected_stage_results_no_experimental)
-        expect(json_response["stages"]).not_to include_json(Experimental: { key4: "value4" })
-        expect(json_response.keys).to contain_exactly(
-          *expected_stage_results_no_experimental.keys
-        )
       end
     end
 

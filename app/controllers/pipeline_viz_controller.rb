@@ -84,17 +84,19 @@ class PipelineVizController < ApplicationController
     stage_dag_json["steps"].each_with_index do |step, to_step_index|
       step["in"].each do |in_target|
         from_step_index = target_to_outputting_step[in_target]
-        # TODO(ezhong): Include file download links for files.
-        files = stage_dag_json["targets"][in_target]
-        edges.push(from: {
-                     stage_index: stage_index,
-                     step_index: from_step_index
-                   }, to: {
-                     stage_index: stage_index,
-                     step_index: to_step_index
-                   },
-                   files: files,
-                   is_intra_stage: !from_step_index.nil?)
+        unless from_step_index.nil?
+          # TODO(ezhong): Include file download links for files.
+          files = stage_dag_json["targets"][in_target]
+          edges.push(from: {
+                       stage_index: stage_index,
+                       step_index: from_step_index
+                     }, to: {
+                       stage_index: stage_index,
+                       step_index: to_step_index
+                     },
+                     files: files,
+                     is_intra_stage: true)
+        end
       end
     end
     return edges
