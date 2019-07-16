@@ -10,6 +10,7 @@ import PropTypes from "~/components/utils/propTypes";
 import SampleDetailsMode from "./SampleDetailsMode";
 import TaxonDetailsMode from "./TaxonDetailsMode";
 import PipelineStepDetailsMode from "./PipelineStepDetailsMode";
+import GeneDetailsMode from "./GeneDetailsMode";
 
 export default class DetailsSidebar extends React.Component {
   renderContents() {
@@ -25,6 +26,8 @@ export default class DetailsSidebar extends React.Component {
         return <TaxonDetailsMode {...params} />;
       case "pipelineStepDetails":
         return <PipelineStepDetailsMode {...params} />;
+      case "geneDetails":
+        return <GeneDetailsMode {...params} />;
       default:
         return null;
     }

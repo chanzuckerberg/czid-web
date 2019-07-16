@@ -6,3 +6,10 @@ export const getAMRCounts = sampleIds =>
       sampleIds,
     },
   });
+
+export const getCARDInfo = geneName =>
+  get("amr_heatmap/fetch_card_info.json", {
+    params: {
+      geneName,
+    },
+  });

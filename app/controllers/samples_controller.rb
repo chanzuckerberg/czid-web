@@ -23,14 +23,14 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
-                  :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,
-                  :stage_results].freeze
+                  :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
-                  :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder, :upload_heartbeat].freeze
+                  :pipeline_runs, :save_metadata, :save_metadata_v2, :upload_heartbeat].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files].freeze
+  OWNER_ACTIONS = [:raw_results_folder].freeze
 
   # For API-like access
   TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
@@ -46,8 +46,9 @@ class SamplesController < ApplicationController
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
   power :samples, map: { EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
 
-  before_action :set_sample, only: READ_ACTIONS + EDIT_ACTIONS
+  before_action :set_sample, only: READ_ACTIONS + EDIT_ACTIONS + OWNER_ACTIONS
   before_action :assert_access, only: OTHER_ACTIONS # Actions which don't require access control check
+  before_action :check_owner, only: OWNER_ACTIONS
   before_action :check_access
 
   PAGE_SIZE = 30
@@ -948,6 +949,7 @@ class SamplesController < ApplicationController
   end
 
   def raw_results_folder
+    # See access check in check_owner
     @file_list = @sample.results_folder_files
     @file_path = "#{@sample.sample_path}/results/"
     render template: "samples/raw_folder"
@@ -965,37 +967,6 @@ class SamplesController < ApplicationController
       format.json do
         render json: { displayed_data: @file_list }
       end
-    end
-  end
-
-  # GET /samples/:id/stage_results
-  # GET /samples/:id/stage_results.json
-  def stage_results
-    pipeline_run = @sample.first_pipeline_run
-    feature_allowed = current_user.allowed_feature_list.include?("pipeline_viz")
-    if feature_allowed && pipeline_run
-      stage_info = {}
-      pipeline_run.pipeline_run_stages.each do |stage|
-        if stage.name != "Experimental" || current_user.admin?
-          stage_info[stage.name] = JSON.parse(stage.dag_json || "{}")
-          stage_info[stage.name][:job_status] = stage.job_status
-        end
-      end
-
-      @results = {
-        pipeline_version: pipeline_run.pipeline_version,
-        stages: stage_info
-      }
-      respond_to do |format|
-        format.html { render template: "samples/stage_results" }
-        format.json { render json: { pipeline_stage_results: @results } }
-      end
-    else
-      status = !feature_allowed ? :unauthorized : :not_found
-      render(json: {
-               status: status,
-               message: "Cannot access feature"
-             }, status: status)
     end
   end
 
@@ -1296,5 +1267,14 @@ class SamplesController < ApplicationController
       end
     end
     samples
+  end
+
+  def check_owner
+    unless current_user.admin? || current_user.id == @sample.user_id
+      render json: {
+        message: "Only the original uploader can access this."
+      }, status: :unauthorized
+      # Rendering halts the filter chain
+    end
   end
 end
