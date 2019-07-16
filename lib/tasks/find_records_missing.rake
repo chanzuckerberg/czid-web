@@ -31,7 +31,29 @@ task "find_records_missing_parents", [:max_per_model] => :environment do |t, arg
   end
 end
 
+desc "Finds database records that appear to be test data"
+
+task "find_test_records", [:max_per_model] => :environment do |t, args|
+  ActiveRecord::Base.logger.level = :info
+  args.with_defaults(:max_per_model => 1000)
+  all_models.select.each do |name, model| 
+    puts "\nFinding #{name} records that contain 'test' or 'demo' in their name ..."
+    model.order(created_at: :desc).limit(args.max_per_model).map do |record|
+      if is_test_record(record)
+        owner = record.respond_to?(:user) && record.user ? record.user.email : "unknown"
+        puts "Record ##{record.id} '#{record.name}' owned by #{owner} appears to be test data"
+      end
+    end
+    puts get_total_message(args.max_per_model, model)
+  end
+end
+
 private 
+
+def is_test_record(record)
+  record.respond_to?(:name) && record.name &&
+   (record.name.include?("test") || record.name.include?("demo"))
+end
 
 def missing_children(model, assocs, max_per_model)
   format_missing(model.order(created_at: :desc).limit(max_per_model).map do |record|
