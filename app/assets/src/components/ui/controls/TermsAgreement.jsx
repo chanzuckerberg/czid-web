@@ -21,7 +21,7 @@ class TermsAgreement extends React.Component {
                 }
               </span>
               <a
-                href="https://assets.idseq.net/Terms.pdf"
+                href="https://idseq.net/terms"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -29,7 +29,7 @@ class TermsAgreement extends React.Component {
               </a>
               {" and "}
               <a
-                href="https://assets.idseq.net/Privacy.pdf"
+                href="https://idseq.net/privacy"
                 target="_blank"
                 rel="noopener noreferrer"
               >
