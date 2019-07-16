@@ -312,6 +312,7 @@ export default class AMRHeatmapVis extends React.Component {
         onColumnMetadataLabelHover: this.onMetadataLabelHover,
         onColumnMetadataLabelOut: this.onMetadataLabelOut,
         onAddColumnMetadataClick: this.onMetadataAddButtonClick,
+        marginLeft: 75, // our gene names are very short, so this is to prevent metadata names from disappearing
       }
     );
     this.heatmap.start();
