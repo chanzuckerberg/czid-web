@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { StickyContainer, Sticky } from "react-sticky";
+import { CSVLink } from "react-csv";
 
 import AMRHeatmapControls from "~/components/views/amr_heatmap/AMRHeatmapControls";
 import AMRHeatmapVis from "~/components/views/amr_heatmap/AMRHeatmapVis";
@@ -9,6 +10,7 @@ import ErrorBoundary from "~/components/ErrorBoundary";
 import { getAMRCounts } from "~/api/amr";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
+import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 
 import cs from "./amr_heatmap_view.scss";
 
@@ -26,6 +28,8 @@ const SCALES = [
   { text: "Logarithmic", value: "symlog" },
   { text: "Linear", value: "linear" },
 ];
+
+const DOWNLOAD_OPTIONS = [{ text: "Download CSV", value: "csv" }];
 
 const SIDEBAR_SAMPLE_MODE = "sampleDetails";
 
@@ -76,10 +80,10 @@ export default class AMRHeatmapView extends React.Component {
         const geneNameExtractionRegex = /[^_]+/; // matches everything before the first underscore
         const geneName = geneNameExtractionRegex.exec(amrCount.gene)[0];
         amrCount.gene = geneName;
-      })
-    })
+      });
+    });
 
-    return filteredSamples
+    return filteredSamples;
   }
 
   assembleControlOptions() {
@@ -144,6 +148,31 @@ export default class AMRHeatmapView extends React.Component {
 
   //*** Post-update methods ***
 
+  computeHeatmapValuesForCSV() {
+    const { samplesWithAMRCounts } = this.state;
+    const csvData = samplesWithAMRCounts.flatMap(sample => {
+      const csvRow = sample.amr_counts.map(amrCount => {
+        const row = [
+          `${sample.sample_name}`,
+          `${amrCount.gene}`,
+          `${amrCount.allele}`,
+          `${amrCount.coverage}`,
+          `${amrCount.depth}`,
+        ];
+        return row;
+      });
+      return csvRow;
+    });
+    csvData.unshift([
+      "sample_name",
+      "gene_name",
+      "allele_name",
+      "coverage",
+      "depth",
+    ]);
+    return csvData;
+  }
+
   getSidebarParams() {
     const { sidebarMode, selectedSampleId } = this.state;
     switch (sidebarMode) {
@@ -159,10 +188,27 @@ export default class AMRHeatmapView extends React.Component {
     }
   }
 
+  getDownloadCSVLink() {
+    return DOWNLOAD_OPTIONS.map(option => {
+      option.text = (
+        <CSVLink
+          data={this.computeHeatmapValuesForCSV()}
+          filename="amr_heatmap.csv"
+          target="_blank"
+          key={`${option.text} CSVLink`}
+        >
+          {option.text}
+        </CSVLink>
+      );
+      return option;
+    });
+  }
+
   //*** Render methods ***
 
   renderHeader() {
     const { sampleIds } = this.props;
+    const { loading } = this.state;
     return (
       <ViewHeader className={cs.viewHeader}>
         <ViewHeader.Content>
@@ -173,6 +219,15 @@ export default class AMRHeatmapView extends React.Component {
             label={`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
           />
         </ViewHeader.Content>
+        {!loading && (
+          <ViewHeader.Controls className={cs.controls}>
+            <DownloadButtonDropdown
+              className={cs.controlElement}
+              options={this.getDownloadCSVLink()}
+              disabled={loading}
+            />
+          </ViewHeader.Controls>
+        )}
       </ViewHeader>
     );
   }
