@@ -57,7 +57,6 @@ export default class AMRHeatmapVis extends React.Component {
       samplesWithAMRCounts
     );
     const alleleToGeneMap = this.mapAllelesToGenes(samplesWithAMRCounts);
-    console.log(sampleLabels);
     this.setState({
       sampleLabels,
       geneLabels,
