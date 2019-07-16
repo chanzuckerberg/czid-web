@@ -5,6 +5,8 @@ import PropTypes from "prop-types";
 import Icon from "../icons/Icon";
 import cs from "./file_picker.scss";
 
+export const FILE_SIZE_LIMIT_GB = 5;
+
 class FilePicker extends React.Component {
   state = {
     file: null,
@@ -13,7 +15,9 @@ class FilePicker extends React.Component {
   // Default handler for dropped files being rejected
   onRejected = () => {
     window.alert(
-      "Invalid file. File size must be under 5GB for local uploads."
+      "Invalid file. File size must be under " +
+        FILE_SIZE_LIMIT_GB +
+        "GB for local uploads."
     );
   };
 
@@ -62,7 +66,7 @@ class FilePicker extends React.Component {
     return (
       <Dropzone
         acceptClassName={cs.accepted}
-        maxSize={5e9}
+        maxSize={FILE_SIZE_LIMIT_GB * 1e9}
         minSize={1}
         onDrop={onChange || this.onChange}
         onDropRejected={onRejected || this.onRejected}

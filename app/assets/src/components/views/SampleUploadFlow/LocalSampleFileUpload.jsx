@@ -12,7 +12,7 @@ import _fp, {
 import cx from "classnames";
 
 import { sampleNameFromFileName, cleanFilePath } from "~utils/sample";
-import FilePicker from "~ui/controls/FilePicker";
+import FilePicker, { FILE_SIZE_LIMIT_GB } from "~ui/controls/FilePicker";
 import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent } from "~/api/analytics";
 
@@ -113,8 +113,8 @@ class LocalSampleFileUpload extends React.Component {
                 &quot;_R2&quot; at the end of the basename.
               </li>
               <li>
-                Each file must be &lt; 5 GB. To upload larger files, please use
-                the{" "}
+                Each file must be &lt; {FILE_SIZE_LIMIT_GB} GB. To upload larger
+                files, please use the{" "}
                 <a href="/cli_user_instructions" target="_blank">
                   CLI
                 </a>.
