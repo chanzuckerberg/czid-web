@@ -154,5 +154,5 @@ def all_models
 end
 
 def get_total_message(max_per_model, model)
-  puts "Finished checking #{max_per_model} most recent records out of #{model.count} in the database."
+  puts "Finished checking #{[max_per_model.to_i, model.count].min} most recent records out of #{model.count} in the database."
 end
