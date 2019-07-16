@@ -51,8 +51,8 @@ end
 private 
 
 def is_test_record(record)
-  record.respond_to?(:name) && record.name &&
-   (record.name.include?("test") || record.name.include?("demo"))
+  record.respond_to?(:name) && record.name && 
+    record.name.match(/\b(test|demo|benchmark|asdf)\b/)
 end
 
 def missing_children(model, assocs, max_per_model)
