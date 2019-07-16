@@ -115,11 +115,7 @@ class LocalSampleFileUpload extends React.Component {
               <li>
                 Each file must be &lt; 5 GB. To upload larger files, please use
                 the{" "}
-                <a
-                  href="/cli_user_instructions"
-                  target="_blank"
-                  className={cs.link}
-                >
+                <a href="/cli_user_instructions" target="_blank">
                   CLI
                 </a>.
               </li>
