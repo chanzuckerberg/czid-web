@@ -54,11 +54,11 @@ class Project < ApplicationRecord
     return path unless path != File.expand_path(path)
   end
 
-  # TODO: (gdingle): fix me
-  # def samples
-  #   # Disable samples function. have to go through power
-  #   nil
-  # end
+  # Disable samples function. have to go through power
+  alias samples_unsafe samples
+  def samples
+    nil
+  end
 
   def cleaned_project_name
     "project-#{name.downcase.split(' ').join('_')}"
