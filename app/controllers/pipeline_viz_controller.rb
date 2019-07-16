@@ -1,16 +1,15 @@
 class PipelineVizController < ApplicationController
   before_action :authenticate_user!
 
-  current_power do
-    Power.new(current_user)
-  end
-
-  # GET /sample/:sample_id/pipeline_viz
-  # GET /sample/:sample_id/pipeline_viz.json
+  # GET /sample/:sample_id/pipeline_viz/:pipeline_version
+  # GET /sample/:sample_id/pipeline_viz/:pipeline_version.json
   def show
     feature_allowed = current_user.allowed_feature_list.include?("pipeline_viz")
     sample = current_power.samples.find_by(id: params[:sample_id])
-    pipeline_run = sample && sample.first_pipeline_run
+    pipeline_version = params[:pipeline_version]
+    pipeline_run = sample && (
+      pipeline_version ? sample.pipeline_runs.where(pipeline_version: pipeline_version)[0] : sample.first_pipeline_run
+    )
 
     if feature_allowed && pipeline_run
       @stages = []
