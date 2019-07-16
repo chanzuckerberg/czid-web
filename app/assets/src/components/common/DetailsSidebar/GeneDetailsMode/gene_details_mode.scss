@@ -1,0 +1,73 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.content {
+  padding: 30px 20px;
+  position: relative;
+}
+
+.title,
+.loadingMsg {
+  @include font-header-xl;
+  margin: 0 10px;
+  margin-right: 60px;
+  word-break: break-all;
+}
+
+.geneContents {
+  padding: 0 10px;
+
+  .subtitle {
+    @include font-header-s;
+    padding-top: 25px;
+    padding-bottom: 10px;
+  }
+
+  .text {
+    @include font-body-s;
+  }
+
+  .textSynonym {
+    @include font-header-xxs;
+  }
+
+  .linksSection {
+    &:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+  }
+
+  .linksList {
+    min-width: 200px;
+    float: left;
+    list-style: none;
+  }
+
+  .link {
+    color: $primary-light;
+    cursor: pointer;
+  }
+
+  .expandLink {
+    color: $primary-light;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+}
+
+.cardLicense {
+  @include font-body-xxs;
+  padding-top: 10px;
+  color: $medium-grey;
+
+  .cardLink {
+    color: $black;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
