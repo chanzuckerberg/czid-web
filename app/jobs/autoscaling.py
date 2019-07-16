@@ -62,6 +62,9 @@ def delete_tags_from_instances(instance_ids, tag_keys):
     cmd = cmd.format(list_instances=' '.join(instance_ids), list_tags=' '.join(['Key='+tag for tag in tag_keys]))
     aws_command(cmd)
 
+def terminate_instances(instance_ids):
+    aws_command("aws ec2 terminate-instances --instance-ids {list_instances}".format(list_instances=' '.join(instance_ids)))
+
 def get_asg_list():
     asg_json = aws_command("aws autoscaling describe-auto-scaling-groups")
     asg_list = json.loads(asg_json).get('AutoScalingGroups', [])
@@ -101,6 +104,15 @@ def autoscaling_update(config):
         print "There are {num_terminating} terminating instances: {terminating_instances}.".format(num_terminating=len(terminating_instances), terminating_instances=terminating_instances)
         if not is_valid_classification:
             print "WARNING: some instances were classified into multiple states or none. This should never happen."
+
+        if num_discarded > 0 and num_desired > num_available + num_draining:
+            # Case where zombie instances exist.
+            # The "discarded" instances will not in fact get killed, because num_desired is higher than the number
+            # of "non-discarded" instances (num_available + num_draining).
+            # So we terminate them manually and print a warning (because the zombie case should have been 
+            # logically excluded from the state machine).
+            print "WARNING: there are zombie instances. This should never happen. Terminating all instances that have lost scale-in protection."
+            terminate_instances(discarded_instances)
 
         print "CHUNKS IN PROGRESS: {num_chunks}".format(num_chunks=service_ASG.num_chunks)
 
