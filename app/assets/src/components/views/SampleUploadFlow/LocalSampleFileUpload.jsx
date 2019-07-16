@@ -112,6 +112,17 @@ class LocalSampleFileUpload extends React.Component {
                 Paired files must be labeled with &quot;_R1&quot; or
                 &quot;_R2&quot; at the end of the basename.
               </li>
+              <li>
+                Each file must be &lt; 5 GB. To upload larger files, please use
+                the{" "}
+                <a
+                  href="/cli_user_instructions"
+                  target="_blank"
+                  className={cs.link}
+                >
+                  CLI
+                </a>.
+              </li>
             </ul>
           </div>
         )}
