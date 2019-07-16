@@ -3,7 +3,8 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
-import { DataTooltip } from "~ui/containers";
+import { DataTooltip, ContextPlaceholder } from "~ui/containers";
+import { SearchBoxList } from "~ui/controls";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 
 import cs from "./amr_heatmap_vis.scss";
@@ -26,6 +27,7 @@ export default class AMRHeatmapVis extends React.Component {
       nodeHoverInfo: null,
       tooltipLocation: null,
       columnMetadataLegend: null,
+      addMetadataTrigger: null,
       selectedMetadata: new Set(DEFAULT_METADATA_TYPE),
     };
 
@@ -36,9 +38,16 @@ export default class AMRHeatmapVis extends React.Component {
     this.processSampleData();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
+    const { selectedMetadata } = this.state;
     if (this.props !== prevProps || this.heatmap === null) {
       this.updateHeatmap();
+    }
+    if (
+      selectedMetadata !== prevState.selectedMetadata &&
+      this.heatmap !== null
+    ) {
+      this.heatmap.updateColumnMetadata(this.getSelectedMetadataFields());
     }
   }
 
@@ -143,6 +152,18 @@ export default class AMRHeatmapVis extends React.Component {
 
   onMetadataLabelOut = () => {
     this.setState({ columnMetadataLegend: null });
+  };
+
+  onMetadataAddButtonClick = trigger => {
+    this.setState({
+      addMetadataTrigger: trigger,
+    });
+  };
+
+  onMetadataSelectionChange = selectedMetadata => {
+    this.setState({
+      selectedMetadata,
+    });
   };
 
   //*** Following functions depend on state and must be called after the component has updated ***
@@ -290,7 +311,7 @@ export default class AMRHeatmapVis extends React.Component {
         onColumnMetadataLabelMove: this.onNodeHoverMove,
         onColumnMetadataLabelHover: this.onMetadataLabelHover,
         onColumnMetadataLabelOut: this.onMetadataLabelOut,
-        onAddColumnMetadataClick: null,
+        onAddColumnMetadataClick: this.onMetadataAddButtonClick,
       }
     );
     this.heatmap.start();
@@ -328,6 +349,43 @@ export default class AMRHeatmapVis extends React.Component {
     );
   }
 
+  renderMetadataSelector() {
+    const { samplesMetadataTypes } = this.props;
+    const { addMetadataTrigger, selectedMetadata } = this.state;
+    if (!addMetadataTrigger) {
+      return;
+    }
+    const searchBoxOptions = Object.keys(samplesMetadataTypes)
+      .sort()
+      .map(type => {
+        return {
+          label: samplesMetadataTypes[type].name,
+          value: samplesMetadataTypes[type].key,
+        };
+      });
+    return (
+      <ContextPlaceholder
+        closeOnOutsideClick
+        context={addMetadataTrigger}
+        horizontalOffset={5}
+        verticalOffset={10}
+        onClose={() => {
+          this.setState({ addMetadataTrigger: null });
+        }}
+        position="bottom right"
+      >
+        <div className={cs.metadataContainer}>
+          <SearchBoxList
+            options={searchBoxOptions}
+            onChange={this.onMetadataSelectionChange}
+            selected={selectedMetadata}
+            title="Select Metadata Fields"
+          />
+        </div>
+      </ContextPlaceholder>
+    );
+  }
+
   renderNodeHoverTooltip() {
     const { nodeHoverInfo, tooltipLocation } = this.state;
     if (!(nodeHoverInfo && tooltipLocation)) {
@@ -357,6 +415,7 @@ export default class AMRHeatmapVis extends React.Component {
         />
         {this.renderNodeHoverTooltip()}
         {this.renderMetadataLegend()}
+        {this.renderMetadataSelector()}
       </div>
     );
   }
@@ -378,5 +437,5 @@ AMRHeatmapVis.propTypes = {
   }),
   onSampleLabelClick: PropTypes.func,
   onGeneLabelClick: PropTypes.func,
-  samplesMetadataTypes: PropTypes.array,
+  samplesMetadataTypes: PropTypes.object,
 };
