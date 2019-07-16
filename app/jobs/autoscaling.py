@@ -63,6 +63,8 @@ def delete_tags_from_instances(instance_ids, tag_keys):
     aws_command(cmd)
 
 def terminate_instances(instance_ids):
+    if not instance_ids:
+        return
     aws_command("aws ec2 terminate-instances --instance-ids {list_instances}".format(list_instances=' '.join(instance_ids)))
 
 def get_asg_list():
