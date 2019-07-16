@@ -308,9 +308,8 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
 
   test 'joe cannot see raw_result_folder for public_sample' do
     sign_in(:joe)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      get "/samples/#{samples(:public_sample).id}/raw_results_folder"
-    end
+    get "/samples/#{samples(:public_sample).id}/raw_results_folder"
+    assert_response :unauthorized
   end
 
   # private project
