@@ -57,47 +57,47 @@ RSpec.describe PipelineVizController, type: :controller do
         "steps" => [
           {
             "name" => "step_one",
-            "input_edges" => [1],
-            "output_edges" => [0]
+            "inputEdges" => [1],
+            "outputEdges" => [0]
           },
           {
             "name" => "step_two",
-            "input_edges" => [0],
-            "output_edges" => [2]
+            "inputEdges" => [0],
+            "outputEdges" => [2]
           }
         ]
       }, {
         "steps" => [{
           "name" => "step_three",
-          "input_edges" => [2],
-          "output_edges" => [3]
+          "inputEdges" => [2],
+          "outputEdges" => [3]
         }]
       }
     ],
     "edges" => [
       # Edges from intra_stage_edges
       {
-        "from" => { "stage_index" => 0, "step_index" => 0 },
-        "to" => { "stage_index" => 0, "step_index" => 1 },
+        "from" => { "stageIndex" => 0, "stepIndex" => 0 },
+        "to" => { "stageIndex" => 0, "stepIndex" => 1 },
         "files" => ["file2"],
-        "is_intra_stage" => true
+        "isIntraStage" => true
       },
       # Edges from inter_stage_edges
       {
         "from" => nil,
-        "to" => { "stage_index" => 0, "step_index" => 0 },
+        "to" => { "stageIndex" => 0, "stepIndex" => 0 },
         "files" => ["file1"],
-        "is_intra_stage" => false
+        "isIntraStage" => false
       },
       {
-        "from" => { "stage_index" => 0, "step_index" => 1 },
-        "to" => { "stage_index" => 1, "step_index" => 0 },
+        "from" => { "stageIndex" => 0, "stepIndex" => 1 },
+        "to" => { "stageIndex" => 1, "stepIndex" => 0 },
         "files" => ["file3"],
-        "is_intra_stage" => false
+        "isIntraStage" => false
       },
       # Edges from add_final_output_edges
       {
-        "from" => { "stage_index" => 1, "step_index" => 0 },
+        "from" => { "stageIndex" => 1, "stepIndex" => 0 },
         "files" => ["file4"]
       }
     ]
@@ -167,7 +167,7 @@ RSpec.describe PipelineVizController, type: :controller do
         expected_stage_results_no_experimental["stages"].pop # Remove experimental stage data
         expected_stage_results_no_experimental["edges"].pop(2) # Remove edges in and to experimental stage data
         # Push new outputting edge for first (and now only) stage
-        expected_stage_results_no_experimental["edges"].push("from" => { "stage_index" => 0, "step_index" => 1 },
+        expected_stage_results_no_experimental["edges"].push("from" => { "stageIndex" => 0, "stepIndex" => 1 },
                                                              "files" => ["file3"])
 
         get :show, params: { format: "json", sample_id: sample.id }
@@ -187,7 +187,7 @@ RSpec.describe PipelineVizController, type: :controller do
         expected_stage_results_no_experimental["stages"].pop # Remove experimental stage data
         expected_stage_results_no_experimental["edges"].pop(2) # Remove edges in and to experimental stage data
         # Push new outputting edge for first (and now only) stage
-        expected_stage_results_no_experimental["edges"].push("from" => { "stage_index" => 0, "step_index" => 1 },
+        expected_stage_results_no_experimental["edges"].push("from" => { "stageIndex" => 0, "stepIndex" => 1 },
                                                              "files" => ["file3"])
 
         get :show, params: { format: "json", sample_id: sample.id }
