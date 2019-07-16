@@ -226,7 +226,7 @@ class Sample < ApplicationRecord
   def results_folder_files
     pr = first_pipeline_run
     return list_outputs(sample_output_s3_path) unless pr
-    file_list = []
+
     if pipeline_version_at_least_2(pr.pipeline_version)
       file_list = list_outputs(pr.output_s3_path_with_version)
       file_list += list_outputs(sample_output_s3_path)
@@ -238,6 +238,7 @@ class Sample < ApplicationRecord
       stage2_files = list_outputs(pr.alignment_output_s3_path, 2)
       file_list = stage1_files + stage2_files
     end
+
     file_list
   end
 

@@ -947,8 +947,12 @@ class SamplesController < ApplicationController
   end
 
   def raw_results_folder
-    @file_list = @sample.results_folder_files
-    @file_path = "#{@sample.sample_path}/results/"
+    can_see_stage1_results = (current_user.id == @sample.user_id)
+    if can_see_stage1_results
+      @file_list = @sample.results_folder_files
+      @file_path = "#{@sample.sample_path}/results/"
+    end
+
     render template: "samples/raw_folder"
   end
 
