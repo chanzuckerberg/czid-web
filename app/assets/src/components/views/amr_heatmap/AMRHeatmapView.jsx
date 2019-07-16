@@ -8,7 +8,10 @@ import DetailsSidebar from "~/components/common/DetailsSidebar";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import { getAMRCounts } from "~/api/amr";
 import { getSampleMetadataFields } from "~/api/metadata";
-import { processMetadataTypes } from "~/components/utils/metadata";
+import {
+  processMetadata,
+  processMetadataTypes,
+} from "~/components/utils/metadata";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
 
@@ -62,7 +65,7 @@ export default class AMRHeatmapView extends React.Component {
     );
     const samplesWithKeyedMetadata = filteredSamples.map(sample =>
       Object.assign({}, sample, {
-        metadata: processMetadataTypes(sample.metadata, true),
+        metadata: processMetadata(sample.metadata, true),
       })
     );
     const samplesWithAMRCounts = this.processSampleAMRCounts(
