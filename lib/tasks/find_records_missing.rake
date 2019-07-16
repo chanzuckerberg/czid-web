@@ -4,11 +4,11 @@ desc "Finds database records that are missing child records"
 task "find_records_missing_children", [:max_per_model] => :environment do |t, args|
   ActiveRecord::Base.logger.level = :info
   args.with_defaults(:max_per_model => 1000)
-  must_have_children.each do |model_name, assocs| 
+  must_have_children.each do |model_name, assocs|
     puts "\nFinding #{model_name} records that are missing child records by has_many assocs #{assocs} ..."
     model = all_models[model_name.to_s]
     missing = missing_children(model, assocs, args.max_per_model)
-    if missing.length > 0 
+    if missing.length > 0
       puts "Model #{model.name} has missing children in records: #{JSON.pretty_generate(missing)}"
     end
     puts get_total_message(args.max_per_model, model)
@@ -20,7 +20,7 @@ desc "Finds database records that are missing parent records"
 task "find_records_missing_parents", [:max_per_model] => :environment do |t, args|
   ActiveRecord::Base.logger.level = :info
   args.with_defaults(:max_per_model => 1000)
-  must_have_parents.each do |model_name, assocs| 
+  must_have_parents.each do |model_name, assocs|
     puts "\nFinding #{model_name} records that are missing a parent record by belongs_to assocs #{assocs} ..."
     model = all_models[model_name.to_s]
     missing = missing_parents(model, assocs, args.max_per_model)
@@ -36,7 +36,7 @@ desc "Finds database records that appear to be test data"
 task "find_test_records", [:max_per_model] => :environment do |t, args|
   ActiveRecord::Base.logger.level = :info
   args.with_defaults(:max_per_model => 1000)
-  all_models.select.each do |name, model| 
+  all_models.select.each do |name, model|
     puts "\nFinding #{name} records that contain 'test' or 'demo' in their name ..."
     model.order(created_at: :desc).limit(args.max_per_model).map do |record|
       if is_test_record(record)
@@ -48,10 +48,10 @@ task "find_test_records", [:max_per_model] => :environment do |t, args|
   end
 end
 
-private 
+private
 
 def is_test_record(record)
-  record.respond_to?(:name) && record.name && 
+  record.respond_to?(:name) && record.name &&
     record.name.match(/\b(test|demo|benchmark|asdf)\b/)
 end
 
@@ -100,7 +100,8 @@ def must_have_children
        :pipeline_run_stages,
        :output_states,
        # :taxon_counts,
-       :job_stats,
+       # job_stats are not required. See pipeline_run#monitor_results.
+       # :job_stats,
        # :taxon_byteranges,
        # :ercc_counts,
        # :amr_counts,
@@ -110,15 +111,16 @@ def must_have_children
     :Background => [:taxon_summaries],
     :Project => [
        # need to use unsafe method to keep with access control
-       :samples_unsafe, 
-       # :samples, 
-       # :favorite_projects, 
-       # :favorited_by, 
+       :samples_unsafe,
+       # :samples,
+       # :favorite_projects,
+       # :favorited_by,
        # :phylo_trees
     ],
     :Sample => [
        :pipeline_runs,
        :input_files,
+       # admins could skip adding metadata in the legacy upload page
        # :metadata
     ]
   }
@@ -139,7 +141,11 @@ def must_have_parents
     :FavoriteProject => %i[project user],
     :JobStat => [:pipeline_run],
     # :Location => %i[country state subdivision city],
-    # :Metadatum => %i[sample metadata_field location],
+    :Metadatum => [
+      :sample,
+      :metadata_field,
+      # :location
+    ],
     :PhyloTree => %i[user project],
     :Sample => %i[project user host_genome],
     :TaxonByterange => [:pipeline_run],
