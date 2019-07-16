@@ -7,7 +7,9 @@ class PipelineVizController < ApplicationController
     feature_allowed = current_user.allowed_feature_list.include?("pipeline_viz")
     sample = current_power.samples.find_by(id: params[:sample_id])
     pipeline_version = params[:pipeline_version]
-    pipeline_run = sample && (pipeline_version ? sample.pipeline_runs.where(pipeline_version: pipeline_version)[0] : sample.first_pipeline_run)
+    pipeline_run = sample && (
+      pipeline_version ? sample.pipeline_runs.where(pipeline_version: pipeline_version)[0] : sample.first_pipeline_run
+    )
 
     if feature_allowed && pipeline_run
       stage_info = {}
