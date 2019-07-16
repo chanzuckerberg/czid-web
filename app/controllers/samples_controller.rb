@@ -947,13 +947,15 @@ class SamplesController < ApplicationController
   end
 
   def raw_results_folder
-    can_see_stage1_results = (current_user.id == @sample.user_id)
-    if can_see_stage1_results
+    if current_user.id != @sample.user_id
+      render json: {
+        message: "Only the uploader can view the raw results folder."
+      }, status: :unauthorized
+    else
       @file_list = @sample.results_folder_files
       @file_path = "#{@sample.sample_path}/results/"
+      render template: "samples/raw_folder"
     end
-
-    render template: "samples/raw_folder"
   end
 
   def results_folder
