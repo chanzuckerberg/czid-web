@@ -55,7 +55,7 @@ class SampleDetailsMode extends React.Component {
   }
 
   fetchMetadata = async () => {
-    const { sampleId, showPipelineVizLink } = this.props;
+    const { sampleId, showPipelineVizLink, pipelineVersion } = this.props;
     this.setState({
       metadata: null,
       additionalInfo: null,
@@ -67,7 +67,7 @@ class SampleDetailsMode extends React.Component {
     }
 
     const [metadata, metadataTypes] = await Promise.all([
-      getSampleMetadata(sampleId),
+      getSampleMetadata(sampleId, pipelineVersion),
       getSampleMetadataFields(sampleId),
     ]);
 
