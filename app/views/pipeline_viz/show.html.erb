@@ -2,8 +2,7 @@
   <%= javascript_tag do %>
     react_component('PipelineViz', {
         admin: <%= current_user.admin %>,
-        stageStepInfo: JSON.parse('<%= raw escape_json(@stages) %>'),
-        edgeFileInfo: JSON.parse('<%= raw escape_json(@edges) %>')
+        graphData: JSON.parse('<%= raw escape_json(@results) %>'),
     }, 'PipelineStageResults');
   <% end %>
 </div>

@@ -57,25 +57,29 @@ class PipelineViz extends React.Component {
   }
 
   getStepDataAtIndices({ stageIndex, stepIndex }) {
-    const { stageStepInfo } = this.props;
-    return stageStepInfo[stageIndex].steps[stepIndex];
+    const {
+      graphData: { stages },
+    } = this.props;
+    return stages[stageIndex].steps[stepIndex];
   }
 
   getEdgeInfoFor(stageIndex, stepIndex, direction) {
-    const { edgeFileInfo } = this.props;
+    const {
+      graphData: { edges },
+    } = this.props;
     const stepData = this.getStepDataAtIndices({
       stageIndex: stageIndex,
       stepIndex: stepIndex,
     });
     switch (direction) {
       case "input":
-        return stepData.inputEdges.map(edgeId => edgeFileInfo[edgeId]);
+        return stepData.inputEdges.map(edgeId => edges[edgeId]);
       case "output":
-        return stepData.outputEdges.map(edgeId => edgeFileInfo[edgeId]);
+        return stepData.outputEdges.map(edgeId => edges[edgeId]);
       default:
         return stepData.inputEdges
           .concat(stepData.outputEdges)
-          .map(edgeId => edgeFileInfo[edgeId]);
+          .map(edgeId => edges[edgeId]);
     }
   }
 
@@ -342,8 +346,10 @@ class PipelineViz extends React.Component {
   }
 
   generateNodeData(stageIndex, edgeData) {
-    const { stageStepInfo } = this.props;
-    const stepData = stageStepInfo[stageIndex].steps;
+    const {
+      graphData: { stages },
+    } = this.props;
+    const stepData = stages[stageIndex].steps;
     const nodeData = stepData.map((step, i) => {
       return { id: i, label: step.name };
     });
@@ -393,7 +399,10 @@ class PipelineViz extends React.Component {
   }
 
   generateEdgeData(stageIndex) {
-    const stepData = this.props.stageStepInfo[stageIndex].steps;
+    const {
+      graphData: { stages },
+    } = this.props;
+    const stepData = stages[stageIndex].steps;
 
     const regularColoringEdgeData = stepData
       .map((_, currStepIndex) => {
@@ -460,6 +469,9 @@ class PipelineViz extends React.Component {
   }
 
   generateHiddenEdges(stageIndex) {
+    const {
+      graphData: { stages },
+    } = this.props;
     const hiddenEdgeColorOption = {
       color: {
         opacity: 0,
@@ -468,7 +480,7 @@ class PipelineViz extends React.Component {
     };
 
     // Connect all nodes to start and end nodes with hidden edges for centering
-    return this.props.stageStepInfo[stageIndex].steps
+    return stages[stageIndex].steps
       .map((_, stepIndex) => {
         return [
           {
@@ -496,7 +508,10 @@ class PipelineViz extends React.Component {
   }
 
   closeIfNonActiveStage(graph, stageIndex) {
-    const stageData = this.props.stageStepInfo[stageIndex];
+    const {
+      graphData: { stages },
+    } = this.props;
+    const stageData = stages[stageIndex];
     if (stageData.jobStatus != "STARTED") {
       graph.afterDrawingOnce(() => this.toggleStage(stageIndex));
     }
@@ -729,8 +744,7 @@ class PipelineViz extends React.Component {
 
 PipelineViz.propTypes = {
   admin: PropTypes.bool,
-  stageStepInfo: PropTypes.array,
-  edgeFileInfo: PropTypes.array,
+  graphData: PropTypes.object,
   backgroundColor: PropTypes.string,
   nodeColor: PropTypes.string,
   edgeColor: PropTypes.string,
