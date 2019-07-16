@@ -22,16 +22,16 @@ class PipelineVizController < ApplicationController
 
           stage_edges = intra_stage_edges(stage_dag_json, stage_index)
           stage_edges.each_with_index do |edge, edge_index|
-            if edge[:is_intra_stage]
+            if edge[:isIntraStage]
               # Offset index for correct value after concatination later
-              stage_nodes[edge[:from][:step_index]][:output_edges].push(edge_index + @edges.length)
-              stage_nodes[edge[:to][:step_index]][:input_edges].push(edge_index + @edges.length)
+              stage_nodes[edge[:from][:stepIndex]][:outputEdges].push(edge_index + @edges.length)
+              stage_nodes[edge[:to][:stepIndex]][:inputEdges].push(edge_index + @edges.length)
             end
           end
           @edges.concat(stage_edges)
 
           @stages.push(steps: stage_nodes,
-                       job_status: stage.job_status)
+                       jobStatus: stage.job_status)
           all_stage_dag_jsons.push(stage_dag_json)
         end
       end
@@ -40,10 +40,14 @@ class PipelineVizController < ApplicationController
       between_stage_edges.each_with_index do |edge, edge_index|
         # Offset index for correct value after concatination later
         if edge[:from]
-          @stages[edge[:from][:stage_index]][:steps][edge[:from][:step_index]][:output_edges].push(edge_index + @edges.length)
+          from_stage_index = edge[:from][:stageIndex]
+          from_step_index = edge[:from][:stepIndex]
+          @stages[from_stage_index][:steps][from_step_index][:outputEdges].push(edge_index + @edges.length)
         end
         if edge[:to]
-          @stages[edge[:to][:stage_index]][:steps][edge[:to][:step_index]][:input_edges].push(edge_index + @edges.length)
+          to_stage_index = edge[:to][:stageIndex]
+          to_step_index = edge[:to][:stepIndex]
+          @stages[to_stage_index][:steps][to_step_index][:inputEdges].push(edge_index + @edges.length)
         end
       end
       @edges.concat(between_stage_edges)
@@ -67,8 +71,8 @@ class PipelineVizController < ApplicationController
     nodes = []
     stage_dag_json["steps"].each do |step|
       nodes.push(name: modify_step_name(step["class"]),
-                 input_edges: [],
-                 output_edges: [])
+                 inputEdges: [],
+                 outputEdges: [])
     end
     return nodes
   end
@@ -87,14 +91,14 @@ class PipelineVizController < ApplicationController
           # TODO(ezhong): Include file download links for files.
           files = stage_dag_json["targets"][in_target]
           edges.push(from: {
-                       stage_index: stage_index,
-                       step_index: from_step_index
+                       stageIndex: stage_index,
+                       stepIndex: from_step_index
                      }, to: {
-                       stage_index: stage_index,
-                       step_index: to_step_index
+                       stageIndex: stage_index,
+                       stepIndex: to_step_index
                      },
                      files: files,
-                     is_intra_stage: true)
+                     isIntraStage: true)
         end
       end
     end
@@ -108,7 +112,7 @@ class PipelineVizController < ApplicationController
       stage_dag_json["steps"].each_with_index do |step, step_index|
         stage_dag_json["targets"][step["out"]].each do |file_name|
           file_path = "#{stage_dag_json['output_dir_s3']}/#{pipeline_version}/#{file_name}"
-          file_path_to_outputting_step[file_path] = { stage_index: stage_index, step_index: step_index }
+          file_path_to_outputting_step[file_path] = { stageIndex: stage_index, stepIndex: step_index }
         end
       end
     end
@@ -136,12 +140,12 @@ class PipelineVizController < ApplicationController
         outputting_step_to_files.each do |outputting_step_info, files|
           edges.push(from: outputting_step_info,
                      to: {
-                       stage_index: to_stage_index,
-                       step_index: to_step_index
+                       stageIndex: to_stage_index,
+                       stepIndex: to_step_index
                      },
                      # TODO(ezhong): Include file download links for files.
                      files: files,
-                     is_intra_stage: false)
+                     isIntraStage: false)
         end
       end
     end
@@ -151,12 +155,12 @@ class PipelineVizController < ApplicationController
   def add_final_outputs_edges(stage_step_data, edge_data, all_dag_jsons)
     stage_step_data.each_with_index do |stage, stage_index|
       stage[:steps].each_with_index do |step, step_index|
-        if step[:output_edges].empty?
+        if step[:outputEdges].empty?
           dag_json = all_dag_jsons[stage_index]
           out_target = dag_json["steps"][step_index]["out"]
-          edge_data.push(from: { stage_index: stage_index, step_index: step_index },
+          edge_data.push(from: { stageIndex: stage_index, stepIndex: step_index },
                          files: dag_json["targets"][out_target])
-          step[:output_edges].push(edge_data.length - 1)
+          step[:outputEdges].push(edge_data.length - 1)
         end
       end
     end

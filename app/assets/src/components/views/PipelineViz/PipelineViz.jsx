@@ -56,25 +56,25 @@ class PipelineViz extends React.Component {
     window.removeEventListener("resize", this.handleWindowResize);
   }
 
-  getStepDataAtIndices({ stage_index, step_index }) {
+  getStepDataAtIndices({ stageIndex, stepIndex }) {
     const { stageStepInfo } = this.props;
-    return stageStepInfo[stage_index].steps[step_index];
+    return stageStepInfo[stageIndex].steps[stepIndex];
   }
 
   getEdgeInfoFor(stageIndex, stepIndex, direction) {
     const { edgeFileInfo } = this.props;
     const stepData = this.getStepDataAtIndices({
-      stage_index: stageIndex,
-      step_index: stepIndex,
+      stageIndex: stageIndex,
+      stepIndex: stepIndex,
     });
     switch (direction) {
       case "input":
-        return stepData.input_edges.map(edgeId => edgeFileInfo[edgeId]);
+        return stepData.inputEdges.map(edgeId => edgeFileInfo[edgeId]);
       case "output":
-        return stepData.output_edges.map(edgeId => edgeFileInfo[edgeId]);
+        return stepData.outputEdges.map(edgeId => edgeFileInfo[edgeId]);
       default:
-        return stepData.input_edges
-          .concat(stepData.output_edges)
+        return stepData.inputEdges
+          .concat(stepData.outputEdges)
           .map(edgeId => edgeFileInfo[edgeId]);
     }
   }
@@ -142,8 +142,8 @@ class PipelineViz extends React.Component {
       .flat();
 
     const stepName = this.getStepDataAtIndices({
-      stage_index: stageIndex,
-      step_index: clickedNodeId,
+      stageIndex: stageIndex,
+      stepIndex: clickedNodeId,
     }).name;
     this.setState({
       sidebarVisible: true,
@@ -223,25 +223,25 @@ class PipelineViz extends React.Component {
     };
     const inputEdgesInfo = this.getEdgeInfoFor(stageIndex, nodeId, "input");
     const intraStageInputEdges = inputEdgesInfo.reduce((edgeIds, edgeInfo) => {
-      if (edgeInfo.is_intra_stage) {
-        edgeIds.push(`${edgeInfo.from.step_index}-${nodeId}-colored`);
+      if (edgeInfo.isIntraStage) {
+        edgeIds.push(`${edgeInfo.from.stepIndex}-${nodeId}-colored`);
       } else {
         if (edgeInfo.from) {
-          const prevGraph = this.graphs[edgeInfo.from.stage_index];
+          const prevGraph = this.graphs[edgeInfo.from.stageIndex];
           const prevEdgeId = `${
-            edgeInfo.from.step_index
+            edgeInfo.from.stepIndex
           }-${END_NODE_ID}-colored`;
           prevGraph.updateEdges([prevEdgeId], inputColorOptions);
 
           for (
-            let arrowIndex = edgeInfo.from.stage_index;
+            let arrowIndex = edgeInfo.from.stageIndex;
             arrowIndex < stageIndex;
             arrowIndex++
           ) {
             updatedInterStageArrows[arrowIndex] = "from";
           }
 
-          this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.from.stage_index);
+          this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.from.stageIndex);
         }
 
         edgeIds.push(`${START_NODE_ID}-${nodeId}-colored`);
@@ -263,24 +263,24 @@ class PipelineViz extends React.Component {
     const intraStageOutputEdges = outputEdgesInfo.reduce(
       (edgeIds, edgeInfo) => {
         if (edgeInfo.to) {
-          if (edgeInfo.is_intra_stage) {
-            edgeIds.push(`${nodeId}-${edgeInfo.to.step_index}-colored`);
+          if (edgeInfo.isIntraStage) {
+            edgeIds.push(`${nodeId}-${edgeInfo.to.stepIndex}-colored`);
           } else {
-            const nextGraph = this.graphs[edgeInfo.to.stage_index];
+            const nextGraph = this.graphs[edgeInfo.to.stageIndex];
             const nextGraphEdgeId = `${START_NODE_ID}-${
-              edgeInfo.to.step_index
+              edgeInfo.to.stepIndex
             }-colored`;
             nextGraph.updateEdges([nextGraphEdgeId], outputColorOptions);
 
             for (
               let arrowIndex = stageIndex;
-              arrowIndex < edgeInfo.to.stage_index;
+              arrowIndex < edgeInfo.to.stageIndex;
               arrowIndex++
             ) {
               updatedInterStageArrows[arrowIndex] = "to";
             }
 
-            this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.to.stage_index);
+            this.lastMouseMoveInfo.alteredGraphs.add(edgeInfo.to.stageIndex);
             edgeIds.push(`${nodeId}-${END_NODE_ID}-colored`);
           }
         }
@@ -342,7 +342,8 @@ class PipelineViz extends React.Component {
   }
 
   generateNodeData(stageIndex, edgeData) {
-    const stepData = this.props.stageStepInfo[stageIndex].steps;
+    const { stageStepInfo } = this.props;
+    const stepData = stageStepInfo[stageIndex].steps;
     const nodeData = stepData.map((step, i) => {
       return { id: i, label: step.name };
     });
@@ -403,11 +404,11 @@ class PipelineViz extends React.Component {
           "output"
         );
         const outputEdges = outputEdgeInfo.reduce((edges, edgeInfo) => {
-          if (edgeInfo.is_intra_stage) {
+          if (edgeInfo.isIntraStage) {
             edges.push({
               from: currStepIndex,
-              to: edgeInfo.to.step_index,
-              id: `${currStepIndex}-${edgeInfo.to.step_index}`,
+              to: edgeInfo.to.stepIndex,
+              id: `${currStepIndex}-${edgeInfo.to.stepIndex}`,
             });
           } else if (!connectedToEndNode && edgeInfo.to) {
             connectedToEndNode = true;
@@ -427,7 +428,7 @@ class PipelineViz extends React.Component {
           "input"
         );
         const inputEdges = inputEdgeInfo.reduce((edges, edgeInfo) => {
-          if (!edgeInfo.is_intra_stage && !connectedToStartNode) {
+          if (!edgeInfo.isIntraStage && !connectedToStartNode) {
             connectedToStartNode = true;
             edges.push({
               from: START_NODE_ID,
