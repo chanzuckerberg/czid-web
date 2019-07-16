@@ -953,7 +953,7 @@ class SamplesController < ApplicationController
       render template: "samples/raw_folder"
     else
       render json: {
-        message: "Only the uploader can view the raw results folder."
+        message: "Only the original uploader can view the sample's raw results folder."
       }, status: :unauthorized
     end
   end
