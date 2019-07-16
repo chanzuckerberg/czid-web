@@ -1,9 +1,9 @@
 class PipelineVizController < ApplicationController
   before_action :authenticate_user!
 
-  # Structures dag_json of each stage of the pipeline run into the following for drawing
+  # Structures dag_json of each stage of the pipeline run into the following in @results for drawing
   # the pipeline visualization graphs on the React side:
-  # @stages: An array of stages, each stage being an object with the following fields:
+  # stages: An array of stages, each stage being an object with the following fields:
   #     - jobStatus: The job status of the stage
   #     - steps: Array of objects, each one defining a node in that stage's graph. This object
   #       is composed of:
@@ -13,7 +13,7 @@ class PipelineVizController < ApplicationController
   #               - ouputEdges: An array of indices that map to edges in the @edges array, each edge being an
   #                 output edge from the node
   #
-  # @edges: An array of edges, each edge object having the following structure:
+  # edges: An array of edges, each edge object having the following structure:
   #     - from: An object containing a stageIndex and stepIndex, denoting the originating node it is from
   #     - to: An object containing a stageIndex and stepIndex, denoating the node it ends after
   #     - files: An array of files that get passed between the from and to nodes. Currently each file is a string,
