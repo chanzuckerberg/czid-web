@@ -74,6 +74,9 @@ class SamplesHeatmapView extends React.Component {
         readSpecificity: parseAndCheckInt(this.urlParams.readSpecificity, 1),
       },
       loading: false,
+      selectedMetadata: this.urlParams.selectedMetadata || [
+        "collection_location",
+      ],
       sampleIds: compact(
         map(parseAndCheckInt, this.urlParams.sampleIds || this.props.sampleIds)
       ),
@@ -161,14 +164,18 @@ class SamplesHeatmapView extends React.Component {
         JSON.parse(urlParams.thresholdFilters)
       );
     }
+    if (typeof urlParams.selectedMetadata === "string") {
+      urlParams.selectedMetadata.split(",");
+    }
     return urlParams;
   };
 
   getUrlParams = () => {
     return Object.assign(
       {
-        sampleIds: this.state.sampleIds,
+        selectedMetadata: this.state.selectedMetadata,
         removedTaxonIds: Array.from(this.removedTaxonIds),
+        sampleIds: this.state.sampleIds,
       },
       this.state.selectedOptions
     );
@@ -362,6 +369,15 @@ class SamplesHeatmapView extends React.Component {
     });
   };
 
+  handleMetadataChange = metadataFields => {
+    this.setState({
+      selectedMetadata: Array.from(metadataFields),
+    });
+    logAnalyticsEvent("SamplesHeatmapView_metadata_changed", {
+      selected: metadataFields,
+    });
+  };
+
   handleSampleLabelClick = sampleId => {
     if (!sampleId) {
       this.setState({
@@ -528,20 +544,22 @@ class SamplesHeatmapView extends React.Component {
     return (
       <ErrorBoundary>
         <SamplesHeatmapVis
+          data={this.state.data}
+          defaultMetadata={this.state.selectedMetadata}
+          metadataTypes={this.state.metadataTypes}
+          metric={this.state.selectedOptions.metric}
+          onMetadataChange={this.handleMetadataChange}
+          onRemoveTaxon={this.handleRemoveTaxon}
+          onSampleLabelClick={this.handleSampleLabelClick}
+          onTaxonLabelClick={this.handleTaxonLabelClick}
           ref={vis => {
             this.heatmapVis = vis;
           }}
           sampleIds={this.state.sampleIds}
           sampleDetails={this.state.sampleDetails}
+          scale={SCALE_OPTIONS[scaleIndex][1]}
           taxonIds={this.state.taxonIds}
           taxonDetails={this.state.taxonDetails}
-          data={this.state.data}
-          metadataTypes={this.state.metadataTypes}
-          metric={this.state.selectedOptions.metric}
-          scale={SCALE_OPTIONS[scaleIndex][1]}
-          onRemoveTaxon={this.handleRemoveTaxon}
-          onSampleLabelClick={this.handleSampleLabelClick}
-          onTaxonLabelClick={this.handleTaxonLabelClick}
           taxonFilterState={this.state.taxonFilterState}
         />
       </ErrorBoundary>

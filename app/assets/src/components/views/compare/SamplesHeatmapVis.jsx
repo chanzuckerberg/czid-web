@@ -210,6 +210,8 @@ class SamplesHeatmapVis extends React.Component {
   };
 
   handleSelectedMetadataChange = selectedMetadata => {
+    const { onMetadataChange } = this.props;
+
     let intersection = new Set(
       [...this.state.selectedMetadata].filter(metadatum =>
         selectedMetadata.has(metadatum)
@@ -222,6 +224,7 @@ class SamplesHeatmapVis extends React.Component {
       },
       () => {
         this.heatmap.updateColumnMetadata(this.getSelectedMetadata());
+        onMetadataChange && onMetadataChange(selectedMetadata);
         logAnalyticsEvent("SamplesHeatmapVis_selected-metadata_changed", {
           selectedMetadata: current.length,
         });
@@ -342,7 +345,7 @@ class SamplesHeatmapVis extends React.Component {
 }
 
 SamplesHeatmapVis.defaultProps = {
-  defaultMetadata: ["collection_location"],
+  defaultMetadata: [],
 };
 
 SamplesHeatmapVis.propTypes = {
@@ -351,6 +354,7 @@ SamplesHeatmapVis.propTypes = {
   defaultMetadata: PropTypes.array,
   metadataTypes: PropTypes.array,
   metric: PropTypes.string,
+  onMetadataChange: PropTypes.func,
   onRemoveTaxon: PropTypes.func,
   onSampleLabelClick: PropTypes.func,
   onTaxonLabelClick: PropTypes.func,
