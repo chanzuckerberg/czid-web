@@ -211,12 +211,10 @@ class AmrHeatmapController < ApplicationController
   def get_drug_classes(accession, xml_dom)
     accession_class = xml_dom.at_xpath(".//owl:Class[@rdf:about='http://purl.obolibrary.org/obo/ARO_#{accession}']")
     drug_class_node_markers = accession_class.xpath("./rdfs:subClassOf/owl:Restriction/owl:onProperty[@rdf:resource='http://purl.obolibrary.org/obo/RO#_confers_resistance_to_drug']")
-    drug_family_node_markers = accession_class.xpath("./rdfs:subClassOf/owl:Restriction/owl:onProperty[@rdf:resource='http://purl.obolibrary.org/obo/RO#_confers_resistance_to']")
+    drug_class_family_node_markers = accession_class.xpath("./rdfs:subClassOf/owl:Restriction/owl:onProperty[@rdf:resource='http://purl.obolibrary.org/obo/RO#_confers_resistance_to']")
+    drug_markers = drug_class_node_markers + drug_class_family_node_markers
     drug_class_nodes = []
-    drug_class_node_markers.each do |node_marker|
-      drug_class_nodes.push(node_marker.at_xpath("./following-sibling::owl:someValuesFrom"))
-    end
-    drug_family_node_markers.each do |node_marker|
+    drug_markers.each do |node_marker|
       drug_class_nodes.push(node_marker.at_xpath("./following-sibling::owl:someValuesFrom"))
     end
     return drug_class_nodes
@@ -232,7 +230,7 @@ class AmrHeatmapController < ApplicationController
     abstract_node = publication_page.at_xpath(".//div[@class='rprt abstract']")
     authors = abstract_node.at_xpath("./div[@class='auths']").content
     title = abstract_node.at_xpath("./h1").content
-    pub_name = authors + " " + title + " (PMID #{pmid})"
+    pub_name = "#{authors} #{title} (PMID #{pmid})"
     return pub_name
   end
 end

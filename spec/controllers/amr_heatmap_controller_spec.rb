@@ -37,6 +37,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
         get :index, params: { sampleIds: [sample_one["id"], sample_two["id"]] }
         expect(assigns(:sample_ids)).to eq([sample_one["id"].to_i, sample_two["id"].to_i])
       end
+
       it "renders the index template" do
         project = create(:project, users: [@admin, @joe])
         sample_one = create(:sample, project: project, pipeline_runs_data: [{
@@ -129,6 +130,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    drug_family: amr_counts_two["drug_family"]
                                                  }])
       end
+
       it "works even if a sample doesn't exist" do
         # Create a test sample (in a project, as required) that contains AMR data.
         project = create(:project, users: [@admin, @joe])
@@ -170,6 +172,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                  amr_counts: [],
                                                  error: "sample not found")
       end
+
       it "works even if a sample doesn't have amr counts" do
         # Create a test sample without AMR data.
         project = create(:project, users: [@admin, @joe])
@@ -189,38 +192,49 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                  error: "")
       end
     end
+
     describe "GET CARD entry information" do
       it "should return relevant information from the CARD Ontology database" do
-        get :fetch_card_info, params: { geneName: "dfrA1" }
+        get :fetch_card_info, params: { geneName: "pgsA" }
         expect(response.content_type).to eq("application/json")
         expect(response).to have_http_status(:ok)
 
         json_response = JSON.parse(response.body)
         expect(json_response).to include_json(
-          accession: "3002854",
-          label: "dfrA1",
+          accession: "3003080",
+          label: "daptomycin resistant pgsA",
           synonyms: [
-            "dfr1"
+            "phosphatidylglycerophosphate synthetase"
           ],
-          description: "dfrA1 is an integron-encoded dihydrofolate reductase",
+          description: "pgsA or phosphatidylglycerophosphate synthetase is an integral membrane protein involved in phospholipid biosynthesis. It is a CDP-diacylglycerol-glycerol-3-phosphate 3-phosphatidyltransferase. Laboratory experiments have detected mutations conferring daptomycin resistance in Entercoccus.",
           geneFamily: [
             {
-              label: "trimethoprim resistant dihydrofolate reductase dfr",
-              description: "Alternative dihydropteroate synthase dfr present on plasmids produces alternate proteins that are less sensitive to trimethoprim from inhibiting its role in folate synthesis, thus conferring trimethoprim resistance."
+              label: "determinant of resistance to lipopeptide antibiotics",
+              description: "Enzymes, other proteins or other gene products shown clinically to confer resistance to lipopeptide antibiotics."
+            },
+            {
+              label: "antibiotic resistant pgsA",
+              description: "pgsA or phosphatidylglycerophosphate synthetase is an integral membrane protein involved in phospholipid biosynthesis. It is a CDP-diacylglycerol-glycerol-3-phosphate 3-phosphatidyltransferase."
             }
           ],
           drugClass: [
             {
-              label: "trimethoprim",
-              description: "Trimethoprim is a synthetic 5-(3,4,5- trimethoxybenzyl) pyrimidine inhibitor of dihydrofolate reductase, inhibiting synthesis of tetrahydrofolic acid. Tetrahydrofolic acid is an essential precursor in the de novo synthesis of the DNA nucleotide thymidine. Trimethoprim is a bacteriostatic antibiotic mainly used in the prophylaxis and treatment of urinary tract infections in combination with sulfamethoxazole, a sulfonamide antibiotic."
+              label: "daptomycin",
+              description: "Daptomycin is a novel lipopeptide antibiotic used in the treatment of certain infections caused by Gram-positive organisms. Daptomycin interferes with the bacterial cell membrane, reducing membrane potential and inhibiting cell wall synthesis."
+            },
+            {
+              label: "peptide antibiotic",
+              description: "Peptide antibiotics have a wide range of antibacterial mechanisms, depending on the amino acids that make up the antibiotic, although most act to disrupt the cell membrane in some manner. Subclasses of peptide antibiotics can include additional sidechains of other types, such as lipids in the case of the lipopeptide antibiotics."
             }
           ],
           publications: [
-            "Sáenz Y1, Briñas L, Domínguez E, Ruiz J, Zarazaga M, Vila J, Torres C. Mechanisms of resistance in multiple-antibiotic-resistant Escherichia coli strains of human, animal, and food origins. (PMID 15388464)"
+            "Hachmann AB1, Sevim E, Gaballa A, Popham DL, Antelmann H, Helmann JD. Reduction in membrane phosphatidylglycerol content leads to daptomycin resistance in Bacillus subtilis. (PMID 21709092)",
+            "Peleg AY1, Miyakis S, Ward DV, Earl AM, Rubio A, Cameron DR, Pillai S, Moellering RC Jr, Eliopoulos GM. Whole genome characterization of the mechanisms of daptomycin resistance in clinical and laboratory derived isolates of Staphylococcus aureus. (PMID 22238576)"
           ],
           error: ""
         )
       end
+
       it "should return an ontology object with an error message if no match is found" do
         get :fetch_card_info, params: { geneName: "ImNotInCard" }
         expect(response.content_type).to eq("application/json")
