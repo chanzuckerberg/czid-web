@@ -54,8 +54,9 @@ class Project < ApplicationRecord
     return path unless path != File.expand_path(path)
   end
 
+  # Disable samples function. have to go through power
+  alias samples_unsafe samples
   def samples
-    # Disable samples function. have to go through power
     nil
   end
 
