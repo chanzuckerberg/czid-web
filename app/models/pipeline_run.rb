@@ -830,7 +830,7 @@ class PipelineRun < ApplicationRecord
     stats_array = stats_array.select { |entry| entry.key?("task") }
     job_stats.destroy_all
     update(job_stats_attributes: stats_array)
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
+    _stdout = Syscall.run("rm", "-f", downloaded_stats_path)
   end
 
   def update_job_status
