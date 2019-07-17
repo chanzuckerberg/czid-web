@@ -1120,7 +1120,7 @@ class PipelineRun < ApplicationRecord
     # available;  this code merges them into taxon_counts.name.
     lineage_version = alignment_config.lineage_version
     %w[species genus family].each do |level|
-      level_id = TaxonCount::NAME_2_LEVEL[level]
+      level_id = ActiveRecord::Base.connection.quote(TaxonCount::NAME_2_LEVEL[level])
       TaxonCount.connection.execute("
         UPDATE taxon_counts, taxon_lineages
         SET taxon_counts.name = taxon_lineages.#{level}_name,
