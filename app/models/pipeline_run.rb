@@ -645,7 +645,7 @@ class PipelineRun < ApplicationRecord
     update_is_phage
 
     # rm the json
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path}")
+    _stdout, _stderr, _status = Open3.capture3("rm", "-f", downloaded_json_path)
   end
 
   def db_load_taxon_counts
