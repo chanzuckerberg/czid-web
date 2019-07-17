@@ -39,7 +39,7 @@ task 'find_test_records', [:max_per_model] => :environment do |_t, args|
   all_models.select.each do |name, model|
     puts "\nFinding #{name} records that contain 'test' or 'demo' in their name ..."
     model.order(created_at: :desc).limit(args.max_per_model).map do |record|
-      if is_test_record(record)
+      if test_record?(record)
         owner = record.respond_to?(:user) && record.user ? record.user.email : 'unknown'
         puts "Record ##{record.id} '#{record.name}' owned by #{owner} appears to be test data"
       end
