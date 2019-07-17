@@ -28,7 +28,6 @@ Rails.application.routes.draw do
     get :contigs_summary, on: :member
     get :results_folder, on: :member
     get :raw_results_folder, on: :member
-    get :stage_results, on: :member
     post :bulk_upload, on: :collection
     post :bulk_upload_with_metadata, on: :collection
     get :metadata, on: :member
@@ -107,11 +106,15 @@ Rails.application.routes.draw do
   get 'visualizations.json', to: 'visualizations#index'
 
   get 'amr_heatmap/amr_counts.json', to: 'amr_heatmap#amr_counts'
+  get 'amr_heatmap/fetch_card_info.json', to: 'amr_heatmap#fetch_card_info'
   get 'amr_heatmap', to: 'amr_heatmap#index'
 
   get 'basespace/oauth', to: 'basespace#oauth'
   get 'basespace/projects', to: 'basespace#projects'
   get 'basespace/samples_for_project', to: 'basespace#samples_for_project'
+
+  get '/samples/:sample_id/pipeline_viz(/:pipeline_version)', to: 'pipeline_viz#show',
+                                                              constraints: { pipeline_version: /\d+\.\d+/ } # To allow period in pipeline version parameter
 
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
