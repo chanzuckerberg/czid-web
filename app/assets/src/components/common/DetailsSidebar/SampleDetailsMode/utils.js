@@ -35,7 +35,9 @@ export const processPipelineInfo = (additionalInfo, showPipelineVizLink) => {
       ...(showPipelineVizLink
         ? {
             linkLabel: "View Pipeline Visualization",
-            link: `/samples/${pipelineRun.sample_id}/stage_results`,
+            link: `/samples/${pipelineRun.sample_id}/pipeline_viz/${
+              pipelineRun.version.pipeline
+            }`,
           }
         : {}),
     };
