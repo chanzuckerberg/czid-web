@@ -92,6 +92,9 @@ class SamplesHeatmapView extends React.Component {
     this.removedTaxonIds = new Set(
       this.urlParams.removedTaxonIds || this.props.removedTaxonIds || []
     );
+    this.metadataSortField = this.urlParams.metadataSortField;
+    this.metadataSortAsc = this.urlParams.metadataSortAsc;
+
     this.lastRequestToken = null;
   }
 
@@ -132,7 +135,6 @@ class SamplesHeatmapView extends React.Component {
     let urlParams = queryString.parse(location.search, {
       arrayFormat: "bracket",
     });
-
     // consider the cases where variables can be passed as array string
     if (typeof urlParams.sampleIds === "string") {
       urlParams.sampleIds = urlParams.sampleIds.split(",");
@@ -165,7 +167,10 @@ class SamplesHeatmapView extends React.Component {
       );
     }
     if (typeof urlParams.selectedMetadata === "string") {
-      urlParams.selectedMetadata.split(",");
+      urlParams.selectedMetadata = urlParams.selectedMetadata.split(",");
+    }
+    if (typeof urlParams.metadataSortAsc === "string") {
+      urlParams.metadataSortAsc = urlParams.metadataSortAsc === "true";
     }
     return urlParams;
   };
@@ -174,6 +179,8 @@ class SamplesHeatmapView extends React.Component {
     return Object.assign(
       {
         selectedMetadata: this.state.selectedMetadata,
+        metadataSortField: this.metadataSortField,
+        metadataSortAsc: this.metadataSortAsc,
         removedTaxonIds: Array.from(this.removedTaxonIds),
         sampleIds: this.state.sampleIds,
       },
@@ -214,7 +221,6 @@ class SamplesHeatmapView extends React.Component {
       "/visualizations/heatmap/" +
       resp.id;
     // Update URL without reloading the page
-    // TODO (gdingle): make back button load previous vis state
     history.replaceState(window.history.state, document.title, url);
   };
 
@@ -280,8 +286,8 @@ class SamplesHeatmapView extends React.Component {
     }
 
     newState.loading = false;
-    // TODO (gdingle): change to pushState to preserve back button behavior?
-    window.history.replaceState("", "", this.getUrlForCurrentParams());
+
+    this.updateHistoryState();
     this.setState(newState);
   }
 
@@ -360,6 +366,10 @@ class SamplesHeatmapView extends React.Component {
     });
   };
 
+  updateHistoryState = () => {
+    window.history.replaceState("", "", this.getUrlForCurrentParams());
+  };
+
   handleRemoveTaxon = taxonName => {
     let taxonId = this.state.taxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
@@ -376,6 +386,13 @@ class SamplesHeatmapView extends React.Component {
     logAnalyticsEvent("SamplesHeatmapView_metadata_changed", {
       selected: metadataFields,
     });
+    this.updateHistoryState();
+  };
+
+  handleMetadataSortChange = (field, dir) => {
+    this.metadataSortField = field;
+    this.metadataSortAsc = dir;
+    this.updateHistoryState();
   };
 
   handleSampleLabelClick = sampleId => {
@@ -547,7 +564,10 @@ class SamplesHeatmapView extends React.Component {
           data={this.state.data}
           defaultMetadata={this.state.selectedMetadata}
           metadataTypes={this.state.metadataTypes}
+          metadataSortField={this.metadataSortField}
+          metadataSortAsc={this.metadataSortAsc}
           metric={this.state.selectedOptions.metric}
+          onMetadataSortChange={this.handleMetadataSortChange}
           onMetadataChange={this.handleMetadataChange}
           onRemoveTaxon={this.handleRemoveTaxon}
           onSampleLabelClick={this.handleSampleLabelClick}

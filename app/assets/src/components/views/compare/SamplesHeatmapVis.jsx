@@ -42,6 +42,12 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   componentDidMount() {
+    const {
+      onMetadataSortChange,
+      metadataSortField,
+      metadataSortAsc,
+    } = this.props;
+
     this.heatmap = new Heatmap(
       this.heatmapContainer,
       {
@@ -50,22 +56,25 @@ class SamplesHeatmapVis extends React.Component {
         values: this.props.data[this.props.metric],
       },
       {
+        customColorCallback: this.colorScale,
+        columnMetadata: this.getSelectedMetadata(),
+        initialColumnMetadataSortField: metadataSortField,
+        initialColumnMetadataSortAsc: metadataSortAsc,
+        onNodeHover: this.handleNodeHover,
+        onNodeHoverMove: this.handleMouseHoverMove,
+        onNodeHoverOut: this.handleNodeHoverOut,
+        onColumnMetadataSortChange: onMetadataSortChange,
+        onColumnMetadataLabelHover: this.handleColumnMetadataLabelHover,
+        onColumnMetadataLabelMove: this.handleMouseHoverMove,
+        onColumnMetadataLabelOut: this.handleColumnMetadataLabelOut,
+        onRemoveRow: this.props.onRemoveTaxon,
+        onCellClick: this.handleCellClick,
+        onColumnLabelClick: this.props.onSampleLabelClick,
+        onRowLabelClick: this.props.onTaxonLabelClick,
+        onAddColumnMetadataClick: this.handleAddColumnMetadataClick,
         scale: this.props.scale,
         // only display colors to positive values
         scaleMin: 0,
-        onNodeHover: this.handleNodeHover,
-        onNodeHoverOut: this.handleNodeHoverOut,
-        onNodeHoverMove: this.handleMouseHoverMove,
-        onColumnMetadataLabelHover: this.handleColumnMetadataLabelHover,
-        onColumnMetadataLabelOut: this.handleColumnMetadataLabelOut,
-        onColumnMetadataLabelMove: this.handleMouseHoverMove,
-        onRemoveRow: this.props.onRemoveTaxon,
-        onColumnLabelClick: this.props.onSampleLabelClick,
-        onRowLabelClick: this.props.onTaxonLabelClick,
-        onCellClick: this.handleCellClick,
-        onAddColumnMetadataClick: this.handleAddColumnMetadataClick,
-        columnMetadata: this.getSelectedMetadata(),
-        customColorCallback: this.colorScale,
       }
     );
     this.heatmap.start();
@@ -354,6 +363,9 @@ SamplesHeatmapVis.propTypes = {
   defaultMetadata: PropTypes.array,
   metadataTypes: PropTypes.array,
   metric: PropTypes.string,
+  metadataSortField: PropTypes.string,
+  metadataSortAsc: PropTypes.bool,
+  onMetadataSortChange: PropTypes.func,
   onMetadataChange: PropTypes.func,
   onRemoveTaxon: PropTypes.func,
   onSampleLabelClick: PropTypes.func,
