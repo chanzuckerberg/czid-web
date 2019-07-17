@@ -27,7 +27,7 @@ script:
   - docker-compose run --rm webtest "pip install mock; python -m unittest discover -v -s /app/test/ -p 'test_*.py'"
   # Run brakeman once to get a full report.
   - brakeman --no-pager || true
-  # Run again on High so High confidence warnings will fail the build. Hide output to avoid confusion.
+  # Run again on High so exit code will fail the build. Hide output to avoid confusion.
   - brakeman --no-pager -w3 >/dev/null 2>&1
 
 env:
