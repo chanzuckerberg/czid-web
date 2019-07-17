@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { groupBy } from "lodash/fp";
 import PropTypes from "prop-types";
 import { PanZoom } from "react-easy-panzoom";
 import cx from "classnames";
