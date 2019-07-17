@@ -195,7 +195,7 @@ class PhyloTree < ApplicationRecord
     # If the tree is for genus level or higher, get the top species underneath (these species will have genbank records pulled in idseq-dag)
     if tax_level > TaxonCount::TAX_LEVEL_SPECIES
       level_str = (TaxonCount::LEVEL_2_NAME[tax_level]).to_s
-      taxid_column = "#{level_str}_taxid"
+      taxid_column = ActiveRecord::Base.connection.quote_column_name("#{level_str}_taxid")
       species_counts = TaxonCount.where(pipeline_run_id: pipeline_run_ids).where("#{taxid_column} = ?", taxid).where(tax_level: TaxonCount::TAX_LEVEL_SPECIES)
       species_counts = species_counts.order('pipeline_run_id, count DESC')
       top_taxid_by_run_id = {}
