@@ -73,7 +73,7 @@ export default class AMRHeatmapView extends React.Component {
     );
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
     const rawSamplesMetadataTypes = await getSampleMetadataFields(
-      samplesWithAMRCounts.map(sample => sample.sample_id)
+      samplesWithAMRCounts.map(sample => sample.sampleId)
     );
     const samplesMetadataTypes = processMetadataTypes(rawSamplesMetadataTypes);
     this.setState({
@@ -87,7 +87,7 @@ export default class AMRHeatmapView extends React.Component {
 
   processSampleAMRCounts(filteredSamples) {
     filteredSamples.forEach(sample => {
-      sample.amr_counts.forEach(amrCount => {
+      sample.amrCounts.forEach(amrCount => {
         // The following three lines are a kind of hacky workaround to the fact that
         // the amr counts stored in the db have a gene name that includes the actual gene
         // plus the drug class.
@@ -112,7 +112,7 @@ export default class AMRHeatmapView extends React.Component {
   findMaxValues(samplesWithAMRCounts) {
     const maxValues = samplesWithAMRCounts.reduce(
       (accum, currentSample) => {
-        currentSample.amr_counts.forEach(amrCount => {
+        currentSample.amrCounts.forEach(amrCount => {
           accum.depth = Math.max(accum.depth, amrCount.depth);
           accum.coverage = Math.max(accum.coverage, amrCount.coverage);
         });

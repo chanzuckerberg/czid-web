@@ -73,7 +73,7 @@ export default class AMRHeatmapVis extends React.Component {
   mapAllelesToGenes(sampleData) {
     const alleleToGeneMap = {};
     sampleData.forEach(sample => {
-      sample.amr_counts.forEach(amrCount => {
+      sample.amrCounts.forEach(amrCount => {
         alleleToGeneMap[amrCount.allele] = amrCount.gene;
       });
     });
@@ -86,11 +86,11 @@ export default class AMRHeatmapVis extends React.Component {
     const alleles = {};
     sampleData.forEach(sample => {
       sampleLabels.push({
-        label: sample.sample_name,
-        id: sample.sample_id,
+        label: sample.sampleName,
+        id: sample.sampleId,
         metadata: sample.metadata,
       });
-      sample.amr_counts.forEach(amrCount => {
+      sample.amrCounts.forEach(amrCount => {
         genes[amrCount.gene] = true;
         alleles[amrCount.allele] = true;
       });
@@ -190,7 +190,7 @@ export default class AMRHeatmapVis extends React.Component {
     const rowLabel = this.getHeatmapLabels()[node.rowIndex].label;
     const sampleForColumn = samplesWithAMRCounts[node.columnIndex];
 
-    const amrCountForNode = sampleForColumn.amr_counts.find(
+    const amrCountForNode = sampleForColumn.amrCounts.find(
       amrCount => amrCount[selectedOptions.viewLevel] === rowLabel
     );
 
@@ -252,7 +252,7 @@ export default class AMRHeatmapVis extends React.Component {
       const rowValues = [];
       const rowName = label.label;
       samplesWithAMRCounts.forEach(sample => {
-        const amrCountForRow = sample.amr_counts.find(
+        const amrCountForRow = sample.amrCounts.find(
           amrCount => amrCount[selectedOptions.viewLevel] === rowName
         );
         if (amrCountForRow !== undefined) {
@@ -425,9 +425,10 @@ export default class AMRHeatmapVis extends React.Component {
 AMRHeatmapVis.propTypes = {
   samplesWithAMRCounts: PropTypes.arrayOf(
     PropTypes.shape({
-      sample_name: PropTypes.string,
-      sample_id: PropTypes.number,
-      amr_counts: PropTypes.array,
+      sampleName: PropTypes.string,
+      sampleId: PropTypes.number,
+      metadata: PropTypes.array,
+      amrCounts: PropTypes.array,
       error: PropTypes.string,
     })
   ),
