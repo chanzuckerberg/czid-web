@@ -4,7 +4,7 @@ class RetrievePipelineVizGraphDataService
   def initialize(pipeline_run_id, is_admin)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
     @all_dag_jsons = []
-    @pipeline_run.pipeline_run_stages.map do |stage|
+    @pipeline_run.pipeline_run_stages.each do |stage|
       if stage.name != "Experimental" || is_admin
         @all_dag_jsons.push(JSON.parse(stage.dag_json || "{}"))
       end
