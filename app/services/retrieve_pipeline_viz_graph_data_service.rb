@@ -16,8 +16,9 @@ class RetrievePipelineVizGraphDataService
   # edges: An array of edges, each edge object having the following structure:
   #     - from: An object containing a stageIndex and stepIndex, denoting the originating node it is from
   #     - to: An object containing a stageIndex and stepIndex, denoating the node it ends after
-  #     - files: An array of files that get passed between the from and to nodes. Currently each file is a string,
-  #       but it may become an object containing download url and potentially other information.
+  #     - files: An array of file objects that get passed between the from and to nodes. It is composed of:
+  #           - displayName: A string to display the file as
+  #           - url: An optional string to download the file
 
   def initialize(pipeline_run_id, is_admin)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
@@ -108,9 +109,16 @@ class RetrievePipelineVizGraphDataService
     edges = []
     input_output_to_file_paths.each do |input_output_json, file_paths|
       edge_info = JSON.parse(input_output_json, symbolize_names: true)
+      files = file_paths.map do |file_path|
+        file_info = file_path_to_info[file_path]
+        display_name = file_info ? file_info.display_name : file_path.split("/").last
+        url = file_info ? file_info.url : nil
+        { displayName: display_name, url: url }
+      end
+
       edges.push(from: edge_info[:from],
                  to: edge_info[:to],
-                 files: file_paths.map { |file_path| file_path_to_info[file_path] || { displayName: file_path.split("/").last } },
+                 files: files,
                  isIntraStage: (edge_info[:to] && edge_info[:from] && edge_info[:to][:stageIndex] == edge_info[:from][:stageIndex])) || false
     end
     return edges
