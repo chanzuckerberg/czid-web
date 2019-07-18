@@ -104,7 +104,6 @@
     "rc-slider": "^8.6.1",
     "react": ">=16.4.2",
     "react-autocomplete": "^1.7.2",
-    "react-csv": "^1.1.1",
     "react-dom": ">=16.4.2",
     "react-dropzone": "^6.2.4",
     "react-easy-panzoom": "^0.3.0",
