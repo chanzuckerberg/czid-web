@@ -12,7 +12,7 @@ class PipelineRun < ApplicationRecord
   has_and_belongs_to_many :backgrounds
   has_and_belongs_to_many :phylo_trees
 
-  has_many :output_states
+  has_many :output_states, dependent: :destroy
   has_many :taxon_counts, dependent: :destroy
   has_many :job_stats, dependent: :destroy
   has_many :taxon_byteranges, dependent: :destroy
