@@ -1124,10 +1124,10 @@ class SamplesController < ApplicationController
   # PUT /samples/:id/resync_prod_data_to_staging
   def resync_prod_data_to_staging
     if Rails.env == 'staging'
-      pr_ids = @sample.pipeline_run_ids.join(",")
+      pr_ids = @sample.pipeline_run_ids
       unless pr_ids.empty?
         ['taxon_counts', 'taxon_byteranges', 'contigs'].each do |table_name|
-          ActiveRecord::Base.connection.execute("REPLACE INTO idseq_staging.#{table_name} SELECT * FROM idseq_prod.#{table_name} WHERE pipeline_run_id IN (#{pr_ids})")
+          ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql, ["REPLACE INTO idseq_staging.#{table_name} SELECT * FROM idseq_prod.#{table_name} WHERE pipeline_run_id IN (?)", pr_ids]))
         end
       end
       Resque.enqueue(InitiateS3ProdSyncToStaging, @sample.id)
