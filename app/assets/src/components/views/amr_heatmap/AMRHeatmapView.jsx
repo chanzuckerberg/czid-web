@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { StickyContainer, Sticky } from "react-sticky";
-import { CSVLink } from "react-csv";
 
 import AMRHeatmapControls from "~/components/views/amr_heatmap/AMRHeatmapControls";
 import AMRHeatmapVis from "~/components/views/amr_heatmap/AMRHeatmapVis";
@@ -153,24 +152,17 @@ export default class AMRHeatmapView extends React.Component {
     const csvData = samplesWithAMRCounts.flatMap(sample => {
       const csvRow = sample.amr_counts.map(amrCount => {
         const row = [
-          `${sample.sample_name}`,
-          `${amrCount.gene}`,
-          `${amrCount.allele}`,
-          `${amrCount.coverage}`,
-          `${amrCount.depth}`,
+          `${sample.sample_name},${amrCount.gene},${amrCount.allele},${
+            amrCount.coverage
+          },${amrCount.depth}`,
         ];
         return row;
       });
       return csvRow;
     });
-    csvData.unshift([
-      "sample_name",
-      "gene_name",
-      "allele_name",
-      "coverage",
-      "depth",
-    ]);
-    return csvData;
+    csvData.unshift(["sample_name,gene_name,allele_name,coverage,depth"]);
+    const csvDataString = csvData.join("\n");
+    return csvDataString;
   }
 
   getSidebarParams() {
@@ -188,20 +180,30 @@ export default class AMRHeatmapView extends React.Component {
     }
   }
 
-  getDownloadCSVLink() {
-    return DOWNLOAD_OPTIONS.map(option => {
-      option.text = (
-        <CSVLink
-          data={this.computeHeatmapValuesForCSV()}
-          filename="amr_heatmap.csv"
-          target="_blank"
-          key={`${option.text} CSVLink`}
-        >
-          {option.text}
-        </CSVLink>
-      );
-      return option;
-    });
+  getDownloadCSVLink(csvOption) {
+    const dataString = this.computeHeatmapValuesForCSV();
+    const dataBlob = new Blob([dataString], { type: "text/csv" });
+    return (
+      <a
+        href={URL.createObjectURL(dataBlob)}
+        download="idseq_amr_heatmap_values.csv"
+        target="_blank"
+        key={`${csvOption.text}_csv_link`}
+      >
+        {csvOption.text}
+      </a>
+    );
+  }
+
+  getDownloadOptions() {
+    const downloadOptions = DOWNLOAD_OPTIONS;
+    const csvOptionIndex = downloadOptions.findIndex(
+      element => element.value === "csv"
+    );
+    downloadOptions[csvOptionIndex].text = this.getDownloadCSVLink(
+      downloadOptions[csvOptionIndex]
+    );
+    return downloadOptions;
   }
 
   //*** Render methods ***
@@ -223,7 +225,7 @@ export default class AMRHeatmapView extends React.Component {
           <ViewHeader.Controls className={cs.controls}>
             <DownloadButtonDropdown
               className={cs.controlElement}
-              options={this.getDownloadCSVLink()}
+              options={this.getDownloadOptions()}
               disabled={loading}
             />
           </ViewHeader.Controls>
