@@ -92,8 +92,8 @@ class RetrievePipelineVizGraphDataService
       edge_info = JSON.parse(input_output_json, symbolize_names: true)
       edges.push(from: edge_info[:from],
                  to: edge_info[:to],
-                 files: file_paths.map { |file_path| file_path_to_info[file_path] || { display_name: file_path.split("/").last } },
-                 isIntraStage: edge_info[:to] && edge_info[:from] && edge_info[:to][:stageIndex] == edge_info[:from][:stageIndex])
+                 files: file_paths.map { |file_path| file_path_to_info[file_path] || { displayName: file_path.split("/").last } },
+                 isIntraStage: (edge_info[:to] && edge_info[:from] && edge_info[:to][:stageIndex] == edge_info[:from][:stageIndex])) || false
     end
     return edges
   end
