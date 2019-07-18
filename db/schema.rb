@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_612_205_949) do
+ActiveRecord::Schema.define(version: 20_190_717_221_024) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -367,6 +367,8 @@ ActiveRecord::Schema.define(version: 20_190_612_205_949) do
     t.text "dag_vars"
     t.integer "max_input_fragments"
     t.datetime "client_updated_at"
+    t.integer "uploaded_from_basespace", limit: 1, default: 0
+    t.string "upload_error"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end

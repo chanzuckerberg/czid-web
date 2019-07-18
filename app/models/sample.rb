@@ -22,12 +22,17 @@ class Sample < ApplicationRecord
   include TestHelper
   include MetadataHelper
   include PipelineRunsHelper
+  include BasespaceHelper
+  include ErrorHelper
 
   STATUS_CREATED = 'created'.freeze
   STATUS_UPLOADED = 'uploaded'.freeze
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
+
+  # Constants for upload errors.
+  UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED = "BASESPACE_UPLOAD_FAILED".freeze
 
   TOTAL_READS_JSON = "total_reads.json".freeze
   LOG_BASENAME = 'log.txt'.freeze
@@ -51,7 +56,8 @@ class Sample < ApplicationRecord
                      :sample_template, # this refers to nucleotide type (RNA or DNA)
                      :sample_library, :sample_sequencer, :sample_notes, :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection].freeze
 
-  attr_accessor :bulk_mode
+  # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
+  attr_accessor :bulk_mode, :basespace_dataset_id, :basespace_access_token
 
   belongs_to :project
   # This is the user who uploaded the sample, possibly distinct from the user(s) owning the sample's project
@@ -113,7 +119,7 @@ class Sample < ApplicationRecord
 
   def input_files_checks
     # validate that we have the correct number of input files
-    errors.add(:input_files, "invalid number") unless input_files.size.between?(1, 2)
+    errors.add(:input_files, "invalid number") unless input_files.size.between?(1, 2) || uploaded_from_basespace?
     # validate that both input files have the same source_type and file_type
     if input_files.length == 2
       errors.add(:input_files, "have different source types") unless input_files[0].source_type == input_files[1].source_type
@@ -246,8 +252,17 @@ class Sample < ApplicationRecord
   end
 
   def initiate_input_file_upload
-    return unless input_files.first.source_type == InputFile::SOURCE_TYPE_S3
-    Resque.enqueue(InitiateS3Cp, id)
+    # The reason why we don't check input_files.first.source_type == InputFile::SOURCE_TYPE_BASESPACE here is:
+    # We don't yet have the input files at this point.
+    # The basespace API doesn't let us query for all input files for a project.
+    # We can only query all the datasets (and get the dataset IDs).
+    # We then need to query each dataset individually (with a separate API call) to get the input files.
+    # We do this query inside the TransferBasespaceFiles resque task.
+    if uploaded_from_basespace?
+      Resque.enqueue(TransferBasespaceFiles, id, basespace_dataset_id, basespace_access_token)
+    elsif !input_files.empty? && input_files.first.source_type == InputFile::SOURCE_TYPE_S3
+      Resque.enqueue(InitiateS3Cp, id)
+    end
   end
 
   def initiate_s3_cp
@@ -326,6 +341,72 @@ class Sample < ApplicationRecord
     save # this triggers pipeline command
   rescue => e
     LogUtil.log_err_and_airbrake("Failed to upload S3 sample '#{name}' (#{id}): #{e}")
+  end
+
+  # Uploads input files from basespace for this sample.
+  # basespace_dataset_id is the id of the dataset from basespace we are uploading samples from.
+  #   A dataset is a basespace concept meaning a collection of one or more related files (such as paired fastq files)
+  # basespace_access_token is the access token that authorizes us to download these files.
+  def transfer_basespace_files(basespace_dataset_id, basespace_access_token)
+    # Only continue if the sample status is CREATED and not yet UPLOADED.
+    return unless status == STATUS_CREATED
+
+    files = files_for_basespace_dataset(basespace_dataset_id, basespace_access_token)
+
+    # Raise error if fetching the files failed, or we fetched zero files (since we can't proceed with zero files)
+    raise SampleUploadErrors.error_fetching_basespace_files_for_dataset(basespace_dataset_id, name, id) if files.nil?
+    raise SampleUploadErrors.no_files_in_basespace_dataset(basespace_dataset_id, name, id) if files.empty?
+
+    # Retry uploading three times, in case of transient network failures.
+    files.each do |file|
+      max_tries = 3
+      try = 0
+      # Use exponential backoff in case the issue is overload on Illumina servers.
+      time_between_tries = [60, 300]
+
+      Rails.logger.info("Starting upload of sample '#{name}' (#{id}) file '#{file[:name]}' from Basespace")
+      while try < max_tries
+        success = upload_from_basespace_to_s3(file[:download_path], sample_input_s3_path, file[:name])
+
+        if success
+          break
+        else
+          Rails.logger.error("Try ##{try}: Upload of sample '#{name}' (#{id}) file '#{file[:name]}' from Basespace failed")
+          try += 1
+          if try < max_tries
+            Kernel.sleep(time_between_tries[try - 1])
+          else
+            raise SampleUploadErrors.upload_from_basespace_failed(name, id, file[:name], basespace_dataset_id, max_tries)
+          end
+        end
+      end
+
+      input_file = InputFile.new(
+        name: file[:name],
+        source_type: InputFile::SOURCE_TYPE_BASESPACE,
+        source: file[:source_path]
+      )
+
+      input_files << input_file
+    end
+
+    self.status = STATUS_UPLOADED
+    save!
+  rescue => e
+    Rails.logger.info(e)
+    LogUtil.log_err_and_airbrake("SampleUploadFailedEvent: #{e}")
+
+    self.status = STATUS_CHECKED
+    self.upload_error = Sample::UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED
+
+    # It's possible the error is caused by failed validation on the input files.
+    # Clear the input files before trying to save again.
+    self.input_files = []
+    save!
+  end
+
+  def uploaded_from_basespace?
+    uploaded_from_basespace == 1
   end
 
   def sample_input_s3_path
