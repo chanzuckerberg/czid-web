@@ -13,7 +13,7 @@ class PipelineVizController < ApplicationController
       )
 
       if pipeline_run
-        @results = RetrievePipelineVizGraphDataService.call(pipeline_run.id, current_user.admin?)
+        @results = RetrievePipelineVizGraphDataService.call(pipeline_run.id, current_user.admin?, current_user.id != sample.user_id)
         respond_to do |format|
           format.html
           format.json { render json: @results }

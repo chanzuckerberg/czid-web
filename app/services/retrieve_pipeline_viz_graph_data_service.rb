@@ -20,7 +20,7 @@ class RetrievePipelineVizGraphDataService
   #           - displayName: A string to display the file as
   #           - url: An optional string to download the file
 
-  def initialize(pipeline_run_id, is_admin)
+  def initialize(pipeline_run_id, is_admin, remove_host_filtering_urls)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
     @all_dag_jsons = []
     @pipeline_run.pipeline_run_stages.each do |stage|
@@ -28,6 +28,7 @@ class RetrievePipelineVizGraphDataService
         @all_dag_jsons.push(JSON.parse(stage.dag_json || "{}"))
       end
     end
+    @remove_host_filtering_urls = remove_host_filtering_urls
   end
 
   def call
@@ -119,8 +120,10 @@ class RetrievePipelineVizGraphDataService
       edges.push(from: edge_info[:from],
                  to: edge_info[:to],
                  files: files,
-                 isIntraStage: (edge_info[:to] && edge_info[:from] && edge_info[:to][:stageIndex] == edge_info[:from][:stageIndex])) || false
+                 isIntraStage: (edge_info[:to] && edge_info[:from] && edge_info[:to][:stageIndex] == edge_info[:from][:stageIndex]) || false)
     end
+
+    @remove_host_filtering_urls && remove_host_filtering_urls(edges)
     return edges
   end
 
@@ -141,5 +144,13 @@ class RetrievePipelineVizGraphDataService
 
   def modify_step_name(step_name)
     step_name.gsub(/^(PipelineStep(Run|Generate)?)/, "")
+  end
+
+  def remove_host_filtering_urls(edges)
+    edges.each do |edge|
+      if (edge[:from] && edge[:from][:stageIndex].zero?) || (edge[:to] && edge[:to][:stageIndex].zero?)
+        edge[:files].each { |file| file[:url] = nil }
+      end
+    end
   end
 end
