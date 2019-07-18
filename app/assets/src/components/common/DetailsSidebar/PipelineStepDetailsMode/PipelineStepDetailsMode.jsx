@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import { openUrl } from "~utils/links";
 import cs from "./pipeline_step_details_mode.scss";
 
 class PipelineStepDetailsMode extends React.Component {
@@ -44,12 +45,12 @@ class PipelineStepDetailsMode extends React.Component {
     return fileList.map((file, i) => {
       const cssClass = file.url ? cs.fileLink : cs.disabledFileLink;
       const content = file.url ? (
-        <a href={file.url} target="_blank">
-          {file.fileName}
-        </a>
+        // Use onClick instead of href to remove url appearance when hovering.
+        <a onClick={() => openUrl(file.url)}>{file.fileName}</a>
       ) : (
         file.fileName
       );
+
       return (
         <div className={cssClass} key={`${file.fileName}-${i}`}>
           {content}
