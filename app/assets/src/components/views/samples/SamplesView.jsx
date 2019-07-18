@@ -88,7 +88,7 @@ class SamplesView extends React.Component {
         flexGrow: 1,
         className: cs.basicCell,
         cellDataGetter: ({ dataKey, rowData }) =>
-          TableRenderers.formatPercentage(rowData[dataKey]),
+          TableRenderers.formatNumber(rowData[dataKey]),
       },
       {
         dataKey: "erccReads",

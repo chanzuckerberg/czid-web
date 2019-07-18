@@ -23,7 +23,7 @@ class PublicSampleNotification extends React.Component {
         </span>. If you have any questions, please refer to IDseq's&nbsp;
         <a
           className={cs.policyLink}
-          onClick={() => window.open("https://assets.idseq.net/Privacy.pdf")}
+          onClick={() => window.open("https://idseq.net/privacy")}
         >
           privacy policy
         </a>

@@ -169,7 +169,7 @@ RSpec.describe PipelineVizController, type: :controller do
         # Push new outputting edge for first (and now only) stage
         expected_stage_results_no_experimental["edges"].push("from" => { "stageIndex" => 0, "stepIndex" => 1 },
                                                              "files" => [{ "displayName" => "file3" }])
-
+        
         get :show, params: { format: "json", sample_id: sample.id }
 
         json_response = JSON.parse(response.body)
