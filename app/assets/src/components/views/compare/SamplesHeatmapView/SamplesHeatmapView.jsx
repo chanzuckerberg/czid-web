@@ -393,6 +393,10 @@ class SamplesHeatmapView extends React.Component {
     this.metadataSortField = field;
     this.metadataSortAsc = dir;
     this.updateHistoryState();
+    logAnalyticsEvent("Heatmap_column-metadata-label_clicked", {
+      columnMetadataSortField: field,
+      sortDirection: dir ? "asc" : "desc",
+    });
   };
 
   handleSampleLabelClick = sampleId => {

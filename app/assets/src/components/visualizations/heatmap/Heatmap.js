@@ -8,8 +8,6 @@ import { interpolateYlOrRd } from "d3-scale-chromatic";
 import SvgSaver from "svgsaver";
 import cx from "classnames";
 
-import { logAnalyticsEvent } from "~/api/analytics";
-
 import symlog from "../../utils/d3/scales/symlog.js";
 import cs from "./heatmap.scss";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap.js";
@@ -844,9 +842,6 @@ export default class Heatmap {
       this.options.onColumnMetadataLabelClick
         ? this.options.onColumnMetadataLabelClick(d.value, d3.event)
         : this.handleColumnMetadataLabelClick(d.value);
-      logAnalyticsEvent("Heatmap_column-metadata-label_clicked", {
-        columnMetadataSortField: d.value,
-      });
     };
 
     columnMetadataLabelEnter
