@@ -111,9 +111,10 @@ class RetrievePipelineVizGraphDataService
     input_output_to_file_paths.each do |input_output_json, file_paths|
       edge_info = JSON.parse(input_output_json, symbolize_names: true)
       files = file_paths.map do |file_path|
+        file_path = file_path.split('/', 4).last # Remove s3://idseq-.../ to match key
         file_info = file_path_to_info[file_path]
-        display_name = file_info ? file_info.display_name : file_path.split("/").last
-        url = file_info ? file_info.url : nil
+        display_name = file_info ? file_info[:display_name] : file_path.split("/").last
+        url = file_info ? file_info[:url] : nil
         { displayName: display_name, url: url }
       end
 
@@ -148,7 +149,7 @@ class RetrievePipelineVizGraphDataService
 
   def remove_host_filtering_urls(edges)
     edges.each do |edge|
-      if (edge[:from] && edge[:from][:stageIndex].zero?) || (edge[:to] && edge[:to][:stageIndex].zero?)
+      if (edge[:to] && edge[:to][:stageIndex].zero?) || edge[:from].nil?
         edge[:files].each { |file| file[:url] = nil }
       end
     end
