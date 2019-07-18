@@ -645,7 +645,7 @@ class PipelineRun < ApplicationRecord
     update_is_phage
 
     # rm the json
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_json_path}")
+    _stdout, _stderr, _status = Open3.capture3("rm", "-f", downloaded_json_path)
   end
 
   def db_load_taxon_counts
@@ -830,7 +830,7 @@ class PipelineRun < ApplicationRecord
     stats_array = stats_array.select { |entry| entry.key?("task") }
     job_stats.destroy_all
     update(job_stats_attributes: stats_array)
-    _stdout, _stderr, _status = Open3.capture3("rm -f #{downloaded_stats_path}")
+    _stdout = Syscall.run("rm", "-f", downloaded_stats_path)
   end
 
   def update_job_status
@@ -1120,7 +1120,7 @@ class PipelineRun < ApplicationRecord
     # available;  this code merges them into taxon_counts.name.
     lineage_version = alignment_config.lineage_version
     %w[species genus family].each do |level|
-      level_id = TaxonCount::NAME_2_LEVEL[level]
+      level_id = ActiveRecord::Base.connection.quote(TaxonCount::NAME_2_LEVEL[level])
       TaxonCount.connection.execute("
         UPDATE taxon_counts, taxon_lineages
         SET taxon_counts.name = taxon_lineages.#{level}_name,
