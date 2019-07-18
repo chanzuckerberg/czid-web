@@ -31,6 +31,7 @@ const SCALES = [
 const DOWNLOAD_OPTIONS = [{ text: "Download CSV", value: "csv" }];
 
 const SIDEBAR_SAMPLE_MODE = "sampleDetails";
+const SIDEBAR_GENE_MODE = "geneDetails";
 
 export default class AMRHeatmapView extends React.Component {
   constructor(props) {
@@ -44,6 +45,7 @@ export default class AMRHeatmapView extends React.Component {
         scale: "symlog",
       },
       selectedSampleId: null,
+      selectedGene: null,
       sidebarVisible: false,
       sidebarMode: null,
     };
@@ -139,6 +141,25 @@ export default class AMRHeatmapView extends React.Component {
     }
   };
 
+  onGeneLabelClick = geneName => {
+    const { sidebarVisible, sidebarMode, selectedGene } = this.state;
+    if (
+      !geneName ||
+      (sidebarVisible &&
+        sidebarMode === SIDEBAR_GENE_MODE &&
+        selectedGene === geneName)
+    ) {
+      this.closeSidebar();
+      return;
+    } else {
+      this.setState({
+        selectedGene: geneName,
+        sidebarMode: SIDEBAR_GENE_MODE,
+        sidebarVisible: true,
+      });
+    }
+  };
+
   closeSidebar = () => {
     this.setState({
       sidebarVisible: false,
@@ -166,12 +187,17 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   getSidebarParams() {
-    const { sidebarMode, selectedSampleId } = this.state;
+    const { sidebarMode, selectedSampleId, selectedGene } = this.state;
     switch (sidebarMode) {
       case SIDEBAR_SAMPLE_MODE: {
         return {
           sampleId: selectedSampleId,
           showReportLink: true,
+        };
+      }
+      case SIDEBAR_GENE_MODE: {
+        return {
+          geneName: selectedGene,
         };
       }
       default: {
@@ -266,6 +292,7 @@ export default class AMRHeatmapView extends React.Component {
             samplesWithAMRCounts={samplesWithAMRCounts}
             selectedOptions={selectedOptions}
             onSampleLabelClick={this.onSampleLabelClick}
+            onGeneLabelClick={this.onGeneLabelClick}
           />
         </ErrorBoundary>
       </div>

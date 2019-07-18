@@ -74,6 +74,9 @@ class SamplesHeatmapView extends React.Component {
         readSpecificity: parseAndCheckInt(this.urlParams.readSpecificity, 1),
       },
       loading: false,
+      selectedMetadata: this.urlParams.selectedMetadata || [
+        "collection_location",
+      ],
       sampleIds: compact(
         map(parseAndCheckInt, this.urlParams.sampleIds || this.props.sampleIds)
       ),
@@ -89,6 +92,9 @@ class SamplesHeatmapView extends React.Component {
     this.removedTaxonIds = new Set(
       this.urlParams.removedTaxonIds || this.props.removedTaxonIds || []
     );
+    this.metadataSortField = this.urlParams.metadataSortField;
+    this.metadataSortAsc = this.urlParams.metadataSortAsc;
+
     this.lastRequestToken = null;
   }
 
@@ -129,7 +135,6 @@ class SamplesHeatmapView extends React.Component {
     let urlParams = queryString.parse(location.search, {
       arrayFormat: "bracket",
     });
-
     // consider the cases where variables can be passed as array string
     if (typeof urlParams.sampleIds === "string") {
       urlParams.sampleIds = urlParams.sampleIds.split(",");
@@ -161,14 +166,23 @@ class SamplesHeatmapView extends React.Component {
         JSON.parse(urlParams.thresholdFilters)
       );
     }
+    if (typeof urlParams.selectedMetadata === "string") {
+      urlParams.selectedMetadata = urlParams.selectedMetadata.split(",");
+    }
+    if (typeof urlParams.metadataSortAsc === "string") {
+      urlParams.metadataSortAsc = urlParams.metadataSortAsc === "true";
+    }
     return urlParams;
   };
 
   getUrlParams = () => {
     return Object.assign(
       {
-        sampleIds: this.state.sampleIds,
+        selectedMetadata: this.state.selectedMetadata,
+        metadataSortField: this.metadataSortField,
+        metadataSortAsc: this.metadataSortAsc,
         removedTaxonIds: Array.from(this.removedTaxonIds),
+        sampleIds: this.state.sampleIds,
       },
       this.state.selectedOptions
     );
@@ -207,7 +221,6 @@ class SamplesHeatmapView extends React.Component {
       "/visualizations/heatmap/" +
       resp.id;
     // Update URL without reloading the page
-    // TODO (gdingle): make back button load previous vis state
     history.replaceState(window.history.state, document.title, url);
   };
 
@@ -273,8 +286,8 @@ class SamplesHeatmapView extends React.Component {
     }
 
     newState.loading = false;
-    // TODO (gdingle): change to pushState to preserve back button behavior?
-    window.history.replaceState("", "", this.getUrlForCurrentParams());
+
+    this.updateHistoryState();
     this.setState(newState);
   }
 
@@ -353,12 +366,36 @@ class SamplesHeatmapView extends React.Component {
     });
   };
 
+  updateHistoryState = () => {
+    window.history.replaceState("", "", this.getUrlForCurrentParams());
+  };
+
   handleRemoveTaxon = taxonName => {
     let taxonId = this.state.taxonDetails[taxonName].id;
     this.removedTaxonIds.add(taxonId);
     logAnalyticsEvent("SamplesHeatmapView_taxon_removed", {
       taxonId,
       taxonName,
+    });
+  };
+
+  handleMetadataChange = metadataFields => {
+    this.setState({
+      selectedMetadata: Array.from(metadataFields),
+    });
+    logAnalyticsEvent("SamplesHeatmapView_metadata_changed", {
+      selected: metadataFields,
+    });
+    this.updateHistoryState();
+  };
+
+  handleMetadataSortChange = (field, dir) => {
+    this.metadataSortField = field;
+    this.metadataSortAsc = dir;
+    this.updateHistoryState();
+    logAnalyticsEvent("Heatmap_column-metadata-label_clicked", {
+      columnMetadataSortField: field,
+      sortDirection: dir ? "asc" : "desc",
     });
   };
 
@@ -528,20 +565,25 @@ class SamplesHeatmapView extends React.Component {
     return (
       <ErrorBoundary>
         <SamplesHeatmapVis
+          data={this.state.data}
+          defaultMetadata={this.state.selectedMetadata}
+          metadataTypes={this.state.metadataTypes}
+          metadataSortField={this.metadataSortField}
+          metadataSortAsc={this.metadataSortAsc}
+          metric={this.state.selectedOptions.metric}
+          onMetadataSortChange={this.handleMetadataSortChange}
+          onMetadataChange={this.handleMetadataChange}
+          onRemoveTaxon={this.handleRemoveTaxon}
+          onSampleLabelClick={this.handleSampleLabelClick}
+          onTaxonLabelClick={this.handleTaxonLabelClick}
           ref={vis => {
             this.heatmapVis = vis;
           }}
           sampleIds={this.state.sampleIds}
           sampleDetails={this.state.sampleDetails}
+          scale={SCALE_OPTIONS[scaleIndex][1]}
           taxonIds={this.state.taxonIds}
           taxonDetails={this.state.taxonDetails}
-          data={this.state.data}
-          metadataTypes={this.state.metadataTypes}
-          metric={this.state.selectedOptions.metric}
-          scale={SCALE_OPTIONS[scaleIndex][1]}
-          onRemoveTaxon={this.handleRemoveTaxon}
-          onSampleLabelClick={this.handleSampleLabelClick}
-          onTaxonLabelClick={this.handleTaxonLabelClick}
           taxonFilterState={this.state.taxonFilterState}
         />
       </ErrorBoundary>

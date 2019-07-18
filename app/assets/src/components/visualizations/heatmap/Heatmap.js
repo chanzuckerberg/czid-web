@@ -8,8 +8,6 @@ import { interpolateYlOrRd } from "d3-scale-chromatic";
 import SvgSaver from "svgsaver";
 import cx from "classnames";
 
-import { logAnalyticsEvent } from "~/api/analytics";
-
 import symlog from "../../utils/d3/scales/symlog.js";
 import cs from "./heatmap.scss";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap.js";
@@ -43,6 +41,7 @@ export default class Heatmap {
         marginLeft: 20,
         marginBottom: 20,
         marginRight: 20,
+        metadataSortIconSize: 16,
         minCellWidth: 26,
         minCellHeight: 26,
         minWidth: 1240,
@@ -86,8 +85,8 @@ export default class Heatmap {
     this.scaleType = this.getScaleType();
 
     this.addMetadataTrigger = null;
-    this.columnMetadataSortField = null;
-    this.columnMetadataSortAsc = true;
+    this.columnMetadataSortField = this.options.initialColumnMetadataSortField;
+    this.columnMetadataSortAsc = this.options.initialColumnMetadataSortAsc;
   }
 
   getScaleType() {
@@ -163,6 +162,14 @@ export default class Heatmap {
 
     for (let i = 0; i < this.rowLabels.length; i++) {
       let label = this.rowLabels[i].label;
+      this.rowLabelsWidth = Math.max(this.rowLabelsWidth, labelWidth(label));
+    }
+
+    for (let i = 0; i < this.options.columnMetadata.length; i++) {
+      // Get label width and compensate for icon size
+      let label =
+        this.options.columnMetadata[i].label +
+        this.options.metadataSortIconSize;
       this.rowLabelsWidth = Math.max(this.rowLabelsWidth, labelWidth(label));
     }
 
@@ -538,6 +545,7 @@ export default class Heatmap {
   };
 
   handleColumnMetadataLabelClick(value) {
+    const { onColumnMetadataSortChange } = this.options;
     if (this.columnMetadataSortField === value) {
       if (this.columnMetadataSortAsc) {
         this.columnMetadataSortAsc = false;
@@ -563,6 +571,11 @@ export default class Heatmap {
       });
     }
     this.processData("cluster");
+    onColumnMetadataSortChange &&
+      onColumnMetadataSortChange(
+        this.columnMetadataSortField,
+        this.columnMetadataSortAsc
+      );
   }
 
   applyScale(scale, value, min, max) {
@@ -783,13 +796,11 @@ export default class Heatmap {
   }
 
   renderColumnMetadataLabels() {
-    let iconSize = 16;
-
     let applyFormat = nodes => {
       nodes.attr("transform", (d, idx) => {
         const xOffset =
           d.value === this.columnMetadataSortField
-            ? -iconSize - this.options.spacing
+            ? -this.options.metadataSortIconSize - this.options.spacing
             : 0;
         return `translate(${xOffset}, ${idx * this.options.minCellHeight})`;
       });
@@ -811,18 +822,6 @@ export default class Heatmap {
       .transition()
       .duration(this.options.transitionDuration);
 
-    columnMetadataLabelUpdate
-      .select(".metadataSortIcon")
-      .attr(
-        "xlink:href",
-        d =>
-          d.value === this.columnMetadataSortField
-            ? `${this.options.iconPath}/sort_${
-                this.columnMetadataSortAsc ? "asc" : "desc"
-              }.svg`
-            : ""
-      );
-
     applyFormat(columnMetadataLabelUpdate);
 
     let columnMetadataLabelEnter = columnMetadataLabel
@@ -843,9 +842,6 @@ export default class Heatmap {
       this.options.onColumnMetadataLabelClick
         ? this.options.onColumnMetadataLabelClick(d.value, d3.event)
         : this.handleColumnMetadataLabelClick(d.value);
-      logAnalyticsEvent("Heatmap_column-metadata-label_clicked", {
-        columnMetadataSortField: d.value,
-      });
     };
 
     columnMetadataLabelEnter
@@ -877,17 +873,29 @@ export default class Heatmap {
       .attr(
         "transform",
         `translate(${this.rowLabelsWidth},${(this.options.minCellHeight +
-          iconSize) /
+          this.options.metadataSortIconSize) /
           2})`
       )
       .append("svg:image")
       .attr("class", "metadataSortIcon")
-      .attr("width", iconSize)
-      .attr("height", iconSize)
+      .attr("width", this.options.metadataSortIconSize)
+      .attr("height", this.options.metadataSortIconSize)
       .attr("transform", "rotate(-90)")
       .on("click", handleColumnMetadataLabelClick);
 
     applyFormat(columnMetadataLabelEnter);
+
+    columnMetadataLabel
+      .select(".metadataSortIcon")
+      .attr(
+        "xlink:href",
+        d =>
+          d.value === this.columnMetadataSortField
+            ? `${this.options.iconPath}/sort_${
+                this.columnMetadataSortAsc ? "asc" : "desc"
+              }.svg`
+            : ""
+      );
   }
 
   renderColumnMetadataCells() {

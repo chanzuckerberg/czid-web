@@ -164,7 +164,7 @@ const UserMenuDropDown = ({
             className={cs.option}
             target="_blank"
             rel="noopener noreferrer"
-            href="https://assets.idseq.net/Terms.pdf"
+            href="https://idseq.net/terms"
             onClick={() =>
               logAnalyticsEvent("Header_dropdown-terms-option_clicked")
             }
@@ -180,7 +180,7 @@ const UserMenuDropDown = ({
             className={cs.option}
             target="_blank"
             rel="noopener noreferrer"
-            href="https://assets.idseq.net/Privacy.pdf"
+            href="https://idseq.net/privacy"
             onClick={() =>
               logAnalyticsEvent("Header_dropdown-privacy-policy-option_clicked")
             }

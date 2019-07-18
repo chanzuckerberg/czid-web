@@ -71,9 +71,9 @@ const processRawSample = sample => {
   const row = {
     sample: {
       name: sample.name,
+      project: get("derived_sample_output.project_name", sample.details),
       publicAccess: !!sample.public,
       user: get("uploader.name", sample.details),
-      project: get("derived_sample_output.project_name", sample.details),
       status: get(
         "run_info.result_status_description",
         sample.details
@@ -107,6 +107,7 @@ const processRawSample = sample => {
     },
     notes: get("db_sample.sample_notes", sample.details),
     nucleotideType: get("metadata.nucleotide_type", sample.details),
+    privateUntil: sample.private_until,
     qcPercent: get(
       "derived_sample_output.summary_stats.qc_percent",
       sample.details

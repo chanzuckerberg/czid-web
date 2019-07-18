@@ -25,11 +25,12 @@ class SamplesController < ApplicationController
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
-                  :pipeline_runs, :save_metadata, :save_metadata_v2, :raw_results_folder, :upload_heartbeat].freeze
+                  :pipeline_runs, :save_metadata, :save_metadata_v2, :upload_heartbeat].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files].freeze
+  OWNER_ACTIONS = [:raw_results_folder].freeze
 
   # For API-like access
   TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
@@ -45,8 +46,9 @@ class SamplesController < ApplicationController
   # Read actions are mapped to viewable_samples scope and Edit actions are mapped to updatable_samples.
   power :samples, map: { EDIT_ACTIONS => :updatable_samples }, as: :samples_scope
 
-  before_action :set_sample, only: READ_ACTIONS + EDIT_ACTIONS
+  before_action :set_sample, only: READ_ACTIONS + EDIT_ACTIONS + OWNER_ACTIONS
   before_action :assert_access, only: OTHER_ACTIONS # Actions which don't require access control check
+  before_action :check_owner, only: OWNER_ACTIONS
   before_action :check_access
 
   PAGE_SIZE = 30
@@ -157,7 +159,7 @@ class SamplesController < ApplicationController
 
     limited_samples_json = limited_samples.as_json(
       only: [:id, :name, :host_genome_id, :project_id, :created_at, :public],
-      methods: []
+      methods: [:private_until]
     )
     samples_visibility = get_visibility(limited_samples)
 
@@ -947,6 +949,7 @@ class SamplesController < ApplicationController
   end
 
   def raw_results_folder
+    # See access check in check_owner
     @file_list = @sample.results_folder_files
     @file_path = "#{@sample.sample_path}/results/"
     render template: "samples/raw_folder"
@@ -1121,10 +1124,10 @@ class SamplesController < ApplicationController
   # PUT /samples/:id/resync_prod_data_to_staging
   def resync_prod_data_to_staging
     if Rails.env == 'staging'
-      pr_ids = @sample.pipeline_run_ids.join(",")
+      pr_ids = @sample.pipeline_run_ids
       unless pr_ids.empty?
         ['taxon_counts', 'taxon_byteranges', 'contigs'].each do |table_name|
-          ActiveRecord::Base.connection.execute("REPLACE INTO idseq_staging.#{table_name} SELECT * FROM idseq_prod.#{table_name} WHERE pipeline_run_id IN (#{pr_ids})")
+          ActiveRecord::Base.connection.execute(ActiveRecord::Base.send(:sanitize_sql, ["REPLACE INTO idseq_staging.#{table_name} SELECT * FROM idseq_prod.#{table_name} WHERE pipeline_run_id IN (?)", pr_ids]))
         end
       end
       Resque.enqueue(InitiateS3ProdSyncToStaging, @sample.id)
@@ -1264,5 +1267,14 @@ class SamplesController < ApplicationController
       end
     end
     samples
+  end
+
+  def check_owner
+    unless current_user.admin? || current_user.id == @sample.user_id
+      render json: {
+        message: "Only the original uploader can access this."
+      }, status: :unauthorized
+      # Rendering halts the filter chain
+    end
   end
 end
