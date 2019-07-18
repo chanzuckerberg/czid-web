@@ -45,9 +45,7 @@ class PublicProjectConfirmationModal extends React.Component {
                 For more information, view our{" "}
                 <span
                   className={cs.link}
-                  onClick={() =>
-                    window.open("https://assets.idseq.net/Privacy.pdf")
-                  }
+                  onClick={() => window.open("https://idseq.net/privacy")}
                 >
                   privacy policy
                 </span>{" "}
