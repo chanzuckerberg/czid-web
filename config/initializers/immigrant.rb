@@ -2,7 +2,7 @@ Immigrant.ignore_keys = [
   # Too big
   { from_table: 'taxon_byteranges', column: 'pipeline_run_id' },
   { from_table: 'taxon_counts', column: 'pipeline_run_id' },
-  { from_table: 'contigs.pipeline_run_id', column: 'pipeline_run_id' },
+  { from_table: 'contigs', column: 'pipeline_run_id' },
 
   # Optional assocs
   { from_table: 'backgrounds', column: 'project_id' },

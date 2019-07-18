@@ -1,7 +1,6 @@
 class AddForeignKeyConstraints < ActiveRecord::Migration[5.1]
   def change
     add_foreign_key "amr_counts", "pipeline_runs", name: "amr_counts_pipeline_run_id_fk"
-    add_foreign_key "contigs", "pipeline_runs", name: "contigs_pipeline_run_id_fk"
     add_foreign_key "ercc_counts", "pipeline_runs", name: "ercc_counts_pipeline_run_id_fk"
     add_foreign_key "favorite_projects", "projects", name: "favorite_projects_project_id_fk"
     add_foreign_key "favorite_projects", "users", name: "favorite_projects_user_id_fk"
