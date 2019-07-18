@@ -188,6 +188,7 @@ export default class AMRHeatmapView extends React.Component {
         href={URL.createObjectURL(dataBlob)}
         download="idseq_amr_heatmap_values.csv"
         target="_blank"
+        rel="noopener noreferrer"
         key={`${csvOption.text}_csv_link`}
       >
         {csvOption.text}
