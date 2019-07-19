@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_717_221_024) do
+ActiveRecord::Schema.define(version: 20_190_719_233_448) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -62,6 +62,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.bigint "background_id"
     t.bigint "pipeline_run_id"
     t.index ["background_id", "pipeline_run_id"], name: "index_bg_pr_id", unique: true
+    t.index ["pipeline_run_id"], name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
   end
 
   create_table "backgrounds_samples", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -71,7 +72,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
   end
 
-  create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
     t.text "sequence", limit: 4_294_967_295
@@ -93,8 +94,8 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
   end
 
   create_table "favorite_projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.integer "project_id"
-    t.integer "user_id"
+    t.bigint "project_id"
+    t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["project_id"], name: "index_favorite_projects_on_project_id"
@@ -102,7 +103,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", null: false
+    t.string "name"
     t.text "s3_star_index_path"
     t.text "s3_bowtie2_index_path"
     t.bigint "default_background_id"
@@ -124,7 +125,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "source_type", null: false
+    t.string "source_type"
     t.text "source"
     t.text "parts"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
@@ -168,17 +169,17 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
   end
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "key", null: false
+    t.string "key", null: false, collation: "latin1_swedish_ci"
     t.string "raw_value"
     t.string "string_validated_value"
     t.decimal "number_validated_value", precision: 36, scale: 9
-    t.integer "sample_id"
+    t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.date "date_validated_value"
     t.bigint "metadata_field_id"
     t.string "specificity"
-    t.integer "location_id"
+    t.bigint "location_id"
     t.index ["metadata_field_id"], name: "index_metadata_on_metadata_field_id"
     t.index ["sample_id", "key"], name: "index_metadata_on_sample_id_and_key", unique: true
   end
@@ -205,6 +206,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
   create_table "metadata_fields_projects", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "project_id", null: false
     t.bigint "metadata_field_id", null: false
+    t.index ["metadata_field_id"], name: "metadata_fields_projects_metadata_field_id_fk"
     t.index ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields", unique: true
   end
 
@@ -250,6 +252,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.bigint "phylo_tree_id"
     t.bigint "pipeline_run_id"
     t.index ["phylo_tree_id", "pipeline_run_id"], name: "index_pt_pr_id", unique: true
+    t.index ["pipeline_run_id"], name: "phylo_trees_pipeline_runs_pipeline_run_id_fk"
   end
 
   create_table "pipeline_run_stages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -314,6 +317,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.integer "max_input_fragments"
     t.text "error_message"
     t.string "known_user_error"
+    t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
@@ -322,7 +326,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "public_access", limit: 1
+    t.integer "public_access", limit: 1, default: 0
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.index ["name"], name: "index_projects_on_name", unique: true
@@ -369,6 +373,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.datetime "client_updated_at"
     t.integer "uploaded_from_basespace", limit: 1, default: 0
     t.string "upload_error"
+    t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end
@@ -449,8 +454,8 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary"
-    t.text "description"
+    t.text "summary", limit: 16_777_215
+    t.text "description", limit: 16_777_215
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -540,11 +545,11 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email", default: "", null: false
+    t.string "email"
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password", default: "", null: false
+    t.string "encrypted_password"
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
@@ -577,4 +582,22 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.string "name"
     t.index ["user_id"], name: "index_visualizations_on_user_id"
   end
+
+  add_foreign_key "amr_counts", "pipeline_runs", name: "amr_counts_pipeline_run_id_fk"
+  add_foreign_key "backgrounds_pipeline_runs", "pipeline_runs", name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
+  add_foreign_key "backgrounds_samples", "backgrounds", name: "backgrounds_samples_background_id_fk"
+  add_foreign_key "backgrounds_samples", "samples", name: "backgrounds_samples_sample_id_fk"
+  add_foreign_key "metadata", "metadata_fields", name: "metadata_metadata_field_id_fk"
+  add_foreign_key "metadata_fields_projects", "metadata_fields", name: "metadata_fields_projects_metadata_field_id_fk"
+  add_foreign_key "metadata_fields_projects", "projects", name: "metadata_fields_projects_project_id_fk"
+  add_foreign_key "phylo_trees", "projects", name: "phylo_trees_project_id_fk"
+  add_foreign_key "phylo_trees", "users", name: "phylo_trees_user_id_fk"
+  add_foreign_key "phylo_trees_pipeline_runs", "phylo_trees", name: "phylo_trees_pipeline_runs_phylo_tree_id_fk"
+  add_foreign_key "phylo_trees_pipeline_runs", "pipeline_runs", name: "phylo_trees_pipeline_runs_pipeline_run_id_fk"
+  add_foreign_key "pipeline_runs", "alignment_configs", name: "pipeline_runs_alignment_config_id_fk"
+  add_foreign_key "pipeline_runs", "samples", name: "pipeline_runs_sample_id_fk"
+  add_foreign_key "samples", "host_genomes", name: "samples_host_genome_id_fk"
+  add_foreign_key "samples", "projects", name: "samples_project_id_fk"
+  add_foreign_key "samples_visualizations", "samples", name: "samples_visualizations_sample_id_fk"
+  add_foreign_key "samples_visualizations", "visualizations", name: "samples_visualizations_visualization_id_fk"
 end
