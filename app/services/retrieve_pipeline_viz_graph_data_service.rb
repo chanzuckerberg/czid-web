@@ -68,7 +68,6 @@ class RetrievePipelineVizGraphDataService
     file_path_to_outputting_step = {}
     file_path_to_inputting_steps = {}
     all_file_paths = Set.new
-
     @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
       stage_dag_json["steps"].each_with_index do |step, step_index|
         stage_dag_json["targets"][step["out"]].each do |file_name|
