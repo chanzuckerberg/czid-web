@@ -372,8 +372,17 @@ module SamplesHelper
       top_pipeline_run = top_pipeline_run_by_sample_id[sample.id]
       job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}
       job_info[:derived_sample_output] = sample_derived_data(sample, top_pipeline_run, job_stats_hash)
-      job_info[:run_info] = pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids,
-                                              pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
+
+      job_info[:run_info] = if sample.upload_error
+                              {
+                                result_status_description: 'FAILED',
+                                finalized: 0,
+                                report_ready: 0
+                              }
+                            else
+                              pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids,
+                                                pipeline_run_stages_by_pipeline_run_id, output_states_by_pipeline_run_id)
+                            end
       job_info[:uploader] = sample_uploader(sample)
       formatted_samples.push(job_info)
     end
@@ -476,11 +485,19 @@ module SamplesHelper
     errors
   end
 
-  def upload_samples_with_metadata(samples_to_upload, metadata)
+  def upload_samples_with_metadata(samples_to_upload, metadata, user)
     samples = []
     errors = []
     samples_to_upload.each do |sample_attributes|
-      sample_attributes[:input_files_attributes].reject! { |f| f["source"] == '' }
+      # A sample won't have input files if and only if it is being uploaded from basespace.
+      if sample_attributes[:input_files_attributes]
+        sample_attributes[:input_files_attributes].reject! { |f| f["source"] == '' }
+      elsif !sample_attributes[:basespace_access_token] || !sample_attributes[:basespace_dataset_id]
+        errors << SampleUploadErrors.missing_input_files_or_basespace_params(sample_attributes[:name])
+        # Remove the metadata for the invalid sample.
+        metadata.delete(sample_attributes[:name])
+        next
+      end
 
       if sample_attributes[:host_genome_name]
         name = sample_attributes.delete(:host_genome_name)
@@ -489,13 +506,25 @@ module SamplesHelper
       sample = Sample.new(sample_attributes)
       sample.input_files.each { |f| f.name ||= File.basename(f.source) }
 
+      # Add these as temporary attributes to this sample object.
+      if sample_attributes[:basespace_access_token]
+        sample.basespace_access_token = sample_attributes.delete(:basespace_access_token)
+        sample.uploaded_from_basespace = 1
+      end
+      if sample_attributes[:basespace_dataset_id]
+        sample.basespace_dataset_id = sample_attributes.delete(:basespace_dataset_id)
+      end
+
       # If s3 upload, set "bulk_mode" to true.
       sample.bulk_mode = sample.input_files.map(&:source_type).include?("s3")
-      sample.user = current_user
+      sample.status = Sample::STATUS_CREATED
+      sample.user = user
       if sample.save
         samples << sample
       else
         errors << sample.errors
+        # Remove the metadata for the invalid sample.
+        metadata.delete(sample_attributes[:name])
       end
     end
 

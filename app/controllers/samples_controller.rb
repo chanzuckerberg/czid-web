@@ -536,7 +536,7 @@ class SamplesController < ApplicationController
       errors << SampleUploadErrors.invalid_project_id(sample)
     end
 
-    upload_errors, samples = upload_samples_with_metadata(samples_to_upload, metadata).values_at("errors", "samples")
+    upload_errors, samples = upload_samples_with_metadata(samples_to_upload, metadata, current_user).values_at("errors", "samples")
 
     errors.concat(upload_errors)
 
@@ -1240,7 +1240,7 @@ class SamplesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def samples_params
-    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id, :host_genome_name,
+    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id, :host_genome_name, :basespace_dataset_id, :basespace_access_token,
                                          input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]])
     new_params[:samples] if new_params
   end
@@ -1251,6 +1251,7 @@ class SamplesController < ApplicationController
                         :host_genome_id, :host_genome_name, :sample_location, :sample_date, :sample_tissue,
                         :sample_template, :sample_library, :sample_sequencer,
                         :sample_notes, :search, :subsample, :max_input_fragments,
+                        :basespace_dataset_id, :basespace_access_token,
                         :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection, :client,
                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample]) if current_user.admin?

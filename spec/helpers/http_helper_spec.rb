@@ -6,12 +6,13 @@ RSpec.describe HttpHelper, type: :helper do
     context "#a successful HTTP request" do
       before do
         stub_request(:get, "https://www.example.com")
+          .with(query: { "param_one" => ["a", "b"] })
           .to_return(body: { "foo" => "bar" }.to_json)
       end
 
       def make_get_request
         HttpHelper.get_json("https://www.example.com", {
-                              "param_one" => "a"
+                              "param_one" => ["a", "b"]
                             }, "Authorization" => "Bearer abc")
       end
 
@@ -21,16 +22,14 @@ RSpec.describe HttpHelper, type: :helper do
         expect(response).to include_json("foo" => "bar")
       end
 
-      it "sends an HTTP get request with the correct headers" do
+      it "sends an HTTP get request with the correct headers and params" do
         make_get_request()
 
         expect(
           a_request(:get, "https://www.example.com")
-            .with(headers: { "Authorization" => "Bearer abc" })
+            .with(headers: { "Authorization" => "Bearer abc" }, query: { "param_one" => ["a", "b"] })
         ).to have_been_made
       end
-      # TODO(mark): Test that get request sends the correct query params.
-      # Couldn"t figure out how to do it properly with Webmock, as it doesn't seem to recognize encode_www_form query params.
     end
 
     context "#a failed HTTP request" do
