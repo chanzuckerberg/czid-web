@@ -1,5 +1,6 @@
 class RetrievePipelineVizGraphDataService
   include Callable
+  include PipelineRunsHelper # For step descriptions
 
   # Structures dag_json of each stage of the pipeline run into the following in @results for drawing
   # the pipeline visualization graphs on the React side:
@@ -22,9 +23,11 @@ class RetrievePipelineVizGraphDataService
   def initialize(pipeline_run_id, is_admin)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
     @all_dag_jsons = []
+    @stage_names = []
     @pipeline_run.pipeline_run_stages.each do |stage|
       if stage.name != "Experimental" || is_admin
         @all_dag_jsons.push(JSON.parse(stage.dag_json || "{}"))
+        @stage_names.push(stage.name)
       end
     end
   end
@@ -41,10 +44,12 @@ class RetrievePipelineVizGraphDataService
   private
 
   def create_stage_nodes_scaffolding
-    stages = @all_dag_jsons.map do |dag_json|
+    stages = @all_dag_jsons.map.with_index do |dag_json, stage_index|
+      stage_step_descriptions = STEP_DESCRIPTIONS[@stage_names[stage_index]]["steps"]
       steps = dag_json["steps"].map do |step|
         {
           name: modify_step_name(step["class"]),
+          description: stage_step_descriptions[step["out"]],
           inputEdges: [],
           outputEdges: []
         }
