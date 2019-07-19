@@ -61,24 +61,30 @@ RSpec.describe RetrievePipelineVizGraphDataService do
         steps: [
           {
             name: "step_one",
-            inputEdges: [3],
-            outputEdges: [0]
+            inputEdges: [0],
+            outputEdges: [1]
           },
           {
             name: "step_two",
-            inputEdges: [0],
-            outputEdges: [1]
+            inputEdges: [1],
+            outputEdges: [2]
           }
         ]
       }, {
         steps: [{
           name: "step_three",
-          inputEdges: [1],
-          outputEdges: [2]
+          inputEdges: [2],
+          outputEdges: [3]
         }]
       }
     ],
     edges: [
+      {
+        # No "from" field as this is the input file.
+        to: { stageIndex: 0, stepIndex: 0 },
+        files: [{ displayName: "unmapped1.fq", url: "test url" }],
+        isIntraStage: false
+      },
       {
         from: { stageIndex: 0, stepIndex: 0 },
         to: { stageIndex: 0, stepIndex: 1 },
@@ -93,12 +99,7 @@ RSpec.describe RetrievePipelineVizGraphDataService do
       },
       {
         from: { stageIndex: 1, stepIndex: 0 },
-        files: [{ displayName: "bowtie2_1.fa", url: "test url" }]
-      },
-      {
-        # No "from" field as this is the input file.
-        to: { stageIndex: 0, stepIndex: 0 },
-        files: [{ displayName: "unmapped1.fq", url: "test url" }],
+        files: [{ displayName: "bowtie2_1.fa", url: "test url" }],
         isIntraStage: false
       }
     ]

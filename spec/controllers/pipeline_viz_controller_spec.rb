@@ -57,12 +57,12 @@ RSpec.describe PipelineVizController, type: :controller do
         "steps" => [
           {
             "name" => "step_one",
-            "inputEdges" => [1],
-            "outputEdges" => [0]
+            "inputEdges" => [0],
+            "outputEdges" => [1]
           },
           {
             "name" => "step_two",
-            "inputEdges" => [0],
+            "inputEdges" => [1],
             "outputEdges" => [2]
           }
         ]
@@ -75,19 +75,17 @@ RSpec.describe PipelineVizController, type: :controller do
       }
     ],
     "edges" => [
-      # Edges from intra_stage_edges
+      {
+        "to" => { "stageIndex" => 0, "stepIndex" => 0 },
+        "files" => [{ "displayName" => "file1" }],
+        "isIntraStage" => false
+      },
+      # Edges from inter_stage_edges
       {
         "from" => { "stageIndex" => 0, "stepIndex" => 0 },
         "to" => { "stageIndex" => 0, "stepIndex" => 1 },
         "files" => [{ "displayName" => "file2" }],
         "isIntraStage" => true
-      },
-      # Edges from inter_stage_edges
-      {
-        "from" => nil,
-        "to" => { "stageIndex" => 0, "stepIndex" => 0 },
-        "files" => [{ "displayName" => "file1" }],
-        "isIntraStage" => false
       },
       {
         "from" => { "stageIndex" => 0, "stepIndex" => 1 },
@@ -98,7 +96,8 @@ RSpec.describe PipelineVizController, type: :controller do
       # Edges from add_final_output_edges
       {
         "from" => { "stageIndex" => 1, "stepIndex" => 0 },
-        "files" => [{ "displayName" => "file4" }]
+        "files" => [{ "displayName" => "file4" }],
+        "isIntraStage" => false
       }
     ]
   }

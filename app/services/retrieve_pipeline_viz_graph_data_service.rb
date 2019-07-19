@@ -82,8 +82,8 @@ class RetrievePipelineVizGraphDataService
   end
 
   def input_output_to_file_paths
-    file_paths_to_input_outputs = file_path_to_outputting_step
-                                  .merge(file_path_to_inputting_steps) do |_file_path, from, to_array|
+    file_paths_to_input_outputs = file_path_to_inputting_steps
+                                  .merge(file_path_to_outputting_step) do |_file_path, to_array, from|
       to_array.map { |to| to.merge(from) }
     end
 
