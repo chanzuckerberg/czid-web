@@ -12,7 +12,8 @@ RSpec.describe RetrievePipelineVizGraphDataService do
       targets: {
         one: ["unmapped1.fq"],
         two: ["trimmomatic1.fq"],
-        three: ["priceseq1.fa"]
+        # Testing partially concated file path and no url available.
+        three: ["file/priceseq1.fa"]
       },
       steps: [
         {
@@ -48,7 +49,7 @@ RSpec.describe RetrievePipelineVizGraphDataService do
       ],
       given_targets: {
         three: {
-          s3_dir: given_targets_dir
+          s3_dir: given_targets_dir + "/file"
         }
       }
     }.to_json
@@ -60,20 +61,20 @@ RSpec.describe RetrievePipelineVizGraphDataService do
         steps: [
           {
             name: "step_one",
-            inputEdges: [1],
+            inputEdges: [3],
             outputEdges: [0]
           },
           {
             name: "step_two",
             inputEdges: [0],
-            outputEdges: [2]
+            outputEdges: [1]
           }
         ]
       }, {
         steps: [{
           name: "step_three",
-          inputEdges: [2],
-          outputEdges: [3]
+          inputEdges: [1],
+          outputEdges: [2]
         }]
       }
     ],
@@ -85,20 +86,20 @@ RSpec.describe RetrievePipelineVizGraphDataService do
         isIntraStage: true
       },
       {
-        from: nil,
-        to: { stageIndex: 0, stepIndex: 0 },
-        files: [{ displayName: "unmapped1.fq", url: "test url" }],
-        isIntraStage: false
-      },
-      {
         from: { stageIndex: 0, stepIndex: 1 },
         to: { stageIndex: 1, stepIndex: 0 },
-        files: [{ displayName: "priceseq1.fa", url: "test url" }],
+        files: [{ displayName: "priceseq1.fa", url: nil }],
         isIntraStage: false
       },
       {
         from: { stageIndex: 1, stepIndex: 0 },
         files: [{ displayName: "bowtie2_1.fa", url: "test url" }]
+      },
+      {
+        # No "from" field as this is the input file.
+        to: { stageIndex: 0, stepIndex: 0 },
+        files: [{ displayName: "unmapped1.fq", url: "test url" }],
+        isIntraStage: false
       }
     ]
   }

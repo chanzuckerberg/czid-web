@@ -1,5 +1,3 @@
-require 'pp'
-
 class RetrievePipelineVizGraphDataService
   include Callable
   # For step descriptions.
