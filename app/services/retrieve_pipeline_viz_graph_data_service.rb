@@ -1,3 +1,5 @@
+require 'pp'
+
 class RetrievePipelineVizGraphDataService
   include Callable
   # For step descriptions.
@@ -71,18 +73,57 @@ class RetrievePipelineVizGraphDataService
     @pipeline_run.sample.results_folder_files(@pipeline_run.pipeline_version).each do |file_entry|
       file_path_to_info[file_entry[:key]] = file_entry
     end
+    edges = input_output_to_file_paths.map do |input_output_json, file_paths|
+      files = file_paths.map { |file_path| file_info(file_path, file_path_to_info) }
+      edge_info = JSON.parse(input_output_json, symbolize_names: true)
+      edge_info.merge(files: files,
+                      isIntraStage: (edge_info.key?(:to) && edge_info.key?(:from) && edge_info[:to][:stageIndex] == edge_info[:from][:stageIndex]) || false)
+    end
+    @remove_host_filtering_urls && remove_host_filtering_urls(edges)
+    return edges
+  end
 
+  def input_output_to_file_paths
+    file_paths_to_input_outputs = file_path_to_outputting_step
+                                  .merge(file_path_to_inputting_steps) do |_file_path, from, to_array|
+      to_array.map { |to| to.merge(from) }
+    end
+
+    input_output_to_file_paths = {}
+    file_paths_to_input_outputs.each do |file_path, input_outputs|
+      # Convert those with only "from" and not "to", which are not arrays due to no conflicting keys in merge.
+      unless input_outputs.is_a? Array
+        input_outputs = [input_outputs]
+      end
+
+      input_outputs.each do |input_output|
+        input_output = input_output.to_json
+        unless input_output_to_file_paths.key? input_output
+          input_output_to_file_paths[input_output] = []
+        end
+        input_output_to_file_paths[input_output].push(file_path)
+      end
+    end
+    input_output_to_file_paths
+  end
+
+  def file_path_to_outputting_step
     file_path_to_outputting_step = {}
-    file_path_to_inputting_steps = {}
-    all_file_paths = Set.new
     @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
       stage_dag_json["steps"].each_with_index do |step, step_index|
         stage_dag_json["targets"][step["out"]].each do |file_name|
           file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{file_name}"
-          file_path_to_outputting_step[file_path] = { stageIndex: stage_index, stepIndex: step_index }
-          all_file_paths.add file_path
+          file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
         end
+      end
+    end
+    file_path_to_outputting_step
+  end
 
+  def file_path_to_inputting_steps
+    file_path_to_inputting_steps = {}
+    @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
+      stage_dag_json["steps"].each_with_index do |step, step_index|
         step["in"].each do |in_target|
           stage_dag_json["targets"][in_target].each do |file_name|
             file_path = if stage_dag_json["given_targets"].key? in_target
@@ -94,45 +135,20 @@ class RetrievePipelineVizGraphDataService
             unless file_path_to_inputting_steps.key? file_path
               file_path_to_inputting_steps[file_path] = []
             end
-            file_path_to_inputting_steps[file_path].push(stageIndex: stage_index, stepIndex: step_index)
-            all_file_paths.add file_path
+            file_path_to_inputting_steps[file_path].push(to: { stageIndex: stage_index, stepIndex: step_index })
           end
         end
       end
     end
+    file_path_to_inputting_steps
+  end
 
-    input_output_to_file_paths = {}
-    all_file_paths.to_a.each do |file_path|
-      output_info = file_path_to_outputting_step[file_path]
-      (file_path_to_inputting_steps[file_path] ? file_path_to_inputting_steps[file_path] : [nil]).each do |input_info|
-        from_to_json = { from: output_info, to: input_info }.to_json
-
-        unless input_output_to_file_paths.key? from_to_json
-          input_output_to_file_paths[from_to_json] = []
-        end
-        input_output_to_file_paths[from_to_json].push(file_path)
-      end
-    end
-
-    edges = []
-    input_output_to_file_paths.each do |input_output_json, file_paths|
-      edge_info = JSON.parse(input_output_json, symbolize_names: true)
-      files = file_paths.map do |file_path|
-        file_path = file_path.split('/', 4).last # Remove s3://idseq-.../ to match key
-        file_info = file_path_to_info[file_path]
-        display_name = file_info ? file_info[:display_name] : file_path.split("/").last
-        url = file_info ? file_info[:url] : nil
-        { displayName: display_name, url: url }
-      end
-
-      edges.push(from: edge_info[:from],
-                 to: edge_info[:to],
-                 files: files,
-                 isIntraStage: (edge_info[:to] && edge_info[:from] && edge_info[:to][:stageIndex] == edge_info[:from][:stageIndex]) || false)
-    end
-
-    @remove_host_filtering_urls && remove_host_filtering_urls(edges)
-    return edges
+  def file_info(file_path, file_path_to_info)
+    file_path = file_path.split('/', 4).last # Remove s3://idseq-.../ to match key
+    file_info = file_path_to_info[file_path]
+    display_name = file_info ? file_info[:display_name] : file_path.split("/").last
+    url = file_info ? file_info[:url] : nil
+    { displayName: display_name, url: url }
   end
 
   def populate_nodes_with_edges(stages_with_nodes, edges)
