@@ -33,7 +33,6 @@ const BASESPACE_SAMPLE_FIELDS = [
   "name",
   "project_id",
   "host_genome_id",
-  "basespace_project_id",
   "basespace_access_token",
   "basespace_dataset_id",
 ];
