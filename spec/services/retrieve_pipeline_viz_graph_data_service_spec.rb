@@ -98,7 +98,7 @@ RSpec.describe RetrievePipelineVizGraphDataService do
       },
       {
         from: { stageIndex: 1, stepIndex: 0 },
-        files: [{ displayName: "bowtie2_1.fa", url: "test" }]
+        files: [{ displayName: "bowtie2_1.fa", url: "test url" }]
       }
     ]
   }
