@@ -119,6 +119,8 @@ Rails.application.routes.draw do
   resources :host_genomes
   resources :users, only: [:create, :new, :edit, :update, :destroy, :index]
 
+  resources :benchmarks, only: [:index]
+
   namespace :playground do
     get :controls
     get :components
