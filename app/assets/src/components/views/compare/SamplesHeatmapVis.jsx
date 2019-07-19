@@ -2,11 +2,9 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 import { keyBy } from "lodash/fp";
-import { orderBy } from "lodash";
 
 import { logAnalyticsEvent } from "~/api/analytics";
-import { DataTooltip, ContextPlaceholder } from "~ui/containers";
-import { SearchBoxList } from "~ui/controls";
+import { DataTooltip } from "~ui/containers";
 import { openUrl } from "~utils/links";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import { getTooltipStyle } from "~/components/utils/tooltip";

@@ -5,6 +5,7 @@ import cx from "classnames";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
+import { DataTooltip } from "~ui/containers";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 
 import cs from "./amr_heatmap_vis.scss";
