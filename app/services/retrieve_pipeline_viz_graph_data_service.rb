@@ -1,6 +1,8 @@
 class RetrievePipelineVizGraphDataService
   include Callable
-  include PipelineRunsHelper # For step descriptions
+  # For step descriptions.
+  # TODO(ezhong): Move to server-fed descriptions.
+  include PipelineRunsHelper
 
   # Structures dag_json of each stage of the pipeline run into the following in @results for drawing
   # the pipeline visualization graphs on the React side:
