@@ -25,6 +25,12 @@ class ApplicationController < ActionController::Base
     redirect_to root_path unless current_user && current_user.admin?
   end
 
+  def allowed_feature_required(allowed_feature, allow_admin = false)
+    redirect_to root_path unless current_user && (
+      current_user.allowed_feature_list.include?(allowed_feature) || (allow_admin && current_user.admin?)
+    )
+  end
+
   def no_demo_user
     login_required
     redirect_to root_path if current_user.demo_user?
