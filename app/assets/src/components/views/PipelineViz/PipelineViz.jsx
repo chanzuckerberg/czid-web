@@ -143,15 +143,15 @@ class PipelineViz extends React.Component {
       })
       .flat();
 
-    const stepName = this.getStepDataAtIndices({
+    const stepInfo = this.getStepDataAtIndices({
       stageIndex: stageIndex,
       stepIndex: clickedNodeId,
-    }).name;
+    });
     this.setState({
       sidebarVisible: true,
       sidebarParams: {
-        stepName: stepName,
-        description: "",
+        stepName: stepInfo.name,
+        description: stepInfo.description,
         inputFiles: inputInfo,
         outputFiles: outputInfo,
       },
