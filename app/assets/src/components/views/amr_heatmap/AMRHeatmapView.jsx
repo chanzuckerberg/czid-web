@@ -59,22 +59,21 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   async requestSampleData(sampleIds) {
-    const rawSampleData = await getAMRCounts(sampleIds);
+    const [rawSampleData, rawSamplesMetadataTypes] = await Promise.all([
+      getAMRCounts(sampleIds),
+      getSampleMetadataFields(sampleIds),
+    ]);
     const filteredSamples = rawSampleData.filter(
       sampleData => sampleData.error === ""
     );
-    const samplesWithKeyedMetadata = filteredSamples.map(sample =>
-      Object.assign({}, sample, {
-        metadata: processMetadata(sample.metadata, true),
-      })
-    );
+    const samplesWithKeyedMetadata = filteredSamples.map(sample => ({
+      ...sample,
+      metadata: processMetadata(sample.metadata, true),
+    }));
     const samplesWithAMRCounts = this.processSampleAMRCounts(
       samplesWithKeyedMetadata
     );
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
-    const rawSamplesMetadataTypes = await getSampleMetadataFields(
-      samplesWithAMRCounts.map(sample => sample.sampleId)
-    );
     const samplesMetadataTypes = processMetadataTypes(rawSamplesMetadataTypes);
     this.setState({
       rawSampleData,

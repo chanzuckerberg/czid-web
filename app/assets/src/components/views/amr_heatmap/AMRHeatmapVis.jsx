@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
-import { DataTooltip, ContextPlaceholder } from "~ui/containers";
-import { SearchBoxList } from "~ui/controls";
+import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
+import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 
 import cs from "./amr_heatmap_vis.scss";
@@ -17,7 +17,7 @@ const METRICS = [
   { text: "Depth", key: "depth" },
 ];
 
-const DEFAULT_METADATA_TYPE = ["collection_location"];
+const DEFAULT_SELECTED_METADATA = ["collection_location"];
 
 export default class AMRHeatmapVis extends React.Component {
   constructor(props) {
@@ -28,7 +28,7 @@ export default class AMRHeatmapVis extends React.Component {
       tooltipLocation: null,
       columnMetadataLegend: null,
       addMetadataTrigger: null,
-      selectedMetadata: new Set(DEFAULT_METADATA_TYPE),
+      selectedMetadata: new Set(DEFAULT_SELECTED_METADATA),
     };
 
     this.heatmap = null;
@@ -40,7 +40,11 @@ export default class AMRHeatmapVis extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { selectedMetadata } = this.state;
-    if (this.props !== prevProps || this.heatmap === null) {
+    const { selectedOptions } = this.props;
+    if (
+      selectedOptions !== prevProps.selectedOptions ||
+      this.heatmap === null
+    ) {
       this.updateHeatmap();
     }
     if (
@@ -103,6 +107,18 @@ export default class AMRHeatmapVis extends React.Component {
     });
 
     return [sampleLabels, geneLabels, alleleLabels];
+  }
+
+  getMetadataTypes() {
+    const { samplesMetadataTypes } = this.props;
+    return Object.keys(samplesMetadataTypes)
+      .sort()
+      .map(type => {
+        return {
+          label: samplesMetadataTypes[type].name,
+          value: samplesMetadataTypes[type].key,
+        };
+      });
   }
 
   //*** Callback functions for the heatmap ***
@@ -294,7 +310,7 @@ export default class AMRHeatmapVis extends React.Component {
       // in the rightmost box, and vice versa.
       {
         rowLabels: rows,
-        columnLabels: columns, // needs to contain selected metadata *values*
+        columnLabels: columns, // Each columnLabel object contains the sample name, id, and all metadata values
         values: values,
       },
       // Custom options:
@@ -312,80 +328,13 @@ export default class AMRHeatmapVis extends React.Component {
         onColumnMetadataLabelHover: this.onMetadataLabelHover,
         onColumnMetadataLabelOut: this.onMetadataLabelOut,
         onAddColumnMetadataClick: this.onMetadataAddButtonClick,
-        marginLeft: 75, // our gene names are very short, so this is to prevent metadata names from disappearing
+        marginLeft: 50, // our gene names are very short, so this is to prevent metadata names from disappearing
       }
     );
     this.heatmap.start();
   }
 
   //*** Render functions ***
-
-  renderMetadataLegend() {
-    const { columnMetadataLegend, tooltipLocation } = this.state;
-    if (!(columnMetadataLegend && tooltipLocation)) {
-      return;
-    }
-    return (
-      <div
-        className={cx(cs.tooltip, columnMetadataLegend && cs.visible)}
-        style={getTooltipStyle(tooltipLocation, {
-          buffer: 20,
-          below: true,
-        })}
-      >
-        <div className={cs.legend}>
-          {Object.keys(columnMetadataLegend)
-            .sort()
-            .map(label => (
-              <div className={cs.legendRow} key={label}>
-                <span
-                  className={cs.legendEntryColor}
-                  style={{ backgroundColor: columnMetadataLegend[label] }}
-                />
-                {label}
-              </div>
-            ))}
-        </div>
-      </div>
-    );
-  }
-
-  renderMetadataSelector() {
-    const { samplesMetadataTypes } = this.props;
-    const { addMetadataTrigger, selectedMetadata } = this.state;
-    if (!addMetadataTrigger) {
-      return;
-    }
-    const searchBoxOptions = Object.keys(samplesMetadataTypes)
-      .sort()
-      .map(type => {
-        return {
-          label: samplesMetadataTypes[type].name,
-          value: samplesMetadataTypes[type].key,
-        };
-      });
-    return (
-      <ContextPlaceholder
-        closeOnOutsideClick
-        context={addMetadataTrigger}
-        horizontalOffset={5}
-        verticalOffset={10}
-        onClose={() => {
-          this.setState({ addMetadataTrigger: null });
-        }}
-        position="bottom right"
-      >
-        <div className={cs.metadataContainer}>
-          <SearchBoxList
-            options={searchBoxOptions}
-            onChange={this.onMetadataSelectionChange}
-            selected={selectedMetadata}
-            title="Select Metadata Fields"
-          />
-        </div>
-      </ContextPlaceholder>
-    );
-  }
 
   renderNodeHoverTooltip() {
     const { nodeHoverInfo, tooltipLocation } = this.state;
@@ -406,6 +355,12 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   render() {
+    const {
+      columnMetadataLegend,
+      tooltipLocation,
+      addMetadataTrigger,
+      selectedMetadata,
+    } = this.state;
     return (
       <div className={cs.AMRHeatmapVis}>
         <div
@@ -415,8 +370,24 @@ export default class AMRHeatmapVis extends React.Component {
           }}
         />
         {this.renderNodeHoverTooltip()}
-        {this.renderMetadataLegend()}
-        {this.renderMetadataSelector()}
+        {columnMetadataLegend &&
+          tooltipLocation && (
+            <MetadataLegend
+              columnMetadataLegend={columnMetadataLegend}
+              tooltipLocation={tooltipLocation}
+            />
+          )}
+        {addMetadataTrigger && (
+          <MetadataSelector
+            addMetadataTrigger={addMetadataTrigger}
+            selectedMetadata={selectedMetadata}
+            metadataTypes={this.getMetadataTypes()}
+            onMetadataSelectionChange={this.onMetadataSelectionChange}
+            onMetadataSelectionClose={() => {
+              this.setState({ addMetadataTrigger: null });
+            }}
+          />
+        )}
       </div>
     );
   }

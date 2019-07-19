@@ -10,6 +10,8 @@ import { SearchBoxList } from "~ui/controls";
 import { openUrl } from "~utils/links";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import { getTooltipStyle } from "~/components/utils/tooltip";
+import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
+import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 
 import cs from "./samples_heatmap_vis.scss";
 
@@ -241,41 +243,6 @@ class SamplesHeatmapVis extends React.Component {
     );
   };
 
-  renderColumnMetadataSelector() {
-    return (
-      <div className={cs.metadataContainer}>
-        <SearchBoxList
-          options={this.getAvailableMetadataOptions()}
-          onChange={this.handleSelectedMetadataChange}
-          selected={this.state.selectedMetadata}
-          title="Select Metadata Fields"
-        />
-      </div>
-    );
-  }
-
-  renderColumnMetadataLegendRow(label, color) {
-    return (
-      <div className={cs.legendRow} key={label}>
-        <span
-          className={cs.legendEntryColor}
-          style={{ backgroundColor: color }}
-        />
-        {label}
-      </div>
-    );
-  }
-
-  renderColumnMetadataLegend(legend) {
-    return (
-      <div className={cs.legend}>
-        {orderBy(Object.keys(legend)).map(label =>
-          this.renderColumnMetadataLegendRow(label, legend[label])
-        )}
-      </div>
-    );
-  }
-
   getSelectedMetadata() {
     const sortByLabel = (a, b) => (a.label > b.label ? 1 : -1);
 
@@ -299,6 +266,7 @@ class SamplesHeatmapVis extends React.Component {
       nodeHoverInfo,
       columnMetadataLegend,
       addMetadataTrigger,
+      selectedMetadata,
     } = this.state;
 
     return (
@@ -324,29 +292,21 @@ class SamplesHeatmapVis extends React.Component {
           )}
         {columnMetadataLegend &&
           tooltipLocation && (
-            <div
-              className={cx(cs.tooltip, columnMetadataLegend && cs.visible)}
-              style={getTooltipStyle(tooltipLocation, {
-                buffer: 20,
-                below: true,
-              })}
-            >
-              {this.renderColumnMetadataLegend(columnMetadataLegend)}
-            </div>
+            <MetadataLegend
+              columnMetadataLegend={columnMetadataLegend}
+              tooltipLocation={tooltipLocation}
+            />
           )}
         {addMetadataTrigger && (
-          <ContextPlaceholder
-            closeOnOutsideClick
-            context={addMetadataTrigger}
-            horizontalOffset={5}
-            verticalOffset={10}
-            onClose={() => {
+          <MetadataSelector
+            addMetadataTrigger={addMetadataTrigger}
+            selectedMetadata={selectedMetadata}
+            metadataTypes={this.getAvailableMetadataOptions()}
+            onMetadataSelectionChange={this.handleSelectedMetadataChange}
+            onMetadataSelectionClose={() => {
               this.setState({ addMetadataTrigger: null });
             }}
-            position="bottom right"
-          >
-            {this.renderColumnMetadataSelector()}
-          </ContextPlaceholder>
+          />
         )}
       </div>
     );

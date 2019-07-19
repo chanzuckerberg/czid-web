@@ -35,13 +35,8 @@ FactoryBot.define do
 
     after :create do |sample, options|
       if MetadataField.table_exists?
-        # So it turns out that common metadata fields like collection_location
-        # and sample_type that are already present in the test db
-        # have 'default_for_new_host_genome' set to '0' for some reason.
-        # so trying to update the host genome with
-        # 'sample.host_genome.metadata_fields = MetadataField.where(default_for_new_host_genome: 1)'
-        # only works if you make up a new field. So just shove them all in for now.
-        sample.host_genome.metadata_fields = MetadataField.all
+        # Make sure the sample's host_genome has the requested metadata fields
+        sample.host_genome.metadata_fields = MetadataField.where(name: options.metadata_fields.keys())
       end
 
       options.metadata_fields.each do |key, value|
