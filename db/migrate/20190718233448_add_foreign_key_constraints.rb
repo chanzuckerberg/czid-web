@@ -5,7 +5,6 @@ class AddForeignKeyConstraints < ActiveRecord::Migration[5.1]
     add_foreign_key "backgrounds_pipeline_runs", "pipeline_runs", name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
     add_foreign_key "backgrounds_samples", "backgrounds", name: "backgrounds_samples_background_id_fk"
     add_foreign_key "backgrounds_samples", "samples", name: "backgrounds_samples_sample_id_fk"
-    add_foreign_key "ercc_counts", "pipeline_runs", name: "ercc_counts_pipeline_run_id_fk"
     add_foreign_key "favorite_projects", "projects", name: "favorite_projects_project_id_fk"
     add_foreign_key "favorite_projects", "users", name: "favorite_projects_user_id_fk"
     add_foreign_key "host_genomes_metadata_fields", "host_genomes", name: "host_genomes_metadata_fields_host_genome_id_fk"
@@ -31,7 +30,6 @@ class AddForeignKeyConstraints < ActiveRecord::Migration[5.1]
     add_foreign_key "samples", "users", name: "samples_user_id_fk"
     add_foreign_key "samples_visualizations", "samples", name: "samples_visualizations_sample_id_fk"
     add_foreign_key "samples_visualizations", "visualizations", name: "samples_visualizations_visualization_id_fk"
-    add_foreign_key "taxon_summaries", "backgrounds", name: "taxon_summaries_background_id_fk"
     add_foreign_key "visualizations", "users", name: "visualizations_user_id_fk"
   end
 end

@@ -3,6 +3,8 @@ Immigrant.ignore_keys = [
   { from_table: 'taxon_byteranges', column: 'pipeline_run_id' },
   { from_table: 'taxon_counts', column: 'pipeline_run_id' },
   { from_table: 'contigs', column: 'pipeline_run_id' },
+  { from_table: 'ercc_counts', column: 'pipeline_run_id' },
+  { from_table: 'taxon_summaries', column: 'background_id' },
 
   # Optional assocs
   { from_table: 'backgrounds', column: 'project_id' },
