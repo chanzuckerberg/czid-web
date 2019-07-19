@@ -133,7 +133,7 @@ class PipelineViz extends React.Component {
       .map(edgeInfo => {
         // Remove duplicate output file listings
         return edgeInfo.files.reduce((files, fileInfo) => {
-          let fileInfoAsString = JSON.stringify(fileInfo);
+          const fileInfoAsString = JSON.stringify(fileInfo);
           if (!seenFiles.has(fileInfoAsString)) {
             seenFiles.add(fileInfoAsString);
             files.push({ fileName: fileInfo.displayName, url: fileInfo.url });

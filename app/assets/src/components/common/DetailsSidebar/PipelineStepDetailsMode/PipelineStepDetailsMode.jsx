@@ -72,26 +72,23 @@ class PipelineStepDetailsMode extends React.Component {
   }
 }
 
+const FileList = PropTypes.arrayOf(
+  PropTypes.shape({
+    fileName: PropTypes.string.isRequired,
+    url: PropTypes.string,
+  }).isRequired
+);
+
 PipelineStepDetailsMode.propTypes = {
   stepName: PropTypes.string,
   description: PropTypes.string,
   inputFiles: PropTypes.arrayOf(
     PropTypes.shape({
       fromStepName: PropTypes.string,
-      files: PropTypes.arrayOf(
-        PropTypes.shape({
-          fileName: PropTypes.string.isRequired,
-          url: PropTypes.string,
-        })
-      ).isRequired,
+      files: FileList.isRequired,
     }).isRequired
   ).isRequired,
-  outputFiles: PropTypes.arrayOf(
-    PropTypes.shape({
-      fileName: PropTypes.string.isRequired,
-      url: PropTypes.string,
-    }).isRequired
-  ).isRequired,
+  outputFiles: FileList.isRequired,
 };
 
 export default PipelineStepDetailsMode;
