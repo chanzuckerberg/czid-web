@@ -10,6 +10,7 @@ import { getAMRCounts } from "~/api/amr";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
+import { createCSVObjectURL } from "~utils/csv";
 
 import cs from "./amr_heatmap_view.scss";
 
@@ -170,7 +171,7 @@ export default class AMRHeatmapView extends React.Component {
 
   computeHeatmapValuesForCSV() {
     const { samplesWithAMRCounts } = this.state;
-    const csvData = samplesWithAMRCounts.flatMap(sample => {
+    const csvRows = samplesWithAMRCounts.flatMap(sample => {
       const csvRow = sample.amr_counts.map(amrCount => {
         const row = [
           `${sample.sample_name},${amrCount.gene},${amrCount.allele},${
@@ -181,9 +182,8 @@ export default class AMRHeatmapView extends React.Component {
       });
       return csvRow;
     });
-    csvData.unshift(["sample_name,gene_name,allele_name,coverage,depth"]);
-    const csvDataString = csvData.join("\n");
-    return csvDataString;
+    const csvHeaders = ["sample_name,gene_name,allele_name,coverage,depth"];
+    return [csvHeaders, csvRows];
   }
 
   getSidebarParams() {
@@ -206,12 +206,12 @@ export default class AMRHeatmapView extends React.Component {
     }
   }
 
-  getDownloadCSVLink(csvOption) {
-    const dataString = this.computeHeatmapValuesForCSV();
-    const dataBlob = new Blob([dataString], { type: "text/csv" });
+  getDownloadCSVLink() {
+    const csvOption = DOWNLOAD_OPTIONS[0];
+    const [csvHeaders, csvRows] = this.computeHeatmapValuesForCSV();
     return (
       <a
-        href={URL.createObjectURL(dataBlob)}
+        href={createCSVObjectURL(csvHeaders, csvRows)}
         download="idseq_amr_heatmap_values.csv"
         target="_blank"
         rel="noopener noreferrer"
@@ -223,14 +223,7 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   getDownloadOptions() {
-    const downloadOptions = DOWNLOAD_OPTIONS;
-    const csvOptionIndex = downloadOptions.findIndex(
-      element => element.value === "csv"
-    );
-    downloadOptions[csvOptionIndex].text = this.getDownloadCSVLink(
-      downloadOptions[csvOptionIndex]
-    );
-    return downloadOptions;
+    return [{ text: this.getDownloadCSVLink(), value: "csv" }];
   }
 
   //*** Render methods ***
