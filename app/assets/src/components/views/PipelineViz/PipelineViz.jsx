@@ -117,9 +117,8 @@ class PipelineViz extends React.Component {
         : "";
       return {
         fromStepName: fromStepName,
-        // TODO(ezhong): Include file url for downloading
         files: edgeInfo.files.map(file => {
-          return { fileName: file };
+          return { fileName: file.displayName, url: file.url };
         }),
       };
     });
@@ -134,10 +133,10 @@ class PipelineViz extends React.Component {
       .map(edgeInfo => {
         // Remove duplicate output file listings
         return edgeInfo.files.reduce((files, fileInfo) => {
-          if (!seenFiles.has(fileInfo)) {
-            seenFiles.add(fileInfo);
-            // TODO(ezhong): Include file url for downloading
-            files.push({ fileName: fileInfo });
+          let fileInfoAsString = JSON.stringify(fileInfo);
+          if (!seenFiles.has(fileInfoAsString)) {
+            seenFiles.add(fileInfoAsString);
+            files.push({ fileName: fileInfo.displayName, url: fileInfo.url });
           }
           return files;
         }, []);
