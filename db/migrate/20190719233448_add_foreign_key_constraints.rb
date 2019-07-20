@@ -1,4 +1,7 @@
 class AddForeignKeyConstraints < ActiveRecord::Migration[5.1]
+  # Deletes invalid rows then adds FK constraint for each table in the app,
+  # except those in initializers/immigrant.rb. delete_bad_rows is only called on
+  # tables that are known to have invalid rows in prod.
   def up
     assign_user_to_samples
     add_foreign_key "samples", "users", name: "samples_user_id_fk"
@@ -75,7 +78,8 @@ class AddForeignKeyConstraints < ActiveRecord::Migration[5.1]
   def delete_bad_rows(table, assoc_table)
     sql = "DELETE t
     FROM #{table} t
-    LEFT JOIN #{assoc_table} a ON t.#{assoc_table.singularize}_id = a.id
+    LEFT JOIN #{assoc_table} a
+    ON t.#{assoc_table.singularize}_id = a.id
     WHERE a.id IS NULL;"
 
     ActiveRecord::Base.connection.execute(sql)
