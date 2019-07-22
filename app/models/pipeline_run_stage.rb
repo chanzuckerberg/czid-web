@@ -26,6 +26,8 @@ class PipelineRunStage < ApplicationRecord
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
 
+  after_create :create_dag
+
   def started?
     job_command.present?
   end
@@ -160,7 +162,18 @@ class PipelineRunStage < ApplicationRecord
   end
 
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
-  def prepare_dag(dag_name, attribute_dict, key_s3_params = nil)
+  def create_dag
+    case name
+    when HOST_FILTERING_STAGE_NAME
+      attribute_dict = host_filtering_dag_attributes
+    when ALIGNMENT_STAGE_NAME
+      attribute_dict = alignment_dag_attributes
+    when POSTPROCESS_STAGE_NAME
+      attribute_dict = postprocess_dag_attributes
+    when EXPT_STAGE_NAME
+      attribute_dict = experimental_dag_attributes
+    end
+
     sample = pipeline_run.sample
     dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
@@ -171,12 +184,10 @@ class PipelineRunStage < ApplicationRecord
                            attribute_dict,
                            pipeline_run.parse_dag_vars)
     self.dag_json = dag.render
-    copy_done_file = "echo done | aws s3 cp - #{sample.sample_output_s3_path}/\\$AWS_BATCH_JOB_ID.#{JOB_SUCCEEDED_FILE_SUFFIX}"
-    upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params, copy_done_file)
+    upload_dag_json(dag_json, dag_s3)
   end
 
-  def host_filtering_command
-    # Upload DAG to S3
+  def host_filtering_dag_attributes
     sample = pipeline_run.sample
     file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
     attribute_dict = {
@@ -196,19 +207,13 @@ class PipelineRunStage < ApplicationRecord
                                      else
                                        PipelineRun::ADAPTER_SEQUENCES["single-end"]
                                      end
-    dag_commands = prepare_dag("host_filter", attribute_dict)
-
-    batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")
-
-    # Dispatch job. Use the himem settings for host filtering.
-    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB)
+    attribute_dict
   end
 
-  def alignment_command
-    # Upload DAG to S3
+  def alignment_dag_attributes
     sample = pipeline_run.sample
     alignment_config = pipeline_run.alignment_config
-    attribute_dict = {
+    {
       input_file_count: sample.input_files.count,
       skip_dedeuterostome_filter: sample.skip_deutero_filter_flag,
       pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_version,
@@ -232,18 +237,12 @@ class PipelineRunStage < ApplicationRecord
       gsnap_m8: PipelineRun::GSNAP_M8,
       rapsearch_m8: PipelineRun::RAPSEARCH_M8
     }
-    key_s3_params = format("--key-path-s3 s3://idseq-secrets/idseq-%s.pem", (Rails.env == 'prod' ? 'prod' : 'staging')) # TODO: This is hacky
-    dag_commands = prepare_dag("non_host_alignment", attribute_dict, key_s3_params)
-    batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
-    # Run it
-    aegea_batch_submit_command(batch_command)
   end
 
-  def postprocess_command
-    # Upload DAG to S3
+  def postprocess_dag_attributes
     sample = pipeline_run.sample
     alignment_config = pipeline_run.alignment_config
-    attribute_dict = {
+    {
       input_file_count: sample.input_files.count,
       skip_dedeuterostome_filter: sample.skip_deutero_filter_flag,
       pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_version,
@@ -256,14 +255,9 @@ class PipelineRunStage < ApplicationRecord
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path
     }
-    dag_commands = prepare_dag("postprocess", attribute_dict)
-    batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
-    # Dispatch job with himem number of vCPUs and to the himem queue.
-    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB)
   end
 
-  def experimental_command
-    # Upload DAG to S3
+  def experimental_dag_attributes
     sample = pipeline_run.sample
     file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
     alignment_config = pipeline_run.alignment_config
@@ -280,9 +274,42 @@ class PipelineRunStage < ApplicationRecord
       nr_loc_db: alignment_config.s3_nr_loc_db_path
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
-    dag_commands = prepare_dag("experimental", attribute_dict)
-    batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
+    attribute_dict
+  end
 
+  def job_commands(dag_name, key_s3_params = nil)
+    sample = pipeline_run.sample
+    dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
+    copy_done_file = "echo done | aws s3 cp - #{sample.sample_output_s3_path}/\\$AWS_BATCH_JOB_ID.#{JOB_SUCCEEDED_FILE_SUFFIX}"
+    dag_job_commands(dag_s3, dag_name, key_s3_params, copy_done_file)
+  end
+
+  def host_filtering_command
+    dag_commands = job_commands("host_filter")
+    batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")
+
+    # Dispatch job. Use the himem settings for host filtering.
+    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB)
+  end
+
+  def alignment_command
+    key_s3_params = format("--key-path-s3 s3://idseq-secrets/idseq-%s.pem", (Rails.env == 'prod' ? 'prod' : 'staging')) # TODO: This is hacky
+    dag_commands = job_commands("non_host_alignment", key_s3_params)
+    batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
+    # Run it
+    aegea_batch_submit_command(batch_command)
+  end
+
+  def postprocess_command
+    dag_commands = job_commands("postprocess")
+    batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
+    # Dispatch job with himem number of vCPUs and to the himem queue.
+    aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB)
+  end
+
+  def experimental_command
+    dag_commands = job_commands("experimental")
+    batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Dispatch job
     aegea_batch_submit_command(batch_command)
   end

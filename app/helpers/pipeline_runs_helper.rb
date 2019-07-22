@@ -109,11 +109,11 @@ module PipelineRunsHelper
     Regexp.last_match(1)
   end
 
-  def upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name, key_s3_params = nil, copy_done_file = "")
-    # Upload dag json
+  def upload_dag_json(dag_json, dag_s3)
     Syscall.pipe(["echo", dag_json], ["aws", "s3", "cp", "-", dag_s3])
+  end
 
-    # Generate job command
+  def dag_job_commands(dag_s3, dag_name, key_s3_params = nil, copy_done_file = "")
     dag_path_on_worker = "/mnt/#{dag_name}.json"
     download_dag = "aws s3 cp #{dag_s3} #{dag_path_on_worker}"
     execute_dag = "idseq_dag #{key_s3_params} #{dag_path_on_worker}"

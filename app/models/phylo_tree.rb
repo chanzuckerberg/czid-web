@@ -253,7 +253,8 @@ class PhyloTree < ApplicationRecord
                            attribute_dict,
                            parse_dag_vars)
     self.dag_json = dag.render
-    upload_dag_json_and_return_job_command(dag_json, dag_s3, dag_name)
+    upload_dag_json(dag_json, dag_s3)
+    dag_job_commands(dag_s3, dag_name)
   end
 
   def sample_names_by_run_ids
