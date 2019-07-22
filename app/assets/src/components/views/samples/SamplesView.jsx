@@ -350,10 +350,11 @@ class SamplesView extends React.Component {
       selectedSampleIds,
     } = this.props;
 
-    let updatedActiveColumns = Object.assign([], activeColumns);
+    // TODO(jsheu): Remove after full release of maps.
+    const updatedActiveColumns = Object.assign([], activeColumns);
     if (allowedFeatures && allowedFeatures.includes("maps")) {
-      const index = updatedActiveColumns.indexOf("collectionLocation");
-      if (index !== -1) updatedActiveColumns[index] += "V2";
+      const i = updatedActiveColumns.indexOf("collectionLocation");
+      if (i !== -1) updatedActiveColumns[i] += "V2";
     }
 
     // TODO(tiago): replace by automated cell height computing
