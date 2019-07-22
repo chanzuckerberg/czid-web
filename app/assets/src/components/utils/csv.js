@@ -12,3 +12,10 @@ export const parseCSVBlob = blob => {
     rows: tail(csvData),
   };
 };
+
+export const createCSVObjectURL = (headers, rows) => {
+  const csvData = [headers].concat(rows);
+  const dataString = csvData.join("\n");
+  const dataBlob = new Blob([dataString], { type: "text/csv" });
+  return URL.createObjectURL(dataBlob);
+};

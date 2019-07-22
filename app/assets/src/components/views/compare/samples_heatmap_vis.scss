@@ -23,28 +23,4 @@
       min-width: 100px;
     }
   }
-
-  .legend {
-    padding: 10px;
-    background-color: $white;
-    border: 1px solid $light-grey;
-    border-radius: 5px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    font-size: 8pt;
-
-    .legendRow {
-      vertical-align: middle;
-
-      &:not(:last-child) {
-        margin-bottom: 10px;
-      }
-
-      .legendEntryColor {
-        width: 10px;
-        height: 10px;
-        display: inline-block;
-        margin-right: 10px;
-      }
-    }
-  }
 }
