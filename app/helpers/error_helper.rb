@@ -29,6 +29,22 @@ module ErrorHelper
     def self.missing_required_metadata(sample, missing_metadata_fields)
       "Could not save sample '#{sample['name']}'. Missing required metadata: #{missing_metadata_fields.join(', ')}"
     end
+
+    def self.missing_input_files_or_basespace_params(sample_name)
+      "Could not save sample '#{sample_name}'. Either input_files_attributes or basespace_access_token/basespace_dataset_id is required in sample."
+    end
+
+    def self.error_fetching_basespace_files_for_dataset(basespace_dataset_id, sample_name, sample_id)
+      "Error fetching Basespace files for dataset #{basespace_dataset_id} for sample '#{sample_name}' (#{sample_id})"
+    end
+
+    def self.no_files_in_basespace_dataset(basespace_dataset_id, sample_name, sample_id)
+      "No files were found when trying to upload from basespace dataset #{basespace_dataset_id} for sample '#{sample_name}' (#{sample_id})"
+    end
+
+    def self.upload_from_basespace_failed(sample_name, sample_id, file_name, basespace_dataset_id, max_tries)
+      "Upload of sample '#{sample_name}' (#{sample_id}) file '#{file_name}', basespace dataset #{basespace_dataset_id} failed after #{max_tries} retries"
+    end
   end
 
   LOCATION_INVALID_ERROR = "Please input a location.".freeze
