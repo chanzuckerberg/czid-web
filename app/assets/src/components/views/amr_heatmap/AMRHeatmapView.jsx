@@ -14,6 +14,8 @@ import {
 } from "~/components/utils/metadata";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
+import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
+import { createCSVObjectURL } from "~utils/csv";
 
 import cs from "./amr_heatmap_view.scss";
 
@@ -180,6 +182,23 @@ export default class AMRHeatmapView extends React.Component {
 
   //*** Post-update methods ***
 
+  computeHeatmapValuesForCSV() {
+    const { samplesWithAMRCounts } = this.state;
+    const csvRows = samplesWithAMRCounts.flatMap(sample => {
+      const csvRow = sample.amrCounts.map(amrCount => {
+        const row = [
+          `${sample.sampleName},${amrCount.gene},${amrCount.allele},${
+            amrCount.coverage
+          },${amrCount.depth}`,
+        ];
+        return row;
+      });
+      return csvRow;
+    });
+    const csvHeaders = ["sample_name,gene_name,allele_name,coverage,depth"];
+    return [csvHeaders, csvRows];
+  }
+
   getSidebarParams() {
     const { sidebarMode, selectedSampleId, selectedGene } = this.state;
     switch (sidebarMode) {
@@ -200,10 +219,30 @@ export default class AMRHeatmapView extends React.Component {
     }
   }
 
+  getDownloadCSVLink() {
+    const [csvHeaders, csvRows] = this.computeHeatmapValuesForCSV();
+    return (
+      <a
+        href={createCSVObjectURL(csvHeaders, csvRows)}
+        download="idseq_amr_heatmap_values.csv"
+        target="_blank"
+        rel="noopener noreferrer"
+        key={"Download_CSV_link"}
+      >
+        Download CSV
+      </a>
+    );
+  }
+
+  getDownloadOptions() {
+    return [{ text: this.getDownloadCSVLink(), value: "csv" }];
+  }
+
   //*** Render methods ***
 
   renderHeader() {
     const { sampleIds } = this.props;
+    const { loading } = this.state;
     return (
       <ViewHeader className={cs.viewHeader}>
         <ViewHeader.Content>
@@ -214,6 +253,15 @@ export default class AMRHeatmapView extends React.Component {
             label={`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
           />
         </ViewHeader.Content>
+        {!loading && (
+          <ViewHeader.Controls className={cs.controls}>
+            <DownloadButtonDropdown
+              className={cs.controlElement}
+              options={this.getDownloadOptions()}
+              disabled={loading}
+            />
+          </ViewHeader.Controls>
+        )}
       </ViewHeader>
     );
   }
