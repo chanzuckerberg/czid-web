@@ -166,12 +166,16 @@ class PipelineRunStage < ApplicationRecord
     case name
     when HOST_FILTERING_STAGE_NAME
       attribute_dict = host_filtering_dag_attributes
+      dag_name = "host_filter"
     when ALIGNMENT_STAGE_NAME
       attribute_dict = alignment_dag_attributes
+      dag_name = "non_host_alignment"
     when POSTPROCESS_STAGE_NAME
       attribute_dict = postprocess_dag_attributes
+      dag_name = "postprocess"
     when EXPT_STAGE_NAME
       attribute_dict = experimental_dag_attributes
+      dag_name = "experimental"
     end
 
     sample = pipeline_run.sample
@@ -184,6 +188,7 @@ class PipelineRunStage < ApplicationRecord
                            attribute_dict,
                            pipeline_run.parse_dag_vars)
     self.dag_json = dag.render
+    save
     upload_dag_json(dag_json, dag_s3)
   end
 
