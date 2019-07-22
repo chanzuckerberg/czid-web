@@ -32,6 +32,16 @@ describe PipelineRun, type: :model do
                                                   **mutates_model_attributes)
         end
 
+        it "contains all dag_jsons for pipeline run stages" do
+          pipeline_run.update_job_status
+
+          pipeline_run.pipeline_run_stages.each do |prs|
+            puts "HUH"
+            puts prs.dag_json
+            expect(prs.dag_json).to be_truthy
+          end
+        end
+
         if reports_error
           it "sends error to airbrake" do
             pipeline_run.update_job_status
