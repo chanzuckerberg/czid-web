@@ -1,3 +1,7 @@
+// *** Metadata selector is a component shared between the AMR
+// and Taxon heatmaps that displays a dropdown checklist (with search box)
+// when a user clicks on the "Add Metadata" button on the Heatmap. ***
+
 import React from "react";
 import PropTypes from "prop-types";
 

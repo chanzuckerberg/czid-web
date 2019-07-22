@@ -291,7 +291,7 @@ class SamplesHeatmapVis extends React.Component {
         {columnMetadataLegend &&
           tooltipLocation && (
             <MetadataLegend
-              columnMetadataLegend={columnMetadataLegend}
+              metadataColors={columnMetadataLegend}
               tooltipLocation={tooltipLocation}
             />
           )}

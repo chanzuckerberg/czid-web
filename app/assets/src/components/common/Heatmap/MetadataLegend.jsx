@@ -1,3 +1,7 @@
+// *** This component is used on both the AMR and Taxon Heatmap. When
+// the user hovers over a label for a metadata field, this component
+// shows a tooltip legend for that field. ***
+
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
@@ -8,23 +12,23 @@ import cs from "./metadata_legend.scss";
 
 export default class MetadataLegend extends React.Component {
   render() {
-    const { columnMetadataLegend, tooltipLocation } = this.props;
+    const { metadataColors, tooltipLocation } = this.props;
     return (
       <div
-        className={cx(cs.tooltip, columnMetadataLegend && cs.visible)}
+        className={cx(cs.tooltip, metadataColors && cs.visible)}
         style={getTooltipStyle(tooltipLocation, {
           buffer: 20,
           below: true,
         })}
       >
         <div className={cs.legend}>
-          {Object.keys(columnMetadataLegend)
+          {Object.keys(metadataColors)
             .sort()
             .map(label => (
               <div className={cs.legendRow} key={label}>
                 <span
                   className={cs.legendEntryColor}
-                  style={{ backgroundColor: columnMetadataLegend[label] }}
+                  style={{ backgroundColor: metadataColors[label] }}
                 />
                 {label}
               </div>
@@ -36,6 +40,6 @@ export default class MetadataLegend extends React.Component {
 }
 
 MetadataLegend.propTypes = {
-  columnMetadataLegend: PropTypes.object,
+  metadataColors: PropTypes.object, // A map containing metadata values and their color in the heatmap
   tooltipLocation: PropTypes.object,
 };

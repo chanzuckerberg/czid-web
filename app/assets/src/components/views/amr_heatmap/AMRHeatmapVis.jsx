@@ -374,7 +374,7 @@ export default class AMRHeatmapVis extends React.Component {
         {columnMetadataLegend &&
           tooltipLocation && (
             <MetadataLegend
-              columnMetadataLegend={columnMetadataLegend}
+              metadataColors={columnMetadataLegend}
               tooltipLocation={tooltipLocation}
             />
           )}
