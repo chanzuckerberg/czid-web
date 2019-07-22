@@ -237,10 +237,11 @@ class SampleView extends React.Component {
   };
 
   pipelineInProgress = () => {
-    if (
-      this.props.pipelineRun &&
-      this.props.pipelineRun.results_finalized > 0
-    ) {
+    const { sample, pipelineRun } = this.props;
+    if (sample.upload_error) {
+      return false;
+    }
+    if (pipelineRun && pipelineRun.results_finalized > 0) {
       return false;
     }
     return true;
@@ -260,12 +261,15 @@ class SampleView extends React.Component {
   };
 
   renderPipelineWarnings = () => {
+    const { pipelineRun } = this.props;
+    if (!pipelineRun) return null;
+
     const warnings = [];
 
     if (
       !this.pipelineInProgress() &&
-      pipelineVersionHasAssembly(this.props.pipelineRun.pipeline_version) &&
-      this.props.pipelineRun.assembled !== 1
+      pipelineVersionHasAssembly(pipelineRun.pipeline_version) &&
+      pipelineRun.assembled !== 1
     ) {
       warnings.push("The reads did not assemble for this run.");
     }
@@ -299,7 +303,17 @@ class SampleView extends React.Component {
   renderSampleReportError = () => {
     const { pipelineRun, sample } = this.props;
     let status, message, linkText, issueType, link;
-    switch (pipelineRun.known_user_error) {
+    switch (
+      sample.upload_error || (pipelineRun && pipelineRun.known_user_error)
+    ) {
+      case "BASESPACE_UPLOAD_FAILED":
+        status = "SAMPLE FAILED";
+        message =
+          "Oh no! There was an issue uploading your sample file from Basespace.";
+        linkText = "Contact us for help.";
+        issueType = "error";
+        link = "mailto:help@idseq.net";
+        break;
       case "FAULTY_INPUT":
         status = "COMPLETE - ISSUE";
         message = `Sorry, something was wrong with your input file. ${

@@ -37,6 +37,7 @@ import BulkSampleUploadTable from "~ui/controls/BulkSampleUploadTable";
 import ProjectCreationForm from "~/components/common/ProjectCreationForm";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
+import { RequestContext } from "~/components/common/RequestContext";
 
 import LocalSampleFileUpload from "./LocalSampleFileUpload";
 import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
@@ -160,12 +161,13 @@ class UploadSampleStep extends React.Component {
     return [];
   };
 
-  getUploadTabs = () => {
+  getUploadTabs = allowedFeatures => {
     const { admin } = this.props;
     return compact([
       LOCAL_UPLOAD_TAB,
       REMOTE_UPLOAD_TAB,
-      admin && BASESPACE_UPLOAD_TAB,
+      (admin || allowedFeatures.includes("basespace_upload_enabled")) &&
+        BASESPACE_UPLOAD_TAB,
     ]);
   };
 
@@ -669,12 +671,18 @@ class UploadSampleStep extends React.Component {
           </div>
           <div className={cs.fileUpload}>
             <div className={cs.title}>Upload Files</div>
-            <Tabs
-              className={cs.tabs}
-              tabs={this.getUploadTabs()}
-              value={this.state.currentTab}
-              onChange={this.handleTabChange}
-            />
+            <RequestContext.Consumer>
+              {({ allowedFeatures } = {}) => {
+                return (
+                  <Tabs
+                    className={cs.tabs}
+                    tabs={this.getUploadTabs(allowedFeatures)}
+                    value={this.state.currentTab}
+                    onChange={this.handleTabChange}
+                  />
+                );
+              }}
+            </RequestContext.Consumer>
             {this.renderTab()}
           </div>
           {this.state.currentTab === LOCAL_UPLOAD_TAB &&
