@@ -167,16 +167,7 @@ class DiscoveryFilters extends React.Component {
           />
           {this.renderTags("taxon")}
         </div>
-        <div className={cs.filterContainer}>
-          <BaseMultipleFilter
-            onChange={this.handleChange.bind(this, "locationSelected")}
-            selected={location && location.length ? locationSelected : null}
-            options={location}
-            label="Location"
-          />
-          {this.renderTags("location")}
-        </div>
-        {allowedFeatures.includes("maps") && (
+        {allowedFeatures.includes("maps") ? (
           <div className={cs.filterContainer}>
             <LocationFilter
               onChange={this.handleChange.bind(this, "locationV2Selected")}
@@ -184,9 +175,19 @@ class DiscoveryFilters extends React.Component {
                 locationV2 && locationV2.length ? locationV2Selected : null
               }
               options={locationV2}
-              label="Location v2"
+              label="Location"
             />
             {this.renderTags("locationV2")}
+          </div>
+        ) : (
+          <div className={cs.filterContainer}>
+            <BaseMultipleFilter
+              onChange={this.handleChange.bind(this, "locationSelected")}
+              selected={location && location.length ? locationSelected : null}
+              options={location}
+              label="Location"
+            />
+            {this.renderTags("location")}
           </div>
         )}
         <div className={cs.filterContainer}>

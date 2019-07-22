@@ -54,7 +54,10 @@ class SamplesView extends React.Component {
         className: cs.basicCell,
       },
       {
-        dataKey: "collectionLocation",
+        dataKey:
+          allowedFeatures && allowedFeatures.includes("maps")
+            ? "collectionLocationV2"
+            : "collectionLocation",
         label: "Location",
         flexGrow: 1,
         className: cs.basicCell,
@@ -132,16 +135,6 @@ class SamplesView extends React.Component {
           TableRenderers.formatDuration(rowData[dataKey]),
       },
     ];
-
-    // TODO(jsheu): Upon release, replace Location 'v1'
-    if (allowedFeatures.includes("maps")) {
-      this.columns.push({
-        dataKey: "collectionLocationV2",
-        label: "Location v2",
-        flexGrow: 1,
-        className: cs.basicCell,
-      });
-    }
   }
 
   handleSelectRow = (value, checked) => {
@@ -351,10 +344,17 @@ class SamplesView extends React.Component {
   renderTable = () => {
     const {
       activeColumns,
+      allowedFeatures,
       onLoadRows,
       protectedColumns,
       selectedSampleIds,
     } = this.props;
+
+    let updatedActiveColumns = Object.assign([], activeColumns);
+    if (allowedFeatures && allowedFeatures.includes("maps")) {
+      const index = updatedActiveColumns.indexOf("collectionLocation");
+      if (index !== -1) updatedActiveColumns[index] += "V2";
+    }
 
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 66;
@@ -365,7 +365,7 @@ class SamplesView extends React.Component {
           ref={infiniteTable => (this.infiniteTable = infiniteTable)}
           columns={this.columns}
           defaultRowHeight={rowHeight}
-          initialActiveColumns={activeColumns}
+          initialActiveColumns={updatedActiveColumns}
           loadingClassName={csTableRenderer.loading}
           onLoadRows={onLoadRows}
           onSelectAllRows={withAnalytics(
