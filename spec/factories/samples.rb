@@ -23,13 +23,11 @@ FactoryBot.define do
 
     # metadata fields
     # ensure the metadata field is added to the host genome
-    # TODO(tiago): will not work if the host genome was created before.
-    # COuld find out why the host genome metadata fields could not be updated.
-    before(:create) do |_sample, options|
+    before(:create) do |sample, options|
       options.metadata_fields.each_key do |metadata_field_name|
-        unless MetadataField.exists?(name: metadata_field_name)
-          create(:metadata_field, name: metadata_field_name, default_for_new_host_genome: 1)
-        end
+        metadata_field = create(:metadata_field, name: metadata_field_name, default_for_new_host_genome: 1)
+        # This is needed to make metadata pass validation below
+        sample.host_genome.metadata_fields << metadata_field
       end
     end
 
