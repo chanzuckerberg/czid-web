@@ -11,21 +11,6 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema.define(version: 20_190_719_233_448) do
-  create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name"
-    t.string "index_dir_suffix"
-    t.text "s3_nt_db_path"
-    t.text "s3_nt_loc_db_path"
-    t.text "s3_nr_db_path"
-    t.text "s3_nr_loc_db_path"
-    t.text "s3_lineage_path"
-    t.text "s3_accession2taxid_path"
-    t.text "s3_deuterostome_db_path"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "lineage_version", limit: 2
-  end
-
   create_table "amr_counts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "gene"
     t.string "allele"
@@ -44,18 +29,6 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "s3_backup_path"
-  end
-
-  create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "project_id"
-    t.text "description"
-    t.integer "public_access", limit: 1
-    t.integer "ready", limit: 1, default: 0
-    t.bigint "user_id"
-    t.index ["name"], name: "index_backgrounds_on_name", unique: true
   end
 
   create_table "backgrounds_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -100,16 +73,6 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
     t.datetime "updated_at", null: false
     t.index ["project_id"], name: "index_favorite_projects_on_project_id"
     t.index ["user_id"], name: "index_favorite_projects_on_user_id"
-  end
-
-  create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", null: false
-    t.text "s3_star_index_path"
-    t.text "s3_bowtie2_index_path"
-    t.bigint "default_background_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "skip_deutero_filter"
   end
 
   create_table "host_genomes_metadata_fields", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -184,25 +147,6 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
     t.index ["sample_id", "key"], name: "index_metadata_on_sample_id_and_key", unique: true
   end
 
-  create_table "metadata_fields", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name", null: false
-    t.string "display_name"
-    t.string "description"
-    t.integer "base_type", limit: 1, null: false
-    t.string "validation_type"
-    t.string "options"
-    t.integer "force_options", limit: 1, default: 0
-    t.integer "is_core", limit: 1, default: 0
-    t.integer "is_default", limit: 1, default: 0
-    t.integer "is_required", limit: 1, default: 0
-    t.string "group"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "examples"
-    t.integer "default_for_new_host_genome", limit: 1, default: 0
-    t.index ["group"], name: "index_metadata_fields_on_group"
-  end
-
   create_table "metadata_fields_projects", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "project_id", null: false
     t.bigint "metadata_field_id", null: false
@@ -217,35 +161,6 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "output"], name: "index_output_states_on_pipeline_run_id_and_output", unique: true
-  end
-
-  create_table "phylo_trees", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.integer "taxid"
-    t.integer "tax_level"
-    t.string "tax_name"
-    t.bigint "user_id"
-    t.bigint "project_id"
-    t.text "newick"
-    t.integer "status", default: 0
-    t.string "dag_version"
-    t.text "dag_json", limit: 4_294_967_295
-    t.text "command_stdout"
-    t.text "command_stderr"
-    t.string "job_id"
-    t.string "job_log_id"
-    t.text "job_description"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "name"
-    t.string "dag_branch"
-    t.text "ncbi_metadata"
-    t.string "snp_annotations"
-    t.datetime "ready_at"
-    t.string "vcf"
-    t.text "dag_vars"
-    t.index ["name"], name: "index_phylo_trees_on_name", unique: true
-    t.index ["project_id", "taxid"], name: "index_phylo_trees_on_project_id_and_taxid"
-    t.index ["user_id"], name: "index_phylo_trees_on_user_id"
   end
 
   create_table "phylo_trees_pipeline_runs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -322,60 +237,11 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
 
-  create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "public_access", limit: 1
-    t.integer "days_to_keep_sample_private", default: 365, null: false
-    t.integer "background_flag", limit: 1, default: 0
-    t.index ["name"], name: "index_projects_on_name", unique: true
-  end
-
   create_table "projects_users", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "project_id", null: false
     t.bigint "user_id", null: false
     t.index ["project_id"], name: "index_projects_users_on_project_id"
     t.index ["user_id"], name: "index_projects_users_on_user_id"
-  end
-
-  create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "project_id"
-    t.string "status"
-    t.string "sample_unique_id"
-    t.string "sample_location"
-    t.string "sample_date"
-    t.string "sample_tissue"
-    t.string "sample_template"
-    t.string "sample_library"
-    t.string "sample_sequencer"
-    t.text "sample_notes"
-    t.text "s3_preload_result_path"
-    t.text "s3_star_index_path"
-    t.text "s3_bowtie2_index_path"
-    t.bigint "host_genome_id"
-    t.bigint "user_id"
-    t.integer "subsample"
-    t.string "pipeline_branch"
-    t.float "sample_input_pg", limit: 24
-    t.integer "sample_batch"
-    t.text "sample_diagnosis"
-    t.string "sample_organism"
-    t.string "sample_detection"
-    t.string "alignment_config_name"
-    t.string "web_commit", default: ""
-    t.string "pipeline_commit", default: ""
-    t.text "dag_vars"
-    t.integer "max_input_fragments"
-    t.datetime "client_updated_at"
-    t.integer "uploaded_from_basespace", limit: 1, default: 0
-    t.string "upload_error"
-    t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
-    t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
-    t.index ["user_id"], name: "index_samples_on_user_id"
   end
 
   create_table "samples_visualizations", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -544,6 +410,131 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "visualizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.bigint "user_id"
+    t.string "visualization_type"
+    t.text "data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "public_access", limit: 1
+    t.string "name"
+    t.index ["user_id"], name: "index_visualizations_on_user_id"
+  end
+
+  create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.string "index_dir_suffix"
+    t.text "s3_nt_db_path"
+    t.text "s3_nt_loc_db_path"
+    t.text "s3_nr_db_path"
+    t.text "s3_nr_loc_db_path"
+    t.text "s3_lineage_path"
+    t.text "s3_accession2taxid_path"
+    t.text "s3_deuterostome_db_path"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "lineage_version", limit: 2
+  end
+
+  create_table "backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "project_id"
+    t.text "description"
+    t.integer "public_access", limit: 1
+    t.integer "ready", limit: 1, default: 0
+    t.bigint "user_id"
+    t.index ["name"], name: "index_backgrounds_on_name", unique: true
+  end
+
+  create_table "metadata_fields", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name", null: false
+    t.string "display_name"
+    t.string "description"
+    t.integer "base_type", limit: 1, null: false
+    t.string "validation_type"
+    t.string "options"
+    t.integer "force_options", limit: 1, default: 0
+    t.integer "is_core", limit: 1, default: 0
+    t.integer "is_default", limit: 1, default: 0
+    t.integer "is_required", limit: 1, default: 0
+    t.string "group"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "examples"
+    t.integer "default_for_new_host_genome", limit: 1, default: 0
+    t.index ["group"], name: "index_metadata_fields_on_group"
+  end
+
+  create_table "phylo_trees", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "taxid"
+    t.integer "tax_level"
+    t.string "tax_name"
+    t.bigint "user_id"
+    t.bigint "project_id"
+    t.text "newick"
+    t.integer "status", default: 0
+    t.string "dag_version"
+    t.text "dag_json", limit: 4_294_967_295
+    t.text "command_stdout"
+    t.text "command_stderr"
+    t.string "job_id"
+    t.string "job_log_id"
+    t.text "job_description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "name"
+    t.string "dag_branch"
+    t.text "ncbi_metadata"
+    t.string "snp_annotations"
+    t.datetime "ready_at"
+    t.string "vcf"
+    t.text "dag_vars"
+    t.index ["name"], name: "index_phylo_trees_on_name", unique: true
+    t.index ["project_id", "taxid"], name: "index_phylo_trees_on_project_id_and_taxid"
+    t.index ["user_id"], name: "index_phylo_trees_on_user_id"
+  end
+
+  create_table "samples", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "project_id"
+    t.string "status"
+    t.string "sample_unique_id"
+    t.string "sample_location"
+    t.string "sample_date"
+    t.string "sample_tissue"
+    t.string "sample_template"
+    t.string "sample_library"
+    t.string "sample_sequencer"
+    t.text "sample_notes"
+    t.text "s3_preload_result_path"
+    t.text "s3_star_index_path"
+    t.text "s3_bowtie2_index_path"
+    t.bigint "host_genome_id"
+    t.bigint "user_id"
+    t.integer "subsample"
+    t.string "pipeline_branch"
+    t.float "sample_input_pg", limit: 24
+    t.integer "sample_batch"
+    t.text "sample_diagnosis"
+    t.string "sample_organism"
+    t.string "sample_detection"
+    t.string "alignment_config_name"
+    t.string "web_commit", default: ""
+    t.string "pipeline_commit", default: ""
+    t.text "dag_vars"
+    t.integer "max_input_fragments"
+    t.datetime "client_updated_at"
+    t.integer "uploaded_from_basespace", limit: 1, default: 0
+    t.string "upload_error"
+    t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
+    t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
+    t.index ["user_id"], name: "index_samples_on_user_id"
+  end
+
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "email", default: "", null: false
     t.string "name"
@@ -572,15 +563,24 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  create_table "visualizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.bigint "user_id"
-    t.string "visualization_type"
-    t.text "data"
+  create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name", null: false
+    t.text "s3_star_index_path"
+    t.text "s3_bowtie2_index_path"
+    t.bigint "default_background_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "skip_deutero_filter"
+  end
+
+  create_table "projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "public_access", limit: 1
-    t.string "name"
-    t.index ["user_id"], name: "index_visualizations_on_user_id"
+    t.integer "days_to_keep_sample_private", default: 365, null: false
+    t.integer "background_flag", limit: 1, default: 0
+    t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
   add_foreign_key "amr_counts", "pipeline_runs", name: "amr_counts_pipeline_run_id_fk"
