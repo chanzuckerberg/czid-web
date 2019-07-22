@@ -2,6 +2,8 @@ class AddForeignKeyConstraints < ActiveRecord::Migration[5.1]
   # Deletes invalid rows then adds FK constraint for each table in the app,
   # except those in initializers/immigrant.rb. delete_bad_rows is only called on
   # tables that are known to have invalid rows in prod.
+  # Make sure this works in the test DB as well with:
+  # bin/rails db:environment:set RAILS_ENV=test && rake db:drop db:create db:migrate db:seed
   def up
     assign_user_to_samples
     add_foreign_key "samples", "users", name: "samples_user_id_fk"
@@ -30,6 +32,11 @@ class AddForeignKeyConstraints < ActiveRecord::Migration[5.1]
     delete_bad_rows "input_files", "samples"
     add_foreign_key "input_files", "samples", name: "input_files_sample_id_fk"
 
+    add_foreign_key "pipeline_runs", "alignment_configs", name: "pipeline_runs_alignment_config_id_fk"
+
+    delete_bad_rows "pipeline_runs", "samples"
+    add_foreign_key "pipeline_runs", "samples", name: "pipeline_runs_sample_id_fk"
+
     delete_bad_rows "job_stats", "pipeline_runs"
     add_foreign_key "job_stats", "pipeline_runs", name: "job_stats_pipeline_run_id_fk"
 
@@ -50,9 +57,6 @@ class AddForeignKeyConstraints < ActiveRecord::Migration[5.1]
 
     delete_bad_rows "pipeline_run_stages", "pipeline_runs"
     add_foreign_key "pipeline_run_stages", "pipeline_runs", name: "pipeline_run_stages_pipeline_run_id_fk"
-
-    add_foreign_key "pipeline_runs", "alignment_configs", name: "pipeline_runs_alignment_config_id_fk"
-    add_foreign_key "pipeline_runs", "samples", name: "pipeline_runs_sample_id_fk"
 
     delete_bad_rows "projects_users", "projects"
     add_foreign_key "projects_users", "projects", name: "projects_users_project_id_fk"

@@ -72,7 +72,7 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
     t.index ["sample_id"], name: "index_backgrounds_samples_on_sample_id"
   end
 
-  create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=latin1" do |t|
+  create_table "contigs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "pipeline_run_id"
     t.string "name"
     t.text "sequence", limit: 4_294_967_295
@@ -103,7 +103,7 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
   end
 
   create_table "host_genomes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "name"
+    t.string "name", null: false
     t.text "s3_star_index_path"
     t.text "s3_bowtie2_index_path"
     t.bigint "default_background_id"
@@ -125,7 +125,7 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
     t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "source_type"
+    t.string "source_type", null: false
     t.text "source"
     t.text "parts"
     t.index ["sample_id"], name: "index_input_files_on_sample_id"
@@ -169,7 +169,7 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
   end
 
   create_table "metadata", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "key", null: false, collation: "latin1_swedish_ci"
+    t.string "key", null: false
     t.string "raw_value"
     t.string "string_validated_value"
     t.decimal "number_validated_value", precision: 36, scale: 9
@@ -326,7 +326,7 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "public_access", limit: 1, default: 0
+    t.integer "public_access", limit: 1
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
     t.index ["name"], name: "index_projects_on_name", unique: true
@@ -454,8 +454,8 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
     t.integer "taxid", null: false
     t.bigint "wikipedia_id"
     t.string "title"
-    t.text "summary", limit: 16_777_215
-    t.text "description", limit: 16_777_215
+    t.text "summary"
+    t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["taxid"], name: "index_taxon_descriptions_on_taxid", unique: true
@@ -545,11 +545,11 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.string "email"
+    t.string "email", default: "", null: false
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "encrypted_password"
+    t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
@@ -610,6 +610,7 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
   add_foreign_key "projects_users", "users", name: "projects_users_user_id_fk"
   add_foreign_key "samples", "host_genomes", name: "samples_host_genome_id_fk"
   add_foreign_key "samples", "projects", name: "samples_project_id_fk"
+  add_foreign_key "samples", "users", name: "samples_user_id_fk"
   add_foreign_key "samples_visualizations", "samples", name: "samples_visualizations_sample_id_fk"
   add_foreign_key "samples_visualizations", "visualizations", name: "samples_visualizations_visualization_id_fk"
   add_foreign_key "visualizations", "users", name: "visualizations_user_id_fk"
