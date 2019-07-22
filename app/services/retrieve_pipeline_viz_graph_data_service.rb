@@ -19,10 +19,11 @@ class RetrievePipelineVizGraphDataService
   # edges: An array of edges, each edge object having the following structure:
   #     - from: An object containing a stageIndex and stepIndex, denoting the originating node it is from
   #     - to: An object containing a stageIndex and stepIndex, denoating the node it ends after
-  #     - files: An array of files that get passed between the from and to nodes. Currently each file is a string,
-  #       but it may become an object containing download url and potentially other information.
+  #     - files: An array of file objects that get passed between the from and to nodes. It is composed of:
+  #           - displayName: A string to display the file as
+  #           - url: An optional string to download the file
 
-  def initialize(pipeline_run_id, is_admin)
+  def initialize(pipeline_run_id, is_admin, remove_host_filtering_urls)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
     @all_dag_jsons = []
     @stage_names = []
@@ -32,13 +33,13 @@ class RetrievePipelineVizGraphDataService
         @stage_names.push(stage.name)
       end
     end
+    @remove_host_filtering_urls = remove_host_filtering_urls
   end
 
   def call
     stages = create_stage_nodes_scaffolding
     edges = create_edges
     populate_nodes_with_edges(stages, edges)
-    add_final_outputs_edges(stages, edges)
 
     return { stages: stages, edges: edges }
   end
@@ -66,11 +67,86 @@ class RetrievePipelineVizGraphDataService
   end
 
   def create_edges
-    edges = []
-    @all_dag_jsons.each_with_index do |dag_json, stage_index|
-      edges.concat(intra_stage_edges(dag_json, stage_index))
+    file_path_to_info = {}
+    @pipeline_run.sample.results_folder_files(@pipeline_run.pipeline_version).each do |file_entry|
+      file_path_to_info[file_entry[:key]] = file_entry
     end
-    edges.concat(inter_stage_edges)
+    edges = input_output_to_file_paths.map do |input_output_json, file_paths|
+      files = file_paths.map { |file_path| file_info(file_path, file_path_to_info) }
+      edge_info = JSON.parse(input_output_json, symbolize_names: true)
+      edge_info.merge(files: files,
+                      isIntraStage: (edge_info.key?(:to) && edge_info.key?(:from) && edge_info[:to][:stageIndex] == edge_info[:from][:stageIndex]) || false)
+    end
+    @remove_host_filtering_urls && remove_host_filtering_urls(edges)
+    return edges
+  end
+
+  def input_output_to_file_paths
+    file_paths_to_input_outputs = file_path_to_inputting_steps
+                                  .merge(file_path_to_outputting_step) do |_file_path, to_array, from|
+      to_array.map { |to| to.merge(from) }
+    end
+
+    input_output_to_file_paths = {}
+    file_paths_to_input_outputs.each do |file_path, input_outputs|
+      # Convert those with only "from" and not "to", which are not arrays due to no conflicting keys in merge.
+      unless input_outputs.is_a? Array
+        input_outputs = [input_outputs]
+      end
+
+      input_outputs.each do |input_output|
+        input_output = input_output.to_json
+        unless input_output_to_file_paths.key? input_output
+          input_output_to_file_paths[input_output] = []
+        end
+        input_output_to_file_paths[input_output].push(file_path)
+      end
+    end
+    input_output_to_file_paths
+  end
+
+  def file_path_to_outputting_step
+    file_path_to_outputting_step = {}
+    @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
+      stage_dag_json["steps"].each_with_index do |step, step_index|
+        stage_dag_json["targets"][step["out"]].each do |file_name|
+          file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{file_name}"
+          file_path_to_outputting_step[file_path] = { from: { stageIndex: stage_index, stepIndex: step_index } }
+        end
+      end
+    end
+    file_path_to_outputting_step
+  end
+
+  def file_path_to_inputting_steps
+    file_path_to_inputting_steps = {}
+    @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
+      stage_dag_json["steps"].each_with_index do |step, step_index|
+        step["in"].each do |in_target|
+          stage_dag_json["targets"][in_target].each do |file_name|
+            file_path = if stage_dag_json["given_targets"].key? in_target
+                          "#{stage_dag_json['given_targets'][in_target]['s3_dir']}/#{file_name}"
+                        else
+                          "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{file_name}"
+                        end
+
+            unless file_path_to_inputting_steps.key? file_path
+              file_path_to_inputting_steps[file_path] = []
+            end
+            file_path_to_inputting_steps[file_path].push(to: { stageIndex: stage_index, stepIndex: step_index })
+          end
+        end
+      end
+    end
+    file_path_to_inputting_steps
+  end
+
+  def file_info(file_path, file_path_to_info)
+    file_path = file_path.split('/', 4).last # Remove s3://idseq-.../ to match key
+    file_info = file_path_to_info[file_path]
+    display_name = file_info ? file_info[:display_name] : file_path.split("/").last
+    url = file_info ? file_info[:url] : nil
+    { displayName: display_name, url: url }
   end
 
   def populate_nodes_with_edges(stages_with_nodes, edges)
@@ -88,95 +164,15 @@ class RetrievePipelineVizGraphDataService
     end
   end
 
-  def intra_stage_edges(stage_dag_json, stage_index)
-    target_to_outputting_step = {}
-    stage_dag_json["steps"].each_with_index do |step, step_index|
-      target_to_outputting_step[step["out"]] = step_index
-    end
-
-    edges = []
-    stage_dag_json["steps"].each_with_index do |step, to_step_index|
-      step["in"].each do |in_target|
-        from_step_index = target_to_outputting_step[in_target]
-        unless from_step_index.nil?
-          # TODO(ezhong): Include file download links for files.
-          files = stage_dag_json["targets"][in_target]
-          edges.push(from: {
-                       stageIndex: stage_index,
-                       stepIndex: from_step_index
-                     }, to: {
-                       stageIndex: stage_index,
-                       stepIndex: to_step_index
-                     },
-                     files: files,
-                     isIntraStage: true)
-        end
-      end
-    end
-    return edges
-  end
-
-  def inter_stage_edges
-    file_path_to_outputting_step = {}
-    @all_dag_jsons.each_with_index do |stage_dag_json, stage_index|
-      stage_dag_json["steps"].each_with_index do |step, step_index|
-        stage_dag_json["targets"][step["out"]].each do |file_name|
-          file_path = "#{stage_dag_json['output_dir_s3']}/#{@pipeline_run.pipeline_version}/#{file_name}"
-          file_path_to_outputting_step[file_path] = { stageIndex: stage_index, stepIndex: step_index }
-        end
-      end
-    end
-
-    edges = []
-    @all_dag_jsons.each_with_index do |stage_dag_json, to_stage_index|
-      stage_dag_json["steps"].each_with_index do |step, to_step_index|
-        # Group files with the same outputting step, as they lie on the same edge.
-        outputting_step_to_files = {}
-
-        step["in"].each do |in_target|
-          if stage_dag_json["given_targets"].key? in_target
-            dir_path = stage_dag_json["given_targets"][in_target]["s3_dir"]
-            stage_dag_json["targets"][in_target].each do |file_name|
-              file_path = "#{dir_path}/#{file_name}"
-              outputting_step_info = file_path_to_outputting_step[file_path]
-              unless outputting_step_to_files.key?(outputting_step_info)
-                outputting_step_to_files[outputting_step_info] = []
-              end
-              outputting_step_to_files[outputting_step_info].push(file_name)
-            end
-          end
-        end
-
-        outputting_step_to_files.each do |outputting_step_info, files|
-          edges.push(from: outputting_step_info,
-                     to: {
-                       stageIndex: to_stage_index,
-                       stepIndex: to_step_index
-                     },
-                     # TODO(ezhong): Include file download links for files.
-                     files: files,
-                     isIntraStage: false)
-        end
-      end
-    end
-    return edges
-  end
-
-  def add_final_outputs_edges(stage_step_data, edge_data)
-    stage_step_data.each_with_index do |stage, stage_index|
-      stage[:steps].each_with_index do |step, step_index|
-        if step[:outputEdges].empty?
-          dag_json = @all_dag_jsons[stage_index]
-          out_target = dag_json["steps"][step_index]["out"]
-          edge_data.push(from: { stageIndex: stage_index, stepIndex: step_index },
-                         files: dag_json["targets"][out_target])
-          step[:outputEdges].push(edge_data.length - 1)
-        end
-      end
-    end
-  end
-
   def modify_step_name(step_name)
     step_name.gsub(/^(PipelineStep(Run|Generate)?)/, "")
+  end
+
+  def remove_host_filtering_urls(edges)
+    edges.each do |edge|
+      if (edge[:to] && edge[:to][:stageIndex].zero?) || edge[:from].nil?
+        edge[:files].each { |file| file[:url] = nil }
+      end
+    end
   end
 end
