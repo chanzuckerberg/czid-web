@@ -34,8 +34,6 @@ const SCALES = [
   { text: "Linear", value: "linear" },
 ];
 
-const DOWNLOAD_OPTIONS = [{ text: "Download CSV", value: "csv" }];
-
 const SIDEBAR_SAMPLE_MODE = "sampleDetails";
 const SIDEBAR_GENE_MODE = "geneDetails";
 
@@ -187,9 +185,9 @@ export default class AMRHeatmapView extends React.Component {
   computeHeatmapValuesForCSV() {
     const { samplesWithAMRCounts } = this.state;
     const csvRows = samplesWithAMRCounts.flatMap(sample => {
-      const csvRow = sample.amr_counts.map(amrCount => {
+      const csvRow = sample.amrCounts.map(amrCount => {
         const row = [
-          `${sample.sample_name},${amrCount.gene},${amrCount.allele},${
+          `${sample.sampleName},${amrCount.gene},${amrCount.allele},${
             amrCount.coverage
           },${amrCount.depth}`,
         ];
@@ -222,7 +220,6 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   getDownloadCSVLink() {
-    const csvOption = DOWNLOAD_OPTIONS[0];
     const [csvHeaders, csvRows] = this.computeHeatmapValuesForCSV();
     return (
       <a
@@ -230,9 +227,9 @@ export default class AMRHeatmapView extends React.Component {
         download="idseq_amr_heatmap_values.csv"
         target="_blank"
         rel="noopener noreferrer"
-        key={`${csvOption.text}_csv_link`}
+        key={"Download_CSV_link"}
       >
-        {csvOption.text}
+        Download CSV
       </a>
     );
   }
