@@ -185,6 +185,7 @@ class MetadataTab extends React.Component {
           <RequestContext.Consumer>
             {({ allowedFeatures } = {}) => {
               return validKeys.map(key => {
+                // Hide the implicit v1 if you have 'maps'. Else hide v2.
                 // TODO(jsheu): Migrate all to location_v2 after release
                 if (allowedFeatures && allowedFeatures.includes("maps")) {
                   if (key === "collection_location") return;
