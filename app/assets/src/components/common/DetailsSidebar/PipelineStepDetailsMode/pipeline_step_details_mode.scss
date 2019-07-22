@@ -24,7 +24,8 @@
 }
 
 .description,
-.fileLink {
+.fileLink,
+.disabledFileLink {
   @include font-body-s;
 }
 
@@ -33,10 +34,16 @@
   margin-bottom: 8px;
 }
 
+.disabledFileLink {
+  color: $medium-grey;
+  cursor: default;
+}
+
 .fileGroup {
   margin-bottom: 8px;
 
-  .fileLink {
+  .fileLink,
+  .disabledFileLink {
     margin-left: 25px;
   }
 
