@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import { PanZoom } from "react-easy-panzoom";
 import cx from "classnames";
@@ -36,6 +35,7 @@ class PipelineViz extends React.Component {
       y: 0,
       alteredGraphs: new Set(),
     };
+    this.panZoomContainer = React.createRef();
 
     this.state = {
       stagesOpened: [true, true, true, true],
@@ -84,7 +84,7 @@ class PipelineViz extends React.Component {
 
   getNodeIdAtCoords(graph, xCoord, yCoord) {
     const { x, y } = inverseTransformDOMCoordinates(
-      ReactDOM.findDOMNode(this.panZoomContainer).firstChild,
+      this.panZoomContainer.current.dragContainer.current,
       xCoord,
       yCoord
     );
@@ -718,9 +718,7 @@ class PipelineViz extends React.Component {
           minZoom={zoomMin}
           maxZoom={zoomMax}
           zoomSpeed={3}
-          ref={ref => {
-            this.panZoomContainer = ref;
-          }}
+          ref={this.panZoomContainer}
         >
           <div className={cs.pipelineViz}>{stageContainers}</div>
         </PanZoom>
