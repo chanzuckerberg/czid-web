@@ -17,11 +17,11 @@ class User < ApplicationRecord
   has_and_belongs_to_many :projects
   # All one-to-many assocs are counter cached for per-user analytics.
   # See traits_for_segment.
-  has_many :samples, dependent: :restrict_with_exception
+  has_many :samples, dependent: :destroy
   has_many :favorite_projects, dependent: :destroy
   has_many :favorites, through: :favorite_projects, source: :project, dependent: :destroy
-  has_many :visualizations, dependent: :restrict_with_exception
-  has_many :phylo_trees, dependent: :restrict_with_exception
+  has_many :visualizations, dependent: :destroy
+  has_many :phylo_trees, dependent: :destroy
 
   validates :email, presence: true
   validates :name, presence: true, format: {
