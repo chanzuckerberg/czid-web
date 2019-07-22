@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import { PanZoom } from "react-easy-panzoom";
 import cx from "classnames";
@@ -36,6 +35,7 @@ class PipelineViz extends React.Component {
       y: 0,
       alteredGraphs: new Set(),
     };
+    this.panZoomContainer = React.createRef();
 
     this.state = {
       stagesOpened: [true, true, true, true],
@@ -84,7 +84,7 @@ class PipelineViz extends React.Component {
 
   getNodeIdAtCoords(graph, xCoord, yCoord) {
     const { x, y } = inverseTransformDOMCoordinates(
-      ReactDOM.findDOMNode(this.panZoomContainer).firstChild,
+      this.panZoomContainer.current.dragContainer.current,
       xCoord,
       yCoord
     );
@@ -117,9 +117,8 @@ class PipelineViz extends React.Component {
         : "";
       return {
         fromStepName: fromStepName,
-        // TODO(ezhong): Include file url for downloading
         files: edgeInfo.files.map(file => {
-          return { fileName: file };
+          return { fileName: file.displayName, url: file.url };
         }),
       };
     });
@@ -134,10 +133,10 @@ class PipelineViz extends React.Component {
       .map(edgeInfo => {
         // Remove duplicate output file listings
         return edgeInfo.files.reduce((files, fileInfo) => {
-          if (!seenFiles.has(fileInfo)) {
-            seenFiles.add(fileInfo);
-            // TODO(ezhong): Include file url for downloading
-            files.push({ fileName: fileInfo });
+          const fileInfoAsString = JSON.stringify(fileInfo);
+          if (!seenFiles.has(fileInfoAsString)) {
+            seenFiles.add(fileInfoAsString);
+            files.push({ fileName: fileInfo.displayName, url: fileInfo.url });
           }
           return files;
         }, []);
@@ -719,9 +718,7 @@ class PipelineViz extends React.Component {
           minZoom={zoomMin}
           maxZoom={zoomMax}
           zoomSpeed={3}
-          ref={ref => {
-            this.panZoomContainer = ref;
-          }}
+          ref={this.panZoomContainer}
         >
           <div className={cs.pipelineViz}>{stageContainers}</div>
         </PanZoom>
