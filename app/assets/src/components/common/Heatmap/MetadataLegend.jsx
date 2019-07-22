@@ -1,6 +1,6 @@
 // *** This component is used on both the AMR and Taxon Heatmap. When
 // the user hovers over a label for a metadata field, this component
-// shows a tooltip legend for that field. ***
+// shows a tooltip legend for that particular field. ***
 
 import React from "react";
 import PropTypes from "prop-types";
