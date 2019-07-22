@@ -580,7 +580,7 @@ ActiveRecord::Schema.define(version: 20_190_719_233_448) do
     t.integer "public_access", limit: 1
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
-    t.index ["name"], name: "index_projects_on_name" # , unique: true
+    t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
   add_foreign_key "amr_counts", "pipeline_runs", name: "amr_counts_pipeline_run_id_fk"
