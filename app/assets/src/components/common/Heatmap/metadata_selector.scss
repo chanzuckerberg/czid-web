@@ -1,0 +1,32 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+
+.metadataContainer {
+  .hasBackground {
+    padding-left: 10px;
+    padding-right: 5px;
+
+    &:not(.statsRow) {
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+  }
+
+  .hasBackground:nth-child(odd) {
+    background-color: $off-white;
+  }
+
+  .title {
+    @include font-header-accordion;
+
+    color: $black;
+    padding: 0 10px;
+    height: 40px;
+  }
+
+  .rowLabel {
+    @include font-header-xxs;
+    display: block;
+    margin: 3px 0;
+  }
+}

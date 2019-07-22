@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
+import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
+import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { DataTooltip } from "~ui/containers";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 
@@ -16,6 +18,8 @@ const METRICS = [
   { text: "Depth", key: "depth" },
 ];
 
+const DEFAULT_SELECTED_METADATA = ["collection_location"];
+
 export default class AMRHeatmapVis extends React.Component {
   constructor(props) {
     super(props);
@@ -23,12 +27,36 @@ export default class AMRHeatmapVis extends React.Component {
     this.state = {
       nodeHoverInfo: null,
       tooltipLocation: null,
+      columnMetadataLegend: null,
+      addMetadataTrigger: null,
+      selectedMetadata: new Set(DEFAULT_SELECTED_METADATA),
     };
 
     this.heatmap = null;
   }
 
   componentDidMount() {
+    this.processSampleData();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { selectedMetadata } = this.state;
+    const { selectedOptions } = this.props;
+    if (
+      selectedOptions !== prevProps.selectedOptions ||
+      this.heatmap === null
+    ) {
+      this.updateHeatmap();
+    }
+    if (
+      selectedMetadata !== prevState.selectedMetadata &&
+      this.heatmap !== null
+    ) {
+      this.heatmap.updateColumnMetadata(this.getSelectedMetadataFields());
+    }
+  }
+
+  processSampleData() {
     const { samplesWithAMRCounts } = this.props;
     const [sampleLabels, geneLabels, alleleLabels] = this.extractLabels(
       samplesWithAMRCounts
@@ -42,12 +70,6 @@ export default class AMRHeatmapVis extends React.Component {
     });
   }
 
-  componentDidUpdate(prevProps) {
-    if (this.props !== prevProps || this.heatmap === null) {
-      this.updateHeatmap();
-    }
-  }
-
   // Sometimes, when presenting the tooltip popup as a user hovers over
   // a node on the heatmap, they will be over a node where the row is
   // an allele and the column is a sample with no AMR count for the allele.
@@ -56,7 +78,7 @@ export default class AMRHeatmapVis extends React.Component {
   mapAllelesToGenes(sampleData) {
     const alleleToGeneMap = {};
     sampleData.forEach(sample => {
-      sample.amr_counts.forEach(amrCount => {
+      sample.amrCounts.forEach(amrCount => {
         alleleToGeneMap[amrCount.allele] = amrCount.gene;
       });
     });
@@ -68,8 +90,12 @@ export default class AMRHeatmapVis extends React.Component {
     const genes = {};
     const alleles = {};
     sampleData.forEach(sample => {
-      sampleLabels.push({ label: sample.sample_name, id: sample.sample_id });
-      sample.amr_counts.forEach(amrCount => {
+      sampleLabels.push({
+        label: sample.sampleName,
+        id: sample.sampleId,
+        metadata: sample.metadata,
+      });
+      sample.amrCounts.forEach(amrCount => {
         genes[amrCount.gene] = true;
         alleles[amrCount.allele] = true;
       });
@@ -82,6 +108,18 @@ export default class AMRHeatmapVis extends React.Component {
     });
 
     return [sampleLabels, geneLabels, alleleLabels];
+  }
+
+  getMetadataTypes() {
+    const { samplesMetadataTypes } = this.props;
+    return Object.keys(samplesMetadataTypes)
+      .sort()
+      .map(type => {
+        return {
+          label: samplesMetadataTypes[type].name,
+          value: samplesMetadataTypes[type].key,
+        };
+      });
   }
 
   //*** Callback functions for the heatmap ***
@@ -122,7 +160,45 @@ export default class AMRHeatmapVis extends React.Component {
     onGeneLabelClick(geneName);
   };
 
-  //*** Following functions must be called after the component has updated ***
+  onMetadataLabelHover = node => {
+    const legend = this.heatmap.getColumnMetadataLegend(node.value);
+    this.setState({
+      columnMetadataLegend: legend,
+    });
+  };
+
+  onMetadataLabelOut = () => {
+    this.setState({ columnMetadataLegend: null });
+  };
+
+  onMetadataAddButtonClick = trigger => {
+    this.setState({
+      addMetadataTrigger: trigger,
+    });
+  };
+
+  onMetadataSelectionChange = selectedMetadata => {
+    this.setState({
+      selectedMetadata,
+    });
+  };
+
+  //*** Following functions depend on state and must be called after the component has updated ***
+
+  getSelectedMetadataFields() {
+    const { samplesMetadataTypes } = this.props;
+    const { selectedMetadata } = this.state;
+    const sortByLabel = (a, b) => (a.label > b.label ? 1 : -1); // alphabetical
+
+    return Array.from(selectedMetadata)
+      .map(metadatum => {
+        return {
+          label: samplesMetadataTypes[metadatum].name,
+          value: metadatum,
+        };
+      })
+      .sort(sortByLabel);
+  }
 
   getTooltipData(node) {
     const { samplesWithAMRCounts, selectedOptions } = this.props;
@@ -131,7 +207,7 @@ export default class AMRHeatmapVis extends React.Component {
     const rowLabel = this.getHeatmapLabels()[node.rowIndex].label;
     const sampleForColumn = samplesWithAMRCounts[node.columnIndex];
 
-    const amrCountForNode = sampleForColumn.amr_counts.find(
+    const amrCountForNode = sampleForColumn.amrCounts.find(
       amrCount => amrCount[selectedOptions.viewLevel] === rowLabel
     );
 
@@ -193,7 +269,7 @@ export default class AMRHeatmapVis extends React.Component {
       const rowValues = [];
       const rowName = label.label;
       samplesWithAMRCounts.forEach(sample => {
-        const amrCountForRow = sample.amr_counts.find(
+        const amrCountForRow = sample.amrCounts.find(
           amrCount => amrCount[selectedOptions.viewLevel] === rowName
         );
         if (amrCountForRow !== undefined) {
@@ -235,7 +311,7 @@ export default class AMRHeatmapVis extends React.Component {
       // in the rightmost box, and vice versa.
       {
         rowLabels: rows,
-        columnLabels: columns,
+        columnLabels: columns, // Each columnLabel object contains the sample name, id, and all metadata values
         values: values,
       },
       // Custom options:
@@ -248,10 +324,18 @@ export default class AMRHeatmapVis extends React.Component {
         onNodeHoverOut: this.onNodeHoverOut,
         onColumnLabelClick: onSampleLabelClick,
         onRowLabelClick: this.onRowLabelClick,
+        columnMetadata: this.getSelectedMetadataFields(), // gets the selected metadata *fields*
+        onColumnMetadataLabelMove: this.onNodeHoverMove,
+        onColumnMetadataLabelHover: this.onMetadataLabelHover,
+        onColumnMetadataLabelOut: this.onMetadataLabelOut,
+        onAddColumnMetadataClick: this.onMetadataAddButtonClick,
+        marginLeft: 50, // our gene names are very short, so this is to prevent metadata names from disappearing
       }
     );
     this.heatmap.start();
   }
+
+  //*** Render functions ***
 
   renderNodeHoverTooltip() {
     const { nodeHoverInfo, tooltipLocation } = this.state;
@@ -272,6 +356,12 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   render() {
+    const {
+      columnMetadataLegend,
+      tooltipLocation,
+      addMetadataTrigger,
+      selectedMetadata,
+    } = this.state;
     return (
       <div className={cs.AMRHeatmapVis}>
         <div
@@ -281,6 +371,24 @@ export default class AMRHeatmapVis extends React.Component {
           }}
         />
         {this.renderNodeHoverTooltip()}
+        {columnMetadataLegend &&
+          tooltipLocation && (
+            <MetadataLegend
+              metadataColors={columnMetadataLegend}
+              tooltipLocation={tooltipLocation}
+            />
+          )}
+        {addMetadataTrigger && (
+          <MetadataSelector
+            addMetadataTrigger={addMetadataTrigger}
+            selectedMetadata={selectedMetadata}
+            metadataTypes={this.getMetadataTypes()}
+            onMetadataSelectionChange={this.onMetadataSelectionChange}
+            onMetadataSelectionClose={() => {
+              this.setState({ addMetadataTrigger: null });
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -289,9 +397,10 @@ export default class AMRHeatmapVis extends React.Component {
 AMRHeatmapVis.propTypes = {
   samplesWithAMRCounts: PropTypes.arrayOf(
     PropTypes.shape({
-      sample_name: PropTypes.string,
-      sample_id: PropTypes.number,
-      amr_counts: PropTypes.array,
+      sampleName: PropTypes.string,
+      sampleId: PropTypes.number,
+      metadata: PropTypes.array,
+      amrCounts: PropTypes.array,
       error: PropTypes.string,
     })
   ),
@@ -302,4 +411,5 @@ AMRHeatmapVis.propTypes = {
   }),
   onSampleLabelClick: PropTypes.func,
   onGeneLabelClick: PropTypes.func,
+  samplesMetadataTypes: PropTypes.object,
 };

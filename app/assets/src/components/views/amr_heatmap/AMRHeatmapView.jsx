@@ -7,6 +7,11 @@ import AMRHeatmapVis from "~/components/views/amr_heatmap/AMRHeatmapVis";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import { getAMRCounts } from "~/api/amr";
+import { getSampleMetadataFields } from "~/api/metadata";
+import {
+  processMetadata,
+  processMetadataTypes,
+} from "~/components/utils/metadata";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
@@ -54,28 +59,38 @@ export default class AMRHeatmapView extends React.Component {
 
   componentDidMount() {
     const { sampleIds } = this.props;
-    this.requestAMRCountsData(sampleIds);
+    this.requestSampleData(sampleIds);
   }
 
-  async requestAMRCountsData(sampleIds) {
-    const rawSampleData = await getAMRCounts(sampleIds);
+  async requestSampleData(sampleIds) {
+    const [rawSampleData, rawSamplesMetadataTypes] = await Promise.all([
+      getAMRCounts(sampleIds),
+      getSampleMetadataFields(sampleIds),
+    ]);
     const filteredSamples = rawSampleData.filter(
       sampleData => sampleData.error === ""
     );
-    const samplesWithAMRCounts = this.processAMRCounts(filteredSamples);
+    const samplesWithKeyedMetadata = filteredSamples.map(sample => ({
+      ...sample,
+      metadata: processMetadata(sample.metadata, true),
+    }));
+    const samplesWithAMRCounts = this.processSampleAMRCounts(
+      samplesWithKeyedMetadata
+    );
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
+    const samplesMetadataTypes = processMetadataTypes(rawSamplesMetadataTypes);
     this.setState({
       rawSampleData,
       samplesWithAMRCounts,
-      sampleIds,
       maxValues,
+      samplesMetadataTypes,
       loading: false,
     });
   }
 
-  processAMRCounts(filteredSamples) {
+  processSampleAMRCounts(filteredSamples) {
     filteredSamples.forEach(sample => {
-      sample.amr_counts.forEach(amrCount => {
+      sample.amrCounts.forEach(amrCount => {
         // The following three lines are a kind of hacky workaround to the fact that
         // the amr counts stored in the db have a gene name that includes the actual gene
         // plus the drug class.
@@ -100,7 +115,7 @@ export default class AMRHeatmapView extends React.Component {
   findMaxValues(samplesWithAMRCounts) {
     const maxValues = samplesWithAMRCounts.reduce(
       (accum, currentSample) => {
-        currentSample.amr_counts.forEach(amrCount => {
+        currentSample.amrCounts.forEach(amrCount => {
           accum.depth = Math.max(accum.depth, amrCount.depth);
           accum.coverage = Math.max(accum.coverage, amrCount.coverage);
         });
@@ -269,7 +284,12 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   renderVisualization() {
-    const { loading, samplesWithAMRCounts, selectedOptions } = this.state;
+    const {
+      loading,
+      samplesWithAMRCounts,
+      selectedOptions,
+      samplesMetadataTypes,
+    } = this.state;
     if (loading) {
       return (
         <p className={cs.loadingIndicator}>
@@ -286,6 +306,7 @@ export default class AMRHeatmapView extends React.Component {
             selectedOptions={selectedOptions}
             onSampleLabelClick={this.onSampleLabelClick}
             onGeneLabelClick={this.onGeneLabelClick}
+            samplesMetadataTypes={samplesMetadataTypes}
           />
         </ErrorBoundary>
       </div>

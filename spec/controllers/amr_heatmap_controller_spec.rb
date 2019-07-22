@@ -84,7 +84,8 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                 output: "amr_counts",
                                 state: PipelineRun::STATUS_LOADED
                               }]
-                            }])
+                            }],
+                                     metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" })
         sample_two = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
                                 gene: "AnoT_Her"
@@ -94,7 +95,8 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                 output: "amr_counts",
                                 state: PipelineRun::STATUS_LOADED
                               }]
-                            }])
+                            }],
+                                     metadata_fields: { collection_location: "Los Angeles, USA", sample_type: "Serum" })
 
         amr_counts_one = sample_one.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
         amr_counts_two = sample_two.first_pipeline_run.amr_counts[0]
@@ -107,9 +109,20 @@ RSpec.describe AmrHeatmapController, type: :controller do
         # The created_at and updated_at fields seem to differ in format (though not content)
         # when this is run, so they are left them out of the comparison.
         json_response = JSON.parse(response.body)
-        expect(json_response[0]).to include_json(sample_id: sample_one["id"],
-                                                 sample_name: sample_one["name"],
-                                                 amr_counts: [{
+        expect(json_response[0]).to include_json(sampleId: sample_one["id"],
+                                                 sampleName: sample_one["name"],
+                                                 metadata: [{
+                                                   key: "collection_location",
+                                                   raw_value: "San Francisco, USA",
+                                                   string_validated_value: "San Francisco, USA",
+                                                   base_type: "string"
+                                                 }, {
+                                                   key: "sample_type",
+                                                   raw_value: "Water",
+                                                   string_validated_value: "Water",
+                                                   base_type: "string"
+                                                 }],
+                                                 amrCounts: [{
                                                    id: amr_counts_one["id"],
                                                    gene: amr_counts_one["gene"],
                                                    allele: amr_counts_one["allele"],
@@ -118,9 +131,20 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    pipeline_run_id: amr_counts_one["pipeline_run_id"],
                                                    drug_family: amr_counts_one["drug_family"]
                                                  }])
-        expect(json_response[1]).to include_json(sample_id: sample_two["id"],
-                                                 sample_name: sample_two["name"],
-                                                 amr_counts: [{
+        expect(json_response[1]).to include_json(sampleId: sample_two["id"],
+                                                 sampleName: sample_two["name"],
+                                                 metadata: [{
+                                                   key: "collection_location",
+                                                   raw_value: "Los Angeles, USA",
+                                                   string_validated_value: "Los Angeles, USA",
+                                                   base_type: "string"
+                                                 }, {
+                                                   key: "sample_type",
+                                                   raw_value: "Serum",
+                                                   string_validated_value: "Serum",
+                                                   base_type: "string"
+                                                 }],
+                                                 amrCounts: [{
                                                    id: amr_counts_two["id"],
                                                    gene: amr_counts_two["gene"],
                                                    allele: amr_counts_two["allele"],
@@ -143,7 +167,8 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                 output: "amr_counts",
                                 state: PipelineRun::STATUS_LOADED
                               }]
-                            }])
+                            }],
+                                     metadata_fields: { collection_location: "Santa Barbara, USA", sample_type: "Blood" })
 
         amr_counts_one = sample_one.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
 
@@ -155,9 +180,20 @@ RSpec.describe AmrHeatmapController, type: :controller do
         # The created_at and updated_at fields seem to differ in format (though not content)
         # when this is run, so they are left them out of the comparison.
         json_response = JSON.parse(response.body)
-        expect(json_response[0]).to include_json(sample_id: sample_one["id"],
-                                                 sample_name: sample_one["name"],
-                                                 amr_counts: [{
+        expect(json_response[0]).to include_json(sampleId: sample_one["id"],
+                                                 sampleName: sample_one["name"],
+                                                 metadata: [{
+                                                   key: "collection_location",
+                                                   raw_value: "Santa Barbara, USA",
+                                                   string_validated_value: "Santa Barbara, USA",
+                                                   base_type: "string"
+                                                 }, {
+                                                   key: "sample_type",
+                                                   raw_value: "Blood",
+                                                   string_validated_value: "Blood",
+                                                   base_type: "string"
+                                                 }],
+                                                 amrCounts: [{
                                                    id: amr_counts_one["id"],
                                                    gene: amr_counts_one["gene"],
                                                    allele: amr_counts_one["allele"],
@@ -167,9 +203,9 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    drug_family: amr_counts_one["drug_family"]
                                                  }],
                                                  error: "")
-        expect(json_response[1]).to include_json(sample_id: 99_999,
-                                                 sample_name: "",
-                                                 amr_counts: [],
+        expect(json_response[1]).to include_json(sampleId: 99_999,
+                                                 sampleName: "",
+                                                 amrCounts: [],
                                                  error: "sample not found")
       end
 
@@ -186,9 +222,9 @@ RSpec.describe AmrHeatmapController, type: :controller do
 
         # Compare controller output to our test sample.
         json_response = JSON.parse(response.body)
-        expect(json_response[0]).to include_json(sample_id: sample_one["id"],
-                                                 sample_name: sample_one["name"],
-                                                 amr_counts: [],
+        expect(json_response[0]).to include_json(sampleId: sample_one["id"],
+                                                 sampleName: sample_one["name"],
+                                                 amrCounts: [],
                                                  error: "")
       end
     end
