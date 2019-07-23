@@ -7,8 +7,15 @@ import AMRHeatmapVis from "~/components/views/amr_heatmap/AMRHeatmapVis";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import ErrorBoundary from "~/components/ErrorBoundary";
 import { getAMRCounts } from "~/api/amr";
+import { getSampleMetadataFields } from "~/api/metadata";
+import {
+  processMetadata,
+  processMetadataTypes,
+} from "~/components/utils/metadata";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
+import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
+import { createCSVObjectURL } from "~utils/csv";
 
 import cs from "./amr_heatmap_view.scss";
 
@@ -50,28 +57,38 @@ export default class AMRHeatmapView extends React.Component {
 
   componentDidMount() {
     const { sampleIds } = this.props;
-    this.requestAMRCountsData(sampleIds);
+    this.requestSampleData(sampleIds);
   }
 
-  async requestAMRCountsData(sampleIds) {
-    const rawSampleData = await getAMRCounts(sampleIds);
+  async requestSampleData(sampleIds) {
+    const [rawSampleData, rawSamplesMetadataTypes] = await Promise.all([
+      getAMRCounts(sampleIds),
+      getSampleMetadataFields(sampleIds),
+    ]);
     const filteredSamples = rawSampleData.filter(
       sampleData => sampleData.error === ""
     );
-    const samplesWithAMRCounts = this.processAMRCounts(filteredSamples);
+    const samplesWithKeyedMetadata = filteredSamples.map(sample => ({
+      ...sample,
+      metadata: processMetadata(sample.metadata, true),
+    }));
+    const samplesWithAMRCounts = this.processSampleAMRCounts(
+      samplesWithKeyedMetadata
+    );
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
+    const samplesMetadataTypes = processMetadataTypes(rawSamplesMetadataTypes);
     this.setState({
       rawSampleData,
       samplesWithAMRCounts,
-      sampleIds,
       maxValues,
+      samplesMetadataTypes,
       loading: false,
     });
   }
 
-  processAMRCounts(filteredSamples) {
+  processSampleAMRCounts(filteredSamples) {
     filteredSamples.forEach(sample => {
-      sample.amr_counts.forEach(amrCount => {
+      sample.amrCounts.forEach(amrCount => {
         // The following three lines are a kind of hacky workaround to the fact that
         // the amr counts stored in the db have a gene name that includes the actual gene
         // plus the drug class.
@@ -96,7 +113,7 @@ export default class AMRHeatmapView extends React.Component {
   findMaxValues(samplesWithAMRCounts) {
     const maxValues = samplesWithAMRCounts.reduce(
       (accum, currentSample) => {
-        currentSample.amr_counts.forEach(amrCount => {
+        currentSample.amrCounts.forEach(amrCount => {
           accum.depth = Math.max(accum.depth, amrCount.depth);
           accum.coverage = Math.max(accum.coverage, amrCount.coverage);
         });
@@ -165,6 +182,23 @@ export default class AMRHeatmapView extends React.Component {
 
   //*** Post-update methods ***
 
+  computeHeatmapValuesForCSV() {
+    const { samplesWithAMRCounts } = this.state;
+    const csvRows = samplesWithAMRCounts.flatMap(sample => {
+      const csvRow = sample.amrCounts.map(amrCount => {
+        const row = [
+          `${sample.sampleName},${amrCount.gene},${amrCount.allele},${
+            amrCount.coverage
+          },${amrCount.depth}`,
+        ];
+        return row;
+      });
+      return csvRow;
+    });
+    const csvHeaders = ["sample_name,gene_name,allele_name,coverage,depth"];
+    return [csvHeaders, csvRows];
+  }
+
   getSidebarParams() {
     const { sidebarMode, selectedSampleId, selectedGene } = this.state;
     switch (sidebarMode) {
@@ -185,10 +219,30 @@ export default class AMRHeatmapView extends React.Component {
     }
   }
 
+  getDownloadCSVLink() {
+    const [csvHeaders, csvRows] = this.computeHeatmapValuesForCSV();
+    return (
+      <a
+        href={createCSVObjectURL(csvHeaders, csvRows)}
+        download="idseq_amr_heatmap_values.csv"
+        target="_blank"
+        rel="noopener noreferrer"
+        key={"Download_CSV_link"}
+      >
+        Download CSV
+      </a>
+    );
+  }
+
+  getDownloadOptions() {
+    return [{ text: this.getDownloadCSVLink(), value: "csv" }];
+  }
+
   //*** Render methods ***
 
   renderHeader() {
     const { sampleIds } = this.props;
+    const { loading } = this.state;
     return (
       <ViewHeader className={cs.viewHeader}>
         <ViewHeader.Content>
@@ -199,6 +253,15 @@ export default class AMRHeatmapView extends React.Component {
             label={`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
           />
         </ViewHeader.Content>
+        {!loading && (
+          <ViewHeader.Controls className={cs.controls}>
+            <DownloadButtonDropdown
+              className={cs.controlElement}
+              options={this.getDownloadOptions()}
+              disabled={loading}
+            />
+          </ViewHeader.Controls>
+        )}
       </ViewHeader>
     );
   }
@@ -218,7 +281,12 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   renderVisualization() {
-    const { loading, samplesWithAMRCounts, selectedOptions } = this.state;
+    const {
+      loading,
+      samplesWithAMRCounts,
+      selectedOptions,
+      samplesMetadataTypes,
+    } = this.state;
     if (loading) {
       return (
         <p className={cs.loadingIndicator}>
@@ -235,6 +303,7 @@ export default class AMRHeatmapView extends React.Component {
             selectedOptions={selectedOptions}
             onSampleLabelClick={this.onSampleLabelClick}
             onGeneLabelClick={this.onGeneLabelClick}
+            samplesMetadataTypes={samplesMetadataTypes}
           />
         </ErrorBoundary>
       </div>

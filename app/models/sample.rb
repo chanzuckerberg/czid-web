@@ -229,8 +229,8 @@ class Sample < ApplicationRecord
     end
   end
 
-  def results_folder_files
-    pr = first_pipeline_run
+  def results_folder_files(pipeline_version = nil)
+    pr = pipeline_version ? pipeline_run_by_version(pipeline_version) : first_pipeline_run
     return list_outputs(sample_output_s3_path) unless pr
     file_list = []
     if pipeline_version_at_least_2(pr.pipeline_version)
