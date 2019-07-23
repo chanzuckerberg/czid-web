@@ -442,6 +442,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.integer "family_taxid", default: -300, null: false
     t.integer "is_phage", limit: 1, default: 0, null: false
     t.index ["pipeline_run_id", "tax_id", "count_type", "tax_level"], name: "index_pr_tax_hit_level_tc", unique: true
+    t.index ["tax_id"], name: "index_taxon_counts_on_tax_id"
   end
 
   create_table "taxon_descriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|

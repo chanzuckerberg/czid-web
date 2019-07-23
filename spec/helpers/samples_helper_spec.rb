@@ -11,7 +11,10 @@ RSpec.describe SamplesHelper, type: :helper do
       before do
         @project = create(:public_project)
         @joe = create(:joe)
-        @host_genome = create(:host_genome)
+        # Add the metadata fields to the host genome so that the metadata will pass validation.
+        @host_genome = create(:host_genome, metadata_fields: [
+                                "Fake Metadata Field One", "Fake Metadata Field Two"
+                              ])
       end
 
       let(:basespace_sample_attributes) do
@@ -29,10 +32,8 @@ RSpec.describe SamplesHelper, type: :helper do
       let(:metadata_attributes) do
         {
           fake_sample_name.to_s => {
-            "Sample Type" => "CSF",
-            "Nucleotide Type" => "DNA",
-            "Collection Location" => "CA, USA",
-            "Collection Date" => "2010-01"
+            "Fake Metadata Field One" => "CSF",
+            "Fake Metadata Field Two" => "DNA"
           }
         }
       end
@@ -61,15 +62,11 @@ RSpec.describe SamplesHelper, type: :helper do
         expect(created_sample.uploaded_from_basespace).to be 1
         expect(created_sample.user).to eq(@joe)
 
-        expect(Metadatum.where(sample_id: created_sample.id).length).to be 4
-        expect(Metadatum.where(sample_id: created_sample.id, key: "Sample Type").length).to be 1
-        expect(Metadatum.where(sample_id: created_sample.id, key: "Sample Type")[0].raw_value).to eq("CSF")
-        expect(Metadatum.where(sample_id: created_sample.id, key: "Nucleotide Type").length).to be 1
-        expect(Metadatum.where(sample_id: created_sample.id, key: "Nucleotide Type")[0].raw_value).to eq("DNA")
-        expect(Metadatum.where(sample_id: created_sample.id, key: "Collection Location").length).to be 1
-        expect(Metadatum.where(sample_id: created_sample.id, key: "Collection Location")[0].raw_value).to eq("CA, USA")
-        expect(Metadatum.where(sample_id: created_sample.id, key: "Collection Date").length).to be 1
-        expect(Metadatum.where(sample_id: created_sample.id, key: "Collection Date")[0].raw_value).to eq("2010-01")
+        expect(Metadatum.where(sample_id: created_sample.id).length).to be 2
+        expect(Metadatum.where(sample_id: created_sample.id, key: "Fake Metadata Field One").length).to be 1
+        expect(Metadatum.where(sample_id: created_sample.id, key: "Fake Metadata Field One")[0].raw_value).to eq("CSF")
+        expect(Metadatum.where(sample_id: created_sample.id, key: "Fake Metadata Field Two").length).to be 1
+        expect(Metadatum.where(sample_id: created_sample.id, key: "Fake Metadata Field Two")[0].raw_value).to eq("DNA")
       end
 
       it "fails if basespace_access_token is not provided" do
