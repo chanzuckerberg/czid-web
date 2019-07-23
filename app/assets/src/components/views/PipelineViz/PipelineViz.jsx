@@ -655,7 +655,8 @@ class PipelineViz extends React.Component {
     const {
       graphData: { stages },
     } = this.props;
-    const isOpened = this.state.stagesOpened[i];
+    const { stagesOpened, hovered } = this.state;
+    const isOpened = stagesOpened[i];
 
     // Stages without dag_json recorded are not toggleable
     const toggleable = i < stages.length;
@@ -670,7 +671,7 @@ class PipelineViz extends React.Component {
           />
         </div>
         <div
-          className={cx(cs.graph, this.state.hovered && cs.hovered)}
+          className={cx(cs.graph, hovered && cs.hovered)}
           onMouseMove={e => this.handleMouseMove(i, e)}
           ref={ref => {
             this.graphContainers[i] = ref;
@@ -684,7 +685,7 @@ class PipelineViz extends React.Component {
         <div
           className={cx(
             isOpened && toggleable ? cs.hidden : cs.stageButton,
-            !toggleable && cs.notToggableStageButton
+            !toggleable && cs.disabled
           )}
           onClick={() => this.toggleStage(i)}
         >

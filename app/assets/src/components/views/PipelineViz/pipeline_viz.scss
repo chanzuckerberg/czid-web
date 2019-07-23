@@ -31,11 +31,11 @@
   font-weight: $font-weight-bold;
   cursor: pointer;
   word-break: break-word;
-}
 
-.notToggableStageButton {
-  cursor: default;
-  opacity: 0.5;
+  &.disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
 }
 
 .stageArrow {
