@@ -38,7 +38,10 @@ class PipelineViz extends React.Component {
     this.panZoomContainer = React.createRef();
 
     this.state = {
-      stagesOpened: [true, true, true, true],
+      // Set stages that can be rendered to open, and others to closed.
+      stagesOpened: this.stageNames.map(
+        (_, i) => i < this.props.graphData.stages.length
+      ),
       interStageArrows: ["", "", ""],
       sidebarVisible: false,
       sidebarParams: {},
@@ -505,18 +508,22 @@ class PipelineViz extends React.Component {
     graph.moveNodeToPosition(END_NODE_ID, xEndNodePos, yStartNodePos);
   }
 
-  closeIfNonActiveStage(graph, stageIndex) {
+  closeIfNonActiveStage(stageIndex) {
     const {
       graphData: { stages },
     } = this.props;
     const stageData = stages[stageIndex];
+    const graph = this.graphs[stageIndex];
     if (stageData.jobStatus != "STARTED") {
       graph.afterDrawingOnce(() => this.toggleStage(stageIndex));
     }
   }
 
   drawGraphs() {
-    this.stageNames.forEach((_, i) => {
+    const {
+      graphData: { stages },
+    } = this.props;
+    stages.forEach((_, i) => {
       this.drawStageGraph(i);
     });
   }
@@ -628,11 +635,11 @@ class PipelineViz extends React.Component {
       edgeData,
       options
     );
+    this.graphs.push(currStageGraph);
+
     currStageGraph.minimizeSizeGivenScale(1.0);
     this.centerEndNodeVertically(currStageGraph);
-    this.closeIfNonActiveStage(currStageGraph, index);
-
-    this.graphs.push(currStageGraph);
+    this.closeIfNonActiveStage(index);
   }
 
   handleWindowResize = () => {
@@ -645,32 +652,45 @@ class PipelineViz extends React.Component {
   };
 
   renderStageContainer(stageName, i) {
+    const {
+      graphData: { stages },
+    } = this.props;
     const isOpened = this.state.stagesOpened[i];
+
+    // Stages without dag_json recorded are not toggleable
+    const toggleable = i < stages.length;
+
+    const openedStageContainer = toggleable && (
+      <div className={isOpened ? cs.openedStage : cs.hidden}>
+        <div className={cs.graphLabel}>
+          {stageName}
+          <RemoveIcon
+            onClick={() => this.toggleStage(i)}
+            className={cs.closeIcon}
+          />
+        </div>
+        <div
+          className={cx(cs.graph, this.state.hovered && cs.hovered)}
+          onMouseMove={e => this.handleMouseMove(i, e)}
+          ref={ref => {
+            this.graphContainers[i] = ref;
+          }}
+        />
+      </div>
+    );
+
     return (
       <div className={cs.stage}>
         <div
-          className={isOpened ? cs.hidden : cs.stageButton}
+          className={cx(
+            isOpened && toggleable ? cs.hidden : cs.stageButton,
+            !toggleable && cs.notToggableStageButton
+          )}
           onClick={() => this.toggleStage(i)}
         >
           {stageName}
         </div>
-
-        <div className={isOpened ? cs.openedStage : cs.hidden}>
-          <div className={cs.graphLabel}>
-            {stageName}
-            <RemoveIcon
-              onClick={() => this.toggleStage(i)}
-              className={cs.closeIcon}
-            />
-          </div>
-          <div
-            className={cx(cs.graph, this.state.hovered && cs.hovered)}
-            onMouseMove={e => this.handleMouseMove(i, e)}
-            ref={ref => {
-              this.graphContainers[i] = ref;
-            }}
-          />
-        </div>
+        {openedStageContainer}
       </div>
     );
   }
