@@ -25,9 +25,11 @@ FactoryBot.define do
     # ensure the metadata field is added to the host genome
     before(:create) do |sample, options|
       options.metadata_fields.each_key do |metadata_field_name|
-        metadata_field = create(:metadata_field, name: metadata_field_name, default_for_new_host_genome: 1)
-        # This is needed to make metadata pass validation below
-        sample.host_genome.metadata_fields << metadata_field
+        unless MetadataField.exists?(name: metadata_field_name)
+          metadata_field = create(:metadata_field, name: metadata_field_name, default_for_new_host_genome: 1)
+          # This is needed to make metadata pass validation below
+          sample.host_genome.metadata_fields << metadata_field
+        end
       end
     end
 
