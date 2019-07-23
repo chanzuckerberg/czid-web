@@ -1,5 +1,5 @@
 class HostGenome < ApplicationRecord
-  has_many :samples
+  has_many :samples, dependent: :restrict_with_exception
   has_and_belongs_to_many :metadata_fields
 
   before_create :add_default_metadata_fields

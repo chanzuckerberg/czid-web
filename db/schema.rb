@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_717_221_024) do
+ActiveRecord::Schema.define(version: 20_190_719_233_448) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -62,6 +62,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.bigint "background_id"
     t.bigint "pipeline_run_id"
     t.index ["background_id", "pipeline_run_id"], name: "index_bg_pr_id", unique: true
+    t.index ["pipeline_run_id"], name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
   end
 
   create_table "backgrounds_samples", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -93,8 +94,8 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
   end
 
   create_table "favorite_projects", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
-    t.integer "project_id"
-    t.integer "user_id"
+    t.bigint "project_id"
+    t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["project_id"], name: "index_favorite_projects_on_project_id"
@@ -172,13 +173,13 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.string "raw_value"
     t.string "string_validated_value"
     t.decimal "number_validated_value", precision: 36, scale: 9
-    t.integer "sample_id"
+    t.bigint "sample_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.date "date_validated_value"
     t.bigint "metadata_field_id"
     t.string "specificity"
-    t.integer "location_id"
+    t.bigint "location_id"
     t.index ["metadata_field_id"], name: "index_metadata_on_metadata_field_id"
     t.index ["sample_id", "key"], name: "index_metadata_on_sample_id_and_key", unique: true
   end
@@ -205,6 +206,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
   create_table "metadata_fields_projects", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.bigint "project_id", null: false
     t.bigint "metadata_field_id", null: false
+    t.index ["metadata_field_id"], name: "metadata_fields_projects_metadata_field_id_fk"
     t.index ["project_id", "metadata_field_id"], name: "index_projects_metadata_fields", unique: true
   end
 
@@ -250,6 +252,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.bigint "phylo_tree_id"
     t.bigint "pipeline_run_id"
     t.index ["phylo_tree_id", "pipeline_run_id"], name: "index_pt_pr_id", unique: true
+    t.index ["pipeline_run_id"], name: "phylo_trees_pipeline_runs_pipeline_run_id_fk"
   end
 
   create_table "pipeline_run_stages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
@@ -314,6 +317,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.integer "max_input_fragments"
     t.text "error_message"
     t.string "known_user_error"
+    t.index ["alignment_config_id"], name: "pipeline_runs_alignment_config_id_fk"
     t.index ["job_status"], name: "index_pipeline_runs_on_job_status"
     t.index ["sample_id"], name: "index_pipeline_runs_on_sample_id"
   end
@@ -369,6 +373,7 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.datetime "client_updated_at"
     t.integer "uploaded_from_basespace", limit: 1, default: 0
     t.string "upload_error"
+    t.index ["host_genome_id"], name: "samples_host_genome_id_fk"
     t.index ["project_id", "name"], name: "index_samples_name_project_id", unique: true
     t.index ["user_id"], name: "index_samples_on_user_id"
   end
@@ -577,4 +582,36 @@ ActiveRecord::Schema.define(version: 20_190_717_221_024) do
     t.string "name"
     t.index ["user_id"], name: "index_visualizations_on_user_id"
   end
+
+  add_foreign_key "amr_counts", "pipeline_runs", name: "amr_counts_pipeline_run_id_fk"
+  add_foreign_key "backgrounds_pipeline_runs", "backgrounds", name: "backgrounds_pipeline_runs_background_id_fk"
+  add_foreign_key "backgrounds_pipeline_runs", "pipeline_runs", name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
+  add_foreign_key "backgrounds_samples", "backgrounds", name: "backgrounds_samples_background_id_fk"
+  add_foreign_key "backgrounds_samples", "samples", name: "backgrounds_samples_sample_id_fk"
+  add_foreign_key "favorite_projects", "projects", name: "favorite_projects_project_id_fk"
+  add_foreign_key "favorite_projects", "users", name: "favorite_projects_user_id_fk"
+  add_foreign_key "host_genomes_metadata_fields", "host_genomes", name: "host_genomes_metadata_fields_host_genome_id_fk"
+  add_foreign_key "host_genomes_metadata_fields", "metadata_fields", name: "host_genomes_metadata_fields_metadata_field_id_fk"
+  add_foreign_key "input_files", "samples", name: "input_files_sample_id_fk"
+  add_foreign_key "job_stats", "pipeline_runs", name: "job_stats_pipeline_run_id_fk"
+  add_foreign_key "metadata", "metadata_fields", name: "metadata_metadata_field_id_fk"
+  add_foreign_key "metadata", "samples", name: "metadata_sample_id_fk"
+  add_foreign_key "metadata_fields_projects", "metadata_fields", name: "metadata_fields_projects_metadata_field_id_fk"
+  add_foreign_key "metadata_fields_projects", "projects", name: "metadata_fields_projects_project_id_fk"
+  add_foreign_key "output_states", "pipeline_runs", name: "output_states_pipeline_run_id_fk"
+  add_foreign_key "phylo_trees", "projects", name: "phylo_trees_project_id_fk"
+  add_foreign_key "phylo_trees", "users", name: "phylo_trees_user_id_fk"
+  add_foreign_key "phylo_trees_pipeline_runs", "phylo_trees", name: "phylo_trees_pipeline_runs_phylo_tree_id_fk"
+  add_foreign_key "phylo_trees_pipeline_runs", "pipeline_runs", name: "phylo_trees_pipeline_runs_pipeline_run_id_fk"
+  add_foreign_key "pipeline_run_stages", "pipeline_runs", name: "pipeline_run_stages_pipeline_run_id_fk"
+  add_foreign_key "pipeline_runs", "alignment_configs", name: "pipeline_runs_alignment_config_id_fk"
+  add_foreign_key "pipeline_runs", "samples", name: "pipeline_runs_sample_id_fk"
+  add_foreign_key "projects_users", "projects", name: "projects_users_project_id_fk"
+  add_foreign_key "projects_users", "users", name: "projects_users_user_id_fk"
+  add_foreign_key "samples", "host_genomes", name: "samples_host_genome_id_fk"
+  add_foreign_key "samples", "projects", name: "samples_project_id_fk"
+  add_foreign_key "samples", "users", name: "samples_user_id_fk"
+  add_foreign_key "samples_visualizations", "samples", name: "samples_visualizations_sample_id_fk"
+  add_foreign_key "samples_visualizations", "visualizations", name: "samples_visualizations_visualization_id_fk"
+  add_foreign_key "visualizations", "users", name: "visualizations_user_id_fk"
 end

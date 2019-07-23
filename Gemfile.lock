@@ -875,6 +875,8 @@ GEM
     http_parser.rb (0.6.0)
     i18n (1.6.0)
       concurrent-ruby (~> 1.0)
+    immigrant (0.3.6)
+      activerecord (>= 3.0)
     jbuilder (2.8.0)
       activesupport (>= 4.2.0)
       multi_json (>= 1.2)
@@ -1167,6 +1169,7 @@ DEPENDENCIES
   health_check (>= 2.7.0)
   honeycomb-rails (>= 0.8.1)
   http-2
+  immigrant
   jbuilder (~> 2.5)
   listen (>= 3.0.5, < 3.2)
   logging-rails
@@ -1206,4 +1209,4 @@ DEPENDENCIES
   will_paginate
 
 BUNDLED WITH
-   2.0.1
+   2.0.2
