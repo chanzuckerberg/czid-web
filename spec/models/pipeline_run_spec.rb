@@ -36,7 +36,6 @@ describe PipelineRun, type: :model do
           pipeline_run.update_job_status
 
           pipeline_run.pipeline_run_stages.each do |prs|
-            puts prs.dag_json
             expect(prs.dag_json).to be_truthy
           end
         end
