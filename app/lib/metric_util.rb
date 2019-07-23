@@ -151,9 +151,9 @@ class MetricUtil
       end
     end
 
-    def a_test?
-      Rails.env == "test" ||
-        (request && request.user_agent == "Rails Testing")
+    def a_test?(request = nil)
+      Rails.env.test? ||
+        (!request.nil? && request.user_agent == "Rails Testing")
     end
   end
 end
