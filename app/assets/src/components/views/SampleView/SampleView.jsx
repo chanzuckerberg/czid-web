@@ -331,6 +331,16 @@ class SampleView extends React.Component {
         issueType = "warning";
         link = `/samples/${sample.id}/results_folder`;
         break;
+      case "BROKEN_PAIRS":
+        status = "COMPLETE - ISSUE";
+        message =
+          "Sorry, something was wrong with your input files. Either paired reads did not follow the same order in both files, " +
+          "or your read pairs followed an unconventional naming scheme.";
+        linkText =
+          "Please ensure mates have the same identifier and follow the same order in both input files, then reupload";
+        issueType = "warning";
+        link = "/samples/upload";
+        break;
       default:
         status = "SAMPLE FAILED";
         message = "Oh no! There was an issue processing your sample.";
