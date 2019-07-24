@@ -636,7 +636,6 @@ class PipelineViz extends React.Component {
       options
     );
     this.graphs.push(currStageGraph);
-
     currStageGraph.minimizeSizeGivenScale(1.0);
     this.centerEndNodeVertically(currStageGraph);
     this.closeIfNonActiveStage(index);
@@ -661,7 +660,7 @@ class PipelineViz extends React.Component {
     // Stages without dag_json recorded are not toggleable
     const toggleable = i < stages.length;
 
-    const openedStageContainer = toggleable && (
+    const stageContainer = toggleable && (
       <div className={isOpened ? cs.openedStage : cs.hidden}>
         <div className={cs.graphLabel}>
           {stageName}
@@ -691,7 +690,7 @@ class PipelineViz extends React.Component {
         >
           {stageName}
         </div>
-        {openedStageContainer}
+        {stageContainer}
       </div>
     );
   }
