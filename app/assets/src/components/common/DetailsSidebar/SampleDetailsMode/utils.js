@@ -30,16 +30,19 @@ export const processPipelineInfo = (additionalInfo, showPipelineVizLink) => {
       text: numberWithCommas(pipelineRun.total_reads),
     };
     pipelineInfo.totalErccReads = { text: `${totalErccReads}${erccPercent}` };
-    pipelineInfo.pipelineVersion = {
-      text: `v${pipelineRun.version.pipeline}`,
-      ...(showPipelineVizLink
-        ? {
-            linkLabel: "View Pipeline Visualization",
-            link: `/samples/${pipelineRun.sample_id}/pipeline_viz/${pipelineRun
-              .version.pipeline || ""}`,
-          }
-        : {}),
-    };
+    if (pipelineRun.version.pipeline) {
+      pipelineInfo.pipelineVersion = {
+        text: `v${pipelineRun.version.pipeline}`,
+        ...(showPipelineVizLink
+          ? {
+              linkLabel: "View Pipeline Visualization",
+              link: `/samples/${pipelineRun.sample_id}/pipeline_viz/${
+                pipelineRun.version.pipeline
+              }`,
+            }
+          : {}),
+      };
+    }
   }
 
   if (summaryStats) {

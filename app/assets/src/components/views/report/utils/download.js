@@ -19,7 +19,7 @@ const getDownloadOptions = (pipelineRun, showPipelineVizLink) => {
     assembled && NON_HOST_CONTIGS_MAPPING_LABEL,
     stageTwoComplete && UNMAPPED_READS_LABEL,
     RESULTS_FOLDER_LABEL,
-    ...(showPipelineVizLink ? [PIPELINE_VIZ_LABEL] : []),
+    showPipelineVizLink && pipelineRun.pipeline_version && PIPELINE_VIZ_LABEL,
   ]);
 };
 
@@ -65,8 +65,7 @@ const getDownloadLinkInfoMap = (sampleId, pipelineRun) => ({
     newPage: true,
   },
   [PIPELINE_VIZ_LABEL]: {
-    path: `/samples/${sampleId}/pipeline_viz/${pipelineRun.pipeline_version ||
-      ""}`,
+    path: `/samples/${sampleId}/pipeline_viz/${pipelineRun.pipeline_version}`,
     newPage: true,
   },
 });
