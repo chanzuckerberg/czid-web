@@ -40,7 +40,7 @@ class MetricUtil
   # segment says the server lib batches automatically. See
   # https://segment.com/docs/sources/server/http/#batch.
   def self.log_analytics_event(event, user, properties = {}, request = nil)
-    if SEGMENT_ANALYTICS
+    if SEGMENT_ANALYTICS && !a_test?(request)
       # current_user should be passed from a controller
       user_id = user ? user.id : 0
 
@@ -149,6 +149,11 @@ class MetricUtil
           Rails.logger.warn("Unable to send data: #{response.message}")
         end
       end
+    end
+
+    def a_test?(request = nil)
+      Rails.env.test? ||
+        (!request.nil? && request.user_agent == "Rails Testing")
     end
   end
 end
