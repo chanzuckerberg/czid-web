@@ -4,7 +4,9 @@ class BasespaceController < ApplicationController
   include HttpHelper
   include BasespaceHelper
 
-  before_action :admin_required
+  before_action do
+    allowed_feature_required("basespace_upload_enabled", true)
+  end
 
   def oauth
     disable_header_navigation
