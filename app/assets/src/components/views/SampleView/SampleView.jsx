@@ -334,10 +334,11 @@ class SampleView extends React.Component {
       case "BROKEN_PAIRS":
         status = "COMPLETE - ISSUE";
         message =
-          "Sorry, something was wrong with your input files. Either paired reads did not follow the same order in both files, " +
-          "or they followed an unconventional naming scheme.";
-        linkText =
-          "Please ensure paired reads have the same identifier and follow the same order in both input files, then reupload";
+          "Sorry, something was wrong with your input files. " +
+          "Either the paired reads did not follow the same order in both files, " +
+          "or they were not named using the same identifiers in both files, " +
+          "or some reads were missing a mate.";
+        linkText = "Please fix the read pairing, then reupload";
         issueType = "warning";
         link = "/samples/upload";
         break;
