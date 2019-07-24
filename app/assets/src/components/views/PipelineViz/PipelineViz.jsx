@@ -523,6 +523,7 @@ class PipelineViz extends React.Component {
     const {
       graphData: { stages },
     } = this.props;
+
     stages.forEach((_, i) => {
       this.drawStageGraph(i);
     });
