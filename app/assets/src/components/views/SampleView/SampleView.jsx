@@ -335,8 +335,7 @@ class SampleView extends React.Component {
         status = "COMPLETE - ISSUE";
         message =
           "Sorry, something was wrong with your input files. " +
-          "Either the paired reads did not follow the same order in both files, " +
-          "or they were not named using the same identifiers in both files, " +
+          "Either the paired reads were not named using the same identifiers in both files, " +
           "or some reads were missing a mate.";
         linkText = "Please fix the read pairing, then reupload";
         issueType = "warning";
