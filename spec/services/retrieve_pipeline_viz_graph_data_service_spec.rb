@@ -109,9 +109,9 @@ RSpec.describe RetrievePipelineVizGraphDataService do
     before do
       # Project and sample required to create pipeline run.
       project = create(:public_project)
-      sample = create(:sample, project: project)
+      @sample = create(:sample, project: project)
 
-      @pr = create(:pipeline_run, sample: sample, pipeline_run_stages_data: pr_stages_data)
+      @pr = create(:pipeline_run, sample: @sample, pipeline_run_stages_data: pr_stages_data)
     end
 
     it "should be structured correctly" do
@@ -136,6 +136,21 @@ RSpec.describe RetrievePipelineVizGraphDataService do
         results = RetrievePipelineVizGraphDataService.call(@pr.id, is_admin, false)
 
         # Only host filtering (other stages omitted for brevity)
+        expect(results[:stages].length).to be(1)
+      end
+    end
+
+    context "for an errored pipeline run with missing dag_json stages" do
+      it "only returns information for stages with dag_jsons" do
+        stage_without_dag_json = pr_stages_data[1].clone
+        stage_without_dag_json[:dag_json] = nil
+
+        pr_stages_data_with_missing_dag_json = pr_stages_data.clone
+        pr_stages_data_with_missing_dag_json[1] = stage_without_dag_json
+
+        pr = create(:pipeline_run, sample: @sample, pipeline_run_stages_data: pr_stages_data_with_missing_dag_json)
+        results = RetrievePipelineVizGraphDataService.call(pr.id, true, false)
+
         expect(results[:stages].length).to be(1)
       end
     end

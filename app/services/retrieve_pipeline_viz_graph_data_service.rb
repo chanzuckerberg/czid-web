@@ -28,7 +28,7 @@ class RetrievePipelineVizGraphDataService
     @all_dag_jsons = []
     @stage_names = []
     @pipeline_run.pipeline_run_stages.each do |stage|
-      if stage.name != "Experimental" || is_admin
+      if stage.dag_json && (stage.name != "Experimental" || is_admin)
         @all_dag_jsons.push(JSON.parse(stage.dag_json || "{}"))
         @stage_names.push(stage.name)
       end
