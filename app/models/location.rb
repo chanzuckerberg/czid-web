@@ -90,7 +90,7 @@ class Location < ApplicationRecord
     existing = Location.find_by(locationiq_id: loc[:locationiq_id])
     if existing
       existing
-    elsif loc[:osm_id] > 0 && loc[:osm_type]
+    elsif loc[:osm_id].to_i > 0 && loc[:osm_type]
       success, resp = geosearch_by_osm_id(loc[:osm_id], loc[:osm_type])
       raise "Couldn't fetch OSM ID #{loc[:osm_id]} (#{loc[:osm_type]})" unless success
 
