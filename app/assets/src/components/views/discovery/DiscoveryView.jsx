@@ -824,7 +824,8 @@ class DiscoveryView extends React.Component {
       return;
     }
 
-    const sampleIds = mapLocationData[mapPreviewedLocationId].sample_ids;
+    const filters = this.preparedFilters();
+    filters["locationV2"] = mapLocationData[mapPreviewedLocationId].name;
 
     // Fetch previewed samples
     // TODO(jsheu): Consider paginating fetching for thousands of samples at a location
@@ -832,7 +833,8 @@ class DiscoveryView extends React.Component {
       samples: fetchedSamples,
       sampleIds: fetchedSampleIds,
     } = await getDiscoverySamples({
-      sampleIds,
+      // TODO(jsheu): Consider using location ID instead (need multi-level search).
+      filters,
       limit: 1e4, // Server needs a max, 1e4 at one location is a good cutoff.
       listAllIds: true,
     });
@@ -848,10 +850,6 @@ class DiscoveryView extends React.Component {
 
     // Fetch stats and dimensions for the map sidebar. Special request with the current filters
     // and the previewed location.
-    const locationName = mapLocationData[mapPreviewedLocationId].name;
-    const filters = this.preparedFilters();
-    filters["locationV2"] = locationName;
-
     const params = {
       domain,
       projectId,
