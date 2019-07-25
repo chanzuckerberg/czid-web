@@ -681,30 +681,37 @@ class DiscoveryView extends React.Component {
   };
 
   getClientSideSuggestions = async query => {
+    const { allowedFeatures } = this.props;
     const { projects } = this.state;
     const dimensions = this.getCurrentDimensions();
 
     let suggestions = {};
     const re = new RegExp(escapeRegExp(query), "i");
-    ["host", "tissue", "location"].forEach(category => {
-      let dimension = find({ dimension: category }, dimensions);
-      if (dimension) {
-        const results = dimension.values
-          .filter(entry => re.test(entry.text))
-          .map(entry => ({
-            category,
-            id: entry.value,
-            title: entry.text,
-          }));
+    const allowedMaps = allowedFeatures && allowedFeatures.includes("maps");
+    ["host", "tissue", allowedMaps ? "locationV2" : "location"].forEach(
+      category => {
+        let dimension = find({ dimension: category }, dimensions);
+        if (dimension) {
+          const results = dimension.values
+            .filter(entry => re.test(entry.text))
+            .map(entry => ({
+              category,
+              id: entry.value,
+              title: entry.text,
+            }));
 
-        if (results.length) {
-          suggestions[category] = {
-            name: capitalize(category),
-            results,
-          };
+          if (results.length) {
+            suggestions[category] = {
+              name:
+                allowedMaps && category === "locationV2"
+                  ? "location"
+                  : capitalize(category),
+              results,
+            };
+          }
         }
       }
-    });
+    );
 
     const filteredProjects = projects.filter(project => re.test(project.name));
     if (filteredProjects.length) {
