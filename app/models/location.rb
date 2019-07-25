@@ -100,7 +100,6 @@ class Location < ApplicationRecord
     else
       # If osm_id and osm_type are missing, just use the original params.
       # 'New' without saving so make sure caller saves.
-      loc[:osm_type] = ""
       new_from_params(loc)
     end
   end
