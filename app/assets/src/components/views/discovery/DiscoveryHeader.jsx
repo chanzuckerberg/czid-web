@@ -22,7 +22,7 @@ class DiscoveryHeader extends React.Component {
     // category "Tissue": key: "tissue", value: id, text: title
     // TODO(jsheu): Replace location "v1"
     let category = result.category;
-    if (category !== "locationV2") category = gicategory.toLowerCase();
+    if (category !== "locationV2") category = category.toLowerCase();
     let value = result.id;
     switch (category) {
       case "taxon": {
