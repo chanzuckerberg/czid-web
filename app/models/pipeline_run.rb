@@ -401,7 +401,7 @@ class PipelineRun < ApplicationRecord
     ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
     return unless status.exitstatus.zero?
-    ercc_lines = Syscall.pipe(["aws", "s3", "cp", ercc_s3_path, "-"], ["grep", "ERCC"], ["cut", "-f1,2"])
+    ercc_lines = Syscall.pipe_with_output(["aws", "s3", "cp", ercc_s3_path, "-"], ["grep", "ERCC"], ["cut", "-f1,2"])
     ercc_counts_array = []
     ercc_lines.split(/\r?\n/).each do |line|
       fields = line.split("\t")
