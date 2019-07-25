@@ -5,6 +5,7 @@ class PipelineRun < ApplicationRecord
   include ApplicationHelper
   include PipelineOutputsHelper
   include PipelineRunsHelper
+  include DagJsonHelper
   belongs_to :sample
   belongs_to :alignment_config
   has_many :pipeline_run_stages, dependent: :destroy
@@ -344,6 +345,11 @@ class PipelineRun < ApplicationRecord
       name: PipelineRunStage::EXPT_STAGE_NAME,
       job_command_func: 'experimental_command'
     )
+
+    dag_names = [DAG_NAME_HOST_FILTER, DAG_NAME_ALIGNMENT, DAG_NAME_POST_PROCESS, DAG_NAME_EXPERIMENTAL]
+    run_stages.each_with_index do |stage, i|
+      stage.dag_json = generate_dag_json(self, dag_names[i])
+    end
 
     self.pipeline_run_stages = run_stages
   end

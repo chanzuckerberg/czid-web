@@ -37,6 +37,7 @@ describe PipelineRun, type: :model do
 
           pipeline_run.pipeline_run_stages.each do |prs|
             expect(prs.dag_json).to be_truthy
+            expect(JSON.parse(prs.dag_json)).to be_truthy # Check if valid JSON.
           end
         end
 
