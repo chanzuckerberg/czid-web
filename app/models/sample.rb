@@ -727,6 +727,10 @@ class Sample < ApplicationRecord
       }
     else
       # If the value didn't change or isn't present, don't re-save the metadata field.
+      if m.id && val.blank?
+        # If the object existed and the user cleared out the new value, delete it.
+        m.delete
+      end
       return {
         metadatum: nil,
         status: "ok"

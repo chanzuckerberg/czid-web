@@ -124,9 +124,6 @@ class Metadatum < ApplicationRecord
       if loc[:name].present?
         self.string_validated_value = loc[:name]
         self.location_id = nil
-      else
-        # Delete if they cleared out the field
-        destroy unless destroyed?
       end
       return
     end

@@ -71,7 +71,7 @@ class GeoSearchInputBox extends React.Component {
     const { onResultSelect } = this.props;
 
     // Wrap plain text submission
-    if (isString(result)) result = { name: result };
+    if (isString(result) && result !== "") result = { name: result };
 
     this.setState({ value: result });
 
