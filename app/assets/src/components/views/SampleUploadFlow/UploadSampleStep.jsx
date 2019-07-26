@@ -65,6 +65,7 @@ class UploadSampleStep extends React.Component {
     removedLocalFiles: [], // Invalid local files that were removed.
     sampleNamesToFiles: {}, // Needed for local samples.
     validatingSamples: false, // Disable the "Continue" button while validating samples.
+    showNoProjectError: false, // Whether we should show an error if no project is currently selected.
   };
 
   async componentDidMount() {
@@ -201,6 +202,7 @@ class UploadSampleStep extends React.Component {
     this.props.onDirty();
     this.setState({
       validatingSamples: true,
+      showNoProjectError: false,
     });
 
     const [
@@ -344,6 +346,7 @@ class UploadSampleStep extends React.Component {
     this.props.onDirty();
     this.setState({
       validatingSamples: true,
+      showNoProjectError: false,
     });
 
     const [
@@ -571,6 +574,12 @@ class UploadSampleStep extends React.Component {
     });
   };
 
+  handleNoProject = () => {
+    this.setState({
+      showNoProjectError: true,
+    });
+  };
+
   getSampleNamesToFiles = () => {
     return flow(
       keyBy("name"),
@@ -599,6 +608,7 @@ class UploadSampleStep extends React.Component {
           <RemoteSampleFileUpload
             project={selectedProject}
             onChange={samples => this.handleSampleChange(samples, "remote")}
+            onNoProject={this.handleNoProject}
           />
         );
       case BASESPACE_UPLOAD_TAB:
@@ -610,6 +620,7 @@ class UploadSampleStep extends React.Component {
             onAccessTokenChange={this.handleBasespaceAccessTokenChange}
             basespaceClientId={this.props.basespaceClientId}
             basespaceOauthRedirectUri={this.props.basespaceOauthRedirectUri}
+            onNoProject={this.handleNoProject}
           />
         );
       default:
@@ -646,6 +657,10 @@ class UploadSampleStep extends React.Component {
               value={get("id", this.state.selectedProject)}
               onChange={this.handleProjectChange}
               disabled={this.state.createProjectOpen}
+              erred={
+                this.state.showNoProjectError &&
+                this.state.selectedProject === null
+              }
             />
             {this.state.createProjectOpen ? (
               <div className={cs.projectCreationContainer}>

@@ -47,18 +47,12 @@ class Dropdown extends React.Component {
 
   renderTrigger = () => {
     const text =
-      this.state.value !== undefined && this.state.value !== null ? (
-        <span>{this.state.labels[this.state.value.toString()]}</span>
-      ) : (
-        <span className={cs.placeholder}>{this.props.placeholder}</span>
-      );
+      this.state.value !== undefined && this.state.value !== null
+        ? this.state.labels[this.state.value.toString()]
+        : null;
 
-    const hasText =
-      this.state.value !== undefined &&
-      this.state.value !== null &&
-      this.state.labels[this.state.value.toString()];
     const labelText =
-      this.props.label && hasText ? this.props.label + ":" : this.props.label;
+      this.props.label && text ? this.props.label + ":" : this.props.label;
 
     return (
       <DropdownTrigger
@@ -66,6 +60,8 @@ class Dropdown extends React.Component {
         value={text}
         rounded={this.props.rounded}
         className={cs.dropdownTrigger}
+        placeholder={this.props.placeholder}
+        erred={this.props.erred}
       />
     );
   };
@@ -97,6 +93,7 @@ Dropdown.propTypes = {
   className: PropTypes.string,
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
+  erred: PropTypes.bool,
   fluid: PropTypes.bool,
   rounded: PropTypes.bool,
   label: PropTypes.string,
