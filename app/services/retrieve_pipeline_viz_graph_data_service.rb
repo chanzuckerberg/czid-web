@@ -10,11 +10,12 @@ class RetrievePipelineVizGraphDataService
   #     - jobStatus: The job status of the stage
   #     - steps: Array of objects, each one defining a node in that stage's graph. This object
   #       is composed of:
-  #           - stepName: The name to be displayed for this step
-  #               - inputEdges: An array of indices that map to edges in the @edges array (see below), each
-  #                 edge being an input edge to the node.
-  #               - ouputEdges: An array of indices that map to edges in the @edges array, each edge being an
-  #                 output edge from the node
+  #           - name: The name to be displayed for this step. This is the out target name.
+  #           - description: The description for the step.
+  #           - inputEdges: An array of indices that map to edges in the @edges array (see below), each
+  #             edge being an input edge to the node.
+  #           - ouputEdges: An array of indices that map to edges in the @edges array, each edge being an
+  #             output edge from the node
   #
   # edges: An array of edges, each edge object having the following structure:
   #     - from: An object containing a stageIndex and stepIndex, denoting the originating node it is from
@@ -51,7 +52,7 @@ class RetrievePipelineVizGraphDataService
       stage_step_descriptions = STEP_DESCRIPTIONS[@stage_names[stage_index]]["steps"]
       steps = dag_json["steps"].map do |step|
         {
-          name: modify_step_name(step["class"]),
+          name: modify_step_name(step["out"]),
           description: stage_step_descriptions[step["out"]],
           inputEdges: [],
           outputEdges: []
@@ -165,7 +166,7 @@ class RetrievePipelineVizGraphDataService
   end
 
   def modify_step_name(step_name)
-    step_name.gsub(/^(PipelineStep(Run|Generate)?)/, "")
+    step_name.gsub(/(_out)$/, "").titleize
   end
 
   def remove_host_filtering_urls(edges)

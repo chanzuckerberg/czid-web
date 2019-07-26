@@ -89,15 +89,38 @@ RSpec.describe BasespaceHelper, type: :helper do
     let(:fake_file_name) { "fake_file_name" }
 
     context "upload happens successfully" do
-      before do
-        expect(helper).to receive(:open).with(fake_basespace_path).exactly(1).times
-        expect(IO).to receive(:copy_stream).exactly(1).times
-        expect(Syscall).to receive(:s3_cp).with(anything, "#{fake_s3_path}/#{fake_file_name}").exactly(1).times.and_return(true)
+      it "returns true" do
+        expect(Syscall).to receive(:pipe).with(
+          ["curl", "--fail", "-s", "--show-error", fake_basespace_path],
+          ["aws", "s3", "cp", "-", "#{fake_s3_path}/#{fake_file_name}"]
+        ).exactly(1).times.and_return([
+                                        true, ""
+                                      ])
+        expect(LogUtil).to receive(:log_err_and_airbrake).exactly(0).times
+
+        success = helper.upload_from_basespace_to_s3(fake_basespace_path, fake_s3_path, fake_file_name)
+        expect(success).to be true
       end
+    end
+
+    context "upload fails" do
+      let(:fake_std_err) { "curl: (22) The requested URL returned error: 403 Forbidden" }
 
       it "returns true" do
-        response = helper.upload_from_basespace_to_s3(fake_basespace_path, fake_s3_path, fake_file_name)
-        expect(response).to be true
+        expect(Syscall).to receive(:pipe).with(
+          ["curl", "--fail", "-s", "--show-error", fake_basespace_path],
+          ["aws", "s3", "cp", "-", "#{fake_s3_path}/#{fake_file_name}"]
+        ).exactly(1).times.and_return([
+                                        false, fake_std_err
+                                      ])
+
+        # If the syscall fails, we should log the error.
+        expect(LogUtil).to receive(:log_err_and_airbrake).with(
+          "Failed to transfer file from basespace to #{fake_s3_path} for #{fake_file_name}: #{fake_std_err}"
+        ).exactly(1).times
+
+        success = helper.upload_from_basespace_to_s3(fake_basespace_path, fake_s3_path, fake_file_name)
+        expect(success).to be false
       end
     end
   end
