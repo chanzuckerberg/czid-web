@@ -86,26 +86,15 @@ module BasespaceHelper
   end
 
   def upload_from_basespace_to_s3(basespace_path, s3_path, file_name)
-    temp_file = Tempfile.new
-    success = false
+    # Run the piped commands and save stderr
+    success, stderr = Syscall.pipe(
+      # Don't show the cURL progress bar, but do show any errors.
+      # Fail if the HTTP status code is an error.
+      ["curl", "--fail", "-s", "--show-error", basespace_path],
+      ["aws", "s3", "cp", "-", "#{s3_path}/#{file_name}"]
+    )
 
-    begin
-      # Download the basespace file into a temp file.
-      download = open(basespace_path)
-      IO.copy_stream(download, temp_file.path.to_s)
-
-      # Upload the temp file to S3.
-      upload_success = Syscall.s3_cp(temp_file.path.to_s, "#{s3_path}/#{file_name}")
-      # Raise an error if the copy failed.
-      raise StandardError, "failed to copy to S3 #{stderr}" unless upload_success
-
-      success = true
-    rescue => exception
-      LogUtil.log_err_and_airbrake("Failed to transfer file from basespace to #{s3_path} for #{file_name}")
-      Rails.logger.error(exception)
-    ensure
-      temp_file.unlink
-    end
+    LogUtil.log_err_and_airbrake("Failed to transfer file from basespace to #{s3_path} for #{file_name}: #{stderr}") unless success
 
     return success
   end
