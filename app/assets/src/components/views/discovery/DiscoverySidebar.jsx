@@ -350,15 +350,12 @@ export default class DiscoverySidebar extends React.Component {
             </div>
             <div className={cs.hasBackground}>
               <span className={cs.rowLabel}>Location</span>
-              {this.buildMetadataRows("location")}
-            </div>
-            {allowedFeatures &&
-              allowedFeatures.includes("maps") && (
-                <div className={cs.hasBackground}>
-                  <span className={cs.rowLabel}>Location v2</span>
-                  {this.buildMetadataRows("locationV2")}
-                </div>
+              {this.buildMetadataRows(
+                allowedFeatures && allowedFeatures.includes("maps")
+                  ? "locationV2"
+                  : "location"
               )}
+            </div>
           </Accordion>
         </div>
       </div>
