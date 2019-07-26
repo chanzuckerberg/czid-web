@@ -838,6 +838,8 @@ class DiscoveryView extends React.Component {
       filters,
       limit: 1e4, // Server needs a max, 1e4 at one location is a good cutoff.
       listAllIds: true,
+      projectId,
+      search,
     });
     this.setState(
       {
