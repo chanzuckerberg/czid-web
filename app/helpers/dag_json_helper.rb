@@ -25,7 +25,7 @@ module DagJsonHelper
                                        PipelineRun::ADAPTER_SEQUENCES["single-end"]
                                      end
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
-    _render_dag_json(sample, attribute_dict)
+    _render_dag_json(sample, attribute_dict, DAG_NAME_HOST_FILTER)
   end
 
   def generate_alignment_dag_json(pipeline_run)
@@ -56,7 +56,7 @@ module DagJsonHelper
       rapsearch_m8: PipelineRun::RAPSEARCH_M8
     }
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
-    _render_dag_json(sample, attribute_dict)
+    _render_dag_json(sample, attribute_dict, DAG_NAME_ALIGNMENT)
   end
 
   def generate_postprocess_dag_json(pipeline_run)
@@ -76,7 +76,7 @@ module DagJsonHelper
       nr_loc_db: alignment_config.s3_nr_loc_db_path
     }
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
-    _render_dag_json(sample, attribute_dict)
+    _render_dag_json(sample, attribute_dict, DAG_NAME_POST_PROCESS)
   end
 
   def generate_experimental_dag_json(pipeline_run)
@@ -97,12 +97,12 @@ module DagJsonHelper
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
-    _render_dag_json(sample, attribute_dict)
+    _render_dag_json(sample, attribute_dict, DAG_NAME_EXPERIMENTAL)
   end
 
   private
 
-  def _render_dag_json(sample, attribute_dict)
+  def _render_dag_json(sample, attribute_dict, dag_name)
     dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.erb",
                            sample.project_id,
                            sample.id,
