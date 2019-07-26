@@ -126,10 +126,7 @@ class Metadatum < ApplicationRecord
         self.location_id = nil
       else
         # Delete if they cleared out the field
-        unless destroyed?
-          Rails.logger.error("foobar 2:51pm going to delete")
-          destroy
-        end
+        destroy unless destroyed?
       end
       return
     end
@@ -149,8 +146,6 @@ class Metadatum < ApplicationRecord
     self.raw_value = nil
     self.string_validated_value = nil
     self.location_id = location.id
-  rescue FrozenError => err
-    Rails.logger.error("#{err.message} hello world")
   rescue => err
     LogUtil.log_err_and_airbrake("Failed to save location metadatum: #{err.message}")
     LogUtil.log_backtrace(err)

@@ -771,13 +771,6 @@ class Sample < ApplicationRecord
         status: "ok"
       }
     end
-  rescue FrozenError => e
-    Rails.logger.error("foobar 2:41pm")
-    Rails.logger.error(e.message)
-    return {
-      status: "error",
-      error: "There was an error saving your metadata."
-    }
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error(e)
     # Don't send the detailed error message to the user.
