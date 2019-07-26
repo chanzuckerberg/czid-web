@@ -33,6 +33,7 @@ class Sample < ApplicationRecord
 
   # Constants for upload errors.
   UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED = "BASESPACE_UPLOAD_FAILED".freeze
+  UPLOAD_ERROR_S3_UPLOAD_FAILED = "S3_UPLOAD_FAILED".freeze
 
   TOTAL_READS_JSON = "total_reads.json".freeze
   LOG_BASENAME = 'log.txt'.freeze
@@ -338,9 +339,12 @@ class Sample < ApplicationRecord
     raise stderr_array.join(" ") unless stderr_array.empty?
 
     self.status = STATUS_UPLOADED
-    save # this triggers pipeline command
+    save! # this triggers pipeline command
   rescue => e
-    LogUtil.log_err_and_airbrake("Failed to upload S3 sample '#{name}' (#{id}): #{e}")
+    LogUtil.log_err_and_airbrake("SampleUploadFailedEvent: Failed to upload S3 sample '#{name}' (#{id}): #{e}")
+    self.status = STATUS_CHECKED
+    self.upload_error = Sample::UPLOAD_ERROR_S3_UPLOAD_FAILED
+    save!
   end
 
   # Uploads input files from basespace for this sample.
