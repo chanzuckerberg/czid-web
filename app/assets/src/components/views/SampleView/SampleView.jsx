@@ -314,6 +314,14 @@ class SampleView extends React.Component {
         issueType = "error";
         link = "mailto:help@idseq.net";
         break;
+      case "S3_UPLOAD_FAILED":
+        status = "SAMPLE FAILED";
+        message =
+          "Oh no! There was an issue uploading your sample file from S3.";
+        linkText = "Contact us for help.";
+        issueType = "error";
+        link = "mailto:help@idseq.net";
+        break;
       case "FAULTY_INPUT":
         status = "COMPLETE - ISSUE";
         message = `Sorry, something was wrong with your input file. ${

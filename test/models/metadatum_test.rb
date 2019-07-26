@@ -8,7 +8,7 @@ class MetadatumTest < ActiveSupport::TestCase
     mock_create = MiniTest::Mock.new
     loc = metadata(:sample_collection_location_v2)
     fields = JSON.parse(loc.raw_value, symbolize_names: true)
-    mock_create.expect(:call, locations(:ucsf), [fields[:locationiq_id], fields[:osm_id], fields[:osm_type]])
+    mock_create.expect(:call, locations(:ucsf), [fields])
 
     Location.stub :find_or_new_by_api_ids, mock_create do
       res = loc.check_and_set_location_type
