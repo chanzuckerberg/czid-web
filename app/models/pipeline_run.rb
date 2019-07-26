@@ -323,7 +323,7 @@ class PipelineRun < ApplicationRecord
       step_number: 1,
       name: PipelineRunStage::HOST_FILTERING_STAGE_NAME,
       job_command_func: 'host_filtering_command',
-      dag_json: generate_dag_json(self, DAG_NAME_HOST_FILTER)
+      dag_json: generate_host_filtering_dag_json(self)
     )
 
     # Alignment and Merging
@@ -331,7 +331,7 @@ class PipelineRun < ApplicationRecord
       step_number: 2,
       name: PipelineRunStage::ALIGNMENT_STAGE_NAME,
       job_command_func: 'alignment_command',
-      dag_json: generate_dag_json(self, DAG_NAME_ALIGNMENT)
+      dag_json: generate_alignment_dag_json(self)
     )
 
     # Taxon Fastas and Alignment Visualization
@@ -339,7 +339,7 @@ class PipelineRun < ApplicationRecord
       step_number: 3,
       name: PipelineRunStage::POSTPROCESS_STAGE_NAME,
       job_command_func: 'postprocess_command',
-      dag_json: generate_dag_json(self, DAG_NAME_POST_PROCESS)
+      dag_json: generate_postprocess_dag_json(self)
     )
 
     # Experimental Stage
@@ -347,7 +347,7 @@ class PipelineRun < ApplicationRecord
       step_number: 4,
       name: PipelineRunStage::EXPT_STAGE_NAME,
       job_command_func: 'experimental_command',
-      dag_json: generate_dag_json(self, DAG_NAME_EXPERIMENTAL)
+      dag_json: generate_experimental_dag_json(self)
     )
 
     self.pipeline_run_stages = run_stages

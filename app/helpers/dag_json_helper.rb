@@ -4,30 +4,7 @@ module DagJsonHelper
   DAG_NAME_POST_PROCESS = "postprocess".freeze
   DAG_NAME_EXPERIMENTAL = "experimental".freeze
 
-  def generate_dag_json(pipeline_run, dag_name)
-    case dag_name
-    when DAG_NAME_HOST_FILTER
-      attribute_dict = host_filtering_dag_attributes(pipeline_run)
-    when DAG_NAME_ALIGNMENT
-      attribute_dict = alignment_dag_attributes(pipeline_run)
-    when DAG_NAME_POST_PROCESS
-      attribute_dict = postprocess_dag_attributes(pipeline_run)
-    when DAG_NAME_EXPERIMENTAL
-      attribute_dict = experimental_dag_attributes(pipeline_run)
-    end
-
-    sample = pipeline_run.sample
-    attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
-    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.erb",
-                           sample.project_id,
-                           sample.id,
-                           sample.host_genome_name.downcase,
-                           attribute_dict,
-                           pipeline_run.parse_dag_vars)
-    dag.render
-  end
-
-  def host_filtering_dag_attributes(pipeline_run)
+  def generate_host_filtering_dag_json(pipeline_run)
     sample = pipeline_run.sample
     file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
     attribute_dict = {
@@ -47,13 +24,14 @@ module DagJsonHelper
                                      else
                                        PipelineRun::ADAPTER_SEQUENCES["single-end"]
                                      end
-    attribute_dict
+    attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
+    _render_dag_json(sample, attribute_dict)
   end
 
-  def alignment_dag_attributes(pipeline_run)
+  def generate_alignment_dag_json(pipeline_run)
     sample = pipeline_run.sample
     alignment_config = pipeline_run.alignment_config
-    {
+    attribute_dict = {
       input_file_count: sample.input_files.count,
       skip_dedeuterostome_filter: sample.skip_deutero_filter_flag,
       pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_version,
@@ -77,12 +55,14 @@ module DagJsonHelper
       gsnap_m8: PipelineRun::GSNAP_M8,
       rapsearch_m8: PipelineRun::RAPSEARCH_M8
     }
+    attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
+    _render_dag_json(sample, attribute_dict)
   end
 
-  def postprocess_dag_attributes(pipeline_run)
+  def generate_postprocess_dag_json(pipeline_run)
     sample = pipeline_run.sample
     alignment_config = pipeline_run.alignment_config
-    {
+    attribute_dict = {
       input_file_count: sample.input_files.count,
       skip_dedeuterostome_filter: sample.skip_deutero_filter_flag,
       pipeline_version: pipeline_run.pipeline_version || pipeline_run.fetch_pipeline_version,
@@ -95,9 +75,11 @@ module DagJsonHelper
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path
     }
+    attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
+    _render_dag_json(sample, attribute_dict)
   end
 
-  def experimental_dag_attributes(pipeline_run)
+  def generate_experimental_dag_json(pipeline_run)
     sample = pipeline_run.sample
     file_ext = sample.fasta_input? ? 'fasta' : 'fastq'
     alignment_config = pipeline_run.alignment_config
@@ -114,6 +96,19 @@ module DagJsonHelper
       nr_loc_db: alignment_config.s3_nr_loc_db_path
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
-    attribute_dict
+    attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
+    _render_dag_json(sample, attribute_dict)
+  end
+
+  private
+
+  def _render_dag_json(sample, attribute_dict)
+    dag = DagGenerator.new("app/lib/dags/#{dag_name}.json.erb",
+                           sample.project_id,
+                           sample.id,
+                           sample.host_genome_name.downcase,
+                           attribute_dict,
+                           pipeline_run.parse_dag_vars)
+    dag.render
   end
 end
