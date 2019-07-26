@@ -20,7 +20,9 @@ class DiscoveryHeader extends React.Component {
     // category "Location": key: "location", value: id, text: title
     // category "Host": key: "host", value: id, text: title
     // category "Tissue": key: "tissue", value: id, text: title
-    const category = result.category.toLowerCase();
+    // TODO(jsheu): Replace location "v1"
+    let category = result.category;
+    if (category !== "locationV2") category = category.toLowerCase();
     let value = result.id;
     switch (category) {
       case "taxon": {
