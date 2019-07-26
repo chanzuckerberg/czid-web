@@ -322,34 +322,33 @@ class PipelineRun < ApplicationRecord
     run_stages << PipelineRunStage.new(
       step_number: 1,
       name: PipelineRunStage::HOST_FILTERING_STAGE_NAME,
-      job_command_func: 'host_filtering_command'
+      job_command_func: 'host_filtering_command',
+      dag_json: generate_dag_json(self, DAG_NAME_HOST_FILTER)
     )
 
     # Alignment and Merging
     run_stages << PipelineRunStage.new(
       step_number: 2,
       name: PipelineRunStage::ALIGNMENT_STAGE_NAME,
-      job_command_func: 'alignment_command'
+      job_command_func: 'alignment_command',
+      dag_json: generate_dag_json(self, DAG_NAME_ALIGNMENT)
     )
 
     # Taxon Fastas and Alignment Visualization
     run_stages << PipelineRunStage.new(
       step_number: 3,
       name: PipelineRunStage::POSTPROCESS_STAGE_NAME,
-      job_command_func: 'postprocess_command'
+      job_command_func: 'postprocess_command',
+      dag_json: generate_dag_json(self, DAG_NAME_POST_PROCESS)
     )
 
     # Experimental Stage
     run_stages << PipelineRunStage.new(
       step_number: 4,
       name: PipelineRunStage::EXPT_STAGE_NAME,
-      job_command_func: 'experimental_command'
+      job_command_func: 'experimental_command',
+      dag_json: generate_dag_json(self, DAG_NAME_EXPERIMENTAL)
     )
-
-    dag_names = [DAG_NAME_HOST_FILTER, DAG_NAME_ALIGNMENT, DAG_NAME_POST_PROCESS, DAG_NAME_EXPERIMENTAL]
-    run_stages.each_with_index do |stage, i|
-      stage.dag_json = generate_dag_json(self, dag_names[i])
-    end
 
     self.pipeline_run_stages = run_stages
   end
