@@ -44,7 +44,14 @@ class MetadataManualInput extends React.Component {
   };
 
   componentDidMount() {
-    const { projectMetadataFields, hostGenomes, samplesAreNew } = this.props;
+    const {
+      projectMetadataFields,
+      hostGenomes,
+      samplesAreNew,
+      initialMetadata,
+    } = this.props;
+
+    console.log("initial metadata: ", initialMetadata);
 
     this.setState({
       projectMetadataFields: projectMetadataFields,
@@ -274,6 +281,10 @@ class MetadataManualInput extends React.Component {
 
   // Create form fields for the table.
   getManualInputData = () => {
+    console.log(
+      "samples in getManualInputData looks like: ",
+      this.props.samples
+    );
     if (!this.props.samples) {
       return null;
     }
@@ -381,6 +392,7 @@ MetadataManualInput.propTypes = {
   withinModal: PropTypes.bool,
   projectMetadataFields: PropTypes.object,
   hostGenomes: PropTypes.array,
+  initialMetadata: PropTypes.object,
 };
 
 export default MetadataManualInput;
