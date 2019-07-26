@@ -46,8 +46,6 @@ FactoryBot.define do
         create(:metadatum, key: key, raw_value: value, sample: sample, metadata_field: MetadataField.find_by(name: key))
       end
 
-      # Pipline runs create pipeline_run_stages automatically, which require a human host genome record
-      HostGenome.find_by(name: "Human") || create(:host_genome, name: "Human")
       options.pipeline_runs_data.each do |pipeline_run_data|
         create(:pipeline_run, sample: sample, **pipeline_run_data)
       end

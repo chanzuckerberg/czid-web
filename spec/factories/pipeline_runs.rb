@@ -14,6 +14,11 @@ FactoryBot.define do
 
     alignment_config { create(:alignment_config) }
 
+    # Pipline runs create pipeline_run_stages automatically, which require a human host genome record
+    before :create do |_pipeline_run, _options|
+      HostGenome.find_by(name: "Human") || create(:host_genome, name: "Human")
+    end
+
     after :create do |pipeline_run, options|
       options.taxon_counts_data.each do |taxon_count_data|
         create(:taxon_count, pipeline_run: pipeline_run, **taxon_count_data)
