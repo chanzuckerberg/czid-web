@@ -124,9 +124,6 @@ class Metadatum < ApplicationRecord
       if loc[:name].present?
         self.string_validated_value = loc[:name]
         self.location_id = nil
-      else
-        # Delete if they cleared out the field
-        delete
       end
       return
     end
@@ -135,7 +132,7 @@ class Metadatum < ApplicationRecord
     # trusting user input, we'll potentially re-fetch location details based on the API and OSM IDs.
     location = Location.check_and_restrict_specificity(loc, sample.host_genome_name)
     unless location.is_a?(Location)
-      location = Location.find_or_new_by_api_ids(loc[:locationiq_id], loc[:osm_id], loc[:osm_type])
+      location = Location.find_or_new_by_api_ids(loc)
     end
     unless location.id
       location = Location.check_and_fetch_parents(location)

@@ -642,7 +642,7 @@ class Sample < ApplicationRecord
   end
 
   def self.pipeline_commit(branch)
-    o = Syscall.pipe(["git", "ls-remote", "https://github.com/chanzuckerberg/idseq-dag.git"], ["grep", "refs/heads/#{branch}"])
+    o = Syscall.pipe_with_output(["git", "ls-remote", "https://github.com/chanzuckerberg/idseq-dag.git"], ["grep", "refs/heads/#{branch}"])
     return false if o.blank?
     o.split[0]
   end
@@ -727,6 +727,10 @@ class Sample < ApplicationRecord
       }
     else
       # If the value didn't change or isn't present, don't re-save the metadata field.
+      if m.id && val.blank?
+        # If the object existed and the user cleared out the new value, delete it.
+        m.delete
+      end
       return {
         metadatum: nil,
         status: "ok"
