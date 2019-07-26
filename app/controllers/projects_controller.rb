@@ -325,7 +325,7 @@ class ProjectsController < ApplicationController
   end
 
   def project_reports_csv_status
-    stdout = Syscall.pipe(["aws", "s3", "ls", @project.report_tar_s3(current_user.id)], ["wc", "-l"])
+    stdout = Syscall.pipe_with_output(["aws", "s3", "ls", @project.report_tar_s3(current_user.id)], ["wc", "-l"])
     return if stdout.blank?
     final_complete = stdout.to_i == 1
     if final_complete
@@ -351,7 +351,7 @@ class ProjectsController < ApplicationController
   end
 
   def host_gene_counts_status
-    stdout = Syscall.pipe(["aws", "s3", "ls", @project.host_gene_counts_tar_s3(current_user.id)], ["wc", "-l"])
+    stdout = Syscall.pipe_with_output(["aws", "s3", "ls", @project.host_gene_counts_tar_s3(current_user.id)], ["wc", "-l"])
     return if stdout.blank?
     final_complete = stdout.to_i == 1
     if final_complete

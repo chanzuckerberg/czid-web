@@ -29,9 +29,9 @@ class Syscall
   #
   # Returns stdout on success, nil on error
   # Call sequentially piped commands by passing in arrays of commands, e.g.
-  #  Syscall.pipe(["echo", "hi"], ["grep", "-i", "Hi"]) ==> "hi\n"
+  #  Syscall.pipe_with_output(["echo", "hi"], ["grep", "-i", "Hi"]) ==> "hi\n"
   #
-  def self.pipe(*cmd)
+  def self.pipe_with_output(*cmd)
     output = ""
     Open3.pipeline_r(*cmd) { |line, _ts| output += line.read }
     output
@@ -45,5 +45,19 @@ class Syscall
 
   def self.s3_cp(source_s3_path, destination_s3_path)
     run("aws", "s3", "cp", source_s3_path, destination_s3_path)
+  end
+
+  def self.pipe(*cmd)
+    err_read, err_write = IO.pipe
+
+    # Run the piped commands and save stderr
+    cmd_statuses = Open3.pipeline(*cmd, err: err_write)
+    err_write.close
+    stderr = err_read.read
+
+    # Check whether the commands all succeeded.
+    success = cmd_statuses.all? { |p| p && p.exitstatus && p.exitstatus.zero? }
+
+    return success, stderr
   end
 end
