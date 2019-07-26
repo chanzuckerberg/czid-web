@@ -205,6 +205,10 @@ module MetadataHelper
       if matching_field.empty?
         warning_aggregator.add_error(:custom_field_creation, [index + 1, col])
       end
+
+      if ["collection_location", "Collection Location"].include?(col)
+        warning_aggregator.add_error(:unresolved_locations, [index + 1, col])
+      end
     end
 
     sample_name_index = metadata["headers"].find_index("sample_name") || metadata["headers"].find_index("Sample Name")
