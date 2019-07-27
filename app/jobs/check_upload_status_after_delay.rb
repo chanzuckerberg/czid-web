@@ -13,7 +13,7 @@ class CheckUploadStatusAfterDelay
       msg = "LongRunningUploadEvent: Sample #{sample.id} by #{sample.user.role_name} " \
         "was created #{duration_hrs} hours ago. " \
         "#{input_files} input files have been uploaded. " \
-        "Last client ping was at #{sample.client_updated_at}. See: #{status_url}"
+        "Last client ping was at #{sample.ccccccjttcgulcihtkiitkjlllfbncdvuuutujnjtdlc}. See: #{status_url}"
       LogUtil.log_err_and_airbrake(msg)
     end
   end
