@@ -8,6 +8,7 @@ class CheckUploadStatusAfterDelay
 
     if sample.status == 'created' &&
        (Time.current - created_at).minutes > minutes
+      duration_hrs = Time.current - sample.created_at
       msg = "LongRunningUploadEvent: Sample #{sample.id} by #{sample.user.role_name} " \
         "was created #{duration_hrs} hours ago. " \
         "#{sample.input_files || 0} input files have been uploaded. " \
