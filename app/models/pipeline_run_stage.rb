@@ -24,6 +24,13 @@ class PipelineRunStage < ApplicationRecord
   POSTPROCESS_STAGE_NAME = 'Post Processing'.freeze
   EXPT_STAGE_NAME = "Experimental".freeze
 
+  DAG_NAME_MAP = {
+    1 => DagJsonHelper::DAG_NAME_HOST_FILTER,
+    2 => DagJsonHelper::DAG_NAME_ALIGNMENT,
+    3 => DagJsonHelper::DAG_NAME_POST_PROCESS,
+    4 => DagJsonHelper::DAG_NAME_EXPERIMENTAL
+  }.freeze
+
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
 
@@ -64,9 +71,14 @@ class PipelineRunStage < ApplicationRecord
     dag_json.gsub(%r{(\"s3://).*(\")}, '"s3://..."')
   end
 
+  def dag_name
+    DAG_NAME_MAP[step_number]
+  end
+
   def run_job
     # Check output for the run and decide if we should run this stage
     return if started? && !failed? # job has been started successfully
+    upload_dag(dag_name)
     self.job_command = send(job_command_func)
     self.command_stdout, self.command_stderr, status = Open3.capture3(job_command)
     if status.exitstatus.zero?
@@ -164,14 +176,17 @@ class PipelineRunStage < ApplicationRecord
   def job_commands(dag_name, key_s3_params = nil)
     sample = pipeline_run.sample
     dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
-    upload_dag_json(dag_json, dag_s3)
-
     copy_done_file = "echo done | aws s3 cp - #{sample.sample_output_s3_path}/\\$AWS_BATCH_JOB_ID.#{JOB_SUCCEEDED_FILE_SUFFIX}"
     dag_job_commands(dag_s3, dag_name, key_s3_params, copy_done_file)
   end
 
+  def upload_dag(dag_name)
+    dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
+    upload_dag_json(dag_json, dag_s3)
+  end
+
   def host_filtering_command
-    dag_commands = job_commands(DAG_NAME_HOST_FILTER)
+    dag_commands = job_commands(dag_name)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")
 
     # Dispatch job. Use the himem settings for host filtering.
@@ -180,21 +195,21 @@ class PipelineRunStage < ApplicationRecord
 
   def alignment_command
     key_s3_params = format("--key-path-s3 s3://idseq-secrets/idseq-%s.pem", (Rails.env == 'prod' ? 'prod' : 'staging')) # TODO: This is hacky
-    dag_commands = job_commands(DAG_NAME_ALIGNMENT, key_s3_params)
+    dag_commands = job_commands(dag_name, key_s3_params)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Run it
     aegea_batch_submit_command(batch_command)
   end
 
   def postprocess_command
-    dag_commands = job_commands(DAG_NAME_POST_PROCESS)
+    dag_commands = job_commands(dag_name)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Dispatch job with himem number of vCPUs and to the himem queue.
     aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB)
   end
 
   def experimental_command
-    dag_commands = job_commands(DAG_NAME_EXPERIMENTAL)
+    dag_commands = job_commands(dag_name)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Dispatch job
     aegea_batch_submit_command(batch_command)
