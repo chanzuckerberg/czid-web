@@ -1,4 +1,4 @@
-check_upload_status_after_delayrequire 'open3'
+require 'open3'
 require 'json'
 require 'csv'
 class PipelineRun < ApplicationRecord
