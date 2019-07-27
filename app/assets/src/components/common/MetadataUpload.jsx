@@ -44,12 +44,8 @@ class MetadataUpload extends React.Component {
   handleTabChange = tab => {
     this.setState({ currentTab: tab, issues: null });
     // When the tab changes, reset state.
-
-    console.log("other metadata looked like: ", this.props.initialMetadata);
-    console.log("this.props.samples: ", this.props.samples);
-
     this.props.onMetadataChange({
-      // metadata: null,
+      metadata: null,
       issues: null,
       wasManual: tab === "Manual Input",
     });
@@ -323,7 +319,6 @@ MetadataUpload.propTypes = {
   // Immediately called when the user changes anything, even before validation has returned.
   // Can be used to disable the header navigation.
   onDirty: PropTypes.func,
-  initialMetadata: PropTypes.array,
 };
 
 export default MetadataUpload;
