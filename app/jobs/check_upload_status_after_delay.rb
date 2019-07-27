@@ -9,7 +9,8 @@ class CheckUploadStatusAfterDelay
     if sample.status == 'created' &&
        (Time.current - created_at).minutes > minutes
       msg = "LongRunningUploadEvent: Sample #{sample.id} by #{sample.user.role_name} " \
-        "was created #{duration_hrs} hours ago. Input files have not yet been uploaded. " \
+        "was created #{duration_hrs} hours ago. " \
+        "#{sample.input_files || 0} input files have been uploaded. " \
         "Last client ping was at #{sample.client_updated_at}. See: #{status_url}"
       LogUtil.log_err_and_airbrake(msg)
     end
