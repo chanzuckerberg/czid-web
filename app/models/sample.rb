@@ -264,6 +264,11 @@ class Sample < ApplicationRecord
     elsif !input_files.empty? && input_files.first.source_type == InputFile::SOURCE_TYPE_S3
       Resque.enqueue(InitiateS3Cp, id)
     end
+
+    # Delay determined based on query of historical upload times, where 80%
+    # of successful uploads took less than 3 hours by client_updated_at.
+    delay = 180.minutes
+    Resque.enqueue_in(delay, CheckUploadStatusAfterDelay, id, delay)
   end
 
   def initiate_s3_cp
@@ -855,5 +860,14 @@ class Sample < ApplicationRecord
   # Be careful when using this because it may cause an extra query for each of your samples!
   def first_pipeline_run
     pipeline_runs.order(created_at: :desc).first
+  end
+
+  def status_url
+    base_url = if Rails.env == 'staging'
+                 "https://staging.idseq.net"
+               else
+                 "https://idseq.net"
+               end
+    base_url + "/samples/#{id}/pipeline_runs"
   end
 end

@@ -1433,14 +1433,7 @@ class PipelineRun < ApplicationRecord
     where(sample_id: Sample.viewable(user).pluck(:id))
   end
 
-  def status_url
-    base_url = if Rails.env == 'staging'
-                 "https://staging.idseq.net"
-               else
-                 "https://idseq.net"
-               end
-    base_url + "/samples/#{sample.id}/pipeline_runs"
-  end
+  delegate :status_url, to: :sample
 
   # Keys here are used as cache keys for report_info action in SamplesController.
   # The values here are used as defaults for PipelineSampleReport.jsx.
