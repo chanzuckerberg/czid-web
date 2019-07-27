@@ -268,7 +268,7 @@ class Sample < ApplicationRecord
     # Delay determined based on query of historical upload times, where 80%
     # of successful uploads took less than 3 hours by client_updated_at.
     delay = 180.minutes
-    Resque.enqueue_in(delay, CheckUploadStatusAfterDelay, id, delay)
+    Resque.enqueue_in(delay + 1.minute, CheckUploadStatusAfterDelay, id, delay)
   end
 
   def initiate_s3_cp
