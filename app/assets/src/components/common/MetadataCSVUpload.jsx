@@ -113,7 +113,7 @@ class MetadataCSVUpload extends React.Component {
     return (
       metadata &&
       metadata.rows &&
-      metadata.rows.map(row => {
+      metadata.rows.map((row, rowIndex) => {
         return (
           <div>
             <span>{row[0]}</span>
@@ -131,7 +131,7 @@ class MetadataCSVUpload extends React.Component {
                 const i = this.state.metadata.headers.indexOf(
                   "Collection Location"
                 );
-                newMetadata.rows[0][i] = value;
+                newMetadata.rows[rowIndex][i] = value;
 
                 this.setState({ metadata: newMetadata });
                 this.props.onMetadataChange({
