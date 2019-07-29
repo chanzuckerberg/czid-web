@@ -10,7 +10,8 @@ class RetrievePipelineVizGraphDataService
   #     - jobStatus: The job status of the stage
   #     - steps: Array of objects, each one defining a node in that stage's graph. This object
   #       is composed of:
-  #           - name: The name to be displayed for this step. This is the out target name.
+  #           - name: The name to be displayed for this step. Currently, this corresponds to the name of the output target
+  #             (works as there is a single output target per step).
   #           - description: The description for the step.
   #           - inputEdges: An array of indices that map to edges in the @edges array (see below), each
   #             edge being an input edge to the node.

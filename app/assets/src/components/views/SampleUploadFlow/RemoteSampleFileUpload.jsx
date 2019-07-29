@@ -6,7 +6,9 @@ import PrimaryButton from "~ui/controls/buttons/PrimaryButton";
 import PropTypes from "~/components/utils/propTypes";
 import { bulkImportRemoteSamples } from "~/api";
 import { logAnalyticsEvent } from "~/api/analytics";
+import Notification from "~ui/notifications/Notification";
 
+import { NO_TARGET_PROJECT_ERROR } from "./constants";
 import cs from "./sample_upload_flow.scss";
 
 class RemoteSampleFileUpload extends React.Component {
@@ -15,6 +17,17 @@ class RemoteSampleFileUpload extends React.Component {
     remoteS3Path: "",
     lastPathChecked: "",
   };
+
+  componentDidUpdate() {
+    if (
+      this.state.error === NO_TARGET_PROJECT_ERROR &&
+      this.props.project !== null
+    ) {
+      this.setState({
+        error: "",
+      });
+    }
+  }
 
   toggleInfo = () => {
     this.setState(
@@ -38,8 +51,9 @@ class RemoteSampleFileUpload extends React.Component {
   handleConnect = async () => {
     if (!this.props.project) {
       this.setState({
-        error: "Please select a project.",
+        error: NO_TARGET_PROJECT_ERROR,
       });
+      this.props.onNoProject();
       return;
     }
 
@@ -141,7 +155,16 @@ class RemoteSampleFileUpload extends React.Component {
             onClick={this.handleConnect}
           />
         </div>
-        {this.state.error && <div className={cs.error}>{this.state.error}</div>}
+
+        {this.state.error && (
+          <Notification
+            type="error"
+            displayStyle="flat"
+            className={cs.notification}
+          >
+            {this.state.error}
+          </Notification>
+        )}
       </div>
     );
   }
@@ -150,6 +173,8 @@ class RemoteSampleFileUpload extends React.Component {
 RemoteSampleFileUpload.propTypes = {
   project: PropTypes.Project,
   onChange: PropTypes.func.isRequired,
+  onNoProject: PropTypes.func.isRequired,
+  showNoProjectError: PropTypes.bool,
 };
 
 export default RemoteSampleFileUpload;
