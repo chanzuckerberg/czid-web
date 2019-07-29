@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DagJsonHelper
   DAG_NAME_HOST_FILTER = "host_filter".freeze
   DAG_NAME_ALIGNMENT = "non_host_alignment".freeze
