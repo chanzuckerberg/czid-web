@@ -56,6 +56,8 @@ class SampleUploadFlow extends React.Component {
   handleUploadMetadata = ({ metadata, issues }) => {
     // Populate host_genome_id in sample using metadata.
     const newSamples = this.state.samples.map(sample => {
+      console.log("I got to here", metadata, sample);
+
       const metadataRow = find(
         row =>
           get("sample_name", row) === sample.name ||

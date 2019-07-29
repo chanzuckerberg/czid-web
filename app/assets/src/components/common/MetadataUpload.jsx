@@ -58,6 +58,7 @@ class MetadataUpload extends React.Component {
 
   // MetadataCSVUpload validates metadata before calling onMetadataChangeCSV.
   onMetadataChangeCSV = ({ metadata, issues, validatingCSV }) => {
+    console.log("The metadata I got was: ", metadata);
     this.props.onMetadataChange({ metadata, issues, wasManual: false });
     this.setState({
       issues,
@@ -139,6 +140,7 @@ class MetadataUpload extends React.Component {
             samplesAreNew={this.props.samplesAreNew}
             visible={this.props.visible}
             onDirty={this.props.onDirty}
+            projectMetadataFields={this.state.projectMetadataFields}
           />
           <a
             className={cs.link}

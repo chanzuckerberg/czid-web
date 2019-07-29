@@ -11,6 +11,8 @@ import {
 import cs from "./metadata_csv_upload.scss";
 import PropTypes from "prop-types";
 
+import MetadataInput from "./MetadataInput";
+
 const processCSVMetadata = csv => {
   const { headers, rows } = csv;
 
@@ -104,6 +106,57 @@ class MetadataCSVUpload extends React.Component {
     });
   };
 
+  renderLocationsInterface = () => {
+    const { metadata } = this.state;
+    console.log("our metadata: ", metadata);
+
+    return (
+      metadata &&
+      metadata.rows &&
+      metadata.rows.map(row => {
+        return (
+          <div>
+            <span>{row[0]}</span>
+            <MetadataInput
+              key={"collection_location_v2"}
+              // className={inputClasses}
+              // value={this.getMetadataValue(sample, column)}
+              metadataType={
+                this.props.projectMetadataFields["collection_location_v2"]
+              }
+              onChange={(key, value) => {
+                console.log(key, value);
+
+                let newMetadata = this.state.metadata;
+                const i = this.state.metadata.headers.indexOf(
+                  "Collection Location"
+                );
+                newMetadata.rows[0][i] = value;
+
+                this.setState({ metadata: newMetadata });
+                this.props.onMetadataChange({
+                  metadata: processCSVMetadata(newMetadata),
+                });
+              }}
+              // onChange={(key, value) => {
+              //   this.updateMetadataField(key, value, sample);
+              //   logAnalyticsEvent("MetadataManualInput_input_changed", {
+              //     key,
+              //     value,
+              //     sampleName: sample.name,
+              //   });
+              // }}
+              withinModal={true}
+              isHuman={true}
+            />
+          </div>
+        );
+      })
+    );
+
+    return <div>{"hello there"}</div>;
+  };
+
   render() {
     const hasMetadata = !isNull(this.state.metadata);
     return (
@@ -113,6 +166,7 @@ class MetadataCSVUpload extends React.Component {
           onCSV={this.onCSV}
           className={cx(cs.csvUpload, hasMetadata && cs.uploaded)}
         />
+        {this.renderLocationsInterface()}
       </div>
     );
   }
