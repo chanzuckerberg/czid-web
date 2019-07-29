@@ -137,15 +137,9 @@ class MetadataCSVUpload extends React.Component {
                 this.props.onMetadataChange({
                   metadata: processCSVMetadata(newMetadata),
                 });
+
+                // Log analytics?
               }}
-              // onChange={(key, value) => {
-              //   this.updateMetadataField(key, value, sample);
-              //   logAnalyticsEvent("MetadataManualInput_input_changed", {
-              //     key,
-              //     value,
-              //     sampleName: sample.name,
-              //   });
-              // }}
               withinModal={true}
               isHuman={true}
             />
