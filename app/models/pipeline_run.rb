@@ -907,7 +907,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def run_time
-    Time.current - created_at
+    Time.now.utc - created_at
   end
 
   def duration_hrs

@@ -525,6 +525,12 @@ class Sample < ApplicationRecord
     end
   end
 
+  # Delay determined based on query of historical upload times, where 80%
+  # of successful uploads took less than 3 hours by client_updated_at.
+  def self.stalled_uploads
+    where(status: STATUS_CREATED).where("created_at < ?", Time.now.utc - 3.hours)
+  end
+
   def destroy
     TaxonByterange.where(pipeline_run_id: pipeline_run_ids).delete_all
     TaxonCount.where(pipeline_run_id: pipeline_run_ids).delete_all
