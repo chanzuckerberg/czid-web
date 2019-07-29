@@ -4,6 +4,8 @@ import { PanZoom } from "react-easy-panzoom";
 import cx from "classnames";
 
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
+import ViewHeader from "~/components/layout/ViewHeader";
+import NarrowContainer from "~/components/layout/NarrowContainer";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
@@ -94,7 +96,7 @@ class PipelineViz extends React.Component {
     return graph.getNodeAt(x, y);
   }
 
-  handleClick(stageIndex, info) {
+  handleStageClick(stageIndex, info) {
     const graph = this.graphs[stageIndex];
     const clickedNodeId = this.getNodeIdAtCoords(
       graph,
@@ -627,7 +629,7 @@ class PipelineViz extends React.Component {
         hover: false,
         selectConnectedEdges: false,
       },
-      onClick: info => this.handleClick(index, info),
+      onClick: info => this.handleStageClick(index, info),
     };
 
     const currStageGraph = new NetworkGraph(
@@ -719,6 +721,20 @@ class PipelineViz extends React.Component {
     );
   }
 
+  renderHeader() {
+    return (
+      <NarrowContainer>
+        <ViewHeader>
+          <ViewHeader.Content>
+            <ViewHeader.Pretitle breadcrumbLink="">
+              sample name
+            </ViewHeader.Pretitle>
+            <ViewHeader.Title label="Pipeline Vizualization" />
+          </ViewHeader.Content>
+        </ViewHeader>
+      </NarrowContainer>
+    );
+  }
   render() {
     const { zoomMin, zoomMax } = this.props;
     const { sidebarVisible, sidebarParams, interStageArrows } = this.state;
@@ -733,7 +749,8 @@ class PipelineViz extends React.Component {
     });
 
     return (
-      <div>
+      <div className={cs.pipelineVizContainer}>
+        {this.renderHeader()}
         <PanZoom
           className={cs.panZoomContainer}
           minZoom={zoomMin}
@@ -744,8 +761,16 @@ class PipelineViz extends React.Component {
           <div className={cs.pipelineViz}>{stageContainers}</div>
         </PanZoom>
         <PlusMinusControl
-          onPlusClick={this.panZoomContainer && this.panZoomContainer.zoomIn}
-          onMinusClick={this.panZoomContainer && this.panZoomContainer.zoomOut}
+          onPlusClick={
+            this.panZoomContainer &&
+            this.panZoomContainer.current &&
+            this.panZoomContainer.current.zoomIn
+          }
+          onMinusClick={
+            this.panZoomContainer &&
+            this.panZoomContainer.current &&
+            this.panZoomContainer.current.zoomOut
+          }
           className={cs.plusMinusControl}
         />
         <DetailsSidebar

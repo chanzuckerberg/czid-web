@@ -2,6 +2,11 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
 
+.pipelineVizContainer {
+  display: flex;
+  flex-direction: column;
+}
+
 .pipelineViz {
   display: flex;
   justify-content: center;
