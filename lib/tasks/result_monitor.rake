@@ -32,6 +32,29 @@ class MonitorPipelineResults
         LogUtil.log_backtrace(exception)
       end
     end
+
+    # "stalled uploads" are not pipeline jobs, but they fit in here better than
+    # anywhere else.
+    begin
+      MonitorPipelineResults.alert_stalled_uploads
+    rescue => exception
+      LogUtil.log_err_and_airbrake("Failed to alert on stalled uploads: #{exception.message}")
+      LogUtil.log_backtrace(exception)
+    end
+  end
+
+  def self.alert_stalled_uploads
+    samples = Sample.stalled_uploads
+    created_at = samples.map { |sample| sample.created_at }.min
+    role_names = samples.map { |sample| sample.user.role_name }.compact.uniq
+    duration_hrs = ((Time.now.utc - created_at) / 60 / 60).round(2)
+    client_updated_at = samples.map { |sample| sample.client_updated_at }.compact.max
+    status_urls = samples.map { |sample| sample.status_url }
+    msg = "LongRunningUploadsEvent: Samples #{samples.pluck(:id)} by #{role_names} " +
+      "were created #{duration_hrs} hours ago. " +
+      (client_updated_at ? "Last client ping was at #{client_updated_at}. " : "") +
+      "See: #{status_urls}"
+    LogUtil.log_err_and_airbrake(msg)
   end
 
   def self.run(duration, min_refresh_interval)
@@ -97,4 +120,9 @@ task "result_monitor", [:duration] => :environment do |_t, args|
       end
     end
   end
+end
+
+# One-off task for testing alerts
+task "alert_stalled_uploads", [] => :environment do |t, args|
+  MonitorPipelineResults.alert_stalled_uploads
 end
