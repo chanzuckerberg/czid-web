@@ -13,6 +13,7 @@ import {
 import { withAnalytics } from "~/api/analytics";
 
 import { openBasespaceOAuthPopup } from "./utils";
+import { NO_TARGET_PROJECT_ERROR } from "./constants";
 import cs from "./basespace_sample_import.scss";
 
 export default class BasespaceSampleImport extends React.Component {
@@ -29,6 +30,17 @@ export default class BasespaceSampleImport extends React.Component {
     window.addEventListener("message", this.handleMessageEvent);
     if (accessToken) {
       this.fetchBasespaceProjects(accessToken);
+    }
+  }
+
+  componentDidUpdate() {
+    if (
+      this.state.error === NO_TARGET_PROJECT_ERROR &&
+      this.props.project !== null
+    ) {
+      this.setState({
+        error: "",
+      });
     }
   }
 
@@ -87,13 +99,14 @@ export default class BasespaceSampleImport extends React.Component {
 
   fetchSamplesForBasespaceProject = async () => {
     const { selectedProjectId, basespaceProjects } = this.state;
-    const { onChange, accessToken, project } = this.props;
+    const { onChange, accessToken, project, onNoProject } = this.props;
 
     if (!this.props.project) {
       this.setState({
-        error: "Please select a project.",
+        error: NO_TARGET_PROJECT_ERROR,
         errorType: "error",
       });
+      onNoProject();
       return;
     } else {
       this.setState({
@@ -218,4 +231,5 @@ BasespaceSampleImport.propTypes = {
   project: PropTypes.Project,
   basespaceClientId: PropTypes.string.isRequired,
   basespaceOauthRedirectUri: PropTypes.string.isRequired,
+  onNoProject: PropTypes.func.isRequired,
 };

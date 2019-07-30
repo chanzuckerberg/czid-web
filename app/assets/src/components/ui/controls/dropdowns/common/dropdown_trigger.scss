@@ -36,4 +36,16 @@
     font-weight: 600;
     margin-right: 5px;
   }
+
+  .placeholder {
+    color: $light-grey;
+  }
+
+  &.erred {
+    border: 1px solid $error;
+
+    .placeholder {
+      color: $error;
+    }
+  }
 }

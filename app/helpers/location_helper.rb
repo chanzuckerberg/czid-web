@@ -33,7 +33,7 @@ module LocationHelper
       lng: body["lon"] ? body["lon"].to_f.round(2) : nil,
       country_code: address["country_code"] || "",
       osm_id: body["osm_id"].to_i,
-      osm_type: body["osm_type"],
+      osm_type: body["osm_type"] || "",
       locationiq_id: body["place_id"].to_i
     }
 

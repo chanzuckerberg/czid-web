@@ -60,19 +60,19 @@ RSpec.describe RetrievePipelineVizGraphDataService do
       {
         steps: [
           {
-            name: "step_one",
+            name: "Two",
             inputEdges: [0],
             outputEdges: [1]
           },
           {
-            name: "step_two",
+            name: "Three",
             inputEdges: [1],
             outputEdges: [2]
           }
         ]
       }, {
         steps: [{
-          name: "step_three",
+          name: "Four",
           inputEdges: [2],
           outputEdges: [3]
         }]
