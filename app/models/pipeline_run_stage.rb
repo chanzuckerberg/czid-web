@@ -29,6 +29,13 @@ class PipelineRunStage < ApplicationRecord
   DAG_NAME_POSTPROCESS = "postprocess".freeze
   DAG_NAME_EXPERIMENTAL = "experimental".freeze
 
+  STEP_NUMBER_TO_DAG_JSON_NAMES = {
+    1 => DAG_NAME_HOST_FILTER,
+    2 => DAG_NAME_ALIGNMENT,
+    3 => DAG_NAME_POSTPROCESS,
+    4 => DAG_NAME_EXPERIMENTAL
+  }.freeze
+
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
 
@@ -39,6 +46,19 @@ class PipelineRunStage < ApplicationRecord
   def stage_status_file(status)
     basename = "#{job_id}.#{status}"
     "#{pipeline_run.sample.sample_output_s3_path}/#{basename}"
+  end
+
+  def dag_json_name
+    STEP_NUMBER_TO_DAG_JSON_NAMES[step_number]
+  end
+
+  def step_status_file_path
+    path_beginning = if step_number <= 2
+                       pipeline_run.sample.sample_output_s3_path
+                     else
+                       pipeline_run.sample.sample_postprocess_s3_path
+                     end
+    "#{path_beginning}/#{pipeline_run.pipeline_version}/#{dag_json_name}_status.json"
   end
 
   def check_status_file_and_update(status_file_suffix, job_status_value)

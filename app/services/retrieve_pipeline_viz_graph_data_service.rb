@@ -3,6 +3,7 @@ class RetrievePipelineVizGraphDataService
   # For step descriptions.
   # TODO(ezhong): Move to server-fed descriptions.
   include PipelineRunsHelper
+  include PipelineOutputsHelper
 
   # Structures dag_json of each stage of the pipeline run into the following in @results for drawing
   # the pipeline visualization graphs on the React side:
@@ -17,6 +18,7 @@ class RetrievePipelineVizGraphDataService
   #             edge being an input edge to the node.
   #           - ouputEdges: An array of indices that map to edges in the @edges array, each edge being an
   #             output edge from the node
+  #           - status: A number representing the current status of the step at time of retrieval.
   #
   # edges: An array of edges, each edge object having the following structure:
   #     - from: An object containing a stageIndex and stepIndex, denoting the originating node it is from
@@ -49,14 +51,19 @@ class RetrievePipelineVizGraphDataService
   private
 
   def create_stage_nodes_scaffolding
+    all_step_status = step_status
     stages = @all_dag_jsons.map.with_index do |dag_json, stage_index|
+      stage_step_status = all_step_status[stage_index]
       stage_step_descriptions = STEP_DESCRIPTIONS[@stage_names[stage_index]]["steps"]
       steps = dag_json["steps"].map do |step|
+        status_info = stage_step_status[step["out"]] || {}
+        description = status_info["description"].blank? ? stage_step_descriptions[step["out"]] : status_info["description"]
         {
           name: modify_step_name(step["out"]),
-          description: stage_step_descriptions[step["out"]],
+          description: description,
           inputEdges: [],
-          outputEdges: []
+          outputEdges: [],
+          status: status_info["status"]
         }
       end
 
@@ -81,6 +88,12 @@ class RetrievePipelineVizGraphDataService
     end
     @remove_host_filtering_urls && remove_host_filtering_urls(edges)
     return edges
+  end
+
+  def step_status
+    @pipeline_run.pipeline_run_stages.map do |prs|
+      JSON.parse(get_s3_file(prs.step_status_file_path) || "{}")
+    end
   end
 
   def input_output_to_file_paths
