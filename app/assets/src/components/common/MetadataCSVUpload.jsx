@@ -22,6 +22,8 @@ import {
 import { getURLParamString } from "~/helpers/url";
 import CSVUpload from "~ui/controls/CSVUpload";
 
+import { getGeoSearchSuggestions } from "~/api/locations";
+
 import MetadataInput from "./MetadataInput";
 import cs from "./metadata_csv_upload.scss";
 
@@ -129,9 +131,9 @@ class MetadataCSVUpload extends React.Component {
     return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
   };
 
-  geosearchCSVlocations = () => {
+  geosearchCSVlocations = async () => {
     console.log("geosearchCSVlocations was called");
-    const { projectMetadataFields } = this.props;
+    const { onMetadataChange, projectMetadataFields } = this.props;
     const { metadata } = this.state;
 
     if (!(metadata && metadata.rows)) return;
@@ -144,6 +146,33 @@ class MetadataCSVUpload extends React.Component {
 
     const originalValues = uniq(metadata.rows.map(r => r[fieldIndex]));
     console.log("original values:", originalValues);
+
+    const mappedResults = {};
+    for (const query of originalValues) {
+      const suggestions = await getGeoSearchSuggestions(query, 1);
+      if (suggestions.length > 0) {
+        const result = suggestions[0];
+        console.log("suggestion: ", result);
+        mappedResults[query] = result;
+      }
+    }
+
+    console.log("all mapped results: ", mappedResults);
+
+    let newMetadata = metadata;
+    metadata.rows.map((row, rowIndex) => {
+      const locationName = row[fieldIndex];
+      if (mappedResults.hasOwnProperty(locationName)) {
+        newMetadata.rows[rowIndex][fieldIndex] = mappedResults[locationName];
+      }
+    });
+
+    console.log("want to set: ", newMetadata);
+
+    this.setState({ metadata: newMetadata });
+    onMetadataChange({
+      metadata: processCSVMetadata(newMetadata),
+    });
   };
 
   renderLocationsInterface = () => {

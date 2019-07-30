@@ -50,9 +50,10 @@ class Location < ApplicationRecord
   end
 
   # Search request to Location IQ API by freeform query
-  def self.geosearch(query)
+  def self.geosearch(query, limit = nil)
     raise ArgumentError, "No query for geosearch" if query.blank?
     endpoint_query = "#{GEOSEARCH_BASE_QUERY}&q=#{query}"
+    endpoint_query += "&limit=#{limit}" if limit.present?
     location_api_request(endpoint_query)
   end
 

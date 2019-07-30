@@ -15,8 +15,9 @@ class LocationsController < ApplicationController
 
     results = []
     query = location_params[:query]
+    limit = location_params[:limit]
     if query.present?
-      success, resp = Location.geosearch(query)
+      success, resp = Location.geosearch(query, limit)
       if success
         results = resp.map { |r| LocationHelper.adapt_location_iq_response(r) }
         # Just keep the first if you get duplicate locations
@@ -125,7 +126,7 @@ class LocationsController < ApplicationController
   private
 
   def location_params
-    params.permit(:query)
+    params.permit(:query, :limit)
   end
 
   def feature_access?
