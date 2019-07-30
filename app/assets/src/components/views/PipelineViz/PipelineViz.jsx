@@ -743,6 +743,7 @@ class PipelineViz extends React.Component {
             <div className={cs.pipelineDetailsLink}>Pipeline Details</div>
           </ViewHeader.Content>
         </ViewHeader>
+        <div className={cs.headerDivider} />
       </NarrowContainer>
     );
   }
@@ -760,10 +761,9 @@ class PipelineViz extends React.Component {
     });
 
     return (
-      <div className={cs.pipelineVizContainer}>
+      <div className={cs.pipelineVizPage}>
         {this.renderHeader()}
-        <NarrowContainer>
-          <div className={cs.headerDivider} />
+        <div className={cs.pipelineVizContainer}>
           <PanZoom
             className={cs.panZoomContainer}
             minZoom={zoomMin}
@@ -786,7 +786,7 @@ class PipelineViz extends React.Component {
             }
             className={cs.plusMinusControl}
           />
-        </NarrowContainer>
+        </div>
         <DetailsSidebar
           visible={sidebarVisible}
           mode="pipelineStepDetails"
