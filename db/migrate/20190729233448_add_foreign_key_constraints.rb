@@ -11,13 +11,17 @@ class AddForeignKeyConstraints < ActiveRecord::Migration[5.1]
     # assign_user_to_samples
     add_foreign_key "samples", "users", name: "samples_user_id_fk"
 
+    # delete_bad_rows "amr_counts", "pipeline_runs"
     add_foreign_key "amr_counts", "pipeline_runs", name: "amr_counts_pipeline_run_id_fk"
 
     # delete_bad_rows "backgrounds_pipeline_runs", "backgrounds"
     add_foreign_key "backgrounds_pipeline_runs", "backgrounds", name: "backgrounds_pipeline_runs_background_id_fk"
 
+    # delete_bad_rows "backgrounds_pipeline_runs", "pipeline_runs"
     add_foreign_key "backgrounds_pipeline_runs", "pipeline_runs", name: "backgrounds_pipeline_runs_pipeline_run_id_fk"
+    # delete_bad_rows "backgrounds_samples", "backgrounds"
     add_foreign_key "backgrounds_samples", "backgrounds", name: "backgrounds_samples_background_id_fk"
+    # delete_bad_rows "backgrounds_samples", "samples"
     add_foreign_key "backgrounds_samples", "samples", name: "backgrounds_samples_sample_id_fk"
 
     # delete_bad_rows "favorite_projects", "projects"
@@ -43,8 +47,11 @@ class AddForeignKeyConstraints < ActiveRecord::Migration[5.1]
     # delete_bad_rows "job_stats", "pipeline_runs"
     add_foreign_key "job_stats", "pipeline_runs", name: "job_stats_pipeline_run_id_fk"
 
+    # delete_bad_rows "metadata_fields_projects", "metadata_fields"
     add_foreign_key "metadata_fields_projects", "metadata_fields", name: "metadata_fields_projects_metadata_field_id_fk"
+    # delete_bad_rows "metadata_fields_projects", "projects"
     add_foreign_key "metadata_fields_projects", "projects", name: "metadata_fields_projects_project_id_fk"
+    # delete_bad_rows "metadata", "metadata_fields"
     add_foreign_key "metadata", "metadata_fields", name: "metadata_metadata_field_id_fk"
 
     # delete_bad_rows "metadata", "samples"
@@ -53,9 +60,13 @@ class AddForeignKeyConstraints < ActiveRecord::Migration[5.1]
     # delete_bad_rows "output_states", "pipeline_runs"
     add_foreign_key "output_states", "pipeline_runs", name: "output_states_pipeline_run_id_fk"
 
+    # delete_bad_rows "phylo_trees_pipeline_runs", "phylo_trees"
     add_foreign_key "phylo_trees_pipeline_runs", "phylo_trees", name: "phylo_trees_pipeline_runs_phylo_tree_id_fk"
+    # delete_bad_rows "phylo_trees_pipeline_runs", "pipeline_runs"
     add_foreign_key "phylo_trees_pipeline_runs", "pipeline_runs", name: "phylo_trees_pipeline_runs_pipeline_run_id_fk"
+    # delete_bad_rows "phylo_trees", "projects"
     add_foreign_key "phylo_trees", "projects", name: "phylo_trees_project_id_fk"
+    # delete_bad_rows "phylo_trees", "users"
     add_foreign_key "phylo_trees", "users", name: "phylo_trees_user_id_fk"
 
     # delete_bad_rows "pipeline_run_stages", "pipeline_runs"
@@ -67,7 +78,9 @@ class AddForeignKeyConstraints < ActiveRecord::Migration[5.1]
     # delete_bad_rows "projects_users", "users"
     add_foreign_key "projects_users", "users", name: "projects_users_user_id_fk"
 
+    # delete_bad_rows "samples", "host_genomes"
     add_foreign_key "samples", "host_genomes", name: "samples_host_genome_id_fk"
+    # delete_bad_rows "samples", "projects"
     add_foreign_key "samples", "projects", name: "samples_project_id_fk"
 
     # delete_bad_rows "samples_visualizations", "samples"
