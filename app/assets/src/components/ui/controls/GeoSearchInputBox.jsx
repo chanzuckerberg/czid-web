@@ -48,6 +48,7 @@ class GeoSearchInputBox extends React.Component {
         };
       }
     } catch (e) {
+      // In the case of an error (e.g. no API key in dev), just catch and show the plain text option.
       // eslint-disable-next-line no-console
       console.log(e);
     }
