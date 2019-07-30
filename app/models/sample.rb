@@ -264,11 +264,6 @@ class Sample < ApplicationRecord
     elsif !input_files.empty? && input_files.first.source_type == InputFile::SOURCE_TYPE_S3
       Resque.enqueue(InitiateS3Cp, id)
     end
-
-    # Delay determined based on query of historical upload times, where 80%
-    # of successful uploads took less than 3 hours by client_updated_at.
-    delay = 180.minutes
-    Resque.enqueue_in(delay + 1.minute, CheckUploadStatusAfterDelay, id, delay)
   end
 
   def initiate_s3_cp
