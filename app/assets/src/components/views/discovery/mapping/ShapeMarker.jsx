@@ -9,8 +9,11 @@ class ShapeMarker extends React.Component {
   render() {
     let {
       active,
+      divisorConst,
       lat,
       lng,
+      maxSize,
+      minSize,
       onClick,
       onMouseEnter,
       onMouseLeave,
@@ -20,27 +23,21 @@ class ShapeMarker extends React.Component {
       sizeMultiple,
       title,
       zoom,
-      minSize,
-      maxSize,
     } = this.props;
 
-    // Scale based on the zoom and point count (zoomed-in = higher zoom)
-    // Log2 of the count scaled looked nice visually for not getting too large with many points.
-    const options = [1, 10, 100, 500, 1000, 3000];
-    pointCount = options[Math.floor(Math.random() * options.length)];
+    // Scale based on the zoom and point count (zoomed-in = higher zoom).
+    // Determined via eyeballing: scaling of a form x/(x+c) shows large differences at the lower
+    // end of the range and smaller differences as it approaches a horizontal asymptote.
+    // clamp(min, x/(x+c) * m * z, max)
     const computedSize =
       size ||
       Math.min(
         Math.max(
-          20 * pointCount / (200 + pointCount) * sizeMultiple * zoom,
+          pointCount / (pointCount + divisorConst) * sizeMultiple * zoom,
           minSize
         ),
         maxSize
       );
-
-    console.log("computed: ", computedSize);
-    console.log(title, pointCount);
-    console.log("9:35am");
 
     return (
       <Marker latitude={lat} longitude={lng}>
@@ -68,16 +65,19 @@ class ShapeMarker extends React.Component {
 
 // Defaults determined via eyeballing.
 ShapeMarker.defaultProps = {
-  minSize: 10,
-  sizeMultiple: 3,
-  zoom: 3,
+  divisorConst: 400,
   maxSize: 90,
+  minSize: 10,
+  sizeMultiple: 60,
+  zoom: 3,
 };
 
 ShapeMarker.propTypes = {
   active: PropTypes.bool,
+  divisorConst: PropTypes.number,
   lat: PropTypes.number,
   lng: PropTypes.number,
+  maxSize: PropTypes.number,
   minSize: PropTypes.number,
   onClick: PropTypes.func,
   onMouseEnter: PropTypes.func,
