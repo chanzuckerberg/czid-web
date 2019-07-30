@@ -53,7 +53,12 @@ class MonitorPipelineResults
   def self.fail_stalled_uploads!
     Sample
       .stalled_uploads(18.hours)
-      .each { |sample| sample.fail_local_upload!("Stalled for more than 6 hours") }
+      .update_all(
+        status: Sample::STATUS_CHECKED,
+        upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED
+      )
+    message = "Stalled for more than 18 hours"
+    LogUtil.log_err_and_airbrake("SampleUploadFailedEvent: Failed to upload local samples #{samples.pluck(:id)}: #{message}")
   end
 
   def self.alert_stalled_uploads!
@@ -64,15 +69,15 @@ class MonitorPipelineResults
       return
     end
 
-    samples.each { |sample| sample.update(upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED) }
+    samples.update_all(upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED)
 
-    created_at = samples.map(&created_at).min
+    created_at = samples.map(&:created_at).min
     role_names = samples.map { |sample| sample.user.role_name }.compact.uniq
+    project_names = samples.map { |sample| sample.project.name }.compact.uniq
     duration_hrs = ((Time.now.utc - created_at) / 60 / 60).round(2)
-    client_updated_at = samples.map(&client_updated_at).compact.max
-    status_urls = samples.map(&status_url)
-    msg = %(LongRunningUploadsEvent: Samples #{samples.pluck(:id)} by #{role_names}
-      were created #{duration_hrs} hours ago.
+    client_updated_at = samples.map(&:client_updated_at).compact.max
+    status_urls = samples.map(&:status_url)
+    msg = %(LongRunningUploadsEvent: #{samples.length} samples were created #{duration_hrs} hours ago by #{role_names} in projects #{project_names}.
       #{client_updated_at ? "Last client ping was at #{client_updated_at}. " : ''}
       See: #{status_urls})
     LogUtil.log_err_and_airbrake(msg)

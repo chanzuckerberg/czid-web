@@ -529,13 +529,6 @@ class Sample < ApplicationRecord
       .where("created_at < ?", Time.now.utc - delay)
   end
 
-  def fail_local_upload!(message)
-    LogUtil.log_err_and_airbrake("SampleUploadFailedEvent: Failed to upload local sample '#{name}' (#{id}): #{message}")
-    self.status = STATUS_CHECKED
-    self.upload_error = Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED
-    save!
-  end
-
   def destroy
     TaxonByterange.where(pipeline_run_id: pipeline_run_ids).delete_all
     TaxonCount.where(pipeline_run_id: pipeline_run_ids).delete_all
