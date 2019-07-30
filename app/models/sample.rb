@@ -873,12 +873,13 @@ class Sample < ApplicationRecord
     pipeline_runs.order(created_at: :desc).first
   end
 
+  # Gets the URL for the admin-only sample status page for printing in internal
+  # error messages.
   def status_url
-    base_url = if Rails.env == 'staging'
-                 "https://staging.idseq.net"
-               else
-                 "https://idseq.net"
-               end
+    host, port = Rails.application.config.action_mailer.default_url_options.values
+    protocol = Rails.application.config.force_ssl ? "https" : "http"
+    port = port ? ":#{port}" : ""
+    base_url = "#{protocol}://#{host}#{port}"
     base_url + "/samples/#{id}/pipeline_runs"
   end
 end

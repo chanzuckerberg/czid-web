@@ -182,4 +182,16 @@ describe Sample, type: :model do
       end
     end
   end
+
+  context "#status_url" do
+    before do
+      project = create(:public_project)
+      @sample = create(:sample, project: project)
+    end
+
+    it "returns the url to the sample status page" do
+      skip "The actual URL depends on the execution environment"
+      expect(@sample.status_url).to eq("http://localhost:3000/samples/8/pipeline_runs")
+    end
+  end
 end
