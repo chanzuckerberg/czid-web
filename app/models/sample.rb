@@ -34,6 +34,8 @@ class Sample < ApplicationRecord
   # Constants for upload errors.
   UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED = "BASESPACE_UPLOAD_FAILED".freeze
   UPLOAD_ERROR_S3_UPLOAD_FAILED = "S3_UPLOAD_FAILED".freeze
+  UPLOAD_ERROR_LOCAL_UPLOAD_STALLED = "LOCAL_UPLOAD_STALLED".freeze
+  UPLOAD_ERROR_LOCAL_UPLOAD_FAILED = "LOCAL_UPLOAD_FAILED".freeze
 
   TOTAL_READS_JSON = "total_reads.json".freeze
   LOG_BASENAME = 'log.txt'.freeze
@@ -264,11 +266,6 @@ class Sample < ApplicationRecord
     elsif !input_files.empty? && input_files.first.source_type == InputFile::SOURCE_TYPE_S3
       Resque.enqueue(InitiateS3Cp, id)
     end
-
-    # Delay determined based on query of historical upload times, where 80%
-    # of successful uploads took less than 3 hours by client_updated_at.
-    delay = 180.minutes
-    Resque.enqueue_in(delay + 1.minute, CheckUploadStatusAfterDelay, id, delay)
   end
 
   def initiate_s3_cp
@@ -527,8 +524,16 @@ class Sample < ApplicationRecord
 
   # Delay determined based on query of historical upload times, where 80%
   # of successful uploads took less than 3 hours by client_updated_at.
-  def self.stalled_uploads
-    where(status: STATUS_CREATED).where("created_at < ?", Time.now.utc - 3.hours)
+  def self.stalled_uploads(delay = 3.hours)
+    where(status: STATUS_CREATED)
+      .where("created_at < ?", Time.now.utc - delay)
+  end
+
+  def fail_local_upload!(message)
+    LogUtil.log_err_and_airbrake("SampleUploadFailedEvent: Failed to upload local sample '#{name}' (#{id}): #{message}")
+    self.status = STATUS_CHECKED
+    self.upload_error = Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED
+    save!
   end
 
   def destroy

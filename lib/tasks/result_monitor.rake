@@ -36,15 +36,37 @@ class MonitorPipelineResults
     # "stalled uploads" are not pipeline jobs, but they fit in here better than
     # anywhere else.
     begin
-      MonitorPipelineResults.alert_stalled_uploads
+      MonitorPipelineResults.alert_stalled_uploads!
     rescue => exception
       LogUtil.log_err_and_airbrake("Failed to alert on stalled uploads: #{exception.message}")
       LogUtil.log_backtrace(exception)
     end
+
+    begin
+      MonitorPipelineResults.fail_stalled_uploads!
+    rescue => exception
+      LogUtil.log_err_and_airbrake("Failed to fail stalled uploads: #{exception.message}")
+      LogUtil.log_backtrace(exception)
+    end
   end
 
-  def self.alert_stalled_uploads
-    samples = Sample.stalled_uploads
+  def self.fail_stalled_uploads!
+    # Delay determined by doubling the time after which an alert is sent to admins.
+    Sample
+      .stalled_uploads(6.hours)
+      .each { |sample| sample.fail_local_upload!("Stalled for more than 6 hours") }
+  end
+
+  def self.alert_stalled_uploads!
+    # Delay determined based on query of historical upload times, where 80%
+    # of successful uploads took less than 3 hours by client_updated_at.
+    samples = Sample.stalled_uploads(3.hours).where(upload_error: nil)
+    if samples.empty?
+      return
+    end
+
+    samples.each { |sample| sample.update(upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED) }
+
     created_at = samples.map { |sample| sample.created_at }.min
     role_names = samples.map { |sample| sample.user.role_name }.compact.uniq
     duration_hrs = ((Time.now.utc - created_at) / 60 / 60).round(2)
@@ -124,5 +146,10 @@ end
 
 # One-off task for testing alerts
 task "alert_stalled_uploads", [] => :environment do |t, args|
-  MonitorPipelineResults.alert_stalled_uploads
+  MonitorPipelineResults.alert_stalled_uploads!
+end
+
+# One-off task for testing failures
+task "fail_stalled_uploads", [] => :environment do |t, args|
+  MonitorPipelineResults.fail_stalled_uploads!
 end
