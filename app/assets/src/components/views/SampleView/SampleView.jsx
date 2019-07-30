@@ -322,6 +322,13 @@ class SampleView extends React.Component {
         issueType = "error";
         link = "mailto:help@idseq.net";
         break;
+      case "LOCAL_UPLOAD_FAILED":
+        status = "SAMPLE FAILED";
+        message = "Oh no! It took too long to upload your sample file.";
+        linkText = "Contact us for help.";
+        issueType = "error";
+        link = "mailto:help@idseq.net";
+        break;
       case "FAULTY_INPUT":
         status = "COMPLETE - ISSUE";
         message = `Sorry, something was wrong with your input file. ${
