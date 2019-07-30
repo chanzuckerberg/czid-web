@@ -22,7 +22,7 @@ class PipelineViz extends React.Component {
 
     this.stageNames = [
       "Host Filtering",
-      "GSNAPL/RAPSEARCH alignment",
+      "Alignment",
       "Post Processing",
       ...(props.admin ? ["Experimental"] : []),
     ];
@@ -567,12 +567,10 @@ class PipelineViz extends React.Component {
         },
         margin: {
           left: 6,
-          right: 12,
-          top: 6,
-          bottom: 6,
+          right: 6,
         },
         widthConstraint: {
-          minimum: 120,
+          minimum: 100,
         },
         heightConstraint: {
           minimum: 24,
@@ -604,7 +602,7 @@ class PipelineViz extends React.Component {
           to: {
             enabled: true,
             type: "arrow",
-            scaleFactor: 0.85,
+            scaleFactor: 0.6,
           },
         },
         smooth: {
@@ -622,7 +620,7 @@ class PipelineViz extends React.Component {
         hierarchical: {
           direction: "LR",
           sortMethod: "directed",
-          levelSeparation: 200,
+          levelSeparation: 150,
           blockShifting: false,
           edgeMinimization: false,
         },
