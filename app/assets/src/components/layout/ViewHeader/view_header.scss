@@ -1,5 +1,6 @@
 @import "~styles/themes/colors";
 @import "~styles/typography";
+@import "~styles/themes/typography";
 @import "~styles/themes/elements";
 
 .viewHeader {
@@ -30,15 +31,12 @@
   }
 
   .sampleName {
+    @include font-header-xl;
     color: $black;
-    font-weight: $font-weight-semibold;
-    letter-spacing: 0.4px;
     max-width: 800px;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    font-size: $font-size-h3;
-    line-height: $line-height-h3;
   }
 
   .trigger {
@@ -52,11 +50,9 @@
   }
 
   .pretitle {
-    font-size: $font-size-body;
-    color: $medium-grey;
-    font-weight: $font-weight-semibold;
-    letter-spacing: 0.5px;
-    margin-bottom: 2px;
+    @include font-header-xxs;
+    color: $dark-grey;
+    margin-bottom: 3px;
     margin-left: 1px;
     display: flex;
 

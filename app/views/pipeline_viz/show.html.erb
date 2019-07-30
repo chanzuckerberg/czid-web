@@ -3,6 +3,10 @@
     react_component('PipelineViz', {
         admin: <%= current_user.admin %>,
         graphData: JSON.parse('<%= raw escape_json(@results) %>'),
+        pipelineRun: <%= raw escape_json(@pipeline_run_display) %>,
+        sample: <%= raw escape_json(@sample) %>,
+        pipelineVersions: <%= raw escape_json(@pipeline_versions) %>,
+        lastProcessedAt: <%= raw escape_json(@last_processed_at) %>
     }, 'PipelineStageResults');
   <% end %>
 </div>
