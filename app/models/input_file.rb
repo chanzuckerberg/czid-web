@@ -4,6 +4,7 @@ class InputFile < ApplicationRecord
   belongs_to :sample
   SOURCE_TYPE_LOCAL = 'local'.freeze
   SOURCE_TYPE_S3 = 's3'.freeze
+  SOURCE_TYPE_BASESPACE = 'basespace'.freeze
 
   FILE_REGEX = %r{\A[^\s\/]+\.(fastq|fq|fastq.gz|fq.gz|fasta|fa|fasta.gz|fa.gz)\z}
   BULK_FILE_PAIRED_REGEX = /([^ ]*)_R(\d)(_001)?.(fastq.gz|fq.gz|fastq|fq|fasta.gz|fa.gz|fasta|fa)\z/
@@ -11,7 +12,7 @@ class InputFile < ApplicationRecord
   S3_CP_PIPE_ERROR = '[Errno 32] Broken pipe'.freeze
 
   validates :name, presence: true, format: { with: FILE_REGEX, message: "file must match format '#{FILE_REGEX}'" }
-  validates :source_type, presence: true, inclusion: { in: %w[local s3] }
+  validates :source_type, presence: true, inclusion: { in: %w[local s3 basespace] }
   validate :s3_source_check, on: :create
 
   def s3_source_check
@@ -22,7 +23,7 @@ class InputFile < ApplicationRecord
       elsif !sample.user.can_upload(source.to_s)
         errors.add(:input_files, "forbidden s3 bucket")
       elsif !sample.bulk_mode # skip the check for bulk mode
-        fhead = Syscall.pipe(["aws", "s3", "cp", source.to_s, "-"], ["head", "-c", "100"])
+        fhead = Syscall.pipe_with_output(["aws", "s3", "cp", source.to_s, "-"], ["head", "-c", "100"])
         errors.add(:input_files, "forbidden file object") if fhead.empty?
       end
     end

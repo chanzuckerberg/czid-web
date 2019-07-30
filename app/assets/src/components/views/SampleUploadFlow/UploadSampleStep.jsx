@@ -37,6 +37,7 @@ import BulkSampleUploadTable from "~ui/controls/BulkSampleUploadTable";
 import ProjectCreationForm from "~/components/common/ProjectCreationForm";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
+import { RequestContext } from "~/components/common/RequestContext";
 
 import LocalSampleFileUpload from "./LocalSampleFileUpload";
 import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
@@ -64,6 +65,7 @@ class UploadSampleStep extends React.Component {
     removedLocalFiles: [], // Invalid local files that were removed.
     sampleNamesToFiles: {}, // Needed for local samples.
     validatingSamples: false, // Disable the "Continue" button while validating samples.
+    showNoProjectError: false, // Whether we should show an error if no project is currently selected.
   };
 
   async componentDidMount() {
@@ -160,12 +162,13 @@ class UploadSampleStep extends React.Component {
     return [];
   };
 
-  getUploadTabs = () => {
+  getUploadTabs = allowedFeatures => {
     const { admin } = this.props;
     return compact([
       LOCAL_UPLOAD_TAB,
       REMOTE_UPLOAD_TAB,
-      admin && BASESPACE_UPLOAD_TAB,
+      (admin || allowedFeatures.includes("basespace_upload_enabled")) &&
+        BASESPACE_UPLOAD_TAB,
     ]);
   };
 
@@ -199,6 +202,7 @@ class UploadSampleStep extends React.Component {
     this.props.onDirty();
     this.setState({
       validatingSamples: true,
+      showNoProjectError: false,
     });
 
     const [
@@ -342,6 +346,7 @@ class UploadSampleStep extends React.Component {
     this.props.onDirty();
     this.setState({
       validatingSamples: true,
+      showNoProjectError: false,
     });
 
     const [
@@ -569,6 +574,12 @@ class UploadSampleStep extends React.Component {
     });
   };
 
+  handleNoProject = () => {
+    this.setState({
+      showNoProjectError: true,
+    });
+  };
+
   getSampleNamesToFiles = () => {
     return flow(
       keyBy("name"),
@@ -597,6 +608,7 @@ class UploadSampleStep extends React.Component {
           <RemoteSampleFileUpload
             project={selectedProject}
             onChange={samples => this.handleSampleChange(samples, "remote")}
+            onNoProject={this.handleNoProject}
           />
         );
       case BASESPACE_UPLOAD_TAB:
@@ -608,6 +620,7 @@ class UploadSampleStep extends React.Component {
             onAccessTokenChange={this.handleBasespaceAccessTokenChange}
             basespaceClientId={this.props.basespaceClientId}
             basespaceOauthRedirectUri={this.props.basespaceOauthRedirectUri}
+            onNoProject={this.handleNoProject}
           />
         );
       default:
@@ -644,6 +657,10 @@ class UploadSampleStep extends React.Component {
               value={get("id", this.state.selectedProject)}
               onChange={this.handleProjectChange}
               disabled={this.state.createProjectOpen}
+              erred={
+                this.state.showNoProjectError &&
+                this.state.selectedProject === null
+              }
             />
             {this.state.createProjectOpen ? (
               <div className={cs.projectCreationContainer}>
@@ -669,12 +686,18 @@ class UploadSampleStep extends React.Component {
           </div>
           <div className={cs.fileUpload}>
             <div className={cs.title}>Upload Files</div>
-            <Tabs
-              className={cs.tabs}
-              tabs={this.getUploadTabs()}
-              value={this.state.currentTab}
-              onChange={this.handleTabChange}
-            />
+            <RequestContext.Consumer>
+              {({ allowedFeatures } = {}) => {
+                return (
+                  <Tabs
+                    className={cs.tabs}
+                    tabs={this.getUploadTabs(allowedFeatures)}
+                    value={this.state.currentTab}
+                    onChange={this.handleTabChange}
+                  />
+                );
+              }}
+            </RequestContext.Consumer>
             {this.renderTab()}
           </div>
           {this.state.currentTab === LOCAL_UPLOAD_TAB &&

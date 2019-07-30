@@ -7,12 +7,12 @@ class PipelineRun < ApplicationRecord
   include PipelineRunsHelper
   belongs_to :sample
   belongs_to :alignment_config
-  has_many :pipeline_run_stages
+  has_many :pipeline_run_stages, dependent: :destroy
   accepts_nested_attributes_for :pipeline_run_stages
   has_and_belongs_to_many :backgrounds
   has_and_belongs_to_many :phylo_trees
 
-  has_many :output_states
+  has_many :output_states, dependent: :destroy
   has_many :taxon_counts, dependent: :destroy
   has_many :job_stats, dependent: :destroy
   has_many :taxon_byteranges, dependent: :destroy
@@ -401,7 +401,7 @@ class PipelineRun < ApplicationRecord
     ercc_s3_path = "#{host_filter_output_s3_path}/#{ERCC_OUTPUT_NAME}"
     _stdout, _stderr, status = Open3.capture3("aws", "s3", "ls", ercc_s3_path)
     return unless status.exitstatus.zero?
-    ercc_lines = Syscall.pipe(["aws", "s3", "cp", ercc_s3_path, "-"], ["grep", "ERCC"], ["cut", "-f1,2"])
+    ercc_lines = Syscall.pipe_with_output(["aws", "s3", "cp", ercc_s3_path, "-"], ["grep", "ERCC"], ["cut", "-f1,2"])
     ercc_counts_array = []
     ercc_lines.split(/\r?\n/).each do |line|
       fields = line.split("\t")

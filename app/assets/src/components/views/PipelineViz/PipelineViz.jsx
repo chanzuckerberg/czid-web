@@ -1,6 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
-import { groupBy } from "lodash/fp";
 import PropTypes from "prop-types";
 import { PanZoom } from "react-easy-panzoom";
 import cx from "classnames";
@@ -28,11 +26,6 @@ class PipelineViz extends React.Component {
       ...(props.admin ? ["Experimental"] : []),
     ];
 
-    this.pipelineVersion = this.props.stageResults.pipeline_version;
-    this.edgeFileData = this.createEdgeFileData();
-    this.stageStepData = this.createStageStepData();
-    this.populateStageStepDataEdges();
-
     this.graphs = [];
     this.graphContainers = [];
     this.lastMouseMoveInfo = {
@@ -42,9 +35,13 @@ class PipelineViz extends React.Component {
       y: 0,
       alteredGraphs: new Set(),
     };
+    this.panZoomContainer = React.createRef();
 
     this.state = {
-      stagesOpened: [true, true, true, true],
+      // Set stages that can be rendered to open, and others to closed.
+      stagesOpened: this.stageNames.map(
+        (_, i) => i < this.props.graphData.stages.length
+      ),
       interStageArrows: ["", "", ""],
       sidebarVisible: false,
       sidebarParams: {},
@@ -61,174 +58,36 @@ class PipelineViz extends React.Component {
     window.removeEventListener("resize", this.handleWindowResize);
   }
 
-  createFilePath(filePathSections) {
-    return filePathSections
-      .filter(
-        pathSection =>
-          pathSection != null && pathSection != undefined && pathSection != ""
-      )
-      .join("/");
-  }
-
   getStepDataAtIndices({ stageIndex, stepIndex }) {
-    return this.stageStepData[stageIndex].steps[stepIndex];
+    const {
+      graphData: { stages },
+    } = this.props;
+    return stages[stageIndex].steps[stepIndex];
   }
 
   getEdgeInfoFor(stageIndex, stepIndex, direction) {
+    const {
+      graphData: { edges },
+    } = this.props;
     const stepData = this.getStepDataAtIndices({
       stageIndex: stageIndex,
       stepIndex: stepIndex,
     });
     switch (direction) {
       case "input":
-        return stepData.inputEdges.map(edgeId => this.edgeFileData[edgeId]);
+        return stepData.inputEdges.map(edgeId => edges[edgeId]);
       case "output":
-        return stepData.outputEdges.map(edgeId => this.edgeFileData[edgeId]);
+        return stepData.outputEdges.map(edgeId => edges[edgeId]);
       default:
         return stepData.inputEdges
           .concat(stepData.outputEdges)
-          .map(edgeId => this.edgeFileData[edgeId]);
+          .map(edgeId => edges[edgeId]);
     }
-  }
-
-  createEdgeFileData() {
-    const infoPerFilePath = this.generateInfoPerFilePath();
-
-    // Group files with the same starting node and ending node
-    const filesGroupedByMatchingStartEndNodes = Object.values(
-      groupBy(filePathInfo => {
-        return JSON.stringify({ from: filePathInfo.from, to: filePathInfo.to });
-      }, infoPerFilePath)
-    );
-
-    // Coalesce redundant information (starting node and ending node)
-    // TODO(ezhong): Include file download urls once passed up from backend.
-    return filesGroupedByMatchingStartEndNodes.map(filesOnSameEdge => {
-      const from = filesOnSameEdge[0].from;
-      const to = filesOnSameEdge[0].to;
-      const fileInfo = filesOnSameEdge.map(fileInfo => {
-        return {
-          fileName: fileInfo.fileName,
-          filePath: fileInfo.filePath,
-          url: "",
-        };
-      });
-
-      return {
-        from: from,
-        to: to,
-        isIntraStage: from && to && from.stageIndex == to.stageIndex,
-        files: fileInfo,
-      };
-    });
-  }
-
-  generateInfoPerFilePath() {
-    const { stageResults } = this.props;
-
-    const filePathToOutputtingStep = {};
-    this.stageNames.forEach((stageName, stageIndex) => {
-      const stageData = stageResults.stages[stageName];
-      const targets = stageData.targets;
-
-      stageData.steps.forEach((step, stepIndex) => {
-        targets[step.out].forEach(fileName => {
-          const filePath = this.createFilePath([
-            stageData.output_dir_s3,
-            this.pipelineVersion,
-            fileName,
-          ]);
-          filePathToOutputtingStep[filePath] = {
-            fileName: fileName,
-            from: {
-              stageIndex: stageIndex,
-              stepIndex: stepIndex,
-            },
-          };
-        });
-      });
-    });
-
-    const infoPerFilePath = [];
-    const remainingOutputFiles = new Set(Object.keys(filePathToOutputtingStep));
-    this.stageNames.forEach((stageName, stageIndex) => {
-      const stageData = stageResults.stages[stageName];
-      const targets = stageData.targets;
-
-      stageData.steps.forEach((step, stepIndex) => {
-        step.in.forEach(inTarget => {
-          targets[inTarget].forEach(fileName => {
-            const filePathSections =
-              inTarget in stageData.given_targets
-                ? [stageData.given_targets[inTarget].s3_dir]
-                : [stageData.output_dir_s3, this.pipelineVersion];
-            filePathSections.push(fileName);
-
-            const filePath = this.createFilePath(filePathSections);
-            remainingOutputFiles.delete(filePath);
-
-            infoPerFilePath.push({
-              filePath: filePath,
-              fileName: fileName,
-              to: {
-                stageIndex: stageIndex,
-                stepIndex: stepIndex,
-              },
-              ...(filePathToOutputtingStep[filePath] || {}),
-            });
-          });
-        });
-      });
-    });
-
-    // Include output files that aren't input to any steps.
-    Array.from(remainingOutputFiles).forEach(filePath => {
-      infoPerFilePath.push({
-        filePath: filePath,
-        ...filePathToOutputtingStep[filePath],
-      });
-    });
-
-    return infoPerFilePath;
-  }
-
-  createStageStepData() {
-    const { stageResults } = this.props;
-
-    const stages = this.stageNames.map(stageName => {
-      const stageData = stageResults.stages[stageName];
-      const steps = stageData.steps.map(step => {
-        return {
-          name: this.getModifiedStepName(step.class),
-          inputEdges: [],
-          outputEdges: [],
-        };
-      });
-      return {
-        stageName: stageName,
-        jobStatus: stageData.job_status,
-        steps: steps,
-      };
-    });
-
-    return stages;
-  }
-
-  populateStageStepDataEdges() {
-    this.edgeFileData.forEach((edgeData, edgeIndex) => {
-      const { from, to } = edgeData;
-      from && this.getStepDataAtIndices(from).outputEdges.push(edgeIndex);
-      to && this.getStepDataAtIndices(to).inputEdges.push(edgeIndex);
-    });
-  }
-
-  getModifiedStepName(stepClassName) {
-    return stepClassName.replace(/^(PipelineStep(Run|Generate)?)/, "");
   }
 
   getNodeIdAtCoords(graph, xCoord, yCoord) {
     const { x, y } = inverseTransformDOMCoordinates(
-      ReactDOM.findDOMNode(this.panZoomContainer).firstChild,
+      this.panZoomContainer.current.dragContainer.current,
       xCoord,
       yCoord
     );
@@ -261,7 +120,9 @@ class PipelineViz extends React.Component {
         : "";
       return {
         fromStepName: fromStepName,
-        files: edgeInfo.files,
+        files: edgeInfo.files.map(file => {
+          return { fileName: file.displayName, url: file.url };
+        }),
       };
     });
 
@@ -275,24 +136,25 @@ class PipelineViz extends React.Component {
       .map(edgeInfo => {
         // Remove duplicate output file listings
         return edgeInfo.files.reduce((files, fileInfo) => {
-          if (!seenFiles.has(fileInfo.fileName)) {
-            seenFiles.add(fileInfo.fileName);
-            files.push(fileInfo);
+          const fileInfoAsString = JSON.stringify(fileInfo);
+          if (!seenFiles.has(fileInfoAsString)) {
+            seenFiles.add(fileInfoAsString);
+            files.push({ fileName: fileInfo.displayName, url: fileInfo.url });
           }
           return files;
         }, []);
       })
       .flat();
 
-    const stepName = this.getStepDataAtIndices({
+    const stepInfo = this.getStepDataAtIndices({
       stageIndex: stageIndex,
       stepIndex: clickedNodeId,
-    }).name;
+    });
     this.setState({
       sidebarVisible: true,
       sidebarParams: {
-        stepName: stepName,
-        description: "",
+        stepName: stepInfo.name,
+        description: stepInfo.description,
         inputFiles: inputInfo,
         outputFiles: outputInfo,
       },
@@ -485,7 +347,10 @@ class PipelineViz extends React.Component {
   }
 
   generateNodeData(stageIndex, edgeData) {
-    const stepData = this.stageStepData[stageIndex].steps;
+    const {
+      graphData: { stages },
+    } = this.props;
+    const stepData = stages[stageIndex].steps;
     const nodeData = stepData.map((step, i) => {
       return { id: i, label: step.name };
     });
@@ -535,7 +400,10 @@ class PipelineViz extends React.Component {
   }
 
   generateEdgeData(stageIndex) {
-    const stepData = this.stageStepData[stageIndex].steps;
+    const {
+      graphData: { stages },
+    } = this.props;
+    const stepData = stages[stageIndex].steps;
 
     const regularColoringEdgeData = stepData
       .map((_, currStepIndex) => {
@@ -602,6 +470,9 @@ class PipelineViz extends React.Component {
   }
 
   generateHiddenEdges(stageIndex) {
+    const {
+      graphData: { stages },
+    } = this.props;
     const hiddenEdgeColorOption = {
       color: {
         opacity: 0,
@@ -609,15 +480,25 @@ class PipelineViz extends React.Component {
       },
     };
 
-    // Connect all nodes to end node with hidden edge for centering
-    return this.stageStepData[stageIndex].steps.map((_, stepIndex) => {
-      return {
-        from: stepIndex,
-        to: END_NODE_ID,
-        id: `${stepIndex}-${END_NODE_ID}-hidden`,
-        ...hiddenEdgeColorOption,
-      };
-    });
+    // Connect all nodes to start and end nodes with hidden edges for centering
+    return stages[stageIndex].steps
+      .map((_, stepIndex) => {
+        return [
+          {
+            from: stepIndex,
+            to: END_NODE_ID,
+            id: `${stepIndex}-${END_NODE_ID}-hidden`,
+            ...hiddenEdgeColorOption,
+          },
+          {
+            from: START_NODE_ID,
+            to: stepIndex,
+            id: `${START_NODE_ID}-${stepIndex}-hidden`,
+            ...hiddenEdgeColorOption,
+          },
+        ];
+      })
+      .flat();
   }
 
   centerEndNodeVertically(graph) {
@@ -627,15 +508,23 @@ class PipelineViz extends React.Component {
     graph.moveNodeToPosition(END_NODE_ID, xEndNodePos, yStartNodePos);
   }
 
-  closeIfNonActiveStage(graph, stageIndex) {
-    const stageData = this.stageStepData[stageIndex];
+  closeIfNonActiveStage(stageIndex) {
+    const {
+      graphData: { stages },
+    } = this.props;
+    const stageData = stages[stageIndex];
+    const graph = this.graphs[stageIndex];
     if (stageData.jobStatus != "STARTED") {
       graph.afterDrawingOnce(() => this.toggleStage(stageIndex));
     }
   }
 
   drawGraphs() {
-    this.stageNames.forEach((_, i) => {
+    const {
+      graphData: { stages },
+    } = this.props;
+
+    stages.forEach((_, i) => {
       this.drawStageGraph(i);
     });
   }
@@ -747,11 +636,10 @@ class PipelineViz extends React.Component {
       edgeData,
       options
     );
+    this.graphs.push(currStageGraph);
     currStageGraph.minimizeSizeGivenScale(1.0);
     this.centerEndNodeVertically(currStageGraph);
-    this.closeIfNonActiveStage(currStageGraph, index);
-
-    this.graphs.push(currStageGraph);
+    this.closeIfNonActiveStage(index);
   }
 
   handleWindowResize = () => {
@@ -764,32 +652,46 @@ class PipelineViz extends React.Component {
   };
 
   renderStageContainer(stageName, i) {
-    const isOpened = this.state.stagesOpened[i];
+    const {
+      graphData: { stages },
+    } = this.props;
+    const { stagesOpened, hovered } = this.state;
+    const isOpened = stagesOpened[i];
+
+    // Stages without dag_json recorded are not toggleable
+    const toggleable = i < stages.length;
+
+    const stageContainer = toggleable && (
+      <div className={isOpened ? cs.openedStage : cs.hidden}>
+        <div className={cs.graphLabel}>
+          {stageName}
+          <RemoveIcon
+            onClick={() => this.toggleStage(i)}
+            className={cs.closeIcon}
+          />
+        </div>
+        <div
+          className={cx(cs.graph, hovered && cs.hovered)}
+          onMouseMove={e => this.handleMouseMove(i, e)}
+          ref={ref => {
+            this.graphContainers[i] = ref;
+          }}
+        />
+      </div>
+    );
+
     return (
       <div className={cs.stage}>
         <div
-          className={isOpened ? cs.hidden : cs.stageButton}
+          className={cx(
+            isOpened && toggleable ? cs.hidden : cs.stageButton,
+            !toggleable && cs.disabled
+          )}
           onClick={() => this.toggleStage(i)}
         >
           {stageName}
         </div>
-
-        <div className={isOpened ? cs.openedStage : cs.hidden}>
-          <div className={cs.graphLabel}>
-            {stageName}
-            <RemoveIcon
-              onClick={() => this.toggleStage(i)}
-              className={cs.closeIcon}
-            />
-          </div>
-          <div
-            className={cx(cs.graph, this.state.hovered && cs.hovered)}
-            onMouseMove={e => this.handleMouseMove(i, e)}
-            ref={ref => {
-              this.graphContainers[i] = ref;
-            }}
-          />
-        </div>
+        {stageContainer}
       </div>
     );
   }
@@ -837,9 +739,7 @@ class PipelineViz extends React.Component {
           minZoom={zoomMin}
           maxZoom={zoomMax}
           zoomSpeed={3}
-          ref={ref => {
-            this.panZoomContainer = ref;
-          }}
+          ref={this.panZoomContainer}
         >
           <div className={cs.pipelineViz}>{stageContainers}</div>
         </PanZoom>
@@ -861,7 +761,7 @@ class PipelineViz extends React.Component {
 
 PipelineViz.propTypes = {
   admin: PropTypes.bool,
-  stageResults: PropTypes.object,
+  graphData: PropTypes.object,
   backgroundColor: PropTypes.string,
   nodeColor: PropTypes.string,
   edgeColor: PropTypes.string,

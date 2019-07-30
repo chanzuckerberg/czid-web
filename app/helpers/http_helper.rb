@@ -3,9 +3,11 @@ require "net/http"
 module HttpHelper
   def self.post_json(url, body)
     uri = URI.parse(url)
-    request = Net::HTTP::Post.new(uri)
+
+    request = Net::HTTP::Post.new(uri.request_uri)
     request.content_type = "application/json"
     request.body = JSON.dump(body)
+
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = uri.scheme == "https"
 
@@ -27,17 +29,17 @@ module HttpHelper
 
   def self.get_json(url, params, headers)
     uri = URI.parse(url)
-    request = Net::HTTP::Get.new(url)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = uri.scheme == "https"
+    # Add params to url
+    uri.query = params.to_query
 
+    request = Net::HTTP::Get.new(uri.request_uri)
     # Add headers
     headers.each do |key, value|
       request[key] = value
     end
 
-    # Add params to url
-    uri.query = URI.encode_www_form(params)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = uri.scheme == "https"
 
     response = http.request(request)
 

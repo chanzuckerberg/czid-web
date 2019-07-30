@@ -5,10 +5,10 @@ class Project < ApplicationRecord
   end
 
   has_and_belongs_to_many :users
-  has_many :samples
-  has_many :favorite_projects
+  has_many :samples, dependent: :restrict_with_exception
+  has_many :favorite_projects, dependent: :destroy
   has_many :favorited_by, through: :favorite_projects, source: :user
-  has_many :phylo_trees, -> { order(created_at: :desc) }, dependent: :destroy
+  has_many :phylo_trees, -> { order(created_at: :desc) }, dependent: :restrict_with_exception
   has_one :background
   has_and_belongs_to_many :metadata_fields
   validates :name, presence: true, uniqueness: true

@@ -42,10 +42,11 @@ class AmrHeatmapController < ApplicationController
         end
       end
       amr_data << {
-        sample_name: sample.name,
-        sample_id: sample.id,
-        amr_counts: amr_counts,
-        error: ""
+        "sampleName" => sample.name,
+        "sampleId" => sample.id,
+        "metadata" => sample.metadata_with_base_type,
+        "amrCounts" => amr_counts,
+        "error" => ""
       }
       good_sample_ids[sample.id] = true
     end
@@ -53,10 +54,11 @@ class AmrHeatmapController < ApplicationController
     sample_ids.each do |input_id|
       unless good_sample_ids.key?(input_id)
         amr_data << {
-          sample_name: "",
-          sample_id: input_id,
-          amr_counts: [],
-          error: "sample not found"
+          "sampleName" => "",
+          "sampleId" => input_id,
+          "metadata" => {},
+          "amrCounts" => [],
+          "error" => "sample not found"
         }
       end
     end

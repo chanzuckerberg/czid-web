@@ -3,7 +3,7 @@ sudo: required
 env:
   CI: yes
 rvm:
-- 2.4
+- 2.5
 services:
   - docker
 before_install:
@@ -21,7 +21,7 @@ script:
   - docker-compose run --rm webtest "rubocop -R --config .rubocop_todo.yml"
   - docker-compose run --rm webtest "rake db:drop db:create db:migrate db:seed"
   - docker-compose run --rm webtest "rails test"
-  - docker-compose run --rm webtest "rake db:drop db:create db:migrate db:reset"
+  - docker-compose run --rm webtest "rake db:drop db:create db:migrate db:seed"
   - docker-compose run --rm webtest "rspec"
   - docker-compose run --rm webtest "npm test"
   - docker-compose run --rm webtest "pip install mock; python -m unittest discover -v -s /app/test/ -p 'test_*.py'"
