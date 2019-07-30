@@ -6,7 +6,7 @@ module BenchmarksHelper
     benchmarks = {}
 
     # Read benchmarks from configuration store in S3
-    benchmark_config = retrieve_config()
+    benchmark_config = benchmarks_config()
     if benchmark_config
       benchmarks = parse_config(benchmark_config)
 
