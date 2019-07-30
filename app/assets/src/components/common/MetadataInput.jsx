@@ -8,7 +8,8 @@ import GeoSearchInputBox from "../ui/controls/GeoSearchInputBox";
 
 import cs from "./metadata_input.scss";
 
-export const LOCATION_WARNING = "Set to county/district for privacy.";
+export const LOCATION_WARNING =
+  "Changed to county/district level for personal privacy.";
 
 class MetadataInput extends React.Component {
   constructor(props) {
