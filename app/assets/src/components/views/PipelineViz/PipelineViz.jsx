@@ -1,19 +1,17 @@
 import React from "react";
-import { PanZoom } from "react-easy-panzoom";
 import cx from "classnames";
+import { PanZoom } from "react-easy-panzoom";
 
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
-import ViewHeader from "~/components/layout/ViewHeader";
-import NarrowContainer from "~/components/layout/NarrowContainer";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
-import PipelineVersionSelect from "~/components/views/SampleView/PipelineVersionSelect";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
-import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 import PropTypes from "~/components/utils/propTypes";
+import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 
-import { inverseTransformDOMCoordinates } from "./utils";
 import cs from "./pipeline_viz.scss";
+import PipelineVizHeader from "./PipelineVizHeader";
+import { inverseTransformDOMCoordinates } from "./utils";
 
 const START_NODE_ID = -1;
 const END_NODE_ID = -2;
@@ -654,13 +652,6 @@ class PipelineViz extends React.Component {
     });
   };
 
-  handlePipelineVersionSelect = version => {
-    const { sample } = this.props;
-    window.location = `${location.protocol}//${location.host}/samples/${
-      sample.id
-    }/pipeline_viz/${version}`;
-  };
-
   renderStageContainer(stageName, i) {
     const {
       graphData: { stages },
@@ -729,51 +720,15 @@ class PipelineViz extends React.Component {
     );
   }
 
-  renderVersionDisplay = () => {
-    const { pipelineRun } = this.props;
-    if (pipelineRun && pipelineRun.version && pipelineRun.version.pipeline) {
-      const versionString = `v${pipelineRun.version.pipeline}`;
-      const alignmentDBString = pipelineRun.version.alignment_db
-        ? `, NT/NR: ${pipelineRun.version.alignment_db}`
-        : "";
-
-      return versionString + alignmentDBString;
-    }
-    return "";
-  };
-
-  renderHeader() {
+  render() {
     const {
+      zoomMin,
+      zoomMax,
       pipelineRun,
       pipelineVersions,
       lastProcessedAt,
       sample,
     } = this.props;
-    return (
-      <NarrowContainer>
-        <ViewHeader className={cs.headerSection}>
-          <ViewHeader.Content>
-            <div className={cs.pipelineInfo}>
-              <span>PIPELINE {this.renderVersionDisplay()}</span>
-              <PipelineVersionSelect
-                pipelineRun={pipelineRun}
-                pipelineVersions={pipelineVersions}
-                lastProcessedAt={lastProcessedAt}
-                onPipelineVersionSelect={this.handlePipelineVersionSelect}
-              />
-            </div>
-            <ViewHeader.Pretitle breadcrumbLink={`/samples/${sample.id}`}>
-              {sample.name}
-            </ViewHeader.Pretitle>
-            <ViewHeader.Title label="Pipeline Vizualization" />
-          </ViewHeader.Content>
-        </ViewHeader>
-        <div className={cs.headerDivider} />
-      </NarrowContainer>
-    );
-  }
-  render() {
-    const { zoomMin, zoomMax } = this.props;
     const { sidebarVisible, sidebarParams, interStageArrows } = this.state;
 
     const stageContainers = this.stageNames.map((stageName, i) => {
@@ -787,7 +742,12 @@ class PipelineViz extends React.Component {
 
     return (
       <div className={cs.pipelineVizPage}>
-        {this.renderHeader()}
+        <PipelineVizHeader
+          pipelineRun={pipelineRun}
+          pipelineVersions={pipelineVersions}
+          lastProcessedAt={lastProcessedAt}
+          sample={sample}
+        />
         <div className={cs.pipelineVizContainer}>
           <PanZoom
             className={cs.panZoomContainer}
@@ -799,16 +759,8 @@ class PipelineViz extends React.Component {
             <div className={cs.pipelineViz}>{stageContainers}</div>
           </PanZoom>
           <PlusMinusControl
-            onPlusClick={
-              this.panZoomContainer &&
-              this.panZoomContainer.current &&
-              this.panZoomContainer.current.zoomIn
-            }
-            onMinusClick={
-              this.panZoomContainer &&
-              this.panZoomContainer.current &&
-              this.panZoomContainer.current.zoomOut
-            }
+            onPlusClick={((this.panZoomContainer || {}).current || {}).zoomIn}
+            onMinusClick={((this.panZoomContainer || {}).current || {}).zoomOut}
             className={cs.plusMinusControl}
           />
         </div>
