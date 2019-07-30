@@ -524,9 +524,11 @@ class Sample < ApplicationRecord
 
   # Delay determined based on query of historical upload times, where 80%
   # of successful uploads took less than 3 hours by client_updated_at.
-  def self.stalled_uploads(delay = 3.hours)
+  def self.current_stalled_local_uploads(delay = 3.hours)
     where(status: STATUS_CREATED)
-      .where("created_at < ?", Time.now.utc - delay)
+      .where("samples.created_at < ?", Time.now.utc - delay)
+      .joins(:input_files)
+      .where(input_files: { source_type: InputFile::SOURCE_TYPE_LOCAL })
   end
 
   def destroy

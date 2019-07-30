@@ -36,7 +36,6 @@ class MonitorPipelineResults
     # "stalled uploads" are not pipeline jobs, but they fit in here better than
     # anywhere else.
     begin
-      break if @shutdown_requested
       MonitorPipelineResults.alert_stalled_uploads!
     rescue => exception
       LogUtil.log_err_and_airbrake("Failed to alert on stalled uploads: #{exception.message}")
@@ -44,7 +43,6 @@ class MonitorPipelineResults
     end
 
     begin
-      break if @shutdown_requested
       MonitorPipelineResults.fail_stalled_uploads!
     rescue => exception
       LogUtil.log_err_and_airbrake("Failed to fail stalled uploads: #{exception.message}")
@@ -54,7 +52,7 @@ class MonitorPipelineResults
 
   def self.fail_stalled_uploads!
     Sample
-      .stalled_uploads(18.hours)
+      .current_stalled_local_uploads(18.hours)
       .update_all( # rubocop:disable Rails/SkipsModelValidations
         status: Sample::STATUS_CHECKED,
         upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED
@@ -66,7 +64,7 @@ class MonitorPipelineResults
   def self.alert_stalled_uploads!
     # Delay determined based on query of historical upload times, where 80%
     # of successful uploads took less than 3 hours by client_updated_at.
-    samples = Sample.stalled_uploads(3.hours).where(upload_error: nil)
+    samples = Sample.current_stalled_local_uploads(3.hours).where(upload_error: nil)
     if samples.empty?
       return
     end
