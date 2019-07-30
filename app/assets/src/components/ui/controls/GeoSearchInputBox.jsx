@@ -28,10 +28,9 @@ class GeoSearchInputBox extends React.Component {
 
   // Fetch geosearch results and format into categories for LiveSearchBox
   handleSearchTriggered = async query => {
-    let serverSideSuggestions = [];
     let categories = {};
     try {
-      serverSideSuggestions = await getGeoSearchSuggestions(query);
+      const serverSideSuggestions = await getGeoSearchSuggestions(query);
       // Semantic UI Search expects results as: `{ category: { name: '', results: [{ title: '', description: '' }] }`
       if (serverSideSuggestions.length > 0) {
         const locationsCategory = "Location Results";
@@ -47,6 +46,10 @@ class GeoSearchInputBox extends React.Component {
           }),
         };
       }
+      logAnalyticsEvent("GeoSearchInputBox_location_queried", {
+        query: query,
+        numResults: serverSideSuggestions.length,
+      });
     } catch (e) {
       // In the case of an error (e.g. no API key in dev), just catch and show the plain text option.
       // eslint-disable-next-line no-console
@@ -63,11 +66,6 @@ class GeoSearchInputBox extends React.Component {
       name: noMatchName,
       results: [{ title: query, name: query }],
     };
-
-    logAnalyticsEvent("GeoSearchInputBox_location_queried", {
-      query: query,
-      numResults: serverSideSuggestions.length,
-    });
     return categories;
   };
 
