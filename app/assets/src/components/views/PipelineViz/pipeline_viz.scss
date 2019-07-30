@@ -155,8 +155,7 @@
 }
 
 .headerSection {
-  padding-left: 105px;
-  padding-bottom: 24px;
+  padding-bottom: 48px;
 }
 
 .pipelineInfo {
@@ -164,12 +163,6 @@
   color: $medium-grey;
   margin-top: 14px;
   margin-bottom: 18px;
-}
-
-.pipelineDetailsLink {
-  @include font-header-xxs;
-  margin-top: 4px;
-  color: $primary-light;
 }
 
 .headerDivider {

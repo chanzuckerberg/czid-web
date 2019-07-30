@@ -766,7 +766,6 @@ class PipelineViz extends React.Component {
               {sample.name}
             </ViewHeader.Pretitle>
             <ViewHeader.Title label="Pipeline Vizualization" />
-            <div className={cs.pipelineDetailsLink}>Pipeline Details</div>
           </ViewHeader.Content>
         </ViewHeader>
         <div className={cs.headerDivider} />
