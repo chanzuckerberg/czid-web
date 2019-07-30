@@ -66,15 +66,15 @@ class MonitorPipelineResults
 
     samples.each { |sample| sample.update(upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED) }
 
-    created_at = samples.map { |sample| sample.created_at }.min
+    created_at = samples.map(&created_at).min
     role_names = samples.map { |sample| sample.user.role_name }.compact.uniq
     duration_hrs = ((Time.now.utc - created_at) / 60 / 60).round(2)
-    client_updated_at = samples.map { |sample| sample.client_updated_at }.compact.max
-    status_urls = samples.map { |sample| sample.status_url }
-    msg = "LongRunningUploadsEvent: Samples #{samples.pluck(:id)} by #{role_names} " +
-      "were created #{duration_hrs} hours ago. " +
-      (client_updated_at ? "Last client ping was at #{client_updated_at}. " : "") +
-      "See: #{status_urls}"
+    client_updated_at = samples.map(&client_updated_at).compact.max
+    status_urls = samples.map(&status_url)
+    msg = %(LongRunningUploadsEvent: Samples #{samples.pluck(:id)} by #{role_names}
+      were created #{duration_hrs} hours ago.
+      #{client_updated_at ? "Last client ping was at #{client_updated_at}. " : ''}
+      See: #{status_urls})
     LogUtil.log_err_and_airbrake(msg)
   end
 
@@ -144,11 +144,11 @@ task "result_monitor", [:duration] => :environment do |_t, args|
 end
 
 # One-off task for testing alerts
-task "alert_stalled_uploads", [] => :environment do |t, args|
+task "alert_stalled_uploads", [] => :environment do
   MonitorPipelineResults.alert_stalled_uploads!
 end
 
 # One-off task for testing failures
-task "fail_stalled_uploads", [] => :environment do |t, args|
+task "fail_stalled_uploads", [] => :environment do
   MonitorPipelineResults.fail_stalled_uploads!
 end
