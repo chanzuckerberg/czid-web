@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { PanZoom } from "react-easy-panzoom";
 import cx from "classnames";
 
@@ -11,6 +10,7 @@ import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrow
 import PipelineVersionSelect from "~/components/views/SampleView/PipelineVersionSelect";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
+import PropTypes from "~/components/utils/propTypes";
 
 import { inverseTransformDOMCoordinates } from "./utils";
 import cs from "./pipeline_viz.scss";
@@ -654,6 +654,13 @@ class PipelineViz extends React.Component {
     });
   };
 
+  handlePipelineVersionSelect = version => {
+    const { sample } = this.props;
+    window.location = `${location.protocol}//${location.host}/samples/${
+      sample.id
+    }/pipeline_viz/${version}`;
+  };
+
   renderStageContainer(stageName, i) {
     const {
       graphData: { stages },
@@ -722,22 +729,41 @@ class PipelineViz extends React.Component {
     );
   }
 
+  renderVersionDisplay = () => {
+    const { pipelineRun } = this.props;
+    if (pipelineRun && pipelineRun.version && pipelineRun.version.pipeline) {
+      const versionString = `v${pipelineRun.version.pipeline}`;
+      const alignmentDBString = pipelineRun.version.alignment_db
+        ? `, NT/NR: ${pipelineRun.version.alignment_db}`
+        : "";
+
+      return versionString + alignmentDBString;
+    }
+    return "";
+  };
+
   renderHeader() {
+    const {
+      pipelineRun,
+      pipelineVersions,
+      lastProcessedAt,
+      sample,
+    } = this.props;
     return (
       <NarrowContainer>
         <ViewHeader className={cs.headerSection}>
           <ViewHeader.Content>
             <div className={cs.pipelineInfo}>
-              <span>PIPELINE display number</span>
+              <span>PIPELINE {this.renderVersionDisplay()}</span>
               <PipelineVersionSelect
-              // pipelineRun={pipelineRun}
-              // pipelineVersions={pipelineVersions}
-              // lastProcessedAt={get("last_processed_at", summaryStats)}
-              // onPipelineVersionSelect={this.handlePipelineVersionSelect}
+                pipelineRun={pipelineRun}
+                pipelineVersions={pipelineVersions}
+                lastProcessedAt={lastProcessedAt}
+                onPipelineVersionSelect={this.handlePipelineVersionSelect}
               />
             </div>
-            <ViewHeader.Pretitle breadcrumbLink="asdfad">
-              sample name
+            <ViewHeader.Pretitle breadcrumbLink={`/samples/${sample.id}`}>
+              {sample.name}
             </ViewHeader.Pretitle>
             <ViewHeader.Title label="Pipeline Vizualization" />
             <div className={cs.pipelineDetailsLink}>Pipeline Details</div>
@@ -801,6 +827,10 @@ class PipelineViz extends React.Component {
 PipelineViz.propTypes = {
   admin: PropTypes.bool,
   graphData: PropTypes.object,
+  pipelineRun: PropTypes.PipelineRun,
+  sample: PropTypes.Sample,
+  pipelineVersions: PropTypes.arrayOf(PropTypes.string),
+  lastProcessedAt: PropTypes.string,
   backgroundColor: PropTypes.string,
   nodeColor: PropTypes.string,
   edgeColor: PropTypes.string,
