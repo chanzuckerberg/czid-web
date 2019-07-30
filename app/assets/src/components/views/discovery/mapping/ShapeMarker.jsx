@@ -7,7 +7,7 @@ import RectangleMarker from "~/components/views/discovery/mapping/RectangleMarke
 
 class ShapeMarker extends React.Component {
   render() {
-    let {
+    const {
       active,
       divisorConst,
       lat,
@@ -25,8 +25,8 @@ class ShapeMarker extends React.Component {
       zoom,
     } = this.props;
 
-    // Scale based on the zoom and point count (zoomed-in = higher zoom).
-    // Determined via eyeballing: scaling of a form x/(x+c) shows large differences at the lower
+    // Scale based on the zoom and point count (zoomed-in = higher zoom)
+    // Determined via eyeballing: scaling of a form x/(x+c) shows larger differences at the lower
     // end of the range and smaller differences as it approaches a horizontal asymptote.
     // clamp(min, x/(x+c) * m * z, max)
     const computedSize =
