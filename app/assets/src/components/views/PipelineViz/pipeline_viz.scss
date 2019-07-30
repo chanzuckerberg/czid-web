@@ -2,10 +2,26 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
 
+.pipelineVizPage {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(100% - 80px);
+}
+
+.pipelineVizContainer {
+  flex-grow: 1;
+  overflow-y: hidden;
+  overflow-x: visible;
+}
+
 .pipelineViz {
   display: flex;
   justify-content: center;
   align-items: stretch;
+  margin-bottom: 60px;
 }
 
 .stageAndArrow {
@@ -137,12 +153,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  position: absolute;
-  top: -50px; /* To offset the page header */
-  bottom: 0;
-  left: 0;
-  right: 0;
   outline: none;
+  height: 100%;
 }
 
 .plusMinusControl {
@@ -154,4 +166,24 @@
 
 .hovered {
   cursor: pointer;
+}
+
+.headerSection {
+  padding-bottom: 48px;
+}
+
+.pipelineInfo {
+  @include font-body-xxxs;
+  color: $medium-grey;
+  margin-top: 14px;
+  margin-bottom: 18px;
+}
+
+.headerDivider {
+  height: 3px;
+  background-color: $lightest-grey;
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1;
 }

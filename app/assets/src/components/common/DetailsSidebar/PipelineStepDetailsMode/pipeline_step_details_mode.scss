@@ -3,30 +3,28 @@
 @import "~styles/themes/colors";
 
 .content {
+  @include font-body-xxs;
   padding: 30px;
+}
+
+.accordion {
+  border-bottom: 1px solid $light-grey;
+}
+
+.accordionContent {
+  margin-bottom: 20px;
 }
 
 .stepName {
   @include font-header-l;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   margin-right: 60px;
   word-break: break-all;
 }
 
-.stepFilesListBoxHeader {
-  @include font-header-s;
-  margin-top: 25px;
-  margin-bottom: 10px;
-}
-
-.stepFilesListBox {
-  margin-bottom: 25px;
-}
-
-.description,
-.fileLink,
-.disabledFileLink {
-  @include font-body-s;
+.title {
+  @include font-header-accordion;
+  height: 40px;
 }
 
 .fileLink {
@@ -41,7 +39,7 @@
 }
 
 .fileGroup {
-  margin-bottom: 8px;
+  margin-bottom: 18px;
 
   .fileLink,
   .disabledFileLink {
@@ -49,6 +47,7 @@
   }
 
   .fileGroupHeader {
+    @include font-header-xs;
     margin-bottom: 8px;
   }
 }
