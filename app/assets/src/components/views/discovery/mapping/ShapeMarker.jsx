@@ -7,11 +7,10 @@ import RectangleMarker from "~/components/views/discovery/mapping/RectangleMarke
 
 class ShapeMarker extends React.Component {
   render() {
-    const {
+    let {
       active,
       lat,
       lng,
-      minSize,
       onClick,
       onMouseEnter,
       onMouseLeave,
@@ -21,12 +20,19 @@ class ShapeMarker extends React.Component {
       sizeMultiple,
       title,
       zoom,
+      minSize,
     } = this.props;
 
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
     // Log2 of the count scaled looked nice visually for not getting too large with many points.
+    const options = [1, 100, 1000, 3000];
+    pointCount = options[Math.floor(Math.random() * options.length)];
     const computedSize =
-      size || Math.max(Math.log2(pointCount) * sizeMultiple * zoom, minSize);
+      size ||
+      Math.max(
+        10 * pointCount / (100 + pointCount) * sizeMultiple * zoom,
+        minSize
+      );
 
     return (
       <Marker latitude={lat} longitude={lng}>
@@ -55,7 +61,7 @@ class ShapeMarker extends React.Component {
 // Defaults determined via eyeballing.
 ShapeMarker.defaultProps = {
   minSize: 14,
-  sizeMultiple: 2,
+  sizeMultiple: 10,
   zoom: 3,
 };
 
