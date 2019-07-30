@@ -28,30 +28,36 @@ class GeoSearchInputBox extends React.Component {
 
   // Fetch geosearch results and format into categories for LiveSearchBox
   handleSearchTriggered = async query => {
-    const serverSideSuggestions = await getGeoSearchSuggestions(query);
-    // Semantic UI Search expects results as: `{ category: { name: '', results: [{ title: '', description: '' }] }`
     let categories = {};
-    if (serverSideSuggestions.length > 0) {
-      const locationsCategory = "Location Results";
-      categories[locationsCategory] = {
-        name: locationsCategory,
-        // Format title/description for the text box.
-        results: serverSideSuggestions.map(r => {
-          const nameParts = r.name.split(", ");
-          r.title = nameParts[0];
-          r.description = nameParts.slice(1).join(", ");
-          r.key = `loc-${r.locationiq_id}`;
-          return r;
-        }),
-      };
+    let serverSideSuggestions = [];
+    try {
+      serverSideSuggestions = await getGeoSearchSuggestions(query);
+      // Semantic UI Search expects results as: `{ category: { name: '', results: [{ title: '', description: '' }] }`
+      if (serverSideSuggestions.length > 0) {
+        const locationsCategory = "Location Results";
+        categories[locationsCategory] = {
+          name: locationsCategory,
+          // Format title/description for the text box.
+          results: serverSideSuggestions.map(r => {
+            const nameParts = r.name.split(", ");
+            r.title = nameParts[0];
+            r.description = nameParts.slice(1).join(", ");
+            r.key = `loc-${r.locationiq_id}`;
+            return r;
+          }),
+        };
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log(e);
     }
+
     // Let users select an unresolved plain text option
     let noMatchName = "Plain Text (No Location Match)";
     categories[noMatchName] = {
       name: noMatchName,
       results: [{ title: query, name: query }],
     };
-
     logAnalyticsEvent("GeoSearchInputBox_location_queried", {
       query: query,
       numResults: serverSideSuggestions.length,
