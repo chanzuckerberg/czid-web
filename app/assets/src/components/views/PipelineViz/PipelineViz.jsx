@@ -8,6 +8,7 @@ import ViewHeader from "~/components/layout/ViewHeader";
 import NarrowContainer from "~/components/layout/NarrowContainer";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
+import PipelineVersionSelect from "~/components/views/SampleView/PipelineVersionSelect";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 
@@ -724,12 +725,22 @@ class PipelineViz extends React.Component {
   renderHeader() {
     return (
       <NarrowContainer>
-        <ViewHeader>
+        <ViewHeader className={cs.headerSection}>
           <ViewHeader.Content>
-            <ViewHeader.Pretitle breadcrumbLink="">
+            <div className={cs.pipelineInfo}>
+              <span>PIPELINE display number</span>
+              <PipelineVersionSelect
+              // pipelineRun={pipelineRun}
+              // pipelineVersions={pipelineVersions}
+              // lastProcessedAt={get("last_processed_at", summaryStats)}
+              // onPipelineVersionSelect={this.handlePipelineVersionSelect}
+              />
+            </div>
+            <ViewHeader.Pretitle breadcrumbLink="asdfad">
               sample name
             </ViewHeader.Pretitle>
             <ViewHeader.Title label="Pipeline Vizualization" />
+            <div className={cs.pipelineDetailsLink}>Pipeline Details</div>
           </ViewHeader.Content>
         </ViewHeader>
       </NarrowContainer>
@@ -751,28 +762,31 @@ class PipelineViz extends React.Component {
     return (
       <div className={cs.pipelineVizContainer}>
         {this.renderHeader()}
-        <PanZoom
-          className={cs.panZoomContainer}
-          minZoom={zoomMin}
-          maxZoom={zoomMax}
-          zoomSpeed={3}
-          ref={this.panZoomContainer}
-        >
-          <div className={cs.pipelineViz}>{stageContainers}</div>
-        </PanZoom>
-        <PlusMinusControl
-          onPlusClick={
-            this.panZoomContainer &&
-            this.panZoomContainer.current &&
-            this.panZoomContainer.current.zoomIn
-          }
-          onMinusClick={
-            this.panZoomContainer &&
-            this.panZoomContainer.current &&
-            this.panZoomContainer.current.zoomOut
-          }
-          className={cs.plusMinusControl}
-        />
+        <NarrowContainer>
+          <div className={cs.headerDivider} />
+          <PanZoom
+            className={cs.panZoomContainer}
+            minZoom={zoomMin}
+            maxZoom={zoomMax}
+            zoomSpeed={3}
+            ref={this.panZoomContainer}
+          >
+            <div className={cs.pipelineViz}>{stageContainers}</div>
+          </PanZoom>
+          <PlusMinusControl
+            onPlusClick={
+              this.panZoomContainer &&
+              this.panZoomContainer.current &&
+              this.panZoomContainer.current.zoomIn
+            }
+            onMinusClick={
+              this.panZoomContainer &&
+              this.panZoomContainer.current &&
+              this.panZoomContainer.current.zoomOut
+            }
+            className={cs.plusMinusControl}
+          />
+        </NarrowContainer>
         <DetailsSidebar
           visible={sidebarVisible}
           mode="pipelineStepDetails"
