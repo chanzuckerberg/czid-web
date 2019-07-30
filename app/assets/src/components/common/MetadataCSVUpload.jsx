@@ -2,7 +2,16 @@
 // Sends uploaded to server for validation and displays errors and warnings.
 import React from "react";
 import cx from "classnames";
-import { filter, map, zip, fromPairs, isNull, isEqual, find } from "lodash/fp";
+import {
+  filter,
+  map,
+  zip,
+  fromPairs,
+  isNull,
+  isEqual,
+  find,
+  uniq,
+} from "lodash/fp";
 import PropTypes from "prop-types";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -68,6 +77,7 @@ class MetadataCSVUpload extends React.Component {
     }
     this.setState({ metadata: csv });
     this.validateCSV(csv);
+    this.geosearchCSVlocations();
   };
 
   validateCSV = async csv => {
@@ -119,6 +129,23 @@ class MetadataCSVUpload extends React.Component {
     return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
   };
 
+  geosearchCSVlocations = () => {
+    console.log("geosearchCSVlocations was called");
+    const { projectMetadataFields } = this.props;
+    const { metadata } = this.state;
+
+    if (!(metadata && metadata.rows)) return;
+
+    const locationField = find(
+      { is_required: 1, dataType: "location" },
+      Object.values(projectMetadataFields)
+    );
+    const fieldIndex = metadata.headers.indexOf(locationField.name);
+
+    const originalValues = uniq(metadata.rows.map(r => r[fieldIndex]));
+    console.log("original values:", originalValues);
+  };
+
   renderLocationsInterface = () => {
     const { samples, onMetadataChange, projectMetadataFields } = this.props;
     const { metadata } = this.state;
@@ -133,12 +160,17 @@ class MetadataCSVUpload extends React.Component {
     const sampleNames = new Set(map("name", samples) || []);
     console.log("sample names: ", sampleNames);
 
+    if (!(metadata && metadata.rows)) return;
+
+    const fieldIndex = metadata.headers.indexOf(locationField.name);
+
+    // Render results
     return (
       metadata &&
       metadata.rows &&
       metadata.rows.map((row, rowIndex) => {
         if (!sampleNames.has(row[0])) return;
-        const fieldIndex = metadata.headers.indexOf(locationField.name);
+
         return (
           <div>
             <span>{row[0]}</span>
