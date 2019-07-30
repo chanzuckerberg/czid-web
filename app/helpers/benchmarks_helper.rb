@@ -6,7 +6,7 @@ module BenchmarksHelper
     benchmarks = {}
 
     # Read benchmarks from configuration store in S3
-    benchmark_config = benchmarks_config()
+    benchmark_config = load_benchmarks_config()
     if benchmark_config
       benchmarks = parse_config(benchmark_config)
 
@@ -29,7 +29,7 @@ module BenchmarksHelper
     return benchmarks
   end
 
-  def benchmarks_config
+  def load_benchmarks_config
     s3_response = S3_CLIENT.get_object(bucket: IDSEQ_BENCH_BUCKET, key: IDSEQ_BENCH_KEY)
     return JSON.parse(s3_response.body.read, symbolize_names: true)
   rescue Aws::S3::Errors::NoSuchKey

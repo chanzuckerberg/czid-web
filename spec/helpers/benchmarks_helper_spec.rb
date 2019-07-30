@@ -3,11 +3,11 @@ require 'rails_helper'
 RSpec::Matchers.define_negated_matcher :array_excluding, :include
 
 RSpec.describe BenchmarksHelper, type: :helper do
-  describe "#benchmarks_config" do
+  describe "#load_benchmarks_config" do
     let(:benchmark_config_json) { JSON.generate("sample_key": "sample_value") }
     let(:benchmark_config_symbolized_json) { JSON.parse(benchmark_config_json).deep_symbolize_keys() }
 
-    subject { helper.benchmarks_config }
+    subject { helper.load_benchmarks_config }
 
     before do
       s3 = Aws::S3::Client.new(stub_responses: true)
@@ -154,7 +154,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
     let(:project_name) { "Bench Project" }
 
     before do
-      allow(helper).to receive(:benchmarks_config) {
+      allow(helper).to receive(:load_benchmarks_config) {
         {
           "defaults": {
             "project_name": project_name,
