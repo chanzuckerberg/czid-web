@@ -23,19 +23,32 @@
 }
 
 .stageButton {
-  background-color: $light-grey;
-  border-radius: 8px;
+  @include font-header-node-l;
+  background-color: $white;
+  border-radius: 4px;
   padding: 12px;
   width: 250px;
   text-align: center;
-  font-weight: $font-weight-bold;
   cursor: pointer;
   word-break: break-word;
+  box-shadow: $box-shadow-bottom-right;
 
   &.disabled {
     cursor: default;
     opacity: 0.5;
   }
+}
+
+.completed {
+  background-color: $success-lightest;
+}
+
+.notStarted {
+  background-color: $white;
+}
+
+.inProgress {
+  background-color: $primary-lightest;
 }
 
 .stageArrow {
@@ -82,7 +95,8 @@
 }
 
 .graphLabel {
-  padding-left: 24px;
+  @include font-header-node-l;
+  padding: 14px 14px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -92,8 +106,8 @@
   top: 0;
 
   .closeIcon {
-    padding: 24px;
     box-sizing: content-box;
+    fill: $light-grey;
   }
 }
 
@@ -107,7 +121,7 @@
 
 .openedStage {
   background-color: $off-white;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 16px 0;
   display: flex;
   flex-direction: column;

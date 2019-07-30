@@ -554,13 +554,21 @@ class PipelineViz extends React.Component {
             background: nodeColor,
           },
         },
+        shadow: {
+          color: "rgba(0, 0, 0, 0.22)",
+          x: 0,
+          y: 2,
+          size: 8,
+        },
         shape: "box",
         shapeProperties: {
-          borderRadius: 6,
+          borderRadius: 4,
         },
         margin: {
-          left: 12,
+          left: 6,
           right: 12,
+          top: 6,
+          bottom: 6,
         },
         widthConstraint: {
           minimum: 120,
@@ -570,6 +578,7 @@ class PipelineViz extends React.Component {
         },
         font: {
           face: "Open Sans",
+          size: 11,
         },
         labelHighlightBold: false,
       },
@@ -775,7 +784,7 @@ PipelineViz.propTypes = {
 PipelineViz.defaultProps = {
   admin: false,
   backgroundColor: "#f8f8f8",
-  nodeColor: "#eaeaea",
+  nodeColor: "#ffffff",
   edgeColor: "#999999",
   highlightColor: "#3867fa",
   inputEdgeColor: "#000000",
