@@ -85,7 +85,7 @@ export const bulkUploadLocalWithMetadata = ({
         const files = sampleNamesToFiles[sampleName];
 
         // Start pinging server to monitor uploads server-side
-        startUploadHeartbeat(sample.id);
+        const interval = startUploadHeartbeat(sample.id);
 
         sample.input_files.map(inputFileAttributes => {
           const file = files[inputFileAttributes.name];
@@ -102,6 +102,7 @@ export const bulkUploadLocalWithMetadata = ({
             onSuccess: () => {
               fileNamesToProgress[file.name] = 100;
               onFileUploadSuccess(sampleName, sample.id);
+              clearInterval(interval);
             },
             onError: error => onUploadError(file, error),
           });
@@ -205,5 +206,5 @@ export const startUploadHeartbeat = async sampleId => {
   };
   sendHeartbeat(); // Send first heartbeat immediately so we know it is working
   const interval = 60000; // 60 sec
-  setInterval(sendHeartbeat, interval);
+  return setInterval(sendHeartbeat, interval);
 };
