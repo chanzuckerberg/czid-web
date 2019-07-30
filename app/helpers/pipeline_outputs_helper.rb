@@ -190,4 +190,6 @@ module PipelineOutputsHelper
       "HOST FILTERING"
     end
   end
+
+  module_function :get_s3_file
 end
