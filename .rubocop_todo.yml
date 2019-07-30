@@ -50,6 +50,7 @@ AllCops:
     - vendor/**/*
     - bin/*
     - node_modules/**/*
+  TargetRubyVersion: 2.2
 
 ClassLength:
   Enabled: false
@@ -104,6 +105,9 @@ Style/GuardClause:
   Enabled: false
 
 Style/IfUnlessModifier:
+  Enabled: false
+
+Style/MultilineBlockChain:
   Enabled: false
 
 Style/WordArray:

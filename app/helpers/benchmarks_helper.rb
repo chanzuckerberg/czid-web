@@ -1,36 +1,38 @@
 module BenchmarksHelper
-
   IDSEQ_BENCH_BUCKET = "idseq-bench".freeze
   IDSEQ_BENCH_KEY = "config.json".freeze
 
-  def get_benchmarks_list
+  def benchmarks_list
     benchmarks = {}
 
     # Read benchmarks from configuration store in S3
-    benchmark_config = get_config()
+    benchmark_config = retrieve_config()
     if benchmark_config
       benchmarks = parse_config(benchmark_config)
 
       benchmarks[:active_benchmarks].each do |benchmark|
         # get the most recent finished sample of this benchmark
         sample = Sample
-          .includes(:pipeline_runs)
-          .where(project: Project.find_by_name(benchmark[:project_name]))
-          .last
-        benchmark[:last_run] = sample ? {
-          sample_name: sample.name,
-          pipeline_version: sample.first_pipeline_run.version
-        } : nil
+                 .includes(:pipeline_runs)
+                 .where(project: Project.find_by(name: benchmark[:project_name]))
+                 .last
+        benchmark[:last_run] = nil
+        if sample
+          benchmark[:last_run] = {
+            sample_name: sample.name,
+            pipeline_version: sample.first_pipeline_run.version
+          }
+        end
       end
     end
 
     return benchmarks
   end
 
-  def get_config
+  def benchmarks_config
     s3_response = S3_CLIENT.get_object(bucket: IDSEQ_BENCH_BUCKET, key: IDSEQ_BENCH_KEY)
     return JSON.parse(s3_response.body.read, symbolize_names: true)
-  rescue Aws::S3::Errors::NoSuchKey => e
+  rescue Aws::S3::Errors::NoSuchKey
     LogUtil.log_err_and_airbrake("[BenchmarkController] Config file not found - '#{IDSEQ_BENCH_KEY}'")
     return nil
   rescue JSON::ParserError
@@ -50,7 +52,7 @@ module BenchmarksHelper
         # add defaults to all benchmarks
         default_options
           .merge(options)
-          .merge({path: path.to_s})
+          .merge(path: path.to_s)
       end.select do |options|
         options[:environments].include?(ENV['RAILS_ENV'])
       end

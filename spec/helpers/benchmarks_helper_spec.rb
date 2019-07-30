@@ -3,15 +3,15 @@ require 'rails_helper'
 RSpec::Matchers.define_negated_matcher :array_excluding, :include
 
 RSpec.describe BenchmarksHelper, type: :helper do
-  describe "#get_config" do
-    let(:benchmark_config_json) { JSON.generate({ "sample_key": "sample_value" }) }
+  describe "#benchmarks_config" do
+    let(:benchmark_config_json) { JSON.generate("sample_key": "sample_value") }
     let(:benchmark_config_symbolized_json) { JSON.parse(benchmark_config_json).deep_symbolize_keys() }
 
-    subject { helper.get_config }
+    subject { helper.benchmarks_config }
 
     before do
       s3 = Aws::S3::Client.new(stub_responses: true)
-      s3.stub_responses(:get_object, -> (context) {
+      s3.stub_responses(:get_object, lambda(context) {
         obj = buckets.dig(context.params[:bucket], context.params[:key])
         return obj ? obj : "NoSuchKey"
       })
@@ -21,7 +21,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
     end
 
     context "when config is available" do
-      let(:buckets) {
+      let(:buckets) do
         {
           BenchmarksHelper::IDSEQ_BENCH_BUCKET => {
             BenchmarksHelper::IDSEQ_BENCH_KEY => {
@@ -29,7 +29,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
             }
           }
         }
-      }
+      end
 
       it "returns config JSON with symbolic key" do
         expect(subject).to eq(benchmark_config_symbolized_json)
@@ -37,11 +37,11 @@ RSpec.describe BenchmarksHelper, type: :helper do
     end
 
     context "when config is not available" do
-      let(:buckets) {
+      let(:buckets) do
         {
           BenchmarksHelper::IDSEQ_BENCH_BUCKET => {}
         }
-      }
+      end
 
       it "returns nil" do
         expect(subject).to be_nil
@@ -54,7 +54,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
     end
 
     context "when config JSON is invalid" do
-      let(:buckets) {
+      let(:buckets) do
         {
           BenchmarksHelper::IDSEQ_BENCH_BUCKET => {
             BenchmarksHelper::IDSEQ_BENCH_KEY => {
@@ -62,7 +62,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
             }
           }
         }
-      }
+      end
 
       it "returns nil" do
         expect(subject).to be_nil
@@ -73,7 +73,6 @@ RSpec.describe BenchmarksHelper, type: :helper do
         expect(LogUtil).to have_received(:log_err_and_airbrake).with(match(/Invalid config file/))
       end
     end
-
   end
 
   describe "#parse_config" do
@@ -81,70 +80,81 @@ RSpec.describe BenchmarksHelper, type: :helper do
 
     context "with valid config" do
       context "for single environment" do
-        let(:benchmark_config) {
+        let(:benchmark_config) do
           {
             "defaults": {
               "default_field": "Default Value",
               "environments": ["test"]
             },
-            "active_benchmarks": {"active_test_benchmark_path": {}},
-            "retired_benchmarks": {"retired_test_benchmark_path": {}}
+            "active_benchmarks": { "active_test_benchmark_path": {} },
+            "retired_benchmarks": { "retired_test_benchmark_path": {} }
           }
-        }
+        end
 
         it "merges default fields" do
           expect(subject).to match(
             hash_including(
               active_benchmarks: array_including(
-                hash_including(default_field: "Default Value")),
+                hash_including(default_field: "Default Value")
+              ),
               retired_benchmarks: array_including(
-                hash_including(default_field: "Default Value"))))
+                hash_including(default_field: "Default Value")
+              )
+            )
+          )
         end
 
         it "merges path field" do
           expect(subject).to match(
             hash_including(
               active_benchmarks: array_including(
-                hash_including(path: "active_test_benchmark_path")),
+                hash_including(path: "active_test_benchmark_path")
+              ),
               retired_benchmarks: array_including(
-                hash_including(path: "retired_test_benchmark_path"))))
+                hash_including(path: "retired_test_benchmark_path")
+              )
+            )
+          )
         end
       end
 
       context "for multiple environments" do
-        let(:benchmark_config) {
+        let(:benchmark_config) do
           {
             "active_benchmarks": {
               "active_test_benchmark_path": { "environments": ["test"] },
-              "active_prod_benchmark_path": { "environments": ["prod"] },
+              "active_prod_benchmark_path": { "environments": ["prod"] }
             },
             "retired_benchmarks": {
               "retired_test_benchmark_path": { "environments": ["test"] },
               "retired_prod_benchmark_path": { "environments": ["prod"] }
             }
           }
-        }
+        end
 
         it "filters environments" do
           expect(subject).to match(
             hash_including(
               active_benchmarks: array_excluding(
-                hash_including(path: "active_prod_benchmark_path")),
+                hash_including(path: "active_prod_benchmark_path")
+              ),
               retired_benchmarks: array_excluding(
-                hash_including(path: "retired_prod_benchmark_path"))
-              ))
+                hash_including(path: "retired_prod_benchmark_path")
+              )
+            )
+          )
         end
       end
     end
   end
 
-  describe "#get_benchmarks_list" do
-    subject { helper.get_benchmarks_list() }
+  describe "#benchmarks_list" do
+    subject { helper.benchmarks_list() }
 
     let(:project_name) { "Bench Project" }
 
     before do
-      allow(helper).to receive(:get_config) {
+      allow(helper).to receive(:benchmarks_config) {
         {
           "defaults": {
             "project_name": project_name,
@@ -155,7 +165,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
           },
           "retired_benchmarks": {
             "retired_test_benchmark_path": {}
-          },
+          }
         }
       }
     end
@@ -164,25 +174,35 @@ RSpec.describe BenchmarksHelper, type: :helper do
       expect(subject).to match(
         hash_including(
           active_benchmarks: array_including(
-            hash_including(path: "active_test_benchmark_path")),
+            hash_including(path: "active_test_benchmark_path")
+          ),
           retired_benchmarks: array_including(
-            hash_including(path: "retired_test_benchmark_path"))))
+            hash_including(path: "retired_test_benchmark_path")
+          )
+        )
+      )
     end
 
     it "returns nil as last run when project does not exist" do
       expect(subject).to match(
         hash_including(
           active_benchmarks: array_including(
-            hash_including(last_run: nil))))
+            hash_including(last_run: nil)
+          )
+        )
+      )
     end
 
     it "returns last run nil for projects with samples" do
-      project = create(:project, name: project_name)
+      create(:project, name: project_name)
 
       expect(subject).to match(
         hash_including(
           active_benchmarks: array_including(
-            hash_including(last_run: nil))))
+            hash_including(last_run: nil)
+          )
+        )
+      )
     end
 
     it "include sample info for active but not for retired benchmarks" do
@@ -193,12 +213,18 @@ RSpec.describe BenchmarksHelper, type: :helper do
       expect(subject).to match(
         hash_including(
           active_benchmarks: array_including(
-            hash_including(last_run: {
-              sample_name: sample.name,
-              pipeline_version: pipeline_run.version
-            })),
+            hash_including(
+              last_run: {
+                sample_name: sample.name,
+                pipeline_version: pipeline_run.version
+              }
+            )
+          ),
           retired_benchmarks: array_excluding(
-            hash_including(:last_run))))
+            hash_including(:last_run)
+          )
+        )
+      )
     end
   end
 end

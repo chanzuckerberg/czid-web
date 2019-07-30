@@ -5,7 +5,7 @@ class BenchmarksController < ApplicationController
   before_action :admin_required
 
   def index
-    benchmarks = helpers.get_benchmarks_list()
+    benchmarks = helpers.benchmarks_list()
 
     # clean fields that should not be exposed
     benchmarks.keys.each do |benchmarks_type|
@@ -20,5 +20,4 @@ class BenchmarksController < ApplicationController
       end
     end
   end
-
 end
