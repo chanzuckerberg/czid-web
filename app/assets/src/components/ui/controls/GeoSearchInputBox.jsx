@@ -51,6 +51,9 @@ class GeoSearchInputBox extends React.Component {
       // In the case of an error (e.g. no API key in dev), just catch and show the plain text option.
       // eslint-disable-next-line no-console
       console.log(e);
+      logAnalyticsEvent("GeoSearchInputBox_request_erred", {
+        query,
+      });
     }
 
     // Let users select an unresolved plain text option
