@@ -11,9 +11,12 @@ class DropdownTrigger extends React.Component {
       rounded,
       active,
       disabled,
+      erred,
       className,
       onClick,
+      placeholder,
     } = this.props;
+
     return (
       <div
         className={cx(
@@ -21,13 +24,16 @@ class DropdownTrigger extends React.Component {
           cs.dropdownTrigger,
           rounded && cs.rounded,
           active && cs.active,
-          disabled && cs.disabled
+          disabled && cs.disabled,
+          erred && cs.erred
         )}
         onClick={onClick}
       >
         <div className={cs.labelContainer}>
           {label && <span className={cs.label}>{label}</span>}
-          {value}
+          <span className={cx(value === null && cs.placeholder)}>
+            {value || placeholder}
+          </span>
         </div>
       </div>
     );
@@ -38,9 +44,11 @@ DropdownTrigger.propTypes = {
   className: PropTypes.string,
   label: PropTypes.string,
   value: PropTypes.node,
+  placeholder: PropTypes.string,
   rounded: PropTypes.bool,
   active: PropTypes.bool,
   disabled: PropTypes.bool,
+  erred: PropTypes.bool,
   onClick: PropTypes.func,
 };
 

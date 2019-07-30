@@ -16,6 +16,7 @@ class ProjectSelect extends React.Component {
   };
 
   render() {
+    const { disabled, erred } = this.props;
     return (
       <Dropdown
         fluid
@@ -24,7 +25,8 @@ class ProjectSelect extends React.Component {
         value={this.props.value}
         placeholder="Select project"
         search
-        disabled={this.props.disabled}
+        disabled={disabled}
+        erred={erred}
       />
     );
   }
@@ -35,6 +37,7 @@ ProjectSelect.propTypes = {
   value: PropTypes.number, // the project id
   onChange: PropTypes.func.isRequired, // the entire project object is returned
   disabled: PropTypes.bool,
+  erred: PropTypes.bool,
 };
 
 export default ProjectSelect;

@@ -26,8 +26,6 @@
   }
 
   .controls {
-    margin: 30px 0 60px;
-
     .helpText {
       @include font-body-xxs;
       margin-bottom: 10px;
@@ -211,9 +209,8 @@
     }
   }
 
-  .error {
-    margin-top: 5px;
-    color: $error;
+  .notification {
+    margin-top: 10px;
   }
 }
 
