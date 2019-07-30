@@ -1,10 +1,26 @@
 import React from "react";
 import PropTypes from "prop-types";
+import cx from "classnames";
 
 import { openUrl } from "~utils/links";
+import { Accordion } from "~/components/layout";
 import cs from "./pipeline_step_details_mode.scss";
 
 class PipelineStepDetailsMode extends React.Component {
+  renderStepInfo() {
+    const { description } = this.props;
+    if (description) {
+      const header = <div className={cs.title}>Step Info</div>;
+      return (
+        <Accordion header={header} className={cs.accordion}>
+          <div className={cx(cs.description, cs.accordionContent)}>
+            {description}
+          </div>
+        </Accordion>
+      );
+    }
+  }
+
   renderInputFiles() {
     const { inputFiles } = this.props;
     if (!inputFiles || !inputFiles.length) {
@@ -16,27 +32,31 @@ class PipelineStepDetailsMode extends React.Component {
         <div className={cs.fileGroup} key={`inputFileGroup.fromStepName-${i}`}>
           <div
             className={cs.fileGroupHeader}
-          >{`From ${inputFileGroup.fromStepName || "Sample"}:`}</div>
+          >{`From ${inputFileGroup.fromStepName || "Sample"} Step:`}</div>
           {this.renderFileList(inputFileGroup.files)}
         </div>
       );
     });
+
+    const fileGroupHeader = <div className={cs.title}>Input Files</div>;
     return (
-      <div className={cs.stepFilesListBox}>
-        <div className={cs.stepFilesListBoxHeader}>Input Files</div>
-        {fileGroupList}
-      </div>
+      <Accordion className={cs.accordion} header={fileGroupHeader}>
+        <div className={cs.accordionContent}>{fileGroupList}</div>
+      </Accordion>
     );
   }
 
   renderOutputFiles() {
-    const { outputFiles } = this.props;
+    const { stepName, outputFiles } = this.props;
     if (outputFiles && outputFiles.length) {
+      const outputFilesHeader = <div className={cs.title}>Output Files</div>;
       return (
-        <div className={cs.stepFilesListBox}>
-          <div className={cs.stepFilesListBoxHeader}>Output Files</div>
-          {this.renderFileList(outputFiles)}
-        </div>
+        <Accordion className={cs.accordion} header={outputFilesHeader}>
+          <div className={cx(cs.accordionContent, cs.fileGroup)}>
+            <div className={cs.fileGroupHeader}>{`From ${stepName} Step:`}</div>
+            {this.renderFileList(outputFiles)}
+          </div>
+        </Accordion>
       );
     }
   }
@@ -60,11 +80,11 @@ class PipelineStepDetailsMode extends React.Component {
   }
 
   render() {
-    const { stepName, description } = this.props;
+    const { stepName } = this.props;
     return (
       <div className={cs.content}>
         <div className={cs.stepName}>{stepName}</div>
-        <div className={cs.description}>{description}</div>
+        {this.renderStepInfo()}
         {this.renderInputFiles()}
         {this.renderOutputFiles()}
       </div>
