@@ -53,6 +53,7 @@ class GeoSearchInputBox extends React.Component {
       console.log(e);
       logAnalyticsEvent("GeoSearchInputBox_request_erred", {
         query,
+        message: e.message,
       });
     }
 
