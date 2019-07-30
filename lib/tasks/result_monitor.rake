@@ -36,6 +36,7 @@ class MonitorPipelineResults
     # "stalled uploads" are not pipeline jobs, but they fit in here better than
     # anywhere else.
     begin
+      break if @shutdown_requested
       MonitorPipelineResults.alert_stalled_uploads!
     rescue => exception
       LogUtil.log_err_and_airbrake("Failed to alert on stalled uploads: #{exception.message}")
@@ -43,6 +44,7 @@ class MonitorPipelineResults
     end
 
     begin
+      break if @shutdown_requested
       MonitorPipelineResults.fail_stalled_uploads!
     rescue => exception
       LogUtil.log_err_and_airbrake("Failed to fail stalled uploads: #{exception.message}")
@@ -53,7 +55,7 @@ class MonitorPipelineResults
   def self.fail_stalled_uploads!
     Sample
       .stalled_uploads(18.hours)
-      .update_all(
+      .update_all( # rubocop:disable Rails/SkipsModelValidations
         status: Sample::STATUS_CHECKED,
         upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED
       )
@@ -69,7 +71,7 @@ class MonitorPipelineResults
       return
     end
 
-    samples.update_all(upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED)
+    samples.update_all(upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED) # rubocop:disable Rails/SkipsModelValidations
 
     created_at = samples.map(&:created_at).min
     role_names = samples.map { |sample| sample.user.role_name }.compact.uniq
