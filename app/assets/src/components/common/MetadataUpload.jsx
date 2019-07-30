@@ -10,7 +10,6 @@ import { getAllHostGenomes } from "~/api";
 import { getProjectMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import LoadingIcon from "~ui/icons/LoadingIcon";
-import { getURLParamString } from "~/helpers/url";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
@@ -88,17 +87,6 @@ class MetadataUpload extends React.Component {
     });
   };
 
-  getCSVUrl = () => {
-    const params = {
-      ...(this.props.samplesAreNew
-        ? { new_sample_names: map("name", this.props.samples) }
-        : {}),
-      project_id: this.props.project.id,
-    };
-
-    return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
-  };
-
   renderTab = () => {
     if (this.state.currentTab === "Manual Input") {
       if (!this.props.samples || !this.state.projectMetadataFields) {
@@ -142,23 +130,6 @@ class MetadataUpload extends React.Component {
             onDirty={this.props.onDirty}
             projectMetadataFields={this.state.projectMetadataFields}
           />
-          <a
-            className={cs.link}
-            href={this.getCSVUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() =>
-              logAnalyticsEvent(
-                "MetadataUpload_download-csv-template_clicked",
-                {
-                  projectId: this.props.project.id,
-                  projectName: this.props.project.name,
-                }
-              )
-            }
-          >
-            Download Metadata CSV Template
-          </a>
           {this.state.validatingCSV && (
             <div className={cs.validationMessage}>
               <LoadingIcon className={cs.loadingIcon} />

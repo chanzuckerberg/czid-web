@@ -2,16 +2,19 @@
 // Sends uploaded to server for validation and displays errors and warnings.
 import React from "react";
 import cx from "classnames";
-import { filter, map, zip, fromPairs, isNull, isEqual } from "lodash/fp";
-import CSVUpload from "~ui/controls/CSVUpload";
+import { filter, map, zip, fromPairs, isNull, isEqual, find } from "lodash/fp";
+import PropTypes from "prop-types";
+
+import { logAnalyticsEvent } from "~/api/analytics";
 import {
   validateMetadataCSVForProject,
   validateMetadataCSVForNewSamples,
 } from "~/api/metadata";
-import cs from "./metadata_csv_upload.scss";
-import PropTypes from "prop-types";
+import { getURLParamString } from "~/helpers/url";
+import CSVUpload from "~ui/controls/CSVUpload";
 
 import MetadataInput from "./MetadataInput";
+import cs from "./metadata_csv_upload.scss";
 
 const processCSVMetadata = csv => {
   const { headers, rows } = csv;
@@ -106,62 +109,93 @@ class MetadataCSVUpload extends React.Component {
     });
   };
 
+  getCSVUrl = () => {
+    const params = {
+      ...(this.props.samplesAreNew
+        ? { new_sample_names: map("name", this.props.samples) }
+        : {}),
+      project_id: this.props.project.id,
+    };
+    return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
+  };
+
   renderLocationsInterface = () => {
+    const { samples, onMetadataChange, projectMetadataFields } = this.props;
     const { metadata } = this.state;
     console.log("our metadata: ", metadata);
+
+    const locationField = find(
+      { is_required: 1, dataType: "location" },
+      Object.values(projectMetadataFields)
+    );
+    console.log("location field: ", locationField);
+
+    const sampleNames = new Set(map("name", samples) || []);
+    console.log("sample names: ", sampleNames);
 
     return (
       metadata &&
       metadata.rows &&
       metadata.rows.map((row, rowIndex) => {
+        if (!sampleNames.has(row[0])) return;
+        const fieldIndex = metadata.headers.indexOf(locationField.name);
         return (
           <div>
             <span>{row[0]}</span>
-            <MetadataInput
-              key={"collection_location_v2"}
-              // className={inputClasses}
-              // value={this.getMetadataValue(sample, column)}
-              metadataType={
-                this.props.projectMetadataFields["collection_location_v2"]
-              }
-              onChange={(key, value) => {
-                console.log(key, value);
+            <span>
+              <MetadataInput
+                key={locationField.key}
+                className={cs.input}
+                value={row[fieldIndex]}
+                metadataType={projectMetadataFields[locationField.key]}
+                onChange={(key, value) => {
+                  const newMetadata = metadata;
+                  newMetadata.rows[rowIndex][fieldIndex] = value;
 
-                let newMetadata = this.state.metadata;
-                const i = this.state.metadata.headers.indexOf(
-                  "Collection Location"
-                );
-                newMetadata.rows[rowIndex][i] = value;
+                  this.setState({ metadata: newMetadata });
+                  onMetadataChange({
+                    metadata: processCSVMetadata(newMetadata),
+                  });
 
-                this.setState({ metadata: newMetadata });
-                this.props.onMetadataChange({
-                  metadata: processCSVMetadata(newMetadata),
-                });
-
-                // Log analytics?
-              }}
-              withinModal={true}
-              isHuman={true}
-            />
+                  // Log analytics?
+                }}
+                withinModal={true}
+                isHuman={true}
+              />
+            </span>
           </div>
         );
       })
     );
-
-    return <div>{"hello there"}</div>;
   };
 
   render() {
     const hasMetadata = !isNull(this.state.metadata);
     return (
-      <div className={cx(cs.metadataCSVUpload, this.props.className)}>
-        <CSVUpload
-          title={hasMetadata ? "" : "Upload your metadata CSV"}
-          onCSV={this.onCSV}
-          className={cx(cs.csvUpload, hasMetadata && cs.uploaded)}
-        />
+      <React.Fragment>
+        <div className={cx(cs.metadataCSVUpload, this.props.className)}>
+          <CSVUpload
+            title={hasMetadata ? "" : "Upload your metadata CSV"}
+            onCSV={this.onCSV}
+            className={cx(cs.csvUpload, hasMetadata && cs.uploaded)}
+          />
+        </div>
+        <a
+          className={cs.link}
+          href={this.getCSVUrl()}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() =>
+            logAnalyticsEvent("MetadataUpload_download-csv-template_clicked", {
+              projectId: this.props.project.id,
+              projectName: this.props.project.name,
+            })
+          }
+        >
+          Download Metadata CSV Template
+        </a>
         {this.renderLocationsInterface()}
-      </div>
+      </React.Fragment>
     );
   }
 }
@@ -187,6 +221,7 @@ MetadataCSVUpload.propTypes = {
   // Immediately called when the user changes anything, even before validation has returned.
   // Can be used to disable the header navigation.
   onDirty: PropTypes.func.isRequired,
+  projectMetadataFields: PropTypes.object,
 };
 
 export default MetadataCSVUpload;
