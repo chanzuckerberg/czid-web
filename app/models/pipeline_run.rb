@@ -190,6 +190,8 @@ class PipelineRun < ApplicationRecord
   # *Exception* for cloned pipeline runs that already have results and finalized status
   before_create :create_output_states, :create_run_stages, unless: :results_finalized?
 
+  delegate :status_url, to: :sample
+
   def parse_dag_vars
     JSON.parse(dag_vars || "{}")
   end
@@ -1432,8 +1434,6 @@ class PipelineRun < ApplicationRecord
   def self.viewable(user)
     where(sample_id: Sample.viewable(user).pluck(:id))
   end
-
-  delegate :status_url, to: :sample
 
   # Keys here are used as cache keys for report_info action in SamplesController.
   # The values here are used as defaults for PipelineSampleReport.jsx.

@@ -51,9 +51,8 @@ class MonitorPipelineResults
   end
 
   def self.fail_stalled_uploads!
-    # Delay determined by doubling the time after which an alert is sent to admins.
     Sample
-      .stalled_uploads(6.hours)
+      .stalled_uploads(18.hours)
       .each { |sample| sample.fail_local_upload!("Stalled for more than 6 hours") }
   end
 
