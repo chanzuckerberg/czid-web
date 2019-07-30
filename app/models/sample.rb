@@ -876,10 +876,6 @@ class Sample < ApplicationRecord
   # Gets the URL for the admin-only sample status page for printing in internal
   # error messages.
   def status_url
-    host, port = Rails.application.config.action_mailer.default_url_options.values
-    protocol = Rails.application.config.force_ssl ? "https" : "http"
-    port = port ? ":#{port}" : ""
-    base_url = "#{protocol}://#{host}#{port}"
-    base_url + "/samples/#{id}/pipeline_runs"
+    UrlUtil.absolute_base_url + "/samples/#{id}/pipeline_runs"
   end
 end
