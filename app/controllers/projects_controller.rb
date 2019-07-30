@@ -325,7 +325,7 @@ class ProjectsController < ApplicationController
   end
 
   def project_reports_csv_status
-    stdout = Syscall.pipe(["aws", "s3", "ls", @project.report_tar_s3(current_user.id)], ["wc", "-l"])
+    stdout = Syscall.pipe_with_output(["aws", "s3", "ls", @project.report_tar_s3(current_user.id)], ["wc", "-l"])
     return if stdout.blank?
     final_complete = stdout.to_i == 1
     if final_complete
@@ -351,7 +351,7 @@ class ProjectsController < ApplicationController
   end
 
   def host_gene_counts_status
-    stdout = Syscall.pipe(["aws", "s3", "ls", @project.host_gene_counts_tar_s3(current_user.id)], ["wc", "-l"])
+    stdout = Syscall.pipe_with_output(["aws", "s3", "ls", @project.host_gene_counts_tar_s3(current_user.id)], ["wc", "-l"])
     return if stdout.blank?
     final_complete = stdout.to_i == 1
     if final_complete
@@ -498,10 +498,15 @@ class ProjectsController < ApplicationController
                              .includes(metadata_fields: [:host_genomes])
                              .map(&:metadata_fields).flatten.uniq.map(&:field_info)
               end
+
     # TODO(jsheu): Migrate all to location_v2 after release
-    unless current_user.allowed_feature?("maps")
-      results = results.reject { |f| f[:key] == "collection_location_v2" }
-    end
+    # Hide location_v2 unless you have 'maps'. Otherwise hide the implicit v1.
+    location_field = if current_user.allowed_feature?("maps")
+                       "collection_location"
+                     else
+                       "collection_location_v2"
+                     end
+    results = results.reject { |f| f[:key] == location_field }
 
     render json: results
   end
