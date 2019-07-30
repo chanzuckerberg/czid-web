@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { clamp } from "lodash/fp";
 import { Marker } from "react-map-gl";
 
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
@@ -28,15 +29,12 @@ class ShapeMarker extends React.Component {
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
     // Determined via eyeballing: scaling of a form x/(x+c) shows larger differences at the lower
     // end of the range and smaller differences as it approaches a horizontal asymptote.
-    // clamp(min, x/(x+c) * m * z, max)
     const computedSize =
       size ||
-      Math.min(
-        Math.max(
-          pointCount / (pointCount + divisorConst) * sizeMultiple * zoom,
-          minSize
-        ),
-        maxSize
+      clamp(
+        minSize,
+        maxSize,
+        pointCount / (pointCount + divisorConst) * sizeMultiple * zoom
       );
 
     return (
