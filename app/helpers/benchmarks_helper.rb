@@ -44,13 +44,13 @@ module BenchmarksHelper
   def parse_config(benchmark_config)
     parsed_config = {}
 
-    default_options = benchmark_config[:defaults]
+    default_options = benchmark_config[:defaults] || {}
     [:active_benchmarks, :retired_benchmarks].each do |benchmarks_type|
       parsed_config[benchmarks_type] = benchmark_config[benchmarks_type].collect do |path, options|
         # add defaults to all benchmarks
         default_options
           .merge(options)
-          .merge({path: path})
+          .merge({path: path.to_s})
       end.select do |options|
         options[:environments].include?(ENV['RAILS_ENV'])
       end
@@ -58,5 +58,4 @@ module BenchmarksHelper
 
     return parsed_config
   end
-
 end
