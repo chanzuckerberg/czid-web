@@ -55,6 +55,13 @@ RSpec.describe RetrievePipelineVizGraphDataService do
     }.to_json
   }]
 
+  step_status_data = {
+    four: {
+      status: 1,
+      description: "This is the description of output four."
+    }
+  }
+
   expected_stage_results = {
     stages: [
       {
@@ -118,6 +125,23 @@ RSpec.describe RetrievePipelineVizGraphDataService do
       results = RetrievePipelineVizGraphDataService.call(@pr.id, true, false)
       expect(results).to include_json(expected_stage_results)
       expect(results.keys).to contain_exactly(*expected_stage_results.keys)
+    end
+
+    it "should include step-level status updates" do
+      allow(PipelineOutputsHelper).to receive(:get_s3_file).and_return(step_status_data.to_json)
+      results = RetrievePipelineVizGraphDataService.call(@pr.id, true, false)
+
+      results[:stages][0][:steps].each do |step|
+        # Status should be nil of no job status data exists for the stage
+        expect(step[:status]).to be_nil
+      end
+
+      results[:stages][1][:steps].each_with_index do |step, step_index|
+        stage_dag_json = JSON.parse(pr_stages_data[1][:dag_json])
+        orig_step_out_name = stage_dag_json["steps"][step_index]["out"]
+        expect(step[:status]).to eq(step_status_data[orig_step_out_name.to_sym][:status])
+        expect(step[:description]).to eq(step_status_data[orig_step_out_name.to_sym][:description])
+      end
     end
 
     context "as admin" do

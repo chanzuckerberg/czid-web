@@ -1,9 +1,7 @@
 class RetrievePipelineVizGraphDataService
   include Callable
-  # For step descriptions.
-  # TODO(ezhong): Move to server-fed descriptions.
+  # For pre-server-fed step descriptions.
   include PipelineRunsHelper
-  include PipelineOutputsHelper
 
   # Structures dag_json of each stage of the pipeline run into the following in @results for drawing
   # the pipeline visualization graphs on the React side:
@@ -92,7 +90,7 @@ class RetrievePipelineVizGraphDataService
 
   def step_status
     @pipeline_run.pipeline_run_stages.map do |prs|
-      JSON.parse(get_s3_file(prs.step_status_file_path) || "{}")
+      JSON.parse(PipelineOutputsHelper.get_s3_file(prs.step_status_file_path) || "{}")
     end
   end
 
