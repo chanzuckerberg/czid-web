@@ -11,7 +11,26 @@ import cs from "./metadata_input.scss";
 export const LOCATION_PRIVACY_WARNING =
   "Changed to county/district level for personal privacy.";
 export const LOCATION_UNRESOLVED_WARNING =
-  "Plain text location was unresolved and will not show up on maps.";
+  "Unresolved plain text location, not shown on maps.";
+
+// For human samples, drop the city part of the name and show a warning.
+// Note that the backend will redo the geosearch for confirmation, so don't
+// modify geo_level here.
+// TODO(jsheu): Consider moving the warnings to the backend and generalizing.
+export const processLocationSelection = (result, isHuman) => {
+  let warning = "";
+  if (isHuman && get("geo_level", result) === "city") {
+    result.name = compact([
+      result.subdivision_name,
+      result.state_name,
+      result.country_name,
+    ]).join(", ");
+    warning = LOCATION_PRIVACY_WARNING;
+  } else if (!result.geo_level) {
+    warning = LOCATION_UNRESOLVED_WARNING;
+  }
+  return { result, warning };
+};
 
 class MetadataInput extends React.Component {
   constructor(props) {
@@ -21,26 +40,6 @@ class MetadataInput extends React.Component {
       locationWarning: "",
     };
   }
-
-  // For human samples, drop the city part of the name and show a warning.
-  // Note that the backend will redo the geosearch for confirmation, so don't
-  // modify geo_level here.
-  // TODO(jsheu): Consider moving the warnings to the backend and generalizing.
-  processLocationSelection = result => {
-    const { isHuman } = this.props;
-
-    let warning = "";
-    if (isHuman && get("geo_level", result) === "city") {
-      result.name = compact([
-        result.subdivision_name,
-        result.state_name,
-        result.country_name,
-      ]).join(", ");
-      warning = LOCATION_PRIVACY_WARNING;
-    }
-    this.setState({ locationWarning: warning });
-    return result;
-  };
 
   render() {
     const {
@@ -88,8 +87,12 @@ class MetadataInput extends React.Component {
             className={className}
             // Calls save on selection
             onResultSelect={({ result }) => {
-              result = this.processLocationSelection(result);
-              onChange(metadataType.key, result, true);
+              const { result: newResult, warning } = processLocationSelection(
+                result,
+                isHuman
+              );
+              onChange(metadataType.key, newResult, true);
+              this.setState({ locationWarning: warning });
             }}
             value={value}
           />

@@ -2,7 +2,9 @@ import React from "react";
 import { uniq } from "lodash/fp";
 
 import { getGeoSearchSuggestions } from "~/api/locations";
-import MetadataInput from "~/components/common/MetadataInput";
+import MetadataInput, {
+  processLocationSelection,
+} from "~/components/common/MetadataInput";
 import PropTypes from "~/components/utils/propTypes";
 
 export const geosearchCSVlocations = async metadata => {
@@ -20,12 +22,21 @@ export const geosearchCSVlocations = async metadata => {
     }
   }
 
+  console.log("The metadata we have: ", metadata);
+
   // Set results if there was a match
   let newMetadata = metadata;
   metadata.rows.forEach((row, rowIndex) => {
     const locationName = row[fieldName];
     if (matchedLocations.hasOwnProperty(locationName)) {
-      newMetadata.rows[rowIndex][fieldName] = matchedLocations[locationName];
+      const isHuman = row["Host Genome"] && row["Host Genome"] === "Human";
+      console.log("isHuman: ", isHuman);
+      const { result, warning } = processLocationSelection(
+        matchedLocations[locationName],
+        isHuman
+      );
+      console.log("processed: ", result, warning);
+      newMetadata.rows[rowIndex][fieldName] = result;
     }
   });
   return newMetadata;
