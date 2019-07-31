@@ -89,6 +89,7 @@ class MetadataUpload extends React.Component {
       onMetadataChange({ metadata: newMetadata });
       this.setState({ CSVLocationWarnings: warnings });
     } catch (e) {
+      // On failure, locations will remain plain text.
       // eslint-disable-next-line no-console
       console.error(e);
     }

@@ -42,6 +42,17 @@ class LocationTest < ActiveSupport::TestCase
     assert mock.verify
   end
 
+  test "should use result limits in geosearch requests" do
+    limit = 7
+    query = "search.php?addressdetails=1&normalizecity=1&q=UCSF&limit=#{limit}"
+    mock = MiniTest::Mock.new
+    mock.expect(:call, nil, [query])
+    Location.stub :location_api_request, mock do
+      Location.geosearch("UCSF", limit)
+    end
+    assert mock.verify
+  end
+
   test "should raise an error for empty geosearch" do
     err = assert_raises ArgumentError do
       Location.geosearch("")

@@ -12,23 +12,21 @@ import PropTypes from "~/components/utils/propTypes";
 export const geosearchCSVlocations = async (metadata, metadataType) => {
   if (!(metadata && metadata.rows)) return;
 
-  // Get results for each plain text value
-  const locationNames = uniq(metadata.rows.map(r => r[metadataType.name]));
+  // Get the #1 result, if any, for each unique plain text value
+  const rawNames = uniq(metadata.rows.map(r => r[metadataType.name]));
   const matchedLocations = {};
-  for (const query of locationNames) {
-    const suggestions = await getGeoSearchSuggestions(query, 1);
-    if (suggestions.length > 0) {
-      matchedLocations[query] = suggestions[0];
-    }
-  }
+  const requests = rawNames.map(async query => {
+    const res = await getGeoSearchSuggestions(query, 1);
+    if (res.length > 0) matchedLocations[query] = res[0];
+  });
+  await Promise.all(requests);
 
-  // Set results if there was a match
+  // Process matched results and set warnings
   let newMetadata = metadata;
   const warnings = {};
   metadata.rows.forEach((row, rowIndex) => {
     const locationName = row[metadataType.name];
     let rowWarning;
-
     if (matchedLocations.hasOwnProperty(locationName)) {
       const { result, warning } = processLocationSelection(
         matchedLocations[locationName],
@@ -39,7 +37,6 @@ export const geosearchCSVlocations = async (metadata, metadataType) => {
     } else {
       rowWarning = LOCATION_UNRESOLVED_WARNING;
     }
-
     if (rowWarning) {
       warnings[row["Sample Name"]] = rowWarning;
     }
