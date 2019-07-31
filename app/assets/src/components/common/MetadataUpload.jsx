@@ -1,6 +1,6 @@
 import React from "react";
 import cx from "classnames";
-import _fp, { filter, keyBy, concat } from "lodash/fp";
+import _fp, { filter, keyBy, concat, find, uniq } from "lodash/fp";
 
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import PropTypes from "~/components/utils/propTypes";
@@ -10,10 +10,15 @@ import { getAllHostGenomes } from "~/api";
 import { getProjectMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import LoadingIcon from "~ui/icons/LoadingIcon";
+import { getURLParamString } from "~/helpers/url";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
+import MetadataInput from "./MetadataInput";
+import { processCSVMetadata } from "./MetadataCSVUpload";
 import IssueGroup from "~ui/notifications/IssueGroup";
+
+import { getGeoSearchSuggestions } from "~/api/locations";
 
 const map = _fp.map.convert({ cap: false });
 
@@ -72,6 +77,53 @@ class MetadataUpload extends React.Component {
         projectName: this.props.project.name,
       });
     }
+
+    // this.geosearchCSVlocations(metadata);
+  };
+
+  geosearchCSVlocations = async metadata => {
+    console.log("geosearchCSVlocations was called");
+    console.log("metadata I got: ", metadata);
+    const { onMetadataChange } = this.props;
+    const { projectMetadataFields } = this.state;
+
+    if (!(metadata && metadata.rows)) return;
+
+    const locationField = find(
+      { is_required: 1, dataType: "location" },
+      Object.values(projectMetadataFields)
+    );
+    const fieldIndex = metadata.headers.indexOf(locationField.name);
+
+    const originalValues = uniq(metadata.rows.map(r => r[fieldIndex]));
+    console.log("original values:", originalValues);
+
+    const mappedResults = {};
+    for (const query of originalValues) {
+      const suggestions = await getGeoSearchSuggestions(query, 1);
+      if (suggestions.length > 0) {
+        const result = suggestions[0];
+        console.log("suggestion: ", result);
+        mappedResults[query] = result;
+      }
+    }
+
+    console.log("all mapped results: ", mappedResults);
+
+    let newMetadata = metadata;
+    metadata.rows.map((row, rowIndex) => {
+      const locationName = row[fieldIndex];
+      if (mappedResults.hasOwnProperty(locationName)) {
+        newMetadata.rows[rowIndex][fieldIndex] = mappedResults[locationName];
+      }
+    });
+
+    console.log("want to set: ", newMetadata);
+
+    this.setState({ metadata: newMetadata });
+    onMetadataChange({
+      metadata: processCSVMetadata(newMetadata),
+    });
   };
 
   // MetadataManualInput doesn't validate metadata before calling onMetadataChangeManual.
@@ -85,6 +137,17 @@ class MetadataUpload extends React.Component {
       projectId: this.props.project.id,
       projectName: this.props.project.name,
     });
+  };
+
+  getCSVUrl = () => {
+    const params = {
+      ...(this.props.samplesAreNew
+        ? { new_sample_names: map("name", this.props.samples) }
+        : {}),
+      project_id: this.props.project.id,
+    };
+
+    return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
   };
 
   renderTab = () => {
@@ -130,12 +193,30 @@ class MetadataUpload extends React.Component {
             onDirty={this.props.onDirty}
             projectMetadataFields={this.state.projectMetadataFields}
           />
+          <a
+            className={cs.link}
+            href={this.getCSVUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() =>
+              logAnalyticsEvent(
+                "MetadataUpload_download-csv-template_clicked",
+                {
+                  projectId: this.props.project.id,
+                  projectName: this.props.project.name,
+                }
+              )
+            }
+          >
+            Download Metadata CSV Template
+          </a>
           {this.state.validatingCSV && (
             <div className={cs.validationMessage}>
               <LoadingIcon className={cs.loadingIcon} />
               Validating metadata...
             </div>
           )}
+          {this.renderLocationsInterface()}
         </React.Fragment>
       );
     }
@@ -200,6 +281,52 @@ class MetadataUpload extends React.Component {
           </div>
         )}
       </div>
+    );
+  };
+
+  renderLocationsInterface = () => {
+    const { samples, onMetadataChange, metadata } = this.props;
+    const { projectMetadataFields } = this.state;
+    console.log("our metadata: ", metadata);
+
+    const sampleNames = new Set(map("name", samples) || []);
+    console.log("sample names: ", sampleNames);
+
+    if (!(metadata && metadata.rows)) return;
+
+    // Render results
+    return (
+      metadata &&
+      metadata.rows &&
+      metadata.rows.map((row, rowIndex) => {
+        if (!sampleNames.has(row[0])) return;
+
+        return (
+          <div>
+            <span>{row[0]}</span>
+            <span>
+              <MetadataInput
+                key={"collection_location_v2"}
+                className={cs.input}
+                value={row["Collection Location"]}
+                metadataType={projectMetadataFields["collection_location_v2"]}
+                onChange={(key, value) => {
+                  const newMetadata = metadata;
+                  newMetadata.rows[rowIndex]["Collection Location"] = value;
+
+                  onMetadataChange({
+                    metadata: newMetadata,
+                  });
+
+                  // Log analytics?
+                }}
+                withinModal={true}
+                isHuman={true}
+              />
+            </span>
+          </div>
+        );
+      })
     );
   };
 
@@ -292,6 +419,7 @@ MetadataUpload.propTypes = {
   // Immediately called when the user changes anything, even before validation has returned.
   // Can be used to disable the header navigation.
   onDirty: PropTypes.func,
+  metadata: PropTypes.object,
 };
 
 export default MetadataUpload;

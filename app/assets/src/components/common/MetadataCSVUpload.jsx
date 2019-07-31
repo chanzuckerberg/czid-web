@@ -14,20 +14,15 @@ import {
 } from "lodash/fp";
 import PropTypes from "prop-types";
 
-import { logAnalyticsEvent } from "~/api/analytics";
 import {
   validateMetadataCSVForProject,
   validateMetadataCSVForNewSamples,
 } from "~/api/metadata";
-import { getURLParamString } from "~/helpers/url";
 import CSVUpload from "~ui/controls/CSVUpload";
 
-import { getGeoSearchSuggestions } from "~/api/locations";
-
-import MetadataInput from "./MetadataInput";
 import cs from "./metadata_csv_upload.scss";
 
-const processCSVMetadata = csv => {
+export const processCSVMetadata = csv => {
   const { headers, rows } = csv;
 
   return {
@@ -79,7 +74,6 @@ class MetadataCSVUpload extends React.Component {
     }
     this.setState({ metadata: csv });
     this.validateCSV(csv);
-    this.geosearchCSVlocations();
   };
 
   validateCSV = async csv => {
@@ -121,115 +115,6 @@ class MetadataCSVUpload extends React.Component {
     });
   };
 
-  getCSVUrl = () => {
-    const params = {
-      ...(this.props.samplesAreNew
-        ? { new_sample_names: map("name", this.props.samples) }
-        : {}),
-      project_id: this.props.project.id,
-    };
-    return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
-  };
-
-  geosearchCSVlocations = async () => {
-    console.log("geosearchCSVlocations was called");
-    const { onMetadataChange, projectMetadataFields } = this.props;
-    const { metadata } = this.state;
-
-    if (!(metadata && metadata.rows)) return;
-
-    const locationField = find(
-      { is_required: 1, dataType: "location" },
-      Object.values(projectMetadataFields)
-    );
-    const fieldIndex = metadata.headers.indexOf(locationField.name);
-
-    const originalValues = uniq(metadata.rows.map(r => r[fieldIndex]));
-    console.log("original values:", originalValues);
-
-    const mappedResults = {};
-    for (const query of originalValues) {
-      const suggestions = await getGeoSearchSuggestions(query, 1);
-      if (suggestions.length > 0) {
-        const result = suggestions[0];
-        console.log("suggestion: ", result);
-        mappedResults[query] = result;
-      }
-    }
-
-    console.log("all mapped results: ", mappedResults);
-
-    let newMetadata = metadata;
-    metadata.rows.map((row, rowIndex) => {
-      const locationName = row[fieldIndex];
-      if (mappedResults.hasOwnProperty(locationName)) {
-        newMetadata.rows[rowIndex][fieldIndex] = mappedResults[locationName];
-      }
-    });
-
-    console.log("want to set: ", newMetadata);
-
-    this.setState({ metadata: newMetadata });
-    onMetadataChange({
-      metadata: processCSVMetadata(newMetadata),
-    });
-  };
-
-  renderLocationsInterface = () => {
-    const { samples, onMetadataChange, projectMetadataFields } = this.props;
-    const { metadata } = this.state;
-    console.log("our metadata: ", metadata);
-
-    const locationField = find(
-      { is_required: 1, dataType: "location" },
-      Object.values(projectMetadataFields)
-    );
-    console.log("location field: ", locationField);
-
-    const sampleNames = new Set(map("name", samples) || []);
-    console.log("sample names: ", sampleNames);
-
-    if (!(metadata && metadata.rows)) return;
-
-    const fieldIndex = metadata.headers.indexOf(locationField.name);
-
-    // Render results
-    return (
-      metadata &&
-      metadata.rows &&
-      metadata.rows.map((row, rowIndex) => {
-        if (!sampleNames.has(row[0])) return;
-
-        return (
-          <div>
-            <span>{row[0]}</span>
-            <span>
-              <MetadataInput
-                key={locationField.key}
-                className={cs.input}
-                value={row[fieldIndex]}
-                metadataType={projectMetadataFields[locationField.key]}
-                onChange={(key, value) => {
-                  const newMetadata = metadata;
-                  newMetadata.rows[rowIndex][fieldIndex] = value;
-
-                  this.setState({ metadata: newMetadata });
-                  onMetadataChange({
-                    metadata: processCSVMetadata(newMetadata),
-                  });
-
-                  // Log analytics?
-                }}
-                withinModal={true}
-                isHuman={true}
-              />
-            </span>
-          </div>
-        );
-      })
-    );
-  };
-
   render() {
     const hasMetadata = !isNull(this.state.metadata);
     return (
@@ -241,21 +126,6 @@ class MetadataCSVUpload extends React.Component {
             className={cx(cs.csvUpload, hasMetadata && cs.uploaded)}
           />
         </div>
-        <a
-          className={cs.link}
-          href={this.getCSVUrl()}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() =>
-            logAnalyticsEvent("MetadataUpload_download-csv-template_clicked", {
-              projectId: this.props.project.id,
-              projectName: this.props.project.name,
-            })
-          }
-        >
-          Download Metadata CSV Template
-        </a>
-        {this.renderLocationsInterface()}
       </React.Fragment>
     );
   }

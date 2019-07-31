@@ -109,6 +109,7 @@ class UploadMetadataStep extends React.Component {
               issues={this.state.wasManual ? this.state.issues : null}
               visible={this.props.visible}
               onDirty={this.props.onDirty}
+              metadata={this.state.metadata}
             />
           </div>
           <div className={cs.controls}>

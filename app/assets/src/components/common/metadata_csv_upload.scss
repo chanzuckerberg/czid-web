@@ -12,14 +12,3 @@
     height: 80px;
   }
 }
-
-.link {
-  // Overwrite <a> inherit rule in header.scss
-  color: $primary-light !important;
-  cursor: pointer;
-}
-
-.input {
-  margin: 5px 30px 5px 0;
-  width: 130px;
-}
