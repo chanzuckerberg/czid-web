@@ -11,7 +11,7 @@ import {
 import cs from "./metadata_csv_upload.scss";
 import PropTypes from "prop-types";
 
-export const processCSVMetadata = csv => {
+const processCSVMetadata = csv => {
   const { headers, rows } = csv;
 
   return {

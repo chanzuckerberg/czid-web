@@ -8,8 +8,10 @@ import GeoSearchInputBox from "../ui/controls/GeoSearchInputBox";
 
 import cs from "./metadata_input.scss";
 
-export const LOCATION_WARNING =
+export const LOCATION_PRIVACY_WARNING =
   "Changed to county/district level for personal privacy.";
+export const LOCATION_UNRESOLVED_WARNING =
+  "Plain text location was unresolved and will not show up on maps.";
 
 class MetadataInput extends React.Component {
   constructor(props) {
@@ -34,7 +36,7 @@ class MetadataInput extends React.Component {
         result.state_name,
         result.country_name,
       ]).join(", ");
-      warning = LOCATION_WARNING;
+      warning = LOCATION_PRIVACY_WARNING;
     }
     this.setState({ locationWarning: warning });
     return result;
