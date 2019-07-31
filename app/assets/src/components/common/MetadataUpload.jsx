@@ -1,16 +1,17 @@
 import React from "react";
 import cx from "classnames";
-import _fp, { filter, keyBy, concat, uniq } from "lodash/fp";
+import _fp, { filter, keyBy, concat } from "lodash/fp";
 
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
-import MetadataInput from "~/components/common/MetadataInput";
+import MetadataCSVGeosearchMenu, {
+  geosearchCSVlocations,
+} from "~/components/common/MetadataCSVGeosearchMenu";
 import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
 import { getAllHostGenomes } from "~/api";
 import { getProjectMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import { getGeoSearchSuggestions } from "~/api/locations";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import { getURLParamString } from "~/helpers/url";
 
@@ -74,37 +75,14 @@ class MetadataUpload extends React.Component {
         projectName: this.props.project.name,
       });
     }
-
-    this.geosearchCSVlocations(metadata);
+    this.getCSVLocationMatches(metadata);
   };
 
-  geosearchCSVlocations = async metadata => {
+  getCSVLocationMatches = async metadata => {
     const { onMetadataChange } = this.props;
-
-    const fieldName = "Collection Location";
-
-    if (!(metadata && metadata.rows)) return;
-
-    const locationNames = uniq(metadata.rows.map(r => r[fieldName]));
-
-    const matchedLocations = {};
-    for (const query of locationNames) {
-      const suggestions = await getGeoSearchSuggestions(query, 1);
-      if (suggestions.length > 0) {
-        matchedLocations[query] = suggestions[0];
-      }
-    }
-
-    let newMetadata = metadata;
-    metadata.rows.map((row, rowIndex) => {
-      const name = row[fieldName];
-      if (matchedLocations.hasOwnProperty(name)) {
-        newMetadata.rows[rowIndex][fieldName] = matchedLocations[name];
-      }
-    });
-
+    const metadataWithMatches = await geosearchCSVlocations(metadata);
     onMetadataChange({
-      metadata: newMetadata,
+      metadata: metadataWithMatches,
     });
   };
 
@@ -133,6 +111,9 @@ class MetadataUpload extends React.Component {
   };
 
   renderTab = () => {
+    const { metadata, onMetadataChange } = this.props;
+    const { projectMetadataFields } = this.state;
+
     if (this.state.currentTab === "Manual Input") {
       if (!this.props.samples || !this.state.projectMetadataFields) {
         return <div className={cs.loadingMsg}>Loading...</div>;
@@ -197,7 +178,11 @@ class MetadataUpload extends React.Component {
               Validating metadata...
             </div>
           )}
-          {this.renderLocationsMenu()}
+          <MetadataCSVGeosearchMenu
+            onMetadataChange={onMetadataChange}
+            metadata={metadata}
+            projectMetadataFields={projectMetadataFields}
+          />
         </React.Fragment>
       );
     }
@@ -263,42 +248,6 @@ class MetadataUpload extends React.Component {
         )}
       </div>
     );
-  };
-
-  renderLocationsMenu = () => {
-    const { onMetadataChange, metadata } = this.props;
-    const { projectMetadataFields } = this.state;
-
-    if (!(metadata && metadata.rows)) return;
-
-    // Render results
-    return metadata.rows.map((sample, rowIndex) => {
-      return (
-        <div>
-          <span>{sample["Sample Name"]}</span>
-          <span>
-            <MetadataInput
-              key={"collection_location_v2"}
-              className={cs.input}
-              value={sample["Collection Location"]}
-              metadataType={projectMetadataFields["collection_location_v2"]}
-              onChange={(key, value) => {
-                const newMetadata = metadata;
-                newMetadata.rows[rowIndex]["Collection Location"] = value;
-
-                onMetadataChange({
-                  metadata: newMetadata,
-                });
-
-                // Log analytics?
-              }}
-              withinModal={true}
-              isHuman={true}
-            />
-          </span>
-        </div>
-      );
-    });
   };
 
   render() {
