@@ -4,7 +4,7 @@ task rename_job_stat_names: :environment do
               "run_cdhitdup" => "cdhitdup_out",
               "run_lzw" => "lzw_out",
               "run_bowtie2" => "bowtie2_out",
-              "run_gsnap_filter" => "gsnap_filter_out" }
+              "run_gsnap_filter" => "gsnap_filter_out", }
 
   JobStat.all.each do |js|
     if mapping[js.task]

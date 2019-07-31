@@ -17,13 +17,13 @@ describe Sample, type: :model do
       {
         name: file_one_name,
         download_path: file_one_href_content,
-        source_path: file_one_href
+        source_path: file_one_href,
       },
       {
         name: file_two_name,
         download_path: file_two_href_content,
-        source_path: file_two_href
-      }
+        source_path: file_two_href,
+      },
     ]
   end
 
@@ -61,8 +61,8 @@ describe Sample, type: :model do
                                                                                                {
                                                                                                  name: file_one_name,
                                                                                                  download_path: file_one_href_content,
-                                                                                                 source_path: file_one_href
-                                                                                               }
+                                                                                                 source_path: file_one_href,
+                                                                                               },
                                                                                              ])
         expect(@sample).to receive(:upload_from_basespace_to_s3).exactly(1).times.and_return(true)
         expect(@sample).to receive(:kickoff_pipeline).exactly(1).times
@@ -98,13 +98,13 @@ describe Sample, type: :model do
                                                                                                {
                                                                                                  name: file_one_name,
                                                                                                  download_path: file_one_href_content,
-                                                                                                 source_path: file_one_href
+                                                                                                 source_path: file_one_href,
                                                                                                },
                                                                                                {
                                                                                                  name: file_two_name,
                                                                                                  download_path: file_two_href_content,
                                                                                                  source_path: file_one_href # This is the same as the previous
-                                                                                               }
+                                                                                               },
                                                                                              ])
 
         expect(@sample).to receive(:upload_from_basespace_to_s3).exactly(2).times.and_return(2)

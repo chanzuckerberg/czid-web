@@ -15,7 +15,7 @@ Rails.application.configure do
   # Configure public file server for tests with Cache-Control for performance.
   config.public_file_server.enabled = true
   config.public_file_server.headers = {
-    'Cache-Control' => "public, max-age=#{1.hour.seconds.to_i}"
+    'Cache-Control' => "public, max-age=#{1.hour.seconds.to_i}",
   }
 
   # Show full error reports and disable caching.
@@ -26,7 +26,7 @@ Rails.application.configure do
   config.cache_store = :redis_store, 'redis://redis:6379/0/cache',
                        {
                          # Needed for redis to evict keys in volatile-lru mode
-                         expires_in: 30.days
+                         expires_in: 30.days,
                        }
 
   # Raise exceptions instead of rendering exception templates.

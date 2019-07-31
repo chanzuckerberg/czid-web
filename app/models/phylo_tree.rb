@@ -54,23 +54,23 @@ class PhyloTree < ApplicationRecord
       "newick" => {
         "s3_path" => "#{versioned_output_s3_path}/phylo_tree.newick",
         "required" => true,
-        "remote" => false
+        "remote" => false,
       },
       "ncbi_metadata" => {
         "s3_path" => "#{versioned_output_s3_path}/ncbi_metadata.json",
         "required" => true,
-        "remote" => false
+        "remote" => false,
       },
       "snp_annotations" => {
         "s3_path" => "#{versioned_output_s3_path}/ksnp3_outputs/SNPs_all_annotated",
         "required" => false,
-        "remote" => true
+        "remote" => true,
       },
       "vcf" => {
         "s3_path" => "#{versioned_output_s3_path}/ksnp3_outputs/variants_reference1.vcf",
         "required" => false,
-        "remote" => true
-      }
+        "remote" => true,
+      },
     }
   end
 
@@ -213,7 +213,7 @@ class PhyloTree < ApplicationRecord
     pipeline_runs.each do |pr|
       hitsummary2_files[pr.id] = [
         "#{pr.postprocess_output_s3_path}/assembly/gsnap.hitsummary2.tab",
-        "#{pr.postprocess_output_s3_path}/assembly/rapsearch2.hitsummary2.tab"
+        "#{pr.postprocess_output_s3_path}/assembly/rapsearch2.hitsummary2.tab",
       ]
       entry = taxon_byteranges_hash[pr.id]
       entry.keys.each do |hit_type|
@@ -234,13 +234,13 @@ class PhyloTree < ApplicationRecord
       hitsummary2_files: hitsummary2_files,
       nt_db: alignment_config.s3_nt_db_path,
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
-      sample_names_by_run_ids: sample_names_by_run_ids
+      sample_names_by_run_ids: sample_names_by_run_ids,
     }
     dag_commands = prepare_dag("phylo_tree", attribute_dict)
     # Dispatch command
     base_command = [install_pipeline(dag_branch),
                     upload_version(dag_version_file),
-                    dag_commands].join("; ")
+                    dag_commands,].join("; ")
     aegea_batch_submit_command(base_command)
   end
 

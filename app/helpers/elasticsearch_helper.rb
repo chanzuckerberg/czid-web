@@ -32,16 +32,16 @@ module ElasticsearchHelper
         query: {
           query_string: {
             query: "*#{query}*",
-            fields: ["#{level}_name"]
-          }
+            fields: ["#{level}_name"],
+          },
         },
         aggs: {
           distinct_taxa: {
             terms: {
-              field: "#{level}_taxid"
-            }
-          }
-        }
+              field: "#{level}_taxid",
+            },
+          },
+        },
       }
       search_response = TaxonLineage.search(search_params)
       search_taxon_ids = search_response.aggregations.distinct_taxa.buckets.pluck(:key)
@@ -56,7 +56,7 @@ module ElasticsearchHelper
                        "title" => name,
                        "description" => "Taxonomy ID: #{taxid}",
                        "taxid" => taxid,
-                       "level" => level
+                       "level" => level,
                      }
                    end
 

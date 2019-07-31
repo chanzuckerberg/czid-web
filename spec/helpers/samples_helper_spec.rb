@@ -13,7 +13,7 @@ RSpec.describe SamplesHelper, type: :helper do
         @joe = create(:joe)
         # Add the metadata fields to the host genome so that the metadata will pass validation.
         @host_genome = create(:host_genome, metadata_fields: [
-                                "Fake Metadata Field One", "Fake Metadata Field Two"
+                                "Fake Metadata Field One", "Fake Metadata Field Two",
                               ])
       end
 
@@ -24,8 +24,8 @@ RSpec.describe SamplesHelper, type: :helper do
             basespace_dataset_id: fake_dataset_id,
             host_genome_id: @host_genome.id,
             name: fake_sample_name,
-            project_id: @project.id
-          }
+            project_id: @project.id,
+          },
         ]
       end
 
@@ -33,8 +33,8 @@ RSpec.describe SamplesHelper, type: :helper do
         {
           fake_sample_name.to_s => {
             "Fake Metadata Field One" => "CSF",
-            "Fake Metadata Field Two" => "DNA"
-          }
+            "Fake Metadata Field Two" => "DNA",
+          },
         }
       end
 
@@ -78,7 +78,7 @@ RSpec.describe SamplesHelper, type: :helper do
 
         expect(response["samples"].length).to be 0
         expect(response["errors"]).to eq([
-                                           ErrorHelper::SampleUploadErrors.missing_input_files_or_basespace_params(fake_sample_name)
+                                           ErrorHelper::SampleUploadErrors.missing_input_files_or_basespace_params(fake_sample_name),
                                          ])
       end
 
@@ -91,7 +91,7 @@ RSpec.describe SamplesHelper, type: :helper do
 
         expect(response["samples"].length).to be 0
         expect(response["errors"]).to eq([
-                                           ErrorHelper::SampleUploadErrors.missing_input_files_or_basespace_params(fake_sample_name)
+                                           ErrorHelper::SampleUploadErrors.missing_input_files_or_basespace_params(fake_sample_name),
                                          ])
       end
     end

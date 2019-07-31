@@ -23,9 +23,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'sample_type'],
         rows: [
           ['metadata_validation_sample_human', 'Whole Blood'],
-          ['metadata_validation_sample_mosquito', 'Whole Blood']
-        ]
-      }
+          ['metadata_validation_sample_mosquito', 'Whole Blood'],
+        ],
+      },
     }, as: :json
 
     assert_response :success
@@ -42,9 +42,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'Sample Type'],
         rows: [
           ['metadata_validation_sample_human', 'Whole Blood'],
-          ['metadata_validation_sample_mosquito', 'Whole Blood']
-        ]
-      }
+          ['metadata_validation_sample_mosquito', 'Whole Blood'],
+        ],
+      },
     }, as: :json
 
     assert_response :success
@@ -60,9 +60,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
         headers: ['sample_type'],
         rows: [
           ['Whole Blood'],
-          ['Whole Blood']
-        ]
-      }
+          ['Whole Blood'],
+        ],
+      },
     }, as: :json
 
     assert_response :success
@@ -82,9 +82,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'sample_type'],
         rows: [
           ['metadata_validation_sample_human', 'Whole Blood', 'foobar'],
-          ['metadata_validation_sample_mosquito']
-        ]
-      }
+          ['metadata_validation_sample_mosquito'],
+        ],
+      },
     }, as: :json
 
     assert_response :success
@@ -107,9 +107,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
         rows: [
           ['', 'Whole Blood'],
           ['foobar', 'Whole Blood'],
-          ['metadata_validation_sample_human', 'Whole Blood']
-        ]
-      }
+          ['metadata_validation_sample_human', 'Whole Blood'],
+        ],
+      },
     }, as: :json
 
     assert_response :success
@@ -135,9 +135,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'sample_type', 'age', 'admission_date', 'blood_fed', 'reported_sex'],
         rows: [
           ['metadata_validation_sample_human', 'Whole Blood', 'foobar', 'foobar', '', ''],
-          ['metadata_validation_sample_mosquito', 'Whole Blood', '', '', 'foobar', 'foobar']
-        ]
-      }
+          ['metadata_validation_sample_mosquito', 'Whole Blood', '', '', 'foobar', 'foobar'],
+        ],
+      },
     }, as: :json
 
     assert_response :success
@@ -167,9 +167,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'sex', 'Nucleotide Type'],
         rows: [
-          ['metadata_validation_sample_human_existing_metadata', 'Female', "DNA"]
-        ]
-      }
+          ['metadata_validation_sample_human_existing_metadata', 'Female', "DNA"],
+        ],
+      },
     }, as: :json
 
     assert_response :success
@@ -183,7 +183,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_equal ErrorAggregator::ERRORS[:value_already_exists][:title].call(2, nil), @response.parsed_body['issues']['warnings'][0]['caption']
     assert_equal [
       [1, "metadata_validation_sample_human_existing_metadata", "sex", "Male", "Female"],
-      [1, "metadata_validation_sample_human_existing_metadata", "Nucleotide Type", "RNA", "DNA"]
+      [1, "metadata_validation_sample_human_existing_metadata", "Nucleotide Type", "RNA", "DNA"],
     ], @response.parsed_body['issues']['warnings'][0]['rows']
   end
 
@@ -194,9 +194,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
         rows: [
-          ['metadata_validation_sample_human', 'Foobar', 'Foobar', 'Foobar']
-        ]
-      }
+          ['metadata_validation_sample_human', 'Foobar', 'Foobar', 'Foobar'],
+        ],
+      },
     }, as: :json
 
     assert_response :success
@@ -208,7 +208,7 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
     assert_equal ErrorAggregator::ERRORS[:custom_field_creation][:title].call(2, nil), @response.parsed_body['issues']['warnings'][0]['caption']
     assert_equal [
       [3, "Custom Field 1"],
-      [4, "Custom Field 2"]
+      [4, "Custom Field 2"],
     ], @response.parsed_body['issues']['warnings'][0]['rows']
   end
 
@@ -219,9 +219,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'blood_fed'],
         rows: [
-          ['metadata_validation_sample_human', 'Foobar']
-        ]
-      }
+          ['metadata_validation_sample_human', 'Foobar'],
+        ],
+      },
     }, as: :json
 
     assert_equal 1, @response.parsed_body['issues']['errors'].length
@@ -239,9 +239,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'Sample Name', 'sample_type', 'Sample Type', 'Custom Field', 'Custom Field'],
         rows: [
-          ['metadata_validation_sample_human', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar']
-        ]
-      }
+          ['metadata_validation_sample_human', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar'],
+        ],
+      },
     }, as: :json
 
     assert_equal 1, @response.parsed_body['issues']['errors'].length
@@ -263,9 +263,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
           headers: ['sample_name', 'sample_type'],
           rows: [
             ['public_project_sampleA', 'Whole Blood'],
-            ['public_project_sampleB', 'Whole Blood']
-          ]
-        }
+            ['public_project_sampleB', 'Whole Blood'],
+          ],
+        },
       }, as: :json
     end
   end
@@ -279,9 +279,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
           headers: ['sample_name', 'sample_type'],
           rows: [
             ['metadata_validation_sample_human', 'Whole Blood'],
-            ['metadata_validation_sample_mosquito', 'Whole Blood']
-          ]
-        }
+            ['metadata_validation_sample_mosquito', 'Whole Blood'],
+          ],
+        },
       }, as: :json
     end
   end
@@ -294,9 +294,9 @@ class ProjectsMetadataValidateTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'sample_type'],
         rows: [
           ['joe_project_sampleA', 'Whole Blood'],
-          ['joe_project_sampleB', 'Whole Blood']
-        ]
-      }
+          ['joe_project_sampleB', 'Whole Blood'],
+        ],
+      },
     }, as: :json
 
     assert_response :success

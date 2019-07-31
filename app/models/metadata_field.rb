@@ -99,7 +99,7 @@ class MetadataField < ApplicationRecord
       description: description,
       is_required: is_required,
       examples: examples && JSON.parse(examples),
-      default_for_new_host_genome: default_for_new_host_genome
+      default_for_new_host_genome: default_for_new_host_genome,
     }
   end
 

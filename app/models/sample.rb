@@ -57,7 +57,7 @@ class Sample < ApplicationRecord
   METADATA_FIELDS = [:sample_unique_id, # 'Unique ID' (e.g. in human case, patient ID)
                      :sample_location, :sample_date, :sample_tissue,
                      :sample_template, # this refers to nucleotide type (RNA or DNA)
-                     :sample_library, :sample_sequencer, :sample_notes, :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection].freeze
+                     :sample_library, :sample_sequencer, :sample_notes, :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection,].freeze
 
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
   attr_accessor :bulk_mode, :basespace_dataset_id, :basespace_access_token
@@ -227,7 +227,7 @@ class Sample < ApplicationRecord
         key: f.key,
         display_name: end_path(f.key, display_prefix),
         url: Sample.get_signed_url(f.key),
-        size: ActiveSupport::NumberHelper.number_to_human_size(f.size)
+        size: ActiveSupport::NumberHelper.number_to_human_size(f.size),
       }
     end
   end
@@ -617,7 +617,7 @@ class Sample < ApplicationRecord
       json_output = pr.to_json(include: [:pipeline_run_stages,
                                          :taxon_counts,
                                          :taxon_byteranges,
-                                         :job_stats])
+                                         :job_stats,])
       file = Tempfile.new
       file.write(json_output)
       file.close
@@ -739,7 +739,7 @@ class Sample < ApplicationRecord
       m.raw_value = val.is_a?(ActionController::Parameters) ? val.to_json : val
       return {
         metadatum: m,
-        status: "ok"
+        status: "ok",
       }
     else
       # If the value didn't change or isn't present, don't re-save the metadata field.
@@ -749,7 +749,7 @@ class Sample < ApplicationRecord
       end
       return {
         metadatum: nil,
-        status: "ok"
+        status: "ok",
       }
     end
   rescue ActiveRecord::RecordNotFound => e
@@ -757,7 +757,7 @@ class Sample < ApplicationRecord
     return {
       metadatum: nil,
       status: "error",
-      error: e
+      error: e,
     }
   end
 
@@ -770,25 +770,25 @@ class Sample < ApplicationRecord
     if result[:status] == "error"
       return {
         status: "error",
-        error: result[:error]
+        error: result[:error],
       }
     elsif result[:metadatum]
       if result[:metadatum].valid?
         result[:metadatum].save!
         return {
-          status: "ok"
+          status: "ok",
         }
       else
         return {
           status: "error",
           # Get the error from ErrorHelper, instead of using the error from metadatum model.
           # The error from ErrorHelper is more user-friendly ("Please input a number") whereas metadatum model is "Invalid number for field"
-          error: get_field_error(result[:metadatum].metadata_field, host_genome_name == "Human")
+          error: get_field_error(result[:metadatum].metadata_field, host_genome_name == "Human"),
         }
       end
     else
       return {
-        status: "ok"
+        status: "ok",
       }
     end
   rescue ActiveRecord::RecordInvalid => e
@@ -796,14 +796,14 @@ class Sample < ApplicationRecord
     # Don't send the detailed error message to the user.
     return {
       status: "error",
-      error: "There was an error saving your metadata."
+      error: "There was an error saving your metadata.",
     }
   rescue ActiveRecord::RangeError => e
     Rails.logger.error(e)
     # Don't send the detailed error message to the user.
     return {
       status: "error",
-      error: "The value you provided was too large."
+      error: "The value you provided was too large.",
     }
   end
 
@@ -826,7 +826,7 @@ class Sample < ApplicationRecord
     {
       errors: m.valid? ? {} : m.errors,
       # The existing metadata field that was used to validate this metadatum.
-      metadata_field: m.metadata_field
+      metadata_field: m.metadata_field,
     }
   end
 
