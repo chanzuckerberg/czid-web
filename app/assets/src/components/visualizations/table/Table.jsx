@@ -9,8 +9,8 @@ class Table extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      sortBy: this.props.sortBy,
-      sortDirection: this.props.sortDirection || SortDirection.ASC,
+      sortBy: this.props.defaultSortBy,
+      sortDirection: this.props.defaultSortDirection || SortDirection.ASC,
     };
   }
 
@@ -104,6 +104,9 @@ Table.propTypes = {
   sortable: PropTypes.bool,
   sortBy: PropTypes.string,
   sortDirection: PropTypes.string,
+  // Allows you to set a sort on table initialization, but still allows user to change the sort.
+  defaultSortBy: PropTypes.string,
+  defaultSortDirection: PropTypes.string,
 };
 
 export default Table;
