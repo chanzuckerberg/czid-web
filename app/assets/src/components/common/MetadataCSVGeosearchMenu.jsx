@@ -1,5 +1,5 @@
 import React from "react";
-import { uniq } from "lodash/fp";
+import { uniq, zipObject } from "lodash/fp";
 
 import { getGeoSearchSuggestions } from "~/api/locations";
 import MetadataInput from "~/components/common/MetadataInput";
@@ -8,6 +8,7 @@ import {
   processLocationSelection,
 } from "~/components/ui/controls/GeoSearchInputBox";
 import PropTypes from "~/components/utils/propTypes";
+import DataTable from "~/components/visualizations/table/DataTable";
 
 export const geosearchCSVlocations = async (metadata, metadataType) => {
   if (!(metadata && metadata.rows)) return;
@@ -47,7 +48,7 @@ export const geosearchCSVlocations = async (metadata, metadataType) => {
 const isRowHuman = row => row["Host Genome"] && row["Host Genome"] === "Human";
 
 class MetadataCSVGeosearchMenu extends React.Component {
-  render() {
+  getManualInputData = () => {
     const {
       CSVLocationWarnings,
       metadata,
@@ -55,14 +56,12 @@ class MetadataCSVGeosearchMenu extends React.Component {
       onMetadataChange,
     } = this.props;
 
-    if (!(metadata && metadata.rows)) return null;
-
     return metadata.rows.map((sample, rowIndex) => {
       const sampleName = sample["Sample Name"];
-      return (
-        <div key={`location-input-${sampleName}`}>
-          <span>{sampleName}</span>
-          <span>
+      return {
+        "Sample Name": sampleName,
+        collection_location_v2: (
+          <div>
             <MetadataInput
               key={metadataType.key}
               // className={cs.input}
@@ -79,10 +78,34 @@ class MetadataCSVGeosearchMenu extends React.Component {
               isHuman={isRowHuman(sample)}
               warning={CSVLocationWarnings[sampleName]}
             />
-          </span>
-        </div>
-      );
+          </div>
+        ),
+      };
     });
+  };
+
+  render() {
+    const {
+      CSVLocationWarnings,
+      metadata,
+      metadataType,
+      onMetadataChange,
+    } = this.props;
+
+    if (!(metadata && metadata.rows)) return null;
+    console.log("my data: ", this.getManualInputData());
+    return (
+      <DataTable
+        // className={cs.inputTable}
+        headers={{
+          "Sample Name": "Sample Name",
+          collection_location_v2: "Collection Location",
+        }}
+        columns={["Sample Name", "collection_location_v2"]}
+        data={this.getManualInputData()}
+        getColumnWidth={column => (column === "Sample Name" ? 240 : 160)}
+      />
+    );
   }
 }
 

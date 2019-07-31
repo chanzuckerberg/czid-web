@@ -353,6 +353,9 @@ class MetadataManualInput extends React.Component {
   };
 
   render() {
+    console.log("headers: ", this.state.headers);
+    console.log("columns: ", this.getManualInputColumns());
+    console.log("data: ", this.getManualInputData());
     return (
       <div className={cx(cs.metadataManualInput, this.props.className)}>
         <div className={cs.tableContainer}>
