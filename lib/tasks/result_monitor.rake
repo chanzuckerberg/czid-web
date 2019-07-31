@@ -51,14 +51,15 @@ class MonitorPipelineResults
   end
 
   def self.fail_stalled_uploads!
-    Sample
-      .current_stalled_local_uploads(18.hours)
-      .update_all( # rubocop:disable Rails/SkipsModelValidations
+    samples = Sample.current_stalled_local_uploads(18.hours)
+    unless samples.empty?
+      message = "Stalled for more than 18 hours"
+      LogUtil.log_err_and_airbrake("SampleUploadFailedEvent: Failed to upload local samples #{samples.pluck(:id)}: #{message}")
+      samples.update_all( # rubocop:disable Rails/SkipsModelValidations
         status: Sample::STATUS_CHECKED,
         upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED
       )
-    message = "Stalled for more than 18 hours"
-    LogUtil.log_err_and_airbrake("SampleUploadFailedEvent: Failed to upload local samples #{samples.pluck(:id)}: #{message}")
+    end
   end
 
   def self.alert_stalled_uploads!
@@ -68,8 +69,6 @@ class MonitorPipelineResults
     if samples.empty?
       return
     end
-
-    samples.update_all(upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED) # rubocop:disable Rails/SkipsModelValidations
 
     created_at = samples.map(&:created_at).min
     role_names = samples.map { |sample| sample.user.role_name }.compact.uniq
@@ -81,6 +80,8 @@ class MonitorPipelineResults
       #{client_updated_at ? "Last client ping was at #{client_updated_at}. " : ''}
       See: #{status_urls})
     LogUtil.log_err_and_airbrake(msg)
+
+    samples.update_all(upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED) # rubocop:disable Rails/SkipsModelValidations
   end
 
   def self.run(duration, min_refresh_interval)
