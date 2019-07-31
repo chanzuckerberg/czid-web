@@ -100,7 +100,10 @@ class MetadataCSVGeosearchMenu extends React.Component {
       <React.Fragment>
         <div className={cs.instructions}>
           <div className={cs.title}>Location Matches</div>
-          <div className={cs.subtitle}>Please correct any errors.</div>
+          <div className={cs.subtitle}>
+            We automatically searched for location matches. Please double check
+            and correct any errors.
+          </div>
         </div>
         <DataTable
           className={cs.inputTable}
