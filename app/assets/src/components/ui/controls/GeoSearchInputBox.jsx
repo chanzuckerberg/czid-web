@@ -80,8 +80,6 @@ class GeoSearchInputBox extends React.Component {
   handleResultSelected = ({ result }) => {
     const { onResultSelect } = this.props;
 
-    console.log("dropdown result looks like: ", result);
-
     // Wrap plain text submission
     if (isString(result) && result !== "") result = { name: result };
 

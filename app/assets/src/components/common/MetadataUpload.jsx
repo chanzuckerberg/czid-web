@@ -1,24 +1,22 @@
 import React from "react";
 import cx from "classnames";
-import _fp, { filter, keyBy, concat, find, uniq } from "lodash/fp";
+import _fp, { filter, keyBy, concat, uniq } from "lodash/fp";
 
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
+import MetadataInput from "~/components/common/MetadataInput";
 import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
 import { getAllHostGenomes } from "~/api";
 import { getProjectMetadataFields } from "~/api/metadata";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { getGeoSearchSuggestions } from "~/api/locations";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import { getURLParamString } from "~/helpers/url";
 
 import cs from "./metadata_upload.scss";
 import MetadataManualInput from "./MetadataManualInput";
-import MetadataInput from "./MetadataInput";
-import { processCSVMetadata } from "./MetadataCSVUpload";
 import IssueGroup from "~ui/notifications/IssueGroup";
-
-import { getGeoSearchSuggestions } from "~/api/locations";
 
 const map = _fp.map.convert({ cap: false });
 
@@ -62,7 +60,6 @@ class MetadataUpload extends React.Component {
 
   // MetadataCSVUpload validates metadata before calling onMetadataChangeCSV.
   onMetadataChangeCSV = ({ metadata, issues, validatingCSV }) => {
-    console.log("The metadata I got was: ", metadata);
     this.props.onMetadataChange({ metadata, issues, wasManual: false });
     this.setState({
       issues,
@@ -82,39 +79,29 @@ class MetadataUpload extends React.Component {
   };
 
   geosearchCSVlocations = async metadata => {
-    console.log("geosearchCSVlocations was called");
-    console.log("metadata I got: ", metadata);
     const { onMetadataChange } = this.props;
+
+    const fieldName = "Collection Location";
 
     if (!(metadata && metadata.rows)) return;
 
-    const originalValues = uniq(
-      metadata.rows.map(r => r["Collection Location"])
-    );
-    console.log("original values:", originalValues);
+    const locationNames = uniq(metadata.rows.map(r => r[fieldName]));
 
-    const mappedResults = {};
-    for (const query of originalValues) {
+    const matchedLocations = {};
+    for (const query of locationNames) {
       const suggestions = await getGeoSearchSuggestions(query, 1);
       if (suggestions.length > 0) {
-        const result = suggestions[0];
-        console.log("suggestion: ", result);
-        mappedResults[query] = result;
+        matchedLocations[query] = suggestions[0];
       }
     }
 
-    console.log("all mapped results: ", mappedResults);
-
     let newMetadata = metadata;
     metadata.rows.map((row, rowIndex) => {
-      const locationName = row["Collection Location"];
-      if (mappedResults.hasOwnProperty(locationName)) {
-        newMetadata.rows[rowIndex]["Collection Location"] =
-          mappedResults[locationName];
+      const name = row[fieldName];
+      if (matchedLocations.hasOwnProperty(name)) {
+        newMetadata.rows[rowIndex][fieldName] = matchedLocations[name];
       }
     });
-
-    console.log("want to set: ", newMetadata);
 
     onMetadataChange({
       metadata: newMetadata,
@@ -186,7 +173,6 @@ class MetadataUpload extends React.Component {
             samplesAreNew={this.props.samplesAreNew}
             visible={this.props.visible}
             onDirty={this.props.onDirty}
-            projectMetadataFields={this.state.projectMetadataFields}
           />
           <a
             className={cs.link}
@@ -211,7 +197,7 @@ class MetadataUpload extends React.Component {
               Validating metadata...
             </div>
           )}
-          {this.renderLocationsInterface()}
+          {this.renderLocationsMenu()}
         </React.Fragment>
       );
     }
@@ -279,48 +265,40 @@ class MetadataUpload extends React.Component {
     );
   };
 
-  renderLocationsInterface = () => {
-    const { samples, onMetadataChange, metadata } = this.props;
+  renderLocationsMenu = () => {
+    const { onMetadataChange, metadata } = this.props;
     const { projectMetadataFields } = this.state;
-    console.log("our metadata: ", metadata);
-
-    const sampleNames = new Set(map("name", samples) || []);
-    console.log("sample names: ", sampleNames);
 
     if (!(metadata && metadata.rows)) return;
 
     // Render results
-    return (
-      metadata &&
-      metadata.rows &&
-      metadata.rows.map((sample, rowIndex) => {
-        return (
-          <div>
-            <span>{sample["Sample Name"]}</span>
-            <span>
-              <MetadataInput
-                key={"collection_location_v2"}
-                className={cs.input}
-                value={sample["Collection Location"]}
-                metadataType={projectMetadataFields["collection_location_v2"]}
-                onChange={(key, value) => {
-                  const newMetadata = metadata;
-                  newMetadata.rows[rowIndex]["Collection Location"] = value;
+    return metadata.rows.map((sample, rowIndex) => {
+      return (
+        <div>
+          <span>{sample["Sample Name"]}</span>
+          <span>
+            <MetadataInput
+              key={"collection_location_v2"}
+              className={cs.input}
+              value={sample["Collection Location"]}
+              metadataType={projectMetadataFields["collection_location_v2"]}
+              onChange={(key, value) => {
+                const newMetadata = metadata;
+                newMetadata.rows[rowIndex]["Collection Location"] = value;
 
-                  onMetadataChange({
-                    metadata: newMetadata,
-                  });
+                onMetadataChange({
+                  metadata: newMetadata,
+                });
 
-                  // Log analytics?
-                }}
-                withinModal={true}
-                isHuman={true}
-              />
-            </span>
-          </div>
-        );
-      })
-    );
+                // Log analytics?
+              }}
+              withinModal={true}
+              isHuman={true}
+            />
+          </span>
+        </div>
+      );
+    });
   };
 
   render() {

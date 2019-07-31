@@ -2,25 +2,14 @@
 // Sends uploaded to server for validation and displays errors and warnings.
 import React from "react";
 import cx from "classnames";
-import {
-  filter,
-  map,
-  zip,
-  fromPairs,
-  isNull,
-  isEqual,
-  find,
-  uniq,
-} from "lodash/fp";
-import PropTypes from "prop-types";
-
+import { filter, map, zip, fromPairs, isNull, isEqual } from "lodash/fp";
+import CSVUpload from "~ui/controls/CSVUpload";
 import {
   validateMetadataCSVForProject,
   validateMetadataCSVForNewSamples,
 } from "~/api/metadata";
-import CSVUpload from "~ui/controls/CSVUpload";
-
 import cs from "./metadata_csv_upload.scss";
+import PropTypes from "prop-types";
 
 export const processCSVMetadata = csv => {
   const { headers, rows } = csv;
@@ -118,15 +107,13 @@ class MetadataCSVUpload extends React.Component {
   render() {
     const hasMetadata = !isNull(this.state.metadata);
     return (
-      <React.Fragment>
-        <div className={cx(cs.metadataCSVUpload, this.props.className)}>
-          <CSVUpload
-            title={hasMetadata ? "" : "Upload your metadata CSV"}
-            onCSV={this.onCSV}
-            className={cx(cs.csvUpload, hasMetadata && cs.uploaded)}
-          />
-        </div>
-      </React.Fragment>
+      <div className={cx(cs.metadataCSVUpload, this.props.className)}>
+        <CSVUpload
+          title={hasMetadata ? "" : "Upload your metadata CSV"}
+          onCSV={this.onCSV}
+          className={cx(cs.csvUpload, hasMetadata && cs.uploaded)}
+        />
+      </div>
     );
   }
 }
@@ -152,7 +139,6 @@ MetadataCSVUpload.propTypes = {
   // Immediately called when the user changes anything, even before validation has returned.
   // Can be used to disable the header navigation.
   onDirty: PropTypes.func.isRequired,
-  projectMetadataFields: PropTypes.object,
 };
 
 export default MetadataCSVUpload;
