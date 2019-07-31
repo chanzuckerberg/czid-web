@@ -9,7 +9,7 @@ class LocationsController < ApplicationController
     unless feature_access?
       render(json: {
                status: :unauthorized,
-               message: "No feature access"
+               message: "No feature access",
              }, status: :unauthorized) && return
     end
 
@@ -30,7 +30,7 @@ class LocationsController < ApplicationController
     render json: {
       status: "failed",
       message: GEOSEARCH_ERR_MSG,
-      errors: [err]
+      errors: [err],
     }, status: :internal_server_error
   end
 
@@ -38,7 +38,7 @@ class LocationsController < ApplicationController
     unless feature_access?
       render(json: {
                status: :unauthorized,
-               message: "No feature access"
+               message: "No feature access",
              }, status: :unauthorized) && return
     end
 
@@ -59,7 +59,7 @@ class LocationsController < ApplicationController
     render json: {
       status: "failed",
       message: LOCATION_LOAD_ERR_MSG,
-      errors: [err]
+      errors: [err],
     }, status: :internal_server_error
   end
 
@@ -70,7 +70,7 @@ class LocationsController < ApplicationController
     unless feature_access?
       render(json: {
                status: :unauthorized,
-               message: "No feature access"
+               message: "No feature access",
              }, status: :unauthorized) && return
     end
 
@@ -96,7 +96,7 @@ class LocationsController < ApplicationController
                     .map do |k, v|
                       [k, v[0].except(:sample_id, :project_id)
                               .merge(sample_ids: v.map { |h| h[:sample_id] })
-                              .merge(project_ids: v.map { |h| h[:project_id] }.uniq)]
+                              .merge(project_ids: v.map { |h| h[:project_id] }.uniq),]
                     end.to_h
 
     # Supply extra Country and State entries for bubble clustering
@@ -118,7 +118,7 @@ class LocationsController < ApplicationController
     render json: {
       status: "failed",
       message: LOCATION_LOAD_ERR_MSG,
-      errors: [err]
+      errors: [err],
     }, status: :internal_server_error
   end
 

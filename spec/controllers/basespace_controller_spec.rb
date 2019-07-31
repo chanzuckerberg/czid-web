@@ -5,16 +5,16 @@ BASESPACE_PAIRED_END_FASTQ_SAMPLE = {
   "Name" => "Sample 1",
   "TotalSize" => 1000,
   "Project" => {
-    "Name" => "Mock Project"
+    "Name" => "Mock Project",
   },
   "DatasetType" => {
-    "Name" => "Illumina Fastq"
+    "Name" => "Illumina Fastq",
   },
   "Attributes" => {
     "common_fastq" => {
-      "IsPairedEnd" => true
-    }
-  }
+      "IsPairedEnd" => true,
+    },
+  },
 }.freeze
 
 BASESPACE_SINGLE_END_FASTQ_SAMPLE = {
@@ -22,16 +22,16 @@ BASESPACE_SINGLE_END_FASTQ_SAMPLE = {
   "Name" => "Sample 2",
   "TotalSize" => 1001,
   "Project" => {
-    "Name" => "Mock Project"
+    "Name" => "Mock Project",
   },
   "DatasetType" => {
-    "Name" => "Illumina Fastq"
+    "Name" => "Illumina Fastq",
   },
   "Attributes" => {
     "common_fastq" => {
-      "IsPairedEnd" => false
-    }
-  }
+      "IsPairedEnd" => false,
+    },
+  },
 }.freeze
 
 BASESPACE_NON_FASTQ_SAMPLE = {
@@ -39,12 +39,12 @@ BASESPACE_NON_FASTQ_SAMPLE = {
   "Name" => "Sample 1",
   "TotalSize" => 1000,
   "Project" => {
-    "Name" => "Mock Project"
+    "Name" => "Mock Project",
   },
   "DatasetType" => {
-    "Name" => "Common Files"
+    "Name" => "Common Files",
   },
-  "Attributes" => {}
+  "Attributes" => {},
 }.freeze
 
 RSpec.describe BasespaceController, type: :controller do
@@ -92,13 +92,13 @@ RSpec.describe BasespaceController, type: :controller do
               "Items" => [
                 {
                   "Id" => "1",
-                  "Name" => "Project 1"
+                  "Name" => "Project 1",
                 },
                 {
                   "Id" => "2",
-                  "Name" => "Project 2"
-                }
-              ]
+                  "Name" => "Project 2",
+                },
+              ],
             }
           )
       end
@@ -111,12 +111,12 @@ RSpec.describe BasespaceController, type: :controller do
           [
             {
               "id" => "1",
-              "name" => "Project 1"
+              "name" => "Project 1",
             },
             {
               "id" => "2",
-              "name" => "Project 2"
-            }
+              "name" => "Project 2",
+            },
           ]
         )
       end
@@ -134,7 +134,7 @@ RSpec.describe BasespaceController, type: :controller do
         before do
           allow(HttpHelper).to receive(:get_json)
             .and_return("ResponseStatus" => {
-                          "Message" => "Failed to list projects"
+                          "Message" => "Failed to list projects",
                         })
         end
 
@@ -153,7 +153,7 @@ RSpec.describe BasespaceController, type: :controller do
         allow(HttpHelper).to receive(:get_json).and_return(
           "Items" => [
             BASESPACE_PAIRED_END_FASTQ_SAMPLE,
-            BASESPACE_SINGLE_END_FASTQ_SAMPLE
+            BASESPACE_SINGLE_END_FASTQ_SAMPLE,
           ]
         )
       end
@@ -170,7 +170,7 @@ RSpec.describe BasespaceController, type: :controller do
               "file_size" => 1000,
               "file_type" => "Paired-end FASTQ",
               "basespace_project_id" => "77",
-              "basespace_project_name" => "Mock Project"
+              "basespace_project_name" => "Mock Project",
             },
             {
               "basespace_dataset_id" => "2",
@@ -178,8 +178,8 @@ RSpec.describe BasespaceController, type: :controller do
               "file_size" => 1001,
               "file_type" => "Single-end FASTQ",
               "basespace_project_id" => "77",
-              "basespace_project_name" => "Mock Project"
-            }
+              "basespace_project_name" => "Mock Project",
+            },
           ]
         )
       end
@@ -189,7 +189,7 @@ RSpec.describe BasespaceController, type: :controller do
           allow(HttpHelper).to receive(:get_json).and_return(
             "Items" => [
               BASESPACE_NON_FASTQ_SAMPLE,
-              BASESPACE_SINGLE_END_FASTQ_SAMPLE
+              BASESPACE_SINGLE_END_FASTQ_SAMPLE,
             ]
           )
         end
@@ -206,8 +206,8 @@ RSpec.describe BasespaceController, type: :controller do
                 "file_size" => 1001,
                 "file_type" => "Single-end FASTQ",
                 "basespace_project_id" => "77",
-                "basespace_project_name" => "Mock Project"
-              }
+                "basespace_project_name" => "Mock Project",
+              },
             ]
           )
         end

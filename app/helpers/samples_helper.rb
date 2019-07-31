@@ -39,7 +39,7 @@ module SamplesHelper
                         nucleotide_type: metadata && metadata[:nucleotide_type] ? metadata[:nucleotide_type] : '',
                         collection_location: metadata && metadata[:collection_location] ? metadata[:collection_location] : '',
                         host_genome: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
-                        notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '' }
+                        notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '', }
         attributes_as_symbols = attributes.map(&:to_sym)
         csv << data_values.values_at(*attributes_as_symbols)
       end
@@ -92,7 +92,7 @@ module SamplesHelper
       qc_percent: compute_qc_value(job_stats_hash),
       percent_remaining: compute_percentage_reads(pr),
       unmapped_reads: unmapped_reads,
-      last_processed_at: last_processed_at
+      last_processed_at: last_processed_at,
     }
     ["star", "trimmomatic", "priceseq", "cdhitdup"].each do |step|
       result["reads_after_#{step}".to_sym] = (job_stats_hash["#{step}_out"] || {})["reads_after"]
@@ -141,7 +141,7 @@ module SamplesHelper
   def parsed_samples_for_s3_path(s3_path, project_id, host_genome_id)
     default_attributes = { project_id: project_id.to_i,
                            host_genome_id: host_genome_id,
-                           status: 'created' }
+                           status: 'created', }
     s3_path.chomp!('/')
     s3_bucket = 's3://' + s3_path.sub('s3://', '').split('/')[0]
     s3_output, _stderr, status = Open3.capture3("aws", "s3", "ls", "--recursive", "#{s3_path}/")
@@ -167,7 +167,7 @@ module SamplesHelper
       samples[name][:input_files_attributes] ||= []
       samples[name][:input_files_attributes][read_idx] = { name: source.split('/')[-1],
                                                            source: "#{s3_bucket}/#{source}",
-                                                           source_type: InputFile::SOURCE_TYPE_S3 }
+                                                           source_type: InputFile::SOURCE_TYPE_S3, }
     end
 
     sample_list = []
@@ -345,7 +345,7 @@ module SamplesHelper
         name: sample.name,
         id: sample.id,
         host_genome_id: sample.host_genome_id,
-        metadata: metadata_by_sample_id[sample.id]
+        metadata: metadata_by_sample_id[sample.id],
       }
     end
   end
@@ -377,7 +377,7 @@ module SamplesHelper
                               {
                                 result_status_description: 'FAILED',
                                 finalized: 0,
-                                report_ready: 0
+                                report_ready: 0,
                               }
                             else
                               pipeline_run_info(top_pipeline_run, report_ready_pipeline_run_ids,
@@ -535,7 +535,7 @@ module SamplesHelper
     {
       "errors" => errors,
       # Need to refetch samples so sample.metadata is fresh.
-      "samples" => Sample.where(id: samples.pluck(:id))
+      "samples" => Sample.where(id: samples.pluck(:id)),
     }
   end
 
@@ -562,7 +562,7 @@ module SamplesHelper
         .group(
           [
             :string_validated_value,
-            "locations.name"
+            "locations.name",
           ] + Location::GEO_LEVELS.map { |l| "#{l.pluralize}_locations.name" }
         )
     else

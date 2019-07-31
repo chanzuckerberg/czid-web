@@ -34,13 +34,13 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
   test 'should create sample' do
     req_headers = { 'X-User-Email' => @user.email,
-                    'X-User-Token' => @user.authentication_token }
+                    'X-User-Token' => @user.authentication_token, }
     input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
                      name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local" },
+                     source_type: "local", },
                    { source: "RR004_water_2_S23_R2_001.fastq.gz",
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local" }]
+                     source_type: "local", },]
     assert_difference('Sample.count') do
       post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }, headers: req_headers
     end
@@ -50,10 +50,10 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
   test 'should redirect ' do
     input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
                      name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local" },
+                     source_type: "local", },
                    { source: "RR004_water_2_S23_R2_001.fastq.gz",
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local" }]
+                     source_type: "local", },]
     assert_difference('Sample.count', 0) do
       post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }
     end
@@ -91,10 +91,10 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_params
     input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
                      name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local" },
+                     source_type: "local", },
                    { source: "RR004_water_2_S23_R2_001.fastq.gz",
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local" }]
+                     source_type: "local", },]
     assert_difference('Sample.count') do
       post samples_url, params: { sample: { name: 'new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }
     end
@@ -243,7 +243,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_nonadmin_params
 
     get metadata_fields_samples_url, params: {
-      sampleIds: [@sample_human_existing_metadata_public.id]
+      sampleIds: [@sample_human_existing_metadata_public.id],
     }
     assert_response :success
 
@@ -254,7 +254,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_nonadmin_params
 
     get metadata_fields_samples_url, params: {
-      sampleIds: [@sample_human_existing_metadata_expired.id]
+      sampleIds: [@sample_human_existing_metadata_expired.id],
     }
     assert_response :success
 
@@ -265,7 +265,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_nonadmin_params
 
     get metadata_fields_samples_url, params: {
-      sampleIds: [@sample_human_existing_metadata_joe_project.id]
+      sampleIds: [@sample_human_existing_metadata_joe_project.id],
     }
     assert_response :success
 
@@ -277,7 +277,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
     assert_raises(ActiveRecord::RecordNotFound) do
       get metadata_fields_samples_url, params: {
-        sampleIds: [@metadata_validation_sample_human_existing_metadata.id]
+        sampleIds: [@metadata_validation_sample_human_existing_metadata.id],
       }
     end
   end
@@ -287,7 +287,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_nonadmin_params
 
     get metadata_fields_samples_url, params: {
-      sampleIds: [@sample_human_existing_metadata_public.id, @sample_human_existing_metadata_expired.id]
+      sampleIds: [@sample_human_existing_metadata_public.id, @sample_human_existing_metadata_expired.id],
     }
     assert_response :success
 
@@ -299,7 +299,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_nonadmin_params
 
     get metadata_fields_samples_url, params: {
-      sampleIds: [@sample_human_existing_metadata_public.id, @metadata_validation_sample_human_existing_metadata.id]
+      sampleIds: [@sample_human_existing_metadata_public.id, @metadata_validation_sample_human_existing_metadata.id],
     }
     assert_response :success
 
@@ -312,7 +312,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_raises(ActiveRecord::RecordNotFound) do
       post save_metadata_v2_sample_url(@sample_human_existing_metadata_public), params: {
         field: "sample_type",
-        value: "Foobar Sample Type"
+        value: "Foobar Sample Type",
       }
     end
   end
@@ -323,7 +323,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_raises(ActiveRecord::RecordNotFound) do
       post save_metadata_v2_sample_url(@sample_human_existing_metadata_expired), params: {
         field: "sample_type",
-        value: "Foobar Sample Type"
+        value: "Foobar Sample Type",
       }
     end
   end
@@ -333,7 +333,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
 
     post save_metadata_v2_sample_url(@sample_human_existing_metadata_joe_project), params: {
       field: "sample_type",
-      value: "Foobar Sample Type"
+      value: "Foobar Sample Type",
     }
 
     assert_response :success
@@ -347,7 +347,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
     assert_raises(ActiveRecord::RecordNotFound) do
       post save_metadata_v2_sample_url(@metadata_validation_sample_human_existing_metadata), params: {
         field: "sample_type",
-        value: "Foobar Sample Type"
+        value: "Foobar Sample Type",
       }
     end
   end
@@ -454,7 +454,7 @@ class SamplesControllerTest < ActionDispatch::IntegrationTest
       sort_by: "nt_aggregatescore",
       report_ts: rand(10**10),
       git_version: "constant",
-      format: "json"
+      format: "json",
     }.merge(params).to_query
 
     path = "/samples/#{samples(sample_name).id}/report_info"

@@ -20,7 +20,7 @@ RSpec.describe ProjectsController, type: :controller do
           create(:project, users: [@joe, @admin]),
           create(:public_project),
           create(:project, samples_data: [{ created_at: 1.year.ago }]),
-          create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }])
+          create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }]),
         ]
 
         get :index, params: { format: "json" }
@@ -39,7 +39,7 @@ RSpec.describe ProjectsController, type: :controller do
           create(:project, users: [@joe, @admin]),
           create(:public_project),
           create(:project, samples_data: [{ created_at: 1.year.ago }]),
-          create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }])
+          create(:project, users: [@admin], samples_data: [{ created_at: 1.year.ago }]),
         ]
 
         get :index, params: { format: "json", domain: "updatable" }
@@ -337,13 +337,13 @@ RSpec.describe ProjectsController, type: :controller do
                 {
                   host_genome_name: "Human",
                   user: extra_users[0],
-                  metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" }
+                  metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" },
                 },
                 {
                   host_genome_name: "Mosquito",
                   user: @user,
-                  metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" }
-                }
+                  metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" },
+                },
               ]
             )
 
@@ -376,13 +376,13 @@ RSpec.describe ProjectsController, type: :controller do
                                           {
                                             host_genome_name: "Human",
                                             user: extra_users[0],
-                                            metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" }
+                                            metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Serum" },
                                           },
                                           {
                                             host_genome_name: "Mosquito",
                                             user: @user,
-                                            metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" }
-                                          }
+                                            metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" },
+                                          },
                                         ])
 
             get :index, params: { format: "json", domain: domain, basic: true }
