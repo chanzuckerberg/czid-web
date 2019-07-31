@@ -1,10 +1,34 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { isString } from "lodash/fp";
+import { compact, get, isString } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
 import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
+
+export const LOCATION_PRIVACY_WARNING =
+  "Changed to county/district level for personal privacy.";
+export const LOCATION_UNRESOLVED_WARNING =
+  "Unresolved plain text location, not shown on maps.";
+
+// For human samples, drop the city part of the name and show a warning.
+// Note that the backend will redo the geosearch for confirmation, so don't
+// modify geo_level here.
+// TODO(jsheu): Consider moving the warnings to the backend and generalizing.
+export const processLocationSelection = (result, isHuman) => {
+  let warning = "";
+  if (isHuman && get("geo_level", result) === "city") {
+    result.name = compact([
+      result.subdivision_name,
+      result.state_name,
+      result.country_name,
+    ]).join(", ");
+    warning = LOCATION_PRIVACY_WARNING;
+  } else if (!result.geo_level) {
+    warning = LOCATION_UNRESOLVED_WARNING;
+  }
+  return { result, warning };
+};
 
 // An input box that fetches and shows geosearch suggestions for user input of locations.
 class GeoSearchInputBox extends React.Component {

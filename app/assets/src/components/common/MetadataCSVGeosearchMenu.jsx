@@ -2,10 +2,11 @@ import React from "react";
 import { uniq } from "lodash/fp";
 
 import { getGeoSearchSuggestions } from "~/api/locations";
-import MetadataInput, {
-  processLocationSelection,
+import MetadataInput from "~/components/common/MetadataInput";
+import {
   LOCATION_UNRESOLVED_WARNING,
-} from "~/components/common/MetadataInput";
+  processLocationSelection,
+} from "~/components/ui/controls/GeoSearchInputBox";
 import PropTypes from "~/components/utils/propTypes";
 
 export const geosearchCSVlocations = async metadata => {
@@ -23,36 +24,39 @@ export const geosearchCSVlocations = async metadata => {
     }
   }
 
-  console.log("The metadata we have: ", metadata);
-
   // Set results if there was a match
   let newMetadata = metadata;
   const warnings = {};
   metadata.rows.forEach((row, rowIndex) => {
     const locationName = row[fieldName];
+    let rowWarning;
+
     if (matchedLocations.hasOwnProperty(locationName)) {
-      const isHuman = row["Host Genome"] && row["Host Genome"] === "Human";
-      console.log("isHuman: ", isHuman);
       const { result, warning } = processLocationSelection(
         matchedLocations[locationName],
-        isHuman
+        isRowHuman(row)
       );
-      console.log("processed: ", result, warning);
-      if (warning) warnings[row["Sample Name"]] = warning;
+      if (warning) rowWarning = warning;
       newMetadata.rows[rowIndex][fieldName] = result;
     } else {
-      warnings[row["Sample Name"]] = LOCATION_UNRESOLVED_WARNING;
+      rowWarning = LOCATION_UNRESOLVED_WARNING;
+    }
+
+    if (rowWarning) {
+      warnings[row["Sample Name"]] = rowWarning;
     }
   });
   return { newMetadata, warnings };
 };
 
+const isRowHuman = row => row["Host Genome"] && row["Host Genome"] === "Human";
+
 class MetadataCSVGeosearchMenu extends React.Component {
   render() {
     const {
       CSVLocationWarnings,
-      onMetadataChange,
       metadata,
+      onMetadataChange,
       projectMetadataFields,
     } = this.props;
 
@@ -60,9 +64,10 @@ class MetadataCSVGeosearchMenu extends React.Component {
 
     // Render results
     return metadata.rows.map((sample, rowIndex) => {
+      const sampleName = sample["Sample Name"];
       return (
-        <div>
-          <span>{sample["Sample Name"]}</span>
+        <div key={`location-input-${sampleName}`}>
+          <span>{sampleName}</span>
           <span>
             <MetadataInput
               key={"collection_location_v2"}
@@ -72,16 +77,13 @@ class MetadataCSVGeosearchMenu extends React.Component {
               onChange={(key, value) => {
                 const newMetadata = metadata;
                 newMetadata.rows[rowIndex]["Collection Location"] = value;
-
                 onMetadataChange({
                   metadata: newMetadata,
                 });
-
-                // Log analytics?
               }}
               withinModal={true}
-              isHuman={true}
-              warning={CSVLocationWarnings[sample["Sample Name"]]}
+              isHuman={isRowHuman(sample)}
+              warning={CSVLocationWarnings[sampleName]}
             />
           </span>
         </div>
