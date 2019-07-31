@@ -34,12 +34,30 @@
   text-align: center;
   text-transform: none;
 
-  .tooltipText {
-    display: inline-block;
+  .sortableHeader {
     max-width: 100%;
+    display: flex;
+    align-items: center;
+
+    .label {
+      // Shrink once you're at the maximum width (e.g. don't overflow). Do not grow unless needed.
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+
+    .sortIcon {
+      // Make the sort icon slightly bigger than the text.
+      font-size: 1.2em;
+      margin-left: 4px;
+    }
+  }
+
+  .label {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    max-width: 100%;
+    display: inline-block;
     vertical-align: middle;
   }
 }
