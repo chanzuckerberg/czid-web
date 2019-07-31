@@ -29,7 +29,7 @@ class TaxonLineage < ApplicationRecord
     class: MISSING_CLASS_ID,
     phylum: MISSING_PHYLUM_ID,
     kingdom: MISSING_KINGDOM_ID,
-    superkingdom: MISSING_SUPERKINGDOM_ID
+    superkingdom: MISSING_SUPERKINGDOM_ID,
   }.freeze
 
   # From https://www.niaid.nih.gov/research/emerging-infectious-diseases-pathogens
@@ -72,7 +72,7 @@ class TaxonLineage < ApplicationRecord
       "Hepacivirus C", "Orthohepevirus A", "Human betaherpesvirus 6", "Human gammaherpesvirus 8",
       "Human polyomavirus 2", "Leptospira", "Mucorales", "Mucor", "Rhizopus", "Absidia", "Cunninghamella",
       "Enterovirus C", "Measles morbillivirus", "Streptococcus sp. 'group A'"
-    ]
+    ],
   }.freeze
 
   def tax_level
@@ -145,7 +145,7 @@ class TaxonLineage < ApplicationRecord
 
   def self.names_a
     ['species_taxid', 'genus_taxid', 'family_taxid', 'order_taxid', 'class_taxid', 'phylum_taxid',
-     'kingdom_taxid', 'superkingdom_taxid', 'superkingdom_name']
+     'kingdom_taxid', 'superkingdom_taxid', 'superkingdom_name',]
   end
 
   def self.null_array

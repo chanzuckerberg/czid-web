@@ -25,7 +25,7 @@ class MetricUtil
     pipeline_run_succeeded: "pipeline_run_succeeded",
     pipeline_run_failed: "pipeline_run_failed",
     sample_upload_batch_created: "sample_upload_batch_created",
-    location_geosearched: "location_geosearched"
+    location_geosearched: "location_geosearched",
   }.freeze
 
   # DEPRECATED. Use log_analytics_event.
@@ -95,10 +95,10 @@ class MetricUtil
 
           referrer: request.referer,
           search: request.fullpath().split("?")[1],
-          url: request.original_url()
+          url: request.original_url(),
         },
         userAgent: request.user_agent,
-        ip: request.remote_ip()
+        ip: request.remote_ip(),
       }
     end
 
@@ -115,8 +115,8 @@ class MetricUtil
                          "metric" => name,
                          "points" => points,
                          "type" => type,
-                         "tags" => tags
-                       }])
+                         "tags" => tags,
+                       },])
       post_to_datadog(data)
     end
 
@@ -139,7 +139,7 @@ class MetricUtil
         request.content_type = "application/json"
         request.body = data
         req_options = {
-          use_ssl: uri.scheme == "https"
+          use_ssl: uri.scheme == "https",
         }
 
         response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|

@@ -57,7 +57,7 @@ class PhyloTreesController < ApplicationController
       @phylo_trees = @phylo_trees.where(taxid: taxid)
       taxon_lineage = TaxonLineage.where(taxid: taxid).last
       @taxon = { taxid: taxid,
-                 name: taxon_lineage.name }
+                 name: taxon_lineage.name, }
     end
 
     # Augment tree data with user name
@@ -73,7 +73,7 @@ class PhyloTreesController < ApplicationController
         render json: {
           project: @project,
           taxon: @taxon,
-          phyloTrees: @phylo_trees
+          phyloTrees: @phylo_trees,
         }
       end
     end
@@ -99,7 +99,7 @@ class PhyloTreesController < ApplicationController
         "name" => pr["name"],
         "project_name" => pr["project_name"],
         "host_genome_name" => pr["host_genome_name"],
-        "metadata" => metadata_by_sample_id[pr["sample_id"]]
+        "metadata" => metadata_by_sample_id[pr["sample_id"]],
       }
     end
     # populate metadata for NCBI nodes
@@ -148,7 +148,7 @@ class PhyloTreesController < ApplicationController
     # Retrieve information about the taxon
     taxon_lineage = TaxonLineage.where(taxid: taxid).last
     @taxon = { taxid: taxid,
-               name: taxon_lineage.name }
+               name: taxon_lineage.name, }
 
     respond_to do |format|
       format.html
@@ -157,7 +157,7 @@ class PhyloTreesController < ApplicationController
           project: @project,
           taxon: @taxon,
           samples: @samples,
-          csrf: form_authenticity_token
+          csrf: form_authenticity_token,
         }
       end
     end
@@ -170,7 +170,7 @@ class PhyloTreesController < ApplicationController
     pt.valid?
     render json: {
       valid: !pt.errors.key?(:name),
-      sanitizedName: name
+      sanitizedName: name,
     }
   end
 
@@ -223,7 +223,7 @@ class PhyloTreesController < ApplicationController
     if !non_viewable_pipeline_run_ids.empty?
       render json: {
         status: :unauthorized,
-        message: "You are not authorized to view all pipeline runs in the list."
+        message: "You are not authorized to view all pipeline runs in the list.",
       }
     else
       pt = PhyloTree.new(name: name, taxid: taxid, tax_level: tax_level, tax_name: tax_name, user_id: current_user.id, project_id: @project.id, pipeline_run_ids: pipeline_run_ids, dag_branch: dag_branch, dag_vars: dag_vars)

@@ -29,7 +29,7 @@ module ApplicationHelper
 
   def request_context
     {
-      allowedFeatures: current_user && current_user.allowed_feature_list
+      allowedFeatures: current_user && current_user.allowed_feature_list,
     }
   end
 

@@ -17,7 +17,7 @@ module TestHelper
       key: "samples/theProjectId/theSampleId/results/1.0/#{file_name}",
       display_name: file_name,
       url: "test url",
-      size: "test size"
+      size: "test size",
     }
   end
 end

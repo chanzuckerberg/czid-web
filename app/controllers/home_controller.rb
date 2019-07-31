@@ -74,7 +74,7 @@ class HomeController < ApplicationController
 
   def feedback
     render json: {
-      status: 'ok'
+      status: 'ok',
     }
   end
 
@@ -95,17 +95,17 @@ class HomeController < ApplicationController
     MetricUtil.put_metric_now("users.sign_ups", 1)
     MetricUtil.log_analytics_event("user_interest_form_submitted", nil, {
                                      # Google Analytics does not allow PII, so we only log institution
-                                     institution: home_params[:institution]
+                                     institution: home_params[:institution],
                                    }, request)
 
     UserMailer.landing_sign_up_email(body).deliver_now
     render json: {
-      status: :ok
+      status: :ok,
     }
   rescue => e
     Rails.logger.warn("Sign up error: #{e}")
     render json: {
-      status: :internal_server_error
+      status: :internal_server_error,
     }
   end
 

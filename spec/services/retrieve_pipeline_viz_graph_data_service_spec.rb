@@ -13,47 +13,47 @@ RSpec.describe RetrievePipelineVizGraphDataService do
         one: ["unmapped1.fq"],
         two: ["trimmomatic1.fq"],
         # Testing partially concated file path and no url available.
-        three: ["file/priceseq1.fa"]
+        three: ["file/priceseq1.fa"],
       },
       steps: [
         {
           in: ["one"],
           out: "two",
-          class: "step_one"
+          class: "step_one",
         }, {
           in: ["two"],
           out: "three",
-          class: "step_two"
-        }
+          class: "step_two",
+        },
       ],
       given_targets: {
         one: {
-          s3_dir: given_targets_dir
-        }
-      }
-    }.to_json
+          s3_dir: given_targets_dir,
+        },
+      },
+    }.to_json,
   }, {
     name: "Experimental",
     dag_json: {
       output_dir_s3: output_dir,
       targets: {
         three: ["priceseq1.fa"],
-        four: ["bowtie2_1.fa"]
+        four: ["bowtie2_1.fa"],
       },
       steps: [
         {
           in: ["three"],
           out: "four",
-          class: "step_three"
-        }
+          class: "step_three",
+        },
       ],
       given_targets: {
         three: {
-          s3_dir: given_targets_dir + "/file"
-        }
-      }
-    }.to_json
-  }]
+          s3_dir: given_targets_dir + "/file",
+        },
+      },
+    }.to_json,
+  },]
 
   expected_stage_results = {
     stages: [
@@ -62,47 +62,47 @@ RSpec.describe RetrievePipelineVizGraphDataService do
           {
             name: "Two",
             inputEdges: [0],
-            outputEdges: [1]
+            outputEdges: [1],
           },
           {
             name: "Three",
             inputEdges: [1],
-            outputEdges: [2]
-          }
-        ]
+            outputEdges: [2],
+          },
+        ],
       }, {
         steps: [{
           name: "Four",
           inputEdges: [2],
-          outputEdges: [3]
-        }]
-      }
+          outputEdges: [3],
+        },],
+      },
     ],
     edges: [
       {
         # No "from" field as this is the input file.
         to: { stageIndex: 0, stepIndex: 0 },
         files: [{ displayName: "unmapped1.fq", url: "test url" }],
-        isIntraStage: false
+        isIntraStage: false,
       },
       {
         from: { stageIndex: 0, stepIndex: 0 },
         to: { stageIndex: 0, stepIndex: 1 },
         files: [{ displayName: "trimmomatic1.fq", url: "test url" }],
-        isIntraStage: true
+        isIntraStage: true,
       },
       {
         from: { stageIndex: 0, stepIndex: 1 },
         to: { stageIndex: 1, stepIndex: 0 },
         files: [{ displayName: "priceseq1.fa", url: nil }],
-        isIntraStage: false
+        isIntraStage: false,
       },
       {
         from: { stageIndex: 1, stepIndex: 0 },
         files: [{ displayName: "bowtie2_1.fa", url: "test url" }],
-        isIntraStage: false
-      }
-    ]
+        isIntraStage: false,
+      },
+    ],
   }
 
   describe "Retrieving graph" do

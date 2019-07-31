@@ -12,5 +12,5 @@ Immigrant.ignore_keys = [
   { from_table: 'locations', column: 'city_id' },
   { from_table: 'locations', column: 'country_id' },
   { from_table: 'locations', column: 'state_id' },
-  { from_table: 'locations', column: 'subdivision_id' }
+  { from_table: 'locations', column: 'subdivision_id' },
 ]

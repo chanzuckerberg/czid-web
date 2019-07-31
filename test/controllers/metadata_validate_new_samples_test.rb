@@ -24,19 +24,19 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'host_genome', 'sample_type', 'blood_fed'],
         rows: [
           ['Test Sample', 'Mosquito', 'Whole Blood', 'Blood Fed'],
-          ['Test Sample 2', 'Mosquito', 'Whole Blood', 'Partially Blood Fed']
-        ]
+          ['Test Sample 2', 'Mosquito', 'Whole Blood', 'Partially Blood Fed'],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample 2",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -54,19 +54,19 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'host_genome', 'Sample Type', 'Blood Fed'],
         rows: [
           ['Test Sample', 'Mosquito', 'Whole Blood', 'Blood Fed'],
-          ['Test Sample 2', 'Mosquito', 'Whole Blood', 'Partially Blood Fed']
-        ]
+          ['Test Sample 2', 'Mosquito', 'Whole Blood', 'Partially Blood Fed'],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample 2",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -83,15 +83,15 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'host_genome', 'sample_type', 'blood_fed'],
         rows: [
           ['Test Sample', 'Mosquito', 'Whole Blood', 'Blood Fed'],
-          ['Test Sample 2', 'Mosquito', 'Whole Blood', 'Blood Fed']
-        ]
+          ['Test Sample 2', 'Mosquito', 'Whole Blood', 'Blood Fed'],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -112,19 +112,19 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'host_genome', 'sample_type', 'blood_fed'],
         rows: [
-          ['Test Sample', 'Mosquito', 'Whole Blood', 'Blood Fed']
-        ]
+          ['Test Sample', 'Mosquito', 'Whole Blood', 'Blood Fed'],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample 2",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -146,19 +146,19 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'sample_type', 'nucleotide_type', 'blood_fed'],
         rows: [
           ['Test Sample', 'Whole Blood', '', 'Blood Fed'],
-          ['Test Sample 2', 'Whole Blood', 'DNA', 'Blood Fed']
-        ]
+          ['Test Sample 2', 'Whole Blood', 'DNA', 'Blood Fed'],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample 2",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -178,19 +178,19 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'blood_fed'],
         rows: [
           ['Test Sample', 'Fake Genome', 'Whole Blood', 'RNA', 'Blood Fed'],
-          ['Test Sample 2', '', 'Whole Blood', 'DNA', 'Blood Fed']
-        ]
+          ['Test Sample 2', '', 'Whole Blood', 'DNA', 'Blood Fed'],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample 2",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -216,19 +216,19 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type'],
         rows: [
           ['Test Sample', 'Human', 'Whole Blood', 'DNA'],
-          ['Test Sample 2', 'Human', '', '']
-        ]
+          ['Test Sample 2', 'Human', '', ''],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample 2",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -250,15 +250,15 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type'],
         rows: [
           ['Test Sample', 'Human', 'Whole Blood', 'DNA'],
-          ['Test Sample', 'Human', 'Whole Blood', '']
-        ]
+          ['Test Sample', 'Human', 'Whole Blood', ''],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -280,19 +280,19 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'age', 'blood_fed', 'custom field'],
         rows: [
           ['Human Sample', 'Human', 'Foobar', 'DNA', '5', 'Foobar', 'Foobar'],
-          ['Mosquito Sample', 'Mosquito', 'Foobar', 'DNA', '10', 'Foobar', 'Foobar']
-        ]
+          ['Mosquito Sample', 'Mosquito', 'Foobar', 'DNA', '10', 'Foobar', 'Foobar'],
+        ],
       },
       samples: [
         {
           name: "Human Sample",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Mosquito Sample",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_equal 1, @response.parsed_body['issues']['errors'].length
@@ -302,7 +302,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_equal [
       [1, "Human Sample", "Human", "blood_fed"],
       [2, "Mosquito Sample", "Mosquito", "nucleotide_type"],
-      [2, "Mosquito Sample", "Mosquito", "age"]
+      [2, "Mosquito Sample", "Mosquito", "age"],
     ], @response.parsed_body['issues']['errors'][0]['rows']
   end
 
@@ -313,15 +313,15 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'Sample Name', 'host_genome', 'sample_type', 'Sample Type', 'Host Genome', 'Custom Field', 'Custom Field'],
         rows: [
-          ['Test Sample', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar']
-        ]
+          ['Test Sample', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar', 'Foobar'],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_equal 1, @response.parsed_body['issues']['errors'].length
@@ -341,15 +341,15 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
         rows: [
-          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar']
-        ]
+          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar'],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -361,7 +361,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     assert_equal ErrorAggregator::ERRORS[:custom_field_creation][:title].call(2, nil), @response.parsed_body['issues']['warnings'][0]['caption']
     assert_equal [
       [6, "Custom Field 1"],
-      [7, "Custom Field 2"]
+      [7, "Custom Field 2"],
     ], @response.parsed_body['issues']['warnings'][0]['rows']
   end
 
@@ -372,15 +372,15 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
         rows: [
-          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar']
-        ]
+          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar'],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: 1234
-        }
-      ]
+          project_id: 1234,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -400,19 +400,19 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
         headers: ['sample_name', 'host_genome', 'sample_type', 'age', 'admission_date', 'blood_fed', 'nucleotide_type', 'reported_sex'],
         rows: [
           ['Test Sample Human', 'Human', 'Whole Blood', 'foobar', 'foobar', '', 'foobar', ''],
-          ['Test Sample Mosquito', 'Mosquito', 'Whole Blood', '', '', 'foobar', '', 'foobar']
-        ]
+          ['Test Sample Mosquito', 'Mosquito', 'Whole Blood', '', '', 'foobar', '', 'foobar'],
+        ],
       },
       samples: [
         {
           name: "Test Sample Human",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample Mosquito",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -456,59 +456,59 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
           ['Test Sample Mosquito 3', 'Mosquito', 'Abdomen', '', '01/2018', ''],
           ['Test Sample Mosquito 4', 'Mosquito', 'Abdomen', '', '01/01/18', ''],
           ['Test Sample Mosquito 5', 'Mosquito', 'Abdomen', '', '2018-01abc', ''],
-          ['Test Sample Mosquito 6', 'Mosquito', 'Abdomen', '', 'abc01/2018', '']
-        ]
+          ['Test Sample Mosquito 6', 'Mosquito', 'Abdomen', '', 'abc01/2018', ''],
+        ],
       },
       samples: [
         {
           name: "Test Sample Human",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample Human 2",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample Human 3",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample Human 4",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample Human 5",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample Human 6",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample Mosquito",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample Mosquito 2",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample Mosquito 3",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample Mosquito 4",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample Mosquito 5",
-          project_id: @metadata_validation_project.id
+          project_id: @metadata_validation_project.id,
         },
         {
           name: "Test Sample Mosquito 6",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -522,7 +522,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       [2, "Test Sample Human 2", "2018-01-01"],
       [4, "Test Sample Human 4", "01/01/18"],
       [5, "Test Sample Human 5", "2018-01abc"],
-      [6, "Test Sample Human 6", "abc01/2018"]
+      [6, "Test Sample Human 6", "abc01/2018"],
     ], @response.parsed_body['issues']['errors'][0]['rows']
 
     assert @response.parsed_body['issues']['errors'][1]['isGroup']
@@ -530,7 +530,7 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
     assert !@response.parsed_body['issues']['errors'][1]['caption'].ends_with?("(for human samples)")
     assert_equal [
       [11, "Test Sample Mosquito 5", "2018-01abc"],
-      [12, "Test Sample Mosquito 6", "abc01/2018"]
+      [12, "Test Sample Mosquito 6", "abc01/2018"],
     ], @response.parsed_body['issues']['errors'][1]['rows']
 
     assert_equal 0, @response.parsed_body['issues']['warnings'].length
@@ -543,15 +543,15 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
         rows: [
-          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar']
-        ]
+          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar'],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @public_project.id
-        }
-      ]
+          project_id: @public_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -570,15 +570,15 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
         rows: [
-          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar']
-        ]
+          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar'],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @metadata_validation_project.id
-        }
-      ]
+          project_id: @metadata_validation_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -597,15 +597,15 @@ class MetadataValudateNewSamplesTest < ActionDispatch::IntegrationTest
       metadata: {
         headers: ['sample_name', 'host_genome', 'sample_type', 'nucleotide_type', 'example_core_field', 'Custom Field 1', 'Custom Field 2'],
         rows: [
-          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar']
-        ]
+          ['Test Sample', 'Human', 'Whole Blood', 'DNA', 'Foobar', 'Foobar', 'Foobar'],
+        ],
       },
       samples: [
         {
           name: "Test Sample",
-          project_id: @joe_project.id
-        }
-      ]
+          project_id: @joe_project.id,
+        },
+      ],
     }, as: :json
 
     assert_response :success

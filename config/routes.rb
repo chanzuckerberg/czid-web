@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   end
   devise_for :users, controllers: {
     sessions: 'sessions',
-    registrations: 'registrations'
+    registrations: 'registrations',
   }
   resources :samples do
     put :reupload_source, on: :member
