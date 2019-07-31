@@ -1,8 +1,9 @@
 import React from "react";
 import { uniq } from "lodash/fp";
 
-import MetadataInput from "~/components/common/MetadataInput";
 import { getGeoSearchSuggestions } from "~/api/locations";
+import MetadataInput from "~/components/common/MetadataInput";
+import PropTypes from "~/components/utils/propTypes";
 
 export const geosearchCSVlocations = async metadata => {
   const fieldName = "Collection Location";
@@ -66,5 +67,11 @@ class MetadataCSVGeosearchMenu extends React.Component {
     });
   }
 }
+
+MetadataCSVGeosearchMenu.propTypes = {
+  metadata: PropTypes.object,
+  onMetadataChange: PropTypes.func.isRequired,
+  projectMetadataFields: PropTypes.object,
+};
 
 export default MetadataCSVGeosearchMenu;
