@@ -78,24 +78,19 @@ class MetadataUpload extends React.Component {
       });
     }
 
-    // this.geosearchCSVlocations(metadata);
+    this.geosearchCSVlocations(metadata);
   };
 
   geosearchCSVlocations = async metadata => {
     console.log("geosearchCSVlocations was called");
     console.log("metadata I got: ", metadata);
     const { onMetadataChange } = this.props;
-    const { projectMetadataFields } = this.state;
 
     if (!(metadata && metadata.rows)) return;
 
-    const locationField = find(
-      { is_required: 1, dataType: "location" },
-      Object.values(projectMetadataFields)
+    const originalValues = uniq(
+      metadata.rows.map(r => r["Collection Location"])
     );
-    const fieldIndex = metadata.headers.indexOf(locationField.name);
-
-    const originalValues = uniq(metadata.rows.map(r => r[fieldIndex]));
     console.log("original values:", originalValues);
 
     const mappedResults = {};
@@ -112,17 +107,17 @@ class MetadataUpload extends React.Component {
 
     let newMetadata = metadata;
     metadata.rows.map((row, rowIndex) => {
-      const locationName = row[fieldIndex];
+      const locationName = row["Collection Location"];
       if (mappedResults.hasOwnProperty(locationName)) {
-        newMetadata.rows[rowIndex][fieldIndex] = mappedResults[locationName];
+        newMetadata.rows[rowIndex]["Collection Location"] =
+          mappedResults[locationName];
       }
     });
 
     console.log("want to set: ", newMetadata);
 
-    this.setState({ metadata: newMetadata });
     onMetadataChange({
-      metadata: processCSVMetadata(newMetadata),
+      metadata: newMetadata,
     });
   };
 
@@ -298,17 +293,15 @@ class MetadataUpload extends React.Component {
     return (
       metadata &&
       metadata.rows &&
-      metadata.rows.map((row, rowIndex) => {
-        if (!sampleNames.has(row[0])) return;
-
+      metadata.rows.map((sample, rowIndex) => {
         return (
           <div>
-            <span>{row[0]}</span>
+            <span>{sample["Sample Name"]}</span>
             <span>
               <MetadataInput
                 key={"collection_location_v2"}
                 className={cs.input}
-                value={row["Collection Location"]}
+                value={sample["Collection Location"]}
                 metadataType={projectMetadataFields["collection_location_v2"]}
                 onChange={(key, value) => {
                   const newMetadata = metadata;
