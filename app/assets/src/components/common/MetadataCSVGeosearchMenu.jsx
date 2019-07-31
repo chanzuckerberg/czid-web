@@ -4,6 +4,7 @@ import { uniq } from "lodash/fp";
 import { getGeoSearchSuggestions } from "~/api/locations";
 import MetadataInput, {
   processLocationSelection,
+  LOCATION_UNRESOLVED_WARNING,
 } from "~/components/common/MetadataInput";
 import PropTypes from "~/components/utils/propTypes";
 
@@ -39,6 +40,8 @@ export const geosearchCSVlocations = async metadata => {
       console.log("processed: ", result, warning);
       if (warning) warnings[row["Sample Name"]] = warning;
       newMetadata.rows[rowIndex][fieldName] = result;
+    } else {
+      warnings[row["Sample Name"]] = LOCATION_UNRESOLVED_WARNING;
     }
   });
   return { newMetadata, warnings };
@@ -78,9 +81,7 @@ class MetadataCSVGeosearchMenu extends React.Component {
               }}
               withinModal={true}
               isHuman={true}
-              initialLocationWarning={
-                CSVLocationWarnings[sample["Sample Name"]]
-              }
+              warning={CSVLocationWarnings[sample["Sample Name"]]}
             />
           </span>
         </div>

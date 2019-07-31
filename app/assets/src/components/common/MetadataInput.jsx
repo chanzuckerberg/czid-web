@@ -36,11 +36,20 @@ class MetadataInput extends React.Component {
   constructor(props) {
     super(props);
 
-    const { initialLocationWarning } = this.props;
-
     this.state = {
-      locationWarning: initialLocationWarning || "",
+      // Small warning below the input. Only used for Locations currently.
+      warning: props.warning,
     };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.warning !== state.prevPropsWarning) {
+      return {
+        warning: props.warning,
+        prevPropsWarning: props.warning,
+      };
+    }
+    return null;
   }
 
   render() {
@@ -52,7 +61,7 @@ class MetadataInput extends React.Component {
       className,
       isHuman,
     } = this.props;
-    const { locationWarning } = this.state;
+    const { warning } = this.state;
 
     if (isArray(metadataType.options)) {
       const options = metadataType.options.map(option => ({
@@ -94,13 +103,11 @@ class MetadataInput extends React.Component {
                 isHuman
               );
               onChange(metadataType.key, newResult, true);
-              this.setState({ locationWarning: warning });
+              this.setState({ warning });
             }}
             value={value}
           />
-          {locationWarning && (
-            <span className={cs.warning}>{locationWarning}</span>
-          )}
+          {warning && <span className={cs.warning}>{warning}</span>}
         </React.Fragment>
       );
     } else {
@@ -117,6 +124,10 @@ class MetadataInput extends React.Component {
   }
 }
 
+MetadataInput.defaultProps = {
+  warning: "",
+};
+
 MetadataInput.propTypes = {
   className: PropTypes.string,
   value: PropTypes.any,
@@ -131,7 +142,7 @@ MetadataInput.propTypes = {
   onSave: PropTypes.func,
   withinModal: PropTypes.bool,
   isHuman: PropTypes.bool,
-  initialLocationWarning: PropTypes.string,
+  warning: PropTypes.string,
 };
 
 export default MetadataInput;
