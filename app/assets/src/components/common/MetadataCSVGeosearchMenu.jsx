@@ -39,13 +39,15 @@ export const geosearchCSVlocations = async (metadata, metadataType) => {
       rowWarning = LOCATION_UNRESOLVED_WARNING;
     }
     if (rowWarning) {
-      warnings[row["Sample Name"]] = rowWarning;
+      warnings[row[NAME_COLUMN]] = rowWarning;
     }
   });
   return { newMetadata, warnings };
 };
 
 const isRowHuman = row => row["Host Genome"] && row["Host Genome"] === "Human";
+
+const NAME_COLUMN = "Sample Name";
 
 class MetadataCSVGeosearchMenu extends React.Component {
   getManualInputData = () => {
@@ -57,10 +59,10 @@ class MetadataCSVGeosearchMenu extends React.Component {
     } = this.props;
 
     return metadata.rows.map((sample, rowIndex) => {
-      const sampleName = sample["Sample Name"];
+      const sampleName = sample[NAME_COLUMN];
       return {
-        "Sample Name": sampleName,
-        collection_location_v2: (
+        [NAME_COLUMN]: sampleName,
+        [metadataType.key]: (
           <div>
             <MetadataInput
               key={metadataType.key}
@@ -85,25 +87,19 @@ class MetadataCSVGeosearchMenu extends React.Component {
   };
 
   render() {
-    const {
-      CSVLocationWarnings,
-      metadata,
-      metadataType,
-      onMetadataChange,
-    } = this.props;
+    const { metadata, metadataType } = this.props;
 
     if (!(metadata && metadata.rows)) return null;
-    console.log("my data: ", this.getManualInputData());
     return (
       <DataTable
         // className={cs.inputTable}
         headers={{
-          "Sample Name": "Sample Name",
-          collection_location_v2: "Collection Location",
+          [NAME_COLUMN]: NAME_COLUMN,
+          [metadataType.key]: metadataType.name,
         }}
-        columns={["Sample Name", "collection_location_v2"]}
+        columns={[NAME_COLUMN, metadataType.key]}
         data={this.getManualInputData()}
-        getColumnWidth={column => (column === "Sample Name" ? 240 : 160)}
+        getColumnWidth={column => (column === NAME_COLUMN ? 240 : 160)}
       />
     );
   }
