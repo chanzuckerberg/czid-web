@@ -176,7 +176,7 @@ export default class BasespaceSampleImport extends React.Component {
         <div className={cs.label}>Select Basespace Project</div>
         <div className={cs.projectSelectContainer}>
           <Dropdown
-            placeholder="Project"
+            placeholder="Loading projects..."
             fluid
             floating
             scrolling

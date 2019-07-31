@@ -1,3 +1,5 @@
+import { map, keyBy, mapValues, every, pick } from "lodash/fp";
+
 import {
   bulkUploadRemoteSamples,
   createSample,
@@ -18,7 +20,6 @@ export const bulkUploadRemote = ({ samples, metadata }) =>
 
 export const bulkUploadLocalWithMetadata = ({
   samples,
-  sampleNamesToFiles,
   metadata,
   onCreateSamplesError,
   onUploadProgress,
@@ -32,13 +33,27 @@ export const bulkUploadLocalWithMetadata = ({
   const markedUploaded = {};
   let allUploadsCompleteRan = false;
 
+  const sampleNamesToFiles = mapValues("files", keyBy("name", samples));
+
+  // Only upload these fields from the sample.
+  const processedSamples = map(
+    pick([
+      "client",
+      "host_genome_id",
+      "input_files_attributes",
+      "name",
+      "project_id",
+    ]),
+    samples
+  );
+
   // This function needs access to fileNamesToProgress.
   const onFileUploadSuccess = (sampleName, sampleId) => {
     const sampleFiles = sampleNamesToFiles[sampleName];
     // If every file for this sample is uploaded, mark it as uploaded.
     if (
       !markedUploaded[sampleName] &&
-      sampleFiles.every(f => fileNamesToProgress[f.name] === 100)
+      every(file => fileNamesToProgress[file.name] === 100, sampleFiles)
     ) {
       markedUploaded[sampleName] = true;
       markSampleUploaded(sampleId)
@@ -58,7 +73,7 @@ export const bulkUploadLocalWithMetadata = ({
     }
   };
 
-  bulkUploadWithMetadata(samples, metadata)
+  bulkUploadWithMetadata(processedSamples, metadata)
     .then(response => {
       if (response.errors.length > 0) {
         onCreateSamplesError(response.errors);
@@ -69,8 +84,9 @@ export const bulkUploadLocalWithMetadata = ({
         const sampleName = sample.name;
         const files = sampleNamesToFiles[sampleName];
 
-        files.map((file, i) => {
-          const url = sample.input_files[i].presigned_url;
+        sample.input_files.map(inputFileAttributes => {
+          const file = files[inputFileAttributes.name];
+          const url = inputFileAttributes.presigned_url;
 
           uploadFileToUrlWithRetries(file, url, {
             onUploadProgress: e => {
