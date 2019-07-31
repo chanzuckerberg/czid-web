@@ -31,6 +31,7 @@ import RemoveIcon from "./RemoveIcon";
 import SamplePublicIcon from "./SamplePublicIcon";
 import SamplePrivateIcon from "./SamplePrivateIcon";
 import SaveIcon from "./SaveIcon";
+import SortIcon from "./SortIcon";
 import TickIcon from "./TickIcon";
 import UserIcon from "./UserIcon";
 import WormIcon from "./WormIcon";
@@ -74,6 +75,7 @@ export default {
     CheckmarkIcon,
     InsightIcon,
     LoadingIcon,
+    SortIcon,
   },
   LOGO: {
     LogoIcon,
