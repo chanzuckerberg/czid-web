@@ -5,6 +5,7 @@ import {
   find,
   filter,
   keys,
+  pick,
   pickBy,
   includes,
   flatten,
@@ -13,18 +14,18 @@ import {
   size,
   flow,
   values,
-  mapValues,
   keyBy,
   get,
   concat,
   map,
-  omit,
   zipObject,
-  mapKeys,
   mergeWith,
   uniqBy,
   uniq,
   compact,
+  difference,
+  union,
+  uniqueId,
 } from "lodash/fp";
 
 import PropTypes from "~/components/utils/propTypes";
@@ -33,7 +34,6 @@ import Tabs from "~/components/ui/controls/Tabs";
 import IssueGroup from "~ui/notifications/IssueGroup";
 import { getProjects, validateSampleNames, validateSampleFiles } from "~/api";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import BulkSampleUploadTable from "~ui/controls/BulkSampleUploadTable";
 import ProjectCreationForm from "~/components/common/ProjectCreationForm";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
@@ -43,12 +43,17 @@ import LocalSampleFileUpload from "./LocalSampleFileUpload";
 import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
 import BasespaceSampleImport from "./BasespaceSampleImport";
 import cs from "./sample_upload_flow.scss";
-import BasespaceSampleUploadTable from "./BasespaceSampleUploadTable";
+import SampleUploadTable from "./SampleUploadTable";
 import { openBasespaceOAuthPopup } from "./utils";
+import { SELECT_ID_KEY } from "./constants";
 
-const LOCAL_UPLOAD_TAB = "Upload from Your Computer";
-const REMOTE_UPLOAD_TAB = "Upload from S3";
-const BASESPACE_UPLOAD_TAB = "Upload from Basespace";
+const LOCAL_UPLOAD = "local";
+const REMOTE_UPLOAD = "remote";
+const BASESPACE_UPLOAD = "basespace";
+
+const LOCAL_UPLOAD_LABEL = "Upload from Your Computer";
+const REMOTE_UPLOAD_LABEL = "Upload from S3";
+const BASESPACE_UPLOAD_LABEL = "Upload from Basespace";
 
 const UPLOADSAMPLESTEP_SAMPLE_CHANGED = "UploadSampleStep_sample_changed";
 
@@ -57,19 +62,23 @@ class UploadSampleStep extends React.Component {
     selectedProject: null,
     createProjectOpen: false,
     projects: [],
-    currentTab: LOCAL_UPLOAD_TAB,
+    currentTab: LOCAL_UPLOAD,
     localSamples: [],
     remoteSamples: [],
     basespaceSamples: [],
+    // We generate a unique "selectId" for each sample, which we use to store which samples are selected.
+    // This simplifies the logic, because sample names can change (they can get renamed when de-duped)
+    localSelectedSampleIds: new Set(),
+    remoteSelectedSampleIds: new Set(),
+    basespaceSelectedSampleIds: new Set(),
     basespaceAccessToken: null,
     removedLocalFiles: [], // Invalid local files that were removed.
-    sampleNamesToFiles: {}, // Needed for local samples.
     validatingSamples: false, // Disable the "Continue" button while validating samples.
     showNoProjectError: false, // Whether we should show an error if no project is currently selected.
   };
 
   async componentDidMount() {
-    window.addEventListener("message", this.handleMessageEvent);
+    window.addEventListener("message", this.handleBasespaceOAuthMessageEvent);
 
     const projects = await getProjects({
       domain: "updatable",
@@ -99,11 +108,19 @@ class UploadSampleStep extends React.Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener("message", this.handleMessageEvent);
+    window.removeEventListener(
+      "message",
+      this.handleBasespaceOAuthMessageEvent
+    );
   }
 
-  handleMessageEvent = async event => {
-    const { basespaceSamples, selectedProject } = this.state;
+  //*** Basespace-related functions ***
+
+  // Handle the message from the Basespace OAuth popup that authorizes IDseq to read (i.e. download files) from user projects.
+  handleBasespaceOAuthMessageEvent = async event => {
+    const { selectedProject } = this.state;
+    const basespaceSamples = this.getSelectedSamples("basespace");
+
     if (
       event.source === this._window &&
       event.origin === window.location.origin &&
@@ -130,7 +147,7 @@ class UploadSampleStep extends React.Component {
   };
 
   requestBasespaceReadProjectPermissions = () => {
-    const { basespaceSamples } = this.state;
+    const basespaceSamples = this.getSelectedSamples("basespace");
     const { basespaceOauthRedirectUri, basespaceClientId } = this.props;
 
     // Request permissions to read (i.e. download files) from all source projects.
@@ -149,197 +166,52 @@ class UploadSampleStep extends React.Component {
     });
   };
 
-  getCurrentSamples = () => {
-    if (this.state.currentTab === LOCAL_UPLOAD_TAB) {
-      return this.state.localSamples;
-    }
-    if (this.state.currentTab === REMOTE_UPLOAD_TAB) {
-      return this.state.remoteSamples;
-    }
-    if (this.state.currentTab === BASESPACE_UPLOAD_TAB) {
-      return this.state.basespaceSamples;
-    }
-    return [];
+  handleBasespaceAccessTokenChange = basespaceAccessToken => {
+    this.setState({
+      basespaceAccessToken,
+    });
   };
+
+  //*** Tab-related functions ***
 
   getUploadTabs = allowedFeatures => {
     const { admin } = this.props;
     return compact([
-      LOCAL_UPLOAD_TAB,
-      REMOTE_UPLOAD_TAB,
-      (admin || allowedFeatures.includes("basespace_upload_enabled")) &&
-        BASESPACE_UPLOAD_TAB,
+      {
+        value: LOCAL_UPLOAD,
+        label: LOCAL_UPLOAD_LABEL,
+      },
+      {
+        value: REMOTE_UPLOAD,
+        label: REMOTE_UPLOAD_LABEL,
+      },
+      (admin || allowedFeatures.includes("basespace_upload_enabled")) && {
+        value: BASESPACE_UPLOAD,
+        label: BASESPACE_UPLOAD_LABEL,
+      },
     ]);
   };
 
-  isValid = () =>
-    this.state.selectedProject !== null &&
-    size(this.getCurrentSamples()) > 0 &&
-    !this.state.validatingSamples;
+  handleTabChange = tab => {
+    this.props.onDirty();
+    this.setState({ currentTab: tab });
+    logAnalyticsEvent("UploadSampleStep_tab_changed", {
+      tab,
+    });
+  };
 
-  // Modify the project_id in our samples, and validate the names and sampleNamesToFiles again.
-  updateSamplesForNewProject = async ({
-    samples,
-    project,
-    sampleNamesToFiles,
-  }) => {
-    const {
-      samples: validatedSamples,
-      sampleNamesToFiles: validatedSampleNamesToFiles,
-    } = await this.validateSampleNames({
+  //*** Project-related functions ***
+
+  // Modify the project_id in our samples, and validate the sample names again.
+  updateSamplesForNewProject = async ({ samples, project }) => {
+    const { samples: validatedSamples } = await this.validateSampleNames({
       samples,
       project,
-      sampleNamesToFiles,
     });
 
     return {
       samples: map(set("project_id", get("id", project)), validatedSamples),
-      sampleNamesToFiles: validatedSampleNamesToFiles,
     };
-  };
-
-  handleProjectChange = async project => {
-    this.props.onDirty();
-    this.setState({
-      validatingSamples: true,
-      showNoProjectError: false,
-    });
-
-    const [
-      { samples: newLocalSamples, sampleNamesToFiles: newSampleNamesToFiles },
-      { samples: newRemoteSamples },
-      { samples: newBasespaceSamples },
-    ] = await Promise.all([
-      this.updateSamplesForNewProject({
-        samples: this.state.localSamples,
-        project,
-        sampleNamesToFiles: this.state.sampleNamesToFiles,
-      }),
-      this.updateSamplesForNewProject({
-        samples: this.state.remoteSamples,
-        project,
-      }),
-      this.updateSamplesForNewProject({
-        samples: this.state.basespaceSamples,
-        project,
-      }),
-    ]);
-
-    this.setState({
-      selectedProject: project,
-      validatingSamples: false,
-      localSamples: newLocalSamples,
-      remoteSamples: newRemoteSamples,
-      basespaceSamples: newBasespaceSamples,
-      sampleNamesToFiles: newSampleNamesToFiles,
-    });
-
-    logAnalyticsEvent("UploadSampleStep_project-selector_changed", {
-      localSamples: newLocalSamples.length,
-      remoteSamples: newRemoteSamples.length,
-      ...this.getAnalyticsContext(),
-    });
-  };
-
-  // Rename duplicated sample names in 'samples' and 'sampleNamesToFiles' if needed.
-  validateSampleNames = async ({ samples, project, sampleNamesToFiles }) => {
-    const selectedProject = project || this.state.selectedProject;
-    if (!selectedProject || size(samples) <= 0) {
-      return Promise.resolve({
-        samples,
-        sampleNamesToFiles,
-      });
-    }
-
-    const validatedSampleNames = await validateSampleNames(
-      get("id", selectedProject),
-      map("name", samples)
-    );
-
-    const validatedNameMap = zipObject(
-      map("name", samples),
-      validatedSampleNames
-    );
-
-    const validatedData = {
-      samples: samples.map(sample => ({
-        ...sample,
-        name: validatedNameMap[sample.name],
-      })),
-    };
-
-    if (sampleNamesToFiles) {
-      validatedData.sampleNamesToFiles = mapKeys(
-        name => validatedNameMap[name],
-        sampleNamesToFiles
-      );
-    }
-
-    return validatedData;
-  };
-
-  // Remove invalid files from sampleNamesToFiles and remove samples with no valid files.
-  validateSampleNamesAndFiles = async ({
-    samples,
-    project,
-    sampleNamesToFiles,
-  }) => {
-    if (size(samples) <= 0) {
-      return Promise.resolve({
-        samples,
-        sampleNamesToFiles,
-        removedLocalFiles: [],
-      });
-    }
-
-    const sampleFiles = map("name", flatten(values(sampleNamesToFiles)));
-
-    const [
-      {
-        samples: validatedSamples,
-        sampleNamesToFiles: validatedSampleNamesToFiles,
-      },
-      areFilesValid,
-    ] = await Promise.all([
-      // Call validateSampleNames to update sample names.
-      this.validateSampleNames({ samples, project, sampleNamesToFiles }),
-      validateSampleFiles(sampleFiles),
-    ]);
-
-    const filesValidMap = zipObject(sampleFiles, areFilesValid);
-
-    // Filter out invalid files.
-    const filteredSampleNamesToFiles = mapValues(
-      files => filter(file => filesValidMap[file.name], files),
-      validatedSampleNamesToFiles
-    );
-
-    // Filter out samples with no valid files.
-    const emptySampleNames = keys(
-      pickBy(files => files.length === 0, filteredSampleNamesToFiles)
-    );
-    const filteredSamples = filter(
-      sample => !includes(sample.name, emptySampleNames),
-      validatedSamples
-    );
-
-    return {
-      samples: filteredSamples,
-      sampleNamesToFiles: filteredSampleNamesToFiles,
-      removedLocalFiles: keys(pickBy(fileValid => !fileValid, filesValidMap)),
-    };
-  };
-
-  openCreateProject = () => {
-    this.setState({
-      createProjectOpen: true,
-    });
-  };
-
-  closeCreateProject = () => {
-    this.setState({
-      createProjectOpen: false,
-    });
   };
 
   handleProjectCreate = async project => {
@@ -350,14 +222,13 @@ class UploadSampleStep extends React.Component {
     });
 
     const [
-      { samples: newLocalSamples, sampleNamesToFiles: newSampleNamesToFiles },
+      { samples: newLocalSamples },
       { samples: newRemoteSamples },
       { samples: newBasespaceSamples },
     ] = await Promise.all([
       this.updateSamplesForNewProject({
         samples: this.state.localSamples,
         project,
-        sampleNamesToFiles: this.state.sampleNamesToFiles,
       }),
       this.updateSamplesForNewProject({
         samples: this.state.remoteSamples,
@@ -377,45 +248,149 @@ class UploadSampleStep extends React.Component {
       localSamples: newLocalSamples,
       remoteSamples: newRemoteSamples,
       basespaceSamples: newBasespaceSamples,
-      sampleNamesToFiles: newSampleNamesToFiles,
     });
 
     logAnalyticsEvent("UploadSampleStep_project_created", {
       localSamples: newLocalSamples.length,
       remoteSamples: newRemoteSamples.length,
+      basespaceSamples: newBasespaceSamples.length,
       ...this.getAnalyticsContext(),
     });
   };
 
-  handleTabChange = tab => {
+  handleProjectChange = async project => {
     this.props.onDirty();
-    this.setState({ currentTab: tab });
-    logAnalyticsEvent("UploadSampleStep_tab_changed", {
-      tab,
+    this.setState({
+      validatingSamples: true,
+      showNoProjectError: false,
+    });
+
+    const [
+      { samples: newLocalSamples },
+      { samples: newRemoteSamples },
+      { samples: newBasespaceSamples },
+    ] = await Promise.all([
+      this.updateSamplesForNewProject({
+        samples: this.state.localSamples,
+        project,
+      }),
+      this.updateSamplesForNewProject({
+        samples: this.state.remoteSamples,
+        project,
+      }),
+      this.updateSamplesForNewProject({
+        samples: this.state.basespaceSamples,
+        project,
+      }),
+    ]);
+
+    this.setState({
+      selectedProject: project,
+      validatingSamples: false,
+      localSamples: newLocalSamples,
+      remoteSamples: newRemoteSamples,
+      basespaceSamples: newBasespaceSamples,
+    });
+
+    logAnalyticsEvent("UploadSampleStep_project-selector_changed", {
+      localSamples: newLocalSamples.length,
+      remoteSamples: newRemoteSamples.length,
+      basespaceSamples: newBasespaceSamples.length,
+      ...this.getAnalyticsContext(),
     });
   };
+
+  handleNoProject = () => {
+    this.setState({
+      showNoProjectError: true,
+    });
+  };
+
+  openCreateProject = () => {
+    this.setState({
+      createProjectOpen: true,
+    });
+  };
+
+  closeCreateProject = () => {
+    this.setState({
+      createProjectOpen: false,
+    });
+  };
+
+  //*** Sample-related functions ***
+
+  // Functions to get the state key by sample type, e.g. this.state.localSamples, this.state.basespaceSamples
+  getSelectedSampleIdsKey = sampleType => `${sampleType}SelectedSampleIds`;
+  getSamplesKey = sampleType => `${sampleType}Samples`;
+
+  getSelectedSampleIds = sampleType => {
+    return this.state[this.getSelectedSampleIdsKey(sampleType)];
+  };
+
+  getSelectedSamples = sampleType => {
+    const selectedSampleIds = this.getSelectedSampleIds(sampleType);
+    const samplesKey = this.getSamplesKey(sampleType);
+    return filter(
+      sample => selectedSampleIds.has(sample._selectId),
+      this.state[samplesKey]
+    );
+  };
+
+  // Get fields for display in the SampleUploadTable.
+  getSampleDataForUploadTable = sampleType => {
+    if (sampleType === "basespace") {
+      return this.state.basespaceSamples;
+    }
+
+    if (sampleType === "remote" || sampleType === "local") {
+      const samplesKey = this.getSamplesKey(sampleType);
+      const samples = this.state[samplesKey];
+      return samples.map(sample => ({
+        ...pick(["name", SELECT_ID_KEY], sample),
+        file_names: map(
+          file => file.name || file.source,
+          sample.input_files_attributes
+        ).sort(),
+      }));
+    }
+  };
+
+  // Add a unique select id to each sample, for tracking selection state.
+  addSelectIdToSamples = samples =>
+    map(sample => set(SELECT_ID_KEY, uniqueId(), sample), samples);
 
   // Merge newly added samples with the list of samples already added.
   mergeSamples = (samples, newSamples) => {
     let samplesByName = keyBy("name", samples);
     let newSamplesByName = keyBy("name", newSamples);
 
-    // If a sample with the same name already exists, just merge their input_files_attributes.
+    // If a sample with the same name already exists, just merge their input_files_attributes and files.
     const mergedSamples = mergeWith(
       (newSample, sample) => {
         if (sample && newSample) {
-          return set(
-            "input_files_attributes",
-            // Ensure that the files are all unique by looking at the source field.
-            uniqBy(
-              "source",
-              concat(
-                newSample.input_files_attributes,
-                sample.input_files_attributes
+          // Merge input_files_attribute and files from newSample into sample.
+          return flow(
+            set(
+              "input_files_attributes",
+              // Ensure that the files are all unique by looking at the source field.
+              uniqBy(
+                "source",
+                concat(
+                  newSample.input_files_attributes,
+                  sample.input_files_attributes
+                )
               )
             ),
-            sample
-          );
+            set(
+              "files",
+              // Files are keyed by name, so just overwrite.
+              {
+                ...newSample.files,
+                ...sample.files,
+              }
+            )
+          )(sample);
         }
       },
       newSamplesByName,
@@ -425,144 +400,218 @@ class UploadSampleStep extends React.Component {
     return values(mergedSamples);
   };
 
-  handleBasespaceAccessTokenChange = basespaceAccessToken => {
-    this.setState({
-      basespaceAccessToken,
-    });
-  };
-
-  handleLocalSampleChange = async (localSamples, sampleNamesToFiles) => {
-    this.props.onDirty();
-    this.setState({
-      validatingSamples: true,
-      removedLocalFiles: [],
-    });
-
-    const {
-      samples: validatedLocalSamples,
-      sampleNamesToFiles: validatedSampleNamesToFiles,
-      removedLocalFiles,
-    } = await this.validateSampleNamesAndFiles({
-      samples: localSamples,
-      sampleNamesToFiles,
-    });
-
-    this.setState({
-      validatingSamples: false,
-      localSamples: this.mergeSamples(
-        this.state.localSamples,
-        validatedLocalSamples
-      ),
-      sampleNamesToFiles: mergeWith(
-        (newFiles, files) => {
-          if (newFiles && files) {
-            return uniqBy("name", concat(newFiles, files));
-          }
-        },
-        validatedSampleNamesToFiles,
-        this.state.sampleNamesToFiles
-      ),
-      removedLocalFiles,
-    });
-
-    logAnalyticsEvent(UPLOADSAMPLESTEP_SAMPLE_CHANGED, {
-      totalSamples: localSamples.length,
-      newSamples: validatedLocalSamples.length,
-      removedLocalFiles: removedLocalFiles.length,
-      sampleType: "local",
-      ...this.getAnalyticsContext(),
-    });
-  };
-
-  // Handle new samples from remote (S3) and Basespace.
-  handleSampleChange = async (samples, sampleType) => {
-    let sampleFieldName = "remoteSamples";
-    if (sampleType === "basespace") {
-      sampleFieldName = "basespaceSamples";
+  // Rename duplicated sample names if needed.
+  validateSampleNames = async ({ samples, project }) => {
+    const selectedProject = project || this.state.selectedProject;
+    if (!selectedProject || size(samples) <= 0) {
+      return {
+        samples,
+      };
     }
 
+    const validatedSampleNames = await validateSampleNames(
+      get("id", selectedProject),
+      map("name", samples)
+    );
+
+    const validatedNameMap = zipObject(
+      map("name", samples),
+      validatedSampleNames
+    );
+
+    // Replace samples name with their de-duped names.
+    return {
+      samples: samples.map(sample => ({
+        ...sample,
+        name: validatedNameMap[sample.name],
+      })),
+    };
+  };
+
+  // Perform sample validation and return the validated samples.
+  validateAddedSamples = async (samples, sampleType) => {
+    // For non-local samples, we just need to de-dupe the name.
+    if (sampleType !== "local") {
+      return this.validateSampleNames({ samples });
+    }
+
+    // For local samples, we also need to:
+    //   Validate that sample files have a valid extension, based on the file name.
+    //   Remove samples with no valid files.
+    //   Return any removed files.
+    if (size(samples) <= 0) {
+      return {
+        samples,
+        removedLocalFiles: [],
+      };
+    }
+
+    // Get all the sample file names.
+    const sampleFileNames = flatten(map(sample => keys(sample.files), samples));
+
+    let [{ samples: validatedSamples }, areFilesValid] = await Promise.all([
+      // Call validateSampleNames to update sample names.
+      this.validateSampleNames({ samples }),
+      validateSampleFiles(sampleFileNames),
+    ]);
+
+    const fileNamesValidMap = zipObject(sampleFileNames, areFilesValid);
+
+    // For each sample, filter out files that aren't valid.
+    validatedSamples = validatedSamples.map(sample =>
+      set(
+        "files",
+        pickBy((_file, fileName) => fileNamesValidMap[fileName], sample.files),
+        sample
+      )
+    );
+    validatedSamples = validatedSamples.map(sample =>
+      set(
+        "input_files_attributes",
+        filter(
+          inputFileAttributes => fileNamesValidMap[inputFileAttributes.source],
+          sample.input_files_attributes
+        ),
+        sample
+      )
+    );
+
+    // Filter out samples with no valid files.
+    const filteredSamples = filter(
+      sample => size(sample.files) > 0,
+      validatedSamples
+    );
+
+    return {
+      samples: filteredSamples,
+      removedLocalFiles: keys(
+        pickBy(fileValid => !fileValid, fileNamesValidMap)
+      ),
+    };
+  };
+
+  // When a sample is checked or unchecked.
+  handleSampleSelect = (value, checked, sampleType) => {
     this.props.onDirty();
+    const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
+    const selectedSamples = this.state[selectedSampleIdsKey];
+
+    if (checked) {
+      selectedSamples.add(value);
+    } else {
+      selectedSamples.delete(value);
+    }
+
+    this.setState({
+      [selectedSampleIdsKey]: selectedSamples,
+    });
+  };
+
+  handleAllSamplesSelect = (checked, sampleType) => {
+    this.props.onDirty();
+    const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
+    const samplesKey = this.getSamplesKey(sampleType);
+
+    this.setState({
+      [selectedSampleIdsKey]: checked
+        ? new Set(map(SELECT_ID_KEY, this.state[samplesKey]))
+        : new Set(),
+    });
+  };
+
+  // Handle newly added samples
+  handleSamplesAdd = async (samples, sampleType) => {
+    this.props.onDirty();
+    const samplesKey = this.getSamplesKey(sampleType);
+    const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
+
+    // If local samples, we also want to keep track of invalid files that were removed
+    // so we can show a warning.
     this.setState({
       validatingSamples: true,
+      ...(sampleType === "local" ? { removedLocalFiles: [] } : {}),
     });
 
-    const { samples: validatedSamples } = await this.validateSampleNames({
-      samples,
-    });
+    const samplesWithSelectIds = this.addSelectIdToSamples(samples);
+
+    const {
+      samples: validatedSamples,
+      removedLocalFiles,
+    } = await this.validateAddedSamples(samplesWithSelectIds, sampleType);
 
     const newSamples = this.mergeSamples(
-      this.state[sampleFieldName],
+      this.state[samplesKey],
       validatedSamples
+    );
+
+    const newSelectedSampleIds = new Set(
+      union(
+        Array.from(this.state[selectedSampleIdsKey]),
+        map(SELECT_ID_KEY, validatedSamples)
+      )
     );
 
     this.setState({
       validatingSamples: false,
-      [sampleFieldName]: newSamples,
+      [samplesKey]: newSamples,
+      [selectedSampleIdsKey]: newSelectedSampleIds,
+      ...(sampleType === "local" ? { removedLocalFiles } : {}),
     });
 
     logAnalyticsEvent(UPLOADSAMPLESTEP_SAMPLE_CHANGED, {
       newSamples: validatedSamples.length,
       totalSamples: newSamples.length,
       sampleType,
+      ...(sampleType === "local"
+        ? { removedLocalFiles: removedLocalFiles.length }
+        : {}),
       ...this.getAnalyticsContext(),
     });
   };
 
-  handleSampleRemoved = sampleName => {
+  handleSamplesRemove = (sampleSelectIds, sampleType) => {
     this.props.onDirty();
-    const newSamples = reject(["name", sampleName], this.getCurrentSamples());
+    const samplesKey = this.getSamplesKey(sampleType);
+    const selectedSampleIdsKey = this.getSelectedSampleIdsKey(sampleType);
 
-    if (this.state.currentTab === LOCAL_UPLOAD_TAB) {
-      const newSampleNamesToFiles = omit(
-        sampleName,
-        this.state.sampleNamesToFiles
-      );
+    const newSamples = reject(
+      sample => includes(sample[SELECT_ID_KEY], sampleSelectIds),
+      this.state[samplesKey]
+    );
+    const newSelectedSampleIds = new Set(
+      difference(
+        Array.from(this.getSelectedSampleIds(sampleType)),
+        sampleSelectIds
+      )
+    );
 
-      this.setState({
-        localSamples: newSamples,
-        sampleNamesToFiles: newSampleNamesToFiles,
-      });
-    }
+    const newState = {
+      [samplesKey]: newSamples,
+      [selectedSampleIdsKey]: newSelectedSampleIds,
+    };
 
-    if (this.state.currentTab === REMOTE_UPLOAD_TAB) {
-      this.setState({
-        remoteSamples: newSamples,
-      });
-    }
+    this.setState(newState);
 
-    if (this.state.currentTab === BASESPACE_UPLOAD_TAB) {
-      this.setState({
-        basespaceSamples: newSamples,
-      });
-    }
-
-    logAnalyticsEvent("UploadSampleStep_sample_removed", {
-      sampleName,
+    logAnalyticsEvent("UploadSampleStep_samples_removed", {
+      sampleNames: sampleSelectIds.length,
       sampleType: this.state.currentTab,
       ...this.getAnalyticsContext(),
     });
   };
 
+  //*** Miscellaneous functions ***
+
   handleContinue = () => {
-    if (this.state.currentTab === LOCAL_UPLOAD_TAB) {
-      this.props.onUploadSamples({
-        samples: this.state.localSamples,
-        project: this.state.selectedProject,
-        sampleNamesToFiles: this.state.sampleNamesToFiles,
-        uploadType: "local",
-      });
-    }
+    const { currentTab, selectedProject } = this.state;
 
-    if (this.state.currentTab === REMOTE_UPLOAD_TAB) {
-      this.props.onUploadSamples({
-        samples: this.state.remoteSamples,
-        project: this.state.selectedProject,
-        uploadType: "remote",
-      });
-    }
-
-    if (this.state.currentTab === BASESPACE_UPLOAD_TAB) {
+    if (this.state.currentTab === BASESPACE_UPLOAD) {
       this.requestBasespaceReadProjectPermissions();
+    } else {
+      this.props.onUploadSamples({
+        samples: this.getSelectedSamples(currentTab),
+        project: selectedProject,
+        uploadType: currentTab,
+      });
     }
 
     logAnalyticsEvent("UploadSampleStep_continue-button_clicked", {
@@ -574,48 +623,47 @@ class UploadSampleStep extends React.Component {
     });
   };
 
-  handleNoProject = () => {
-    this.setState({
-      showNoProjectError: true,
-    });
+  // Whether the current user input is valid. Determines whether the Continue button is enabled.
+  isValid = () =>
+    this.state.selectedProject !== null &&
+    size(this.getSelectedSamples(this.state.currentTab)) > 0 &&
+    !this.state.validatingSamples;
+
+  getAnalyticsContext = () => {
+    const project = this.state.selectedProject;
+    return {
+      projectId: project && project.id,
+      projectName: project && project.name,
+    };
   };
 
-  getSampleNamesToFiles = () => {
-    return flow(
-      keyBy("name"),
-      mapValues(sample => sample.input_files_attributes)
-    )(this.getCurrentSamples());
-  };
+  //*** Render functions ***
 
   renderTab = () => {
-    const {
-      basespaceAccessToken,
-      currentTab,
-      selectedProject,
-      localSamples,
-    } = this.state;
+    const { basespaceAccessToken, currentTab, selectedProject } = this.state;
     switch (currentTab) {
-      case LOCAL_UPLOAD_TAB:
+      case LOCAL_UPLOAD:
         return (
           <LocalSampleFileUpload
-            onChange={this.handleLocalSampleChange}
+            onChange={samples => this.handleSamplesAdd(samples, "local")}
             project={selectedProject}
-            samples={localSamples}
+            samples={this.getSelectedSamples("local")}
+            hasSamplesLoaded={size(this.state.localSamples) > 0}
           />
         );
-      case REMOTE_UPLOAD_TAB:
+      case REMOTE_UPLOAD:
         return (
           <RemoteSampleFileUpload
             project={selectedProject}
-            onChange={samples => this.handleSampleChange(samples, "remote")}
+            onChange={samples => this.handleSamplesAdd(samples, "remote")}
             onNoProject={this.handleNoProject}
           />
         );
-      case BASESPACE_UPLOAD_TAB:
+      case BASESPACE_UPLOAD:
         return (
           <BasespaceSampleImport
             project={selectedProject}
-            onChange={samples => this.handleSampleChange(samples, "basespace")}
+            onChange={samples => this.handleSamplesAdd(samples, "basespace")}
             accessToken={basespaceAccessToken}
             onAccessTokenChange={this.handleBasespaceAccessTokenChange}
             basespaceClientId={this.props.basespaceClientId}
@@ -628,18 +676,10 @@ class UploadSampleStep extends React.Component {
     }
   };
 
-  getAnalyticsContext = () => {
-    const project = this.state.selectedProject;
-    return {
-      projectId: project && project.id,
-      projectName: project && project.name,
-    };
-  };
-
   render() {
     const { currentTab } = this.state;
     const readyForBasespaceAuth =
-      currentTab === BASESPACE_UPLOAD_TAB && this.isValid();
+      currentTab === BASESPACE_UPLOAD && this.isValid();
 
     return (
       <div
@@ -700,7 +740,7 @@ class UploadSampleStep extends React.Component {
             </RequestContext.Consumer>
             {this.renderTab()}
           </div>
-          {this.state.currentTab === LOCAL_UPLOAD_TAB &&
+          {this.state.currentTab === LOCAL_UPLOAD &&
             this.state.removedLocalFiles.length > 0 && (
               <IssueGroup
                 caption={`${
@@ -711,22 +751,20 @@ class UploadSampleStep extends React.Component {
                 type="warning"
               />
             )}
-          {(currentTab === REMOTE_UPLOAD_TAB ||
-            currentTab === LOCAL_UPLOAD_TAB) && (
-            <BulkSampleUploadTable
-              sampleNamesToFiles={this.getSampleNamesToFiles()}
-              onRemoved={this.handleSampleRemoved}
-              hideProgressColumn
-              showCount={this.state.currentTab === REMOTE_UPLOAD_TAB}
-              className={cs.uploadTable}
-            />
-          )}
-          {currentTab === BASESPACE_UPLOAD_TAB && (
-            <BasespaceSampleUploadTable
-              samples={this.getCurrentSamples()}
-              onSampleRemove={this.handleSampleRemoved}
-            />
-          )}
+          <SampleUploadTable
+            samples={this.getSampleDataForUploadTable(currentTab)}
+            onSamplesRemove={sampleNames =>
+              this.handleSamplesRemove(sampleNames, currentTab)
+            }
+            onSampleSelect={(value, checked) =>
+              this.handleSampleSelect(value, checked, currentTab)
+            }
+            onAllSamplesSelect={checked =>
+              this.handleAllSamplesSelect(checked, currentTab)
+            }
+            selectedSampleIds={this.getSelectedSampleIds(currentTab)}
+            sampleUploadType={currentTab}
+          />
         </div>
         <div className={cs.controls}>
           {readyForBasespaceAuth && (

@@ -8,10 +8,11 @@ import _fp, {
   sortBy,
   slice,
   sumBy,
+  keyBy,
 } from "lodash/fp";
 import cx from "classnames";
 
-import { sampleNameFromFileName, cleanFilePath } from "~utils/sample";
+import { sampleNameFromFileName } from "~utils/sample";
 import FilePicker from "~ui/controls/FilePicker";
 import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -39,19 +40,22 @@ class LocalSampleFileUpload extends React.Component {
       (files, name) => ({
         name,
         project_id: get("id", this.props.project),
-        host_genome_id: "", // Supplied by metadata in next step.
+        // Set by the user in the Upload Metadata step.
+        host_genome_id: "",
         input_files_attributes: files.map(file => ({
           source_type: "local",
-          source: cleanFilePath(file.name),
-          parts: cleanFilePath(file.name),
+          source: file.name,
+          parts: file.name,
         })),
+        // Store the files keyed by name for easy de-duping. These files are associated with the input_file_attributes.
+        files: keyBy("name", files),
         status: "created",
         client: "web",
       }),
       sampleNamesToFiles
     );
 
-    this.props.onChange(localSamples, sampleNamesToFiles);
+    this.props.onChange(localSamples);
   };
 
   onRejected = rejectedFiles => {
@@ -83,14 +87,27 @@ class LocalSampleFileUpload extends React.Component {
     );
   };
 
-  render() {
+  getFilePickerTitle = () => {
+    const { hasSamplesLoaded } = this.props;
+
     const fileCount = sumBy(
       s => size(s.input_files_attributes),
       this.props.samples
     );
-    const filePickerTitle = fileCount
-      ? `${fileCount} File${fileCount > 1 ? "s" : ""} To Upload`
-      : null;
+
+    if (fileCount) {
+      return `${fileCount} File${fileCount > 1 ? "s" : ""} Selected For Upload`;
+    }
+
+    if (hasSamplesLoaded) {
+      return "No Files Selected For Upload";
+    }
+
+    return null;
+  };
+
+  render() {
+    const filePickerTitle = this.getFilePickerTitle();
 
     return (
       <div className={cs.localFileUpload}>
@@ -131,6 +148,7 @@ LocalSampleFileUpload.propTypes = {
   project: PropTypes.Project,
   onChange: PropTypes.func.isRequired,
   samples: PropTypes.arrayOf(PropTypes.object),
+  hasSamplesLoaded: PropTypes.bool,
 };
 
 export default LocalSampleFileUpload;

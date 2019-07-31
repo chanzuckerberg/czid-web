@@ -66,7 +66,6 @@ class ReviewStep extends React.Component {
       onUploadComplete,
       uploadType,
       samples,
-      sampleNamesToFiles,
       metadata,
     } = this.props;
 
@@ -121,7 +120,6 @@ class ReviewStep extends React.Component {
       // TODO(mark): Handle progress indicators in UI.
       bulkUploadLocalWithMetadata({
         samples,
-        sampleNamesToFiles: sampleNamesToFiles,
         metadata: processMetadataRows(metadata.rows),
         onAllUploadsComplete: () => {
           this.setState({
@@ -434,12 +432,10 @@ ReviewStep.propTypes = {
       file_size: PropTypes.number,
       file_type: PropTypes.string,
       basespace_project_name: PropTypes.string,
+      files: PropTypes.objectOf(PropTypes.objectOf(PropTypes.instanceOf(File))),
     })
   ),
   uploadType: PropTypes.string.isRequired,
-  sampleNamesToFiles: PropTypes.objectOf(
-    PropTypes.arrayOf(PropTypes.instanceOf(File))
-  ),
   hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome),
   visible: PropTypes.bool,
   // Triggers when we start or stop uploading. Lets the parent know to disable header link.
