@@ -529,6 +529,7 @@ class Sample < ApplicationRecord
       .where("samples.created_at < ?", Time.now.utc - delay)
       .joins(:input_files)
       .where(input_files: { source_type: InputFile::SOURCE_TYPE_LOCAL })
+      .distinct
   end
 
   def destroy

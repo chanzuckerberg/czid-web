@@ -373,7 +373,7 @@ module SamplesHelper
       job_stats_hash = top_pipeline_run ? job_stats_by_pipeline_run_id[top_pipeline_run.id] : {}
       job_info[:derived_sample_output] = sample_derived_data(sample, top_pipeline_run, job_stats_hash)
 
-      job_info[:run_info] = if sample.upload_error
+      job_info[:run_info] = if sample.upload_error && sample.upload_error != Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED
                               {
                                 result_status_description: 'FAILED',
                                 finalized: 0,
