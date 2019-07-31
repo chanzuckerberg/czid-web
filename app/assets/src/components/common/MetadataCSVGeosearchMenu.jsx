@@ -1,5 +1,5 @@
 import React from "react";
-import { uniq, zipObject } from "lodash/fp";
+import { uniq } from "lodash/fp";
 
 import { getGeoSearchSuggestions } from "~/api/locations";
 import MetadataInput from "~/components/common/MetadataInput";
@@ -9,6 +9,8 @@ import {
 } from "~/components/ui/controls/GeoSearchInputBox";
 import PropTypes from "~/components/utils/propTypes";
 import DataTable from "~/components/visualizations/table/DataTable";
+
+import cs from "./metadata_csv_geosearch_menu.scss";
 
 export const geosearchCSVlocations = async (metadata, metadataType) => {
   if (!(metadata && metadata.rows)) return;
@@ -61,12 +63,16 @@ class MetadataCSVGeosearchMenu extends React.Component {
     return metadata.rows.map((sample, rowIndex) => {
       const sampleName = sample[NAME_COLUMN];
       return {
-        [NAME_COLUMN]: sampleName,
+        [NAME_COLUMN]: (
+          <div className={cs.sampleName} key={NAME_COLUMN}>
+            {sampleName}
+          </div>
+        ),
         [metadataType.key]: (
           <div>
             <MetadataInput
               key={metadataType.key}
-              // className={cs.input}
+              className={cs.input}
               value={sample[metadataType.name]}
               metadataType={metadataType}
               onChange={(key, value) => {
@@ -91,16 +97,22 @@ class MetadataCSVGeosearchMenu extends React.Component {
 
     if (!(metadata && metadata.rows)) return null;
     return (
-      <DataTable
-        // className={cs.inputTable}
-        headers={{
-          [NAME_COLUMN]: NAME_COLUMN,
-          [metadataType.key]: metadataType.name,
-        }}
-        columns={[NAME_COLUMN, metadataType.key]}
-        data={this.getManualInputData()}
-        getColumnWidth={column => (column === NAME_COLUMN ? 240 : 160)}
-      />
+      <React.Fragment>
+        <div className={cs.instructions}>
+          <div className={cs.title}>Location Matches</div>
+          <div className={cs.subtitle}>Please correct any errors.</div>
+        </div>
+        <DataTable
+          className={cs.inputTable}
+          headers={{
+            [NAME_COLUMN]: NAME_COLUMN,
+            [metadataType.key]: metadataType.name,
+          }}
+          columns={[NAME_COLUMN, metadataType.key]}
+          data={this.getManualInputData()}
+          getColumnWidth={() => 240}
+        />
+      </React.Fragment>
     );
   }
 }
