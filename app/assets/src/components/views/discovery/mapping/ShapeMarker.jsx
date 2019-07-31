@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { clamp } from "lodash/fp";
 import { Marker } from "react-map-gl";
 
 import CircleMarker from "~/components/views/discovery/mapping/CircleMarker";
@@ -9,8 +10,10 @@ class ShapeMarker extends React.Component {
   render() {
     const {
       active,
+      divisorConst,
       lat,
       lng,
+      maxSize,
       minSize,
       onClick,
       onMouseEnter,
@@ -24,9 +27,15 @@ class ShapeMarker extends React.Component {
     } = this.props;
 
     // Scale based on the zoom and point count (zoomed-in = higher zoom)
-    // Log2 of the count scaled looked nice visually for not getting too large with many points.
+    // Determined via eyeballing: scaling of a form x/(x+c) shows larger differences at the lower
+    // end of the range and smaller differences as it approaches a horizontal asymptote.
     const computedSize =
-      size || Math.max(Math.log2(pointCount) * sizeMultiple * zoom, minSize);
+      size ||
+      clamp(
+        minSize,
+        maxSize,
+        pointCount / (pointCount + divisorConst) * sizeMultiple * zoom
+      );
 
     return (
       <Marker latitude={lat} longitude={lng}>
@@ -54,15 +63,19 @@ class ShapeMarker extends React.Component {
 
 // Defaults determined via eyeballing.
 ShapeMarker.defaultProps = {
-  minSize: 14,
-  sizeMultiple: 2,
+  divisorConst: 400,
+  maxSize: 90,
+  minSize: 10,
+  sizeMultiple: 60,
   zoom: 3,
 };
 
 ShapeMarker.propTypes = {
   active: PropTypes.bool,
+  divisorConst: PropTypes.number,
   lat: PropTypes.number,
   lng: PropTypes.number,
+  maxSize: PropTypes.number,
   minSize: PropTypes.number,
   onClick: PropTypes.func,
   onMouseEnter: PropTypes.func,
