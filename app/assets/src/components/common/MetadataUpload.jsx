@@ -1,6 +1,6 @@
 import React from "react";
 import cx from "classnames";
-import _fp, { filter, keyBy, concat } from "lodash/fp";
+import _fp, { filter, keyBy, concat, find } from "lodash/fp";
 
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import MetadataCSVGeosearchMenu, {
@@ -81,12 +81,17 @@ class MetadataUpload extends React.Component {
 
   getCSVLocationMatches = async metadata => {
     const { onMetadataChange } = this.props;
-    const { newMetadata, warnings } = await geosearchCSVlocations(metadata);
-    console.log("WARNINGS: ", warnings);
-    onMetadataChange({
-      metadata: newMetadata,
-    });
-    this.setState({ CSVLocationWarnings: warnings });
+    try {
+      const { newMetadata, warnings } = await geosearchCSVlocations(
+        metadata,
+        this.getRequiredLocationMetadataType()
+      );
+      onMetadataChange({ metadata: newMetadata });
+      this.setState({ CSVLocationWarnings: warnings });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
   };
 
   // MetadataManualInput doesn't validate metadata before calling onMetadataChangeManual.
@@ -113,9 +118,18 @@ class MetadataUpload extends React.Component {
     return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
   };
 
+  getRequiredLocationMetadataType = () => {
+    const { projectMetadataFields } = this.state;
+    // Use the first required location MetadataField
+    return find(
+      { dataType: "location", is_required: 1 },
+      Object.values(projectMetadataFields)
+    );
+  };
+
   renderTab = () => {
     const { metadata, onMetadataChange } = this.props;
-    const { CSVLocationWarnings, projectMetadataFields } = this.state;
+    const { CSVLocationWarnings } = this.state;
 
     if (this.state.currentTab === "Manual Input") {
       if (!this.props.samples || !this.state.projectMetadataFields) {
@@ -184,8 +198,8 @@ class MetadataUpload extends React.Component {
           <MetadataCSVGeosearchMenu
             CSVLocationWarnings={CSVLocationWarnings}
             metadata={metadata}
+            metadataType={this.getRequiredLocationMetadataType()}
             onMetadataChange={onMetadataChange}
-            projectMetadataFields={projectMetadataFields}
           />
         </React.Fragment>
       );

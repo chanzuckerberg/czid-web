@@ -9,7 +9,7 @@ import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
 export const LOCATION_PRIVACY_WARNING =
   "Changed to county/district level for personal privacy.";
 export const LOCATION_UNRESOLVED_WARNING =
-  "Unresolved plain text location, not shown on maps.";
+  "Unresolved plain text, not shown on maps.";
 
 // For human samples, drop the city part of the name and show a warning.
 // Note that the backend will redo the geosearch for confirmation, so don't

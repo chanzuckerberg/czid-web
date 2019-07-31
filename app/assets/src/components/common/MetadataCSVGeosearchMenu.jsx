@@ -9,13 +9,11 @@ import {
 } from "~/components/ui/controls/GeoSearchInputBox";
 import PropTypes from "~/components/utils/propTypes";
 
-export const geosearchCSVlocations = async metadata => {
-  const fieldName = "Collection Location";
-
+export const geosearchCSVlocations = async (metadata, metadataType) => {
   if (!(metadata && metadata.rows)) return;
 
   // Get results for each plain text value
-  const locationNames = uniq(metadata.rows.map(r => r[fieldName]));
+  const locationNames = uniq(metadata.rows.map(r => r[metadataType.name]));
   const matchedLocations = {};
   for (const query of locationNames) {
     const suggestions = await getGeoSearchSuggestions(query, 1);
@@ -28,7 +26,7 @@ export const geosearchCSVlocations = async metadata => {
   let newMetadata = metadata;
   const warnings = {};
   metadata.rows.forEach((row, rowIndex) => {
-    const locationName = row[fieldName];
+    const locationName = row[metadataType.name];
     let rowWarning;
 
     if (matchedLocations.hasOwnProperty(locationName)) {
@@ -37,7 +35,7 @@ export const geosearchCSVlocations = async metadata => {
         isRowHuman(row)
       );
       if (warning) rowWarning = warning;
-      newMetadata.rows[rowIndex][fieldName] = result;
+      newMetadata.rows[rowIndex][metadataType.name] = result;
     } else {
       rowWarning = LOCATION_UNRESOLVED_WARNING;
     }
@@ -56,13 +54,12 @@ class MetadataCSVGeosearchMenu extends React.Component {
     const {
       CSVLocationWarnings,
       metadata,
+      metadataType,
       onMetadataChange,
-      projectMetadataFields,
     } = this.props;
 
     if (!(metadata && metadata.rows)) return null;
 
-    // Render results
     return metadata.rows.map((sample, rowIndex) => {
       const sampleName = sample["Sample Name"];
       return (
@@ -70,13 +67,13 @@ class MetadataCSVGeosearchMenu extends React.Component {
           <span>{sampleName}</span>
           <span>
             <MetadataInput
-              key={"collection_location_v2"}
+              key={metadataType.key}
               // className={cs.input}
-              value={sample["Collection Location"]}
-              metadataType={projectMetadataFields["collection_location_v2"]}
+              value={sample[metadataType.name]}
+              metadataType={metadataType}
               onChange={(key, value) => {
                 const newMetadata = metadata;
-                newMetadata.rows[rowIndex]["Collection Location"] = value;
+                newMetadata.rows[rowIndex][metadataType.name] = value;
                 onMetadataChange({
                   metadata: newMetadata,
                 });
@@ -95,8 +92,8 @@ class MetadataCSVGeosearchMenu extends React.Component {
 MetadataCSVGeosearchMenu.propTypes = {
   CSVLocationWarnings: PropTypes.object,
   metadata: PropTypes.object,
+  metadataType: PropTypes.object,
   onMetadataChange: PropTypes.func.isRequired,
-  projectMetadataFields: PropTypes.object,
 };
 
 export default MetadataCSVGeosearchMenu;
