@@ -31,6 +31,7 @@ class MetadataUpload extends React.Component {
     projectMetadataFields: null,
     hostGenomes: [],
     validatingCSV: false,
+    CSVLocationWarnings: {},
   };
 
   async componentDidMount() {
@@ -80,10 +81,12 @@ class MetadataUpload extends React.Component {
 
   getCSVLocationMatches = async metadata => {
     const { onMetadataChange } = this.props;
-    const metadataWithMatches = await geosearchCSVlocations(metadata);
+    const { newMetadata, warnings } = await geosearchCSVlocations(metadata);
+    console.log("WARNINGS: ", warnings);
     onMetadataChange({
-      metadata: metadataWithMatches,
+      metadata: newMetadata,
     });
+    this.setState({ CSVLocationWarnings: warnings });
   };
 
   // MetadataManualInput doesn't validate metadata before calling onMetadataChangeManual.
@@ -112,7 +115,7 @@ class MetadataUpload extends React.Component {
 
   renderTab = () => {
     const { metadata, onMetadataChange } = this.props;
-    const { projectMetadataFields } = this.state;
+    const { CSVLocationWarnings, projectMetadataFields } = this.state;
 
     if (this.state.currentTab === "Manual Input") {
       if (!this.props.samples || !this.state.projectMetadataFields) {
@@ -179,8 +182,9 @@ class MetadataUpload extends React.Component {
             </div>
           )}
           <MetadataCSVGeosearchMenu
-            onMetadataChange={onMetadataChange}
+            CSVLocationWarnings={CSVLocationWarnings}
             metadata={metadata}
+            onMetadataChange={onMetadataChange}
             projectMetadataFields={projectMetadataFields}
           />
         </React.Fragment>

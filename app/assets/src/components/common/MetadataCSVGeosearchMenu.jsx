@@ -26,6 +26,7 @@ export const geosearchCSVlocations = async metadata => {
 
   // Set results if there was a match
   let newMetadata = metadata;
+  const warnings = {};
   metadata.rows.forEach((row, rowIndex) => {
     const locationName = row[fieldName];
     if (matchedLocations.hasOwnProperty(locationName)) {
@@ -36,15 +37,21 @@ export const geosearchCSVlocations = async metadata => {
         isHuman
       );
       console.log("processed: ", result, warning);
+      if (warning) warnings[row["Sample Name"]] = warning;
       newMetadata.rows[rowIndex][fieldName] = result;
     }
   });
-  return newMetadata;
+  return { newMetadata, warnings };
 };
 
 class MetadataCSVGeosearchMenu extends React.Component {
   render() {
-    const { onMetadataChange, metadata, projectMetadataFields } = this.props;
+    const {
+      CSVLocationWarnings,
+      onMetadataChange,
+      metadata,
+      projectMetadataFields,
+    } = this.props;
 
     if (!(metadata && metadata.rows)) return null;
 
@@ -71,6 +78,9 @@ class MetadataCSVGeosearchMenu extends React.Component {
               }}
               withinModal={true}
               isHuman={true}
+              initialLocationWarning={
+                CSVLocationWarnings[sample["Sample Name"]]
+              }
             />
           </span>
         </div>
@@ -80,6 +90,7 @@ class MetadataCSVGeosearchMenu extends React.Component {
 }
 
 MetadataCSVGeosearchMenu.propTypes = {
+  CSVLocationWarnings: PropTypes.object,
   metadata: PropTypes.object,
   onMetadataChange: PropTypes.func.isRequired,
   projectMetadataFields: PropTypes.object,

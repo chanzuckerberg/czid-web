@@ -36,8 +36,10 @@ class MetadataInput extends React.Component {
   constructor(props) {
     super(props);
 
+    const { initialLocationWarning } = this.props;
+
     this.state = {
-      locationWarning: "",
+      locationWarning: initialLocationWarning || "",
     };
   }
 
@@ -129,6 +131,7 @@ MetadataInput.propTypes = {
   onSave: PropTypes.func,
   withinModal: PropTypes.bool,
   isHuman: PropTypes.bool,
+  initialLocationWarning: PropTypes.string,
 };
 
 export default MetadataInput;
