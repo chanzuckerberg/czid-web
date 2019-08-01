@@ -82,6 +82,7 @@ class MetadataUpload extends React.Component {
   getCSVLocationMatches = async metadata => {
     const { onMetadataChange } = this.props;
     if (!metadata) return;
+
     try {
       const { newMetadata, warnings } = await geosearchCSVlocations(
         metadata,
@@ -277,8 +278,8 @@ class MetadataUpload extends React.Component {
         CSVLocationWarnings={CSVLocationWarnings}
         metadata={metadata}
         metadataType={this.getRequiredLocationMetadataType()}
-        onMetadataChange={onMetadataChange}
         onCSVLocationWarningsChange={this.handleCSVLocationWarningsChange}
+        onMetadataChange={onMetadataChange}
       />
     ) : null;
   };

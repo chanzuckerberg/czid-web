@@ -16,7 +16,7 @@ import cs from "./metadata_csv_locations_menu.scss";
 export const geosearchCSVlocations = async (metadata, metadataType) => {
   if (!(metadata && metadata.rows)) return;
 
-  // Get the #1 result, if any, for each unique plain text value
+  // For each unique plain text value, get the #1 search result, if any.
   const rawNames = uniq(metadata.rows.map(r => r[metadataType.name]));
   const matchedLocations = {};
   const requests = rawNames.map(async query => {
@@ -25,24 +25,21 @@ export const geosearchCSVlocations = async (metadata, metadataType) => {
   });
   await Promise.all(requests);
 
-  // Process matched results and set warnings
+  // Process results and set warnings.
   let newMetadata = metadata;
   const warnings = {};
   metadata.rows.forEach((row, rowIndex) => {
+    const sampleName = row[NAME_COLUMN];
     const locationName = row[metadataType.name];
-    let rowWarning;
+
+    const { result, warning } = processLocationSelection(
+      matchedLocations[locationName] || locationName,
+      isRowHuman(row)
+    );
+    if (warning) warnings[sampleName] = warning;
+
     if (matchedLocations.hasOwnProperty(locationName)) {
-      const { result, warning } = processLocationSelection(
-        matchedLocations[locationName],
-        isRowHuman(row)
-      );
-      if (warning) rowWarning = warning;
       newMetadata.rows[rowIndex][metadataType.name] = result;
-    } else {
-      rowWarning = LOCATION_UNRESOLVED_WARNING;
-    }
-    if (rowWarning) {
-      warnings[row[NAME_COLUMN]] = rowWarning;
     }
   });
   return { newMetadata, warnings };
@@ -88,8 +85,9 @@ class MetadataCSVLocationsMenu extends React.Component {
       metadataType.name
     ];
     const newMetadata = metadata;
-
     const warnings = {};
+
+    // Set all the rows to the newValue
     newMetadata.rows.forEach(row => {
       const { result, warning } = processLocationSelection(
         newValue,
@@ -98,6 +96,7 @@ class MetadataCSVLocationsMenu extends React.Component {
       row[metadataType.name] = result;
       if (warning) warnings[row[NAME_COLUMN]] = warning;
     });
+
     onMetadataChange({
       metadata: newMetadata,
     });
@@ -115,6 +114,22 @@ class MetadataCSVLocationsMenu extends React.Component {
 
     return metadata.rows.map((row, rowIndex) => {
       const sampleName = row[NAME_COLUMN];
+
+      const onChange = (key, value) => {
+        const newMetadata = metadata;
+        newMetadata.rows[rowIndex][metadataType.name] = value;
+
+        onMetadataChange({
+          metadata: newMetadata,
+        });
+        this.setState({ applyToAllSample: sampleName });
+        logAnalyticsEvent("MetadataManualInput_input_changed", {
+          key,
+          value,
+          sampleName,
+        });
+      };
+
       return {
         [NAME_COLUMN]: (
           <div className={cs.sampleName} key={NAME_COLUMN}>
@@ -128,19 +143,7 @@ class MetadataCSVLocationsMenu extends React.Component {
               className={cs.input}
               value={row[metadataType.name]}
               metadataType={metadataType}
-              onChange={(key, value) => {
-                const newMetadata = metadata;
-                newMetadata.rows[rowIndex][metadataType.name] = value;
-                this.setState({ applyToAllSample: sampleName });
-                onMetadataChange({
-                  metadata: newMetadata,
-                });
-                logAnalyticsEvent("MetadataManualInput_input_changed", {
-                  key,
-                  value,
-                  sampleName,
-                });
-              }}
+              onChange={onChange}
               withinModal={true}
               isHuman={isRowHuman(row)}
               warning={CSVLocationWarnings[sampleName]}
@@ -173,7 +176,6 @@ class MetadataCSVLocationsMenu extends React.Component {
           }}
           columns={[NAME_COLUMN, metadataType.key]}
           data={this.getManualInputData()}
-          getColumnWidth={() => 240}
         />
       </React.Fragment>
     );
@@ -184,8 +186,8 @@ MetadataCSVLocationsMenu.propTypes = {
   CSVLocationWarnings: PropTypes.object,
   metadata: PropTypes.object,
   metadataType: PropTypes.object,
-  onMetadataChange: PropTypes.func.isRequired,
   onCSVLocationWarningsChange: PropTypes.func.isRequired,
+  onMetadataChange: PropTypes.func.isRequired,
 };
 
 export default MetadataCSVLocationsMenu;
