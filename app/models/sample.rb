@@ -34,6 +34,8 @@ class Sample < ApplicationRecord
   # Constants for upload errors.
   UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED = "BASESPACE_UPLOAD_FAILED".freeze
   UPLOAD_ERROR_S3_UPLOAD_FAILED = "S3_UPLOAD_FAILED".freeze
+  UPLOAD_ERROR_LOCAL_UPLOAD_STALLED = "LOCAL_UPLOAD_STALLED".freeze
+  UPLOAD_ERROR_LOCAL_UPLOAD_FAILED = "LOCAL_UPLOAD_FAILED".freeze
 
   TOTAL_READS_JSON = "total_reads.json".freeze
   LOG_BASENAME = 'log.txt'.freeze
@@ -520,6 +522,16 @@ class Sample < ApplicationRecord
     end
   end
 
+  # Delay determined based on query of historical upload times, where 80%
+  # of successful uploads took less than 3 hours by client_updated_at.
+  def self.current_stalled_local_uploads(delay = 3.hours)
+    where(status: STATUS_CREATED)
+      .where("samples.created_at < ?", Time.now.utc - delay)
+      .joins(:input_files)
+      .where(input_files: { source_type: InputFile::SOURCE_TYPE_LOCAL })
+      .distinct
+  end
+
   def destroy
     TaxonByterange.where(pipeline_run_id: pipeline_run_ids).delete_all
     TaxonCount.where(pipeline_run_id: pipeline_run_ids).delete_all
@@ -855,5 +867,11 @@ class Sample < ApplicationRecord
   # Be careful when using this because it may cause an extra query for each of your samples!
   def first_pipeline_run
     pipeline_runs.order(created_at: :desc).first
+  end
+
+  # Gets the URL for the admin-only sample status page for printing in internal
+  # error messages.
+  def status_url
+    UrlUtil.absolute_base_url + "/samples/#{id}/pipeline_runs"
   end
 end

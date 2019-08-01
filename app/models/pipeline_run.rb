@@ -190,6 +190,8 @@ class PipelineRun < ApplicationRecord
   # *Exception* for cloned pipeline runs that already have results and finalized status
   before_create :create_output_states, :create_run_stages, unless: :results_finalized?
 
+  delegate :status_url, to: :sample
+
   def parse_dag_vars
     JSON.parse(dag_vars || "{}")
   end
@@ -907,7 +909,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def run_time
-    Time.current - created_at
+    Time.now.utc - created_at
   end
 
   def duration_hrs
@@ -1431,15 +1433,6 @@ class PipelineRun < ApplicationRecord
 
   def self.viewable(user)
     where(sample_id: Sample.viewable(user).pluck(:id))
-  end
-
-  def status_url
-    base_url = if Rails.env == 'staging'
-                 "https://staging.idseq.net"
-               else
-                 "https://idseq.net"
-               end
-    base_url + "/samples/#{sample.id}/pipeline_runs"
   end
 
   # Keys here are used as cache keys for report_info action in SamplesController.
