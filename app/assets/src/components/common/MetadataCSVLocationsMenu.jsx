@@ -4,15 +4,13 @@ import { uniq, find } from "lodash/fp";
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
 import MetadataInput from "~/components/common/MetadataInput";
-import {
-  LOCATION_UNRESOLVED_WARNING,
-  processLocationSelection,
-} from "~/components/ui/controls/GeoSearchInputBox";
+import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 import PropTypes from "~/components/utils/propTypes";
 import DataTable from "~/components/visualizations/table/DataTable";
 
 import cs from "./metadata_csv_locations_menu.scss";
 
+// Batch geosearch CSV locations for matches
 export const geosearchCSVlocations = async (metadata, metadataType) => {
   if (!(metadata && metadata.rows)) return;
 
@@ -27,7 +25,7 @@ export const geosearchCSVlocations = async (metadata, metadataType) => {
 
   // Process results and set warnings.
   let newMetadata = metadata;
-  const warnings = {};
+  const allWarnings = {};
   metadata.rows.forEach((row, rowIndex) => {
     const sampleName = row[NAME_COLUMN];
     const locationName = row[metadataType.name];
@@ -36,13 +34,13 @@ export const geosearchCSVlocations = async (metadata, metadataType) => {
       matchedLocations[locationName] || locationName,
       isRowHuman(row)
     );
-    if (warning) warnings[sampleName] = warning;
+    if (warning) allWarnings[sampleName] = warning;
 
     if (matchedLocations.hasOwnProperty(locationName)) {
       newMetadata.rows[rowIndex][metadataType.name] = result;
     }
   });
-  return { newMetadata, warnings };
+  return { newMetadata, warnings: allWarnings };
 };
 
 const isRowHuman = row => row["Host Genome"] && row["Host Genome"] === "Human";
@@ -85,7 +83,7 @@ class MetadataCSVLocationsMenu extends React.Component {
       metadataType.name
     ];
     const newMetadata = metadata;
-    const warnings = {};
+    const allWarnings = {};
 
     // Set all the rows to the newValue
     newMetadata.rows.forEach(row => {
@@ -94,16 +92,17 @@ class MetadataCSVLocationsMenu extends React.Component {
         isRowHuman(row)
       );
       row[metadataType.name] = result;
-      if (warning) warnings[row[NAME_COLUMN]] = warning;
+      if (warning) allWarnings[row[NAME_COLUMN]] = warning;
     });
 
     onMetadataChange({
       metadata: newMetadata,
     });
-    onCSVLocationWarningsChange(warnings);
+    onCSVLocationWarningsChange(allWarnings);
     this.setState({ applyToAllSample: null });
   };
 
+  // Populate the data table cells
   getManualInputData = () => {
     const {
       CSVLocationWarnings,

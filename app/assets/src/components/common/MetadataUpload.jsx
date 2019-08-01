@@ -76,6 +76,7 @@ class MetadataUpload extends React.Component {
         projectName: this.props.project.name,
       });
     }
+    // Batch geosearch for locations for the interactive menu
     this.getCSVLocationMatches(metadata);
   };
 
