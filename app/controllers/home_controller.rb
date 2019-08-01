@@ -86,7 +86,11 @@ class HomeController < ApplicationController
       return
     end
 
-    UserMailer.account_request_reply(home_params[:email])
+    begin
+      UserMailer.account_request_reply(home_params[:email]).deliver_now
+    rescue
+      LogUtil.log_err_and_airbrake("account_request_reply(#{home_params[:email]} failed")
+    end
 
     body = ""
     home_params.each do |k, v|
