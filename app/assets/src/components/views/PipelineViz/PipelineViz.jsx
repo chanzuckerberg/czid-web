@@ -204,18 +204,15 @@ class PipelineViz extends React.Component {
   }
 
   handleNodeHover(stageIndex, nodeId) {
-    const { highlightColor, nodeColor, inputEdgeColor } = this.props;
+    const { inputEdgeColor, highlightColor } = this.props;
     const graph = this.graphs[stageIndex];
     const updatedInterStageArrows = [...this.state.interStageArrows];
 
-    const hoveredNodeOptions = {
-      borderWidth: 1,
-      color: {
-        background: nodeColor,
-        border: highlightColor,
-      },
-    };
-    graph.updateNodes([nodeId], hoveredNodeOptions);
+    const hoveredNodeColoring = this.getColorOptions(
+      this.getStatusGroupFor(stageIndex, nodeId),
+      true
+    );
+    graph.updateNodes([nodeId], hoveredNodeColoring);
     this.lastMouseMoveInfo.alteredGraphs.add(stageIndex);
 
     const inputColorOptions = {
@@ -304,20 +301,15 @@ class PipelineViz extends React.Component {
   }
 
   handleNodeBlur = () => {
-    const { nodeColor } = this.props;
     const { graphIndex, nodeId, alteredGraphs } = this.lastMouseMoveInfo;
     if (nodeId == null) {
       return;
     }
 
-    const defaultNodeOptions = {
-      borderWidth: 1,
-      color: {
-        background: nodeColor,
-        border: nodeColor,
-      },
-    };
-    this.graphs[graphIndex].updateNodes([nodeId], defaultNodeOptions);
+    const origNodeColor = this.getColorOptions(
+      this.getStatusGroupFor(graphIndex, nodeId)
+    );
+    this.graphs[graphIndex].updateNodes([nodeId], origNodeColor);
 
     alteredGraphs.forEach(i => {
       const graph = this.graphs[i];
@@ -347,13 +339,25 @@ class PipelineViz extends React.Component {
     this.setState({ stagesOpened: updatedStagesOpened });
   }
 
+  getStatusGroupFor(stageIndex, stepIndex) {
+    const {
+      graphData: { stages },
+    } = this.props;
+    const step = stages[stageIndex].steps[stepIndex];
+    return this.stepStatusToGroup(step.status);
+  }
+
   generateNodeData(stageIndex, edgeData) {
     const {
       graphData: { stages },
     } = this.props;
     const stepData = stages[stageIndex].steps;
     const nodeData = stepData.map((step, i) => {
-      return { id: i, label: step.name };
+      return {
+        id: i,
+        label: step.name,
+        group: this.stepStatusToGroup(step.status),
+      };
     });
 
     nodeData.push({ id: START_NODE_ID, group: "startEndNodes" });
@@ -361,6 +365,78 @@ class PipelineViz extends React.Component {
 
     this.addHierarchicalLevelsToNodes(nodeData, edgeData);
     return nodeData;
+  }
+
+  stepStatusToGroup(status) {
+    switch (status) {
+      case null:
+      case 0:
+        return "notStarted";
+      case 1:
+        return "inProgress";
+      case 2:
+      case 3:
+        return "finished";
+      case 4:
+        return "errored";
+    }
+  }
+
+  getStageStatusClass(stageIndex) {
+    const {
+      graphData: { stages },
+    } = this.props;
+
+    switch (stages[stageIndex].jobStatus) {
+      case null:
+      case 0:
+        return cs.notStarted;
+      case 1:
+        return cs.inProgress;
+      case 2:
+      case 3:
+        return cs.finished;
+      case 4:
+        return cs.errored;
+      default:
+        return cs.notStarted;
+    }
+  }
+
+  getColorOptions(statusGroup, hovered = false) {
+    const {
+      notStartedNodeColor,
+      inProgressNodeColor,
+      finishedNodeColor,
+      erroredNodeColor,
+    } = this.props;
+    let color;
+    switch (statusGroup) {
+      case "notStarted":
+        color = notStartedNodeColor;
+        break;
+      case "inProgress":
+        color = inProgressNodeColor;
+        break;
+      case "finished":
+        color = finishedNodeColor;
+        break;
+      case "errored":
+        color = erroredNodeColor;
+        break;
+    }
+
+    color = hovered && color.hovered ? color.hovered : color.default;
+    return {
+      color: {
+        background: color,
+        border: color,
+        highlight: {
+          background: color,
+          border: color,
+        },
+      },
+    };
   }
 
   addHierarchicalLevelsToNodes(nodeData, edgeData) {
@@ -531,12 +607,7 @@ class PipelineViz extends React.Component {
   }
 
   drawStageGraph(index) {
-    const {
-      nodeColor,
-      backgroundColor,
-      edgeColor,
-      highlightColor,
-    } = this.props;
+    const { backgroundColor, edgeColor } = this.props;
 
     const container = this.graphContainers[index];
 
@@ -547,14 +618,6 @@ class PipelineViz extends React.Component {
       nodes: {
         borderWidth: 1,
         borderWidthSelected: 1,
-        color: {
-          background: nodeColor,
-          border: nodeColor,
-          highlight: {
-            border: highlightColor,
-            background: nodeColor,
-          },
-        },
         shadow: {
           color: "rgba(0, 0, 0, 0.22)",
           x: 0,
@@ -595,6 +658,10 @@ class PipelineViz extends React.Component {
             y: true,
           },
         },
+        notStarted: this.getColorOptions("notStarted"),
+        inProgress: this.getColorOptions("inProgress"),
+        finished: this.getColorOptions("finished"),
+        errored: this.getColorOptions("errored"),
       },
       edges: {
         chosen: false,
@@ -693,6 +760,7 @@ class PipelineViz extends React.Component {
         <div
           className={cx(
             isOpened && toggleable ? cs.hidden : cs.stageButton,
+            this.getStageStatusClass(i),
             !toggleable && cs.disabled
           )}
           onClick={() => this.toggleStage(i)}
@@ -782,6 +850,11 @@ class PipelineViz extends React.Component {
   }
 }
 
+const nodeColors = PropTypes.shape({
+  default: PropTypes.string.isRequired,
+  hovered: PropTypes.string,
+});
+
 PipelineViz.propTypes = {
   admin: PropTypes.bool,
   graphData: PropTypes.object,
@@ -790,7 +863,10 @@ PipelineViz.propTypes = {
   pipelineVersions: PropTypes.arrayOf(PropTypes.string),
   lastProcessedAt: PropTypes.string,
   backgroundColor: PropTypes.string,
-  nodeColor: PropTypes.string,
+  notStartedNodeColor: nodeColors,
+  inProgressNodeColor: nodeColors,
+  finishedNodeColor: nodeColors,
+  erroredNodeColor: nodeColors,
   edgeColor: PropTypes.string,
   highlightColor: PropTypes.string,
   inputEdgeColor: PropTypes.string,
@@ -802,7 +878,10 @@ PipelineViz.propTypes = {
 PipelineViz.defaultProps = {
   admin: false,
   backgroundColor: "#f8f8f8",
-  nodeColor: "#ffffff",
+  notStartedNodeColor: { default: "#ffffff" },
+  inProgressNodeColor: { default: "#eff2fc", hovered: "#5887fa" },
+  finishedNodeColor: { default: "#e6f7ed" },
+  erroredNodeColor: { default: "#f9ebeb" },
   edgeColor: "#999999",
   highlightColor: "#3867fa",
   inputEdgeColor: "#000000",

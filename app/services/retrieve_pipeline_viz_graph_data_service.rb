@@ -53,9 +53,12 @@ class RetrievePipelineVizGraphDataService
     stages = @all_dag_jsons.map.with_index do |dag_json, stage_index|
       stage_step_status = all_step_status[stage_index]
       stage_step_descriptions = STEP_DESCRIPTIONS[@stage_names[stage_index]]["steps"]
+
+      max_job_status = 0
       steps = dag_json["steps"].map do |step|
         status_info = stage_step_status[step["out"]] || {}
         description = status_info["description"].blank? ? stage_step_descriptions[step["out"]] : status_info["description"]
+        max_job_status = [status_info["status"], max_job_status].max
         {
           name: modify_step_name(step["out"]),
           description: description,
@@ -67,7 +70,7 @@ class RetrievePipelineVizGraphDataService
 
       {
         steps: steps,
-        jobStatus: dag_json[:job_status]
+        jobStatus: max_job_status
       }
     end
     return stages

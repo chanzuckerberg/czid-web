@@ -12,7 +12,7 @@ class PipelineStepDetailsMode extends React.Component {
     if (description) {
       const header = <div className={cs.title}>Step Info</div>;
       return (
-        <Accordion header={header} className={cs.accordion}>
+        <Accordion header={header} className={cs.accordion} open={true}>
           <div className={cx(cs.description, cs.accordionContent)}>
             {description}
           </div>
@@ -40,7 +40,7 @@ class PipelineStepDetailsMode extends React.Component {
 
     const fileGroupHeader = <div className={cs.title}>Input Files</div>;
     return (
-      <Accordion className={cs.accordion} header={fileGroupHeader}>
+      <Accordion className={cs.accordion} header={fileGroupHeader} open={true}>
         <div className={cs.accordionContent}>{fileGroupList}</div>
       </Accordion>
     );
@@ -51,7 +51,11 @@ class PipelineStepDetailsMode extends React.Component {
     if (outputFiles && outputFiles.length) {
       const outputFilesHeader = <div className={cs.title}>Output Files</div>;
       return (
-        <Accordion className={cs.accordion} header={outputFilesHeader}>
+        <Accordion
+          className={cs.accordion}
+          header={outputFilesHeader}
+          open={true}
+        >
           <div className={cx(cs.accordionContent, cs.fileGroup)}>
             <div className={cs.fileGroupHeader}>{`From ${stepName} Step:`}</div>
             {this.renderFileList(outputFiles)}

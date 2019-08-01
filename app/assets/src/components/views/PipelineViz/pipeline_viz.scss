@@ -55,16 +55,21 @@
   }
 }
 
-.completed {
+.finished {
   background-color: $success-lightest;
 }
 
 .notStarted {
   background-color: $white;
+  color: $dark-grey;
 }
 
 .inProgress {
   background-color: $primary-lightest;
+}
+
+.errored {
+  background-color: $error-lightest;
 }
 
 .stageArrow {
