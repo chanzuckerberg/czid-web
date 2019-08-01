@@ -90,7 +90,11 @@ class RetrievePipelineVizGraphDataService
 
   def step_statuses
     @pipeline_run.pipeline_run_stages.map do |prs|
-      JSON.parse(PipelineOutputsHelper.get_s3_file(prs.step_status_file_path) || "{}")
+      begin
+        JSON.parse(PipelineOutputsHelper.get_s3_file(prs.step_status_file_path) || "{}")
+      rescue JSON::ParserError
+        {}
+      end
     end
   end
 
