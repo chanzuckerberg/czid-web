@@ -23,4 +23,8 @@ class UserMailerPreview < ActionMailer::Preview
   def reset_password_instructions
     CustomDeviseMailer.reset_password_instructions(User.first, "fake_token", {})
   end
+
+  def account_request_reply
+    UserMailer.account_request_reply(User.first.email)
+  end
 end
