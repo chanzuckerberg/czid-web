@@ -49,7 +49,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def dag_name
-    STAGE_NAME_TO_DAG_NAMES[name]
+    STAGE_NAME_TO_DAG_NAME[name]
   end
 
   def step_status_file_path
