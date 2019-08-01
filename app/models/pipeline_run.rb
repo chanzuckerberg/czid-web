@@ -319,7 +319,7 @@ class PipelineRun < ApplicationRecord
   def create_run_stages
     run_stages = []
     PipelineRunStage::STAGE_INFO.each do |step_number, info|
-      run_stages << PipelineRunStages.new(
+      run_stages << PipelineRunStage.new(
         step_number: step_number,
         name: info[:name],
         job_command_func: info[:job_command_func]
