@@ -23,14 +23,14 @@ RSpec.describe BasespaceHelper, type: :helper do
                 "Name" => file_one_name,
                 "HrefContent" => file_one_href_content,
                 "Href" => file_one_href,
-                "Id" => "1"
+                "Id" => "1",
               },
               {
                 "Name" => file_two_name,
                 "HrefContent" => file_two_href_content,
                 "Href" => file_two_href,
-                "Id" => "2"
-              }
+                "Id" => "2",
+              },
             ]
           )
       end
@@ -43,13 +43,13 @@ RSpec.describe BasespaceHelper, type: :helper do
             {
               name: file_one_name,
               download_path: file_one_href_content,
-              source_path: file_one_href
+              source_path: file_one_href,
             },
             {
               name: file_two_name,
               download_path: file_two_href_content,
-              source_path: file_two_href
-            }
+              source_path: file_two_href,
+            },
           ]
         )
       end
@@ -94,7 +94,7 @@ RSpec.describe BasespaceHelper, type: :helper do
           ["curl", "--fail", "-s", "--show-error", fake_basespace_path],
           ["aws", "s3", "cp", "-", "#{fake_s3_path}/#{fake_file_name}"]
         ).exactly(1).times.and_return([
-                                        true, ""
+                                        true, "",
                                       ])
         expect(LogUtil).to receive(:log_err_and_airbrake).exactly(0).times
 
@@ -111,7 +111,7 @@ RSpec.describe BasespaceHelper, type: :helper do
           ["curl", "--fail", "-s", "--show-error", fake_basespace_path],
           ["aws", "s3", "cp", "-", "#{fake_s3_path}/#{fake_file_name}"]
         ).exactly(1).times.and_return([
-                                        false, fake_std_err
+                                        false, fake_std_err,
                                       ])
 
         # If the syscall fails, we should log the error.

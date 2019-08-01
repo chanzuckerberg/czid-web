@@ -46,7 +46,7 @@ class AmrHeatmapController < ApplicationController
         "sampleId" => sample.id,
         "metadata" => sample.metadata_with_base_type,
         "amrCounts" => amr_counts,
-        "error" => ""
+        "error" => "",
       }
       good_sample_ids[sample.id] = true
     end
@@ -58,7 +58,7 @@ class AmrHeatmapController < ApplicationController
           "sampleId" => input_id,
           "metadata" => {},
           "amrCounts" => [],
-          "error" => "sample not found"
+          "error" => "sample not found",
         }
       end
     end
@@ -76,7 +76,7 @@ class AmrHeatmapController < ApplicationController
       "geneFamily" => [],
       "drugClass" => [],
       "publications" => [],
-      "error" => ""
+      "error" => "",
     }
 
     card_owl = fetch_card_owl()
@@ -167,7 +167,7 @@ class AmrHeatmapController < ApplicationController
     # but their labels are located elsewhere in the document.
     remote_properties = {
       "drugClass" => get_drug_classes(ontology_information["accession"], xml_dom),
-      "geneFamily" => matching_entry.xpath("./rdfs:subClassOf[not(*)]")
+      "geneFamily" => matching_entry.xpath("./rdfs:subClassOf[not(*)]"),
     }
 
     # Some drug resistances are only listed in the gene family entry
@@ -182,7 +182,7 @@ class AmrHeatmapController < ApplicationController
 
     local_properties = {
       "synonyms" => matching_entry.xpath("./oboInOwl:hasExactSynonym"),
-      "publications" => matching_entry.at_xpath("./following-sibling::owl:Axiom").xpath("./oboInOwl:hasDbXref")
+      "publications" => matching_entry.at_xpath("./following-sibling::owl:Axiom").xpath("./oboInOwl:hasDbXref"),
     }
 
     local_properties.each do |ontology_key, property_nodes|

@@ -31,7 +31,7 @@ module BasespaceHelper
     response["Response"]["Items"].map do |dataset|
       {
         id: dataset["Id"],
-        name: dataset["Name"]
+        name: dataset["Name"],
       }
     end
   end
@@ -54,7 +54,7 @@ module BasespaceHelper
         file_size: dataset["TotalSize"],
         file_type: get_dataset_file_type(dataset),
         basespace_project_id: project_id,
-        basespace_project_name: dataset["Project"]["Name"]
+        basespace_project_name: dataset["Project"]["Name"],
       }
     end
 
@@ -80,7 +80,7 @@ module BasespaceHelper
         download_path: file["HrefContent"],
         # Store the file id for debugging purposes.
         # Without a valid access token, the file cannot be accessed using the file id.
-        source_path: file["Href"]
+        source_path: file["Href"],
       }
     end
   end

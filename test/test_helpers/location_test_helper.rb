@@ -14,9 +14,9 @@ module LocationTestHelper
         "county" => "San Francisco City and County",
         "state" => "California",
         "country" => "USA",
-        "country_code" => "us"
-      }
-    }
+        "country_code" => "us",
+      },
+    },
   ].freeze
   API_OSM_ID_SEARCH_RESPONSE = API_GEOSEARCH_RESPONSE[0].freeze
 
@@ -33,8 +33,8 @@ module LocationTestHelper
       "country_code" => "us",
       "osm_id" => 34_324_395,
       "osm_type" => "way",
-      "locationiq_id" => 89_640_023
-    }
+      "locationiq_id" => 89_640_023,
+    },
   ].freeze
   API_GEOSEARCH_CALIFORNIA_RESPONSE = [
     {
@@ -48,9 +48,9 @@ module LocationTestHelper
       "address" => {
         "state" => "California",
         "country" => "USA",
-        "country_code" => "us"
-      }
-    }
+        "country_code" => "us",
+      },
+    },
   ].freeze
   API_GEOSEARCH_SF_COUNTY_RESPONSE = [
     {
@@ -65,9 +65,9 @@ module LocationTestHelper
         "county" => "San Francisco City and County",
         "state" => "California",
         "country" => "USA",
-        "country_code" => "us"
-      }
-    }
+        "country_code" => "us",
+      },
+    },
   ].freeze
   API_GEOSEARCH_DHAKA_RESPONSE = [
     {
@@ -81,9 +81,9 @@ module LocationTestHelper
         "city" => "Dhaka",
         "state" => "Dhaka Division",
         "country" => "Bangladesh",
-        "country_code" => "bd"
-      }
-    }
+        "country_code" => "bd",
+      },
+    },
   ].freeze
   API_GEOSEARCH_USA_RESPONSE = [
     {
@@ -95,9 +95,9 @@ module LocationTestHelper
       "display_name" => "USA",
       "address" => {
         "country" => "USA",
-        "country_code" => "us"
-      }
-    }
+        "country_code" => "us",
+      },
+    },
   ].freeze
   FORMATTED_GEOSEARCH_DHAKA_RESPONSE = [
     {
@@ -112,8 +112,8 @@ module LocationTestHelper
       "country_code" => "bd",
       "osm_id" => 3_442_474_911,
       "osm_type" => "node",
-      "locationiq_id" => 46_003_496
-    }
+      "locationiq_id" => 46_003_496,
+    },
   ].freeze
   API_GEOSEARCH_UGANDA_RESPONSE = [
     {
@@ -125,9 +125,9 @@ module LocationTestHelper
       "display_name" => "Uganda",
       "address" => {
         "country" => "Uganda",
-        "country_code" => "ug"
-      }
-    }
+        "country_code" => "ug",
+      },
+    },
   ].freeze
   FORMATTED_GEOSEARCH_UGANDA_RESPONSE = [
     {
@@ -142,7 +142,7 @@ module LocationTestHelper
       "country_code" => "ug",
       "osm_id" => 192_796,
       "osm_type" => "relation",
-      "locationiq_id" => 214_342_685
-    }
+      "locationiq_id" => 214_342_685,
+    },
   ].freeze
 end

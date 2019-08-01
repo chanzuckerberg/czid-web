@@ -9,47 +9,47 @@ RSpec.describe PipelineVizController, type: :controller do
       targets: {
         one: ["file1"],
         two: ["file2"],
-        three: ["file3"]
+        three: ["file3"],
       },
       steps: [
         {
           in: ["one"],
           out: "two",
-          class: "step_one"
+          class: "step_one",
         }, {
           in: ["two"],
           out: "three",
-          class: "step_two"
-        }
+          class: "step_two",
+        },
       ],
       given_targets: {
         one: {
-          s3_dir: "/1.0"
-        }
-      }
-    }.to_json
+          s3_dir: "/1.0",
+        },
+      },
+    }.to_json,
   }, {
     name: "Experimental",
     dag_json: {
       output_dir_s3: "",
       targets: {
         three: ["file3"],
-        four: ["file4"]
+        four: ["file4"],
       },
       steps: [
         {
           in: ["three"],
           out: "four",
-          class: "step_three"
-        }
+          class: "step_three",
+        },
       ],
       given_targets: {
         three: {
-          s3_dir: "/1.0"
-        }
-      }
-    }.to_json
-  }]
+          s3_dir: "/1.0",
+        },
+      },
+    }.to_json,
+  },]
 
   expected_stage_results = {
     "stages" => [
@@ -58,48 +58,48 @@ RSpec.describe PipelineVizController, type: :controller do
           {
             "name" => "Two",
             "inputEdges" => [0],
-            "outputEdges" => [1]
+            "outputEdges" => [1],
           },
           {
             "name" => "Three",
             "inputEdges" => [1],
-            "outputEdges" => [2]
-          }
-        ]
+            "outputEdges" => [2],
+          },
+        ],
       }, {
         "steps" => [{
           "name" => "Four",
           "inputEdges" => [2],
-          "outputEdges" => [3]
-        }]
-      }
+          "outputEdges" => [3],
+        },],
+      },
     ],
     "edges" => [
       {
         "to" => { "stageIndex" => 0, "stepIndex" => 0 },
         "files" => [{ "displayName" => "file1" }],
-        "isIntraStage" => false
+        "isIntraStage" => false,
       },
       # Edges from inter_stage_edges
       {
         "from" => { "stageIndex" => 0, "stepIndex" => 0 },
         "to" => { "stageIndex" => 0, "stepIndex" => 1 },
         "files" => [{ "displayName" => "file2" }],
-        "isIntraStage" => true
+        "isIntraStage" => true,
       },
       {
         "from" => { "stageIndex" => 0, "stepIndex" => 1 },
         "to" => { "stageIndex" => 1, "stepIndex" => 0 },
         "files" => [{ "displayName" => "file3" }],
-        "isIntraStage" => false
+        "isIntraStage" => false,
       },
       # Edges from add_final_output_edges
       {
         "from" => { "stageIndex" => 1, "stepIndex" => 0 },
         "files" => [{ "displayName" => "file4" }],
-        "isIntraStage" => false
-      }
-    ]
+        "isIntraStage" => false,
+      },
+    ],
   }
 
   # Admin specific behavior

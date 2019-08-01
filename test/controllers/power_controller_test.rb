@@ -28,10 +28,10 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @joe_project = projects(:joe_project)
     input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
                      name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local" },
+                     source_type: "local", },
                    { source: "RR004_water_2_S23_R2_001.fastq.gz",
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local" }]
+                     source_type: "local", },]
     assert_difference('Sample.count') do
       post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @joe_project.name, client: "web", input_files_attributes: input_files } }
     end
@@ -259,10 +259,10 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @public_project = projects(:public_project)
     input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
                      name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local" },
+                     source_type: "local", },
                    { source: "RR004_water_2_S23_R2_001.fastq.gz",
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local" }]
+                     source_type: "local", },]
     assert_no_difference('Sample.count') do
       post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @public_project.name, client: "web", input_files_attributes: input_files } }
     end
@@ -335,10 +335,10 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @project = projects(:one)
     input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
                      name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local" },
+                     source_type: "local", },
                    { source: "RR004_water_2_S23_R2_001.fastq.gz",
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local" }]
+                     source_type: "local", },]
     assert_no_difference('Sample.count') do
       post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }
     end
@@ -378,10 +378,10 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     @project = projects(:two)
     input_files = [{ source: "RR004_water_2_S23_R1_001.fastq.gz",
                      name: "RR004_water_2_S23_R1_001.fastq.gz",
-                     source_type: "local" },
+                     source_type: "local", },
                    { source: "RR004_water_2_S23_R2_001.fastq.gz",
                      name: "RR004_water_2_S23_R2_001.fastq.gz",
-                     source_type: "local" }]
+                     source_type: "local", },]
     assert_no_difference('Sample.count') do
       post "#{samples_url}.json", params: { sample: { name: 'joe new sample', project_name: @project.name, client: "web", input_files_attributes: input_files } }
     end
@@ -492,7 +492,7 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     entrypoint_taxon_count = taxon_counts(:three)
     post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
                                           taxId: entrypoint_taxon_count.tax_id, pipelineRunIds: [pipeline_runs(:three).id, pipeline_runs(:four).id],
-                                          taxName: entrypoint_taxon_count.name }
+                                          taxName: entrypoint_taxon_count.name, }
     assert_equal "unauthorized", JSON.parse(@response.body)['status']
   end
 
@@ -500,8 +500,8 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
                                           taxId: 1, pipelineRunIds: [pipeline_runs(:public_project_sampleA_run).id,
-                                                                     pipeline_runs(:public_project_sampleB_run).id],
-                                          tax_name: 'some species' }
+                                                                     pipeline_runs(:public_project_sampleB_run).id,],
+                                          tax_name: 'some species', }
     assert_equal "ok", JSON.parse(@response.body)['status']
   end
 
@@ -509,8 +509,8 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
     sign_in(:joe)
     post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:joe_project).id,
                                           taxId: 1, pipelineRunIds: [pipeline_runs(:joe_project_sampleA_run).id,
-                                                                     pipeline_runs(:joe_project_sampleB_run).id],
-                                          tax_name: 'some species' }
+                                                                     pipeline_runs(:joe_project_sampleB_run).id,],
+                                          tax_name: 'some species', }
     assert_equal "ok", JSON.parse(@response.body)['status']
   end
 
@@ -520,8 +520,8 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
       sign_in(:joe)
       post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: projects(:public_project).id,
                                             taxId: 1, pipelineRunIds: [pipeline_runs(:joe_project_sampleA_run).id,
-                                                                       pipeline_runs(:joe_project_sampleB_run).id],
-                                            taxName: 'some species' }
+                                                                       pipeline_runs(:joe_project_sampleB_run).id,],
+                                            taxName: 'some species', }
     end
   end
 

@@ -83,7 +83,7 @@ module MetadataHelper
                   {
                     name: sample_name,
                     # For now, always default to Human for new samples.
-                    host_genome_name: "Human"
+                    host_genome_name: "Human",
                   }
                 end
               elsif project.nil?
@@ -91,7 +91,7 @@ module MetadataHelper
                 host_genomes_by_name.map do |name, _|
                   {
                     name: "Example #{name} Sample",
-                    host_genome_name: name
+                    host_genome_name: name,
                   }
                 end
               else
@@ -100,7 +100,7 @@ module MetadataHelper
                   {
                     name: sample.name,
                     host_genome_name: sample.host_genome_name,
-                    metadata: sample.metadata.index_by(&:key)
+                    metadata: sample.metadata.index_by(&:key),
                   }
                 end
               end
@@ -335,7 +335,7 @@ module MetadataHelper
 
     {
       warnings: warning_aggregator.error_groups,
-      errors: errors + error_aggregator.error_groups
+      errors: errors + error_aggregator.error_groups,
     }
   end
 end

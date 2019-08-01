@@ -72,7 +72,7 @@ class CheckPipelineRuns
     unless autoscaling_state
       autoscaling_state = {
         t_last: t_now - forced_update_interval,
-        chunk_counts: nil
+        chunk_counts: nil,
       }
     end
     last_chunk_counts = autoscaling_state[:chunk_counts]
@@ -88,11 +88,11 @@ class CheckPipelineRuns
       'mode' => 'update',
       'gsnapl' => {
         'num_chunks' => new_chunk_counts[:gsnap],
-        'max_concurrent' => PipelineRun::GSNAP_MAX_CONCURRENT
+        'max_concurrent' => PipelineRun::GSNAP_MAX_CONCURRENT,
       },
       'rapsearch2' => {
         'num_chunks' => new_chunk_counts[:rapsearch],
-        'max_concurrent' => PipelineRun::RAPSEARCH_MAX_CONCURRENT
+        'max_concurrent' => PipelineRun::RAPSEARCH_MAX_CONCURRENT,
       },
       'my_environment' => Rails.env,
       'max_job_dispatch_lag_seconds' => PipelineRun::MAX_JOB_DISPATCH_LAG_SECONDS,
@@ -103,14 +103,14 @@ class CheckPipelineRuns
         {
           'queue_name' => Sample::DEFAULT_QUEUE,
           'vcpus' => Sample::DEFAULT_VCPUS,
-          'region' => AWS_DEFAULT_REGION
+          'region' => AWS_DEFAULT_REGION,
         },
         {
           'queue_name' => Sample::DEFAULT_QUEUE_HIMEM,
           'vcpus' => Sample::DEFAULT_VCPUS_HIMEM,
-          'region' => AWS_DEFAULT_REGION
-        }
-      ]
+          'region' => AWS_DEFAULT_REGION,
+        },
+      ],
     }
     c_stdout, c_stderr, c_status = Open3.capture3("app/jobs/autoscaling.py '#{autoscaling_config.to_json}'")
     Rails.logger.info(c_stdout)
@@ -145,7 +145,7 @@ class CheckPipelineRuns
       {
         name: fq,
         source: s3path + "/" + fq,
-        source_type: "s3"
+        source_type: "s3",
       }
     end
     unless metadata['idseq_bench_reproducible'] && metadata['idseq_bench_git_hash'].length == 40
@@ -179,7 +179,7 @@ class CheckPipelineRuns
       web_commit: web_commit,
       pipeline_commit: pipeline_commit,
       pipeline_branch: bm_pipeline_branch,
-      sample_notes: JSON.pretty_generate(new_metadata)
+      sample_notes: JSON.pretty_generate(new_metadata),
     }
     @bm_sample = Sample.new(bm_sample_params)
     # HACK: Not really sure why we have to manually set the status to STATUS_CREATED here,

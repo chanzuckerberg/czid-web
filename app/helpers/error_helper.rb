@@ -83,67 +83,67 @@ module ErrorHelper
     ERRORS = {
       duplicate_columns: {
         headers: ["Column #", "Column Name", "Duplicate Column #"],
-        title: ->(num_cols, _) { "#{num_cols} duplicate columns were found. Please ensure all column names are unique." }
+        title: ->(num_cols, _) { "#{num_cols} duplicate columns were found. Please ensure all column names are unique." },
       },
       no_matching_sample_existing: {
         headers: ["Row #", "Sample Name"],
-        title: ->(num_rows, _) { "#{num_rows} sample names do not match any samples in this project." }
+        title: ->(num_rows, _) { "#{num_rows} sample names do not match any samples in this project." },
       },
       no_matching_sample_new: {
         headers: ["Row #", "Sample Name"],
-        title: ->(num_rows, _) { "#{num_rows} sample names do not match any samples being uploaded." }
+        title: ->(num_rows, _) { "#{num_rows} sample names do not match any samples being uploaded." },
       },
       row_wrong_num_values: {
         headers: ["Row #", "Sample Name", "Number of Values"],
-        title: ->(num_rows, metadata) { "#{num_rows} rows have an unexpected number of values. (#{metadata['num_cols']} values expected based on the number of CSV headers.)" }
+        title: ->(num_rows, metadata) { "#{num_rows} rows have an unexpected number of values. (#{metadata['num_cols']} values expected based on the number of CSV headers.)" },
       },
       row_missing_sample_name: {
         headers: ["Row #"],
-        title: ->(num_rows, _) { "#{num_rows} rows are missing sample names." }
+        title: ->(num_rows, _) { "#{num_rows} rows are missing sample names." },
       },
       row_duplicate_sample: {
         headers: ["Row #", "Sample Name"],
-        title: ->(num_rows, _) { "#{num_rows} rows are duplicates of earlier rows." }
+        title: ->(num_rows, _) { "#{num_rows} rows are duplicates of earlier rows." },
       },
       row_missing_required_metadata: {
         headers: ["Row #", "Sample Name", "Missing Fields"],
-        title: ->(num_rows, _) { "#{num_rows} samples are missing required metadata fields." }
+        title: ->(num_rows, _) { "#{num_rows} samples are missing required metadata fields." },
       },
       missing_sample: {
         headers: ["Sample Name"],
-        title: ->(num_rows, _) { "#{num_rows} samples are missing from the CSV. Please upload required metadata." }
+        title: ->(num_rows, _) { "#{num_rows} samples are missing from the CSV. Please upload required metadata." },
       },
       # This should theoretically never happen if the user uses the upload UI.
       row_invalid_project_id: {
         headers: ["Row #", "Sample Name"],
-        title: ->(num_rows, _) { "#{num_rows} samples are assigned to an invalid project. Please contact us for support." }
+        title: ->(num_rows, _) { "#{num_rows} samples are assigned to an invalid project. Please contact us for support." },
       },
       row_missing_host_genome: {
         headers: ["Row #", "Sample Name"],
-        title: ->(num_rows, _) { "#{num_rows} rows are missing host genomes." }
+        title: ->(num_rows, _) { "#{num_rows} rows are missing host genomes." },
       },
       row_invalid_host_genome: {
         headers: ["Row #", "Sample Name", "Invalid Host Genome"],
-        title: ->(num_rows, _) { "#{num_rows} rows specify host genomes that are not supported." }
+        title: ->(num_rows, _) { "#{num_rows} rows specify host genomes that are not supported." },
       },
       # This should theoretically never happen. This is when a Metadata object doesn't have a sample attached to it.
       sample_not_found: {
         headers: ["Row #", "Sample Name"],
-        title: ->(num_rows, _) { "#{num_rows} samples were unexpectedly missing. Please contact us for support." }
+        title: ->(num_rows, _) { "#{num_rows} samples were unexpectedly missing. Please contact us for support." },
       },
       # This should theoretically never happen since we now have custom fields.
       invalid_key_for_host_genome: {
         headers: ["Row #", "Sample Name", "Host Genome Name", "Incompatible Field"],
-        title: ->(num_rows, _) { "#{num_rows} metadata fields are incompatible with their sample's host genome. Please check the metadata dictionary." }
+        title: ->(num_rows, _) { "#{num_rows} metadata fields are incompatible with their sample's host genome. Please check the metadata dictionary." },
       },
       value_already_exists: {
         headers: ["Row #", "Sample Name", "Field", "Old Value", "New Value"],
-        title: ->(num_rows, _) { "#{num_rows} metadata fields will be permanently overwritten." }
+        title: ->(num_rows, _) { "#{num_rows} metadata fields will be permanently overwritten." },
       },
       custom_field_creation: {
         headers: ["Column #", "Field"],
-        title: ->(num_cols, _) { "#{num_cols} new custom fields will be created. Please check our metadata dictionary to see if your fields are listed under different names." }
-      }
+        title: ->(num_cols, _) { "#{num_cols} new custom fields will be created. Please check our metadata dictionary to see if your fields are listed under different names." },
+      },
     }.freeze
 
     def initialize
@@ -189,7 +189,7 @@ module ErrorHelper
         if field.base_type == Metadatum::LOCATION_TYPE
           @supported_errors[error_type] = {
             headers: ["Row #", "Sample Name", "Invalid Value"],
-            title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{LOCATION_INVALID_ERROR}" }
+            title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{LOCATION_INVALID_ERROR}" },
           }
         end
 
@@ -197,12 +197,12 @@ module ErrorHelper
           @supported_errors[error_type] = if is_human
                                             {
                                               headers: ["Row #", "Sample Name", "Invalid Value"],
-                                              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{DATE_INVALID_ERROR_HUMAN}" }
+                                              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{DATE_INVALID_ERROR_HUMAN}" },
                                             }
                                           else
                                             {
                                               headers: ["Row #", "Sample Name", "Invalid Value"],
-                                              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{DATE_INVALID_ERROR}" }
+                                              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{DATE_INVALID_ERROR}" },
                                             }
                                           end
         end
@@ -210,7 +210,7 @@ module ErrorHelper
         if field.base_type == Metadatum::NUMBER_TYPE
           @supported_errors[error_type] = {
             headers: ["Row #", "Sample Name", "Invalid Value"],
-            title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{NUMBER_INVALID_ERROR}" }
+            title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). #{NUMBER_INVALID_ERROR}" },
           }
         end
 
@@ -218,13 +218,13 @@ module ErrorHelper
           @supported_errors[error_type] = if field.force_options
                                             {
                                               headers: ["Row #", "Sample Name", "Invalid Value"],
-                                              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). The valid options are #{JSON.parse(field.options).join(', ')}." }
+                                              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). The valid options are #{JSON.parse(field.options).join(', ')}." },
                                             }
                                           else
                                             # This should theoreticaly never happen, because string fields with force_options=false have no validation constraints.
                                             {
                                               headers: ["Row #", "Sample Name", "Invalid Value"],
-                                              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). Please contact us for help." }
+                                              title: ->(num_rows, _) { "#{num_rows} invalid values for \"#{field.display_name}\" (column #{col_index}). Please contact us for help." },
                                             }
                                           end
         end
