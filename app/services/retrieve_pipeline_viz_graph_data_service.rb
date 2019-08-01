@@ -1,6 +1,6 @@
 class RetrievePipelineVizGraphDataService
   include Callable
-  # For pre-server-fed step descriptions.
+  # PipelineRunsHelper includes default descriptions, before we can get them from the dag
   include PipelineRunsHelper
 
   # Structures dag_json of each stage of the pipeline run into the following in @results for drawing
@@ -49,12 +49,12 @@ class RetrievePipelineVizGraphDataService
   private
 
   def create_stage_nodes_scaffolding
-    all_step_status = step_status
+    all_step_statuses = step_statuses
     stages = @all_dag_jsons.map.with_index do |dag_json, stage_index|
-      stage_step_status = all_step_status[stage_index]
+      stage_step_statuses = all_step_statuses[stage_index]
       stage_step_descriptions = STEP_DESCRIPTIONS[@stage_names[stage_index]]["steps"]
       steps = dag_json["steps"].map do |step|
-        status_info = stage_step_status[step["out"]] || {}
+        status_info = stage_step_statuses[step["out"]] || {}
         description = status_info["description"].blank? ? stage_step_descriptions[step["out"]] : status_info["description"]
         {
           name: modify_step_name(step["out"]),
@@ -88,7 +88,7 @@ class RetrievePipelineVizGraphDataService
     return edges
   end
 
-  def step_status
+  def step_statuses
     @pipeline_run.pipeline_run_stages.map do |prs|
       JSON.parse(PipelineOutputsHelper.get_s3_file(prs.step_status_file_path) || "{}")
     end

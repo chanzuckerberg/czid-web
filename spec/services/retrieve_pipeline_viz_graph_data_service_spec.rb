@@ -132,7 +132,7 @@ RSpec.describe RetrievePipelineVizGraphDataService do
       results = RetrievePipelineVizGraphDataService.call(@pr.id, true, false)
 
       results[:stages][0][:steps].each do |step|
-        # Status should be nil of no job status data exists for the stage
+        # Status should be nil if no job status data exists for the stage
         expect(step[:status]).to be_nil
       end
 
