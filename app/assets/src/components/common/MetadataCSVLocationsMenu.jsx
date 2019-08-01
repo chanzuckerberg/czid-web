@@ -11,7 +11,7 @@ import {
 import PropTypes from "~/components/utils/propTypes";
 import DataTable from "~/components/visualizations/table/DataTable";
 
-import cs from "./metadata_csv_geosearch_menu.scss";
+import cs from "./metadata_csv_locations_menu.scss";
 
 export const geosearchCSVlocations = async (metadata, metadataType) => {
   if (!(metadata && metadata.rows)) return;
@@ -52,7 +52,7 @@ const isRowHuman = row => row["Host Genome"] && row["Host Genome"] === "Human";
 
 const NAME_COLUMN = "Sample Name";
 
-class MetadataCSVGeosearchMenu extends React.Component {
+class MetadataCSVLocationsMenu extends React.Component {
   state = {
     // Which sample the "Apply to All" button should appear on.
     applyToAllSample: null,
@@ -65,7 +65,7 @@ class MetadataCSVGeosearchMenu extends React.Component {
         className={cs.applyToAll}
         onClick={withAnalytics(
           () => this.applyToAll(sample),
-          "MetadataCSVGeosearchMenu_apply-all_clicked",
+          "MetadataCsvLocationsMenu_apply-all_clicked",
           {
             sampleName: sample.name,
           }
@@ -77,18 +77,31 @@ class MetadataCSVGeosearchMenu extends React.Component {
   };
 
   applyToAll = sample => {
-    const { metadata, metadataType, onMetadataChange } = this.props;
+    const {
+      metadata,
+      metadataType,
+      onMetadataChange,
+      onCSVLocationWarningsChange,
+    } = this.props;
 
     const newValue = (find({ [NAME_COLUMN]: sample }, metadata.rows) || {})[
       metadataType.name
     ];
     const newMetadata = metadata;
+
+    const warnings = {};
     newMetadata.rows.forEach(row => {
-      row[metadataType.name] = newValue;
+      const { result, warning } = processLocationSelection(
+        newValue,
+        isRowHuman(row)
+      );
+      row[metadataType.name] = result;
+      if (warning) warnings[row[NAME_COLUMN]] = warning;
     });
     onMetadataChange({
       metadata: newMetadata,
     });
+    onCSVLocationWarningsChange(warnings);
     this.setState({ applyToAllSample: null });
   };
 
@@ -167,11 +180,12 @@ class MetadataCSVGeosearchMenu extends React.Component {
   }
 }
 
-MetadataCSVGeosearchMenu.propTypes = {
+MetadataCSVLocationsMenu.propTypes = {
   CSVLocationWarnings: PropTypes.object,
   metadata: PropTypes.object,
   metadataType: PropTypes.object,
   onMetadataChange: PropTypes.func.isRequired,
+  onCSVLocationWarningsChange: PropTypes.func.isRequired,
 };
 
-export default MetadataCSVGeosearchMenu;
+export default MetadataCSVLocationsMenu;

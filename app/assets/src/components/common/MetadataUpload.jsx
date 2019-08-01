@@ -3,9 +3,9 @@ import cx from "classnames";
 import _fp, { filter, keyBy, concat, find } from "lodash/fp";
 
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
-import MetadataCSVGeosearchMenu, {
+import MetadataCSVLocationsMenu, {
   geosearchCSVlocations,
-} from "~/components/common/MetadataCSVGeosearchMenu";
+} from "~/components/common/MetadataCSVLocationsMenu";
 import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
@@ -128,6 +128,9 @@ class MetadataUpload extends React.Component {
       Object.values(projectMetadataFields)
     );
   };
+
+  handleCSVLocationWarningsChange = CSVLocationWarnings =>
+    this.setState({ CSVLocationWarnings });
 
   renderTab = () => {
     if (this.state.currentTab === "Manual Input") {
@@ -270,11 +273,12 @@ class MetadataUpload extends React.Component {
 
     // Hide if they still have errors that will require re-uploading their CSV.
     return currentTab === "CSV Upload" && !hasErrors ? (
-      <MetadataCSVGeosearchMenu
+      <MetadataCSVLocationsMenu
         CSVLocationWarnings={CSVLocationWarnings}
         metadata={metadata}
         metadataType={this.getRequiredLocationMetadataType()}
         onMetadataChange={onMetadataChange}
+        onCSVLocationWarningsChange={this.handleCSVLocationWarningsChange}
       />
     ) : null;
   };
