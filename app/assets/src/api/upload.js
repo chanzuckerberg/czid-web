@@ -84,6 +84,9 @@ export const bulkUploadLocalWithMetadata = ({
         const sampleName = sample.name;
         const files = sampleNamesToFiles[sampleName];
 
+        // Start pinging server to monitor uploads server-side
+        const interval = startUploadHeartbeat(sample.id);
+
         sample.input_files.map(inputFileAttributes => {
           const file = files[inputFileAttributes.name];
           const url = inputFileAttributes.presigned_url;
@@ -99,6 +102,7 @@ export const bulkUploadLocalWithMetadata = ({
             onSuccess: () => {
               fileNamesToProgress[file.name] = 100;
               onFileUploadSuccess(sampleName, sample.id);
+              clearInterval(interval);
             },
             onError: error => onUploadError(file, error),
           });
@@ -194,11 +198,13 @@ export const bulkUploadLocal = ({
 // Local uploads go directly from the browser to S3, so we don't know if an upload was interrupted.
 // Ping the heartbeat endpoint periodically to say the browser is actively uploading this sample.
 export const startUploadHeartbeat = async sampleId => {
-  const interval = 60000; // 60 sec
-  setInterval(() => {
+  const sendHeartbeat = () => {
     putWithCSRF(`/samples/${sampleId}/upload_heartbeat.json`).catch(() =>
       // eslint-disable-next-line no-console
       console.error("Can't connect to IDseq server.")
     );
-  }, interval);
+  };
+  sendHeartbeat(); // Send first heartbeat immediately so we know it is working
+  const interval = 60000; // 60 sec
+  return setInterval(sendHeartbeat, interval);
 };
