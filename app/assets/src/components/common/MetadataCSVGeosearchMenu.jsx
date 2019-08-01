@@ -1,5 +1,5 @@
 import React from "react";
-import { uniq } from "lodash/fp";
+import { set, union, uniq, find } from "lodash/fp";
 
 import { getGeoSearchSuggestions } from "~/api/locations";
 import MetadataInput from "~/components/common/MetadataInput";
@@ -52,6 +52,45 @@ const isRowHuman = row => row["Host Genome"] && row["Host Genome"] === "Human";
 const NAME_COLUMN = "Sample Name";
 
 class MetadataCSVGeosearchMenu extends React.Component {
+  state = {
+    // Which sample the "Apply to All" button should appear on.
+    applyToAllSample: null,
+  };
+
+  renderApplyToAll = sample => {
+    const { applyToAllSample } = this.state;
+    return applyToAllSample === sample ? (
+      <div
+        className={cs.applyToAll}
+        onClick={() => {
+          this.applyToAll(sample);
+          // logAnalyticsEvent("MetadataManualInput_apply-all_clicked", {
+          //   sampleName: sample.name,
+          //   column,
+          // });
+        }}
+      >
+        Apply to All
+      </div>
+    ) : null;
+  };
+
+  applyToAll = sample => {
+    const { metadata, metadataType, onMetadataChange } = this.props;
+
+    const newValue = (find({ [NAME_COLUMN]: sample }, metadata.rows) || {})[
+      metadataType.name
+    ];
+    const newMetadata = metadata;
+    newMetadata.rows.forEach(row => {
+      row[metadataType.name] = newValue;
+    });
+    onMetadataChange({
+      metadata: newMetadata,
+    });
+    this.setState({ applyToAllSample: null });
+  };
+
   getManualInputData = () => {
     const {
       CSVLocationWarnings,
@@ -60,8 +99,8 @@ class MetadataCSVGeosearchMenu extends React.Component {
       onMetadataChange,
     } = this.props;
 
-    return metadata.rows.map((sample, rowIndex) => {
-      const sampleName = sample[NAME_COLUMN];
+    return metadata.rows.map((row, rowIndex) => {
+      const sampleName = row[NAME_COLUMN];
       return {
         [NAME_COLUMN]: (
           <div className={cs.sampleName} key={NAME_COLUMN}>
@@ -73,19 +112,21 @@ class MetadataCSVGeosearchMenu extends React.Component {
             <MetadataInput
               key={metadataType.key}
               className={cs.input}
-              value={sample[metadataType.name]}
+              value={row[metadataType.name]}
               metadataType={metadataType}
               onChange={(key, value) => {
                 const newMetadata = metadata;
                 newMetadata.rows[rowIndex][metadataType.name] = value;
+                this.setState({ applyToAllSample: sampleName });
                 onMetadataChange({
                   metadata: newMetadata,
                 });
               }}
               withinModal={true}
-              isHuman={isRowHuman(sample)}
+              isHuman={isRowHuman(row)}
               warning={CSVLocationWarnings[sampleName]}
             />
+            {this.renderApplyToAll(sampleName)}
           </div>
         ),
       };
