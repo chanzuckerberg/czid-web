@@ -86,6 +86,8 @@ class HomeController < ApplicationController
       return
     end
 
+    UserMailer.account_request_reply(home_params[:email])
+
     body = ""
     home_params.each do |k, v|
       body += "#{k}: #{v}\n"
