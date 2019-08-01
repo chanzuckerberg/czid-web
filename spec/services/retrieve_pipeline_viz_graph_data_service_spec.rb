@@ -58,8 +58,8 @@ RSpec.describe RetrievePipelineVizGraphDataService do
   step_status_data = {
     four: {
       status: 1,
-      description: "This is the description of output four."
-    }
+      description: "This is the description of output four.",
+    },
   }
 
   expected_stage_results = {

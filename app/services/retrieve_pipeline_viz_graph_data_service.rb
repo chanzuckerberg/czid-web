@@ -32,7 +32,7 @@ class RetrievePipelineVizGraphDataService
     1 => "inProgress",
     2 => "finished",
     3 => "finished", # Uploaded
-    4 => "errored"
+    4 => "errored",
   }.freeze
 
   def initialize(pipeline_run_id, is_admin, remove_host_filtering_urls)
@@ -71,7 +71,7 @@ class RetrievePipelineVizGraphDataService
           description: description,
           inputEdges: [],
           outputEdges: [],
-          status: JOB_STATUS_NUM_TO_STRING[status_info["status"]]
+          status: JOB_STATUS_NUM_TO_STRING[status_info["status"]],
         }
       end
 

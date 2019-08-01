@@ -33,7 +33,7 @@ class PipelineRunStage < ApplicationRecord
     HOST_FILTERING_STAGE_NAME => DAG_NAME_HOST_FILTER,
     ALIGNMENT_STAGE_NAME => DAG_NAME_ALIGNMENT,
     POSTPROCESS_STAGE_NAME => DAG_NAME_POSTPROCESS,
-    EXPT_STAGE_NAME => DAG_NAME_EXPERIMENTAL
+    EXPT_STAGE_NAME => DAG_NAME_EXPERIMENTAL,
   }.freeze
 
   # Max number of times we resubmit a job when it gets killed by EC2.
