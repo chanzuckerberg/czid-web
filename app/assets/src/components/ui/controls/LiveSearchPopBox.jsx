@@ -97,12 +97,16 @@ class LiveSearchPopBox extends React.Component {
   };
 
   renderSearchBox = () => {
-    const { placeholder, rectangular } = this.props;
+    const { placeholder, rectangular, inputClassName } = this.props;
     const { isLoading, value } = this.state;
     return (
       <Input
         fluid
-        className={cx(cs.searchInput, rectangular && cs.rectangular)}
+        className={cx(
+          cs.searchInput,
+          rectangular && cs.rectangular,
+          inputClassName
+        )}
         icon="search"
         loading={isLoading}
         placeholder={placeholder}
@@ -191,14 +195,15 @@ LiveSearchPopBox.defaultProps = {
 
 LiveSearchPopBox.propTypes = {
   className: PropTypes.string,
-  initialValue: PropTypes.string,
-  inputMode: PropTypes.bool,
   delayTriggerSearch: PropTypes.number,
+  initialValue: PropTypes.string,
+  inputClassName: PropTypes.string,
+  inputMode: PropTypes.bool,
   minChars: PropTypes.number,
   onEnter: PropTypes.func,
-  onSearchTriggered: PropTypes.func.isRequired,
-  onSearchChange: PropTypes.func,
   onResultSelect: PropTypes.func,
+  onSearchChange: PropTypes.func,
+  onSearchTriggered: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
   rectangular: PropTypes.bool,
   value: PropTypes.string,

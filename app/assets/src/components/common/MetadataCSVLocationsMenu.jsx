@@ -190,7 +190,7 @@ MetadataCSVLocationsMenu.propTypes = {
     rows: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.any)),
   }),
   locationMetadataType: PropTypes.shape({
-    dataType: "location",
+    dataType: PropTypes.oneOf(["location"]),
     key: PropTypes.string,
     name: PropTypes.string,
   }),

@@ -128,19 +128,20 @@ class GeoSearchInputBox extends React.Component {
   };
 
   render() {
-    const { className } = this.props;
+    const { className, inputClassName } = this.props;
     const { value } = this.state;
 
     return (
       <LiveSearchPopBox
         className={className}
+        inputClassName={inputClassName}
         inputMode
-        onSearchTriggered={this.handleSearchTriggered}
-        onSearchChange={this.handleSearchChange}
         onResultSelect={this.handleResultSelected}
+        onSearchChange={this.handleSearchChange}
+        onSearchTriggered={this.handleSearchTriggered}
         placeholder="Enter a location"
-        value={isString(value) ? value : value.name}
         rectangular
+        value={isString(value) ? value : value.name}
       />
     );
   }
@@ -152,6 +153,7 @@ GeoSearchInputBox.defaultProps = {
 
 GeoSearchInputBox.propTypes = {
   className: PropTypes.string,
+  inputClassName: PropTypes.string,
   onResultSelect: PropTypes.func,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 };

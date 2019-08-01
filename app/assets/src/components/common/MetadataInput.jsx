@@ -1,12 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { isArray } from "lodash/fp";
+import cx from "classnames";
 
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
 import GeoSearchInputBox, {
   processLocationSelection,
 } from "~/components/ui/controls/GeoSearchInputBox";
+import AlertIcon from "~ui/icons/AlertIcon";
 
 import cs from "./metadata_input.scss";
 
@@ -74,6 +76,7 @@ class MetadataInput extends React.Component {
         <React.Fragment>
           <GeoSearchInputBox
             className={className}
+            inputClassName={cx(warning && "warning")}
             // Calls save on selection
             onResultSelect={({ result: selection }) => {
               const { result, warning } = processLocationSelection(
@@ -85,7 +88,14 @@ class MetadataInput extends React.Component {
             }}
             value={value}
           />
-          {warning && <span className={cs.warning}>{warning}</span>}
+          {warning && (
+            <div className={cs.warning}>
+              <div className={cs.icon}>
+                <AlertIcon />
+              </div>
+              <div>{warning}</div>
+            </div>
+          )}
         </React.Fragment>
       );
     } else {
