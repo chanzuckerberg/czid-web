@@ -111,13 +111,13 @@ class VisualizationsController < ApplicationController
       id: vis.id,
       data: @data,
       name: vis.name,
-      sample_ids: vis.sample_ids
+      sample_ids: vis.sample_ids,
     }
   rescue => err
     render json: {
       status: "failed",
       message: "Unable to save",
-      errors: [err]
+      errors: [err],
     }, status: :internal_server_error
   end
 
@@ -126,13 +126,13 @@ class VisualizationsController < ApplicationController
     render json: {
       status: "success",
       message: "Url shortened successfully",
-      unique_key: short_url.unique_key
+      unique_key: short_url.unique_key,
     }
   rescue => err
     render json: {
       status: "failed",
       message: "Unable to shorten",
-      errors: [err]
+      errors: [err],
     }, status: :internal_server_error
   end
 
@@ -143,7 +143,7 @@ class VisualizationsController < ApplicationController
       taxonLevels: %w[Genus Species],
       categories: ReportHelper::ALL_CATEGORIES.pluck('name'),
       subcategories: {
-        Viruses: ["Phage"]
+        Viruses: ["Phage"],
       },
       metrics: HeatmapHelper::ALL_METRICS,
       backgrounds: current_power.backgrounds.map do |background|
@@ -162,12 +162,12 @@ class VisualizationsController < ApplicationController
           { text: "NR rPM", value: "NR_rpm" },
           { text: "NR %id", value: "NR_percentidentity" },
           { text: "NR L (alignment length in bp)", value: "NR_alignmentlength" },
-          { text: "R log(1/e)", value: "NR_neglogevalue" }
+          { text: "R log(1/e)", value: "NR_neglogevalue" },
         ],
-        operators: [">=", "<="]
+        operators: [">=", "<="],
       },
       allowedFeatures: current_user.allowed_feature_list,
-      heatmapTs: heatmap_ts
+      heatmapTs: heatmap_ts,
     }
   end
 

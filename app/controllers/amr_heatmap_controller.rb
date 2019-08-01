@@ -47,7 +47,7 @@ class AmrHeatmapController < ApplicationController
         "sampleId" => sample.id,
         "metadata" => sample.metadata_with_base_type,
         "amrCounts" => amr_counts,
-        "error" => ""
+        "error" => "",
       }
       good_sample_ids[sample.id] = true
     end
@@ -59,7 +59,7 @@ class AmrHeatmapController < ApplicationController
           "sampleId" => input_id,
           "metadata" => {},
           "amrCounts" => [],
-          "error" => "sample not found"
+          "error" => "sample not found",
         }
       end
     end
@@ -103,12 +103,12 @@ class AmrHeatmapController < ApplicationController
       expression: "SELECT * FROM S3Object[*].#{gene_name} LIMIT 1",
       input_serialization: {
         json: {
-          type: "DOCUMENT"
-        }
+          type: "DOCUMENT",
+        },
       },
       output_serialization: {
-        json: {}
-      }
+        json: {},
+      },
     }
 
     entry = []

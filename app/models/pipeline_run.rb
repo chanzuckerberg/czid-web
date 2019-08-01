@@ -29,7 +29,7 @@ class PipelineRun < ApplicationRecord
   DEFAULT_SUBSAMPLING = 1_000_000 # number of fragments to subsample to, after host filtering
   DEFAULT_MAX_INPUT_FRAGMENTS = 75_000_000 # max fragments going into the pipeline
   ADAPTER_SEQUENCES = { "single-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-SE.fasta",
-                        "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta" }.freeze
+                        "paired-end" => "s3://idseq-database/adapter_sequences/illumina_TruSeq3-PE-2_NexteraPE-PE.fasta", }.freeze
 
   GSNAP_CHUNK_SIZE = 60_000
   RAPSEARCH_CHUNK_SIZE = 80_000
@@ -82,7 +82,7 @@ class PipelineRun < ApplicationRecord
                "Number of mismatches", "Number of gap openings",
                "Start of alignment in query", "End of alignment in query",
                "Start of alignment in accession", "End of alignment in accession",
-               "E-value", "Bitscore"].freeze
+               "E-value", "Bitscore",].freeze
   M8_FIELDS_TO_EXTRACT = [1, 2, 3, 4, 10, 11].freeze
 
   # The PIPELINE MONITOR is responsible for keeping status of AWS Batch jobs
@@ -133,7 +133,7 @@ class PipelineRun < ApplicationRecord
                         "taxon_counts" => "db_load_taxon_counts",
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
-                        "amr_counts" => "db_load_amr_counts" }.freeze
+                        "amr_counts" => "db_load_amr_counts", }.freeze
   # Note: reads_before_priceseqfilter, reads_after_priceseqfilter, reads_after_cdhitdup
   #       are the only "job_stats" we actually need for web display.
   REPORT_READY_OUTPUT = "taxon_counts".freeze
@@ -189,6 +189,8 @@ class PipelineRun < ApplicationRecord
   # Triggers a run for new samples by defining output states and run stages configurations.
   # *Exception* for cloned pipeline runs that already have results and finalized status
   before_create :create_output_states, :create_run_stages, unless: :results_finalized?
+
+  delegate :status_url, to: :sample
 
   def parse_dag_vars
     JSON.parse(dag_vars || "{}")
@@ -267,12 +269,12 @@ class PipelineRun < ApplicationRecord
       gsnap: {
         chunk_size: GSNAP_CHUNK_SIZE,
         can_pair_chunks: true, # gsnap can take paired inputs
-        is_run_paired: is_run_paired
+        is_run_paired: is_run_paired,
       },
       rapsearch: {
         chunk_size: RAPSEARCH_CHUNK_SIZE,
         can_pair_chunks: false # rapsearch always takes a single input file
-      }
+      },
     }
     gsnap_num_chunks = count_chunks(need_alignment.pluck(:id), known_num_reads, count_configs[:gsnap], completed_gsnap_chunks)
     rapsearch_num_chunks = count_chunks(need_alignment.pluck(:id), known_num_reads, count_configs[:rapsearch], completed_rapsearch_chunks)
@@ -583,7 +585,7 @@ class PipelineRun < ApplicationRecord
                               allele: amr_result_fields[1],
                               coverage: amr_result_fields[2],
                               depth:  amr_result_fields[3],
-                              drug_family: amr_result_fields[12] }
+                              drug_family: amr_result_fields[12], }
       end
       update(amr_counts_attributes: amr_counts_array)
     end
@@ -623,7 +625,7 @@ class PipelineRun < ApplicationRecord
     tcnt_attrs_to_merge = {
       'created_at' => current_time,
       'updated_at' => current_time,
-      'pipeline_run_id' => id
+      'pipeline_run_id' => id,
     }
     taxon_counts_attributes_filtered.each do |tcnt|
       tcnt["count_type"] += "+" if refined
@@ -907,7 +909,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def run_time
-    Time.current - created_at
+    Time.now.utc - created_at
   end
 
   def duration_hrs
@@ -1266,16 +1268,16 @@ class PipelineRun < ApplicationRecord
     # by tax_level and hit_type
     { TaxonCount::TAX_LEVEL_SPECIES => {
       'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA}",
-      'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_NR}"
+      'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_NR}",
     },
       TaxonCount::TAX_LEVEL_GENUS => {
         'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NT}",
-        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}"
+        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_GENUS_NR}",
       },
       TaxonCount::TAX_LEVEL_FAMILY => {
         'NT' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NT}",
-        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}"
-      } }
+        'NR' => "#{postprocess_output_s3_path}/#{file_prefix}#{SORTED_TAXID_ANNOTATED_FASTA_FAMILY_NR}",
+      }, }
   end
 
   def pipeline_version_file
@@ -1377,7 +1379,7 @@ class PipelineRun < ApplicationRecord
       ret << {
         name: baseline[:ercc_id],
         actual: actual_count,
-        expected: baseline[:concentration_in_mix_1_attomolesul]
+        expected: baseline[:concentration_in_mix_1_attomolesul],
       }
     end
     ret
@@ -1398,7 +1400,7 @@ class PipelineRun < ApplicationRecord
       result[prs.name] = {
         "stage_description" => STEP_DESCRIPTIONS[prs.name]["stage"],
         "stage_dag_json" => prs.redacted_dag_json,
-        "steps" => {}
+        "steps" => {},
       }
       dag_dict = JSON.parse(prs.dag_json)
       output_dir_s3_key = dag_dict["output_dir_s3"].chomp("/").split("/", 4)[3] # keep everything after bucket name, except trailing '/'
@@ -1421,7 +1423,7 @@ class PipelineRun < ApplicationRecord
           result[prs.name]["steps"][target_name] = {
             "step_description" => STEP_DESCRIPTIONS[prs.name]["steps"][target_name],
             "file_list" => file_info,
-            "reads_after" => (job_stats_by_task[target_name] || {})["reads_after"]
+            "reads_after" => (job_stats_by_task[target_name] || {})["reads_after"],
           }
         end
       end
@@ -1431,15 +1433,6 @@ class PipelineRun < ApplicationRecord
 
   def self.viewable(user)
     where(sample_id: Sample.viewable(user).pluck(:id))
-  end
-
-  def status_url
-    base_url = if Rails.env == 'staging'
-                 "https://staging.idseq.net"
-               else
-                 "https://idseq.net"
-               end
-    base_url + "/samples/#{sample.id}/pipeline_runs"
   end
 
   # Keys here are used as cache keys for report_info action in SamplesController.
@@ -1453,7 +1446,7 @@ class PipelineRun < ApplicationRecord
       # For invalidation if underlying data changes. This should only happen in
       # exceptional situations, such as manual DB edits.
       report_ts: max_updated_at.utc.beginning_of_day.to_i,
-      format: "json"
+      format: "json",
     }
   end
 

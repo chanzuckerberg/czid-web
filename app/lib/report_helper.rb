@@ -56,7 +56,7 @@ module ReportHelper
     { 'taxid' => 2759, 'name' => "Eukaryota" },
     { 'taxid' => 10_239, 'name' => "Viruses" },
     { 'taxid' => 12_884, 'name' => "Viroids" },
-    { 'taxid' => TaxonLineage::MISSING_SUPERKINGDOM_ID, 'name' => "Uncategorized" }
+    { 'taxid' => TaxonLineage::MISSING_SUPERKINGDOM_ID, 'name' => "Uncategorized" },
   ].freeze
   CATEGORIES_TAXID_BY_NAME = ALL_CATEGORIES.map { |category| { category['name'] => category['taxid'] } }.reduce({}, :merge)
 
@@ -66,12 +66,12 @@ module ReportHelper
   # and within the Z, for things with equal Z, use the R as tertiary
   OTHER_COUNT_TYPE = {
     'NT' => 'NR',
-    'NR' => 'NT'
+    'NR' => 'NT',
   }.freeze
   OTHER_METRIC = {
     'zscore' => 'r',
     'r' => 'zscore',
-    'rpm' => 'zscore'
+    'rpm' => 'zscore',
   }.freeze
 
   # Example cache key:
@@ -177,7 +177,7 @@ module ReportHelper
       subsampled_reads: pipeline_run.subsampled_reads,
       sample_info: sample,
       default_background: Background.find(pipeline_run.sample.default_background_id),
-      taxon_fasta_flag: !pipeline_run.taxon_byteranges.empty?
+      taxon_fasta_flag: !pipeline_run.taxon_byteranges.empty?,
     }
   end
 
@@ -212,7 +212,7 @@ module ReportHelper
                           NT_zscore: (taxon_record["NT"] || {})["zscore"],
                           NR_r: (taxon_record["NR"] || {})["r"],
                           NR_rpm: (taxon_record["NR"] || {})["rpm"],
-                          NR_zscore: (taxon_record["NR"] || {})["zscore"] }
+                          NR_zscore: (taxon_record["NR"] || {})["zscore"], }
           csv << data_values.values_at(*attribute_names.map(&:to_sym))
         end
       end
@@ -300,7 +300,7 @@ module ReportHelper
     {
       direction:    direction,
       count_type:   count_type,
-      metric:       metric
+      metric:       metric,
     }
   end
 
@@ -312,7 +312,7 @@ module ReportHelper
 
   ZERO_ONE = {
     '0' => 0,
-    '1' => 1
+    '1' => 1,
   }.freeze
 
   def self.valid_arg_value(name, value, all_cats)
@@ -410,7 +410,7 @@ module ReportHelper
       'alignmentlength' => DEFAULT_SAMPLE_ALIGNMENTLENGTH,
       'neglogevalue' => DEFAULT_SAMPLE_NEGLOGEVALUE,
       'percentconcordant' => DEFAULT_SAMPLE_PERCENTCONCORDANT,
-      'aggregatescore' => nil
+      'aggregatescore' => nil,
     }
   end
 

@@ -151,7 +151,7 @@ class SamplesView extends React.Component {
     });
   };
 
-  handleSelectAllRows = (value, checked) => {
+  handleSelectAllRows = checked => {
     const {
       selectableIds,
       selectedSampleIds,

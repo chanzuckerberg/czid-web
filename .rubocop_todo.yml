@@ -50,6 +50,7 @@ AllCops:
     - vendor/**/*
     - bin/*
     - node_modules/**/*
+  TargetRubyVersion: 2.2
 
 ClassLength:
   Enabled: false
@@ -106,6 +107,9 @@ Style/GuardClause:
 Style/IfUnlessModifier:
   Enabled: false
 
+Style/MultilineBlockChain:
+  Enabled: false
+
 Style/WordArray:
   Enabled: false
 
@@ -126,3 +130,7 @@ Style/RedundantReturn:
 
 Rails/FindEach:
   Enabled: false
+
+# Consistent with JS linting
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: consistent_comma

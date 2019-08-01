@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { forEach, values } from "lodash/fp";
+import { forEach, values, sortBy } from "lodash/fp";
 import { BaseMultipleFilter } from "~/components/common/filters";
 
 class LocationFilter extends React.Component {
@@ -41,7 +41,7 @@ class LocationFilter extends React.Component {
     return (
       <BaseMultipleFilter
         {...otherProps}
-        options={this.expandParents(options)}
+        options={sortBy("text", this.expandParents(options))}
       />
     );
   }

@@ -28,7 +28,7 @@ end
 def migrate_pre_result_monitor(pr)
   old_loaders_by_output = { "db_load_host_filtering" => "ercc_counts",
                             "db_load_alignment" => "taxon_counts",
-                            "db_load_postprocess" => "taxon_byteranges" }
+                            "db_load_postprocess" => "taxon_byteranges", }
   run_stages = pr.pipeline_run_stages
   run_stages.each do |rs|
     output_name = old_loaders_by_output[rs.load_db_command_func]

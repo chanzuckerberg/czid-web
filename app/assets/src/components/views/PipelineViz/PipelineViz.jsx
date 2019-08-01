@@ -1,16 +1,17 @@
 import React from "react";
-import PropTypes from "prop-types";
-import { PanZoom } from "react-easy-panzoom";
 import cx from "classnames";
+import { PanZoom } from "react-easy-panzoom";
 
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
+import PropTypes from "~/components/utils/propTypes";
 import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 
-import { inverseTransformDOMCoordinates } from "./utils";
 import cs from "./pipeline_viz.scss";
+import PipelineVizHeader from "./PipelineVizHeader";
+import { inverseTransformDOMCoordinates } from "./utils";
 
 const START_NODE_ID = -1;
 const END_NODE_ID = -2;
@@ -94,7 +95,7 @@ class PipelineViz extends React.Component {
     return graph.getNodeAt(x, y);
   }
 
-  handleClick(stageIndex, info) {
+  handleStageClick(stageIndex, info) {
     const graph = this.graphs[stageIndex];
     const clickedNodeId = this.getNodeIdAtCoords(
       graph,
@@ -627,7 +628,7 @@ class PipelineViz extends React.Component {
         hover: false,
         selectConnectedEdges: false,
       },
-      onClick: info => this.handleClick(index, info),
+      onClick: info => this.handleStageClick(index, info),
     };
 
     const currStageGraph = new NetworkGraph(
@@ -720,7 +721,14 @@ class PipelineViz extends React.Component {
   }
 
   render() {
-    const { zoomMin, zoomMax } = this.props;
+    const {
+      zoomMin,
+      zoomMax,
+      pipelineRun,
+      pipelineVersions,
+      lastProcessedAt,
+      sample,
+    } = this.props;
     const { sidebarVisible, sidebarParams, interStageArrows } = this.state;
 
     const stageContainers = this.stageNames.map((stageName, i) => {
@@ -733,21 +741,29 @@ class PipelineViz extends React.Component {
     });
 
     return (
-      <div>
-        <PanZoom
-          className={cs.panZoomContainer}
-          minZoom={zoomMin}
-          maxZoom={zoomMax}
-          zoomSpeed={3}
-          ref={this.panZoomContainer}
-        >
-          <div className={cs.pipelineViz}>{stageContainers}</div>
-        </PanZoom>
-        <PlusMinusControl
-          onPlusClick={this.panZoomContainer && this.panZoomContainer.zoomIn}
-          onMinusClick={this.panZoomContainer && this.panZoomContainer.zoomOut}
-          className={cs.plusMinusControl}
+      <div className={cs.pipelineVizPage}>
+        <PipelineVizHeader
+          pipelineRun={pipelineRun}
+          pipelineVersions={pipelineVersions}
+          lastProcessedAt={lastProcessedAt}
+          sample={sample}
         />
+        <div className={cs.pipelineVizContainer}>
+          <PanZoom
+            className={cs.panZoomContainer}
+            minZoom={zoomMin}
+            maxZoom={zoomMax}
+            zoomSpeed={3}
+            ref={this.panZoomContainer}
+          >
+            <div className={cs.pipelineViz}>{stageContainers}</div>
+          </PanZoom>
+          <PlusMinusControl
+            onPlusClick={((this.panZoomContainer || {}).current || {}).zoomIn}
+            onMinusClick={((this.panZoomContainer || {}).current || {}).zoomOut}
+            className={cs.plusMinusControl}
+          />
+        </div>
         <DetailsSidebar
           visible={sidebarVisible}
           mode="pipelineStepDetails"
@@ -762,6 +778,10 @@ class PipelineViz extends React.Component {
 PipelineViz.propTypes = {
   admin: PropTypes.bool,
   graphData: PropTypes.object,
+  pipelineRun: PropTypes.PipelineRun,
+  sample: PropTypes.Sample,
+  pipelineVersions: PropTypes.arrayOf(PropTypes.string),
+  lastProcessedAt: PropTypes.string,
   backgroundColor: PropTypes.string,
   nodeColor: PropTypes.string,
   edgeColor: PropTypes.string,

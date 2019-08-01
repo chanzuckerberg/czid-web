@@ -4,8 +4,8 @@ class AddRatHost < ActiveRecord::Migration[5.1]
 
     hg = HostGenome.new
     hg.name = "Rat"
-    hg.s3_star_index_path = "s3://idseq-database/host_filter/rat/2019-04-17/STAR_genome.tar"
-    hg.s3_bowtie2_index_path = "s3://idseq-database/host_filter/rat/2019-04-17/bowtie2_genome.tar"
+    hg.s3_star_index_path = "s3://idseq-database/host_filter/rat/2019-07-24/rat_STAR_genome.tar"
+    hg.s3_bowtie2_index_path = "s3://idseq-database/host_filter/rat/2019-07-24/rat_bowtie2_genome.tar"
 
     human_host = HostGenome.find_by(name: "Human")
     # For lack of a better default, use Human background.
