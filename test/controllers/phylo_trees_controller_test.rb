@@ -23,7 +23,7 @@ class PhyloTreesControllerTest < ActionDispatch::IntegrationTest
     assert_difference('PhyloTree.count') do
       post "/phylo_trees/create", params: { name: 'new_phylo_tree', projectId: @project.id,
                                             taxId: entrypoint_taxon_count.tax_id, pipelineRunIds: [pipeline_runs(:three).id, pipeline_runs(:four).id],
-                                            taxName: entrypoint_taxon_count.name }
+                                            taxName: entrypoint_taxon_count.name, }
     end
     assert_equal "ok", JSON.parse(@response.body)['status']
   end

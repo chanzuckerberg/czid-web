@@ -130,3 +130,7 @@ Style/RedundantReturn:
 
 Rails/FindEach:
   Enabled: false
+
+# Consistent with JS linting
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: consistent_comma

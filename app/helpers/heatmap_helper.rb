@@ -20,7 +20,7 @@ module HeatmapHelper
     { text: "NT r (total reads)", value: "NT.r" },
     { text: "NR rPM", value: "NR.rpm" },
     { text: "NR Z Score", value: "NR.zscore" },
-    { text: "NR r (total reads)", value: "NR.r" }
+    { text: "NR r (total reads)", value: "NR.r" },
   ].freeze
 
   # Samples and background are assumed here to be vieweable.
@@ -297,7 +297,7 @@ module HeatmapHelper
           name: samples_by_id[sample_id].name,
           metadata: samples_by_id[sample_id].metadata_with_base_type,
           host_genome_name: samples_by_id[sample_id].host_genome_name,
-          taxons: filtered_rows
+          taxons: filtered_rows,
         }
       end
     end
@@ -309,7 +309,7 @@ module HeatmapHelper
           sample_id: sample.id,
           name: sample.name,
           metadata: sample.metadata_with_base_type,
-          host_genome_name: sample.host_genome_name
+          host_genome_name: sample.host_genome_name,
         }
       end
     end
@@ -423,7 +423,7 @@ module HeatmapHelper
           count_type: count_type,
           metric: metric,
           value: value,
-          operator: filter["operator"]
+          operator: filter["operator"],
         }
       end
     end

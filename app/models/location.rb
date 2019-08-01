@@ -19,7 +19,7 @@ class Location < ApplicationRecord
     :country_id,
     :state_id,
     :subdivision_id,
-    :city_id
+    :city_id,
   ].freeze
   DEFAULT_MAX_NAME_LENGTH = 30
 

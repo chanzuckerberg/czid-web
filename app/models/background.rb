@@ -68,7 +68,7 @@ class Background < ApplicationRecord
         end
         # reset the results
         taxon_result = { tax_id: row["tax_id"], count_type: row["count_type"],
-                         tax_level: row["tax_level"], sum_rpm: 0.0, sum_rpm2: 0.0, rpm_list: [] }
+                         tax_level: row["tax_level"], sum_rpm: 0.0, sum_rpm2: 0.0, rpm_list: [], }
         key = current_key
       end
       # increment

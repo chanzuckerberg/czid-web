@@ -17,7 +17,7 @@ class ProjectsController < ApplicationController
   READ_ACTIONS = [
     :show, :add_favorite, :remove_favorite, :make_host_gene_counts, :host_gene_counts_status,
     :send_host_gene_counts, :make_project_reports_csv, :project_reports_csv_status,
-    :send_project_reports_csv, :validate_sample_names
+    :send_project_reports_csv, :validate_sample_names,
   ].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :add_user, :all_users, :update_project_visibility, :upload_metadata, :validate_metadata_csv].freeze
   OTHER_ACTIONS = [:choose_project, :create, :dimensions, :index, :metadata_fields, :new, :send_project_csv].freeze
@@ -98,7 +98,7 @@ class ProjectsController < ApplicationController
               name: project.name,
               created_at: project.created_at,
               public_access: project.public_access,
-              number_of_samples: (samples_by_project_id[project.id] || []).length
+              number_of_samples: (samples_by_project_id[project.id] || []).length,
             }
           end
           render json: projects_formatted
@@ -173,20 +173,20 @@ class ProjectsController < ApplicationController
     private_count = samples.distinct(:project_id).pluck(:project_id).count - public_count
     visibility = [
       { value: "public", text: "Public", count: public_count },
-      { value: "private", text: "Private", count: private_count }
+      { value: "private", text: "Private", count: private_count },
     ]
 
     times = [
       { value: "1_week", text: "Last Week",
-        count: projects.where("projects.created_at >= ?", 1.week.ago.utc).count },
+        count: projects.where("projects.created_at >= ?", 1.week.ago.utc).count, },
       { value: "1_month", text: "Last Month",
-        count: projects.where("projects.created_at >= ?", 1.month.ago.utc).count },
+        count: projects.where("projects.created_at >= ?", 1.month.ago.utc).count, },
       { value: "3_month", text: "Last 3 Months",
-        count: projects.where("projects.created_at >= ?", 3.months.ago.utc).count },
+        count: projects.where("projects.created_at >= ?", 3.months.ago.utc).count, },
       { value: "6_month", text: "Last 6 Months",
-        count: projects.where("projects.created_at >= ?", 6.months.ago.utc).count },
+        count: projects.where("projects.created_at >= ?", 6.months.ago.utc).count, },
       { value: "1_year", text: "Last Year",
-        count: projects.where("projects.created_at >= ?", 1.year.ago.utc).count }
+        count: projects.where("projects.created_at >= ?", 1.year.ago.utc).count, },
     ]
 
     # TODO(tiago): move grouping to a helper function (similar code in samples_controller)
@@ -205,7 +205,7 @@ class ProjectsController < ApplicationController
           {
             value: date,
             text: date,
-            count: bins_map[date] || 0
+            count: bins_map[date] || 0,
           }
         end
       else
@@ -224,7 +224,7 @@ class ProjectsController < ApplicationController
             interval: { start: start_date, end: end_date },
             count: bins_map[bucket] || 0,
             value: "#{start_date}:#{end_date}",
-            text: "#{start_date} - #{end_date}"
+            text: "#{start_date} - #{end_date}",
           }
         end
       end
@@ -244,7 +244,7 @@ class ProjectsController < ApplicationController
           { dimension: "time", values: times },
           { dimension: "time_bins", values: time_bins },
           { dimension: "host", values: hosts },
-          { dimension: "tissue", values: tissues }
+          { dimension: "tissue", values: tissues },
         ]
       end
     end
@@ -254,7 +254,7 @@ class ProjectsController < ApplicationController
     project_search = current_power.updatable_projects.index_by(&:name).map do |name, record|
       { "title" => name,
         "description" => "",
-        "project_id" => record.id }
+        "project_id" => record.id, }
     end
     render json: JSON.dump(project_search)
   end
@@ -272,7 +272,7 @@ class ProjectsController < ApplicationController
           name: @project.name,
           public_access: @project.public_access.to_i,
           created_at: @project.created_at,
-          total_sample_count: @samples.count
+          total_sample_count: @samples.count,
         }
       end
     end
@@ -305,13 +305,13 @@ class ProjectsController < ApplicationController
       @project.update(public_access: public_access)
       render json: {
         message: 'Project visibility updated successfully',
-        status: :accepted
+        status: :accepted,
       }
     else
       render json: {
         message: 'Unable to set visibility for project',
         status: :unprocessable_entity,
-        errors: errors
+        errors: errors,
       }
     end
   end
@@ -472,7 +472,7 @@ class ProjectsController < ApplicationController
     issues = validate_metadata_csv_for_samples(project_samples.to_a, metadata)
     render json: {
       status: "success",
-      issues: issues
+      issues: issues,
     }
   end
 
@@ -484,7 +484,7 @@ class ProjectsController < ApplicationController
     errors = upload_metadata_for_samples(project_samples.to_a, metadata)
     render json: {
       status: "success",
-      errors: errors
+      errors: errors,
     }
   end
 
@@ -563,7 +563,7 @@ class ProjectsController < ApplicationController
       email_subject: 'You have been invited to IDseq',
       email_template: 'new_user_new_project',
       sharing_user_id: current_user.id,
-      shared_project_id: @project.id
+      shared_project_id: @project.id,
     }
   end
 
@@ -571,7 +571,7 @@ class ProjectsController < ApplicationController
     {
       email_subject: 'You have been added to a project on IDseq',
       sharing_user_id: current_user.id,
-      shared_project_id: @project.id
+      shared_project_id: @project.id,
     }
   end
 

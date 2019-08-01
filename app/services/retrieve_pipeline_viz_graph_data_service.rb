@@ -56,13 +56,13 @@ class RetrievePipelineVizGraphDataService
           name: modify_step_name(step["out"]),
           description: stage_step_descriptions[step["out"]],
           inputEdges: [],
-          outputEdges: []
+          outputEdges: [],
         }
       end
 
       {
         steps: steps,
-        jobStatus: dag_json[:job_status]
+        jobStatus: dag_json[:job_status],
       }
     end
     return stages

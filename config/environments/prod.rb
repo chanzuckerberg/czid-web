@@ -16,7 +16,7 @@ Rails.application.configure do
   config.cache_store = :redis_store, ENV['REDISCLOUD_URL'] + '/0/cache',
                        {
                          # Needed for redis to evict keys in volatile-lru mode
-                         expires_in: 30.days
+                         expires_in: 30.days,
                        }
 
   # Attempt to read encrypted secrets from `config/secrets.yml.enc`.
@@ -82,7 +82,7 @@ Rails.application.configure do
   config.action_mailer.delivery_method = :mailgun
   config.action_mailer.mailgun_settings = {
     api_key: ENV['MAIL_GUN_API_KEY'],
-    domain: 'mg.idseq.net'
+    domain: 'mg.idseq.net',
   }
 
   config.action_controller.asset_host = 'idseq.net'
@@ -105,7 +105,7 @@ Rails.application.configure do
       ddsource: ["ruby"],
       remote_ip: event.payload[:remote_ip],
       user_id: event.payload[:user_id],
-      params: event.payload[:params].reject { |k| %w[controller action].include? k } }
+      params: event.payload[:params].reject { |k| %w[controller action].include? k }, }
   end
   config.colorize_logging = false
   config.lograge.ignore_actions = ["HealthCheck::HealthCheckController#index"]

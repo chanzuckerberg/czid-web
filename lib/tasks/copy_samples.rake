@@ -79,7 +79,7 @@ def duplicate_sample_db(old_sample, target_project, new_sample_fields)
       :ercc_counts,
       :amr_counts,
       :contigs,
-      :pipeline_run_stages
+      :pipeline_run_stages,
     ] do |original, copy|
       copy.created_at = original.created_at
     end

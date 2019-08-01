@@ -15,24 +15,24 @@ RSpec.describe AmrHeatmapController, type: :controller do
         project = create(:project, users: [@admin, @joe])
         sample_one = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
-                                gene: "IamA_Gene"
-                              }],
+                                gene: "IamA_Gene",
+                              },],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
-                                state: PipelineRun::STATUS_LOADED
-                              }]
-                            }])
+                                state: PipelineRun::STATUS_LOADED,
+                              },],
+                            },])
         sample_two = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
-                                gene: "AnoT_Her"
-                              }],
+                                gene: "AnoT_Her",
+                              },],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
-                                state: PipelineRun::STATUS_LOADED
-                              }]
-                            }])
+                                state: PipelineRun::STATUS_LOADED,
+                              },],
+                            },])
 
         get :index, params: { sampleIds: [sample_one["id"], sample_two["id"]] }
         expect(assigns(:sample_ids)).to eq([sample_one["id"].to_i, sample_two["id"].to_i])
@@ -42,24 +42,24 @@ RSpec.describe AmrHeatmapController, type: :controller do
         project = create(:project, users: [@admin, @joe])
         sample_one = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
-                                gene: "IamA_Gene"
-                              }],
+                                gene: "IamA_Gene",
+                              },],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
-                                state: PipelineRun::STATUS_LOADED
-                              }]
-                            }])
+                                state: PipelineRun::STATUS_LOADED,
+                              },],
+                            },])
         sample_two = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
-                                gene: "AnoT_Her"
-                              }],
+                                gene: "AnoT_Her",
+                              },],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
-                                state: PipelineRun::STATUS_LOADED
-                              }]
-                            }])
+                                state: PipelineRun::STATUS_LOADED,
+                              },],
+                            },])
 
         get :index, params: { sampleIds: [sample_one["id"], sample_two["id"]] }
         expect(response).to render_template("index")
@@ -77,25 +77,25 @@ RSpec.describe AmrHeatmapController, type: :controller do
         project = create(:project, users: [@admin, @joe])
         sample_one = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
-                                gene: "IamA_Gene"
-                              }],
+                                gene: "IamA_Gene",
+                              },],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
-                                state: PipelineRun::STATUS_LOADED
-                              }]
-                            }],
+                                state: PipelineRun::STATUS_LOADED,
+                              },],
+                            },],
                                      metadata_fields: { collection_location: "San Francisco, USA", sample_type: "Water" })
         sample_two = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
-                                gene: "AnoT_Her"
-                              }],
+                                gene: "AnoT_Her",
+                              },],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
-                                state: PipelineRun::STATUS_LOADED
-                              }]
-                            }],
+                                state: PipelineRun::STATUS_LOADED,
+                              },],
+                            },],
                                      metadata_fields: { collection_location: "Los Angeles, USA", sample_type: "Serum" })
 
         amr_counts_one = sample_one.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
@@ -115,13 +115,13 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    key: "collection_location",
                                                    raw_value: "San Francisco, USA",
                                                    string_validated_value: "San Francisco, USA",
-                                                   base_type: "string"
+                                                   base_type: "string",
                                                  }, {
                                                    key: "sample_type",
                                                    raw_value: "Water",
                                                    string_validated_value: "Water",
-                                                   base_type: "string"
-                                                 }],
+                                                   base_type: "string",
+                                                 },],
                                                  amrCounts: [{
                                                    id: amr_counts_one["id"],
                                                    gene: amr_counts_one["gene"],
@@ -129,21 +129,21 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    coverage: amr_counts_one["coverage"],
                                                    depth: amr_counts_one["depth"],
                                                    pipeline_run_id: amr_counts_one["pipeline_run_id"],
-                                                   drug_family: amr_counts_one["drug_family"]
-                                                 }])
+                                                   drug_family: amr_counts_one["drug_family"],
+                                                 },])
         expect(json_response[1]).to include_json(sampleId: sample_two["id"],
                                                  sampleName: sample_two["name"],
                                                  metadata: [{
                                                    key: "collection_location",
                                                    raw_value: "Los Angeles, USA",
                                                    string_validated_value: "Los Angeles, USA",
-                                                   base_type: "string"
+                                                   base_type: "string",
                                                  }, {
                                                    key: "sample_type",
                                                    raw_value: "Serum",
                                                    string_validated_value: "Serum",
-                                                   base_type: "string"
-                                                 }],
+                                                   base_type: "string",
+                                                 },],
                                                  amrCounts: [{
                                                    id: amr_counts_two["id"],
                                                    gene: amr_counts_two["gene"],
@@ -151,8 +151,8 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    coverage: amr_counts_two["coverage"],
                                                    depth: amr_counts_two["depth"],
                                                    pipeline_run_id: amr_counts_two["pipeline_run_id"],
-                                                   drug_family: amr_counts_two["drug_family"]
-                                                 }])
+                                                   drug_family: amr_counts_two["drug_family"],
+                                                 },])
       end
 
       it "works even if a sample doesn't exist" do
@@ -160,14 +160,14 @@ RSpec.describe AmrHeatmapController, type: :controller do
         project = create(:project, users: [@admin, @joe])
         sample_one = create(:sample, project: project, pipeline_runs_data: [{
                               amr_counts_data: [{
-                                gene: "IamA_Gene"
-                              }],
+                                gene: "IamA_Gene",
+                              },],
                               job_status: PipelineRun::STATUS_CHECKED,
                               output_states_data: [{
                                 output: "amr_counts",
-                                state: PipelineRun::STATUS_LOADED
-                              }]
-                            }],
+                                state: PipelineRun::STATUS_LOADED,
+                              },],
+                            },],
                                      metadata_fields: { collection_location: "Santa Barbara, USA", sample_type: "Blood" })
 
         amr_counts_one = sample_one.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
@@ -186,13 +186,13 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    key: "collection_location",
                                                    raw_value: "Santa Barbara, USA",
                                                    string_validated_value: "Santa Barbara, USA",
-                                                   base_type: "string"
+                                                   base_type: "string",
                                                  }, {
                                                    key: "sample_type",
                                                    raw_value: "Blood",
                                                    string_validated_value: "Blood",
-                                                   base_type: "string"
-                                                 }],
+                                                   base_type: "string",
+                                                 },],
                                                  amrCounts: [{
                                                    id: amr_counts_one["id"],
                                                    gene: amr_counts_one["gene"],
@@ -200,8 +200,8 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                    coverage: amr_counts_one["coverage"],
                                                    depth: amr_counts_one["depth"],
                                                    pipeline_run_id: amr_counts_one["pipeline_run_id"],
-                                                   drug_family: amr_counts_one["drug_family"]
-                                                 }],
+                                                   drug_family: amr_counts_one["drug_family"],
+                                                 },],
                                                  error: "")
         expect(json_response[1]).to include_json(sampleId: 99_999,
                                                  sampleName: "",
@@ -213,8 +213,8 @@ RSpec.describe AmrHeatmapController, type: :controller do
         # Create a test sample without AMR data.
         project = create(:project, users: [@admin, @joe])
         sample_one = create(:sample, project: project, pipeline_runs_data: [{
-                              job_status: PipelineRun::STATUS_CHECKED
-                            }])
+                              job_status: PipelineRun::STATUS_CHECKED,
+                            },])
 
         get :amr_counts, params: { sampleIds: [sample_one["id"]] }
         expect(response.content_type).to eq("application/json")
@@ -240,32 +240,32 @@ RSpec.describe AmrHeatmapController, type: :controller do
           accession: "3003080",
           label: "daptomycin resistant pgsA",
           synonyms: [
-            "phosphatidylglycerophosphate synthetase"
+            "phosphatidylglycerophosphate synthetase",
           ],
           description: "pgsA or phosphatidylglycerophosphate synthetase is an integral membrane protein involved in phospholipid biosynthesis. It is a CDP-diacylglycerol-glycerol-3-phosphate 3-phosphatidyltransferase. Laboratory experiments have detected mutations conferring daptomycin resistance in Entercoccus.",
           geneFamily: [
             {
               label: "determinant of resistance to lipopeptide antibiotics",
-              description: "Enzymes, other proteins or other gene products shown clinically to confer resistance to lipopeptide antibiotics."
+              description: "Enzymes, other proteins or other gene products shown clinically to confer resistance to lipopeptide antibiotics.",
             },
             {
               label: "antibiotic resistant pgsA",
-              description: "pgsA or phosphatidylglycerophosphate synthetase is an integral membrane protein involved in phospholipid biosynthesis. It is a CDP-diacylglycerol-glycerol-3-phosphate 3-phosphatidyltransferase."
-            }
+              description: "pgsA or phosphatidylglycerophosphate synthetase is an integral membrane protein involved in phospholipid biosynthesis. It is a CDP-diacylglycerol-glycerol-3-phosphate 3-phosphatidyltransferase.",
+            },
           ],
           drugClass: [
             {
               label: "daptomycin",
-              description: "Daptomycin is a novel lipopeptide antibiotic used in the treatment of certain infections caused by Gram-positive organisms. Daptomycin interferes with the bacterial cell membrane, reducing membrane potential and inhibiting cell wall synthesis."
+              description: "Daptomycin is a novel lipopeptide antibiotic used in the treatment of certain infections caused by Gram-positive organisms. Daptomycin interferes with the bacterial cell membrane, reducing membrane potential and inhibiting cell wall synthesis.",
             },
             {
               label: "peptide antibiotic",
-              description: "Peptide antibiotics have a wide range of antibacterial mechanisms, depending on the amino acids that make up the antibiotic, although most act to disrupt the cell membrane in some manner. Subclasses of peptide antibiotics can include additional sidechains of other types, such as lipids in the case of the lipopeptide antibiotics."
-            }
+              description: "Peptide antibiotics have a wide range of antibacterial mechanisms, depending on the amino acids that make up the antibiotic, although most act to disrupt the cell membrane in some manner. Subclasses of peptide antibiotics can include additional sidechains of other types, such as lipids in the case of the lipopeptide antibiotics.",
+            },
           ],
           publications: [
             "Hachmann AB1, Sevim E, Gaballa A, Popham DL, Antelmann H, Helmann JD. Reduction in membrane phosphatidylglycerol content leads to daptomycin resistance in Bacillus subtilis. (PMID 21709092)",
-            "Peleg AY1, Miyakis S, Ward DV, Earl AM, Rubio A, Cameron DR, Pillai S, Moellering RC Jr, Eliopoulos GM. Whole genome characterization of the mechanisms of daptomycin resistance in clinical and laboratory derived isolates of Staphylococcus aureus. (PMID 22238576)"
+            "Peleg AY1, Miyakis S, Ward DV, Earl AM, Rubio A, Cameron DR, Pillai S, Moellering RC Jr, Eliopoulos GM. Whole genome characterization of the mechanisms of daptomycin resistance in clinical and laboratory derived isolates of Staphylococcus aureus. (PMID 22238576)",
           ],
           error: ""
         )
@@ -305,14 +305,14 @@ RSpec.describe AmrHeatmapController, type: :controller do
         project = create(:project, users: [@admin, @joe])
         sample = create(:sample, project: project, pipeline_runs_data: [{
                           amr_counts_data: [{
-                            gene: "IamA_Gene"
-                          }],
+                            gene: "IamA_Gene",
+                          },],
                           job_status: PipelineRun::STATUS_CHECKED,
                           output_states_data: [{
                             output: "amr_counts",
-                            state: PipelineRun::STATUS_LOADED
-                          }]
-                        }])
+                            state: PipelineRun::STATUS_LOADED,
+                          },],
+                        },])
 
         get :amr_counts, params: { id: [sample["id"]] }
         expect(response).to redirect_to("/")
