@@ -231,42 +231,31 @@ RSpec.describe AmrHeatmapController, type: :controller do
 
     describe "GET CARD entry information" do
       it "should return relevant information from the CARD Ontology database" do
-        get :fetch_card_info, params: { geneName: "pgsA" }
+        get :fetch_card_info, params: { geneName: "oqxB" }
         expect(response.content_type).to eq("application/json")
         expect(response).to have_http_status(:ok)
 
         json_response = JSON.parse(response.body)
         expect(json_response).to include_json(
-          accession: "3003080",
-          label: "daptomycin resistant pgsA",
+          label: "oqxB",
+          accession: "3003923",
+          description: "RND efflux pump conferring resistance to fluoroquinolone",
           synonyms: [
-            "phosphatidylglycerophosphate synthetase",
-          ],
-          description: "pgsA or phosphatidylglycerophosphate synthetase is an integral membrane protein involved in phospholipid biosynthesis. It is a CDP-diacylglycerol-glycerol-3-phosphate 3-phosphatidyltransferase. Laboratory experiments have detected mutations conferring daptomycin resistance in Entercoccus.",
-          geneFamily: [
-            {
-              label: "determinant of resistance to lipopeptide antibiotics",
-              description: "Enzymes, other proteins or other gene products shown clinically to confer resistance to lipopeptide antibiotics.",
-            },
-            {
-              label: "antibiotic resistant pgsA",
-              description: "pgsA or phosphatidylglycerophosphate synthetase is an integral membrane protein involved in phospholipid biosynthesis. It is a CDP-diacylglycerol-glycerol-3-phosphate 3-phosphatidyltransferase.",
-            },
-          ],
-          drugClass: [
-            {
-              label: "daptomycin",
-              description: "Daptomycin is a novel lipopeptide antibiotic used in the treatment of certain infections caused by Gram-positive organisms. Daptomycin interferes with the bacterial cell membrane, reducing membrane potential and inhibiting cell wall synthesis.",
-            },
-            {
-              label: "peptide antibiotic",
-              description: "Peptide antibiotics have a wide range of antibacterial mechanisms, depending on the amino acids that make up the antibiotic, although most act to disrupt the cell membrane in some manner. Subclasses of peptide antibiotics can include additional sidechains of other types, such as lipids in the case of the lipopeptide antibiotics.",
-            },
+
           ],
           publications: [
-            "Hachmann AB1, Sevim E, Gaballa A, Popham DL, Antelmann H, Helmann JD. Reduction in membrane phosphatidylglycerol content leads to daptomycin resistance in Bacillus subtilis. (PMID 21709092)",
-            "Peleg AY1, Miyakis S, Ward DV, Earl AM, Rubio A, Cameron DR, Pillai S, Moellering RC Jr, Eliopoulos GM. Whole genome characterization of the mechanisms of daptomycin resistance in clinical and laboratory derived isolates of Staphylococcus aureus. (PMID 22238576)",
+            "Kim HB1, Wang M, Park CH, Kim EC, Jacoby GA, Hooper DC. oqxAB encoding a multidrug efflux pump in human clinical isolates of Enterobacteriaceae. (PMID 19528276)",
           ],
+          geneFamily: [
+            {
+              label: "subunit of efflux pump conferring antibiotic resistance",
+              description: "Subunits of efflux proteins that pump antibiotic out of a cell to confer resistance.",
+            },
+          ],
+          drugClass: {
+            label: "Fluroquinolones",
+            description: "The fluoroquinolones are a family of synthetic broad-spectrum antibiotics that are 4-quinolone-3-carboxylates. These compounds interact with topoisomerase II (DNA gyrase) to disrupt bacterial DNA replication, damage DNA, and cause cell death.",
+          },
           error: ""
         )
       end
@@ -278,14 +267,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
 
         json_response = JSON.parse(response.body)
         expect(json_response).to include_json(
-          accession: "",
-          label: "",
-          synonyms: [],
-          description: "",
-          geneFamily: [],
-          drugClass: [],
-          publications: [],
-          error: "No match found for ImNotInCard in the CARD Antibiotic Resistance Ontology."
+          error: "No data for ImNotInCard."
         )
       end
     end
