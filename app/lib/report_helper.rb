@@ -16,6 +16,8 @@ module ReportHelper
   DEFAULT_SAMPLE_ALIGNMENTLENGTH = 0.0
   DEFAULT_SAMPLE_PERCENTCONCORDANT = 0.0
 
+  HOMO_SAPIEN_TAX_ID = 9606
+
   # For taxon_count 'species' rows without a corresponding 'genus' rows,
   # we create a fake singleton genus containing just that species;
   # the fake genus IDs start here:
@@ -586,6 +588,10 @@ module ReportHelper
     taxon_counts_2d.keep_if { |_tax_id, tax_info| tax_info['tax_level'] != TaxonCount::TAX_LEVEL_FAMILY }
   end
 
+  def self.remove_homo_sapiens_counts!(taxon_counts_2d)
+    taxon_counts_2d.delete_if { |tax_id, _tax_info| HOMO_SAPIEN_TAX_ID == tax_id }
+  end
+
   def self.taxon_counts_cleanup(taxon_counts)
     # convert_2d also does some filtering.
     tax_2d = convert_2d(taxon_counts)
@@ -742,6 +748,9 @@ module ReportHelper
 
     # Remove family level rows because the reports only display species/genus
     remove_family_level_counts!(tax_2d)
+
+    # Remove any rows that correspond to homo sapiens.
+    remove_homo_sapiens_counts!(tax_2d)
 
     # Add tax_info into output rows.
     rows = []
