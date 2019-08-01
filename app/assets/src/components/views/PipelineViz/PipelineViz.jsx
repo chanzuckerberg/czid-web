@@ -754,6 +754,7 @@ class PipelineViz extends React.Component {
             minZoom={zoomMin}
             maxZoom={zoomMax}
             zoomSpeed={3}
+            disableScrollZoom={true}
             ref={this.panZoomContainer}
           >
             <div className={cs.pipelineViz}>{stageContainers}</div>
@@ -799,7 +800,7 @@ PipelineViz.defaultProps = {
   edgeColor: "#999999",
   highlightColor: "#3867fa",
   inputEdgeColor: "#000000",
-  zoomMin: 0.5,
+  zoomMin: 0.1,
   zoomMax: 3,
   minMouseMoveUpdateDistance: 20,
 };
