@@ -76,6 +76,7 @@ class MetadataInput extends React.Component {
         <React.Fragment>
           <GeoSearchInputBox
             className={className}
+            // .warning reference in old .idseq-ui.input file
             inputClassName={cx(warning && "warning")}
             // Calls save on selection
             onResultSelect={({ result: selection }) => {
