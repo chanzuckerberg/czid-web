@@ -19,14 +19,14 @@ DRUG_CLASSES = {
   "rif" => ["Rifampicin", "3000169"],
   "sul" => ["Sulfonamides", "3000282"],
   "tet" => ["Tetracyclines", "3000050"],
-  "tmt" => ["Trimethoprim", "3000188"]
+  "tmt" => ["Trimethoprim", "3000188"],
 }.freeze # label, ARO Accession number
 
 require "aws-sdk-s3"
 require "nokogiri"
 
 desc 'Updates and precomputes AMR Ontology information'
-task :precompute_gene_ontology => :environment do
+task precompute_gene_ontology: :environment do
   s3 = Aws::S3::Client.new(region: DEFAULT_S3_REGION)
 
   owl_uri = URI(MASTER_OWL_URI)
@@ -56,12 +56,11 @@ task :precompute_gene_ontology => :environment do
     if line[0] == ">"
       split_entry = line.split(";")
       gene_name = split_entry[2]
-      drug_class = split_entry[3].downcase
-      if DRUG_CLASSES.key?(drug_class)
-        drug_class = DRUG_CLASSES[drug_class]
-      else
-        drug_class = [drug_class, "error"]
-      end
+      drug_class = if DRUG_CLASSES.key?(drug_class)
+                     DRUG_CLASSES[drug_class]
+                   else
+                     [drug_class, "error"]
+                   end
       arg_entries.push([gene_name, drug_class])
     end
   end
@@ -74,30 +73,30 @@ task :precompute_gene_ontology => :environment do
     search_result = search_card_owl(gene, owl_doc)
     if search_result["error"].nil?
       ontology_info = gather_ontology_information(search_result["matching_node"], owl_doc)
-      ontology_info.each do |key, value|
-        ontology[key] = value
+      ontology_info.each do |property, record|
+        ontology[property] = record
       end
       ontology["publications"] = ontology["publications"].map do |pubmed_string|
         get_publication_name(pubmed_string.split(":")[1])
       end
     end
-    unless drug_class[1] == "error"
+    if drug_class[1] != "error"
       ontology["drugClass"] = get_node_information(drug_class[1], owl_doc)
       ontology["drugClass"]["label"] = drug_class[0]
     else
       Rails.logger.info("No drug class mapping for #{drug_class[0]} belonging to #{gene}")
-      ontology["drugClass"] = { "label" => drug_class[0], "description" => "No description"}
+      ontology["drugClass"] = { "label" => drug_class[0], "description" => "No description" }
     end
     json_ontology[gene] = ontology
   end
 
-  S3_JSON_KEY = "amr/ontology/#{Time.now().strftime("%Y-%m-%d")}/aro.json".freeze
+  S3_JSON_KEY = "amr/ontology/#{Time.zone.now().strftime('%Y-%m-%d')}/aro.json".freeze
   begin
-    s3_resp = s3.put_object({
+    s3.put_object(
       body: json_ontology.to_json,
       bucket: S3_JSON_BUCKET,
       key: S3_JSON_KEY
-    })
+    )
   rescue Aws::S3::Errors => err
     Rails.logger.error("Failed to upload JSON ontology to S3")
     Rails.logger.error(err.message)
@@ -149,7 +148,6 @@ def search_card_owl(gene_name, xml_dom)
   return search_result
 end
 
-
 def gather_ontology_information(matching_entry, xml_dom)
   ontology_information = {}
   # Gathering properties
@@ -160,12 +158,12 @@ def gather_ontology_information(matching_entry, xml_dom)
   # These properties are referred to by accession number in the matching OWL Class,
   # but their labels are located elsewhere in the document.
   remote_properties = {
-    "geneFamily" => matching_entry.xpath("./rdfs:subClassOf[not(*)]")
+    "geneFamily" => matching_entry.xpath("./rdfs:subClassOf[not(*)]"),
   }
 
   local_properties = {
     "synonyms" => matching_entry.xpath("./oboInOwl:hasExactSynonym"),
-    "publications" => matching_entry.at_xpath("./following-sibling::owl:Axiom").xpath("./oboInOwl:hasDbXref")
+    "publications" => matching_entry.at_xpath("./following-sibling::owl:Axiom").xpath("./oboInOwl:hasDbXref"),
   }
 
   local_properties.each do |ontology_key, property_nodes|
