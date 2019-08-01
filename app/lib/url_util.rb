@@ -4,7 +4,9 @@ class UrlUtil
   # absolute URLs to be the same in emails and in other places.
   def self.absolute_base_url
     options = Rails.application.config.action_mailer.default_url_options
-    host, port, protocol = options[:host], options[:port], options[:protocol] # rubocop:disable Style/ParallelAssignment
+    host = options[:host]
+    port = options[:port]
+    protocol = options[:protocol]
     if protocol.nil?
       protocol = Rails.application.config.force_ssl ? "https" : "http"
     end
