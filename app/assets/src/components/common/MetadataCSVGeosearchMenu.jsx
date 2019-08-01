@@ -1,6 +1,7 @@
 import React from "react";
-import { set, union, uniq, find } from "lodash/fp";
+import { uniq, find } from "lodash/fp";
 
+import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
 import MetadataInput from "~/components/common/MetadataInput";
 import {
@@ -62,13 +63,13 @@ class MetadataCSVGeosearchMenu extends React.Component {
     return applyToAllSample === sample ? (
       <div
         className={cs.applyToAll}
-        onClick={() => {
-          this.applyToAll(sample);
-          // logAnalyticsEvent("MetadataManualInput_apply-all_clicked", {
-          //   sampleName: sample.name,
-          //   column,
-          // });
-        }}
+        onClick={withAnalytics(
+          () => this.applyToAll(sample),
+          "MetadataCSVGeosearchMenu_apply-all_clicked",
+          {
+            sampleName: sample.name,
+          }
+        )}
       >
         Apply to All
       </div>
@@ -120,6 +121,11 @@ class MetadataCSVGeosearchMenu extends React.Component {
                 this.setState({ applyToAllSample: sampleName });
                 onMetadataChange({
                   metadata: newMetadata,
+                });
+                logAnalyticsEvent("MetadataManualInput_input_changed", {
+                  key,
+                  value,
+                  sampleName,
                 });
               }}
               withinModal={true}

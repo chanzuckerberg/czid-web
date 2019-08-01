@@ -81,6 +81,7 @@ class MetadataUpload extends React.Component {
 
   getCSVLocationMatches = async metadata => {
     const { onMetadataChange } = this.props;
+    if (!metadata) return;
     try {
       const { newMetadata, warnings } = await geosearchCSVlocations(
         metadata,
@@ -129,9 +130,6 @@ class MetadataUpload extends React.Component {
   };
 
   renderTab = () => {
-    const { metadata, onMetadataChange } = this.props;
-    const { CSVLocationWarnings } = this.state;
-
     if (this.state.currentTab === "Manual Input") {
       if (!this.props.samples || !this.state.projectMetadataFields) {
         return <div className={cs.loadingMsg}>Loading...</div>;
@@ -196,12 +194,6 @@ class MetadataUpload extends React.Component {
               Validating metadata...
             </div>
           )}
-          <MetadataCSVGeosearchMenu
-            CSVLocationWarnings={CSVLocationWarnings}
-            metadata={metadata}
-            metadataType={this.getRequiredLocationMetadataType()}
-            onMetadataChange={onMetadataChange}
-          />
         </React.Fragment>
       );
     }
@@ -267,6 +259,24 @@ class MetadataUpload extends React.Component {
         )}
       </div>
     );
+  };
+
+  renderCSVLocationsMenu = () => {
+    const { metadata, onMetadataChange } = this.props;
+    const { CSVLocationWarnings, currentTab } = this.state;
+
+    const issues = this.props.issues || this.state.issues;
+    const hasErrors = issues && issues.errors.length > 0;
+
+    // Hide if they still have errors that will require re-uploading their CSV.
+    return currentTab === "CSV Upload" && !hasErrors ? (
+      <MetadataCSVGeosearchMenu
+        CSVLocationWarnings={CSVLocationWarnings}
+        metadata={metadata}
+        metadataType={this.getRequiredLocationMetadataType()}
+        onMetadataChange={onMetadataChange}
+      />
+    ) : null;
   };
 
   render() {
@@ -337,6 +347,7 @@ class MetadataUpload extends React.Component {
         />
         {this.renderTab()}
         {this.renderIssues()}
+        {this.renderCSVLocationsMenu()}
       </div>
     );
   }
