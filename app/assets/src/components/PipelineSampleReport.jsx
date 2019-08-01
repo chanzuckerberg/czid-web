@@ -1269,11 +1269,9 @@ class PipelineSampleReport extends React.Component {
       subsampled_reads &&
       subsampled_reads <
         this.report_details.pipeline_info.adjusted_remaining_reads
-        ? "The total was randomly subsampled to " +
-          subsampled_reads +
-          " out of " +
-          this.report_details.pipeline_info.adjusted_remaining_reads +
-          " reads passing host and quality filters."
+        ? `Report values are computed on results from ${subsampled_reads} reads subsampled randomly from the ${
+            this.report_details.pipeline_info.adjusted_remaining_reads
+          } reads passing host and quality filters.`
         : "";
     const disable_filter = this.anyFilterSet() ? (
       <span
