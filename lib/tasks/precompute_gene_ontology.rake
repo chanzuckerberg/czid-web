@@ -2,7 +2,25 @@ MASTER_OWL_URI = "https://raw.githubusercontent.com/arpcard/aro/master/aro.owl".
 URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/".freeze
 S3_JSON_BUCKET = "idseq-database".freeze
 S3_ARGANNOT_FASTA = "s3://idseq-database/amr/ARGannot_r2.fasta".freeze
-DEFAULT_S3_REGION = "us-west-2".freeze
+
+DRUG_CLASSES = {
+  "agly" => ["Aminoglycosides", "0000016"],
+  "bla" => ["Beta-lactamases", "3000001"],
+  "colistin" => ["Colistins", "0000067"],
+  # "fcd" => [], # Unclear which one this refers to
+  "fos" => ["Fosfomycin", "0000025"],
+  "fcyn" => ["Fosfomycin", "0000025"],
+  "flq" => ["Fluroquinolones", "0000001"],
+  "gly" => ["Glycopeptides", "3000081"],
+  "mls" => ["Macrolide-lincosamide-streptogramin", "0000000"],
+  "ntmdz" => ["Nitroimidazoles", "3004115"],
+  "oxzln" => ["Oxazolidinones", "3000079"],
+  "phe" => ["Phenicols", "3000387"],
+  "rif" => ["Rifampicin", "3000169"],
+  "sul" => ["Sulfonamides", "3000282"],
+  "tet" => ["Tetracyclines", "3000050"],
+  "tmt" => ["Trimethoprim", "3000188"]
+}.freeze # label, ARO Accession number
 
 require "aws-sdk-s3"
 require "nokogiri"
@@ -38,30 +56,42 @@ task :precompute_gene_ontology => :environment do
     if line[0] == ">"
       split_entry = line.split(";")
       gene_name = split_entry[2]
-      arg_entries.push(gene_name)
+      drug_class = split_entry[3].downcase
+      if DRUG_CLASSES.key?(drug_class)
+        drug_class = DRUG_CLASSES[drug_class]
+      else
+        drug_class = [drug_class, "error"]
+      end
+      arg_entries.push([gene_name, drug_class])
     end
   end
 
   json_ontology = {}
-  arg_entries.each do |gene|
+  arg_entries.each do |entry|
+    gene, drug_class = entry
     Rails.logger.info("Building ontology for #{gene}")
     ontology = {}
     search_result = search_card_owl(gene, owl_doc)
-    unless search_result["error"].nil?
-      next
+    if search_result["error"].nil?
+      ontology_info = gather_ontology_information(search_result["matching_node"], owl_doc)
+      ontology_info.each do |key, value|
+        ontology[key] = value
+      end
+      ontology["publications"] = ontology["publications"].map do |pubmed_string|
+        get_publication_name(pubmed_string.split(":")[1])
+      end
     end
-    ontology_info = gather_ontology_information(search_result["matching_node"], owl_doc)
-    ontology_info.each do |key, value|
-      ontology[key] = value
+    unless drug_class[1] == "error"
+      ontology["drugClass"] = get_node_information(drug_class[1], owl_doc)
+      ontology["drugClass"]["label"] = drug_class[0]
+    else
+      Rails.logger.info("No drug class mapping for #{drug_class[0]} belonging to #{gene}")
+      ontology["drugClass"] = { "label" => drug_class[0], "description" => "No description"}
     end
-    ontology["publications"] = ontology["publications"].map do |pubmed_string|
-      get_publication_name(pubmed_string.split(":")[1])
-    end
-    json_ontology[:gene] = ontology
+    json_ontology[gene] = ontology
   end
 
-  time = Time.now()
-  S3_JSON_KEY = "amr/#{time.year}-#{time.mon}-#{time.day}/aro.json".freeze
+  S3_JSON_KEY = "amr/ontology/#{Time.now().strftime("%Y-%m-%d")}/aro.json".freeze
   begin
     s3_resp = s3.put_object({
       body: json_ontology.to_json,
@@ -130,19 +160,8 @@ def gather_ontology_information(matching_entry, xml_dom)
   # These properties are referred to by accession number in the matching OWL Class,
   # but their labels are located elsewhere in the document.
   remote_properties = {
-    "drugClass" => get_drug_classes(ontology_information["accession"], xml_dom),
     "geneFamily" => matching_entry.xpath("./rdfs:subClassOf[not(*)]")
   }
-
-  # Some drug resistances are only listed in the gene family entry
-  if remote_properties["drugClass"].empty?
-    drug_classes = []
-    remote_properties["geneFamily"].each do |node|
-      gene_family_accession = node.get_attribute("rdf:resource").split('_')[1]
-      drug_classes.concat(get_drug_classes(gene_family_accession, xml_dom))
-    end
-    remote_properties["drugClass"] = drug_classes
-  end
 
   local_properties = {
     "synonyms" => matching_entry.xpath("./oboInOwl:hasExactSynonym"),
@@ -161,10 +180,7 @@ def gather_ontology_information(matching_entry, xml_dom)
     collection = []
     property_nodes.each do |node|
       accession = node.get_attribute("rdf:resource").split('_')[1]
-      accession_class = xml_dom.at_xpath(".//owl:Class[@rdf:about='http://purl.obolibrary.org/obo/ARO_#{accession}']")
-      label = accession_class.at_xpath("./rdfs:label").content
-      description = accession_class.at_xpath("./obo:IAO_0000115").content
-      entry = { "label" => label, "description" => description }
+      entry = get_node_information(accession, xml_dom)
       collection.push(entry)
     end
     ontology_information[ontology_key] = collection
@@ -172,16 +188,12 @@ def gather_ontology_information(matching_entry, xml_dom)
   return ontology_information
 end
 
-def get_drug_classes(accession, xml_dom)
+def get_node_information(accession, xml_dom)
   accession_class = xml_dom.at_xpath(".//owl:Class[@rdf:about='http://purl.obolibrary.org/obo/ARO_#{accession}']")
-  drug_class_node_markers = accession_class.xpath("./rdfs:subClassOf/owl:Restriction/owl:onProperty[@rdf:resource='http://purl.obolibrary.org/obo/RO#_confers_resistance_to_drug']")
-  drug_class_family_node_markers = accession_class.xpath("./rdfs:subClassOf/owl:Restriction/owl:onProperty[@rdf:resource='http://purl.obolibrary.org/obo/RO#_confers_resistance_to']")
-  drug_markers = drug_class_node_markers + drug_class_family_node_markers
-  drug_class_nodes = []
-  drug_markers.each do |node_marker|
-    drug_class_nodes.push(node_marker.at_xpath("./following-sibling::owl:someValuesFrom"))
-  end
-  return drug_class_nodes
+  label = accession_class.at_xpath("./rdfs:label").content
+  description = accession_class.at_xpath("./obo:IAO_0000115").content
+  entry = { "label" => label, "description" => description }
+  return entry
 end
 
 def get_publication_name(pmid)

@@ -65,7 +65,6 @@ export default class GeneDetailsMode extends React.Component {
   async getGeneInfo(geneName) {
     const ontology = await getCARDInfo(geneName);
     const cardEntryFound = ontology.error !== "" ? false : true;
-
     this.setState({
       ontology,
       loading: false,
@@ -191,11 +190,11 @@ export default class GeneDetailsMode extends React.Component {
                 </div>
               </div>
             )}
-            {drugClass.length > 0 && (
+            {drugClass && (
               <div>
                 <div className={cs.subtitle}>{CARD_RESISTANCES}</div>
                 <div className={cs.text}>
-                  {this.renderPropertyList(drugClass)}
+                  {this.renderPropertyList([drugClass])}
                 </div>
               </div>
             )}
