@@ -11,11 +11,11 @@ import DataTable from "~/components/visualizations/table/DataTable";
 import cs from "./metadata_csv_locations_menu.scss";
 
 // Batch geosearch CSV locations for matches
-export const geosearchCSVlocations = async (metadata, metadataType) => {
+export const geosearchCSVLocations = async (metadata, locationMetadataType) => {
   if (!(metadata && metadata.rows)) return;
 
   // For each unique plain text value, get the #1 search result, if any.
-  const rawNames = uniq(metadata.rows.map(r => r[metadataType.name]));
+  const rawNames = uniq(metadata.rows.map(r => r[locationMetadataType.name]));
   const matchedLocations = {};
   const requests = rawNames.map(async query => {
     const res = await getGeoSearchSuggestions(query, 1);
@@ -28,7 +28,7 @@ export const geosearchCSVlocations = async (metadata, metadataType) => {
   const allWarnings = {};
   metadata.rows.forEach((row, rowIndex) => {
     const sampleName = row[NAME_COLUMN];
-    const locationName = row[metadataType.name];
+    const locationName = row[locationMetadataType.name];
 
     const { result, warning } = processLocationSelection(
       matchedLocations[locationName] || locationName,
@@ -37,7 +37,7 @@ export const geosearchCSVlocations = async (metadata, metadataType) => {
     if (warning) allWarnings[sampleName] = warning;
 
     if (matchedLocations.hasOwnProperty(locationName)) {
-      newMetadata.rows[rowIndex][metadataType.name] = result;
+      newMetadata.rows[rowIndex][locationMetadataType.name] = result;
     }
   });
   return { newMetadata, warnings: allWarnings };
@@ -53,34 +53,34 @@ class MetadataCSVLocationsMenu extends React.Component {
     applyToAllSample: null,
   };
 
-  renderApplyToAll = sample => {
+  renderApplyToAll = () => {
     const { applyToAllSample } = this.state;
-    return applyToAllSample === sample ? (
+    return (
       <div
         className={cs.applyToAll}
         onClick={withAnalytics(
-          () => this.applyToAll(sample),
+          () => this.applyToAll(applyToAllSample),
           "MetadataCsvLocationsMenu_apply-all_clicked",
           {
-            sampleName: sample.name,
+            sampleName: applyToAllSample,
           }
         )}
       >
         Apply to All
       </div>
-    ) : null;
+    );
   };
 
   applyToAll = sample => {
     const {
       metadata,
-      metadataType,
+      locationMetadataType,
       onMetadataChange,
       onCSVLocationWarningsChange,
     } = this.props;
 
     const newValue = (find({ [NAME_COLUMN]: sample }, metadata.rows) || {})[
-      metadataType.name
+      locationMetadataType.name
     ];
     const newMetadata = metadata;
     const allWarnings = {};
@@ -91,7 +91,7 @@ class MetadataCSVLocationsMenu extends React.Component {
         newValue,
         isRowHuman(row)
       );
-      row[metadataType.name] = result;
+      row[locationMetadataType.name] = result;
       if (warning) allWarnings[row[NAME_COLUMN]] = warning;
     });
 
@@ -106,17 +106,18 @@ class MetadataCSVLocationsMenu extends React.Component {
   getManualInputData = () => {
     const {
       CSVLocationWarnings,
+      locationMetadataType,
       metadata,
-      metadataType,
       onMetadataChange,
     } = this.props;
+    const { applyToAllSample } = this.state;
 
     return metadata.rows.map((row, rowIndex) => {
       const sampleName = row[NAME_COLUMN];
 
       const onChange = (key, value) => {
         const newMetadata = metadata;
-        newMetadata.rows[rowIndex][metadataType.name] = value;
+        newMetadata.rows[rowIndex][locationMetadataType.name] = value;
 
         onMetadataChange({
           metadata: newMetadata,
@@ -135,19 +136,19 @@ class MetadataCSVLocationsMenu extends React.Component {
             {sampleName}
           </div>
         ),
-        [metadataType.key]: (
+        [locationMetadataType.key]: (
           <div>
             <MetadataInput
-              key={metadataType.key}
+              key={locationMetadataType.key}
               className={cs.input}
-              value={row[metadataType.name]}
-              metadataType={metadataType}
+              value={row[locationMetadataType.name]}
+              metadataType={locationMetadataType}
               onChange={onChange}
               withinModal={true}
               isHuman={isRowHuman(row)}
               warning={CSVLocationWarnings[sampleName]}
             />
-            {this.renderApplyToAll(sampleName)}
+            {applyToAllSample === sampleName && this.renderApplyToAll()}
           </div>
         ),
       };
@@ -155,13 +156,13 @@ class MetadataCSVLocationsMenu extends React.Component {
   };
 
   render() {
-    const { metadata, metadataType } = this.props;
+    const { metadata, locationMetadataType } = this.props;
 
     if (!(metadata && metadata.rows)) return null;
     return (
       <React.Fragment>
         <div className={cs.instructions}>
-          <div className={cs.title}>Location Matches</div>
+          <div className={cs.title}>Confirm Your Collection Locations</div>
           <div className={cs.subtitle}>
             We automatically searched for location matches. Please double check
             and correct any errors.
@@ -171,10 +172,11 @@ class MetadataCSVLocationsMenu extends React.Component {
           className={cs.inputTable}
           headers={{
             [NAME_COLUMN]: NAME_COLUMN,
-            [metadataType.key]: metadataType.name,
+            [locationMetadataType.key]: locationMetadataType.name,
           }}
-          columns={[NAME_COLUMN, metadataType.key]}
+          columns={[NAME_COLUMN, locationMetadataType.key]}
           data={this.getManualInputData()}
+          getColumnWidth={column => column === NAME_COLUMN && 240}
         />
       </React.Fragment>
     );
@@ -182,9 +184,16 @@ class MetadataCSVLocationsMenu extends React.Component {
 }
 
 MetadataCSVLocationsMenu.propTypes = {
-  CSVLocationWarnings: PropTypes.object,
-  metadata: PropTypes.object,
-  metadataType: PropTypes.object,
+  CSVLocationWarnings: PropTypes.objectOf(PropTypes.string),
+  metadata: PropTypes.shape({
+    headers: PropTypes.arrayOf(PropTypes.string),
+    rows: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.any)),
+  }),
+  locationMetadataType: PropTypes.shape({
+    dataType: "location",
+    key: PropTypes.string,
+    name: PropTypes.string,
+  }),
   onCSVLocationWarningsChange: PropTypes.func.isRequired,
   onMetadataChange: PropTypes.func.isRequired,
 };

@@ -4,7 +4,7 @@ import _fp, { filter, keyBy, concat, find } from "lodash/fp";
 
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
 import MetadataCSVLocationsMenu, {
-  geosearchCSVlocations,
+  geosearchCSVLocations,
 } from "~/components/common/MetadataCSVLocationsMenu";
 import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
@@ -85,7 +85,7 @@ class MetadataUpload extends React.Component {
     if (!metadata) return;
 
     try {
-      const { newMetadata, warnings } = await geosearchCSVlocations(
+      const { newMetadata, warnings } = await geosearchCSVLocations(
         metadata,
         this.getRequiredLocationMetadataType()
       );
@@ -277,8 +277,8 @@ class MetadataUpload extends React.Component {
     return currentTab === "CSV Upload" && !hasErrors ? (
       <MetadataCSVLocationsMenu
         CSVLocationWarnings={CSVLocationWarnings}
+        locationMetadataType={this.getRequiredLocationMetadataType()}
         metadata={metadata}
-        metadataType={this.getRequiredLocationMetadataType()}
         onCSVLocationWarningsChange={this.handleCSVLocationWarningsChange}
         onMetadataChange={onMetadataChange}
       />
