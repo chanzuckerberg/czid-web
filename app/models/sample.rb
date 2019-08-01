@@ -67,7 +67,7 @@ class Sample < ApplicationRecord
   belongs_to :user, optional: true, counter_cache: true # use .size for cache, use .count to force COUNT query
   belongs_to :host_genome, optional: true
   has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
-  has_and_belongs_to_many :backgrounds, through: :pipeline_runs
+  has_many :backgrounds, through: :pipeline_runs
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
   has_many :metadata, dependent: :destroy
