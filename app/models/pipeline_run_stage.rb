@@ -29,11 +29,27 @@ class PipelineRunStage < ApplicationRecord
   DAG_NAME_POSTPROCESS = "postprocess".freeze
   DAG_NAME_EXPERIMENTAL = "experimental".freeze
 
-  STAGE_NAME_TO_DAG_NAME = {
-    HOST_FILTERING_STAGE_NAME => DAG_NAME_HOST_FILTER,
-    ALIGNMENT_STAGE_NAME => DAG_NAME_ALIGNMENT,
-    POSTPROCESS_STAGE_NAME => DAG_NAME_POSTPROCESS,
-    EXPT_STAGE_NAME => DAG_NAME_EXPERIMENTAL,
+  STAGE_INFO = {
+    1 => {
+      name: HOST_FILTERING_STAGE_NAME,
+      dag_name: DAG_NAME_HOST_FILTER,
+      job_command_func: 'host_filtering_command'.freeze,
+    },
+    2 => {
+      name: ALIGNMENT_STAGE_NAME,
+      dag_name: DAG_NAME_ALIGNMENT,
+      job_command_func: 'alignment_command'.freeze,
+    },
+    3 => {
+      name: POSTPROCESS_STAGE_NAME,
+      dag_name: DAG_NAME_POSTPROCESS,
+      job_command_func: 'postprocess_command'.freeze,
+    },
+    4 => {
+      name: EXPT_STAGE_NAME,
+      dag_name: DAG_NAME_EXPERIMENTAL,
+      job_command_func: 'experimental_command'.freeze,
+    },
   }.freeze
 
   # Max number of times we resubmit a job when it gets killed by EC2.
@@ -49,7 +65,15 @@ class PipelineRunStage < ApplicationRecord
   end
 
   def dag_name
-    STAGE_NAME_TO_DAG_NAME[name]
+    STAGE_INFO[step_number][:dag_name]
+  end
+
+  def name
+    STAGE_INFO[step_number][:name]
+  end
+
+  def job_command_func
+    STAGE_INFO[step_number][:job_command_func]
   end
 
   def step_status_file_path
