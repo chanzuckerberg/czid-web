@@ -139,7 +139,7 @@ RSpec.describe RetrievePipelineVizGraphDataService do
       results[:stages][1][:steps].each_with_index do |step, step_index|
         stage_dag_json = JSON.parse(pr_stages_data[1][:dag_json])
         orig_step_out_name = stage_dag_json["steps"][step_index]["out"]
-        expect(step[:status]).to eq("finished")
+        expect(step[:status]).to eq("inProgress")
         expect(step[:description]).to eq(step_status_data[orig_step_out_name.to_sym][:description])
       end
     end
