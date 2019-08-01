@@ -128,7 +128,11 @@ RSpec.describe RetrievePipelineVizGraphDataService do
     end
 
     it "should include step-level status updates" do
-      allow(PipelineOutputsHelper).to receive(:get_s3_file).and_return(step_status_data.to_json)
+      s3 = Aws::S3::Client.new(stub_responses: true)
+      s3.stub_responses(:get_object, body: step_status_data.to_json)
+
+      stub_const("PipelineOutputsHelper::Client", s3)
+      # allow(PipelineOutputsHelper).to receive(:get_s3_file).and_return(step_status_data.to_json)
       results = RetrievePipelineVizGraphDataService.call(@pr.id, true, false)
 
       results[:stages][0][:steps].each do |step|

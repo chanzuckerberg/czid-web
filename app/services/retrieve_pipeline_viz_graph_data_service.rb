@@ -2,6 +2,7 @@ class RetrievePipelineVizGraphDataService
   include Callable
   # PipelineRunsHelper includes default descriptions, before we can get them from the dag
   include PipelineRunsHelper
+  include PipelineOutputsHelper
 
   # Structures dag_json of each stage of the pipeline run into the following in @results for drawing
   # the pipeline visualization graphs on the React side:
@@ -101,7 +102,7 @@ class RetrievePipelineVizGraphDataService
   def step_statuses
     @pipeline_run.pipeline_run_stages.map do |prs|
       begin
-        JSON.parse(PipelineOutputsHelper.get_s3_file(prs.step_status_file_path) || "{}")
+        JSON.parse(get_s3_file(prs.step_status_file_path) || "{}")
       rescue JSON::ParserError
         {}
       end
