@@ -16,7 +16,8 @@ class RetrievePipelineVizGraphDataService
   #             edge being an input edge to the node.
   #           - ouputEdges: An array of indices that map to edges in the @edges array, each edge being an
   #             output edge from the node
-  #           - status: A number representing the current status of the step at time of retrieval.
+  #           - status: The current status of the step at time of retrieval, as represented by a string
+  #             (see JOB_STATUS_NUM_TO_STRING below for possible strings).
   #
   # edges: An array of edges, each edge object having the following structure:
   #     - from: An object containing a stageIndex and stepIndex, denoting the originating node it is from
@@ -24,6 +25,15 @@ class RetrievePipelineVizGraphDataService
   #     - files: An array of file objects that get passed between the from and to nodes. It is composed of:
   #           - displayName: A string to display the file as
   #           - url: An optional string to download the file
+
+  JOB_STATUS_NUM_TO_STRING = {
+    nil => "notStarted",
+    0 => "notStarted",
+    1 => "inProgress",
+    2 => "finished",
+    3 => "finished", # Uploaded
+    4 => "errored"
+  }.freeze
 
   def initialize(pipeline_run_id, is_admin, remove_host_filtering_urls)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
@@ -61,7 +71,7 @@ class RetrievePipelineVizGraphDataService
           description: description,
           inputEdges: [],
           outputEdges: [],
-          status: status_info["status"]
+          status: JOB_STATUS_NUM_TO_STRING[status_info["status"]]
         }
       end
 
