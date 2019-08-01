@@ -364,6 +364,10 @@ MetadataUpload.propTypes = {
     errors: PropTypes.arrayOf(PropTypes.string),
     warnings: PropTypes.arrayOf(PropTypes.string),
   }),
+  metadata: PropTypes.object,
+  // Immediately called when the user changes anything, even before validation has returned.
+  // Can be used to disable the header navigation.
+  onDirty: PropTypes.func,
   onMetadataChange: PropTypes.func.isRequired,
   onShowCSVInstructions: PropTypes.func.isRequired,
   project: PropTypes.Project,
@@ -371,10 +375,6 @@ MetadataUpload.propTypes = {
   samplesAreNew: PropTypes.bool,
   withinModal: PropTypes.bool,
   visible: PropTypes.bool,
-  // Immediately called when the user changes anything, even before validation has returned.
-  // Can be used to disable the header navigation.
-  onDirty: PropTypes.func,
-  metadata: PropTypes.object,
 };
 
 export default MetadataUpload;

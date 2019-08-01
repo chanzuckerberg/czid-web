@@ -12,8 +12,7 @@ export const LOCATION_UNRESOLVED_WARNING =
   "Unresolved plain text, not shown on maps.";
 
 // For human samples, drop the city part of the name and show a warning.
-// Note that the backend will redo the geosearch for confirmation, so don't
-// modify geo_level here.
+// Note that the backend will redo the geosearch for confirmation.
 // TODO(jsheu): Consider moving the warnings to the backend and generalizing.
 export const processLocationSelection = (result, isHuman) => {
   let warning = "";
@@ -23,6 +22,15 @@ export const processLocationSelection = (result, isHuman) => {
       result.state_name,
       result.country_name,
     ]).join(", ");
+
+    if (result.subdivision_name) {
+      result.geo_level = "subdivision";
+    } else if (result.state_name) {
+      result.geo_level = "state";
+    } else if (result.country_name) {
+      result.geo_level = "country";
+    }
+
     warning = LOCATION_PRIVACY_WARNING;
   } else if (!result.geo_level) {
     warning = LOCATION_UNRESOLVED_WARNING;
