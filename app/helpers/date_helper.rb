@@ -3,22 +3,22 @@ module DateHelper
   # We match against regex first, then use strptime
   DATE_STANDARD = {
     format: "%Y-%m-%d",
-    regex: /(^\d{4}-\d{1,2}-\d{1,2}$)/
+    regex: /(^\d{4}-\d{1,2}-\d{1,2}$)/,
   }.freeze
 
   DATE_STANDARD_MONTH = {
     format: "%Y-%m",
-    regex: /(^\d{4}-\d{1,2}$)/
+    regex: /(^\d{4}-\d{1,2}$)/,
   }.freeze
 
   DATE_ALT = {
     format: "%m/%d/%y",
-    regex: %r{^\d{1,2}\/\d{1,2}\/\d{2}$}
+    regex: %r{^\d{1,2}\/\d{1,2}\/\d{2}$},
   }.freeze
 
   DATE_ALT_MONTH = {
     format: "%m/%Y",
-    regex: %r{^\d{1,2}\/\d{4}$}
+    regex: %r{^\d{1,2}\/\d{4}$},
   }.freeze
 
   def parse_date(date_string, allow_day = true)

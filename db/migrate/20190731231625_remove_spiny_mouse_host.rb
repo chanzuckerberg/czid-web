@@ -1,5 +1,10 @@
-class AddSpinyMouseHost < ActiveRecord::Migration[5.1]
+class RemoveSpinyMouseHost < ActiveRecord::Migration[5.1]
   def up
+    hg = HostGenome.find_by(name: "Spiny Mouse")
+    hg.destroy if hg
+  end
+
+  def down
     return if HostGenome.find_by(name: "Spiny Mouse")
 
     hg = HostGenome.new
@@ -13,10 +18,5 @@ class AddSpinyMouseHost < ActiveRecord::Migration[5.1]
     # from their uninfected samples that we can substitute as the default.
     hg.default_background_id = human_host.default_background_id if human_host
     hg.save
-  end
-
-  def down
-    hg = HostGenome.find_by(name: "Spiny Mouse")
-    hg.destroy if hg
   end
 end

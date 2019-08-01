@@ -7,7 +7,7 @@ module PipelineOutputsHelper
     pipeline_run_display = pipeline_run.as_json.except("version")
     pipeline_run_display["version"] = {
       pipeline: pipeline_run.pipeline_version,
-      alignment_db: pipeline_run.alignment_config.name
+      alignment_db: pipeline_run.alignment_config.name,
     }
     pipeline_run_display
   end
@@ -75,7 +75,7 @@ module PipelineOutputsHelper
                             "reversed" => reversed,
                             "alignment" => [ref_seq_display,
                                             read_seq_display,
-                                            quality_string_display] }
+                                            quality_string_display,], }
     end
     results
   end

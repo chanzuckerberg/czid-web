@@ -64,7 +64,7 @@ class TaxonScoringModel < ApplicationRecord
     'Human coronavirus 229E', 'Human parainfluenza', 'Human orthopneumovirus', 'Influenza A virus',
     'Influenza B virus', 'Influenza C virus', 'Parainfluenza virus', 'Respiratory syncytial virus',
     'Rhinovirus A', 'Rhinovirus B', 'Rhinovirus C', 'Klebsiella oxytoca', 'Klebsiella pneumoniae',
-    'Legionella pneumophila', 'Metapneumovirus', 'Human orthopneumovirus'
+    'Legionella pneumophila', 'Metapneumovirus', 'Human orthopneumovirus',
   ].freeze
   PATHO_MAP = { "is_respiratory_patho" => RESP_PATHOGEN_LIST }.freeze
 

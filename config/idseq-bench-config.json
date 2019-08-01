@@ -24,8 +24,7 @@
     "********************************************************************************"
   ],
   "defaults": {
-    "how_to_use_these_defaults":
-      "These properties may be overridden in each entry of active_benchmarks below.",
+    "how_to_use_these_defaults": "These properties may be overridden in each entry of active_benchmarks below.",
     "project_name": "IDSeq Bench",
     "user_email": "bdimitrov@chanzuckerberg.com",
     "frequency_hours": 24,
@@ -33,23 +32,32 @@
     "trigger_on_pipeline_change": true,
     "pipeline_branch": "master",
     "host": "Human",
-    "comment":
-      "No comment provided for this benchmark in s3://idseq-bench/config.json."
+    "comment": "No comment provided for this benchmark in s3://idseq-bench/config.json."
   },
   "active_benchmarks": {
-    "s3://idseq-bench/4": {
-      "comment":
-        "Comprehensive general benchmark built with idseq-bench.  Deployed 2018-10-11.",
-      "environments": ["prod", "staging"]
+    "s3://idseq-bench/5": {
+      "comment": "Comprehensive general benchmark built with idseq-bench, contains additional microbes (beyond bench/4) commonly found in IDseq samples. Deployed 2019-04-30.",
+      "environments": [
+        "prod",
+        "staging"
+      ]
     }
   },
   "retired_benchmarks": {
+    "s3://idseq-bench/4": {
+      "comment": "Comprehensive general benchmark built with idseq-bench.  Deployed 2018-10-11.  Retired 2019-04-30 (presumably).",
+      "environments": [
+        "prod",
+        "staging"
+      ]
+    },
     "s3://idseq-bench/3": {
-      "comment":
-        "A tiny pseudo-benchmark meant for exercising the job control logic.  Deployed 2018-10-11",
-      "environments": ["development"],
+      "comment": "A tiny pseudo-benchmark meant for exercising the job control logic.  Deployed 2018-10-11",
+      "environments": [
+        "development"
+      ],
       "project_name": "IDSeq Bench Development",
-      "frequency_hours": 1.0
+      "frequency_hours": 1
     }
   }
 }

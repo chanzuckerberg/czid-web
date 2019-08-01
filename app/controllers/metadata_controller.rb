@@ -50,13 +50,13 @@ class MetadataController < ApplicationController
 
     render json: {
       status: "success",
-      issues: issues
+      issues: issues,
     }
   rescue => err
     render json: {
       status: "error",
       # Wrapped for consistency with success response
-      issues: { errors: [err] }
+      issues: { errors: [err] },
     }, status: :unprocessable_entity
   end
 end

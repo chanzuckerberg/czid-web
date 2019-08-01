@@ -77,7 +77,7 @@ class RetrievePipelineVizGraphDataService
 
       {
         steps: steps,
-        jobStatus: dag_json[:job_status]
+        jobStatus: dag_json[:job_status],
       }
     end
     return stages

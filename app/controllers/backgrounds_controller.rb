@@ -52,19 +52,19 @@ class BackgroundsController < ApplicationController
     if !non_viewable_sample_ids.empty?
       render json: {
         status: :unauthorized,
-        message: "You are not authorized to view all samples in the list."
+        message: "You are not authorized to view all samples in the list.",
       }
     else
       pipeline_run_ids = Background.eligible_pipeline_runs.where(sample_id: sample_ids).pluck(:id)
       @background = Background.new(user_id: current_user.id, name: name, description: description, pipeline_run_ids: pipeline_run_ids)
       if @background.save
         render json: {
-          status: :ok
+          status: :ok,
         }
       else
         render json: {
           status: :not_acceptable,
-          message: @background.errors.full_messages
+          message: @background.errors.full_messages,
         }
       end
     end
@@ -75,7 +75,7 @@ class BackgroundsController < ApplicationController
   def update
     current_data = @background.to_json(include: [{ pipeline_runs: { only: [:id, :sample_id] } }])
     current_data_full_string = @background.to_json(include: [{ pipeline_runs: { only: [:id, :sample_id] } },
-                                                             :taxon_summaries])
+                                                             :taxon_summaries,])
     background_changed = assign_attributes_and_has_changed?(background_params)
     if background_changed
       s3_archive_successful, s3_backup_path = archive_background_to_s3(current_data_full_string)

@@ -104,6 +104,8 @@ const Location = PropTypes.shape({
   subdivision_name: PropTypes.string,
 });
 
+const SampleUploadType = PropTypes.oneOf(["basespace", "local", "remote"]);
+
 export default {
   ReportDetails,
   Taxon,
@@ -116,5 +118,6 @@ export default {
   SummaryStats,
   HostGenome,
   Location,
+  SampleUploadType,
   ...PropTypes,
 };

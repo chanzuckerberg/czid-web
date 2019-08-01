@@ -44,7 +44,7 @@ class ApplicationRecord < ActiveRecord::Base
       user_id: record.respond_to?(:user_id) ? record.user_id : nil,
       project_id: record.respond_to?(:project_id) ? record.project_id : nil,
       sample_id: record.respond_to?(:sample_id) ? record.sample_id : nil,
-      pipeline_run_id: record.respond_to?(:pipeline_run_id) ? record.pipeline_run_id : nil
+      pipeline_run_id: record.respond_to?(:pipeline_run_id) ? record.pipeline_run_id : nil,
     }
 
     # Merge status changes, important for updates, for example:

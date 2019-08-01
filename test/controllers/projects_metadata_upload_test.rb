@@ -29,9 +29,9 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
         'metadata_validation_sample_human' => {
           'sex' => 'Female',
           'age' => 100,
-          'admission_date' => '2018-01'
-        }
-      }
+          'admission_date' => '2018-01',
+        },
+      },
     }, as: :json
 
     assert_response :success
@@ -50,9 +50,9 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
           'foobar' => {
             'sex' => 'Female',
             'age' => 100,
-            'admission_date' => '2018-01'
-          }
-        }
+            'admission_date' => '2018-01',
+          },
+        },
       }, as: :json
     end
 
@@ -71,9 +71,9 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
           'metadata_validation_sample_human' => {
             'sex' => 'foobar',
             'age' => 'foobar',
-            'admission_date' => 'foobar'
-          }
-        }
+            'admission_date' => 'foobar',
+          },
+        },
       }, as: :json
     end
 
@@ -93,9 +93,9 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
       post upload_metadata_project_url(@metadata_validation_project), params: {
         metadata: {
           'metadata_validation_sample_human' => {
-            'blood_fed' => 'Yes'
-          }
-        }
+            'blood_fed' => 'Yes',
+          },
+        },
       }, as: :json
     end
 
@@ -123,9 +123,9 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
           'admission_date' => '2018-01',
           'Example Core Field' => 'Value',
           'Custom Field' => 'Value',
-          'Custom Field 2' => 'Value'
-        }
-      }
+          'Custom Field 2' => 'Value',
+        },
+      },
     }, as: :json
 
     assert_response :success
@@ -156,12 +156,12 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
     post upload_metadata_project_url(@metadata_validation_project), params: {
       metadata: {
         'metadata_validation_sample_human' => {
-          'Custom Field' => 'Value'
+          'Custom Field' => 'Value',
         },
         'metadata_validation_sample_mosquito' => {
-          'Custom Field' => 'Value'
-        }
-      }
+          'Custom Field' => 'Value',
+        },
+      },
     }, as: :json
 
     assert_response :success
@@ -191,9 +191,9 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
           'metadata_validation_sample_human' => {
             'sex' => 'Female',
             'age' => 100,
-            'admission_date' => '2018-01'
-          }
-        }
+            'admission_date' => '2018-01',
+          },
+        },
       }, as: :json
     end
   end
@@ -207,9 +207,9 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
           'metadata_validation_sample_human' => {
             'sex' => 'Female',
             'age' => 100,
-            'admission_date' => '2018-01'
-          }
-        }
+            'admission_date' => '2018-01',
+          },
+        },
       }, as: :json
     end
   end
@@ -222,9 +222,9 @@ class ProjectsMetadataUploadTest < ActionDispatch::IntegrationTest
         'joe_project_sampleA' => {
           'sex' => 'Female',
           'age' => 100,
-          'admission_date' => '2018-01'
-        }
-      }
+          'admission_date' => '2018-01',
+        },
+      },
     }, as: :json
 
     assert_response :success
