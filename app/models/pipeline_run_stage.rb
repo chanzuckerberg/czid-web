@@ -68,14 +68,6 @@ class PipelineRunStage < ApplicationRecord
     STAGE_INFO[step_number][:dag_name]
   end
 
-  def name
-    STAGE_INFO[step_number][:name]
-  end
-
-  def job_command_func
-    STAGE_INFO[step_number][:job_command_func]
-  end
-
   def step_status_file_path
     path_beginning = if step_number <= 2
                        pipeline_run.sample.sample_output_s3_path
