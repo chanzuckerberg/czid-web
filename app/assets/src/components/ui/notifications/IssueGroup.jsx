@@ -12,7 +12,7 @@ import cs from "./issue_group.scss";
 
 class IssueGroup extends React.Component {
   render() {
-    const { initialOpen, type } = this.props;
+    const { initialOpen, type, getColumnWidth } = this.props;
 
     const rowObject = this.props.rows.map(row =>
       zipObject(this.props.headers, row)
@@ -40,6 +40,7 @@ class IssueGroup extends React.Component {
           <DataTable
             columns={this.props.headers}
             data={rowObject}
+            getColumnWidth={getColumnWidth}
             striped={false}
           />
         </div>
@@ -51,6 +52,7 @@ class IssueGroup extends React.Component {
 IssueGroup.propTypes = {
   caption: PropTypes.string,
   className: PropTypes.string,
+  getColumnWidth: PropTypes.func,
   headers: PropTypes.arrayOf(PropTypes.string),
   initialOpen: PropTypes.bool,
   rows: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)),

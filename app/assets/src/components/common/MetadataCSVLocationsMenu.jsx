@@ -174,10 +174,11 @@ class MetadataCSVLocationsMenu extends React.Component {
           caption={
             "We automatically searched for location matches. Please double check and correct any errors."
           }
+          getColumnWidth={column => column === NAME_COLUMN && 240}
           headers={[NAME_COLUMN, locationMetadataType.name]}
+          initialOpen={true}
           rows={this.getManualInputData()}
           type="info"
-          initialOpen={true}
         />
       </React.Fragment>
     );
