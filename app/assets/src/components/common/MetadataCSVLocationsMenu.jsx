@@ -6,7 +6,6 @@ import { getGeoSearchSuggestions } from "~/api/locations";
 import MetadataInput from "~/components/common/MetadataInput";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 import PropTypes from "~/components/utils/propTypes";
-import DataTable from "~/components/visualizations/table/DataTable";
 import IssueGroup from "~ui/notifications/IssueGroup";
 
 import cs from "./metadata_csv_locations_menu.scss";
