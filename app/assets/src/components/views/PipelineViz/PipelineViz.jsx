@@ -207,7 +207,7 @@ class PipelineViz extends React.Component {
   }
 
   handleNodeHover(stageIndex, nodeId) {
-    const { inputEdgeColor, highlightColor } = this.props;
+    const { inputEdgeColor, outputEdgeColor } = this.props;
     const graph = this.graphs[stageIndex];
     const updatedInterStageArrows = [...this.state.interStageArrows];
 
@@ -261,8 +261,8 @@ class PipelineViz extends React.Component {
 
     const outputColorOptions = {
       color: {
-        color: highlightColor,
-        hover: highlightColor,
+        color: outputEdgeColor,
+        hover: outputEdgeColor,
         inherit: false,
       },
       width: 2,
@@ -711,7 +711,7 @@ class PipelineViz extends React.Component {
 
     // Stages without dag_json recorded are not toggleable
     const toggleable = i < stages.length;
-    const jobStatus = stages[i].jobStatus;
+    const jobStatus = toggleable ? stages[i].jobStatus : "notStarted";
 
     const stageContainer = toggleable && (
       <div className={isOpened ? cs.openedStage : cs.hidden}>
@@ -850,6 +850,7 @@ class PipelineViz extends React.Component {
 const nodeColors = PropTypes.shape({
   default: PropTypes.string.isRequired,
   hovered: PropTypes.string,
+  textColor: PropTypes.string,
 });
 
 PipelineViz.propTypes = {
@@ -865,7 +866,7 @@ PipelineViz.propTypes = {
   finishedNodeColor: nodeColors,
   erroredNodeColor: nodeColors,
   edgeColor: PropTypes.string,
-  highlightColor: PropTypes.string,
+  outputEdgeColor: PropTypes.string,
   inputEdgeColor: PropTypes.string,
   zoomMin: PropTypes.number,
   zoomMax: PropTypes.number,
@@ -875,13 +876,19 @@ PipelineViz.propTypes = {
 PipelineViz.defaultProps = {
   admin: false,
   backgroundColor: cs.offWhite,
-  notStartedNodeColor: { default: cs.white, textColor: cs.darkGrey },
-  inProgressNodeColor: { default: "#eff2fc", hovered: "#dae1f8" },
-  finishedNodeColor: { default: cs.successBg, hovered: cs.successLight },
-  erroredNodeColor: { default: cs.errorBg, hovered: cs.errorLightest },
-  edgeColor: cs.mediumGrey,
-  highlightColor: cs.primaryLight,
-  inputEdgeColor: cs.black,
+  notStartedNodeColor: {
+    default: cs.notStartedBg,
+    textColor: cs.notStartedText,
+  },
+  inProgressNodeColor: {
+    default: cs.inProgressBg,
+    hovered: cs.inProgressHoverBg,
+  },
+  finishedNodeColor: { default: cs.finishedBg, hovered: cs.finishedHoverBg },
+  erroredNodeColor: { default: cs.erroredBg, hovered: cs.erroredHoverBg },
+  edgeColor: cs.defaultEdgeColor,
+  inputEdgeColor: cs.inputEdgeColor,
+  outputEdgeColor: cs.outputEdgeColor,
   zoomMin: 0.5,
   zoomMax: 3,
   minMouseMoveUpdateDistance: 20,

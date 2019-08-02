@@ -42,3 +42,7 @@ $box-shadow-dark: rgba(34, 36, 38, 0.5);
 
 $melrose: #a9bdfc;
 $celery: rgba(147, 193, 81, 1);
+
+@function hover-state($base-color) {
+  @return darken($base-color, 5%);
+}

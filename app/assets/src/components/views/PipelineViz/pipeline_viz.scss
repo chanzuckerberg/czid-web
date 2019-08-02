@@ -4,27 +4,22 @@
 
 // Exporting strings to style nodes and edges in vis.js
 :export {
-  // Not started
-  white: $white;
-  darkGrey: $dark-grey;
+  notStartedBg: $white;
+  notStartedText: $dark-grey;
 
-  // In progress
+  inProgressBg: $primary-lightest;
+  inProgressHoverBg: hover-state($primary-lightest);
 
-  // Finished
-  successBg: $success-bg;
-  successLight: $success-light;
+  finishedBg: $success-bg;
+  finishedHoverBg: hover-state($success-bg);
 
-  // Errored
-  errorBg: $error-bg;
-  errorLightest: $error-lightest;
+  erroredBg: $error-bg;
+  erroredHoverBg: hover-state($error-bg);
 
-  // Stage background color for hidden start and end nodes
-  offWhite: $off-white;
-
-  // Edges
-  mediumGrey: $medium-grey;
-  primaryLight: $primary-light;
-  black: $black;
+  stageBg: $off-white;
+  defaultEdgeColor: $medium-grey;
+  outputEdgeColor: $primary-light;
+  inputEdgeColor: $black;
 }
 
 .pipelineVizPage {
