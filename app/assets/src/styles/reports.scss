@@ -86,6 +86,8 @@ input[type="number"] {
     top: 0;
   }
 
+  // border disappears when stickying
+  // a typicall hack is to add a line as after element
   tr.report-header th:after {
     content: "";
     position: absolute;
@@ -95,9 +97,9 @@ input[type="number"] {
     border-bottom: 1px solid $light-grey;
   }
 
+  // materialize adds border to all theads
   thead {
     border: 0;
-    border-image-width: 0;
   }
 }
 
