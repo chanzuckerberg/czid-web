@@ -15,6 +15,28 @@ export const geosearchCSVLocations = async (metadata, locationMetadataType) => {
   if (!(metadata && metadata.rows)) return;
 
   // For each unique plain text value, get the #1 search result, if any.
+  const getHelper = async query => {
+    try {
+      const res = await getGeoSearchSuggestions(query, 1);
+    } catch (err) {
+      return {};
+    }
+
+    const result = new Promise();
+    return result.then(
+      value => {
+        return { ok: true, value };
+      },
+      error => {
+        return {
+          ok: false,
+          value: error,
+          retry: () => getHelper(query),
+        };
+      }
+    );
+  };
+
   const rawNames = uniq(metadata.rows.map(r => r[locationMetadataType.name]));
   const matchedLocations = {};
   const requests = rawNames.map(async query => {
