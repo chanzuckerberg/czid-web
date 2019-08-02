@@ -713,10 +713,40 @@ class PipelineViz extends React.Component {
     const toggleable = i < stages.length;
     const jobStatus = toggleable ? stages[i].jobStatus : "notStarted";
 
+    let statusIcon;
+    switch (jobStatus) {
+      case "inProgress":
+        statusIcon = (
+          <span className={cs.statusIcon}>
+            <LoadingIcon className={cs.inProgressIcon} />
+          </span>
+        );
+        break;
+      case "finished":
+        statusIcon = (
+          <CircleCheckmarkIcon className={cx(cs.statusIcon, cs.finishedIcon)} />
+        );
+        break;
+      case "errored":
+        statusIcon = (
+          <InfoCircleIcon className={cx(cs.statusIcon, cs.erroredIcon)} />
+        );
+        break;
+      default:
+        statusIcon = <span className={cx(cs.statusIcon, cs.noIcon)} />;
+    }
+
+    const stageNameAndIcon = (
+      <span className={cs.stageNameAndIcon}>
+        {statusIcon}
+        {stageName}
+      </span>
+    );
+
     const stageContainer = toggleable && (
       <div className={isOpened ? cs.openedStage : cs.hidden}>
         <div className={cs.graphLabel}>
-          {stageName}
+          {stageNameAndIcon}
           <RemoveIcon
             onClick={() => this.toggleStage(i)}
             className={cs.closeIcon}
@@ -732,25 +762,6 @@ class PipelineViz extends React.Component {
       </div>
     );
 
-    let statusIcon;
-    switch (jobStatus) {
-      case "inProgress":
-        statusIcon = (
-          <LoadingIcon className={cx(cs.statusIcon, cs.inProgressIcon)} />
-        );
-        break;
-      case "finished":
-        statusIcon = (
-          <CircleCheckmarkIcon className={cx(cs.statusIcon, cs.finishedIcon)} />
-        );
-        break;
-      case "errored":
-        statusIcon = (
-          <InfoCircleIcon className={cx(cs.statusIcon, cs.erroredIcon)} />
-        );
-        break;
-    }
-
     return (
       <div className={cs.stage}>
         <div
@@ -761,8 +772,7 @@ class PipelineViz extends React.Component {
           )}
           onClick={() => this.toggleStage(i)}
         >
-          {statusIcon}
-          {stageName}
+          {stageNameAndIcon}
         </div>
         {stageContainer}
       </div>

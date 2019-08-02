@@ -63,7 +63,6 @@
   background-color: $white;
   border-radius: 4px;
   padding: 6px 12px 6px 6px;
-  text-align: center;
   cursor: pointer;
   box-shadow: $box-shadow-bottom-right;
   display: flex;
@@ -75,39 +74,51 @@
     opacity: 0.5;
   }
 
+  &.finished {
+    background-color: $success-lightest;
+  }
+
+  &.notStarted {
+    background-color: $white;
+    color: $dark-grey;
+  }
+
+  &.inProgress {
+    background-color: $primary-lightest;
+  }
+
+  &.errored {
+    background-color: $error-lightest;
+  }
+}
+
+.stageNameAndIcon {
+  display: flex;
+  align-items: center;
+
   .statusIcon {
     height: 15px;
     width: 15px;
     fill: $success;
     margin: 2.5px 4px 2.5px 0;
-
-    &.inProgressIcon {
-      fill: $primary-light;
-    }
-    &.erroredIcon {
-      fill: $error;
-    }
-    &.finishedIcon {
-      fill: $success;
-    }
   }
-}
 
-.finished {
-  background-color: $success-lightest;
-}
-
-.notStarted {
-  background-color: $white;
-  color: $dark-grey;
-}
-
-.inProgress {
-  background-color: $primary-lightest;
-}
-
-.errored {
-  background-color: $error-lightest;
+  .inProgressIcon {
+    color: $primary-light;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .erroredIcon {
+    fill: $error;
+  }
+  .finishedIcon {
+    fill: $success;
+  }
+  .noIcon {
+    margin: 2.5px 0;
+  }
 }
 
 .stageArrow {
