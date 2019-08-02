@@ -7,6 +7,7 @@ import MetadataInput from "~/components/common/MetadataInput";
 import { processLocationSelection } from "~/components/ui/controls/GeoSearchInputBox";
 import PropTypes from "~/components/utils/propTypes";
 import DataTable from "~/components/visualizations/table/DataTable";
+import IssueGroup from "~ui/notifications/IssueGroup";
 
 import cs from "./metadata_csv_locations_menu.scss";
 
@@ -132,7 +133,6 @@ class MetadataCSVLocationsMenu extends React.Component {
       const onChange = (key, value) => {
         const newMetadata = metadata;
         newMetadata.rows[rowIndex][locationMetadataType.name] = value;
-
         onMetadataChange({
           metadata: newMetadata,
         });
@@ -144,28 +144,22 @@ class MetadataCSVLocationsMenu extends React.Component {
         });
       };
 
-      return {
-        [NAME_COLUMN]: (
-          <div className={cs.sampleName} key={NAME_COLUMN}>
-            {sampleName}
-          </div>
-        ),
-        [locationMetadataType.key]: (
-          <div>
-            <MetadataInput
-              key={locationMetadataType.key}
-              className={cs.input}
-              value={row[locationMetadataType.name]}
-              metadataType={locationMetadataType}
-              onChange={onChange}
-              withinModal={true}
-              isHuman={isRowHuman(row)}
-              warning={CSVLocationWarnings[sampleName]}
-            />
-            {applyToAllSample === sampleName && this.renderApplyToAll()}
-          </div>
-        ),
-      };
+      return [
+        <div key={NAME_COLUMN}>{sampleName}</div>,
+        <div key={locationMetadataType.name}>
+          <MetadataInput
+            key={locationMetadataType.key}
+            className={cs.input}
+            value={row[locationMetadataType.name]}
+            metadataType={locationMetadataType}
+            onChange={onChange}
+            withinModal={true}
+            isHuman={isRowHuman(row)}
+            warning={CSVLocationWarnings[sampleName]}
+          />
+          {applyToAllSample === sampleName && this.renderApplyToAll()}
+        </div>,
+      ];
     });
   };
 
@@ -175,22 +169,15 @@ class MetadataCSVLocationsMenu extends React.Component {
     if (!(metadata && metadata.rows)) return null;
     return (
       <React.Fragment>
-        <div className={cs.instructions}>
-          <div className={cs.title}>Confirm Your Collection Locations</div>
-          <div className={cs.subtitle}>
-            We automatically searched for location matches. Please double check
-            and correct any errors.
-          </div>
-        </div>
-        <DataTable
-          className={cs.inputTable}
-          headers={{
-            [NAME_COLUMN]: NAME_COLUMN,
-            [locationMetadataType.key]: locationMetadataType.name,
-          }}
-          columns={[NAME_COLUMN, locationMetadataType.key]}
-          data={this.getManualInputData()}
-          getColumnWidth={column => column === NAME_COLUMN && 240}
+        <div className={cs.title}>Confirm Your Collection Locations</div>
+        <IssueGroup
+          caption={
+            "We automatically searched for location matches. Please double check and correct any errors."
+          }
+          headers={[NAME_COLUMN, locationMetadataType.name]}
+          rows={this.getManualInputData()}
+          type="info"
+          initialOpen={true}
         />
       </React.Fragment>
     );

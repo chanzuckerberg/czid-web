@@ -1,33 +1,18 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
 
-.instructions {
+.title {
+  @include font-header-m;
   margin-top: 25px;
-
-  .title {
-    @include font-header-m;
-  }
-
-  .subtitle {
-    @include font-body-s;
-  }
+  margin-bottom: 10px;
 }
 
-.inputTable {
-  margin-top: 15px;
-  margin-bottom: 20px;
+.input {
+  margin: 5px 30px 5px 0;
+  max-width: 400px;
+}
 
-  .sampleName {
-    font-weight: $font-weight-semibold;
-  }
-
-  .input {
-    margin: 5px 30px 5px 0;
-    max-width: 400px;
-  }
-
-  .applyToAll {
-    color: $primary-light;
-    cursor: pointer;
-  }
+.applyToAll {
+  color: $primary-light;
+  cursor: pointer;
 }
