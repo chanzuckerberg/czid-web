@@ -1,0 +1,18 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.title {
+  @include font-header-m;
+  margin-top: 25px;
+  margin-bottom: 10px;
+}
+
+.input {
+  margin: 5px 30px 5px 0;
+  max-width: 400px;
+}
+
+.applyToAll {
+  color: $primary-light;
+  cursor: pointer;
+}

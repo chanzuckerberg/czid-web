@@ -1,5 +1,15 @@
+@import "~styles/themes/colors";
 @import "~styles/themes/typography";
 
 .warning {
   @include font-body-xxxs;
+  color: $warning;
+  display: flex;
+
+  .icon {
+    width: 14px;
+    height: 14px;
+    margin-right: 7px;
+    fill: $warning;
+  }
 }

@@ -1,10 +1,43 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { isString } from "lodash/fp";
+import { compact, get, isString } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
 import LiveSearchPopBox from "~ui/controls/LiveSearchPopBox";
+
+export const LOCATION_PRIVACY_WARNING =
+  "Changed to county/district level for personal privacy.";
+export const LOCATION_UNRESOLVED_WARNING =
+  "Unresolved plain text, not shown on maps.";
+
+// Process location selections and add warnings.
+export const processLocationSelection = (result, isHuman) => {
+  let warning = "";
+  if (isHuman && get("geo_level", result) === "city") {
+    // For human samples, drop the city part of the name and show a warning.
+    // NOTE: The backend will redo the geosearch for confirmation and re-apply
+    // this restriction.
+    result.name = compact([
+      result.subdivision_name,
+      result.state_name,
+      result.country_name,
+    ]).join(", ");
+
+    if (result.subdivision_name) {
+      result.geo_level = "subdivision";
+    } else if (result.state_name) {
+      result.geo_level = "state";
+    } else if (result.country_name) {
+      result.geo_level = "country";
+    }
+
+    warning = LOCATION_PRIVACY_WARNING;
+  } else if (!result.geo_level) {
+    warning = LOCATION_UNRESOLVED_WARNING;
+  }
+  return { result, warning };
+};
 
 // An input box that fetches and shows geosearch suggestions for user input of locations.
 class GeoSearchInputBox extends React.Component {
@@ -95,19 +128,20 @@ class GeoSearchInputBox extends React.Component {
   };
 
   render() {
-    const { className } = this.props;
+    const { className, inputClassName } = this.props;
     const { value } = this.state;
 
     return (
       <LiveSearchPopBox
         className={className}
+        inputClassName={inputClassName}
         inputMode
-        onSearchTriggered={this.handleSearchTriggered}
-        onSearchChange={this.handleSearchChange}
         onResultSelect={this.handleResultSelected}
+        onSearchChange={this.handleSearchChange}
+        onSearchTriggered={this.handleSearchTriggered}
         placeholder="Enter a location"
-        value={isString(value) ? value : value.name}
         rectangular
+        value={isString(value) ? value : value.name}
       />
     );
   }
@@ -119,6 +153,7 @@ GeoSearchInputBox.defaultProps = {
 
 GeoSearchInputBox.propTypes = {
   className: PropTypes.string,
+  inputClassName: PropTypes.string,
   onResultSelect: PropTypes.func,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
 };
