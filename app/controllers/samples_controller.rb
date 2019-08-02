@@ -23,13 +23,13 @@ class SamplesController < ApplicationController
   READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
-                  :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data].freeze
+                  :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,].freeze
   EDIT_ACTIONS = [:edit, :update, :destroy, :reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline,
-                  :pipeline_runs, :save_metadata, :save_metadata_v2, :upload_heartbeat].freeze
+                  :pipeline_runs, :save_metadata, :save_metadata_v2, :upload_heartbeat,].freeze
 
   OTHER_ACTIONS = [:create, :bulk_new, :bulk_upload, :bulk_upload_with_metadata, :bulk_import, :new, :index, :index_v2, :details,
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
-                   :search_suggestions, :stats, :upload, :validate_sample_files].freeze
+                   :search_suggestions, :stats, :upload, :validate_sample_files,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
 
   # For API-like access
@@ -130,11 +130,11 @@ class SamplesController < ApplicationController
         # Total number of samples in the project
         count_project: @count_project,
         # Ids for all ready samples in the current query, not just the current page.
-        ready_sample_ids: @ready_sample_ids
+        ready_sample_ids: @ready_sample_ids,
       }
     else
       render json: {
-        samples: @samples_formatted
+        samples: @samples_formatted,
       }
     end
   end
@@ -157,7 +157,7 @@ class SamplesController < ApplicationController
     samples = samples.order(Hash[order_by => order_dir])
     limited_samples = samples.offset(offset).limit(limit)
 
-    limited_samples_json = limited_samples.as_json(
+    limited_samples_json = limited_samples.includes(:project).as_json(
       only: [:id, :name, :host_genome_id, :project_id, :created_at, :public],
       methods: [:private_until]
     )
@@ -216,7 +216,7 @@ class SamplesController < ApplicationController
     private_count = samples_count - public_count
     visibility = [
       { value: "public", text: "Public", count: public_count },
-      { value: "private", text: "Private", count: private_count }
+      { value: "private", text: "Private", count: private_count },
     ]
 
     times = [
@@ -224,7 +224,7 @@ class SamplesController < ApplicationController
       { value: "1_month", text: "Last Month", count: samples.where("samples.created_at >= ?", 1.month.ago.utc).count },
       { value: "3_month", text: "Last 3 Months", count: samples.where("samples.created_at >= ?", 3.months.ago.utc).count },
       { value: "6_month", text: "Last 6 Months", count: samples.where("samples.created_at >= ?", 6.months.ago.utc).count },
-      { value: "1_year", text: "Last Year", count: samples.where("samples.created_at >= ?", 1.year.ago.utc).count }
+      { value: "1_year", text: "Last Year", count: samples.where("samples.created_at >= ?", 1.year.ago.utc).count },
     ]
 
     # TODO(tiago): move grouping to a helper function (similar code in projects_controller)
@@ -243,7 +243,7 @@ class SamplesController < ApplicationController
           {
             value: date,
             text: date,
-            count: bins_map[date] || 0
+            count: bins_map[date] || 0,
           }
         end
       else
@@ -262,7 +262,7 @@ class SamplesController < ApplicationController
             interval: { start: start_date, end: end_date },
             count: bins_map[bucket] || 0,
             value: "#{start_date}:#{end_date}",
-            text: "#{start_date} - #{end_date}"
+            text: "#{start_date} - #{end_date}",
           }
         end
       end
@@ -282,7 +282,7 @@ class SamplesController < ApplicationController
           { dimension: "time", values: times },
           { dimension: "time_bins", values: time_bins },
           { dimension: "host", values: hosts },
-          { dimension: "tissue", values: tissues }
+          { dimension: "tissue", values: tissues },
         ]
       end
     end
@@ -314,7 +314,7 @@ class SamplesController < ApplicationController
           count: sample_ids.count,
           projectCount: project_ids.count,
           avgTotalReads: avg_total_reads.present? ? avg_total_reads : 0,
-          avgAdjustedRemainingReads: avg_remaining_reads.present? ? avg_remaining_reads : 0
+          avgAdjustedRemainingReads: avg_remaining_reads.present? ? avg_remaining_reads : 0,
         }
       end
     end
@@ -351,7 +351,7 @@ class SamplesController < ApplicationController
           "name" => "Project",
           "results" => projects.index_by(&:name).map do |_, p|
             { "category" => "Project", "title" => p.name, "id" => p.id }
-          end
+          end,
         }
       end
     end
@@ -361,7 +361,7 @@ class SamplesController < ApplicationController
           "name" => "Uploader",
           "results" => users.group_by(&:name).map do |val, records|
             { "category" => "Uploader", "title" => val, "id" => records.pluck(:id) }
-          end
+          end,
         }
       end
     end
@@ -384,7 +384,7 @@ class SamplesController < ApplicationController
           "name" => "Host",
           "results" => hosts.map do |h|
             { "category" => "Host", "title" => h.name, "id" => h.id }
-          end
+          end,
         }
       end
     end
@@ -396,7 +396,7 @@ class SamplesController < ApplicationController
           "name" => "Sample",
           "results" => samples.group_by(&:name).map do |val, records|
             { "category" => "Sample", "title" => val, "id" => val, "sample_ids" => records.pluck(:id), "project_id" => records.count == 1 ? records.first.project_id : nil }
-          end
+          end,
         }
       end
     end
@@ -408,7 +408,7 @@ class SamplesController < ApplicationController
           "name" => "Location",
           "results" => locations.pluck(:string_validated_value).uniq.map do |val|
                          { "category" => "Location", "title" => val, "id" => val }
-                       end
+                       end,
         }
       end
     end
@@ -420,7 +420,7 @@ class SamplesController < ApplicationController
           "name" => "Tissue",
           "results" => tissues.pluck(:string_validated_value).uniq.map do |val|
             { "category" => "Tissue", "title" => val, "id" => val }
-          end
+          end,
         }
       end
     end
@@ -432,7 +432,7 @@ class SamplesController < ApplicationController
           "name" => "Taxon",
           "results" => taxon_list.map do |entry|
             entry.merge("category" => "Taxon")
-          end
+          end,
         }
       end
     end
@@ -521,7 +521,7 @@ class SamplesController < ApplicationController
     unless client && (client == "web" || Gem::Version.new(client) >= min_version)
       render json: {
         message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
-        status: :upgrade_required
+        status: :upgrade_required,
       }
       return
     end
@@ -604,8 +604,8 @@ class SamplesController < ApplicationController
         notes: @sample.sample_notes,
         ercc_comparison: ercc_comparison,
         pipeline_run: pr_display,
-        summary_stats: summary_stats
-      }
+        summary_stats: summary_stats,
+      },
     }
   end
 
@@ -636,12 +636,12 @@ class SamplesController < ApplicationController
     if result[:status] == "ok"
       render json: {
         status: "success",
-        message: "Saved successfully"
+        message: "Saved successfully",
       }
     else
       render json: {
         status: 'failed',
-        message: result[:error]
+        message: result[:error],
       }
     end
   end
@@ -768,13 +768,13 @@ class SamplesController < ApplicationController
     metadata.select! { |k, _v| (Sample::METADATA_FIELDS + [:name]).include?(k) }
     if @sample[field].blank? && value.strip.blank?
       render json: {
-        status: "ignored"
+        status: "ignored",
       }
     else
       @sample.update_attributes!(metadata)
       render json: {
         status: "success",
-        message: "Saved successfully"
+        message: "Saved successfully",
       }
     end
   rescue
@@ -782,7 +782,7 @@ class SamplesController < ApplicationController
     render json: {
       status: 'failed',
       message: 'Unable to update sample',
-      errors: error_messages
+      errors: error_messages,
     }
   end
 
@@ -855,12 +855,12 @@ class SamplesController < ApplicationController
             render json: output_array.sort { |a, b| b['reads_count'] <=> a['reads_count'] }
           else
             render json: {
-              error: "alignment file too big"
+              error: "alignment file too big",
             }
           end
         rescue
           render json: {
-            error: "unexpected error occurred"
+            error: "unexpected error occurred",
           }
         end
       end
@@ -877,7 +877,7 @@ class SamplesController < ApplicationController
       send_data @contigs_fasta, filename: @sample.name + '_contigs.fasta'
     else
       render json: {
-        error: "contigs fasta file does not exist for this sample"
+        error: "contigs fasta file does not exist for this sample",
       }
     end
   end
@@ -1023,7 +1023,7 @@ class SamplesController < ApplicationController
     unless client && (client == "web" || Gem::Version.new(client) >= min_version)
       render json: {
         message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
-        status: :upgrade_required
+        status: :upgrade_required,
       }
       return
     end
@@ -1073,7 +1073,7 @@ class SamplesController < ApplicationController
         format.html { render :new }
         format.json do
           render json: { sample_errors: @sample.errors.full_messages,
-                         project_errors: project ? project.errors.full_messages : nil },
+                         project_errors: project ? project.errors.full_messages : nil, },
                  status: :unprocessable_entity
         end
       end
@@ -1193,13 +1193,13 @@ class SamplesController < ApplicationController
       render json: @coverage_viz_summary
     else
       render json: {
-        error: "coverage viz summary file does not exist for this sample"
+        error: "coverage viz summary file does not exist for this sample",
       }
     end
   # For safety.
   rescue
     render json: {
-      error: "There was an error fetching the coverage viz summary file."
+      error: "There was an error fetching the coverage viz summary file.",
     }
   end
 
@@ -1212,13 +1212,13 @@ class SamplesController < ApplicationController
       render json: @coverage_viz_data
     else
       render json: {
-        error: "coverage viz data file does not exist for this sample and accession id"
+        error: "coverage viz data file does not exist for this sample and accession id",
       }
     end
   # For safety.
   rescue
     render json: {
-      error: "There was an error fetching the coverage viz data file."
+      error: "There was an error fetching the coverage viz data file.",
     }
   end
 
@@ -1241,7 +1241,7 @@ class SamplesController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def samples_params
     new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id, :host_genome_name, :basespace_dataset_id, :basespace_access_token,
-                                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]])
+                                         input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],])
     new_params[:samples] if new_params
   end
 
@@ -1253,7 +1253,7 @@ class SamplesController < ApplicationController
                         :sample_notes, :search, :subsample, :max_input_fragments,
                         :basespace_dataset_id, :basespace_access_token,
                         :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection, :client,
-                        input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts]]
+                        input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],]
     permitted_params.concat([:pipeline_branch, :dag_vars, :s3_preload_result_path, :alignment_config_name, :subsample]) if current_user.admin?
     params.require(:sample).permit(*permitted_params)
   end
@@ -1273,7 +1273,7 @@ class SamplesController < ApplicationController
   def check_owner
     unless current_user.admin? || current_user.id == @sample.user_id
       render json: {
-        message: "Only the original uploader can access this."
+        message: "Only the original uploader can access this.",
       }, status: :unauthorized
       # Rendering halts the filter chain
     end

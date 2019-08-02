@@ -1,6 +1,6 @@
 class Background < ApplicationRecord
-  has_and_belongs_to_many :samples, through: :pipeline_runs
   has_and_belongs_to_many :pipeline_runs
+  has_many :samples, through: :pipeline_runs
   has_many :taxon_summaries, dependent: :destroy
   belongs_to :project, optional: true
   validate :validate_size
@@ -48,7 +48,7 @@ class Background < ApplicationRecord
         end
         # reset the results
         taxon_result = { tax_id: row["tax_id"], count_type: row["count_type"],
-                         tax_level: row["tax_level"], sum_rpm: 0.0, sum_rpm2: 0.0, rpm_list: [] }
+                         tax_level: row["tax_level"], sum_rpm: 0.0, sum_rpm2: 0.0, rpm_list: [], }
         key = current_key
       end
       # increment

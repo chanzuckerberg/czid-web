@@ -18,10 +18,10 @@ class PlaygroundController < ApplicationController
           { text: "NR r (total reads)", value: "NR_r" },
           { text: "NR rPM", value: "NR_rpm" },
           { text: "NR %id", value: "NR_percentidentity" },
-          { text: "R log(1/e)", value: "NR_neglogevalue" }
+          { text: "R log(1/e)", value: "NR_neglogevalue" },
         ],
-        operators: [">=", "<="]
-      }
+        operators: [">=", "<="],
+      },
     }
   end
 

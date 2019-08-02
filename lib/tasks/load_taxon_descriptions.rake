@@ -16,7 +16,7 @@ task :load_taxon_descriptions, [:taxon_desc_s3_path] => :environment do |_t, arg
       title = ec.convert(data['title'] || '')
       summary = ec.convert(data['summary'] || '')
       datum = [taxid.to_i, data['pageid'].to_i,
-               description, title, summary, date, date].map { |v| ActiveRecord::Base.connection.quote(v) }
+               description, title, summary, date, date,].map { |v| ActiveRecord::Base.connection.quote(v) }
       values_list << datum
       if values_list.size >= LOAD_CHUNK_SIZE
         ActiveRecord::Base.connection.execute <<-SQL

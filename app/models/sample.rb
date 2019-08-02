@@ -34,6 +34,8 @@ class Sample < ApplicationRecord
   # Constants for upload errors.
   UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED = "BASESPACE_UPLOAD_FAILED".freeze
   UPLOAD_ERROR_S3_UPLOAD_FAILED = "S3_UPLOAD_FAILED".freeze
+  UPLOAD_ERROR_LOCAL_UPLOAD_STALLED = "LOCAL_UPLOAD_STALLED".freeze
+  UPLOAD_ERROR_LOCAL_UPLOAD_FAILED = "LOCAL_UPLOAD_FAILED".freeze
 
   TOTAL_READS_JSON = "total_reads.json".freeze
   LOG_BASENAME = 'log.txt'.freeze
@@ -55,7 +57,7 @@ class Sample < ApplicationRecord
   METADATA_FIELDS = [:sample_unique_id, # 'Unique ID' (e.g. in human case, patient ID)
                      :sample_location, :sample_date, :sample_tissue,
                      :sample_template, # this refers to nucleotide type (RNA or DNA)
-                     :sample_library, :sample_sequencer, :sample_notes, :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection].freeze
+                     :sample_library, :sample_sequencer, :sample_notes, :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection,].freeze
 
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
   attr_accessor :bulk_mode, :basespace_dataset_id, :basespace_access_token
@@ -65,7 +67,7 @@ class Sample < ApplicationRecord
   belongs_to :user, optional: true, counter_cache: true # use .size for cache, use .count to force COUNT query
   belongs_to :host_genome, optional: true
   has_many :pipeline_runs, -> { order(created_at: :desc) }, dependent: :destroy
-  has_and_belongs_to_many :backgrounds, through: :pipeline_runs
+  has_many :backgrounds, through: :pipeline_runs
   has_many :input_files, dependent: :destroy
   accepts_nested_attributes_for :input_files
   has_many :metadata, dependent: :destroy
@@ -225,7 +227,7 @@ class Sample < ApplicationRecord
         key: f.key,
         display_name: end_path(f.key, display_prefix),
         url: Sample.get_signed_url(f.key),
-        size: ActiveSupport::NumberHelper.number_to_human_size(f.size)
+        size: ActiveSupport::NumberHelper.number_to_human_size(f.size),
       }
     end
   end
@@ -520,6 +522,16 @@ class Sample < ApplicationRecord
     end
   end
 
+  # Delay determined based on query of historical upload times, where 80%
+  # of successful uploads took less than 3 hours by client_updated_at.
+  def self.current_stalled_local_uploads(delay = 3.hours)
+    where(status: STATUS_CREATED)
+      .where("samples.created_at < ?", Time.now.utc - delay)
+      .joins(:input_files)
+      .where(input_files: { source_type: InputFile::SOURCE_TYPE_LOCAL })
+      .distinct
+  end
+
   def destroy
     TaxonByterange.where(pipeline_run_id: pipeline_run_ids).delete_all
     TaxonCount.where(pipeline_run_id: pipeline_run_ids).delete_all
@@ -605,7 +617,7 @@ class Sample < ApplicationRecord
       json_output = pr.to_json(include: [:pipeline_run_stages,
                                          :taxon_counts,
                                          :taxon_byteranges,
-                                         :job_stats])
+                                         :job_stats,])
       file = Tempfile.new
       file.write(json_output)
       file.close
@@ -727,7 +739,7 @@ class Sample < ApplicationRecord
       m.raw_value = val.is_a?(ActionController::Parameters) ? val.to_json : val
       return {
         metadatum: m,
-        status: "ok"
+        status: "ok",
       }
     else
       # If the value didn't change or isn't present, don't re-save the metadata field.
@@ -737,7 +749,7 @@ class Sample < ApplicationRecord
       end
       return {
         metadatum: nil,
-        status: "ok"
+        status: "ok",
       }
     end
   rescue ActiveRecord::RecordNotFound => e
@@ -745,7 +757,7 @@ class Sample < ApplicationRecord
     return {
       metadatum: nil,
       status: "error",
-      error: e
+      error: e,
     }
   end
 
@@ -758,25 +770,25 @@ class Sample < ApplicationRecord
     if result[:status] == "error"
       return {
         status: "error",
-        error: result[:error]
+        error: result[:error],
       }
     elsif result[:metadatum]
       if result[:metadatum].valid?
         result[:metadatum].save!
         return {
-          status: "ok"
+          status: "ok",
         }
       else
         return {
           status: "error",
           # Get the error from ErrorHelper, instead of using the error from metadatum model.
           # The error from ErrorHelper is more user-friendly ("Please input a number") whereas metadatum model is "Invalid number for field"
-          error: get_field_error(result[:metadatum].metadata_field, host_genome_name == "Human")
+          error: get_field_error(result[:metadatum].metadata_field, host_genome_name == "Human"),
         }
       end
     else
       return {
-        status: "ok"
+        status: "ok",
       }
     end
   rescue ActiveRecord::RecordInvalid => e
@@ -784,14 +796,14 @@ class Sample < ApplicationRecord
     # Don't send the detailed error message to the user.
     return {
       status: "error",
-      error: "There was an error saving your metadata."
+      error: "There was an error saving your metadata.",
     }
   rescue ActiveRecord::RangeError => e
     Rails.logger.error(e)
     # Don't send the detailed error message to the user.
     return {
       status: "error",
-      error: "The value you provided was too large."
+      error: "The value you provided was too large.",
     }
   end
 
@@ -814,7 +826,7 @@ class Sample < ApplicationRecord
     {
       errors: m.valid? ? {} : m.errors,
       # The existing metadata field that was used to validate this metadatum.
-      metadata_field: m.metadata_field
+      metadata_field: m.metadata_field,
     }
   end
 
@@ -855,5 +867,11 @@ class Sample < ApplicationRecord
   # Be careful when using this because it may cause an extra query for each of your samples!
   def first_pipeline_run
     pipeline_runs.order(created_at: :desc).first
+  end
+
+  # Gets the URL for the admin-only sample status page for printing in internal
+  # error messages.
+  def status_url
+    UrlUtil.absolute_base_url + "/samples/#{id}/pipeline_runs"
   end
 end

@@ -27,7 +27,7 @@ class User < ApplicationRecord
   validates :name, presence: true, format: {
     # See https://www.ascii-code.com/. These were the ranges that captured the
     # common accented chars I knew from experience, leaving out pure symbols.
-    with: /\A[- 'a-zA-ZÀ-ÖØ-öø-ÿ]+\z/, message: "Name must contain only letters, apostrophes, dashes or spaces"
+    with: /\A[- 'a-zA-ZÀ-ÖØ-öø-ÿ]+\z/, message: "Name must contain only letters, apostrophes, dashes or spaces",
   }
   attr_accessor :email_arguments
   ROLE_ADMIN = 1

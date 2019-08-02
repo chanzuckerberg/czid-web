@@ -18,10 +18,10 @@ Rails.application.configure do
     config.cache_store = :redis_store, 'redis://redis:6379/0/cache',
                          {
                            # Needed for redis to evict keys in volatile-lru mode
-                           expires_in: 30.days
+                           expires_in: 30.days,
                          }
     config.public_file_server.headers = {
-      'Cache-Control' => "public, max-age=#{2.days.seconds.to_i}"
+      'Cache-Control' => "public, max-age=#{2.days.seconds.to_i}",
     }
   else
     config.action_controller.perform_caching = false
@@ -40,7 +40,7 @@ Rails.application.configure do
   config.action_mailer.delivery_method = :mailgun
   config.action_mailer.mailgun_settings = {
     api_key: ENV['MAIL_GUN_API_KEY'],
-    domain: 'mg.idseq.net'
+    domain: 'mg.idseq.net',
   }
 
   # Print deprecation notices to the Rails logger.

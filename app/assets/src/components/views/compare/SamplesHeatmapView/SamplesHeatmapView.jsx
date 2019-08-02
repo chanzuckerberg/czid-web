@@ -75,7 +75,7 @@ class SamplesHeatmapView extends React.Component {
       },
       loading: false,
       selectedMetadata: this.urlParams.selectedMetadata || [
-        "collection_location",
+        "collection_location_v2",
       ],
       sampleIds: compact(
         map(parseAndCheckInt, this.urlParams.sampleIds || this.props.sampleIds)

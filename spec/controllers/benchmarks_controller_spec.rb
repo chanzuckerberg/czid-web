@@ -16,34 +16,34 @@ RSpec.describe BenchmarksController, type: :controller do
       "trigger_on_pipeline_change": true,
       "pipeline_branch": "master",
       "host": "Human",
-      "comment": "Default benchmark comment."
+      "comment": "Default benchmark comment.",
     },
     "active_benchmarks": {
       "active_benchmark_1_file_path": {
         "comment": "Sample active benchmark 1",
-        "environments": ["prod", "staging"]
+        "environments": ["prod", "staging"],
       },
       "active_benchmark_2_file_path": {
         "comment": "Sample active benchmark 2",
-        "environments": ["test"]
-      }
+        "environments": ["test"],
+      },
     },
     "retired_benchmarks": {
       "retired_benchmark_3_file_path": {
         "comment": "Sample retired benchmark 2",
         "environments": ["prod"],
-        "project_name": "IDSeq Bench Prod"
+        "project_name": "IDSeq Bench Prod",
       },
       "retired_benchmark_4_file_path": {
         "comment": "Sample retired benchmark 3",
         "environments": ["staging"],
-        "project_name": "IDSeq Bench Staging"
+        "project_name": "IDSeq Bench Staging",
       },
       "retired_benchmark_5_file_path": {
         "comment": "Sample retired benchmark 4",
         "environments": ["test"],
-        "project_name": "IDSeq Bench Test"
-      }
+        "project_name": "IDSeq Bench Test",
+      },
     }
   )
 
@@ -56,13 +56,13 @@ RSpec.describe BenchmarksController, type: :controller do
           "host": "Human",
           "last_run": {
             "pipeline_version": DEFAULT_PIPELINE_VERSION,
-            "sample_name": DEFAULT_SAMPLE_NAME
+            "sample_name": DEFAULT_SAMPLE_NAME,
           },
           "project_name": DEFAULT_BENCHMARK_PROJECT,
           "trigger_on_pipeline_change": true,
           "trigger_on_webapp_change": true,
-          "user_email": "sample@idseq.net"
-        }
+          "user_email": "sample@idseq.net",
+        },
       ],
       "retired_benchmarks": [
         {
@@ -72,8 +72,8 @@ RSpec.describe BenchmarksController, type: :controller do
           "project_name": "IDSeq Bench Test",
           "trigger_on_pipeline_change": true,
           "trigger_on_webapp_change": true,
-          "user_email": "sample@idseq.net"
-        }
+          "user_email": "sample@idseq.net",
+        },
       ]
     )
   )
@@ -81,9 +81,9 @@ RSpec.describe BenchmarksController, type: :controller do
   buckets = {
     BenchmarksHelper::IDSEQ_BENCH_BUCKET => {
       BenchmarksHelper::IDSEQ_BENCH_KEY => {
-        body: BENCHMARKS_CONFIG_JSON
-      }
-    }
+        body: BENCHMARKS_CONFIG_JSON,
+      },
+    },
   }
 
   create_users
@@ -133,7 +133,7 @@ RSpec.describe BenchmarksController, type: :controller do
       context "with missing config" do
         before do
           buckets = {
-            BenchmarksHelper::IDSEQ_BENCH_BUCKET => {}
+            BenchmarksHelper::IDSEQ_BENCH_BUCKET => {},
           }
           get :index, format: :json
         end
@@ -153,9 +153,9 @@ RSpec.describe BenchmarksController, type: :controller do
           buckets = {
             BenchmarksHelper::IDSEQ_BENCH_BUCKET => {
               BenchmarksHelper::IDSEQ_BENCH_KEY => {
-                body: "{Invalid JSON}"
-              }
-            }
+                body: "{Invalid JSON}",
+              },
+            },
           }
           get :index, format: :json
         end
