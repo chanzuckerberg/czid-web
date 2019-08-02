@@ -1,5 +1,5 @@
 import React from "react";
-import { uniq, find } from "lodash/fp";
+import { uniq, find, chunk, random } from "lodash/fp";
 
 import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { getGeoSearchSuggestions } from "~/api/locations";
@@ -10,40 +10,30 @@ import DataTable from "~/components/visualizations/table/DataTable";
 
 import cs from "./metadata_csv_locations_menu.scss";
 
+const CONCURRENT_REQUESTS_LIMIT = 20;
+
 // Batch geosearch CSV locations for matches
 export const geosearchCSVLocations = async (metadata, locationMetadataType) => {
   if (!(metadata && metadata.rows)) return;
 
   // For each unique plain text value, get the #1 search result, if any.
-  const getHelper = async query => {
-    try {
-      const res = await getGeoSearchSuggestions(query, 1);
-    } catch (err) {
-      return {};
-    }
-
-    const result = new Promise();
-    return result.then(
-      value => {
-        return { ok: true, value };
-      },
-      error => {
-        return {
-          ok: false,
-          value: error,
-          retry: () => getHelper(query),
-        };
-      }
-    );
-  };
-
   const rawNames = uniq(metadata.rows.map(r => r[locationMetadataType.name]));
   const matchedLocations = {};
   const requests = rawNames.map(async query => {
     const res = await getGeoSearchSuggestions(query, 1);
     if (res.length > 0) matchedLocations[query] = res[0];
   });
-  await Promise.all(requests);
+
+  // Batch the requests with a delay to avoid geosearch API limits.
+  const sleep = () =>
+    new Promise(resolve => setTimeout(resolve, random(1000, 2000)));
+  const batches = chunk(CONCURRENT_REQUESTS_LIMIT, requests);
+  const batchRequests = batches.map(async (batch, batchIndex) => {
+    await Promise.all(batch);
+    // Sleep after every batch except the last
+    if (batchIndex !== batches.length - 1) await sleep();
+  });
+  await Promise.all(batchRequests);
 
   // Process results and set warnings.
   let newMetadata = metadata;
