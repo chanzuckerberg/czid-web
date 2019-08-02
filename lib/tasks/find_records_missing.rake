@@ -122,7 +122,7 @@ def must_have_children
       :input_files,
       # admins could skip adding metadata in the legacy upload page
       # :metadata
-    ]
+    ],
   }
 end
 
@@ -150,7 +150,7 @@ def must_have_parents
     Sample: [:project, :user, :host_genome],
     TaxonByterange: [:pipeline_run],
     TaxonSummary: [:background],
-    Visualization: [:user]
+    Visualization: [:user],
   }
 end
 

@@ -13,4 +13,11 @@ class UserMailer < ApplicationMailer
     account_email = "accounts@idseq.net"
     mail(to: account_email, subject: "New sign up from landing page", body: body)
   end
+
+  def account_request_reply(request_email)
+    mail(
+      to: request_email,
+      subject: "Thank you for contacting the IDseq Team"
+    )
+  end
 end

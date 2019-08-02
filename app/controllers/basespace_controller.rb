@@ -36,7 +36,7 @@ class BasespaceController < ApplicationController
 
     if access_token.nil?
       render json: {
-        error: "basespace access token required"
+        error: "basespace access token required",
       }
       return
     end
@@ -45,7 +45,7 @@ class BasespaceController < ApplicationController
 
     if bs_projects.nil?
       render json: {
-        error: "unable to fetch data from basespace"
+        error: "unable to fetch data from basespace",
       }
       return
     end
@@ -61,14 +61,14 @@ class BasespaceController < ApplicationController
 
     if access_token.nil?
       render json: {
-        error: "basespace access token required"
+        error: "basespace access token required",
       }
       return
     end
 
     if basespace_project_id.nil?
       render json: {
-        error: "basespace project id required"
+        error: "basespace project id required",
       }
       return
     end
@@ -77,7 +77,7 @@ class BasespaceController < ApplicationController
 
     if bs_samples.nil?
       render json: {
-        error: "unable to fetch data from basespace"
+        error: "unable to fetch data from basespace",
       }
       return
     end

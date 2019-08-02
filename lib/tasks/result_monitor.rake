@@ -32,6 +32,56 @@ class MonitorPipelineResults
         LogUtil.log_backtrace(exception)
       end
     end
+
+    # "stalled uploads" are not pipeline jobs, but they fit in here better than
+    # anywhere else.
+    begin
+      MonitorPipelineResults.alert_stalled_uploads!
+    rescue => exception
+      LogUtil.log_err_and_airbrake("Failed to alert on stalled uploads: #{exception.message}")
+      LogUtil.log_backtrace(exception)
+    end
+
+    begin
+      MonitorPipelineResults.fail_stalled_uploads!
+    rescue => exception
+      LogUtil.log_err_and_airbrake("Failed to fail stalled uploads: #{exception.message}")
+      LogUtil.log_backtrace(exception)
+    end
+  end
+
+  def self.fail_stalled_uploads!
+    samples = Sample.current_stalled_local_uploads(18.hours)
+    unless samples.empty?
+      LogUtil.log_err_and_airbrake(
+        "SampleFailedEvent: Failed to upload local samples after 18 hours #{samples.pluck(:id)}"
+      )
+      samples.update_all( # rubocop:disable Rails/SkipsModelValidations
+        status: Sample::STATUS_CHECKED,
+        upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_FAILED
+      )
+    end
+  end
+
+  def self.alert_stalled_uploads!
+    # Delay determined based on query of historical upload times, where 80%
+    # of successful uploads took less than 3 hours by client_updated_at.
+    samples = Sample.current_stalled_local_uploads(3.hours).where(upload_error: nil)
+    if samples.empty?
+      return
+    end
+
+    created_at = samples.map(&:created_at).max
+    role_names = samples.map { |sample| sample.user.role_name }.compact.uniq
+    project_names = samples.map { |sample| sample.project.name }.compact.uniq
+    duration_hrs = ((Time.now.utc - created_at) / 60 / 60).round(2)
+    client_updated_at = samples.map(&:client_updated_at).compact.max
+    status_urls = samples.map(&:status_url)
+    msg = %(LongRunningUploadsEvent: #{samples.length} samples were created more than #{duration_hrs} hours ago by #{role_names} in projects #{project_names}.
+      #{client_updated_at ? "Last client ping was at #{client_updated_at}. " : ''} See: #{status_urls})
+    LogUtil.log_err_and_airbrake(msg)
+
+    samples.update_all(upload_error: Sample::UPLOAD_ERROR_LOCAL_UPLOAD_STALLED) # rubocop:disable Rails/SkipsModelValidations
   end
 
   def self.run(duration, min_refresh_interval)
@@ -97,4 +147,14 @@ task "result_monitor", [:duration] => :environment do |_t, args|
       end
     end
   end
+end
+
+# One-off task for testing alerts
+task "alert_stalled_uploads", [] => :environment do
+  MonitorPipelineResults.alert_stalled_uploads!
+end
+
+# One-off task for testing failures
+task "fail_stalled_uploads", [] => :environment do
+  MonitorPipelineResults.fail_stalled_uploads!
 end

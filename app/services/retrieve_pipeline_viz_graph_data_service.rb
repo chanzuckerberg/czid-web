@@ -1,8 +1,8 @@
 class RetrievePipelineVizGraphDataService
   include Callable
-  # For step descriptions.
-  # TODO(ezhong): Move to server-fed descriptions.
+  # PipelineRunsHelper includes default descriptions, before we can get them from the dag
   include PipelineRunsHelper
+  include PipelineOutputsHelper
 
   # Structures dag_json of each stage of the pipeline run into the following in @results for drawing
   # the pipeline visualization graphs on the React side:
@@ -17,6 +17,8 @@ class RetrievePipelineVizGraphDataService
   #             edge being an input edge to the node.
   #           - ouputEdges: An array of indices that map to edges in the @edges array, each edge being an
   #             output edge from the node
+  #           - status: The current status of the step at time of retrieval, as represented by a string
+  #             (see JOB_STATUS_NUM_TO_STRING below for possible strings).
   #
   # edges: An array of edges, each edge object having the following structure:
   #     - from: An object containing a stageIndex and stepIndex, denoting the originating node it is from
@@ -24,6 +26,15 @@ class RetrievePipelineVizGraphDataService
   #     - files: An array of file objects that get passed between the from and to nodes. It is composed of:
   #           - displayName: A string to display the file as
   #           - url: An optional string to download the file
+
+  JOB_STATUS_NUM_TO_STRING = {
+    nil => "notStarted",
+    0 => "notStarted",
+    1 => "inProgress",
+    2 => "finished",
+    3 => "finished", # Uploaded
+    4 => "errored",
+  }.freeze
 
   def initialize(pipeline_run_id, is_admin, remove_host_filtering_urls)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
@@ -49,20 +60,25 @@ class RetrievePipelineVizGraphDataService
   private
 
   def create_stage_nodes_scaffolding
+    all_step_statuses = step_statuses
     stages = @all_dag_jsons.map.with_index do |dag_json, stage_index|
+      stage_step_statuses = all_step_statuses[stage_index]
       stage_step_descriptions = STEP_DESCRIPTIONS[@stage_names[stage_index]]["steps"]
       steps = dag_json["steps"].map do |step|
+        status_info = stage_step_statuses[step["out"]] || {}
+        description = status_info["description"].blank? ? stage_step_descriptions[step["out"]] : status_info["description"]
         {
           name: modify_step_name(step["out"]),
-          description: stage_step_descriptions[step["out"]],
+          description: description,
           inputEdges: [],
-          outputEdges: []
+          outputEdges: [],
+          status: JOB_STATUS_NUM_TO_STRING[status_info["status"]],
         }
       end
 
       {
         steps: steps,
-        jobStatus: dag_json[:job_status]
+        jobStatus: dag_json[:job_status],
       }
     end
     return stages
@@ -81,6 +97,16 @@ class RetrievePipelineVizGraphDataService
     end
     @remove_host_filtering_urls && remove_host_filtering_urls(edges)
     return edges
+  end
+
+  def step_statuses
+    @pipeline_run.pipeline_run_stages.map do |prs|
+      begin
+        JSON.parse(get_s3_file(prs.step_status_file_path) || "{}")
+      rescue JSON::ParserError
+        {}
+      end
+    end
   end
 
   def input_output_to_file_paths

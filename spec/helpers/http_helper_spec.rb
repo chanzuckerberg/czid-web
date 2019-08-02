@@ -12,7 +12,7 @@ RSpec.describe HttpHelper, type: :helper do
 
       def make_get_request
         HttpHelper.get_json("https://www.example.com", {
-                              "param_one" => ["a", "b"]
+                              "param_one" => ["a", "b"],
                             }, "Authorization" => "Bearer abc")
       end
 
@@ -64,7 +64,7 @@ RSpec.describe HttpHelper, type: :helper do
       before do
         stub_request(:post, "https://www.example.com")
           .with(body: {
-                  "param_one" => "a"
+                  "param_one" => "a",
                 })
           .to_return(body: { "foo" => "bar" }.to_json)
       end

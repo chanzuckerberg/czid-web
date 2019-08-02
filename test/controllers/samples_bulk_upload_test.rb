@@ -28,14 +28,14 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
           'age' => 100,
           'admission_date' => '2018-01',
           'sample_type' => 'blood',
-          'nucleotide_type' => 'DNA'
+          'nucleotide_type' => 'DNA',
         },
         "RR004_water_2_S23B" => {
           'sex' => 'Male',
           'age' => 50,
           'sample_type' => 'CSF',
-          'nucleotide_type' => 'RNA'
-        }
+          'nucleotide_type' => 'RNA',
+        },
       },
       samples: [
         {
@@ -44,18 +44,18 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               name: "RR004_water_2_S23D_R1_001.fastq",
               source: "s3://idseq-samples-test/markazhang/RR004_water_2_S23D_R1_001.fastq",
-              source_type: "s3"
+              source_type: "s3",
             },
             {
               name: "RR004_water_2_S23D_R2_001.fastq",
               source: "s3://idseq-samples-test/markazhang/RR004_water_2_S23D_R2_001.fastq",
-              source_type: "s3"
-            }
+              source_type: "s3",
+            },
           ],
           name: "RR004_water_2_S23A",
           # project_id is currently passed from front-end as a string, so need to test this works.
           project_id: String(@metadata_validation_project.id),
-          status: "created"
+          status: "created",
         },
         {
           host_genome_id: @host_genome_human.id,
@@ -63,20 +63,20 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               name: "RR004_water_2_S23D_R1_001.fastq",
               source: "s3://idseq-samples-test/markazhang/RR004_water_2_S23D_R1_001.fastq",
-              source_type: "s3"
+              source_type: "s3",
             },
             {
               name: "RR004_water_2_S23D_R2_001.fastq",
               source: "s3://idseq-samples-test/markazhang/RR004_water_2_S23D_R2_001.fastq",
-              source_type: "s3"
-            }
+              source_type: "s3",
+            },
           ],
           name: "RR004_water_2_S23B",
           # project_id is currently passed from front-end as a string, so need to test this works.
           project_id: String(@metadata_validation_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -101,14 +101,14 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
           'age' => 100,
           'admission_date' => '2018-01',
           'sample_type' => 'blood',
-          'nucleotide_type' => 'DNA'
+          'nucleotide_type' => 'DNA',
         },
         "RR004_water_2_S23B" => {
           'sex' => 'Male',
           'age' => 50,
           'sample_type' => 'CSF',
-          'nucleotide_type' => 'RNA'
-        }
+          'nucleotide_type' => 'RNA',
+        },
       },
       samples: [
         {
@@ -117,17 +117,17 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               parts: "RR004_water_2_S23A_R1_001.fastq",
               source: "RR004_water_2_S23A_R1_001.fastq",
-              source_type: "local"
+              source_type: "local",
             },
             {
               parts: "RR004_water_2_S23A_R2_001.fastq",
               source: "RR004_water_2_S23A_R2_001.fastq",
-              source_type: "local"
-            }
+              source_type: "local",
+            },
           ],
           name: "RR004_water_2_S23A",
           project_id: String(@metadata_validation_project.id),
-          status: "created"
+          status: "created",
         },
         {
           host_genome_id: @host_genome_human.id,
@@ -135,19 +135,19 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               parts: "RR004_water_2_S23B_R1_001.fastq",
               source: "RR004_water_2_S23B_R1_001.fastq",
-              source_type: "local"
+              source_type: "local",
             },
             {
               parts: "RR004_water_2_S23B_R2_001.fastq",
               source: "RR004_water_2_S23B_R2_001.fastq",
-              source_type: "local"
-            }
+              source_type: "local",
+            },
           ],
           name: "RR004_water_2_S23B",
           project_id: String(@metadata_validation_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -173,8 +173,8 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
           'Age' => 100,
           'Admission Date' => '2018-01',
           'Sample Type' => 'blood',
-          'Nucleotide Type' => 'DNA'
-        }
+          'Nucleotide Type' => 'DNA',
+        },
       },
       samples: [
         {
@@ -183,20 +183,20 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               name: "RR004_water_2_S23D_R1_001.fastq",
               source: "s3://idseq-samples-test/markazhang/RR004_water_2_S23D_R1_001.fastq",
-              source_type: "s3"
+              source_type: "s3",
             },
             {
               name: "RR004_water_2_S23D_R2_001.fastq",
               source: "s3://idseq-samples-test/markazhang/RR004_water_2_S23D_R2_001.fastq",
-              source_type: "s3"
-            }
+              source_type: "s3",
+            },
           ],
           name: "RR004_water_2_S23A",
           # project_id is currently passed from front-end as a string, so need to test this works.
           project_id: String(@metadata_validation_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -218,8 +218,8 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
           'age' => 100,
           'admission_date' => '2018-01',
           'sample_type' => 'blood',
-          'nucleotide_type' => 'DNA'
-        }
+          'nucleotide_type' => 'DNA',
+        },
       },
       samples: [
         {
@@ -228,19 +228,19 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               parts: "RR004_water_2_S23A_R1_001.fastq",
               source: "RR004_water_2_S23A_R1_001.fastq",
-              source_type: "local"
+              source_type: "local",
             },
             {
               parts: "RR004_water_2_S23A_R2_001.fastq",
               source: "RR004_water_2_S23A_R2_001.fastq",
-              source_type: "local"
-            }
+              source_type: "local",
+            },
           ],
           name: "RR004_water_2_S23A",
           project_id: String(@metadata_validation_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -258,8 +258,8 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
           'age' => 100,
           'admission_date' => '2018-01',
           'sample_type' => 'blood',
-          'nucleotide_type' => 'DNA'
-        }
+          'nucleotide_type' => 'DNA',
+        },
       },
       samples: [
         {
@@ -268,19 +268,19 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               parts: "RR004_water_2_S23A_R1_001.fastq",
               source: "RR004_water_2_S23A_R1_001.fastq",
-              source_type: "local"
+              source_type: "local",
             },
             {
               parts: "RR004_water_2_S23A_R2_001.fastq",
               source: "RR004_water_2_S23A_R2_001.fastq",
-              source_type: "local"
-            }
+              source_type: "local",
+            },
           ],
           name: "RR004_water_2_S23A",
           project_id: String(@metadata_validation_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -300,8 +300,8 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
         "RR004_water_2_S23A" => {
           'sex' => 'Female',
           'age' => 100,
-          'admission_date' => '2018-01'
-        }
+          'admission_date' => '2018-01',
+        },
       },
       samples: [
         {
@@ -310,19 +310,19 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               parts: "RR004_water_2_S23A_R1_001.fastq",
               source: "RR004_water_2_S23A_R1_001.fastq",
-              source_type: "local"
+              source_type: "local",
             },
             {
               parts: "RR004_water_2_S23A_R2_001.fastq",
               source: "RR004_water_2_S23A_R2_001.fastq",
-              source_type: "local"
-            }
+              source_type: "local",
+            },
           ],
           name: "RR004_water_2_S23A",
           project_id: String(@metadata_validation_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -348,8 +348,8 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
           'admission_date' => '2018-01',
           'sample_type' => 'blood',
           'nucleotide_type' => 'DNA',
-          'blood_fed' => 'Yes'
-        }
+          'blood_fed' => 'Yes',
+        },
       },
       samples: [
         {
@@ -358,20 +358,20 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               name: "RR004_water_2_S23D_R1_001.fastq",
               source: "s3://idseq-samples-test/markazhang/RR004_water_2_S23D_R1_001.fastq",
-              source_type: "s3"
+              source_type: "s3",
             },
             {
               name: "RR004_water_2_S23D_R2_001.fastq",
               source: "s3://idseq-samples-test/markazhang/RR004_water_2_S23D_R2_001.fastq",
-              source_type: "s3"
-            }
+              source_type: "s3",
+            },
           ],
           name: "RR004_water_2_S23A",
           # project_id is currently passed from front-end as a string, so need to test this works.
           project_id: String(@metadata_validation_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -403,8 +403,8 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
           'nucleotide_type' => 'DNA',
           'Example Core Field' => 'Value',
           'Custom Field' => 'Value',
-          'Custom Field 2' => 'Value'
-        }
+          'Custom Field 2' => 'Value',
+        },
       },
       samples: [
         {
@@ -413,19 +413,19 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               parts: "RR004_water_2_S23A_R1_001.fastq",
               source: "RR004_water_2_S23A_R1_001.fastq",
-              source_type: "local"
+              source_type: "local",
             },
             {
               parts: "RR004_water_2_S23A_R2_001.fastq",
               source: "RR004_water_2_S23A_R2_001.fastq",
-              source_type: "local"
-            }
+              source_type: "local",
+            },
           ],
           name: "RR004_water_2_S23A",
           project_id: String(@metadata_validation_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -454,8 +454,8 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
           'nucleotide_type' => 'DNA',
           'Example Core Field' => 'Value',
           'Custom Field' => 'Value',
-          'Custom Field 2' => 'Value'
-        }
+          'Custom Field 2' => 'Value',
+        },
       },
       samples: [
         {
@@ -464,19 +464,19 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               parts: "RR004_water_2_S23A_R1_001.fastq",
               source: "RR004_water_2_S23A_R1_001.fastq",
-              source_type: "local"
+              source_type: "local",
             },
             {
               parts: "RR004_water_2_S23A_R2_001.fastq",
               source: "RR004_water_2_S23A_R2_001.fastq",
-              source_type: "local"
-            }
+              source_type: "local",
+            },
           ],
           name: "RR004_water_2_S23B",
           project_id: String(@metadata_validation_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -505,12 +505,12 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
         "Human Sample" => {
           'sample_type' => 'blood',
           'nucleotide_type' => 'DNA',
-          'Custom Field' => 'Value'
+          'Custom Field' => 'Value',
         },
         "Mosquito Sample" => {
           'sample_type' => 'blood',
-          'Custom Field' => 'Value'
-        }
+          'Custom Field' => 'Value',
+        },
       },
       samples: [
         {
@@ -519,17 +519,17 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               parts: "RR004_water_2_S23A_R1_001.fastq",
               source: "RR004_water_2_S23A_R1_001.fastq",
-              source_type: "local"
+              source_type: "local",
             },
             {
               parts: "RR004_water_2_S23A_R2_001.fastq",
               source: "RR004_water_2_S23A_R2_001.fastq",
-              source_type: "local"
-            }
+              source_type: "local",
+            },
           ],
           name: "Human Sample",
           project_id: String(@metadata_validation_project.id),
-          status: "created"
+          status: "created",
         },
         {
           host_genome_id: @host_genome_mosquito.id,
@@ -537,19 +537,19 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               parts: "RR004_water_2_S23A_R1_001.fastq",
               source: "RR004_water_2_S23A_R1_001.fastq",
-              source_type: "local"
+              source_type: "local",
             },
             {
               parts: "RR004_water_2_S23A_R2_001.fastq",
               source: "RR004_water_2_S23A_R2_001.fastq",
-              source_type: "local"
-            }
+              source_type: "local",
+            },
           ],
           name: "Mosquito Sample",
           project_id: String(@metadata_validation_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -585,8 +585,8 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
           'nucleotide_type' => 'DNA',
           'Example Core Field' => 'Value',
           'Custom Field' => 'Value',
-          'Custom Field 2' => 'Value'
-        }
+          'Custom Field 2' => 'Value',
+        },
       },
       samples: [
         {
@@ -595,19 +595,19 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               parts: "RR004_water_2_S23A_R1_001.fastq",
               source: "RR004_water_2_S23A_R1_001.fastq",
-              source_type: "local"
+              source_type: "local",
             },
             {
               parts: "RR004_water_2_S23A_R2_001.fastq",
               source: "RR004_water_2_S23A_R2_001.fastq",
-              source_type: "local"
-            }
+              source_type: "local",
+            },
           ],
           name: "RR004_water_2_S23A",
           project_id: String(@metadata_validation_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -629,8 +629,8 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
           'nucleotide_type' => 'DNA',
           'Example Core Field' => 'Value',
           'Custom Field' => 'Value',
-          'Custom Field 2' => 'Value'
-        }
+          'Custom Field 2' => 'Value',
+        },
       },
       samples: [
         {
@@ -639,19 +639,19 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               parts: "RR004_water_2_S23A_R1_001.fastq",
               source: "RR004_water_2_S23A_R1_001.fastq",
-              source_type: "local"
+              source_type: "local",
             },
             {
               parts: "RR004_water_2_S23A_R2_001.fastq",
               source: "RR004_water_2_S23A_R2_001.fastq",
-              source_type: "local"
-            }
+              source_type: "local",
+            },
           ],
           name: "RR004_water_2_S23A",
           project_id: String(@public_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success
@@ -673,8 +673,8 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
           'nucleotide_type' => 'DNA',
           'Example Core Field' => 'Value',
           'Custom Field' => 'Value',
-          'Custom Field 2' => 'Value'
-        }
+          'Custom Field 2' => 'Value',
+        },
       },
       samples: [
         {
@@ -683,19 +683,19 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
             {
               parts: "RR004_water_2_S23A_R1_001.fastq",
               source: "RR004_water_2_S23A_R1_001.fastq",
-              source_type: "local"
+              source_type: "local",
             },
             {
               parts: "RR004_water_2_S23A_R2_001.fastq",
               source: "RR004_water_2_S23A_R2_001.fastq",
-              source_type: "local"
-            }
+              source_type: "local",
+            },
           ],
           name: "RR004_water_2_S23A",
           project_id: String(@joe_project.id),
-          status: "created"
-        }
-      ]
+          status: "created",
+        },
+      ],
     }, as: :json
 
     assert_response :success

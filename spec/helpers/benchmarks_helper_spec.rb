@@ -25,9 +25,9 @@ RSpec.describe BenchmarksHelper, type: :helper do
         {
           BenchmarksHelper::IDSEQ_BENCH_BUCKET => {
             BenchmarksHelper::IDSEQ_BENCH_KEY => {
-              body: benchmark_config_json
-            }
-          }
+              body: benchmark_config_json,
+            },
+          },
         }
       end
 
@@ -39,7 +39,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
     context "when config is not available" do
       let(:buckets) do
         {
-          BenchmarksHelper::IDSEQ_BENCH_BUCKET => {}
+          BenchmarksHelper::IDSEQ_BENCH_BUCKET => {},
         }
       end
 
@@ -58,9 +58,9 @@ RSpec.describe BenchmarksHelper, type: :helper do
         {
           BenchmarksHelper::IDSEQ_BENCH_BUCKET => {
             BenchmarksHelper::IDSEQ_BENCH_KEY => {
-              body: "{Invalid JSON}"
-            }
-          }
+              body: "{Invalid JSON}",
+            },
+          },
         }
       end
 
@@ -84,10 +84,10 @@ RSpec.describe BenchmarksHelper, type: :helper do
           {
             "defaults": {
               "default_field": "Default Value",
-              "environments": ["test"]
+              "environments": ["test"],
             },
             "active_benchmarks": { "active_test_benchmark_path": {} },
-            "retired_benchmarks": { "retired_test_benchmark_path": {} }
+            "retired_benchmarks": { "retired_test_benchmark_path": {} },
           }
         end
 
@@ -123,12 +123,12 @@ RSpec.describe BenchmarksHelper, type: :helper do
           {
             "active_benchmarks": {
               "active_test_benchmark_path": { "environments": ["test"] },
-              "active_prod_benchmark_path": { "environments": ["prod"] }
+              "active_prod_benchmark_path": { "environments": ["prod"] },
             },
             "retired_benchmarks": {
               "retired_test_benchmark_path": { "environments": ["test"] },
-              "retired_prod_benchmark_path": { "environments": ["prod"] }
-            }
+              "retired_prod_benchmark_path": { "environments": ["prod"] },
+            },
           }
         end
 
@@ -158,14 +158,14 @@ RSpec.describe BenchmarksHelper, type: :helper do
         {
           "defaults": {
             "project_name": project_name,
-            "environments": ["test"]
+            "environments": ["test"],
           },
           "active_benchmarks": {
-            "active_test_benchmark_path": {}
+            "active_test_benchmark_path": {},
           },
           "retired_benchmarks": {
-            "retired_test_benchmark_path": {}
-          }
+            "retired_test_benchmark_path": {},
+          },
         }
       }
     end
@@ -216,7 +216,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
             hash_including(
               last_run: {
                 sample_name: sample.name,
-                pipeline_version: pipeline_run.version
+                pipeline_version: pipeline_run.version,
               }
             )
           ),

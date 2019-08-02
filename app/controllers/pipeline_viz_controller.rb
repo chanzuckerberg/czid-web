@@ -29,7 +29,7 @@ class PipelineVizController < ApplicationController
     status = !feature_allowed ? :unauthorized : :not_found
     render(json: {
              status: status,
-             message: "Cannot access feature"
+             message: "Cannot access feature",
            }, status: status)
   end
 end

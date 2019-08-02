@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import {
   AutoSizer,
   Column,
-  SortIndicator,
   Table as VirtualizedTable,
 } from "react-virtualized";
 import "react-virtualized/styles.css";
@@ -14,6 +13,7 @@ import BasicPopup from "~/components/BasicPopup";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import PlusIcon from "~ui/icons/PlusIcon";
+import SortIcon from "~ui/icons/SortIcon";
 import { humanize } from "~/helpers/strings";
 import { logAnalyticsEvent } from "~/api/analytics";
 
@@ -29,27 +29,45 @@ class BaseTable extends React.Component {
   constructor(props) {
     super(props);
 
-    // TOOD: move this to componentDidUpdate and remove from state?
     this.state = {
       activeColumns: this.props.initialActiveColumns,
-      columns: this.setDefaults(this.props.columns),
+      columns: BaseTable.setColumnDefaults(
+        this.props.columns,
+        this.props.defaultColumnWidth
+      ),
     };
   }
 
-  setDefaults = columns => {
-    const { defaultColumnWidth } = this.props;
+  // Need to update the columns immediately, otherwise there will be a render
+  // where the data has been updated but the columns haven't.
+  static getDerivedStateFromProps(props, state) {
+    if (props.columns !== state.prevPropsColumns) {
+      return {
+        activeColumns: props.initialActiveColumns,
+        columns: BaseTable.setColumnDefaults(
+          props.columns,
+          props.defaultColumnWidth
+        ),
+        prevPropsColumns: props.columns,
+      };
+    }
+    return null;
+  }
+
+  // Add defaults to the columns.
+  static setColumnDefaults(columns, defaultColumnWidth) {
     return columns.map(column => {
       column.label =
         column.label !== undefined ? column.label : humanize(column.dataKey);
       column.width = column.width || defaultColumnWidth;
       return column;
     });
-  };
+  }
 
   basicHeaderRenderer({ label }) {
     return (
       <BasicPopup
-        trigger={<span className={cs.tooltipText}>{label}</span>}
+        trigger={<span className={cs.label}>{label}</span>}
         content={label}
       />
     );
@@ -59,10 +77,15 @@ class BaseTable extends React.Component {
     return (
       <BasicPopup
         trigger={
-          <div className={cs.tooltipText}>
-            {label}
+          <div className={cs.sortableHeader}>
+            <div className={cs.label}>{label}</div>
             {sortBy === dataKey && (
-              <SortIndicator sortDirection={sortDirection} />
+              <SortIcon
+                sortDirection={
+                  sortDirection === "ASC" ? "ascending" : "descending"
+                }
+                className={cs.sortIcon}
+              />
             )}
           </div>
         }
@@ -133,7 +156,7 @@ class BaseTable extends React.Component {
     return (
       <Checkbox
         checked={selectAllChecked}
-        onChange={onSelectAllRows}
+        onChange={(_value, checked, _event) => onSelectAllRows(checked)}
         value={"all"}
       />
     );

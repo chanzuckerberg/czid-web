@@ -1,3 +1,5 @@
+import { map, keyBy, mapValues, every, pick } from "lodash/fp";
+
 import {
   bulkUploadRemoteSamples,
   createSample,
@@ -18,7 +20,6 @@ export const bulkUploadRemote = ({ samples, metadata }) =>
 
 export const bulkUploadLocalWithMetadata = ({
   samples,
-  sampleNamesToFiles,
   metadata,
   onCreateSamplesError,
   onUploadProgress,
@@ -32,13 +33,27 @@ export const bulkUploadLocalWithMetadata = ({
   const markedUploaded = {};
   let allUploadsCompleteRan = false;
 
+  const sampleNamesToFiles = mapValues("files", keyBy("name", samples));
+
+  // Only upload these fields from the sample.
+  const processedSamples = map(
+    pick([
+      "client",
+      "host_genome_id",
+      "input_files_attributes",
+      "name",
+      "project_id",
+    ]),
+    samples
+  );
+
   // This function needs access to fileNamesToProgress.
   const onFileUploadSuccess = (sampleName, sampleId) => {
     const sampleFiles = sampleNamesToFiles[sampleName];
     // If every file for this sample is uploaded, mark it as uploaded.
     if (
       !markedUploaded[sampleName] &&
-      sampleFiles.every(f => fileNamesToProgress[f.name] === 100)
+      every(file => fileNamesToProgress[file.name] === 100, sampleFiles)
     ) {
       markedUploaded[sampleName] = true;
       markSampleUploaded(sampleId)
@@ -58,7 +73,7 @@ export const bulkUploadLocalWithMetadata = ({
     }
   };
 
-  bulkUploadWithMetadata(samples, metadata)
+  bulkUploadWithMetadata(processedSamples, metadata)
     .then(response => {
       if (response.errors.length > 0) {
         onCreateSamplesError(response.errors);
@@ -69,8 +84,12 @@ export const bulkUploadLocalWithMetadata = ({
         const sampleName = sample.name;
         const files = sampleNamesToFiles[sampleName];
 
-        files.map((file, i) => {
-          const url = sample.input_files[i].presigned_url;
+        // Start pinging server to monitor uploads server-side
+        const interval = startUploadHeartbeat(sample.id);
+
+        sample.input_files.map(inputFileAttributes => {
+          const file = files[inputFileAttributes.name];
+          const url = inputFileAttributes.presigned_url;
 
           uploadFileToUrlWithRetries(file, url, {
             onUploadProgress: e => {
@@ -83,6 +102,7 @@ export const bulkUploadLocalWithMetadata = ({
             onSuccess: () => {
               fileNamesToProgress[file.name] = 100;
               onFileUploadSuccess(sampleName, sample.id);
+              clearInterval(interval);
             },
             onError: error => onUploadError(file, error),
           });
@@ -178,11 +198,13 @@ export const bulkUploadLocal = ({
 // Local uploads go directly from the browser to S3, so we don't know if an upload was interrupted.
 // Ping the heartbeat endpoint periodically to say the browser is actively uploading this sample.
 export const startUploadHeartbeat = async sampleId => {
-  const interval = 60000; // 60 sec
-  setInterval(() => {
+  const sendHeartbeat = () => {
     putWithCSRF(`/samples/${sampleId}/upload_heartbeat.json`).catch(() =>
       // eslint-disable-next-line no-console
       console.error("Can't connect to IDseq server.")
     );
-  }, interval);
+  };
+  sendHeartbeat(); // Send first heartbeat immediately so we know it is working
+  const interval = 60000; // 60 sec
+  return setInterval(sendHeartbeat, interval);
 };

@@ -29,6 +29,29 @@ class PipelineRunStage < ApplicationRecord
   DAG_NAME_POSTPROCESS = "postprocess".freeze
   DAG_NAME_EXPERIMENTAL = "experimental".freeze
 
+  STAGE_INFO = {
+    1 => {
+      name: HOST_FILTERING_STAGE_NAME,
+      dag_name: DAG_NAME_HOST_FILTER,
+      job_command_func: 'host_filtering_command'.freeze,
+    },
+    2 => {
+      name: ALIGNMENT_STAGE_NAME,
+      dag_name: DAG_NAME_ALIGNMENT,
+      job_command_func: 'alignment_command'.freeze,
+    },
+    3 => {
+      name: POSTPROCESS_STAGE_NAME,
+      dag_name: DAG_NAME_POSTPROCESS,
+      job_command_func: 'postprocess_command'.freeze,
+    },
+    4 => {
+      name: EXPT_STAGE_NAME,
+      dag_name: DAG_NAME_EXPERIMENTAL,
+      job_command_func: 'experimental_command'.freeze,
+    },
+  }.freeze
+
   # Max number of times we resubmit a job when it gets killed by EC2.
   MAX_RETRIES = 5
 
@@ -39,6 +62,19 @@ class PipelineRunStage < ApplicationRecord
   def stage_status_file(status)
     basename = "#{job_id}.#{status}"
     "#{pipeline_run.sample.sample_output_s3_path}/#{basename}"
+  end
+
+  def dag_name
+    STAGE_INFO[step_number][:dag_name]
+  end
+
+  def step_status_file_path
+    path_beginning = if step_number <= 2
+                       pipeline_run.sample.sample_output_s3_path
+                     else
+                       pipeline_run.sample.sample_postprocess_s3_path
+                     end
+    "#{path_beginning}/#{pipeline_run.pipeline_version}/#{dag_name}_status.json"
   end
 
   def check_status_file_and_update(status_file_suffix, job_status_value)
@@ -166,7 +202,7 @@ class PipelineRunStage < ApplicationRecord
   end
 
   ########### STAGE SPECIFIC FUNCTIONS BELOW ############
-  def prepare_dag(dag_name, attribute_dict, key_s3_params = nil)
+  def prepare_dag(attribute_dict, key_s3_params = nil)
     sample = pipeline_run.sample
     dag_s3 = "#{sample.sample_output_s3_path}/#{dag_name}.json"
     attribute_dict[:bucket] = SAMPLES_BUCKET_NAME
@@ -191,7 +227,7 @@ class PipelineRunStage < ApplicationRecord
       star_genome: sample.s3_star_index_path,
       bowtie2_genome: sample.s3_bowtie2_index_path,
       max_fragments: pipeline_run.max_input_fragments,
-      max_subsample_frag: pipeline_run.subsample
+      max_subsample_frag: pipeline_run.subsample,
     }
     human_host_genome = HostGenome.find_by(name: "Human")
     attribute_dict[:human_star_genome] = human_host_genome.s3_star_index_path
@@ -202,7 +238,7 @@ class PipelineRunStage < ApplicationRecord
                                      else
                                        PipelineRun::ADAPTER_SEQUENCES["single-end"]
                                      end
-    dag_commands = prepare_dag(DAG_NAME_HOST_FILTER, attribute_dict)
+    dag_commands = prepare_dag(attribute_dict)
 
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), upload_version(pipeline_run.pipeline_version_file), dag_commands].join("; ")
 
@@ -236,10 +272,10 @@ class PipelineRunStage < ApplicationRecord
       rapsearch_max_concurrent: PipelineRun::RAPSEARCH_MAX_CONCURRENT,
       chunks_in_flight: PipelineRun::MAX_CHUNKS_IN_FLIGHT,
       gsnap_m8: PipelineRun::GSNAP_M8,
-      rapsearch_m8: PipelineRun::RAPSEARCH_M8
+      rapsearch_m8: PipelineRun::RAPSEARCH_M8,
     }
     key_s3_params = format("--key-path-s3 s3://idseq-secrets/idseq-%s.pem", (Rails.env == 'prod' ? 'prod' : 'staging')) # TODO: This is hacky
-    dag_commands = prepare_dag(DAG_NAME_ALIGNMENT, attribute_dict, key_s3_params)
+    dag_commands = prepare_dag(attribute_dict, key_s3_params)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Run it
     aegea_batch_submit_command(batch_command)
@@ -260,9 +296,9 @@ class PipelineRunStage < ApplicationRecord
       nt_db: alignment_config.s3_nt_db_path,
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
       nr_db: alignment_config.s3_nr_db_path,
-      nr_loc_db: alignment_config.s3_nr_loc_db_path
+      nr_loc_db: alignment_config.s3_nr_loc_db_path,
     }
-    dag_commands = prepare_dag(DAG_NAME_POSTPROCESS, attribute_dict)
+    dag_commands = prepare_dag(attribute_dict)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
     # Dispatch job with himem number of vCPUs and to the himem queue.
     aegea_batch_submit_command(batch_command, vcpus: Sample::DEFAULT_VCPUS_HIMEM, job_queue: Sample::DEFAULT_QUEUE_HIMEM, memory: Sample::HIMEM_IN_MB)
@@ -283,10 +319,10 @@ class PipelineRunStage < ApplicationRecord
       nt_db: alignment_config.s3_nt_db_path,
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
       nr_db: alignment_config.s3_nr_db_path,
-      nr_loc_db: alignment_config.s3_nr_loc_db_path
+      nr_loc_db: alignment_config.s3_nr_loc_db_path,
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
-    dag_commands = prepare_dag(DAG_NAME_EXPERIMENTAL, attribute_dict)
+    dag_commands = prepare_dag(attribute_dict)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
 
     # Dispatch job

@@ -15,8 +15,8 @@ module PipelineRunsHelper
         "star_human_out" => "Remove human reads using STAR.",
         "bowtie2_human_out" => "Remove residual human reads using Bowtie2.",
         "subsampled_out" => "Subsample if there are too many remaining reads.",
-        "gsnap_filter_out" => "Remove residual human reads using GSNAP."
-      }
+        "gsnap_filter_out" => "Remove residual human reads using GSNAP.",
+      },
     },
     PipelineRunStage::ALIGNMENT_STAGE_NAME => {
       "stage" => "Align reads to NCBI nucleotide and protein databases.",
@@ -24,8 +24,8 @@ module PipelineRunsHelper
         "gsnap_out" => "Align remaining reads to the NCBI NT database using GSNAP.",
         "rapsearch2_out" => "Align remaining reads to the NCBI NR database using RAPSearch2.",
         "taxon_count_out" => "Count preliminary taxon hits.",
-        "annotated_out" => "Annotate non-host FASTA with preliminary NCBI accession IDs."
-      }
+        "annotated_out" => "Annotate non-host FASTA with preliminary NCBI accession IDs.",
+      },
     },
     PipelineRunStage::POSTPROCESS_STAGE_NAME => {
       "stage" => "Assemble reads and refine read assignments.",
@@ -42,15 +42,15 @@ module PipelineRunsHelper
         "refined_taxon_count_out" => "Count taxon hits after the reassignment based on the BLAST results.",
         "contig_summary_out" => "Record statistics on the assembled contigs.",
         "refined_annotated_out" => "Annotate non-host FASTA with NCBI accession IDs after the BLAST-based match refinement.",
-        "refined_taxid_locator_out" => "Annotate non-host FASTA with revised Taxonomy IDs after the BLAST-based match refinement."
-      }
+        "refined_taxid_locator_out" => "Annotate non-host FASTA with revised Taxonomy IDs after the BLAST-based match refinement.",
+      },
     },
     PipelineRunStage::EXPT_STAGE_NAME => {
       "stage" => "Generate additional experimental output.",
       "steps" => {
-        "nonhost_fastq_out" => "Filter original fastq/fasta input files to only contain non-host reads processed by IdSeq."
-      }
-    }
+        "nonhost_fastq_out" => "Filter original fastq/fasta input files to only contain non-host reads processed by IdSeq.",
+      },
+    },
   }.freeze
 
   def aegea_batch_submit_command(base_command,

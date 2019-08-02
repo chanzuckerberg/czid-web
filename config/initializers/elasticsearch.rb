@@ -4,6 +4,6 @@ ELASTICSEARCH_ON = (Rails.env != 'test')
 # Initialize elasticsearch client
 config = {
   host: ENV['ES_ADDRESS'],
-  transport_options: { request: { timeout: 200 } }
+  transport_options: { request: { timeout: 200 } },
 }
 Elasticsearch::Model.client = Elasticsearch::Client.new(config) if Rails.env != 'test'

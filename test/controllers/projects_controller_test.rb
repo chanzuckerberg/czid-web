@@ -65,7 +65,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_params
 
     post validate_sample_names_project_url(@metadata_validation_project), params: {
-      sample_names: ['Test One', 'Test Two', 'metadata_validation_sample_mosquito']
+      sample_names: ['Test One', 'Test Two', 'metadata_validation_sample_mosquito'],
     }, as: :json
 
     assert_response :success
@@ -77,7 +77,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_params
 
     post validate_sample_names_project_url(@metadata_validation_project), params: {
-      sample_names: ['Test One', 'Test One', 'Test One_1']
+      sample_names: ['Test One', 'Test One', 'Test One_1'],
     }, as: :json
 
     assert_response :success
@@ -89,7 +89,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_nonadmin_params
 
     get metadata_fields_projects_url, params: {
-      projectIds: [@public_project.id]
+      projectIds: [@public_project.id],
     }
     assert_response :success
 
@@ -100,7 +100,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_nonadmin_params
 
     get metadata_fields_projects_url, params: {
-      projectIds: [@joe_project.id]
+      projectIds: [@joe_project.id],
     }
     assert_response :success
 
@@ -112,7 +112,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
 
     assert_raises(ActiveRecord::RecordNotFound) do
       get metadata_fields_projects_url, params: {
-        projectIds: [@metadata_validation_project.id]
+        projectIds: [@metadata_validation_project.id],
       }
     end
   end
@@ -122,7 +122,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_nonadmin_params
 
     get metadata_fields_projects_url, params: {
-      projectIds: [@public_project.id, @joe_project.id]
+      projectIds: [@public_project.id, @joe_project.id],
     }
     assert_response :success
 
@@ -134,7 +134,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     post user_session_path, params: @user_nonadmin_params
 
     get metadata_fields_projects_url, params: {
-      projectIds: [@public_project.id, @metadata_validation_project.id]
+      projectIds: [@public_project.id, @metadata_validation_project.id],
     }
     assert_response :success
 

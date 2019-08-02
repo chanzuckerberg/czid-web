@@ -22,7 +22,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       readSpecificity: 1,
       species: 1,
       subcategories: {},
-      minReads: 1
+      minReads: 1,
     }
 
     @results_by_pr = HeatmapHelper.fetch_top_taxons(
@@ -68,9 +68,9 @@ class HeatmapHelperTest < ActiveSupport::TestCase
         {
           metric: "NT_zscore",
           value: "10000",
-          operator: ">="
-        }
-      ].to_json
+          operator: ">=",
+        },
+      ].to_json,
     }
 
     response = HeatmapHelper.sample_taxons_dict(params, @samples, @background.id)
@@ -273,10 +273,10 @@ class HeatmapHelperTest < ActiveSupport::TestCase
   test "threshold filters parsing" do
     assert_equal [
       { count_type: "NT", metric: "zscore", value: 2.0, operator: ">=" },
-      { count_type: "NR", metric: "rpm", value: 1000.0, operator: "<=" }
+      { count_type: "NR", metric: "rpm", value: 1000.0, operator: "<=" },
     ], HeatmapHelper.parse_custom_filters([
                                             { "metric" => "NT_zscore", "value" => "2", "operator" => ">=" },
-                                            { "metric" => "NR_rpm", "value" => "1000", "operator" => "<=" }
+                                            { "metric" => "NR_rpm", "value" => "1000", "operator" => "<=" },
                                           ])
   end
 end
