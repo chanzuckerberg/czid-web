@@ -18,7 +18,7 @@ const METRICS = [
   { text: "Depth", key: "depth" },
 ];
 
-const DEFAULT_SELECTED_METADATA = ["collection_location"];
+const DEFAULT_SELECTED_METADATA = ["collection_location_v2"];
 
 export default class AMRHeatmapVis extends React.Component {
   constructor(props) {
