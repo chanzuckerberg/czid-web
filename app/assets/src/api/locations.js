@@ -1,6 +1,6 @@
 import { get } from "./core";
 
-export const getGeoSearchSuggestions = query =>
+export const getGeoSearchSuggestions = (query, limit = null) =>
   get("/locations/external_search", {
-    params: { query },
+    params: { query, limit },
   });

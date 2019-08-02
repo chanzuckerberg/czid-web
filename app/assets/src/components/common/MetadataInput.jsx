@@ -1,44 +1,36 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { compact, get, isArray } from "lodash/fp";
+import { isArray } from "lodash/fp";
+import cx from "classnames";
 
 import Input from "~/components/ui/controls/Input";
 import Dropdown from "~/components/ui/controls/dropdowns/Dropdown";
-import GeoSearchInputBox from "../ui/controls/GeoSearchInputBox";
+import GeoSearchInputBox, {
+  processLocationSelection,
+} from "~/components/ui/controls/GeoSearchInputBox";
+import AlertIcon from "~ui/icons/AlertIcon";
 
 import cs from "./metadata_input.scss";
-
-export const LOCATION_WARNING =
-  "Changed to county/district level for personal privacy.";
 
 class MetadataInput extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      locationWarning: "",
+      // Small warning below the input. Only used for Locations currently.
+      warning: props.warning,
     };
   }
 
-  // For human samples, drop the city part of the name and show a warning.
-  // Note that the backend will redo the geosearch for confirmation, so don't
-  // modify geo_level here.
-  // TODO(jsheu): Consider moving the warnings to the backend and generalizing.
-  processLocationSelection = result => {
-    const { isHuman } = this.props;
-
-    let warning = "";
-    if (isHuman && get("geo_level", result) === "city") {
-      result.name = compact([
-        result.subdivision_name,
-        result.state_name,
-        result.country_name,
-      ]).join(", ");
-      warning = LOCATION_WARNING;
+  static getDerivedStateFromProps(props, state) {
+    if (props.warning !== state.prevPropsWarning) {
+      return {
+        warning: props.warning,
+        prevPropsWarning: props.warning,
+      };
     }
-    this.setState({ locationWarning: warning });
-    return result;
-  };
+    return null;
+  }
 
   render() {
     const {
@@ -49,7 +41,7 @@ class MetadataInput extends React.Component {
       className,
       isHuman,
     } = this.props;
-    const { locationWarning } = this.state;
+    const { warning } = this.state;
 
     if (isArray(metadataType.options)) {
       const options = metadataType.options.map(option => ({
@@ -84,15 +76,26 @@ class MetadataInput extends React.Component {
         <React.Fragment>
           <GeoSearchInputBox
             className={className}
+            // .warning reference in old .idseq-ui.input file
+            inputClassName={cx(warning && "warning")}
             // Calls save on selection
-            onResultSelect={({ result }) => {
-              result = this.processLocationSelection(result);
+            onResultSelect={({ result: selection }) => {
+              const { result, warning } = processLocationSelection(
+                selection,
+                isHuman
+              );
               onChange(metadataType.key, result, true);
+              this.setState({ warning });
             }}
             value={value}
           />
-          {locationWarning && (
-            <span className={cs.warning}>{locationWarning}</span>
+          {warning && (
+            <div className={cs.warning}>
+              <div className={cs.icon}>
+                <AlertIcon />
+              </div>
+              <div>{warning}</div>
+            </div>
           )}
         </React.Fragment>
       );
@@ -110,6 +113,10 @@ class MetadataInput extends React.Component {
   }
 }
 
+MetadataInput.defaultProps = {
+  warning: "",
+};
+
 MetadataInput.propTypes = {
   className: PropTypes.string,
   value: PropTypes.any,
@@ -124,6 +131,7 @@ MetadataInput.propTypes = {
   onSave: PropTypes.func,
   withinModal: PropTypes.bool,
   isHuman: PropTypes.bool,
+  warning: PropTypes.string,
 };
 
 export default MetadataInput;
