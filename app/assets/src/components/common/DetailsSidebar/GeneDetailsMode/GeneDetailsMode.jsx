@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { getCARDInfo } from "~/api/amr";
+import { getOntology } from "~/api/amr";
 import StringHelper from "~/helpers/StringHelper";
 
 import cs from "./gene_details_mode.scss";
@@ -63,7 +63,7 @@ export default class GeneDetailsMode extends React.Component {
   }
 
   async getGeneInfo(geneName) {
-    const ontology = await getCARDInfo(geneName);
+    const ontology = await getOntology(geneName);
     const cardEntryFound = ontology.error !== "" ? false : true;
     this.setState({
       ontology,

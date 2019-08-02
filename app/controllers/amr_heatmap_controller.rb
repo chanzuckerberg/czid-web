@@ -4,8 +4,10 @@ S3_JSON_PREFIX = "amr/ontology/".freeze
 DEFAULT_S3_REGION = "us-west-2".freeze
 
 class AmrHeatmapController < ApplicationController
+  include S3Util
+
   before_action :admin_required
-  before_action :set_aws_client, only: [:fetch_card_info]
+  before_action :set_aws_client, only: [:fetch_ontology]
 
   def index
     @sample_ids = params[:sampleIds].map(&:to_i)
@@ -67,15 +69,25 @@ class AmrHeatmapController < ApplicationController
     render json: amr_data
   end
 
-  def fetch_card_info
+  def fetch_ontology
     gene_name = params[:geneName]
-    ontology = {}
+    ontology = {
+      "accession" => "",
+      "label" => "",
+      "synonyms" => [],
+      "description" => "",
+      "geneFamily" => [],
+      "drugClass" => {},
+      "publications" => [],
+      "error" => "",
+    }
 
     ontology_json_key = fetch_current_ontology_file_key()
-    card_entry = fetch_ontology(ontology_json_key, gene_name)
+    card_entry = fetch_ontology_entry(ontology_json_key, gene_name)
     if card_entry.key?("label")
-      ontology = card_entry
-      ontology["error"] = ""
+      card_entry.each do |property, description|
+        ontology[property] = description
+      end
     else
       ontology["error"] = "No data for #{gene_name}."
     end
@@ -95,39 +107,16 @@ class AmrHeatmapController < ApplicationController
     return target_key
   end
 
-  def fetch_ontology(s3_key, gene_name)
-    s3_select_params = {
-      bucket: S3_JSON_BUCKET,
-      key: s3_key,
-      expression_type: "SQL",
-      expression: "SELECT * FROM S3Object[*].#{gene_name} LIMIT 1",
-      input_serialization: {
-        json: {
-          type: "DOCUMENT",
-        },
-      },
-      output_serialization: {
-        json: {},
-      },
-    }
-
-    entry = []
-    begin
-      @client.select_object_content(s3_select_params) do |stream|
-        stream.on_records_event do |event|
-          entry.push(event.payload.read)
-        end
-      end
-    rescue
-      Rails.logger.info("Error retrieving ontology entry for #{gene_name} from s3")
-      return {}
-    end
-    whole_entry = entry.join
+  def fetch_ontology_entry(s3_key, gene_name)
+    sql_expression = "SELECT * FROM S3Object[*].#{gene_name.dump} LIMIT 1"
+    entry = s3_select_json(S3_JSON_BUCKET, s3_key, sql_expression)
+    whole_entry = entry.join.chomp(",")
+    Rails.logger.info(whole_entry)
     ontology = {}
     begin
       ontology = JSON.parse(whole_entry)
     rescue JSON::ParserError => e
-      Rails.logger.info(e.message)
+      Rails.logger.error(e.message)
       return {}
     end
     return ontology

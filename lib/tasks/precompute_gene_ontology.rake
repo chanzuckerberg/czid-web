@@ -1,13 +1,13 @@
 MASTER_OWL_URI = "https://raw.githubusercontent.com/arpcard/aro/master/aro.owl".freeze
 URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/".freeze
-S3_JSON_BUCKET = "idseq-database".freeze
-S3_ARGANNOT_FASTA = "s3://idseq-database/amr/ARGannot_r2.fasta".freeze
+S3_DB_BUCKET = "idseq-database".freeze
+S3_ARGANNOT_FASTA = "amr/ARGannot_r2.fasta".freeze
 
 DRUG_CLASSES = {
   "agly" => ["Aminoglycosides", "0000016"],
   "bla" => ["Beta-lactamases", "3000001"],
   "colistin" => ["Colistins", "0000067"],
-  # "fcd" => [], # Unclear which one this refers to
+  # "fcd" => [], # Listed in ARG-ANNOT for Far1, but unclear what it refers to
   "fos" => ["Fosfomycin", "0000025"],
   "fcyn" => ["Fosfomycin", "0000025"],
   "flq" => ["Fluroquinolones", "0000001"],
@@ -38,11 +38,8 @@ task precompute_gene_ontology: :environment do
   owl_doc = Nokogiri::XML(response.body.force_encoding("utf-8"))
 
   arg_annot_fasta = nil
-  split_uri = S3_ARGANNOT_FASTA.split("/", 4)
-  bucket = split_uri[2]
-  key = split_uri[3]
   begin
-    resp = s3.get_object(bucket: bucket, key: key)
+    resp = s3.get_object(bucket: S3_DB_BUCKET, key: S3_ARGANNOT_FASTA)
     arg_annot_fasta = resp.body.read
   rescue Aws::S3::Errors => err
     Rails.logger.error("Unable to fetch ARG ANNOT fasta file from S3")
@@ -94,7 +91,7 @@ task precompute_gene_ontology: :environment do
   begin
     s3.put_object(
       body: json_ontology.to_json,
-      bucket: S3_JSON_BUCKET,
+      bucket: S3_DB_BUCKET,
       key: S3_JSON_KEY
     )
   rescue Aws::S3::Errors => err
