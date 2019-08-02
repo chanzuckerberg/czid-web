@@ -157,7 +157,7 @@ class SamplesController < ApplicationController
     samples = samples.order(Hash[order_by => order_dir])
     limited_samples = samples.offset(offset).limit(limit)
 
-    limited_samples_json = limited_samples.as_json(
+    limited_samples_json = limited_samples.includes(:project).as_json(
       only: [:id, :name, :host_genome_id, :project_id, :created_at, :public],
       methods: [:private_until]
     )
