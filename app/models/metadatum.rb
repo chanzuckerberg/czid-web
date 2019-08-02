@@ -24,6 +24,7 @@ class Metadatum < ApplicationRecord
 
   # Validations
   validates :string_validated_value, length: { maximum: 250 }
+  validates :raw_value, length: { maximum: 250 } # mysql varchar has a max limit of 255
   validates :number_validated_value, numericality: true, allow_nil: true
   validate :set_validated_values
 
