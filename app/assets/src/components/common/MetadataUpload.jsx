@@ -77,7 +77,8 @@ class MetadataUpload extends React.Component {
       });
     }
     // Batch geosearch for locations for the interactive menu
-    this.getCSVLocationMatches(metadata);
+    const hasErrors = issues && issues.errors.length > 0;
+    if (!hasErrors) this.getCSVLocationMatches(metadata);
   };
 
   getCSVLocationMatches = async metadata => {
