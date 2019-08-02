@@ -24,13 +24,7 @@ class BackgroundsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update background" do
-    skip "This passes locally but fails in Travis because of s3 call. See archive_background_to_s3."
-    patch background_url(@background), params: {
-      background: {
-        name: @background.name,
-        pipeline_run_ids: @background.pipeline_runs.map(&:id),
-      },
-    }
+    patch background_url(@background), params: { background: { name: @background.name, pipeline_run_ids: @background.pipeline_runs.map(&:id), sample_ids: @background.samples.pluck(:id) } }
     assert_redirected_to background_url(@background)
   end
 
