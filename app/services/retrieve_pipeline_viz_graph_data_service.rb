@@ -27,15 +27,6 @@ class RetrievePipelineVizGraphDataService
   #           - displayName: A string to display the file as
   #           - url: An optional string to download the file
 
-  JOB_STATUS_NUM_TO_STRING = {
-    nil => "notStarted",
-    0 => "notStarted",
-    1 => "inProgress",
-    2 => "finished",
-    3 => "finished", # Uploaded
-    4 => "errored",
-  }.freeze
-
   def initialize(pipeline_run_id, is_admin, remove_host_filtering_urls)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
     @all_dag_jsons = []
@@ -65,26 +56,49 @@ class RetrievePipelineVizGraphDataService
       stage_step_statuses = all_step_statuses[stage_index]
       stage_step_descriptions = STEP_DESCRIPTIONS[@stage_names[stage_index]]["steps"]
 
-      max_job_status = 0
       steps = dag_json["steps"].map do |step|
         status_info = stage_step_statuses[step["out"]] || {}
         description = status_info["description"].blank? ? stage_step_descriptions[step["out"]] : status_info["description"]
-        max_job_status = [max_job_status, status_info["status"]].max
         {
           name: modify_step_name(step["out"]),
           description: description,
           inputEdges: [],
           outputEdges: [],
-          status: JOB_STATUS_NUM_TO_STRING[status_info["status"]],
+          status: job_status([status_info["status"]]),
         }
       end
 
       {
         steps: steps,
-        jobStatus: JOB_STATUS_NUM_TO_STRING[max_job_status],
+        jobStatus: stage_job_status(stage_step_statuses.values.map { |status| job_status(status) }),
       }
     end
     return stages
+  end
+
+  def job_status(status)
+    case status
+    when "instantiated", nil
+      return "notStarted"
+    when "running", "finished_running"
+      return "inProgress"
+    when "uploaded"
+      return "finished"
+    when "errored"
+      return "errored"
+    end
+  end
+
+  def stage_job_status(statuses)
+    if status.include? "errored"
+      return "errored"
+    elsif statuses.include?("inProgress") || (status.include?("notStarted") && status.include?("finished"))
+      return "inProgress"
+    elsif status.include? "notStarted"
+      return "notStarted"
+    elsif status.include? "finished"
+      return "finished"
+    end
   end
 
   def create_edges
