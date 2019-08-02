@@ -231,7 +231,7 @@ RSpec.describe AmrHeatmapController, type: :controller do
 
     describe "GET CARD entry information" do
       it "should return relevant information from the CARD Ontology database" do
-        get :fetch_ontology, params: { geneName: "oqxB" }
+        get :fetch_ontology, params: { geneName: "OqxB" }
         expect(response.content_type).to eq("application/json")
         expect(response).to have_http_status(:ok)
 
