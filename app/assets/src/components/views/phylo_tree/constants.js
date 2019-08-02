@@ -16,7 +16,7 @@ export const SAMPLE_FIELDS = [
 ];
 
 export const SAMPLE_METADATA_FIELDS = [
-  "collection_location",
+  "collection_location_v2",
   "collection_date",
   "sample_type",
   "nucleotide_type",
