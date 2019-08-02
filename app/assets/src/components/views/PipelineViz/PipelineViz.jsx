@@ -3,6 +3,7 @@ import cx from "classnames";
 import { PanZoom } from "react-easy-panzoom";
 
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
+import CircleCheckmarkIcon from "~/components/ui/icons/CircleCheckmarkIcon";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
@@ -208,8 +209,11 @@ class PipelineViz extends React.Component {
     const graph = this.graphs[stageIndex];
     const updatedInterStageArrows = [...this.state.interStageArrows];
 
-    const hoveredNodeColoring = this.getColorOptions(
-      this.getStatusGroupFor(stageIndex, nodeId),
+    const hoveredNodeColoring = this.getNodeStatusOptions(
+      this.getStepDataAtIndices({
+        stageIndex: stageIndex,
+        stepIndex: nodeId,
+      }).status,
       true
     );
     graph.updateNodes([nodeId], hoveredNodeColoring);
@@ -306,8 +310,11 @@ class PipelineViz extends React.Component {
       return;
     }
 
-    const origNodeColor = this.getColorOptions(
-      this.getStatusGroupFor(graphIndex, nodeId)
+    const origNodeColor = this.getNodeStatusOptions(
+      this.getStepDataAtIndices({
+        stageIndex: graphIndex,
+        stepIndex: nodeId,
+      }).status
     );
     this.graphs[graphIndex].updateNodes([nodeId], origNodeColor);
 
@@ -344,7 +351,7 @@ class PipelineViz extends React.Component {
       graphData: { stages },
     } = this.props;
     const step = stages[stageIndex].steps[stepIndex];
-    return this.stepStatusToGroup(step.status);
+    return step.status;
   }
 
   generateNodeData(stageIndex, edgeData) {
@@ -356,7 +363,7 @@ class PipelineViz extends React.Component {
       return {
         id: i,
         label: step.name,
-        group: this.stepStatusToGroup(step.status),
+        group: step.status,
       };
     });
 
@@ -367,75 +374,42 @@ class PipelineViz extends React.Component {
     return nodeData;
   }
 
-  stepStatusToGroup(status) {
-    switch (status) {
-      case null:
-      case 0:
-        return "notStarted";
-      case 1:
-        return "inProgress";
-      case 2:
-      case 3:
-        return "finished";
-      case 4:
-        return "errored";
-    }
-  }
-
-  getStageStatusClass(stageIndex) {
-    const {
-      graphData: { stages },
-    } = this.props;
-
-    switch (stages[stageIndex].jobStatus) {
-      case null:
-      case 0:
-        return cs.notStarted;
-      case 1:
-        return cs.inProgress;
-      case 2:
-      case 3:
-        return cs.finished;
-      case 4:
-        return cs.errored;
-      default:
-        return cs.notStarted;
-    }
-  }
-
-  getColorOptions(statusGroup, hovered = false) {
+  getNodeStatusOptions(status, hovered = false) {
     const {
       notStartedNodeColor,
       inProgressNodeColor,
       finishedNodeColor,
       erroredNodeColor,
     } = this.props;
-    let color;
-    switch (statusGroup) {
+    let options;
+    switch (status) {
       case "notStarted":
-        color = notStartedNodeColor;
+        options = notStartedNodeColor;
         break;
       case "inProgress":
-        color = inProgressNodeColor;
+        options = inProgressNodeColor;
         break;
       case "finished":
-        color = finishedNodeColor;
+        options = finishedNodeColor;
         break;
       case "errored":
-        color = erroredNodeColor;
+        options = erroredNodeColor;
         break;
     }
 
-    color = hovered && color.hovered ? color.hovered : color.default;
+    const backgroundColor =
+      hovered && options.hovered ? options.hovered : options.default;
+    const textColor = options.textColor;
     return {
       color: {
-        background: color,
-        border: color,
+        background: backgroundColor,
+        border: backgroundColor,
         highlight: {
-          background: color,
-          border: color,
+          background: backgroundColor,
+          border: backgroundColor,
         },
       },
+      ...(textColor ? { font: { color: textColor } } : {}),
     };
   }
 
@@ -658,10 +632,10 @@ class PipelineViz extends React.Component {
             y: true,
           },
         },
-        notStarted: this.getColorOptions("notStarted"),
-        inProgress: this.getColorOptions("inProgress"),
-        finished: this.getColorOptions("finished"),
-        errored: this.getColorOptions("errored"),
+        notStarted: this.getNodeStatusOptions("notStarted"),
+        inProgress: this.getNodeStatusOptions("inProgress"),
+        finished: this.getNodeStatusOptions("finished"),
+        errored: this.getNodeStatusOptions("errored"),
       },
       edges: {
         chosen: false,
@@ -735,6 +709,7 @@ class PipelineViz extends React.Component {
 
     // Stages without dag_json recorded are not toggleable
     const toggleable = i < stages.length;
+    const jobStatus = stages[i].jobStatus;
 
     const stageContainer = toggleable && (
       <div className={isOpened ? cs.openedStage : cs.hidden}>
@@ -760,11 +735,12 @@ class PipelineViz extends React.Component {
         <div
           className={cx(
             isOpened && toggleable ? cs.hidden : cs.stageButton,
-            this.getStageStatusClass(i),
+            cs[jobStatus],
             !toggleable && cs.disabled
           )}
           onClick={() => this.toggleStage(i)}
         >
+          <CircleCheckmarkIcon className={cs.statusIcon} />
           {stageName}
         </div>
         {stageContainer}
@@ -878,7 +854,7 @@ PipelineViz.propTypes = {
 PipelineViz.defaultProps = {
   admin: false,
   backgroundColor: "#f8f8f8",
-  notStartedNodeColor: { default: "#ffffff" },
+  notStartedNodeColor: { default: "#ffffff", textColor: "#666666" },
   inProgressNodeColor: { default: "#eff2fc", hovered: "#5887fa" },
   finishedNodeColor: { default: "#e6f7ed" },
   erroredNodeColor: { default: "#f9ebeb" },

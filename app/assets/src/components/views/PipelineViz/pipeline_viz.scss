@@ -42,16 +42,23 @@
   @include font-header-node-l;
   background-color: $white;
   border-radius: 4px;
-  padding: 12px;
-  width: 200px;
+  padding: 6px 12px 6px 6px;
   text-align: center;
   cursor: pointer;
-  word-break: break-word;
   box-shadow: $box-shadow-bottom-right;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 
   &.disabled {
     cursor: default;
     opacity: 0.5;
+  }
+
+  .statusIcon {
+    height: 15px;
+    fill: $success;
+    margin: 2.5px 4px 2.5px 0;
   }
 }
 
