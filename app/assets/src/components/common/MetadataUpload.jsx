@@ -1,8 +1,11 @@
 import React from "react";
 import cx from "classnames";
-import _fp, { filter, keyBy, concat } from "lodash/fp";
+import _fp, { filter, keyBy, concat, find } from "lodash/fp";
 
 import MetadataCSVUpload from "~/components/common/MetadataCSVUpload";
+import MetadataCSVLocationsMenu, {
+  geosearchCSVLocations,
+} from "~/components/common/MetadataCSVLocationsMenu";
 import PropTypes from "~/components/utils/propTypes";
 import AlertIcon from "~ui/icons/AlertIcon";
 import Tabs from "~/components/ui/controls/Tabs";
@@ -28,6 +31,7 @@ class MetadataUpload extends React.Component {
     projectMetadataFields: null,
     hostGenomes: [],
     validatingCSV: false,
+    CSVLocationWarnings: {},
   };
 
   async componentDidMount() {
@@ -72,6 +76,27 @@ class MetadataUpload extends React.Component {
         projectName: this.props.project.name,
       });
     }
+    // Batch geosearch for locations for the interactive menu
+    const hasErrors = issues && issues.errors.length > 0;
+    if (!hasErrors) this.getCSVLocationMatches(metadata);
+  };
+
+  getCSVLocationMatches = async metadata => {
+    const { onMetadataChange } = this.props;
+    if (!metadata) return;
+
+    try {
+      const { newMetadata, warnings } = await geosearchCSVLocations(
+        metadata,
+        this.getRequiredLocationMetadataType()
+      );
+      onMetadataChange({ metadata: newMetadata });
+      this.setState({ CSVLocationWarnings: warnings });
+    } catch (e) {
+      // On failure, locations will remain plain text.
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
   };
 
   // MetadataManualInput doesn't validate metadata before calling onMetadataChangeManual.
@@ -97,6 +122,18 @@ class MetadataUpload extends React.Component {
 
     return `/metadata/metadata_template_csv?${getURLParamString(params)}`;
   };
+
+  getRequiredLocationMetadataType = () => {
+    const { projectMetadataFields } = this.state;
+    // Use the first required location MetadataField
+    return find(
+      { dataType: "location", is_required: 1 },
+      Object.values(projectMetadataFields)
+    );
+  };
+
+  handleCSVLocationWarningsChange = CSVLocationWarnings =>
+    this.setState({ CSVLocationWarnings });
 
   renderTab = () => {
     if (this.state.currentTab === "Manual Input") {
@@ -230,6 +267,25 @@ class MetadataUpload extends React.Component {
     );
   };
 
+  renderCSVLocationsMenu = () => {
+    const { metadata, onMetadataChange } = this.props;
+    const { CSVLocationWarnings, currentTab } = this.state;
+
+    const issues = this.props.issues || this.state.issues;
+    const hasErrors = issues && issues.errors.length > 0;
+
+    // Hide if they still have errors that will require re-uploading their CSV.
+    return currentTab === "CSV Upload" && !hasErrors ? (
+      <MetadataCSVLocationsMenu
+        CSVLocationWarnings={CSVLocationWarnings}
+        locationMetadataType={this.getRequiredLocationMetadataType()}
+        metadata={metadata}
+        onCSVLocationWarningsChange={this.handleCSVLocationWarningsChange}
+        onMetadataChange={onMetadataChange}
+      />
+    ) : null;
+  };
+
   render() {
     const { hostGenomes, projectMetadataFields, currentTab } = this.state;
     const { samplesAreNew } = this.props;
@@ -298,6 +354,7 @@ class MetadataUpload extends React.Component {
         />
         {this.renderTab()}
         {this.renderIssues()}
+        {this.renderCSVLocationsMenu()}
       </div>
     );
   }
@@ -309,6 +366,10 @@ MetadataUpload.propTypes = {
     errors: PropTypes.arrayOf(PropTypes.string),
     warnings: PropTypes.arrayOf(PropTypes.string),
   }),
+  metadata: PropTypes.object,
+  // Immediately called when the user changes anything, even before validation has returned.
+  // Can be used to disable the header navigation.
+  onDirty: PropTypes.func,
   onMetadataChange: PropTypes.func.isRequired,
   onShowCSVInstructions: PropTypes.func.isRequired,
   project: PropTypes.Project,
@@ -316,9 +377,6 @@ MetadataUpload.propTypes = {
   samplesAreNew: PropTypes.bool,
   withinModal: PropTypes.bool,
   visible: PropTypes.bool,
-  // Immediately called when the user changes anything, even before validation has returned.
-  // Can be used to disable the header navigation.
-  onDirty: PropTypes.func,
 };
 
 export default MetadataUpload;

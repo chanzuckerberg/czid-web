@@ -23,4 +23,10 @@
       border: 1px solid red;
     }
   }
+
+  &.warning {
+    input[type="text"] {
+      border: 1px solid $warning;
+    }
+  }
 }
