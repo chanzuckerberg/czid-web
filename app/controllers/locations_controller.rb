@@ -22,6 +22,9 @@ class LocationsController < ApplicationController
         results = resp.map { |r| LocationHelper.adapt_location_iq_response(r) }
         # Just keep the first if you get duplicate locations
         results = results.uniq { |r| [r[:name], r[:geo_level]] }
+      else
+        # Monitor if users run up against geosearch API rate limits.
+        LogUtil.log_err_and_airbrake("Geosearch failed. Check API rate limits.")
       end
     end
     event = MetricUtil::ANALYTICS_EVENT_NAMES[:location_geosearched]
