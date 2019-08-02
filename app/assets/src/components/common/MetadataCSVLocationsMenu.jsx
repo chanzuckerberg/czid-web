@@ -11,6 +11,8 @@ import DataTable from "~/components/visualizations/table/DataTable";
 import cs from "./metadata_csv_locations_menu.scss";
 
 const CONCURRENT_REQUESTS_LIMIT = 20;
+const REQUEST_DELAY_MIN = 1000;
+const REQUEST_DELAY_MAX = 2000;
 
 // Batch geosearch CSV locations for matches
 export const geosearchCSVLocations = async (metadata, locationMetadataType) => {
@@ -25,13 +27,13 @@ export const geosearchCSVLocations = async (metadata, locationMetadataType) => {
   });
 
   // Batch the requests with a delay to avoid geosearch API limits.
-  const sleep = () =>
-    new Promise(resolve => setTimeout(resolve, random(1000, 2000)));
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const batches = chunk(CONCURRENT_REQUESTS_LIMIT, requests);
   const batchRequests = batches.map(async (batch, batchIndex) => {
     await Promise.all(batch);
     // Sleep after every batch except the last
-    if (batchIndex !== batches.length - 1) await sleep();
+    if (batchIndex !== batches.length - 1)
+      await sleep(random(REQUEST_DELAY_MIN, REQUEST_DELAY_MAX));
   });
   await Promise.all(batchRequests);
 
