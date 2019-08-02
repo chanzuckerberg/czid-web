@@ -2,8 +2,10 @@ import React from "react";
 import cx from "classnames";
 import { PanZoom } from "react-easy-panzoom";
 
-import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
 import CircleCheckmarkIcon from "~/components/ui/icons/CircleCheckmarkIcon";
+import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
+import InfoCircleIcon from "~/components/ui/icons/InfoCircleIcon";
+import LoadingIcon from "~/components/ui/icons/LoadingIcon";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
@@ -565,7 +567,7 @@ class PipelineViz extends React.Component {
     } = this.props;
     const stageData = stages[stageIndex];
     const graph = this.graphs[stageIndex];
-    if (stageData.jobStatus != "STARTED") {
+    if (stageData.jobStatus != "inProgress") {
       graph.afterDrawingOnce(() => this.toggleStage(stageIndex));
     }
   }
@@ -603,14 +605,14 @@ class PipelineViz extends React.Component {
           borderRadius: 4,
         },
         margin: {
-          left: 6,
-          right: 6,
+          top: 6,
+          bottom: 6,
+          left: 12,
+          right: 12,
         },
-        widthConstraint: {
-          minimum: 100,
-        },
+        widthConstraint: 75,
         heightConstraint: {
-          minimum: 24,
+          minimum: 20,
         },
         font: {
           face: "Open Sans",
@@ -661,7 +663,7 @@ class PipelineViz extends React.Component {
         hierarchical: {
           direction: "LR",
           sortMethod: "directed",
-          levelSeparation: 150,
+          levelSeparation: 130,
           blockShifting: false,
           edgeMinimization: false,
         },
@@ -730,6 +732,25 @@ class PipelineViz extends React.Component {
       </div>
     );
 
+    let statusIcon;
+    switch (jobStatus) {
+      case "inProgress":
+        statusIcon = (
+          <LoadingIcon className={cx(cs.statusIcon, cs.inProgressIcon)} />
+        );
+        break;
+      case "finished":
+        statusIcon = (
+          <CircleCheckmarkIcon className={cx(cs.statusIcon, cs.finishedIcon)} />
+        );
+        break;
+      case "errored":
+        statusIcon = (
+          <InfoCircleIcon className={cx(cs.statusIcon, cs.erroredIcon)} />
+        );
+        break;
+    }
+
     return (
       <div className={cs.stage}>
         <div
@@ -740,7 +761,7 @@ class PipelineViz extends React.Component {
           )}
           onClick={() => this.toggleStage(i)}
         >
-          <CircleCheckmarkIcon className={cs.statusIcon} />
+          {statusIcon}
           {stageName}
         </div>
         {stageContainer}
@@ -853,14 +874,14 @@ PipelineViz.propTypes = {
 
 PipelineViz.defaultProps = {
   admin: false,
-  backgroundColor: "#f8f8f8",
-  notStartedNodeColor: { default: "#ffffff", textColor: "#666666" },
-  inProgressNodeColor: { default: "#eff2fc", hovered: "#5887fa" },
-  finishedNodeColor: { default: "#e6f7ed" },
-  erroredNodeColor: { default: "#f9ebeb" },
-  edgeColor: "#999999",
-  highlightColor: "#3867fa",
-  inputEdgeColor: "#000000",
+  backgroundColor: cs.offWhite,
+  notStartedNodeColor: { default: cs.white, textColor: cs.darkGrey },
+  inProgressNodeColor: { default: "#eff2fc", hovered: "#dae1f8" },
+  finishedNodeColor: { default: cs.successBg, hovered: cs.successLight },
+  erroredNodeColor: { default: cs.errorBg, hovered: cs.errorLightest },
+  edgeColor: cs.mediumGrey,
+  highlightColor: cs.primaryLight,
+  inputEdgeColor: cs.black,
   zoomMin: 0.5,
   zoomMax: 3,
   minMouseMoveUpdateDistance: 20,

@@ -2,6 +2,31 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
 
+// Exporting strings to style nodes and edges in vis.js
+:export {
+  // Not started
+  white: $white;
+  darkGrey: $dark-grey;
+
+  // In progress
+
+  // Finished
+  successBg: $success-bg;
+  successLight: $success-light;
+
+  // Errored
+  errorBg: $error-bg;
+  errorLightest: $error-lightest;
+
+  // Stage background color for hidden start and end nodes
+  offWhite: $off-white;
+
+  // Edges
+  mediumGrey: $medium-grey;
+  primaryLight: $primary-light;
+  black: $black;
+}
+
 .pipelineVizPage {
   display: flex;
   flex-direction: column;
@@ -57,8 +82,19 @@
 
   .statusIcon {
     height: 15px;
+    width: 15px;
     fill: $success;
     margin: 2.5px 4px 2.5px 0;
+
+    &.inProgressIcon {
+      fill: $primary-light;
+    }
+    &.erroredIcon {
+      fill: $error;
+    }
+    &.finishedIcon {
+      fill: $success;
+    }
   }
 }
 
@@ -136,6 +172,10 @@
   .closeIcon {
     box-sizing: content-box;
     fill: $light-grey;
+
+    &:hover {
+      fill: $black;
+    }
   }
 }
 
