@@ -318,35 +318,13 @@ class PipelineRun < ApplicationRecord
 
   def create_run_stages
     run_stages = []
-
-    # Host Filtering
-    run_stages << PipelineRunStage.new(
-      step_number: 1,
-      name: PipelineRunStage::HOST_FILTERING_STAGE_NAME,
-      job_command_func: 'host_filtering_command'
-    )
-
-    # Alignment and Merging
-    run_stages << PipelineRunStage.new(
-      step_number: 2,
-      name: PipelineRunStage::ALIGNMENT_STAGE_NAME,
-      job_command_func: 'alignment_command'
-    )
-
-    # Taxon Fastas and Alignment Visualization
-    run_stages << PipelineRunStage.new(
-      step_number: 3,
-      name: PipelineRunStage::POSTPROCESS_STAGE_NAME,
-      job_command_func: 'postprocess_command'
-    )
-
-    # Experimental Stage
-    run_stages << PipelineRunStage.new(
-      step_number: 4,
-      name: PipelineRunStage::EXPT_STAGE_NAME,
-      job_command_func: 'experimental_command'
-    )
-
+    PipelineRunStage::STAGE_INFO.each do |step_number, info|
+      run_stages << PipelineRunStage.new(
+        step_number: step_number,
+        name: info[:name],
+        job_command_func: info[:job_command_func]
+      )
+    end
     self.pipeline_run_stages = run_stages
   end
 
