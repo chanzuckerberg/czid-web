@@ -8,12 +8,13 @@
   position: absolute;
   left: 0;
   right: 0;
-  height: calc(100% - 80px);
+  bottom: 0;
+  height: calc(100% - 50px);
 }
 
 .pipelineVizContainer {
   flex-grow: 1;
-  overflow-y: hidden;
+  overflow-y: scroll;
   overflow-x: visible;
 }
 
@@ -21,7 +22,6 @@
   display: flex;
   justify-content: center;
   align-items: stretch;
-  margin-bottom: 60px;
 }
 
 .stageAndArrow {
@@ -137,13 +137,12 @@
 .panZoomContainer {
   cursor: all-scroll !important;
   display: flex;
-  align-items: center;
   outline: none;
   height: 100%;
-  overflow-x: scroll;
+  // overflow-x: scroll;
   & > div {
     margin: 0 auto;
-    padding: 0 150px;
+    align-self: center;
   }
 }
 
@@ -165,7 +164,7 @@
 .pipelineInfo {
   @include font-body-xxxs;
   color: $medium-grey;
-  margin-top: 14px;
+  margin-top: 24px;
   margin-bottom: 18px;
 }
 
