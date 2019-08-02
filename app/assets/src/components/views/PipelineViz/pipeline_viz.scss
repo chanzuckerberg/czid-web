@@ -137,10 +137,14 @@
 .panZoomContainer {
   cursor: all-scroll !important;
   display: flex;
-  justify-content: center;
   align-items: center;
   outline: none;
   height: 100%;
+  overflow-x: scroll;
+  & > div {
+    margin: 0 auto;
+    padding: 0 150px;
+  }
 }
 
 .plusMinusControl {
