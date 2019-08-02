@@ -56,47 +56,60 @@ class RetrievePipelineVizGraphDataService
       stage_step_statuses = all_step_statuses[stage_index]
       stage_step_descriptions = STEP_DESCRIPTIONS[@stage_names[stage_index]]["steps"]
 
+      all_redefined_statuses = []
       steps = dag_json["steps"].map do |step|
         status_info = stage_step_statuses[step["out"]] || {}
         description = status_info["description"].blank? ? stage_step_descriptions[step["out"]] : status_info["description"]
+        status = redefine_job_status(status_info["status"])
+        all_redefined_statuses << status
         {
           name: modify_step_name(step["out"]),
           description: description,
           inputEdges: [],
           outputEdges: [],
-          status: job_status([status_info["status"]]),
+          status: status,
         }
       end
 
       {
         steps: steps,
-        jobStatus: stage_job_status(stage_step_statuses.values.map { |status| job_status(status) }),
+        jobStatus: stage_job_status(all_redefined_statuses),
       }
     end
     return stages
   end
 
-  def job_status(status)
+  def step_statuses
+    @pipeline_run.pipeline_run_stages.map do |prs|
+      begin
+        JSON.parse(get_s3_file(prs.step_status_file_path) || "{}")
+      rescue JSON::ParserError
+        {}
+      end
+    end
+  end
+
+  def redefine_job_status(status)
     case status
     when "instantiated", nil
-      return "notStarted"
+      "notStarted"
     when "running", "finished_running"
-      return "inProgress"
+      "inProgress"
     when "uploaded"
-      return "finished"
+      "finished"
     when "errored"
-      return "errored"
+      "errored"
     end
   end
 
   def stage_job_status(statuses)
-    if status.include? "errored"
+    if statuses.include? "errored"
       return "errored"
-    elsif statuses.include?("inProgress") || (status.include?("notStarted") && status.include?("finished"))
+    elsif statuses.include?("inProgress") || (statuses.include?("notStarted") && statuses.include?("finished"))
       return "inProgress"
-    elsif status.include? "notStarted"
+    elsif statuses.include? "notStarted"
       return "notStarted"
-    elsif status.include? "finished"
+    elsif statuses.include? "finished"
       return "finished"
     end
   end
@@ -114,16 +127,6 @@ class RetrievePipelineVizGraphDataService
     end
     @remove_host_filtering_urls && remove_host_filtering_urls(edges)
     return edges
-  end
-
-  def step_statuses
-    @pipeline_run.pipeline_run_stages.map do |prs|
-      begin
-        JSON.parse(get_s3_file(prs.step_status_file_path) || "{}")
-      rescue JSON::ParserError
-        {}
-      end
-    end
   end
 
   def input_output_to_file_paths
