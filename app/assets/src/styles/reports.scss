@@ -75,6 +75,30 @@ input[type="number"] {
   tr:not(.report-header):hover {
     background-color: $off-white-blue;
   }
+
+  td {
+    border-bottom: 1px solid $light-grey;
+  }
+
+  tr.report-header th {
+    background-color: $white;
+    position: sticky;
+    top: 0;
+  }
+
+  tr.report-header th:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    border-bottom: 1px solid $light-grey;
+  }
+
+  thead {
+    border: 0;
+    border-image-width: 0;
+  }
 }
 
 .report-table .count-info {
