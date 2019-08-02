@@ -21,6 +21,13 @@
 </p>
 <% end %>
 
+<% if @sample.upload_error %>
+<p>
+  <strong>Upload error:</strong>
+  <strong class="failed"><%= @sample.upload_error %></strong>
+</p>
+<% end %>
+
 <% pipeline_run = @sample.first_pipeline_run %>
 <% if pipeline_run && pipeline_run.completed? %>
   <%= button_to 'rerun from top', kickoff_pipeline_sample_path(@sample), method: :put, form: {target: '_blank'} %>
@@ -47,7 +54,9 @@
               <tr>
 
                 <td> <%= "#{pipeline_run.id} - #{run_stage.name}" %> </td>
-                <td> <%= run_stage.job_status %></td>
+                <td class="<%= run_stage.job_status == "FAILED" ? "failed" : "" %>">
+                  <%= run_stage.job_status %>
+                </td>
                 <td> <%= run_stage.job_id %></td>
                 <td> <u><%= link_to 'Logs', run_stage.log_url, target: :_blank  %></u></td>
                 <td><%= pipeline_run.adjusted_remaining_reads %> &nbsp;</td>
@@ -58,7 +67,7 @@
             <% end %>
             <% if pipeline_run.output_states.present? %>
               <% pipeline_run.output_states.each do |output_state| %>
-                <tr class="complete">
+                <tr>
                     <td>  <%= "#{pipeline_run.id} - Output - #{output_state.output}" %> </td>
                     <td> <%= output_state.state %> </td>
                     <td colspan=4> &nbsp; </td>
