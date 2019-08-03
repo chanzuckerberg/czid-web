@@ -5,25 +5,34 @@ S3_JSON_BUCKET = "idseq-database".freeze
 S3_JSON_PREFIX = "amr/ontology/".freeze
 ONTOLOGY_BUILD_DATE = "2019-06-20".freeze
 
+OQXB_LABEL = "oqxB".freeze
+OQXB_ACCESSION = "3003923".freeze
+OQXB_DESCRIPTION = "RND efflux pump conferring resistance to fluoroquinolone".freeze
+OQXB_GENE_FAMILY_LABEL = "subunit of efflux pump conferring antibiotic resistance".freeze
+OQXB_GENE_FAMILY_DESC = "Subunits of efflux proteins that pump antibiotic out of a cell to confer resistance.".freeze
+OQXB_DRUG_CLASS_LABEL = "Fluroquinolones".freeze
+OQXB_DRUG_CLASS_DESC = "The fluoroquinolones are a family of synthetic broad-spectrum antibiotics that are 4-quinolone-3-carboxylates. These compounds interact with topoisomerase II (DNA gyrase) to disrupt bacterial DNA replication, damage DNA, and cause cell death.".freeze
+OQXB_PUBLICATION = "Kim HB1, Wang M, Park CH, Kim EC, Jacoby GA, Hooper DC. oqxAB encoding a multidrug efflux pump in human clinical isolates of Enterobacteriaceae. (PMID 19528276)".freeze
+
 OQXB_ONTOLOGY = {
-  "accession" => "3003923",
-  "label" => "oqxB",
+  "accession" => OQXB_ACCESSION,
+  "label" => OQXB_LABEL,
   "synonyms" => [
 
   ],
-  "description" => "RND efflux pump conferring resistance to fluoroquinolone",
+  "description" => OQXB_DESCRIPTION,
   "geneFamily" => [
     {
-      "label" => "subunit of efflux pump conferring antibiotic resistance",
-      "description" => "Subunits of efflux proteins that pump antibiotic out of a cell to confer resistance.",
+      "label" => OQXB_GENE_FAMILY_LABEL,
+      "description" => OQXB_GENE_FAMILY_DESC,
     },
   ],
   "drugClass" => {
-    "label" => "Fluroquinolones",
-    "description" => "The fluoroquinolones are a family of synthetic broad-spectrum antibiotics that are 4-quinolone-3-carboxylates. These compounds interact with topoisomerase II (DNA gyrase) to disrupt bacterial DNA replication, damage DNA, and cause cell death.",
+    "label" => OQXB_DRUG_CLASS_LABEL,
+    "description" => OQXB_DRUG_CLASS_DESC,
   },
   "publications" => [
-    "Kim HB1, Wang M, Park CH, Kim EC, Jacoby GA, Hooper DC. oqxAB encoding a multidrug efflux pump in human clinical isolates of Enterobacteriaceae. (PMID 19528276)",
+    OQXB_PUBLICATION,
   ],
   "error" => "",
 }.freeze
@@ -282,6 +291,9 @@ RSpec.describe AmrHeatmapController, type: :controller do
       end
       context "when a matching gene name is found" do
         before do
+          # The comma is added to emulate the JSON delimiter between entries.
+          # Although in this instance we are only returning one entry,
+          # S3 always adds the comma at the end.
           allow(S3Util).to receive(:s3_select_json).and_return(OQXB_ONTOLOGY.to_json + ",")
         end
 
@@ -291,24 +303,24 @@ RSpec.describe AmrHeatmapController, type: :controller do
           expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           expect(json_response).to include_json(
-            label: "oqxB",
-            accession: "3003923",
-            description: "RND efflux pump conferring resistance to fluoroquinolone",
+            label: OQXB_LABEL,
+            accession: OQXB_ACCESSION,
+            description: OQXB_DESCRIPTION,
             synonyms: [
 
             ],
             publications: [
-              "Kim HB1, Wang M, Park CH, Kim EC, Jacoby GA, Hooper DC. oqxAB encoding a multidrug efflux pump in human clinical isolates of Enterobacteriaceae. (PMID 19528276)",
+              OQXB_PUBLICATION,
             ],
             geneFamily: [
               {
-                label: "subunit of efflux pump conferring antibiotic resistance",
-                description: "Subunits of efflux proteins that pump antibiotic out of a cell to confer resistance.",
+                label: OQXB_GENE_FAMILY_LABEL,
+                description: OQXB_GENE_FAMILY_DESC,
               },
             ],
             drugClass: {
-              label: "Fluroquinolones",
-              description: "The fluoroquinolones are a family of synthetic broad-spectrum antibiotics that are 4-quinolone-3-carboxylates. These compounds interact with topoisomerase II (DNA gyrase) to disrupt bacterial DNA replication, damage DNA, and cause cell death.",
+              label: OQXB_DRUG_CLASS_LABEL,
+              description: OQXB_DRUG_CLASS_DESC,
             },
             error: ""
           )

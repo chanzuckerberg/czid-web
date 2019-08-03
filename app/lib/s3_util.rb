@@ -1,6 +1,7 @@
 require "aws-sdk-s3"
 
 module S3Util
+  # select a particular part of a JSON file using Amazon S3 Select SQL syntax
   def self.s3_select_json(bucket, key, expression)
     s3_select_params = {
       bucket: bucket,
@@ -29,7 +30,7 @@ module S3Util
     rescue Aws::S3::Errors => e
       Rails.logger.error("Error retrieving entry #{expression} from #{bucket}/#{key} from s3")
       Rails.logger.error(e.message)
-      return []
+      return ""
     end
     return entry.join
   end
