@@ -1,10 +1,7 @@
-DEFAULT_S3_REGION = "us-west-2".freeze
-
 require "aws-sdk-s3"
 
 module S3Util
-  def s3_select_json(bucket, key, expression)
-    s3_select_client = Aws::S3::Client.new(region: DEFAULT_S3_REGION)
+  def self.s3_select_json(bucket, key, expression)
     s3_select_params = {
       bucket: bucket,
       key: key,
@@ -24,7 +21,8 @@ module S3Util
 
     entry = []
     begin
-      s3_select_client.select_object_content(s3_select_params) do |stream|
+      S3_CLIENT.select_object_content(s3_select_params) do |stream|
+        Rails.logger.info(stream)
         stream.on_records_event do |event|
           entry.push(event.payload.read)
         end
@@ -34,7 +32,6 @@ module S3Util
       Rails.logger.error(e.message)
       return []
     end
-    return entry
+    return entry.join
   end
-  module_function :s3_select_json
 end

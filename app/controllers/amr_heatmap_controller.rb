@@ -1,13 +1,11 @@
 URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/".freeze
 S3_JSON_BUCKET = "idseq-database".freeze
 S3_JSON_PREFIX = "amr/ontology/".freeze
-DEFAULT_S3_REGION = "us-west-2".freeze
 
 class AmrHeatmapController < ApplicationController
   include S3Util
 
   before_action :admin_required
-  before_action :set_aws_client, only: [:fetch_ontology]
 
   def index
     @sample_ids = params[:sampleIds].map(&:to_i)
@@ -96,25 +94,21 @@ class AmrHeatmapController < ApplicationController
 
   private
 
-  def set_aws_client
-    @client = Aws::S3::Client.new(region: DEFAULT_S3_REGION)
-  end
-
   def fetch_current_ontology_file_key
-    ontology_folder = @client.list_objects_v2(bucket: S3_JSON_BUCKET,
-                                              prefix: S3_JSON_PREFIX).to_h
+    ontology_folder = S3_CLIENT.list_objects_v2(bucket: S3_JSON_BUCKET,
+                                                prefix: S3_JSON_PREFIX).to_h
+    Rails.logger.info(ontology_folder)
     target_key = ontology_folder[:contents][-1][:key] # contents already sorted by key
     return target_key
   end
 
   def fetch_ontology_entry(s3_key, gene_name)
     sql_expression = "SELECT * FROM S3Object[*].#{gene_name.dump} LIMIT 1"
-    entry = s3_select_json(S3_JSON_BUCKET, s3_key, sql_expression)
-    whole_entry = entry.join.chomp(",")
-    Rails.logger.info(whole_entry)
+    entry = S3Util.s3_select_json(S3_JSON_BUCKET, s3_key, sql_expression)
+    trimmed_entry = entry.chomp(",")
     ontology = {}
     begin
-      ontology = JSON.parse(whole_entry)
+      ontology = JSON.parse(trimmed_entry)
     rescue JSON::ParserError => e
       Rails.logger.error(e.message)
       return {}

@@ -1,4 +1,32 @@
 require 'rails_helper'
+require 'webmock/rspec'
+
+S3_JSON_BUCKET = "idseq-database".freeze
+S3_JSON_PREFIX = "amr/ontology/".freeze
+ONTOLOGY_BUILD_DATE = "2019-06-20".freeze
+
+OQXB_ONTOLOGY = {
+  "accession" => "3003923",
+  "label" => "oqxB",
+  "synonyms" => [
+
+  ],
+  "description" => "RND efflux pump conferring resistance to fluoroquinolone",
+  "geneFamily" => [
+    {
+      "label" => "subunit of efflux pump conferring antibiotic resistance",
+      "description" => "Subunits of efflux proteins that pump antibiotic out of a cell to confer resistance.",
+    },
+  ],
+  "drugClass" => {
+    "label" => "Fluroquinolones",
+    "description" => "The fluoroquinolones are a family of synthetic broad-spectrum antibiotics that are 4-quinolone-3-carboxylates. These compounds interact with topoisomerase II (DNA gyrase) to disrupt bacterial DNA replication, damage DNA, and cause cell death.",
+  },
+  "publications" => [
+    "Kim HB1, Wang M, Park CH, Kim EC, Jacoby GA, Hooper DC. oqxAB encoding a multidrug efflux pump in human clinical isolates of Enterobacteriaceae. (PMID 19528276)",
+  ],
+  "error" => "",
+}.freeze
 
 RSpec.describe AmrHeatmapController, type: :controller do
   create_users
@@ -229,46 +257,79 @@ RSpec.describe AmrHeatmapController, type: :controller do
       end
     end
 
-    describe "GET CARD entry information" do
-      it "should return relevant information from the CARD Ontology database" do
-        get :fetch_ontology, params: { geneName: "OqxB" }
-        expect(response.content_type).to eq("application/json")
-        expect(response).to have_http_status(:ok)
+    describe "GET ontology information" do
+      before do
+        s3 = Aws::S3::Client.new(stub_responses: true)
+        s3.stub_responses(:list_objects_v2, lambda { |context|
+          return {
+            is_truncated: false,
+            contents: [
+              {
+                key: "amr/ontology/#{ONTOLOGY_BUILD_DATE}/aro.json",
+                last_modified: Time.new(2019, 0o6, 20, 18, 30, 0, "-07:00"),
+                etag: "\"d70a48922d199eb2dd1ea1186c8998df\"",
+                size: 2_820_541,
+                storage_class: "STANDARD",
+              },
+            ],
+            name: context.params[:bucket].to_s,
+            prefix: context.params[:prefix].to_s,
+            max_keys: 1000,
+            key_count: 1,
+          }
+        })
+        stub_const("S3_CLIENT", s3)
+      end
+      context "when a matching gene name is found" do
+        before do
+          allow(S3Util).to receive(:s3_select_json).and_return(OQXB_ONTOLOGY.to_json + ",")
+        end
 
-        json_response = JSON.parse(response.body)
-        expect(json_response).to include_json(
-          label: "oqxB",
-          accession: "3003923",
-          description: "RND efflux pump conferring resistance to fluoroquinolone",
-          synonyms: [
+        it "should return relevant information from the Ontology JSON stored on s3" do
+          get :fetch_ontology, params: { geneName: "OqxB" }
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          expect(json_response).to include_json(
+            label: "oqxB",
+            accession: "3003923",
+            description: "RND efflux pump conferring resistance to fluoroquinolone",
+            synonyms: [
 
-          ],
-          publications: [
-            "Kim HB1, Wang M, Park CH, Kim EC, Jacoby GA, Hooper DC. oqxAB encoding a multidrug efflux pump in human clinical isolates of Enterobacteriaceae. (PMID 19528276)",
-          ],
-          geneFamily: [
-            {
-              label: "subunit of efflux pump conferring antibiotic resistance",
-              description: "Subunits of efflux proteins that pump antibiotic out of a cell to confer resistance.",
+            ],
+            publications: [
+              "Kim HB1, Wang M, Park CH, Kim EC, Jacoby GA, Hooper DC. oqxAB encoding a multidrug efflux pump in human clinical isolates of Enterobacteriaceae. (PMID 19528276)",
+            ],
+            geneFamily: [
+              {
+                label: "subunit of efflux pump conferring antibiotic resistance",
+                description: "Subunits of efflux proteins that pump antibiotic out of a cell to confer resistance.",
+              },
+            ],
+            drugClass: {
+              label: "Fluroquinolones",
+              description: "The fluoroquinolones are a family of synthetic broad-spectrum antibiotics that are 4-quinolone-3-carboxylates. These compounds interact with topoisomerase II (DNA gyrase) to disrupt bacterial DNA replication, damage DNA, and cause cell death.",
             },
-          ],
-          drugClass: {
-            label: "Fluroquinolones",
-            description: "The fluoroquinolones are a family of synthetic broad-spectrum antibiotics that are 4-quinolone-3-carboxylates. These compounds interact with topoisomerase II (DNA gyrase) to disrupt bacterial DNA replication, damage DNA, and cause cell death.",
-          },
-          error: ""
-        )
+            error: ""
+          )
+        end
       end
 
-      it "should return an ontology object with an error message if no match is found" do
-        get :fetch_ontology, params: { geneName: "ImNotInCard" }
-        expect(response.content_type).to eq("application/json")
-        expect(response).to have_http_status(:ok)
+      context "when no matching gene is found" do
+        before do
+          allow(S3Util).to receive(:s3_select_json).and_return("")
+        end
 
-        json_response = JSON.parse(response.body)
-        expect(json_response).to include_json(
-          error: "No data for ImNotInCard."
-        )
+        it "should return an ontology object with an error message if no match is found" do
+          get :fetch_ontology, params: { geneName: "ImNotInCard" }
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+
+          json_response = JSON.parse(response.body)
+          expect(json_response).to include_json(
+            error: "No data for ImNotInCard."
+          )
+        end
       end
     end
   end
