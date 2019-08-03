@@ -95,12 +95,14 @@
 .stageNameAndIcon {
   display: flex;
   align-items: center;
+  height: 20px;
 
-  .statusIcon {
+  .inProgressIcon,
+  .erroredIcon,
+  .finishedIcon,
+  .noIcon {
     height: 15px;
     width: 15px;
-    fill: $success;
-    margin: 2.5px 4px 2.5px 0;
   }
 
   .inProgressIcon {
@@ -118,6 +120,10 @@
   }
   .noIcon {
     margin: 2.5px 0;
+  }
+
+  .stageName {
+    margin: 2.5px 0 2.5px 4px;
   }
 }
 

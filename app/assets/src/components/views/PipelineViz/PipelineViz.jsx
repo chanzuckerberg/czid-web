@@ -19,6 +19,13 @@ import { inverseTransformDOMCoordinates } from "./utils";
 const START_NODE_ID = -1;
 const END_NODE_ID = -2;
 
+const STATUS_TO_ICON = {
+  notStarted: <span className={cs.noIcon} />,
+  inProgress: <LoadingIcon className={cs.inProgressIcon} />,
+  finished: <CircleCheckmarkIcon className={cs.finishedIcon} />,
+  errored: <InfoCircleIcon className={cs.erroredIcon} />,
+};
+
 class PipelineViz extends React.Component {
   constructor(props) {
     super(props);
@@ -377,28 +384,7 @@ class PipelineViz extends React.Component {
   }
 
   getNodeStatusOptions(status, hovered = false) {
-    const {
-      notStartedNodeColor,
-      inProgressNodeColor,
-      finishedNodeColor,
-      erroredNodeColor,
-    } = this.props;
-    let options;
-    switch (status) {
-      case "notStarted":
-        options = notStartedNodeColor;
-        break;
-      case "inProgress":
-        options = inProgressNodeColor;
-        break;
-      case "finished":
-        options = finishedNodeColor;
-        break;
-      case "errored":
-        options = erroredNodeColor;
-        break;
-    }
-
+    const options = this.props[`${status}NodeColor`];
     const backgroundColor =
       hovered && options.hovered ? options.hovered : options.default;
     const textColor = options.textColor;
@@ -712,34 +698,12 @@ class PipelineViz extends React.Component {
     // Stages without dag_json recorded are not toggleable
     const toggleable = i < stages.length;
     const jobStatus = toggleable ? stages[i].jobStatus : "notStarted";
-
-    let statusIcon;
-    switch (jobStatus) {
-      case "inProgress":
-        statusIcon = (
-          <span className={cs.statusIcon}>
-            <LoadingIcon className={cs.inProgressIcon} />
-          </span>
-        );
-        break;
-      case "finished":
-        statusIcon = (
-          <CircleCheckmarkIcon className={cx(cs.statusIcon, cs.finishedIcon)} />
-        );
-        break;
-      case "errored":
-        statusIcon = (
-          <InfoCircleIcon className={cx(cs.statusIcon, cs.erroredIcon)} />
-        );
-        break;
-      default:
-        statusIcon = <span className={cx(cs.statusIcon, cs.noIcon)} />;
-    }
+    const statusIcon = STATUS_TO_ICON[jobStatus];
 
     const stageNameAndIcon = (
       <span className={cs.stageNameAndIcon}>
         {statusIcon}
-        {stageName}
+        <span className={cs.stageName}>{stageName}</span>
       </span>
     );
 
