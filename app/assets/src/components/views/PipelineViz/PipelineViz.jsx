@@ -720,6 +720,16 @@ class PipelineViz extends React.Component {
     );
   }
 
+  handleZoom = isIn => {
+    return () => {
+      if (this.panZoomContainer && this.panZoomContainer.current) {
+        isIn
+          ? this.panZoomContainer.current.zoomIn(3)
+          : this.panZoomContainer.current.zoomOut(3);
+      }
+    };
+  };
+
   render() {
     const {
       zoomMin,
@@ -763,8 +773,8 @@ class PipelineViz extends React.Component {
             <div className={cs.pipelineViz}>{stageContainers}</div>
           </PanZoom>
           <PlusMinusControl
-            onPlusClick={((this.panZoomContainer || {}).current || {}).zoomIn}
-            onMinusClick={((this.panZoomContainer || {}).current || {}).zoomOut}
+            onPlusClick={this.handleZoom(true)}
+            onMinusClick={this.handleZoom(false)}
             className={cs.plusMinusControl}
           />
         </div>
