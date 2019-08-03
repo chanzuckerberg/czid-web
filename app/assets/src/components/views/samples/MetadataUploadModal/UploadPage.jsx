@@ -77,6 +77,7 @@ class UploadPage extends React.Component {
           onMetadataChange={this.handleMetadataChange}
           onShowCSVInstructions={this.showInstructions}
           issues={this.state.wasManual ? this.state.issues : null}
+          metadata={this.state.metadata}
           withinModal
         />
       </div>

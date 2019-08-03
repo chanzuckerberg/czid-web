@@ -332,7 +332,7 @@ class SampleView extends React.Component {
       case "LOCAL_UPLOAD_STALLED":
         status = "INCOMPLETE - ISSUE";
         message =
-          "It tooks like it is taking a long time to upload your sample file.";
+          "It looks like it is taking a long time to upload your sample file.";
         linkText = "Contact us for help.";
         issueType = "warning";
         link = "mailto:help@idseq.net";
