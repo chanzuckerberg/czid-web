@@ -22,6 +22,51 @@
   word-break: break-all;
 }
 
+.statusBox {
+  padding: 12px;
+  display: flex;
+  border-radius: 4px;
+  margin-bottom: 16px;
+
+  .statusIcon {
+    height: 20px;
+    width: 20px;
+    margin-top: 4px;
+  }
+
+  .statusText {
+    margin-left: 12px;
+  }
+
+  .statusTitle {
+    @include font-header-s;
+  }
+
+  .statusDescription {
+    @include font-body-xxs;
+  }
+
+  &.inProgress {
+    background-color: $primary-lightest;
+
+    .statusIcon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $primary-light;
+      font-size: 20px;
+    }
+  }
+
+  &.errored {
+    background-color: $error-bg;
+
+    .statusIcon {
+      fill: $error;
+    }
+  }
+}
+
 .title {
   @include font-header-accordion;
   height: 40px;

@@ -2,10 +2,7 @@ import React from "react";
 import cx from "classnames";
 import { PanZoom } from "react-easy-panzoom";
 
-import CircleCheckmarkIcon from "~/components/ui/icons/CircleCheckmarkIcon";
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
-import InfoCircleIcon from "~/components/ui/icons/InfoCircleIcon";
-import LoadingIcon from "~/components/ui/icons/LoadingIcon";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
@@ -14,18 +11,11 @@ import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 
 import cs from "./pipeline_viz.scss";
 import PipelineVizHeader from "./PipelineVizHeader";
+import PipelineVizStatusIcon from "./PipelineVizStatusIcon";
 import { inverseTransformDOMCoordinates } from "./utils";
 
 const START_NODE_ID = -1;
 const END_NODE_ID = -2;
-
-const STATUS_TO_ICON = {
-  notStarted: <span className={cs.noIcon} />,
-  inProgress: <LoadingIcon className={cs.inProgressIcon} />,
-  finished: <CircleCheckmarkIcon className={cs.finishedIcon} />,
-  errored: <InfoCircleIcon className={cs.erroredIcon} />,
-};
-
 class PipelineViz extends React.Component {
   constructor(props) {
     super(props);
@@ -168,6 +158,8 @@ class PipelineViz extends React.Component {
         description: stepInfo.description,
         inputFiles: inputInfo,
         outputFiles: outputInfo,
+        status: stepInfo.status,
+        startTime: stepInfo.startTime,
       },
     });
   }
@@ -698,11 +690,10 @@ class PipelineViz extends React.Component {
     // Stages without dag_json recorded are not toggleable
     const toggleable = i < stages.length;
     const jobStatus = toggleable ? stages[i].jobStatus : "notStarted";
-    const statusIcon = STATUS_TO_ICON[jobStatus];
 
     const stageNameAndIcon = (
       <span className={cs.stageNameAndIcon}>
-        {statusIcon}
+        <PipelineVizStatusIcon type={jobStatus} />
         <span className={cs.stageName}>{stageName}</span>
       </span>
     );

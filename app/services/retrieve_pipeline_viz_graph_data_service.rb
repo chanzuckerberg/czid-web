@@ -68,6 +68,7 @@ class RetrievePipelineVizGraphDataService
           inputEdges: [],
           outputEdges: [],
           status: status,
+          startTime: status_info["start_time"],
         }
       end
 

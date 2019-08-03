@@ -1,12 +1,45 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
+import moment from "moment";
 
 import { openUrl } from "~utils/links";
 import { Accordion } from "~/components/layout";
+import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
+
 import cs from "./pipeline_step_details_mode.scss";
 
 class PipelineStepDetailsMode extends React.Component {
+  renderStatusBox() {
+    const { status, startTime } = this.props;
+    let statusTitle, statusDescription;
+    switch (status) {
+      case "inProgress":
+        statusTitle = "Current step";
+        statusDescription = `Running for ${moment(
+          Math.floor(startTime * 1000)
+        ).fromNow(true)}`;
+        break;
+      case "errored":
+        statusTitle = "Sample failed at this step.";
+        statusDescription =
+          "Please upload again or reach out to help@idseq.com.";
+        break;
+      default:
+        return;
+    }
+
+    return (
+      <div className={cx(cs.statusBox, cs[status])}>
+        <PipelineVizStatusIcon type={status} className={cs.statusIcon} />
+        <div className={cs.statusText}>
+          <div className={cs.statusTitle}>{statusTitle}</div>
+          <div className={cs.statusDescription}>{statusDescription}</div>
+        </div>
+      </div>
+    );
+  }
+
   renderStepInfo() {
     const { description } = this.props;
     if (description) {
@@ -88,6 +121,7 @@ class PipelineStepDetailsMode extends React.Component {
     return (
       <div className={cs.content}>
         <div className={cs.stepName}>{stepName}</div>
+        {this.renderStatusBox()}
         {this.renderStepInfo()}
         {this.renderInputFiles()}
         {this.renderOutputFiles()}
@@ -113,6 +147,8 @@ PipelineStepDetailsMode.propTypes = {
     }).isRequired
   ).isRequired,
   outputFiles: FileList.isRequired,
+  status: PropTypes.string,
+  startTime: PropTypes.number,
 };
 
 export default PipelineStepDetailsMode;
