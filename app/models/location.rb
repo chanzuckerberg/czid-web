@@ -46,7 +46,9 @@ class Location < ApplicationRecord
     resp = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
       http.request(request)
     end
-    [resp.is_a?(Net::HTTPSuccess), JSON.parse(resp.body)]
+    # Successful request with 0 results will return HTTPNotFound
+    success = resp.is_a?(Net::HTTPSuccess) || resp.is_a?(Net::HTTPNotFound)
+    [success, JSON.parse(resp.body)]
   end
 
   # Search request to Location IQ API by freeform query
