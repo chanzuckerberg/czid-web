@@ -17,7 +17,7 @@ class PipelineStepDetailsMode extends React.Component {
       case "inProgress":
         statusTitle = "Current step";
         statusDescription = `Running for ${moment(
-          Math.floor(startTime * 1000)
+          Math.floor(startTime * 1000) // Convert seconds to milliseconds
         ).fromNow(true)}`;
         break;
       case "errored":
