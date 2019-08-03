@@ -765,9 +765,6 @@ class PipelineViz extends React.Component {
             maxZoom={zoomMax}
             zoomSpeed={3}
             disableScrollZoom={true}
-            enableBoundingBox
-            boundaryRatioHorizontal={0.9}
-            boundaryRatioVertical={0.9}
             ref={this.panZoomContainer}
           >
             <div className={cs.pipelineViz}>{stageContainers}</div>

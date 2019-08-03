@@ -14,8 +14,26 @@
 
 .pipelineVizContainer {
   flex-grow: 1;
-  overflow-y: scroll;
-  overflow-x: visible;
+  position: relative;
+}
+
+.panZoomContainer {
+  display: flex;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: scroll;
+  cursor: all-scroll !important;
+  outline: none;
+  & > div {
+    margin: 0 auto;
+    align-self: stretch;
+    display: flex !important; /* Override existing library styling */
+    align-items: center;
+    padding: 150px;
+  }
 }
 
 .pipelineViz {
@@ -132,18 +150,6 @@
   font-weight: $font-weight-bold;
   position: relative;
   height: 100%;
-}
-
-.panZoomContainer {
-  cursor: all-scroll !important;
-  display: flex;
-  outline: none;
-  height: 100%;
-  // overflow-x: scroll;
-  & > div {
-    margin: 0 auto;
-    align-self: center;
-  }
 }
 
 .plusMinusControl {
