@@ -97,7 +97,6 @@ class AmrHeatmapController < ApplicationController
   def fetch_current_ontology_file_key
     ontology_folder = S3_CLIENT.list_objects_v2(bucket: S3_JSON_BUCKET,
                                                 prefix: S3_JSON_PREFIX).to_h
-    Rails.logger.info(ontology_folder)
     target_key = ontology_folder[:contents][-1][:key] # contents already sorted by key
     return target_key
   end

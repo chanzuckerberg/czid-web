@@ -22,7 +22,6 @@ module S3Util
     entry = []
     begin
       S3_CLIENT.select_object_content(s3_select_params) do |stream|
-        Rails.logger.info(stream)
         stream.on_records_event do |event|
           entry.push(event.payload.read)
         end
