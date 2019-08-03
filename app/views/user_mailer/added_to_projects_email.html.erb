@@ -1,1 +1,3 @@
-<p><%= @sharing_user.name %> (<%= @sharing_user.email %>) has invited you to IDseq project <b><%= @shared_project_name %>.</p>
+<p><%= @sharing_user.name %> (<%= @sharing_user.email %>) has invited you to IDseq project
+  <b><a href="https://idseq.net/my_data?projectId=<%=(@shared_project_id)%>"><%= @shared_project_name %></a></b>
+</p>
