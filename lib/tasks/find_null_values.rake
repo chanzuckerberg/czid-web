@@ -6,14 +6,14 @@ task 'find_cols_that_have_nulls', [:max_per_model, :only_presence_true] => :envi
   Rails.application.eager_load!
   models = ApplicationRecord.descendants
 
-  args.with_defaults(max_per_model: 100000)
+  args.with_defaults(max_per_model: 1_000_000)
   args.with_defaults(only_presence_true: true)
 
   models.each do |model|
     puts "\nFinding #{model} cols that have NULL values ..."
     cols = cols_that_have_nulls(model, args.max_per_model)
     unless cols.empty?
-      puts "Model #{model.name} has NULLs in #{args.only_presence_true ? "presence: true" : ""} columns: #{JSON.pretty_generate(cols)}"
+      puts "Model #{model.name} has NULLs in #{args.only_presence_true ? 'presence: true' : ''} columns: #{JSON.pretty_generate(cols)}"
     end
     puts get_total_message(args.max_per_model, model)
   end
