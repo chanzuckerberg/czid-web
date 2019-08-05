@@ -7,12 +7,12 @@ task 'find_cols_that_have_nulls', [:max_per_model, :only_presence_true] => :envi
   models = ApplicationRecord.descendants
 
   args.with_defaults(max_per_model: 1_000_000)
-  args.with_defaults(only_presence_true: true)
+  args.with_defaults(only_presence_true: false)
 
   models.each do |model|
-    puts "\nFinding #{model} cols that have NULL values ..."
-    cols = cols_that_have_nulls(model, args.max_per_model)
-    unless cols.empty?
+    # puts "\nFinding #{model} cols that have NULL values ..."
+    cols = cols_that_have_nulls(model, args.max_per_model, args.only_presence_true)
+    unless cols.values.sum.zero?
       puts "Model #{model.name} has NULLs in #{args.only_presence_true ? 'presence: true' : ''} columns: #{JSON.pretty_generate(cols)}"
     end
     puts get_total_message(args.max_per_model, model)
@@ -27,7 +27,7 @@ def cols_that_have_presence(model)
   cols
 end
 
-def cols_that_have_nulls(model, max_per_model, only_presence_true = true)
+def cols_that_have_nulls(model, max_per_model, only_presence_true)
   cols = if only_presence_true
            cols_that_have_presence(model)
          else
@@ -35,14 +35,21 @@ def cols_that_have_nulls(model, max_per_model, only_presence_true = true)
          end
   counts = cols.select(&:null).map do |col|
     sql = "
-      SELECT COUNT(*) AS c FROM #{model.table_name}
-      WHERE `#{col.name}` IS NULL
-        AND id > (SELECT MAX(id) - #{max_per_model} FROM #{model.table_name})
+      SELECT COUNT(*) AS t,
+        SUM(IF(`#{col.name}` IS NULL, 1, 0)) AS c,
+        MAX(IF(`#{col.name}` IS NOT NULL, created_at, NULL)) AS d
+        FROM #{model.table_name}
+        WHERE id > (SELECT MAX(id) - #{max_per_model} FROM #{model.table_name})
     "
-    count = ActiveRecord::Base.connection.execute(sql).to_a[0][0]
-    [col.name, count.to_f / max_per_model]
+    total, count, date = ActiveRecord::Base.connection.execute(sql).to_a[0]
+    begin
+      last = date.to_date
+    rescue
+      last = nil
+    end
+    ["#{col.name}, #{last}", (count.to_f / total).round(2)]
   end
-  counts.compact.to_h
+  counts.compact.sort_by { |row| row[1] }.to_h
 end
 
 def get_total_message(max_per_model, model)
