@@ -19,14 +19,14 @@ class LocationsController < ApplicationController
     if query.present?
       success, resp = Location.geosearch(query, limit)
       if success && resp.is_a?(Array)
+        # Successful request with results. Just keep the first if you get duplicate locations.
         results = resp.map { |r| LocationHelper.adapt_location_iq_response(r) }
-        # Just keep the first if you get duplicate locations
         results = results.uniq { |r| [r[:name], r[:geo_level]] }
-      elsif success && resp.is_a?(Hash) && resp["error"].present? && resp["error"] == "Unable to geocode"
-        # Successful but 0 results
+      elsif success && resp.is_a?(Hash) && resp["error"] == "Unable to geocode"
+        # Successful request but 0 results
         Rails.logger.info("No geosearch results for: #{query}")
       else
-        # Likely Net::HTTPTooManyRequests. Monitor if users run up against geosearch API rate limits.
+        # Unsuccessful request. Likely Net::HTTPTooManyRequests. Monitor if users run up against geosearch API rate limits.
         msg = "Geosearch failed. Check API rate limits."
         LogUtil.log_err_and_airbrake(msg)
         raise msg
