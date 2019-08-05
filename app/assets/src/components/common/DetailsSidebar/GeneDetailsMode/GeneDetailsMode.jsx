@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { getCARDInfo } from "~/api/amr";
+import { getOntology } from "~/api/amr";
 import StringHelper from "~/helpers/StringHelper";
 
 import cs from "./gene_details_mode.scss";
@@ -63,9 +63,8 @@ export default class GeneDetailsMode extends React.Component {
   }
 
   async getGeneInfo(geneName) {
-    const ontology = await getCARDInfo(geneName);
+    const ontology = await getOntology(geneName);
     const cardEntryFound = ontology.error !== "" ? false : true;
-
     this.setState({
       ontology,
       loading: false,
@@ -191,11 +190,11 @@ export default class GeneDetailsMode extends React.Component {
                 </div>
               </div>
             )}
-            {drugClass.length > 0 && (
+            {drugClass && (
               <div>
                 <div className={cs.subtitle}>{CARD_RESISTANCES}</div>
                 <div className={cs.text}>
-                  {this.renderPropertyList(drugClass)}
+                  {this.renderPropertyList([drugClass])}
                 </div>
               </div>
             )}
