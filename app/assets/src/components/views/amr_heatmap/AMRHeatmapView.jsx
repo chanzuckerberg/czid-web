@@ -247,10 +247,10 @@ export default class AMRHeatmapView extends React.Component {
       <ViewHeader className={cs.viewHeader}>
         <ViewHeader.Content>
           <ViewHeader.Pretitle>
-            Antimicrobial Resistance Heatmap
+            {`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
           </ViewHeader.Pretitle>
           <ViewHeader.Title
-            label={`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
+            label={"Antimicrobial Resistance Heatmap"}
           />
         </ViewHeader.Content>
         {!loading && (
