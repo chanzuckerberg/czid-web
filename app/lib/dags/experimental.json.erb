@@ -105,14 +105,10 @@
       "out": "srst2_out",
       "class": "PipelineStepRunSRST2",
       "module": "idseq_dag.steps.run_srst2",
-      <% if attribute_dict[:pipeline_version].to_f >= 3.8 %>
       "additional_files": {
         "resist_gene_db": "s3://idseq-database/test/AMR/ARGannot_r2.fasta",
         "resist_genome_bed": "s3://idseq-database/test/AMR/argannot_genome.bed"
       },
-      <% else %>
-      "additional_files": {"resist_gene_db": "s3://idseq-database/amr/ARGannot_r2.fasta"},
-      <% end %>
       "additional_attributes": {
         "min_cov": 0,
         "n_threads": 16,
