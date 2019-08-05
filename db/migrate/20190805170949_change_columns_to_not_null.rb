@@ -1,3 +1,7 @@
+# TODO: (gdingle): also do junction tables
+# TODO: (gdingle): also do tables that have cols thta are all NOT NULL
+# TODO: (gdingle): change to presence true for all cols as well?
+
 class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
   def change
     change_column_null :pipeline_run_stages, :pipeline_run_id, false
@@ -36,7 +40,10 @@ class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
     change_column_null :output_states, :pipeline_run_id, false
 
     change_column_null :pipeline_runs, :sample_id, false
-    change_column_null :pipeline_runs, :job_status, false
+
+    # TODO: (gdingle): fix me
+    # change_column_null :pipeline_runs, :job_status, false
+
     change_column_null :pipeline_runs, :results_finalized, false
     change_column_null :pipeline_runs, :alignment_config_id, false
     change_column_null :pipeline_runs, :alert_sent, false
@@ -79,11 +86,11 @@ class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
     change_column_null :phylo_trees, :user_id, false
     change_column_null :phylo_trees, :project_id, false
     change_column_null :phylo_trees, :status, false
-    change_column_null :phylo_trees, :dag_json, false
-    change_column_null :phylo_trees, :command_stdout, false
-    change_column_null :phylo_trees, :command_stderr, false
-    change_column_null :phylo_trees, :job_id, false
     change_column_null :phylo_trees, :name, false
+    change_table_comment :phylo_trees, :dag_json, "Populated after phylo_tree pipeline kickoff"
+    change_table_comment :phylo_trees, :command_stdout, "Populated after phylo_tree pipeline kickoff"
+    change_table_comment :phylo_trees, :command_stderr, "Populated after phylo_tree pipeline kickoff"
+    change_table_comment :phylo_trees, :job_id, "Populated after phylo_tree pipeline kickoff"
 
     change_column_null :samples, :name, false
     change_column_null :samples, :project_id, false
