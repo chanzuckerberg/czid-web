@@ -84,9 +84,6 @@ gem 'redis-rails', '~> 5'
 gem 'actionpack-action_caching'
 gem 'nokogiri'
 
-# For adding foreign key constraints
-gem 'immigrant'
-
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'bundler-audit'
@@ -107,6 +104,10 @@ group :development do
   gem 'listen', '>= 3.0.5', '< 3.2'
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
   gem 'web-console', '>= 3.5.1'
+  # For adding foreign key constraints
+  gem 'immigrant'
+  # For adding comments to columns in migrations
+  gem 'migration_comments'
 end
 
 group :test do

@@ -1,6 +1,7 @@
 # TODO: (gdingle): also do junction tables
 # TODO: (gdingle): also do tables that have cols thta are all NOT NULL
 # TODO: (gdingle): change to presence true for all cols as well?
+# TODO: (gdingle):  before_create :create_output_states, :create_run_stages, unless: :results_finalized?
 
 class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
   def change
@@ -35,15 +36,16 @@ class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
     change_column_null :metadata_fields, :is_default, false
     change_column_null :metadata_fields, :is_required, false
     change_column_null :metadata_fields, :default_for_new_host_genome, false
+    set_column_comment :metadata_fields, :example,
+                       "Examples are used on the metadata dictionary page. They list some
+                 examples of what the user should enter for the field."
+    set_column_comment :metadata_fields, :options, "For some metadata fields, the user is only allowed to input certain values. The
+options field lists what these values are. This won't apply to most fields."
 
     change_column_null :output_states, :output, false
     change_column_null :output_states, :pipeline_run_id, false
 
     change_column_null :pipeline_runs, :sample_id, false
-
-    # TODO: (gdingle): fix me
-    # change_column_null :pipeline_runs, :job_status, false
-
     change_column_null :pipeline_runs, :results_finalized, false
     change_column_null :pipeline_runs, :alignment_config_id, false
     change_column_null :pipeline_runs, :alert_sent, false
@@ -67,6 +69,7 @@ class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
 
     change_column_null :backgrounds, :name, false
     change_column_null :backgrounds, :ready, false
+    set_column_comment :backgrounds, :project_id, "deprecated"
 
     change_column_null :job_stats, :task, false
     change_column_null :job_stats, :reads_after, false
@@ -87,10 +90,10 @@ class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
     change_column_null :phylo_trees, :project_id, false
     change_column_null :phylo_trees, :status, false
     change_column_null :phylo_trees, :name, false
-    change_table_comment :phylo_trees, :dag_json, "Populated after phylo_tree pipeline kickoff"
-    change_table_comment :phylo_trees, :command_stdout, "Populated after phylo_tree pipeline kickoff"
-    change_table_comment :phylo_trees, :command_stderr, "Populated after phylo_tree pipeline kickoff"
-    change_table_comment :phylo_trees, :job_id, "Populated after phylo_tree pipeline kickoff"
+    set_column_comment :phylo_trees, :dag_json, "Populated after phylo_tree pipeline kickoff"
+    set_column_comment :phylo_trees, :command_stdout, "Populated after phylo_tree pipeline kickoff"
+    set_column_comment :phylo_trees, :command_stderr, "Populated after phylo_tree pipeline kickoff"
+    set_column_comment :phylo_trees, :job_id, "Populated after phylo_tree pipeline kickoff"
 
     change_column_null :samples, :name, false
     change_column_null :samples, :project_id, false
@@ -124,5 +127,9 @@ class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
     change_column_null :visualizations, :visualization_type, false
     change_column_null :visualizations, :data, false
     change_column_null :visualizations, :name, false
+    set_column_comment :visualizations, :user_id, "the user that saved the visualization"
+    set_column_comment :visualizations, :visualization_type, "heatmap, phylo_tree or something else"
+    set_column_comment :visualizations, :data, "visualization_type-specific state"
+    set_column_comment :visualizations, :name, "a user-provided name"
   end
 end
