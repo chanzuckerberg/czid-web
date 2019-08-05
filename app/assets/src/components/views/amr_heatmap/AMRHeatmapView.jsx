@@ -294,6 +294,12 @@ export default class AMRHeatmapView extends React.Component {
           Loading...
         </p>
       );
+    } else if (samplesWithAMRCounts.length < 1) {
+      return (
+        <p className={cs.loadingIndicator}>
+          No Antimicrobial Resistance data for selected samples.
+        </p>
+      );
     }
     return (
       <div className="row visualization-content">
