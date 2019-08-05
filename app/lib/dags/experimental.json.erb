@@ -38,11 +38,7 @@
       "taxid_locations_combined.json"
     ],
     "alignment_viz_out": ["align_viz.summary"],
-    <% if attribute_dict[:pipeline_version].to_f >= 3.8 %>
     "srst2_out": ["out.log", "out__genes__ARGannot_r2__results.txt", "out__fullgenes__ARGannot_r2__results.txt", "amr_processed_results.csv", "amr_summary_results.csv", "output__.ARGannot_r2.sorted.bam"]
-    <% else %>
-    "srst2_out": ["output.log", "output__genes__ARGannot_r2__results.txt", "output__fullgenes__ARGannot_r2__results.txt", "amr_processed_results.csv", "amr_summary_results.csv"],
-    <% end %>
     <% if attribute_dict[:pipeline_version].to_f >= 3.6 %>
       "coverage_viz_out": ["coverage_viz_summary.json"],
     <% end %>
