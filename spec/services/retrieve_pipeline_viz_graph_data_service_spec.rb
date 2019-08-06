@@ -57,7 +57,7 @@ RSpec.describe RetrievePipelineVizGraphDataService do
 
   step_status_data = {
     four: {
-      status: 1,
+      status: "running",
       description: "This is the description of output four.",
     },
   }
