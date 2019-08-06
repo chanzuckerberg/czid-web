@@ -757,10 +757,22 @@ class PipelineViz extends React.Component {
     );
   }
 
+  handleZoom = isIn => {
+    const { zoomSpeed } = this.props;
+    return () => {
+      if (this.panZoomContainer && this.panZoomContainer.current) {
+        isIn
+          ? this.panZoomContainer.current.zoomIn(zoomSpeed)
+          : this.panZoomContainer.current.zoomOut(zoomSpeed);
+      }
+    };
+  };
+
   render() {
     const {
       zoomMin,
       zoomMax,
+      zoomSpeed,
       pipelineRun,
       pipelineVersions,
       lastProcessedAt,
@@ -790,14 +802,15 @@ class PipelineViz extends React.Component {
             className={cs.panZoomContainer}
             minZoom={zoomMin}
             maxZoom={zoomMax}
-            zoomSpeed={3}
+            zoomSpeed={zoomSpeed}
+            disableScrollZoom={true}
             ref={this.panZoomContainer}
           >
             <div className={cs.pipelineViz}>{stageContainers}</div>
           </PanZoom>
           <PlusMinusControl
-            onPlusClick={((this.panZoomContainer || {}).current || {}).zoomIn}
-            onMinusClick={((this.panZoomContainer || {}).current || {}).zoomOut}
+            onPlusClick={this.handleZoom(true)}
+            onMinusClick={this.handleZoom(false)}
             className={cs.plusMinusControl}
           />
         </div>
@@ -835,6 +848,7 @@ PipelineViz.propTypes = {
   inputEdgeColor: PropTypes.string,
   zoomMin: PropTypes.number,
   zoomMax: PropTypes.number,
+  zoomSpeed: PropTypes.number,
   minMouseMoveUpdateDistance: PropTypes.number,
 };
 
@@ -856,6 +870,7 @@ PipelineViz.defaultProps = {
   outputEdgeColor: cs.outputEdgeColor,
   zoomMin: 0.5,
   zoomMax: 3,
+  zoomSpeed: 3,
   minMouseMoveUpdateDistance: 20,
 };
 
