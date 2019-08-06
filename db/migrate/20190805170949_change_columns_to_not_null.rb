@@ -146,6 +146,44 @@ options field lists what these values are. This won't apply to most fields."
     change_column_null :phylo_trees_pipeline_runs, :phylo_tree_id, false
     change_column_null :phylo_trees_pipeline_runs, :pipeline_run_id, false
     # END OF JUNCTION TABLES
+
+    # START OF TABLES THAT ARE ALL NOT NULL
+    change_column_null :amr_counts, :gene, false
+    change_column_null :amr_counts, :allele, false
+    change_column_null :amr_counts, :coverage, false
+    change_column_null :amr_counts, :depth, false
+    change_column_null :amr_counts, :pipeline_run_id, false
+    change_column_null :amr_counts, :drug_family, false
+
+    change_column_null :archived_backgrounds, :archive_of, false
+    change_column_null :archived_backgrounds, :data, false
+    change_column_null :archived_backgrounds, :s3_backup_path, false
+
+    change_column_null :contigs, :pipeline_run_id, false
+    change_column_null :contigs, :name, false
+    change_column_null :contigs, :sequence, false
+    change_column_null :contigs, :read_count, false
+    change_column_null :contigs, :lineage_json, false
+
+    change_column_null :ercc_counts, :pipeline_run_id, false
+    change_column_null :ercc_counts, :name, false
+    change_column_null :ercc_counts, :count, false
+
+    change_column_null :projects, :name, false
+    change_column_null :projects, :public_access, false
+    change_column_null :projects, :background_flag, false
+
+    change_column_null :taxon_descriptions, :wikipedia_id, false
+    change_column_null :taxon_descriptions, :title, false
+    change_column_null :taxon_descriptions, :summary, false
+    change_column_null :taxon_descriptions, :description, false
+
+    change_column_null :ui_configs, :min_nt_z, false
+    change_column_null :ui_configs, :min_nr_z, false
+    change_column_null :ui_configs, :min_nt_rpm, false
+    change_column_null :ui_configs, :min_nr_rpm, false
+    change_column_null :ui_configs, :top_n, false
+    # END OF TABLES THAT ARE ALL NOT NULL
   end
 
   private
