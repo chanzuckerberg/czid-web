@@ -2,28 +2,40 @@ dummy1:
   taxid: 1
   hit_type: 'NT'
   pipeline_run: three
+  first_byte: 8363513
+  last_byte: 8363523
 
 dummy2:
   taxid: 1
   hit_type: 'NT'
   pipeline_run: four
+  first_byte: 8363513
+  last_byte: 8363523
 
 dummy3:
   taxid: 1
   hit_type: 'NT'
   pipeline_run: joe_project_sampleA_run
+  first_byte: 8363513
+  last_byte: 8363523
 
 dummy4:
   taxid: 1
   hit_type: 'NT'
   pipeline_run: joe_project_sampleB_run
+  first_byte: 8363513
+  last_byte: 8363523
 
 dummy5:
   taxid: 1
   hit_type: 'NT'
   pipeline_run: public_project_sampleA_run
+  first_byte: 8363513
+  last_byte: 8363523
 
 dummy6:
   taxid: 1
   hit_type: 'NT'
   pipeline_run: public_project_sampleB_run
+  first_byte: 8363513
+  last_byte: 8363523

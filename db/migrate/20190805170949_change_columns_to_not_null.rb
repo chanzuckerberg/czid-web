@@ -1,4 +1,3 @@
-# TODO: (gdingle): also do tables that have cols thta are all NOT NULL
 # TODO: (gdingle):  before_create :create_output_states, :create_run_stages, unless: :results_finalized?
 
 class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
@@ -101,6 +100,8 @@ options field lists what these values are. This won't apply to most fields."
     change_column_null :samples, :web_commit, false
     change_column_null :samples, :pipeline_commit, false
     change_column_null :samples, :uploaded_from_basespace, false
+    set_column_comment :samples, :s3_star_index_path, "Copied from host_genome on sample creation"
+    set_column_comment :samples, :s3_bowtie2_index_path, "Copied from host_genome on sample creation"
 
     change_column_null :taxon_byteranges, :taxid, false
     change_column_null :taxon_byteranges, :first_byte, false

@@ -3,8 +3,8 @@ class MetadataField < ApplicationRecord
   has_and_belongs_to_many :projects
   has_many :metadata, dependent: :destroy
 
-  validates :name, presence: true, uniqueness: { scope: :project_id }
-  validates :display_name, presence: true, uniqueness: { scope: :project_id }
+  validates :name, presence: true
+  validates :display_name, presence: true
 
   # ActiveRecord documentation summary
 

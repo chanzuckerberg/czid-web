@@ -1,6 +1,7 @@
 one:
   name: tree_one
   project: one
+  user: one
   taxid: 1
   tax_level: 1
   tax_name: 'some species'
@@ -9,6 +10,7 @@ one:
 joe_phylo_tree:
   name: joe_phylo_tree
   project: joe_project
+  user: joe
   taxid: 1
   tax_level: 1
   tax_name: 'some species'
@@ -17,6 +19,7 @@ joe_phylo_tree:
 joe_failed_phylo_tree:
   name: joe_failed_phylo_tree
   project: joe_project
+  user: joe
   status: 2
   taxid: 1
   tax_level: 1

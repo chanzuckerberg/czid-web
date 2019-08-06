@@ -517,7 +517,6 @@ module SamplesHelper
 
       # If s3 upload, set "bulk_mode" to true.
       sample.bulk_mode = sample.input_files.map(&:source_type).include?("s3")
-      sample.status = Sample::STATUS_CREATED
       sample.user = user
       if sample.save
         samples << sample

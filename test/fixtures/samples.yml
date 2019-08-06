@@ -3,103 +3,199 @@
 one:
   name: sample1
   project: one
+  user: one
+  status: checked
+  host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 two:
   name: sample2
   project: two
+  user: one
+  status: checked
+  host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 expired_sample:
   name: expired_sample
   created_at: '2016-01-31 23:41:59'
   project: two
+  user: one
+  status: checked
   host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 public_sample:
   name: public_sample
   project: public_project
+  user: one
+  status: checked
+  host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 deletable_sample:
   name: sample5
   project: one
+  user: one
   status: "created"
+  host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 joe_sample:
   name: sample Joe
   project: joe_project
+  user: joe
+  status: checked
   host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 six:
   name: RR004_water_2_S23-20180208
   project: one
+  user: one
+  status: checked
   host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 public_project_sampleA:
   name: public_project_sampleA
   project: public_project
+  user: one
+  status: checked
+  host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 public_project_sampleB:
   name: public_project_sampleB
   project: public_project
+  user: one
+  status: checked
   host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 public_sample_with_pipeline_stages:
   name: public_sample_with_pipeline_stages
   project: public_project
-  
+  user: one
+  status: checked
+  host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
+
 private_sample_with_pipeline_stages:
   name: private_sample_with_pipeline_stages
   project: not_joe_project
+  user: one
+  status: checked
+  host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 joe_project_sampleB:
   name: joe_project_sampleB
   project: joe_project
+  user: joe
+  status: checked
   host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 joe_project_sampleA:
   name: joe_project_sampleA
   project: joe_project
+  user: joe
+  status: checked
   host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 joe_project_sample_mosquito:
   name: joe_project_sample_mosquito
   project: joe_project
+  user: joe
+  status: checked
   host_genome: mosquito
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 project_one_sampleA:
   name: project_one_sampleA_run
   project: one
+  user: one
+  status: checked
+  host_genome: mosquito
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 project_one_sampleB:
   name: project_one_sampleB
   project: one
+  user: one
+  status: checked
+  host_genome: mosquito
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 metadata_validation_sample_human:
   name: metadata_validation_sample_human
   project: metadata_validation_project
+  user: one
+  status: checked
   host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 metadata_validation_sample_mosquito:
   name: metadata_validation_sample_mosquito
   project: metadata_validation_project
+  user: one
+  status: checked
   host_genome: mosquito
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 metadata_validation_sample_human_existing_metadata:
   name: metadata_validation_sample_human_existing_metadata
   project: metadata_validation_project
+  user: one
+  status: checked
   host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 sample_human_existing_metadata_public:
   name: sample_human_existing_metadata_public
   project: public_project
+  user: one
+  status: checked
   host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 sample_human_existing_metadata_joe_project:
   name: sample_human_existing_metadata_joe_project
   project: joe_project
+  user: joe
+  status: checked
   host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
 
 sample_human_existing_metadata_expired:
   name: sample_human_existing_metadata_expired
   project: two
+  user: one
+  status: checked
   host_genome: human
+  s3_bowtie2_index_path: s3://czbiohub-infectious-disease/references/human/bowtie2_genome.tar.gz
+  s3_star_index_path: s3://czbiohub-infectious-disease/references/human/STAR_genome.tar.gz
   created_at: '2016-01-31 23:41:59'

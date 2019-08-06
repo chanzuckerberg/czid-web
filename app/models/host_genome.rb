@@ -6,9 +6,7 @@ class HostGenome < ApplicationRecord
 
   before_create :add_default_metadata_fields
 
-  def default_background
-    Background.find(default_background_id) if default_background_id
-  end
+  belongs_to :default_background, class_name: "Background", foreign_key: :default_background_id
 
   def add_default_metadata_fields
     # Cat Genome was created in migrations before MetadataField table, so need to check this for the test db migrations.

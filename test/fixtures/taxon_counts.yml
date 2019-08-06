@@ -4,13 +4,21 @@ one:
   pipeline_run: one
   tax_id: 1
   tax_level: 1
+  count_type: 'NT'
   count: 1
+  percent_identity: 96
+  alignment_length: 149.9
+  e_value: -16.9
 
 two:
   pipeline_run: two
   tax_id: 1
   tax_level: 1
+  count_type: 'NT'
   count: 1
+  percent_identity: 96
+  alignment_length: 149.9
+  e_value: -16.9
 
 three:
   pipeline_run: three
@@ -19,6 +27,9 @@ three:
   tax_level: 1
   name: 'some species'
   count: 1
+  percent_identity: 96
+  alignment_length: 149.9
+  e_value: -16.9
 
 four:
   pipeline_run:  four
@@ -27,6 +38,9 @@ four:
   tax_level: 1
   name: 'some species'
   count: 2
+  percent_identity: 96
+  alignment_length: 149.9
+  e_value: -16.9
 
 five:
   pipeline_run: six
@@ -147,21 +161,42 @@ pt_tc1:
   count_type: 'NT'
   count: 1
   pipeline_run: joe_project_sampleA_run
+  tax_level: 1
+  name: "Streptococcus mitis"
+  percent_identity: 95.65
+  alignment_length: 149.75
+  e_value: -81.478
+
 
 pt_tc2:
   tax_id: 1
   count_type: 'NT'
   count: 1
   pipeline_run: joe_project_sampleB_run
+  tax_level: 1
+  name: "Streptococcus mitis"
+  percent_identity: 95.65
+  alignment_length: 149.75
+  e_value: -81.478
 
 pt_tc3:
   tax_id: 1
   count_type: 'NT'
   count: 1
   pipeline_run: public_project_sampleA_run
+  tax_level: 1
+  name: "Streptococcus mitis"
+  percent_identity: 95.65
+  alignment_length: 149.75
+  e_value: -81.478
 
 pt_tc4:
   tax_id: 1
   count_type: 'NT'
   count: 1
   pipeline_run: public_project_sampleB_run
+  tax_level: 1
+  name: "Streptococcus mitis"
+  percent_identity: 95.65
+  alignment_length: 149.75
+  e_value: -81.478

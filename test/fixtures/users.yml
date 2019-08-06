@@ -3,6 +3,7 @@
 one:
   email: email@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
+  authentication_token: <%= Devise::Encryptor.digest(User, "password")[-6..-1] %>
   name: User One
   role: 1
   allowed_features: "[\"pipeline_viz\"]"
@@ -10,16 +11,19 @@ one:
 two:
   email: email2@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password2") %>
+  authentication_token: <%= Devise::Encryptor.digest(User, "password2")[-6..-1] %>
   name: User Two
 
 joe:
   email: joe@gmail.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
+  authentication_token: <%= Devise::Encryptor.digest(User, "password")[-6..-1] %>
   name: User Three
   allowed_features: "[\"pipeline_viz\"]"
 
 admin:
   email: admin@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password") %>
+  authentication_token: <%= Devise::Encryptor.digest(User, "password")[-6..-1] %>
   name: Admin User
   role: 1

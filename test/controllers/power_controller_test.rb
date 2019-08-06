@@ -155,7 +155,8 @@ class PowerControllerTest < ActionDispatch::IntegrationTest
   test 'joe can delete his own sample' do
     sign_in(:joe)
     @joe_sample = samples(:joe_sample)
-    delete sample_url(@joe_sample)
+    # format json needed because html returns a redirect
+    delete sample_url(@joe_sample, format: "json")
     assert_response :success
   end
 

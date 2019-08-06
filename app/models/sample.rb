@@ -30,6 +30,7 @@ class Sample < ApplicationRecord
   STATUS_RERUN    = 'need_rerun'.freeze
   STATUS_RETRY_PR = 'retry_pr'.freeze # retry existing pipeline run
   STATUS_CHECKED = 'checked'.freeze # status regarding pipeline kickoff is checked
+  attribute :status, :string, default: STATUS_CREATED
 
   # Constants for upload errors.
   UPLOAD_ERROR_BASESPACE_UPLOAD_FAILED = "BASESPACE_UPLOAD_FAILED".freeze

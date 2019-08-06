@@ -209,7 +209,8 @@ class PhyloTreesController < ApplicationController
     pipeline_run_ids = params[:pipelineRunIds].map(&:to_i)
 
     name = sanitize_title_name(params[:name])
-    tax_name = params[:taxName]
+    # TODO: (gdingle): is this a good default?
+    tax_name = params[:taxName] || "unknown taxon"
     dag_branch = if current_user.admin?
                    params[:dagBranch] || "master"
                  else
@@ -217,7 +218,8 @@ class PhyloTreesController < ApplicationController
                  end
     dag_vars = params[:dagVars] if current_user.admin?
 
-    tax_level = TaxonLineage.where(taxid: taxid).last.tax_level
+    # TODO: (gdingle): is this a good default?
+    tax_level = TaxonLineage.where(taxid: taxid).last.tax_level || TaxonCount::TAX_LEVEL_SPECIES
 
     non_viewable_pipeline_run_ids = pipeline_run_ids.to_set - current_power.pipeline_runs.pluck(:id).to_set
     if !non_viewable_pipeline_run_ids.empty?
