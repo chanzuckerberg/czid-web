@@ -94,6 +94,8 @@ class RetrievePipelineVizGraphDataService
     case status
     when "instantiated", nil
       "notStarted"
+    # finished_running occurs when the outputs have been created, but hasn't been uploaded to aws yet. Since the file
+    # is not available to download yet, it is marked as "inProgress"
     when "running", "finished_running"
       "inProgress"
     when "uploaded"
