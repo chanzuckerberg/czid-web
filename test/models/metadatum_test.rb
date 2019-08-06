@@ -28,4 +28,11 @@ class MetadatumTest < ActiveSupport::TestCase
     loc.check_and_set_location_type
     assert_match MetadataValidationErrors::INVALID_LOCATION, loc.errors.full_messages[0]
   end
+
+  test "should raise validation error on long value" do
+    datum = metadata(:sample_human_sex)
+    datum.raw_value = "123" * 250
+    datum.save
+    assert_match "Raw value is too long (maximum is 250 characters)", datum.errors.full_messages[0]
+  end
 end

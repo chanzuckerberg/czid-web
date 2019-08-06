@@ -98,3 +98,5 @@ RSpec.configure do |config|
 end
 
 require "rspec/json_expectations"
+require 'webmock/rspec'
+WebMock.disable_net_connect!(allow_localhost: true)
