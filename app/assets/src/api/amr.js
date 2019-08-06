@@ -7,8 +7,8 @@ export const getAMRCounts = sampleIds =>
     },
   });
 
-export const getCARDInfo = geneName =>
-  get("amr_heatmap/fetch_card_info.json", {
+export const getOntology = geneName =>
+  get("amr_heatmap/fetch_ontology.json", {
     params: {
       geneName,
     },
