@@ -772,6 +772,7 @@ class PipelineViz extends React.Component {
     const {
       zoomMin,
       zoomMax,
+      zoomSpeed,
       pipelineRun,
       pipelineVersions,
       lastProcessedAt,
@@ -801,7 +802,7 @@ class PipelineViz extends React.Component {
             className={cs.panZoomContainer}
             minZoom={zoomMin}
             maxZoom={zoomMax}
-            zoomSpeed={3}
+            zoomSpeed={zoomSpeed}
             disableScrollZoom={true}
             ref={this.panZoomContainer}
           >
