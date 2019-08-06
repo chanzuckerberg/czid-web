@@ -204,7 +204,9 @@ class SamplesHeatmapView extends React.Component {
 
   handleDownloadCsv = () => {
     let url = new URL("/visualizations/download_heatmap", window.origin);
-    location.href = `${url.toString()}?${this.prepareParams()}`;
+    const href = `${url.toString()}?${this.prepareParams()}`;
+    // target="_blank" is needed to avoid unload handler
+    window.open(href, "_blank");
   };
 
   handleShareClick = async () => {
