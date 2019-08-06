@@ -1,6 +1,4 @@
-# TODO: (gdingle): also do junction tables
 # TODO: (gdingle): also do tables that have cols thta are all NOT NULL
-# TODO: (gdingle): change to presence true for all cols as well?
 # TODO: (gdingle):  before_create :create_output_states, :create_run_stages, unless: :results_finalized?
 
 class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
@@ -37,7 +35,7 @@ class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
     change_column_null :metadata_fields, :is_default, false
     change_column_null :metadata_fields, :is_required, false
     change_column_null :metadata_fields, :default_for_new_host_genome, false
-    set_column_comment :metadata_fields, :example,
+    set_column_comment :metadata_fields, :examples,
                        "Examples are used on the metadata dictionary page. They list some
                  examples of what the user should enter for the field."
     set_column_comment :metadata_fields, :options, "For some metadata fields, the user is only allowed to input certain values. The
@@ -64,9 +62,6 @@ options field lists what these values are. This won't apply to most fields."
     change_column_null :users, :name, false
     change_column_null :users, :encrypted_password, false
     change_column_null :users, :authentication_token, false
-
-    change_column_null :taxon_lineages, :version_end, false
-    change_column_null :taxon_lineages, :version_start, false
 
     change_column_null :backgrounds, :name, false
     change_column_null :backgrounds, :ready, false
@@ -122,15 +117,44 @@ options field lists what these values are. This won't apply to most fields."
     change_column_null :taxon_summaries, :tax_level, false
     change_column_null :taxon_summaries, :mean, false
     change_column_null :taxon_summaries, :stdev, false
+    # NOTE: uncomment this line if the migration fails with "Invalid use of NULL value"
+    # delete_bad_rows :taxon_summaries, :rpm_list
     change_column_null :taxon_summaries, :rpm_list, false
 
     change_column_null :visualizations, :user_id, false
     change_column_null :visualizations, :visualization_type, false
     change_column_null :visualizations, :data, false
+
+    # NOTE: uncomment this line if the migration fails with "Invalid use of NULL value"
+    # delete_bad_rows :visualizations, :name
     change_column_null :visualizations, :name, false
     set_column_comment :visualizations, :user_id, "the user that saved the visualization"
     set_column_comment :visualizations, :visualization_type, "heatmap, phylo_tree or something else"
     set_column_comment :visualizations, :data, "visualization_type-specific state"
     set_column_comment :visualizations, :name, "a user-provided name"
+
+    # START OF JUNCTION TABLES
+    change_column_null :backgrounds_pipeline_runs, :background_id, false
+    change_column_null :backgrounds_pipeline_runs, :pipeline_run_id, false
+
+    change_column_null :backgrounds_samples, :background_id, false
+    change_column_null :backgrounds_samples, :sample_id, false
+
+    change_column_null :favorite_projects, :project_id, false
+    change_column_null :favorite_projects, :user_id, false
+
+    change_column_null :phylo_trees_pipeline_runs, :phylo_tree_id, false
+    change_column_null :phylo_trees_pipeline_runs, :pipeline_run_id, false
+    # END OF JUNCTION TABLES
+  end
+
+  private
+
+  def delete_bad_rows(table, column)
+    sql = "DELETE t
+    FROM #{table} t
+    WHERE `t`.`#{column}` IS NULL;"
+
+    ActiveRecord::Base.connection.execute(sql)
   end
 end
