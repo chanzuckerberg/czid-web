@@ -75,6 +75,32 @@ input[type="number"] {
   tr:not(.report-header):hover {
     background-color: $off-white-blue;
   }
+
+  td {
+    border-bottom: 1px solid $light-grey;
+  }
+
+  tr.report-header th {
+    background-color: $white;
+    position: sticky;
+    top: 0;
+  }
+
+  // border disappears when stickying
+  // a typically hack is to add a line as after element
+  tr.report-header th:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    border-bottom: 1px solid $light-grey;
+  }
+
+  // materialize adds border to all theads
+  thead {
+    border: 0;
+  }
 }
 
 .report-table .count-info {

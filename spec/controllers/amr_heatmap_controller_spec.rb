@@ -1,4 +1,41 @@
 require 'rails_helper'
+require 'webmock/rspec'
+
+S3_JSON_BUCKET = "idseq-database".freeze
+S3_JSON_PREFIX = "amr/ontology/".freeze
+ONTOLOGY_BUILD_DATE = "2019-06-20".freeze
+
+OQXB_LABEL = "oqxB".freeze
+OQXB_ACCESSION = "3003923".freeze
+OQXB_DESCRIPTION = "RND efflux pump conferring resistance to fluoroquinolone".freeze
+OQXB_GENE_FAMILY_LABEL = "subunit of efflux pump conferring antibiotic resistance".freeze
+OQXB_GENE_FAMILY_DESC = "Subunits of efflux proteins that pump antibiotic out of a cell to confer resistance.".freeze
+OQXB_DRUG_CLASS_LABEL = "Fluroquinolones".freeze
+OQXB_DRUG_CLASS_DESC = "The fluoroquinolones are a family of synthetic broad-spectrum antibiotics that are 4-quinolone-3-carboxylates. These compounds interact with topoisomerase II (DNA gyrase) to disrupt bacterial DNA replication, damage DNA, and cause cell death.".freeze
+OQXB_PUBLICATION = "Kim HB1, Wang M, Park CH, Kim EC, Jacoby GA, Hooper DC. oqxAB encoding a multidrug efflux pump in human clinical isolates of Enterobacteriaceae. (PMID 19528276)".freeze
+
+OQXB_ONTOLOGY = {
+  "accession" => OQXB_ACCESSION,
+  "label" => OQXB_LABEL,
+  "synonyms" => [
+
+  ],
+  "description" => OQXB_DESCRIPTION,
+  "geneFamily" => [
+    {
+      "label" => OQXB_GENE_FAMILY_LABEL,
+      "description" => OQXB_GENE_FAMILY_DESC,
+    },
+  ],
+  "drugClass" => {
+    "label" => OQXB_DRUG_CLASS_LABEL,
+    "description" => OQXB_DRUG_CLASS_DESC,
+  },
+  "publications" => [
+    OQXB_PUBLICATION,
+  ],
+  "error" => "",
+}.freeze
 
 RSpec.describe AmrHeatmapController, type: :controller do
   create_users
@@ -229,64 +266,82 @@ RSpec.describe AmrHeatmapController, type: :controller do
       end
     end
 
-    describe "GET CARD entry information" do
-      it "should return relevant information from the CARD Ontology database" do
-        get :fetch_card_info, params: { geneName: "pgsA" }
-        expect(response.content_type).to eq("application/json")
-        expect(response).to have_http_status(:ok)
+    describe "GET ontology information" do
+      before do
+        s3 = Aws::S3::Client.new(stub_responses: true)
+        s3.stub_responses(:list_objects_v2, lambda { |context|
+          return {
+            is_truncated: false,
+            contents: [
+              {
+                key: "amr/ontology/#{ONTOLOGY_BUILD_DATE}/aro.json",
+                last_modified: Time.new(2019, 0o6, 20, 18, 30, 0, "-07:00"),
+                etag: "\"d70a48922d199eb2dd1ea1186c8998df\"",
+                size: 2_820_541,
+                storage_class: "STANDARD",
+              },
+            ],
+            name: context.params[:bucket].to_s,
+            prefix: context.params[:prefix].to_s,
+            max_keys: 1000,
+            key_count: 1,
+          }
+        })
+        stub_const("S3_CLIENT", s3)
+      end
+      context "when a matching gene name is found" do
+        before do
+          # The comma is added to emulate the JSON delimiter between entries.
+          # Although in this instance we are only returning one entry,
+          # S3 always adds the comma at the end.
+          allow(S3Util).to receive(:s3_select_json).and_return(OQXB_ONTOLOGY.to_json + ",")
+        end
 
-        json_response = JSON.parse(response.body)
-        expect(json_response).to include_json(
-          accession: "3003080",
-          label: "daptomycin resistant pgsA",
-          synonyms: [
-            "phosphatidylglycerophosphate synthetase",
-          ],
-          description: "pgsA or phosphatidylglycerophosphate synthetase is an integral membrane protein involved in phospholipid biosynthesis. It is a CDP-diacylglycerol-glycerol-3-phosphate 3-phosphatidyltransferase. Laboratory experiments have detected mutations conferring daptomycin resistance in Entercoccus.",
-          geneFamily: [
-            {
-              label: "determinant of resistance to lipopeptide antibiotics",
-              description: "Enzymes, other proteins or other gene products shown clinically to confer resistance to lipopeptide antibiotics.",
+        it "should return relevant information from the Ontology JSON stored on s3" do
+          get :fetch_ontology, params: { geneName: "OqxB" }
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          expect(json_response).to include_json(
+            label: OQXB_LABEL,
+            accession: OQXB_ACCESSION,
+            description: OQXB_DESCRIPTION,
+            synonyms: [
+
+            ],
+            publications: [
+              OQXB_PUBLICATION,
+            ],
+            geneFamily: [
+              {
+                label: OQXB_GENE_FAMILY_LABEL,
+                description: OQXB_GENE_FAMILY_DESC,
+              },
+            ],
+            drugClass: {
+              label: OQXB_DRUG_CLASS_LABEL,
+              description: OQXB_DRUG_CLASS_DESC,
             },
-            {
-              label: "antibiotic resistant pgsA",
-              description: "pgsA or phosphatidylglycerophosphate synthetase is an integral membrane protein involved in phospholipid biosynthesis. It is a CDP-diacylglycerol-glycerol-3-phosphate 3-phosphatidyltransferase.",
-            },
-          ],
-          drugClass: [
-            {
-              label: "daptomycin",
-              description: "Daptomycin is a novel lipopeptide antibiotic used in the treatment of certain infections caused by Gram-positive organisms. Daptomycin interferes with the bacterial cell membrane, reducing membrane potential and inhibiting cell wall synthesis.",
-            },
-            {
-              label: "peptide antibiotic",
-              description: "Peptide antibiotics have a wide range of antibacterial mechanisms, depending on the amino acids that make up the antibiotic, although most act to disrupt the cell membrane in some manner. Subclasses of peptide antibiotics can include additional sidechains of other types, such as lipids in the case of the lipopeptide antibiotics.",
-            },
-          ],
-          publications: [
-            "Hachmann AB1, Sevim E, Gaballa A, Popham DL, Antelmann H, Helmann JD. Reduction in membrane phosphatidylglycerol content leads to daptomycin resistance in Bacillus subtilis. (PMID 21709092)",
-            "Peleg AY1, Miyakis S, Ward DV, Earl AM, Rubio A, Cameron DR, Pillai S, Moellering RC Jr, Eliopoulos GM. Whole genome characterization of the mechanisms of daptomycin resistance in clinical and laboratory derived isolates of Staphylococcus aureus. (PMID 22238576)",
-          ],
-          error: ""
-        )
+            error: ""
+          )
+        end
       end
 
-      it "should return an ontology object with an error message if no match is found" do
-        get :fetch_card_info, params: { geneName: "ImNotInCard" }
-        expect(response.content_type).to eq("application/json")
-        expect(response).to have_http_status(:ok)
+      context "when no matching gene is found" do
+        before do
+          allow(S3Util).to receive(:s3_select_json).and_return("")
+        end
 
-        json_response = JSON.parse(response.body)
-        expect(json_response).to include_json(
-          accession: "",
-          label: "",
-          synonyms: [],
-          description: "",
-          geneFamily: [],
-          drugClass: [],
-          publications: [],
-          error: "No match found for ImNotInCard in the CARD Antibiotic Resistance Ontology."
-        )
+        it "should return an ontology object with an error message if no match is found" do
+          get :fetch_ontology, params: { geneName: "ImNotInCard" }
+          expect(response.content_type).to eq("application/json")
+          expect(response).to have_http_status(:ok)
+
+          json_response = JSON.parse(response.body)
+          expect(json_response).to include_json(
+            error: "No data for ImNotInCard."
+          )
+        end
       end
     end
   end
