@@ -75,7 +75,7 @@ class Sample < ApplicationRecord
 
   validate :input_files_checks
   after_create :initiate_input_file_upload
-  validates :name, uniqueness: { scope: :project_id }
+  validates :name, presence: true, uniqueness: { scope: :project_id }
 
   before_save :check_host_genome, :concatenate_input_parts, :check_status
   after_save :set_presigned_url_for_local_upload

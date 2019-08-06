@@ -6,6 +6,7 @@ class PhyloTree < ApplicationRecord
   has_and_belongs_to_many :pipeline_runs
   belongs_to :user, counter_cache: true # use .size for cache, use .count to force COUNT query
   belongs_to :project
+  # TODO: (gdingle): should it be uniqueness: { scope: :project_id } ?
   validates :name, presence: true, uniqueness: true
   after_create :create_visualization
 

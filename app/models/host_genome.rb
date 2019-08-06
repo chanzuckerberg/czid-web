@@ -2,6 +2,8 @@ class HostGenome < ApplicationRecord
   has_many :samples, dependent: :restrict_with_exception
   has_and_belongs_to_many :metadata_fields
 
+  validates :name, presence: true, uniqueness: true
+
   before_create :add_default_metadata_fields
 
   def default_background

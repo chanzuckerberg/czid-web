@@ -20,6 +20,7 @@ class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
     change_column_null :alignment_configs, :s3_deuterostome_db_path, false
     change_column_null :alignment_configs, :lineage_version, false
 
+    # TODO: (gdingle): why is already name not null in schema?
     change_column_null :host_genomes, :name, false
     change_column_null :host_genomes, :s3_star_index_path, false
     change_column_null :host_genomes, :s3_bowtie2_index_path, false
