@@ -721,11 +721,12 @@ class PipelineViz extends React.Component {
   }
 
   handleZoom = isIn => {
+    const { zoomSpeed } = this.props;
     return () => {
       if (this.panZoomContainer && this.panZoomContainer.current) {
         isIn
-          ? this.panZoomContainer.current.zoomIn(3)
-          : this.panZoomContainer.current.zoomOut(3);
+          ? this.panZoomContainer.current.zoomIn(zoomSpeed)
+          : this.panZoomContainer.current.zoomOut(zoomSpeed);
       }
     };
   };
@@ -800,6 +801,7 @@ PipelineViz.propTypes = {
   inputEdgeColor: PropTypes.string,
   zoomMin: PropTypes.number,
   zoomMax: PropTypes.number,
+  zoomSpeed: PropTypes.number,
   minMouseMoveUpdateDistance: PropTypes.number,
 };
 
@@ -812,6 +814,7 @@ PipelineViz.defaultProps = {
   inputEdgeColor: "#000000",
   zoomMin: 0.1,
   zoomMax: 3,
+  zoomSpeed: 3,
   minMouseMoveUpdateDistance: 20,
 };
 
