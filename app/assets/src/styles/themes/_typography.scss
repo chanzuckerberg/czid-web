@@ -84,6 +84,21 @@ $font-weight-heavy: 800;
   text-transform: uppercase;
 }
 
+@mixin font-header-node-l {
+  font-size: 12px;
+  line-height: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+@mixin font-header-node-s {
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
 @mixin font-body-l {
   font-size: 18px;
   line-height: 28px;
