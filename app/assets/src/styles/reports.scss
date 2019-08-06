@@ -87,7 +87,7 @@ input[type="number"] {
   }
 
   // border disappears when stickying
-  // a typicall hack is to add a line as after element
+  // a typically hack is to add a line as after element
   tr.report-header th:after {
     content: "";
     position: absolute;
