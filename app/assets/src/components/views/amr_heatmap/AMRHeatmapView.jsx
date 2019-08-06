@@ -77,7 +77,6 @@ export default class AMRHeatmapView extends React.Component {
     );
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
     const samplesMetadataTypes = processMetadataTypes(rawSamplesMetadataTypes);
-    console.log(samplesWithAMRCounts);
     this.setState({
       rawSampleData,
       samplesWithAMRCounts,
