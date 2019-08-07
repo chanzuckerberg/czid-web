@@ -28,20 +28,38 @@
   position: absolute;
   left: 0;
   right: 0;
-  height: calc(100% - 80px);
+  bottom: 0;
+  height: calc(100% - 50px);
 }
 
 .pipelineVizContainer {
   flex-grow: 1;
-  overflow-y: hidden;
-  overflow-x: visible;
+  position: relative;
+}
+
+.panZoomContainer {
+  display: flex;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: scroll;
+  cursor: all-scroll !important;
+  outline: none;
+  & > div {
+    margin: 0 auto;
+    align-self: stretch;
+    display: flex !important; /* Override existing library styling */
+    align-items: center;
+    padding: 150px;
+  }
 }
 
 .pipelineViz {
   display: flex;
   justify-content: center;
   align-items: stretch;
-  margin-bottom: 60px;
 }
 
 .stageAndArrow {
@@ -213,15 +231,6 @@
   height: 100%;
 }
 
-.panZoomContainer {
-  cursor: all-scroll !important;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  outline: none;
-  height: 100%;
-}
-
 .plusMinusControl {
   position: fixed;
   bottom: 50px;
@@ -240,7 +249,7 @@
 .pipelineInfo {
   @include font-body-xxxs;
   color: $medium-grey;
-  margin-top: 14px;
+  margin-top: 24px;
   margin-bottom: 18px;
 }
 
