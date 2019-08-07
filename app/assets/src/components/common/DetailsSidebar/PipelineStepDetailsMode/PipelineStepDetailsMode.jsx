@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 import moment from "moment";
+import ReactMarkdown from "react-markdown";
 
 import { openUrl } from "~utils/links";
 import { Accordion } from "~/components/layout";
@@ -47,7 +48,7 @@ class PipelineStepDetailsMode extends React.Component {
       return (
         <Accordion header={header} className={cs.accordion} open={true}>
           <div className={cx(cs.description, cs.accordionContent)}>
-            {description}
+            <ReactMarkdown source={description} />
           </div>
         </Accordion>
       );
