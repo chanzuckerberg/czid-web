@@ -1,5 +1,5 @@
 
-desc 'Finds database columns that are have NULL values'
+desc 'Finds database columns that have NULL values'
 
 task 'find_cols_that_have_nulls', [:max_per_model, :only_presence_true] => :environment do |_t, args|
   ActiveRecord::Base.logger.level = :info
@@ -10,7 +10,7 @@ task 'find_cols_that_have_nulls', [:max_per_model, :only_presence_true] => :envi
   args.with_defaults(only_presence_true: false)
 
   models.each do |model|
-    # puts "\nFinding #{model} cols that have NULL values ..."
+    puts "\nFinding #{model} cols that have NULL values ..."
     cols = cols_that_have_nulls(model, args.max_per_model, args.only_presence_true)
     unless cols.values.sum.zero?
       puts "Model #{model.name} has NULLs in #{args.only_presence_true ? 'presence: true' : ''} columns: #{JSON.pretty_generate(cols)}"
