@@ -45,10 +45,14 @@ class PipelineStepDetailsMode extends React.Component {
     const { description } = this.props;
     if (description) {
       const header = <div className={cs.title}>Step Info</div>;
+      const descriptionWithoutIndentation = description.replace(/( {4})/gi, "");
       return (
         <Accordion header={header} className={cs.accordion} open={true}>
           <div className={cx(cs.description, cs.accordionContent)}>
-            <ReactMarkdown source={description} />
+            <ReactMarkdown
+              source={descriptionWithoutIndentation}
+              className={cs.description}
+            />
           </div>
         </Accordion>
       );
