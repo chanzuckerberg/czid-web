@@ -3,6 +3,7 @@ class LocationsController < ApplicationController
   include SamplesHelper
 
   GEOSEARCH_ERR_MSG = "Unable to perform geosearch".freeze
+  GEOSEARCH_RATE_LIMIT_ERR = "Geosearch failed. Check API rate limits".freeze
   LOCATION_LOAD_ERR_MSG = "Unable to load sample locations".freeze
 
   def external_search
@@ -27,7 +28,7 @@ class LocationsController < ApplicationController
         Rails.logger.info("No geosearch results for: #{query}")
       else
         # Unsuccessful request. Likely Net::HTTPTooManyRequests. Monitor if users run up against geosearch API rate limits.
-        msg = "Geosearch failed. Check API rate limits."
+        msg = GEOSEARCH_RATE_LIMIT_ERR
         LogUtil.log_err_and_airbrake(msg)
         raise msg
       end

@@ -8,6 +8,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     @user_params = { "user[email]" => @user.email, "user[password]" => "password" }
     @non_admin_user_params = { "user[email]" => users(:joe).email, "user[password]" => "password" }
     @api_response = true, LocationTestHelper::API_GEOSEARCH_RESPONSE
+    @api_rate_limit_response = false, LocationTestHelper::API_RATE_LIMIT_RESPONSE
     @our_results = LocationTestHelper::FORMATTED_GEOSEARCH_RESPONSE
   end
 
@@ -37,14 +38,31 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
       assert_response :success
       assert_equal "[]", @response.body
     end
+
+    Location.stub :geosearch, [true, LocationTestHelper::API_NO_GEOCODE_RESPONSE] do
+      get external_search_locations_path, params: { query: "ahsdlfkjasfk" }
+      assert_response :success
+      assert_equal "[]", @response.body
+    end
   end
 
-  test "user can geosearch and see an error" do
+  test "user can geosearch and see an API key error" do
     post user_session_path, params: @user_params
     ENV["LOCATION_IQ_API_KEY"] = nil
     get external_search_locations_path, params: { query: "UCSF" }
     assert_response :error
     assert_equal LocationsController::GEOSEARCH_ERR_MSG, JSON.parse(@response.body)["message"]
+  end
+
+  test "user can geosearch and see a service-side error" do
+    post user_session_path, params: @user_params
+
+    Location.stub :geosearch, @api_rate_limit_response do
+      get external_search_locations_path, params: { query: "UCSF" }
+      assert_response :error
+      assert_equal LocationsController::GEOSEARCH_ERR_MSG, JSON.parse(@response.body)["message"]
+      assert_equal LocationsController::GEOSEARCH_RATE_LIMIT_ERR, JSON.parse(@response.body)["errors"][0]
+    end
   end
 
   test "user can see their map playground results" do

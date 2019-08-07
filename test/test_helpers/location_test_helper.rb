@@ -145,4 +145,10 @@ module LocationTestHelper
       "locationiq_id" => 214_342_685,
     },
   ].freeze
+  API_RATE_LIMIT_RESPONSE = {
+    "error" => "Rate Limited Second",
+  }.freeze
+  API_NO_GEOCODE_RESPONSE = {
+    "error" => "Unable to geocode",
+  }.freeze
 end
