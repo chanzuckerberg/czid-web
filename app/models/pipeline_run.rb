@@ -1440,7 +1440,7 @@ class PipelineRun < ApplicationRecord
   # 10s in testing.
   def precache_report_info!
     params = report_info_params
-    Background.where(ready: 1).pluck(:id).each do |background_id|
+    Background.top_for_sample(sample).pluck(:id).each do |background_id|
       cache_key = ReportHelper.report_info_cache_key(
         "/samples/#{sample.id}/report_info",
         params.merge(background_id: background_id)
