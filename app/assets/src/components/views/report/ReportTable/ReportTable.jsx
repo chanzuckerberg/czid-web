@@ -45,7 +45,7 @@ export default class ReportTable extends React.Component {
 
     return (
       <div className="reports-main">
-        <table id="report-table" className="bordered report-table">
+        <table id="report-table" className="report-table">
           <thead>
             <tr className="report-header">
               <th>

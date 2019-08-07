@@ -22,19 +22,95 @@
   word-break: break-all;
 }
 
+.statusBox {
+  padding: 12px;
+  display: flex;
+  border-radius: 4px;
+  margin-bottom: 16px;
+
+  .statusIcon {
+    height: 20px;
+    width: 20px;
+    margin-top: 4px;
+  }
+
+  .statusText {
+    margin-left: 12px;
+  }
+
+  .statusTitle {
+    @include font-header-s;
+  }
+
+  .statusDescription {
+    @include font-body-xxs;
+  }
+
+  &.inProgress {
+    background-color: $primary-lightest;
+
+    .statusIcon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $primary-light;
+      font-size: 20px;
+    }
+  }
+
+  &.errored {
+    background-color: $error-bg;
+
+    .statusIcon {
+      fill: $error;
+    }
+  }
+}
+
 .title {
   @include font-header-accordion;
   height: 40px;
 }
 
+.description {
+  p,
+  ol,
+  ul,
+  li {
+    @include font-body-s;
+  }
+
+  pre {
+    padding: 12px 12px 18px;
+    background-color: $off-white;
+    margin-left: 15px;
+  }
+
+  code {
+    @include font-code;
+    color: $darkest-grey;
+  }
+
+  a {
+    // Override color: inherit in _header.scss.
+    color: $primary-light !important;
+  }
+
+  strong {
+    font-weight: inherit; // Override bolding from markdown.
+  }
+}
+
 .fileLink {
   color: $primary-light;
+  cursor: pointer;
   margin-bottom: 8px;
 }
 
 .disabledFileLink {
   color: $medium-grey;
   cursor: default;
+  margin-bottom: 8px;
 }
 
 .fileGroup {

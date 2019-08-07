@@ -1,20 +1,61 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
+import moment from "moment";
+import Linkify from "react-linkify";
+import ReactMarkdown from "react-markdown";
 
 import { openUrl } from "~utils/links";
 import { Accordion } from "~/components/layout";
+import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
+
 import cs from "./pipeline_step_details_mode.scss";
 
 class PipelineStepDetailsMode extends React.Component {
+  renderStatusBox() {
+    const { status, startTime } = this.props;
+    let statusTitle, statusDescription;
+    switch (status) {
+      case "inProgress":
+        statusTitle = "Current step";
+        statusDescription = `Running for ${moment(
+          Math.floor(startTime * 1000) // Convert seconds to milliseconds
+        ).fromNow(true)}`;
+        break;
+      case "errored":
+        statusTitle = "Sample failed at this step.";
+        statusDescription =
+          "Please upload again or reach out to help@idseq.com.";
+        break;
+      default:
+        return;
+    }
+
+    return (
+      <div className={cx(cs.statusBox, cs[status])}>
+        <PipelineVizStatusIcon type={status} className={cs.statusIcon} />
+        <div className={cs.statusText}>
+          <div className={cs.statusTitle}>{statusTitle}</div>
+          <div className={cs.statusDescription}>{statusDescription}</div>
+        </div>
+      </div>
+    );
+  }
+
   renderStepInfo() {
     const { description } = this.props;
     if (description) {
       const header = <div className={cs.title}>Step Info</div>;
+      const descriptionWithoutIndentation = description.replace(/( {4})/gi, "");
       return (
-        <Accordion header={header} className={cs.accordion}>
+        <Accordion header={header} className={cs.accordion} open={true}>
           <div className={cx(cs.description, cs.accordionContent)}>
-            {description}
+            <Linkify>
+              <ReactMarkdown
+                source={descriptionWithoutIndentation}
+                className={cs.description}
+              />
+            </Linkify>
           </div>
         </Accordion>
       );
@@ -40,7 +81,7 @@ class PipelineStepDetailsMode extends React.Component {
 
     const fileGroupHeader = <div className={cs.title}>Input Files</div>;
     return (
-      <Accordion className={cs.accordion} header={fileGroupHeader}>
+      <Accordion className={cs.accordion} header={fileGroupHeader} open={true}>
         <div className={cs.accordionContent}>{fileGroupList}</div>
       </Accordion>
     );
@@ -51,7 +92,11 @@ class PipelineStepDetailsMode extends React.Component {
     if (outputFiles && outputFiles.length) {
       const outputFilesHeader = <div className={cs.title}>Output Files</div>;
       return (
-        <Accordion className={cs.accordion} header={outputFilesHeader}>
+        <Accordion
+          className={cs.accordion}
+          header={outputFilesHeader}
+          open={true}
+        >
           <div className={cx(cs.accordionContent, cs.fileGroup)}>
             <div className={cs.fileGroupHeader}>{`From ${stepName} Step:`}</div>
             {this.renderFileList(outputFiles)}
@@ -84,6 +129,7 @@ class PipelineStepDetailsMode extends React.Component {
     return (
       <div className={cs.content}>
         <div className={cs.stepName}>{stepName}</div>
+        {this.renderStatusBox()}
         {this.renderStepInfo()}
         {this.renderInputFiles()}
         {this.renderOutputFiles()}
@@ -109,6 +155,8 @@ PipelineStepDetailsMode.propTypes = {
     }).isRequired
   ).isRequired,
   outputFiles: FileList.isRequired,
+  status: PropTypes.string,
+  startTime: PropTypes.number,
 };
 
 export default PipelineStepDetailsMode;
