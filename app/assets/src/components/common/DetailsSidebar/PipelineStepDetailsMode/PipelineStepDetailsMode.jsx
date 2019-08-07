@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
 import moment from "moment";
+import Linkify from "react-linkify";
+import ReactMarkdown from "react-markdown";
 
 import { openUrl } from "~utils/links";
 import { Accordion } from "~/components/layout";
@@ -44,10 +46,16 @@ class PipelineStepDetailsMode extends React.Component {
     const { description } = this.props;
     if (description) {
       const header = <div className={cs.title}>Step Info</div>;
+      const descriptionWithoutIndentation = description.replace(/( {4})/gi, "");
       return (
         <Accordion header={header} className={cs.accordion} open={true}>
           <div className={cx(cs.description, cs.accordionContent)}>
-            {description}
+            <Linkify>
+              <ReactMarkdown
+                source={descriptionWithoutIndentation}
+                className={cs.description}
+              />
+            </Linkify>
           </div>
         </Accordion>
       );
