@@ -61,7 +61,7 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
       get external_search_locations_path, params: { query: "UCSF" }
       assert_response :error
       assert_equal LocationsController::GEOSEARCH_ERR_MSG, JSON.parse(@response.body)["message"]
-      assert_equal LocationsController::GEOSEARCH_RATE_LIMIT_ERR, JSON.parse(@response.body)["errors"][0]
+      assert_match LocationsController::GEOSEARCH_RATE_LIMIT_ERR, JSON.parse(@response.body)["errors"][0]
     end
   end
 
