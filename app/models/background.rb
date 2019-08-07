@@ -3,6 +3,7 @@ class Background < ApplicationRecord
   has_many :samples, through: :pipeline_runs
   has_many :taxon_summaries, dependent: :destroy
   belongs_to :project, optional: true
+  belongs_to :user, optional: true
   validate :validate_size
   validates :name, presence: true, uniqueness: true
   after_save :submit_store_summary_job
@@ -13,6 +14,14 @@ class Background < ApplicationRecord
 
   def self.eligible_pipeline_runs
     PipelineRun.top_completed_runs.order(:sample_id)
+  end
+
+  # Returns the top backgrounds for a user for the purpose of precache_report_info.
+  def self.top_for_sample(sample)
+    public_access_bgs = where(public_access: true).where(ready: 1)
+    user_bgs = where(user: sample.user).where(ready: 1)
+    host_bgs = where(id: sample.host_genome.default_background_id).where(ready: 1)
+    (public_access_bgs + user_bgs + host_bgs).uniq
   end
 
   def validate_size
