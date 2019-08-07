@@ -3,7 +3,7 @@ class LocationsController < ApplicationController
   include SamplesHelper
 
   GEOSEARCH_ERR_MSG = "Unable to perform geosearch".freeze
-  GEOSEARCH_RATE_LIMIT_ERR = "Geosearch failed. Check API rate limits".freeze
+  GEOSEARCH_RATE_LIMIT_ERR = "API rate limited".freeze
   LOCATION_LOAD_ERR_MSG = "Unable to load sample locations".freeze
 
   def external_search
