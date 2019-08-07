@@ -28,9 +28,8 @@ class LocationsController < ApplicationController
         Rails.logger.info("No geosearch results for: #{query}")
       else
         # Unsuccessful request. Likely Net::HTTPTooManyRequests. Monitor if users run up against geosearch API rate limits.
-        msg = GEOSEARCH_RATE_LIMIT_ERR
-        LogUtil.log_err_and_airbrake(msg)
-        raise msg
+        LogUtil.log_err_and_airbrake(GEOSEARCH_RATE_LIMIT_ERR)
+        raise GEOSEARCH_RATE_LIMIT_ERR
       end
     end
     event = MetricUtil::ANALYTICS_EVENT_NAMES[:location_geosearched]
