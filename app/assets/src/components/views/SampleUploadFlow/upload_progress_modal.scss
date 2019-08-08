@@ -1,0 +1,149 @@
+@import "~styles/themes/typography";
+@import "~styles/themes/colors";
+
+.uploadProgressModal {
+  padding: 0;
+
+  .header {
+    margin-top: 40px;
+    text-align: center;
+
+    .uploadIcon {
+      width: 140px;
+      height: 110px;
+      margin-bottom: 15px;
+    }
+
+    .title {
+      @include font-header-l;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 0 40px;
+    }
+
+    .titleWithIcon {
+      @include font-header-l;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .alertIcon {
+        fill: $error;
+        width: 18px;
+        height: 18px;
+        margin-right: 6px;
+      }
+
+      .checkmarkIcon {
+        margin-bottom: 4px;
+      }
+    }
+
+    .subtitle {
+      @include font-body-s;
+
+      .helpLink {
+        @include font-label-s;
+        color: $primary-light !important;
+      }
+    }
+
+    .instructions {
+      @include font-body-s;
+      color: $medium-grey;
+      max-width: 500px;
+      margin: 40px auto;
+    }
+  }
+
+  .sampleList {
+    margin: 35px 10px 0 10px;
+    padding: 0 40px;
+    max-height: 200px;
+    overflow: auto;
+
+    .sample {
+      margin-top: 30px;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
+    .sampleHeader {
+      display: flex;
+      align-items: center;
+
+      .sampleName {
+        @include font-header-s;
+        flex: 0 1 auto;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .fill {
+        flex: 1 1 0;
+      }
+
+      .sampleStatus {
+        @include font-body-xxs;
+        display: flex;
+        align-items: center;
+        margin-left: 10px;
+        white-space: nowrap;
+
+        .alertIcon {
+          fill: $error;
+          width: 14px;
+          height: 14px;
+          margin-right: 4px;
+          margin-bottom: 2px;
+        }
+
+        .checkmarkIcon {
+          width: 13px;
+          height: 12px;
+          margin-right: 4px;
+          margin-bottom: 6px;
+        }
+      }
+    }
+
+    .loadingBarBackground {
+      background-color: $lightest-grey;
+      height: 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+
+      .loadingBar {
+        background-color: $primary-light;
+        height: 8px;
+        width: 0px;
+        border-radius: 4px;
+      }
+    }
+  }
+
+  .failedSamples {
+    @include font-body-s;
+    color: $medium-grey;
+    max-width: 500px;
+    margin: 40px auto;
+    text-align: center;
+  }
+
+  .footer {
+    text-align: center;
+    height: 34px;
+    margin-top: 45px;
+    margin-bottom: 35px;
+
+    .completeMessage {
+      @include font-body-xxs;
+      display: flex;
+      align-items: center;
+    }
+  }
+}

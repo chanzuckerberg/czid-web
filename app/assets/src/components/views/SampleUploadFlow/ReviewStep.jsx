@@ -1,44 +1,18 @@
 import React from "react";
 import cx from "classnames";
-import {
-  pick,
-  get,
-  without,
-  map,
-  keyBy,
-  flow,
-  mapValues,
-  omit,
-} from "lodash/fp";
+import { get, without, map, keyBy, flow, mapValues, omit } from "lodash/fp";
 
 import DataTable from "~/components/visualizations/table/DataTable";
 import PropTypes from "~/components/utils/propTypes";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
-import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
 import TermsAgreement from "~ui/controls/TermsAgreement";
-import {
-  bulkUploadLocalWithMetadata,
-  bulkUploadRemote,
-  bulkUploadBasespace,
-} from "~/api/upload";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
-import LoadingIcon from "~ui/icons/LoadingIcon";
 import { formatFileSize } from "~/components/utils/format";
 
 import cs from "./sample_upload_flow.scss";
-
-const BASESPACE_SAMPLE_FIELDS = [
-  "name",
-  "project_id",
-  "host_genome_id",
-  "basespace_access_token",
-  "basespace_dataset_id",
-];
-
-const REVIEWSTEP_UPLOAD_FAILED = "ReviewStep_upload_failed";
-const REVIEWSTEP_UPLOAD_SUCCEEDED = "ReviewStep_upload_succeeded";
+import UploadProgressModal from "./UploadProgressModal";
 
 const processMetadataRows = metadataRows =>
   flow(
@@ -49,121 +23,19 @@ const processMetadataRows = metadataRows =>
 class ReviewStep extends React.Component {
   state = {
     consentChecked: false,
-    submitState: "review",
-  };
-
-  onUploadError = error => {
-    this.setState({
-      submitState: "review",
-      errorMessage: error,
-    });
-    this.props.onUploadStatusChange(false);
+    showUploadModal: false,
   };
 
   uploadSamplesAndMetadata = () => {
-    const {
-      onUploadStatusChange,
-      onUploadComplete,
-      uploadType,
-      samples,
-      metadata,
-    } = this.props;
+    const { onUploadStatusChange } = this.props;
 
     onUploadStatusChange(true);
 
     this.setState({
-      submitState: "submitting",
-      errorMessage: "",
+      showUploadModal: true,
     });
 
-    // For uploading samples with files on S3 or Basespace
-    if (uploadType === "remote" || uploadType === "basespace") {
-      let bulkUploadFn = bulkUploadRemote;
-      let bulkUploadFnName = "bulkUploadRemote";
-      let samplesToUpload = samples;
-
-      if (uploadType === "basespace") {
-        bulkUploadFn = bulkUploadBasespace;
-        bulkUploadFnName = "bulkUploadBasespace";
-        samplesToUpload = map(pick(BASESPACE_SAMPLE_FIELDS), samplesToUpload);
-      }
-
-      bulkUploadFn({
-        samples: samplesToUpload,
-        metadata: processMetadataRows(metadata.rows),
-      })
-        .then(response => {
-          this.setState({
-            submitState: "success",
-            createdSampleIds: response.sample_ids,
-          });
-          onUploadComplete();
-          logAnalyticsEvent(REVIEWSTEP_UPLOAD_SUCCEEDED, {
-            createdSampleIds: response.sample_ids.length,
-            uploadType,
-          });
-        })
-        // TODO(mark): Display better errors.
-        // For example, some samples may have successfully saved, but not others. Should explain to user.
-        .catch(error => {
-          // eslint-disable-next-line no-console
-          console.error(`${bulkUploadFnName} error:`, error);
-          this.onUploadError("There were some issues creating your samples.");
-          logAnalyticsEvent(REVIEWSTEP_UPLOAD_FAILED, {
-            error,
-            uploadType,
-          });
-        });
-    }
-    // For uploading samples with local files
-    if (uploadType === "local") {
-      // TODO(mark): Handle progress indicators in UI.
-      bulkUploadLocalWithMetadata({
-        samples,
-        metadata: processMetadataRows(metadata.rows),
-        onAllUploadsComplete: () => {
-          this.setState({
-            submitState: "success",
-          });
-          onUploadComplete();
-          logAnalyticsEvent(REVIEWSTEP_UPLOAD_SUCCEEDED, {
-            samples: samples.length,
-            uploadType,
-          });
-        },
-        onCreateSamplesError: errors => {
-          // TODO(mark): Display better errors.
-          // eslint-disable-next-line no-console
-          console.error("onCreateSamplesError:", errors);
-          this.onUploadError("There were some issues creating your samples.");
-          logAnalyticsEvent(REVIEWSTEP_UPLOAD_FAILED, {
-            errors: errors.length,
-            uploadType,
-          });
-        },
-        // TODO(mark): Display better errors.
-        // For example, some samples may have successfuly saved, but not others. Should explain to user.
-        onUploadError: (file, error) => {
-          // eslint-disable-next-line no-console
-          console.error("onUploadError:", error);
-          this.onUploadError("There were some issues creating your samples.");
-          logAnalyticsEvent(REVIEWSTEP_UPLOAD_FAILED, {
-            fileName: file.name,
-            error,
-            uploadType,
-          });
-        },
-        onMarkSampleUploadedError: sampleName => {
-          this.onUploadError(
-            `Failed to mark sample ${sampleName} as uploaded.`
-          );
-          logAnalyticsEvent(REVIEWSTEP_UPLOAD_FAILED, {
-            sampleName,
-            uploadType,
-          });
-        },
-      });
-    }
+    this.setState({});
   };
 
   getDataHeaders = () => {
@@ -225,7 +97,7 @@ class ReviewStep extends React.Component {
     return map(assembleDataForSample, this.props.samples);
   };
 
-  linksEnabled = () => this.state.submitState === "review";
+  linksEnabled = () => !this.state.showUploadModal;
 
   onLinkClick = link => {
     if (this.linksEnabled()) {
@@ -245,6 +117,16 @@ class ReviewStep extends React.Component {
   };
 
   render() {
+    const { showUploadModal } = this.state;
+
+    const {
+      onUploadComplete,
+      uploadType,
+      samples,
+      metadata,
+      project,
+    } = this.props;
+
     return (
       <div
         className={cx(
@@ -339,58 +221,21 @@ class ReviewStep extends React.Component {
           </div>
         </div>
         <div className={cs.controls}>
-          {this.state.submitState === "review" && (
-            <TermsAgreement
-              checked={this.state.consentChecked}
-              onChange={() =>
-                this.setState(
-                  {
-                    consentChecked: !this.state.consentChecked,
-                  },
-                  () =>
-                    logAnalyticsEvent("ReviewStep_consent-checkbox_checked", {
-                      consentChecked: this.state.consentChecked,
-                    })
-                )
-              }
-            />
-          )}
-          {this.state.submitState === "submitting" && (
-            <div className={cs.uploadMessage}>
-              <LoadingIcon className={cs.loadingIcon} />
-              Upload in progress... Please keep this page open until
-              completed...
-            </div>
-          )}
-          {this.state.errorMessage && (
-            <div className={cs.error}>{this.state.errorMessage}</div>
-          )}
-          {this.state.submitState === "success" && (
-            <div>
-              <div className={cs.successMessage}>
-                Samples successfully uploaded to {this.props.project.name}.
-              </div>
-              <a
-                className={cs.link}
-                href={`/home?project_id=${this.props.project.id}`}
-              >
-                <SecondaryButton
-                  text="Go to Project"
-                  rounded={false}
-                  onClick={() =>
-                    logAnalyticsEvent(
-                      "ReviewStep_go-to-project-button_clicked",
-                      {
-                        projectId: this.props.project.id,
-                        projectName: this.props.project.name,
-                      }
-                    )
-                  }
-                />
-              </a>
-            </div>
-          )}
-          {this.state.submitState === "review" && (
+          <TermsAgreement
+            checked={this.state.consentChecked}
+            onChange={() =>
+              this.setState(
+                {
+                  consentChecked: !this.state.consentChecked,
+                },
+                () =>
+                  logAnalyticsEvent("ReviewStep_consent-checkbox_checked", {
+                    consentChecked: this.state.consentChecked,
+                  })
+              )
+            }
+          />
+          {!showUploadModal && (
             <PrimaryButton
               text="Start Upload"
               disabled={!this.state.consentChecked}
@@ -403,6 +248,15 @@ class ReviewStep extends React.Component {
                 }
               )}
               rounded={false}
+            />
+          )}
+          {showUploadModal && (
+            <UploadProgressModal
+              samples={samples}
+              uploadType={uploadType}
+              onUploadComplete={onUploadComplete}
+              metadata={processMetadataRows(metadata.rows)}
+              project={project}
             />
           )}
         </div>
@@ -432,7 +286,7 @@ ReviewStep.propTypes = {
       file_size: PropTypes.number,
       file_type: PropTypes.string,
       basespace_project_name: PropTypes.string,
-      files: PropTypes.objectOf(PropTypes.objectOf(PropTypes.instanceOf(File))),
+      files: PropTypes.objectOf(PropTypes.instanceOf(File)),
     })
   ),
   uploadType: PropTypes.string.isRequired,
