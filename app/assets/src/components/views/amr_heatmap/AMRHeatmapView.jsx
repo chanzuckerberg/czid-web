@@ -127,7 +127,7 @@ export default class AMRHeatmapView extends React.Component {
   hasDataToDisplay(maxValues) {
     let hasData = false;
     Object.entries(maxValues).forEach(metric => {
-      const [_, value] = metric;
+      const value = metric[1];
       if (value > 0) {
         hasData = true;
       }
