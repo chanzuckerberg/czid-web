@@ -41,7 +41,7 @@ export default class AMRHeatmapVis extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { selectedMetadata } = this.state;
-    const { selectedOptions } = this.props;
+    const { lastDataUpdate, selectedOptions } = this.props;
     if (
       selectedOptions !== prevProps.selectedOptions ||
       this.heatmap === null
@@ -49,8 +49,9 @@ export default class AMRHeatmapVis extends React.Component {
       this.updateHeatmap();
     }
     if (
-      selectedMetadata !== prevState.selectedMetadata &&
-      this.heatmap !== null
+      this.heatmap !== null &&
+      (selectedMetadata !== prevState.selectedMetadata ||
+        lastDataUpdate !== prevProps.lastDataUpdate)
     ) {
       this.heatmap.updateColumnMetadata(this.getSelectedMetadataFields());
     }
@@ -412,4 +413,5 @@ AMRHeatmapVis.propTypes = {
   onSampleLabelClick: PropTypes.func,
   onGeneLabelClick: PropTypes.func,
   samplesMetadataTypes: PropTypes.object,
+  lastDataUpdate: PropTypes.object,
 };

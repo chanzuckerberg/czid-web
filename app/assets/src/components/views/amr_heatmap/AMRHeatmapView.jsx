@@ -42,6 +42,7 @@ export default class AMRHeatmapView extends React.Component {
     super(props);
 
     this.state = {
+      lastDataUpdate: new Date(),
       loading: true,
       selectedOptions: {
         metric: "coverage",
@@ -180,6 +181,22 @@ export default class AMRHeatmapView extends React.Component {
     });
   };
 
+  onMetadataUpdate = (key, value) => {
+    const { selectedSampleId, samplesWithAMRCounts } = this.state;
+    const updatedSamples = samplesWithAMRCounts.map(sample => {
+      if (sample.sampleId !== selectedSampleId) {
+        return sample;
+      } else {
+        sample.metadata[key] = value;
+        return sample;
+      }
+    });
+    this.setState({
+      samplesWithAMRCounts: updatedSamples,
+      lastDataUpdate: new Date(),
+    });
+  };
+
   //*** Post-update methods ***
 
   computeHeatmapValuesForCSV() {
@@ -206,6 +223,7 @@ export default class AMRHeatmapView extends React.Component {
         return {
           sampleId: selectedSampleId,
           showReportLink: true,
+          onMetadataUpdate: this.onMetadataUpdate,
         };
       }
       case SIDEBAR_GENE_MODE: {
@@ -282,6 +300,7 @@ export default class AMRHeatmapView extends React.Component {
 
   renderVisualization() {
     const {
+      lastDataUpdate,
       loading,
       samplesWithAMRCounts,
       selectedOptions,
@@ -304,6 +323,7 @@ export default class AMRHeatmapView extends React.Component {
             onSampleLabelClick={this.onSampleLabelClick}
             onGeneLabelClick={this.onGeneLabelClick}
             samplesMetadataTypes={samplesMetadataTypes}
+            lastDataUpdate={lastDataUpdate}
           />
         </ErrorBoundary>
       </div>
