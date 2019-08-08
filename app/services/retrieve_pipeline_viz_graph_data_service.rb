@@ -69,6 +69,7 @@ class RetrievePipelineVizGraphDataService
           outputEdges: [],
           status: status,
           startTime: status_info["start_time"],
+          endTime: status_info["end_time"],
         }
       end
 
@@ -100,14 +101,18 @@ class RetrievePipelineVizGraphDataService
       "inProgress"
     when "uploaded"
       "finished"
-    when "errored"
-      "errored"
+    when "pipeline_errored"
+      "pipelineErrored"
+    when "errored", "user_errored"
+      "userErrored"
     end
   end
 
   def stage_job_status(statuses)
-    if statuses.include? "errored"
-      return "errored"
+    if statuses.include? "userErrored"
+      return "userErrored"
+    elsif statuses.include? "pipelineErrored"
+      return "pipelineErrored"
     elsif statuses.include?("inProgress") || (statuses.include?("notStarted") && statuses.include?("finished"))
       return "inProgress"
     elsif statuses.include? "notStarted"

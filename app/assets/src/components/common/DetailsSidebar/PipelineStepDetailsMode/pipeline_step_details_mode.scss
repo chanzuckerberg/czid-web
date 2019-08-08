@@ -58,11 +58,25 @@
     }
   }
 
-  &.errored {
+  &.pipelineErrored {
     background-color: $error-bg;
 
     .statusIcon {
       fill: $error;
+    }
+  }
+
+  &.userErrored {
+    background-color: $warning-bg;
+    .statusIcon {
+      fill: $warning;
+    }
+  }
+
+  &.finished {
+    background-color: $success-bg;
+    .statusIcon {
+      fill: $success;
     }
   }
 }

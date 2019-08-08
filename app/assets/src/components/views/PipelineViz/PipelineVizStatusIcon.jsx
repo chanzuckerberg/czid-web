@@ -14,8 +14,12 @@ const PipelineVizStatusIcon = ({ type, className }) => {
       return <LoadingIcon className={cx(className, cs.inProgressIcon)} />;
     case "finished":
       return <CircleCheckmarkIcon className={cx(className, cs.finishedIcon)} />;
-    case "errored":
-      return <InfoCircleIcon className={cx(className, cs.erroredIcon)} />;
+    case "pipelineErrored":
+      return (
+        <InfoCircleIcon className={cx(className, cs.pipelineErroredIcon)} />
+      );
+    case "userErrored":
+      return <InfoCircleIcon className={cx(className, cs.userErroredIcon)} />;
     default:
       return null;
   }

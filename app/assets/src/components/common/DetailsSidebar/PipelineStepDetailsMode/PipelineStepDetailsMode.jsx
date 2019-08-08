@@ -13,7 +13,7 @@ import cs from "./pipeline_step_details_mode.scss";
 
 class PipelineStepDetailsMode extends React.Component {
   renderStatusBox() {
-    const { status, startTime } = this.props;
+    const { status, startTime, endTime } = this.props;
     let statusTitle, statusDescription;
     switch (status) {
       case "inProgress":
@@ -22,10 +22,20 @@ class PipelineStepDetailsMode extends React.Component {
           Math.floor(startTime * 1000) // Convert seconds to milliseconds
         ).fromNow(true)}`;
         break;
-      case "errored":
+      case "userErrored":
+      case "pipelineErrored":
         statusTitle = "Sample failed at this step.";
         statusDescription =
           "Please upload again or reach out to help@idseq.com.";
+        break;
+      case "finished":
+        statusTitle = "Step completed";
+        statusDescription =
+          endTime &&
+          `Finished in ${moment(Math.floor(startTime * 1000)).from(
+            endTime * 1000,
+            true
+          )}.`;
         break;
       default:
         return;
@@ -157,6 +167,7 @@ PipelineStepDetailsMode.propTypes = {
   outputFiles: FileList.isRequired,
   status: PropTypes.string,
   startTime: PropTypes.number,
+  endTime: PropTypes.number,
 };
 
 export default PipelineStepDetailsMode;

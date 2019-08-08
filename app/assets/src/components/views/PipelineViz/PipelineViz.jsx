@@ -160,6 +160,7 @@ class PipelineViz extends React.Component {
         outputFiles: outputInfo,
         status: stepInfo.status,
         startTime: stepInfo.startTime,
+        endTime: stepInfo.endTime,
       },
     });
   }
@@ -626,7 +627,8 @@ class PipelineViz extends React.Component {
         notStarted: this.getNodeStatusOptions("notStarted"),
         inProgress: this.getNodeStatusOptions("inProgress"),
         finished: this.getNodeStatusOptions("finished"),
-        errored: this.getNodeStatusOptions("errored"),
+        userErrored: this.getNodeStatusOptions("userErrored"),
+        pipelineErrored: this.getNodeStatusOptions("pipelineErrored"),
       },
       edges: {
         chosen: false,
@@ -877,7 +879,14 @@ PipelineViz.defaultProps = {
     hovered: cs.inProgressHoverBg,
   },
   finishedNodeColor: { default: cs.finishedBg, hovered: cs.finishedHoverBg },
-  erroredNodeColor: { default: cs.erroredBg, hovered: cs.erroredHoverBg },
+  pipelineErroredNodeColor: {
+    default: cs.pipelineErroredBg,
+    hovered: cs.pipelineErroredHoverBg,
+  },
+  userErroredNodeColor: {
+    default: cs.userErroredBg,
+    hovered: cs.userErroredHoverBg,
+  },
   edgeColor: cs.defaultEdgeColor,
   inputEdgeColor: cs.inputEdgeColor,
   outputEdgeColor: cs.outputEdgeColor,

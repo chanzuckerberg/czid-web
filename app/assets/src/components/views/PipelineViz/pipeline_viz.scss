@@ -14,8 +14,11 @@
   finishedBg: $success-bg;
   finishedHoverBg: hover-state($success-bg);
 
-  erroredBg: $error-bg;
-  erroredHoverBg: hover-state($error-bg);
+  pipelineErroredBg: $error-bg;
+  pipelineEroredHoverBg: hover-state($error-bg);
+
+  userErroredBg: $warning-bg;
+  userErroredHoverBg: hover-state($warning-bg);
 
   stageBg: $off-white;
   defaultEdgeColor: $medium-grey;
@@ -108,8 +111,12 @@
     background-color: $primary-lightest;
   }
 
-  &.errored {
+  &.pipelineErrored {
     background-color: $error-lightest;
+  }
+
+  &.userErrored {
+    background-color: $warning-bg;
   }
 }
 
@@ -119,7 +126,8 @@
   height: 20px;
 
   .inProgressIcon,
-  .erroredIcon,
+  .pipelineErroredIcon,
+  .userErroredIcon,
   .finishedIcon {
     height: 15px;
     width: 15px;
@@ -132,8 +140,11 @@
     justify-content: center;
     font-size: 15px;
   }
-  .erroredIcon {
+  .pipelineErroredIcon {
     fill: $error;
+  }
+  .userErroredIcon {
+    fill: $warning;
   }
   .finishedIcon {
     fill: $success;
