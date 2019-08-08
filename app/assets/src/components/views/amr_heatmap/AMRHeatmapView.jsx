@@ -241,7 +241,9 @@ export default class AMRHeatmapView extends React.Component {
         target="_blank"
         rel="noopener noreferrer"
         key={"Download_CSV_link"}
-        onClick={logAnalyticsEvent("AMRHeatmapView_download-csv-table_clicked")}
+        onClick={() =>
+          logAnalyticsEvent("AMRHeatmapView_download-csv-table_clicked")
+        }
       >
         Download CSV
       </a>
@@ -272,9 +274,11 @@ export default class AMRHeatmapView extends React.Component {
             <DownloadButtonDropdown
               className={cs.controlElement}
               options={this.getDownloadOptions()}
-              onClick={logAnalyticsEvent(
-                "AMRHeatmapView_download-button-dropdown_clicked"
-              )}
+              onClick={() =>
+                logAnalyticsEvent(
+                  "AMRHeatmapView_download-button-dropdown_clicked"
+                )
+              }
               disabled={loading}
             />
           </ViewHeader.Controls>

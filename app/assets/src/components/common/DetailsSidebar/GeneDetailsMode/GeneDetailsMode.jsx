@@ -76,8 +76,11 @@ export default class GeneDetailsMode extends React.Component {
   //*** Callback functions ***
 
   expandOntology = () => {
+    const { geneName } = this.props;
     this.setState({ collapseOntology: false });
-    logAnalyticsEvent("GeneDetailsMode_expand-ontology_clicked");
+    logAnalyticsEvent("GeneDetailsMode_expand-ontology_clicked", {
+      geneName,
+    });
   };
 
   //*** Functions depending on state ***
@@ -120,9 +123,11 @@ export default class GeneDetailsMode extends React.Component {
           className={cs.cardLink}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={logAnalyticsEvent(
-            "GeneDetailsMode_card-ontology-attribution_clicked"
-          )}
+          onClick={() =>
+            logAnalyticsEvent(
+              "GeneDetailsMode_card-ontology-attribution_clicked"
+            )
+          }
         >
           CARD Antibiotic Resistance Ontology
         </a>, which is released under the{" "}
@@ -131,9 +136,11 @@ export default class GeneDetailsMode extends React.Component {
           className={cs.cardLink}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={logAnalyticsEvent(
-            "GeneDetailsMode_creative-commons-license_clicked"
-          )}
+          onClick={() =>
+            logAnalyticsEvent(
+              "GeneDetailsMode_creative-commons-license_clicked"
+            )
+          }
         >
           Creative Commons CC-BY license version 4.0
         </a>{" "}
@@ -274,15 +281,17 @@ export default class GeneDetailsMode extends React.Component {
               className={cs.link}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={logAnalyticsEvent(
-                "GeneDetailsMode_pubmed-citation-link_clicked",
-                {
-                  citation: citation,
-                  pubmedId: pubmedId,
-                  ontologyLabel: label,
-                  geneName,
-                }
-              )}
+              onClick={() =>
+                logAnalyticsEvent(
+                  "GeneDetailsMode_pubmed-citation-link_clicked",
+                  {
+                    citation: citation,
+                    pubmedId: pubmedId,
+                    ontologyLabel: label,
+                    geneName,
+                  }
+                )
+              }
             >
               {pmidText}
             </a>
@@ -310,9 +319,8 @@ export default class GeneDetailsMode extends React.Component {
             href={this.generateLinkTo(source)}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={
-              (logAnalyticsEvent("GeneDetailsMode_footer-link_clicked"),
-              {
+            onClick={() =>
+              logAnalyticsEvent("GeneDetailsMode_footer-link_clicked", {
                 destination: source,
                 geneName,
               })
