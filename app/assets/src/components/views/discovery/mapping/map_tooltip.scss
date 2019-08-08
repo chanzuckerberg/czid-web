@@ -45,6 +45,7 @@ $tooltip-tip-size: 8px;
 
       .title {
         @include font-header-xs;
+        cursor: pointer;
 
         &.hoverable {
           &:hover {

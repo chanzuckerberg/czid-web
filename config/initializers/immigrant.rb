@@ -8,6 +8,7 @@ Immigrant.ignore_keys = [
 
   # Optional assocs
   { from_table: 'backgrounds', column: 'project_id' },
+  { from_table: 'backgrounds', column: 'user_id' },
   { from_table: 'metadata', column: 'location_id' },
   { from_table: 'locations', column: 'city_id' },
   { from_table: 'locations', column: 'country_id' },
