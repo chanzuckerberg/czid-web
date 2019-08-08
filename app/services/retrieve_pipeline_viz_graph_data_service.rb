@@ -27,12 +27,12 @@ class RetrievePipelineVizGraphDataService
   #           - displayName: A string to display the file as
   #           - url: An optional string to download the file
 
-  def initialize(pipeline_run_id, is_admin, remove_host_filtering_urls)
+  def initialize(pipeline_run_id, see_experimental, remove_host_filtering_urls)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
     @all_dag_jsons = []
     @stage_names = []
     @pipeline_run.pipeline_run_stages.each do |stage|
-      if stage.dag_json && (stage.name != "Experimental" || is_admin)
+      if stage.dag_json && (stage.name != "Experimental" || see_experimental)
         @all_dag_jsons.push(JSON.parse(stage.dag_json || "{}"))
         @stage_names.push(stage.name)
       end
