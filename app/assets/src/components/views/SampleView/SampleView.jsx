@@ -544,16 +544,45 @@ class SampleView extends React.Component {
     this.setState({ view: data.name });
   };
 
-  render() {
+  renderPipelineVersionHeader() {
+    const { sample, pipelineRun, pipelineVersions, summaryStats } = this.props;
     const versionDisplay = this.renderVersionDisplay();
+    const pipelineVersion =
+      pipelineRun && pipelineRun.version && pipelineRun.version.pipeline;
+    const pipelineVersionSelectContent = (
+      <div className={cs.pipelineInfo}>
+        <span>PIPELINE {versionDisplay}</span>
+        <PipelineVersionSelect
+          pipelineRun={pipelineRun}
+          pipelineVersions={pipelineVersions}
+          lastProcessedAt={get("last_processed_at", summaryStats)}
+          onPipelineVersionSelect={this.handlePipelineVersionSelect}
+        />
+        {this.renderPipelineWarnings()}
+      </div>
+    );
 
+    if (pipelineVersion) {
+      return (
+        <a
+          href={`/samples/${sample.id}/pipeline_viz/${pipelineVersion}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cs.linkToPipelineViz}
+        >
+          {pipelineVersionSelectContent}
+        </a>
+      );
+    }
+    return pipelineVersionSelectContent;
+  }
+
+  render() {
     const {
       project,
       sampleIdToNameMap,
-      pipelineVersions,
       sample,
       pipelineRun,
-      summaryStats,
       amr,
       reportPresent,
       reportDetails,
@@ -561,34 +590,12 @@ class SampleView extends React.Component {
     } = this.props;
 
     const showAMR = amr;
-    const pipelineVersion =
-      pipelineRun && pipelineRun.version && pipelineRun.version.pipeline;
     return (
       <div>
         <NarrowContainer>
           <ViewHeader className={cs.viewHeader}>
             <ViewHeader.Content>
-              <div
-                className={cx(
-                  cs.pipelineInfo,
-                  pipelineVersion && cs.linkToPipelineViz
-                )}
-                onClick={() =>
-                  pipelineVersion &&
-                  window.open(
-                    `/samples/${sample.id}/pipeline_viz/${pipelineVersion}`
-                  )
-                }
-              >
-                <span>PIPELINE {versionDisplay}</span>
-                <PipelineVersionSelect
-                  pipelineRun={pipelineRun}
-                  pipelineVersions={pipelineVersions}
-                  lastProcessedAt={get("last_processed_at", summaryStats)}
-                  onPipelineVersionSelect={this.handlePipelineVersionSelect}
-                />
-                {this.renderPipelineWarnings()}
-              </div>
+              {this.renderPipelineVersionHeader()}
               <ViewHeader.Pretitle
                 breadcrumbLink={`/home?project_id=${project.id}`}
               >

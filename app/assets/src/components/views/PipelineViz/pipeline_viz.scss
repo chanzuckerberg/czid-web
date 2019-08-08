@@ -140,12 +140,15 @@
     justify-content: center;
     font-size: 15px;
   }
+
   .pipelineErroredIcon {
     fill: $error;
   }
+
   .userErroredIcon {
     fill: $warning;
   }
+
   .finishedIcon {
     fill: $success;
   }
