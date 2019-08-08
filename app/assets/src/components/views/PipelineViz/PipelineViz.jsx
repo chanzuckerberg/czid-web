@@ -380,6 +380,7 @@ class PipelineViz extends React.Component {
     const backgroundColor =
       hovered && options.hovered ? options.hovered : options.default;
     const textColor = options.textColor;
+    const shadowColor = options.shadowColor;
     return {
       color: {
         background: backgroundColor,
@@ -390,6 +391,16 @@ class PipelineViz extends React.Component {
         },
       },
       ...(textColor ? { font: { color: textColor } } : {}),
+      ...(shadowColor
+        ? {
+            shadow: {
+              color: shadowColor,
+              x: 0,
+              y: 2,
+              size: 8,
+            },
+          }
+        : {}),
     };
   }
 
@@ -573,7 +584,7 @@ class PipelineViz extends React.Component {
         borderWidth: 1,
         borderWidthSelected: 1,
         shadow: {
-          color: "rgba(0, 0, 0, 0.22)",
+          color: cs.nodeShadowColor,
           x: 0,
           y: 2,
           size: 8,
@@ -623,7 +634,7 @@ class PipelineViz extends React.Component {
           to: {
             enabled: true,
             type: "arrow",
-            scaleFactor: 0.6,
+            scaleFactor: 0.5,
           },
         },
         smooth: {
@@ -829,6 +840,7 @@ const nodeColors = PropTypes.shape({
   default: PropTypes.string.isRequired,
   hovered: PropTypes.string,
   textColor: PropTypes.string,
+  shadowColor: PropTypes.string,
 });
 
 PipelineViz.propTypes = {
@@ -858,6 +870,7 @@ PipelineViz.defaultProps = {
   notStartedNodeColor: {
     default: cs.notStartedBg,
     textColor: cs.notStartedText,
+    shadowColor: cs.notStartedShadow,
   },
   inProgressNodeColor: {
     default: cs.inProgressBg,

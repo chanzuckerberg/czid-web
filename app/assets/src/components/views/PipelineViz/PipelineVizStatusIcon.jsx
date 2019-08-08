@@ -17,7 +17,7 @@ const PipelineVizStatusIcon = ({ type, className }) => {
     case "errored":
       return <InfoCircleIcon className={cx(className, cs.erroredIcon)} />;
     default:
-      return <span className={cx(className, cs.noIcon)} />;
+      return null;
   }
 };
 
