@@ -18,6 +18,7 @@ $transparent-light-grey: rgba(0, 0, 0, 0.15);
 $transparent-medium-grey: rgba(0, 0, 0, 0.3);
 
 $success-lightest: #e6f7ed;
+$success-light: #d3f1df;
 $success: #3cb371;
 $success-bg: $success-lightest;
 
@@ -41,3 +42,7 @@ $box-shadow-dark: rgba(34, 36, 38, 0.5);
 
 $melrose: #a9bdfc;
 $celery: rgba(147, 193, 81, 1);
+
+@function hover-state($base-color) {
+  @return darken($base-color, 5%);
+}
