@@ -563,11 +563,12 @@ class PipelineRun < ApplicationRecord
                               allele: amr_result_fields[1],
                               coverage: amr_result_fields[2],
                               depth:  amr_result_fields[3],
-                              annotation: amr_result_fields[11],
+                              annotation_gene: amr_result_fields[11].split(";")[2],
+                              genbank_accession: amr_result_fields[11].split(";")[4],
                               drug_family: amr_result_fields[12],
                               total_reads: amr_result_fields[16],
                               rpm: amr_result_fields[17],
-                              dpm: amr_result_fields[18], }
+                              dpm: amr_result_fields[18].strip, } # Remove dangling newline character
       end
       update(amr_counts_attributes: amr_counts_array)
     end
