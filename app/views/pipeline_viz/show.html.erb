@@ -1,7 +1,7 @@
 <div id="PipelineStageResults">
   <%= javascript_tag do %>
     react_component('PipelineViz', {
-        admin: <%= current_user.admin %>,
+        showExperimental: <%= @show_experimental %>,
         graphData: JSON.parse('<%= raw escape_json(@results) %>'),
         pipelineRun: <%= raw escape_json(@pipeline_run_display) %>,
         sample: <%= raw escape_json(@sample) %>,

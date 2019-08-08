@@ -233,5 +233,21 @@ RSpec.describe PipelineVizController, type: :controller do
         expect(response).to have_http_status 401
       end
     end
+
+    describe "Get pipeline stage results with pipeline viz experimental flag enabled" do
+      it "can see all stage results, including experimental" do
+        @joe.add_allowed_feature("pipeline_viz_experimental")
+
+        project = create(:public_project)
+        sample = create(:sample, project: project,
+                                 pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
+
+        get :show, params: { format: "json", sample_id: sample.id }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response).to include_json(expected_stage_results)
+        expect(json_response.keys).to contain_exactly(*expected_stage_results.keys)
+      end
+    end
   end
 end
