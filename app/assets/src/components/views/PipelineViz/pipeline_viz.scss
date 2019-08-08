@@ -123,12 +123,10 @@
   .finishedIcon {
     height: 15px;
     width: 15px;
-    margin-right: 4px;
   }
 
   .inProgressIcon {
     color: $primary-light;
-    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -143,6 +141,12 @@
 
   .stageName {
     margin: 2.5px 0;
+  }
+
+  // Only give the stage name a margin-left if there is
+  // an icon preceding it.
+  & > .stageName:nth-child(2) {
+    margin-left: 4px;
   }
 }
 
