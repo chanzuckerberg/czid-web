@@ -24,7 +24,7 @@ class PipelineViz extends React.Component {
       "Host Filtering",
       "Alignment",
       "Post Processing",
-      ...(props.admin ? ["Experimental"] : []),
+      ...(props.showExperimental ? ["Experimental"] : []),
     ];
 
     this.graphs = [];
@@ -832,7 +832,7 @@ const nodeColors = PropTypes.shape({
 });
 
 PipelineViz.propTypes = {
-  admin: PropTypes.bool,
+  showExperimental: PropTypes.bool,
   graphData: PropTypes.object,
   pipelineRun: PropTypes.PipelineRun,
   sample: PropTypes.Sample,
@@ -853,7 +853,7 @@ PipelineViz.propTypes = {
 };
 
 PipelineViz.defaultProps = {
-  admin: false,
+  showExperimental: false,
   backgroundColor: cs.offWhite,
   notStartedNodeColor: {
     default: cs.notStartedBg,
