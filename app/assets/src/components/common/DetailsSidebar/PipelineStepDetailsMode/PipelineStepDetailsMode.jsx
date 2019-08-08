@@ -134,6 +134,34 @@ class PipelineStepDetailsMode extends React.Component {
     });
   }
 
+  renderResources() {
+    const { resources } = this.props;
+    if (resources && resources.length) {
+      const resourcesHeader = <div className={cs.title}>Resources</div>;
+      const resourceLinks = resources.map(linkInfo => {
+        return (
+          <span key={linkInfo.url}>
+            <a href={linkInfo.url} target="_blank" rel="noopener noreferrer">
+              {linkInfo.name}
+            </a>
+          </span>
+        );
+      });
+
+      return (
+        <Accordion
+          className={cs.accordion}
+          header={resourcesHeader}
+          open={true}
+        >
+          <div className={cx(cs.resourcesContainer, cs.accordionContent)}>
+            {resourceLinks}
+          </div>
+        </Accordion>
+      );
+    }
+  }
+
   render() {
     const { stepName } = this.props;
     return (
@@ -143,6 +171,7 @@ class PipelineStepDetailsMode extends React.Component {
         {this.renderStepInfo()}
         {this.renderInputFiles()}
         {this.renderOutputFiles()}
+        {this.renderResources()}
       </div>
     );
   }
@@ -168,6 +197,12 @@ PipelineStepDetailsMode.propTypes = {
   status: PropTypes.string,
   startTime: PropTypes.number,
   endTime: PropTypes.number,
+  resources: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string,
+      url: PropTypes.string,
+    })
+  ),
 };
 
 export default PipelineStepDetailsMode;

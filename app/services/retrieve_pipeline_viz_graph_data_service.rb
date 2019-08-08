@@ -70,6 +70,7 @@ class RetrievePipelineVizGraphDataService
           status: status,
           startTime: status_info["start_time"],
           endTime: status_info["end_time"],
+          resources: status_info["resources"].to_a.map { |name_and_url| { name: name_and_url[0], url: name_and_url[1] } },
         }
       end
 

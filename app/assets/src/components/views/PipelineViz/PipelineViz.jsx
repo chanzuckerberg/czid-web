@@ -161,6 +161,7 @@ class PipelineViz extends React.Component {
         status: stepInfo.status,
         startTime: stepInfo.startTime,
         endTime: stepInfo.endTime,
+        resources: stepInfo.resources,
       },
     });
   }
