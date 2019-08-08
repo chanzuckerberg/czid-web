@@ -11,7 +11,9 @@ class Pretitle extends React.Component {
           <a href={breadcrumbLink} className={cs.link}>
             {this.props.children}
           </a>
-          <span className={cs.rightArrow}>{">"}</span>
+          <span className={cs.rightArrow}>
+            <i className="fa fa-angle-right" aria-hidden="true" />
+          </span>
         </div>
       );
     } else {
