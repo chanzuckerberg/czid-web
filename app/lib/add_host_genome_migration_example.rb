@@ -1,4 +1,7 @@
 class AddCarpHost < ActiveRecord::Migration[5.1]
+  # TEMPLATE for a migration adding a host genome.
+  # The example chosen here is "Carp" host.
+  # Replace occurrences of "Carp" as well as other column values as appropriate.
   def up
     return if HostGenome.find_by(name: "Carp")
 
