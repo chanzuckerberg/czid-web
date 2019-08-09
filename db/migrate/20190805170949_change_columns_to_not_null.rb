@@ -23,6 +23,7 @@ class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
     change_column_null :host_genomes, :s3_star_index_path, false
     change_column_null :host_genomes, :s3_bowtie2_index_path, false
     change_column_null :host_genomes, :default_background_id, false
+    set_column_comment :host_genomes, :skip_dedeuterostome_filter, "Whenever we add a new host genome, we need to check if it's a deuterostome or not and set this accordingly. For mammals, deuterostome filtering should be performed."
 
     change_column_null :input_files, :name, false
     change_column_null :input_files, :sample_id, false
