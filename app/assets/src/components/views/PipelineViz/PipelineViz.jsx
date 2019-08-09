@@ -301,7 +301,6 @@ class PipelineViz extends React.Component {
     );
     graph.updateEdges(intraStageOutputEdges, outputColorOptions);
 
-    this.graphs.forEach(graph => this.centerEndNodeVertically(graph));
     this.setState({
       hovered: true,
       interStageArrows: updatedInterStageArrows,
@@ -328,7 +327,6 @@ class PipelineViz extends React.Component {
         return edge.id.match(/-colored$/g);
       });
       graph.updateEdges(allColoredEdges, { hidden: true });
-      this.centerEndNodeVertically(graph);
     });
     alteredGraphs.clear();
     this.setState({
@@ -581,13 +579,6 @@ class PipelineViz extends React.Component {
       .flat();
   }
 
-  centerEndNodeVertically(graph) {
-    // Starting for each graph node is already vertically centered.
-    const yStartNodePos = graph.getNodePosition(START_NODE_ID).y;
-    const xEndNodePos = graph.getNodePosition(END_NODE_ID).x;
-    graph.moveNodeToPosition(END_NODE_ID, xEndNodePos, yStartNodePos);
-  }
-
   closeIfNonActiveStage(stageIndex) {
     const {
       graphData: { stages },
@@ -708,7 +699,6 @@ class PipelineViz extends React.Component {
     );
     this.graphs.push(currStageGraph);
     currStageGraph.minimizeSizeGivenScale(1.0);
-    this.centerEndNodeVertically(currStageGraph);
     this.closeIfNonActiveStage(index);
   }
 
@@ -716,7 +706,6 @@ class PipelineViz extends React.Component {
     this.graphs.forEach((graph, i) => {
       if (this.state.stagesOpened[i]) {
         graph.minimizeSizeGivenScale(1.0);
-        this.centerEndNodeVertically(graph);
       }
     });
   };
