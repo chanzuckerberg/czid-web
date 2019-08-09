@@ -196,10 +196,6 @@ class PipelineRun < ApplicationRecord
     JSON.parse(dag_vars || "{}")
   end
 
-  def as_json(options = {})
-    super(options.merge(except: [:command, :command_stdout, :command_error, :job_description]))
-  end
-
   def check_box_label
     project_name = sample.project ? sample.project.name : 'Unknown Project'
     "#{project_name} : #{sample.name} (#{id})"
@@ -332,12 +328,6 @@ class PipelineRun < ApplicationRecord
     return true if finalized?
     # Old version before run stages
     return true if pipeline_run_stages.blank? && (job_status == STATUS_FAILED || job_status == STATUS_CHECKED)
-  end
-
-  def log_url
-    return nil unless job_log_id
-    "https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2" \
-      "#logEventViewer:group=/aws/batch/job;stream=#{job_log_id}"
   end
 
   def active_stage
