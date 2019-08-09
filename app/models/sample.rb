@@ -774,13 +774,11 @@ class Sample < ApplicationRecord
       }
     elsif result[:metadatum]
       if result[:metadatum].valid?
-        puts "RESULT 8:41pm", result, "END"
         result[:metadatum].save!
         return {
           status: "ok",
         }
       else
-        puts "ERROR HERE"
         return {
           status: "error",
           # Get the error from ErrorHelper, instead of using the error from metadatum model.

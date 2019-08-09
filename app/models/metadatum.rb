@@ -112,8 +112,6 @@ class Metadatum < ApplicationRecord
     # raw_value.
     begin
       loc = JSON.parse(raw_value, symbolize_names: true)
-      # At this point, discard raw_value (too long to store anyway)
-      self.raw_value = nil
     rescue JSON::ParserError
       # CSV uploads will be unwrapped strings
       self.string_validated_value = raw_value
@@ -141,8 +139,8 @@ class Metadatum < ApplicationRecord
       location.save!
     end
 
-    puts "GOT TO HERE 9:00pm", raw_value, "end"
-
+    # At this point, discard raw_value (too long to store anyway)
+    self.raw_value = nil
     self.string_validated_value = nil
     self.location_id = location.id
   rescue => err
