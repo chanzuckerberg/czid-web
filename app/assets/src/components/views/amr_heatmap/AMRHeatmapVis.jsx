@@ -247,7 +247,7 @@ export default class AMRHeatmapVis extends React.Component {
     }
 
     let values = METRICS.map(metric => {
-      const value = amrCountForNode ? amrCountForNode[metric.key] : 0;
+      const value = amrCountForNode ? amrCountForNode[metric.key] || "N/A" : 0;
       return [
         metric.text,
         metric.key === selectedOptions.metric ? <b>{value}</b> : value,
@@ -290,7 +290,7 @@ export default class AMRHeatmapVis extends React.Component {
           amrCount => amrCount[selectedOptions.viewLevel] === rowName
         );
         if (amrCountForRow !== undefined) {
-          rowValues.push(amrCountForRow[selectedOptions.metric]);
+          rowValues.push(amrCountForRow[selectedOptions.metric] || 0);
         } else {
           rowValues.push(0);
         }

@@ -23,6 +23,9 @@ import cs from "./amr_heatmap_view.scss";
 const METRICS = [
   { text: "Coverage", value: "coverage" },
   { text: "Depth", value: "depth" },
+  { text: "RPM (reads per million)", value: "rpm" },
+  { text: "DPM (depth per million)", value: "dpm" },
+  { text: "Total Reads", value: "total_reads" },
 ];
 
 const VIEW_LEVELS = [
@@ -93,6 +96,7 @@ export default class AMRHeatmapView extends React.Component {
         // The following three lines are a kind of hacky workaround to the fact that
         // the amr counts stored in the db have a gene name that includes the actual gene
         // plus the drug class.
+        // Only needed for samples run on pipeline 3.8 or earlier.
         const geneNameExtractionRegex = /[^_]+/; // matches everything before the first underscore
         const geneName = geneNameExtractionRegex.exec(amrCount.gene)[0];
         amrCount.gene = geneName;
@@ -117,10 +121,16 @@ export default class AMRHeatmapView extends React.Component {
         currentSample.amrCounts.forEach(amrCount => {
           accum.depth = Math.max(accum.depth, amrCount.depth);
           accum.coverage = Math.max(accum.coverage, amrCount.coverage);
+          accum.rpm = Math.max(accum.rpm, amrCount.rpm || 0);
+          accum.dpm = Math.max(accum.dpm, amrCount.dpm || 0);
+          accum.total_reads = Math.max(
+            accum.total_reads,
+            amrCount.total_reads || 0
+          );
         });
         return accum;
       },
-      { depth: 0, coverage: 0 }
+      { depth: 0, coverage: 0, rpm: 0, dpm: 0, total_reads: 0 }
     );
     return maxValues;
   }
@@ -202,13 +212,16 @@ export default class AMRHeatmapView extends React.Component {
         const row = [
           `${sample.sampleName},${amrCount.gene},${amrCount.allele},${
             amrCount.coverage
-          },${amrCount.depth}`,
+          },${amrCount.depth},${amrCount.rpm || "N/A"},${amrCount.dpm ||
+            "N/A"},${amrCount.total_reads || "N/A"}`,
         ];
         return row;
       });
       return csvRow;
     });
-    const csvHeaders = ["sample_name,gene_name,allele_name,coverage,depth"];
+    const csvHeaders = [
+      "sample_name,gene_name,allele_name,coverage,depth,rpm,dpm,total_reads",
+    ];
     return [csvHeaders, csvRows];
   }
 
