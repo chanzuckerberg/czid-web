@@ -193,7 +193,6 @@ export default class AMRHeatmapView extends React.Component {
     });
     this.setState({
       samplesWithAMRCounts: updatedSamples,
-      lastDataUpdate: new Date(),
     });
   };
 
@@ -256,6 +255,46 @@ export default class AMRHeatmapView extends React.Component {
     return [{ text: this.getDownloadCSVLink(), value: "csv" }];
   }
 
+  // Sometimes, when presenting the tooltip popup as a user hovers over
+  // a node on the heatmap, they will be over a node where the row is
+  // an allele and the column is a sample with no AMR count for the allele.
+  // With no AMR count, there's no easy way to grab the name of the gene
+  // for the allele. Hence the allele-to-gene mapping.
+  mapAllelesToGenes(sampleData) {
+    const alleleToGeneMap = {};
+    sampleData.forEach(sample => {
+      sample.amrCounts.forEach(amrCount => {
+        alleleToGeneMap[amrCount.allele] = amrCount.gene;
+      });
+    });
+    return alleleToGeneMap;
+  }
+
+  extractLabels(sampleData) {
+    const sampleLabels = [];
+    const genes = {};
+    const alleles = {};
+    sampleData.forEach(sample => {
+      sampleLabels.push({
+        label: sample.sampleName,
+        id: sample.sampleId,
+        metadata: sample.metadata,
+      });
+      sample.amrCounts.forEach(amrCount => {
+        genes[amrCount.gene] = true;
+        alleles[amrCount.allele] = true;
+      });
+    });
+    const geneLabels = Object.keys(genes).map(gene => {
+      return { label: gene };
+    });
+    const alleleLabels = Object.keys(alleles).map(allele => {
+      return { label: allele };
+    });
+
+    return [sampleLabels, geneLabels, alleleLabels];
+  }
+
   //*** Render methods ***
 
   renderHeader() {
@@ -300,7 +339,6 @@ export default class AMRHeatmapView extends React.Component {
 
   renderVisualization() {
     const {
-      lastDataUpdate,
       loading,
       samplesWithAMRCounts,
       selectedOptions,
@@ -314,6 +352,10 @@ export default class AMRHeatmapView extends React.Component {
         </p>
       );
     }
+    const [sampleLabels, geneLabels, alleleLabels] = this.extractLabels(
+      samplesWithAMRCounts
+    );
+    const alleleToGeneMap = this.mapAllelesToGenes(samplesWithAMRCounts);
     return (
       <div className="row visualization-content">
         <ErrorBoundary>
@@ -323,7 +365,10 @@ export default class AMRHeatmapView extends React.Component {
             onSampleLabelClick={this.onSampleLabelClick}
             onGeneLabelClick={this.onGeneLabelClick}
             samplesMetadataTypes={samplesMetadataTypes}
-            lastDataUpdate={lastDataUpdate}
+            sampleLabels={sampleLabels}
+            geneLabels={geneLabels}
+            alleleLabels={alleleLabels}
+            alleleToGeneMap={alleleToGeneMap}
           />
         </ErrorBoundary>
       </div>
