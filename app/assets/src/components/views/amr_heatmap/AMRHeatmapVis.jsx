@@ -30,7 +30,7 @@ export default class AMRHeatmapVis extends React.Component {
       tooltipLocation: null,
       columnMetadataLegend: null,
       addMetadataTrigger: null,
-      nodeHoverTriggered: false,
+      nodeHovered: false,
       metadataLabelHovered: false,
       selectedMetadata: new Set(DEFAULT_SELECTED_METADATA),
     };
@@ -43,11 +43,7 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const {
-      selectedMetadata,
-      nodeHoverTriggered,
-      metadataLabelHovered,
-    } = this.state;
+    const { selectedMetadata, nodeHovered, metadataLabelHovered } = this.state;
     const { selectedOptions } = this.props;
     if (
       selectedOptions !== prevProps.selectedOptions ||
@@ -61,7 +57,7 @@ export default class AMRHeatmapVis extends React.Component {
     ) {
       this.heatmap.updateColumnMetadata(this.getSelectedMetadataFields());
     }
-    if (nodeHoverTriggered !== prevState.nodeHoverTriggered) {
+    if (nodeHovered !== prevState.nodeHovered) {
       logAnalyticsEvent("AMRHeatmapVis_heatmap-node-hover_triggered");
     }
     if (metadataLabelHovered !== prevState.metadataLabelHovered) {
@@ -145,7 +141,7 @@ export default class AMRHeatmapVis extends React.Component {
   onNodeHover = node => {
     this.setState({
       nodeHoverInfo: this.getTooltipData(node),
-      nodeHoverTriggered: true,
+      nodeHovered: true,
     });
   };
 

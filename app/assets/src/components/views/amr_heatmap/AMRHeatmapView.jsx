@@ -316,7 +316,6 @@ export default class AMRHeatmapView extends React.Component {
         </p>
       );
     }
-    logAnalyticsEvent("AMRHeatmapView_heatmap_rendered");
     return (
       <div className="row visualization-content">
         <ErrorBoundary>
