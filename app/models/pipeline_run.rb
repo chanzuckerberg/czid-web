@@ -555,20 +555,20 @@ class PipelineRun < ApplicationRecord
     amr_results = PipelineRun.download_file(s3_file_for("amr_counts"), local_amr_full_results_path)
     unless File.zero?(amr_results)
       amr_counts_array = []
-      # First line of output file has header titles, e.g. "Sample/Gene/Allele..." that are extraneous
-      # that we drop
-      File.readlines(amr_results).drop(1).each do |amr_result|
-        amr_result_fields = amr_result.split(",").drop(2)
-        amr_counts_array << { gene: amr_result_fields[0],
-                              allele: amr_result_fields[1],
-                              coverage: amr_result_fields[2],
-                              depth:  amr_result_fields[3],
-                              annotation_gene: amr_result_fields[11].split(";")[2],
-                              genbank_accession: amr_result_fields[11].split(";")[4],
-                              drug_family: amr_result_fields[12],
-                              total_reads: amr_result_fields[16],
-                              rpm: amr_result_fields[17],
-                              dpm: amr_result_fields[18].strip, } # Remove dangling newline character
+      amr_results_table = CSV.read(amr_results, headers: true)
+      amr_results_table.each do |row|
+        amr_counts_array << {
+          gene: row["gene"],
+          allele: row["allele"],
+          coverage: row["coverage"],
+          depth: row["depth"],
+          annotation_gene: row["annotation"].split(";")[2],
+          genbank_accession: row["annotation"].split(";")[4],
+          drug_family: row["gene_family"],
+          total_reads: row["total_reads"],
+          rpm: row["rpm"],
+          dpm: row["dpm"],
+        }
       end
       update(amr_counts_attributes: amr_counts_array)
     end
