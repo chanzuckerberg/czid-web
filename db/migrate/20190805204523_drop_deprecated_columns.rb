@@ -6,7 +6,7 @@ class DropDeprecatedColumns < ActiveRecord::Migration[5.1]
 
     remove_column :metadata, :specificity
 
-    # wait for boris
+    # TODO: wait for boris
     remove_column :pipeline_runs, :version
     remove_column :pipeline_runs, :ready_step
 
@@ -19,6 +19,7 @@ class DropDeprecatedColumns < ActiveRecord::Migration[5.1]
     remove_column :pipeline_runs, :job_log_id
     remove_column :pipeline_runs, :postprocess_status
     remove_column :pipeline_runs, :assembled_taxids
+    remove_column :pipeline_runs, :subsample
 
     remove_column :taxon_counts, :percent_concordant
     remove_column :taxon_counts, :species_total_concordant
@@ -28,17 +29,14 @@ class DropDeprecatedColumns < ActiveRecord::Migration[5.1]
     remove_columns :backgrounds, :project_id
 
     remove_columns :job_stats, :reads_before
-    # TODO: (gdingle): verify below this line
 
-    remove_column :samples, :subsample
-    remove_column :samples, :sample_detection
-    remove_column :samples, :max_input_fragments
-    # TODO: (gdingle): after data migration drop sample_organism, sample_*
-
+    # this col is completely NULL
     remove_column :taxon_byteranges, :tax_level
 
+    # this col is completely NULL
     remove_column :taxon_scoring_models, :user_id
 
+    # this col is completely NULL
     remove_column :taxon_summaries, :name
   end
 end
