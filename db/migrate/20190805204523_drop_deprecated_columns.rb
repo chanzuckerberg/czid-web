@@ -2,8 +2,6 @@ class DropDeprecatedColumns < ActiveRecord::Migration[5.1]
   def change
     remove_column :pipeline_run_stages, :failed_jobs
 
-    remove_column :host_genomes, :skip_deutero_filter
-
     remove_column :metadata_fields, :validation_type
 
     remove_column :pipeline_runs, :version
