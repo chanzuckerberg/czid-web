@@ -134,8 +134,6 @@ class PipelineRun < ApplicationRecord
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
                         "amr_counts" => "db_load_amr_counts", }.freeze
-  # Note: reads_before_priceseqfilter, reads_after_priceseqfilter, reads_after_cdhitdup
-  #       are the only "job_stats" we actually need for web display.
   REPORT_READY_OUTPUT = "taxon_counts".freeze
 
   # Values for results_finalized are as follows.

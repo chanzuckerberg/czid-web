@@ -4,6 +4,8 @@ class DropDeprecatedColumns < ActiveRecord::Migration[5.1]
 
     remove_column :metadata_fields, :validation_type
 
+    remove_column :metadata, :specificity
+
     # wait for boris
     remove_column :pipeline_runs, :version
     remove_column :pipeline_runs, :ready_step
@@ -23,12 +25,10 @@ class DropDeprecatedColumns < ActiveRecord::Migration[5.1]
     remove_column :taxon_counts, :genus_total_concordant
     remove_column :taxon_counts, :family_total_concordant
 
-    # TODO: (gdingle): verify below this line
     remove_columns :backgrounds, :project_id
 
     remove_columns :job_stats, :reads_before
-
-    remove_column :metadata, :specificity
+    # TODO: (gdingle): verify below this line
 
     remove_column :samples, :subsample
     remove_column :samples, :sample_detection
