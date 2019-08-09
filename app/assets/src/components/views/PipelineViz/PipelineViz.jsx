@@ -160,6 +160,8 @@ class PipelineViz extends React.Component {
         outputFiles: outputInfo,
         status: stepInfo.status,
         startTime: stepInfo.startTime,
+        endTime: stepInfo.endTime,
+        resources: stepInfo.resources,
       },
     });
   }
@@ -380,6 +382,7 @@ class PipelineViz extends React.Component {
     const backgroundColor =
       hovered && options.hovered ? options.hovered : options.default;
     const textColor = options.textColor;
+    const shadowColor = options.shadowColor;
     return {
       color: {
         background: backgroundColor,
@@ -390,6 +393,16 @@ class PipelineViz extends React.Component {
         },
       },
       ...(textColor ? { font: { color: textColor } } : {}),
+      ...(shadowColor
+        ? {
+            shadow: {
+              color: shadowColor,
+              x: 0,
+              y: 2,
+              size: 8,
+            },
+          }
+        : {}),
     };
   }
 
@@ -573,7 +586,7 @@ class PipelineViz extends React.Component {
         borderWidth: 1,
         borderWidthSelected: 1,
         shadow: {
-          color: "rgba(0, 0, 0, 0.22)",
+          color: cs.nodeShadowColor,
           x: 0,
           y: 2,
           size: 8,
@@ -615,7 +628,8 @@ class PipelineViz extends React.Component {
         notStarted: this.getNodeStatusOptions("notStarted"),
         inProgress: this.getNodeStatusOptions("inProgress"),
         finished: this.getNodeStatusOptions("finished"),
-        errored: this.getNodeStatusOptions("errored"),
+        userErrored: this.getNodeStatusOptions("userErrored"),
+        pipelineErrored: this.getNodeStatusOptions("pipelineErrored"),
       },
       edges: {
         chosen: false,
@@ -623,7 +637,7 @@ class PipelineViz extends React.Component {
           to: {
             enabled: true,
             type: "arrow",
-            scaleFactor: 0.6,
+            scaleFactor: 0.5,
           },
         },
         smooth: {
@@ -829,6 +843,7 @@ const nodeColors = PropTypes.shape({
   default: PropTypes.string.isRequired,
   hovered: PropTypes.string,
   textColor: PropTypes.string,
+  shadowColor: PropTypes.string,
 });
 
 PipelineViz.propTypes = {
@@ -858,13 +873,21 @@ PipelineViz.defaultProps = {
   notStartedNodeColor: {
     default: cs.notStartedBg,
     textColor: cs.notStartedText,
+    shadowColor: cs.notStartedShadow,
   },
   inProgressNodeColor: {
     default: cs.inProgressBg,
     hovered: cs.inProgressHoverBg,
   },
   finishedNodeColor: { default: cs.finishedBg, hovered: cs.finishedHoverBg },
-  erroredNodeColor: { default: cs.erroredBg, hovered: cs.erroredHoverBg },
+  pipelineErroredNodeColor: {
+    default: cs.pipelineErroredBg,
+    hovered: cs.pipelineErroredHoverBg,
+  },
+  userErroredNodeColor: {
+    default: cs.userErroredBg,
+    hovered: cs.userErroredHoverBg,
+  },
   edgeColor: cs.defaultEdgeColor,
   inputEdgeColor: cs.inputEdgeColor,
   outputEdgeColor: cs.outputEdgeColor,

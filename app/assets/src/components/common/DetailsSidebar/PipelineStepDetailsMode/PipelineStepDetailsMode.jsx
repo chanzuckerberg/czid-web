@@ -13,7 +13,7 @@ import cs from "./pipeline_step_details_mode.scss";
 
 class PipelineStepDetailsMode extends React.Component {
   renderStatusBox() {
-    const { status, startTime } = this.props;
+    const { status, startTime, endTime } = this.props;
     let statusTitle, statusDescription;
     switch (status) {
       case "inProgress":
@@ -22,10 +22,20 @@ class PipelineStepDetailsMode extends React.Component {
           Math.floor(startTime * 1000) // Convert seconds to milliseconds
         ).fromNow(true)}`;
         break;
-      case "errored":
+      case "userErrored":
+      case "pipelineErrored":
         statusTitle = "Sample failed at this step.";
         statusDescription =
           "Please upload again or reach out to help@idseq.com.";
+        break;
+      case "finished":
+        statusTitle = "Step completed";
+        statusDescription =
+          endTime &&
+          `Finished in ${moment(Math.floor(startTime * 1000)).from(
+            endTime * 1000,
+            true
+          )}.`;
         break;
       default:
         return;
@@ -124,6 +134,34 @@ class PipelineStepDetailsMode extends React.Component {
     });
   }
 
+  renderResources() {
+    const { resources } = this.props;
+    if (resources && resources.length) {
+      const resourcesHeader = <div className={cs.title}>Resources</div>;
+      const resourceLinks = resources.map(linkInfo => {
+        return (
+          <span key={linkInfo.url}>
+            <a href={linkInfo.url} target="_blank" rel="noopener noreferrer">
+              {linkInfo.name}
+            </a>
+          </span>
+        );
+      });
+
+      return (
+        <Accordion
+          className={cs.accordion}
+          header={resourcesHeader}
+          open={true}
+        >
+          <div className={cx(cs.resourcesContainer, cs.accordionContent)}>
+            {resourceLinks}
+          </div>
+        </Accordion>
+      );
+    }
+  }
+
   render() {
     const { stepName } = this.props;
     return (
@@ -133,6 +171,7 @@ class PipelineStepDetailsMode extends React.Component {
         {this.renderStepInfo()}
         {this.renderInputFiles()}
         {this.renderOutputFiles()}
+        {this.renderResources()}
       </div>
     );
   }
@@ -157,6 +196,13 @@ PipelineStepDetailsMode.propTypes = {
   outputFiles: FileList.isRequired,
   status: PropTypes.string,
   startTime: PropTypes.number,
+  endTime: PropTypes.number,
+  resources: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string,
+      url: PropTypes.string,
+    })
+  ),
 };
 
 export default PipelineStepDetailsMode;
