@@ -4,7 +4,6 @@
 
 /* Subheader */
 .viewHeader {
-  margin-top: 20px;
   margin-bottom: 5px;
 
   .pipelineInfo {
@@ -20,6 +19,14 @@
       &:last-child {
         margin-bottom: 0;
       }
+    }
+  }
+
+  .linkToPipelineViz {
+    cursor: pointer;
+
+    &:hover {
+      color: $primary-light;
     }
   }
 

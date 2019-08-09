@@ -33,6 +33,7 @@ import SamplePrivateIcon from "./SamplePrivateIcon";
 import SaveIcon from "./SaveIcon";
 import SortIcon from "./SortIcon";
 import TickIcon from "./TickIcon";
+import UploadIcon from "./UploadIcon";
 import UserIcon from "./UserIcon";
 import WormIcon from "./WormIcon";
 
@@ -65,6 +66,7 @@ export default {
     SamplePublicIcon,
     SamplePrivateIcon,
     TickIcon,
+    UploadIcon,
     UserIcon,
     WormIcon,
     PublicProjectIcon,

@@ -5,7 +5,8 @@
 // Exporting strings to style nodes and edges in vis.js
 :export {
   notStartedBg: $white;
-  notStartedText: $dark-grey;
+  notStartedText: scale-color($black, $alpha: -50%);
+  notStartedShadow: scale-color($box-shadow-light, $alpha: -50%);
 
   inProgressBg: $primary-lightest;
   inProgressHoverBg: hover-state($primary-lightest);
@@ -13,13 +14,18 @@
   finishedBg: $success-bg;
   finishedHoverBg: hover-state($success-bg);
 
-  erroredBg: $error-bg;
-  erroredHoverBg: hover-state($error-bg);
+  pipelineErroredBg: $error-bg;
+  pipelineEroredHoverBg: hover-state($error-bg);
+
+  userErroredBg: $warning-bg;
+  userErroredHoverBg: hover-state($warning-bg);
 
   stageBg: $off-white;
   defaultEdgeColor: $medium-grey;
   outputEdgeColor: $primary-light;
   inputEdgeColor: $black;
+
+  nodeShadowColor: $box-shadow-light;
 }
 
 .pipelineVizPage {
@@ -80,7 +86,7 @@
   @include font-header-node-l;
   background-color: $white;
   border-radius: 4px;
-  padding: 6px 12px 6px 6px;
+  padding: 6px 8px;
   cursor: pointer;
   box-shadow: $box-shadow-bottom-right;
   display: flex;
@@ -105,8 +111,12 @@
     background-color: $primary-lightest;
   }
 
-  &.errored {
+  &.pipelineErrored {
     background-color: $error-lightest;
+  }
+
+  &.userErrored {
+    background-color: $warning-bg;
   }
 }
 
@@ -116,38 +126,46 @@
   height: 20px;
 
   .inProgressIcon,
-  .erroredIcon,
-  .finishedIcon,
-  .noIcon {
+  .pipelineErroredIcon,
+  .userErroredIcon,
+  .finishedIcon {
     height: 15px;
     width: 15px;
   }
 
   .inProgressIcon {
     color: $primary-light;
-    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 15px;
   }
-  .erroredIcon {
+
+  .pipelineErroredIcon {
     fill: $error;
   }
+
+  .userErroredIcon {
+    fill: $warning;
+  }
+
   .finishedIcon {
     fill: $success;
   }
-  .noIcon {
+
+  .stageName {
     margin: 2.5px 0;
   }
 
-  .stageName {
-    margin: 2.5px 0 2.5px 4px;
+  // Only give the stage name a margin-left if there is
+  // an icon preceding it.
+  & > .stageName:nth-child(2) {
+    margin-left: 4px;
   }
 }
 
 .stageArrow {
-  width: 50px;
+  width: 30px;
   height: 10px;
   display: flex;
   align-items: center;
@@ -158,7 +176,7 @@
 
   .stageArrowBody {
     position: relative;
-    width: calc(100% - 12px);
+    width: calc(100% - 8px);
     padding: 0.5px 0;
     background-color: $medium-grey;
 
@@ -176,7 +194,7 @@
   .stageArrowHead {
     position: absolute;
     right: 0;
-    height: 100%;
+    height: 75%;
     fill: $medium-grey;
 
     &.fromColoring {
