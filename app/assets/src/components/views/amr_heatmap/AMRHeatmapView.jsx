@@ -249,7 +249,6 @@ export default class AMRHeatmapView extends React.Component {
   //*** Render methods ***
 
   renderHeader() {
-    const { sampleIds } = this.props;
     const { loading } = this.state;
     return (
       <ViewHeader className={cs.viewHeader}>
