@@ -1,5 +1,6 @@
 import React from "react";
 import cx from "classnames";
+import { groupBy } from "lodash/fp";
 import { PanZoom } from "react-easy-panzoom";
 
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
@@ -373,7 +374,7 @@ class PipelineViz extends React.Component {
     nodeData.push({ id: START_NODE_ID, group: "startEndNodes" });
     nodeData.push({ id: END_NODE_ID, group: "startEndNodes" });
 
-    this.addHierarchicalLevelsToNodes(nodeData, edgeData);
+    this.addPositionToNodes(nodeData, edgeData);
     return nodeData;
   }
 
@@ -406,40 +407,75 @@ class PipelineViz extends React.Component {
     };
   }
 
-  addHierarchicalLevelsToNodes(nodeData, edgeData) {
+  addPositionToNodes(nodeData, edgeData) {
+    const xInterval = 130;
+    const yInterval = 84;
+    const staggerMultiplier = 1.5;
+
     const nodeToCurrentLevel = {};
-    const fromToToEdgeMap = {};
     nodeData.forEach(node => {
-      nodeToCurrentLevel[node.id] = 1;
-      fromToToEdgeMap[node.id] = [];
+      nodeToCurrentLevel[node.id] = 0;
     });
 
-    edgeData.forEach(edge => {
-      fromToToEdgeMap[edge.from].push(edge.to);
-    });
+    const fromToToEdgeMap = groupBy("from", edgeData);
+    const toToFromEdgeMap = groupBy("to", edgeData);
 
     const bfs = [START_NODE_ID];
     while (bfs.length) {
       const currentNode = bfs.shift();
-
-      // Update children and add to back of bfs queue
-      const newLevel = nodeToCurrentLevel[currentNode] + 1;
-      fromToToEdgeMap[currentNode].forEach(toNodeId => {
-        if (newLevel > nodeToCurrentLevel[toNodeId]) {
-          nodeToCurrentLevel[toNodeId] = newLevel;
-          if (toNodeId != END_NODE_ID) {
-            nodeToCurrentLevel[END_NODE_ID] = Math.max(
-              nodeToCurrentLevel[END_NODE_ID],
-              newLevel + 1
-            );
+      // End node should have no children, so skip.
+      if (currentNode > END_NODE_ID) {
+        // Update children and add to back of bfs queue
+        const newLevel = nodeToCurrentLevel[currentNode] + 1;
+        fromToToEdgeMap[currentNode].forEach(edge => {
+          const toNodeId = edge.to;
+          if (newLevel > nodeToCurrentLevel[toNodeId]) {
+            nodeToCurrentLevel[toNodeId] = newLevel;
+            if (toNodeId != END_NODE_ID) {
+              nodeToCurrentLevel[END_NODE_ID] = Math.max(
+                nodeToCurrentLevel[END_NODE_ID],
+                newLevel + 1
+              );
+            }
           }
-        }
-        bfs.push(toNodeId);
-      });
+          bfs.push(toNodeId);
+        });
+      }
     }
 
+    const maxLevel = Math.max(...Object.values(nodeToCurrentLevel));
     nodeData.forEach(node => {
+      node.x = (nodeToCurrentLevel[node.id] - maxLevel / 2.0) * xInterval;
       node.level = nodeToCurrentLevel[node.id];
+    });
+
+    const nodesByLevel = groupBy("level", nodeData);
+    // Stagger nodes if more than 2 levels (4, if including start and end nodes).
+    let applyStaggerNodesMultiplier = maxLevel > 4;
+    Object.values(nodesByLevel).forEach(nodes => {
+      // Sort by number of inputting and outputting edges
+      nodes.sort((n1, n2) => {
+        const n1Val =
+          fromToToEdgeMap[n1.id].length + toToFromEdgeMap[n1.id].length;
+        const n2Val =
+          fromToToEdgeMap[n2.id].length + toToFromEdgeMap[n2.id].length;
+        return n2Val - n1Val;
+      });
+
+      let direction = nodes.length % 2 ? -1 : 1;
+      let offsetAmount = nodes.length % 2 ? 0 : yInterval / 2;
+      nodes.forEach(node => {
+        node.y =
+          offsetAmount *
+          direction *
+          (applyStaggerNodesMultiplier ? staggerMultiplier : 1);
+        if (direction == -1) {
+          offsetAmount += yInterval;
+        }
+        direction *= -1;
+      });
+      applyStaggerNodesMultiplier =
+        maxLevel > 4 && !applyStaggerNodesMultiplier;
     });
   }
 
@@ -650,15 +686,6 @@ class PipelineViz extends React.Component {
         },
         selectionWidth: 0,
         hoverWidth: 0,
-      },
-      layout: {
-        hierarchical: {
-          direction: "LR",
-          sortMethod: "directed",
-          levelSeparation: 130,
-          blockShifting: false,
-          edgeMinimization: false,
-        },
       },
       physics: {
         enabled: false,
