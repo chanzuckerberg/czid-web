@@ -6,6 +6,7 @@ class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
     change_column_null :pipeline_run_stages, :step_number, false
     change_column_null :pipeline_run_stages, :job_command_func, false
     change_column_null :pipeline_run_stages, :name, false
+    set_column_comment :pipeline_run_stages, :failed_jobs, "For retrying failed AWS jobs"
 
     change_column_null :alignment_configs, :name, false
     change_column_null :alignment_configs, :s3_nt_db_path, false
