@@ -70,13 +70,6 @@ export default class DetailCells extends React.Component {
           1
         )}
         {renderNumber(taxInfo.NT.neglogevalue, taxInfo.NR.neglogevalue, 0)}
-        {renderNumber(
-          taxInfo.NT.percentconcordant,
-          taxInfo.NR.percentconcordant,
-          1,
-          undefined,
-          showConcordance
-        )}
         <td className="last-col" />
       </tr>
     ));

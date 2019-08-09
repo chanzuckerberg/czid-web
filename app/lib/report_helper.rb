@@ -14,7 +14,6 @@ module ReportHelper
   DEFAULT_SAMPLE_NEGLOGEVALUE = 0.0
   DEFAULT_SAMPLE_PERCENTIDENTITY = 0.0
   DEFAULT_SAMPLE_ALIGNMENTLENGTH = 0.0
-  DEFAULT_SAMPLE_PERCENTCONCORDANT = 0.0
 
   HOMO_SAPIEN_TAX_ID = 9606
 
@@ -34,7 +33,7 @@ module ReportHelper
 
   SORT_DIRECTIONS = %w[highest lowest].freeze
   # We do not allow underscores in metric names, sorry!
-  METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue percentconcordant aggregatescore maxzscore r_pct rpm_bg].freeze
+  METRICS = %w[r rpm zscore percentidentity alignmentlength neglogevalue aggregatescore maxzscore r_pct rpm_bg].freeze
   COUNT_TYPES = %w[NT NR].freeze
   # Note: no underscore in sortable column names. Add to here to protect from data cleaning.
   PROPERTIES_OF_TAXID = %w[tax_id name common_name tax_level species_taxid genus_taxid family_taxid superkingdom_taxid category_name is_phage].freeze
@@ -387,8 +386,7 @@ module ReportHelper
           taxon_counts.e_value IS NOT NULL,
           (0.0 - taxon_counts.e_value),
           #{DEFAULT_SAMPLE_NEGLOGEVALUE}
-        )                                AS  neglogevalue,
-        taxon_counts.percent_concordant  AS  percentconcordant
+        )                                AS  neglogevalue
       FROM taxon_counts
       LEFT OUTER JOIN taxon_summaries ON
         #{background_id.to_i}   = taxon_summaries.background_id   AND
@@ -411,7 +409,6 @@ module ReportHelper
       'percentidentity' => DEFAULT_SAMPLE_PERCENTIDENTITY,
       'alignmentlength' => DEFAULT_SAMPLE_ALIGNMENTLENGTH,
       'neglogevalue' => DEFAULT_SAMPLE_NEGLOGEVALUE,
-      'percentconcordant' => DEFAULT_SAMPLE_PERCENTCONCORDANT,
       'aggregatescore' => nil,
     }
   end

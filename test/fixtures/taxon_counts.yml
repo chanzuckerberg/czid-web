@@ -40,10 +40,6 @@ five:
   e_value: -16.9101
   genus_taxid: 570
   superkingdom_taxid: 2
-  percent_concordant: 66.6667
-  species_total_concordant: 46.0
-  genus_total_concordant: 82.0
-  family_total_concordant: 162.0
   common_name: ""
 
 six:
@@ -58,10 +54,6 @@ six:
   e_value: -89.5641
   genus_taxid: 570
   superkingdom_taxid: 2
-  percent_concordant: 98.5646
-  species_total_concordant: 206.0
-  genus_total_concordant: 216.0
-  family_total_concordant: 232.0
   common_name: ""
 
 seven:
@@ -76,10 +68,6 @@ seven:
   e_value: -16.9874
   genus_taxid: 570
   superkingdom_taxid: 2
-  percent_concordant: 94.2529
-  species_total_concordant: 11.2
-  genus_total_concordant: 82.0
-  family_total_concordant: 162.0
   common_name: ""
 
 eight:
@@ -94,10 +82,6 @@ eight:
   e_value: -89.5822
   genus_taxid: 570
   superkingdom_taxid: 2
-  percent_concordant: 99.5392
-  species_total_concordant: 42.0
-  genus_total_concordant: 216.0
-  family_total_concordant: 232.0
   pipeline_run_id: 2661
   common_name: ""
 
@@ -113,10 +97,6 @@ nine:
   e_value: -9.3
   genus_taxid: 1301
   superkingdom_taxid: 2
-  percent_concordant: 0.0
-  species_total_concordant: 0.0
-  genus_total_concordant: 4.0
-  family_total_concordant: 4.0
   common_name: ""
 
 ten:
@@ -131,10 +111,6 @@ ten:
   e_value: -9.3
   genus_taxid: 1301
   superkingdom_taxid: 2
-  percent_concordant: 200.0
-  species_total_concordant: 0.0
-  genus_total_concordant: 4.0
-  family_total_concordant: 4.0
   common_name: ""
 
 eleven:
@@ -149,10 +125,6 @@ eleven:
   e_value: -81.478
   genus_taxid: 1301
   superkingdom_taxid: 2
-  percent_concordant: 100.0
-  species_total_concordant: 4.0
-  genus_total_concordant: 4.0
-  family_total_concordant: 4.0
   common_name: ""
 
 twelve:
@@ -167,10 +139,6 @@ twelve:
   e_value: -81.478
   genus_taxid: 1301
   superkingdom_taxid: 2
-  percent_concordant: 100.0
-  species_total_concordant: 4.0
-  genus_total_concordant: 4.0
-  family_total_concordant: 4.0
   common_name: ""
 
 # for phylo_trees
