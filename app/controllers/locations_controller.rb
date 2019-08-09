@@ -6,6 +6,11 @@ class LocationsController < ApplicationController
   GEOSEARCH_RATE_LIMIT_ERR = "Geosearch failed. Check API rate limits".freeze
   LOCATION_LOAD_ERR_MSG = "Unable to load sample locations".freeze
 
+  TOKEN_AUTH_ACTIONS = [:external_search].freeze
+
+  before_action :authenticate_user!, except: TOKEN_AUTH_ACTIONS
+  before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
+
   def external_search
     unless feature_access?
       render(json: {
