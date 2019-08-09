@@ -5,8 +5,8 @@ const NON_HOST_CONTIGS_LABEL = "Download Non-Host Contigs (.fasta)";
 const NON_HOST_CONTIGS_MAPPING_LABEL =
   "Download Non-Host Contigs Summary (.csv)";
 const UNMAPPED_READS_LABEL = "Download Unmapped Reads (.fasta)";
-const RESULTS_FOLDER_LABEL = "See Results Folder";
-const PIPELINE_VIZ_LABEL = "See Pipeline Visualization";
+const RESULTS_FOLDER_LABEL = "View Results Folder";
+const PIPELINE_VIZ_LABEL = "View Pipeline Visualization";
 
 // Get download options based on pipeline metadata.
 const getDownloadOptions = (pipelineRun, showPipelineVizLink) => {

@@ -31,10 +31,12 @@ class RetrievePipelineVizGraphDataService
     @pipeline_run = PipelineRun.find(pipeline_run_id)
     @all_dag_jsons = []
     @stage_names = []
+    @stage_job_statuses = []
     @pipeline_run.pipeline_run_stages.each do |stage|
       if stage.dag_json && (stage.name != "Experimental" || see_experimental)
         @all_dag_jsons.push(JSON.parse(stage.dag_json || "{}"))
         @stage_names.push(stage.name)
+        @stage_job_statuses.push(stage.job_status)
       end
     end
     @remove_host_filtering_urls = remove_host_filtering_urls
@@ -60,7 +62,7 @@ class RetrievePipelineVizGraphDataService
       steps = dag_json["steps"].map do |step|
         status_info = stage_step_statuses[step["out"]] || {}
         description = status_info["description"].blank? ? stage_step_descriptions[step["out"]] : status_info["description"]
-        status = redefine_job_status(status_info["status"])
+        status = redefine_job_status(status_info["status"], @stage_job_statuses[stage_index])
         all_redefined_statuses << status
         {
           name: modify_step_name(step["out"]),
@@ -69,6 +71,8 @@ class RetrievePipelineVizGraphDataService
           outputEdges: [],
           status: status,
           startTime: status_info["start_time"],
+          endTime: status_info["end_time"],
+          resources: status_info["resources"].to_a.map { |name_and_url| { name: name_and_url[0], url: name_and_url[1] } },
         }
       end
 
@@ -90,24 +94,29 @@ class RetrievePipelineVizGraphDataService
     end
   end
 
-  def redefine_job_status(status)
-    case status
+  def redefine_job_status(step_status, stage_status)
+    case step_status
     when "instantiated", nil
       "notStarted"
+    when "uploaded"
+      "finished"
+    when "pipeline_errored"
+      "pipelineErrored"
+    when "errored", "user_errored"
+      "userErrored"
     # finished_running occurs when the outputs have been created, but hasn't been uploaded to aws yet. Since the file
     # is not available to download yet, it is marked as "inProgress"
     when "running", "finished_running"
-      "inProgress"
-    when "uploaded"
-      "finished"
-    when "errored"
-      "errored"
+      # Should be errored if pipeline is killed and the step_status file isn't updated.
+      stage_status == PipelineRunStage::STATUS_FAILED ? "pipelineErrored" : "inProgress"
     end
   end
 
   def stage_job_status(statuses)
-    if statuses.include? "errored"
-      return "errored"
+    if statuses.include? "userErrored"
+      return "userErrored"
+    elsif statuses.include? "pipelineErrored"
+      return "pipelineErrored"
     elsif statuses.include?("inProgress") || (statuses.include?("notStarted") && statuses.include?("finished"))
       return "inProgress"
     elsif statuses.include? "notStarted"

@@ -13,6 +13,7 @@ import {
   processMetadataTypes,
 } from "~/components/utils/metadata";
 import LoadingIcon from "~ui/icons/LoadingIcon";
+import { logAnalyticsEvent } from "~/api/analytics";
 import { ViewHeader, NarrowContainer } from "~/components/layout";
 import { DownloadButtonDropdown } from "~ui/controls/dropdowns";
 import { createCSVObjectURL } from "~utils/csv";
@@ -133,6 +134,10 @@ export default class AMRHeatmapView extends React.Component {
     this.setState({
       selectedOptions: newOptions,
     });
+    logAnalyticsEvent("AMRHeatmapView_options_changed", {
+      control: Object.keys(options)[0],
+      option: Object.values(options)[0],
+    });
   };
 
   onSampleLabelClick = sampleId => {
@@ -153,6 +158,10 @@ export default class AMRHeatmapView extends React.Component {
         sidebarMode: SIDEBAR_SAMPLE_MODE,
         sidebarVisible: true,
       });
+      logAnalyticsEvent("AMRHeatmapView_sample-details-sidebar_opened", {
+        sampleId: sampleId,
+        sidebarMode: "sampleDetails",
+      });
     }
   };
 
@@ -171,6 +180,10 @@ export default class AMRHeatmapView extends React.Component {
         selectedGene: geneName,
         sidebarMode: SIDEBAR_GENE_MODE,
         sidebarVisible: true,
+      });
+      logAnalyticsEvent("AMRHeatmapView_gene-details-sidebar_opened", {
+        selectedGene: geneName,
+        sidebarMode: "geneDetails",
       });
     }
   };
@@ -245,6 +258,9 @@ export default class AMRHeatmapView extends React.Component {
         target="_blank"
         rel="noopener noreferrer"
         key={"Download_CSV_link"}
+        onClick={() =>
+          logAnalyticsEvent("AMRHeatmapView_download-csv-table_clicked")
+        }
       >
         Download CSV
       </a>
@@ -315,6 +331,11 @@ export default class AMRHeatmapView extends React.Component {
             <DownloadButtonDropdown
               className={cs.controlElement}
               options={this.getDownloadOptions()}
+              onClick={() =>
+                logAnalyticsEvent(
+                  "AMRHeatmapView_download-button-dropdown_clicked"
+                )
+              }
               disabled={loading}
             />
           </ViewHeader.Controls>

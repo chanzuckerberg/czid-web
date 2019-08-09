@@ -7,6 +7,7 @@ import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { DataTooltip } from "~ui/containers";
 import { getTooltipStyle } from "~/components/utils/tooltip";
+import { logAnalyticsEvent } from "~/api/analytics";
 
 import cs from "./amr_heatmap_vis.scss";
 
@@ -29,6 +30,8 @@ export default class AMRHeatmapVis extends React.Component {
       tooltipLocation: null,
       columnMetadataLegend: null,
       addMetadataTrigger: null,
+      nodeHovered: false,
+      metadataLabelHovered: false,
       selectedMetadata: new Set(DEFAULT_SELECTED_METADATA),
     };
 
@@ -40,7 +43,7 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { selectedMetadata } = this.state;
+    const { selectedMetadata, nodeHovered, metadataLabelHovered } = this.state;
     const { sampleLabels, selectedOptions } = this.props;
     if (
       this.heatmap === null ||
@@ -55,6 +58,12 @@ export default class AMRHeatmapVis extends React.Component {
         sampleLabels !== prevProps.sampleLabels)
     ) {
       this.heatmap.updateColumnMetadata(this.getSelectedMetadataFields());
+    }
+    if (nodeHovered !== prevState.nodeHovered) {
+      logAnalyticsEvent("AMRHeatmapVis_heatmap-node-hover_triggered");
+    }
+    if (metadataLabelHovered !== prevState.metadataLabelHovered) {
+      logAnalyticsEvent("AMRHeatmapVis_heatmap-metadata-label-hover_triggered");
     }
   }
 
@@ -78,7 +87,10 @@ export default class AMRHeatmapVis extends React.Component {
   };
 
   onNodeHover = node => {
-    this.setState({ nodeHoverInfo: this.getTooltipData(node) });
+    this.setState({
+      nodeHoverInfo: this.getTooltipData(node),
+      nodeHovered: true,
+    });
   };
 
   onNodeHoverMove = (_, event) => {
@@ -111,6 +123,7 @@ export default class AMRHeatmapVis extends React.Component {
     const legend = this.heatmap.getColumnMetadataLegend(node.value);
     this.setState({
       columnMetadataLegend: legend,
+      metadataLabelHovered: true,
     });
   };
 
@@ -122,10 +135,14 @@ export default class AMRHeatmapVis extends React.Component {
     this.setState({
       addMetadataTrigger: trigger,
     });
+    logAnalyticsEvent("AMRHeatmapVis_metadata-add-button_clicked");
   };
 
   onMetadataSelectionChange = selectedMetadata => {
     this.setState({
+      selectedMetadata,
+    });
+    logAnalyticsEvent("AMRHeatmapVis_selected-metadata_changed", {
       selectedMetadata,
     });
   };

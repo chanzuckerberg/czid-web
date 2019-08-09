@@ -58,11 +58,25 @@
     }
   }
 
-  &.errored {
+  &.pipelineErrored {
     background-color: $error-bg;
 
     .statusIcon {
       fill: $error;
+    }
+  }
+
+  &.userErrored {
+    background-color: $warning-bg;
+    .statusIcon {
+      fill: $warning;
+    }
+  }
+
+  &.finished {
+    background-color: $success-bg;
+    .statusIcon {
+      fill: $success;
     }
   }
 }
@@ -78,6 +92,10 @@
   ul,
   li {
     @include font-body-s;
+  }
+
+  li {
+    margin-bottom: 1em;
   }
 
   pre {
@@ -124,5 +142,21 @@
   .fileGroupHeader {
     @include font-header-xs;
     margin-bottom: 8px;
+  }
+}
+
+.resourcesContainer {
+  display: flex;
+  flex-wrap: wrap;
+
+  span {
+    width: 50%;
+    padding-right: 12px;
+    margin-bottom: 8px;
+  }
+
+  a {
+    // Override color: inherit in _header.scss.
+    color: $primary-light !important;
   }
 }
