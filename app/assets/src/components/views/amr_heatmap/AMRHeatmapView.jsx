@@ -43,6 +43,10 @@ export default class AMRHeatmapView extends React.Component {
 
     this.state = {
       loading: true,
+      maxValues: null,
+      rawSampleData: null,
+      samplesWithAMRCounts: null,
+      samplesMetadataTypes: null,
       selectedOptions: {
         metric: "coverage",
         viewLevel: "gene",
@@ -124,15 +128,8 @@ export default class AMRHeatmapView extends React.Component {
     return maxValues;
   }
 
-  hasDataToDisplay(maxValues) {
-    let hasData = false;
-    Object.entries(maxValues).forEach(metric => {
-      const value = metric[1];
-      if (value > 0) {
-        hasData = true;
-      }
-    });
-    return hasData;
+  hasDataToDisplay(samplesWithAMRCounts) {
+    return samplesWithAMRCounts.some(sample => sample.amrCounts.length > 0);
   }
 
   //*** Callback methods ***
@@ -257,8 +254,8 @@ export default class AMRHeatmapView extends React.Component {
     return (
       <ViewHeader className={cs.viewHeader}>
         <ViewHeader.Content>
-          <ViewHeader.Pretitle>
-            {`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
+          <ViewHeader.Pretitle breadcrumbLink={"/home"}>
+            Discovery View
           </ViewHeader.Pretitle>
           <ViewHeader.Title label={"Antimicrobial Resistance Heatmap"} />
         </ViewHeader.Content>
@@ -295,7 +292,6 @@ export default class AMRHeatmapView extends React.Component {
       samplesWithAMRCounts,
       selectedOptions,
       samplesMetadataTypes,
-      maxValues,
     } = this.state;
     if (loading) {
       return (
@@ -304,9 +300,9 @@ export default class AMRHeatmapView extends React.Component {
           Loading...
         </p>
       );
-    } else if (!this.hasDataToDisplay(maxValues)) {
+    } else if (!this.hasDataToDisplay(samplesWithAMRCounts)) {
       return (
-        <p className={cs.loadingIndicator}>
+        <p className={cs.noDataMsg}>
           No Antimicrobial Resistance data for selected samples.
         </p>
       );
