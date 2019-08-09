@@ -141,7 +141,7 @@ class Metadatum < ApplicationRecord
       location.save!
     end
 
-    puts "GOT TO HERE 9:00pm", self.raw_value, "end"
+    puts "GOT TO HERE 9:00pm", raw_value, "end"
 
     self.string_validated_value = nil
     self.location_id = location.id
