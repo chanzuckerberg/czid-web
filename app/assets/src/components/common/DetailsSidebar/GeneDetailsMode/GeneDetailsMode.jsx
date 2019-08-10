@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import { getOntology } from "~/api/amr";
+import { logAnalyticsEvent } from "~/api/analytics";
 import StringHelper from "~/helpers/StringHelper";
 
 import cs from "./gene_details_mode.scss";
@@ -75,7 +76,11 @@ export default class GeneDetailsMode extends React.Component {
   //*** Callback functions ***
 
   expandOntology = () => {
+    const { geneName } = this.props;
     this.setState({ collapseOntology: false });
+    logAnalyticsEvent("GeneDetailsMode_expand-ontology_clicked", {
+      geneName,
+    });
   };
 
   //*** Functions depending on state ***
@@ -118,6 +123,11 @@ export default class GeneDetailsMode extends React.Component {
           className={cs.cardLink}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() =>
+            logAnalyticsEvent(
+              "GeneDetailsMode_card-ontology-attribution_clicked"
+            )
+          }
         >
           CARD Antibiotic Resistance Ontology
         </a>, which is released under the{" "}
@@ -126,6 +136,11 @@ export default class GeneDetailsMode extends React.Component {
           className={cs.cardLink}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() =>
+            logAnalyticsEvent(
+              "GeneDetailsMode_creative-commons-license_clicked"
+            )
+          }
         >
           Creative Commons CC-BY license version 4.0
         </a>{" "}
@@ -146,6 +161,11 @@ export default class GeneDetailsMode extends React.Component {
     const {
       ontology: { error },
     } = this.state;
+    const { geneName } = this.props;
+    logAnalyticsEvent("GeneDetailsMode_error_rendered", {
+      geneName,
+      error,
+    }); // exclusive with ontology_rendered
     return <div className={cs.cardLicense}>{error}</div>;
   }
 
@@ -163,9 +183,21 @@ export default class GeneDetailsMode extends React.Component {
 
   renderOntology() {
     const {
-      ontology: { synonyms, description, geneFamily, drugClass, publications },
+      ontology: {
+        label,
+        synonyms,
+        description,
+        geneFamily,
+        drugClass,
+        publications,
+      },
       collapseOntology,
     } = this.state;
+    const { geneName } = this.props;
+    logAnalyticsEvent("GeneDetailsMode_ontology_rendered", {
+      ontologyLabel: label,
+      geneName,
+    }); // exclusive with error_rendered
     return (
       <div>
         {synonyms.length > 0 && (
@@ -234,8 +266,9 @@ export default class GeneDetailsMode extends React.Component {
 
   renderPublications() {
     const {
-      ontology: { publications },
+      ontology: { label, publications },
     } = this.state;
+    const { geneName } = this.props;
     return publications.map(publication => {
       const citation = /.*(?=(\(PMID))/.exec(publication)[0];
       const pmidText = /(PMID)\s[0-9]*/.exec(publication)[0];
@@ -248,6 +281,17 @@ export default class GeneDetailsMode extends React.Component {
               className={cs.link}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() =>
+                logAnalyticsEvent(
+                  "GeneDetailsMode_pubmed-citation-link_clicked",
+                  {
+                    citation: citation,
+                    pubmedId: pubmedId,
+                    ontologyLabel: label,
+                    geneName,
+                  }
+                )
+              }
             >
               {pmidText}
             </a>
@@ -259,6 +303,7 @@ export default class GeneDetailsMode extends React.Component {
 
   renderFooterLinks() {
     const { cardEntryFound } = this.state;
+    const { geneName } = this.props;
     const sources = [
       SOURCE_NCBI_REF_GENE,
       SOURCE_PUBMED,
@@ -274,6 +319,12 @@ export default class GeneDetailsMode extends React.Component {
             href={this.generateLinkTo(source)}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() =>
+              logAnalyticsEvent("GeneDetailsMode_footer-link_clicked", {
+                destination: source,
+                geneName,
+              })
+            }
           >
             {source}
           </a>
