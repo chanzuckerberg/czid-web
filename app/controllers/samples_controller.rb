@@ -54,6 +54,7 @@ class SamplesController < ApplicationController
   PAGE_SIZE = 30
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
+  MIN_CLI_VERSION = '0.6.0'.freeze
 
   # GET /samples
   # GET /samples.json
@@ -517,7 +518,7 @@ class SamplesController < ApplicationController
     # Check if the client is up-to-date. "web" is always valid whereas the
     # CLI client should provide a version string to-be-checked against the
     # minimum version here. Bulk upload from CLI goes to this method.
-    min_version = Gem::Version.new('0.5.0')
+    min_version = Gem::Version.new(MIN_CLI_VERSION)
     unless client && (client == "web" || Gem::Version.new(client) >= min_version)
       render json: {
         message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
@@ -1019,7 +1020,7 @@ class SamplesController < ApplicationController
     # CLI client should provide a version string to-be-checked against the
     # minimum version here. Bulk upload from CLI goes to this method.
     client = params.delete(:client)
-    min_version = Gem::Version.new('0.5.0')
+    min_version = Gem::Version.new(MIN_CLI_VERSION)
     unless client && (client == "web" || Gem::Version.new(client) >= min_version)
       render json: {
         message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
