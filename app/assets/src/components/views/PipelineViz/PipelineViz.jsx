@@ -347,6 +347,11 @@ class PipelineViz extends React.Component {
     const updatedStagesOpened = [...this.state.stagesOpened];
     updatedStagesOpened[index] = !updatedStagesOpened[index];
     this.setState({ stagesOpened: updatedStagesOpened });
+
+    window.sessionStorage.setItem(
+      "stagesOpened",
+      JSON.stringify(updatedStagesOpened)
+    );
   }
 
   getStatusGroupFor(stageIndex, stepIndex) {
@@ -552,15 +557,26 @@ class PipelineViz extends React.Component {
     graph.moveNodeToPosition(END_NODE_ID, xEndNodePos, yStartNodePos);
   }
 
-  closeIfNonActiveStage(stageIndex) {
+  setInitialOpenedStages() {
     const {
       graphData: { stages },
     } = this.props;
-    const stageData = stages[stageIndex];
-    const graph = this.graphs[stageIndex];
-    if (stageData.jobStatus != "inProgress") {
-      graph.afterDrawingOnce(() => this.toggleStage(stageIndex));
-    }
+
+    const stagesOpened =
+      window.sessionStorage.getItem("stagesOpened") &&
+      JSON.parse(window.sessionStorage.getItem("stagesOpened"));
+    stages.forEach((stageData, stageIndex) => {
+      const graph = this.graphs[stageIndex];
+      const prevOpened = stagesOpened && stagesOpened[stageIndex];
+      if (!(prevOpened || stageData.jobStatus == "inProgress")) {
+        graph.afterDrawingOnce(() => this.toggleStage(stageIndex));
+      }
+    });
+
+    window.sessionStorage.setItem(
+      "stagesOpened",
+      JSON.stringify(this.state.stagesOpened)
+    );
   }
 
   drawGraphs() {
@@ -571,6 +587,8 @@ class PipelineViz extends React.Component {
     stages.forEach((_, i) => {
       this.drawStageGraph(i);
     });
+
+    this.setInitialOpenedStages();
   }
 
   drawStageGraph(index) {
@@ -682,7 +700,6 @@ class PipelineViz extends React.Component {
     this.graphs.push(currStageGraph);
     currStageGraph.minimizeSizeGivenScale(1.0);
     this.centerEndNodeVertically(currStageGraph);
-    this.closeIfNonActiveStage(index);
   }
 
   handleWindowResize = () => {
