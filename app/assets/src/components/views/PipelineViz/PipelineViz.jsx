@@ -406,9 +406,11 @@ class PipelineViz extends React.Component {
   }
 
   addPositionToNodes(nodeData, edgeData) {
-    const xInterval = 130;
-    const yInterval = 84;
-    const staggerMultiplier = 1.5;
+    const {
+      xLayoutInterval,
+      yLayoutInterval,
+      staggerLayoutMultiplier,
+    } = this.props;
 
     const nodeToCurrentLevel = {};
     nodeData.forEach(node => {
@@ -443,7 +445,7 @@ class PipelineViz extends React.Component {
 
     const maxLevel = Math.max(...Object.values(nodeToCurrentLevel));
     nodeData.forEach(node => {
-      node.x = (nodeToCurrentLevel[node.id] - maxLevel / 2.0) * xInterval;
+      node.x = (nodeToCurrentLevel[node.id] - maxLevel / 2.0) * xLayoutInterval;
       node.level = nodeToCurrentLevel[node.id];
     });
 
@@ -461,14 +463,14 @@ class PipelineViz extends React.Component {
       });
 
       let direction = nodes.length % 2 ? -1 : 1;
-      let offsetAmount = nodes.length % 2 ? 0 : yInterval / 2;
+      let offsetAmount = nodes.length % 2 ? 0 : yLayoutInterval / 2;
       nodes.forEach(node => {
         node.y =
           offsetAmount *
           direction *
-          (applyStaggerNodesMultiplier ? staggerMultiplier : 1);
+          (applyStaggerNodesMultiplier ? staggerLayoutMultiplier : 1);
         if (direction == -1) {
-          offsetAmount += yInterval;
+          offsetAmount += yLayoutInterval;
         }
         direction *= -1;
       });
@@ -881,6 +883,9 @@ PipelineViz.propTypes = {
   zoomMax: PropTypes.number,
   zoomSpeed: PropTypes.number,
   minMouseMoveUpdateDistance: PropTypes.number,
+  xLayoutInterval: PropTypes.number,
+  yLayoutInterval: PropTypes.number,
+  staggerLayoutMultiplier: PropTypes.number,
 };
 
 PipelineViz.defaultProps = {
@@ -911,6 +916,9 @@ PipelineViz.defaultProps = {
   zoomMax: 3,
   zoomSpeed: 3,
   minMouseMoveUpdateDistance: 20,
+  xLayoutInterval: 130,
+  yLayoutInterval: 84,
+  staggerLayoutMultiplier: 1.5,
 };
 
 export default PipelineViz;
