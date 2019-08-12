@@ -4,6 +4,7 @@ import { groupBy } from "lodash/fp";
 import { PanZoom } from "react-easy-panzoom";
 
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
+import { getGraph } from "~/api/pipelineViz";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
@@ -28,6 +29,7 @@ class PipelineViz extends React.Component {
       ...(props.showExperimental ? ["Experimental"] : []),
     ];
 
+    this.graphData = props.graphData;
     this.graphs = [];
     this.graphContainers = [];
     this.lastMouseMoveInfo = {
@@ -54,23 +56,28 @@ class PipelineViz extends React.Component {
   componentDidMount() {
     this.drawGraphs();
     window.addEventListener("resize", this.handleWindowResize);
+    // this.updateGraphs();
+    // this.updateLoop = setInterval(() => this.updateGraphs(), 1000);
   }
 
   componentWillUnmount() {
     window.removeEventListener("resize", this.handleWindowResize);
+    clearInterval(this.updateLoop);
+  }
+
+  async updateGraphs() {
+    const { sample, pipelineRun } = this.props;
+
+    this.graphData = await getGraph(sample.id, pipelineRun.version.pipeline);
+    this.drawGraphs();
   }
 
   getStepDataAtIndices({ stageIndex, stepIndex }) {
-    const {
-      graphData: { stages },
-    } = this.props;
-    return stages[stageIndex].steps[stepIndex];
+    return this.graphData.stages[stageIndex].steps[stepIndex];
   }
 
   getEdgeInfoFor(stageIndex, stepIndex, direction) {
-    const {
-      graphData: { edges },
-    } = this.props;
+    const edges = this.graphData.edges;
     const stepData = this.getStepDataAtIndices({
       stageIndex: stageIndex,
       stepIndex: stepIndex,
@@ -349,18 +356,15 @@ class PipelineViz extends React.Component {
   }
 
   getStatusGroupFor(stageIndex, stepIndex) {
-    const {
-      graphData: { stages },
-    } = this.props;
-    const step = stages[stageIndex].steps[stepIndex];
+    const step = this.getStepDataAtIndices({
+      stageIndex: stageIndex,
+      stepIndex: stepIndex,
+    });
     return step.status;
   }
 
   generateNodeData(stageIndex, edgeData) {
-    const {
-      graphData: { stages },
-    } = this.props;
-    const stepData = stages[stageIndex].steps;
+    const stepData = this.graphData.stages[stageIndex].steps;
     const nodeData = stepData.map((step, i) => {
       return {
         id: i,
@@ -489,10 +493,7 @@ class PipelineViz extends React.Component {
   }
 
   generateEdgeData(stageIndex) {
-    const {
-      graphData: { stages },
-    } = this.props;
-    const stepData = stages[stageIndex].steps;
+    const stepData = this.graphData.stages[stageIndex].steps;
 
     const regularColoringEdgeData = stepData
       .map((_, currStepIndex) => {
@@ -559,9 +560,6 @@ class PipelineViz extends React.Component {
   }
 
   generateHiddenEdges(stageIndex) {
-    const {
-      graphData: { stages },
-    } = this.props;
     const hiddenEdgeColorOption = {
       color: {
         opacity: 0,
@@ -570,7 +568,7 @@ class PipelineViz extends React.Component {
     };
 
     // Connect all nodes to start and end nodes with hidden edges for centering
-    return stages[stageIndex].steps
+    return this.graphData.stages[stageIndex].steps
       .map((_, stepIndex) => {
         return [
           {
@@ -591,10 +589,7 @@ class PipelineViz extends React.Component {
   }
 
   closeIfNonActiveStage(stageIndex) {
-    const {
-      graphData: { stages },
-    } = this.props;
-    const stageData = stages[stageIndex];
+    const stageData = this.graphData.stages[stageIndex];
     const graph = this.graphs[stageIndex];
     if (stageData.jobStatus != "inProgress") {
       graph.afterDrawingOnce(() => this.toggleStage(stageIndex));
@@ -602,11 +597,7 @@ class PipelineViz extends React.Component {
   }
 
   drawGraphs() {
-    const {
-      graphData: { stages },
-    } = this.props;
-
-    stages.forEach((_, i) => {
+    this.graphData.stages.forEach((_, i) => {
       this.drawStageGraph(i);
     });
   }
@@ -722,9 +713,7 @@ class PipelineViz extends React.Component {
   };
 
   renderStageContainer(stageName, i) {
-    const {
-      graphData: { stages },
-    } = this.props;
+    const stages = this.graphData.stages;
     const { stagesOpened, hovered } = this.state;
     const isOpened = stagesOpened[i];
 
