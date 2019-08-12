@@ -217,6 +217,8 @@ module HeatmapHelper
       #{rpm_sql} AS rpm,
       #{zscore_sql} AS zscore
     FROM taxon_counts
+    -- Needed to avoid a full table scan
+    FORCE INDEX (index_pr_tax_hit_level_tc)
     LEFT OUTER JOIN pipeline_runs pr ON pipeline_run_id = pr.id
     LEFT OUTER JOIN taxon_summaries ON
       #{background_id.to_i}   = taxon_summaries.background_id   AND
@@ -350,6 +352,8 @@ module HeatmapHelper
         )                                AS  neglogevalue,
         taxon_counts.percent_concordant  AS  percentconcordant
       FROM taxon_counts
+      -- Needed to avoid a full table scan
+      FORCE INDEX (index_pr_tax_hit_level_tc)
       LEFT OUTER JOIN taxon_summaries ON
         #{background_id.to_i}   = taxon_summaries.background_id   AND
         taxon_counts.count_type = taxon_summaries.count_type      AND
