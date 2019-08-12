@@ -406,19 +406,20 @@ class PipelineViz extends React.Component {
   }
 
   addPositionToNodes(nodeData, edgeData) {
-    const {
-      xLayoutInterval,
-      yLayoutInterval,
-      staggerLayoutMultiplier,
-    } = this.props;
+    const fromToToEdgeMap = groupBy("from", edgeData);
+    const toToFromEdgeMap = groupBy("to", edgeData);
+
+    this.addXCoordinatesToNodes(nodeData, fromToToEdgeMap);
+    this.addYCoordinatesToNodes(nodeData, fromToToEdgeMap, toToFromEdgeMap);
+  }
+
+  addXCoordinatesToNodes(nodeData, fromToToEdgeMap) {
+    const { xLayoutInterval } = this.props;
 
     const nodeToCurrentLevel = {};
     nodeData.forEach(node => {
       nodeToCurrentLevel[node.id] = 0;
     });
-
-    const fromToToEdgeMap = groupBy("from", edgeData);
-    const toToFromEdgeMap = groupBy("to", edgeData);
 
     const bfs = [START_NODE_ID];
     while (bfs.length) {
@@ -448,8 +449,16 @@ class PipelineViz extends React.Component {
       node.x = (nodeToCurrentLevel[node.id] - maxLevel / 2.0) * xLayoutInterval;
       node.level = nodeToCurrentLevel[node.id];
     });
+  }
 
+  addYCoordinatesToNodes(nodeData, fromToToEdgeMap, toToFromEdgeMap) {
+    const { yLayoutInterval, staggerLayoutMultiplier } = this.props;
+
+    // Because this method groups by the "level" value in the nodes, it must be
+    // called after addPositionToNodes, which populates the "level" field
     const nodesByLevel = groupBy("level", nodeData);
+    const maxLevel = Object.keys(nodesByLevel).length;
+
     // Stagger nodes if more than 2 levels (4, if including start and end nodes).
     let applyStaggerNodesMultiplier = maxLevel > 4;
     Object.values(nodesByLevel).forEach(nodes => {
