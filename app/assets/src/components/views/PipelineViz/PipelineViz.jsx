@@ -1,5 +1,6 @@
 import React from "react";
 import cx from "classnames";
+import { diff } from "deep-object-diff";
 import { groupBy } from "lodash/fp";
 import { PanZoom } from "react-easy-panzoom";
 
@@ -29,7 +30,6 @@ class PipelineViz extends React.Component {
       ...(props.showExperimental ? ["Experimental"] : []),
     ];
 
-    this.graphData = props.graphData;
     this.graphs = [];
     this.graphContainers = [];
     this.lastMouseMoveInfo = {
@@ -50,14 +50,17 @@ class PipelineViz extends React.Component {
       sidebarVisible: false,
       sidebarParams: {},
       hovered: false,
+      graphData: props.graphData,
     };
   }
 
   componentDidMount() {
     this.drawGraphs();
     window.addEventListener("resize", this.handleWindowResize);
-    // this.updateGraphs();
-    // this.updateLoop = setInterval(() => this.updateGraphs(), 1000);
+    // Only set update loop if the pipeline is still running.
+    if (!this.pipelineIsFinished()) {
+      this.updateLoop = setInterval(() => this.updateGraphs(), 1000);
+    }
   }
 
   componentWillUnmount() {
@@ -67,17 +70,74 @@ class PipelineViz extends React.Component {
 
   async updateGraphs() {
     const { sample, pipelineRun } = this.props;
+    const { graphData } = this.state;
 
-    this.graphData = await getGraph(sample.id, pipelineRun.version.pipeline);
-    this.drawGraphs();
+    const oldGraphData = graphData;
+    this.setState({
+      graphData: await getGraph(sample.id, pipelineRun.version.pipeline),
+    });
+    const updates = diff(oldGraphData, this.state.graphData);
+    if (updates.stages) {
+      Object.keys(updates.stages).forEach(stageIndexStr => {
+        const stageIndex = parseInt(stageIndexStr);
+
+        if (stageIndex < this.graphs.length) {
+          // Graph already exists.
+          const graph = this.graphs[stageIndex];
+          const steps = updates.stages[stageIndexStr].steps;
+          Object.keys(steps).forEach(stepIndexStr => {
+            const stepIndex = parseInt(stepIndexStr);
+            const status = steps[stepIndex].status;
+            graph.updateNodes([stepIndex], {
+              group: status,
+              ...this.getNodeStatusOptions(status),
+            });
+          });
+        } else {
+          // A new stage has started and needs to be drawn.
+          if (stageIndex > 0) {
+            // Modify previous stage's graph to create edges to new stage
+            const prevGraph = this.graphs[stageIndex - 1];
+            this.generateEdgeData(stageIndex - 1).forEach(edge => {
+              const { id, ...options } = edge;
+              prevGraph.updateEdges([id], options);
+            });
+          }
+          this.drawStageGraph(stageIndex);
+        }
+      });
+
+      if (this.pipelineIsFinished()) {
+        clearInterval(this.updateLoop);
+      }
+    }
+  }
+
+  pipelineIsFinished() {
+    const {
+      graphData: { stages },
+    } = this.state;
+    const stageJobStatuses = stages.map(stage => stage.jobStatus);
+    const finishedWithoutErrors =
+      stageJobStatuses.length == this.stageNames.length &&
+      stageJobStatuses.every(jobStatus => jobStatus == "finished");
+    const finishedWithErrors =
+      stageJobStatuses.includes("pipelineErrored") ||
+      stageJobStatuses.includes("userErrored");
+    return finishedWithErrors || finishedWithoutErrors;
   }
 
   getStepDataAtIndices({ stageIndex, stepIndex }) {
-    return this.graphData.stages[stageIndex].steps[stepIndex];
+    const {
+      graphData: { stages },
+    } = this.state;
+    return stages[stageIndex].steps[stepIndex];
   }
 
   getEdgeInfoFor(stageIndex, stepIndex, direction) {
-    const edges = this.graphData.edges;
+    const {
+      graphData: { edges },
+    } = this.state;
     const stepData = this.getStepDataAtIndices({
       stageIndex: stageIndex,
       stepIndex: stepIndex,
@@ -364,7 +424,10 @@ class PipelineViz extends React.Component {
   }
 
   generateNodeData(stageIndex, edgeData) {
-    const stepData = this.graphData.stages[stageIndex].steps;
+    const {
+      graphData: { stages },
+    } = this.state;
+    const stepData = stages[stageIndex].steps;
     const nodeData = stepData.map((step, i) => {
       return {
         id: i,
@@ -382,6 +445,9 @@ class PipelineViz extends React.Component {
 
   getNodeStatusOptions(status, hovered = false) {
     const options = this.props[`${status}NodeColor`];
+    if (!options) {
+      return {};
+    }
     const backgroundColor =
       hovered && options.hovered ? options.hovered : options.default;
     const textColor = options.textColor;
@@ -395,7 +461,9 @@ class PipelineViz extends React.Component {
           border: backgroundColor,
         },
       },
-      ...(textColor ? { font: { color: textColor } } : {}),
+      ...(textColor
+        ? { font: { color: textColor } }
+        : { font: { color: cs.defaultNodeText } }),
       ...(shadowColor
         ? {
             shadow: {
@@ -493,7 +561,10 @@ class PipelineViz extends React.Component {
   }
 
   generateEdgeData(stageIndex) {
-    const stepData = this.graphData.stages[stageIndex].steps;
+    const {
+      graphData: { stages },
+    } = this.state;
+    const stepData = stages[stageIndex].steps;
 
     const regularColoringEdgeData = stepData
       .map((_, currStepIndex) => {
@@ -560,6 +631,9 @@ class PipelineViz extends React.Component {
   }
 
   generateHiddenEdges(stageIndex) {
+    const {
+      graphData: { stages },
+    } = this.state;
     const hiddenEdgeColorOption = {
       color: {
         opacity: 0,
@@ -568,7 +642,7 @@ class PipelineViz extends React.Component {
     };
 
     // Connect all nodes to start and end nodes with hidden edges for centering
-    return this.graphData.stages[stageIndex].steps
+    return stages[stageIndex].steps
       .map((_, stepIndex) => {
         return [
           {
@@ -589,7 +663,10 @@ class PipelineViz extends React.Component {
   }
 
   closeIfNonActiveStage(stageIndex) {
-    const stageData = this.graphData.stages[stageIndex];
+    const {
+      graphData: { stages },
+    } = this.state;
+    const stageData = stages[stageIndex];
     const graph = this.graphs[stageIndex];
     if (stageData.jobStatus != "inProgress") {
       graph.afterDrawingOnce(() => this.toggleStage(stageIndex));
@@ -597,13 +674,17 @@ class PipelineViz extends React.Component {
   }
 
   drawGraphs() {
-    this.graphData.stages.forEach((_, i) => {
+    const {
+      graphData: { stages },
+    } = this.state;
+    stages.forEach((_, i) => {
       this.drawStageGraph(i);
     });
   }
 
   drawStageGraph(index) {
     const { backgroundColor, edgeColor } = this.props;
+    const { stagesOpened } = this.state;
 
     const container = this.graphContainers[index];
 
@@ -693,6 +774,11 @@ class PipelineViz extends React.Component {
       onClick: info => this.handleStageClick(index, info),
     };
 
+    // Ensure stage is opened when drawing stage graph for accurate positioning.
+    if (!stagesOpened[index]) {
+      this.toggleStage(index);
+    }
+
     const currStageGraph = new NetworkGraph(
       container,
       nodeData,
@@ -701,6 +787,7 @@ class PipelineViz extends React.Component {
     );
     this.graphs.push(currStageGraph);
     currStageGraph.minimizeSizeGivenScale(1.0);
+
     this.closeIfNonActiveStage(index);
   }
 
@@ -713,12 +800,14 @@ class PipelineViz extends React.Component {
   };
 
   renderStageContainer(stageName, i) {
-    const stages = this.graphData.stages;
+    const {
+      graphData: { stages },
+    } = this.state;
     const { stagesOpened, hovered } = this.state;
-    const isOpened = stagesOpened[i];
 
     // Stages without dag_json recorded are not toggleable
     const toggleable = i < stages.length;
+    const isOpened = toggleable && stagesOpened[i];
     const jobStatus = toggleable ? stages[i].jobStatus : "notStarted";
 
     const stageNameAndIcon = (
@@ -728,7 +817,7 @@ class PipelineViz extends React.Component {
       </span>
     );
 
-    const stageContainer = toggleable && (
+    const stageContainer = (
       <div className={isOpened ? cs.openedStage : cs.hidden}>
         <div className={cs.graphLabel}>
           {stageNameAndIcon}

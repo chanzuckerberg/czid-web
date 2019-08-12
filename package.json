@@ -84,6 +84,7 @@
     "d3-shape": "^1.2.2",
     "d3-timer": "^1.0.7",
     "d3-transition": "^1.1.1",
+    "deep-object-diff": "^1.1.0",
     "fast-deep-equal": "^2.0.1",
     "font-awesome": "^4.7.0",
     "fstream": "^1.0.12",
