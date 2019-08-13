@@ -212,7 +212,6 @@ module HeatmapHelper
       percent_identity    AS  percentidentity,
       alignment_length    AS  alignmentlength,
       COALESCE(0.0 - e_value, #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}) AS neglogevalue,
-      percent_concordant  AS  percentconcordant,
       -- First pass of ranking in SQL. Second pass in Ruby.
       #{rpm_sql} AS rpm,
       #{zscore_sql} AS zscore
@@ -347,8 +346,7 @@ module HeatmapHelper
           taxon_counts.e_value IS NOT NULL,
           (0.0 - taxon_counts.e_value),
           #{ReportHelper::DEFAULT_SAMPLE_NEGLOGEVALUE}
-        )                                AS  neglogevalue,
-        taxon_counts.percent_concordant  AS  percentconcordant
+        )                                AS  neglogevalue
       FROM taxon_counts
       LEFT OUTER JOIN taxon_summaries ON
         #{background_id.to_i}   = taxon_summaries.background_id   AND

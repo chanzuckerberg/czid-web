@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const NoResultsBacteriaIcon = props => {
+const BacteriaIcon = props => {
   return (
     <svg
       className={props.className}
@@ -44,8 +44,8 @@ const NoResultsBacteriaIcon = props => {
   );
 };
 
-NoResultsBacteriaIcon.propTypes = {
+BacteriaIcon.propTypes = {
   className: PropTypes.string,
 };
 
-export default NoResultsBacteriaIcon;
+export default BacteriaIcon;
