@@ -15,7 +15,7 @@ import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
 import LoadingIcon from "~ui/icons/LoadingIcon";
 import BasicPopup from "~/components/BasicPopup";
 import NarrowContainer from "~/components/layout/NarrowContainer";
-import NoResultsBacteriaIcon from "~ui/icons/NoResultsBacteriaIcon";
+import BacteriaIcon from "~ui/icons/BacteriaIcon";
 import { DataTooltip } from "~ui/containers";
 import { getCoverageVizData } from "~/api";
 import { getTooltipStyle } from "~/components/utils/tooltip";
@@ -589,7 +589,7 @@ export default class CoverageVizBottomSidebar extends React.Component {
                 <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
               </a>
             </div>
-            <NoResultsBacteriaIcon className={cs.icon} />
+            <BacteriaIcon className={cs.icon} />
           </div>
         </div>
       </NarrowContainer>
