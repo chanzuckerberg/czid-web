@@ -73,10 +73,14 @@ class PipelineViz extends React.Component {
     const { graphData } = this.state;
 
     const oldGraphData = graphData;
+    const newGraphData = await getGraph(
+      sample.id,
+      pipelineRun.version.pipeline
+    );
     this.setState({
-      graphData: await getGraph(sample.id, pipelineRun.version.pipeline),
+      graphData: newGraphData,
     });
-    const updates = diff(oldGraphData, this.state.graphData);
+    const updates = diff(oldGraphData, newGraphData);
     if (updates.stages) {
       Object.keys(updates.stages).forEach(stageIndexStr => {
         const stageIndex = parseInt(stageIndexStr);
@@ -561,6 +565,7 @@ class PipelineViz extends React.Component {
   }
 
   generateEdgeData(stageIndex) {
+    const { edgeColor } = this.props;
     const {
       graphData: { stages },
     } = this.state;
@@ -580,6 +585,7 @@ class PipelineViz extends React.Component {
               from: currStepIndex,
               to: edgeInfo.to.stepIndex,
               id: `${currStepIndex}-${edgeInfo.to.stepIndex}`,
+              color: edgeColor,
             });
           } else if (!connectedToEndNode && edgeInfo.to) {
             connectedToEndNode = true;
@@ -587,6 +593,7 @@ class PipelineViz extends React.Component {
               from: currStepIndex,
               to: END_NODE_ID,
               id: `${currStepIndex}-${END_NODE_ID}`,
+              color: edgeColor,
             });
           }
           return edges;
@@ -605,6 +612,7 @@ class PipelineViz extends React.Component {
               from: START_NODE_ID,
               to: currStepIndex,
               id: `${START_NODE_ID}-${currStepIndex}`,
+              color: edgeColor,
             });
           }
           return edges;
@@ -620,6 +628,7 @@ class PipelineViz extends React.Component {
         {
           id: `${edge.from}-${edge.to}-colored`,
           hidden: true,
+          color: null,
         }
       );
     });

@@ -232,11 +232,7 @@
 }
 
 .hidden {
-  // display: none;
-  height: 0.5px;
-  width: 0.5px;
-  overflow: hidden;
-  opacity: 0;
+  display: none;
 }
 
 .graph {
