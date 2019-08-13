@@ -97,6 +97,10 @@ group :development, :test do
   gem 'rspec-rails', '>= 3.7.2'
   gem 'rubocop', '=0.49.1'
   gem 'selenium-webdriver'
+  # For adding foreign key constraints
+  gem 'immigrant'
+  # For adding comments to columns in migrations
+  gem 'migration_comments'
 end
 
 group :development do
@@ -104,10 +108,6 @@ group :development do
   gem 'listen', '>= 3.0.5', '< 3.2'
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
   gem 'web-console', '>= 3.5.1'
-  # For adding foreign key constraints
-  gem 'immigrant'
-  # For adding comments to columns in migrations
-  gem 'migration_comments'
 end
 
 group :test do

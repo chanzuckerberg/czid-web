@@ -23,7 +23,7 @@ class ChangeColumnsToNotNull < ActiveRecord::Migration[5.1]
     change_column_null :host_genomes, :s3_star_index_path, false
     change_column_null :host_genomes, :s3_bowtie2_index_path, false
     change_column_null :host_genomes, :default_background_id, false
-    set_column_comment :host_genomes, :skip_dedeuterostome_filter, "Whenever we add a new host genome, we need to check if it's a deuterostome or not and set this accordingly. For mammals, deuterostome filtering should be performed."
+    set_column_comment :host_genomes, :skip_deutero_filter, "Whenever we add a new host genome, we need to check if it's a deuterostome or not and set this accordingly. For mammals, deuterostome filtering should be performed."
 
     change_column_null :input_files, :name, false
     change_column_null :input_files, :sample_id, false
@@ -66,7 +66,6 @@ options field lists what these values are. This won't apply to most fields."
 
     change_column_null :backgrounds, :name, false
     change_column_null :backgrounds, :ready, false
-    set_column_comment :backgrounds, :project_id, "deprecated"
 
     change_column_null :job_stats, :task, false
     change_column_null :job_stats, :reads_after, false
@@ -173,6 +172,7 @@ options field lists what these values are. This won't apply to most fields."
     change_column_null :ercc_counts, :count, false
 
     change_column_null :projects, :name, false
+    change_column_default :projects, :public_access, from: nil, to: 0
     change_column_null :projects, :public_access, false
     change_column_null :projects, :background_flag, false
 
@@ -181,10 +181,16 @@ options field lists what these values are. This won't apply to most fields."
     change_column_null :taxon_descriptions, :summary, false
     change_column_null :taxon_descriptions, :description, false
 
+    # defaults taken from label_top_scoring_taxa
+    change_column_default :ui_configs, :min_nt_z, from: nil, to: 1
     change_column_null :ui_configs, :min_nt_z, false
+    change_column_default :ui_configs, :min_nr_z, from: nil, to: 1
     change_column_null :ui_configs, :min_nr_z, false
+    change_column_default :ui_configs, :min_nt_rpm, from: nil, to: 1
     change_column_null :ui_configs, :min_nt_rpm, false
+    change_column_default :ui_configs, :min_nr_rpm, from: nil, to: 1
     change_column_null :ui_configs, :min_nr_rpm, false
+    change_column_default :ui_configs, :top_n, from: nil, to: 3
     change_column_null :ui_configs, :top_n, false
     # END OF TABLES THAT ARE ALL NOT NULL
   end
