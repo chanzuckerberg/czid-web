@@ -119,16 +119,13 @@ class PipelineViz extends React.Component {
 
   pipelineIsFinished() {
     const {
-      graphData: { stages },
+      graphData: { status },
     } = this.state;
-    const stageJobStatuses = stages.map(stage => stage.jobStatus);
-    const finishedWithoutErrors =
-      stageJobStatuses.length == this.stageNames.length &&
-      stageJobStatuses.every(jobStatus => jobStatus == "finished");
-    const finishedWithErrors =
-      stageJobStatuses.includes("pipelineErrored") ||
-      stageJobStatuses.includes("userErrored");
-    return finishedWithErrors || finishedWithoutErrors;
+    return (
+      status == "finished" ||
+      status == "userErrored" ||
+      status == "pipelineErrored"
+    );
   }
 
   getStepDataAtIndices({ stageIndex, stepIndex }) {
