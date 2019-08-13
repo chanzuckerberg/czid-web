@@ -2,26 +2,70 @@
 @import "~styles/themes/typography";
 @import "~styles/themes/elements";
 
+// Exporting strings to style nodes and edges in vis.js
+:export {
+  notStartedBg: $white;
+  notStartedText: scale-color($black, $alpha: -50%);
+  notStartedShadow: scale-color($box-shadow-light, $alpha: -50%);
+
+  inProgressBg: $primary-lightest;
+  inProgressHoverBg: hover-state($primary-lightest);
+
+  finishedBg: $success-bg;
+  finishedHoverBg: hover-state($success-bg);
+
+  pipelineErroredBg: $error-bg;
+  pipelineEroredHoverBg: hover-state($error-bg);
+
+  userErroredBg: $warning-bg;
+  userErroredHoverBg: hover-state($warning-bg);
+
+  stageBg: $off-white;
+  defaultEdgeColor: $medium-grey;
+  outputEdgeColor: $primary-light;
+  inputEdgeColor: $black;
+
+  nodeShadowColor: $box-shadow-light;
+}
+
 .pipelineVizPage {
   display: flex;
   flex-direction: column;
   position: absolute;
   left: 0;
   right: 0;
-  height: calc(100% - 80px);
+  bottom: 0;
+  height: calc(100% - 50px);
 }
 
 .pipelineVizContainer {
   flex-grow: 1;
-  overflow-y: hidden;
-  overflow-x: visible;
+  position: relative;
+}
+
+.panZoomContainer {
+  display: flex;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: scroll;
+  cursor: all-scroll !important;
+  outline: none;
+  & > div {
+    margin: 0 auto;
+    align-self: stretch;
+    display: flex !important; /* Override existing library styling */
+    align-items: center;
+    padding: 150px;
+  }
 }
 
 .pipelineViz {
   display: flex;
   justify-content: center;
   align-items: stretch;
-  margin-bottom: 60px;
 }
 
 .stageAndArrow {
@@ -39,23 +83,90 @@
 }
 
 .stageButton {
-  background-color: $light-grey;
-  border-radius: 8px;
-  padding: 12px;
-  width: 250px;
-  text-align: center;
-  font-weight: $font-weight-bold;
+  @include font-header-node-l;
+  background-color: $white;
+  border-radius: 4px;
+  padding: 6px 8px;
   cursor: pointer;
-  word-break: break-word;
+  box-shadow: $box-shadow-bottom-right;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 
   &.disabled {
     cursor: default;
     opacity: 0.5;
   }
+
+  &.finished {
+    background-color: $success-lightest;
+  }
+
+  &.notStarted {
+    background-color: $white;
+    color: $dark-grey;
+  }
+
+  &.inProgress {
+    background-color: $primary-lightest;
+  }
+
+  &.pipelineErrored {
+    background-color: $error-lightest;
+  }
+
+  &.userErrored {
+    background-color: $warning-bg;
+  }
+}
+
+.stageNameAndIcon {
+  display: flex;
+  align-items: center;
+  height: 20px;
+
+  .inProgressIcon,
+  .pipelineErroredIcon,
+  .userErroredIcon,
+  .finishedIcon {
+    height: 15px;
+    width: 15px;
+  }
+
+  .inProgressIcon {
+    color: $primary-light;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    cursor: default;
+  }
+
+  .pipelineErroredIcon {
+    fill: $error;
+  }
+
+  .userErroredIcon {
+    fill: $warning;
+  }
+
+  .finishedIcon {
+    fill: $success;
+  }
+
+  .stageName {
+    margin: 2.5px 0;
+  }
+
+  // Only give the stage name a margin-left if there is
+  // an icon preceding it.
+  & > .stageName:nth-child(2) {
+    margin-left: 4px;
+  }
 }
 
 .stageArrow {
-  width: 50px;
+  width: 30px;
   height: 10px;
   display: flex;
   align-items: center;
@@ -66,7 +177,7 @@
 
   .stageArrowBody {
     position: relative;
-    width: calc(100% - 12px);
+    width: calc(100% - 8px);
     padding: 0.5px 0;
     background-color: $medium-grey;
 
@@ -84,7 +195,7 @@
   .stageArrowHead {
     position: absolute;
     right: 0;
-    height: 100%;
+    height: 75%;
     fill: $medium-grey;
 
     &.fromColoring {
@@ -98,7 +209,8 @@
 }
 
 .graphLabel {
-  padding-left: 24px;
+  @include font-header-node-l;
+  padding: 14px 14px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -108,8 +220,12 @@
   top: 0;
 
   .closeIcon {
-    padding: 24px;
     box-sizing: content-box;
+    fill: $light-grey;
+
+    &:hover {
+      fill: $black;
+    }
   }
 }
 
@@ -123,7 +239,7 @@
 
 .openedStage {
   background-color: $off-white;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 16px 0;
   display: flex;
   flex-direction: column;
@@ -131,15 +247,6 @@
   align-items: center;
   font-weight: $font-weight-bold;
   position: relative;
-  height: 100%;
-}
-
-.panZoomContainer {
-  cursor: all-scroll !important;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  outline: none;
   height: 100%;
 }
 
@@ -161,7 +268,7 @@
 .pipelineInfo {
   @include font-body-xxxs;
   color: $medium-grey;
-  margin-top: 14px;
+  margin-top: 24px;
   margin-bottom: 18px;
 }
 

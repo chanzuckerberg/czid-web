@@ -57,7 +57,7 @@ RSpec.describe RetrievePipelineVizGraphDataService do
 
   step_status_data = {
     four: {
-      status: 1,
+      status: "running",
       description: "This is the description of output four.",
     },
   }
@@ -148,20 +148,20 @@ RSpec.describe RetrievePipelineVizGraphDataService do
       end
     end
 
-    context "as admin" do
+    context "with see_experimental flag" do
       it "sees all stage results" do
-        is_admin = true
-        results = RetrievePipelineVizGraphDataService.call(@pr.id, is_admin, false)
+        see_experimental = true
+        results = RetrievePipelineVizGraphDataService.call(@pr.id, see_experimental, false)
 
         # Host filtering and experimental; other stages omitted for brevity.
         expect(results[:stages].length).to be(2)
       end
     end
 
-    context "as nonadmin" do
+    context "without see_experimental flag" do
       it "sees all stage results except experimental" do
-        is_admin = false
-        results = RetrievePipelineVizGraphDataService.call(@pr.id, is_admin, false)
+        see_experimental = false
+        results = RetrievePipelineVizGraphDataService.call(@pr.id, see_experimental, false)
 
         # Only host filtering (other stages omitted for brevity)
         expect(results[:stages].length).to be(1)

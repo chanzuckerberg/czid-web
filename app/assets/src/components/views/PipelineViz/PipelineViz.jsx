@@ -1,5 +1,6 @@
 import React from "react";
 import cx from "classnames";
+import { groupBy } from "lodash/fp";
 import { PanZoom } from "react-easy-panzoom";
 
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
@@ -11,20 +12,20 @@ import RemoveIcon from "~/components/ui/icons/RemoveIcon";
 
 import cs from "./pipeline_viz.scss";
 import PipelineVizHeader from "./PipelineVizHeader";
+import PipelineVizStatusIcon from "./PipelineVizStatusIcon";
 import { inverseTransformDOMCoordinates } from "./utils";
 
 const START_NODE_ID = -1;
 const END_NODE_ID = -2;
-
 class PipelineViz extends React.Component {
   constructor(props) {
     super(props);
 
     this.stageNames = [
       "Host Filtering",
-      "GSNAPL/RAPSEARCH alignment",
+      "Alignment",
       "Post Processing",
-      ...(props.admin ? ["Experimental"] : []),
+      ...(props.showExperimental ? ["Experimental"] : []),
     ];
 
     this.graphs = [];
@@ -158,6 +159,10 @@ class PipelineViz extends React.Component {
         description: stepInfo.description,
         inputFiles: inputInfo,
         outputFiles: outputInfo,
+        status: stepInfo.status,
+        startTime: stepInfo.startTime,
+        endTime: stepInfo.endTime,
+        resources: stepInfo.resources,
       },
     });
   }
@@ -204,18 +209,18 @@ class PipelineViz extends React.Component {
   }
 
   handleNodeHover(stageIndex, nodeId) {
-    const { highlightColor, nodeColor, inputEdgeColor } = this.props;
+    const { inputEdgeColor, outputEdgeColor } = this.props;
     const graph = this.graphs[stageIndex];
     const updatedInterStageArrows = [...this.state.interStageArrows];
 
-    const hoveredNodeOptions = {
-      borderWidth: 1,
-      color: {
-        background: nodeColor,
-        border: highlightColor,
-      },
-    };
-    graph.updateNodes([nodeId], hoveredNodeOptions);
+    const hoveredNodeColoring = this.getNodeStatusOptions(
+      this.getStepDataAtIndices({
+        stageIndex: stageIndex,
+        stepIndex: nodeId,
+      }).status,
+      true
+    );
+    graph.updateNodes([nodeId], hoveredNodeColoring);
     this.lastMouseMoveInfo.alteredGraphs.add(stageIndex);
 
     const inputColorOptions = {
@@ -258,8 +263,8 @@ class PipelineViz extends React.Component {
 
     const outputColorOptions = {
       color: {
-        color: highlightColor,
-        hover: highlightColor,
+        color: outputEdgeColor,
+        hover: outputEdgeColor,
         inherit: false,
       },
       width: 2,
@@ -296,7 +301,6 @@ class PipelineViz extends React.Component {
     );
     graph.updateEdges(intraStageOutputEdges, outputColorOptions);
 
-    this.graphs.forEach(graph => this.centerEndNodeVertically(graph));
     this.setState({
       hovered: true,
       interStageArrows: updatedInterStageArrows,
@@ -304,20 +308,18 @@ class PipelineViz extends React.Component {
   }
 
   handleNodeBlur = () => {
-    const { nodeColor } = this.props;
     const { graphIndex, nodeId, alteredGraphs } = this.lastMouseMoveInfo;
     if (nodeId == null) {
       return;
     }
 
-    const defaultNodeOptions = {
-      borderWidth: 1,
-      color: {
-        background: nodeColor,
-        border: nodeColor,
-      },
-    };
-    this.graphs[graphIndex].updateNodes([nodeId], defaultNodeOptions);
+    const origNodeColor = this.getNodeStatusOptions(
+      this.getStepDataAtIndices({
+        stageIndex: graphIndex,
+        stepIndex: nodeId,
+      }).status
+    );
+    this.graphs[graphIndex].updateNodes([nodeId], origNodeColor);
 
     alteredGraphs.forEach(i => {
       const graph = this.graphs[i];
@@ -325,7 +327,6 @@ class PipelineViz extends React.Component {
         return edge.id.match(/-colored$/g);
       });
       graph.updateEdges(allColoredEdges, { hidden: true });
-      this.centerEndNodeVertically(graph);
     });
     alteredGraphs.clear();
     this.setState({
@@ -347,56 +348,143 @@ class PipelineViz extends React.Component {
     this.setState({ stagesOpened: updatedStagesOpened });
   }
 
+  getStatusGroupFor(stageIndex, stepIndex) {
+    const {
+      graphData: { stages },
+    } = this.props;
+    const step = stages[stageIndex].steps[stepIndex];
+    return step.status;
+  }
+
   generateNodeData(stageIndex, edgeData) {
     const {
       graphData: { stages },
     } = this.props;
     const stepData = stages[stageIndex].steps;
     const nodeData = stepData.map((step, i) => {
-      return { id: i, label: step.name };
+      return {
+        id: i,
+        label: step.name,
+        group: step.status,
+      };
     });
 
     nodeData.push({ id: START_NODE_ID, group: "startEndNodes" });
     nodeData.push({ id: END_NODE_ID, group: "startEndNodes" });
 
-    this.addHierarchicalLevelsToNodes(nodeData, edgeData);
+    this.addPositionToNodes(nodeData, edgeData);
     return nodeData;
   }
 
-  addHierarchicalLevelsToNodes(nodeData, edgeData) {
-    const nodeToCurrentLevel = {};
-    const fromToToEdgeMap = {};
-    nodeData.forEach(node => {
-      nodeToCurrentLevel[node.id] = 1;
-      fromToToEdgeMap[node.id] = [];
-    });
+  getNodeStatusOptions(status, hovered = false) {
+    const options = this.props[`${status}NodeColor`];
+    const backgroundColor =
+      hovered && options.hovered ? options.hovered : options.default;
+    const textColor = options.textColor;
+    const shadowColor = options.shadowColor;
+    return {
+      color: {
+        background: backgroundColor,
+        border: backgroundColor,
+        highlight: {
+          background: backgroundColor,
+          border: backgroundColor,
+        },
+      },
+      ...(textColor ? { font: { color: textColor } } : {}),
+      ...(shadowColor
+        ? {
+            shadow: {
+              color: shadowColor,
+              x: 0,
+              y: 2,
+              size: 8,
+            },
+          }
+        : {}),
+    };
+  }
 
-    edgeData.forEach(edge => {
-      fromToToEdgeMap[edge.from].push(edge.to);
+  addPositionToNodes(nodeData, edgeData) {
+    const fromToToEdgeMap = groupBy("from", edgeData);
+    const toToFromEdgeMap = groupBy("to", edgeData);
+
+    this.addXCoordinatesToNodes(nodeData, fromToToEdgeMap);
+    this.addYCoordinatesToNodes(nodeData, fromToToEdgeMap, toToFromEdgeMap);
+  }
+
+  addXCoordinatesToNodes(nodeData, fromToToEdgeMap) {
+    const { xLayoutInterval } = this.props;
+
+    const nodeToCurrentLevel = {};
+    nodeData.forEach(node => {
+      nodeToCurrentLevel[node.id] = 0;
     });
 
     const bfs = [START_NODE_ID];
     while (bfs.length) {
       const currentNode = bfs.shift();
-
-      // Update children and add to back of bfs queue
-      const newLevel = nodeToCurrentLevel[currentNode] + 1;
-      fromToToEdgeMap[currentNode].forEach(toNodeId => {
-        if (newLevel > nodeToCurrentLevel[toNodeId]) {
-          nodeToCurrentLevel[toNodeId] = newLevel;
-          if (toNodeId != END_NODE_ID) {
-            nodeToCurrentLevel[END_NODE_ID] = Math.max(
-              nodeToCurrentLevel[END_NODE_ID],
-              newLevel + 1
-            );
+      // End node should have no children, so skip.
+      if (currentNode > END_NODE_ID) {
+        // Update children and add to back of bfs queue
+        const newLevel = nodeToCurrentLevel[currentNode] + 1;
+        fromToToEdgeMap[currentNode].forEach(edge => {
+          const toNodeId = edge.to;
+          if (newLevel > nodeToCurrentLevel[toNodeId]) {
+            nodeToCurrentLevel[toNodeId] = newLevel;
+            if (toNodeId != END_NODE_ID) {
+              nodeToCurrentLevel[END_NODE_ID] = Math.max(
+                nodeToCurrentLevel[END_NODE_ID],
+                newLevel + 1
+              );
+            }
           }
-        }
-        bfs.push(toNodeId);
-      });
+          bfs.push(toNodeId);
+        });
+      }
     }
 
+    const maxLevel = Math.max(...Object.values(nodeToCurrentLevel));
     nodeData.forEach(node => {
+      node.x = (nodeToCurrentLevel[node.id] - maxLevel / 2.0) * xLayoutInterval;
       node.level = nodeToCurrentLevel[node.id];
+    });
+  }
+
+  addYCoordinatesToNodes(nodeData, fromToToEdgeMap, toToFromEdgeMap) {
+    const { yLayoutInterval, staggerLayoutMultiplier } = this.props;
+
+    // Because this method groups by the "level" value in the nodes, it must be
+    // called after addPositionToNodes, which populates the "level" field
+    const nodesByLevel = groupBy("level", nodeData);
+    const maxLevel = Object.keys(nodesByLevel).length;
+
+    // Stagger nodes if more than 2 levels (4, if including start and end nodes).
+    let applyStaggerNodesMultiplier = maxLevel > 4;
+    Object.values(nodesByLevel).forEach(nodes => {
+      // Sort by number of inputting and outputting edges
+      nodes.sort((n1, n2) => {
+        const n1Val =
+          fromToToEdgeMap[n1.id].length + toToFromEdgeMap[n1.id].length;
+        const n2Val =
+          fromToToEdgeMap[n2.id].length + toToFromEdgeMap[n2.id].length;
+        return n2Val - n1Val;
+      });
+
+      let direction = nodes.length % 2 ? -1 : 1;
+      let offsetAmount = nodes.length % 2 ? 0 : yLayoutInterval / 2;
+      nodes.forEach(node => {
+        node.y =
+          offsetAmount *
+          direction *
+          (applyStaggerNodesMultiplier ? staggerLayoutMultiplier : 1);
+        if (direction == -1) {
+          offsetAmount += yLayoutInterval;
+        }
+        direction *= -1;
+      });
+      applyStaggerNodesMultiplier =
+        maxLevel > 4 && !applyStaggerNodesMultiplier;
     });
   }
 
@@ -502,20 +590,13 @@ class PipelineViz extends React.Component {
       .flat();
   }
 
-  centerEndNodeVertically(graph) {
-    // Starting for each graph node is already vertically centered.
-    const yStartNodePos = graph.getNodePosition(START_NODE_ID).y;
-    const xEndNodePos = graph.getNodePosition(END_NODE_ID).x;
-    graph.moveNodeToPosition(END_NODE_ID, xEndNodePos, yStartNodePos);
-  }
-
   closeIfNonActiveStage(stageIndex) {
     const {
       graphData: { stages },
     } = this.props;
     const stageData = stages[stageIndex];
     const graph = this.graphs[stageIndex];
-    if (stageData.jobStatus != "STARTED") {
+    if (stageData.jobStatus != "inProgress") {
       graph.afterDrawingOnce(() => this.toggleStage(stageIndex));
     }
   }
@@ -531,12 +612,7 @@ class PipelineViz extends React.Component {
   }
 
   drawStageGraph(index) {
-    const {
-      nodeColor,
-      backgroundColor,
-      edgeColor,
-      highlightColor,
-    } = this.props;
+    const { backgroundColor, edgeColor } = this.props;
 
     const container = this.graphContainers[index];
 
@@ -547,30 +623,29 @@ class PipelineViz extends React.Component {
       nodes: {
         borderWidth: 1,
         borderWidthSelected: 1,
-        color: {
-          background: nodeColor,
-          border: nodeColor,
-          highlight: {
-            border: highlightColor,
-            background: nodeColor,
-          },
+        shadow: {
+          color: cs.nodeShadowColor,
+          x: 0,
+          y: 2,
+          size: 8,
         },
         shape: "box",
         shapeProperties: {
-          borderRadius: 6,
+          borderRadius: 4,
         },
         margin: {
+          top: 6,
+          bottom: 6,
           left: 12,
           right: 12,
         },
-        widthConstraint: {
-          minimum: 120,
-        },
+        widthConstraint: 75,
         heightConstraint: {
-          minimum: 24,
+          minimum: 20,
         },
         font: {
           face: "Open Sans",
+          size: 11,
         },
         labelHighlightBold: false,
       },
@@ -588,6 +663,11 @@ class PipelineViz extends React.Component {
             y: true,
           },
         },
+        notStarted: this.getNodeStatusOptions("notStarted"),
+        inProgress: this.getNodeStatusOptions("inProgress"),
+        finished: this.getNodeStatusOptions("finished"),
+        userErrored: this.getNodeStatusOptions("userErrored"),
+        pipelineErrored: this.getNodeStatusOptions("pipelineErrored"),
       },
       edges: {
         chosen: false,
@@ -595,7 +675,7 @@ class PipelineViz extends React.Component {
           to: {
             enabled: true,
             type: "arrow",
-            scaleFactor: 0.85,
+            scaleFactor: 0.5,
           },
         },
         smooth: {
@@ -608,15 +688,6 @@ class PipelineViz extends React.Component {
         },
         selectionWidth: 0,
         hoverWidth: 0,
-      },
-      layout: {
-        hierarchical: {
-          direction: "LR",
-          sortMethod: "directed",
-          levelSeparation: 200,
-          blockShifting: false,
-          edgeMinimization: false,
-        },
       },
       physics: {
         enabled: false,
@@ -639,7 +710,6 @@ class PipelineViz extends React.Component {
     );
     this.graphs.push(currStageGraph);
     currStageGraph.minimizeSizeGivenScale(1.0);
-    this.centerEndNodeVertically(currStageGraph);
     this.closeIfNonActiveStage(index);
   }
 
@@ -647,7 +717,6 @@ class PipelineViz extends React.Component {
     this.graphs.forEach((graph, i) => {
       if (this.state.stagesOpened[i]) {
         graph.minimizeSizeGivenScale(1.0);
-        this.centerEndNodeVertically(graph);
       }
     });
   };
@@ -661,11 +730,19 @@ class PipelineViz extends React.Component {
 
     // Stages without dag_json recorded are not toggleable
     const toggleable = i < stages.length;
+    const jobStatus = toggleable ? stages[i].jobStatus : "notStarted";
+
+    const stageNameAndIcon = (
+      <span className={cs.stageNameAndIcon}>
+        <PipelineVizStatusIcon type={jobStatus} />
+        <span className={cs.stageName}>{stageName}</span>
+      </span>
+    );
 
     const stageContainer = toggleable && (
       <div className={isOpened ? cs.openedStage : cs.hidden}>
         <div className={cs.graphLabel}>
-          {stageName}
+          {stageNameAndIcon}
           <RemoveIcon
             onClick={() => this.toggleStage(i)}
             className={cs.closeIcon}
@@ -686,11 +763,12 @@ class PipelineViz extends React.Component {
         <div
           className={cx(
             isOpened && toggleable ? cs.hidden : cs.stageButton,
+            cs[jobStatus],
             !toggleable && cs.disabled
           )}
           onClick={() => this.toggleStage(i)}
         >
-          {stageName}
+          {stageNameAndIcon}
         </div>
         {stageContainer}
       </div>
@@ -720,10 +798,22 @@ class PipelineViz extends React.Component {
     );
   }
 
+  handleZoom = isIn => {
+    const { zoomSpeed } = this.props;
+    return () => {
+      if (this.panZoomContainer && this.panZoomContainer.current) {
+        isIn
+          ? this.panZoomContainer.current.zoomIn(zoomSpeed)
+          : this.panZoomContainer.current.zoomOut(zoomSpeed);
+      }
+    };
+  };
+
   render() {
     const {
       zoomMin,
       zoomMax,
+      zoomSpeed,
       pipelineRun,
       pipelineVersions,
       lastProcessedAt,
@@ -753,14 +843,15 @@ class PipelineViz extends React.Component {
             className={cs.panZoomContainer}
             minZoom={zoomMin}
             maxZoom={zoomMax}
-            zoomSpeed={3}
+            zoomSpeed={zoomSpeed}
+            disableScrollZoom={true}
             ref={this.panZoomContainer}
           >
             <div className={cs.pipelineViz}>{stageContainers}</div>
           </PanZoom>
           <PlusMinusControl
-            onPlusClick={((this.panZoomContainer || {}).current || {}).zoomIn}
-            onMinusClick={((this.panZoomContainer || {}).current || {}).zoomOut}
+            onPlusClick={this.handleZoom(true)}
+            onMinusClick={this.handleZoom(false)}
             className={cs.plusMinusControl}
           />
         </div>
@@ -775,33 +866,68 @@ class PipelineViz extends React.Component {
   }
 }
 
+const nodeColors = PropTypes.shape({
+  default: PropTypes.string.isRequired,
+  hovered: PropTypes.string,
+  textColor: PropTypes.string,
+  shadowColor: PropTypes.string,
+});
+
 PipelineViz.propTypes = {
-  admin: PropTypes.bool,
+  showExperimental: PropTypes.bool,
   graphData: PropTypes.object,
   pipelineRun: PropTypes.PipelineRun,
   sample: PropTypes.Sample,
   pipelineVersions: PropTypes.arrayOf(PropTypes.string),
   lastProcessedAt: PropTypes.string,
   backgroundColor: PropTypes.string,
-  nodeColor: PropTypes.string,
+  notStartedNodeColor: nodeColors,
+  inProgressNodeColor: nodeColors,
+  finishedNodeColor: nodeColors,
+  erroredNodeColor: nodeColors,
   edgeColor: PropTypes.string,
-  highlightColor: PropTypes.string,
+  outputEdgeColor: PropTypes.string,
   inputEdgeColor: PropTypes.string,
   zoomMin: PropTypes.number,
   zoomMax: PropTypes.number,
+  zoomSpeed: PropTypes.number,
   minMouseMoveUpdateDistance: PropTypes.number,
+  xLayoutInterval: PropTypes.number,
+  yLayoutInterval: PropTypes.number,
+  staggerLayoutMultiplier: PropTypes.number,
 };
 
 PipelineViz.defaultProps = {
-  admin: false,
-  backgroundColor: "#f8f8f8",
-  nodeColor: "#eaeaea",
-  edgeColor: "#999999",
-  highlightColor: "#3867fa",
-  inputEdgeColor: "#000000",
+  showExperimental: false,
+  backgroundColor: cs.offWhite,
+  notStartedNodeColor: {
+    default: cs.notStartedBg,
+    textColor: cs.notStartedText,
+    shadowColor: cs.notStartedShadow,
+  },
+  inProgressNodeColor: {
+    default: cs.inProgressBg,
+    hovered: cs.inProgressHoverBg,
+  },
+  finishedNodeColor: { default: cs.finishedBg, hovered: cs.finishedHoverBg },
+  pipelineErroredNodeColor: {
+    default: cs.pipelineErroredBg,
+    hovered: cs.pipelineErroredHoverBg,
+  },
+  userErroredNodeColor: {
+    default: cs.userErroredBg,
+    hovered: cs.userErroredHoverBg,
+  },
+  edgeColor: cs.defaultEdgeColor,
+  inputEdgeColor: cs.inputEdgeColor,
+  outputEdgeColor: cs.outputEdgeColor,
   zoomMin: 0.5,
   zoomMax: 3,
+  zoomSpeed: 3,
   minMouseMoveUpdateDistance: 20,
+  xLayoutInterval: 130,
+  yLayoutInterval: 84,
+  staggerLayoutMultiplier: 1.5,
 };
 
 export default PipelineViz;

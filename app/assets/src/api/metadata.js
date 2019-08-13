@@ -80,16 +80,7 @@ const uploadMetadataForProject = (id, metadata) =>
 const getOfficialMetadataFields = () =>
   get("/metadata/official_metadata_fields");
 
-// Bulk-upload samples (both local and remote), with metadata.
-const bulkUploadWithMetadata = (samples, metadata) =>
-  postWithCSRF(`/samples/bulk_upload_with_metadata.json`, {
-    samples,
-    metadata,
-    client: "web",
-  });
-
 export {
-  bulkUploadWithMetadata,
   getOfficialMetadataFields,
   getSampleMetadata,
   getSampleMetadataFields,

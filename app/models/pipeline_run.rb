@@ -543,15 +543,20 @@ class PipelineRun < ApplicationRecord
     amr_results = PipelineRun.download_file(s3_file_for("amr_counts"), local_amr_full_results_path)
     unless File.zero?(amr_results)
       amr_counts_array = []
-      # First line of output file has header titles, e.g. "Sample/Gene/Allele..." that are extraneous
-      # that we drop
-      File.readlines(amr_results).drop(1).each do |amr_result|
-        amr_result_fields = amr_result.split(",").drop(2)
-        amr_counts_array << { gene: amr_result_fields[0],
-                              allele: amr_result_fields[1],
-                              coverage: amr_result_fields[2],
-                              depth:  amr_result_fields[3],
-                              drug_family: amr_result_fields[12], }
+      amr_results_table = CSV.read(amr_results, headers: true)
+      amr_results_table.each do |row|
+        amr_counts_array << {
+          gene: row["gene"],
+          allele: row["allele"],
+          coverage: row["coverage"],
+          depth: row["depth"],
+          annotation_gene: row["annotation"].split(";")[2],
+          genbank_accession: row["annotation"].split(";")[4],
+          drug_family: row["gene_family"],
+          total_reads: row["total_reads"],
+          rpm: row["rpm"],
+          dpm: row["dpm"],
+        }
       end
       update(amr_counts_attributes: amr_counts_array)
     end
@@ -1428,7 +1433,7 @@ class PipelineRun < ApplicationRecord
   # 10s in testing.
   def precache_report_info!
     params = report_info_params
-    Background.where(ready: 1).pluck(:id).each do |background_id|
+    Background.top_for_sample(sample).pluck(:id).each do |background_id|
       cache_key = ReportHelper.report_info_cache_key(
         "/samples/#{sample.id}/report_info",
         params.merge(background_id: background_id)

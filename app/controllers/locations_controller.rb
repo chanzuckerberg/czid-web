@@ -3,7 +3,13 @@ class LocationsController < ApplicationController
   include SamplesHelper
 
   GEOSEARCH_ERR_MSG = "Unable to perform geosearch".freeze
+  GEOSEARCH_RATE_LIMIT_ERR = "Geosearch failed. Check API rate limits".freeze
   LOCATION_LOAD_ERR_MSG = "Unable to load sample locations".freeze
+
+  TOKEN_AUTH_ACTIONS = [:external_search].freeze
+
+  before_action :authenticate_user!, except: TOKEN_AUTH_ACTIONS
+  before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
 
   def external_search
     unless feature_access?
@@ -18,13 +24,19 @@ class LocationsController < ApplicationController
     limit = location_params[:limit]
     if query.present?
       success, resp = Location.geosearch(query, limit)
-      if success
+      if success && resp.is_a?(Array)
+        # Successful request with results. Just keep the first if you get duplicate locations.
         results = resp.map { |r| LocationHelper.adapt_location_iq_response(r) }
-        # Just keep the first if you get duplicate locations
         results = results.uniq { |r| [r[:name], r[:geo_level]] }
+      elsif success && resp.is_a?(Hash) && resp["error"] == "Unable to geocode"
+        # Successful request but 0 results
+        Rails.logger.info("No geosearch results for: #{query}")
       else
-        # Monitor if users run up against geosearch API rate limits.
-        LogUtil.log_err_and_airbrake("Geosearch failed. Check API rate limits.")
+        # Unsuccessful request. Likely Net::HTTPTooManyRequests. Monitor if users run up against geosearch API rate limits / record any other errs.
+        msg = GEOSEARCH_RATE_LIMIT_ERR
+        msg += ": #{resp}" if resp
+        LogUtil.log_err_and_airbrake(msg)
+        raise msg
       end
     end
     event = MetricUtil::ANALYTICS_EVENT_NAMES[:location_geosearched]

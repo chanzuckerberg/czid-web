@@ -548,6 +548,7 @@ class SampleView extends React.Component {
     const versionDisplay = this.renderVersionDisplay();
 
     const {
+      allowedFeatures,
       project,
       sampleIdToNameMap,
       pipelineVersions,
@@ -561,12 +562,27 @@ class SampleView extends React.Component {
     } = this.props;
 
     const showAMR = amr;
+    const pipelineVersion =
+      pipelineRun && pipelineRun.version && pipelineRun.version.pipeline;
+    const showPipelineVizLink =
+      allowedFeatures.includes("pipeline_viz") && pipelineVersion;
     return (
       <div>
         <NarrowContainer>
           <ViewHeader className={cs.viewHeader}>
             <ViewHeader.Content>
-              <div className={cs.pipelineInfo}>
+              <div
+                className={cx(
+                  cs.pipelineInfo,
+                  showPipelineVizLink && cs.linkToPipelineViz
+                )}
+                onClick={() =>
+                  showPipelineVizLink &&
+                  window.open(
+                    `/samples/${sample.id}/pipeline_viz/${pipelineVersion}`
+                  )
+                }
+              >
                 <span>PIPELINE {versionDisplay}</span>
                 <PipelineVersionSelect
                   pipelineRun={pipelineRun}
