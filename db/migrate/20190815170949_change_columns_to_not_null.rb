@@ -165,6 +165,7 @@ options field lists what these values are. This won't apply to most fields."
     change_column_null :contigs, :name, false
     change_column_null :contigs, :sequence, false
     change_column_null :contigs, :read_count, false
+    delete_bad_rows :contigs, :lineage_json
     change_column_null :contigs, :lineage_json, false
 
     change_column_null :ercc_counts, :pipeline_run_id, false
