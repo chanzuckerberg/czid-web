@@ -106,7 +106,7 @@
   }
 }
 
-.sampleReportError {
+.sampleMessage {
   display: flex;
   justify-content: center;
   margin-top: 100px;
@@ -148,6 +148,16 @@
 
         .icon {
           fill: $error;
+        }
+      }
+
+      &.inProgress {
+        background-color: $primary-lightest;
+        color: $primary-light;
+
+        .icon {
+          fill: $primary-light;
+          font-size: 20px;
         }
       }
     }
