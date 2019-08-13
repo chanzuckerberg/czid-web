@@ -43,7 +43,6 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     assert_equal 2, results.length
   end
 
-  # TODO: (gdingle): test this and see if it executes fetch_samples_taxons_counts
   test "sample_taxons_dict defaults" do
     dicts = HeatmapHelper.sample_taxons_dict(@params, @samples, @background.id)
 
