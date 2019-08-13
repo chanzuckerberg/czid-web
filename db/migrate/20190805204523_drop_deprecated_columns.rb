@@ -4,7 +4,6 @@ class DropDeprecatedColumns < ActiveRecord::Migration[5.1]
 
     remove_column :metadata, :specificity
 
-    # TODO: wait for boris
     remove_column :pipeline_runs, :version
     remove_column :pipeline_runs, :ready_step
 
