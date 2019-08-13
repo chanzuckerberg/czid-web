@@ -208,7 +208,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
     it "include sample info for active but not for retired benchmarks" do
       project = create(:project, name: project_name)
       sample = create(:sample, project: project)
-      pipeline_run = create(:pipeline_run, sample: sample, version: "5.0")
+      pipeline_run = create(:pipeline_run, sample: sample, pipeline_version: "5.0")
 
       expect(subject).to match(
         hash_including(
@@ -216,7 +216,7 @@ RSpec.describe BenchmarksHelper, type: :helper do
             hash_including(
               last_run: {
                 sample_name: sample.name,
-                pipeline_version: pipeline_run.version,
+                pipeline_version: pipeline_run.pipeline_version,
               }
             )
           ),

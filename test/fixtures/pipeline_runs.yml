@@ -5,18 +5,15 @@
 # below each fixture, per the syntax in the comments below
 #
 one:
-  job_id: 'dfdf'
   total_reads: 1
   adjusted_remaining_reads: 1
   alignment_config: one
 two:
-  job_id: 'sdfsf'
   total_reads: 1
   adjusted_remaining_reads: 1
   alignment_config: one
 three:
   sample: one
-  job_id: 'sdfsdfsdf'
   total_reads: 1
   adjusted_remaining_reads: 1
   alignment_config: one
@@ -24,14 +21,12 @@ three:
   job_status: "CHECKED"
 four:
   sample: two
-  job_id: 'four'
   total_reads: 1
   adjusted_remaining_reads: 1
   alignment_config: one
   total_ercc_reads: 0
   job_status: "CHECKED"
 five:
-  job_id: 'five'
   total_reads: 1
   adjusted_remaining_reads: 1
   alignment_config: one
@@ -45,49 +40,42 @@ six:
   alignment_config: one
 public_project_sampleA_run:
   sample: public_project_sampleA
-  job_id: 'public_project_sampleA_job'
   job_status: 'CHECKED'
   total_reads: 1
   adjusted_remaining_reads: 1
   alignment_config: one
 public_project_sampleB_run:
   sample: public_project_sampleB
-  job_id: 'public_project_sampleB_job'
   job_status: 'CHECKED'
   total_reads: 1
   adjusted_remaining_reads: 1
   alignment_config: one
 joe_project_sampleA_run:
   sample: joe_project_sampleA
-  job_id: 'joe_project_sampleA_job'
   job_status: 'CHECKED'
   total_reads: 1
   adjusted_remaining_reads: 1
   alignment_config: one
 joe_project_sampleB_run:
   sample: joe_project_sampleB
-  job_id: 'joe_project_sampleB_job'
   job_status: 'CHECKED'
   total_reads: 1
   adjusted_remaining_reads: 1
   alignment_config: one
 project_one_sampleA_run:
   sample: project_one_sampleA
-  job_id: 'project_one_sampleA_job'
   job_status: 'CHECKED'
   total_reads: 1
   adjusted_remaining_reads: 1
   alignment_config: one
 project_one_sampleB_run:
   sample: project_one_sampleB
-  job_id: 'project_one_sampleB_job'
   job_status: 'CHECKED'
   total_reads: 1
   adjusted_remaining_reads: 1
   alignment_config: one
 expired_sample_run:
   sample: expired_sample
-  job_id: 'expired_sample_job'
   job_status: 'CHECKED'
   total_reads: 1
   adjusted_remaining_reads: 1
@@ -95,7 +83,6 @@ expired_sample_run:
 public_sample_run:
   sample: public_sample
   pipeline_version: '1.0'
-  job_id: 'public_sample_job'
   job_status: 'CHECKED'
   total_reads: 1
   adjusted_remaining_reads: 1
@@ -103,7 +90,6 @@ public_sample_run:
 public_sample_run_with_pipeline_stages:
   sample: public_sample_with_pipeline_stages
   pipeline_version: '1.0'
-  job_id: 'pipeline_stages_sample_job'
   job_status: 'CHECKED'
   total_reads: 1
   adjusted_remaining_reads: 1
@@ -111,7 +97,6 @@ public_sample_run_with_pipeline_stages:
 private_sample_run_with_pipeline_stages:
   sample: private_sample_with_pipeline_stages
   pipeline_version: '1.0'
-  job_id: 'pipeline_stages_sample_job'
   job_status: 'CHECKED'
   total_reads: 1
   adjusted_remaining_reads: 1

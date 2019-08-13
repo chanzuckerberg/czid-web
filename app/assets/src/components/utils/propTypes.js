@@ -6,7 +6,6 @@ const TaxonDatabaseStats = PropTypes.shape({
   count_type: PropTypes.string.isRequired,
   maxzscore: PropTypes.number.isRequired,
   neglogevalue: PropTypes.number.isRequired,
-  percentconcordant: PropTypes.number.isRequired,
   percentidentity: PropTypes.number.isRequired,
   r: PropTypes.number.isRequired,
   r_pct: PropTypes.string,

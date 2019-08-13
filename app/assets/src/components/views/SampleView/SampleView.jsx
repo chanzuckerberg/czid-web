@@ -30,8 +30,9 @@ import Tabs from "~/components/ui/controls/Tabs";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
-import NoResultsBacteriaIcon from "~ui/icons/NoResultsBacteriaIcon";
+import BacteriaIcon from "~ui/icons/BacteriaIcon";
 import AlertIcon from "~ui/icons/AlertIcon";
+import LoadingIcon from "~/components/ui/icons/LoadingIcon";
 
 import SampleViewControls from "./SampleViewControls";
 import PipelineVersionSelect from "./PipelineVersionSelect";
@@ -300,107 +301,121 @@ class SampleView extends React.Component {
     return null;
   };
 
-  renderSampleReportError = () => {
-    const { pipelineRun, sample } = this.props;
-    let status, message, linkText, issueType, link;
-    switch (
-      sample.upload_error || (pipelineRun && pipelineRun.known_user_error)
-    ) {
-      case "BASESPACE_UPLOAD_FAILED":
-        status = "SAMPLE FAILED";
-        message =
-          "Oh no! There was an issue uploading your sample file from Basespace.";
-        linkText = "Contact us for help.";
-        issueType = "error";
-        link = "mailto:help@idseq.net";
-        break;
-      case "S3_UPLOAD_FAILED":
-        status = "SAMPLE FAILED";
-        message =
-          "Oh no! There was an issue uploading your sample file from S3.";
-        linkText = "Contact us for help.";
-        issueType = "error";
-        link = "mailto:help@idseq.net";
-        break;
-      case "LOCAL_UPLOAD_FAILED":
-        status = "SAMPLE FAILED";
-        message = "Oh no! It took too long to upload your sample file.";
-        linkText = "Contact us for help.";
-        issueType = "error";
-        link = "mailto:help@idseq.net";
-        break;
-      case "LOCAL_UPLOAD_STALLED":
-        status = "INCOMPLETE - ISSUE";
-        message =
-          "It looks like it is taking a long time to upload your sample file.";
-        linkText = "Contact us for help.";
-        issueType = "warning";
-        link = "mailto:help@idseq.net";
-        break;
-      case "FAULTY_INPUT":
-        status = "COMPLETE - ISSUE";
-        message = `Sorry, something was wrong with your input file. ${
-          pipelineRun.error_message
-        }.`;
-        linkText = "Please check your file format and reupload your file";
-        issueType = "warning";
-        link = "/samples/upload";
-        break;
-      case "INSUFFICIENT_READS":
-        status = "COMPLETE - ISSUE";
-        message =
-          "Oh no! No matches were identified because there weren't any reads left after host and quality filtering.";
-        linkText = "Check where your reads were filtered out";
-        issueType = "warning";
-        link = `/samples/${sample.id}/results_folder`;
-        break;
-      case "BROKEN_PAIRS":
-        status = "COMPLETE - ISSUE";
-        message =
-          "Sorry, something was wrong with your input files. " +
-          "Either the paired reads were not named using the same identifiers in both files, " +
-          "or some reads were missing a mate.";
-        linkText = "Please fix the read pairing, then reupload";
-        issueType = "warning";
-        link = "/samples/upload";
-        break;
-      default:
-        status = "SAMPLE FAILED";
-        message = "Oh no! There was an issue processing your sample.";
-        linkText = "Contact us for help re-running your sample.";
-        issueType = "error";
-        link = "mailto:help@idseq.net";
-        break;
+  renderSampleMessage = () => {
+    const { pipelineRun, sample, sampleStatus, allowedFeatures } = this.props;
+    let status, message, linkText, type, link, icon;
+    if (this.pipelineInProgress()) {
+      status = "IN PROGRESS";
+      message = sampleStatus;
+      icon = <LoadingIcon className={cs.icon} />;
+      type = "inProgress";
+      if (
+        pipelineRun &&
+        pipelineRun.version &&
+        pipelineRun.version.pipeline &&
+        allowedFeatures.includes("pipeline_viz")
+      ) {
+        linkText = "View Pipeline Visualization";
+        link = `/samples/${sample.id}/pipeline_viz/${
+          pipelineRun.version.pipeline
+        }`;
+      }
+    } else {
+      // Some kind of error or warning has occurred.
+      icon = <AlertIcon className={cs.icon} />;
+      switch (
+        sample.upload_error || (pipelineRun && pipelineRun.known_user_error)
+      ) {
+        case "BASESPACE_UPLOAD_FAILED":
+          status = "SAMPLE FAILED";
+          message =
+            "Oh no! There was an issue uploading your sample file from Basespace.";
+          linkText = "Contact us for help.";
+          type = "error";
+          link = "mailto:help@idseq.net";
+          break;
+        case "S3_UPLOAD_FAILED":
+          status = "SAMPLE FAILED";
+          message =
+            "Oh no! There was an issue uploading your sample file from S3.";
+          linkText = "Contact us for help.";
+          type = "error";
+          link = "mailto:help@idseq.net";
+          break;
+        case "LOCAL_UPLOAD_FAILED":
+          status = "SAMPLE FAILED";
+          message = "Oh no! It took too long to upload your sample file.";
+          linkText = "Contact us for help.";
+          type = "error";
+          link = "mailto:help@idseq.net";
+          break;
+        case "LOCAL_UPLOAD_STALLED":
+          status = "INCOMPLETE - ISSUE";
+          message =
+            "It looks like it is taking a long time to upload your sample file.";
+          linkText = "Contact us for help.";
+          type = "warning";
+          link = "mailto:help@idseq.net";
+          break;
+        case "FAULTY_INPUT":
+          status = "COMPLETE - ISSUE";
+          message = `Sorry, something was wrong with your input file. ${
+            pipelineRun.error_message
+          }.`;
+          linkText = "Please check your file format and reupload your file";
+          type = "warning";
+          link = "/samples/upload";
+          break;
+        case "INSUFFICIENT_READS":
+          status = "COMPLETE - ISSUE";
+          message =
+            "Oh no! No matches were identified because there weren't any reads left after host and quality filtering.";
+          linkText = "Check where your reads were filtered out";
+          type = "warning";
+          link = `/samples/${sample.id}/results_folder`;
+          break;
+        case "BROKEN_PAIRS":
+          status = "COMPLETE - ISSUE";
+          message =
+            "Sorry, something was wrong with your input files. " +
+            "Either the paired reads were not named using the same identifiers in both files, " +
+            "or some reads were missing a mate.";
+          linkText = "Please fix the read pairing, then reupload";
+          type = "warning";
+          link = "/samples/upload";
+          break;
+        default:
+          status = "SAMPLE FAILED";
+          message = "Oh no! There was an issue processing your sample.";
+          linkText = "Contact us for help re-running your sample.";
+          type = "error";
+          link = "mailto:help@idseq.net";
+          break;
+      }
     }
 
     return (
-      <div className={cs.sampleReportError}>
+      <div className={cs.sampleMessage}>
         <div className={cs.textContainer}>
-          <div className={cx(cs.reportStatus, cs[issueType])}>
-            <AlertIcon className={cs.icon} />
+          <div className={cx(cs.reportStatus, cs[type])}>
+            {icon}
             <span className={cs.text}>{status}</span>
           </div>
           <div className={cs.message}>{message}</div>
           <a className={cs.actionLink} href={link}>
             {linkText}
-            <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+            {linkText && (
+              <i className={cx("fa fa-chevron-right", cs.rightArrow)} />
+            )}
           </a>
         </div>
-        <NoResultsBacteriaIcon className={cs.bacteriaIcon} />
+        <BacteriaIcon className={cs.bacteriaIcon} />
       </div>
     );
   };
 
   renderTab = () => {
     if (this.state.currentTab === "Report") {
-      const waitingSpinner = (
-        <div className={cs.waitingContainer}>
-          Sample {this.props.sampleStatus} ...
-          <div className={cs.spinner}>
-            <i className="fa fa-spinner fa-spin fa-3x" />
-          </div>
-        </div>
-      );
       if (this.props.reportPresent) {
         return (
           <PipelineSampleReport
@@ -430,10 +445,8 @@ class SampleView extends React.Component {
             view={this.state.view}
           />
         );
-      } else if (this.pipelineInProgress()) {
-        return waitingSpinner;
       } else {
-        return this.renderSampleReportError();
+        return this.renderSampleMessage(); // Either the report error, or in progress view.
       }
     }
     if (this.state.currentTab === "Antimicrobial Resistance") {
@@ -548,6 +561,7 @@ class SampleView extends React.Component {
     const versionDisplay = this.renderVersionDisplay();
 
     const {
+      allowedFeatures,
       project,
       sampleIdToNameMap,
       pipelineVersions,
@@ -563,6 +577,8 @@ class SampleView extends React.Component {
     const showAMR = amr;
     const pipelineVersion =
       pipelineRun && pipelineRun.version && pipelineRun.version.pipeline;
+    const showPipelineVizLink =
+      allowedFeatures.includes("pipeline_viz") && pipelineVersion;
     return (
       <div>
         <NarrowContainer>
@@ -571,10 +587,10 @@ class SampleView extends React.Component {
               <div
                 className={cx(
                   cs.pipelineInfo,
-                  pipelineVersion && cs.linkToPipelineViz
+                  showPipelineVizLink && cs.linkToPipelineViz
                 )}
                 onClick={() =>
-                  pipelineVersion &&
+                  showPipelineVizLink &&
                   window.open(
                     `/samples/${sample.id}/pipeline_viz/${pipelineVersion}`
                   )
