@@ -243,7 +243,7 @@ class SamplesBulkUploadTest < ActionDispatch::IntegrationTest
       ],
     }, as: :json
 
-    assert_response :success
+    assert_response :upgrade_required
     assert_equal "upgrade_required", @response.parsed_body["status"]
   end
 
