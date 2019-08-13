@@ -55,11 +55,12 @@ class PipelineViz extends React.Component {
   }
 
   componentDidMount() {
+    const { updateInterval } = this.props;
     this.drawGraphs();
     window.addEventListener("resize", this.handleWindowResize);
     // Only set update loop if the pipeline is still running.
     if (!this.pipelineIsFinished()) {
-      this.updateLoop = setInterval(() => this.updateGraphs(), 1000);
+      this.updateLoop = setInterval(() => this.updateGraphs(), updateInterval);
     }
   }
 
@@ -77,9 +78,12 @@ class PipelineViz extends React.Component {
       sample.id,
       pipelineRun.version.pipeline
     );
-    this.setState({
-      graphData: newGraphData,
-    });
+    this.setState(
+      {
+        graphData: newGraphData,
+      },
+      () => this.pipelineIsFinished() && clearInterval(this.updateLoop)
+    );
     const updates = diff(oldGraphData, newGraphData);
     if (updates.stages) {
       Object.keys(updates.stages).forEach(stageIndexStr => {
@@ -110,10 +114,6 @@ class PipelineViz extends React.Component {
           this.drawStageGraph(stageIndex);
         }
       });
-
-      if (this.pipelineIsFinished()) {
-        clearInterval(this.updateLoop);
-      }
     }
   }
 
@@ -982,6 +982,7 @@ PipelineViz.propTypes = {
   xLayoutInterval: PropTypes.number,
   yLayoutInterval: PropTypes.number,
   staggerLayoutMultiplier: PropTypes.number,
+  updateInterval: PropTypes.number,
 };
 
 PipelineViz.defaultProps = {
@@ -1015,6 +1016,7 @@ PipelineViz.defaultProps = {
   xLayoutInterval: 130,
   yLayoutInterval: 84,
   staggerLayoutMultiplier: 1.5,
+  updateInterval: 60000,
 };
 
 export default PipelineViz;
