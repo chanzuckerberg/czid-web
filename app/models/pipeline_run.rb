@@ -541,8 +541,13 @@ class PipelineRun < ApplicationRecord
 
   def db_load_amr_counts
     amr_results = PipelineRun.download_file(s3_file_for("amr_counts"), local_amr_full_results_path)
-    unless File.zero?(amr_results)
-      amr_counts_array = []
+    if amr_results.nil?
+      Rails.logger.error("No AMR results file found for PipelineRun ##{id}. Is the pipeline okay?")
+      return
+    end
+    amr_counts_array = []
+    # results can be as small as ~80 bytes, so play it safe; empty results are 1 byte files
+    unless File.size?(amr_results) < 10
       amr_results_table = CSV.read(amr_results, headers: true)
       amr_results_table.each do |row|
         amr_counts_array << {
@@ -558,8 +563,8 @@ class PipelineRun < ApplicationRecord
           dpm: row["dpm"],
         }
       end
-      update(amr_counts_attributes: amr_counts_array)
     end
+    update(amr_counts_attributes: amr_counts_array)
   end
 
   def taxon_counts_json_name
