@@ -1025,7 +1025,7 @@ class SamplesController < ApplicationController
       render json: {
         message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
         status: :upgrade_required,
-      }
+      }, status: :upgrade_required
       return
     end
 
