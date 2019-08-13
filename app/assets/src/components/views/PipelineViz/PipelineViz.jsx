@@ -4,6 +4,7 @@ import { groupBy } from "lodash/fp";
 import { PanZoom } from "react-easy-panzoom";
 
 import DetailsSidebar from "~/components/common/DetailsSidebar/DetailsSidebar";
+import { getURLParamString, parseUrlParams } from "~/helpers/url";
 import NetworkGraph from "~/components/visualizations/NetworkGraph";
 import PipelineStageArrowheadIcon from "~/components/ui/icons/PipelineStageArrowheadIcon";
 import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
@@ -342,15 +343,17 @@ class PipelineViz extends React.Component {
     });
   };
 
-  toggleStage(index) {
+  toggleStage(index, updateHistory = true) {
     const updatedStagesOpened = [...this.state.stagesOpened];
     updatedStagesOpened[index] = !updatedStagesOpened[index];
     this.setState({ stagesOpened: updatedStagesOpened });
 
-    window.sessionStorage.setItem(
-      "stagesOpened",
-      JSON.stringify(updatedStagesOpened)
-    );
+    updateHistory &&
+      history.replaceState(
+        updatedStagesOpened,
+        null,
+        this.urlWithStagesOpenedState(updatedStagesOpened)
+      );
   }
 
   getStatusGroupFor(stageIndex, stepIndex) {
@@ -600,21 +603,31 @@ class PipelineViz extends React.Component {
       graphData: { stages },
     } = this.props;
 
-    const stagesOpened =
-      window.sessionStorage.getItem("stagesOpened") &&
-      JSON.parse(window.sessionStorage.getItem("stagesOpened"));
+    const stagesOpened = history.state || parseUrlParams();
     stages.forEach((stageData, stageIndex) => {
       const graph = this.graphs[stageIndex];
       const prevOpened = stagesOpened && stagesOpened[stageIndex];
-      if (!(prevOpened || stageData.jobStatus == "inProgress")) {
-        graph.afterDrawingOnce(() => this.toggleStage(stageIndex));
+      if (!(prevOpened || stageData.jobStatus == "inProgress") && graph) {
+        graph.afterDrawingOnce(() => this.toggleStage(stageIndex, false));
       }
     });
 
-    window.sessionStorage.setItem(
-      "stagesOpened",
-      JSON.stringify(this.state.stagesOpened)
+    history.replaceState(
+      this.state.stagesOpened,
+      null,
+      this.urlWithStagesOpenedState(this.state.stagesOpened)
     );
+  }
+
+  urlWithStagesOpenedState(stagesOpened) {
+    const { sample, pipelineRun } = this.props;
+    const pipelineVersion =
+      pipelineRun && pipelineRun.version && pipelineRun.version.pipeline;
+    return `${location.protocol}//${location.host}/samples/${
+      sample.id
+    }/pipeline_viz${
+      pipelineVersion ? `/${pipelineVersion}` : ""
+    }?${getURLParamString(stagesOpened)}`;
   }
 
   drawGraphs() {
