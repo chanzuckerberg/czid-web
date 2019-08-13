@@ -126,8 +126,6 @@ class PipelineSampleReport extends React.Component {
       ThresholdMap.getSavedThresholdFilters()
     );
 
-    this.showConcordance = false;
-
     this.treeMetrics = [
       { text: "Aggregate Score", value: "aggregatescore" },
       { text: "NT r (total reads)", value: "nt_r" },
@@ -1556,7 +1554,6 @@ class RenderMarkup extends React.Component {
         taxonRowRefs={parent.taxon_row_refs}
         renderName={parent.renderName}
         renderNumber={parent.renderNumber}
-        showConcordance={parent.showConcordance}
         getRowClass={parent.getRowClass}
         reportDetails={parent.report_details}
         backgroundData={parent.state.backgroundData}
