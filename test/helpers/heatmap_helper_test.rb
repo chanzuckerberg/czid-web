@@ -35,13 +35,18 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @min_reads,
       @sort_by
     )
-    @top_taxons_details = [{ "tax_id" => 1, "samples" => { 980_190_962 => [1, 1, 100.0, -100], 298_486_374 => [1, 1, 100.0, -100] }, "max_aggregate_score" => 2_000_000.0 }, { "tax_id" => 28_037, "samples" => { 51_848_956 => [1, 1, 100.0, -100] } }, { "tax_id" => 573, "samples" => { 51_848_956 => [2, 1, 100.0, 100.0] } }, { "tax_id" => 1313, "samples" => { 51_848_956 => [3, 1, -100, 100.0] } }].sort_by! { |d| d["tax_id"] }
+    @top_taxons_details = [
+      { "tax_id" => 1, "samples" => { 980_190_962 => [1, 1, 100.0, -100] } },
+      { "tax_id" => 28_037, "samples" => { 51_848_956 => [1, 1, 100.0, -100] } },
+      { "tax_id" => 573, "samples" => { 51_848_956 => [2, 1, 100.0, 100.0] } },
+      { "tax_id" => 1313, "samples" => { 51_848_956 => [3, 1, -100, 100.0] } },
+    ].sort_by! { |d| d["tax_id"] }
   end
 
   test "fetch_samples_taxons_counts" do
-    taxons = [taxons(:one), taxons(:two)]
-    results = HeatmapHelper.fetch_samples_taxons_counts(@samples, taxons.pluck(:id), [], @background.id)
-    assert_equal [], results
+    taxon_counts = [taxon_counts(:one), taxon_counts(:two), taxon_counts(:six), taxon_counts(:seven)]
+    results = HeatmapHelper.fetch_samples_taxons_counts(@samples, taxon_counts.pluck(:tax_id), taxon_counts.pluck(:genus_taxid), @background.id)
+    assert_equal 2, results.length
   end
 
   # TODO: (gdingle): test this and see if it executes fetch_samples_taxons_counts
@@ -53,8 +58,8 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     assert dict.key?(:taxons)
     assert_equal 3, dict[:taxons].length
     taxon = dict[:taxons][0]
-    assert_equal 10, taxon["NT"].length
-    assert_equal 10, taxon["NR"].length
+    assert_equal 9, taxon["NT"].length
+    assert_equal 9, taxon["NR"].length
     assert_equal 99, taxon["NT"]["zscore"]
     assert_equal 99, taxon["NR"]["zscore"]
     assert_equal "Klebsiella pneumoniae", taxon["name"]
@@ -101,7 +106,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     )
     details.sort_by! { |d| d["tax_id"] }
     assert_equal 4, details.length
-    assert_equal 2_000_000.0, details[0]["max_aggregate_score"]
+    assert_equal [1, 1, 100.0, -100], details[0]["samples"].first[1]
     assert_equal @top_taxons_details[0], details[0]
     assert_equal @top_taxons_details[2], details[2]
   end
@@ -117,17 +122,6 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     assert_equal 2, details.length
   end
 
-  test "top_taxons_details sort_by" do
-    details = HeatmapHelper.top_taxons_details(
-      @results_by_pr,
-      @num_results,
-      "highest_nt_rpm",
-      @species_selected,
-      @threshold_filters
-    )
-    assert_equal 2_000_000.0, details[0]["max_aggregate_score"]
-  end
-
   test "top_taxons_details species_selected false" do
     details = HeatmapHelper.top_taxons_details(
       @results_by_pr,
@@ -136,28 +130,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       false,
       @threshold_filters
     )
-    assert_equal 1_900_000_001 * -1, details[0]["tax_id"]
-  end
-
-  test "fetch_top_taxons defaults" do
-    top_taxons = HeatmapHelper.fetch_top_taxons(
-      @samples,
-      @background.id,
-      @categories,
-      @read_specificity,
-      @include_phage,
-      @num_results,
-      @min_reads,
-      @sort_by
-    )
-    assert_equal 3, top_taxons.length
-    top_taxon = top_taxons[@samples[0].pipeline_runs[0].id]
-    taxon_counts = top_taxon["taxon_counts"]
-    assert_equal 1, taxon_counts.length
-    taxon_count = taxon_counts[0]
-    assert_equal "some species", taxon_count["name"]
-    assert_equal 100, taxon_count["zscore"]
-    assert_equal 1_000_000, taxon_count["rpm"]
+    assert_equal 570, details[0]["tax_id"]
   end
 
   test "fetch_top_taxons num_results" do
@@ -231,7 +204,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @min_reads,
       @sort_by
     )
-    assert_equal 2, top_taxons.length
+    assert_equal 1, top_taxons.length
 
     top_taxons = HeatmapHelper.fetch_top_taxons(
       @samples,
@@ -258,10 +231,10 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     dict = dicts[0]
     assert_equal 3, dict[:taxons].length
     taxon = dict[:taxons][0]
-    assert_equal 10, taxon["NT"].length
-    assert_equal 10, taxon["NR"].length
-    assert_equal 100.0, taxon["NT"]["zscore"]
-    assert_equal 100 * -1, taxon["NR"]["zscore"]
+    assert_equal 9, taxon["NT"].length
+    assert_equal 9, taxon["NR"].length
+    assert_equal 100.0, taxon["NT"]["zscore"].abs
+    assert_equal 100.0, taxon["NR"]["zscore"].abs
   end
 
   test "samples_taxons_details species_selected false" do
