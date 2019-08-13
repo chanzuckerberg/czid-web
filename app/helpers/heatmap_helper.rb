@@ -67,92 +67,20 @@ module HeatmapHelper
       num_results,
       min_reads,
       sort_by,
-      threshold_filters
+      threshold_filters,
+      removed_taxon_ids,
+      species_selected
     )
-
-    details = top_taxons_details(
-      results_by_pr,
-      num_results,
-      sort_by,
-      species_selected,
-      threshold_filters
-    )
-
-    taxon_ids = details.pluck('tax_id')
-    taxon_ids -= removed_taxon_ids
-
-    unless taxon_ids.empty?
-      # Refetch at genus level using species level
-      parent_ids = species_selected ? [] : HeatmapHelper.fetch_parent_ids(taxon_ids, samples)
-      results_by_pr = HeatmapHelper.fetch_samples_taxons_counts(samples, taxon_ids, parent_ids, background_id)
-    end
 
     HeatmapHelper.samples_taxons_details(
       results_by_pr,
       samples,
-      taxon_ids,
       species_selected,
       threshold_filters
     )
   end
 
-  def self.top_taxons_details(
-    results_by_pr,
-    num_results,
-    sort_by,
-    species_selected,
-    threshold_filters
-  )
-    sort = ReportHelper.decode_sort_by(sort_by)
-    count_type = sort[:count_type]
-    metric = sort[:metric]
-    candidate_taxons = {}
-    results_by_pr.each do |_pr_id, res|
-      pr = res["pr"]
-      taxon_counts = res["taxon_counts"]
-      sample_id = pr.sample_id
-
-      tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
-      HeatmapHelper.only_species_or_genus_counts!(tax_2d, species_selected)
-
-      rows = []
-      tax_2d.each do |_tax_id, tax_info|
-        rows << tax_info
-      end
-
-      # NOTE: This block of code can probably be all removed because the same
-      # filtering now happens earlier in SQL.
-      HeatmapHelper.compute_aggregate_scores_v2!(rows)
-      rows = rows.select do |row|
-        row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD &&
-          # Note: these are applied *after* SQL filters, so results may not be
-          # 100% as expected .
-          HeatmapHelper.apply_custom_filters(row, threshold_filters)
-      end
-
-      # Get the top N for each sample. This re-sorts on the same metric as in
-      # fetch_top_taxons SQL. We sort there first for performance.
-      rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
-      count = 1
-      rows.each do |row|
-        taxon = if candidate_taxons[row["tax_id"]]
-                  candidate_taxons[row["tax_id"]]
-                else
-                  { "tax_id" => row["tax_id"], "samples" => {} }
-                end
-        taxon["max_aggregate_score"] = row[sort[:count_type]][sort[:metric]] if
-          taxon["max_aggregate_score"].to_f < row[sort[:count_type]][sort[:metric]].to_f
-        taxon["samples"][sample_id] = [count, row["tax_level"], row["NT"]["zscore"], row["NR"]["zscore"]]
-        candidate_taxons[row["tax_id"]] = taxon
-        break if count >= num_results
-        count += 1
-      end
-    end
-
-    candidate_taxons.values.sort_by { |taxon| -1.0 * taxon["max_aggregate_score"].to_f }
-  end
-
-  def self.fetch_top_taxons(
+  def self.fetch_top_taxons( # rubocop:disable Metrics/ParameterLists
     samples,
     background_id,
     categories,
@@ -161,7 +89,9 @@ module HeatmapHelper
     num_results = 1_000_000,
     min_reads = MINIMUM_READ_THRESHOLD,
     sort_by = DEFAULT_TAXON_SORT_PARAM,
-    threshold_filters = []
+    threshold_filters = [],
+    removed_taxon_ids = [],
+    species_selected = true
   )
     categories_map = ReportHelper::CATEGORIES_TAXID_BY_NAME
     categories_clause = ""
@@ -180,6 +110,10 @@ module HeatmapHelper
       phage_clause = " AND is_phage != 1"
     elsif include_phage && categories.blank?
       phage_clause = " AND is_phage = 1"
+    end
+
+    if removed_taxon_ids.present?
+      removed_taxon_ids_clause = " AND taxon_id NOT IN (#{removed_taxon_ids.join(', ')})"
     end
 
     # fraction_subsampled was introduced 2018-03-30. For prior runs, we assume
@@ -216,7 +150,7 @@ module HeatmapHelper
       #{rpm_sql} AS rpm,
       #{zscore_sql} AS zscore
     FROM taxon_counts
-    LEFT OUTER JOIN pipeline_runs pr ON pipeline_run_id = pr.id
+    JOIN pipeline_runs pr ON pipeline_run_id = pr.id
     LEFT OUTER JOIN taxon_summaries ON
       #{background_id.to_i}   = taxon_summaries.background_id   AND
       taxon_counts.count_type = taxon_summaries.count_type      AND
@@ -228,9 +162,11 @@ module HeatmapHelper
       AND count >= #{min_reads}
       -- We need both types of counts for threshold filters
       AND taxon_counts.count_type IN ('NT', 'NR')
+      AND taxon_counts.tax_level = #{species_selected ? TaxonCount::TAX_LEVEL_SPECIES : TaxonCount::TAX_LEVEL_GENUS}
       #{categories_clause}
       #{read_specificity_clause}
-      #{phage_clause}"
+      #{phage_clause}
+      #{removed_taxon_ids_clause}"
 
     # TODO: (gdingle): how do we protect against SQL injection?
     sql_results = TaxonCount.connection.select_all(
@@ -267,38 +203,33 @@ module HeatmapHelper
   def self.samples_taxons_details(
     results_by_pr,
     samples,
-    taxon_ids,
     species_selected,
     threshold_filters
   )
     results = {}
 
-    # Get sample results for the taxon ids
-    unless taxon_ids.empty?
-      samples_by_id = Hash[samples.map { |s| [s.id, s] }]
-      results_by_pr.each do |_pr_id, res|
-        pr = res["pr"]
-        taxon_counts = res["taxon_counts"]
-        sample_id = pr.sample_id
-        tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
-        HeatmapHelper.only_species_or_genus_counts!(tax_2d, species_selected)
+    samples_by_id = Hash[samples.map { |s| [s.id, s] }]
+    results_by_pr.each do |_pr_id, res|
+      pr = res["pr"]
+      taxon_counts = res["taxon_counts"]
+      sample_id = pr.sample_id
+      tax_2d = ReportHelper.taxon_counts_cleanup(taxon_counts)
+      HeatmapHelper.only_species_or_genus_counts!(tax_2d, species_selected)
 
-        rows = []
-        tax_2d.each { |_tax_id, tax_info| rows << tax_info }
-        HeatmapHelper.compute_aggregate_scores_v2!(rows)
+      rows = []
+      tax_2d.each { |_tax_id, tax_info| rows << tax_info }
+      HeatmapHelper.compute_aggregate_scores_v2!(rows)
 
-        filtered_rows = rows
-                        .select { |row| taxon_ids.include?(row["tax_id"]) }
-                        .each { |row| row[:filtered] = HeatmapHelper.apply_custom_filters(row, threshold_filters) }
+      filtered_rows = rows
+                      .each { |row| row[:filtered] = HeatmapHelper.apply_custom_filters(row, threshold_filters) }
 
-        results[sample_id] = {
-          sample_id: sample_id,
-          name: samples_by_id[sample_id].name,
-          metadata: samples_by_id[sample_id].metadata_with_base_type,
-          host_genome_name: samples_by_id[sample_id].host_genome_name,
-          taxons: filtered_rows,
-        }
-      end
+      results[sample_id] = {
+        sample_id: sample_id,
+        name: samples_by_id[sample_id].name,
+        metadata: samples_by_id[sample_id].metadata_with_base_type,
+        host_genome_name: samples_by_id[sample_id].host_genome_name,
+        taxons: filtered_rows,
+      }
     end
 
     # For samples that didn't have matching taxons, just throw in the metadata.

@@ -35,12 +35,6 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @min_reads,
       @sort_by
     )
-    @top_taxons_details = [
-      { "tax_id" => 1, "samples" => { 980_190_962 => [1, 1, 100.0, -100] } },
-      { "tax_id" => 28_037, "samples" => { 51_848_956 => [1, 1, 100.0, -100] } },
-      { "tax_id" => 573, "samples" => { 51_848_956 => [2, 1, 100.0, 100.0] } },
-      { "tax_id" => 1313, "samples" => { 51_848_956 => [3, 1, -100, 100.0] } },
-    ].sort_by! { |d| d["tax_id"] }
   end
 
   test "fetch_samples_taxons_counts" do
@@ -56,12 +50,15 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     assert_equal @samples.length, dicts.length
     dict = dicts[0]
     assert dict.key?(:taxons)
+
+    # TODO: (gdingle): why more?
     assert_equal 3, dict[:taxons].length
+
     taxon = dict[:taxons][0]
     assert_equal 9, taxon["NT"].length
     assert_equal 9, taxon["NR"].length
-    assert_equal 99, taxon["NT"]["zscore"]
-    assert_equal 99, taxon["NR"]["zscore"]
+    assert_equal 100.0, taxon["NT"]["zscore"].abs
+    assert_equal 100.0, taxon["NR"]["zscore"].abs
     assert_equal "Klebsiella pneumoniae", taxon["name"]
     assert_equal "Bacteria", taxon["category_name"]
   end
@@ -79,7 +76,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       thresholdFilters: [
         {
           metric: "NT_zscore",
-          value: "10000",
+          value: "1",
           operator: ">=",
         },
       ].to_json,
@@ -88,49 +85,9 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     response = HeatmapHelper.sample_taxons_dict(params, @samples, @background.id)
 
     assert_equal @samples.length, response.length
-    assert_equal "sample1", response[0][:name]
-    assert_equal "sample2", response[1][:name]
-    assert_equal "RR004_water_2_S23-20180208", response[2][:name]
-    assert !response[0].key?(:taxons)
-    assert !response[1].key?(:taxons)
-    assert !response[2].key?(:taxons)
-  end
-
-  test "top_taxons_details defaults" do
-    details = HeatmapHelper.top_taxons_details(
-      @results_by_pr,
-      @num_results,
-      @sort_by,
-      @species_selected,
-      @threshold_filters
-    )
-    details.sort_by! { |d| d["tax_id"] }
-    assert_equal 4, details.length
-    assert_equal [1, 1, 100.0, -100], details[0]["samples"].first[1]
-    assert_equal @top_taxons_details[0], details[0]
-    assert_equal @top_taxons_details[2], details[2]
-  end
-
-  test "top_taxons_details num_results" do
-    details = HeatmapHelper.top_taxons_details(
-      @results_by_pr,
-      1,
-      @sort_by,
-      @species_selected,
-      @threshold_filters
-    )
-    assert_equal 2, details.length
-  end
-
-  test "top_taxons_details species_selected false" do
-    details = HeatmapHelper.top_taxons_details(
-      @results_by_pr,
-      @num_results,
-      @sort_by,
-      false,
-      @threshold_filters
-    )
-    assert_equal 570, details[0]["tax_id"]
+    assert_equal "RR004_water_2_S23-20180208", response[0][:name]
+    assert_equal "sample1", response[1][:name]
+    assert_equal "sample2", response[2][:name]
   end
 
   test "fetch_top_taxons num_results" do
@@ -160,8 +117,8 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     )
     top_taxon = top_taxons.first[1]
     taxon_count = top_taxon["taxon_counts"][0]
-    assert_equal "Klebsiella", taxon_count["name"]
-    assert_equal 217, taxon_count["r"]
+    assert_equal "Klebsiella pneumoniae", taxon_count["name"]
+    assert_equal 209, taxon_count["r"]
 
     top_taxons = HeatmapHelper.fetch_top_taxons(
       @samples,
@@ -223,7 +180,6 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     dicts = HeatmapHelper.samples_taxons_details(
       @results_by_pr,
       @samples,
-      @top_taxons_details.pluck('tax_id'),
       @species_selected,
       @threshold_filters
     )
@@ -241,13 +197,12 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     dicts = HeatmapHelper.samples_taxons_details(
       @results_by_pr,
       @samples,
-      @top_taxons_details.pluck('tax_id'),
       false,
       @threshold_filters
     )
 
     dict = dicts[0]
-    assert_equal 0, dict[:taxons].length
+    assert_equal 3, dict[:taxons].length
   end
 
   test "threshold filters parsing" do
