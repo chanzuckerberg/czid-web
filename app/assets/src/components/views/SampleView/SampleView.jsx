@@ -302,14 +302,19 @@ class SampleView extends React.Component {
   };
 
   renderSampleMessage = () => {
-    const { pipelineRun, sample, sampleStatus } = this.props;
+    const { pipelineRun, sample, sampleStatus, allowedFeatures } = this.props;
     let status, message, linkText, type, link, icon;
     if (this.pipelineInProgress()) {
       status = "IN PROGRESS";
       message = sampleStatus;
       icon = <LoadingIcon className={cs.icon} />;
       type = "inProgress";
-      if (pipelineRun && pipelineRun.version && pipelineRun.version.pipeline) {
+      if (
+        pipelineRun &&
+        pipelineRun.version &&
+        pipelineRun.version.pipeline &&
+        allowedFeatures.includes("pipeline_viz")
+      ) {
         linkText = "View Pipeline Visualization";
         link = `/samples/${sample.id}/pipeline_viz/${
           pipelineRun.version.pipeline
