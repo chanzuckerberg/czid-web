@@ -17,7 +17,6 @@ class DropDeprecatedColumns < ActiveRecord::Migration[5.1]
     remove_column :pipeline_runs, :job_log_id
     remove_column :pipeline_runs, :postprocess_status
     remove_column :pipeline_runs, :assembled_taxids
-    remove_column :pipeline_runs, :subsample
 
     remove_column :taxon_counts, :percent_concordant
     remove_column :taxon_counts, :species_total_concordant
