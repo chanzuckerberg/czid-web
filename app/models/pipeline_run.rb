@@ -134,8 +134,6 @@ class PipelineRun < ApplicationRecord
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
                         "amr_counts" => "db_load_amr_counts", }.freeze
-  # Note: reads_before_priceseqfilter, reads_after_priceseqfilter, reads_after_cdhitdup
-  #       are the only "job_stats" we actually need for web display.
   REPORT_READY_OUTPUT = "taxon_counts".freeze
 
   # Values for results_finalized are as follows.
@@ -194,10 +192,6 @@ class PipelineRun < ApplicationRecord
 
   def parse_dag_vars
     JSON.parse(dag_vars || "{}")
-  end
-
-  def as_json(options = {})
-    super(options.merge(except: [:command, :command_stdout, :command_error, :job_description]))
   end
 
   def check_box_label
@@ -332,12 +326,6 @@ class PipelineRun < ApplicationRecord
     return true if finalized?
     # Old version before run stages
     return true if pipeline_run_stages.blank? && (job_status == STATUS_FAILED || job_status == STATUS_CHECKED)
-  end
-
-  def log_url
-    return nil unless job_log_id
-    "https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2" \
-      "#logEventViewer:group=/aws/batch/job;stream=#{job_log_id}"
   end
 
   def active_stage
