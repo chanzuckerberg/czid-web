@@ -150,6 +150,16 @@
           fill: $error;
         }
       }
+
+      &.inProgress {
+        background-color: $primary-lightest;
+        color: $primary-light;
+
+        .icon {
+          fill: $primary-light;
+          font-size: 20px;
+        }
+      }
     }
 
     .message {
