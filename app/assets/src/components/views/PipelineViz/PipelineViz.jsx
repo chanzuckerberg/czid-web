@@ -86,16 +86,16 @@ class PipelineViz extends React.Component {
     );
     const updates = diff(oldGraphData, newGraphData);
     if (updates.stages) {
-      Object.keys(updates.stages).forEach(stageIndexStr => {
+      Object.entries(updates.stages).forEach((stageIndexStr, stageChanges) => {
         const stageIndex = parseInt(stageIndexStr);
 
         if (stageIndex < this.graphs.length) {
           // Graph already exists.
           const graph = this.graphs[stageIndex];
-          const steps = updates.stages[stageIndexStr].steps;
-          Object.keys(steps).forEach(stepIndexStr => {
+          const steps = stageChanges.steps;
+          Object.entries(steps).forEach((stepIndexStr, stepChanges) => {
             const stepIndex = parseInt(stepIndexStr);
-            const status = steps[stepIndex].status;
+            const status = stepChanges.status;
             graph.updateNodes([stepIndex], {
               group: status,
               ...this.getNodeStatusOptions(status),
@@ -121,11 +121,7 @@ class PipelineViz extends React.Component {
     const {
       graphData: { status },
     } = this.state;
-    return (
-      status == "finished" ||
-      status == "userErrored" ||
-      status == "pipelineErrored"
-    );
+    return ["finished", "userErrored", "pipelineErrored"].includes(status);
   }
 
   getStepDataAtIndices({ stageIndex, stepIndex }) {
