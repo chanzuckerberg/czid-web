@@ -107,7 +107,7 @@ RSpec.describe BenchmarksController, type: :controller do
         create(
           :project,
           name: DEFAULT_BENCHMARK_PROJECT,
-          samples_data: [{ name: DEFAULT_SAMPLE_NAME, pipeline_runs_data: [{ version: DEFAULT_PIPELINE_VERSION }] }]
+          samples_data: [{ name: DEFAULT_SAMPLE_NAME, pipeline_runs_data: [{ pipeline_version: DEFAULT_PIPELINE_VERSION }] }]
         )
       end
 
