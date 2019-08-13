@@ -30,7 +30,7 @@ import Tabs from "~/components/ui/controls/Tabs";
 import DetailsSidebar from "~/components/common/DetailsSidebar";
 import CoverageVizBottomSidebar from "~/components/common/CoverageVizBottomSidebar";
 import { SaveButton, ShareButton } from "~ui/controls/buttons";
-import NoResultsBacteriaIcon from "~ui/icons/NoResultsBacteriaIcon";
+import BacteriaIcon from "~ui/icons/BacteriaIcon";
 import AlertIcon from "~ui/icons/AlertIcon";
 import LoadingIcon from "~/components/ui/icons/LoadingIcon";
 
@@ -301,14 +301,14 @@ class SampleView extends React.Component {
     return null;
   };
 
-  renderSampleReportError = () => {
+  renderSampleMessage = () => {
     const { pipelineRun, sample, sampleStatus } = this.props;
-    let status, message, linkText, issueType, link, icon;
+    let status, message, linkText, type, link, icon;
     if (this.pipelineInProgress()) {
       status = "IN PROGRESS";
       message = sampleStatus;
       icon = <LoadingIcon className={cs.icon} />;
-      issueType = "inProgress";
+      type = "inProgress";
       if (pipelineRun && pipelineRun.version && pipelineRun.version.pipeline) {
         linkText = "View Pipeline Visualization";
         link = `/samples/${sample.id}/pipeline_viz/${
@@ -316,6 +316,7 @@ class SampleView extends React.Component {
         }`;
       }
     } else {
+      // Some kind of error or warning has occurred.
       icon = <AlertIcon className={cs.icon} />;
       switch (
         sample.upload_error || (pipelineRun && pipelineRun.known_user_error)
@@ -325,7 +326,7 @@ class SampleView extends React.Component {
           message =
             "Oh no! There was an issue uploading your sample file from Basespace.";
           linkText = "Contact us for help.";
-          issueType = "error";
+          type = "error";
           link = "mailto:help@idseq.net";
           break;
         case "S3_UPLOAD_FAILED":
@@ -333,14 +334,14 @@ class SampleView extends React.Component {
           message =
             "Oh no! There was an issue uploading your sample file from S3.";
           linkText = "Contact us for help.";
-          issueType = "error";
+          type = "error";
           link = "mailto:help@idseq.net";
           break;
         case "LOCAL_UPLOAD_FAILED":
           status = "SAMPLE FAILED";
           message = "Oh no! It took too long to upload your sample file.";
           linkText = "Contact us for help.";
-          issueType = "error";
+          type = "error";
           link = "mailto:help@idseq.net";
           break;
         case "LOCAL_UPLOAD_STALLED":
@@ -348,7 +349,7 @@ class SampleView extends React.Component {
           message =
             "It looks like it is taking a long time to upload your sample file.";
           linkText = "Contact us for help.";
-          issueType = "warning";
+          type = "warning";
           link = "mailto:help@idseq.net";
           break;
         case "FAULTY_INPUT":
@@ -357,7 +358,7 @@ class SampleView extends React.Component {
             pipelineRun.error_message
           }.`;
           linkText = "Please check your file format and reupload your file";
-          issueType = "warning";
+          type = "warning";
           link = "/samples/upload";
           break;
         case "INSUFFICIENT_READS":
@@ -365,7 +366,7 @@ class SampleView extends React.Component {
           message =
             "Oh no! No matches were identified because there weren't any reads left after host and quality filtering.";
           linkText = "Check where your reads were filtered out";
-          issueType = "warning";
+          type = "warning";
           link = `/samples/${sample.id}/results_folder`;
           break;
         case "BROKEN_PAIRS":
@@ -375,23 +376,23 @@ class SampleView extends React.Component {
             "Either the paired reads were not named using the same identifiers in both files, " +
             "or some reads were missing a mate.";
           linkText = "Please fix the read pairing, then reupload";
-          issueType = "warning";
+          type = "warning";
           link = "/samples/upload";
           break;
         default:
           status = "SAMPLE FAILED";
           message = "Oh no! There was an issue processing your sample.";
           linkText = "Contact us for help re-running your sample.";
-          issueType = "error";
+          type = "error";
           link = "mailto:help@idseq.net";
           break;
       }
     }
 
     return (
-      <div className={cs.sampleReportError}>
+      <div className={cs.sampleMessage}>
         <div className={cs.textContainer}>
-          <div className={cx(cs.reportStatus, cs[issueType])}>
+          <div className={cx(cs.reportStatus, cs[type])}>
             {icon}
             <span className={cs.text}>{status}</span>
           </div>
@@ -403,7 +404,7 @@ class SampleView extends React.Component {
             )}
           </a>
         </div>
-        <NoResultsBacteriaIcon className={cs.bacteriaIcon} />
+        <BacteriaIcon className={cs.bacteriaIcon} />
       </div>
     );
   };
@@ -440,7 +441,7 @@ class SampleView extends React.Component {
           />
         );
       } else {
-        return this.renderSampleReportError();
+        return this.renderSampleMessage(); // Either the report error, or in progress view.
       }
     }
     if (this.state.currentTab === "Antimicrobial Resistance") {
