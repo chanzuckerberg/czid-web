@@ -11,7 +11,6 @@ export default class DetailCells extends React.Component {
       taxonRowRefs,
       renderName,
       renderNumber,
-      showConcordance,
       getRowClass,
       onTaxonClick,
       reportDetails,
@@ -81,7 +80,6 @@ DetailCells.propTypes = {
   taxonRowRefs: PropTypes.objectOf(PropTypes.any).isRequired, // These are DOM elements.
   renderName: PropTypes.func.isRequired,
   renderNumber: PropTypes.func.isRequired,
-  showConcordance: PropTypes.bool.isRequired,
   onTaxonClick: PropTypes.func.isRequired,
   getRowClass: PropTypes.func.isRequired,
   reportDetails: PropTypes.ReportDetails,

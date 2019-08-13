@@ -32,7 +32,6 @@ export default class ReportTable extends React.Component {
       renderName,
       renderNumber,
       renderColumnHeader,
-      showConcordance,
       getRowClass,
       reportDetails,
       backgroundData,
@@ -144,7 +143,6 @@ export default class ReportTable extends React.Component {
               taxonRowRefs={taxonRowRefs}
               renderName={renderName}
               renderNumber={renderNumber}
-              showConcordance={showConcordance}
               getRowClass={getRowClass}
               onTaxonClick={this.handleTaxonClick}
               reportDetails={reportDetails}
@@ -165,7 +163,6 @@ ReportTable.propTypes = {
   taxonRowRefs: PropTypes.objectOf(PropTypes.any).isRequired, // These are DOM elements.
   renderName: PropTypes.func.isRequired,
   renderNumber: PropTypes.func.isRequired,
-  showConcordance: PropTypes.bool.isRequired,
   getRowClass: PropTypes.func.isRequired,
   reportDetails: PropTypes.ReportDetails,
   backgroundData: PropTypes.BackgroundData,
