@@ -14,17 +14,17 @@ gem 'brakeman'
 gem 'bcrypt', '~> 3.1.7'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.2', '>= 4.2.2'
-gem 'consul', '>= 0.13.1'
-gem 'devise', '>= 4.6.0'
-gem 'health_check', '>= 2.7.0'
+gem 'consul', '>= 1.0.1'
+gem 'devise', '>= 4.6.1'
+gem 'health_check', '>= 3.0.0'
 gem 'honeycomb-rails', '>= 0.8.1'
 gem 'mailgun_rails', '>= 0.9.0'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
 # Logger
 gem 'logging-rails', require: 'logging/rails'
-gem 'lograge'
-gem 'lograge-sql'
+gem 'lograge', '>= 0.10.0'
+gem 'lograge-sql', '>= 0.3.0'
 gem 'multipart-post'
 gem 'silencer'
 # elasticsearch
@@ -37,8 +37,8 @@ gem 'puma', '~> 3.7'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.1.5'
-gem 'rails-controller-testing'
+gem 'rails', '~> 5.1.6', '>= 5.1.6.2'
+gem 'rails-controller-testing', '>= 1.0.4'
 gem 'rake'
 # Worker/Scheduler management
 gem 'resque', '>= 1.27.4'
@@ -79,10 +79,10 @@ gem 'http-2'
 
 gem 'deep_cloneable', '~> 2.4.0'
 # For using redis as a cache
-gem 'redis-rails', '~> 5'
+gem 'redis-rails', '~> 5', '>= 5.0.2'
 # For caching actions by request URL
-gem 'actionpack-action_caching'
-gem 'nokogiri'
+gem 'actionpack-action_caching', '>= 1.2.0'
+gem 'nokogiri', '>= 1.10.4'
 
 # For adding foreign key constraints
 gem 'immigrant'
@@ -92,12 +92,12 @@ group :development, :test do
   gem 'bundler-audit'
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   # Adds support for Capybara system testing and selenium driver
-  gem 'capybara', '~> 2.17', '>= 2.17.0'
+  gem 'capybara', '~> 2.18', '>= 2.18.0'
   gem 'coveralls', require: false
-  gem 'factory_bot_rails'
+  gem 'factory_bot_rails', '>= 5.0.2'
   gem 'guard', '~> 2.15'
   gem 'guard-rspec', '~> 4.7'
-  gem 'rspec-rails', '>= 3.7.2'
+  gem 'rspec-rails', '>= 3.8.2'
   gem 'rubocop', '=0.49.1'
   gem 'selenium-webdriver'
 end
@@ -106,7 +106,7 @@ group :development do
   gem 'active_record_query_trace'
   gem 'listen', '>= 3.0.5', '< 3.2'
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
-  gem 'web-console', '>= 3.5.1'
+  gem 'web-console', '>= 3.7.0'
 end
 
 group :test do
