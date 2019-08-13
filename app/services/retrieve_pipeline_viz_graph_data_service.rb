@@ -129,7 +129,7 @@ class RetrievePipelineVizGraphDataService
   end
 
   def pipeline_job_status(stages)
-    stage_job_status(stages.map(&:jobStatus))
+    stage_job_status(stages.map { |stage| stage[:jobStatus] })
   end
 
   def create_edges
