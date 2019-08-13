@@ -11,7 +11,6 @@ export default class DetailCells extends React.Component {
       taxonRowRefs,
       renderName,
       renderNumber,
-      showConcordance,
       getRowClass,
       onTaxonClick,
       reportDetails,
@@ -70,13 +69,6 @@ export default class DetailCells extends React.Component {
           1
         )}
         {renderNumber(taxInfo.NT.neglogevalue, taxInfo.NR.neglogevalue, 0)}
-        {renderNumber(
-          taxInfo.NT.percentconcordant,
-          taxInfo.NR.percentconcordant,
-          1,
-          undefined,
-          showConcordance
-        )}
         <td className="last-col" />
       </tr>
     ));
@@ -88,7 +80,6 @@ DetailCells.propTypes = {
   taxonRowRefs: PropTypes.objectOf(PropTypes.any).isRequired, // These are DOM elements.
   renderName: PropTypes.func.isRequired,
   renderNumber: PropTypes.func.isRequired,
-  showConcordance: PropTypes.bool.isRequired,
   onTaxonClick: PropTypes.func.isRequired,
   getRowClass: PropTypes.func.isRequired,
   reportDetails: PropTypes.ReportDetails,

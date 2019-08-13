@@ -32,7 +32,6 @@ export default class ReportTable extends React.Component {
       renderName,
       renderNumber,
       renderColumnHeader,
-      showConcordance,
       getRowClass,
       reportDetails,
       backgroundData,
@@ -104,12 +103,6 @@ export default class ReportTable extends React.Component {
                 `${countType}_neglogevalue`,
                 `Average log-10-transformed expect value for alignments to NCBI NT/NR`
               )}
-              {renderColumnHeader(
-                "%conc",
-                `${countType}_percentconcordant`,
-                `Percentage of aligned reads belonging to a concordantly mappped pair (NCBI NT/NR)`,
-                showConcordance
-              )}
               <th className="last-col">
                 <Tipsy content="Switch count type" placement="top">
                   <div className="sort-controls center left">
@@ -150,7 +143,6 @@ export default class ReportTable extends React.Component {
               taxonRowRefs={taxonRowRefs}
               renderName={renderName}
               renderNumber={renderNumber}
-              showConcordance={showConcordance}
               getRowClass={getRowClass}
               onTaxonClick={this.handleTaxonClick}
               reportDetails={reportDetails}
@@ -171,7 +163,6 @@ ReportTable.propTypes = {
   taxonRowRefs: PropTypes.objectOf(PropTypes.any).isRequired, // These are DOM elements.
   renderName: PropTypes.func.isRequired,
   renderNumber: PropTypes.func.isRequired,
-  showConcordance: PropTypes.bool.isRequired,
   getRowClass: PropTypes.func.isRequired,
   reportDetails: PropTypes.ReportDetails,
   backgroundData: PropTypes.BackgroundData,

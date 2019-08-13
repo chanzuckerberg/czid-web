@@ -181,6 +181,13 @@ class PipelineRunStage < ApplicationRecord
       save
       return
     end
+
+    # This code path is not being used anymore because we no longer use spot
+    # instances for the Batch jobs. Spot instances can be terminated at any time
+    # if someone bids more, so a retry is necessary. Now we use on-demand
+    # instances. If we decided to go back to spot instances, this code would
+    # ensure that terminated Batch jobs get resubmitted.
+
     # note failed attempt and retry
     add_failed_job
     unless count_failed_tries <= MAX_RETRIES

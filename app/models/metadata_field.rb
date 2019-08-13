@@ -22,12 +22,6 @@ class MetadataField < ApplicationRecord
   # Name of a validation type corresponding to a 'hardcoded' validation function.
   # Ex: "positive_number" here would call a positive_number validator in code dynamically (with
   # a restricted set of functions we make).
-  #
-  # Our current plan is that the validation function will also do the duty of inferring the
-  # specificity level to set. E.g. one location validator would infer if it's a country/state/
-  # city name. One date validator would accept things like "2019", "2019-01", "2019-01-14" and
-  # infer year/month/date from that.
-  # t.string :validation_type
 
   # An array of options when applicable. Ex for nucleotide_type: ["DNA", "RNA"]. Unfortunately our
   # RDS flavor/version doesn't support json types so this is string.
