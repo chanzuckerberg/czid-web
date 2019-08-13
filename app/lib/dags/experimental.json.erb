@@ -38,7 +38,7 @@
       "taxid_locations_combined.json"
     ],
     "alignment_viz_out": ["align_viz.summary"],
-    "srst2_out": ["output.log", "output__genes__ARGannot_r2__results.txt", "output__fullgenes__ARGannot_r2__results.txt", "amr_processed_results.csv", "amr_summary_results.csv"],
+    "srst2_out": ["out.log", "out__genes__ARGannot_r2__results.txt", "out__fullgenes__ARGannot_r2__results.txt", "amr_processed_results.csv", "amr_summary_results.csv", "output__.ARGannot_r2.sorted.bam"],
     <% if attribute_dict[:pipeline_version].to_f >= 3.6 %>
       "coverage_viz_out": ["coverage_viz_summary.json"],
     <% end %>
@@ -101,7 +101,10 @@
       "out": "srst2_out",
       "class": "PipelineStepRunSRST2",
       "module": "idseq_dag.steps.run_srst2",
-      "additional_files": {"resist_gene_db": "s3://idseq-database/amr/ARGannot_r2.fasta"},
+      "additional_files": {
+        "resist_gene_db": "s3://idseq-database/amr/ARGannot_r2.fasta",
+        "resist_genome_bed": "s3://idseq-database/amr/argannot_genome.bed"
+      },
       "additional_attributes": {
         "min_cov": 0,
         "n_threads": 16,
