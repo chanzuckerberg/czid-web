@@ -38,6 +38,13 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     @top_taxons_details = [{ "tax_id" => 1, "samples" => { 980_190_962 => [1, 1, 100.0, -100], 298_486_374 => [1, 1, 100.0, -100] }, "max_aggregate_score" => 2_000_000.0 }, { "tax_id" => 28_037, "samples" => { 51_848_956 => [1, 1, 100.0, -100] } }, { "tax_id" => 573, "samples" => { 51_848_956 => [2, 1, 100.0, 100.0] } }, { "tax_id" => 1313, "samples" => { 51_848_956 => [3, 1, -100, 100.0] } }].sort_by! { |d| d["tax_id"] }
   end
 
+  test "fetch_samples_taxons_counts" do
+    taxons = [taxons(:one), taxons(:two)]
+    results = HeatmapHelper.fetch_samples_taxons_counts(@samples, taxons.pluck(:id), [], @background.id)
+    assert_equal [], results
+  end
+
+  # TODO: (gdingle): test this and see if it executes fetch_samples_taxons_counts
   test "sample_taxons_dict defaults" do
     dicts = HeatmapHelper.sample_taxons_dict(@params, @samples, @background.id)
 
