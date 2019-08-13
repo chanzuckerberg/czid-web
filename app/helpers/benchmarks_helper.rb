@@ -20,7 +20,7 @@ module BenchmarksHelper
         if sample
           benchmark[:last_run] = {
             sample_name: sample.name,
-            pipeline_version: sample.first_pipeline_run.version,
+            pipeline_version: sample.first_pipeline_run.pipeline_version,
           }
         end
       end
