@@ -131,6 +131,8 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({ nodeHoverInfo: this.getTooltipData(node) });
     logAnalyticsEvent("SamplesHeatmapVis_node_hovered", {
       nodeValue: node.value,
+      nodeId: node.id,
+      isMetadata: !!node.metadata,
     });
   };
 
@@ -161,7 +163,24 @@ class SamplesHeatmapVis extends React.Component {
     this.heatmap.downloadAsPng();
   }
 
+  getMetadataTooltipData(node) {
+    const metadata = node.metadata;
+    return [
+      {
+        name: "Metadata",
+        // TODO (gdingle): display name
+        data: Object.keys(metadata).map(k => [
+          k.replace("_", " ").replace("_v2", ""),
+          metadata[k],
+        ]),
+      },
+    ];
+  }
+
   getTooltipData(node) {
+    if (node.metadata) {
+      return this.getMetadataTooltipData(node);
+    }
     let sampleId = this.props.sampleIds[node.columnIndex];
     let taxonId = this.props.taxonIds[node.rowIndex];
     let sampleDetails = this.props.sampleDetails[sampleId];

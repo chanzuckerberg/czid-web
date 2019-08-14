@@ -968,7 +968,17 @@ export default class Heatmap {
       let columnMetadataCellEnter = columnMetadataCell
         .enter()
         .append("rect")
-        .attr("class", "columnMetadataCell");
+        .attr("class", "columnMetadataCell")
+        .on("mouseover", d => {
+          this.options.onNodeHover && this.options.onNodeHover(d);
+        })
+        .on("mouseleave", d => {
+          this.options.onNodeHoverOut && this.options.onNodeHoverOut(d);
+        })
+        .on("mousemove", d => {
+          this.options.onNodeHoverMove &&
+            this.options.onNodeHoverMove(d, d3.event);
+        });
 
       columnMetadataCell.style("fill", d => {
         let metadataValue = d.metadata[metadata.value];
