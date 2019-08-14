@@ -168,7 +168,6 @@ export default class GeneDetailsMode extends React.Component {
     const {
       ontology: { error },
     } = this.state;
-    const { geneName } = this.props;
     return <div className={cs.cardLicense}>{error}</div>;
   }
 
@@ -186,17 +185,9 @@ export default class GeneDetailsMode extends React.Component {
 
   renderOntology() {
     const {
-      ontology: {
-        label,
-        synonyms,
-        description,
-        geneFamily,
-        drugClass,
-        publications,
-      },
+      ontology: { synonyms, description, geneFamily, drugClass, publications },
       collapseOntology,
     } = this.state;
-    const { geneName } = this.props;
     return (
       <div>
         {synonyms.length > 0 && (
@@ -336,7 +327,7 @@ export default class GeneDetailsMode extends React.Component {
   }
 
   renderGeneContents() {
-    const { loading, cardEntryFound, ontologyInfoFound } = this.state;
+    const { loading, ontologyInfoFound } = this.state;
     if (loading) {
       return;
     }
