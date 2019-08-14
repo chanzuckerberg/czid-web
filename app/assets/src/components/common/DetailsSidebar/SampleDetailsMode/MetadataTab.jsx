@@ -7,7 +7,6 @@ import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
 import MetadataInput from "~/components/common/MetadataInput";
 import { logAnalyticsEvent } from "~/api/analytics";
-import { RequestContext } from "~/components/common/RequestContext";
 
 import MetadataSection from "./MetadataSection";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
@@ -181,29 +180,18 @@ class MetadataTab extends React.Component {
               />
             </div>
           )}
-        {
-          <RequestContext.Consumer>
-            {({ allowedFeatures } = {}) => {
-              return validKeys.map(key => {
-                // Hide the implicit v1 if you have 'maps'. Else hide v2.
-                // TODO(jsheu): Migrate all to location_v2 after release
-                if (allowedFeatures && allowedFeatures.includes("maps")) {
-                  if (key === "collection_location") return;
-                } else {
-                  if (key === "collection_location_v2") return;
-                }
-                return (
-                  <div className={cs.field} key={metadataTypes[key].key}>
-                    <div className={cs.label}>{metadataTypes[key].name}</div>
-                    {isSectionEditing
-                      ? this.renderInput(metadataTypes[key])
-                      : this.renderMetadataType(metadataTypes[key])}
-                  </div>
-                );
-              });
-            }}
-          </RequestContext.Consumer>
-        }
+        {validKeys.map(key => {
+          // Hide legacy collection_location (v1) field.
+          if (key === "collection_location") return;
+          return (
+            <div className={cs.field} key={metadataTypes[key].key}>
+              <div className={cs.label}>{metadataTypes[key].name}</div>
+              {isSectionEditing
+                ? this.renderInput(metadataTypes[key])
+                : this.renderMetadataType(metadataTypes[key])}
+            </div>
+          );
+        })}
       </div>
     );
   };
