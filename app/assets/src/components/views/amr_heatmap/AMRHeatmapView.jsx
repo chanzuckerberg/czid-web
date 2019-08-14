@@ -43,7 +43,6 @@ export default class AMRHeatmapView extends React.Component {
     super(props);
 
     this.state = {
-      lastDataUpdate: new Date(),
       loading: true,
       selectedOptions: {
         metric: "coverage",
