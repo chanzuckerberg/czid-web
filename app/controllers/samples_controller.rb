@@ -54,7 +54,7 @@ class SamplesController < ApplicationController
   PAGE_SIZE = 30
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
-  MIN_CLI_VERSION = '0.5.0'.freeze
+  MIN_CLI_VERSION = '0.7.3'.freeze
 
   # GET /samples
   # GET /samples.json
