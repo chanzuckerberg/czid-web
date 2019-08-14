@@ -227,7 +227,7 @@ module HeatmapHelper
 
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
-      HeatmapHelper.compute_aggregate_scores_v2!(rows)
+      HeatmapHelper.compute_maxzscores!(rows)
       rows = rows.select { |row| row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD }
       rows = rows.each { |row| row[:filtered] = HeatmapHelper.apply_custom_filters(row, threshold_filters) }
 
@@ -357,7 +357,7 @@ module HeatmapHelper
     tax_2d
   end
 
-  def self.compute_aggregate_scores_v2!(rows)
+  def self.compute_maxzscores!(rows)
     rows.each do |taxon_info|
       # NT and NR zscore are set to the same
       taxon_info['NT']['maxzscore'] = [taxon_info['NT']['zscore'], taxon_info['NR']['zscore']].max
