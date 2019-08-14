@@ -76,7 +76,7 @@ export const joinServerError = response => {
   return joined;
 };
 
-export const errorMessageInfo = (sample, pipelineRun) => {
+export const sampleErrorInfo = (sample, pipelineRun) => {
   let status, message, linkText, type, link;
   switch (
     sample.upload_error || (pipelineRun && pipelineRun.known_user_error)

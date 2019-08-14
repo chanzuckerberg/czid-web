@@ -4,7 +4,7 @@ import moment from "moment";
 import Linkify from "react-linkify";
 import ReactMarkdown from "react-markdown";
 
-import { errorMessageInfo } from "~/components/utils/sample";
+import { sampleErrorInfo } from "~/components/utils/sample";
 import { openUrl } from "~utils/links";
 import { Accordion } from "~/components/layout";
 import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
@@ -26,7 +26,7 @@ class PipelineStepDetailsMode extends React.Component {
         break;
       case "userErrored":
       case "pipelineErrored": {
-        const { message, linkText, link } = errorMessageInfo(
+        const { message, linkText, link } = sampleErrorInfo(
           sample,
           pipelineRun
         );

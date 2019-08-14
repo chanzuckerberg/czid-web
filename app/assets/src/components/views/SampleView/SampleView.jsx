@@ -18,7 +18,7 @@ import {
 } from "~/api/analytics";
 import PropTypes from "~/components/utils/propTypes";
 import {
-  errorMessageInfo,
+  sampleErrorInfo,
   pipelineVersionHasAssembly,
   pipelineVersionHasCoverageViz,
 } from "~/components/utils/sample";
@@ -323,7 +323,7 @@ class SampleView extends React.Component {
       }
     } else {
       // Some kind of error or warning has occurred.
-      ({ status, message, linkText, type, link, icon } = errorMessageInfo(
+      ({ status, message, linkText, type, link, icon } = sampleErrorInfo(
         sample,
         pipelineRun
       ));
