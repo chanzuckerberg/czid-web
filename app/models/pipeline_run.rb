@@ -134,8 +134,6 @@ class PipelineRun < ApplicationRecord
                         "contig_counts" => "db_load_contig_counts",
                         "taxon_byteranges" => "db_load_byteranges",
                         "amr_counts" => "db_load_amr_counts", }.freeze
-  # Note: reads_before_priceseqfilter, reads_after_priceseqfilter, reads_after_cdhitdup
-  #       are the only "job_stats" we actually need for web display.
   REPORT_READY_OUTPUT = "taxon_counts".freeze
 
   # Values for results_finalized are as follows.
@@ -194,10 +192,6 @@ class PipelineRun < ApplicationRecord
 
   def parse_dag_vars
     JSON.parse(dag_vars || "{}")
-  end
-
-  def as_json(options = {})
-    super(options.merge(except: [:command, :command_stdout, :command_error, :job_description]))
   end
 
   def check_box_label
@@ -332,12 +326,6 @@ class PipelineRun < ApplicationRecord
     return true if finalized?
     # Old version before run stages
     return true if pipeline_run_stages.blank? && (job_status == STATUS_FAILED || job_status == STATUS_CHECKED)
-  end
-
-  def log_url
-    return nil unless job_log_id
-    "https://us-west-2.console.aws.amazon.com/cloudwatch/home?region=us-west-2" \
-      "#logEventViewer:group=/aws/batch/job;stream=#{job_log_id}"
   end
 
   def active_stage
@@ -553,20 +541,30 @@ class PipelineRun < ApplicationRecord
 
   def db_load_amr_counts
     amr_results = PipelineRun.download_file(s3_file_for("amr_counts"), local_amr_full_results_path)
-    unless File.zero?(amr_results)
-      amr_counts_array = []
-      # First line of output file has header titles, e.g. "Sample/Gene/Allele..." that are extraneous
-      # that we drop
-      File.readlines(amr_results).drop(1).each do |amr_result|
-        amr_result_fields = amr_result.split(",").drop(2)
-        amr_counts_array << { gene: amr_result_fields[0],
-                              allele: amr_result_fields[1],
-                              coverage: amr_result_fields[2],
-                              depth:  amr_result_fields[3],
-                              drug_family: amr_result_fields[12], }
-      end
-      update(amr_counts_attributes: amr_counts_array)
+    if amr_results.nil?
+      Rails.logger.error("No AMR results file found for PipelineRun ##{id}. Is the pipeline okay?")
+      return
     end
+    amr_counts_array = []
+    # results can be as small as ~80 bytes, so play it safe; empty results are 1 byte files
+    unless File.size?(amr_results) < 10
+      amr_results_table = CSV.read(amr_results, headers: true)
+      amr_results_table.each do |row|
+        amr_counts_array << {
+          gene: row["gene"],
+          allele: row["allele"],
+          coverage: row["coverage"],
+          depth: row["depth"],
+          annotation_gene: row["annotation"].split(";")[2],
+          genbank_accession: row["annotation"].split(";")[4],
+          drug_family: row["gene_family"],
+          total_reads: row["total_reads"],
+          rpm: row["rpm"],
+          dpm: row["dpm"],
+        }
+      end
+    end
+    update(amr_counts_attributes: amr_counts_array)
   end
 
   def taxon_counts_json_name

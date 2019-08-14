@@ -29,11 +29,6 @@ class Metadatum < ApplicationRecord
 
   # Additional ActiveRecord field documentation:
   #
-  # For things like location/date we should try to have a consistent pattern. This is the
-  # "explicitly-specifying levels of things" option vs. the reverse option of "freeform fields and
-  # then inferring the level of specificity from the values".
-  # t.string :specificity
-  #
   # Every piece of metadata will belong to a type of metadata_field
   # add_reference :metadata, :metadata_field
 

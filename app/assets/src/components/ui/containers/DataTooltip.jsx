@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { isObject } from "lodash/fp";
 import cs from "./data_tooltip.scss";
 
 const DataTooltip = ({ data, subtitle, title, singleColumn }) => {
@@ -23,7 +24,12 @@ const DataTooltip = ({ data, subtitle, title, singleColumn }) => {
               ) : (
                 <React.Fragment>
                   <div className={cs.dataTooltipLabel}>{keyValuePair[0]}</div>
-                  <div className={cs.dataTooltipValue}>{keyValuePair[1]}</div>
+                  <div className={cs.dataTooltipValue}>
+                    {/*Use .name if value is an object (e.g. location object)*/}
+                    {isObject(keyValuePair[1])
+                      ? keyValuePair[1].name
+                      : keyValuePair[1]}
+                  </div>
                 </React.Fragment>
               )}
             </div>
