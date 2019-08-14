@@ -27,8 +27,6 @@ class SamplesView extends React.Component {
   constructor(props) {
     super(props);
 
-    const { allowedFeatures } = this.props;
-
     this.state = {
       phyloTreeCreationModalOpen: false,
     };

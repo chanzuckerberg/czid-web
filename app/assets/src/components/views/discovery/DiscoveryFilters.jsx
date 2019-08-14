@@ -137,7 +137,6 @@ class DiscoveryFilters extends React.Component {
   render() {
     const {
       hostSelected,
-      locationSelected,
       locationV2Selected,
       taxonSelected,
       timeSelected,
