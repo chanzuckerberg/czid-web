@@ -82,11 +82,20 @@ export default class AMRHeatmapView extends React.Component {
     );
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
     const samplesMetadataTypes = processMetadataTypes(rawSamplesMetadataTypes);
+    const sampleLabels = this.extractSampleLabels(samplesWithAMRCounts);
+    const [geneLabels, alleleLabels] = this.extractGeneAndAlleleLabels(
+      samplesWithAMRCounts
+    );
+    const alleleToGeneMap = this.mapAllelesToGenes(samplesWithAMRCounts);
     this.setState({
       rawSampleData,
       samplesWithAMRCounts,
       maxValues,
       samplesMetadataTypes,
+      sampleLabels,
+      geneLabels,
+      alleleLabels,
+      alleleToGeneMap,
       loading: false,
     });
   }
@@ -211,8 +220,10 @@ export default class AMRHeatmapView extends React.Component {
         return sample;
       }
     });
+    const sampleLabels = this.extractSampleLabels(updatedSamples);
     this.setState({
       samplesWithAMRCounts: updatedSamples,
+      sampleLabels,
     });
   };
 
@@ -293,16 +304,21 @@ export default class AMRHeatmapView extends React.Component {
     return alleleToGeneMap;
   }
 
-  extractLabels(sampleData) {
-    const sampleLabels = [];
-    const genes = {};
-    const alleles = {};
-    sampleData.forEach(sample => {
-      sampleLabels.push({
+  extractSampleLabels(sampleData) {
+    const sampleLabels = sampleData.map(sample => {
+      return {
         label: sample.sampleName,
         id: sample.sampleId,
         metadata: sample.metadata,
-      });
+      };
+    });
+    return sampleLabels;
+  }
+
+  extractGeneAndAlleleLabels(sampleData) {
+    const genes = {};
+    const alleles = {};
+    sampleData.forEach(sample => {
       sample.amrCounts.forEach(amrCount => {
         genes[amrCount.gene] = true;
         alleles[amrCount.allele] = true;
@@ -315,7 +331,7 @@ export default class AMRHeatmapView extends React.Component {
       return { label: allele };
     });
 
-    return [sampleLabels, geneLabels, alleleLabels];
+    return [geneLabels, alleleLabels];
   }
 
   //*** Render methods ***
@@ -368,6 +384,10 @@ export default class AMRHeatmapView extends React.Component {
       samplesWithAMRCounts,
       selectedOptions,
       samplesMetadataTypes,
+      sampleLabels,
+      geneLabels,
+      alleleLabels,
+      alleleToGeneMap,
     } = this.state;
     if (loading) {
       return (
@@ -383,10 +403,6 @@ export default class AMRHeatmapView extends React.Component {
         </p>
       );
     }
-    const [sampleLabels, geneLabels, alleleLabels] = this.extractLabels(
-      samplesWithAMRCounts
-    );
-    const alleleToGeneMap = this.mapAllelesToGenes(samplesWithAMRCounts);
     return (
       <div className="row visualization-content">
         <ErrorBoundary>
