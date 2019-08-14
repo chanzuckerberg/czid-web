@@ -165,6 +165,7 @@ class PipelineViz extends React.Component {
   }
 
   handleStageClick(stageIndex, info) {
+    const { sample, pipelineRun } = this.props;
     const graph = this.graphs[stageIndex];
     const clickedNodeId = this.getNodeIdAtCoords(
       graph,
@@ -239,6 +240,8 @@ class PipelineViz extends React.Component {
         startTime: stepInfo.startTime,
         endTime: stepInfo.endTime,
         resources: stepInfo.resources,
+        sample: sample,
+        pipelineRun: pipelineRun,
       },
     });
   }

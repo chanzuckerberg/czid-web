@@ -7,7 +7,6 @@
 
   .policyLink,
   .emailLink {
-    text-decoration-line: underline;
-    text-decoration-style: dashed !important;
+    border-bottom: 1px dashed $medium-grey;
   }
 }

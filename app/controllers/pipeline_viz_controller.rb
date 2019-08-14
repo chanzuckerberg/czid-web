@@ -23,6 +23,7 @@ class PipelineVizController < ApplicationController
         @sample = {
           id: sample.id,
           name: sample.name,
+          upload_error: sample.upload_error,
         }
         respond_to do |format|
           format.html

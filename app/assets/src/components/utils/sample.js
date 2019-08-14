@@ -75,3 +75,83 @@ export const joinServerError = response => {
   });
   return joined;
 };
+
+export const sampleErrorInfo = (sample, pipelineRun) => {
+  let status, message, linkText, type, link;
+  switch (
+    sample.upload_error || (pipelineRun && pipelineRun.known_user_error)
+  ) {
+    case "BASESPACE_UPLOAD_FAILED":
+      status = "SAMPLE FAILED";
+      message =
+        "Oh no! There was an issue uploading your sample file from Basespace.";
+      linkText = "Contact us for help.";
+      type = "error";
+      link = "mailto:help@idseq.net";
+      break;
+    case "S3_UPLOAD_FAILED":
+      status = "SAMPLE FAILED";
+      message = "Oh no! There was an issue uploading your sample file from S3.";
+      linkText = "Contact us for help.";
+      type = "error";
+      link = "mailto:help@idseq.net";
+      break;
+    case "LOCAL_UPLOAD_FAILED":
+      status = "SAMPLE FAILED";
+      message = "Oh no! It took too long to upload your sample file.";
+      linkText = "Contact us for help.";
+      type = "error";
+      link = "mailto:help@idseq.net";
+      break;
+    case "LOCAL_UPLOAD_STALLED":
+      status = "INCOMPLETE - ISSUE";
+      message =
+        "It looks like it is taking a long time to upload your sample file.";
+      linkText = "Contact us for help.";
+      type = "warning";
+      link = "mailto:help@idseq.net";
+      break;
+    case "FAULTY_INPUT":
+      status = "COMPLETE - ISSUE";
+      message = `Sorry, something was wrong with your input file. ${
+        pipelineRun.error_message
+      }.`;
+      linkText = "Please check your file format and reupload your file";
+      type = "warning";
+      link = "/samples/upload";
+      break;
+    case "INSUFFICIENT_READS":
+      status = "COMPLETE - ISSUE";
+      message =
+        "Oh no! No matches were identified because there weren't any reads left after host and quality filtering.";
+      linkText = "Check where your reads were filtered out";
+      type = "warning";
+      link = `/samples/${sample.id}/results_folder`;
+      break;
+    case "BROKEN_PAIRS":
+      status = "COMPLETE - ISSUE";
+      message =
+        "Sorry, something was wrong with your input files. " +
+        "Either the paired reads were not named using the same identifiers in both files, " +
+        "or some reads were missing a mate.";
+      linkText = "Please fix the read pairing, then reupload";
+      type = "warning";
+      link = "/samples/upload";
+      break;
+    default:
+      status = "SAMPLE FAILED";
+      message = "Oh no! There was an issue processing your sample.";
+      linkText = "Contact us for help re-running your sample.";
+      type = "error";
+      link = "mailto:help@idseq.net";
+      break;
+  }
+
+  return {
+    status: status,
+    message: message,
+    type: type,
+    linkText: linkText,
+    link: link,
+  };
+};

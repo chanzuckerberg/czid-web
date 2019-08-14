@@ -115,7 +115,6 @@ class ProjectsView extends React.Component {
 
   render() {
     const {
-      allowedFeatures,
       currentDisplay,
       currentTab,
       mapLevel,
@@ -146,9 +145,7 @@ class ProjectsView extends React.Component {
 
     return (
       <div className={cs.container}>
-        {allowedFeatures &&
-          allowedFeatures.includes("maps") &&
-          this.renderDisplaySwitcher()}
+        {this.renderDisplaySwitcher()}
         {currentDisplay === "table" ? (
           <BaseDiscoveryView
             columns={this.columns}
