@@ -228,6 +228,7 @@ module HeatmapHelper
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
       HeatmapHelper.compute_aggregate_scores_v2!(rows)
+      rows = rows.select { |row| row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD }
       rows = rows.each { |row| row[:filtered] = HeatmapHelper.apply_custom_filters(row, threshold_filters) }
 
       # Get the top N for each sample. This re-sorts on the same metric as in
