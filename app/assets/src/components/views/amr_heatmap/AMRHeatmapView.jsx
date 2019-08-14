@@ -25,7 +25,7 @@ const METRICS = [
   { text: "Depth", value: "depth" },
   { text: "RPM (reads per million)", value: "rpm" },
   { text: "DPM (depth per million)", value: "dpm" },
-  { text: "Total Reads", value: "total_reads" },
+  { text: "Mapped Reads", value: "total_reads" },
 ];
 
 const VIEW_LEVELS = [
@@ -91,17 +91,17 @@ export default class AMRHeatmapView extends React.Component {
   }
 
   processSampleAMRCounts(filteredSamples) {
-    filteredSamples.forEach(sample => {
-      sample.amrCounts.forEach(amrCount => {
-        // The following three lines are a kind of hacky workaround to the fact that
-        // the amr counts stored in the db have a gene name that includes the actual gene
-        // plus the drug class.
-        // Only needed for samples run on pipeline 3.8 or earlier.
-        const geneNameExtractionRegex = /[^_]+/; // matches everything before the first underscore
-        const geneName = geneNameExtractionRegex.exec(amrCount.gene)[0];
-        amrCount.gene = geneName;
-      });
-    });
+    // filteredSamples.forEach(sample => {
+    //   sample.amrCounts.forEach(amrCount => {
+    //     // The following three lines are a kind of hacky workaround to the fact that
+    //     // the amr counts stored in the db have a gene name that includes the actual gene
+    //     // plus the drug class.
+    //     // Only needed for samples run on pipeline 3.8 or earlier.
+    //     const geneNameExtractionRegex = /[^_]+/; // matches everything before the first underscore
+    //     const geneName = geneNameExtractionRegex.exec(amrCount.gene)[0];
+    //     amrCount.gene = geneName;
+    //   });
+    // });
 
     return filteredSamples;
   }
@@ -338,6 +338,7 @@ export default class AMRHeatmapView extends React.Component {
             onSampleLabelClick={this.onSampleLabelClick}
             onGeneLabelClick={this.onGeneLabelClick}
             samplesMetadataTypes={samplesMetadataTypes}
+            metrics={METRICS}
           />
         </ErrorBoundary>
       </div>

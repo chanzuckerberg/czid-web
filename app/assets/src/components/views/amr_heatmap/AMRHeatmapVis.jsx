@@ -14,11 +14,6 @@ import cs from "./amr_heatmap_vis.scss";
 const VIEW_LEVEL_ALLELES = "allele";
 const VIEW_LEVEL_GENES = "gene";
 
-const METRICS = [
-  { text: "Coverage", key: "coverage" },
-  { text: "Depth", key: "depth" },
-];
-
 const DEFAULT_SELECTED_METADATA = ["collection_location_v2"];
 
 export default class AMRHeatmapVis extends React.Component {
@@ -88,7 +83,10 @@ export default class AMRHeatmapVis extends React.Component {
     const alleleToGeneMap = {};
     sampleData.forEach(sample => {
       sample.amrCounts.forEach(amrCount => {
-        alleleToGeneMap[amrCount.allele] = amrCount.gene;
+        // annotation_gene is more fine grained label introduced in pipeline v3.9
+        // older samples will not have that field
+        alleleToGeneMap[amrCount.allele] =
+          amrCount.annotation_gene || amrCount.gene;
       });
     });
     return alleleToGeneMap;
@@ -105,7 +103,12 @@ export default class AMRHeatmapVis extends React.Component {
         metadata: sample.metadata,
       });
       sample.amrCounts.forEach(amrCount => {
-        genes[amrCount.gene] = true;
+        // backwards compatibility for older samples without annotation_gene
+        if (amrCount.hasOwnProperty("annotation_gene")) {
+          genes[amrCount.annotation_gene] = true;
+        } else {
+          genes[amrCount.gene] = true;
+        }
         alleles[amrCount.allele] = true;
       });
     });
@@ -247,10 +250,12 @@ export default class AMRHeatmapVis extends React.Component {
     }
 
     let values = METRICS.map(metric => {
-      const value = amrCountForNode ? amrCountForNode[metric.key] || "N/A" : 0;
+      const value = amrCountForNode
+        ? amrCountForNode[metric.value] || "N/A"
+        : 0;
       return [
         metric.text,
-        metric.key === selectedOptions.metric ? <b>{value}</b> : value,
+        metric.value === selectedOptions.metric ? <b>{value}</b> : value,
       ];
     });
 
@@ -429,4 +434,10 @@ AMRHeatmapVis.propTypes = {
   onSampleLabelClick: PropTypes.func,
   onGeneLabelClick: PropTypes.func,
   samplesMetadataTypes: PropTypes.object,
+  metrics: PropTypes.arrayOf(
+    PropTypes.shape({
+      text: PropTypes.string,
+      value: PropTypes.string,
+    })
+  ),
 };
