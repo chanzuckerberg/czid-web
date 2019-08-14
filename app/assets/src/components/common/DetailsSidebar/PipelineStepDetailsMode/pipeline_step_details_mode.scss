@@ -47,6 +47,11 @@
     @include font-body-xxs;
   }
 
+  a {
+    // Use border-bottom instead of text-decoration: underline to give space under text
+    border-bottom: 1px dashed $medium-grey;
+  }
+
   &.inProgress {
     background-color: $primary-lightest;
 

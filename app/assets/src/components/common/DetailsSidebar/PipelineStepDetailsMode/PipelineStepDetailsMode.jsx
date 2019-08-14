@@ -33,7 +33,7 @@ class PipelineStepDetailsMode extends React.Component {
         statusTitle = "Sample failed at this step.";
         statusDescription = (
           <span>
-            {message} <a href={link}>{linkText}</a>
+            {message} <a href={link}>{linkText}</a>.
           </span>
         );
         break;
