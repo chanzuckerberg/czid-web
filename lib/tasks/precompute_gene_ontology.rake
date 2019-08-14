@@ -53,19 +53,26 @@ task precompute_gene_ontology: :environment do
     if line[0] == ">"
       split_entry = line.split(";")
       gene_name = split_entry[2]
-      drug_class = if DRUG_CLASSES.key?(drug_class)
-                     DRUG_CLASSES[drug_class]
+      annotation_drug_class = split_entry[3]
+      drug_class = if DRUG_CLASSES.key?(annotation_drug_class.downcase)
+                     DRUG_CLASSES[annotation_drug_class.downcase]
                    else
-                     [drug_class, "error"]
+                     [annotation_drug_class, "error"]
                    end
       genbank_accession = split_entry[4]
-      arg_entries.push([gene_name, drug_class, genbank_accession])
+      arg_entries << {
+        "gene_name" => gene_name,
+        "drug_class" => drug_class,
+        "genbank_accession" => genbank_accession
+      }
     end
   end
 
   json_ontology = {}
   arg_entries.each do |entry|
-    gene, drug_class, genbank_accession = entry
+    gene = entry["gene_name"]
+    drug_class = entry["drug_class"]
+    genbank_accession = entry["genbank_accession"]
     Rails.logger.info("Building ontology for #{gene}")
     ontology = {}
     search_result = search_card_owl(gene, owl_doc)
@@ -85,7 +92,7 @@ task precompute_gene_ontology: :environment do
       Rails.logger.info("No drug class mapping for #{drug_class[0]} belonging to #{gene}")
       ontology["drugClass"] = { "label" => drug_class[0], "description" => "No description" }
     end
-    ontology["genbank_accession"] = genbank_accession
+    ontology["genbankAccession"] = genbank_accession
     json_ontology[gene] = ontology
   end
 

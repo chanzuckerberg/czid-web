@@ -12,6 +12,7 @@ const SOURCE_PUBMED = "PubMed Search";
 const SOURCE_GOOGLE_SCHOLAR = "Google Scholar Search";
 const SOURCE_NCBI_REF_GENE = "NCBI AMR Reference Gene Catalog";
 const SOURCE_OWL = "CARD Ontology OWL";
+const SOURCE_GENBANK_NUCCORE = "NCBI Genbank / Nucleotide Database";
 
 const URL_CARD_ARO = "https://card.mcmaster.ca/aro/";
 const URL_CARD_OWL = "https://github.com/arpcard/aro";
@@ -19,6 +20,7 @@ const URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/";
 const URL_GOOGLE_SCHOLAR = "https://scholar.google.com/scholar?q=";
 const URL_NCBI_REF_GENE =
   "https://www.ncbi.nlm.nih.gov/pathogens/isolates#/refgene/";
+const URL_GENBANK_NUCCORE = "https://www.ncbi.nlm.nih.gov/nuccore/";
 
 const CARD_FAMILY = "AMR Gene Family";
 const CARD_RESISTANCES = "Drug Resistances";
@@ -87,7 +89,7 @@ export default class GeneDetailsMode extends React.Component {
 
   generateLinkTo(source) {
     const {
-      ontology: { accession },
+      ontology: { accession, genbankAccession },
     } = this.state;
     const { geneName } = this.props;
     switch (source) {
@@ -105,6 +107,9 @@ export default class GeneDetailsMode extends React.Component {
       }
       case SOURCE_NCBI_REF_GENE: {
         return URL_NCBI_REF_GENE + geneName;
+      }
+      case SOURCE_GENBANK_NUCCORE: {
+        return URL_GENBANK_NUCCORE + genbankAccession;
       }
       default: {
         return "";
@@ -305,6 +310,7 @@ export default class GeneDetailsMode extends React.Component {
     const { cardEntryFound } = this.state;
     const { geneName } = this.props;
     const sources = [
+      SOURCE_GENBANK_NUCCORE,
       SOURCE_NCBI_REF_GENE,
       SOURCE_PUBMED,
       SOURCE_GOOGLE_SCHOLAR,
@@ -314,21 +320,23 @@ export default class GeneDetailsMode extends React.Component {
     }
     const footerLinks = sources.map(source => {
       return (
-        <li className={cs.link} key={source}>
-          <a
-            href={this.generateLinkTo(source)}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() =>
-              logAnalyticsEvent("GeneDetailsMode_footer-link_clicked", {
-                destination: source,
-                geneName,
-              })
-            }
-          >
-            {source}
-          </a>
-        </li>
+        <ul className={cs.linksList} key={source}>
+          <li className={cs.link}>
+            <a
+              href={this.generateLinkTo(source)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() =>
+                logAnalyticsEvent("GeneDetailsMode_footer-link_clicked", {
+                  destination: source,
+                  geneName,
+                })
+              }
+            >
+              {source}
+            </a>
+          </li>
+        </ul>
       );
     });
     return footerLinks;
@@ -343,9 +351,7 @@ export default class GeneDetailsMode extends React.Component {
       <div className={cs.geneContents}>
         {cardEntryFound ? this.renderOntology() : this.renderError()}
         <div className={cs.subtitle}>Links</div>
-        <div className={cs.linksSection}>
-          <ul className={cs.linksList}>{this.renderFooterLinks()}</ul>
-        </div>
+        <div className={cs.linksSection}>{this.renderFooterLinks()}</div>
       </div>
     );
   }
