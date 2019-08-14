@@ -50,7 +50,6 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     dict = dicts[0]
     assert dict.key?(:taxons)
 
-    # TODO: (gdingle): why more?
     assert_equal 3, dict[:taxons].length
 
     taxon = dict[:taxons][0]
