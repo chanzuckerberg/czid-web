@@ -110,8 +110,11 @@ class PipelineViz extends React.Component {
     }
 
     logAnalyticsEvent("PipelineViz_step-node_clicked", {
-      stageIndex: stageIndex,
-      stepIndex: clickedNodeId,
+      stageName: this.stageNames[stageIndex],
+      stepName: this.getStepDataAtIndices({
+        stageIndex: stageIndex,
+        stepIndex: clickedNodeId,
+      }).name,
     });
 
     this.graphs.forEach((graph, i) => i != stageIndex && graph.unselectAll());
@@ -216,8 +219,11 @@ class PipelineViz extends React.Component {
 
   handleNodeHover(stageIndex, nodeId) {
     logAnalyticsEvent("PipelineViz_step-node_mouseovered", {
-      stageIndex: stageIndex,
-      stepIndex: nodeId,
+      stageName: this.stageNames[stageIndex],
+      stepName: this.getStepDataAtIndices({
+        stageIndex: stageIndex,
+        stepIndex: nodeId,
+      }).name,
     });
 
     const { inputEdgeColor, outputEdgeColor } = this.props;
@@ -758,7 +764,7 @@ class PipelineViz extends React.Component {
             onClick={withAnalytics(
               () => this.toggleStage(i),
               "PipelineViz_stage-collapse-button_clicked",
-              { stageIndex: i }
+              { stage: this.stageNames[i] }
             )}
             className={cs.closeIcon}
           />
@@ -783,8 +789,8 @@ class PipelineViz extends React.Component {
           )}
           onClick={withAnalytics(
             () => this.toggleStage(i),
-            "PipelineViz_stage-open-button_clicked",
-            { stageIndex: i }
+            "PipelineViz_stage-expand-button_clicked",
+            { stage: this.stageNames[i] }
           )}
         >
           {stageNameAndIcon}
