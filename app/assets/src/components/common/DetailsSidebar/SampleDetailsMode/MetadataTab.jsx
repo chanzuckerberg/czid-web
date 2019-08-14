@@ -7,7 +7,6 @@ import PropTypes from "~/components/utils/propTypes";
 import Input from "~/components/ui/controls/Input";
 import MetadataInput from "~/components/common/MetadataInput";
 import { logAnalyticsEvent } from "~/api/analytics";
-import { RequestContext } from "~/components/common/RequestContext";
 
 import MetadataSection from "./MetadataSection";
 import { SAMPLE_ADDITIONAL_INFO } from "./constants";
