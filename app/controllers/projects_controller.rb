@@ -499,10 +499,8 @@ class ProjectsController < ApplicationController
                              .map(&:metadata_fields).flatten.uniq.map(&:field_info)
               end
 
-    # TODO(jsheu): Migrate all to location_v2 after release
-    # Hide location_v2 unless you have 'maps'. Otherwise hide the implicit v1.
-    location_field = "collection_location_v2"
-    results = results.reject { |f| f[:key] == location_field }
+    # Hide legacy v1 collection_location until removal.
+    results = results.reject { |f| f[:key] == "collection_location" }
 
     render json: results
   end
