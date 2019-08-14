@@ -45,17 +45,13 @@ export default class AMRHeatmapVis extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     const { selectedMetadata, nodeHovered, metadataLabelHovered } = this.state;
     const { sampleLabels, selectedOptions } = this.props;
-    if (
-      this.heatmap === null ||
-      selectedOptions !== prevProps.selectedOptions ||
+    if (selectedOptions !== prevProps.selectedOptions ||
       sampleLabels !== prevProps.sampleLabels
     ) {
       this.updateHeatmap();
     }
-    if (
-      this.heatmap !== null &&
-      (selectedMetadata !== prevState.selectedMetadata ||
-        sampleLabels !== prevProps.sampleLabels)
+    if (selectedMetadata !== prevState.selectedMetadata ||
+        sampleLabels !== prevProps.sampleLabels
     ) {
       this.heatmap.updateColumnMetadata(this.getSelectedMetadataFields());
     }
