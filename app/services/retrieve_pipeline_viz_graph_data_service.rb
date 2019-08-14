@@ -26,6 +26,8 @@ class RetrievePipelineVizGraphDataService
   #     - files: An array of file objects that get passed between the from and to nodes. It is composed of:
   #           - displayName: A string to display the file as
   #           - url: An optional string to download the file
+  #
+  # status: The status of the pipeline.
 
   def initialize(pipeline_run_id, see_experimental, remove_host_filtering_urls)
     @pipeline_run = PipelineRun.find(pipeline_run_id)
@@ -47,7 +49,7 @@ class RetrievePipelineVizGraphDataService
     edges = create_edges
     populate_nodes_with_edges(stages, edges)
 
-    return { stages: stages, edges: edges }
+    return { stages: stages, edges: edges, status: pipeline_job_status(stages) }
   end
 
   private
@@ -124,6 +126,10 @@ class RetrievePipelineVizGraphDataService
     elsif statuses.include? "finished"
       return "finished"
     end
+  end
+
+  def pipeline_job_status(stages)
+    stage_job_status(stages.map { |stage| stage[:jobStatus] })
   end
 
   def create_edges
