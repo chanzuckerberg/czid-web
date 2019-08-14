@@ -54,10 +54,7 @@ class SamplesView extends React.Component {
         className: cs.basicCell,
       },
       {
-        dataKey:
-          allowedFeatures && allowedFeatures.includes("maps")
-            ? "collectionLocationV2"
-            : "collectionLocation",
+        dataKey: "collectionLocationV2",
         label: "Location",
         flexGrow: 1,
         className: cs.basicCell,
@@ -303,12 +300,10 @@ class SamplesView extends React.Component {
   };
 
   renderToolbar = () => {
-    const { allowedFeatures, selectedSampleIds } = this.props;
+    const { selectedSampleIds } = this.props;
     return (
       <div className={cs.samplesToolbar}>
-        {allowedFeatures &&
-          allowedFeatures.includes("maps") &&
-          this.renderDisplaySwitcher()}
+        {this.renderDisplaySwitcher()}
         <div className={cs.fluidBlank} />
         <div className={cs.counterContainer}>
           <Label
@@ -344,18 +339,10 @@ class SamplesView extends React.Component {
   renderTable = () => {
     const {
       activeColumns,
-      allowedFeatures,
       onLoadRows,
       protectedColumns,
       selectedSampleIds,
     } = this.props;
-
-    // TODO(jsheu): Remove after full release of maps.
-    const updatedActiveColumns = Object.assign([], activeColumns);
-    if (allowedFeatures && allowedFeatures.includes("maps")) {
-      const i = updatedActiveColumns.indexOf("collectionLocation");
-      if (i !== -1) updatedActiveColumns[i] += "V2";
-    }
 
     // TODO(tiago): replace by automated cell height computing
     const rowHeight = 66;
@@ -366,7 +353,7 @@ class SamplesView extends React.Component {
           ref={infiniteTable => (this.infiniteTable = infiniteTable)}
           columns={this.columns}
           defaultRowHeight={rowHeight}
-          initialActiveColumns={updatedActiveColumns}
+          initialActiveColumns={activeColumns}
           loadingClassName={csTableRenderer.loading}
           onLoadRows={onLoadRows}
           onSelectAllRows={withAnalytics(
@@ -479,7 +466,7 @@ SamplesView.defaultProps = {
     "sample",
     "createdAt",
     "host",
-    "collectionLocation",
+    "collectionLocationV2",
     "nonHostReads",
     "qcPercent",
   ],

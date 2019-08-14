@@ -501,11 +501,7 @@ class ProjectsController < ApplicationController
 
     # TODO(jsheu): Migrate all to location_v2 after release
     # Hide location_v2 unless you have 'maps'. Otherwise hide the implicit v1.
-    location_field = if current_user.allowed_feature?("maps")
-                       "collection_location"
-                     else
-                       "collection_location_v2"
-                     end
+    location_field = "collection_location_v2"
     results = results.reject { |f| f[:key] == location_field }
 
     render json: results

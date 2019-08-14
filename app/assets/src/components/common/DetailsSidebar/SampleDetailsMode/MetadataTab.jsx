@@ -181,29 +181,18 @@ class MetadataTab extends React.Component {
               />
             </div>
           )}
-        {
-          <RequestContext.Consumer>
-            {({ allowedFeatures } = {}) => {
-              return validKeys.map(key => {
-                // Hide the implicit v1 if you have 'maps'. Else hide v2.
-                // TODO(jsheu): Migrate all to location_v2 after release
-                if (allowedFeatures && allowedFeatures.includes("maps")) {
-                  if (key === "collection_location") return;
-                } else {
-                  if (key === "collection_location_v2") return;
-                }
-                return (
-                  <div className={cs.field} key={metadataTypes[key].key}>
-                    <div className={cs.label}>{metadataTypes[key].name}</div>
-                    {isSectionEditing
-                      ? this.renderInput(metadataTypes[key])
-                      : this.renderMetadataType(metadataTypes[key])}
-                  </div>
-                );
-              });
-            }}
-          </RequestContext.Consumer>
-        }
+        {validKeys.map(key => {
+          // Hide legacy collection_location (v1) field.
+          if (key === "collection_location") return;
+          return (
+            <div className={cs.field} key={metadataTypes[key].key}>
+              <div className={cs.label}>{metadataTypes[key].name}</div>
+              {isSectionEditing
+                ? this.renderInput(metadataTypes[key])
+                : this.renderMetadataType(metadataTypes[key])}
+            </div>
+          );
+        })}
       </div>
     );
   };
