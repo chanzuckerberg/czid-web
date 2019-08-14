@@ -111,12 +111,6 @@ class LocationsControllerTest < ActionDispatch::IntegrationTest
     assert_includes results.keys, loc.state_id.to_s
   end
 
-  test "disallowed users cannot access sample_locations" do
-    post user_session_path, params: @non_admin_user_params
-    get sample_locations_locations_path, as: :json
-    assert_response 401
-  end
-
   # TODO: Uncomment and use non-admin user once released
   # test "joe cannot see someone else's private map playground results" do
   #   post user_session_path, params: @user_params

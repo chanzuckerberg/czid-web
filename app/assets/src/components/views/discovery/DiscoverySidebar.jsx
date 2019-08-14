@@ -253,7 +253,7 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
-    const { allowedFeatures, className, currentTab, loading } = this.props;
+    const { className, currentTab, loading } = this.props;
     if (!loading && !this.hasData()) {
       return (
         <div className={cx(className, cs.sidebar)}>
@@ -350,11 +350,7 @@ export default class DiscoverySidebar extends React.Component {
             </div>
             <div className={cs.hasBackground}>
               <span className={cs.rowLabel}>Location</span>
-              {this.buildMetadataRows(
-                allowedFeatures && allowedFeatures.includes("maps")
-                  ? "locationV2"
-                  : "location"
-              )}
+              {this.buildMetadataRows("locationV2")}
             </div>
           </Accordion>
         </div>
