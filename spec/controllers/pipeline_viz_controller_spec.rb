@@ -106,12 +106,12 @@ RSpec.describe PipelineVizController, type: :controller do
   # Admin specific behavior
   context "Admin user" do
     before do
-      @admin = create(:admin, allowed_features: ["pipeline_viz"])
+      @admin = create(:admin)
       sign_in @admin
     end
 
-    describe "GET pipeline stage results" do
-      it "sees all pipeline stage results" do
+    describe "GET pipeline viz graph data" do
+      it "sees all stages graph data" do
         project = create(:public_project)
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
@@ -124,23 +124,8 @@ RSpec.describe PipelineVizController, type: :controller do
       end
     end
 
-    describe "GET pipeline stage results without pipeline viz flag enabled" do
-      it "cannot see stage results" do
-        # Create new admin user with a unique email.
-        @admin_disabled_flag = create(:admin, email: "admin2@example.com")
-        sign_in @admin_disabled_flag
-
-        project = create(:public_project)
-        sample = create(:sample, project: project,
-                                 pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
-        get :show, params: { sample_id: sample.id }
-
-        expect(response).to have_http_status 401
-      end
-    end
-
-    describe "GET pipeline stage results from sample with no pipeline stages" do
-      it "cannot see stage results" do
+    describe "GET pipeline viz graph data from sample with no pipeline run" do
+      it "cannot see graph data" do
         project = create(:public_project)
         sample = create(:sample, project: project)
         get :show, params: { sample_id: sample.id }
@@ -153,12 +138,12 @@ RSpec.describe PipelineVizController, type: :controller do
   # Non-admin, aka Joe, specific behavior
   context "Joe" do
     before do
-      @joe = create(:joe, allowed_features: ["pipeline_viz"])
+      @joe = create(:joe)
       sign_in @joe
     end
 
-    describe "GET pipeline stage results for public sample" do
-      it "can see pipeline stage results without the experimental stage results" do
+    describe "GET pipeline viz graph data for public sample" do
+      it "can see pipeline viz graph data without the experimental stage" do
         project = create(:public_project)
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
@@ -177,8 +162,8 @@ RSpec.describe PipelineVizController, type: :controller do
       end
     end
 
-    describe "GET pipeline stage results for own sample" do
-      it "can see pipeline stage results without the experimental stage results" do
+    describe "GET pipeline viz graph data for own sample" do
+      it "can see pipeline viz graph data without the experimental stage" do
         project = create(:project, users: [@joe])
         sample = create(:sample, project: project,
                                  pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
@@ -197,8 +182,8 @@ RSpec.describe PipelineVizController, type: :controller do
       end
     end
 
-    describe "GET pipeline stage results for another user\'s private sample" do
-      it "cannot access stage results" do
+    describe "GET pipeline viz graph data for another user\'s private sample" do
+      it "cannot access viz graph data" do
         private_project = create(:project)
         private_sample = create(:sample, project: private_project,
                                          pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
@@ -209,8 +194,8 @@ RSpec.describe PipelineVizController, type: :controller do
       end
     end
 
-    describe "GET pipeline stage results from sample with no pipeline stages (nonadmin)" do
-      it "cannot see stage results" do
+    describe "GET pipeline viz graph data from sample with no pipeline run (nonadmin)" do
+      it "cannot see viz graph data" do
         project = create(:project, users: [@joe])
         sample = create(:sample, project: project)
         get :show, params: { sample_id: sample.id }
@@ -219,24 +204,8 @@ RSpec.describe PipelineVizController, type: :controller do
       end
     end
 
-    describe "GET pipeline stage results without pipeline viz flag enabled (nonadmin)" do
-      it "cannot see stage results" do
-        # Create new user with a unique email.
-        @joe = create(:joe, email: "joe2@example.com")
-        sign_in @joe
-
-        project = create(:public_project)
-        sample = create(:sample, project: project,
-                                 pipeline_runs_data: [{ pipeline_run_stages_data: pipeline_run_stages_data }])
-
-        get :show, params: { sample_id: sample.id }
-
-        expect(response).to have_http_status 401
-      end
-    end
-
-    describe "Get pipeline stage results with pipeline viz experimental flag enabled" do
-      it "can see all stage results, including experimental" do
+    describe "Get pipeline viz graph data with pipeline viz experimental flag enabled" do
+      it "can see all viz graph data, including experimental" do
         @joe.add_allowed_feature("pipeline_viz_experimental")
 
         project = create(:public_project)
