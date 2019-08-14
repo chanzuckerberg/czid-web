@@ -27,13 +27,10 @@ class PipelineVizController < ApplicationController
         format.html
         format.json { render json: @results }
       end
-      return
+    else
+      render(json: {
+               status: :not_found,
+             }, status: :not_found)
     end
-
-    status = pipeline_run ? :unauthorized : :not_found
-    render(json: {
-             status: status,
-             message: "Cannot access feature",
-           }, status: status)
   end
 end
