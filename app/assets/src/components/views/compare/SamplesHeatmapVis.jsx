@@ -61,6 +61,7 @@ class SamplesHeatmapVis extends React.Component {
         initialColumnMetadataSortField: metadataSortField,
         initialColumnMetadataSortAsc: metadataSortAsc,
         onNodeHover: this.handleNodeHover,
+        onMetadataNodeHover: this.handleMetadataNodeHover,
         onNodeHoverMove: this.handleMouseHoverMove,
         onNodeHoverOut: this.handleNodeHoverOut,
         onColumnMetadataSortChange: onMetadataSortChange,
@@ -131,7 +132,18 @@ class SamplesHeatmapVis extends React.Component {
     this.setState({ nodeHoverInfo: this.getTooltipData(node) });
     logAnalyticsEvent("SamplesHeatmapVis_node_hovered", {
       nodeValue: node.value,
+      nodeId: node.id,
     });
+  };
+
+  handleMetadataNodeHover = (node, metadata) => {
+    const legend = this.heatmap.getColumnMetadataLegend(metadata.value);
+    const currentValue = node.metadata[metadata.value] || "Unknown";
+    const currentPair = { [currentValue]: legend[currentValue] };
+    this.setState({
+      columnMetadataLegend: currentPair,
+    });
+    logAnalyticsEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
   };
 
   handleNodeHoverOut = () => {
@@ -266,7 +278,6 @@ class SamplesHeatmapVis extends React.Component {
       addMetadataTrigger,
       selectedMetadata,
     } = this.state;
-
     return (
       <div className={cs.samplesHeatmapVis}>
         <div
@@ -275,7 +286,6 @@ class SamplesHeatmapVis extends React.Component {
             this.heatmapContainer = container;
           }}
         />
-
         {nodeHoverInfo &&
           tooltipLocation && (
             <div
