@@ -67,10 +67,12 @@ export default class GeneDetailsMode extends React.Component {
 
   async getGeneInfo(geneName) {
     const ontology = await getOntology(geneName);
-    const cardEntryFound = ontology.error !== "" ? false : true;
+    const ontologyInfoFound = ontology.error === "" ? true : false;
+    const cardEntryFound = ontology.label !== "" ? true : false;
     this.setState({
       ontology,
       loading: false,
+      ontologyInfoFound,
       cardEntryFound,
     });
   }
@@ -167,10 +169,6 @@ export default class GeneDetailsMode extends React.Component {
       ontology: { error },
     } = this.state;
     const { geneName } = this.props;
-    logAnalyticsEvent("GeneDetailsMode_error_rendered", {
-      geneName,
-      error,
-    }); // exclusive with ontology_rendered
     return <div className={cs.cardLicense}>{error}</div>;
   }
 
@@ -199,10 +197,6 @@ export default class GeneDetailsMode extends React.Component {
       collapseOntology,
     } = this.state;
     const { geneName } = this.props;
-    logAnalyticsEvent("GeneDetailsMode_ontology_rendered", {
-      ontologyLabel: label,
-      geneName,
-    }); // exclusive with error_rendered
     return (
       <div>
         {synonyms.length > 0 && (
@@ -217,6 +211,14 @@ export default class GeneDetailsMode extends React.Component {
         <div className={cs.text}>
           <div className={cs.textInner}>{description}</div>
         </div>
+        {drugClass && (
+          <div>
+            <div className={cs.subtitle}>{CARD_RESISTANCES}</div>
+            <div className={cs.text}>
+              {this.renderPropertyList([drugClass])}
+            </div>
+          </div>
+        )}
         {!collapseOntology && (
           <div>
             {geneFamily.length > 0 && (
@@ -224,14 +226,6 @@ export default class GeneDetailsMode extends React.Component {
                 <div className={cs.subtitle}>{CARD_FAMILY}</div>
                 <div className={cs.text}>
                   {this.renderPropertyList(geneFamily)}
-                </div>
-              </div>
-            )}
-            {drugClass && (
-              <div>
-                <div className={cs.subtitle}>{CARD_RESISTANCES}</div>
-                <div className={cs.text}>
-                  {this.renderPropertyList([drugClass])}
                 </div>
               </div>
             )}
@@ -243,11 +237,12 @@ export default class GeneDetailsMode extends React.Component {
             )}
           </div>
         )}
-        {collapseOntology && (
-          <div className={cs.expandLink} onClick={this.expandOntology}>
-            Show More
-          </div>
-        )}
+        {collapseOntology &&
+          (geneFamily.length > 0 || publications.length > 0) && (
+            <div className={cs.expandLink} onClick={this.expandOntology}>
+              Show More
+            </div>
+          )}
         <div className={cs.text}>
           <div className={cs.textInner}>{this.renderCARDLicense()}</div>
           <div className={cs.textInner}>{this.renderPubMedLicense()}</div>
@@ -320,38 +315,38 @@ export default class GeneDetailsMode extends React.Component {
     }
     const footerLinks = sources.map(source => {
       return (
-        <ul className={cs.linksList} key={source}>
-          <li className={cs.link}>
-            <a
-              href={this.generateLinkTo(source)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() =>
-                logAnalyticsEvent("GeneDetailsMode_footer-link_clicked", {
-                  destination: source,
-                  geneName,
-                })
-              }
-            >
-              {source}
-            </a>
-          </li>
-        </ul>
+        <li className={cs.link} key={source}>
+          <a
+            href={this.generateLinkTo(source)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() =>
+              logAnalyticsEvent("GeneDetailsMode_footer-link_clicked", {
+                destination: source,
+                geneName,
+              })
+            }
+          >
+            {source}
+          </a>
+        </li>
       );
     });
     return footerLinks;
   }
 
   renderGeneContents() {
-    const { loading, cardEntryFound } = this.state;
+    const { loading, cardEntryFound, ontologyInfoFound } = this.state;
     if (loading) {
       return;
     }
     return (
       <div className={cs.geneContents}>
-        {cardEntryFound ? this.renderOntology() : this.renderError()}
+        {ontologyInfoFound ? this.renderOntology() : this.renderError()}
         <div className={cs.subtitle}>Links</div>
-        <div className={cs.linksSection}>{this.renderFooterLinks()}</div>
+        <div className={cs.linksSection}>
+          <ul className={cs.linksList}>{this.renderFooterLinks()}</ul>
+        </div>
       </div>
     );
   }
