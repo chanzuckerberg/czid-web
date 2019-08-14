@@ -86,34 +86,36 @@ class PipelineViz extends React.Component {
     );
     const updates = diff(oldGraphData, newGraphData);
     if (updates.stages) {
-      Object.entries(updates.stages).forEach((stageIndexStr, stageChanges) => {
-        const stageIndex = parseInt(stageIndexStr);
+      Object.entries(updates.stages).forEach(
+        ([stageIndexStr, stageChanges]) => {
+          const stageIndex = parseInt(stageIndexStr);
 
-        if (stageIndex < this.graphs.length) {
-          // Graph already exists.
-          const graph = this.graphs[stageIndex];
-          const steps = stageChanges.steps;
-          Object.entries(steps).forEach((stepIndexStr, stepChanges) => {
-            const stepIndex = parseInt(stepIndexStr);
-            const status = stepChanges.status;
-            graph.updateNodes([stepIndex], {
-              group: status,
-              ...this.getNodeStatusOptions(status),
+          if (stageIndex < this.graphs.length) {
+            // Graph already exists.
+            const graph = this.graphs[stageIndex];
+            const steps = stageChanges.steps;
+            Object.entries(steps).forEach(([stepIndexStr, stepChanges]) => {
+              const stepIndex = parseInt(stepIndexStr);
+              const status = stepChanges.status;
+              graph.updateNodes([stepIndex], {
+                group: status,
+                ...this.getNodeStatusOptions(status),
+              });
             });
-          });
-        } else {
-          // A new stage has started and needs to be drawn.
-          if (stageIndex > 0) {
-            // Modify previous stage's graph to create edges to new stage
-            const prevGraph = this.graphs[stageIndex - 1];
-            this.generateEdgeData(stageIndex - 1).forEach(edge => {
-              const { id, ...options } = edge;
-              prevGraph.updateEdges([id], options);
-            });
+          } else {
+            // A new stage has started and needs to be drawn.
+            if (stageIndex > 0) {
+              // Modify previous stage's graph to create edges to new stage
+              const prevGraph = this.graphs[stageIndex - 1];
+              this.generateEdgeData(stageIndex - 1).forEach(edge => {
+                const { id, ...options } = edge;
+                prevGraph.updateEdges([id], options);
+              });
+            }
+            this.drawStageGraph(stageIndex);
           }
-          this.drawStageGraph(stageIndex);
         }
-      });
+      );
     }
   }
 
