@@ -61,6 +61,7 @@ class SamplesHeatmapVis extends React.Component {
         initialColumnMetadataSortField: metadataSortField,
         initialColumnMetadataSortAsc: metadataSortAsc,
         onNodeHover: this.handleNodeHover,
+        onMetadataNodeHover: this.handleMetadataNodeHover,
         onNodeHoverMove: this.handleMouseHoverMove,
         onNodeHoverOut: this.handleNodeHoverOut,
         onColumnMetadataSortChange: onMetadataSortChange,
@@ -132,8 +133,17 @@ class SamplesHeatmapVis extends React.Component {
     logAnalyticsEvent("SamplesHeatmapVis_node_hovered", {
       nodeValue: node.value,
       nodeId: node.id,
-      isMetadata: !!node.metadata,
     });
+  };
+
+  handleMetadataNodeHover = (node, metadata) => {
+    const legend = this.heatmap.getColumnMetadataLegend(metadata.value);
+    const currentValue = node.metadata[metadata.value] || "Unknown";
+    const currentPair = { [currentValue]: legend[currentValue] };
+    this.setState({
+      columnMetadataLegend: currentPair,
+    });
+    logAnalyticsEvent("SamplesHeatmapVis_metadata-node_hovered", metadata);
   };
 
   handleNodeHoverOut = () => {
@@ -163,24 +173,7 @@ class SamplesHeatmapVis extends React.Component {
     this.heatmap.downloadAsPng();
   }
 
-  getMetadataTooltipData(node) {
-    const metadata = node.metadata;
-    return [
-      {
-        name: "Metadata",
-        // TODO (gdingle): display name
-        data: Object.keys(metadata).map(k => [
-          k.replace("_", " ").replace("_v2", ""),
-          metadata[k],
-        ]),
-      },
-    ];
-  }
-
   getTooltipData(node) {
-    if (node.metadata) {
-      return this.getMetadataTooltipData(node);
-    }
     let sampleId = this.props.sampleIds[node.columnIndex];
     let taxonId = this.props.taxonIds[node.rowIndex];
     let sampleDetails = this.props.sampleDetails[sampleId];
@@ -285,7 +278,6 @@ class SamplesHeatmapVis extends React.Component {
       addMetadataTrigger,
       selectedMetadata,
     } = this.state;
-
     return (
       <div className={cs.samplesHeatmapVis}>
         <div
@@ -294,7 +286,6 @@ class SamplesHeatmapVis extends React.Component {
             this.heatmapContainer = container;
           }}
         />
-
         {nodeHoverInfo &&
           tooltipLocation && (
             <div

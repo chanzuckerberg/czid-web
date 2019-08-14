@@ -970,14 +970,17 @@ export default class Heatmap {
         .append("rect")
         .attr("class", "columnMetadataCell")
         .on("mouseover", d => {
-          this.options.onNodeHover && this.options.onNodeHover(d);
+          this.options.onMetadataNodeHover &&
+            this.options.onMetadataNodeHover(d, metadata);
         })
         .on("mouseleave", d => {
-          this.options.onNodeHoverOut && this.options.onNodeHoverOut(d);
+          // use same hover out handler because we want the same behavior
+          this.options.onColumnMetadataLabelOut &&
+            this.options.onColumnMetadataLabelOut(d);
         })
         .on("mousemove", d => {
           this.options.onNodeHoverMove &&
-            this.options.onNodeHoverMove(d, d3.event);
+            this.options.onColumnMetadataLabelMove(d, d3.event);
         });
 
       columnMetadataCell.style("fill", d => {
