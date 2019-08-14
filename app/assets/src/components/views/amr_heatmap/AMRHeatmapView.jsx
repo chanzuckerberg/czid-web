@@ -307,7 +307,7 @@ export default class AMRHeatmapView extends React.Component {
       return csvRow;
     });
     const csvHeaders = [
-      "sample_name,gene_name,allele_name,coverage,depth,rpm,dpm,total_reads",
+      "sample_name,gene_name,allele_name,coverage,depth,rpm,dpm,mapped_reads",
     ];
     return [csvHeaders, csvRows];
   }
