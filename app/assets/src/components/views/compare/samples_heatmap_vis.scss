@@ -22,5 +22,22 @@
     .data-tooltip__label {
       min-width: 100px;
     }
+
+    .warning {
+      display: flex;
+
+      .warningIcon {
+        height: 14px;
+        width: 14px;
+        margin-right: 6px;
+        // Vertical-align the svg element with the text.
+        transform: translateY(1px);
+      }
+
+      .warningText {
+        flex: 1 1 0;
+        min-width: 0;
+      }
+    }
   }
 }

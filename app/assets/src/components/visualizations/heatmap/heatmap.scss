@@ -122,9 +122,23 @@
     }
   }
 
+  .captionContainer {
+    .caption {
+      font-size: 12px;
+      fill: $medium-grey;
+      opacity: 0;
+    }
+  }
+
   &.printMode {
     .columnMetadataAdd {
       opacity: 0;
+    }
+
+    .captionContainer {
+      .caption {
+        opacity: 1;
+      }
     }
   }
 }
