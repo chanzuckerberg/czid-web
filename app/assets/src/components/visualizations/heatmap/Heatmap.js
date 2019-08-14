@@ -70,6 +70,9 @@ export default class Heatmap {
         customColorCallback: null,
         colors: null,
         colorNoValue: "#eaeaea",
+        // The caption to add when the heatmap is saved as an SVG or PNG.
+        printCaption: [],
+        captionLineHeight: 18,
       },
       options
     );
@@ -144,6 +147,10 @@ export default class Heatmap {
   updateData(data) {
     this.data = Object.assign(this.data, data);
     this.processData("parse");
+  }
+
+  updatePrintCaption(printCaption) {
+    this.options.printCaption = printCaption;
   }
 
   parseData() {
@@ -253,6 +260,7 @@ export default class Heatmap {
       .append("g")
       .attr("class", cx(cs.dendogram, "columnDendogram"));
     this.gColumnMetadata = this.g.append("g").attr("class", cs.columnMetadata);
+    this.gCaption = this.g.append("g").attr("class", cs.captionContainer);
   }
 
   placeContainers() {
@@ -282,19 +290,34 @@ export default class Heatmap {
       ),
     };
 
-    this.width =
-      this.cell.width * this.columnLabels.length +
-      this.options.marginLeft +
-      this.options.marginRight +
-      this.rowLabelsWidth +
-      (this.options.clustering ? this.rowClusterWidth : 0);
-    this.height =
-      this.cell.height * this.filteredRowLabels.length +
-      this.options.marginTop +
-      this.options.marginBottom +
-      this.columnLabelsHeight +
-      (this.options.clustering ? this.columnClusterHeight : 0) +
+    const totalCellWidth = this.cell.width * this.columnLabels.length;
+    const totalRowClusterWidth = this.options.clustering
+      ? this.rowClusterWidth
+      : 0;
+
+    const totalColumnLabelsHeight = this.columnLabelsHeight;
+    const totalMetadataHeight =
       this.options.columnMetadata.length * this.options.minCellHeight +
+      this.options.spacing;
+    const totalCellHeight = this.cell.height * this.filteredRowLabels.length;
+    const totalColumnClusterHeight = this.options.clustering
+      ? this.columnClusterHeight + this.options.spacing * 2
+      : 0;
+
+    this.width =
+      this.options.marginLeft +
+      this.rowLabelsWidth +
+      totalCellWidth +
+      totalRowClusterWidth +
+      this.options.marginRight;
+
+    this.height =
+      this.options.marginTop +
+      this.columnLabelsHeight +
+      totalMetadataHeight +
+      totalCellHeight +
+      totalColumnClusterHeight +
+      this.options.marginBottom +
       this.options.spacing;
 
     this.svg.attr("width", this.width).attr("height", this.height);
@@ -303,40 +326,46 @@ export default class Heatmap {
       "transform",
       `translate(${this.options.marginLeft},${this.options.marginTop})`
     );
-
     this.gRowLabels.attr(
       "transform",
-      `translate(0, ${this.columnLabelsHeight +
-        this.options.minCellHeight * this.options.columnMetadata.length +
-        this.options.spacing})`
+      `translate(0, ${totalColumnLabelsHeight + totalMetadataHeight})`
     );
     this.gColumnLabels.attr(
       "transform",
-      `translate(${this.rowLabelsWidth},${this.columnLabelsHeight})`
+      `translate(${this.rowLabelsWidth},${totalColumnLabelsHeight})`
     );
     this.gCells.attr(
       "transform",
-      `translate(${this.rowLabelsWidth},${this.columnLabelsHeight +
-        this.options.minCellHeight * this.options.columnMetadata.length +
-        this.options.spacing})`
+      `translate(${this.rowLabelsWidth},
+        ${totalColumnLabelsHeight + totalMetadataHeight})`
     );
     this.gRowDendogram.attr(
       "transform",
-      `translate(${this.rowLabelsWidth +
-        this.cell.width * this.columnLabels.length},${this.columnLabelsHeight +
-        this.options.minCellHeight * this.options.columnMetadata.length +
-        this.options.spacing})`
+      `translate(
+        ${this.rowLabelsWidth + totalCellWidth},
+        ${totalColumnLabelsHeight + totalMetadataHeight}
+      )`
     );
     this.gColumnDendogram.attr(
       "transform",
-      `translate(${this.rowLabelsWidth},${this.columnLabelsHeight +
-        this.cell.height * this.filteredRowLabels.length +
-        this.options.minCellHeight * this.options.columnMetadata.length +
-        this.options.spacing})`
+      `translate(
+        ${this.rowLabelsWidth},
+        ${totalColumnLabelsHeight + totalMetadataHeight + totalCellHeight}
+      )`
     );
     this.gColumnMetadata.attr(
       "transform",
-      `translate(0, ${this.columnLabelsHeight})`
+      `translate(0, ${totalColumnLabelsHeight})`
+    );
+    this.gCaption.attr(
+      "transform",
+      `translate(${this.rowLabelsWidth},
+        ${totalColumnLabelsHeight +
+          totalMetadataHeight +
+          totalCellHeight +
+          totalColumnClusterHeight +
+          this.options.spacing}
+      )`
     );
   }
 
@@ -527,15 +556,39 @@ export default class Heatmap {
 
   download(filename) {
     this.svg.classed(cs.printMode, true);
+    this.showPrintCaption();
     this.svgSaver.asSvg(this.svg.node(), filename || "heatmap.svg");
     this.svg.classed(cs.printMode, false);
+    this.hidePrintCaption();
   }
 
   downloadAsPng(filename) {
     this.svg.classed(cs.printMode, true);
+    this.showPrintCaption();
     this.svgSaver.asPng(this.svg.node(), filename || "heatmap.png");
     this.svg.classed(cs.printMode, false);
+    this.hidePrintCaption();
   }
+
+  showPrintCaption = () => {
+    const totalCaptionHeight = this.options.printCaption
+      ? this.options.printCaption.length * this.options.captionLineHeight
+      : 0;
+
+    // This assumes that this.height contains the "normal" height of the heatmap.
+    // We temporarily change the svg height to add the caption, and will revert it as
+    // soon as the printing is done.
+    this.svg.attr("height", this.height + totalCaptionHeight);
+    this.renderCaption();
+  };
+
+  hidePrintCaption = () => {
+    // Revert the svg to its previous height, without the caption.
+    this.svg.attr("height", this.height);
+
+    // Remove all captions.
+    this.gCaption.selectAll(`.${cs.caption}`).remove();
+  };
 
   removeRow = row => {
     this.options.onRemoveRow && this.options.onRemoveRow(row.label);
@@ -1109,6 +1162,22 @@ export default class Heatmap {
       "transform",
       `scale(-1,1) translate(-${this.rowClusterWidth},0)`
     );
+  }
+
+  renderCaption() {
+    let caption = this.gCaption
+      .selectAll(`.${cs.caption}`)
+      .data(this.options.printCaption);
+
+    caption
+      .enter()
+      .append("text")
+      .attr("class", cs.caption)
+      .text(d => d)
+      .attr(
+        "transform",
+        (_, idx) => `translate(0, ${idx * this.options.captionLineHeight})`
+      );
   }
 
   updateCellHighlights() {

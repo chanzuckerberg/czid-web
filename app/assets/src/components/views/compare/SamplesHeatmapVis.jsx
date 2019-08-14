@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import cx from "classnames";
-import { keyBy } from "lodash/fp";
+import { size, map, keyBy } from "lodash/fp";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 import { DataTooltip } from "~ui/containers";
@@ -10,8 +10,12 @@ import Heatmap from "~/components/visualizations/heatmap/Heatmap";
 import { getTooltipStyle } from "~/components/utils/tooltip";
 import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
+import { splitIntoMultipleLines } from "~/helpers/strings";
+import AlertIcon from "~ui/icons/AlertIcon";
 
 import cs from "./samples_heatmap_vis.scss";
+
+const CAPTION_LINE_WIDTH = 180;
 
 class SamplesHeatmapVis extends React.Component {
   constructor(props) {
@@ -76,6 +80,7 @@ class SamplesHeatmapVis extends React.Component {
         scale: this.props.scale,
         // only display colors to positive values
         scaleMin: 0,
+        printCaption: this.generateHeatmapCaptions(),
       }
     );
     this.heatmap.start();
@@ -90,6 +95,9 @@ class SamplesHeatmapVis extends React.Component {
       this.heatmap.updateData({
         columnLabels: this.extractSampleLabels(), // Also includes column metadata.
       });
+    }
+    if (this.props.thresholdFilters !== prevProps.thresholdFilters) {
+      this.heatmap.updatePrintCaption(this.generateHeatmapCaptions());
     }
   }
 
@@ -116,6 +124,28 @@ class SamplesHeatmapVis extends React.Component {
       };
     });
   }
+
+  generateHeatmapCaptions = () => {
+    const { thresholdFilters } = this.props;
+
+    const numFilters = size(thresholdFilters);
+
+    if (numFilters == 0) {
+      return [];
+    }
+
+    const filterStrings = map(
+      filter => `${filter.metricDisplay} ${filter.operator} ${filter.value}`,
+      thresholdFilters
+    );
+
+    const fullString = `${numFilters} filter${
+      numFilters > 1 ? "s were" : " was"
+    } applied to the above heatmap: ${filterStrings.join(", ")}.
+      Non-conforming cells have been hidden or grayed out.`;
+
+    return splitIntoMultipleLines(fullString, CAPTION_LINE_WIDTH);
+  };
 
   handleMouseHoverMove = (_, currentEvent) => {
     if (currentEvent) {
@@ -174,14 +204,17 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   getTooltipData(node) {
-    let sampleId = this.props.sampleIds[node.columnIndex];
-    let taxonId = this.props.taxonIds[node.rowIndex];
+    const { data, taxonFilterState, sampleIds, taxonIds } = this.props;
+    let sampleId = sampleIds[node.columnIndex];
+    let taxonId = taxonIds[node.rowIndex];
     let sampleDetails = this.props.sampleDetails[sampleId];
     let taxonDetails = this.props.taxonDetails[taxonId];
 
     let nodeHasData = this.metrics.some(
-      metric => !!this.props.data[metric.key][node.rowIndex][node.columnIndex]
+      metric => !!data[metric.key][node.rowIndex][node.columnIndex]
     );
+
+    const isFiltered = taxonFilterState[node.rowIndex][node.columnIndex];
 
     let values = null;
     if (nodeHasData) {
@@ -197,7 +230,24 @@ class SamplesHeatmapVis extends React.Component {
       });
     }
 
-    return [
+    let subtitle = null;
+
+    if (!nodeHasData) {
+      subtitle = "This taxon was not found in the sample.";
+    } else if (!isFiltered) {
+      subtitle = "This taxon does not satisfy the threshold filters.";
+    }
+
+    if (subtitle) {
+      subtitle = (
+        <div className={cs.warning}>
+          <AlertIcon className={cs.warningIcon} />
+          <div className={cs.warningText}>{subtitle}</div>
+        </div>
+      );
+    }
+
+    const sections = [
       {
         name: "Info",
         data: [
@@ -205,12 +255,22 @@ class SamplesHeatmapVis extends React.Component {
           ["Taxon", taxonDetails.name],
           ["Category", taxonDetails.category],
         ],
-      },
-      {
-        name: "Values",
-        data: nodeHasData ? values : [["", "Taxon not found in Sample"]],
+        disabled: !isFiltered,
       },
     ];
+
+    if (nodeHasData) {
+      sections.push({
+        name: "Values",
+        data: values,
+        disabled: !isFiltered,
+      });
+    }
+
+    return {
+      subtitle,
+      data: sections,
+    };
   }
 
   handleCellClick = (cell, currentEvent) => {
@@ -295,7 +355,7 @@ class SamplesHeatmapVis extends React.Component {
                 below: true,
               })}
             >
-              <DataTooltip data={nodeHoverInfo} />
+              <DataTooltip {...nodeHoverInfo} />
             </div>
           )}
         {columnMetadataLegend &&
@@ -343,6 +403,7 @@ SamplesHeatmapVis.propTypes = {
   scale: PropTypes.string,
   taxonDetails: PropTypes.object,
   taxonIds: PropTypes.array,
+  thresholdFilters: PropTypes.any,
 };
 
 export default SamplesHeatmapVis;
