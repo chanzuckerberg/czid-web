@@ -58,13 +58,14 @@ task precompute_gene_ontology: :environment do
                    else
                      [drug_class, "error"]
                    end
-      arg_entries.push([gene_name, drug_class])
+      genbank_accession = split_entry[4]
+      arg_entries.push([gene_name, drug_class, genbank_accession])
     end
   end
 
   json_ontology = {}
   arg_entries.each do |entry|
-    gene, drug_class = entry
+    gene, drug_class, genbank_accession = entry
     Rails.logger.info("Building ontology for #{gene}")
     ontology = {}
     search_result = search_card_owl(gene, owl_doc)
@@ -84,6 +85,7 @@ task precompute_gene_ontology: :environment do
       Rails.logger.info("No drug class mapping for #{drug_class[0]} belonging to #{gene}")
       ontology["drugClass"] = { "label" => drug_class[0], "description" => "No description" }
     end
+    ontology["genbank_accession"] = genbank_accession
     json_ontology[gene] = ontology
   end
 

@@ -79,12 +79,14 @@ class AmrHeatmapController < ApplicationController
       "publications" => [],
       "error" => "",
     }
-
     ontology_json_key = fetch_current_ontology_file_key()
     card_entry = fetch_ontology_entry(ontology_json_key, gene_name)
-    if card_entry.key?("label")
+    if card_entry.key?("drugClass")
       card_entry.each do |property, description|
         ontology[property] = description
+      end
+      unless card_entry.key?("description")
+        ontology["description"] = "No description available for #{gene_name}."
       end
     else
       ontology["error"] = "No data for #{gene_name}."
