@@ -152,7 +152,7 @@ module HeatmapHelper
       #{rpm_sql} AS rpm,
       #{zscore_sql} AS zscore
     FROM taxon_counts
-    JOIN pipeline_runs pr ON pipeline_run_id = pr.id
+    INNER JOIN pipeline_runs pr ON pipeline_run_id = pr.id
     LEFT OUTER JOIN taxon_summaries ON
       #{background_id.to_i}   = taxon_summaries.background_id   AND
       taxon_counts.count_type = taxon_summaries.count_type      AND
