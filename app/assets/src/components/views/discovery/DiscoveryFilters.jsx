@@ -137,7 +137,6 @@ class DiscoveryFilters extends React.Component {
   render() {
     const {
       hostSelected,
-      locationSelected,
       locationV2Selected,
       taxonSelected,
       timeSelected,
@@ -146,11 +145,9 @@ class DiscoveryFilters extends React.Component {
     } = this.state;
 
     const {
-      allowedFeatures,
       className,
       domain,
       host,
-      location,
       locationV2,
       time,
       tissue,
@@ -167,29 +164,17 @@ class DiscoveryFilters extends React.Component {
           />
           {this.renderTags("taxon")}
         </div>
-        {allowedFeatures.includes("maps") ? (
-          <div className={cs.filterContainer}>
-            <LocationFilter
-              onChange={this.handleChange.bind(this, "locationV2Selected")}
-              selected={
-                locationV2 && locationV2.length ? locationV2Selected : null
-              }
-              options={locationV2}
-              label="Location"
-            />
-            {this.renderTags("locationV2")}
-          </div>
-        ) : (
-          <div className={cs.filterContainer}>
-            <BaseMultipleFilter
-              onChange={this.handleChange.bind(this, "locationSelected")}
-              selected={location && location.length ? locationSelected : null}
-              options={location}
-              label="Location"
-            />
-            {this.renderTags("location")}
-          </div>
-        )}
+        <div className={cs.filterContainer}>
+          <LocationFilter
+            onChange={this.handleChange.bind(this, "locationV2Selected")}
+            selected={
+              locationV2 && locationV2.length ? locationV2Selected : null
+            }
+            options={locationV2}
+            label="Location"
+          />
+          {this.renderTags("locationV2")}
+        </div>
         <div className={cs.filterContainer}>
           <BaseSingleFilter
             label="Timeframe"

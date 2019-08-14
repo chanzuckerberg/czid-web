@@ -12,13 +12,6 @@ class LocationsController < ApplicationController
   before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
 
   def external_search
-    unless feature_access?
-      render(json: {
-               status: :unauthorized,
-               message: "No feature access",
-             }, status: :unauthorized) && return
-    end
-
     results = []
     query = location_params[:query]
     limit = location_params[:limit]
@@ -51,13 +44,6 @@ class LocationsController < ApplicationController
   end
 
   def map_playground
-    unless feature_access?
-      render(json: {
-               status: :unauthorized,
-               message: "No feature access",
-             }, status: :unauthorized) && return
-    end
-
     # Show all viewable locations in a demo format
     field_id = MetadataField.find_by(name: "collection_location_v2").id
     sample_info = current_power.samples
@@ -83,13 +69,6 @@ class LocationsController < ApplicationController
   # Get location data for a set of samples with filters
   # TODO(jsheu): Consider consolidating if similar location data is loaded w/ data discovery tables.
   def sample_locations
-    unless feature_access?
-      render(json: {
-               status: :unauthorized,
-               message: "No feature access",
-             }, status: :unauthorized) && return
-    end
-
     # Get the samples
     domain = params[:domain]
     samples = samples_by_domain(domain) # access controlled
@@ -142,9 +121,5 @@ class LocationsController < ApplicationController
 
   def location_params
     params.permit(:query, :limit)
-  end
-
-  def feature_access?
-    current_user.admin? || current_user.allowed_feature_list.include?("maps")
   end
 end
