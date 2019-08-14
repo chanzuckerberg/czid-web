@@ -1,20 +1,21 @@
 import React from "react";
-import PropTypes from "prop-types";
 import cx from "classnames";
 import moment from "moment";
 import Linkify from "react-linkify";
 import ReactMarkdown from "react-markdown";
 
+import { errorMessageInfo } from "~/components/utils/sample";
 import { openUrl } from "~utils/links";
 import { Accordion } from "~/components/layout";
 import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
+import PropTypes from "~/components/utils/propTypes";
 import { withAnalytics } from "~/api/analytics";
 
 import cs from "./pipeline_step_details_mode.scss";
 
 class PipelineStepDetailsMode extends React.Component {
   renderStatusBox() {
-    const { status, startTime, endTime } = this.props;
+    const { status, startTime, endTime, sample, pipelineRun } = this.props;
     let statusTitle, statusDescription;
     switch (status) {
       case "inProgress":
@@ -24,11 +25,19 @@ class PipelineStepDetailsMode extends React.Component {
         ).fromNow(true)}`;
         break;
       case "userErrored":
-      case "pipelineErrored":
+      case "pipelineErrored": {
+        const { message, linkText, link } = errorMessageInfo(
+          sample,
+          pipelineRun
+        );
         statusTitle = "Sample failed at this step.";
-        statusDescription =
-          "Please upload again or reach out to help@idseq.com.";
+        statusDescription = (
+          <span>
+            {message} <a href={link}>{linkText}</a>
+          </span>
+        );
         break;
+      }
       case "finished":
         statusTitle = "Step completed";
         statusDescription =
@@ -221,6 +230,8 @@ PipelineStepDetailsMode.propTypes = {
       url: PropTypes.string,
     })
   ),
+  sample: PropTypes.Sample,
+  pipelineRun: PropTypes.PipelineRun,
 };
 
 export default PipelineStepDetailsMode;
