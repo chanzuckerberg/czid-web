@@ -76,7 +76,9 @@ module HeatmapHelper
       results_by_pr,
       samples,
       species_selected,
-      threshold_filters
+      threshold_filters,
+      sort_by,
+      num_results
     )
   end
 
@@ -204,9 +206,16 @@ module HeatmapHelper
     results_by_pr,
     samples,
     species_selected,
-    threshold_filters
+    threshold_filters,
+    sort_by = DEFAULT_TAXON_SORT_PARAM,
+    num_results = DEFAULT_MAX_NUM_TAXONS
   )
+    sort = ReportHelper.decode_sort_by(sort_by)
+    count_type = sort[:count_type]
+    metric = sort[:metric]
+
     results = {}
+    candidate_taxons = {}
 
     samples_by_id = Hash[samples.map { |s| [s.id, s] }]
     results_by_pr.each do |_pr_id, res|
@@ -219,16 +228,32 @@ module HeatmapHelper
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
       HeatmapHelper.compute_aggregate_scores_v2!(rows)
+      rows = rows.each { |row| row[:filtered] = HeatmapHelper.apply_custom_filters(row, threshold_filters) }
 
-      filtered_rows = rows
-                      .each { |row| row[:filtered] = HeatmapHelper.apply_custom_filters(row, threshold_filters) }
+      # Get the top N for each sample. This re-sorts on the same metric as in
+      # fetch_top_taxons SQL. We sort there first for performance.
+      rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
+      count = 1
+      rows.each do |row|
+        taxon = if candidate_taxons[row["tax_id"]]
+                  candidate_taxons[row["tax_id"]]
+                else
+                  { "tax_id" => row["tax_id"], "samples" => {} }
+                end
+        taxon["max_aggregate_score"] = row[sort[:count_type]][sort[:metric]] if
+          taxon["max_aggregate_score"].to_f < row[sort[:count_type]][sort[:metric]].to_f
+        taxon["samples"][sample_id] = [count, row["tax_level"], row["NT"]["zscore"], row["NR"]["zscore"]]
+        candidate_taxons[row["tax_id"]] = taxon
+        break if count >= num_results
+        count += 1
+      end
 
       results[sample_id] = {
         sample_id: sample_id,
         name: samples_by_id[sample_id].name,
         metadata: samples_by_id[sample_id].metadata_with_base_type,
         host_genome_name: samples_by_id[sample_id].host_genome_name,
-        taxons: filtered_rows,
+        taxons: rows,
       }
     end
 

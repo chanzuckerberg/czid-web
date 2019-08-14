@@ -58,7 +58,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
     assert_equal 9, taxon["NR"].length
     assert_equal 100.0, taxon["NT"]["zscore"].abs
     assert_equal 100.0, taxon["NR"]["zscore"].abs
-    assert_equal "Klebsiella pneumoniae", taxon["name"]
+    assert_equal "Streptococcus mitis", taxon["name"]
     assert_equal "Bacteria", taxon["category_name"]
   end
 
