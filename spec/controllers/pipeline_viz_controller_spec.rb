@@ -100,6 +100,7 @@ RSpec.describe PipelineVizController, type: :controller do
         "isIntraStage" => false,
       },
     ],
+    "status" => "notStarted",
   }
 
   # Admin specific behavior

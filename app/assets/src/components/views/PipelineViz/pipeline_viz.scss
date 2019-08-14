@@ -4,6 +4,8 @@
 
 // Exporting strings to style nodes and edges in vis.js
 :export {
+  defaultNodeText: $black;
+
   notStartedBg: $white;
   notStartedText: scale-color($black, $alpha: -50%);
   notStartedShadow: scale-color($box-shadow-light, $alpha: -50%);

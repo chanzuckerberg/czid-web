@@ -110,6 +110,7 @@ RSpec.describe RetrievePipelineVizGraphDataService do
         isIntraStage: false,
       },
     ],
+    status: "notStarted",
   }
 
   describe "Retrieving graph" do
@@ -146,6 +147,8 @@ RSpec.describe RetrievePipelineVizGraphDataService do
         expect(step[:status]).to eq("inProgress")
         expect(step[:description]).to eq(step_status_data[orig_step_out_name.to_sym][:description])
       end
+
+      expect(results[:status]).to eq("inProgress")
     end
 
     context "with see_experimental flag" do

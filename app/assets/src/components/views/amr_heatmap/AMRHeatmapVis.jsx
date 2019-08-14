@@ -34,21 +34,21 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   componentDidMount() {
-    this.processSampleData();
+    this.updateHeatmap();
   }
 
   componentDidUpdate(prevProps, prevState) {
     const { selectedMetadata, nodeHovered, metadataLabelHovered } = this.state;
-    const { selectedOptions } = this.props;
+    const { sampleLabels, selectedOptions } = this.props;
     if (
       selectedOptions !== prevProps.selectedOptions ||
-      this.heatmap === null
+      sampleLabels !== prevProps.sampleLabels
     ) {
       this.updateHeatmap();
     }
     if (
-      selectedMetadata !== prevState.selectedMetadata &&
-      this.heatmap !== null
+      selectedMetadata !== prevState.selectedMetadata ||
+      sampleLabels !== prevProps.sampleLabels
     ) {
       this.heatmap.updateColumnMetadata(this.getSelectedMetadataFields());
     }
@@ -58,68 +58,6 @@ export default class AMRHeatmapVis extends React.Component {
     if (metadataLabelHovered !== prevState.metadataLabelHovered) {
       logAnalyticsEvent("AMRHeatmapVis_heatmap-metadata-label-hover_triggered");
     }
-  }
-
-  processSampleData() {
-    const { samplesWithAMRCounts } = this.props;
-    const [sampleLabels, geneLabels, alleleLabels] = this.extractLabels(
-      samplesWithAMRCounts
-    );
-    const alleleToGeneMap = this.mapAllelesToGenes(samplesWithAMRCounts);
-    this.setState({
-      sampleLabels,
-      geneLabels,
-      alleleLabels,
-      alleleToGeneMap,
-    });
-  }
-
-  // Sometimes, when presenting the tooltip popup as a user hovers over
-  // a node on the heatmap, they will be over a node where the row is
-  // an allele and the column is a sample with no AMR count for the allele.
-  // With no AMR count, there's no easy way to grab the name of the gene
-  // for the allele. Hence the allele-to-gene mapping.
-  mapAllelesToGenes(sampleData) {
-    const alleleToGeneMap = {};
-    sampleData.forEach(sample => {
-      sample.amrCounts.forEach(amrCount => {
-        // annotation_gene is more fine grained label introduced in pipeline v3.9
-        // older samples will not have that field
-        alleleToGeneMap[amrCount.allele] =
-          amrCount.annotation_gene || amrCount.gene;
-      });
-    });
-    return alleleToGeneMap;
-  }
-
-  extractLabels(sampleData) {
-    const sampleLabels = [];
-    const genes = {};
-    const alleles = {};
-    sampleData.forEach(sample => {
-      sampleLabels.push({
-        label: sample.sampleName,
-        id: sample.sampleId,
-        metadata: sample.metadata,
-      });
-      sample.amrCounts.forEach(amrCount => {
-        // backwards compatibility for older samples without annotation_gene
-        if (amrCount.hasOwnProperty("annotation_gene")) {
-          genes[amrCount.annotation_gene] = true;
-        } else {
-          genes[amrCount.gene] = true;
-        }
-        alleles[amrCount.allele] = true;
-      });
-    });
-    const geneLabels = Object.keys(genes).map(gene => {
-      return { label: gene };
-    });
-    const alleleLabels = Object.keys(alleles).map(allele => {
-      return { label: allele };
-    });
-
-    return [sampleLabels, geneLabels, alleleLabels];
   }
 
   getMetadataTypes() {
@@ -166,8 +104,7 @@ export default class AMRHeatmapVis extends React.Component {
   // mediate the callback function for clicking a row label in the heatmap,
   // so that clicking an allele returns the proper gene
   onRowLabelClick = rowLabel => {
-    const { selectedOptions, onGeneLabelClick } = this.props;
-    const { alleleToGeneMap } = this.state;
+    const { alleleToGeneMap, selectedOptions, onGeneLabelClick } = this.props;
     let geneName = rowLabel;
     if (selectedOptions.viewLevel === VIEW_LEVEL_ALLELES) {
       geneName = alleleToGeneMap[rowLabel];
@@ -221,8 +158,12 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   getTooltipData(node) {
-    const { samplesWithAMRCounts, selectedOptions } = this.props;
-    const { sampleLabels, alleleToGeneMap } = this.state;
+    const {
+      sampleLabels,
+      alleleToGeneMap,
+      samplesWithAMRCounts,
+      selectedOptions,
+    } = this.props;
     const sampleName = sampleLabels[node.columnIndex].label;
     const rowLabel = this.getHeatmapLabels()[node.rowIndex].label;
     const sampleForColumn = samplesWithAMRCounts[node.columnIndex];
@@ -272,8 +213,7 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   getHeatmapLabels() {
-    const { selectedOptions } = this.props;
-    const { alleleLabels, geneLabels } = this.state;
+    const { alleleLabels, geneLabels, selectedOptions } = this.props;
     switch (selectedOptions.viewLevel) {
       case VIEW_LEVEL_ALLELES: {
         return alleleLabels;
@@ -306,8 +246,7 @@ export default class AMRHeatmapVis extends React.Component {
   }
 
   updateHeatmap() {
-    const { selectedOptions } = this.props;
-    const { sampleLabels } = this.state;
+    const { selectedOptions, sampleLabels } = this.props;
     const rows = this.getHeatmapLabels();
     const columns = sampleLabels;
     const values = this.computeHeatmapValues(rows);
@@ -434,6 +373,16 @@ AMRHeatmapVis.propTypes = {
   onSampleLabelClick: PropTypes.func,
   onGeneLabelClick: PropTypes.func,
   samplesMetadataTypes: PropTypes.object,
+  sampleLabels: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string,
+      id: PropTypes.number,
+      metadata: PropTypes.object,
+    })
+  ),
+  geneLabels: PropTypes.shape({ label: PropTypes.string }),
+  alleleLabels: PropTypes.shape({ label: PropTypes.string }),
+  alleleToGeneMap: PropTypes.object,
   metrics: PropTypes.arrayOf(
     PropTypes.shape({
       text: PropTypes.string,

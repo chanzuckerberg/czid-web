@@ -47,6 +47,10 @@ export default class AMRHeatmapView extends React.Component {
 
     this.state = {
       loading: true,
+      maxValues: null,
+      rawSampleData: null,
+      samplesWithAMRCounts: null,
+      samplesMetadataTypes: null,
       selectedOptions: {
         metric: "coverage",
         viewLevel: "gene",
@@ -81,11 +85,20 @@ export default class AMRHeatmapView extends React.Component {
     );
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
     const samplesMetadataTypes = processMetadataTypes(rawSamplesMetadataTypes);
+    const sampleLabels = this.extractSampleLabels(samplesWithAMRCounts);
+    const [geneLabels, alleleLabels] = this.extractGeneAndAlleleLabels(
+      samplesWithAMRCounts
+    );
+    const alleleToGeneMap = this.mapAllelesToGenes(samplesWithAMRCounts);
     this.setState({
       rawSampleData,
       samplesWithAMRCounts,
       maxValues,
       samplesMetadataTypes,
+      sampleLabels,
+      geneLabels,
+      alleleLabels,
+      alleleToGeneMap,
       loading: false,
     });
   }
@@ -133,6 +146,10 @@ export default class AMRHeatmapView extends React.Component {
       { depth: 0, coverage: 0, rpm: 0, dpm: 0, total_reads: 0 }
     );
     return maxValues;
+  }
+
+  hasDataToDisplay(samplesWithAMRCounts) {
+    return samplesWithAMRCounts.some(sample => sample.amrCounts.length > 0);
   }
 
   //*** Callback methods ***
@@ -203,6 +220,23 @@ export default class AMRHeatmapView extends React.Component {
     });
   };
 
+  onMetadataUpdate = (key, value) => {
+    const { selectedSampleId, samplesWithAMRCounts } = this.state;
+    const updatedSamples = samplesWithAMRCounts.map(sample => {
+      if (sample.sampleId !== selectedSampleId) {
+        return sample;
+      } else {
+        sample.metadata[key] = value;
+        return sample;
+      }
+    });
+    const sampleLabels = this.extractSampleLabels(updatedSamples);
+    this.setState({
+      samplesWithAMRCounts: updatedSamples,
+      sampleLabels,
+    });
+  };
+
   //*** Post-update methods ***
 
   computeHeatmapValuesForCSV() {
@@ -232,6 +266,7 @@ export default class AMRHeatmapView extends React.Component {
         return {
           sampleId: selectedSampleId,
           showReportLink: true,
+          onMetadataUpdate: this.onMetadataUpdate,
         };
       }
       case SIDEBAR_GENE_MODE: {
@@ -267,20 +302,62 @@ export default class AMRHeatmapView extends React.Component {
     return [{ text: this.getDownloadCSVLink(), value: "csv" }];
   }
 
+  // Sometimes, when presenting the tooltip popup as a user hovers over
+  // a node on the heatmap, they will be over a node where the row is
+  // an allele and the column is a sample with no AMR count for the allele.
+  // With no AMR count, there's no easy way to grab the name of the gene
+  // for the allele. Hence the allele-to-gene mapping.
+  mapAllelesToGenes(sampleData) {
+    const alleleToGeneMap = {};
+    sampleData.forEach(sample => {
+      sample.amrCounts.forEach(amrCount => {
+        alleleToGeneMap[amrCount.allele] = amrCount.gene;
+      });
+    });
+    return alleleToGeneMap;
+  }
+
+  extractSampleLabels(sampleData) {
+    const sampleLabels = sampleData.map(sample => {
+      return {
+        label: sample.sampleName,
+        id: sample.sampleId,
+        metadata: sample.metadata,
+      };
+    });
+    return sampleLabels;
+  }
+
+  extractGeneAndAlleleLabels(sampleData) {
+    const genes = {};
+    const alleles = {};
+    sampleData.forEach(sample => {
+      sample.amrCounts.forEach(amrCount => {
+        genes[amrCount.gene] = true;
+        alleles[amrCount.allele] = true;
+      });
+    });
+    const geneLabels = Object.keys(genes).map(gene => {
+      return { label: gene };
+    });
+    const alleleLabels = Object.keys(alleles).map(allele => {
+      return { label: allele };
+    });
+
+    return [geneLabels, alleleLabels];
+  }
+
   //*** Render methods ***
 
   renderHeader() {
-    const { sampleIds } = this.props;
     const { loading } = this.state;
     return (
       <ViewHeader className={cs.viewHeader}>
         <ViewHeader.Content>
-          <ViewHeader.Pretitle>
-            Antimicrobial Resistance Heatmap
+          <ViewHeader.Pretitle breadcrumbLink={"/home"}>
+            Discovery View
           </ViewHeader.Pretitle>
-          <ViewHeader.Title
-            label={`Comparing ${sampleIds ? sampleIds.length : ""} Samples`}
-          />
+          <ViewHeader.Title label={"Antimicrobial Resistance Heatmap"} />
         </ViewHeader.Content>
         {!loading && (
           <ViewHeader.Controls className={cs.controls}>
@@ -320,12 +397,22 @@ export default class AMRHeatmapView extends React.Component {
       samplesWithAMRCounts,
       selectedOptions,
       samplesMetadataTypes,
+      sampleLabels,
+      geneLabels,
+      alleleLabels,
+      alleleToGeneMap,
     } = this.state;
     if (loading) {
       return (
         <p className={cs.loadingIndicator}>
           <LoadingIcon className={cs.loadingIndicator} />
           Loading...
+        </p>
+      );
+    } else if (!this.hasDataToDisplay(samplesWithAMRCounts)) {
+      return (
+        <p className={cs.noDataMsg}>
+          No Antimicrobial Resistance data for selected samples.
         </p>
       );
     }
@@ -338,6 +425,10 @@ export default class AMRHeatmapView extends React.Component {
             onSampleLabelClick={this.onSampleLabelClick}
             onGeneLabelClick={this.onGeneLabelClick}
             samplesMetadataTypes={samplesMetadataTypes}
+            sampleLabels={sampleLabels}
+            geneLabels={geneLabels}
+            alleleLabels={alleleLabels}
+            alleleToGeneMap={alleleToGeneMap}
             metrics={METRICS}
           />
         </ErrorBoundary>
