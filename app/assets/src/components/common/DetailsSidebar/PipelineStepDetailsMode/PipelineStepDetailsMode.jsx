@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown";
 import { openUrl } from "~utils/links";
 import { Accordion } from "~/components/layout";
 import PipelineVizStatusIcon from "~/components/views/PipelineViz/PipelineVizStatusIcon";
+import { withAnalytics } from "~/api/analytics";
 
 import cs from "./pipeline_step_details_mode.scss";
 
@@ -121,7 +122,15 @@ class PipelineStepDetailsMode extends React.Component {
       const cssClass = file.url ? cs.fileLink : cs.disabledFileLink;
       const content = file.url ? (
         // Use onClick instead of href to remove url appearance when hovering.
-        <a onClick={() => openUrl(file.url)}>{file.fileName}</a>
+        <a
+          onClick={withAnalytics(
+            () => openUrl(file.url),
+            "PipelineStepDetailsMode_file-link_clicked",
+            { fileName: file.fileName, url: file.url }
+          )}
+        >
+          {file.fileName}
+        </a>
       ) : (
         file.fileName
       );
@@ -141,7 +150,16 @@ class PipelineStepDetailsMode extends React.Component {
       const resourceLinks = resources.map(linkInfo => {
         return (
           <span key={linkInfo.url}>
-            <a href={linkInfo.url} target="_blank" rel="noopener noreferrer">
+            <a
+              href={linkInfo.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={withAnalytics(
+                () => {},
+                "PipelineStepDetailsMode_resource-link_clicked",
+                { linkName: linkInfo.name, linkUrl: linkInfo.url }
+              )}
+            >
               {linkInfo.name}
             </a>
           </span>
