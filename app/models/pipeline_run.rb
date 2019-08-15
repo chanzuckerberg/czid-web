@@ -546,20 +546,19 @@ class PipelineRun < ApplicationRecord
       return
     end
     amr_counts_array = []
+    amr_counts_keys = [:gene, :allele, :coverage, :depth, :drug_family, :total_reads, :rpm, :dpm]
+    amr_results_keys = %w[gene allele coverage depth gene_family total_reads rpm dpm]
     # results can be as small as ~80 bytes, so play it safe; empty results are 1 byte files
     unless File.size?(amr_results) < 10
       amr_results_table = CSV.read(amr_results, headers: true)
       amr_results_table.each do |row|
-        amr_count_for_gene = {
-          gene: row["gene"],
-          allele: row["allele"],
-          coverage: row["coverage"],
-          depth: row["depth"],
-          drug_family: row["gene_family"],
-          total_reads: row["total_reads"],
-          rpm: row["rpm"],
-          dpm: row["dpm"],
-        }
+        amr_count_for_gene = {}
+        amr_counts_keys.each_with_index do |_counts_key, index|
+          result_value = row[amr_results_keys[index]]
+          if result_value.present?
+            amr_count_for_gene[amr_counts_keys[index]] = result_value
+          end
+        end
         if row["annotation"].present?
           split_annotation = row["annotation"].split(";")
           if split_annotation.length >= 5

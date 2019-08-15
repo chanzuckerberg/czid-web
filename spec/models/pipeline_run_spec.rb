@@ -158,4 +158,35 @@ describe PipelineRun, type: :model do
       end
     end
   end
+  context "ensure that loading amr counts works properly" do
+    let(:user) { build_stubbed(:user) }
+    let(:sample) { build_stubbed(:sample, user: user) }
+    let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample, pipeline_version: "3.9") }
+    context "No AMR counts file exists on S3 (PipelineRun.download_file() returned nil)" do
+      before do
+        # Test case nil
+        allow(PipelineRun).to receive(:download_file).and_return(nil)
+        allow(Rails.logger).to receive(:error)
+      end
+      it "should log an error and simply return" do
+        pipeline_run.db_load_amr_counts()
+
+        expect(Rails.logger).to have_received(:error).with(match(/No AMR results file found for PipelineRun #/))
+        expect(pipeline_run.amr_counts).to eq([])
+      end
+    end
+    context "AMR counts file exists, but is empty (results found no amr counts)" do
+      before do
+        empty_results_path = "amr_processed_results.csv"
+        File.open(empty_results_path, "w") { |file| file.puts("\n") }
+        allow(PipelineRun).to receive(:download_file).and_return(empty_results_path)
+      end
+      it "should update amr counts as an empty array" do
+        pipeline_run.db_load_amr_counts()
+
+        expect(Rails.logger).to receive(:error).exactly(0).times
+        expect(pipeline_run.amr_counts).to eq([])
+      end
+    end
+  end
 end
