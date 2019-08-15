@@ -555,13 +555,17 @@ class PipelineRun < ApplicationRecord
           allele: row["allele"],
           coverage: row["coverage"],
           depth: row["depth"],
-          annotation_gene: row["annotation"].split(";")[2],
-          genbank_accession: row["annotation"].split(";")[4],
           drug_family: row["gene_family"],
           total_reads: row["total_reads"],
           rpm: row["rpm"],
           dpm: row["dpm"],
         }
+        if row["annotation"].nil? == false
+          amr_counts_array << {
+            annotation_gene: row["annotation"].split(";")[2],
+            genbank_accession: row["annotation"].split(";")[4],
+          }
+        end
       end
     end
     update(amr_counts_attributes: amr_counts_array)
