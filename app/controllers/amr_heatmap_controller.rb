@@ -11,7 +11,6 @@ class AmrHeatmapController < ApplicationController
 
   def index
     @sample_ids = params[:sampleIds].map(&:to_i)
-    render 'index'
   end
 
   # GET /amr_heatmap/amr_counts.json
