@@ -32,6 +32,15 @@ class AmrHeatmapController < ApplicationController
   # },
 
   def amr_counts
+    feature_allowed = current_user.allowed_feature_list.include?("amr_heatmap")
+
+    unless feature_allowed || current_user.admin?
+      render(json: {
+               status: :unauthorized,
+               message: "Cannot access feature",
+             }) && return
+    end
+
     sample_ids = params[:sampleIds].map(&:to_i)
     samples = current_power.viewable_samples.where(id: sample_ids)
     good_sample_ids = {}
@@ -72,6 +81,15 @@ class AmrHeatmapController < ApplicationController
   end
 
   def fetch_ontology
+    feature_allowed = current_user.allowed_feature_list.include?("amr_heatmap")
+
+    unless feature_allowed || current_user.admin?
+      render(json: {
+               status: :unauthorized,
+               message: "Cannot access feature",
+             }) && return
+    end
+
     gene_name = params[:geneName]
     ontology = {
       "accession" => "",
