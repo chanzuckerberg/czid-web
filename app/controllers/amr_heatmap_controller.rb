@@ -5,14 +5,13 @@ S3_JSON_PREFIX = "amr/ontology/".freeze
 class AmrHeatmapController < ApplicationController
   include S3Util
 
+  before_action do
+    allowed_feature_required("basespace_upload_enabled", true)
+  end
+
   def index
-    feature_allowed = current_user.allowed_feature_list.include?("amr_heatmap")
-    if feature_allowed || current_user.admin?
-      @sample_ids = params[:sampleIds].map(&:to_i)
-      render 'index'
-    else
-      redirect_to controller: "home", action: "my_data", status: :unauthorized
-    end
+    @sample_ids = params[:sampleIds].map(&:to_i)
+    render 'index'
   end
 
   # GET /amr_heatmap/amr_counts.json
@@ -32,15 +31,6 @@ class AmrHeatmapController < ApplicationController
   # },
 
   def amr_counts
-    feature_allowed = current_user.allowed_feature_list.include?("amr_heatmap")
-
-    unless feature_allowed || current_user.admin?
-      render(json: {
-               status: :unauthorized,
-               message: "Cannot access feature",
-             }) && return
-    end
-
     sample_ids = params[:sampleIds].map(&:to_i)
     samples = current_power.viewable_samples.where(id: sample_ids)
     good_sample_ids = {}
@@ -81,15 +71,6 @@ class AmrHeatmapController < ApplicationController
   end
 
   def fetch_ontology
-    feature_allowed = current_user.allowed_feature_list.include?("amr_heatmap")
-
-    unless feature_allowed || current_user.admin?
-      render(json: {
-               status: :unauthorized,
-               message: "Cannot access feature",
-             }) && return
-    end
-
     gene_name = params[:geneName]
     ontology = {
       "accession" => "",
