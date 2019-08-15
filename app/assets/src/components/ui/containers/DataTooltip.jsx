@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { isObject } from "lodash/fp";
+import cx from "classnames";
+
 import cs from "./data_tooltip.scss";
 
 const DataTooltip = ({ data, subtitle, title, singleColumn }) => {
@@ -9,9 +11,12 @@ const DataTooltip = ({ data, subtitle, title, singleColumn }) => {
   // - subtitle
   // - an array of object(section_name, data: array([label, value], [..]))
 
-  const renderSection = (sectionName, dataValues) => {
+  const renderSection = (sectionName, dataValues, isDisabled) => {
     return (
-      <div className={cs.dataTooltipSection} key={`section-${sectionName}`}>
+      <div
+        className={cx(cs.dataTooltipSection, isDisabled && cs.disabled)}
+        key={`section-${sectionName}`}
+      >
         <div className={cs.dataTooltipSectionName}>{sectionName}</div>
         {dataValues.map(keyValuePair => {
           return (
@@ -40,7 +45,9 @@ const DataTooltip = ({ data, subtitle, title, singleColumn }) => {
   };
 
   const renderSections = data => {
-    return data.map(section => renderSection(section.name, section.data));
+    return data.map(section =>
+      renderSection(section.name, section.data, section.disabled)
+    );
   };
 
   return (
@@ -53,7 +60,15 @@ const DataTooltip = ({ data, subtitle, title, singleColumn }) => {
 };
 
 DataTooltip.propTypes = {
-  data: PropTypes.array,
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string,
+      // Array of key-value pairs.
+      data: PropTypes.arrayOf(PropTypes.array),
+      // Grey out the section if disabled.
+      disabled: PropTypes.bool,
+    })
+  ),
   subtitle: PropTypes.string,
   title: PropTypes.string,
   singleColumn: PropTypes.bool,

@@ -1,11 +1,12 @@
 @import "~styles/themes/colors";
+@import "~styles/themes/typography";
 
 .dataTooltip {
+  @include font-body-xxs;
   background-color: $white;
   border: 1px solid $light-grey;
   border-radius: 5px;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-  font-size: 8pt;
   height: auto;
   min-width: 200px;
   max-width: 400px;
@@ -13,26 +14,35 @@
   pointer-events: none;
 
   &Title {
+    @include font-label-xs;
     border-bottom: 1px solid $lightest-grey;
     color: $medium-grey;
     margin-bottom: 10px;
-    text-transform: uppercase;
   }
 
   &Subtitle {
-    font-weight: 700;
+    @include font-body-xxs;
+    margin-bottom: 15px;
   }
 
   &SectionName {
+    @include font-label-xs;
     border-bottom: 1px solid $lightest-grey;
     color: $medium-grey;
     margin-bottom: 10px;
-    text-transform: uppercase;
   }
 
   &Section {
     &:not(:first-child) {
       margin-top: 20px;
+    }
+
+    &.disabled {
+      color: $light-grey;
+
+      .dataTooltipSectionName {
+        color: $light-grey;
+      }
     }
   }
 
@@ -41,7 +51,7 @@
   }
 
   &Label {
-    font-weight: 700;
+    @include font-header-xxs;
     margin-right: 10px;
     width: 160px;
     flex-shrink: 0;
