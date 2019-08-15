@@ -550,18 +550,23 @@ class PipelineRun < ApplicationRecord
     unless File.size?(amr_results) < 10
       amr_results_table = CSV.read(amr_results, headers: true)
       amr_results_table.each do |row|
-        amr_counts_array << {
+        amr_count_for_gene = {
           gene: row["gene"],
           allele: row["allele"],
           coverage: row["coverage"],
           depth: row["depth"],
-          annotation_gene: row["annotation"].split(";")[2],
-          genbank_accession: row["annotation"].split(";")[4],
           drug_family: row["gene_family"],
           total_reads: row["total_reads"],
           rpm: row["rpm"],
           dpm: row["dpm"],
         }
+        if row["annotation"].present?
+          if row["annotation"].split(";").length >= 5
+            amr_count_for_gene[:annotation_gene] = row["annotation"].split(";")[2]
+            amr_count_for_gene[:genbank_accession] = row["annotation"].split(";")[4]
+          end
+        end
+        amr_counts_array << amr_count_for_gene
       end
     end
     update(amr_counts_attributes: amr_counts_array)
