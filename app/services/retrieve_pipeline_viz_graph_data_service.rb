@@ -42,6 +42,7 @@ class RetrievePipelineVizGraphDataService
       end
     end
     @remove_host_filtering_urls = remove_host_filtering_urls
+    @see_experimental = see_experimental
   end
 
   def call
@@ -129,7 +130,11 @@ class RetrievePipelineVizGraphDataService
   end
 
   def pipeline_job_status(stages)
-    stage_job_status(stages.map { |stage| stage[:jobStatus] })
+    existing_stages_status = stage_job_status(stages.map { |stage| stage[:jobStatus] })
+    if existing_stages_status == "finished" && @all_dag_jsons.length != (@see_experimental ? 4 : 3)
+      return "inProgress"
+    end
+    return existing_stages_status
   end
 
   def create_edges
