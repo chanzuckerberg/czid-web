@@ -561,8 +561,10 @@ class PipelineRun < ApplicationRecord
           dpm: row["dpm"],
         }
         if row["annotation"].present?
-          amr_count_for_sequence[:annotation_gene] = row["annotation"].split(";")[2]
-          amr_count_for_sequence[:genbank_accession] = row["annotation"].split(";")[4]
+          if row["annotation"].split(";").length >= 5
+            amr_count_for_sequence[:annotation_gene] = row["annotation"].split(";")[2]
+            amr_count_for_sequence[:genbank_accession] = row["annotation"].split(";")[4]
+          end
         end
         amr_counts_array << amr_count_for_sequence
       end
