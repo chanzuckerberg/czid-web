@@ -587,6 +587,7 @@ class SamplesHeatmapView extends React.Component {
           taxonIds={this.state.taxonIds}
           taxonDetails={this.state.taxonDetails}
           taxonFilterState={this.state.taxonFilterState}
+          thresholdFilters={this.state.selectedOptions.thresholdFilters}
         />
       </ErrorBoundary>
     );

@@ -28,3 +28,32 @@ export function humanize(key) {
     .map(str => str.charAt(0).toUpperCase() + str.slice(1))
     .join(" ");
 }
+
+// Split a string into multiple lines based on maxChars. Only split on white-space.
+export function splitIntoMultipleLines(string, maxChars) {
+  const words = string.split(" ");
+
+  const lines = [];
+  let curLine = "";
+
+  words.forEach(word => {
+    // If adding the next word overflows the line, start a new line.
+    if (curLine.length + 1 + word.length > maxChars && curLine.length > 0) {
+      lines.push(curLine);
+      curLine = "";
+    }
+
+    // If not the first word in the line, add a space first.
+    if (curLine.length > 0) {
+      curLine += " ";
+    }
+    curLine += word;
+  });
+
+  // Add the last line if it's non-empty.
+  if (curLine.length > 0) {
+    lines.push(curLine);
+  }
+
+  return lines;
+}
