@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 import { size, map, keyBy } from "lodash/fp";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { DataTooltip } from "~ui/containers";
 import { openUrl } from "~utils/links";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
@@ -12,6 +12,7 @@ import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
 import AlertIcon from "~ui/icons/AlertIcon";
+import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
 
 import cs from "./samples_heatmap_vis.scss";
 
@@ -27,6 +28,7 @@ class SamplesHeatmapVis extends React.Component {
       columnMetadataLegend: null,
       selectedMetadata: new Set(this.props.defaultMetadata),
       tooltipLocation: null,
+      zoom: null,
     };
 
     this.heatmap = null;
@@ -334,6 +336,21 @@ class SamplesHeatmapVis extends React.Component {
     });
   }
 
+  handleZoom(direction) {
+    this.setState({ zoom: direction });
+  }
+
+  getZoomStyle() {
+    const zoom = this.state.zoom;
+    if (zoom === null) {
+      return 1.0;
+    } else if (zoom === "in") {
+      return 1.5;
+    } else if (zoom === "out") {
+      return 0.5;
+    }
+  }
+
   render() {
     const {
       tooltipLocation,
@@ -344,8 +361,20 @@ class SamplesHeatmapVis extends React.Component {
     } = this.state;
     return (
       <div className={cs.samplesHeatmapVis}>
+        <PlusMinusControl
+          onPlusClick={withAnalytics(
+            this.handleZoom("in"),
+            "SamplesHeatmapVis_zoom-in-control_clicked"
+          )}
+          onMinusClick={withAnalytics(
+            this.handleZoom("out"),
+            "SamplesHeatmapVis_zoom-out-control_clicked"
+          )}
+          className={cs.plusMinusControl}
+        />
         <div
           className={cs.heatmapContainer}
+          style={{ zoom: this.getZoomStyle() }}
           ref={container => {
             this.heatmapContainer = container;
           }}
