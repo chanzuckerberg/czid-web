@@ -176,7 +176,10 @@ class SamplesView extends React.Component {
   renderHeatmapTrigger = () => {
     const { selectedSampleIds } = this.props;
 
-    if (this.props.admin) {
+    if (
+      this.props.allowedFeatures.includes("amr_heatmap") ||
+      this.props.admin
+    ) {
       const heatmapOptions = [
         { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
         { text: "AMR Heatmap", value: "/amr_heatmap" },
