@@ -63,7 +63,7 @@ task precompute_gene_ontology: :environment do
       arg_entries << {
         "gene_name" => gene_name,
         "drug_class" => drug_class,
-        "genbank_accession" => genbank_accession
+        "genbank_accession" => genbank_accession,
       }
     end
   end
