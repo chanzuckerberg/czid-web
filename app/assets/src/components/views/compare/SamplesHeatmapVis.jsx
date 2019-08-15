@@ -363,11 +363,11 @@ class SamplesHeatmapVis extends React.Component {
       <div className={cs.samplesHeatmapVis}>
         <PlusMinusControl
           onPlusClick={withAnalytics(
-            this.handleZoom("in"),
+            () => this.handleZoom("in"),
             "SamplesHeatmapVis_zoom-in-control_clicked"
           )}
           onMinusClick={withAnalytics(
-            this.handleZoom("out"),
+            () => this.handleZoom("out"),
             "SamplesHeatmapVis_zoom-out-control_clicked"
           )}
           className={cs.plusMinusControl}
