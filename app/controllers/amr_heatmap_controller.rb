@@ -6,7 +6,7 @@ class AmrHeatmapController < ApplicationController
   include S3Util
 
   before_action do
-    allowed_feature_required("basespace_upload_enabled", true)
+    allowed_feature_required("amr_heatmap", true)
   end
 
   def index
