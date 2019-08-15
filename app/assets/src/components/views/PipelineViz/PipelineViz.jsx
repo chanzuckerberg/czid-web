@@ -106,14 +106,18 @@ class PipelineViz extends React.Component {
             });
           } else {
             // A new stage has started and needs to be drawn.
-            if (stageIndex > 0) {
-              // Modify previous stage's graph to create edges to new stage
-              const prevGraph = this.graphs[stageIndex - 1];
-              this.generateEdgeData(stageIndex - 1).forEach(edge => {
+            for (
+              let prevStageIndex = 0;
+              prevStageIndex < stageIndex;
+              prevStageIndex++
+            ) {
+              const prevGraph = this.graphs[prevStageIndex];
+              this.generateEdgeData(prevStageIndex).forEach(edge => {
                 const { id, ...options } = edge;
                 prevGraph.updateEdges([id], options);
               });
             }
+
             this.drawStageGraph(stageIndex);
           }
         }
