@@ -560,7 +560,7 @@ class PipelineRun < ApplicationRecord
           rpm: row["rpm"],
           dpm: row["dpm"],
         }
-        if row["annotation"]
+        if row["annotation"].present?
           amr_count_for_sequence[:annotation_gene] = row["annotation"].split(";")[2]
           amr_count_for_sequence[:genbank_accession] = row["annotation"].split(";")[4]
         end
