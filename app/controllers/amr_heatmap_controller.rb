@@ -5,10 +5,14 @@ S3_JSON_PREFIX = "amr/ontology/".freeze
 class AmrHeatmapController < ApplicationController
   include S3Util
 
-  before_action :admin_required
-
   def index
-    @sample_ids = params[:sampleIds].map(&:to_i)
+    feature_allowed = current_user.allowed_feature_list.include?("amr_heatmap")
+    if feature_allowed || current_user.admin?
+      @sample_ids = params[:sampleIds].map(&:to_i)
+      render 'index'
+    else
+      redirect_to controller: "home", action: "my_data", status: :unauthorized
+    end
   end
 
   # GET /amr_heatmap/amr_counts.json
