@@ -3,12 +3,12 @@
 @import "~styles/themes/elements";
 
 .samplesHeatmapVis {
-  position: relative; // for plusMinusControl
-
   .plusMinusControl {
     position: absolute;
-    top: 0px;
-    right: 160px;
+    // Offset from the viewport ot line up with the controls. This will need to
+    // be adjusted if the position of the controls changes.
+    top: 220px;
+    right: calc(50% - 700px);
     box-shadow: $box-shadow-dropdown-menu;
   }
 

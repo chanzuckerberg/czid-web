@@ -45,6 +45,7 @@ export default class Heatmap {
         minCellWidth: 26,
         minCellHeight: 26,
         minWidth: 1240,
+        maxWidth: 1600, // used for shrink-to-fit
         minHeight: 500,
         clustering: true,
         shouldSortColumns: true,
@@ -250,10 +251,7 @@ export default class Heatmap {
       .append("svg")
       .attr("class", cs.heatmap)
       .attr("id", "visualization")
-      .attr("xmlns", "http://www.w3.org/2000/svg")
-      // Not standard but it works for downloads and svgsaver. See:
-      // https://stackoverflow.com/questions/11293026/default-background-color-of-svg-root-element
-      .attr("style", `background-color: ${this.options.svgBackgroundColor}`);
+      .attr("xmlns", "http://www.w3.org/2000/svg");
 
     this.g = this.svg.append("g");
     this.gRowLabels = this.g.append("g").attr("class", cs.rowLabels);
@@ -327,6 +325,15 @@ export default class Heatmap {
       this.options.spacing;
 
     this.svg.attr("width", this.width).attr("height", this.height);
+
+    const zoom = Math.min(this.width, this.options.maxWidth) / this.width;
+
+    // Not standard but it works for downloads and svgsaver. See:
+    // https://stackoverflow.com/questions/11293026/default-background-color-of-svg-root-element
+    this.svg.attr(
+      "style",
+      `background-color: ${this.options.svgBackgroundColor}; zoom: ${zoom}`
+    );
 
     this.g.attr(
       "transform",

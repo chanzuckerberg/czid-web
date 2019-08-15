@@ -28,7 +28,7 @@ class SamplesHeatmapVis extends React.Component {
       columnMetadataLegend: null,
       selectedMetadata: new Set(this.props.defaultMetadata),
       tooltipLocation: null,
-      zoom: null,
+      zoom: 1.0,
     };
 
     this.heatmap = null;
@@ -84,6 +84,9 @@ class SamplesHeatmapVis extends React.Component {
         scaleMin: 0,
         printCaption: this.generateHeatmapCaptions(),
         shouldSortColumns: this.props.sampleSortType === "alpha", // else cluster
+        // Shrink to fit the viewport width
+        // See https://developer.mozilla.org/en-US/docs/Web/API/window/innerWidth
+        maxWidth: window.innerWidth,
       }
     );
     this.heatmap.start();
@@ -336,19 +339,9 @@ class SamplesHeatmapVis extends React.Component {
     });
   }
 
-  handleZoom(direction) {
-    this.setState({ zoom: direction });
-  }
-
-  getZoomStyle() {
-    const zoom = this.state.zoom;
-    if (zoom === null) {
-      return 1.0;
-    } else if (zoom === "in") {
-      return 1.5;
-    } else if (zoom === "out") {
-      return 0.5;
-    }
+  handleZoom(increment) {
+    const newZoom = Math.max(0.1, this.state.zoom + increment);
+    this.setState({ zoom: newZoom });
   }
 
   render() {
@@ -358,23 +351,24 @@ class SamplesHeatmapVis extends React.Component {
       columnMetadataLegend,
       addMetadataTrigger,
       selectedMetadata,
+      zoom,
     } = this.state;
     return (
       <div className={cs.samplesHeatmapVis}>
         <PlusMinusControl
           onPlusClick={withAnalytics(
-            () => this.handleZoom("in"),
+            () => this.handleZoom(0.33),
             "SamplesHeatmapVis_zoom-in-control_clicked"
           )}
           onMinusClick={withAnalytics(
-            () => this.handleZoom("out"),
+            () => this.handleZoom(-0.33),
             "SamplesHeatmapVis_zoom-out-control_clicked"
           )}
           className={cs.plusMinusControl}
         />
         <div
           className={cs.heatmapContainer}
-          style={{ zoom: this.getZoomStyle() }}
+          style={{ zoom: zoom }}
           ref={container => {
             this.heatmapContainer = container;
           }}
