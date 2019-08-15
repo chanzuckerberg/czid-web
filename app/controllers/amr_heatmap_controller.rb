@@ -81,7 +81,7 @@ class AmrHeatmapController < ApplicationController
     }
     ontology_json_key = fetch_current_ontology_file_key()
     card_entry = fetch_ontology_entry(ontology_json_key, gene_name)
-    if card_entry.key?("drugClass")
+    if card_entry.key?("drugClass") # present in every ontology entry
       card_entry.each do |property, description|
         ontology[property] = description
       end

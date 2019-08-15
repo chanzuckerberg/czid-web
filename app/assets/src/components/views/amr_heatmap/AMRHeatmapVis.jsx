@@ -156,19 +156,10 @@ export default class AMRHeatmapVis extends React.Component {
 
   /*** On "annotation_gene" vs "gene" ***/
   /*** 
-  So it's kind of technical, but what gets passed as the gene name by the pipeline is a 
-  locus. A locus is a site in a DNA or RNA sequence where a cluster of different alleles 
-  may be found, but perform essentially the same function. When srst2 identifies an 
-  AMR gene, it compares a sequence to all the reference sequences that match to the 
-  same locus and gives only 1 best match between all the reference sequences. This is 
-  so that srst2 does not report closely related sequences as different genes. The locus 
-  name is what is used by the pipeline for "gene", and that's what gets stored under the 
-  gene key for an AmrCount in a sample.
-
-  However, the ARG ANNOT database also defines a gene name in the annotation for 
-  each reference sequence. This gene name is much more closely aligned with how 
-  genes are listed in CARD. I believe the issue of naming AMR genes is something 
-  that's still in the process of being solved by the research community.
+  So it's kind of technical, but essentially there's kind
+  of a fuzzy line between a locus and an allele
+  and what gets named a gene. See the documentation
+  for more detail.
   ***/
 
   findAMRCountForName(rowName, sample) {

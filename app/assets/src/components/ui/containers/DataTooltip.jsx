@@ -30,8 +30,8 @@ const DataTooltip = ({ data, subtitle, title, singleColumn }) => {
                 <React.Fragment>
                   <div className={cs.dataTooltipLabel}>{keyValuePair[0]}</div>
                   <div className={cs.dataTooltipValue}>
-                    {/*Use .name if value is an object (e.g. location object) AND it's
-                      an object with a name property */}
+                    {/* Use .name if value is an object (e.g. location object) 
+                    with a name property. Display React elements normally. */}
                     {isObject(keyValuePair[1]) &&
                     keyValuePair.hasOwnProperty("name")
                       ? keyValuePair[1].name
