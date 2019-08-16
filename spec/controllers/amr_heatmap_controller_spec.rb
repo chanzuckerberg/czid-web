@@ -13,6 +13,7 @@ OQXB_GENE_FAMILY_DESC = "Subunits of efflux proteins that pump antibiotic out of
 OQXB_DRUG_CLASS_LABEL = "Fluroquinolones".freeze
 OQXB_DRUG_CLASS_DESC = "The fluoroquinolones are a family of synthetic broad-spectrum antibiotics that are 4-quinolone-3-carboxylates. These compounds interact with topoisomerase II (DNA gyrase) to disrupt bacterial DNA replication, damage DNA, and cause cell death.".freeze
 OQXB_PUBLICATION = "Kim HB1, Wang M, Park CH, Kim EC, Jacoby GA, Hooper DC. oqxAB encoding a multidrug efflux pump in human clinical isolates of Enterobacteriaceae. (PMID 19528276)".freeze
+OQXB_GENBANK_ACCESSION = "EU370913".freeze
 
 OQXB_ONTOLOGY = {
   "accession" => OQXB_ACCESSION,
@@ -34,6 +35,7 @@ OQXB_ONTOLOGY = {
   "publications" => [
     OQXB_PUBLICATION,
   ],
+  "genbankAccession" => OQXB_GENBANK_ACCESSION,
   "error" => "",
 }.freeze
 
