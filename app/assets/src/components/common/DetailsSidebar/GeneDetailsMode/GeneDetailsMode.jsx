@@ -68,7 +68,7 @@ export default class GeneDetailsMode extends React.Component {
   async getGeneInfo(geneName) {
     const ontology = await getOntology(geneName);
     const ontologyInfoFound = ontology.error === "";
-    // either the CARD accession is 7 or it is useless
+    // all the CARD accessions we are interested in ar 7 in length.
     const cardEntryFound = ontology.accession.length === 7;
     this.setState({
       ontology,
