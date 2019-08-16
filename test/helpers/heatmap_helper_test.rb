@@ -40,7 +40,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
   test "fetch_samples_taxons_counts" do
     taxon_counts = [taxon_counts(:one), taxon_counts(:two), taxon_counts(:six), taxon_counts(:seven)]
     results = HeatmapHelper.fetch_samples_taxons_counts(@samples, taxon_counts.pluck(:tax_id), taxon_counts.pluck(:genus_taxid), @background.id)
-    assert_equal 2, results.length
+    assert_equal 3, results.length
   end
 
   test "sample_taxons_dict defaults" do
@@ -159,7 +159,7 @@ class HeatmapHelperTest < ActiveSupport::TestCase
       @min_reads,
       @sort_by
     )
-    assert_equal 1, top_taxons.length
+    assert_equal 2, top_taxons.length
 
     top_taxons = HeatmapHelper.fetch_top_taxons(
       @samples,

@@ -91,7 +91,7 @@ module HeatmapHelper
     num_results = 1_000_000,
     min_reads = MINIMUM_READ_THRESHOLD,
     sort_by = DEFAULT_TAXON_SORT_PARAM,
-    threshold_filters = [],
+    _threshold_filters = [],
     removed_taxon_ids = [],
     species_selected = true
   )
@@ -172,7 +172,7 @@ module HeatmapHelper
 
     # TODO: (gdingle): how do we protect against SQL injection?
     sql_results = TaxonCount.connection.select_all(
-      top_n_query(query, sort_by, num_results, threshold_filters)
+      top_n_query(query, sort_by, num_results)
     ).to_hash
 
     # organizing the results by pipeline_run_id
@@ -396,12 +396,7 @@ module HeatmapHelper
   # 1) assigns a rank to each row within a pipeline run
   # 2) returns rows ranking <= num_results
   # See http://www.sqlines.com/mysql/how-to/get_top_n_each_group
-  def self.top_n_query(query, sort_by, num_results, threshold_filters)
-    if threshold_filters.present?
-      # custom filters are applied at the taxon level, not the count level,
-      # so we need rank entirely in ruby.
-      return query
-    end
+  def self.top_n_query(query, sort_by, num_results)
     sort = ReportHelper.decode_sort_by(sort_by)
     "SELECT *
       FROM (
