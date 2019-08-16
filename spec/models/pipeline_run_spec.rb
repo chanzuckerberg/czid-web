@@ -212,17 +212,20 @@ RSpec.describe PipelineRun, type: :model do
       end
     end
   end
+
   context "ensure that loading amr counts works properly" do
     let(:user) { build_stubbed(:user) }
     let(:sample) { build_stubbed(:sample, user: user) }
     let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample, pipeline_version: "3.9") }
     let(:results_path) { "amr_processed_results.csv" }
+
     context "No AMR counts file exists on S3 (PipelineRun.download_file() returned nil)" do
       before do
         # Test case nil
         allow(PipelineRun).to receive(:download_file).and_return(nil)
         allow(Rails.logger).to receive(:error)
       end
+
       it "should log an error and simply return" do
         pipeline_run.db_load_amr_counts()
 
@@ -230,6 +233,7 @@ RSpec.describe PipelineRun, type: :model do
         expect(pipeline_run.amr_counts).to eq([])
       end
     end
+
     context "AMR counts file exists, but is empty (results found no amr counts)" do
       before do
         pseudofile = StringIO.new("\n")
@@ -238,6 +242,7 @@ RSpec.describe PipelineRun, type: :model do
         allow(CSV).to receive(:read).and_return(CSV.new(pseudofile.read, headers: true))
         allow(pipeline_run).to receive(:update).and_return(true)
       end
+
       it "should update amr counts as an empty array" do
         pipeline_run.db_load_amr_counts()
 
@@ -245,6 +250,7 @@ RSpec.describe PipelineRun, type: :model do
         expect(pipeline_run.amr_counts).to eq([])
       end
     end
+
     context "AMR counts file exists, but lines are malformed" do
       before do
         csv_write_string = CSV.generate do |csv|
@@ -267,6 +273,7 @@ RSpec.describe PipelineRun, type: :model do
           pipeline_run.amr_counts = amr_counts
         end
       end
+
       it "should properly handle a malformed csv file" do
         pipeline_run.db_load_amr_counts()
 
@@ -274,6 +281,7 @@ RSpec.describe PipelineRun, type: :model do
         expect(JSON.parse(pipeline_run.amr_counts[0].to_json)).to include(MALFORMED_AMR_COUNTS[0])
       end
     end
+
     context "Properly handle a good AMR result" do
       before do
         pipeline_run.amr_counts = []
@@ -297,6 +305,7 @@ RSpec.describe PipelineRun, type: :model do
           pipeline_run.amr_counts = amr_counts
         end
       end
+
       it "should properly handle a good csv file" do
         pipeline_run.db_load_amr_counts()
 
