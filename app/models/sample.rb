@@ -143,10 +143,13 @@ class Sample < ApplicationRecord
   end
 
   def set_presigned_url_for_local_upload
+    use_acceleration = nil
     input_files.each do |f|
       if f.source_type == InputFile::SOURCE_TYPE_LOCAL && f.parts
-        accel_response = S3_CLIENT.get_bucket_accelerate_configuration(bucket: SAMPLES_BUCKET_NAME)
-        use_acceleration = accel_response && accel_response[:status] == "Enabled"
+        if use_acceleration.nil?
+          accel_response = S3_CLIENT.get_bucket_accelerate_configuration(bucket: SAMPLES_BUCKET_NAME)
+          use_acceleration = accel_response && accel_response[:status] == "Enabled"
+        end
 
         # TODO: investigate the content-md5 stuff https://github.com/aws/aws-sdk-js/issues/151 https://gist.github.com/algorist/385616
         parts = f.parts.split(", ")
