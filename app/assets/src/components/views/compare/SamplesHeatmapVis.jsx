@@ -28,7 +28,6 @@ class SamplesHeatmapVis extends React.Component {
       columnMetadataLegend: null,
       selectedMetadata: new Set(this.props.defaultMetadata),
       tooltipLocation: null,
-      zoom: 1.0,
     };
 
     this.heatmap = null;
@@ -341,9 +340,10 @@ class SamplesHeatmapVis extends React.Component {
   }
 
   handleZoom(increment) {
-    const newZoom = Math.max(0.1, this.state.zoom + increment);
-    // TODO (gdingle): better way to trigger re-render?
-    this.setState({ zoom: newZoom });
+    const newZoom = Math.min(
+      3,
+      Math.max(0.1, this.heatmap.options.zoom + increment)
+    );
     this.heatmap.updateZoom(newZoom);
   }
 
@@ -354,7 +354,6 @@ class SamplesHeatmapVis extends React.Component {
       columnMetadataLegend,
       addMetadataTrigger,
       selectedMetadata,
-      zoom,
     } = this.state;
     return (
       <div className={cs.samplesHeatmapVis}>

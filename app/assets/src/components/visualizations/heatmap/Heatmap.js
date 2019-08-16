@@ -46,7 +46,7 @@ export default class Heatmap {
         minCellHeight: 26,
         minWidth: 1240,
         maxWidth: 1600, // used for shrink-to-fit
-        zoom: null, // multiplier for zooming in and out
+        zoom: 1.0, // multiplier for zooming in and out
         minHeight: 500,
         clustering: true,
         shouldSortColumns: true,
@@ -337,15 +337,17 @@ export default class Heatmap {
       this.options.marginBottom +
       this.options.spacing;
 
-    // TODO (gdingle): why initial zoom too much?
+    this.svg.attr("viewBox", `0 0 ${this.width} ${this.height}`);
+
     const defaultZoom =
       Math.min(this.width, this.options.maxWidth) / this.width;
     const zoom = this.options.zoom || defaultZoom;
 
-    // If we make the viewbox numbers larger than the viewport dimensions we’ll
+    // If we make these numbers larger than the viewport dimensions we’ll
     // effectively zoom out, and if we make them smaller we’ll zoom in.
-    this.svg.attr("viewBox", `0 0 ${this.width / zoom} ${this.height / zoom}`);
-    this.svg.attr("width", this.width).attr("height", this.height);
+    this.svg
+      .attr("width", this.width * zoom)
+      .attr("height", this.height * zoom);
 
     this.g.attr(
       "transform",
