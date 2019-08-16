@@ -215,7 +215,6 @@ module HeatmapHelper
     metric = sort[:metric]
 
     results = {}
-    candidate_taxons = {}
 
     samples_by_id = Hash[samples.map { |s| [s.id, s] }]
     results_by_pr.each do |_pr_id, res|
@@ -228,26 +227,12 @@ module HeatmapHelper
       rows = []
       tax_2d.each { |_tax_id, tax_info| rows << tax_info }
       HeatmapHelper.compute_maxzscores!(rows)
-      rows = rows.select { |row| row["NT"]["maxzscore"] >= MINIMUM_ZSCORE_THRESHOLD }
       rows = rows.each { |row| row[:filtered] = HeatmapHelper.apply_custom_filters(row, threshold_filters) }
 
       # Get the top N for each sample. This re-sorts on the same metric as in
       # fetch_top_taxons SQL. We sort there first for performance.
       rows.sort_by! { |tax_info| ((tax_info[count_type] || {})[metric] || 0.0) * -1.0 }
-      count = 1
-      rows.each do |row|
-        taxon = if candidate_taxons[row["tax_id"]]
-                  candidate_taxons[row["tax_id"]]
-                else
-                  { "tax_id" => row["tax_id"], "samples" => {} }
-                end
-        taxon["max_aggregate_score"] = row[sort[:count_type]][sort[:metric]] if
-          taxon["max_aggregate_score"].to_f < row[sort[:count_type]][sort[:metric]].to_f
-        taxon["samples"][sample_id] = [count, row["tax_level"], row["NT"]["zscore"], row["NR"]["zscore"]]
-        candidate_taxons[row["tax_id"]] = taxon
-        break if count >= num_results
-        count += 1
-      end
+      rows = rows[0...num_results]
 
       results[sample_id] = {
         sample_id: sample_id,
