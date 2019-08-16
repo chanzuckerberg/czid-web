@@ -23,6 +23,9 @@ import cs from "./amr_heatmap_view.scss";
 const METRICS = [
   { text: "Coverage", value: "coverage" },
   { text: "Depth", value: "depth" },
+  { text: "RPM (reads per million)", value: "rpm" },
+  { text: "DPM (depth per million)", value: "dpm" },
+  { text: "Mapped Reads", value: "total_reads" },
 ];
 
 const VIEW_LEVELS = [
@@ -77,7 +80,7 @@ export default class AMRHeatmapView extends React.Component {
       ...sample,
       metadata: processMetadata(sample.metadata, true),
     }));
-    const samplesWithAMRCounts = this.processSampleAMRCounts(
+    const samplesWithAMRCounts = this.correctGeneNames(
       samplesWithKeyedMetadata
     );
     const maxValues = this.findMaxValues(samplesWithAMRCounts);
@@ -100,12 +103,13 @@ export default class AMRHeatmapView extends React.Component {
     });
   }
 
-  processSampleAMRCounts(filteredSamples) {
+  correctGeneNames(filteredSamples) {
     filteredSamples.forEach(sample => {
       sample.amrCounts.forEach(amrCount => {
         // The following three lines are a kind of hacky workaround to the fact that
         // the amr counts stored in the db have a gene name that includes the actual gene
         // plus the drug class.
+        // Only needed for samples run on pipeline 3.8 or earlier.
         const geneNameExtractionRegex = /[^_]+/; // matches everything before the first underscore
         const geneName = geneNameExtractionRegex.exec(amrCount.gene)[0];
         amrCount.gene = geneName;
@@ -130,16 +134,75 @@ export default class AMRHeatmapView extends React.Component {
         currentSample.amrCounts.forEach(amrCount => {
           accum.depth = Math.max(accum.depth, amrCount.depth);
           accum.coverage = Math.max(accum.coverage, amrCount.coverage);
+          accum.rpm = Math.max(accum.rpm, amrCount.rpm || 0);
+          accum.dpm = Math.max(accum.dpm, amrCount.dpm || 0);
+          accum.total_reads = Math.max(
+            accum.total_reads,
+            amrCount.total_reads || 0
+          );
         });
         return accum;
       },
-      { depth: 0, coverage: 0 }
+      { depth: 0, coverage: 0, rpm: 0, dpm: 0, total_reads: 0 }
     );
     return maxValues;
   }
 
   hasDataToDisplay(samplesWithAMRCounts) {
     return samplesWithAMRCounts.some(sample => sample.amrCounts.length > 0);
+  }
+
+  // Sometimes, when presenting the tooltip popup as a user hovers over
+  // a node on the heatmap, they will be over a node where the row is
+  // an allele and the column is a sample with no AMR count for the allele.
+  // With no AMR count, there's no easy way to grab the name of the gene
+  // for the allele. Hence the allele-to-gene mapping.
+  mapAllelesToGenes(sampleData) {
+    const alleleToGeneMap = {};
+    sampleData.forEach(sample => {
+      sample.amrCounts.forEach(amrCount => {
+        alleleToGeneMap[amrCount.allele] =
+          amrCount.annotation_gene || amrCount.gene;
+      });
+    });
+    return alleleToGeneMap;
+  }
+
+  extractSampleLabels(sampleData) {
+    const sampleLabels = sampleData.map(sample => {
+      return {
+        label: sample.sampleName,
+        id: sample.sampleId,
+        metadata: sample.metadata,
+      };
+    });
+    return sampleLabels;
+  }
+
+  extractGeneAndAlleleLabels(sampleData) {
+    const genes = {};
+    const alleles = {};
+    sampleData.forEach(sample => {
+      sample.amrCounts.forEach(amrCount => {
+        if (
+          amrCount.annotation_gene == null ||
+          amrCount.annotation_gene == undefined
+        ) {
+          genes[amrCount.gene] = true;
+        } else {
+          genes[amrCount.annotation_gene] = true;
+        }
+        alleles[amrCount.allele] = true;
+      });
+    });
+    const geneLabels = Object.keys(genes).map(gene => {
+      return { label: gene };
+    });
+    const alleleLabels = Object.keys(alleles).map(allele => {
+      return { label: allele };
+    });
+
+    return [geneLabels, alleleLabels];
   }
 
   //*** Callback methods ***
@@ -236,13 +299,16 @@ export default class AMRHeatmapView extends React.Component {
         const row = [
           `${sample.sampleName},${amrCount.gene},${amrCount.allele},${
             amrCount.coverage
-          },${amrCount.depth}`,
+          },${amrCount.depth},${amrCount.rpm || "N/A"},${amrCount.dpm ||
+            "N/A"},${amrCount.total_reads || "N/A"}`,
         ];
         return row;
       });
       return csvRow;
     });
-    const csvHeaders = ["sample_name,gene_name,allele_name,coverage,depth"];
+    const csvHeaders = [
+      "sample_name,gene_name,allele_name,coverage,depth,rpm,dpm,mapped_reads",
+    ];
     return [csvHeaders, csvRows];
   }
 
@@ -287,51 +353,6 @@ export default class AMRHeatmapView extends React.Component {
 
   getDownloadOptions() {
     return [{ text: this.getDownloadCSVLink(), value: "csv" }];
-  }
-
-  // Sometimes, when presenting the tooltip popup as a user hovers over
-  // a node on the heatmap, they will be over a node where the row is
-  // an allele and the column is a sample with no AMR count for the allele.
-  // With no AMR count, there's no easy way to grab the name of the gene
-  // for the allele. Hence the allele-to-gene mapping.
-  mapAllelesToGenes(sampleData) {
-    const alleleToGeneMap = {};
-    sampleData.forEach(sample => {
-      sample.amrCounts.forEach(amrCount => {
-        alleleToGeneMap[amrCount.allele] = amrCount.gene;
-      });
-    });
-    return alleleToGeneMap;
-  }
-
-  extractSampleLabels(sampleData) {
-    const sampleLabels = sampleData.map(sample => {
-      return {
-        label: sample.sampleName,
-        id: sample.sampleId,
-        metadata: sample.metadata,
-      };
-    });
-    return sampleLabels;
-  }
-
-  extractGeneAndAlleleLabels(sampleData) {
-    const genes = {};
-    const alleles = {};
-    sampleData.forEach(sample => {
-      sample.amrCounts.forEach(amrCount => {
-        genes[amrCount.gene] = true;
-        alleles[amrCount.allele] = true;
-      });
-    });
-    const geneLabels = Object.keys(genes).map(gene => {
-      return { label: gene };
-    });
-    const alleleLabels = Object.keys(alleles).map(allele => {
-      return { label: allele };
-    });
-
-    return [geneLabels, alleleLabels];
   }
 
   //*** Render methods ***
@@ -416,6 +437,7 @@ export default class AMRHeatmapView extends React.Component {
             geneLabels={geneLabels}
             alleleLabels={alleleLabels}
             alleleToGeneMap={alleleToGeneMap}
+            metrics={METRICS}
           />
         </ErrorBoundary>
       </div>
