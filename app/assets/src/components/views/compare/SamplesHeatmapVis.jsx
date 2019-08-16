@@ -86,6 +86,7 @@ class SamplesHeatmapVis extends React.Component {
         shouldSortColumns: this.props.sampleSortType === "alpha", // else cluster
         // Shrink to fit the viewport width
         // See https://developer.mozilla.org/en-US/docs/Web/API/window/innerWidth
+        // TODO (gdingle): use computed value
         maxWidth: window.innerWidth,
       }
     );
@@ -341,7 +342,9 @@ class SamplesHeatmapVis extends React.Component {
 
   handleZoom(increment) {
     const newZoom = Math.max(0.1, this.state.zoom + increment);
+    // TODO (gdingle): better way to trigger re-render?
     this.setState({ zoom: newZoom });
+    this.heatmap.updateZoom(newZoom);
   }
 
   render() {
@@ -368,7 +371,6 @@ class SamplesHeatmapVis extends React.Component {
         />
         <div
           className={cs.heatmapContainer}
-          style={{ zoom: zoom }}
           ref={container => {
             this.heatmapContainer = container;
           }}
