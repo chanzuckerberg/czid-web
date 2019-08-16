@@ -1,29 +1,58 @@
 require 'rails_helper'
 
+GOOD_GENE = "Tet-40_Tet".freeze
+GOOD_ALLELE = "Tet-40_1546".freeze
+GOOD_COVERAGE = "100.0".freeze
+GOOD_DEPTH = "15.478".freeze
+GOOD_ANNOTATION = "no;no;Tet-40;Tet;AM419751;14211-15431;1221".freeze
+GOOD_DRUG_FAMILY = "Tet".freeze
+GOOD_TOTAL_READS = "196".freeze
+GOOD_RPM = "19.6".freeze
+GOOD_DPM = "1.5478".freeze
+
+GOOD_ANNOTATION_GENE = "Tet-40".freeze
+GOOD_GENBANK_ACCESSION = "AM419751".freeze
+
+GOOD_AMR_RESULTS = [
+  ["Sample", "DB", "gene", "allele", "coverage", "depth", "diffs", "uncertainty", "divergence", "length", "maxMAF", "clusterid", "seqid", "annotation", "gene_family", "total_gene_hits", "total_coverage", "total_depth", "total_reads", "rpm", "dpm"],
+  ["", "ARGannot_r2", GOOD_GENE, GOOD_ALLELE, GOOD_COVERAGE, GOOD_DEPTH, "4snp", "", "0.32799999999999996", "1221", "0.5", "63", "1546", GOOD_ANNOTATION, GOOD_DRUG_FAMILY, "9", "653.292", "151.204", GOOD_TOTAL_READS, GOOD_RPM, GOOD_DPM],
+].freeze
+
+GOOD_AMR_COUNTS = [
+  {
+    "gene" => GOOD_GENE,
+    "allele" => GOOD_ALLELE,
+    "coverage" => GOOD_COVERAGE.to_f,
+    "depth" => GOOD_DEPTH.to_f,
+    "drug_family" => GOOD_DRUG_FAMILY,
+    "total_reads" => GOOD_TOTAL_READS.to_i,
+    "rpm" => GOOD_RPM.to_f,
+    "dpm" => GOOD_DPM.to_f,
+    "annotation_gene" => GOOD_ANNOTATION_GENE,
+    "genbank_accession" => GOOD_GENBANK_ACCESSION,
+  },
+].freeze
+
+MALFORMED_ANNOTATION = "no;no;".freeze
 MALFORMED_AMR_RESULTS = [
   ["Sample", "DB", "gene", "allele", "coverage", "depth", "diffs", "uncertainty", "divergence", "length", "maxMAF", "clusterid", "seqid", "annotation", "gene_family", "total_gene_hits", "total_coverage", "total_depth", "total_reads", "rpm", "dpm"],
-  ["", "ARGannot_r2", "Aph3''Ia_AGly", "Aph3''Ia_1217", "4.779", "1.875", "1snp777holes", "edge0.0", "2.5639999999999996", "816", "0.0", "251", "1217", "", "AGly", "1", "4.779", "1.875", "3", "0.02481738581632464", "0.0155108661352029"],
-  ["", "ARGannot_r2", "MeowZ", "", "4.779", "1.875", "1snp777holes", "edge0.0", "2.5639999999999996", "816", "0.0", "251", "1217", "", "", "1", "4.779", "1.875", "3", "0.02481738581632464", ""],
-].freeze
+  ["", "ARGannot_r2", GOOD_GENE, GOOD_ALLELE, "", GOOD_DEPTH, "4snp", "", "0.32799999999999996", "1221", "0.5", "63", "1546", MALFORMED_ANNOTATION, GOOD_DRUG_FAMILY, "9", "653.292", "151.204", GOOD_TOTAL_READS, "", GOOD_DPM],
+].freeze # test missing and malformed results
+
 MALFORMED_AMR_COUNTS = [
   {
-    "gene" => "Aph3''Ia_AGly",
-    "allele" => "Aph3''Ia_1217",
-    "coverage" => 4.779,
-    "depth" => 1.875,
-    "drug_family" => "AGly",
-    "total_reads" => 3,
-    "rpm" => 0.02481738581632464,
-    "dpm" => 0.0155108661352029,
+    "gene" => GOOD_GENE,
+    "allele" => GOOD_ALLELE,
+    "coverage" => nil,
+    "depth" => GOOD_DEPTH.to_f,
+    "drug_family" => GOOD_DRUG_FAMILY,
+    "total_reads" => GOOD_TOTAL_READS.to_i,
+    "rpm" => nil,
+    "dpm" => GOOD_DPM.to_f,
+    "annotation_gene" => nil,
+    "genbank_accession" => nil,
   },
-  {
-    "gene" => "MeowZ",
-    "coverage" => 4.779,
-    "depth" => 1.875,
-    "total_reads" => 3,
-    "rpm" => 0.02481738581632464,
-  },
-].freeze
+].freeze # properly handled amr count for problematic results
 
 RSpec.describe PipelineRun, type: :model do
   context "#update_job_status" do
@@ -242,8 +271,37 @@ RSpec.describe PipelineRun, type: :model do
         pipeline_run.db_load_amr_counts()
 
         expect(Rails.logger).to receive(:error).exactly(0).times
-        expect(JSON.parse(pipeline_run.amr_counts[1].to_json)).to include(MALFORMED_AMR_COUNTS[0])
-        expect(JSON.parse(pipeline_run.amr_counts[0].to_json)).to include(MALFORMED_AMR_COUNTS[1])
+        expect(JSON.parse(pipeline_run.amr_counts[0].to_json)).to include(MALFORMED_AMR_COUNTS[0])
+      end
+    end
+    context "Properly handle a good AMR result" do
+      before do
+        pipeline_run.amr_counts = []
+        csv_write_string = CSV.generate do |csv|
+          GOOD_AMR_RESULTS.each do |line|
+            csv << line
+          end
+        end
+        pseudofile = StringIO.new(csv_write_string)
+        allow(PipelineRun).to receive(:download_file).and_return(results_path)
+        allow(File).to receive(:size?).and_return(80)
+        allow(CSV).to receive(:read).and_return(CSV.new(pseudofile.read, headers: true))
+        allow(pipeline_run).to receive(:update) do |update|
+          amr_counts = []
+          ActiveRecord::Base.connection.execute('SET foreign_key_checks = 0;')
+          update[:amr_counts_attributes].each do |count|
+            new_count = create(:amr_count, pipeline_run: pipeline_run, annotation_gene: count[:annotation_gene], genbank_accession: count[:genbank_accession], gene: count[:gene], allele: count[:allele], coverage: count[:coverage], depth: count[:depth], drug_family: count[:drug_family], rpm: count[:rpm], dpm: count[:dpm], total_reads: count[:total_reads])
+            amr_counts.push(new_count)
+          end
+          ActiveRecord::Base.connection.execute('SET foreign_key_checks = 1;')
+          pipeline_run.amr_counts = amr_counts
+        end
+      end
+      it "should properly handle a good csv file" do
+        pipeline_run.db_load_amr_counts()
+
+        expect(Rails.logger).to receive(:error).exactly(0).times
+        expect(JSON.parse(pipeline_run.amr_counts[0].to_json)).to include(GOOD_AMR_COUNTS[0])
       end
     end
   end
