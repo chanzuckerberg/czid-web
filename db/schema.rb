@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_725_182_344) do
+ActiveRecord::Schema.define(version: 20_190_813_185_753) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -329,6 +329,7 @@ ActiveRecord::Schema.define(version: 20_190_725_182_344) do
     t.integer "public_access", limit: 1
     t.integer "days_to_keep_sample_private", default: 365, null: false
     t.integer "background_flag", limit: 1, default: 0
+    t.text "description"
     t.index ["name"], name: "index_projects_on_name", unique: true
   end
 
