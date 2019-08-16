@@ -149,7 +149,7 @@ class Sample < ApplicationRecord
         parts = f.parts.split(", ")
         presigned_urls = parts.map do |part|
           S3_PRESIGNER.presigned_url(:put_object, expires_in: 86_400, bucket: SAMPLES_BUCKET_NAME,
-                                                  key: File.join(File.dirname(f.file_path), File.basename(part)))
+                                                  key: File.join(File.dirname(f.file_path), File.basename(part)), use_accelerate_endpoint: true)
         end
         f.update(presigned_url: presigned_urls.join(", "))
       end
