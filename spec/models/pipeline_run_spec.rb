@@ -1,6 +1,31 @@
 require 'rails_helper'
 
-describe PipelineRun, type: :model do
+MALFORMED_AMR_RESULTS = [
+  ["Sample", "DB", "gene", "allele", "coverage", "depth", "diffs", "uncertainty", "divergence", "length", "maxMAF", "clusterid", "seqid", "annotation", "gene_family", "total_gene_hits", "total_coverage", "total_depth", "total_reads", "rpm", "dpm"],
+  ["", "ARGannot_r2", "Aph3''Ia_AGly", "Aph3''Ia_1217", "4.779", "1.875", "1snp777holes", "edge0.0", "2.5639999999999996", "816", "0.0", "251", "1217", "", "AGly", "1", "4.779", "1.875", "3", "0.02481738581632464", "0.0155108661352029"],
+  ["", "ARGannot_r2", "MeowZ", "", "4.779", "1.875", "1snp777holes", "edge0.0", "2.5639999999999996", "816", "0.0", "251", "1217", "", "", "1", "4.779", "1.875", "3", "0.02481738581632464", ""],
+].freeze
+MALFORMED_AMR_COUNTS = [
+  {
+    "gene" => "Aph3''Ia_AGly",
+    "allele" => "Aph3''Ia_1217",
+    "coverage" => 4.779,
+    "depth" => 1.875,
+    "drug_family" => "AGly",
+    "total_reads" => 3,
+    "rpm" => 0.02481738581632464,
+    "dpm" => 0.0155108661352029,
+  },
+  {
+    "gene" => "MeowZ",
+    "coverage" => 4.779,
+    "depth" => 1.875,
+    "total_reads" => 3,
+    "rpm" => 0.02481738581632464,
+  },
+].freeze
+
+RSpec.describe PipelineRun, type: :model do
   context "#update_job_status" do
     let(:user) { build_stubbed(:user) }
     let(:sample) { build_stubbed(:sample, user: user) }
@@ -162,6 +187,7 @@ describe PipelineRun, type: :model do
     let(:user) { build_stubbed(:user) }
     let(:sample) { build_stubbed(:sample, user: user) }
     let(:pipeline_run) { build_stubbed(:pipeline_run, sample: sample, pipeline_version: "3.9") }
+    let(:results_path) { "amr_processed_results.csv" }
     context "No AMR counts file exists on S3 (PipelineRun.download_file() returned nil)" do
       before do
         # Test case nil
@@ -177,15 +203,47 @@ describe PipelineRun, type: :model do
     end
     context "AMR counts file exists, but is empty (results found no amr counts)" do
       before do
-        empty_results_path = "amr_processed_results.csv"
-        File.open(empty_results_path, "w") { |file| file.puts("\n") }
-        allow(PipelineRun).to receive(:download_file).and_return(empty_results_path)
+        pseudofile = StringIO.new("\n")
+        allow(PipelineRun).to receive(:download_file).and_return(results_path)
+        allow(File).to receive(:size?).and_return(1)
+        allow(CSV).to receive(:read).and_return(CSV.new(pseudofile.read, headers: true))
+        allow(pipeline_run).to receive(:update).and_return(true)
       end
       it "should update amr counts as an empty array" do
         pipeline_run.db_load_amr_counts()
 
         expect(Rails.logger).to receive(:error).exactly(0).times
         expect(pipeline_run.amr_counts).to eq([])
+      end
+    end
+    context "AMR counts file exists, but lines are malformed" do
+      before do
+        csv_write_string = CSV.generate do |csv|
+          MALFORMED_AMR_RESULTS.each do |line|
+            csv << line
+          end
+        end
+        pseudofile = StringIO.new(csv_write_string)
+        allow(PipelineRun).to receive(:download_file).and_return(results_path)
+        allow(File).to receive(:size?).and_return(80)
+        allow(CSV).to receive(:read).and_return(CSV.new(pseudofile.read, headers: true))
+        allow(pipeline_run).to receive(:update) do |update|
+          amr_counts = []
+          ActiveRecord::Base.connection.execute('SET foreign_key_checks = 0;')
+          update[:amr_counts_attributes].each do |count|
+            new_count = create(:amr_count, pipeline_run: pipeline_run, gene: count[:gene], allele: count[:allele], coverage: count[:coverage], depth: count[:depth], drug_family: count[:drug_family], rpm: count[:rpm], dpm: count[:dpm], total_reads: count[:total_reads])
+            amr_counts.push(new_count)
+          end
+          ActiveRecord::Base.connection.execute('SET foreign_key_checks = 1;')
+          pipeline_run.amr_counts = amr_counts
+        end
+      end
+      it "should properly handle a malformed csv file" do
+        pipeline_run.db_load_amr_counts()
+
+        expect(Rails.logger).to receive(:error).exactly(0).times
+        expect(JSON.parse(pipeline_run.amr_counts[1].to_json)).to include(MALFORMED_AMR_COUNTS[0])
+        expect(JSON.parse(pipeline_run.amr_counts[0].to_json)).to include(MALFORMED_AMR_COUNTS[1])
       end
     end
   end

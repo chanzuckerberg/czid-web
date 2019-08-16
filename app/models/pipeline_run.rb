@@ -553,10 +553,10 @@ class PipelineRun < ApplicationRecord
       amr_results_table = CSV.read(amr_results, headers: true)
       amr_results_table.each do |row|
         amr_count_for_gene = {}
-        amr_counts_keys.each_with_index do |_counts_key, index|
+        amr_counts_keys.each_with_index do |counts_key, index|
           result_value = row[amr_results_keys[index]]
           if result_value.present?
-            amr_count_for_gene[amr_counts_keys[index]] = result_value
+            amr_count_for_gene[counts_key] = result_value
           end
         end
         if row["annotation"].present?
