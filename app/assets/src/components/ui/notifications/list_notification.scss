@@ -1,16 +1,16 @@
-@import "~styles/themes/typography";
 @import "~styles/themes/colors";
-@import "~styles/themes/elements";
 
 .listNotification {
   .accordion {
     background-color: $transparent-lightest-grey;
     border-radius: 5px;
-    margin-top: $space-s;
+    margin-top: 10px;
 
     .title {
-      @include font-header-node-l;
-      padding: $space-s;
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 10px;
     }
 
     .content {
