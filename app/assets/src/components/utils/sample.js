@@ -116,7 +116,7 @@ export const sampleErrorInfo = (sample, pipelineRun) => {
       message = `Sorry, something was wrong with your input file. ${
         pipelineRun.error_message
       }.`;
-      linkText = "Please check your file format and reupload your file";
+      linkText = "Please check your file format and reupload your file.";
       type = "warning";
       link = "/samples/upload";
       break;
@@ -124,7 +124,7 @@ export const sampleErrorInfo = (sample, pipelineRun) => {
       status = "COMPLETE - ISSUE";
       message =
         "Oh no! No matches were identified because there weren't any reads left after host and quality filtering.";
-      linkText = "Check where your reads were filtered out";
+      linkText = "Check where your reads were filtered out.";
       type = "warning";
       link = `/samples/${sample.id}/results_folder`;
       break;
