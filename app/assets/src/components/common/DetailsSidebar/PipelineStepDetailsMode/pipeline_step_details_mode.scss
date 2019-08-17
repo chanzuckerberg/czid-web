@@ -1,6 +1,7 @@
 @import "~styles/typography";
 @import "~styles/themes/typography";
 @import "~styles/themes/colors";
+@import "~styles/themes/elements";
 
 .content {
   @include font-body-xxs;
@@ -23,20 +24,20 @@
 }
 
 .statusBox {
-  padding: 12px;
+  padding: $space-m;
   display: flex;
   border-radius: 4px;
-  margin-bottom: 16px;
+  margin-bottom: $space-m;
 
   .statusIcon {
     height: 20px;
     width: 20px;
-    margin-top: 4px;
+    margin-top: $space-xxs;
     flex-shrink: 0;
   }
 
   .statusText {
-    margin-left: 12px;
+    margin-left: $space-s;
   }
 
   .statusTitle {
