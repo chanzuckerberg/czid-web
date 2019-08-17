@@ -55,6 +55,7 @@ class SamplesController < ApplicationController
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
   MIN_CLI_VERSION = '0.7.3'.freeze
+  CLI_DEPRECATION_MSG = "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git` or with sudo + pip2/pip3 depending on your setup to update and try again.".freeze
 
   # GET /samples
   # GET /samples.json
@@ -521,7 +522,9 @@ class SamplesController < ApplicationController
     min_version = Gem::Version.new(MIN_CLI_VERSION)
     unless client && (client == "web" || Gem::Version.new(client) >= min_version)
       render json: {
-        message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
+        message: CLI_DEPRECATION_MSG,
+        # idseq-cli v0.6.0 only checks the 'errors' field, so ensure users see this.
+        errors: [CLI_DEPRECATION_MSG],
         status: :upgrade_required,
       }, status: :upgrade_required
       return
@@ -1023,7 +1026,9 @@ class SamplesController < ApplicationController
     min_version = Gem::Version.new(MIN_CLI_VERSION)
     unless client && (client == "web" || Gem::Version.new(client) >= min_version)
       render json: {
-        message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
+        message: CLI_DEPRECATION_MSG,
+        # idseq-cli v0.6.0 only checks the 'errors' field, so ensure users see this.
+        errors: [CLI_DEPRECATION_MSG],
         status: :upgrade_required,
       }, status: :upgrade_required
       return
