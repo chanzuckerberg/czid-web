@@ -279,6 +279,7 @@ class SamplesHeatmapVis extends React.Component {
     return {
       subtitle,
       data: sections,
+      nodeHasData,
     };
   }
 
@@ -381,6 +382,8 @@ class SamplesHeatmapVis extends React.Component {
               style={getTooltipStyle(tooltipLocation, {
                 buffer: 20,
                 below: true,
+                // so we can show the tooltip above the cursor if need be
+                height: nodeHoverInfo.nodeHasData ? 300 : 180,
               })}
             >
               <DataTooltip {...nodeHoverInfo} />
