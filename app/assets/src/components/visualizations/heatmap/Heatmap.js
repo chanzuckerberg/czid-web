@@ -46,7 +46,7 @@ export default class Heatmap {
         minCellHeight: 26,
         minWidth: 1240,
         maxWidth: 1600, // used for shrink-to-fit
-        zoom: 1.0, // multiplier for zooming in and out
+        zoom: null, // multiplier for zooming in and out
         minHeight: 500,
         clustering: true,
         shouldSortColumns: true,
@@ -339,15 +339,13 @@ export default class Heatmap {
 
     this.svg.attr("viewBox", `0 0 ${this.width} ${this.height}`);
 
-    const defaultZoom =
-      Math.min(this.width, this.options.maxWidth) / this.width;
-    const zoom = this.options.zoom || defaultZoom;
+    this.options.zoom = this.getZoomFactor();
 
     // If we make these numbers larger than the viewport dimensions we’ll
     // effectively zoom out, and if we make them smaller we’ll zoom in.
     this.svg
-      .attr("width", this.width * zoom)
-      .attr("height", this.height * zoom);
+      .attr("width", this.width * this.options.zoom)
+      .attr("height", this.height * this.options.zoom);
 
     this.g.attr(
       "transform",
@@ -1347,5 +1345,14 @@ export default class Heatmap {
     } else {
       return this.metadataColors[value];
     }
+  }
+
+  getZoomFactor() {
+    if (this.options.zoom !== null) return this.options.zoom;
+    // Decrease the max width slightly to avoid zooming slightly too much, which
+    // would produce a useless horizontal scrollbar.
+    const adjustedMaxWidth = this.options.maxWidth - 8;
+    // Shrink to fit
+    return Math.min(this.width, adjustedMaxWidth) / this.width;
   }
 }

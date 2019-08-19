@@ -257,6 +257,9 @@
   bottom: 50px;
   right: 15px;
   box-shadow: $box-shadow-dropdown-menu;
+  svg:hover {
+    background-color: darken(white, 5%);
+  }
 }
 
 .hovered {

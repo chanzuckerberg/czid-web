@@ -341,8 +341,8 @@ class SamplesHeatmapVis extends React.Component {
 
   handleZoom(increment) {
     const newZoom = Math.min(
-      3,
-      Math.max(0.1, this.heatmap.options.zoom + increment)
+      3, // max zoom factor
+      Math.max(0.2, this.heatmap.options.zoom + increment)
     );
     this.heatmap.updateZoom(newZoom);
   }
@@ -359,11 +359,11 @@ class SamplesHeatmapVis extends React.Component {
       <div className={cs.samplesHeatmapVis}>
         <PlusMinusControl
           onPlusClick={withAnalytics(
-            () => this.handleZoom(0.33),
+            () => this.handleZoom(0.25),
             "SamplesHeatmapVis_zoom-in-control_clicked"
           )}
           onMinusClick={withAnalytics(
-            () => this.handleZoom(-0.33),
+            () => this.handleZoom(-0.25),
             "SamplesHeatmapVis_zoom-out-control_clicked"
           )}
           className={cs.plusMinusControl}

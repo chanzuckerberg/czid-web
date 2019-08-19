@@ -5,16 +5,24 @@
 .samplesHeatmapVis {
   .plusMinusControl {
     position: absolute;
-    // Offset from the viewport ot line up with the controls. This will need to
-    // be adjusted if the position of the controls changes.
-    top: 220px;
-    right: calc(50% - 700px);
+    // Offset from the viewport to line up with the filter controls. This will
+    // need to be adjusted if the position of the controls changes.
+    top: 360px;
+    right: 40px;
     box-shadow: $box-shadow-dropdown-menu;
+
+    svg:hover {
+      background-color: darken(white, 5%);
+    }
   }
 
   .heatmapContainer {
     overflow-x: auto;
-    margin-bottom: 300px;
+    // Set the height to force the horizontal scrollbar to appear at the bottom
+    // of the viewport instead of the bottom of the page. 360px is the height
+    // of the all the elements above the heatmapContainer. It *will* need to
+    // change if the height of the elements above ever change.
+    height: calc(100vh - 360px);
 
     svg {
       display: block;
