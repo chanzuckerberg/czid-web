@@ -84,9 +84,7 @@ class SamplesHeatmapVis extends React.Component {
         printCaption: this.generateHeatmapCaptions(),
         shouldSortColumns: this.props.sampleSortType === "alpha", // else cluster
         // Shrink to fit the viewport width
-        // See https://developer.mozilla.org/en-US/docs/Web/API/window/innerWidth
-        // TODO (gdingle): use computed value
-        maxWidth: window.innerWidth,
+        maxWidth: this.heatmapContainer.offsetWidth,
       }
     );
     this.heatmap.start();
