@@ -39,9 +39,9 @@ RSpec.describe HttpHelper, type: :helper do
       end
 
       it "returns nil on errors" do
-        response = HttpHelper.get_json("https://www.example.com", {}, {})
-
-        expect(response).to be_nil
+        expect do
+          HttpHelper.get_json("https://www.example.com", {}, {})
+        end.to raise_error(StandardError)
       end
     end
 
@@ -52,9 +52,9 @@ RSpec.describe HttpHelper, type: :helper do
       end
 
       it "returns nil on invalid JSON" do
-        response = HttpHelper.get_json("https://www.example.com", {}, {})
-
-        expect(response).to be_nil
+        expect do
+          HttpHelper.get_json("https://www.example.com", {}, {})
+        end.to raise_error(JSON::ParserError)
       end
     end
   end
@@ -96,9 +96,9 @@ RSpec.describe HttpHelper, type: :helper do
       end
 
       it "returns nil on invalid JSON" do
-        response = HttpHelper.post_json("https://www.example.com", {})
-
-        expect(response).to be_nil
+        expect do
+          HttpHelper.post_json("https://www.example.com", {})
+        end.to raise_error(JSON::ParserError)
       end
     end
   end

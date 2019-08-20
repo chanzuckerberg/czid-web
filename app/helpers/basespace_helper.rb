@@ -20,11 +20,13 @@ module BasespaceHelper
   def verify_access_token_revoked(access_token)
     # Verify that the token was revoked by using it to call an API endpoint.
     # The API endpoint should return a 401.
-    response = fetch_from_basespace(BASESPACE_CURRENT_PROJECTS_URL, access_token, {}, true)
 
-    if response.present?
-      LogUtil.log_err_and_airbrake("BasespaceAccessTokenError failed to revoke access token")
-    end
+    fetch_from_basespace(BASESPACE_CURRENT_PROJECTS_URL, access_token, {}, true)
+
+    LogUtil.log_err_and_airbrake("BasespaceAccessTokenError Revoke access token check failed")
+  rescue
+    # The call should fail.
+    Rails.logger.info("Revoke access token check succeeded")
   end
 
   # In one instance, we send a request expecting it to fail. So we provide a silence_errors option.
@@ -40,12 +42,19 @@ module BasespaceHelper
   module_function :revoke_access_token, :verify_access_token_revoked, :fetch_from_basespace
 
   def basespace_projects(access_token)
-    response = fetch_from_basespace(BASESPACE_CURRENT_PROJECTS_URL, access_token)
+    begin
+      response = fetch_from_basespace(BASESPACE_CURRENT_PROJECTS_URL, access_token)
 
-    if response.nil? || response.dig("Response", "Items").nil?
-      if response.present? && response.dig("ResponseStatus", "Message").present?
-        LogUtil.log_err_and_airbrake("basespace_projects failed with error: #{response['ResponseStatus']['Message']}")
+      if response.dig("Response", "Items").nil?
+        if response.dig("ResponseStatus", "Message").present?
+          LogUtil.log_err_and_airbrake("Fetch Basespace projects failed with error: #{response['ResponseStatus']['Message']}")
+        else
+          LogUtil.log_err_and_airbrake("Failed to fetch Basespace projects")
+        end
+        return nil
       end
+    rescue
+      LogUtil.log_err_and_airbrake("Failed to fetch Basespace projects")
       return nil
     end
 
@@ -59,12 +68,19 @@ module BasespaceHelper
   end
 
   def samples_for_basespace_project(project_id, access_token)
-    response = fetch_from_basespace(BASESPACE_PROJECT_DATASETS_URL % project_id, access_token)
+    begin
+      response = fetch_from_basespace(BASESPACE_PROJECT_DATASETS_URL % project_id, access_token)
 
-    if response.nil? || response["Items"].nil?
-      if response.present? && response["ErrorMessage"].present?
-        LogUtil.log_err_and_airbrake("samples_for_basespace_project failed with error: #{response['ErrorMessage']}")
+      if response["Items"].nil?
+        if response["ErrorMessage"].present?
+          LogUtil.log_err_and_airbrake("Fetch samples for Basespace project failed with error: #{response['ErrorMessage']}")
+        else
+          LogUtil.log_err_and_airbrake("Failed to fetch samples for Basespace project")
+        end
+        return nil
       end
+    rescue
+      LogUtil.log_err_and_airbrake("Failed to fetch samples for Basespace project")
       return nil
     end
 
@@ -86,12 +102,19 @@ module BasespaceHelper
   end
 
   def files_for_basespace_dataset(dataset_id, access_token)
-    response = fetch_from_basespace(BASESPACE_DATASET_FILES_URL % dataset_id, access_token, filehrefcontentresolution: "true")
+    begin
+      response = fetch_from_basespace(BASESPACE_DATASET_FILES_URL % dataset_id, access_token, filehrefcontentresolution: "true")
 
-    if response.nil? || response["Items"].nil?
-      if response.present? && response["ErrorMessage"].present?
-        LogUtil.log_err_and_airbrake("files_for_basespace_dataset failed with error: #{response['ErrorMessage']}")
+      if response["Items"].nil?
+        if response["ErrorMessage"].present?
+          LogUtil.log_err_and_airbrake("Fetch files for Basespace dataset failed with error: #{response['ErrorMessage']}")
+        else
+          LogUtil.log_err_and_airbrake("Failed to fetch files for basespace dataset")
+        end
+        return nil
       end
+    rescue
+      LogUtil.log_err_and_airbrake("Failed to fetch files for basespace dataset")
       return nil
     end
 
