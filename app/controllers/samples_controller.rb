@@ -744,7 +744,9 @@ class SamplesController < ApplicationController
 
     cache_key = ReportHelper.report_info_cache_key(
       request.path,
-      params.permit(report_info_params.keys)
+      params
+        .permit(report_info_params.keys)
+        .merge(pipeline_run_id: pipeline_run.id)
     )
 
     # This allows 304 Not Modified to be returned so that the client can use its

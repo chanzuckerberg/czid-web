@@ -76,7 +76,7 @@ module ReportHelper
   }.freeze
 
   # Example cache key:
-  # /samples/12303/report_info?background_id=93&format=json&pipeline_version=3.3&report_ts=1549504990
+  # /samples/12303/report_info?background_id=93&format=json&pipeline_version=3.3&report_ts=1549504990&pipeline_run_id=39185
   def self.report_info_cache_key(path, kvs)
     kvs = kvs.to_h.sort.to_h
     # Increment this if you ever change the response structure of report_info
