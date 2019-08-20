@@ -404,6 +404,7 @@ export default class Heatmap {
 
     if (this.columnMetadataSortField) return;
 
+    console.log(this.options.sortColumns, "sortColumns");
     if (this.options.sortColumns) {
       // TODO (gdingle): parameterize direction
       this.sortColumns("asc");

@@ -179,6 +179,7 @@ export default class SamplesHeatmapControls extends React.Component {
     });
   };
 
+  // TODO (gdingle): make smaller
   renderSpecificityFilter() {
     return (
       <Dropdown
@@ -187,6 +188,32 @@ export default class SamplesHeatmapControls extends React.Component {
         options={this.props.options.specificityOptions}
         value={this.props.selectedOptions.readSpecificity}
         label="Read Specificity"
+        onChange={this.onSpecificityChange}
+        disabled={!this.props.data}
+      />
+    );
+  }
+
+  // TODO (gdingle): do same for sort taxa
+  onSortSamplesChange = order => {
+    if (order === this.props.selectedOptions.sortSamples) {
+      return;
+    }
+
+    this.props.onSelectedOptionsChange({ sortSamples: order });
+    logAnalyticsEvent("SamplesHeatmapControls_sort-samples-select_changed", {
+      sortSamples: order,
+    });
+  };
+
+  renderSortSamplesSelect() {
+    return (
+      <Dropdown
+        fluid
+        rounded
+        options={this.props.options.sortSamplesOptions}
+        value={this.props.selectedOptions.sortSamples}
+        label="Sort Samples By"
         onChange={this.onSpecificityChange}
         disabled={!this.props.data}
       />
@@ -369,14 +396,14 @@ export default class SamplesHeatmapControls extends React.Component {
       <div className={cs.menu}>
         <Divider />
         <div className={`${cs.filterRow} row`}>
-          <div className="col s3">{this.renderTaxonLevelSelect()}</div>
-          <div className="col s3">{this.renderCategoryFilter()}</div>
+          <div className="col s2">{this.renderTaxonLevelSelect()}</div>
+          <div className="col s2">{this.renderCategoryFilter()}</div>
           <div className="col s3">{this.renderMetricSelect()}</div>
           <div className="col s3">{this.renderBackgroundSelect()}</div>
         </div>
         <div className={`${cs.filterRow} row`}>
-          <div className="col s3">{this.renderThresholdFilterSelect()}</div>
-          <div className="col s3">{this.renderSpecificityFilter()}</div>
+          <div className="col s2">{this.renderThresholdFilterSelect()}</div>
+          <div className="col s2">{this.renderSortSamplesSelect()}</div>
           <div className="col s2">{this.renderScaleSelect()}</div>
           <div className="col s2">{this.renderTaxonsPerSampleSlider()}</div>
           <div className="col s2">{this.renderLegend()}</div>
@@ -418,6 +445,18 @@ SamplesHeatmapControls.propTypes = {
         value: PropTypes.number,
       })
     ),
+    sortSamplesOptions: PropTypes.arrayOf(
+      PropTypes.shape({
+        text: PropTypes.string,
+        value: PropTypes.string,
+      })
+    ),
+    sortTaxaOptions: PropTypes.arrayOf(
+      PropTypes.shape({
+        text: PropTypes.string,
+        value: PropTypes.number,
+      })
+    ),
     thresholdFilters: PropTypes.shape({
       operators: PropTypes.arrayOf(PropTypes.string),
       targets: PropTypes.arrayOf(
@@ -444,6 +483,7 @@ SamplesHeatmapControls.propTypes = {
       })
     ),
     readSpecificity: PropTypes.number,
+    sortSamples: PropTypes.string,
     dataScaleIdx: PropTypes.number,
     taxonsPerSample: PropTypes.number,
   }),

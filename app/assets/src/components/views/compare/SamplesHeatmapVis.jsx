@@ -81,6 +81,7 @@ class SamplesHeatmapVis extends React.Component {
         // only display colors to positive values
         scaleMin: 0,
         printCaption: this.generateHeatmapCaptions(),
+        sortColumns: this.props.sortSamples == "alphabetical", // else cluster
       }
     );
     this.heatmap.start();
@@ -404,6 +405,7 @@ SamplesHeatmapVis.propTypes = {
   taxonDetails: PropTypes.object,
   taxonIds: PropTypes.array,
   thresholdFilters: PropTypes.any,
+  sortSamples: PropTypes.string,
 };
 
 export default SamplesHeatmapVis;

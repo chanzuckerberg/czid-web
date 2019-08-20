@@ -31,6 +31,10 @@ import SamplesHeatmapControls from "./SamplesHeatmapControls";
 import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 
 const SCALE_OPTIONS = [["Log", "symlog"], ["Lin", "linear"]];
+const SORT_SAMPLES_OPTIONS = [
+  ["Alpabetical", "alpabetical"],
+  ["Cluster", "cluster"],
+];
 const TAXONS_PER_SAMPLE_RANGE = {
   min: 0,
   max: 100,
@@ -68,6 +72,7 @@ class SamplesHeatmapView extends React.Component {
           this.props.backgrounds[0].value
         ),
         species: parseAndCheckInt(this.urlParams.species, 1),
+        sortSamples: this.urlParams.sortSamples || "",
         thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseAndCheckInt(this.urlParams.dataScaleIdx, 0),
         taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 30),
@@ -510,6 +515,7 @@ class SamplesHeatmapView extends React.Component {
     thresholdFilters: this.props.thresholdFilters,
     // Client side options
     scales: SCALE_OPTIONS,
+    sortSamples: SORT_SAMPLES_OPTIONS,
     taxonsPerSample: TAXONS_PER_SAMPLE_RANGE,
     specificityOptions: SPECIFICITY_OPTIONS,
   });
@@ -588,6 +594,7 @@ class SamplesHeatmapView extends React.Component {
           taxonDetails={this.state.taxonDetails}
           taxonFilterState={this.state.taxonFilterState}
           thresholdFilters={this.state.selectedOptions.thresholdFilters}
+          sortSamples={this.state.sortSamples}
         />
       </ErrorBoundary>
     );
