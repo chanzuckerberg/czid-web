@@ -4,18 +4,40 @@ require 'open-uri'
 BASESPACE_CURRENT_PROJECTS_URL = "https://api.basespace.illumina.com/v1pre3/users/current/projects".freeze
 BASESPACE_PROJECT_DATASETS_URL = "https://api.basespace.illumina.com/v2/projects/%s/datasets".freeze
 BASESPACE_DATASET_FILES_URL = "https://api.basespace.illumina.com/v2/datasets/%s/files?filehrefcontentresolution=true".freeze
+BASESPACE_DELETE_ACCESS_TOKEN_URL = "https://api.basespace.illumina.com/v2/oauthv2tokens/current".freeze
 # 1024 is the maximum limit allowed by Basespace.
 # If users reach this limit, we will need to implement multiple requests to fetch all the samples.
 BASESPACE_PAGE_SIZE = 1024
 
 module BasespaceHelper
-  def fetch_from_basespace(url, access_token, params = {})
+  def revoke_access_token(access_token)
+    HttpHelper.delete(
+      BASESPACE_DELETE_ACCESS_TOKEN_URL,
+      "x-access-token" => access_token
+    )
+  end
+
+  def verify_access_token_revoked(access_token)
+    # Verify that the token was revoked by using it to call an API endpoint.
+    # The API endpoint should return a 401.
+    response = fetch_from_basespace(BASESPACE_CURRENT_PROJECTS_URL, access_token, {}, true)
+
+    if response.present?
+      LogUtil.log_err_and_airbrake("BasespaceAccessTokenError failed to revoke access token")
+    end
+  end
+
+  # In one instance, we send a request expecting it to fail. So we provide a silence_errors option.
+  def fetch_from_basespace(url, access_token, params = {}, silence_errors = false)
     HttpHelper.get_json(
       url,
       params.merge(limit: BASESPACE_PAGE_SIZE),
-      "Authorization" => "Bearer #{access_token}"
+      { "Authorization" => "Bearer #{access_token}" },
+      silence_errors
     )
   end
+
+  module_function :revoke_access_token, :verify_access_token_revoked, :fetch_from_basespace
 
   def basespace_projects(access_token)
     response = fetch_from_basespace(BASESPACE_CURRENT_PROJECTS_URL, access_token)

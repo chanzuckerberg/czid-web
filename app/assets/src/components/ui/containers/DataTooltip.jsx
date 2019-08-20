@@ -33,7 +33,7 @@ const DataTooltip = ({ data, subtitle, title, singleColumn }) => {
                     {/* Use .name if value is an object (e.g. location object) 
                     with a name property. Display React elements normally. */}
                     {isObject(keyValuePair[1]) &&
-                    keyValuePair.hasOwnProperty("name")
+                    keyValuePair[1].hasOwnProperty("name")
                       ? keyValuePair[1].name
                       : keyValuePair[1]}
                   </div>
