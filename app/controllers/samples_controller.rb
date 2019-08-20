@@ -750,20 +750,20 @@ class SamplesController < ApplicationController
         .merge(pipeline_run_id: pipeline_run.id)
     )
 
-    # This allows 304 Not Modified to be returned so that the client can use its
-    # local cache and avoid the large download.
-    httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
-    response.headers["Last-Modified"] = httpdate unless skip_cache
-    # This is a custom header for testing and debugging
-    response.headers["X-IDseq-Cache"] = 'requested' unless skip_cache
-    response.headers["X-IDseq-Cache-Key"] = cache_key unless skip_cache
-    Rails.logger.info("Requesting report_info #{cache_key}") unless skip_cache
-
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     json =
       if skip_cache
         ReportHelper.report_info_json(pipeline_run, params[:background_id])
       else
+        # This allows 304 Not Modified to be returned so that the client can use its
+        # local cache and avoid the large download.
+        httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
+        response.headers["Last-Modified"] = httpdate
+        # This is a custom header for testing and debugging
+        response.headers["X-IDseq-Cache"] = 'requested'
+        response.headers["X-IDseq-Cache-Key"] = cache_key
+        Rails.logger.info("Requesting report_info #{cache_key}")
+
         Rails.cache.fetch(cache_key, expires_in: 30.days) do
           MetricUtil.put_metric_now("samples.cache.miss", 1)
           response.headers["X-IDseq-Cache"] = 'missed'
