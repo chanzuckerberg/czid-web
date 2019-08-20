@@ -72,7 +72,7 @@ class SamplesHeatmapView extends React.Component {
           this.props.backgrounds[0].value
         ),
         species: parseAndCheckInt(this.urlParams.species, 1),
-        sortSamples: this.urlParams.sortSamples || "cluster",
+        sampleSortType: this.urlParams.sampleSortType || "cluster",
         thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseAndCheckInt(this.urlParams.dataScaleIdx, 0),
         taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 30),
@@ -515,19 +515,19 @@ class SamplesHeatmapView extends React.Component {
     thresholdFilters: this.props.thresholdFilters,
     // Client side options
     scales: SCALE_OPTIONS,
-    sortSamplesOptions: SORT_SAMPLES_OPTIONS,
+    sampleSortTypeOptions: SORT_SAMPLES_OPTIONS,
     taxonsPerSample: TAXONS_PER_SAMPLE_RANGE,
     specificityOptions: SPECIFICITY_OPTIONS,
   });
 
   handleSelectedOptionsChange = newOptions => {
-    const excluding = ["dataScaleIdx", "sortSamples"];
-    const refetchData = difference(keys(newOptions), excluding);
+    const excluding = ["dataScaleIdx", "sampleSortType"];
+    const shouldRefetchData = difference(keys(newOptions), excluding).length;
     this.setState(
       {
         selectedOptions: assign(this.state.selectedOptions, newOptions),
       },
-      refetchData.length ? this.updateHeatmap : null
+      shouldRefetchData ? this.updateHeatmap : null
     );
   };
 
@@ -593,7 +593,7 @@ class SamplesHeatmapView extends React.Component {
           taxonDetails={this.state.taxonDetails}
           taxonFilterState={this.state.taxonFilterState}
           thresholdFilters={this.state.selectedOptions.thresholdFilters}
-          sortSamples={this.state.selectedOptions.sortSamples}
+          sampleSortType={this.state.selectedOptions.sampleSortType}
         />
       </ErrorBoundary>
     );
