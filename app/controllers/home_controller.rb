@@ -106,6 +106,8 @@ class HomeController < ApplicationController
                                    }, request)
 
     UserMailer.landing_sign_up_email(body).deliver_now
+    send_sign_up_to_airtable(home_params)
+
     render json: {
       status: :ok,
     }
@@ -124,5 +126,19 @@ class HomeController < ApplicationController
 
   def landing_params
     params.permit(:show_bulletin)
+  end
+
+  def send_sign_up_to_airtable(params)
+    table_name = "Landing Page Form"
+    data = {
+      fields: {
+        firstName: params[:firstName] || "",
+        lastName: params[:lastName] || "",
+        email: params[:email] || "",
+        institution: params[:institution] || "",
+        usage: params[:usage] || "",
+      },
+    }
+    MetricUtil.post_to_airtable(table_name, data.to_json)
   end
 end
