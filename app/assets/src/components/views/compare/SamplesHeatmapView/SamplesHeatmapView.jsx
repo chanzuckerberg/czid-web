@@ -5,7 +5,7 @@ import queryString from "query-string";
 import {
   compact,
   map,
-  isEqual,
+  difference,
   keys,
   assign,
   get,
@@ -32,8 +32,8 @@ import SamplesHeatmapHeader from "./SamplesHeatmapHeader";
 
 const SCALE_OPTIONS = [["Log", "symlog"], ["Lin", "linear"]];
 const SORT_SAMPLES_OPTIONS = [
-  ["Alpabetical", "alpabetical"],
-  ["Cluster", "cluster"],
+  { text: "Alphabetical", value: "alpha" },
+  { text: "Cluster", value: "cluster" },
 ];
 const TAXONS_PER_SAMPLE_RANGE = {
   min: 0,
@@ -72,7 +72,7 @@ class SamplesHeatmapView extends React.Component {
           this.props.backgrounds[0].value
         ),
         species: parseAndCheckInt(this.urlParams.species, 1),
-        sortSamples: this.urlParams.sortSamples || "",
+        sortSamples: this.urlParams.sortSamples || "cluster",
         thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseAndCheckInt(this.urlParams.dataScaleIdx, 0),
         taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 30),
@@ -515,19 +515,19 @@ class SamplesHeatmapView extends React.Component {
     thresholdFilters: this.props.thresholdFilters,
     // Client side options
     scales: SCALE_OPTIONS,
-    sortSamples: SORT_SAMPLES_OPTIONS,
+    sortSamplesOptions: SORT_SAMPLES_OPTIONS,
     taxonsPerSample: TAXONS_PER_SAMPLE_RANGE,
     specificityOptions: SPECIFICITY_OPTIONS,
   });
 
   handleSelectedOptionsChange = newOptions => {
-    const refetchData = !isEqual(keys(newOptions), ["dataScaleIdx"]);
-
+    const excluding = ["dataScaleIdx", "sortSamples"];
+    const refetchData = difference(keys(newOptions), excluding);
     this.setState(
       {
         selectedOptions: assign(this.state.selectedOptions, newOptions),
       },
-      refetchData ? this.updateHeatmap : null
+      refetchData.length ? this.updateHeatmap : null
     );
   };
 
@@ -569,7 +569,6 @@ class SamplesHeatmapView extends React.Component {
       return <div className={cs.noDataMsg}>No data to render</div>;
     }
     let scaleIndex = this.state.selectedOptions.dataScaleIdx;
-
     return (
       <ErrorBoundary>
         <SamplesHeatmapVis
@@ -594,7 +593,7 @@ class SamplesHeatmapView extends React.Component {
           taxonDetails={this.state.taxonDetails}
           taxonFilterState={this.state.taxonFilterState}
           thresholdFilters={this.state.selectedOptions.thresholdFilters}
-          sortSamples={this.state.sortSamples}
+          sortSamples={this.state.selectedOptions.sortSamples}
         />
       </ErrorBoundary>
     );

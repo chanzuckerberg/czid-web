@@ -179,7 +179,6 @@ export default class SamplesHeatmapControls extends React.Component {
     });
   };
 
-  // TODO (gdingle): make smaller
   renderSpecificityFilter() {
     return (
       <Dropdown
@@ -194,7 +193,6 @@ export default class SamplesHeatmapControls extends React.Component {
     );
   }
 
-  // TODO (gdingle): do same for sort taxa
   onSortSamplesChange = order => {
     if (order === this.props.selectedOptions.sortSamples) {
       return;
@@ -213,8 +211,8 @@ export default class SamplesHeatmapControls extends React.Component {
         rounded
         options={this.props.options.sortSamplesOptions}
         value={this.props.selectedOptions.sortSamples}
-        label="Sort Samples By"
-        onChange={this.onSpecificityChange}
+        label="Sort Samples"
+        onChange={this.onSortSamplesChange}
         disabled={!this.props.data}
       />
     );
@@ -397,13 +395,13 @@ export default class SamplesHeatmapControls extends React.Component {
         <Divider />
         <div className={`${cs.filterRow} row`}>
           <div className="col s2">{this.renderTaxonLevelSelect()}</div>
-          <div className="col s2">{this.renderCategoryFilter()}</div>
+          <div className="col s3">{this.renderCategoryFilter()}</div>
           <div className="col s3">{this.renderMetricSelect()}</div>
           <div className="col s3">{this.renderBackgroundSelect()}</div>
         </div>
         <div className={`${cs.filterRow} row`}>
           <div className="col s2">{this.renderThresholdFilterSelect()}</div>
-          <div className="col s2">{this.renderSortSamplesSelect()}</div>
+          <div className="col s3">{this.renderSortSamplesSelect()}</div>
           <div className="col s2">{this.renderScaleSelect()}</div>
           <div className="col s2">{this.renderTaxonsPerSampleSlider()}</div>
           <div className="col s2">{this.renderLegend()}</div>

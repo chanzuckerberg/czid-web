@@ -81,7 +81,7 @@ class SamplesHeatmapVis extends React.Component {
         // only display colors to positive values
         scaleMin: 0,
         printCaption: this.generateHeatmapCaptions(),
-        sortColumns: this.props.sortSamples == "alphabetical", // else cluster
+        sortColumns: this.props.sortSamples === "alpha", // else cluster
       }
     );
     this.heatmap.start();
@@ -99,6 +99,9 @@ class SamplesHeatmapVis extends React.Component {
     }
     if (this.props.thresholdFilters !== prevProps.thresholdFilters) {
       this.heatmap.updatePrintCaption(this.generateHeatmapCaptions());
+    }
+    if (this.props.sortSamples !== prevProps.sortSamples) {
+      this.heatmap.updateSortColumns(this.props.sortSamples === "alpha");
     }
   }
 

@@ -140,6 +140,11 @@ export default class Heatmap {
     this.processData("cluster");
   }
 
+  updateSortColumns(sortColumns) {
+    this.options.sortColumns = sortColumns;
+    this.processData("cluster");
+  }
+
   updateColumnMetadata(metadata) {
     this.options.columnMetadata = metadata;
     this.processData("processMetadata");
@@ -404,9 +409,7 @@ export default class Heatmap {
 
     if (this.columnMetadataSortField) return;
 
-    console.log(this.options.sortColumns, "sortColumns");
     if (this.options.sortColumns) {
-      // TODO (gdingle): parameterize direction
       this.sortColumns("asc");
     } else if (this.options.clustering) {
       this.clusterColumns();
