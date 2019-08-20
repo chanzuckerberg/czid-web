@@ -200,7 +200,7 @@ module ReportHelper
   def generate_heatmap_csv(sample_taxa_hash)
     attribute_names = %w[sample_name tax_id taxon_name aggregatescore
                          NT_r NT_rpm NT_zscore NR_r NR_rpm NR_zscore]
-    CSV.generate(headers: true) do |csv|
+    CSVSafe.generate(headers: true) do |csv|
       csv << attribute_names
       (sample_taxa_hash || []).each do |sample_record|
         (sample_record[:taxons] || []).each do |taxon_record|
@@ -261,7 +261,7 @@ module ReportHelper
     attributes_as_symbols = flat_keys_symbols - IGNORE_IN_DOWNLOAD
     attribute_names = attributes_as_symbols.map { |k| k.map(&:to_s).join("_") }
     attribute_names = attribute_names.map { |a| a == 'NT_aggregatescore' ? 'aggregatescore' : a }
-    CSV.generate(headers: true) do |csv|
+    CSVSafe.generate(headers: true) do |csv|
       csv << attribute_names
       rows.each do |tax_info|
         flat_tax_info = flat_hash(tax_info)
