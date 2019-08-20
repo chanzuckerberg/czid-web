@@ -87,6 +87,7 @@ class MetricUtil
     if ENV["AIRTABLE_BASE_ID"] && ENV["AIRTABLE_API_KEY"]
       endpoint = "https://api.airtable.com/v0"
       uri = URI.parse("#{endpoint}/#{ENV['AIRTABLE_BASE_ID']}/#{URI.encode(table_name)}?api_key=#{ENV['AIRTABLE_API_KEY']}")
+
       https_post(uri, data)
     else
       Rails.logger.warn("Cannot send to Airtable. Check AIRTABLE_BASE_ID and AIRTABLE_API_KEY.")
