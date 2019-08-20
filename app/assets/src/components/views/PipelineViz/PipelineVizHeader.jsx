@@ -52,7 +52,7 @@ class PipelineVizHeader extends React.Component {
             <ViewHeader.Pretitle breadcrumbLink={`/samples/${sample.id}`}>
               {sample.name}
             </ViewHeader.Pretitle>
-            <ViewHeader.Title label="Pipeline Vizualization" />
+            <ViewHeader.Title label="Pipeline Visualization" />
           </ViewHeader.Content>
         </ViewHeader>
         <div className={cs.headerDivider} />
