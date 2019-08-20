@@ -1,4 +1,5 @@
 require 'open3'
+require 'shellwords'
 
 module PipelineRunsHelper
   STEP_DESCRIPTIONS = {
@@ -58,8 +59,8 @@ module PipelineRunsHelper
                                  vcpus: Sample::DEFAULT_VCPUS,
                                  job_queue: Sample::DEFAULT_QUEUE,
                                  docker_image: "idseq_dag")
-    command = "aegea batch submit --command=\"#{base_command}\" "
-    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image #{docker_image} --memory #{memory} --queue #{job_queue} --vcpus #{vcpus} --job-role idseq-pipeline "
+    command = "aegea batch submit --command=#{Shellwords.escape(base_command)} "
+    command += " --storage /mnt=#{Sample::DEFAULT_STORAGE_IN_GB} --volume-type gp2 --ecr-image #{Shellwords.escape(docker_image)} --memory #{memory} --queue #{Shellwords.escape(job_queue)} --vcpus #{vcpus} --job-role idseq-pipeline "
     command
   end
 
@@ -125,12 +126,12 @@ module PipelineRunsHelper
     "cd /mnt; " \
     "git clone https://github.com/chanzuckerberg/idseq-dag.git; " \
     "cd idseq-dag; " \
-    "git checkout #{commit_or_branch}; " \
+    "git checkout #{Shellwords.escape(commit_or_branch)}; " \
     "pip3 install -e . --upgrade"
   end
 
   def upload_version(s3_file)
-    "idseq_dag --version | cut -f2 -d ' ' | aws s3 cp  - #{s3_file}"
+    "idseq_dag --version | cut -f2 -d ' ' | aws s3 cp  - #{Shellwords.escape(s3_file)}"
   end
 
   def download_to_filename?(s3_file, local_file)
