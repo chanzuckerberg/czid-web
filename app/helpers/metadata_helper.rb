@@ -105,7 +105,7 @@ module MetadataHelper
                 end
               end
 
-    CSV.generate(headers: true) do |csv|
+    CSVSafe.generate(headers: true) do |csv|
       csv << field_names
       samples.each do |sample|
         values = fields.map do |field|

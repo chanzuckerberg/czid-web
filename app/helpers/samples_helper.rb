@@ -11,7 +11,7 @@ module SamplesHelper
                     quality_control compression_ratio reads_after_star reads_after_trimmomatic reads_after_priceseq reads_after_cdhitdup
                     sample_type nucleotide_type collection_location
                     host_genome notes]
-    CSV.generate(headers: true) do |csv|
+    CSVSafe.generate(headers: true) do |csv|
       csv << attributes
       formatted_samples.each do |sample_info|
         derived_output = sample_info[:derived_sample_output]
