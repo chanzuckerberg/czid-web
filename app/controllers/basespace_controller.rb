@@ -16,17 +16,19 @@ class BasespaceController < ApplicationController
        ENV["BASESPACE_OAUTH_REDIRECT_URI"] &&
        ENV["BASESPACE_CLIENT_ID"] &&
        ENV["BASESPACE_CLIENT_SECRET"]
-      response = HttpHelper.post_json(
-        "https://api.basespace.illumina.com/v1pre3/oauthv2/token",
-        "code" => params[:code],
-        "redirect_uri" => ENV["BASESPACE_OAUTH_REDIRECT_URI"],
-        "client_id" => ENV["BASESPACE_CLIENT_ID"],
-        "client_secret" => ENV["BASESPACE_CLIENT_SECRET"],
-        "grant_type" => "authorization_code"
-      )
 
-      if response.present?
+      begin
+        response = HttpHelper.post_json(
+          "https://api.basespace.illumina.com/v1pre3/oauthv2/token",
+          "code" => params[:code],
+          "redirect_uri" => ENV["BASESPACE_OAUTH_REDIRECT_URI"],
+          "client_id" => ENV["BASESPACE_CLIENT_ID"],
+          "client_secret" => ENV["BASESPACE_CLIENT_SECRET"],
+          "grant_type" => "authorization_code"
+        )
         @access_token = response["access_token"]
+      rescue
+        Rails.logger.warn("Failed to get basespace access token")
       end
     end
   end
