@@ -253,7 +253,7 @@ RSpec.describe PipelineRun, type: :model do
 
     context "AMR counts file exists, but lines are malformed" do
       before do
-        csv_write_string = CSV.generate do |csv|
+        csv_write_string = CSVSafe.generate do |csv|
           MALFORMED_AMR_RESULTS.each do |line|
             csv << line
           end
@@ -285,7 +285,7 @@ RSpec.describe PipelineRun, type: :model do
     context "Properly handle a good AMR result" do
       before do
         pipeline_run.amr_counts = []
-        csv_write_string = CSV.generate do |csv|
+        csv_write_string = CSVSafe.generate do |csv|
           GOOD_AMR_RESULTS.each do |line|
             csv << line
           end

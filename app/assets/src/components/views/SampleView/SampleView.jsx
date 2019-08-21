@@ -303,19 +303,14 @@ class SampleView extends React.Component {
   };
 
   renderSampleMessage = () => {
-    const { pipelineRun, sample, sampleStatus, allowedFeatures } = this.props;
+    const { pipelineRun, sample, sampleStatus } = this.props;
     let status, message, linkText, type, link, icon;
     if (this.pipelineInProgress()) {
       status = "IN PROGRESS";
       message = sampleStatus;
       icon = <LoadingIcon className={cs.icon} />;
       type = "inProgress";
-      if (
-        pipelineRun &&
-        pipelineRun.version &&
-        pipelineRun.version.pipeline &&
-        allowedFeatures.includes("pipeline_viz")
-      ) {
+      if (pipelineRun && pipelineRun.version && pipelineRun.version.pipeline) {
         linkText = "View Pipeline Visualization";
         link = `/samples/${sample.id}/pipeline_viz/${
           pipelineRun.version.pipeline
@@ -392,7 +387,7 @@ class SampleView extends React.Component {
   };
 
   getSidebarParams = () => {
-    const { reportDetails, sample, allowedFeatures } = this.props;
+    const { reportDetails, sample } = this.props;
     if (this.state.sidebarMode === "taxonDetails") {
       return this.state.sidebarTaxonModeConfig;
     }
@@ -401,7 +396,6 @@ class SampleView extends React.Component {
         sampleId: sample.id,
         pipelineVersion: get("pipeline_info.pipeline_version", reportDetails),
         onMetadataUpdate: this.handleMetadataUpdate,
-        showPipelineVizLink: allowedFeatures.includes("pipeline_viz"),
       };
     }
     return {};
@@ -497,7 +491,6 @@ class SampleView extends React.Component {
     const versionDisplay = this.renderVersionDisplay();
 
     const {
-      allowedFeatures,
       project,
       sampleIdToNameMap,
       pipelineVersions,
@@ -513,8 +506,6 @@ class SampleView extends React.Component {
     const showAMR = amr;
     const pipelineVersion =
       pipelineRun && pipelineRun.version && pipelineRun.version.pipeline;
-    const showPipelineVizLink =
-      allowedFeatures.includes("pipeline_viz") && pipelineVersion;
     return (
       <div>
         <NarrowContainer>
@@ -523,10 +514,10 @@ class SampleView extends React.Component {
               <div
                 className={cx(
                   cs.pipelineInfo,
-                  showPipelineVizLink && cs.linkToPipelineViz
+                  pipelineVersion && cs.linkToPipelineViz
                 )}
                 onClick={() =>
-                  showPipelineVizLink &&
+                  pipelineVersion &&
                   window.open(
                     `/samples/${sample.id}/pipeline_viz/${pipelineVersion}`
                   )

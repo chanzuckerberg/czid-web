@@ -450,7 +450,7 @@ class PipelineRun < ApplicationRecord
     # s3_file_name = contigs_summary_s3_path # TODO(yf): might turn back for s3 generation later
     nt_m8_map = get_m8_mapping(CONTIG_NT_TOP_M8)
     nr_m8_map = get_m8_mapping(CONTIG_NR_TOP_M8)
-    CSV.open(local_file_name, 'w') do |writer|
+    CSVSafe.open(local_file_name, 'w') do |writer|
       header_row = ['contig_name', 'read_count', 'contig_length', 'contig_coverage']
       header_row += TaxonLineage.names_a.map { |name| "NT.#{name}" }
       header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NT.#{M8_FIELDS[idx]}" }
@@ -1422,9 +1422,9 @@ class PipelineRun < ApplicationRecord
   def report_info_params
     {
       pipeline_version: pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL,
-      # Default background is complicated... see get_background_id. In any case,
-      # we precache all backgrounds. See precache_report_info below.
+      # background should be set by caller
       background_id: nil,
+      pipeline_run_id: id,
       # For invalidation if underlying data changes. This should only happen in
       # exceptional situations, such as manual DB edits.
       report_ts: max_updated_at.utc.beginning_of_day.to_i,
