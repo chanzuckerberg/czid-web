@@ -36,7 +36,10 @@
       }
 
       .checkmarkIcon {
-        margin-bottom: 4px;
+        width: 25px;
+        height: 25px;
+        margin-right: 6px;
+        fill: $success;
       }
     }
 
@@ -44,16 +47,14 @@
       @include font-body-s;
 
       .helpLink {
-        @include font-label-s;
         color: $primary-light !important;
       }
     }
 
     .instructions {
       @include font-body-s;
-      color: $medium-grey;
       max-width: 500px;
-      margin: 40px auto;
+      margin: 8px auto 40px;
     }
   }
 
@@ -98,15 +99,15 @@
           fill: $error;
           width: 14px;
           height: 14px;
-          margin-right: 4px;
+          margin-right: 5px;
           margin-bottom: 2px;
         }
 
         .checkmarkIcon {
-          width: 13px;
-          height: 12px;
-          margin-right: 4px;
-          margin-bottom: 6px;
+          width: 16px;
+          height: 16px;
+          margin-right: 5px;
+          fill: $success;
         }
       }
     }
@@ -128,9 +129,8 @@
 
   .failedSamples {
     @include font-body-s;
-    color: $medium-grey;
     max-width: 500px;
-    margin: 40px auto;
+    margin: 8px auto 40px;
     text-align: center;
   }
 

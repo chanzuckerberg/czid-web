@@ -193,6 +193,31 @@ export default class SamplesHeatmapControls extends React.Component {
     );
   }
 
+  onSortSamplesChange = order => {
+    if (order === this.props.selectedOptions.sampleSortType) {
+      return;
+    }
+
+    this.props.onSelectedOptionsChange({ sampleSortType: order });
+    logAnalyticsEvent("SamplesHeatmapControls_sort-samples-select_changed", {
+      sampleSortType: order,
+    });
+  };
+
+  renderSortSamplesSelect() {
+    return (
+      <Dropdown
+        fluid
+        rounded
+        options={this.props.options.sampleSortTypeOptions}
+        value={this.props.selectedOptions.sampleSortType}
+        label="Sort Samples"
+        onChange={this.onSortSamplesChange}
+        disabled={!this.props.data}
+      />
+    );
+  }
+
   onDataScaleChange = scaleIdx => {
     if (scaleIdx == this.props.selectedOptions.dataScaleIdx) {
       return;
@@ -371,8 +396,9 @@ export default class SamplesHeatmapControls extends React.Component {
         <div className={`${cs.filterRow} row`}>
           <div className="col s3">{this.renderTaxonLevelSelect()}</div>
           <div className="col s3">{this.renderCategoryFilter()}</div>
-          <div className="col s3">{this.renderMetricSelect()}</div>
-          <div className="col s3">{this.renderBackgroundSelect()}</div>
+          <div className="col s2">{this.renderSortSamplesSelect()}</div>
+          <div className="col s2">{this.renderMetricSelect()}</div>
+          <div className="col s2">{this.renderBackgroundSelect()}</div>
         </div>
         <div className={`${cs.filterRow} row`}>
           <div className="col s3">{this.renderThresholdFilterSelect()}</div>
@@ -418,6 +444,18 @@ SamplesHeatmapControls.propTypes = {
         value: PropTypes.number,
       })
     ),
+    sampleSortTypeOptions: PropTypes.arrayOf(
+      PropTypes.shape({
+        text: PropTypes.string,
+        value: PropTypes.string,
+      })
+    ),
+    sortTaxaOptions: PropTypes.arrayOf(
+      PropTypes.shape({
+        text: PropTypes.string,
+        value: PropTypes.number,
+      })
+    ),
     thresholdFilters: PropTypes.shape({
       operators: PropTypes.arrayOf(PropTypes.string),
       targets: PropTypes.arrayOf(
@@ -444,6 +482,7 @@ SamplesHeatmapControls.propTypes = {
       })
     ),
     readSpecificity: PropTypes.number,
+    sampleSortType: PropTypes.string,
     dataScaleIdx: PropTypes.number,
     taxonsPerSample: PropTypes.number,
   }),

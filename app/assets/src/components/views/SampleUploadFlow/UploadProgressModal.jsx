@@ -9,6 +9,8 @@ import {
   times,
   constant,
   pick,
+  pickBy,
+  size,
 } from "lodash/fp";
 
 import Modal from "~ui/containers/Modal";
@@ -16,7 +18,7 @@ import PropTypes from "~/components/utils/propTypes";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { formatFileSize } from "~/components/utils/format";
 import AlertIcon from "~ui/icons/AlertIcon";
-import CheckmarkIcon from "~ui/icons/CheckmarkIcon";
+import CircleCheckmarkIcon from "~ui/icons/CircleCheckmarkIcon";
 import UploadIcon from "~ui/icons/UploadIcon";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import {
@@ -245,6 +247,16 @@ export default class UploadProgressModal extends React.Component {
     return sum(map(file => file.size, sample.files));
   };
 
+  getNumFailedSamples = () => {
+    const { uploadType } = this.props;
+    const { sampleUploadStatuses, failedSampleNames } = this.state;
+    if (uploadType === "local") {
+      return size(pickBy(status => status === "error", sampleUploadStatuses));
+    } else {
+      return failedSampleNames.length;
+    }
+  };
+
   someLocalSamplesInProgress = () => {
     const { samples } = this.props;
     const { sampleUploadStatuses } = this.state;
@@ -278,7 +290,7 @@ export default class UploadProgressModal extends React.Component {
     if (sampleUploadStatuses[sample.name] === "success") {
       return (
         <React.Fragment>
-          <CheckmarkIcon className={cs.checkmarkIcon} />
+          <CircleCheckmarkIcon className={cs.checkmarkIcon} />
           Uploaded and sent to pipeline
         </React.Fragment>
       );
@@ -293,28 +305,33 @@ export default class UploadProgressModal extends React.Component {
 
     return `Uploaded ${formatFileSize(
       totalSize * uploadPercentage
-    )} of ${formatFileSize(totalSize)}...`;
+    )} of ${formatFileSize(totalSize)}`;
   };
 
-  renderFailedSamplesTitle = () => (
-    <React.Fragment>
-      <div className={cs.titleWithIcon}>
-        <AlertIcon className={cs.alertIcon} />
-        Some samples failed to upload
-      </div>
-      <div className={cs.subtitle}>
-        <a
-          className={cs.helpLink}
-          href="mailto:help@idseq.net"
-          onClick={() =>
-            logAnalyticsEvent("UploadProgressModal_contact-us-link_clicked")
-          }
-        >
-          Contact us for help
-        </a>
-      </div>
-    </React.Fragment>
-  );
+  renderFailedSamplesTitle = () => {
+    const numFailedSamples = this.getNumFailedSamples();
+
+    return (
+      <React.Fragment>
+        <div className={cs.titleWithIcon}>
+          <AlertIcon className={cs.alertIcon} />
+          {numFailedSamples} sample{numFailedSamples === 1 ? "" : "s"} failed to
+          upload
+        </div>
+        <div className={cs.subtitle}>
+          <a
+            className={cs.helpLink}
+            href="mailto:help@idseq.net"
+            onClick={() =>
+              logAnalyticsEvent("UploadProgressModal_contact-us-link_clicked")
+            }
+          >
+            Contact us for help
+          </a>
+        </div>
+      </React.Fragment>
+    );
+  };
 
   renderTitle = () => {
     const { samples, project, uploadType } = this.props;
@@ -330,11 +347,11 @@ export default class UploadProgressModal extends React.Component {
           return (
             <React.Fragment>
               <div className={cs.titleWithIcon}>
-                <CheckmarkIcon className={cs.checkmarkIcon} />
+                <CircleCheckmarkIcon className={cs.checkmarkIcon} />
                 {samples.length} samples successfully created
               </div>
               <div className={cs.instructions}>
-                Our servers have started uploading your sample files from{" "}
+                We have started uploading your sample files from{" "}
                 {uploadType === "basespace" ? "Basespace" : "S3"}. After the
                 upload is complete, your samples will automatically start
                 processing.
@@ -378,7 +395,7 @@ export default class UploadProgressModal extends React.Component {
     // If all local samples succeeded.
     return (
       <div className={cs.titleWithIcon}>
-        <CheckmarkIcon className={cs.checkmarkIcon} />
+        <CircleCheckmarkIcon className={cs.checkmarkIcon} />
         All samples uploaded successfully
       </div>
     );

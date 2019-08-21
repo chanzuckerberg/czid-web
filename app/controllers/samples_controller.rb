@@ -55,6 +55,7 @@ class SamplesController < ApplicationController
   MAX_PAGE_SIZE_V2 = 100
   MAX_BINS = 34
   MIN_CLI_VERSION = '0.7.3'.freeze
+  CLI_DEPRECATION_MSG = "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git` or with sudo + pip2/pip3 depending on your setup to update and try again.".freeze
 
   # GET /samples
   # GET /samples.json
@@ -521,7 +522,9 @@ class SamplesController < ApplicationController
     min_version = Gem::Version.new(MIN_CLI_VERSION)
     unless client && (client == "web" || Gem::Version.new(client) >= min_version)
       render json: {
-        message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
+        message: CLI_DEPRECATION_MSG,
+        # idseq-cli v0.6.0 only checks the 'errors' field, so ensure users see this.
+        errors: [CLI_DEPRECATION_MSG],
         status: :upgrade_required,
       }, status: :upgrade_required
       return
@@ -727,7 +730,8 @@ class SamplesController < ApplicationController
 
   # The json response here should be precached in PipelineRun.
   def report_info
-    MetricUtil.put_metric_now("samples.cache.requested", 1)
+    skip_cache = params[:skip_cache] || false
+    MetricUtil.put_metric_now("samples.cache.requested", 1) unless skip_cache
 
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
     if pipeline_run.nil?
@@ -741,23 +745,31 @@ class SamplesController < ApplicationController
 
     cache_key = ReportHelper.report_info_cache_key(
       request.path,
-      params.permit(report_info_params.keys)
+      params
+        .permit(report_info_params.keys)
+        .merge(pipeline_run_id: pipeline_run.id)
     )
 
-    # This allows 304 Not Modified to be returned so that the client can use its
-    # local cache and avoid the large download.
-    httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
-    response.headers["Last-Modified"] = httpdate
-    # This is a custom header for testing and debugging
-    response.headers["X-IDseq-Cache"] = 'requested'
-    Rails.logger.info("Requesting report_info #{cache_key}")
-
     pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
-    json = Rails.cache.fetch(cache_key, expires_in: 30.days) do
-      MetricUtil.put_metric_now("samples.cache.miss", 1)
-      response.headers["X-IDseq-Cache"] = 'missed'
-      ReportHelper.report_info_json(pipeline_run, params[:background_id])
-    end
+    json =
+      if skip_cache
+        ReportHelper.report_info_json(pipeline_run, params[:background_id])
+      else
+        # This allows 304 Not Modified to be returned so that the client can use its
+        # local cache and avoid the large download.
+        httpdate = Time.at(report_info_params[:report_ts]).utc.httpdate
+        response.headers["Last-Modified"] = httpdate
+        # This is a custom header for testing and debugging
+        response.headers["X-IDseq-Cache"] = 'requested'
+        response.headers["X-IDseq-Cache-Key"] = cache_key
+        Rails.logger.info("Requesting report_info #{cache_key}")
+
+        Rails.cache.fetch(cache_key, expires_in: 30.days) do
+          MetricUtil.put_metric_now("samples.cache.miss", 1)
+          response.headers["X-IDseq-Cache"] = 'missed'
+          ReportHelper.report_info_json(pipeline_run, params[:background_id])
+        end
+      end
 
     render json: json
   end
@@ -1023,7 +1035,9 @@ class SamplesController < ApplicationController
     min_version = Gem::Version.new(MIN_CLI_VERSION)
     unless client && (client == "web" || Gem::Version.new(client) >= min_version)
       render json: {
-        message: "Outdated command line client. Please run `pip install --upgrade git+https://github.com/chanzuckerberg/idseq-cli.git ` or with sudo + pip2/pip3 depending on your setup.",
+        message: CLI_DEPRECATION_MSG,
+        # idseq-cli v0.6.0 only checks the 'errors' field, so ensure users see this.
+        errors: [CLI_DEPRECATION_MSG],
         status: :upgrade_required,
       }, status: :upgrade_required
       return
@@ -1241,7 +1255,7 @@ class SamplesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def samples_params
-    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id, :host_genome_name, :basespace_dataset_id, :basespace_access_token,
+    new_params = params.permit(samples: [:name, :project_id, :status, :host_genome_id, :host_genome_name, :basespace_dataset_id, :basespace_access_token, :skip_cache,
                                          input_files_attributes: [:name, :presigned_url, :source_type, :source, :parts],])
     new_params[:samples] if new_params
   end

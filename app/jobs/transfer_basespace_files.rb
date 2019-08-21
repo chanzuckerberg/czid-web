@@ -10,6 +10,14 @@ class TransferBasespaceFiles
     Rails.logger.info("Start TransferBasespaceFiles for sample id #{sample_id}")
     sample = Sample.find(sample_id)
     sample.transfer_basespace_files(basespace_dataset_id, basespace_access_token)
+
+    # Revoke the access token, so that it can no longer be used.
+    begin
+      BasespaceHelper.revoke_access_token(basespace_access_token)
+      BasespaceHelper.verify_access_token_revoked(basespace_access_token)
+    rescue
+      Rails.logger.warn("BasespaceAccessTokenError Failed to revoke access token")
+    end
   rescue => e
     Rails.logger.error(e)
   end
