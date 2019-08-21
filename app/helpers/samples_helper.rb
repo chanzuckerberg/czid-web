@@ -156,6 +156,8 @@ module SamplesHelper
 
     begin
       entries = S3_CLIENT.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
+      # ignore illumina Undetermined FASTQ files (ex: "Undetermined_AAA_R1_001.fastq.gz")
+      entries = entries.reject { |line| line.include? "Undetermined" }
     rescue Aws::S3::Errors::ServiceError => e # Covers all S3 access errors (AccessDenied/NoSuchBucket/AllAccessDisabled)
       Rails.logger.info("parsed_samples_for_s3_path Aws::S3::Errors::ServiceError. s3_path: #{s3_path}, error_class: #{e.class.name}, error_message: #{e.message} ")
       return
