@@ -129,6 +129,12 @@ class LocalSampleFileUpload extends React.Component {
                 Paired files must be labeled with &quot;_R1&quot; or
                 &quot;_R2&quot; at the end of the basename.
               </li>
+              <li>
+                File names must be no longer than 120 characters and can only
+                contain letters from the English alphabet (A-Z, upper and lower
+                case), numbers (0-9), periods (.), hyphens (-) and underscores
+                (_). Spaces are not allowed.
+              </li>
             </ul>
           </div>
         )}

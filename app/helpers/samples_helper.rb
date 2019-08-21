@@ -1,9 +1,12 @@
 require 'open3'
 require 'csv'
+require 'aws-sdk-s3'
 
 module SamplesHelper
   include PipelineOutputsHelper
   include ErrorHelper
+
+  S3_CLIENT = Aws::S3::Client.new
 
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
@@ -142,14 +145,27 @@ module SamplesHelper
     default_attributes = { project_id: project_id.to_i,
                            host_genome_id: host_genome_id,
                            status: 'created', }
-    s3_path.chomp!('/')
-    s3_bucket = 's3://' + s3_path.sub('s3://', '').split('/')[0]
-    s3_output, _stderr, status = Open3.capture3("aws", "s3", "ls", "--recursive", "#{s3_path}/")
-    return unless status.exitstatus.zero?
-    s3_output.chomp!
-    entries = s3_output.split("\n").reject { |line| line.include? "Undetermined" }
+
+    parsed_uri = URI.parse(s3_path)
+    return if parsed_uri.scheme != "s3"
+
+    s3_bucket_name = parsed_uri.host
+    return if s3_bucket_name.nil?
+
+    s3_prefix = parsed_uri.path.sub(%r{^/(.*?)/?$}, '\1/')
+
+    begin
+      entries = S3_CLIENT.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
+      # ignore illumina Undetermined FASTQ files (ex: "Undetermined_AAA_R1_001.fastq.gz")
+      entries = entries.reject { |line| line.include? "Undetermined" }
+    rescue Aws::S3::Errors::ServiceError => e # Covers all S3 access errors (AccessDenied/NoSuchBucket/AllAccessDisabled)
+      Rails.logger.info("parsed_samples_for_s3_path Aws::S3::Errors::ServiceError. s3_path: #{s3_path}, error_class: #{e.class.name}, error_message: #{e.message} ")
+      return
+    end
+
     samples = {}
-    entries.each do |file_name|
+    entries.each do |s3_entry|
+      file_name = File.basename(s3_entry)
       matched_paired = InputFile::BULK_FILE_PAIRED_REGEX.match(file_name)
       matched_single = InputFile::BULK_FILE_SINGLE_REGEX.match(file_name)
       if matched_paired
@@ -161,12 +177,11 @@ module SamplesHelper
       else
         next
       end
-      source = matched[0]
-      name = matched[1].split('/')[-1]
+      name = matched[1]
       samples[name] ||= default_attributes.clone
       samples[name][:input_files_attributes] ||= []
-      samples[name][:input_files_attributes][read_idx] = { name: source.split('/')[-1],
-                                                           source: "#{s3_bucket}/#{source}",
+      samples[name][:input_files_attributes][read_idx] = { name: file_name,
+                                                           source: "s3://#{s3_bucket_name}/#{s3_entry}",
                                                            source_type: InputFile::SOURCE_TYPE_S3, }
     end
 
