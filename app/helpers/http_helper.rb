@@ -15,7 +15,7 @@ module HttpHelper
 
     unless response.is_a?(Net::HTTPSuccess)
       Rails.logger.warn("POST request to #{url} failed: #{response.message}")
-      return nil
+      raise "HTTP POST request failed"
     end
 
     begin
@@ -23,7 +23,7 @@ module HttpHelper
       JSON.parse(response.body)
     rescue JSON::ParserError
       Rails.logger.warn("POST response from #{url} was not valid JSON")
-      return nil
+      raise
     end
   end
 
@@ -47,7 +47,7 @@ module HttpHelper
       unless silence_errors
         Rails.logger.warn("GET request to #{url} failed: #{response.message}")
       end
-      return nil
+      raise "HTTP GET request failed"
     end
 
     begin
@@ -55,7 +55,7 @@ module HttpHelper
       JSON.parse(response.body)
     rescue JSON::ParserError
       Rails.logger.warn("GET response from #{url} was not valid JSON")
-      return nil
+      raise
     end
   end
 
@@ -76,7 +76,7 @@ module HttpHelper
 
     unless response.is_a?(Net::HTTPSuccess)
       Rails.logger.warn("DELETE request to #{url} failed: #{response.message}")
-      return nil
+      raise "HTTP DELETE request failed"
     end
 
     return nil
