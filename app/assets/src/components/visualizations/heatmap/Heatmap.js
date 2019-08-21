@@ -45,6 +45,8 @@ export default class Heatmap {
         minCellWidth: 26,
         minCellHeight: 26,
         minWidth: 1240,
+        maxWidth: 1600, // used for shrink-to-fit
+        zoom: null, // multiplier for zooming in and out
         minHeight: 500,
         clustering: true,
         shouldSortColumns: true,
@@ -132,6 +134,11 @@ export default class Heatmap {
       default:
         break;
     }
+  }
+
+  updateZoom(zoom) {
+    this.options.zoom = zoom;
+    this.processData("placeContainers");
   }
 
   updateScale(scale) {
@@ -250,10 +257,14 @@ export default class Heatmap {
       .append("svg")
       .attr("class", cs.heatmap)
       .attr("id", "visualization")
-      .attr("xmlns", "http://www.w3.org/2000/svg")
-      // Not standard but it works for downloads and svgsaver. See:
-      // https://stackoverflow.com/questions/11293026/default-background-color-of-svg-root-element
-      .attr("style", `background-color: ${this.options.svgBackgroundColor}`);
+      .attr("xmlns", "http://www.w3.org/2000/svg");
+
+    // Not standard but it works for downloads and svgsaver. See:
+    // https://stackoverflow.com/questions/11293026/default-background-color-of-svg-root-element
+    this.svg.attr(
+      "style",
+      `background-color: ${this.options.svgBackgroundColor}`
+    );
 
     this.g = this.svg.append("g");
     this.gRowLabels = this.g.append("g").attr("class", cs.rowLabels);
@@ -326,7 +337,15 @@ export default class Heatmap {
       this.options.marginBottom +
       this.options.spacing;
 
-    this.svg.attr("width", this.width).attr("height", this.height);
+    this.svg.attr("viewBox", `0 0 ${this.width} ${this.height}`);
+
+    this.options.zoom = this.getZoomFactor();
+
+    // If we make these numbers larger than the viewport dimensions we’ll
+    // effectively zoom out, and if we make them smaller we’ll zoom in.
+    this.svg
+      .attr("width", this.width * this.options.zoom)
+      .attr("height", this.height * this.options.zoom);
 
     this.g.attr(
       "transform",
@@ -1326,5 +1345,14 @@ export default class Heatmap {
     } else {
       return this.metadataColors[value];
     }
+  }
+
+  getZoomFactor() {
+    if (this.options.zoom !== null) return this.options.zoom;
+    // Decrease the max width slightly to avoid zooming slightly too much, which
+    // would produce a useless horizontal scrollbar.
+    const adjustedMaxWidth = this.options.maxWidth - 8;
+    // Shrink to fit
+    return Math.min(this.width, adjustedMaxWidth) / this.width;
   }
 }

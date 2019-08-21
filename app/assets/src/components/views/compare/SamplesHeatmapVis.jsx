@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import cx from "classnames";
 import { size, map, keyBy } from "lodash/fp";
 
-import { logAnalyticsEvent } from "~/api/analytics";
+import { withAnalytics, logAnalyticsEvent } from "~/api/analytics";
 import { DataTooltip } from "~ui/containers";
 import { openUrl } from "~utils/links";
 import Heatmap from "~/components/visualizations/heatmap/Heatmap";
@@ -12,6 +12,7 @@ import MetadataLegend from "~/components/common/Heatmap/MetadataLegend";
 import MetadataSelector from "~/components/common/Heatmap/MetadataSelector";
 import { splitIntoMultipleLines } from "~/helpers/strings";
 import AlertIcon from "~ui/icons/AlertIcon";
+import PlusMinusControl from "~/components/ui/controls/PlusMinusControl";
 
 import cs from "./samples_heatmap_vis.scss";
 
@@ -82,6 +83,8 @@ class SamplesHeatmapVis extends React.Component {
         scaleMin: 0,
         printCaption: this.generateHeatmapCaptions(),
         shouldSortColumns: this.props.sampleSortType === "alpha", // else cluster
+        // Shrink to fit the viewport width
+        maxWidth: this.heatmapContainer.offsetWidth,
       }
     );
     this.heatmap.start();
@@ -274,6 +277,7 @@ class SamplesHeatmapVis extends React.Component {
     return {
       subtitle,
       data: sections,
+      nodeHasData,
     };
   }
 
@@ -334,6 +338,14 @@ class SamplesHeatmapVis extends React.Component {
     });
   }
 
+  handleZoom(increment) {
+    const newZoom = Math.min(
+      3, // max zoom factor
+      Math.max(0.2, this.heatmap.options.zoom + increment)
+    );
+    this.heatmap.updateZoom(newZoom);
+  }
+
   render() {
     const {
       tooltipLocation,
@@ -344,6 +356,17 @@ class SamplesHeatmapVis extends React.Component {
     } = this.state;
     return (
       <div className={cs.samplesHeatmapVis}>
+        <PlusMinusControl
+          onPlusClick={withAnalytics(
+            () => this.handleZoom(0.25),
+            "SamplesHeatmapVis_zoom-in-control_clicked"
+          )}
+          onMinusClick={withAnalytics(
+            () => this.handleZoom(-0.25),
+            "SamplesHeatmapVis_zoom-out-control_clicked"
+          )}
+          className={cs.plusMinusControl}
+        />
         <div
           className={cs.heatmapContainer}
           ref={container => {
@@ -357,6 +380,8 @@ class SamplesHeatmapVis extends React.Component {
               style={getTooltipStyle(tooltipLocation, {
                 buffer: 20,
                 below: true,
+                // so we can show the tooltip above the cursor if need be
+                height: nodeHoverInfo.nodeHasData ? 300 : 180,
               })}
             >
               <DataTooltip {...nodeHoverInfo} />
