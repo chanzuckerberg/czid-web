@@ -139,7 +139,6 @@ class RemoteSampleFileUpload extends React.Component {
                 case), numbers (0-9), periods (.), hyphens (-) and underscores
                 (_). Spaces are not allowed.
               </li>
-              <li>File names must be no longer than 140 characters.</li>
             </ul>
           </div>
         )}

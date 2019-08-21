@@ -147,7 +147,7 @@ module SamplesHelper
                            status: 'created', }
 
     parsed_uri = URI.parse(s3_path)
-    return unless parsed_uri.scheme == "s3"
+    return if parsed_uri.scheme != "s3"
 
     s3_bucket_name = parsed_uri.host
     return if s3_bucket_name.nil?
