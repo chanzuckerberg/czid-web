@@ -6,6 +6,8 @@ module SamplesHelper
   include PipelineOutputsHelper
   include ErrorHelper
 
+  S3_CLIENT = Aws::S3::Client.new
+
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
                     total_reads nonhost_reads nonhost_reads_percent total_ercc_reads subsampled_fraction
@@ -152,9 +154,8 @@ module SamplesHelper
 
     s3_prefix = parsed_uri.path.sub(%r{^/(.*?)/?$}, '\1/')
 
-    client = Aws::S3::Client.new
     begin
-      entries = client.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
+      entries = S3_CLIENT.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
     rescue Aws::S3::Errors::ServiceError => e # Covers all S3 access errors (AccessDenied/NoSuchBucket/AllAccessDisabled)
       Rails.logger.info("parsed_samples_for_s3_path Aws::S3::Errors::ServiceError. s3_path: #{s3_path}, error_class: #{e.class.name}, error_message: #{e.message} ")
       return
