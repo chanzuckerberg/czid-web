@@ -20,6 +20,7 @@ $space-xl: 40px;
   &::-webkit-scrollbar {
     // Overwrite semantic ui.
     width: 8px !important;
+    height: 8px !important;
   }
 
   &::-webkit-scrollbar-track {

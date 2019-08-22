@@ -537,7 +537,7 @@ class SamplesHeatmapView extends React.Component {
 
   renderVisualization() {
     return (
-      <div className="row visualization-content">
+      <div className="visualization-content">
         {this.state.loading ? this.renderLoading() : this.renderHeatmap()}
       </div>
     );

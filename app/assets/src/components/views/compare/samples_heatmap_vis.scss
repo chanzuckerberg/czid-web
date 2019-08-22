@@ -20,10 +20,11 @@
   .heatmapContainer {
     overflow-x: auto;
     // Set the height to force the horizontal scrollbar to appear at the bottom
-    // of the viewport instead of the bottom of the page. 360px is the height
+    // of the viewport instead of the bottom of the page. 334px is the height
     // of the all the elements above the heatmapContainer. It *will* need to
     // change if the height of the elements above ever change.
-    height: calc(100vh - 360px);
+    // TODO(mark): Use flexbox instead of hard-coding the offset.
+    height: calc(100vh - 334px);
 
     svg {
       display: block;
