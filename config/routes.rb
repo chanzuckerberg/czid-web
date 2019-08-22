@@ -1,5 +1,3 @@
-require 'resque/server'
-
 Rails.application.routes.draw do
   resources :backgrounds do
     get :show_taxon_dist, on: :member
@@ -143,7 +141,7 @@ Rails.application.routes.draw do
   end
 
   authenticate :user, ->(u) { u.admin? } do
-    mount Resque::Server.new, at: "/resque"
+    mount RESQUE_SERVER, at: "/resque"
   end
 
   # See health_check gem
