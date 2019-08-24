@@ -22,6 +22,11 @@ module SamplesHelper
         db_sample = sample_info[:db_sample]
         run_info = sample_info[:run_info]
         metadata = sample_info[:metadata]
+        collection_location = if metadata && metadata[:collection_location_v2]
+                                metadata[:collection_location_v2].is_a?(Hash) ? metadata[:collection_location_v2].dig(:name) : metadata[:collection_location_v2]
+                              else
+                                ''
+                              end
         data_values = { sample_name: db_sample ? db_sample[:name] : '',
                         uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
                         upload_date: db_sample ? db_sample[:created_at] : '',
@@ -40,7 +45,8 @@ module SamplesHelper
                         reads_after_cdhitdup: (derived_output[:summary_stats] || {})[:reads_after_cdhitdup] || '',
                         sample_type: metadata && metadata[:sample_type] ? metadata[:sample_type] : '',
                         nucleotide_type: metadata && metadata[:nucleotide_type] ? metadata[:nucleotide_type] : '',
-                        collection_location: metadata && metadata[:collection_location_v2] ? metadata[:collection_location_v2] : '',
+                        # Handle both location objects w/name and strings
+                        collection_location: collection_location,
                         host_genome: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
                         notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '', }
         attributes_as_symbols = attributes.map(&:to_sym)
