@@ -77,9 +77,20 @@ class Header extends React.Component {
     const {
       adminUser,
       userSignedIn,
+      showBlank,
       disableNavigation,
       ...userMenuProps
     } = this.props;
+
+    if (showBlank) {
+      return (
+        <div className={cs.header}>
+          <div className={cs.logo}>
+            <LogoIcon className={cs.icon} />
+          </div>
+        </div>
+      );
+    }
 
     return (
       userSignedIn && (
@@ -110,6 +121,7 @@ Header.propTypes = {
   adminUser: PropTypes.bool,
   userSignedIn: PropTypes.bool,
   disableNavigation: PropTypes.bool,
+  showBlank: PropTypes.bool,
 };
 
 const UserMenuDropDown = ({

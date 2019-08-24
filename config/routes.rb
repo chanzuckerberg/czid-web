@@ -65,6 +65,8 @@ Rails.application.routes.draw do
   get 'terms_changes', to: 'support#terms_changes'
   get 'faqs', to: 'support#faqs'
 
+  get 'maintenance', to: 'home#maintenance'
+
   resources :projects do
     get :make_project_reports_csv, on: :member
     get :project_reports_csv_status, on: :member

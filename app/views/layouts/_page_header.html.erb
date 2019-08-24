@@ -1,5 +1,5 @@
 <div id="page_header">
-  <% if current_user && current_user.id %>
+  <% if current_user && current_user.id && !@show_blank_header %>
     <%= javascript_tag do %>
       react_component('Header', {
         adminUser: <%= current_user.admin %>,
@@ -22,7 +22,10 @@
     <% end %>
   <% else %>
     <%= javascript_tag do %>
-      react_component('Header', { userSignedIn: false }, 'page_header')
+      react_component('Header', {
+        userSignedIn: false,
+        showBlank: <%= @show_blank_header %>
+      }, 'page_header')
     <% end %>
   <% end %>
 </div>
