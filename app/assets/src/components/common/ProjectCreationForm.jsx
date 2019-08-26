@@ -3,6 +3,7 @@ import cx from "classnames";
 import PropTypes from "prop-types";
 
 import Input from "~ui/controls/Input";
+import Textarea from "~ui/controls/Textarea";
 import RadioButton from "~ui/controls/RadioButton";
 import { createProject } from "~/api";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
@@ -15,11 +16,18 @@ class ProjectCreationForm extends React.Component {
     name: "",
     publicAccess: -1, // No selection by default
     error: "",
+    description: "",
   };
 
   handleNameChange = name => {
     this.setState({
       name,
+    });
+  };
+
+  handleDescriptionChange = description => {
+    this.setState({
+      description,
     });
   };
 
@@ -34,6 +42,7 @@ class ProjectCreationForm extends React.Component {
       const newProject = await createProject({
         name: this.state.name,
         public_access: this.state.publicAccess,
+        description: this.state.description,
       });
 
       this.props.onCreate(newProject);
@@ -95,6 +104,21 @@ class ProjectCreationForm extends React.Component {
                 will become public after one year.
               </div>
             </div>
+          </div>
+        </div>
+        <div className={cs.field}>
+          <div>
+            <span className={cs.label}>Description</span>
+            <span className={cs.optionalLabel}> - Optional</span>
+          </div>
+          <Textarea
+            onChange={this.handleDescriptionChange}
+            value={this.state.description}
+            className={cs.desc}
+            maxLength="700"
+          />
+          <div className={cs.charCounter}>
+            {700 - this.state.description.length}/700 characters remaining
           </div>
         </div>
         {this.state.error && <div className={cs.error}>{this.state.error}</div>}

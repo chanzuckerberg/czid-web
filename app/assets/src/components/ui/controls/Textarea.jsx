@@ -20,6 +20,7 @@ class Textarea extends React.Component {
     return (
       <SemanticTextarea
         className={cx(cs.textarea, className)}
+        maxLength={this.maxLength}
         {...props}
         onChange={this.handleChange}
       />
@@ -31,6 +32,7 @@ Textarea.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   className: PropTypes.string,
+  maxLength: PropTypes.string,
 };
 
 export default Textarea;
