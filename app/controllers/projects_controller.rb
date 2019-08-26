@@ -96,6 +96,7 @@ class ProjectsController < ApplicationController
             {
               id: project.id,
               name: project.name,
+              description: project.description,
               created_at: project.created_at,
               public_access: project.public_access,
               number_of_samples: (samples_by_project_id[project.id] || []).length,
@@ -128,7 +129,7 @@ class ProjectsController < ApplicationController
           !hide_empty_projects || (sample_count_by_project_id[project.id] || 0) > 0
         end
         extended_projects = filtered_projects.map do |project|
-          project.as_json(only: [:id, :name, :created_at, :public_access]).merge(
+          project.as_json(only: [:id, :name, :description, :created_at, :public_access]).merge(
             number_of_samples: sample_count_by_project_id[project.id] || 0,
             hosts: host_genome_names_by_project_id[project.id] || [],
             tissues: tissues_by_project_id[project.id] || [],
@@ -253,7 +254,7 @@ class ProjectsController < ApplicationController
   def choose_project
     project_search = current_power.updatable_projects.index_by(&:name).map do |name, record|
       { "title" => name,
-        "description" => "",
+        "description" => record.description,
         "project_id" => record.id, }
     end
     render json: JSON.dump(project_search)
@@ -270,6 +271,7 @@ class ProjectsController < ApplicationController
         render json: {
           id: @project.id,
           name: @project.name,
+          description: @project.description,
           public_access: @project.public_access.to_i,
           created_at: @project.created_at,
           total_sample_count: @samples.count,
@@ -576,7 +578,7 @@ class ProjectsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def project_params
-    result = params.require(:project).permit(:name, :public_access, user_ids: [])
+    result = params.require(:project).permit(:name, :public_access, :description, user_ids: [])
     result[:name] = sanitize(result[:name]) if result[:name]
     result
   end
