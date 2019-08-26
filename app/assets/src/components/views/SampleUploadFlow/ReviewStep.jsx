@@ -9,7 +9,6 @@ import TermsAgreement from "~ui/controls/TermsAgreement";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
-import ProjectDescription from "~/components/views/projects/ProjectDescription";
 import { formatFileSize } from "~/components/utils/format";
 
 import cs from "./sample_upload_flow.scss";
