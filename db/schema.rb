@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20_190_813_185_753) do
+ActiveRecord::Schema.define(version: 20_190_823_223_316) do
   create_table "alignment_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.string "name"
     t.string "index_dir_suffix"
@@ -36,6 +36,12 @@ ActiveRecord::Schema.define(version: 20_190_813_185_753) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pipeline_run_id", "allele"], name: "index_amr_counts_on_pipeline_run_id_and_allele", unique: true
+  end
+
+  create_table "app_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "key"
+    t.string "value"
+    t.index ["key"], name: "index_app_configs_on_key", unique: true
   end
 
   create_table "archived_backgrounds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|

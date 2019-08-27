@@ -2,10 +2,11 @@ require 'will_paginate/array'
 
 class HomeController < ApplicationController
   include SamplesHelper
-  before_action :login_required, except: [:landing, :sign_up]
+  before_action :login_required, except: [:landing, :sign_up, :maintenance]
   before_action :admin_required, only: [:all_data]
-  skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up]
-  power :projects, except: [:landing, :sign_up]
+  skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up, :maintenance]
+  skip_before_action :check_for_maintenance, only: [:maintenance, :landing, :sign_up]
+  power :projects, except: [:landing, :sign_up, :maintenance]
 
   # Public unsecured landing page
   def landing
@@ -113,6 +114,14 @@ class HomeController < ApplicationController
     render json: {
       status: :internal_server_error,
     }
+  end
+
+  def maintenance
+    if get_app_config("disable_site_for_maintenance") != "1"
+      redirect_to root_path
+    else
+      @show_blank_header = true
+    end
   end
 
   private

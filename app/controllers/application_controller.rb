@@ -2,12 +2,14 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   before_action :authenticate_user!
+  before_action :check_for_maintenance
   before_action :check_rack_mini_profiler
   before_action :check_browser
   before_action :set_current_context_for_logging!
   before_action :set_application_view_variables
 
   include Consul::Controller
+  include AppConfigHelper
 
   current_power do
     Power.new(current_user)
@@ -29,6 +31,12 @@ class ApplicationController < ActionController::Base
     redirect_to root_path unless current_user && (
       current_user.allowed_feature_list.include?(allowed_feature) || (allow_admin && current_user.admin?)
     )
+  end
+
+  def check_for_maintenance
+    if get_app_config(AppConfig::DISABLE_SITE_FOR_MAINTENANCE) == "1"
+      redirect_to maintenance_path
+    end
   end
 
   def no_demo_user
