@@ -330,13 +330,13 @@
       height: 40px;
       width: 40px;
       margin-right: 15px;
-      flex-shrink: 0;
     }
 
     .descriptionContainer {
       @include font-body-s;
       color: $dark-grey;
       white-space: pre-wrap;
+      margin: 10px 0;
     }
   }
 

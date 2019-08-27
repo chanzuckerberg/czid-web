@@ -10,10 +10,10 @@
   .optionalLabel {
     @include font-body-xxs;
     color: $medium-grey;
-    margin-bottom: 5px;
   }
 
-  .desc {
+  .descriptionTextArea {
+    @include font-body-xs;
     margin-top: 5px;
     padding: 5px;
     height: 150px;
