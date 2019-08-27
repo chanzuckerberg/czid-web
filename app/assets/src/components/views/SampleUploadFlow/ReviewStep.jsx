@@ -24,6 +24,7 @@ class ReviewStep extends React.Component {
   state = {
     consentChecked: false,
     showUploadModal: false,
+    showLess: true,
   };
 
   uploadSamplesAndMetadata = () => {
@@ -116,8 +117,16 @@ class ReviewStep extends React.Component {
     }
   };
 
+  toggleDisplayDescription = () => {
+    this.setState(prevState => ({ showLess: !prevState.showLess }));
+  };
+
+  countNewLines = text => {
+    return text.split(/\r*\n/).length;
+  };
+
   render() {
-    const { showUploadModal } = this.state;
+    const { showUploadModal, showLess } = this.state;
 
     const {
       onUploadComplete,
@@ -171,7 +180,25 @@ class ReviewStep extends React.Component {
                   </div>
                 </div>
                 <div className={cs.descriptionContainer}>
-                  {this.props.project.description}
+                  {/* Use showmore/showless pattern if description has many (>4) newlines. */}
+                  {/* TODO(julie): Consider making a separate component to do this in a
+                  less hacky way. */}
+                  {this.countNewLines(this.props.project.description) < 5 ||
+                  !showLess ? (
+                    <div>{this.props.project.description}</div>
+                  ) : (
+                    <div className={cs.truncated}>
+                      {this.props.project.description}
+                    </div>
+                  )}
+                  {this.countNewLines(this.props.project.description) > 5 && (
+                    <div
+                      className={cs.showHide}
+                      onClick={this.toggleDisplayDescription}
+                    >
+                      {showLess ? "Show More" : "Show Less"}
+                    </div>
+                  )}
                 </div>
                 <div className={cs.existingSamples}>
                   {this.props.project.number_of_samples || 0} existing samples
