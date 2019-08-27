@@ -8,6 +8,7 @@ import RadioButton from "~ui/controls/RadioButton";
 import { createProject } from "~/api";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
+import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
 
 import cs from "./project_creation_form.scss";
 
@@ -115,10 +116,11 @@ class ProjectCreationForm extends React.Component {
             onChange={this.handleDescriptionChange}
             value={this.state.description}
             className={cs.desc}
-            maxLength="700"
+            maxLength={MAX_DESCRIPTION_LENGTH}
           />
           <div className={cs.charCounter}>
-            {700 - this.state.description.length}/700 characters remaining
+            {MAX_DESCRIPTION_LENGTH - this.state.description.length}/
+            {MAX_DESCRIPTION_LENGTH} characters remaining
           </div>
         </div>
         {this.state.error && <div className={cs.error}>{this.state.error}</div>}
