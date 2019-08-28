@@ -8,7 +8,7 @@
       "gsnap.hitsummary.tab",
       "rapsearch2.hitsummary.tab"
     ],
-    <% if attribute_dict[:pipeline_version].to_f >= 3.6 %>
+    <% if attribute_dict[:coverage_viz_enabled] %>
       "refined_gsnap_in": [
         "gsnap.reassigned.m8",
         "gsnap.hitsummary2.tab",
@@ -39,7 +39,7 @@
     ],
     "alignment_viz_out": ["align_viz.summary"],
     "srst2_out": ["out.log", "out__genes__ARGannot_r2__results.txt", "out__fullgenes__ARGannot_r2__results.txt", "amr_processed_results.csv", "amr_summary_results.csv", "output__.ARGannot_r2.sorted.bam"],
-    <% if attribute_dict[:pipeline_version].to_f >= 3.6 %>
+    <% if attribute_dict[:coverage_viz_enabled] %>
       "coverage_viz_out": ["coverage_viz_summary.json"],
     <% end %>
     <% if @attribute_dict[:fastq2] %>
@@ -111,7 +111,7 @@
         "file_ext": "<%= @attribute_dict[:file_ext] %>"
       }
     },
-    <% if attribute_dict[:pipeline_version].to_f >= 3.6 %>
+    <% if attribute_dict[:coverage_viz_enabled] %>
       {
         "in": ["refined_gsnap_in", "contig_in", "gsnap_m8"],
         "out": "coverage_viz_out",
@@ -139,7 +139,7 @@
     "gsnap_m8": {
       "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/results/<%= @attribute_dict[:pipeline_version] %>"
     },
-    <% if attribute_dict[:pipeline_version].to_f >= 3.6 %>
+    <% if attribute_dict[:coverage_viz_enabled] %>
       "refined_gsnap_in": {
         "s3_dir": "s3://<%= @attribute_dict[:bucket] %>/samples/<%= @project_id %>/<%= @sample_id %>/postprocess/<%= @attribute_dict[:pipeline_version] %>/assembly"
       },

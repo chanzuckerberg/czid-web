@@ -38,7 +38,7 @@
       "assembly/gsnap.reassigned.m8",
       "assembly/gsnap.hitsummary2.tab",
       "assembly/refined_gsnap_counts.json",
-      <% if attribute_dict[:pipeline_version].to_f >= 3.6 %>
+      <% if attribute_dict[:coverage_viz_enabled] %>
         "assembly/gsnap_contig_summary.json",
         "assembly/gsnap.blast.top.m8"
       <% else %>
@@ -50,7 +50,7 @@
       "assembly/rapsearch2.reassigned.m8",
       "assembly/rapsearch2.hitsummary2.tab",
       "assembly/refined_rapsearch2_counts.json",
-      <% if attribute_dict[:pipeline_version].to_f >= 3.6 %>
+      <% if attribute_dict[:coverage_viz_enabled] %>
         "assembly/rapsearch2_contig_summary.json",
         "assembly/rapsearch2.blast.top.m8"
       <% else %>
