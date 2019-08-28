@@ -24,7 +24,7 @@ class ReviewStep extends React.Component {
   state = {
     consentChecked: false,
     showUploadModal: false,
-    showLess: true,
+    showLessDescription: true,
   };
 
   uploadSamplesAndMetadata = () => {
@@ -118,15 +118,20 @@ class ReviewStep extends React.Component {
   };
 
   toggleDisplayDescription = () => {
-    this.setState(prevState => ({ showLess: !prevState.showLess }));
+    this.setState(prevState => ({
+      showLessDescription: !prevState.showLessDescription,
+    }));
   };
 
   countNewLines = text => {
+    // the code for newline in Windows is \r\n
     return text.split(/\r*\n/).length;
   };
 
   render() {
-    const { showUploadModal, showLess } = this.state;
+    const { showUploadModal, showLessDescription } = this.state;
+    const shouldTruncateDescription =
+      this.countNewLines(this.props.project.description) > 5;
 
     const {
       onUploadComplete,
@@ -183,20 +188,21 @@ class ReviewStep extends React.Component {
                   {/* Use showmore/showless pattern if description has many (>4) newlines. */}
                   {/* TODO(julie): Consider making a separate component to do this in a
                   less hacky way. */}
-                  {this.countNewLines(this.props.project.description) < 5 ||
-                  !showLess ? (
-                    <div>{this.props.project.description}</div>
-                  ) : (
-                    <div className={cs.truncated}>
-                      {this.props.project.description}
-                    </div>
-                  )}
-                  {this.countNewLines(this.props.project.description) > 5 && (
+                  <div
+                    className={cx(
+                      shouldTruncateDescription &&
+                        showLessDescription &&
+                        cs.truncated
+                    )}
+                  >
+                    {this.props.project.description}
+                  </div>
+                  {shouldTruncateDescription && (
                     <div
                       className={cs.showHide}
                       onClick={this.toggleDisplayDescription}
                     >
-                      {showLess ? "Show More" : "Show Less"}
+                      {showLessDescription ? "Show More" : "Show Less"}
                     </div>
                   )}
                 </div>
