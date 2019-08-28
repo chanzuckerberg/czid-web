@@ -208,6 +208,22 @@ const UserMenuDropDown = ({
           signOut,
           "Header_dropdown-logout-option_clicked"
         )}
+      />,
+      <BareDropdown.Item
+        key="8"
+        text={
+          <a
+            className={cs.option}
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://github.com/chanzuckerberg/idseq-dag/wiki"
+            onClick={() =>
+              logAnalyticsEvent("Header_dropdown-wiki-option_clicked")
+            }
+          >
+            IDseq Wiki
+          </a>
+        }
       />
     );
     return userDropdownItems;
