@@ -107,9 +107,11 @@ class ProjectCreationForm extends React.Component {
             </div>
           </div>
         </div>
-        <div className={cs.label}>
-          Description
-          <span className={cs.optionalLabel}> - Optional</span>
+        <div className={cs.field}>
+          <div className={cs.label}>
+            Description
+            <span className={cs.optionalLabel}> - Optional</span>
+          </div>
           <Textarea
             onChange={this.handleDescriptionChange}
             value={this.state.description}
