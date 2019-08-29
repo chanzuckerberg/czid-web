@@ -14,11 +14,6 @@ import cs from "./amr_heatmap_vis.scss";
 const VIEW_LEVEL_ALLELES = "allele";
 const VIEW_LEVEL_GENES = "gene";
 
-const METRICS = [
-  { text: "Coverage", key: "coverage" },
-  { text: "Depth", key: "depth" },
-];
-
 const DEFAULT_SELECTED_METADATA = ["collection_location_v2"];
 
 export default class AMRHeatmapVis extends React.Component {
@@ -45,13 +40,15 @@ export default class AMRHeatmapVis extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     const { selectedMetadata, nodeHovered, metadataLabelHovered } = this.state;
     const { sampleLabels, selectedOptions } = this.props;
-    if (selectedOptions !== prevProps.selectedOptions ||
+    if (
+      selectedOptions !== prevProps.selectedOptions ||
       sampleLabels !== prevProps.sampleLabels
     ) {
       this.updateHeatmap();
     }
-    if (selectedMetadata !== prevState.selectedMetadata ||
-        sampleLabels !== prevProps.sampleLabels
+    if (
+      selectedMetadata !== prevState.selectedMetadata ||
+      sampleLabels !== prevProps.sampleLabels
     ) {
       this.heatmap.updateColumnMetadata(this.getSelectedMetadataFields());
     }
@@ -73,6 +70,188 @@ export default class AMRHeatmapVis extends React.Component {
           value: samplesMetadataTypes[type].key,
         };
       });
+  }
+
+  getTooltipData(node) {
+    const {
+      sampleLabels,
+      alleleToGeneMap,
+      samplesWithAMRCounts,
+      selectedOptions,
+      metrics,
+    } = this.props;
+    const sampleName = sampleLabels[node.columnIndex].label;
+    const rowLabel = this.getHeatmapLabels()[node.rowIndex].label;
+    const sampleForColumn = samplesWithAMRCounts[node.columnIndex];
+
+    const amrCountForNode = this.findAMRCountForName(rowLabel, sampleForColumn);
+
+    let gene = "";
+    let allele = "";
+    switch (selectedOptions.viewLevel) {
+      case VIEW_LEVEL_ALLELES: {
+        allele = rowLabel;
+        gene = alleleToGeneMap[allele];
+        break;
+      }
+      case VIEW_LEVEL_GENES: {
+        gene = rowLabel;
+        allele = amrCountForNode ? amrCountForNode.allele : "---";
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+
+    let values = metrics.map(metric => {
+      // If sample is too old to have evaluated the new metrics, give "N/A"
+      let value = amrCountForNode ? amrCountForNode[metric.value] || "N/A" : 0;
+
+      if (
+        metric.value !== "coverage" &&
+        metric.value !== "depth" &&
+        sampleForColumn.amrCounts.length > 0
+      ) {
+        // If sample is too old to have evaluated the new metrics,
+        // change 0 to N/A
+        const newAMRDataCheck = sampleForColumn.amrCounts[0].rpm;
+        if (
+          value === 0 &&
+          (newAMRDataCheck === null || newAMRDataCheck === undefined)
+        ) {
+          value = "N/A";
+        }
+      }
+
+      return [
+        metric.text,
+        metric.value === selectedOptions.metric ? <b>{value}</b> : value,
+      ];
+    });
+
+    return [
+      {
+        name: "Info",
+        data: [["Sample", sampleName], ["Gene", gene], ["Allele", allele]],
+      },
+      {
+        name: "Values",
+        data: values,
+      },
+    ];
+  }
+
+  getHeatmapLabels() {
+    const { alleleLabels, geneLabels, selectedOptions } = this.props;
+    switch (selectedOptions.viewLevel) {
+      case VIEW_LEVEL_ALLELES: {
+        return alleleLabels;
+      }
+      case VIEW_LEVEL_GENES: {
+        return geneLabels;
+      }
+    }
+  }
+
+  /*** On "annotation_gene" vs "gene" ***/
+  /*** 
+  So it's kind of technical, but essentially there's kind
+  of a fuzzy line between a locus and an allele
+  and what gets named a gene. See the documentation
+  for more detail.
+  ***/
+
+  findAMRCountForName(rowName, sample) {
+    const { selectedOptions } = this.props;
+    switch (selectedOptions.viewLevel) {
+      case VIEW_LEVEL_ALLELES: {
+        return sample.amrCounts.find(
+          amrCount => amrCount["allele"] === rowName
+        );
+      }
+      case VIEW_LEVEL_GENES: {
+        let amrCountForRow = sample.amrCounts.find(
+          amrCount => amrCount["annotation_gene"] === rowName
+        );
+        if (amrCountForRow === undefined) {
+          amrCountForRow = sample.amrCounts.find(
+            amrCount => amrCount["gene"] === rowName
+          );
+        }
+        return amrCountForRow;
+      }
+    }
+  }
+
+  computeHeatmapValues(rows) {
+    const { selectedOptions, samplesWithAMRCounts } = this.props;
+    const heatmapValues = [];
+    rows.forEach(label => {
+      const rowValues = [];
+      const rowName = label.label;
+      samplesWithAMRCounts.forEach(sample => {
+        const amrCountForRow = this.findAMRCountForName(rowName, sample);
+        if (amrCountForRow !== undefined) {
+          rowValues.push(amrCountForRow[selectedOptions.metric] || 0);
+        } else {
+          rowValues.push(0);
+        }
+      });
+      heatmapValues.push(rowValues);
+    });
+    return heatmapValues;
+  }
+
+  updateHeatmap() {
+    const { selectedOptions, sampleLabels } = this.props;
+    const rows = this.getHeatmapLabels();
+    const columns = sampleLabels;
+    const values = this.computeHeatmapValues(rows);
+    if (this.heatmap !== null) {
+      this.heatmap.updateData({
+        rowLabels: rows,
+        columnLabels: columns,
+        values: values,
+      });
+      this.heatmap.updateScale(selectedOptions.scale);
+    } else {
+      this.initializeHeatmap(rows, columns, values);
+    }
+  }
+
+  initializeHeatmap(rows, columns, values) {
+    const { selectedOptions, onSampleLabelClick } = this.props;
+    this.heatmap = new Heatmap(
+      this.heatmapContainer,
+      // Data for the Heatmap
+      // The Heatmap expects values to be listed by rows, and rows and values are rendered in reverse order.
+      // That is, the first array in "values" is rendered on the bottom; and the leftmost value is rendered
+      // in the rightmost box, and vice versa.
+      {
+        rowLabels: rows,
+        columnLabels: columns, // Each columnLabel object contains the sample name, id, and all metadata values
+        values: values,
+      },
+      // Custom options:
+      {
+        scale: selectedOptions.scale,
+        scaleMin: 0,
+        customColorCallback: this.colorFilter,
+        onNodeHover: this.onNodeHover,
+        onNodeHoverMove: this.onNodeHoverMove,
+        onNodeHoverOut: this.onNodeHoverOut,
+        onColumnLabelClick: onSampleLabelClick,
+        onRowLabelClick: this.onRowLabelClick,
+        columnMetadata: this.getSelectedMetadataFields(), // gets the selected metadata *fields*
+        onColumnMetadataLabelMove: this.onNodeHoverMove,
+        onColumnMetadataLabelHover: this.onMetadataLabelHover,
+        onColumnMetadataLabelOut: this.onMetadataLabelOut,
+        onAddColumnMetadataClick: this.onMetadataAddButtonClick,
+        marginLeft: 50, // our gene names are very short, so this is to prevent metadata names from disappearing
+      }
+    );
+    this.heatmap.start();
   }
 
   //*** Callback functions for the heatmap ***
@@ -158,143 +337,6 @@ export default class AMRHeatmapVis extends React.Component {
         };
       })
       .sort(sortByLabel);
-  }
-
-  getTooltipData(node) {
-    const {
-      sampleLabels,
-      alleleToGeneMap,
-      samplesWithAMRCounts,
-      selectedOptions,
-    } = this.props;
-    const sampleName = sampleLabels[node.columnIndex].label;
-    const rowLabel = this.getHeatmapLabels()[node.rowIndex].label;
-    const sampleForColumn = samplesWithAMRCounts[node.columnIndex];
-
-    const amrCountForNode = sampleForColumn.amrCounts.find(
-      amrCount => amrCount[selectedOptions.viewLevel] === rowLabel
-    );
-
-    let gene = "";
-    let allele = "";
-    switch (selectedOptions.viewLevel) {
-      case VIEW_LEVEL_ALLELES: {
-        allele = rowLabel;
-        gene = alleleToGeneMap[allele];
-        break;
-      }
-      case VIEW_LEVEL_GENES: {
-        gene = rowLabel;
-        allele = amrCountForNode ? amrCountForNode.allele : "---";
-        break;
-      }
-      default: {
-        break;
-      }
-    }
-
-    let values = METRICS.map(metric => {
-      const value = amrCountForNode ? amrCountForNode[metric.key] : 0;
-      return [
-        metric.text,
-        metric.key === selectedOptions.metric ? <b>{value}</b> : value,
-      ];
-    });
-
-    return [
-      {
-        name: "Info",
-        data: [["Sample", sampleName], ["Gene", gene], ["Allele", allele]],
-      },
-      {
-        name: "Values",
-        data: values,
-      },
-    ];
-  }
-
-  getHeatmapLabels() {
-    const { alleleLabels, geneLabels, selectedOptions } = this.props;
-    switch (selectedOptions.viewLevel) {
-      case VIEW_LEVEL_ALLELES: {
-        return alleleLabels;
-      }
-      case VIEW_LEVEL_GENES: {
-        return geneLabels;
-      }
-    }
-  }
-
-  computeHeatmapValues(rows) {
-    const { selectedOptions, samplesWithAMRCounts } = this.props;
-    const heatmapValues = [];
-    rows.forEach(label => {
-      const rowValues = [];
-      const rowName = label.label;
-      samplesWithAMRCounts.forEach(sample => {
-        const amrCountForRow = sample.amrCounts.find(
-          amrCount => amrCount[selectedOptions.viewLevel] === rowName
-        );
-        if (amrCountForRow !== undefined) {
-          rowValues.push(amrCountForRow[selectedOptions.metric]);
-        } else {
-          rowValues.push(0);
-        }
-      });
-      heatmapValues.push(rowValues);
-    });
-    return heatmapValues;
-  }
-
-  updateHeatmap() {
-    const { selectedOptions, sampleLabels } = this.props;
-    const rows = this.getHeatmapLabels();
-    const columns = sampleLabels;
-    const values = this.computeHeatmapValues(rows);
-    if (this.heatmap !== null) {
-      this.heatmap.updateData({
-        rowLabels: rows,
-        columnLabels: columns,
-        values: values,
-      });
-      this.heatmap.updateScale(selectedOptions.scale);
-    } else {
-      this.initializeHeatmap(rows, columns, values);
-    }
-  }
-
-  initializeHeatmap(rows, columns, values) {
-    const { selectedOptions, onSampleLabelClick } = this.props;
-    this.heatmap = new Heatmap(
-      this.heatmapContainer,
-      // Data for the Heatmap
-      // The Heatmap expects values to be listed by rows, and rows and values are rendered in reverse order.
-      // That is, the first array in "values" is rendered on the bottom; and the leftmost value is rendered
-      // in the rightmost box, and vice versa.
-      {
-        rowLabels: rows,
-        columnLabels: columns, // Each columnLabel object contains the sample name, id, and all metadata values
-        values: values,
-      },
-      // Custom options:
-      {
-        scale: selectedOptions.scale,
-        scaleMin: 0,
-        customColorCallback: this.colorFilter,
-        onNodeHover: this.onNodeHover,
-        onNodeHoverMove: this.onNodeHoverMove,
-        onNodeHoverOut: this.onNodeHoverOut,
-        onColumnLabelClick: onSampleLabelClick,
-        onRowLabelClick: this.onRowLabelClick,
-        columnMetadata: this.getSelectedMetadataFields(), // gets the selected metadata *fields*
-        onColumnMetadataLabelMove: this.onNodeHoverMove,
-        onColumnMetadataLabelHover: this.onMetadataLabelHover,
-        onColumnMetadataLabelOut: this.onMetadataLabelOut,
-        onAddColumnMetadataClick: this.onMetadataAddButtonClick,
-        marginLeft: 50, // our gene names are very short, so this is to prevent metadata names from disappearing
-      }
-    );
-    this.heatmap.start();
   }
 
   //*** Render functions ***
@@ -384,4 +426,10 @@ AMRHeatmapVis.propTypes = {
   geneLabels: PropTypes.shape({ label: PropTypes.string }),
   alleleLabels: PropTypes.shape({ label: PropTypes.string }),
   alleleToGeneMap: PropTypes.object,
+  metrics: PropTypes.arrayOf(
+    PropTypes.shape({
+      text: PropTypes.string,
+      value: PropTypes.string,
+    })
+  ),
 };

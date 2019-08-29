@@ -12,6 +12,7 @@ const SOURCE_PUBMED = "PubMed Search";
 const SOURCE_GOOGLE_SCHOLAR = "Google Scholar Search";
 const SOURCE_NCBI_REF_GENE = "NCBI AMR Reference Gene Catalog";
 const SOURCE_OWL = "CARD Ontology OWL";
+const SOURCE_GENBANK_NUCCORE = "NCBI Genbank / Nucleotide Database";
 
 const URL_CARD_ARO = "https://card.mcmaster.ca/aro/";
 const URL_CARD_OWL = "https://github.com/arpcard/aro";
@@ -19,6 +20,7 @@ const URL_PUBMED = "https://www.ncbi.nlm.nih.gov/pubmed/";
 const URL_GOOGLE_SCHOLAR = "https://scholar.google.com/scholar?q=";
 const URL_NCBI_REF_GENE =
   "https://www.ncbi.nlm.nih.gov/pathogens/isolates#/refgene/";
+const URL_GENBANK_NUCCORE = "https://www.ncbi.nlm.nih.gov/nuccore/";
 
 const CARD_FAMILY = "AMR Gene Family";
 const CARD_RESISTANCES = "Drug Resistances";
@@ -65,10 +67,13 @@ export default class GeneDetailsMode extends React.Component {
 
   async getGeneInfo(geneName) {
     const ontology = await getOntology(geneName);
-    const cardEntryFound = ontology.error !== "" ? false : true;
+    const ontologyInfoFound = ontology.error === "";
+    // all the CARD accessions we are interested in ar 7 in length.
+    const cardEntryFound = ontology.accession.length === 7;
     this.setState({
       ontology,
       loading: false,
+      ontologyInfoFound,
       cardEntryFound,
     });
   }
@@ -87,7 +92,7 @@ export default class GeneDetailsMode extends React.Component {
 
   generateLinkTo(source) {
     const {
-      ontology: { accession },
+      ontology: { accession, genbankAccession },
     } = this.state;
     const { geneName } = this.props;
     switch (source) {
@@ -105,6 +110,9 @@ export default class GeneDetailsMode extends React.Component {
       }
       case SOURCE_NCBI_REF_GENE: {
         return URL_NCBI_REF_GENE + geneName;
+      }
+      case SOURCE_GENBANK_NUCCORE: {
+        return URL_GENBANK_NUCCORE + genbankAccession;
       }
       default: {
         return "";
@@ -161,11 +169,6 @@ export default class GeneDetailsMode extends React.Component {
     const {
       ontology: { error },
     } = this.state;
-    const { geneName } = this.props;
-    logAnalyticsEvent("GeneDetailsMode_error_rendered", {
-      geneName,
-      error,
-    }); // exclusive with ontology_rendered
     return <div className={cs.cardLicense}>{error}</div>;
   }
 
@@ -183,21 +186,9 @@ export default class GeneDetailsMode extends React.Component {
 
   renderOntology() {
     const {
-      ontology: {
-        label,
-        synonyms,
-        description,
-        geneFamily,
-        drugClass,
-        publications,
-      },
+      ontology: { synonyms, description, geneFamily, drugClass, publications },
       collapseOntology,
     } = this.state;
-    const { geneName } = this.props;
-    logAnalyticsEvent("GeneDetailsMode_ontology_rendered", {
-      ontologyLabel: label,
-      geneName,
-    }); // exclusive with error_rendered
     return (
       <div>
         {synonyms.length > 0 && (
@@ -212,6 +203,14 @@ export default class GeneDetailsMode extends React.Component {
         <div className={cs.text}>
           <div className={cs.textInner}>{description}</div>
         </div>
+        {drugClass && (
+          <div>
+            <div className={cs.subtitle}>{CARD_RESISTANCES}</div>
+            <div className={cs.text}>
+              {this.renderPropertyList([drugClass])}
+            </div>
+          </div>
+        )}
         {!collapseOntology && (
           <div>
             {geneFamily.length > 0 && (
@@ -219,14 +218,6 @@ export default class GeneDetailsMode extends React.Component {
                 <div className={cs.subtitle}>{CARD_FAMILY}</div>
                 <div className={cs.text}>
                   {this.renderPropertyList(geneFamily)}
-                </div>
-              </div>
-            )}
-            {drugClass && (
-              <div>
-                <div className={cs.subtitle}>{CARD_RESISTANCES}</div>
-                <div className={cs.text}>
-                  {this.renderPropertyList([drugClass])}
                 </div>
               </div>
             )}
@@ -238,11 +229,12 @@ export default class GeneDetailsMode extends React.Component {
             )}
           </div>
         )}
-        {collapseOntology && (
-          <div className={cs.expandLink} onClick={this.expandOntology}>
-            Show More
-          </div>
-        )}
+        {collapseOntology &&
+          (geneFamily.length > 0 || publications.length > 0) && (
+            <div className={cs.expandLink} onClick={this.expandOntology}>
+              Show More
+            </div>
+          )}
         <div className={cs.text}>
           <div className={cs.textInner}>{this.renderCARDLicense()}</div>
           <div className={cs.textInner}>{this.renderPubMedLicense()}</div>
@@ -305,6 +297,7 @@ export default class GeneDetailsMode extends React.Component {
     const { cardEntryFound } = this.state;
     const { geneName } = this.props;
     const sources = [
+      SOURCE_GENBANK_NUCCORE,
       SOURCE_NCBI_REF_GENE,
       SOURCE_PUBMED,
       SOURCE_GOOGLE_SCHOLAR,
@@ -335,13 +328,13 @@ export default class GeneDetailsMode extends React.Component {
   }
 
   renderGeneContents() {
-    const { loading, cardEntryFound } = this.state;
+    const { loading, ontologyInfoFound } = this.state;
     if (loading) {
       return;
     }
     return (
       <div className={cs.geneContents}>
-        {cardEntryFound ? this.renderOntology() : this.renderError()}
+        {ontologyInfoFound ? this.renderOntology() : this.renderError()}
         <div className={cs.subtitle}>Links</div>
         <div className={cs.linksSection}>
           <ul className={cs.linksList}>{this.renderFooterLinks()}</ul>

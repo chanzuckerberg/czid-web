@@ -450,7 +450,7 @@ class PipelineRun < ApplicationRecord
     # s3_file_name = contigs_summary_s3_path # TODO(yf): might turn back for s3 generation later
     nt_m8_map = get_m8_mapping(CONTIG_NT_TOP_M8)
     nr_m8_map = get_m8_mapping(CONTIG_NR_TOP_M8)
-    CSV.open(local_file_name, 'w') do |writer|
+    CSVSafe.open(local_file_name, 'w') do |writer|
       header_row = ['contig_name', 'read_count', 'contig_length', 'contig_coverage']
       header_row += TaxonLineage.names_a.map { |name| "NT.#{name}" }
       header_row += M8_FIELDS_TO_EXTRACT.map { |idx| "NT.#{M8_FIELDS[idx]}" }
@@ -546,22 +546,27 @@ class PipelineRun < ApplicationRecord
       return
     end
     amr_counts_array = []
+    amr_counts_keys = [:gene, :allele, :coverage, :depth, :drug_family, :total_reads, :rpm, :dpm]
+    amr_results_keys = %w[gene allele coverage depth gene_family total_reads rpm dpm]
     # results can be as small as ~80 bytes, so play it safe; empty results are 1 byte files
     unless File.size?(amr_results) < 10
       amr_results_table = CSV.read(amr_results, headers: true)
       amr_results_table.each do |row|
-        amr_counts_array << {
-          gene: row["gene"],
-          allele: row["allele"],
-          coverage: row["coverage"],
-          depth: row["depth"],
-          annotation_gene: row["annotation"].split(";")[2],
-          genbank_accession: row["annotation"].split(";")[4],
-          drug_family: row["gene_family"],
-          total_reads: row["total_reads"],
-          rpm: row["rpm"],
-          dpm: row["dpm"],
-        }
+        amr_count_for_gene = {}
+        amr_counts_keys.each_with_index do |counts_key, index|
+          result_value = row[amr_results_keys[index]]
+          if result_value.present?
+            amr_count_for_gene[counts_key] = result_value
+          end
+        end
+        if row["annotation"].present?
+          split_annotation = row["annotation"].split(";")
+          if split_annotation.length >= 5
+            amr_count_for_gene[:annotation_gene] = split_annotation[2]
+            amr_count_for_gene[:genbank_accession] = split_annotation[4]
+          end
+        end
+        amr_counts_array << amr_count_for_gene
       end
     end
     update(amr_counts_attributes: amr_counts_array)
@@ -1417,9 +1422,9 @@ class PipelineRun < ApplicationRecord
   def report_info_params
     {
       pipeline_version: pipeline_version || PipelineRun::PIPELINE_VERSION_WHEN_NULL,
-      # Default background is complicated... see get_background_id. In any case,
-      # we precache all backgrounds. See precache_report_info below.
+      # background should be set by caller
       background_id: nil,
+      pipeline_run_id: id,
       # For invalidation if underlying data changes. This should only happen in
       # exceptional situations, such as manual DB edits.
       report_ts: max_updated_at.utc.beginning_of_day.to_i,

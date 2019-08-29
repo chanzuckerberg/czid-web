@@ -77,9 +77,20 @@ class Header extends React.Component {
     const {
       adminUser,
       userSignedIn,
+      showBlank,
       disableNavigation,
       ...userMenuProps
     } = this.props;
+
+    if (showBlank) {
+      return (
+        <div className={cs.header}>
+          <div className={cs.logo}>
+            <LogoIcon className={cs.icon} />
+          </div>
+        </div>
+      );
+    }
 
     return (
       userSignedIn && (
@@ -110,6 +121,7 @@ Header.propTypes = {
   adminUser: PropTypes.bool,
   userSignedIn: PropTypes.bool,
   disableNavigation: PropTypes.bool,
+  showBlank: PropTypes.bool,
 };
 
 const UserMenuDropDown = ({
@@ -148,6 +160,22 @@ const UserMenuDropDown = ({
         text={
           <a
             className={cs.option}
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://github.com/chanzuckerberg/idseq-dag/wiki"
+            onClick={() =>
+              logAnalyticsEvent("Header_dropdown-wiki-option_clicked")
+            }
+          >
+            IDseq Wiki
+          </a>
+        }
+      />,
+      <BareDropdown.Item
+        key="5"
+        text={
+          <a
+            className={cs.option}
             href={`mailto:${email}?Subject=Report%20Feedback`}
             onClick={() =>
               logAnalyticsEvent("Header_dropdown-feedback-option_clicked")
@@ -158,7 +186,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="5"
+        key="6"
         text={
           <a
             className={cs.option}
@@ -174,7 +202,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="6"
+        key="7"
         text={
           <a
             className={cs.option}
@@ -190,7 +218,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="7"
+        key="8"
         text="Logout"
         onClick={withAnalytics(
           signOut,

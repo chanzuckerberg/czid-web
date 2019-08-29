@@ -1,9 +1,12 @@
 require 'open3'
 require 'csv'
+require 'aws-sdk-s3'
 
 module SamplesHelper
   include PipelineOutputsHelper
   include ErrorHelper
+
+  S3_CLIENT = Aws::S3::Client.new
 
   def generate_sample_list_csv(formatted_samples)
     attributes = %w[sample_name uploader upload_date overall_job_status runtime_seconds
@@ -11,7 +14,7 @@ module SamplesHelper
                     quality_control compression_ratio reads_after_star reads_after_trimmomatic reads_after_priceseq reads_after_cdhitdup
                     sample_type nucleotide_type collection_location
                     host_genome notes]
-    CSV.generate(headers: true) do |csv|
+    CSVSafe.generate(headers: true) do |csv|
       csv << attributes
       formatted_samples.each do |sample_info|
         derived_output = sample_info[:derived_sample_output]
@@ -19,6 +22,11 @@ module SamplesHelper
         db_sample = sample_info[:db_sample]
         run_info = sample_info[:run_info]
         metadata = sample_info[:metadata]
+        collection_location = if metadata && metadata[:collection_location_v2]
+                                metadata[:collection_location_v2].is_a?(Hash) ? metadata[:collection_location_v2].dig(:name) : metadata[:collection_location_v2]
+                              else
+                                ''
+                              end
         data_values = { sample_name: db_sample ? db_sample[:name] : '',
                         uploader: sample_info[:uploader] ? sample_info[:uploader][:name] : '',
                         upload_date: db_sample ? db_sample[:created_at] : '',
@@ -37,7 +45,8 @@ module SamplesHelper
                         reads_after_cdhitdup: (derived_output[:summary_stats] || {})[:reads_after_cdhitdup] || '',
                         sample_type: metadata && metadata[:sample_type] ? metadata[:sample_type] : '',
                         nucleotide_type: metadata && metadata[:nucleotide_type] ? metadata[:nucleotide_type] : '',
-                        collection_location: metadata && metadata[:collection_location] ? metadata[:collection_location] : '',
+                        # Handle both location objects w/name and strings
+                        collection_location: collection_location,
                         host_genome: derived_output && derived_output[:host_genome_name] ? derived_output[:host_genome_name] : '',
                         notes: db_sample && db_sample[:sample_notes] ? db_sample[:sample_notes] : '', }
         attributes_as_symbols = attributes.map(&:to_sym)
@@ -142,14 +151,27 @@ module SamplesHelper
     default_attributes = { project_id: project_id.to_i,
                            host_genome_id: host_genome_id,
                            status: 'created', }
-    s3_path.chomp!('/')
-    s3_bucket = 's3://' + s3_path.sub('s3://', '').split('/')[0]
-    s3_output, _stderr, status = Open3.capture3("aws", "s3", "ls", "--recursive", "#{s3_path}/")
-    return unless status.exitstatus.zero?
-    s3_output.chomp!
-    entries = s3_output.split("\n").reject { |line| line.include? "Undetermined" }
+
+    parsed_uri = URI.parse(s3_path)
+    return if parsed_uri.scheme != "s3"
+
+    s3_bucket_name = parsed_uri.host
+    return if s3_bucket_name.nil?
+
+    s3_prefix = parsed_uri.path.sub(%r{^/(.*?)/?$}, '\1/')
+
+    begin
+      entries = S3_CLIENT.list_objects_v2(bucket: s3_bucket_name, prefix: s3_prefix).contents.map(&:key)
+      # ignore illumina Undetermined FASTQ files (ex: "Undetermined_AAA_R1_001.fastq.gz")
+      entries = entries.reject { |line| line.include? "Undetermined" }
+    rescue Aws::S3::Errors::ServiceError => e # Covers all S3 access errors (AccessDenied/NoSuchBucket/AllAccessDisabled)
+      Rails.logger.info("parsed_samples_for_s3_path Aws::S3::Errors::ServiceError. s3_path: #{s3_path}, error_class: #{e.class.name}, error_message: #{e.message} ")
+      return
+    end
+
     samples = {}
-    entries.each do |file_name|
+    entries.each do |s3_entry|
+      file_name = File.basename(s3_entry)
       matched_paired = InputFile::BULK_FILE_PAIRED_REGEX.match(file_name)
       matched_single = InputFile::BULK_FILE_SINGLE_REGEX.match(file_name)
       if matched_paired
@@ -161,12 +183,11 @@ module SamplesHelper
       else
         next
       end
-      source = matched[0]
-      name = matched[1].split('/')[-1]
+      name = matched[1]
       samples[name] ||= default_attributes.clone
       samples[name][:input_files_attributes] ||= []
-      samples[name][:input_files_attributes][read_idx] = { name: source.split('/')[-1],
-                                                           source: "#{s3_bucket}/#{source}",
+      samples[name][:input_files_attributes][read_idx] = { name: file_name,
+                                                           source: "s3://#{s3_bucket_name}/#{s3_entry}",
                                                            source_type: InputFile::SOURCE_TYPE_S3, }
     end
 

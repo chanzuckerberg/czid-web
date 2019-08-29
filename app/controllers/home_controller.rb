@@ -2,10 +2,11 @@ require 'will_paginate/array'
 
 class HomeController < ApplicationController
   include SamplesHelper
-  before_action :login_required, except: [:landing, :sign_up]
+  before_action :login_required, except: [:landing, :sign_up, :maintenance]
   before_action :admin_required, only: [:all_data]
-  skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up]
-  power :projects, except: [:landing, :sign_up]
+  skip_before_action :authenticate_user!, :verify_authenticity_token, only: [:landing, :sign_up, :maintenance]
+  skip_before_action :check_for_maintenance, only: [:maintenance, :landing, :sign_up]
+  power :projects, except: [:landing, :sign_up, :maintenance]
 
   # Public unsecured landing page
   def landing
@@ -100,12 +101,11 @@ class HomeController < ApplicationController
     Rails.logger.info("New sign up:\n#{body}")
     # DEPRECATED. Use log_analytics_event.
     MetricUtil.put_metric_now("users.sign_ups", 1)
-    MetricUtil.log_analytics_event("user_interest_form_submitted", nil, {
-                                     # Google Analytics does not allow PII, so we only log institution
-                                     institution: home_params[:institution],
-                                   }, request)
+    MetricUtil.log_analytics_event("user_interest_form_submitted", nil, home_params.to_hash, request)
 
     UserMailer.landing_sign_up_email(body).deliver_now
+    send_sign_up_to_airtable(home_params)
+
     render json: {
       status: :ok,
     }
@@ -116,6 +116,14 @@ class HomeController < ApplicationController
     }
   end
 
+  def maintenance
+    if get_app_config("disable_site_for_maintenance") != "1"
+      redirect_to root_path
+    else
+      @show_blank_header = true
+    end
+  end
+
   private
 
   def home_params
@@ -124,5 +132,19 @@ class HomeController < ApplicationController
 
   def landing_params
     params.permit(:show_bulletin)
+  end
+
+  def send_sign_up_to_airtable(params)
+    table_name = "Landing Page Form"
+    data = {
+      fields: {
+        firstName: params[:firstName] || "",
+        lastName: params[:lastName] || "",
+        email: params[:email] || "",
+        institution: params[:institution] || "",
+        usage: params[:usage] || "",
+      },
+    }
+    MetricUtil.post_to_airtable(table_name, data.to_json)
   end
 end

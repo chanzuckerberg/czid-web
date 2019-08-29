@@ -16,7 +16,7 @@ export default class FAQPage extends React.Component {
           <p>
             No. The data you upload into IDseq is yours and so is any research
             you create with it. We don’t own it and will never sell it. You do,
-            however, give us limited rights to use it for the IDSeq service.
+            however, give us limited rights to use it for the IDseq service.
           </p>
         </Accordion>
         <Accordion
@@ -227,18 +227,18 @@ export default class FAQPage extends React.Component {
             time you visit our website. They are stored in your browser’s cache
             or mobile device and allow a website or a third party to recognize
             your browser. Some of the cookies we use are associated with your
-            IDSeq account (including information about you, such as the email
+            IDseq account (including information about you, such as the email
             address you gave us) and other cookies are not. We use three
             different types of cookies:
           </p>
           <ul>
             <li>
               <span className={cs.listItemLabel}>Session cookies</span> are
-              specific to a particular visit you make to IDSeq and hold certain
+              specific to a particular visit you make to IDseq and hold certain
               information as you browse different pages so you don’t have to
               re-enter information every time you change pages. Session cookies
               expire and delete themselves automatically in a short period of
-              time like after you leave IDSeq or when you close your web
+              time like after you leave IDseq or when you close your web
               browser.
             </li>
           </ul>

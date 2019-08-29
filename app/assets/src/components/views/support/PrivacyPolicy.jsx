@@ -23,7 +23,7 @@ export default class PrivacyPolicy extends React.Component {
           website visitors (“<b>Visitors</b>”) and registered users (“<b>
             Users
           </b>”), and how we use, share, and protect that information. See our{" "}
-          <a href="/faqs">FAQ</a>, which has useful information about IDSeq, and
+          <a href="/faqs">FAQ</a>, which has useful information about IDseq, and
           for more information about our data practices, the IDseq service and
           the <a href="/terms">Terms of Use</a> (“<b>Terms</b>”) that applies to
           your access and use of IDseq.
@@ -367,7 +367,7 @@ export default class PrivacyPolicy extends React.Component {
         </p>
         <p className={cs.large}>
           Security takes ongoing work and we will continue to monitor and adjust
-          our security measures as IDSeq develops. Please notify us immediately
+          our security measures as IDseq develops. Please notify us immediately
           at{" "}
           <a href="mailto:security@idseq.net">
             <b>security@idseq.net</b>

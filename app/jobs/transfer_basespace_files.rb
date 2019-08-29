@@ -10,6 +10,9 @@ class TransferBasespaceFiles
     Rails.logger.info("Start TransferBasespaceFiles for sample id #{sample_id}")
     sample = Sample.find(sample_id)
     sample.transfer_basespace_files(basespace_dataset_id, basespace_access_token)
+
+    # TODO: Revoke the access token, so that it can no longer be used.
+    # Need to do this after ALL samples that use the access token can be uploaded.
   rescue => e
     Rails.logger.error(e)
   end
