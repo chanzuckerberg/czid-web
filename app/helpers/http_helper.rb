@@ -15,7 +15,7 @@ module HttpHelper
 
     unless response.is_a?(Net::HTTPSuccess)
       Rails.logger.warn("POST request to #{url} failed: #{response.message}")
-      return nil
+      raise "HTTP POST request failed"
     end
 
     begin
@@ -23,11 +23,11 @@ module HttpHelper
       JSON.parse(response.body)
     rescue JSON::ParserError
       Rails.logger.warn("POST response from #{url} was not valid JSON")
-      return nil
+      raise
     end
   end
 
-  def self.get_json(url, params, headers)
+  def self.get_json(url, params, headers, silence_errors = false)
     uri = URI.parse(url)
     # Add params to url
     uri.query = params.to_query
@@ -44,8 +44,10 @@ module HttpHelper
     response = http.request(request)
 
     unless response.is_a?(Net::HTTPSuccess)
-      Rails.logger.warn("GET request to #{url} failed: #{response.message}")
-      return nil
+      unless silence_errors
+        Rails.logger.warn("GET request to #{url} failed: #{response.message}")
+      end
+      raise "HTTP GET request failed"
     end
 
     begin
@@ -53,7 +55,30 @@ module HttpHelper
       JSON.parse(response.body)
     rescue JSON::ParserError
       Rails.logger.warn("GET response from #{url} was not valid JSON")
-      return nil
+      raise
     end
+  end
+
+  # Delete requests typically don't contain a request body.
+  def self.delete(url, headers)
+    uri = URI.parse(url)
+
+    request = Net::HTTP::Delete.new(uri.request_uri)
+    # Add headers
+    headers.each do |key, value|
+      request[key] = value
+    end
+
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = uri.scheme == "https"
+
+    response = http.request(request)
+
+    unless response.is_a?(Net::HTTPSuccess)
+      Rails.logger.warn("DELETE request to #{url} failed: #{response.message}")
+      raise "HTTP DELETE request failed"
+    end
+
+    return nil
   end
 end

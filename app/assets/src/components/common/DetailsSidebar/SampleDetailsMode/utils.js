@@ -2,7 +2,7 @@ import moment from "moment";
 import { numberWithCommas } from "~/helpers/strings";
 
 // Compute display values for Pipeline Info from server response.
-export const processPipelineInfo = (additionalInfo, showPipelineVizLink) => {
+export const processPipelineInfo = additionalInfo => {
   const {
     pipeline_run: pipelineRun,
     summary_stats: summaryStats,
@@ -33,14 +33,10 @@ export const processPipelineInfo = (additionalInfo, showPipelineVizLink) => {
     if (pipelineRun.version.pipeline) {
       pipelineInfo.pipelineVersion = {
         text: `v${pipelineRun.version.pipeline}`,
-        ...(showPipelineVizLink
-          ? {
-              linkLabel: "View Pipeline Visualization",
-              link: `/samples/${pipelineRun.sample_id}/pipeline_viz/${
-                pipelineRun.version.pipeline
-              }`,
-            }
-          : {}),
+        linkLabel: "View Pipeline Visualization",
+        link: `/samples/${pipelineRun.sample_id}/pipeline_viz/${
+          pipelineRun.version.pipeline
+        }`,
       };
     }
   }
