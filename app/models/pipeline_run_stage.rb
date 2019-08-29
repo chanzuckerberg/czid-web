@@ -304,7 +304,6 @@ class PipelineRunStage < ApplicationRecord
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
-      coverage_viz_enabled: pipeline_run.after('3.6'),
     }
     dag_commands = prepare_dag(attribute_dict)
     batch_command = [install_pipeline(pipeline_run.pipeline_commit), dag_commands].join("; ")
@@ -328,7 +327,6 @@ class PipelineRunStage < ApplicationRecord
       nt_loc_db: alignment_config.s3_nt_loc_db_path,
       nr_db: alignment_config.s3_nr_db_path,
       nr_loc_db: alignment_config.s3_nr_loc_db_path,
-      coverage_viz_enabled: pipeline_run.after('3.6'),
     }
     attribute_dict[:fastq2] = sample.input_files[1].name if sample.input_files[1]
     dag_commands = prepare_dag(attribute_dict)
