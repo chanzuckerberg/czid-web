@@ -579,7 +579,8 @@ class ProjectsController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def project_params
     result = params.require(:project).permit(:name, :public_access, :description, user_ids: [])
-    result[:name] = sanitize(result[:name]) if result[:name]
+    result[:name] = sanitize_project_name(result[:name]) if result[:name]
+    result[:description] = sanitize_description(result[:description])
     result
   end
 
