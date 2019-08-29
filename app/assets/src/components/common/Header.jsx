@@ -160,6 +160,22 @@ const UserMenuDropDown = ({
         text={
           <a
             className={cs.option}
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://github.com/chanzuckerberg/idseq-dag/wiki"
+            onClick={() =>
+              logAnalyticsEvent("Header_dropdown-wiki-option_clicked")
+            }
+          >
+            IDseq Wiki
+          </a>
+        }
+      />,
+      <BareDropdown.Item
+        key="5"
+        text={
+          <a
+            className={cs.option}
             href={`mailto:${email}?Subject=Report%20Feedback`}
             onClick={() =>
               logAnalyticsEvent("Header_dropdown-feedback-option_clicked")
@@ -170,7 +186,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="5"
+        key="6"
         text={
           <a
             className={cs.option}
@@ -186,7 +202,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="6"
+        key="7"
         text={
           <a
             className={cs.option}
@@ -202,7 +218,7 @@ const UserMenuDropDown = ({
         }
       />,
       <BareDropdown.Item
-        key="7"
+        key="8"
         text="Logout"
         onClick={withAnalytics(
           signOut,
