@@ -29,6 +29,10 @@ class ProjectDescription extends React.Component {
     });
   }
 
+  // Make sure that the project (and its description) is fetched every
+  // time the page is rerendered.
+  // Description is not passed down through props to make it easier to
+  // establish a single source of truth when editing descriptions later.
   fetchProject = async () => {
     this.setState({
       project: await getProject(this.props.projectId),
