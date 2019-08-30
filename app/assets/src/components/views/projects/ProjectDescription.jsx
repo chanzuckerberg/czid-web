@@ -48,7 +48,7 @@ class ProjectDescription extends React.Component {
       <Accordion
         className={cs.descriptionContainer}
         bottomContentPadding
-        open={description.length > 0}
+        open={true}
         header={<div className={cs.title}>Description</div>}
       >
         {description ? (

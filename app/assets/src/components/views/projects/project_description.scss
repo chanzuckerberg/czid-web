@@ -4,7 +4,7 @@
 
 .descriptionContainer {
   color: $dark-grey;
-  padding: 0 $space-default;
+  padding-left: $space-default;
 
   .title {
     @include font-header-accordion;
