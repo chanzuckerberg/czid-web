@@ -24,6 +24,7 @@ class ReviewStep extends React.Component {
   state = {
     consentChecked: false,
     showUploadModal: false,
+    showLessDescription: true,
   };
 
   uploadSamplesAndMetadata = () => {
@@ -116,8 +117,21 @@ class ReviewStep extends React.Component {
     }
   };
 
+  toggleDisplayDescription = () => {
+    this.setState(prevState => ({
+      showLessDescription: !prevState.showLessDescription,
+    }));
+  };
+
+  countNewLines = text => {
+    // the code for newline in Windows is \r\n
+    return text.split(/\r*\n/).length;
+  };
+
   render() {
-    const { showUploadModal } = this.state;
+    const { showUploadModal, showLessDescription } = this.state;
+    const shouldTruncateDescription =
+      this.countNewLines(this.props.project.description) > 5;
 
     const {
       onUploadComplete,
@@ -169,6 +183,28 @@ class ReviewStep extends React.Component {
                       ? "Public Project"
                       : "Private Project"}
                   </div>
+                </div>
+                <div className={cs.descriptionContainer}>
+                  {/* Use showmore/showless pattern if description has many (>4) newlines. */}
+                  {/* TODO(julie): Consider making a separate component to do this in a
+                  less hacky way. */}
+                  <div
+                    className={cx(
+                      shouldTruncateDescription &&
+                        showLessDescription &&
+                        cs.truncated
+                    )}
+                  >
+                    {this.props.project.description}
+                  </div>
+                  {shouldTruncateDescription && (
+                    <div
+                      className={cs.showHide}
+                      onClick={this.toggleDisplayDescription}
+                    >
+                      {showLessDescription ? "Show More" : "Show Less"}
+                    </div>
+                  )}
                 </div>
                 <div className={cs.existingSamples}>
                   {this.props.project.number_of_samples || 0} existing samples
