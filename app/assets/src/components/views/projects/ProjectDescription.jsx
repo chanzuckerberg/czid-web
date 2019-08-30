@@ -42,7 +42,9 @@ class ProjectDescription extends React.Component {
   render() {
     const { description, showLess } = this.state;
     const cutoffLength = MAX_DESCRIPTION_LENGTH / 2;
-    const shouldTruncateDescription = description.length > cutoffLength;
+    const shouldTruncateDescription = description
+      ? description.length > cutoffLength
+      : false;
 
     return (
       <Accordion
