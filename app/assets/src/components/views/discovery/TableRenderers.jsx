@@ -22,6 +22,7 @@ class TableRenderers extends React.Component {
   static renderItemDetails = ({
     cellData: item,
     detailsRenderer,
+    descriptionRenderer,
     nameRenderer,
     visibilityIconRenderer,
   }) => {
@@ -39,7 +40,17 @@ class TableRenderers extends React.Component {
             trigger={<div className={cs.itemName}>{nameRenderer(item)}</div>}
             content={nameRenderer(item)}
           />
-          <div className={cs.itemDescription}>{item.description}</div>
+          {item.description && (
+            <BasicPopup
+              trigger={
+                <div className={cs.itemDescription}>
+                  {descriptionRenderer(item)}
+                </div>
+              }
+              content={descriptionRenderer(item)}
+              wide="very"
+            />
+          )}
           <div className={cs.itemDetails}>{detailsRenderer(item)}</div>
         </div>
       </div>

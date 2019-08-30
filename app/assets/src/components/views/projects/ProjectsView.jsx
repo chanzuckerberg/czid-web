@@ -30,6 +30,7 @@ class ProjectsView extends React.Component {
               {
                 nameRenderer: this.nameRenderer,
                 detailsRenderer: this.detailsRenderer,
+                descriptionRenderer: this.descriptionRenderer,
                 visibilityIconRenderer: this.visibilityIconRenderer,
               }
             )
@@ -75,6 +76,10 @@ class ProjectsView extends React.Component {
     );
   }
 
+  descriptionRenderer(project) {
+    return project.description;
+  }
+
   detailsRenderer(project) {
     return (
       <div>
@@ -82,6 +87,14 @@ class ProjectsView extends React.Component {
       </div>
     );
   }
+
+  // Projects with descriptions should be displayed in taller rows,
+  // otherwise use the default row height of 68.
+  getRowHeight = ({ index }) => {
+    const { projects } = this.props;
+    const project = projects[index];
+    return project.description ? 98 : 68;
+  };
 
   handleRowClick = ({ rowData }) => {
     const { onProjectSelected, projects } = this.props;
@@ -151,6 +164,7 @@ class ProjectsView extends React.Component {
             columns={this.columns}
             data={data}
             handleRowClick={this.handleRowClick}
+            rowHeight={this.getRowHeight}
           />
         ) : (
           <div className={cs.map}>
