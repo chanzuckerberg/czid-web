@@ -1116,6 +1116,7 @@ class DiscoveryView extends React.Component {
       selectedSampleIds,
       mapSidebarTab,
       projectDimensions,
+      projectId,
       projects,
       sampleDimensions,
       search,
@@ -1185,6 +1186,7 @@ class DiscoveryView extends React.Component {
               projectStats={projectStats}
               sampleDimensions={computedSampleDimensions}
               sampleStats={filteredSampleStats}
+              projectId={projectId}
             />
           ))}
       </div>
