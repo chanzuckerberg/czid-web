@@ -1,1 +1,3 @@
 export const MAX_DESCRIPTION_LENGTH = 700;
+export const DEFAULT_ROW_HEIGHT = 68;
+export const MAX_PROJECT_ROW_HEIGHT = 98;

@@ -10,6 +10,7 @@ import PropTypes from "~/components/utils/propTypes";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
+import { DEFAULT_ROW_HEIGHT, MAX_PROJECT_ROW_HEIGHT } from "./constants";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
@@ -89,11 +90,11 @@ class ProjectsView extends React.Component {
   }
 
   // Projects with descriptions should be displayed in taller rows,
-  // otherwise use the default row height of 68.
+  // otherwise use the default row height.
   getRowHeight = ({ index }) => {
     const { projects } = this.props;
     const project = projects[index];
-    return project.description ? 98 : 68;
+    return project.description ? MAX_PROJECT_ROW_HEIGHT : DEFAULT_ROW_HEIGHT;
   };
 
   handleRowClick = ({ rowData }) => {
