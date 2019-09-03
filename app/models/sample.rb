@@ -363,7 +363,9 @@ class Sample < ApplicationRecord
     self.status = STATUS_UPLOADED
     save! # this triggers pipeline command
   rescue => e
-    LogUtil.log_err_and_airbrake("SampleUploadFailedEvent: Failed to upload S3 sample '#{name}' (#{id}): #{e}", e)
+    err_msg = "SampleUploadFailedEvent: Failed to upload S3 sample '#{name}' (#{id})"
+    LogUtil.log_err_and_airbrake("#{err_msg}: #{e}")
+    LogUtil.log_backtrace(e, err_msg)
     self.status = STATUS_CHECKED
     self.upload_error = Sample::UPLOAD_ERROR_S3_UPLOAD_FAILED
     save!
