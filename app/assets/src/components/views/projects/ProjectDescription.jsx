@@ -4,7 +4,6 @@ import cs from "./project_description.scss";
 
 import PropTypes from "prop-types";
 import { Accordion } from "~/components/layout";
-import { getProject } from "~/api";
 
 import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
 
