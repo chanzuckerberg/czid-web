@@ -100,8 +100,8 @@ class TaxonScoringModel < ApplicationRecord
   end
 
   def self.pathogen_features(taxon_info)
-    species_name = taxon_info['species']['name']
-    genus_name = taxon_info['genus']['name']
+    species_name = taxon_info.dig('species', 'name') || taxon_info.dig(:species, :name)
+    genus_name = taxon_info.dig('genus', 'name') || taxon_info.dig(:genus, :name)
     PATHO_MAP.each do |key, patho_list|
       taxon_info[key] = patho_list.include?(species_name) || patho_list.include?(genus_name) ? 1 : 0
     end

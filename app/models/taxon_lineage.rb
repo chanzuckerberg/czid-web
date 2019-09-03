@@ -32,6 +32,8 @@ class TaxonLineage < ApplicationRecord
     superkingdom: MISSING_SUPERKINGDOM_ID,
   }.freeze
 
+  HOMO_SAPIENS_TAX_ID = 9606
+
   # From https://www.niaid.nih.gov/research/emerging-infectious-diseases-pathogens
   # Accessed 9/18/2018.
   # Categories are listed in order of priority (A, B, C). So if a taxon is included by the rules of both
