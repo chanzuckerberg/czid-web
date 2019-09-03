@@ -254,7 +254,7 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
-    const { className, currentTab, loading, projectId } = this.props;
+    const { className, currentTab, loading, project } = this.props;
     if (!loading && !this.hasData()) {
       return (
         <div className={cx(className, cs.sidebar)}>
@@ -270,9 +270,9 @@ export default class DiscoverySidebar extends React.Component {
     const dataKey = this.state.stats.avgTotalReads;
     return (
       <div className={cx(className, cs.sidebar)}>
-        {projectId && (
+        {project && (
           <div className={cs.descriptionContainer}>
-            <ProjectDescription projectId={projectId} />
+            <ProjectDescription project={project} />
           </div>
         )}
         <div className={cs.metadataContainer}>
@@ -380,5 +380,5 @@ DiscoverySidebar.propTypes = {
   projectStats: PropTypes.object,
   sampleDimensions: PropTypes.array,
   sampleStats: PropTypes.object,
-  projectId: PropTypes.number,
+  project: PropTypes.object,
 };

@@ -238,13 +238,6 @@ const getProjects = ({ domain, filters, search, projectId, basic } = {}) =>
     },
   });
 
-const getProject = projectId =>
-  get(`/projects/${projectId}.json`, {
-    params: {
-      projectId,
-    },
-  });
-
 const getVisualizations = ({ domain, filters, search } = {}) =>
   get("/visualizations.json", {
     params: {
@@ -343,7 +336,6 @@ export {
   getPhyloTree,
   getProjectDimensions,
   getProjects,
-  getProject,
   getSampleDimensions,
   getSampleReportInfo,
   getSamples,

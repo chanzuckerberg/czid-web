@@ -15,29 +15,10 @@ class ProjectDescription extends React.Component {
     this.toggleDisplayDescription = this.toggleDisplayDescription.bind(this);
 
     this.state = {
-      project: null,
-      description: "",
+      description: props.project.description,
       showLess: true,
     };
   }
-
-  async componentDidMount() {
-    await this.fetchProject();
-
-    this.setState({
-      description: this.state.project.description,
-    });
-  }
-
-  // Make sure that the project (and its description) is fetched every
-  // time the page is rerendered.
-  // Description is not passed down through props to make it easier to
-  // establish a single source of truth when editing descriptions later.
-  fetchProject = async () => {
-    this.setState({
-      project: await getProject(this.props.projectId),
-    });
-  };
 
   toggleDisplayDescription() {
     this.setState(prevState => ({ showLess: !prevState.showLess }));
@@ -84,7 +65,7 @@ class ProjectDescription extends React.Component {
 }
 
 ProjectDescription.propTypes = {
-  projectId: PropTypes.number,
+  project: PropTypes.object.isRequired,
 };
 
 export default ProjectDescription;
