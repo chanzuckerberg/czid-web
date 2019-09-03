@@ -9,7 +9,7 @@ import { Accordion } from "~/components/layout";
 import BasicPopup from "~/components/BasicPopup";
 
 import cs from "./discovery_sidebar.scss";
-import ProjectDescription from "~/components/views/projects/ProjectDescription";
+import ProjectDescription from "./ProjectDescription";
 
 export default class DiscoverySidebar extends React.Component {
   constructor(props) {
