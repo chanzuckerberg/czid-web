@@ -6,11 +6,7 @@ class LogUtil
     Airbrake.notify(msg)
   end
 
-  def self.log_backtrace(exception, msg = nil)
-    if msg.nil?
-      Rails.logger.error("Exception message: #{exception.try(:message)}. Backtrace:\n\t#{exception.try(:backtrace).try(:join, "\n\t")}")
-    else
-      Rails.logger.error("Error message: #{msg}. Exception message: #{exception.try(:message)}. Backtrace:\n\t#{exception.try(:backtrace).try(:join, "\n\t")}")
-    end
+  def self.log_backtrace(exception)
+    Rails.logger.error("Backtrace:\n\t#{exception.backtrace.join("\n\t")}")
   end
 end
