@@ -138,6 +138,7 @@ class SamplesHeatmapVis extends React.Component {
     return this.props.taxonIds.map(id => {
       return {
         label: this.props.taxonDetails[id].name,
+        parentId: this.props.taxonDetails[id].parentId, // used for sorting
       };
     });
   }

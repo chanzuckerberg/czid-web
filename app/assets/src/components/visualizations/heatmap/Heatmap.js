@@ -587,7 +587,10 @@ export default class Heatmap {
   }
 
   cluster() {
-    if (this.options.clustering) {
+    // TODO (gdingle): replace shouldSortColumns by shouldSortRows
+    if (this.options.shouldSortColumns) {
+      this.sortRows("asc");
+    } else if (this.options.clustering) {
       this.clusterRows();
     }
 
@@ -607,8 +610,9 @@ export default class Heatmap {
     this.renderColumnMetadata();
 
     if (this.options.clustering) {
-      this.renderRowDendrogram();
-      this.renderColumnDendrogram();
+      // TODO (gdingle): replace with shouldSortRows
+      this.options.shouldSortColumns || this.renderRowDendrogram();
+      this.options.shouldSortColumns || this.renderColumnDendrogram();
     }
 
     this.options.onUpdateFinished && this.options.onUpdateFinished();
@@ -753,6 +757,17 @@ export default class Heatmap {
         label.pos = idx;
       }
     );
+  }
+
+  sortRows(direction) {
+    this.rowClustering = null;
+    orderBy(
+      this.rowLabels,
+      label => label.category + "-" + label.parentId + "-" + label.label, // kingdom then genus then species
+      direction
+    ).forEach((label, idx) => {
+      label.pos = idx;
+    });
   }
 
   range(n) {
