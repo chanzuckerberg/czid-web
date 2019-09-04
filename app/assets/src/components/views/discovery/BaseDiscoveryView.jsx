@@ -52,7 +52,7 @@ BaseDiscoveryView.propTypes = {
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
   protectedColumns: PropTypes.arrayOf(PropTypes.string),
   rowClassName: PropTypes.string,
-  rowHeight: PropTypes.number,
+  rowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
 };
 
 export default BaseDiscoveryView;

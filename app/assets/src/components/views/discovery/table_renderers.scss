@@ -9,7 +9,7 @@
   .visibility {
     display: flex;
     flex: 0 0 40px;
-    align-items: center;
+    align-items: flex-start;
     justify-items: center;
     margin-right: 12px;
   }
@@ -23,16 +23,18 @@
   }
 
   .itemDescription {
-    color: $dark-grey;
-    font-size: $font-size-h6;
-    line-height: 16px;
-    // remove description for now
-    // (we have no descriptions yet, but want to keep the placeholder)
-    height: 0;
-    overflow: hidden;
-    // height: 32px;
-    // margin-bottom: 8px;
+    @include font-body-s;
+    color: $medium-grey;
+    font-weight: $font-weight-regular;
+    line-height: 20px;
+    margin: 6px 0 8px 0;
     vertical-align: middle;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: pre-wrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
   }
 
   .itemDetails {

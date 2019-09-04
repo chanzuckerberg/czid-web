@@ -9,6 +9,7 @@ import { Accordion } from "~/components/layout";
 import BasicPopup from "~/components/BasicPopup";
 
 import cs from "./discovery_sidebar.scss";
+import ProjectDescription from "./ProjectDescription";
 
 export default class DiscoverySidebar extends React.Component {
   constructor(props) {
@@ -253,7 +254,7 @@ export default class DiscoverySidebar extends React.Component {
   }
 
   render() {
-    const { className, currentTab, loading } = this.props;
+    const { className, currentTab, loading, project } = this.props;
     if (!loading && !this.hasData()) {
       return (
         <div className={cx(className, cs.sidebar)}>
@@ -269,6 +270,11 @@ export default class DiscoverySidebar extends React.Component {
     const dataKey = this.state.stats.avgTotalReads;
     return (
       <div className={cx(className, cs.sidebar)}>
+        {project && (
+          <div className={cs.descriptionContainer}>
+            <ProjectDescription project={project} />
+          </div>
+        )}
         <div className={cs.metadataContainer}>
           <Accordion
             className={cs.metadataSection}
@@ -374,4 +380,5 @@ DiscoverySidebar.propTypes = {
   projectStats: PropTypes.object,
   sampleDimensions: PropTypes.array,
   sampleStats: PropTypes.object,
+  project: PropTypes.object,
 };
