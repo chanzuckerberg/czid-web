@@ -53,7 +53,8 @@ export default class Heatmap {
         zoom: null, // multiplier for zooming in and out
         minHeight: 500,
         clustering: true,
-        shouldSortColumns: true,
+        shouldSortColumns: false,
+        shouldSortRows: false,
         defaultClusterStep: 6,
         maxRowClusterWidth: 100,
         maxColumnClusterHeight: 100,
@@ -156,6 +157,11 @@ export default class Heatmap {
 
   updateSortColumns(shouldSortColumns) {
     this.options.shouldSortColumns = shouldSortColumns;
+    this.processData("cluster");
+  }
+
+  updateSortRows(shouldSortRows) {
+    this.options.shouldSortRows = shouldSortRows;
     this.processData("cluster");
   }
 
@@ -587,8 +593,7 @@ export default class Heatmap {
   }
 
   cluster() {
-    // TODO (gdingle): replace shouldSortColumns by shouldSortRows
-    if (this.options.shouldSortColumns) {
+    if (this.options.shouldSortRows) {
       this.sortRows("asc");
     } else if (this.options.clustering) {
       this.clusterRows();
@@ -610,8 +615,7 @@ export default class Heatmap {
     this.renderColumnMetadata();
 
     if (this.options.clustering) {
-      // TODO (gdingle): replace with shouldSortRows
-      this.options.shouldSortColumns || this.renderRowDendrogram();
+      this.options.shouldSortRows || this.renderRowDendrogram();
       this.options.shouldSortColumns || this.renderColumnDendrogram();
     }
 
@@ -759,10 +763,12 @@ export default class Heatmap {
     );
   }
 
+  // This is hardcoded to sort by lineage
   sortRows(direction) {
     this.rowClustering = null;
     orderBy(
       this.rowLabels,
+      // TODO (gdingle): what about unknown genus?
       label => label.category + "-" + label.parentId + "-" + label.label, // kingdom then genus then species
       direction
     ).forEach((label, idx) => {

@@ -73,7 +73,7 @@ class ExportUsersAuth0
   private def export_user(user)
     email = user.email
     legacy_user_record = format_legacy_user_record(user)
-    puts ">>> Exporting user #{email} <<<"
+    puts ">> Exporting user #{email} <<"
     result = auth0_api_create_user(legacy_user_record)
 
     if result['error'] && result['response'].fetch_values('statusCode', 'error') == [409, 'Conflict']

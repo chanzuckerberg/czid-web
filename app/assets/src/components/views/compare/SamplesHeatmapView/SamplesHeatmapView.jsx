@@ -35,6 +35,10 @@ const SORT_SAMPLES_OPTIONS = [
   { text: "Alphabetical", value: "alpha" },
   { text: "Cluster", value: "cluster" },
 ];
+const TAXA_SAMPLES_OPTIONS = [
+  { text: "Genus", value: "genus" },
+  { text: "Cluster", value: "cluster" },
+];
 const TAXONS_PER_SAMPLE_RANGE = {
   min: 0,
   max: 100,
@@ -73,6 +77,7 @@ class SamplesHeatmapView extends React.Component {
         ),
         species: parseAndCheckInt(this.urlParams.species, 1),
         sampleSortType: this.urlParams.sampleSortType || "cluster",
+        taxaSortType: this.urlParams.sampleSortType || "cluster",
         thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseAndCheckInt(this.urlParams.dataScaleIdx, 0),
         taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 30),
@@ -517,12 +522,13 @@ class SamplesHeatmapView extends React.Component {
     // Client side options
     scales: SCALE_OPTIONS,
     sampleSortTypeOptions: SORT_SAMPLES_OPTIONS,
+    taxaSortTypeOptions: TAXA_SAMPLES_OPTIONS,
     taxonsPerSample: TAXONS_PER_SAMPLE_RANGE,
     specificityOptions: SPECIFICITY_OPTIONS,
   });
 
   handleSelectedOptionsChange = newOptions => {
-    const excluding = ["dataScaleIdx", "sampleSortType"];
+    const excluding = ["dataScaleIdx", "sampleSortType", "taxaSortType"];
     const shouldRefetchData = difference(keys(newOptions), excluding).length;
     this.setState(
       {
@@ -597,6 +603,7 @@ class SamplesHeatmapView extends React.Component {
           thresholdFilters={this.state.selectedOptions.thresholdFilters}
           sampleSortType={this.state.selectedOptions.sampleSortType}
           fullScreen={this.state.hideFilters}
+          taxaSortType={this.state.selectedOptions.taxaSortType}
         />
       </ErrorBoundary>
     );
