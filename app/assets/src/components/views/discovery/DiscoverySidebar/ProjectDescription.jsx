@@ -23,6 +23,7 @@ class ProjectDescription extends React.Component {
       editing: false,
       changed: false,
       savePending: false,
+      errors: null,
     };
   }
 
@@ -38,6 +39,7 @@ class ProjectDescription extends React.Component {
     this.setState({
       description: value,
       changed: true,
+      errors: null,
     });
   };
 
@@ -64,8 +66,11 @@ class ProjectDescription extends React.Component {
     const response = await saveProjectDescription(projectId, value);
 
     // If save fails, revert to last valid description value.
-    if (response.status === 422) {
-      this.setState({ description: lastValidDescription });
+    if (response.status === "failed") {
+      this.setState({
+        description: lastValidDescription,
+        errors: response.message,
+      });
     } else {
       this.setState({
         description: value,
@@ -79,7 +84,7 @@ class ProjectDescription extends React.Component {
   };
 
   render() {
-    const { description, showLess } = this.state;
+    const { description, showLess, errors } = this.state;
     const cutoffLength = MAX_DESCRIPTION_LENGTH / 2;
     const shouldTruncateDescription = description
       ? description.length > cutoffLength
@@ -88,7 +93,7 @@ class ProjectDescription extends React.Component {
     return (
       <MetadataSection
         editable={this.props.project.editable}
-        onEditToggle={this.toggleEditing}
+        onEditToggle={() => this.toggleEditing()}
         editing={this.state.editing}
         title="Description"
         savePending={this.state.savePending}
@@ -100,7 +105,7 @@ class ProjectDescription extends React.Component {
           <div className={cs.descriptionContainer}>
             <Textarea
               onChange={val => this.handleDescriptionChange(val)}
-              onBlur={this.handleDescriptionSave}
+              onBlur={() => this.handleDescriptionSave()}
               value={description}
               className={cs.textarea}
               maxLength={MAX_DESCRIPTION_LENGTH}
@@ -109,6 +114,7 @@ class ProjectDescription extends React.Component {
               {MAX_DESCRIPTION_LENGTH - description.length}/
               {MAX_DESCRIPTION_LENGTH} characters remaining
             </div>
+            {errors && <div className={cs.error}>{errors}</div>}
           </div>
         ) : (
           <div className={cs.descriptionContainer}>

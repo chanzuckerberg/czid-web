@@ -30,4 +30,9 @@
     color: $primary-light;
     cursor: pointer;
   }
+
+  .error {
+    @include font-body-xxs;
+    color: $error;
+  }
 }
