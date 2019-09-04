@@ -37,9 +37,20 @@ class UserTest < ActiveSupport::TestCase
     assert !user.valid?
   end
 
+  test "CZI user detected" do
+    user = new_user "test@chanzuckerberg.com"
+    assert user.czi_user?
+
+    user = new_user "test@contractor.chanzuckerberg.com"
+    assert user.czi_user?
+
+    user = new_user "test@test.com"
+    assert !user.czi_user?
+  end
+
   private
 
-  def new_user
-    User.new(email: "test@test.com", password: "password123")
+  def new_user(email = "test@test.com")
+    User.new(email: email, password: "password123")
   end
 end

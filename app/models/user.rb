@@ -103,7 +103,7 @@ class User < ApplicationRecord
   end
 
   def czi_user?
-    ["chanzuckerberg.com"].include?(email.split("@").last)
+    email.split("@").last.ends_with?("chanzuckerberg.com")
   end
 
   # "Greg  L.  Dingle" -> "Greg L."
