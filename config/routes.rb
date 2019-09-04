@@ -15,6 +15,7 @@ Rails.application.routes.draw do
     put :retry_pipeline, on: :member
     get :all, on: :collection
     get :pipeline_runs, on: :member
+    get :report_v2, on: :member
     get :report_info, on: :member
     get :report_csv, on: :member
     get :bulk_new, on: :collection

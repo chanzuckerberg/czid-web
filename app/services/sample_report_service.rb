@@ -152,27 +152,48 @@ class SampleReportService
       end
     end
 
-    # DO NOT USE
-    # timer("convert to json with JSON") do
-    #   JSON.dump(counts_by_tax_level)
-    # end
-
     # puts "len of table: #{Oj.dump(counts_by_tax_level).length}"
     # puts "len of lineage: #{Oj.dump(structured_lineage).length}"
     # puts "len of unstructured lineage: #{Oj.dump(lineage_by_tax_id).length}"
 
     # puts counts_by_tax_level.keys
-
-    # OJ often showed >x2 faster performance
-    json timer("convert to json with OJ") do
-      json_result = Oj.dump(
-        counts: counts_by_tax_level,
-        lineage: structured_lineage
-      )
-      # puts "len of json: #{json_result.length}"
-      json_result
+    # TODO: sort by custom field
+    sorted_genus_tax_ids = timer("sort genus by aggregate score") do
+      counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
+        .values
+        .sort_by { |genus| genus[:agg_score] }
+        .map { |genus| genus[:tax_id] }
+        .reverse!
     end
 
+    timer("sort species within each genus") do
+      counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS].transform_values! do |genus|
+        genus[:children].sort_by { |species_id| counts_by_tax_level[TaxonCount::TAX_LEVEL_SPECIES][species_id][:agg_score] }.reverse!
+        genus
+      end
+    end
+
+    # # OJ often showed >x2 faster performance
+    # timer("convert to json with OJ") do
+    #   json_result = Oj.dump(
+    #     counts: counts_by_tax_level,
+    #     lineage: structured_lineage,
+    #     sorted_genus: sorted_genus_tax_ids
+    #   )
+    #   # puts "len of json: #{json_result.length}"
+    #   json_result
+    # end
+
+    # DO NOT USE
+    json_dump = timer("convert to json with JSON") do
+      JSON.dump(
+        counts: counts_by_tax_level,
+        lineage: structured_lineage,
+        sorted_genus: sorted_genus_tax_ids
+      )
+    end
+
+    return json_dump
     # DEFINITELY DO NOT USE
     # return timer("convert to json") do
     #   counts_by_tax_level.to_json
@@ -240,34 +261,34 @@ class SampleReportService
     end
   end
 
-  def compute_species_aggregate_scores_from_db(species_counts, genus_counts)
-    # TODO : currently this does not work due to a mismatch of the format
-    # This should be used for development only...
-    scoring_model ||= TaxonScoringModel::DEFAULT_MODEL_NAME
-    tsm = TaxonScoringModel.find_by(name: scoring_model)
-    species_counts.each_value do |species|
-      # puts "tax_id=#{tax_id}"
-      # puts "species=#{species}"
-      # puts species[:genus_tax_id]
-      # puts species[:genus_tax_id].class
-      # puts "genus=#{genus_counts[species[:genus_tax_id]]}"
-      agg_score = tsm.score(
-        genus: genus_counts[species[:genus_tax_id]],
-        species: species
-      )
-      species['agg_score'] = agg_score
-      # puts(agg_score)
-      # species_info['NT']['maxzscore'] = [species_info['NT']['zscore'], species_info['NR']['zscore']].max
-      # species_info['NR']['maxzscore'] = species_info['NT']['maxzscore']
-      # next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
-      # genus_id = species_info['genus_taxid']
-      # genus_info = tax_2d[genus_id]
-      # taxon_info = { "genus" => genus_info, "species" => species_info }
-      # species_score = tsm.score(taxon_info)
-      # species_info['NT']['aggregatescore'] = species_score.to_f
-      # species_info['NR']['aggregatescore'] = species_score.to_f
-    end
-  end
+  # def compute_species_aggregate_scores_from_db(species_counts, genus_counts)
+  #   # TODO : currently this does not work due to a mismatch of the format
+  #   # This should be used for development only...
+  #   scoring_model ||= TaxonScoringModel::DEFAULT_MODEL_NAME
+  #   tsm = TaxonScoringModel.find_by(name: scoring_model)
+  #   species_counts.each_value do |species|
+  #     # puts "tax_id=#{tax_id}"
+  #     # puts "species=#{species}"
+  #     # puts species[:genus_tax_id]
+  #     # puts species[:genus_tax_id].class
+  #     # puts "genus=#{genus_counts[species[:genus_tax_id]]}"
+  #     agg_score = tsm.score(
+  #       genus: genus_counts[species[:genus_tax_id]],
+  #       species: species
+  #     )
+  #     species['agg_score'] = agg_score
+  #     # puts(agg_score)
+  #     # species_info['NT']['maxzscore'] = [species_info['NT']['zscore'], species_info['NR']['zscore']].max
+  #     # species_info['NR']['maxzscore'] = species_info['NT']['maxzscore']
+  #     # next unless species_info['tax_level'] == TaxonCount::TAX_LEVEL_SPECIES
+  #     # genus_id = species_info['genus_taxid']
+  #     # genus_info = tax_2d[genus_id]
+  #     # taxon_info = { "genus" => genus_info, "species" => species_info }
+  #     # species_score = tsm.score(taxon_info)
+  #     # species_info['NT']['aggregatescore'] = species_score.to_f
+  #     # species_info['NR']['aggregatescore'] = species_score.to_f
+  #   end
+  # end
 end
 
 def timer(name)

@@ -20,7 +20,7 @@ class SamplesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update, :bulk_upload_with_metadata]
 
   # Read action meant for single samples with set_sample before_action
-  READ_ACTIONS = [:show, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
+  READ_ACTIONS = [:show, :report_v2, :report_info, :report_csv, :assembly, :show_taxid_fasta, :nonhost_fasta, :unidentified_fasta,
                   :contigs_fasta, :contigs_fasta_by_byteranges, :contigs_sequences_by_byteranges, :contigs_summary,
                   :results_folder, :show_taxid_alignment, :show_taxid_alignment_viz, :metadata,
                   :contig_taxid_list, :taxid_contigs, :summary_contig_counts, :coverage_viz_summary, :coverage_viz_data,].freeze
@@ -702,6 +702,9 @@ class SamplesController < ApplicationController
     MetricUtil.put_metric_now("samples.showed", 1, tags)
   end
 
+  def show_v2
+  end
+
   # TODO: (gdingle): remove this if we are not going to allow saving reports as visualizations
   def last_saved_visualization
     valid_viz_types = ['tree', 'table'] # See PipelineSampleReport.jsx
@@ -726,6 +729,12 @@ class SamplesController < ApplicationController
       params[:projectId] ? Project.find(params[:projectId]) : nil
     )
     render json: samples.to_json(include: [{ project: { only: [:id, :name] } }])
+  end
+
+  def report_v2
+    @pipeline_run = select_pipeline_run(@sample, params[:pipeline_version])
+    background_id = get_background_id(@sample)
+    render json: SampleReportService.new(@pipeline_run.id, background_id).generate
   end
 
   # The json response here should be precached in PipelineRun.
