@@ -286,7 +286,7 @@ BaseTable.propTypes = {
   defaultCellRenderer: PropTypes.func,
   defaultColumnWidth: PropTypes.number,
   defaultHeaderHeight: PropTypes.number,
-  defaultRowHeight: PropTypes.number,
+  defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
   defaultSelectColumnWidth: PropTypes.number,
   headerClassName: PropTypes.string,
   // Set of dataKeys of columns to be shown by default
