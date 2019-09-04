@@ -130,10 +130,11 @@ class SamplesHeatmapVis extends React.Component {
 
   extractTaxonLabels() {
     return this.props.taxonIds.map(id => {
+      const name = this.props.taxonDetails[id].name;
       return {
-        label: this.props.taxonDetails[id].name,
-        // TODO (gdingle): can we use parentLabel here?
-        parentId: this.props.taxonDetails[id].parentId, // used for sorting
+        // Moves missing to the top in "genus" sort.
+        // See MISSING_GENUS_ID in TaxonLineage.
+        label: id === -200 ? "* " + name : name,
       };
     });
   }

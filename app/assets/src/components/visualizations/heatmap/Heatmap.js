@@ -598,17 +598,13 @@ export default class Heatmap {
     );
   }
 
-  // This is hardcoded to sort by lineage
   sortRows(direction) {
     this.rowClustering = null;
-    orderBy(
-      this.rowLabels,
-      // TODO (gdingle): what about unknown genus?
-      label => label.category + "-" + label.parentId + "-" + label.label, // kingdom then genus then species
-      direction
-    ).forEach((label, idx) => {
-      label.pos = idx;
-    });
+    orderBy(this.rowLabels, label => label.label, direction).forEach(
+      (label, idx) => {
+        label.pos = idx;
+      }
+    );
   }
 
   range(n) {

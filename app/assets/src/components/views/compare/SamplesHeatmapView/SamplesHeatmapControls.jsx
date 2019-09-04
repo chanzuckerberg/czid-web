@@ -419,10 +419,10 @@ export default class SamplesHeatmapControls extends React.Component {
       <div className={cs.menu}>
         <Divider />
         <div className={`${cs.filterRow} row`}>
-          <div className="col s3">{this.renderTaxonLevelSelect()}</div>
-          <div className="col s3">{this.renderCategoryFilter()}</div>
-          <div className="col s2">{this.renderSortSamplesSelect()}</div>
+          <div className="col s2">{this.renderTaxonLevelSelect()}</div>
+          <div className="col s2">{this.renderCategoryFilter()}</div>
           <div className="col s2">{this.renderSortTaxaSelect()}</div>
+          <div className="col s2">{this.renderSortSamplesSelect()}</div>
           <div className="col s2">{this.renderMetricSelect()}</div>
           <div className="col s2">{this.renderBackgroundSelect()}</div>
         </div>
