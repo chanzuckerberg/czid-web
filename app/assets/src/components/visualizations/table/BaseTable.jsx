@@ -133,7 +133,7 @@ class BaseTable extends React.Component {
             value={value}
           />
         }
-        content="Select Columns"
+        content="Add or Remove Columns"
       />
     );
   };

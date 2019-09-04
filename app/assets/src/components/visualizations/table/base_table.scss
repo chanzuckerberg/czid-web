@@ -21,6 +21,10 @@
     width: 14px;
     fill: $medium-grey;
     vertical-align: center;
+
+    &:hover {
+      fill: $primary-light;
+    }
   }
 }
 
