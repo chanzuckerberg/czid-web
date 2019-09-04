@@ -10,6 +10,7 @@ import PropTypes from "~/components/utils/propTypes";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
+import { DEFAULT_ROW_HEIGHT, MAX_PROJECT_ROW_HEIGHT } from "./constants";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
@@ -30,6 +31,7 @@ class ProjectsView extends React.Component {
               {
                 nameRenderer: this.nameRenderer,
                 detailsRenderer: this.detailsRenderer,
+                descriptionRenderer: this.descriptionRenderer,
                 visibilityIconRenderer: this.visibilityIconRenderer,
               }
             )
@@ -75,6 +77,10 @@ class ProjectsView extends React.Component {
     );
   }
 
+  descriptionRenderer(project) {
+    return project.description;
+  }
+
   detailsRenderer(project) {
     return (
       <div>
@@ -82,6 +88,14 @@ class ProjectsView extends React.Component {
       </div>
     );
   }
+
+  // Projects with descriptions should be displayed in taller rows,
+  // otherwise use the default row height.
+  getRowHeight = ({ index }) => {
+    const { projects } = this.props;
+    const project = projects[index];
+    return project.description ? MAX_PROJECT_ROW_HEIGHT : DEFAULT_ROW_HEIGHT;
+  };
 
   handleRowClick = ({ rowData }) => {
     const { onProjectSelected, projects } = this.props;
@@ -151,6 +165,7 @@ class ProjectsView extends React.Component {
             columns={this.columns}
             data={data}
             handleRowClick={this.handleRowClick}
+            rowHeight={this.getRowHeight}
           />
         ) : (
           <div className={cs.map}>

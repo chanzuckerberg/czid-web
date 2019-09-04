@@ -86,6 +86,12 @@
   }
 }
 
+.descriptionContainer {
+  @include font-body-xxs;
+  white-space: pre-wrap;
+  color: $dark-grey;
+}
+
 .dataList {
   display: flex;
   flex-flow: row wrap;
