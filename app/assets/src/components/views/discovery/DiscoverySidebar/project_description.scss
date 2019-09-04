@@ -21,4 +21,13 @@
     height: 200px;
     resize: vertical;
   }
+
+  .showHide {
+    @include font-body-xxs;
+    text-transform: uppercase;
+    display: inline-block;
+    margin: $space-xxs 0 $space-default 0;
+    color: $primary-light;
+    cursor: pointer;
+  }
 }
