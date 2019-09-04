@@ -6,12 +6,6 @@
   color: $dark-grey;
   padding-left: $space-default;
 
-  .title {
-    @include font-header-accordion;
-    color: $black;
-    height: 40px;
-  }
-
   .truncated {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -20,12 +14,11 @@
     -webkit-box-orient: vertical;
   }
 
-  .showHide {
-    @include font-body-xxs;
-    text-transform: uppercase;
-    display: inline-block;
-    margin: $space-xxs 0 $space-default 0;
-    color: $primary-light;
-    cursor: pointer;
+  .textarea {
+    @include font-body-xs;
+    margin-top: 5px;
+    padding: 5px;
+    height: 200px;
+    resize: vertical;
   }
 }
