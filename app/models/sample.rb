@@ -297,25 +297,27 @@ class Sample < ApplicationRecord
         # Run the piped commands and save stderr
         err_read, err_write = IO.pipe
         if fastq =~ /\.gz/
-          _proc_download, _proc_unzip, proc_head, proc_validation, proc_zip, proc_upload = Open3.pipeline(
+          _proc_download, _proc_unzip, proc_cut, proc_head, proc_validation, proc_zip, proc_upload = Open3.pipeline(
             ["aws", "s3", "cp", fastq, "-"],
             ["gzip", "-dc"],
+            ["cut", "-c", "-#{Sample::MAX_LINE_LENGTH + 1}"],
             ["head", "-n", max_lines.to_s],
             ["awk", "-f", FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT, "-v", "max_line_length=#{Sample::MAX_LINE_LENGTH}"],
             ["gzip", "-c"],
             ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
             err: err_write
           )
-          to_check = [proc_head, proc_zip, proc_validation, proc_upload]
+          to_check = [proc_cut, proc_head, proc_zip, proc_validation, proc_upload]
         else
-          _proc_download, proc_head, proc_validation, proc_upload = Open3.pipeline(
+          _proc_download, proc_cut, proc_head, proc_validation, proc_upload = Open3.pipeline(
             ["aws", "s3", "cp", fastq, "-"],
+            ["cut", "-c", "-#{Sample::MAX_LINE_LENGTH + 1}"],
             ["head", "-n", max_lines.to_s],
             ["awk", "-f", FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT, "-v", "max_line_length=#{Sample::MAX_LINE_LENGTH}"],
             ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
             err: err_write
           )
-          to_check = [proc_head, proc_validation, proc_upload]
+          to_check = [proc_cut, proc_head, proc_validation, proc_upload]
         end
         err_write.close
         stderr = err_read.read
