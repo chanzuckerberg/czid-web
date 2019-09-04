@@ -46,6 +46,9 @@ class UserTest < ActiveSupport::TestCase
 
     user = new_user "test@test.com"
     assert !user.czi_user?
+
+    user = new_user "test@fakechanzuckerberg.com"
+    assert !user.czi_user?
   end
 
   private

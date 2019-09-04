@@ -76,6 +76,7 @@ class User < ApplicationRecord
     end
   end
 
+  # This method is for tracking purposes only, not security.
   def demo_user?
     DEMO_USER_EMAILS.include?(email)
   end
@@ -98,12 +99,15 @@ class User < ApplicationRecord
     true
   end
 
+  # This method is for tracking purposes only, not security.
   def biohub_user?
     ["czbiohub.org", "ucsf.edu"].include?(email.split("@").last)
   end
 
+  # This method is for tracking purposes only, not security.
   def czi_user?
-    email.split("@").last.ends_with?("chanzuckerberg.com")
+    domain = email.split("@").last
+    domain == "chanzuckerberg.com" || domain.ends_with?(".chanzuckerberg.com")
   end
 
   # "Greg  L.  Dingle" -> "Greg L."
