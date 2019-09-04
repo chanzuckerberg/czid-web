@@ -88,7 +88,7 @@ class ProjectDescription extends React.Component {
     return (
       <MetadataSection
         editable={this.props.project.editable}
-        onEditToggle={() => this.toggleEditing()}
+        onEditToggle={this.toggleEditing}
         editing={this.state.editing}
         title="Description"
         savePending={this.state.savePending}
@@ -100,7 +100,7 @@ class ProjectDescription extends React.Component {
           <div className={cs.descriptionContainer}>
             <Textarea
               onChange={val => this.handleDescriptionChange(val)}
-              onBlur={() => this.handleDescriptionSave()}
+              onBlur={this.handleDescriptionSave}
               value={description}
               className={cs.textarea}
               maxLength={MAX_DESCRIPTION_LENGTH}
