@@ -64,7 +64,7 @@ class Sample < ApplicationRecord
   # Error message to identify parse errors from fastq-fasta-line-validation.awk
   PARSE_ERROR_MESSAGE = 'PARSE ERROR'.freeze
   # Script parameters
-  FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT = File.expand_path("../../scripts/fastq-fasta-line-validation.awk", __dir__)
+  FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT = Rails.root.join("scripts", "fastq-fasta-line-validation.awk").to_s
 
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
   attr_accessor :bulk_mode, :basespace_dataset_id, :basespace_access_token
