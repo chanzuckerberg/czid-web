@@ -123,9 +123,9 @@ class DiscoveryView extends React.Component {
         projects: [],
         rawMapLocationData: {},
         sampleDimensions: [],
-        sampleIds: [],
-        samples: [],
-        samplesAllLoaded: false,
+        // sampleIds: [],
+        // samples: [],
+        // samplesAllLoaded: false,
         search: null,
         selectedSampleIds: new Set(),
         showFilters: true,
@@ -230,9 +230,9 @@ class DiscoveryView extends React.Component {
         loadingSamples: true,
         // instead of resetting projects we use the current project info, if selected
         projects: compact([project]),
-        sampleIds: [],
-        samples: [],
-        samplesAllLoaded: false,
+        // sampleIds: [],
+        // samples: [],
+        // samplesAllLoaded: false,
         visualizations: [],
       },
       () => {
@@ -590,52 +590,52 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleLoadSampleRows = async ({ startIndex, stopIndex }) => {
-    const { domain } = this.props;
-    const {
-      projectId,
-      samples,
-      sampleIds,
-      samplesAllLoaded,
-      search,
-    } = this.state;
+  // handleLoadSampleRows = async ({ startIndex, stopIndex }) => {
+  //   const { domain } = this.props;
+  //   const {
+  //     projectId,
+  //     samples,
+  //     sampleIds,
+  //     samplesAllLoaded,
+  //     search,
+  //   } = this.state;
 
-    const previousLoadedSamples = samples.slice(startIndex, stopIndex + 1);
-    const neededStartIndex = Math.max(startIndex, samples.length);
+  //   const previousLoadedSamples = samples.slice(startIndex, stopIndex + 1);
+  //   const neededStartIndex = Math.max(startIndex, samples.length);
 
-    let newlyFetchedSamples = [];
-    if (!samplesAllLoaded && stopIndex >= neededStartIndex) {
-      const numRequestedSamples = stopIndex - neededStartIndex + 1;
-      let {
-        samples: fetchedSamples,
-        sampleIds: fetchedSampleIds,
-      } = await getDiscoverySamples({
-        domain,
-        filters: this.preparedFilters(),
-        projectId,
-        search,
-        limit: stopIndex - neededStartIndex + 1,
-        offset: neededStartIndex,
-        listAllIds: sampleIds.length === 0,
-      });
+  //   let newlyFetchedSamples = [];
+  //   if (!samplesAllLoaded && stopIndex >= neededStartIndex) {
+  //     const numRequestedSamples = stopIndex - neededStartIndex + 1;
+  //     let {
+  //       samples: fetchedSamples,
+  //       sampleIds: fetchedSampleIds,
+  //     } = await getDiscoverySamples({
+  //       domain,
+  //       filters: this.preparedFilters(),
+  //       projectId,
+  //       search,
+  //       limit: stopIndex - neededStartIndex + 1,
+  //       offset: neededStartIndex,
+  //       listAllIds: sampleIds.length === 0,
+  //     });
 
-      let newState = {
-        // add newly fetched samples to the list (assumes that samples are requested in order)
-        samples: samples.concat(fetchedSamples),
-        // if returned samples are less than requested, we assume all data was loaded
-        samplesAllLoaded: fetchedSamples.length < numRequestedSamples,
-        loadingSamples: false,
-      };
-      if (fetchedSampleIds) {
-        newState.sampleIds = fetchedSampleIds;
-      }
+  //     let newState = {
+  //       // add newly fetched samples to the list (assumes that samples are requested in order)
+  //       samples: samples.concat(fetchedSamples),
+  //       // if returned samples are less than requested, we assume all data was loaded
+  //       samplesAllLoaded: fetchedSamples.length < numRequestedSamples,
+  //       loadingSamples: false,
+  //     };
+  //     if (fetchedSampleIds) {
+  //       newState.sampleIds = fetchedSampleIds;
+  //     }
 
-      this.setState(newState);
-      newlyFetchedSamples = fetchedSamples;
-    }
+  //     this.setState(newState);
+  //     newlyFetchedSamples = fetchedSamples;
+  //   }
 
-    return previousLoadedSamples.concat(newlyFetchedSamples);
-  };
+  //   return previousLoadedSamples.concat(newlyFetchedSamples);
+  // };
 
   handleProjectSelected = ({ project }) => {
     const { mapSidebarTab } = this.state;
@@ -1001,8 +1001,8 @@ class DiscoveryView extends React.Component {
       selectedSampleIds,
       projectId,
       projects,
-      sampleIds,
-      samples,
+      // sampleIds,
+      // samples,
       visualizations,
     } = this.state;
     const { admin, allowedFeatures, mapTilerKey } = this.props;
@@ -1064,12 +1064,12 @@ class DiscoveryView extends React.Component {
                 onSelectedSamplesUpdate={this.handleSelectedSamplesUpdate}
                 projectId={projectId}
                 ref={samplesView => (this.samplesView = samplesView)}
-                samples={samples}
-                selectableIds={sampleIds}
+                samples={dataLayer.get("samples")}
+                selectableIds={dataLayer.getIds("samples")}
                 selectedSampleIds={selectedSampleIds}
               />
             </div>
-            {!samples.length &&
+            {!dataLayer.getLength("samples") &&
               !loadingSamples &&
               currentDisplay === "table" && (
                 <NoResultsBanner
@@ -1200,7 +1200,6 @@ class DiscoveryView extends React.Component {
       filters,
       project,
       projectId,
-      samples,
       search,
       showFilters,
       showStats,
@@ -1217,7 +1216,7 @@ class DiscoveryView extends React.Component {
           {projectId && (
             <ProjectHeader
               project={project || {}}
-              fetchedSamples={samples}
+              fetchedSamples={dataLayer.get("samples")}
               onProjectUpdated={this.handleProjectUpdated}
               onMetadataUpdated={this.refreshDataFromProjectChange}
             />
