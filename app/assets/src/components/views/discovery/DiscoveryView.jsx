@@ -44,6 +44,7 @@ import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
 import DiscoverySidebar from "./DiscoverySidebar";
 import DiscoveryFilters from "./DiscoveryFilters";
+import DiscoveryDataLayer from "./discovery_data_layer";
 import ProjectHeader from "./ProjectHeader";
 import {
   getDiscoverySyncData,
@@ -59,7 +60,6 @@ import NoResultsBanner from "./NoResultsBanner";
 import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 
 import cs from "./discovery_view.scss";
-import { DiscoveryDataLayer } from "./discovery_data_layer";
 
 // Data available
 // (A) non-filtered dimensions: for filter options

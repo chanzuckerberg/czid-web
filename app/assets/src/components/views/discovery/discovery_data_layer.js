@@ -1,7 +1,7 @@
 import { range } from "lodash/fp";
 import { getDiscoverySamples } from "./discovery_api";
 
-export class DiscoveryDataLayer {
+export default class DiscoveryDataLayer {
   constructor(domain) {
     this.domain = domain;
 
