@@ -73,7 +73,7 @@ export default class DiscoveryDataLayer {
     }
     if (missingIdxs.length > 0) {
       // currently loads using limit and offset
-      // could eventually lead to redundant fetches if data is not requests in regular continuous chunks
+      // could eventually lead to redundant fetches if data is not requested in regular continuous chunks
       const minNeededIdx = missingIdxs[0];
       const maxNeededIdx = missingIdxs[missingIdxs.length - 1];
       let { fetchedObjects, fetchedObjectIds } = await apiFunction({

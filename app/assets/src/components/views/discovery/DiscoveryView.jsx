@@ -44,7 +44,7 @@ import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
 import DiscoverySidebar from "./DiscoverySidebar";
 import DiscoveryFilters from "./DiscoveryFilters";
-import DiscoveryDataLayer from "./discovery_data_layer";
+import DiscoveryDataLayer from "./DiscoveryDataLayer";
 import ProjectHeader from "./ProjectHeader";
 import {
   getDiscoverySyncData,
