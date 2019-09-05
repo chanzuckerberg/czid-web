@@ -80,6 +80,7 @@ Rails.application.routes.draw do
     put :remove_favorite, on: :member
     put :update_project_visibility, on: :member
     put :add_user, on: :member
+    put :update, on: :member
     post :validate_metadata_csv, on: :member
     post :upload_metadata, on: :member
     post :validate_sample_names, on: :member
