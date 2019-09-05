@@ -59,6 +59,7 @@ import NoResultsBanner from "./NoResultsBanner";
 import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 
 import cs from "./discovery_view.scss";
+import { DiscoveryDataLayer } from "./discovery_data_layer";
 
 // Data available
 // (A) non-filtered dimensions: for filter options
@@ -96,7 +97,10 @@ class DiscoveryView extends React.Component {
     this.state = defaults(
       {
         currentDisplay: "table",
-        currentTab: projectId ? "samples" : "projects",
+        currentTab:
+          projectId || this.props.domain === "all_data"
+            ? "samples"
+            : "projects",
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
         filteredSampleStats: {},
@@ -104,7 +108,6 @@ class DiscoveryView extends React.Component {
         loadingDimensions: true,
         loadingLocations: true,
         loadingProjects: true,
-        loadingSamples: true,
         loadingStats: true,
         loadingVisualizations: true,
         mapLevel: "country",
@@ -123,9 +126,6 @@ class DiscoveryView extends React.Component {
         projects: [],
         rawMapLocationData: {},
         sampleDimensions: [],
-        // sampleIds: [],
-        // samples: [],
-        // samplesAllLoaded: false,
         search: null,
         selectedSampleIds: new Set(),
         showFilters: true,
@@ -135,7 +135,7 @@ class DiscoveryView extends React.Component {
       urlState
     );
 
-    this.data = null;
+    this.dataLayer = new DiscoveryDataLayer(this.props.domain);
     this.updateBrowsingHistory("replace");
   }
 
@@ -221,18 +221,16 @@ class DiscoveryView extends React.Component {
   resetData = ({ callback }) => {
     const { project } = this.state;
 
+    this.dataLayer.reset("samples");
+
     this.setState(
       {
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
         filteredSampleStats: {},
         loadingDimensions: true,
-        loadingSamples: true,
         // instead of resetting projects we use the current project info, if selected
         projects: compact([project]),
-        // sampleIds: [],
-        // samples: [],
-        // samplesAllLoaded: false,
         visualizations: [],
       },
       () => {
@@ -296,7 +294,6 @@ class DiscoveryView extends React.Component {
     this.setState({
       loadingProjects: true,
       loadingVisualizations: true,
-      loadingSamples: true,
     });
 
     const { projects = [], visualizations = [] } = await getDiscoverySyncData({
@@ -590,52 +587,21 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  // handleLoadSampleRows = async ({ startIndex, stopIndex }) => {
-  //   const { domain } = this.props;
-  //   const {
-  //     projectId,
-  //     samples,
-  //     sampleIds,
-  //     samplesAllLoaded,
-  //     search,
-  //   } = this.state;
+  handleLoadSampleRows = async ({ startIndex, stopIndex }) => {
+    const { dataLayer } = this;
+    const { projectId, search } = this.state;
 
-  //   const previousLoadedSamples = samples.slice(startIndex, stopIndex + 1);
-  //   const neededStartIndex = Math.max(startIndex, samples.length);
-
-  //   let newlyFetchedSamples = [];
-  //   if (!samplesAllLoaded && stopIndex >= neededStartIndex) {
-  //     const numRequestedSamples = stopIndex - neededStartIndex + 1;
-  //     let {
-  //       samples: fetchedSamples,
-  //       sampleIds: fetchedSampleIds,
-  //     } = await getDiscoverySamples({
-  //       domain,
-  //       filters: this.preparedFilters(),
-  //       projectId,
-  //       search,
-  //       limit: stopIndex - neededStartIndex + 1,
-  //       offset: neededStartIndex,
-  //       listAllIds: sampleIds.length === 0,
-  //     });
-
-  //     let newState = {
-  //       // add newly fetched samples to the list (assumes that samples are requested in order)
-  //       samples: samples.concat(fetchedSamples),
-  //       // if returned samples are less than requested, we assume all data was loaded
-  //       samplesAllLoaded: fetchedSamples.length < numRequestedSamples,
-  //       loadingSamples: false,
-  //     };
-  //     if (fetchedSampleIds) {
-  //       newState.sampleIds = fetchedSampleIds;
-  //     }
-
-  //     this.setState(newState);
-  //     newlyFetchedSamples = fetchedSamples;
-  //   }
-
-  //   return previousLoadedSamples.concat(newlyFetchedSamples);
-  // };
+    return dataLayer.handleLoadSampleRows({
+      dataType: "samples",
+      startIndex,
+      stopIndex,
+      conditions: {
+        projectId,
+        search,
+        filters: this.preparedFilters(),
+      },
+    });
+  };
 
   handleProjectSelected = ({ project }) => {
     const { mapSidebarTab } = this.state;
@@ -992,7 +958,6 @@ class DiscoveryView extends React.Component {
       currentDisplay,
       currentTab,
       loadingProjects,
-      loadingSamples,
       loadingVisualizations,
       mapLevel,
       mapLocationData,
@@ -1001,11 +966,10 @@ class DiscoveryView extends React.Component {
       selectedSampleIds,
       projectId,
       projects,
-      // sampleIds,
-      // samples,
       visualizations,
     } = this.state;
     const { admin, allowedFeatures, mapTilerKey } = this.props;
+    const { dataLayer } = this;
 
     return (
       <React.Fragment>
@@ -1070,7 +1034,7 @@ class DiscoveryView extends React.Component {
               />
             </div>
             {!dataLayer.getLength("samples") &&
-              !loadingSamples &&
+              !dataLayer.isLoading("samples") &&
               currentDisplay === "table" && (
                 <NoResultsBanner
                   className={cs.noResultsContainer}
@@ -1205,6 +1169,7 @@ class DiscoveryView extends React.Component {
       showStats,
     } = this.state;
     const { domain, allowedFeatures } = this.props;
+    const { dataLayer } = this;
 
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
