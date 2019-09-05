@@ -16,16 +16,16 @@ export default class DiscoveryDataLayer {
 
   newObjectDb = () => ({
     entries: {},
-    order: null,
+    orderedIds: null,
     loading: true,
   });
   get = dataType => Object.values(this.data[dataType].entries);
-  getIds = dataType => this.data[dataType].order || [];
+  getIds = dataType => this.data[dataType].orderedIds || [];
   getLength = dataType => Object.keys(this.data[dataType].entries).length;
   isLoading = dataType => this.data[dataType].loading;
   reset = dataType => {
     const objectDb = this.data[dataType];
-    objectDb.order = null;
+    objectDb.orderedIds = null;
     objectDb.loading = true;
   };
 
@@ -62,13 +62,13 @@ export default class DiscoveryDataLayer {
     const apiFunction = this.apiFunctions[dataType];
     const domain = this.domain;
 
-    const minStopIndex = objects.order
-      ? Math.min(objects.order.length - 1, stopIndex)
+    const minStopIndex = objects.orderedIds
+      ? Math.min(objects.orderedIds.length - 1, stopIndex)
       : stopIndex;
     let missingIdxs = range(startIndex, minStopIndex + 1);
-    if (objects.order) {
+    if (objects.orderedIds) {
       missingIdxs = missingIdxs.filter(
-        idx => !(objects.order[idx] in objects.entries)
+        idx => !(objects.orderedIds[idx] in objects.entries)
       );
     }
     if (missingIdxs.length > 0) {
@@ -81,11 +81,11 @@ export default class DiscoveryDataLayer {
         ...conditions,
         limit: maxNeededIdx - minNeededIdx + 1,
         offset: minNeededIdx,
-        listAllIds: objects.order === null,
+        listAllIds: objects.orderedIds === null,
       });
 
       if (fetchedObjectIds) {
-        objects.order = fetchedObjectIds;
+        objects.orderedIds = fetchedObjectIds;
       }
 
       fetchedObjects.forEach(sample => {
@@ -96,8 +96,8 @@ export default class DiscoveryDataLayer {
     }
 
     const requestedObjects = range(startIndex, minStopIndex + 1)
-      .filter(idx => idx in objects.order)
-      .map(idx => objects.entries[objects.order[idx]]);
+      .filter(idx => idx in objects.orderedIds)
+      .map(idx => objects.entries[objects.orderedIds[idx]]);
     onDataLoaded && onDataLoaded(this);
     return requestedObjects;
   };
