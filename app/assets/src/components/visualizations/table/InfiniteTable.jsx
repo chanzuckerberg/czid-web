@@ -11,12 +11,11 @@ const STATUS_LOADED = 2;
 
 class InfiniteTable extends React.Component {
   // Encapsulates Table in an InfiniteLoader component.
-  // - Keeps track of rows for which a load request was made,
-  //   to avoid requesting the same row twice.
-  // TODO(tiago): Current limitations:
-  // - does not reload rows if they change; this can be addressed,
-  //   by having a function to clear some or all rows that client can call
-  //   through a ref to the component.
+  // Keeps track of rows for which a load request was made, to avoid requesting the same row twice.
+  // ATTENTION: This class does not automatically reload rows if data changes.
+  //            Reset function must be called explicitly by the client.
+  //            This happens also because react virtualized memoizes responses and
+  //            may not ask for the rows again.
 
   constructor(props) {
     super(props);
@@ -83,8 +82,8 @@ class InfiniteTable extends React.Component {
     );
   };
 
-  // !Attention!: reset function must be called if previously loaded data changes
   reset = () => {
+    // Reset function MUST be called if previously loaded data changes
     const { rowCount } = this.props;
     this.rows = [];
     this.loadedRowsMap = [];
