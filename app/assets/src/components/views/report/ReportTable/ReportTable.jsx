@@ -6,6 +6,9 @@ import { logAnalyticsEvent } from "~/api/analytics";
 import PropTypes from "../../../utils/propTypes";
 import DetailCells from "./DetailCells";
 
+const doclink =
+  "https://github.com/chanzuckerberg/idseq-dag/wiki/IDseq-Pipeline-Stage-%233:-Reporting-and-Visualization#reports";
+
 export default class ReportTable extends React.Component {
   constructor(props) {
     super(props);
@@ -56,53 +59,54 @@ export default class ReportTable extends React.Component {
                 </span>
                 Taxon
               </th>
-              {renderColumnHeader(
-                "Score",
-                `NT_aggregatescore`,
-                "Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )"
-              )}
-              {renderColumnHeader(
-                "Z",
-                `${countType}_zscore`,
-                `Z-score relative to background model for alignments to NCBI NT/NR`
-              )}
-              {renderColumnHeader(
-                "rPM",
-                `${countType}_rpm`,
-                `Number of reads aligning to the taxon in the NCBI NT/NR database per million total input reads`
-              )}
-              {renderColumnHeader(
-                "r",
-                `${countType}_r`,
-                `Number of reads aligning to the taxon in the NCBI NT/NR database`
-              )}
+              {renderColumnHeader("Score", `NT_aggregatescore`, {
+                title: "Aggregate score",
+                tooltip:
+                  "Experimental ranking score for prioritizing microbes.",
+                link: doclink,
+              })}
+              {renderColumnHeader("Z", `${countType}_zscore`, {
+                title: "Z-score",
+                tooltip:
+                  "Experimental method for evaluating the prevelance of microbes in your sample as compared to background contaminants.",
+                link: doclink,
+              })}
+              {renderColumnHeader("rPM", `${countType}_rpm`, {
+                tooltip:
+                  "Number of reads aligning to the taxon in the NCBI NR/NT database per million reads sequenced.",
+                link: doclink,
+              })}
+              {renderColumnHeader("r", `${countType}_r`, {
+                tooltip:
+                  "Number of reads aligning to the taxon in the NCBI NT/NR database.",
+                link: doclink,
+              })}
               {showAssemblyColumns &&
-                renderColumnHeader(
-                  "contig",
-                  `${countType}_contigs`,
-                  `Number of assembled contigs aligning to the taxon in the NCBI NT/NR database`
-                )}
+                renderColumnHeader("contig", `${countType}_contigs`, {
+                  tooltip:
+                    "Number of assembled contigs aligning to the taxon in the NCBI NT/NR database.",
+                  link: doclink,
+                })}
               {showAssemblyColumns &&
-                renderColumnHeader(
-                  "contig r",
-                  `${countType}_contigreads`,
-                  `Total number of reads across all assembled contigs`
-                )}
-              {renderColumnHeader(
-                "%id",
-                `${countType}_percentidentity`,
-                `Average percent-identity of alignments to NCBI NT/NR`
-              )}
-              {renderColumnHeader(
-                "L",
-                `${countType}_alignmentlength`,
-                `Average length (bp) of alignments to NCBI NT/NR`
-              )}
-              {renderColumnHeader(
-                "log(1/E)",
-                `${countType}_neglogevalue`,
-                `Average log-10-transformed expect value for alignments to NCBI NT/NR`
-              )}
+                renderColumnHeader("contig r", `${countType}_contigreads`, {
+                  tooltip: "Total number reads across all assembled contigs.",
+                  link: doclink,
+                })}
+              {renderColumnHeader("%id", `${countType}_percentidentity`, {
+                tooltip:
+                  "Average percent-identity of alignments to NCBI NT/NR.",
+                link: doclink,
+              })}
+              {renderColumnHeader("L", `${countType}_alignmentlength`, {
+                tooltip:
+                  "Average length of the local alignment for all contigs.",
+                link: doclink,
+              })}
+              {renderColumnHeader("log(1/E)", `${countType}_neglogevalue`, {
+                tooltip:
+                  "Average log10 transformed expect value of alignments to NCBI NT/NR.",
+                link: doclink,
+              })}
               <th className="last-col">
                 <Tipsy content="Switch count type" placement="top">
                   <div className="sort-controls center left">
