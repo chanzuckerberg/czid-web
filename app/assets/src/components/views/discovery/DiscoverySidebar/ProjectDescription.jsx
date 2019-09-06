@@ -17,8 +17,10 @@ class ProjectDescription extends React.Component {
     this.toggleEditing = this.toggleEditing.bind(this);
 
     this.state = {
-      description: props.project.description,
-      lastValidDescription: props.project.description,
+      description: props.project.description ? props.project.description : "",
+      lastValidDescription: props.project.description
+        ? props.project.description
+        : "",
       showLess: true,
       editing: false,
       changed: false,
