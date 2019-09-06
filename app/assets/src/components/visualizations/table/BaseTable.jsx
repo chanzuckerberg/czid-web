@@ -10,6 +10,7 @@ import cx from "classnames";
 import { concat, difference, find, includes, map } from "lodash/fp";
 
 import BasicPopup from "~/components/BasicPopup";
+import TableTooltip from "~/components/ui/containers/TableTooltip";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import PlusIcon from "~ui/icons/PlusIcon";
@@ -64,18 +65,26 @@ class BaseTable extends React.Component {
     });
   }
 
-  basicHeaderRenderer({ label }) {
+  basicHeaderRenderer({ columnData, label }) {
     return (
-      <BasicPopup
+      <TableTooltip
         trigger={<span className={cs.label}>{label}</span>}
-        content={label}
+        title={label}
+        content={columnData.tooltip}
+        link={columnData.link}
       />
     );
   }
 
-  _sortableHeaderRenderer({ dataKey, label, sortBy, sortDirection }) {
+  _sortableHeaderRenderer({
+    columnData,
+    dataKey,
+    label,
+    sortBy,
+    sortDirection,
+  }) {
     return (
-      <BasicPopup
+      <TableTooltip
         trigger={
           <div className={cs.sortableHeader}>
             <div className={cs.label}>{label}</div>
@@ -89,7 +98,9 @@ class BaseTable extends React.Component {
             )}
           </div>
         }
-        content={label}
+        title={label}
+        content={columnData.tooltip}
+        link={columnData.link}
       />
     );
   }
@@ -231,6 +242,7 @@ class BaseTable extends React.Component {
                 return (
                   <Column
                     className={cx(cs.cell, className)}
+                    columnData={columnProps.columnData}
                     key={columnProps.dataKey}
                     headerRenderer={
                       sortable && !columnProps.disableSort

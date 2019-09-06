@@ -21,6 +21,9 @@ class ProjectsView extends React.Component {
 
     this.columns = [
       {
+        columnData: {
+          tooltip: "User-defined project name and author.",
+        },
         dataKey: "project",
         flexGrow: 1,
         width: 350,
@@ -40,24 +43,38 @@ class ProjectsView extends React.Component {
         sortFunction: p => (p.name || "").toLowerCase(),
       },
       {
+        columnData: {
+          tooltip: "Date project was created in IDseq.",
+        },
         dataKey: "created_at",
         label: "Created On",
         width: 120,
         cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
+        columnData: {
+          tooltip:
+            "User-selected organism(s) from which the samples in the project were collected.",
+        },
         dataKey: "hosts",
         width: 200,
         disableSort: true,
         cellRenderer: TableRenderers.renderList,
       },
       {
+        columnData: {
+          tooltip:
+            "User-supplied metadata field indicating sample types in the project.",
+        },
         dataKey: "tissues",
         width: 200,
         disableSort: true,
         cellRenderer: TableRenderers.renderList,
       },
       {
+        columnData: {
+          tooltip: "Total number of samples in the project.",
+        },
         dataKey: "number_of_samples",
         width: 140,
         label: "No. of Samples",

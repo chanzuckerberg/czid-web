@@ -23,6 +23,9 @@ import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
 
+const doclink =
+  "https://github.com/chanzuckerberg/idseq-dag/wiki/IDseq-Pipeline-Stage-%233:-Reporting-and-Visualization#samples-table";
+
 class SamplesView extends React.Component {
   constructor(props) {
     super(props);
@@ -33,6 +36,10 @@ class SamplesView extends React.Component {
 
     this.columns = [
       {
+        columnData: {
+          tooltip: "The user-defined sample name.",
+          link: doclink,
+        },
         dataKey: "sample",
         flexGrow: 1,
         width: 350,
@@ -40,6 +47,11 @@ class SamplesView extends React.Component {
         headerClassName: cs.sampleHeader,
       },
       {
+        columnData: {
+          tooltip:
+            "The date on which the sample was initially uploaded to IDseq.",
+          link: doclink,
+        },
         dataKey: "createdAt",
         label: "Uploaded On",
         width: 120,
@@ -47,17 +59,31 @@ class SamplesView extends React.Component {
         cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
+        columnData: {
+          tooltip: `User-selected organism from which this sample was collected; this
+            value is selected by the user at sample upload and dictates which
+            genomes are used for initial host subtraction pipeline steps.`,
+          link: doclink,
+        },
         dataKey: "host",
         flexGrow: 1,
         className: cs.basicCell,
       },
       {
+        columnData: {
+          tooltip: "User-defined location from which the sample was collected.",
+          link: doclink,
+        },
         dataKey: "collectionLocationV2",
         label: "Location",
         flexGrow: 1,
         className: cs.basicCell,
       },
       {
+        columnData: {
+          tooltip: "The total number of reads uploaded.",
+          link: doclink,
+        },
         dataKey: "totalReads",
         label: "Total Reads",
         flexGrow: 1,
@@ -66,6 +92,11 @@ class SamplesView extends React.Component {
           TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
+        columnData: {
+          tooltip: `The percentage of reads that came out of step (8) of the host filtration
+            and QC steps as compared to what went in at step (1).`,
+          link: doclink,
+        },
         dataKey: "nonHostReads",
         label: "Passed Filters",
         flexGrow: 1,
@@ -73,6 +104,11 @@ class SamplesView extends React.Component {
         cellRenderer: TableRenderers.renderNumberAndPercentage,
       },
       {
+        columnData: {
+          tooltip: `The percentage of reads that came out of PriceSeq, step (3) of the host
+            filtration and QC steps, compared to what went in to Trimmomatic, step (2).`,
+          link: doclink,
+        },
         dataKey: "qcPercent",
         label: "Passed QC",
         flexGrow: 1,
@@ -81,6 +117,13 @@ class SamplesView extends React.Component {
           TableRenderers.formatPercentage(rowData[dataKey]),
       },
       {
+        columnData: {
+          tooltip: `Duplicate Compression Ratio is the ratio of sequences present prior to
+            running cd-hit-dup (duplicate removal) vs after duplicate removal.
+            High values indicate the presence of more duplicate reads, indicating lower
+            library complexity.`,
+          link: doclink,
+        },
         dataKey: "duplicateCompressionRatio",
         label: "DCR",
         flexGrow: 1,
@@ -89,6 +132,11 @@ class SamplesView extends React.Component {
           TableRenderers.formatNumber(rowData[dataKey]),
       },
       {
+        columnData: {
+          tooltip: `The total number of reads aligning to ERCC (External RNA Controls
+            Consortium) sequences.`,
+          link: doclink,
+        },
         dataKey: "erccReads",
         label: "ERCC Reads",
         flexGrow: 1,
@@ -97,23 +145,42 @@ class SamplesView extends React.Component {
           TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
+        columnData: {
+          tooltip: "User-supplied notes.",
+          link: doclink,
+        },
         dataKey: "notes",
         flexGrow: 1,
         className: cs.basicCell,
       },
       {
+        columnData: {
+          tooltip:
+            "User-selected metadata field indicating the nucleotide type (RNA, DNA).",
+          link: doclink,
+        },
         dataKey: "nucleotideType",
         label: "Nucleotide Type",
         flexGrow: 1,
         className: cs.basicCell,
       },
       {
+        columnData: {
+          tooltip: "User-supplied metadata field indicating the sample type.",
+          link: doclink,
+        },
         dataKey: "sampleType",
         label: "Sample Type",
         flexGrow: 1,
         className: cs.basicCell,
       },
       {
+        columnData: {
+          tooltip: `After host filtration and QC, the remaining reads are subsampled to 1
+            million fragments (2 million paired reads). This field indicates the ratio of
+            subsampled reads to total reads passing host filtration and QC steps.`,
+          link: doclink,
+        },
         dataKey: "subsampledFraction",
         label: "SubSampled Fraction",
         flexGrow: 1,
@@ -122,6 +189,11 @@ class SamplesView extends React.Component {
           TableRenderers.formatNumber(rowData[dataKey]),
       },
       {
+        columnData: {
+          tooltip: `The total time required by the IDseq pipeline to process .fastq files into
+            IDseq reports.`,
+          link: doclink,
+        },
         dataKey: "totalRuntime",
         label: "Total Runtime",
         flexGrow: 1,
