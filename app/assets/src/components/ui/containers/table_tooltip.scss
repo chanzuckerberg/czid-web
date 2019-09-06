@@ -1,0 +1,19 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.tooltip {
+  text-align: left;
+
+  .title {
+    font-weight: bold;
+    margin-right: $space-xxs;
+  }
+
+  .link {
+    margin-left: $space-xxs;
+    color: $primary-lighter !important;
+    text-decoration: underline;
+    text-decoration-style: dashed;
+  }
+}
