@@ -25,7 +25,7 @@ export const logAnalyticsEvent = async (eventName, eventData = {}) => {
         // see traits_for_segment
         admin: traits.admin,
         biohub_user: traits.biohub_user,
-        czi_user: traits.biohub_user,
+        czi_user: traits.czi_user,
         demo_user: traits.demo_user,
         has_samples: traits.has_samples,
         git_version: window.GIT_VERSION,
