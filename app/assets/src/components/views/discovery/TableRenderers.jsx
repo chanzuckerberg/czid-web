@@ -40,17 +40,18 @@ class TableRenderers extends React.Component {
             trigger={<div className={cs.itemName}>{nameRenderer(item)}</div>}
             content={nameRenderer(item)}
           />
-          {item.description && (
-            <BasicPopup
-              trigger={
-                <div className={cs.itemDescription}>
-                  {descriptionRenderer(item)}
-                </div>
-              }
-              content={descriptionRenderer(item)}
-              wide="very"
-            />
-          )}
+          {item &&
+            item.description && (
+              <BasicPopup
+                trigger={
+                  <div className={cs.itemDescription}>
+                    {descriptionRenderer(item)}
+                  </div>
+                }
+                content={descriptionRenderer(item)}
+                wide="very"
+              />
+            )}
           <div className={cs.itemDetails}>{detailsRenderer(item)}</div>
         </div>
       </div>

@@ -82,6 +82,15 @@ class InfiniteTable extends React.Component {
     );
   };
 
+  handleGetRowHeight = ({ index }) => {
+    const { defaultRowHeight } = this.props;
+    const height =
+      typeof defaultRowHeight === "function"
+        ? defaultRowHeight({ index, row: this.rows[index] })
+        : defaultRowHeight;
+    return height;
+  };
+
   reset = () => {
     // Reset function MUST be called if previously loaded data changes
     const { rowCount } = this.props;
@@ -100,6 +109,7 @@ class InfiniteTable extends React.Component {
       minimumBatchSize,
       onSelectRow,
       onSelectAllRows,
+      defaultRowHeight,
       threshold,
       ...extraProps
     } = this.props;
@@ -128,6 +138,7 @@ class InfiniteTable extends React.Component {
               onSelectRow={onSelectRow}
               rowCount={rowCount}
               rowGetter={this.getRow}
+              rowHeight={this.handleGetRowHeight}
               rowRenderer={this.rowRenderer}
             />
           );
@@ -155,6 +166,7 @@ InfiniteTable.propTypes = {
   onSelectRow: PropTypes.func,
   onSelectAllRows: PropTypes.func,
   rowCount: PropTypes.number,
+  defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
   threshold: PropTypes.number,
 };
 

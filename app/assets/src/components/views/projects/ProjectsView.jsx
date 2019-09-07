@@ -1,5 +1,5 @@
 import React from "react";
-import { find, merge, pick } from "lodash/fp";
+import { merge, pick } from "lodash/fp";
 
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
@@ -66,7 +66,7 @@ class ProjectsView extends React.Component {
   }
 
   nameRenderer(project) {
-    return project.name;
+    return <div className={cs.projectName}>{project ? project.name : ""}</div>;
   }
 
   visibilityIconRenderer(project) {
@@ -78,32 +78,35 @@ class ProjectsView extends React.Component {
   }
 
   descriptionRenderer(project) {
-    return project.description;
+    return (
+      <div className={cs.projectDescription}>
+        {project ? project.description : ""}
+      </div>
+    );
   }
 
   detailsRenderer(project) {
     return (
       <div>
-        <span>{project.owner}</span>
+        <span>{project ? project.owner : ""}</span>
       </div>
     );
   }
 
   // Projects with descriptions should be displayed in taller rows,
   // otherwise use the default row height.
-  getRowHeight = ({ index }) => {
-    const { projects } = this.props;
-    const project = projects[index];
-    return project.description ? MAX_PROJECT_ROW_HEIGHT : DEFAULT_ROW_HEIGHT;
+  getRowHeight = ({ row: project }) => {
+    return project && project.description
+      ? MAX_PROJECT_ROW_HEIGHT
+      : DEFAULT_ROW_HEIGHT;
   };
 
   handleRowClick = ({ rowData }) => {
-    const { onProjectSelected, projects } = this.props;
-    const project = find({ id: rowData.id }, projects);
-    onProjectSelected && onProjectSelected({ project });
+    const { onProjectSelected } = this.props;
+    onProjectSelected && onProjectSelected({ rowData });
     logAnalyticsEvent("ProjectsView_row_clicked", {
-      projectId: project.id,
-      projectName: project.name,
+      projectId: rowData.id,
+      projectName: rowData.name,
     });
   };
 
@@ -127,22 +130,10 @@ class ProjectsView extends React.Component {
     );
   };
 
-  render() {
-    const {
-      currentDisplay,
-      currentTab,
-      mapLevel,
-      mapLocationData,
-      mapPreviewedLocationId,
-      mapTilerKey,
-      onClearFilters,
-      onMapClick,
-      onMapLevelChange,
-      onMapMarkerClick,
-      onMapTooltipTitleClick,
-      projects,
-    } = this.props;
-    let data = projects.map(project => {
+  handleLoadRowsAndFormat = args => {
+    const { onLoadRows } = this.props;
+    const projects = onLoadRows(args);
+    return projects.map(project => {
       return merge(
         {
           project: pick(
@@ -156,6 +147,23 @@ class ProjectsView extends React.Component {
         )
       );
     });
+  };
+
+  render() {
+    const {
+      currentDisplay,
+      currentTab,
+      mapLevel,
+      mapLocationData,
+      mapPreviewedLocationId,
+      mapTilerKey,
+      onClearFilters,
+      onLoadRows,
+      onMapClick,
+      onMapLevelChange,
+      onMapMarkerClick,
+      onMapTooltipTitleClick,
+    } = this.props;
 
     return (
       <div className={cs.container}>
@@ -163,8 +171,8 @@ class ProjectsView extends React.Component {
         {currentDisplay === "table" ? (
           <BaseDiscoveryView
             columns={this.columns}
-            data={data}
             handleRowClick={this.handleRowClick}
+            onLoadRows={onLoadRows}
             rowHeight={this.getRowHeight}
           />
         ) : (
@@ -203,12 +211,12 @@ ProjectsView.propTypes = {
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
+  onLoadRows: PropTypes.func.isRequired,
   onMapClick: PropTypes.func,
   onMapLevelChange: PropTypes.func,
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onProjectSelected: PropTypes.func,
-  projects: PropTypes.array,
 };
 
 export default ProjectsView;

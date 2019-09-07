@@ -13,23 +13,23 @@ const DISCOVERY_DOMAIN_MY_DATA = "my_data";
 const DISCOVERY_DOMAIN_ALL_DATA = "all_data";
 const DISCOVERY_DOMAIN_PUBLIC = "public";
 
-const getDiscoverySyncData = async ({ domain, filters, projectId, search }) => {
-  try {
-    const [projects, visualizations] = await Promise.all([
-      getProjects({ domain, filters, projectId, search }),
-      getVisualizations({ domain, filters, search }),
-    ]);
+// const getDiscoverySyncData = async ({ domain, filters, projectId, search }) => {
+//   try {
+//     const [projects, visualizations] = await Promise.all([
+//       getProjects({ domain, filters, projectId, search }),
+//       getVisualizations({ domain, filters, search }),
+//     ]);
 
-    return {
-      projects,
-      visualizations,
-    };
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
-    return {};
-  }
-};
+//     return {
+//       projects,
+//       visualizations,
+//     };
+//   } catch (error) {
+//     // eslint-disable-next-line no-console
+//     console.error(error);
+//     return {};
+//   }
+// };
 
 const getDiscoveryDimensions = async ({
   domain,
@@ -152,6 +152,54 @@ const getDiscoverySamples = async ({
   };
 };
 
+const getDiscoveryProjects = async ({
+  domain,
+  filters,
+  projectId,
+  search,
+  limit = 100,
+  offset = 0,
+  listAllIds = false,
+} = {}) => {
+  const projects = await getProjects({
+    domain,
+    filters,
+    projectId,
+    search,
+    limit,
+    offset,
+    listAllIds,
+  });
+  return {
+    projects,
+    projectIds: listAllIds ? projects.map(project => project.id) : null,
+  };
+};
+
+const getDiscoveryVisualizations = async ({
+  domain,
+  filters,
+  search,
+  limit = 100,
+  offset = 0,
+  listAllIds = false,
+} = {}) => {
+  const visualizations = await getVisualizations({
+    domain,
+    filters,
+    search,
+    limit,
+    offset,
+    listAllIds,
+  });
+  return {
+    visualizations,
+    visualizationIds: listAllIds
+      ? visualizations.map(visualization => visualization.id)
+      : null,
+  };
+};
+
 const getDiscoveryLocations = async ({
   domain,
   filters,
@@ -178,7 +226,9 @@ export {
   DISCOVERY_DOMAIN_PUBLIC,
   getDiscoveryDimensions,
   getDiscoveryLocations,
+  getDiscoveryProjects,
   getDiscoverySamples,
   getDiscoveryStats,
-  getDiscoverySyncData,
+  // getDiscoverySyncData,
+  getDiscoveryVisualizations,
 };
