@@ -352,7 +352,6 @@ class SamplesView extends React.Component {
     return (
       <div className={cs.table}>
         <InfiniteTable
-          testId="SamplesTable"
           ref={infiniteTable => (this.infiniteTable = infiniteTable)}
           columns={this.columns}
           defaultRowHeight={rowHeight}
