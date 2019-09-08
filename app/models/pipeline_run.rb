@@ -1294,7 +1294,7 @@ class PipelineRun < ApplicationRecord
 
   def contig_lineages(min_contig_size = MIN_CONTIG_SIZE)
     contigs.select("id, read_count, lineage_json")
-           .where("read_count >= #{min_contig_size}")
+           .where("read_count >= ?", min_contig_size)
            .where("lineage_json IS NOT NULL")
   end
 

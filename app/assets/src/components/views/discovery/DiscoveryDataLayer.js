@@ -5,15 +5,36 @@ import {
   getDiscoveryVisualizations,
 } from "./discovery_api";
 
-export default class DiscoveryDataLayer {
+class ObjectCollection {
+  constructor() {
+    this.entries = {};
+    this.orderedIds = null;
+    this.loading = true;
+  }
+
+  get loaded() {
+    return (this.orderedIds || []).map(id => this.entries[id]);
+  }
+  get = id => this.entries[id];
+  getIds = () => this.orderedIds || [];
+  getLength = () => {
+    return Object.keys(this.entries).length;
+  };
+  isLoading = () => this.loading;
+
+  reset = () => {
+    this.orderedIds = null;
+    this.loading = true;
+  };
+}
+
+class DiscoveryDataLayer {
   constructor(domain) {
     this.domain = domain;
 
-    this.data = {
-      projects: this.newObjectDb(),
-      samples: this.newObjectDb(),
-      visualizations: this.newObjectDb(),
-    };
+    this.projects = new ObjectCollection();
+    this.samples = new ObjectCollection();
+    this.visualizations = new ObjectCollection();
 
     this.apiFunctions = {
       projects: this.fetchProjects,
@@ -21,27 +42,6 @@ export default class DiscoveryDataLayer {
       visualizations: this.fetchVisualizations,
     };
   }
-
-  newObjectDb = () => ({
-    entries: {},
-    orderedIds: null,
-    loading: true,
-  });
-
-  reset = dataType => {
-    const objectDb = this.data[dataType];
-    objectDb.orderedIds = null;
-    objectDb.loading = true;
-  };
-
-  get = dataType => Object.values(this.data[dataType].entries);
-  getIds = dataType => this.data[dataType].orderedIds || [];
-  getLength = dataType => Object.keys(this.data[dataType].entries).length;
-  isLoading = dataType => this.data[dataType].loading;
-
-  update = (dataType, object) => {
-    this.data[dataType][object.id] = object;
-  };
 
   fetchSamples = async params => {
     const {
@@ -74,7 +74,7 @@ export default class DiscoveryDataLayer {
     conditions = {},
     onDataLoaded,
   }) => {
-    const objects = this.data[dataType];
+    const objects = this[dataType];
     const apiFunction = this.apiFunctions[dataType];
     const domain = this.domain;
 
@@ -120,3 +120,5 @@ export default class DiscoveryDataLayer {
     return requestedObjects;
   };
 }
+
+export { DiscoveryDataLayer, ObjectCollection };

@@ -44,7 +44,7 @@ import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
 import DiscoverySidebar from "./DiscoverySidebar";
 import DiscoveryFilters from "./DiscoveryFilters";
-import DiscoveryDataLayer from "./DiscoveryDataLayer";
+import { DiscoveryDataLayer } from "./DiscoveryDataLayer";
 import ProjectHeader from "./ProjectHeader";
 import {
   getDiscoveryDimensions,
@@ -59,6 +59,7 @@ import NoResultsBanner from "./NoResultsBanner";
 import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 
 import cs from "./discovery_view.scss";
+import { restElement } from "@babel/types";
 
 // Data available
 // (A) non-filtered dimensions: for filter options
@@ -139,12 +140,12 @@ class DiscoveryView extends React.Component {
   }
 
   async componentDidMount() {
-    this.resetDataFromInitialLoad();
+    this.initialLoad();
     this.checkPublicSamples();
 
     window.onpopstate = () => {
       this.setState(history.state, () => {
-        this.resetDataFromInitialLoad();
+        this.initialLoad();
       });
     };
   }
@@ -218,9 +219,9 @@ class DiscoveryView extends React.Component {
   };
 
   resetData = ({ callback }) => {
-    this.dataLayer.reset("samples");
-    this.dataLayer.reset("projects");
-    this.dataLayer.reset("visualizations");
+    this.dataLayer.samples.reset();
+    this.dataLayer.projects.reset();
+    this.dataLayer.visualizations.reset();
 
     this.setState(
       {
@@ -228,7 +229,6 @@ class DiscoveryView extends React.Component {
         filteredSampleDimensions: [],
         filteredSampleStats: {},
         loadingDimensions: true,
-        visualizations: [],
       },
       () => {
         this.samplesView && this.samplesView.reset();
@@ -239,21 +239,18 @@ class DiscoveryView extends React.Component {
     );
   };
 
-  resetDataFromInitialLoad = () => {
+  initialLoad = () => {
     const { project } = this.state;
-    this.resetData({
-      callback: () => {
-        // * Initial load:
-        //   - load (A) non-filtered dimensions, (C) filtered stats, (D) filtered locations, and (E) synchronous table data
-        this.refreshDimensions();
-        this.refreshFilteredStats();
-        this.refreshFilteredLocations();
-        // this.refreshSynchronousData();
-        //   * if filter or project is set
-        //     - load (B) filtered dimensions
-        (this.getFilterCount() || project) && this.refreshFilteredDimensions();
-      },
-    });
+
+    // * Initial load:
+    //   - load (A) non-filtered dimensions, (C) filtered stats, (D) filtered locations, and (E) synchronous table data
+    this.refreshDimensions();
+    this.refreshFilteredStats();
+    this.refreshFilteredLocations();
+    this.refreshSynchronousData();
+    //   * if filter or project is set
+    //     - load (B) filtered dimensions
+    (this.getFilterCount() || project) && this.refreshFilteredDimensions();
   };
 
   resetDataFromFilterChange = () => {
@@ -1042,13 +1039,13 @@ class DiscoveryView extends React.Component {
                 onSelectedSamplesUpdate={this.handleSelectedSamplesUpdate}
                 projectId={projectId}
                 ref={samplesView => (this.samplesView = samplesView)}
-                samples={dataLayer.get("samples")}
-                selectableIds={dataLayer.getIds("samples")}
+                samples={dataLayer.samples}
+                selectableIds={dataLayer.samples.getIds()}
                 selectedSampleIds={selectedSampleIds}
               />
             </div>
-            {!dataLayer.getLength("samples") &&
-              !dataLayer.isLoading("samples") &&
+            {!dataLayer.samples.getLength() &&
+              !dataLayer.samples.isLoading() &&
               currentDisplay === "table" && (
                 <NoResultsBanner
                   className={cs.noResultsContainer}
@@ -1200,7 +1197,7 @@ class DiscoveryView extends React.Component {
           {projectId && (
             <ProjectHeader
               project={project || {}}
-              fetchedSamples={dataLayer.get("samples")}
+              fetchedSamples={dataLayer.samples.loaded}
               onProjectUpdated={this.handleProjectUpdated}
               onMetadataUpdated={this.refreshDataFromProjectChange}
             />
