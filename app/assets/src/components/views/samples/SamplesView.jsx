@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { difference, find, isEmpty, union } from "lodash/fp";
+import { difference, isEmpty, union } from "lodash/fp";
 import React from "react";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
