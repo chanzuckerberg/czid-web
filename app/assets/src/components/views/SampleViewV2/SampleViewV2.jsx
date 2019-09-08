@@ -1,4 +1,6 @@
 import React from "react";
+import { getSampleReportData } from "~/api";
+import ReportTable from "./ReportTable";
 
 export default class SampleViewV2 extends React.Component {
   constructor(props) {
@@ -10,6 +12,22 @@ export default class SampleViewV2 extends React.Component {
   }
 
   componentDidMount() {
-    fetch_sample_report_data();
+    fetchSampeleReportData();
+  }
+
+  fetchSampleReportData = async () => {
+    const reportData = await getSampleReportData();
+    console.log(reportData);
+  }
+
+  render = () => {
+    return (
+      <div>
+        <div>Report page here</div>
+        <div>
+          <ReportTable />
+        </div>
+      </div>
+    )
   }
 }
