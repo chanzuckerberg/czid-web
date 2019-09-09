@@ -130,9 +130,10 @@ class ProjectsView extends React.Component {
     );
   };
 
-  handleLoadRowsAndFormat = args => {
+  handleLoadRowsAndFormat = async args => {
     const { onLoadRows } = this.props;
-    const projects = onLoadRows(args);
+    const projects = await onLoadRows(args);
+
     return projects.map(project => {
       return merge(
         {
@@ -158,7 +159,6 @@ class ProjectsView extends React.Component {
       mapPreviewedLocationId,
       mapTilerKey,
       onClearFilters,
-      onLoadRows,
       onMapClick,
       onMapLevelChange,
       onMapMarkerClick,
@@ -172,7 +172,7 @@ class ProjectsView extends React.Component {
           <BaseDiscoveryView
             columns={this.columns}
             handleRowClick={this.handleRowClick}
-            onLoadRows={onLoadRows}
+            onLoadRows={this.handleLoadRowsAndFormat}
             rowHeight={this.getRowHeight}
           />
         ) : (

@@ -247,14 +247,14 @@ class DiscoveryView extends React.Component {
     this.refreshDimensions();
     this.refreshFilteredStats();
     this.refreshFilteredLocations();
-    this.refreshSynchronousData();
+    // this.refreshSynchronousData();
     //   * if filter or project is set
     //     - load (B) filtered dimensions
     (this.getFilterCount() || project) && this.refreshFilteredDimensions();
   };
 
   resetDataFromFilterChange = () => {
-    const { project } = this.state;
+    // const { project } = this.state;
     this.resetData({
       callback: () => {
         // * On filter change:
@@ -262,9 +262,9 @@ class DiscoveryView extends React.Component {
         this.refreshFilteredDimensions();
         this.refreshFilteredStats();
         this.refreshFilteredLocations();
-        //  * if project not set
-        //       load (E) synchronous table data
-        !project && this.refreshSynchronousData();
+        // //  * if project not set
+        // //       load (E) synchronous table data
+        // !project && this.refreshSynchronousData();
       },
     });
   };
@@ -614,7 +614,7 @@ class DiscoveryView extends React.Component {
         currentDisplay: "table",
         currentTab: "samples",
         mapSidebarTab: mapSidebarTab === "summary" ? mapSidebarTab : "samples",
-        project: this.dataLayer.get(project.id),
+        project: this.dataLayer.projects.get(project.id),
         projectId: project.id,
         search: null,
       },
@@ -632,7 +632,7 @@ class DiscoveryView extends React.Component {
 
   handleProjectUpdated = ({ project }) => {
     // const { projects } = this.state;
-    this.dataLayer.update("projects", project);
+    this.dataLayer.projects.update(project);
     // const projectIndex = findIndex({ id: project.id }, projects);
     // let newProjects = projects.slice();
     // newProjects.splice(projectIndex, 1, project);
@@ -836,9 +836,8 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  // This uses 'projects' so it comes after refreshSynchronousData
   refreshMapPreviewedProjects = async () => {
-    const { mapLocationData, mapPreviewedLocationId, projects } = this.state;
+    const { mapLocationData, mapPreviewedLocationId, search } = this.state;
 
     if (!mapPreviewedLocationId) return;
 
@@ -849,7 +848,15 @@ class DiscoveryView extends React.Component {
     }
 
     const projectIds = mapLocationData[mapPreviewedLocationId].project_ids;
-    const mapPreviewedProjects = at(projectIds, keyBy("id", projects));
+    const mapPreviewedProjects = await this.dataLayer.loadObjectsByIdList({
+      dataType: "projects",
+      ids: projectIds,
+      conditions: {
+        search,
+        filters: this.preparedFilters(),
+      },
+    });
+    // const mapPreviewedProjects = at(projectIds, keyBy("id", projects));
 
     this.setState({ mapPreviewedProjects }, () => {
       this.mapPreviewSidebar && this.mapPreviewSidebar.reset();
@@ -975,7 +982,7 @@ class DiscoveryView extends React.Component {
     } = this.state;
 
     const { admin, allowedFeatures, mapTilerKey } = this.props;
-    const { dataLayer } = this;
+    const { projects, samples, visualizations } = this.dataLayer;
 
     return (
       <React.Fragment>
@@ -1000,11 +1007,11 @@ class DiscoveryView extends React.Component {
                 onMapMarkerClick={this.handleMapMarkerClick}
                 onProjectSelected={this.handleProjectSelected}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
-                // projects={projects}
+                projects={projects}
               />
             </div>
-            {!dataLayer.getLength("projects") &&
-              !dataLayer.isLoading("projects") &&
+            {!projects.getLength() &&
+              !projects.isLoading() &&
               currentDisplay === "table" && (
                 <NoResultsBanner
                   className={cs.noResultsContainer}
@@ -1039,13 +1046,13 @@ class DiscoveryView extends React.Component {
                 onSelectedSamplesUpdate={this.handleSelectedSamplesUpdate}
                 projectId={projectId}
                 ref={samplesView => (this.samplesView = samplesView)}
-                samples={dataLayer.samples}
-                selectableIds={dataLayer.samples.getIds()}
+                samples={samples}
+                selectableIds={samples.getIds()}
                 selectedSampleIds={selectedSampleIds}
               />
             </div>
-            {!dataLayer.samples.getLength() &&
-              !dataLayer.samples.isLoading() &&
+            {!samples.getLength() &&
+              !samples.isLoading() &&
               currentDisplay === "table" && (
                 <NoResultsBanner
                   className={cs.noResultsContainer}
@@ -1063,8 +1070,8 @@ class DiscoveryView extends React.Component {
                 }
               />
             </div>
-            {!dataLayer.getLength("visualizations") &&
-              !dataLayer.isLoading("visualizations") &&
+            {!visualizations.getLength() &&
+              !visualizations.isLoading() &&
               currentDisplay === "table" && (
                 <NoResultsBanner
                   className={cs.noResultsContainer}
@@ -1109,7 +1116,7 @@ class DiscoveryView extends React.Component {
     const computedSampleDimensions =
       filterCount || search ? filteredSampleDimensions : sampleDimensions;
     const loading = loadingDimensions || loadingStats;
-    const projectStats = { count: this.dataLayer.getIds("projects").length };
+    const projectStats = { count: this.dataLayer.projects.getIds().length };
 
     return (
       <div className={cs.rightPane}>
@@ -1132,7 +1139,9 @@ class DiscoveryView extends React.Component {
                   : mapSidebarProjectDimensions
               }
               projects={
-                isEmpty(mapPreviewedProjects) ? projects : mapPreviewedProjects
+                isEmpty(mapPreviewedProjects)
+                  ? this.dataLayer.projects.loaded
+                  : mapPreviewedProjects
               }
               projectStats={
                 isEmpty(mapSidebarSampleStats)

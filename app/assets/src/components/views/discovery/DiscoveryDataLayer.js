@@ -21,6 +21,9 @@ class ObjectCollection {
     return Object.keys(this.entries).length;
   };
   isLoading = () => this.loading;
+  update = entry => {
+    this.entries[entry.id] = entry;
+  };
 
   reset = () => {
     this.orderedIds = null;
@@ -65,6 +68,35 @@ class DiscoveryDataLayer {
       visualizationIds: fetchedObjectIds,
     } = await getDiscoveryVisualizations(params);
     return { fetchedObjects, fetchedObjectIds };
+  };
+
+  loadObjectsByIdList = async ({ dataType, ids, ...props }) => {
+    const collection = this[dataType];
+    const requestedIds = new Set(ids);
+    let startIndex = null;
+    let stopIndex = null;
+
+    for (let idx; idx < collection.orderedIds.length; idx++) {
+      if (collection.orderedIds[idx] in requestedIds) {
+        startIndex = startIndex || idx;
+        stopIndex = idx;
+      }
+    }
+
+    if (startIndex) {
+      return this.handleLoadObjectRows({
+        dataType,
+        startIndex,
+        stopIndex,
+        ...props,
+      });
+    }
+
+    if (ids.length) {
+      // eslint-disable-next-line no-console
+      console.error("Non-existent IDs requested");
+    }
+    return [];
   };
 
   handleLoadObjectRows = async ({
@@ -116,7 +148,6 @@ class DiscoveryDataLayer {
       .map(idx => objects.entries[objects.orderedIds[idx]]);
 
     onDataLoaded && onDataLoaded(this);
-
     return requestedObjects;
   };
 }
