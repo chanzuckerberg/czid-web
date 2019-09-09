@@ -34,7 +34,7 @@ class InfiniteTable extends React.Component {
   loadMoreRows = async ({ startIndex, stopIndex }) => {
     const { onLoadRows, minimumBatchSize } = this.props;
 
-    for (var i = startIndex; i <= stopIndex; i++) {
+    for (let i = startIndex; i <= stopIndex; i++) {
       this.loadedRowsMap[i] = STATUS_LOADING;
     }
 
@@ -48,7 +48,7 @@ class InfiniteTable extends React.Component {
       this.setState({ rowCount: this.rows.length + minimumBatchSize });
     }
 
-    for (i = startIndex; i <= stopIndex; i++) {
+    for (let i = startIndex; i <= stopIndex; i++) {
       this.loadedRowsMap[i] = STATUS_LOADED;
     }
 

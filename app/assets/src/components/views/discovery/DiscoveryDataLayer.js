@@ -1,47 +1,39 @@
 import { range } from "lodash/fp";
 import { getDiscoverySamples } from "./discovery_api";
 
-export default class DiscoveryDataLayer {
+class ObjectCollection {
+  constructor() {
+    this.entries = {};
+    this.orderedIds = null;
+    this.loading = true;
+  }
+
+  get loaded() {
+    return (this.orderedIds || []).map(id => this.entries[id]);
+  }
+  get = id => this.entries[id];
+  getIds = () => this.orderedIds || [];
+  getLength = () => {
+    return Object.keys(this.entries).length;
+  };
+  isLoading = () => this.loading;
+
+  reset = () => {
+    this.orderedIds = null;
+    this.loading = true;
+  };
+}
+
+class DiscoveryDataLayer {
   constructor(domain) {
     this.domain = domain;
 
-    this.data = {
-      samples: this.newObjectDb(),
-    };
+    this.samples = new ObjectCollection();
 
     this.apiFunctions = {
       samples: this.fetchSamples,
     };
   }
-
-  newObjectDb = () => ({
-    entries: {},
-    orderedIds: null,
-    loading: true,
-  });
-  get = dataType => Object.values(this.data[dataType].entries);
-  getIds = dataType => this.data[dataType].orderedIds || [];
-  getLength = dataType => Object.keys(this.data[dataType].entries).length;
-  isLoading = dataType => this.data[dataType].loading;
-  reset = dataType => {
-    const objectDb = this.data[dataType];
-    objectDb.orderedIds = null;
-    objectDb.loading = true;
-  };
-
-  handleLoadSampleRows = params => {
-    return this.handleLoadObjectRows({
-      objects: this.data.samples,
-      apiFunction: async params => {
-        let {
-          samples: fetchedObjects,
-          sampleIds: fetchedObjectIds,
-        } = await getDiscoverySamples(params);
-        return { fetchedObjects, fetchedObjectIds };
-      },
-      ...params,
-    });
-  };
 
   fetchSamples = async params => {
     let {
@@ -58,7 +50,7 @@ export default class DiscoveryDataLayer {
     conditions = {},
     onDataLoaded,
   }) => {
-    const objects = this.data[dataType];
+    const objects = this[dataType];
     const apiFunction = this.apiFunctions[dataType];
     const domain = this.domain;
 
@@ -98,7 +90,11 @@ export default class DiscoveryDataLayer {
     const requestedObjects = range(startIndex, minStopIndex + 1)
       .filter(idx => idx in objects.orderedIds)
       .map(idx => objects.entries[objects.orderedIds[idx]]);
+
     onDataLoaded && onDataLoaded(this);
+
     return requestedObjects;
   };
 }
+
+export { DiscoveryDataLayer, ObjectCollection };
