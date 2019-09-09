@@ -38,7 +38,6 @@ class SamplesView extends React.Component {
       {
         columnData: {
           tooltip: "The user-defined sample name.",
-          link: doclink,
         },
         dataKey: "sample",
         flexGrow: 1,
@@ -50,7 +49,6 @@ class SamplesView extends React.Component {
         columnData: {
           tooltip:
             "The date on which the sample was initially uploaded to IDseq.",
-          link: doclink,
         },
         dataKey: "createdAt",
         label: "Uploaded On",
@@ -72,7 +70,6 @@ class SamplesView extends React.Component {
       {
         columnData: {
           tooltip: "User-defined location from which the sample was collected.",
-          link: doclink,
         },
         dataKey: "collectionLocationV2",
         label: "Location",
@@ -82,7 +79,6 @@ class SamplesView extends React.Component {
       {
         columnData: {
           tooltip: "The total number of reads uploaded.",
-          link: doclink,
         },
         dataKey: "totalReads",
         label: "Total Reads",
@@ -147,7 +143,6 @@ class SamplesView extends React.Component {
       {
         columnData: {
           tooltip: "User-supplied notes.",
-          link: doclink,
         },
         dataKey: "notes",
         flexGrow: 1,
@@ -157,7 +152,6 @@ class SamplesView extends React.Component {
         columnData: {
           tooltip:
             "User-selected metadata field indicating the nucleotide type (RNA, DNA).",
-          link: doclink,
         },
         dataKey: "nucleotideType",
         label: "Nucleotide Type",
@@ -167,7 +161,6 @@ class SamplesView extends React.Component {
       {
         columnData: {
           tooltip: "User-supplied metadata field indicating the sample type.",
-          link: doclink,
         },
         dataKey: "sampleType",
         label: "Sample Type",
@@ -192,7 +185,6 @@ class SamplesView extends React.Component {
         columnData: {
           tooltip: `The total time required by the IDseq pipeline to process .fastq files into
             IDseq reports.`,
-          link: doclink,
         },
         dataKey: "totalRuntime",
         label: "Total Runtime",

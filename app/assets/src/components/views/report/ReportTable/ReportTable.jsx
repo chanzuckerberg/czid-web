@@ -1,5 +1,5 @@
 import React from "react";
-import Tipsy from "react-tipsy";
+import { Popup } from "semantic-ui-react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 
@@ -62,18 +62,18 @@ export default class ReportTable extends React.Component {
               {renderColumnHeader("Score", `NT_aggregatescore`, {
                 title: "Aggregate score",
                 tooltip:
-                  "Experimental ranking score for prioritizing microbes.",
+                  "Experimental ranking score for prioritizing microbes based on abundance within the sample (rPM) as well as compared to control samples (Z-score).",
                 link: doclink,
               })}
               {renderColumnHeader("Z", `${countType}_zscore`, {
                 title: "Z-score",
                 tooltip:
-                  "Experimental method for evaluating the prevelance of microbes in your sample as compared to background contaminants.",
+                  "Statistic used for evaluating the prevelance of microbes in your sample as compared to background contaminants.",
                 link: doclink,
               })}
               {renderColumnHeader("rPM", `${countType}_rpm`, {
                 tooltip:
-                  "Number of reads aligning to the taxon in the NCBI NR/NT database per million reads sequenced.",
+                  "Number of reads aligning to the taxon in the NCBI NR/NT database, per million reads sequenced.",
                 link: doclink,
               })}
               {renderColumnHeader("r", `${countType}_r`, {
@@ -99,45 +99,54 @@ export default class ReportTable extends React.Component {
               })}
               {renderColumnHeader("L", `${countType}_alignmentlength`, {
                 tooltip:
-                  "Average length of the local alignment for all contigs.",
+                  "Average length of the local alignment for all contigs and reads assigned to this taxon.",
                 link: doclink,
               })}
               {renderColumnHeader("log(1/E)", `${countType}_neglogevalue`, {
                 tooltip:
-                  "Average log10 transformed expect value of alignments to NCBI NT/NR.",
+                  "Average log10 transformed expect value (e-value) of alignments to NCBI NT/NR.",
                 link: doclink,
               })}
               <th className="last-col">
-                <Tipsy content="Switch count type" placement="top">
-                  <div className="sort-controls center left">
-                    <div
-                      className={
-                        countType === "NT"
-                          ? "active column-switcher"
-                          : "column-switcher"
-                      }
-                      onClick={() => {
-                        setCountType("NT");
-                        logAnalyticsEvent("ReportTable_count-type-nt_clicked");
-                      }}
-                    >
-                      NT
+                <Popup
+                  trigger={
+                    <div className="sort-controls center left">
+                      <div
+                        className={
+                          countType === "NT"
+                            ? "active column-switcher"
+                            : "column-switcher"
+                        }
+                        onClick={() => {
+                          setCountType("NT");
+                          logAnalyticsEvent(
+                            "ReportTable_count-type-nt_clicked"
+                          );
+                        }}
+                      >
+                        NT
+                      </div>
+                      <div
+                        className={
+                          countType === "NR"
+                            ? "active column-switcher"
+                            : "column-switcher"
+                        }
+                        onClick={() => {
+                          setCountType("NR");
+                          logAnalyticsEvent(
+                            "ReportTable_count-type-nr_clicked"
+                          );
+                        }}
+                      >
+                        NR
+                      </div>
                     </div>
-                    <div
-                      className={
-                        countType === "NR"
-                          ? "active column-switcher"
-                          : "column-switcher"
-                      }
-                      onClick={() => {
-                        setCountType("NR");
-                        logAnalyticsEvent("ReportTable_count-type-nr_clicked");
-                      }}
-                    >
-                      NR
-                    </div>
-                  </div>
-                </Tipsy>
+                  }
+                  position="top right"
+                  content="Switch count type"
+                  inverted
+                />
               </th>
             </tr>
           </thead>
