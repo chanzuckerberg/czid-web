@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { difference, find, isEmpty, union } from "lodash/fp";
+import { difference, isEmpty, union } from "lodash/fp";
 import React from "react";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
@@ -22,6 +22,7 @@ import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
+import { ObjectCollection } from "../discovery/DiscoveryDataLayer";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -271,14 +272,14 @@ class SamplesView extends React.Component {
     const {
       currentDisplay,
       mapPreviewedSamples,
-      selectedSampleIds,
       samples,
+      selectedSampleIds,
     } = this.props;
 
     // NOTE(jsheu): For mapSidebar sample names to appear in CollectionModal,
     // they need to be presently loaded/fetched. Otherwise the ids work but says "and more..." for un-fetched samples.
     const targetSamples =
-      currentDisplay === "map" ? mapPreviewedSamples : samples;
+      currentDisplay === "map" ? mapPreviewedSamples : samples.loaded;
     return selectedSampleIds.size < 2 ? (
       <SaveIcon
         className={cx(cs.icon, cs.disabled, cs.save)}
@@ -428,7 +429,7 @@ class SamplesView extends React.Component {
 
   handleRowClick = ({ event, rowData }) => {
     const { onSampleSelected, samples } = this.props;
-    const sample = find({ id: rowData.id }, samples);
+    const sample = samples.get(rowData.id);
     onSampleSelected && onSampleSelected({ sample, currentEvent: event });
     logAnalyticsEvent("SamplesView_row_clicked", {
       sampleId: sample.id,
@@ -497,7 +498,7 @@ SamplesView.propTypes = {
   onSelectedSamplesUpdate: PropTypes.func,
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
-  samples: PropTypes.array,
+  samples: PropTypes.instanceOf(ObjectCollection),
   selectableIds: PropTypes.array.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
 };
