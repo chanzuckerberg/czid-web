@@ -7,6 +7,7 @@ import InfoIcon from "~ui/icons/InfoIcon";
 import Label from "~ui/labels/Label";
 import Tabs from "~ui/controls/Tabs";
 import LiveSearchBox from "~ui/controls/LiveSearchBox";
+import BasicPopup from "~/components/BasicPopup";
 
 import cs from "./discovery_header.scss";
 
@@ -73,13 +74,26 @@ class DiscoveryHeader extends React.Component {
     return (
       <div className={cs.header}>
         <div className={cs.filtersTrigger} onClick={onFilterToggle}>
-          <FiltersIcon
-            className={cx(cs.filtersIcon, cs.icon, !showFilters && cs.closed)}
-          />
-          <Label
-            className={cs.filtersCounter}
-            circular
-            text={`${filterCount}`}
+          <BasicPopup
+            trigger={
+              <div>
+                <FiltersIcon
+                  className={cx(
+                    cs.filtersIcon,
+                    cs.icon,
+                    !showFilters && cs.closed
+                  )}
+                />
+                <Label
+                  className={cs.filtersCounter}
+                  circular
+                  text={`${filterCount}`}
+                />
+              </div>
+            }
+            content="Filters"
+            mouseEnterDelay={500}
+            position="bottom center"
           />
         </div>
         <div className={cs.searchContainer}>
@@ -99,8 +113,17 @@ class DiscoveryHeader extends React.Component {
         />
         <div className={cs.blankFill} />
         <div className={cs.statsTrigger} onClick={onStatsToggle}>
-          <InfoIcon
-            className={cx(cs.statsIcon, cs.icon, !showStats && cs.closed)}
+          <BasicPopup
+            trigger={
+              <div>
+                <InfoIcon
+                  className={cx(cs.statsIcon, cs.icon, !showStats && cs.closed)}
+                />
+              </div>
+            }
+            content="Info"
+            mouseEnterDelay={500}
+            position="bottom center"
           />
         </div>
       </div>
