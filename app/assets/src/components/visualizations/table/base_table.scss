@@ -47,6 +47,11 @@
       // Shrink once you're at the maximum width (e.g. don't overflow). Do not grow unless needed.
       flex: 0 1 auto;
       min-width: 0;
+
+      &:hover {
+        color: $black;
+        cursor: pointer;
+      }
     }
 
     .sortIcon {
@@ -63,6 +68,11 @@
     max-width: 100%;
     display: inline-block;
     vertical-align: middle;
+
+    &:hover {
+      color: $black;
+      cursor: default;
+    }
   }
 }
 

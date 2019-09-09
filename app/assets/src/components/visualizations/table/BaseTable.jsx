@@ -84,24 +84,20 @@ class BaseTable extends React.Component {
     sortDirection,
   }) {
     return (
-      <TableTooltip
-        trigger={
-          <div className={cs.sortableHeader}>
-            <div className={cs.label}>{label}</div>
-            {sortBy === dataKey && (
-              <SortIcon
-                sortDirection={
-                  sortDirection === "ASC" ? "ascending" : "descending"
-                }
-                className={cs.sortIcon}
-              />
-            )}
-          </div>
-        }
-        title={label}
-        content={columnData.tooltip}
-        link={columnData.link}
-      />
+      <div className={cs.sortableHeader}>
+        <TableTooltip
+          trigger={<div className={cs.label}>{label}</div>}
+          title={label}
+          content={columnData.tooltip}
+          link={columnData.link}
+        />
+        {sortBy === dataKey && (
+          <SortIcon
+            sortDirection={sortDirection === "ASC" ? "ascending" : "descending"}
+            className={cs.sortIcon}
+          />
+        )}
+      </div>
     );
   }
 
