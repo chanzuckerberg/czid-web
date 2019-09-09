@@ -9,8 +9,6 @@ class TableTooltip extends React.Component {
       <Popup
         on="hover"
         {...this.props}
-        //position="top center"
-        //basic
         hoverable
         content={
           <div className={cs.tooltip}>
@@ -37,6 +35,8 @@ TableTooltip.propTypes = {
 
 TableTooltip.defaultProps = {
   size: "small",
+  position: "top center",
+  mouseEnterDelay: 300,
 };
 
 export default TableTooltip;
