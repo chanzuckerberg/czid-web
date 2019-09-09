@@ -29,10 +29,10 @@ const getAlignmentData = (sampleId, alignmentQuery, pipelineVersion) =>
 const deleteSample = id => deleteWithCSRF(`/samples/${id}.json`);
 
 const getSampleReportData = (id, params) =>
-  get(`/samples/${id}/report_info${params}`);
+  get(`/samples/${id}/report_v2`, { params });
 
 const getSampleReportInfo = (id, params) =>
-  get(`/samples/${id}/report_v2/${params}`);
+  get(`/samples/${id}/report_info${params}`);
 
 const getSummaryContigCounts = (id, minContigSize) =>
   get(`/samples/${id}/summary_contig_counts?min_contig_size=${minContigSize}`);

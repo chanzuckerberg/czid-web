@@ -1,7 +1,7 @@
-<div id="sample_view">
+<div id="sample_view_v2">
   <%= javascript_tag do %>
     react_component('SampleViewV2', {
-      pipelineRunId: <%= @pipeline_run.id =>
-    }, 'sample_view', JSON.parse('<%= raw escape_json(request_context)%>'));
+      sampleId: <%= @sample.id %>,
+    }, 'sample_view_v2', JSON.parse('<%= raw escape_json(request_context)%>'));
   <% end %>
 </div>

@@ -1,24 +1,26 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { getSampleReportData } from "~/api";
-import ReportTable from "./ReportTable";
+import ReportTable from "./ReportTableV2";
 
 export default class SampleViewV2 extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {};
-
-    this.gsnapFilterStatus = this.generateGsnapFilterStatus();
+    console.log("sample view v2");
   }
 
   componentDidMount() {
-    fetchSampeleReportData();
+    this.fetchSampleReportData();
   }
 
   fetchSampleReportData = async () => {
-    const reportData = await getSampleReportData();
+    const { sampleId } = this.props;
+
+    const reportData = await getSampleReportData(sampleId);
     console.log(reportData);
-  }
+  };
 
   render = () => {
     return (
@@ -28,6 +30,10 @@ export default class SampleViewV2 extends React.Component {
           <ReportTable />
         </div>
       </div>
-    )
-  }
+    );
+  };
 }
+
+SampleViewV2.propTypes = {
+  sampleId: PropTypes.number,
+};
