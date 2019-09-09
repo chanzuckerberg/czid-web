@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { difference, find, isEmpty, union } from "lodash/fp";
+import { difference, isEmpty, union } from "lodash/fp";
 import React from "react";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
@@ -352,7 +352,6 @@ class SamplesView extends React.Component {
     return (
       <div className={cs.table}>
         <InfiniteTable
-          testId="SamplesTable"
           ref={infiniteTable => (this.infiniteTable = infiniteTable)}
           columns={this.columns}
           defaultRowHeight={rowHeight}
