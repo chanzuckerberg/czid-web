@@ -102,14 +102,4 @@ sudo chmod -R 777 docker_data/elasticsearch/data
 # Increase systemd max heap for elasticsearch
 sudo sysctl -w vm.max_map_count=262144
 
-gem install bundler --conservative
-
-docker-compose build
-npm install && ./node_modules/.bin/webpack --config webpack.config.dev.js
-docker-compose up -d db
-sleep 10
-docker-compose run --rm web rake db:drop db:create db:migrate db:seed
-docker-compose run --rm -e RAILS_ENV=test web rake db:drop db:create db:migrate db:seed
-docker-compose up -d db redis web resque resque_result_monitor resque_pipeline_monitor elasticsearch
-sleep 10
-docker-compose run web rake create_elasticsearch_indices
+./bin/base-setup
