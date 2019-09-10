@@ -91,12 +91,10 @@ class BaseTable extends React.Component {
           content={columnData.tooltip}
           link={columnData.link}
         />
-        {sortBy === dataKey && (
-          <SortIcon
-            sortDirection={sortDirection === "ASC" ? "ascending" : "descending"}
-            className={cs.sortIcon}
-          />
-        )}
+        <SortIcon
+          sortDirection={sortDirection === "ASC" ? "ascending" : "descending"}
+          className={cx(cs.sortIcon, sortBy === dataKey && cs.active)}
+        />
       </div>
     );
   }

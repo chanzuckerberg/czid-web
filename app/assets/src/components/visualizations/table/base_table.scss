@@ -58,6 +58,15 @@
       // Make the sort icon slightly bigger than the text.
       font-size: 1.2em;
       margin-left: 4px;
+      display: none;
+
+      &.active {
+        display: flex;
+      }
+    }
+    // Display sortIcon when sortableHeader label is hovered over
+    .label:hover + .sortIcon {
+      display: flex;
     }
   }
 
