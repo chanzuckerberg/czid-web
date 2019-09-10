@@ -1162,7 +1162,7 @@ DEPENDENCIES
   coveralls
   csv-safe (~> 1.2)
   deep_cloneable (~> 2.4.0)
-  devise (>= 4.6.0)
+  devise (>= 4.7.1)
   elasticsearch-model
   factory_bot_rails
   flamegraph
