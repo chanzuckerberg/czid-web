@@ -102,4 +102,4 @@ sudo chmod -R 777 docker_data/elasticsearch/data
 # Increase systemd max heap for elasticsearch
 sudo sysctl -w vm.max_map_count=262144
 
-./bin/shared-setup
+./bin/setup-shared

@@ -29,5 +29,5 @@ chdir APP_ROOT do
     system!("brew install #{pkg}") unless package_exists
   end
 
-  system! './bin/shared-setup'
+  system! './bin/setup-shared'
 end
