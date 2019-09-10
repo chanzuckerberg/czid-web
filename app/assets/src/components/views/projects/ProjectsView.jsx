@@ -10,7 +10,11 @@ import PropTypes from "~/components/utils/propTypes";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
-import { DEFAULT_ROW_HEIGHT, MAX_PROJECT_ROW_HEIGHT } from "./constants";
+import {
+  DEFAULT_ROW_HEIGHT,
+  MAX_PROJECT_ROW_HEIGHT,
+  PROJECT_TABLE_COLUMNS,
+} from "./constants";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
@@ -21,9 +25,7 @@ class ProjectsView extends React.Component {
 
     this.columns = [
       {
-        columnData: {
-          tooltip: "User-defined project name and author.",
-        },
+        columnData: PROJECT_TABLE_COLUMNS["project"],
         dataKey: "project",
         flexGrow: 1,
         width: 350,
@@ -43,38 +45,28 @@ class ProjectsView extends React.Component {
         sortFunction: p => (p.name || "").toLowerCase(),
       },
       {
-        columnData: {
-          tooltip: "Date project was created in IDseq.",
-        },
+        columnData: PROJECT_TABLE_COLUMNS["created_at"],
         dataKey: "created_at",
         label: "Created On",
         width: 120,
         cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
-        columnData: {
-          tooltip:
-            "User-selected organism(s) from which the samples in the project were collected.",
-        },
+        columnData: PROJECT_TABLE_COLUMNS["hosts"],
         dataKey: "hosts",
         width: 200,
         disableSort: true,
         cellRenderer: TableRenderers.renderList,
       },
       {
-        columnData: {
-          tooltip:
-            "User-supplied metadata field indicating sample types in the project.",
-        },
+        columnData: PROJECT_TABLE_COLUMNS["tissues"],
         dataKey: "tissues",
         width: 200,
         disableSort: true,
         cellRenderer: TableRenderers.renderList,
       },
       {
-        columnData: {
-          tooltip: "Total number of samples in the project.",
-        },
+        columnData: PROJECT_TABLE_COLUMNS["number_of_samples"],
         dataKey: "number_of_samples",
         width: 140,
         label: "No. of Samples",

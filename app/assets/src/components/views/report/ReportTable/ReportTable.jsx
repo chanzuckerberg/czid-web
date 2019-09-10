@@ -5,9 +5,7 @@ import { logAnalyticsEvent } from "~/api/analytics";
 
 import PropTypes from "../../../utils/propTypes";
 import DetailCells from "./DetailCells";
-
-const doclink =
-  "https://github.com/chanzuckerberg/idseq-dag/wiki/IDseq-Pipeline-Stage-%233:-Reporting-and-Visualization#reports";
+import { REPORT_TABLE_COLUMNS } from "./constants";
 
 export default class ReportTable extends React.Component {
   constructor(props) {
@@ -59,54 +57,53 @@ export default class ReportTable extends React.Component {
                 </span>
                 Taxon
               </th>
-              {renderColumnHeader("Score", `NT_aggregatescore`, {
-                title: "Aggregate score",
-                tooltip:
-                  "Experimental ranking score for prioritizing microbes based on abundance within the sample (rPM) as well as compared to control samples (Z-score).",
-                link: doclink,
-              })}
-              {renderColumnHeader("Z", `${countType}_zscore`, {
-                title: "Z-score",
-                tooltip:
-                  "Statistic used for evaluating the prevelance of microbes in your sample as compared to background contaminants.",
-                link: doclink,
-              })}
-              {renderColumnHeader("rPM", `${countType}_rpm`, {
-                tooltip:
-                  "Number of reads aligning to the taxon in the NCBI NR/NT database, per million reads sequenced.",
-                link: doclink,
-              })}
-              {renderColumnHeader("r", `${countType}_r`, {
-                tooltip:
-                  "Number of reads aligning to the taxon in the NCBI NT/NR database.",
-                link: doclink,
-              })}
+              {renderColumnHeader(
+                "Score",
+                `NT_aggregatescore`,
+                REPORT_TABLE_COLUMNS["NT_aggregatescore"]
+              )}
+              {renderColumnHeader(
+                "Z",
+                `${countType}_zscore`,
+                REPORT_TABLE_COLUMNS["zscore"]
+              )}
+              {renderColumnHeader(
+                "rPM",
+                `${countType}_rpm`,
+                REPORT_TABLE_COLUMNS["rpm"]
+              )}
+              {renderColumnHeader(
+                "r",
+                `${countType}_r`,
+                REPORT_TABLE_COLUMNS["r"]
+              )}
               {showAssemblyColumns &&
-                renderColumnHeader("contig", `${countType}_contigs`, {
-                  tooltip:
-                    "Number of assembled contigs aligning to the taxon in the NCBI NT/NR database.",
-                  link: doclink,
-                })}
+                renderColumnHeader(
+                  "contig",
+                  `${countType}_contigs`,
+                  REPORT_TABLE_COLUMNS["contigs"]
+                )}
               {showAssemblyColumns &&
-                renderColumnHeader("contig r", `${countType}_contigreads`, {
-                  tooltip: "Total number reads across all assembled contigs.",
-                  link: doclink,
-                })}
-              {renderColumnHeader("%id", `${countType}_percentidentity`, {
-                tooltip:
-                  "Average percent-identity of alignments to NCBI NT/NR.",
-                link: doclink,
-              })}
-              {renderColumnHeader("L", `${countType}_alignmentlength`, {
-                tooltip:
-                  "Average length of the local alignment for all contigs and reads assigned to this taxon.",
-                link: doclink,
-              })}
-              {renderColumnHeader("log(1/E)", `${countType}_neglogevalue`, {
-                tooltip:
-                  "Average log10 transformed expect value (e-value) of alignments to NCBI NT/NR.",
-                link: doclink,
-              })}
+                renderColumnHeader(
+                  "contig r",
+                  `${countType}_contigreads`,
+                  REPORT_TABLE_COLUMNS["contigreads"]
+                )}
+              {renderColumnHeader(
+                "%id",
+                `${countType}_percentidentity`,
+                REPORT_TABLE_COLUMNS["percentidentity"]
+              )}
+              {renderColumnHeader(
+                "L",
+                `${countType}_alignmentlength`,
+                REPORT_TABLE_COLUMNS["alignmentlength"]
+              )}
+              {renderColumnHeader(
+                "log(1/E)",
+                `${countType}_neglogevalue`,
+                REPORT_TABLE_COLUMNS["neglogevalue"]
+              )}
               <th className="last-col">
                 <Popup
                   trigger={
