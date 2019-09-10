@@ -20,6 +20,7 @@ if [ "$HAS_DOCKER" == "0" ] || [ "$HAS_RUBY" == "0" ] || [ "$HAS_MYSQL" == "0" ]
 fi
 
 if [ "$HAS_DOCKER" == "0" ] ; then
+    # https://docs.docker.com/install/linux/docker-ce/ubuntu/
     echo "Installing docker"
     sudo apt-get remove docker docker-engine docker.io containerd runc
     sudo apt-get update
@@ -32,6 +33,7 @@ if [ "$HAS_DOCKER" == "0" ] ; then
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
     sudo apt-key fingerprint 0EBFCD88
 
+    # Compatibility for Linux Mint, you need to use the upstream Ubuntu codename
     RELEASE="$(lsb_release -cs)"
     if [ "$(lsb_release -is)" == LinuxMint ] ; then
         RELEASE="$(cat /etc/upstream-release/lsb-release | grep -oP -o "(?<=DISTRIB_CODENAME=).*")"
@@ -44,12 +46,15 @@ if [ "$HAS_DOCKER" == "0" ] ; then
     sudo apt-get update
     sudo apt-get install docker-ce docker-ce-cli containerd.io
     sudo usermod -aG docker $USER
+
+    # https://docs.docker.com/compose/install/
     echo "Installing docker-compose"
     sudo curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
 fi
 
 if [ "$HAS_RUBY" == "0" ] ; then
+    # https://www.digitalocean.com/community/tutorials/how-to-install-ruby-on-rails-with-rbenv-on-ubuntu-16-04
     echo "Installing ruby via rbenv"
     sudo apt-get install -y autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev
     git clone https://github.com/rbenv/rbenv.git ~/.rbenv
@@ -66,6 +71,7 @@ if [ "$HAS_MYSQL" == "0" ] ; then
 fi
 
 if [ "$HAS_HUB" == "0" ] ; then
+    # https://github.com/github/hub
     echo "Installing hub"
     if !snap --version > /dev/null 2>&1 ; then
         echo "Installing snap to install hub"
@@ -80,6 +86,7 @@ if [ "$HAS_BASH_COMPLETION" == "0" ] ; then
 fi
 
 if [ "$HAS_NODE" == "0" ] ; then
+    # https://github.com/nvm-sh/nvm#installation-and-update
     echo "Installing node via nvm"
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
     export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
@@ -87,6 +94,13 @@ if [ "$HAS_NODE" == "0" ] ; then
     nvm install stable
     nvm use stable
 fi
+
+# Make the docker volume directory and open permissions for elasticsearch
+mkdir -p docker_data/elasticsearch/data
+sudo chmod -R 777 docker_data/elasticsearch/data
+
+# Increase systemd max heap for elasticsearch
+sudo sysctl -w vm.max_map_count=262144
 
 gem install bundler --conservative
 
