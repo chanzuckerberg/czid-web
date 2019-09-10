@@ -67,7 +67,7 @@ fi
 
 if [ "$HAS_MYSQL" == "0" ] ; then
     echo "Intalling mysql-client"
-    sudo apt-get install -y mysql-client
+    sudo apt-get install -y mysql-client libmysqlclient-dev
 fi
 
 if [ "$HAS_HUB" == "0" ] ; then

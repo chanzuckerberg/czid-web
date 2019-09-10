@@ -2,6 +2,7 @@
 # multi-platform compatible setup script to be shared by platform specific setup scripts
 
 gem install bundler --conservative
+bundle install
 
 docker-compose build
 
