@@ -5,7 +5,9 @@ const DOC_LINK =
 
 export const SAMPLE_TABLE_COLUMNS_V2 = {
   sample: {
-    tooltip: "The user-defined sample name.",
+    tooltip: `Information about the sample, including the user-defined sample name,
+      its current pipeline status, the user who uploaded it, and the project
+      it belongs to.`,
   },
   createdAt: {
     tooltip: "The date on which the sample was initially uploaded to IDseq.",
