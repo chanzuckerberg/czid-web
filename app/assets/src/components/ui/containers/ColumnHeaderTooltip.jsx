@@ -18,7 +18,7 @@ class ColumnHeaderTooltip extends React.Component {
               <a
                 className={cs.link}
                 target="_blank"
-                rel="noopener no referrer"
+                rel="noopener noreferrer"
                 href={this.props.link}
               >
                 Learn more.
