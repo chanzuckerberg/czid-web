@@ -1,9 +1,9 @@
 import React from "react";
 import { Popup } from "semantic-ui-react";
 import PropTypes from "prop-types";
-import cs from "./table_tooltip.scss";
+import cs from "./column_header_tooltip.scss";
 
-class TableTooltip extends React.Component {
+class ColumnHeaderTooltip extends React.Component {
   render() {
     return (
       <Popup
@@ -26,17 +26,17 @@ class TableTooltip extends React.Component {
   }
 }
 
-TableTooltip.propTypes = {
+ColumnHeaderTooltip.propTypes = {
   size: PropTypes.string,
   wide: PropTypes.string,
   title: PropTypes.string,
   link: PropTypes.string,
 };
 
-TableTooltip.defaultProps = {
+ColumnHeaderTooltip.defaultProps = {
   size: "small",
   position: "top center",
   mouseEnterDelay: 300,
 };
 
-export default TableTooltip;
+export default ColumnHeaderTooltip;

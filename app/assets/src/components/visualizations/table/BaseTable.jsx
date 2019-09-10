@@ -10,7 +10,7 @@ import cx from "classnames";
 import { concat, difference, find, includes, map } from "lodash/fp";
 
 import BasicPopup from "~/components/BasicPopup";
-import TableTooltip from "~/components/ui/containers/TableTooltip";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import PlusIcon from "~ui/icons/PlusIcon";
@@ -67,7 +67,7 @@ class BaseTable extends React.Component {
 
   basicHeaderRenderer({ columnData, label }) {
     return (
-      <TableTooltip
+      <ColumnHeaderTooltip
         trigger={<span className={cs.label}>{label}</span>}
         title={label}
         content={columnData.tooltip}
@@ -85,7 +85,7 @@ class BaseTable extends React.Component {
   }) {
     return (
       <div className={cs.sortableHeader}>
-        <TableTooltip
+        <ColumnHeaderTooltip
           trigger={<div className={cs.label}>{label}</div>}
           title={label}
           content={columnData.tooltip}
