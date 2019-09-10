@@ -162,7 +162,7 @@ class SampleReportService
       counts_by_tax_level[TaxonCount::TAX_LEVEL_GENUS]
         .values
         .sort_by { |genus| genus[:agg_score] }
-        .map { |genus| genus[:tax_id] }
+        .map { |genus| genus[:genus_tax_id] }
         .reverse!
     end
 
@@ -189,7 +189,7 @@ class SampleReportService
       JSON.dump(
         counts: counts_by_tax_level,
         lineage: structured_lineage,
-        sorted_genus: sorted_genus_tax_ids
+        sortedGenus: sorted_genus_tax_ids
       )
     end
 
@@ -254,7 +254,7 @@ class SampleReportService
       genus[:agg_score] = species[:agg_score] if genus[:agg_score].nil? || genus[:agg_score] < species[:agg_score]
       # TODO : more this to a more logical place
       if !genus[:children]
-        genus[:children] = []
+        genus[:children] = [tax_id]
       else
         genus[:children].append(tax_id)
       end

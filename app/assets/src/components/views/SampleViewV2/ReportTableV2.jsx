@@ -8,17 +8,44 @@ class ReportTableV2 extends React.Component {
 
     this.columns = [
       {
-        dataKey: "taxName",
+        dataKey: "name",
         flexGrow: 1,
         widht: 400,
       },
       {
-        dataKey: "r",
+        dataKey: "agg_score",
         flexGrow: 1,
         widht: 60,
       },
       {
-        dataKey: "aggScore",
+        dataKey: "taxLevel",
+        flexGrow: 1,
+        widht: 60,
+      },
+      {
+        cellDataGetter: ({ rowData }) => {
+          return [
+            (rowData.nt || {}).z_score || 0,
+            (rowData.nr || {}).z_score || 0,
+          ];
+        },
+        dataKey: "z_score",
+        flexGrow: 1,
+        widht: 60,
+      },
+      {
+        cellDataGetter: ({ rowData }) => {
+          return [(rowData.nt || {}).rpm || 0, (rowData.nr || {}).rpm || 0];
+        },
+        dataKey: "rpm",
+        flexGrow: 1,
+        widht: 60,
+      },
+      {
+        cellDataGetter: ({ rowData }) => {
+          return [(rowData.nt || {}).count || 0, (rowData.nr || {}).count || 0];
+        },
+        dataKey: "r",
         flexGrow: 1,
         widht: 60,
       },
