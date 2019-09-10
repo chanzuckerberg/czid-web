@@ -59,6 +59,13 @@ class Sample < ApplicationRecord
                      :sample_template, # this refers to nucleotide type (RNA or DNA)
                      :sample_library, :sample_sequencer, :sample_notes, :sample_input_pg, :sample_batch, :sample_diagnosis, :sample_organism, :sample_detection,].freeze
 
+  # Maximum allowed line length in characters for fastq/fasta files
+  MAX_LINE_LENGTH = 10_000
+  # Error message to identify parse errors from fastq-fasta-line-validation.awk
+  PARSE_ERROR_MESSAGE = 'PARSE ERROR'.freeze
+  # Script parameters
+  FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT = Rails.root.join("scripts", "fastq-fasta-line-validation.awk").to_s
+
   # These are temporary variables that are not saved to the database. They only persist for the lifetime of the Sample object.
   attr_accessor :bulk_mode, :basespace_dataset_id, :basespace_access_token
 
@@ -290,23 +297,27 @@ class Sample < ApplicationRecord
         # Run the piped commands and save stderr
         err_read, err_write = IO.pipe
         if fastq =~ /\.gz/
-          _proc_download, _proc_unzip, proc_head, proc_zip, proc_upload = Open3.pipeline(
+          _proc_download, _proc_unzip, proc_cut, proc_head, proc_validation, proc_zip, proc_upload = Open3.pipeline(
             ["aws", "s3", "cp", fastq, "-"],
-            "gzip -dc",
+            ["gzip", "-dc"],
+            ["cut", "-c", "-#{Sample::MAX_LINE_LENGTH + 1}"],
             ["head", "-n", max_lines.to_s],
-            "gzip -c",
+            ["awk", "-f", FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT, "-v", "max_line_length=#{Sample::MAX_LINE_LENGTH}"],
+            ["gzip", "-c"],
             ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
             err: err_write
           )
-          to_check = [proc_head, proc_zip, proc_upload]
+          to_check = [proc_cut, proc_head, proc_zip, proc_validation, proc_upload]
         else
-          _proc_download, proc_head, proc_upload = Open3.pipeline(
+          _proc_download, proc_cut, proc_head, proc_validation, proc_upload = Open3.pipeline(
             ["aws", "s3", "cp", fastq, "-"],
+            ["cut", "-c", "-#{Sample::MAX_LINE_LENGTH + 1}"],
             ["head", "-n", max_lines.to_s],
+            ["awk", "-f", FASTQ_FASTA_LINE_VALIDATION_AWK_SCRIPT, "-v", "max_line_length=#{Sample::MAX_LINE_LENGTH}"],
             ["aws", "s3", "cp", "-", "#{sample_input_s3_path}/#{input_file.name}"],
             err: err_write
           )
-          to_check = [proc_head, proc_upload]
+          to_check = [proc_cut, proc_head, proc_validation, proc_upload]
         end
         err_write.close
         stderr = err_read.read
@@ -316,6 +327,11 @@ class Sample < ApplicationRecord
         # we still want to see errs like HeadObject Forbidden.
         if to_check.all? { |p| p && p.exitstatus && p.exitstatus.zero? } && (stderr.empty? || stderr.include?(InputFile::S3_CP_PIPE_ERROR))
           # Success
+          break
+        elsif !proc_validation.exitstatus.zero? && stderr.include?(Sample::PARSE_ERROR_MESSAGE)
+          error_msg = "Error parsing upload of S3 sample '#{name}' (#{id}) file '#{fastq}' failed with: #{stderr}"
+          Rails.logger.error(error_msg)
+          stderr_array << error_msg
           break
         else
           # Try again

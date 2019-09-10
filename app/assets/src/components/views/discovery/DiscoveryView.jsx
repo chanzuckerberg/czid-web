@@ -44,6 +44,7 @@ import SamplesView from "../samples/SamplesView";
 import VisualizationsView from "../visualizations/VisualizationsView";
 import DiscoverySidebar from "./DiscoverySidebar";
 import DiscoveryFilters from "./DiscoveryFilters";
+import { DiscoveryDataLayer } from "./DiscoveryDataLayer";
 import ProjectHeader from "./ProjectHeader";
 import {
   getDiscoverySyncData,
@@ -96,7 +97,10 @@ class DiscoveryView extends React.Component {
     this.state = defaults(
       {
         currentDisplay: "table",
-        currentTab: projectId ? "samples" : "projects",
+        currentTab:
+          projectId || this.props.domain === "all_data"
+            ? "samples"
+            : "projects",
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
         filteredSampleStats: {},
@@ -104,7 +108,6 @@ class DiscoveryView extends React.Component {
         loadingDimensions: true,
         loadingLocations: true,
         loadingProjects: true,
-        loadingSamples: true,
         loadingStats: true,
         loadingVisualizations: true,
         mapLevel: "country",
@@ -123,9 +126,6 @@ class DiscoveryView extends React.Component {
         projects: [],
         rawMapLocationData: {},
         sampleDimensions: [],
-        sampleIds: [],
-        samples: [],
-        samplesAllLoaded: false,
         search: null,
         selectedSampleIds: new Set(),
         showFilters: true,
@@ -135,17 +135,17 @@ class DiscoveryView extends React.Component {
       urlState
     );
 
-    this.data = null;
+    this.dataLayer = new DiscoveryDataLayer(this.props.domain);
     this.updateBrowsingHistory("replace");
   }
 
   async componentDidMount() {
-    this.resetDataFromInitialLoad();
+    this.initialLoad();
     this.checkPublicSamples();
 
     window.onpopstate = () => {
       this.setState(history.state, () => {
-        this.resetDataFromInitialLoad();
+        this.initialLoad();
       });
     };
   }
@@ -221,18 +221,16 @@ class DiscoveryView extends React.Component {
   resetData = ({ callback }) => {
     const { project } = this.state;
 
+    this.dataLayer.samples.reset();
+
     this.setState(
       {
         filteredProjectDimensions: [],
         filteredSampleDimensions: [],
         filteredSampleStats: {},
         loadingDimensions: true,
-        loadingSamples: true,
         // instead of resetting projects we use the current project info, if selected
         projects: compact([project]),
-        sampleIds: [],
-        samples: [],
-        samplesAllLoaded: false,
         visualizations: [],
       },
       () => {
@@ -242,21 +240,17 @@ class DiscoveryView extends React.Component {
     );
   };
 
-  resetDataFromInitialLoad = () => {
+  initialLoad = () => {
     const { project } = this.state;
-    this.resetData({
-      callback: () => {
-        // * Initial load:
-        //   - load (A) non-filtered dimensions, (C) filtered stats, (D) filtered locations, and (E) synchronous table data
-        this.refreshDimensions();
-        this.refreshFilteredStats();
-        this.refreshFilteredLocations();
-        this.refreshSynchronousData();
-        //   * if filter or project is set
-        //     - load (B) filtered dimensions
-        (this.getFilterCount() || project) && this.refreshFilteredDimensions();
-      },
-    });
+    // * Initial load:
+    //   - load (A) non-filtered dimensions, (C) filtered stats, (D) filtered locations, and (E) synchronous table data
+    this.refreshDimensions();
+    this.refreshFilteredStats();
+    this.refreshFilteredLocations();
+    this.refreshSynchronousData();
+    //   * if filter or project is set
+    //     - load (B) filtered dimensions
+    (this.getFilterCount() || project) && this.refreshFilteredDimensions();
   };
 
   resetDataFromFilterChange = () => {
@@ -296,7 +290,6 @@ class DiscoveryView extends React.Component {
     this.setState({
       loadingProjects: true,
       loadingVisualizations: true,
-      loadingSamples: true,
     });
 
     const { projects = [], visualizations = [] } = await getDiscoverySyncData({
@@ -591,50 +584,19 @@ class DiscoveryView extends React.Component {
   };
 
   handleLoadSampleRows = async ({ startIndex, stopIndex }) => {
-    const { domain } = this.props;
-    const {
-      projectId,
-      samples,
-      sampleIds,
-      samplesAllLoaded,
-      search,
-    } = this.state;
+    const { dataLayer } = this;
+    const { projectId, search } = this.state;
 
-    const previousLoadedSamples = samples.slice(startIndex, stopIndex + 1);
-    const neededStartIndex = Math.max(startIndex, samples.length);
-
-    let newlyFetchedSamples = [];
-    if (!samplesAllLoaded && stopIndex >= neededStartIndex) {
-      const numRequestedSamples = stopIndex - neededStartIndex + 1;
-      let {
-        samples: fetchedSamples,
-        sampleIds: fetchedSampleIds,
-      } = await getDiscoverySamples({
-        domain,
-        filters: this.preparedFilters(),
+    return dataLayer.handleLoadObjectRows({
+      dataType: "samples",
+      startIndex,
+      stopIndex,
+      conditions: {
         projectId,
         search,
-        limit: stopIndex - neededStartIndex + 1,
-        offset: neededStartIndex,
-        listAllIds: sampleIds.length === 0,
-      });
-
-      let newState = {
-        // add newly fetched samples to the list (assumes that samples are requested in order)
-        samples: samples.concat(fetchedSamples),
-        // if returned samples are less than requested, we assume all data was loaded
-        samplesAllLoaded: fetchedSamples.length < numRequestedSamples,
-        loadingSamples: false,
-      };
-      if (fetchedSampleIds) {
-        newState.sampleIds = fetchedSampleIds;
-      }
-
-      this.setState(newState);
-      newlyFetchedSamples = fetchedSamples;
-    }
-
-    return previousLoadedSamples.concat(newlyFetchedSamples);
+        filters: this.preparedFilters(),
+      },
+    });
   };
 
   handleProjectSelected = ({ project }) => {
@@ -992,7 +954,6 @@ class DiscoveryView extends React.Component {
       currentDisplay,
       currentTab,
       loadingProjects,
-      loadingSamples,
       loadingVisualizations,
       mapLevel,
       mapLocationData,
@@ -1001,11 +962,10 @@ class DiscoveryView extends React.Component {
       selectedSampleIds,
       projectId,
       projects,
-      sampleIds,
-      samples,
       visualizations,
     } = this.state;
     const { admin, allowedFeatures, mapTilerKey } = this.props;
+    const { dataLayer } = this;
 
     return (
       <React.Fragment>
@@ -1064,13 +1024,13 @@ class DiscoveryView extends React.Component {
                 onSelectedSamplesUpdate={this.handleSelectedSamplesUpdate}
                 projectId={projectId}
                 ref={samplesView => (this.samplesView = samplesView)}
-                samples={samples}
-                selectableIds={sampleIds}
+                samples={dataLayer.samples}
+                selectableIds={dataLayer.samples.getIds()}
                 selectedSampleIds={selectedSampleIds}
               />
             </div>
-            {!samples.length &&
-              !loadingSamples &&
+            {!dataLayer.samples.getLength() &&
+              !dataLayer.samples.isLoading() &&
               currentDisplay === "table" && (
                 <NoResultsBanner
                   className={cs.noResultsContainer}
@@ -1200,12 +1160,12 @@ class DiscoveryView extends React.Component {
       filters,
       project,
       projectId,
-      samples,
       search,
       showFilters,
       showStats,
     } = this.state;
     const { domain, allowedFeatures } = this.props;
+    const { dataLayer } = this;
 
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
@@ -1217,7 +1177,7 @@ class DiscoveryView extends React.Component {
           {projectId && (
             <ProjectHeader
               project={project || {}}
-              fetchedSamples={samples}
+              fetchedSamples={dataLayer.samples.loaded}
               onProjectUpdated={this.handleProjectUpdated}
               onMetadataUpdated={this.refreshDataFromProjectChange}
             />
