@@ -15,7 +15,12 @@ class ColumnHeaderTooltip extends React.Component {
             <span className={cs.title}>{this.props.title}:</span>
             {this.props.content}
             {this.props.link && (
-              <a className={cs.link} target="_blank" href={this.props.link}>
+              <a
+                className={cs.link}
+                target="_blank"
+                rel="noopener no referrer"
+                href={this.props.link}
+              >
                 Learn more.
               </a>
             )}
