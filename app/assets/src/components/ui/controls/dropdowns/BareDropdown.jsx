@@ -116,6 +116,7 @@ class BareDropdown extends React.Component {
       arrowInsideTrigger,
       className,
       hideArrow,
+      smallArrow,
       menuLabel,
       search,
       closeOnClick,
@@ -133,7 +134,8 @@ class BareDropdown extends React.Component {
       !hideArrow &&
         (arrowInsideTrigger ? cs.arrowInsideTrigger : cs.arrowOutsideTrigger),
       className,
-      hideArrow && cs.hideArrow
+      hideArrow && cs.hideArrow,
+      smallArrow && cs.smallArrow
     );
 
     const { filterString } = this.state;
@@ -237,6 +239,7 @@ BareDropdown.propTypes = forbidExtraProps({
   // whether the arrow should be displayed outside the trigger or inside it.
   arrowInsideTrigger: PropTypes.bool,
   hideArrow: PropTypes.bool,
+  smallArrow: PropTypes.bool,
   menuLabel: PropTypes.string,
   // whether the dropdown should close when you click on the menu. Useful for custom dropdown menus.
   closeOnClick: PropTypes.bool,
