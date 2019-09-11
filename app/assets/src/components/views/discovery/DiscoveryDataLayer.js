@@ -9,7 +9,9 @@ class ObjectCollection {
   }
 
   get loaded() {
-    return (this.orderedIds || []).map(id => this.entries[id]);
+    return (this.orderedIds || [])
+      .filter(id => id in this.entries)
+      .map(id => this.entries[id]);
   }
   get = id => this.entries[id];
   getIds = () => this.orderedIds || [];
