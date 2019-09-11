@@ -11,7 +11,7 @@ export const REPORT_TABLE_COLUMNS = {
   zscore: {
     title: "Z-score",
     tooltip:
-      "Statistic used for evaluating the prevelance of microbes in your sample as compared to background contaminants.",
+      "Statistic used for evaluating the prevelance of microbes in the sample as compared to background contaminants.",
     link: DOC_LINK,
   },
   rpm: {
@@ -30,7 +30,7 @@ export const REPORT_TABLE_COLUMNS = {
     link: DOC_LINK,
   },
   contigreads: {
-    tooltip: "Total number reads across all assembled contigs.",
+    tooltip: "Total number of reads across all assembled contigs.",
     link: DOC_LINK,
   },
   percentidentity: {
