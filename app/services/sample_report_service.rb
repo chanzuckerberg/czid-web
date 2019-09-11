@@ -7,6 +7,9 @@ class SampleReportService
     :count_type,
     :tax_level,
     :count,
+    :percent_identity,
+    :alignment_length,
+    :e_value,
     :mean,
     :stdev,
     :name # name needed for taxon scoring model?!
@@ -41,6 +44,10 @@ class SampleReportService
     timer("initialize and adjust reads") do
       pipeline_run = PipelineRun.find(@pipeline_run_id)
       adjusted_total_reads = (pipeline_run.total_reads - pipeline_run.total_ercc_reads.to_i) * pipeline_run.subsample_fraction
+    end
+
+    timer("get contig summary") do
+      pipeline_run.get_summary_contig_counts(PipelineRun::MIN_CONTIG_SIZE)
     end
 
     timer("query_counts_and_summaries (should be fast)") do
