@@ -11,6 +11,7 @@ import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { DEFAULT_ROW_HEIGHT, MAX_PROJECT_ROW_HEIGHT } from "./constants";
+import { ObjectCollection } from "../discovery/DiscoveryDataLayer";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
@@ -95,18 +96,21 @@ class ProjectsView extends React.Component {
 
   // Projects with descriptions should be displayed in taller rows,
   // otherwise use the default row height.
-  getRowHeight = ({ row: project }) => {
-    return project && project.description
+  getRowHeight = ({ row }) => {
+    return row && row.project && row.project.description
       ? MAX_PROJECT_ROW_HEIGHT
       : DEFAULT_ROW_HEIGHT;
   };
 
   handleRowClick = ({ rowData }) => {
-    const { onProjectSelected } = this.props;
-    onProjectSelected && onProjectSelected({ rowData });
+    console.log("ProjectsView:handleRowClick", rowData, onProjectSelected);
+    const { onProjectSelected, projects } = this.props;
+    const project = projects.get(rowData.id);
+    console.log("ProjectsView:handleRowClick", project);
+    onProjectSelected && onProjectSelected({ project });
     logAnalyticsEvent("ProjectsView_row_clicked", {
-      projectId: rowData.id,
-      projectName: rowData.name,
+      projectId: project.id,
+      projectName: project.name,
     });
   };
 
@@ -217,6 +221,7 @@ ProjectsView.propTypes = {
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onProjectSelected: PropTypes.func,
+  projects: PropTypes.instanceOf(ObjectCollection),
 };
 
 export default ProjectsView;

@@ -19,10 +19,10 @@ import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { ObjectCollection } from "../discovery/DiscoveryDataLayer";
 
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
-import { ObjectCollection } from "../discovery/DiscoveryDataLayer";
 
 class SamplesView extends React.Component {
   constructor(props) {
@@ -170,6 +170,7 @@ class SamplesView extends React.Component {
   };
 
   reset = () => {
+    console.log("SamplesView:reset");
     const { currentDisplay } = this.props;
     if (currentDisplay === "table") this.infiniteTable.reset();
   };

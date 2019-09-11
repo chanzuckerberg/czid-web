@@ -58,6 +58,10 @@ class ProjectsController < ApplicationController
 
         order_by = sanitize_order_by(Project, params[:orderBy], :id)
         order_dir = sanitize_order_dir(params[:orderDir], :desc)
+        # TODO: impose a max return value -> implies changing all calls to projects
+        limit = params[:limit] ? params[:limit].to_i : nil
+        offset = params[:offset] ? params[:offset].to_i : 0
+
         project_id = params[:projectId]
 
         # we do not want to search samples by name
@@ -89,6 +93,10 @@ class ProjectsController < ApplicationController
         projects = projects.where(id: project_id) if project_id
         projects = projects.db_search(search) if search
         projects = projects.order(Hash[order_by => order_dir])
+        if limit
+          projects = projects.offset(offset).limit(limit)
+          samples = samples.where(project_id: projects.pluck(:id))
+        end
 
         if basic
           # Use group_by for performance.
@@ -129,6 +137,7 @@ class ProjectsController < ApplicationController
         filtered_projects = projects.includes(:users).select do |project|
           !hide_empty_projects || (sample_count_by_project_id[project.id] || 0) > 0
         end
+
         extended_projects = filtered_projects.map do |project|
           project.as_json(only: [:id, :name, :description, :created_at, :public_access]).merge(
             number_of_samples: sample_count_by_project_id[project.id] || 0,

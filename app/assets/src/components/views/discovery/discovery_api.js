@@ -136,6 +136,17 @@ const getDiscoverySamples = async ({
   listAllIds = false,
   sampleIds,
 } = {}) => {
+  console.log(
+    "DiscoveryView:refreshMapPreviewedSamples",
+    domain,
+    filters,
+    projectId,
+    search,
+    limit,
+    offset,
+    listAllIds,
+    sampleIds
+  );
   const sampleResults = await getSamples({
     domain,
     filters,

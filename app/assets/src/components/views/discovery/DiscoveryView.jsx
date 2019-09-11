@@ -59,7 +59,6 @@ import NoResultsBanner from "./NoResultsBanner";
 import MapPreviewSidebar from "./mapping/MapPreviewSidebar";
 
 import cs from "./discovery_view.scss";
-import { restElement } from "@babel/types";
 
 // Data available
 // (A) non-filtered dimensions: for filter options
@@ -518,7 +517,7 @@ class DiscoveryView extends React.Component {
       }
       case "project": {
         console.log("Fix project click");
-        this.handleProjectSelected({ project: { id: value }, currentEvent });
+        this.handleProjectSelected({ project });
         // const project = find({ id: value }, projects);
         // if (project) {
         //   this.handleProjectSelected({ project });
@@ -614,7 +613,7 @@ class DiscoveryView extends React.Component {
         currentDisplay: "table",
         currentTab: "samples",
         mapSidebarTab: mapSidebarTab === "summary" ? mapSidebarTab : "samples",
-        project: this.dataLayer.projects.get(project.id),
+        project: project,
         projectId: project.id,
         search: null,
       },
@@ -779,7 +778,12 @@ class DiscoveryView extends React.Component {
       projectId,
       search,
     } = this.state;
-
+    console.log(
+      "DiscoveryView:refreshMapPreviewedSamples",
+      mapLocationData,
+      mapPreviewedLocationId,
+      projectId
+    );
     if (!mapPreviewedLocationId) return;
 
     if (!mapLocationData[mapPreviewedLocationId]) {
@@ -1035,7 +1039,7 @@ class DiscoveryView extends React.Component {
                 mapTilerKey={mapTilerKey}
                 onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
-                onLoadRows={({ args }) =>
+                onLoadRows={args =>
                   this.handleLoadRows({ dataType: "samples", ...args })
                 }
                 onMapClick={this.clearMapPreview}

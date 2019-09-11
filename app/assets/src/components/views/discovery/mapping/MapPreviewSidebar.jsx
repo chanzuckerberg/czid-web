@@ -182,12 +182,6 @@ export default class MapPreviewSidebar extends React.Component {
     ];
   }
 
-  handleLoadSampleRows = async () => {
-    // TODO(jsheu): Add pagination on the endpoint and loading for long lists of samples
-    const { samples } = this.props;
-    return samples;
-  };
-
   handleSelectRow = (value, checked) => {
     const { selectedSampleIds, onSelectionUpdate } = this.props;
     let newSelected = new Set(selectedSampleIds);
@@ -273,7 +267,7 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   renderTable = () => {
-    const { selectedSampleIds } = this.props;
+    const { onLoadSampleRows, selectedSampleIds } = this.props;
 
     const rowHeight = 60;
     const batchSize = 1e4;
@@ -287,7 +281,7 @@ export default class MapPreviewSidebar extends React.Component {
             headerClassName={cs.tableHeader}
             initialActiveColumns={["sample"]}
             minimumBatchSize={batchSize}
-            onLoadRows={this.handleLoadSampleRows}
+            onLoadRows={onLoadSampleRows}
             onRowClick={this.handleSampleRowClick}
             onSelectAllRows={this.handleSelectAllRows}
             onSelectRow={this.handleSelectRow}
@@ -344,9 +338,11 @@ export default class MapPreviewSidebar extends React.Component {
     return samples.length === 0 ? this.renderNoData() : this.renderTable();
   };
 
-  renderProjectsTab = () => {
-    const { projects } = this.props;
-    let data = projects.map(project => {
+  handleLoadRowsAndFormat = async args => {
+    const { onLoadRows } = this.props;
+    const projects = await onLoadRows(args);
+
+    return projects.map(project => {
       return merge(
         {
           project: pick(
@@ -360,15 +356,17 @@ export default class MapPreviewSidebar extends React.Component {
         )
       );
     });
+  };
 
+  renderProjectsTab = () => {
     return (
       <BaseDiscoveryView
         columns={this.projectColumns}
-        data={data}
         handleRowClick={this.handleProjectRowClick}
         initialActiveColumns={["project", "number_of_samples"]}
         protectedColumns={["project"]}
         headerClassName={cs.tableHeader}
+        onLoadRows={this.handleLoadRowsAndFormat}
         rowClassName={cs.projectRow}
         rowHeight={50}
       />
@@ -414,6 +412,9 @@ MapPreviewSidebar.propTypes = {
   discoveryCurrentTab: PropTypes.string,
   loading: PropTypes.bool,
   onFilterClick: PropTypes.func,
+  onLoadProjectRows: PropTypes.func,
+  onLoadSampleRows: PropTypes.func,
+  onLoadVisualizationRows: PropTypes.func,
   onProjectSelected: PropTypes.func,
   onSampleClicked: PropTypes.func,
   onSelectionUpdate: PropTypes.func.isRequired,

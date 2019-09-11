@@ -1,4 +1,4 @@
-import { range } from "lodash/fp";
+import { pick, range } from "lodash/fp";
 import {
   getDiscoveryProjects,
   getDiscoverySamples,
@@ -13,7 +13,9 @@ class ObjectCollection {
   }
 
   get loaded() {
-    return (this.orderedIds || []).map(id => this.entries[id]);
+    return (this.orderedIds || [])
+      .filter(id => id in this.entries)
+      .map(id => this.entries[id]);
   }
   get = id => this.entries[id];
   getIds = () => this.orderedIds || [];
@@ -84,12 +86,20 @@ class DiscoveryDataLayer {
     }
 
     if (startIndex) {
-      return this.handleLoadObjectRows({
+      await this.handleLoadObjectRows({
         dataType,
         startIndex,
         stopIndex,
         ...props,
       });
+      console.log(
+        "DiscoveryDataLayer:handleLoadObjectRows",
+        dataType,
+        ids,
+        props,
+        pick(requestedIds, collection.entries)
+      );
+      return pick(requestedIds, collection.entries);
     }
 
     if (ids.length) {
@@ -106,6 +116,14 @@ class DiscoveryDataLayer {
     conditions = {},
     onDataLoaded,
   }) => {
+    console.log(
+      "DiscoveryDataLayer:handleLoadObjectRows",
+      dataType,
+      startIndex,
+      stopIndex,
+      conditions,
+      onDataLoaded
+    );
     const objects = this[dataType];
     const apiFunction = this.apiFunctions[dataType];
     const domain = this.domain;
