@@ -1084,7 +1084,7 @@ class PipelineSampleReport extends React.Component {
   renderColumnHeader = (
     visibleMetric,
     columnName,
-    tooltipMessage,
+    tooltipData,
     visibleFlag = true
   ) => {
     let element = (
@@ -1111,9 +1111,9 @@ class PipelineSampleReport extends React.Component {
         <ColumnHeaderTooltip
           position="top right"
           trigger={element}
-          content={tooltipMessage.tooltip}
-          title={tooltipMessage.title ? tooltipMessage.title : visibleMetric}
-          link={tooltipMessage.link}
+          content={tooltipData.tooltip}
+          title={tooltipData.title ? tooltipData.title : visibleMetric}
+          link={tooltipData.link}
         />
       </th>
     );
