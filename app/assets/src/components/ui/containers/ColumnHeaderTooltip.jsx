@@ -41,7 +41,7 @@ ColumnHeaderTooltip.defaultProps = {
   inverted: false,
   size: "small",
   position: "top center",
-  mouseEnterDelay: 300,
+  mouseEnterDelay: 500,
 };
 
 export default ColumnHeaderTooltip;

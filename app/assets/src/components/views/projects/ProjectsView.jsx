@@ -25,7 +25,6 @@ class ProjectsView extends React.Component {
 
     this.columns = [
       {
-        columnData: PROJECT_TABLE_COLUMNS["project"],
         dataKey: "project",
         flexGrow: 1,
         width: 350,
@@ -45,33 +44,33 @@ class ProjectsView extends React.Component {
         sortFunction: p => (p.name || "").toLowerCase(),
       },
       {
-        columnData: PROJECT_TABLE_COLUMNS["created_at"],
         dataKey: "created_at",
         label: "Created On",
         width: 120,
         cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
-        columnData: PROJECT_TABLE_COLUMNS["hosts"],
         dataKey: "hosts",
         width: 200,
         disableSort: true,
         cellRenderer: TableRenderers.renderList,
       },
       {
-        columnData: PROJECT_TABLE_COLUMNS["tissues"],
         dataKey: "tissues",
         width: 200,
         disableSort: true,
         cellRenderer: TableRenderers.renderList,
       },
       {
-        columnData: PROJECT_TABLE_COLUMNS["number_of_samples"],
         dataKey: "number_of_samples",
         width: 140,
         label: "No. of Samples",
       },
     ];
+
+    for (let column of this.columns) {
+      column["columnData"] = PROJECT_TABLE_COLUMNS[column["dataKey"]];
+    }
   }
 
   nameRenderer(project) {

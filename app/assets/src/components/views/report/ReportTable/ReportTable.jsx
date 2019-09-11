@@ -1,5 +1,5 @@
 import React from "react";
-import { Popup } from "semantic-ui-react";
+import BasicPopup from "~/components/BasicPopup";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 
@@ -105,7 +105,7 @@ export default class ReportTable extends React.Component {
                 REPORT_TABLE_COLUMNS["neglogevalue"]
               )}
               <th className="last-col">
-                <Popup
+                <BasicPopup
                   trigger={
                     <div className="sort-controls center left">
                       <div
@@ -143,6 +143,8 @@ export default class ReportTable extends React.Component {
                   position="top right"
                   content="Switch count type"
                   inverted
+                  basic={false}
+                  size="small"
                 />
               </th>
             </tr>

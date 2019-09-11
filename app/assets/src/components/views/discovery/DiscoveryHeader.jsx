@@ -87,7 +87,7 @@ class DiscoveryHeader extends React.Component {
                 <Label
                   className={cs.filtersCounter}
                   circular
-                  text={`${filterCount}`}
+                  text={filterCount}
                 />
               </div>
             }

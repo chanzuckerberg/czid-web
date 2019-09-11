@@ -34,7 +34,6 @@ class SamplesView extends React.Component {
 
     this.columns = [
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["sample"],
         dataKey: "sample",
         flexGrow: 1,
         width: 350,
@@ -42,7 +41,6 @@ class SamplesView extends React.Component {
         headerClassName: cs.sampleHeader,
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["createdAt"],
         dataKey: "createdAt",
         label: "Uploaded On",
         width: 120,
@@ -50,20 +48,17 @@ class SamplesView extends React.Component {
         cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["host"],
         dataKey: "host",
         flexGrow: 1,
         className: cs.basicCell,
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["collectionLocationV2"],
         dataKey: "collectionLocationV2",
         label: "Location",
         flexGrow: 1,
         className: cs.basicCell,
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["totalReads"],
         dataKey: "totalReads",
         label: "Total Reads",
         flexGrow: 1,
@@ -72,7 +67,6 @@ class SamplesView extends React.Component {
           TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["nonHostReads"],
         dataKey: "nonHostReads",
         label: "Passed Filters",
         flexGrow: 1,
@@ -80,7 +74,6 @@ class SamplesView extends React.Component {
         cellRenderer: TableRenderers.renderNumberAndPercentage,
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["qcPercent"],
         dataKey: "qcPercent",
         label: "Passed QC",
         flexGrow: 1,
@@ -89,7 +82,6 @@ class SamplesView extends React.Component {
           TableRenderers.formatPercentage(rowData[dataKey]),
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["duplicateCompressionRatio"],
         dataKey: "duplicateCompressionRatio",
         label: "DCR",
         flexGrow: 1,
@@ -98,7 +90,6 @@ class SamplesView extends React.Component {
           TableRenderers.formatNumber(rowData[dataKey]),
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["erccReads"],
         dataKey: "erccReads",
         label: "ERCC Reads",
         flexGrow: 1,
@@ -107,27 +98,23 @@ class SamplesView extends React.Component {
           TableRenderers.formatNumberWithCommas(rowData[dataKey]),
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["notes"],
         dataKey: "notes",
         flexGrow: 1,
         className: cs.basicCell,
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["nucleotideType"],
         dataKey: "nucleotideType",
         label: "Nucleotide Type",
         flexGrow: 1,
         className: cs.basicCell,
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["sampleType"],
         dataKey: "sampleType",
         label: "Sample Type",
         flexGrow: 1,
         className: cs.basicCell,
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["subsampledFraction"],
         dataKey: "subsampledFraction",
         label: "SubSampled Fraction",
         flexGrow: 1,
@@ -136,7 +123,6 @@ class SamplesView extends React.Component {
           TableRenderers.formatNumber(rowData[dataKey]),
       },
       {
-        columnData: SAMPLE_TABLE_COLUMNS_V2["totalRuntime"],
         dataKey: "totalRuntime",
         label: "Total Runtime",
         flexGrow: 1,
@@ -145,6 +131,10 @@ class SamplesView extends React.Component {
           TableRenderers.formatDuration(rowData[dataKey]),
       },
     ];
+
+    for (let column of this.columns) {
+      column["columnData"] = SAMPLE_TABLE_COLUMNS_V2[column["dataKey"]];
+    }
   }
 
   handleSelectRow = (value, checked) => {
