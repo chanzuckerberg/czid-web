@@ -1,10 +1,11 @@
 import React from "react";
-import Tipsy from "react-tipsy";
+import BasicPopup from "~/components/BasicPopup";
 
 import { logAnalyticsEvent } from "~/api/analytics";
 
 import PropTypes from "../../../utils/propTypes";
 import DetailCells from "./DetailCells";
+import { REPORT_TABLE_COLUMNS } from "./constants";
 
 export default class ReportTable extends React.Component {
   constructor(props) {
@@ -59,81 +60,92 @@ export default class ReportTable extends React.Component {
               {renderColumnHeader(
                 "Score",
                 `NT_aggregatescore`,
-                "Aggregate score: ( |genus.NT.Z| * species.NT.Z * species.NT.rPM ) + ( |genus.NR.Z| * species.NR.Z * species.NR.rPM )"
+                REPORT_TABLE_COLUMNS["NT_aggregatescore"]
               )}
               {renderColumnHeader(
                 "Z",
                 `${countType}_zscore`,
-                `Z-score relative to background model for alignments to NCBI NT/NR`
+                REPORT_TABLE_COLUMNS["zscore"]
               )}
               {renderColumnHeader(
                 "rPM",
                 `${countType}_rpm`,
-                `Number of reads aligning to the taxon in the NCBI NT/NR database per million total input reads`
+                REPORT_TABLE_COLUMNS["rpm"]
               )}
               {renderColumnHeader(
                 "r",
                 `${countType}_r`,
-                `Number of reads aligning to the taxon in the NCBI NT/NR database`
+                REPORT_TABLE_COLUMNS["r"]
               )}
               {showAssemblyColumns &&
                 renderColumnHeader(
                   "contig",
                   `${countType}_contigs`,
-                  `Number of assembled contigs aligning to the taxon in the NCBI NT/NR database`
+                  REPORT_TABLE_COLUMNS["contigs"]
                 )}
               {showAssemblyColumns &&
                 renderColumnHeader(
                   "contig r",
                   `${countType}_contigreads`,
-                  `Total number of reads across all assembled contigs`
+                  REPORT_TABLE_COLUMNS["contigreads"]
                 )}
               {renderColumnHeader(
                 "%id",
                 `${countType}_percentidentity`,
-                `Average percent-identity of alignments to NCBI NT/NR`
+                REPORT_TABLE_COLUMNS["percentidentity"]
               )}
               {renderColumnHeader(
                 "L",
                 `${countType}_alignmentlength`,
-                `Average length (bp) of alignments to NCBI NT/NR`
+                REPORT_TABLE_COLUMNS["alignmentlength"]
               )}
               {renderColumnHeader(
                 "log(1/E)",
                 `${countType}_neglogevalue`,
-                `Average log-10-transformed expect value for alignments to NCBI NT/NR`
+                REPORT_TABLE_COLUMNS["neglogevalue"]
               )}
               <th className="last-col">
-                <Tipsy content="Switch count type" placement="top">
-                  <div className="sort-controls center left">
-                    <div
-                      className={
-                        countType === "NT"
-                          ? "active column-switcher"
-                          : "column-switcher"
-                      }
-                      onClick={() => {
-                        setCountType("NT");
-                        logAnalyticsEvent("ReportTable_count-type-nt_clicked");
-                      }}
-                    >
-                      NT
+                <BasicPopup
+                  trigger={
+                    <div className="sort-controls center left">
+                      <div
+                        className={
+                          countType === "NT"
+                            ? "active column-switcher"
+                            : "column-switcher"
+                        }
+                        onClick={() => {
+                          setCountType("NT");
+                          logAnalyticsEvent(
+                            "ReportTable_count-type-nt_clicked"
+                          );
+                        }}
+                      >
+                        NT
+                      </div>
+                      <div
+                        className={
+                          countType === "NR"
+                            ? "active column-switcher"
+                            : "column-switcher"
+                        }
+                        onClick={() => {
+                          setCountType("NR");
+                          logAnalyticsEvent(
+                            "ReportTable_count-type-nr_clicked"
+                          );
+                        }}
+                      >
+                        NR
+                      </div>
                     </div>
-                    <div
-                      className={
-                        countType === "NR"
-                          ? "active column-switcher"
-                          : "column-switcher"
-                      }
-                      onClick={() => {
-                        setCountType("NR");
-                        logAnalyticsEvent("ReportTable_count-type-nr_clicked");
-                      }}
-                    >
-                      NR
-                    </div>
-                  </div>
-                </Tipsy>
+                  }
+                  position="top right"
+                  content="Switch count type"
+                  inverted
+                  basic={false}
+                  size="small"
+                />
               </th>
             </tr>
           </thead>

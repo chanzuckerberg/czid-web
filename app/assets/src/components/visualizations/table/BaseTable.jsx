@@ -10,6 +10,7 @@ import cx from "classnames";
 import { concat, difference, find, includes, map } from "lodash/fp";
 
 import BasicPopup from "~/components/BasicPopup";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import PlusIcon from "~ui/icons/PlusIcon";
@@ -64,33 +65,37 @@ class BaseTable extends React.Component {
     });
   }
 
-  basicHeaderRenderer({ label }) {
+  basicHeaderRenderer({ columnData, label }) {
     return (
-      <BasicPopup
+      <ColumnHeaderTooltip
         trigger={<span className={cs.label}>{label}</span>}
-        content={label}
+        title={label}
+        content={columnData.tooltip}
+        link={columnData.link}
       />
     );
   }
 
-  _sortableHeaderRenderer({ dataKey, label, sortBy, sortDirection }) {
+  _sortableHeaderRenderer({
+    columnData,
+    dataKey,
+    label,
+    sortBy,
+    sortDirection,
+  }) {
     return (
-      <BasicPopup
-        trigger={
-          <div className={cs.sortableHeader}>
-            <div className={cs.label}>{label}</div>
-            {sortBy === dataKey && (
-              <SortIcon
-                sortDirection={
-                  sortDirection === "ASC" ? "ascending" : "descending"
-                }
-                className={cs.sortIcon}
-              />
-            )}
-          </div>
-        }
-        content={label}
-      />
+      <div className={cs.sortableHeader}>
+        <ColumnHeaderTooltip
+          trigger={<div className={cs.label}>{label}</div>}
+          title={label}
+          content={columnData.tooltip}
+          link={columnData.link}
+        />
+        <SortIcon
+          sortDirection={sortDirection === "ASC" ? "ascending" : "descending"}
+          className={cx(cs.sortIcon, sortBy === dataKey && cs.active)}
+        />
+      </div>
     );
   }
 
@@ -133,7 +138,7 @@ class BaseTable extends React.Component {
             value={value}
           />
         }
-        content="Select Columns"
+        content="Add or Remove Columns"
       />
     );
   };
@@ -231,6 +236,7 @@ class BaseTable extends React.Component {
                 return (
                   <Column
                     className={cx(cs.cell, className)}
+                    columnData={columnProps.columnData}
                     key={columnProps.dataKey}
                     headerRenderer={
                       sortable && !columnProps.disableSort
