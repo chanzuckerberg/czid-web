@@ -131,6 +131,7 @@ class ReviewStep extends React.Component {
   render() {
     const { showUploadModal, showLessDescription } = this.state;
     const shouldTruncateDescription =
+      this.props.project.description &&
       this.countNewLines(this.props.project.description) > 5;
 
     const {
@@ -184,28 +185,30 @@ class ReviewStep extends React.Component {
                       : "Private Project"}
                   </div>
                 </div>
-                <div className={cs.descriptionContainer}>
-                  {/* Use showmore/showless pattern if description has many (>4) newlines. */}
-                  {/* TODO(julie): Consider making a separate component to do this in a
-                  less hacky way. */}
-                  <div
-                    className={cx(
-                      shouldTruncateDescription &&
-                        showLessDescription &&
-                        cs.truncated
-                    )}
-                  >
-                    {this.props.project.description}
-                  </div>
-                  {shouldTruncateDescription && (
+                {this.props.project.description && (
+                  <div className={cs.descriptionContainer}>
+                    {/* Use showmore/showless pattern if description has many (>4) newlines. */}
+                    {/* TODO(julie): Consider making a separate component to do this in a
+                    less hacky way. */}
                     <div
-                      className={cs.showHide}
-                      onClick={this.toggleDisplayDescription}
+                      className={cx(
+                        shouldTruncateDescription &&
+                          showLessDescription &&
+                          cs.truncated
+                      )}
                     >
-                      {showLessDescription ? "Show More" : "Show Less"}
+                      {this.props.project.description}
                     </div>
-                  )}
-                </div>
+                    {shouldTruncateDescription && (
+                      <div
+                        className={cs.showHide}
+                        onClick={this.toggleDisplayDescription}
+                      >
+                        {showLessDescription ? "Show More" : "Show Less"}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className={cs.existingSamples}>
                   {this.props.project.number_of_samples || 0} existing samples
                   in project
