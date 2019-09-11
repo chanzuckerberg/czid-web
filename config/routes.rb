@@ -144,7 +144,17 @@ Rails.application.routes.draw do
   end
 
   authenticate :user, ->(u) { u.admin? } do
-    mount RESQUE_SERVER, at: "/resque"
+    web_constraint = lambda do |req|
+      puts "REQUEST 2:09pm: ", req, "END"
+      # puts req.methods
+      puts req.query_parameters
+      req.update_param("class", "")
+      puts req.query_parameters
+      true
+    end
+    constraints web_constraint do
+      mount RESQUE_SERVER, at: "/resque"
+    end
   end
 
   # See health_check gem

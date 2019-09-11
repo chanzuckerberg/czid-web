@@ -7,6 +7,7 @@ class ApplicationController < ActionController::Base
   before_action :check_browser
   before_action :set_current_context_for_logging!
   before_action :set_application_view_variables
+  before_action :check_resque_web
 
   include Consul::Controller
   include AppConfigHelper
@@ -124,5 +125,11 @@ class ApplicationController < ActionController::Base
     ApplicationRecord._current_request = request if request
   rescue => e
     Rails.logger.error(e)
+  end
+
+  def check_resque_web
+    puts "FOOBAR 1:50pm"
+    puts params
+    puts "END"
   end
 end
