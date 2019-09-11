@@ -66,7 +66,7 @@ export const SAMPLE_TABLE_COLUMNS_V2 = {
   },
 };
 
-// deprecated
+// DEPRECATED
 export const SAMPLE_TABLE_COLUMNS = {
   total_reads: {
     display_name: "Total reads",

@@ -13,6 +13,7 @@
 
   .link {
     margin-left: $space-xxs;
+    // override link color `inherit !important` in _header.scss
     color: $primary-lighter !important;
     text-decoration: underline;
     text-decoration-style: dashed;
