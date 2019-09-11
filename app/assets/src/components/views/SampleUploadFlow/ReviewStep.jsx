@@ -125,14 +125,14 @@ class ReviewStep extends React.Component {
 
   countNewLines = text => {
     // the code for newline in Windows is \r\n
-    return text.split(/\r*\n/).length;
+    if (text) {
+      return text.split(/\r*\n/).length;
+    }
+    return 0;
   };
 
   render() {
     const { showUploadModal, showLessDescription } = this.state;
-    const shouldTruncateDescription =
-      this.props.project.description &&
-      this.countNewLines(this.props.project.description) > 5;
 
     const {
       onUploadComplete,
@@ -141,6 +141,9 @@ class ReviewStep extends React.Component {
       metadata,
       project,
     } = this.props;
+
+    const shouldTruncateDescription =
+      project.description && this.countNewLines(project.description) > 5;
 
     return (
       <div
@@ -185,7 +188,7 @@ class ReviewStep extends React.Component {
                       : "Private Project"}
                   </div>
                 </div>
-                {this.props.project.description && (
+                {project.description && (
                   <div className={cs.descriptionContainer}>
                     {/* Use showmore/showless pattern if description has many (>4) newlines. */}
                     {/* TODO(julie): Consider making a separate component to do this in a
@@ -197,7 +200,7 @@ class ReviewStep extends React.Component {
                           cs.truncated
                       )}
                     >
-                      {this.props.project.description}
+                      {project.description}
                     </div>
                     {shouldTruncateDescription && (
                       <div
