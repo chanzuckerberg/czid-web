@@ -36,6 +36,7 @@ class PipelineVersionSelect extends React.Component {
         className={cs.pipelineVersionDropdown}
         options={options}
         onChange={this.props.onPipelineVersionSelect}
+        smallArrow
       />
     );
   };
