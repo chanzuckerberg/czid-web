@@ -18,6 +18,8 @@ BasicPopup.propTypes = {
 
 BasicPopup.defaultProps = {
   basic: true,
+  // Actionable tooltips should be black (inverted),
+  // description/information tooltips should be white.
   inverted: true,
   size: "tiny",
 };

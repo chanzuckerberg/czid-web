@@ -92,7 +92,8 @@ class DiscoveryHeader extends React.Component {
               </div>
             }
             content="Filters"
-            mouseEnterDelay={500}
+            mouseEnterDelay={600}
+            mouseLeaveDelay={200}
             position="bottom center"
           />
         </div>
@@ -122,7 +123,8 @@ class DiscoveryHeader extends React.Component {
               </div>
             }
             content="Info"
-            mouseEnterDelay={500}
+            mouseEnterDelay={600}
+            mouseLeaveDelay={200}
             position="bottom center"
           />
         </div>
