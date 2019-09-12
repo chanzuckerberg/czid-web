@@ -29,7 +29,7 @@ import {
   getCategoryAdjective,
   addContigCountsToTaxonomyDetails,
 } from "./views/report/utils/taxon";
-import BasicPopup from "./BasicPopup";
+import ColumnHeaderTooltip from "./ui/containers/ColumnHeaderTooltip";
 import ThresholdFilterDropdown from "./ui/controls/dropdowns/ThresholdFilterDropdown";
 import PathogenLabel from "./ui/labels/PathogenLabel";
 import PathogenPreview from "./views/report/PathogenPreview";
@@ -1084,7 +1084,7 @@ class PipelineSampleReport extends React.Component {
   renderColumnHeader = (
     visibleMetric,
     columnName,
-    tooltipMessage,
+    tooltipData,
     visibleFlag = true
   ) => {
     let element = (
@@ -1108,7 +1108,13 @@ class PipelineSampleReport extends React.Component {
     if (!visibleFlag) return null;
     return (
       <th className={cx(className)}>
-        <BasicPopup trigger={element} content={tooltipMessage} />
+        <ColumnHeaderTooltip
+          position="top right"
+          trigger={element}
+          content={tooltipData.tooltip}
+          title={tooltipData.title ? tooltipData.title : visibleMetric}
+          link={tooltipData.link}
+        />
       </th>
     );
   };

@@ -10,7 +10,11 @@ import PropTypes from "~/components/utils/propTypes";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
-import { DEFAULT_ROW_HEIGHT, MAX_PROJECT_ROW_HEIGHT } from "./constants";
+import {
+  DEFAULT_ROW_HEIGHT,
+  MAX_PROJECT_ROW_HEIGHT,
+  PROJECT_TABLE_COLUMNS,
+} from "./constants";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
@@ -63,6 +67,10 @@ class ProjectsView extends React.Component {
         label: "No. of Samples",
       },
     ];
+
+    for (let column of this.columns) {
+      column["columnData"] = PROJECT_TABLE_COLUMNS[column["dataKey"]];
+    }
   }
 
   nameRenderer(project) {

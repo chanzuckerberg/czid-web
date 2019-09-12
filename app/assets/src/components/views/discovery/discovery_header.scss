@@ -13,6 +13,10 @@
     &.closed {
       fill: $light-grey;
     }
+
+    &:hover {
+      fill: $primary-lighter;
+    }
   }
   .filtersTrigger {
     align-items: center;

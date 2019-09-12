@@ -152,6 +152,9 @@ input[type="number"] {
   text-align: right;
   .table-head-label {
     cursor: pointer;
+    &:hover {
+      color: $black;
+    }
     &.active {
       color: $primary-light;
     }

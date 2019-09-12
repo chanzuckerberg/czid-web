@@ -7,7 +7,7 @@ import PropTypes from "prop-types";
 
 class BasicPopup extends React.Component {
   render() {
-    return <Popup on="hover" {...this.props} basic inverted />;
+    return <Popup on="hover" {...this.props} />;
   }
 }
 
@@ -17,6 +17,10 @@ BasicPopup.propTypes = {
 };
 
 BasicPopup.defaultProps = {
+  basic: true,
+  // Actionable tooltips should be black (inverted),
+  // description/information tooltips should be white.
+  inverted: true,
   size: "tiny",
 };
 

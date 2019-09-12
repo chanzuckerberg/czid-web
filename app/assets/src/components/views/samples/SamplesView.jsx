@@ -19,6 +19,7 @@ import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
 
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
@@ -131,6 +132,10 @@ class SamplesView extends React.Component {
           TableRenderers.formatDuration(rowData[dataKey]),
       },
     ];
+
+    for (let column of this.columns) {
+      column["columnData"] = SAMPLE_TABLE_COLUMNS_V2[column["dataKey"]];
+    }
   }
 
   handleSelectRow = (value, checked) => {
