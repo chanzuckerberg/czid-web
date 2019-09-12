@@ -10,7 +10,7 @@ class ResqueMiddleware
       req = Rack::Request.new(env)
       req.params.each do |k, v|
         # Don't rely on other sanitize methods that may miss HTML encoding.
-        req.update_param(k, v.gsub(/[^0-9A-Za-z_]/i))
+        req.update_param(k, v.gsub(/[^0-9A-Za-z_]/, ''))
       end
     end
 
