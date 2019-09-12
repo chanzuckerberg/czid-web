@@ -1,5 +1,6 @@
 # Jos to check the status of pipeline runs
 require 'English'
+require 'json'
 require 'thread/pool'
 
 # Benchmark status will not be updated faster than this.
@@ -288,6 +289,7 @@ class CheckPipelineRuns
     max_work_duration = 0
     iter_count = 0
     until @shutdown_requested
+      before_iter_timestamp = Time.now.to_f # unixtime
       iter_count += 1
       t_iter_start = t_now
       pr_ids = PipelineRun.in_progress.pluck(:id)
@@ -305,6 +307,17 @@ class CheckPipelineRuns
       autoscaling_state = autoscaling_update(autoscaling_state, t_now)
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f
+
+      # HACK This logger isn't really meant to deal with nested json
+      #  this will appear under the message key at the top level
+      logger_iteration_data = {
+        message: "Pipeline Monitor Iteration Complete",
+        duration: (t_now - before_iter_timestamp),
+        pr_id_count: pr_ids.count,
+        pt_id_count: pt_ids.count,
+        num_shards: num_shards
+      }
+      Rails.logger.info(JSON.generate(logger_iteration_data))
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
       break unless t_iter_end + max_work_duration < t_end
