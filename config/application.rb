@@ -13,7 +13,6 @@ module Idseq
     config.time_zone = 'Pacific Time (US & Canada)'
     config.active_record.default_timezone = :local
     config.middleware.use Rack::Deflater
-
     config.encoding = "utf-8"
 
     # Settings in config/environments/* take precedence over those specified here.
