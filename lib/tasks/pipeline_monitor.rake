@@ -308,14 +308,14 @@ class CheckPipelineRuns
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f
 
-      # HACK This logger isn't really meant to deal with nested json
+      # HACK: This logger isn't really meant to deal with nested json
       #  this will appear under the message key at the top level
       logger_iteration_data = {
         message: "Pipeline Monitor Iteration Complete",
         duration: (t_now - before_iter_timestamp),
         pr_id_count: pr_ids.count,
         pt_id_count: pt_ids.count,
-        num_shards: num_shards
+        num_shards: num_shards,
       }
       Rails.logger.info(JSON.generate(logger_iteration_data))
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
