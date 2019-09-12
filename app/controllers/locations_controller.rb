@@ -8,8 +8,7 @@ class LocationsController < ApplicationController
 
   TOKEN_AUTH_ACTIONS = [:external_search].freeze
 
-  before_action :authenticate_user!, except: TOKEN_AUTH_ACTIONS
-  before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
+  prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
 
   def external_search
     results = []

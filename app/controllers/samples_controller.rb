@@ -31,11 +31,10 @@ class SamplesController < ApplicationController
                    :dimensions, :all, :show_sample_names, :cli_user_instructions, :metadata_fields, :samples_going_public,
                    :search_suggestions, :stats, :upload, :validate_sample_files,].freeze
   OWNER_ACTIONS = [:raw_results_folder].freeze
+  TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
 
   # For API-like access
-  TOKEN_AUTH_ACTIONS = [:create, :update, :bulk_upload, :bulk_upload_with_metadata].freeze
-  before_action :authenticate_user!, except: TOKEN_AUTH_ACTIONS
-  before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
+  prepend_before_action :authenticate_user_from_token!, only: TOKEN_AUTH_ACTIONS
 
   before_action :admin_required, only: [:reupload_source, :resync_prod_data_to_staging, :kickoff_pipeline, :retry_pipeline, :pipeline_runs]
   before_action :no_demo_user, only: [:create, :bulk_new, :bulk_upload, :bulk_import, :new]

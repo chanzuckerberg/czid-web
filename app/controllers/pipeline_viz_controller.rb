@@ -1,8 +1,6 @@
 class PipelineVizController < ApplicationController
   include PipelineOutputsHelper
 
-  before_action :authenticate_user!
-
   # GET /sample/:sample_id/pipeline_viz/:pipeline_version
   # GET /sample/:sample_id/pipeline_viz/:pipeline_version.json
   def show
