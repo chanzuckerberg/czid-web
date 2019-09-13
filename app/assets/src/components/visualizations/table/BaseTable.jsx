@@ -67,12 +67,21 @@ class BaseTable extends React.Component {
 
   basicHeaderRenderer({ columnData, label }) {
     return (
-      <ColumnHeaderTooltip
-        trigger={<span className={cs.label}>{label}</span>}
-        title={label}
-        content={columnData.tooltip}
-        link={columnData.link}
-      />
+      <div>
+        {columnData ? (
+          <ColumnHeaderTooltip
+            trigger={<span className={cs.label}>{label}</span>}
+            title={label}
+            content={columnData.tooltip}
+            link={columnData.link}
+          />
+        ) : (
+          <BasicPopup
+            trigger={<span className={cs.label}>{label}</span>}
+            content={label}
+          />
+        )}
+      </div>
     );
   }
 
@@ -85,12 +94,19 @@ class BaseTable extends React.Component {
   }) {
     return (
       <div className={cs.sortableHeader}>
-        <ColumnHeaderTooltip
-          trigger={<div className={cs.label}>{label}</div>}
-          title={label}
-          content={columnData.tooltip}
-          link={columnData.link}
-        />
+        {columnData ? (
+          <ColumnHeaderTooltip
+            trigger={<div className={cs.label}>{label}</div>}
+            title={label}
+            content={columnData.tooltip}
+            link={columnData.link}
+          />
+        ) : (
+          <BasicPopup
+            trigger={<div className={cs.label}>{label}</div>}
+            content={label}
+          />
+        )}
         <SortIcon
           sortDirection={sortDirection === "ASC" ? "ascending" : "descending"}
           className={cx(cs.sortIcon, sortBy === dataKey && cs.active)}
