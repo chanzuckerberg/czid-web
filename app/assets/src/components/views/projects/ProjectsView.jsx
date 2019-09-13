@@ -11,7 +11,7 @@ import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
 import { DEFAULT_ROW_HEIGHT, MAX_PROJECT_ROW_HEIGHT } from "./constants";
-import { ObjectCollection } from "../discovery/DiscoveryDataLayer";
+import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
@@ -221,7 +221,7 @@ ProjectsView.propTypes = {
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onProjectSelected: PropTypes.func,
-  projects: PropTypes.instanceOf(ObjectCollection),
+  projects: PropTypes.instanceOf(ObjectCollectionView),
 };
 
 export default ProjectsView;

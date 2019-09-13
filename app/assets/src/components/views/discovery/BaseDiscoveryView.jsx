@@ -22,7 +22,6 @@ class BaseDiscoveryView extends React.Component {
       rowClassName,
       rowHeight,
     } = this.props;
-
     return (
       <InfiniteTable
         columns={columns}

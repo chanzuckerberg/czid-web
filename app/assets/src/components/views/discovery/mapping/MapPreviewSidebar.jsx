@@ -1,13 +1,5 @@
 import cx from "classnames";
-import {
-  difference,
-  find,
-  isEmpty,
-  merge,
-  pick,
-  union,
-  upperFirst,
-} from "lodash/fp";
+import { difference, isEmpty, merge, pick, union, upperFirst } from "lodash/fp";
 import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -19,6 +11,7 @@ import TableRenderers from "~/components/views/discovery/TableRenderers";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
+import { ObjectCollectionView } from "../DiscoveryDataLayer";
 
 import cs from "./map_preview_sidebar.scss";
 
@@ -132,15 +125,15 @@ export default class MapPreviewSidebar extends React.Component {
         dataKey: "project",
         flexGrow: 1,
         width: 350,
-        cellRenderer: ({ cellData }) =>
-          TableRenderers.renderItemDetails(
+        cellRenderer: ({ cellData }) => {
+          return TableRenderers.renderItemDetails(
             merge(
               { cellData },
               {
-                nameRenderer: p => p.name,
+                nameRenderer: p => (p ? p.name : ""),
                 detailsRenderer: p => (
                   <div>
-                    <span>{p.owner}</span>
+                    <span>{p ? p.owner : ""}</span>
                   </div>
                 ),
                 visibilityIconRenderer: p =>
@@ -151,10 +144,11 @@ export default class MapPreviewSidebar extends React.Component {
                   ),
               }
             )
-          ),
+          );
+        },
         headerClassName: cs.projectHeader,
         className: cs.project,
-        sortFunction: p => (p.name || "").toLowerCase(),
+        sortFunction: p => ((p && p.name) || "").toLowerCase(),
       },
       {
         dataKey: "created_at",
@@ -198,7 +192,7 @@ export default class MapPreviewSidebar extends React.Component {
 
   handleSampleRowClick = ({ event, rowData }) => {
     const { onSampleClicked, samples } = this.props;
-    const sample = find({ id: rowData.id }, samples);
+    const sample = samples.get(rowData.id);
     onSampleClicked && onSampleClicked({ sample, currentEvent: event });
     logAnalyticsEvent("MapPreviewSidebar_sample-row_clicked", {
       sampleId: sample.id,
@@ -208,7 +202,7 @@ export default class MapPreviewSidebar extends React.Component {
 
   handleProjectRowClick = ({ rowData }) => {
     const { onProjectSelected, projects } = this.props;
-    const project = find({ id: rowData.id }, projects);
+    const project = projects.get(rowData.id);
     onProjectSelected && onProjectSelected({ project });
     logAnalyticsEvent("MapPreviewSidebar_project-row_clicked", {
       projectId: project.id,
@@ -217,19 +211,19 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   isSelectAllChecked = () => {
-    const { selectableIds, selectedSampleIds } = this.props;
+    const { samples, selectedSampleIds } = this.props;
     return (
-      !isEmpty(selectableIds) &&
-      isEmpty(difference(selectableIds, Array.from(selectedSampleIds)))
+      !isEmpty(samples.getIds()) &&
+      isEmpty(difference(samples.getIds(), Array.from(selectedSampleIds)))
     );
   };
 
   handleSelectAllRows = checked => {
-    const { selectableIds, selectedSampleIds, onSelectionUpdate } = this.props;
+    const { samples, selectedSampleIds, onSelectionUpdate } = this.props;
     let newSelected = new Set(
       checked
-        ? union(Array.from(selectedSampleIds), selectableIds)
-        : difference(Array.from(selectedSampleIds), selectableIds)
+        ? union(Array.from(selectedSampleIds), samples.getIds())
+        : difference(Array.from(selectedSampleIds), samples.getIds())
     );
     onSelectionUpdate(newSelected);
 
@@ -244,7 +238,8 @@ export default class MapPreviewSidebar extends React.Component {
 
   computeTabs = () => {
     const { discoveryCurrentTab: tab, projects, samples } = this.props;
-    const count = (tab === "samples" ? samples : projects || []).length;
+    const count =
+      tab === "samples" ? samples.getTotalLength() : projects.getTotalLength();
     return [
       {
         label: <span className={cs.tabLabel}>Summary</span>,
@@ -267,7 +262,7 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   renderTable = () => {
-    const { onLoadSampleRows, selectedSampleIds } = this.props;
+    const { samples, selectedSampleIds } = this.props;
 
     const rowHeight = 60;
     const batchSize = 1e4;
@@ -281,7 +276,7 @@ export default class MapPreviewSidebar extends React.Component {
             headerClassName={cs.tableHeader}
             initialActiveColumns={["sample"]}
             minimumBatchSize={batchSize}
-            onLoadRows={onLoadSampleRows}
+            onLoadRows={samples.handleLoadObjectRows}
             onRowClick={this.handleSampleRowClick}
             onSelectAllRows={this.handleSelectAllRows}
             onSelectRow={this.handleSelectRow}
@@ -339,10 +334,14 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   handleLoadRowsAndFormat = async args => {
-    const { onLoadRows } = this.props;
-    const projects = await onLoadRows(args);
-
-    return projects.map(project => {
+    const { projects } = this.props;
+    const loadedProjects = await projects.handleLoadObjectRows(args);
+    console.log(
+      "MapPreviewSidebar:handleLoadRowsAndFormat",
+      args,
+      loadedProjects
+    );
+    return loadedProjects.map(project => {
       return merge(
         {
           project: pick(
@@ -412,19 +411,15 @@ MapPreviewSidebar.propTypes = {
   discoveryCurrentTab: PropTypes.string,
   loading: PropTypes.bool,
   onFilterClick: PropTypes.func,
-  onLoadProjectRows: PropTypes.func,
-  onLoadSampleRows: PropTypes.func,
-  onLoadVisualizationRows: PropTypes.func,
   onProjectSelected: PropTypes.func,
   onSampleClicked: PropTypes.func,
   onSelectionUpdate: PropTypes.func.isRequired,
   onTabChange: PropTypes.func,
   projectDimensions: PropTypes.array,
-  projects: PropTypes.array,
+  projects: PropTypes.instanceOf(ObjectCollectionView),
   projectStats: PropTypes.object,
   sampleDimensions: PropTypes.array,
-  samples: PropTypes.array,
+  samples: PropTypes.instanceOf(ObjectCollectionView),
   sampleStats: PropTypes.object,
-  selectableIds: PropTypes.array.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
 };

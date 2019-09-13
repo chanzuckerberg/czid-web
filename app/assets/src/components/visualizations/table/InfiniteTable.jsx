@@ -113,9 +113,7 @@ class InfiniteTable extends React.Component {
       threshold,
       ...extraProps
     } = this.props;
-
     const { rowCount } = this.state;
-
     return (
       <InfiniteLoader
         ref={infiniteLoader => (this.infiniteLoader = infiniteLoader)}

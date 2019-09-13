@@ -136,8 +136,7 @@ const getDiscoverySamples = async ({
   listAllIds = false,
   sampleIds,
 } = {}) => {
-  console.log(
-    "DiscoveryView:refreshMapPreviewedSamples",
+  console.log("[API][SAMPLES]", {
     domain,
     filters,
     projectId,
@@ -145,8 +144,8 @@ const getDiscoverySamples = async ({
     limit,
     offset,
     listAllIds,
-    sampleIds
-  );
+    sampleIds,
+  });
   const sampleResults = await getSamples({
     domain,
     filters,
@@ -172,6 +171,15 @@ const getDiscoveryProjects = async ({
   offset = 0,
   listAllIds = false,
 } = {}) => {
+  console.log("[API][PROJECTS]", {
+    domain,
+    filters,
+    projectId,
+    search,
+    limit,
+    offset,
+    listAllIds,
+  });
   const projects = await getProjects({
     domain,
     filters,

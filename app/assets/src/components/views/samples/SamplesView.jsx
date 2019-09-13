@@ -19,7 +19,7 @@ import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
-import { ObjectCollection } from "../discovery/DiscoveryDataLayer";
+import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
@@ -499,7 +499,7 @@ SamplesView.propTypes = {
   onSelectedSamplesUpdate: PropTypes.func,
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
-  samples: PropTypes.instanceOf(ObjectCollection),
+  samples: PropTypes.instanceOf(ObjectCollectionView),
   selectableIds: PropTypes.array.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
 };
