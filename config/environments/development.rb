@@ -79,6 +79,8 @@ Rails.application.configure do
   logger.formatter = config.log_formatter
   config.logger    = ActiveSupport::TaggedLogging.new(logger)
   config.log_to = %w[stdout file]
+
+  config.middleware.use ResqueMiddleware
 end
 
 # Development logging configuration
