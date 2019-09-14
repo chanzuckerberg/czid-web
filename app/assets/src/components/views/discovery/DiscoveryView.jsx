@@ -86,6 +86,7 @@ class DiscoveryView extends React.Component {
     const { projectId } = this.props;
 
     this.urlParser = new UrlQueryParser({
+      sampleActiveColumns: "object",
       filters: "object",
       projectId: "number",
       showFilters: "boolean",
@@ -96,10 +97,8 @@ class DiscoveryView extends React.Component {
     let sessionState = this.loadState(sessionStorage, "DiscoveryViewOptions");
     let localState = this.loadState(localStorage, "DiscoveryViewOptions");
 
-    // values are copied from left to rigth to the last argument (left elements have priority)
-    const savedState = defaults(urlState, sessionState, localState, {});
-
-    this.state = defaults(
+    // values are copied from left to right to the first argument (last arguments override previous)
+    this.state = Object.assign(
       {
         currentDisplay: "table",
         currentTab:
@@ -138,7 +137,9 @@ class DiscoveryView extends React.Component {
         showStats: true,
         visualizations: [],
       },
-      savedState
+      localState,
+      sessionState,
+      urlState
     );
     this.dataLayer = new DiscoveryDataLayer(this.props.domain);
     this.updateBrowsingHistory("replace");
@@ -157,12 +158,13 @@ class DiscoveryView extends React.Component {
 
   loadState = (store, key) => {
     try {
-      return JSON.parse(store.getItem(key));
+      return JSON.parse(store.getItem(key)) || {};
     } catch (e) {
       // Avoid possible bad transient state related crash
       // eslint-disable-next-line no-console
       console.warn(`Bad state: ${e}`);
     }
+    return {};
   };
 
   updateBrowsingHistory = (action = "push") => {
