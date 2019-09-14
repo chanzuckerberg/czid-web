@@ -114,6 +114,8 @@ Rails.application.configure do
 
   # Set the logging destination(s)
   config.log_to = %w[stdout]
+
+  config.middleware.use ResqueMiddleware
 end
 
 # Deployed logging configuration
