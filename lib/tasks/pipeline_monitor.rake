@@ -289,7 +289,7 @@ class CheckPipelineRuns
     max_work_duration = 0
     iter_count = 0
     until @shutdown_requested
-      before_iter_timestamp = Time.now.to_f # unixtime
+      before_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       iter_count += 1
       t_iter_start = t_now
       pr_ids = PipelineRun.in_progress.pluck(:id)
@@ -307,12 +307,12 @@ class CheckPipelineRuns
       autoscaling_state = autoscaling_update(autoscaling_state, t_now)
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f
-
+      after_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       # HACK: This logger isn't really meant to deal with nested json
       #  this will appear under the message key at the top level
       logger_iteration_data = {
         message: "Pipeline Monitor Iteration Complete",
-        duration: (t_now - before_iter_timestamp),
+        duration: (after_iter_timestamp - before_iter_timestamp),
         pr_id_count: pr_ids.count,
         pt_id_count: pt_ids.count,
         num_shards: num_shards,
