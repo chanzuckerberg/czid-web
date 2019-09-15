@@ -8,7 +8,6 @@ import {
   clone,
   compact,
   concat,
-  defaults,
   escapeRegExp,
   find,
   findIndex,
