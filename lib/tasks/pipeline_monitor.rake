@@ -29,7 +29,6 @@ class CheckPipelineRuns
   def self.update_pr(prid)
     pr = PipelineRun.find(prid)
     begin
-      break if @shutdown_requested
       Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
       pr.update_job_status
     rescue => exception
@@ -41,7 +40,6 @@ class CheckPipelineRuns
   def self.update_pt(ptid)
     pt = PhyloTree.find(ptid)
     begin
-      break if @shutdown_requested
       Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
       pt.monitor_job
     rescue => exception
