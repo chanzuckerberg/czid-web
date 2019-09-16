@@ -116,8 +116,12 @@ class BaseTable extends React.Component {
   }
 
   handleColumnChange = selectedColumns => {
-    const { protectedColumns } = this.props;
-    this.setState({ activeColumns: concat(protectedColumns, selectedColumns) });
+    const { onActiveColumnsChange, protectedColumns } = this.props;
+    this.setState(
+      { activeColumns: concat(protectedColumns, selectedColumns) },
+      () =>
+        onActiveColumnsChange && onActiveColumnsChange(this.state.activeColumns)
+    );
     logAnalyticsEvent("BaseTable_column-selector_changed", {
       selectedColumns: selectedColumns.length,
       protectedColumns: protectedColumns.length,
@@ -313,6 +317,7 @@ BaseTable.propTypes = {
   headerClassName: PropTypes.string,
   // Set of dataKeys of columns to be shown by default
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
+  onActiveColumnsChange: PropTypes.func,
   onRowClick: PropTypes.func,
   onRowsRendered: PropTypes.func,
   onSort: PropTypes.func,
