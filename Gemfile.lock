@@ -1182,6 +1182,7 @@ DEPENDENCIES
   multipart-post
   mysql2
   nokogiri
+  parallel (~> 1.14)
   prometheus-client (= 0.7.1)
   puma (~> 3.7)
   rack-host-redirect
