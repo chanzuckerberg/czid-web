@@ -130,17 +130,9 @@ class TableRenderers extends React.Component {
         <div className={cs.value}>
           {number && numberWithCommas(number.value)}
         </div>
-        {number && (
-          <BasicPopup
-            position="top center"
-            trigger={
-              <div className={cs.percentage}>
-                {TableRenderers.formatPercentage(number.percent)}
-              </div>
-            }
-            content={`${number.percent}%`}
-          />
-        )}
+        <div className={cs.percentage}>
+          {number && TableRenderers.formatPercentage(number.percent)}
+        </div>
       </div>
     );
   };
