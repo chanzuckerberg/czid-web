@@ -346,6 +346,7 @@ class SamplesView extends React.Component {
   renderTable = () => {
     const {
       activeColumns,
+      onActiveColumnsChange,
       onLoadRows,
       protectedColumns,
       selectedSampleIds,
@@ -362,6 +363,7 @@ class SamplesView extends React.Component {
           defaultRowHeight={rowHeight}
           initialActiveColumns={activeColumns}
           loadingClassName={csTableRenderer.loading}
+          onActiveColumnsChange={onActiveColumnsChange}
           onLoadRows={onLoadRows}
           onSelectAllRows={withAnalytics(
             this.handleSelectAllRows,
@@ -493,6 +495,7 @@ SamplesView.propTypes = {
   mapPreviewedSamples: PropTypes.array,
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
+  onActiveColumnsChange: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
   onMapClick: PropTypes.func,
