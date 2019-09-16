@@ -35,7 +35,7 @@ const SORT_SAMPLES_OPTIONS = [
   { text: "Alphabetical", value: "alpha" },
   { text: "Cluster", value: "cluster" },
 ];
-const TAXA_SAMPLES_OPTIONS = [
+const SORT_TAXA_OPTIONS = [
   { text: "Genus", value: "genus" },
   { text: "Cluster", value: "cluster" },
 ];
@@ -521,7 +521,7 @@ class SamplesHeatmapView extends React.Component {
     // Client side options
     scales: SCALE_OPTIONS,
     sampleSortTypeOptions: SORT_SAMPLES_OPTIONS,
-    taxaSortTypeOptions: TAXA_SAMPLES_OPTIONS,
+    taxaSortTypeOptions: SORT_TAXA_OPTIONS,
     taxonsPerSample: TAXONS_PER_SAMPLE_RANGE,
     specificityOptions: SPECIFICITY_OPTIONS,
   });
