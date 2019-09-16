@@ -77,7 +77,7 @@ class SamplesHeatmapView extends React.Component {
         ),
         species: parseAndCheckInt(this.urlParams.species, 1),
         sampleSortType: this.urlParams.sampleSortType || "cluster",
-        taxaSortType: this.urlParams.sampleSortType || "cluster",
+        taxaSortType: this.urlParams.taxaSortType || "cluster",
         thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseAndCheckInt(this.urlParams.dataScaleIdx, 0),
         taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 30),
