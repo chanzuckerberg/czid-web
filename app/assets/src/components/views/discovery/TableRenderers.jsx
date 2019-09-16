@@ -130,9 +130,17 @@ class TableRenderers extends React.Component {
         <div className={cs.value}>
           {number && numberWithCommas(number.value)}
         </div>
-        <div className={cs.percentage}>
-          {number && TableRenderers.formatPercentage(number.percent)}
-        </div>
+        {number && (
+          <BasicPopup
+            position="top center"
+            trigger={
+              <div className={cs.percentage}>
+                {TableRenderers.formatPercentage(number.percent)}
+              </div>
+            }
+            content={`${number.percent}%`}
+          />
+        )}
       </div>
     );
   };
@@ -145,7 +153,8 @@ class TableRenderers extends React.Component {
 
   static formatPercentage = value => {
     if (!value) return value;
-    return `${TableRenderers.formatNumber(value)}%`;
+    const rounded = TableRenderers.formatNumber(value);
+    return rounded < 0.01 ? "<0.01%" : `${rounded}%`;
   };
 
   static formatDuration = runtime => {
