@@ -27,23 +27,21 @@ class CheckPipelineRuns
   end
 
   def self.update_pr(prid)
-      pr = PipelineRun.find(prid)
-      Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
-      pr.update_job_status
-    rescue => exception
-      LogUtil.log_err_and_airbrake("Failed to update pipeline run #{pr.id}")
-      LogUtil.log_backtrace(exception)
-    end
+    pr = PipelineRun.find(prid)
+    Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
+    pr.update_job_status
+  rescue => exception
+    LogUtil.log_err_and_airbrake("Failed to update pipeline run #{pr.id}")
+    LogUtil.log_backtrace(exception)
   end
 
   def self.update_pt(ptid)
-      pt = PhyloTree.find(ptid)
-      Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
-      pt.monitor_job
-    rescue => exception
-      LogUtil.log_err_and_airbrake("Failed monitor job for phylo_tree #{pt.id}")
-      LogUtil.log_backtrace(exception)
-    end
+    pt = PhyloTree.find(ptid)
+    Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
+    pt.monitor_job
+  rescue => exception
+    LogUtil.log_err_and_airbrake("Failed monitor job for phylo_tree #{pt.id}")
+    LogUtil.log_backtrace(exception)
   end
 
   def self.forced_update_interval

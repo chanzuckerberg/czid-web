@@ -14,21 +14,19 @@ class MonitorPipelineResults
   end
 
   def self.monitor_pr(pr)
-      Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
-      pr.monitor_results
-    rescue => exception
-      LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
-      LogUtil.log_backtrace(exception)
-    end
+    Rails.logger.info("Monitoring results: pipeline run #{pr.id}, sample #{pr.sample_id}")
+    pr.monitor_results
+  rescue => exception
+    LogUtil.log_err_and_airbrake("Failed monitor results for pipeline run #{pr.id}: #{exception.message}")
+    LogUtil.log_backtrace(exception)
   end
 
   def self.monitor_pt(pt)
-      Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
-      pt.monitor_results
-    rescue => exception
-      LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
-      LogUtil.log_backtrace(exception)
-    end
+    Rails.logger.info("Monitoring results for phylo_tree #{pt.id}")
+    pt.monitor_results
+  rescue => exception
+    LogUtil.log_err_and_airbrake("Failed monitor results for phylo_tree #{pt.id}: #{exception.message}")
+    LogUtil.log_backtrace(exception)
   end
 
   def self.update_jobs
