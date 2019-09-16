@@ -130,11 +130,8 @@ class SamplesHeatmapVis extends React.Component {
 
   extractTaxonLabels() {
     return this.props.taxonIds.map(id => {
-      const name = this.props.taxonDetails[id].name;
       return {
-        // Moves missing to the top in "genus" sort.
-        // See MISSING_GENUS_ID in TaxonLineage.
-        label: id === -200 ? "* " + name : name,
+        label: this.props.taxonDetails[id].name,
       };
     });
   }
