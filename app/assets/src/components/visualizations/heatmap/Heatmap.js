@@ -49,7 +49,8 @@ export default class Heatmap {
         zoom: null, // multiplier for zooming in and out
         minHeight: 500,
         clustering: true,
-        shouldSortColumns: true,
+        shouldSortColumns: false,
+        shouldSortRows: false,
         defaultClusterStep: 6,
         maxRowClusterWidth: 100,
         maxColumnClusterHeight: 100,
@@ -149,6 +150,11 @@ export default class Heatmap {
 
   updateSortColumns(shouldSortColumns) {
     this.options.shouldSortColumns = shouldSortColumns;
+    this.processData("cluster");
+  }
+
+  updateSortRows(shouldSortRows) {
+    this.options.shouldSortRows = shouldSortRows;
     this.processData("cluster");
   }
 
@@ -422,7 +428,9 @@ export default class Heatmap {
   }
 
   cluster() {
-    if (this.options.clustering) {
+    if (this.options.shouldSortRows) {
+      this.sortRows("asc");
+    } else if (this.options.clustering) {
       this.clusterRows();
     }
 
@@ -442,8 +450,8 @@ export default class Heatmap {
     this.renderColumnMetadata();
 
     if (this.options.clustering) {
-      this.renderRowDendrogram();
-      this.renderColumnDendrogram();
+      this.options.shouldSortRows || this.renderRowDendrogram();
+      this.options.shouldSortColumns || this.renderColumnDendrogram();
     }
 
     this.options.onUpdateFinished && this.options.onUpdateFinished();
@@ -584,6 +592,15 @@ export default class Heatmap {
   sortColumns(direction) {
     this.columnClustering = null;
     orderBy(this.columnLabels, label => label.label, direction).forEach(
+      (label, idx) => {
+        label.pos = idx;
+      }
+    );
+  }
+
+  sortRows(direction) {
+    this.rowClustering = null;
+    orderBy(this.rowLabels, label => label.label, direction).forEach(
       (label, idx) => {
         label.pos = idx;
       }
