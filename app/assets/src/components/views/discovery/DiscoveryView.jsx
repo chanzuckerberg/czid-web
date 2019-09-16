@@ -198,7 +198,7 @@ class DiscoveryView extends React.Component {
       urlQuery = `?${urlQuery}`;
     }
 
-    // History state may include some fields that enable fast loading of previous pages (e.g. project)
+    // History state may include some fields that enable faster loading of previous pages (e.g. project)
     if (action === "push") {
       history.pushState(
         historyState,
