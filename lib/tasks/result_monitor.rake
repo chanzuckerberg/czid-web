@@ -32,7 +32,7 @@ class MonitorPipelineResults
   end
 
   def self.update_jobs
-    Parallel.each(PipelineRun.results_in_progress) do |pr|
+    Parallel.each(PipelineRun.results_in_progress, in_threads: THREAD_COUNT) do |pr|
       # Explicitly use ActiveRecord connection pool
       # https://github.com/grosser/parallel#activerecord
       ActiveRecord::Base.connection_pool.with_connection do
@@ -40,7 +40,7 @@ class MonitorPipelineResults
       end
     end
 
-    Parallel.each(PhyloTree.in_progress) do |pt|
+    Parallel.each(PhyloTree.in_progress, in_threads: THREAD_COUNT) do |pt|
       # Explicitly use ActiveRecord connection pool
       # https://github.com/grosser/parallel#activerecord
       ActiveRecord::Base.connection_pool.with_connection do
