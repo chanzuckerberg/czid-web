@@ -42,7 +42,7 @@ class MonitorPipelineResults
       # Explicitly use ActiveRecord connection pool
       # https://github.com/grosser/parallel#activerecord
       ActiveRecord::Base.connection_pool.with_connection do
-        monitor_pt(pr)
+        monitor_pt(pt)
       end
     end
 
