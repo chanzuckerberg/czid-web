@@ -1187,6 +1187,7 @@ DEPENDENCIES
   puma (~> 3.7)
   rack-host-redirect
   rack-mini-profiler
+  rack-protection
   rails (~> 5.1.5)
   rails-controller-testing
   rake

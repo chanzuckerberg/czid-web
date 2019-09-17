@@ -90,6 +90,8 @@ gem 'immigrant'
 # Better CSV handling
 gem 'csv-safe', '~> 1.2'
 
+gem 'rack-protection'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'bundler-audit'
