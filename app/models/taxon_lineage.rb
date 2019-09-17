@@ -10,6 +10,11 @@ class TaxonLineage < ApplicationRecord
   end
   include TaxonLineageHelper
 
+  # We use an artificial negative taxon ID if we have determined that
+  # the alignment is not specific at the taxonomy level under
+  # consideration. This happens when a read's multiple reference matches
+  # do not agree on taxon ID at the given level.
+  # See idseq-dag for more info.
   INVALID_CALL_BASE_ID = -100_000_000 # don't run into -2e9 limit (not common, mostly a concern for fp32 or int32)
   MISSING_SPECIES_ID = -100
   MISSING_SPECIES_ID_ALT = -1
