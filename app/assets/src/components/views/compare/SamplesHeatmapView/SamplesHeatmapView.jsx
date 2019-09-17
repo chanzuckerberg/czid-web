@@ -40,7 +40,7 @@ const SORT_TAXA_OPTIONS = [
   // more accurate. To sort by genus, we should sort by taxon parent ID,
   // which is currently not always accurate, and we should show what the genus
   // is for viruses, which is not currently shown.
-  { text: "Alphabetical", value: "genus" },
+  { text: "Alphabetical", value: "alpha" },
   { text: "Cluster", value: "cluster" },
 ];
 const TAXONS_PER_SAMPLE_RANGE = {
