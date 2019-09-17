@@ -1,5 +1,5 @@
 class ResqueMiddleware
-  CONTROLLER_INSTANCE = ActionController::Base.new
+  BASE_CONTROLLER = ActionController::Base.new
 
   def initialize(app)
     @app = app
@@ -14,31 +14,30 @@ class ResqueMiddleware
         # Don't rely on other sanitize methods that may miss HTML encoding.
         req.update_param(k, v.gsub(/[^0-9A-Za-z_]/, ''))
       end
+
+      post_params = req.body.read
+      if post_params.present?
+        key, value = post_params.split("=")
+        value = URI.unescape(value)
+        puts "post params 2:02pm: ", key, " = ", value, "END"
+
+        result = BASE_CONTROLLER.send(:valid_authenticity_token?, req.session, value)
+        puts "RESULT 2:25pm: ", result
+      end
     end
 
     status, headers, response = @app.call(env)
-    puts "RESP 5:07pm: ", response, "END"
 
     if env['PATH_INFO'].start_with?("/resque")
-      puts "INSIDE THE BLOCK 5:12pm"
-
-      puts "CLASS: ", response.class, "END"
-      puts "LEN: ", response.size
-
       begin
         doc = Nokogiri::HTML.parse(response[0])
-        puts "The doc is: ", doc, "END"
         forms = doc.xpath("//form")
-        puts "FORMS 5:51pm", forms, "END"
-        puts "FORM COUNT #{forms.size}"
-        puts "CLASS: ", forms.class
 
         req = Rack::Request.new(env)
-        masked = CONTROLLER_INSTANCE.send(:masked_authenticity_token, req.session)
-        puts "MASKED 12:06pm", masked
+        masked = BASE_CONTROLLER.send(:masked_authenticity_token, req.session)
 
         forms.each do |form|
-          form.add_child("<input type=\"hidden\" name=\"_csrf\" value=\"#{masked}\"/>")
+          form.prepend_child("<input type=\"hidden\" name=\"_csrf\" value=\"#{masked}\"/>")
         end
 
         response = [doc.to_s]
