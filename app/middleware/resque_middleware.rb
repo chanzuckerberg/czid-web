@@ -1,4 +1,6 @@
 class ResqueMiddleware
+  CONTROLLER_INSTANCE = ActionController::Base.new
+
   def initialize(app)
     @app = app
   end
@@ -28,10 +30,15 @@ class ResqueMiddleware
         puts "The doc is: ", doc, "END"
         forms = doc.xpath("//form")
         puts "FORMS 5:51pm", forms, "END"
-        puts "FORM COUNT", forms.size
+        puts "FORM COUNT #{forms.size}"
         puts "CLASS: ", forms.class
+
+        req = Rack::Request.new(env)
+        masked = CONTROLLER_INSTANCE.send(:masked_authenticity_token, req.session)
+        puts "MASKED 12:06pm", masked
+
         forms.each do |form|
-          form.add_child('<input type="hidden" name="csrf" value="yoyoyo"/>')
+          form.add_child("<input type=\"hidden\" name=\"_csrf\" value=\"#{masked}\"/>")
         end
 
         response = [doc.to_s]
