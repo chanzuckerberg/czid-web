@@ -185,7 +185,7 @@ class UploadSampleStep extends React.Component {
         value: REMOTE_UPLOAD,
         label: REMOTE_UPLOAD_LABEL,
       },
-      (admin || allowedFeatures.includes("basespace_upload_enabled")) && {
+      {
         value: BASESPACE_UPLOAD,
         label: BASESPACE_UPLOAD_LABEL,
       },
