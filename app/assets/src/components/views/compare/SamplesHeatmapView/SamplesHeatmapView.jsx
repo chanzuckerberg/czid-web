@@ -36,7 +36,11 @@ const SORT_SAMPLES_OPTIONS = [
   { text: "Cluster", value: "cluster" },
 ];
 const SORT_TAXA_OPTIONS = [
-  { text: "Genus", value: "genus" },
+  // NOTE: "genus" sort was renamed to "alphabetical" because that is currently
+  // more accurate. To sort by genus, we should sort by taxon parent ID,
+  // which is currently not always accurate, and we should show what the genus
+  // is for viruses, which is not currently shown.
+  { text: "Alphabetical", value: "genus" },
   { text: "Cluster", value: "cluster" },
 ];
 const TAXONS_PER_SAMPLE_RANGE = {
@@ -77,7 +81,7 @@ class SamplesHeatmapView extends React.Component {
         ),
         species: parseAndCheckInt(this.urlParams.species, 1),
         sampleSortType: this.urlParams.sampleSortType || "cluster",
-        taxaSortType: this.urlParams.sampleSortType || "cluster",
+        taxaSortType: this.urlParams.taxaSortType || "cluster",
         thresholdFilters: this.urlParams.thresholdFilters || [],
         dataScaleIdx: parseAndCheckInt(this.urlParams.dataScaleIdx, 0),
         taxonsPerSample: parseAndCheckInt(this.urlParams.taxonsPerSample, 30),
