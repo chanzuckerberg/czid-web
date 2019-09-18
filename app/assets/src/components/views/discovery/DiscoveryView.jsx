@@ -169,28 +169,23 @@ class DiscoveryView extends React.Component {
   updateBrowsingHistory = (action = "push") => {
     const { domain } = this.props;
 
-    const sessionFields = [
-      "currentDisplay",
-      "currentTab",
-      "mapSidebarTab",
-      "sampleActiveColumns",
-      "showFilters",
-      "showStats",
-    ];
-    const urlFields = concat(sessionFields, ["filters", "search", "projectId"]);
-    const stateFields = concat(urlFields, ["project"]);
-
     const localFields = [
       "currentTab",
       "sampleActiveColumns",
       "showFilters",
       "showStats",
     ];
+    const sessionFields = concat(sessionFields, [
+      "currentDisplay",
+      "mapSidebarTab",
+    ]);
+    const urlFields = concat(sessionFields, ["filters", "projectId", "search"]);
+    const stateFields = concat(urlFields, ["project"]);
 
-    const sessionState = pick(sessionFields, this.state);
-    const historyState = pick(stateFields, this.state);
-    const urlState = pick(urlFields, this.state);
     const localState = pick(localFields, this.state);
+    const sessionState = pick(sessionFields, this.state);
+    const urlState = pick(urlFields, this.state);
+    const historyState = pick(stateFields, this.state);
 
     // Saving on URL enables sharing current view with other users
     let urlQuery = this.urlParser.stringify(urlState);
