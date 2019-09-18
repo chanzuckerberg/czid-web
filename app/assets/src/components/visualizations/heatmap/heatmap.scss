@@ -1,7 +1,8 @@
 @import "~styles/themes/colors";
 @import "~styles/themes/typography";
-@value colors: "../../../styles/themes/_colors.scss";
-@value primaryLight from colors;
+:export {
+  primaryLight: $primary-light;
+}
 
 .heatmap {
   .cells {
