@@ -54,7 +54,8 @@ export default class Heatmap {
         maxRowClusterWidth: 100,
         maxColumnClusterHeight: 100,
         spacing: 10,
-        columnMetadataAddHeight: 14,
+        metadataAddLinkHeight: 14,
+        colorHoverLink: "#2b52cd", // used for filter to make icon blue
         transitionDuration: 200,
         nullValue: 0,
         columnMetadata: [],
@@ -271,14 +272,22 @@ export default class Heatmap {
 
     // Creates a color matrix that can recolor a black icon via a filter. See:
     // https://semisignal.com/using-fecolormatrix-to-dynamically-recolor-icons-part-1-single-color-icons/
-    const generateColorMatrix = function(r, g, b) {
-      let rScaled = r / 255.0;
-      let gScaled = g / 255.0;
-      let bScaled = b / 255.0;
+    const generateColorMatrix = function(rgb) {
+      let rScaled = rgb[0] / 255.0;
+      let gScaled = rgb[1] / 255.0;
+      let bScaled = rgb[2] / 255.0;
       return `0 0 0 0 ${rScaled}
-                0 0 0 0 ${gScaled}
-                0 0 0 0 ${bScaled}
-                0 0 0 1 0`;
+              0 0 0 0 ${gScaled}
+              0 0 0 0 ${bScaled}
+              0 0 0 1 0`;
+    };
+
+    // Convert hex string to rgb array
+    const hexToRgb = function(hex) {
+      var r = parseInt(hex.slice(1, 3), 16),
+        g = parseInt(hex.slice(3, 5), 16),
+        b = parseInt(hex.slice(5, 7), 16);
+      return [r, g, b];
     };
 
     // Create a blue color filter to match $primary-light.
@@ -287,7 +296,10 @@ export default class Heatmap {
       .attr("id", "blue")
       .append("feColorMatrix")
       .attr("type", "matrix")
-      .attr("values", generateColorMatrix(0x2b, 0x52, 0xcd));
+      .attr(
+        "values",
+        generateColorMatrix(hexToRgb(this.options.colorHoverLink))
+      );
 
     this.g = this.svg.append("g");
     this.gRowLabels = this.g.append("g").attr("class", cs.rowLabels);
@@ -338,7 +350,7 @@ export default class Heatmap {
     const totalColumnLabelsHeight = this.columnLabelsHeight;
     const totalMetadataHeight =
       this.options.columnMetadata.length * this.options.minCellHeight +
-      this.options.columnMetadataAddHeight;
+      this.options.metadataAddLinkHeight;
     const totalCellHeight = this.cell.height * this.filteredRowLabels.length;
     const totalColumnClusterHeight = this.options.clustering
       ? this.columnClusterHeight + this.options.spacing * 2
@@ -1127,7 +1139,7 @@ export default class Heatmap {
         .append("g")
         .attr("class", cs.columnMetadataAdd);
 
-      let yPos = this.options.columnMetadataAddHeight / 2;
+      let yPos = this.options.metadataAddLinkHeight / 2;
 
       addLinkEnter.append("rect");
 
@@ -1149,8 +1161,8 @@ export default class Heatmap {
       addMetadataTrigger
         .append("svg:image")
         .attr("class", cs.metadataAddIcon)
-        .attr("width", this.options.columnMetadataAddHeight)
-        .attr("height", this.options.columnMetadataAddHeight)
+        .attr("width", this.options.metadataAddLinkHeight)
+        .attr("height", this.options.metadataAddLinkHeight)
         .attr("x", this.rowLabelsWidth - 20)
         .attr("xlink:href", `${this.options.iconPath}/plus.svg`);
 
@@ -1171,7 +1183,7 @@ export default class Heatmap {
           "width",
           this.rowLabelsWidth + this.columnLabels.length * this.cell.width
         )
-        .attr("height", this.options.columnMetadataAddHeight);
+        .attr("height", this.options.metadataAddLinkHeight);
 
       addLink
         .select(`.${cs.metadataAddLine}`)
