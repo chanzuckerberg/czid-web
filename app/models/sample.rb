@@ -344,7 +344,7 @@ class Sample < ApplicationRecord
           to_check[:no_errors].all? { |p| p&.exitstatus&.zero? }
           # Success
           break
-        elsif to_check.values.flatten.all? { |p| p.exitstatus.zero? }
+        elsif to_check.values.flatten.all? { |p| p&.exitstatus&.zero? }
           # Success
           break
         elsif !proc_validation.exitstatus.zero? && stderr.include?(Sample::PARSE_ERROR_MESSAGE)
