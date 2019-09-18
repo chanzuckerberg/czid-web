@@ -8,22 +8,24 @@ class ResqueMiddleware
   def call(env)
     # Restrict allowed characters going to Resque server params.
     # update_param will modify the original 'env' object.
-    if env['PATH_INFO'].start_with?("/resque")
-      puts "ENV 1:26pm: ", env, "END"
+    is_resque = env['PATH_INFO'].start_with?("/resque")
+
+    if is_resque
       req = Rack::Request.new(env)
       req.params.each do |k, v|
         # Don't rely on other sanitize methods that may miss HTML encoding.
-        req.update_param(k, v.gsub(/[^0-9A-Za-z_]/, ''))
+        # req.update_param(k, v.gsub(/[^0-9A-Za-z_]/, ''))
+
+        # Replace this with only the vulnerable fields?
       end
 
-      post_params = req.body.read
-      if post_params.present?
-        key, value = post_params.split("=")
-        value = URI.unescape(value)
-        puts "post params 2:02pm: ", key, " = ", value, "END"
-
+      post_params = env["rack.request.form_hash"] || {}
+      puts "POST PARAMS: ", post_params
+      if post_params.key?("_csrf")
+        value = post_params["_csrf"]
+        puts "We got: ", value
         result = BASE_CONTROLLER.send(:valid_authenticity_token?, req.session, value)
-        puts "RESULT 2:25pm: ", result
+        puts "VALID? ", result
       end
     end
 
@@ -32,7 +34,7 @@ class ResqueMiddleware
     status, headers, response = @app.call(env)
 
     puts "PATH INFO: ", env['PATH_INFO']
-    if env['PATH_INFO'].start_with?("/resque")
+    if is_resque
       begin
         puts "I am in begin block"
         doc = Nokogiri::HTML.parse(response[0])
