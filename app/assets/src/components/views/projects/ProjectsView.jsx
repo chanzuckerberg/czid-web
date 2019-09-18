@@ -20,7 +20,7 @@ class ProjectsView extends React.Component {
   constructor(props) {
     super(props);
 
-    this.columns = [
+    this.discoveryView = this.columns = [
       {
         dataKey: "project",
         flexGrow: 1,
@@ -67,11 +67,14 @@ class ProjectsView extends React.Component {
   }
 
   nameRenderer(project) {
-    return <div className={cs.projectName}>{project ? project.name : ""}</div>;
+    return project ? project.name : "";
   }
 
   visibilityIconRenderer(project) {
-    return project && project.public_access ? (
+    if (!project) {
+      return <div className={cs.icon} />;
+    }
+    return project.public_access ? (
       <PublicProjectIcon />
     ) : (
       <PrivateProjectIcon />
@@ -87,11 +90,7 @@ class ProjectsView extends React.Component {
   }
 
   detailsRenderer(project) {
-    return (
-      <div>
-        <span>{project ? project.owner : ""}</span>
-      </div>
-    );
+    return <div>{project ? project.owner : ""}</div>;
   }
 
   // Projects with descriptions should be displayed in taller rows,
@@ -154,6 +153,13 @@ class ProjectsView extends React.Component {
     });
   };
 
+  reset = () => {
+    const { currentDisplay } = this.props;
+    currentDisplay === "table" &&
+      this.discoveryView &&
+      this.discoveryView.reset();
+  };
+
   render() {
     const {
       currentDisplay,
@@ -177,6 +183,7 @@ class ProjectsView extends React.Component {
             columns={this.columns}
             handleRowClick={this.handleRowClick}
             onLoadRows={this.handleLoadRowsAndFormat}
+            ref={discoveryView => (this.discoveryView = discoveryView)}
             rowHeight={this.getRowHeight}
           />
         ) : (
@@ -202,7 +209,6 @@ class ProjectsView extends React.Component {
 
 ProjectsView.defaultProps = {
   currentDisplay: "table",
-  projects: [],
 };
 
 ProjectsView.propTypes = {
@@ -221,7 +227,7 @@ ProjectsView.propTypes = {
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onProjectSelected: PropTypes.func,
-  projects: PropTypes.instanceOf(ObjectCollectionView),
+  projects: PropTypes.instanceOf(ObjectCollectionView).isRequired,
 };
 
 export default ProjectsView;

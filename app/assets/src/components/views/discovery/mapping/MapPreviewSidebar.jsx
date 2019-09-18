@@ -237,9 +237,8 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   computeTabs = () => {
-    const { discoveryCurrentTab: tab, projects, samples } = this.props;
-    const count =
-      tab === "samples" ? samples.getTotalLength() : projects.getTotalLength();
+    const { discoveryCurrentTab: tab, projectStats, sampleStats } = this.props;
+    const count = tab === "samples" ? sampleStats.count : projectStats.count;
     return [
       {
         label: <span className={cs.tabLabel}>Summary</span>,
@@ -312,6 +311,11 @@ export default class MapPreviewSidebar extends React.Component {
       sampleDimensions,
       sampleStats,
     } = this.props;
+    console.log(
+      "MapPreviewSidebar:renderSummaryTab",
+      this.props.projects,
+      projectStats
+    );
 
     return (
       <DiscoverySidebar
@@ -385,6 +389,8 @@ export default class MapPreviewSidebar extends React.Component {
 
   render() {
     const { className, currentTab } = this.props;
+    console.log("MapPreviewSidebar:render", this.props.projects);
+
     return (
       <div className={cx(className, cs.sidebar)}>
         <Tabs

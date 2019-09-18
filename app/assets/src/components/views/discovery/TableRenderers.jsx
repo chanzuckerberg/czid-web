@@ -58,8 +58,14 @@ class TableRenderers extends React.Component {
     );
   };
 
+  static baseRenderer = data => {
+    return <div className={cs.base}>{data}</div>;
+  };
+
   static renderList = ({ cellData: list }) => {
-    return list && list.length > 0 ? list.join(", ") : "";
+    return TableRenderers.baseRenderer(
+      list && list.length > 0 ? list.join(", ") : ""
+    );
   };
 
   static renderDate = ({ cellData: date }) => {
@@ -83,7 +89,7 @@ class TableRenderers extends React.Component {
     return (
       <div className={cs.sample}>
         {full && (
-          <div className={cs.publicAccess}>
+          <div className={cs.visibility}>
             {sample &&
               (sample.publicAccess ? (
                 <SamplePublicIcon className={cx(cs.icon)} />

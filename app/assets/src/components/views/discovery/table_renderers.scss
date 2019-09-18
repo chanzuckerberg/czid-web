@@ -164,6 +164,14 @@
 }
 
 .loading {
+  .base {
+    @include loadingAnimation;
+
+    background-clip: content-box;
+    padding: 4px 0;
+    height: 20px;
+  }
+
   .numberValueAndPercentage {
     .value {
       @include loadingAnimation;
@@ -182,7 +190,7 @@
     }
   }
 
-  .publicAccess {
+  .visibility {
     @include loadingAnimation;
 
     height: 36px;
@@ -196,7 +204,7 @@
       background-clip: content-box;
       padding: 4px 0;
       height: 20px;
-      width: 365px;
+      flex: 365px;
     }
 
     .sampleDetails {
@@ -209,14 +217,35 @@
     }
   }
 
+  .itemRightPane {
+    flex: 1 0 auto;
+
+    .itemName {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 20px;
+      flex: 1 0 auto;
+    }
+
+    .itemDetails {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 17px;
+      flex: 1 0 auto;
+    }
+  }
+
   .dateContainer {
     .elapsed {
       @include loadingAnimation;
 
       background-clip: content-box;
       height: 12px;
-      margin-left: 20%;
-      margin-right: 20%;
+      margin: 4px 20%;
     }
   }
 }

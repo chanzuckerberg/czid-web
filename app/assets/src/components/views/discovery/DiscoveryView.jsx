@@ -138,6 +138,25 @@ class DiscoveryView extends React.Component {
     this.mapPreviewProjects = this.projects;
     this.mapPreviewSamples = this.samples;
 
+    // hold references to the views to allow resetting the tables
+    this.projectsView = null;
+    this.samplesView = null;
+
+    // preload first pages
+    const pageSize = 50;
+    this.projects.handleLoadObjectRows({
+      startIndex: 0,
+      stopIndex: pageSize - 1,
+    });
+    this.samples.handleLoadObjectRows({
+      startIndex: 0,
+      stopIndex: pageSize - 1,
+    });
+    this.visualizations.handleLoadObjectRows({
+      startIndex: 0,
+      stopIndex: pageSize - 1,
+    });
+
     this.updateBrowsingHistory("replace");
   }
 
@@ -222,11 +241,12 @@ class DiscoveryView extends React.Component {
 
   resetData = ({ callback }) => {
     const conditions = this.getConditions();
-    this.samples.reset(conditions);
-    this.projects.reset(conditions);
-    this.visualizations.reset(conditions);
-    this.mapPreviewSamples.reset(conditions);
-    this.mapPreviewProjects.reset(conditions);
+    console.log("DiscoveryView:resetData", conditions);
+    this.samples.reset({ conditions });
+    this.projects.reset({ conditions });
+    this.visualizations.reset({ conditions });
+    this.mapPreviewSamples.reset({ conditions });
+    this.mapPreviewProjects.reset({ conditions });
 
     this.setState(
       {
@@ -238,7 +258,6 @@ class DiscoveryView extends React.Component {
       () => {
         this.samplesView && this.samplesView.reset();
         this.projectsView && this.projectsView.reset();
-        this.visualizationsView && this.visualizationsView.reset();
         callback && callback();
       }
     );
@@ -267,9 +286,6 @@ class DiscoveryView extends React.Component {
         this.refreshFilteredDimensions();
         this.refreshFilteredStats();
         this.refreshFilteredLocations();
-        // //  * if project not set
-        // //       load (E) synchronous table data
-        // !project && this.refreshSynchronousData();
       },
     });
   };
@@ -366,9 +382,14 @@ class DiscoveryView extends React.Component {
   };
 
   refreshProjectStats = () => {
+    console.log(
+      "DiscoveryView:refreshProjectStats",
+      this.projects,
+      this.projects.length
+    );
     this.setState({
       filteredProjectStats: {
-        count: this.projects.getLength(),
+        count: this.projects.length,
       },
     });
   };
@@ -444,7 +465,11 @@ class DiscoveryView extends React.Component {
         </div>
       );
     };
-
+    console.log(
+      "DiscoveryView:computeTabs",
+      this.projects,
+      filteredProjectStats
+    );
     return compact([
       !projectId && {
         label: renderTab("Projects", filteredProjectStats.count || "-"),
@@ -456,8 +481,7 @@ class DiscoveryView extends React.Component {
       },
       domain !== DISCOVERY_DOMAIN_PUBLIC &&
         !projectId && {
-          // label: renderTab("Visualizations", (visualizations || []).length),
-          label: renderTab("Visualizations", "FIX"),
+          label: renderTab("Visualizations", this.visualizations.length || "-"),
           value: "visualizations",
         },
     ]);
@@ -529,7 +553,7 @@ class DiscoveryView extends React.Component {
         break;
       }
       case "project": {
-        this.handleProjectSelected({ project });
+        this.handleProjectSelected({ project: this.projects.get(value) });
         // const project = find({ id: value }, projects);
         // if (project) {
         //   this.handleProjectSelected({ project });
@@ -593,7 +617,7 @@ class DiscoveryView extends React.Component {
     });
   };
 
-  handleLoadRowshandleStatsToggle = () => {
+  handleStatsToggle = () => {
     this.setState({ showStats: !this.state.showStats }, () => {
       this.updateBrowsingHistory("replace");
       logAnalyticsEvent("DiscoveryView_show-stats_toggled", {
@@ -627,8 +651,10 @@ class DiscoveryView extends React.Component {
         this.clearMapPreview();
         this.updateBrowsingHistory();
         this.refreshDataFromProjectChange();
+        console.log("DiscoveryView:handleProjectSelected - setState callback");
       }
     );
+    console.log("DiscoveryView:handleProjectSelected - out");
   };
 
   handleSampleSelected = ({ sample, currentEvent }) => {
@@ -761,6 +787,7 @@ class DiscoveryView extends React.Component {
 
   clearMapPreview = () => {
     const { mapPreviewedLocationId } = this.state;
+    console.log("DiscoveryView:clearMapPreview");
     if (mapPreviewedLocationId) {
       this.mapPreviewProjects.reset();
       this.mapPreviewSamples.reset();
@@ -906,12 +933,13 @@ class DiscoveryView extends React.Component {
 
   refreshMapPreviewedDimensions = async () => {
     const { mapLocationData, mapPreviewedLocationId } = this.state;
+    const { domain } = this.props;
 
     if (!mapPreviewedLocationId || !mapLocationData[mapPreviewedLocationId]) {
       return;
     }
     console.log(
-      "DiscoveryView:refreshMapPreviewedProjects",
+      "DiscoveryView:refreshMapPreviewedDimensions",
       mapLocationData,
       mapPreviewedLocationId
     );
@@ -919,13 +947,26 @@ class DiscoveryView extends React.Component {
     // Fetch stats and dimensions for the map sidebar. Special request with the current filters
     // and the previewed location.
     const params = this.getConditions();
-    const { sampleStats, dimensions } = await Promise.all([
-      getDiscoveryStats(params),
-      getDiscoveryDimensions(params),
+    params.filters["locationV2"] = mapLocationData[mapPreviewedLocationId].name;
+    const [
+      { sampleStats },
+      { projectDimensions, sampleDimensions },
+    ] = await Promise.all([
+      getDiscoveryStats({ domain, ...params }),
+      getDiscoveryDimensions({ domain, ...params }),
     ]);
-    const { projectDimensions, sampleDimensions } = dimensions;
-    console.log(dimensions);
+    console.log(
+      "DiscoveryView:refreshMapPreviewedDimensions",
+      sampleStats,
+      projectDimensions,
+      sampleDimensions
+    );
     this.setState({
+      mapSidebarProjectDimensions: projectDimensions,
+      mapSidebarSampleDimensions: sampleDimensions,
+      mapSidebarSampleStats: sampleStats,
+    });
+    console.log("DiscoveryView:refreshMapPreviewedDimensions - Set state", {
       mapSidebarProjectDimensions: projectDimensions,
       mapSidebarSampleDimensions: sampleDimensions,
       mapSidebarSampleStats: sampleStats,
@@ -1082,9 +1123,10 @@ class DiscoveryView extends React.Component {
                 onProjectSelected={this.handleProjectSelected}
                 onMapTooltipTitleClick={this.handleMapTooltipTitleClick}
                 projects={projects}
+                ref={projectsView => (this.projectsView = projectsView)}
               />
             </div>
-            {!projects.getLength() &&
+            {!projects.length &&
               !projects.isLoading() &&
               currentDisplay === "table" && (
                 <NoResultsBanner
@@ -1123,7 +1165,7 @@ class DiscoveryView extends React.Component {
                 selectedSampleIds={selectedSampleIds}
               />
             </div>
-            {!samples.getLength() &&
+            {!samples.length &&
               !samples.isLoading() &&
               currentDisplay === "table" && (
                 <NoResultsBanner
@@ -1136,11 +1178,9 @@ class DiscoveryView extends React.Component {
         {currentTab === "visualizations" && (
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
-              <VisualizationsView
-                onLoadRows={visualizations.handleLoadObjectRows}
-              />
+              <VisualizationsView visualizations={visualizations} />
             </div>
-            {!visualizations.getLength() &&
+            {!visualizations.length &&
               !visualizations.isLoading() &&
               currentDisplay === "table" && (
                 <NoResultsBanner
@@ -1259,7 +1299,7 @@ class DiscoveryView extends React.Component {
     const tabs = this.computeTabs();
     const dimensions = this.getCurrentDimensions();
     const filterCount = this.getFilterCount();
-
+    console.log("DiscoveryView:render", this.projects);
     return (
       <div className={cs.layout}>
         <div className={cs.headerContainer}>

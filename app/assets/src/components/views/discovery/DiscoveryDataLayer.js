@@ -1,37 +1,38 @@
-import { pick, range } from "lodash/fp";
+import { range } from "lodash/fp";
 import {
   getDiscoveryProjects,
   getDiscoverySamples,
   getDiscoveryVisualizations,
 } from "./discovery_api";
+import { timingSafeEqual } from "crypto";
 
 class ObjectCollection {
   constructor(domain, apiFunction) {
     this.domain = domain;
     this.entries = {};
-    // this.orderedIds = null;
-    // this.loading = true;
+    // this._orderedIds = null;
+    // this._loading = true;
     this.apiFunction = apiFunction;
   }
 
   // get loaded() {
-  //   return (this.orderedIds || [])
+  //   return (this._orderedIds || [])
   //     .filter(id => id in this.entries)
   //     .map(id => this.entries[id]);
   // }
   // get = id => this.entries[id];
-  // getIds = () => this.orderedIds || [];
+  // getIds = () => this._orderedIds || [];
   // getLength = () => {
   //   return Object.keys(this.entries).length;
   // };
-  // isLoading = () => this.loading;
+  // isLoading = () => this._loading;
   // update = entry => {
   //   this.entries[entry.id] = entry;
   // };
 
   // reset = () => {
-  //   this.orderedIds = null;
-  //   this.loading = true;
+  //   this._orderedIds = null;
+  //   this._loading = true;
   // };
 
   createView = viewProps => {
@@ -41,33 +42,43 @@ class ObjectCollection {
 
 class ObjectCollectionView {
   constructor(collection, { conditions = {}, onViewChange = null }) {
-    this.orderedIds = null;
-    this.loading = true;
-    this.collection = collection;
-    this.conditions = conditions;
+    this._orderedIds = null;
+    this._loading = true;
+    this._collection = collection;
+    this._conditions = conditions;
+    this._activePromises = {};
 
-    this.onViewChange = onViewChange;
+    this._onViewChange = onViewChange;
+    console.log(
+      "ObjectCollectionView:constructor",
+      this._onViewChange,
+      onViewChange
+    );
   }
 
   get loaded() {
-    return (this.orderedIds || [])
-      .filter(id => id in this.collection.entries)
-      .map(id => this.collection.entries[id]);
+    return (this._orderedIds || [])
+      .filter(id => id in this._collection.entries)
+      .map(id => this._collection.entries[id]);
   }
-  get = id => this.collection.entries[id];
-  getIds = () => this.orderedIds || [];
-  getTotalLength = () => (this.orderedIds || []).length;
-  getLength = () => {
-    return Object.keys(this.collection.entries).length;
+  get length() {
+    return (this._orderedIds || []).length;
+  }
+  get = id => this._collection.entries[id];
+  getIds = () => this._orderedIds || [];
+  getCollectionLength = () => {
+    return Object.keys(this._collection.entries).length;
   };
-  isLoading = () => this.loading;
+  isLoading = () => this._loading;
   update = entry => {
-    this.collection.entries[entry.id] = entry;
+    this._collection.entries[entry.id] = entry;
   };
-  reset = ({ conditions = {} }) => {
-    this.orderedIds = null;
-    this.loading = true;
-    this.conditions = conditions;
+  reset = ({ conditions } = {}) => {
+    console.log("ObjectCollectionView:reset", conditions);
+    this._orderedIds = null;
+    this._loading = true;
+    this._conditions = conditions;
+    this._activePromises = {};
   };
 
   handleLoadObjectRows = async ({ startIndex, stopIndex }) => {
@@ -75,17 +86,45 @@ class ObjectCollectionView {
       "ObjectCollectionView:handleLoadObjectRows",
       startIndex,
       stopIndex,
-      this.conditions
+      this._conditions
     );
-    const domain = this.collection.domain;
+    // Make sure we do not load the same information twice
+    // If conditions change (see reset), then the active promises tracker is emptied
+    // CAVEAT: we use a key based on 'startIndex,stopindex', thus, this only works if the request are exactly the same
+    // Asking for a subset of an existing request (e.g. asking for 0,49 and then 10,19) will still lead to redundant requests
+    if (this._activePromises[[startIndex, stopIndex]]) {
+      const promiseLoadObjectRows = this._activePromises[
+        [startIndex, stopIndex]
+      ];
+      return await promiseLoadObjectRows;
+    } else {
+      const promiseLoadObjectRows = this._innerHandleLoadObjectRows({
+        startIndex,
+        stopIndex,
+      });
+      this._activePromises[[startIndex, stopIndex]] = promiseLoadObjectRows;
+      const result = await promiseLoadObjectRows;
+      delete this._activePromises[[startIndex, stopIndex]];
+      return result;
+    }
+  };
 
-    const minStopIndex = this.orderedIds
-      ? Math.min(this.orderedIds.length - 1, stopIndex)
+  _innerHandleLoadObjectRows = async ({ startIndex, stopIndex }) => {
+    console.log(
+      "ObjectCollectionView:_innerHandleLoadObjectRows",
+      startIndex,
+      stopIndex,
+      this._conditions
+    );
+    const domain = this._collection.domain;
+
+    const minStopIndex = this._orderedIds
+      ? Math.min(this._orderedIds.length - 1, stopIndex)
       : stopIndex;
     let missingIdxs = range(startIndex, minStopIndex + 1);
-    if (this.orderedIds) {
+    if (this._orderedIds) {
       missingIdxs = missingIdxs.filter(
-        idx => !(this.orderedIds[idx] in this.collection.entries)
+        idx => !(this._orderedIds[idx] in this._collection.entries)
       );
     }
     if (missingIdxs.length > 0) {
@@ -93,32 +132,37 @@ class ObjectCollectionView {
       // could eventually lead to redundant fetches if data is not requested in regular continuous chunks
       const minNeededIdx = missingIdxs[0];
       const maxNeededIdx = missingIdxs[missingIdxs.length - 1];
-      let {
+      const {
         fetchedObjects,
         fetchedObjectIds,
-      } = await this.collection.apiFunction({
+      } = await this._collection.apiFunction({
         domain,
-        ...this.conditions,
+        ...this._conditions,
         limit: maxNeededIdx - minNeededIdx + 1,
         offset: minNeededIdx,
-        listAllIds: this.orderedIds === null,
+        listAllIds: this._orderedIds === null,
       });
 
       fetchedObjects.forEach(sample => {
-        this.collection.entries[sample.id] = sample;
+        this._collection.entries[sample.id] = sample;
       });
 
+      console.log(
+        "ObjectCollectionView:_innerHandleLoadObjectRows",
+        fetchedObjectIds,
+        this._onViewChange
+      );
       if (fetchedObjectIds) {
-        this.orderedIds = fetchedObjectIds;
-        this.onViewChange && this.onViewChange();
+        this._orderedIds = fetchedObjectIds;
+        this._onViewChange && this._onViewChange();
       }
 
-      this.loading = false;
+      this._loading = false;
     }
 
     const requestedObjects = range(startIndex, minStopIndex + 1)
-      .filter(idx => idx in this.orderedIds)
-      .map(idx => this.collection.entries[this.orderedIds[idx]]);
+      .filter(idx => idx in this._orderedIds)
+      .map(idx => this._collection.entries[this._orderedIds[idx]]);
 
     return requestedObjects;
   };
@@ -157,46 +201,8 @@ class DiscoveryDataLayer {
     const {
       visualizations: fetchedObjects,
       visualizationIds: fetchedObjectIds,
-    } = await getpsualizations(params);
+    } = await getDiscoveryVisualizations(params);
     return { fetchedObjects, fetchedObjectIds };
-  };
-
-  loadObjectsByIdList = async ({ dataType, ids, ...props }) => {
-    throw new Error("Not Implemented!");
-    const collection = this[dataType];
-    const requestedIds = new Set(ids);
-    let startIndex = null;
-    let stopIndex = null;
-
-    for (let idx; idx < collection.orderedIds.length; idx++) {
-      if (collection.orderedIds[idx] in requestedIds) {
-        startIndex = startIndex || idx;
-        stopIndex = idx;
-      }
-    }
-
-    if (startIndex) {
-      await this.handleLoadObjectRows({
-        dataType,
-        startIndex,
-        stopIndex,
-        ...props,
-      });
-      console.log(
-        "DiscoveryDataLayer:handleLoadObjectRows",
-        dataType,
-        ids,
-        props,
-        pick(requestedIds, collection.entries)
-      );
-      return pick(requestedIds, collection.entries);
-    }
-
-    if (ids.length) {
-      // eslint-disable-next-line no-console
-      console.error("Non-existent IDs requested");
-    }
-    return [];
   };
 
   // handleLoadObjectRows = async ({

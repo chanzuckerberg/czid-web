@@ -11,6 +11,15 @@ class BaseDiscoveryView extends React.Component {
   // Note: This class guarantees that a couple of settings are synced
   // between views that use it (at the time of this comment, ProjectsView and VisualizationsView)
   // We might be able to get rid of it once we implement dynamic row height on the tables.
+  constructor(props) {
+    super(props);
+    this.infiniteTable = null;
+  }
+
+  reset = () => {
+    this.infiniteTable && this.infiniteTable.reset();
+  };
+
   render() {
     const {
       columns,

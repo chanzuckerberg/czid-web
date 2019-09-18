@@ -78,7 +78,7 @@ class BaseTable extends React.Component {
       <BasicPopup
         trigger={
           <div className={cs.sortableHeader}>
-            <div className={cs.label}>{label}</div>
+            <span className={cs.label}>{label}</span>
             {sortBy === dataKey && (
               <SortIcon
                 sortDirection={

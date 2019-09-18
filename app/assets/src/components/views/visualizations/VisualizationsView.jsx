@@ -42,7 +42,7 @@ class VisualizationsView extends React.Component {
         dataKey: "updated_at",
         label: "Updated On",
         width: 120,
-        cellRenderer: TableRenderers.renderDate,
+        cellRenderer: TableRenderers.renderDateWithElapsed,
       },
       {
         dataKey: "project_name",
@@ -57,11 +57,19 @@ class VisualizationsView extends React.Component {
     ];
   }
 
-  nameRenderer(visualization) {
-    return visualization.name || humanize(visualization.visualization_type);
-  }
+  nameRenderer = visualization => {
+    return (
+      <div>
+        {visualization
+          ? visualization.name || humanize(visualization.visualization_type)
+          : ""}
+      </div>
+    );
+  };
 
   visibilityIconRenderer = visualization => {
+    if (!visualization) return <div className={cs.icon} />;
+
     const {
       visualization_type: visualizationType,
       publicAccess,
@@ -85,11 +93,7 @@ class VisualizationsView extends React.Component {
   };
 
   detailsRenderer(visualization) {
-    return (
-      <div>
-        <span>{visualization.user_name}</span>
-      </div>
-    );
+    return <div>{visualization ? visualization.user_name : ""}</div>;
   }
 
   handleRowClick = ({ rowData }) => {
@@ -104,9 +108,11 @@ class VisualizationsView extends React.Component {
     });
   };
 
-  render() {
+  handleLoadRowsAndFormat = async args => {
     const { visualizations } = this.props;
-    let data = visualizations.map(visualization => {
+    const visualizationsArray = await visualizations.handleLoadObjectRows(args);
+
+    return visualizationsArray.map(visualization => {
       return merge(
         {
           visualization: pick(
@@ -120,23 +126,21 @@ class VisualizationsView extends React.Component {
         )
       );
     });
+  };
 
+  render() {
     return (
       <BaseDiscoveryView
         columns={this.columns}
-        data={data}
         handleRowClick={this.handleRowClick}
+        onLoadRows={this.handleLoadRowsAndFormat}
       />
     );
   }
 }
 
-VisualizationsView.defaultProps = {
-  visualizations: [],
-};
-
 VisualizationsView.propTypes = {
-  visualizations: PropTypes.instanceOf(ObjectCollectionView),
+  visualizations: PropTypes.instanceOf(ObjectCollectionView).isRequired,
 };
 
 export default VisualizationsView;
