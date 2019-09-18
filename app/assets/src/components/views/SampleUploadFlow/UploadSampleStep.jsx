@@ -175,7 +175,6 @@ class UploadSampleStep extends React.Component {
   //*** Tab-related functions ***
 
   getUploadTabs = allowedFeatures => {
-    const { admin } = this.props;
     return compact([
       {
         value: LOCAL_UPLOAD,
@@ -805,7 +804,6 @@ UploadSampleStep.propTypes = {
   visible: PropTypes.bool,
   basespaceClientId: PropTypes.string.isRequired,
   basespaceOauthRedirectUri: PropTypes.string.isRequired,
-  admin: PropTypes.bool,
 };
 
 export default UploadSampleStep;

@@ -50,9 +50,9 @@ BASESPACE_NON_FASTQ_SAMPLE = {
 RSpec.describe BasespaceController, type: :controller do
   create_users
 
-  context "Admin user" do
+  context "non-admin user" do
     before do
-      sign_in @admin
+      sign_in @joe
     end
 
     describe "GET oauth" do
@@ -244,33 +244,6 @@ RSpec.describe BasespaceController, type: :controller do
           json_response = JSON.parse(response.body)
           expect(json_response).to include_json(error: "unable to fetch data from basespace")
         end
-      end
-    end
-  end
-
-  context "non-admin user" do
-    before do
-      sign_in @joe
-    end
-
-    describe "GET oauth" do
-      it "should redirect to the root" do
-        get :oauth, params: { code: "MOCK_CODE" }
-        expect(response).to redirect_to("/")
-      end
-    end
-
-    describe "GET projects" do
-      it "should redirect to the root" do
-        get :projects, params: { access_token: "123" }
-        expect(response).to redirect_to("/")
-      end
-    end
-
-    describe "GET samples_for_project" do
-      it "should redirect to the root" do
-        get :samples_for_project, params: { basespace_project_id: 77 }
-        expect(response).to redirect_to("/")
       end
     end
   end

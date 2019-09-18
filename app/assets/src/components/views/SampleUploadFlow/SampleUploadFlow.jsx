@@ -136,7 +136,6 @@ class SampleUploadFlow extends React.Component {
           visible={this.state.currentStep === "uploadSamples"}
           basespaceClientId={this.props.basespaceClientId}
           basespaceOauthRedirectUri={this.props.basespaceOauthRedirectUri}
-          admin={this.props.admin}
         />
         {this.state.samples && (
           <UploadMetadataStep
