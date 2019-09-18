@@ -13,7 +13,7 @@ import cs from "./heatmap.scss";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap.js";
 import addSvgColorFilter from "../../utils/d3/svg.js";
 // used for filter to make plus icon blue
-const COLOR_HOVER_LINK = "#3867fa";
+const COLOR_HOVER_LINK = cs.primaryLight;
 
 // TODO(tcarvalho): temporary hack to send elements to the back.
 // Remove once code is ported to d3 v4, which contains this function.
