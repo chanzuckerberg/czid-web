@@ -9,6 +9,7 @@ class ResqueMiddleware
     # Restrict allowed characters going to Resque server params.
     # update_param will modify the original 'env' object.
     if env['PATH_INFO'].start_with?("/resque")
+      puts "ENV 1:26pm: ", env, "END"
       req = Rack::Request.new(env)
       req.params.each do |k, v|
         # Don't rely on other sanitize methods that may miss HTML encoding.
@@ -26,10 +27,14 @@ class ResqueMiddleware
       end
     end
 
+    puts "BEFORE: ", env['PATH_INFO']
+
     status, headers, response = @app.call(env)
 
+    puts "PATH INFO: ", env['PATH_INFO']
     if env['PATH_INFO'].start_with?("/resque")
       begin
+        puts "I am in begin block"
         doc = Nokogiri::HTML.parse(response[0])
         forms = doc.xpath("//form")
 
@@ -37,6 +42,7 @@ class ResqueMiddleware
         masked = BASE_CONTROLLER.send(:masked_authenticity_token, req.session)
 
         forms.each do |form|
+          puts "I am prepending 12:34pm"
           form.prepend_child("<input type=\"hidden\" name=\"_csrf\" value=\"#{masked}\"/>")
         end
 
