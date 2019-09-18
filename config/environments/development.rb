@@ -81,7 +81,6 @@ Rails.application.configure do
   config.log_to = %w[stdout file]
 
   config.middleware.use ResqueMiddleware
-  config.middleware.use Rack::Protection
 end
 
 # Development logging configuration
