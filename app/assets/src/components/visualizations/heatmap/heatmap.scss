@@ -99,24 +99,25 @@
       }
 
       .metadataAddLabel {
-        @include font-label-xs;
+        @include font-label-s;
         fill: $medium-grey;
-        opacity: 0;
         cursor: pointer;
         text-anchor: end;
       }
 
       &:hover {
         .metadataAddLine {
-          stroke: $medium-grey;
+          stroke: $primary-light;
         }
 
         .metadataAddIcon {
-          opacity: 0.5;
+          // The filter is defined in heatmap.js
+          filter: url("#blue");
+          opacity: 1;
         }
 
         .metadataAddLabel {
-          opacity: 1;
+          fill: $primary-light;
         }
       }
     }

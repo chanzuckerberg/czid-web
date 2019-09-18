@@ -54,6 +54,7 @@ export default class Heatmap {
         maxRowClusterWidth: 100,
         maxColumnClusterHeight: 100,
         spacing: 10,
+        columnMetadataAddHeight: 14,
         transitionDuration: 200,
         nullValue: 0,
         columnMetadata: [],
@@ -266,6 +267,28 @@ export default class Heatmap {
       `background-color: ${this.options.svgBackgroundColor}`
     );
 
+    const defs = this.svg.append("defs");
+
+    // Creates a color matrix that can recolor a black icon via a filter. See:
+    // https://semisignal.com/using-fecolormatrix-to-dynamically-recolor-icons-part-1-single-color-icons/
+    const generateColorMatrix = function(r, g, b) {
+      let rScaled = r / 255.0;
+      let gScaled = g / 255.0;
+      let bScaled = b / 255.0;
+      return `0 0 0 0 ${rScaled}
+                0 0 0 0 ${gScaled}
+                0 0 0 0 ${bScaled}
+                0 0 0 1 0`;
+    };
+
+    // Create a blue color filter to match $primary-light.
+    defs
+      .append("filter")
+      .attr("id", "blue")
+      .append("feColorMatrix")
+      .attr("type", "matrix")
+      .attr("values", generateColorMatrix(0x2b, 0x52, 0xcd));
+
     this.g = this.svg.append("g");
     this.gRowLabels = this.g.append("g").attr("class", cs.rowLabels);
     this.gColumnLabels = this.g.append("g").attr("class", cs.columnLabels);
@@ -315,7 +338,7 @@ export default class Heatmap {
     const totalColumnLabelsHeight = this.columnLabelsHeight;
     const totalMetadataHeight =
       this.options.columnMetadata.length * this.options.minCellHeight +
-      this.options.spacing;
+      this.options.columnMetadataAddHeight;
     const totalCellHeight = this.cell.height * this.filteredRowLabels.length;
     const totalColumnClusterHeight = this.options.clustering
       ? this.columnClusterHeight + this.options.spacing * 2
@@ -1104,7 +1127,7 @@ export default class Heatmap {
         .append("g")
         .attr("class", cs.columnMetadataAdd);
 
-      let yPos = this.options.spacing / 2;
+      let yPos = this.options.columnMetadataAddHeight / 2;
 
       addLinkEnter.append("rect");
 
@@ -1114,8 +1137,8 @@ export default class Heatmap {
         .append("text")
         .text(() => "Add Metadata")
         .attr("class", cs.metadataAddLabel)
-        .attr("x", this.rowLabelsWidth - 20)
-        .attr("y", 9)
+        .attr("x", this.rowLabelsWidth - 25)
+        .attr("y", 11)
         .on("click", handleAddColumnMetadataClick);
 
       let addMetadataTrigger = addLinkEnter
@@ -1126,10 +1149,9 @@ export default class Heatmap {
       addMetadataTrigger
         .append("svg:image")
         .attr("class", cs.metadataAddIcon)
-        .attr("width", 10)
-        .attr("height", 10)
-        .attr("x", this.rowLabelsWidth - 15)
-        .attr("y", yPos - 5)
+        .attr("width", this.options.columnMetadataAddHeight)
+        .attr("height", this.options.columnMetadataAddHeight)
+        .attr("x", this.rowLabelsWidth - 20)
         .attr("xlink:href", `${this.options.iconPath}/plus.svg`);
 
       // setup triggers
@@ -1149,7 +1171,7 @@ export default class Heatmap {
           "width",
           this.rowLabelsWidth + this.columnLabels.length * this.cell.width
         )
-        .attr("height", this.options.spacing);
+        .attr("height", this.options.columnMetadataAddHeight);
 
       addLink
         .select(`.${cs.metadataAddLine}`)
