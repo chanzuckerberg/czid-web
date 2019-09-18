@@ -174,7 +174,7 @@ class UploadSampleStep extends React.Component {
 
   //*** Tab-related functions ***
 
-  getUploadTabs = allowedFeatures => {
+  getUploadTabs = () => {
     return compact([
       {
         value: LOCAL_UPLOAD,
@@ -725,18 +725,12 @@ class UploadSampleStep extends React.Component {
           </div>
           <div className={cs.fileUpload}>
             <div className={cs.title}>Upload Files</div>
-            <RequestContext.Consumer>
-              {({ allowedFeatures } = {}) => {
-                return (
-                  <Tabs
-                    className={cs.tabs}
-                    tabs={this.getUploadTabs(allowedFeatures)}
-                    value={this.state.currentTab}
-                    onChange={this.handleTabChange}
-                  />
-                );
-              }}
-            </RequestContext.Consumer>
+            <Tabs
+              className={cs.tabs}
+              tabs={this.getUploadTabs()}
+              value={this.state.currentTab}
+              onChange={this.handleTabChange}
+            />
             {this.renderTab()}
           </div>
           {this.state.currentTab === LOCAL_UPLOAD &&
