@@ -175,7 +175,7 @@ class DiscoveryView extends React.Component {
       "showFilters",
       "showStats",
     ];
-    const sessionFields = concat(sessionFields, [
+    const sessionFields = concat(localFields, [
       "currentDisplay",
       "mapSidebarTab",
     ]);
