@@ -1,5 +1,3 @@
-import d3 from "d3";
-
 // Creates a color matrix that can recolor a black icon via a filter. See:
 // https://semisignal.com/using-fecolormatrix-to-dynamically-recolor-icons-part-1-single-color-icons/
 function generateColorMatrix(rgb) {
