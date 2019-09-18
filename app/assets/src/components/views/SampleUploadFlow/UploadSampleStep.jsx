@@ -37,7 +37,6 @@ import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import ProjectCreationForm from "~/components/common/ProjectCreationForm";
 import PrimaryButton from "~/components/ui/controls/buttons/PrimaryButton";
 import SecondaryButton from "~/components/ui/controls/buttons/SecondaryButton";
-import { RequestContext } from "~/components/common/RequestContext";
 
 import LocalSampleFileUpload from "./LocalSampleFileUpload";
 import RemoteSampleFileUpload from "./RemoteSampleFileUpload";
