@@ -169,18 +169,17 @@ class DiscoveryView extends React.Component {
   updateBrowsingHistory = (action = "push") => {
     const { domain } = this.props;
 
-    const urlFields = [
+    const sessionFields = [
       "currentDisplay",
       "currentTab",
-      "filters",
       "mapSidebarTab",
-      "projectId",
       "sampleActiveColumns",
-      "search",
       "showFilters",
       "showStats",
     ];
+    const urlFields = concat(sessionFields, ["filters", "search", "projectId"]);
     const stateFields = concat(urlFields, ["project"]);
+
     const localFields = [
       "currentTab",
       "sampleActiveColumns",
@@ -188,6 +187,7 @@ class DiscoveryView extends React.Component {
       "showStats",
     ];
 
+    const sessionState = pick(sessionFields, this.state);
     const historyState = pick(stateFields, this.state);
     const urlState = pick(urlFields, this.state);
     const localState = pick(localFields, this.state);
@@ -215,7 +215,10 @@ class DiscoveryView extends React.Component {
     }
 
     // We want to persist all options when user navigates to other pages within the same session
-    sessionStorage.setItem("DiscoveryViewOptions", JSON.stringify(urlState));
+    sessionStorage.setItem(
+      "DiscoveryViewOptions",
+      JSON.stringify(sessionState)
+    );
 
     // We want to persist some options when user returns to the page on a different session
     localStorage.setItem("DiscoveryViewOptions", JSON.stringify(localState));
