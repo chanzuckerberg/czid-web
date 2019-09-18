@@ -335,16 +335,16 @@ class Sample < ApplicationRecord
         # SIGPIPE 13 'pipe broken'. This is an expected condition that shouldn't be
         # considered as an error.
         if (
-            # exitstatus is 0 when input file is small enough to be read in a single fetch
-            (proc_download.exitstatus == 0) ||
-            # exitstatus is 1 when input file is too big and aws cp still have its connection open
-            (proc_download.exitstatus == 1 && stderr.include?(InputFile::S3_CP_PIPE_ERROR))
-          ) &&
-          to_check[:sig_pipe].all? { |p| p&.termsig == 13 } &&
-          to_check[:no_errors].all? { |p| p&.exitstatus&.zero? }
+             # exitstatus is 0 when input file is small enough to be read in a single fetch
+             proc_download&.exitstatus&.zero? ||
+             # exitstatus is 1 when input file is too big and aws cp still have its connection open
+             (proc_download&.exitstatus == 1 && stderr.include?(InputFile::S3_CP_PIPE_ERROR))
+        ) &&
+           to_check[:sig_pipe].all? { |p| p&.termsig == 13 } &&
+           to_check[:no_errors].all? { |p| p&.exitstatus&.zero? }
           # Success
           break
-        elsif to_check.values.flatten.all? { |p| p&.exitstatus&.zero? }
+        elsif to_check.values.flatten.all? { |p| p.exitstatus.zero? }
           # Success
           break
         elsif !proc_validation.exitstatus.zero? && stderr.include?(Sample::PARSE_ERROR_MESSAGE)
