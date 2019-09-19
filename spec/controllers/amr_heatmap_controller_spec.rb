@@ -42,11 +42,11 @@ OQXB_ONTOLOGY = {
 RSpec.describe AmrHeatmapController, type: :controller do
   create_users
 
-  # Admin context
-  context 'Admin user' do
+  # Regular Joe context
+  context 'Joe' do
     # create users
     before do
-      sign_in @admin
+      sign_in @joe
     end
 
     describe "GET index" do
@@ -248,6 +248,73 @@ RSpec.describe AmrHeatmapController, type: :controller do
                                                  error: "sample not found")
       end
 
+      it "works properly if user tries to access sample they don't have access to" do
+        # Create a test sample (in a project, as required) that contains AMR data.
+        project_joe = create(:project, users: [@joe])
+        project_admin = create(:project, users: [@admin])
+        sample_joe = create(:sample, project: project_joe, pipeline_runs_data: [{
+                              amr_counts_data: [{
+                                gene: "IamA_Gene",
+                              },],
+                              job_status: PipelineRun::STATUS_CHECKED,
+                              output_states_data: [{
+                                output: "amr_counts",
+                                state: PipelineRun::STATUS_LOADED,
+                              },],
+                            },],
+                                     metadata_fields: { collection_location: "Santa Barbara, USA", sample_type: "Blood" })
+
+        sample_admin = create(:sample, project: project_admin, pipeline_runs_data: [{
+                                amr_counts_data: [{
+                                  gene: "AnoT_Her",
+                                },],
+                                job_status: PipelineRun::STATUS_CHECKED,
+                                output_states_data: [{
+                                  output: "amr_counts",
+                                  state: PipelineRun::STATUS_LOADED,
+                                },],
+                              },],
+                                       metadata_fields: { collection_location: "Los Angeles, USA", sample_type: "Serum" })
+
+        amr_counts_joe = sample_joe.first_pipeline_run.amr_counts[0] # Because we only have one AmrCount in amr_counts_data
+
+        get :amr_counts, params: { sampleIds: [sample_joe["id"], sample_admin["id"]] } # Joe shouldn't be able to access sample_admin
+        expect(response.content_type).to eq("application/json")
+        expect(response).to have_http_status(:ok)
+
+        # Compare controller output to our test sample.
+        # The created_at and updated_at fields seem to differ in format (though not content)
+        # when this is run, so they are left them out of the comparison.
+        json_response = JSON.parse(response.body)
+        expect(json_response[0]).to include_json(sampleId: sample_joe["id"],
+                                                 sampleName: sample_joe["name"],
+                                                 metadata: [{
+                                                   key: "collection_location",
+                                                   raw_value: "Santa Barbara, USA",
+                                                   string_validated_value: "Santa Barbara, USA",
+                                                   base_type: "string",
+                                                 }, {
+                                                   key: "sample_type",
+                                                   raw_value: "Blood",
+                                                   string_validated_value: "Blood",
+                                                   base_type: "string",
+                                                 },],
+                                                 amrCounts: [{
+                                                   id: amr_counts_joe["id"],
+                                                   gene: amr_counts_joe["gene"],
+                                                   allele: amr_counts_joe["allele"],
+                                                   coverage: amr_counts_joe["coverage"],
+                                                   depth: amr_counts_joe["depth"],
+                                                   pipeline_run_id: amr_counts_joe["pipeline_run_id"],
+                                                   drug_family: amr_counts_joe["drug_family"],
+                                                 },],
+                                                 error: "")
+        expect(json_response[1]).to include_json(sampleId: sample_admin["id"],
+                                                 sampleName: "",
+                                                 amrCounts: [],
+                                                 error: "sample not found")
+      end
+
       it "works even if a sample doesn't have amr counts" do
         # Create a test sample without AMR data.
         project = create(:project, users: [@admin, @joe])
@@ -344,35 +411,6 @@ RSpec.describe AmrHeatmapController, type: :controller do
             error: "No data for ImNotInCard."
           )
         end
-      end
-    end
-  end
-
-  # Regular Joe context
-  # Ensure that this feature cannot be accessed by non-admin users
-  # TODO: Add a test case where the user tries to access a sample that they don't have access to.
-  context 'Joe' do
-    before do
-      sign_in @joe
-    end
-
-    describe "GET json" do
-      it "should not see any AMR information" do
-        # As above
-        project = create(:project, users: [@admin, @joe])
-        sample = create(:sample, project: project, pipeline_runs_data: [{
-                          amr_counts_data: [{
-                            gene: "IamA_Gene",
-                          },],
-                          job_status: PipelineRun::STATUS_CHECKED,
-                          output_states_data: [{
-                            output: "amr_counts",
-                            state: PipelineRun::STATUS_LOADED,
-                          },],
-                        },])
-
-        get :amr_counts, params: { id: [sample["id"]] }
-        expect(response).to redirect_to("/")
       end
     end
   end
