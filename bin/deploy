@@ -5,6 +5,7 @@ require 'rubygems'
 require 'bundler/setup'
 require 'pp'
 require 'json'
+require 'shellwords'
 
 def system!(cmd, err = nil)
   system(cmd) || abort("\n== Command #{cmd} failed ==\n\n#{err}\n\n====")
@@ -39,8 +40,8 @@ def notify_slack(env, image, stage)
           definition = JSON.parse(`aws ecs describe-task-definition --task-definition #{definition_list["taskDefinitionArns"][0]}`)
           prod_image = definition["taskDefinition"]["containerDefinitions"][0]["image"].split(':')[1]
           log_history = `git log --graph --pretty=format:'%an -%d %s (%cr) <%h>' --abbrev-commit #{prod_image.split('-')[1]}..#{image.split('-')[1]} | sort`
-          payload = {"icon_emoji": ":sharkdance:", "text": "Please test these changes:\n#{log_history}"}
-          puts `curl -X POST --data-urlencode 'payload=#{JSON.dump(payload)}' #{slack_hook}`
+          payload = { "icon_emoji": ":sharkdance:", "text": "Please test these changes:\n#{log_history}" }
+          puts `curl -X POST --data-urlencode payload=#{Shellwords.escape(JSON.dump(payload))} #{slack_hook}`
         rescue
         end
       end
