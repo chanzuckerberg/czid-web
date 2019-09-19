@@ -1,4 +1,5 @@
 class ResqueMiddleware
+  # Separate controller instance to access RequestForgeryProtection methods
   BASE_CONTROLLER = ActionController::Base.new
 
   def initialize(app)
@@ -46,8 +47,9 @@ class ResqueMiddleware
     status, headers, response = @app.call(env)
 
     # Add a _csrf token to all Resque UI forms
-    if response.present?
+    if response.is_a?(Array) && response.present?
       doc = Nokogiri::HTML.parse(response[0])
+
       # Masked token varies on each request but is valid for the session.
       masked_token = BASE_CONTROLLER.send(:masked_authenticity_token, rack_session)
       form_nodes = doc.xpath("//form")
