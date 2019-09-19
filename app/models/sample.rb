@@ -298,7 +298,7 @@ class Sample < ApplicationRecord
       while try < max_tries
         # Run the piped commands and save stderr
         err_read, err_write = IO.pipe
-        if fastq =~ /\.gz/
+        if fastq.match?(/\.gz/)
           proc_download, proc_unzip, proc_cut, proc_head, proc_validation, proc_zip, proc_upload = Open3.pipeline(
             ["aws", "s3", "cp", fastq, "-"],
             ["gzip", "-dc"],
@@ -344,10 +344,10 @@ class Sample < ApplicationRecord
            to_check[:no_errors].all? { |p| p&.exitstatus&.zero? }
           # Success
           break
-        elsif to_check.values.flatten.all? { |p| p.exitstatus.zero? }
+        elsif to_check.values.flatten.all? { |p| p&.exitstatus&.zero? }
           # Success
           break
-        elsif !proc_validation.exitstatus.zero? && stderr.include?(Sample::PARSE_ERROR_MESSAGE)
+        elsif proc_validation&.exitstatus&.nonzero? && stderr.include?(Sample::PARSE_ERROR_MESSAGE)
           error_msg = "Error parsing upload of S3 sample '#{name}' (#{id}) file '#{fastq}' failed with: #{stderr}"
           Rails.logger.error(error_msg)
           stderr_array << error_msg
