@@ -131,6 +131,15 @@ Style/RedundantReturn:
 Style/FrozenStringLiteralComment:
   Enabled: false
 
+Style/NumericPredicate:
+  Enabled: false
+
+Style/SafeNavigation:
+  Enabled: false
+
+Performance/RegexpMatch:
+  Enabled: false
+
 Rails/FindEach:
   Enabled: false
 
