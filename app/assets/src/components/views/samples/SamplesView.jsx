@@ -175,7 +175,6 @@ class SamplesView extends React.Component {
   };
 
   reset = () => {
-    console.log("SamplesView:reset");
     const { currentDisplay } = this.props;
     if (currentDisplay === "table") this.infiniteTable.reset();
   };

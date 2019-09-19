@@ -311,11 +311,6 @@ export default class MapPreviewSidebar extends React.Component {
       sampleDimensions,
       sampleStats,
     } = this.props;
-    console.log(
-      "MapPreviewSidebar:renderSummaryTab",
-      this.props.projects,
-      projectStats
-    );
 
     return (
       <DiscoverySidebar
@@ -340,11 +335,7 @@ export default class MapPreviewSidebar extends React.Component {
   handleLoadRowsAndFormat = async args => {
     const { projects } = this.props;
     const loadedProjects = await projects.handleLoadObjectRows(args);
-    console.log(
-      "MapPreviewSidebar:handleLoadRowsAndFormat",
-      args,
-      loadedProjects
-    );
+
     return loadedProjects.map(project => {
       return merge(
         {
@@ -389,7 +380,6 @@ export default class MapPreviewSidebar extends React.Component {
 
   render() {
     const { className, currentTab } = this.props;
-    console.log("MapPreviewSidebar:render", this.props.projects);
 
     return (
       <div className={cx(className, cs.sidebar)}>
