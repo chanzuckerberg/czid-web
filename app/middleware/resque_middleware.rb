@@ -41,7 +41,7 @@ class ResqueMiddleware
       end
     end
 
-    ### OUTPUT DECORATION
+    ### OUTPUT ADDITIONS
 
     # Get regular application response
     status, headers, response = @app.call(env)
