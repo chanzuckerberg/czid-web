@@ -15,6 +15,12 @@
     margin-bottom: 10px;
   }
 
+  .table {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
   .map {
     flex: 1 0 auto;
     display: flex;
