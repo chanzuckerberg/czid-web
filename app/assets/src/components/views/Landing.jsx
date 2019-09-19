@@ -11,6 +11,7 @@ import {
   Divider,
 } from "semantic-ui-react";
 import Container from "../ui/containers/Container";
+import ExternalLink from "~ui/controls/ExternalLink";
 import TransparentButton from "../ui/controls/buttons/TransparentButton";
 import PrimaryButton from "../ui/controls/buttons/PrimaryButton";
 import StringHelper from "../../helpers/StringHelper";
@@ -242,21 +243,19 @@ class Landing extends React.Component {
       bulletinBanner = (
         <div className="bulletin-banner">
           <Container>
-            <div className="bulletin-title">Grand Challenges Grant RFP</div>
+            <div className="bulletin-title">Experience IDseq in Action</div>
             <div className="bulletin-description">
-              In collaboration with the Gates Foundation, Chan Zuckerberg
-              Initiative and Chan Zuckerberg Biohub have announced a Grand
-              Challenges Grant that will use IDseq to build capacity for
-              metagenomic sequencing in labs around the world. Applications open
-              until December 5, 2018.
+              Journey to the frontlines of global health with a 360° video tour.
+              See how a local researcher quickly detects the source of a
+              meningitis outbreak in Dhaka, Bangladesh by using IDseq
+              technology.
             </div>
-            <a
-              href="https://gcgh.grandchallenges.org/challenge/application-metagenomic-next-generation-sequencing-detect-and-identify-pathogens-round-22"
-              target="_blank"
-              rel="noopener noreferrer"
+            <ExternalLink
+              href="https://discoveridseq.com/vr"
+              analyticsEventName="Landing_video-tour-link_clicked"
             >
-              <TransparentButton text="Learn More" />
-            </a>
+              <TransparentButton text="Take a Video Tour" />
+            </ExternalLink>
           </Container>
         </div>
       );
