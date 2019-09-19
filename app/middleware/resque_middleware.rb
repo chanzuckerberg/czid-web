@@ -5,6 +5,7 @@ class ResqueMiddleware
     @app = app
   end
 
+  # CSRF reference: https://medium.com/rubyinside/a-deep-dive-into-csrf-protection-in-rails-19fa0a42c0ef
   def call(env)
     # Regular execution for non-Resque paths
     unless env['PATH_INFO'].start_with?("/resque")
@@ -27,7 +28,7 @@ class ResqueMiddleware
     unless rack_request.get? || rack_request.head?
       valid_token = false
 
-      # Expect state-changing actions to use a form submit with a _csrf hidden field.
+      # Expect actions to use a form submit with a _csrf hidden field.
       form_params = env["rack.request.form_hash"] || {}
       if form_params.key?("_csrf")
         valid_token = BASE_CONTROLLER.send(:valid_authenticity_token?, rack_session, form_params["_csrf"])
@@ -45,14 +46,16 @@ class ResqueMiddleware
     status, headers, response = @app.call(env)
 
     # Add a _csrf token to all Resque UI forms
-    doc = Nokogiri::HTML.parse(response[0])
-    form_nodes = doc.xpath("//form")
-    masked_token = BASE_CONTROLLER.send(:masked_authenticity_token, rack_session)
-
-    form_nodes.each do |form|
-      form.prepend_child("<input type=\"hidden\" name=\"_csrf\" value=\"#{masked_token}\"/>")
+    if response.present?
+      doc = Nokogiri::HTML.parse(response[0])
+      # Masked token varies on each request but is valid for the session.
+      masked_token = BASE_CONTROLLER.send(:masked_authenticity_token, rack_session)
+      form_nodes = doc.xpath("//form")
+      form_nodes.each do |form|
+        form.prepend_child("<input type=\"hidden\" name=\"_csrf\" value=\"#{masked_token}\"/>")
+      end
+      response = [doc.to_s]
     end
-    response = [doc.to_s]
 
     [status, headers, response]
   end
