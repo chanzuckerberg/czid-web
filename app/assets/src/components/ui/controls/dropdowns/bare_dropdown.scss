@@ -36,6 +36,12 @@
     }
   }
 
+  &.smallArrow {
+    i:global(.dropdown) {
+      font-size: 16px;
+    }
+  }
+
   :global(.item) {
     font-size: 13px;
     font-weight: 400;

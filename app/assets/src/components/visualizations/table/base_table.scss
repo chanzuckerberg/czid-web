@@ -21,6 +21,10 @@
     width: 14px;
     fill: $medium-grey;
     vertical-align: center;
+
+    &:hover {
+      fill: $primary-light;
+    }
   }
 }
 
@@ -47,12 +51,26 @@
       // Shrink once you're at the maximum width (e.g. don't overflow). Do not grow unless needed.
       flex: 0 1 auto;
       min-width: 0;
+
+      &:hover {
+        color: $black;
+        cursor: pointer;
+      }
     }
 
     .sortIcon {
       // Make the sort icon slightly bigger than the text.
       font-size: 1.2em;
       margin-left: 4px;
+      display: none;
+
+      &.active {
+        display: flex;
+      }
+    }
+    // Display sortIcon when sortableHeader label is hovered over
+    .label:hover + .sortIcon {
+      display: flex;
     }
   }
 
@@ -63,6 +81,11 @@
     max-width: 100%;
     display: inline-block;
     vertical-align: middle;
+
+    &:hover {
+      color: $black;
+      cursor: default;
+    }
   }
 }
 

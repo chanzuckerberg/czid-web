@@ -50,7 +50,7 @@ AllCops:
     - vendor/**/*
     - bin/*
     - node_modules/**/*
-  TargetRubyVersion: 2.2
+  TargetRubyVersion: 2.4
 
 ClassLength:
   Enabled: false
@@ -126,6 +126,18 @@ Style/MethodCallWithoutArgsParentheses:
   Enabled: false
 
 Style/RedundantReturn:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false
+
+Style/SafeNavigation:
+  Enabled: false
+
+Performance/RegexpMatch:
   Enabled: false
 
 Rails/FindEach:

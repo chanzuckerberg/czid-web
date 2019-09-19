@@ -10,7 +10,11 @@ import PropTypes from "~/components/utils/propTypes";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
-import { DEFAULT_ROW_HEIGHT, MAX_PROJECT_ROW_HEIGHT } from "./constants";
+import {
+  DEFAULT_ROW_HEIGHT,
+  MAX_PROJECT_ROW_HEIGHT,
+  PROJECT_TABLE_COLUMNS,
+} from "./constants";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 
 // CSS file must be loaded after any elements you might want to override
@@ -20,7 +24,9 @@ class ProjectsView extends React.Component {
   constructor(props) {
     super(props);
 
-    this.discoveryView = this.columns = [
+    this.discoveryView = null;
+
+    this.columns = [
       {
         dataKey: "project",
         flexGrow: 1,
@@ -64,6 +70,10 @@ class ProjectsView extends React.Component {
         label: "No. of Samples",
       },
     ];
+
+    for (let column of this.columns) {
+      column["columnData"] = PROJECT_TABLE_COLUMNS[column["dataKey"]];
+    }
   }
 
   nameRenderer(project) {
@@ -102,10 +112,8 @@ class ProjectsView extends React.Component {
   };
 
   handleRowClick = ({ rowData }) => {
-    console.log("ProjectsView:handleRowClick", rowData, onProjectSelected);
     const { onProjectSelected, projects } = this.props;
     const project = projects.get(rowData.id);
-    console.log("ProjectsView:handleRowClick", project);
     onProjectSelected && onProjectSelected({ project });
     logAnalyticsEvent("ProjectsView_row_clicked", {
       projectId: project.id,

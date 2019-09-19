@@ -20,6 +20,7 @@ import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
 import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
+import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
 
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
@@ -131,6 +132,10 @@ class SamplesView extends React.Component {
           TableRenderers.formatDuration(rowData[dataKey]),
       },
     ];
+
+    for (let column of this.columns) {
+      column["columnData"] = SAMPLE_TABLE_COLUMNS_V2[column["dataKey"]];
+    }
   }
 
   handleSelectRow = (value, checked) => {
@@ -342,6 +347,7 @@ class SamplesView extends React.Component {
   renderTable = () => {
     const {
       activeColumns,
+      onActiveColumnsChange,
       onLoadRows,
       protectedColumns,
       selectedSampleIds,
@@ -358,6 +364,7 @@ class SamplesView extends React.Component {
           defaultRowHeight={rowHeight}
           initialActiveColumns={activeColumns}
           loadingClassName={csTableRenderer.loading}
+          onActiveColumnsChange={onActiveColumnsChange}
           onLoadRows={onLoadRows}
           onSelectAllRows={withAnalytics(
             this.handleSelectAllRows,
@@ -489,6 +496,7 @@ SamplesView.propTypes = {
   mapPreviewedSamples: PropTypes.array,
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
+  onActiveColumnsChange: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
   onMapClick: PropTypes.func,

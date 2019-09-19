@@ -7,7 +7,6 @@ import {
   clone,
   compact,
   concat,
-  defaults,
   escapeRegExp,
   find,
   isEmpty,
@@ -82,6 +81,7 @@ class DiscoveryView extends React.Component {
     const { projectId } = this.props;
 
     this.urlParser = new UrlQueryParser({
+      sampleActiveColumns: "object",
       filters: "object",
       projectId: "number",
       showFilters: "boolean",
@@ -89,8 +89,11 @@ class DiscoveryView extends React.Component {
     });
 
     const urlState = this.urlParser.parse(location.search);
+    let sessionState = this.loadState(sessionStorage, "DiscoveryViewOptions");
+    let localState = this.loadState(localStorage, "DiscoveryViewOptions");
 
-    this.state = defaults(
+    // values are copied from left to right to the first argument (last arguments override previous)
+    this.state = Object.assign(
       {
         currentDisplay: "table",
         currentTab:
@@ -116,15 +119,17 @@ class DiscoveryView extends React.Component {
         projectDimensions: [],
         projectId: projectId,
         rawMapLocationData: {},
+        sampleActiveColumns: undefined,
         sampleDimensions: [],
         search: null,
         selectedSampleIds: new Set(),
         showFilters: true,
         showStats: true,
       },
+      localState,
+      sessionState,
       urlState
     );
-
     this.dataLayer = new DiscoveryDataLayer(this.props.domain);
     const conditions = this.getConditions();
     this.samples = this.dataLayer.samples.createView({ conditions });
@@ -171,29 +176,46 @@ class DiscoveryView extends React.Component {
     };
   }
 
+  loadState = (store, key) => {
+    try {
+      return JSON.parse(store.getItem(key)) || {};
+    } catch (e) {
+      // Avoid possible bad transient state related crash
+      // eslint-disable-next-line no-console
+      console.warn(`Bad state: ${e}`);
+    }
+    return {};
+  };
+
   updateBrowsingHistory = (action = "push") => {
     const { domain } = this.props;
 
-    const urlFields = [
-      "currentDisplay",
+    const localFields = [
       "currentTab",
-      "filters",
-      "mapSidebarTab",
-      "projectId",
-      "search",
+      "sampleActiveColumns",
       "showFilters",
       "showStats",
     ];
+    const sessionFields = concat(localFields, [
+      "currentDisplay",
+      "mapSidebarTab",
+    ]);
+    const urlFields = concat(sessionFields, ["filters", "projectId", "search"]);
     const stateFields = concat(urlFields, ["project"]);
 
-    const historyState = pick(stateFields, this.state);
+    const localState = pick(localFields, this.state);
+    const sessionState = pick(sessionFields, this.state);
     const urlState = pick(urlFields, this.state);
+    const historyState = pick(stateFields, this.state);
 
+    // Saving on URL enables sharing current view with other users
     let urlQuery = this.urlParser.stringify(urlState);
     if (urlQuery) {
       urlQuery = `?${urlQuery}`;
     }
 
+    // History state may include some small fields that enable direct loading of previous pages
+    // from browser history without having to request those fields from server (e.g. project)
     if (action === "push") {
       history.pushState(
         historyState,
@@ -207,6 +229,15 @@ class DiscoveryView extends React.Component {
         `/${domain}${urlQuery}`
       );
     }
+
+    // We want to persist all options when user navigates to other pages within the same session
+    sessionStorage.setItem(
+      "DiscoveryViewOptions",
+      JSON.stringify(sessionState)
+    );
+
+    // We want to persist some options when user returns to the page on a different session
+    localStorage.setItem("DiscoveryViewOptions", JSON.stringify(localState));
   };
 
   preparedFilters = () => {
@@ -265,13 +296,11 @@ class DiscoveryView extends React.Component {
 
   initialLoad = () => {
     const { project } = this.state;
-
     // * Initial load:
     //   - load (A) non-filtered dimensions, (C) filtered stats, (D) filtered locations, and (E) synchronous table data
     this.refreshDimensions();
     this.refreshFilteredStats();
     this.refreshFilteredLocations();
-    // this.refreshSynchronousData();
     //   * if filter or project is set
     //     - load (B) filtered dimensions
     (this.getFilterCount() || project) && this.refreshFilteredDimensions();
@@ -509,6 +538,12 @@ class DiscoveryView extends React.Component {
       logAnalyticsEvent(`DiscoveryView_filters_changed`, {
         filters: this.getFilterCount(),
       });
+    });
+  };
+
+  handleSampleActiveColumnsChange = activeColumns => {
+    this.setState({ sampleActiveColumns: activeColumns }, () => {
+      this.updateBrowsingHistory("replace");
     });
   };
 
@@ -1092,6 +1127,7 @@ class DiscoveryView extends React.Component {
       mapLocationData,
       mapPreviewedLocationId,
       mapPreviewedSamples,
+      sampleActiveColumns,
       selectedSampleIds,
       projectId,
       // projects,
@@ -1140,6 +1176,7 @@ class DiscoveryView extends React.Component {
           <div className={cs.tableContainer}>
             <div className={cs.dataContainer}>
               <SamplesView
+                activeColumns={sampleActiveColumns}
                 admin={admin}
                 allowedFeatures={allowedFeatures}
                 currentDisplay={currentDisplay}
@@ -1149,6 +1186,7 @@ class DiscoveryView extends React.Component {
                 mapPreviewedLocationId={mapPreviewedLocationId}
                 mapPreviewedSamples={mapPreviewedSamples}
                 mapTilerKey={mapTilerKey}
+                onActiveColumnsChange={this.handleSampleActiveColumnsChange}
                 onClearFilters={this.handleClearFilters}
                 onDisplaySwitch={this.handleDisplaySwitch}
                 onLoadRows={samples.handleLoadObjectRows}

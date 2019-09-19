@@ -10,7 +10,6 @@ const STATUS_LOADING = 1;
 const STATUS_LOADED = 2;
 
 const makeCancelable = promise => {
-  console.log("InfiniteTable:makeCancelable");
   let hasCanceled_ = false;
 
   const wrappedPromise = new Promise((resolve, reject) => {
@@ -23,7 +22,6 @@ const makeCancelable = promise => {
   return {
     promise: wrappedPromise,
     cancel() {
-      console.log("InfiniteTable:makeCancelable:cancel");
       hasCanceled_ = true;
     },
   };
@@ -50,9 +48,7 @@ class InfiniteTable extends React.Component {
   }
 
   componentWillUnmount = () => {
-    console.log("InfiniteTable:componentWillUnmount");
     if (this.cancelableLoadRowsPromise) {
-      console.log("InfiniteTable:componentWillUnmount - canceled request");
       this.cancelableLoadRowsPromise.cancel();
     }
   };
@@ -90,28 +86,12 @@ class InfiniteTable extends React.Component {
         return true;
       })
       .catch(error => {
-        console.log("InfiniteTable:onLoadRows:catch", error);
         if (!error.isCanceled) {
           // eslint-disable-next-line no-console
           console.error("Error loading rows", error);
         }
       });
-    // const newRows = await onLoadRows({ startIndex, stopIndex });
     return this.cancelableLoadRowsPromise.promise;
-    // const requestedNumberOfRows = stopIndex - startIndex + 1;
-    // this.rows.splice(startIndex, requestedNumberOfRows, ...newRows);
-
-    // if (requestedNumberOfRows !== newRows.length) {
-    //   this.setState({ rowCount: this.rows.length });
-    // } else {
-    //   this.setState({ rowCount: this.rows.length + minimumBatchSize });
-    // }
-
-    // for (let i = startIndex; i <= stopIndex; i++) {
-    //   this.loadedRowsMap[i] = STATUS_LOADED;
-    // }
-
-    // return true;
   };
 
   getRow = ({ index }) => {
