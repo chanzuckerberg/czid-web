@@ -174,12 +174,13 @@ class UploadSampleStep extends React.Component {
   //*** Tab-related functions ***
 
   getUploadTabs = () => {
+    const { admin, biohubUser } = this.props;
     return compact([
       {
         value: LOCAL_UPLOAD,
         label: LOCAL_UPLOAD_LABEL,
       },
-      {
+      (admin || biohubUser) && {
         value: REMOTE_UPLOAD,
         label: REMOTE_UPLOAD_LABEL,
       },
@@ -795,6 +796,8 @@ UploadSampleStep.propTypes = {
   // Used to disable later steps the header navigation if the data in previous steps has changed.
   onDirty: PropTypes.func.isRequired,
   visible: PropTypes.bool,
+  admin: PropTypes.bool,
+  biohubUser: PropTypes.bool,
   basespaceClientId: PropTypes.string.isRequired,
   basespaceOauthRedirectUri: PropTypes.string.isRequired,
 };

@@ -136,6 +136,8 @@ class SampleUploadFlow extends React.Component {
           visible={this.state.currentStep === "uploadSamples"}
           basespaceClientId={this.props.basespaceClientId}
           basespaceOauthRedirectUri={this.props.basespaceOauthRedirectUri}
+          admin={this.props.admin}
+          biohubUser={this.props.biohub_user}
         />
         {this.state.samples && (
           <UploadMetadataStep
@@ -197,6 +199,7 @@ SampleUploadFlow.propTypes = {
   csrf: PropTypes.string,
   hostGenomes: PropTypes.arrayOf(PropTypes.HostGenome),
   admin: PropTypes.bool,
+  biohub_user: PropTypes.bool,
   basespaceClientId: PropTypes.string.isRequired,
   basespaceOauthRedirectUri: PropTypes.string.isRequired,
 };
