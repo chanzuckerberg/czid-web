@@ -169,12 +169,14 @@ class ProjectsView extends React.Component {
       <div className={cs.container}>
         {this.renderDisplaySwitcher()}
         {currentDisplay === "table" ? (
-          <BaseDiscoveryView
-            columns={this.columns}
-            data={data}
-            handleRowClick={this.handleRowClick}
-            rowHeight={this.getRowHeight}
-          />
+          <div className={cs.table}>
+            <BaseDiscoveryView
+              columns={this.columns}
+              data={data}
+              handleRowClick={this.handleRowClick}
+              rowHeight={this.getRowHeight}
+            />
+          </div>
         ) : (
           <div className={cs.map}>
             <DiscoveryMap
