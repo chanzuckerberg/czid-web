@@ -169,26 +169,28 @@
   background: $primary-light;
   color: $white;
   text-align: center;
+  padding: 4rem 0;
 
   .bulletin-title {
-    font-size: 1.7rem;
-    padding-top: 3rem;
+    font-size: 1.75rem;
+    font-weight: 600;
     letter-spacing: 0.07rem;
   }
 
   .bulletin-description {
-    margin-top: 1.5rem;
+    margin-top: 2rem;
     font-size: 1.1rem;
     font-weight: 100;
     letter-spacing: 0.05rem;
     line-height: 1.7rem;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 800px;
   }
 
   .button.transparent-btn {
     margin-top: 2rem;
-    margin-bottom: 3rem;
     height: 2.5rem;
-    width: 9rem;
 
     &:hover,
     &:active,
