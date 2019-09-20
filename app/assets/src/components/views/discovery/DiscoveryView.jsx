@@ -164,7 +164,9 @@ class DiscoveryView extends React.Component {
 
     window.onpopstate = () => {
       this.setState(history.state, () => {
-        this.initialLoad();
+        this.resetData({
+          callback: this.initialLoad,
+        });
       });
     };
   }
@@ -263,7 +265,7 @@ class DiscoveryView extends React.Component {
     return preparedFilters;
   };
 
-  resetData = ({ callback }) => {
+  resetData = ({ callback } = {}) => {
     const conditions = this.getConditions();
 
     this.samples.reset({ conditions });
