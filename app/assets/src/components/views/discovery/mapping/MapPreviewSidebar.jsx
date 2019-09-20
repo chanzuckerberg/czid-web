@@ -174,7 +174,20 @@ export default class MapPreviewSidebar extends React.Component {
         label: "No. of Samples",
       },
     ];
+
+    // refs to components for reset
+    this.samplesTable = null;
+    this.projectsTable = null;
   }
+
+  componentDidUpdate = prevProps => {
+    if (
+      this.props.samples != prevProps.samples ||
+      this.props.projects != prevProps.projects
+    ) {
+      this.reset();
+    }
+  };
 
   handleSelectRow = (value, checked) => {
     const { selectedSampleIds, onSelectionUpdate } = this.props;
@@ -257,14 +270,14 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   reset = () => {
-    this.infiniteTable && this.infiniteTable.reset();
+    this.samplesTable && this.samplesTable.reset();
+    this.projectsTable && this.projectsTable.reset();
   };
 
-  renderTable = () => {
+  renderSamplesTab = () => {
     const { samples, selectedSampleIds } = this.props;
 
     const rowHeight = 60;
-    const batchSize = 1e4;
     const selectAllChecked = this.isSelectAllChecked();
     return (
       <div className={cs.container}>
@@ -274,29 +287,22 @@ export default class MapPreviewSidebar extends React.Component {
             defaultRowHeight={rowHeight}
             headerClassName={cs.tableHeader}
             initialActiveColumns={["sample"]}
-            minimumBatchSize={batchSize}
             onLoadRows={samples.handleLoadObjectRows}
             onRowClick={this.handleSampleRowClick}
             onSelectAllRows={this.handleSelectAllRows}
             onSelectRow={this.handleSelectRow}
             protectedColumns={["sample"]}
-            ref={infiniteTable => (this.infiniteTable = infiniteTable)}
+            ref={samplesTable => {
+              this.samplesTable = samplesTable;
+            }}
             rowClassName={cs.sampleRow}
-            rowCount={batchSize}
             selectableColumnClassName={cs.selectColumn}
             selectableKey="id"
             selectAllChecked={selectAllChecked}
             selected={selectedSampleIds}
-            threshold={batchSize}
           />
         </div>
       </div>
-    );
-  };
-
-  renderNoData = () => {
-    return (
-      <div className={cs.noData}>Select a location to preview samples.</div>
     );
   };
 
@@ -325,11 +331,6 @@ export default class MapPreviewSidebar extends React.Component {
         sampleStats={sampleStats}
       />
     );
-  };
-
-  renderSamplesTab = () => {
-    const { samples } = this.props;
-    return samples.length === 0 ? this.renderNoData() : this.renderTable();
   };
 
   handleLoadRowsAndFormat = async args => {
@@ -361,6 +362,9 @@ export default class MapPreviewSidebar extends React.Component {
         protectedColumns={["project"]}
         headerClassName={cs.tableHeader}
         onLoadRows={this.handleLoadRowsAndFormat}
+        ref={projectsTable => {
+          this.projectsTable = projectsTable;
+        }}
         rowClassName={cs.projectRow}
         rowHeight={50}
       />
@@ -380,7 +384,6 @@ export default class MapPreviewSidebar extends React.Component {
 
   render() {
     const { className, currentTab } = this.props;
-
     return (
       <div className={cx(className, cs.sidebar)}>
         <Tabs

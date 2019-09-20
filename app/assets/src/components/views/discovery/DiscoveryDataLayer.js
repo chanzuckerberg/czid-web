@@ -9,8 +9,6 @@ class ObjectCollection {
   constructor(domain, apiFunction) {
     this.domain = domain;
     this.entries = {};
-    // this._orderedIds = null;
-    // this._loading = true;
     this.apiFunction = apiFunction;
   }
 
@@ -60,10 +58,12 @@ class ObjectCollectionView {
     // CAVEAT: we use a key based on 'startIndex,stopindex', thus, this only works if the request are exactly the same
     // Asking for a subset of an existing request (e.g. asking for 0,49 and then 10,19) will still lead to redundant requests
     if (this._activePromises[[startIndex, stopIndex]]) {
-      const promiseLoadObjectRows = this._activePromises[[startIndex, stopIndex]];
+      const promiseLoadObjectRows = this._activePromises[
+        [startIndex, stopIndex]
+      ];
       return await promiseLoadObjectRows;
     } else {
-      const promiseLoadObjectRows = this._innerHandleLoadObjectRows({
+      const promiseLoadObjectRows = this.fetchObjectRows({
         startIndex,
         stopIndex,
       });
@@ -74,7 +74,7 @@ class ObjectCollectionView {
     }
   };
 
-  _innerHandleLoadObjectRows = async ({ startIndex, stopIndex }) => {
+  fetchObjectRows = async ({ startIndex, stopIndex }) => {
     const domain = this._collection.domain;
 
     const minStopIndex = this._orderedIds
@@ -88,7 +88,7 @@ class ObjectCollectionView {
     }
     if (missingIdxs.length > 0) {
       // currently loads using limit and offset
-      // could eventually lead to redundant fetches if data is not requested in regular continuous chunks
+      // could eventually lead to redundant fetches if data is not requested in regular-sized chunks
       const minNeededIdx = missingIdxs[0];
       const maxNeededIdx = missingIdxs[missingIdxs.length - 1];
       const {

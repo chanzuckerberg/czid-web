@@ -80,7 +80,7 @@
 .sample {
   display: flex;
 
-  .publicAccess {
+  .visibility {
     flex: 0 0 40px;
     display: flex;
     align-items: center;
@@ -193,8 +193,16 @@
   .visibility {
     @include loadingAnimation;
 
-    height: 36px;
-    width: 36px;
+    flex: 0 0 40px;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    margin-right: 12px;
+
+    .icon {
+      fill: $primary-light;
+      width: 36px;
+    }
   }
 
   .sampleRightPane {
@@ -204,7 +212,7 @@
       background-clip: content-box;
       padding: 4px 0;
       height: 20px;
-      flex: 365px;
+      width: 365px;
     }
 
     .sampleDetails {

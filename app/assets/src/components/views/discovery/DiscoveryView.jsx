@@ -146,10 +146,11 @@ class DiscoveryView extends React.Component {
     // hold references to the views to allow resetting the tables
     this.projectsView = null;
     this.samplesView = null;
+    this.mapPreviewSidebar = null;
 
     // preload first pages
     const pageSize = 50;
-    const firstPageArgs = {startIndex: 0, stopIndex: pageSize - 1};
+    const firstPageArgs = { startIndex: 0, stopIndex: pageSize - 1 };
     this.projects.handleLoadObjectRows(firstPageArgs);
     this.samples.handleLoadObjectRows(firstPageArgs);
     this.visualizations.handleLoadObjectRows(firstPageArgs);
@@ -431,11 +432,7 @@ class DiscoveryView extends React.Component {
 
   computeTabs = () => {
     const { domain } = this.props;
-    const {
-      projectId,
-      filteredProjectStats,
-      filteredSampleStats,
-    } = this.state;
+    const { projectId, filteredProjectStats, filteredSampleStats } = this.state;
 
     const renderTab = (label, count) => {
       return (
@@ -745,8 +742,8 @@ class DiscoveryView extends React.Component {
   clearMapPreview = () => {
     const { mapPreviewedLocationId } = this.state;
     if (mapPreviewedLocationId) {
-      this.mapPreviewProjects.reset();
-      this.mapPreviewSamples.reset();
+      this.mapPreviewProjects = this.projects;
+      this.mapPreviewSamples = this.samples;
       this.setState({
         mapPreviewedLocationId: null,
         mapSidebarProjectDimensions: [],
@@ -778,7 +775,7 @@ class DiscoveryView extends React.Component {
     const { mapLocationData, mapPreviewedLocationId } = this.state;
 
     if (!mapPreviewedLocationId || !mapLocationData[mapPreviewedLocationId]) {
-      // // Previewed location has been filtered out, so exit preview mode.
+      // Previewed location has been filtered out, so exit preview mode.
       this.mapPreviewProjects = this.projects;
       return;
     } else {
