@@ -182,59 +182,37 @@ class SamplesView extends React.Component {
   renderHeatmapTrigger = () => {
     const { selectedSampleIds } = this.props;
 
-    if (
-      this.props.allowedFeatures.includes("amr_heatmap") ||
-      this.props.admin
-    ) {
-      const heatmapOptions = [
-        { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
-        { text: "AMR Heatmap", value: "/amr_heatmap" },
-      ];
+    const heatmapOptions = [
+      { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
+      { text: "AMR Heatmap", value: "/amr_heatmap" },
+    ];
 
-      return selectedSampleIds.size < 2 ? (
-        <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
-      ) : (
-        <BareDropdown
-          hideArrow
-          className={cx(cs.icon, cs.heatmapDropdown)}
-          items={heatmapOptions.map(option => {
-            const params = getURLParamString({
-              sampleIds: Array.from(selectedSampleIds),
+    return selectedSampleIds.size < 2 ? (
+      <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
+    ) : (
+      <BareDropdown
+        hideArrow
+        className={cx(cs.icon, cs.heatmapDropdown)}
+        items={heatmapOptions.map(option => {
+          const params = getURLParamString({
+            sampleIds: Array.from(selectedSampleIds),
+          });
+          const log = () =>
+            logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
+              option,
+              selectedSampleIds: selectedSampleIds.size,
             });
-            const log = () =>
-              logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
-                option,
-                selectedSampleIds: selectedSampleIds.size,
-              });
-            return (
-              <BareDropdown.Item
-                key={option.text}
-                text={<a href={`${option.value}?${params}`}>{option.text}</a>}
-                onClick={log}
-              />
-            );
-          })}
-          trigger={<HeatmapIcon className={cx(cs.icon, cs.heatmap)} />}
-        />
-      );
-    } else {
-      const log = () =>
-        logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
-          selectedSampleIds: selectedSampleIds.size,
-        });
-      return selectedSampleIds.size < 2 ? (
-        <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
-      ) : (
-        <a
-          onClick={log}
-          href={`/visualizations/heatmap?sampleIds=${Array.from(
-            selectedSampleIds
-          )}`}
-        >
-          <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
-        </a>
-      );
-    }
+          return (
+            <BareDropdown.Item
+              key={option.text}
+              text={<a href={`${option.value}?${params}`}>{option.text}</a>}
+              onClick={log}
+            />
+          );
+        })}
+        trigger={<HeatmapIcon className={cx(cs.icon, cs.heatmap)} />}
+      />
+    );
   };
 
   renderDownloadTrigger = () => {
