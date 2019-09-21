@@ -57,19 +57,18 @@ class ObjectCollectionView {
     // If conditions change (see reset), then the active promises tracker is emptied
     // CAVEAT: we use a key based on 'startIndex,stopindex', thus, this only works if the request are exactly the same
     // Asking for a subset of an existing request (e.g. asking for 0,49 and then 10,19) will still lead to redundant requests
-    if (this._activePromises[[startIndex, stopIndex]]) {
-      const promiseLoadObjectRows = this._activePromises[
-        [startIndex, stopIndex]
-      ];
+    const key = [startIndex, stopIndex];
+    if (this._activePromises[key]) {
+      const promiseLoadObjectRows = this._activePromises[key];
       return await promiseLoadObjectRows;
     } else {
       const promiseLoadObjectRows = this.fetchObjectRows({
         startIndex,
         stopIndex,
       });
-      this._activePromises[[startIndex, stopIndex]] = promiseLoadObjectRows;
+      this._activePromises[key] = promiseLoadObjectRows;
       const result = await promiseLoadObjectRows;
-      delete this._activePromises[[startIndex, stopIndex]];
+      delete this._activePromises[key];
       return result;
     }
   };

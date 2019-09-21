@@ -13,6 +13,7 @@ import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import { ObjectCollectionView } from "../DiscoveryDataLayer";
 
+import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
 import cs from "./map_preview_sidebar.scss";
 
 export default class MapPreviewSidebar extends React.Component {
@@ -137,10 +138,14 @@ export default class MapPreviewSidebar extends React.Component {
                   </div>
                 ),
                 visibilityIconRenderer: p =>
-                  p && p.public_access ? (
-                    <PublicProjectIcon />
+                  p ? (
+                    p.public_access ? (
+                      <PublicProjectIcon />
+                    ) : (
+                      <PrivateProjectIcon />
+                    )
                   ) : (
-                    <PrivateProjectIcon />
+                    ""
                   ),
               }
             )
@@ -287,6 +292,7 @@ export default class MapPreviewSidebar extends React.Component {
             defaultRowHeight={rowHeight}
             headerClassName={cs.tableHeader}
             initialActiveColumns={["sample"]}
+            loadingClassName={csTableRenderer.loading}
             onLoadRows={samples.handleLoadObjectRows}
             onRowClick={this.handleSampleRowClick}
             onSelectAllRows={this.handleSelectAllRows}
