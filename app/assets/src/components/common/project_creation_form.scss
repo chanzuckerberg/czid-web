@@ -7,6 +7,26 @@
     margin-bottom: 5px;
   }
 
+  .optionalLabel {
+    @include font-body-xxs;
+    color: $medium-grey;
+  }
+
+  .descriptionTextArea {
+    @include font-body-xs;
+    margin-top: 5px;
+    padding: 5px;
+    height: 150px;
+    resize: vertical;
+    background-color: $white;
+  }
+
+  .charCounter {
+    @include font-body-xxs;
+    color: $medium-grey;
+    text-align: right;
+  }
+
   .field {
     margin-bottom: 30px;
   }

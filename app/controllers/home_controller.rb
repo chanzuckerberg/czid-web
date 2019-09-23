@@ -15,7 +15,7 @@ class HomeController < ApplicationController
       redirect_to home_path
     else
       @show_bulletin = false
-      if landing_params[:show_bulletin]
+      if get_app_config(AppConfig::SHOW_LANDING_VIDEO_BANNER) == "1"
         @show_bulletin = true
       else
         time_zone = ActiveSupport::TimeZone.new("Pacific Time (US & Canada)")
@@ -117,7 +117,7 @@ class HomeController < ApplicationController
   end
 
   def maintenance
-    if get_app_config("disable_site_for_maintenance") != "1"
+    if get_app_config(AppConfig::DISABLE_SITE_FOR_MAINTENANCE) != "1"
       redirect_to root_path
     else
       @show_blank_header = true

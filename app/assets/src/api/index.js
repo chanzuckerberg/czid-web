@@ -255,6 +255,11 @@ const createProject = params =>
     project: params,
   });
 
+const saveProjectDescription = (projectId, description) =>
+  putWithCSRF(`/projects/${projectId}.json`, {
+    description: description,
+  });
+
 const validateSampleNames = (projectId, sampleNames) => {
   if (!projectId) {
     return Promise.resolve(sampleNames);
@@ -353,6 +358,7 @@ export {
   getTaxonDistributionForBackground,
   getVisualizations,
   markSampleUploaded,
+  saveProjectDescription,
   saveSampleName,
   saveSampleNotes,
   saveVisualization,

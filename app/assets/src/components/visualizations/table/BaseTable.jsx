@@ -10,6 +10,7 @@ import cx from "classnames";
 import { concat, difference, find, includes, map } from "lodash/fp";
 
 import BasicPopup from "~/components/BasicPopup";
+import ColumnHeaderTooltip from "~/components/ui/containers/ColumnHeaderTooltip";
 import Checkbox from "~ui/controls/Checkbox";
 import MultipleDropdown from "~ui/controls/dropdowns/MultipleDropdown";
 import PlusIcon from "~ui/icons/PlusIcon";
@@ -64,39 +65,63 @@ class BaseTable extends React.Component {
     });
   }
 
-  basicHeaderRenderer({ label }) {
+  basicHeaderRenderer({ columnData, label }) {
     return (
-      <BasicPopup
-        trigger={<span className={cs.label}>{label}</span>}
-        content={label}
-      />
+      <div>
+        {columnData ? (
+          <ColumnHeaderTooltip
+            trigger={<span className={cs.label}>{label}</span>}
+            title={label}
+            content={columnData.tooltip}
+            link={columnData.link}
+          />
+        ) : (
+          <BasicPopup
+            trigger={<span className={cs.label}>{label}</span>}
+            content={label}
+          />
+        )}
+      </div>
     );
   }
 
-  _sortableHeaderRenderer({ dataKey, label, sortBy, sortDirection }) {
+  _sortableHeaderRenderer({
+    columnData,
+    dataKey,
+    label,
+    sortBy,
+    sortDirection,
+  }) {
     return (
-      <BasicPopup
-        trigger={
-          <div className={cs.sortableHeader}>
-            <div className={cs.label}>{label}</div>
-            {sortBy === dataKey && (
-              <SortIcon
-                sortDirection={
-                  sortDirection === "ASC" ? "ascending" : "descending"
-                }
-                className={cs.sortIcon}
-              />
-            )}
-          </div>
-        }
-        content={label}
-      />
+      <div className={cs.sortableHeader}>
+        {columnData ? (
+          <ColumnHeaderTooltip
+            trigger={<span className={cs.label}>{label}</span>}
+            title={label}
+            content={columnData.tooltip}
+            link={columnData.link}
+          />
+        ) : (
+          <BasicPopup
+            trigger={<span className={cs.label}>{label}</span>}
+            content={label}
+          />
+        )}
+        <SortIcon
+          sortDirection={sortDirection === "ASC" ? "ascending" : "descending"}
+          className={cx(cs.sortIcon, sortBy === dataKey && cs.active)}
+        />
+      </div>
     );
   }
 
   handleColumnChange = selectedColumns => {
-    const { protectedColumns } = this.props;
-    this.setState({ activeColumns: concat(protectedColumns, selectedColumns) });
+    const { onActiveColumnsChange, protectedColumns } = this.props;
+    this.setState(
+      { activeColumns: concat(protectedColumns, selectedColumns) },
+      () =>
+        onActiveColumnsChange && onActiveColumnsChange(this.state.activeColumns)
+    );
     logAnalyticsEvent("BaseTable_column-selector_changed", {
       selectedColumns: selectedColumns.length,
       protectedColumns: protectedColumns.length,
@@ -133,7 +158,7 @@ class BaseTable extends React.Component {
             value={value}
           />
         }
-        content="Select Columns"
+        content="Add or Remove Columns"
       />
     );
   };
@@ -231,6 +256,7 @@ class BaseTable extends React.Component {
                 return (
                   <Column
                     className={cx(cs.cell, className)}
+                    columnData={columnProps.columnData}
                     key={columnProps.dataKey}
                     headerRenderer={
                       sortable && !columnProps.disableSort
@@ -286,11 +312,12 @@ BaseTable.propTypes = {
   defaultCellRenderer: PropTypes.func,
   defaultColumnWidth: PropTypes.number,
   defaultHeaderHeight: PropTypes.number,
-  defaultRowHeight: PropTypes.number,
+  defaultRowHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
   defaultSelectColumnWidth: PropTypes.number,
   headerClassName: PropTypes.string,
   // Set of dataKeys of columns to be shown by default
   initialActiveColumns: PropTypes.arrayOf(PropTypes.string),
+  onActiveColumnsChange: PropTypes.func,
   onRowClick: PropTypes.func,
   onRowsRendered: PropTypes.func,
   onSort: PropTypes.func,

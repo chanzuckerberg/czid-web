@@ -22,6 +22,7 @@ class TableRenderers extends React.Component {
   static renderItemDetails = ({
     cellData: item,
     detailsRenderer,
+    descriptionRenderer,
     nameRenderer,
     visibilityIconRenderer,
   }) => {
@@ -39,15 +40,32 @@ class TableRenderers extends React.Component {
             trigger={<div className={cs.itemName}>{nameRenderer(item)}</div>}
             content={nameRenderer(item)}
           />
-          <div className={cs.itemDescription}>{item.description}</div>
+          {item &&
+            item.description && (
+              <BasicPopup
+                trigger={
+                  <div className={cs.itemDescription}>
+                    {descriptionRenderer(item)}
+                  </div>
+                }
+                content={descriptionRenderer(item)}
+                wide="very"
+              />
+            )}
           <div className={cs.itemDetails}>{detailsRenderer(item)}</div>
         </div>
       </div>
     );
   };
 
+  static baseRenderer = data => {
+    return <div className={cs.base}>{data}</div>;
+  };
+
   static renderList = ({ cellData: list }) => {
-    return list && list.length > 0 ? list.join(", ") : "";
+    return TableRenderers.baseRenderer(
+      list && list.length > 0 ? list.join(", ") : ""
+    );
   };
 
   static renderDate = ({ cellData: date }) => {
@@ -71,7 +89,7 @@ class TableRenderers extends React.Component {
     return (
       <div className={cs.sample}>
         {full && (
-          <div className={cs.publicAccess}>
+          <div className={cs.visibility}>
             {sample &&
               (sample.publicAccess ? (
                 <SamplePublicIcon className={cx(cs.icon)} />
@@ -134,7 +152,8 @@ class TableRenderers extends React.Component {
 
   static formatPercentage = value => {
     if (!value) return value;
-    return `${TableRenderers.formatNumber(value)}%`;
+    const rounded = TableRenderers.formatNumber(value);
+    return rounded < 0.01 ? "<0.01%" : `${rounded}%`;
   };
 
   static formatDuration = runtime => {

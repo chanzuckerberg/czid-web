@@ -1,0 +1,43 @@
+@import "~styles/themes/colors";
+@import "~styles/themes/typography";
+@import "~styles/themes/elements";
+
+.descriptionContainer {
+  color: $dark-grey;
+  padding-left: $space-default;
+
+  .truncated {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  .textarea {
+    @include font-body-xs;
+    margin-top: 5px;
+    padding: 5px;
+    height: 200px;
+    resize: vertical;
+  }
+
+  .showHide {
+    @include font-body-xxs;
+    text-transform: uppercase;
+    display: inline-block;
+    margin: $space-xxs 0 $space-default 0;
+    color: $primary-light;
+    cursor: pointer;
+  }
+
+  .charCounter {
+    @include font-body-xxs;
+    color: $medium-grey;
+  }
+
+  .error {
+    @include font-body-xxs;
+    color: $error;
+  }
+}

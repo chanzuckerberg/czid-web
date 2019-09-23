@@ -308,10 +308,6 @@
     padding: 25px;
     display: flex;
 
-    .header {
-      display: flex;
-    }
-
     .name {
       @include font-header-m;
     }
@@ -321,15 +317,50 @@
       margin-left: 10px;
     }
 
-    .existingSamples {
-      @include font-body-xs;
-      color: $medium-grey;
-    }
-
     .projectIcon {
       height: 40px;
       width: 40px;
       margin-right: 15px;
+    }
+
+    .text {
+      flex: 1 1 0;
+      min-width: 0;
+
+      .header {
+        display: flex;
+      }
+
+      .existingSamples {
+        @include font-body-xs;
+        color: $medium-grey;
+      }
+
+      .truncated {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 5;
+        -webkit-box-orient: vertical;
+      }
+
+      .showHide {
+        text-transform: uppercase;
+        display: inline-block;
+        margin-top: 5px;
+        margin-bottom: 10px;
+        color: $primary-light;
+        font-size: $font-size-smallest;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+      }
+    }
+
+    .descriptionContainer {
+      @include font-body-s;
+      color: $dark-grey;
+      white-space: pre-wrap;
+      margin: 10px 0;
     }
   }
 

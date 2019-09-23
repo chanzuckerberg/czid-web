@@ -200,6 +200,25 @@ RSpec.describe ProjectsController, type: :controller do
         end
       end
 
+      describe "GET index for a specific page" do
+        it "sees projects from that page only" do
+          expected_projects = []
+          create(:project, name: "Project A", users: [@user])
+          create(:project, name: "Project B", users: [@user])
+          expected_projects << create(:project, name: "Project C", users: [@user])
+          expected_projects << create(:project, name: "Project D", users: [@user])
+          create(:project, name: "Project E", users: [@user])
+          create(:project, name: "Project F", users: [@user])
+          expected_projects.sort_by!(&:name).reverse!
+
+          get :index, params: { format: "json", limit: 2, offset: 2 }
+
+          json_response = JSON.parse(response.body)
+          expect(json_response.count).to eq(expected_projects.count)
+          expect(json_response.pluck("id")).to eq(expected_projects.pluck("id"))
+        end
+      end
+
       describe "GET index with ascending order" do
         it "sees projects sorted in ascending order" do
           expected_projects = []
@@ -397,7 +416,7 @@ RSpec.describe ProjectsController, type: :controller do
                                                      created_at: expected_projects[0].created_at.as_json,
                                                      public_access: expected_projects[0].public_access,
                                                      number_of_samples: 2)
-            expect(response_project.keys).to contain_exactly("id", "name", "created_at", "public_access", "number_of_samples")
+            expect(response_project.keys).to contain_exactly("id", "name", "description", "created_at", "public_access", "number_of_samples")
           end
 
           it "sees private projects when filtering by private visibility" do

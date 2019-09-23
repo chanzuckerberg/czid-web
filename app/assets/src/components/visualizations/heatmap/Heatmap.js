@@ -11,6 +11,9 @@ import cx from "classnames";
 import symlog from "../../utils/d3/scales/symlog.js";
 import cs from "./heatmap.scss";
 import { CategoricalColormap } from "../../utils/colormaps/CategoricalColormap.js";
+import addSvgColorFilter from "../../utils/d3/svg.js";
+// used for filter to make plus icon blue
+const COLOR_HOVER_LINK = cs.primaryLight;
 
 // TODO(tcarvalho): temporary hack to send elements to the back.
 // Remove once code is ported to d3 v4, which contains this function.
@@ -54,6 +57,7 @@ export default class Heatmap {
         maxRowClusterWidth: 100,
         maxColumnClusterHeight: 100,
         spacing: 10,
+        metadataAddLinkHeight: 14,
         transitionDuration: 200,
         nullValue: 0,
         columnMetadata: [],
@@ -266,6 +270,10 @@ export default class Heatmap {
       `background-color: ${this.options.svgBackgroundColor}`
     );
 
+    const defs = this.svg.append("defs");
+    // Create a blue color filter to match $primary-light.
+    addSvgColorFilter(defs, "blue", COLOR_HOVER_LINK);
+
     this.g = this.svg.append("g");
     this.gRowLabels = this.g.append("g").attr("class", cs.rowLabels);
     this.gColumnLabels = this.g.append("g").attr("class", cs.columnLabels);
@@ -315,7 +323,7 @@ export default class Heatmap {
     const totalColumnLabelsHeight = this.columnLabelsHeight;
     const totalMetadataHeight =
       this.options.columnMetadata.length * this.options.minCellHeight +
-      this.options.spacing;
+      this.options.metadataAddLinkHeight;
     const totalCellHeight = this.cell.height * this.filteredRowLabels.length;
     const totalColumnClusterHeight = this.options.clustering
       ? this.columnClusterHeight + this.options.spacing * 2
@@ -1104,7 +1112,7 @@ export default class Heatmap {
         .append("g")
         .attr("class", cs.columnMetadataAdd);
 
-      let yPos = this.options.spacing / 2;
+      let yPos = this.options.metadataAddLinkHeight / 2;
 
       addLinkEnter.append("rect");
 
@@ -1114,8 +1122,8 @@ export default class Heatmap {
         .append("text")
         .text(() => "Add Metadata")
         .attr("class", cs.metadataAddLabel)
-        .attr("x", this.rowLabelsWidth - 20)
-        .attr("y", 9)
+        .attr("x", this.rowLabelsWidth - 25)
+        .attr("y", 11)
         .on("click", handleAddColumnMetadataClick);
 
       let addMetadataTrigger = addLinkEnter
@@ -1126,10 +1134,9 @@ export default class Heatmap {
       addMetadataTrigger
         .append("svg:image")
         .attr("class", cs.metadataAddIcon)
-        .attr("width", 10)
-        .attr("height", 10)
-        .attr("x", this.rowLabelsWidth - 15)
-        .attr("y", yPos - 5)
+        .attr("width", this.options.metadataAddLinkHeight)
+        .attr("height", this.options.metadataAddLinkHeight)
+        .attr("x", this.rowLabelsWidth - 20)
         .attr("xlink:href", `${this.options.iconPath}/plus.svg`);
 
       // setup triggers
@@ -1149,7 +1156,7 @@ export default class Heatmap {
           "width",
           this.rowLabelsWidth + this.columnLabels.length * this.cell.width
         )
-        .attr("height", this.options.spacing);
+        .attr("height", this.options.metadataAddLinkHeight);
 
       addLink
         .select(`.${cs.metadataAddLine}`)

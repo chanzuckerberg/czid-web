@@ -1,5 +1,5 @@
 import React from "react";
-import { find, merge, pick } from "lodash/fp";
+import { merge, pick } from "lodash/fp";
 
 import BaseDiscoveryView from "~/components/views/discovery/BaseDiscoveryView";
 import DiscoveryMap from "~/components/views/discovery/mapping/DiscoveryMap";
@@ -10,6 +10,12 @@ import PropTypes from "~/components/utils/propTypes";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { logAnalyticsEvent } from "~/api/analytics";
+import {
+  DEFAULT_ROW_HEIGHT,
+  MAX_PROJECT_ROW_HEIGHT,
+  PROJECT_TABLE_COLUMNS,
+} from "./constants";
+import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
 
 // CSS file must be loaded after any elements you might want to override
 import cs from "./projects_view.scss";
@@ -17,6 +23,8 @@ import cs from "./projects_view.scss";
 class ProjectsView extends React.Component {
   constructor(props) {
     super(props);
+
+    this.discoveryView = null;
 
     this.columns = [
       {
@@ -30,6 +38,7 @@ class ProjectsView extends React.Component {
               {
                 nameRenderer: this.nameRenderer,
                 detailsRenderer: this.detailsRenderer,
+                descriptionRenderer: this.descriptionRenderer,
                 visibilityIconRenderer: this.visibilityIconRenderer,
               }
             )
@@ -61,31 +70,50 @@ class ProjectsView extends React.Component {
         label: "No. of Samples",
       },
     ];
+
+    for (let column of this.columns) {
+      column["columnData"] = PROJECT_TABLE_COLUMNS[column["dataKey"]];
+    }
   }
 
   nameRenderer(project) {
-    return project.name;
+    return project ? project.name : "";
   }
 
   visibilityIconRenderer(project) {
-    return project && project.public_access ? (
+    if (!project) {
+      return <div className={cs.icon} />;
+    }
+    return project.public_access ? (
       <PublicProjectIcon />
     ) : (
       <PrivateProjectIcon />
     );
   }
 
-  detailsRenderer(project) {
+  descriptionRenderer(project) {
     return (
-      <div>
-        <span>{project.owner}</span>
+      <div className={cs.projectDescription}>
+        {project ? project.description : ""}
       </div>
     );
   }
 
+  detailsRenderer(project) {
+    return <div>{project ? project.owner : ""}</div>;
+  }
+
+  // Projects with descriptions should be displayed in taller rows,
+  // otherwise use the default row height.
+  getRowHeight = ({ row }) => {
+    return row && row.project && row.project.description
+      ? MAX_PROJECT_ROW_HEIGHT
+      : DEFAULT_ROW_HEIGHT;
+  };
+
   handleRowClick = ({ rowData }) => {
     const { onProjectSelected, projects } = this.props;
-    const project = find({ id: rowData.id }, projects);
+    const project = projects.get(rowData.id);
     onProjectSelected && onProjectSelected({ project });
     logAnalyticsEvent("ProjectsView_row_clicked", {
       projectId: project.id,
@@ -113,22 +141,11 @@ class ProjectsView extends React.Component {
     );
   };
 
-  render() {
-    const {
-      currentDisplay,
-      currentTab,
-      mapLevel,
-      mapLocationData,
-      mapPreviewedLocationId,
-      mapTilerKey,
-      onClearFilters,
-      onMapClick,
-      onMapLevelChange,
-      onMapMarkerClick,
-      onMapTooltipTitleClick,
-      projects,
-    } = this.props;
-    let data = projects.map(project => {
+  handleLoadRowsAndFormat = async args => {
+    const { onLoadRows } = this.props;
+    const projects = await onLoadRows(args);
+
+    return projects.map(project => {
       return merge(
         {
           project: pick(
@@ -142,6 +159,29 @@ class ProjectsView extends React.Component {
         )
       );
     });
+  };
+
+  reset = () => {
+    const { currentDisplay } = this.props;
+    currentDisplay === "table" &&
+      this.discoveryView &&
+      this.discoveryView.reset();
+  };
+
+  render() {
+    const {
+      currentDisplay,
+      currentTab,
+      mapLevel,
+      mapLocationData,
+      mapPreviewedLocationId,
+      mapTilerKey,
+      onClearFilters,
+      onMapClick,
+      onMapLevelChange,
+      onMapMarkerClick,
+      onMapTooltipTitleClick,
+    } = this.props;
 
     return (
       <div className={cs.container}>
@@ -149,8 +189,10 @@ class ProjectsView extends React.Component {
         {currentDisplay === "table" ? (
           <BaseDiscoveryView
             columns={this.columns}
-            data={data}
             handleRowClick={this.handleRowClick}
+            onLoadRows={this.handleLoadRowsAndFormat}
+            ref={discoveryView => (this.discoveryView = discoveryView)}
+            rowHeight={this.getRowHeight}
           />
         ) : (
           <div className={cs.map}>
@@ -175,7 +217,6 @@ class ProjectsView extends React.Component {
 
 ProjectsView.defaultProps = {
   currentDisplay: "table",
-  projects: [],
 };
 
 ProjectsView.propTypes = {
@@ -188,12 +229,13 @@ ProjectsView.propTypes = {
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
+  onLoadRows: PropTypes.func.isRequired,
   onMapClick: PropTypes.func,
   onMapLevelChange: PropTypes.func,
   onMapMarkerClick: PropTypes.func,
   onMapTooltipTitleClick: PropTypes.func,
   onProjectSelected: PropTypes.func,
-  projects: PropTypes.array,
+  projects: PropTypes.instanceOf(ObjectCollectionView).isRequired,
 };
 
 export default ProjectsView;

@@ -9,7 +9,7 @@
   .visibility {
     display: flex;
     flex: 0 0 40px;
-    align-items: center;
+    align-items: flex-start;
     justify-items: center;
     margin-right: 12px;
   }
@@ -23,16 +23,18 @@
   }
 
   .itemDescription {
-    color: $dark-grey;
-    font-size: $font-size-h6;
-    line-height: 16px;
-    // remove description for now
-    // (we have no descriptions yet, but want to keep the placeholder)
-    height: 0;
-    overflow: hidden;
-    // height: 32px;
-    // margin-bottom: 8px;
+    @include font-body-s;
+    color: $medium-grey;
+    font-weight: $font-weight-regular;
+    line-height: 20px;
+    margin: 6px 0 8px 0;
     vertical-align: middle;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: pre-wrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
   }
 
   .itemDetails {
@@ -78,7 +80,7 @@
 .sample {
   display: flex;
 
-  .publicAccess {
+  .visibility {
     flex: 0 0 40px;
     display: flex;
     align-items: center;
@@ -162,6 +164,14 @@
 }
 
 .loading {
+  .base {
+    @include loadingAnimation;
+
+    background-clip: content-box;
+    padding: 4px 0;
+    height: 20px;
+  }
+
   .numberValueAndPercentage {
     .value {
       @include loadingAnimation;
@@ -180,11 +190,19 @@
     }
   }
 
-  .publicAccess {
+  .visibility {
     @include loadingAnimation;
 
-    height: 36px;
-    width: 36px;
+    flex: 0 0 40px;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    margin-right: 12px;
+
+    .icon {
+      fill: $primary-light;
+      width: 36px;
+    }
   }
 
   .sampleRightPane {
@@ -207,14 +225,35 @@
     }
   }
 
+  .itemRightPane {
+    flex: 1 0 auto;
+
+    .itemName {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 20px;
+      flex: 1 0 auto;
+    }
+
+    .itemDetails {
+      @include loadingAnimation;
+
+      background-clip: content-box;
+      padding: 4px 0;
+      height: 17px;
+      flex: 1 0 auto;
+    }
+  }
+
   .dateContainer {
     .elapsed {
       @include loadingAnimation;
 
       background-clip: content-box;
       height: 12px;
-      margin-left: 20%;
-      margin-right: 20%;
+      margin: 4px 20%;
     }
   }
 }

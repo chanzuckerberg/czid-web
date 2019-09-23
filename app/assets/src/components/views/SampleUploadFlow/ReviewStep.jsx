@@ -24,6 +24,7 @@ class ReviewStep extends React.Component {
   state = {
     consentChecked: false,
     showUploadModal: false,
+    showLessDescription: true,
   };
 
   uploadSamplesAndMetadata = () => {
@@ -116,8 +117,22 @@ class ReviewStep extends React.Component {
     }
   };
 
+  toggleDisplayDescription = () => {
+    this.setState(prevState => ({
+      showLessDescription: !prevState.showLessDescription,
+    }));
+  };
+
+  countNewLines = text => {
+    // the code for newline in Windows is \r\n
+    if (text) {
+      return text.split(/\r*\n/).length;
+    }
+    return 0;
+  };
+
   render() {
-    const { showUploadModal } = this.state;
+    const { showUploadModal, showLessDescription } = this.state;
 
     const {
       onUploadComplete,
@@ -126,6 +141,9 @@ class ReviewStep extends React.Component {
       metadata,
       project,
     } = this.props;
+
+    const shouldTruncateDescription =
+      project.description && this.countNewLines(project.description) > 5;
 
     return (
       <div
@@ -170,6 +188,30 @@ class ReviewStep extends React.Component {
                       : "Private Project"}
                   </div>
                 </div>
+                {project.description && (
+                  <div className={cs.descriptionContainer}>
+                    {/* Use showmore/showless pattern if description has many (>4) newlines. */}
+                    {/* TODO(julie): Consider making a separate component to do this in a
+                    less hacky way. */}
+                    <div
+                      className={cx(
+                        shouldTruncateDescription &&
+                          showLessDescription &&
+                          cs.truncated
+                      )}
+                    >
+                      {project.description}
+                    </div>
+                    {shouldTruncateDescription && (
+                      <div
+                        className={cs.showHide}
+                        onClick={this.toggleDisplayDescription}
+                      >
+                        {showLessDescription ? "Show More" : "Show Less"}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className={cs.existingSamples}>
                   {this.props.project.number_of_samples || 0} existing samples
                   in project

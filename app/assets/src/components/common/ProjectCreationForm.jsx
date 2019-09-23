@@ -3,10 +3,12 @@ import cx from "classnames";
 import PropTypes from "prop-types";
 
 import Input from "~ui/controls/Input";
+import Textarea from "~ui/controls/Textarea";
 import RadioButton from "~ui/controls/RadioButton";
 import { createProject } from "~/api";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
+import { MAX_DESCRIPTION_LENGTH } from "~/components/views/projects/constants";
 
 import cs from "./project_creation_form.scss";
 
@@ -15,11 +17,18 @@ class ProjectCreationForm extends React.Component {
     name: "",
     publicAccess: -1, // No selection by default
     error: "",
+    description: "",
   };
 
   handleNameChange = name => {
     this.setState({
       name,
+    });
+  };
+
+  handleDescriptionChange = description => {
+    this.setState({
+      description,
     });
   };
 
@@ -34,6 +43,7 @@ class ProjectCreationForm extends React.Component {
       const newProject = await createProject({
         name: this.state.name,
         public_access: this.state.publicAccess,
+        description: this.state.description,
       });
 
       this.props.onCreate(newProject);
@@ -95,6 +105,22 @@ class ProjectCreationForm extends React.Component {
                 will become public after one year.
               </div>
             </div>
+          </div>
+        </div>
+        <div className={cs.field}>
+          <div className={cs.label}>
+            Description
+            <span className={cs.optionalLabel}> - Optional</span>
+          </div>
+          <Textarea
+            onChange={this.handleDescriptionChange}
+            value={this.state.description}
+            className={cs.descriptionTextArea}
+            maxLength={MAX_DESCRIPTION_LENGTH}
+          />
+          <div className={cs.charCounter}>
+            {MAX_DESCRIPTION_LENGTH - this.state.description.length}/
+            {MAX_DESCRIPTION_LENGTH} characters remaining
           </div>
         </div>
         {this.state.error && <div className={cs.error}>{this.state.error}</div>}

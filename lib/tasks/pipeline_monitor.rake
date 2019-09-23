@@ -1,6 +1,7 @@
 # Jos to check the status of pipeline runs
 require 'English'
-require 'thread/pool'
+require 'json'
+require 'parallel'
 
 # Benchmark status will not be updated faster than this.
 IDSEQ_BENCH_UPDATE_FREQUENCY_SECONDS = 600
@@ -14,11 +15,9 @@ IDSEQ_BENCH_CONFIG = "s3://idseq-bench/config.json".freeze
 
 AWS_DEFAULT_REGION = ENV.fetch('AWS_DEFAULT_REGION') { "us-west-2" }
 
-class CheckPipelineRuns
-  # Concurrency allowed
-  MAX_SHARDS = 10
-  MIN_JOBS_PER_SHARD = 20
+THREAD_COUNT = 20
 
+class CheckPipelineRuns
   @sleep_quantum = 5.0
 
   @shutdown_requested = false
@@ -27,36 +26,22 @@ class CheckPipelineRuns
     attr_accessor :shutdown_requested
   end
 
-  def self.update_jobs(num_shards, shard_id, pr_ids, pt_ids)
-    ActiveRecord::Base.connection.reconnect! if shard_id > 0
-    num_pr = pr_ids.count
-    num_pt = pt_ids.count
-    Rails.logger.info("New pipeline monitor loop started with #{num_pr} pr and #{num_pt} pt. shard #{shard_id} out of #{num_shards}")
-    pr_ids.each do |prid|
-      next unless prid % num_shards == shard_id
-      pr = PipelineRun.find(prid)
-      begin
-        break if @shutdown_requested
-        Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
-        pr.update_job_status
-      rescue => exception
-        LogUtil.log_err_and_airbrake("Failed to update pipeline run #{pr.id}")
-        LogUtil.log_backtrace(exception)
-      end
-    end
+  def self.update_pr(prid)
+    pr = PipelineRun.find(prid)
+    Rails.logger.info("  Checking pipeline run #{pr.id} for sample #{pr.sample_id}")
+    pr.update_job_status
+  rescue => exception
+    LogUtil.log_err_and_airbrake("Failed to update pipeline run #{pr.id}")
+    LogUtil.log_backtrace(exception)
+  end
 
-    pt_ids.each do |ptid|
-      next unless ptid % num_shards == shard_id
-      pt = PhyloTree.find(ptid)
-      begin
-        break if @shutdown_requested
-        Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
-        pt.monitor_job
-      rescue => exception
-        LogUtil.log_err_and_airbrake("Failed monitor job for phylo_tree #{pt.id}")
-        LogUtil.log_backtrace(exception)
-      end
-    end
+  def self.update_pt(ptid)
+    pt = PhyloTree.find(ptid)
+    Rails.logger.info("Monitoring job for phylo_tree #{pt.id}")
+    pt.monitor_job
+  rescue => exception
+    LogUtil.log_err_and_airbrake("Failed monitor job for phylo_tree #{pt.id}")
+    LogUtil.log_backtrace(exception)
   end
 
   def self.forced_update_interval
@@ -288,23 +273,38 @@ class CheckPipelineRuns
     max_work_duration = 0
     iter_count = 0
     until @shutdown_requested
+      before_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       iter_count += 1
       t_iter_start = t_now
       pr_ids = PipelineRun.in_progress.pluck(:id)
       pt_ids = PhyloTree.in_progress.pluck(:id)
-      num_shards = ((pr_ids.count + pt_ids.count) / MIN_JOBS_PER_SHARD).to_i
-      num_shards = [[num_shards, MAX_SHARDS].min, 1].max
-      fork_pids = []
-      shard_id = 0
-      while shard_id < num_shards
-        pid = Process.fork { update_jobs(num_shards, shard_id, pr_ids, pt_ids) }
-        fork_pids << pid
-        shard_id += 1
+      Parallel.each(pr_ids, in_threads: THREAD_COUNT) do |prid|
+        # Explicitly use ActiveRecord connection pool
+        # https://github.com/grosser/parallel#activerecord
+        ActiveRecord::Base.connection_pool.with_connection do
+          update_pr(prid)
+        end
       end
-      fork_pids.each { |p| Process.waitpid(p) }
+      Parallel.each(pt_ids, in_threads: THREAD_COUNT) do |ptid|
+        # Explicitly use ActiveRecord connection pool
+        # https://github.com/grosser/parallel#activerecord
+        ActiveRecord::Base.connection_pool.with_connection do
+          update_pt(ptid)
+        end
+      end
       autoscaling_state = autoscaling_update(autoscaling_state, t_now)
       benchmark_state = benchmark_update_safely_and_not_too_often(benchmark_state, t_now)
       t_now = Time.now.to_f
+      after_iter_timestamp = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      # HACK: This logger isn't really meant to deal with nested json
+      #  this will appear under the message key at the top level
+      logger_iteration_data = {
+        message: "Pipeline Monitor Iteration Complete",
+        duration: (after_iter_timestamp - before_iter_timestamp),
+        pr_id_count: pr_ids.count,
+        pt_id_count: pt_ids.count,
+      }
+      Rails.logger.info(JSON.generate(logger_iteration_data))
       max_work_duration = [t_now - t_iter_start, max_work_duration].max
       t_iter_end = [t_now, t_iter_start + min_refresh_interval].max
       break unless t_iter_end + max_work_duration < t_end

@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { difference, find, isEmpty, union } from "lodash/fp";
+import { difference, isEmpty, union } from "lodash/fp";
 import React from "react";
 
 import BareDropdown from "~ui/controls/dropdowns/BareDropdown";
@@ -19,6 +19,8 @@ import TableRenderers from "~/components/views/discovery/TableRenderers";
 import { DownloadIconDropdown } from "~ui/controls/dropdowns";
 import { getURLParamString } from "~/helpers/url";
 import { logAnalyticsEvent, withAnalytics } from "~/api/analytics";
+import { ObjectCollectionView } from "../discovery/DiscoveryDataLayer";
+import { SAMPLE_TABLE_COLUMNS_V2 } from "./constants";
 
 import cs from "./samples_view.scss";
 import csTableRenderer from "../discovery/table_renderers.scss";
@@ -130,6 +132,10 @@ class SamplesView extends React.Component {
           TableRenderers.formatDuration(rowData[dataKey]),
       },
     ];
+
+    for (let column of this.columns) {
+      column["columnData"] = SAMPLE_TABLE_COLUMNS_V2[column["dataKey"]];
+    }
   }
 
   handleSelectRow = (value, checked) => {
@@ -176,59 +182,37 @@ class SamplesView extends React.Component {
   renderHeatmapTrigger = () => {
     const { selectedSampleIds } = this.props;
 
-    if (
-      this.props.allowedFeatures.includes("amr_heatmap") ||
-      this.props.admin
-    ) {
-      const heatmapOptions = [
-        { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
-        { text: "AMR Heatmap", value: "/amr_heatmap" },
-      ];
+    const heatmapOptions = [
+      { text: "Taxon Heatmap", value: "/visualizations/heatmap" },
+      { text: "AMR Heatmap", value: "/amr_heatmap" },
+    ];
 
-      return selectedSampleIds.size < 2 ? (
-        <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
-      ) : (
-        <BareDropdown
-          hideArrow
-          className={cx(cs.icon, cs.heatmapDropdown)}
-          items={heatmapOptions.map(option => {
-            const params = getURLParamString({
-              sampleIds: Array.from(selectedSampleIds),
+    return selectedSampleIds.size < 2 ? (
+      <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
+    ) : (
+      <BareDropdown
+        hideArrow
+        className={cx(cs.icon, cs.heatmapDropdown)}
+        items={heatmapOptions.map(option => {
+          const params = getURLParamString({
+            sampleIds: Array.from(selectedSampleIds),
+          });
+          const log = () =>
+            logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
+              option,
+              selectedSampleIds: selectedSampleIds.size,
             });
-            const log = () =>
-              logAnalyticsEvent("SamplesView_heatmap-option_clicked", {
-                option,
-                selectedSampleIds: selectedSampleIds.size,
-              });
-            return (
-              <BareDropdown.Item
-                key={option.text}
-                text={<a href={`${option.value}?${params}`}>{option.text}</a>}
-                onClick={log}
-              />
-            );
-          })}
-          trigger={<HeatmapIcon className={cx(cs.icon, cs.heatmap)} />}
-        />
-      );
-    } else {
-      const log = () =>
-        logAnalyticsEvent("SamplesView_heatmap-icon_clicked", {
-          selectedSampleIds: selectedSampleIds.size,
-        });
-      return selectedSampleIds.size < 2 ? (
-        <HeatmapIcon className={cx(cs.icon, cs.disabled, cs.heatmap)} />
-      ) : (
-        <a
-          onClick={log}
-          href={`/visualizations/heatmap?sampleIds=${Array.from(
-            selectedSampleIds
-          )}`}
-        >
-          <HeatmapIcon className={cx(cs.icon, cs.heatmap)} />
-        </a>
-      );
-    }
+          return (
+            <BareDropdown.Item
+              key={option.text}
+              text={<a href={`${option.value}?${params}`}>{option.text}</a>}
+              onClick={log}
+            />
+          );
+        })}
+        trigger={<HeatmapIcon className={cx(cs.icon, cs.heatmap)} />}
+      />
+    );
   };
 
   renderDownloadTrigger = () => {
@@ -271,14 +255,14 @@ class SamplesView extends React.Component {
     const {
       currentDisplay,
       mapPreviewedSamples,
-      selectedSampleIds,
       samples,
+      selectedSampleIds,
     } = this.props;
 
     // NOTE(jsheu): For mapSidebar sample names to appear in CollectionModal,
     // they need to be presently loaded/fetched. Otherwise the ids work but says "and more..." for un-fetched samples.
     const targetSamples =
-      currentDisplay === "map" ? mapPreviewedSamples : samples;
+      currentDisplay === "map" ? mapPreviewedSamples : samples.loaded;
     return selectedSampleIds.size < 2 ? (
       <SaveIcon
         className={cx(cs.icon, cs.disabled, cs.save)}
@@ -340,6 +324,7 @@ class SamplesView extends React.Component {
   renderTable = () => {
     const {
       activeColumns,
+      onActiveColumnsChange,
       onLoadRows,
       protectedColumns,
       selectedSampleIds,
@@ -356,6 +341,7 @@ class SamplesView extends React.Component {
           defaultRowHeight={rowHeight}
           initialActiveColumns={activeColumns}
           loadingClassName={csTableRenderer.loading}
+          onActiveColumnsChange={onActiveColumnsChange}
           onLoadRows={onLoadRows}
           onSelectAllRows={withAnalytics(
             this.handleSelectAllRows,
@@ -428,7 +414,7 @@ class SamplesView extends React.Component {
 
   handleRowClick = ({ event, rowData }) => {
     const { onSampleSelected, samples } = this.props;
-    const sample = find({ id: rowData.id }, samples);
+    const sample = samples.get(rowData.id);
     onSampleSelected && onSampleSelected({ sample, currentEvent: event });
     logAnalyticsEvent("SamplesView_row_clicked", {
       sampleId: sample.id,
@@ -487,6 +473,7 @@ SamplesView.propTypes = {
   mapPreviewedSamples: PropTypes.array,
   mapTilerKey: PropTypes.string,
   onClearFilters: PropTypes.func,
+  onActiveColumnsChange: PropTypes.func,
   onDisplaySwitch: PropTypes.func,
   onLoadRows: PropTypes.func.isRequired,
   onMapClick: PropTypes.func,
@@ -497,7 +484,7 @@ SamplesView.propTypes = {
   onSelectedSamplesUpdate: PropTypes.func,
   projectId: PropTypes.number,
   protectedColumns: PropTypes.array,
-  samples: PropTypes.array,
+  samples: PropTypes.instanceOf(ObjectCollectionView),
   selectableIds: PropTypes.array.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
 };

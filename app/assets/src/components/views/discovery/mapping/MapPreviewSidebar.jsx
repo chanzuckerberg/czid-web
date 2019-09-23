@@ -1,13 +1,5 @@
 import cx from "classnames";
-import {
-  difference,
-  find,
-  isEmpty,
-  merge,
-  pick,
-  union,
-  upperFirst,
-} from "lodash/fp";
+import { difference, isEmpty, merge, pick, union, upperFirst } from "lodash/fp";
 import React from "react";
 
 import { logAnalyticsEvent } from "~/api/analytics";
@@ -19,7 +11,9 @@ import TableRenderers from "~/components/views/discovery/TableRenderers";
 import InfiniteTable from "~/components/visualizations/table/InfiniteTable";
 import PrivateProjectIcon from "~ui/icons/PrivateProjectIcon";
 import PublicProjectIcon from "~ui/icons/PublicProjectIcon";
+import { ObjectCollectionView } from "../DiscoveryDataLayer";
 
+import csTableRenderer from "~/components/views/discovery/table_renderers.scss";
 import cs from "./map_preview_sidebar.scss";
 
 export default class MapPreviewSidebar extends React.Component {
@@ -132,29 +126,34 @@ export default class MapPreviewSidebar extends React.Component {
         dataKey: "project",
         flexGrow: 1,
         width: 350,
-        cellRenderer: ({ cellData }) =>
-          TableRenderers.renderItemDetails(
+        cellRenderer: ({ cellData }) => {
+          return TableRenderers.renderItemDetails(
             merge(
               { cellData },
               {
-                nameRenderer: p => p.name,
+                nameRenderer: p => (p ? p.name : ""),
                 detailsRenderer: p => (
                   <div>
-                    <span>{p.owner}</span>
+                    <span>{p ? p.owner : ""}</span>
                   </div>
                 ),
                 visibilityIconRenderer: p =>
-                  p && p.public_access ? (
-                    <PublicProjectIcon />
+                  p ? (
+                    p.public_access ? (
+                      <PublicProjectIcon />
+                    ) : (
+                      <PrivateProjectIcon />
+                    )
                   ) : (
-                    <PrivateProjectIcon />
+                    ""
                   ),
               }
             )
-          ),
+          );
+        },
         headerClassName: cs.projectHeader,
         className: cs.project,
-        sortFunction: p => (p.name || "").toLowerCase(),
+        sortFunction: p => ((p && p.name) || "").toLowerCase(),
       },
       {
         dataKey: "created_at",
@@ -180,12 +179,19 @@ export default class MapPreviewSidebar extends React.Component {
         label: "No. of Samples",
       },
     ];
+
+    // refs to components for reset
+    this.samplesTable = null;
+    this.projectsTable = null;
   }
 
-  handleLoadSampleRows = async () => {
-    // TODO(jsheu): Add pagination on the endpoint and loading for long lists of samples
-    const { samples } = this.props;
-    return samples;
+  componentDidUpdate = prevProps => {
+    if (
+      this.props.samples != prevProps.samples ||
+      this.props.projects != prevProps.projects
+    ) {
+      this.reset();
+    }
   };
 
   handleSelectRow = (value, checked) => {
@@ -204,7 +210,7 @@ export default class MapPreviewSidebar extends React.Component {
 
   handleSampleRowClick = ({ event, rowData }) => {
     const { onSampleClicked, samples } = this.props;
-    const sample = find({ id: rowData.id }, samples);
+    const sample = samples.get(rowData.id);
     onSampleClicked && onSampleClicked({ sample, currentEvent: event });
     logAnalyticsEvent("MapPreviewSidebar_sample-row_clicked", {
       sampleId: sample.id,
@@ -214,7 +220,7 @@ export default class MapPreviewSidebar extends React.Component {
 
   handleProjectRowClick = ({ rowData }) => {
     const { onProjectSelected, projects } = this.props;
-    const project = find({ id: rowData.id }, projects);
+    const project = projects.get(rowData.id);
     onProjectSelected && onProjectSelected({ project });
     logAnalyticsEvent("MapPreviewSidebar_project-row_clicked", {
       projectId: project.id,
@@ -223,19 +229,19 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   isSelectAllChecked = () => {
-    const { selectableIds, selectedSampleIds } = this.props;
+    const { samples, selectedSampleIds } = this.props;
     return (
-      !isEmpty(selectableIds) &&
-      isEmpty(difference(selectableIds, Array.from(selectedSampleIds)))
+      !isEmpty(samples.getIds()) &&
+      isEmpty(difference(samples.getIds(), Array.from(selectedSampleIds)))
     );
   };
 
   handleSelectAllRows = checked => {
-    const { selectableIds, selectedSampleIds, onSelectionUpdate } = this.props;
+    const { samples, selectedSampleIds, onSelectionUpdate } = this.props;
     let newSelected = new Set(
       checked
-        ? union(Array.from(selectedSampleIds), selectableIds)
-        : difference(Array.from(selectedSampleIds), selectableIds)
+        ? union(Array.from(selectedSampleIds), samples.getIds())
+        : difference(Array.from(selectedSampleIds), samples.getIds())
     );
     onSelectionUpdate(newSelected);
 
@@ -249,8 +255,8 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   computeTabs = () => {
-    const { discoveryCurrentTab: tab, projects, samples } = this.props;
-    const count = (tab === "samples" ? samples : projects || []).length;
+    const { discoveryCurrentTab: tab, projectStats, sampleStats } = this.props;
+    const count = tab === "samples" ? sampleStats.count : projectStats.count;
     return [
       {
         label: <span className={cs.tabLabel}>Summary</span>,
@@ -269,14 +275,14 @@ export default class MapPreviewSidebar extends React.Component {
   };
 
   reset = () => {
-    this.infiniteTable && this.infiniteTable.reset();
+    this.samplesTable && this.samplesTable.reset();
+    this.projectsTable && this.projectsTable.reset();
   };
 
-  renderTable = () => {
-    const { selectedSampleIds } = this.props;
+  renderSamplesTab = () => {
+    const { samples, selectedSampleIds } = this.props;
 
     const rowHeight = 60;
-    const batchSize = 1e4;
     const selectAllChecked = this.isSelectAllChecked();
     return (
       <div className={cs.container}>
@@ -286,29 +292,23 @@ export default class MapPreviewSidebar extends React.Component {
             defaultRowHeight={rowHeight}
             headerClassName={cs.tableHeader}
             initialActiveColumns={["sample"]}
-            minimumBatchSize={batchSize}
-            onLoadRows={this.handleLoadSampleRows}
+            loadingClassName={csTableRenderer.loading}
+            onLoadRows={samples.handleLoadObjectRows}
             onRowClick={this.handleSampleRowClick}
             onSelectAllRows={this.handleSelectAllRows}
             onSelectRow={this.handleSelectRow}
             protectedColumns={["sample"]}
-            ref={infiniteTable => (this.infiniteTable = infiniteTable)}
+            ref={samplesTable => {
+              this.samplesTable = samplesTable;
+            }}
             rowClassName={cs.sampleRow}
-            rowCount={batchSize}
             selectableColumnClassName={cs.selectColumn}
             selectableKey="id"
             selectAllChecked={selectAllChecked}
             selected={selectedSampleIds}
-            threshold={batchSize}
           />
         </div>
       </div>
-    );
-  };
-
-  renderNoData = () => {
-    return (
-      <div className={cs.noData}>Select a location to preview samples.</div>
     );
   };
 
@@ -339,14 +339,11 @@ export default class MapPreviewSidebar extends React.Component {
     );
   };
 
-  renderSamplesTab = () => {
-    const { samples } = this.props;
-    return samples.length === 0 ? this.renderNoData() : this.renderTable();
-  };
-
-  renderProjectsTab = () => {
+  handleLoadRowsAndFormat = async args => {
     const { projects } = this.props;
-    let data = projects.map(project => {
+    const loadedProjects = await projects.handleLoadObjectRows(args);
+
+    return loadedProjects.map(project => {
       return merge(
         {
           project: pick(
@@ -360,15 +357,20 @@ export default class MapPreviewSidebar extends React.Component {
         )
       );
     });
+  };
 
+  renderProjectsTab = () => {
     return (
       <BaseDiscoveryView
         columns={this.projectColumns}
-        data={data}
         handleRowClick={this.handleProjectRowClick}
         initialActiveColumns={["project", "number_of_samples"]}
         protectedColumns={["project"]}
         headerClassName={cs.tableHeader}
+        onLoadRows={this.handleLoadRowsAndFormat}
+        ref={projectsTable => {
+          this.projectsTable = projectsTable;
+        }}
         rowClassName={cs.projectRow}
         rowHeight={50}
       />
@@ -419,11 +421,10 @@ MapPreviewSidebar.propTypes = {
   onSelectionUpdate: PropTypes.func.isRequired,
   onTabChange: PropTypes.func,
   projectDimensions: PropTypes.array,
-  projects: PropTypes.array,
+  projects: PropTypes.instanceOf(ObjectCollectionView),
   projectStats: PropTypes.object,
   sampleDimensions: PropTypes.array,
-  samples: PropTypes.array,
+  samples: PropTypes.instanceOf(ObjectCollectionView),
   sampleStats: PropTypes.object,
-  selectableIds: PropTypes.array.isRequired,
   selectedSampleIds: PropTypes.instanceOf(Set),
 };
