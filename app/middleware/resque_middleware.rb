@@ -27,7 +27,7 @@ class ResqueMiddleware
     # update_param will modify the original 'env' object.
     rack_request.params.each do |k, v|
       # Don't rely on other sanitize methods that may miss HTML encoding.
-      req.update_param(k, v.gsub(/[^0-9A-Za-z_]/, '')) unless k == "_csrf"
+      rack_request.update_param(k, v.gsub(/[^0-9A-Za-z_]/, '')) unless k == "_csrf"
     end
 
     # Verify every request except GET and HEAD
