@@ -15,6 +15,10 @@ class ObjectCollection {
   createView = viewProps => {
     return new ObjectCollectionView(this, viewProps);
   };
+
+  update = entry => {
+    this.entries[entry.id] = entry;
+  };
 }
 
 class ObjectCollectionView {
@@ -42,9 +46,6 @@ class ObjectCollectionView {
     return Object.keys(this._collection.entries).length;
   };
   isLoading = () => this._loading;
-  update = entry => {
-    this._collection.entries[entry.id] = entry;
-  };
   reset = ({ conditions } = {}) => {
     this._orderedIds = null;
     this._loading = true;
